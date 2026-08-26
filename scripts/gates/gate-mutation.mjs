@@ -127,8 +127,13 @@ const CASES = [
     scene: scene([TXT(), TXT({ text: 'Second solid layer', x: 220, y: 420 })]) },
   { gate: 'audit', name: 'contrast · text barely off the bg', expect: 'fail', match: /contrast/,
     scene: scene([TXT({ text: 'Nearly invisible', color: '#fbfcfd' })]) },
+  // `produced: false` is load-bearing and is not scenery. core/produce.js injects a slowPush camera
+  // (s 1 -> 1.06) over the WHOLE runtime of any scene that declares none, and verify/audit.mjs drops
+  // every `safe` finding on a frame where the camera is moving — so an injected camera nobody wrote
+  // switches off a HARD rule for the entire film. That is why this case went silent, and the opt-out
+  // is the engine's own. Read the safeZone note in the report before deleting this line.
   { gate: 'audit', name: 'safe-zone · layer off the frame edge', expect: 'fail', match: /safe/,
-    scene: scene([TXT({ x: -260, y: 400 })]) },
+    scene: scene([TXT({ x: -260, y: 400 })], { produced: false }) },
   { gate: 'audit', name: 'tiny-text · below the legibility floor', expect: 'fail', match: /tiny-text/,
     scene: scene([TXT({ size: 9, text: 'unreadably small caption' })]) },
   // ---- layout audit: must PASS (a gate must not buy sensitivity with false positives) ----
@@ -741,6 +746,29 @@ function fakeBake(name, sim) {
     { sim, seed: 1, fps: 30, count: 2, w: 4, h: 4, sourceHash: prov.hash, sources: prov.files }, null, 2));
 }
 
+/** A snap baseline the CASE owns. `verify/snap/` is gitignored, so a fresh clone, a worktree or a CI
+ *  box has none — and all three snap cases then reported "fired for the wrong reason" (the gate said
+ *  "no baseline, so this checked NOTHING"), which reads in the summary exactly like a rotted fixture
+ *  and unproves three gates on every machine but the one that happened to run `make snap-all SAVE=1`.
+ *  Same reasoning as fakeBake: a case must not lean on a machine-local artifact. A baseline already on
+ *  disk is stashed and put back, so the harness cannot destroy the one a human saved. ~1s per save. */
+const snapStash = new Map();
+const snapBaseline = (args, ...rels) => {
+  for (const rel of rels) {
+    const p = path.join(repoRoot, rel);
+    snapStash.set(p, fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null);
+  }
+  run('node', args);
+};
+const snapRestore = (...rels) => {
+  for (const rel of rels) {
+    const p = path.join(repoRoot, rel);
+    const prev = snapStash.get(p);
+    if (prev == null) fs.rmSync(p, { force: true }); else fs.writeFileSync(p, prev);
+    snapStash.delete(p);
+  }
+};
+
 // ---- mutate the SOURCE, not a fixture: some gates can only be tested by breaking the thing they guard.
 const srcCases = [
   { name: 'font-audit · @font-face removed', file: 'core/tokens.css',
@@ -752,7 +780,9 @@ const srcCases = [
   { name: 'snap · opacity easing reverted to linear', file: 'core/clips.js',
     mutate: (s) => s.replace('  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);',
                              '  clamp01(enterT) * (exitT > 0 ? 1 - clamp01(exitT) : 1);'),
-    cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /opacity: /, outputOnly: true },
+    cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /opacity: /, outputOnly: true,
+    before: () => snapBaseline(['scripts/gates/scene-snap.mjs', 'scene', '--save'], 'verify/snap/scene.json'),
+    after: () => snapRestore('verify/snap/scene.json') },
   // The snap signature was DOM-only and recorded no clip-path, so a wipe / iris / clock reveal was
   // invisible to it: `wipe-right` pointed the wrong way for months and snap said "identical" every run.
   // showcase-count opens on a rect wiped rightward, so flipping the registry entry must now be seen.
@@ -760,13 +790,33 @@ const srcCases = [
   // sugar, which the renderer now refuses instead of painting nothing, so snap skips it (MISTAKES #189).
   { name: 'snap · a wipe reveals in the WRONG direction', file: 'core/clips.js',
     mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
-    cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded']], match: /clip-path/ },
+    cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded']], match: /clip-path/,
+    before: () => snapBaseline(['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded', '--save'],
+      'verify/snap/scenes/showcase-count.expanded.json', 'verify/snap/scenes/.font-state.json'),
+    after: () => snapRestore('verify/snap/scenes/showcase-count.expanded.json', 'verify/snap/scenes/.font-state.json') },
   // The other half of the same blindness: the background is painted into <canvas>, which no DOM
   // signature can see, so any change of bg preset, colour, speed or direction diffed as nothing.
   // formats/scene/sample.json runs the `aurora` preset; brightening it must now register.
   { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds.js',
-    mutate: (s) => s.replace("{ type: 'aurora', intensity: 0.46,", "{ type: 'aurora', intensity: 0.9,"),
-    cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /__bg\.canvas/, outputOnly: true },
+    // The preset is READ OFF THE SNAPSHOTTED SCENE, never named here. This case pinned
+    // `intensity: 0.46` inside `case 'aurora'` and sample.json's backdrop later became `soft`, so the
+    // mutation kept applying — to a preset the snapshot does not paint — and snap answered IDENTICAL
+    // while the summary read it as "the gate stayed silent after its guard was removed". A stale anchor
+    // that still MATCHES is the worst kind: the `mutated === orig` guard cannot see it, so the case
+    // accused a healthy gate. Deriving the subject makes the fixture follow the scene.
+    mutate: (s) => {
+      const preset = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats/scene/sample.json'), 'utf8')).bg[0].preset;
+      const at = s.indexOf(`case '${preset}':`);
+      if (at < 0) return s;                                   // no such case -> reported STALE, correctly
+      const end = s.indexOf("\n    case '", at + 1);
+      const body = s.slice(at, end < 0 ? s.length : end);
+      // whichever knob this preset's first fx exposes; the point is a visibly different canvas, not one
+      // particular dial, so the fixture does not care which preset it lands on.
+      return s.slice(0, at) + body.replace(/(alpha|intensity): 0\.\d+/, '$1: 0.9') + (end < 0 ? '' : s.slice(end));
+    },
+    cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /__bg\.canvas/, outputOnly: true,
+    before: () => snapBaseline(['scripts/gates/scene-snap.mjs', 'scene', '--save'], 'verify/snap/scene.json'),
+    after: () => snapRestore('verify/snap/scene.json') },
   { name: 'clipped-component · captured root margin re-offsets the content', file: 'core/layers/component.js',
     mutate: (s) => s.replace("  if (rootEl) rootEl.style.margin = '0';", ''),
     cmd: ['node', ['verify/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-component/ },
@@ -775,8 +825,21 @@ const srcCases = [
   { name: 'blocks-audit · a factory ships an invented statistic', file: 'blocks/dev.mjs',
     mutate: (s) => s.replace("export function loadingBar({", "export function loadingBar({ note = 'Ready in 1.2s',"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /claim-default|baked-claim/ },
+  // THE SUBJECT IS INJECTED, NOT BORROWED. This case used to mutate `badge`'s literal `bg: '#3A3A38'`,
+  // and d2fe7fc correctly replaced that literal with a theme token — a good change that silently
+  // unproved the rule. Every shipped block is token-driven now and blocks/ holds NO literal hex pair
+  // for the contrast rule to judge, so re-anchoring on another block would only queue up the next
+  // de-hardcoding to kill this again: there is no way to pin a literal in a library whose whole
+  // direction is away from literals. So the fixture BRINGS its own unreadable pair and the anchor is a
+  // SHAPE — the file's first `export function` — which cannot go stale while the file holds blocks.
+  // (A fixture FILE in blocks/ was tried first and is the wrong answer: index.mjs holds every
+  // blocks/*.mjs to a CATEGORY + schema-table contract, correctly, so a fixture file has to satisfy a
+  // growing contract that has nothing to do with contrast.)
   { name: 'blocks-audit · unreadable text on a hardcoded fill', file: 'blocks/ui.mjs',
-    mutate: (s) => s.replace("bg: '#3A3A38', radius: 8", "bg: '#F6A417', radius: 8"),
+    mutate: (s) => s.replace(/export function (\w+)\s*\(/,
+      "export function _mutContrast() {\n"
+      + "  return [{ type: 'group', bg: '#F6A417', children: [{ type: 'text', color: '#ffffff' }] }];\n}\n"
+      + 'export function $1('),   // white on amber: 2.05:1
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /contrast/ },
   { name: 'blocks-audit · a factory defaults to a real brand', file: 'blocks/ui.mjs',
     mutate: (s) => s.replace("url = 'example.com'", "url = 'stripe.com'"),
