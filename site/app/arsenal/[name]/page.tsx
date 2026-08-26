@@ -57,25 +57,25 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
 
   return (
     <div className="shell">
-      <Header active="blocks" />
+      <Header active="arsenal" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
           <article className="bx">
             <nav className="bx-nav" aria-label="Block navigation">
               {/* The index filters in the URL's absence, so this carries the one thing worth carrying
                   back: which category the visitor was walking. */}
-              <Link className="bx-back" href={`/blocks?cat=${encodeURIComponent(cat(b))}`}>
-                ← blocks<span aria-hidden="true"> / </span>{cat(b)}
+              <Link className="bx-back" href={`/arsenal?axis=${encodeURIComponent("block:" + cat(b))}`}>
+                ← arsenal<span aria-hidden="true"> / </span>{cat(b)}
               </Link>
               <span className="bx-walk">
                 {prev ? (
-                  <Link href={`/blocks/${prev.name}`} rel="prev"><span aria-hidden="true">←</span> {prev.name}</Link>
+                  <Link href={`/arsenal/${prev.name}`} rel="prev"><span aria-hidden="true">←</span> {prev.name}</Link>
                 ) : (
                   <span className="bx-off">← first</span>
                 )}
                 <em>{i + 1}/{peers.length}</em>
                 {next ? (
-                  <Link href={`/blocks/${next.name}`} rel="next">{next.name} <span aria-hidden="true">→</span></Link>
+                  <Link href={`/arsenal/${next.name}`} rel="next">{next.name} <span aria-hidden="true">→</span></Link>
                 ) : (
                   <span className="bx-off">last →</span>
                 )}

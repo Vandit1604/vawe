@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 export default function TypePage() {
   return (
     <div className="shell">
-      <Header active="showcase" />
+      <Header active="arsenal" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
           <section className="phead">

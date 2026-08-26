@@ -20,6 +20,24 @@ const nextConfig = {
   outputFileTracingRoot: import.meta.dirname,
   // Docker: emit a self-contained server so the runtime image carries no dev deps.
   output: "standalone",
+  // THE CONSOLIDATION: /blocks, /showcase/effects and /type were three indexes over one library.
+  // They are now one page, /arsenal, and every old URL still resolves. 308s, because these moved
+  // for good and each one was linked from outside the app — a 404 is a worse answer than a hop.
+  async redirects() {
+    return [
+      { source: "/blocks", destination: "/arsenal", permanent: true },
+      { source: "/blocks/:name", destination: "/arsenal/:name", permanent: true },
+      // The effects index is gone as a page: /arsenal indexes blocks and effects together, so the
+      // nearest true destination is that index already narrowed to effects.
+      { source: "/showcase/effects", destination: "/arsenal?kind=effect", permanent: true },
+      { source: "/arsenal/effects", destination: "/arsenal?kind=effect", permanent: true },
+      { source: "/showcase/effects/:stem", destination: "/arsenal/effects/:stem", permanent: true },
+      // /type already redirected to /showcase/type; both now point at the specimens' new home
+      // rather than chaining one redirect through another.
+      { source: "/type", destination: "/arsenal/type", permanent: true },
+      { source: "/showcase/type", destination: "/arsenal/type", permanent: true },
+    ];
+  },
   async rewrites() {
     return [
       // the animation explainer: one source (docs/animation.html), published here by

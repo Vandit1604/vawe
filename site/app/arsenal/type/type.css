@@ -1,4 +1,4 @@
-/* /showcase/type — the two places this page departs from the shared .fold primitive.
+/* /arsenal/type — the two places this page departs from the shared .fold primitive.
    The fold sits under the page head here rather than inside a filter bar, so it carries its own
    air; everything else about it lives in globals.css. */
 .fold { margin: 4px 0 26px; }

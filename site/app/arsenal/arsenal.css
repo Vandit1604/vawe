@@ -1,206 +1,273 @@
-/* The block catalog — instrument register.
+/* /arsenal — the one index over everything the engine is made of. Instrument register.
  *
- * Built on the site's existing tokens only (--ink/--muted/--line/--surface/--accent/--r/--ease from
- * globals.css). Nothing here declares a colour of its own, so this page reskins with the rest of the
- * site and inherits `.pgdark` if a route ever opts into it.
+ * Built on the site's own tokens (globals.css) and its two shared catalog primitives: .rail-layout
+ * / .rail-col / .rail for the sticky filter column, .fold nowhere on this page because there is no
+ * essay to hide. Nothing here declares a literal colour, so the page reskins with the rest of the
+ * site and would inherit a real dark mode the day one exists.
  *
- * WORTH KNOWING: the site has NO system dark mode. There is no `prefers-color-scheme` block and no
- * `data-theme` anywhere in globals.css — only `.pgdark`, a class a single route opts into. So a visitor
- * whose OS is dark gets the light site. That is a site-wide decision, not this page's to make, but it
- * should be a deliberate one rather than an oversight.
+ * The register is a precise tool: hairlines instead of shadows, ONE elevation step and only on
+ * hover, mono for anything that is data (a name, a count), sans for prose. Depth says "this is
+ * liftable", never "this is a box".
  *
- * The register is a precise tool, so: hairlines instead of shadows, ONE elevation step and only on
- * hover, mono for anything that is data (a name, a count), sans for prose. Depth is used to say
- * "this is liftable", never for decoration. */
+ * MONO IS var(--font-mono) HERE, AND THAT IS A FIX. The stylesheet this replaces wrote
+ * `var(--mono, ui-monospace, …)` in seven places and `--mono` is defined nowhere on the site, so
+ * every name and count on the catalog rendered in the system mono while the rest of the site used
+ * JetBrains Mono. A silent substitution: valid CSS, no warning, a whole page off-brand. */
 
-.ct { --ct-rail: 188px; --ct-gap: 20px; }
+.ar { --ar-gap: 20px; }
 
 /* ── toolbar ───────────────────────────────────────────────────────────────
- * This IS the page header. The count sits inside the title because it is the
- * single most useful number on the page, not a statistic to be announced. */
-.ct-bar {
-  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+ * This IS the page header. The count sits inside the title because it is the single most useful
+ * number on the page, not a statistic to be announced. */
+.ar-bar {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   padding: 22px 0 18px; border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: var(--z-sticky);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
 }
-.ct-bar h1 {
+.ar-bar h1 {
   margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink);
   display: flex; align-items: baseline; gap: 10px;
 }
-.ct-n {
-  font: 500 13px/1 var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+.ar-n {
+  font: 500 13px/1 var(--font-mono), ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
   color: var(--muted); padding: 4px 7px; border: 1px solid var(--line); border-radius: 6px;
 }
 
-.ct-find { position: relative; display: flex; align-items: center; margin-left: auto; min-width: 260px; flex: 0 1 340px; }
-.ct-find svg {
+.ar-find { position: relative; display: flex; align-items: center; margin-left: auto; min-width: 240px; flex: 0 1 340px; }
+.ar-find svg {
   position: absolute; left: 11px; width: 15px; height: 15px; pointer-events: none;
   fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round;
 }
-.ct-find input {
+.ar-find input {
   width: 100%; padding: 9px 40px 9px 34px;
   font: 400 14px/1.2 inherit; color: var(--ink);
   background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
   transition: border-color .16s var(--ease), box-shadow .16s var(--ease);
 }
-.ct-find input::placeholder { color: var(--muted); }
-.ct-find input:focus-visible {
+.ar-find input::placeholder { color: var(--muted); }
+/* A ring cannot sit flush inside this field, so the house rule's sanctioned replacement is used:
+   a border-colour change PLUS a 3px accent-tinted ring, keyed to :focus-visible. The field this
+   replaces answered :focus with a border alone, so a keyboard user got less than a mouse user. */
+.ar-find input:focus-visible {
   outline: none; border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
 }
-.ct-find input::-webkit-search-cancel-button { display: none; }
-.ct-find kbd {
+.ar-find input::-webkit-search-cancel-button { display: none; }
+.ar-find kbd {
   position: absolute; right: 10px;
-  font: 500 11px/1 var(--mono, ui-monospace, monospace); color: var(--muted);
+  font: 500 11px/1 var(--font-mono), ui-monospace, monospace; color: var(--muted);
   padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px;
 }
-.ct-find:focus-within kbd { opacity: 0; }
+.ar-find:focus-within kbd { opacity: 0; }
 
-/* ── body ────────────────────────────────────────────────────────────────── */
-.ct-main { scroll-margin-top: 84px; }   /* clears the sticky toolbar when a page change scrolls us back up */
-.ct-body { display: grid; grid-template-columns: var(--ct-rail) minmax(0, 1fr); gap: 40px; padding: 24px 0 96px; }
-
-.ct-rail { position: sticky; top: 76px; align-self: start; display: flex; flex-direction: column; gap: 1px; }
-.ct-cat {
-  display: flex; text-decoration: none; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 7px 9px; border: 0; border-radius: 7px; background: none; cursor: pointer;
-  font: 400 14px/1 inherit; color: var(--muted); text-align: left;
-  transition: color .14s var(--ease), background-color .14s var(--ease);
+/* The one toggle on the page. It answers the question a still cannot: can I watch this move? */
+.ar-live-only {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--ink-2); cursor: pointer; user-select: none; white-space: nowrap;
 }
-.ct-cat em {
-  font: 500 12px/1 var(--mono, ui-monospace, monospace); font-style: normal;
-  font-variant-numeric: tabular-nums; color: var(--muted); opacity: .75;
-}
-.ct-cat:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 4%, transparent); }
-.ct-cat[data-on] { color: var(--ink); background: color-mix(in srgb, var(--accent) 10%, transparent); font-weight: 500; }
-.ct-cat[data-on] em { color: var(--accent); opacity: 1; }
-.ct-cat:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ar-live-only input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+.ar-live-only input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ar-live-only .ar-n { padding: 3px 6px; font-size: 11.5px; }
 
-.ct-how {
+/* ── the rail ──────────────────────────────────────────────────────────────
+ * The frame is the shared primitive; this is only the link type. Two levels, both derived: a kind
+ * (blocks, effects) and under it that registry's own axis. Highlighting comes from the primitive's
+ * .rail a[aria-current], so one attribute serves the sighted reader and the screen reader. */
+.ar-body { padding-bottom: 96px; }
+.ar-main { min-width: 0; scroll-margin-top: 84px; }
+
+.ar-rail { gap: 1px; }
+.ar-ax {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 6px 9px; font-size: 13.5px;
+}
+.ar-ax em {
+  font: 500 11.5px/1 var(--font-mono), ui-monospace, monospace; font-style: normal;
+  font-variant-numeric: tabular-nums; color: var(--muted);
+}
+.ar-ax[aria-current] em { color: var(--accent); }
+.ar-ax:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* The kind row leads its own block, so it is the one thing in the rail set in the page's sans at
+   full ink. Everything under it is a narrowing of it. */
+.ar-ax-kind { color: var(--ink); font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.ar-ax-kind em { text-transform: none; letter-spacing: 0; }
+.ar-group + .ar-group, .ar-ax-all + .ar-group { margin-top: 14px; }
+.ar-ax-out { margin-top: 14px; border-top: 1px solid var(--line); border-radius: 0; padding-top: 12px; }
+.ar-ax-out:hover { border-top-color: var(--line); }
+
+.ar-how {
   margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--line);
   font-size: 12.5px; line-height: 1.55; color: var(--muted); text-wrap: pretty;
 }
-.ct-how code {
-  font: 500 11.5px/1 var(--mono, ui-monospace, monospace);
+.ar-how code {
+  font: 500 11.5px/1 var(--font-mono), ui-monospace, monospace;
   color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, transparent);
   padding: 2px 5px; border-radius: 4px; white-space: nowrap;
 }
 
 /* ── result line ─────────────────────────────────────────────────────────── */
-.ct-count {
+.ar-count {
   margin: 0 0 18px; font-size: 13px; color: var(--muted);
-  font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 10px;
+  font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
-.ct-count b { color: var(--ink); font-weight: 500; }
-.ct-clear {
-  border: 0; background: none; padding: 0; cursor: pointer;
-  font: inherit; font-size: 13px; color: var(--accent); text-decoration: underline;
+.ar-count b { color: var(--ink); font-weight: 500; }
+.ar-clear {
+  font-size: 13px; color: var(--accent); text-decoration: underline;
   text-underline-offset: 3px; text-decoration-thickness: 1px;
 }
-.ct-none { margin: 40px 0; font-size: 14px; color: var(--muted); text-wrap: pretty; }
-.ct-none b { color: var(--ink); font-weight: 500; }
-.ct-none code {
-  font: 500 12.5px/1 var(--mono, ui-monospace, monospace); color: var(--ink);
+.ar-none-msg { margin: 40px 0; font-size: 14px; color: var(--muted); text-wrap: pretty; }
+.ar-none-msg b { color: var(--ink); font-weight: 500; }
+.ar-none-msg code {
+  font: 500 12.5px/1 var(--font-mono), ui-monospace, monospace; color: var(--ink);
   background: color-mix(in srgb, var(--ink) 5%, transparent); padding: 2px 5px; border-radius: 4px;
 }
 
 /* ── grid ────────────────────────────────────────────────────────────────── */
-.ct-grid {
+.ar-grid {
   list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: var(--ct-gap);
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--ar-gap);
 }
-.ct-card {
-  display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: inherit;
+.ar-card {
+  display: flex; flex-direction: column; gap: 9px; text-decoration: none; color: inherit;
   border-radius: calc(var(--r) - 2px);
 }
-.ct-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.ar-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-/* CONTAIN, NOT COVER, and the reason is in the data. Each poster is already cropped to its own block's
- * bounds, so their aspects genuinely differ — codeTyping is 705x257 (2.7:1), usMapHex is 911x629
- * (1.4:1). `cover` in a fixed 16/10 box cropped the code off the left of every terminal card, which
- * on a page whose entire job is showing you the block is the one thing it must not do. A spec sheet
- * shows the part whole; the cell is a consistent stage and the block sits inside it at its own shape. */
-.ct-thumb {
+/* CONTAIN FOR A BLOCK, COVER FOR AN EFFECT, and the reason is in the data rather than in taste.
+ * Every block poster is already cropped to that block's own bounds, so their aspects genuinely
+ * differ (codeTyping is 705x257, usMapHex is 911x629) and `cover` in a fixed cell cut the code off
+ * the left of every terminal card. An effect still is a whole 16:9 render, so it fills the cell and
+ * nothing is lost. The cell is a consistent stage; what sits inside it follows the source. */
+.ar-thumb {
   position: relative; display: grid; place-items: center; aspect-ratio: 16 / 10; overflow: hidden;
-  padding: 12px;
   border: 1px solid var(--line); border-radius: calc(var(--r) - 2px);
   background: var(--surface);
   transition: border-color .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
 }
-.ct-thumb img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
-/* The one elevation step on the page, and it only exists to say the card is liftable. */
-.ct-card:hover .ct-thumb {
+.ar-thumb img { display: block; width: 100%; height: 100%; }
+.ar-thumb img[data-fit="contain"] { object-fit: contain; padding: 12px; }
+.ar-thumb img[data-fit="cover"] { object-fit: cover; }
+/* The one elevation step on the page, and it exists only to say the card is liftable. */
+.ar-card:hover .ar-thumb {
   border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
   transform: translateY(-2px);
   box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
-.ct-card:hover 
-.ct-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.ct-meta code {
-  font: 500 13px/1.3 var(--mono, ui-monospace, monospace); color: var(--ink);
+/* Cobalt and a verb means you can act on it, so this dot is deliberately NOT cobalt: it is inert
+   data about the entry, not a control. It is the ink dot the site uses for a fact. */
+.ar-live {
+  position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink-2); box-shadow: 0 0 0 3px var(--surface);
+}
+
+/* NO STILL. A designed state, not a hole: a stripe that is visibly not a photograph, carrying the
+   one thing the cell can still tell you. An easing has no picture and never will; a blank grey box
+   would say the site is broken, which is a different and untrue claim. */
+.ar-none {
+  gap: 6px; align-content: center; text-align: center; padding: 10px;
+  background: repeating-linear-gradient(135deg, var(--bg-2) 0 8px, var(--surface) 8px 16px);
+}
+.ar-none-tag {
+  font: 500 10px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px;
+}
+.ar-none-why { font-size: 10.5px; line-height: 1; color: var(--muted); }
+
+.ar-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ar-meta code {
+  font: 500 13px/1.3 var(--font-mono), ui-monospace, monospace; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.ct-blurb {
+.ar-blurb {
   font-size: 12.5px; line-height: 1.45; color: var(--muted);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
-/* ── responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 860px) {
-  .ct-body { grid-template-columns: 1fr; gap: 20px; }
-  .ct-rail {
-    position: static; flex-direction: row; flex-wrap: nowrap; gap: 6px;
-    overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;
-  }
-  .ct-rail::-webkit-scrollbar { display: none; }
-  .ct-cat { flex: 0 0 auto; border: 1px solid var(--line); }
-  .ct-how { display: none; }   /* the rail becomes a filter strip; the note moves out of the way */
-  .ct-find { flex: 1 1 100%; margin-left: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ct-thumb,   .ct-card:hover .ct-thumb { transform: none; }
-}
-
 /* ── sections ──────────────────────────────────────────────────────────────
- * A label, not a control. The rail is the only thing that changes what you see; these headings just
- * say which run you are looking at. Deliberately NOT sticky — two sticky bars and a sticky rail
- * would leave a moving band across the top of every scroll. */
-.ct-sec { scroll-margin-top: 84px; }
-.ct-sec + .ct-sec { margin-top: 34px; }
-.ct-sec h2 {
+ * A label, not a control. The rail is the only thing that changes what you see; these headings say
+ * which run you are looking at. Deliberately NOT sticky: two sticky bars and a sticky rail would
+ * leave a moving band across the top of every scroll. */
+.ar-sec { scroll-margin-top: 84px; }
+.ar-sec + .ar-sec { margin-top: 34px; }
+.ar-sec h2 {
   display: flex; align-items: center; gap: 9px;
   margin: 0 0 14px; padding-bottom: 9px; border-bottom: 1px solid var(--line);
   font-size: 14px; font-weight: 600; letter-spacing: -0.005em; color: var(--ink);
 }
-.ct-sec h2 .ct-n { font-size: 11.5px; padding: 3px 6px; }
+.ar-sec h2 .ar-n { font-size: 11.5px; padding: 3px 6px; }
 
 /* ── paging ────────────────────────────────────────────────────────────────
  * Pages, not infinite scroll: a browse position you can link to, come back to, and step through
- * with the keyboard. Every control here is a real link, so Back works and so does middle-click. */
-.ct-pages {
+ * with the keyboard. Every control is a real link, so Back works and so does middle-click. */
+.ar-pages {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line);
 }
-.ct-pages ol { display: flex; gap: 4px; list-style: none; margin: 0 auto; padding: 0; }
-.ct-step, .ct-pg {
+.ar-pages ol { display: flex; gap: 4px; list-style: none; margin: 0 auto; padding: 0; }
+.ar-step, .ar-pg {
   display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
   padding: 7px 11px; border: 1px solid var(--line); border-radius: 8px;
   font-size: 13px; color: var(--muted); background: var(--surface);
   transition: color .14s var(--ease), border-color .14s var(--ease);
 }
-.ct-pg { font: 500 12.5px/1 var(--mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; padding: 8px 11px; }
-.ct-step svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-a.ct-step:hover, a.ct-pg:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
-.ct-step:focus-visible, .ct-pg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.ct-pg[data-on] { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-span.ct-step { opacity: .35; }   /* the end of the run, shown so the row keeps its shape */
+.ar-pg { font: 500 12.5px/1 var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; padding: 8px 11px; }
+.ar-step svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+a.ar-step:hover, a.ar-pg:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.ar-step:focus-visible, .ar-pg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ar-pg[data-on] { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+span.ar-step { color: var(--muted); opacity: .45; }   /* the end of the run, shown so the row keeps its shape */
 
-@media (max-width: 860px) {
-  .ct-pages ol { order: 3; flex-basis: 100%; justify-content: center; margin: 4px 0 0; }
-  .ct-step { flex: 1 1 0; justify-content: center; }
+/* ── responsive ──────────────────────────────────────────────────────────────
+ * 900 is where the shared primitive collapses the rail, so this page collapses there too rather
+ * than inventing a second breakpoint a few pixels away. EVERYTHING THE PILL NEEDS IS DECLARED HERE:
+ * .rail a and .ar-ax have equal specificity, so the primitive's own collapse block cannot reach
+ * past a page's link rules and anything that must change has to change in this file. */
+@media (max-width: 900px) {
+  /* Height-capped and scrollable, because 33 pills unwrapped run 700px tall and push the first
+     card two screens down on a phone. The cap is what keeps the strip a filter and not a page. */
+  .ar-rail { flex-direction: row; flex-wrap: wrap; gap: 6px; padding: 12px 0; max-height: 118px; overflow-y: auto; }
+  /* The two-level rail flattens: the group box would otherwise wrap each kind onto its own row and
+     turn a pill strip back into a stack. */
+  .ar-group { display: contents; }
+  .ar-ax { flex: 0 0 auto; padding: 5px 11px; white-space: nowrap; }
+  .ar-group + .ar-group, .ar-ax-all + .ar-group, .ar-ax-out { margin-top: 0; }
+  .ar-ax-out { border-top: 0; border-radius: 999px; padding-top: 5px; }
+  .ar-how { display: none; }   /* the rail is a filter strip here; the note moves out of the way */
+  .ar-find { flex: 1 1 100%; margin-left: 0; }
+  .ar-pages ol { order: 3; flex-basis: 100%; justify-content: center; margin: 4px 0 0; }
+  .ar-step { flex: 1 1 0; justify-content: center; }
 }
+
+@media (max-width: 640px) {
+  /* A 200px card at 430px is one column, and one column of 741 entries is a scroll nobody finishes.
+     A smaller card buys a second and third; the name stays legible because it never shrinks. */
+  .ar-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; }
+  .ar-thumb img[data-fit="contain"] { padding: 7px; }
+  .ar-blurb { -webkit-line-clamp: 2; font-size: 11.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-thumb, .ar-card:hover .ar-thumb { transform: none; transition: none; }
+}
+
+/* ── chips ─────────────────────────────────────────────────────────────────
+ * The run where no entry has a still, and none ever will: an easing named by its curve, a blend
+ * mode the CSS spec defines, a drawn icon that is one glyph. A grid of identical striped swatches
+ * under one repeated sentence costs a screen and says nothing, so the run becomes its names. */
+.ar-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.ar-chip {
+  display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+  padding: 5px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  transition: border-color .15s var(--ease);
+}
+.ar-chip code { font: 500 12.5px/1.3 var(--font-mono), ui-monospace, monospace; color: var(--ink); }
+.ar-chip:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.ar-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Inside a chip the marker sits in flow rather than pinned to a picture that is not there. */
+.ar-chip .ar-live { position: static; box-shadow: none; }

@@ -6,14 +6,14 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Header } from "../../../components/Header";
 import { Footer } from "../../../components/Footer";
-import { Rich, type Index, type Family, type Entry } from "../EffectsBrowser";
+import { Rich, type Index, type Family, type Entry } from "../shared";
 import { EffectStage } from "./EffectStage";
 import { deriveKnobs } from "./knobs";
 import index from "../../../../lib/effects.json";
 import bodies from "../../../../lib/effects-body.json";
 import "../effects.css";
 
-/* /showcase/effects/[stem] — one effect, one page, the way a component library gives each
+/* /arsenal/effects/[stem] — one effect, one page, the way a component library gives each
  * component a page. 521 of these, statically generated: every registered effect gets a URL, not
  * just the 227 that can play.
  *
@@ -30,7 +30,7 @@ import "../effects.css";
 const ix = index as Index;
 const BODY = bodies as Record<string, string>;
 
-// site/app/showcase/effects/[stem]/ is 4 directories under site/ — same depth the lib/*.json
+// site/app/arsenal/effects/[stem]/ is 4 directories under site/ — same depth the lib/*.json
 // imports above already climb, just walked at runtime instead of by the bundler, because a still's
 // presence has to be checked per RELATED entry, not just this page's own.
 const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../../../public");
@@ -126,11 +126,11 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
 
   return (
     <div className="shell">
-      <Header active="showcase" />
+      <Header active="arsenal" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
           <section className="fxpage">
-            <Link className="backlink" href={`/showcase/effects#${family.id}`}>← {family.title}</Link>
+            <Link className="backlink" href={`/arsenal?axis=${encodeURIComponent("effect:" + family.tag)}`}>← arsenal<span aria-hidden="true"> / </span>{family.tag}</Link>
 
             <div className="phead" style={{ padding: 0, maxWidth: "none" }}>
               <span className="kicker">
@@ -151,10 +151,10 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
 
             <nav className="fxpage-nav" aria-label="Other effects in this family">
               {prev ? (
-                <Link href={`/showcase/effects/${prev.stem}`} className="fxpage-prev">← <span className="mono">{prev.name}</span></Link>
+                <Link href={`/arsenal/effects/${prev.stem}`} className="fxpage-prev">← <span className="mono">{prev.name}</span></Link>
               ) : <span />}
               {next ? (
-                <Link href={`/showcase/effects/${next.stem}`} className="fxpage-next"><span className="mono">{next.name}</span> →</Link>
+                <Link href={`/arsenal/effects/${next.stem}`} className="fxpage-next"><span className="mono">{next.name}</span> →</Link>
               ) : <span />}
             </nav>
 
@@ -163,7 +163,7 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
                 <h2 className="fxrelated-h">Related</h2>
                 <div className="fxgrid">
                   {related.map((e) => (
-                    <Link key={e.stem} href={`/showcase/effects/${e.stem}`} className="fxcard">
+                    <Link key={e.stem} href={`/arsenal/effects/${e.stem}`} className="fxcard">
                       <span className="fxcard-media">
                         {hasStill(e.stem) ? (
                           // eslint-disable-next-line @next/next/no-img-element
