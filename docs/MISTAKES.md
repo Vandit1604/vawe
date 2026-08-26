@@ -15307,3 +15307,42 @@ joint past the duration. Both fail when the old line is restored, which is how I
 
 **The shape worth grepping for.** A merged convenience list read where a narrower one was meant. The
 inclusive list is always the easier import and is usually the wrong answer.
+
+## #475 — the ghost trail painted OVER the layer, and a filled plate trailed nothing at all
+
+**What.** `core/fx/ghost.js` builds k copies of a layer and poses each at where the layer WAS. Two
+defects, both visible in a shipped film (`showcase-ui`, the panel that slides out at 4.5s): the echoes
+were drawn on top of the card, veiling the number and the progress bar behind grey; and a `rect`, whose
+fill is CSS on the layer element, left no trail at all because a ghost cloned only `innerHTML`.
+
+**Root cause 1: DOM order does not decide paint order.** The builder inserted each ghost as a FIRST
+child and the comment said that put them behind. It does not. An absolutely-positioned child paints in
+a later step of the stacking algorithm than its parent's in-flow content, whatever the tree order says.
+The fix is `z-index: -1` on each ghost, which is the one thing that puts a positioned child under its
+parent's own content, plus `isolation: isolate` on the layer so that negative index resolves inside a
+stacking context the layer owns on EVERY frame. Without the isolation the context existed only on the
+frames a track happened to write a transform, so the trail would have sat behind the whole stage on the
+others: a paint bug that comes and goes with the motion track is worse than one that is always there.
+
+**Root cause 2: what a layer paints is not in its markup.** `rect` puts its fill, radius and shadow on
+the layer element (`kit.chipBox`), and `innerHTML` on a rect is empty. So the effect rendered a silent
+no-op for the one layer type most likely to want a trail. Each ghost now carries the layer's own paint
+longhands (`background-*`, `border-*`, `box-shadow`, `outline-*`, `backdrop-filter`).
+
+**Where the first attempt went wrong, because the shape recurs.** The paint copy was read with
+`getComputedStyle(el)` at build. It returned nothing, twice over: a computed declaration holds no
+SHORTHANDS, so `getPropertyValue('background')` is always `''`; and a layer is built DETACHED
+(`formats/scene/scene.js` `buildLayer` creates the element and appends it later), so a computed style
+there answers with the initial value for everything. The copy reads the layer's own inline style
+instead, where a shorthand enumerates as its longhands.
+
+**Two dead reads in the same file, same root, NOT fixed here.** `el.offsetWidth` at build is 0 on a
+detached element, so `ghostR` is always its 100px fallback and the rotation/scale half of the
+separation ramp is measured against a constant. `getComputedStyle(el).position` is `''` there too, so
+the `position: static` fallback never fires. Neither is wrong on any shipped scene (every layer is
+absolute, and no scene ghosts a rotation), and changing `ghostR` moves the fade on existing films, so
+both are recorded rather than changed.
+
+**Which gate catches it now.** None, and that is honest: `make audit` fires on collisions, not on a
+trail that veils its own subject. It was found by rendering a repro and LOOKING, which is what
+`make judge` is for. `probe-purity` still passes: nothing here reads a previous frame.

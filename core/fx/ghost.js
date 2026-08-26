@@ -58,6 +58,15 @@ export const GHOST_KEYS = ['mode', 'k', 'back', 'alpha', 'fade'];
 // Twelve is the cap because past it the honest answer is a shader, not a stack of copies.
 const K_MAX = 12;
 
+// The surface a layer paints on its own element rather than in its markup. Matched against the
+// LONGHANDS of the layer's own inline style, and read from there rather than from getComputedStyle:
+// a layer is built DETACHED (formats/scene/scene.js `buildLayer` creates the element and appends it
+// afterwards), so a computed style at build time answers with the initial value for everything. A
+// shorthand written inline (`el.style.background = ...`) enumerates as its longhands, so nothing has
+// to know which spelling the primitive used. `opacity` is excluded on purpose: the fade down the
+// trail is the ghost's own.
+const PAINT = /^(background-|border-|box-shadow$|outline-|backdrop-filter$)/;
+
 const name = (L) => `"${L.id || L.type || 'layer'}"`;
 
 function resolve(spec, L) {
@@ -111,9 +120,24 @@ export function build(kit, el, L, spec) {
   // this covers the ones that are not, and it is a build-time write to a property no track owns.
   const cs = typeof getComputedStyle === 'function' ? getComputedStyle(el) : null;
   if (cs && cs.position === 'static') el.style.position = 'relative';
+  // A NEGATIVE z-index ONLY MEANS "behind the layer" INSIDE A STACKING CONTEXT THE LAYER OWNS, and the
+  // layer owns one only on the frames its tracks happen to write a transform. Left to chance, a trail
+  // would sit behind the whole stage on some frames and in front of the words on others. `isolate` makes
+  // the context unconditional, at build, so every frame paints the same way.
+  el.style.isolation = 'isolate';
   // Snapshot BEFORE inserting, or each ghost would carry the ghosts inserted before it.
   const inner = el.innerHTML;
   const first = el.firstChild;
+  // WHAT THE LAYER PAINTS IS NOT IN ITS innerHTML. A rect's fill, a card's radius, a chip's border and
+  // its shadow are all CSS on the layer ELEMENT, so a ghost cloning only the markup left a hollow
+  // outline of a filled plate behind — and for a `rect`, which carries no markup at all, it left
+  // nothing and the effect rendered a silent no-op. Read the paint off the layer once, here, and hand
+  // each echo the same surface.
+  const paint = [];
+  for (let i = 0; i < el.style.length; i++) {
+    const prop = el.style.item(i);
+    if (PAINT.test(prop)) paint.push([prop, el.style.getPropertyValue(prop)]);
+  }
   for (let i = 0; i < k; i++) {
     const g = document.createElement('div');
     g.setAttribute(MARK, String(i));
@@ -125,8 +149,14 @@ export function build(kit, el, L, spec) {
     g.style.inset = '0';
     g.style.pointerEvents = 'none';
     g.style.opacity = '0';
+    // DOM ORDER DOES NOT DECIDE THIS. An absolutely-positioned child paints in a later step of the
+    // stacking algorithm than its parent's in-flow content, so `first` bought nothing: the trail was
+    // drawn ON TOP of the very words it was trailing. A negative z-index is the one thing that puts a
+    // positioned child under the layer's own content, and `isolation` above is what makes it hold.
+    g.style.zIndex = '-1';
+    g.style.boxSizing = 'border-box';
+    for (const [prop, v] of paint) g.style.setProperty(prop, v);
     g.innerHTML = inner;
-    // FIRST children, so the echoes paint BEHIND the layer's real content rather than over it.
     el.insertBefore(g, first);
   }
 }
