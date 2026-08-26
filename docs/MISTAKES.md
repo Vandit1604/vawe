@@ -14806,7 +14806,7 @@ already exactly the opt-in. designspec lost two findings, both on `onefile.anima
 generated sidecar, excludes `schema.json` and templates, every member declares `module: "scene"`, and
 the derivatives opt-in is a strict superset. Deleting the derivative clause fails the first assertion.
 
-## #465 · the render order was a comment, so two bugs in one week broke it and nothing said so
+## #466 · the render order was a comment, so two bugs in one week broke it and nothing said so
 
 **What happened.** `#463` and `#464` landed within days of each other. Neither was arithmetic. `#464`
 resolved the `becomes` handover before the build-time layout measurement, so an unsized text layer
