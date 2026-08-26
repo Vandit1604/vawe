@@ -1,4 +1,14 @@
 {
+ "authoring": {
+  "allow": [
+   "safe",
+   "no-storyboard"
+  ],
+  "_why": {
+   "safe": "the beat IS a dimension diagram of the 160px margin, so its leader line and its '160' label are drawn from the frame edge inward. Moving them inside the safe box would measure a distance the film is not about.",
+   "no-storyboard": "this film predates the storyboard rule and was grandfathered by the legacy manifest. Recording the safe waiver above changed the file, which forfeits that row by design. No plan was ever written for this film and inventing one now would be the fake plan the ratchet exists to prevent."
+  }
+ },
  "module": "scene",
  "theme": "stripe",
  "aspect": "16:9",

@@ -127,13 +127,15 @@ const CASES = [
     scene: scene([TXT(), TXT({ text: 'Second solid layer', x: 220, y: 420 })]) },
   { gate: 'audit', name: 'contrast · text barely off the bg', expect: 'fail', match: /contrast/,
     scene: scene([TXT({ text: 'Nearly invisible', color: '#fbfcfd' })]) },
-  // `produced: false` is load-bearing and is not scenery. core/produce.js injects a slowPush camera
-  // (s 1 -> 1.06) over the WHOLE runtime of any scene that declares none, and verify/audit.mjs drops
-  // every `safe` finding on a frame where the camera is moving — so an injected camera nobody wrote
-  // switches off a HARD rule for the entire film. That is why this case went silent, and the opt-out
-  // is the engine's own. Read the safeZone note in the report before deleting this line.
+  // No `produced: false` here any more, and its absence is the point. This fixture used to need it:
+  // core/produce.js injects a slowPush camera (s 1 -> 1.06) over the WHOLE runtime of any scene that
+  // declares none, and verify/audit.mjs then dropped every `safe` finding on any frame where a camera
+  // was moving, so an injected camera nobody wrote switched a HARD rule off for the film. The fixture
+  // had to opt out of production to see the rule at all. The frame-wide exemption is gone (#451), so a
+  // plain produced scene fails this the way an author's would, and the case now proves the rule under
+  // the defaults every film actually renders with.
   { gate: 'audit', name: 'safe-zone · layer off the frame edge', expect: 'fail', match: /safe/,
-    scene: scene([TXT({ x: -260, y: 400 })], { produced: false }) },
+    scene: scene([TXT({ x: -260, y: 400 })]) },
   { gate: 'audit', name: 'tiny-text · below the legibility floor', expect: 'fail', match: /tiny-text/,
     scene: scene([TXT({ size: 9, text: 'unreadably small caption' })]) },
   // ---- layout audit: must PASS (a gate must not buy sensitivity with false positives) ----
