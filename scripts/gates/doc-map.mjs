@@ -47,8 +47,11 @@ const EXCLUDE = [
   ['.claude/skills/impeccable/reference/', 'a vendored third-party skill; its SKILL.md is indexed, its 27 reference pages are not'],
   ['.claude/plans/', 'historical plan records, superseded by what shipped'],
   ['assets/', 'licence and attribution notes that travel with the asset'],
-  ['site/DESIGN.md', 'the marketing site\'s own design system, extracted from site/app CSS. This map indexes FILM craft, and a token table for a Next app answers none of its questions; the site reads it from site/CLAUDE.md, which is what a UI contributor opens'],
-  ['site/public/', 'published copies of docs that are already indexed at their source'],
+  // The marketing site is a Next app with its own design system, the same shape as docs-site/ above.
+  // This map indexes FILM doctrine, and a token table for a web app answers none of its questions.
+  // A UI contributor is routed by site/CLAUDE.md, which is directory-scoped and therefore found
+  // without an index; site/public/ additionally holds published copies of docs indexed at source.
+  ['site/', 'a Next app with its own design system, entered through site/CLAUDE.md, not through film doctrine'],
   ['node_modules/', 'dependencies'],
   ['.venv-tools/', 'dependencies'],
 ];
