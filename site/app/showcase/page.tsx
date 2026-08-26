@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
+import films from "../../lib/films.json";
 import { SourceViewer } from "../components/SourceViewer";
 import LINES from "../../lib/scene-lines.json";
 import "./showcase.css";
@@ -29,7 +30,13 @@ export const metadata: Metadata = {
  * hands the grid the whole 1160px measure, which is the one thing a page of video actually wants.
  */
 
-type Film = { slug: string; brand: string; dur: string; template?: boolean };
+type Film = { slug: string; brand: string; template?: boolean };
+
+// THE DURATION IS READ FROM THE FILM, NEVER TYPED. Each `dur` used to sit in the array below and go
+// stale the moment a film was recut: `creed-launch` went from 53s to 36s and this page said 0:53,
+// `plinth-ad` said 0:27 against a 0:28 render. Same class as the eight stale counts `site-counts`
+// exists to catch. `scripts/site/films-json.mjs` ffprobes the mp4s the site actually serves.
+const durOf = (slug: string) => (films as Record<string, { label: string }>)[slug]?.label ?? "";
 
 // Two of these used to be pixel recreations of other companies' marketing pages, shipped whole:
 // their headlines, their gradients, their copy. A recreation is also useless to anybody else, because
@@ -37,12 +44,12 @@ type Film = { slug: string; brand: string; dur: string; template?: boolean };
 // deleted: same composition, same timing, same camera, same beat structure, with the borrowed
 // identity taken out and the copy, palette and mark made fillable. They are the templates below.
 const FILMS: Film[] = [
-  { slug: "creed-launch", brand: "Creed", dur: "0:53" },
-  { slug: "saas-hero-launch", brand: "SaaS hero launch", dur: "0:45", template: true },
-  { slug: "product-feature-tour", brand: "Product feature tour", dur: "0:50", template: true },
-  { slug: "argus-launch", brand: "Argus", dur: "0:23" },
-  { slug: "threadcite-open", brand: "ThreadCite", dur: "0:30" },
-  { slug: "plinth-ad", brand: "Plinth", dur: "0:27" },
+  { slug: "creed-launch", brand: "Creed" },
+  { slug: "saas-hero-launch", brand: "SaaS hero launch", template: true },
+  { slug: "product-feature-tour", brand: "Product feature tour", template: true },
+  { slug: "argus-launch", brand: "Argus" },
+  { slug: "threadcite-open", brand: "ThreadCite" },
+  { slug: "plinth-ad", brand: "Plinth" },
 ];
 
 const RATIOS = [
@@ -59,7 +66,7 @@ function FilmTile({ film }: { film: Film }) {
       </div>
       <figcaption>
         <span className="fbrand">{film.brand}</span>
-        <span className="fdur">{film.template ? `template · ${film.dur}` : film.dur}</span>
+        <span className="fdur">{film.template ? `template · ${durOf(film.slug)}` : durOf(film.slug)}</span>
         <SourceViewer name={film.slug} lines={lineCount(film.slug)} />
       </figcaption>
     </figure>

@@ -15254,3 +15254,26 @@ inputs exist, never that the output makes a sound.
 needs the same question asked once: is there a path where the declaration is present and the artifact is
 empty. `bed-missing` was the answer for one field; this is the answer for the next; the rest of
 `audio-check` still grades intent alone.
+
+## #473 — the showcase page typed six film durations, and two were already wrong
+
+**What.** `site/app/showcase/page.tsx` carried a hand-written `dur` string per film. `creed-launch` was
+recut from 53s to 35.6s and the page still read **`0:53`**. `plinth-ad` read `0:27` against a **0:28**
+render, and nobody had touched that film.
+
+**Root cause, and it is the shape this repo logs most.** A duration is a fact about the mp4, and the
+page held a second copy of it, updated by whoever last remembered. `site-counts.mjs` exists because the
+same class produced eight stale figures across five files in one afternoon; `#471` exists because a
+poster went stale with nothing watching. This was the same thing one file over.
+
+**Fix.** `scripts/site/films-json.mjs` reads the duration from the encoded film with `ffprobe` and
+writes `site/lib/films.json`; the page looks each one up by slug. `make films-json` reports a
+disagreement and names every stale figure; `WRITE=1` rewrites.
+
+**Why the mp4 and not the scene.** Four of the six film sources are gitignored as content, so the scene
+JSON is not reliably on disk. The encoded film always is, because the site serves it. The measurement
+has to come from the artifact that ships.
+
+**Which gate catches it now.** `make films-json`. It is not in the pre-push hook: the films are
+regenerated rarely and re-encoding six of them to check a label is a poor trade on every push. It
+belongs beside `make site-assets`, which is what changes them.

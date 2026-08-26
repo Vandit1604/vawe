@@ -1,0 +1,26 @@
+{
+ "argus-launch": {
+  "seconds": 23.01,
+  "label": "0:23"
+ },
+ "creed-launch": {
+  "seconds": 35.62,
+  "label": "0:36"
+ },
+ "plinth-ad": {
+  "seconds": 27.8,
+  "label": "0:28"
+ },
+ "product-feature-tour": {
+  "seconds": 50,
+  "label": "0:50"
+ },
+ "saas-hero-launch": {
+  "seconds": 45,
+  "label": "0:45"
+ },
+ "threadcite-open": {
+  "seconds": 30,
+  "label": "0:30"
+ }
+}

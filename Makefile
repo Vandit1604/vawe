@@ -866,6 +866,9 @@ blocks-json: ## regenerate site/lib/blocks.json (the site's grid) from the manif
 scenes-json: ## check site/public/scenes/ against formats/scene/ (WRITE=1 to rewrite)
 	node scripts/site/scenes-json.mjs $(if $(WRITE),--write,)
 
+films-json: ## check site/lib/films.json against the rendered films (WRITE=1 to rewrite)
+	node scripts/site/films-json.mjs $(if $(WRITE),--write,)
+
 # make blocks-sync — after adding a block: docs table, the site's grid, and the site's per-block
 # scenes + posters. blocks-scenes is safe to include here because it needs no render: each block is
 # measured on its own stage, so adding one touches only its own files.
