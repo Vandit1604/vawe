@@ -23,6 +23,7 @@
 // film with {"authoring":{"allow":["plain-slideshow"]}}.
 import fs from 'node:fs';
 import { motionAt } from '../../core/sequence.js';
+import { bgPreset } from '../../core/backgrounds.js';
 import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion.js';
 import { sceneDims } from '../../core/safe.js';
@@ -55,16 +56,23 @@ const isExpressiveText = (l) => !!(l.split || l.preset || l.fx || Array.isArray(
 const plainHeadlines = headlines.filter((l) => !isExpressiveText(l));
 
 // background motion: a bg WINDOW on a moving preset, or a shader / canvasFx / three layer.
-// Matching on the preset NAME misses presets that animate by nature: `dotmatrix` is a dot field with a
-// mode (pulse/wave/ripple) and a period, it is never still, and it is one of the most-used backdrops in
-// this library. A window that names a mode, period or drift is animating whatever it is called, so ask
-// the window rather than only its name.
-const MOVING_BG = /gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither|dotmatrix|metallic|softwash|liquid|spotlight/i;
+// ASK THE PRESET, DO NOT MATCH ITS NAME. This was a hand-kept regex over preset names, and a hand-kept
+// list of a fact somebody else owns is the drift this codebase logs most: it called EIGHT of the 22
+// presets flat while they animate (paperDots, paperShapes, soft, accent, shapes, brandglow, ink, blobs),
+// so a film on the loud brand field was told its backdrop was dead. The owner of "does this move" is
+// `bgPreset` in core/backgrounds.js: it returns the fx list that renderBg(…, t) paints, and `grain` is
+// the only fx that is not motion (film grain over a still base). That is the same split BG_BLURBS
+// states in prose — FLAT = plain · paper · accentPlain · dark · deep — now read off the code instead of
+// restated here. An unknown name throws there (#361) and is not this gate's finding to report.
+const movingPreset = (name, value) => {
+  try { return (bgPreset(name ?? undefined, value).fx || []).some((f) => f && f.type !== 'grain'); }
+  catch { return false; }
+};
 // ...and a HAND-AUTHORED backdrop (core/bg-html.js) animates by being a function of `var(--t)`, the one
 // thing it is allowed to move by — CSS animation is disabled engine-wide and the sanitiser rejects it.
 // Without this the escape hatch for a backdrop the preset vocabulary cannot express was told it was a
 // flat field, which pushes the author back onto the presets: the opposite of what it exists for.
-const animatedWin = (b) => b && (MOVING_BG.test(String(b.preset || b.value || ''))
+const animatedWin = (b) => b && (movingPreset(b.preset, b.value)
   || b.mode != null || b.period != null || b.driftX != null || b.driftY != null
   || (typeof b.html === 'string' && /var\(\s*--[tp]\b/.test(b.html)));
 const hasBgMotion = (d.bg || []).some(animatedWin)
