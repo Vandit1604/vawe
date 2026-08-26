@@ -1,116 +1,136 @@
 {
-  "module": "scene",
-  "aspect": "16:9",
-  "theme": "vawe",
-  "duration": 8.4,
-  "audio": {
-    "silent": true
+ "module": "scene",
+ "aspect": "16:9",
+ "theme": "vawe",
+ "duration": 8.4,
+ "sceneUnits": false,
+ "audio": {
+  "silent": true
+ },
+ "layers": [
+  {
+   "type": "text",
+   "text": "Every claim needs",
+   "x": 210,
+   "y": 214,
+   "w": 1500,
+   "align": "center",
+   "size": 64,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.08,
+   "each": 0.5,
+   "start": 0.3,
+   "duration": 3.2,
+   "anim": "none",
+   "exitDur": 0.25
   },
-  "layers": [
-    {
-      "type": "text",
-      "text": "Every claim needs",
-      "x": 210,
-      "y": 360,
-      "w": 1500,
-      "align": "center",
-      "size": 78,
-      "weight": 500,
-      "color": "var(--text-2)",
-      "split": "word",
-      "preset": "up",
-      "stagger": 0.08,
-      "each": 0.5,
-      "start": 0.3,
-      "duration": 3.2,
-      "anim": "none",
-      "exitDur": 0.25
-    },
-    {
-      "type": "text",
-      "text": "a <b>moment</b> it lands.",
-      "x": 210,
-      "y": 470,
-      "w": 1500,
-      "align": "center",
-      "size": 122,
-      "weight": 700,
-      "color": "var(--text)",
-      "split": "word",
-      "preset": "up",
-      "stagger": 0.08,
-      "each": 0.5,
-      "start": 1.1,
-      "duration": 2.4,
-      "anim": "none",
-      "exitDur": 0.25
-    },
-    {
-      "type": "text",
-      "text": "proof.",
-      "x": 210,
-      "y": 400,
-      "w": 1500,
-      "align": "center",
-      "size": 210,
-      "weight": 700,
-      "color": "var(--accent)",
-      "split": "char",
-      "preset": "stretch",
-      "stagger": 0.03,
-      "each": 0.4,
-      "start": 3.75,
-      "duration": 2.05,
-      "anim": "none",
-      "exitDur": 0.22
-    },
-    {
-      "type": "text",
-      "text": "Punctuation, not decoration.",
-      "x": 210,
-      "y": 460,
-      "w": 1500,
-      "align": "center",
-      "size": 86,
-      "weight": 700,
-      "color": "var(--text)",
-      "split": "word",
-      "preset": "up",
-      "stagger": 0.07,
-      "each": 0.5,
-      "start": 6.1,
-      "duration": 2.3,
-      "anim": "none",
-      "exitDur": 0
-    }
-  ],
-  "cuts": [
-    {
-      "t": 3.7,
-      "style": "punch"
-    },
-    {
-      "t": 6.05,
-      "style": "riseBlur"
-    }
-  ],
-  "stings": [
-    {
-      "t": 3.72,
-      "fx": "flash",
-      "colors": [
-        "#2563eb"
-      ],
-      "intensity": 0.6
-    },
-    {
-      "t": 6.07,
-      "fx": "leak",
-      "colors": [
-        "#2563eb",
-        "#8fc0ff"
-      ],
-      "intensity": 0.35
-    }
-  ]
+  {
+   "type": "text",
+   "text": "a <b>moment</b> it lands.",
+   "x": 210,
+   "y": 300,
+   "w": 1500,
+   "align": "center",
+   "size": 106,
+   "weight": 700,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.08,
+   "each": 0.5,
+   "start": 1.1,
+   "duration": 2.4,
+   "anim": "none",
+   "exitDur": 0.25
+  },
+  {
+   "type": "text",
+   "text": "proof.",
+   "x": 210,
+   "y": 248,
+   "w": 1500,
+   "align": "center",
+   "size": 176,
+   "weight": 700,
+   "color": "var(--accent)",
+   "split": "char",
+   "preset": "stretch",
+   "stagger": 0.03,
+   "each": 0.4,
+   "start": 3.75,
+   "duration": 2.05,
+   "anim": "none",
+   "exitDur": 0.22
+  },
+  {
+   "type": "text",
+   "text": "Punctuation, not decoration.",
+   "x": 210,
+   "y": 288,
+   "w": 1500,
+   "align": "center",
+   "size": 78,
+   "weight": 700,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.07,
+   "each": 0.5,
+   "start": 6.1,
+   "duration": 2.3,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "type": "html",
+   "x": 100,
+   "y": 500,
+   "w": 1720,
+   "h": 460,
+   "start": 0.15,
+   "duration": 8.25,
+   "anim": "fade",
+   "enterDur": 0.5,
+   "exitDur": 0,
+   "src": "formats/scene/_showcase-stings-panel.html"
+  }
+ ],
+ "cuts": [
+  {
+   "t": 3.7,
+   "style": "punch"
+  },
+  {
+   "t": 6.05,
+   "style": "riseBlur"
+  }
+ ],
+ "stings": [
+  {
+   "t": 3.72,
+   "fx": "flash",
+   "colors": [
+    "#2563eb"
+   ],
+   "intensity": 0.6
+  },
+  {
+   "t": 6.07,
+   "fx": "leak",
+   "colors": [
+    "#2563eb",
+    "#8fc0ff"
+   ],
+   "intensity": 0.35
+  }
+ ],
+ "bg": [
+  {
+   "t": 0,
+   "preset": "dotmatrix"
+  }
+ ]
 }

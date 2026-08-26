@@ -1,112 +1,118 @@
 {
-  "module": "scene",
-  "aspect": "16:9",
-  "theme": "vawe",
-  "duration": 8.4,
-  "audio": {
-    "silent": true
+ "module": "scene",
+ "aspect": "16:9",
+ "theme": "vawe",
+ "duration": 8.4,
+ "audio": {
+  "silent": true
+ },
+ "layers": [
+  {
+   "type": "text",
+   "text": "One film. <b>1,350</b> frames.",
+   "x": 210,
+   "y": 280,
+   "w": 1500,
+   "align": "center",
+   "size": 96,
+   "weight": 700,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.07,
+   "each": 0.44,
+   "start": 0.3,
+   "duration": 4,
+   "anim": "none",
+   "exitDur": 0.24
   },
-  "layers": [
-    {
-      "type": "text",
-      "text": "One film. <b>1,350</b> frames.",
-      "x": 210,
-      "y": 280,
-      "w": 1500,
-      "align": "center",
-      "size": 96,
-      "weight": 700,
-      "color": "var(--text)",
-      "split": "word",
-      "preset": "up",
-      "stagger": 0.07,
-      "each": 0.44,
-      "start": 0.3,
-      "duration": 4,
-      "anim": "none",
-      "exitDur": 0.24
-    },
-    {
-      "type": "html",
-      "x": 400,
-      "y": 440,
-      "w": 1120,
-      "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:1120px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">frames rendered / worker</div><svg viewBox=\"0 0 1076 256\" width=\"100%\" height=\"256\" style=\"display:block;overflow:visible\"><polygon points=\"8,248 8.0,8.0 159.4,9.4 310.9,8.0 462.3,9.4 613.7,8.0 765.1,8.0 916.6,8.0 1068.0,8.0 1068,248\" fill=\"var(--up)\" opacity=\"0.12\"/><polyline points=\"8.0,8.0 159.4,9.4 310.9,8.0 462.3,9.4 613.7,8.0 765.1,8.0 916.6,8.0 1068.0,8.0\" fill=\"none\" stroke=\"var(--up)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"8.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"159.4\" cy=\"9.4\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"310.9\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"462.3\" cy=\"9.4\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"613.7\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"765.1\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"916.6\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"1068.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/></svg></div>",
-      "start": 1,
-      "duration": 3.3,
-      "anim": "rise",
-      "enterDur": 0.5,
-      "exitDur": 0.35
-    },
-    {
-      "type": "text",
-      "text": "Render it again.",
-      "x": 210,
-      "y": 330,
-      "w": 1500,
-      "align": "center",
-      "size": 92,
-      "weight": 500,
-      "color": "var(--text-2)",
-      "split": "word",
-      "preset": "up",
-      "stagger": 0.07,
-      "each": 0.44,
-      "start": 4.5,
-      "duration": 3.9,
-      "anim": "none",
-      "exitDur": 0
-    },
-    {
-      "type": "text",
-      "text": "Byte for byte, <b>the same</b>.",
-      "x": 210,
-      "y": 450,
-      "w": 1500,
-      "align": "center",
-      "size": 118,
-      "weight": 700,
-      "color": "var(--text)",
-      "split": "word",
-      "preset": "up",
-      "stagger": 0.08,
-      "each": 0.5,
-      "start": 5.3,
-      "duration": 3.1,
-      "anim": "none",
-      "exitDur": 0
-    },
-    {
-      "type": "text",
-      "text": "renderFrame(n) is pure in n",
-      "x": 210,
-      "y": 660,
-      "w": 1500,
-      "align": "center",
-      "size": 30,
-      "font": "mono",
-      "color": "var(--dim)",
-      "start": 6.4,
-      "duration": 2,
-      "anim": "fade",
-      "enterDur": 0.5,
-      "exitDur": 0
-    }
-  ],
-  "cuts": [
-    {
-      "t": 4.45,
-      "style": "riseBlur"
-    }
-  ],
-  "stings": [
-    {
-      "t": 5.28,
-      "fx": "flash",
-      "colors": [
-        "#2563eb"
-      ],
-      "intensity": 0.4
-    }
-  ]
+  {
+   "type": "html",
+   "x": 400,
+   "y": 440,
+   "w": 1120,
+   "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:1120px\"><div style=\"font:600 18px var(--font-mono);color:var(--dim);margin-bottom:14px\">frames rendered / worker</div><svg viewBox=\"0 0 1076 256\" width=\"100%\" height=\"256\" style=\"display:block;overflow:visible\"><polygon points=\"8,248 8.0,8.0 159.4,9.4 310.9,8.0 462.3,9.4 613.7,8.0 765.1,8.0 916.6,8.0 1068.0,8.0 1068,248\" fill=\"var(--up)\" opacity=\"0.12\"/><polyline points=\"8.0,8.0 159.4,9.4 310.9,8.0 462.3,9.4 613.7,8.0 765.1,8.0 916.6,8.0 1068.0,8.0\" fill=\"none\" stroke=\"var(--up)\" stroke-width=\"2.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"8.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"159.4\" cy=\"9.4\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"310.9\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"462.3\" cy=\"9.4\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"613.7\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"765.1\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"916.6\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/><circle cx=\"1068.0\" cy=\"8.0\" r=\"2.6\" fill=\"var(--up)\"/></svg></div>",
+   "start": 1,
+   "duration": 3.3,
+   "anim": "rise",
+   "enterDur": 0.5,
+   "exitDur": 0.35
+  },
+  {
+   "type": "text",
+   "text": "Render it again.",
+   "x": 210,
+   "y": 330,
+   "w": 1500,
+   "align": "center",
+   "size": 92,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.07,
+   "each": 0.44,
+   "start": 4.5,
+   "duration": 3.9,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "type": "text",
+   "text": "Byte for byte, <b>the same</b>.",
+   "x": 210,
+   "y": 450,
+   "w": 1500,
+   "align": "center",
+   "size": 118,
+   "weight": 700,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.08,
+   "each": 0.5,
+   "start": 5.3,
+   "duration": 3.1,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "type": "text",
+   "text": "renderFrame(n) is pure in n",
+   "x": 210,
+   "y": 660,
+   "w": 1500,
+   "align": "center",
+   "size": 30,
+   "font": "mono",
+   "color": "var(--dim)",
+   "start": 6.4,
+   "duration": 2,
+   "anim": "fade",
+   "enterDur": 0.5,
+   "exitDur": 0
+  }
+ ],
+ "cuts": [
+  {
+   "t": 4.45,
+   "style": "riseBlur"
+  }
+ ],
+ "stings": [
+  {
+   "t": 5.28,
+   "fx": "flash",
+   "colors": [
+    "#2563eb"
+   ],
+   "intensity": 0.4
+  }
+ ],
+ "bg": [
+  {
+   "t": 0,
+   "preset": "dotmatrix"
+  }
+ ]
 }

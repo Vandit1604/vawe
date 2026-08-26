@@ -14266,3 +14266,41 @@ reports it, which is right, but the two numbers are still one fact with two owne
 `y: 48`, outside a 6% margin, on purpose: nobody delivers a contact sheet to a phone feed. No waiver was
 added to them, and a waiver would have been the wrong shape anyway, because the next `make catalog` run
 overwrites the file it was written into.
+
+## #455 — the site kept its own copy of a scene, and served a bug that had been fixed for forty days
+
+**What.** A user reported that `argus-launch` fails to boot in the site's `/editor`. It does not fail:
+`./bin/vawe formats/scene/argus-launch.json --draft` renders it in 23.0s, 690 frames, exit 0, and
+`core/validate.mjs` passes it.
+
+`/editor` fetches `/scenes/<id>.json`, which is `site/public/scenes/` — a hand-curated, git-tracked
+copy of the scene, not the scene. That copy was dated 16 July against a source dated 25 August, and it
+still carried `"anim": "rise"` on the three layers that declare a `cut`, a pair the engine refuses.
+Someone had fixed the real film in July by dropping the `anim`. The site's copy never heard, so the
+editor faithfully showed a visitor a defect that had not existed for forty days.
+
+**It was worse than stale.** Comparing all fifteen copies against their sources, **every one had
+drifted**, and the missing keys were not only cosmetic: **`bg` was absent from nine of them and
+`sceneUnits` from three.** `bg` is a required field. Nine films were playing on the site without the
+backdrop their author wrote, and no gate anywhere looked at that directory.
+
+**Root cause.** One fact, two owners, which is the failure this file logs most. `scripts/site/site-engine.mjs`
+states the split as a decision ("scene JSON is content and the site curates its own under
+`public/scenes/`"), and the decision is defensible: a scene carries `authoring` waivers and author
+notes that no visitor should be served. What made it rot is that the curation was performed by hand,
+so the rule lived in nobody's head consistently and the copy was only as fresh as the last person who
+thought about it.
+
+**Fix.** `scripts/site/scenes-json.mjs` DERIVES the whole directory from `formats/scene/`, dropping a
+short closed list of author-only keys (`authoring`, `authoringNote`, `note`) and copying everything
+else byte for byte. `make scenes-json` checks and exits non-zero on any difference; `WRITE=1` rewrites.
+A site scene whose source has been deleted is reported as an orphan rather than removed, because a
+film may have been renamed and silently dropping a page's content is worse than saying it is unbacked.
+
+**Which gate catches it now.** `make scenes-json`, and it is in the pre-push hook rather than in a site
+build, because the drift is invisible: nothing renders differently on this machine, the site is simply
+serving different bytes. It reads fifteen files.
+
+**The general shape, worth grepping for.** A directory that is (a) tracked, (b) a copy of something
+else in the repo, and (c) maintained by hand. `site/public/` holds other such copies. Each one is a
+`#455` waiting for someone to notice by hand.

@@ -1,46 +1,68 @@
 {
-  "module": "scene",
-  "aspect": "16:9",
-  "theme": "vawe",
-  "duration": 6,
-  "audio": {
-    "silent": true
+ "module": "scene",
+ "aspect": "16:9",
+ "theme": "vawe",
+ "duration": 6,
+ "audio": {
+  "silent": true
+ },
+ "layers": [
+  {
+   "type": "html",
+   "id": "frame",
+   "pin": "center",
+   "w": 840,
+   "h": 672,
+   "start": 0.35,
+   "duration": 5.65,
+   "anim": "fade",
+   "enterDur": 0.4,
+   "exitDur": 0,
+   "html": "<svg viewBox=\"0 0 1000 800\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" style=\"display:block;--g:clamp(0,(var(--t,0) - 0.5) / 0.9,1);--q1:clamp(0,(var(--t,0) - 2.4) / 0.6,1);--q2:clamp(0,(var(--t,0) - 3.6) / 0.6,1);--e0:calc(var(--g) * (2 - var(--g)));--e1:calc(var(--q1) * var(--q1) * (3 - 2 * var(--q1)));--e2:calc(var(--q2) * var(--q2) * (3 - 2 * var(--q2)));--fw:calc(900px - 200px * var(--e1) - 280px * var(--e2));--fh:calc(506px + 194px * var(--e1) + 47px * var(--e2));--c:clamp(0,(var(--t,0) - 1.3) / 0.45,1)\"><rect x=\"66\" y=\"163\" width=\"868\" height=\"474\" rx=\"8\" fill=\"none\" stroke=\"var(--line-strong)\" stroke-width=\"1.5\" stroke-dasharray=\"9 9\" style=\"x:calc(500px - var(--fw) / 2 + 16px);y:calc(400px - var(--fh) / 2 + 16px);width:calc(var(--fw) - 32px);height:calc(var(--fh) - 32px);opacity:calc(var(--c) * 0.9)\"/><g style=\"opacity:var(--c)\"><rect x=\"76\" y=\"173\" width=\"46\" height=\"46\" rx=\"12\" fill=\"var(--accent)\" style=\"x:calc(500px - var(--fw) / 2 + 26px);y:calc(400px - var(--fh) / 2 + 26px)\"/><rect x=\"832\" y=\"185\" width=\"92\" height=\"14\" rx=\"7\" fill=\"var(--dim)\" fill-opacity=\"0.5\" style=\"x:calc(500px + var(--fw) / 2 - 118px);y:calc(400px - var(--fh) / 2 + 38px)\"/><rect x=\"176\" y=\"344\" width=\"648\" height=\"44\" rx=\"8\" fill=\"var(--text)\" style=\"x:calc(500px - var(--fw) * 0.36);width:calc(var(--fw) * 0.72)\"/><rect x=\"275\" y=\"406\" width=\"450\" height=\"18\" rx=\"9\" fill=\"var(--dim)\" fill-opacity=\"0.5\" style=\"x:calc(500px - var(--fw) * 0.25);width:calc(var(--fw) * 0.5)\"/><rect x=\"347\" y=\"438\" width=\"306\" height=\"18\" rx=\"9\" fill=\"var(--dim)\" fill-opacity=\"0.5\" style=\"x:calc(500px - var(--fw) * 0.17);width:calc(var(--fw) * 0.34)\"/><rect x=\"76\" y=\"595\" width=\"270\" height=\"16\" rx=\"8\" fill=\"var(--dim)\" fill-opacity=\"0.5\" style=\"x:calc(500px - var(--fw) / 2 + 26px);y:calc(400px + var(--fh) / 2 - 42px);width:calc(var(--fw) * 0.3)\"/><text x=\"500\" y=\"611\" text-anchor=\"middle\" fill=\"var(--dim)\" style=\"y:calc(400px + var(--fh) / 2 - 26px);font-family:var(--font-mono);font-size:44px;letter-spacing:1px;opacity:calc(1 - clamp(0,(var(--t,0) - 2.4) / 0.3,1))\">16:9</text><text x=\"500\" y=\"611\" text-anchor=\"middle\" fill=\"var(--dim)\" style=\"y:calc(400px + var(--fh) / 2 - 26px);font-family:var(--font-mono);font-size:44px;letter-spacing:1px;opacity:calc(clamp(0,(var(--t,0) - 2.7) / 0.3,1) - clamp(0,(var(--t,0) - 3.6) / 0.3,1))\">1:1</text><text x=\"500\" y=\"611\" text-anchor=\"middle\" fill=\"var(--dim)\" style=\"y:calc(400px + var(--fh) / 2 - 26px);font-family:var(--font-mono);font-size:44px;letter-spacing:1px;opacity:clamp(0,(var(--t,0) - 3.9) / 0.3,1)\">9:16</text></g><rect x=\"50\" y=\"147\" width=\"900\" height=\"506\" rx=\"14\" fill=\"none\" stroke=\"var(--text)\" stroke-width=\"4\" style=\"x:calc(500px - var(--fw) / 2);y:calc(400px - var(--fh) / 2);width:var(--fw);height:var(--fh);stroke-dasharray:2812px;stroke-dashoffset:calc(2812px * (1 - var(--e0)))\"/></svg>"
   },
-  "layers": [
-    {
-      "type": "text",
-      "text": "one source",
-      "x": 60,
-      "y": 320,
-      "w": 1800,
-      "align": "center",
-      "size": 38,
-      "font": "mono",
-      "color": "var(--dim)",
-      "start": 0.3,
-      "duration": 5.7,
-      "anim": "fade",
-      "enterDur": 0.5,
-      "exitDur": 0
-    },
-    {
-      "type": "text",
-      "text": "every <b>ratio</b>.",
-      "x": 60,
-      "y": 410,
-      "w": 1800,
-      "align": "center",
-      "size": 148,
-      "weight": 700,
-      "color": "var(--text)",
-      "split": "word",
-      "preset": "up",
-      "stagger": 0.09,
-      "each": 0.55,
-      "start": 0.7,
-      "duration": 5.3,
-      "anim": "none",
-      "exitDur": 0
-    }
-  ]
+  {
+   "type": "text",
+   "id": "hero",
+   "text": "every <b>ratio</b>.",
+   "anchor": "frame",
+   "at": "below-center",
+   "dy": 30,
+   "w": "88%",
+   "align": "center",
+   "size": 96,
+   "weight": 700,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.09,
+   "each": 0.55,
+   "start": 1.1,
+   "duration": 4.9,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "type": "text",
+   "text": "one source",
+   "anchor": "frame",
+   "at": "above-center",
+   "dy": 26,
+   "w": "88%",
+   "align": "center",
+   "size": 34,
+   "font": "mono",
+   "color": "var(--dim)",
+   "start": 0.3,
+   "duration": 5.7,
+   "anim": "fade",
+   "enterDur": 0.5,
+   "exitDur": 0
+  }
+ ],
+ "bg": [
+  {
+   "t": 0,
+   "preset": "dotmatrix"
+  }
+ ]
 }

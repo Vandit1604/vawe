@@ -861,6 +861,9 @@ blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
 blocks-json: ## regenerate site/lib/blocks.json (the site's grid) from the manifest
 	node scripts/site/blocks-json.mjs
 
+scenes-json: ## check site/public/scenes/ against formats/scene/ (WRITE=1 to rewrite)
+	node scripts/site/scenes-json.mjs $(if $(WRITE),--write,)
+
 # make blocks-sync — after adding a block: docs table, the site's grid, and the site's per-block
 # scenes + posters. blocks-scenes is safe to include here because it needs no render: each block is
 # measured on its own stage, so adding one touches only its own files.
