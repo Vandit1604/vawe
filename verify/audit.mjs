@@ -192,6 +192,30 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     while (w.nextNode()) out += w.currentNode.nodeValue;
     return out;
   };
+  // A MASK IS NOT A MISFIT. `scrollWidth > clientWidth` says the content is BIGGER than the box; every
+  // check below then reports that as "the box is cutting the content", which is one reading of two.
+  // The other is a WINDOW: an `overflow:hidden` box with an out-of-flow child deliberately parked or
+  // slid past its edge, which is how every reveal, tab strip, marquee and carousel is built. The
+  // `tabBar.switch` block is exactly that — a 158px window over a 488px strip translated by `var(--p)`
+  // — and it HARD-FAILED clipped-text on every frame where the strip happened to sit at translate 0,
+  // reporting "329px too narrow for the glyphs" about a mask doing its job.
+  // The two cases are told apart structurally, not by size: the defect (#35, a riseClip mask shorter
+  // than the descenders; #43, a component whose captured box is too small) is IN-FLOW content that did
+  // not fit. A child taken OUT of flow was placed at a coordinate by whoever wrote it, so the box never
+  // tried to fit it and clipping it is the intent. Known ceiling, stated rather than hidden: a card
+  // that absolutely-positions real copy off its own edge is now unreported here. The layer-level
+  // safe-zone and overflow checks still see the layer itself.
+  const maskedByDesign = (el) => {
+    const r = el.getBoundingClientRect();
+    for (const n of el.querySelectorAll('*')) {
+      const pos = getComputedStyle(n).position;
+      if (pos !== 'absolute' && pos !== 'fixed') continue;
+      const b = n.getBoundingClientRect();
+      if (b.width < 1 || b.height < 1) continue;
+      if (b.right > r.right + 1 || b.bottom > r.bottom + 1 || b.left < r.left - 1 || b.top < r.top - 1) return true;
+    }
+    return false;
+  };
   // What the safe check must measure is what the VIEWER can see. A text layer given a `w` (which it
   // needs, since pin centres a box) paints nothing but glyphs: the container is invisible slack, and
   // centred text leaves half that slack on each side. Measuring the container flags empty air as
@@ -482,7 +506,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // clipped" fired on every ken layer in the repo (gradient-showcase failed its own audit for this),
     // which teaches authors the gate is noise. The rule is about clipped TEXT; keep it there.
     const clipsByDesign = el.classList.contains('hs-img-wrap');
-    if (!clipsByDesign && ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1)))
+    if (!clipsByDesign && ((s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1)) && !maskedByDesign(el))
       issues.push({ kind: 'overflow', a: id, li, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` });
     // Measure the INK on BOTH axes. The border box is the size the author DECLARED; on a `group`, an
     // `html` layer or a component that size is `h` verbatim, and nothing need be painted in it. A group
@@ -598,7 +622,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // same mistake as docs/MISTAKES.md #214, which fixed it for the overlap check and missed this one,
     // so the rule is now shared rather than repeated: only RENDERED text counts.
     const txt = inkText(el).trim();
-    if (!txt || !vis(el) || !atRest(el)) continue;
+    if (!txt || !vis(el) || !atRest(el) || maskedByDesign(el)) continue;
     const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-text', a: txt.slice(0, 16),
       detail: `mask is ${dy > 1 ? `${dy}px too short` : `${dx}px too narrow`} for the glyphs — descenders/edges are being cut` });
@@ -609,7 +633,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // the same failure one level down, but it only walks .hs-text: a component is a foreign DOM subtree
   // and no rule looked at it at all, so a card lost its bottom 24px for as long as it shipped (#43).
   for (const el of document.querySelectorAll('.hs-comp')) {
-    if (!vis(el) || !atRest(el)) continue;
+    if (!vis(el) || !atRest(el) || maskedByDesign(el)) continue;
     const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-component', a: 'component',
       detail: `content needs ${el.scrollWidth}x${el.scrollHeight} but the captured box is ${el.clientWidth}x${el.clientHeight} — ${dy > 1 ? `${dy}px` : `${dx}px`} is being cut off. A margin on the captured root is the usual cause (capture measures a border box).` });

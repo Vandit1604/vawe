@@ -15353,3 +15353,35 @@ a finding.
 
 **The shape worth grepping for.** A feature with two spellings and a reader that knows one. The tell is
 that the failure looks like a defect in the film rather than in the reader.
+
+## #477 — the clipped-text rule read every mask as a mistake
+
+`verify/audit.mjs` hard-failed any film using the `tabBar.switch` block:
+`[clipped-text] DesignMotionExpo — mask is 329px too narrow for the glyphs`. Nothing was cut that was
+not meant to be. The block is a 158px window over a 488px strip of three tabs, translated by
+`var(--p)` so the active pill slides: an `overflow:hidden` box with an absolutely-positioned child
+parked past its edge, which is how every reveal, tab strip, marquee and carousel is built.
+
+**Root cause: one reading of an ambiguous measurement.** `scrollWidth > clientWidth` says the content
+is BIGGER than the box. The check turned that into "the box is cutting the content", which is true for
+a misfit and false for a window. The existing guard, `atRest`, only asks whether the first child is
+mid-transform, so it cleared every frame where the strip happened to sit at translate 0 — including
+frame 9, before the switch even starts.
+
+**The two cases are told apart structurally, not by size.** The defects this rule exists for are
+in-flow content that did not fit: #35 (a `riseClip` mask shorter than the descenders) and #43 (a
+captured component whose box is 24px too small). A child taken OUT of flow was placed at a coordinate
+by whoever wrote it, so the box never tried to fit it and clipping it is the intent. `maskedByDesign(el)`
+answers exactly that: does a positioned descendant extend past this box.
+
+**Every consumer, not the one that was reported.** `scrollWidth`/`scrollHeight` is read in four places
+in this file. Three are checks and all three take the guard: the layer-level `overflow` finding,
+`clipped-text`, and `clipped-component`. The fourth is `info[].clip`/`sw`/`cw`/`sh`/`ch`, computed and
+read by nothing at all — dead, and left alone rather than half-fixed.
+
+**Known ceiling, stated rather than hidden.** A card that absolutely-positions real copy off its own
+edge is no longer reported here. The layer-level safe-zone and overflow checks still see the layer.
+
+**Blast radius, measured.** The whole audit sweep, 105 scenes, before and after: 103 identical, 0 scenes
+changed exit code, no finding added or removed in kind. Two scenes report the SAME finding one sample
+frame later, because the earliest frame was the one holding a mask at rest.
