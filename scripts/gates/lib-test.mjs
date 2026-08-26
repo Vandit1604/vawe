@@ -5,7 +5,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
-import { ANIM_NAMES, ANIM_BLURBS } from '../../core/clips.js';
+import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt } from '../../core/clips.js';
 import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
   normalizeIdle, settledGain } from '../../core/idle.js';
 import { SEAM_BLURBS } from '../../core/seams.js';
@@ -1983,6 +1983,45 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       const leaving = opacityEnvelope(1, t), arriving = opacityEnvelope(t, 0);
       if (Math.abs(leaving + arriving - 1) > 1e-9) return false;
     } return true; })());
+}
+
+// ---- clipStyleAt (core/clips.js) — the composition asked for, not performed ----
+// A fake element is enough because the function reads only `el.dataset` and writes nothing. That is
+// the whole point of the lift: the pose at t is a VALUE, so it can be asked for out of order, twice,
+// or for a t nobody is rendering.
+{
+  const clip = (d) => ({ dataset: { start: '1', duration: '3', ...d } });
+  const keys = (o) => Object.keys(o).sort().join(',');
+
+  // COMPLETE, NOT A DELTA (MISTAKES #41). Entrances and exits write different CSS properties, so both
+  // branches must hand back every property either half of this layer's animation can touch — or the
+  // one the other half wrote sticks across out-of-order worker frames.
+  const both = clip({ anim: 'wipe', out: 'defocus', track: '3' });
+  const inWin = clipStyleAt(both, 2), offWin = clipStyleAt(both, 9);
+  ok('clipStyleAt: in-window carries the resting keys of BOTH halves', 'clipPath' in inWin && 'filter' in inWin);
+  ok('clipStyleAt: off-window carries the resting keys of BOTH halves', 'clipPath' in offWin && 'filter' in offWin);
+  ok('clipStyleAt: off-window is a state, not an absence', offWin.opacity === '0' && offWin.pointerEvents === 'none');
+  ok('clipStyleAt: in-window re-enables pointer events', inWin.pointerEvents === '');
+  ok('clipStyleAt: both branches return zIndex from the track', inWin.zIndex === '3' && offWin.zIndex === '3');
+  ok('clipStyleAt: no track means no zIndex key, so the stylesheet keeps it',
+     !('zIndex' in clipStyleAt(clip({ anim: 'fade' }), 2)));
+  ok('clipStyleAt: the envelope owns opacity, not the anim',
+     clipStyleAt(clip({ anim: 'fade', opacity: '0.4' }), 2).opacity === '0.400');
+
+  // PURE IN t. Ask twice with a different t asked in between, then sweep scrambled against forward.
+  const a1 = clipStyleAt(both, 1.15); clipStyleAt(both, 3.9); const a2 = clipStyleAt(both, 1.15);
+  ok('clipStyleAt: the same t answers the same twice, whatever was asked between',
+     JSON.stringify(a1) === JSON.stringify(a2));
+  ok('clipStyleAt: a scrambled sweep matches a forward one', (() => {
+    const ts = [0.5, 1.1, 1.4, 2, 3.6, 3.95, 4.5];
+    const fwd = ts.map((t) => JSON.stringify(clipStyleAt(both, t)));
+    const order = [4, 0, 6, 2, 5, 1, 3];
+    const seen = new Map();
+    for (const i of order) seen.set(i, JSON.stringify(clipStyleAt(both, ts[i])));
+    return ts.every((_, i) => seen.get(i) === fwd[i]);
+  })());
+  ok('clipStyleAt: writes nothing (a frozen element is still answerable)',
+     clipStyleAt(Object.freeze({ dataset: Object.freeze({ start: '0', duration: '2', anim: 'rise' }) }), 1).opacity === '1.000');
 }
 
 // ---- sceneDims (core/safe.js) — how big is the frame, asked once ----
