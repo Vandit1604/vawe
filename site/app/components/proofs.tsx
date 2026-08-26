@@ -1,15 +1,17 @@
-/* The three proof diagrams for the claims section.
+/* The two proof diagrams on the landing page.
  *
  * Each claim gets a diagram drawn for THAT claim, never a shared shape: determinism is one frame
- * hashing the same from two different render orders, agent-native is prose becoming a contract,
- * any-aspect is one source fanning out to four ratios. The variance is the argument.
+ * hashing the same from two different render orders, any-aspect is one source fanning out to four
+ * ratios. The variance is the argument. A third diagram (a prompt becoming a contract) was cut
+ * with the claim it illustrated: the hero above it already shows JSON, live and editable, so a
+ * drawing of JSON was the page saying the same thing twice and drawing it worse the second time.
  *
  * They are SVG rather than boxes of styled text so the geometry can carry meaning: in the aspect
  * diagram the rectangles' widths ARE the ratios (one shared height times 16/9, 9/16, 1/1, 4/5),
  * computed, so the picture cannot drift from the sentence beside it.
  *
  * Cobalt is the only ink, per The One Voice Rule. Strokes are non-scaling so a transform-scaled
- * mark keeps the same hairline as an unscaled one. All three are aria-hidden: they illustrate the
+ * mark keeps the same hairline as an unscaled one. Both are aria-hidden: they illustrate the
  * claim beside them, and a screen reader gets that claim as prose.
  */
 
@@ -77,72 +79,6 @@ export function ProofHash() {
         <text className="dg-hash" x="48" y="104">frame 412</text>
         <text className="dg-hash is-key" x="472" y="104" textAnchor="end">a4f0…9c1</text>
       </g>
-    </svg>
-  );
-}
-
-/* ── Agent-native ─────────────────────────────────────────────────────────────────────────────
-   The literal prompt and the literal contract, not a speech-bubble glyph pointing at a document
-   glyph: an abstract metaphor here would be exactly the placeholder this repo's own value gate
-   forbids. The layer rail at the bottom is the part a schema buys you, drawn as structure. */
-export function ProofSay() {
-  const layers = [
-    { t: "text", w: 96 },
-    { t: "shader", w: 78 },
-    { t: "image", w: 70 },
-    { t: "cut", w: 54 },
-  ];
-  let lx = 34;
-  return (
-    <svg className="dg" viewBox={VB} role="img" aria-hidden="true">
-      <text className="dg-lab" x="34" y="0">you say</text>
-      <rect className="dg-soft" x="34" y="10" width="452" height="48" rx="10" />
-      <text className="dg-quote" x="50" y="40">
-        “a 15s launch film, cobalt, ends on the wordmark”
-      </text>
-
-      <path className="dg-arrow" d="M260 66v22" />
-      <path className="dg-arrow" d="M253 82l7 8 7-8" />
-
-      <text className="dg-lab" x="34" y="112">vawe writes</text>
-      <rect className="dg-card" x="34" y="122" width="452" height="112" rx="10" />
-      <text className="dg-code" x="50" y="148">
-        <tspan className="dg-p">{"{"}</tspan> <tspan className="dg-k">&quot;module&quot;</tspan>
-        <tspan className="dg-p">:</tspan> <tspan className="dg-s">&quot;scene&quot;</tspan>
-        <tspan className="dg-p">,</tspan> <tspan className="dg-k">&quot;theme&quot;</tspan>
-        <tspan className="dg-p">:</tspan> <tspan className="dg-s">&quot;vawe&quot;</tspan>
-        <tspan className="dg-p">,</tspan>
-      </text>
-      <text className="dg-code" x="50" y="172">
-        <tspan className="dg-p">{"  "}</tspan>
-        <tspan className="dg-k">&quot;duration&quot;</tspan>
-        <tspan className="dg-p">: </tspan>
-        <tspan className="dg-n">15</tspan>
-        <tspan className="dg-p">,</tspan>
-      </text>
-      <text className="dg-code" x="50" y="196">
-        <tspan className="dg-p">{"  "}</tspan>
-        <tspan className="dg-k">&quot;layers&quot;</tspan>
-        <tspan className="dg-p">: [ … ]</tspan>
-      </text>
-      <text className="dg-code" x="50" y="220">
-        <tspan className="dg-p">{"}"}</tspan>
-      </text>
-
-      {/* the vocabulary the schema names, as structure rather than a word */}
-      <text className="dg-lab" x="34" y="262">composable primitives</text>
-      {layers.map((l) => {
-        const x = lx;
-        lx += l.w + 10;
-        return (
-          <g key={l.t}>
-            <rect className="dg-pill" x={x} y="272" width={l.w} height="24" rx="6" />
-            <text className="dg-pilltx" x={x + l.w / 2} y="288" textAnchor="middle">
-              {l.t}
-            </text>
-          </g>
-        );
-      })}
     </svg>
   );
 }

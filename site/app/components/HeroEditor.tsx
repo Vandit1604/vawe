@@ -11,6 +11,12 @@ import { useEffect, useRef, useState } from "react";
 //
 // Cost: the engine (~1.3MB) mounts on intersection and the poster carries first paint, so it stays
 // off the critical path and the hero is never blank if it fails.
+//
+// It also carries THE REFUSAL, which is the one claim on this page that has to be live rather than
+// drawn. Every comparable tool asks its authors, in prose, not to reach for a wall clock. This one
+// refuses at boot and names the layer, because a frame is seeked and not played, so anything that
+// runs on wall-clock time is dead config. `break it` writes one such property into the scene; the
+// status strip below then shows the engine's own words, unedited.
 
 const POSTER = "/assets/hero.jpg";
 
@@ -22,6 +28,7 @@ const START = `{
   "theme": "vawe",
   "duration": 6,
   "audio": { "silent": true },
+  "bg": [{ "preset": "dotmatrix" }],
   "layers": [
     {
       "type": "text",
@@ -46,6 +53,23 @@ const START = `{
   ]
 }`;
 
+// The same scene with ONE banned property added. `css` is the passthrough for CSS the layer
+// vocabulary does not name, and core/validate.mjs refuses any property the engine rewrites every
+// frame. `transition` is one: it is killed engine-wide because a frame is seeked, not played. The
+// message the strip shows below is the engine's, unedited.
+const BROKEN = START.replace(
+  '"split": "word", "preset": "up",',
+  '"split": "word", "preset": "up",\n      "css": { "transition": "opacity .4s ease" },',
+);
+
+/** The one line worth showing from an engine refusal: the first bullet, or the first line if the
+ *  error carries no list. boot.js reports `Error: invalid data for "scene":\n  - <reason>`, so line
+ *  zero is only a heading. */
+const reason = (e: string) => {
+  const bullet = e.split("\n").find((l) => l.trimStart().startsWith("- "));
+  return (bullet ? bullet.trim().slice(2) : e.split("\n")[0].replace(/^Error:\s*/, "")).trim();
+};
+
 type Engine = { meta: { fps: number; totalFrames: number; width: number; height: number }; renderFrame: (n: number) => void };
 
 export function HeroEditor() {
@@ -56,6 +80,7 @@ export function HeroEditor() {
   const [ready, setReady] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [edited, setEdited] = useState(false);
+  const broken = code === BROKEN;
   const t = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // keep the engine off the critical path until the hero is actually on screen
@@ -98,7 +123,7 @@ export function HeroEditor() {
       const wait = () => {
         if (dead) return;
         const w = el.contentWindow as unknown as { __engine?: Engine; __engineReady?: boolean; __engineError?: string } | null;
-        if (w?.__engineError) { setErr(String(w.__engineError).split("\n")[0]); return; }
+        if (w?.__engineError) { setErr(reason(String(w.__engineError))); return; }
         if (w?.__engineReady && w.__engine) {
           const eng = w.__engine;
           const { fps, totalFrames, width, height } = eng.meta;
@@ -142,13 +167,20 @@ export function HeroEditor() {
             onChange={(e) => { setCode(e.target.value); setEdited(true); }}
           />
           <div className={`hb-status ${err ? "bad" : ""}`}>
-            {err ? `invalid JSON · ${err.slice(0, 44)}` : edited ? "valid · rendering live" : "editable — change anything"}
+            <span className="hb-msg">
+              {err ? err : edited ? "valid · rendering live" : "editable · change anything"}
+            </span>
+            <button className="hb-break" type="button" onClick={() => { setCode(broken ? START : BROKEN); setEdited(true); }}>
+              {broken ? "put it back" : "break it"}
+            </button>
           </div>
         </div>
         <div className="hb-right">
           <div className={`hb-out ${ready ? "is-live" : ""}`} ref={screen}>
             <img className="hb-poster" src={POSTER} alt="" aria-hidden="true" />
-            <span className="hb-badge">{ready ? "live · renderFrame(n)" : "starting engine…"}</span>
+            {/* `err` alone does not mean the render stopped: a JSON typo mid-edit leaves the last
+                good scene playing. Only a scene that never booted is a refusal. */}
+            <span className={`hb-badge ${!ready && err ? "bad" : ""}`}>{ready ? "live · renderFrame(n)" : err ? "refused at boot" : "starting engine…"}</span>
           </div>
           {/* a 16:9 screen cannot fill a browser-tall window, and cropping a composed frame is never
               an option — so the leftover space carries real output facts instead of dead pixels */}
