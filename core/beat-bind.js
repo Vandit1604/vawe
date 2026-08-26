@@ -17,6 +17,14 @@ import { snapToBeat } from './beats.js';
 // "WEAK — ambient/rubato, do not snap to this"; snapping to a grid that weak scatters cuts at
 // times that mean nothing, which is worse than leaving them where the author put them.
 const MIN_CONFIDENCE = 1.6;
+
+// HOW FAR A JOINT MAY TRAVEL, and there is one answer. `snapToBeat` in core/beats.js already carries
+// this as its own default, with the reason: past this the time the author wrote means more than the
+// grid does. `scripts/media/beatsync.mjs` used to hold a second opinion (half a beat, capped at
+// 0.18s), which at any tempo above 60 BPM is wider than the gap between beats — so nothing was ever
+// left alone and the tool's own "left as-is" report could not fire. A scene overrides per film with
+// `audio.beatSync.maxShift`; the CLI with `SNAP=`.
+export const DEFAULT_MAX_SHIFT = 0.12;
 const FIX = 'run `make beatmap MUSIC=<the track>.wav` to write it';
 
 /** The declaration, normalised. `null` when the scene does not ask for beat matching. */
@@ -54,7 +62,33 @@ export async function loadBeatGrid(data, fetchJson) {
 }
 
 /**
- * THE OWNER. Snap the film's picture junctions to the grid, once, and say what moved.
+ * A short bed LOOPS to fill the film (the Go mixer repeats music.wav), but a sidecar only covers the
+ * track file: `warm` is 8 seconds, so a 20-second film has no beats past 8 and every later joint would
+ * hold for want of a grid rather than for want of a pulse. A seamless bed keeps its phase, so beat b
+ * recurs at b + k*period. Returns a NEW array; the caller's sidecar is never touched.
+ */
+export function unrollGrid(pulse, period, dur) {
+  const grid = pulse.slice();
+  if (!(period > 0.5) || !(dur > period + 0.1)) return grid;
+  const base = grid.slice();
+  for (let k = 1; k * period < dur; k++) for (const b of base) {
+    const t = +(b + k * period).toFixed(4);
+    if (t <= dur) grid.push(t);
+  }
+  grid.sort((x, y) => x - y);
+  return grid;
+}
+
+/**
+ * THE POLICY, and the ONLY copy of it. Which of a film's joints move onto a grid, and by how much.
+ *
+ * `bindBeats` (the render path, from an `audio.beatSync` declaration) and `make beatsync` (the
+ * author-time preview) both call THIS. They used to answer the question separately, with a different
+ * tolerance and a different set of joints, and the CLI re-implemented the nearest-beat search rather
+ * than importing `snapToBeat`, so nothing linked the two and neither knew it disagreed with the other.
+ *
+ * The scene must be LOWERED first (core/transitions-lower.js): a junction written as `transitions`
+ * is not a cut or a seam until then, and snapping its `at` would snap a seam by its start.
  *
  * What snaps, and what does not:
  *  - `cuts` snap their `t`. A cut IS the joint; landing it on the pulse is the whole point.
@@ -67,6 +101,27 @@ export async function loadBeatGrid(data, fetchJson) {
  *
  * A joint further than `maxShift` from any beat is LEFT ALONE — snapToBeat's own refusal, honoured
  * and reported, never widened. An author who means a time writes `"snap": false` on that joint.
+ */
+export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT) {
+  const moved = [], held = [];
+  const apply = (j, kind, centre) => {
+    if (j.snap === false) return;                       // the author meant this time
+    const to = snapToBeat(centre, grid, maxShift);
+    if (to === centre) { held.push(`${kind}@${centre}`); return; }
+    j.t = +(j.t + (to - centre)).toFixed(3);
+    moved.push({ kind, from: centre, to, drift: +Math.abs(to - centre).toFixed(3) });
+  };
+  for (const c of data.cuts || []) if (c && typeof c.t === 'number') apply(c, 'cut', c.t);
+  for (const s of data.seams || []) {
+    if (!s || typeof s.t !== 'number') continue;
+    apply(s, 'seam', typeof s.dur === 'number' ? +(s.t + s.dur / 2).toFixed(3) : s.t);
+  }
+  return { moved, held };
+}
+
+/**
+ * THE OWNER on the render path. Read the declaration, validate the grid, apply the policy above once,
+ * and say what moved.
  */
 export function bindBeats(data, sidecar) {
   const cfg = beatSyncOf(data);
@@ -82,36 +137,9 @@ export function bindBeats(data, sidecar) {
     throw new Error(`the beat grid ${beatGridPath(data)} scored confidence ${sidecar.confidence} `
       + `(below ${MIN_CONFIDENCE}): the track has no pulse worth snapping to. Use a bed with a clear `
       + 'beat, or drop audio.beatSync.');
-  const maxShift = typeof cfg.maxShift === 'number' ? cfg.maxShift : 0.12;
-  // A short bed LOOPS to fill the film (the Go mixer repeats music.wav), but the sidecar only covers
-  // the track file: `warm` is 8 seconds, so a 20-second film has no beats past 8 and every later joint
-  // would hold for want of a grid rather than for want of a pulse. A seamless bed keeps its phase, so
-  // beat b recurs at b + k*period. Same unroll scripts/media/beatsync.mjs does at author time.
-  const grid = pulse.slice();   // a copy: the sidecar belongs to the caller
-  const period = Number(sidecar.seconds) || 0;
-  const dur = Number(data.duration) || 0;
-  if (period > 0.5 && dur > period + 0.1) {
-    const base = grid.slice();
-    for (let k = 1; k * period < dur; k++) for (const b of base) {
-      const t = +(b + k * period).toFixed(4);
-      if (t <= dur) grid.push(t);
-    }
-    grid.sort((x, y) => x - y);
-  }
-
-  const moved = [], held = [];
-  const apply = (j, kind, centre) => {
-    if (j.snap === false) return;                       // the author meant this time
-    const to = snapToBeat(centre, grid, maxShift);
-    if (to === centre) { held.push(`${kind}@${centre}`); return; }
-    j.t = +(j.t + (to - centre)).toFixed(3);
-    moved.push(`${kind} ${centre}s → ${to}s`);
-  };
-  for (const c of data.cuts || []) if (c && typeof c.t === 'number') apply(c, 'cut', c.t);
-  for (const s of data.seams || []) {
-    if (!s || typeof s.t !== 'number') continue;
-    apply(s, 'seam', typeof s.dur === 'number' ? +(s.t + s.dur / 2).toFixed(3) : s.t);
-  }
+  const maxShift = typeof cfg.maxShift === 'number' ? cfg.maxShift : DEFAULT_MAX_SHIFT;
+  const grid = unrollGrid(pulse, Number(sidecar.seconds) || 0, Number(data.duration) || 0);
+  const { moved, held } = snapJoints(data, grid, maxShift);
   return { unit, bpm: sidecar.bpm, confidence: conf, maxShift, moved, held };
 }
 
@@ -119,6 +147,6 @@ export function bindBeats(data, sidecar) {
 export function describeBind(r) {
   if (!r) return '';
   return `beatSync: ${r.bpm} BPM ${r.unit}, ${r.moved.length} joint(s) moved`
-    + (r.moved.length ? ` (${r.moved.join(', ')})` : '')
+    + (r.moved.length ? ` (${r.moved.map((m) => `${m.kind} ${m.from}s → ${m.to}s`).join(', ')})` : '')
     + (r.held.length ? `, ${r.held.length} left where the author put them (>${r.maxShift}s from any beat): ${r.held.join(', ')}` : '');
 }

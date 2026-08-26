@@ -1,24 +1,29 @@
-// beatsync.mjs — align a scene's cuts to the music's beat grid, so the edit lands ON the beat.
+// beatsync.mjs — align a scene's joints to the music's beat grid, at AUTHOR time.
 //
-//   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav            # report: what it would snap
+//   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav            # report: what would move
 //   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav WRITE=1    # → x.beatsync.json
-//   [GRID=beat|downbeat]  [SNAP=0.18]  [LAYERS=1]
+//   [GRID=beat|downbeat]  [SNAP=0.12]  [LAYERS=1]
 //
-// A cut that lands a few frames off the beat reads as sloppy; on the beat it reads as directed. This is
-// the last mile the reference does that our default doesn't — the edit is cut TO the track. `make beatmap`
-// already detects the grid (bpm + beats[] + downbeats[]); this snaps each structural edit time to the
-// nearest beat within a tolerance, reports the drift, and (WRITE) writes the synced scene.
+// THE SNAP ITSELF IS NOT HERE ANY MORE. `core/beat-bind.js` owns which joints move and how far; this
+// reads the grid, calls `snapJoints`, and reports. It used to answer the same question separately:
+// its own nearest-beat search (so it never appeared as an importer of `snapToBeat` and nothing linked
+// the two), its own tolerance (half a beat capped at 0.18s, against beat-bind's 0.12s), and its own
+// joint set (transitions and stings as well as cuts and seams). Two owners of one fact, drifting
+// quietly — docs/MISTAKES.md #457.
 //
-// What it snaps: data.cuts[].t · data.transitions[].at · data.seams[].t · data.stings[].t. With LAYERS=1
-// it also snaps layer start times (the entrance hits the beat) — off by default because moving a start
-// also moves that layer's content, which is a content decision, not a pure edit.
+// A scene that will be beat-matched EVERY render should declare it instead and skip the derivative
+// entirely: `"audio": { "music": "warm", "beatSync": true }`. This tool is the preview, and the
+// escape hatch for a film that wants the snapped times written down where a human can edit them.
 //
-// Deterministic: the snap is a pure function of the scene + the (deterministic) beatmap. No Date/random.
-// Idempotent: a synced scene re-syncs to itself (its edits already sit on grid points).
+// Deterministic: the snap is a pure function of the scene + the (deterministic) beatmap.
+// Idempotent: a synced scene re-syncs to itself (its joints already sit on grid points).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { lowerScene } from '../../core/transitions-lower.js';
+import { snapToBeat } from '../../core/beats.js';
+import { unrollGrid, snapJoints, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -27,7 +32,7 @@ const has = (n) => argv.includes(n) || process.env[n.replace(/^--/, '').toUpperC
 
 const D = flag('--data') || flag('-d') || argv.find((a) => a.endsWith('.json'));
 const MUSIC = flag('--music') || flag('-m');
-if (!D || !fs.existsSync(D)) { console.error('usage: node scripts/media/beatsync.mjs <scene.json> --music <track.wav> [--grid beat|downbeat] [--snap 0.18] [--layers] [--write]'); process.exit(2); }
+if (!D || !fs.existsSync(D)) { console.error('usage: node scripts/media/beatsync.mjs <scene.json> --music <track.wav> [--grid beat|downbeat] [--snap 0.12] [--layers] [--write]'); process.exit(2); }
 if (!MUSIC || !fs.existsSync(MUSIC)) { console.error(`✗ MUSIC track not found: ${MUSIC || '(none)'} — pass MUSIC=assets/music/<track>.wav`); process.exit(2); }
 const GRID = (flag('--grid') || process.env.GRID || 'beat').toLowerCase();
 const WRITE = has('--write') || process.env.WRITE === '1';
@@ -41,72 +46,47 @@ if (!fs.existsSync(beatsFile)) {
   if (r.status !== 0 || !fs.existsSync(beatsFile)) { console.error('✗ beatmap failed — cannot sync'); process.exit(1); }
 }
 const bm = JSON.parse(fs.readFileSync(beatsFile, 'utf8'));
-const data = JSON.parse(fs.readFileSync(D, 'utf8'));
-let grid = (GRID === 'downbeat' ? bm.downbeats : bm.beats) || [];
-if (!grid.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad has no beat) — nothing to snap to`); process.exit(1); }
-const beatInt = 60 / (bm.bpm || 120);
+const pulse = (GRID === 'downbeat' ? bm.downbeats : bm.beats) || [];
+if (!pulse.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad has no beat) — nothing to snap to`); process.exit(1); }
 
-// A short bed LOOPS to fill the film (the Go mixer repeats music.wav), but the beatmap only covers the
-// track file — so beats past the loop length don't exist and later cuts had nothing to snap to. Unroll
-// the grid across the scene: a seamless bed keeps its beat phase, so beat b recurs at b + k·period.
+// LOWER FIRST, for the same reason core/boot.js binds after the lowering pass: a junction written as
+// `transitions` is not a cut or a seam until then, so snapping its `at` would snap a seam by its start
+// where the engine snaps it by its centre. This is why the CLI no longer knows the word `transitions`.
+const data = lowerScene(JSON.parse(fs.readFileSync(D, 'utf8')));
 let sceneDur = data.duration || 0;
 if (!sceneDur) for (const L of data.layers || []) sceneDur = Math.max(sceneDur, (L.start ?? 0) + (L.duration ?? 2));
-const period = bm.seconds || 0;
-let unrolled = 0;
-if (period > 0.5 && sceneDur > period + 0.1) {
-  const base = grid.slice();
-  for (let k = 1; k * period < sceneDur; k++) for (const b of base) { const t = +(b + k * period).toFixed(4); if (t <= sceneDur) { grid.push(t); unrolled++; } }
-  grid.sort((a, b) => a - b);
-}
-// default tolerance = half a beat, capped so a snap never drags an edit implausibly far
-const TOL = +(flag('--snap') || process.env.SNAP || Math.min(0.18, beatInt * 0.5));
+const grid = unrollGrid(pulse, bm.seconds || 0, sceneDur);
+const unrolled = grid.length - pulse.length;
 
-const snap = (t) => {
-  let best = null, bd = Infinity;
-  for (const b of grid) { const d = Math.abs(b - t); if (d < bd) { bd = d; best = b; } }
-  return bd <= TOL ? { to: +best.toFixed(3), drift: +bd.toFixed(3) } : null;
-};
+const TOL = Number(flag('--snap') || process.env.SNAP) || DEFAULT_MAX_SHIFT;
+const { moved, held } = snapJoints(data, grid, TOL);
 
-const moves = [];
-// each edit kind: [array, key, label]
-const kinds = [
-  [data.cuts, 't', 'cut'],
-  [data.transitions, 'at', 'transition'],
-  [data.seams, 't', 'seam'],
-  [data.stings, 't', 'sting'],
-];
-for (const [arr, key, label] of kinds) {
-  if (!Array.isArray(arr)) continue;
-  for (const e of arr) {
-    const t = e[key] ?? e.t ?? e.at;
-    if (typeof t !== 'number') continue;
-    const s = snap(t);
-    if (s && s.drift > 0.0005) { moves.push({ label, from: +t.toFixed(3), to: s.to, drift: s.drift }); e[key] = s.to; }
-    else if (s) moves.push({ label, from: +t.toFixed(3), to: s.to, drift: 0, onbeat: true });
-  }
-}
+// LAYER STARTS are not junctions, so they are not part of the shared policy and stay here: moving a
+// start moves that layer's CONTENT, which is a content decision, not an edit. Off by default.
+const layersMoved = [];
 if (SNAP_LAYERS && Array.isArray(data.layers)) {
   for (const L of data.layers) {
     if (L.track === 0 || typeof L.start !== 'number') continue;
-    const s = snap(L.start);
-    if (s && s.drift > 0.0005) { moves.push({ label: 'layer', from: +L.start.toFixed(3), to: s.to, drift: s.drift }); L.start = s.to; }
+    const to = snapToBeat(L.start, grid, TOL);
+    if (to !== L.start) { layersMoved.push({ kind: 'layer', from: L.start, to, drift: +Math.abs(to - L.start).toFixed(3) }); L.start = to; }
   }
 }
 
-const snapped = moves.filter((m) => !m.onbeat && m.drift > 0.0005);
-const already = moves.filter((m) => m.onbeat);
 console.log(`\n  beatsync · ${path.basename(D)}  ×  ${bm.track} (${bm.bpm.toFixed(1)} BPM, ${GRID} grid, conf ${bm.confidence.toFixed(2)})`);
-if (unrolled) console.log(`  bed loops every ${period}s → unrolled the grid across ${sceneDur.toFixed(1)}s (+${unrolled} beats) so later cuts can snap`);
-console.log(`  tolerance ${TOL.toFixed(3)}s (half-beat ${(beatInt / 2).toFixed(3)}s) · ${snapped.length} edit(s) moved onto the beat · ${already.length} already on-beat`);
-for (const m of snapped) console.log(`    ${m.label.padEnd(11)} ${m.from.toFixed(3)}s → ${m.to.toFixed(3)}s  (${(m.drift * 1000).toFixed(0)}ms)`);
-const offgrid = [];
-for (const [arr, key] of kinds) if (Array.isArray(arr)) for (const e of arr) { const t = e[key]; if (typeof t === 'number' && !snap(t)) offgrid.push(+t.toFixed(3)); }
-if (offgrid.length) console.log(`  ${offgrid.length} edit(s) left as-is (nearest beat > ${TOL.toFixed(2)}s away — off-grid on purpose, or the wrong track): ${offgrid.join(', ')}`);
+if (unrolled > 0) console.log(`  bed loops every ${bm.seconds}s → unrolled the grid across ${sceneDur.toFixed(1)}s (+${unrolled} beats) so later cuts can snap`);
+console.log(`  tolerance ${TOL.toFixed(3)}s · ${moved.length} joint(s) moved onto the beat · ${held.length} left where the author put them`);
+for (const m of moved.concat(layersMoved)) console.log(`    ${m.kind.padEnd(5)} ${m.from.toFixed(3)}s → ${m.to.toFixed(3)}s  (${(m.drift * 1000).toFixed(0)}ms)`);
+if (held.length) console.log(`  held (already on-beat, further than ${TOL.toFixed(2)}s from any beat, or "snap": false): ${held.join(', ')}`);
+console.log('  stings are never snapped: a sting is punctuation hung off a junction and an author offsets one on purpose.');
 
 if (WRITE) {
   const out = D.replace(/\.json$/, '.beatsync.json');
   fs.writeFileSync(out, JSON.stringify(data, null, 2));
-  console.log(`\n  ✓ synced scene → ${out}   (render it; the cuts now land on ${bm.track}'s ${GRID}s)\n`);
+  console.log(`\n  ✓ synced scene → ${out}   (render it; the joints now land on ${bm.track}'s ${GRID}s)`);
+  console.log('    Two files now hold one film and nothing keeps their times equal. If this scene is')
+  console.log(`    beat-matched every render, delete the derivative and declare it instead:`);
+  console.log(`      "audio": { "music": ${JSON.stringify(path.basename(MUSIC).replace(/\.wav$/i, ''))}, "beatSync": true }\n`);
 } else {
-  console.log('\n  report only. Re-run with WRITE=1 to write <scene>.beatsync.json (then set audio.music to this track).\n');
+  console.log('\n  report only. WRITE=1 writes <scene>.beatsync.json; `"audio":{"beatSync":true}` in the scene');
+  console.log('  gets the same joints at boot with no second file. docs/CRAFT/SOUND.md.\n');
 }

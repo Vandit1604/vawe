@@ -16,10 +16,28 @@
 
 import { isLightBg as bgIsLight } from './motion.js';
 import { buildCameraMove } from './camera-moves.js';
-import { sceneDims } from './safe.js';
+import { sceneDims, MAX_ZOOM } from './safe.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
+
+// THE BASELINE PUSH. 1.06, not 1.04: under a 5% scale change a push is below the perception threshold,
+// so the frame reads as dead however long it runs (the old 1.04 default did, for every scene that took
+// it). 5-15% is the comfortable-emphasis band; sit at its bottom so this never fights an authored film.
+// That reasoning is about the EYE, so this number is owned here and is not derived from anything.
+//
+// What it is NOT free to be is larger than the safe margin can absorb. `core/safe.js` owns that limit
+// and states the arithmetic; this reads it rather than keeping a second copy of the same geometry. The
+// two numbers were independent until now, and the coincidence that both read 0.06 hid the fact that
+// they describe one thing: how far a layer placed on the safe line may travel before it is cropped
+// (docs/MISTAKES.md #458). A push past MAX_ZOOM would deliver clipped edges on every film that never
+// declared a camera, which is most of the library, so it stops the build instead.
+const BASELINE_PUSH = 1.06;
+if (BASELINE_PUSH > MAX_ZOOM)
+  throw new Error(`core/produce.js injects a slowPush to ${BASELINE_PUSH}, and core/safe.js's MARGIN `
+    + `absorbs only ${MAX_ZOOM.toFixed(4)}. Every scene that declares no camera would have content `
+    + 'pinned to the safe edge cropped by the frame edge. Lower the push, or widen MARGIN and re-run '
+    + '`node scripts/gates/snap-scenes.mjs` — widening it moves every pinned layer in the library.');
 
 export function produceBaseline(data, theme, frame) {
   if (!data || typeof data !== 'object') return data;
@@ -39,10 +57,7 @@ export function produceBaseline(data, theme, frame) {
   // 2. CAMERA — a gentle slow push if the scene declares no camera move at all (the frame stays alive).
   const hasCam = (Array.isArray(data.cameraMove) && data.cameraMove.length) || (Array.isArray(data.camera) && data.camera.length);
   if (!hasCam && !choreographed) {
-    // 1.06, not 1.04: under a 5% scale change a push is below the perception threshold, so the frame
-    // reads as dead however long it runs (the old 1.04 default did, for every scene that took it).
-    // 5-15% is the comfortable-emphasis band; sit at its bottom so this never fights an authored film.
-    data.cameraMove = [{ move: 'slowPush', start: 0, dur: data.duration || 12, from: 1, to: 1.06 }];
+    data.cameraMove = [{ move: 'slowPush', start: 0, dur: data.duration || 12, from: 1, to: BASELINE_PUSH }];
   }
 
   // 3. SCENE-UNIT TRANSITIONS — a film WITH cuts that hasn't opted into unit transitions gets them, so the
