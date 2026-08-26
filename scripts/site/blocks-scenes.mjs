@@ -18,6 +18,7 @@
 // the live player scales the same 1920x1080 iframe and offsets it by the same rect (see BlockLive).
 // So the frame rect is not a rendering detail, it is shared geometry, and it ships as data.
 import fs from 'node:fs';
+import { sameWithinNoise } from '../lib/png-diff.mjs';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +30,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const OUT = path.join(repoRoot, 'site/public/assets/blocks');
 const FRAMES = path.join(repoRoot, 'site/lib/block-frames.json');
 fs.mkdirSync(OUT, { recursive: true });
+
 
 const grid = CATALOG.filter((e) => !e.overlay);   // full-frame overlays (captions) have no thumbnail
 
@@ -92,7 +94,7 @@ await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const frames = {};
-let wrote = 0, shot = 0, miss = 0;
+let wrote = 0, shot = 0, kept = 0, miss = 0;
 
 for (const entry of grid) {
   const safe = safeName(entry.name);
@@ -147,8 +149,26 @@ for (const entry of grid) {
   const stillT = Math.min(m.lastSeen ?? SETTLED, SETTLED);
   try {
     await page.evaluate((t) => window.__engine.renderFrame(Math.round(t * 30)), stillT);
-    await page.screenshot({ path: path.join(OUT, `${safe}.png`), clip: { x: x0, y: y0, width: w, height: h } });
-    shot++;
+    const dest = path.join(OUT, `${safe}.png`);
+    const shotBuf = await page.screenshot({ clip: { x: x0, y: y0, width: w, height: h } });
+    // RASTER NOISE IS NOT A CHANGE, and writing it as one made two posters dirty the tree on every
+    // run. renderFrame(n) is pure in the DOM, and `block-frames.json` proves the crop is stable, but a
+    // GPU-backed block does not rasterise byte-identically: measured on `borderBeamCard` (a `beam`
+    // layer) and `glassCard` (an `aurora` paint), 196 and 96 of ~700k channels moved, MAX DELTA 1.
+    // That is invisible and it is not information.
+    //
+    // The threshold is that measurement, not a round number: a channel that moved by 1 is the
+    // rasteriser, and anything a design change does moves a channel by more. Keeping the committed
+    // bytes is the write-site fix, so `git status` after a regenerate names only real changes.
+    // Nothing else guards these files: `snap-blocks` reads the layer JSON, so a poster can drift or
+    // go stale in silence (docs/MISTAKES.md #470).
+    const prior = fs.existsSync(dest) ? fs.readFileSync(dest) : null;
+    // FAIL OPEN. A comparison that cannot run is not evidence that the picture is unchanged, and the
+    // safe answer is to write the fresh bytes: a poster that drifts is a nuisance, a poster that is
+    // never written is a hole on the site.
+    let noise = false;
+    if (prior) { try { noise = sameWithinNoise(prior, shotBuf); } catch (e) { console.error(`  cmp ${entry.name}: ${e.message.slice(0, 100)}`); noise = false; } }
+    if (noise) kept++; else { fs.writeFileSync(dest, shotBuf); shot++; }
   } catch (e) { console.error(`still fail ${entry.name}: ${e.message.slice(0, 80)}`); miss++; }
 }
 
@@ -165,7 +185,7 @@ const stale = fs.readdirSync(OUT).filter((f) => !keep.has(f));
 for (const f of stale) fs.rmSync(path.join(OUT, f));
 
 const bytes = fs.readdirSync(OUT).reduce((a, f) => a + fs.statSync(path.join(OUT, f)).size, 0);
-console.log(`blocks-scenes: ${grid.length} blocks · ${wrote} scene(s) written · ${shot} still(s) (${(bytes / 1e6).toFixed(1)}MB total) → ${path.relative(repoRoot, OUT)}`
+console.log(`blocks-scenes: ${grid.length} blocks · ${wrote} scene(s) written · ${shot} still(s) rewritten · ${kept} unchanged (${(bytes / 1e6).toFixed(1)}MB total) → ${path.relative(repoRoot, OUT)}`
   + `\n  frames → ${path.relative(repoRoot, FRAMES)}`
   + (stale.length ? `\n  removed ${stale.length} stale file(s)` : '')
   + (miss ? `\n  ${miss} MISSING` : ''));

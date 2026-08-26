@@ -15187,3 +15187,37 @@ a card.
 `make blocks-scenes` and `borderBeamCard.png` no longer matches what is committed. Neither block was
 touched here and neither shows up in `snap-blocks`, which reads the layer JSON and not the picture, so a
 poster for a time-sampled block can drift with nothing to say so. Both were reverted rather than fixed.
+
+## #471 — a poster drifted on every run, and nothing anywhere looked at a poster
+
+**What.** `make blocks-scenes` rewrote `borderBeamCard.png` and `glassCard.png` on every run. `git status`
+was dirty after a no-op regenerate, so a real poster change and a re-run looked the same.
+
+**Nothing guards these files.** `snap-blocks` reads the layer JSON a factory returns, so a poster can
+drift, or go stale against a block that changed, in complete silence. One had: `toast.stack.png` was
+still showing the see-through avatar fill that `#470` replaced.
+
+**Root cause.** `renderFrame(n)` is pure in the DOM and the crop rects are stable (`block-frames.json`
+is byte-identical across runs). A GPU-backed block does not rasterise byte-identically: measured on
+`borderBeamCard` (a `beam` layer) and `glassCard` (an `aurora` paint), **196 and 96 of ~700k channels
+moved, max delta 1**. That is invisible and it is not information.
+
+**Fix, at the write site.** `scripts/lib/png-diff.mjs` decodes both PNGs and compares per channel; the
+poster is only written when a channel moved by more than 1. The threshold is that measurement, not a
+round number. `make blocks-scenes` now reports `N rewritten · M unchanged`, and the tree stays clean
+across repeated runs while a real change still lands: `toast.stack` came through at **max delta 4 over
+5556 channels**, two orders of magnitude clear of the noise floor.
+
+**The comparison is in Node, and that took three attempts to learn.** Doing it inside the puppeteer
+page that was already open failed three different ways, and on exactly the two largest posters every
+time: `new Image()` rejected with a bare `Event`, `fetch` on a `data:` URI answered "Failed to fetch",
+and `atob` refused the payload as "not correctly encoded". Three symptoms, one cause: an argument too
+large to survive `page.evaluate`'s round trip. Each symptom looked like its own bug and sent me after a
+different fix. **A comparison should not depend on the thing it is comparing**, and a 90-line PNG
+decoder removed the browser, the server and the serialisation from the question at once.
+
+**STILL OPEN, and it is a real defect rather than noise.** `parallaxZoom` renders with a **max channel
+delta of 19** between runs, at a fixed frame, measured three times. That is not the rasteriser. Its
+poster is left drifting on purpose rather than absorbed by a wider threshold, because loosening a check
+until a number stops appearing is how a gate ends up measuring nothing. The block wants the same
+backward-seek treatment `#370` applied to the engine.
