@@ -2610,12 +2610,14 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const num = (v, d2) => (typeof v === 'number' && Number.isFinite(v) ? v : d2);
   // eslint-disable-next-line no-new-func
   const resolveBecomes = new Function('num', `${body}; return resolveBecomes;`)(num);
+  // The engine hands it the box measured at build. These layers state w/h, so nothing is measured.
+  const unmeasured = () => null;
   const centre = (L, k) => [L.x + num(k.x, 0) + L.w / 2, L.y + num(k.y, 0) + L.h / 2];
 
   const A = { id: 'card', type: 'rect', x: 300, y: 200, w: 640, h: 380, start: 1, duration: 2, becomes: 'dot',
     motion: [{ t: 0 }, { t: 1.4, x: 120, y: -40, scale: 0.5, rot: 6 }] };
   const B = { id: 'dot', type: 'rect', x: 1500, y: 800, w: 80, h: 80, start: 3, duration: 2 };
-  resolveBecomes({ layers: [A, B] });
+  resolveBecomes({ layers: [A, B] }, unmeasured);
   const [acx, acy] = centre(A, A.motion[A.motion.length - 1]);
   const [bcx, bcy] = centre(B, B.motion[0]);
   // CSS scales about the element's own centre, so scaling must NOT move the centre. Using the scaled
@@ -2629,16 +2631,62 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const C = { id: 'c', type: 'rect', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 1, becomes: 'd' };
   const D = { id: 'd', type: 'rect', x: 500, y: 500, w: 100, h: 100, start: 1, duration: 2,
     motion: [{ t: 0.1, x: 999 }, { t: 1.2, x: 40 }] };
-  resolveBecomes({ layers: [C, D] });
+  resolveBecomes({ layers: [C, D] }, unmeasured);
   ok('becomes drops incoming keys inside the handover', !D.motion.some((k) => k.x === 999));
   ok('becomes keeps incoming keys after the handover', D.motion.some((k) => k.t === 1.2 && k.x === 40));
 
   let threw = '';
-  try { resolveBecomes({ layers: [{ id: 'x', becomes: 'nope' }] }); } catch (e) { threw = e.message; }
+  try { resolveBecomes({ layers: [{ id: 'x', becomes: 'nope' }] }, unmeasured); } catch (e) { threw = e.message; }
   ok('becomes throws on a dangling reference', /no layer with id/.test(threw));
   threw = '';
-  try { resolveBecomes({ layers: [{ id: 'x', becomes: 'x' }] }); } catch (e) { threw = e.message; }
+  try { resolveBecomes({ layers: [{ id: 'x', becomes: 'x' }] }, unmeasured); } catch (e) { threw = e.message; }
   ok('becomes throws on a self reference', /becomes itself/.test(threw));
+
+  // THE CASE THAT WAS SILENT. A text layer states no w/h, so the old pass scored it 0x0: the scale
+  // collapsed to 1 and the centre landed on the layer's top-left corner. The film rendered, every gate
+  // passed, and the handover was merely wrong. The box now comes from the build measurement.
+  {
+    const word = { id: 'word', type: 'text', text: 'LATENCY', x: 300, y: 420, start: 0, duration: 3, becomes: 'card' };
+    const card = { id: 'card', type: 'rect', x: 660, y: 340, w: 600, h: 400, start: 3, duration: 3 };
+    const glyphs = { w: 780, h: 187 };
+    resolveBecomes({ layers: [word, card] }, (L) => (L === word ? glyphs : null));
+    const k = card.motion[0];
+    ok('becomes centres an unsized outgoing layer on its MEASURED box',
+      k.x === +(300 + glyphs.w / 2 - (660 + 300)).toFixed(3) && k.y === +(420 + glyphs.h / 2 - (340 + 200)).toFixed(3));
+    ok('becomes scales an unsized outgoing layer by its MEASURED box',
+      k.scale === +Math.max(glyphs.w / 600, glyphs.h / 400).toFixed(3) && k.scale > 1);
+  }
+
+  // A declared w/h still wins over the measurement, exactly as resolveBoxes reads `L.w ?? base.w`.
+  {
+    const a = { id: 'a', type: 'rect', x: 0, y: 0, w: 400, h: 400, start: 0, duration: 1, becomes: 'b' };
+    const b = { id: 'b', type: 'rect', x: 0, y: 0, w: 200, h: 200, start: 1, duration: 1 };
+    resolveBecomes({ layers: [a, b] }, () => ({ w: 999, h: 999 }));
+    ok('becomes prefers the declared box to the measured one', b.motion[0].scale === 2);
+  }
+
+  // Unknowable rather than merely undeclared: nothing measured either. Refuse, never substitute.
+  threw = '';
+  try {
+    resolveBecomes({ layers: [
+      { id: 'ghost', type: 'text', x: 0, y: 0, start: 0, duration: 1, becomes: 'box' },
+      { id: 'box', type: 'rect', x: 0, y: 0, w: 100, h: 100, start: 1, duration: 1 },
+    ] }, () => null);
+  } catch (e) { threw = e.message; }
+  ok('becomes refuses a form with no box rather than guessing one', /no box to match against/.test(threw) && /ghost/.test(threw));
+
+  // matches:[{at,from,to}] is the authoring front door and it hands the geometry to resolveBecomes, so
+  // the same measurement has to reach through it. It never touches w/h itself.
+  {
+    const from = { id: 'word', type: 'text', x: 300, y: 420, start: 0, duration: 5 };
+    const to = { id: 'card', type: 'rect', x: 660, y: 340, w: 600, h: 400, start: 4, duration: 4 };
+    const scene = { duration: 8, sceneUnits: false, cuts: [{ t: 3, style: 'none' }], layers: [from, to],
+      matches: [{ at: 'cut@0', from: 'word', to: 'card' }] };
+    bindMatchesToJunctions(scene, junctionTable(marksOf(scene)));
+    ok('matches hands the pair to becomes', from.becomes === 'card' && to.start === 3);
+    resolveBecomes(scene, (L) => (L === from ? { w: 780, h: 187 } : null));
+    ok('a matched handover is measured too', to.motion[0].scale === +Math.max(780 / 600, 187 / 400).toFixed(3));
+  }
 }
 
 // ---- sound bridges (J/L-cuts) ------------------------------------------------------------------

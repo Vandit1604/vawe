@@ -213,6 +213,15 @@ centre uses the UNSCALED half-width, because CSS scales about the element's own 
 not move it. Getting that wrong put a handover 160px out and it still looked *almost* right, which is
 the worst kind of wrong for a match cut.
 
+A form that states no `w`/`h` is measured, not assumed. A `text` layer's box is its glyphs, so the most
+natural match cut anyone writes, a word becoming a card, has nothing to declare; the handover reads the
+box the browser laid out, the same measurement `boxOf` answers from. It has to be measured rather than
+retyped, because the real width of a word depends on the theme's face: the same 180px `LATENCY` measures
+781px in `vawe`, 837px in `linear` and 796px in `higgsfield`, and no number an author types tracks all
+three. Until 2026-08 an unsized side scored 0x0 instead: the scale collapsed to 1 and the centre landed
+on the layer's top-left corner, so the handover was wrong and said nothing (`docs/MISTAKES.md` #461).
+A form that measures nothing on either axis is now refused by name.
+
 `validate` fails a `becomes` whose two layers do not meet at the boundary, naming the gap in seconds. A
 match that drifts is exactly the failure this exists to remove, so it is checked rather than trusted.
 

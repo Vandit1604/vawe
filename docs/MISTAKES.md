@@ -14703,3 +14703,60 @@ would be dropped silently. `scripts/gates/lib-test.mjs` now pins that every `ANI
 but px translates and unitless scales, plus the three distances the fix depends on (1115 → 1119
 passing). `node scripts/gates/probe-purity.mjs scene` is clean: `clipStyleAt` is pure in `(dataset, t)`,
 so a box stays a pure function of `t`.
+
+## #464 — the handover measured a word as zero wide, and put the card 401px away without saying so
+
+**What.** `becomes: "<id>"` resolves the incoming layer's opening pose from the outgoing layer's final
+pose: centres matched, size matched by scale. `resolveBecomes` in `formats/scene/scene.js` read that
+size straight off the JSON, `num(A.w, 0)`. A layer that states no `w`/`h` therefore scored **0x0** on
+both axes, and two things went wrong together and quietly. The scale guard `(bw > 0 && aw > 0) ? … : 1`
+fell to its else branch, so the incoming form opened at scale 1 instead of the ratio; and the centre,
+`num(A.x, 0) + num(A.w, 0) / 2`, collapsed to the layer's top-left CORNER. The film rendered, the
+snapshot gate matched, `validate` passed, `lib-test` passed. The handover was merely wrong.
+
+**Why that case and not another.** A `text` layer states no `w`/`h` by design: its box is its glyphs,
+measured at build. So the most natural match cut anyone would ever write, a word becoming a card, was
+exactly the case that mis-scaled. Measured on a 180px `LATENCY` handing over to a 600x400 card, both in
+the `vawe` theme: the word's real box is **780.9 x 187.2** centred at **(690.5, 513.6)**, and at the
+handover frame (f90, t=3.000s) the card opened centred at **(300, 420)** at scale **1.000**. That is
+**390.5px out in x and 93.6px in y, 401.6px of centre error**, at **0.77x** of the scale the match
+needed (1.302), with the card's left edge at x=0 — off the canvas — instead of over the word. Both
+frames are in the report; the word and the card share no pixels at all.
+
+**It reaches through `matches` too, and worse.** `bindMatchesToJunctions` (`core/junctions.js:165`,
+#460) is the authoring front door: it retimes the pair onto a junction and then writes `A.becomes`,
+handing every question of geometry to this function. It never touches `w`/`h`. So the feature written
+so authors would not hand-align coordinates carried the same silent mis-alignment into the case it was
+written for.
+
+**Root cause.** The engine already knew the answer. `baseSize` (`formats/scene/scene.js`) measures
+`offsetWidth`/`offsetHeight` for every top-level layer at build, for this exact reason, and its own
+comment says so: *"Text states no w/h — its box is its content — so without this every text layer would
+report a zero box, which is a wrong answer rather than no answer."* `resolveBecomes` ran with the other
+data passes, before any DOM existed, so it could not see that measurement and re-derived the same fact
+from the JSON alone. One fact, two owners, and the second one was wrong.
+
+**Fix — defer, do not refuse.** `resolveBecomes(data, sizeOf)` now runs beside the `baseSize` loop,
+after the build measurement and still exactly once at boot. Declared `w`/`h` still wins over the
+measurement, matching `resolveBoxes` (`L.w ?? base.w`) so there is one precedence rule and not two;
+that is why all 106 scene snapshots are byte-identical and `cadence-film`, the only film in the library
+using `becomes`, does not move. The sizes are keyed on the layer object in a `WeakMap`, not on the id,
+because `becomes` is declared on the outgoing layer and only the INCOMING one has to be named.
+`resolveKeyedProps` runs a second time after it, because the injected keys are new and a target whose
+own track states `w`/`h` needs them stated on every key.
+
+**Why not simply refuse an unsized side.** Making the author type the number is not a root fix, it is a
+correction every future caller has to remember, and here it cannot be typed correctly at all: the real
+width of a word depends on the theme's face. The same `LATENCY` measures **781px in `vawe`, 837px in
+`linear`, 796px in `higgsfield`**. A hand-declared `w` is right for one theme and silently wrong for the
+other two, which is the same class of bug one layer down. Deferring was also not larger: it moved one
+call and added five lines. Refusal survives only where measurement genuinely answers nothing — a form
+that measures zero on either axis is now rejected by name, saying what it measured and why a corner at
+scale 1 is not an acceptable substitute.
+
+**Which gate catches it now.** `scripts/gates/lib-test.mjs` gained 6 assertions (1115 → 1121 passing):
+an unsized outgoing layer centres and scales on its MEASURED box, a declared box still beats a
+measured one, a form measuring nothing is refused, and the `matches` path is measured too. Reverting
+`formats/scene/scene.js` fails 4 of them. Nothing was added to `core/validate.mjs` on purpose:
+validate reads data and cannot measure, so the only rule it could state is "declare `w`/`h`", which is
+the answer this entry rejects.

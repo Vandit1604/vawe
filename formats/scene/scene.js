@@ -62,8 +62,19 @@ const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 // It resolves the incoming layer's OPENING pose from the outgoing layer's FINAL pose — centres matched,
 // size matched by scale — then hands control back so the incoming layer animates away into its own
 // geometry. Centres rather than corners, because two boxes of different sizes sharing a top-left corner
-// visibly jump; sharing a centre does not. Pure geometry on the JSON, before any DOM exists.
-function resolveBecomes(data) {
+// visibly jump; sharing a centre does not.
+//
+// IT RUNS AFTER THE BUILD MEASUREMENT, not with the other data passes, and that is the whole point.
+// It used to read `num(L.w, 0)`, so a layer that states no w/h scored ZERO on both axes: the scale
+// ratio collapsed to 1 and the centre landed on the layer's top-left corner. A TEXT layer states no
+// w/h — its box is its glyphs — so the most natural match cut anyone would write, a word becoming a
+// card, was exactly the case that mis-scaled, and it did it in silence. Measured on a 780x187 word
+// handing over to a 600x400 card: the card opened 401px off centre at 1.00 instead of 1.30, half of it
+// off the left edge of the canvas, with every gate green. `baseSize` above already measures the real
+// box for the same reason ("its box is its content"), so the fact existed and this pass simply could
+// not see it. Declared w/h still wins over the measurement, matching resolveBoxes exactly, so nothing
+// that states its size changes. A side that measures nothing is REFUSED rather than guessed at.
+function resolveBecomes(data, sizeOf) {
   const byId = {};
   for (const L of data.layers || []) if (L.id) byId[L.id] = L;
   for (const A of data.layers || []) {
@@ -72,19 +83,28 @@ function resolveBecomes(data) {
     if (!B) throw new Error(`layer "${A.id || '?'}" becomes: no layer with id "${A.becomes}"`);
     if (B === A) throw new Error(`layer "${A.id}" becomes itself`);
     if (typeof B.becomes === 'string' && byId[B.becomes] === A) throw new Error(`layers "${A.id}" and "${B.id}" become each other`);
+    const box = (L, role) => {
+      const m = sizeOf(L) || {};
+      const w = num(L.w, num(m.w, 0)), h = num(L.h, num(m.h, 0));
+      if (w > 0 && h > 0) return { w, h };
+      throw new Error(`layer "${L.id || L.type || '?'}" is the ${role} form of a becomes handover, but it `
+        + `measures ${w}x${h} at build, so there is no box to match against. A handover aligns two `
+        + `CENTRES and scales one box onto the other; with a zero side it can only put the form at its own `
+        + `corner at scale 1, which renders a plausible frame in the wrong place. Give it w and h, or `
+        + `make it paint something the browser can measure.`);
+    };
+    const a = box(A, 'outgoing'), b = box(B, 'incoming');
     const lastA = Array.isArray(A.motion) && A.motion.length ? A.motion[A.motion.length - 1] : {};
     const aS = num(lastA.scale, 1);
-    const aw = num(A.w, 0) * aS, ah = num(A.h, 0) * aS;
-    const bw = num(B.w, 0), bh = num(B.h, 0);
     // Centre of the outgoing layer on its last frame, and of the incoming layer where it is authored.
     // The UNSCALED half-width, deliberately: CSS scales about the element's own centre, so scaling does
     // not move the centre. Using the scaled half here put the handover 160px off and it looked almost
     // right, which is the worst kind of wrong for a match cut.
-    const acx = num(A.x, 0) + num(lastA.x, 0) + num(A.w, 0) / 2;
-    const acy = num(A.y, 0) + num(lastA.y, 0) + num(A.h, 0) / 2;
-    const bcx = num(B.x, 0) + bw / 2, bcy = num(B.y, 0) + bh / 2;
+    const acx = num(A.x, 0) + num(lastA.x, 0) + a.w / 2;
+    const acy = num(A.y, 0) + num(lastA.y, 0) + a.h / 2;
+    const bcx = num(B.x, 0) + b.w / 2, bcy = num(B.y, 0) + b.h / 2;
     // match the LARGER axis ratio so the incoming form covers the outgoing one rather than sitting inside it
-    const s0 = (bw > 0 && aw > 0) ? Math.max(aw / bw, bh > 0 && ah > 0 ? ah / bh : 0) : 1;
+    const s0 = Math.max((a.w * aS) / b.w, (a.h * aS) / b.h);
     const rot = num(lastA.rot, 0);
     const dur = Math.max(0.05, num(A.becomesDur, 0.42));
     const own = Array.isArray(B.motion) ? B.motion : [];
@@ -326,7 +346,8 @@ boot((data, fps, theme, canvas) => {
   // handover is handed to `becomes` below. AFTER relative starts, so both layers carry a number.
   bindMatchesToJunctions(data, BG_JUNCTIONS);
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
-  resolveBecomes(data);        // becomes:"<id>" → the incoming layer opens on the outgoing one's last pose
+  // becomes:"<id>" is NOT resolved here. It needs the measured box of a layer that states no w/h, and
+  // nothing is measured until the DOM exists, so it runs beside `baseSize` below (see resolveBecomes).
   resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
   resolveKeyedProps(data.layers);   // a key that states w/h → every key on that track states it (see core/sequence.js)
   const extra = []; // group children (any depth), animated on their root group's window
@@ -619,10 +640,22 @@ boot((data, fps, theme, canvas) => {
   // be asked about). Text states no w/h — its box is its content — so without this every text layer
   // would report a zero box, which is a wrong answer rather than no answer.
   const baseSize = new Map();
+  // Keyed by the LAYER, not by its id, because `becomes` is declared on the outgoing layer and that
+  // layer need not carry an id at all — only the incoming one is named. boxOf still answers from
+  // `baseSize`, which stays id-only, so nothing outside this pair sees the unnamed entries.
+  const measured = new WeakMap();
   for (let i = 0; i < topCount; i++) {
     const { L, el } = layers[i];
-    if (L.id) baseSize.set(L.id, { w: el.offsetWidth, h: el.offsetHeight });
+    const box = { w: el.offsetWidth, h: el.offsetHeight };
+    measured.set(L, box);
+    if (L.id) baseSize.set(L.id, box);
   }
+  // The handover, now that both forms have a real box. Still ONCE, at build, still pure geometry on the
+  // JSON: it writes `motion` keys, which every reader samples per frame. resolveKeyedProps runs again
+  // because the keys it injects are new, and a target whose own track states w/h needs them stated on
+  // every key (core/sequence.js keeps exactly one rule: both endpoints, or neither).
+  resolveBecomes(data, (L) => measured.get(L));
+  resolveKeyedProps(data.layers);
   // A GROUP CHILD'S BOX, which used to be null on the argument that flex and grid put it where only
   // layout knows. That argument was right about the AUTHORED x/y and wrong about the conclusion: the
   // child is laid out, so the browser knows exactly where it landed, and the one thing that must not
