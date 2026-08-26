@@ -3,6 +3,8 @@
 // the deterministic virtual clock, image/component preload, and boot() (fetch data → validate →
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
 import { FPS, isLightBg } from './motion.js';
+import { bakeResamples } from './resample.js';
+import { glLive } from './webgl.js';
 import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { themeErrors, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from './theme-contract.js';
 import { parseColor, contrastRatio, ensureContrast } from './motion.js';
@@ -528,6 +530,12 @@ export async function boot(build) {
     // SEAM D: rasterise the beats either side of every seam into static textures ONCE, before the
     // render loop. Awaited here (async raster is fine at build); renderFrame then only samples them,
     // so it stays pure in n. A scene with no `seams` returns immediately — zero cost, zero DOM change.
+    // RESAMPLE BAKE: a resample aimed at a layer that owns no raster (text · rect · group · svg ·
+    // component · html) turns that subtree into a static texture here, ONCE. Before bakeSeams on
+    // purpose — bakeSeams drives renderFrame itself and would leave the DOM on an arbitrary frame,
+    // which would make what a bake captured depend on how many seams the film has. It throws rather
+    // than degrades: a source that will not serialise must name itself, not render a hole.
+    await bakeResamples();
     if (typeof scene.bakeSeams === 'function') {
       try { await scene.bakeSeams(); } catch (e) { console.warn('seam bake:', e); }
     }
@@ -571,6 +579,22 @@ export async function boot(build) {
     // timers (via the clock), and chromedp observes __engineReady in rAF-polling mode — so readiness
     // must be visible while rAF is still native. The warm renderFrame(0) then flips timers to virtual;
     // the Poll's already-scheduled native rAF callback still fires and catches the flag.
+    // A LOST CONTEXT IS THE CAP ARRIVING BY THE OTHER DOOR, and until now nothing said so. glContext
+    // refuses a context the browser DECLINES to create, which is what core/webgl.js was written for.
+    // But past the cap some drivers hand one out and then drop an older one instead: 21 resampled
+    // layers came back `{live:21, lost:5}` — five surfaces that will paint nothing, exit 0, no error.
+    // The loss counter existed and only the counter did. `__engineError` is read exactly once, at
+    // readiness (internal/scene/scene.go:200), so the check belongs HERE, before the flag goes up, and
+    // it names the number rather than recovering: recovery would make a frame depend on when the loss
+    // happened, which renderFrame(n) forbids.
+    {
+      const { live, lost } = glLive();
+      if (lost) throw new Error(`${lost} of ${live} WebGL contexts were lost before the first frame. `
+        + `Browsers cap concurrent contexts at roughly 16 and some drivers drop an OLDER one rather `
+        + `than refuse a new one, so those layers would render BLANK with no error. Use fewer `
+        + `WebGL-backed layers at once (shader · paint · raymarch · three · globe · sting · seam · a `
+        + `resampled layer takes one each), or split the beats so they do not co-exist.`);
+    }
     window.__engineReady = true;
     window.__engine.renderFrame(0);
   } catch (e) {

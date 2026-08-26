@@ -7,7 +7,7 @@
 // type is. core/layers/index.js registers four of them under their four author-facing names, so the
 // scene vocabulary is unchanged: there is no `canvas` type and no `surface` prop in scene JSON.
 import { pick } from '../surfaces/index.js';
-import { attachResample, tickResample, PROPS as RESAMPLE_PROPS } from '../resample.js';
+import { attachResample, PROPS as RESAMPLE_PROPS } from '../resample.js';
 import { mergeProps } from '../props.js';
 
 // The props the SHARED canvas procedure reads, whichever surface is behind it: the box, the corner, the
@@ -54,7 +54,7 @@ export function canvasLayer(name, blurb) {
       // 8 workers in arbitrary order. driveClips hides the layer at opacity 0, which is exactly why
       // it would never be noticed: it is impurity waiting for the day a canvas layer is given a
       // non-zero resting opacity, or for sceneUnits to extend its visible window. MISTAKES #41, #64.
-      if (!(t >= start && t < end)) { s.clear(); if (S.resamplable) tickResample(el, L, t, false); return; }
+      if (!(t >= start && t < end)) { s.clear(); return; }
       const lt = (t - start) * (L.speed ?? 1);
       s.draw(lt, L);
       // LOAD-BEARING. A canvas-only frame changes no attribute and no computed style, so without a
@@ -63,7 +63,10 @@ export function canvasLayer(name, blurb) {
       // the stamp only has to CHANGE, and `shader` has always written two decimals where the others
       // write three.
       el.dataset.st = lt.toFixed(S.stamp);
-      if (S.resamplable) tickResample(el, L, t, true);   // AFTER the draw: sample this frame's pixels, never last frame's
+      // The resample TICK is core/tracks/resample.js, which occupies the slot immediately after
+      // `primitive` — so it still runs AFTER this draw and still samples THIS frame's pixels. It moved
+      // because a text or group layer has no frame() of its own to hang a tick off, and this call
+      // being one of two hand-placed sites is why nothing but a raster could ever be resampled.
     },
   };
 }

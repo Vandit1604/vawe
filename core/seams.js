@@ -1,4 +1,5 @@
 import { glContext } from './webgl.js';
+import { buildInlinedCss, domToCanvas } from './raster.js';
 import { DIRS } from './cuts.js';
 import { defineRegistry } from './registry.js';
 // core/seams.js — SEAM D: two-scene shader transitions.
@@ -403,119 +404,8 @@ function make2dFallback(canvas, w, h) {
 // Limitation: cross-origin <img>/captured components can render blank inside the foreignObject; those
 // beats degrade toward the background + text, and a fully empty raster trips the cross-fade fallback.
 
-// Two caches, and the reason they are safe. A seam raster refetches and re-base64s every face it
-// uses, and tokens.css with it, once per seam. The bytes are identical every time, so caching them
-// changes no pixel and cannot break renderFrame(n) purity: the cached value is what the fetch would
-// have returned. The declaration below existed for months and nothing read it, so a comment claimed
-// "inlined once per document" while the work ran on every seam (docs/MISTAKES.md #257).
-const _fontCache = new Map();   // absolute url → data: URI
-let _tokensCss = null;          // core/tokens.css text, fetched once
-
-async function fetchAsDataUri(url, mime) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('fetch ' + url + ' ' + res.status);
-  const buf = await res.arrayBuffer();
-  let bin = ''; const bytes = new Uint8Array(buf);
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return `data:${mime};base64,${btoa(bin)}`;
-}
-
-// Collect @font-face rules from same-origin sheets, fetch each src file once, emit @font-face blocks
-// with data: URIs. Restricted to `families` (the faces the DOM actually uses) to keep the fetch small.
-async function inlineFonts(families) {
-  const want = new Set([...families].map((f) => f.toLowerCase()));
-  const faces = [];
-  const seen = new Set();
-  for (const sheet of document.styleSheets) {
-    let rules; try { rules = sheet.cssRules; } catch { continue; }
-    if (!rules) continue;
-    for (const rule of rules) {
-      if (!(rule.type === 5 || rule.constructor?.name === 'CSSFontFaceRule')) continue;
-      const fam = (rule.style.fontFamily || '').replace(/^["']|["']$/g, '');
-      if (!fam || !want.has(fam.toLowerCase())) continue;
-      const src = rule.style.src || '';
-      const m = src.match(/url\((["']?)([^"')]+)\1\)/); // first url() wins (woff2 is declared first)
-      if (!m) continue;
-      let url = m[2];
-      if (url.startsWith('data:')) { faces.push(rule.cssText); continue; }
-      const abs = new URL(url, location.href).href;
-      const key = fam + '|' + rule.style.fontWeight + '|' + rule.style.fontStyle;
-      if (seen.has(key)) continue; seen.add(key);
-      try {
-        if (!_fontCache.has(abs)) _fontCache.set(abs, await fetchAsDataUri(abs, 'font/woff2'));
-        const data = _fontCache.get(abs);
-        faces.push(`@font-face{font-family:'${fam}';font-weight:${rule.style.fontWeight || 'normal'};font-style:${rule.style.fontStyle || 'normal'};font-display:block;src:url(${data}) format('woff2');}`);
-      } catch (e) { /* a face that won't fetch just falls back inside the raster */ }
-    }
-  }
-  return faces.join('\n');
-}
-
-// Which families does this element actually paint? (mirrors fonts.usedFamilies, kept local so seams.js
-// has no import cycle with fonts.js). Only these get fetched+inlined.
-function usedFamilies(el) {
-  const fams = new Set();
-  const GENERIC = new Set(['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'inherit', 'ui-sans-serif', 'ui-monospace', 'ui-serif']);
-  const walk = (n) => {
-    const cs = getComputedStyle(n);
-    const first = (cs.fontFamily || '').split(',')[0].trim().replace(/^["']|["']$/g, '');
-    if (first && !GENERIC.has(first.toLowerCase())) fams.add(first);
-    for (const c of n.children) walk(c);
-  };
-  walk(el);
-  return fams;
-}
-
-async function buildInlinedCss(el) {
-  const families = usedFamilies(el);
-  // base sheet: the scene's own <style> blocks + tokens.css, minus their @font-face (url()s that
-  // would not resolve in the isolated raster — the data: versions below replace them).
-  let base = '';
-  for (const st of document.querySelectorAll('style')) base += '\n' + st.textContent;
-  if (_tokensCss === null) {
-    try { _tokensCss = await (await fetch('/core/tokens.css')).text(); } catch (e) { _tokensCss = ''; }
-  }
-  base += '\n' + _tokensCss;
-  base = base.replace(/@font-face\s*\{[^}]*\}/g, '');
-  const fonts = await inlineFonts(families);
-  // :root custom properties (applyTheme wrote --bg/--accent/--font-* onto the documentElement inline
-  // style; they are NOT in any stylesheet, so re-declare them for the isolated render).
-  const rootVars = document.documentElement.getAttribute('style') || '';
-  return `${fonts}\n:root{${rootVars}}\n${base}`;
-}
-
-// domToCanvas(el, w, h): serialise `el` into an SVG <foreignObject> with the inlined CSS, rasterise
-// it through an <img>, and return a canvas. Async (image decode) — build-time only.
-async function domToCanvas(el, w, h, css) {
-  const xml = new XMLSerializer().serializeToString(el);
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
-    // CSS goes in a CDATA section: stylesheet text can legally contain characters (`<`, `&`) that are
-    // not valid raw XML, and the SVG is parsed as XML during rasterisation.
-    `<defs><style type="text/css"><![CDATA[${css}]]></style></defs>` +
-    `<foreignObject x="0" y="0" width="${w}" height="${h}">` +
-    `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;position:relative;overflow:hidden;">${xml}</div>` +
-    `</foreignObject></svg>`;
-  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  const img = new Image();
-  img.width = w; img.height = h;
-  // Time-bound the decode with a REAL timer (scene setTimeout is virtualized and would never fire
-  // during boot): a raster that never resolves must not deadlock the render — it becomes a bake miss.
-  const timer = window.__realTimeout || setTimeout;
-  await new Promise((res, rej) => {
-    let done = false;
-    const finish = (fn) => (arg) => { if (done) return; done = true; fn(arg); };
-    const ok = finish(res), fail = finish(rej);
-    timer(() => fail(new Error('foreignObject raster timed out')), 15000);
-    img.onload = () => ok();
-    img.onerror = () => fail(new Error('foreignObject raster failed'));
-    img.src = url;
-  });
-  if (img.decode) { try { await img.decode(); } catch (e) {} }
-  const c = document.createElement('canvas'); c.width = w; c.height = h;
-  c.getContext('2d').drawImage(img, 0, 0, w, h);
-  return c;
-}
+// The <foreignObject> serialiser those two gotchas belong to now lives in core/raster.js: a resample
+// pass wants the same DOM-to-pixels step for ONE layer, and a second copy of it would drift.
 
 // stageToCanvas({ w, h, cv, cam, root, useCanvasBg }): composite the CURRENT stage into one raster.
 //   • useCanvasBg (bg windows present, #cv is the opaque backdrop): draw the live #cv bitmap, then the
@@ -549,24 +439,10 @@ export async function stageToCanvas({ w, h, cv, cam, root, useCanvasBg }) {
   return out;
 }
 
-// isBlankRaster(canvas): a bake that produced essentially nothing (all one colour / transparent) —
-// the signal to fall back to the plain cross-fade rather than flashing an empty frame.
-export function isBlankRaster(canvas) {
-  try {
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const { width: w, height: h } = canvas;
-    const d = ctx.getImageData(0, 0, w, h).data;
-    let opaque = 0, nonUniform = 0; const r0 = d[0], g0 = d[1], b0 = d[2];
-    const step = Math.max(4, (w * h / 4000 | 0)) * 4;
-    let n = 0;
-    for (let i = 0; i < d.length; i += step) {
-      n++;
-      if (d[i + 3] > 8) opaque++;
-      if (Math.abs(d[i] - r0) > 6 || Math.abs(d[i + 1] - g0) > 6 || Math.abs(d[i + 2] - b0) > 6) nonUniform++;
-    }
-    return opaque / n < 0.02 || nonUniform / n < 0.005;
-  } catch (e) { return false; } // unreadable (tainted) → assume it painted; the GL path can still use it
-}
+// isBlankRaster moved to core/raster.js with the serialiser it grades; re-exported so the seam
+// compositor's callers keep importing it from here.
+export { isBlankRaster } from './raster.js';
+
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a seam fx" when someone writes it somewhere else. core/registry.js.
