@@ -542,9 +542,9 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 | `ripple` | gentle water caustics: three rings of cool light expanding and overlapping |
 | `vhs` | tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY — place it ABOVE content |
 
-## Per-layer fx  `[per-layer]`
+## Per-layer modifiers  `[per-layer]`
 
-`"fx"` blocks on a layer — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow.
+`"modifiers"` on a layer, applied in array order after every motion track — a physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow. NOT `"fx"`, which is the named-GSAP-effect slot and refuses an entry with no name.
 
 | name | what / when |
 |---|---|

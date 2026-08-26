@@ -14591,3 +14591,38 @@ layers agreeing across a boundary the film already has, so it is voiced by whate
 gives the joint it hangs on, and no new cut style was added because one that did nothing visually would
 be a second name for `none`. A match at a `none` cut is silent on purpose: that is the hard match cut,
 where the only event is the form changing.
+
+## #461 — the catalogue taught the wrong key, and a whole subsystem went unused
+
+**What.** `core/fx/` ships **ten modifiers**, about 80KB of engine: `mixBlend`, `occlude`, `plane`,
+`progress`, `shadow`, `tilt`, `kick`, `wordSlot`, `alongPath`, `ghost`. They are reached by **3 of the
+135 gate-visible scenes**, only **2 of the 10** are ever used, **0 of 30 block files** emit one, and one
+blueprint file does.
+
+`docs/EFFECTS.md` is the generated arsenal catalogue and the place an author goes to find a capability.
+Its entry for this family read:
+
+> Per-layer fx — `"fx"` blocks on a layer
+
+**The key is `modifiers`.** `core/fx/index.js:13-19` says so in capitals and explains why: `L.fx` has
+been the named-GSAP-effect slot since `core/gsap-effects.js` shipped, and `L.fxOut` is its exit half.
+An author who followed the catalogue wrote `fx: [{ tilt: { y: 18 } }]` and got
+`layers[0].fx entry needs a name` — a message about a slot they never meant to use.
+
+**Root cause.** One string in `scripts/site/effects-catalog.mjs:172`, the generator. The catalogue is
+derived from the registries, which is why its CONTENT cannot drift; the family's prose label is
+hand-written beside the derivation, and prose has no gate. `arsenal-check.mjs` verifies that every
+exported capability is NAMED in the catalogue. It cannot verify that the catalogue names it correctly.
+
+**Fix.** The family is `Per-layer modifiers`, the prose names `"modifiers"`, and it says what `"fx"` is
+so an author who has already made the mistake can see why the error mentioned a name.
+
+**Which gate catches it now.** None, and that is the honest answer. `arsenal-check` proves presence,
+not correctness, and a gate that diffs prose against intent is not a thing. What would have caught it
+is the check nobody runs: **follow your own documentation once, literally, as an author would.**
+
+**The adoption lesson, which is not the same as the fix.** `parts` is the sibling case (#410): it was
+documented, and documentation moved it from 0 to 5 block files while scenes stayed at 2. So correcting
+this string will not by itself make modifiers used. What it removes is the guarantee of the opposite: an
+author who tried, failed, and concluded the feature was broken. The adoption work is putting modifiers
+into `blocks/`, where an author meets them without having to look them up.
