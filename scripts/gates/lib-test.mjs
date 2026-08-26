@@ -63,6 +63,7 @@ import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAME
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
+import { beatSyncOf, beatGridPath, bindBeats } from '../../core/beat-bind.js';
 import { lift } from '../../core/motion.js';
 import { opacityEnvelope, ANIM } from '../../core/clips.js';
 import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../../core/backgrounds.js';
@@ -1866,6 +1867,33 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beats: snapToBeat REFUSES to drag a far cut', snapToBeat(1.28, bts, 0.12) === 1.28);
   ok('beats: snapToBeat is a no-op with no grid', snapToBeat(3.3, [], 0.12) === 3.3);
   ok('beats: downbeats take every 4th beat', downbeats([0, 1, 2, 3, 4, 5, 6, 7, 8], 4).join() === '0,4,8');
+  // ---- beat BINDING (core/beat-bind.js): the grid reaches the film's joints, or the render stops ----
+  const throws = (fn, re) => { try { fn(); return false; } catch (e) { return re.test(e.message); } };
+  const G = { bpm: 120, confidence: 8, beats: [0, 0.5, 1, 1.5, 2, 2.5, 3], downbeats: [0, 2] };
+  const sc = () => ({ audio: { music: 'beat', beatSync: true }, cuts: [{ t: 0.54, style: 'punch' }, { t: 1.28, style: 'punch' }], seams: [{ t: 1.75, dur: 0.5, fx: 'fade' }] });
+  ok('beat-bind: a scene without beatSync is left entirely alone', beatSyncOf({ audio: { music: 'beat' } }) === null);
+  ok('beat-bind: a bare bed name resolves to its sidecar', beatGridPath(sc()) === 'assets/music/beat.beats.json');
+  ok('beat-bind: a .wav path resolves beside the track', beatGridPath({ audio: { music: 'assets/music/x.wav', beatSync: true } }) === 'assets/music/x.beats.json');
+  const s1 = sc(); const r1 = bindBeats(s1, G);
+  ok('beat-bind: a near-miss cut lands on the beat', s1.cuts[0].t === 0.5);
+  ok('beat-bind: a far cut keeps the time the author wrote', s1.cuts[1].t === 1.28);
+  ok('beat-bind: the run reports what moved and what did not', r1.moved.length === 1 && r1.held.length === 2);
+  ok('beat-bind: a seam snaps the CENTRE of its blend', s1.seams[0].t === 1.75 && s1.seams[0].dur === 0.5);
+  const s2 = sc(); s2.seams[0].t = 1.65; bindBeats(s2, G);
+  ok('beat-bind: a seam whose centre is a near miss slides whole', Math.abs(s2.seams[0].t - 1.75) < 1e-6);
+  const s3 = sc(); s3.cuts[0].snap = false; bindBeats(s3, G);
+  ok('beat-bind: `snap:false` keeps a time the author means', s3.cuts[0].t === 0.54);
+  const s4 = sc(); s4.audio.beatSync = { bar: true }; bindBeats(s4, G);
+  ok('beat-bind: `bar:true` snaps to downbeats only', s4.cuts[0].t === 0.54);
+  const s5 = { duration: 8, audio: { music: 'beat', beatSync: true }, cuts: [{ t: 4.48, style: 'punch' }] };
+  bindBeats(s5, { ...G, seconds: 3 });
+  ok('beat-bind: a looping bed unrolls its grid across the film', s5.cuts[0].t === 4.5);
+  ok('beat-bind: the unroll leaves the caller\'s sidecar alone', G.beats.length === 7);
+  ok('beat-bind: binding twice is identical (pure)', JSON.stringify(bindBeats(sc(), G)) === JSON.stringify(bindBeats(sc(), G)));
+  ok('beat-bind: a missing grid THROWS rather than rendering unmatched', throws(() => bindBeats(sc(), null), /beat grid|beatmap/));
+  ok('beat-bind: a pulseless track is refused, not snapped to', throws(() => bindBeats(sc(), { ...G, confidence: 1.2 }), /confidence/));
+  ok('beat-bind: an empty grid is refused', throws(() => bindBeats(sc(), { ...G, beats: [] }), /carries no/));
+  ok('beat-bind: beatSync with no track to read names the fix', throws(() => beatGridPath({ audio: { beatSync: true, music: 'auto' } }), /audio\.music/));
   // the `lift` entrance must actually travel — pop only scaled 14%, which read as flat
   ok('motion: lift travels further than pop at t=0', parseFloat(String(lift(0).transform).match(/scale\(([\d.]+)/)[1]) < 0.75);
   ok('motion: lift settles to identity', lift(1).transform.includes('scale(1.0000)'));

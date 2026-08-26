@@ -211,6 +211,10 @@
           "label": "Cut time (s)",
           "required": true
         },
+        "snap": {
+          "type": "boolean",
+          "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beat-bind.js)."
+        },
         "style": {
           "type": "string",
           "label": "Presentation",
@@ -366,6 +370,10 @@
           "label": "Seam start time (s) — the window is [t, t+dur]",
           "required": true,
           "min": 0
+        },
+        "snap": {
+          "type": "boolean",
+          "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beat-bind.js)."
         },
         "fx": {
           "type": "string",
@@ -2144,6 +2152,15 @@
         "spectrum": {
           "type": "string",
           "label": "Precomputed spectrum sidecar JSON for audio-reactive layers (layer `react:{}`)."
+        },
+        "beatSync": {
+          "type": "boolean|object",
+          "label": "Snap the film's picture joints to the music's pulse. `true` takes the grid `make beatmap` wrote beside audio.music (assets/music/<bed>.beats.json); an object may set `grid` (an explicit .beats.json), `maxShift` (how far a joint may travel, default 0.12s) and `bar` (snap to downbeats, not every beat). Cuts snap their time and seams snap the centre of their blend; stings never snap, because an author offsets one from its cut on purpose. A grid that is missing, empty or below confidence 1.6 FAILS the render rather than quietly leaving the film unmatched. core/beat-bind.js, docs/CRAFT/SOUND.md.",
+          "fields": {
+            "grid": { "type": "string", "label": "Explicit path to a .beats.json (default: derived from audio.music)." },
+            "maxShift": { "type": "number", "label": "How far a joint may travel to reach a beat, in seconds (default 0.12). Beyond it the joint stays where it was written and the run says so.", "min": 0, "max": 1 },
+            "bar": { "type": "boolean", "label": "Snap to downbeats (bar lines) instead of every beat." }
+          }
         },
         "silent": {
           "type": "boolean",

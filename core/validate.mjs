@@ -25,6 +25,7 @@ import { parseColor, contrastRatio } from '../core/motion.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism, lowerScene } from '../core/transitions-lower.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../core/junctions.js';
+import { beatGridPath } from '../core/beat-bind.js';
 import { GSAP_FX, EXIT_FX, GSAP_REGISTRY, GSAP_EXIT_REGISTRY, DEPRECATED_FX, DEPRECATED_EXIT } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
 import { EASINGS, isEasingName } from '../core/motion.js';
@@ -1243,6 +1244,13 @@ if (isMain) {
         if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav) — the render fails rather than dropping the bridge. Run make audio / make music-pack.`);
         if (!/^[a-z]+@\d+$/.test(String(b?.at ?? ''))) errors.push(`audio.bridges[${i}].at must be "<kind>@<index>" (cut@1 · seam@0 · sting@2 · junction@3), got ${JSON.stringify(b?.at)}.`);
       }
+      // (b2) BEAT GRID. `audio.beatSync` moves real cut times at boot, and boot THROWS when the grid
+      //      it names will not load — so catching it here turns a failed render into a named error at
+      //      author time. Same posture as the spectrum sidecar below: an error, never a warning.
+      try {
+        const gp = beatGridPath(data);
+        if (gp && !resolves(gp)) errors.push(`audio.beatSync names a beat grid that is not on disk: ${gp} — run \`make beatmap MUSIC=<the track>.wav\` to write it. The render fails rather than leaving the film unmatched.`);
+      } catch (e) { errors.push(e.message); }
       // (c) VO + sidecars named but absent → the mixer skips them without a word. Fail instead.
       for (const k of ['vo', 'voWords', 'spectrum']) {
         if (typeof A[k] === 'string' && !resolves(A[k]))
