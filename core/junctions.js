@@ -99,3 +99,27 @@ export function marksOf(data) {
     for (const m of data?.[key] || []) if (Number.isFinite(+m?.t)) out.push({ t: +m.t, kind });
   return out.sort((a, b) => a.t - b.t);
 }
+/**
+ * shotWindows(table, duration) → [{ start, end }] in seconds: the film cut into SHOTS at its own joints.
+ *
+ * bindWindowsToJunctions reads the joints to place windows an author declared. This reads the same
+ * joints to DERIVE the windows nobody declared, and it is here rather than in the gate that wanted it
+ * because a second copy of "where does this film turn" is the drift MISTAKES #159 and #358 both are.
+ *
+ * STINGS ARE NOT JOINTS HERE, and that is the one judgement in this function. A cut or a seam is a
+ * boundary by construction: the picture on one side is not the picture on the other. A sting is a
+ * punctuation mark and lands INSIDE a shot at least as often as it ends one, so cutting on stings
+ * invents boundaries the film does not have. `junction` (the merged list) is therefore the wrong list
+ * to read for this, even though it is the more inclusive one.
+ *
+ * A film with no cuts and no seams is ONE shot, which is a true answer and not a fallback.
+ */
+export function shotWindows(table, duration) {
+  const joints = [...new Set([...(table?.cut || []), ...(table?.seam || [])])]
+    .filter((t) => t > 0 && t < duration)
+    .sort((a, b) => a - b);
+  const edges = [0, ...joints, duration];
+  const out = [];
+  for (let i = 0; i + 1 < edges.length; i++) out.push({ start: edges[i], end: edges[i + 1] });
+  return out;
+}

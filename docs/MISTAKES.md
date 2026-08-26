@@ -13944,10 +13944,16 @@ this gate have a way to say it could not check?", and a gate cannot ask that of 
 **Still open.** `inspect --strict` has no teeth and giving it any is a design decision, not a fix: the
 candidate rule is that a beat whose `at` has no live layers passes today when `mustShow` is empty. It is
 defensible and it would create new failures across the library, which is a decision about the library
-rather than about the gate. Separately, `motion-audit`'s inferred single window may be a bad rule: with
-one window `visEnd == end`, so every ordinary layer exit reads as a mid-scene fade, which is why
-`ii:monotonic` fires on a clean sample. The real repair is scenes declaring `segments`, or `add()`
-deriving windows from `cuts`.
+rather than about the gate.
+
+**CLOSED by #452.** This entry also said `motion-audit`'s single inferred window may be a bad rule, and
+guessed the repair was scenes declaring `segments` or `add()` deriving windows from `cuts`. Half right.
+Windows now come from the film's own cuts and seams, but that was the small half: 100 of the 127
+buildable scenes declare no cuts at all, so their windows did not move. `ii:monotonic` fired on a clean
+sample because it could not tell a layer's exit from a mid-scene dip, which no window would have fixed,
+and the gate was also scoring the CAMERA RIG as content. See #452.
+
+
 
 ## #451 — eight resampling passes, and nothing we build ourselves could be fed to one
 
@@ -14034,3 +14040,64 @@ ticks or a `type` that types is frozen at the state build left it in. Sampling a
 would need a rasterisation per frame, and `renderFrame(n)` is synchronous by contract while
 `<foreignObject>` decoding is not. That is a real ceiling, not a detail: the honest shape of this
 feature is "a still of composed content, transformed over time by the pass".
+## #452 — the motion contract's windows came from a field nobody writes, and one of its clauses was measuring the camera
+
+`scripts/gates/motion-audit.mjs` scores five FAIL-tier clauses (i final-hold · ii monotonic · iii settle ·
+iv count-up · v typing) against a WINDOW. Windows came from `meta.segments`, `meta.segments` came from
+`scene.segments`, and **no scene has ever set it.** There is one format and `formats/scene/scene.js` never
+returns the key, so `core/boot.js:537` read `scene.segments || []` and got `[]` every time, for every film,
+since the gate was written. #423 fixed the gate's SILENCE about this. This fixes the cause.
+
+**`segments` was never a missing declaration. It was a second way to say what `cuts` already says.** A film
+declares where it turns, in `cuts` and `seams`, and `core/junctions.js` already owns the reading of those
+joints for backgrounds and for audio bridges. Asking 135 scenes to write the same boundaries again under a
+different key is the drift #159 and #358 are both about, one field earlier. So `shotWindows(table, duration)`
+joins `bindWindowsToJunctions` in `core/junctions.js`: the same joints, read the other way round. Stings are
+excluded deliberately, because a sting punctuates inside a shot at least as often as it ends one. `segments`
+is deleted from `meta`.
+
+**Then the windows stopped being the interesting part.** Three separate things were wrong, and only the first
+is about windows at all.
+
+**(ii) could not tell a layer's exit from the defect it hunts.** Its only exclusion was the SEGMENT's
+transition window, so every ordinary layer leaving mid-shot read as a mid-scene fade. This clause is scoped
+to a LAYER'S LIFE, not to a shot, and no window would ever have fixed it. An exit is a terminal descent: from
+some frame on the opacity never rises again and the element does reach nothing. A dip comes back, and a dip
+is the bug. **454 findings across 91 films became 20 across 15**, and `formats/scene/sample.json`, the
+canonical clean scene, came out clean.
+
+**`cam` was counted as content.** The camera rig (`formats/scene/scene.html:13`) sat outside `INFRA` beside
+`stage` and `root`, where it has always belonged. Two consequences. A camera move made the rig report as
+unsettled content, and every layer riding that camera reported with it, because a bounding rect is read in
+screen space: `playhead` drifts its camera through a whole shot and (iii) called six layers plus the rig
+unsettled, every one of them exactly where the author put it. Each row now carries a hash of the RIG's
+transform only, never a `group`'s, whose motion really is the layer's motion, and where the rig moved
+between two samples the positional half of (iii) is not asked. Opacity and text are unaffected by the camera
+and still are. **125 findings across 50 films became 49 across 35.**
+
+**And the rig was hiding clause (i) completely.** `cam` is always at opacity 1, so `maxOp` was always 1, so
+`i:final-hold` **had never fired once in 135 films.** With the rig removed it fires on 44, and four checked
+against the render — `brew-launch-act1`, `tpot-launch`, `example-kinetic-type`, `_catalog-2` — all four end
+on an EMPTY frame. `brew-launch-act1` is one of the two films CLAUDE.md argues from.
+
+**The per-shot half of (i) is deleted, because it was measuring the wrong thing.** It asks "does this shot end
+faded" and can only see `[id], [data-layer="critical"]`, which is not the frame. Where a `group` or an `html`
+mock carries the picture, the tracked layers of that shot sit at zero and a full frame is reported as faded:
+`tpot-launch` 13.50s and `vawe-intro` 7.90s were both checked against the render and both are solid. Whether a
+FRAME has anything in it is a question about PIXELS, and `beat-check`'s `dead-air` already answers it. The
+whole-video variant survives because at the end of a film "every tracked layer is gone" and "the frame is
+empty" stop being different claims.
+
+**Blast radius.** No pixel moves: `core/boot.js` loses a meta key nothing wrote and nothing else read.
+`lib-test` 1066/1066. Across the 135-scene population, 127 of which build, every clause went DOWN except the
+two the rig was suppressing: `ii` 454→20, `iii` 125→49, `i` 0→44 (verified real), `coverage` 0→33 (the gate
+saying it cannot see a film, which is honest), `vi:frozen` 359→476 (WARN, unmasked by the same rig removal).
+Films carrying at least one FAIL-tier finding: **93 → 53 of 127.**
+
+**Tier: still REPORT, and that is a measured decision.** `MOTION_TIER=enforce` turns the FAIL tier into a
+wall. It is not the default, because 53 of 127 films is two in five, and CLAUDE.md already measures where that
+road ends: a rule waived by reflex has been repealed with nobody writing it down.
+
+**Which gate catches it now.** Nothing catches "a field is written by nobody and read as meaning something".
+The shape to grep for is a `|| []` fallback on a key no producer sets, and #424 is the same sin with the
+producer and the consumer swapped.
