@@ -21,7 +21,7 @@
 .ct-bar {
   display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
   padding: 22px 0 18px; border-bottom: 1px solid var(--line);
-  position: sticky; top: 0; z-index: 5;
+  position: sticky; top: 0; z-index: var(--z-sticky);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
 }

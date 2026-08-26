@@ -30,10 +30,22 @@
   /* ---- SYSTEM ---- */
   --r:14px; --maxw:1160px;
   --ease:cubic-bezier(.16,1,.3,1);        /* ease-out-expo-ish */
-  --ease-soft:cubic-bezier(.22,1,.36,1);
   --shadow-1:0 1px 2px rgba(16,22,32,.04), 0 2px 8px rgba(16,22,32,.05);
   --shadow-2:0 8px 24px -8px rgba(16,22,32,.14), 0 2px 8px rgba(16,22,32,.06);
   --shadow-3:0 40px 80px -24px rgba(16,22,32,.28), 0 12px 32px -12px rgba(16,22,32,.16);
+
+  /* ---- STACKING · seven layers, and nothing outside this list ----
+     Every z-index on the site is one of these. The numbers are the ones already in use; the names
+     are what stops two pages picking 4 and 5 for the same idea. A layer inside a component that
+     needs no page-level meaning uses --z-raise; if it needs more, it needs its own stacking
+     context, not a bigger number. */
+  --z-under:-2;   /* a backdrop the page content sits over */
+  --z-base:1;     /* page content, above the backdrop */
+  --z-raise:2;    /* lifted within its own section: a hero stage, a play button on a card */
+  --z-badge:3;    /* a label pinned over lifted content */
+  --z-sticky:5;   /* a toolbar or rail that survives a scroll */
+  --z-nav:6;      /* the site header, over every sticky toolbar */
+  --z-skip:100;   /* the skip link, over everything, because it is the first tab stop */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
@@ -54,10 +66,10 @@ a{color:inherit;text-decoration:none}
    stands wide and planted, technical labels compress like a spec sheet. It is deliberately NOT
    animated — the hero already contains a live engine, and type that reflows every frame would
    compete with the render it frames (and thrash layout doing it). See DESIGN.md. */
-:root{ --wd-display:105; --wd-body:100; --wd-tight:88; }
+:root{ --wd-display:105; --wd-body:100; }
 
 /* WCAG 2.4.1 — visible only on focus, but always the first tab stop. */
-.skip{position:absolute;left:-9999px;top:0;z-index:100;
+.skip{position:absolute;left:-9999px;top:0;z-index:var(--z-skip);
   background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:14.5px;
   padding:11px 18px;border-radius:0 0 10px 0}
 .skip:focus{left:0}
@@ -95,7 +107,7 @@ a{color:inherit;text-decoration:none}
 /* opacity is the shadow dial. The field still has luminance variation, and multiply turns any
    dark region into what reads as a shadow on the band; at .28 the whole range lands within ~5%
    of cobalt, so it is movement rather than shading. */
-.bookend video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;
+.bookend video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:var(--z-under);
   mix-blend-mode:multiply;opacity:.28;filter:blur(30px) saturate(1.35);transform:scale(1.16)}
 /* No darkening gradient. It weighted each band's foot to make the V read, but it just looked like
    a shadow slumped under the footer. The V has a shape; it does not need shading to be seen. */
@@ -111,7 +123,7 @@ a{color:inherit;text-decoration:none}
    child of the band now, so its computed background really is cobalt and contrast checkers read
    what a viewer sees instead of the white shell behind it.
    .wrap sets position:relative and is defined later, so this must out-specify it, not tie. */
-.wrap.navhold{position:absolute;top:0;left:0;right:0;z-index:6;margin:0 auto}
+.wrap.navhold{position:absolute;top:0;left:0;right:0;z-index:var(--z-nav);margin:0 auto}
 
 /* Skip target. tabindex=-1 makes it programmatically focusable; without this rule the browser
    paints a focus ring around the whole hero when the skip link is used. */
@@ -163,13 +175,13 @@ a{color:inherit;text-decoration:none}
 .foot-meta{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
   font-size:13px;color:#fff}
 .foot-meta a{text-decoration:underline;text-underline-offset:2px}
-.wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 26px}
+.wrap{position:relative;z-index:var(--z-base);max-width:var(--maxw);margin:0 auto;padding:0 26px}
 .accent{color:var(--accent)}
 
 /* =========================================================
    NAV
    ========================================================= */
-.bar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;position:relative;z-index:5}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;position:relative;z-index:var(--z-sticky)}
 .mark{display:flex;align-items:center;gap:10px;font-weight:600;font-size:20px;letter-spacing:-.02em}
 .glyph{width:24px;height:13px}
 .nav{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:500}
@@ -219,7 +231,7 @@ a{color:inherit;text-decoration:none}
      mask 2  an ellipse rising from the bottom-centre → carves the arch
    Intersected. Replaces an 880KB image with 0 bytes, and the ink type sits on plain white. */
 /* top padding clears the absolutely-positioned pill nav */
-.hero-head{position:relative;z-index:2;text-align:center;padding:clamp(104px,11vw,132px) 0 clamp(90px,11vw,150px)}
+.hero-head{position:relative;z-index:var(--z-raise);text-align:center;padding:clamp(104px,11vw,132px) 0 clamp(90px,11vw,150px)}
 /* No backdrop-filter: it used to blur the dot field behind the hero. That field is gone, so the
    glass blurred plain white — decoration with nothing behind it. A hairline pill on paper instead. */
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;font-size:12.5px;
@@ -236,7 +248,7 @@ a{color:inherit;text-decoration:none}
 .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 
 /* The editor overlaps UP into the V the band cuts, so the band reads as pouring into it. */
-.hero-stage{position:relative;z-index:2;width:80%;max-width:none;margin:clamp(-150px,-9vw,-70px) auto -190px;padding:0}
+.hero-stage{position:relative;z-index:var(--z-raise);width:80%;max-width:none;margin:clamp(-150px,-9vw,-70px) auto -190px;padding:0}
 /* ===== THE HERO EDITOR ======================================================================
    A real browser window running the REAL engine, with an EDITABLE code pane. Light chrome, not a
    black slab: the site is white-first, and a dark device fought everything around it. The URL is
@@ -272,7 +284,7 @@ a{color:inherit;text-decoration:none}
 .hb-out.is-live .hb-frame{opacity:1}
 .hb-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .45s var(--ease)}
 .hb-out.is-live .hb-poster{opacity:0}
-.hb-badge{position:absolute;left:9px;bottom:8px;z-index:3;font-family:var(--font-mono),monospace;
+.hb-badge{position:absolute;left:9px;bottom:8px;z-index:var(--z-badge);font-family:var(--font-mono),monospace;
   font-size:10px;color:var(--accent);background:rgba(255,255,255,.86);backdrop-filter:blur(6px);
   border:1px solid var(--accent-line);border-radius:6px;padding:3px 7px}
 .hb-meta{display:grid;gap:6px;font-family:var(--font-mono),monospace;font-size:10.5px}
@@ -501,7 +513,6 @@ a{color:inherit;text-decoration:none}
 .phead h1{font-size:clamp(2.4rem,5.5vw,4rem);line-height:1;font-weight:700;letter-spacing:-.035em;margin-bottom:16px;text-wrap:balance}
 .phead p{color:var(--ink-2);font-size:1.1rem;line-height:1.5}
 .row{display:grid;grid-template-columns:1.5fr 1fr;gap:44px;align-items:center;padding:48px 0;border-top:1px solid var(--line)}
-.row.flip .media{order:2}
 .media{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg-2);box-shadow:var(--shadow-2);
   transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .media:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
@@ -654,91 +665,29 @@ a{color:inherit;text-decoration:none}
 .srcopen:hover .arw{transform:translateX(3px)}
 
 /* =========================================================
-   BLOCKS REGISTRY
+   ENGINE PREVIEW — the live window, and the two signals that it is booting
+   Shared: BlockLive mounts .blive on /blocks/<name>; /showcase/type drives .typlay/.tyboot off
+   the same keyframes. Booting is an iframe + fonts + theme + schema, so it is seconds, and a
+   control that produces no visible change in that time reads as broken.
    ========================================================= */
-.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px;margin-top:32px}
-.bcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-1);
-  display:flex;flex-direction:column;transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
-.bcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);border-color:var(--accent-line)}
-/* The thumb CENTRES its media and caps it, never stretches it. `cover` + `top left` was cropping a
-   block that was already stranded in the top-left of its own image (the still was the whole catalog
-   cell), so the frame agreed with the dead space instead of fixing it. The stills are now cropped to
-   each block's measured bounds, so the block IS the image: place-items centres it, and max-width/height
-   with auto sizing means a 170px badge renders at 170px while a 540px card scales down to fit. That is
-   their real relative size, and nothing is ever upscaled into blur. */
-/* One grid CELL, both media stacked in it. The explicit minmax(0,1fr) track is load-bearing: an auto
-   track sizes to max-content, so the cell grew to the media's natural width and `max-width:100%`
-   resolved against THAT — a 384px-wide block overflowed a 335px thumb instead of scaling down, and
-   the poster (sized by its own intrinsic width) and the live render disagreed by 15%. */
-.bcard .thumb{position:relative;aspect-ratio:3/2;background:#eef1f6;overflow:hidden;
-  border-bottom:1px solid var(--line);display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);
-  place-items:center;padding:10px}
-.bcard .thumb img,.bcard .thumb .blive{grid-area:1/1;max-width:100%;max-height:100%;width:auto;height:auto;
-  object-fit:contain;display:block}
-
-/* The live render, framed exactly like its poster. The scene is a 1920x1080 canvas with one block on
-   it; .blive is a WINDOW the size of the rect that was measured around that block when the poster was
-   screenshot, and the iframe inside stays at full frame size, scaled and slid so the rect fills the
-   window. Sizing the iframe to the window instead would crop the scene to its top-left corner.
-   Because the window carries the same intrinsic size and the same cap-don't-stretch rules as the
-   poster <img>, both land in the same layout box and pressing play cannot make the block jump. */
-.bcard .thumb .blive{position:relative;overflow:hidden;--sp-scale:1;opacity:0;transition:opacity .25s var(--ease)}
-.bcard .thumb .blive[data-ready]{opacity:1}
+/* The window is the measured rect around the block; the iframe inside stays at full frame size,
+   scaled and slid so that rect fills the window. Sizing the iframe to the window instead would
+   crop the scene to its top-left corner. */
 .blive-stage{position:absolute;inset:0}
 .blive .sp-frame{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;display:block;
-  transform-origin:top left;transform:scale(var(--sp-scale)) translate(var(--bl-x),var(--bl-y))}
+  transform-origin:top left;transform:scale(var(--sp-scale)) translate(var(--bl-x,0px),var(--bl-y,0px))}
 
-/* Play: cobalt + an icon = actionable, per The Affordance Rule. It sits ON the card (which is a link to
-   the detail page), so it stops the click from navigating — pressing play means "show me this move",
-   not "take me away". Hidden from a11y duplication: the card's own link already names the block. */
-.bplay{position:absolute;right:8px;bottom:8px;z-index:2;display:grid;place-items:center;
-  width:32px;height:32px;padding:0;border-radius:999px;cursor:pointer;
-  color:#fff;background:var(--accent);border:1px solid var(--accent);
-  box-shadow:0 2px 10px rgb(15 23 42 / .18);opacity:0;transition:opacity .2s var(--ease),transform .2s var(--ease)}
-.bcard:hover .bplay,.bplay:focus-visible,.bplay[data-on]{opacity:1}
-.bplay:hover{transform:scale(1.08)}
-.bplay svg{width:14px;height:14px;fill:currentColor}
-
-/* Booting the engine is an iframe + fonts + theme + schema, which is seconds. The ready-gate on
-   .blive keeps that from flashing a black stage, but it also means the press produced no visible
-   change at all until the render landed, and the honest read of that is "the button is broken".
-   Two signals, because they answer different questions: the ring says the CONTROL took the press,
-   the sweep says the SURFACE is still working. The ring alone is 15px and loses at card scale. */
-.bplay[data-loading]{cursor:progress;opacity:1}
-.bplay .bspin{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;
-  transform-origin:center;animation:bspin .75s linear infinite}
 @keyframes bspin{to{transform:rotate(360deg)}}
-
-/* Sits on the thumb's bottom hairline, the one edge no block artwork occupies. */
-.thumb .bboot{position:absolute;left:0;right:0;bottom:0;height:2px;z-index:2;overflow:hidden;
-  background:color-mix(in oklab,var(--accent) 15%,transparent)}
-.thumb .bboot::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;
-  background:var(--accent);animation:bboot 1.15s var(--ease) infinite}
 @keyframes bboot{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
-
 /* Reduced motion still has to answer "is it working?", so this fades rather than removing the
-   signal: a loader that stops moving is indistinguishable from the frozen state it exists to deny. */
-@media (prefers-reduced-motion:reduce){
-  .bplay .bspin{animation:bfade 1.3s ease-in-out infinite}
-  .thumb .bboot::after{width:100%;animation:bfade 1.3s ease-in-out infinite}
-  @keyframes bfade{0%,100%{opacity:.3}50%{opacity:1}}
-}
-/* Touch and keyboard have no hover, so the control must be permanently visible there or it does not
-   exist. (any-hover:none) is the honest query: it asks about the input, not the screen width. */
-@media (any-hover:none){.bplay{opacity:1}}
-.bcard .meta{padding:13px 15px 15px}
-.bcard .bn{font-family:var(--font-mono),monospace;font-size:13.5px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
-.bcard .bf{font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);margin:5px 0 9px}
-.bcard .bp{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);line-height:1.6;word-break:break-word}
-.bnote{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--ink-2);
-  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:10px;padding:9px 14px}
-.bnote b{color:var(--accent)}
+   signal: a loader that stops moving cannot be told from the frozen state it exists to deny. */
+@media (prefers-reduced-motion:reduce){@keyframes bfade{0%,100%{opacity:.3}50%{opacity:1}}}
 
 /* ===== BLOCKS FILTER ======================================================================
    96 blocks in one flat grid meant scrolling and hoping. Search carries the load; the family
    dropdown is the coarse cut. Both derive from the registry, so a new block cannot leave them
    behind. Sticky: the toolbar is useless the moment it scrolls away from the grid it filters. */
-.bfilter{position:sticky;top:70px;z-index:5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+.bfilter{position:sticky;top:70px;z-index:var(--z-sticky);display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   padding:14px 0;margin-bottom:6px;background:var(--bg);border-bottom:1px solid var(--line)}
 .bsearch{position:relative;display:flex;align-items:center;flex:1 1 260px;min-width:0}
 .bsearch-i{position:absolute;left:12px;width:15px;height:15px;color:var(--muted);pointer-events:none}
@@ -767,53 +716,6 @@ a{color:inherit;text-decoration:none}
 .blink{background:none;border:0;padding:0;font:inherit;color:var(--accent);font-weight:600;cursor:pointer;
   text-decoration:underline;text-underline-offset:3px}
 
-/* ===== BLOCK DETAIL (/blocks/<name>) ======================================================
-   The still IS the argument here: it is the block rendered by the real engine, so it gets the
-   dominant slot and the copy sits beside it rather than over it. */
-.bdetail{padding:34px 0 20px}
-.bd-head{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(24px,4vw,56px);
-  align-items:center;padding:22px 0 40px;border-bottom:1px solid var(--line)}
-.bd-head h1{font-size:clamp(2rem,4.4vw,3.2rem);line-height:1;letter-spacing:-.02em;font-weight:800;
-  font-variation-settings:"wdth" var(--wd-display);font-family:var(--font-mono),monospace;margin-bottom:12px}
-.bd-blurb{color:var(--ink-2);font-size:1.05rem;line-height:1.6;max-width:44ch}
-.bd-shot{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#eef1f6;
-  box-shadow:var(--shadow-2)}
-.bd-shot img{display:block;width:100%;height:auto}
-.bd-shot figcaption{font-size:11px;color:var(--muted);padding:8px 12px;background:var(--bg-2);
-  border-top:1px solid var(--line)}
-
-.bd-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);
-  padding:38px 0}
-.bd-h2{font-size:1.15rem;font-weight:700;letter-spacing:-.015em;margin-bottom:6px}
-.bd-count{font-family:var(--font-mono),monospace;font-size:12px;color:var(--accent);
-  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:2px 8px;margin-left:6px}
-.bd-note{color:var(--muted);font-size:13.5px;line-height:1.6;margin-bottom:14px;max-width:48ch}
-.bd-code{background:#0d1117;color:#c9d1d9;border-radius:12px;padding:16px 18px;font-size:12.5px;
-  line-height:1.7;overflow-x:auto;border:1px solid var(--line)}
-
-/* hairline rows, not a table-in-a-card */
-.bd-props{border-top:1px solid var(--line)}
-.bd-prop{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.2fr);gap:12px;align-items:baseline;
-  padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
-.bd-key{color:var(--ink);font-weight:600}
-.bd-type{color:var(--accent);font-size:11px}
-.bd-val{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
-
-.bd-sib{padding:8px 0 40px;border-top:1px solid var(--line)}
-.bd-sib .bd-h2{margin:28px 0 14px}
-.bd-siblist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.bd-sibcard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);
-  display:block;transition:border-color .2s var(--ease),transform .2s var(--ease)}
-.bd-sibcard:hover{border-color:var(--accent-line);transform:translateY(-2px)}
-.bd-sibcard img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;object-position:top left;
-  background:#eef1f6;border-bottom:1px solid var(--line)}
-.bd-sibcard span{display:block;padding:7px 10px;font-size:11.5px;color:var(--ink-2)}
-
-@media (max-width:860px){
-  .bd-head,.bd-grid{grid-template-columns:1fr}
-  .bd-prop{grid-template-columns:minmax(0,1fr) auto}
-  .bd-val{grid-column:1/-1;text-align:left;white-space:normal}
-}
 
 /* =========================================================
    FEATURES
@@ -843,18 +745,66 @@ a{color:inherit;text-decoration:none}
 .fdetail .tag{margin-top:24px}
 
 /* =========================================================
+   PRIMITIVES — the patterns more than one route needs
+   A rule earns a place here by having two consumers. Everything with one consumer stays in that
+   route's own stylesheet, which is why globals.css does not know what a .fxcard is.
+   ========================================================= */
+
+/* ── the catalog shape: a sticky family rail, the work to its right ──────────────────────────────
+   /showcase and /showcase/effects both index hundreds of items under dozens of headings, and both
+   arrived at this independently (see each file's banner). The metrics are one behaviour across the
+   catalog pages, not two that happen to look similar. A page brings its own link type and its own
+   collapsed direction; the frame is here. */
+.rail-layout{display:grid;grid-template-columns:172px 1fr;gap:22px;align-items:start;padding-top:8px}
+.rail-col{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 104px);overflow-y:auto;
+  padding-right:6px}
+.rail{display:flex;flex-direction:column;gap:2px}
+.rail a{color:var(--ink-2);text-decoration:none;border:1px solid transparent;border-radius:7px;
+  line-height:1.3;
+  transition:border-color .15s var(--ease),color .15s var(--ease),background-color .15s var(--ease)}
+.rail a:hover{color:var(--accent)}
+/* Scrollspy, not a route: aria-current carries the same signal to a screen reader that the
+   highlight gives a sighted one, so the observer sets the attribute and CSS reads it. */
+.rail a[aria-current]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line);
+  font-weight:600}
+
+/* No room for a second column, so the rail becomes the horizontal jump strip of pills these pages
+   carried before they had a rail at all. */
+@media (max-width:900px){
+  .rail-layout{grid-template-columns:minmax(0,1fr);gap:0}
+  .rail-col{position:static;max-height:none;overflow:visible;padding-right:0;min-width:0}
+  .rail{border-bottom:1px solid var(--line)}
+  /* Only what no page overrides on its own link: a page sets its link type at .fxrail a / .scrail a,
+     which has the same specificity as .rail a and wins on source order, so anything the pages also
+     declare (padding, white-space) has to come from their own collapse block, not from here. */
+  .rail a{border-color:var(--line);border-radius:999px}
+}
+@media (prefers-reduced-motion:reduce){.rail a{transition:none}}
+
+/* ── the fold: an explainer that is available and not in the way ─────────────────────────────────
+   A <details> with the disclosure triangle replaced by a +/- that reads at 12.5px. */
+.fold>summary{cursor:pointer;list-style:none;font-size:12.5px;color:var(--muted);
+  padding:2px 0;width:fit-content}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary::before{content:"+ ";font-family:var(--font-mono),monospace}
+.fold[open]>summary::before{content:"- "}
+.fold>summary:hover{color:var(--ink-2)}
+.fold>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.fold>p{font-size:14px;line-height:1.6;color:var(--ink-2);max-width:66ch}
+.fold>p b{color:var(--ink)}
+
+/* =========================================================
    MICRO-ANIMATIONS
    ========================================================= */
 .rise{opacity:0;transform:translateY(18px);animation:rise .85s var(--ease) forwards}
-.rise.d1{animation-delay:.08s}.rise.d2{animation-delay:.16s}.rise.d3{animation-delay:.26s}.rise.d4{animation-delay:.36s}
+.rise.d1{animation-delay:.08s}.rise.d2{animation-delay:.16s}.rise.d3{animation-delay:.26s}
 .pop{opacity:0;transform:translateY(30px) scale(.985);animation:pop 1s var(--ease) .34s forwards}
 @keyframes rise{to{opacity:1;transform:none}}
 @keyframes pop{to{opacity:1;transform:none}}
 @media (max-width:900px){
   .hero-stage{margin-bottom:-90px}.hero-foot{height:120px}
-  .feat3{grid-template-columns:1fr}
   .strip{grid-template-columns:1fr}.clip.big{grid-column:auto}
-  .row,.row.flip{grid-template-columns:1fr;gap:22px}.row.flip .media{order:0}
+  .row{grid-template-columns:1fr;gap:22px}
 }
 @media (prefers-reduced-motion:reduce){
   .rise,.pop{animation:none;opacity:1;transform:none}
@@ -987,30 +937,30 @@ a{color:inherit;text-decoration:none}
 
 /* ── the generator playground ──────────────────────────────────────────────────────────────────
    The stage is an INK well inside a white page, which is the pattern .demo-media already sets:
-   generated fields are light on dark, and framing them in white chrome is what the site does. */
-.pgpage { padding: 56px 0 96px; }
-.pghead { max-width: 46rem; margin-bottom: 34px; }
-.pghead h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); letter-spacing: -.022em; margin-bottom: 14px; }
-.pghead p { color: var(--ink-2); line-height: 1.6; }
-.pghead .pgsub { color: var(--muted); font-size: .95rem; margin-top: 10px; }
+   generated fields are light on dark, and framing them in white chrome is what the site does.
 
-.pgtabs { display: flex; gap: 6px; margin-bottom: 16px; }
-.pgtabs button {
-  font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 999px; cursor: pointer;
-  background: var(--surface); color: var(--ink-2); border: 1px solid var(--line-2);
-}
-.pgtabs button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+   Preview wide, controls beneath. The panel used to be a 20rem column beside the stage; with
+   twenty-odd dials that is a cramped scroller next to a preview that never gets the width it
+   wants, so both halves lose. Now the stage takes the full column and the controls wrap under it
+   as a grid of chips: more dials visible at once, and the picture as large as the page allows. */
+.pgpage { padding: 28px 0 32px; }
+.pghead { max-width: 44rem; margin-bottom: 18px; }
+.pghead h1 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); letter-spacing: -.022em; margin-bottom: 8px; }
+.pghead p { color: var(--ink-2); font-size: .98rem; line-height: 1.6; }
 
-.pggrid { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 24px; align-items: start; }
-@media (max-width: 900px) { .pggrid { grid-template-columns: minmax(0, 1fr); } }
-
-.pgstage { min-width: 0; }
+.pggrid { display: block; }
+.pgstage { display: block; min-width: 0; }
 /* The field sizes itself against this box: a generator is full-bleed, so the container is what gives
    it a height. A width with no height collapses an inset:0 child to nothing (docs/MISTAKES.md #261). */
 .pgfield {
-  position: relative; aspect-ratio: 16 / 9; width: 100%; overflow: hidden;
+  position: relative; width: 100%; height: clamp(320px, 56vh, 640px); overflow: hidden;
   border: 1px solid var(--line); border-radius: 16px; background: #05070c;
   box-shadow: var(--shadow-2);
+}
+/* the scene stage inside the playground: the editor's proven .sp-stage, given this page's frame */
+.pgscene {
+  border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-2);
+  max-height: 56vh; margin-inline: auto; width: 100%;
 }
 .pgerr {
   margin-top: 12px; padding: 12px 14px; border-radius: 10px;
@@ -1018,30 +968,40 @@ a{color:inherit;text-decoration:none}
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.5;
 }
 
-.pgpanel {
-  border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
-  padding: 16px 16px 6px; box-shadow: var(--shadow-1);
+/* the control wall */
+.pgpanel { margin-top: 16px; }
+.pgblurb { color: var(--muted); font-size: .88rem; line-height: 1.5; margin-bottom: 14px; max-width: 46rem; }
+.pggroup {
+  border: 0; padding: 0; margin: 0 0 10px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 8px;
 }
-.pgblurb { color: var(--muted); font-size: .88rem; line-height: 1.5; margin-bottom: 14px; }
-.pggroup { border: 0; padding: 0; margin: 0 0 14px; }
+/* the per-section roll sits in the legend, so it reads as belonging to that group */
 .pggroup legend {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 0 2px;
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 11.5px; color: var(--muted);
-  letter-spacing: .06em; text-transform: uppercase; padding: 0 0 6px;
+  letter-spacing: .06em; text-transform: uppercase;
 }
+/* every dial is a chip: its name on the left, its control on the right, one line */
 .pgrow {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 5px 0; font-size: 13.5px; color: var(--ink-2);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 7px 11px; margin: 0; font-size: 13px; color: var(--ink-2);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
 }
+.pgrow:hover { border-color: var(--line-2); }
 .pgrow-stack { align-items: flex-start; }
-.pgrow > span:first-child { flex: 0 0 auto; }
+.pgrow > span:first-child {
+  flex: 0 0 auto; color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .pgnum { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.pgnum input[type="range"] { width: 6.5rem; accent-color: var(--accent); height: 2px; }
-.pgnum input[type="number"], .pgrow select {
-  font: inherit; font-size: 13px; padding: 4px 7px; width: 6.2rem;
+.pgnum input[type="range"] { width: 4.2rem; accent-color: var(--accent); height: 2px; }
+.pgnum input[type="number"], .pgrow select, .pgtext {
+  font: inherit; font-size: 12.5px; padding: 4px 7px; width: 5.4rem;
   border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg); color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
-.pgrow select { width: 8rem; }
+.pgrow select { width: 6.6rem; }
+.pgtext-sm { width: 5.4rem; font-family: var(--font-mono), ui-monospace, monospace; font-size: 11.5px; }
 .pghex { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .pghex input[type="color"] {
   width: 26px; height: 26px; padding: 0; border: 1px solid var(--line-2);
@@ -1053,12 +1013,37 @@ a{color:inherit;text-decoration:none}
   border: 1px solid var(--line-2); background: var(--bg); color: var(--ink-2);
 }
 .pgadd:hover { border-color: var(--accent); color: var(--accent); }
+.pgroll {
+  width: 20px; height: 20px; line-height: 1; padding: 0; cursor: pointer; font-size: 11px;
+  border: 1px solid var(--line-2); border-radius: 5px; background: var(--bg); color: var(--muted);
+}
+.pgroll:hover { border-color: var(--accent); color: var(--accent); }
+.pgmore {
+  font: inherit; font-size: 12.5px; color: var(--accent); background: none; border: 0; cursor: pointer;
+  padding: 8px 0 4px; text-align: left; width: 100%;
+}
+.pgmore:hover { text-decoration: underline; }
 
 .pgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .pgbar .btn { font-size: 14px; padding: 9px 15px; }
 .pgmeta { color: var(--muted); font-size: 12.5px; margin-left: auto; }
 .pgnote { color: var(--muted); padding: 28px 0; }
 .pgnote.pgbad { color: var(--bad); }
+.pgtodo { font-size: 12px; color: var(--muted); font-style: normal; }
+.pgskip { margin-left: 0; font-style: normal; opacity: .8; }
+.pgcopy { display: inline-flex; align-items: stretch; }
+.pgcopy .btn { border-radius: 12px 0 0 12px; }
+.pgcopy select {
+  font: inherit; font-size: 13px; width: 2.4rem; cursor: pointer; color: var(--muted);
+  border: 1px solid var(--line-2); border-left: 0; border-radius: 0 12px 12px 0; background: var(--surface);
+}
+
+.pgpresets { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
+.pgpresets button {
+  font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line-2);
+}
+.pgpresets button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
 .pgjson { margin-top: 20px; }
 .pgjson summary { cursor: pointer; color: var(--muted); font-size: 13px; }
@@ -1068,108 +1053,16 @@ a{color:inherit;text-decoration:none}
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.55;
 }
 
-@media (prefers-reduced-motion: reduce) { .pgtabs button, .pgadd { transition: none; } }
-.pgpresets { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
-.pgpresets button {
-  font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
-  background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line-2);
-}
-.pgpresets button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.pgpick { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.pgpick label { font-size: 13px; color: var(--muted); }
-.pgpick select {
-  font: inherit; font-size: 14px; padding: 7px 10px; min-width: 14rem;
-  border: 1px solid var(--line-2); border-radius: 9px; background: var(--bg); color: var(--ink);
-}
-.pgcount { font-size: 12.5px; color: var(--muted); }
-.pgtext {
-  font: inherit; font-size: 13px; padding: 4px 7px; width: 9rem;
-  border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg); color: var(--ink);
-}
-.pgtext-sm { width: 7.4rem; font-family: var(--font-mono), ui-monospace, monospace; font-size: 11.5px; }
-.pgtodo { font-size: 12px; color: var(--muted); font-style: normal; }
-/* the scene stage inside the playground: the editor's proven .sp-stage, given this page's frame */
-.pgscene { border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-2); }
-.pgskip { margin-left: 0; font-style: normal; opacity: .8; }
-
-/* ── playground: preview wide, controls beneath ────────────────────────────────────────────────
-   The panel used to be a 20rem column beside the stage. With twenty-odd dials that is a cramped
-   scroller next to a preview that never gets the width it wants, so both halves lose. Now the stage
-   takes the full column and the controls wrap under it as a grid of chips: more dials visible at once,
-   and the picture as large as the page allows. */
-.pgpage { padding: 28px 0 32px; }
-.pghead { max-width: 44rem; margin-bottom: 18px; }
-.pghead h1 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); margin-bottom: 8px; }
-.pghead p { font-size: .98rem; }
-.pgpick { margin-bottom: 12px; }
-
-.pggrid { display: block; }
-.pgstage { display: block; min-width: 0; }
-.pgfield { aspect-ratio: auto; height: clamp(320px, 56vh, 640px); width: 100%; }
-.pgscene { max-height: 56vh; margin-inline: auto; width: 100%; }
-
-/* the control wall */
-.pgpanel {
-  position: static; max-height: none; overflow: visible;
-  margin-top: 16px; padding: 0; background: none; border: 0; box-shadow: none;
-}
-.pgblurb { max-width: 46rem; }
-.pggroup {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
-  gap: 8px; margin: 0 0 10px;
-}
-.pggroup legend {
-  grid-column: 1 / -1; padding: 6px 0 2px;
-}
-/* every dial is a chip: its name on the left, its control on the right, one line */
-.pgrow {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 7px 11px; margin: 0; font-size: 13px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
-}
-.pgrow:hover { border-color: var(--line-2); }
-.pgrow > span:first-child { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pgnum input[type="range"] { width: 4.2rem; }
-.pgnum input[type="number"], .pgrow select, .pgtext { width: 5.4rem; font-size: 12.5px; }
-.pgrow select { width: 6.6rem; }
-.pgtext-sm { width: 5.4rem; }
-
-@media (max-width: 900px) {
-  .pgfield { height: 38vh; }
-  .pgscene { max-height: none; }
-  .pggroup { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-}
-
-/* the per-section roll sits in the legend, so it reads as belonging to that group */
-.pggroup legend { display: flex; align-items: center; gap: 8px; width: 100%; }
-.pgroll {
-  width: 20px; height: 20px; line-height: 1; padding: 0; cursor: pointer; font-size: 11px;
-  border: 1px solid var(--line-2); border-radius: 5px; background: var(--bg); color: var(--muted);
-}
-.pgroll:hover { border-color: var(--accent); color: var(--accent); }
-
-.pgcopy { display: inline-flex; align-items: stretch; }
-.pgcopy .btn { border-radius: 12px 0 0 12px; }
-.pgcopy select {
-  font: inherit; font-size: 13px; width: 2.4rem; cursor: pointer; color: var(--muted);
-  border: 1px solid var(--line-2); border-left: 0; border-radius: 0 12px 12px 0; background: var(--surface);
-}
-
-/* Below this the two columns stack, so a sticky panel would trap the page scroll inside it. */
+@media (prefers-reduced-motion: reduce) { .pgadd { transition: none; } }
 /* Stacked, the panel sits UNDER the preview, so a tall preview pushes every control off the screen.
    Filling the row is right beside a panel and wrong above one: at 390x844 the clamp above resolved to
    544px and put the page back to 3.1 screens, worse than before the change. Height is a share of the
    viewport here, so the preview and the first controls arrive together. */
 @media (max-width: 900px) {
-  .pgpanel { position: static; max-height: none; overflow: visible; }
-  .pgfield { height: 38vh; max-height: none; }
+  .pgfield { height: 38vh; }
   .pgscene { max-height: none; }
+  .pggroup { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
-.pgmore {
-  font: inherit; font-size: 12.5px; color: var(--accent); background: none; border: 0; cursor: pointer;
-  padding: 8px 0 4px; text-align: left; width: 100%;
-}
-.pgmore:hover { text-decoration: underline; }
 
 /* ── playground: dark ──────────────────────────────────────────────────────────────────────────
    Token-level, not component-level. Every control on this page already styles itself from --bg,
@@ -1192,14 +1085,14 @@ a{color:inherit;text-decoration:none}
 .pgdark .nav a.on { background: var(--accent-soft); color: var(--accent-on-dark); }
 .pgdark .ghbtn { background: rgba(255,255,255,.07); color: var(--ink); border-color: var(--line-2); }
 .pgdark .pgfield { border-color: var(--line-2); }
-.pgdark input[type="number"], .pgdark .pgtext, .pgdark .pgrow select, .pgdark .pgpick select {
+.pgdark input[type="number"], .pgdark .pgtext, .pgdark .pgrow select {
   background: var(--field); color: var(--ink); border-color: var(--line-2);
 }
 
 /* ── the library ───────────────────────────────────────────────────────────────────────────────
    A wall of looks, each one the REAL generator rendered still at card size, not a poster. Mirrors
-   .bgrid/.bcard on /blocks; the difference is that a field costs a few gradients, so every card can
-   be live where a block needed a screenshot and a click to play. */
+   the block catalog's own card wall (blocks/catalog.css); the difference is that a field costs a few
+   gradients, so every card here can be live where a block needs a poster and a click to play. */
 .lgrid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
   gap: 12px; margin-bottom: 20px;
@@ -1241,10 +1134,6 @@ a{color:inherit;text-decoration:none}
    for a full 16:9 stage rather than a measured block rect: a type specimen has no crop, the frame
    IS the subject. The still is deliberately a MID-ENTRANCE frame, so a grid of them reads as many
    different states of arrival instead of the same settled word repeated. */
-.tyintro{display:grid;grid-template-columns:1.35fr .9fr;gap:44px;align-items:start;
-  padding:34px 0 6px;border-top:1px solid var(--line)}
-.tyintro h2{font-size:clamp(24px,2.6vw,34px);letter-spacing:-.02em;margin:0 0 12px}
-.tyintro p{color:var(--ink-2);max-width:56ch;margin:0}
 .tyderived{list-style:none;margin:0;padding:16px 18px;background:var(--bg-2);
   border:1px solid var(--line);border-radius:var(--r)}
 .tyderived li{font-size:12.5px;color:var(--ink-2);padding:5px 0;border-bottom:1px dashed var(--line);
@@ -1254,7 +1143,7 @@ a{color:inherit;text-decoration:none}
   font-family:inherit;padding-top:0!important}
 
 /* The filter bar sticks, because the grid is long and the group jump is how you use it. */
-.tybar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+.tybar{position:sticky;top:0;z-index:var(--z-sticky);display:flex;flex-wrap:wrap;gap:12px;align-items:center;
   padding:16px 0 14px;margin-top:26px;background:var(--bg);border-bottom:1px solid var(--line)}
 .tysearch{flex:1 1 300px;min-width:0;font:inherit;font-size:15px;padding:10px 14px;
   border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink)}
@@ -1293,7 +1182,7 @@ a{color:inherit;text-decoration:none}
 
 /* Play carries a WORD as well as a glyph. On /blocks the icon alone is enough because the card is
    already a link somewhere; here the press is the only thing the card does, so it says so. */
-.typlay{position:absolute;right:10px;bottom:10px;z-index:2;display:inline-flex;align-items:center;gap:7px;
+.typlay{position:absolute;right:10px;bottom:10px;z-index:var(--z-raise);display:inline-flex;align-items:center;gap:7px;
   padding:6px 13px 6px 10px;border-radius:999px;cursor:pointer;font:inherit;font-size:12.5px;font-weight:600;
   color:#fff;background:var(--accent);border:1px solid var(--accent);
   box-shadow:0 2px 10px rgb(15 23 42 / .18);opacity:0;transition:opacity .2s var(--ease),transform .2s var(--ease)}
@@ -1303,7 +1192,7 @@ a{color:inherit;text-decoration:none}
 .typlay[data-loading]{cursor:progress;opacity:1}
 .typlay .tyspin{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;
   transform-origin:center;animation:bspin .75s linear infinite}
-.tyboot{position:absolute;left:0;right:0;bottom:0;height:2px;z-index:2;overflow:hidden;
+.tyboot{position:absolute;left:0;right:0;bottom:0;height:2px;z-index:var(--z-raise);overflow:hidden;
   background:color-mix(in oklab,var(--accent) 15%,transparent)}
 .tyboot::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;
   background:var(--accent);animation:bboot 1.15s var(--ease) infinite}
@@ -1351,7 +1240,6 @@ a{color:inherit;text-decoration:none}
 .tycovlist{font-size:11.5px;color:var(--muted);line-height:1.7;word-break:break-word}
 
 @media (max-width:900px){
-  .tyintro{grid-template-columns:1fr;gap:22px}
   .tybar{position:static}
 }
 

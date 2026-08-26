@@ -44,7 +44,7 @@ export default function Effects() {
                 rows and not others reads as breakage, so the split has to be stated somewhere; it
                 does not have to be stated in front of the index a person came here to scan. It used
                 to run ~300 words before the first effect name. */}
-            <details className="fxabout">
+            <details className="fold">
               <summary>Which {ix.previewed} play, and why the other {ix.total - ix.previewed} do not</summary>
               <p>
                 <b>It plays</b> {ix.previewed} of {ix.total}, across {live} families. An effect is
