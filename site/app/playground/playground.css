@@ -1,0 +1,101 @@
+/* ── /playground ───────────────────────────────────────────────────────────────────────────────
+   One route, so these rules live beside it rather than in globals.css. The bulk of the page's CSS
+   is still in globals.css (.pgpage … .pgjson) and belongs here; moving it is a deletion from a file
+   this pass could not touch, so it is reported instead.
+
+   The route is on the LIGHT system now. It used to wrap itself in .pgdark, which is why seven
+   tokens the dark scope never redefined (--ok, --bad, --bad-bg, --accent-ink, --shadow-3 …) painted
+   a near-white error box on ink. /arsenal already shows hundreds of live renders on a white ground,
+   so the site had answered this question and this route was the one disagreeing. */
+
+/* The lede belongs to the LIBRARY view. On a generator it was preamble, and its last clause,
+   "Open one to turn its dials", was false to the person who already had. */
+.pglede {
+  color: var(--ink-2); font-size: .98rem; line-height: 1.6;
+  max-width: 44rem; margin: 0 0 18px;
+}
+
+/* ── the frame around a moving picture ─────────────────────────────────────────────────────────
+   .pgfield keeps its ink well: every generator here is a light-field, dark by construction, and a
+   dark subject needs a definite edge on a white page rather than a lighter one. .pgscene is a SCENE,
+   which can be any colour including white, so it gets the hairline and one elevation step from the
+   catalog register — the boundary is drawn by the frame, not by the content. Both already read from
+   --line and --shadow-2 in globals.css; nothing here repeats them. */
+
+/* ── a refusal holds its picture ───────────────────────────────────────────────────────────────
+   The engine's own message is the most useful thing on the page when an option is wrong, so it is
+   printed verbatim. The frame it refers to is kept and dimmed: taken away, the reader loses both the
+   picture they were judging and any way to see what the bad dial did.
+   The fade is SLIGHT on purpose. A generator is dark and the page is white, so dimming it far
+   enough to read as "off" also washes it out, and the frame you kept is the one thing this branch
+   exists to keep. The sentence under the box carries the meaning; the fade only makes the change
+   felt. */
+.pgstage.is-stale .pgfield,
+.pgstage.is-stale .pgscene { opacity: .82; }
+@media (prefers-reduced-motion: no-preference) {
+  .pgstage .pgfield, .pgstage .pgscene { transition: opacity .18s var(--ease); }
+}
+.pgerr > p { margin: 0; }
+/* Our voice, not the engine's: the refusal is set in mono because it is literal, and a sentence
+   we wrote should not be dressed as part of it. */
+.pgerr > .pgheld {
+  margin-top: 6px; color: var(--ink-2);
+  font-family: var(--font-sans), system-ui, sans-serif; font-size: 12.5px;
+}
+
+/* ── focus ─────────────────────────────────────────────────────────────────────────────────────
+   Every control on the panel answered focus with the browser's default ring, which is not this
+   site's. DESIGN.md: 2px solid var(--accent), offset 1-3px, keyed to :focus-visible so a keyboard
+   user is never given less than a mouse user. */
+.pgrow select:focus-visible,
+.pgrow input:focus-visible,
+.pgtext:focus-visible,
+.pgadd:focus-visible,
+.pgroll:focus-visible,
+.pgmore:focus-visible,
+.pgpresets button:focus-visible,
+.pgcopy select:focus-visible,
+.pgjson summary:focus-visible,
+.lback button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* A colour well paints its own swatch edge to edge, so the ring sits clear of it. */
+.pghex input[type="color"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ── the disclosure is a link, not a page-wide strip ───────────────────────────────────────────
+   width:100% made "all options (12 more)" a 1160px button: the pointer changed and the label
+   underlined anywhere on the row, a click target eleven times the size of its own words. */
+.pgmore { width: auto; display: inline-block; }
+
+/* ── shrinking ────────────────────────────────────────────────────────────────────────────────
+   A grid track sized 1fr still will not shrink an item below its own min-content, so a chip whose
+   label plus slider plus number field exceeded the track pushed the entire grid past the page. At
+   430px that put a number field outside the viewport and gave the document a horizontal scrollbar.
+   Let the chip and its parts shrink; the grid then holds whatever width it is given.
+
+   The NAME does not shrink: flexbox shares a shortfall by base size, so letting the label shrink
+   truncated "lightOriginX" to "lightOri..." at 1440px where nothing was short of room. The controls
+   give way instead, and they can, because a number field is legible at half its width. */
+.pgrow { min-width: 0; }
+.pgnum { min-width: 0; }
+.pgnum input[type="range"] { flex: 0 1 4.2rem; min-width: 0; }
+.pgnum input[type="number"], .pgrow select, .pgtext { min-width: 0; }
+
+/* Two dials abreast do not fit a phone, and the slider is decoration there: it is aria-hidden and
+   out of the tab order already, because the number field beside it is the real control. */
+@media (max-width: 640px) {
+  .pggroup { grid-template-columns: 1fr; }
+  .pgnum input[type="range"] { display: none; }
+}
+
+/* A count that changes while you turn a dial should not reflow the line it sits in. */
+.pgmeta, .lback span { font-variant-numeric: tabular-nums; }
+
+/* ── the library wall ──────────────────────────────────────────────────────────────────────────
+   A 420px minimum track is a hard floor, not a preference: below 420px of column the card keeps
+   its 420px and the whole document scrolls sideways. At 430 it did, by 22px. min() lets the floor
+   give way to the column when the column is the smaller of the two, and changes nothing above it,
+   so the deliberate two-up wall at 1440 is untouched. */
+.pgpage .lgrid { grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }

@@ -122,14 +122,15 @@ export function EditorClient() {
 
   const load = async (id: string) => {
     setLoading(id);
-    try {
+    setErr(null);                          // a failed load has nothing else to clear it: the scene
+    try {                                  // never re-boots, so the old message would sit there
       const r = await fetch(`/scenes/${id}.json`);
-      if (!r.ok) throw new Error(`${id}.json not found`);
+      if (!r.ok) throw new Error(`${id}.json not found (${r.status})`);
       const text = await r.text();
       setJson(text);
       setLive(text);
       setPicked(id);                       // only on success: a failed load must not claim to be loaded
-    } catch (e) { setErr(String(e)); }
+    } catch (e) { setErr((e as Error).message); }
     setLoading(null);
   };
 
@@ -227,7 +228,8 @@ export function EditorClient() {
           <button className="ed-copy" onClick={copy}>{copied ? "copied ✓" : "copy"}</button>
         </div>
         <CodeEditor value={json} onChange={setJson} viewRef={view} />
-        <div className={`ed-status ${parseErr || err ? "bad" : "ok"}`}>
+        {/* role=status, so someone who cannot see the box is told when the scene stops rendering. */}
+        <div className={`ed-status ${parseErr || err ? "bad" : "ok"}`} role="status">
           {parseErr ? `invalid JSON · ${parseErr}` : err ? err : "valid · rendering live"}
         </div>
       </div>
@@ -235,10 +237,8 @@ export function EditorClient() {
       <div className="ed-main">
         <ScenePlayer json={live} onError={onErr} />
         <p className="ed-note">
-          This is the real engine, running in your browser. The same <code>renderFrame(n)</code> the
-          renderer screenshots to make an mp4. Edit the JSON and it re-renders.
-          <br />
-          For a frame-perfect file with sound and grain:{" "}
+          Every frame here comes from the same <code>renderFrame(n)</code> the renderer screenshots
+          to make an mp4. For a frame-perfect file with sound and grain:{" "}
           <code>make video D=scene.json</code>
         </p>
       </div>

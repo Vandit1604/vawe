@@ -1,0 +1,46 @@
+/* ── /editor ───────────────────────────────────────────────────────────────────────────────────
+   One route, so these rules live beside it. The rest of the editor's CSS is still in globals.css
+   (.ed … .ed-note) and belongs here; moving it is a deletion from a file this pass could not touch,
+   so it is reported instead. */
+
+/* ── the status line ───────────────────────────────────────────────────────────────────────────
+   An engine refusal is the most useful thing on this page, so it is printed the way the engine
+   wrote it. Two things were losing it:
+
+   `white-space:normal` collapsed the message's own newlines, so a refusal naming two separate
+   problems ("bg is required …", "layers needs ≥ 1 item(s)") ran together as one paragraph.
+
+   `max-height:96px` then cut that paragraph off mid-sentence with overlay scrollbars, which on
+   macOS are invisible until you scroll, so the box looked truncated rather than scrollable. The cap
+   still exists, because a stack trace should not push the code pane off the screen; it is now high
+   enough that the engine's own words fit inside it and only the trace needs scrolling. */
+.ed-status { white-space: pre-wrap; max-height: 15rem; }
+
+/* --ok / --bad are the ONE sanctioned exception to the one-voice colour rule, and this is the line
+   they exist for. globals.css spells the same six values as raw hex, so the tokens were documented
+   and unused. Read them here; the duplicate literals are reported for deletion. */
+.ed-status.ok  { color: var(--ok);  background: var(--ok-bg);  border-color: #cdeadb; }
+.ed-status.bad { color: var(--bad); background: var(--bad-bg); border-color: #f0d2d3; }
+
+/* ── focus ─────────────────────────────────────────────────────────────────────────────────────
+   The code pane answered focus with a border colour only, because CodeEditor.tsx sets
+   `outline:none` on `.cm-focused` — the same shape DESIGN.md flags on the hero pane and asks a
+   rebuild to close rather than copy. A ring cannot sit on the CodeMirror content itself without
+   landing inside the box, so the frame carries it, in the form DESIGN.md prescribes where a plain
+   ring will not fit: the border changes AND a 3px accent-tinted ring goes around it. */
+.ed-cm:has(.cm-editor.cm-focused) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.ed-fold:focus-visible,
+.ed-copy:focus-visible,
+.ed-claude a:focus-visible,
+.ed-preslab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* The line count changes on every keystroke; proportional digits reflow the row while you type. */
+.ed-lines { font-variant-numeric: tabular-nums; }
