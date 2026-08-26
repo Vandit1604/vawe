@@ -39,7 +39,7 @@
       "children": [
         {
           "type": "group",
-          "radius": 16,
+          "radius": 18,
           "w": 86,
           "h": 86,
           "bg": "rgba(255,255,255,0.16)",
@@ -61,7 +61,7 @@
         },
         {
           "type": "group",
-          "radius": 16,
+          "radius": 19,
           "w": 92,
           "h": 92,
           "bg": "rgba(255,255,255,0.16)",
@@ -83,7 +83,7 @@
         },
         {
           "type": "group",
-          "radius": 16,
+          "radius": 26,
           "w": 123,
           "h": 123,
           "bg": "color-mix(in srgb, var(--accent) 30%, transparent)",
@@ -105,7 +105,7 @@
         },
         {
           "type": "group",
-          "radius": 16,
+          "radius": 19,
           "w": 92,
           "h": 92,
           "bg": "rgba(255,255,255,0.16)",
@@ -127,7 +127,7 @@
         },
         {
           "type": "group",
-          "radius": 16,
+          "radius": 18,
           "w": 86,
           "h": 86,
           "bg": "rgba(255,255,255,0.16)",

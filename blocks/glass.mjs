@@ -265,6 +265,10 @@ export function glassControls({ x, y, w = 760, track = 'Deterministic render', e
 export function glassHome({ x, y, tiles = [], cols = 4, size = 132, gap = SPACE.lg, label = true,
   widget = null, start = 0, dur = 5 } = {}) {
   const w = cols * size + (cols - 1) * gap;
+  // the glyph is a PROPORTION of its tile, the way glassDock's already is. A fixed 56px happened to be
+  // right at the catalog's size:132 and nowhere else: at size:200 the same glyph covers 28% of the tile
+  // instead of 42% and the launcher reads as empty plates. 0.424 reproduces 56 at 132.
+  const glyph = Math.round(size * 0.424);
   const labelH = label ? 34 : 0;
   const widgetH = widget ? 160 : 0;
   const out = [];
@@ -293,7 +297,7 @@ export function glassHome({ x, y, tiles = [], cols = 4, size = 132, gap = SPACE.
       ...frost({ radius: R.round, tint: 0.13, blur: 18 }),
       start: st, duration: r2(dur - (st - start)), anim: 'pop', enterDur: 0.4,
       out: 'defocus', exitDur: 0.35,
-      children: [{ type: 'html', w: 56, h: 56, html: svgIcon(t.icon || 'cube', { size: 56, color: INK, stroke: 1.6 }) }],
+      children: [{ type: 'html', w: glyph, h: glyph, html: svgIcon(t.icon || 'cube', { size: glyph, color: INK, stroke: 1.6 }) }],
     });
     if (label && t.label) {
       // TYPE.base, not TYPE.fine: a TOP-LEVEL text layer is floored at 18px by the validator, and
@@ -328,7 +332,11 @@ export function glassDock({ x, y, items = [], magnify = -1, size = 76, peak = 1.
     gap, pad, ...frost({ radius: R.round, tint: 0.12, blur: 24 }),
     start, duration: dur, anim: 'rise', enterDur: 0.45, out: 'defocus', exitDur: 0.4,
     children: items.map((it, i) => box({
-      w: sizes[i], h: sizes[i], radius: R.soft,
+      // THE CORNER SCALES WITH THE TILE. Magnification is a scale of the whole icon, so a fixed
+      // `R.soft` made the one tile this block exists to enlarge the least round of the row: 16px is
+      // 21% of a 76px neighbour and 13% of the 123px peak, so the subject read squarer than its
+      // context. 0.21 reproduces 16px at the default size and follows every other tile up.
+      w: sizes[i], h: sizes[i], radius: Math.round(sizes[i] * 0.21),
       bg: i === magnify ? HILITE : 'rgba(255,255,255,0.16)',
       border: `1px solid ${i === magnify ? EDGE : EDGE_SOFT}`,
       layout: 'row', justify: 'center', items: 'center',

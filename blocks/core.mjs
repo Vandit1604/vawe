@@ -80,6 +80,12 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 // baked, so every video that used this block published the same invented number (MISTAKES #67).
 export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = {}) {
   const bars = [38, 52, 44, 66, 58, 80, 72];
+  // THE CHART SPANS THE CARD. The bars were a fixed 26px, so the only part of this card that reads as
+  // Stripe stopped 62px short of the Pay button beneath it at the catalog's own w:340 (7 x 26 + 6 x 8
+  // = 230 of a 292px content box) and 102px short at the default w:380. A dashboard's volume chart is
+  // measured against the panel it sits in; one that ends two thirds of the way across is a sparkline
+  // someone left in a wide box. Derived from `w`, it fills at every width.
+  const barW = r2(Math.max(8, (w - 2 * 24 - 6 * 8) / 7));
   return [{
     type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 24,
     bg: T.card, radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
@@ -87,7 +93,7 @@ export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = 
       text({ text: 'Net volume', size: 18, color: T.stripeGrey, font: 'mono' }),
       text({ text: (amount || ''), size: 44, weight: 700, color: T.stripeNavy, ls: '-0.02em' }),
       { type: 'group', layout: 'row', items: 'flex-end', gap: 8, h: 70, children:
-        bars.map((b) => box({ w: 26, h: b, radius: 4, bg: T.blurple })) },
+        bars.map((b) => box({ w: barW, h: b, radius: 4, bg: T.blurple })) },
       { type: 'group', bg: T.blurple, radius: 4, pad: '12px 0', layout: 'row', justify: 'center',
         children: [text({ text: (amount ? `Pay ${amount}` : 'Pay'), size: 18, weight: 600, color: '#fff' })] },
     ],

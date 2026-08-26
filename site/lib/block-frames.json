@@ -284,7 +284,7 @@
   "avatarStack": {
     "x": 138,
     "y": 138,
-    "w": 217,
+    "w": 236,
     "h": 92
   },
   "toast": {
@@ -524,7 +524,7 @@
   "avatarStack.large": {
     "x": 138,
     "y": 138,
-    "w": 316,
+    "w": 348,
     "h": 108
   },
   "reactionBar.love": {
@@ -866,7 +866,7 @@
   "socialProof": {
     "x": 138,
     "y": 138,
-    "w": 506,
+    "w": 525,
     "h": 92
   },
   "installCard": {

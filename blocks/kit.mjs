@@ -387,8 +387,15 @@ export const TONE_NAMES = Object.keys(TONES);
 export const initialsOf = (s) => String(s ?? '').trim().split(/\s+/).slice(0, 2)
   .map((w) => (w[0] || '').toUpperCase()).join('') || '•';
 
+// AN AVATAR IS AN OPAQUE OBJECT. The default fill was `accentSoft`, which is the accent at 14% over
+// TRANSPARENT: correct for a chip lying flat on a card, wrong for a disc that overlaps its own
+// siblings. `avatarStack` steps its discs by 0.65 of their size, so 35% of every avatar sat over the
+// one before it and you read both fills at once; the 2px `--card` ring that is meant to cut each disc
+// out of the next separated nothing, because there was nothing behind it to cut. Mixing toward
+// `--card` instead of `transparent` renders IDENTICALLY on a card ground, which is where every
+// single-avatar block puts it, and makes the stack a stack.
 export function avatarEl({ avatar = '', initials = '', name = '', size = 56, radius = 100,
-  bg = TOKENS.accentSoft, color = TOKENS.accentInk } = {}) {
+  bg = 'color-mix(in srgb, var(--accent) 14%, var(--card))', color = TOKENS.accentInk } = {}) {
   if (avatar) return { type: 'image', src: avatar, w: size, h: size, radius };
   return box({ w: size, h: size, radius, bg, layout: 'row', justify: 'center', items: 'center',
     children: [text({ text: initials || initialsOf(name), size: Math.round(size * 0.4), weight: 700, color })] });

@@ -111,8 +111,23 @@ export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone 
 // without which the frame reads as a black rectangle rather than a phone in use.
 export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = true, time = '10:24',
   start = 0, dur = 4 } = {}) {
+  // THE CORNER IS A PROPORTION TOO, and for a while it was not: the bezel and the screen both carried
+  // `R.pill`, which is 100px, and at the catalog's own w:230 that is 43% of the device width. A radius
+  // that large stops describing a corner and describes an end, so the block rendered a capsule. A real
+  // handset corner is about a sixth of the width (iPhone 15: 55pt of 393pt of display, the bezel a
+  // shade more), and 0.16 lands there at every w.
+  const bezelR = Math.round(w * 0.16);
+  // CONCENTRIC RADII: an inner corner is the outer corner MINUS the gap between the two curves, or the
+  // two arcs are not parallel and the bezel reads as thicker at the corners than along the sides. The
+  // gap here is the frame's own `pad`, SPACE.xs.
+  const screenR = Math.max(R.micro, bezelR - SPACE.xs);
   // the notch is a PROPORTION of the device, not a fixed 116px — at the catalog's w:230 that constant
   // covered more than half the screen. 0.39 / 0.087 of w reproduce the shipped look at w:300.
+  //
+  // #0A0A0A ON BOTH, and it is one of this library's few legitimate literals, on the same test
+  // blocks/camera-chrome.mjs applies to its REC lamp: the colour belongs to the HARDWARE, not to a
+  // brand. A bezel is near-black because it is glass over an unlit edge, and the island is black
+  // because those pixels are off. A theme that repainted either would be depicting a different object.
   const screen = [box({ w: Math.round(w * 0.39), h: Math.round(w * 0.087), radius: R.pill, bg: '#0A0A0A' })];
   // The status glyphs are `--text-2`, never `--dim`: `--dim` is the de-emphasised CHROME role and
   // measures 2.6:1 on higgsfield, which `make audit` fails HARD. Quiet is a colour; unread is a bug.
@@ -127,8 +142,8 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
                text({ text: '▮▮▮', size: statusSize(0.038), color: T.sub })] });
   if (children.length) screen.push({ type: 'group', grow: 1, w: w - 44, layout: 'column', items: 'stretch', gap: SPACE.xs, pad: `${SPACE.xs}px 0 0`, children });
   return [{ type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: SPACE.xs,
-    bg: '#0A0A0A', radius: R.pill, elevation: E.card, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: [{ type: 'group', grow: 1, bg: T.card, radius: R.pill, layout: 'column', items: 'center', pad: SPACE.sm,
+    bg: '#0A0A0A', radius: bezelR, elevation: E.card, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+    children: [{ type: 'group', grow: 1, bg: T.card, radius: screenR, layout: 'column', items: 'center', pad: SPACE.sm,
       children: screen }] }];
 }
 

@@ -38,7 +38,7 @@
           "radius": 100,
           "w": 76,
           "h": 76,
-          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
+          "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
           "layout": "row",
           "justify": "center",
           "items": "center",
