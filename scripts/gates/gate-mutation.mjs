@@ -862,11 +862,14 @@ const srcCases = [
     mutate: (s) => s.replace('- Still absent: **Glitch RGB captions', '- Still absent: `zoomBlur`, **Glitch RGB captions'),
     cmd: ['node', ['scripts/gates/docs-drift.mjs']], match: /DOCS DRIFT/ },
   { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/canvas.js',
-    // Anchored on the clear() call, not the whole line: the line also carries the resample tick, and
-    // pinning the exact text made the fixture go stale the moment the branch grew. A stale fixture
-    // SKIPS, which reads as "fine" in the summary while proving nothing. The off-window clear is one
-    // branch for all four canvas types now, so this case covers shader/raymarch/three as well.
-    mutate: (s) => s.replace("{ s.clear(); if (S.resamplable)", "{ if (S.resamplable)"),
+    // Anchored on the clear() CALL and nothing around it. This case has now gone stale twice for the
+    // same reason: the line it sits on keeps growing. It was pinned to the whole line, then re-pinned
+    // to a version carrying the resample tick, which stopped existing the day that tick moved into
+    // core/tracks/resample.js. A stale fixture SKIPS, and a skip reads as "fine" in the summary while
+    // proving nothing. Take the smallest string that carries the meaning: dropping s.clear() is the
+    // impurity, whatever else shares the branch. It is one branch for all four canvas types, so this
+    // covers shader/raymarch/three too.
+    mutate: (s) => s.replace("{ s.clear(); return; }", "{ return; }"),
     cmd: ['node', ['scripts/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
   // The fixture layer sets `pulseAmp`, which ONLY core/layers/glow.js reads, and the mutation deletes
   // its DECLARATION. The gate answers from the declarations now, so deleting the read itself would
