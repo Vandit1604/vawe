@@ -14847,7 +14847,7 @@ from source text. It cannot prove that a track read a fresh value rather than a 
 property of one scene at one `t`, and `probe-purity`, `canvas-purity` and `snap-scenes` are what see
 it. All 107 scene snapshots are byte-identical.
 
-## #465 · the GSAP trigger list was a hand-kept second source of truth, and #148 was one of its failures
+## #467 · the GSAP trigger list was a hand-kept second source of truth, and #148 was one of its failures
 
 **What.** `core/preload.js` decides whether the tween engine is fetched at all, from the props a scene
 names. Get that set wrong and the render is silent and STILL: no throw, no warning, a figure that simply
