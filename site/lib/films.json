@@ -1,26 +1,35 @@
 {
  "argus-launch": {
-  "seconds": 23.01,
-  "label": "0:23"
+  "seconds": 23,
+  "label": "0:23",
+  "peakDb": -2.8,
+  "sourceHash": "83dcae1f7a33379debb2222b7fc58791b82baa937ec0bd5ea14c876d5f68fde9"
  },
  "creed-launch": {
-  "seconds": 35.62,
-  "label": "0:36"
+  "seconds": 53,
+  "label": "0:53",
+  "sourceHash": "15079b1fbc645f09b8505d978f3cd696bd984d309931bdbd37bbe050434456b3"
  },
  "plinth-ad": {
   "seconds": 27.01,
-  "label": "0:27"
+  "label": "0:27",
+  "peakDb": -91,
+  "sourceHash": "8ec02e84796f32760c818c1d565c4f6bfb6f5829e23ab35ff988158c5ae15f05"
  },
  "product-feature-tour": {
-  "seconds": 34.01,
-  "label": "0:34"
+  "seconds": 50,
+  "label": "0:50",
+  "sourceHash": "1f200ecd2190f9da18eeaa26bf5d97de4cd4d0da0fc83c2bf642bbae13a17362"
  },
  "saas-hero-launch": {
-  "seconds": 35.01,
-  "label": "0:35"
+  "seconds": 45,
+  "label": "0:45",
+  "sourceHash": "273412bf408b254b0c2a60b4b2492dd75bdcae036dc8cf69c1286b61bae25fc2"
  },
  "threadcite-open": {
   "seconds": 30,
-  "label": "0:30"
+  "label": "0:30",
+  "peakDb": -91,
+  "sourceHash": "3f7422a15acadd19b454bbad4e2bda59ae64336fcd90ab74a0b79f99a87cc0be"
  }
 }

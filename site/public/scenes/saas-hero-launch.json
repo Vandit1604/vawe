@@ -1,79 +1,33 @@
 {
  "module": "scene",
  "storyboard": "formats/scene/saas-hero-launch.storyboard.md",
- "_template": "FILLABLE TEMPLATE - a white-first SaaS launch film, cut into seven shots. Nothing here is anyone's brand: the product is the fictional 'Meridian', every colour is a theme token, and every mark is inline svg. To reskin, change `theme` (any file in themes/) and nothing else. To refill, replace the copy strings, the logoWall entries, the browserFrame rows, the barChart data and the four capability cards. What is worth keeping is the SHAPE: six cuts, one backdrop window per shot, one match cut, one word that swaps inside a fixed chip, and a bed the cuts are snapped to.",
+ "_template": "FILLABLE TEMPLATE - a white-first SaaS launch film. Nothing here is anyone's brand: the product is the fictional 'Meridian', every colour is a theme token, and every logo in the wall is invented. To reskin, change `theme` (any file in themes/) and nothing else. To refill, replace the copy strings, the logoWall entries, the browserFrame rows, the barChart data and the four capability cards. Structure, timing and camera are the part worth keeping.",
  "orientation": "landscape",
  "theme": "default",
- "duration": 35,
+ "duration": 45,
  "audio": {
-  "music": "assets/music/launch.wav",
-  "musicGain": 0.4,
-  "musicFade": {
-   "in": 1.2,
-   "out": 2
-  },
-  "auto": true,
-  "sfxGain": 0.7,
-  "loudness": -14,
-  "beatSync": {
-   "maxShift": 0.1
-  },
-  "_why": "The bed is the film's clock. beatSync snaps every cut to the track's pulse, and `auto` voices each cut from its own style (core/audio-cues.js), so a fork that swaps the bed re-times the edit for free."
+  "silent": true,
+  "_why": "Template ships mute so a fork can drop its own bed in without fighting a mix it did not choose. Replace with a real audio block before shipping."
  },
- "cuts": [
-  {
-   "t": 5.2,
-   "style": "rise"
-  },
-  {
-   "t": 9.8,
-   "style": "punch"
-  },
-  {
-   "t": 15.2,
-   "style": "zoom"
-  },
-  {
-   "t": 20,
-   "style": "none",
-   "snap": false
-  },
-  {
-   "t": 25.4,
-   "style": "punch"
-  },
-  {
-   "t": 30,
-   "style": "rise"
-  }
- ],
- "matches": [
-  {
-   "at": "cut@3",
-   "from": "rolloutPanel",
-   "to": "heroCount",
-   "dur": 0.4
-  }
- ],
  "camera": [
   {
    "t": 0,
    "s": 1
   },
   {
-   "t": 15.2,
+   "t": 13.6,
    "s": 1
   },
   {
-   "t": 19.9,
+   "t": 24.2,
    "s": 1.06
   },
   {
-   "t": 20,
+   "t": 24.6,
    "s": 1
   },
   {
-   "t": 35,
+   "t": 45,
    "s": 1
   }
  ],
@@ -82,23 +36,92 @@
    "type": "text",
    "track": 1,
    "critical": false,
-   "text": "<div style=\"width:1300px;height:1300px;border-radius:50%;filter:blur(80px);opacity:0.3;background:radial-gradient(circle at 50% 50%, var(--accent) 0%, color-mix(in srgb, var(--accent) 45%, transparent) 42%, transparent 70%)\"></div>",
+   "text": "<div style=\"width:1300px;height:1300px;border-radius:50%;filter:blur(80px);opacity:0.55;background:radial-gradient(circle at 50% 50%, var(--accent) 0%, color-mix(in srgb, var(--accent) 45%, transparent) 42%, transparent 70%)\"></div>",
    "x": 980,
    "y": -360,
    "start": 0,
-   "duration": 35,
+   "duration": 45,
    "anim": "fade",
    "enterDur": 1,
    "exitDur": 0.8,
-   "modifiers": [
+   "motion": [
     {
-     "kick": {
-      "on": "cut",
-      "scale": 1.08,
-      "frames": 6
-     }
+     "t": 0,
+     "x": 0,
+     "y": 0,
+     "scale": 1
+    },
+    {
+     "t": 15,
+     "x": -180,
+     "y": 120,
+     "scale": 1.14
+    },
+    {
+     "t": 30,
+     "x": 60,
+     "y": -60,
+     "scale": 0.95
+    },
+    {
+     "t": 45,
+     "x": -120,
+     "y": 80,
+     "scale": 1.1
     }
-   ],
+   ]
+  },
+  {
+   "type": "text",
+   "track": 1,
+   "critical": false,
+   "text": "<div style=\"width:1200px;height:1200px;border-radius:50%;filter:blur(80px);opacity:0.5;background:radial-gradient(circle at 50% 50%, var(--accent-2, var(--up)) 0%, color-mix(in srgb, var(--accent) 40%, transparent) 48%, transparent 72%)\"></div>",
+   "x": 1280,
+   "y": 260,
+   "start": 0,
+   "duration": 45,
+   "anim": "fade",
+   "enterDur": 1,
+   "exitDur": 0.8,
+   "motion": [
+    {
+     "t": 0,
+     "x": 0,
+     "y": 0,
+     "scale": 1
+    },
+    {
+     "t": 18,
+     "x": -140,
+     "y": -180,
+     "scale": 1.12
+    },
+    {
+     "t": 34,
+     "x": 120,
+     "y": 40,
+     "scale": 0.94
+    },
+    {
+     "t": 45,
+     "x": -60,
+     "y": -120,
+     "scale": 1.08
+    }
+   ]
+  },
+  {
+   "type": "text",
+   "track": 1,
+   "critical": false,
+   "text": "<div style=\"width:1000px;height:1000px;border-radius:50%;filter:blur(78px);opacity:0.42;background:radial-gradient(circle at 50% 50%, var(--accent) 0%, transparent 64%)\"></div>",
+   "x": 900,
+   "y": 520,
+   "start": 0,
+   "duration": 45,
+   "anim": "fade",
+   "enterDur": 1,
+   "exitDur": 0.8,
    "motion": [
     {
      "t": 0,
@@ -108,20 +131,59 @@
     },
     {
      "t": 12,
-     "x": -180,
+     "x": 160,
+     "y": -100,
+     "scale": 1.1
+    },
+    {
+     "t": 28,
+     "x": -80,
      "y": 120,
-     "scale": 1.14
+     "scale": 0.96
     },
     {
-     "t": 24,
-     "x": 60,
-     "y": -60,
-     "scale": 0.95
+     "t": 45,
+     "x": 100,
+     "y": -40,
+     "scale": 1.12
+    }
+   ]
+  },
+  {
+   "type": "text",
+   "track": 1,
+   "critical": false,
+   "text": "<div style=\"width:900px;height:900px;border-radius:50%;filter:blur(76px);opacity:0.34;background:radial-gradient(circle at 50% 50%, var(--up) 0%, transparent 62%)\"></div>",
+   "x": 1500,
+   "y": 620,
+   "start": 0,
+   "duration": 45,
+   "anim": "fade",
+   "enterDur": 1,
+   "exitDur": 0.8,
+   "motion": [
+    {
+     "t": 0,
+     "x": 0,
+     "y": 0,
+     "scale": 1
     },
     {
-     "t": 35,
+     "t": 16,
      "x": -120,
-     "y": 80,
+     "y": 60,
+     "scale": 1.08
+    },
+    {
+     "t": 32,
+     "x": 80,
+     "y": -140,
+     "scale": 0.92
+    },
+    {
+     "t": 45,
+     "x": -40,
+     "y": 100,
      "scale": 1.1
     }
    ]
@@ -133,83 +195,82 @@
    "text": "<div style=\"width:1920px;height:1180px;background:linear-gradient(96deg, var(--bg) 24%, color-mix(in srgb, var(--bg) 88%, transparent) 46%, transparent 80%)\"></div>",
    "x": -20,
    "y": -40,
-   "start": 0.446,
-   "duration": 29.854,
+   "start": 0,
+   "duration": 45,
    "anim": "fade",
    "enterDur": 0.4,
-   "out": "defocus",
-   "exitDur": 0.5
+   "exitDur": 0.6
   },
   {
-   "type": "svg",
+   "type": "group",
    "track": 20,
-   "id": "heroMark",
+   "direction": "row",
+   "align2": "baseline",
+   "gap": 20,
    "x": 150,
-   "y": 176,
-   "w": 104,
-   "h": 104,
-   "viewBox": "0 0 100 100",
-   "d": "M50 8 L92 32 L50 56 L8 32 Z M50 66 L92 42 L92 54 L50 78 L8 54 L8 42 Z",
-   "fill": "var(--accent)",
-   "start": 0.186,
-   "duration": 5.314,
-   "anim": "pop",
-   "enterDur": 0.45,
-   "out": "defocus",
-   "exitDur": 0.4
-  },
-  {
-   "type": "text",
-   "track": 20,
-   "text": "MERIDIAN",
-   "font": "mono",
-   "size": 26,
-   "weight": 600,
-   "color": "var(--text-2)",
-   "tracking": "0.22em",
-   "x": 284,
-   "y": 214,
-   "start": 0.371,
-   "duration": 5.129,
+   "y": 250,
+   "start": 0.3,
+   "duration": 6.9,
    "anim": "fade",
    "enterDur": 0.4,
-   "out": "defocus",
-   "exitDur": 0.4
+   "exitDur": 0.4,
+   "children": [
+    {
+     "type": "text",
+     "text": "UPTIME, LAST 90 DAYS",
+     "font": "mono",
+     "size": 22,
+     "weight": 600,
+     "color": "var(--text-2)",
+     "tracking": "0.12em"
+    },
+    {
+     "type": "count",
+     "from": 99,
+     "to": 99.98,
+     "decimals": 2,
+     "suffix": "%",
+     "font": "mono",
+     "size": 22,
+     "weight": 700,
+     "color": "var(--accent)",
+     "countStart": 0.3,
+     "countDur": 1.6
+    }
+   ]
   },
   {
    "type": "text",
    "track": 20,
    "text": "One platform to run<br>your <b>whole release.</b>",
-   "size": 128,
+   "size": 104,
    "weight": 600,
    "color": "var(--text)",
-   "w": 1400,
-   "align": "left",
+   "w": 1080,
    "x": 150,
-   "y": 330,
+   "y": 320,
    "split": "word",
    "preset": "up",
    "dist": 24,
    "stagger": 0.035,
    "each": 0.32,
-   "start": 0.557,
-   "duration": 4.943,
+   "start": 0.5,
+   "duration": 6.7,
    "exitDur": 0.4,
    "critical": true
   },
   {
    "type": "text",
    "track": 20,
-   "text": "Plan, ship and watch. One workspace.",
+   "text": "Plan the work, ship the change, and watch what it did,<br>without leaving one workspace.",
    "size": 30,
    "weight": 400,
    "color": "var(--text-2)",
    "w": 1000,
-   "align": "left",
    "x": 152,
    "y": 736,
-   "start": 1,
-   "duration": 4.5,
+   "start": 1.3,
+   "duration": 5.9,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.4
@@ -225,9 +286,9 @@
    "radius": 10,
    "pad": "17px 34px",
    "x": 152,
-   "y": 812,
-   "start": 1.857,
-   "duration": 3.643,
+   "y": 800,
+   "start": 1.9,
+   "duration": 5.3,
    "anim": "rise",
    "enterDur": 0.35,
    "exitDur": 0.4,
@@ -241,7 +302,6 @@
    "weight": 600,
    "color": "var(--text)",
    "w": 1500,
-   "align": "left",
    "x": 150,
    "y": 330,
    "split": "word",
@@ -249,8 +309,8 @@
    "dist": 18,
    "stagger": 0.03,
    "each": 0.26,
-   "start": 5.3,
-   "duration": 4.8,
+   "start": 8,
+   "duration": 4.6,
    "exitDur": 0.4,
    "critical": true
   },
@@ -258,12 +318,12 @@
    "type": "group",
    "x": 150,
    "y": 520,
-   "w": 1200,
+   "w": 1620,
    "layout": "column",
    "items": "stretch",
    "gap": 12,
-   "start": 5.7,
-   "duration": 4.4,
+   "start": 8.5,
+   "duration": 4.1,
    "anim": "rise",
    "enterDur": 0.5,
    "exitDur": 0.35,
@@ -415,38 +475,20 @@
   {
    "type": "text",
    "track": 20,
-   "text": "Startups to platforms.",
-   "font": "mono",
-   "size": 24,
-   "weight": 500,
-   "color": "var(--text-2)",
-   "tracking": "0.06em",
-   "w": 1620,
-   "align": "left",
-   "x": 152,
-   "y": 830,
-   "start": 7.9,
-   "duration": 2.2,
-   "anim": "fade",
-   "enterDur": 0.35,
-   "exitDur": 0.35
-  },
-  {
-   "type": "text",
-   "track": 20,
    "text": "Ship a change<br>in <b>one click.</b>",
    "size": 84,
    "weight": 600,
    "color": "var(--text)",
    "w": 700,
-   "align": "left",
    "x": 150,
    "y": 330,
-   "start": 9.9,
-   "duration": 5,
-   "anim": "slide-right",
-   "enterDur": 0.5,
-   "out": "slide-left",
+   "split": "word",
+   "preset": "up",
+   "dist": 20,
+   "stagger": 0.03,
+   "each": 0.28,
+   "start": 13.2,
+   "duration": 11,
    "exitDur": 0.4,
    "critical": true
   },
@@ -463,8 +505,8 @@
    "bg": "var(--card)",
    "radius": 14,
    "elevation": 2,
-   "start": 10.1,
-   "duration": 5.4,
+   "start": 13.6,
+   "duration": 10.6,
    "anim": "rise",
    "enterDur": 0.5,
    "exitDur": 0.35,
@@ -571,8 +613,8 @@
        "border": "1px solid var(--line)",
        "elevation": 1,
        "anim": "fade",
-       "start": 10.7,
-       "duration": 4.8,
+       "start": 14.4,
+       "duration": 9.4,
        "enterDur": 0.25,
        "exitDur": 0.35,
        "children": [
@@ -713,16 +755,15 @@
   {
    "type": "text",
    "track": 20,
-   "text": "Review, canary and rollout are one timeline.",
+   "text": "Review, canary and full rollout are one timeline.<br>Every step is reversible, and every step is logged.",
    "size": 27,
    "weight": 400,
    "color": "var(--text-2)",
    "w": 700,
-   "align": "left",
    "x": 152,
    "y": 660,
-   "start": 11,
-   "duration": 4.5,
+   "start": 14.6,
+   "duration": 9.6,
    "anim": "fade",
    "enterDur": 0.45,
    "exitDur": 0.4
@@ -730,81 +771,16 @@
   {
    "type": "text",
    "track": 20,
-   "text": "Every step is <b>reversible.</b>",
-   "size": 120,
+   "text": "SHIPPED LAST YEAR",
+   "font": "mono",
+   "size": 22,
    "weight": 600,
-   "color": "var(--text)",
-   "w": 1620,
-   "align": "left",
-   "x": 150,
-   "y": 330,
-   "start": 15.3,
-   "duration": 5,
-   "anim": "slide-right",
-   "enterDur": 0.5,
-   "out": "slide-left",
-   "exitDur": 0.4,
-   "critical": true
-  },
-  {
-   "type": "group",
-   "track": 20,
-   "id": "rolloutPanel",
-   "direction": "row",
-   "align2": "center",
-   "gap": 26,
-   "pad": "34px 44px",
-   "x": 150,
-   "y": 600,
-   "w": 900,
-   "bg": "var(--surface)",
-   "radius": 16,
-   "elevation": 2,
-   "start": 15.3,
-   "anim": "rise",
-   "enterDur": 0.5,
-   "children": [
-    {
-     "type": "text",
-     "text": "<b style=\"display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--up)\"></b>",
-     "size": 20
-    },
-    {
-     "type": "text",
-     "text": "Roll out to everyone",
-     "size": 36,
-     "weight": 600,
-     "color": "var(--text)"
-    },
-    {
-     "type": "text",
-     "text": "done",
-     "font": "mono",
-     "size": 24,
-     "weight": 600,
-     "color": "var(--up)"
-    }
-   ]
-  },
-  {
-   "type": "text",
-   "track": 20,
-   "id": "rolloutNote",
-   "text": "Reversible from the same row.",
-   "size": 25,
-   "weight": 400,
    "color": "var(--text-2)",
-   "w": 900,
-   "align": "left",
-   "follow": {
-    "id": "rolloutPanel",
-    "edge": "below",
-    "gap": 34
-   },
-   "x": 150,
-   "y": 740,
-   "start": 16.4,
-   "duration": 3.9,
+   "tracking": "0.12em",
+   "x": 152,
+   "y": 300,
+   "start": 24.6,
+   "duration": 6.4,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.4
@@ -812,7 +788,6 @@
   {
    "type": "count",
    "track": 20,
-   "id": "heroCount",
    "from": 0,
    "to": 4.8,
    "decimals": 1,
@@ -822,26 +797,27 @@
    "color": "var(--text)",
    "x": 150,
    "y": 352,
-   "countStart": 0.25,
-   "countDur": 1.5,
-   "start": 20,
-   "duration": 5.7,
+   "countStart": 0.2,
+   "countDur": 1.4,
+   "start": 24.7,
+   "duration": 6.3,
+   "anim": "rise",
+   "enterDur": 0.4,
    "exitDur": 0.4,
    "critical": true
   },
   {
    "type": "text",
    "track": 20,
-   "text": "SHIPPED LAST YEAR",
-   "font": "mono",
-   "size": 22,
-   "weight": 600,
-   "color": "var(--accent)",
-   "tracking": "0.12em",
+   "text": "deployments run through Meridian, up 38%<br>year over year, and more than double 2021.",
+   "size": 30,
+   "weight": 400,
+   "color": "var(--text-2)",
+   "w": 720,
    "x": 152,
-   "y": 300,
-   "start": 20,
-   "duration": 5.7,
+   "y": 590,
+   "start": 25.1,
+   "duration": 5.9,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.4
@@ -852,8 +828,8 @@
    "y": 260,
    "w": 840,
    "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:840px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05)\"><div style=\"display:flex;align-items:flex-end;justify-content:space-between;gap:14px;height:476px\"><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">2.1</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(186px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2021</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">2.8</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(249px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2022</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">3.5</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(311px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2023</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">4.8</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(426px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2024</div></div></div></div>",
-   "start": 20.964,
-   "duration": 4.736,
+   "start": 25.2,
+   "duration": 5.8,
    "anim": "fade",
    "enterDur": 0.25,
    "exitDur": 0.3,
@@ -870,53 +846,23 @@
   {
    "type": "text",
    "track": 20,
-   "text": "deployments, up 38%.",
-   "size": 30,
-   "weight": 400,
-   "color": "var(--text-2)",
-   "w": 720,
-   "align": "left",
-   "x": 152,
-   "y": 590,
-   "start": 22.121,
-   "duration": 3.579,
-   "anim": "fade",
-   "enterDur": 0.4,
-   "exitDur": 0.4
-  },
-  {
-   "type": "text",
-   "track": 20,
-   "text": "Everything the team needs to {}.",
-   "size": 62,
+   "text": "One platform. <b>Every tool the team needs.</b>",
+   "size": 64,
    "weight": 600,
    "color": "var(--text)",
    "w": 1620,
    "align": "center",
    "x": 150,
    "y": 250,
-   "start": 25.5,
-   "duration": 4.8,
-   "anim": "fade",
-   "enterDur": 0.45,
+   "split": "word",
+   "preset": "up",
+   "dist": 16,
+   "stagger": 0.028,
+   "each": 0.24,
+   "start": 31.4,
+   "duration": 7,
    "exitDur": 0.4,
-   "critical": true,
-   "modifiers": [
-    {
-     "wordSlot": {
-      "words": [
-       "deploy",
-       "observe",
-       "review",
-       "roll back"
-      ],
-      "every": 1,
-      "swap": 0.24,
-      "chip": true,
-      "delay": 0.5
-     }
-    }
-   ]
+   "critical": true
   },
   {
    "type": "group",
@@ -924,17 +870,14 @@
    "layout": "grid",
    "gridCols": 4,
    "gap": 26,
-   "each": 0.45,
-   "stagger": 0.11,
    "x": 150,
    "y": 440,
    "w": 1620,
-   "start": 25.8,
-   "duration": 4.5,
-   "anim": "rise",
-   "enterDur": 0.45,
-   "out": "defocus",
-   "exitDur": 0.45,
+   "start": 31.9,
+   "duration": 6.5,
+   "anim": "fade",
+   "enterDur": 0.4,
+   "exitDur": 0.4,
    "children": [
     {
      "type": "group",
@@ -1048,42 +991,36 @@
       }
      ]
     }
+   ],
+   "motion": [
+    {
+     "t": 0,
+     "y": 40,
+     "opacity": 0
+    },
+    {
+     "t": 0.6,
+     "y": 0,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    }
    ]
-  },
-  {
-   "type": "text",
-   "track": 20,
-   "text": "One workspace. One log. One bill.",
-   "font": "mono",
-   "size": 24,
-   "weight": 500,
-   "color": "var(--text-2)",
-   "tracking": "0.06em",
-   "w": 1620,
-   "align": "center",
-   "x": 150,
-   "y": 790,
-   "start": 27.6,
-   "duration": 2.7,
-   "anim": "fade",
-   "enterDur": 0.4,
-   "exitDur": 0.4
   },
   {
    "type": "svg",
    "track": 20,
    "id": "ctamark",
-   "x": 880,
+   "x": 912,
    "y": 300,
-   "w": 160,
-   "h": 160,
+   "w": 96,
+   "h": 96,
    "viewBox": "0 0 100 100",
    "d": "M50 8 L92 32 L50 56 L8 32 Z M50 66 L92 42 L92 54 L50 78 L8 54 L8 42 Z",
    "fill": "var(--accent)",
-   "start": 30.093,
-   "duration": 4.907,
+   "start": 39.2,
+   "duration": 5.8,
    "anim": "pop",
-   "enterDur": 0.45,
+   "enterDur": 0.4,
    "exitDur": 0,
    "motion": [
     {
@@ -1091,17 +1028,17 @@
      "y": 0
     },
     {
-     "t": 1.7,
+     "t": 1.6,
      "y": -12,
      "ease": "easeInOutCubic"
     },
     {
-     "t": 3.4,
+     "t": 3.2,
      "y": 0,
      "ease": "easeInOutCubic"
     },
     {
-     "t": 5.3,
+     "t": 4.8,
      "y": -12,
      "ease": "easeInOutCubic"
     }
@@ -1111,22 +1048,22 @@
    "type": "text",
    "track": 20,
    "text": "Start with <b>Meridian.</b>",
-   "size": 120,
+   "size": 100,
    "weight": 600,
+   "color": "var(--text)",
    "w": 1620,
    "align": "center",
    "x": 150,
-   "y": 500,
+   "y": 460,
    "split": "word",
    "preset": "up",
    "dist": 20,
    "stagger": 0.03,
    "each": 0.3,
-   "start": 30.37,
-   "duration": 4.63,
+   "start": 39.4,
+   "duration": 5.6,
    "exitDur": 0,
-   "critical": true,
-   "emColor": "color-mix(in srgb, var(--accent) 45%, var(--bg))"
+   "critical": true
   },
   {
    "type": "text",
@@ -1139,9 +1076,9 @@
    "radius": 10,
    "pad": "17px 40px",
    "x": 810,
-   "y": 680,
-   "start": 31.019,
-   "duration": 3.981,
+   "y": 640,
+   "start": 40,
+   "duration": 5,
    "anim": "rise",
    "enterDur": 0.35,
    "exitDur": 0,
@@ -1154,13 +1091,13 @@
    "font": "mono",
    "size": 24,
    "weight": 500,
-   "color": "color-mix(in srgb, var(--accent) 45%, var(--bg))",
+   "color": "var(--text-2)",
    "w": 1620,
    "align": "center",
    "x": 150,
-   "y": 800,
-   "start": 31.481,
-   "duration": 3.519,
+   "y": 760,
+   "start": 40.3,
+   "duration": 4.7,
    "anim": "fade",
    "enterDur": 0.3,
    "exitDur": 0
@@ -1168,25 +1105,8 @@
  ],
  "bg": [
   {
+   "t": 0,
    "preset": "dotmatrix"
-  },
-  {
-   "preset": "paper"
-  },
-  {
-   "preset": "soft"
-  },
-  {
-   "preset": "gradientWash"
-  },
-  {
-   "preset": "accentPlain"
-  },
-  {
-   "preset": "paperShapes"
-  },
-  {
-   "preset": "ink"
   }
  ]
 }
