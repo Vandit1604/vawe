@@ -7,11 +7,11 @@
 //   make sheet NAME=linear SERVE=1    → live in your browser (real fonts/assets, scrollable)
 //
 // Reads every assets/brands/<brand>/components/*.json ({html,w,h,fonts}) — the captures.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { serveRepo } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -59,18 +59,14 @@ html,body{margin:0;background:${bg};color:#f7f8f8;font-family:'Inter',system-ui,
 <body><div class="wrap"><h1>${brand} · design sheet</h1><p class="sub">${files.length} captured elements · review + fix before building a video</p>
 ${cards}</div></body></html>`;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2',
-  '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
-const server = http.createServer((req, res) => {
-  const url = decodeURIComponent(req.url.split('?')[0]);
-  if (url === '/__sheet') { res.writeHead(200, { 'Content-Type': 'text/html' }); return res.end(sheetHtml); }
-  const p = path.join(ROOT, url.replace(/^\/+/, ''));
-  if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
+const { server, port } = await serveRepo({
+  route: (req, res) => {
+    if (decodeURIComponent(req.url.split('?')[0]) !== '/__sheet') return false;
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(sheetHtml);
+    return true;
+  },
 });
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
 const url = `http://127.0.0.1:${port}/__sheet`;
 
 if (argv.includes('--serve')) {

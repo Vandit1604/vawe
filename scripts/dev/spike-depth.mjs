@@ -22,11 +22,11 @@
 // leaves no file behind and cannot rot against one.
 //
 //   node scripts/dev/spike-depth.mjs
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const W = 1080, H = 1920;
@@ -47,29 +47,21 @@ const scene = {
   })),
 };
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.css': 'text/css', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
 const SCENE_URL = '/__spike-depth.json';
-const server = http.createServer((req, res) => {
-  const url = decodeURIComponent(req.url.split('?')[0]);
-  if (url === SCENE_URL) {
+const { server, port } = await serveRepo({
+  route: (req, res) => {
+    if (decodeURIComponent(req.url.split('?')[0]) !== SCENE_URL) return false;
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(scene));
-  }
-  const p = path.join(repoRoot, url.replace(/^\/+/, ''));
-  if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
+    res.end(JSON.stringify(scene));
+    return true;
+  },
 });
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
 await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });  // what the Go capture emulates
 await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent(SCENE_URL)}&fps=30`, { waitUntil: 'load' });
-await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-const err = await page.evaluate(() => window.__engineError || null);
+const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); await browser.close(); server.close(); process.exit(1); }
 
 // A ZERO-SIZE MARKER at each layer's own centre, not the layer's bounding rect. Under perspective a

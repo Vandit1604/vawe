@@ -20,11 +20,10 @@
 import fs from 'node:fs';
 import { sameWithinNoise } from '../lib/png-diff.mjs';
 import path from 'node:path';
-import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import puppeteer from 'puppeteer';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
+import { serveRepo, launchPage, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(repoRoot, 'site/public/assets/blocks');
@@ -76,21 +75,8 @@ function sceneFor(entry) {
 }
 
 // ---- a static file server over the repo, so scene.html resolves /core, /themes, /assets as usual ----
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
-const server = await new Promise((r) => {
-  const s = http.createServer((req, res) => {
-    const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-    fs.createReadStream(p).pipe(res);
-  });
-  s.listen(0, '127.0.0.1', () => r(s));
-});
-const port = server.address().port;
-const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
-const page = await browser.newPage();
-await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+const { server, port } = await serveRepo();
+const { browser, page } = await launchPage({ width: W, height: H });
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const frames = {};
@@ -108,16 +94,7 @@ for (const entry of grid) {
 
   await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/site/public/assets/blocks/${encodeURIComponent(safe)}.json&fps=30&aspect=16:9`,
     { waitUntil: 'load' });
-  const boot = await page.evaluate(() => new Promise((res) => {
-    const t0 = Date.now();
-    const tick = () => {
-      if (window.__engineError) return res(String(window.__engineError));
-      if (window.__engineReady) return res(null);
-      if (Date.now() - t0 > 30000) return res('timeout');
-      requestAnimationFrame(tick);
-    };
-    tick();
-  }));
+  const boot = await waitForEngine(page, { throwOnTimeout: false });
   if (boot) { console.error(`boot fail ${entry.name}: ${boot}`); miss++; continue; }
 
   const m = await page.evaluate((cfg) => {

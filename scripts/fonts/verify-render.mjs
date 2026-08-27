@@ -11,11 +11,11 @@
 // So the image puts the two side by side: the top row is three.js TextGeometry built from the
 // generated outlines; the bottom row is the SAME string set in the original woff2 by the browser,
 // at the same weight. If the pipeline is honest, they are the same typeface.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { serveRepo } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const name = process.argv[2] || 'Anybody';
@@ -29,16 +29,7 @@ if (!fs.existsSync(typefacePath)) {
 }
 const meta = JSON.parse(fs.readFileSync(typefacePath, 'utf8')).vawe;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
-  '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.png': 'image/png' };
-const server = http.createServer((req, res) => {
-  const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-  if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
+const { server, port } = await serveRepo();
 
 // The jsm addons import a bare "three" specifier, which a browser cannot resolve on its own.
 const html = `<!doctype html><meta charset="utf-8">

@@ -3402,5 +3402,20 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   globalThis.window = priorWin;
 }
 
+// ---- the render harness: the one path guard 22 scripts used to hand-roll ----
+{
+  const { insideRoot, MIME, REPO_ROOT } = await import('../lib/render-harness.mjs');
+  const root = '/repo';
+  ok('a file under the root is served', insideRoot(root, '/repo/core/boot.js'));
+  ok('the root itself is inside itself', insideRoot(root, '/repo'));
+  ok('a parent is refused', insideRoot(root, '/etc/passwd') === false);
+  ok('a climb out is refused', insideRoot(root, path.join(root, '../secrets')) === false);
+  // The bug every hand-rolled `p.startsWith(root)` carried: a sibling whose name extends the root's.
+  ok('a sibling with the root as a name prefix is refused', insideRoot(root, '/repo-evil/config') === false);
+  ok('the mime table covers every type the copies served',
+    ['.html', '.mjs', '.json', '.woff2', '.otf', '.mp4', '.webm', '.jpeg'].every((e) => MIME[e]));
+  ok('the harness resolves the repo root', fs.existsSync(path.join(REPO_ROOT, 'core/motion.js')));
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -10,11 +10,11 @@
 // so it held whatever a previous frame had drawn, and frames render across 8 workers in arbitrary
 // order (docs/MISTAKES.md #64). This gate hashes the actual pixels instead.
 import fs from 'node:fs';
-import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const format = process.argv[2] || 'scene';
@@ -22,16 +22,7 @@ const dataArg = process.argv[3];
 const dataUrl = dataArg ? '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/')
   : `/formats/${format}/sample.json`;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
-const server = http.createServer((req, res) => {
-  const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-  if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
+const { server, port } = await serveRepo();
 
 const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, decodeURIComponent(dataUrl).replace(/^\//, '')), 'utf8')); } catch { return {}; } })();
 const [VW, VH] = sceneDims(cfg);
@@ -39,8 +30,7 @@ const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', 
 const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'networkidle0' });
-await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-const err = await page.evaluate(() => window.__engineError || null);
+const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); process.exit(1); }
 
 const total = (await page.evaluate(() => window.__engine.meta)).totalFrames;

@@ -3,13 +3,13 @@
 //   node verify/run.js [format ...]      (default: all formats)
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { ffprobe } from './extract.js';
 import { safeArea, ASPECTS, sceneDims } from '../core/safe.js';
 import { population } from '../scripts/lib/census.mjs';
+import { serveRepo, waitForEngine } from '../scripts/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -24,17 +24,6 @@ const dimsFor = (cfg) => sceneDims(cfg);
 const modules = process.argv.slice(2).length ? process.argv.slice(2)
   : fs.readdirSync(formatsDir).filter((d) => fs.existsSync(path.join(formatsDir, d, 'scene.html')));
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.webm': 'video/webm' };
-function startServer() {
-  const s = http.createServer((req, res) => {
-    const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-    fs.createReadStream(p).pipe(res);
-  });
-  return new Promise((r) => s.listen(0, '127.0.0.1', () => r(s)));
-}
 
 const results = [];
 const add = (check, m, pass, detail) => results.push({ check, m, pass, detail });
@@ -65,8 +54,7 @@ for (const m of modules) {
   }
 }
 
-const server = await startServer();
-const port = server.address().port;
+const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 
 for (const m of modules) {
@@ -84,7 +72,7 @@ for (const m of modules) {
   const page = await browser.newPage();
   await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
   await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  await waitForEngine(page);
   const meta = await page.evaluate(() => window.__engine.meta);
   const total = meta.totalFrames;
 

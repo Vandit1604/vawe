@@ -8,11 +8,11 @@
 //
 // Accepts a raw HTML file, OR a captured component/scene JSON ({html} or {parts:[{html}]}) so you can
 // eyeball a `make capture` result too. Writes /tmp/preview.png (1920×1080).
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { serveRepo } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -71,8 +71,6 @@ if (src.endsWith('.json')) {
 // Decided after `raw` is resolved, because a captured .json carries its markup one level in.
 const fullBleed = FULLBLEED_RE.test(raw) && INSET_RE.test(raw);
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2',
-  '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 const page$html = `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="/core/tokens.css">
 <style>*{box-sizing:border-box}
@@ -99,16 +97,14 @@ html,body{margin:0;background:${bg};color:var(--text);width:auto;height:auto;ove
   catch (e) { window.__themed = 'error: ' + e.message; }
 </script></body></html>`;
 
-const server = http.createServer((req, res) => {
-  const url = decodeURIComponent(req.url.split('?')[0]);
-  if (url === '/__frag') { res.writeHead(200, { 'Content-Type': 'text/html' }); return res.end(page$html); }
-  const p = path.join(ROOT, url.replace(/^\/+/, ''));
-  if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
+const { server, port } = await serveRepo({
+  route: (req, res) => {
+    if (decodeURIComponent(req.url.split('?')[0]) !== '/__frag') return false;
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(page$html);
+    return true;
+  },
 });
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
 
 // --serve: keep the page live in your browser (real fonts/assets, interactive) instead of a PNG
 if (argv.includes('--serve')) {

@@ -8,7 +8,6 @@
 //   make snap M=<format> [SAVE=1]
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
@@ -16,6 +15,7 @@ import { sceneDims } from '../../core/safe.js';
 // keep their own hand-copied version; that duplication is how a field gets added to one and not the
 // other, and how a gate goes blind without saying so (MISTAKES #159).
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap');
@@ -36,9 +36,7 @@ if (extra.length) {
   process.exit(1);
 }
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
-const server = await new Promise((r) => { const s = http.createServer((req, res) => { const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '')); if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); }); s.listen(0, '127.0.0.1', () => r(s)); });
-const port = server.address().port;
+const { server, port } = await serveRepo();
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
@@ -47,7 +45,7 @@ const snapCfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoR
 const [SVW, SVH] = sceneDims(snapCfg);
 await page.setViewport({ width: SVW, height: SVH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/formats/${m}/sample.json&fps=30`, { waitUntil: 'load' });
-await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+await waitForEngine(page);
 const meta = await page.evaluate(() => window.__engine.meta);
 const total = meta.totalFrames;
 // Sample WHERE THE MOTION IS. An even spread lands almost entirely in steady state — transition

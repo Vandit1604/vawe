@@ -12,17 +12,13 @@
 // That debt is paid: `beats.mjs` and `reveal.mjs` both boot through here now, and neither owns a server
 // or a browser any more. What that buys beyond one copy of the code: `scripts/author/sheets.mjs` builds
 // BOTH contact sheets off ONE open page, because the expensive thing is no longer per-tool.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+import { serveRepo, launchPage, waitForEngine } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4' };
 
 export async function openScene(dataArg, opts = {}) {
   const scale = opts.scale ?? 1;
@@ -34,24 +30,14 @@ export async function openScene(dataArg, opts = {}) {
   }
   const dataUrl = '/' + path.relative(ROOT, path.resolve(dataArg)).split(path.sep).join('/');
 
-  const server = http.createServer((req, res) => {
-    const p = path.join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-    fs.createReadStream(p).pipe(res);
-  });
-  await new Promise((r) => server.listen(0, '127.0.0.1', r));
-  const port = server.address().port;
+  const { server, port } = await serveRepo();
 
   const [VW, VH] = sceneDims(data);
-  const browser = await puppeteer.launch({ headless: true,
+  const { browser, page } = await launchPage({ width: VW, height: VH, scale,
     args: ['--no-sandbox', '--hide-scrollbars', '--force-color-profile=srgb', '--font-render-hinting=none',
       `--force-device-scale-factor=${scale}`] });
-  const page = await browser.newPage();
-  await page.setViewport({ width: VW, height: VH, deviceScaleFactor: scale });
   await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-  const err = await page.evaluate(() => window.__engineError || null);
+  const err = await waitForEngine(page);
   if (err) { await browser.close(); server.close(); throw new Error(`SCENE ERROR: ${err}`); }
   const meta = await page.evaluate(() => window.__engine.meta);
 

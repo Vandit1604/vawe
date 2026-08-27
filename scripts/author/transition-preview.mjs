@@ -11,7 +11,6 @@
 // The strip samples the transition window at even steps and labels each frame with its eased progress,
 // so `TIMING=linear` vs `smooth` is visible as WHERE the motion bunches. Two legible beats (a blue "A"
 // and an orange "B") make direction and the from→to swap obvious. Deterministic; no video is muxed.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -22,6 +21,7 @@ import { scratch, scratchBase, ffmpegOrDie } from '../lib/scratch.mjs';
 import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { ANIM_NAMES } from '../../core/clips.js';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const env = (k, d) => process.env[k] || d;
@@ -84,23 +84,13 @@ fs.writeFileSync(sceneFile, JSON.stringify(scene, null, 2));
 const dataUrl = '/' + path.relative(ROOT, sceneFile).split(path.sep).join('/');
 const tmpDir = scratchBase();
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png' };
-const server = http.createServer((req, res) => {
-  const p = path.join(ROOT, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-  if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
+const { server, port } = await serveRepo();
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
 await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
-await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-const err = await page.evaluate(() => window.__engineError || null);
+const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); await browser.close(); server.close(); process.exit(1); }
 const F = 30;
 

@@ -41,12 +41,12 @@
 //   make paints-nothing [D=scene.json] [STRICT=1]
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneTiming, spanOf } from './scene-timing.mjs';
 import { population, SCENE_DIR } from '../lib/census.mjs';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -56,19 +56,6 @@ const strict = argv.includes('--strict');
 const FPS = 30;
 const OPACITY_FLOOR = 0.01; // below this a layer is DECLARED invisible right now — not a paint failure
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
-
-async function startServer() {
-  const server = http.createServer((req, res) => {
-    const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-    fs.createReadStream(p).pipe(res);
-  });
-  await new Promise((r) => server.listen(0, '127.0.0.1', r));
-  return server;
-}
 
 // Per top-level layer, the engine-corrected [start,end] — the same rewrite scene.js does for a
 // sceneUnits beat wrapper (a non-last-beat layer runs to `beatEnd + cutDur`, not its authored duration).
@@ -104,16 +91,7 @@ async function checkScene(browser, port, absFile) {
   const page = await browser.newPage();
   try {
     await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/${relFile}&fps=${FPS}`, { waitUntil: 'load' });
-    const boot = await page.evaluate(() => new Promise((res) => {
-      const t0 = Date.now();
-      const tick = () => {
-        if (window.__engineError) return res(String(window.__engineError));
-        if (window.__engineReady) return res(null);
-        if (Date.now() - t0 > 30000) return res('timeout');
-        requestAnimationFrame(tick);
-      };
-      tick();
-    }));
+    const boot = await waitForEngine(page, { throwOnTimeout: false });
     if (boot) return { file: relFile, error: `boot: ${boot}` };
 
     // `.hs-layer` is stamped ONLY on top-level layers (formats/scene/scene.js buildLayer); a nested
@@ -176,8 +154,7 @@ async function checkScene(browser, port, absFile) {
 }
 
 // ---- driver ----------------------------------------------------------------------------------------
-const server = await startServer();
-const port = server.address().port;
+const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 
 async function reportOne(absFile) {

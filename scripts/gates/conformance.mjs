@@ -22,7 +22,6 @@
 // ...except that frameSig cannot be used to decide DISTINCTNESS, which is what phase 1 exists to
 // decide. See BLIND_ATTRS below (MISTAKES #74).
 import fs from 'node:fs';
-import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
@@ -33,32 +32,26 @@ import { ANIM_NAMES } from '../../core/clips.js';
 import { PRESETS } from '../../core/type.js';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const only = process.argv[2] || 'all';
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.css': 'text/css', '.svg': 'image/svg+xml',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 
 // Scenes are served from MEMORY, never written to formats/. A sweep that litters the repo with
 // hundreds of fixture files is a sweep nobody runs twice.
 const scenes = new Map();
-const server = http.createServer((req, res) => {
-  const url = decodeURIComponent(req.url.split('?')[0]);
-  if (url.startsWith('/__conf/')) {
+const { server, port } = await serveRepo({
+  route: (req, res) => {
+    const url = decodeURIComponent(req.url.split('?')[0]);
+    if (!url.startsWith('/__conf/')) return false;
     const body = scenes.get(url.slice('/__conf/'.length));
-    if (!body) { res.writeHead(404); return res.end(); }
+    if (!body) { res.writeHead(404); res.end(); return true; }
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(body);
-  }
-  const p = path.join(repoRoot, url.replace(/^\/+/, ''));
-  if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
+    res.end(body);
+    return true;
+  },
 });
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
@@ -125,8 +118,7 @@ async function sig(scene, frames, blind = []) {
   const key = `s${id++}.json`;
   scenes.set(key, JSON.stringify(scene));
   await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-  const err = await page.evaluate(() => window.__engineError || null);
+  const err = await waitForEngine(page);
   if (err) return { error: String(err).slice(0, 120) };
   const out = blind.length
     ? await page.evaluate((fr, b, src) => fr.map((n) => new Function('return ' + src)()(n, b)), frames, blind, blindSig.toString())
@@ -145,7 +137,7 @@ async function assertMirrorsFrameSig() {
   const key = `mirror.json`;
   scenes.set(key, JSON.stringify(base([T(), I({ x: 900, y: 200 })])));
   await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  await waitForEngine(page);
   const bad = await page.evaluate((src) => {
     const fn = new Function('return ' + src)();
     return [0, 7, 15, 29].filter((n) => fn(n, []) !== window.__engine.frameSig(n));

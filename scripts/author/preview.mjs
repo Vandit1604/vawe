@@ -10,13 +10,13 @@
 // the scene you asked for. That is the same defect the Makefile records fixing for `make motion`
 // ("without it the target silently audited sample.json instead of your scene") — it survived here
 // because the fix went to one call site. docs/MISTAKES.md #351.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -44,16 +44,7 @@ const dataUrl = dataArg
   ? '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/')
   : `/formats/${format}/sample.json`;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.webm': 'video/webm' };
-const server = http.createServer((req, res) => {
-  const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-  if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
+const { server, port } = await serveRepo();
 
 const t0 = Date.now();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
@@ -65,8 +56,7 @@ const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot,
 const [VW, VH] = sceneDims(cfg);
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
-await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-const err = await page.evaluate(() => window.__engineError || null);
+const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); process.exit(1); }
 const meta = await page.evaluate(() => window.__engine.meta);
 const { duration, stings, fps: F } = meta;

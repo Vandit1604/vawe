@@ -9,11 +9,11 @@
 //
 // This exists because both prior occurrences of this bug were warnings that scrolled past in
 // unrelated command output. A warning nobody reads is not a safeguard, so this exits non-zero.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const format = process.argv[2] || 'scene';
@@ -22,23 +22,12 @@ const dataUrl = dataArg
   ? '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/')
   : `/formats/${format}/sample.json`;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.otf': 'font/otf', '.css': 'text/css',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
-const server = http.createServer((req, res) => {
-  const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-  if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const port = server.address().port;
+const { server, port } = await serveRepo();
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
 await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
-await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-const err = await page.evaluate(() => window.__engineError || null);
+const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); await browser.close(); server.close(); process.exit(1); }
 
 // Sample across the whole timeline: a family used by ONE late beat (a captured component that
