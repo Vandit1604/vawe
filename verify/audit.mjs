@@ -25,7 +25,6 @@
 // output. Default stays the scene's own aspect, so a single-aspect scene costs nothing.
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
@@ -38,6 +37,7 @@ import { resolveCoords } from '../core/boot.js';
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
 import { snippet } from '../scripts/lib/text.mjs';
 import { lowerScene } from '../core/transitions-lower.js';
+import { serveRepo, waitForEngine } from '../scripts/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -112,17 +112,6 @@ const capBandFor = (vw, vh, cfg) => {
   return { ...b, tol: CAP_TOL };
 };
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4' };
-function startServer() {
-  const s = http.createServer((req, res) => {
-    const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-    fs.createReadStream(p).pipe(res);
-  });
-  return new Promise((r) => s.listen(0, '127.0.0.1', () => r(s)));
-}
 
 // runs in-page: render frame n, measure every visible [data-layer=critical] box, return issues.
 function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
@@ -1291,8 +1280,7 @@ function contrastFindings(probes, img, vw, vh) {
 // rules measured NOTHING that frame, and a gate that goes quiet when it stops working is worse
 // than one that fails.
 const HARD = new Set(['overlap', 'overflow', 'safe', 'contrast', 'buried', 'weak-headline', 'degenerate-pin', 'collapsed-image', 'clipped-text', 'clipped-component', 'contrast-unmeasurable']);
-const server = await startServer();
-const port = server.address().port;
+const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const rows = [];
 
@@ -1342,7 +1330,7 @@ for (const aspectKey of askedAspects) {
   // canvas the CLI would actually ship rather than a re-implementation of it.
   const q = aspectKey ? `&aspect=${encodeURIComponent(aspectKey)}` : '';
   await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30${q}`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  await waitForEngine(page);
   // A scene that refuses to boot is the loudest possible failure, so report it as one. Reading
   // __engine.meta unconditionally threw an uncaught TypeError here, which killed the whole run: one
   // broken scene meant every OTHER scene in a `make audit` sweep went unaudited and unreported, and the

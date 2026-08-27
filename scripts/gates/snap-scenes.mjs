@@ -17,7 +17,6 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
-import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
@@ -27,6 +26,7 @@ import { flattenLayers } from '../lib/layers.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap', 'scenes');
@@ -91,9 +91,7 @@ const scenes = population('snap-scenes', { filter: (f) => f !== 'schema.json' &&
 for (const s of skippedSugar) console.log(`  · skipping un-expanded source: ${s}`);
 if (!scenes.length) { console.error('no scenes found'); process.exit(1); }
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
-const server = await new Promise((r) => { const s = http.createServer((req, res) => { const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '')); if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); }); s.listen(0, '127.0.0.1', () => r(s)); });
-const port = server.address().port;
+const { server, port } = await serveRepo();
 const launch = () => puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 let browser = await launch();
 
@@ -132,8 +130,7 @@ for (const scene of scenes) {
   try {
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
     await page.goto(`http://127.0.0.1:${port}/${SCENE_DIR}/scene.html?data=${dataPath}&fps=30`, { waitUntil: 'load' });
-    await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-    const err = await page.evaluate(() => window.__engineError || null);
+    const err = await waitForEngine(page);
     if (err) { errored.push(`${name}: ${String(err).slice(0, 80)}`); await page.close(); continue; }
     const meta = await page.evaluate(() => window.__engine.meta);
     const total = meta.totalFrames;

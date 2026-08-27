@@ -29,12 +29,12 @@
 //   make motion [M=<format>] [STRIDE=2]
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { junctionTable, marksOf, shotWindows } from '../../core/junctions.js';
 import { lowerScene } from '../../core/transitions-lower.js';
+import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -58,9 +58,7 @@ const FAIL_LEVEL = (process.env.MOTION_TIER || 'report') === 'enforce' ? 'FAIL' 
 // changing". It belongs here beside `stage` and `root`, which it has always been a sibling of.
 const INFRA = new Set(['cv', 'root', 'cam', 'dip', 'grain', 'stage', 'ripple', 'cursor', 'brand', 'vig']); // chrome, not content
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
-const server = await new Promise((r) => { const s = http.createServer((req, res) => { const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '')); if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); }); s.listen(0, '127.0.0.1', () => r(s)); });
-const port = server.address().port;
+const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 
 // parse "$1,247", "2.5M", "412ms", "88%" → number (for count-up monotonicity)
@@ -79,8 +77,7 @@ async function audit(format, dataArg) {
   const page = await browser.newPage();
   await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
   await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-  const err = await page.evaluate(() => window.__engineError);
+  const err = await waitForEngine(page);
   if (err) { await page.close(); return { format, data: dataName, error: String(err), findings: [] }; }
   const meta = await page.evaluate(() => window.__engine.meta);
   const total = meta.totalFrames;
