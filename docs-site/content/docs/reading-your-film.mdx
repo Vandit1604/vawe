@@ -1,0 +1,111 @@
+---
+title: Reading your own film
+description: Every gate here reads structure. None of them can see whether a film is good. These six tools put the frames in front of you, and each one shows something the others hide.
+icon: Eye
+---
+
+Vawe has a lot of gates and they are strict. They will tell you a caption is under the platform chrome,
+that a transition flashes, that a beat holds nothing. **Not one of them can tell you the film is worth
+watching.** They read structure. Structure is necessary and it is not the thing.
+
+So the engine ships six ways to put frames in front of you, and they are not interchangeable. Each one
+hides what the next one shows.
+
+<Callout type="warn">
+**Producing an image is not looking at one.** `make ship` generates the sheets whether you open them or
+not, and `beat-check` will tell you nobody has read the current version. That check exists because
+"the file is on disk" stopped being evidence that a person had looked.
+</Callout>
+
+## The six, and what each one is blind to
+
+| Tool | Shows | Blind to |
+|---|---|---|
+| `make beats` | first, middle and last frame of every beat | how anything MOVES |
+| `make reveal` | the enter arc, the settled frame, the exit arc | whether the beat was worth having |
+| `make studio` | a live scrubber and a timeline of every layer | anything you do not scrub to |
+| `make seam-check` | the frames straddling every transition | the middle of a beat |
+| `make judge` | key frames plus a scoring rubric | motion, entirely |
+| `make scrub` | the whole film as one contact sheet | detail, at that size |
+
+### `make beats` shows the holds
+
+```bash
+make beats D=formats/scene/<film>.json      # → /tmp/beats/<film>.png
+```
+
+Three frames per beat. This is the fastest way to catch murk, an overlap, a beat that lands on nothing.
+It samples the MIDDLE of each beat, which is exactly why it cannot show you an entrance: by the time it
+samples, everything has arrived.
+
+### `make reveal` shows the arrival
+
+```bash
+make reveal D=formats/scene/<film>.json     # → /tmp/reveal/<film>.png
+```
+
+Per beat: the enter arc, the settled frame, the exit arc, pulled from the real layer start times. This
+is where you see the dolly direction, the typing, the colour wave, the stagger. **Judging a film on
+settled frames is how a recreation loses the one thing that made the original good**, and this page
+exists because that happened here.
+
+### `make studio` is the only one that moves
+
+```bash
+make studio D=formats/scene/<film>.json
+```
+
+A frame scrubber (drag, step, space to play) over a timeline: one bar per layer against a seconds
+ruler, cuts and seams and stings marked, enter and exit ramps shaded off the settled middle, and every
+dead-air hole painted as a hazard band. **The contact sheets sample. This is where you see structure.**
+
+### `make seam-check` is the cheapest catch for the worst bugs
+
+```bash
+make seam-check D=formats/scene/<film>.json  # → /tmp/seams/<film>.png
+```
+
+It pulls the frames straddling every transition out of the rendered mp4 and flags a luminance flash in
+the overlap. A one-frame black flash is invisible in every center-sampling tool and horrible to watch.
+This finds it in seconds.
+
+### `make judge` is the scored one
+
+```bash
+make judge D=formats/scene/<film>.json      # → /tmp/judge/sheet.png + a rubric
+```
+
+Score every frame 1 to 5 on **readability, hierarchy, composition, brand fidelity, asset fidelity,
+produced-not-generated, and value.** The last one is the hardest to be honest about on your own work,
+which is why it is worth scoring separately rather than as a general impression.
+
+## What to actually look for
+
+A checklist beats a vibe, because a vibe finds whatever you were already worried about.
+
+1. **Anything unreadable.** Contrast, clipping, a caption under the platform chrome.
+2. **A seam that flashes.** Worst defect per unit of effort to find.
+3. **A beat with no focal point.** If your eye does not know where to land, neither does anyone's.
+4. **A beat that is only type.** Ask what it could SHOW: a bar whose length IS the number, the real
+   product surface, a diagram.
+5. **A dead backdrop.** Most films in this library paint one backdrop for the entire runtime.
+6. **Passive whitespace.** Name what the empty part of the frame is doing in one clause. If enlarging
+   the subject removes it and improves the frame, it was never working.
+
+## The rule that makes this worth doing
+
+**If your eye catches a flaw, it is a fix, never a rationalisation.** The temptation after a green gate
+run is to decide the thing you noticed is fine. It is not fine; the gates simply cannot see it. That is
+the entire reason this page exists.
+
+And the converse, which matters just as much: **when satisfying a gate requires making the film worse,
+suspect the gate.** A gate that measures the wrong thing does not merely miss defects, it manufactures
+them, and you pay by deforming something you can see is right until a number moves.
+
+## Where to go next
+
+<Cards>
+  <Card title="Quality gates" href="/docs/quality-gates" description="What the gates DO catch, and which findings block." />
+  <Card title="When it looks wrong" href="/docs/troubleshooting" description="Symptom to cause, for the failures that repeat." />
+  <Card title="Prompting" href="/docs/prompting" description="How to describe what you saw so it gets fixed." />
+</Cards>

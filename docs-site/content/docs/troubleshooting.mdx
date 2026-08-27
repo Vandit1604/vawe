@@ -1,0 +1,130 @@
+---
+title: When it looks wrong
+description: Symptom to cause, for the failures that actually repeat. Most of these are the engine accepting something and then quietly not doing it, which is the hardest kind to debug from the outside.
+icon: Wrench
+---
+
+Every entry here comes from something that really went wrong and is written down in the repo's mistake
+log. The pattern worth internalising: **the worst failures are silent.** The engine takes your input,
+does something else, and renders a plausible frame. That is why so much of this engine refuses loudly
+now, and why the refusals name the fix.
+
+## The render will not start
+
+<Callout type="error">
+The render refuses, naming the layer and the block, and tells you to run `make expand`.
+</Callout>
+
+`block`, `beat` and `comp` are authoring sugar, not layer types. They become real layers at build time.
+
+```bash
+make expand D=formats/scene/<film>.json     # writes <film>.expanded.json
+./bin/vawe formats/scene/<film>.expanded.json
+```
+
+This fails loudly on purpose. Expansion imports every block factory, which has no business running on
+every render, so the build step is real rather than hidden.
+
+<Callout type="error">
+The render refuses, naming every font family whose file never loaded, and tells you to run `make fonts`.
+</Callout>
+
+Fonts are fetched, never committed. On a fresh clone, run `make build`, which fetches them first.
+
+The engine refuses rather than rendering, and that is deliberate: **a browser does not complain about a
+font it cannot load. It paints a generic and says nothing.** An unchecked family renders a completely
+plausible frame in the wrong typeface, and you find out later, from someone else.
+
+## It renders, but something is not there
+
+**A layer stays on screen for the whole film.** A layer with no `duration` renders for the entire
+runtime. Give it `start` and `duration`, or `track: 0` if it really is a backdrop.
+
+**A layer is invisible and no error appeared.** Check its asset actually exists. An icon fetched with a
+bare `curl` that 404s leaves a **zero-byte file on disk**, which passes every path check and renders as
+a hole. Use `make assets`, which requires a 200, a minimum size and a literal `<svg` before it writes.
+
+**A hand-written HTML fragment does not move.** `transition` and `animation` are disabled engine-wide
+and refused at boot, because a frame is rendered by seeking, not by playing, and CSS animation cannot be
+seeked. Drive geometry from `var(--t)` in a `calc()`, or better, use `parts`: a CSS selector into your
+own markup that gives every matched element an engine-driven, seeked entrance with a stagger.
+
+**Two HTML layers fight and the later one wins.** An `html` layer's `<style>` block lands in the
+*document*, not the layer, so two fragments sharing class names collide and the last one silently wins.
+Namespace your classes (`.hero-`, `.panel-`) until this is fixed at the root.
+
+## It renders in the wrong place
+
+**Text lands left-edge-on-centre.** `pin` centres a *box*. A text layer with no `w` has a zero-width
+box, so pinning centres the box and the text runs off to one side. Set `w` (for example `"88%"`) and
+`align`.
+
+**`dx` / `dy` do nothing.** They only apply together with `anchor`.
+
+**It looks right at 16:9 and wrong everywhere else.** A scene passes at its own aspect and can be broken
+at every other one. Audit each canvas you intend to ship:
+
+```bash
+make audit M=<file> ASPECT=16:9,9:16,1:1,4:5
+```
+
+**Captions sit under the platform's own chrome.** The safe area is not a property of the shape. 9:16 for
+a website hero and 9:16 for TikTok are the same canvas, but TikTok paints a rail down one side and
+captions across the bottom. Declare where it is going:
+
+```json
+{ "destination": "tiktok" }
+```
+
+## The validator rejected it
+
+**An em dash in on-screen text.** Rejected outright. Use a comma, a period, or a middot.
+
+**A waiver with no reason.** A gate waiver must carry a written `_why` of at least twelve characters:
+
+```json
+"authoring": {
+  "allow": ["dead-air"],
+  "_why": { "dead-air": "the held frame IS the beat: the room empties and nothing replaces it" }
+}
+```
+
+Nothing judges whether the reason is good. The cost of one sentence is the entire mechanism, because
+that cost is what turns a reflex back into a decision.
+
+## The film and its source disagree
+
+**The shipped mp4 does not match the scene.** A film is stale the moment its scene moves on, and a
+duration check cannot see it. Run:
+
+```bash
+node scripts/site/films-json.mjs
+```
+
+It reports `film-orphan` (the film cannot be reproduced from this scene), `film-stale` (the scene
+changed since the render) and `film-silent` (the scene names sound and the track is digital silence).
+All three shipped here at once before this existed.
+
+## Something exported differently than it previewed
+
+An image copied or downloaded from the playground is rasterised through an SVG `foreignObject`, and two
+things do not survive that trip:
+
+- **`backdrop-filter`** does not composite. It samples a backdrop, and there is no page in there. Filter
+  the picture itself instead.
+- **`vw` units** resolve against the SVG's own width rather than the browser viewport, so type comes out
+  a different size. Use container units and declare a `container-type`.
+
+Both were real, both were silent, and both were found only by rendering the two paths side by side and
+looking.
+
+## Still stuck
+
+`docs/MISTAKES.md` in the repo carries 500+ entries: what broke, the root cause, the fix, and which
+gate now catches it. It is searchable and it is the memory this engine runs on.
+
+<Cards>
+  <Card title="Reading your own film" href="/docs/reading-your-film" description="The six ways to put frames in front of you." />
+  <Card title="Quality gates" href="/docs/quality-gates" description="What each gate checks and which findings block." />
+  <Card title="Determinism" href="/docs/determinism" description="Why a frame must be a pure function of its number." />
+</Cards>
