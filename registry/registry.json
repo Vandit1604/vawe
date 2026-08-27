@@ -1331,6 +1331,22 @@
       ]
     },
     {
+      "name": "splitFlapBoard",
+      "type": "vawe:block",
+      "description": "a mechanical departure board · a drum per character steps through the alphabet and lands",
+      "tags": [
+        "splitFlapBoard"
+      ]
+    },
+    {
+      "name": "splitFlapBoard.small",
+      "type": "vawe:block",
+      "description": "the board at caption size, no header rail",
+      "tags": [
+        "splitFlapBoard"
+      ]
+    },
+    {
       "name": "splitScreen",
       "type": "vawe:block",
       "description": "two panes, one geometry · second pane lands behind the first",

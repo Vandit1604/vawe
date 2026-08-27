@@ -1,0 +1,56 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "splitFlapBoard.small",
+  "type": "vawe:block",
+  "title": "splitFlapBoard.small",
+  "description": "the board at caption size, no header rail",
+  "tags": [
+    "splitFlapBoard"
+  ],
+  "dimensions": {
+    "width": 214,
+    "height": 106
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "block",
+      "block": "splitFlapBoard.small",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "word": "LIVE",
+      "size": 52,
+      "steps": 10
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "word",
+      "size",
+      "gap",
+      "radius",
+      "steps",
+      "each",
+      "stagger",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/splitFlapBoard.small.json",
+      "url": "https://vawe.dev/assets/blocks/splitFlapBoard.small.json",
+      "target": "formats/scene/splitFlapBoard.small.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/splitFlapBoard.small.png"
+  }
+}

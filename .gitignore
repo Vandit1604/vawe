@@ -86,6 +86,10 @@ formats/scene/*.json
 !formats/scene/vawe-intro.json
 !formats/scene/hero-site.json
 !formats/scene/showcase-*.json
+# ...but NOT their expansions. `make expand` writes <name>.expanded.json beside the source, and that is
+# build output: scripts/site/scenes-json.mjs treats it as regenerable and says so. The showcase
+# allowlist above is a glob, so it was quietly re-including the generated file too.
+formats/scene/*.expanded.json
 !formats/scene/site-backdrop.json
 # gh-wrapped is a TEMPLATE, not a video: it carries {{placeholders}} and renders nothing on its own.
 # scripts/media/gh-wrapped.mjs is tracked, and an untracked template would leave a clean clone holding
@@ -206,3 +210,6 @@ site/public/scenes/*
 themes/stripe.json
 themes/linear.json
 themes/higgsfield.json
+
+# scratch probe renders, written by hand during debugging and never an input to anything
+assets/video/
