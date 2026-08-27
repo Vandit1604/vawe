@@ -22,13 +22,9 @@
 // leaves no file behind and cannot rot against one.
 //
 //   node scripts/dev/spike-depth.mjs
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const W = 1080, H = 1920;
 const LENS = 1600;            // the default lens; no `p` and no `tilt.dist` is stated below
 const TRUCK = 600;            // camera x from -300 to +300 across the film

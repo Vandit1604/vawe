@@ -5,7 +5,7 @@
 // Serves the repo, renders five frames forwards, backwards, shuffled and again, and compares pixel
 // hashes. See the header of seam-c-proto.html for what this is and why it exists.
 import puppeteer from 'puppeteer'; import fs from 'node:fs';
-import http from 'node:http'; import path from 'node:path';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { serveRepo } from '../lib/render-harness.mjs';
 
