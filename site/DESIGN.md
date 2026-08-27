@@ -173,3 +173,35 @@ from the frozen state it exists to deny, so it fades instead.
   5.17:1 on every frame of the video behind it. Those three can lighten, and the guarantee dies.
 - Don't draw an inert chip and a control the same way.
 - Don't animate the `wdth` axis.
+
+## Provenance: what shaped each surface
+
+Every rule above records a decision. This section records where the decision CAME FROM, per surface,
+because that is the one part of a design that evaporates.
+
+The gap this closes is real and was found the dull way: someone asked which skills built `/arsenal`,
+and the answer was unrecoverable. Not in the commit message, not here, not in a comment in
+`Arsenal.tsx`. The tokens survived; the reasoning did not. A design system that records what a colour
+is but not why that colour was reached for can only be obeyed, never argued with, and a rule nobody can
+argue with is followed until it is quietly abandoned.
+
+**The convention.** When you build or rework a surface, add its row. One line, written at the time,
+while you still know.
+
+| Surface | Register | Shaped by | Notes |
+|---|---|---|---|
+| `/arsenal` | product | **UNRECORDED** | Built before this convention existed. The craft bar of the site (hairlines for structure, one elevation step and only on hover, mono for anything literal), but the sources are lost. Re-derive from the code, do not guess. |
+| `/editor` | product | **UNRECORDED** | Same. |
+| `/showcase`, `/`, `/playground`, `/features` | brand | **UNRECORDED** | Same. |
+| `site/og/card.html` | brand | `zeke/swiss-design` (ui-skills), local tokens win | Swiss principles taken (grid is real, whitespace is structure, opacity not hue for hierarchy, one accent, headings never bold). Its Tailwind and IBM Plex specifics REJECTED: this site owns its faces. |
+
+**Two rules for filling a row in.**
+
+Name the source precisely enough to re-fetch: `zeke/swiss-design (ui-skills)` can be re-read;
+"some design skill" cannot. The registry command is `npm exec --yes -- ui-skills get <name>` (a bare
+`npx` is rewritten by a local hook here and fails).
+
+Say what you REJECTED, not only what you took. A fetched skill arrives with defaults that have not read
+this project: a font stack, an icon set, a colour strategy. The local system wins on specifics, because
+it has read these tokens and that register. Recording the rejection is what stops the next author
+re-importing the default and calling it the house style.

@@ -1,4 +1,4 @@
-# site/ — read DESIGN.md before you change a pixel
+# site/ : read DESIGN.md before you change a pixel
 
 **[`DESIGN.md`](DESIGN.md) is the contract for this directory.** It was extracted from the shipped
 CSS, not written as an aspiration, so it describes what the site IS. Read it first, every time, and
@@ -8,7 +8,7 @@ The root `CLAUDE.md` governs the video engine. It has nothing to say about this 
 film-craft doc map (`docs/INDEX.md`) deliberately does not index `DESIGN.md`, because a token table
 for a marketing site answers none of that map's questions. This file is how you find it instead.
 
-## The four rules a contributor breaks first
+## The five rules a contributor breaks first
 
 1. **z-index is a closed set.** `--z-under · --z-base · --z-raise · --z-badge · --z-sticky · --z-nav
    · --z-skip`. Never write a number. If `--z-raise` is not enough you need your own stacking
@@ -20,6 +20,10 @@ for a marketing site answers none of that map's questions. This file is how you 
    stylesheet. That rule is why a consolidation pass could delete 221 dead lines instead of 400.
 4. **Pick a breakpoint from {640, 760, 900}** unless you have a measured reason. The set has already
    drifted once: 900 and 860 both ship and are the same breakpoint written twice.
+5. **Record what shaped a surface, in DESIGN.md's provenance table, while you still know.** One line,
+   naming the source precisely enough to re-fetch and saying what you REJECTED from it. Three surfaces
+   already read UNRECORDED because nobody wrote it down and the session ended. Tokens survive in the
+   CSS; the reasoning only survives if you type it.
 
 ## Where the craft bar is
 
