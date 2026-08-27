@@ -1,15 +1,15 @@
-// blueprints/beats.mjs — the BEAT LIBRARY. Each factory is a pure props → array-of-richly-animated-layers
+// blueprints/beats.mjs: the BEAT LIBRARY. Each factory is a pure props → array-of-richly-animated-layers
 // for one whole beat, with the direction baked in (kinetic reveals, overshoot, cascades, count-ups, ken
 // push, cursor). Compose a video as a sequence of beats + brand content; the good motion is the default.
 //
-// A beat fixes MOTION and STRUCTURE, never copy/colour/brand — those come from props + the theme, so two
+// A beat fixes MOTION and STRUCTURE, never copy/colour/brand. Those come from props + the theme, so two
 // brands using the same beat still differ (the ledger/similarity gate enforce it). Placed in a scene as
 //   { "type": "beat", "beat": "kineticHook", "start": 0.3, "dur": 5.5, "eyebrow": "...", "to": 94, ... }
 // and expanded by `make expand`. See docs/CRAFT/BLUEPRINTS.md.
 import { INK, DIM, ACCENT, kineticHeadline, dollyNumber, caption, chip, panel, verdictChip, rowGroup, colGroup } from './kit.mjs';
 import { glyphText } from '../core/on-screen-text.js';
 
-// kineticHook — the OPEN LOOP. An eyebrow question, a hero number (count-up + pop) OR a big kinetic word,
+// kineticHook: the OPEN LOOP. An eyebrow question, a hero number (count-up + pop) OR a big kinetic word,
 // then a word-by-word subline. Front-loads the strong element (DIRECTION.md §4).
 export function kineticHook({ x = 160, y = 160, w = 1600, eyebrow, to, unit = '', decimals, word, wordSize = 300, sub,
   start = 0, dur = 5.5 } = {}) {
@@ -21,7 +21,7 @@ export function kineticHook({ x = 160, y = 160, w = 1600, eyebrow, to, unit = ''
   return out;
 }
 
-// statReveal — the PAYOFF. A hero count-up + a kinetic label. Held long (the release the build earned).
+// statReveal: the PAYOFF. A hero count-up + a kinetic label. Held long (the release the build earned).
 export function statReveal({ x = 160, y = 330, w = 1600, to, unit = '', decimals, prefix, label, start = 0, dur = 3.6 } = {}) {
   return [
     dollyNumber({ to, unit, decimals, prefix, x, y, w, size: 320, start, dur }),
@@ -29,7 +29,7 @@ export function statReveal({ x = 160, y = 330, w = 1600, to, unit = '', decimals
   ].filter(Boolean);
 }
 
-// cardCascade — a FEATURE GRID that proves density: a kinetic title + N cards that pop in one after
+// cardCascade. A FEATURE GRID that proves density: a kinetic title + N cards that pop in one after
 // another (follow-through/staging). Each card = name (accent) + desc (body) + a mono command/detail.
 export function cardCascade({ x = 197, y = 300, w = 1526, title, cards = [], cols = 3, cardW = 490,
   start = 0, dur = 8 } = {}) {
@@ -48,7 +48,7 @@ export function cardCascade({ x = 197, y = 300, w = 1526, title, cards = [], col
   ].filter(Boolean);
 }
 
-// chipGrid — NAMED things (sources, integrations, tools) as mono pills that pop in staggered, with an
+// chipGrid: NAMED things (sources, integrations, tools) as mono pills that pop in staggered, with an
 // accent footer line. Backs a "reads every X" / "works with Y" claim by SHOWING the set.
 export function chipGrid({ x = 300, y = 380, w = 1320, title, chips = [], cols = 4, footer, start = 0, dur = 6.5 } = {}) {
   const rows = [];
@@ -60,7 +60,7 @@ export function chipGrid({ x = 300, y = 380, w = 1320, title, chips = [], cols =
   ].filter(Boolean);
 }
 
-// terminalReveal — the product IS a CLI: a light panel, a typing command with a cursor, output that
+// terminalReveal. The product IS a CLI: a light panel, a typing command with a cursor, output that
 // rises in word-by-word, and an accent result. A live demo, not a screenshot of one.
 export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, prompt = '$', command,
   output = [], result, cps = 16, start = 0, dur = 6.7 } = {}) {
@@ -77,7 +77,7 @@ export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, pro
   return L.filter(Boolean);
 }
 
-// screenDive — the payoff PRODUCT surface: a kinetic title, then the real UI capture/screenshot that
+// screenDive. The payoff PRODUCT surface: a kinetic title, then the real UI capture/screenshot that
 // KEN-PUSHES in (zoom into the dashboard, not a static card), plus a mono caption. Pair with a
 // `cinematicZoom` seam at `start` for the dive-in (docs/MOTION-RECIPES.md dive-in).
 export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: cap, zoom = [1.0, 1.28], start = 0, dur = 7 } = {}) {
@@ -88,7 +88,7 @@ export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: c
   ].filter(Boolean);
 }
 
-// logoLockup — the BRAND beat: the real mark pops (ken drift), the wordmark travels in, a kinetic
+// logoLockup. The BRAND beat: the real mark pops (ken drift), the wordmark travels in, a kinetic
 // headline, a mono sub. Give the logo prominence (a deliberate element, not a bullet).
 export function logoLockup({ markX = 690, markY = 300, markW = 150, wordX = 860, wordY = 322, wordW = 470,
   mark, wordmark, headline, sub, start = 0, dur = 5.5 } = {}) {
@@ -100,19 +100,19 @@ export function logoLockup({ markX = 690, markY = 300, markW = 150, wordX = 860,
   ].filter(Boolean);
 }
 
-// logoReveal — the mark ASSEMBLES itself: a bloom swells behind it while the logo either DRAWS on
+// logoReveal. The mark ASSEMBLES itself: a bloom swells behind it while the logo either DRAWS on
 // (stroke, line-by-line) or MELTS into place from a blob (true shape-morph, optional spin), then the
 // wordmark cascades in word-by-word. This is the "rotate/draw and morph into the logo" beat. Pass a raw
 // SVG path in `mark` (the settled logo). For the melt, also pass `morphFrom` (the start shape); omit it to
 // get the stroke draw-on. Give the mark prominence (size 260+).
-// COORDS: `mark`/`morphFrom` are in the `viewBox` space (default "0 0 100 100"), NOT stage pixels — a path
+// COORDS: `mark`/`morphFrom` are in the `viewBox` space (default "0 0 100 100"), NOT stage pixels, a path
 // like "M50 10 L90 88 L10 88 Z" fills the box; the box is placed/sized by x/size. Path coords outside the
 // viewBox render off-box (invisible) with no error. Pass a matching `viewBox` if your path uses other units.
 export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', mark, morphFrom, spin = 0,
   wordmark, sub, color = ACCENT, canvasW = 1920, start = 0, dur = 5 } = {}) {
   const mx = x != null ? x : Math.round((canvasW - size) / 2);   // centre the mark box on the canvas
   const out = [
-    // a bloom that SWELLS as the mark completes (attack-decay, not a strobe) — light overflowing the mark
+    // a bloom that SWELLS as the mark completes (attack-decay, not a strobe), light overflowing the mark
     { type: 'glow', x: mx - 70, y: y - 70, w: size + 140, h: size + 140, preset: 'bloom', intensity: 0.5,
       color, flash: { attack: 0.55, decay: 1.5, peak: 0.4 }, start: start + 0.6, duration: dur - 0.6 },
   ];
@@ -130,7 +130,7 @@ export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', ma
   return out;
 }
 
-// verdictProof — a claim PROVEN, not asserted: a typing command, a stats note, and a tone-coloured
+// verdictProof. A claim PROVEN, not asserted: a typing command, a stats note, and a tone-coloured
 // verdict chip that pops (the reading first, then the verdict on it).
 export function verdictProof({ x = 360, y = 360, w = 1200, h = 300, title, prompt = '$', command, note,
   verdict = 'HOLDS', tone = 'ok', cps = 22, start = 0, dur = 5.5 } = {}) {
@@ -145,8 +145,8 @@ export function verdictProof({ x = 360, y = 360, w = 1200, h = 300, title, promp
   ].filter(Boolean);
 }
 
-// ctaEnd — the HELD end card: mark pops, the install command sits in an accent-bordered chip, a mono
-// sub, the URL. Everything holds to the final frame (exitDur 0) — never fade the payoff.
+// ctaEnd. The HELD end card: mark pops, the install command sits in an accent-bordered chip, a mono
+// sub, the URL. Everything holds to the final frame (exitDur 0), never fade the payoff.
 export function ctaEnd({ mark, markX = 895, markY = 250, markW = 130, command, sub, url, start = 0, dur = 3.6 } = {}) {
   return [
     mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.1, duration: dur - 0.1, anim: 'pop', enterDur: 0.6, exitDur: 0, fx: 'breathe' },
@@ -161,7 +161,7 @@ export function ctaEnd({ mark, markX = 895, markY = 250, markW = 130, command, s
 // make that film read as a product film are otherwise reachable only by hand-writing the JSON, which is
 // how the library ended up with ONE layer using motionBlur and ONE using untype.
 
-// typedHook — the hook that ERASES ITSELF. Types in, holds, then un-types faster than it arrived, with a
+// typedHook: the hook that ERASES ITSELF. Types in, holds, then un-types faster than it arrived, with a
 // caret throughout and no fade (`exitDur: 0`). A fade-out is a way of declining to decide how something
 // leaves; a typed line already knows. The untype rate is deliberately ~2x the type rate: writing is
 // considered, deleting is not.
@@ -180,9 +180,9 @@ export function typedHook({ text, x = 368, y = 459, w = 1400, size = 126, weight
   }];
 }
 
-// morphButton — the object that BECOMES the next thing: a labelled button that shrinks, rounds and sheds
+// morphButton. The object that BECOMES the next thing: a labelled button that shrinks, rounds and sheds
 // its label until it is a dot. Position keys cannot express this, so it runs on ONE progress variable
-// with a different POWER per property — linear height, eased width, cubic radius (square until late,
+// with a different POWER per property, linear height, eased width, cubic radius (square until late,
 // then suddenly round), and a label that leaves early on a squared term. One clock, many curves.
 export function morphButton({ label = 'GENERATE', x = 764, y = 429, w = 392, h = 222,
   fill = 'var(--accent)', ink = 'var(--on-light)', shrink = 205, at = 1.45, over = 0.4,

@@ -1,4 +1,4 @@
-// scripts/gates/scene-timing.mjs — ONE model of when a scene's layers are actually on screen.
+// scripts/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen.
 //
 // A scene JSON does not say when its layers are visible. `start` + `duration` are what the AUTHOR wrote;
 // the renderer then rewrites them. core/produce.js turns `sceneUnits` on for any cut film that is not
@@ -13,18 +13,18 @@
 //
 //   import { sceneTiming } from './scene-timing.mjs';
 //   const T = sceneTiming(sceneJson);
-//   T.spans        // [[start, end], ...] for CONTENT layers, SORTED, engine-corrected — so spans[i] is
+//   T.spans        // [[start, end], ...] for CONTENT layers, SORTED, engine-corrected, so spans[i] is
 //                  // NOT content[i]. For a per-layer question use T.contentSpans.
 //   T.contentSpans // the same spans, aligned to T.content by index, unsorted
 //   T.allSpans     // the same for every top-level layer, blackouts and specks included
-//   T.duration     // declared, else last end + a beat — the renderer's own rule
+//   T.duration     // declared, else last end + a beat, the renderer's own rule
 //   T.cutTimes     // sorted times of every real (style !== 'none') cut
 //   T.sceneUnits   // whether the engine will wrap beats as units
-//   T.edges        // [0, ...cutTimes] — the start of each beat
+//   T.edges        // [0, ...cutTimes], the start of each beat
 //   T.cutDurAt(t)  // the cut window that closes the beat at t
 //   T.unitCut(L)   // the cut that closes this layer's beat (null when the wrapper leaves it alone)
 //   T.unitEnd(L)   // where the engine actually drops the layer: unitCut + that cut's window
-//   T.scene        // the scene LOWERED (see sceneTiming below) — read cuts/seams/stings from here
+//   T.scene        // the scene LOWERED (see sceneTiming below), read cuts/seams/stings from here
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -107,7 +107,7 @@ export function intrinsicAspect(src, root = ROOT) {
   return ar;
 }
 
-// THE PICTORIAL VOCABULARY — which layer types DEPICT and which merely DECORATE. It lives here, beside
+// THE PICTORIAL VOCABULARY, which layer types DEPICT and which merely DECORATE. It lives here, beside
 // the geometry, because a gate that reasons about layers needs it: `critique` asks whether a layer
 // spanning the film is its subject or just wallpaper. It is kept in one place so two copies could never
 // disagree about what counts as a picture. (`visual-vocabulary` was the other reader, and is deleted.)
@@ -164,8 +164,8 @@ export function boxOf(L, root = ROOT) {
 // `view` is WHERE THE FRAME IS, from cameraView(). Without it the frame is the canvas box at the origin,
 // which is where the camera stands on frame 0 and nowhere else: on a film that travels between stations
 // (linear-journey lays five of them across 5760x2160) a station that FILLS the screen scored 0, because
-// every one of its pixels is off-canvas at the origin. Pass a view and both halves move with the camera —
-// the clip and the denominator — so the share stays "how much of what the viewer sees is this layer".
+// every one of its pixels is off-canvas at the origin. Pass a view and both halves move with the camera.
+// The clip and the denominator, so the share stays "how much of what the viewer sees is this layer".
 // Absent or null it is the old canvas-box answer, byte for byte.
 export function canvasShare(L, CW, CH, root = ROOT, view = null) {
   const b = boxOf(L, root);
@@ -179,7 +179,7 @@ export function canvasShare(L, CW, CH, root = ROOT, view = null) {
   return { share: Math.min(1, (vw * vh) / (V.w * V.h)), how: b.how };
 }
 
-// sceneView(d, t, CW, CH) — the stage rectangle the camera is looking at, or `null` for "no opinion,
+// sceneView(d, t, CW, CH): the stage rectangle the camera is looking at, or `null` for "no opinion,
 // measure against the canvas as before". THE WHOLE RULE IN ONE PLACE, because it has two halves and the
 // second is easy to forget: `cameraView` refuses when the CAMERA carries an angle, and it takes
 // keyframes, so it cannot see that a top-level `tilt` or `plane` modifier builds the same 3D rig with no
@@ -197,7 +197,7 @@ export function sceneView(d, t, CW, CH) {
   return cameraView(Array.isArray(d?.camera) ? d.camera : null, t, CW, CH);
 }
 
-// inView(L, view) — does this layer's box meet the camera's rectangle? `null` view means yes: the caller
+// inView(L, view): does this layer's box meet the camera's rectangle? `null` view means yes: the caller
 // has no camera opinion and must not lose a layer to one. An UNKNOWN box keeps its POSITION (boxOf's
 // contract is that the extent is unknown, never that the layer is elsewhere), so it is placed by its own
 // x/y and given no size, which can keep a layer whose top-left sits just outside a view its body is in.
@@ -208,7 +208,7 @@ export function sceneView(d, t, CW, CH) {
 // derived, so an html fragment that declares `w: 1600` and no `h` (its height comes from the fragment's
 // own aspect, which no gate can read) was judged as a zero-area POINT at its top-left corner. A 1600px
 // grid whose left edge sat 46px outside the view was therefore "not being looked at" while it filled
-// the frame, and `camera-aimed-at-nothing` invented 1.4s of emptiness in gh-wrapped — the exact
+// the frame, and `camera-aimed-at-nothing` invented 1.4s of emptiness in gh-wrapped, the exact
 // direction the paragraph above says this predicate must never take. Reading each axis's declared value
 // back keeps boxOf's contract (the extent it could not derive is still unknown) and only ever grows the
 // box, so it can delete a false finding and cannot create a true one. docs/MISTAKES.md.

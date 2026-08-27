@@ -1,13 +1,13 @@
-// showcase-build.mjs — emits the six capability clips the site's showcase rows play.
+// showcase-build.mjs: emits the six capability clips the site's showcase rows play.
 //
 //   node scripts/author/showcase-build.mjs        # → formats/scene/showcase-*.json
 //
 // THE RULE EVERY CLIP OBEYS: the capability performs itself. No clip carries an eyebrow naming what
 // it is ("kinetic typography", "shader stings"), and no clip labels its effects ("fade", "whip",
-// "flash") — a word in a box proves nothing, and six clips sharing one skeleton is exactly what the
+// "flash"). A word in a box proves nothing, and six clips sharing one skeleton is exactly what the
 // ledger flags. Each clip is a hook and a payoff, with the artifact as the argument.
 //
-// Theme is `vawe`: the real brand read off site/app/globals.css — white field, one cobalt accent.
+// Theme is `vawe`: the real brand read off site/app/globals.css, white field, one cobalt accent.
 import fs from 'node:fs';
 import { BLOCKS } from '../../blocks/index.mjs';
 
@@ -108,7 +108,7 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
 }
 
 /* ── 6. ASPECT ── the site plays this scene at three ratios side by side, so the TRIO is the
-      proof. The clip must not label its own ratio (the page already does) — it just composes. ── */
+      proof. The clip must not label its own ratio (the page already does), it just composes. ── */
 {
   const L = [
     txt({ text: 'one source', x: 60, y: 320, w: 1800, align: 'center', size: 38, font: 'mono', color: 'var(--dim)', start: 0.3, duration: 5.7, anim: 'fade', enterDur: 0.5, exitDur: 0 }),

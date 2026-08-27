@@ -1,10 +1,10 @@
-// storyboard-parse — ONE reader for the storyboard contract (docs/CRAFT/STORYBOARD-TEMPLATE.md).
+// storyboard-parse: ONE reader for the storyboard contract (docs/CRAFT/STORYBOARD-TEMPLATE.md).
 //
 // It exists because two things now read a storyboard: the gate that grades it, and the animatic that
-// PLAYS it. Two parsers would drift, and the drift would be invisible in the worst way — the gate
+// PLAYS it. Two parsers would drift, and the drift would be invisible in the worst way, the gate
 // passing a beat the animatic silently drops. The regexes below are lifted verbatim from
 // storyboard-check.mjs so the reader is unchanged, only shared.
-export const RANGE = /\(([\d.]+)\s*s\s*[–—-]\s*([\d.]+)\s*s\)/;
+export const RANGE = /\(([\d.]+)\s*s\s*[–: -]\s*([\d.]+)\s*s\)/;
 
 export function frontmatter(src) {
   const fm = /^---\n([\s\S]*?)\n---/.exec(src);
@@ -55,7 +55,7 @@ export function parseStoryboard(src) {
     const declared = f('duration');
     return {
       i, title,
-      name: title.replace(RANGE, '').replace(/^(?:Beat\s+)?\d+\s*[—:-]\s*/i, '').trim() || `Beat ${i + 1}`,
+      name: title.replace(RANGE, '').replace(/^(?:Beat\s+)?\d+\s*[, :-]\s*/i, '').trim() || `Beat ${i + 1}`,
       start: r ? parseFloat(r[1]) : null,
       end: r ? parseFloat(r[2]) : null,
       duration: durSec(declared),
@@ -63,7 +63,7 @@ export function parseStoryboard(src) {
       onscreen: onscreenLines(f('onscreen')), mechanism: f('mechanism'),
       becomes: f('becomes'), why: f('why'), emotion: f('emotion'),
       transition_in: f('transition_in'),
-      // the shot vocabulary — see docs/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
+      // the shot vocabulary: see docs/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
       // keep parsing; the gate is what asks for them.
       shot: f('shot'), camera: f('camera'), picture: f('picture'),
       // WHERE things sit. Its own field, not a placement word buried in `picture`, because that is
@@ -71,7 +71,7 @@ export function parseStoryboard(src) {
       // all: a storyboard stating a HUD corner on every beat still drew centred boxes labelled
       // "placement not stated", which is a declaration accepted and ignored.
       placement: f('placement'),
-      // style · layout · rest — the three slots their beat formula has (Element · Motion · Layout ·
+      // style · layout · rest: the three slots their beat formula has (Element · Motion · Layout ·
       // Style · Timing) and ours did not. Parsed here for the same reason `placement` above is: a slot
       // an author is told to fill and nothing reads is worse than no slot, because the storyboard looks
       // complete and the film is unchanged. `rest` is what MOVES during the hold, which is the half of
@@ -99,7 +99,7 @@ export function parseStoryboard(src) {
 
 // Fill in the clock. A beat may state a range in its heading, a `duration:`, or neither; the animatic
 // needs a real span for every beat or it cannot be played at all. Missing spans are inferred by
-// dividing whatever time is left equally, and the caller is told which ones were guessed — a guessed
+// dividing whatever time is left equally, and the caller is told which ones were guessed, a guessed
 // span is a fine thing to watch and a terrible thing to trust.
 export function timeline(sb) {
   const out = [], guessed = [];

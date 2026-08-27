@@ -1,4 +1,4 @@
-// measure-regression.mjs — proves the layout audit measures the THING and not its DECLARATION.
+// measure-regression.mjs: proves the layout audit measures the THING and not its DECLARATION.
 //
 // This repo has logged the same measurement error four times: #214 (a `<style>` block counted as
 // glyphs in the overlap check), #216 (the identical bug still live in clipped-text), #217 (two more

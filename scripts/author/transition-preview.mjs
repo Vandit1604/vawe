@@ -1,4 +1,4 @@
-// transition-preview.mjs — SEE a transition before you author it. Renders a canned two-beat scene
+// transition-preview.mjs: SEE a transition before you author it. Renders a canned two-beat scene
 // (beat A → beat B) through one transition and lays the window out as a filmstrip → /tmp/transition-preview.png,
 // so you can read its motion, direction and easing without building a whole video first.
 //
@@ -31,7 +31,7 @@ const TIMING = env('TIMING', 'smooth');
 const DUR = Math.max(0.2, Math.min(3, +env('DUR', '0.7')));
 let MECH = env('MECH', '');
 
-// mechanism registries — a transition belongs to exactly one (docs/CRAFT/TRANSITIONS.md).
+// mechanism registries: a transition belongs to exactly one (docs/CRAFT/TRANSITIONS.md).
 const REG = { seam: SEAM_FX, cut: Object.keys(PRESENTATIONS).filter((n) => n !== 'none'), sting: SHADER_FX, anim: [...ANIM_NAMES] };
 
 if (!FX) {
@@ -44,15 +44,15 @@ if (!MECH) {
   const owners = Object.keys(REG).filter((m) => REG[m].includes(FX));
   MECH = owners.includes('seam') ? 'seam' : owners[0] || 'seam';
 }
-if (!REG[MECH]) { console.error(`✗ unknown MECH "${MECH}" — one of: ${Object.keys(REG).join(', ')}`); process.exit(2); }
+if (!REG[MECH]) { console.error(`✗ unknown MECH "${MECH}". One of: ${Object.keys(REG).join(', ')}`); process.exit(2); }
 if (!REG[MECH].includes(FX)) {
   console.error(`✗ "${FX}" is not a ${MECH} transition. ${MECH}s: ${REG[MECH].join(', ')}`);
   const elsewhere = Object.keys(REG).filter((m) => REG[m].includes(FX));
-  if (elsewhere.length) console.error(`  (it IS a ${elsewhere.join('/')} transition — pass MECH=${elsewhere[0]})`);
+  if (elsewhere.length) console.error(`  (it IS a ${elsewhere.join('/')} transition, pass MECH=${elsewhere[0]})`);
   process.exit(2);
 }
 if ((MECH === 'seam' || MECH === 'cut') && !TIMINGS[TIMING]) {
-  console.error(`✗ unknown TIMING "${TIMING}" — one of: ${Object.keys(TIMINGS).join(', ')}`); process.exit(2);
+  console.error(`✗ unknown TIMING "${TIMING}". One of: ${Object.keys(TIMINGS).join(', ')}`); process.exit(2);
 }
 
 // ---- the canned two-beat scene: solid A (blue) → solid B (orange), swapped by the transition ----
@@ -65,8 +65,8 @@ const panel = (t, dur, color, extra) => ({ type: 'rect', x: 0, y: 0, w: W, h: H,
 const beatA = [panel(0, T, '#12233f', { exitDur: 0 }), label(0, 'A', '#fff', { duration: T, exitDur: 0 })];
 const beatB = [panel(T, END - T, '#f26b3a', { enterDur: 0 }), label(T, 'B', '#fff', { duration: END - T, enterDur: 0 })];
 
-// author the canned scene through the UNIFIED transition surface (core/transitions-lower.js) — the same
-// one an author writes — so the preview dogfoods the API. `mech` is passed explicitly so MECH=cut vs
+// author the canned scene through the UNIFIED transition surface (core/transitions-lower.js), the same
+// one an author writes, so the preview dogfoods the API. `mech` is passed explicitly so MECH=cut vs
 // MECH=seam previews the same ambiguous fx (slide/fade/wipe) as each mechanism.
 const scene = { module: 'scene', aspect: '16:9', duration: END, theme: 'linear', layers: [...beatA, ...beatB] };
 if (MECH === 'anim') { // a layer entrance/exit: sugar over anim/out, window = dur
@@ -119,7 +119,7 @@ for (let k = 0; k < frames.length; k++) {
 }
 await browser.close(); server.close();
 
-// Same base as the frames above, and loud on failure — the split that hid reveal.mjs's missing sheet
+// Same base as the frames above, and loud on failure. The split that hid reveal.mjs's missing sheet
 // was the identical shape here.
 const sheet = scratch('transition-preview.png');
 ffmpegOrDie(['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]), '-filter_complex', `hstack=inputs=${cells.length}`, '-frames:v', '1', sheet], sheet, 'transition strip');

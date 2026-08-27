@@ -1,11 +1,11 @@
 // WHAT IS LEFT OF THIS GATE, AND WHY IT NO LONGER OWNS A MATCHER.
 //
 // It was written for a denylist .dockerignore, where a new directory joined the build context the day
-// it was created — invisible in `git status`, unmentioned in any COPY, and shipped to the daemon every
+// it was created, invisible in `git status`, unmentioned in any COPY, and shipped to the daemon every
 // build (67M of assets/baked, 5M of assets/gen). .dockerignore is an ALLOWLIST now: `**` first, then
 // the paths the two Dockerfiles COPY. A directory nobody names is simply not in the context, so that
-// whole failure has no subject any more, and the reverse drift — a COPY whose path the ignore file
-// forgot — is `make docker-check` (scripts/site/docker-context-check.mjs), which reads the COPY lines.
+// whole failure has no subject any more, and the reverse drift, a COPY whose path the ignore file
+// forgot, is `make docker-check` (scripts/site/docker-context-check.mjs), which reads the COPY lines.
 //
 // The SIZE budget still has a subject: an allowed directory can grow (site/ is most of the context
 // today). But the walker this file used to carry re-implemented Docker's glob, and under an allowlist
@@ -22,7 +22,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 
 // Generous enough that ordinary growth does not trip it, tight enough that a whole asset directory
 // slipping in does. The context was 15.8M when this was written and 49M when it moved to an allowlist.
-// MiB, matching `du`'s own unit — see the reading of `du -sk` below.
+// MiB, matching `du`'s own unit: see the reading of `du -sk` below.
 const BUDGET_MB = 60;
 
 // A throwaway image that copies the context and measures it. `-f -` reads the Dockerfile from stdin,
@@ -53,7 +53,7 @@ if (!Number.isFinite(totalKb)) {
 }
 // `du -sk` counts 1024-BYTE BLOCKS. Dividing by 1000 gave a figure that was neither MB nor MiB and
 // was then compared against a budget written in MiB (the 15.8M and 49M in the comment above are du's
-// own M, which is MiB) — so the number on screen ran ~2.4% high against its own yardstick.
+// own M, which is MiB), so the number on screen ran ~2.4% high against its own yardstick.
 const mib = totalKb / 1024;
 console.log(`docker build context: ${mib.toFixed(1)}MiB (budget ${BUDGET_MB}MiB)`);
 for (const l of lines.filter((l) => /^\d+\s+\/ctx\/./.test(l)))

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/gates/snap-blocks.mjs — the REGRESSION NET FOR THE BLOCK LIBRARY. snap-scenes sweeps the
+// scripts/gates/snap-blocks.mjs: the REGRESSION NET FOR THE BLOCK LIBRARY. snap-scenes sweeps the
 // shipped films; this sweeps the 179 catalog entries in blocks/, and it exists because snap-scenes
 // cannot see a block at all.
 //
@@ -11,12 +11,12 @@
 //
 // WHAT IS HASHED: the LAYER JSON each factory returns, not a rendered pixel.
 //   A factory is a pure props → layer-JSON function (the contract at the top of blocks/index.mjs), and
-//   every visual decision it owns — colour, size, position, weight, the html string, the timing — is a
+//   every visual decision it owns, colour, size, position, weight, the html string, the timing, is a
 //   literal in that JSON. Identical layer JSON + identical engine + identical theme is identical pixels,
 //   and the engine half is already proved across 106 films by snap-scenes. So the JSON is exactly the
 //   missing half, and it costs one Node process (~0.3s) instead of 179 browser renders.
-//   THE LIMIT, stated rather than implied: a restyle that lives OUTSIDE the factory — a token in
-//   themes/*.json that `var(--card)` resolves to, CSS in core/ — changes block pixels and leaves this
+//   THE LIMIT, stated rather than implied: a restyle that lives OUTSIDE the factory, a token in
+//   themes/*.json that `var(--card)` resolves to, CSS in core/. Changes block pixels and leaves this
 //   gate green. That is snap-scenes' and the theme gates' subject, not this one's. A gate that claimed
 //   both would be the `make slop` mistake again: confidence over evidence it never had.
 //
@@ -46,7 +46,7 @@ const safeName = (name) => name.replace(/[^a-z0-9.]/gi, '_');
 // STATE THE POPULATION, and refuse one this checkout should not have. Two numbers, because they are
 // two different subjects: the CATALOG entries are what gets swept, and the module files are what the
 // entries are drawn from. Only the second is a file population, so only the second goes through the
-// census — and it is honest about what that buys: blocks/ is fully git-tracked, and a module missing
+// census, and it is honest about what that buys: blocks/ is fully git-tracked, and a module missing
 // from disk throws out of the ESM import above rather than reaching here, so the census's value is the
 // ANCHOR arm (a worktree seeing fewer modules than the main checkout it shares a .git with) and a
 // stated N. The no-baseline refusal at the bottom is what covers the blind-run case for this gate.
@@ -94,7 +94,7 @@ for (const entry of entries) {
   const props = { ...(entry.props || {}), ...STAGE };
   let layers, again;
   try { layers = fam({ ...props }); again = fam({ ...props }); }
-  catch (e) { errored.push(`${entry.name}: threw — ${(e && e.message || e).toString().slice(0, 90)}`); continue; }
+  catch (e) { errored.push(`${entry.name}: threw, ${(e && e.message || e).toString().slice(0, 90)}`); continue; }
 
   // A factory that answers differently to the same props has no baseline worth saving, and it breaks
   // the contract blocks/index.mjs states ("Deterministic: no Date/random"). Quarantine it by name
@@ -105,15 +105,15 @@ for (const entry of entries) {
   const file = path.join(SNAP, `${safeName(entry.name)}.json`);
   // Round-trip through JSON before comparing. A layer carrying `foo: undefined` survives in memory and
   // vanishes when the baseline is written, so an unnormalised `now` would differ from its OWN baseline
-  // on the very next run — a gate inventing findings, which this repo treats as a regression.
+  // on the very next run. A gate inventing findings, which this repo treats as a regression.
   let now;
   try { now = JSON.parse(JSON.stringify({ family: entry.family, props, layers })); }
-  catch (e) { errored.push(`${entry.name}: layers are not JSON — ${e.message.slice(0, 60)}`); continue; }
+  catch (e) { errored.push(`${entry.name}: layers are not JSON, ${e.message.slice(0, 60)}`); continue; }
   if (SAVE) { fs.writeFileSync(file, JSON.stringify(now, null, 1) + '\n'); saved.push(entry.name); continue; }
   if (!fs.existsSync(file)) { nobaseline.push(entry.name); continue; }
   let base;
   try { base = JSON.parse(fs.readFileSync(file, 'utf8')); }
-  catch (e) { errored.push(`${entry.name}: unreadable baseline — ${e.message.slice(0, 60)}`); continue; }
+  catch (e) { errored.push(`${entry.name}: unreadable baseline, ${e.message.slice(0, 60)}`); continue; }
   const d = diffLeaves(base, now);
   if (d.length) changed.push({ name: entry.name, diffs: d }); else identical.push(entry.name);
 }
@@ -128,7 +128,7 @@ if (SAVE) {
 }
 console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ non-deterministic: ${nondeterministic.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}`);
 if (nobaseline.length) {
-  console.log(`\n○ NO BASELINE (nothing to diff against — run \`make snap-blocks SAVE=1\`):`);
+  console.log(`\n○ NO BASELINE (nothing to diff against, run \`make snap-blocks SAVE=1\`):`);
   for (const n of nobaseline) console.log(`  ${n}`);
 }
 if (nondeterministic.length) { console.log(`\n✗ NON-DETERMINISTIC:`); for (const q of nondeterministic) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
@@ -137,8 +137,8 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 // A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. verify/snap/ is gitignored (.gitignore:32), so a
 // fresh clone has no baselines and every block lands in `nobaseline`. snap-scenes learned this the hard
 // way (docs/MISTAKES.md #377, #420): a green tick over zero comparisons is the strongest-sounding
-// statement the repo makes and it would be checking nothing. A FEW no-baseline entries stay soft —
-// that is a newly added block waiting for SAVE=1, and failing there makes adding a block feel like
+// statement the repo makes and it would be checking nothing. A FEW no-baseline entries stay soft.
+// That is a newly added block waiting for SAVE=1, and failing there makes adding a block feel like
 // breaking the build.
 if (!identical.length && !changed.length && nobaseline.length) {
   console.error(`\n✗ nothing to compare: all ${nobaseline.length} block(s) lack a baseline, so this gate checked NOTHING.`);

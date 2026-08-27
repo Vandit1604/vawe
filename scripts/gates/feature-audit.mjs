@@ -1,5 +1,5 @@
-// scripts/gates/feature-audit.mjs — static utilization report: what the framework OFFERS vs what the
-// authored videos actually USE. No browser, no render — pure JSON walk. This is the another engine
+// scripts/gates/feature-audit.mjs, static utilization report: what the framework OFFERS vs what the
+// authored videos actually USE. No browser, no render. Pure JSON walk. This is the another engine
 // `lint`/`inspect` analogue: keep authored content honest against the framework's real capability,
 // and surface the newest/best primitives (group layout, spring easing, multi-line fit) that videos
 // haven't adopted yet. WARN-tier: always exits 0 (a coaching report, not a blocker).
@@ -47,13 +47,13 @@ function scan(obj) {
 const vids = files.map((f) => ({ f, reel: isReel(f), ...scan(JSON.parse(fs.readFileSync(path.join(DIR, f)))) }));
 const ship = vids.filter((v) => !v.reel);
 
-// ---- 1. vocabulary coverage (across ALL authored files — reels prove a primitive exists) ----
+// ---- 1. vocabulary coverage (across ALL authored files, reels prove a primitive exists) ----
 const allPresets = new Set(), allCuts = new Set(), allFx = new Set();
 for (const v of vids) { Object.keys(v.presets).forEach((p) => allPresets.add(p)); v.cuts.forEach((c) => allCuts.add(c)); v.fx.forEach((x) => allFx.add(x)); }
 const coverage = (label, offered, used) => {
   const unused = offered.filter((x) => !used.has(x));
   const pct = Math.round((used.size / offered.length) * 100);
-  console.log(`  ${label.padEnd(22)} ${String(used.size).padStart(2)}/${offered.length}  (${pct}%)  unused: ${unused.join(', ') || '—'}`);
+  console.log(`  ${label.padEnd(22)} ${String(used.size).padStart(2)}/${offered.length}  (${pct}%)  unused: ${unused.join(', ') || '-'}`);
 };
 console.log('\n=== VOCABULARY COVERAGE (framework offers → ever used by any video) ===');
 coverage('kinetic presets', Object.keys(PRESETS), allPresets);
@@ -69,7 +69,7 @@ for (const v of ship) console.log('  ' + v.f.replace('.json', '').padEnd(20) + c
 const totals = cols.map((c) => ship.filter((v) => has(v, c)).length);
 console.log('  ' + `TOTAL /${ship.length}`.padEnd(20) + totals.map((t) => String(t).padEnd(7)).join(''));
 const never = cols.filter((c, i) => totals[i] === 0);
-if (never.length) console.log(`\n  ⚠ NEVER adopted by any shipped video: ${never.join(', ')}  — the newest/best primitives are going unused.`);
+if (never.length) console.log(`\n  ⚠ NEVER adopted by any shipped video: ${never.join(', ')}. The newest/best primitives are going unused.`);
 
 // ---- 3. preset-monotony warnings (shipped videos) ----
 console.log('\n=== ENTRANCE VARIETY (shipped videos) ===');
@@ -79,7 +79,7 @@ for (const v of ship) {
   if (total < 5) continue;
   const [top, n] = Object.entries(v.presets).sort((a, b) => b[1] - a[1])[0];
   const share = n / total;
-  if (share > 0.5) { console.log(`  ⚠ ${v.f}: "${top}" is ${Math.round(share * 100)}% of ${total} entrances — vary it (21 presets available).`); warned++; }
+  if (share > 0.5) { console.log(`  ⚠ ${v.f}: "${top}" is ${Math.round(share * 100)}% of ${total} entrances, vary it (21 presets available).`); warned++; }
 }
 if (!warned) console.log('  ✓ no single preset dominates any shipped video');
 

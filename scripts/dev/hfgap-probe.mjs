@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/dev/hfgap-probe.mjs — writes formats/scene/_probe-hfgap.json.
+// scripts/dev/hfgap-probe.mjs: writes formats/scene/_probe-hfgap.json.
 //
 // It BAKES the blocks/vfx.mjs factories to concrete layers rather than emitting `{"type":"block"}`
 // sugar, because vfx.mjs is not wired into blocks/index.mjs yet (a registry refactor owns that file).
@@ -60,7 +60,7 @@ const scene = {
   module: 'scene', theme, aspect: '16:9', duration,
   audio: { silent: true, _why: 'a block probe, not a film: the subject is what each block draws, and a bed would only add a thing to check' },
   // THE BACKDROP FOLLOWS THE THEME'S OWN DOMINANCE, read off its palette rather than fixed. `plain`
-  // paints `bg.paperBase`, and themes/linear.json declares a WHITE paper while its text is #f7f8f8 —
+  // paints `bg.paperBase`, and themes/linear.json declares a WHITE paper while its text is #f7f8f8,
   // so a fixed `plain` puts white type on white paper for every layer in the probe, not just mine.
   bg: [{ preset: dark ? 'dark' : 'paper', from: 0, to: duration }],
   layers,

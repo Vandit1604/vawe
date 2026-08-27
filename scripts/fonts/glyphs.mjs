@@ -1,11 +1,11 @@
-// glyphs.mjs — turn a vendored woff2 into a three.js "typeface JSON" of glyph OUTLINES.
+// glyphs.mjs: turn a vendored woff2 into a three.js "typeface JSON" of glyph OUTLINES.
 //
 //   node scripts/fonts/glyphs.mjs Anybody
 //   node scripts/fonts/glyphs.mjs assets/fonts/Fraunces.woff2 --weight 900
 //   make glyphs FONT=Anybody WEIGHT=700
 //
 // three.js TextGeometry extrudes vector outlines, so it cannot read a woff2 the way the browser
-// does — it needs the contours as numbers. Every font in this repo is woff2 (Brotli-compressed,
+// does. It needs the contours as numbers. Every font in this repo is woff2 (Brotli-compressed,
 // with a transformed `glyf` table), so the chain is:
 //
 //   woff2 --wawoff2--> ttf --fontkit--> outlines --> typeface JSON
@@ -15,7 +15,7 @@
 // only reason adding two dependencies is acceptable at all.
 //
 // WHY fontkit AND NOT opentype.js: every face in assets/fonts/ is a VARIABLE font, and opentype.js
-// reads only the default master. Anybody's default master is wght=100 — Thin. Extracting it would
+// reads only the default master. Anybody's default master is wght=100, Thin. Extracting it would
 // have produced a real-looking file that renders the brand headline in a hairline weight, i.e. the
 // silent-substitution failure this repo has been burned by before (MISTAKES: the wrong font shipped
 // because nothing said it had been swapped). fontkit applies gvar deltas, so we bake the weight we
@@ -91,7 +91,7 @@ function codepointsFor({ charset, chars }) {
 // mercy of the last bit. At 1000-2000 units/em, integers are well below a pixel at any render size.
 const r = (n) => Math.round(n);
 
-// three's FontLoader reads curve arguments END-POINT FIRST, then the controls — the inverse of every
+// three's FontLoader reads curve arguments END-POINT FIRST, then the controls, the inverse of every
 // canvas/path API. Getting this backwards yields a file that parses fine and renders as knotted
 // spaghetti, so the reversal is done here, once, deliberately.
 //   q  endX endY  cpX cpY
@@ -106,7 +106,7 @@ function outlineFor(glyphPath) {
       case 'quadraticCurveTo': out.push('q', r(a[2]), r(a[3]), r(a[0]), r(a[1])); break;
       case 'bezierCurveTo': out.push('b', r(a[4]), r(a[5]), r(a[0]), r(a[1]), r(a[2]), r(a[3])); break;
       case 'closePath': break; // ShapePath closes each subpath itself
-      default: die(`unhandled path command "${c.command}" — the outline would be silently incomplete`);
+      default: die(`unhandled path command "${c.command}". The outline would be silently incomplete`);
     }
   }
   return out.join(' ');
@@ -134,11 +134,11 @@ let font = base;
 if (axis) {
   const want = args.weight ?? DEFAULT_WEIGHT;
   weight = Math.min(axis.max, Math.max(axis.min, want));
-  if (weight !== want) console.log(`  ⚠ weight ${want} is outside this font's wght axis [${axis.min}, ${axis.max}] — clamped to ${weight}`);
+  if (weight !== want) console.log(`  ⚠ weight ${want} is outside this font's wght axis [${axis.min}, ${axis.max}], clamped to ${weight}`);
   font = base.getVariation({ wght: weight });
 } else if (args.weight != null) {
   // Accepting a flag and then ignoring it is exactly how the wrong font ships. Say so.
-  die(`${sourceRel} is a STATIC font (no wght axis) — --weight ${args.weight} cannot be applied. Drop the flag, or vendor the weight you want as its own woff2.`);
+  die(`${sourceRel} is a STATIC font (no wght axis): --weight ${args.weight} cannot be applied. Drop the flag, or vendor the weight you want as its own woff2.`);
 }
 
 const { list: codepoints, label: charsetLabel, ranges } = codepointsFor(args);
@@ -148,7 +148,7 @@ const missing = [];
 for (const cp of codepoints) {
   const ch = String.fromCodePoint(cp);
   const g = font.glyphForCodePoint(cp);
-  if (!g || g.id === 0) { missing.push(cp); continue; } // .notdef — a blank box is not a glyph
+  if (!g || g.id === 0) { missing.push(cp); continue; } // .notdef, a blank box is not a glyph
   glyphs[ch] = {
     ha: r(g.advanceWidth),
     x_min: r(g.bbox.minX),

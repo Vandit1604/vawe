@@ -1,4 +1,4 @@
-// scripts/author/lightfield-model-check.mjs — is lightfield-model.mjs a model of the field, or just
+// scripts/author/lightfield-model-check.mjs: is lightfield-model.mjs a model of the field, or just
 // plausible arithmetic?
 //
 //   node scripts/author/lightfield-model-check.mjs

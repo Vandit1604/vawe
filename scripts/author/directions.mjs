@@ -1,4 +1,4 @@
-// scripts/author/directions.mjs — THE CREATIVE DIRECTIONS a brief can be taken in.
+// scripts/author/directions.mjs: THE CREATIVE DIRECTIONS a brief can be taken in.
 //
 // A direction commits to three things at once: the THREAD that holds the film across its cuts
 // (docs/CRAFT/FILM-STRUCTURE.md), the PACE (median beat length, which decides the beat count for a fixed
@@ -9,8 +9,8 @@
 // that file's usage guard, so importing it without CLI arguments exited before the table existed. A
 // vocabulary no second reader can reach is a private table.
 //
-// Each `why` is already written as a forced choice WITH ITS CONSEQUENCE — "buys total visual freedom …
-// at a cut rate that leaves no room for a slow entrance" — which is exactly the register a question
+// Each `why` is already written as a forced choice WITH ITS CONSEQUENCE, "buys total visual freedom …
+// at a cut rate that leaves no room for a slow entrance", which is exactly the register a question
 // needs. Anything asking a person to pick a direction should render these, not restate them.
 // ── the directions ─────────────────────────────────────────────────────────────────────────────────
 // Ordered so that taking the first N gives the widest spread available: thread, pace band and preset

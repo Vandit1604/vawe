@@ -46,7 +46,7 @@ destination: web
      the first.
 
   THE ONE RISK: four demonstrations in a held frame can read as a feature list. The defence is the
-  escalation — if beat 5 does not visibly displace beats 2 to 4, the film is a list and we stop and
+  escalation, if beat 5 does not visibly displace beats 2 to 4, the film is a list and we stop and
   rethink it. That is the thing to check on the style frames, before any motion exists.
 
   SOUND. Not decided here, deliberately. `docs/CRAFT/SOUND.md` landed today and a J-cut is being built

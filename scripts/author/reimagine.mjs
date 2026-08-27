@@ -1,4 +1,4 @@
-// scripts/author/reimagine.mjs — rebuild the flagged beats through the taste library. Run once.
+// scripts/author/reimagine.mjs: rebuild the flagged beats through the taste library. Run once.
 import fs from 'node:fs';
 // index.mjs is the registry, not a barrel of 200 re-exported names. Alias it back to the `B.<factory>`
 // shape this file was written in; `TOKENS` rides along because the colours here come from the kit.
@@ -71,7 +71,7 @@ push(mini(54, 33.8, 2.0), mini(96, 35.9, 2.5));
 push(...B.stripeCard({ x: 1260, y: 400, w: 420, start: 40.8, dur: 2.6 }));
 push({ type: 'text', text: 'stripe.com, rebuilt', x: 1260, y: 856, font: 'mono', size: 18, color: T.dim, start: 41.3, duration: 2.1 });
 
-// 15 ── capture: the click has a consequence — a deploy success card
+// 15 ── capture: the click has a consequence, a deploy success card
 L().forEach((l) => { const s = l.start ?? 0; if (s >= 44 && s < 48.4 && ((l.type === 'rect' && l.x === 660) || has(l, 'make capture') || has(l, 'Deploy to production') || l.text === 'Confirm')) l.duration = +(46.8 - s).toFixed(2); });
 push({ type: 'group', x: 700, y: 380, w: 620, layout: 'row', items: 'center', gap: 16, pad: 22, bg: T.card, radius: 14, border: `1px solid ${T.greenSoft}`, elevation: 1, start: 46.9, duration: 1.9, anim: 'rise', enterDur: 0.4, children: [
   { type: 'group', bg: T.green, radius: 100, pad: '8px 12px', children: [{ type: 'text', text: '✓', size: 22, weight: 700, color: '#fff' }] },

@@ -1,4 +1,4 @@
-// scripts/gates/plan-vs-render.mjs — DOES THE FILM DO WHAT THE PLAN SAID?
+// scripts/gates/plan-vs-render.mjs: DOES THE FILM DO WHAT THE PLAN SAID?
 //
 // storyboard-check reads the plan and grades it against ITSELF: are the beats timed, does each one name
 // what it becomes, does the last one end on a change. Every one of those can pass on a plan for a film
@@ -26,7 +26,7 @@
 // Two frontmatter decisions never reach it, and both are decisions ABOUT the render: `spectacle:` names
 // the film's one loud moment, and `pace:` budgets its seconds per idea. So this gate reads the storyboard
 // itself as a second input, alongside the sidecar, and joins those two lines to the film. Without that
-// they are fields an author fills and no code reads, which is worse than no field at all — the plan looks
+// they are fields an author fills and no code reads, which is worse than no field at all, the plan looks
 // complete and the film is unchanged (docs/MISTAKES.md #213, #369, #373, #386).
 //
 //   node scripts/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
@@ -85,7 +85,7 @@ const s = (n) => `${(+n).toFixed(2)}s`;
 
 // ---------- the peak, asked about even when there is no plan ----------
 // THE GAP THIS CLOSES. Everything else in this file needs a sidecar, so the film most likely to have no
-// peak — the one nobody storyboarded — was the one film never asked about it. Whether a scene NOMINATES
+// peak (the one nobody storyboarded) was the one film never asked about it. Whether a scene NOMINATES
 // its loud moment needs no plan at all: the `spectacle` block is either in the JSON or it is not.
 //
 // WHY THE QUESTION IS WORTH ASKING. `effect-soup` fails a film that shouts on every beat and
@@ -114,7 +114,7 @@ function nominationNote() {
   // too, through `T.scene`.
   //
   // IT STAYS ON THE AUTHORED SURFACE, deliberately. `T.scene.cuts` would carry the lowered transitions,
-  // and adding seams and stings to it would read as the same tidy-up — but it is not one. A raw `stings`
+  // and adding seams and stings to it would read as the same tidy-up, but it is not one. A raw `stings`
   // block has never counted as structure here, and folding those in re-tunes a trigger #389 measured on
   // purpose (24 of 110 scenes; the seams/stings set adds 16 more). That is a decision about how loud this
   // advisory should be, not about lowering, and it does not get made in passing.
@@ -307,7 +307,7 @@ if (!spanned.length) {
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
 // Which beat did the SPECTACLE line name? Two ways, both literal: an ordinal ("beat 4"), or exactly one
-// beat name quoted inside the line. Anything else is unresolved and SAID to be unresolved — guessing
+// beat name quoted inside the line. Anything else is unresolved and SAID to be unresolved, guessing
 // which beat the author meant would put a finding on a film for a sentence this gate misread.
 function plannedSpectacleBeat(line, list) {
   const m = /\bbeat\s*#?\s*(\d+)\b/i.exec(line);

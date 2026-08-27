@@ -1,4 +1,4 @@
-// scripts/media/vo-captions.mjs — VO CAPTION BUILDER. Turns a voiceover word-timing sidecar
+// scripts/media/vo-captions.mjs: VO CAPTION BUILDER. Turns a voiceover word-timing sidecar
 // (audio.voWords → [{ w, t }]) into timed caption layers the scene engine reads: a top-level
 // `captions` array of { t0, t1, text, words } plus a `captionStyle` (core/captions.js CAP_STYLES).
 // Deterministic + pure: reads files only, no TTS, no speech recognition, no network/clock/random.
@@ -27,14 +27,14 @@ const style = argVal('--style') || 'weightShift';
 const group = Math.max(1, parseInt(argVal('--group') || String(DEFAULT_GROUP), 10) || DEFAULT_GROUP);
 
 if (!CAP_STYLES[style]) {
-  console.error(`unknown --style "${style}" — known styles: ${CAP_STYLE_NAMES.join(', ')}`);
+  console.error(`unknown --style "${style}", known styles: ${CAP_STYLE_NAMES.join(', ')}`);
   process.exit(2);
 }
 
 const scene = JSON.parse(fs.readFileSync(file, 'utf8'));
 const voRef = scene.audio && scene.audio.voWords;
 if (!voRef) {
-  console.error(`no audio.voWords in ${file} — nothing to caption (expected a path to a [{w,t}] sidecar)`);
+  console.error(`no audio.voWords in ${file}: nothing to caption (expected a path to a [{w,t}] sidecar)`);
   process.exit(2);
 }
 

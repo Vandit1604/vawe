@@ -1,4 +1,4 @@
-// site-assets.mjs — the ONE way engine renders become site assets.
+// site-assets.mjs: the ONE way engine renders become site assets.
 //
 // out/<scene>.mp4  →  site/public/assets/<path>.mp4 (+ .jpg poster)
 //
@@ -37,13 +37,13 @@ const MANIFEST = [
   // The hero/footer bookend band. The ONLY contentless scene: no text, no blocks, no stings.
   // Every other entry in this table demonstrates a capability and therefore has words in it,
   // which behind a headline read as drifting smudges. Narrow (1280) because the page blurs it
-  // to 30px and multiplies it over cobalt — it is judged on luminance movement, not detail.
+  // to 30px and multiplies it over cobalt. It is judged on luminance movement, not detail.
   ['hero',   'site-backdrop',      'site-backdrop',          'backdrop.mp4',               1280, 1.0, 16 / 9],
 
-  // homepage gallery strip — same scenes as the showcase rows, smaller
+  // homepage gallery strip, same scenes as the showcase rows, smaller
   // The `big` cell spans both columns, so it is the only one that renders near full width and the
   // only one encoded at 1920. Everything under it sits in a half-column: 1120 is already generous.
-  // Keep the non-big count EVEN — the grid is two up, and an odd tail leaves a hole in the last row.
+  // Keep the non-big count EVEN: the grid is two up, and an odd tail leaves a hole in the last row.
   ['strip',  'looks',              'looks',                  'looks.mp4',                  1920, 13.2, 16 / 9],
   ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1120, 4.0, 16 / 9],
   ['strip',  'showcase-type',      'showcase-type',          'type.mp4',                   1120, 3.0, 16 / 9],
@@ -65,7 +65,7 @@ const MANIFEST = [
   // midpoint poster would ship an almost empty still. 6.0 is the chart.
   ['showcase', 'ditherkit',        'ditherkit',              'showcase/dither.mp4',       1280, 6.0, 16 / 9],
 
-  // the aspect trio — one scene, three ratios. Each box on the page carries the TRUE ratio.
+  // the aspect trio: one scene, three ratios. Each box on the page carries the TRUE ratio.
   ['aspect', 'showcase-aspect',    'showcase-aspect.16x9',   'showcase/aspect-169.mp4',     800, 2.0, 16 / 9],
   ['aspect', 'showcase-aspect',    'showcase-aspect.9x16',   'showcase/aspect-916.mp4',     360, 2.0, 9 / 16],
   ['aspect', 'showcase-aspect',    'showcase-aspect.1x1',    'showcase/aspect-11.mp4',      520, 2.0, 1],
@@ -145,7 +145,7 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
   // row beneath it: three new entries added below the aspect trio silently never encoded, and the
   // only output was the one error about the trio. A build step that stops at the first problem
   // reports one problem per run, which is the slowest possible way to fix five.
-  if (!fs.existsSync(src)) { console.error(`✗ ${dest}: no render at out/${render}.mp4 — run with --render`); missingRenders.push(dest); continue; }
+  if (!fs.existsSync(src)) { console.error(`✗ ${dest}: no render at out/${render}.mp4, run with --render`); missingRenders.push(dest); continue; }
 
   const { w, h } = probe(src);
 
@@ -175,7 +175,7 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
   const outH = Math.round((width * h) / w / 2) * 2;       // even height; ratio preserved exactly
   const srcTime = fs.statSync(src).mtimeMs;
   const dstTime = fs.existsSync(dst) ? fs.statSync(dst).mtimeMs : 0;
-  // Staleness is not only "the source moved". Editing THIS FILE — a width, a poster second — must
+  // Staleness is not only "the source moved". Editing THIS FILE, a width, a poster second, must
   // also invalidate the output, and mtime cannot see that: changing stings from 1920 to 1120 was
   // reported "up to date" and the 1920 encode stayed on the site, manifest and reality disagreeing
   // in silence. Ask the existing file what shape it actually is; ffprobe is already a dependency
@@ -222,8 +222,8 @@ if (stalerender) {
   process.exitCode = 1;
 }
 if (mismatched) {
-  console.error(`\n✗ ${mismatched} render(s) have the wrong aspect — NOT written. Fix the scene, re-render, re-run.`);
+  console.error(`\n✗ ${mismatched} render(s) have the wrong aspect, NOT written. Fix the scene, re-render, re-run.`);
   process.exit(1);
 }
-if (DRY) console.log(stale ? `\n~ ${stale} asset(s) stale — re-run without --check` : '\n✓ all site assets current');
-else console.log(`\n✓ ${wrote} asset(s) written${wrote ? '' : ' (all current — use --force to rebuild)'}`);
+if (DRY) console.log(stale ? `\n~ ${stale} asset(s) stale, re-run without --check` : '\n✓ all site assets current');
+else console.log(`\n✓ ${wrote} asset(s) written${wrote ? '' : ' (all current, use --force to rebuild)'}`);

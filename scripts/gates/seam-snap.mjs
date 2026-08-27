@@ -1,17 +1,17 @@
-// scripts/gates/seam-snap.mjs — SAMPLE THE SEAMS, NOT THE CENTERS.
+// scripts/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS.
 //
-// The another engine lesson (and our own docs/MISTAKES.md #138): the highest-value render bugs — a black
-// flash on a transition, a morph that reads as a collision — live INSIDE the transition overlap, which
+// The another engine lesson (and our own docs/MISTAKES.md #138): the highest-value render bugs, a black
+// flash on a transition, a morph that reads as a collision. Live INSIDE the transition overlap, which
 // every center-sampling gate steps right over. `make beats` samples beat midpoints; `make audit` judges
 // the settled frame; `make probe` checks purity. None of them look at the 3-frame window where two beats
 // cross. This gate does exactly that: for every authored transition boundary (cut · seam · sting · a
 // beat's start cluster), it pulls the frames straddling the boundary out of the RENDERED mp4 and flags a
-// luminance DIP that is present at the seam but not just outside it — the signature of a flash.
+// luminance DIP that is present at the seam but not just outside it, the signature of a flash.
 //
 //   node scripts/gates/seam-snap.mjs formats/scene/<file>.json     ·     make seam-check D=<file>
 //
 // It reads the real rendered pixels (not renderFrame) because a seam is composited during the render
-// (core/seams.js), so it only exists in the mp4 — which is the whole reason a DOM-signature gate can't
+// (core/seams.js), so it only exists in the mp4, which is the whole reason a DOM-signature gate can't
 // see it. Requires out/<name>.mp4 (render first). Writes /tmp/seams/<name>.png so the eye gets the seams too.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -30,12 +30,12 @@ if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/ga
 const data = lowerScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
-if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at out/${name}.mp4 — render first (make video D=${dataArg})`); process.exit(2); }
+if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at out/${name}.mp4, render first (make video D=${dataArg})`); process.exit(2); }
 
 // ffmpeg AND ffprobe ARE THE INSTRUMENT, and their absence is a fact about this machine, never about
 // the film. Every measurement below is a spawnSync whose failure mode was an ABSENCE of findings: with
 // no binary on PATH, `fps` silently defaulted to 30, `total` fell back to the declared duration, and
-// lumaAt returned null for every frame — so every boundary was `continue`d past and the gate printed
+// lumaAt returned null for every frame, so every boundary was `continue`d past and the gate printed
 // "seam-snap clean" having decoded nothing. Refuse, and name the binary.
 function requireTool(bin) {
   const r = spawnSync(bin, ['-version'], { encoding: 'utf8' });
@@ -55,7 +55,7 @@ requireTool('ffprobe');
 requireTool('ffmpeg');
 
 // READ the rate from the file rather than assuming it. Finals now render at 60 and drafts at 30, and
-// every use of `fps` below converts a TIME into a FRAME NUMBER — so an assumed 30 seeks to half the
+// every use of `fps` below converts a TIME into a FRAME NUMBER, so an assumed 30 seeks to half the
 // intended timestamp on a 60fps final and checks frames that have nothing to do with the seam. Silent,
 // and it would have reported a clean seam by looking at the wrong side of it (docs/MISTAKES.md #205).
 const probeFps = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
@@ -67,7 +67,7 @@ const fps = (() => {
   // below becomes a frame number through this value, so a wrong rate checks frames that have nothing to
   // do with the seam and reports what it finds there.
   if (!(v > 0)) {
-    console.error(`✗ seam-snap: ffprobe read no frame rate out of out/${name}.mp4 — the file cannot be scanned.`);
+    console.error(`✗ seam-snap: ffprobe read no frame rate out of out/${name}.mp4, the file cannot be scanned.`);
     console.error(`  ${String(probeFps.stderr || '').trim().split('\n').slice(0, 3).join('\n  ') || '(ffprobe said nothing)'}`);
     process.exit(2);
   }
@@ -157,13 +157,13 @@ if (tiles.length) {
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
 console.log(`  seam-snap · ${seams.length - unread.length} of ${seams.length} transition boundary(ies) read · sheet → ${SHEET}`);
-for (const nt of unread) console.error(`  ? boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode — NOT checked.`);
-if (!findings.length && !unread.length) { console.log(`✓ seam-snap clean — no luminance flash at any transition (read ${SHEET} to confirm the eye agrees)`); process.exit(0); }
+for (const nt of unread) console.error(`  ? boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked.`);
+if (!findings.length && !unread.length) { console.log(`✓ seam-snap clean. No luminance flash at any transition (read ${SHEET} to confirm the eye agrees)`); process.exit(0); }
 if (!findings.length) {
   console.error(`\n✗ seam-snap: ${unread.length} of ${seams.length} boundary(ies) could not be read out of out/${name}.mp4.`);
   console.error('  No flash was found at the ones that decoded, and that is not a verdict on the ones that did not.');
   process.exit(2);
 }
-for (const f of findings) console.error(`  ✗ flash at ${f.t}s (frame ${f.frame}): luma dips to ${f.dip} vs ${f.outside} just outside — a black/dark flash in the transition overlap (docs/MISTAKES.md #138).`);
-console.error(`\n✗ seam-snap: ${findings.length} transition flash(es). The center-sampling gates cannot see these — fix the seam compositing or the clip timing, then re-render.`);
+for (const f of findings) console.error(`  ✗ flash at ${f.t}s (frame ${f.frame}): luma dips to ${f.dip} vs ${f.outside} just outside. A black/dark flash in the transition overlap (docs/MISTAKES.md #138).`);
+console.error(`\n✗ seam-snap: ${findings.length} transition flash(es). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
 process.exit(1);

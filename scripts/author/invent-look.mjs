@@ -1,4 +1,4 @@
-// invent-look.mjs — the THIRD move. Every other look tool here either REFLECTS a real brand
+// invent-look.mjs: the THIRD move. Every other look tool here either REFLECTS a real brand
 // (`make palette`, `make brandspec`) or SELECTS from what already exists (`make lookbook`,
 // `make quiz-look`, `make theme-remix`). So an author asked to invent a look has two options, copy or
 // pick, and picks arrive before their reasoning. This one AUTHORS: it reads a storyboard's brief,
@@ -105,7 +105,7 @@ const rgba = (hex, a) => { const [r, g, b] = parseHex(hex); return `rgba(${r},${
 
 // ---------------------------------------------------------------- the brief
 // The house brief is SUBJECT / DATA / PAYOFF / AUDIENCE / FEELING (CLAUDE.md). Real storyboards in this
-// repo carry it as prose under a title rather than as labelled lines, so both are read — and what was
+// repo carry it as prose under a title rather than as labelled lines, so both are read, and what was
 // read is PRINTED, because a tool that guesses the subject and says nothing invents a look for the
 // wrong film.
 const FIELDS = ['SUBJECT', 'DATA', 'PAYOFF', 'AUDIENCE', 'FEELING'];
@@ -260,7 +260,7 @@ function buildPalette(stance, hue) {
   const text = oklch(stance.textL, stance.textC, gH);
   const accent = oklch(stance.accent.L, stance.accent.C, hue);
   const lineHex = dark ? oklch(Math.min(0.99, stance.ground.L + 0.35), stance.ground.C, gH) : oklch(Math.max(0.02, stance.ground.L - 0.35), stance.ground.C, gH);
-  // `down` is semantic (a fall, a loss) so it stays red whatever the accent does — unless the accent is
+  // `down` is semantic (a fall, a loss) so it stays red whatever the accent does, unless the accent is
   // already red, in which case it moves to crimson so the two are never confusable in a chart.
   const warmAccent = hue < 60 || hue > 340;
   const down = oklch(0.58, 0.18, warmAccent ? 8 : 30);
@@ -330,7 +330,7 @@ function discover(seed, category, count) {
     out = execFileSync('node', [path.join(ROOT, 'scripts/author/fonts-discover.mjs'), '--seed', String(seed), '--count', String(count), '--category', category, '--json'],
       { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 24 });
   } catch (e) {
-    die(`fonts-discover failed for category "${category}" — ${String(e.stderr || e.message).trim()}\n  This tool has no font list of its own on purpose: a hardcoded fallback would reinstate the default it exists to remove.`);
+    die(`fonts-discover failed for category "${category}": ${String(e.stderr || e.message).trim()}\n  This tool has no font list of its own on purpose: a hardcoded fallback would reinstate the default it exists to remove.`);
   }
   let parsed;
   try { parsed = JSON.parse(out); } catch (e) { die(`fonts-discover --json did not return JSON (${e.message})`); }
@@ -368,7 +368,7 @@ const fingerprint = fnv(`${brief.SUBJECT}\n${title}`.toLowerCase().replace(/[^a-
 const resolved = streamSeed(seed, fingerprint);
 
 // Stance selection. The brief's own words pull matching stances forward; the rest are seeded. One
-// family only, and both dominances present — a sheet of five dark candidates is one candidate.
+// family only, and both dominances present. A sheet of five dark candidates is one candidate.
 const hay = `${Object.values(brief).join(' ')} ${prose}`.toLowerCase();
 const cueScore = (s) => s.cues.reduce((n, c) => n + (hay.includes(c) ? 1 : 0), 0);
 const ordered = shuffled(STANCES, resolved).sort((a, b) => cueScore(b) - cueScore(a));
@@ -396,7 +396,7 @@ const candidates = [];
 const replacements = [];
 // A slot is tried 12 times: a fresh hue from the stance's arc each time, and past attempt 6 a lightness
 // nudge as well, because two pale grounds cannot separate on hue alone. If the stance still cannot clear
-// the gate it is the WRONG STANCE for this set, not a bad draw — so the slot is handed to an unused
+// the gate it is the WRONG STANCE for this set, not a bad draw, so the slot is handed to an unused
 // stance from another family. The alternative, telling the author to re-run with another seed, makes the
 // generator's problem the author's problem.
 const spare = ordered.filter((s) => !chosen.includes(s));
@@ -424,7 +424,7 @@ for (const first of chosen) {
   candidates.push(cand);
 }
 
-// Type. One pairing per candidate, no family and no LINEAGE repeated inside a run — two candidates
+// Type. One pairing per candidate, no family and no LINEAGE repeated inside a run, two candidates
 // sharing a display face are two colourways of one look.
 const bannedLineages = new Set();
 for (const f of fs.readdirSync(path.join(ROOT, 'themes')).filter((n) => n.endsWith('.json'))) {
@@ -493,7 +493,7 @@ function buildTheme(c, name) {
     // REPRODUCIBILITY. The seed alone will not rebuild this look: fonts-discover samples a LIVE
     // catalogue and Google adds families every week, so the same seed months from now draws from a
     // different pool. The RESOLVED family names are therefore the source of truth and the seed is only
-    // provenance — enough to retrace how the look was reached, never enough to regenerate it.
+    // provenance, enough to retrace how the look was reached, never enough to regenerate it.
     invented: {
       tool: 'scripts/author/invent-look.mjs',
       storyboard: path.relative(ROOT, file),
@@ -514,7 +514,7 @@ function buildTheme(c, name) {
 // ---------------------------------------------------------------- vendoring the faces
 // A theme naming a face that has no @font-face renders in a substitute and says nothing (core/fonts.js
 // exists because that shipped twice). So a picked look VENDORS its faces and registers them, and fails
-// loud if it cannot — an invented theme that does not paint is worse than no theme.
+// loud if it cannot. An invented theme that does not paint is worse than no theme.
 const slug = (fam) => fam.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 const fileName = (fam) => fam.replace(/[^A-Za-z0-9]/g, '') + '.woff2';
 const isWoff2 = (b) => b.length > 4 && b[0] === 0x77 && b[1] === 0x4f && b[2] === 0x46 && b[3] === 0x32;
@@ -528,16 +528,16 @@ async function vendor(face) {
   const tried = [];
   for (const url of urls) {
     let res;
-    try { res = await fetch(url, { redirect: 'follow' }); } catch (e) { tried.push(`${url} — ${e.message}`); continue; }
-    if (!res.ok) { tried.push(`${url} — HTTP ${res.status}`); continue; }
+    try { res = await fetch(url, { redirect: 'follow' }); } catch (e) { tried.push(`${url}, ${e.message}`); continue; }
+    if (!res.ok) { tried.push(`${url}: HTTP ${res.status}`); continue; }
     const buf = Buffer.from(await res.arrayBuffer());
-    if (!isWoff2(buf)) { tried.push(`${url} — not a woff2 file`); continue; }
+    if (!isWoff2(buf)) { tried.push(`${url}, not a woff2 file`); continue; }
     const dest = path.join(ROOT, 'assets/fonts', fileName(face.family));
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.writeFileSync(dest, buf);
     return { family: face.family, file: fileName(face.family), url, variable: url.includes('-variable/'), weight: w, kb: Math.round(buf.length / 1024) };
   }
-  die(`cannot vendor "${face.family}" — the theme would name a face with no @font-face and render in a substitute.\n  tried:\n    ${tried.join('\n    ')}`);
+  die(`cannot vendor "${face.family}": the theme would name a face with no @font-face and render in a substitute.\n  tried:\n    ${tried.join('\n    ')}`);
 }
 
 const FONT_MANIFEST = path.join(ROOT, 'assets/fonts/invented.json');
@@ -568,7 +568,7 @@ function register(vendored) {
 // Each candidate is photographed THROUGH THE ENGINE: its theme is written to a temp file and rendered by
 // scripts/author/preview-fragment.mjs, which applies it with core/boot.js's own applyTheme. A second
 // theme renderer here is exactly how the preview came to paint every brand colour black (#368), so
-// there is not one — this only lays the resulting PNGs out side by side.
+// there is not one. This only lays the resulting PNGs out side by side.
 const OUT = '/tmp/invent-look';
 const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 function specimen(c, theme) {
@@ -629,9 +629,9 @@ if (pick != null) {
   const registered = register(vendored);
   const theme = buildTheme(c, name);
   const errs = themeErrors(theme);
-  if (errs.length) die(`the invented theme is incomplete — missing ${errs.join(', ')}. That is a bug in this generator.`);
+  if (errs.length) die(`the invented theme is incomplete: missing ${errs.join(', ')}. That is a bug in this generator.`);
   fs.writeFileSync(dest, JSON.stringify(theme, null, 2) + '\n');
-  console.log(`✓ invented themes/${name}.json — stance "${c.stance.key}", ${c.stance.dominance}-first`);
+  console.log(`✓ invented themes/${name}.json: stance "${c.stance.key}", ${c.stance.dominance}-first`);
   console.log(`  story: ${c.sentence}`);
   console.log(`  bg ${theme.palette.bg} · accent ${theme.palette.accent} (${c.contrast.accent}:1) · text (${c.contrast.text}:1)`);
   console.log(`  type: ${theme.type.serif} (display) + ${theme.type.sans} (body) + ${theme.type.mono} (mono)`);
@@ -647,7 +647,7 @@ const shots = [];
 for (const [i, c] of candidates.entries()) {
   const theme = buildTheme(c, c.name);
   const errs = themeErrors(theme);
-  if (errs.length) die(`candidate ${i + 1} (${c.name}) is an incomplete theme — missing ${errs.join(', ')}. That is a bug in this generator.`);
+  if (errs.length) die(`candidate ${i + 1} (${c.name}) is an incomplete theme, missing ${errs.join(', ')}. That is a bug in this generator.`);
   const tf = path.join(OUT, 'themes', `${c.name}.json`);
   fs.writeFileSync(tf, JSON.stringify(theme, null, 2) + '\n');
   const frag = path.join(OUT, `${c.name}.html`);
@@ -657,7 +657,7 @@ for (const [i, c] of candidates.entries()) {
     execFileSync('node', [path.join(ROOT, 'scripts/author/preview-fragment.mjs'), frag, '--theme-file', tf, '--out', png, '--w', '1180', '--no-detect'],
       { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   } catch (e) {
-    die(`preview-fragment could not photograph candidate "${c.name}" — ${String(e.stderr || e.message).trim()}`);
+    die(`preview-fragment could not photograph candidate "${c.name}", ${String(e.stderr || e.message).trim()}`);
   }
   shots.push({ c, png, theme });
   console.log(`  ${i + 1}. ${c.name}  ·  ${c.stance.key}  ·  ${c.type.display.family} + ${c.type.body.family}`);
@@ -693,10 +693,10 @@ const sheetPng = path.join(OUT, `${slugName}-sheet.png`);
 }
 
 console.log(`\n✓ ${candidates.length} candidate looks for "${brief.SUBJECT}"`);
-console.log(`  sheet: ${sheetPng}   (READ it — a palette is judged by eye, never by its hexes)`);
+console.log(`  sheet: ${sheetPng}   (READ it. A palette is judged by eye, never by its hexes)`);
 if (collisions.length) {
   console.log(`  14px chip gate fired ${collisions.length} time(s) and regenerated:`);
-  for (const x of collisions.slice(-8)) console.log(`    ${x.stance} vs ${x.against} — ΔE ${x.distance} < ${CHIP_MIN} on attempt ${x.attempt}`);
+  for (const x of collisions.slice(-8)) console.log(`    ${x.stance} vs ${x.against}, ΔE ${x.distance} < ${CHIP_MIN} on attempt ${x.attempt}`);
   for (const r of replacements) console.log(`    "${r.dropped}" could not separate at all → the slot went to "${r.replacedBy}"`);
 } else {
   console.log(`  14px chip gate: no collisions (closest pair ΔE ${Math.min(...candidates.flatMap((a, i) => candidates.slice(i + 1).map((b) => chipDistance(a, b)))).toFixed(1)}, min ${CHIP_MIN})`);

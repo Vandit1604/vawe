@@ -1,4 +1,4 @@
-// coverage-reel.mjs — build a reel that renders whatever nothing else renders.
+// coverage-reel.mjs: build a reel that renders whatever nothing else renders.
 //
 //   node scripts/author/coverage-reel.mjs          write formats/scene/_coverage-reel.json
 //   make coverage-reel                             write it, then render it
@@ -8,7 +8,7 @@
 // a real effect doing real work and slicing the glyphs while it did. Nobody caught it for 11 scenes
 // because nobody had reason to look closely at that word.
 //
-// So this generates a reel from the LIVE coverage gap rather than a hand-listed snapshot — run it
+// So this generates a reel from the LIVE coverage gap rather than a hand-listed snapshot, run it
 // after adding an effect and the new effect is in the reel, no edit required. The output is a real
 // video you watch; the gates only say it did not crash.
 import fs from 'node:fs';
@@ -38,7 +38,7 @@ if (!fs.existsSync(path.join(CLIP_DIR, 'manifest.json'))) {
     '-t', '2.5', '-r', '30', '-pix_fmt', 'yuv420p', tmp], { cwd: repoRoot });
   execFileSync('node', ['scripts/media/gen-clip.mjs', path.relative(repoRoot, tmp), 'sweep', '--fps', '30', '--w', '640'], { cwd: repoRoot, stdio: 'ignore' });
   fs.rmSync(tmp, { force: true });
-  console.log('  · synthesized the clip fixture (assets/gen/sweep) — it is gitignored, so this self-heals');
+  console.log('  · synthesized the clip fixture (assets/gen/sweep), it is gitignored, so this self-heals');
 }
 
 // ---- what is currently unexercised (same scan as scripts/gates/coverage.mjs) ----
@@ -56,19 +56,19 @@ for (const j of scenes) {
   walk(j.layers);
 }
 // `none` is a documented no-op sentinel (the builder filters it before it reaches the renderer), so
-// it is not a coverage gap — listing it would make the reel look permanently incomplete.
+// it is not a coverage gap, listing it would make the reel look permanently incomplete.
 const cuts = Object.keys(PRESENTATIONS).filter((v) => v !== 'none' && !seen.cut.has(v));
 const anims = ANIM_NAMES.filter((v) => !seen.anim.has(v));
 const stings = SHADER_FX.filter((v) => !seen.sting.has(v));
 
 if (!cuts.length && !anims.length && !stings.length) {
-  console.log('✓ nothing unexercised — every cut, anim and sting already appears in an authored scene');
+  console.log('✓ nothing unexercised: every cut, anim and sting already appears in an authored scene');
   process.exit(0);
 }
 
 // ---- compose: one beat per unused cut, with unused anims + stings woven through ----
 // PACING. At 1.15s per style the reel read as a smear: each boundary stacked THREE overlapping
-// events — the outgoing label lingering 0.26s past the cut, the incoming label entering, and the
+// events. The outgoing label lingering 0.26s past the cut, the incoming label entering, and the
 // camera mid-cut. A demo reel has one job, which is to let you see ONE transition at a time.
 // So: a longer beat (a settled hold of ~1.3s where the style name sits alone), and the outgoing
 // label now clears within 0.08s of the cut instead of hanging around into the next beat.
@@ -84,11 +84,11 @@ layers.push({ type: 'text', text: `${cuts.length} cuts · ${anims.length} anims 
 
 cuts.forEach((style, i) => {
   const t0 = +(LEAD + i * BEAT).toFixed(3);
-  // beats OVERLAP their cut — a transition needs something on both sides of it (MISTAKES #29)
+  // beats OVERLAP their cut: a transition needs something on both sides of it (MISTAKES #29)
   // NO label overlap at all. A cross-dissolve between two big words is exactly what read as "mixed":
   // for ~0.12s you saw both names ghosted together and could not tell which transition you were
   // watching. The outgoing label now ends EXACTLY at the next cut, so one name is on screen at a
-  // time. The cut still has content on both sides of it — the camera treatment plays over the
+  // time. The cut still has content on both sides of it, the camera treatment plays over the
   // outgoing label as it fades and the incoming one as it arrives, which is the part you want to see.
   const dur = +(BEAT - 0.04).toFixed(3);
   cutArr.push({ t: t0, style, dur: CUT_DUR });
@@ -103,7 +103,7 @@ cuts.forEach((style, i) => {
   if (i < stings.length) stingArr.push({ t: t0, fx: stings[i], dur: 0.9, seed: 3 + i });
 });
 
-// the final beat covers the last uncovered PRIMITIVE — a real video playing frame-accurately
+// the final beat covers the last uncovered PRIMITIVE: a real video playing frame-accurately
 const clipT = +(LEAD + cuts.length * BEAT).toFixed(3);
 cutArr.push({ t: clipT, style: 'softwipe', dur: CUT_DUR });
 layers.push({ type: 'clip', src: CLIP_MANIFEST, x: 140, y: 250, w: 900, radius: 20, loop: true,
@@ -121,6 +121,6 @@ fs.writeFileSync(OUT, JSON.stringify(scene, null, 1) + '\n');
 
 console.log(`✓ ${path.relative(repoRoot, OUT)}  ${duration}s · ${layers.length} layers`);
 console.log(`  cuts   (${cuts.length}): ${cuts.join(', ')}`);
-console.log(`  anims  (${anims.length}): ${anims.join(', ') || '—'}`);
-console.log(`  stings (${stings.length}): ${stings.join(', ') || '—'}`);
-console.log('  render it and WATCH it — the gates only prove it did not crash.');
+console.log(`  anims  (${anims.length}): ${anims.join(', ') || '-'}`);
+console.log(`  stings (${stings.length}): ${stings.join(', ') || '-'}`);
+console.log('  render it and WATCH it: the gates only prove it did not crash.');

@@ -1,4 +1,4 @@
-// scripts/media/cutout.mjs — a photograph becomes a PROP: background removed, alpha kept.
+// scripts/media/cutout.mjs. A photograph becomes a PROP: background removed, alpha kept.
 //
 // Why this exists, from the film that needed it. A rectangular photo cannot be both recognisable and
 // edge-free in a frame it does not fill: crop it to fill and the subject becomes an unidentifiable
@@ -58,5 +58,5 @@ if (+maxEdge > 8) {
   console.log(`    so this is a rectangle wearing a .png extension. Try a source with a clearer subject.\n`);
   process.exit(1);
 }
-console.log(`  ✓ corners transparent (alpha ${maxEdge}/255) — this is a prop, not a picture of one.\n`);
+console.log(`  ✓ corners transparent (alpha ${maxEdge}/255). This is a prop, not a picture of one.\n`);
 console.log(`  use: { "type": "image", "src": "/assets/cutouts/${name}.png", "w": …, "h": … }\n`);

@@ -1,4 +1,4 @@
-// scripts/lib/text.mjs — what a layer's copy READS AS, which is not what it is authored as.
+// scripts/lib/text.mjs: what a layer's copy READS AS, which is not what it is authored as.
 //
 // The RULE lives in core/on-screen-text.js, because core/validate.mjs and core/captions.js need it too
 // and they ship to the browser, so they cannot import out of scripts/. This file is the tooling front
@@ -18,7 +18,7 @@
 //
 // A copy in each gate is how the two that lacked one went unnoticed: nothing looked missing, because
 // there was nothing central to be missing from. It is also how the same `<style>`-is-not-glyphs bug
-// (#214/#216/#217) reached a fifth consumer — `designspec-check` was reading a captured component's
+// (#214/#216/#217) reached a fifth consumer, `designspec-check` was reading a captured component's
 // CSS as the film's copy and running the jargon rules over it.
 export { onScreenText, glyphText } from '../../core/on-screen-text.js';
 import { onScreenText } from '../../core/on-screen-text.js';

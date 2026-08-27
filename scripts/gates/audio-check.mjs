@@ -1,9 +1,9 @@
-// scripts/gates/audio-check.mjs — THE SOUND GATE: is this film's silence a decision, or an omission?
+// scripts/gates/audio-check.mjs. THE SOUND GATE: is this film's silence a decision, or an omission?
 //
 // WHY THIS EXISTS. Measured across the library: 90 scenes set `audio.silent:true`, 20 name no `audio`
 // key at all, and 25 carry a real bed. So five films in six ship with no sound, and nothing anywhere
-// asked why. `docs/CRAFT/FILM-STRUCTURE.md` found that this closes a whole family of structural device
-// — the sound bridge, music-led structure, the unfinished sentence all need a track to exist — and the
+// asked why. `docs/CRAFT/FILM-STRUCTURE.md` found that this closes a whole family of structural device:
+// the sound bridge, music-led structure, the unfinished sentence all need a track to exist, and the
 // engine has had the machinery for all of it since `374ffa9` and has barely been asked to use it.
 //
 // This gate does NOT add sound to anything. It cannot: choosing a bed is a taste decision and picking
@@ -39,14 +39,14 @@ const file = argv.find((a) => !a.startsWith('--'));
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
 // ---- bed provenance ---------------------------------------------------------------------------
-// credits.json is keyed by bed NAME ("lofi"), and a scene may name the bed either way — bare, or as
+// credits.json is keyed by bed NAME ("lofi"), and a scene may name the bed either way, bare, or as
 // the path the bare name resolves to. Reduce both to the basename so one table answers both.
 const creditsPath = path.join(ROOT, 'assets/music/credits.json');
 const credits = fs.existsSync(creditsPath) ? readJSON(creditsPath) : {};
 const bedKey = (m) => path.basename(String(m)).replace(/\.[a-z0-9]+$/i, '');
 
 // A bed resolves the way internal/audio/audio.go resolves it: a real path, or a bare name against
-// assets/music/<name>.wav. Keep this in step with the mixer — the two disagreeing is MISTAKES #132.
+// assets/music/<name>.wav. Keep this in step with the mixer, the two disagreeing is MISTAKES #132.
 const resolveBed = (m, sceneDir) => {
   if (typeof m !== 'string' || !m || m === 'auto') return null;
   const bases = [m, path.join(ROOT, m.replace(/^\/+/, '')), path.join(sceneDir, m)];
@@ -56,7 +56,7 @@ const resolveBed = (m, sceneDir) => {
 
 // ---- classify one scene -----------------------------------------------------------------------
 // Four states, and the split that matters is between the two kinds of quiet: one was chosen and one
-// was never considered. `sounded` means the mixer will actually write a track — an audio block that
+// was never considered. `sounded` means the mixer will actually write a track, an audio block that
 // names nothing produces silence too, and calling that "sounded" would be the silent substitution
 // this repo keeps having to fix.
 const OMITTED = 'omitted', SILENT = 'silent', HOLLOW = 'hollow', SOUNDED = 'sounded';
@@ -70,7 +70,7 @@ export function classify(scene) {
     || (typeof a.vo === 'string' && a.vo !== '')
     || a.auto === true
     || (Array.isArray(a.cues) && a.cues.length > 0)
-    // A film can be held together by sound bridges alone — that is the point of them — so a scene
+    // A film can be held together by sound bridges alone (that is the point of them) so a scene
     // whose only audio is a J-cut across its junctions is sounded, not hollow.
     || (Array.isArray(a.bridges) && a.bridges.length > 0);
   return makesSound ? SOUNDED : HOLLOW;
@@ -100,7 +100,7 @@ function findings(scene, sceneDir) {
       '        "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries it alone" }']);
   } else if (state === HOLLOW) {
     out.push(['audio-block-produces-nothing', true,
-      'there is an `audio` block, but it names no music, no VO, no cues and no `auto` — the mixer\'s',
+      'there is an `audio` block, but it names no music, no VO, no cues and no `auto`, the mixer\'s',
       'emptiness guard writes no track at all, so this renders SILENT while reading as sounded.\n' +
       '        Name a bed, or say `"silent": true` with a `_why` and mean it.']);
   }
@@ -136,21 +136,21 @@ function findings(scene, sceneDir) {
 
   if (a.music === 'auto') {
     out.push(['bed-unresolved', false,
-      '`music:"auto"` is a sentinel resolved at AUTHORING time, not at render — the mixer does not run',
+      '`music:"auto"` is a sentinel resolved at AUTHORING time, not at render, the mixer does not run',
       'core/audio-select.js, so an unresolved "auto" reaching it plays SILENCE.\n' +
       `        Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1`]);
   } else if (typeof a.music === 'string' && a.music) {
     const hit = resolveBed(a.music, sceneDir);
     if (!hit) {
       out.push(['bed-missing', true,
-        `audio.music "${a.music}" resolves to no file — the mixer falls back to SILENCE.`,
+        `audio.music "${a.music}" resolves to no file: the mixer falls back to SILENCE.`,
         'Use a bed that exists under assets/music/ (`make music-pack`), or a real .wav path.']);
     } else {
       const k = bedKey(a.music);
       const c = credits[k];
       if (!c) {
         out.push(['bed-provenance-unknown', false,
-          `bed "${k}" has no entry in assets/music/credits.json — nobody recorded where it came from.`,
+          `bed "${k}" has no entry in assets/music/credits.json: nobody recorded where it came from.`,
           'An unattributed track under a commercial product film cannot be defended if it is claimed.\n' +
           '        Record its source + licence in credits.json, or replace it with a bed that has one.']);
       } else if (c.licenceVerified !== true) {
@@ -188,12 +188,12 @@ if (all) {
   }
   const n = Object.values(tally).reduce((a, b) => a + b.length, 0);
   console.log(`\n  sound census · ${n} scene(s) in formats/scene\n`);
-  console.log(`    ${String(tally[SOUNDED].length).padStart(4)}  sounded          a bed, a VO, or cues — the mixer writes a track`);
+  console.log(`    ${String(tally[SOUNDED].length).padStart(4)}  sounded          a bed, a VO, or cues, the mixer writes a track`);
   console.log(`    ${String(tally[SILENT].length).padStart(4)}  silent:true      ${reasoned} of them state a reason`);
   console.log(`    ${String(tally[OMITTED].length).padStart(4)}  no audio key     silent, and nobody decided it`);
   console.log(`    ${String(tally[HOLLOW].length).padStart(4)}  hollow block     an audio block that produces no sound`);
   console.log(`\n  Only the last two would change if the engine default were ever flipped. A scene that says`);
-  console.log(`  silent:true keeps its silence — that is an author's decision and it stays.\n`);
+  console.log(`  silent:true keeps its silence. That is an author's decision and it stays.\n`);
   for (const f of tally[OMITTED]) console.log(`      · no audio key: ${f}`);
   for (const f of tally[HOLLOW]) console.log(`      · hollow block: ${f}`);
   console.log('');
@@ -222,5 +222,5 @@ for (const [code, blocks, headline, fix] of out) {
 }
 console.log(strict && blocking.length
   ? `\n  ✗ sound gate (strict): ${blocking.length} finding(s) block.\n`
-  : `\n  Sound is a structural device, not decoration — docs/CRAFT/SOUND.md. Block these with --strict.\n`);
+  : `\n  Sound is a structural device, not decoration. Docs/CRAFT/SOUND.md. Block these with --strict.\n`);
 process.exit(strict && blocking.length ? 1 : 0);

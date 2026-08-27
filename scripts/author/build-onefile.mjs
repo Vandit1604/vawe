@@ -1,4 +1,4 @@
-// scripts/author/build-onefile.mjs — generate formats/scene/onefile.json.
+// scripts/author/build-onefile.mjs: generate formats/scene/onefile.json.
 //
 // vawe's own film, and the first one built ON the box track and keyed depth rather than around them.
 //
@@ -7,7 +7,7 @@
 // grid of real rendered frames, then that grid collapses back into one hero frame with a ribbon around
 // it. Same object, four shapes. Nothing here is a slideshow because nothing here is ever replaced.
 //
-// The stills are REAL OUTPUT — frames pulled from films in out/ — because a film claiming "one JSON,
+// The stills are REAL OUTPUT (frames pulled from films in out/) because a film claiming "one JSON,
 // one video" that shows a stock photograph instead of its own output is telling, not showing.
 import fs from 'node:fs';
 

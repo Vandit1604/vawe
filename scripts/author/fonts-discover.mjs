@@ -1,4 +1,4 @@
-// fonts-discover.mjs — surface typefaces this repo has never used. A pure data query over the Google
+// fonts-discover.mjs: surface typefaces this repo has never used. A pure data query over the Google
 // Fonts catalogue, carrying no taste of its own. It exists because every other look tool here SELECTS
 // (a theme, a vendored face) or REFLECTS (a real site), so an author asked to invent a look reaches for
 // the same handful of faces every time. That is a training-data default, not a decision. Sampling by

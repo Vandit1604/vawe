@@ -1,4 +1,4 @@
-// kie.mjs — kie.ai generation client (shared by tts/music/gen-image/gen-video/transcribe).
+// kie.mjs: kie.ai generation client (shared by tts/music/gen-image/gen-video/transcribe).
 // Async job model: createTask → poll recordInfo → parse resultJson.resultUrls → download.
 // Key from env KIE_API_KEY or a gitignored .kie.key file. Import as a lib OR run as a CLI.
 //
@@ -19,7 +19,7 @@ export function getKey() {
   if (process.env.KIE_API_KEY) return process.env.KIE_API_KEY.trim();
   const f = path.join(ROOT, '.kie.key');
   if (fs.existsSync(f)) return fs.readFileSync(f, 'utf8').trim();
-  throw new Error('no kie.ai key — set env KIE_API_KEY or write it to .kie.key (gitignored)');
+  throw new Error('no kie.ai key: set env KIE_API_KEY or write it to .kie.key (gitignored)');
 }
 const authHeaders = () => ({ Authorization: `Bearer ${getKey()}`, 'Content-Type': 'application/json' });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -87,7 +87,7 @@ export async function uploadFile(localPath) {
 // READ BACK the body, not just the status. A 200 is not a promise that the bytes are media: a CDN that
 // has expired the asset answers 200 with an HTML or JSON error page, and writing it to `dest` leaves a
 // file that EXISTS, passes every path check, and renders as a hole. That is docs/MISTAKES.md #426 with
-// a different fetcher — `tryFetch` in scripts/media/assets.mjs already requires a status AND a size AND
+// a different fetcher, `tryFetch` in scripts/media/assets.mjs already requires a status AND a size AND
 // a magic number before it writes, and this is the same demand.
 const MAGIC = [ // enough of each container to tell media from an error page
   [[0xff, 0xd8, 0xff], 'jpeg'], [[0x89, 0x50, 0x4e, 0x47], 'png'], [[0x47, 0x49, 0x46], 'gif'],

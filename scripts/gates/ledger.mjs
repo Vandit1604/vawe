@@ -1,6 +1,6 @@
-// ledger.mjs — the DESIGN LEDGER: cross-video memory that makes anti-sameness enforceable.
+// ledger.mjs. The DESIGN LEDGER: cross-video memory that makes anti-sameness enforceable.
 // Every shipped video logs its fingerprint; every new design is checked against history BEFORE
-// shipping. Per-video QA can't see repetition — this can.
+// shipping. Per-video QA can't see repetition, this can.
 //
 //   node scripts/gates/ledger.mjs check formats/x/brand-video.json   # compare vs all logged designs
 //   node scripts/gates/ledger.mjs add   formats/x/brand-video.json   # log it (after it ships)
@@ -21,7 +21,7 @@ const load = () => (fs.existsSync(LEDGER) ? JSON.parse(fs.readFileSync(LEDGER, '
 
 if (cmd === 'list') {
   const entries = load();
-  if (!entries.length) console.log('ledger empty — nothing shipped yet');
+  if (!entries.length) console.log('ledger empty: nothing shipped yet');
   for (const e of entries) console.log(`${e.file}  (${e.theme}) · ${e.fp.structure.join('→')}`);
   process.exit(0);
 }
@@ -44,8 +44,8 @@ if (cmd === 'check') {
     const v = verdict(s, sameBrand);
     if (v === 'ok' || v === 'distinct') continue;
     if (v === 'SAME') hard++; else warn++;
-    console.log(`${v === 'SAME' ? '✗ SAME' : '~ ' + v}  vs ${e.file}${sameBrand ? ' (same brand)' : ''} — score ${(s.score * 100).toFixed(0)}% · vocab ${(s.vocab * 100).toFixed(0)}% · structure ${(s.struct * 100).toFixed(0)}%`);
-    if (v === 'SAME-SKELETON') console.log('    same brand retelling the same beat skeleton — vary the structure');
+    console.log(`${v === 'SAME' ? '✗ SAME' : '~ ' + v}  vs ${e.file}${sameBrand ? ' (same brand)' : ''}, score ${(s.score * 100).toFixed(0)}% · vocab ${(s.vocab * 100).toFixed(0)}% · structure ${(s.struct * 100).toFixed(0)}%`);
+    if (v === 'SAME-SKELETON') console.log('    same brand retelling the same beat skeleton, vary the structure');
     if (v === 'SAME') console.log('    differentiate: change ≥2 of {cut family, beat structure, layout archetype}');
   }
   if (!hard && !warn) console.log(`✓ distinct from all ${entries.length} logged design(s)`);
@@ -57,5 +57,5 @@ if (cmd === 'add') {
   next.push({ file: rel, theme: fp.theme, module: data.module, added: new Date().toISOString().slice(0, 10), fp });
   fs.mkdirSync(path.dirname(LEDGER), { recursive: true });
   fs.writeFileSync(LEDGER, JSON.stringify(next, null, 2) + '\n');
-  console.log(`✓ logged ${rel} (${fp.theme}) — ledger now ${next.length} design(s)`);
+  console.log(`✓ logged ${rel} (${fp.theme}): ledger now ${next.length} design(s)`);
 }

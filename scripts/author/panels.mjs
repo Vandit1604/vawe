@@ -1,4 +1,4 @@
-// scripts/author/panels.mjs — the storyboard stop, as a picture.
+// scripts/author/panels.mjs: the storyboard stop, as a picture.
 //
 // docs/CRAFT/APPROVAL-STOPS.md states the rule: "a stop is a picture, not a report." The storyboard
 // stop was the one with no picture. A storyboard here is prose, so a reviewer was asked to approve a
@@ -10,7 +10,7 @@
 // So: one rough still per beat, tiled into a sheet, rendered from the markdown alone.
 //
 // WHAT MAKES THIS DIFFERENT FROM `make animatic`, which also draws grey boxes. The animatic is a CLOCK
-// check — it synthesizes a scratch read and asks whether each beat has room for its own words. This is
+// check. It synthesizes a scratch read and asks whether each beat has room for its own words. This is
 // a COMPOSITION check, and it asks where things sit and how big they are. The animatic draws every
 // beat's slot the same size, so a `wide` and a `close` look identical in it. Here `shot:` drives the
 // subject box, which is the one field that turns a storyboard into blocking.
@@ -50,8 +50,8 @@ if (!SELFTEST && (!SB || !fs.existsSync(SB))) {
 
 // ── the shot vocabulary → how much of the frame the subject occupies ───────────────────────────────
 // This is the whole reason the file exists. The template already glosses its own terms in exactly these
-// terms — "wide (establishing, the frame is mostly empty)", "medium (the object arrives and owns the
-// middle third)" — so the box is sized to what the words already mean rather than to a new convention.
+// terms, "wide (establishing, the frame is mostly empty)", "medium (the object arrives and owns the
+// middle third)", so the box is sized to what the words already mean rather than to a new convention.
 // A `shot:` value is often a sentence ("medium, the caret dead centre with the frame deliberately empty
 // around it"), so the keyword is found inside it and the rest is kept and shown as written.
 const SHOTS = [
@@ -65,7 +65,7 @@ const DEFAULT_SHOT = SHOTS.find((s) => s[1] === 'medium');
 const readShot = (raw) => {
   if (!raw) return { kind: 'medium', sx: DEFAULT_SHOT[2], sy: DEFAULT_SHOT[3], note: '', why: 'missing' };
   for (const [re, kind, sx, sy] of SHOTS) {
-    if (re.test(raw)) return { kind, sx, sy, note: raw.replace(re, '').replace(/^[\s,(–—-]+|[\s,)]+$/g, '').trim(), why: 'named' };
+    if (re.test(raw)) return { kind, sx, sy, note: raw.replace(re, '').replace(/^[\s,(–, -]+|[\s,)]+$/g, '').trim(), why: 'named' };
   }
   return { kind: 'medium', sx: DEFAULT_SHOT[2], sy: DEFAULT_SHOT[3], note: raw.trim(), why: 'unknown' };
 };
@@ -229,7 +229,7 @@ if (SELFTEST) {
 }
 
 const sb = parseStoryboard(fs.readFileSync(SB, 'utf8'));
-if (!sb.beats.length) { console.error(`✗ no beats in ${SB} — beats are "## Beat N: Title (0s-6s)" headings.`); process.exit(1); }
+if (!sb.beats.length) { console.error(`✗ no beats in ${SB}, beats are "## Beat N: Title (0s-6s)" headings.`); process.exit(1); }
 const { beats, guessed } = timeline(sb);
 
 const NAME = baseOf(SB).replace(/\.storyboard$/i, '');
@@ -245,7 +245,7 @@ const g = gcd(W, H);
 const ASPECT = `${W / g}:${H / g}`;
 
 const INK = '#111111', GREY = '#bdbdbd', SLOT = '#e8e8e8', MUTED = '#7a7a7a', FAINT = '#a8a8a8', RED = '#b00020';
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/[—–]/g, ',');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/[, –]/g, ',');
 const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
 
 // The drawn frame, inset so the panel can carry a slate above it and a caption below without either

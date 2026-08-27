@@ -1,4 +1,4 @@
-// preview.mjs — FAST iteration: render the key frames of a format directly (no encode),
+// preview.mjs, FAST iteration: render the key frames of a format directly (no encode),
 // into one labeled contact sheet. ~5s, not a full render.
 //   node scripts/author/preview.mjs higherlower            (storyboard)
 //   node scripts/author/preview.mjs higherlower 560         (single exact frame)
@@ -8,7 +8,7 @@
 // `--data` exists because the positional slot is THIRD, so `make look M=scene D=x.json` had nowhere
 // to put it and the Makefile silently dropped it: both targets rendered sample.json while reporting
 // the scene you asked for. That is the same defect the Makefile records fixing for `make motion`
-// ("without it the target silently audited sample.json instead of your scene") — it survived here
+// ("without it the target silently audited sample.json instead of your scene"), it survived here
 // because the fix went to one call site. docs/MISTAKES.md #351.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -50,7 +50,7 @@ const t0 = Date.now();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
 // The viewport must be the canvas the renderer would actually produce, or a preview is a crop of a
-// different video. This read `orientation`, which almost no scene declares — scenes declare `aspect` —
+// different video. This read `orientation`, which almost no scene declares, scenes declare `aspect`,
 // so every 16:9 scene previewed into a 1080x1920 portrait window, silently (MISTAKES #46).
 const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, decodeURIComponent(dataUrl).replace(/^\//, '')), 'utf8')); } catch { return {}; } })();
 const [VW, VH] = sceneDims(cfg);
@@ -73,7 +73,7 @@ if (single != null) {
   await browser.close(); server.close(); process.exit(0);
 }
 
-// tiles keep the scene's own ratio — a fixed 300x533 squashed every landscape frame in the sheet
+// tiles keep the scene's own ratio: a fixed 300x533 squashed every landscape frame in the sheet
 const TILE_W = VW >= VH ? 400 : 300, TILE_H = Math.round(TILE_W * VH / VW);
 const tmp = '/tmp/preview_frames'; fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
 const ts = [0.3, 1.2, ...stings.flatMap((s) => [s - 0.2, s + 0.5]), duration * 0.55, duration - 1.0, duration - 0.15]

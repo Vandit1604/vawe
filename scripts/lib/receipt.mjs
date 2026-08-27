@@ -1,4 +1,4 @@
-// scripts/lib/receipt.mjs — STAGE APPROVAL, as a content hash.
+// scripts/lib/receipt.mjs: STAGE APPROVAL, as a content hash.
 //
 // A studio pipeline works because a person says "proceed" between stages. This engine generates every
 // artifact in one pass and then grades its own output, which is the structural difference between our
@@ -9,8 +9,8 @@
 //
 // That idea is stage-agnostic and was hardcoded three ways: the directory name was a literal in every
 // file, the writer was copy-pasted between beats.mjs and reveal.mjs, and the reader lived inside
-// beat-check.mjs. This module is the same idea with the stage as a parameter, so any stage — a chosen
-// concept, an approved treatment, a draft that cleared a bar — can be signed off and can go stale.
+// beat-check.mjs. This module is the same idea with the stage as a parameter, so any stage, a chosen
+// concept, an approved treatment, a draft that cleared a bar. Can be signed off and can go stale.
 //
 // WHY A HASH AND NOT A FLAG. An approval that survives the thing it approved is worse than no
 // approval, because it reads as verified. Hashing the subject's bytes means editing the subject
@@ -38,7 +38,7 @@ export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf
 
 // A scene's hand-authored markup can live INSIDE the JSON as an escaped `html` string, or beside it as
 // `{"type":"html","src":"formats/scene/x.html"}`. The second form moves the markup out of the subject's
-// bytes — so hashing the subject alone would leave every receipt for that scene FRESH while its whole
+// bytes, so hashing the subject alone would leave every receipt for that scene FRESH while its whole
 // backdrop was rewritten. That is precisely the failure this module exists to prevent, reintroduced by
 // a feature, and it landed before a single scene used `src`.
 //
@@ -47,7 +47,7 @@ export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf
 // question, and folding assets in here would stale the whole library at once.
 //
 // The path is folded in beside the bytes, so pointing a layer at a different file with identical
-// contents still counts as a change — it is a different scene to read.
+// contents still counts as a change, it is a different scene to read.
 function fragmentsOf(subject) {
   if (!/\.json$/i.test(subject)) return [];
   let data;
@@ -77,7 +77,7 @@ export function hashOf(subject) {
 }
 
 /** Record that `stage` was completed for `subject`. `meta` is free-form and is what makes a receipt
- *  worth reading later — the sheet that was produced, the option that was picked, the warnings a
+ *  worth reading later: the sheet that was produced, the option that was picked, the warnings a
  *  draft was allowed to carry. Never throws: failing to write a receipt must not fail a render. */
 export function writeReceipt(stage, subject, meta = {}) {
   const hash = hashOf(subject);
@@ -94,7 +94,7 @@ export function writeReceipt(stage, subject, meta = {}) {
 }
 
 /** `{ exists, stale, hash, path, rel, receipt }`. `stale` is true only when a receipt EXISTS and its
- *  hash disagrees — absent and stale are different states and callers word them differently: nobody
+ *  hash disagrees: absent and stale are different states and callers word them differently: nobody
  *  has looked at all, versus somebody looked at an older version. */
 export function readReceipt(stage, subject) {
   const hash = hashOf(subject);

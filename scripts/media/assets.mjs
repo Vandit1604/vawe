@@ -1,7 +1,7 @@
-// scripts/media/assets.mjs — make integrating images easy. Given a data JSON, fill every item that has a
+// scripts/media/assets.mjs: make integrating images easy. Given a data JSON, fill every item that has a
 // name but no real image: country → flag (flagcdn, public domain), brand → logo (simple-icons, free),
 // else → a generated topic card (scripts/cards.mjs). Rewrites the icon paths in place.
-//   node scripts/media/assets.mjs formats/scene/video.json            (dry run — prints the plan)
+//   node scripts/media/assets.mjs formats/scene/video.json            (dry run, prints the plan)
 //   node scripts/media/assets.mjs formats/scene/video.json --write    (fetch/generate + save JSON)
 //   flags:  --no-fetch (skip network, cards only) · --replace-emoji (also replace emoji icons)
 import fs from 'node:fs';
@@ -87,8 +87,8 @@ for (const s of all) {
   done.set(s.name, to); plan.push({ ...s, to, how });
 }
 
-if (!plan.length) { console.log('✓ every item already has a real image — nothing to do.'); process.exit(0); }
-console.log(`\n${WRITE ? 'WROTE' : 'PLAN (dry run — pass --write to apply)'} · ${dataPath}`);
+if (!plan.length) { console.log('✓ every item already has a real image, nothing to do.'); process.exit(0); }
+console.log(`\n${WRITE ? 'WROTE' : 'PLAN (dry run, pass --write to apply)'} · ${dataPath}`);
 for (const p of plan) console.log(`  ${p.how.padEnd(6)} ${p.name}  →  ${p.to}`);
 const byHow = plan.reduce((m, p) => ((m[p.how] = (m[p.how] || 0) + 1), m), {});
 console.log(`  (${Object.entries(byHow).map(([k, v]) => `${v} ${k}`).join(', ')})`);
@@ -96,7 +96,7 @@ console.log(`  (${Object.entries(byHow).map(([k, v]) => `${v} ${k}`).join(', ')}
 if (WRITE) {
   for (const p of plan) p.obj[p.key] = p.to;
   fs.writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n');
-  console.log(`\n✓ updated ${dataPath} — render with:  ./bin/vawe ${path.relative(repoRoot, path.resolve(dataPath))}`);
+  console.log(`\n✓ updated ${dataPath}, render with:  ./bin/vawe ${path.relative(repoRoot, path.resolve(dataPath))}`);
 } else {
   console.log('\n(dry run) re-run with --write to fetch/generate + update the JSON.');
 }

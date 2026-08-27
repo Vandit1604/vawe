@@ -1,4 +1,4 @@
-// scripts/gates/unused.mjs — which registered effects has no shipped scene ever named?
+// scripts/gates/unused.mjs, which registered effects has no shipped scene ever named?
 //
 //   node scripts/gates/unused.mjs        ·        make unused
 //
@@ -11,7 +11,7 @@
 // uses is a capability nobody has tested, so this list is really a test backlog.
 //
 // WHY THE COUNT IS NOT A TARGET, which matters more. docs/MISTAKES.md #359 records the trap: about a
-// third of the never-used GSAP effects DUPLICATE something the engine already does well — `fadeIn` is
+// third of the never-used GSAP effects DUPLICATE something the engine already does well, `fadeIn` is
 // `anim:"fade"`, `zoomIn` is `scale`, `revealUp` is the `riseClip` preset. Driving this number down by
 // folding those into blueprints would put two ways to do one thing in front of every author, which
 // `direction-floor` blocks as effect-soup. For that group the right question is whether to RETIRE them.
@@ -78,4 +78,4 @@ for (const [family, used, all, missing] of rows) {
 }
 console.log(`\n  ${total - dead}/${total} of the registered vocabulary appears in a shipped scene · ${dead} never named.`);
 console.log('  Read each zero as: nobody can find it, it does not work, or something else does it better.');
-console.log('  Do not drive this number down for its own sake — see docs/MISTAKES.md #359.');
+console.log('  Do not drive this number down for its own sake, see docs/MISTAKES.md #359.');

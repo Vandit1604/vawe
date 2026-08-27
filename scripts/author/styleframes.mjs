@@ -1,9 +1,9 @@
-// scripts/author/styleframes.mjs — the LOOK, settled and signed off, before the motion is trusted.
+// scripts/author/styleframes.mjs: the LOOK, settled and signed off, before the motion is trusted.
 //
 // Stage 5 of the studio pipeline, and the one this repo never had. A studio designs three to five
 // frames to final quality and gets them approved BEFORE anyone animates, because animation is the
 // expensive part and you cannot un-animate a look that was wrong. vawe's animation is cheap, so the
-// economic argument is weaker here — but the DESIGN argument is not, and it is the one that bites:
+// economic argument is weaker here, but the DESIGN argument is not, and it is the one that bites:
 // composition, hierarchy, palette and type are decisions a still forces you to resolve and motion lets
 // you paper over. `onefile` shipped a backdrop that rendered as loud blue blocks, and it survived every
 // static gate because no gate looks at a picture. One still would have shown it in three seconds.
@@ -66,7 +66,7 @@ for (let i = 0; i < PROBES; i++) {
 }
 
 // SETTLED, NOT TRANSITIONAL. The first cut of this picked purely by distinctness and returned a frame
-// at 0.88s with the headline still fading in at half opacity — a frame nobody designed, presented as
+// at 0.88s with the headline still fading in at half opacity, a frame nobody designed, presented as
 // the design. A style frame is the SETTLED state of a look. A probe sitting inside a transition differs
 // sharply from both its neighbours, so that is exactly what to measure and penalise.
 for (let i = 0; i < probes.length; i++) {
@@ -145,7 +145,7 @@ for (const f of frames) console.log(`    ${f.t.toFixed(2).padStart(6)}s   ${f.fi
 console.log(`\n  sheet: ${sheet}`);
 for (const l of look) {
   const bad = l.code !== 0;
-  console.log(`  ${bad ? '✗' : '✓'} ${l.gate}${bad ? ' — ' + (l.out.split('\n').find((x) => /[✗×]/.test(x)) || 'failed').trim() : ''}`);
+  console.log(`  ${bad ? '✗' : '✓'} ${l.gate}${bad ? ', ' + (l.out.split('\n').find((x) => /[✗×]/.test(x)) || 'failed').trim() : ''}`);
 }
 console.log('\n  These are the LOOK, not the motion. Open them full size and answer only: is this the film');
 console.log('  I want to have made? Composition, hierarchy, palette, type. Approve, then animate.\n');

@@ -1,4 +1,4 @@
-// scripts/site/blocks-json.mjs — derive site/lib/blocks.json from the registry manifest.
+// scripts/site/blocks-json.mjs: derive site/lib/blocks.json from the registry manifest.
 // Run via `make blocks-json` (or `make blocks-sync`). Deterministic; no network.
 //
 // WHY THIS EXISTS: site/lib/blocks.json used to be a hand-kept copy of blocks/catalog.mjs, and the
@@ -7,8 +7,8 @@
 //   • site/app/blocks/*               lists and filters from blocks.json
 // If those disagree by even one row the site shows the wrong picture for the right name, silently,
 // because both files are still valid. They happened to agree at 96 rows; adding a family broke it.
-// Deriving removes the class. (Per-block media is keyed BY NAME now, not by position in this list —
-// see scripts/site/blocks-scenes.mjs — so an ordering drift can no longer misattribute a thumbnail.)
+// Deriving removes the class. (Per-block media is keyed BY NAME now, not by position in this list.
+// See scripts/site/blocks-scenes.mjs, so an ordering drift can no longer misattribute a thumbnail.)
 //
 // The site file is CATALOG minus `overlay` rows, which is exactly the grid the catalog renders
 // (captions is a full-frame overlay and has no cell).
@@ -22,7 +22,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const OUT = path.join(root, 'site/lib/blocks.json');
 
 // CATEGORY, resolved rather than tabulated. 90-odd families is far too many for a browsing rail and
-// most hold one block, so the site needs a coarser grouping — and a 176-row name-to-category table in
+// most hold one block, so the site needs a coarser grouping, and a 176-row name-to-category table in
 // a React component would be stale the day someone adds a block. The grouping already EXISTS in the
 // code: the module a factory lives in. Each blocks/*.mjs exports its own `CATEGORY` and
 // blocks/index.mjs discovers it while assembling the registry, so this file just reads the answer.

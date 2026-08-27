@@ -1,10 +1,10 @@
-// font-audit.mjs — fail the build if any text renders in a font we did not intend.
+// font-audit.mjs: fail the build if any text renders in a font we did not intend.
 //
 //   node scripts/gates/font-audit.mjs scene formats/scene/tpot-launch.json
 //   make fonts D=formats/scene/tpot-launch.json
 //
 // Writes a deterministic sidecar next to the render: out/<name>.fonts.json.
-// Deliberately records only the VERDICT per family — never the probe widths, which are
+// Deliberately records only the VERDICT per family, never the probe widths, which are
 // OS/version dependent and would churn the file on every machine that touches it.
 //
 // This exists because both prior occurrences of this bug were warnings that scrolled past in
@@ -54,12 +54,12 @@ for (const r of report) console.log(`  ${ICON[r.verdict]} ${r.family.padEnd(22)}
 console.log(`  → ${path.relative(repoRoot, sidecar)}`);
 
 if (bad.length) {
-  console.error(`\n✗ font audit FAILED — ${bad.length} family(ies) are not rendering as intended:`);
+  console.error(`\n✗ font audit FAILED: ${bad.length} family(ies) are not rendering as intended:`);
   for (const r of bad) {
-    if (r.verdict === 'FALLBACK') console.error(`  ✗ ${r.family}: no @font-face — the browser silently substituted a generic. Vendor it to assets/fonts/ and add an @font-face to core/tokens.css.`);
+    if (r.verdict === 'FALLBACK') console.error(`  ✗ ${r.family}: no @font-face. The browser silently substituted a generic. Vendor it to assets/fonts/ and add an @font-face to core/tokens.css.`);
     if (r.verdict === 'SYSTEM-LUCK') console.error(`  ⚠ ${r.family}: painting from a SYSTEM install with no @font-face. It looks right on this machine and will fall back everywhere else. Vendor it.`);
     if (r.verdict === 'BROKEN') console.error(`  ✗ ${r.family}: @font-face exists but the file failed to load (bad path or 404). Check the src url in core/tokens.css.`);
   }
   process.exit(1);
 }
-console.log(`\n✓ font audit OK — ${report.length} family(ies), all vendored, loaded and painting (${name})`);
+console.log(`\n✓ font audit OK: ${report.length} family(ies), all vendored, loaded and painting (${name})`);

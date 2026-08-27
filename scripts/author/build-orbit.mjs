@@ -1,4 +1,4 @@
-// scripts/author/build-orbit.mjs — generate formats/scene/orbit-proof.json.
+// scripts/author/build-orbit.mjs: generate formats/scene/orbit-proof.json.
 //
 // The single shot that proved keyed depth was worth building. In the reference a ribbon sweeps around
 // a photograph, passing IN FRONT of it on the near side and BEHIND it on the far side, so the flat
@@ -15,7 +15,7 @@ const CX = 960, CY = 540;             // 16:9 centre
 const PW = 620, PH = 400;             // the photograph, the thing being orbited
 
 // The photo sits at depth 5. A half-ring keyed from 9 down to 1 crosses it exactly once, and the
-// crossing is what sells the space — not the sweep, the OCCLUSION.
+// crossing is what sells the space, not the sweep, the OCCLUSION.
 const layers = [
   {
     type: 'image', id: 'photo', src: '/assets/brands/zerochrome/photos/architecture-interior-landscape-2.jpg',

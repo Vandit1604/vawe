@@ -1,4 +1,4 @@
-// scripts/author/scene-page.mjs — open a scene in a headless browser and hand back a frame grabber.
+// scripts/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber.
 //
 // Every tool that wants to LOOK at a scene without rendering an mp4 needs the same twenty lines: serve
 // the repo, boot scene.html against the JSON, wait for __engineReady, read meta, then seek and shoot.

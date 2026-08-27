@@ -3,7 +3,7 @@ message: vawe refuses to render a film that fails its own checks, and the film y
 audience: Developers evaluating a render engine, arriving through an agent, deciding whether to trust output nobody watched.
 arc: hook → measure → verdict → refusal → repair → sweep → payoff
 thread: unfinished sentence
-object: none — the thread is unfinished sentence
+object: none, the thread is unfinished sentence
 duration: 21s
 format: 1920x1080
 concept: fast-sentence · technical (dark)
@@ -31,7 +31,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 2: <name this beat> (1.4s-2.8s)
 - type: build
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -41,7 +41,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 3: <name this beat> (2.8s-4.2s)
 - type: problem
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -62,7 +62,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 5: <name this beat> (5.6s-7s)
 - type: proof
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -83,7 +83,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 7: <name this beat> (8.4s-9.8s)
 - type: problem
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -104,7 +104,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 9: <name this beat> (11.2s-12.6s)
 - type: proof
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -125,7 +125,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 11: <name this beat> (14s-15.4s)
 - type: problem
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -146,7 +146,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 13: <name this beat> (16.8s-18.2s)
 - type: proof
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -167,7 +167,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 15: <name this beat> (19.6s-21s)
 - type: payoff
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

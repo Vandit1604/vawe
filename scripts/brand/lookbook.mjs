@@ -1,7 +1,7 @@
-// lookbook.mjs — capture a site's LOOK for art direction: full-page screenshot + viewport shots
+// lookbook.mjs, capture a site's LOOK for art direction: full-page screenshot + viewport shots
 // at a few scroll depths. This is the no-template step: the designer (human or agent) STUDIES
 // these images and derives the video's design language from the brand's own typography, spacing,
-// shape language and density — instead of picking a canned style.
+// shape language and density, instead of picking a canned style.
 //
 //   node scripts/brand/lookbook.mjs <url> <brand>     →  assets/brands/<brand>/look/*.png
 //   make lookbook URL=https://site.com NAME=acme

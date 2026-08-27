@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// scripts/dev/worktree-prune.mjs — retire agent worktrees once their work has landed.
+// scripts/dev/worktree-prune.mjs: retire agent worktrees once their work has landed.
 //   make worktrees            report only (default; touches nothing)
 //   make worktrees PRUNE=1    remove the SAFE ones + their branches
 //
 // WHY THIS EXISTS. Agent worktrees accumulate: 35 of them reached 9.1G here, and the harness only
-// auto-removes the ones that were never changed — precisely the cheap half. The ones that DID change
+// auto-removes the ones that were never changed, precisely the cheap half. The ones that DID change
 // something are the ones that pile up, and they are also the only ones that can lose work.
 //
 // The hazard is not the disk, it is deleting the one worktree that still holds something. Auditing 35
@@ -45,7 +45,7 @@ const trees = git(['worktree', 'list', '--porcelain']).split('\n\n')
     return p && p !== root ? { path: p, branch: b } : null;
   }).filter(Boolean);
 
-if (!trees.length) { console.log('✓ no agent worktrees — nothing to retire'); process.exit(0); }
+if (!trees.length) { console.log('✓ no agent worktrees: nothing to retire'); process.exit(0); }
 
 // A file gitignored in the MAIN tree is build noise (node_modules, out/*.png, .vawe-data), never work.
 // Asked in one batch: one `git check-ignore` beats one per file across thousands of paths.
@@ -104,11 +104,11 @@ for (const t of trees) {
 
 const name = (t) => path.basename(t.path);
 if (safe.length) {
-  console.log(`\n✓ ${safe.length} worktree(s) fully landed in main${PRUNE ? ' — removing' : ''}:`);
+  console.log(`\n✓ ${safe.length} worktree(s) fully landed in main${PRUNE ? ', removing' : ''}:`);
   for (const t of safe) console.log(`  ${name(t)}${t.commits ? `  (${t.commits} commit(s), all content present in main)` : ''}`);
 }
 if (unsafe.length) {
-  console.log(`\n⚠ ${unsafe.length} worktree(s) STILL HOLD WORK — not touched:`);
+  console.log(`\n⚠ ${unsafe.length} worktree(s) STILL HOLD WORK, not touched:`);
   for (const t of unsafe) {
     console.log(`\n  ${name(t)}`);
     for (const s of t.stranded.slice(0, 12)) console.log(`      ${s}`);
@@ -117,7 +117,7 @@ if (unsafe.length) {
   }
 }
 if (!PRUNE) {
-  console.log(`\n(report only — nothing removed. \`make worktrees PRUNE=1\` retires the ${safe.length} landed one(s).)`);
+  console.log(`\n(report only: nothing removed. \`make worktrees PRUNE=1\` retires the ${safe.length} landed one(s).)`);
   process.exit(0);
 }
 let n = 0;

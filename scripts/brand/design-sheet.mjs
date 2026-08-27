@@ -1,12 +1,12 @@
-// design-sheet.mjs — the REVIEW step between capture and compose. Renders every captured element for a
+// design-sheet.mjs: the REVIEW step between capture and compose. Renders every captured element for a
 // brand onto ONE page (on the theme background), each labelled with its name/size/fonts, so you vet the
-// raw material — ghost bleed, substituted fonts, missing assets — and fix it BEFORE building a video.
+// raw material (ghost bleed, substituted fonts, missing assets) and fix it BEFORE building a video.
 //
 //   node scripts/brand/design-sheet.mjs <brand> [--theme name] [--serve]
 //   make sheet NAME=linear            → /tmp/sheet.png  (one tall contact sheet)
 //   make sheet NAME=linear SERVE=1    → live in your browser (real fonts/assets, scrollable)
 //
-// Reads every assets/brands/<brand>/components/*.json ({html,w,h,fonts}) — the captures.
+// Reads every assets/brands/<brand>/components/*.json ({html,w,h,fonts}), the captures.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,7 +23,7 @@ let bg = '#0a0a0c';
 try { bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', themeName + '.json'), 'utf8')).palette.bg; } catch {}
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'components');
-if (!fs.existsSync(dir)) { console.error(`✗ no components for "${brand}" — run: make capture …  (dir: ${path.relative(ROOT, dir)})`); process.exit(1); }
+if (!fs.existsSync(dir)) { console.error(`✗ no components for "${brand}", run: make capture …  (dir: ${path.relative(ROOT, dir)})`); process.exit(1); }
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
 if (!files.length) { console.error(`✗ no captured components in ${path.relative(ROOT, dir)}`); process.exit(1); }
 
@@ -84,6 +84,6 @@ if (argv.includes('--serve')) {
   await browser.close(); server.close();
   const miss = files.map((f) => { try { return missingFonts(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')).fonts); } catch { return []; } }).flat();
   console.log(`✓ ${brand} design sheet · ${files.length} elements → ${out}`);
-  if (miss.length) console.log(`  ⚠ substituted fonts: ${[...new Set(miss)].join(', ')} — add @font-face aliases in core/tokens.css`);
+  if (miss.length) console.log(`  ⚠ substituted fonts: ${[...new Set(miss)].join(', ')}. Add @font-face aliases in core/tokens.css`);
   console.log('  live/interactive version:  make sheet NAME=' + brand + ' SERVE=1');
 }

@@ -1,4 +1,4 @@
-// scripts/gates/code-quality.mjs — the codebase may get simpler, never more tangled.
+// scripts/gates/code-quality.mjs: the codebase may get simpler, never more tangled.
 //
 //   node scripts/gates/code-quality.mjs           # check
 //   node scripts/gates/code-quality.mjs --write   # accept the current state as the new baseline

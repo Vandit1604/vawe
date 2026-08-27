@@ -1,4 +1,4 @@
-// scripts/dev/spike-depth.mjs — DOES `plane` PRODUCE PARALLAX, OR ONLY A SCALE?
+// scripts/dev/spike-depth.mjs: DOES `plane` PRODUCE PARALLAX, OR ONLY A SCALE?
 //
 // The two are easy to confuse and look similar on a still: a layer pushed back gets smaller either way.
 // They part company the moment the CAMERA MOVES. Under a real depth the projection divides by the
@@ -6,7 +6,7 @@
 // opens as the camera trucks. Under a scale every layer is still on one plane and the whole composition
 // slides rigidly: same displacement, every layer, whatever z says.
 //
-// So the measurement is not "did the layer move" — it is "did the layers move by DIFFERENT amounts, and
+// So the measurement is not "did the layer move". It is "did the layers move by DIFFERENT amounts, and
 // by the amounts the lens predicts". A perspective projection at lens L puts a point at depth z on
 // screen at L / (L - z) of its offset from the vanishing point, so trucking the camera by dx moves it by
 //
@@ -16,7 +16,7 @@
 // layers, three depths, one camera move; predict the three numbers, then read them off the real engine.
 // Equal numbers mean a scale was built and the feature does not work.
 //
-// It drives the SHIPPING scene format rather than a hand-built page — the point is the engine's own rig,
+// It drives the SHIPPING scene format rather than a hand-built page, the point is the engine's own rig,
 // tracks and modifier stack, and a spike that rebuilt the construction by hand would prove the CSS works
 // and say nothing about whether the engine reaches it. The scene is served from memory, so the spike
 // leaves no file behind and cannot rot against one.
@@ -62,9 +62,9 @@ if (err) { console.error('SCENE ERROR:', err); await browser.close(); server.clo
 
 // A ZERO-SIZE MARKER at each layer's own centre, not the layer's bounding rect. Under perspective a
 // rotated box projects to a trapezium whose axis-aligned bbox centre is NOT the projected centre, and it
-// drifts as the camera moves — measuring that would fold a shape change into the displacement and report
+// drifts as the camera moves, measuring that would fold a shape change into the displacement and report
 // a parallax that is partly the tilt. A 1px marker rides the same transform and its rect IS the point.
-// An `id` is scene bookkeeping and is not written to the DOM, so the layers are matched by ORDER — the
+// An `id` is scene bookkeeping and is not written to the DOM, so the layers are matched by ORDER, the
 // engine builds `.hs-layer` elements in the order the JSON lists them.
 await page.evaluate((ids) => {
   const els = [...document.querySelectorAll('.hs-layer')];
@@ -100,7 +100,7 @@ for (const [id, z] of Object.entries(DEPTHS)) {
 const spread = Math.abs((B.near - A.near) - (B.far - A.far));
 console.log(`\nnear vs far: ${spread.toFixed(2)}px of differential displacement across the move.`);
 if (spread < 1) {
-  console.error('✗ NO PARALLAX — every layer moved by the same amount. That is a scale, not a depth.');
+  console.error('✗ NO PARALLAX: every layer moved by the same amount. That is a scale, not a depth.');
   process.exit(1);
 }
 if (fail) { console.error(`✗ ${fail} layer(s) missed the predicted displacement`); process.exit(1); }

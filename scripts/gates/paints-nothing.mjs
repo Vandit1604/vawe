@@ -1,30 +1,30 @@
-// scripts/gates/paints-nothing.mjs — did this layer actually paint anything, in its own box?
+// scripts/gates/paints-nothing.mjs: did this layer actually paint anything, in its own box?
 //
 // A terminal card was hand-authored as an `html` layer: a CSS mask-image on an auto-height wrapper whose
-// children were all absolutely positioned. That masks EVERYTHING to nothing — the card rendered as a
+// children were all absolutely positioned. That masks EVERYTHING to nothing, the card rendered as a
 // blank white box, and it shipped past every gate that exists: `make audit` measures overlap, safe zones
 // and contrast, never whether a layer painted anything at all.
 //
-// THE TECHNIQUE IS NOT NEW — it is copied from scripts/site/type-specimens.mjs:427-446, whose own comment
+// THE TECHNIQUE IS NOT NEW. It is copied from scripts/site/type-specimens.mjs:427-446, whose own comment
 // records the reason it looks at pixels: a DOM probe was tried first and it PASSED a blank frame, because
 // a `background-clip:text` layer's glyphs inherit `color: transparent` and measure as full-size, opaque
 // boxes while painting nothing. Only a screenshot knows what actually landed on screen.
 //
-// THE COMPARISON, per LAYER (not per beat — beat-check's `dead-air` already fails a hole in the WHOLE
+// THE COMPARISON, per LAYER (not per beat. Beat-check's `dead-air` already fails a hole in the WHOLE
 // frame; a blank layer sitting inside an otherwise busy frame trips nothing there). At the layer's own
 // settled midpoint: screenshot its own box, hide just that element (`visibility:hidden`, which never
 // reflows a sibling since every layer is `position:absolute`), screenshot the same box again, restore the
 // element, diff the two PNGs byte for byte. Identical means the layer's presence made no visible
-// difference inside its own box — it painted nothing.
+// difference inside its own box, it painted nothing.
 //
 // WHICH LAYERS ARE SKIPPED, and why each is not a finding:
 //   - `group` containers: not themselves a paint target (their children are the content; a group's own
 //     wrapper box is layout, not a picture). Nested group children are NOT walked by this gate (v1
-//     limitation — see the README-style note in checkScene below).
+//     limitation, see the README-style note in checkScene below).
 //   - a layer whose own opacity, multiplied through every ancestor, is under 1% at the sampled moment: it
 //     is DECLARED invisible right now, a timing/authoring decision this gate has no opinion on.
 //   - a layer with no real box (width or height under 1px): boxless is a DIFFERENT failure
-//     (motion-audit's "degenerate" WARN, xi) — this gate only asks about a layer that HAS a box.
+//     (motion-audit's "degenerate" WARN, xi). This gate only asks about a layer that HAS a box.
 //
 // SEVERITY: REPORTS, not BLOCKS. This rule has never applied to the library before today; making it a
 // wall on day one would fail scenes nobody ever asked to satisfy it (docs/TASTE.md, "One process, two
@@ -33,7 +33,7 @@
 //
 // WAIVERS need a reason, the identical mechanism `dead-air` uses today (scripts/gates/author-check.mjs):
 //   { "authoring": { "allow": ["paints-nothing"], "_why": { "paints-nothing": "…" } } }
-// A waiver with no `_why` (or one under 12 characters) is treated as no waiver — the finding still prints
+// A waiver with no `_why` (or one under 12 characters) is treated as no waiver, the finding still prints
 // and --strict still fails on it.
 //
 //   node scripts/gates/paints-nothing.mjs <scene.json> [--strict]
@@ -54,10 +54,10 @@ const file = argv.find((a) => !a.startsWith('--'));
 const strict = argv.includes('--strict');
 
 const FPS = 30;
-const OPACITY_FLOOR = 0.01; // below this a layer is DECLARED invisible right now — not a paint failure
+const OPACITY_FLOOR = 0.01; // below this a layer is DECLARED invisible right now, not a paint failure
 
 
-// Per top-level layer, the engine-corrected [start,end] — the same rewrite scene.js does for a
+// Per top-level layer, the engine-corrected [start,end]: the same rewrite scene.js does for a
 // sceneUnits beat wrapper (a non-last-beat layer runs to `beatEnd + cutDur`, not its authored duration).
 // Sampled at the midpoint so entrance/exit ramps sit behind it, mirroring beat-check's own reasoning for
 // a "settled" frame, just applied per layer instead of per beat.
@@ -97,11 +97,11 @@ async function checkScene(browser, port, absFile) {
     // `.hs-layer` is stamped ONLY on top-level layers (formats/scene/scene.js buildLayer); a nested
     // group child gets `hs-group` alone. So this NodeList's length and order matches `T.layers` exactly
     // for the ordinary (non-beat-wrapped) scene, and matches it for a beat-wrapped one too as long as a
-    // beat's layers are declared contiguously in the JSON — true of every scene this repo authors. A
+    // beat's layers are declared contiguously in the JSON, true of every scene this repo authors. A
     // mismatch is reported rather than guessed at.
     const domCount = await page.evaluate(() => document.querySelectorAll('.hs-layer').length);
     if (domCount !== times.length) {
-      return { file: relFile, error: `layer count mismatch: DOM has ${domCount} top-level .hs-layer, scene declares ${times.length} — cannot align, skipped` };
+      return { file: relFile, error: `layer count mismatch: DOM has ${domCount} top-level .hs-layer, scene declares ${times.length}, cannot align, skipped` };
     }
 
     const findings = [];
@@ -163,7 +163,7 @@ async function reportOne(absFile) {
   if (r.skip) { console.log(`  · ${r.skip}\n`); return { fail: false }; }
   if (r.error) { console.log(`  ✗ ${r.error}\n`); return { fail: false }; }
   if (!r.findings.length) { console.log(`  ✓ ${r.layerCount} layer(s) checked, all paint something\n`); return { fail: false }; }
-  for (const f of r.findings) console.log(`    ~ [paints-nothing] ${f.layer} at t=${f.t}s (frame ${f.frame}) is pixel-identical to itself hidden — it paints nothing in its own box.`);
+  for (const f of r.findings) console.log(`    ~ [paints-nothing] ${f.layer} at t=${f.t}s (frame ${f.frame}) is pixel-identical to itself hidden, it paints nothing in its own box.`);
   const blockable = !r.waived;
   console.log(r.waived
     ? '\n  (waived: authoring.allow has "paints-nothing" with a stated reason)\n'

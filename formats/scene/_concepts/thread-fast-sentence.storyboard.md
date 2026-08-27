@@ -3,7 +3,7 @@ message: hand-animating a video is fine until the number changes, and then you d
 audience: people who rebuild the same product video every time a figure moves
 arc: a familiar grind, named clause by clause, until the thing that ends it arrives
 thread: unfinished sentence
-object: none — the thread is unfinished sentence
+object: none, the thread is unfinished sentence
 duration: 15s
 format: 1080x1920
 concept: fast-sentence · technical (dark)
@@ -31,7 +31,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 2: <name this beat> (1.36s-2.72s)
 - type: build
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -41,7 +41,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 3: <name this beat> (2.72s-4.08s)
 - type: problem
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -62,7 +62,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 5: <name this beat> (5.44s-6.8s)
 - type: proof
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -83,7 +83,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 7: <name this beat> (8.16s-9.52s)
 - type: problem
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -104,7 +104,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 9: <name this beat> (10.88s-12.24s)
 - type: proof
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -125,7 +125,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 11: <name this beat> (13.6s-14.96s)
 - type: payoff
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

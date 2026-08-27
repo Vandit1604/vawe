@@ -1,4 +1,4 @@
-// scripts/gates/docs-drift.mjs — a doc is a claim about the PAST as much as the future, and
+// scripts/gates/docs-drift.mjs: a doc is a claim about the PAST as much as the future, and
 // nothing checked it. Twice now it listed shipped work as missing and routed a planning pass at
 // effects that already existed (see its own closing warning, and MISTAKES #83).
 //
@@ -20,15 +20,15 @@ import { BG_NAMES } from '../../core/backgrounds.js';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
 
-// PRIMITIVES.md states a count in its section HEADINGS ("— 35 WebGL cover-the-cut effects"). Those
+// PRIMITIVES.md states a count in its section HEADINGS (", 35 WebGL cover-the-cut effects"). Those
 // decayed exactly like the roadmap's did (33 and 14 against a real 35 and 17) while this gate watched
 // only one file. A gate's blind spot is rarely the rule it states; it is the file list underneath it.
 const PRIM_PATH = path.join(repoRoot, 'docs', 'PRIMITIVES.md');
 const prim = fs.readFileSync(PRIM_PATH, 'utf8');
 const HEADING_COUNTS = [
-  { re: /## Shader stings \(`core\/stings\.js`\) — (\d+)/,          reg: 'SHADER_FX' },
-  { re: /## Ambient shader looks \(`core\/shaders-ambient\.js`\) — (\d+)/, reg: 'AMBIENT_FX' },
-  { re: /the `raymarch` layer type — (\d+)/,                         reg: 'RAYMARCH_FX' },
+  { re: /## Shader stings \(`core\/stings\.js`\), (\d+)/,          reg: 'SHADER_FX' },
+  { re: /## Ambient shader looks \(`core\/shaders-ambient\.js`\), (\d+)/, reg: 'AMBIENT_FX' },
+  { re: /the `raymarch` layer type, (\d+)/,                         reg: 'RAYMARCH_FX' },
 ];
 
 const REGISTRIES = {
@@ -77,7 +77,7 @@ for (const [reg, { names, src }] of Object.entries(REGISTRIES)) {
 
 for (const { re, reg } of HEADING_COUNTS) {
   const m = prim.match(re);
-  if (!m) { findings.push(`docs/PRIMITIVES.md has no ${reg} heading matching ${re} — the count check silently stopped running`); continue; }
+  if (!m) { findings.push(`docs/PRIMITIVES.md has no ${reg} heading matching ${re}. The count check silently stopped running`); continue; }
   const claimed = Number(m[1]);
   const real = REGISTRIES[reg].names.length;
   if (claimed !== real) {
@@ -93,14 +93,14 @@ const BG_MDX = path.join(repoRoot, 'docs-site', 'content', 'docs', 'backgrounds-
 if (fs.existsSync(BG_MDX)) {
   const mdx = fs.readFileSync(BG_MDX, 'utf8');
   const cm = /There are (\d+) presets:/.exec(mdx);
-  if (!cm) findings.push(`docs-site backgrounds-and-images.mdx has no "There are N presets:" line — the bg count check silently stopped running`);
+  if (!cm) findings.push(`docs-site backgrounds-and-images.mdx has no "There are N presets:" line. The bg count check silently stopped running`);
   else if (+cm[1] !== BG_NAMES.length) findings.push(`docs-site backgrounds-and-images.mdx says ${cm[1]} bg presets, but core/backgrounds.js BG_NAMES holds ${BG_NAMES.length}`);
   const missing = BG_NAMES.filter((n) => !mdx.includes('`' + n + '`'));
   if (missing.length) findings.push(`docs-site backgrounds-and-images.mdx never lists bg preset(s): ${missing.join(', ')} (in core/backgrounds.js BG_NAMES)`);
 }
 
 if (!findings.length) {
-  console.log(`✓ docs in sync — no shipped effect listed as missing, every quoted registry count right (ROADMAP + PRIMITIVES + bg presets)`);
+  console.log(`✓ docs in sync: no shipped effect listed as missing, every quoted registry count right (ROADMAP + PRIMITIVES + bg presets)`);
   process.exit(0);
 }
 console.log(`DOCS DRIFT (${findings.length})\n`);

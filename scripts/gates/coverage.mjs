@@ -1,11 +1,11 @@
-// coverage.mjs — which parts of the engine has nothing ever exercised?
+// coverage.mjs, which parts of the engine has nothing ever exercised?
 //
 //   node scripts/gates/coverage.mjs        report
 //   make coverage
 //
 // Conformance proves a value WORKS. This asks a different question: is anyone USING it? Vocabulary
 // that no scene touches is where regressions live undetected, because nothing renders it and no
-// screenshot shows it. The audio path is the worked example — no scene and no gate exercised the
+// screenshot shows it. The audio path is the worked example, no scene and no gate exercised the
 // mix, so `cuts` produced no sound for as long as it existed and nobody could have noticed (#23).
 //
 // WARN tier by design (always exits 0). Unused vocabulary is a fact to act on, not a build failure:
@@ -32,13 +32,13 @@ const scenes = population('coverage · corpus', { filter: LIBRARY_WITH_DERIVATIV
   // cut style and a sting fx that this report otherwise scores as unexercised, so the library looked
   // like it used less of the engine than it does (docs/MISTAKES.md #391b). `raw` is the authored file,
   // because lowering CONSUMES the unified keys, and the prop census below asks which authored props no
-  // scene sets — answering that off the lowered copy would report `transition` and `mech` as dead the
+  // scene sets, answering that off the lowered copy would report `transition` and `mech` as dead the
   // moment somebody used them.
   .map((f) => { try { const raw = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
     return { f, raw, j: lowerScene(structuredClone(raw)) }; } catch { return null; } })
   .filter((x) => x && x.j.module === 'scene');
 
-// walk every layer, including group children — a primitive used only inside a group is still used
+// walk every layer, including group children: a primitive used only inside a group is still used
 const layersOf = (j) => { const out = [];
   const push = (ls) => { for (const l of ls || []) { out.push(l); if (l.children) push(l.children); } };
   push(j.layers); return out; };
@@ -48,7 +48,7 @@ const used = { anim: new Set(), preset: new Set(), cut: new Set(), sting: new Se
 
 for (const { j, raw } of scenes) {
   // Props live on cuts/stings/bg/camera ITEMS too, not just layers. Collecting only layer keys made
-  // the report claim `t`, `dur`, `style` and `timing` were unused — they are used constantly. A
+  // the report claim `t`, `dur`, `style` and `timing` were unused, they are used constantly. A
   // coverage report that cries wolf gets ignored exactly like a gate that does.
   // Read off `raw`: this census is about what an AUTHOR writes, and `transitions` is one of the things
   // an author writes, so it is counted here and not through the cuts it lowers to.
@@ -100,7 +100,7 @@ for (const [label, all, seen] of GROUPS) {
   if (unused.length) gaps.push([label, unused]);
 }
 
-// props the schema declares that NO scene sets — the surface most likely to rot unnoticed
+// props the schema declares that NO scene sets: the surface most likely to rot unnoticed
 const unusedProps = [...schemaProps].filter((p) => !used.prop.has(p)).sort();
 
 console.log('\n── unexercised vocabulary (nothing renders these, so nothing would notice a regression)\n');

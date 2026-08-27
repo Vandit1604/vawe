@@ -1,8 +1,8 @@
-// capture-motion.mjs — WATCH a real element animate and emit a motion track our engine can replay.
+// capture-motion.mjs: WATCH a real element animate and emit a motion track our engine can replay.
 // It samples the element's transform + opacity every frame as it reveals (scroll-triggered by default,
 // or on-load), decomposes the CSS matrix into translate/scale/rotate, normalises to REST at the end
 // (a motion track composes on top of the layer's final position), and reduces to keyframes. Same
-// "measure, don't guess" idea as brandspec — reproduce the site's actual move, not an invented one.
+// "measure, don't guess" idea as brandspec. Reproduce the site's actual move, not an invented one.
 //
 //   node scripts/author/capture-motion.mjs https://example.com/home 'main section:nth-of-type(3)'   [--onload] [--dur 2.5]
 import puppeteer from 'puppeteer';
@@ -50,7 +50,7 @@ const rec = await page.evaluate(() => window.__rec);
 await browser.close();
 
 const s = (rec && rec.samples) || [];
-if (s.length < 3) { console.error(`captured only ${s.length} samples — the element may not animate on ${onload ? 'load' : 'scroll'}; try the other mode or a child selector.`); process.exit(1); }
+if (s.length < 3) { console.error(`captured only ${s.length} samples. The element may not animate on ${onload ? 'load' : 'scroll'}; try the other mode or a child selector.`); process.exit(1); }
 // normalise to REST (final settled sample) so the track is an entrance offset ending at 0/1
 const fin = s[s.length - 1];
 const norm = s.map((k) => ({ t: +(k.t / 1000).toFixed(3), x: +(k.x - fin.x).toFixed(1), y: +(k.y - fin.y).toFixed(1), scale: +(k.scale / (fin.scale || 1)).toFixed(3), rot: +(k.rot - fin.rot).toFixed(1), opacity: +(k.opacity).toFixed(2), blur: k.blur }));

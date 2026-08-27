@@ -1,4 +1,4 @@
-// wav-read.mjs — ONE PCM WAV reader. Walks the chunk table rather than assuming a 44-byte header
+// wav-read.mjs: ONE PCM WAV reader. Walks the chunk table rather than assuming a 44-byte header
 // (fmt/LIST sizes vary), and handles 16/24/32-bit PCM plus 32-bit float, because the repo holds both
 // synthesized 16-bit cues and recorded 24-bit ones.
 //

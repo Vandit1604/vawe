@@ -1,6 +1,6 @@
-// palette.mjs — EYEDROP a brand's real pixels → dominant colours + LIGHT/DARK dominance. The taste
+// palette.mjs: EYEDROP a brand's real pixels → dominant colours + LIGHT/DARK dominance. The taste
 // system depends on this being ACCURATE (a wrong dominance is how bad videos happen), so it samples
-// the WHOLE page — every captured section, not just the hero — aggregating a real pixel histogram.
+// the WHOLE page (every captured section, not just the hero) aggregating a real pixel histogram.
 // That way white-body-text + a blue hero + purple accent all get seen, and dominance = the page's
 // true average luminance, not one section's. Writes a swatch card to /tmp/palette.png. NOT a
 // substitute for looking: confirm against the screenshots + the make beats VS=<brand> fidelity gate.
@@ -43,7 +43,7 @@ const result = await page.evaluate(async (uris) => {
   const cols = [...bins.values()].map((e) => ({ r: Math.round(e.r / e.c), g: Math.round(e.g / e.c), b: Math.round(e.b / e.c), c: e.c })).sort((a, b) => b.c - a.c);
   // 16 was the real reason a sparse accent could never be found: the accent pass ran over the sixteen
   // MOST FREQUENT bins, which on any white-first site are sixteen neutrals. Ranking could not fix what
-  // was never in the list. The extra bins cost nothing — they are counted either way.
+  // was never in the list. The extra bins cost nothing, they are counted either way.
   return { cols: cols.slice(0, 400), total: n, avgLum: lumSum / n };
 }, uris);
 await browser.close();
@@ -56,12 +56,12 @@ const light = result.avgLum > 0.5;
 // bg = the most-frequent LOW-saturation colour on the dominant side (real backdrop, not a photo blob)
 const bg = cols.filter((c) => sat(c) < 0.2 && (light ? lum(c) > 0.7 : lum(c) < 0.28))[0] || cols[0];
 // text = the EXTREME neutral, not the most-frequent: text is thin (few pixels) so it loses a
-// frequency vote to fills — but it IS the darkest (light page) / lightest (dark page) near-neutral
+// frequency vote to fills, but it IS the darkest (light page) / lightest (dark page) near-neutral
 // that's actually present. Pick that among colours above a tiny presence floor.
 const textCands = cols.filter((c) => sat(c) < 0.28 && c.c > result.total * 0.001);
 const text = (light ? textCands.sort((a, b) => lum(a) - lum(b)) : textCands.sort((a, b) => lum(b) - lum(a)))[0] || cols[cols.length - 1];
 // An accent is the colour a brand SPENDS sparingly, so ranking candidates by how much of the page they
-// cover finds the opposite of one. Ramp's lime lives on two buttons — well under 1% of the pixels — and
+// cover finds the opposite of one. Ramp's lime lives on two buttons, well under 1% of the pixels, and
 // frequency-ranking handed back #111605 instead: near-black antialiasing noise that is technically
 // saturated and completely invisible. Two changes: an accent must be VISIBLE (not near-black, not
 // near-white, or it is a shadow or a highlight), and candidates rank by vividness weighted by presence

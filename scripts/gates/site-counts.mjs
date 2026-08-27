@@ -1,4 +1,4 @@
-// scripts/gates/site-counts.mjs — assert every capability count written on the SITE still matches the
+// scripts/gates/site-counts.mjs: assert every capability count written on the SITE still matches the
 // registry it describes.  make site-counts
 //
 // KNOWN LIMIT, worth stating so the next false positive is recognised rather than argued with: the
@@ -33,7 +33,7 @@ import { validateAll } from '../../core/validate.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const size = (o) => (Array.isArray(o) ? o.length : Object.keys(o).length);
 
-// The grid is CATALOG minus full-frame overlays — the same set the site's /blocks page lists, so the
+// The grid is CATALOG minus full-frame overlays: the same set the site's /blocks page lists, so the
 // number the copy quotes and the number the page renders are the same number by construction.
 const grid = CATALOG.filter((e) => !e.overlay);
 
@@ -50,7 +50,7 @@ const TRUTH = {
   'canvas fx': size(CANVAS_FX_NAMES),
   // COUNT WHAT SHIPS, not what is on this disk. Three brand themes are deliberately untracked but
   // still present locally, so `readdirSync` says 38 here and a fresh clone has 35. A copy line reading
-  // "38 themes" would therefore pass on the author's machine and fail for every contributor — the
+  // "38 themes" would therefore pass on the author's machine and fail for every contributor, the
   // stale-count failure this gate exists to prevent, inverted. The site describes the PUBLISHED
   // product, so the published set is the truth. (Same lesson as docs/MISTAKES.md #423: grade the thing
   // that actually ships, never the copy sitting in the working tree.)
@@ -59,7 +59,7 @@ const TRUTH = {
       const tracked = execFileSync('git', ['ls-files', 'themes'], { cwd: root, encoding: 'utf8' });
       const n = tracked.split('\n').filter((f) => f.endsWith('.json')).length;
       if (n) return n;
-    } catch { /* not a git checkout — fall back to disk */ }
+    } catch { /* not a git checkout: fall back to disk */ }
     return fs.readdirSync(path.join(root, 'themes')).filter((f) => f.endsWith('.json')).length;
   })(),
 };

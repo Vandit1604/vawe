@@ -1,13 +1,13 @@
-// scripts/media/tts.mjs — LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script,
+// scripts/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script,
 // entirely offline with macOS `say` (on-device neural voices, no cloud, no API key, no downloads). The
-// engine already mixes VO (audio.go: `vo` + `voWords`, ducks the music under speech) — this is the missing
+// engine already mixes VO (audio.go: `vo` + `voWords`, ducks the music under speech), this is the missing
 // generation half, adapted from another engine' Step 3.1 to a local model.
 //
 //   node scripts/media/tts.mjs --script narration.txt --out formats/scene/myvideo.vo [--voice Samantha]
 //   node scripts/media/tts.mjs --text "Line one.\nLine two." --out out/vo
 //   make tts SCRIPT=narration.txt OUT=formats/scene/myvideo.vo VOICE=Samantha
 //
-// Writes <out>.wav (the VO) and <out>.words.json ([{w,t}] — the voWords format captions read). Each
+// Writes <out>.wav (the VO) and <out>.words.json ([{w,t}], the voWords format captions read). Each
 // non-empty line of the script is one caption UNIT: it is synthesized separately so line boundaries are
 // exact, the wavs are concatenated, and words inside a line are timed by character weight across that
 // line's measured duration. Deterministic: same text + voice → same audio + same timings (TTS has no
@@ -35,8 +35,8 @@ const lines = text.replace(/\\n/g, '\n').split('\n').map((l) => l.trim()).filter
 if (!lines.length) { console.error('✗ script has no speakable lines'); process.exit(2); }
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-tts-'));
-// READ BACK what ffprobe answered. `|| 0` turned every failure — ffprobe absent, a wav ffmpeg never
-// wrote, a file it cannot parse — into a duration of ZERO, and a zero duration is not an error here: it
+// READ BACK what ffprobe answered. `|| 0` turned every failure, ffprobe absent, a wav ffmpeg never
+// wrote, a file it cannot parse. Into a duration of ZERO, and a zero duration is not an error here: it
 // stacks that line's words at one instant, gives the line no room in the offset, and the VO ships short
 // with the captions off. A tool we do not own reporting nothing must not read as "0.0 seconds".
 const dur = (f) => {
@@ -82,7 +82,7 @@ fs.writeFileSync(wordsOut, JSON.stringify(words, null, 2) + '\n');
 fs.rmSync(tmp, { recursive: true, force: true });
 
 const total = dur(wavOut);
-console.log(`✓ tts — ${lines.length} line(s) · ${words.length} words · ${total.toFixed(1)}s${voice ? ` · voice ${voice}` : ' · system voice'}`);
+console.log(`✓ tts: ${lines.length} line(s) · ${words.length} words · ${total.toFixed(1)}s${voice ? ` · voice ${voice}` : ' · system voice'}`);
 console.log(`  vo    → ${wavOut}`);
 console.log(`  words → ${wordsOut}`);
 console.log(`  wire it: "audio": { "vo": "${path.basename(wavOut)}", "voWords": "${path.basename(wordsOut)}" }  (paths resolve against the scene dir)`);

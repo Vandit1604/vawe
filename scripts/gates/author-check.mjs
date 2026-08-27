@@ -1,4 +1,4 @@
-// scripts/gates/author-check.mjs — THE MANDATORY AUTHORING-QUALITY LADDER.
+// scripts/gates/author-check.mjs: THE MANDATORY AUTHORING-QUALITY LADDER.
 //
 // The static quality gates existed but were opt-in and mostly WARN-tier, so a maximal "effect-soup"
 // video passed everything the render flow actually ran (only schema + purity were mandatory). This one
@@ -9,36 +9,36 @@
 // mechanism that does not exist, and half this ladder sat behind TASTE=1 where almost nobody set it.
 //
 // What is NOT uniform is SEVERITY, and that separation is the whole design:
-//   BLOCKS  — the film is broken. A schema error, a hole in the clock, a plan the render does not deliver.
-//   REPORTS — the film may be off the house style. Always printed, never a wall, promoted by TASTE=1.
+//   BLOCKS: the film is broken. A schema error, a hole in the clock, a plan the render does not deliver.
+//   REPORTS: the film may be off the house style. Always printed, never a wall, promoted by TASTE=1.
 // Measured before this was written: turning the REPORTS half into blocks fails 116 of the 141 scenes in
-// this library, four films in five, which is the exact shape CLAUDE.md warns about — a rule waived by
+// this library, four films in five, which is the exact shape CLAUDE.md warns about, a rule waived by
 // reflex has already been repealed and nobody wrote it down. So the steps became mandatory and the
 // severities did not move. See docs/TASTE.md · "One process, two severities".
 //
 // BLOCKS:
-//   validate  — schema + em-dash (correctness; never waivable)
-//   beats     — the TIMELINE gate: dead air, an empty last frame, an empty cut/seam window, a dead backdrop
-//   assets    — the READINESS preflight: every referenced image/icon/capture/vo exists on disk (STRICT only)
-//   inspect   — the per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
-//   plan      — plan vs render, off the same sidecar
+//   validate: schema + em-dash (correctness; never waivable)
+//   beats. The TIMELINE gate: dead air, an empty last frame, an empty cut/seam window, a dead backdrop
+//   assets. The READINESS preflight: every referenced image/icon/capture/vo exists on disk (STRICT only)
+//   inspect. The per-beat value contract, if a .intent.json sidecar exists (absent → visible WARN)
+//   plan, plan vs render, off the same sidecar
 //
 // REPORTS (always run and always print; TASTE=1 gives them teeth):
-//   storyboard— is there a plan this film came from, and does the plan hold together
-//   critique  — the value gate: hollow/placeholder/unbacked/thin/mis-centre beats
-//   direct    — the direction gate: cut families, effect-soup, continuity, pacing, and the book-grounded
+//   storyboard: is there a plan this film came from, and does the plan hold together
+//   critique. The value gate: hollow/placeholder/unbacked/thin/mis-centre beats
+//   direct. The direction gate: cut families, effect-soup, continuity, pacing, and the book-grounded
 //               motion tells (linear-motion, monotone-timing, enter-and-retreat)
-//   floor     — the AMBITION floor (inverse of effect-soup): fails a plain slideshow (no kinetic type,
+//   floor. The AMBITION floor (inverse of effect-soup): fails a plain slideshow (no kinetic type,
 //               no camera, no transitions). Directed lives BETWEEN soup and slideshow.
-//   dissolve  — the TRANSITION gate: two text states cross-dissolved in place
-//   designspec— the LOOK lock: off-palette colours / non-role fonts vs the theme
-//   copy      — the WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
-//   pace      — is anything happening, and how often
-//   hero      — the one LAYOUT finding that can run pre-render: `thin-hero`, via verify/audit.mjs --hero.
+//   dissolve. The TRANSITION gate: two text states cross-dissolved in place
+//   designspec. The LOOK lock: off-palette colours / non-role fonts vs the theme
+//   copy. The WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
+//   pace, is anything happening, and how often
+//   hero. The one LAYOUT finding that can run pre-render: `thin-hero`, via verify/audit.mjs --hero.
 //               Landscape only, and it costs a browser launch (1.4s measured), so it announces the cost
 //               before it pays it. Portrait films are told the rule has nothing to say about them.
-//   treatment — is the film's written rationale current with its storyboard
-//   drift     — how many other films excuse the same waiver
+//   treatment: is the film's written rationale current with its storyboard
+//   drift, how many other films excuse the same waiver
 //
 // `visual-vocabulary` used to sit here and was DELETED, not moved: its size measurement squared a
 // single-axis layer, so a 590x18 underline was scored as 590x590 and passed a blocking gate whose only
@@ -46,7 +46,7 @@
 //
 // The vision judge (docs/JUDGE.md) is NOT run here: it needs the rendered mp4, so it is a post-render
 // step. A deterministic script also cannot force an agent to judge honestly. So the ladder ends by
-// printing the REQUIRED post-render judge step — author-check being green is necessary, not sufficient.
+// printing the REQUIRED post-render judge step, author-check being green is necessary, not sufficient.
 //
 // Rules stay tunable: a scene may waive a specific BLOCKING rule it deliberately breaks with
 //   { "authoring": { "allow": ["cut-families", "profile"] } }
@@ -71,9 +71,9 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 //
 // A rule that is right and new fails the whole library on its first run. `no-storyboard` fires on 88 of
 // the 132 scenes here. Both of the obvious answers are worse than the red:
-//   BACKFILL — write 88 storyboards to satisfy a gate. For a judgement rule that produces 88 fake plans,
+//   BACKFILL: write 88 storyboards to satisfy a gate. For a judgement rule that produces 88 fake plans,
 //              the number goes green and nobody learns anything.
-//   WAIT     — "promote it when under a quarter are missing" leaves the rule toothless for months and
+//   WAIT: "promote it when under a quarter are missing" leaves the rule toothless for months and
 //              depends on a cleanup nobody is scheduled to do.
 // So: grandfather the past EXPLICITLY, block new work immediately. A scene that predates the rule is
 // recorded as LEGACY in a generated manifest, with the rule and the date it was adopted.
@@ -86,7 +86,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 // IT ONLY TIGHTENS. `--adopt` freezes a rule's legacy set once, on the day the rule is promoted, and
 // refuses to run twice. `--stamp` can only REMOVE rows: a scene that now complies, a scene that was
 // deleted, a scene that was EDITED. Nothing can add a row after adoption, so no author can grandfather
-// today's film by re-running the stamp — which is the only way a ratchet stays a ratchet.
+// today's film by re-running the stamp, which is the only way a ratchet stays a ratchet.
 //
 // AN EDITED LEGACY SCENE LOSES ITS LEGACY STATUS. Touching a film is when you owe it a plan: the moment
 // you have the file open and are making decisions about it is the cheapest moment there will ever be to
@@ -113,7 +113,7 @@ function resolveStoryboard(sceneFile, sceneJson) {
 }
 
 // A rule joins the ratchet BY NAME here. `no-storyboard` is the first user, not the only one.
-// `fails` must be CHEAP and PURE — fs and JSON, nothing else. The census runs it over every scene in the
+// `fails` must be CHEAP and PURE: fs and JSON, nothing else. The census runs it over every scene in the
 // library on every author-check run, so a probe that launched a browser would cost 132 browsers. A rule
 // whose finding only exists after a child gate has run cannot be ratcheted this way, and should not be:
 // its census would go stale between runs, which is #159.
@@ -142,7 +142,7 @@ const readManifest = () => {
 // SOFT, not fatal, and the distinction is the point. This census is DISPLAY: it tells an author how many
 // other films the rule reaches. The ladder's verdict about the film in front of them does not depend on
 // it, so a bare worktree must still be able to run author-check. It prints the reason it cannot count
-// instead of a number, which is the whole ask — say what you looked at, and say when you could not look.
+// instead of a number, which is the whole ask, say what you looked at, and say when you could not look.
 let censusBlind = null;
 const libraryScenes = () => {
   const pop = population('ratchet census', { filter: LIBRARY, quiet: true, soft: true });
@@ -154,7 +154,7 @@ const libraryScenes = () => {
 };
 
 // One scene, one rule: legacy / new / current. `edited` is reported separately from `absent` because they
-// are different arguments — one film was never looked at, the other was looked at this week.
+// are different arguments. One film was never looked at, the other was looked at this week.
 function ratchetStatus(rule, sceneFile, sceneJson, manifest = readManifest()) {
   const spec = RATCHET_RULES[rule];
   const entry = manifest.rules?.[rule];
@@ -180,7 +180,7 @@ function census(rule, manifest = readManifest()) {
   return c;
 }
 const censusLine = (rule, c) => censusBlind
-  ? `NOT COUNTED — this checkout cannot see the library:\n      ${censusBlind.replace(/\n\s+/g, '\n      ')}`
+  ? `NOT COUNTED. This checkout cannot see the library:\n      ${censusBlind.replace(/\n\s+/g, '\n      ')}`
   : `${c.legacy} legacy · ${c.current} current · ${c.new} NEW failures  (of ${c.total} scene(s) in ${SCENE_DIR.replace(repoRoot + '/', '')})`;
 // `newNames` was collected on every run and printed nowhere. Those are the films the rule stops TODAY,
 // so withholding them makes the number unactionable: a reader learns twelve films block and cannot find
@@ -234,7 +234,7 @@ if (process.argv.includes('--legacy')) {
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
 // ITERATE MODE: same gates, same findings, no consequence. While a film is still being explored, a
-// blocking gate does not save time, it breaks the loop — you stop to fix or waive something you were
+// blocking gate does not save time, it breaks the loop. You stop to fix or waive something you were
 // about to rewrite anyway. Measured, the whole static ladder costs about a second against an 8s draft
 // render, so the cost was never the runtime; it was being interrupted. So iterate reports everything
 // and exits 0, and says plainly what WOULD block, while ship keeps the teeth.
@@ -252,7 +252,7 @@ const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) 
 // A WAIVER MUST STATE ITS REASON. The doctrine has always said a waiver is a deliberate exception with
 // a written cause; the audit says otherwise. Across the tracked library `no-continuous-object` is
 // waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carried a
-// reason on every single one — and that difference is exactly the difference between a rule people
+// reason on every single one, and that difference is exactly the difference between a rule people
 // argue with and a keyword that makes a gate stop talking (docs/MISTAKES.md #203).
 //
 // Nothing here judges whether the reason is GOOD. It cannot. It only makes waiving cost one sentence,
@@ -296,7 +296,7 @@ if (hasSugar(scene.layers)) {
 // A scene declares its plan one of two ways, and the explicit one wins:
 //   1. `"storyboard": "path/to/x.storyboard.md"` in the scene JSON, relative to the repo root or to the
 //      scene. This is the declaration: it survives a rename and it says out loud that a plan exists.
-//   2. the naming convention already used by plan-vs-render — <base>.storyboard.md beside the scene, or
+//   2. the naming convention already used by plan-vs-render, <base>.storyboard.md beside the scene, or
 //      in _concepts/ next to it.
 // A scene with neither is not silently fine. It gets a finding (`no-storyboard`), because the alternative
 // is what this ladder used to do: print "write the storyboard" into a void and check nothing.
@@ -404,10 +404,10 @@ const record = (name, { code, blockCodes, findings = 0 }, { waivable, exitMeansF
 const styleGate = (name, label, script, args, opts) =>
   record(name, runGate(name, label, script, args), { ...opts, tier: 'reports' });
 
-// 1. validate — correctness, never waivable.
+// 1. validate, correctness, never waivable.
 record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
 
-// 1a. storyboard — DOES THIS FILM HAVE A PLAN, AND DOES THE PLAN HOLD TOGETHER?
+// 1a. storyboard, DOES THIS FILM HAVE A PLAN, AND DOES THE PLAN HOLD TOGETHER?
 //
 // This step exists because the previous answer was a printed sentence and nothing else: plan-vs-render
 // said "write the storyboard" to a film that had none, and no step anywhere asked whether one existed.
@@ -417,7 +417,7 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
 // SEVERITY, ARGUED. 130 of the 141 scenes in this library have no storyboard. Blocking on day one would
 // fail 92% of the library on its first run, and CLAUDE.md already names what happens next: everyone adds
 // a waiver and the rule is repealed without anyone writing it down. So `no-storyboard` REPORTS. It is
-// promoted to a block when the shape of the library makes that a rule rather than a purge — the
+// promoted to a block when the shape of the library makes that a rule rather than a purge, the
 // condition is written into docs/TASTE.md, not left as a wish: once fewer than a quarter of the scenes
 // in formats/scene/ are missing a plan, `no-storyboard` moves to the blocking tier.
 {
@@ -461,36 +461,36 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
   }
 }
 
-// 1b. beats — the TIMELINE gate: dead air, an empty closing plate, a transition window with nothing in it,
+// 1b. beats. The TIMELINE gate: dead air, an empty closing plate, a transition window with nothing in it,
 //     a backdrop that structurally cannot move. Every other gate reads the scene as a bag of layers; this
 //     one walks the clock. Blocking, waivable by code.
 record('beats', runGate('beats', 'beat check (timeline holes)', 'scripts/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
-// 2. critique — value gate; errors report, waivable by rule code.
+// 2. critique, value gate; errors report, waivable by rule code.
 styleGate('critique', 'critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
-// 3. direct — direction gate; FAILs report, waivable by code.
+// 3. direct, direction gate; FAILs report, waivable by code.
 styleGate('direct', 'direct (direction gate)', 'scripts/author/motion-director.mjs', [], { waivable: true });
-// 3b. direction floor — the AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
+// 3b. direction floor. The AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
 styleGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : [], { waivable: true });
 
-// 4c. dissolve — the TRANSITION gate. Everything else here samples settled frames by construction, so a
+// 4c. dissolve. The TRANSITION gate. Everything else here samples settled frames by construction, so a
 //     crossfade between two text states (a double exposure: both strings at half strength through the
 //     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
 styleGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
-// 4. slop — RETIRED 2026-08. It ran 41 borrowed rules over a DOM dump carrying three of the CSS
+// 4. slop, RETIRED 2026-08. It ran 41 borrowed rules over a DOM dump carrying three of the CSS
 // properties those rules read, so most of them had no evidence to work from and their silence read as
 // a pass across the whole library (docs/MISTAKES.md #326). Its replacement is the designspec rule
 // table, which runs in the gate below. The vendored detector is still the right tool for a hand-authored
-// FRAGMENT, where it gets real computed styles — `make preview HTML=<file>` still runs it.
-// 4b. designspec — the LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts. TASTE.
+// FRAGMENT, where it gets real computed styles, `make preview HTML=<file>` still runs it.
+// 4b. designspec. The LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts. TASTE.
 // BLOCKS under TASTE, not just under STRICT. It was a warning, and across two films it named the exact
-// drift ("#8fdcff is 17% from anything in the palette") and I read it and shipped anyway — twice. A
+// drift ("#8fdcff is 17% from anything in the palette") and I read it and shipped anyway, twice. A
 // gate whose finding is precise and whose severity is advisory teaches the author that warnings are
 // decoration. Every scene in the library passes it: the seven that are legitimately off the brand say
 // so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #323).
 styleGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
-// 4c. copy — the WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
+// 4c. copy. The WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
 styleGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
-// 4d. read — the CLOCK lock, and it is the half `copy` cannot see. `copy` grades the LINE: its length,
+// 4d. read. The CLOCK lock, and it is the half `copy` cannot see. `copy` grades the LINE: its length,
 // its opener, its jargon. Nothing anywhere graded the line against the SECONDS it exists for, so a
 // nine-word headline living for 0.6s passed the whole ladder. Constants are Netflix's and the BBC's
 // subtitling numbers converted to 30fps, cited in the gate; film editing publishes none.
@@ -511,13 +511,13 @@ styleGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/
 // measurement is weak. Know two limits before you act on it. The focal point is scored from the JSON,
 // so a layer whose colour is a color-mix or a gradient cannot be read: those are dropped and the count
 // prints on every verdict, never defaulted to zero. And a side holding ONE live layer is marked, because
-// a layer can win by being alone — the first false positive found was a corner watermark scoring 43%
+// a layer can win by being alone. The first false positive found was a corner watermark scoring 43%
 // across an 0.8s hole, where the real defect is dead air and `beats` owns it.
 styleGate('eye', 'eye-trace (where the viewer is looking at each cut)', 'scripts/gates/eye-trace.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
-// 4d. assets — the READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
+// 4d. assets. The READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('assets', 'asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 
-// 4g. hero fill — the one LAYOUT finding that can be moved before the render.
+// 4g. hero fill. The one LAYOUT finding that can be moved before the render.
 //
 // WHY IT WAS LATE. `thin-hero` lives in verify/audit.mjs, which runs under `make audit` after the mp4
 // exists, so a hero line set at web scale was reported once the render had been paid for. Every other
@@ -546,7 +546,7 @@ if (landscape) {
   console.log(`  ○ portrait canvas (${sceneW}x${sceneH}); thin-hero is a landscape rule and has nothing to say here.`);
 }
 
-// 4e. treatment — the film's own rationale. It REPORTS, always: a treatment is an argument a person
+// 4e. treatment. The film's own rationale. It REPORTS, always: a treatment is an argument a person
 //     makes, so a gate can only check that one exists and still describes THIS storyboard. It goes
 //     stale the moment the plan moves, and a stale rationale is worse than none because it reads as
 //     current. It runs against whichever storyboard step 2 resolved, so a declared plan is checked too;
@@ -560,7 +560,7 @@ if (sbPath) {
     console.log(`  → 1 finding: no treatment written.`);
   } else if (t.stale) {
     console.log(`  ~ the treatment is STALE: ${path.basename(sbPath)} has changed since ${t.rel} was written.`);
-    console.log(`    Re-run \`make treatment SB=${sbPath}\` — it refreshes the measured block and leaves your prose.`);
+    console.log(`    Re-run \`make treatment SB=${sbPath}\`: it refreshes the measured block and leaves your prose.`);
     console.log(`  → 1 finding: the rationale describes an older plan.`);
   } else {
     console.log(`  ✓ treatment current (${t.receipt.treatment || 'recorded'}).`);
@@ -568,13 +568,13 @@ if (sbPath) {
   }
 }
 
-// 4f. waiver drift — is this waiver a decision or a habit? REPORTS, and never blocks, because a gate
+// 4f. waiver drift, is this waiver a decision or a habit? REPORTS, and never blocks, because a gate
 //     that blocked on this would itself be waived. It reads the whole library and reports how many other
 //     films excuse the same rule, which is the only level at which "we keep letting ourselves off" is
 //     visible. Written after a gate blocked two films on the same day and the second one was waived.
 runGate('drift', 'waiver drift (is this a decision or a habit)', 'scripts/gates/waiver-drift.mjs', []);
 
-// 5. inspect — the per-beat value contract. inspect.mjs silently passes when no sidecar exists; here
+// 5. inspect. The per-beat value contract. inspect.mjs silently passes when no sidecar exists; here
 //    we make that ABSENCE visible as a WARN so the value contract is a choice, not an accident.
 const sidecar = sidecarPath;
 // Hand the storyboard to plan-vs-render explicitly. It resolves one by name on its own, but a scene that
@@ -582,13 +582,13 @@ const sidecar = sidecarPath;
 const planArgs = [...(strict ? ['--strict'] : []), ...(sbPath ? ['--sb', sbPath] : [])];
 if (hasSidecar) {
   record('inspect', runGate('inspect', 'inspect (per-beat value contract)', 'scripts/gates/inspect.mjs', strict ? ['--strict'] : []), { waivable: true });
-  // 5b. plan vs render — inspect reads the scene at ONE instant per beat, so it cannot see a beat that
+  // 5b. plan vs render, inspect reads the scene at ONE instant per beat, so it cannot see a beat that
   //     stalls. This one lines the plan's beat spans up against the film's clock: a promised junction
   //     with no event at it, and a beat the author froze while the plan says it turns.
   record('plan', runGate('plan', 'plan vs render (does the film do what the plan said)', 'scripts/gates/plan-vs-render.mjs', planArgs), { waivable: true });
 } else {
   openStep('inspect', 'inspect (per-beat value contract)');
-  process.stdout.write(`  ⚠ no .intent.json sidecar — this scene declares no per-beat value contract.\n` +
+  process.stdout.write(`  ⚠ no .intent.json sidecar: this scene declares no per-beat value contract.\n` +
     `      A sidecar states, per beat, the artifact that earns the frame + what must show/animate;\n` +
     `      inspect then verifies the render delivers it. Add ${path.basename(sidecar)} to make value checkable.\n` +
     `  → 1 finding: no value contract to verify.\n`);
@@ -623,8 +623,8 @@ const line = (r) => {
     : r.legacy ? `LEGACY (${r.blockCodes.join(', ')}, grandfathered ${r.legacySince}) · nobody has looked yet`
     : r.reported ? `reported, does not block (${r.blockCodes.join(', ') || 'see above'})`
     // A GATE CAN EXIT 0 AND STILL HAVE SAID SOMETHING. critique prints its warnings and returns 0, so
-    // this line read "nothing found" directly under three ⚠ findings and the summary — the part people
-    // actually read — erased them. Exit code is the verdict; the finding count is the evidence, and the
+    // this line read "nothing found" directly under three ⚠ findings and the summary, the part people
+    // actually read, erased them. Exit code is the verdict; the finding count is the evidence, and the
     // table has to carry both or it contradicts the transcript above it.
     : r.findings > 0 ? `${r.findings} finding(s) above, none blocking`
     : 'nothing found';
@@ -633,14 +633,14 @@ const line = (r) => {
 const refusals = results.filter((r) => ENGINE_REFUSES.has(r.name));
 const judgements = results.filter((r) => !ENGINE_REFUSES.has(r.name));
 if (refusals.length) {
-  console.log('\n  THE ENGINE WOULD REFUSE THIS — not skippable, NOCHECK=1 included:');
+  console.log('\n  THE ENGINE WOULD REFUSE THIS, not skippable, NOCHECK=1 included:');
   refusals.forEach(line);
 }
 if (judgements.length) {
-  console.log('\n  CRAFT JUDGEMENTS — this target\'s opinion; the engine renders these regardless:');
+  console.log('\n  CRAFT JUDGEMENTS: this target\'s opinion; the engine renders these regardless:');
   judgements.forEach(line);
 }
-if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene — deliberate rule breaks)`);
+if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene, deliberate rule breaks)`);
 const legacies = results.filter((r) => r.legacy);
 if (legacies.length) {
   console.log(`  (▪ legacy comes from ${path.relative(repoRoot, MANIFEST)} · the rule arrived after the film did.`);
@@ -651,7 +651,7 @@ if (sbCensus) {
   const names = censusBlind ? [] : censusNames(sbCensus);
   if (names.length) {
     const edited = new Set(sbCensus.editedNames);
-    console.log(`    the ${names.length} NEW failure(s) — these block their own author-check run, not this one:`);
+    console.log(`    the ${names.length} NEW failure(s): these block their own author-check run, not this one:`);
     for (const n of names) console.log(`      ${n}${edited.has(n) ? '  (was legacy, edited since)' : ''}`);
   }
 }
@@ -682,7 +682,7 @@ console.log(`\n  ▶ REQUIRED after render (the ladder is not complete without i
 console.log(`      make judge D=${file}${vs ? ` VS=${vs}` : ''}`);
 console.log(`      then READ /tmp/judge/${path.basename(file, '.json')}/sheet.png against its rubric.md and score every frame`);
 console.log(`      (readability · hierarchy · composition · brand + asset fidelity · produced · value).`);
-console.log(`      If your eye catches a flaw, it is a FIX — never ship one you noticed. See docs/JUDGE.md.`);
+console.log(`      If your eye catches a flaw, it is a FIX, never ship one you noticed. See docs/JUDGE.md.`);
 
 if (failed.length) {
   if (iterate) {
@@ -693,5 +693,5 @@ if (failed.length) {
   console.log(`\n✗ author-check FAILED: ${failed.map((r) => r.name).join(', ')}. Fix, or waive a deliberate break via {"authoring":{"allow":[...]}}. ${strict ? '(--strict: warnings also block.)' : ''}\n`);
   process.exit(1);
 }
-console.log(`\n✓ author-check passed${waivers.length ? ` (${waivers.length} waived)` : ''}. Static ladder green — now do the judge step above before shipping.\n`);
+console.log(`\n✓ author-check passed${waivers.length ? ` (${waivers.length} waived)` : ''}. Static ladder green, now do the judge step above before shipping.\n`);
 process.exit(0);

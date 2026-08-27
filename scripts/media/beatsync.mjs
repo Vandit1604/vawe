@@ -1,4 +1,4 @@
-// beatsync.mjs — align a scene's joints to the music's beat grid, at AUTHOR time.
+// beatsync.mjs: align a scene's joints to the music's beat grid, at AUTHOR time.
 //
 //   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav            # report: what would move
 //   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav WRITE=1    # → x.beatsync.json
@@ -9,7 +9,7 @@
 // its own nearest-beat search (so it never appeared as an importer of `snapToBeat` and nothing linked
 // the two), its own tolerance (half a beat capped at 0.18s, against beat-bind's 0.12s), and its own
 // joint set (transitions and stings as well as cuts and seams). Two owners of one fact, drifting
-// quietly — docs/MISTAKES.md #457.
+// quietly, docs/MISTAKES.md #457.
 //
 // A scene that will be beat-matched EVERY render should declare it instead and skip the derivative
 // entirely: `"audio": { "music": "warm", "beatSync": true }`. This tool is the preview, and the
@@ -33,7 +33,7 @@ const has = (n) => argv.includes(n) || process.env[n.replace(/^--/, '').toUpperC
 const D = flag('--data') || flag('-d') || argv.find((a) => a.endsWith('.json'));
 const MUSIC = flag('--music') || flag('-m');
 if (!D || !fs.existsSync(D)) { console.error('usage: node scripts/media/beatsync.mjs <scene.json> --music <track.wav> [--grid beat|downbeat] [--snap 0.12] [--layers] [--write]'); process.exit(2); }
-if (!MUSIC || !fs.existsSync(MUSIC)) { console.error(`✗ MUSIC track not found: ${MUSIC || '(none)'} — pass MUSIC=assets/music/<track>.wav`); process.exit(2); }
+if (!MUSIC || !fs.existsSync(MUSIC)) { console.error(`✗ MUSIC track not found: ${MUSIC || '(none)'}, pass MUSIC=assets/music/<track>.wav`); process.exit(2); }
 const GRID = (flag('--grid') || process.env.GRID || 'beat').toLowerCase();
 const WRITE = has('--write') || process.env.WRITE === '1';
 const SNAP_LAYERS = has('--layers') || process.env.LAYERS === '1';
@@ -41,13 +41,13 @@ const SNAP_LAYERS = has('--layers') || process.env.LAYERS === '1';
 // ---- beat grid: read the sidecar; generate it once if missing (make beatmap) --------------------
 const beatsFile = MUSIC.replace(/\.(wav|mp3|m4a|aac)$/i, '.beats.json');
 if (!fs.existsSync(beatsFile)) {
-  process.stderr.write(`  no ${path.basename(beatsFile)} yet — running beatmap…\n`);
+  process.stderr.write(`  no ${path.basename(beatsFile)} yet, running beatmap…\n`);
   const r = spawnSync('node', [path.join(ROOT, 'scripts/media/beatmap.mjs'), MUSIC], { stdio: 'inherit' });
-  if (r.status !== 0 || !fs.existsSync(beatsFile)) { console.error('✗ beatmap failed — cannot sync'); process.exit(1); }
+  if (r.status !== 0 || !fs.existsSync(beatsFile)) { console.error('✗ beatmap failed, cannot sync'); process.exit(1); }
 }
 const bm = JSON.parse(fs.readFileSync(beatsFile, 'utf8'));
 const pulse = (GRID === 'downbeat' ? bm.downbeats : bm.beats) || [];
-if (!pulse.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad has no beat) — nothing to snap to`); process.exit(1); }
+if (!pulse.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad has no beat). Nothing to snap to`); process.exit(1); }
 
 // LOWER FIRST, for the same reason core/boot.js binds after the lowering pass: a junction written as
 // `transitions` is not a cut or a seam until then, so snapping its `at` would snap a seam by its start

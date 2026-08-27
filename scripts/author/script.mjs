@@ -1,11 +1,11 @@
-// scripts/author/script.mjs — the WORDS, as a two-column AV script, checked before a picture exists.
+// scripts/author/script.mjs: the WORDS, as a two-column AV script, checked before a picture exists.
 //
 // Stage 3 of the studio pipeline. A script is written and approved before storyboarding because words
 // are the cheapest thing to change: a line rewritten costs a minute, the same line rewritten after it
 // has been animated costs a day.
 //
 // This does NOT introduce a new file to keep in sync. The storyboard already carries `narration:` and
-// `onscreen:`, so this reads those and lays them out the way the trade does — AUDIO beside VISUAL —
+// `onscreen:`, so this reads those and lays them out the way the trade does, AUDIO beside VISUAL,
 // because the layout is the point. Two columns side by side make one specific failure impossible to
 // miss, and it is the failure this repo's own doctrine names:
 //
@@ -14,7 +14,7 @@
 // If the narration says what the screen already says, the film has one channel and a redundant echo,
 // not two channels. On paper that reads as thoroughness. In two columns it reads as waste.
 //
-// TIMING HERE IS AN ESTIMATE ON PURPOSE. 150wpm, instant, no synthesis — this is the artefact you
+// TIMING HERE IS AN ESTIMATE ON PURPOSE. 150wpm, instant, no synthesis, this is the artefact you
 // iterate on while writing, and waiting on TTS for every draft would stop you writing. `make animatic`
 // owns the measured clock. This owns the words.
 //
@@ -87,7 +87,7 @@ for (const r of rows) {
   const meta = [`${r.b.i + 1}. ${r.b.name}`];
   const lines = Math.max(a.length, v.length);
   for (let i = 0; i < lines; i++) {
-    const t = i === 0 ? (need > 0 ? `${need.toFixed(1)}s` : '—') : '';
+    const t = i === 0 ? (need > 0 ? `${need.toFixed(1)}s` : '-') : '';
     console.log(`  ${(a[i] || '').padEnd(W1)}  ${(v[i] || '').padEnd(W2)}  ${t}`);
   }
   console.log(`  ${('· ' + meta[0]).padEnd(W1)}  ${('· ' + (r.b.picture || 'NO PICTURE NAMED')).slice(0, W2).padEnd(W2)}`);
@@ -106,7 +106,7 @@ const fail = [], warn = [];
 // its card is a beat that forgot to say something; EVERY beat doing it is a form. So: if most beats are
 // near-identical, this is kinetic type, and the question changes. It is no longer "do the two word
 // channels differ" (they are one channel on purpose) but "does the PICTURE carry anything the words do
-// not" — which is the show-don't-tell question, asked where it still costs nothing to answer.
+// not", which is the show-don't-tell question, asked where it still costs nothing to answer.
 const ECHOING = rows.filter((r) => r.nar && r.cards.length && r.echo >= 0.7);
 const KINETIC = rows.length >= 3 && ECHOING.length / rows.filter((r) => r.nar && r.cards.length).length >= 0.6;
 if (KINETIC) {

@@ -3,7 +3,7 @@ message: hand-animating a video is fine until the number changes, and then you d
 audience: people who rebuild the same product video every time a figure moves
 arc: a familiar grind, named clause by clause, until the thing that ends it arrives
 thread: camera travel
-object: none — the thread is camera travel
+object: none, the thread is camera travel
 duration: 15s
 format: 1080x1920
 concept: travelled · bold (light)
@@ -31,7 +31,7 @@ concept: travelled · bold (light)
 ## Beat 2: <name this beat> (2.14s-4.28s)
 - type: build
 - object: <what carries the camera travel at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -63,7 +63,7 @@ concept: travelled · bold (light)
 ## Beat 5: <name this beat> (8.56s-10.7s)
 - type: build
 - object: <what carries the camera travel at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

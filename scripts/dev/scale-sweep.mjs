@@ -1,4 +1,4 @@
-// scripts/dev/scale-sweep.mjs — snap off-scale literals in blocks/*.mjs to the nearest scale step.
+// scripts/dev/scale-sweep.mjs: snap off-scale literals in blocks/*.mjs to the nearest scale step.
 //   node scripts/dev/scale-sweep.mjs radius [--write]
 // Prints every edit it would make. Nothing runs without --write.
 import fs from 'node:fs'; import path from 'node:path';

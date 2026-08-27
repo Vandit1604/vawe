@@ -3,7 +3,7 @@ message: Ledgerline reads the bank CSV nobody can read and hands back a ledger y
 audience: Freelancers and small-business owners who export their bank statement and then stare at it.
 arc: one row is pulled out of a raw export, split at its commas, named and categorized, and put back as the first line of a finished ledger
 thread: unfinished sentence
-object: none — the thread is unfinished sentence
+object: none, the thread is unfinished sentence
 duration: 12s
 format: 1080x1920
 concept: fast-sentence · technical (dark)
@@ -30,7 +30,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 2: <name this beat> (1.33s-2.66s)
 - type: build
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -40,7 +40,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 3: <name this beat> (2.66s-3.99s)
 - type: problem
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -60,7 +60,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 5: <name this beat> (5.32s-6.65s)
 - type: proof
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -80,7 +80,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 7: <name this beat> (7.98s-9.31s)
 - type: problem
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -100,7 +100,7 @@ concept: fast-sentence · technical (dark)
 ## Beat 9: <name this beat> (10.64s-11.97s)
 - type: payoff
 - object: <what carries the unfinished sentence at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

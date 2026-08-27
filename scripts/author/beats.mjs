@@ -1,7 +1,7 @@
-// beats.mjs — verify a video BEAT BY BEAT before you trust it. Renders the first / mid / last frame of
+// beats.mjs: verify a video BEAT BY BEAT before you trust it. Renders the first / mid / last frame of
 // every beat into one labeled contact sheet (/tmp/beats/<name>.png) so one image tells you if a beat is murky,
 // overlapping, or off. With --vs <brand> it stacks each beat beside its source-section screenshot (from
-// `make sections`) — a side-by-side taste diff: does our beat actually reflect the real section?
+// `make sections`). A side-by-side taste diff: does our beat actually reflect the real section?
 //
 //   node scripts/author/beats.mjs <data.json> [--vs brand] [--stride 1]
 //   make beats D=formats/scene/linear-30.json            (self check)
@@ -26,14 +26,14 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 /** Beat windows for a scene, [t0,t1).
  *  A beat is a story unit, and the truest signal of one is the AUTHORED transition: a `cuts[]` time.
- *  Next best is a CLUSTER of layer start-times (a new group of content entering after a gap) — the
+ *  Next best is a CLUSTER of layer start-times (a new group of content entering after a gap), the
  *  same heuristic the motion director uses. camera/captions are weaker signals, and an even chop is
  *  the last resort. Earlier this used ONLY camera→captions→even-split, so a cut-driven scene (the
  *  reel) was chopped into arbitrary 5s chunks and undercounted its real beats. */
 export function beatWindows(data, duration) {
   const near = (arr, t, eps = 0.35) => arr.some((x) => Math.abs(x - t) < eps);
   let bounds = [];
-  // 1. explicit cut times — the strongest boundary
+  // 1. explicit cut times, the strongest boundary
   for (const c of data.cuts || []) if (typeof c.t === 'number' && !near(bounds, c.t)) bounds.push(c.t);
   // 2. layer-start clusters: sort starts, a >1.2s gap opens a new beat (ignore the full-bleed base track 0)
   const starts = [...new Set((data.layers || []).filter((l) => l.track !== 0).map((l) => l.start ?? 0))].sort((a, b) => a - b);
@@ -48,7 +48,7 @@ export function beatWindows(data, duration) {
   return bounds.map((t0, i) => ({ i, t0, t1: i + 1 < bounds.length ? bounds[i + 1] : duration })).filter((b) => b.t1 - b.t0 > 0.2);
 }
 
-/** Build the beat contact sheet from an open scene. `auto` marks the receipt as machine-made — see
+/** Build the beat contact sheet from an open scene. `auto` marks the receipt as machine-made, see
  *  sheets.mjs for why an automatic sheet must not read as a sheet somebody looked at. */
 export async function beatSheet(s, { dataArg, vs = null, auto = false } = {}) {
   // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
@@ -62,7 +62,7 @@ export async function beatSheet(s, { dataArg, vs = null, auto = false } = {}) {
   let sections = [];
   if (vs) {
     try { sections = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/brands', vs, 'sections', 'sections.json'), 'utf8')).sections; }
-    catch { console.warn(`  ⚠ --vs ${vs}: no sections.json (run: make sections URL=… NAME=${vs}) — skipping fidelity column`); }
+    catch { console.warn(`  ⚠ --vs ${vs}: no sections.json (run: make sections URL=… NAME=${vs}), skipping fidelity column`); }
   }
 
   // PER SCENE, not one global path. Two authors working at once wrote the same `/tmp/beats.png` and wiped
@@ -98,7 +98,7 @@ export async function beatSheet(s, { dataArg, vs = null, auto = false } = {}) {
       // and half the brands on disk carry those. Skipping in silence made --vs look like it worked and
       // produced a sheet with no fidelity column at all, so say which file is missing.
       if (!fs.existsSync(secShot)) {
-        console.warn(`  ⚠ --vs ${vs}: section ${b.i + 1} shot missing (${sec.shot}) — no fidelity cell for this beat`);
+        console.warn(`  ⚠ --vs ${vs}: section ${b.i + 1} shot missing (${sec.shot}), no fidelity cell for this beat`);
       } else {
         const sl = path.join(tmp, `b${b.i}_src.png`);
         ffmpegOrDie(['-v', 'error', '-y', '-i', secShot, '-vf',

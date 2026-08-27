@@ -1,4 +1,4 @@
-// filmstrip.mjs — SEE a whole video efficiently: extract frames and pack them into a few dense,
+// filmstrip.mjs, SEE a whole video efficiently: extract frames and pack them into a few dense,
 // timestamped contact sheets so the entire piece fits in a small token budget (vs. reading 2000+ raw
 // frames one by one, which is ~millions of tokens and mostly duplicate hold frames).
 //
@@ -8,9 +8,9 @@
 //   make filmstrip VIDEO=ref.mp4 FROM=6 TO=9 FPS=12  # a window at high fps (enter/exit detail)
 //
 // Two sampling modes:
-//   • uniform (default): every 1/FPS s — full, even coverage of the whole timeline.
+//   • uniform (default): every 1/FPS s, full, even coverage of the whole timeline.
 //   • DEDUP=1: only frames where the picture CHANGES (ffmpeg scene score) + one per ~1s so long holds
-//     still show — fewer tiles, each meaningful (the whole story in the fewest images).
+//     still show, fewer tiles, each meaningful (the whole story in the fewest images).
 // Each tile is timestamp-labelled. Prints how many sheets + a rough token estimate so the cost is known.
 import fs from 'node:fs';
 import path from 'node:path';

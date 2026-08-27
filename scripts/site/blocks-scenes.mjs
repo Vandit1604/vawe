@@ -3,7 +3,7 @@
 //
 // The site plays these scenes LIVE, in the real engine, in an iframe. It used to ship a pre-encoded
 // mp4 per block, which was a marketing page for a render engine playing baked video of its own
-// output — and, because .dockerignore excludes `*.mp4`, video that 404'd in production.
+// output, and, because .dockerignore excludes `*.mp4`, video that 404'd in production.
 //
 // WHY EACH BLOCK GETS ITS OWN SCENE. The stills used to be cropped out of out/_catalog-N.mp4 BY CELL
 // INDEX: a 3x2 grid of blocks on a shared 1920x1080 stage, sliced by arithmetic. That coupling caused
@@ -33,7 +33,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const grid = CATALOG.filter((e) => !e.overlay);   // full-frame overlays (captions) have no thumbnail
 
-// The stage. 1920x1080 is the engine's own 16:9 canvas — a scene cannot ask for arbitrary pixel dims
+// The stage. 1920x1080 is the engine's own 16:9 canvas. A scene cannot ask for arbitrary pixel dims
 // (core/safe.js sizes every ratio to a 1920 long edge), and it does not need to: the frame rect below
 // is what decides what you see, and it is applied identically to the still and to the live iframe.
 const W = 1920, H = 1080;
@@ -47,7 +47,7 @@ const PAD = 22;                              // breathing room around the block'
 // Sampled over TIME, not at one instant. The rect must hold the block for the whole loop or a block
 // that moves gets clipped mid-playback, and a single settled time is a guess about a lifetime that is
 // not always true: loadingBar's layers last ~3s no matter what `dur` it is passed, so measuring only
-// at 4.5s finds nothing — which is why its thumbnail used to ship blank.
+// at 4.5s finds nothing, which is why its thumbnail used to ship blank.
 const SAMPLES = [1.5, 2.5, 3.5, 4.5, 6.0];
 const SETTLED = 4.5;                         // prefer a still from here or earlier: entrances have landed
 
@@ -60,7 +60,7 @@ function sceneFor(entry) {
   return {
     module: 'scene', aspect: '16:9', theme: process.env.THEME || 'vawe', duration: DURATION,
     audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: DURATION }], layers,
-    // NOT A FILM. `produceBaseline` injects direction into any scene that declares none — a gentle slow
+    // NOT A FILM. `produceBaseline` injects direction into any scene that declares none, a gentle slow
     // push so a film's frame stays alive, plus scene-unit transitions (core/produce.js). Correct there,
     // wrong here: a preview exists so you can JUDGE the block, and the push scales about the frame
     // centre, drifting a block placed at x:160,y:160 steadily up and to the left while you read it.
@@ -68,7 +68,7 @@ function sceneFor(entry) {
     // `produced: false` is the engine's own opt-out and has been since before this generator existed
     // (core/produce.js:27, asserted at scripts/gates/lib-test.mjs:2690). It turns off the whole injected
     // baseline while still baking an author's explicit `cameraMove` sugar. Reaching for it beats
-    // declaring an empty `camera` here, which would be a second way to say one thing — and a preview
+    // declaring an empty `camera` here, which would be a second way to say one thing, and a preview
     // harness rendering one block is exactly what "not a directed film" means.
     produced: false,
   };
@@ -114,7 +114,7 @@ for (const entry of grid) {
     return r && { ...r, lastSeen };
   }, { samples: SAMPLES });
 
-  if (!m) { console.error(`no content measured for ${entry.name} — renders nothing at ${SAMPLES.join('/')}s`); miss++; continue; }
+  if (!m) { console.error(`no content measured for ${entry.name}, renders nothing at ${SAMPLES.join('/')}s`); miss++; continue; }
 
   const x0 = clamp(Math.round(m.x0 - PAD), 0, W), y0 = clamp(Math.round(m.y0 - PAD), 0, H);
   const x1 = clamp(Math.round(m.x1 + PAD), 0, W), y1 = clamp(Math.round(m.y1 + PAD), 0, H);

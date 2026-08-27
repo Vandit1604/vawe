@@ -1,4 +1,4 @@
-// scripts/brand/intent-from-storyboard.mjs — export a STORYBOARD.md's whys into a `.intent.json` sidecar,
+// scripts/brand/intent-from-storyboard.mjs: export a STORYBOARD.md's whys into a `.intent.json` sidecar,
 // so `inspect` (scripts/gates/inspect.mjs) VERIFIES the render delivers what each beat promised. The
 // storyboard already names, per beat, the on-screen cue + the WHY (the artifact that earns the frame); this
 // turns that plan into a machine-checkable contract instead of doctrine. Closes the "a beat occupies time
@@ -8,14 +8,14 @@
 //   make intent SB=<storyboard.md> [D=formats/scene/<topic>.json]   → writes <topic>.intent.json (or prints)
 // It reads the storyboard's beat time ranges for `at` + `span`, the quoted copy in `onscreen:` for
 // `mustShow`, and `why:` for the artifact note. A beat whose onscreen is still a <fill:…> placeholder is
-// emitted WITHOUT mustShow (nothing to verify yet) and flagged — sharpen the storyboard first for a real
+// emitted WITHOUT mustShow (nothing to verify yet) and flagged, sharpen the storyboard first for a real
 // contract.
 //
 // THE SPINE. A storyboard teaches three things: which OBJECT persists, which TRANSFORMATION happens at
 // each junction (`becomes:`), and WHY the beat lands. Only the third used to survive into the intent, so
 // the contract could be satisfied by nine unrelated islands. The top-level `spine` and the per-beat
-// `object` / `becomes` carry the other two across the bridge. They are RECORDED, not machine-checked —
-// see the honesty note in scripts/gates/inspect.mjs.
+// `object` / `becomes` carry the other two across the bridge. They are RECORDED, not machine-checked.
+// See the honesty note in scripts/gates/inspect.mjs.
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
@@ -52,9 +52,9 @@ const beats = [], warns = [];
 for (const b of blocks) {
   const head = b.split('\n')[0].trim();
   // time range "(0s–2.3s)" / "(0s-2.3s)"; at = its midpoint. No range → skip (can't place the check).
-  const tr = /\(([\d.]+)\s*s\s*[–—-]\s*([\d.]+)\s*s\)/.exec(head);
-  const name = head.replace(/^Beat\s+\d+\s*[—:-]\s*/i, '').replace(/\s*\([^)]*\)\s*$/, '').trim();
-  if (!tr) { warns.push(`beat "${name}": no (start s–end s) range in the heading — skipped (add one so intent can place the check).`); continue; }
+  const tr = /\(([\d.]+)\s*s\s*[–: -]\s*([\d.]+)\s*s\)/.exec(head);
+  const name = head.replace(/^Beat\s+\d+\s*[: :-]\s*/i, '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+  if (!tr) { warns.push(`beat "${name}": no (start s–end s) range in the heading, skipped (add one so intent can place the check).`); continue; }
   const at = +(( +tr[1] + +tr[2]) / 2).toFixed(2);
   const span = [+(+tr[1]).toFixed(2), +(+tr[2]).toFixed(2)];
   const onscreen = fieldIn(b, 'onscreen') || '';
@@ -63,8 +63,8 @@ for (const b of blocks) {
   const blueprint = fieldIn(b, 'blueprint') || fieldIn(b, 'mechanism') || '';
   const placeholder = /<fill[:\s]/i.test(onscreen);
   const mustShow = placeholder ? [] : quotes(onscreen);
-  if (placeholder) warns.push(`beat "${name}": onscreen is still a <fill:…> placeholder — emitted without mustShow. Fill the real copy for a verifiable contract.`);
-  else if (!mustShow.length && onscreen) warns.push(`beat "${name}": no quoted copy in onscreen — inspect can't verify text here. Put the exact on-screen words in quotes.`);
+  if (placeholder) warns.push(`beat "${name}": onscreen is still a <fill:…> placeholder, emitted without mustShow. Fill the real copy for a verifiable contract.`);
+  else if (!mustShow.length && onscreen) warns.push(`beat "${name}": no quoted copy in onscreen, inspect can't verify text here. Put the exact on-screen words in quotes.`);
   // a directed beat moves; only a beat that literally says static/freeze opts out.
   const mustAnimate = !/\b(static|freeze|frozen|still hold)\b/i.test(type + ' ' + onscreen + ' ' + blueprint);
   const artifact = (why && !/<fill[:\s]/i.test(why)) ? why : [type, blueprint].filter(Boolean).join(' · ') || 'the beat\'s earning artifact';
@@ -72,7 +72,7 @@ for (const b of blocks) {
   // `becomes:` is newer than most storyboards, so both keys are omitted rather than emitted empty.
   const object = fieldIn(b, 'object');
   const becomes = fieldIn(b, 'becomes');
-  if (!becomes) warns.push(`beat "${name}": no becomes: line — the transformation at this junction is not recorded. Name what this beat's object turns into.`);
+  if (!becomes) warns.push(`beat "${name}": no becomes: line. The transformation at this junction is not recorded. Name what this beat's object turns into.`);
   beats.push({
     at, span, name, mustShow, mustAnimate, artifact,
     ...(object ? { object: unquote(object) } : {}),
@@ -80,8 +80,8 @@ for (const b of blocks) {
   });
 }
 
-if (!beats.length) { console.error('✗ no beats with a time range found — is this a storyboard from make storyboard-draft / STORYBOARD-TEMPLATE.md?'); process.exit(1); }
-if (!spine.object) warns.push('frontmatter has no object: — the intent records no spine, so nothing states what the film is about.');
+if (!beats.length) { console.error('✗ no beats with a time range found, is this a storyboard from make storyboard-draft / STORYBOARD-TEMPLATE.md?'); process.exit(1); }
+if (!spine.object) warns.push('frontmatter has no object:, the intent records no spine, so nothing states what the film is about.');
 const out = JSON.stringify({ ...(Object.keys(spine).length ? { spine } : {}), beats }, null, 2) + '\n';
 
 let dest = process.env.OUT || null;
@@ -90,9 +90,9 @@ for (const w of warns) console.log(`  ~ ${w}`);
 if (dest) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, out);
-  console.log(`\n✓ wrote ${dest} — ${beats.length} beat(s), ${beats.filter((b) => b.mustShow.length).length} with verifiable copy.`);
+  console.log(`\n✓ wrote ${dest}: ${beats.length} beat(s), ${beats.filter((b) => b.mustShow.length).length} with verifiable copy.`);
   console.log(`  Align the \`at\` times + mustShow to the final scene, then \`make author-check D=${D || '<scene>.json'}\` runs inspect against it.`);
 } else {
   console.log(out);
-  console.log(`  (no D=<scene.json> given — printed only. Pass D= to write <scene>.intent.json next to it.)`);
+  console.log(`  (no D=<scene.json> given: printed only. Pass D= to write <scene>.intent.json next to it.)`);
 }

@@ -1,4 +1,4 @@
-// scripts/site/films-json.mjs — what each showcase film IS, read from the film and from its source.
+// scripts/site/films-json.mjs: what each showcase film IS, read from the film and from its source.
 //
 //   node scripts/site/films-json.mjs            # check, and name every film that disagrees with its source
 //   node scripts/site/films-json.mjs --write    # rewrite site/lib/films.json

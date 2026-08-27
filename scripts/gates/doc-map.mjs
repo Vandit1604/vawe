@@ -1,4 +1,4 @@
-// scripts/gates/doc-map.mjs — the doc map: one source of truth, every index generated from it.
+// scripts/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it.
 //
 //   node scripts/gates/doc-map.mjs            verify (used by craft-coverage / make craft-coverage)
 //   node scripts/gates/doc-map.mjs --write    regenerate every index view (make doc-index)
@@ -9,8 +9,8 @@
 // unreachable from anything: FILM-STRUCTURE, APPROVAL-STOPS and SUBAGENT-BUDGET were all orphaned from
 // their own index on the day they were written.
 //
-// THE MECHANISM. Every indexed doc carries frontmatter — `when` (reach for this when…) and `answers`
-// (what it settles) — the same shape a SKILL.md carries, for the same reason: one line per doc is
+// THE MECHANISM. Every indexed doc carries frontmatter, `when` (reach for this when…) and `answers`
+// (what it settles). The same shape a SKILL.md carries, for the same reason: one line per doc is
 // enough to choose, and the body only loads if chosen. That frontmatter is the ONLY place a
 // description is written by hand. Three views are GENERATED from it and never edited:
 //
@@ -32,7 +32,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // ── what counts as an indexed doc ────────────────────────────────────────────────────────────────
-// The roots are entry points and maps — the things that point AT the index, not entries in it.
+// The roots are entry points and maps. The things that point AT the index, not entries in it.
 // CLAUDE.md and AGENTS.md are loaded up front by the agent; INDEX.md and CRAFT/README.md are the
 // generated maps themselves. Their links are still checked; they just do not describe themselves.
 const ROOTS = new Set(['CLAUDE.md', 'AGENTS.md', 'docs/INDEX.md', 'docs/CRAFT/README.md']);
@@ -80,7 +80,7 @@ const GENERATED = {
 // Docs another agent is editing right now, so the frontmatter could not be applied without a
 // collision. The map still carries their line, and the gate NAMES them on every run, so an
 // incomplete index announces itself rather than looking finished. Delete an entry once the doc
-// carries its own frontmatter — the gate fails if a PENDING doc turns out to already have it.
+// carries its own frontmatter. The gate fails if a PENDING doc turns out to already have it.
 const PENDING = {
   // empty. Every doc that was held here has since had its frontmatter applied directly.
   // Keep the mechanism: the next time an agent cannot take a file it does not own, its line
@@ -94,13 +94,13 @@ const CRAFT_ALSO = [{
   file: '.claude/skills/vawe-continuous-action/SKILL.md',
   label: '[`vawe-continuous-action`](../../.claude/skills/vawe-continuous-action/SKILL.md) (skill)',
   group: 'crosscutting',
-  when: 'planning a short product film (≤ ~15s) whose subject really is one thing changing — pick it from FILM-STRUCTURE.md first, it is one device of about eighteen',
+  when: 'planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen',
   answers: 'the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `formats/scene/higgsfield-recreation.json`.',
 }];
 
 const GROUPS = [
   ['project', 'The project', 'what this is, before any authoring'],
-  ['reference', 'Vocabulary & reference', 'what a scene may contain — look the answer up, do not guess it'],
+  ['reference', 'Vocabulary & reference', 'what a scene may contain. Look the answer up, do not guess it'],
   ['crosscutting', 'Craft · front-to-back & cross-cutting', 'the whole arc of a video, and the spines that run through all of it'],
   ['story', 'Craft · what & why (the story layer)', 'the beats, their order, and which effect serves which feeling'],
   ['look', 'Craft · how it looks (the house-style layer)', 'type · colour · layout · imagery · the surface copy sits on'],
@@ -160,25 +160,25 @@ export function docMap() {
     // rebuilds the index is the one thing that cannot ask the author to fix the index first.
     const abs = path.join(ROOT, f);
     if (!fs.existsSync(abs)) {
-      problems.push({ kind: 'fail', msg: `${f} is tracked by git and missing from disk — run \`git rm --cached ${f}\` if you meant to delete it, or restore it` });
+      problems.push({ kind: 'fail', msg: `${f} is tracked by git and missing from disk, run \`git rm --cached ${f}\` if you meant to delete it, or restore it` });
       continue;
     }
     const text = fs.readFileSync(abs, 'utf8');
     const fm = frontmatter(text) || {};
 
     if (GENERATED[f]) {
-      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as GENERATED but carries \`when\` frontmatter — move the line into the doc and drop it from GENERATED in scripts/gates/doc-map.mjs` });
+      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as GENERATED but carries \`when\` frontmatter. Move the line into the doc and drop it from GENERATED in scripts/gates/doc-map.mjs` });
       entries.push({ file: f, source: 'generated', ...GENERATED[f] });
       continue;
     }
     if (PENDING[f]) {
-      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as PENDING but now carries its own frontmatter — delete its PENDING entry in scripts/gates/doc-map.mjs` });
-      else problems.push({ kind: 'pending', msg: `${f} — frontmatter NOT applied (another agent owns the file). Its line is held in PENDING; the index is incomplete here on purpose.` });
+      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as PENDING but now carries its own frontmatter. Delete its PENDING entry in scripts/gates/doc-map.mjs` });
+      else problems.push({ kind: 'pending', msg: `${f}. Frontmatter NOT applied (another agent owns the file). Its line is held in PENDING; the index is incomplete here on purpose.` });
       entries.push({ file: f, source: 'pending', ...PENDING[f] });
       continue;
     }
     if (isSkill(f)) {
-      if (!fm.description) { problems.push({ kind: 'fail', msg: `${f}: a SKILL.md with no \`description\` — nothing can surface it` }); continue; }
+      if (!fm.description) { problems.push({ kind: 'fail', msg: `${f}: a SKILL.md with no \`description\`. Nothing can surface it` }); continue; }
       entries.push({ file: f, source: 'skill', group: 'skill', when: fm.description, answers: '', name: fm.name || path.basename(path.dirname(f)) });
       continue;
     }
@@ -190,7 +190,7 @@ export function docMap() {
     // A relative link resolves differently in each generated view, so it breaks in at least one of
     // them. Name the file in backticks instead; the map already links the doc itself.
     for (const k of ['when', 'answers']) {
-      if (/\]\([^)\s]+\.md/.test(fm[k])) problems.push({ kind: 'fail', msg: `${f}: \`${k}\` contains a markdown link to a .md file. Relative links break in the generated views — write the name in backticks instead.` });
+      if (/\]\([^)\s]+\.md/.test(fm[k])) problems.push({ kind: 'fail', msg: `${f}: \`${k}\` contains a markdown link to a .md file. Relative links break in the generated views. Write the name in backticks instead.` });
     }
     entries.push({ file: f, source: 'frontmatter', group: fm.group, when: fm.when, answers: fm.answers });
   }
@@ -265,7 +265,7 @@ function indexBody(entries) {
 }
 
 export function renderIndex(entries) {
-  return `# The doc map — which document settles this?\n\n${indexBody(entries)}`;
+  return `# The doc map, which document settles this?\n\n${indexBody(entries)}`;
 }
 
 export function renderSkill(entries) {
@@ -281,7 +281,7 @@ export function renderSkill(entries) {
       '_GENERATED by `make doc-index`. The same map lives at `docs/INDEX.md`. Do not edit either by hand._')
     .replace(/\]\(\.\.\/([^)]+)\)/g, '](../../../$1)')
     .replace(/\]\((?!\.\.\/|https?:)([^)]+)\)/g, '](../../../docs/$1)');
-  return `${fm}# vawe-docs — which document settles this?\n\n${body}`;
+  return `${fm}# vawe-docs, which document settles this?\n\n${body}`;
 }
 
 export function renderCraftBlock(entries) {
@@ -300,7 +300,7 @@ export function renderCraftBlock(entries) {
     for (const r of rows) out.push(`| ${r.label}${r.source === 'pending' ? ' ⚠' : ''} | ${cell(r.when)} | ${cell(r.answers)} |`);
     out.push('');
   }
-  out.push('_GENERATED by `make doc-index` from each guide\'s `when:` / `answers:` frontmatter — the rows cannot');
+  out.push('_GENERATED by `make doc-index` from each guide\'s `when:` / `answers:` frontmatter, the rows cannot');
   out.push('drift from the docs. Change a description in the doc, then run `make doc-index`. The whole-repo map,');
   out.push('including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._');
   return out.join('\n');
@@ -330,10 +330,10 @@ export function views(entries) {
 export function staleViews(entries) {
   const errs = [];
   for (const [f, want] of views(entries)) {
-    if (want === null) { errs.push(`docs/CRAFT/README.md: the ${START} / ${END} markers are missing — the generated index has nowhere to go`); continue; }
+    if (want === null) { errs.push(`docs/CRAFT/README.md: the ${START} / ${END} markers are missing. The generated index has nowhere to go`); continue; }
     const p = path.join(ROOT, f);
     const cur = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
-    if (cur !== want) errs.push(`${f} is stale — run \`make doc-index\``);
+    if (cur !== want) errs.push(`${f} is stale, run \`make doc-index\``);
   }
   return errs;
 }
@@ -342,7 +342,7 @@ export function staleViews(entries) {
 export function orphanErrors(entries) {
   const map = renderIndex(entries);
   return entries.filter((e) => !map.includes(`(${e.file.startsWith('docs/') ? e.file.slice(5) : '../' + e.file})`) && !map.includes(`(../${e.file})`))
-    .map((e) => `${e.file} is not linked from docs/INDEX.md — orphaned from the map`);
+    .map((e) => `${e.file} is not linked from docs/INDEX.md: orphaned from the map`);
 }
 
 export function run({ write = false } = {}) {

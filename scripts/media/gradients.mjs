@@ -1,4 +1,4 @@
-// scripts/media/gradients.mjs — bake a gradient-background pack into a render-ready library.
+// scripts/media/gradients.mjs: bake a gradient-background pack into a render-ready library.
 //   make gradients [SRC=~/Downloads/…zip] [W=1920] [N=0]
 //
 // The packs ship 4K JPGs (3840x2160, ~290KB each). A 1080p render decodes every one of those pixels
@@ -6,7 +6,7 @@
 // an index.json the author can browse. Nothing here runs at frame time.
 //
 // LICENCE: these packs are royalty-free to USE but explicitly forbid redistributing the files on their
-// own. assets/gradients is gitignored for that reason — bake locally, never commit the images.
+// own. assets/gradients is gitignored for that reason, bake locally, never commit the images.
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -48,7 +48,7 @@ const pick = LIMIT > 0 ? files.slice(0, LIMIT) : files;
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
-// ffmpeg is already a hard dependency of the render pipeline, so it costs no new tooling — and it is
+// ffmpeg is already a hard dependency of the render pipeline, so it costs no new tooling, and it is
 // far quicker over a thousand 4K frames than decoding each one in a browser canvas.
 const index = [];
 let n = 0;
@@ -69,5 +69,5 @@ console.log(`\ngradients: ${index.length} backgrounds at ${WIDTH}px → assets/g
 console.log('  use one full-bleed under a scene:');
 console.log('    { "type":"image", "src":"/assets/gradients/0001.jpg", "x":0, "y":0, "w":1920, "h":1080,');
 console.log('      "ken":{"from":1.0,"to":1.08}, "start":0, "duration":6 }');
-console.log('  NOTE: royalty-free to use, but redistributing the files themselves is not permitted —');
+console.log('  NOTE: royalty-free to use, but redistributing the files themselves is not permitted, ');
 console.log('  assets/gradients is gitignored. Bake locally; never commit the images.');

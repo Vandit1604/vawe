@@ -1,7 +1,7 @@
-// scripts/site/arsenal-json.mjs — derive site/lib/arsenal.json, the one index behind /arsenal.
+// scripts/site/arsenal-json.mjs: derive site/lib/arsenal.json, the one index behind /arsenal.
 //
 // WHY THIS EXISTS: the site used to answer "what can this engine do" on three pages that never
-// agreed on a shape — /blocks (a category rail over blocks.json), /showcase/effects (a family rail
+// agreed on a shape, /blocks (a category rail over blocks.json), /showcase/effects (a family rail
 // over effects.json) and /type (specimens). A visitor looking for one thing had to already know
 // which of the three held it. This merges the two REGISTRIES into one flat item list so a single
 // search box reaches everything, and /arsenal renders that list.

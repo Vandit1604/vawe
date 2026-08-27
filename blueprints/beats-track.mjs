@@ -1,9 +1,9 @@
-// blueprints/beats-track.mjs — the KEYED-TRACK beats, harvested from formats/scene/higgsfield-recreation.json,
+// blueprints/beats-track.mjs: the KEYED-TRACK beats, harvested from formats/scene/higgsfield-recreation.json,
 // the one film in this library where 75% of the layers carry a hand-written `motion` track (the median is 0).
 //
 // Both beats here are the mechanics of that film generalised, and neither can be reached from a preset:
 // a preset animates ONE layer over ONE span with ONE curve, and what makes the exemplar read as a captured
-// product film is the opposite of that — a track whose keys are irregular and whose interior is linear, and
+// product film is the opposite of that. A track whose keys are irregular and whose interior is linear, and
 // several layers sharing it. docs/CRAFT/KEYED-MOTION.md carries the measurements this file is built from.
 //
 // Colours are semantic theme vars; coordinates are the 1920x1080 stage. Pure: props in, layers out.
@@ -34,7 +34,7 @@ const lerpAt = (rows, at, col) => {                   // piecewise-linear read o
   return last[col];
 };
 
-// recordedPan — a surface WIDER THAN THE FRAME, panned on an irregular multi-key linear track, with
+// recordedPan: a surface WIDER THAN THE FRAME, panned on an irregular multi-key linear track, with
 // riders welded to that same track. Beat 2 of the exemplar.
 //
 // Two things make it read as a screen recording rather than as an animation, and both are props because
@@ -83,7 +83,7 @@ export function recordedPan({ id = 'recpan', image, capture, html, x = 0, y = 0,
   return layers;
 }
 
-// echoRing — a stroked ring that REPLAYS another layer's path one beat late, growing and fading as it
+// echoRing: a stroked ring that REPLAYS another layer's path one beat late, growing and fading as it
 // goes. Beat 4 of the exemplar, where the generate button has become a dot and is about to expand.
 //
 // Its job is not decoration. A slow morph starves the eye: the subject is changing shape over most of a
@@ -144,7 +144,7 @@ const GSAP_EASE_ALIAS = { 'power3.out': 'easeOutQuart', 'power2.inOut': 'easeInO
 const engineEase = (e) => GSAP_EASE_ALIAS[e] || e;
 
 // The surface a pan or a scroll moves: a captured component, an image, or hand HTML. Precedence is
-// stated rather than inferred, and an empty surface is refused — a blueprint that silently emits
+// stated rather than inferred, and an empty surface is refused, a blueprint that silently emits
 // nothing is a black hole in a contact sheet with no error anywhere.
 function surfaceLayer({ image, capture, html, w, h }, who) {
   if (html) return { type: 'html', html, w, ...(h != null ? { h } : {}) };
@@ -153,7 +153,7 @@ function surfaceLayer({ image, capture, html, w, h }, who) {
   throw new Error(`${who} needs a surface: \`html\` (a string), \`capture\` ({src, part}) or \`image\` (a path).`);
 }
 
-// scrollStory — a surface TALLER than the frame whose content scrolls while the frame stays put, so the
+// scrollStory: a surface TALLER than the frame whose content scrolls while the frame stays put, so the
 // beat reads as a screen recording of somebody scrolling a page.
 //
 // What makes it read as a recording rather than as an animation, all of it measured:
@@ -167,7 +167,7 @@ function surfaceLayer({ image, capture, html, w, h }, who) {
 //      direction from `scene.lighting` and this one has to follow the tilt.
 //   3. THE STOPS ARE ABSOLUTE, and they come from real cumulative section heights (`sections`), never
 //      from a tunable travel distance. Every step gets a HOLD key at the value the previous step
-//      finished on, so step A is over before step B starts — the interior can never cross-fade two
+//      finished on, so step A is over before step B starts. The interior can never cross-fade two
 //      scrolls into one long drift.
 //   4. ONE EASE ACROSS EVERY SCROLL. `power3.out` reads as a programmatic scroll (a wheel event landing);
 //      `power2.inOut` reads as a camera pan. Mixing them inside one scene reads as jerky, so `ease` is a
@@ -257,7 +257,7 @@ export function scrollStory({ id = 'scrollstory', image, capture, html, x = 0, y
   return layers;
 }
 
-// focusRack — a rack focus: one plane pulls sharp while the other goes soft. Depth of field, not a
+// focusRack. A rack focus: one plane pulls sharp while the other goes soft. Depth of field, not a
 // camera move, which is the distinction the whole beat turns on. The camera transforms the FRAME, so
 // faking a rack with one is impossible by construction: the two planes have to disagree. So the blur
 // lives on each layer's own `m.blur` channel (core/tracks/motion.js) and nothing here touches a camera.

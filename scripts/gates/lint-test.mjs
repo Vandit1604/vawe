@@ -1,4 +1,4 @@
-// lint-test.mjs — regression asserts for validate.mjs lintData (make lint-test). Each rule below maps
+// lint-test.mjs: regression asserts for validate.mjs lintData (make lint-test). Each rule below maps
 // to a bug that shipped this session and slipped every other gate; this pins that the rule still fires,
 // so a future refactor can't silently un-catch it. Pure, no browser.
 //   node scripts/gates/lint-test.mjs
@@ -18,7 +18,7 @@ const ok = (cond, msg) => { if (!cond) { console.error(`✗ ${msg}`); fail++; } 
 const bad = lintData(read('verify/fixtures/lint-bad.json'));
 ok(bad.some((w) => /no "duration"/.test(w)), 'rule 1: missing-duration (the "+" that leaked 53s)');
 // rule 2 was RETIRED: typing is HTML-safe since core/layers/text.js gained revealHtml (#85). Pinned the
-// other way round now — a typed line carrying <b> must produce NO warning, so the stale rule cannot
+// other way round now. A typed line carrying <b> must produce NO warning, so the stale rule cannot
 // come back by reflex and go on telling authors to strip markup the engine renders correctly.
 ok(!bad.some((w) => /typing.*markup/i.test(w)), 'rule 2 retired: typing + <b>/<em> is silent (HTML-safe typing, #85)');
 ok(bad.some((w) => /colliding/.test(w)), 'rule 3: scene collision (Preferences↔agents overlap)');

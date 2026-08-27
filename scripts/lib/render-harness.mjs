@@ -1,4 +1,4 @@
-// scripts/lib/render-harness.mjs — ONE owner for the three things every browser-side tool in this
+// scripts/lib/render-harness.mjs: ONE owner for the three things every browser-side tool in this
 // repo needs: a static file server over the repo, a puppeteer page at a known size, and the wait for
 // the engine to boot.
 //

@@ -1,11 +1,11 @@
-// blocks-audit.mjs — do the block FACTORIES obey the rules the videos are held to?
+// blocks-audit.mjs: do the block FACTORIES obey the rules the videos are held to?
 //
 //   node scripts/gates/blocks-audit.mjs      ·   make blocks-audit
 //
 // Two defects shipped in the registry and were found by a human storyboarding a film, not by a gate:
 //   • deploySuccess baked "Ready in 1.2s" into the factory, so every caller published a statistic
-//     nobody could stand behind. The authoring rule is "an unbacked number is worse than no number" —
-//     it was enforced on scene JSON and on nothing else.
+//     nobody could stand behind. The authoring rule is "an unbacked number is worse than no number".
+//     It was enforced on scene JSON and on nothing else.
 //   • browserFrame defaulted `url` to a real company's domain, putting a brand into every caller that
 //     did not override it, in a repo whose rule is to ship the SHAPE and never a lockup.
 //
@@ -23,7 +23,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 // status block in the library, so an unreadable pair or a baked brand in there reaches more callers
 // than one in any single factory would. The gate reads what ships, not one file of it.
 // EVERY blocks/*.mjs, discovered rather than listed. The list was hand-maintained, which makes adding
-// a file the way to escape the gate — and it is the same failure the file boundary already caused
+// a file the way to escape the gate, and it is the same failure the file boundary already caused
 // once: a new family lands, nobody remembers this array, and its factories ship unaudited. The only
 // signal was an `unauditable` row per catalog entry, which reads as a manifest problem, not a gate
 // that cannot see the code. catalog.mjs is excluded because it is data, audited separately below.
@@ -33,13 +33,13 @@ const SRC = fs.readdirSync(path.join(repoRoot, 'blocks'))
 // THE MANIFEST IS A SECOND SOURCE OF DEFAULTS, and auditing only the factories misses it completely.
 // Proven the hard way: the brand URL was removed from `browserFrame` and the catalog row put it
 // straight back, and the invented "1.2s" was removed from `deploySuccess` and still shipped from a
-// `terminal` row. This gate reported green with both sitting in a file it never opened — the rule was
+// `terminal` row. This gate reported green with both sitting in a file it never opened, the rule was
 // right and the thing it measured was a proxy for it, for the seventh time (MISTAKES #68).
 
 // Real brands. Shipping the SHAPE is the rule; a brand belongs in a scene that deliberately reflects
 // one, never in a factory default where it reaches callers who never asked for it.
 const BRANDS = /\b(stripe|google|apple|spotify|youtube|reddit|twitter|netflix|amazon|meta|facebook|instagram|tiktok|linkedin|slack|notion|figma|github|vercel|openai|anthropic)\b/i;
-// A number with a unit, a percentage, a money figure, a rating — the shapes a CLAIM takes.
+// A number with a unit, a percentage, a money figure, a rating, the shapes a CLAIM takes.
 const CLAIM = /(\b\d+(\.\d+)?\s?(ms|s|x|%|k|m|b)\b)|(\$\s?\d)|(\b\d+(\.\d+)?\s?\/\s?5\b)|(\b\d{1,3}(,\d{3})+\b)/i;
 // CSS is not copy. `rgba(255,255,255,0.08)` trips the thousands-separator rule and `1px solid` trips
 // the unit rule; neither is a claim anyone reads. A gate that cries wolf is ignored exactly like a
@@ -75,14 +75,14 @@ for (const [name, body] of Object.entries(FACTORIES)) {
   const sig = body.slice(0, body.indexOf(') = {}') + 1 || 400);
   for (const d of [...sig.matchAll(/(\w+)\s*=\s*'([^']{2,60})'/g)]) {
     const [, prop, val] = d;
-    if (BRANDS.test(val)) issues.push({ name, kind: 'brand-default', detail: `\`${prop}\` defaults to "${val}" — a real brand reaching every caller that does not override it. Ship the shape.` });
-    if (CLAIM.test(val)) issues.push({ name, kind: 'claim-default', detail: `\`${prop}\` defaults to "${val}" — a figure shipped by default that no caller stood behind.` });
+    if (BRANDS.test(val)) issues.push({ name, kind: 'brand-default', detail: `\`${prop}\` defaults to "${val}". A real brand reaching every caller that does not override it. Ship the shape.` });
+    if (CLAIM.test(val)) issues.push({ name, kind: 'claim-default', detail: `\`${prop}\` defaults to "${val}". A figure shipped by default that no caller stood behind.` });
   }
   // 2. baked copy anywhere in the body
   for (const lit of literals(body)) {
-    if (CLAIM.test(lit) && !CSS_VALUE.test(lit) && !/^[\d\s.,]+$/.test(lit)) issues.push({ name, kind: 'baked-claim', detail: `hardcoded "${lit}" — a claim a caller cannot override or stand behind. Make it a prop, defaulting to nothing.` });
-    if (SUPERLATIVE.test(lit)) issues.push({ name, kind: 'baked-superlative', detail: `hardcoded "${lit}" — a superlative with nothing behind it.` });
-    if (BRANDS.test(lit) && name !== 'stripeCard') issues.push({ name, kind: 'baked-brand', detail: `hardcoded "${lit}" — a real brand baked into a factory.` });
+    if (CLAIM.test(lit) && !CSS_VALUE.test(lit) && !/^[\d\s.,]+$/.test(lit)) issues.push({ name, kind: 'baked-claim', detail: `hardcoded "${lit}". A claim a caller cannot override or stand behind. Make it a prop, defaulting to nothing.` });
+    if (SUPERLATIVE.test(lit)) issues.push({ name, kind: 'baked-superlative', detail: `hardcoded "${lit}". A superlative with nothing behind it.` });
+    if (BRANDS.test(lit) && name !== 'stripeCard') issues.push({ name, kind: 'baked-brand', detail: `hardcoded "${lit}". A real brand baked into a factory.` });
   }
 }
 
@@ -100,11 +100,11 @@ for (const fam of FAMILIES) {
     const used = have.map((f) => ({ f, hit: props(f).filter((p) => group.includes(p)) })).filter((x) => x.hit.length);
     if (used.length < 2) continue;
     // The defect is siblings sharing NO common word, not siblings having aliases. A block that accepts
-    // both the canonical name and its old one is the CURE — flagging it would punish the fix and push
+    // both the canonical name and its old one is the CURE, flagging it would punish the fix and push
     // an author toward a breaking rename instead.
     const shared = used.reduce((acc, u) => acc.filter((p) => u.hit.includes(p)), [...used[0].hit]);
     if (!shared.length) issues.push({ name: have.join('/'), kind: 'prop-divergence',
-      detail: `siblings share NO common name for the same slot: ${used.map((u) => `${u.f}(${u.hit.join(',')})`).join(' vs ')} — an author relearns the vocabulary per block. Pick one canonical name and accept the others as aliases.` });
+      detail: `siblings share NO common name for the same slot: ${used.map((u) => `${u.f}(${u.hit.join(',')})`).join(' vs ')}. An author relearns the vocabulary per block. Pick one canonical name and accept the others as aliases.` });
   }
 }
 
@@ -113,10 +113,10 @@ for (const e of CATALOG) {
   const fam = B.BLOCKS[e.family]; if (typeof fam !== 'function') continue;
   const known = new Set(props(e.family));
   // A signature it cannot read used to `continue`, so an entry whose factory lived in another file was
-  // skipped silently — the check reported nothing and looked identical to the check passing.
+  // skipped silently. The check reported nothing and looked identical to the check passing.
   if (!known.size) { issues.push({ name: e.name, kind: 'unauditable', detail: `cannot read \`${e.family}\`'s signature, so its props are unchecked. If the factory moved, this gate must be able to see it.` }); continue; }
   const unknown = Object.keys(e.props || {}).filter((k) => !known.has(k));
-  if (unknown.length) issues.push({ name: e.name, kind: 'dead-prop', detail: `manifest passes ${unknown.map((u) => `\`${u}\``).join(', ')}, which \`${e.family}\` does not accept — silently dropped.` });
+  if (unknown.length) issues.push({ name: e.name, kind: 'dead-prop', detail: `manifest passes ${unknown.map((u) => `\`${u}\``).join(', ')}, which \`${e.family}\` does not accept, silently dropped.` });
 }
 
 // Blocks whose PURPOSE is to display a figure. A price on a pricing card is a specimen, not a claim:
@@ -138,12 +138,12 @@ const FIGURE_IS_THE_POINT = {
   nowPlaying: 'a player shows a track position', card: 'the pricing variant exists to show a price',
 };
 
-// every string a catalog row ships as content — the props ARE the block's default content
+// every string a catalog row ships as content: the props ARE the block's default content
 for (const e of CATALOG) {
   const walk = (v, at) => {
     if (typeof v === 'string') {
-      if (BRANDS.test(v) && e.family !== 'stripeCard') issues.push({ name: e.name, kind: 'baked-brand', detail: `manifest \`${at}\` ships "${v}" — a real brand, straight into the registry, docs table and site grid.` });
-      if (CLAIM.test(v) && !CSS_VALUE.test(v) && !FIGURE_IS_THE_POINT[e.family]) issues.push({ name: e.name, kind: 'baked-claim', detail: `manifest \`${at}\` ships "${v}" — a figure nobody stood behind, and it lands in docs/BLOCKS.md and the site thumbnails.` });
+      if (BRANDS.test(v) && e.family !== 'stripeCard') issues.push({ name: e.name, kind: 'baked-brand', detail: `manifest \`${at}\` ships "${v}". A real brand, straight into the registry, docs table and site grid.` });
+      if (CLAIM.test(v) && !CSS_VALUE.test(v) && !FIGURE_IS_THE_POINT[e.family]) issues.push({ name: e.name, kind: 'baked-claim', detail: `manifest \`${at}\` ships "${v}". A figure nobody stood behind, and it lands in docs/BLOCKS.md and the site thumbnails.` });
       if (SUPERLATIVE.test(v)) issues.push({ name: e.name, kind: 'baked-superlative', detail: `manifest \`${at}\` ships "${v}".` });
     } else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${at}[${i}]`));
     else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) walk(x, `${at}.${k}`);
@@ -152,7 +152,7 @@ for (const e of CATALOG) {
 }
 
 // CONTRAST. `CODE_THEMES` was measured (the set's minimum is 4.68:1) and nothing else in the file
-// was, so five hardcoded pairs shipped below the bar — white on amber at 2.05:1 and a toast action
+// was, so five hardcoded pairs shipped below the bar. White on amber at 2.05:1 and a toast action
 // link at 2.00:1 among them. Only literal hex pairs can be judged statically; CSS vars resolve at
 // render and are the layout audit's job. That is a real limit, so it is stated, not hidden.
 const lum = (h) => { const n = parseInt(h.slice(1), 16);
@@ -167,7 +167,7 @@ for (const [name, body] of Object.entries(FACTORIES)) {
       const full = fg.length === 4 ? '#' + [...fg.slice(1)].map((c) => c + c).join('') : fg;
       if (!bg || full.length !== 7) continue;
       const r = ratio(full, bg);
-      if (r < 4.5) issues.push({ name, kind: 'contrast', detail: `${full} on ${bg} is ${r.toFixed(2)}:1 — under the 4.5:1 body bar. Pick a readable foreground (see \`onColor\`) or darken the fill.` });
+      if (r < 4.5) issues.push({ name, kind: 'contrast', detail: `${full} on ${bg} is ${r.toFixed(2)}:1. Under the 4.5:1 body bar. Pick a readable foreground (see \`onColor\`) or darken the fill.` });
     }
   }
 }

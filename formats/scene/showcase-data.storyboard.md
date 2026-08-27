@@ -2,11 +2,11 @@
 message: "Render the same film twice and the bytes match, because a frame is a pure function of its number."
 audience: "Engineers reading the vawe docs site who have been burned by a render pipeline that drifts between runs."
 arc: "hook → build → proof → payoff"
-framework: "Star-Story-Solution — the star is the first run's hash, the story is running it again, the solution is that the two are one line."
+framework: "Star-Story-Solution. The star is the first run's hash, the story is running it again, the solution is that the two are one line."
 threads: "a continuous object (the run 1 hash chip survives the cut, slides aside and stays on screen while the second one arrives) + a bookend (the film opens on 1,350 frames and closes on the function that draws each of them)"
 object: "the hash chip for run 1"
 object_t0: "it does not exist. The terminal is still building."
-object_states: "cut 1 — it slides left out of the centre to leave room for a second chip that is about to arrive and prove it"
+object_states: "cut 1. It slides left out of the centre to leave room for a second chip that is about to arrive and prove it"
 object_last: "it is off the left edge, and the sentence it earned is on screen"
 format: 1920x1080
 theme: "themes/vawe.json"

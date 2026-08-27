@@ -1,4 +1,4 @@
-// scripts/gates/silent-fallback.mjs — is any named vocabulary still resolved with a silent default?
+// scripts/gates/silent-fallback.mjs: is any named vocabulary still resolved with a silent default?
 //
 //   node scripts/gates/silent-fallback.mjs        ·        make silent-check
 //
@@ -26,25 +26,25 @@ const SCAN = ['core', 'formats/scene'];
 // positional and excluded: an index out of range is not a misspelling.
 // `\??\.?` before the bracket, because OPTIONAL CHAINING is the same lookup: `MAP?.[name] || dflt`
 // hides exactly the bug this file exists to find. The first cut of this pattern could not match it,
-// and three of the waivers below described `o?.[k]` code the gate had therefore never once seen —
+// and three of the waivers below described `o?.[k]` code the gate had therefore never once seen,
 // dead entries that made the list look inspected. A check green about what it cannot see is the
 // defect this whole run was about, reproduced in the check written to catch it. docs/MISTAKES.md #363.
 const PATTERN = /\b([A-Za-z_$][\w$]*)\s*\??\.?\s*\[\s*([A-Za-z_$][\w$.?]*)\s*\]\s*(\|\||\?\?)/;
 const POSITIONAL = /^(i|j|k|n|idx|index|len|[0-9]+)$/;
 
-// Each waiver states WHY, because an unexplained waiver list becomes the place the next real one hides —
-// the same rule scripts/gates/arsenal-check.mjs applies to the catalogue.
+// Each waiver states WHY, because an unexplained waiver list becomes the place the next real one hides.
+// The same rule scripts/gates/arsenal-check.mjs applies to the catalogue.
 const WAIVED = new Map(Object.entries({
   // ABSENCE answers, each true about the thing being asked:
-  'core/backgrounds.js:_pcache[key]': 'a memo cache keyed by dimensions, not a vocabulary — a miss BUILDS the value',
-  'core/backgrounds.js:FX_PARAMS[t]': 'a preset with no declared parameters yields [] — "this fx takes no options"',
+  'core/backgrounds.js:_pcache[key]': 'a memo cache keyed by dimensions, not a vocabulary, a miss BUILDS the value',
+  'core/backgrounds.js:FX_PARAMS[t]': 'a preset with no declared parameters yields [], "this fx takes no options"',
   'core/backgrounds.js:FX_PARAMS[fx.type]': 'as above, inside applyBgOver',
   'core/generators.js:base[key]': 'an author option bag walked against a declared schema, which generators.js validates separately',
   'core/junctions.js:data[key]': 'marksOf reads cuts/seams/stings off a lowered scene; a film with no seams has no `seams` key, and [] is the true answer',
   'core/knobs.js:fam[preset]': 'a preset with no knobs of its own keeps only the family\'s shared ones',
-  'core/looks.js:PASS_READS[passName]': 'a pass that reads no routed argument yields [] — and lib-test proves the table against behaviour',
+  'core/looks.js:PASS_READS[passName]': 'a pass that reads no routed argument yields [], and lib-test proves the table against behaviour',
   'core/prop-audit.js:LAYER_PROPS[type]': 'a SPARSE map keyed by layer TYPE: a type declaring no type-scoped props of its own (it reads only the shared set) has no entry, and {} is the true answer. The type NAME cannot be wrong here - core/layers/index.js refuses an unknown type before a layer is ever built',
-  'core/captions.js:CAP_STYLE_SHAPE[name]': 'a SPARSE map: only four of the eighteen styles have a non-default shape, so an absent entry IS the answer ({unit:word, mode:line}). The NAME cannot be wrong here — formats/scene/scene.js:742 throws on an unknown captionStyle before this is reached, and lib-test:992 locks the default in',
+  'core/captions.js:CAP_STYLE_SHAPE[name]': 'a SPARSE map: only four of the eighteen styles have a non-default shape, so an absent entry IS the answer ({unit:word, mode:line}). The NAME cannot be wrong here. Formats/scene/scene.js:742 throws on an unknown captionStyle before this is reached, and lib-test:992 locks the default in',
   'core/validate.mjs:KNOBS[family]': 'DEBT, not a safe default, and stated so rather than hidden: a family with no manifest entry is not graded AT ALL, which is exactly how `colorWave`, `shimmerWave` and the `globe` three scene escape knob validation while reading real per-preset opts. lib-test:2753 asserts that silence on purpose, because grading them against `_shared` alone would refuse four shipped films for a hole in core/knobs.js. Fix by FILLING THE MANIFEST (then delete this waiver and that assertion), never by widening the fallback',
   'core/tracks/vars.js:v[name]': 'the per-channel map for `vars`; an absent channel falls to the scalar or `*`, by design',
   // ALREADY VALIDATED one call earlier, so the wrong-name case cannot arrive here:
@@ -83,11 +83,11 @@ const walk = (dir) => {
 for (const d of SCAN) walk(d);
 
 // A waiver that matches NOTHING is worse than no waiver: it reads as "inspected and cleared" while the
-// gate never saw the line at all. Three of these existed here — written for `o?.[k]`, which the first
-// pattern could not match — and they are what made a real blind spot look considered. #363.
+// gate never saw the line at all. Three of these existed here, written for `o?.[k]`, which the first
+// pattern could not match, and they are what made a real blind spot look considered. #363.
 const stale = [...WAIVED.keys()].filter((k) => !hit.has(k));
 if (stale.length) {
-  console.error(`✗ silent-fallback: ${stale.length} waiver(s) matched nothing — they describe code this gate`);
+  console.error(`✗ silent-fallback: ${stale.length} waiver(s) matched nothing, they describe code this gate`);
   console.error('  never saw, so they claim an inspection that did not happen:\n');
   for (const k of stale) console.error(`    ${k}`);
   console.error('\n  Either the code moved (update the key) or the pattern cannot see it (widen the pattern).');

@@ -1,4 +1,4 @@
-// build-cadence-film.mjs — 15s, three dense 5s beats joined by TWO transitions, one invisible and one
+// build-cadence-film.mjs: 15s, three dense 5s beats joined by TWO transitions, one invisible and one
 // expressive. The shape docs/CRAFT/TRANSITIONS.md argues for: one cut family carries the film and a
 // single seam is earned at the payoff. Three families would trip `effect-soup`; the vocabulary is deep
 // so you can pick the right one, not so you can use several.
@@ -87,7 +87,7 @@ const scene = {
   // a seam blends two frozen stills. Both are something laid OVER a boundary. Here the boundary is
   // BUILT: at 5s the input bar hands its pose to the stem panel (`becomes`) while the form opens from
   // one line into four, and at 10s the four fold back into one. Nothing crosses that is not already on
-  // screen, so there is no transition to look at — only the content changing state.
+  // screen, so there is no transition to look at, only the content changing state.
   layers: [
     // ---- beat 1: the ask ----
     T({ text: 'CADENCE', x: 200, y: 150, w: 900, size: 26, weight: 500, color: 'var(--text-2)',
@@ -140,7 +140,7 @@ const scene = {
   // A HAND-AUTHORED backdrop, because `dotmatrix` was chosen to clear a `no-bg-motion` warning and a
   // dot field means nothing for a product that writes music. This is the grid the music sits on: beat
   // lines every 120px and a brighter bar line every fourth, scrolling left at 240px/s. At that rate one
-  // beat crosses every 0.5s, so the field is keeping 120bpm — the backdrop is a metronome rather than a
+  // beat crosses every 0.5s, so the field is keeping 120bpm. The backdrop is a metronome rather than a
   // texture. Plus the zero-line the waveform is drawn against, and a vignette so the centre reads.
   // No CSS animation anywhere (the sanitiser rejects it by name): everything is a function of var(--t),
   // so a seeked frame is pure in n.
@@ -148,7 +148,7 @@ const scene = {
     `<div style="position:absolute;inset:0;background:#07080a"></div>`
     // TRANSFORM, because it is the path core/bg-html.js documents and the DOM confirms it: at t=7.0 this
     // element computes matrix(1,0,0,1,-1680,0), exactly 7.0 x -240. I first blamed background-position
-    // for not moving, on a pixel test that was too crude to tell — at alpha 0.05 under a vignette the
+    // for not moving, on a pixel test that was too crude to tell, at alpha 0.05 under a vignette the
     // flat backdrop dominates and a zero shift wins by default. That was a bad measurement, not a
     // finding; whether background-position also works is untested.
     + `<div style="position:absolute;top:0;bottom:0;left:0;width:5600px;`

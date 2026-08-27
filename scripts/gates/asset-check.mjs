@@ -1,5 +1,5 @@
-// scripts/gates/asset-check.mjs — ASSET-READINESS PREFLIGHT. A scene that names a logo / icon / captured
-// UI / photo / VO that isn't on disk renders a BROKEN image or a silent gap — and you find out at render,
+// scripts/gates/asset-check.mjs: ASSET-READINESS PREFLIGHT. A scene that names a logo / icon / captured
+// UI / photo / VO that isn't on disk renders a BROKEN image or a silent gap, and you find out at render,
 // or worse, in the mp4. This walks the scene for every asset REFERENCE (image/component/lottie src, audio
 // vo/music/spectrum, any assets|formats path) and confirms the file exists, so you fetch what's missing
 // BEFORE authoring around it. Remote http(s)/data: refs are noted, not failed (can't check offline).
@@ -13,8 +13,8 @@
 // looks total:
 //   · this runs BEFORE a render, on the shell, in milliseconds. The boot throw costs a browser launch
 //     and arrives from inside one of eight workers.
-//   · it names the FIX per asset — the `curl` / `make capture` / `make photos` line that fetches the
-//     thing — where the engine can only say the file is not there.
+//   · it names the FIX per asset: the `curl` / `make capture` / `make photos` line that fetches the
+//     thing, where the engine can only say the file is not there.
 //   · it covers what no image preloader ever sees: VO and music (`audio.vo`, `audio.music`), lottie,
 //     captured `component` JSON, spectrum sidecars, and `.html` fragment files.
 import fs from 'node:fs';
@@ -37,7 +37,7 @@ const isPathish = (s) => typeof s === 'string' && !/\s/.test(s) && (/^\/?(assets
 const remote = (s) => /^(https?:)?\/\//.test(s) || s.startsWith('data:');
 // a scene resolves an asset path against a few bases (repo root, the scene's own dir); accept any hit.
 // Returns the RESOLVED PATH, not a boolean. It used to return a bare true, which is fine for a
-// yes/no existence test and useless to any caller that then wants to OPEN the file — the keyframe probe
+// yes/no existence test and useless to any caller that then wants to OPEN the file, the keyframe probe
 // below handed `true` to ffprobe and got "true: No such file or directory". Truthy either way, so every
 // existing caller is unchanged.
 const fileFor = (p) => {
@@ -58,7 +58,7 @@ function walk(node, where) {
 if (data.audio) walk(data.audio, 'audio');
 if (data.bg) walk(data.bg, 'bg');
 
-// audio.music may be a NAMED bed ("lofi") resolved by the mixer, not a path — don't treat a bare name as missing.
+// audio.music may be a NAMED bed ("lofi") resolved by the mixer, not a path. Don't treat a bare name as missing.
 const isNamedBed = (where, v) => /audio\.music$/.test(where) && !v.includes('/') && !ASSET_EXT.test(v);
 
 const missing = [], remotes = [], seen = new Set();
@@ -71,11 +71,11 @@ for (const [where, v] of refs) {
 
 // a targeted "how to get it" per missing kind.
 const howto = (v) => {
-  if (/\.(wav|mp3|m4a)$/i.test(v)) return `narration/music — make tts SCRIPT=… OUT=${v.replace(/\.(wav|mp3|m4a)$/i, '')}, or drop the file in place`;
-  if (/assets\/icons\//.test(v)) return `icon/logo — make assets D=${file} WRITE=1 (fills brand logos + UI icons)`;
-  if (/\.html$/i.test(v)) return `hand-authored fragment — write the HTML at this path, then preview it: make preview HTML=${v}`;
-  if (/\.json$/i.test(v)) return `captured component — make capture URL=… SEL=… OUT=${v}`;
-  if (ASSET_EXT.test(v)) return `image — make assets D=${file} WRITE=1, or make capture / make photos`;
+  if (/\.(wav|mp3|m4a)$/i.test(v)) return `narration/music: make tts SCRIPT=… OUT=${v.replace(/\.(wav|mp3|m4a)$/i, '')}, or drop the file in place`;
+  if (/assets\/icons\//.test(v)) return `icon/logo: make assets D=${file} WRITE=1 (fills brand logos + UI icons)`;
+  if (/\.html$/i.test(v)) return `hand-authored fragment, write the HTML at this path, then preview it: make preview HTML=${v}`;
+  if (/\.json$/i.test(v)) return `captured component: make capture URL=… SEL=… OUT=${v}`;
+  if (ASSET_EXT.test(v)) return `image: make assets D=${file} WRITE=1, or make capture / make photos`;
   return `add the file at this path`;
 };
 
@@ -131,7 +131,7 @@ for (const [where, v] of videoRefs) {
   } catch (e) { unprobed.push([v, /ENOENT/.test(String(e && e.message)) ? 'ffprobe is not installed here' : 'ffprobe could not read it']); }
 }
 if (sparse.length) {
-  console.log(`  ${sparse.length} clip(s) with SPARSE KEYFRAMES — a seek lands early and the wrong frame renders, silently:`);
+  console.log(`  ${sparse.length} clip(s) with SPARSE KEYFRAMES. A seek lands early and the wrong frame renders, silently:`);
   for (const [w, v, k, d] of sparse)
     console.log(`    ✗ ${v}  [${w}]  ${k} keyframe(s) in ${d.toFixed(1)}s\n`
       + `        → ffmpeg -i ${v} -c:v libx264 -pix_fmt yuv420p -g 1 -crf 18 <out>.mp4   (all-intra; bigger file, exact seeks)`);
@@ -140,11 +140,11 @@ if (sparse.length) {
 console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${remotes.length} remote · ${fonts.size} typeface(s)`
   + `${videoRefs.length ? ` · ${videoRefs.length - unprobed.length}/${videoRefs.length} clip(s) keyframe-probed` : ''})`);
 if (unprobed.length) {
-  console.log(`  ${unprobed.length} clip(s) NOT checked for sparse keyframes — this is about this machine, not the film:`);
+  console.log(`  ${unprobed.length} clip(s) NOT checked for sparse keyframes. This is about this machine, not the film:`);
   for (const [v, why] of unprobed) console.log(`    ○ ${v}  (${why})`);
 }
 if (missingFonts.length) {
-  console.log(`  ${missingFonts.length} MISSING typeface(s) — every frame will render in a fallback face and NOTHING else will say so:`);
+  console.log(`  ${missingFonts.length} MISSING typeface(s). Every frame will render in a fallback face and NOTHING else will say so:`);
   for (const [u, fam] of missingFonts) console.log(`    ✗ ${u}  (${[...fam].join(', ')})`);
   console.log(`        → make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)`);
 }
@@ -154,7 +154,7 @@ if (!missing.length) {
   console.log(`  ✓ every local asset reference resolves to a file on disk.\n`);
   process.exit(strict ? 1 : 0);
 }
-console.log(`  ${missing.length} MISSING asset(s) — the render will show a broken image / silent gap:`);
+console.log(`  ${missing.length} MISSING asset(s): the render will show a broken image / silent gap:`);
 for (const [w, v] of missing) console.log(`    ✗ ${v}  [${w}]\n        → ${howto(v)}`);
 console.log(strict ? `\n  ✗ asset preflight (strict): fetch these before rendering.\n` : `\n  fetch these before you author around them (make assets D=${file} fills most). Block with --strict.\n`);
 process.exit(strict && (missing.length || missingFonts.length) ? 1 : 0);

@@ -1,6 +1,6 @@
-// scripts/site/blueprints-catalog.mjs — browse the directed-motion BEAT blueprints before authoring.
+// scripts/site/blueprints-catalog.mjs: browse the directed-motion BEAT blueprints before authoring.
 // Introspects blueprints/index.mjs (no render): each beat's name, props it accepts, and what it emits.
-// Token-efficient by design — it's the "reach for a blueprint" priming step (docs/CRAFT/BLUEPRINTS.md).
+// Token-efficient by design: it's the "reach for a blueprint" priming step (docs/CRAFT/BLUEPRINTS.md).
 //   node scripts/site/blueprints-catalog.mjs   ·   make blueprints
 import { pathToFileURL } from 'node:url';
 import { readFileSync } from 'node:fs';
@@ -68,7 +68,7 @@ if (isMain) {
     console.log(`      ask:   "${REQUESTS[name]}"`);
     console.log(`      props: ${propsOf(fn)}\n`);
   }
-  console.log('  A blueprint fixes MOTION + structure, never copy/colour — two brands using one still differ.');
+  console.log('  A blueprint fixes MOTION + structure, never copy/colour. Two brands using one still differ.');
   console.log('  Full doctrine + the reference reel: docs/CRAFT/BLUEPRINTS.md\n');
   
 }

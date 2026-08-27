@@ -1,4 +1,4 @@
-// RETIRED — the sound library is SYNTHESIZED now (`make audio`, core/audio-kit.mjs). This fetcher is
+// RETIRED: the sound library is SYNTHESIZED now (`make audio`, core/audio-kit.mjs). This fetcher is
 // kept only as a record of where the old recorded samples came from; it is wired to no make target.
 // It asked Mixkit for "the Nth ranked result in category X" and saved whatever came back, which is how
 // assets/sfx/click.wav ended up being 19.6 SECONDS of audio and stacking into a drone (MISTAKES #51).
@@ -57,7 +57,7 @@ async function grab(name, cat, idx, pinned) {
   if (!FORCE && fs.existsSync(dest) && fs.statSync(dest).size > 0) return { name, status: 'skip', id: pinned };
   try {
     // candidate ids: the pinned one first, then the category's ranked list from idx onward
-    // (some Mixkit assets 403 at the predictable URL — fall through to the next good one).
+    // (some Mixkit assets 403 at the predictable URL, fall through to the next good one).
     const ranked = await idsFor(cat);
     const cands = [pinned, ...ranked.slice(idx)].filter(Boolean);
     for (const id of cands) {
@@ -75,7 +75,7 @@ async function grab(name, cat, idx, pinned) {
 }
 
 fs.mkdirSync(DEST, { recursive: true });
-const credits = fs.existsSync(CREDITS) ? JSON.parse(fs.readFileSync(CREDITS, 'utf8')) : { license: 'Mixkit Free License — https://mixkit.co/license/#sfxFree', sounds: {} };
+const credits = fs.existsSync(CREDITS) ? JSON.parse(fs.readFileSync(CREDITS, 'utf8')) : { license: 'Mixkit Free License. Https://mixkit.co/license/#sfxFree', sounds: {} };
 const results = [];
 for (const [name, cat, idx] of SFX) results.push(await grab(name, cat, idx, credits.sounds[name]?.id));
 
@@ -83,9 +83,9 @@ let ok = 0, skip = 0, fail = 0;
 for (const r of results) {
   if (r.status === 'ok')   { ok++;   credits.sounds[r.name] = { id: r.id, category: r.cat, source: `https://mixkit.co/free-sound-effects/${r.cat}/` }; console.log(`  ✓ ${r.name}.wav  (${r.kb} KB · mixkit #${r.id})`); }
   if (r.status === 'skip') { skip++; }
-  if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.name} — ${r.why}`); }
+  if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.name}, ${r.why}`); }
 }
 fs.writeFileSync(CREDITS, JSON.stringify(credits, null, 2) + '\n');
-console.log(`sfx: ${ok} downloaded, ${skip} present, ${fail} failed${fail ? '' : ' — library ready'} (Mixkit Free License)`);
+console.log(`sfx: ${ok} downloaded, ${skip} present, ${fail} failed${fail ? '' : '. Library ready'} (Mixkit Free License)`);
 console.log('cues: cuts→whoosh, stings→reveal are auto-placed by the mixer; add {sfx:[{t,name}]} for more.');
 if (fail) process.exit(1);

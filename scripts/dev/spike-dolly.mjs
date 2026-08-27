@@ -1,4 +1,4 @@
-// scripts/dev/spike-dolly.mjs — PHASE 0 SPIKE: can the CAMERA travel past a tilted layer?
+// scripts/dev/spike-dolly.mjs, PHASE 0 SPIKE: can the CAMERA travel past a tilted layer?
 //
 // scripts/dev/spike-3d.mjs settled where the lens goes (`perspective` as a PROPERTY, on the tilted
 // layer's DIRECT parent) and shipped `tilt`. It left the other half open: with the lens on #cam and the
@@ -18,7 +18,7 @@
 //
 // Four questions, each answered by a number rather than a look:
 //   1. does the engine's real CSS survive preserve-3d on #cam? (`will-change: transform` is on it, and
-//      overflow/filter/opacity are the documented flatteners — will-change is not, but assert it.)
+//      overflow/filter/opacity are the documented flatteners, will-change is not, but assert it.)
 //   2. under a TRUCK, does a tilted card's vanishing point move relative to the card? (the flat path
 //      keeps it nailed on: that difference is the whole finding.)
 //   3. does translateZ dolly (scale up) without changing the foreshortening? (a dolly is not a zoom.)
@@ -42,7 +42,7 @@ const card = (rot = `rotate:0 1 0 ${RY}deg;`) => `
     </div>
   </div>`;
 
-// FLAT — exactly what formats/scene/scene.js writes today: lens on #cam (tilt), camera as a 2D
+// FLAT, exactly what formats/scene/scene.js writes today: lens on #cam (tilt), camera as a 2D
 // transform on that same #cam.
 const flat = (camTf) => `
   <div id="root" style="position:absolute;inset:0;overflow:hidden">
@@ -50,7 +50,7 @@ const flat = (camTf) => `
          perspective:${PERSP}px;perspective-origin:${OX}px ${OY}px;transform:${camTf}">${card()}</div>
   </div>`;
 
-// RIG — the construction under test.
+// RIG: the construction under test.
 const rig = (camTf) => `
   <div id="root" style="position:absolute;inset:0;overflow:hidden;
        perspective:${PERSP}px;perspective-origin:${OX}px ${OY}px">
@@ -83,7 +83,7 @@ const cx = (c) => c.reduce((a, p) => a + p.x, 0) / 4;
 // foreshortening: the ratio of the two vertical edges. 1.0 is face-on; the further from 1, the harder
 // the lean reads. Right for a DOLLY and for detecting a flattened context.
 const fore = (c) => Math.abs(c[2].y - c[0].y) / Math.abs(c[3].y - c[1].y);
-// projected width — the measurement a horizontal TRUCK actually moves, and the first draft of this
+// projected width: the measurement a horizontal TRUCK actually moves, and the first draft of this
 // spike used `fore` here and reported a working construction as broken. The projection factor
 // L/(L-z) depends on z ALONE, so an x translation cannot touch the vertical edges: it scales the two
 // corners by their own unequal factors and the card's WIDTH changes. Measure what the move can move.
@@ -94,7 +94,7 @@ const out = [];
 let fail = 0;
 const ok = (name, pass, detail) => { if (!pass) fail++; out.push([name, pass, detail]); };
 
-// 1 · identity — the rig must not move an untouched camera by a single pixel.
+// 1 · identity: the rig must not move an untouched camera by a single pixel.
 {
   const f = await corners(flat('scale(1) translate(0px, 0px)'));
   const r = await corners(rig('translate3d(0px, 0px, 0px) scale(1)'));
@@ -102,7 +102,7 @@ const ok = (name, pass, detail) => { if (!pass) fail++; out.push([name, pass, de
   ok('identity', d < 0.01, `max corner delta ${d.toFixed(4)}px`);
 }
 
-// 2 · TRUCK — pan the camera and ask where the card's vanishing point went RELATIVE TO THE CARD.
+// 2 · TRUCK: pan the camera and ask where the card's vanishing point went RELATIVE TO THE CARD.
 // Flat: the projection is already baked, so the VP rides along and the offset is unchanged.
 // Rig: the eye stays on the frame axis, so the offset must change by a large, visible amount.
 {
@@ -120,7 +120,7 @@ const ok = (name, pass, detail) => { if (!pass) fail++; out.push([name, pass, de
   ok('truck · rig re-foreshortens the card', pct(r0, r1) > 5, `projected width moved ${pct(r0, r1).toFixed(2)}%`);
 }
 
-// 3 · DOLLY — translateZ must magnify by the projective law P/(P-z) and must NOT be a scale():
+// 3 · DOLLY: translateZ must magnify by the projective law P/(P-z) and must NOT be a scale():
 // a scale leaves the lean untouched, a dolly does not.
 {
   const z = 500;
@@ -134,7 +134,7 @@ const ok = (name, pass, detail) => { if (!pass) fail++; out.push([name, pass, de
   ok('dolly · is not the same shot as a scale of equal size', dLean > 0.01, `lean differs by ${dLean.toFixed(4)}`);
 }
 
-// 4 · ROLL — rotateZ on the rig must rotate the frame without flattening the card's lean.
+// 4 · ROLL: rotateZ on the rig must rotate the frame without flattening the card's lean.
 {
   const r0 = await corners(rig('translate3d(0px, 0px, 0px) scale(1)'));
   const rr = await corners(rig('translate3d(0px, 0px, 0px) rotateZ(8deg) scale(1)'));
@@ -157,7 +157,7 @@ console.log('\n  SPIKE · a camera that travels past a tilted card\n');
 for (const [name, pass, detail] of out)
   console.log(`  ${pass ? '✓' : '✗'} ${name.padEnd(58)} ${detail}`);
 console.log(fail === 0
-  ? '\n  ✓ GO — the rig dollies, rolls and reprojects, and an untouched camera is pixel-identical\n'
+  ? '\n  ✓ GO. The rig dollies, rolls and reprojects, and an untouched camera is pixel-identical\n'
     + '    to the flat path. The flat path provably CANNOT move a vanishing point.\n'
-  : `\n  ✗ NO-GO — ${fail} check(s) failed.\n`);
+  : `\n  ✗ NO-GO, ${fail} check(s) failed.\n`);
 process.exit(fail === 0 ? 0 : 1);

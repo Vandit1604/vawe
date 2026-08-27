@@ -1,4 +1,4 @@
-// scripts/lib/designspec-rules.mjs — OUR anti-slop rules. A table we own, not a list we borrow.
+// scripts/lib/designspec-rules.mjs: OUR anti-slop rules. A table we own, not a list we borrow.
 //
 // WHY THIS EXISTS. `make slop` shells out to the vendored impeccable detector (41 rules, Apache-2.0,
 // `.claude/skills/impeccable/`). It is good work and it is not ours, in three ways that cost us:
@@ -6,7 +6,7 @@
 //   1. WE CANNOT FIX IT. The browser path injects `detect-antipatterns-browser.js`, a 4,920-line
 //      GENERATED bundle whose build script is not vendored. It cannot be regenerated here. When the
 //      detector reported 21 false low-contrast findings on the first fragment it was ever shown
-//      (docs/MISTAKES.md #324), the only repair was to hand-edit the generated file — and a skill
+//      (docs/MISTAKES.md #324), the only repair was to hand-edit the generated file, and a skill
 //      update silently reverts it.
 //   2. ITS THRESHOLDS WERE FITTED TO SOMEBODY ELSE'S PAGES. They are calibrated for React landing
 //      pages. A 13-second film carries about eight lines of copy, so a rule that needs three
@@ -93,7 +93,7 @@ export const BUZZ_PHRASES = [
 // it is right and the reasoning is worth carrying over rather than rediscovering.
 const MARKER = /(?<![\w\-/:.])(0[1-9]|1[0-2])(?![\w\-/:.])/g;
 
-// "Not a feature. A platform." — a claim manufactured out of a contrast rather than out of a fact.
+// "Not a feature. A platform.". A claim manufactured out of a contrast rather than out of a fact.
 // The `n` is deliberately either case. The version this came from required a capital, so it saw
 // "Not a template. A canvas." and missed "This is not a template. A canvas.", which is the same line
 // with a run-up. The two-beat shape is what makes it a tell, never where the sentence happens to start:
@@ -137,7 +137,7 @@ export const RULES = [
       for (let i = 1; i < seen.length; i++) if (+seen[i] === +seen[i - 1] + 1) run++;
       return run >= 2 ? `sequence ${seen.slice(0, 6).join(' · ')}` : null;
     },
-    fires: '01 Capture — 02 Compose — 03 Render — the three steps.',
+    fires: '01 Capture (02 Compose) 03 Render, the three steps.',
     clean: 'Shot on 2026-03-01, exported at 12:05, engine v1.02.3.',
   },
   {
@@ -150,7 +150,7 @@ export const RULES = [
     // from. That one waits for THREE constructions, which is right for a landing page and useless for
     // a film: eight lines of copy will never reach three. Here ONE is the signal, because in a film
     // this shape lands on the last beat and IS the ending. `showcase-flight-globe` closes on "Every
-    // vertex computed. Not one drawn." — this rule fires on it, correctly, and the film keeps the line
+    // vertex computed. Not one drawn.". This rule fires on it, correctly, and the film keeps the line
     // with a waiver. That is the intended outcome: the gate makes the author decide, not comply.
     why: 'Manufactured contrast reads as profundity and carries no fact. If the line is true and '
       + 'specific, keep it and waive; if it only sounds good, it is filler in the payoff slot.',
@@ -180,7 +180,7 @@ export const RULES = [
     //
     // Which leaves gradient text, and the port INVERTS there. Upstream calls it "decorative, never
     // meaningful" and bans it. Here it is a first-party effect: `core/type.js:122` implements a
-    // gradient sweep and its own comment sets the dose — "ONE hero word per film". A rule that banned
+    // gradient sweep and its own comment sets the dose, "ONE hero word per film". A rule that banned
     // it would ban a capability we built. So this counts instead, and the engine's comment IS the
     // threshold. Only we could know that, which is the whole argument for owning the table.
     why: 'A gradient sweep reads as the hero moment because it is rare. Two of them in one film is two '
@@ -250,7 +250,7 @@ export const RULES = [
     needs: 'scene',
     // The library's tightest declared tracking is exactly -0.04em, so the floor sits just beyond it:
     // fitted to what we ship, not to a number somebody else picked. `ls` is a documented synonym for
-    // `tracking` (docs/MISTAKES.md), so both are read — reading one and not the other is how a prop
+    // `tracking` (docs/MISTAKES.md), so both are read. Reading one and not the other is how a prop
     // goes silently unchecked here.
     why: 'Past about -0.04em the letters touch and the word stops being read, it is recognised. That is '
       + 'a logo technique, and it is wrong for anything a viewer has to actually read.',
@@ -302,7 +302,7 @@ export const RULES = [
     // DECLARED weights only. core/layers/util.js:76 defaults an undeclared layer to 800 (400 for serif),
     // and reproducing that defaulting rule here would be a second copy of it, going stale invisibly. The
     // subject is the type system the author wrote down, so three declarations is the floor for having
-    // one at all — the same reasoning `flat-type-hierarchy` uses for sizes.
+    // one at all. The same reasoning `flat-type-hierarchy` uses for sizes.
     why: 'Weight contrast has to survive motion, and a frame is on screen for about a second. One step '
       + 'apart on the 400/500/600/700/800 ladder is not a hierarchy, it is the same voice twice. The '
       + 'light and black ends of the face are already loaded and paid for.',
@@ -334,7 +334,7 @@ export const RULES = [
   },
 ];
 
-/** Run every rule over a scene's text UNITS — one per layer, one per fragment file.
+/** Run every rule over a scene's text UNITS: one per layer, one per fragment file.
  *
  *  SCOPE IS PART OF THE RULE, and getting it wrong is not cosmetic. The first census run joined every
  *  unit into one blob, and `aphoristic-cadence` promptly matched a span that began at a "PARIS" chip
@@ -342,8 +342,8 @@ export const RULES = [
  *  anywhere reported one. A rule reading across a boundary its subject does not have will invent
  *  findings, which is the failure this whole file exists to stop doing.
  *
- *  `unit` — the tell lives inside one piece of copy. Never let it span two.
- *  `document` — the tell IS the relationship between pieces (01 / 02 / 03 across three layers).
+ *  `unit`: the tell lives inside one piece of copy. Never let it span two.
+ *  `document`: the tell IS the relationship between pieces (01 / 02 / 03 across three layers).
  *
  *  No DOM, no globals, and every `test` is a pure function of what it is handed. That is what makes the
  *  self-test meaningful. The one exception is stated where it happens: FACE_WEIGHT_AXES and THEME_SANS

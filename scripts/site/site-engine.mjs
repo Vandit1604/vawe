@@ -1,4 +1,4 @@
-// site-engine.mjs — vendor the RENDER ENGINE into the marketing site so scenes play in the browser.
+// site-engine.mjs: vendor the RENDER ENGINE into the marketing site so scenes play in the browser.
 //
 // The engine is already a web page: the Go renderer just serves the repo over HTTP and navigates to
 // `formats/scene/scene.html?data=<url>&fps=30` (internal/scene/scene.go). Nothing in core/ imports
@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PUB = path.join(root, 'site', 'public');
 
-// [from, to] — relative to repo root / site/public
+// [from, to]: relative to repo root / site/public
 const COPY = [
   ['core', 'core'],                                   // the engine itself (216K, zero node imports)
   ['themes', 'themes'],                               // boot.js fetches /themes/<name>.json
@@ -78,11 +78,11 @@ for (const [src, dst] of FILES) put(path.join(root, src), path.join(PUB, dst));
 // assets/brands is 59M of section shots and lookbooks and stays out, but the scenes the editor can
 // load reach into it for a handful of real marks: preface's agent logos, argus's mascot, linear's
 // icon. 144K of the 59M. They were not shipped, so every one 404'd in production the moment the
-// editor could load a film — invisible locally, where the whole 59M is on disk.
+// editor could load a film, invisible locally, where the whole 59M is on disk.
 //
 // Derived, never listed: this reads the scenes and ships exactly what they name, so adding a scene
 // that reaches for a new asset cannot silently 404 again. A missing one FAILS THE BUILD, because
-// the alternative is what already happened — finding out from the browser console in production.
+// the alternative is what already happened, finding out from the browser console in production.
 const sceneDir = path.join(PUB, 'scenes');
 const wanted = new Set();
 if (fs.existsSync(sceneDir)) {
@@ -157,5 +157,5 @@ if (missing.length || unshippable.length || uncopied.length) {
   process.exit(1);
 }
 
-if (DRY) console.log(drift ? `\n~ ${drift} file(s) drifted — run without --check` : '\n✓ site engine in sync');
+if (DRY) console.log(drift ? `\n~ ${drift} file(s) drifted, run without --check` : '\n✓ site engine in sync');
 else console.log(`✓ engine → site/public  (${copied} file(s), ${(bytes / 1024) | 0}KB)`);

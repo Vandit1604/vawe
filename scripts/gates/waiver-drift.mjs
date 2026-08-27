@@ -1,4 +1,4 @@
-// scripts/gates/waiver-drift.mjs — IS THIS WAIVER A DECISION, OR A HABIT?
+// scripts/gates/waiver-drift.mjs: IS THIS WAIVER A DECISION, OR A HABIT?
 //
 // Every blocking gate here can be waived with {"authoring":{"allow":["code"]}} and a `_why`. That is
 // correct: a rule worth having is worth breaking deliberately, and forcing an author to argue for the
@@ -60,7 +60,7 @@ for (const f of pop.names) {
 // who reads a scene file believes a rule is being dodged that nothing has enforced for months.
 // Retired: `visual-vocabulary`'s three codes. It measured a single-axis layer by squaring it, so a
 // 590x18 underline scored as 590x590 and bought a pass off the exact defect the gate existed to catch;
-// it was also waived by a quarter of the library. Deleted rather than fixed — docs/TASTE.md says why.
+// it was also waived by a quarter of the library. Deleted rather than fixed, docs/TASTE.md says why.
 const RETIRED = new Map([
   ['no-visual-vocabulary', 'visual-vocabulary, deleted (its size measurement was wrong)'],
   ['graphics-thin', 'visual-vocabulary, deleted (its size measurement was wrong)'],
@@ -87,19 +87,19 @@ if (file) {
   }
   for (const c of mine) {
     if (RETIRED.has(c)) {
-      console.log(`  ✗ ${c} — DEAD WAIVER: no gate emits this code any more (${RETIRED.get(c)}).`);
+      console.log(`  ✗ ${c}, DEAD WAIVER: no gate emits this code any more (${RETIRED.get(c)}).`);
       console.log(`      Delete it from "authoring.allow" (and its \`_why\`). It excuses nothing.`);
       continue;
     }
     const others = (tally.get(c) || []).filter((n) => n !== name);
     const pct = Math.round(share(c) * 100);
-    if (!others.length) { console.log(`  ✓ ${c} — waived here and nowhere else. That is a decision.`); continue; }
+    if (!others.length) { console.log(`  ✓ ${c}: waived here and nowhere else. That is a decision.`); continue; }
     const why = d.authoring?._why?.[c];
-    const line = `${c} — also waived by ${others.length} other film(s) (${pct}% of the library): ${others.slice(0, 6).join(', ')}${others.length > 6 ? ', …' : ''}`;
+    const line = `${c}: also waived by ${others.length} other film(s) (${pct}% of the library): ${others.slice(0, 6).join(', ')}${others.length > 6 ? ', …' : ''}`;
     if (share(c) >= DRIFT) {
       console.log(`  ~ ${line}`);
       console.log(`      At this share the rule is effectively repealed and nothing recorded that decision.`);
-      console.log(`      Either fix the films, or change the gate honestly — but stop paying the toll.`);
+      console.log(`      Either fix the films, or change the gate honestly, but stop paying the toll.`);
     } else {
       console.log(`  · ${line}`);
     }
@@ -131,7 +131,7 @@ if (ratcheted.length) {
   console.log(`    status and must comply. Census: make legacy\n`);
 }
 if (dead.length) {
-  console.log(`  ✗ DEAD WAIVERS — no gate emits these codes any more, so they excuse nothing:\n`);
+  console.log(`  ✗ DEAD WAIVERS: no gate emits these codes any more, so they excuse nothing:\n`);
   for (const [c, films] of dead) console.log(`      ${c.padEnd(28)} ${films.length} film(s): ${films.slice(0, 6).join(', ')}${films.length > 6 ? ', …' : ''}`);
   console.log(`      (${[...new Set(dead.map(([c]) => RETIRED.get(c)))].join('; ')})\n`);
 }

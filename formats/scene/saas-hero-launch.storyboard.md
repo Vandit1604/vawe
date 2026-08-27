@@ -2,12 +2,12 @@
 message: "A white-first SaaS launch film you can refill: swap the copy, swap the theme, keep the cut."
 audience: "Anyone forking this engine who needs a launch film and has no film to copy."
 arc: "hook → proof → demo → reverse → number → capability → CTA"
-framework: "FAB — feature, advantage, benefit. Chosen because a launch film for a fictional product has no pain to agitate; it has a claim, a demonstration and a number."
+framework: "FAB, feature, advantage, benefit. Chosen because a launch film for a fictional product has no pain to agitate; it has a claim, a demonstration and a number."
 threads: "a motif (the accent-lit field never leaves, and it flinches on every cut, so the whole world feels the edit) + a match cut (the one rollout row becomes the count of 4.8 million of them) + a bookend (the hero CTA button returns as the end card CTA)"
 format: 1920x1080
-theme: "themes/default.json — swap this one field to reskin the whole film"
+theme: "themes/default.json, swap this one field to reskin the whole film"
 duration: 35s
-pace: "explainer, 5s per shot — seven shots over 36s, six cuts, one backdrop window each"
+pace: "explainer, 5s per shot. Seven shots over 36s, six cuts, one backdrop window each"
 spectacle: "shot 5 · the match cut at 20.0s · the rollout row that says done is REPLACED, in its own pose, by a 176px figure counting to 4.8M. One rollout becomes four point eight million of them, with no entrance and no exit, and the accent field lifts under it. Every other shot holds one idea at one volume."
 not: "no stock photography, no captured third-party UI, no real company logos, no narration, no hardcoded hex, and no shot longer than six seconds."
 ---
@@ -100,7 +100,7 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - why: land the scale the demo implied, on the frame where the form changes
 - emotion: inevitability
 - duration: 5.4s
-- transition_in: hard cut (none — the match IS the transition)
+- transition_in: hard cut (none, the match IS the transition)
 - backdrop: accentPlain
 
 ## Beat 6: Capability (25.4s-30s)

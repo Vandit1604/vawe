@@ -1,4 +1,4 @@
-// scripts/site/registry.mjs — GENERATED, never hand-edited. `make registry` writes registry/;
+// scripts/site/registry.mjs: GENERATED, never hand-edited. `make registry` writes registry/;
 // `make registry CHECK=1` fails if what is on disk differs from what the sources say. Edit a row in
 // blocks/catalog.mjs (or a beat in blueprints/index.mjs) and re-run; editing registry/ by hand is
 // undone by the next run.
@@ -8,7 +8,7 @@
 // contract. This emits the shadcn/another engine registry shape over the data we already keep, so an
 // agent can fetch an index, pick an item by name and tags, and know exactly what to write where.
 //
-// SOURCES (one each — nothing here is re-derived and nothing is hand-typed):
+// SOURCES (one each. Nothing here is re-derived and nothing is hand-typed):
 //   blocks/catalog.mjs          name · family · blurb · props · overlay      (the block manifest)
 //   blueprints/index.mjs        BEATS + REQUESTS                              (the beat registry)
 //   site/lib/block-frames.json  the measured ink rect of each block           (make blocks-scenes)
@@ -24,15 +24,15 @@
 // So "install" here has two honest meanings, and the item carries both:
 //
 //   install.layer   THE PRIMARY PAYLOAD. A ready-to-paste scene-layer object, complete with example
-//                   props and placeholder x/y/start/dur. `install.target` is "layers[]" — an ARRAY
+//                   props and placeholder x/y/start/dur. `install.target` is "layers[]", an ARRAY
 //                   POSITION in the consumer's scene JSON, not a path on their disk. That is the real
 //                   unit of installation for this engine, and it is why `files` alone could not
 //                   express it. Requires the consumer to have the vawe engine (the factory runs at
 //                   expand time).
 //
 //   files[]         THE FALLBACK, for a consumer who does NOT have our block library. The scene at
-//                   site/public/assets/blocks/<name>.json is ALREADY EXPANDED — it holds concrete
-//                   layer primitives, no factory reference — so it renders in any vawe checkout as-is.
+//                   site/public/assets/blocks/<name>.json is ALREADY EXPANDED, it holds concrete
+//                   layer primitives, no factory reference, so it renders in any vawe checkout as-is.
 //                   `target` is a real path there: formats/scene/<name>.json.
 //
 // We INDEX that artifact, we do not copy it: `source` is its repo path and `url` is where the site
@@ -212,7 +212,7 @@ if (CHECK) {
   }
   for (const rel of have) if (!want.has(rel)) bad.push(`orphan  ${rel}`);
   if (bad.length) {
-    console.error(`registry is STALE (${bad.length} file(s)) — run \`make registry\`:`);
+    console.error(`registry is STALE (${bad.length} file(s)), run \`make registry\`:`);
     for (const b of bad.slice(0, 20)) console.error('  ' + b);
     process.exit(1);
   }

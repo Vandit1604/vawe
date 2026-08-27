@@ -1,10 +1,10 @@
-// scripts/sim/run.mjs — bake a stateful simulation to a deterministic PNG frame sequence.
+// scripts/sim/run.mjs: bake a stateful simulation to a deterministic PNG frame sequence.
 //
 //   node scripts/sim/run.mjs sims/ember-burst.mjs            (dry run: report, write nothing)
 //   node scripts/sim/run.mjs sims/ember-burst.mjs --write     (bake → assets/baked/ember-burst/)
 //   make sim D=sims/ember-burst.mjs WRITE=1
 //
-// WHY THIS EXISTS. `renderFrame(n)` is a pure function of n — eight workers, arbitrary order,
+// WHY THIS EXISTS. `renderFrame(n)` is a pure function of n, eight workers, arbitrary order,
 // byte-identical output. A simulation is the exact opposite: frame 412 exists only because 411 ran
 // first. So the simulation runs HERE, offline, in order, once, and emits frames; the scene plays
 // them back through the existing `clip` layer. Non-determinism is confined to bake time.
@@ -128,6 +128,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`   → ${path.relative(repoRoot, r.outDir)}/  (manifest.json + meta.json + f0001..f${pad(r.meta.count)}.png)`);
     console.log(`   play it:  { "type": "clip", "src": "/assets/baked/${r.name}/manifest.json", "x": 90, "y": 300, "w": 900, "start": 0, "duration": ${(r.meta.count / r.meta.fps).toFixed(2)} }`);
   } else {
-    console.log('   DRY RUN — nothing written. Add WRITE=1 (or --write) to bake.');
+    console.log('   DRY RUN: nothing written. Add WRITE=1 (or --write) to bake.');
   }
 }

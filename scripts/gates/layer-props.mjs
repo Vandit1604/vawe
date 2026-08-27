@@ -1,10 +1,10 @@
-// layer-props.mjs — does the engine READ the props a layer sets, and will it read them on THIS layer?
+// layer-props.mjs: does the engine READ the props a layer sets, and will it read them on THIS layer?
 //
 //   node scripts/gates/layer-props.mjs [scene.json ...]   ·   make layer-props
 //
 // `make expand` warns when a BLOCK is handed a prop its factory does not accept (MISTAKES #60).
 // Nothing did the equivalent for a raw layer, so `{"type":"glow","r":620,"opacity":0.5}` was accepted
-// and silently dropped — `core/layers/glow.js` sizes from w/h and takes color+intensity, and neither
+// and silently dropped, `core/layers/glow.js` sizes from w/h and takes color+intensity, and neither
 // `r` nor that `opacity` is a prop it reads. That is the single most expensive bug class in this repo.
 //
 // THE ANSWER IS DECLARED, NOT FOUND. This gate used to regex the engine's source for `L.<prop>` over a
@@ -16,7 +16,7 @@
 // that reads a layer prop now says so beside the read; this is a set difference against those statements.
 // The declaration contract is core/props.js.
 //
-// AND THE GUARD IS HALF THE ANSWER. Six props fire only behind another — `preset` needs a split, `dist`
+// AND THE GUARD IS HALF THE ANSWER. Six props fire only behind another, `preset` needs a split, `dist`
 // needs a `cut` or a split, `motionBlur` needs a `motion` track. A layer that sets one without its
 // enabler renders exactly as if the prop were absent, which is the very thing this gate exists to name,
 // and the scanner could not express it at all: it called them live and shouted about the ones that work.
@@ -92,7 +92,7 @@ for (const rel of targets) {
           console.log(`       ${t} reads: ${Object.keys(LAYER_PROPS[t]).sort().slice(0, 14).join(', ')}${Object.keys(LAYER_PROPS[t]).length > 14 ? ', …' : ''}`);
         } else {
           inert++;
-          console.log(`   ✗ ${at}: \`${k}\` is read only when the layer sets ${v.guards.map((g) => `\`${g}\``).join(' or ')} — it does not, so \`${k}\` does nothing.`);
+          console.log(`   ✗ ${at}: \`${k}\` is read only when the layer sets ${v.guards.map((g) => `\`${g}\``).join(' or ')}. It does not, so \`${k}\` does nothing.`);
         }
       }
       if (L.children) walk(L.children, `${where}[${i}].children`);

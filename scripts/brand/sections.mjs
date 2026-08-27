@@ -1,7 +1,7 @@
-// sections.mjs — inventory a page as SECTIONS so nothing gets ignored. Where lookbook.mjs gives you
+// sections.mjs: inventory a page as SECTIONS so nothing gets ignored. Where lookbook.mjs gives you
 // a few scroll shots to study, this enumerates every major block on the page, screenshots each one on
 // its own, and writes a manifest with a STABLE selector + a ready-to-paste capture command per block.
-// The point is the doctrine flip: don't rewrite the site by hand — capture its real sections (real
+// The point is the doctrine flip: don't rewrite the site by hand, capture its real sections (real
 // assets, real taste) and re-animate them. This tool tells you exactly what's there and how to grab it.
 //
 //   node scripts/brand/sections.mjs <url> <brand>     →  assets/brands/<brand>/sections/NN-*.png + sections.json
@@ -23,7 +23,7 @@ const [VW, VH] = flag('--viewport', '1512x950').split('x').map(Number);
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'sections');
 // Clear the directory first. Section names come from their headings, so a re-crawl of a changed page
-// writes DIFFERENT filenames and the old shots survive beside the new ones — `palette` then eyedrops a
+// writes DIFFERENT filenames and the old shots survive beside the new ones, `palette` then eyedrops a
 // mix of two crawls and the storyboard shows sections that are no longer on the site.
 if (fs.existsSync(dir)) for (const f of fs.readdirSync(dir)) if (/\.(png|json)$/.test(f)) fs.rmSync(path.join(dir, f));
 fs.mkdirSync(dir, { recursive: true });
@@ -32,13 +32,13 @@ const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] 
 const page = await browser.newPage();
 // A real browser's User-Agent, because a growing number of marketing sites CONTENT-NEGOTIATE on it and
 // serve automated clients something else entirely. ramp.com answers puppeteer's default (which says
-// "HeadlessChrome") with a markdown "Machine Version" written for AI agents — no <section> tags, no
+// "HeadlessChrome") with a markdown "Machine Version" written for AI agents, no <section> tags, no
 // layout, no product UI, and therefore nothing to reflect. With this line it serves the real page: 8
 // sections instead of 0. Reflecting a brand means capturing what a PERSON sees (docs/MISTAKES.md #201).
 await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36');
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 2 });
 try { await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }); }
-catch (e) { console.error(`  · networkidle timed out (${e.message}) — retrying with domcontentloaded`); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 }); }
+catch (e) { console.error(`  · networkidle timed out (${e.message}), retrying with domcontentloaded`); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 }); }
 // clear newsletter modals / cookie walls / chat bubbles BEFORE measuring, or every section shot is
 // taken through them and every capture command below inherits the same furniture.
 await dismissOverlays(page);
@@ -96,9 +96,9 @@ const found = await page.evaluate((VW) => {
     const hasCanvasGl = !!el.querySelector('canvas, video, [style*="webgl"], iframe');
     const imgs = el.querySelectorAll('img, svg').length;
     const kind = hasCanvasGl ? 'canvas' : imgs >= 3 ? 'rich' : 'text';
-    const note = hasCanvasGl ? 'canvas/video — capture as clipped screenshot image layer + ken, DOM capture will miss it'
-      : imgs >= 3 ? 'image-rich — capture-component keeps its real assets; animate as one component'
-      : 'mostly text — capture-component, then overlay our own type layer to re-type the copy';
+    const note = hasCanvasGl ? 'canvas/video, capture as clipped screenshot image layer + ken, DOM capture will miss it'
+      : imgs >= 3 ? 'image-rich, capture-component keeps its real assets; animate as one component'
+      : 'mostly text, capture-component, then overlay our own type layer to re-type the copy';
     // `label` is sliced to 28 chars because it names a FILE. `title` is the heading as the site actually
     // wrote it, kept because a question that quotes the site back cannot quote a filename: the label for
     // "Move work forward across teams and agents" truncates to "move-work-forward-across-tea", and asking
@@ -122,7 +122,7 @@ for (let i = 0; i < found.length; i++) {
     await page.screenshot({ path: file, captureBeyondViewport: true, clip: { x: Math.max(0, clip.x), y: Math.max(0, clip.y), width: Math.min(clip.w, VW), height: Math.min(clip.h, 4000) } });
   } catch (e) { console.warn(`  ⚠ shot failed for ${s.label}: ${e.message}`); continue; }
   const capture = s.kind === 'canvas'
-    ? `# canvas — screenshot ${path.relative(ROOT, file)} into a clipped image layer (ken burns)`
+    ? `# canvas, screenshot ${path.relative(ROOT, file)} into a clipped image layer (ken burns)`
     : `make capture URL="${url}" SEL='${s.sel}' NAME=${brand} LABEL=${s.label.replace(/-/g, '') || 'sec' + (i + 1)}`;
   manifest.push({ i: i + 1, label: s.label, title: s.title, sel: s.sel, x: s.x, y: s.y, w: s.w, h: s.h, kind: s.kind, note: s.note, shot: path.relative(ROOT, file), capture });
 }
@@ -137,9 +137,9 @@ if (!manifest.length) {
   console.error(`✗ 0 sections found at ${url}`);
   console.error('  The page rendered but nothing matched. Usually one of:');
   console.error('   · the site served a non-HTML version (some sites answer automated clients with a');
-  console.error('     markdown "machine" page — check by opening the URL in a real browser and comparing)');
+  console.error('     markdown "machine" page: check by opening the URL in a real browser and comparing)');
   console.error('   · the content is behind a consent wall or bot check that did not clear');
-  console.error('   · the layout uses no <section>/landmark elements — try --viewport, or target a subpage');
+  console.error('   · the layout uses no <section>/landmark elements, try --viewport, or target a subpage');
   process.exit(1);
 }
 console.log(`✓ ${manifest.length} sections → ${path.relative(ROOT, dir)}/  (NN-*.png + sections.json)`);

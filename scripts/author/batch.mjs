@@ -1,4 +1,4 @@
-// scripts/author/batch.mjs — DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered
+// scripts/author/batch.mjs: DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered
 // videos. Deterministic per row. `{{key}}` placeholders in any string field are substituted from each
 // row; `expand-blocks` runs automatically so templates can use {type:"block"} layers.
 //

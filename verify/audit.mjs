@@ -1,16 +1,16 @@
-// verify/audit.mjs — layout audit: catches what eyes catch but checklists miss.
+// verify/audit.mjs, layout audit: catches what eyes catch but checklists miss.
 // Renders each format's sample headless across sampled frames and flags, on [data-layer="critical"]:
-//   • overlap   — two TEXT inks intersect (any size, not just critical)  (HARD fail)
-//   • overflow  — text clipped (scrollW/H > clientW/H)    (HARD fail)
-//   • safe-zone — element outside the SAFE box            (HARD fail)
-//   • caption-band — content inside the strip a burnt-in caption will be painted into, on a film that
+//   • overlap: two TEXT inks intersect (any size, not just critical)  (HARD fail)
+//   • overflow, text clipped (scrollW/H > clientW/H)    (HARD fail)
+//   • safe-zone, element outside the SAFE box            (HARD fail)
+//   • caption-band, content inside the strip a burnt-in caption will be painted into, on a film that
 //                 declares captions (core/safe.js captionBand)     (warn)
-//   • contrast  — text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
+//   • contrast, text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
 //                 (blue-on-blue); widened to any ≥60px headline text  (HARD on critical, else warn)
-//   • buried    — >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
-//   • thin-hero — a LANDSCAPE hero line's ink fills <55% of frame width, and nothing else on the
+//   • buried, >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
+//   • thin-hero. A LANDSCAPE hero line's ink fills <55% of frame width, and nothing else on the
 //                 frame reaches out past it (a split frame is exempt)     (warn)
-//   • tight     — sibling boxes closer than MIN_GAP px    (warn)
+//   • tight, sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
 //   node verify/audit.mjs [format ...]      (default: all)   ·   make audit
 //   node verify/audit.mjs <scene.json> --hero    thin-hero alone, no screenshots, exit 0. This is the
@@ -71,16 +71,16 @@ if (aspectAt !== -1) {
 const askedAspects = aspectArg === 'all' ? Object.keys(ASPECTS)
   : aspectArg ? aspectArg.split(',').map((s) => s.trim()).filter(Boolean) : [''];
 const badAspect = askedAspects.find((a) => a && !ASPECTS[a]);
-if (badAspect) { console.error(`unknown aspect "${badAspect}" — known: ${Object.keys(ASPECTS).join(', ')}, or "all"`); process.exit(2); }
+if (badAspect) { console.error(`unknown aspect "${badAspect}", known: ${Object.keys(ASPECTS).join(', ')}, or "all"`); process.exit(2); }
 
 const modules = argv.length ? argv
   : fs.readdirSync(formatsDir).filter((d) => fs.existsSync(path.join(formatsDir, d, 'scene.html')));
 
-// The canvas this audit runs at comes from core/safe.js, alongside the safe box it feeds — same
+// The canvas this audit runs at comes from core/safe.js, alongside the safe box it feeds, same
 // reason the safe box lives there. An explicit --aspect wins; else the scene's own `aspect`.
 const dimsFor = (key, cfg) => sceneDims(cfg, key);
 
-// The safe box comes from core/safe.js — the SAME function boot.js places against and writes to
+// The safe box comes from core/safe.js: the SAME function boot.js places against and writes to
 // --safe-* for the debug overlay. This file used to carry its own tables (a portrait box, a landscape
 // box, and a proportional fallback for everything else), which is how the checker ended up rejecting
 // content the engine's own `pin:"bottom"` had just placed. A gate that disagrees with the thing it
@@ -117,7 +117,7 @@ const capBandFor = (vw, vh, cfg) => {
 function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   window.__engine.renderFrame(n);
   const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentElement) { const s = getComputedStyle(p); if (s.visibility === 'hidden' || +s.opacity <= 0.05) return false; } return true; };
-  // effOpacity — the product of every opacity down the paint tree, which is what the VIEWER sees.
+  // effOpacity: the product of every opacity down the paint tree, which is what the VIEWER sees.
   // A judgement about how something LOOKS is only a judgement once the thing has ARRIVED. The
   // weak-headline check knew this and said so ("mid-fade is motion, not a verdict"), but it read the
   // element's OWN opacity, and in a captured component or any grouped beat the fade lives on an
@@ -128,7 +128,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // docs/MISTAKES.md #376.
   const effOpacity = (el) => { let a = 1; for (let p = el; p && p !== document.body; p = p.parentElement) a *= (+getComputedStyle(p).opacity || 0); return a; };
   const ARRIVED = 0.85;
-  // OVERLAP looked only at [data-layer="critical"] — text >=60px — so a headline that WRAPPED onto a
+  // OVERLAP looked only at [data-layer="critical"] (text >=60px) so a headline that WRAPPED onto a
   // second line and landed on the small mono caption beneath it was never compared with it. Measured
   // on the reproduction: the headline occupied y 400-681 and the caption sat at 500-525, entirely
   // inside it, and the audit said 0 hard (docs/MISTAKES.md #77).
@@ -157,10 +157,10 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     }
     return false;
   };
-  // `data-ink="off"` — TEXT THAT IS IN THE DOM ON PURPOSE AND IS NEVER ON SCREEN. `wordSlot`
+  // `data-ink="off"`: TEXT THAT IS IN THE DOM ON PURPOSE AND IS NEVER ON SCREEN. `wordSlot`
   // (core/fx/word-slot.js) stacks every candidate word in ONE grid cell, because that is what sizes the
   // slot to the widest of them, and shows one at a time. So `textContent` read
-  // "docsdashboardschangelogs" — a string no frame ever paints — and contrast, weak-headline and
+  // "docsdashboardschangelogs" (a string no frame ever paints) and contrast, weak-headline and
   // clipped-text each graded a film against it. Same rule as the `style, script` reject beside it and
   // the same lesson as #214: what is in the DOM is not what is painted.
   //
@@ -185,8 +185,8 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // check below then reports that as "the box is cutting the content", which is one reading of two.
   // The other is a WINDOW: an `overflow:hidden` box with an out-of-flow child deliberately parked or
   // slid past its edge, which is how every reveal, tab strip, marquee and carousel is built. The
-  // `tabBar.switch` block is exactly that — a 158px window over a 488px strip translated by `var(--p)`
-  // — and it HARD-FAILED clipped-text on every frame where the strip happened to sit at translate 0,
+  // `tabBar.switch` block is exactly that. A 158px window over a 488px strip translated by `var(--p)`,
+  // and it HARD-FAILED clipped-text on every frame where the strip happened to sit at translate 0,
   // reporting "329px too narrow for the glyphs" about a mask doing its job.
   // The two cases are told apart structurally, not by size: the defect (#35, a riseClip mask shorter
   // than the descenders; #43, a component whose captured box is too small) is IN-FLOW content that did
@@ -210,7 +210,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // centred text leaves half that slack on each side. Measuring the container flags empty air as
   // off-frame and pushes the author to shrink `w` until the BOX fits, which is tuning a number against
   // the tightest ratio, not fixing a layout. So when a layer paints no box of its own (no background,
-  // border, or shadow), measure the ink instead — a Range over its contents hugs the real line boxes.
+  // border, or shadow), measure the ink instead. A Range over its contents hugs the real line boxes.
   // Anything that paints (cards, rects, images) keeps its border box, because there the box IS visible.
   const paintsBox = (s) => {
     const bg = s.backgroundColor || '';
@@ -268,8 +268,8 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     return { left, top, right, bottom, width: right - left, height: bottom - top, geometry: true };
   };
   // THE INK MAY ONLY EVER SHRINK THE BORDER BOX. This clamp is the whole contract of an ink rect:
-  // ink exists to stop measuring empty space, so a rect it returns that is BIGGER than — or somewhere
-  // else entirely from — the element's own box is not ink, it is a broken measurement, and the honest
+  // ink exists to stop measuring empty space, so a rect it returns that is BIGGER than, or somewhere
+  // else entirely from. The element's own box is not ink, it is a broken measurement, and the honest
   // answer there is the border box. It used to live at ONE call site (the safe-zone walk), where #211
   // added it after an unclamped svg bound turned showcase-cuts from 0 hard failures into 7. `buried`
   // read the same helper unclamped and inherited the identical bug (docs/MISTAKES.md #211/#214/#216/
@@ -278,7 +278,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   //
   // What it catches here: getScreenCTM() is NOT composed through a 3D rig. The engine promotes #cam to
   // `perspective` + `preserve-3d` for any camera z/tilt move, and from then on an inline <svg> inside a
-  // layer reports a screen CTM that is neither the layer's scale nor its position — playhead's tick svg
+  // layer reports a screen CTM that is neither the layer's scale nor its position, playhead's tick svg
   // sits at (408,898,288x73) and its CTM maps the same paths to (150,341,123x29), a rect on the far side
   // of the frame. Unclamped, `buried` then sampled 81 points over a region the layer does not occupy,
   // found the white card that really is painted there, and reported the headline 100% buried.
@@ -324,14 +324,14 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // layer MUST declare a `w`, and that `w` is a wrapping width: the glyphs that land inside it are
     // usually far narrower and, with `align:"left"`, sit against one edge with the rest empty. Two
     // layers whose declared boxes intersect over that empty slack are not touching on screen, and the
-    // check reported them as a collision — a finding about the JSON, not about the film. Reproduced
+    // check reported them as a collision. A finding about the JSON, not about the film. Reproduced
     // with a 1200px-wide layer reading "Hi": a hard `overlap 400x50px` against a neighbour 700px away.
     // The ink rect is clamped inside the border box (see clampToBox), so this can only ever SHRINK a
     // measured box and therefore can only ever remove a finding, never invent one.
     const ink = !paintsBox(s) && inkRect(el);
     const b1 = ink || b0;
     // A text element's BOX includes line-height leading; its INK does not. `statBig` tucks its label
-    // under the number's box on purpose and the two never touch visually — comparing raw boxes called
+    // under the number's box on purpose and the two never touch visually, comparing raw boxes called
     // that a collision. Inset each text box by ~16% of its font size top and bottom, which is about
     // the gap between the em box and the cap-to-descender ink, so the check compares what is SEEN.
     const fs = parseFloat(s.fontSize) || 0;
@@ -346,12 +346,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   });
   const issues = [];
   // A layer mid enter-animation (or a moving `out` exit) is intentionally off-position, so its box
-  // isn't a real safe-zone breach — only flag safe when the layer is at rest. Default exits fade in
+  // isn't a real safe-zone breach, only flag safe when the layer is at rest. Default exits fade in
   // place (no movement), so those still get checked. Timing comes from the render's data-* attrs.
   const FPS = (window.__engine && window.__engine.meta && window.__engine.meta.fps) || 30;
   const tNow = n / FPS;
   // A SCENE CUT displaces the whole camera for the length of its window, so during one every layer
-  // is legitimately off its mark — including outside the safe box. midMove() understands per-layer
+  // is legitimately off its mark, including outside the safe box. midMove() understands per-layer
   // entrances but knew nothing about cuts, because until recently the cuts array rendered nothing at
   // all (MISTAKES #29); the moment it did, a cut mid-flight read as 15 safe-zone violations.
   const inCut = (CUTS || []).some((c) => Math.abs(tNow - c.t) < c.half + 0.02);
@@ -359,7 +359,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // `ry` or `roll` (or a layer tilts), the engine promotes #cam into a preserve-3d rig, and from then
   // on getBoundingClientRect returns the AABB of a PROJECTED QUAD, not the shape. A 700px hairline
   // rolled 3 degrees reports a box 80px tall; two file lines sitting a comfortable 88px apart report
-  // boxes that intersect. Neither is on screen — the ink never touches — but the overlap/tight pair
+  // boxes that intersect. Neither is on screen (the ink never touches) but the overlap/tight pair
   // loop compares those AABBs and calls it a collision. So it manufactures findings on exactly the
   // frames a film is doing its most deliberate camera work, and the only way to clear one is to
   // spread the layout until the OVER-BOUNDS stop touching, which makes the film worse to satisfy a
@@ -413,13 +413,13 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // TRAVELLING. midMove knew only about the enter/exit RAMPS, because those are the only timings the
   // DOM records. A layer carrying a hand-keyed `motion` track leaves no trace on its element at all, so
   // a layer crossing the frame on a keyed track read as SETTLED and every frame of its journey was
-  // graded as if it were parked — a prompt panel keyed `y: 0 → -572` on its way off the top reported
+  // graded as if it were parked. A prompt panel keyed `y: 0 → -572` on its way off the top reported
   // as content leaving the safe area, which is the shot the film is there to show. Six of the eight
   // scenes that failed a frame-bounds measurement failed for exactly this.
   //
   // Do not re-derive it from the JSON. The scene file cannot be mapped onto the DOM here: `sceneUnits`
   // reparents top-level layers into per-beat wrappers, so document order is not authoring order, and no
-  // layer element carries its authored id. ASK THE RENDER instead — renderFrame(n) is pure in n
+  // layer element carries its authored id. ASK THE RENDER instead, renderFrame(n) is pure in n
   // (core/boot.js), so stepping to the next frame, measuring, and stepping back leaves the page exactly
   // where it was. One definition of "moving", covering `motion`, motionPath, gsap and ken alike: the box
   // is not where it is 0.1s either side of here.
@@ -428,9 +428,9 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // A keyed track is a chain of eased segments, and the lead-in of one is arbitrarily slow: higgsfield's
   // button opens `x: 1132 → 1102` over 0.45s, so at the third frame of a 700px journey across the frame
   // it is moving 0.07px per frame and a per-frame test calls it parked. Asking where it is 3 frames out
-  // asks the question the check actually needs — is this box where it is going to stay — instead of the
+  // asks the question the check actually needs (is this box where it is going to stay) instead of the
   // instantaneous velocity, which is a property of the easing and not of the shot.
-  const MOVE_PX = 3;    // >3px across 0.1s ≈ >30px/s — travel, not an ambient hold
+  const MOVE_PX = 3;    // >3px across 0.1s ≈ >30px/s, travel, not an ambient hold
   const MOVE_F = 3;
   const travelling = (() => {
     const els = [...document.querySelectorAll('.hs-layer')];
@@ -463,7 +463,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // off-frame or gets clipped is always a bug regardless of the layer's role (a corner watermark counts).
   // Overlap/tight stay critical-scoped below, because layered overlaps are frequently intentional.
   //
-  // The safe box governs LEGIBLE CONTENT — text the viewer must read, imagery they must recognise.
+  // The safe box governs LEGIBLE CONTENT, text the viewer must read, imagery they must recognise.
   // Decoration (gradient blobs, glows, hairline rules) routinely bleeds off-frame BY DESIGN, so a
   // layer only earns the safe check when it carries a text node or an image. Text inside a decorative
   // container is still reached: the walker descends, and child text layers are their own .hs-layer.
@@ -475,23 +475,23 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   const FW = window.innerWidth, FH = window.innerHeight;
   // `li` = the layer's index in document order. It is the only STABLE per-element identity available:
   // the walk below is over every .hs-layer whether visible or not, so an index means the same element
-  // on every frame. The id/class label alone is not an identity — every text layer is `hs-text` — and
+  // on every frame. The id/class label alone is not an identity, every text layer is `hs-text`, and
   // de-duping on it collapsed N distinct off-frame layers into one reported failure.
   [...document.querySelectorAll('.hs-layer')].forEach((el, li) => {
     if (!vis(el)) return;
-    // `critical: false` — the author's explicit "this layer is not legible content, do not judge its
+    // `critical: false`. The author's explicit "this layer is not legible content, do not judge its
     // edges". It already suppressed the critical-scoped checks below; it was silently inert here, which
     // is the whole reason a frame-wide field had no way to declare itself. Opt-out only: it can remove a
     // finding and never add one, so no scene can newly fail because of this line.
     if (el.dataset && el.dataset.audit === 'off') return;
     const b = el.getBoundingClientRect();
     if (b.width <= 1 || b.height <= 1) return;
-    if (b.width >= FW * 0.9 && b.height >= FH * 0.9) return; // full-bleed backdrop — meant to bleed
+    if (b.width >= FW * 0.9 && b.height >= FH * 0.9) return; // full-bleed backdrop, meant to bleed
     const s = getComputedStyle(el);
     const id = el.id || (typeof el.className === 'string' ? (el.className.split(' ').filter((c) => c !== 'hs-layer')[0] || 'layer') : el.tagName);
     const t = inkText(el).trim().slice(0, 18);   // a label, and a stylesheet is not what the viewer reads
     // An image layer's box exists in order to clip: `object-fit: cover` already overscans, and `ken`
-    // overscans further on purpose — that overscan IS the Ken-Burns move. Measuring it as "content
+    // overscans further on purpose. That overscan IS the Ken-Burns move. Measuring it as "content
     // clipped" fired on every ken layer in the repo (gradient-showcase failed its own audit for this),
     // which teaches authors the gate is noise. The rule is about clipped TEXT; keep it there.
     const clipsByDesign = el.classList.contains('hs-img-wrap');
@@ -500,7 +500,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // Measure the INK on BOTH axes. The border box is the size the author DECLARED; on a `group`, an
     // `html` layer or a component that size is `h` verbatim, and nothing need be painted in it. A group
     // declaring h:400 around a 30px label reported its extent as 400px tall and hard-failed safe-zone on
-    // 360px of empty air (reproduced: `[safe] hs-group "small" — (200,800,266,1200)`).
+    // 360px of empty air (reproduced: `[safe] hs-group "small", (200,800,266,1200)`).
     //
     // The axes used to be split, and the reason has expired. Vertical took the box because a text ink is
     // a LINE box that can overhang the border box by the font's half-leading, so measuring it would fail
@@ -515,18 +515,18 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     const sb = ink || b;
     // A ROTATED stage is skipped here for the reason the overlap pair is skipped (see stageRotated):
     // once #cam is a preserve-3d rig, every box read here is the AABB of a PROJECTED QUAD, so it is an
-    // OVER-bound — strictly larger than the shape on screen — and the safe check is the one rule an
+    // OVER-bound (strictly larger than the shape on screen) and the safe check is the one rule an
     // over-bound can only ever push into failing. A film settled at a tilted pose therefore reported its
     // whole cast as leaving the frame, and the only way to clear it was to shrink a correct composition.
     // The comment at stageRotated used to claim safe was safe to leave running; it was not.
     //
-    // A pure SCALE or TRANSLATE is deliberately NOT exempted. There the rect is exact — a 1600px pill on
+    // A pure SCALE or TRANSLATE is deliberately NOT exempted. There the rect is exact, a 1600px pill on
     // a stage settled at s=1.24 really is 1984px wide and really does have both ends cut off. That is a
     // defect the audit should keep reporting, not a projection artefact.
     //
     // Two spaces, two questions. The SAFE box is asked in SCENE space, because it is the margin the
     // author placed against (see unCam). The FRAME is asked on SCREEN, because a box past the frame edge
-    // is genuinely cropped whatever put it there — that is the 1600px pill on a stage settled at s=1.24,
+    // is genuinely cropped whatever put it there. That is the 1600px pill on a stage settled at s=1.24,
     // which really is 1984px wide and really does lose both ends. The frame is strictly outside the safe
     // box, so this second clause can only ever fire where the first shape already did.
     const cb = unCam(sb);
@@ -539,11 +539,11 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     const offSafe = outside(sb) && outside(cb);
     const cropped = sb.left < -1 || sb.right > FW + 1 || sb.top < -1 || sb.bottom > FH + 1;
     if (!stageRotated && !midMove(el) && carriesContent(el) && (offSafe || cropped))
-      issues.push({ kind: 'safe', a: id, li, t, detail: `(${cb.left | 0},${cb.top | 0},${cb.right | 0},${cb.bottom | 0})${cropped ? ' — cropped by the frame edge' : ''}` });
+      issues.push({ kind: 'safe', a: id, li, t, detail: `(${cb.left | 0},${cb.top | 0},${cb.right | 0},${cb.bottom | 0})${cropped ? '. Cropped by the frame edge' : ''}` });
     // CAPTION BAND. The safe box says where content may live; it says nothing about the strip a
     // burnt-in caption is about to be painted into, so a headline could land squarely on the caption
-    // and every rule above stayed green. Same subject and same measurement as the safe walk — settled
-    // content, ink box, an image or real text — over a band core/safe.js derives from the same
+    // and every rule above stayed green. Same subject and same measurement as the safe walk, settled
+    // content, ink box, an image or real text. Over a band core/safe.js derives from the same
     // destination numbers the caption itself is placed against.
     if (CAPBAND && !stageRotated && !midMove(el) && carriesContent(el)) {
       const deep = Math.min(sb.bottom, CAPBAND.y1) - Math.max(sb.top, CAPBAND.y0);
@@ -564,10 +564,10 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // Measure the LAYOUT box (offsetWidth/Height), not the painted rect: an image mid-`scale` entry
     // legitimately has a ~0 painted rect, but its layout box is still full size.
     if (im.offsetHeight < 1 || im.offsetWidth < 1) {
-      issues.push({ kind: 'collapsed-image', a: (im.getAttribute('src') || 'img').split('/').pop(), detail: `lays out ${im.offsetWidth}x${im.offsetHeight} — visible but occupies no space, renders as nothing` });
+      issues.push({ kind: 'collapsed-image', a: (im.getAttribute('src') || 'img').split('/').pop(), detail: `lays out ${im.offsetWidth}x${im.offsetHeight}. Visible but occupies no space, renders as nothing` });
       continue;
     }
-    if (b.height > 1 && b.height < MIN_IMG) issues.push({ kind: 'tiny-image', a: (im.getAttribute('src') || 'img').split('/').pop(), detail: `${b.height | 0}px tall < ${MIN_IMG | 0}px floor (5% frame h) — logos read at ~7%` });
+    if (b.height > 1 && b.height < MIN_IMG) issues.push({ kind: 'tiny-image', a: (im.getAttribute('src') || 'img').split('/').pop(), detail: `${b.height | 0}px tall < ${MIN_IMG | 0}px floor (5% frame h), logos read at ~7%` });
   }
   // text legibility floor: a text layer rendered below ~1.3% of frame height is unreadable at video
   // distance. Frame-relative so it scales to portrait/landscape.
@@ -576,7 +576,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     if (!vis(tx)) continue;   // the logotype exemption is CONTRAST-only (WCAG 1.4.3); a mark still has to be big enough to see
     // Measure the element that actually HOLDS the text (an element with a direct text node), not the
     // layer wrapper. An `html` layer nests its content in a child styled at its own size, so the
-    // wrapper's inherited 16px default is not what the viewer sees — walk to the real text holders.
+    // wrapper's inherited 16px default is not what the viewer sees, walk to the real text holders.
     const holders = [tx, ...tx.querySelectorAll('*')].filter((el) =>
       [...el.childNodes].some((nd) => nd.nodeType === 3 && nd.nodeValue.trim()));
     for (const el of holders) {
@@ -584,7 +584,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       if (el.getBoundingClientRect().width <= 1) continue;
       const fs = parseFloat(getComputedStyle(el).fontSize) || 0;
       const t = inkText(el).trim();   // a <style> block has a font-size and would read as tiny text
-      if (fs && t && fs < MIN_TXT) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h) — unreadable` });
+      if (fs && t && fs < MIN_TXT) issues.push({ kind: 'tiny-text', a: t.slice(0, 16), detail: `${fs | 0}px < ${MIN_TXT | 0}px floor (1.3% frame h), unreadable` });
     }
   }
   // CLIPPED GLYPHS. The overflow rule above only inspects top-level/critical layers, so a mask NESTED
@@ -592,7 +592,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // .hs-text's 1.04 line-height is tighter than any real font's descender depth, so 13px was sliced
   // off every word at 76px and shipped as flat-bottomed g/y/p (MISTAKES #35).
   // Only measured while the word is AT REST. A transformed descendant contributes to its ancestor's
-  // scrollable overflow, so mid-rise every masked word reports a huge scrollHeight — which is the
+  // scrollable overflow, so mid-rise every masked word reports a huge scrollHeight, which is the
   // effect working, not a defect. (Assuming otherwise produced a confident false positive on the
   // very fix that removed the real clipping, which is the whole reason gates get mutation-tested.)
   const atRest = (host) => {
@@ -614,21 +614,21 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     if (!txt || !vis(el) || !atRest(el) || maskedByDesign(el)) continue;
     const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-text', a: txt.slice(0, 16),
-      detail: `mask is ${dy > 1 ? `${dy}px too short` : `${dx}px too narrow`} for the glyphs — descenders/edges are being cut` });
+      detail: `mask is ${dy > 1 ? `${dy}px too short` : `${dx}px too narrow`} for the glyphs, descenders/edges are being cut` });
   }
   // A captured component is sized to the box the capture MEASURED. If the re-rendered content does not
   // fit that box, .hs-comp's overflow:hidden trims it and the result reads as a screenshot cropped at
-  // the edge — the loudest possible "this is broken" signal, delivered silently. clipped-text guards
+  // the edge. The loudest possible "this is broken" signal, delivered silently. clipped-text guards
   // the same failure one level down, but it only walks .hs-text: a component is a foreign DOM subtree
   // and no rule looked at it at all, so a card lost its bottom 24px for as long as it shipped (#43).
   for (const el of document.querySelectorAll('.hs-comp')) {
     if (!vis(el) || !atRest(el) || maskedByDesign(el)) continue;
     const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-component', a: 'component',
-      detail: `content needs ${el.scrollWidth}x${el.scrollHeight} but the captured box is ${el.clientWidth}x${el.clientHeight} — ${dy > 1 ? `${dy}px` : `${dx}px`} is being cut off. A margin on the captured root is the usual cause (capture measures a border box).` });
+      detail: `content needs ${el.scrollWidth}x${el.scrollHeight} but the captured box is ${el.clientWidth}x${el.clientHeight}, ${dy > 1 ? `${dy}px` : `${dx}px`} is being cut off. A margin on the captured root is the usual cause (capture measures a border box).` });
   }
   // VERTICAL MASS. Nothing measured where a beat's content SITS in the frame, so a composition with
-  // everything crammed in the top 60% and a dead bottom third passed every check — six of twelve
+  // everything crammed in the top 60% and a dead bottom third passed every check, six of twelve
   // beats across two showcase films did exactly that, and all six passed safe-zone (MISTAKES #77).
   // Safe-zone answers "is it inside the frame"; this answers "does it USE the frame". Warn tier: a
   // deliberately top-weighted beat is a real choice, so this reports and never blocks.
@@ -641,14 +641,14 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       // a third of the frame empty at ONE end, while the other end is nearly flush, reads as a beat
       // that ran out rather than one that was composed
       if (deadBottom > 0.33 && deadTop < 0.12) issues.push({ kind: 'top-heavy', a: 'composition',
-        detail: `content ends at ${(btm / H * 100) | 0}% of the frame with the bottom ${(deadBottom * 100) | 0}% empty — the beat uses the top and abandons the rest` });
+        detail: `content ends at ${(btm / H * 100) | 0}% of the frame with the bottom ${(deadBottom * 100) | 0}% empty. The beat uses the top and abandons the rest` });
       if (deadTop > 0.33 && deadBottom < 0.12) issues.push({ kind: 'bottom-heavy', a: 'composition',
         detail: `content starts at ${(deadTop * 100) | 0}% down with the top ${(deadTop * 100) | 0}% empty` });
     }
   }
   // A CROSS-DISSOLVE is two layers deliberately sharing the same box while one fades out and the
   // other fades in. That is the standard way to morph a headline between two states, and reading it
-  // as a collision would make dissolves unusable — the gate would forbid a technique the engine
+  // as a collision would make dissolves unusable. The gate would forbid a technique the engine
   // ships. Only exempt a genuine hand-off: both partly transparent, one exiting while the other
   // enters. Two solid overlapping layers are still a hard fail.
   const fading = (el) => {
@@ -667,11 +667,11 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     const oa = +getComputedStyle(A.el).opacity, ob = +getComputedStyle(B.el).opacity;
     return oa < 0.98 && ob < 0.98;                                      // both mid-blend, neither solid
   };
-  // Skipped wholesale on a rotated stage: see stageRotated above. Only these two rules are dropped —
-  // they are the pair that reads an intersection OF TWO BOXES, and a projected quad's AABB carries no
+  // Skipped wholesale on a rotated stage: see stageRotated above. Only these two rules are dropped.
+  // They are the pair that reads an intersection OF TWO BOXES, and a projected quad's AABB carries no
   // information about whether two shapes intersect. `safe` and `caption-band` are skipped for the same
   // reason at their own call sites; this line used to say they were fine to leave running, on the
-  // grounds that "an over-bound only ever fails safe" — which is the failure, not the reassurance.
+  // grounds that "an over-bound only ever fails safe", which is the failure, not the reassurance.
   // clipped/contrast still run: neither reads a rect against the frame.
   for (let i = 0; i < info.length && !stageRotated; i++) for (let j = i + 1; j < info.length; j++) {
     const A = info[i], B = info[j];
@@ -680,11 +680,11 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     const oy = Math.min(A.btm, B.btm) - Math.max(A.y, B.y);            // >0 → overlap on Y
     if (ox > 2 && oy > 2 && crossDissolve(A, B)) continue;             // intentional hand-off
     // A layer mid-entrance is intentionally off-position, so a transient intersection while it travels
-    // is motion, not a collision — the safe-zone check has always exempted moving layers and overlap
+    // is motion, not a collision. The safe-zone check has always exempted moving layers and overlap
     // now needs the same exemption, because widening it past `critical` made those transients visible.
     if (ox > 2 && oy > 2 && (midMove(A.el) || midMove(B.el))) continue;
     // OCCLUSION. A card floating over a board overlaps the text beneath it by box and hides it by
-    // paint — that is a layered composition, not a collision. Sample the centre of the intersection:
+    // paint. That is a layered composition, not a collision. Sample the centre of the intersection:
     // if an opaque surface is painted above the lower of the two, the lower one cannot be SEEN, so
     // there is nothing to report. Same reasoning as the filled-chip case in the headline rule (#44).
     if (ox > 2 && oy > 2) {
@@ -693,7 +693,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       // The element and its descendants are its paint; its ANCESTORS are not. Ancestors sit in the
       // stack at every point on the frame, so `e.contains(el)` made this index the depth of the whole
       // page rather than the depth of the layer, and the scan below then walked every intervening
-      // ancestor looking for an opaque background — which a full-bleed backdrop always provides. The
+      // ancestor looking for an opaque background, which a full-bleed backdrop always provides. The
       // occlusion escape therefore fired far more often than it was written to. Same misread as the
       // `mine` index in `buried` below; fixed in both, because the rule is one rule.
       const at = (el) => stack.findIndex((e) => e === el || el.contains(e));
@@ -760,7 +760,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       if (px < 0 || py < 0 || px >= FW || py >= FH) continue;
       const stack = document.elementsFromPoint(px, py);
       // "Is this MY paint?" is answered by the element and its descendants only. `e.contains(el)` also
-      // matched every ANCESTOR — #cam, .hs-stage, body — and those are in the stack at every point on
+      // matched every ANCESTOR (#cam, .hs-stage, body) and those are in the stack at every point on
       // the frame, so the guard below could never fire and the escape hatch it documents was dead code
       // for as long as the check existed. That is what let a mis-measured rect (see clampToBox) sample
       // 81 points of empty canvas and still call all 81 "the headline".
@@ -835,8 +835,8 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
         detail: `hero ink is ${Math.round(hero.w / FW * 100)}% of frame width, want 60-80%. Set it at video scale, not web scale.` });
   }
   // ── CONTRAST: COLLECT PROBES, THEN HIDE THE GLYPHS (docs/MISTAKES.md #376) ────────────────────
-  // No rule below decides anything. Each one names its SUBJECT — the ink box, the declared ink
-  // colour, the size, the structural flags — and the caller measures the backdrop from the
+  // No rule below decides anything. Each one names its SUBJECT, the ink box, the declared ink
+  // colour, the size, the structural flags, and the caller measures the backdrop from the
   // composited frame with every subject's own paint hidden. The WCAG arithmetic, the size-aware
   // bars and the -soft tiering are unchanged and live in `contrastFindings` at the bottom of this
   // file, next to the pixels.
@@ -851,7 +851,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // canvas fails whenever a hand-authored `html` backdrop hides the canvas outright. The search has
   // no correct order because the question is not a DOM question. The composited pixel is.
   // parse: rgb()/rgba() AND color(srgb r g b / a). The second form is what Chromium returns as the
-  // COMPUTED value of any color-mix() — and the blocks library mixes colours everywhere (accentSoft
+  // COMPUTED value of any color-mix(), and the blocks library mixes colours everywhere (accentSoft
   // pills, card tints, artwork squares). Before this, every such backgroundColor failed to parse, the
   // ancestor walk skipped it as if transparent, and the probe fell through to the white card behind:
   // a white-on-cobalt artwork square measured as white-on-white 1.0:1. Unparseable is not the same as
@@ -864,7 +864,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     return null;
   };
   // A probe is a SUBJECT plus the box its backdrop will be read from. `hide` is the element whose
-  // own paint has to come off before the screenshot — the text holder itself, or the raster for an
+  // own paint has to come off before the screenshot. The text holder itself, or the raster for an
   // image probe. Same element can be probed twice (a headline is both `text` and `headline`); the
   // hide list de-dups, because hiding twice would capture the already-transparent inline style as
   // the value to restore and leave the frame permanently blank.
@@ -874,8 +874,8 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // core/seams.js). Nothing under one can be graded, and the frame list SAMPLES sting times on
   // purpose, so the composited pixel under a headline mid-burn is the burn. cuts-demo's "sting:
   // burn" measured 1.1:1 against #080301 and the frame is a wall of fire: true about the pixel,
-  // false about the film. The same shape as #376's opening finding — a verdict passed on a frame
-  // that is motion, not design — so it gets the same answer: do not judge.
+  // false about the film. The same shape as #376's opening finding, a verdict passed on a frame
+  // that is motion, not design, so it gets the same answer: do not judge.
   const inOverlay = (OVERLAYS || []).some((o) => Math.abs(tNow - o.t) < o.half + 0.02);
   const probe = (hide, box, p) => { if (inOverlay) return; probes.push({ box, ...p }); if (hide) hideList.push(hide); };
   // Contrast (WCAG AA, size-aware) on EVERY rendered text element, not just [data-layer=critical].
@@ -905,12 +905,12 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       t: inkText(el).trim().slice(0, 18) });
   }
   // EMPHASIS + WIDE contrast: the loop above reads each layer's TOP-level colour only. A layer's
-  // <b>/<em> spans carry their OWN colour (--em) — an accent <b> on an accent bg vanishes (the
+  // <b>/<em> spans carry their OWN colour (--em). An accent <b> on an accent bg vanishes (the
   // blue-on-blue bug the old audit missed). Also widen past [data-layer=critical] to ANY headline-
   // scale text (≥60px), soft-tier when the layer isn't critical so existing videos don't newly HARD-fail.
   const checkSpan = (span, critical, label) => {
     // inkText, not textContent: this `t` is a GATE as well as a label, and `checkSpan` is called with a
-    // whole layer when it is headline-scale — a layer that carries only an inline stylesheet would pass
+    // whole layer when it is headline-scale. A layer that carries only an inline stylesheet would pass
     // the emptiness test on its own CSS source (docs/MISTAKES.md #214/#216/#217, same rule again).
     const t = inkText(span).trim(); if (!t || !vis(span)) return;
     const b = span.getBoundingClientRect(); if (b.width < 2 || b.height < 2) return;
@@ -941,7 +941,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // ONE div with a background and a white word inside it, so "is there an opaque SIBLING under the
     // glyphs" answered no and a deliberate white-on-brand-blue chip was held to the 7:1 field bar
     // (docs/MISTAKES.md #376, second face). Walk the element and its ancestors up to the layer first.
-    // A full-bleed surface is the FIELD, not a chip, so it does not count — but it does not veto the
+    // A full-bleed surface is the FIELD, not a chip, so it does not count, but it does not veto the
     // sibling walk either: this loop can only ever return true, so it can only relax a bar.
     const stop = el.closest('.hs-layer');
     for (let p = el; p; p = p.parentElement) {
@@ -979,14 +979,14 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       if (!fg || fg[3] < 0.85) continue;
       const bx = { x: e.x, y: e.y, w: e.r - e.x, h: e.btm - e.y };
       // The 7:1 bar exists for display type on the SCENE FIELD, where a low-saturation tint of the
-      // background reads as a washed-out grey heading. Text on a filled chip cannot wash out — it is
+      // background reads as a washed-out grey heading. Text on a filled chip cannot wash out, it is
       // a deliberate, saturated block, and WCAG judges exactly that case at the large-text bar. Held
       // to 7:1, the gate rejected white on a brand's own button blue, which is a treatment the brand
       // ships on its real site. Same rule, the right bar for the situation (MISTAKES #44).
       probe(e.el, bx, { rule: 'headline', a: e.id, t: e.t, fg, px, chip: onOwnFill(e.el, bx) });
     }
   }
-  // IMAGE contrast: a critical logo/icon can vanish into a same-hue backdrop (orange-on-orange) —
+  // IMAGE contrast: a critical logo/icon can vanish into a same-hue backdrop (orange-on-orange),
   // average the image's opaque pixels and hold them to the WCAG non-text bar (3:1; hard < 1.7).
   const imgProbe = document.createElement('canvas'); imgProbe.width = imgProbe.height = 24;
   const ipc = imgProbe.getContext('2d', { willReadFrequently: true });
@@ -1000,7 +1000,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       const d = ipc.getImageData(0, 0, 24, 24).data;
       let r = 0, g = 0, b = 0, k = 0;
       for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 40) { r += d[i]; g += d[i + 1]; b += d[i + 2]; k++; }
-      if (k < 20) continue; // nearly empty raster — nothing to judge
+      if (k < 20) continue; // nearly empty raster, nothing to judge
       avg = [r / k, g / k, b / k];
     } catch { continue; } // cross-origin taint → skip, never guess
     // The backdrop wanted is the LAYER's, whether the raster is the layer itself or a child <img>,
@@ -1032,7 +1032,7 @@ function auditFrameFn(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
       // A text-shadow is the TEXT's paint, not the backdrop's, and here it is often the ink colour
       // itself: `core/ransom.js` sets `0 0 4px <ink>, 0 0 9px <ink>` as a neon glow. Left standing,
       // a transparent glyph still smears its own colour across the box the backdrop is read from,
-      // and the ratio collapses toward 1:1 — the old bug's shape, in a new place. Chromium paints a
+      // and the ratio collapses toward 1:1. The old bug's shape, in a new place. Chromium paints a
       // text-shadow even for transparent text, so it has to come off explicitly.
       set('text-shadow', 'none');
       if (el.ownerSVGElement) set('fill', 'transparent');
@@ -1073,10 +1073,10 @@ function overlayFn(n, SAFE) {
 // caught by name rather than hoped to trip a measurement.
 //
 // `pin`/`x` centring keywords resolve against the LAYER'S OWN SIZE (core/boot.js resolveCoords: `center`
-// → (W - size)/2). A layer with no `w` has size 0, so `center` means (W-0)/2 — the layer's LEFT EDGE
+// → (W - size)/2). A layer with no `w` has size 0, so `center` means (W-0)/2, the layer's LEFT EDGE
 // lands on the centre line and the content runs off to the right. It renders wrong at every aspect, but
 // Layout placement (a centring keyword with nothing to centre) is defined ONCE, in core/validate.mjs,
-// and imported here. It used to live in this file with its own NEEDS_W/PIN_X tables — a second copy of
+// and imported here. It used to live in this file with its own NEEDS_W/PIN_X tables, a second copy of
 // a rule the engine also needs, which is the exact shape of the bug that gave the repo four safe boxes
 // and eight canvas-size derivations (docs/MISTAKES.md #46). The validator is the owner; the audit
 // reports the same finding so a render surfaces it too.
@@ -1087,9 +1087,9 @@ function sourceIssues(cfg) {
     const id = L.id || L.type || 'layer';
     const t = snippet(L.text, 18);
     // dx/dy are read only inside scene.html's anchor pass (`const T = L.anchor && byId[L.anchor]`), so
-    // without a resolvable anchor they are silently dropped — authored intent that never renders.
+    // without a resolvable anchor they are silently dropped, authored intent that never renders.
     if ((L.dx != null || L.dy != null) && !L.anchor)
-      out.push({ kind: 'dead-offset', a: id, t, detail: `dx/dy are anchor offsets and do nothing without \`anchor\` — the layer renders unshifted` });
+      out.push({ kind: 'dead-offset', a: id, t, detail: `dx/dy are anchor offsets and do nothing without \`anchor\`, the layer renders unshifted` });
   }
   return out;
 }
@@ -1174,7 +1174,7 @@ function sampleBg(img, box, sx, sy) {
   return r.length ? [median(r), median(g), median(b)] : null;
 }
 
-// WCAG arithmetic, unchanged from the in-page version it replaces — same relative-luminance curve
+// WCAG arithmetic, unchanged from the in-page version it replaces, same relative-luminance curve
 // core/motion.js uses. It moved here because the pixels are here.
 const relLum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const cratio = (a, b) => { const [hi, lo] = relLum(a) > relLum(b) ? [relLum(a), relLum(b)] : [relLum(b), relLum(a)]; return (hi + 0.05) / (lo + 0.05); };
@@ -1198,7 +1198,7 @@ const hslToRgb = (h, s, l) => {
 // A WCAG failure that names the passing colour gets fixed; one that only reports a ratio gets
 // waived. So every finding carries the nearest ink that would PASS: same hue, same saturation,
 // lightness walked the shortest distance in whichever direction reaches the bar. When no ink
-// clears it — a 7:1 bar on a mid-tone backdrop is unreachable from any colour — it says so, which
+// clears it. A 7:1 bar on a mid-tone backdrop is unreachable from any colour, it says so, which
 // is the more useful answer, because then the thing to change is the BACKDROP.
 function suggestColour(fg, bg, want) {
   const [h, s, l] = rgbToHsl(fg);
@@ -1220,7 +1220,7 @@ const withFix = (detail, ink, bg, want) => {
   const s = suggestColour(ink, bg, want);
   return {
     detail: `${detail} on ${hex(bg)} → ${s.reachable ? `try ${s.hex} (${s.ratio.toFixed(1)}:1)`
-      : `no ink clears ${want}:1 on this backdrop, ${s.hex} is the best at ${s.ratio.toFixed(1)}:1 — change the backdrop`}`,
+      : `no ink clears ${want}:1 on this backdrop, ${s.hex} is the best at ${s.ratio.toFixed(1)}:1, change the backdrop`}`,
     suggested: s.hex,
   };
 };
@@ -1256,7 +1256,7 @@ function contrastFindings(probes, img, vw, vh) {
       // tint of the background", which reads as a washed-out grey heading. White on a brand's
       // saturated orange is the opposite of that, and #44 already made the argument for a chip:
       // deliberate, saturated block, WCAG's large-text bar governs. It could only ever say "chip"
-      // structurally, so a full-bleed brand FIELD — the same treatment, painted larger — was still
+      // structurally, so a full-bleed brand FIELD (the same treatment, painted larger) was still
       // held to 7:1. That never surfaced while the backdrop was searched for, because `bgFor`
       // returned null on a hand-authored `html` backdrop and the rule silently skipped; measuring
       // the pixel makes it visible, and brew-launch-act1's 400px white "Meet" on brand orange, the
@@ -1288,8 +1288,8 @@ for (const spec of modules) {
   // a .json arg audits THAT data file (module read from it); a bare name audits the format's sample
   const isData = spec.endsWith('.json');
   const raw = isData ? spec : `formats/${spec}/sample.json`;
-  // Normalise to a repo-RELATIVE path. An absolute arg — which the MCP pipeline passes for a scene
-  // under .vawe-data — otherwise broke everything: `path.join(repoRoot, absolute)` concatenates into
+  // Normalise to a repo-RELATIVE path. An absolute arg, which the MCP pipeline passes for a scene
+  // under .vawe-data, otherwise broke everything: `path.join(repoRoot, absolute)` concatenates into
   // a garbage path (→ "file not found") and `?data=/${absolute}` sends the browser a doubled path.
   // A relative arg is unchanged. (Bug found by a fresh MCP session auditing every draft.)
   const sample = path.isAbsolute(raw) ? path.relative(repoRoot, raw) : raw;
@@ -1303,7 +1303,7 @@ for (const spec of modules) {
   // the scene's own waiver list, read the same way every other gate reads it.
   const allow = new Set(Array.isArray(cfg.authoring?.allow) ? cfg.authoring.allow : []);
 
-  // source checks are aspect-independent (they're about the JSON, not a canvas) — report them once
+  // source checks are aspect-independent (they're about the JSON, not a canvas), report them once
   const si = heroOnly ? [] : sourceIssues(cfg);
   if (si.length) rows.push({ m: `${isData ? `${m} · ${path.basename(sample)}` : m}  [source]`,
     hard: si.filter((i) => HARD.has(i.kind)).length, warn: si.filter((i) => !HARD.has(i.kind)).length, crit: 0, items: si });
@@ -1320,7 +1320,7 @@ for (const aspectKey of askedAspects) {
   const cutWindows = (cfg.cuts || []).filter((c) => c && c.style && c.style !== 'none')
     .map((c) => ({ t: +c.t, half: (c.dur ?? 0.36) / 2 }));
   // Full-frame generative overlays, mirroring what scene.js builds: a sting spans `dur ?? 1.0`
-  // centred on t, a seam `dur ?? 0.5`. Contrast is not graded inside one — see `inOverlay`.
+  // centred on t, a seam `dur ?? 0.5`. Contrast is not graded inside one, see `inOverlay`.
   const overlayWindows = [
     ...(cfg.stings || []).filter((s) => s && s.fx && s.fx !== 'none').map((s) => ({ t: +s.t, half: (+(s.dur ?? 1.0)) / 2 })),
     ...(cfg.seams || []).filter((s) => s && s.fx !== 'none').map((s) => ({ t: +s.t, half: (+(s.dur ?? 0.5)) / 2 })),
@@ -1353,7 +1353,7 @@ for (const aspectKey of askedAspects) {
   }
   // CONTENT-AWARE SAMPLING. Uniform ticks alone have a blind spot exactly the width of a beat: with
   // 14 samples across 25s they sit 1.8s apart, so a card on screen for 1.4s can fall cleanly between
-  // two of them and every rule in this file silently skips it. That is not hypothetical — a captured
+  // two of them and every rule in this file silently skips it. That is not hypothetical, a captured
   // component shipped visibly cropped while the audit reported green, because frames 187 and 240
   // straddled its 190-232 window (MISTAKES #45). So: also sample the RESTING MIDPOINT of every layer,
   // which is the one frame where that layer is guaranteed on screen and done animating.
@@ -1381,7 +1381,7 @@ for (const aspectKey of askedAspects) {
   for (const f of frames) {
     const { issues, count, probes } = await page.evaluate(auditFrameFn, f, safe, MIN_GAP, cutWindows, overlayWindows, capBand);
     critMax = Math.max(critMax, count);
-    // The frame with every contrast subject's own paint hidden — the backdrop, composited, as the
+    // The frame with every contrast subject's own paint hidden, the backdrop, composited, as the
     // viewer would see it under the glyphs. Deliberately page.screenshot() and not a cached frame
     // buffer: a cache is keyed on the frame, knows nothing of the DOM mutation just made, and would
     // hand back a picture that predates it (the same trap the reference implementation carries).
@@ -1427,7 +1427,7 @@ for (const aspectKey of askedAspects) {
   for (const i of waived) i.waived = true;
   // De-dup repeated issues to the first frame they appear on: the SAME element failing on 12 sampled
   // frames is one bug, not twelve. Identity is the layer index (`li`) where we have it, because the
-  // label is a class name — `hs-text` for every text layer — so keying on it merged unrelated layers
+  // label is a class name (`hs-text` for every text layer) so keying on it merged unrelated layers
   // and reported 1 of 4 real off-frame failures. Fall back to label+text for issues that carry no
   // index (the critical-element checks, whose `a`/`b` are already per-element ids).
   const key = (i) => `${i.kind}|${i.li ?? `${i.a}|${i.t || ''}`}|${i.b || ''}`;
@@ -1438,7 +1438,7 @@ for (const aspectKey of askedAspects) {
 
   if (heroOnly) { await page.close(); continue; }   // no overlay: nothing here is worth a picture yet
   await page.evaluate(overlayFn, worst.f, safe);
-  // one overlay per audited canvas — the whole point is comparing where the SAME scene breaks per ratio
+  // one overlay per audited canvas: the whole point is comparing where the SAME scene breaks per ratio
   // named for the SCENE, not the module: every scene audits as module `scene`, so `scene.png` was one
   // file thirteen films deep and the overlay never belonged to the run that just printed its verdict.
   const shot = `${isData ? path.basename(sample, '.json') : m}${aspectKey ? `.${aspectKey.replace(':', 'x')}` : ''}.png`;
@@ -1458,7 +1458,7 @@ if (heroOnly) {
   if (!items.length && !rows.some((r) => r.note)) {
     console.log(`  ✓ hero fill: no landscape frame sampled sets its hero line at web scale.`);
   } else {
-    for (const i of items) console.log(`  ~ [thin-hero]${i.waived ? ' (waived)' : ''} ${i.m} f${i.f} ${i.a}${i.t ? ` "${i.t}"` : ''} — ${i.detail}`);
+    for (const i of items) console.log(`  ~ [thin-hero]${i.waived ? ' (waived)' : ''} ${i.m} f${i.f} ${i.a}${i.t ? ` "${i.t}"` : ''}, ${i.detail}`);
   }
   console.log(`  (hero fill only: 1 of the 19 finding kinds in this file. Every contrast, overlap, clipping`);
   console.log(`   and safe-zone check still runs post-render, under \`make audit\`.)`);
@@ -1474,7 +1474,7 @@ for (const r of rows) {
   for (const i of (r.items || [])) {
     const who = i.b ? `${i.a} ✕ ${i.b}` : `${i.a}${i.t ? ` "${i.t}"` : ''}`;
     // a waived issue still prints. A gate that goes silent when waived teaches you to waive.
-    console.log(`    ${i.waived ? '○' : ' '}[${i.kind}]${i.waived ? ' (waived)' : ''} ${i.f == null ? '' : `f${i.f} `}${who} — ${i.detail}`);
+    console.log(`    ${i.waived ? '○' : ' '}[${i.kind}]${i.waived ? ' (waived)' : ''} ${i.f == null ? '' : `f${i.f} `}${who}, ${i.detail}`);
   }
 }
 console.log(`\noverlays in ${OUT}/ (one PNG per audited scene)`);

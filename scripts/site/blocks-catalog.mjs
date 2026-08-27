@@ -1,4 +1,4 @@
-// scripts/site/blocks-catalog.mjs — auto-renders EVERY registry entry from the manifest onto paged stages.
+// scripts/site/blocks-catalog.mjs: auto-renders EVERY registry entry from the manifest onto paged stages.
 // Proof + visual regression + the browsable arsenal. No hand-placement: drop a row in blocks/catalog.mjs
 // and it shows up here. Writes formats/scene/_catalog-<n>.json (one per page). Run via `make catalog`.
 import fs from 'node:fs';
@@ -16,7 +16,7 @@ for (let p = 0; p < pages; p++) {
     // read `page N/${pages} · ${grid.length} blocks`, so adding one block changed text on every page,
     // every frame re-encoded, and H.264 rate control redistributed quantization noise across the whole
     // image. The per-block crops sit far below this line and still came out byte-different (~9.8% of
-    // pixels, max delta 13/255 — invisible), so ONE cosmetic label dirtied all 108 stills and 108 clips
+    // pixels, max delta 13/255. Invisible), so ONE cosmetic label dirtied all 108 stills and 108 clips
     // on every regeneration and wrote 4.3MB of new blobs into git history for no visible change.
     // Now appending a block only re-renders the page it lands on.
     { type: 'text', text: `page ${p + 1}`, x: 1560, y: 52, font: 'mono', size: 18, color: 'var(--dim)', start: 0, duration: 9 }];
@@ -37,7 +37,7 @@ for (let p = 0; p < pages; p++) {
   // Write only on CHANGE, so `make catalog` can skip re-rendering untouched pages by mtime. This
   // matters more than it looks: the renderer's frame-dedup picks a representative frame per
   // static-ish group, and WHICH frame wins varies across the 8 parallel workers when spring settles
-  // leave sub-pixel motion inside the signature's rounding — so re-rendering an UNCHANGED page
+  // leave sub-pixel motion inside the signature's rounding, so re-rendering an UNCHANGED page
   // produces a pixel-different mp4, and every clip cropped from it churns in git for no reason.
   // (Pre-existing renderer behaviour, recorded in docs/ROADMAP.md; not fixed here.)
   const out = `formats/scene/_catalog-${p + 1}.json`;

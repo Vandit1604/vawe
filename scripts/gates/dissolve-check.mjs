@@ -1,4 +1,4 @@
-// scripts/gates/dissolve-check.mjs — IS ANY TRANSITION A DOUBLE EXPOSURE?
+// scripts/gates/dissolve-check.mjs: IS ANY TRANSITION A DOUBLE EXPOSURE?
 //
 // A crossfade is the reflex for "A becomes B". For TEXT it is the wrong move: two strings at half
 // opacity on top of each other are not a transition, they are a double exposure, and the midpoint of

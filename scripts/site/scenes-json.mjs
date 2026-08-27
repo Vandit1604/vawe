@@ -1,4 +1,4 @@
-// scripts/site/scenes-json.mjs — the site's playable scenes, DERIVED from the real ones.
+// scripts/site/scenes-json.mjs: the site's playable scenes, DERIVED from the real ones.
 //
 //   node scripts/site/scenes-json.mjs          # check, and say what drifted
 //   node scripts/site/scenes-json.mjs --write   # rewrite site/public/scenes/
@@ -41,10 +41,10 @@ const strip = (scene) => {
 };
 
 const files = fs.readdirSync(OUT).filter((f) => f.endsWith('.json')).sort();
-if (!files.length) { console.error(`✗ no scenes under ${path.relative(ROOT, OUT)} — this script derives the existing set, it does not choose one`); process.exit(2); }
+if (!files.length) { console.error(`✗ no scenes under ${path.relative(ROOT, OUT)}. This script derives the existing set, it does not choose one`); process.exit(2); }
 
 // SUGAR CANNOT BE PUBLISHED, because a browser cannot expand it. `block`, `beat` and `comp` become
-// layer TYPES, and `core/layers/index.js` refuses one at boot with "run `make expand`" — advice a
+// layer TYPES, and `core/layers/index.js` refuses one at boot with "run `make expand`", advice a
 // visitor to /editor cannot take. `make expand` needs `blocks/index.mjs`, which discovers its factories
 // with readdirSync plus a dynamic import; no bundler can follow that, so there is no client-side or
 // server-side route to expanding one here.

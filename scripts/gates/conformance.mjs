@@ -1,4 +1,4 @@
-// conformance.mjs — does the engine actually DO what it says it accepts?
+// conformance.mjs: does the engine actually DO what it says it accepts?
 //
 //   node scripts/gates/conformance.mjs            everything
 //   node scripts/gates/conformance.mjs enums      only the vocabulary sweep
@@ -12,7 +12,7 @@
 // schema label but no such anim exists, so it resolved to `fade`. The `cuts` array was never read by
 // auto sound-design. A group child dropped `radius` even after the top-level path was fixed.
 //
-// None of those are findable by reading code — they are all "looks plausible, does nothing". They ARE
+// None of those are findable by reading code. They are all "looks plausible, does nothing". They ARE
 // findable mechanically: apply the input, and assert the output CHANGED. That is all this does.
 //
 // Signature = window.__engine.frameSig(n), the engine's own content hash (DOM innerHTML + canvas
@@ -26,7 +26,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 // Vocabulary is DERIVED from the registries, never restated here. A hand-typed list in a gate drifts
-// from the code the same way the schema label did (MISTAKES #21) — and then the gate certifies the
+// from the code the same way the schema label did (MISTAKES #21), and then the gate certifies the
 // drift. Importing means new vocabulary is swept the day it lands.
 import { ANIM_NAMES } from '../../core/clips.js';
 import { PRESETS } from '../../core/type.js';
@@ -61,7 +61,7 @@ const IMG = fs.existsSync(path.join(repoRoot, AVATAR.slice(1))) ? AVATAR : '/ass
 // SAY WHICH ONE. This is the gate whose entire subject is silent substitution, and it silently
 // substituted: a checkout without assets/brands/ sweeps every image prop against a small mono SVG, and
 // its results are not comparable with a full checkout's.
-console.log(`  image probe: ${IMG}${IMG === AVATAR ? '' : '   (the tpot avatar is absent here — a mono SVG has less to differ on)'}`);
+console.log(`  image probe: ${IMG}${IMG === AVATAR ? '' : '   (the tpot avatar is absent here, a mono SVG has less to differ on)'}`);
 
 // ------------------------------------------------------- the identity-blind signature (MISTAKES #74)
 //
@@ -72,7 +72,7 @@ console.log(`  image probe: ${IMG}${IMG === AVATAR ? '' : '   (the tpot avatar i
 //
 // Which attributes actually leak was measured, not guessed: each phase-1 vocabulary was rendered and
 // its own value name searched for in the resulting DOM. `anim` (and its exit twin `out`) leak as a
-// data-attribute. `kinetic preset`, `cut style`, `composite look` and `canvas fx` do NOT — they reach
+// data-attribute. `kinetic preset`, `cut style`, `composite look` and `canvas fx` do NOT, they reach
 // the frame as computed styles or as a baked data-URL, never as their own name. That measurement is
 // why this is a two-attribute redaction and not a free-text scrub of every value name: over-redaction
 // invents duplicates, and a gate that cries wolf gets skimmed (#85, #90).
@@ -80,7 +80,7 @@ const BLIND_ATTRS = ['anim', 'out'];
 
 // blindSig MIRRORS frameSig (core/boot.js) instead of calling it, because the innerHTML term is
 // exactly what must be redacted and frameSig does not expose it separately. A mirror can drift from
-// its original — so with an EMPTY redaction list it must return frameSig's value bit for bit, and
+// its original, so with an EMPTY redaction list it must return frameSig's value bit for bit, and
 // that is asserted below before any sweep runs. The reverted `visualSig` attempt failed precisely
 // here: it hashed a hand-picked list of computed properties, was far LESS sensitive than frameSig,
 // and reported five real props as inert. Mirroring makes "at least as sensitive" a fact, not a hope.
@@ -110,7 +110,7 @@ let id = 0;
 /**
  * Render a scene and return its content signature across the sampled frames.
  * `blind` is the list of data-attributes whose values are neutralised first. Phases 2 and 3 pass
- * nothing and therefore keep using frameSig unchanged — the blind signature is only needed where the
+ * nothing and therefore keep using frameSig unchanged: the blind signature is only needed where the
  * question is "are these two VALUES the same", and confining it there is what keeps the prop sweep
  * (the one that really caught `tracking`, #28) free of new false positives.
  */
@@ -143,7 +143,7 @@ async function assertMirrorsFrameSig() {
     return [0, 7, 15, 29].filter((n) => fn(n, []) !== window.__engine.frameSig(n));
   }, blindSig.toString());
   scenes.delete(key);
-  if (bad.length) note('signature', 'blindSig mirror', `blindSig(n, []) disagrees with frameSig at frame(s) ${bad.join(', ')} — the mirror has drifted from core/boot.js, so phase 1 is measuring something WEAKER than the engine's own hash. Re-sync blindSig before trusting any distinctness result.`);
+  if (bad.length) note('signature', 'blindSig mirror', `blindSig(n, []) disagrees with frameSig at frame(s) ${bad.join(', ')}. The mirror has drifted from core/boot.js, so phase 1 is measuring something WEAKER than the engine's own hash. Re-sync blindSig before trusting any distinctness result.`);
   return bad.length === 0;
 }
 
@@ -166,29 +166,29 @@ const PROBE = {
   elevation: 3, maxLines: 1, fit: true,
 };
 
-// Props that are legitimately inert on their own — each needs a REASON, never a bare name, or the
+// Props that are legitimately inert on their own: each needs a REASON, never a bare name, or the
 // allowlist quietly becomes the place bugs go to hide.
 const EXPECTED_INERT = {
-  'text.radius': 'chipBox early-returns without bg/border/shadow — a corner radius on a transparent text box is meaningless',
+  'text.radius': 'chipBox early-returns without bg/border/shadow. A corner radius on a transparent text box is meaningless',
   'text.pad':    'same: padding only applies once the layer has a chip/pill background',
   'rect.shadow': 'rect already paints a fill; shadow needs elevation to differ visibly at this size',
 };
 
 // Declared SYNONYMS: two names deliberately bound to the same function in the registry, not two names
-// that accidentally do the same thing. Same discipline as EXPECTED_INERT — a reason, never a bare
-// pair — because this is the one place a real duplicate could now hide. The very first run of the
+// that accidentally do the same thing. Same discipline as EXPECTED_INERT, a reason, never a bare
+// pair, because this is the one place a real duplicate could now hide. The very first run of the
 // fixed distinctness check surfaced both of these, which is the evidence that it can see duplicates
 // at all; they are exempt because core/clips.js writes `up: rise, rise` and `pop, scale: pop`
 // literally, i.e. the aliasing is declared, not emergent.
 const EXPECTED_ALIAS = {
   'layer anim': {
-    'rise=up': '`up` and `rise` are the same entry in the ANIM registry — one spelling names the direction, the other the gesture',
-    'scale=pop': '`scale` and `pop` are the same entry in the ANIM registry — same reason',
+    'rise=up': '`up` and `rise` are the same entry in the ANIM registry. One spelling names the direction, the other the gesture',
+    'scale=pop': '`scale` and `pop` are the same entry in the ANIM registry, same reason',
     'wipe-right=wipe': '`wipe` is the DEFAULT direction of the wipe family and the family is named for the edge the reveal travels toward, so the default IS `wipe-right`; `wipe-left`/`wipe-up`/`wipe-down` are the other three',
   },
 };
 
-// ---------------------------------------------------------------- PHASE 1 — vocabulary
+// ---------------------------------------------------------------- PHASE 1, vocabulary
 // Every declared enum value must produce a DISTINCT frame. A value that renders identically to the
 // fallback is unimplemented, misspelled, or dead vocabulary the schema still advertises.
 async function sweepEnums() {
@@ -214,7 +214,7 @@ async function sweepEnums() {
       frames: [4, 8, 14], build: (v) => base([T({ split: 'word', preset: v, each: 0.9, stagger: 0.08, anim: 'none' })]) },
     { label: 'cut style', values: CUT_STYLES, frames: [29, 31, 33],
       // baseline = the SAME scene with NO cut at all (passing style:undefined fails validation,
-      // because `style` is required — that is a valid schema rule, not a bug to route around).
+      // because `style` is required. That is a valid schema rule, not a bug to route around).
       build: (v) => base([T(), T({ text: 'Second', y: 600, start: 1, duration: 1 })],
         v === undefined ? {} : { cuts: [{ t: 1, style: v }] }) },
     { label: 'composite look', values: LOOK_NAMES,
@@ -224,7 +224,7 @@ async function sweepEnums() {
   ];
 
   for (const V of VOCAB) {
-    // The baseline is the SAME scene with the value omitted — that is what a silent fallback returns.
+    // The baseline is the SAME scene with the value omitted, that is what a silent fallback returns.
     const baseSig = await sig(V.build(undefined), V.frames, BLIND_ATTRS);
     if (baseSig.error) { note('vocab', V.label, `baseline scene errored: ${baseSig.error}`); continue; }
     const seen = new Map(), sigs = new Set();
@@ -246,7 +246,7 @@ async function sweepEnums() {
     // to carrying the value's identity and every "distinct" printed below is unearned.
     // The first version of this assertion used the DEFAULT value instead, and it was vacuous: scene.html
     // stamps `data-anim` on every layer and defaults it to `fade`, so the baseline and `anim:'fade'`
-    // matched even with redaction switched off. Verified by switching it off — the sweep still said
+    // matched even with redaction switched off. Verified by switching it off, the sweep still said
     // clean. That is the same self-fulfilling shape as the bug being fixed, one level up.
     for (const pair of Object.keys(aliases)) {
       if (!collided.includes(pair)) note('vocab', `${V.label} (falsifiability)`, `\`${pair}\` are the same entry in the registry and MUST hash identically, but this sweep saw them as distinct. The signature is identity-revealing again, so nothing below is evidence. Check BLIND_ATTRS against what scene.html now stamps on a layer.`);
@@ -264,7 +264,7 @@ async function sweepEnums() {
   }
 }
 
-// ---------------------------------------------------------------- PHASE 2 — prop effect
+// ---------------------------------------------------------------- PHASE 2, prop effect
 // A prop the schema advertises for a layer type must change that layer's output. This is the sweep
 // that would have caught `radius` doing nothing on an image (MISTAKES #19) the day it was written.
 async function sweepProps() {
@@ -289,9 +289,9 @@ async function sweepProps() {
   }
 }
 
-// ---------------------------------------------------------------- PHASE 3 — cross-path
+// ---------------------------------------------------------------- PHASE 3, cross-path
 // The same primitive is built by more than one constructor (top-level layer vs group child). A prop
-// fixed on one path stays broken on the other, silently — exactly MISTAKES #24.
+// fixed on one path stays broken on the other, silently, exactly MISTAKES #24.
 async function sweepPaths() {
   console.log('\n── phase 3 · cross-path: does a prop behave the same inside a group?');
   const props = { radius: 90, w: 300, h: 300 };
@@ -303,7 +303,7 @@ async function sweepPaths() {
     const topWorks = topOff.sig !== topOn.sig, grpWorks = grpOff.sig !== grpOn.sig;
     const verdict = topWorks && grpWorks ? '✓ both' : topWorks && !grpWorks ? '✗ DIVERGES (top-level only)' : !topWorks && grpWorks ? '✗ DIVERGES (group only)' : '~ inert on both';
     console.log(`   image.${p.padEnd(12)} top=${topWorks ? 'yes' : 'no '}  group-child=${grpWorks ? 'yes' : 'no '}   ${verdict}`);
-    if (topWorks !== grpWorks) note('cross-path', `image.${p}`, `honoured on ${topWorks ? 'top-level but IGNORED as a group child' : 'group child but IGNORED at top level'} — one primitive, two constructors, one forgotten`);
+    if (topWorks !== grpWorks) note('cross-path', `image.${p}`, `honoured on ${topWorks ? 'top-level but IGNORED as a group child' : 'group child but IGNORED at top level'}. One primitive, two constructors, one forgotten`);
   }
 }
 
@@ -316,7 +316,7 @@ if (only === 'all' || only === 'paths') await sweepPaths();
 await browser.close(); server.close();
 
 console.log('\n' + '='.repeat(72));
-if (!findings.length) { console.log('✓ conformance clean — every declared value and prop changes the output'); process.exit(0); }
+if (!findings.length) { console.log('✓ conformance clean: every declared value and prop changes the output'); process.exit(0); }
 console.log(`CONFORMANCE FINDINGS (${findings.length})\n`);
 for (const f of findings) console.log(`  [${f.area}] ${f.subject}\n      ${f.detail}\n`);
 console.log('Each finding is one of: unimplemented vocabulary, a prop accepted and discarded, or a');

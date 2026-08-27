@@ -1,4 +1,4 @@
-// scripts/author/build-zerochrome.mjs — generate formats/scene/zerochrome.json.
+// scripts/author/build-zerochrome.mjs: generate formats/scene/zerochrome.json.
 //
 // This film exists to prove one primitive. Its reference (refs/arc-zero-chrome.mp4, measured frame by
 // frame) is a browser whose chrome dissolves while the photo grid underneath REFLOWS to fill the space
@@ -24,7 +24,7 @@ const r = (v) => +v.toFixed(1);
 // the reference's clock
 const T = { openFrom: 0.467, openTo: 0.817, closeFrom: 1.783, closeTo: 2.083, end: 3.0 };
 // NOT a guess, and not a name picked because it sounded like the shape. Displacement per frame ramps
-// for ~3 frames, peaks about 15% in, then decays over four times as long — so it is neither easeOut
+// for ~3 frames, peaks about 15% in, then decays over four times as long, so it is neither easeOut
 // (peak at frame one) nor easeInOut (peak at the middle). `make measure refs/arc-zero-chrome.mp4 0.467
 // 0.817` fits that curve against every easing the engine has and answers `brake`, residual 0.032, with
 // easeOutQuad behind it. The first pass here used `settle` on the reasoning above and was visibly

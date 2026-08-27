@@ -1,5 +1,5 @@
-// photos.mjs — fetch openly-licensed photos for image layers, with attribution RECORDED.
-// Sources Openverse (openverse.org — aggregates Flickr/Wikimedia/museums; no API key), filtered
+// photos.mjs: fetch openly-licensed photos for image layers, with attribution RECORDED.
+// Sources Openverse (openverse.org: aggregates Flickr/Wikimedia/museums; no API key), filtered
 // to commercial-safe licenses (cc0, pdm, by, by-sa). Never rips arbitrary web images: license
 // data travels with the file in credits.json, so published videos stay claim-proof.
 //
@@ -8,7 +8,7 @@
 //
 // Output: assets/brands/<brand>/photos/<slug>-<i>.jpg + credits.json (license + author + url).
 // Taste rule (enforced by the caller, documented here): photos go in CLIPPED frames with a ken
-// burns zoom (layer: {type:'image', src, ken:true}) — never raw full-bleed screenshots of moods.
+// burns zoom (layer: {type:'image', src, ken:true}), never raw full-bleed screenshots of moods.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -35,7 +35,7 @@ const credits = fs.existsSync(creditsPath) ? JSON.parse(fs.readFileSync(creditsP
 let saved = 0;
 let firstFile = '';
 
-// Openverse serves whatever the upstream host stored — commonly WebP, sometimes PNG, from a URL
+// Openverse serves whatever the upstream host stored: commonly WebP, sometimes PNG, from a URL
 // that still ends in .jpg. Naming every download .jpg regardless is a lie the browser papers over
 // (it sniffs) but nothing else does: a CDN that sets Content-Type from the extension serves a WebP
 // as image/jpeg, and any extension-trusting tool in the chain rejects it. Sniff the magic bytes.
@@ -65,4 +65,4 @@ fs.writeFileSync(creditsPath, JSON.stringify(credits, null, 2) + '\n');
 if (!saved) { console.error('✗ downloads all failed'); process.exit(1); }
 console.log(`→ ${saved} photo(s) in assets/brands/${brand}/photos/ · attribution in credits.json`);
 console.log(`  use: { "type": "image", "src": "/assets/brands/${brand}/photos/${firstFile}", "w": 900, "h": 560, "ken": true }`);
-if (LICENSES.includes('by')) console.log('  ⚠ CC-BY items need visible credit — put creator in a caption or end-card (see credits.json).');
+if (LICENSES.includes('by')) console.log('  ⚠ CC-BY items need visible credit, put creator in a caption or end-card (see credits.json).');

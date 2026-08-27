@@ -1,4 +1,4 @@
-// blueprints/beats-collage.mjs — the two COLLAGE beats measured off `brew-launch-act1`, the densest
+// blueprints/beats-collage.mjs: the two COLLAGE beats measured off `brew-launch-act1`, the densest
 // film in this library. Both exist for the same reason: the frames an author reaches for by hand are
 // one headline and one supporting line, and brew's best two beats are neither.
 //
@@ -22,7 +22,7 @@ import { INK, ACCENT, LINE, SURF2 } from './kit.mjs';
 const wave = (rest) => ({ color: rest, split: 'word', preset: 'colorWave',
   presetOpts: { hold: 0.5, to: rest }, each: 0.7, anim: 'none' });
 
-// propSentence — a sentence whose nouns are REAL OBJECTS: word · photo · chip · captured UI · word,
+// propSentence. A sentence whose nouns are REAL OBJECTS: word · photo · chip · captured UI · word,
 // flowed as one reading line that wraps. Measured off brew beat 4 (t=4.6, 1.6s): nine layers land
 // inside 0.42s at a rolling ~0.06-0.08s step, the props popping (0.32s) while the words light up on a
 // colour wave. The density IS the effect, so the beat is short and the whole frame arrives at once.
@@ -86,10 +86,10 @@ export function propSentence({ items = [], x = 120, y = 250, w = 1680, gap = 44,
     start, duration: dur, anim: 'none', children }];
 }
 
-// slotSwap — three slots that never move while their CONTENTS turn over N times. Measured off brew
+// slotSwap: three slots that never move while their CONTENTS turn over N times. Measured off brew
 // beats 11-13 (t=14.9/16.5/18.1, 1.3s visible each): badge, label and payload sit at the same three
 // boxes every pass, and every pass re-uses the same four stagger offsets (label 0 · tile +0.10 ·
-// icon +0.16 · payload +0.35). The repeat is the point — an identical rhythm three times is what makes
+// icon +0.16 · payload +0.35). The repeat is the point. An identical rhythm three times is what makes
 // the row read as one object being re-filled instead of three cuts.
 //
 // The payload slot changes TYPE (a word, then a number, then a picture), which is the difference
@@ -125,7 +125,7 @@ export function slotSwap({ passes = [], x = 240, y = 330, badge = 150, badgeRadi
   // all: scene.js sets `data-enter=0` on any split layer and the preset only repaints `color`, so the
   // incoming label is fully painted on its first frame. Butt-jointed, the outgoing label's last frame
   // and the incoming label's first frame are adjacent and the slot is never blank. The PAYLOAD, which
-  // pops, blinks for its `payload` offset (0.35s by default, and that is a dial) — a slot visibly
+  // pops, blinks for its `payload` offset (0.35s by default, and that is a dial), a slot visibly
   // re-filling, which is the device this beat is a picture of.
   //
   // `hold` still means what it always meant: a shorter hold than the cadence is the deliberate gap brew

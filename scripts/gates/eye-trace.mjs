@@ -1,4 +1,4 @@
-// scripts/gates/eye-trace.mjs — WHERE IS THE VIEWER LOOKING WHEN A CUT LANDS, and where does the next
+// scripts/gates/eye-trace.mjs, WHERE IS THE VIEWER LOOKING WHEN A CUT LANDS, and where does the next
 // shot make them look? The first gate in this engine that measures Murch's fourth priority.
 //
 //   node scripts/gates/eye-trace.mjs <scene.json> [--strict] [--json]
@@ -7,14 +7,14 @@
 //
 // TIER: REPORT, and the ranking is the reason. Murch puts eye-trace fourth of six, at 7%, under
 // emotion (51%), story (23%) and rhythm (10%), and his instruction is to sacrifice UPWARD from the
-// bottom — a cut that serves the story is allowed to cost the eye a journey. A gate that BLOCKED on
+// bottom. A cut that serves the story is allowed to cost the eye a journey. A gate that BLOCKED on
 // eye-trace would invert his own ranking and make the 7% item the one thing a film cannot spend.
 // So it prints the measurement and stops nobody.
 //
 // SOURCES
-//   Derek Lieu, "Good Eye Trace For Smooth Editing" — the procedure: read the outgoing focal point,
+//   Derek Lieu, "Good Eye Trace For Smooth Editing". The procedure: read the outgoing focal point,
 //   place the incoming subject there. https://www.derek-lieu.com/blog/4/6/good-eye-trace-for-smooth-editing
-//   EditMentor, "Eye Trace in Filmmaking" — the attention ranking (brighter > larger > in focus >
+//   EditMentor, "Eye Trace in Filmmaking". The attention ranking (brighter > larger > in focus >
 //   moving > eyes > mouth) and the cumulative-debt point.
 //   https://editmentor.com/blog/eye-trace-in-filmmaking-a-visual-journey/
 //   Walter Murch's Rule of Six, via PremiumBeat.
@@ -34,7 +34,7 @@
 //
 //   bright  NOT luminance. CONTRAST against the backdrop, which for a built frame is the better
 //           question anyway: white type on a white field is the brightest thing in the scene and
-//           nobody looks at it. The backdrop is a real colour, not a guess — core/backgrounds.js
+//           nobody looks at it. The backdrop is a real colour, not a guess, core/backgrounds.js
 //           bgPreset() returns the literal base hex for the scene's own bg window, so the ground is
 //           read from the one place that paints it. A layer colour is a hex, an rgb()/hsl(), or a
 //           var(--token) resolved through the theme palette exactly as core/boot.js applyTheme maps
@@ -43,7 +43,7 @@
 //           guessed at. Every verdict prints how many layers were unreadable.
 //   large   canvasShare's box, clipped to the camera's view. It refuses to invent an extent: a layer
 //           declaring one axis with no readable intrinsic aspect scores 0 rather than being squared.
-//           That refusal is why the hairline test below passes, and it is not mine — scene-timing.mjs
+//           That refusal is why the hairline test below passes, and it is not mine, scene-timing.mjs
 //           already paid for it, in the gate that got deleted for squaring a 590x18 rule into 590x590.
 //   focus   the `blur` channel of the motion track plus a declared blur filter. Cheap and real.
 //   moving  per-frame centroid displacement from the motion track, plus a nominal contribution while
@@ -95,7 +95,7 @@ const TOKEN = { '--bg': 'bg', '--bg-2': 'bg2', '--surface': 'surface', '--surfac
   '--dim': 'dim', '--ink': 'ink', '--up': 'up', '--down': 'down', '--accent': 'accent',
   '--accent-2': 'accent2', '--accent-dim': 'accentDim', '--accent-glow': 'accentGlow' };
 
-/** relative luminance, WCAG. `null` in, `null` out — an unreadable colour never becomes a number. */
+/** relative luminance, WCAG. `null` in, `null` out. An unreadable colour never becomes a number. */
 export function lumOf(v, palette) {
   if (typeof v !== 'string') return null;
   const s = v.trim();
@@ -130,14 +130,14 @@ export function groundLum(d, theme, t) {
 // WHERE THE INK IS, which for a wide text layer is not the middle of its box. A text layer declares a
 // box and CSS puts the glyphs at one end of it: `align` is unset for 511 of the 1215 sized text layers
 // in this library and CSS defaults to left, so a 6-word headline in a 1600px box has its ink centre
-// about 500px left of its box centre — a quarter of the diagonal, which is larger than JUMP_FAR. An
+// about 500px left of its box centre. A quarter of the diagonal, which is larger than JUMP_FAR. An
 // eye-trace gate that scored the box centre would be reporting the wrong place for a third of the
 // library's type.
 //
 // THIS IS AN ESTIMATE AND IT IS BOUNDED, which is the whole difference between it and the size helper
 // that got `visual-vocabulary` deleted. That one squared an axis it did not know and produced a number
 // with no ceiling. This one estimates a Latin advance width at 0.55em, CLAMPS it to the declared box,
-// and touches the CENTROID ONLY — the `large` term still reads the declared box, unestimated, so the
+// and touches the CENTROID ONLY. The `large` term still reads the declared box, unestimated, so the
 // term that killed the old gate is not fed by a guess. Worst case the ink centre is off by half the
 // difference between the guess and the truth, and it can never leave the box.
 const EM_ADVANCE = 0.55;
@@ -193,15 +193,15 @@ export function focalAt(ctx, t) {
   const cand = live.map((L) => {
     const p = poseAt(L, t), pPrev = poseAt(L, t - DT);
     const cx = p.cx == null ? CW / 2 : p.cx, cy = p.cy == null ? CH / 2 : p.cy;
-    // AREA — clipped to what the camera is looking at, and 0 for an extent this file cannot derive.
+    // AREA: clipped to what the camera is looking at, and 0 for an extent this file cannot derive.
     const vw = Math.max(0, Math.min(cx + p.w / 2, view.x + view.w) - Math.max(cx - p.w / 2, view.x));
     const vh = Math.max(0, Math.min(cy + p.h / 2, view.y + view.h) - Math.max(cy - p.h / 2, view.y));
     const large = p.how === 'unknown' ? 0 : Math.min(1, (vw * vh) / (view.w * view.h));
-    // BRIGHT — contrast against the ground, or null when the colour cannot be read.
+    // BRIGHT: contrast against the ground, or null when the colour cannot be read.
     const own = L.color ?? L.bg;
     const ll = lumOf(own, palette);
     const bright = (ll == null || ground == null) ? null : Math.abs(ll - ground) * (p.opacity ?? 1);
-    // MOVING — keyed displacement this frame, plus the ramp nominal.
+    // MOVING: keyed displacement this frame, plus the ramp nominal.
     const diag = Math.hypot(view.w, view.h);
     const keyed = (pPrev.cx == null || p.cx == null) ? 0 : Math.hypot(p.cx - pPrev.cx, p.cy - pPrev.cy) / diag;
     const moving = keyed + (ramping(L, t) ? RAMP_MOTION : 0);
@@ -340,7 +340,7 @@ export function debtOf(t) {
 }
 
 // ------------------------------------------------------------------------------------------------
-// SELF-TEST — run this before you trust a single number the gate prints.
+// SELF-TEST, run this before you trust a single number the gate prints.
 //
 // The first fixture is not decoration. `visual-vocabulary` was deleted from this repo for squaring a
 // 590x18 decorative rule into 590x590 and crediting a hairline with a tenth of the frame, and this
@@ -395,7 +395,7 @@ function selftest() {
     for (const r of rows) console.log(`      ${r}`);
     console.log('');
   }
-  console.log(bad ? `  ✗ ${bad} fixture(s) wrong — STOP. A confident wrong number is worse than no gate.\n`
+  console.log(bad ? `  ✗ ${bad} fixture(s) wrong, STOP. A confident wrong number is worse than no gate.\n`
     : '  ✓ the scorer beats the hairline. Raw terms are printed above so the arithmetic is arguable.\n');
   process.exit(bad ? 1 : 0);
 }
@@ -414,10 +414,10 @@ function report(file, opts = {}) {
   for (const j of t.junctions) {
     if (j.empty || j.dist == null) continue;
     if (j.dist > JUMP_FAR) findings.push({ code: 'eye-jumps-the-frame', t: j.t,
-      msg: `${j.kind}@${j.t.toFixed(2)}s · the eye moves ${(j.dist * 100).toFixed(0)}% of the diagonal — from `
+      msg: `${j.kind}@${j.t.toFixed(2)}s · the eye moves ${(j.dist * 100).toFixed(0)}% of the diagonal, from `
         + `${named(j.before.win)} at (${j.before.win.cx | 0},${j.before.win.cy | 0}) to ${named(j.after.win)} at `
         + `(${j.after.win.cx | 0},${j.after.win.cy | 0}). Land the incoming subject nearer where the eye already is.`
-        + (j.lonely ? ` NOTE: the ${j.lonely} side holds ONE live layer, so it won by being alone — check `
+        + (j.lonely ? ` NOTE: the ${j.lonely} side holds ONE live layer, so it won by being alone, check `
           + `beat-check for dead air before you move anything.` : '') });
   }
   for (const c of D.crowded) findings.push({ code: 'no-time-to-catch-up', t: c.t,
@@ -465,11 +465,11 @@ if (args.includes('--census')) {
   const q = (arr, p) => (arr.length ? arr[Math.min(arr.length - 1, Math.floor(p * arr.length))] : 0);
   console.log(`  ${all.length} junction(s) across ${rows.length} scene(s) · ${bad} unreadable file(s)`);
   console.log(`  ${all.length - moved.length} of them (${((1 - moved.length / (all.length || 1)) * 100).toFixed(0)}%) keep the SAME `
-    + `focal layer across the junction — a continuous subject, distance 0 by construction.`);
+    + `focal layer across the junction: a continuous subject, distance 0 by construction.`);
   console.log(`  ${unread} of ${scored} scored layers had a colour this gate could not read `
     + `(${((unread / (scored || 1)) * 100).toFixed(1)}%).\n`);
   const histo = (arr, label) => {
-    console.log(`  ${label} — fraction of the frame diagonal`);
+    console.log(`  ${label}: fraction of the frame diagonal`);
     const B = 10, hist = new Array(B).fill(0);
     for (const v of arr) hist[Math.min(B - 1, Math.floor(v * B))]++;
     const wide = Math.max(1, ...hist);
@@ -486,7 +486,7 @@ if (args.includes('--census')) {
     + `(${((moved.filter((v) => v > JUMP_FAR).length / (moved.length || 1)) * 100).toFixed(0)}%).\n`);
   const worstDebt = debts.filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 12);
   if (worstDebt.length) {
-    console.log(`  ACCUMULATED COST — share of runtime the eye spends travelling (at ${RECOVER}s per full diagonal)`);
+    console.log(`  ACCUMULATED COST: share of runtime the eye spends travelling (at ${RECOVER}s per full diagonal)`);
     for (const [nm2, sh, tr, md, cr] of worstDebt)
       console.log(`   ${nm2.padEnd(34)} ${(sh * 100).toFixed(2).padStart(5)}%  ${tr.toFixed(2)}s total  `
         + `median beat ${md.toFixed(2)}s${cr ? `   ${cr} jump(s) with no time to catch up` : ''}`);
@@ -525,11 +525,11 @@ const nm = (c) => c.L.id || `${c.L.type}${c.L.text ? ` "${String(c.L.text).repla
 console.log(`\n  eye-trace · ${path.basename(file)}  theme ${r.t.theme} · ${r.t.CW}x${r.t.CH} · `
   + `${r.t.junctions.length} junction(s) · median beat ${r.D.median.toFixed(2)}s  (JUMP_FAR ${JUMP_FAR}, ours)\n`);
 if (!r.t.junctions.length) {
-  console.log('  no cuts, seams or stings — there is no junction for the eye to cross.\n');
+  console.log('  no cuts, seams or stings: there is no junction for the eye to cross.\n');
   process.exit(0);
 }
 console.log(`  the eye spends ${(r.D.travel).toFixed(2)}s of ${r.t.duration.toFixed(1)}s travelling `
-  + `(${(r.D.share * 100).toFixed(1)}% of the runtime, at ${RECOVER}s per full-diagonal jump — ours)\n`);
+  + `(${(r.D.share * 100).toFixed(1)}% of the runtime, at ${RECOVER}s per full-diagonal jump, ours)\n`);
 console.log('   at      kind    the eye moves        from                     to                       cost');
 for (const j of r.t.junctions) {
   if (j.empty || j.dist == null) { console.log(`   ${j.t.toFixed(2).padStart(6)}s ${j.kind.padEnd(7)} (nothing on screen)`); continue; }
@@ -549,7 +549,7 @@ if (!r.findings.length) {
 for (const f of r.findings) console.log(`    ~ [eye-trace] ${f.code}: ${f.msg}`);
 console.log(strict
   ? '\n  ✗ eye-trace (strict)\n'
-  : '\n  REPORT ONLY — Murch ranks eye-trace fourth of six at 7%, under emotion, story and rhythm, and says\n'
+  : '\n  REPORT ONLY, Murch ranks eye-trace fourth of six at 7%, under emotion, story and rhythm, and says\n'
     + '  to sacrifice upward from the bottom. A cut that serves the story may cost the eye a journey.\n'
     + '  Waive with {"authoring":{"allow":["eye-jumps-the-frame"]}} plus a _why.\n');
 process.exit(strict ? 1 : 0);

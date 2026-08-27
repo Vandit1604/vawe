@@ -1,4 +1,4 @@
-// blueprints/index.mjs — the BEAT REGISTRY. Blocks give you a COMPONENT (a card, a chart); a blueprint
+// blueprints/index.mjs: the BEAT REGISTRY. Blocks give you a COMPONENT (a card, a chart); a blueprint
 // gives you a whole BEAT's directed MOTION. Compose a video from beats and the good choreography is the
 // default, so the agent never regresses to plain fades (the failure the direction floor gates).
 //

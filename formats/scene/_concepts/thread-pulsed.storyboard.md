@@ -3,7 +3,7 @@ message: hand-animating a video is fine until the number changes, and then you d
 audience: people who rebuild the same product video every time a figure moves
 arc: a familiar grind, named clause by clause, until the thing that ends it arrives
 thread: rhythm
-object: none — the thread is rhythm
+object: none, the thread is rhythm
 duration: 15s
 format: 1080x1920
 concept: pulsed · mesh (light)
@@ -31,7 +31,7 @@ concept: pulsed · mesh (light)
 ## Beat 2: <name this beat> (1.15s-2.3s)
 - type: build
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -41,7 +41,7 @@ concept: pulsed · mesh (light)
 ## Beat 3: <name this beat> (2.3s-3.45s)
 - type: problem
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -62,7 +62,7 @@ concept: pulsed · mesh (light)
 ## Beat 5: <name this beat> (4.6s-5.75s)
 - type: build
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -72,7 +72,7 @@ concept: pulsed · mesh (light)
 ## Beat 6: <name this beat> (5.75s-6.9s)
 - type: problem
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -93,7 +93,7 @@ concept: pulsed · mesh (light)
 ## Beat 8: <name this beat> (8.05s-9.2s)
 - type: build
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -114,7 +114,7 @@ concept: pulsed · mesh (light)
 ## Beat 10: <name this beat> (10.35s-11.5s)
 - type: proof
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -124,7 +124,7 @@ concept: pulsed · mesh (light)
 ## Beat 11: <name this beat> (11.5s-12.65s)
 - type: build
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -145,7 +145,7 @@ concept: pulsed · mesh (light)
 ## Beat 13: <name this beat> (13.8s-14.95s)
 - type: payoff
 - object: <what carries the rhythm at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

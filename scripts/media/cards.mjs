@@ -1,4 +1,4 @@
-// scripts/media/cards.mjs — parametric, copyright-safe topic cards (designed SVGs) for ANY topic.
+// scripts/media/cards.mjs: parametric, copyright-safe topic cards (designed SVGs) for ANY topic.
 // A deterministic palette derived from the title gives each card a distinct, on-brand look:
 // dark→mid gradient + soft grain + vignette + accent frame + balanced wrapped title.
 // Use as a library (import { card, slugify }) or a CLI:

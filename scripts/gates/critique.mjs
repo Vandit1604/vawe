@@ -1,4 +1,4 @@
-// scripts/gates/critique.mjs — the VALUE GATE. Static critic over a scene JSON that fires on the failure
+// scripts/gates/critique.mjs: the VALUE GATE. Static critic over a scene JSON that fires on the failure
 // modes a human otherwise catches per-scene: placeholder words, unbacked claims, static lists,
 // illegible transitions, lonely low-value beats. Not taste-complete, but it makes the recurring
 // mistakes un-shippable. Run: node scripts/gates/critique.mjs <scene.json> [--strict]
@@ -45,7 +45,7 @@ for (const l of layers) {
   if (l.type !== 'text' || !l.text) continue;
   const w = onScreenText(l.text).toLowerCase();
   if (PLACEHOLDER.has(w) && (l.size ?? 0) >= 48) {
-    F('error', 'placeholder-word', `"${snippet(l.text, 40)}" (${l.size}px) is a filler label, not a real artifact — render the actual thing (a live mini-scene), not the word.`, s0(l));
+    F('error', 'placeholder-word', `"${snippet(l.text, 40)}" (${l.size}px) is a filler label, not a real artifact. Render the actual thing (a live mini-scene), not the word.`, s0(l));
   }
 }
 
@@ -60,9 +60,9 @@ for (const l of layers) {
     const shaderish = /shader/.test(noun);
     const hasShaderLayer = layers.some((x) => x.type === 'shader');
     if (shaderish && !hasShaderLayer) {
-      F('error', 'false-claim', `"${snippet(l.text, 40)}" claims ${m[1]} ${noun} but the scene has NO shader layers — remove the claim or add the effect.`, s0(l));
+      F('error', 'false-claim', `"${snippet(l.text, 40)}" claims ${m[1]} ${noun} but the scene has NO shader layers. Remove the claim or add the effect.`, s0(l));
     } else {
-      F('warn', 'unbacked-claim', `"${snippet(l.text, 40)}" — a count claim ("${m[1]} ${noun}"). Verify the ${noun} are actually shown in this beat, or cut the number.`, s0(l));
+      F('warn', 'unbacked-claim', `"${snippet(l.text, 40)}": a count claim ("${m[1]} ${noun}"). Verify the ${noun} are actually shown in this beat, or cut the number.`, s0(l));
     }
   }
 }
@@ -72,13 +72,13 @@ for (const l of layers) {
   if (l.type !== 'group' || !l.children) continue;
   const txt = l.children.filter((c) => c.type === 'text');
   if (txt.length >= 4 && txt.every((c) => !c.split && !c.preset) && (l.duration ?? 0) > 2 && !l.stagger) {
-    F('warn', 'static-list', `a ${txt.length}-item text group held ${(l.duration).toFixed(1)}s with no live motion — a list reads as a spec sheet; animate the concept (reveal/pass/count).`, s0(l));
+    F('warn', 'static-list', `a ${txt.length}-item text group held ${(l.duration).toFixed(1)}s with no live motion. A list reads as a spec sheet; animate the concept (reveal/pass/count).`, s0(l));
   }
 }
 
 // ---- 4. illegible transition ----
 for (const s of d.stings || []) {
-  if (LOW_LEGIBILITY_STINGS.has(s.fx)) F('warn', 'illegible-effect', `sting "${s.fx}" @${s.t}s is hard to perceive at cut scale — replace with a legible one (wipe/iris/push).`, s.t);
+  if (LOW_LEGIBILITY_STINGS.has(s.fx)) F('warn', 'illegible-effect', `sting "${s.fx}" @${s.t}s is hard to perceive at cut scale. Replace with a legible one (wipe/iris/push).`, s.t);
 }
 
 // ---- 5. lonely beat: a beat whose ONLY sizable content is a single centered text >3s ----
@@ -89,12 +89,12 @@ for (const b of beats) {
   const artifacts = content.filter((l) => l.type !== 'text' || (l.children && l.children.length));
   const texts = content.filter((l) => l.type === 'text');
   if (texts.length && artifacts.length === 0 && content.length <= 2) {
-    F('warn', 'lonely-beat', `beat @${b.start.toFixed(1)}s is text-only with no artifact — what does the viewer LOSE if cut? give it a demo/proof or fold it into a neighbour.`, b.start);
+    F('warn', 'lonely-beat', `beat @${b.start.toFixed(1)}s is text-only with no artifact. What does the viewer LOSE if cut? give it a demo/proof or fold it into a neighbour.`, b.start);
   }
 }
 
 // ---- 6. thin-beat: a content beat held >3s with <3 sizable elements = a slide, not a shot ----
-//        (density doctrine — see docs/CRAFT/DENSITY.md). First & last beat exempt (hook / end card).
+//        (density doctrine, see docs/CRAFT/DENSITY.md). First & last beat exempt (hook / end card).
 beats.forEach((b, bi) => {
   if (bi === 0 || bi === beats.length - 1) return;
   const span = (b.end + 3) - b.start;
@@ -102,7 +102,7 @@ beats.forEach((b, bi) => {
   const content = layers.filter((l) => (l.track ?? 9) > 2 && overlaps(l, b.start, b.end + 0.3)
     && (l.type !== 'text' || (l.size ?? 0) >= 24));
   if (content.length && content.length < 3) {
-    F('warn', 'thin-beat', `beat @${b.start.toFixed(1)}s has only ${content.length} sizable element(s) over ${span.toFixed(1)}s — reads as a slide. Add support (a demo/stat/chart) + metadata (a dim readout). See docs/CRAFT/DENSITY.md.`, b.start);
+    F('warn', 'thin-beat', `beat @${b.start.toFixed(1)}s has only ${content.length} sizable element(s) over ${span.toFixed(1)}s. Reads as a slide. Add support (a demo/stat/chart) + metadata (a dim readout). See docs/CRAFT/DENSITY.md.`, b.start);
   }
 });
 
@@ -112,7 +112,7 @@ for (const l of layers) {
   if (l.type && l.type !== 'text') continue;
   if (!l.text || l.split) continue;
   if ((l.size ?? 0) >= 40 && (l.w ?? 0) >= 600 && !l.align) {
-    F('warn', 'mis-centre', `"${snippet(l.text, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align" — text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
+    F('warn', 'mis-centre', `"${snippet(l.text, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align". Text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
   }
 }
 
@@ -124,10 +124,10 @@ for (const l of layers) {
 // window" and "on screen together" are different sets. linear-journey (five stations on 5760x2160, zero
 // cuts) reported 10 and 11 elements at 14.5s and 19.7s by summing the station arriving with the one still
 // fading out two stations away; the eye sees one station and about five things. Both findings were false.
-// No camera, or a camera rotated at this instant, and cameraView returns null — then this is the old count.
+// No camera, or a camera rotated at this instant, and cameraView returns null, then this is the old count.
 //
 // THE STAGE MUST BE FLAT for any of this to mean anything, and the camera's own angles are only half of
-// that test — a top-level `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all.
+// that test. A top-level `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all.
 // Both halves, and the reason, now live in `sceneView` (scripts/gates/scene-timing.mjs), because
 // beat-check became a second consumer and a rule split across two files gets remembered by half.
 for (const b of beats) {
@@ -138,7 +138,7 @@ for (const b of beats) {
     && overlaps(l, b.start, b.end + 0.3) && (l.type !== 'text' || (l.size ?? 0) >= 18)
     && inView(l, view));
   if (content.length >= 8) {
-    F('warn', 'scattered-beat', `beat @${b.start.toFixed(1)}s packs ${content.length} top-level elements — likely no clear focal (the eye can't land). Cut to a hero + 1-2 supports; run make judge to confirm.`, b.start);
+    F('warn', 'scattered-beat', `beat @${b.start.toFixed(1)}s packs ${content.length} top-level elements. Likely no clear focal (the eye can't land). Cut to a hero + 1-2 supports; run make judge to confirm.`, b.start);
   }
 }
 
@@ -150,19 +150,19 @@ for (const l of layers) {
   if (!l.typing || l.type !== 'text') continue;
   const cps = l.typing === true ? 24 : +l.typing;
   if (!(cps > 0)) continue;
-  // glyphText: this predicts typing TIME, so it must count the characters the caret walks past —
+  // glyphText: this predicts typing TIME, so it must count the characters the caret walks past,
   // which is core/layers/text.js stripLen(), i.e. DOM textContent, where a `<br>` costs nothing.
   const chars = glyphText(l.text).length;
   const typeTime = chars / cps;
   const dur = l.duration ?? 0;
   if (typeTime + MIN_TYPE_HOLD > dur + 1e-6) {
-    F('warn', 'typing-cutoff', `"${snippet(l.text, 32)}" types for ${typeTime.toFixed(2)}s (${chars} chars / ${cps}per s) but its beat is only ${dur.toFixed(2)}s — it cannot finish and hold before the cut. Extend duration to >= ${(typeTime + MIN_TYPE_HOLD).toFixed(1)}s or raise the typing speed.`, s0(l));
+    F('warn', 'typing-cutoff', `"${snippet(l.text, 32)}" types for ${typeTime.toFixed(2)}s (${chars} chars / ${cps}per s) but its beat is only ${dur.toFixed(2)}s. It cannot finish and hold before the cut. Extend duration to >= ${(typeTime + MIN_TYPE_HOLD).toFixed(1)}s or raise the typing speed.`, s0(l));
   }
 }
 
 // ---- 10. transition-dip: the stage must never go EMPTY between beats. If the outgoing beat fully
 //        exits before the next enters, the cut is a jump-cut-with-a-dip (both another engine and another engine
-//        ban it — the transition should BE the exit: overlap outgoing + incoming). We merge every
+//        ban it. The transition should BE the exit: overlap outgoing + incoming). We merge every
 //        content layer's [start, end] interval and flag any blank gap in the middle. Persistent marks
 //        (a watermark spanning most of the film) and tiny captions are excluded so they can't mask a dip.
 const sceneDur = d.duration ?? 0;
@@ -180,7 +180,7 @@ const sceneDur = d.duration ?? 0;
 //
 // This share is deliberately CANVAS-relative while scattered-beat's is camera-relative, because the two ask
 // different questions. Scattered-beat asks about one named instant, which is a frame the camera is in.
-// This asks whether a layer spanning most of the film is ever the subject — a question about the film, with
+// This asks whether a layer spanning most of the film is ever the subject, a question about the film, with
 // no single instant to hand cameraView, and a layer at a station is large in frame only while the camera is
 // there. Sampling one arbitrary time would swap one wrong number for another, and it could split one
 // transition-dip warning into two, which is a gate inventing findings. Measured across the library: exactly
@@ -203,7 +203,7 @@ if (contentIv.length > 1) {
   for (let i = 1; i < contentIv.length; i++) {
     const gap = contentIv[i][0] - covEnd;
     if (gap > 0.12) {
-      F('warn', 'transition-dip', `the stage is EMPTY from ${covEnd.toFixed(1)}s to ${contentIv[i][0].toFixed(1)}s (${gap.toFixed(1)}s of blank) — the outgoing beat fully exits before the next enters (a jump-cut with a dip). Overlap them: start the next beat during this one's exit, so the transition IS the exit.`, covEnd);
+      F('warn', 'transition-dip', `the stage is EMPTY from ${covEnd.toFixed(1)}s to ${contentIv[i][0].toFixed(1)}s (${gap.toFixed(1)}s of blank). The outgoing beat fully exits before the next enters (a jump-cut with a dip). Overlap them: start the next beat during this one's exit, so the transition IS the exit.`, covEnd);
     }
     covEnd = Math.max(covEnd, contentIv[i][1]);
   }
@@ -218,6 +218,6 @@ for (const f of findings) {
   console.log(`  ${tag} [${f.rule}] @${f.t.toFixed(1)}s`);
   console.log(`      ${f.msg}`);
 }
-if (!findings.length) console.log('  ✓ no value-gate violations — every beat carries an artifact.\n');
+if (!findings.length) console.log('  ✓ no value-gate violations, every beat carries an artifact.\n');
 else console.log('');
 process.exit((errs.length || (strict && findings.length)) ? 1 : 0);

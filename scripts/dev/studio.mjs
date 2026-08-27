@@ -1,17 +1,17 @@
-// scripts/dev/studio.mjs — a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an
+// scripts/dev/studio.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an
 // mp4. Starts a local static server and serves a wrapper page: the real scene.html in an iframe, plus a
 // scrubber + play/pause + frame/time readout that drive `__engine.renderFrame(n)` directly (the same pure
-// function the Go renderer seeks). Edit the JSON, hit reload, scrub — no 30-60s render round-trip.
+// function the Go renderer seeks). Edit the JSON, hit reload, scrub, no 30-60s render round-trip.
 //
 // Under the scrubber is a TIMELINE: one bar per top-level layer against a seconds/frames ruler, with the
 // cuts/seams/stings marked, the enter/exit ramps shaded off the settled middle, and every dead-air hole
-// painted as a hazard band. It answers the question a contact sheet cannot — what is on screen WHEN.
+// painted as a hazard band. It answers the question a contact sheet cannot, what is on screen WHEN.
 //
 //   make studio D=formats/scene/<file>.json [PORT=8799] [THEME=dark]
 //     → open the printed URL, leave it running (Ctrl-C to stop). Light is the default; the toggle in the
 //       transport switches to dark and the choice sticks per browser.
 //
-// DEV TOOLING ONLY — it does not touch the renderer or the determinism contract; it just calls the engine's
+// DEV TOOLING ONLY. It does not touch the renderer or the determinism contract; it just calls the engine's
 // own renderFrame(n) from the parent frame (same-origin), exactly as the Go capture loop does per frame.
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
@@ -31,8 +31,8 @@ const PORT = Number(process.env.PORT) || 8799;
 // ---------- the timeline model ----------
 // Where "dead air" comes from. The definition (which layers count as content: a full-canvas opaque rect
 // is a blackout, a box under 8% of the canvas is a speck, track:0 is backdrop) lives in
-// scripts/gates/beat-check.mjs. That file is a SCRIPT, not a module — it reads process.argv and calls
-// process.exit at top level — so it cannot be imported into a long-lived server. Restating its rules here
+// scripts/gates/beat-check.mjs. That file is a SCRIPT, not a module, it reads process.argv and calls
+// process.exit at top level, so it cannot be imported into a long-lived server. Restating its rules here
 // would give the timeline a second definition free to drift from the gate that blocks the build, which is
 // the one thing this band must never do. So the gate is RUN and its findings are read back. If it is ever
 // split into an importable core, import it and delete this.
@@ -43,7 +43,7 @@ const beatCheck = (file) => {
   const finding = (code) => (out.match(new RegExp(`[✗~] \\[${code}\\] ([^\\n]*)`)) || [])[1] || '';
   const spans = (s, re) => [...s.matchAll(re)].map((m) => [+m[1], +m[2]]);
   return {
-    // "6.38s to 6.86s (0.48s) · …" — the trailing "(" keeps the fix prose ("anything under 0.40s") out.
+    // "6.38s to 6.86s (0.48s) · …": the trailing "(" keeps the fix prose ("anything under 0.40s") out.
     deadAir: spans(finding('dead-air'), /([\d.]+)s to ([\d.]+)s \(/g),
     emptyBeat: spans(finding('empty-beat'), /at ([\d.]+)s \(to ([\d.]+)s\)/g),
     tail: +((finding('ends-on-nothing').match(/from ([\d.]+)s\)/) || [])[1] || 0) || null,
@@ -57,8 +57,8 @@ const beatCheck = (file) => {
 const label = (L) => L.id || (L.text && onScreenText(L.text))
   || (L.src && path.basename(String(L.src))) || L.comp || L.capture || L.preset || '';
 // UNDO is a stack of whole previous file contents. A scene is a few kilobytes and an editing session is
-// tens of edits, so keeping the bytes is simpler and more honest than replaying inverse operations —
-// there is no way for it to drift from what is on disk.
+// tens of edits, so keeping the bytes is simpler and more honest than replaying inverse operations.
+// There is no way for it to drift from what is on disk.
 const undoStack = [];
 
 const timelineModel = (file) => {
@@ -86,7 +86,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
 <style>
  @font-face{font-family:Anybody;src:url(/assets/fonts/Anybody.woff2) format('woff2');font-weight:100 900;font-display:swap}
  @font-face{font-family:'JetBrains Mono';src:url(/assets/fonts/JetBrainsMono.woff2) format('woff2');font-weight:100 800;font-display:swap}
- /* the site's committed tokens. Ink 17:1, ink-2 8:1, muted 5:1, accent 5.17:1 — all on white. */
+ /* the site's committed tokens. Ink 17:1, ink-2 8:1, muted 5:1, accent 5.17:1, all on white. */
  :root[data-theme=light]{color-scheme:light;
    --accent:#2563eb;--accent-2:#1d4ed8;--accent-soft:#eef3ff;--accent-line:#cfe0ff;
    --bg:#fff;--bg-2:#f6f8fb;--field:#e9ecf1;--surface:#fff;--line:#e7eaf0;--line-2:#d7dce4;
@@ -129,7 +129,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  #ruler .t s{position:absolute;left:4px;top:2px;color:var(--ink-2);text-decoration:none;font-size:11px}
  #ruler .t.end s{left:auto;right:4px}
  #ruler .t s em{color:var(--muted);font-style:normal;margin-left:5px}
- /* a transition is a moment, not a layer — it lives on the ruler, above every track */
+ /* a transition is a moment, not a layer: it lives on the ruler, above every track */
  #ruler .m{position:absolute;top:15px;bottom:0;border-left:2px solid;padding-left:3px;font-size:10px;font-weight:700;white-space:nowrap}
  #ruler .ms{position:absolute;top:15px;bottom:0;opacity:.2}
  #rows{position:relative}
@@ -249,7 +249,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  }
  function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n); read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n; ph.style.left='calc(16px + '+pc(n/fps)+')'; if(selIdx>=0&&!dragging)selReadout(); }
  const errBox=document.getElementById('err');
- // The engine already knows why it did not boot — core/boot.js runs core/validate.mjs before the first
+ // The engine already knows why it did not boot, core/boot.js runs core/validate.mjs before the first
  // frame and parks the reason on __engineError. Waiting only on __engineReady turned that into a blank
  // stage, which is the same picture a slow load gives, so the one state that needs a message had none.
  // The deadline covers the third case: neither flag ever arrives (a syntax error before boot even runs).
@@ -261,7 +261,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    if(!w.__engineReady||!w.__engine){
      const dl=deadline||Date.now()+20000;
      if(Date.now()>dl) return fail('the scene never signalled ready',
-       'No __engineReady and no __engineError after 20s. The page failed before core/boot.js could report — open '+sc.src+' directly and read the console.');
+       'No __engineReady and no __engineError after 20s. The page failed before core/boot.js could report, open '+sc.src+' directly and read the console.');
      return setTimeout(()=>ready(dl),80); }
    errBox.hidden=true;
    const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; scrub.max=total; fit(); timeline(); n=0; draw(); }
@@ -279,7 +279,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  const esc=(s)=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
  // A lane bar carries its own label, so the fill and the label have to pass contrast TOGETHER. Dark
  // keeps the light-on-dark neons (dark label). Light inverts the relationship rather than the colours:
- // saturated fills carrying WHITE labels, every one at or above 4.9:1 against white — the same trick a
+ // saturated fills carrying WHITE labels, every one at or above 4.9:1 against white, the same trick a
  // status chip uses, and the reason the stack still reads as bars rather than as highlighted prose.
  const PALETTE={
   dark:{color:{text:'#5ee0c8',type:'#5ee0c8',count:'#84e06a',image:'#f0a35e',rect:'#5c6b86',component:'#b78bf0',html:'#b78bf0',
@@ -367,7 +367,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    document.getElementById('alerts').innerHTML=holes.map(([a,b,lab])=>{
      const dis=grown.some(([x,y])=>x<b-1e-9&&y>a+1e-9);
      return '<span'+(dis?' class=dis':'')+'>'+(dis?'? ':'⚠ ')+lab+' '+a.toFixed(2)+'s → '+b.toFixed(2)+'s'
-       +(dis?' — the engine holds a window open here that the JSON does not declare, so beat-check may be reading a hole that does not render':'')+'</span>'; }).join('');
+       +(dis?': the engine holds a window open here that the JSON does not declare, so beat-check may be reading a hole that does not render':'')+'</span>'; }).join('');
  }
  // drag anywhere in the lanes to seek; the playhead and the scrubber are the same value
  const seek=(e)=>{ const r=ruler.getBoundingClientRect(); n=Math.max(0,Math.min(total,Math.round((e.clientX-r.left)/r.width*dur*fps))); draw(); };
@@ -409,7 +409,7 @@ const studioRoutes = (req, res) => {
         const L = d.layers?.[layer];
         if (!L) return reply({ ok: false, error: `no layer at index ${layer}` }, 400);
         // A key is only meaningful at a time the layer is actually on screen, and `motion` t is LOCAL to
-        // the layer's start — the single easiest thing to get wrong when writing these by hand.
+        // the layer's start. The single easiest thing to get wrong when writing these by hand.
         const keys = upsertKey(Array.isArray(L.motion) ? L.motion : [], {
           t: +(+t).toFixed(3), x: Math.round(x), y: Math.round(y),
         });
@@ -429,10 +429,10 @@ const studioRoutes = (req, res) => {
   return false;
 };
 
-const oops = (e) => { console.error(e.code === 'EADDRINUSE' ? `✗ port ${PORT} is busy — set a free one: make studio D=${dataArg} PORT=8800` : e.message); process.exit(1); };
+const oops = (e) => { console.error(e.code === 'EADDRINUSE' ? `✗ port ${PORT} is busy, set a free one: make studio D=${dataArg} PORT=8800` : e.message); process.exit(1); };
 const { server } = await serveRepo({ port: PORT, route: studioRoutes }).catch((e) => (oops(e), {}));
 server.on('error', oops);
-console.log(`\n  ▶ vawe studio — ${path.basename(dataArg)}`);
+console.log(`\n  ▶ vawe studio: ${path.basename(dataArg)}`);
 console.log(`    open  http://127.0.0.1:${PORT}/studio`);
 console.log(`    scrub the slider · ← → step a frame · space plays · edit the JSON + reload to see changes`);
 console.log(`    timeline below: drag it to seek · hazard bands are dead air (beat-check) · hover a bar for its ramps`);

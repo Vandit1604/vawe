@@ -1,4 +1,4 @@
-// glyphs-audit.mjs — fail the build if a 3D typeface JSON no longer matches the font it came from.
+// glyphs-audit.mjs: fail the build if a 3D typeface JSON no longer matches the font it came from.
 //
 //   node scripts/gates/glyphs-audit.mjs
 //   make glyphs-audit
@@ -6,13 +6,13 @@
 // assets/fonts/3d/*.typeface.json are BAKED artifacts: outlines copied out of a woff2 at a moment in
 // time. Nothing at render time re-reads the woff2, so when the font is re-subset or swapped, the
 // stale JSON keeps loading, keeps parsing, and keeps rendering perfectly formed letters in the
-// PREVIOUS font. There is no error and no visual glitch to notice — the scene simply stops being in
+// PREVIOUS font. There is no error and no visual glitch to notice, the scene simply stops being in
 // the brand face. That is the same silent-substitution class this repo has shipped before, which is
 // why the artifact records its source hash and why this exits non-zero rather than warning.
 //
 // Two checks, because the artifact can lie in two directions:
-//   STALE   — the source woff2's bytes no longer hash to what the artifact was built from.
-//   GAPS    — the artifact claims a charset it does not actually cover, so TextGeometry will hit a
+//   STALE: the source woff2's bytes no longer hash to what the artifact was built from.
+//   GAPS: the artifact claims a charset it does not actually cover, so TextGeometry will hit a
 //             missing glyph and quietly substitute '?' (FontLoader's fallback) mid-headline.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,9 +22,9 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DIR = path.join(repoRoot, 'assets/fonts/3d');
 
-if (!fs.existsSync(DIR)) { console.log('  · no assets/fonts/3d yet — nothing to audit'); process.exit(0); }
+if (!fs.existsSync(DIR)) { console.log('  · no assets/fonts/3d yet, nothing to audit'); process.exit(0); }
 const files = fs.readdirSync(DIR).filter((f) => f.endsWith('.typeface.json')).sort();
-if (!files.length) { console.log('  · no typeface JSON in assets/fonts/3d — nothing to audit'); process.exit(0); }
+if (!files.length) { console.log('  · no typeface JSON in assets/fonts/3d, nothing to audit'); process.exit(0); }
 
 const problems = [];
 const hex = (cp) => `U+${cp.toString(16).toUpperCase().padStart(4, '0')}`;
@@ -83,9 +83,9 @@ for (const f of files) {
 }
 
 if (problems.length) {
-  console.error(`\n✗ glyphs audit FAILED — ${problems.length} problem(s) in assets/fonts/3d:\n`);
+  console.error(`\n✗ glyphs audit FAILED: ${problems.length} problem(s) in assets/fonts/3d:\n`);
   for (const p of problems) console.error(`  ✗ ${p.rel}  [${p.kind}]\n      ${p.msg}\n`);
   console.error('A stale typeface JSON renders flawlessly in the WRONG font. Nothing else will tell you.');
   process.exit(1);
 }
-console.log(`\n✓ glyphs audit OK — ${files.length} typeface artifact(s), each matching its source woff2 and covering the charset it claims`);
+console.log(`\n✓ glyphs audit OK: ${files.length} typeface artifact(s), each matching its source woff2 and covering the charset it claims`);

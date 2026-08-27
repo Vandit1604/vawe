@@ -1,5 +1,5 @@
-/* scene — the OPEN CANVAS. A generic, data-driven layered composition: the JSON is the
-   video. No per-topic code, no sealed scenes — layers (text/image/component/rect) + timed
+/* scene. The OPEN CANVAS. A generic, data-driven layered composition: the JSON is the
+   video. No per-topic code, no sealed scenes. Layers (text/image/component/rect) + timed
    windows + kinetic splits + the cut kit (core/cuts.js) + shader stings
    (core/stings.js) + theme bg presets on canvas + a global camera. Everything pure in n. */
 .chrome { display: none; }
@@ -36,13 +36,13 @@
   font: 700 46px var(--font-sans), sans-serif; color: var(--text); text-shadow: 0 3px 24px rgba(0,0,0,0.7);
   opacity: 0; }
 .hs-cap.word { font-weight: 800; }
-/* pop: muted-social burned-in subtitle — big, bottom-third safe zone, high-contrast, accent emphasis */
+/* pop: muted-social burned-in subtitle, big, bottom-third safe zone, high-contrast, accent emphasis */
 .hs-cap.pop { left: 8%; right: 8%; bottom: max(12%, var(--safe-bottom, 12%)); font: 800 64px var(--font-sans), sans-serif;
   letter-spacing: -0.01em; color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.95); }
 .hs-cap.pop b, .hs-cap.pop em { color: var(--accent); font-style: normal; }
-/* caption STYLES (wave 1) — word-timed treatments on the pop layout (core/captions.js drives
+/* caption STYLES (wave 1): word-timed treatments on the pop layout (core/captions.js drives
    the per-word progress). All look values are theme tokens; the .styled scrim plate exists so
-   contrast is computable — the video content behind a caption is unknown, a plate is not. */
+   contrast is computable: the video content behind a caption is unknown, a plate is not. */
 .hs-cap.styled { left: 8%; right: 8%; bottom: max(12%, var(--safe-bottom, 12%)); font: 700 64px var(--font-sans), sans-serif;
   letter-spacing: -0.01em; color: var(--text); text-shadow: none;
   background: color-mix(in srgb, var(--bg) 78%, transparent);

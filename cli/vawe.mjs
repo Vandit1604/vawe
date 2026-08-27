@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// cli/vawe.mjs — the npm entry point.  `npx vawe my.json [--draft] [--aspect 9:16]`
+// cli/vawe.mjs: the npm entry point.  `npx vawe my.json [--draft] [--aspect 9:16]`
 //
 // WHY A WRAPPER AND NOT JUST THE BINARY. The Go renderer is already relocatable: repoRoot()
 // (cmd/render/main.go:267) walks up from cwd for a directory holding formats/ and core/, and REPO
@@ -11,7 +11,7 @@
 //      .vawe-data/scenes/ .vawe-data/uploads/). A scene sitting in the user's own directory cannot be
 //      fetched by the page, and the engine says so by name. `.vawe-data/scenes/` is the sanctioned
 //      drop path, so the scene is STAGED there and removed afterwards.
-//   2. Output lands in `$REPO/out/` (main.go:98,208) — inside the installed package, where nobody
+//   2. Output lands in `$REPO/out/` (main.go:98,208), inside the installed package, where nobody
 //      will look. The mp4 is copied back to the working directory.
 //   3. ffmpeg is spawned off PATH (internal/encode/encode.go:12) and Chrome honours CHROME_BIN
 //      (internal/scene/scene.go:141). Both are supplied here when we can, and REFUSED LOUDLY when we
@@ -34,11 +34,11 @@ const die = (msg, hint) => {
 
 const argv = process.argv.slice(2);
 if (!argv.length || argv[0] === '-h' || argv[0] === '--help') {
-  console.log(`vawe — one JSON, one video.
+  console.log(`vawe: one JSON, one video.
 
   vawe <scene.json> [--draft] [--aspect 16:9,9:16] [--no-grain]
 
-  --draft   fast, no grain, single sample — for iteration
+  --draft   fast, no grain, single sample, for iteration
   Renders into the current directory. Engine: ${ROOT}`);
   process.exit(argv.length ? 0 : 1);
 }
@@ -49,7 +49,7 @@ if (!fs.existsSync(scene)) die(`no such file: ${scene}`);
 
 // PICK THE BINARY FOR THIS MACHINE, AND REFUSE ONE BUILT FOR ANOTHER.
 //
-// This used to be `process.platform === 'win32' ? 'vawe.exe' : 'vawe'` — a FILENAME choice with no
+// This used to be `process.platform === 'win32' ? 'vawe.exe' : 'vawe'`, a FILENAME choice with no
 // architecture check at all. `bin/` ships inside the npm package, so whatever machine published it
 // decided everyone's architecture. Published from an Apple Silicon Mac, the tarball carries a
 // `Mach-O arm64` binary, and then:
@@ -59,7 +59,7 @@ if (!fs.existsSync(scene)) die(`no such file: ${scene}`);
 // The user is told the wrong thing about a working install of the wrong build.
 //
 // So the host's own identity picks the file, and the file's MAGIC BYTES are read back before we spawn
-// it — the same read-back-from-a-boundary-you-do-not-own rule the engine applies to GSAP eases and CSS
+// it. The same read-back-from-a-boundary-you-do-not-own rule the engine applies to GSAP eases and CSS
 // declarations. The OS loader will not tell us politely, so we ask the bytes first.
 const TRIPLE = `${process.platform}-${process.arch}`;
 const EXE = process.platform === 'win32' ? '.exe' : '';
@@ -88,7 +88,7 @@ if (builtFor && builtFor !== process.platform) {
 }
 
 // ffmpeg: prefer a bundled static build, fall back to PATH, refuse if neither. `ffmpeg-static` is an
-// OPTIONAL dependency on purpose — it is ~80MB, and a machine that already has ffmpeg should not pay
+// OPTIONAL dependency on purpose. It is ~80MB, and a machine that already has ffmpeg should not pay
 // for a second copy.
 const env = { ...process.env };
 let ffmpegNote = 'system ffmpeg (on PATH)';
@@ -109,7 +109,7 @@ if (ffmpegNote.startsWith('system')) {
 }
 
 // Chrome: an explicit CHROME_BIN always wins. Otherwise offer puppeteer's download if it is there, and
-// stay silent if it is not — chromedp finds a system Chrome on its own, and overriding that with a
+// stay silent if it is not, chromedp finds a system Chrome on its own, and overriding that with a
 // guess would be worse than leaving it alone.
 if (!env.CHROME_BIN) {
   try {
@@ -118,7 +118,7 @@ if (!env.CHROME_BIN) {
     // EXISTS IS NOT RUNS, and here the difference is a support ticket. Puppeteer's bundled Chrome needs
     // libnss3/libatk/libgbm, which minimal, cloud and Docker Linux images routinely lack. Handing that
     // path to chromedp would surface as "error while loading shared libraries" from the OS loader, deep
-    // inside the Go process, long after Node could explain it — and CHROME_BIN would have OVERRIDDEN a
+    // inside the Go process, long after Node could explain it, and CHROME_BIN would have OVERRIDDEN a
     // perfectly good system browser to get there. So the binary is asked whether it works, and stays
     // unset if it does not: chromedp then finds the system Chrome it would have found anyway.
     if (p && fs.existsSync(p) && spawnSync(p, ['--version'], { timeout: 10000 }).status === 0) env.CHROME_BIN = p;
@@ -130,8 +130,8 @@ env.REPO = ROOT;
 //
 // `{type:"block"}` / `{type:"beat"}` / `{type:"comp"}` are authoring sugar that a Node build step
 // resolves (scripts/author/expand-blocks.mjs); the Go renderer never expands, it only strips the
-// `.expanded` suffix off the output name (main.go:184-188). So without this, any scene using a block —
-// which is most of them — reaches the validator as an unknown layer type and dies. That is exactly the
+// `.expanded` suffix off the output name (main.go:184-188). So without this, any scene using a block,
+// which is most of them, reaches the validator as an unknown layer type and dies. That is exactly the
 // failure the gh-wrapped source shows when it is validated directly instead of expanded.
 //
 // It runs UNCONDITIONALLY rather than sniffing for sugar, because expansion is a verified no-op on a

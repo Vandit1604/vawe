@@ -1,4 +1,4 @@
-// scripts/site/og-image.mjs — the social card, rendered from one HTML file.
+// scripts/site/og-image.mjs: the social card, rendered from one HTML file.
 //
 //   node scripts/site/og-image.mjs            # write site/public/assets/og.png
 //

@@ -1,4 +1,4 @@
-// scripts/brand/house-style.mjs — scaffold a brand's persisted DESIGN READ as declarative markdown, so the
+// scripts/brand/house-style.mjs: scaffold a brand's persisted DESIGN READ as declarative markdown, so the
 // planning skill reads taste instead of re-deriving it every video (the another engine "house style" pattern).
 // Measured facts (faces, palette, motion, dominance) are auto-filled from themes/<name>.json; the
 // judgment lines (<…>) are yours to sharpen from the site study. Writes assets/brands/<name>/house-style.md.
@@ -25,9 +25,9 @@ const motionFeel = (M.bounce ?? 0) > 0.1 ? 'playful (has bounce)' : (M.settle ??
 const dir = path.join('assets', 'brands', brand);
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, 'house-style.md');
-const keep = fs.existsSync(out); // don't clobber hand-sharpened judgment on re-run — only refresh a fenced block
+const keep = fs.existsSync(out); // don't clobber hand-sharpened judgment on re-run, only refresh a fenced block
 
-const measured = `<!-- MEASURED:START (auto-filled from themes/${themeName}.json — safe to regenerate) -->
+const measured = `<!-- MEASURED:START (auto-filled from themes/${themeName}.json, safe to regenerate) -->
 - **Dominance:** ${dominance} (bg \`${C.bg}\`, luma ${luma(C.bg).toFixed(2)})
 - **Faces:** sans \`${P.sans || '?'}\` · serif \`${P.serif || '?'}\` · mono \`${P.mono || '?'}\`
 - **Palette (use ONLY these):** bg \`${C.bg}\` · text \`${C.text}\` · accent \`${C.accent}\` · up \`${C.up}\` · down \`${C.down}\`
@@ -44,7 +44,7 @@ if (keep) {
   }
 }
 
-const body = `# House style — ${brand}
+const body = `# House style: ${brand}
 
 > The persisted **Design Read** for ${brand}. The planning skill reads this FIRST so taste isn't
 > re-derived each video and every render stays on-brand. The measured block is auto-filled from
@@ -60,24 +60,24 @@ ${measured}
 - **The extremes** (2-3 details WRONG for any other brand): <e.g. logos inline in headlines · gray-ink fear section>
 
 ## Type
-- **Headline:** \`${P.sans || '?'}\` at its measured weight, <tracking> — <personality in a phrase>
+- **Headline:** \`${P.sans || '?'}\` at its measured weight, <tracking>, <personality in a phrase>
 - **Rule:** <e.g. one huge hero + a tiny mono caption; scale contrast over decoration>
 
 ## Colour
 - **Accent usage:** <e.g. ≤10% of the surface, one accent moment per beat>
-- **Dominance:** ${dominance} — <confirm by LOOKING at the hero, not just the number>
+- **Dominance:** ${dominance}, <confirm by LOOKING at the hero, not just the number>
 
 ## Shape & surface
-- <e.g. hairline cards (1px), radius 14, NO shadows/elevation — the site is flat and technical>
+- <e.g. hairline cards (1px), radius 14, NO shadows/elevation, the site is flat and technical>
 
 ## Motion
-- ${motionFeel} — <e.g. payoffs snap 0.25-0.35s, thesis lines luxurious, whip cuts only same-bg>
+- ${motionFeel}: <e.g. payoffs snap 0.25-0.35s, thesis lines luxurious, whip cuts only same-bg>
 
 ## Signature details (what this brand does that nothing else does)
 - <detail 1> · <detail 2> · <detail 3>
 
 ## Background
-- <e.g. plain paper only — the real site is flat, so NO invented dots/shapes/aurora>
+- <e.g. plain paper only. The real site is flat, so NO invented dots/shapes/aurora>
 
 ## NEVER
 - <e.g. gradients · centered heroes · Inter · stock imagery · em-dashes on screen>
@@ -87,4 +87,4 @@ ${measured}
 `;
 
 fs.writeFileSync(out, body);
-console.log(`wrote ${out} — fill the <…> judgment lines from the site study.`);
+console.log(`wrote ${out}: fill the <…> judgment lines from the site study.`);

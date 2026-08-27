@@ -1,8 +1,8 @@
-// scripts/site/examples-gallery.mjs — build a hover-to-play showcase from the flagship example registry.
+// scripts/site/examples-gallery.mjs: build a hover-to-play showcase from the flagship example registry.
 // Reads formats/scene/examples.json, copies each rendered video into out/gallery/, and writes a single
 // self-contained out/gallery/index.html: a "start from a use case" table + portrait/landscape grids of
 // cards that play on hover and park on a poster frame on leave (the another engine template-gallery pattern).
-// Run via `make gallery`. Render the videos first (make video / beatsync) — a missing video is warned, not fatal.
+// Run via `make gallery`. Render the videos first (make video / beatsync), a missing video is warned, not fatal.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,11 +21,11 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const ready = [];
 for (const it of items) {
   const src = path.join(repoRoot, 'out', it.video);
-  if (!fs.existsSync(src)) { console.warn(`  ⚠ ${it.title}: out/${it.video} not found — render it first (make video / beatsync). Skipped.`); continue; }
+  if (!fs.existsSync(src)) { console.warn(`  ⚠ ${it.title}: out/${it.video} not found, render it first (make video / beatsync). Skipped.`); continue; }
   fs.copyFileSync(src, path.join(OUT, it.video));
   ready.push(it);
 }
-if (!ready.length) { console.error('no rendered videos found — nothing to build. Render the examples, then re-run.'); process.exit(1); }
+if (!ready.length) { console.error('no rendered videos found. Nothing to build. Render the examples, then re-run.'); process.exit(1); }
 
 const card = (it) => `
   <figure class="card ${it.orientation}" data-poster="${it.poster ?? 0}">

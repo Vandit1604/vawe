@@ -1,11 +1,11 @@
-// schema-drift.mjs — keep the DATA CONTRACT honest. The engine (scene.html) reads layer props as
+// schema-drift.mjs: keep the DATA CONTRACT honest. The engine (scene.html) reads layer props as
 // `L.<prop>` / `C.<prop>`; the schema (schema.json) is what validate knows about. When a new
 // primitive ships a prop that never gets registered (e.g. `motion` did), validation silently passes and
 // it drifts. This asserts every prop the engine reads is defined somewhere in the schema.
 //
-//   node scripts/gates/schema-drift.mjs            (make schema-check) — exits 1 on drift
-//   node scripts/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part
-//                                                  — layerProps AND the registry-owned enums — then
+//   node scripts/gates/schema-drift.mjs            (make schema-check), exits 1 on drift
+//   node scripts/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part,
+//                                                  layerProps AND the registry-owned enums, then
 //                                                  re-run with no flag to verify
 //
 // THE PER-LAYER VOCABULARY IS GENERATED, NOT MAINTAINED. `schema.layerProps` is written by this file
@@ -36,7 +36,7 @@ import path from 'node:path';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 // THE ENGINE IS EVERY FILE THAT READS A LAYER PROP, and that list is derived rather than remembered.
 // It was `scene.html` + `core/layers/*.js`, written when scene.html WAS the orchestrator. scene.html
-// is now a 20-line shell that imports scene.js, and it contains zero `L.` reads — so for as long as
+// is now a 20-line shell that imports scene.js, and it contains zero `L.` reads, so for as long as
 // that split has existed, every prop read only by the orchestrator (cut · vars · react · motionBlur ·
 // borderTrail · circle · becomes · panWith …) was outside the check, and the gate reported green over
 // the blind spot (docs/MISTAKES.md #229).
@@ -107,7 +107,7 @@ const OWNED = [
   { path: 'seams.item.timing',  want: Object.keys(TIMINGS),                    src: 'core/cuts.js TIMINGS' },
   { path: 'spectacle.fields.device', want: SPECTACLE_DEVICES.names,           src: 'core/knobs.js SPECTACLE_DEVICES' },
   // unified transitions: `timing` mirrors TIMINGS; `fx` is intentionally NOT enumerated (its valid set
-  // is the union of all four registries — the router in transitions-lower.js is the drift-proof guard).
+  // is the union of all four registries. The router in transitions-lower.js is the drift-proof guard).
   { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },
   { path: 'layers.item.cutTiming', want: Object.keys(TIMINGS),                 src: 'core/cuts.js TIMINGS (via TIMING_REGISTRY)' },
   { path: 'layers.item.modifiers.item.mixBlend', want: BLEND_MODES,            src: 'core/fx/mix-blend.js BLEND_MODES' },
@@ -128,7 +128,7 @@ const OWNED = [
 // rewritten too, and that is harmless: same values in, same values out, only the registry's order.
 const ENUM_RE = /"enum"\s*:\s*\[[^\]]*\]/g;
 
-// Same layout in, same layout out — multi-line stays multi-line at its own indent, one-line stays one.
+// Same layout in, same layout out: multi-line stays multi-line at its own indent, one-line stays one.
 function renderEnum(found, values) {
   const json = values.map((v) => JSON.stringify(v));
   if (!found.includes('\n')) return `"enum": [${json.join(', ')}]`;
@@ -241,7 +241,7 @@ if (process.argv.includes('--write')) {
 }
 
 // props the engine reads off a layer/child object (L.<prop>, LL.<prop> or C.<prop>). `LL` is the same
-// layer under an inner name where `L` is already taken — core/three-fx.js has always done it, and
+// layer under an inner name where `L` is already taken, core/three-fx.js has always done it, and
 // core/surfaces does it in the per-frame draw. scripts/gates/layer-props.mjs has matched all three
 // since it shipped; this pattern matched two, so a prop read only as `LL.` counted as read nowhere.
 const engineProps = new Set();
@@ -263,16 +263,16 @@ const INTERNAL = new Set(['type', 'children', 'part', 'use']);
 
 const missing = [...engineProps].filter((p) => !defined.has(p) && !INTERNAL.has(p)).sort();
 if (missing.length) {
-  console.error(`✗ schema drift — engine reads ${missing.length} prop(s) not in schema.json:`);
+  console.error(`✗ schema drift: engine reads ${missing.length} prop(s) not in schema.json:`);
   for (const p of missing) console.error(`    • L.${p}`);
   console.error('  add them to formats/scene/schema.json (or to INTERNAL in this script if truly computed).');
   process.exit(1);
 }
-console.log(`✓ schema in sync — all ${engineProps.size} engine props are defined in schema.json`);
+console.log(`✓ schema in sync: all ${engineProps.size} engine props are defined in schema.json`);
 
 // EVERY enum in the schema is a COPY of a registry the engine owns, and a copy drifts. The schema
 // once advertised "slideL", an anim that never existed and so silently resolved to fade (#21). This
-// check existed for exactly that — and covered ONE enum out of eight. Adding `nebula` to AMBIENT_FX
+// check existed for exactly that, and covered ONE enum out of eight. Adding `nebula` to AMBIENT_FX
 // made the schema reject a valid value and nothing said so until a scene failed to validate
 // (docs/MISTAKES.md #82). Every vocabulary the engine owns is compared here now, both directions.
 {
@@ -307,7 +307,7 @@ console.log(`✓ schema in sync — all ${engineProps.size} engine props are def
       // generator can invent. The shared fix line below said --write and it does nothing for this
       // block, so an author ran it, saw the same failure, and had no next move.
       console.error('    fix: add the key by hand to layers.item.modifiers.item in formats/scene/schema.json'
-        + ' — this block is a hand-written prop schema per modifier, NOT a generated enum.');
+        + ': this block is a hand-written prop schema per modifier, NOT a generated enum.');
       bad++;
     } else checked++;
   }

@@ -1,4 +1,4 @@
-// verify/run.js — light, format-agnostic checks (no per-format special-casing).
+// verify/run.js: light, format-agnostic checks (no per-format special-casing).
 //   per format: integrity (ffprobe) + safe-zone (critical bboxes ⊂ SAFE) + a contact sheet.
 //   node verify/run.js [format ...]      (default: all formats)
 import fs from 'node:fs';
@@ -15,7 +15,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const formatsDir = path.join(repoRoot, 'formats');
 const OUT = path.join(repoRoot, 'verify', 'out');
 fs.mkdirSync(OUT, { recursive: true });
-// The canvas and the safe box come from the SAMPLE, via core/safe.js — the same function boot.js
+// The canvas and the safe box come from the SAMPLE, via core/safe.js, the same function boot.js
 // places against and verify/audit.mjs checks with. This file used to hardcode a portrait 1080x1920
 // viewport, a portrait safe box, and a 1080x1920 integrity assert, so it could only ever be right for
 // one of the five aspects the engine renders, and it was a fourth independent opinion on "safe".
@@ -29,7 +29,7 @@ const results = [];
 const add = (check, m, pass, detail) => results.push({ check, m, pass, detail });
 
 // assets: every image path in every data JSON must resolve to a real file (else broken-image placeholder).
-// Image extension only — audio refs (assets/music.wav) are resolved separately by the mixer.
+// Image extension only: audio refs (assets/music.wav) are resolved separately by the mixer.
 const isImg = (v) => typeof v === 'string' && /\.(svg|png|jpe?g|webp|gif)$/i.test(v);
 function imgRefs(o, acc = []) {
   if (!o || typeof o !== 'object') return acc;

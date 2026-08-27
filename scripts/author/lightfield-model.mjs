@@ -1,4 +1,4 @@
-// scripts/author/lightfield-model.mjs — the colour field, evaluated on the CPU, and the palette
+// scripts/author/lightfield-model.mjs: the colour field, evaluated on the CPU, and the palette
 // that best fits a photograph under it.
 //
 // WHY THIS EXISTS. `lightfield-seeds.mjs` and `lightfield-fit.mjs` both import this file. Neither has

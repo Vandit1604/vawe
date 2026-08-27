@@ -1,4 +1,4 @@
-// scripts/gates/sim-audit.mjs — is the offline tier still deterministic, and is what shipped
+// scripts/gates/sim-audit.mjs: is the offline tier still deterministic, and is what shipped
 // actually what the sim says?
 //
 //   node scripts/gates/sim-audit.mjs        (make sim-audit)
@@ -13,7 +13,7 @@
 //                     reproducibility.
 //   (ii)  STALE       the sim was edited after the bake. The old PNGs keep playing and the video
 //                     ships the previous version of the effect. This is the exact shape of MISTAKES
-//                     #96 — a record that does not grow stale loudly, decays quietly.
+//                     #96. A record that does not grow stale loudly, decays quietly.
 //   (iii) SEQUENCE    a frame is missing or misnumbered. `clip` indexes by array position, so one
 //                     absent PNG does not error: it shows the previous frame, or a broken <img>.
 //
@@ -37,11 +37,11 @@ const note = (kind, where, msg) => problems.push({ kind, where, msg });
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 
 const BANNED = [
-  { re: /\bMath\.random\s*\(/, why: 'Math.random() — use ctx.rng (sims/lib/rng.mjs), seeded from the sim\'s exported seed' },
-  { re: /\bDate\.now\s*\(/, why: 'Date.now() — a bake that depends on when it ran is not a bake' },
-  { re: /\bnew\s+Date\s*\(/, why: 'new Date() — same: wall-clock time makes the bake unrepeatable' },
-  { re: /\bperformance\.now\s*\(/, why: 'performance.now() — wall-clock time' },
-  { re: /\bcrypto\.getRandomValues\s*\(/, why: 'crypto.getRandomValues() — platform entropy' },
+  { re: /\bMath\.random\s*\(/, why: 'Math.random(), use ctx.rng (sims/lib/rng.mjs), seeded from the sim\'s exported seed' },
+  { re: /\bDate\.now\s*\(/, why: 'Date.now(). A bake that depends on when it ran is not a bake' },
+  { re: /\bnew\s+Date\s*\(/, why: 'new Date(), same: wall-clock time makes the bake unrepeatable' },
+  { re: /\bperformance\.now\s*\(/, why: 'performance.now(), wall-clock time' },
+  { re: /\bcrypto\.getRandomValues\s*\(/, why: 'crypto.getRandomValues(), platform entropy' },
   { re: /\bMath\.random\b/, why: 'a reference to Math.random' },
 ];
 
@@ -67,7 +67,7 @@ for (const f of sims) {
 }
 
 // ---- contract: every entry sim exports the shape the runner calls --------------------------------
-// `lib/` holds helpers, not sims, so it is exempt by PATH rather than by name — a name-based exempt
+// `lib/` holds helpers, not sims, so it is exempt by PATH rather than by name, a name-based exempt
 // list is the thing that stops matching the moment somebody adds a second helper (MISTAKES #96).
 const REQUIRED = ['dims', 'fps', 'frames', 'seed', 'setup', 'step', 'draw'];
 const entrySims = sims.filter((f) => path.dirname(f) === SIMS);
@@ -92,8 +92,8 @@ for (const name of bakes) {
   const dir = path.join(BAKED, name);
   const rel = `assets/baked/${name}`;
   const metaP = path.join(dir, 'meta.json'), manP = path.join(dir, 'manifest.json');
-  if (!fs.existsSync(metaP)) { note('sequence', rel, 'no meta.json — this bake has no provenance, so nothing can tell whether it is current. Re-bake it.'); continue; }
-  if (!fs.existsSync(manP)) { note('sequence', rel, 'no manifest.json — the clip layer has nothing to play.'); continue; }
+  if (!fs.existsSync(metaP)) { note('sequence', rel, 'no meta.json. This bake has no provenance, so nothing can tell whether it is current. Re-bake it.'); continue; }
+  if (!fs.existsSync(manP)) { note('sequence', rel, 'no manifest.json. The clip layer has nothing to play.'); continue; }
 
   let meta, man;
   try { meta = JSON.parse(fs.readFileSync(metaP, 'utf8')); man = JSON.parse(fs.readFileSync(manP, 'utf8')); }
@@ -123,8 +123,8 @@ for (const name of bakes) {
   for (let i = 0; i < (man.frames || []).length; i++) {
     const want = `f${String(i + 1).padStart(4, '0')}.png`;
     const got = path.basename(man.frames[i] || '');
-    if (got !== want) { note('sequence', rel, `frame ${i} is "${got}", expected "${want}" — a misnumbered sequence plays the wrong moment silently`); break; }
-    if (!fs.existsSync(path.join(dir, want))) { note('sequence', rel, `${want} is declared in the manifest and missing on disk — clip would hold the previous frame rather than error`); break; }
+    if (got !== want) { note('sequence', rel, `frame ${i} is "${got}", expected "${want}". A misnumbered sequence plays the wrong moment silently`); break; }
+    if (!fs.existsSync(path.join(dir, want))) { note('sequence', rel, `${want} is declared in the manifest and missing on disk. Clip would hold the previous frame rather than error`); break; }
   }
   if (man.fps !== meta.fps) note('sequence', rel, `manifest fps ${man.fps} disagrees with meta fps ${meta.fps}`);
 }
@@ -134,14 +134,14 @@ console.log('── sim audit: seeded, fresh, intact?\n');
 console.log(`   sims:  ${entrySims.length} (+${sims.length - entrySims.length} helper module(s))`);
 console.log(`   bakes: ${bakes.length}${bakes.length ? '  ' + bakes.join(', ') : ''}`);
 // An audit over an empty set is not a pass, it is a no-op wearing a tick (MISTAKES #45/#68). Say so.
-if (!entrySims.length) console.log('\n   (no sims — nothing to check)');
+if (!entrySims.length) console.log('\n   (no sims: nothing to check)');
 console.log('');
 
 if (!problems.length) {
   console.log('='.repeat(72));
   // The old line claimed three things unconditionally. `assets/baked/` is gitignored, so a checkout with
   // none printed "every bake matches its source" having compared no bakes at all.
-  console.log(`✓ sim audit OK — ${entrySims.length ? `all ${entrySims.length} sim(s) seeded` : 'no sims to seed-check'}`
+  console.log(`✓ sim audit OK, ${entrySims.length ? `all ${entrySims.length} sim(s) seeded` : 'no sims to seed-check'}`
     + `, ${bakes.length ? `all ${bakes.length} bake(s) match their source and their sequences are intact` : 'NO bakes present (assets/baked is gitignored) so nothing was compared against a source'}`);
   process.exit(0);
 }

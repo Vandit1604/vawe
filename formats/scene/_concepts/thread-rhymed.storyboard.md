@@ -3,7 +3,7 @@ message: hand-animating a video is fine until the number changes, and then you d
 audience: people who rebuild the same product video every time a figure moves
 arc: a familiar grind, named clause by clause, until the thing that ends it arrives
 thread: match cut
-object: none — the thread is match cut
+object: none, the thread is match cut
 duration: 15s
 format: 1080x1920
 concept: rhymed · warm (dark)
@@ -31,7 +31,7 @@ concept: rhymed · warm (dark)
 ## Beat 2: <name this beat> (1.88s-3.76s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -52,7 +52,7 @@ concept: rhymed · warm (dark)
 ## Beat 4: <name this beat> (5.64s-7.52s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -84,7 +84,7 @@ concept: rhymed · warm (dark)
 ## Beat 7: <name this beat> (11.28s-13.16s)
 - type: proof
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

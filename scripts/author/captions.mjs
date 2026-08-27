@@ -1,4 +1,4 @@
-// captions.mjs — burn muted-social subtitles onto a video with zero hand-timing. Splits a script into
+// captions.mjs: burn muted-social subtitles onto a video with zero hand-timing. Splits a script into
 // short readable phrases and distributes them across the video's duration (time ∝ word count), then
 // writes `captions` + `captionMode:"pop"` into the JSON. Deterministic: same script + duration → same
 // timing. Emphasise a word with <b>…</b> in the script (renders in the theme accent).

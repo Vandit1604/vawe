@@ -2,12 +2,12 @@
 message: "One markdown file, written once, and every coding agent you open already knows who you are."
 audience: "Developers who use several AI coding agents and re-explain themselves to each one."
 arc: "hook → thesis → anatomy → detail → reach → proof → consent → compounding → quality → recap → CTA"
-framework: "PAS — the pain is re-explaining yourself, the agitation is that it happens on every session with every tool, the solution is one file they all read."
+framework: "PAS. The pain is re-explaining yourself, the agitation is that it happens on every session with every tool, the solution is one file they all read."
 threads: "a motif (the same paper card, always titled preface.md, returning at five different sizes: hero, anatomy, ring centre, recap, and the mark on the end card) + a through-line (one person's file, filled in beat 3, quoted back in beat 6, extended by consent in beat 7, scored in beat 9)"
 format: 1920x1080
 theme: "themes/preface.json"
 duration: 53s
-pace: "explainer, about 4.8s per idea — eleven ideas over 53s, ten cuts, one backdrop window each"
+pace: "explainer, about 4.8s per idea. Eleven ideas over 53s, ten cuts, one backdrop window each"
 spectacle: "beat 5 · the ring layer `agentring` · ten spokes DRAW outward from the file at once, the ten agent nodes pop behind their logos, and a ripple leaves the centre while the camera dives to 1.13 · this is the only moment the film raises its voice, and it is the moment the argument stops being about a file and starts being about ten tools at once."
 not: "no captured third-party UI, no recreation of anyone's marketing page, no invented company wordmark, no live domain, no stock photography, no gradient hero, no narration, and no beat that shouts except beat 5."
 ---

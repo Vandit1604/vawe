@@ -1,4 +1,4 @@
-// scripts/site/effects-json.mjs — derive the site's effects index from the SAME family list that
+// scripts/site/effects-json.mjs: derive the site's effects index from the SAME family list that
 // generates docs/EFFECTS.md, plus one playable scene per previewable effect.
 //
 //   node scripts/site/effects-json.mjs [--check]   ·   make effects-json
@@ -34,7 +34,7 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g
 // user-facing surface here (CLAUDE.md, hard rules), and the blurbs live in core/ where this script
 // has no business editing them, so the dash is normalised on the way out. The middle dot is the
 // sanctioned replacement and it is what the rest of the site already uses.
-const prose = (s) => String(s).replace(/\s*[—–]\s*/g, ' · ');
+const prose = (s) => String(s).replace(/\s*[: –]\s*/g, ' · ');
 const j = (o) => JSON.stringify(o, null, 2);
 
 // ── the JSON an author writes, per family ───────────────────────────────────────────────────────
@@ -218,7 +218,7 @@ const families = sections.map(([title, intro, list, tag, meta]) => {
 });
 
 if (gaps.length) {
-  console.error('✗ effects-json: a family is not described —');
+  console.error('✗ effects-json: a family is not described, ');
   for (const g of gaps) console.error(`    ${g}`);
   console.error('  Add its authoring form to USAGE, and either a PREVIEW scene or a NO_PREVIEW reason.');
   process.exit(1);
@@ -236,11 +236,11 @@ const index = { total, previewed, families: families.length, tags, list: familie
 const counts = { total, previewed, families: families.length };
 const COUNTS = path.join(root, 'site/lib/effects-counts.json');
 
-// The authoring snippet, keyed by `stem`, for EVERY effect (not just the 227 previewable ones — a
+// The authoring snippet, keyed by `stem`, for EVERY effect (not just the 227 previewable ones, a
 // family with no live preview still gets a page that shows the JSON that uses it). This is what used
 // to be the `json` field on each index entry: 59KB of the 166KB the index shipped in the first byte,
 // for text that /showcase/effects (the list) never renders. It moves here because
-// site/app/showcase/effects/[stem]/page.tsx is a SERVER component — reading it there puts the text
+// site/app/showcase/effects/[stem]/page.tsx is a SERVER component, reading it there puts the text
 // straight into that one effect's static HTML and never into the client bundle the list page ships.
 const BODY = path.join(root, 'site/lib/effects-body.json');
 const bodies = Object.fromEntries(
@@ -270,8 +270,8 @@ if (CHECK) {
     || curCounts.trim() !== (j(counts) + '\n').trim()
     || curBody.trim() !== (j(bodies) + '\n').trim()
     || [...want].some(([f, body]) => !fs.existsSync(path.join(SCENES, f)) || fs.readFileSync(path.join(SCENES, f), 'utf8') !== body);
-  if (stale) { console.error('✗ site/lib/effects.json is stale — run `make effects-json`.'); process.exit(1); }
-  console.log(`✓ effects index in sync — ${total} effects, ${previewed} previewable`);
+  if (stale) { console.error('✗ site/lib/effects.json is stale, run `make effects-json`.'); process.exit(1); }
+  console.log(`✓ effects index in sync: ${total} effects, ${previewed} previewable`);
   process.exit(0);
 }
 
@@ -289,6 +289,6 @@ for (const f of fs.existsSync(SCENES) ? fs.readdirSync(SCENES) : []) {
 fs.writeFileSync(INDEX, j(index) + '\n');
 fs.writeFileSync(COUNTS, j(counts) + '\n');
 fs.writeFileSync(BODY, j(bodies) + '\n');
-console.log(`✓ site/lib/effects.json — ${total} effects across ${families.length} families, ${previewed} previewable`
-  + `\n✓ site/lib/effects-body.json — ${Object.keys(bodies).length} authoring snippets, read only by the per-effect pages`
-  + `\n✓ site/public/assets/effects — ${want.size} scenes (${wrote} written, ${gone} removed)`);
+console.log(`✓ site/lib/effects.json: ${total} effects across ${families.length} families, ${previewed} previewable`
+  + `\n✓ site/lib/effects-body.json: ${Object.keys(bodies).length} authoring snippets, read only by the per-effect pages`
+  + `\n✓ site/public/assets/effects: ${want.size} scenes (${wrote} written, ${gone} removed)`);

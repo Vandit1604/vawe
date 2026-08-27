@@ -1,4 +1,4 @@
-// gen-clip.mjs — turn a video (a kie.ai generation, or any mp4) into a DETERMINISTIC clip the engine
+// gen-clip.mjs: turn a video (a kie.ai generation, or any mp4) into a DETERMINISTIC clip the engine
 // can play frame-by-frame. renderFrame(n) must be pure, so we never seek a <video> mid-render (async
 // decode); instead we pre-extract the video to a PNG frame sequence + a manifest, and the `clip` layer
 // swaps a preloaded <img> src per frame. Frames are downscaled to the display width to stay light.

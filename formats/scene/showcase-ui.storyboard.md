@@ -2,7 +2,7 @@
 message: "The interface in this film was never recorded. Every frame of it is drawn from JSON."
 audience: "Engineers and designers reading the vawe docs site, deciding whether this engine can render their product."
 arc: "hook → build → proof → payoff"
-framework: "BAB — the frame opens on something familiar (a dashboard), turns it into something a capture could not do, and the bridge is the format itself."
+framework: "BAB. The frame opens on something familiar (a dashboard), turns it into something a capture could not do, and the bridge is the format itself."
 threads: "a continuous object (the panel lifted out of the dashboard survives the last cut and flies out of frame under the payoff) + a motif (a mono caption in the engine's own voice sits under every shot)"
 format: 1920x1080
 theme: "themes/vawe.json"

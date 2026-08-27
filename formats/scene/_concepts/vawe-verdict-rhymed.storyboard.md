@@ -3,7 +3,7 @@ message: vawe refuses to render a film that fails its own checks, and the film y
 audience: Developers evaluating a render engine, arriving through an agent, deciding whether to trust output nobody watched.
 arc: hook → measure → verdict → refusal → repair → sweep → payoff
 thread: match cut
-object: none — the thread is match cut
+object: none, the thread is match cut
 duration: 21s
 format: 1920x1080
 concept: rhymed · warm (dark)
@@ -31,7 +31,7 @@ concept: rhymed · warm (dark)
 ## Beat 2: <name this beat> (1.75s-3.5s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -52,7 +52,7 @@ concept: rhymed · warm (dark)
 ## Beat 4: <name this beat> (5.25s-7s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -73,7 +73,7 @@ concept: rhymed · warm (dark)
 ## Beat 6: <name this beat> (8.75s-10.5s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -105,7 +105,7 @@ concept: rhymed · warm (dark)
 ## Beat 9: <name this beat> (14s-15.75s)
 - type: proof
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -126,7 +126,7 @@ concept: rhymed · warm (dark)
 ## Beat 11: <name this beat> (17.5s-19.25s)
 - type: proof
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

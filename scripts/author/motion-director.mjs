@@ -1,4 +1,4 @@
-// scripts/author/motion-director.mjs — the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from
+// scripts/author/motion-director.mjs: the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from
 // the brand's motion personality (theme.motion) + the MOTION-CRAFT ruleset, so effects are chosen with
 // restraint instead of the author over-reaching. Suggest-first: prints a director's report; WRITE=1 (or
 // --write) applies the picks into <file>.directed.json. Deterministic (pure mapping, no Date/random).
@@ -16,13 +16,13 @@
 // from taste; this copies them.
 //
 // THE CENSUS SETS NO TARGET, and that is deliberate. It annotates findings that ALREADY fired and can
-// neither create one nor clear one — every threshold is exactly where it was. The library median is
+// neither create one nor clear one. Every threshold is exactly where it was. The library median is
 // printed as a description of what has been made here, never as a mark to reach, because a census that
 // became a target would push every film toward one rhythm and that is a worse library, not a better one
 // (the same reasoning that keeps pace-check's floor at the tenth percentile instead of the median).
 //
 // Usage: node scripts/author/motion-director.mjs <scene.json> [--write]   ·   make direct D=<file> [WRITE=1]
-//        node scripts/author/motion-director.mjs                          — the library census, no verdict
+//        node scripts/author/motion-director.mjs, the library census, no verdict
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -48,7 +48,7 @@ const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
 //
 // WHAT THE LIBRARY SAYS. Over all 135 gate-visible scenes, every motion-track segment that covers ground
 // in a span the engine treats as a span (DENSE_KEY_SEC, below): n=345 moves. Bucketed by distance, the
-// MEDIAN SPEED IS FLAT — 644 px/s over 50-150px, 652 over 150-300, 712 over 300-600, 697 over 600-1000.
+// MEDIAN SPEED IS FLAT, 644 px/s over 50-150px, 652 over 150-300, 712 over 300-600, 697 over 600-1000.
 // Flat speed is duration scaling with distance, linearly, and it is already what these films do. Carbon's
 // non-linear claim does not reproduce here. Below 50px the median drops to 72 px/s across 176 moves,
 // which is ambient drift and is deliberate.
@@ -98,7 +98,7 @@ function resolveFamily(d) {
 
   // Reference profiles (docs/CRAFT/SELECTION.md Part 2): a named target picks the whole look at once.
   // A scene opts in with a top-level "profile":"apple". `bounceOk` and the banned lists are the
-  // contradiction rules — a bounce preset on `apple` is wrong by rule, not by taste.
+  // contradiction rules. A bounce preset on `apple` is wrong by rule, not by taste.
   const profile = PROFILES[d.profile] || null;
   if (profile) { FAMILY.cuts = profile.cuts.length ? profile.cuts : FAMILY.cuts; FAMILY.stings = profile.stings; }
 
@@ -111,20 +111,20 @@ function tellProfile(d, layers, profile) {
   if (!profile) return nothing;
   const contradictions = [];
   const bounceUsed = layers.some((l) => ['bounce', 'elastic'].includes(l.preset));
-  if (bounceUsed && profile.bounceOk === false) contradictions.push(`bounce/elastic preset on "${d.profile}" — cheap on a serious brand (SELECTION §contradictions)`);
+  if (bounceUsed && profile.bounceOk === false) contradictions.push(`bounce/elastic preset on "${d.profile}", cheap on a serious brand (SELECTION §contradictions)`);
   for (const l of layers) {
-    if (l.cut && profile.banCuts.includes(l.cut)) contradictions.push(`cut "${l.cut}" on "${d.profile}" — announces an edit this profile hides`);
+    if (l.cut && profile.banCuts.includes(l.cut)) contradictions.push(`cut "${l.cut}" on "${d.profile}", announces an edit this profile hides`);
     // …and the ENTRANCE, which banCuts could never reach: `pop` is an anim and `bounce` is a preset, so
     // both sat in a cut list being compared against cut styles and never matched anything.
     for (const k of ['anim', 'preset']) {
-      if (l[k] && (profile.banMotion || []).includes(l[k])) contradictions.push(`${k} "${l[k]}" on "${d.profile}" — this profile's entrances do not overshoot`);
+      if (l[k] && (profile.banMotion || []).includes(l[k])) contradictions.push(`${k} "${l[k]}" on "${d.profile}". This profile's entrances do not overshoot`);
     }
   }
   for (const c of d.cuts || []) {
-    if (profile.banCuts.includes(c.style)) contradictions.push(`cut "${c.style}" @${c.t}s on "${d.profile}" — wrong for this profile's restraint`);
+    if (profile.banCuts.includes(c.style)) contradictions.push(`cut "${c.style}" @${c.t}s on "${d.profile}", wrong for this profile's restraint`);
   }
   const families = new Set((d.cuts || []).map((c) => c.style));
-  if (families.size > 2) contradictions.push(`${families.size} cut families in one film (${[...families].join(', ')}) — one film, one family`);
+  if (families.size > 2) contradictions.push(`${families.size} cut families in one film (${[...families].join(', ')}), one film, one family`);
   return { metrics: {}, findings: contradictions.map((c) => fail('profile', c)) };
 }
 
@@ -144,9 +144,9 @@ function beatsOf(layers) {
 
 // one cut family per film. Group the cut vocabulary by edit-grammar meaning (SELECTION §1).
 const CUT_FAMILY = {
-  soft: ['none', 'fade', 'blur', 'riseBlur', 'softwipe', 'softiris'],       // dissolves — hide the seam
+  soft: ['none', 'fade', 'blur', 'riseBlur', 'softwipe', 'softiris'],       // dissolves, hide the seam
   motion: ['whip', 'skewWhip', 'punch', 'zoom', 'slide', 'squeeze', 'drop', 'rise', 'jitter'], // directional pushes
-  shape: ['wipe', 'iris', 'clock', 'blinds', 'barn', 'letterbox'],          // matte reveals — notice the cut
+  shape: ['wipe', 'iris', 'clock', 'blinds', 'barn', 'letterbox'],          // matte reveals, notice the cut
   spatial: ['cube', 'flip', 'spin', 'roll', 'collapse'],                    // 3D dimensional turns
 };
 function tellCutFamilies(d, layers) {
@@ -154,8 +154,8 @@ function tellCutFamilies(d, layers) {
   const cutStyles = [...(d.cuts || []).map((c) => c.style), ...layers.map((l) => l.cut)].filter((s) => s && s !== 'none');
   const usedFamilies = [...new Set(cutStyles.map(familyOf))];
   const metrics = cutStyles.length ? { 'cut-families': usedFamilies.length } : {};
-  if (usedFamilies.length >= 3) return { metrics, findings: [fail('cut-families', `${usedFamilies.length} cut families (${usedFamilies.join(', ')}) — one film, one family (TASTE-RULES: restraint)`)] };
-  if (usedFamilies.length === 2) return { metrics, findings: [warn('cut-families', `2 cut families (${usedFamilies.join(', ')}) — prefer one; the director rotates WITHIN a family`)] };
+  if (usedFamilies.length >= 3) return { metrics, findings: [fail('cut-families', `${usedFamilies.length} cut families (${usedFamilies.join(', ')}). One film, one family (TASTE-RULES: restraint)`)] };
+  if (usedFamilies.length === 2) return { metrics, findings: [warn('cut-families', `2 cut families (${usedFamilies.join(', ')}). Prefer one; the director rotates WITHIN a family`)] };
   return { metrics, findings: [] };
 }
 
@@ -178,9 +178,9 @@ function tellEffectSoup(d, layers, beats) {
   const effectBeats = effectsPerBeat.filter((s) => s.size).length;
   const metrics = beats.length ? { 'effect-soup': effectBeats / beats.length } : {};
   if (beats.length >= 3 && effectBeats / beats.length > 0.6)
-    return { metrics, findings: [warn('effect-soup', `an effect on ${effectBeats}/${beats.length} beats — most beats should be clean type; effects are 2-3 earned moments (TASTE-RULES: effect soup)`)] };
+    return { metrics, findings: [warn('effect-soup', `an effect on ${effectBeats}/${beats.length} beats. Most beats should be clean type; effects are 2-3 earned moments (TASTE-RULES: effect soup)`)] };
   if (distinctEffects.size > Math.max(4, Math.ceil(beats.length / 2)))
-    return { metrics, findings: [warn('effect-soup', `${distinctEffects.size} distinct effects across ${beats.length} beats — a new look every beat is a demo reel, not a film`)] };
+    return { metrics, findings: [warn('effect-soup', `${distinctEffects.size} distinct effects across ${beats.length} beats. A new look every beat is a demo reel, not a film`)] };
   return { metrics, findings: [] };
 }
 
@@ -193,7 +193,7 @@ function tellContinuity(d, layers, beats) {
   if (beats.length < 4) return nothing;
   const metrics = { continuity: travelers.length };
   if (travelers.length === 0 && d.sceneUnits !== true)
-    return { metrics, findings: [warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat) — reads as a slideshow (TASTE-RULES: continuity). Or set "sceneUnits":true so each beat slides in/out as one unit.`)] };
+    return { metrics, findings: [warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat). Reads as a slideshow (TASTE-RULES: continuity). Or set "sceneUnits":true so each beat slides in/out as one unit.`)] };
   return { metrics, findings: [] };
 }
 
@@ -205,8 +205,8 @@ function tellPacing(d, duration) {
   const holds = cutTimes.map((t, i) => (cutTimes[i + 1] ?? (duration || t + 3)) - t);
   const tiny = holds.filter((h) => h > 0 && h < 0.9).length;
   const unreadable = holds.filter((h) => h > 0 && h < 0.5).length;
-  if (unreadable >= 2) return { metrics: {}, findings: [warn('pacing', `${unreadable} cuts less than 0.5s apart — too fast to read unless a deliberate montage`)] };
-  if (tiny / cutTimes.length > 0.5) return { metrics: {}, findings: [warn('pacing', `${tiny}/${cutTimes.length} cut-to-cut holds under 0.9s — chaotic pacing unless intentional`)] };
+  if (unreadable >= 2) return { metrics: {}, findings: [warn('pacing', `${unreadable} cuts less than 0.5s apart. Too fast to read unless a deliberate montage`)] };
+  if (tiny / cutTimes.length > 0.5) return { metrics: {}, findings: [warn('pacing', `${tiny}/${cutTimes.length} cut-to-cut holds under 0.9s. Chaotic pacing unless intentional`)] };
   return nothing;
 }
 
@@ -215,7 +215,7 @@ function tellDeadFinalFrame(layers, duration) {
   if (!(duration > 0 && layers.length)) return nothing;
   const holdsEnd = layers.some((l) => l.track !== 0 && (l.exitDur === 0 || (l.start ?? 0) + (l.dur ?? 1e9) >= duration - 0.15));
   if (holdsEnd) return nothing;
-  return { metrics: {}, findings: [warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s) — end on a held frame, exitDur:0, never fade the payoff`)] };
+  return { metrics: {}, findings: [warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s). End on a held frame, exitDur:0, never fade the payoff`)] };
 }
 
 // ---- MOTION MECHANICS: the book-grounded amateur tells (docs/CRAFT/DIRECTION.md) ----------------
@@ -311,7 +311,7 @@ function tellLinearMotion(layers) {
   return { metrics, findings: [warn('linear-motion', `${linearHits.length} move(s) run FLAT from rest to rest on ease "linear"/"none". A move that starts and stops must decelerate in / accelerate out (DIRECTION.md: slow-in/slow-out). A pan, scroll, marquee, spinner or ambient drift is exempt: it is entered or left in motion, it turns a full circle, it stays inside the ambient band, or its keys are spaced so the run already decelerates. At: ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? ', …' : ''}`)] };
 }
 
-// ---- DURATION AGAINST DISTANCE (measured, never a finding — see the header) ---------------------
+// ---- DURATION AGAINST DISTANCE (measured, never a finding. See the header) ---------------------
 // Nothing else here relates a move's LENGTH to its TIME, so a 40px nudge and a 900px sweep both take
 // whatever the author typed. This measures every keyed move so the report can place the fastest one.
 //
@@ -346,11 +346,11 @@ function measureKeyedSpeed(allLayers) {
 
 // monotone-timing: fires ONLY when the author took manual control of tempo and made it uniform.
 // A default-timed scene is fine (the engine default IS one deliberate snap band); this needs ≥6 layers
-// EXPLICITLY setting enterDur to one identical value — hand-set monotony (Murch: rhythm variety).
+// EXPLICITLY setting enterDur to one identical value, hand-set monotony (Murch: rhythm variety).
 function tellMonotoneTiming(allLayers) {
   const explicitDurs = allLayers.map((l) => l.enterDur).filter((v) => typeof v === 'number');
   if (!(explicitDurs.length >= 6 && new Set(explicitDurs).size === 1)) return nothing;
-  return { metrics: {}, findings: [warn('monotone-timing', `${explicitDurs.length} entrances all set enterDur:${explicitDurs[0]} — uniform tempo reads as monotone. Timing is a voice: ambient drifts slow (0.6-1s), payoffs snap (0.25-0.35s), thesis lines luxurious (DIRECTION.md: timing)`)] };
+  return { metrics: {}, findings: [warn('monotone-timing', `${explicitDurs.length} entrances all set enterDur:${explicitDurs[0]}. Uniform tempo reads as monotone. Timing is a voice: ambient drifts slow (0.6-1s), payoffs snap (0.25-0.35s), thesis lines luxurious (DIRECTION.md: timing)`)] };
 }
 
 // ---- ARRIVAL RHYTHM: four measures nothing else here can see (docs/MOTION-CRAFT.md rules 1, 3, 4) --
@@ -359,7 +359,7 @@ function tellMonotoneTiming(allLayers) {
 
 // (1) shared-start: three or more layers that begin on the SAME frame arrive as one block, so the beat
 // states no reading order. Two together is a pair (a card and the label sitting on it); three is a row.
-// `monotone-timing` above measures identical DURATIONS and is blind to this — those layers may each run
+// `monotone-timing` above measures identical DURATIONS and is blind to this, those layers may each run
 // a different length and still all leave the gate together.
 function tellSharedStart(layers) {
   const startClumps = new Map();
@@ -378,7 +378,7 @@ function tellSharedStart(layers) {
 }
 
 // (2) stagger-total: a per-unit step inside the 0.04-0.12s band still overruns when the unit count is
-// high — 8 items at 0.10s take 0.8s to leave the gate and stop reading as ONE arrival. The dial table in
+// high, 8 items at 0.10s take 0.8s to leave the gate and stop reading as ONE arrival. The dial table in
 // MOTION-CRAFT gives the per-item band and no total, which is exactly the hole this closes. The measure
 // is the STAGGER SEQUENCE, first unit start to last unit start: (n-1) x stagger.
 // A RATE is not a stagger. `type` is a typewriter and `wave` is a looping phase (core/type.js), so for
@@ -417,11 +417,11 @@ function tellStaggerTotal(allLayers) {
 }
 
 // (3) uneven-cascade: WITHIN one cascade the interval must be even. A cascade is a run of sibling layers
-// of the same kind, entering the same way, close together — one list arriving, hand-keyed instead of
+// of the same kind, entering the same way, close together. One list arriving, hand-keyed instead of
 // authored with `stagger`. Reference test: consistent = maxDrift < avgInterval * 0.3.
 // This does NOT contradict (1). Different scopes: (1) wants DIFFERENT elements to arrive at irregular
 // offsets across a beat; (3) wants ONE cascade of like elements to keep its own metre. Both stated in
-// docs/MOTION-CRAFT.md. The two can never fire on the same run — an exact clump has a zero interval.
+// docs/MOTION-CRAFT.md. The two can never fire on the same run, an exact clump has a zero interval.
 function tellUnevenCascade(layers) {
   const CASCADE_GAP = 0.3;      // a wider hole is a new beat, not the next item
   const CASCADE_SPAN = 1.2;     // an arrival, not the film's whole running order
@@ -456,7 +456,7 @@ function tellUnevenCascade(layers) {
 
 // (4) tempo-flat: `monotone-timing` fires only on a dead heat (every enterDur identical) and names no
 // target. This measures the SPREAD. The speed-dial table already gives the band a directed film speaks
-// in — payoffs 0.25-0.35s, ambient 0.75-1.2s — which is about 3x end to end.
+// in (payoffs 0.25-0.35s, ambient 0.75-1.2s) which is about 3x end to end.
 function tellTempoFlat(allLayers) {
   const TEMPO_TARGET = 3, TEMPO_FLOOR = 1.5;
   const durs = allLayers.map((l) => l.enterDur).filter((v) => typeof v === 'number' && v > 0);
@@ -469,19 +469,19 @@ function tellTempoFlat(allLayers) {
 }
 
 // enter-and-retreat: a layer that enters from a side and leaves back the SAME side. Pro motion travels
-// one continuous direction (enter right → exit left) — the launch rule + staging continuity.
+// one continuous direction (enter right → exit left), the launch rule + staging continuity.
 function tellEnterAndRetreat(allLayers) {
   const DIR = /^slide-(left|right|up|down)$/;
   const retreats = allLayers.filter((l) => DIR.test(l.anim || '') && DIR.test(l.out || '') && l.anim.split('-')[1] === l.out.split('-')[1]);
   const metrics = { 'enter-and-retreat': retreats.length };
   if (!retreats.length) return { metrics, findings: [] };
-  return { metrics, findings: [warn('enter-and-retreat', `${retreats.length} layer(s) enter and exit on the same side (e.g. anim:"${retreats[0].anim}" + out:"${retreats[0].out}") — travel ONE continuous direction: enter a side, exit the opposite (DIRECTION.md: paired directional exits)`)] };
+  return { metrics, findings: [warn('enter-and-retreat', `${retreats.length} layer(s) enter and exit on the same side (e.g. anim:"${retreats[0].anim}" + out:"${retreats[0].out}"). Travel ONE continuous direction: enter a side, exit the opposite (DIRECTION.md: paired directional exits)`)] };
 }
 
 // ---- ONE SCENE, MEASURED ---------------------------------------------------------------------------
 // Returns findings, the beats the report needs, and `metrics`: the scalar behind each rule, computed
 // whether or not the rule fired. The census needs the whole distribution, not just the failures, so a
-// metric is recorded any time it is DEFINED — `undefined` means "this film has no such measure".
+// metric is recorded any time it is DEFINED, `undefined` means "this film has no such measure".
 function analyse(d) {
   const layers = d.layers || [];
   // flatten nested children so the mechanical motion tells see every layer, not just the top level.
@@ -538,7 +538,7 @@ const sceneFiles = () => population('direction census', {
 });
 
 // Walk the library once and collect, per code, the set of films that trip it and every value of its
-// scalar. Reads JSON only — no browser, no render — so it costs a fraction of a second.
+// scalar. Reads JSON only (no browser, no render) so it costs a fraction of a second.
 function library() {
   const pop = sceneFiles();
   if (pop.blind) return { blind: pop.blind };
@@ -577,7 +577,7 @@ function census(code, mine, lib) {
 // ---- census mode: no file, no verdict --------------------------------------------------------------
 if (!file) {
   const lib = library();
-  if (lib.blind) { console.error(`\n  ✗ direction census: BLIND SWEEP — ${lib.blind}\n`); process.exit(3); }
+  if (lib.blind) { console.error(`\n  ✗ direction census: BLIND SWEEP, ${lib.blind}\n`); process.exit(3); }
   console.log(`\n  direction census · ${lib.films} scenes · how often each rule fires, and the spread behind it`);
   console.log(`  A share is not a verdict on the films and a median is not a target. A code most of the`);
   console.log(`  library trips is a code on trial (waiver-drift.mjs makes the same argument about waivers).\n`);
@@ -626,7 +626,7 @@ beats.forEach((t, i) => {
 
 // ---- THE ONE EARNED SEAM (the decision procedure, applied) ----------------------------------------
 // TRANSITIONS.md: straight cuts are the meat; a seam is seasoning reserved for the hero/payoff. So the
-// director suggests exactly ONE two-scene seam, at the payoff boundary — the transition INTO the
+// director suggests exactly ONE two-scene seam, at the payoff boundary, the transition INTO the
 // longest-held beat, the climax the film builds to. Everything else stays an invisible cut. A seam is a
 // real scene-to-scene blend; it needs a boundary where a beat lands and breathes, which the longest
 // hold identifies structurally (the script can't read emotion, but it can find where the film pauses).
@@ -663,7 +663,7 @@ const warns = findings.filter((f) => f.sev === 'WARN');
 console.log(`\n  direction audit: ${fails.length} fail · ${warns.length} warn${findings.length > 1 ? '   (most unusual first)' : ''}`);
 if (findings.length && !lib.blind) console.log(`  Each finding carries where this film sits in the ${lib.films}-scene library. That is a position, not a\n`
   + `  target: the rule is what fired, and the median is only what has been made here.`);
-if (findings.length && lib.blind && lib.blind !== 'no findings') console.log(`  census BLIND (${lib.blind}) — findings print without their library context.`);
+if (findings.length && lib.blind && lib.blind !== 'no findings') console.log(`  census BLIND (${lib.blind}), findings print without their library context.`);
 for (const f of findings) {
   console.log(`    ${f.sev === 'FAIL' ? '✗' : '~'} [${f.code}] ${f.msg}`);
   if (f.census) console.log(`        library: ${f.census}`);
@@ -683,10 +683,10 @@ if (fastest && fastest.v > VMAX) {
   console.log(`  pane leaving and a card tucking away all sit here and all read clean. Watch it, do not obey it.`);
 }
 console.log('');
-if (!picks.length) console.log('  only one beat — no transitions to direct.\n');
+if (!picks.length) console.log('  only one beat: no transitions to direct.\n');
 for (const p of picks) {
   console.log(`  @${p.t.toFixed(1)}s  cut: ${p.cut.padEnd(9)}${p.sting ? `sting: ${p.sting.padEnd(9)}` : ''.padEnd(16)}${p.reason}`);
-  if (p.seam) console.log(`           ★ seam: ${p.seam} (${p.seamTiming}) — ${p.seamReason}`);
+  if (p.seam) console.log(`           ★ seam: ${p.seam} (${p.seamTiming}), ${p.seamReason}`);
 }
 
 if (WRITE) {
@@ -708,7 +708,7 @@ if (WRITE) {
   console.log(`\n  suggest-only. Re-run with WRITE=1 (or --write) to apply → <file>.directed.json`);
   // pre-render gate: a rule violation blocks the render. WARN-tier informs but does not block.
   if (fails.length) {
-    console.log(`\n  ✗ direction gate: ${fails.length} rule violation(s) — fix before rendering.\n`);
+    console.log(`\n  ✗ direction gate: ${fails.length} rule violation(s), fix before rendering.\n`);
     process.exit(1);
   }
   console.log(warns.length ? `\n  gate passed with ${warns.length} warning(s) to review.\n` : `\n  ✓ direction gate clean.\n`);

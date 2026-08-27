@@ -1,16 +1,16 @@
-// dead-branch.mjs — a branch that can never be taken, or two branches that do the same thing.
+// dead-branch.mjs: a branch that can never be taken, or two branches that do the same thing.
 //
 //   node scripts/gates/dead-branch.mjs      ·   make dead-branch
 //
-// `deploySuccess` shipped `i === last ? T.green : T.green` — a ternary whose arms are identical — next
+// `deploySuccess` shipped `i === last ? T.green : T.green`. A ternary whose arms are identical, next
 // to a condition that was always true. Between them the cascade the block exists for was unreachable,
 // and NO render gate could ever catch it: the output was valid, deterministic and wrong-by-omission.
 // That is a linter's job, and this repo has one dependency and intends to keep it that way, so this is
 // the cheap half done honestly rather than a linter added for one rule (docs/MISTAKES.md #81).
 //
 // WHAT IT CATCHES:
-//   1. SYNTACTIC  — `cond ? X : X`, both arms textually identical after normalising space.
-//   2. DATAFLOW   — a name that is BOUND and then never mentioned again in its own file: a value
+//   1. SYNTACTIC, `cond ? X : X`, both arms textually identical after normalising space.
+//   2. DATAFLOW. A name that is BOUND and then never mentioned again in its own file: a value
 //      computed and discarded, a destructured prop read and dropped. Plus a condition whose operands
 //      are all constants, so the branch cannot vary.
 //
@@ -22,7 +22,7 @@
 //
 // THE MEASUREMENT UNDERNEATH RULE 2, stated because a gate's blind spot is never in the rule it
 // states: "never mentioned again" is decided by counting word-boundary occurrences of the identifier
-// in the WHOLE FILE, raw text included — comments and strings count as mentions. That is deliberately
+// in the WHOLE FILE, raw text included. Comments and strings count as mentions. That is deliberately
 // the over-counting direction. A shadowed name in two scopes, a name referenced only from a template
 // literal, a name mentioned only in a comment: all count as used, so all are MISSED rather than
 // invented. Exactly one occurrence means no scope in the file can possibly read it.
@@ -58,7 +58,7 @@ const files = cp.execSync('git ls-files', { cwd: repoRoot }).toString().trim().s
 const norm = (s) => s.trim().replace(/\s+/g, ' ');
 // a ternary's two arms, kept deliberately narrow: no nested ?/: inside either arm, so a complex
 // expression is skipped rather than mis-parsed. Missing a real one is better than inventing one.
-// `(?<!\?)\?(?![?.])` — a single `?`, never the `??` of a nullish coalesce and never the `?.` of an
+// `(?<!\?)\?(?![?.])`: a single `?`, never the `??` of a nullish coalesce and never the `?.` of an
 // optional chain. Without the first guard, `a ?? 0 : 0` matched from the SECOND question mark and
 // reported two identical arms that are not a ternary at all. Without the second,
 // `node?.nodeType === 1 ? node : node?.parentElement` matched from the `?` of `node?.` and reported
@@ -67,8 +67,8 @@ const TERNARY = /(?<!\?)\?(?![?.])\s*([^?:;{}]{1,90}?)\s*:\s*([^?:;{},)\n]{1,90}
 const balanced = (s) => (s.match(/'/g) || []).length % 2 === 0 && (s.match(/"/g) || []).length % 2 === 0
   && (s.match(/`/g) || []).length % 2 === 0 && (s.match(/\(/g) || []).length === (s.match(/\)/g) || []).length;
 
-// Excluded BY REASON, never by convenience. Both files QUOTE the patterns this gate hunts — one to
-// document them, one to inject them as fixtures — so both would be flagged for text that is a
+// Excluded BY REASON, never by convenience. Both files QUOTE the patterns this gate hunts, one to
+// document them, one to inject them as fixtures, so both would be flagged for text that is a
 // quotation, not a defect (MISTAKES #85). The same two exclusions cover the dataflow rules below,
 // for the same reason: gate-mutation injects an unused binding and a constant condition on purpose.
 const EXCLUDED = (fp) => fp.endsWith(path.join('gates', 'dead-branch.mjs')) || fp.endsWith(path.join('gates', 'gate-mutation.mjs'));
@@ -93,13 +93,13 @@ for (const fp of files) {
 // Three binding shapes, one mechanism. Each is matched over the WHOLE file text rather than line by
 // line, because the destructures that matter most here (a block factory's prop bag) routinely wrap
 // across lines, and a line-scoped scan would have silently exempted precisely the code this rule
-// exists for — the sampling blind spot, not the rule, is where a gate goes wrong.
+// exists for. The sampling blind spot, not the rule, is where a gate goes wrong.
 const RESERVED = new Set(['true', 'false', 'null', 'undefined', 'this', 'arguments', 'void', 'typeof', 'new', 'in', 'of']);
 
 /** Bound names inside one `{ … }` destructuring pattern. `a`, `b: c`, `d = x`, `...r` → a, c, d, r. */
 const boundNames = (inner) => inner.split(',').map((s) => {
   s = s.trim().replace(/^\.\.\./, '');
-  const c = s.indexOf(':'); if (c >= 0) s = s.slice(c + 1);   // `key: binding` — the BINDING is on the right
+  const c = s.indexOf(':'); if (c >= 0) s = s.slice(c + 1);   // `key: binding`, the BINDING is on the right
   const eq = s.indexOf('='); if (eq >= 0) s = s.slice(0, eq); // a default value is a reference, not a binding
   return s.trim();
 }).filter((s) => /^[A-Za-z_$][\w$]*$/.test(s) && !RESERVED.has(s));
@@ -109,11 +109,11 @@ const BINDINGS = [
   { kind: 'value computed and never read', re: /(?:^|[;{}\s])(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=/g, names: (m) => [m[1]] },
   // `const { a, b } = …`
   { kind: 'destructured and never read', re: /(?:const|let)\s*\{([^{}]*)\}\s*=/g, names: (m) => boundNames(m[1]) },
-  // `const a = 1, b = 2` — the SECOND declarator. `const W = 1080, H = 1920;` had two dead constants
+  // `const a = 1, b = 2`: the SECOND declarator. `const W = 1080, H = 1920;` had two dead constants
   // and the rule above reported one, because it stops at the first name. The first initializer must
   // contain no comma or bracket, so there is no call argument list for the comma to be hiding inside.
   { kind: 'value computed and never read', re: /(?:const|let)\s+[A-Za-z_$][\w$]*\s*=\s*[^,;(){}[\]\n]+,\s*([A-Za-z_$][\w$]*)\s*=/g, names: (m) => [m[1]] },
-  // a destructured object PARAMETER of a function definition — "a prop read and then discarded".
+  // a destructured object PARAMETER of a function definition: "a prop read and then discarded".
   // The trailing `=>` or `{` is what separates a definition from a call site: `launch({ headless: true })`
   // is followed by `)` and `;`, never by a function body. Without that anchor the first draft read
   // every options object at every call site as a parameter list and reported `true` as a dead binding.
@@ -123,7 +123,7 @@ const BINDINGS = [
 // A condition whose operands are all constant cannot choose anything. Single hop only: two literals,
 // or a module-scope const that is itself bound to a literal.
 //
-// ANCHORED ON THE WHOLE CONDITION — `if (…)` / `while (…)` and nothing else — and this is the entire
+// ANCHORED ON THE WHOLE CONDITION (`if (…)` / `while (…)` and nothing else) and this is the entire
 // design of the rule, not a detail. The first version matched a comparison ANYWHERE and reported
 // `2 === 0` inside `Math.floor(x * 2.2) % 2 === 0`, `1080 > 0.85` inside `(y1 - y0) / 1080 > 0.85`,
 // and a `<` that was a character in a string array. A regex cannot see operator precedence or string
@@ -155,7 +155,7 @@ for (const fp of files) {
   for (const B of BINDINGS) {
     for (const m of src.matchAll(B.re)) {
       // the `(?:^|[;{}\s])` lead-in can be the previous line's newline, which would report the
-      // declaration one line early — address the keyword itself, not the match start.
+      // declaration one line early, address the keyword itself, not the match start.
       const at = m.index + Math.max(0, m[0].search(/[A-Za-z_$({]/));
       if (isCommented(src, at)) continue;
       // An exported name is read by other files; nothing in THIS file's text can prove it dead.
@@ -167,7 +167,7 @@ for (const fp of files) {
     }
   }
 
-  // module-scope `const NAME = <literal>` — the only bindings the constant-condition rule will trust
+  // module-scope `const NAME = <literal>`: the only bindings the constant-condition rule will trust
   const constLit = new Map();
   for (const m of src.matchAll(/^(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n]+);/gm)) {
     const v = m[2].trim();
@@ -178,7 +178,7 @@ for (const fp of files) {
     if (isCommented(src, m.index)) continue;
     const a = constant(m[1]), b = constant(m[3]);
     if (!a || !b) continue;
-    dataflow.push({ file: rel, line: lineAt(src, m.index), why: `condition cannot vary — \`${a} ${m[2]} ${b}\` is decided at author time`, name: norm(m[0]), text: norm(lineText(src, m.index)).slice(0, 100) });
+    dataflow.push({ file: rel, line: lineAt(src, m.index), why: `condition cannot vary, \`${a} ${m[2]} ${b}\` is decided at author time`, name: norm(m[0]), text: norm(lineText(src, m.index)).slice(0, 100) });
   }
 }
 
@@ -186,7 +186,7 @@ console.log(`── dead branch · ${files.length} source file(s)\n`);
 if (!hits.length) console.log('✓ no ternary has identical arms');
 for (const h of hits) console.log(`   ✗ ${h.file}:${h.line}  both arms are \`${h.arm}\`\n       ${h.text}`);
 if (!dataflow.length) console.log('✓ no value is computed and then discarded, and no condition is decided at author time');
-for (const d of dataflow) console.log(`   ✗ ${d.file}:${d.line}  \`${d.name}\` — ${d.why}\n       ${d.text}`);
+for (const d of dataflow) console.log(`   ✗ ${d.file}:${d.line}  \`${d.name}\`, ${d.why}\n       ${d.text}`);
 if (!hits.length && !dataflow.length) process.exit(0);
 console.log(`\n✗ ${hits.length + dataflow.length} place(s) where the code decides nothing. A render gate cannot see this:`);
 console.log('  the output is valid, deterministic, and wrong by omission.');

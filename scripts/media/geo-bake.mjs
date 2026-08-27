@@ -1,4 +1,4 @@
-// scripts/media/geo-bake.mjs — regenerate assets/geo/us-states.js and assets/geo/world.js.
+// scripts/media/geo-bake.mjs: regenerate assets/geo/us-states.js and assets/geo/world.js.
 //
 //   node assets/geo/bake.mjs
 //
@@ -28,7 +28,7 @@ function dp(pts, tol) {
   if (pts.length < 3) return pts;
   const keep = new Uint8Array(pts.length); keep[0] = keep[pts.length - 1] = 1;
   // A CLOSED ring has pts[0] === pts[n-1], so the seed baseline is a zero-length segment and every
-  // perpendicular distance is 0 — the whole ring collapses to two points. Split at the point farthest
+  // perpendicular distance is 0. The whole ring collapses to two points. Split at the point farthest
   // from pts[0] first, which gives both halves a real baseline.
   const last = pts.length - 1;
   let m = 0, md = -1;
@@ -79,7 +79,7 @@ for (const g of topo.objects.states.geometries) {
   us.push({ c: code, n: g.properties.name, r: rings });
 }
 us.sort((a, b) => a.c < b.c ? -1 : 1);
-const HDR = (src, cmd) => `// GENERATED — DO NOT EDIT BY HAND.\n// source: ${src}\n// bake: ${cmd}\n`;
+const HDR = (src, cmd) => `// GENERATED. DO NOT EDIT BY HAND.\n// source: ${src}\n// bake: ${cmd}\n`;
 fs.writeFileSync(`${ROOT}/assets/geo/us-states.js`,
   HDR('us-atlas@3 states-10m.json (US Census TIGER, public domain)', 'node assets/geo/bake.mjs')
   + `// 51 states + DC. Outer rings only, Douglas-Peucker at 0.09 deg, lon/lat to 3dp.\n`
@@ -106,7 +106,7 @@ for (const f of world.features) {
 }
 wc.sort((a, b) => a.c < b.c ? -1 : 1);
 fs.writeFileSync(`${ROOT}/assets/geo/world.js`,
-  HDR('assets/globe/countries.geojson — Natural Earth 110m admin-0 (public domain)', 'node assets/geo/bake.mjs')
+  HDR('assets/globe/countries.geojson: Natural Earth 110m admin-0 (public domain)', 'node assets/geo/bake.mjs')
   + `// ${wc.length} countries. Outer rings only, Douglas-Peucker at 0.4 deg, lon/lat to 3dp.\n`
   + `export const WORLD_COUNTRIES = ${JSON.stringify(wc)};\n`);
 

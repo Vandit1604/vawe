@@ -1,4 +1,4 @@
-// scripts/gates/arsenal-check.mjs — is every capability the engine offers actually IN the catalogue
+// scripts/gates/arsenal-check.mjs: is every capability the engine offers actually IN the catalogue
 // an author is told to read?
 //
 //   node scripts/gates/arsenal-check.mjs
@@ -32,7 +32,7 @@ const CATALOG = 'scripts/site/effects-catalog.mjs';
 // place to hide the next real one.
 const WAIVED = new Map(Object.entries({
   PROPS: 'per-module prop declarations. Covered by schema-drift and layer-props, which check them against schema.json',
-  SHARED_PROPS: 'the props every layer type inherits — a prop list, not a vocabulary',
+  SHARED_PROPS: 'the props every layer type inherits, a prop list, not a vocabulary',
   LAYER_PROPS: 'the generated prop table behind schema-drift',
   SURFACE_PROPS: 'as LAYER_PROPS, for surfaces',
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
@@ -45,10 +45,10 @@ const WAIVED = new Map(Object.entries({
   ICON_REGISTRY: 'the registry object wrapping ICONS, which IS catalogued as "Drawn icons"',
   ICON_NAMES: 'the same list the Drawn icons section already renders from ICONS',
   DIRS: 'the four travel directions (left/right/up/down). A scene names one, but as the `dir` field of a '
-    + 'cut or seam, and the schema carries it as an enum on both — this is the shared constant behind those, '
+    + 'cut or seam, and the schema carries it as an enum on both. This is the shared constant behind those, '
     + 'not a vocabulary of its own',
 
-  JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name — each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
+  JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name. Each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
   ANIM_REGISTRY: 'the registry OBJECT wrapping ANIM, which is catalogued as "Enter / exit anims". A scene names an anim, never a registry',
   BG_REGISTRY: 'as ANIM_REGISTRY, for BG_NAMES ("Backgrounds")',
   SEAM_REGISTRY: 'as ANIM_REGISTRY, for SEAM_FX ("Seams")',
@@ -59,13 +59,13 @@ const WAIVED = new Map(Object.entries({
   AMBIENT_REGISTRY: 'as ANIM_REGISTRY, for AMBIENT_FX ("Ambient shader fields")',
   THREE_REGISTRY: 'as ANIM_REGISTRY, for THREE_FX ("three.js scenes")',
   CAMERA_REGISTRY: 'as ANIM_REGISTRY, for CAMERA_MOVE_NAMES ("Camera moves")',
-  FEEL_REGISTRY: 'as ANIM_REGISTRY, for FEEL — the words themselves ARE catalogued under "Plain words", and in full in docs/CRAFT/VOCABULARY.md',
+  FEEL_REGISTRY: 'as ANIM_REGISTRY, for FEEL. The words themselves ARE catalogued under "Plain words", and in full in docs/CRAFT/VOCABULARY.md',
   DURATION_REGISTRY: 'as FEEL_REGISTRY, for DURATION',
   CAMERA_WORD_REGISTRY: 'as FEEL_REGISTRY, for CAMERA_WORDS',
   okDir: 'the direction guard seams shares with core/cuts.js DIRS; a scene names a direction, not a guard',
 
   CUT_REGISTRY: 'as ANIM_REGISTRY, for PRESENTATIONS ("Scene cuts")',
-  TIMING_REGISTRY: 'as ANIM_REGISTRY, for TIMINGS — the cut timing curve, catalogued with the cuts',
+  TIMING_REGISTRY: 'as ANIM_REGISTRY, for TIMINGS. The cut timing curve, catalogued with the cuts',
   GSAP_REGISTRY: 'as ANIM_REGISTRY, for GSAP_FX ("GSAP named effects")',
   GSAP_EXIT_REGISTRY: 'as ANIM_REGISTRY, for EXIT_FX ("GSAP exits")',
   PRESET_REGISTRY: 'as ANIM_REGISTRY, for PRESETS ("Kinetic text presets")',
@@ -76,9 +76,9 @@ const WAIVED = new Map(Object.entries({
   KNOB_ROUTES: 'the map from a lookOpts knob to the private pass arguments it sets. The KNOBS themselves are '
     + 'catalogued in the Composite looks section and PRIMITIVES.md; this is the wiring under them, and a scene '
     + 'names a knob, never a route',
-  LOOP_FX: 'the loop half of GSAP_FX, which IS catalogued — a subset named so a gate can tell an entrance from something that never settles',
+  LOOP_FX: 'the loop half of GSAP_FX, which IS catalogued. A subset named so a gate can tell an entrance from something that never settles',
   ONESHOT_FX: 'the other half of the same split',
-  LOOK_BLURBS: 'the descriptions OF the looks, rendered in the catalogue beside each look — the words, not a vocabulary of their own',
+  LOOK_BLURBS: 'the descriptions OF the looks, rendered in the catalogue beside each look. The words, not a vocabulary of their own',
   PRESET_BLURBS: 'as LOOK_BLURBS, for kinetic presets',
   ANIM_BLURBS: 'as LOOK_BLURBS, for enter/exit anims',
   CUT_BLURBS: 'as LOOK_BLURBS, for scene cuts',
@@ -92,7 +92,7 @@ const WAIVED = new Map(Object.entries({
   TIMINGS: 'cut duration constants',
   MECHANISMS: 'internal classification of transitions, used by the direction gate',
   FAMILIES: 'internal classification of transitions, used by the direction gate',
-  HONOURS: 'which lightfield options each pattern reads — drives narrow(), not an author choice',
+  HONOURS: 'which lightfield options each pattern reads, drives narrow(), not an author choice',
   BUILDERS: 'the lightfield pattern implementations behind PATTERNS, which IS catalogued',
   SLOTS: 'track slot names, internal to the track resolver',
   FPS: 'the frame rate constant',
@@ -109,13 +109,13 @@ const WAIVED = new Map(Object.entries({
   PAINT_FX: 'the implementations behind PAINT_FX_NAMES, which IS catalogued',
   ANIM: 'the anim implementations behind ANIM_NAMES, which IS catalogued',
   IDLE: 'the idle generators behind IDLE_NAMES, which IS catalogued',
-  IDLE_REGISTRY: 'as IDLE — the registry object, not a name a scene can write',
+  IDLE_REGISTRY: 'as IDLE. The registry object, not a name a scene can write',
   // A scene never names a caption SKIN: it sets `captionMode`/`captionStyle` and the skin follows from
   // that plus the destination. CAPTION_SKINS is the geometry table captionBand() measures against, so
   // there is nothing here for an author to choose. It reached main uncatalogued, which is why the gate
   // is right to have asked (docs/MISTAKES.md #392).
   CAPTION_SKINS: 'the caption geometry captionBand() measures against; a scene sets captionMode/captionStyle and the skin follows',
-  CAPTION_LINES: 'as CAPTION_SKINS — how many lines the band reserves, not a name a scene can write',
+  CAPTION_LINES: 'as CAPTION_SKINS, how many lines the band reserves, not a name a scene can write',
   // A scene names a caption STYLE and the shape follows it. CAP_STYLE_SHAPE is how the RENDERER
   // treats that style (one word on screen, or split per character); an author never writes it and
   // could not use it if they did. The fact it carries IS catalogued, in the place an author actually
@@ -133,7 +133,7 @@ const WAIVED = new Map(Object.entries({
   SCHEMA: 'the lightfield option schema. It drives narrow() and the playground panel; its user-facing dials are PATTERNS/SHAPES/ANCHORS/DIRECTIONS/MOTIONS, which ARE catalogued',
   RAMP: 'the lightfield bloom falloff constants',
   DEFAULT_MOTION: 'the fallback motion block',
-  REQUIRED: 'the theme contract keys a theme file must define — checked by the theme gate, not chosen by a scene',
+  REQUIRED: 'the theme contract keys a theme file must define, checked by the theme gate, not chosen by a scene',
   ORDER: 'track resolution order',
   LAYER_OWNED: 'which props a layer owns versus its sequence, internal to the sequencer',
   DENSE_KEY_SEC: 'a density threshold constant',

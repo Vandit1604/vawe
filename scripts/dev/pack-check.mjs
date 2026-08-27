@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// scripts/dev/pack-check.mjs — refuse to publish a package that cannot render, or that carries the
+// scripts/dev/pack-check.mjs: refuse to publish a package that cannot render, or that carries the
 // demo reel.  `npm run pack-check`, and automatically via `prepublishOnly`.
 //
 // TWO FAILURES THIS EXISTS TO PREVENT, and they pull in opposite directions.
 //
-// TOO LITTLE: `files` is an allowlist, so a forgotten entry does not error — it ships a package that
+// TOO LITTLE: `files` is an allowlist, so a forgotten entry does not error, it ships a package that
 // installs cleanly and then dies at render time on a missing file. Every path in REQUIRED was proven
 // necessary by rendering from an extracted tarball, not by reading imports.
 //
@@ -21,7 +21,7 @@ const MAX_MB = 25; // fits the engine + fonts with headroom; the demo reel alone
 // Proven by rendering from the extracted tarball. Each entry: a path that must appear, and WHY, so a
 // future edit that drops one gets an error explaining the consequence rather than a bare path.
 const REQUIRED = [
-  ['cli/vawe.mjs', 'the bin entry point — without it `npx vawe` resolves to nothing'],
+  ['cli/vawe.mjs', 'the bin entry point, without it `npx vawe` resolves to nothing'],
   ['formats/scene/scene.html', 'the render page the Go binary serves'],
   ['formats/scene/scene.js', 'scene.html loads this by URL; a missing file is a blank render'],
   ['formats/scene/schema.json', 'validate.mjs reads it at boot; absent means every scene is refused'],
@@ -32,7 +32,7 @@ const REQUIRED = [
   ['blocks/index.mjs', 'expand-blocks imports it; a block scene dies without it'],
   ['blueprints/index.mjs', 'same, for beats'],
 ];
-// A prefix that must appear at least N times — a directory shipped empty is the subtler version of
+// A prefix that must appear at least N times. A directory shipped empty is the subtler version of
 // shipping nothing, and an allowlist entry like `themes/` gives no error when the directory is bare.
 const REQUIRED_DIRS = [['themes/', 10, 'palettes'], ['core/', 50, 'engine modules'], ['assets/fonts/', 1, 'font files']];
 const FORBIDDEN = [/^site\//, /\.mp4$/, /^out\//, /^verify\//, /^docs\/media\//, /^\.claude\//];
@@ -74,4 +74,4 @@ if (bad.length) {
   process.exit(1);
 }
 console.log(`✓ publishable: ${files.length} files, ${sizeMB.toFixed(1)}MB unpacked (ceiling ${MAX_MB}MB)`);
-if (!hasBin) console.log('  ⚠ no bin/ in the package — run `make build` first, or the release will ship without a renderer');
+if (!hasBin) console.log('  ⚠ no bin/ in the package, run `make build` first, or the release will ship without a renderer');

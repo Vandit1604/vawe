@@ -1,4 +1,4 @@
-// scripts/gates/lib-test.mjs — fast pure-JS asserts for the motion primitives in core/motion.js.
+// scripts/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion.js.
 // No browser needed (the primitives are pure). Run: node scripts/gates/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
@@ -92,11 +92,11 @@ if (process.argv.includes('--colours')) {
     ['#7cfa', 'was gate-only (#rgba)'],
     ['#ee7c56', 'the only form the lightfield takes, on purpose'],
     ['#0b0b0fcc', 'was gate-only (#rrggbbaa)'],
-    ['#12345', 'a typo — null everywhere, before and after'],
+    ['#12345', 'a typo: null everywhere, before and after'],
     ['rgb(1, 2, 3)', 'every copy took this'],
     ['rgb(1 2 3)', 'was motion-only (space-separated)'],
     ['rgba(1.5, 2, 3, 0.5)', 'was gate-only (float channels)'],
-    ['foo rgb(1,2,3)', 'was motion-only — the missing anchor, now null'],
+    ['foo rgb(1,2,3)', 'was motion-only: the missing anchor, now null'],
     [[1, 2, 3], 'was motion-only (array passthrough)'],
   ];
   console.log('\n  the one colour parser · core/motion.js\n');
@@ -150,7 +150,7 @@ ok('fade', fade(0.5).opacity === 0.5);
 ok('pop opacity clamped', pop(1).opacity === 1 && pop(1).transform.includes('scale'));
 ok('slide dir', slide(0, 'left', 60).transform.includes('-60') || slide(0, 'left', 60).transform.includes('-6'));
 
-// seeded randomness — deterministic, in-range, seed-sensitive
+// seeded randomness: deterministic, in-range, seed-sensitive
 ok('random in [0,1)', (() => { for (let i = 0; i < 200; i++) { const r = random(i); if (r < 0 || r >= 1) return false; } return true; })());
 ok('random deterministic', random(42) === random(42) && random('x') === random('x'));
 ok('random seed-sensitive', random(1) !== random(2) && random('a') !== random('b'));
@@ -174,7 +174,7 @@ ok('resolveEasing unknown → throws', (() => { try { resolveEasing('nope'); ret
 ok('resolveEasing names the wrong slot for a GSAP ease', (() => {
   try { resolveEasing('power2.inOut'); return false; } catch (e) { return /GSAP ease/.test(e.message) && /parts\[\]\.ease/.test(e.message); }
 })());
-// Every easing the LIBRARY names must resolve — the census that made throwing safe, kept as a gate.
+// Every easing the LIBRARY names must resolve: the census that made throwing safe, kept as a gate.
 ok('resolveEasing accepts every name the library uses', ['linear', 'easeOutCubic', 'easeInOutCubic', 'ramp', 'spring', 'springEase', 'settle', 'snap', 'brake', 'rush'].every((n) => typeof resolveEasing(n) === 'function'));
 ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
 
@@ -205,7 +205,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
   // imports core/vocab.js, and the cycle is not worth one constant.
   ok('vocab: `medium` is the engine\'s own default entrance (BASE_ENTER)', DURATION.medium === BASE_ENTER);
 
-  // PASSTHROUGH — the non-negotiable. A scene naming a number or a real name is untouched.
+  // PASSTHROUGH: the non-negotiable. A scene naming a number or a real name is untouched.
   ok('vocab: a concrete duration passes through unchanged',
     resolveSeconds(0.42) === 0.42 && resolveSeconds(0) === 0 && resolveSeconds(null) === null && resolveSeconds(undefined) === undefined);
   ok('vocab: a concrete easing name still wins over the word list', resolveEasing('settle') === EASINGS.settle);
@@ -224,8 +224,8 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
   ok('vocab: resolveSeconds never substitutes a default', (() => {
     try { resolveSeconds('quick'); return false; } catch { return true; }
   })());
-  // A feel word written into a slot that takes a different vocabulary is DIAGNOSED, not just rejected —
-  // the cross-registry hint core/registry.js exists for.
+  // A feel word written into a slot that takes a different vocabulary is DIAGNOSED, not just rejected.
+  // The cross-registry hint core/registry.js exists for.
   ok('vocab: a feel word in the `anim` slot is named as a feel word', (() => {
     try { ANIM_REGISTRY.pick('snappy'); return false; }
     catch (e) { return /feel word/.test(e.message) && /ease: "snappy"/.test(e.message); }
@@ -290,7 +290,7 @@ ok('motionDefaults falls back to DEFAULT', motionDefaults(undefined).bounce === 
 ok('motionDefaults keeps overrides', motionDefaults({ motion: { enter: 99 } }).enter === 99);
 ok('motionDefaults durationScale default 1', motionDefaults({ motion: {} }).durationScale === 1);
 
-// sequencing — segments with transition windows (trans=0.4 default)
+// sequencing: segments with transition windows (trans=0.4 default)
 const segs = [{ name: 's1', dur: 2 }, { name: 's2', dur: 2 }, { name: 's3', dur: 1 }];
 ok('sequence picks segment', sequence(30, 30, segs).name === 's1');            // 1s → s1
 ok('sequence second segment', sequence(90, 30, segs).name === 's2');           // 3s → s2
@@ -300,7 +300,7 @@ ok('sequence exit 0 mid-segment', sequence(30, 30, segs).exit === 0);          /
 ok('sequence exit ramps at end', sequence(59, 30, segs).exit > 0);             // ~1.97s into s1 (dur 2)
 ok('sequence active in [0,1]', (() => { for (let n = 0; n < 150; n += 3) { const a = sequence(n, 30, segs).active; if (a < 0 || a > 1) return false; } return true; })());
 ok('sequence deterministic', sequence(77, 30, segs).active === sequence(77, 30, segs).active);
-// holdLast (default): the LAST segment never exits — the ending holds through the final frame
+// holdLast (default): the LAST segment never exits. The ending holds through the final frame
 ok('sequence last segment holds (exit 0)', sequence(149, 30, segs).exit === 0);          // ~4.97s, end of s3
 ok('sequence last segment fully active', sequence(149, 30, segs).active === 1);          // no fade at the end
 ok('sequence holdLast:false restores exit', sequence(149, 30, segs, { holdLast: false }).exit > 0.9);
@@ -320,7 +320,7 @@ ok('clockWipe deterministic', clockWipe(0.33).clipPath === clockWipe(0.33).clipP
 // see this: `wipe-right` was registered as wipe(t,'right') and therefore revealed right-to-left, against
 // its own name and the comment beside it, and no gate could tell. A wipe is named for the edge its
 // reveal TRAVELS TOWARD; motion.js `wipe(dir)` names the edge it grows FROM, so each pair is crossed.
-// inset(top right bottom left) — the side whose inset SHRINKS is the side the reveal moves toward.
+// inset(top right bottom left): the side whose inset SHRINKS is the side the reveal moves toward.
 ok('wipe-right grows rightward from the left edge', ANIM['wipe-right'](0.5).clipPath === 'inset(0 50% 0 0)');
 ok('wipe-left grows leftward from the right edge', ANIM['wipe-left'](0.5).clipPath === 'inset(0 0 0 50%)');
 ok('wipe-down grows downward from the top edge', ANIM['wipe-down'](0.5).clipPath === 'inset(0 0 50% 0)');
@@ -357,7 +357,7 @@ ok('bg opts reach the fx (liquid scale/speed/edge0)', (() => { const s = bgOver(
 ok('bg opts meta knobs still scale the baked numbers', (() => { const s = bgOver('paperDots', { dotAlpha: 0.5, grain: 0.2 }); const d = s && s.fx.find((f) => f.type === 'dots'), g = s && s.fx.find((f) => f.type === 'grain'); return !!d && d.peakAlpha === 0.5 && g.alpha === 0.2; })());
 ok('a bg opt no fx here reads is REFUSED, not dropped', bgOverErrors(bgPreset('liquid'), { dotAlpha: 0.2 }, 'bg[0]').length === 1 && bgOver('liquid', { dotAlpha: 0.2 }) === null);
 
-// kinetic typography — unitProgress staggering + presets (pure)
+// kinetic typography: unitProgress staggering + presets (pure)
 ok('unitProgress unit 0 starts at 0', approx(unitProgress(0, 0, 3, { each: 0.5, stagger: 0.06 }), 0));
 ok('unitProgress later unit delayed', unitProgress(0.06, 1, 3, { each: 0.5, stagger: 0.06 }) === 0);
 ok('unitProgress completes', unitProgress(2, 2, 3, { each: 0.5, stagger: 0.06 }) === 1);
@@ -405,21 +405,21 @@ ok('preset highlight grows', PRESETS.highlight(1).backgroundSize.startsWith('100
 ok('preset underline draws', PRESETS.underline(0.5).backgroundSize.startsWith('50'));
 // riseClip travels in PERCENT of the unit's own height, not px: 44px was a different fraction of a
 // 40px caption than of a 150px headline, so at large sizes the word was already half out from behind
-// its mask at u=0. These assert the invariant, not the literal string — the old assertion pinned
+// its mask at u=0. These assert the invariant, not the literal string, the old assertion pinned
 // "(0.00px)" and so failed the moment the unit was corrected, which says nothing about identity.
 ok('preset riseClip identity at 1', parseFloat(PRESETS.riseClip(1).transform.match(/-?[\d.]+/)[0]) === 0);
 ok('preset riseClip travels in % (scales with type size)', PRESETS.riseClip(0).transform.includes('%'));
 ok('preset riseClip starts fully behind its mask', parseFloat(PRESETS.riseClip(0).transform.match(/-?[\d.]+/)[0]) >= 110);
 ok('presets deterministic (stretch)', JSON.stringify(PRESETS.stretch(0.37)) === JSON.stringify(PRESETS.stretch(0.37)));
 
-// shake / pulse — deterministic, decaying, zero before the hit
+// shake / pulse: deterministic, decaying, zero before the hit
 ok('shake zero before hit', shake(-0.1).x === 0 && shake(0).y === 0);
 ok('shake deterministic', shake(0.2, { seed: 5 }).x === shake(0.2, { seed: 5 }).x);
 ok('shake seeds differ', shake(0.2, { seed: 5 }).x !== shake(0.2, { seed: 9 }).x);
 ok('shake decays', Math.abs(shake(2).x) < Math.abs(shake(0.05).x) + 1e-9);
 ok('pulse centered', approx(pulse(0), 1, 0.05) && pulse(0.6) !== pulse(0.3));
 
-// velocity ramping — monotone, endpoints exact, peak-velocity placement honored
+// velocity ramping: monotone, endpoints exact, peak-velocity placement honored
 ok('accel endpoints', accel(0) === 0 && accel(1) === 1);
 ok('accel slow start', accel(0.3) < 0.3);
 ok('decel fast start', decel(0.3) > 0.3);
@@ -429,18 +429,18 @@ ok('speedRamp monotone', (() => { let prev = 0; for (let t = 0; t <= 1.001; t +=
 ok('speedRamp peak shifts', speedRamp(0.3, { peak: 0.2 }) > speedRamp(0.3, { peak: 0.8 }));
 ok('EASINGS has ramps', typeof EASINGS.ramp === 'function' && typeof EASINGS.rush === 'function' && typeof EASINGS.brake === 'function');
 
-// optical tracking — em string, monotone tighter as size grows
+// optical tracking: em string, monotone tighter as size grows
 ok('trackingFor em string', trackingFor(16).endsWith('em'));
 ok('trackingFor tightens', parseFloat(trackingFor(120)) < parseFloat(trackingFor(16)));
 ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-6 && Math.abs(parseFloat(trackingFor(120)) - -0.022) < 1e-6);
 
-// LIGHT-ON-DARK OPTICAL COMPENSATION — trackingFor(px, dark). A light glyph on a dark ground irradiates,
+// LIGHT-ON-DARK OPTICAL COMPENSATION: trackingFor(px, dark). A light glyph on a dark ground irradiates,
 // so it reads heavier and its gaps read tighter than the same pair inverted; the correction opens the
 // tracking back up at display sizes. Three things have to stay true, and each one is a way this could
 // silently go wrong:
 //   1. the ONE-ARGUMENT form is byte-identical, or 21 dark themes get re-tracked by an unrelated change;
 //   2. the TWO-ARGUMENT form actually differs, or the feature is inert and nothing says so;
-//   3. it is PURE — same input, same string, no clock and no randomness anywhere in the ramp.
+//   3. it is PURE, same input, same string, no clock and no randomness anywhere in the ramp.
 {
   const sizes = [12, 14, 20, 28, 32, 40, 48, 64, 96, 120, 200];
   ok('trackingFor 1-arg unchanged by the dark term',
@@ -476,9 +476,9 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // silently discarded the author's `tracking` (12 shipped scenes) and then the light-on-dark polarity.
 // Each repair threaded another argument into the second writer, which fixed the symptom and left the
 // trap. Two things are pinned below, and BOTH are needed:
-//   1. the SOURCE test — no file in core/ may assign letter-spacing except the resolver. A second
+//   1. the SOURCE test. No file in core/ may assign letter-spacing except the resolver. A second
 //      writer now fails here rather than in a film nobody diffs.
-//   2. the BEHAVIOUR tests — the one resolver really does fold in every opinion (author prop, size
+//   2. the BEHAVIOUR tests. The one resolver really does fold in every opinion (author prop, size
 //      ramp, polarity, mono, raw), so nobody has to add a second write to get one of them honoured.
 {
   // 1. THE SOURCE TEST.
@@ -599,7 +599,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     && soloCutStyle('punch', { enter: 1, exit: 0 }, opts).filter === 'none');
 }
 
-// timeline evaluators (core/sequence.js) — pure math lifted out of scene.html
+// timeline evaluators (core/sequence.js): pure math lifted out of scene.html
 {
   // cameraAt: empty → null; endpoints clamp; midpoint eases between two keyframes
   ok('cameraAt empty null', cameraAt([], 1) === null);
@@ -614,7 +614,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('cameraAt roll defaults to 0', cameraAt([{ t: 0 }, { t: 1 }], 0.5).roll === 0);
   ok('cameraAt roll lerps', approx(cameraAt([{ t: 0, roll: 0 }, { t: 1, roll: 10 }], 0.5).roll, 5));
 
-  // dollyZ — `s` is WHERE THE CAMERA STANDS, so it must convert to a depth the projection agrees with:
+  // dollyZ: `s` is WHERE THE CAMERA STANDS, so it must convert to a depth the projection agrees with:
   // a camera whose translateZ is z magnifies the canvas plane by lens/(lens-z), and that must come back
   // out as exactly the `s` that went in. A round trip is the only assertion that catches a sign flip.
   ok('dollyZ identity at s=1', dollyZ(1, 1600) === 0);
@@ -711,7 +711,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 {
   const { EASINGS } = await import('../../core/motion.js');
   // These curves leave [0,1] BY DESIGN: `back` dips below 0 to anticipate, `elastic`/`spring` ring
-  // past 1 before settling. The f(0)=0 / f(1)=1 checks below still apply to them — overshooting is
+  // past 1 before settling. The f(0)=0 / f(1)=1 checks below still apply to them, overshooting is
   // character, not arriving is a bug (see the spring-bouncy f(1)=0.96 fix).
   const OVERSHOOT = new Set(['easeOutBack', 'easeInBack', 'easeInOutBack', 'easeOutElastic', 'easeInElastic',
     'easeInOutElastic', 'spring', 'springStiff', 'spring-bouncy', 'spring-stiff', 'settle', 'snap']);
@@ -724,7 +724,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       for (let t = 0; t <= 1; t += 0.05) { const v = fn(t); if (v < -1e-6 || v > 1 + 1e-6) { bad.push(`${name} out of range at ${t.toFixed(2)}`); break; } }
     }
   }
-  ok(`easings: all ${Object.keys(EASINGS).length} land 0->1${bad.length ? ' — ' + bad.slice(0, 4).join(', ') : ''}`, bad.length === 0);
+  ok(`easings: all ${Object.keys(EASINGS).length} land 0->1${bad.length ? ', ' + bad.slice(0, 4).join(', ') : ''}`, bad.length === 0);
   // the sine family closes a documented gap: the planning skill says "ambient loops sinusoidal"
   ok('easing sine family present', ['easeInSine', 'easeOutSine', 'easeInOutSine'].every((k) => typeof EASINGS[k] === 'function'));
   ok('easeOutSine is gentler than easeOutQuint early', EASINGS.easeOutSine(0.25) < EASINGS.easeOutQuint(0.25));
@@ -741,7 +741,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     (() => { try { safeArea(1080, 1920, 'nope'); return false; } catch { return true; } })());
 
   // web = margin only. This is the default precisely so that a portrait canvas does NOT inherit a
-  // phone feed's caption strip just for being taller than it is wide — the bug this module exists for.
+  // phone feed's caption strip just for being taller than it is wide, the bug this module exists for.
   const web = safeArea(1080, 1920, 'web');
   ok('safe: web is symmetric margin only', web.x0 === web.margin && web.y0 === web.margin
     && web.x1 === 1080 - web.margin && web.y1 === 1920 - web.margin);
@@ -755,7 +755,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     (sq.y1 - sq.y0) / 1080 > 0.85);
   ok('safe: 4:5 feed keeps its frame', (() => { const s = safeArea(1080, 1350, 'feed'); return (s.y1 - s.y0) / 1350 > 0.85; })());
 
-  // tiktok must still reproduce the repo's existing portrait box — those are the only platform numbers
+  // tiktok must still reproduce the repo's existing portrait box, those are the only platform numbers
   // with provenance, so carrying them over as fractions must not quietly change them.
   const tt = safeArea(1080, 1920, 'tiktok');
   ok(`safe: tiktok 9:16 keeps the historic chrome (y0=${tt.y0} y1=${tt.y1} x1=${tt.x1})`,
@@ -789,7 +789,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const s = safeArea(w, h, name);
     if (!(s.x0 >= 0 && s.y0 >= 0 && s.x1 <= w && s.y1 <= h && s.x1 > s.x0 && s.y1 > s.y0)) bad.push(name);
   }
-  ok(`safe: all ${DESTINATION_NAMES.length} destinations yield a valid box${bad.length ? ' — ' + bad.join(', ') : ''}`, bad.length === 0);
+  ok(`safe: all ${DESTINATION_NAMES.length} destinations yield a valid box${bad.length ? ', ' + bad.join(', ') : ''}`, bad.length === 0);
   ok('safe: nativeAspect is null for the canvas-agnostic ones',
     nativeAspect('web') === null && nativeAspect('feed') === null && nativeAspect('tiktok') === '9:16');
 }
@@ -810,7 +810,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     if (JSON.stringify(f.safe) !== JSON.stringify(s)) wrong.push(`${key}/${dest}: safe box`);
   }
   ok(`frame: frameOf agrees with sceneDims+safeArea at ${ratios.length} ratios x ${DESTINATION_NAMES.length} destinations`
-    + (wrong.length ? ' — ' + wrong.slice(0, 3).join('; ') : ''), wrong.length === 0);
+    + (wrong.length ? ', ' + wrong.slice(0, 3).join('; ') : ''), wrong.length === 0);
   ok('frame: a 4:3 canvas is 1440x1080, not the long-edge fallback',
     frameOf({ aspect: '4:3' }).W === 1440 && frameOf({ aspect: '4:3' }).H === 1080);
   ok('frame: explicit pixel dims win, so a view outside boot gets its real canvas',
@@ -842,7 +842,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('bounds: an unplaced layer is the stylesheet\'s business, not the check\'s',
     outOfFrame({ type: 'text', w: 600, start: 0, duration: 6 }, F) === null);
 
-  // REPORT ONLY. It must return findings and print, and it must not throw — the refusal is a later
+  // REPORT ONLY. It must return findings and print, and it must not throw, the refusal is a later
   // decision for a human holding the count of shipped films it would fail.
   ok('bounds: reportBounds returns findings and never throws',
     (() => { const lines = []; const out = reportBounds([settled, { type: 'rect', x: 10, y: 10, w: 100, h: 100, start: 0, duration: 6 }], F, (s) => lines.push(s));
@@ -861,7 +861,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // Call each row the way `make catalog` does: family factory + the manifest's props. A BARE name in
   // the registry is the raw factory with NO props merged, so calling it by name yields an empty block
-  // (captions with no lines is correctly []) — that is the registry working, not a bug to assert on.
+  // (captions with no lines is correctly []). That is the registry working, not a bug to assert on.
   const build = (e, opts = {}) => BLOCKS[e.family]({ ...(e.props || {}), x: 100, y: 100, start: 0, dur: 4, ...opts });
   const bad = [];
   for (const e of CATALOG) {
@@ -879,14 +879,14 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const small = out.filter((L) => typeof L.size === 'number' && L.size < 18).map((L) => L.size);
     if (small.length) bad.push(`${e.name}: top-level text size ${small.join(',')} < the schema's 18px min`);
   }
-  ok(`registry: all ${CATALOG.length} manifest rows resolve + build${bad.length ? ' — ' + bad.slice(0, 3).join(' · ') : ''}`, bad.length === 0);
+  ok(`registry: all ${CATALOG.length} manifest rows resolve + build${bad.length ? ', ' + bad.slice(0, 3).join(' · ') : ''}`, bad.length === 0);
 
   // determinism is the product; a block that reads a clock or Math.random breaks every render.
   const drift = CATALOG.filter((e) => BLOCKS[e.family]).filter((e) => {
     try { return JSON.stringify(build(e, { x: 10, start: 1 })) !== JSON.stringify(build(e, { x: 10, start: 1 })); }
     catch { return false; }
   });
-  ok(`registry: every block is deterministic${drift.length ? ' — ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
+  ok(`registry: every block is deterministic${drift.length ? ', ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
 
   // ── A BLOCK THAT DEPICTS A REAL OBJECT KEEPS ITS PROPORTIONS ──────────────────────────────────
   // Every one of these was a shipped defect: a constant that happened to look right at one size and
@@ -935,7 +935,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
   // would mean Chromium inside a node:22-alpine image to buy only what this assert buys for free.
-  // The cost of committing derived output is that it can go stale silently — add a block, forget
+  // The cost of committing derived output is that it can go stale silently, add a block, forget
   // `make blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
   // every registry entry must have both its poster and the scene the site plays live.
   // This runs in lib-test because lib-test runs on pre-push, which is the last moment drift is cheap.
@@ -946,14 +946,14 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       const safe = e.name.replace(/[^a-z0-9.]/gi, '_');
       return !fs.existsSync(path.join(mediaDir, `${safe}.png`)) || !fs.existsSync(path.join(mediaDir, `${safe}.json`));
     }).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? ` — run \`make blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? `, run \`make blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
       noMedia.length === 0);
     // The frame rect is what keeps the poster and the live render framed identically. A block with a
     // scene but no rect renders nothing on the card at all, which is a silent, invisible failure.
     const framesPath = path.join(repoRoot, 'site/lib/block-frames.json');
     const framesOk = fs.existsSync(framesPath) ? JSON.parse(fs.readFileSync(framesPath, 'utf8')) : {};
     const noFrame = gridRows.filter((e) => !framesOk[e.name]).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? ` — run \`make blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? `, run \`make blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
       noFrame.length === 0);
   }
 
@@ -989,21 +989,21 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const J = (v) => JSON.stringify(parseColor(v));
   // filters.js rejected every hex that was not 3 or 6 digits, so an 8-digit brand colour read null
   // and the grade silently fell back to white.
-  ok('colour: filters.js rejected #rrggbbaa — now parsed, alpha dropped', J('#0b0b0fcc') === '[11,11,15]');
-  ok('colour: filters.js rejected #rgba — now parsed', J('#7cfa') === '[119,204,255]');
-  ok('colour: filters.js accepted #rgb and rgb() — still the same channels', J('#7cf') === '[119,204,255]' && J('rgb(1, 2, 3)') === '[1,2,3]');
+  ok('colour: filters.js rejected #rrggbbaa, now parsed, alpha dropped', J('#0b0b0fcc') === '[11,11,15]');
+  ok('colour: filters.js rejected #rgba, now parsed', J('#7cfa') === '[119,204,255]');
+  ok('colour: filters.js accepted #rgb and rgb(), still the same channels', J('#7cf') === '[119,204,255]' && J('rgb(1, 2, 3)') === '[1,2,3]');
   // motion.js was the only copy with an array passthrough, and the only one whose rgb() was
   // UNANCHORED. The passthrough is kept; the missing anchor was a bug and is gone.
   ok('colour: motion.js array passthrough kept', J([1, 2, 3]) === '[1,2,3]');
   ok('colour: motion.js unanchored rgb() is now rejected', parseColor('foo rgb(1,2,3)') === null && parseColor('rgb(1,2,3) bar') === null);
   // designspec-check.mjs split rgb() on commas only, so the modern space-separated CSS form was
   // null to the gate; and it alone read floats, which the palette-distance maths depends on.
-  ok('colour: designspec rejected space-separated rgb() — now parsed', J('rgb(1 2 3)') === '[1,2,3]' && J('rgb(1 2 3 / 50%)') === '[1,2,3]');
-  ok('colour: designspec accepted float channels — still unrounded', J('rgba(1.5, 2, 3, 0.5)') === '[1.5,2,3]');
+  ok('colour: designspec rejected space-separated rgb(), now parsed', J('rgb(1 2 3)') === '[1,2,3]' && J('rgb(1 2 3 / 50%)') === '[1,2,3]');
+  ok('colour: designspec accepted float channels, still unrounded', J('rgba(1.5, 2, 3, 0.5)') === '[1.5,2,3]');
   ok('colour: 5- and 7-digit hex are a typo, not a colour', parseColor('#12345') === null && parseColor('#1234567') === null);
-  // The {r,g,b} adapter is the SAME parse, reshaped — never a second grammar.
+  // The {r,g,b} adapter is the SAME parse, reshaped, never a second grammar.
   ok('colour: parseColorRGB is the tuple, reshaped', JSON.stringify(parseColorRGB('#0b0b0fcc')) === '{"r":11,"g":11,"b":15}' && parseColorRGB('nope') === null);
-  // lightfield stays 6-digit-hex only ON PURPOSE (core/lightfield/colour.js) — a narrow wrapper over
+  // lightfield stays 6-digit-hex only ON PURPOSE (core/lightfield/colour.js), a narrow wrapper over
   // the shared parser, not a widening of it. Everything the shared parser gained is still refused here.
   ok('colour: lightfield accepts its 6-digit hex', JSON.stringify(lightfieldToRgb('#ee7c56')) === '{"r":238,"g":124,"b":86}');
   ok('colour: lightfield still refuses what the shared parser gained', ['#7cf', '#0b0b0fcc', 'rgb(1,2,3)'].every((v) => {
@@ -1106,18 +1106,18 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const st = (name, u, active) => JSON.stringify(CAP_STYLES[name](u, active));
   for (const name of CAP_STYLE_NAMES.filter((n) => n !== 'clipWipe')) {
     const upcoming = st(name, 0, false), current = st(name, 0.5, true), spoken = st(name, 1, false);
-    ok(`captions: ${name} — upcoming, current and spoken all differ`,
+    ok(`captions: ${name}, upcoming, current and spoken all differ`,
       new Set([upcoming, current, spoken]).size === 3);
     // `undefined` or a flat 1 both mean "this style does not reach for opacity". PRESETS.highlight
     // writes 1 authoritatively, which is the opposite of the failure and must not read as one.
-    ok(`captions: ${name} — no state dims by opacity`,
+    ok(`captions: ${name}, no state dims by opacity`,
       [0, 0.5, 1].every((u) => [true, false].every((a) => {
         const o = CAP_STYLES[name](u, a).opacity;
         return o === undefined || Number(o) === 1;
       })));
-    ok(`captions: ${name} — every colour it names is a theme token`,
+    ok(`captions: ${name}. Every colour it names is a theme token`,
       [upcoming, current, spoken].every((s) => !/#[0-9a-f]{3}|rgba?\(|hsla?\(/i.test(s)));
-    ok(`captions: ${name} — pure in u`, st(name, 0.37, true) === st(name, 0.37, true));
+    ok(`captions: ${name}, pure in u`, st(name, 0.37, true) === st(name, 0.37, true));
   }
   // The wave-2 bound that keeps captionBand() honest: nothing may scale past 1.22, which at the
   // styled skin's 64px stays inside its 14px pad. A style that wants more must move the band first.
@@ -1160,18 +1160,18 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- shader stings ----
 // The overlay itself is GL, so JS asserts the contract around it: one name list, one shader branch
-// per name, and the schema exposing exactly that vocabulary — the three surfaces that can drift.
+// per name, and the schema exposing exactly that vocabulary, the three surfaces that can drift.
 {
   const src = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
   ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length > 0 && new Set(SHADER_FX).size === SHADER_FX.length);
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('const VERT'));
   const noBranch = SHADER_FX.map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
-  ok(`stings: FRAG has a branch for every effect${noBranch.length ? ' — missing ' + noBranch.map((i) => SHADER_FX[i]).join(', ') : ''}`, noBranch.length === 0);
+  ok(`stings: FRAG has a branch for every effect${noBranch.length ? ', missing ' + noBranch.map((i) => SHADER_FX[i]).join(', ') : ''}`, noBranch.length === 0);
   ok('stings: no shader branch past the end of the list', !frag.includes(`u_fx == ${SHADER_FX.length}`));
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   const en = schema.fields.stings.item.fx.enum;
   ok('stings: schema fx enum is exactly SHADER_FX, in order', JSON.stringify(en) === JSON.stringify(SHADER_FX));
-  // EVERY branch keys off pp/bell (progress) — a sting that ignores progress freezes mid-cut, which
+  // EVERY branch keys off pp/bell (progress): a sting that ignores progress freezes mid-cut, which
   // defeats the only thing a sting is for. Derived from SHADER_FX, not a hand-typed wave list: the
   // list version covered 10 of 34 effects, so appending an effect added ZERO coverage and a frozen
   // new sting would have passed. Same failure as the hardcoded counts in MISTAKES #83.
@@ -1182,7 +1182,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const body = frag.slice(frag.indexOf(`u_fx == ${i}`), next > 0 ? next : frag.length);
     return !(body.includes('pp') || body.includes('bell'));
   });
-  ok(`stings: all ${SHADER_FX.length} branches depend on progress${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+  ok(`stings: all ${SHADER_FX.length} branches depend on progress${frozen.length ? ', frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
 }
 
 // ---- three (real geometry) ----
@@ -1199,11 +1199,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const implemented = [...code.matchAll(/^  ([a-zA-Z][a-zA-Z0-9]*)\(L, colors\) \{/gm)].map((m) => m[1]);
   const missing = THREE_FX.filter((n) => !implemented.includes(n));
   const extra = implemented.filter((n) => !THREE_FX.includes(n));
-  ok(`three: every name in THREE_FX has a SCENES implementation${missing.length ? ' — missing: ' + missing.join(', ') : ''}${extra.length ? ' — orphaned: ' + extra.join(', ') : ''}`,
+  ok(`three: every name in THREE_FX has a SCENES implementation${missing.length ? ' (missing: ' + missing.join(', ') : ''}${extra.length ? ') orphaned: ' + extra.join(', ') : ''}`,
      missing.length === 0 && extra.length === 0);
   const BANNED = ['THREE.Clock', 'T().Clock', 'performance.now', 'Date.now', 'new Date', 'Math.random', 'requestAnimationFrame', 'AnimationMixer'];
   const used = BANNED.filter((b) => code.includes(b));
-  ok(`three: no wall-clock or unseeded randomness${used.length ? ' — found: ' + used.join(', ') : ''}`, used.length === 0);
+  ok(`three: no wall-clock or unseeded randomness${used.length ? ', found: ' + used.join(', ') : ''}`, used.length === 0);
   // A scene that never reads t is a still image rendered the most expensive way available.
   const frozen = THREE_FX.filter((n) => {
     const i = code.indexOf(`  ${n}(L, colors) {`);
@@ -1211,7 +1211,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const body = code.slice(i, code.indexOf('\n  },', i));
     return !/pose\(t\b/.test(body);
   });
-  ok(`three: every scene poses from t${frozen.length ? ' — frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+  ok(`three: every scene poses from t${frozen.length ? ', frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('three: schema enum is exactly THREE_FX, in order', JSON.stringify(schema.fields.layers.item.three.enum) === JSON.stringify(THREE_FX));
 }
@@ -1226,7 +1226,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`raymarch: ${RAYMARCH_FX.length} scenes, all unique`, RAYMARCH_FX.length > 0 && new Set(RAYMARCH_FX).size === RAYMARCH_FX.length);
   const mapFn = frag.slice(frag.indexOf('float map(vec3 p)'), frag.indexOf('vec3 normalAt'));
   const noMap = RAYMARCH_FX.slice(0, -1).map((_, i) => i).filter((i) => !mapFn.includes(`u_fx == ${i}`));
-  ok(`raymarch: map() dispatches every scene 0..${RAYMARCH_FX.length - 2}${noMap.length ? ' — missing ' + noMap.map((i) => RAYMARCH_FX[i]).join(', ') : ''}`, noMap.length === 0);
+  ok(`raymarch: map() dispatches every scene 0..${RAYMARCH_FX.length - 2}${noMap.length ? ', missing ' + noMap.map((i) => RAYMARCH_FX[i]).join(', ') : ''}`, noMap.length === 0);
   // every scene needs its own distance function, named for it, and every one must MOVE: a raymarched
   // subject that ignores time is a still image rendered the most expensive way available.
   const frozen = RAYMARCH_FX.filter((n) => {
@@ -1236,7 +1236,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const body = frag.slice(i, frag.indexOf('\n}', i));
     return !body.includes('u_time');
   });
-  ok(`raymarch: every scene has a named distance field that depends on time${frozen.length ? ' — missing/frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+  ok(`raymarch: every scene has a named distance field that depends on time${frozen.length ? ', missing/frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('raymarch: schema enum is exactly RAYMARCH_FX, in order', JSON.stringify(schema.fields.layers.item.raymarch.enum) === JSON.stringify(RAYMARCH_FX));
 }
@@ -1250,7 +1250,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   ok(`resample: ${RESAMPLE_FX.length} effects, all unique`, RESAMPLE_FX.length > 0 && new Set(RESAMPLE_FX).size === RESAMPLE_FX.length);
   const noBranch = RESAMPLE_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
-  ok(`resample: FRAG has a branch for effects 0..${RESAMPLE_FX.length - 2}${noBranch.length ? ' — missing ' + noBranch.map((i) => RESAMPLE_FX[i]).join(', ') : ''}`, noBranch.length === 0);
+  ok(`resample: FRAG has a branch for effects 0..${RESAMPLE_FX.length - 2}${noBranch.length ? ', missing ' + noBranch.map((i) => RESAMPLE_FX[i]).join(', ') : ''}`, noBranch.length === 0);
   ok(`resample: last effect (${RESAMPLE_FX[RESAMPLE_FX.length - 1]}) is the trailing else`, !frag.includes(`u_fx == ${RESAMPLE_FX.length - 1}`));
   const branchAt = (i) => {
     const start = i === RESAMPLE_FX.length - 1 ? frag.lastIndexOf('} else {') : frag.indexOf(`u_fx == ${i}`);
@@ -1258,11 +1258,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return frag.slice(start, next > start ? next : frag.length);
   };
   const blind = RESAMPLE_FX.filter((_, i) => !branchAt(i).includes('texture2D'));
-  ok(`resample: every effect samples the source texture${blind.length ? ' — blind: ' + blind.join(', ') : ''}`, blind.length === 0);
+  ok(`resample: every effect samples the source texture${blind.length ? ', blind: ' + blind.join(', ') : ''}`, blind.length === 0);
   // amount is the one dial every effect exposes; a branch that ignores it cannot be animated,
   // which is what `amount: [from, to]` exists for.
   const deaf = RESAMPLE_FX.filter((_, i) => !branchAt(i).includes('u_amt'));
-  ok(`resample: every effect responds to amount${deaf.length ? ' — deaf: ' + deaf.join(', ') : ''}`, deaf.length === 0);
+  ok(`resample: every effect responds to amount${deaf.length ? ', deaf: ' + deaf.join(', ') : ''}`, deaf.length === 0);
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('resample: schema enum is exactly RESAMPLE_FX, in order', JSON.stringify(schema.fields.layers.item.resample.enum) === JSON.stringify(RESAMPLE_FX));
 }
@@ -1275,11 +1275,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`ambient: ${AMBIENT_FX.length} effects, all unique`, AMBIENT_FX.length > 0 && new Set(AMBIENT_FX).size === AMBIENT_FX.length);
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   const noBranch = AMBIENT_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx==${i}`));
-  ok(`ambient: FRAG has a branch for effects 0..${AMBIENT_FX.length - 2}${noBranch.length ? ' — missing ' + noBranch.map((i) => AMBIENT_FX[i]).join(', ') : ''}`, noBranch.length === 0);
+  ok(`ambient: FRAG has a branch for effects 0..${AMBIENT_FX.length - 2}${noBranch.length ? ', missing ' + noBranch.map((i) => AMBIENT_FX[i]).join(', ') : ''}`, noBranch.length === 0);
   ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
-  // EVERY ambient look must animate — one that ignores t is a frozen still on a layer whose entire
+  // EVERY ambient look must animate: one that ignores t is a frozen still on a layer whose entire
   // contract is "loops smoothly". Derived from AMBIENT_FX with a NAMED exemption set, because the
   // hand-typed wave list covered 8 of 17 and every appended effect landed outside it uncovered.
   // FRAG IS A TEMPLATE LITERAL. A backtick anywhere inside it ends the string, and what follows is
@@ -1445,8 +1445,8 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return !/\bt\b/.test(body);
   });
   const stillReal = still.filter((n) => !AMBIENT_EXEMPT.has(n));
-  ok(`ambient: all ${AMBIENT_FX.length} looks animate (exempt: ${[...AMBIENT_EXEMPT].join(', ')})${stillReal.length ? ' — frozen: ' + stillReal.join(', ') : ''}`, stillReal.length === 0);
-  // matrixDecode (wave 4, the trailing else) is digital rain — its heads must fall with t
+  ok(`ambient: all ${AMBIENT_FX.length} looks animate (exempt: ${[...AMBIENT_EXEMPT].join(', ')})${stillReal.length ? '. Frozen: ' + stillReal.join(', ') : ''}`, stillReal.length === 0);
+  // matrixDecode (wave 4, the trailing else) is digital rain, its heads must fall with t
   // Locate a branch by NAME, not by position: this used to slice the trailing `else`, which stopped
   // being matrixDecode the moment two effects were appended after it. A positional assertion silently
   // starts testing a different thing.
@@ -1466,7 +1466,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('looks: isLook/lookName parse a spec', isLook('neon:0.9') && lookName('neon:0.9') === 'neon' && !isLook('duotone'));
   const neon = resolveComposite('neon');
   // neon glows the LUMINANCE via an SVG bloom filter (url(#f-bloom-...)), not a CSS drop-shadow. By
-  // default the glow keeps the SOURCE's own colours (id `f-bloom-src`) — a real neon bleeds the image's
+  // default the glow keeps the SOURCE's own colours (id `f-bloom-src`), a real neon bleeds the image's
   // colours; an explicit colour override floods a uniform tint (encoded as RGB in the id).
   ok('looks: neon yields a filter with grade + bloom', neon.filter.includes('saturate(') && neon.filter.includes('url(#f-bloom'));
   ok('looks: neon default glows the source\'s own colours (no flood tint)', neon.filter.includes('f-bloom-src'));
@@ -1480,13 +1480,13 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // overlays: crt stacks scanlines + vignette, in pipeline order (texture before vignette)
   const crt = resolveComposite('crt');
   ok('looks: crt returns >=2 overlays (scanlines + vignette)', crt.overlays.length >= 2);
-  ok('looks: pipeline order — grade before glow in neon', neon.filter.indexOf('saturate(') < neon.filter.indexOf('url(#f-bloom'));
+  ok('looks: pipeline order, grade before glow in neon', neon.filter.indexOf('saturate(') < neon.filter.indexOf('url(#f-bloom'));
   ok('looks: every look resolves to a filter or overlays', LOOK_NAMES.every((n) => { const r = resolveComposite(n); return r && (r.filter.length > 0 || r.overlays.length > 0); }));
   ok('looks: deterministic', resolveComposite('vhs', {}, 0.6).filter === resolveComposite('vhs', {}, 0.6).filter);
 
   // ---- the three guards from docs/MISTAKES.md #351 ----
   // All derived from LOOKS. A hand-written list is what let `color` be dead on nineteen looks while
-  // the test above proved the feature on `neon` — one of the three where it happened to work.
+  // the test above proved the feature on `neon`. One of the three where it happened to work.
   const sig = (r) => r.filter + '||' + JSON.stringify(r.overlays);
   const PROBE = { color: '#123456', color2: '#654321', colors: ['#111111', '#eeeeee'], grain: 0.9, vignette: 0.9, strength: 0.2 };
 
@@ -1500,14 +1500,14 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       if (!moved) deadKnobs.push(`${n}.${k}`);
     }
   }
-  ok(`looks: every knob a look declares changes its output${deadKnobs.length ? ' — dead: ' + deadKnobs.join(', ') : ''}`, deadKnobs.length === 0);
+  ok(`looks: every knob a look declares changes its output${deadKnobs.length ? ', dead: ' + deadKnobs.join(', ') : ''}`, deadKnobs.length === 0);
 
   // 1b. A VALUE A LOOK DECLARES MUST RENDER. The check above asks whether an AUTHOR can move the knob;
   // this asks whether the look's OWN default reaches the frame. They are different questions, because
   // the two travel by different routes: the author's knob is expanded into private argument names and
   // written AFTER the per-pass fixed bag (so it wins), while `d.color` is merged BEFORE it (so a pass
   // that fixes the same spelling silently shadows it). Sixteen looks declared a colour that never
-  // rendered, including vintageAnamorphic's `#a9c8ff` — the exact hex the comment in core/looks.js
+  // rendered, including vintageAnamorphic's `#a9c8ff`. The exact hex the comment in core/looks.js
   // records finding dead and fixing, where the fix went to the pass and left the look entry behind.
   // Setting letterpress's to pure red moved zero pixels. docs/MISTAKES.md #366.
   const shadowed = [];
@@ -1523,7 +1523,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       if (!moved) shadowed.push(`${n}.${k}`);
     }
   }
-  ok(`looks: every DEFAULT a look declares reaches the frame${shadowed.length ? ' — shadowed: ' + shadowed.join(', ') : ''}`, shadowed.length === 0);
+  ok(`looks: every DEFAULT a look declares reaches the frame${shadowed.length ? ', shadowed: ' + shadowed.join(', ') : ''}`, shadowed.length === 0);
 
   // The routing table must agree with what the passes actually read, in BOTH directions, or the
   // "this look does not take that knob" error starts lying.
@@ -1535,7 +1535,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       if (moved !== liveKnobs(n).includes(k)) knobDrift.push(`${n}.${k}`);
     }
   }
-  ok(`looks: liveKnobs matches behaviour on all ${LOOK_NAMES.length} looks${knobDrift.length ? ' — drift: ' + knobDrift.join(', ') : ''}`, knobDrift.length === 0);
+  ok(`looks: liveKnobs matches behaviour on all ${LOOK_NAMES.length} looks${knobDrift.length ? ', drift: ' + knobDrift.join(', ') : ''}`, knobDrift.length === 0);
 
   // A knob the look cannot apply is refused, not dropped (core/fx/index.js reasoning, one level up).
   ok('looks: a knob the look cannot use throws', (() => {
@@ -1545,7 +1545,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // 2. NO LOOK MAY BLUR THE ALPHA CHANNEL. #112 stated this rule and fixed one call site; `hStreak`
   // and `chromaPair` carried it for another two hundred entries. Stated once, for the whole registry.
   const alphaBlur = LOOK_NAMES.filter((n) => resolveComposite(n).filter.includes('drop-shadow('));
-  ok(`looks: no look blurs the ALPHA channel (drop-shadow)${alphaBlur.length ? ' — ' + alphaBlur.join(', ') : ''}`, alphaBlur.length === 0);
+  ok(`looks: no look blurs the ALPHA channel (drop-shadow)${alphaBlur.length ? ', ' + alphaBlur.join(', ') : ''}`, alphaBlur.length === 0);
   ok('looks: vintageAnamorphic streaks the HIGHLIGHTS via a directional bloom (wide x, narrow y)',
     /f-bloom-[\d_]+-t[\d_]+-r[\d_]+-ry[\d_]+/.test(resolveComposite('vintageAnamorphic').filter));
   ok('looks: chromatic looks use a per-pixel channel split', resolveComposite('cyberpunk').filter.includes('#f-chroma-'));
@@ -1571,7 +1571,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // `default` is the name every author reaches for by habit. It used to hold a mono+lime palette that
 // belonged to no site of ours, so films shipped in a colour nobody chose (docs/MISTAKES.md #352). It
 // now mirrors themes/vawe.json, and two files holding the same palette is exactly the shape that
-// drifts — so the drift is a test, not a comment.
+// drifts, so the drift is a test, not a comment.
 {
   const readTheme = (n) => JSON.parse(fsMod.readFileSync(new URL(`../../themes/${n}.json`, import.meta.url), 'utf8'));
   const def = readTheme('default'), vawe = readTheme('vawe'), neutral = readTheme('neutral');
@@ -1588,7 +1588,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const t = JSON.parse(fsMod.readFileSync(new URL(f, themeDir), 'utf8'));
     return !t.bg && !bgPaletteFrom(t.palette);
   });
-  ok(`themes: every theme resolves a background palette (authored or derived)${noPal.length ? ' — ' + noPal.join(', ') : ''}`, noPal.length === 0);
+  ok(`themes: every theme resolves a background palette (authored or derived)${noPal.length ? ', ' + noPal.join(', ') : ''}`, noPal.length === 0);
 }
 
 // ---- the registry primitive (core/registry.js) ----
@@ -1680,7 +1680,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // an explicit null is a DECISION (silence); only a missing KEY is a gap.
   const missing = CUT_REGISTRY.names.filter((n) => !(n in CUT_CUE));
   ok(`sound: CUT_CUE voices every one of the ${CUT_REGISTRY.names.length} cut presentations`
-    + `${missing.length ? ' — missing: ' + missing.join(', ') : ''}`, missing.length === 0);
+    + `${missing.length ? ', missing: ' + missing.join(', ') : ''}`, missing.length === 0);
 }
 
 // ---- blueprints: a HELD element needs idle motion (docs/MISTAKES.md #359) ----
@@ -1689,7 +1689,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const mark = cta.find((l) => l.type === 'image');
   ok('blueprints: the end card\'s mark carries an idle loop, not a freeze', LOOP_FX.includes(mark.fx));
   // The measurement behind it: across the 12 beats, 33 layers are held >=2.5s and only 3 had ANY idle
-  // motion. This asserts the one that is unambiguous — a mark on a held end card. It deliberately does
+  // motion. This asserts the one that is unambiguous. A mark on a held end card. It deliberately does
   // NOT assert the other 30: most are TEXT, and drifting type is harder to read, so "add idle
   // everywhere" would be the wrong lesson drawn from a true measurement.
   ok('blueprints: idle is on the MARK, not on the copy around it',
@@ -1715,17 +1715,17 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- deprecation: 16 gsap names that duplicate an `anim` exactly (#364) ----
 {
-  ok('deprecated: every deprecated name STILL resolves — a notice, not a removal',
+  ok('deprecated: every deprecated name STILL resolves, a notice, not a removal',
     Object.keys(DEPRECATED_FX).every((n) => GSAP_FX.includes(n))
     && Object.keys(DEPRECATED_EXIT).every((n) => EXIT_FX.includes(n)));
   ok('deprecated: each one names a REPLACEMENT, because "deprecated" alone is a scolding',
     Object.values({ ...DEPRECATED_FX, ...DEPRECATED_EXIT }).every((v) => /^(anim|out):"/.test(v)));
   // The ones that survive do something no `anim` can. A kinetic preset only works on a TEXT layer with
-  // `split`, so bounceIn is NOT a duplicate of preset:"bounce" on an image — it is the only way.
+  // `split`, so bounceIn is NOT a duplicate of preset:"bounce" on an image, it is the only way.
   ok('deprecated: the per-character effects and idle loops are KEPT',
     ['charFold', 'charTilt', 'charBlurCascade', 'charOvershoot', 'float', 'breathe', 'wobble', 'heartbeat']
       .every((n) => !DEPRECATED_FX[n]));
-  ok('deprecated: using one is a WARNING, not an error — it still renders', (() => {
+  ok('deprecated: using one is a WARNING, not an error, it still renders', (() => {
     const w = lintData({ layers: [{ type: 'text', fx: 'popIn' }] });
     return w.some((m) => /deprecated/.test(m) && /anim:"pop"/.test(m));
   })());
@@ -1755,7 +1755,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     JSON.stringify(marksOf({ cuts: [{ t: 2 }], stings: [{ t: 1 }] })) === '[{"t":1,"kind":"sting"},{"t":2,"kind":"cut"}]');
   // bg windows that name NO times bind to the film's own joints, one each, in order. Before this,
   // every one of them defaulted to 0..1e9 and bgWinAt kept the last, so all but the final window were
-  // accepted and never drawn — silent substitution, the same shape as #213 and #369.
+  // accepted and never drawn, silent substitution, the same shape as #213 and #369.
   {
     const T = junctionTable([{ t: 2, kind: 'cut' }, { t: 5, kind: 'cut' }, { t: 8, kind: 'sting' }]);
     const w = bindWindowsToJunctions([{ preset: 'paper' }, { preset: 'dark' }, { preset: 'accent' }], T);
@@ -1938,7 +1938,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('looks: nostalgia likewise', leakOf('nostalgia').includes('#ffcf9a'));
 }
 
-// ---- canvas FX (core/canvas-fx.js) — pure pixel math (the DOM passes bake in the browser) ----
+// ---- canvas FX (core/canvas-fx.js): pure pixel math (the DOM passes bake in the browser) ----
 {
   ok('canvasfx: luma weights sum to 1 (rec709)', approx(luma(255, 255, 255), 255, 1e-3) && luma(0, 0, 0) === 0);
   ok('canvasfx: luma ranks green>red>blue', luma(0, 255, 0) > luma(255, 0, 0) && luma(255, 0, 0) > luma(0, 0, 255));
@@ -1958,7 +1958,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('canvasfx: every preset targets a real pass', Object.values(CANVAS_FX_PRESETS).every((p) => CANVAS_FX_NAMES.includes(p.fx)));
 }
 
-// ---- audio kit (core/audio-kit.mjs) — synthesized cues must be deterministic + audible ----
+// ---- audio kit (core/audio-kit.mjs): synthesized cues must be deterministic + audible ----
 {
   const a = renderCue(CUES.tick, 5), b = renderCue(CUES.tick, 5);
   ok('audio: renderCue is deterministic for a seed', a.length === b.length && a.every((v, i) => v === b[i]));
@@ -1976,7 +1976,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('audio: biquad lowpass passes DC', (() => { const f = biquad('lowpass', 8000, 0.707); let last = 0; for (let i = 0; i < 500; i++) last = f(1); return last > 0.8; })());
 }
 
-// ---- beat detection (core/beats.js) — the grid a beat-matched edit is built on ----
+// ---- beat detection (core/beats.js): the grid a beat-matched edit is built on ----
 {
   const SR = 44100;
   // synthetic 120 BPM click track: a beat every 0.5s. If the detector cannot find THIS, it cannot
@@ -1994,7 +1994,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const grid = beatGrid(periodFrames, phase, hopSeconds, dur);
   ok('beats: grid spacing matches the tempo', grid.length > 20 && Math.abs((grid[5] - grid[4]) - 0.5) < 0.03);
   ok('beats: grid phase lands on the clicks', Math.abs(grid[4] - Math.round(grid[4] / 0.5) * 0.5) < 0.06);
-  // silence has no pulse — the detector must say so rather than invent a grid to snap cuts to
+  // silence has no pulse: the detector must say so rather than invent a grid to snap cuts to
   const { env: envQ, hopSeconds: hq } = onsetEnvelope(new Float32Array(SR * 4), SR);
   ok('beats: silence yields no confident tempo', estimateTempo(envQ, hq).confidence < 1.6);
   // snapping must respect the author's intent
@@ -2057,19 +2057,19 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
      JSON.stringify(s8.cuts.map((c) => c.t)) === JSON.stringify(s7.cuts.map((c) => c.t))
      && s8.seams[0].t === s7.seams[0].t);
   ok('beat-bind: unrollGrid returns a new array and never edits the sidecar', unrollGrid(G.beats, 3, 8) !== G.beats && G.beats.length === 7);
-  // the `lift` entrance must actually travel — pop only scaled 14%, which read as flat
+  // the `lift` entrance must actually travel: pop only scaled 14%, which read as flat
   ok('motion: lift travels further than pop at t=0', parseFloat(String(lift(0).transform).match(/scale\(([\d.]+)/)[1]) < 0.75);
   ok('motion: lift settles to identity', lift(1).transform.includes('scale(1.0000)'));
 }
 
-// ---- opacity envelope (core/clips.js) — eased, and safe to cross-dissolve with ----
+// ---- opacity envelope (core/clips.js): eased, and safe to cross-dissolve with ----
 {
   ok('envelope: not linear (an entrance decelerates)', opacityEnvelope(0.25, 0) > 0.4);
   ok('envelope: 0 at the start, 1 when settled', opacityEnvelope(0, 0) === 0 && opacityEnvelope(1, 0) === 1);
   ok('envelope: gone at the end of an exit', opacityEnvelope(1, 1) === 0);
   ok('envelope: monotonic in', (() => { let p = -1; for (let t = 0; t <= 1.001; t += 0.05) { const v = opacityEnvelope(t, 0); if (v < p - 1e-9) return false; p = v; } return true; })());
   // THE invariant: a handoff (A exiting while B enters, matched windows) holds constant density.
-  // Without it the blend brightens in the middle and reads as muddy — measured 1.71 before the fix.
+  // Without it the blend brightens in the middle and reads as muddy, measured 1.71 before the fix.
   ok('envelope: a matched handoff sums to exactly 1', (() => {
     for (let t = 0; t <= 1.001; t += 0.05) {
       const leaving = opacityEnvelope(1, t), arriving = opacityEnvelope(t, 0);
@@ -2077,7 +2077,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     } return true; })());
 }
 
-// ---- clipStyleAt (core/clips.js) — the composition asked for, not performed ----
+// ---- clipStyleAt (core/clips.js): the composition asked for, not performed ----
 // A fake element is enough because the function reads only `el.dataset` and writes nothing. That is
 // the whole point of the lift: the pose at t is a VALUE, so it can be asked for out of order, twice,
 // or for a t nobody is rendering.
@@ -2086,7 +2086,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const keys = (o) => Object.keys(o).sort().join(',');
 
   // COMPLETE, NOT A DELTA (MISTAKES #41). Entrances and exits write different CSS properties, so both
-  // branches must hand back every property either half of this layer's animation can touch — or the
+  // branches must hand back every property either half of this layer's animation can touch, or the
   // one the other half wrote sticks across out-of-order worker frames.
   const both = clip({ anim: 'wipe', out: 'defocus', track: '3' });
   const inWin = clipStyleAt(both, 2), offWin = clipStyleAt(both, 9);
@@ -2116,7 +2116,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
      clipStyleAt(Object.freeze({ dataset: Object.freeze({ start: '0', duration: '2', anim: 'rise' }) }), 1).opacity === '1.000');
 }
 
-// ---- sceneDims (core/safe.js) — how big is the frame, asked once ----
+// ---- sceneDims (core/safe.js): how big is the frame, asked once ----
 {
   ok('dims: aspect wins', sceneDims({ aspect: '16:9' }).join() === '1920,1080');
   ok('dims: portrait aspect', sceneDims({ aspect: '9:16' }).join() === '1080,1920');
@@ -2148,7 +2148,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`dims: nobody re-derives the canvas (${offenders.join(', ') || 'clean'})`, offenders.length === 0);
 }
 
-// ---- spectrum (core/spectrum.js) — the audio-reactive bake is a pure transform ----
+// ---- spectrum (core/spectrum.js): the audio-reactive bake is a pure transform ----
 {
   const sr = 44100, n = sr, sig = new Float64Array(n);
   for (let i = 0; i < n; i++) sig[i] = Math.sin(2 * Math.PI * 80 * i / sr) * (i < n / 2 ? 1 : 0.05);
@@ -2171,7 +2171,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 {
   // ransom: the whole effect rests on being a PURE function of (seed, index). If it ever picked up
-  // Math.random or the clock the note would flicker frame to frame — this is the guard for that.
+  // Math.random or the clock the note would flicker frame to frame, this is the guard for that.
   const a = ransomGlyph('READ', 3, { accent: '#c8342b' });
   const b = ransomGlyph('READ', 3, { accent: '#c8342b' });
   ok('ransom: same (seed,i) → identical glyph spec', JSON.stringify(a) === JSON.stringify(b));
@@ -2213,7 +2213,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
      refuses(() => lowerScene({ stings: [{ t: 1, fx: 'flash', color: 'var(--nope)' }] }), /--nope/));
   ok('transitions: a sting palette is checked entry by entry',
      refuses(() => lowerScene({ stings: [{ t: 1, fx: 'leak', colors: ['#fff', 'not-a-colour'] }] }), /colors\[1\]/));
-  // Auto sound-design must cue EVERY seam fx — a seam with no mapping falls back to a bare whoosh and
+  // Auto sound-design must cue EVERY seam fx: a seam with no mapping falls back to a bare whoosh and
   // reads wrong (a bloom-iris should not swoosh). This gate is why `data.seams` stopped rendering silent
   // (audio derived cuts+stings only). If a new SEAM_FX ships without a SEAM_CUE row, this fails loudly.
   ok('audio: SEAM_CUE covers every SEAM_FX (no silent seam)', SEAM_FX.every((fx) => typeof SEAM_CUE[fx] === 'string'));
@@ -2232,7 +2232,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('springEase: underdamped overshoots past 1 somewhere', (() => { for (let u = 0.1; u < 1; u += 0.02) if (bouncy(u) > 1.001) return true; return false; })());
   ok('springEase: default factory works', typeof springEase() === 'function' && springEase()(1) === 1);
 }
-// ---- path-morph (true shape morph) — pure maths, no DOM ------------------------------------------
+// ---- path-morph (true shape morph): pure maths, no DOM ------------------------------------------
 {
   const A = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
   const B = [{ x: 0, y: 0 }, { x: 20, y: 0 }, { x: 20, y: 20 }, { x: 0, y: 20 }];
@@ -2350,7 +2350,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // docs/EFFECTS.md is generated from the registries and 379 of its 476 rows had no description, because
 // the only source was a FLAT 68-key map in the generator whose own comment called the notes "a bonus,
 // never a second source of truth". A name with no description is a vocabulary nobody can choose from.
-// Each family now keeps its blurbs next to its registry, and a missing one fails HERE — the same shape
+// Each family now keeps its blurbs next to its registry, and a missing one fails HERE, the same shape
 // as blueprints-catalog.mjs, which exits 1 when a beat has no trailing comment.
 {
   const families = [
@@ -2370,8 +2370,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   for (const [label, keys, map] of families) {
     const miss = keys.filter((k) => !map[k]);
     const extra = Object.keys(map).filter((k) => !keys.includes(k));
-    ok(`every ${label} entry has a blurb` + (miss.length ? ` — missing ${miss.join(', ')}` : ''), miss.length === 0);
-    ok(`no blurb for a ${label} entry that does not exist` + (extra.length ? ` — ${extra.join(', ')}` : ''), extra.length === 0);
+    ok(`every ${label} entry has a blurb` + (miss.length ? `, missing ${miss.join(', ')}` : ''), miss.length === 0);
+    ok(`no blurb for a ${label} entry that does not exist` + (extra.length ? `, ${extra.join(', ')}` : ''), extra.length === 0);
   }
   // A LOOP IS NOT AN ENTRANCE. GSAP_FX is one flat list of both, so a layer given `float` as its entrance
   // never settles and reads as a hung render. The two sets must stay disjoint and must together BE the
@@ -2405,7 +2405,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     for (const v of P.banMotion || []) if (!MOTION.has(v)) bad.push(`${name}.banMotion: ${v}`);
     for (const v of P.stings || []) if (!SHADER_FX.includes(v)) bad.push(`${name}.stings: ${v}`);
   }
-  ok('every profile names only real cuts / stings / entrances' + (bad.length ? ` — ${bad.join(' · ')}` : ''), bad.length === 0);
+  ok('every profile names only real cuts / stings / entrances' + (bad.length ? `, ${bad.join(' · ')}` : ''), bad.length === 0);
   ok('every profile carries the 7 fields SELECTION.md declares',
     Object.values(PROFILES).every((P) => ['face', 'pace', 'easing', 'accent', 'look', 'blurb', 'antiBlurb'].every((k) => typeof P[k] === 'string' && P[k].length)));
 }
@@ -2432,7 +2432,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('multiPhase: deterministic', JSON.stringify(multiPhase({ start: 0, legs: [{ dur: 1, s: 1.2 }] })) === JSON.stringify(multiPhase({ start: 0, legs: [{ dur: 1, s: 1.2 }] })));
   // A leg that mentions no axis must CHANGE no axis. `s` always carried forward; x and y defaulted to
   // 0 on the same line, so the documented "hold" leg between a push and a settle panned the camera all
-  // the way home — 180px over 2s, a move as big as the push (MISTAKES #197). The old test passed `s` on
+  // the way home, 180px over 2s, a move as big as the push (MISTAKES #197). The old test passed `s` on
   // every leg and no position at all, which is exactly the input shape that works.
   const hold = multiPhase({ start: 0, legs: [{ dur: 1.5, s: 1.25, x: 180, y: -60 }, { dur: 2 }, { dur: 1.5, s: 1, x: 0, y: 0 }] });
   const h0 = cameraAt(hold, 1.5), h1 = cameraAt(hold, 3.5);
@@ -2440,7 +2440,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('multiPhase: ...and holds scale, as it always did', approx(h1.s, h0.s, 1e-6));
   ok('multiPhase: an explicit later leg still moves', approx(cameraAt(hold, 5).x, 0, 1e-6) && approx(cameraAt(hold, 5).s, 1, 1e-6));
   // travel: the contract is the pan math, so every station must sit at frame CENTRE when the camera
-  // arrives — that conversion is the reason the helper exists and the thing hand-typed legs get wrong.
+  // arrives. That conversion is the reason the helper exists and the thing hand-typed legs get wrong.
   const trStations = [
     { tx: 400, ty: 300, s: 1.4 },
     { tx: 1500, ty: 800, s: 1.8, dur: 1.2, dwell: 0.6 },
@@ -2562,7 +2562,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('cameraShake: a different seed gives a different shake',
     JSON.stringify(cameraShake({ seed: 5 })) !== JSON.stringify(cameraShake({ seed: 9 })));
   // Monotonic decay: an impact gets quieter, it does not swell. Compared as envelopes, not per sample.
-  ok('cameraShake: decays — the late half is quieter than the early half', (() => {
+  ok('cameraShake: decays. The late half is quieter than the early half', (() => {
     const body = sh.slice(1, -1), half = Math.floor(body.length / 2);
     const peak = (a) => Math.max(...a.map((k) => Math.abs(k.x)));
     return peak(body.slice(half)) < peak(body.slice(0, half));
@@ -2583,7 +2583,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('punchIn: cameraAt reads the endpoints', approx(cameraAt(pi, 0).s, 0.72)
     && approx(cameraAt(pi, 0.32 + 0.08 + 0.5).s, 1));
   ok('punchIn: the squash really dips below the resting scale', cameraAt(pi, 0.4).s < 1);
-  ok('punchIn: never pans — it is a scale move', pi.every((k) => k.x === 0 && k.y === 0));
+  ok('punchIn: never pans. It is a scale move', pi.every((k) => k.x === 0 && k.y === 0));
   ok('punchIn: deterministic', JSON.stringify(punchIn({})) === JSON.stringify(punchIn({})));
   ok('punchIn: REFUSES a non-positive leg or magnification', [
     () => punchIn({ dur: 0 }), () => punchIn({ squashDur: -1 }), () => punchIn({ settleDur: 0 }),
@@ -2597,7 +2597,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('driftHold: opens at the origin and never leaves the declared amplitude',
     approx(dh[0].x, 0, 1e-12) && approx(dh[0].y, 0, 1e-12)
     && dh.every((k) => Math.abs(k.x) <= 6 + 1e-9 && Math.abs(k.y) <= 3 + 1e-9));
-  ok('driftHold: it MOVES — the frame is not dead', Math.max(...dh.map((k) => Math.abs(k.x))) > 3);
+  ok('driftHold: it MOVES. The frame is not dead', Math.max(...dh.map((k) => Math.abs(k.x))) > 3);
   // The whole craft point: x and y at the same frequency walk a straight diagonal. At 1.3 they do not.
   ok('driftHold: x and y run at different frequencies (a Lissajous, not a diagonal)', (() => {
     const straight = driftHold({ ratio: 1 }), organic = driftHold({ ratio: 1.3 });
@@ -2621,7 +2621,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     JSON.stringify(buildCameraMove({ move: 'punch in', dur: 0.3 })) === JSON.stringify(punchIn({ dur: 0.3 }))
     && JSON.stringify(buildCameraMove({ move: 'shake', seed: 3 })) === JSON.stringify(cameraShake({ seed: 3 }))
     && JSON.stringify(buildCameraMove({ move: 'drift hold' })) === JSON.stringify(driftHold({})));
-  // The schema's move list is FREE TEXT and has drifted before — it omitted travel and truck for months.
+  // The schema's move list is FREE TEXT and has drifted before, it omitted travel and truck for months.
   // The code is the source of truth; this is the assertion that says so out loud.
   ok('the schema cameraMove label names every move the code exports', (() => {
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -2825,14 +2825,14 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       const a = idleAt(name, u, 0.41), b = idleAt(name, u, 0.41);
       if (!near(a.dx, b.dx) || !near(a.dy, b.dy) || !near(a.scale, b.scale) || !near(a.rot, b.rot)) same = false;
     }
-    ok(`idle "${name}" is pure — same time, same delta`, same);
+    ok(`idle "${name}" is pure, same time, same delta`, same);
   }
 
   // A TRUE NO-OP, on all four channels. `none` exists so an author can opt one layer out of a scene
   // default; an idle that moved anything at all through that name would be the opposite of the ask.
   {
     // BOTH DOORS. `idleAt` short-circuits on the name before the generator is reached, so asserting
-    // only through it would prove the short-circuit and say nothing about IDLE.none itself — and the
+    // only through it would prove the short-circuit and say nothing about IDLE.none itself, and the
     // generator is what a future caller reaching into the registry would get.
     let flat = true;
     for (const u of [0, 0.9, 3.3, 12.7]) {
@@ -2864,7 +2864,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('idlePhase is a turn in [0,1)', IDLE_NAMES.every(() => idlePhase('x') >= 0 && idlePhase('x') < 1));
   ok('a phase shifts the wave', !near(idleAt('breathe', 1, 0).scale, idleAt('breathe', 1, 0.5).scale, 1e-6));
 
-  // THE SETTLED MIDDLE. Zero through the entrance and through the exit — an idle that overlapped either
+  // THE SETTLED MIDDLE. Zero through the entrance and through the exit, an idle that overlapped either
   // would be fighting the very ramp driveClips is animating, for the same pixels.
   {
     const w = { dur: 4, enterDur: 0.4, exitDur: 0.3 };
@@ -3001,13 +3001,13 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 {
   const { SHADER_ID: ID, SHADER_FX: FX } = await import('../../core/stings.js');
   // The shipped order, transcribed by hand. If a future edit renumbers an effect, every scene using
-  // shader stings renders a DIFFERENT shader with no crash and no visual error — this catches that.
+  // shader stings renders a DIFFERENT shader with no crash and no visual error, this catches that.
   const SHIPPED = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti',
     'ripple', 'scan', 'warp', 'bokeh', 'wipe', 'circle', 'blinds', 'squares', 'pinwheel', 'doors',
     'polka', 'swirl', 'crossWarp', 'domainWarp', 'sdfIris', 'vortex', 'ridgedBurn', 'lens', 'thermal', 'whipPan',
     'chromaticSplit', 'dispersion', 'gridPixelateWipe', 'iridescence', 'cinematicZoom'];
   const moved = SHIPPED.filter((n, i) => ID[n] !== i);
-  ok(`sting ids: every effect keeps its shipped branch number${moved.length ? ' — moved: ' + moved.map((n) => `${n} ${SHIPPED.indexOf(n)}->${ID[n]}`).join(', ') : ''}`,
+  ok(`sting ids: every effect keeps its shipped branch number${moved.length ? ', moved: ' + moved.map((n) => `${n} ${SHIPPED.indexOf(n)}->${ID[n]}`).join(', ') : ''}`,
     moved.length === 0);
   ok('sting ids: no shipped effect was dropped', SHIPPED.every((n) => n in ID));
   ok('sting ids: SHADER_FX is exactly the keys of SHADER_ID', JSON.stringify(FX) === JSON.stringify(Object.keys(ID)));
@@ -3017,7 +3017,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   const fragSrc = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
   const missing = ids.filter((i) => !fragSrc.includes(`u_fx == ${i}`));
-  ok(`sting ids: FRAG branches every id${missing.length ? ' — missing ' + missing.join(', ') : ''}`, missing.length === 0);
+  ok(`sting ids: FRAG branches every id${missing.length ? ', missing ' + missing.join(', ') : ''}`, missing.length === 0);
   ok('sting ids: no FRAG branch past the last id', !fragSrc.includes(`u_fx == ${ids.length}`));
 
   // An unknown name used to be a silent no-op (draw() returned clear()). A real draw() needs WebGL,
@@ -3057,7 +3057,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     && of({ type: 'three', three: 'globe', pointSize: 3, spin: 1 }).length === 0);
 
   // A three scene's dials sit on the LAYER beside generic props, so only a real sibling dial can be
-  // called misused — anything else is somebody's layout and must never be touched.
+  // called misused, anything else is somebody's layout and must never be touched.
   ok('knobs: on a three layer a generic prop is left alone and a sibling scene\'s dial is refused',
     of({ type: 'three', three: 'pointCloud', x: 100, start: 2, w: 400 }).length === 0
     && of({ type: 'three', three: 'pointCloud', yaw: 12 }).length === 1);
@@ -3074,7 +3074,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       let d; try { d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return false; }
       return d.module === 'scene' && knobErrors(d).length > 0;
     });
-    ok(`knobs: no shipped scene is refused by the new rule${guilty.length ? ' — ' + guilty.join(', ') : ''}`, guilty.length === 0);
+    ok(`knobs: no shipped scene is refused by the new rule${guilty.length ? ', ' + guilty.join(', ') : ''}`, guilty.length === 0);
   }
 }
 
@@ -3095,7 +3095,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('images: a repo-local image that never loaded is refused, naming the path', /assets\/brands\/nope\/logo\.svg/.test(local));
   ok('images: the refusal names where it was written', /layers\[0\]\.src/.test(local));
 
-  ok('images: a remote URL stays soft — a dead CDN is not the author\'s mistake',
+  ok('images: a remote URL stays soft. A dead CDN is not the author\'s mistake',
     (await threw({ layers: [{ type: 'image', src: 'https://cdn.example.com/logo.svg' }] })) === '');
   // One shipped film sets a text layer to the literal string "hero.png"; the walk reads every string in
   // the scene, so a bare filename must never be grounds to refuse a film.
@@ -3113,18 +3113,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 {
   const kf = dollyZoom({ dur: 2, from: 2400, to: 800 });
   ok('dollyZoom emits two ascending keys', kf.length === 2 && kf[1].t > kf[0].t);
-  ok('dollyZoom holds `s` across both keys — the subject cannot change size',
+  ok('dollyZoom holds `s` across both keys: the subject cannot change size',
     kf[0].s === kf[1].s && kf[0].s === 1);
   ok('dollyZoom ramps the lens, which is the only thing it moves',
     kf[0].p === 2400 && kf[1].p === 800);
-  ok('dollyZoom leaves x/y at the origin — it reframes nothing',
+  ok('dollyZoom leaves x/y at the origin: it reframes nothing',
     kf.every((k) => k.x === 0 && k.y === 0));
   // m(z) at the two ends of the default move, for a layer standing 800px back. The subject's own
   // magnification is s at both; the background's is not, and that difference IS the shot.
   const m = (s, L, z) => s * L / (L - s * z);
   ok('dollyZoom: the picture plane is magnified by s at BOTH ends, whatever the lens says',
     m(1, 2400, 0) === 1 && m(1, 800, 0) === 1);
-  ok('dollyZoom: a layer 800px back SHRINKS as the lens opens — the ground gives way',
+  ok('dollyZoom: a layer 800px back SHRINKS as the lens opens, the ground gives way',
     m(1, 800, -800) < m(1, 2400, -800));
   ok('dollyZoom refuses a lens ramp that never ramps, a dur that rewinds, and a camera at nowhere', [
     () => dollyZoom({ from: 900, to: 900 }),
@@ -3158,7 +3158,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     const w = PRESETS.weight(1, { from: 300, to: 500 });
     return w.fontVariationSettings === "'wght' 500";
   })());
-  ok('preset `weight` degrades to a static cut too — it never writes the axis alone',
+  ok('preset `weight` degrades to a static cut too: it never writes the axis alone',
     PRESETS.weight(0.5).fontWeight != null);
 }
 
@@ -3185,16 +3185,16 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const el = mount('Ship {} in seconds');
   ws.build(null, el, {}, { words: WORDS });
   const slot = el.querySelector();
-  ok('wordSlot puts EVERY candidate in the same grid cell — that is what sizes the box to the widest',
+  ok('wordSlot puts EVERY candidate in the same grid cell. That is what sizes the box to the widest',
     slot && slot.children.length === 3 && slot.children.every((c) => c.style.gridArea === '1 / 1'));
   ok('wordSlot leaves the text before and after the placeholder in place',
     el.childNodes[0].nodeValue === 'Ship ' && el.childNodes[2].nodeValue === ' in seconds');
-  ok('wordSlot never hides a candidate with display/visibility — a hidden grid item must still size the track',
+  ok('wordSlot never hides a candidate with display/visibility. A hidden grid item must still size the track',
     slot.children.every((c) => c.style.display == null && c.style.visibility == null));
 
   const opac = (t) => { ws.frame(null, el, { start: 0 }, t, null, { words: WORDS, every: 1, swap: 0.25 });
     return slot.children.map((c) => +c.style.opacity); };
-  ok('wordSlot holds word 0 before the first swap — a slot is never blank',
+  ok('wordSlot holds word 0 before the first swap: a slot is never blank',
     opac(0)[0] === 1 && opac(0.9)[0] === 1);
   ok('wordSlot crossfades exactly two words mid-swap and nothing else',
     (() => { const o = opac(1.125); return Math.abs(o[0] - 0.5) < 0.02 && Math.abs(o[1] - 0.5) < 0.02 && o[2] === 0; })());
@@ -3205,7 +3205,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ws.frame(null, el, { start: 0 }, 3.6, null, { words: WORDS, every: 1, swap: 0.25, loop: true });
     return +slot.children[0].style.opacity === 1;
   })());
-  ok('wordSlot is pure in t — the same second twice gives the same frame',
+  ok('wordSlot is pure in t: the same second twice gives the same frame',
     JSON.stringify(opac(1.4)) === JSON.stringify(opac(1.4)));
   // The gates read the DOM, and every candidate is in it so the box can be sized to the widest. Exactly
   // the words NOT on screen this frame must say so, or the audit grades the film against all of them
@@ -3214,7 +3214,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('wordSlot marks every off-screen candidate as not-ink, and only those',
     JSON.stringify(inkOff(0.4)) === JSON.stringify(['on', 'off', 'off'])
     && JSON.stringify(inkOff(2.0)) === JSON.stringify(['off', 'on', 'off']));
-  ok('wordSlot marks BOTH words as ink mid-swap — a crossfade really does show two',
+  ok('wordSlot marks BOTH words as ink mid-swap: a crossfade really does show two',
     JSON.stringify(inkOff(1.125)) === JSON.stringify(['on', 'on', 'off']));
 
   ok('wordSlot refuses one word, a swap longer than the hold, an unknown key and a missing placeholder', [

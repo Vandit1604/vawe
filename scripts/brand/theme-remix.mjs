@@ -1,6 +1,6 @@
-// scripts/brand/theme-remix.mjs — the another engine "pick a preset, remix it onto the brand" move (their
-// Step 2), adapted to our theme system. A PRESET (presets/*.json) is a shippable design SYSTEM — dominance,
-// type roles, motion character, bg style, colour-derivation rules — with placeholder base colours. The
+// scripts/brand/theme-remix.mjs: the another engine "pick a preset, remix it onto the brand" move (their
+// Step 2), adapted to our theme system. A PRESET (presets/*.json) is a shippable design SYSTEM, dominance,
+// type roles, motion character, bg style, colour-derivation rules, with placeholder base colours. The
 // remix maps a brand's real base + accent (from `make palette`/`brandspec`, or --flags) onto the preset's
 // ROLES and DERIVES the full 15-key palette (surfaces, lines, text ladder, accent tints) so good, coherent
 // design is one command instead of hand-authoring every theme from pixels.
@@ -95,13 +95,13 @@ const theme = {
 };
 
 const errs = themeErrors(theme);
-if (errs.length) { console.error(`✗ remix produced an incomplete theme — missing: ${errs.join(', ')}`); process.exit(1); }
+if (errs.length) { console.error(`✗ remix produced an incomplete theme, missing: ${errs.join(', ')}`); process.exit(1); }
 // contrast sanity: the accent must be legible on the ground for at least large text
 const acc = contrast(palette.accent, palette.bg);
 const txt = contrast(palette.text, palette.bg);
 const dest = path.join(ROOT, 'themes', `${brandName}.json`);
 fs.writeFileSync(dest, JSON.stringify(theme, null, 2) + '\n');
-console.log(`✓ theme-remix — wrote themes/${brandName}.json from "${presetName}" preset`);
+console.log(`✓ theme-remix: wrote themes/${brandName}.json from "${presetName}" preset`);
 console.log(`  bg ${palette.bg} · accent ${palette.accent} (${acc.toFixed(1)}:1 on bg) · text (${txt.toFixed(1)}:1) · ${light ? 'light' : 'dark'}-first · fonts ${type.sans}/${type.mono}`);
-if (txt < 4.5) console.warn(`  ⚠ text contrast ${txt.toFixed(1)}:1 is below AA (4.5) — pass a --text that reads on ${palette.bg}`);
-if (acc < 3) console.warn(`  ⚠ accent contrast ${acc.toFixed(1)}:1 is low — fine for fills, weak for accent TEXT on the ground`);
+if (txt < 4.5) console.warn(`  ⚠ text contrast ${txt.toFixed(1)}:1 is below AA (4.5), pass a --text that reads on ${palette.bg}`);
+if (acc < 3) console.warn(`  ⚠ accent contrast ${acc.toFixed(1)}:1 is low, fine for fills, weak for accent TEXT on the ground`);

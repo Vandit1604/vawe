@@ -1,4 +1,4 @@
-// Static hook-copy library — no AI, no network, nothing at runtime.
+// Static hook-copy library: no AI, no network, nothing at runtime.
 // Every line below is hand-written. A template is:
 //   { pattern, framework, slot, fill(ctx) -> string }
 //     pattern   the human-readable template (shown so you can see the shape)
@@ -26,14 +26,14 @@ export const TEMPLATES = [
     fill: c => `What if the ${c.niche} you swear by isn't even close?` },
 
   // ── Negative / contrarian ───────────────────────────────────────────────
-  { pattern: 'No — you don\'t know which {niche} actually wins.', framework: 'contrarian', slot: 'hook',
-    fill: c => `No — you don't know which ${c.niche} actually wins.` },
-  { pattern: 'No, {subject} isn\'t dead — it\'s still #1.', framework: 'contrarian', slot: 'hook',
-    fill: c => `No, ${c.subject} isn't dead — it's still #1.` },
+  { pattern: 'No. You don\'t know which {niche} actually wins.', framework: 'contrarian', slot: 'hook',
+    fill: c => `No. You don't know which ${c.niche} actually wins.` },
+  { pattern: 'No, {subject} isn\'t dead. It\'s still #1.', framework: 'contrarian', slot: 'hook',
+    fill: c => `No, ${c.subject} isn't dead, it's still #1.` },
   { pattern: 'Stop assuming you\'d score {count}/{count}. You wouldn\'t.', framework: 'contrarian', slot: 'hook',
     fill: c => `Stop assuming you'd score ${c.count}/${c.count}. You wouldn't.` },
-  { pattern: 'Wrong — the {niche} you picked isn\'t the biggest.', framework: 'contrarian', slot: 'hook',
-    fill: c => `Wrong — the ${c.niche} you picked isn't the biggest.` },
+  { pattern: 'Wrong. The {niche} you picked isn\'t the biggest.', framework: 'contrarian', slot: 'hook',
+    fill: c => `Wrong. The ${c.niche} you picked isn't the biggest.` },
 
   // ── Curiosity gap / open loop ───────────────────────────────────────────
   { pattern: '{count} {niches} you open daily. The last one breaks everyone.', framework: 'curiosity', slot: 'hook',
@@ -50,8 +50,8 @@ export const TEMPLATES = [
     fill: c => `If you think ${c.subject} is dead, watch this.` },
   { pattern: 'If you use {niches} every day, you\'ll still fail.', framework: 'callout', slot: 'hook',
     fill: c => `If you use ${c.niches} every day, you'll still fail this.` },
-  { pattern: '{niche} addicts — bet you can\'t go {count}/{count}.', framework: 'callout', slot: 'hook',
-    fill: c => `${cap(c.niche)} addicts — bet you can't go ${c.count}/${c.count}.` },
+  { pattern: '{niche} addicts, bet you can\'t go {count}/{count}.', framework: 'callout', slot: 'hook',
+    fill: c => `${cap(c.niche)} addicts, bet you can't go ${c.count}/${c.count}.` },
   { pattern: 'Think you know {niches}? Prove it.', framework: 'callout', slot: 'hook',
     fill: c => `Think you know ${c.niches}? Prove it.` },
 
@@ -86,33 +86,33 @@ export const TEMPLATES = [
     fill: c => `That moment you realize ${c.subject} never left.` },
 
   // ── Titles (<= 100 chars) ───────────────────────────────────────────────
-  { pattern: 'The #1 {niche} isn\'t the one you think — {pct}% guess wrong', framework: 'curiosity', slot: 'title',
-    fill: c => `The #1 ${c.niche} isn't the one you think — ${c.pct}% guess wrong` },
+  { pattern: 'The #1 {niche} isn\'t the one you think, {pct}% guess wrong', framework: 'curiosity', slot: 'title',
+    fill: c => `The #1 ${c.niche} isn't the one you think, ${c.pct}% guess wrong` },
   { pattern: 'If you think {subject} is dead, you\'re wrong', framework: 'contrarian', slot: 'title',
     fill: c => `If you think ${c.subject} is dead, you're wrong` },
   { pattern: 'Can you score {count}/{count}? Most people can\'t', framework: 'stakes', slot: 'title',
     fill: c => `Can you score ${c.count}/${c.count}? Most people can't` },
-  { pattern: 'I ranked {count} {niches} by users — the ending shocked me', framework: 'specific', slot: 'title',
-    fill: c => `I ranked ${c.count} ${c.niches} by users — the ending shocked me` },
+  { pattern: 'I ranked {count} {niches} by users. The ending shocked me', framework: 'specific', slot: 'title',
+    fill: c => `I ranked ${c.count} ${c.niches} by users, the ending shocked me` },
 
   // ── Descriptions ────────────────────────────────────────────────────────
-  { pattern: '{count} {niches}, {count} guesses — the last one breaks everyone. Go {count}/{count}?', framework: 'curiosity', slot: 'description',
-    fill: c => `${c.count} ${c.niches}, ${c.count} guesses — and the last one breaks everyone. Can you go ${c.count}/${c.count}?` },
+  { pattern: '{count} {niches}, {count} guesses. The last one breaks everyone. Go {count}/{count}?', framework: 'curiosity', slot: 'description',
+    fill: c => `${c.count} ${c.niches}, ${c.count} guesses, and the last one breaks everyone. Can you go ${c.count}/${c.count}?` },
   { pattern: 'Most people miss the final round. Can you beat the average?', framework: 'stakes', slot: 'description',
     fill: () => `Most people miss the final round. Can you beat the average?` },
 
   // ── First comments (CTA) ────────────────────────────────────────────────
   { pattern: 'Which one did you miss? Bet it was the last 👇', framework: 'callout', slot: 'comment',
     fill: () => `Which one did you miss? Bet it was the last 👇` },
-  { pattern: 'Drop your score — {count}/{count} or be honest 👇', framework: 'stakes', slot: 'comment',
-    fill: c => `Drop your score — ${c.count}/${c.count} or be honest 👇` },
+  { pattern: 'Drop your score, {count}/{count} or be honest 👇', framework: 'stakes', slot: 'comment',
+    fill: c => `Drop your score, ${c.count}/${c.count} or be honest 👇` },
 ];
 
 const cap = (s = '') => s.charAt(0).toUpperCase() + s.slice(1);
 
 // ── validator ──────────────────────────────────────────────────────────────
 const EMOJI = /\p{Extended_Pictographic}/gu;
-// weak openers only — fillers that bury the hook. Articles / "If" / "No" are fine.
+// weak openers only: fillers that bury the hook. Articles / "If" / "No" are fine.
 const WEAK_OPENERS = new Set(['just', 'so', 'well', 'basically', 'actually', 'really', 'very', 'maybe', 'um', 'like', 'kinda', 'sorta']);
 const LIMITS = { hook: { words: 12 }, title: { chars: 100 } };
 

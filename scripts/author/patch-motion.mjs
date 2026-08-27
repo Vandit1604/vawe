@@ -1,4 +1,4 @@
-// patch-motion.mjs — SURGICAL edits to a scene's `motion` tracks, as TEXT.
+// patch-motion.mjs: SURGICAL edits to a scene's `motion` tracks, as TEXT.
 //
 // Every scene in this repo is hand-formatted, and a `JSON.parse` → `JSON.stringify` round-trip
 // reformats the whole file: one keyframe moved, a 400-line diff, and every hand-placed comment on
@@ -9,7 +9,7 @@
 // and `]`, and a brace counter that does not know it is inside a string will find the wrong layer and
 // corrupt the file. Escapes are handled for the same reason.
 //
-// Pure and dependency-free so it can be tested without a browser — the editor in scripts/dev/studio.mjs
+// Pure and dependency-free so it can be tested without a browser, the editor in scripts/dev/studio.mjs
 // calls it, and scripts/gates/lib-test.mjs proves it.
 
 // scan forward from `i` (which must sit on the opening bracket) to the matching close, skipping strings.
@@ -107,7 +107,7 @@ export function renderKeys(keys, { expanded, indent = '      ' }) {
 // this engine renders, and it keeps 0.1 + 0.2 from writing 0.30000000000000004 into a tracked file.
 const trimNum = (v) => String(+(+v).toFixed(3));
 
-// leading whitespace of the line `pos` sits on — so an inserted property lines up with its siblings.
+// leading whitespace of the line `pos` sits on, so an inserted property lines up with its siblings.
 function indentAt(src, pos) {
   const lineStart = src.lastIndexOf('\n', pos - 1) + 1;
   const m = /^[ \t]*/.exec(src.slice(lineStart, pos));
@@ -207,7 +207,7 @@ function renderKey(k, proto) {
   return `{\n${kv.map((x) => ind + x).join(',\n')}\n${closeInd}}`;
 }
 
-// upsertKey(keys, k) — set a keyframe at time k.t, replacing any key already at that time (within one
+// upsertKey(keys, k): set a keyframe at time k.t, replacing any key already at that time (within one
 // tick) and keeping the track sorted. This is what a drag in the editor produces: you scrub to a frame,
 // move the layer, and that frame gets a key.
 export function upsertKey(keys, k, eps = 1e-4) {

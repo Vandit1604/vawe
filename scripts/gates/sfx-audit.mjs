@@ -1,4 +1,4 @@
-// sfx-audit.mjs — is a sound effect the SHAPE its role claims?
+// sfx-audit.mjs: is a sound effect the SHAPE its role claims?
 //
 //   node scripts/gates/sfx-audit.mjs        check assets/sfx
 //   make sfx-check
@@ -6,7 +6,7 @@
 // assets/sfx/click.wav was 19.6 SECONDS. The Mixkit fetcher asked for "the 4th ranked result in the
 // click category" and saved whatever came back; nothing ever asked whether a file called `click` was
 // actually a click. The typing sound design then stacked 38 of them 0.09s apart and the result was a
-// continuous drone — a passing train, in the words of the person who had to listen to it (#51).
+// continuous drone. A passing train, in the words of the person who had to listen to it (#51).
 //
 // A cue's role implies a duration class. A transient that outlasts the gap between two of its own
 // triggers is not a transient any more, and that is checkable.
@@ -24,7 +24,7 @@ const CLASSES = [
   // sound design fires it every ~0.09s; a tail longer than that gap is how a typed line became a drone.
   [/^(press|click)$/,                 0.15, 'a keystroke fires every ~0.09s; longer and the train arrives'],
   // `key` is the soft typing tap: it carries a low body that rings a touch longer than a sharp click on
-  // purpose (that body is what makes it pleasant, not buzzy). Still an event, not a bed — capped so it
+  // purpose (that body is what makes it pleasant, not buzzy). Still an event, not a bed, capped so it
   // cannot drone even when the default 24cps typing fires it every 0.042s.
   [/^key$/,                           0.24, 'a soft keystroke tap rings slightly for a legato train'],
   [/^(tick|release|toggle)$/,         0.60, 'a UI transient is an event, not a sound bed'],
@@ -32,7 +32,7 @@ const CLASSES = [
   [/^(reveal|chime|success|error|ready)$/,                      5.0, 'a sting lands once'],
 ];
 
-// How long is this sound? NOT how long the FILE is — writeWav pads a decay tail, so a 46ms key click
+// How long is this sound? NOT how long the FILE is, writeWav pads a decay tail, so a 46ms key click
 // lands in a 0.31s file. Gating on file length flagged correct clicks and would happily pass a file
 // that is 19s of silence after a 20ms tick. The honest measure is the last moment the signal is still
 // audible, so decode the PCM and find where the energy falls below -45dBFS for good.
@@ -69,7 +69,7 @@ function measure(file) {
   return { file: frames / rate, audible: (last + 1) / rate };
 }
 
-if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make sfx` / `make audio`) — nothing to check'); process.exit(0); }
+if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make sfx` / `make audio`). Nothing to check'); process.exit(0); }
 // assets/sfx is entirely gitignored, so a checkout without it swept zero cues and said nothing was
 // wrong with them. population() states N and refuses a checkout that should hold more.
 const files = population('sfx audit', { dir: 'assets/sfx', ext: '.wav', quiet: true }).names;
@@ -84,8 +84,8 @@ for (const f of files) {
   if (!cls) { console.log(`   ~ ${name.padEnd(10)} ${shown}  (no duration class declared)`); continue; }
   const [, cap, why] = cls;
   const ok = m.audible <= cap;
-  console.log(`   ${ok ? '✓' : '✗'} ${name.padEnd(10)} ${shown}  (cap ${cap}s — ${why})`);
-  if (!ok) bad.push({ name, why: `${m.audible.toFixed(2)}s of audible signal exceeds the ${cap}s cap — ${why}` });
+  console.log(`   ${ok ? '✓' : '✗'} ${name.padEnd(10)} ${shown}  (cap ${cap}s, ${why})`);
+  if (!ok) bad.push({ name, why: `${m.audible.toFixed(2)}s of audible signal exceeds the ${cap}s cap, ${why}` });
 }
 console.log('');
 if (!bad.length) { console.log('✓ every sound effect is the shape its role claims'); process.exit(0); }

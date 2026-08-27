@@ -3,7 +3,7 @@ message: vawe refuses to render a film that fails its own checks, and the film y
 audience: Developers evaluating a render engine, arriving through an agent, deciding whether to trust output nobody watched.
 arc: hook → measure → verdict → refusal → repair → sweep → payoff
 thread: camera travel
-object: none — the thread is camera travel
+object: none, the thread is camera travel
 duration: 21s
 format: 1920x1080
 concept: travelled · bold (light)
@@ -31,7 +31,7 @@ concept: travelled · bold (light)
 ## Beat 2: <name this beat> (2.1s-4.2s)
 - type: build
 - object: <what carries the camera travel at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -63,7 +63,7 @@ concept: travelled · bold (light)
 ## Beat 5: <name this beat> (8.4s-10.5s)
 - type: build
 - object: <what carries the camera travel at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -95,7 +95,7 @@ concept: travelled · bold (light)
 ## Beat 8: <name this beat> (14.7s-16.8s)
 - type: build
 - object: <what carries the camera travel at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

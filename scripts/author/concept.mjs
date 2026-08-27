@@ -1,4 +1,4 @@
-// scripts/author/concept.mjs — N DIRECTIONS FOR ONE BRIEF, before any of them is built.
+// scripts/author/concept.mjs: N DIRECTIONS FOR ONE BRIEF, before any of them is built.
 //
 // The missing first stage. Every other stage here refines a single idea; nothing ever produced a
 // second one. That absence has a visible symptom: an anti-sameness LEDGER had to be invented to catch
@@ -10,7 +10,7 @@
 //
 // WHAT AN OPTION IS. Not a palette swap. A direction commits to three decisions at once, and they are
 // the three that actually change a film:
-//   THREAD  what survives a cut (docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md) — an object that
+//   THREAD  what survives a cut (docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md), an object that
 //           transforms, a sentence that never finishes, a match cut, a travelling camera, a counter.
 //   PACE    the median beat length, which sets beat COUNT for a fixed duration. The reference study
 //           put a good film at a 1.52s median against our habitual 2.5-4s; pace is not a detail.
@@ -70,7 +70,7 @@ const TAIL_MIN = Math.max(2, +flag('--tail-min', 2) || 2);
 
 // ── pick: promote one direction and RECORD THE ONES TURNED DOWN ────────────────────────────────────
 // The rejected set is the point, not bookkeeping. A treatment's real content is why this direction and
-// not the others, and that argument is only available at the moment of choosing — a week later nobody
+// not the others, and that argument is only available at the moment of choosing, a week later nobody
 // remembers what was on the table. scripts/author/treatment.mjs reads this receipt.
 const PICK = flag('--pick', null);
 if (PICK) {
@@ -136,7 +136,7 @@ function redistribute(beats, target) {
 
 // THE BEAT ARC FOLLOWS THE THREAD. This used to be one fixed cycle for every direction, which made the
 // beat-type skeleton nearly identical across directions and collapsed the distinctness score on the
-// `skeleton` axis — the generator's fault, not the check's. It is also just wrong: a counter film really
+// `skeleton` axis. The generator's fault, not the check's. It is also just wrong: a counter film really
 // does accumulate proof beats, a question film really does hold its hook open, a match-cut film really
 // does alternate. The middle of each arc repeats to fill whatever beat count the pace implies; the first
 // and last beat are always the hook and the payoff.
@@ -168,7 +168,7 @@ function buildOption(dir) {
   lines.push(`audience: ${sb.audience || '<who this is for>'}`);
   lines.push(`arc: ${sb.arc || '<the shape, in one line>'}`);
   lines.push(`thread: ${dir.thread}`);
-  lines.push(`object: ${dir.thread === 'transforming object' ? (sb.object || '<the prop that carries it>') : `none — the thread is ${dir.thread}`}`);
+  lines.push(`object: ${dir.thread === 'transforming object' ? (sb.object || '<the prop that carries it>') : `none, the thread is ${dir.thread}`}`);
   lines.push(`duration: ${DUR}s`);
   lines.push(`format: ${sb.format || '1080x1920'}`);
   lines.push(`concept: ${dir.slug} · ${dir.preset} (${preset.dominance})`);
@@ -190,7 +190,7 @@ function buildOption(dir) {
     lines.push(`## Beat ${i + 1}: ${b._new ? '<name this beat>' : strip(b.name).replace(/^Beat \d+:\s*/, '')} (${t}s-${end}s)`);
     lines.push(`- type: ${type}`);
     lines.push(`- object: ${dir.thread === 'transforming object' ? '<what shape the prop is in here>' : `<what carries the ${dir.thread} at this beat>`}`);
-    lines.push(`- picture: ${b._new ? '<what this beat SHOWS — not what it says>' : strip(b.picture) || '<what this beat SHOWS>'}`);
+    lines.push(`- picture: ${b._new ? '<what this beat SHOWS, not what it says>' : strip(b.picture) || '<what this beat SHOWS>'}`);
     lines.push(`- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>`);
     lines.push(`- becomes: <the X becomes the Y at this junction>`);
     lines.push(`- onscreen: ${(b.onscreen || []).map(strip).filter(Boolean).join(' | ') || '<the words on screen>'}`);
@@ -217,7 +217,7 @@ function buildOption(dir) {
 // which is the same failure as a film grading its own beats, so the number has to come from somewhere
 // the generator does not control. Three sources, all of them files on disk:
 //
-//   PACE   every shipped scene's median beat span, read through scripts/gates/beats-of.mjs — the beat
+//   PACE   every shipped scene's median beat span, read through scripts/gates/beats-of.mjs, the beat
 //          model the judge and the A/B harness already use. A second beat model here would mean this
 //          stage and every later gate disagreed about where the beats are.
 //   LOOK   every shipped scene's theme background luminance, so "dark" and "light" are measured rather
@@ -467,7 +467,7 @@ for (const o of options) {
 // unique thread and a unique preset, so a pairwise comparison can only re-report what the table
 // guarantees by construction.
 //
-// So the honest check is on the table itself — an invariant over real data, which catches the actual
+// So the honest check is on the table itself. An invariant over real data, which catches the actual
 // regression available here: someone adding an eighth direction that duplicates a thread or a look.
 // The genuine cross-film sameness check already exists, runs on finished scenes where the data is real,
 // and is called `make ledger`.
@@ -520,7 +520,7 @@ if (stale.length) {
   console.log(`      ${stale.join(', ')}\n`);
 }
 for (const p of problems) console.log(`  ✗ [options-collapse] ${p}`);
-for (const c of closePace) console.log(`  ~ [close-pace] ${c} — fine if the thread and look carry it, worth changing if they do not.`);
+for (const c of closePace) console.log(`  ~ [close-pace] ${c}, fine if the thread and look carry it, worth changing if they do not.`);
 if (problems.length) { console.log(''); process.exit(1); }
 console.log('  ✓ every direction commits to a different thread, a different look and a different silhouette.');
 console.log(`  ✓ ${options.filter((o) => o.p < IMPROBABLE).length} of ${options.length} sit under ${IMPROBABLE.toFixed(2)}, so the round is not all median.\n`);

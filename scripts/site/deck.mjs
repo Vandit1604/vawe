@@ -1,4 +1,4 @@
-// scripts/site/deck.mjs — publish docs/animation.html to the marketing site as /deck.
+// scripts/site/deck.mjs: publish docs/animation.html to the marketing site as /deck.
 //
 // One source, two homes. docs/animation.html is the canonical file and opens straight from disk;
 // the site copy differs only in where it reaches for the fonts and the engine's easing module, so
@@ -26,7 +26,7 @@ const built = fs.readFileSync(SRC, 'utf8')
 const current = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
 if (check) {
   if (current === built) { console.log('✓ site/public/deck.html is current'); process.exit(0); }
-  console.error('✗ site/public/deck.html is stale — run `make deck`'); process.exit(1);
+  console.error('✗ site/public/deck.html is stale, run `make deck`'); process.exit(1);
 }
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, built);

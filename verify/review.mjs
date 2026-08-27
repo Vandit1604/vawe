@@ -1,4 +1,4 @@
-// verify/review.mjs — one-command system health snapshot. Runs the fast checks and tiles the
+// verify/review.mjs: one-command system health snapshot. Runs the fast checks and tiles the
 // per-format layout overlays into a single sheet you can scan. The heavier render-integrity check
 // (make verify) and purity guard (make probe) stay separate; this is the routine "are we good?".
 //   node verify/review.mjs        (make review)

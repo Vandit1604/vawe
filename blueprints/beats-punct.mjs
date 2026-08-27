@@ -1,4 +1,4 @@
-// blueprints/beats-punct.mjs — the PUNCTUATION register. A beat here is not a scene, it is a single
+// blueprints/beats-punct.mjs: the PUNCTUATION register. A beat here is not a scene, it is a single
 // stressed syllable: one word or one mark, on screen for about a second, sized to fill the frame.
 //
 // Lifted off `brew-launch-act1`, which spends four of its beats this way ("Today." · "Meet" · the logo ·
@@ -6,7 +6,7 @@
 // not because anything is carried across the cuts.
 import { INK } from './kit.mjs';
 
-// wordBlast — the four-key SCALE PUNCTUATION. It arrives already too big and falls into its reading, holds
+// wordBlast: the four-key SCALE PUNCTUATION. It arrives already too big and falls into its reading, holds
 // with a creep, then leaves by growing THROUGH the frame. `anim:"none"` is the whole point: the engine's
 // entrance presets would cross-fade this, and a fade is how a slide starts. This does not start, it lands.
 //

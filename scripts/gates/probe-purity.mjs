@@ -1,9 +1,9 @@
-// probe-purity.mjs — assert renderFrame(n) is PURE in n.
+// probe-purity.mjs: assert renderFrame(n) is PURE in n.
 //
 // The Go capture loop (internal/scene/scene.go) pulls frames off a shared channel
 // across several browser tabs in arbitrary order. If a format accumulates state
-// frame-to-frame, the same n renders differently depending on what came before —
-// invisible until sharded/parallel rendering corrupts the output.
+// frame-to-frame, the same n renders differently depending on what came before.
+// Invisible until sharded/parallel rendering corrupts the output.
 //
 // This catches it: for sampled frames n, render n, render a FAR-AWAY scrambler
 // frame to dirty any hidden state, render n again, and require the two screenshots
@@ -42,11 +42,11 @@ const openPage = async () => {
 };
 const page = await openPage();
 // THE FORWARD-ONLY TRUTH. `page` above is deliberately dirtied by the scrambler, so comparing it with
-// itself proves only that two dirty states agree — which is exactly how #370 passed this gate for as
+// itself proves only that two dirty states agree, which is exactly how #370 passed this gate for as
 // long as it existed. GSAP's root timeline used to unlink a tween the moment it completed, so every
 // frame drawn AFTER the playhead had once reached the end kept that tween's end values; both the `a`
 // and the `b` read below carried the same wrong values and the diff was empty. `ref` never seeks
-// backwards, so it holds what frame n looks like on a tab that has not yet seen any later frame — the
+// backwards, so it holds what frame n looks like on a tab that has not yet seen any later frame, the
 // single-worker render, and the only reading that is right by construction.
 const ref = await openPage();
 
@@ -62,7 +62,7 @@ const total = meta.totalFrames;
 //     → catches real order-dependence that would change captured pixels (the flicker risk)
 //   - it's a DOM signature, so GPU/AA rasterization noise (which flakes SVG formats like
 //     growth on a pixel probe) can't cause a false failure
-// (A format drawing to <canvas> with hidden state would escape this — none do; note it if one does.)
+// (A format drawing to <canvas> with hidden state would escape this, none do; note it if one does.)
 const domOn = async (p, n) => {
   await p.evaluate((f) => window.__engine.renderFrame(f), n);
   return p.evaluate(() => {
@@ -72,7 +72,7 @@ const domOn = async (p, n) => {
       if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return;
       const leaf = el.children.length === 0;
       // filter + clipPath are in the signature because an entrance/exit pair can write them and a
-      // stuck value is invisible to text/transform/opacity/colour alone — which is how a blur that
+      // stuck value is invisible to text/transform/opacity/colour alone, which is how a blur that
       // survived across frames passed this gate (MISTAKES #41).
       out.push(el.tagName + '|' + (leaf ? el.textContent.trim() : '') + '|' + cs.transform + '|' + cs.opacity + '|' + cs.color + '|' + cs.filter + '|' + cs.clipPath);
       for (const c of el.children) walk(c);
@@ -99,11 +99,11 @@ for (const n of samples) {
     const dir = '/tmp/purity_fail'; fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, `f${n}_forward.html`), truth);
     fs.writeFileSync(path.join(dir, `f${n}_seeked.html`), a);
-    console.error(`✗ frame ${n} (${(n / meta.fps).toFixed(1)}s) differs from the FORWARD-ONLY render — a later frame left state behind; diff: ${dir}/f${n}_{forward,seeked}.html`);
+    console.error(`✗ frame ${n} (${(n / meta.fps).toFixed(1)}s) differs from the FORWARD-ONLY render. A later frame left state behind; diff: ${dir}/f${n}_{forward,seeked}.html`);
   }
   // Dirty the state with frames that actually RUN something, not just far-away ones. The old
   // scrambler used frame 0 or the last frame; at both, a layer mid-timeline is off-window and
-  // driveClips returns before writing any style — so nothing got dirtied and a genuinely sticky
+  // driveClips returns before writing any style, so nothing got dirtied and a genuinely sticky
   // property (a blur left behind by an exit) passed this gate. n+9 lands roughly one exit-window
   // later, which is where the writes that stick actually happen. (MISTAKES #41)
   for (const scram of [Math.min(total - 1, n + 9), total - 1, 0, Math.max(0, n - 9)]) await dom(scram);
@@ -113,10 +113,10 @@ for (const n of samples) {
     const dir = '/tmp/purity_fail'; fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, `f${n}_a.html`), a);
     fs.writeFileSync(path.join(dir, `f${n}_b.html`), b);
-    console.error(`✗ frame ${n} (${(n / meta.fps).toFixed(1)}s) NOT pure — render-order-dependent DOM; diff: ${dir}/f${n}_{a,b}.html`);
+    console.error(`✗ frame ${n} (${(n / meta.fps).toFixed(1)}s) NOT pure, render-order-dependent DOM; diff: ${dir}/f${n}_{a,b}.html`);
   }
 }
 await browser.close(); server.close();
 
 if (fails) { console.error(`\n✗ purity FAILED: ${fails}/${samples.length} frames depend on render order`); process.exit(1); }
-console.log(`✓ purity OK — ${samples.length} sampled frames produce identical DOM regardless of render order (${format}, ${meta.duration.toFixed(1)}s)`);
+console.log(`✓ purity OK: ${samples.length} sampled frames produce identical DOM regardless of render order (${format}, ${meta.duration.toFixed(1)}s)`);

@@ -1,13 +1,13 @@
-// scripts/gates/designspec-check.mjs — THE DESIGN-SPEC LOCK (the visual twin of the storyboard gate).
+// scripts/gates/designspec-check.mjs: THE DESIGN-SPEC LOCK (the visual twin of the storyboard gate).
 // The storyboard locks the story; this locks the LOOK. A video's design system is its theme
 // (themes/<name>.json: the 15-key palette + type roles + motion). This gate treats the theme as the locked
 // spec and flags any layer that reaches OUTSIDE it: an off-palette chromatic colour, or a font that isn't
-// one of the theme's roles. That is the "looks off but I can't say why" failure — one stray colour, a
-// random face — caught before it ships, the same way the direction floor catches flat motion.
+// one of the theme's roles. That is the "looks off but I can't say why" failure, one stray colour, a
+// random face, caught before it ships, the same way the direction floor catches flat motion.
 //
 //   node scripts/gates/designspec-check.mjs <scene.json> [--strict]   ·   make designspec-check D=<file>
 // WARN by default (coaching); --strict blocks. What's allowed: any `var(--token)` / color-mix of one;
-// near-NEUTRAL tints (white/black/grey scrims — legitimate glass/vignette); a raw colour within tolerance
+// near-NEUTRAL tints (white/black/grey scrims: legitimate glass/vignette); a raw colour within tolerance
 // of a palette colour (it IS a palette colour, just hardcoded). Flagged: a CHROMATIC colour far from every
 // palette entry. Optional radii/shadow lock: declare `"spec": { "radii":[…], "shadows":[…] }` in the scene.
 import fs from 'node:fs';
@@ -17,14 +17,14 @@ import cp from 'node:child_process';
 import { snippet, onScreenText as plainText } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
-// THE RULE TABLE IS OURS (scripts/lib/designspec-rules.mjs). This gate is the design-spec lock — the
-// theme is the locked look — and the rules there are the second half of the same question: not only
+// THE RULE TABLE IS OURS (scripts/lib/designspec-rules.mjs). This gate is the design-spec lock, the
+// theme is the locked look, and the rules there are the second half of the same question: not only
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
 // They live in one gate under one name because an author should run one command, not two.
 import { RULES, runRules } from '../lib/designspec-rules.mjs';
 import { parseColorRGB } from '../../core/motion.js';
 
-/** A scene's text as UNITS — one per layer, one per named fragment. Never joined: a joined blob let a
+/** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
  *  `type:"html"` layers and bg windows, the same rule core/preload.js uses. */
 function sceneTextUnits(d) {
@@ -119,7 +119,7 @@ const TOL = 0.14, NEUTRAL_SAT = 0.12;
 // every colour LITERAL inside a value string that is NOT token-based (var/color-mix skipped whole).
 const literalsIn = (val) => {
   const s = String(val);
-  if (/var\(--/.test(s)) return []; // token-based (incl color-mix of a var) — on-spec by construction
+  if (/var\(--/.test(s)) return []; // token-based (incl color-mix of a var), on-spec by construction
   return [...s.matchAll(/#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)/g)].map((m) => m[0]);
 };
 
@@ -133,9 +133,9 @@ function strings(node, keyPath, out) {
 const flat = flattenLayers(data.layers);
 const scanTargets = [...flat, ...(data.bg || [])];
 
-// The engine's four type roles, not three. `num` is first-class everywhere that matters — declared in
+// The engine's four type roles, not three. `num` is first-class everywhere that matters, declared in
 // core/theme-contract.js, emitted as `--font-num` by core/boot.js, dispatched by core/layers/util.js,
-// and listed in the scene schema's `font` enum — and every shipped theme sets it. Leaving it out here
+// and listed in the scene schema's `font` enum, and every shipped theme sets it. Leaving it out here
 // made this gate report a correctly-themed tabular-figures layer as off-spec, which is a gate inventing
 // a finding: the only way to satisfy it was to put the numbers in the wrong face. docs/MISTAKES.md #86.
 const ROLES = new Set(['sans', 'serif', 'mono', 'num']);
@@ -200,7 +200,7 @@ if (tokenLockRan) {
         seenVar.add(name);
         // nearest known token, so the message names the fix rather than the problem
         const near = [...KNOWN_VARS].filter((n) => n.replace(/-/g, '') === name.replace(/-/g, ''));
-        findings.push({ sev: 'dead-token', msg: `${label(l)} · \`${k}\` reads var(${name}), which nothing defines — CSS answers an undefined custom property by INHERITING, so this renders as whatever the parent was, silently.${near.length ? ` Did you mean var(${near[0]})?` : ' Define it in the theme\'s `vars`, or use a token the engine sets.'}` });
+        findings.push({ sev: 'dead-token', msg: `${label(l)} · \`${k}\` reads var(${name}), which nothing defines. CSS answers an undefined custom property by INHERITING, so this renders as whatever the parent was, silently.${near.length ? ` Did you mean var(${near[0]})?` : ' Define it in the theme\'s `vars`, or use a token the engine sets.'}` });
       }
     }
   }
@@ -214,13 +214,13 @@ scanTargets.forEach((l, i) => {
     for (const lit of literalsIn(v)) {
       const rgb = parseColor(lit);
       if (!rgb) continue;
-      if (sat(rgb) < NEUTRAL_SAT) continue; // neutral scrim (white/black/grey) — allowed overlay
+      if (sat(rgb) < NEUTRAL_SAT) continue; // neutral scrim (white/black/grey), allowed overlay
       const near = allowRGB.length ? Math.min(...allowRGB.map((p) => dist(rgb, p))) : 1;
       if (near <= TOL) continue; // ≈ a palette colour (hardcoded, but on-spec)
       const key = lit + '@' + k.replace(/\[\d+\]/g, '');
       if (seen.has(key)) continue; seen.add(key);
       if (allowed.has('off-colour')) continue;
-      findings.push({ sev: 'off-colour', msg: `${label(l, i)} · \`${k}\` uses ${lit} — a chromatic colour NOT in the ${themeName} palette (nearest is ${(near * 100).toFixed(0)}% away). Use a var(--token) or a color-mix of one, or add it to the theme.` });
+      findings.push({ sev: 'off-colour', msg: `${label(l, i)} · \`${k}\` uses ${lit}. A chromatic colour NOT in the ${themeName} palette (nearest is ${(near * 100).toFixed(0)}% away). Use a var(--token) or a color-mix of one, or add it to the theme.` });
     }
   }
   // fonts (the engine's roles). A `font` outside sans/serif/mono is dropped silently or off-system.
@@ -240,9 +240,9 @@ for (const f of runRules(sceneTextUnits(data), { allow: [...allowed], scene: dat
 console.log(`\n  design-spec lock · ${file}  (spec: themes/${themeName} · ${paletteRGB.length} palette colours${specRadii ? ` · ${specRadii.size} radii` : ''})`);
 if (!tokenLockRan) console.log(`  ~ dead-token lock SKIPPED: only ${KNOWN_VARS.size} engine token(s) could be derived from `
   + `core/boot.js + core/tokens.css (needs > 8). Undefined var(--x) reads are NOT checked in this run.`);
-if (!allowRGB.length) console.log(`  ⚠ theme "${themeName}" has no readable palette — colour lock skipped (fonts still checked).`);
-if (!findings.length) { console.log(`  ✓ on-spec — every colour is a token or a palette colour, every font a role.`
-    + `${tokenLockRan ? '' : ' (dead-token lock did not run — see above.)'}\n`); process.exit(0); }
+if (!allowRGB.length) console.log(`  ⚠ theme "${themeName}" has no readable palette, colour lock skipped (fonts still checked).`);
+if (!findings.length) { console.log(`  ✓ on-spec: every colour is a token or a palette colour, every font a role.`
+    + `${tokenLockRan ? '' : ' (dead-token lock did not run, see above.)'}\n`); process.exit(0); }
 console.log(`  ${findings.length} off-spec value(s):`);
 for (const f of findings) console.log(`    ~ [${f.sev}] ${f.msg}`);
 console.log(strict ? `\n  ✗ design-spec lock (strict): bring these onto the theme before shipping.\n` : `\n  reach onto the theme: these are the drift the eye reads as "off". (Block them with --strict / STRICT=1.)\n`);

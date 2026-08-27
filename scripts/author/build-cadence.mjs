@@ -1,4 +1,4 @@
-// build-cadence.mjs — a 5-second launch clip for a made-up product, authored in the higgsfield
+// build-cadence.mjs: a 5-second launch clip for a made-up product, authored in the higgsfield
 // register (docs/CRAFT/KEYED-MOTION.md) rather than by tracing a reference.
 //
 // The grammar it copies, deliberately and item by item:
@@ -7,7 +7,7 @@
 //   • ONE object that survives everything: the COMPOSE button. It rides the page, peels off it, lifts
 //     to centre and becomes the loading dot. The button is the verb.
 //   • Dense keys, linear between them, easing only where the motion settles.
-//   • The chrome, the prompt and the button share ONE pan — `panWith`, instead of the same deltas
+//   • The chrome, the prompt and the button share ONE pan, `panWith`, instead of the same deltas
 //     typed three times.
 //   • `--p` for the morph position cannot express, one clock and a different power per property.
 //   • The hook erases itself instead of fading.
@@ -31,7 +31,7 @@ const PAN = [
   { t: 1.38, x: -486, ease: 'easeOutCubic' },
 ];
 
-// the app chrome, at measured coordinates — the same hand-built approach the reference uses
+// the app chrome, at measured coordinates: the same hand-built approach the reference uses
 const chrome = () => {
   const pill = (x, y, w, h, r = 18, fill = 'var(--surface2)') =>
     `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${r}px;background:${fill}"></div>`;
@@ -46,7 +46,7 @@ const chrome = () => {
   return h + '</div>';
 };
 
-// a pulse ring that blooms out of the dot — curves, not linear: this is a bloom, not a machine
+// a pulse ring that blooms out of the dot, curves, not linear: this is a bloom, not a machine
 const ring = {
   type: 'rect', x: 812, y: 230, w: 296, h: 296, radius: 148, bg: 'transparent',
   border: '3px solid var(--accent-glow)', start: 3.68, duration: 0.62,
@@ -75,8 +75,8 @@ btn.panWith = 'chrome';
 // Peeling later means travelling left past the destination and coming back, and a reversal is a snap no
 // easing can hide: the previous cut peeled at 1.44, by which time the pan sat at -512, so the first own
 // key threw the button 194px RIGHT in two frames at 3244 px/s (docs/MISTAKES.md #194). So it leaves at
-// 1.05 carrying the pan's own speed (825 px/s against the pan's 877) and decelerates along its arc —
-// 825 → 601 → 555 → 362 → 183 — while the page keeps sliding out from under it. The break reads as the
+// 1.05 carrying the pan's own speed (825 px/s against the pan's 877) and decelerates along its arc,
+// 825 → 601 → 555 → 362 → 183, while the page keeps sliding out from under it. The break reads as the
 // button refusing to leave with the page, which is the whole point of it being the object.
 btn.motion = [
   { t: 0, x: 0, y: 0 },                                   // origin for the shared pan
@@ -122,7 +122,7 @@ const scene = {
   module: 'scene',
   // Waived against MEASURED evidence, not preference. The reference this register comes from trips the
   // same three findings at the same frames: contrast on its button label at f48 (a dark label on a
-  // gradient still fading in — one frame of an entrance, and the audit measures the nested span, which
+  // gradient still fading in. One frame of an entrance, and the audit measures the nested span, which
   // has no timing of its own to be skipped by), safe on its prompt panning off-frame by design, and
   // overlap where the button sits inside its own input bar. On the safe one this film measures better
   // than the reference (56px inside the frame against -34px outside it). Fixing any of the three means
@@ -166,7 +166,7 @@ const scene = {
     // two spinners. The collision was in the FORM, not in the element: what it contributed (this is
     // live, it is still going) the beat genuinely needs. So the affordance stays and the circle goes.
     //
-    // Three dots, pulsing in sequence, are literally the ellipsis of "Composing…" — the one indicator
+    // Three dots, pulsing in sequence, are literally the ellipsis of "Composing…", the one indicator
     // that cannot be mistaken for the ring because it is not round, and the only one that reads as part
     // of the sentence instead of as furniture parked next to it. Separate layers rather than one html
     // block: a single layer's scale would throb all three together, and a sequence is what says
@@ -175,8 +175,8 @@ const scene = {
     ...[0, 1, 2].map((i) => ({
       // 932, not 1178: `gen` travels +246 across its entrance, and a panWith layer's authored x is where
       // it STARTS, not where it settles. Placing these by their resting position parked them 274px off
-      // the end of the word. That is #194 exactly, walked into again by the author who had just fixed it
-      // — the pan's total delta still appears nowhere near the layer that has to account for it.
+      // the end of the word. That is #194 exactly, walked into again by the author who had just fixed it:
+      // the pan's total delta still appears nowhere near the layer that has to account for it.
       type: 'rect', id: `dot${i}`, panWith: 'gen', x: 932 + i * 30, y: 520, w: 14, h: 14, radius: 7,
       bg: 'var(--accent)', start: +(4.0 + i * 0.13).toFixed(2), duration: +(1.0 - i * 0.13).toFixed(2),
       exitDur: 0,

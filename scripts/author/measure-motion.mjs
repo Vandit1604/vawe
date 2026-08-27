@@ -1,4 +1,4 @@
-// measure-motion.mjs — MEASURE a transition's real motion from a video, and name it in OUR vocabulary.
+// measure-motion.mjs: MEASURE a transition's real motion from a video, and name it in OUR vocabulary.
 //
 // Eyeballing frames tells you "a slide with some easing". This measures it: per-frame it tracks the
 // moving element (centroid / bounding box / area / luminance) and fits the normalised progress curve
@@ -43,7 +43,7 @@ if (!SRCW || !SRCH) { console.error(`✗ could not probe ${VIDEO}`); process.exi
 // downscale to width 320 for speed; grey rawvideo so tracking is one byte/pixel.
 const W = 320, H = Math.round((320 * SRCH) / SRCW / 2) * 2;
 const raw = path.join(tmp, 'frames.gray');
-// accurate seek (-ss AFTER -i) so frame timing is exact — fast seek would start at a keyframe and
+// accurate seek (-ss AFTER -i) so frame timing is exact, fast seek would start at a keyframe and
 // corrupt the curve. -vsync 0 keeps every real frame (VFR sync would silently drop duplicates).
 const ff = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', VIDEO, '-ss', String(FROM), '-t', String(TO - FROM),
   '-vsync', '0', '-vf', `scale=${W}:${H}`, '-pix_fmt', 'gray', '-f', 'rawvideo', raw]);
@@ -51,7 +51,7 @@ if (ff.status !== 0) { console.error('✗ ffmpeg extract failed:', (ff.stderr ||
 const bytes = fs.readFileSync(raw);
 const frameSize = W * H;
 const N = Math.floor(bytes.length / frameSize);
-if (N < 3) { console.error(`✗ only ${N} frames in [${FROM}, ${TO}] — widen the window`); process.exit(1); }
+if (N < 3) { console.error(`✗ only ${N} frames in [${FROM}, ${TO}]. Widen the window`); process.exit(1); }
 
 // ---- per-frame tracking: centroid / bbox / area / mean-luma of the FOREGROUND ----
 // foreground = pixels whose luma differs from the background by > delta. bg = median of the 4 corners
@@ -82,7 +82,7 @@ const stat = (a) => { const mn = Math.min(...a), mx = Math.max(...a); return { m
 const CH = { cx: 'centroid-x (slide/whip →)', cy: 'centroid-y (slide/whip ↕)', area: 'area (scale/zoom)', luma: 'mean-luma (dissolve/flash/opacity)' };
 const candidates = ['cx', 'cy', 'area', 'luma'].map((k) => {
   const s = stat(series[k]); const denom = k === 'luma' ? 255 : k === 'area' ? frameSize : (k === 'cx' ? W : H);
-  // a rigid channel (cx/cy) that travels < ~2% of the frame is tracking noise, not a slide — a word
+  // a rigid channel (cx/cy) that travels < ~2% of the frame is tracking noise, not a slide, a word
   // that blurs/types in place jitters the centroid a few px. Deprioritise it so a real channel wins.
   const noise = (k === 'cx' || k === 'cy') && s.range < W * 0.02;
   return { k, ...s, norm: noise ? s.range / denom * 0.01 : s.range / denom };
@@ -125,21 +125,21 @@ spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', VIDEO, '-ss', String(FROM), '-t'
 
 // ---- report ----
 console.log(`\n  MOTION MEASUREMENT · ${VIDEO} · [${FROM}s → ${TO}s] · ${FPS.toFixed(0)}fps · ${N} frames\n`);
-console.log(`  dominant channel : ${dom.k}  — ${CH[dom.k]}`);
+console.log(`  dominant channel : ${dom.k}, ${CH[dom.k]}`);
 console.log(`  active window    : frames ${a}–${b}  →  measured duration ${durS.toFixed(2)}s (${b - a} frames)`);
 const px = (v, k) => k === 'luma' ? `${v.toFixed(1)}/255` : k === 'area' ? `${(100 * v / frameSize).toFixed(1)}% coverage` : `${v.toFixed(0)}px @${W}w`;
 console.log(`  delta            : ${px(y0, dom.k)} → ${px(yF, dom.k)}  (span ${span.toFixed(1)})`);
 if (dom.k === 'cx' || dom.k === 'cy') console.log(`  in source px     : ${(span * SRCW / W).toFixed(0)}px of ${dom.k === 'cx' ? SRCW : SRCH}  (${(100 * Math.abs(span) / W).toFixed(0)}% of frame)`);
 console.log(`\n  measured curve   : ${spark(yNorm)}`);
 console.log(`  best-fit preset  : ${spark(bestCurve)}   ← ${best.name}`);
-console.log(`\n  ▶ nearest engine easing: "${best.name}"  (residual ${best.rms.toFixed(3)} ${best.rms < 0.03 ? '— tight' : best.rms < 0.07 ? '— close' : '— loose, see note'})`);
+console.log(`\n  ▶ nearest engine easing: "${best.name}"  (residual ${best.rms.toFixed(3)} ${best.rms < 0.03 ? ' (tight' : best.rms < 0.07 ? ') close' : ', loose, see note'})`);
 console.log(`    runners-up: ${ranked.slice(1, 4).map((r) => `${r.name} ${r.rms.toFixed(3)}`).join(' · ')}`);
 if (overshoot) console.log(`    ⤴ overshoot to ${overshoot} → an anticipation/back/elastic ease (pop / easeOutBack / spring-bouncy)`);
-if (best.rms > 0.07) console.log(`    ~ loose fit: likely TWO stacked tweens (e.g. position + scale), a mid-hold, or a mask/dissolve the single-channel tracker can't split — confirm on the filmstrip.`);
+if (best.rms > 0.07) console.log(`    ~ loose fit: likely TWO stacked tweens (e.g. position + scale), a mid-hold, or a mask/dissolve the single-channel tracker can't split, confirm on the filmstrip.`);
 if (EXPECT) {
   const er = ALL[EXPECT] ? rms(EXPECT) : null;
-  if (er == null) console.log(`\n  EXPECT "${EXPECT}" is not a known preset — one of: ${Object.keys(ALL).slice(0, 12).join(', ')}…`);
-  else console.log(`\n  ✓ EXPECT check: authored "${EXPECT}" → residual ${er.toFixed(3)} ${er < 0.05 ? '(matches — the render is faithful to the intent)' : `(does NOT match; measured curve is closer to "${best.name}")`}`);
+  if (er == null) console.log(`\n  EXPECT "${EXPECT}" is not a known preset. One of: ${Object.keys(ALL).slice(0, 12).join(', ')}…`);
+  else console.log(`\n  ✓ EXPECT check: authored "${EXPECT}" → residual ${er.toFixed(3)} ${er < 0.05 ? '(matches. The render is faithful to the intent)' : `(does NOT match; measured curve is closer to "${best.name}")`}`);
 }
 console.log(`\n  filmstrip: ${strip}   ·   what this CAN'T see: masks vs clip-path, blend modes, true 3D depth, shader distortion (docs/CRAFT/MEASURE.md).\n`);
 

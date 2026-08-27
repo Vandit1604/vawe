@@ -1,4 +1,4 @@
-// scripts/lib/census.mjs — ONE owner for "which files does this sweep walk, and can it see them all?"
+// scripts/lib/census.mjs: ONE owner for "which files does this sweep walk, and can it see them all?"
 //
 // THE BUG CLASS THIS CLOSES: absence read as a pass. A tool walks a population, finds nothing because
 // it was looking at nothing, and prints a green tick. `make slop` ran 41 rules over a DOM dump carrying
@@ -10,8 +10,8 @@
 // Two parts, and the second is what makes it more than a print statement:
 //   1. state N, unmissably, on every sweep. `waiver-drift` already did, and CLAUDE.md can quote its
 //      number precisely BECAUSE it is printed. Everything else copies that.
-//   2. refuse a population this checkout should not have. Not against a hardcoded floor — that goes
-//      stale the day somebody adds a scene — but against what the repo demonstrably holds.
+//   2. refuse a population this checkout should not have. Not against a hardcoded floor, that goes
+//      stale the day somebody adds a scene, but against what the repo demonstrably holds.
 //
 // THE HONEST COMPLICATION, and getting it right IS the job. A fresh clone legitimately sees ~36 scenes
 // of 135: films are gitignored on purpose (.gitignore:61), and CLAUDE.md has a section saying so. So
@@ -63,7 +63,7 @@ const listing = (root, dir, ext, filter) => {
  * @param {object}   opts
  * @param {string}   opts.dir    repo-relative directory (default formats/scene)
  * @param {string}   opts.ext    file extension that makes a file a candidate (default .json)
- * @param {function} opts.filter (name, absPath) => boolean — the SWEEP'S OWN rule for what counts.
+ * @param {function} opts.filter (name, absPath) => boolean: the SWEEP'S OWN rule for what counts.
  *                               Applied identically to this checkout and to the anchor, so a tool that
  *                               excludes sidecars is compared against a count that excludes them too.
  * @param {boolean}  opts.quiet  suppress the printed line (the caller prints N its own way)
@@ -71,7 +71,7 @@ const listing = (root, dir, ext, filter) => {
  *                               is DISPLAY ONLY inside a larger tool: killing the whole run over a
  *                               census nobody was going to act on is worse than saying the census is
  *                               blind and carrying on. A soft caller MUST print `blind` where it would
- *                               have printed the number — swallowing it puts the confident green back.
+ *                               have printed the number: swallowing it puts the confident green back.
  * @returns {{names: string[], n: number, dir: string, root: string, line: string, blind: string|null}}
  *
  * Exits 3 rather than throwing: every caller is a CLI gate, and a sweep that cannot see its subject has
@@ -117,7 +117,7 @@ function trackedButAbsent(dir, ext) {
 }
 
 function refuse(what, why) {
-  console.error(`\n  ✗ ${what}: BLIND SWEEP — ${why}\n`
+  console.error(`\n  ✗ ${what}: BLIND SWEEP, ${why}\n`
     + `    Refusing rather than reporting a pass over a population this tool cannot see.\n`);
   process.exit(3);
 }

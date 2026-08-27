@@ -1,5 +1,5 @@
 // Fetch the FREE, openly-licensed faces the engine registers in core/tokens.css into the
-// gitignored assets/fonts/. No font binary is committed to the repo (redistribution) — a
+// gitignored assets/fonts/. No font binary is committed to the repo (redistribution), a
 // fresh clone runs `make fonts` (or `make build`) to self-heal. Söhne is paid and stays manual in
 // assets/fonts/local/ (see tokens.css). Idempotent: skips files already present (--force redownloads).
 //
@@ -7,7 +7,7 @@
 //   node scripts/media/fonts.mjs --force    redownload everything
 //   node scripts/media/fonts.mjs --relock   rewrite fonts.lock.json from what is on disk
 //
-// Sources: Fontsource (npm, via jsDelivr) — the canonical open mirror for OFL/Apache webfonts.
+// Sources: Fontsource (npm, via jsDelivr). The canonical open mirror for OFL/Apache webfonts.
 //
 // EVERY URL CARRIES AN EXACT VERSION, AND EVERY FACE CARRIES A HASH. These used to be unversioned
 // `@fontsource-variable/<pkg>/files/…` URLs, so the bytes were whatever the CDN published that day and
@@ -119,7 +119,7 @@ for (const r of results) {
   if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.name}  · ${r.why}`); }
   if (r.status === 'mismatch') {
     bad++;
-    console.error(`  ✗ ${r.name}  — HASH MISMATCH (${r.remote ? 'downloaded bytes' : 'file on disk'})`);
+    console.error(`  ✗ ${r.name}, HASH MISMATCH (${r.remote ? 'downloaded bytes' : 'file on disk'})`);
     console.error(`      locked   ${r.want}`);
     console.error(`      measured ${r.got}`);
   }

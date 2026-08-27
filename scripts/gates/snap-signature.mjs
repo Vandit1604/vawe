@@ -1,4 +1,4 @@
-// scripts/gates/snap-signature.mjs — the ONE definition of a snap signature, shared by both snap gates.
+// scripts/gates/snap-signature.mjs: the ONE definition of a snap signature, shared by both snap gates.
 //
 // snap-scenes.mjs (whole library) and scene-snap.mjs (one format) both prove "this refactor changed no
 // pixels" by diffing a per-frame signature. They used to carry two hand-kept copies of the capture and
@@ -7,26 +7,26 @@
 // them, so a field added here is seen by both.
 //
 // WHAT THE SIGNATURE RECORDS, and why each field is here:
-//   x/y/w/h/tf/op/fs/c/t — layout, motion, fade, type, colour, copy. The original set.
-//   cp (clip-path)       — a wipe / iris / clock reveal is ONLY a clip-path animation. Without this the
+//   x/y/w/h/tf/op/fs/c/t: layout, motion, fade, type, colour, copy. The original set.
+//   cp (clip-path): a wipe / iris / clock reveal is ONLY a clip-path animation. Without this the
 //                          signature could not see a reveal at all: `wipe-right` pointed the wrong way
 //                          for months and snap said "identical" every single run.
-//   cv (canvas hash)     — the background is painted into <canvas id="cv">, and a DOM signature cannot
+//   cv (canvas hash): the background is painted into <canvas id="cv">, and a DOM signature cannot
 //                          see canvas pixels. Without this, any change of bg preset, colour, speed or
 //                          direction was invisible.
-//   bgc (background)     — the FOURTH instance of the same gap, found the same way. A composite look's
+//   bgc (background): the FOURTH instance of the same gap, found the same way. A composite look's
 //                          vignette, grain, scanlines and light leak are all overlay DIVS, so changing
 //                          `lightLeak`'s default colour altered two shipped looks and the whole-library
 //                          net reported "identical: 104, changed: 0". If a property can carry a visual
 //                          change, it belongs here; that is the only rule this list has.
-//   ku (split units)     — NOT a field but a class of ELEMENT, and the same gap one level down. A
+//   ku (split units), NOT a field but a class of ELEMENT, and the same gap one level down. A
 //                          kinetic reveal moves `<span class="ku">` units, which carry no id, no
 //                          data-layer and no data-start, so every split reveal in the library sat
 //                          outside the capture. A real fix to `gradient` + `split` changed one scene's
 //                          pixels and the whole-library net reported 103 of 103 identical, because the
 //                          one scene whose frames provably moved is the one it could not see
 //                          (MISTAKES #399, now #400).
-//   ft (filter)          — a GRADE is invisible to every field above it. Rebuilding the anamorphic
+//   ft (filter): a GRADE is invisible to every field above it. Rebuilding the anamorphic
 //                          streak and the chromatic split changed how 8 composite looks render across
 //                          3 scenes, and the whole-library net reported "identical: 102, changed: 0"
 //                          both before and after. Same shape as `cp` and `cv`, third time: a property
@@ -40,10 +40,10 @@ export const SIG_FIELDS = {
 };
 
 // The browser-side capture. Passed whole to page.evaluate, so it may not reference anything outside
-// itself — everything it needs is defined inline.
+// itself, everything it needs is defined inline.
 function capture(frames) {
   const round = (v) => Math.round(v * 10) / 10;
-  // WHICH elements are captured. `[data-layer="critical"]` is only ever set on big TEXT layers — every
+  // WHICH elements are captured. `[data-layer="critical"]` is only ever set on big TEXT layers, every
   // rect, image, group, component and glow was outside the signature entirely, which is the other half
   // of why a mis-pointed wipe went unseen: the wipe lived on a rect. `[data-start]` is exactly the set
   // driveClips animates, so the signature now covers every timed layer rather than the text ones.
@@ -73,7 +73,7 @@ function capture(frames) {
   // stable run to run and still fine enough to move when a preset, colour, speed or direction changes.
   //
   // Baselines live in verify/snap/, which is GITIGNORED and therefore local-only, so the fingerprint
-  // never has to survive a different machine's GPU — cross-machine variance is acceptable here.
+  // never has to survive a different machine's GPU, cross-machine variance is acceptable here.
   const bgFingerprint = () => {
     const cv = document.querySelector('canvas#cv') || document.querySelector('canvas');
     if (!cv || !cv.width || !cv.height) return 'no-canvas';
@@ -152,7 +152,7 @@ function capture(frames) {
       const key = keyOf(el);
       // Record text ONLY for LEAF content. A scaffold wrapper (root/cam/stage, a group) concatenates all
       // descendant text, so a typing/decode layer mid-reveal makes the wrapper's aggregate text look
-      // order-dependent even when every leaf is pure — a false non-determinism signal. Skip it for any
+      // order-dependent even when every leaf is pure. A false non-determinism signal. Skip it for any
       // element that contains another captured element; leaf text layers keep their text.
       // `.ku` joins the wrapper test for the same reason: a split container's own text is now carried,
       // unit by unit, by its children, and the aggregate adds nothing the leaves do not already say.
@@ -220,7 +220,7 @@ export function diffSig(base, sig) {
       for (const fld of Object.keys(SIG_FIELDS)) {
         const av = a[k][fld], bv = b[k][fld];
         // Tolerance is PER FIELD. A shared 0.6 threshold is sane for a pixel box and meaningless for
-        // opacity, which lives on 0..1 — it took a >60% opacity change to register, which is why
+        // opacity, which lives on 0..1. It took a >60% opacity change to register, which is why
         // re-easing every fade in the engine diffed as nothing at all.
         const tol = fld === 'op' ? 0.02 : 0.6;
         if ((typeof av === 'number' ? Math.abs(av - bv) > tol : av !== bv)) {

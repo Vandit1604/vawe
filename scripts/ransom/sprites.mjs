@@ -1,13 +1,13 @@
-// scripts/ransom/sprites.mjs — turn a pack of real cut-out letter images into a sprite set the
+// scripts/ransom/sprites.mjs: turn a pack of real cut-out letter images into a sprite set the
 // engine can compose notes from.  make ransom-sprites  [SRC=assets/ransom-src] [H=220]
 //
-// IN:  assets/ransom-src/<CHAR>/<anything>.png    (a folder per character — preferred)
+// IN:  assets/ransom-src/<CHAR>/<anything>.png    (a folder per character, preferred)
 //      assets/ransom-src/<CHAR>.png               (or flat: A.png, A-2.png, a3.png …)
 // OUT: assets/ransom/<CHAR>/<n>.png  +  assets/ransom/manifest.json
 //
 // Each source is trimmed to its ALPHA BOUNDING BOX (packs ship letters floating in a big
 // transparent frame; untrimmed, every glyph would carry invisible padding and the line would space
-// itself wrong) and scaled to a common cap height so one `lineH` drives the whole line — a letter's
+// itself wrong) and scaled to a common cap height so one `lineH` drives the whole line, a letter's
 // width then follows its own aspect, which is what makes a real cutout set look hand-assembled.
 //
 // The trim/scale runs in the SAME headless Chrome the renderer uses (canvas + getImageData), so it
@@ -26,7 +26,7 @@ const ALPHA = 12;                              // alpha above this counts as ink
 
 if (!fs.existsSync(SRC)) {
   console.error(`ransom-sprites: no source dir at ${path.relative(repoRoot, SRC)}`);
-  console.error('  Unzip your cut-out letter pack there — a folder per character is ideal:');
+  console.error('  Unzip your cut-out letter pack there: a folder per character is ideal:');
   console.error('    assets/ransom-src/A/a1.png  assets/ransom-src/A/a2.png  assets/ransom-src/B/…');
   console.error('  Flat files (A.png, A-2.png) also work. Then re-run: make ransom-sprites');
   process.exit(1);
@@ -41,13 +41,13 @@ function collect() {
     const p = path.join(SRC, entry.name);
     if (entry.isDirectory()) {
       // A folder name IS the character. Packs also ship grouped extras (_Shapes, _Words,
-      // _Special Characters) whose folder name is a category, not a glyph — skip those rather than
+      // _Special Characters) whose folder name is a category, not a glyph, skip those rather than
       // bake a bogus "_SHAPES" key that no text could ever reference.
       if (entry.name.startsWith('_') || entry.name.length !== 1) continue;
       const key = entry.name.toUpperCase();
       for (const f of fs.readdirSync(p).sort()) if (IMG.test(f)) add(key, path.join(p, f));
     } else if (IMG.test(entry.name)) {
-      // flat: leading run of non-separator chars is the character — "A.png", "A-2.png", "a_3.png"
+      // flat: leading run of non-separator chars is the character, "A.png", "A-2.png", "a_3.png"
       const m = /^([^\W_]|[!?&$@#%'".,()])/.exec(entry.name);
       if (m) add(m[1].toUpperCase(), p);
     }
@@ -126,4 +126,4 @@ console.log(`ransom-sprites: ${made} sprites across ${keys.length} characters �
 console.log(`  cap height ${CAP_H}px · characters: ${keys.join(' ')}`);
 if (blank) console.log(`  skipped ${blank} fully-transparent source image(s)`);
 const missing = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].filter((c) => !manifest[c]);
-if (missing.length) console.log(`  NOTE: no sprite for ${missing.join('')} — those characters will fail loudly at render`);
+if (missing.length) console.log(`  NOTE: no sprite for ${missing.join('')}. Those characters will fail loudly at render`);

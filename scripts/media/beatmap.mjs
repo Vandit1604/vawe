@@ -1,4 +1,4 @@
-// beatmap.mjs — detect a track's pulse and write it beside the audio.
+// beatmap.mjs: detect a track's pulse and write it beside the audio.
 //
 //   node scripts/media/beatmap.mjs assets/music/calm.wav
 //   make beatmap MUSIC=assets/music/calm.wav
@@ -18,7 +18,7 @@ if (!file) { console.error('usage: node scripts/media/beatmap.mjs <file.wav>'); 
 const abs = path.resolve(repoRoot, file);
 if (!fs.existsSync(abs)) { console.error(`no such file: ${file}`); process.exit(1); }
 
-/** Minimal PCM WAV reader — walks the chunk table rather than assuming a 44-byte header. */
+/** Minimal PCM WAV reader: walks the chunk table rather than assuming a 44-byte header. */
 function readWav(p) {
   const b = fs.readFileSync(p);
   if (b.toString('latin1', 0, 4) !== 'RIFF' || b.toString('latin1', 8, 12) !== 'WAVE') throw new Error('not a RIFF/WAVE file');
@@ -53,7 +53,7 @@ const out = path.join(path.dirname(abs), `${name}.beats.json`);
 fs.writeFileSync(out, JSON.stringify({ track: name, seconds: +duration.toFixed(2), bpm: +bpm.toFixed(2),
   confidence: +confidence.toFixed(2), beatCount: beats.length, beats, downbeats: bars }, null, 1) + '\n');
 
-const verdict = confidence >= 2.5 ? 'strong' : confidence >= 1.6 ? 'usable' : 'WEAK — ambient/rubato, do not snap to this';
+const verdict = confidence >= 2.5 ? 'strong' : confidence >= 1.6 ? 'usable' : 'WEAK, ambient/rubato, do not snap to this';
 console.log(`✓ ${name}: ${bpm.toFixed(1)} BPM · ${beats.length} beats · ${bars.length} bars · confidence ${confidence.toFixed(2)} (${verdict})`);
 console.log(`  first bars: ${bars.slice(0, 6).map((b) => b.toFixed(2)).join('s, ')}s`);
 console.log(`  → ${path.relative(repoRoot, out)}`);

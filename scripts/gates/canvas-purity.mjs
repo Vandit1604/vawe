@@ -1,10 +1,10 @@
-// canvas-purity.mjs — do the CANVAS PIXELS depend only on n?
+// canvas-purity.mjs: do the CANVAS PIXELS depend only on n?
 //
 //   node scripts/gates/canvas-purity.mjs <format> [data.json]
 //   make canvas-purity
 //
 // `make probe` compares a DOM SIGNATURE, so it can only see attributes and computed styles. The two
-// layer types that draw pixels — `shader` (WebGL) and `paint` (Canvas 2D) — put their entire output
+// layer types that draw pixels (`shader` (WebGL) and `paint` (Canvas 2D)) put their entire output
 // somewhere the DOM signature cannot reach. probe reported the paint demo clean while 2 of 6 frames
 // rendered different PIXELS depending on render order: an off-window layer never cleared its canvas,
 // so it held whatever a previous frame had drawn, and frames render across 8 workers in arbitrary
@@ -68,6 +68,6 @@ for (const n of frames) {
   }
 }
 await browser.close(); server.close();
-if (bad) { console.log(`\n✗ CANVAS PURITY FAILED — ${bad}/${frames.length} frames depend on render order.`);
+if (bad) { console.log(`\n✗ CANVAS PURITY FAILED: ${bad}/${frames.length} frames depend on render order.`);
   console.log('A shader/paint layer that does not clear when off-window holds the last frame it drew.'); process.exit(1); }
-console.log(`✓ canvas purity OK — ${frames.length} frames, ${nCanvas} canvases, pixels identical regardless of render order`);
+console.log(`✓ canvas purity OK: ${frames.length} frames, ${nCanvas} canvases, pixels identical regardless of render order`);

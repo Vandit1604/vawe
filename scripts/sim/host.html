@@ -34,7 +34,7 @@ window.__simLoad = async (src) => {
 
 window.__simFrame = (n) => {
   // Frames are baked strictly in order. Asking for one out of order is a bug in the CALLER, and it
-  // must say so rather than quietly returning a picture of the wrong moment — a sim cannot seek.
+  // must say so rather than quietly returning a picture of the wrong moment, a sim cannot seek.
   if (n !== cursor + 1) throw new Error(`sim frames must be baked in order: expected ${cursor + 1}, got ${n}`);
   cursor = n;
   ctx.frame = n;

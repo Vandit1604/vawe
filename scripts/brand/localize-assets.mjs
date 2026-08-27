@@ -1,4 +1,4 @@
-// localize-assets.mjs — make a CAPTURED component self-contained, so a render never touches the network.
+// localize-assets.mjs: make a CAPTURED component self-contained, so a render never touches the network.
 //
 // `make capture` lifts a real UI block off a live site and absolutizes every asset URL against that
 // site. That makes the capture depend, at RENDER time, on a third party's CDN: the render is not
@@ -7,8 +7,8 @@
 // the local copy.
 //
 // TWO ENTRY POINTS, one rule:
-//   • at capture time — capture-component.mjs / capture-scene.mjs call localizeHtml() before writing
-//   • after the fact  — `node scripts/brand/localize-assets.mjs [--write] [paths…]` repairs captures
+//   • at capture time: capture-component.mjs / capture-scene.mjs call localizeHtml() before writing
+//   • after the fact, `node scripts/brand/localize-assets.mjs [--write] [paths…]` repairs captures
 //     already on disk, and with no --write reports the remaining debt.
 //
 // WHY A FILE BESIDE THE JSON, NOT A data: URI. core/seams.js inlines FONTS as data: URIs, and that is
@@ -18,7 +18,7 @@
 // inflates the bytes by a third into a checked-in JSON that git stores as one blob, so a re-capture
 // rewrites megabytes and the diff is unreadable; a file beside it is content-addressed, shared between
 // captures of the same asset, and diffs as one added binary. The known cost is that a component inside
-// a SEAM bake still renders its images blank (core/seams.js:371) — that limitation already applies to
+// a SEAM bake still renders its images blank (core/seams.js:371), that limitation already applies to
 // every `image` layer in the repo, so a component is not special, and curing it belongs in seams.js.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -48,12 +48,12 @@ const ASSET_ATTRS = {
 const STYLE_ATTR = 'css';
 
 // DELIBERATELY NOT LOCALIZED, and each for a reason rather than by omission:
-//   • <a href>, <link href>, <form action>  — navigation, not an asset the frame paints
-//   • xmlns / xmlns:xlink                   — an XML namespace name, not a fetchable document
-//   • <use href="#id">                      — an in-document fragment reference
-//   • data: / blob: URIs                    — already self-contained
-//   • <object data>, <iframe src>           — embedding elements; core/sanitize-html.js removes them
-//   • data-src / data-srcset (lazy loaders) — the capture promotes the real src before this runs, and
+//   • <a href>, <link href>, <form action>: navigation, not an asset the frame paints
+//   • xmlns / xmlns:xlink. An XML namespace name, not a fetchable document
+//   • <use href="#id">, an in-document fragment reference
+//   • data: / blob: URIs, already self-contained
+//   • <object data>, <iframe src>. Embedding elements; core/sanitize-html.js removes them
+//   • data-src / data-srcset (lazy loaders). The capture promotes the real src before this runs, and
 //     a data-* attribute is never fetched by the browser, so copying it would add bytes that no frame
 //     can paint. A capture that still shows a placeholder is a settle bug, not a localization one.
 

@@ -1,4 +1,4 @@
-// scripts/media/pace-from-vo.mjs — SCRIPT-FIRST PACING. Write the narration first (make tts), then pace the
+// scripts/media/pace-from-vo.mjs: SCRIPT-FIRST PACING. Write the narration first (make tts), then pace the
 // video TO THE VOICE instead of guessing seconds per beat. This reads a voWords sidecar ([{w,t}], from
 // make tts / captions) and proposes beat boundaries at the sentence breaks, with each beat's start +
 // duration taken from when the words are actually spoken. Transcribe those onto each beat's hero layer and

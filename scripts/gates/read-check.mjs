@@ -1,7 +1,7 @@
-// scripts/gates/read-check.mjs — CAN A VIEWER READ IT, IN THE SECONDS IT IS THERE?
+// scripts/gates/read-check.mjs: CAN A VIEWER READ IT, IN THE SECONDS IT IS THERE?
 //
 // Every other gate that touches on-screen words grades the WORDS. `copy-check` asks whether a line is
-// well written and flags one over 14 words as too long "to read in a beat" — but it never looks at the
+// well written and flags one over 14 words as too long "to read in a beat", but it never looks at the
 // beat. `validate` refuses an em-dash. `beat-check` refuses an empty frame. So a nine-word headline
 // alive for 0.6s walks the whole ladder clean, and the only thing that ever noticed was an eye.
 // This gate joins the copy to the clock: for every line of prose, how long is it STILL, and is that
@@ -103,7 +103,7 @@
 // is authored to read the words ONCE. So the rule is not measuring the wrong thing; it is asking for
 // an ambition this library has never had, and CLAUDE.md measures what happens when a rule like that
 // gets teeth (116 of 141, and reflex waivers). Promote to BLOCKS when fewer than a fifth of the
-// gate-visible scenes carry an `unreadable-hold` finding — the same written condition, not a wish,
+// gate-visible scenes carry an `unreadable-hold` finding, the same written condition, not a wish,
 // that the storyboard step uses. Until then `TASTE=1` gives it teeth for one run.
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
@@ -203,7 +203,7 @@ export function readFindings(scene) {
     } else if (hold > MAX_HOLD && hold > need) {
       // `hold > need` as well, or the two published rules contradict each other: a 9-word line NEEDS
       // 5.4s to be read twice and is over the 5s ceiling the moment it gets it. That contradiction is
-      // real and it is Netflix's 42-character cap arriving as a word count — past 8 words a line cannot
+      // real and it is Netflix's 42-character cap arriving as a word count, past 8 words a line cannot
       // satisfy both, and the answer is to cut the line, not to argue with the clock. So this fires
       // only on time the reading did not ask for.
       say('text-overstays', e.a, `${label} holds still for ${f(hold)}. The ceiling on one text event is `

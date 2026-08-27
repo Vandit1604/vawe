@@ -1,4 +1,4 @@
-// scripts/site/type-specimens.mjs — the /type page's catalogue, DERIVED from the registries.
+// scripts/site/type-specimens.mjs: the /type page's catalogue, DERIVED from the registries.
 //
 //   site/lib/type-specimens.json          the catalogue the page renders (groups, blurbs, coverage)
 //   site/public/assets/type/<id>.json     one real scene per specimen (the site plays these LIVE)
@@ -12,8 +12,8 @@
 // the text-layer prop list the schema generates from the PROPS declarations. Add a preset and it
 // appears on the site with its own blurb and a working specimen, with no edit here.
 //
-// WHAT IS STILL AUTHORED, and why it has to be. A specimen needs CONTENT — a word, a size, a beat's
-// props — and no registry carries that. So this file authors the content and derives everything else,
+// WHAT IS STILL AUTHORED, and why it has to be. A specimen needs CONTENT, a word, a size, a beat's
+// props, and no registry carries that. So this file authors the content and derives everything else,
 // and every authored piece is checked against the registry it belongs to: a group that names a preset
 // which no longer exists FAILS, a preset in no group lands in `unfiled` (visible on the page, never
 // dropped), and a text-layer prop with no specimen is reported as coverage rather than hidden.
@@ -21,7 +21,7 @@
 // WHY THE STILLS ARE MID-MOTION. Type in motion cannot be shown with a settled still: a grid of the
 // same word set 27 times is a worse page than no page. Each poster is taken partway through the
 // entrance, so the grid shows 27 different states of arrival, and the real motion is one click away
-// in the real engine (the site ships core/ + scene.html already — see scripts/site/site-engine.mjs).
+// in the real engine (the site ships core/ + scene.html already, see scripts/site/site-engine.mjs).
 //
 // WHY THE COPY IS A LINE AND NOT A WORD. Every specimen used to be set in the preset's own name:
 // `blur`, `focus`, `slide`. It labelled itself, and it hid everything a film needs to know. A single
@@ -61,7 +61,7 @@ const LABELS = {};
   if (typeof node.label === 'string' && key) LABELS[key] ??= node.label;
   for (const [k, v] of Object.entries(node)) walk(v, k);
 })(schema, null);
-// The props a text layer reads are its OWN plus the shared ones — `split`, `stagger` and `each` live
+// The props a text layer reads are its OWN plus the shared ones, `split`, `stagger` and `each` live
 // in `shared` because every layer that can be split reads them, not because they are not typographic.
 const TEXT_PROPS = schema.layerProps.byType.text;
 const READABLE = new Set([...TEXT_PROPS, ...schema.layerProps.shared]);
@@ -71,7 +71,7 @@ const READABLE = new Set([...TEXT_PROPS, ...schema.layerProps.shared]);
 // registry cannot supply, and it is the part that decides whether the page teaches anything.
 //
 // y is DERIVED, not set, because the copy now wraps. A two-line specimen parked at the y that centres
-// one line sits low in the card and leaves a band of space nobody decided (docs/CRAFT/LAYOUT.md —
+// one line sits low in the card and leaves a band of space nobody decided (docs/CRAFT/LAYOUT.md,
 // passive whitespace reads as unfinished, not minimal). So the block is centred on its own height.
 const ADVANCE = 0.55;   // average glyph advance in em, the same estimate core/validate.mjs:727 uses
 const LINE_H = 1.04;    // .hs-text in formats/scene/scene.css
@@ -123,7 +123,7 @@ const midEntrance = (L) => {
   return Math.round(Math.min(START + 0.45 * total, DUR - 0.5) * 100) / 100;
 };
 
-// Per-preset staging: the COPY, its size, and only what the default would otherwise get wrong — a
+// Per-preset staging: the COPY, its size, and only what the default would otherwise get wrong, a
 // `slide` with no direction, a looping preset that needs a phase step, a `draw` that has no glyphs to
 // draw. A preset absent from this table still works: it falls back to its own name, set at the plain
 // treatment below, which is what makes a NEW preset appear on the page with no edit to this file.
@@ -172,7 +172,7 @@ const PRESET_STAGING = {
   shimmerWave: { text: 'a surface, not a sentence', size: 108, split: 'char', stagger: 0, phaseStep: 0.12, speed: 0.5, poster: 2.2 },
 
   draw: {
-    // the only preset whose units are STROKES, not glyphs — splitText(el,'path') stamps pathLength
+    // the only preset whose units are STROKES, not glyphs. SplitText(el,'path') stamps pathLength
     text: '<svg viewBox="0 0 46 24" width="900" height="470" fill="none" style="display:block"><path d="M1 12 Q7 1 12 12 T23 12 T34 12 T46 4" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg>',
     x: 510, y: 305, w: null, align: null, size: null, weight: null, color: null,
     split: 'path', presetOpts: { ease: 'easeInOutSine' }, each: 2.2, poster: 1.4,
@@ -230,7 +230,7 @@ const MECHANICS = [
     note: 'A gradient painted THROUGH the letterforms with background-clip. Static by default; `animate` sets it turning, flowing or shimmering.',
     caution: 'One gradient headline per film. Two and neither is special.',
     // NO `split` here, deliberately. A gradient fill paints the CONTAINER and clips it to the text,
-    // and a split layer moves the glyphs into child spans that carry no background of their own — so
+    // and a split layer moves the glyphs into child spans that carry no background of their own, so
     // they inherit `color: transparent` and paint nothing at all. See the note in the return report:
     // formats/scene/example-product-promo.json combines the two and its headline is invisible.
     layer: { text: 'Painted through the letterforms', size: 130, weight: 800, anim: 'fade', enterDur: 0.5,
@@ -382,7 +382,7 @@ function presetSpecimen(name) {
 }
 
 for (const g of groups) specimens.push(...g.specimens);
-if (process.exitCode) { console.error('\n✗ catalogue is inconsistent with the registries — nothing written'); process.exit(1); }
+if (process.exitCode) { console.error('\n✗ catalogue is inconsistent with the registries, nothing written'); process.exit(1); }
 
 // ── write the scenes, then shoot one mid-motion still each ────────────────────────────────────────
 let wrote = 0;
@@ -427,7 +427,7 @@ await page.close(); await browser.close(); server.close();
 
 // ── the catalogue ─────────────────────────────────────────────────────────────────────────────────
 const catalogue = {
-  _generated: 'node scripts/site/type-specimens.mjs — do not hand-edit',
+  _generated: 'node scripts/site/type-specimens.mjs, do not hand-edit',
   _derivedFrom: [
     'core/type.js · PRESETS + PRESET_BLURBS',
     'core/layers/text.js · PROPS (through the generated formats/scene/schema.json)',

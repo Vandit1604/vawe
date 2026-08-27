@@ -1,4 +1,4 @@
-// scripts/sim/provenance.mjs — what produced a bake, as a hash.
+// scripts/sim/provenance.mjs: what produced a bake, as a hash.
 //
 // Kept apart from run.mjs deliberately: the baker needs puppeteer, and the GATE that checks bakes
 // does not. A gate that has to boot a browser to answer "is this stale?" is a gate people stop
@@ -6,7 +6,7 @@
 //
 // A bake records the hash of its whole SOURCE GRAPH, not of the entry file. Hashing the entry alone
 // would let an edit to sims/lib/rng.mjs change every sequence in the repo while every meta.json still
-// claimed to be current — silent staleness, the shape this repo keeps writing gates against
+// claimed to be current, silent staleness, the shape this repo keeps writing gates against
 // (MISTAKES #96).
 import fs from 'node:fs';
 import path from 'node:path';

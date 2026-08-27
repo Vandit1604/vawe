@@ -74,7 +74,7 @@ function splitTop(body) {
 }
 
 // The scope a default expression is evaluated in. Every module-level name a block default reaches for
-// is a kit export, so the scope IS the kit — spread, never hand-listed.
+// is a kit export, so the scope IS the kit, spread, never hand-listed.
 //
 // It WAS hand-listed (`{ T: TOKENS, TOKENS, SERIES, R, HAIR }`) and had drifted from the vocabulary
 // this repo tells authors to reach for: `SPACE` and `TYPE` were absent, so every family defaulting a
@@ -84,7 +84,7 @@ function splitTop(body) {
 // (core/camera-moves.js:216) instead of keeping a table of parameter names.
 // A family's default may also reach for a constant its OWN module exports (a demo node set, a city
 // table). `EXPORTS` is every named export of every discovered family module, so the registry's own
-// surface is the second half of the scope — again spread, never listed. It is EXPORTS and not BLOCKS
+// surface is the second half of the scope, again spread, never listed. It is EXPORTS and not BLOCKS
 // because BLOCKS also holds namespaced `family.variant` names, which are not JS identifiers and
 // cannot be parameters of the Function this scope is fed to.
 const SCOPE = { ...KIT, ...EXPORTS, T: TOKENS };

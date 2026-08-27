@@ -1,4 +1,4 @@
-// study.mjs — READ A REFERENCE FILM. The film-side twin of `make sections`.
+// study.mjs, READ A REFERENCE FILM. The film-side twin of `make sections`.
 //
 // `make sections` inventories a real WEBSITE so a film can reflect it: a shot per section, a stable
 // selector, a ready capture command. Nothing here read a FILM. Every frame tool we own (make beats,

@@ -1,4 +1,4 @@
-// scripts/author/lightfield-check.mjs — one row per LOOK, not one averaged number.
+// scripts/author/lightfield-check.mjs: one row per LOOK, not one averaged number.
 //
 //   node scripts/author/lightfield-check.mjs          every look that has a reference
 //   node scripts/author/lightfield-check.mjs blinds   just one

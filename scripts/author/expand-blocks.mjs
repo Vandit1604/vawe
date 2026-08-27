@@ -1,15 +1,15 @@
-// scripts/author/expand-blocks.mjs — makes taste BLOCKS and reusable COMPS first-class in scene JSON, at build time.
+// scripts/author/expand-blocks.mjs: makes taste BLOCKS and reusable COMPS first-class in scene JSON, at build time.
 //
-// BLOCK — a vetted factory from blocks/index.mjs:
+// BLOCK, a vetted factory from blocks/index.mjs:
 //   { "type": "block", "block": "stripeCard", "x": 1260, "y": 400, "start": 40, "dur": 3 }
 //   → expands into the real layers the block emits.
 //
-// COMP — a named sub-composition you define once and instance many times/places/times. Define under a
+// COMP. A named sub-composition you define once and instance many times/places/times. Define under a
 // top-level "comps" map (each entry is { "layers": [...] } authored relative to origin 0,0), then place it:
 //   "comps": { "gate": { "layers": [ ... ] } }
 //   { "type": "comp", "ref": "gate", "x": 200, "y": 120, "start": 8 }
 //   → the comp's layers, each with x/y/start OFFSET by the instance (group children flow, so untouched).
-//   Comps may contain blocks and other comps — expansion is recursive (cycle-guarded).
+//   Comps may contain blocks and other comps: expansion is recursive (cycle-guarded).
 //
 // Both are deterministic: same JSON → identical expanded layers → identical render. Run before
 // validate/render, or via `make expand`. The "comps" key is stripped from the output.
@@ -21,7 +21,7 @@ import { CATALOG } from '../../blocks/catalog.mjs';
 import { BEATS } from '../../blueprints/index.mjs';
 // bakeCameraMove owns the conversion now (core/produce.js) and takes a FRAME, not dimensions. This
 // file was switched to call it and its imports were not, so `bakeCameraMove is not defined` threw on
-// any scene carrying a top-level `cameraMove` — and nothing caught it, because no snapshotted scene
+// any scene carrying a top-level `cameraMove`, and nothing caught it, because no snapshotted scene
 // has one. A call site updated without its import is invisible to every gate that never takes that
 // branch, which is why the check below renders one.
 import { bakeCameraMove } from '../../core/produce.js';
@@ -65,12 +65,12 @@ function expand(layer, stack) {
     if (sig) {
       const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));
       const unknown = Object.keys(opts).filter((k) => !known.has(k));
-      if (unknown.length) warnings.push(`block "${layer.block}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')} — not a prop it accepts (known: ${[...known].join(', ')})`);
+      if (unknown.length) warnings.push(`block "${layer.block}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')}, not a prop it accepts (known: ${[...known].join(', ')})`);
     }
     nBlocks++;
-    return f(opts).flatMap((l) => expand(l, stack)); // a block could emit comps in theory — stay recursive
+    return f(opts).flatMap((l) => expand(l, stack)); // a block could emit comps in theory, stay recursive
   }
-  // BEAT — a directed-motion blueprint from blueprints/index.mjs. Same expansion contract as a block,
+  // BEAT: a directed-motion blueprint from blueprints/index.mjs. Same expansion contract as a block,
   // but it emits a whole BEAT's richly-animated layers (kinetic reveals, count-ups, cascades, ken push),
   // so the good motion is the default rather than re-derived (docs/CRAFT/BLUEPRINTS.md).
   if (layer.type === 'beat') {
@@ -81,7 +81,7 @@ function expand(layer, stack) {
     if (sig) {
       const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));
       const unknown = Object.keys(opts).filter((k) => !known.has(k) && k !== 'note');
-      if (unknown.length) warnings.push(`beat "${layer.beat}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')} — not a prop it accepts (known: ${[...known].join(', ')})`);
+      if (unknown.length) warnings.push(`beat "${layer.beat}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')}, not a prop it accepts (known: ${[...known].join(', ')})`);
     }
     nBeats++;
     return f(opts).flatMap((l) => expand(l, stack));
@@ -96,7 +96,7 @@ function expand(layer, stack) {
       .map((l) => shift(l, dx, dy, dt))
       .flatMap((l) => expand(l, [...stack, layer.ref]));
   }
-  // SLOTS. A container block takes `children`, and those children may themselves be blocks —
+  // SLOTS. A container block takes `children`, and those children may themselves be blocks,
   // `{type:'block', block:'listRow'}` inside a phoneFrame. `expand` only ever mapped a block's OUTPUT
   // array, so a nested descriptor sat in the tree as an unrenderable `type:"block"` layer and the
   // validator's un-expanded-block error was the only thing that noticed. Descending here is what makes

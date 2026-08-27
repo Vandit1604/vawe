@@ -1,4 +1,4 @@
-// similarity.mjs — the SAMENESS AUDIT. Two videos that share too much motion vocabulary,
+// similarity.mjs: the SAMENESS AUDIT. Two videos that share too much motion vocabulary,
 // beat structure, and layout are the template problem re-emerging; this turns that taste
 // judgment into a failing check (same philosophy as the contrast + motion audits).
 //
@@ -104,6 +104,6 @@ if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
     console.log(`    score ${(s.score * 100).toFixed(0)}% · vocab ${(s.vocab * 100).toFixed(0)}% · structure ${(s.struct * 100).toFixed(0)}%${s.layout != null ? ` · layout ${(s.layout * 100).toFixed(0)}%` : ''}`);
   }
   if (!hard && !warn) console.log(`✓ ${fps.length} video(s), all pairs distinct`);
-  else console.log(`${hard ? '✗ ' + hard + ' SAME pair(s) — differentiate before shipping' : '~ ' + warn + ' close pair(s)'}`);
+  else console.log(`${hard ? '✗ ' + hard + ' SAME pair(s), differentiate before shipping' : '~ ' + warn + ' close pair(s)'}`);
   process.exit(hard ? 1 : 0);
 }

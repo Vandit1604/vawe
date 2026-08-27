@@ -1,6 +1,6 @@
 {
   "title": "Hyperscene (open canvas)",
-  "description": "Generic data-driven composition — the JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
+  "description": "Generic data-driven composition. The JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
   "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080×1920 portrait, 1920×1080 landscape).",
   "layerProps": {
     "_generated": "node scripts/gates/schema-drift.mjs --write - do not hand-edit",
@@ -398,7 +398,7 @@
       "item": {
         "t": {
           "type": "number",
-          "label": "Seam start time (s) — the window is [t, t+dur]",
+          "label": "Seam start time (s), the window is [t, t+dur]",
           "required": true,
           "min": 0
         },
@@ -478,11 +478,11 @@
     },
     "transitions": {
       "type": "array",
-      "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut · seam · sting) via core/transitions.js — ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
+      "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut · seam · sting) via core/transitions.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
       "item": {
         "at": {
           "type": "number",
-          "label": "Boundary time (s) — the transition plays over [at, at+dur]",
+          "label": "Boundary time (s). The transition plays over [at, at+dur]",
           "required": true,
           "min": 0
         },
@@ -573,7 +573,7 @@
     },
     "lighting": {
       "type": "object",
-      "label": "The scene's KEY LIGHT: { x, y } in canvas px, plus optional { intensity } (default 1, scales every shadow at once). Read by the `shadow` modifier, which points each layer's shadow directly away from this point — so two cards either side of it throw their shadows in opposite directions, and one number re-lights the whole film. A light outside the canvas is normal.",
+      "label": "The scene's KEY LIGHT: { x, y } in canvas px, plus optional { intensity } (default 1, scales every shadow at once). Read by the `shadow` modifier, which points each layer's shadow directly away from this point, so two cards either side of it throw their shadows in opposite directions, and one number re-lights the whole film. A light outside the canvas is normal.",
       "fields": {
         "x": {
           "type": "number",
@@ -636,7 +636,7 @@
         },
         "p": {
           "type": "number",
-          "label": "The LENS: focal distance in px (default 1600; lower = wider). Not the camera's position — that is s. Keying both at once is the dolly zoom.",
+          "label": "The LENS: focal distance in px (default 1600; lower = wider). Not the camera's position. That is s. Keying both at once is the dolly zoom.",
           "min": 200,
           "max": 6000
         },
@@ -755,7 +755,7 @@
         },
         "blocks": {
           "type": "array",
-          "label": "doc: content blocks — {h,accent} heading · {body} mono lines · {code} · {bullets:[]}"
+          "label": "doc: content blocks, {h,accent} heading · {body} mono lines · {code} · {bullets:[]}"
         },
         "nameSize": {
           "type": "number",
@@ -779,7 +779,7 @@
         },
         "src": {
           "type": "string",
-          "label": "Path to the layer's source file: an image, a captured component (.json), a lottie (.json), or — on an `html` layer — a hand-authored fragment (.html) instead of the inline `html` string (exactly one of the two)"
+          "label": "Path to the layer's source file: an image, a captured component (.json), a lottie (.json), or (on an `html` layer) a hand-authored fragment (.html) instead of the inline `html` string (exactly one of the two)"
         },
         "x": {
           "type": "number|string",
@@ -871,7 +871,7 @@
         },
         "size": {
           "type": "number",
-          "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame — scale contrast). The auto-fit safety + `make audit` still catch true overflow/clipping.",
+          "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame, scale contrast). The auto-fit safety + `make audit` still catch true overflow/clipping.",
           "min": 18,
           "max": 560
         },
@@ -954,7 +954,7 @@
         },
         "anim": {
           "type": "string",
-          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | lift | defocus | slide-left | slide-right | slide-up | slide-down | wipe | wipe-left | wipe-right | wipe-up | wipe-down | iris | clock | none. Unknown names fall back to fade silently — there is no 'slide', and direction is part of the name, not a separate prop. A slide is named for the edge it comes FROM; a wipe is named for the edge its reveal TRAVELS TOWARD (wipe-up grows upward from the bottom; plain `wipe` = `wipe-right`).",
+          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | lift | defocus | slide-left | slide-right | slide-up | slide-down | wipe | wipe-left | wipe-right | wipe-up | wipe-down | iris | clock | none. Unknown names fall back to fade silently. There is no 'slide', and direction is part of the name, not a separate prop. A slide is named for the edge it comes FROM; a wipe is named for the edge its reveal TRAVELS TOWARD (wipe-up grows upward from the bottom; plain `wipe` = `wipe-right`).",
           "enum": [
             "fade",
             "up",
@@ -1182,15 +1182,15 @@
         },
         "comp": {
           "type": "string",
-          "label": "Composition name (type:\"composition\") — a FIRST-PARTY hand-authored per-beat GSAP timeline from core/compositions/index.js (the safe form of another engine' one-timeline-per-beat model). The JSON names the comp + passes DATA via `props`; the code lives first-party, so untrusted input cannot inject. Use for bespoke multi-tween motion `parts`/blueprints can't reach (a token travelling a path while a check draws). e.g. \"pipelineFlow\"."
+          "label": "Composition name (type:\"composition\"). A FIRST-PARTY hand-authored per-beat GSAP timeline from core/compositions/index.js (the safe form of another engine' one-timeline-per-beat model). The JSON names the comp + passes DATA via `props`; the code lives first-party, so untrusted input cannot inject. Use for bespoke multi-tween motion `parts`/blueprints can't reach (a token travelling a path while a check draws). e.g. \"pipelineFlow\"."
         },
         "props": {
           "type": "object",
-          "label": "DATA passed to a `composition` comp (labels, numbers, accent) — treated as textContent/attr, never markup. e.g. { stages:[\"Input\",\"Engine\",\"Render\"] }."
+          "label": "DATA passed to a `composition` comp (labels, numbers, accent). Treated as textContent/attr, never markup. e.g. { stages:[\"Input\",\"Engine\",\"Render\"] }."
         },
         "splitText": {
           "type": "object",
-          "label": "Masked LINE reveals (GSAP SplitText): { mask, stagger, dur, ease } — each line slides up from behind a clip. Line-level only; use `split` for char/word. Do not combine with `split`."
+          "label": "Masked LINE reveals (GSAP SplitText): { mask, stagger, dur, ease }. Each line slides up from behind a clip. Line-level only; use `split` for char/word. Do not combine with `split`."
         },
         "circle": {
           "type": "boolean|object",
@@ -1230,7 +1230,7 @@
         },
         "css": {
           "type": "object",
-          "label": "Raw CSS the layer vocabulary does not name (a box gradient via `background`, `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration). camelCase keys in (`boxShadow`), applied once at build time. REFUSES opacity/transform/animation/transition/position/left/top/width/height/zIndex/pointerEvents (the engine owns and rewrites those every frame) — use anim/motion/parts/vars/x/y/w/h/track instead."
+          "label": "Raw CSS the layer vocabulary does not name (a box gradient via `background`, `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration). camelCase keys in (`boxShadow`), applied once at build time. REFUSES opacity/transform/animation/transition/position/left/top/width/height/zIndex/pointerEvents (the engine owns and rewrites those every frame), use anim/motion/parts/vars/x/y/w/h/track instead."
         },
         "critical": {
           "type": "boolean",
@@ -1352,7 +1352,7 @@
           "label": "Group gap (px)"
         },
         "pad": {
-          "label": "Padding (px or CSS string) — groups and text chips"
+          "label": "Padding (px or CSS string), groups and text chips"
         },
         "justify": {
           "type": "string",
@@ -1360,7 +1360,7 @@
         },
         "children": {
           "type": "array",
-          "label": "Group children — text/image/count, or a nested group (layout by flow)",
+          "label": "Group children, text/image/count, or a nested group (layout by flow)",
           "item": {
             "type": {
               "type": "string",
@@ -1427,7 +1427,7 @@
         },
         "fitH": {
           "type": "number",
-          "label": "Max height (px) for multi-line auto-fit (with fit+w) — binary-search font to fit"
+          "label": "Max height (px) for multi-line auto-fit (with fit+w), binary-search font to fit"
         },
         "maxLines": {
           "type": "number",
@@ -1439,7 +1439,7 @@
         },
         "align2": {
           "type": "string",
-          "label": "DEPRECATED alias of `items` (align-items) — use `items`"
+          "label": "DEPRECATED alias of `items` (align-items), use `items`"
         },
         "wrap": {
           "type": "boolean",
@@ -1462,7 +1462,7 @@
         },
         "motion": {
           "type": "array",
-          "label": "Keyframe track — element choreography (pure in t). Offsets on the base position.",
+          "label": "Keyframe track, element choreography (pure in t). Offsets on the base position.",
           "item": {
             "t": {
               "type": "number",
@@ -1652,7 +1652,7 @@
         },
         "logotype": {
           "type": "boolean",
-          "label": "Text is part of a logo/brand mark — exempt from the CONTRAST bar only (WCAG 1.4.3)"
+          "label": "Text is part of a logo/brand mark, exempt from the CONTRAST bar only (WCAG 1.4.3)"
         },
         "keyClicks": {
           "type": "boolean",
@@ -1705,7 +1705,7 @@
         },
         "react": {
           "type": "object|array",
-          "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] } — needs audio.spectrum"
+          "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] }, needs audio.spectrum"
         },
         "vars": {
           "type": "object",
@@ -1847,7 +1847,7 @@
           "label": "globe: seconds the settle takes"
         },
         "theta": {
-          "label": "globe: tilt in radians — how far the pole leans toward the camera"
+          "label": "globe: tilt in radians, how far the pole leans toward the camera"
         },
         "arcWidth": {
           "label": "globe: thickness of the route"
@@ -1892,7 +1892,7 @@
           "label": "three globe: sun longitude at the end of the layer. Decreasing sends the terminator WEST, which is the direction the real one moves"
         },
         "sunLat": {
-          "label": "three globe: the sun's declination in degrees — the seasonal tilt of the day/night line"
+          "label": "three globe: the sun's declination in degrees. The seasonal tilt of the day/night line"
         },
         "dawnWidth": {
           "label": "three globe: how soft the terminator is, in cosine units. 0 is a hard edge, 0.22 is a band of dawn"
@@ -2030,7 +2030,7 @@
     },
     "audio": {
       "type": "object",
-      "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio-select.js. The CUES are synthesized and carry no licence (core/audio-kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks — check assets/music/credits.json before any commercial release. See docs/CRAFT/SOUND.md.",
+      "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio-select.js. The CUES are synthesized and carry no licence (core/audio-kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See docs/CRAFT/SOUND.md.",
       "fields": {
         "music": {
           "type": "string",
@@ -2079,7 +2079,7 @@
         },
         "voWords": {
           "type": "string",
-          "label": "VO word-timing sidecar JSON: [{ \"w\": \"hello\", \"t\": 1.2 }] — drives word captions."
+          "label": "VO word-timing sidecar JSON: [{ \"w\": \"hello\", \"t\": 1.2 }], drives word captions."
         },
         "sfxGain": {
           "type": "number",
@@ -2088,7 +2088,7 @@
         },
         "bridges": {
           "type": "array",
-          "label": "Sound bridges — J-cuts and L-cuts. A bridge is a texture that crosses a picture change instead of stopping at it: a J-cut starts the next shot's sound BEFORE its picture, an L-cut lets the last shot's sound run UNDER the new one. It is the one continuous object that costs the picture nothing, so a film whose beats are visually unrelated is still held together. Each bridge names a JUNCTION, never a timestamp, so retiming a beat moves the sound with it. Resolved by core/audio-bridges.js, mixed by internal/audio/audio.go. See docs/CRAFT/SOUND.md §2.",
+          "label": "Sound bridges, J-cuts and L-cuts. A bridge is a texture that crosses a picture change instead of stopping at it: a J-cut starts the next shot's sound BEFORE its picture, an L-cut lets the last shot's sound run UNDER the new one. It is the one continuous object that costs the picture nothing, so a film whose beats are visually unrelated is still held together. Each bridge names a JUNCTION, never a timestamp, so retiming a beat moves the sound with it. Resolved by core/audio-bridges.js, mixed by internal/audio/audio.go. See docs/CRAFT/SOUND.md §2.",
           "item": {
             "bridge": {
               "type": "string",
@@ -2106,7 +2106,7 @@
             },
             "sound": {
               "type": "string",
-              "label": "The texture: a bed name (\"tense\" → assets/music/tense.wav), a synthesized cue name (\"loading\" → assets/sfx/loading.wav), or a path to a .wav. Looped to fill the span. A source that is not on disk FAILS the render — a bridge that never plays is not a quieter film.",
+              "label": "The texture: a bed name (\"tense\" → assets/music/tense.wav), a synthesized cue name (\"loading\" → assets/sfx/loading.wav), or a path to a .wav. Looped to fill the span. A source that is not on disk FAILS the render. A bridge that never plays is not a quieter film.",
               "required": true
             },
             "lead": {
@@ -2199,7 +2199,7 @@
         },
         "silent": {
           "type": "boolean",
-          "label": "Render with NO audio track at all. A real device — a film can be better mute — but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make audio-check` says so."
+          "label": "Render with NO audio track at all. A real device (a film can be better mute) but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make audio-check` says so."
         },
         "_why": {
           "type": "string",

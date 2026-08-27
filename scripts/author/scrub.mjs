@@ -1,4 +1,4 @@
-// scripts/author/scrub.mjs — the PREVIEW LOOP. Extract N frames evenly across a rendered video into one
+// scripts/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one
 // contact sheet, so the author (or agent) sees the WHOLE film at a glance and can spot dead/weak
 // beats without scrubbing a timeline. This is the automated stand-in for another engine's Studio scrub.
 //

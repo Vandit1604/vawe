@@ -1,10 +1,10 @@
-// scripts/lib/layers.mjs — walking a scene's layer TREE, once.
+// scripts/lib/layers.mjs: walking a scene's layer TREE, once.
 //
 // `layers` is a tree: a group carries `children`, and a gate that reasons about "every layer" has to
 // flatten it first. Five gates did, in four slightly different ways, and the differences were all
 // accidental. Two of them dropped the guard the other three had, which is the only part that mattered:
 //
-//   seam-snap.mjs   `(ls||[]).flatMap((l) => [l, ...walk(l.children)])` — a `null` left in the array
+//   seam-snap.mjs   `(ls||[]).flatMap((l) => [l, ...walk(l.children)])`, a `null` left in the array
 //                   (a deleted layer, a trailing comma an editor turned into a hole) threw
 //                   `TypeError: cannot read properties of null` out of the seam gate, so the check that
 //                   exists to catch a black flash reported a crash instead of a frame.

@@ -1,4 +1,4 @@
-// scripts/dev/grab-beats.mjs — grab an explicit list of timestamps from a scene.
+// scripts/dev/grab-beats.mjs: grab an explicit list of timestamps from a scene.
 // `make styleframes` picks frames by visual distinctness, so it cannot be aimed at a beat.
 // Usage: node scripts/dev/grab-beats.mjs <scene.json> <outDir> <t1> <t2> ...
 import fs from 'node:fs';

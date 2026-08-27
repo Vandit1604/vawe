@@ -1,4 +1,4 @@
-// scripts/dev/spike-3d.mjs — PHASE 0 SPIKE: can sibling layers tilt in 3D and share one vanishing point?
+// scripts/dev/spike-3d.mjs, PHASE 0 SPIKE: can sibling layers tilt in 3D and share one vanishing point?
 //
 // docs/MISTAKES.md #59 rejected per-layer 3D and concluded "there is no per-layer angle that composes
 // correctly". Its diagnosis is right about the construction it considered: CSS `perspective()` takes its
@@ -131,8 +131,8 @@ for (const [name, r] of Object.entries(results)) {
     if (conv <= 100) fail++;
   } else if (!r.tilted) {
     // a flattened WRAPPER case is a documented constraint on where the camera may sit, not a no-go
-    if (name.startsWith('wrap')) { verdict = 'FLATTENED — constraint, see below'; notes.push(name); }
-    else { verdict = 'FLATTENED — 3D lost'; fail++; }
+    if (name.startsWith('wrap')) { verdict = 'FLATTENED, constraint, see below'; notes.push(name); }
+    else { verdict = 'FLATTENED: 3D lost'; fail++; }
   } else if (conv < 2 && onV < 2) verdict = 'converges, matches prediction';
   else if (conv < 2) { verdict = `agrees but off prediction by ${onV.toFixed(1)}px`; fail++; }
   else { verdict = `DIVERGES by ${conv.toFixed(1)}px`; fail++; }
@@ -141,7 +141,7 @@ for (const [name, r] of Object.entries(results)) {
 
 console.log(`\n  predicted convergence: (${PREDICTED.x.toFixed(0)}, ${PREDICTED.y.toFixed(0)})  [VX + d/tan(ry)]`);
 if (notes.length) {
-  console.log(`\n  CONSTRAINT: every intervening wrapper flattens (${notes.join(', ')}) — including a BARE div with`);
+  console.log(`\n  CONSTRAINT: every intervening wrapper flattens (${notes.join(', ')}), including a BARE div with`);
   console.log('  no clip and no filter. So the cause is not overflow or filter, it is `transform-style: flat`');
   console.log('  being the default on every intermediate element. `wrapPreserve` converges, which confirms it.');
   console.log('  Two implementations follow, and both work:');
@@ -151,8 +151,8 @@ if (notes.length) {
   console.log('  rasterisation, which is the exact thing #59 kept byte-identical by emitting only on tilt.');
 }
 console.log(fail === 0
-  ? '\n  ✓ GO — sibling layers tilt independently and share one camera, landing on the predicted point,\n'
+  ? '\n  ✓ GO, sibling layers tilt independently and share one camera, landing on the predicted point,\n'
     + '    and it survives overflow/filter/opacity ON the tilted layer. #59\'s diagnosis holds exactly\n'
     + '    (its naive case diverges by the box spacing); its CONCLUSION does not.\n'
-  : `\n  ✗ NO-GO — ${fail} case(s) failed. Report and stop.\n`);
+  : `\n  ✗ NO-GO, ${fail} case(s) failed. Report and stop.\n`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1,4 +1,4 @@
-// sheets.mjs — BOTH review contact sheets from ONE browser, and the rule that keeps them honest.
+// sheets.mjs, BOTH review contact sheets from ONE browser, and the rule that keeps them honest.
 //
 // `make beats` and `make reveal` answer two halves of the same question (where a beat lands, and how it
 // arrives) and used to cost two of everything: two HTTP servers, two puppeteer launches, two scene boots,
@@ -13,7 +13,7 @@
 // prove a PERSON LOOKED at a sheet, and beat-check fires `beats-unseen` when no receipt matches the
 // scene's hash. Producing sheets automatically inside the iteration loop would make every receipt
 // permanently fresh, so the gate could never fire again and would report green for scenes nobody has
-// read — a gate that manufactures confidence, which is worse than no gate.
+// read. A gate that manufactures confidence, which is worse than no gate.
 //
 // So the two facts the receipt used to conflate are now separate:
 //   the sheet is CURRENT for this scene content  → automatic, stamped here with `auto: true`
@@ -27,7 +27,7 @@ import { openScene } from './scene-page.mjs';
 import { readReceipt, writeReceipt } from '../lib/receipt.mjs';
 
 /** Make a string safe to hand ffmpeg's drawtext. The text goes through a filter-graph parser, so a
- *  colon or a quote inside it ends the argument and the whole graph fails to build — which is how
+ *  colon or a quote inside it ends the argument and the whole graph fails to build, which is how
  *  `--vs` produced no sheet at all while printing a tick (the label was `SITE: <name>`). Strip rather
  *  than escape: this is a caption, and a caption that costs a debugging session is not worth the
  *  extra character. */

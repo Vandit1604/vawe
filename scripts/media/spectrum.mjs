@@ -1,4 +1,4 @@
-// spectrum.mjs — bake a track's per-frame band energy beside the audio.
+// spectrum.mjs: bake a track's per-frame band energy beside the audio.
 //
 //   node scripts/media/spectrum.mjs assets/music/launch.wav [--fps 30]
 //   make spectrum MUSIC=assets/music/launch.wav
@@ -7,7 +7,7 @@
 // video frame. A scene points at it with `audio.spectrum` and layers react with `react: {…}`.
 //
 // This is the whole audio-reactivity determinism story: the ANALYSIS happens once, here, offline. The
-// render never touches a decoder — it reads row `n` of a table. So renderFrame(412) is as pure as it
+// render never touches a decoder. It reads row `n` of a table. So renderFrame(412) is as pure as it
 // was before, which is why this ships instead of sitting in ROADMAP Tier 5 with the sims.
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,4 +1,4 @@
-// scripts/dev/seam-c-proto.mjs — does the Seam C technique hold renderFrame(n) purity?
+// scripts/dev/seam-c-proto.mjs: does the Seam C technique hold renderFrame(n) purity?
 //
 //   node scripts/dev/seam-c-proto.mjs
 //

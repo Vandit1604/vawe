@@ -1,4 +1,4 @@
-// verify-render.mjs — prove a generated typeface JSON actually EXTRUDES, in the right typeface.
+// verify-render.mjs: prove a generated typeface JSON actually EXTRUDES, in the right typeface.
 //
 //   node scripts/fonts/verify-render.mjs Anybody
 //   make glyphs-verify FONT=Anybody
@@ -112,7 +112,7 @@ await browser.close(); server.close(); fs.rmSync(tmp, { force: true });
 // substitution, so it is a failure here, not a warning.
 const missing = errors.filter((e) => /does not exists in font family/.test(e));
 if (missing.length) { console.error('\n✗ ' + missing.join('\n✗ ') + '\n'); process.exit(1); }
-if (!stats.verts) { console.error('\n✗ TextGeometry produced ZERO vertices — the outlines parsed to nothing.\n'); process.exit(1); }
+if (!stats.verts) { console.error('\n✗ TextGeometry produced ZERO vertices. The outlines parsed to nothing.\n'); process.exit(1); }
 
 console.log(`  ✓ ${name}: ${stats.glyphs} glyphs in the file, ${stats.verts} vertices extruded for "${text}"`);
-console.log(`  → ${out}  — LOOK AT IT: the two rows must be the same typeface.`);
+console.log(`  → ${out}, LOOK AT IT: the two rows must be the same typeface.`);

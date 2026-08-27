@@ -1,9 +1,9 @@
-// scripts/lib/scratch.mjs — ONE answer to "where does a review artifact go", and one that fails loudly.
+// scripts/lib/scratch.mjs: ONE answer to "where does a review artifact go", and one that fails loudly.
 //
 // The tools that write contact sheets each decided this for themselves, and two of them decided it
 // twice in the same file: the frames directory honoured CLAUDE_JOB_DIR while the sheet path stayed a
 // `/tmp/...` literal. When the job dir is set, the parent of that literal is never created, ffmpeg
-// cannot open its output, and nothing notices — spawnSync's status was dropped on the floor, so
+// cannot open its output, and nothing notices. SpawnSync's status was dropped on the floor, so
 // `make reveal` printed the sheet's path and exited 0 with no sheet anywhere on disk. Worse, it then
 // stamped a review receipt, so the gate that exists to prove somebody LOOKED was satisfied by an
 // image that was never written (docs/MISTAKES.md #245).

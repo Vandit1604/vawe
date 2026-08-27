@@ -1,4 +1,4 @@
-// gen-audio.mjs — synthesize license-free audio (no deps, deterministic).
+// gen-audio.mjs: synthesize license-free audio (no deps, deterministic).
 // Writes a subtle music bed + a small SFX library used by the audio mixer.
 //   node scripts/media/gen-audio.mjs
 import fs from 'node:fs';

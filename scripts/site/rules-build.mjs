@@ -1,4 +1,4 @@
-// rules-build.mjs — emits vawe-rules.md, the single file you paste into Claude (or any model) to
+// rules-build.mjs: emits vawe-rules.md, the single file you paste into Claude (or any model) to
 // get a valid scene.json back.
 //
 //   node scripts/site/rules-build.mjs      → docs/vawe-rules.md + site/public/vawe-rules.md
@@ -6,7 +6,7 @@
 // GENERATED, never hand-written. A hand-maintained rules file drifts from the engine the moment a
 // preset is added, and a rules file that lies is worse than none: the model authors a scene that
 // fails validate, and the user blames the product. Everything below is read out of the real source
-// of truth — schema.json, PRESETS, EASINGS, PRESENTATIONS, SHADER_FX, themes/ — so it cannot drift.
+// of truth, schema.json, PRESETS, EASINGS, PRESENTATIONS, SHADER_FX, themes/, so it cannot drift.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,11 +44,11 @@ const propRow = (k) => {
   if (!p) return null;
   const t = p.type || (p.enum ? 'string' : '?');
   const lab = (p.label || '').replace(/\|/g, '/').slice(0, 78);
-  const en = p.enum ? ` — one of: \`${p.enum.join('` `')}\`` : '';
+  const en = p.enum ? `. One of: \`${p.enum.join('` `')}\`` : '';
   return `| \`${k}\` | ${t} | ${lab}${en} |`;
 };
 
-const md = `# vawe-rules.md — how to write a scene.json
+const md = `# vawe-rules.md: how to write a scene.json
 
 Paste this whole file into Claude (or any model) and ask for a scene. Paste the JSON it returns into
 the editor at **/editor** and watch it render live in your browser. Nothing is uploaded; the engine
@@ -84,8 +84,8 @@ JSON *is* the video.
 }
 \`\`\`
 
-- \`module\` is always \`"scene"\`. \`aspect\` **must be in the JSON** (\`16:9\` · \`9:16\` · \`1:1\` · \`4:5\`) —
-  a scene that needs a CLI flag to come out right is not reproducible.
+- \`module\` is always \`"scene"\`. \`aspect\` **must be in the JSON** (\`16:9\` · \`9:16\` · \`1:1\` · \`4:5\`).
+  A scene that needs a CLI flag to come out right is not reproducible.
 - The frame is **1920×1080** at \`16:9\` (1080×1920 at \`9:16\`). All \`x\`/\`y\`/\`size\` are real frame pixels.
 - \`start\`/\`duration\` are **seconds**. 30fps.
 
@@ -106,7 +106,7 @@ Set \`split\` (\`${SPLITS.join('` / `')}\`) to break text into units, then \`pre
 \`${PRESET_NAMES.join('` · `')}\`
 
 - \`split:"path"\` + \`preset:"draw"\` makes an **inline SVG stroke draw itself** (logos, icons, chart
-  lines). The SVG must be inline in \`text\` — an \`<img>\` has no reachable paths.
+  lines). The SVG must be inline in \`text\`, an \`<img>\` has no reachable paths.
 - \`presetOpts\` passes per-preset knobs, e.g. \`{"px":30}\` for \`blur\`, \`{"ease":"easeOutQuint"}\` for \`draw\`.
 
 ## Easings (${EASE_NAMES.length})
@@ -118,7 +118,7 @@ Entrances decelerate (\`easeOut*\`), exits accelerate (\`rush\`), ambient loops 
 
 ## Cuts (${CUTS.length})
 
-\`"cuts": [{ "t": 3.2, "style": "punch" }]\` — \`${CUTS.join('` · `')}\`
+\`"cuts": [{ "t": 3.2, "style": "punch" }]\`, \`${CUTS.join('` · `')}\`
 
 ## Shader stings (${STINGS.length})
 
@@ -130,7 +130,7 @@ A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 
 ## Backgrounds (${BGS.length})
 
-\`"bg": [{ "t": 0, "preset": "plain" }]\` — \`${BGS.join('` · `')}\`
+\`"bg": [{ "t": 0, "preset": "plain" }]\`, \`${BGS.join('` · `')}\`
 
 Use the texture the brand actually has. A flat brand gets \`plain\`. A pattern is a seasoning for one
 beat, never the wallpaper.
@@ -155,7 +155,7 @@ Colours come from the theme, never hardcoded: \`var(--text)\` \`var(--text-2)\` 
 
 - **Hook → build → payoff.** Never spoil the payoff. Order beats so the most surprising one is last.
 - **Every frame fights for its value.** If cutting a beat loses nothing, it was slop.
-- **Show, never say.** A word in a box proves nothing. Do not label your effects ("fade", "flash") —
+- **Show, never say.** A word in a box proves nothing. Do not label your effects ("fade", "flash"),
   let them land. Do not open with an eyebrow naming the topic.
 - **Never claim on screen what the video does not show.** An unbacked number invites the viewer to
   notice its absence.

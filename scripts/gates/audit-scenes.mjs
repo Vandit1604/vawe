@@ -1,4 +1,4 @@
-// scripts/gates/audit-scenes.mjs — run the LAYOUT AUDIT over every shipped scene, not just the open one.
+// scripts/gates/audit-scenes.mjs, run the LAYOUT AUDIT over every shipped scene, not just the open one.
 //
 // WHY THIS EXISTS. `verify/audit.mjs` is a good check and it was never the problem. It samples the bg
 // canvas under a text element's own ink box, computes WCAG against it, and reports `1.0:1 (want 3:1)`
@@ -51,14 +51,14 @@ const scenes = pop.names
   });
 
 // A FILTER THAT MATCHED NOTHING PRINTED A GREEN TICK. `audit-scenes.mjs formats/scene/thread.json` swept
-// 0 scenes and reported `✓ clean: 0 … errored: 0`, exit 0 — the filter is a bare-FILENAME substring, so
+// 0 scenes and reported `✓ clean: 0 … errored: 0`, exit 0. The filter is a bare-FILENAME substring, so
 // any path-shaped argument silently matches none. That is #377 at the scale of one command: the sweep
 // reported confidence over a population it never had. Say what the filter did, always, and refuse an
 // empty one rather than grading it.
 console.log(`  audit-scenes · ${pop.n} candidate(s) in ${DIR}`
   + `${filter ? ` · filter "${filter}" (a substring of the FILENAME) leaves ${scenes.length}` : ` · ${scenes.length} auditable`}`);
 if (!scenes.length) {
-  console.error(`\n  ✗ audit-scenes: NOTHING TO AUDIT — ${filter
+  console.error(`\n  ✗ audit-scenes: NOTHING TO AUDIT, ${filter
     ? `no filename in ${DIR}/ contains "${filter}". The filter is matched against the bare filename, so a path`
       + ` ("${DIR}/x.json") never matches; pass "x" instead.`
     : `${pop.n} candidate(s) were found and every one was excluded as un-auditable.`}\n`
@@ -100,7 +100,7 @@ for (const r of bad) {
   // every finding, never a head: a truncated list reads as "that was all of them"
   for (const line of r.findings) console.log(`    ${line}`);
 }
-for (const r of errored) console.log(`! ${r.f} — audit could not run:\n${r.out.split('\n').slice(-4).join('\n')}`);
+for (const r of errored) console.log(`! ${r.f}, audit could not run:\n${r.out.split('\n').slice(-4).join('\n')}`);
 
 const clean = rows.length - bad.length - errored.length;
 console.log(`\n==== AUDIT-ALL · ${rows.length} scenes ====`);

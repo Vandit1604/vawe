@@ -1,15 +1,15 @@
-// scripts/gates/craft-coverage.mjs — keep the docs honest: against the engine, and against each other.
+// scripts/gates/craft-coverage.mjs, keep the docs honest: against the engine, and against each other.
 //
 //   make craft-coverage
 //
 // Four ways the docs rot, each caught here so a doc can never silently lie to an author:
-//   1. COVERAGE — a look (core/looks.js) or sting (core/stings.js SHADER_FX) exists in the engine but
+//   1. COVERAGE. A look (core/looks.js) or sting (core/stings.js SHADER_FX) exists in the engine but
 //      no CRAFT doc classifies it, so an author reaching for it finds no guidance. (New effects added
 //      to a registry without a doc row trip this.)
-//   2. PHANTOMS — a doc names a look/sting the engine no longer has (a rename left a dead reference).
-//   3. LINKS + INDEX — a CRAFT cross-link points at a missing file, or a CRAFT guide is orphaned
+//   2. PHANTOMS. A doc names a look/sting the engine no longer has (a rename left a dead reference).
+//   3. LINKS + INDEX. A CRAFT cross-link points at a missing file, or a CRAFT guide is orphaned
 //      (not linked from README's index, so nobody finds it).
-//   4. THE DOC MAP (scripts/gates/doc-map.mjs) — repo-wide, not CRAFT-only: every indexed doc carries
+//   4. THE DOC MAP (scripts/gates/doc-map.mjs), repo-wide, not CRAFT-only: every indexed doc carries
 //      the `when:`/`answers:` frontmatter the map is generated from, every generated view is current,
 //      every markdown link anywhere resolves, and nothing is written and left unreachable. Checks 3
 //      and 4 overlap on purpose: 3 is the CRAFT-local rule, 4 is the same rule for the other 90 docs.
@@ -38,8 +38,8 @@ const covers = (text, name) => nameRe(name).test(text);
 
 // The two §4 coverage tables, as their table-row lines only (prose like "an `apple` beat" is excluded,
 // so profile names are never mistaken for effect names). `from`/`to` bound ONE of the two tables so the
-// looks rows and the stings rows can be read apart — see registersOf for why that matters.
-function selectionTableRows(selection, from = 'Looks — the held texture', to = '\n## ') {
+// looks rows and the stings rows can be read apart, see registersOf for why that matters.
+function selectionTableRows(selection, from = 'Looks: the held texture', to = '\n## ') {
   const start = selection.indexOf(from);
   if (start < 0) return [];
   const end = selection.indexOf(to, start + from.length);
@@ -47,7 +47,7 @@ function selectionTableRows(selection, from = 'Looks — the held texture', to =
   return region.split('\n').filter((l) => l.trim().startsWith('|'));
 }
 
-// registersOf(selection) — §4's classification as DATA: { look: {name → register}, sting: {…} }.
+// registersOf(selection), §4's classification as DATA: { look: {name → register}, sting: {…} }.
 //
 // The rows were already parsed here and then thrown away by a `.join('\n')`, so the one place in this
 // repo that knows a `vhs` is analog nostalgia and a `lens` is premium glamour could not tell anyone.
@@ -55,7 +55,7 @@ function selectionTableRows(selection, from = 'Looks — the held texture', to =
 // MCP client asking "what IS this" gets nothing. Returning the map costs a split and buys 66 entries.
 //
 // KEYED BY KIND, not flat, because `thermal` is BOTH a look (sci-fi/data/digital) and a sting (premium
-// glamour/product) — verified against the registries, and the only such collision. A flat map would
+// glamour/product), verified against the registries, and the only such collision. A flat map would
 // silently give one of them the other's meaning, which is worse than the blank it replaces.
 export function registersOf(selection) {
   const parse = (rows) => {
@@ -84,10 +84,10 @@ export function registersOf(selection) {
     const m = /\n\*\*/.exec(selection.slice(at + from.length));
     return m ? selection.slice(at + from.length + m.index, at + from.length + m.index + 3) : '\n## ';
   };
-  const LOOKS = 'Looks — the held texture';
+  const LOOKS = 'Looks: the held texture';
   const reg = {
     look: parse(selectionTableRows(selection, LOOKS, nextBold(LOOKS))),
-    sting: parse(selectionTableRows(selection, 'Stings — the shader AT the seam')),
+    sting: parse(selectionTableRows(selection, 'Stings, the shader AT the seam')),
   };
   // …and prove the split landed where it was meant to. A key that is not a member of the registry its
   // table is FOR means the region boundaries slipped, which no missing-key check can see: `coverageErrors`
@@ -96,7 +96,7 @@ export function registersOf(selection) {
     ...Object.keys(reg.look).filter((n) => !LOOK_NAMES.includes(n)).map((n) => `look table names "${n}", which is not a look`),
     ...Object.keys(reg.sting).filter((n) => !SHADER_FX.includes(n)).map((n) => `sting table names "${n}", which is not a sting`),
   ];
-  if (stray.length) throw new Error(`SELECTION.md §4 did not parse into two tables — ${stray.join(' · ')}. `
+  if (stray.length) throw new Error(`SELECTION.md §4 did not parse into two tables, ${stray.join(' · ')}. `
     + `Did a bold sub-header get retitled, or a row move between tables?`);
   return reg;
 }
@@ -105,7 +105,7 @@ function coverageErrors() {
   const errs = [];
   const selection = read('SELECTION.md');
   // Ask the MAP, not the whole file. `covers()` tested for the name anywhere in SELECTION.md, so a look
-  // named once in a profile paragraph counted as classified while its §4 row was missing — the check
+  // named once in a profile paragraph counted as classified while its §4 row was missing, the check
   // could pass on prose. Reading the table means "classified" means what it says.
   const reg = registersOf(selection);
   for (const look of LOOK_NAMES) if (!reg.look[look]) errs.push(`look "${look}" (core/looks.js) is not classified in SELECTION.md §4's LOOKS table`);
@@ -120,7 +120,7 @@ function phantomErrors() {
   const known = new Set([...LOOK_NAMES, ...SHADER_FX]);
   const rows = selectionTableRows(read('SELECTION.md')).join('\n');
   const tokens = new Set((rows.match(/`([a-z][A-Za-z0-9]+)`/g) || []).map((t) => t.slice(1, -1)));
-  for (const t of tokens) if (!known.has(t)) errs.push(`SELECTION.md §4 names \`${t}\` — no such look or sting in the engine (renamed/removed?)`);
+  for (const t of tokens) if (!known.has(t)) errs.push(`SELECTION.md §4 names \`${t}\`. No such look or sting in the engine (renamed/removed?)`);
   return errs;
 }
 
@@ -143,7 +143,7 @@ function indexErrors() {
   const readme = read('README.md');
   for (const doc of craftDocs()) {
     if (doc === 'README.md') continue;
-    if (!readme.includes(`(${doc})`)) errs.push(`${doc} is not linked from README.md — orphaned from the index`);
+    if (!readme.includes(`(${doc})`)) errs.push(`${doc} is not linked from README.md, orphaned from the index`);
   }
   return errs;
 }

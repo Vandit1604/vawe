@@ -2,12 +2,12 @@
 message: "A dark, chaptered product tour you can refill: three chapters, a proof number, an end card."
 audience: "Anyone forking this engine who needs a longer product film and has no film to copy."
 arc: "hook → chapter 1 → chapter 2 → chapter 3 → result → proof → statement → CTA"
-framework: "Star-Story-Solution — the product is the star, the three chapters are the story of one issue moving through it, the end card is the solution."
+framework: "Star-Story-Solution. The product is the star, the three chapters are the story of one issue moving through it, the end card is the solution."
 threads: "a through-line (one issue, NW-1184, is raised in chapter 1, scheduled in chapter 2 and closed by an agent in chapter 3) + a continuous object (the accent rail across the top, on screen for every frame of the film, filling with the film's own progress and flinching on every cut) + a motif (the mono chapter slug 1.0 / 2.0 / 3.0, in the same place every time, returning as the last line before the end card)"
 format: 1920x1080
-theme: "themes/northwind.json — swap this one field to reskin the whole film"
+theme: "themes/northwind.json, swap this one field to reskin the whole film"
 duration: 34s
-pace: "explainer, about 4s per shot — eight shots over 34s, seven cuts, one backdrop window each"
+pace: "explainer, about 4s per shot. Eight shots over 34s, seven cuts, one backdrop window each"
 spectacle: "shot 4 · the match cut at 14.0s · the roadmap bar labelled Agents does not leave. It IS the agent panel in the next chapter, handed over in its own pose with no entrance and no exit, and the panel then types the fix out character by character. The plan becomes the work. Every other shot holds one idea at one volume."
 not: "no stock photography, no captured third-party UI, no real company logos, no vendor chips naming real tools, no narration, no hardcoded hex, and no shot longer than five seconds."
 ---
@@ -82,7 +82,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - why: this is the spectacle. The plan does not describe the agent, it turns into it
 - emotion: surprise
 - duration: 4.6s
-- transition_in: hard cut (none — the match IS the transition)
+- transition_in: hard cut (none, the match IS the transition)
 - backdrop: dark
 
 ## Beat 5: Result (18.6s-22.4s)

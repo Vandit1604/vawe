@@ -1,8 +1,8 @@
-// scripts/gates/beats-of.mjs — WHERE ARE THE BEATS, and which frame represents each one.
+// scripts/gates/beats-of.mjs, WHERE ARE THE BEATS, and which frame represents each one.
 //
 // A scene does not declare its beats. They are inferred from where content layers START: a cluster of
 // starts within ~1.6s is one beat. Three things must be excluded or the clustering invents beats that
-// aren't there — backgrounds (track 0), persistent chrome (track 1), and near-full-duration layers, any
+// aren't there, backgrounds (track 0), persistent chrome (track 1), and near-full-duration layers, any
 // of which would spawn a phantom beat on a blank pre-hook frame.
 //
 // This lived inline in judge.mjs. It is here because the A/B judge needs the identical table: two arms

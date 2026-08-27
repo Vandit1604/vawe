@@ -1,8 +1,8 @@
-// reveal.mjs — see how each beat ANIMATES IN, not just where it lands. `make beats` samples a beat's
-// middle (the settled state), which hides the motion that carries the craft — the dolly direction, the
+// reveal.mjs: see how each beat ANIMATES IN, not just where it lands. `make beats` samples a beat's
+// middle (the settled state), which hides the motion that carries the craft, the dolly direction, the
 // typewriter, a colour-wave, a collage assembling. This renders, per beat, the ENTER arc densely +
 // the settled frame + the EXIT arc, so the reveal is always visible. The recurring failure it kills:
-// judging a beat by its hold and missing the reveal (docs/MISTAKES.md — the "settled not reveal" trap).
+// judging a beat by its hold and missing the reveal (docs/MISTAKES.md, the "settled not reveal" trap).
 //
 //   make reveal D=formats/scene/x.json                 → /tmp/reveal/<name>.png (one row per beat: enter | set | exit)
 //   node scripts/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]
@@ -19,7 +19,7 @@
 //
 // Deterministic: reads the scene's exact layer start-times to place each beat's enter window precisely
 // (no guessing), and renders headless via the engine's pure renderFrame(n). For a raw reference video
-// (no JSON) use `make filmstrip … FROM=<beat> FPS=12` per beat instead — this tool is for our renders.
+// (no JSON) use `make filmstrip … FROM=<beat> FPS=12` per beat instead, this tool is for our renders.
 //
 // The serve+boot block this file used to carry is gone: `openScene` owns it (scripts/author/scene-page.mjs).
 // `revealSheet` takes an ALREADY-OPEN scene, which is what lets `make sheets` build both sheets from one browser.
@@ -64,7 +64,7 @@ function meanLuma(file) {
 const desc = (l) => l.text ? `"${onScreenText(l.text).slice(0, 16)}"` : (l.src ? l.src.split('/').pop().slice(0, 16) : l.type);
 
 /** Build the reveal contact sheet (or the onion-skin ghost sheet) from an open scene.
- *  `auto` marks the receipt as machine-made — see sheets.mjs. */
+ *  `auto` marks the receipt as machine-made: see sheets.mjs. */
 export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false, ghost = false, auto = false } = {}) {
   const ENTER = enter, NENTER = n;
   // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
@@ -74,7 +74,7 @@ export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false,
   const { duration } = s.meta;
   const [VW, VH] = [s.width, s.height];
 
-  // ---- beat boundaries: cut times, else layer-start clusters (>1.2s gap) — same signal as beats.mjs ----
+  // ---- beat boundaries: cut times, else layer-start clusters (>1.2s gap), same signal as beats.mjs ----
   const near = (arr, t, e = 0.35) => arr.some((x) => Math.abs(x - t) < e);
   let bounds = [];
   for (const c of data.cuts || []) if (typeof c.t === 'number' && !near(bounds, c.t)) bounds.push(c.t);
@@ -107,7 +107,7 @@ export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false,
   // per scene, so two authors running at once cannot read each other's reveal (same reason as beats.mjs)
   const SLUG = path.basename(dataArg, '.json');
   // The frames and the sheet MUST come off one base. They did not, and the sheet's parent was therefore
-  // never created under a job dir — see scripts/lib/scratch.mjs.
+  // never created under a job dir, see scripts/lib/scratch.mjs.
   const sheet = scratch('reveal', `${SLUG}.png`);
   const tmp = scratch('reveal', `${SLUG}.frames`);
   fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
@@ -207,7 +207,7 @@ export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false,
     return { sheet: gsheet, ghost: true, cells: shown.length };
   }
 
-  // --layers / LAYERS=1 : the "ALL reveals" mode — every DISTINCT entrance (unique layer start-time),
+  // --layers / LAYERS=1 : the "ALL reveals" mode. Every DISTINCT entrance (unique layer start-time),
   // not just beat-starts, so a staggered sub-reveal mid-beat is captured too. Otherwise: beat-level arcs.
   let units;
   if (all) {
@@ -246,7 +246,7 @@ export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false,
     return p;
   });
   stack('v', padded, sheet, 'contact sheet');
-  // REVIEW RECEIPT — the same stamp `make beats` writes: proof that a sheet exists for THIS scene content.
+  // REVIEW RECEIPT. The same stamp `make beats` writes: proof that a sheet exists for THIS scene content.
   writeReceipt('beats', dataArg, { sheet, tool: 'reveal', ...(auto ? { auto: true } : {}) });
   if (all) console.log(`✓ reveal (ALL layers) · ${units.length} distinct entrances · each row = one reveal event's ENTER arc  →  ${sheet}`);
   else console.log(`✓ reveal · ${beats.length} beats · each row = [green ENTER arc · white SETTLED · orange EXIT arc]  →  ${sheet}`);

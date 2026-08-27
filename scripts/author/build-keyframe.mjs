@@ -1,4 +1,4 @@
-// Builds formats/scene/keyframe.json — a film about keyed motion that IS keyed motion.
+// Builds formats/scene/keyframe.json: a film about keyed motion that IS keyed motion.
 // The timeline strip and the shape's motion track are generated from ONE list of keys, so the diamonds
 // you see landing are literally the keys the shape is moving through. If they ever disagree the film is
 // lying, and generating both from one source is the only way to be sure they cannot.
@@ -8,7 +8,7 @@ import fs from 'node:fs';
 // The film's claim is "these keys ARE this motion", so the shape must ride directly above its own
 // track: a key's x on the strip and the shape's x are the SAME number, derived from one mapping. The
 // first cut had the shape crossing the top of the frame while its diamonds landed at the bottom, which
-// looks related in time and is unrelated in space — the picture was not saying what the words said.
+// looks related in time and is unrelated in space. The picture was not saying what the words said.
 const STRIP = { x: 170, y: 726, w: 1580, h: 210 };
 const SPAN = 2.1, PAD = 26;
 const px = (t) => +(PAD + (STRIP.w - PAD * 2) * (t / SPAN)).toFixed(1);

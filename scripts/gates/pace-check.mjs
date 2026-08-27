@@ -1,12 +1,12 @@
-// scripts/gates/pace-check.mjs — is anything actually HAPPENING, and how often?
+// scripts/gates/pace-check.mjs: is anything actually HAPPENING, and how often?
 //
 //   node scripts/gates/pace-check.mjs <scene.json> [--strict]
 //   node scripts/gates/pace-check.mjs            (census across the committed library)
 //
 // WHY THIS EXISTS. Two films were authored as a deliberate improvement on showcase-flight.json and both
 // came out SLOWER than the thing they replaced: 0.85 and 0.95 events per second against its 1.79, and
-// below the library's own median of 1.20. Nobody had to watch them to know — it is arithmetic on the
-// JSON — and nothing measured it (docs/MISTAKES.md #322).
+// below the library's own median of 1.20. Nobody had to watch them to know, it is arithmetic on the
+// JSON, and nothing measured it (docs/MISTAKES.md #322).
 //
 // The gate that knew already existed and was looking at the wrong artefact. `storyboard-check` warns
 // `held-state-too-long` at about 1.5 seconds, and it grades the PLAN. Both films were replanned until
@@ -16,7 +16,7 @@
 //
 // WHAT AN EVENT IS. Any moment a layer arrives or leaves, plus every cut. It is deliberately crude: it
 // cannot see a count ticking or a route drawing, so a film can score badly and be fine. That is why the
-// floor is set at the library's own tenth percentile among FILMS rather than at its median — the aim is
+// floor is set at the library's own tenth percentile among FILMS rather than at its median, the aim is
 // to catch a film that is asleep, not to push everything toward the same rhythm.
 //
 // It cannot see the opposite failure either. A film can hit any number here by strobing its layers, and
@@ -86,7 +86,7 @@ const m = measure(path.join(ROOT, file));
 if (!m) { console.error(`✗ ${file}: no layers or no duration`); process.exit(2); }
 const problems = [];
 if (m.copy && m.eps < FLOOR && !m.allow.includes('slow-pace')) {
-  problems.push(`${m.eps.toFixed(2)} events/s over ${m.dur}s (${m.events} event(s)) — below the floor of ${FLOOR.toFixed(2)}, `
+  problems.push(`${m.eps.toFixed(2)} events/s over ${m.dur}s (${m.events} event(s)), below the floor of ${FLOOR.toFixed(2)}, `
     + `which is this library's tenth percentile among films. For scale: the median film is 1.20 and the one this `
     + `replaces is 1.79. Cut the duration before adding layers: a slow film is almost always a film that is too long.`);
 }
@@ -102,10 +102,10 @@ if (!problems.length) {
   // one that cleared the bar. Say which of the two rules ran, so a fixture cannot borrow a film's tick.
   const waived = m.allow.includes('slow-pace');
   console.log(waived
-    ? `  ○ pace rules WAIVED by {"authoring":{"allow":["slow-pace"]}} — neither the ${FLOOR.toFixed(2)} ev/s floor\n`
+    ? `  ○ pace rules WAIVED by {"authoring":{"allow":["slow-pace"]}}, neither the ${FLOOR.toFixed(2)} ev/s floor\n`
       + `    nor the ${HOLD.toFixed(1)}s hold cap was applied. The numbers above are measured; no verdict was reached.\n`
     : m.copy
-    ? `  ✓ it keeps moving — ${m.copy} line(s) of copy, so both rules applied\n`
+    ? `  ✓ it keeps moving, ${m.copy} line(s) of copy, so both rules applied\n`
     : `  ✓ within the hold cap. NO COPY in this scene, so the ${FLOOR.toFixed(2)} ev/s floor did not apply:\n`
       + `    a backdrop or a determinism fixture is meant to be still and is never failed for it.\n`);
   process.exit(0);

@@ -1,4 +1,4 @@
-// scripts/author/lightfield-render.mjs — take a screenshot that is the same picture every time.
+// scripts/author/lightfield-render.mjs, take a screenshot that is the same picture every time.
 //
 // `page.screenshot()` right after `load` is a lie waiting to happen. A lightfield is dozens of blended,
 // masked elements, and the compositor is free to hand back a frame before they have all rastered: the

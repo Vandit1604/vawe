@@ -1,13 +1,13 @@
-// scripts/gates/snap-scenes.mjs — the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs
+// scripts/gates/snap-scenes.mjs: the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs
 // snapshots one format's sample.json; this sweeps EVERY shipped scene (formats/scene/*.json), and for
 // each does two things the single-scene gate never did across the library:
 //
-//   1. NON-DETERMINISM CHECK — render the sampled frames ascending, then descending, and compare. A
+//   1. NON-DETERMINISM CHECK, render the sampled frames ascending, then descending, and compare. A
 //      pure renderFrame(n) gives the same signature regardless of order; a scene whose signature moves
 //      when the order changes has state leaking across frames (the BorderTrail-class bug). Such a scene
 //      is QUARANTINED: not baselined, listed in the report. (Date.now/Math.random are already banned by
 //      lib-test; this catches the order-dependence class, complementing probe-purity's per-frame proof.)
-//   2. REGRESSION BASELINE — for deterministic scenes, save/diff a DOM signature keyed by scene name,
+//   2. REGRESSION BASELINE, for deterministic scenes, save/diff a DOM signature keyed by scene name,
 //      so any future refactor / version bump / new effect is provably byte-identical (or shows exactly
 //      what moved) across all 75 scenes, not just one.
 //
@@ -41,7 +41,7 @@ const SAVE = args.includes('--save');
 // of code different, and a `make build` fetching 16 fonts moved 56 scenes the same way.
 //
 // That is worse than a flaky number. A refactor verified across the boundary reads as broken, and a
-// real regression captured after it reads as fonts — so the net stops being evidence in both
+// real regression captured after it reads as fonts, so the net stops being evidence in both
 // directions at once. The stamp is one file for the whole SET, because the font state is a property of
 // the set and not of any scene, and it deliberately does not touch the per-scene signature format.
 const FONT_DIRS = ['assets/fonts', 'assets/fonts/local'];
@@ -61,7 +61,7 @@ const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one 
 
 // Every shipped SCENE: formats/scene/*.json with module:"scene", except the schema and _-prefixed
 // scratch. A file without module:"scene" (the examples registry, a *.intent storyboard partial) is not
-// a renderable scene and is skipped — not errored.
+// a renderable scene and is skipped, not errored.
 const dir = path.join(repoRoot, SCENE_DIR);
 const isScene = (f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')).module === 'scene'; } catch { return false; } };
 // A source carrying un-expanded build-time sugar (`block` / `beat` / `comp`) is not renderable: those
@@ -157,7 +157,7 @@ for (const scene of scenes) {
 
     // NON-DETERMINISM: same frames ascending vs descending. A pure render is order-blind.
     // Prime first, so the ascending pass is not the only one that ever sees a never-yet-animated split
-    // unit — see primeFrames in snap-signature.mjs for what that difference cost.
+    // unit, see primeFrames in snap-signature.mjs for what that difference cost.
     await primeFrames(page, frames);
     const sigAsc = await captureSig(page, frames);
     const sigDesc = await captureSig(page, [...frames].reverse());
@@ -183,7 +183,7 @@ if (!SAVE) {
   let was = null;
   try { was = JSON.parse(fs.readFileSync(STAMP, 'utf8')); } catch { /* baselines predating the stamp */ }
   // EACH ARM STANDS ALONE. These were an if/else-if chain, and inserting the checkout note between the
-  // two halves left `else if (was.hash …)` reachable with `was === null` — so a tree with NO stamp
+  // two halves left `else if (was.hash …)` reachable with `was === null`, so a tree with NO stamp
   // crashed on a null dereference AFTER the whole sweep had run, trading a computed 106-scene verdict
   // for a stack trace. That is the first-run path for every fresh clone and every new worktree, because
   // verify/snap/ is gitignored. Independent conditions, never a chain: the notes are not alternatives to
@@ -193,7 +193,7 @@ if (!SAVE) {
   // reasons that have nothing to do with the diff under test, and a "changed" line gives the reader no
   // way to tell which. Four separate agents spent real time on ONE scene (react-demo) that renders
   // consistently in every worktree and consistently differently on main, with code, scene, theme and
-  // font state proved byte-identical — three of them reported it as "pre-existing", which is true and
+  // font state proved byte-identical. Three of them reported it as "pre-existing", which is true and
   // was not checkable from the output. Saying where the baseline came from turns an ambiguous signal
   // into an explained one, which is the whole job of a gate's message.
   if (was && was.root && was.root !== repoRoot)
@@ -209,16 +209,16 @@ if (SAVE) {
   const fsNow = fontState();
   fs.writeFileSync(STAMP, JSON.stringify({ ...fsNow, root: repoRoot }, null, 2) + '\n');
   console.log(`✓ ${saved.length} baselines saved → verify/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s))`);
-  if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic — NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
+  if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic, NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }
   process.exit(quarantined.length || errored.length ? 1 : 0);
 }
 console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ quarantined: ${quarantined.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}`);
 // NAME them, always. A scene with no baseline has no regression net at all, which is worse than one that
-// merely changed — and the old line both withheld the names and suppressed itself whenever anything else
+// merely changed, and the old line both withheld the names and suppressed itself whenever anything else
 // was off, so the very runs where you most need to know were the runs that said nothing.
 if (nobaseline.length) {
-  console.log(`\n○ NO BASELINE (determinism-checked, but nothing to diff against — run \`make snap-all SAVE=1\`):`);
+  console.log(`\n○ NO BASELINE (determinism-checked, but nothing to diff against, run \`make snap-all SAVE=1\`):`);
   for (const n of nobaseline) console.log(`  ${n}`);
 }
 if (quarantined.length) { console.log(`\n✗ NON-DETERMINISTIC (quarantined):`); for (const q of quarantined) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
@@ -227,7 +227,7 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 // A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. `verify/snap/` is gitignored (.gitignore:32),
 // so a fresh clone has no baselines at all: every scene lands in `nobaseline`, the loop above prints
 // them, and the exit below used to return 0. The first thing a new contributor runs would therefore
-// pass while checking not one pixel — and this is the engine's flagship determinism gate, so a green
+// pass while checking not one pixel, and this is the engine's flagship determinism gate, so a green
 // tick from it reads as the strongest guarantee the repo makes.
 //
 // A FEW no-baseline scenes stay soft on purpose: that is just a newly authored film waiting for

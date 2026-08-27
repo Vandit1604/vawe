@@ -1,8 +1,8 @@
-// scripts/author/animatic.mjs — cut the picture to the sound, before building the film.
+// scripts/author/animatic.mjs: cut the picture to the sound, before building the film.
 //
 // THE FIRST VERSION OF THIS FILE WAS NOT AN ANIMATIC. It laid grey boxes on the storyboard's own
 // declared timings and shipped `audio: {silent: true}`, and the trade's own definition is blunt about
-// that: "a silent animatic is just a slideshow — without scratch voiceover and temp music you cannot
+// that: "a silent animatic is just a slideshow, without scratch voiceover and temp music you cannot
 // evaluate pacing accurately." It tested the plan against itself, which is the one thing
 // `storyboard-check` already does, so nobody ever ran it and it was deleted.
 //
@@ -34,7 +34,7 @@ if (!SB || !fs.existsSync(SB)) {
 }
 
 const sb = parseStoryboard(fs.readFileSync(SB, 'utf8'));
-if (!sb.beats.length) { console.error(`✗ no beats in ${SB} — beats are "## Beat N: Title (0s-6s)" headings.`); process.exit(1); }
+if (!sb.beats.length) { console.error(`✗ no beats in ${SB}, beats are "## Beat N: Title (0s-6s)" headings.`); process.exit(1); }
 
 const name = path.basename(SB).replace(/\.(md|markdown)$/i, '').replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
 const OUT = flag('--out') || `formats/scene/${name}.animatic.json`;
@@ -127,7 +127,7 @@ const fmt = /(\d+)\s*[x×]\s*(\d+)/.exec(sb.format || '');
 const W = fmt ? +fmt[1] : 1920, H = fmt ? +fmt[2] : 1080;
 const INK = '#111111', GREY = '#c9c9c9', SLOT = '#e6e6e6', MUTED = '#8a8a8a';
 const PAD = Math.round(W * 0.055);
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/[—–]/g, ',');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/[, –]/g, ',');
 const layers = [];
 
 for (const r of timed) {
@@ -150,7 +150,7 @@ for (const r of timed) {
     cursorY += Math.round(size * 1.18 * lines) + (big ? 14 : 6);
   });
 
-  // the picture slot — drawn even when the beat names nothing to draw, because an empty labelled box
+  // the picture slot: drawn even when the beat names nothing to draw, because an empty labelled box
   // IS the dual-channel gap and it should be impossible to skim past
   const hasPic = !!(b.picture || b.blueprint);
   const capt = b.picture || (b.blueprint ? `blueprint: ${b.blueprint}` : 'NO PICTURE NAMED, this beat is type only');
@@ -202,15 +202,15 @@ const scene = {
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(scene, null, 2) + '\n');
 
-// ── the report — the number the storyboard cannot produce about itself ──────────────────────────────
+// ── the report: the number the storyboard cannot produce about itself ──────────────────────────────
 const plannedTotal = timed.reduce((s, r) => s + (r.planned ?? 0), 0);
 console.log(`\n  ANIMATIC · ${path.basename(SB)} → ${OUT}`);
 console.log(`  ${timed.filter((r) => r.voiced).length}/${timed.length} beats narrated (${allWords.length} words of scratch read); the rest timed by READING speed at ${READ_WPM}wpm\n`);
 console.log('  beat                        clock   planned    needs    verdict');
 for (const r of timed) {
   const over = r.planned != null ? r.spoken - r.planned : null;
-  const v = over == null ? '—' : over > 0.35 ? `OVER by ${over.toFixed(1)}s` : over < -0.6 ? `${(-over).toFixed(1)}s spare` : 'fits';
-  console.log(`  ${(r.beat.i + 1 + '. ' + r.beat.name).slice(0, 26).padEnd(28)}${(r.voiced ? 'voice' : 'read').padEnd(7)}${(r.planned != null ? r.planned.toFixed(1) + 's' : '—').padStart(7)}   ${(r.spoken.toFixed(1) + 's').padStart(7)}    ${v}`);
+  const v = over == null ? '-' : over > 0.35 ? `OVER by ${over.toFixed(1)}s` : over < -0.6 ? `${(-over).toFixed(1)}s spare` : 'fits';
+  console.log(`  ${(r.beat.i + 1 + '. ' + r.beat.name).slice(0, 26).padEnd(28)}${(r.voiced ? 'voice' : 'read').padEnd(7)}${(r.planned != null ? r.planned.toFixed(1) + 's' : '-').padStart(7)}   ${(r.spoken.toFixed(1) + 's').padStart(7)}    ${v}`);
 }
 if (plannedTotal > 0) {
   const d = total - plannedTotal;

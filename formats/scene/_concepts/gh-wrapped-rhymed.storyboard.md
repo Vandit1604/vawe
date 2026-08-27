@@ -3,7 +3,7 @@ message: <the one sentence this film has to land>
 audience: <who this is for>
 arc: <the shape, in one line>
 thread: match cut
-object: none — the thread is match cut
+object: none, the thread is match cut
 duration: 12s
 format: 1080x1920
 concept: rhymed · warm (dark)
@@ -30,7 +30,7 @@ concept: rhymed · warm (dark)
 ## Beat 2: <name this beat> (1.71s-3.42s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -50,7 +50,7 @@ concept: rhymed · warm (dark)
 ## Beat 4: <name this beat> (5.13s-6.84s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
@@ -70,7 +70,7 @@ concept: rhymed · warm (dark)
 ## Beat 6: <name this beat> (8.55s-10.26s)
 - type: build
 - object: <what carries the match cut at this beat>
-- picture: <what this beat SHOWS — not what it says>
+- picture: <what this beat SHOWS, not what it says>
 - mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>

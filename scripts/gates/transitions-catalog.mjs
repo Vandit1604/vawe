@@ -1,7 +1,7 @@
-// scripts/gates/transitions-catalog.mjs — print THE TRANSITION DATABASE (core/transitions.js).
+// scripts/gates/transitions-catalog.mjs: print THE TRANSITION DATABASE (core/transitions.js).
 //   make transitions            → the full catalog, grouped by mechanism, basics marked ★
 //   make transitions BASIC=1    → just the basics (the fundamentals every tool has)
-// The catalog is DERIVED from the four source registries, so this is always in sync — its only failure
+// The catalog is DERIVED from the four source registries, so this is always in sync, its only failure
 // mode is a name the family classifier didn't recognise (family "other"), which it reports at the end.
 import { TRANSITIONS, MECHANISMS, basics, unclassified } from '../../core/transitions.js';
 
@@ -19,7 +19,7 @@ console.log(`\n  TRANSITION DATABASE · ${TRANSITIONS.length} transitions · ${b
 for (const m of MECHANISMS) {
   const list = rows.filter((t) => t.mechanism === m);
   if (!list.length) continue;
-  console.log(`  ${m.toUpperCase().padEnd(6)} — ${MECH_DESC[m]}`);
+  console.log(`  ${m.toUpperCase().padEnd(6)}: ${MECH_DESC[m]}`);
   // group by family within the mechanism
   const fams = [...new Set(list.map((t) => t.family))].sort();
   for (const f of fams) {
@@ -34,6 +34,6 @@ console.log('  Decision theory (what to pick, and why): docs/CRAFT/TRANSITIONS.m
 
 const orphan = unclassified();
 if (orphan.length) {
-  console.log(`  ~ ${orphan.length} unclassified (family "other") — extend FAMILY_OF in core/transitions.js:`);
+  console.log(`  ~ ${orphan.length} unclassified (family "other"), extend FAMILY_OF in core/transitions.js:`);
   console.log(`    ${orphan.map((t) => `${t.mechanism}:${t.name}`).join(', ')}\n`);
 }

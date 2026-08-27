@@ -1,8 +1,8 @@
-// capture-scene.mjs — capture an ANIMATED site section as PARTS, so the engine can re-stage the
+// capture-scene.mjs: capture an ANIMATED site section as PARTS, so the engine can re-stage the
 // animation with its own pure primitives. Sites animate scenes (a chat card floating over a live
 // board, cards popping in, a message typing); one frozen capture can't express that. This tool
 // captures the section plus each named part (computed styles inlined, same proven approach as
-// capture-component.mjs) and records every part's rect RELATIVE to the section — then prints
+// capture-component.mjs) and records every part's rect RELATIVE to the section, then prints
 // ready-to-paste scene layer stubs. The author gives each part a window/cut/anim; typing is
 // re-created by overlaying our own `type`-preset text layer on the captured input box.
 //
@@ -32,7 +32,7 @@ const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] 
 const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 2 });
 try { await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }); }
-catch (e) { console.error(`  · networkidle timed out (${e.message}) — retrying with domcontentloaded`); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 }); }
+catch (e) { console.error(`  · networkidle timed out (${e.message}), retrying with domcontentloaded`); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 }); }
 await page.evaluate(async (sel) => {
   await document.fonts.ready;
   for (let y = 0; y < document.body.scrollHeight; y += 700) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 100)); }
@@ -121,7 +121,7 @@ const out = path.join(dir, label + '.json');
 const capture = { url, sectionSel, w: result.w, h: result.h, parts: result.parts };
 const { localized, failures } = await localizeCapture(capture, { ...mediaTargetFor(out, ROOT), referer: url });
 if (failures.length && !argv.includes('--allow-remote')) {
-  console.error(`✗ ${failures.length} asset(s) could not be localized — the capture was NOT written.`);
+  console.error(`✗ ${failures.length} asset(s) could not be localized, the capture was NOT written.`);
   for (const f of failures) console.error(`    ${f.reason}: ${f.url}`);
   console.error('  Fix the source, or pass --allow-remote to write it anyway (the render will then depend on the network).');
   process.exit(1);
@@ -134,7 +134,7 @@ console.log(`✓ scene "${label}" → ${path.relative(ROOT, out)}  (${result.w}�
 // ready-to-paste scene stubs, scaled into 1920-wide frame space (author adds windows/cuts)
 const scale = Math.min(1680 / result.w, 900 / result.h);
 const ox = Math.round((1920 - result.w * scale) / 2), oy = Math.round((1080 - result.h * scale) / 2);
-console.log('  layer stubs (assign start/duration/anim per part — background parts first, fade/dim them; foreground gets elevation):');
+console.log('  layer stubs (assign start/duration/anim per part, background parts first, fade/dim them; foreground gets elevation):');
 for (const p of result.parts.sort((a, b) => a.z - b.z)) {
   console.log(`  { "type": "component", "src": "/assets/brands/${brand}/scenes/${label}.json", "part": "${p.name}", "x": ${ox + Math.round(p.x * scale)}, "y": ${oy + Math.round(p.y * scale)}, "w": ${Math.round(p.w * scale)}, "start": 0, "duration": 5 },  // ${p.sel}`);
 }

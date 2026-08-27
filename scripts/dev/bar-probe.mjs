@@ -1,4 +1,4 @@
-// scripts/dev/bar-probe.mjs — PROVE the continuous subject is actually drawn, by counting pixels.
+// scripts/dev/bar-probe.mjs: PROVE the continuous subject is actually drawn, by counting pixels.
 //
 // A film whose spine is one travelling mark can pass every static gate while that mark is invisible:
 // under the 3D rig painting is by DEPTH, not by layer order, so a tilted 1440px capture happily paints
@@ -35,7 +35,7 @@ let hit = 0;
     if (l.children) paint(l.children);
   }
 })(data.layers);
-if (hit !== IDS.length) { console.error(`✗ asked for ${IDS.length} id(s), painted ${hit} — check --ids`); process.exit(1); }
+if (hit !== IDS.length) { console.error(`✗ asked for ${IDS.length} id(s), painted ${hit}, check --ids`); process.exit(1); }
 
 const probeFile = path.join(path.dirname(file), `_probe-${path.basename(file)}`);
 fs.writeFileSync(probeFile, JSON.stringify(data, null, 1));

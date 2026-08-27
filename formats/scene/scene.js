@@ -29,10 +29,10 @@ import { normalizeIdle } from '/core/idle.js';
 import { resolveSpectacle } from '/core/spectacle.js';
 const $ = (id) => document.getElementById(id);
 
-// resolveRelativeStarts — a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
+// resolveRelativeStarts: a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
 // stagger chains are declared relationships (the temporal twin of `anchor`) instead of hand-added
 // arithmetic. Multi-pass (a target may itself be relative); an unresolvable/circular ref fails loud.
-// Pure in `data` — mutates the layers' start fields in place before any DOM exists.
+// Pure in `data`: mutates the layers' start fields in place before any DOM exists.
 function resolveRelativeStarts(data) {
   const byId = {};
   for (const L of data.layers || []) if (L.id) byId[L.id] = L;
@@ -54,21 +54,21 @@ function resolveRelativeStarts(data) {
 
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 
-// resolveBecomes — `becomes: "<layerId>"` on the OUTGOING layer declares that it CONTINUES as the
+// resolveBecomes, `becomes: "<layerId>"` on the OUTGOING layer declares that it CONTINUES as the
 // incoming one. A cut transforms one root and a seam blends two frozen stills; neither connects the
 // CONTENT, so the only thing that truly joins two scenes is a form that persists across the boundary.
 // The engine could not express that: you hand-aligned coordinates either side and hoped, and when they
 // drifted twenty pixels the match quietly stopped working with nothing to tell you.
 //
-// It resolves the incoming layer's OPENING pose from the outgoing layer's FINAL pose — centres matched,
-// size matched by scale — then hands control back so the incoming layer animates away into its own
+// It resolves the incoming layer's OPENING pose from the outgoing layer's FINAL pose, centres matched,
+// size matched by scale, then hands control back so the incoming layer animates away into its own
 // geometry. Centres rather than corners, because two boxes of different sizes sharing a top-left corner
 // visibly jump; sharing a centre does not.
 //
 // IT RUNS AFTER THE BUILD MEASUREMENT, not with the other data passes, and that is the whole point.
 // It used to read `num(L.w, 0)`, so a layer that states no w/h scored ZERO on both axes: the scale
 // ratio collapsed to 1 and the centre landed on the layer's top-left corner. A TEXT layer states no
-// w/h — its box is its glyphs — so the most natural match cut anyone would write, a word becoming a
+// w/h (its box is its glyphs) so the most natural match cut anyone would write, a word becoming a
 // card, was exactly the case that mis-scaled, and it did it in silence. Measured on a 780x187 word
 // handing over to a 600x400 card: the card opened 401px off centre at 1.00 instead of 1.30, half of it
 // off the left edge of the canvas, with every gate green. `baseSize` above already measures the real
@@ -119,7 +119,7 @@ function resolveBecomes(data, sizeOf) {
   }
 }
 
-// resolveAnchors — position a layer RELATIVE to another (`anchor` id → `at`/`dx`/`dy`), so annotations,
+// resolveAnchors: position a layer RELATIVE to another (`anchor` id → `at`/`dx`/`dy`), so annotations,
 // chips and badges point at what they annotate by declared relationship, not eyeballed coordinates.
 // Resolved purely from the JSON geometry before any DOM exists (targets need w; h falls back to size*1.2).
 function resolveAnchors(data) {
@@ -127,8 +127,8 @@ function resolveAnchors(data) {
   for (const L of data.layers || []) if (L.id) byId[L.id] = L;
   for (const L of data.layers || []) {
     // NO ANCHOR and a WRONG ANCHOR are different questions, and `if (!T) continue` answered both with
-    // silence. A typo'd id left the layer at whatever x/y it happened to carry — usually 0,0 or on top
-    // of something else — with no error, no warning and no gate, because `anchor` is a bare string in
+    // silence. A typo'd id left the layer at whatever x/y it happened to carry, usually 0,0 or on top
+    // of something else, with no error, no warning and no gate, because `anchor` is a bare string in
     // schema.json and nothing checked it resolves. Same shape as ANIM[name] || fade (core/registry.js).
     if (L.anchor && !byId[L.anchor]) {
       const near = Object.keys(byId).filter((id) => id.toLowerCase().includes(String(L.anchor).toLowerCase().slice(0, 4)));
@@ -158,7 +158,7 @@ boot((data, fps, theme, canvas) => {
   // keys is untouched. Kept here (top of the callback) so every parser sees the lowered form.
   data = lowerScene(data);
   // Snap the film's joints to the track's pulse, if the scene named a grid. AFTER lowering (a cut
-  // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time — the bg
+  // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time, the bg
   // windows bound to `cut@n` below therefore follow the snapped joint rather than the written one.
   // Once, at build, so renderFrame(n) stays pure. Throws when a grid was named and none arrived.
   // The note is KEPT, not only logged: console.log runs inside the headless page and the render
@@ -189,10 +189,10 @@ boot((data, fps, theme, canvas) => {
   // core/junctions.js, docs/MISTAKES.md #358.
   const BG_JUNCTIONS = junctionTable(marksOf(data));
   const atTime = (v, where) => (isJunctionRef(v) ? resolveJunction(v, BG_JUNCTIONS, where) : v);
-  // Windows that declare NO times at all bind to the film's own joints, in order — see
+  // Windows that declare NO times at all bind to the film's own joints, in order, see
   // bindWindowsToJunctions. Untouched when there is one window, or when any window names an edge.
   const bgWins = bindWindowsToJunctions(data.bg || [], BG_JUNCTIONS, Number(data.duration) || Infinity).map((b0, bi) => {
-    // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault) —
+    // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault),
     // so each brand has a custom bg it declares once, not a shared global preset name repeated
     // (the "customize, don't default" rule; fails loud if the theme never authored one).
     if (b0.use === 'theme' && !(theme && theme.bgDefault)) throw new Error(`bg use:"theme" but theme "${(theme && theme.name) || '?'}" defines no bgDefault`);
@@ -204,7 +204,7 @@ boot((data, fps, theme, canvas) => {
     if (b.html != null || b.src != null)
       return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, html: htmlSource(b, window.__html, 'bg window'), tone: b.tone, spec: null };
     const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined), b.opts);
-    // grain is OPT-IN (`"grain": true`) — strip the in-engine canvas grain unless a video asks for
+    // grain is OPT-IN (`"grain": true`), strip the in-engine canvas grain unless a video asks for
     // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.
     if (data.grain !== true) spec.fx = (spec.fx || []).filter((f) => f.type !== 'grain');
     const sd = b.seed != null ? b.seed : hashSeed(String((theme && theme.name) || 'x') + ':' + (b.preset || 'paper')) % 1000;
@@ -222,10 +222,10 @@ boot((data, fps, theme, canvas) => {
   // so a scene using only presets adds no DOM and renders byte-identical to before).
   const bgHtml = ALPHA ? null : createBgHtml($('root'), bgWins, window.__html);
   // ink-aware default text color: a layer with no explicit color gets dark ink over light
-  // bg windows and light text over dark ones (looked up at the layer's midpoint) — otherwise
+  // bg windows and light text over dark ones (looked up at the layer's midpoint), otherwise
   // a light-text theme (plinth) silently renders white-on-paper.
   const LIGHT_BGS = ['paper', 'paperShapes', 'paperDots', 'soft', 'dotmatrix'];
-  // bg windows whose field IS the accent colour — accent-tinted emphasis would clash (blue-on-blue)
+  // bg windows whose field IS the accent colour: accent-tinted emphasis would clash (blue-on-blue)
   const ACCENT_BGS = ['accent', 'accentPlain', 'brandglow'];
   const bgWinAt = (t) => {
     if (!bgWins.length) return null;
@@ -237,10 +237,10 @@ boot((data, fps, theme, canvas) => {
   // here on the assumption that a theme's `text` is its LIGHT one. That is true of a dark-first theme
   // and false of a white-first one: `themes/vawe.json` sets text AND ink to the same #0f1620, so a dark
   // bg window rendered dark-on-dark and the beat simply was not there. Nothing failed and nothing
-  // warned — the same invisible-output class as #213 and #369, and Phase-4 per-beat backdrops make it
+  // warned. The same invisible-output class as #213 and #369, and Phase-4 per-beat backdrops make it
   // the common case rather than the rare one. So ask the palette instead of trusting the token name:
   // use `--text` when it really is light, and otherwise the theme's own light ground.
-  // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light — the same
+  // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light, the same
   // one backgrounds.js and produce.js ask. A second hand-kept copy of that question is MISTAKES #159.
   const P = (theme && theme.palette) || {};
   const ON_DARK = isLightBg(P.text) ? 'var(--text)'
@@ -251,7 +251,7 @@ boot((data, fps, theme, canvas) => {
   // LIGHT_BGS is a hand-kept list of preset names, and a preset's lightness is not a property of the
   // name: `bgPreset` builds every base out of the THEME's own ramp, so `accent` is a pale tint in a
   // white-first brand and a saturated field in a dark one. Naming it light or dark once, globally, is
-  // right for whichever family the list was written against and silently wrong for the other — which
+  // right for whichever family the list was written against and silently wrong for the other, which
   // is how `three` rendered white-on-pale in the very first film that used a per-beat backdrop.
   // Returns null for a hand-authored backdrop with no `tone`: the engine cannot read lightness out of
   // somebody's CSS, and guessing there is how a frame ends up white-on-white.
@@ -271,7 +271,7 @@ boot((data, fps, theme, canvas) => {
     return light ? 'var(--ink)' : ON_DARK;
   };
 
-  // ---- shader stings: [{t, fx, dur, seed, color?, intensity?}] — boundary effects on a WebGL overlay ----
+  // ---- shader stings: [{t, fx, dur, seed, color?, intensity?}]. Boundary effects on a WebGL overlay ----
   // A sting tint is a COLOUR: a hex, an rgb(), a CSS name, or a theme token. This read `parseInt(hex,
   // 16)` and nothing else, so every other form became NaN and then [0,0,0] -- "var(--accent)" tinted
   // the sting BLACK with no error (docs/MISTAKES.md #476). core/filters.js `glowRGB` is the engine's
@@ -282,7 +282,7 @@ boot((data, fps, theme, canvas) => {
   // simply never happened, which is the quietest failure of the three junction kinds. #361.
   for (const s of data.stings || [])
     if (s && s.fx != null && !SHADER_FX.includes(s.fx))
-      throw new Error(`unknown sting fx "${s.fx}" at t=${s.t} — one of: ${SHADER_FX.join(', ')}`);
+      throw new Error(`unknown sting fx "${s.fx}" at t=${s.t}, one of: ${SHADER_FX.join(', ')}`);
   const stings = (data.stings || []).filter((s) => SHADER_FX.includes(s.fx))
     .map((s) => ({
       ...s,
@@ -292,14 +292,14 @@ boot((data, fps, theme, canvas) => {
     }));
   const fxo = createShaderOverlay($('root'), W, H);
 
-  // ---- scene cuts: [{t, style, dur?, dir?, timing?}] — the transition BETWEEN beats ----
+  // ---- scene cuts: [{t, style, dur?, dir?, timing?}], the transition BETWEEN beats ----
   // Filtered and sorted once at build, never per frame. An unknown style would silently become
-  // `fade` inside cutStyle, so it is rejected loudly here instead — that silent fallback is how
+  // `fade` inside cutStyle, so it is rejected loudly here instead, that silent fallback is how
   // a nonexistent name survived in the schema for months (MISTAKES #21).
   const sceneCuts = (data.cuts || [])
     .filter((c) => c && c.style && c.style !== 'none')
     .map((c) => {
-      if (!CUT_PRESENTATIONS[c.style]) throw new Error(`unknown cut style "${c.style}" at t=${c.t} — known: ${Object.keys(CUT_PRESENTATIONS).join(', ')}`);
+      if (!CUT_PRESENTATIONS[c.style]) throw new Error(`unknown cut style "${c.style}" at t=${c.t}, known: ${Object.keys(CUT_PRESENTATIONS).join(', ')}`);
       return c;
     })
     .sort((a, b) => +a.t - +b.t);
@@ -307,17 +307,17 @@ boot((data, fps, theme, canvas) => {
   // ---- SCENE UNITS (opt-in): beats that transition as WHOLE units (A slides out, B slides in) ----
   // The default `cuts` transform the whole `cam` at once (a camera bump). With `sceneUnits:true` each
   // BEAT (the interval between cut times) becomes its own wrapper, and a boundary moves the OUTGOING
-  // wrapper (exit) against the INCOMING wrapper (enter) as separate units — a real scene swap, not a
+  // wrapper (exit) against the INCOMING wrapper (enter) as separate units, a real scene swap, not a
   // pile of independent layer fades. Reuses the cutStyle PRESENTATIONS (slide/push/slideBlur/…), pure in
   // n. STRICTLY OPT-IN: without the flag, layers attach flat to `cam` exactly as before (snap-identical).
   const sceneUnits = data.sceneUnits === true && sceneCuts.length > 0;
   // Without sceneUnits a cut drives ONE root (drawCameraAndCut), so it can only transition through
-  // transform/filter — the visibility channels are pinned open or the frame empties. A style whose
+  // transform/filter. The visibility channels are pinned open or the frame empties. A style whose
   // whole transition IS a visibility channel would therefore be silently inert here, so refuse it.
   if (!sceneUnits) for (const cu of sceneCuts) {
     if (!SOLO_BLIND.has(cu.style)) continue;
     throw new Error(`cut style "${cu.style}" at t=${cu.t} transitions only by fading/masking, which a `
-      + `whole-frame cut cannot do (there is nothing underneath — the frame would go empty). Either set `
+      + `whole-frame cut cannot do (there is nothing underneath, the frame would go empty). Either set `
       + `"sceneUnits": true so the two beats cross-fade as units, or use a style that moves: `
       + `${Object.keys(CUT_PRESENTATIONS).filter((k) => !SOLO_BLIND.has(k)).join(', ')}.`);
   }
@@ -367,7 +367,7 @@ boot((data, fps, theme, canvas) => {
   resolveKeyedProps(data.layers);   // a key that states w/h → every key on that track states it (see core/sequence.js)
   const extra = []; // group children (any depth), animated on their root group's window
 
-  // applyGsapHooks — the GSAP-driven layer entrances/exits/paths, all built as PAUSED tweens on
+  // applyGsapHooks: the GSAP-driven layer entrances/exits/paths, all built as PAUSED tweens on
   // gsap.globalTimeline at build; seekAll(t) seeks them per frame (runs AFTER driveClips, so GSAP
   // owns the transform), and fromTo/immediateRender pin the start values so a frame is pure in t
   // regardless of render order. Split layers target the per-unit `units` (staggered); else the layer.
@@ -376,12 +376,12 @@ boot((data, fps, theme, canvas) => {
     // interpolate: sampled every 0.1s a layer tweening x from 0 to 1500 read 100, then -4 (off frame)
     // for most of a second, then alternated 1556 / 100 / 1592 / 100 / 1600 frame to frame. It rendered
     // flicker and said nothing, for as long as it has existed, because no scene in the library ever
-    // used it — a feature with the SILENT verdict the rules audit gives a rule nobody trips.
+    // used it. A feature with the SILENT verdict the rules audit gives a rule nobody trips.
     // Removed rather than repaired: `motion` does everything it claimed and more (a real keyframe
     // track, holds, reversals, per-key easing), deterministically. Rejected loudly at validate so an
     // author who reaches for it is redirected instead of shipping a flickering layer. (MISTAKES #208.)
     // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
-    // Guard on type: an svg layer's `morph` is a SHAPE morph it drives itself in svg.js frame() — without
+    // Guard on type: an svg layer's `morph` is a SHAPE morph it drives itself in svg.js frame(), without
     // this, buildMorph would rebuild the svg as text glyphs and render the target path `d` string as words
     // (docs/MISTAKES.md #140: the engine silently doing the wrong thing on an accepted input).
     if (L.morph && L.type !== 'svg' && window.gsap) buildMorph(el, L, window.gsap);
@@ -396,7 +396,7 @@ boot((data, fps, theme, canvas) => {
         // least supervised. docs/MISTAKES.md #360.
         GSAP_REGISTRY.pick(spec.name);
         const fn = window.gsap.effects[spec.name];
-        if (!fn) throw new Error(`fx "${spec.name}" is registered but GSAP has no such effect — the `
+        if (!fn) throw new Error(`fx "${spec.name}" is registered but GSAP has no such effect, the `
           + `effect registry and the GSAP registration have drifted apart.`);
         const { name, dur, ease, delay, stagger, ...rest } = spec;
         fn(targets, { delay: (L.start ?? 0) + (delay || 0), stagger: stagger ?? (targets === units ? 0.04 : 0),
@@ -437,9 +437,9 @@ boot((data, fps, theme, canvas) => {
           duration: p.dur ?? (L.duration ?? 2), ease: 'none', delay: (L.start ?? 0) + (p.delay || 0), immediateRender: true });
       });
     }
-    // SPLIT TEXT (SplitText) — LINE level ONLY (char/word stay with the engine's own `split`): masked line
+    // SPLIT TEXT (SplitText), LINE level ONLY (char/word stay with the engine's own `split`): masked line
     // reveals, each line clipped so it slides up from behind. Do NOT combine with `split` on the same layer.
-    // PARTS — dense per-CHILD choreography: stagger a named entrance across a layer's own child elements
+    // PARTS, dense per-CHILD choreography: stagger a named entrance across a layer's own child elements
     // (a bespoke SVG's bars/dots/paths, a group's cards), so a single figure animates piece by piece
     // instead of arriving as one block. This is the another engine density move (tl.fromTo on child elements
     // with a stagger), built on our seeked GSAP so it stays pure in n. Applies to any layer with children
@@ -447,7 +447,7 @@ boot((data, fps, theme, canvas) => {
     if (L.parts && window.gsap) {
       // The PARTS vocabulary used to be declared right here, inside the build path, which is why it was
       // the one registry with no name, no catalogue entry and no gate: core/parts.js now owns it.
-      // one spec or an ARRAY of specs — a figure can grow its bars, THEN draw its line, THEN pop its dots.
+      // one spec or an ARRAY of specs: a figure can grow its bars, THEN draw its line, THEN pop its dots.
       for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) {
         const sel = p.select || 'rect, circle, path, polyline, line, [data-part]';
         const targets = [...el.querySelectorAll(sel)];
@@ -490,14 +490,14 @@ boot((data, fps, theme, canvas) => {
     }
   }
 
-  // the layer registry (core/layers/*) — one primitive per file; scene.html just dispatches.
+  // the layer registry (core/layers/*): one primitive per file; scene.html just dispatches.
   // `frame` is boot's one frame object (core/safe.js frameOf), forwarded whole so createKit hands every
   // primitive the canvas instead of each one re-deriving or hardcoding it. Nothing recomputes it here.
   const renderer = createRenderer({ theme, W, H, frame: canvas?.frame, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
     splitText, icon, motionAt, kenBurns, interpolate, resolveEasing, clamp01, fitText, fitBox,
     extra, components: window.__components, clips: window.__clips, lottie: window.__lottie,
     html: window.__html });
-  // setLayerTiming — write the data-* attributes driveClips reads (start/duration/track/anim/enter/exit).
+  // setLayerTiming: write the data-* attributes driveClips reads (start/duration/track/anim/enter/exit).
   // Enter/exit default to the base snap durations scaled by the theme's durationScale; a split layer
   // enters instantly (units reveal themselves), and fxOut zeroes the fade so GSAP owns the exit alone.
   function setLayerTiming(el, L, idx) {
@@ -508,19 +508,19 @@ boot((data, fps, theme, canvas) => {
     // entrance IS the cut, so both branches below discard `anim` and (for split) `enterDur`. Accepting
     // them and dropping them silently is the failure this engine logs most: 33 layers across 10 films
     // carried an entrance the render never performed, and every gate stayed green (docs/MISTAKES.md).
-    // `anim: "none"` is exempt — it asks for exactly what happens.
+    // `anim: "none"` is exempt, it asks for exactly what happens.
     const owner = L.split ? `split: "${L.split}"` : `cut: "${L.cut}"`;
     const instead = L.split
       ? 'a split layer\'s rhythm is its `each`/`stagger`, not a layer entrance'
-      : 'a cut layer\'s entrance IS the cut — reach for `cutTiming`/`dist`, or drop the `cut`';
+      : 'a cut layer\'s entrance IS the cut, reach for `cutTiming`/`dist`, or drop the `cut`';
     if ((L.split || L.cut) && L.anim != null && L.anim !== 'none') {
-      throw new Error(`layer ${idx} (${L.type}) sets anim: "${L.anim}" with ${owner}. The engine cannot honour it: ${owner.split(':')[0]} owns this layer's entrance and the anim is discarded. Remove it — ${instead}.`);
+      throw new Error(`layer ${idx} (${L.type}) sets anim: "${L.anim}" with ${owner}. The engine cannot honour it: ${owner.split(':')[0]} owns this layer's entrance and the anim is discarded. Remove it, ${instead}.`);
     }
     if (L.split && L.enterDur != null) {
-      throw new Error(`layer ${idx} (${L.type}) sets enterDur: ${JSON.stringify(L.enterDur)} with ${owner}. The engine cannot honour it: a split layer's units reveal themselves, so its enter window is fixed at 0. Remove it — ${instead}.`);
+      throw new Error(`layer ${idx} (${L.type}) sets enterDur: ${JSON.stringify(L.enterDur)} with ${owner}. The engine cannot honour it: a split layer's units reveal themselves, so its enter window is fixed at 0. Remove it, ${instead}.`);
     }
     el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
-    if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake — exempt from shimmer checks
+    if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake, exempt from shimmer checks
     // Resolve this layer's idle AT BUILD, and throw the result away. The idle track resolves it again
     // for itself; what this call buys is WHEN a misspelled name is refused. Left to the track alone,
     // `idle: "breath"` would first throw on whichever frame that layer reaches its settled middle,
@@ -554,7 +554,7 @@ boot((data, fps, theme, canvas) => {
     }
   }
 
-  // buildLayer — turn one layer's JSON into its DOM element (position + class + timing), dispatch to the
+  // buildLayer: turn one layer's JSON into its DOM element (position + class + timing), dispatch to the
   // primitive builder, apply split/ransom/circle, decorate, and wire the GSAP hooks. Returns the tuple
   // the per-frame loop drives: { L, el, units }. Order is load-bearing (see the decorate note below).
   function buildLayer(L, idx) {
@@ -572,7 +572,7 @@ boot((data, fps, theme, canvas) => {
     // `critical: false` is documented as "force EXCLUDE from layout audit", and for the overlap/contrast
     // checks it was: those are scoped to [data-layer=critical], which this branch withholds. The
     // safe-zone and overflow walk reads every .hs-layer and consulted the flag nowhere, so an author who
-    // opted a layer out was told it was out and it was not — documented input accepted and ignored, the
+    // opted a layer out was told it was out and it was not, documented input accepted and ignored, the
     // failure this codebase logs most. A deliberately frame-wide FIELD (a terrain strip, a bleeding
     // figure) has no other way to say so: the walk's own escape is a full-bleed box ≥90% of BOTH
     // dimensions, which a wide short band can never satisfy. Marked here so the audit can honour it.
@@ -593,7 +593,7 @@ boot((data, fps, theme, canvas) => {
     // top-level layer with `filter:"crt"` got the filter half of the look and none of the texture
     // half, with no error. Group children (core/layers/util.js:187) always built-then-decorated,
     // which is why the same look was correct inside a group and broken outside one.
-    renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype — ONE definition, shared with group children
+    renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype. ONE definition, shared with group children
     applyGsapHooks(el, L, units);   // gsap / morph / fx / fxOut / motionPath / physics / splitText (all pure, seeked per frame)
     // The read record is snapshotted HERE, the instant this layer's build finishes, and never later:
     // everything after this point (the frozen scene-view copies at specs, the per-frame pipeline)
@@ -611,7 +611,7 @@ boot((data, fps, theme, canvas) => {
   // top-level layer is in `cam` (or in its beat wrapper, which is), and every group child was appended
   // by addGroupChild during the map above. Both writers of `data-start` have run, and nothing after
   // this line adds one. Collected once instead of re-queried inside driveClips, which walked the tree
-  // 780 times a render for a set that is fixed after build — and, worse, made what frame N renders a
+  // 780 times a render for a set that is fixed after build, and, worse, made what frame N renders a
   // function of what was in the DOM at that instant. core/clips.js carries the reasoning and the rule
   // for the day something legitimately needs to add a clip later.
   const CLIPS = collectClips(cam);
@@ -621,7 +621,7 @@ boot((data, fps, theme, canvas) => {
   // light and per-layer 3D could not be written at all: none of them is a property of one layer.
   // `scene` is passed as the 5th argument to every primitive's frame() (core/layers/index.js).
   //
-  // Boxes are PURE GEOMETRY — authored x/y/w/h, the motion track sampled at t, and one size measured
+  // Boxes are PURE GEOMETRY, authored x/y/w/h, the motion track sampled at t, and one size measured
   // at build for layers that state neither. Never a live DOM measurement, and that is the whole point:
   // a geometric box for EVERY layer is resolvable before ANY layer's frame() runs, so a layer can
   // never read a neighbour's box left behind by the previous frame. A measured box would be exactly
@@ -637,26 +637,26 @@ boot((data, fps, theme, canvas) => {
     const l = data.lighting;
     if (l == null) return null;
     if (typeof l !== 'object' || Array.isArray(l))
-      throw new Error(`lighting must be an object like { "x": 540, "y": 120 } — got ${JSON.stringify(l)}.`);
+      throw new Error(`lighting must be an object like { "x": 540, "y": 120 }, got ${JSON.stringify(l)}.`);
     const KEYS = ['x', 'y', 'intensity'];
     for (const k of Object.keys(l))
-      if (!KEYS.includes(k)) throw new Error(`lighting: unknown key "${k}" — known: ${KEYS.join(', ')}.`);
+      if (!KEYS.includes(k)) throw new Error(`lighting: unknown key "${k}", known: ${KEYS.join(', ')}.`);
     const fin = (v) => typeof v === 'number' && Number.isFinite(v);
     if (!fin(l.x) || !fin(l.y))
-      throw new Error(`lighting needs numeric x and y in canvas px (the point the light is at) — got `
+      throw new Error(`lighting needs numeric x and y in canvas px (the point the light is at), got `
         + `${JSON.stringify({ x: l.x, y: l.y })}. The canvas is ${W}x${H}; a light OUTSIDE it is fine and `
         + `is usually what you want.`);
     const intensity = l.intensity == null ? 1 : l.intensity;
     if (!fin(intensity) || intensity < 0)
-      throw new Error(`lighting.intensity must be a number 0 or more (it scales every shadow at once) — got ${JSON.stringify(l.intensity)}.`);
+      throw new Error(`lighting.intensity must be a number 0 or more (it scales every shadow at once), got ${JSON.stringify(l.intensity)}.`);
     return Object.freeze({ x: l.x, y: l.y, intensity });
   })();
   // One measurement pass, at build, and only for layers an author gave an id (the only ones boxOf can
-  // be asked about). Text states no w/h — its box is its content — so without this every text layer
+  // be asked about). Text states no w/h (its box is its content) so without this every text layer
   // would report a zero box, which is a wrong answer rather than no answer.
   const baseSize = new Map();
   // Keyed by the LAYER, not by its id, because `becomes` is declared on the outgoing layer and that
-  // layer need not carry an id at all — only the incoming one is named. boxOf still answers from
+  // layer need not carry an id at all, only the incoming one is named. boxOf still answers from
   // `baseSize`, which stays id-only, so nothing outside this pair sees the unnamed entries.
   const measured = new WeakMap();
   for (let i = 0; i < topCount; i++) {
@@ -674,7 +674,7 @@ boot((data, fps, theme, canvas) => {
   // A GROUP CHILD'S BOX, which used to be null on the argument that flex and grid put it where only
   // layout knows. That argument was right about the AUTHORED x/y and wrong about the conclusion: the
   // child is laid out, so the browser knows exactly where it landed, and the one thing that must not
-  // happen — measuring the DOM inside the frame loop — is avoidable because the offset INSIDE the
+  // happen (measuring the DOM inside the frame loop) is avoidable because the offset INSIDE the
   // group is static. Flow position does not depend on t. So it is measured ONCE here, as a delta from
   // the top-level ancestor's own rect, and composed with that ancestor's per-frame box below.
   //
@@ -697,7 +697,7 @@ boot((data, fps, theme, canvas) => {
     }
   }
   const boxes = new Map();
-  const topGeom = new Array(topCount);   // every top-level layer, id or not — a child needs its parent's
+  const topGeom = new Array(topCount);   // every top-level layer, id or not, a child needs its parent's
   // `reflowed` is the ONE field of a top-level layer's geometry that is not part of its box: it says the
   // build-time child offsets went stale, which is a fact about this frame's bookkeeping and not about
   // where the layer is. It used to live ON the geometry object, so every id'd layer paid a second object
@@ -707,7 +707,7 @@ boot((data, fps, theme, canvas) => {
   // to read a field the contract never had (the same drift TRACK_PROPS and IDS exist to refuse).
   const topReflowed = new Uint8Array(topCount);
   // A REUSED object for every top-level layer that has NO id. Nothing outside this function can ever see
-  // one — boxOf answers from `boxes`, which only id'd layers enter — so its only reader is the child loop
+  // one (boxOf answers from `boxes`, which only id'd layers enter) so its only reader is the child loop
   // below, on the same frame that wrote it. An id'd layer still gets a fresh frozen object, because that
   // one IS handed out and freezing a reused object would freeze it for every later frame.
   // core/tracks/index.js states the rule this serves: nothing allocates per frame if it does not have to.
@@ -729,7 +729,7 @@ boot((data, fps, theme, canvas) => {
   const pose = { dx: 0, dy: 0, scale: 1 };
   const poseM = new DOMMatrix();
   // clipPose(el, t, visible) -> `pose`, the enter/exit transform's effect on the layer's CENTRE and size.
-  // Translate moves the centre; scale multiplies about it and leaves it where it is — the same split
+  // Translate moves the centre; scale multiplies about it and leaves it where it is, the same split
   // boxOf already makes between w/h and `scale`, and for the same reason (CSS scales about the
   // element's own centre, so folding scale into w/h would move the top-left corner with nothing on
   // screen moving with it).
@@ -783,7 +783,7 @@ boot((data, fps, theme, canvas) => {
       const p = topGeom[k.root];
       // THE ONE CONDITION THAT STAYS NULL, narrowed from "every group child" to this: a resized group
       // has reflowed, so the build-time offset is a stale measurement. Scaling or moving the group is
-      // fine — those transform the child with it, which the arithmetic below does exactly.
+      // fine. Those transform the child with it, which the arithmetic below does exactly.
       if (topReflowed[k.root]) continue;
       const start = L.start ?? 0, end = start + (L.duration ?? 2);
       const visible = p.visible && t >= start && t < end;
@@ -816,7 +816,7 @@ boot((data, fps, theme, canvas) => {
   // WHO ELSE IS IN THE FRAME. `ids` in PAINT ORDER (the z driveClips writes, `track ?? array index`),
   // so "everything in front of me" is a slice and not a sort the caller has to reinvent. `specOf`
   // hands back the layer's own authored JSON plus that z. Read by core/fx/occlude.js, whose `by`
-  // accepts "above"/"below" — occlusion by stacking order rather than by a hand-listed set of ids,
+  // accepts "above"/"below", occlusion by stacking order rather than by a hand-listed set of ids,
   // which is the form the effect actually wants ("hide me under everything on a higher track").
   //
   // A DEEP-FROZEN COPY, not the live object. The engine mutates layer specs (resolveRelativeStarts
@@ -836,7 +836,7 @@ boot((data, fps, theme, canvas) => {
   // GROUP CHILDREN ARE IN HERE TOO, because boxOf answers for them. Their `z` is their GROUP's, which
   // is the truth: a group paints as one element and its children stack inside it, so a child is neither
   // above nor below anything outside the group. Ties are excluded by the stacking sentinels that read
-  // this (core/fx/occlude.js), which is exactly right — a sibling is not "in front".
+  // this (core/fx/occlude.js), which is exactly right, a sibling is not "in front".
   const specs = new Map();
   for (let i = 0; i < layers.length; i++) {
     const { L } = layers[i];
@@ -848,7 +848,7 @@ boot((data, fps, theme, canvas) => {
   const specOf = (id) => specs.get(id) || null;
 
   // THE LOCKED LOOK. A film's palette is decided once, in the theme, and an effect that wants to key
-  // to the accent had to be handed the hex by the author — who then owns a colour the theme already
+  // to the accent had to be handed the hex by the author, who then owns a colour the theme already
   // owns, in a second place, forever. `name` rides along so a modifier rejecting an unknown role can
   // say WHICH theme does not have it. Read by core/fx/shadow.js (`color` may be a palette role, and
   // its default resolves through this).
@@ -859,11 +859,11 @@ boot((data, fps, theme, canvas) => {
   const THEME = Object.freeze({ name: (theme && theme.name) || null,
     palette: Object.freeze({ ...((theme && theme.palette) || {}) }) });
 
-  // WHAT WE ARE COMPOSITING AGAINST, at t. Read by core/fx/shadow.js for `color: "auto"` — what colour
+  // WHAT WE ARE COMPOSITING AGAINST, at t. Read by core/fx/shadow.js for `color: "auto"`, what colour
   // a shadow should be is a fact about the SURFACE IT FALLS ON, not about the layer casting it.
   //
   // The CLASSIFICATION, not the preset name. LIGHT_BGS and ACCENT_BGS are decided here, once, and a
-  // view that handed out `preset` would make every consumer re-derive them from a copied list — the
+  // view that handed out `preset` would make every consumer re-derive them from a copied list, the
   // duplicate-vocabulary shape this repo keeps logging. `light` is three-valued on purpose: true /
   // false / null, where null is a hand-authored backdrop that declared no `tone`. The engine cannot
   // read lightness out of somebody's CSS, and a guess there is how a frame ends up white-on-white, so
@@ -882,24 +882,24 @@ boot((data, fps, theme, canvas) => {
   const caps = data.captions || [];
   const capMode = data.captionMode || 'sentence';
   // captionStyle: a word-timed treatment (core/captions.js) layered on the pop layout.
-  // Unknown names fail LOUD at boot, matching the theme doctrine — never a silent fallback look.
+  // Unknown names fail LOUD at boot, matching the theme doctrine, never a silent fallback look.
   const capStyle = data.captionStyle || null;
   if (capStyle && !CAP_STYLES[capStyle])
-    throw new Error(`unknown captionStyle "${capStyle}" — known: ${Object.keys(CAP_STYLES).join(', ')}`);
+    throw new Error(`unknown captionStyle "${capStyle}", known: ${Object.keys(CAP_STYLES).join(', ')}`);
   const camKf = data.camera || []; // cameraAt/motionAt now live in /core/sequence.js (pure, tested)
 
   // ---- THE CAMERA RIG: one model, two emissions ----
   //
   // The camera is a position in space (core/sequence.js). Where NOTHING in the frame leaves the canvas
   // plane, every point sits at z=0 and the perspective projection of the whole frame collapses exactly
-  // to the affine `scale(s) translate(x,y)` this engine has always written — same picture, to the pixel,
+  // to the affine `scale(s) translate(x,y)` this engine has always written, same picture, to the pixel,
   // proved in scripts/dev/spike-dolly.mjs. So that string is still what gets emitted, for the reason
   // #59 gives: a 3D transform promotes the subtree into a 3D rendering context and changes rasterisation
   // even when it changes no geometry, and a film with no depth in it should not pay that.
   //
-  // The moment anything DOES leave the plane — a tilted layer, a layer standing at a DEPTH
-  // (core/fx/plane.js), or a camera that pitches, yaws or rolls —
-  // the flat emission stops being equivalent, and it fails in the one way that matters: it moves an
+  // The moment anything DOES leave the plane. A tilted layer, a layer standing at a DEPTH
+  // (core/fx/plane.js), or a camera that pitches, yaws or rolls.
+  // The flat emission stops being equivalent, and it fails in the one way that matters: it moves an
   // already-finished projection, so a tilted card's vanishing point travels WITH the card and the
   // perspective never changes however far the camera goes. That is the tell in
   // docs/CRAFT/REF-pin-16818198602994243.md, and it is why this is a rig and not a transform.
@@ -907,14 +907,14 @@ boot((data, fps, theme, canvas) => {
   //   #root  perspective + perspective-origin   the EYE, fixed to the frame
   //   #cam   transform-style: preserve-3d       the RIG, standing inside the eye's space
   //   layer  rotate: <axis> <deg>               tilt, unchanged (core/fx/tilt.js)
-  //   layer  translate: 0 0 <z>px               depth — which plane the layer stands on (core/fx/plane.js)
+  //   layer  translate: 0 0 <z>px               depth, which plane the layer stands on (core/fx/plane.js)
   //
   // Every layer rotation now composes with the rig's own transform in ONE 3D space, projected once. A
   // pan becomes a TRUCK past the subject, `s` becomes a real dolly, and the vanishing point stays nailed
   // to the frame while the world crosses it.
   // KNOWN INTERACTION, named because it is invisible until it bites. `opacity < 1`, `filter` and a clip
   // are GROUPING properties: they flatten the element they sit on, 3D context and all. A cut writes
-  // exactly those, onto `#cam` (whole-frame) or onto a beat wrapper (`sceneUnits`) — which is where the
+  // exactly those, onto `#cam` (whole-frame) or onto a beat wrapper (`sceneUnits`), which is where the
   // rig lives. So for the few frames a fading or blurring cut is mid-flight, a tilted frame loses its
   // depth and pops back. It is steady-state-safe (the identity reset writes `none`/`1`), and no shipped
   // scene both tilts and cuts. Pair depth with a cut that only TRANSLATES, or accept the pop. The fix,
@@ -925,23 +925,23 @@ boot((data, fps, theme, canvas) => {
   const tiltFx = topFx('tilt');
   // A DEPTH turns the rig on for the same reason an angle does, and the reason is worth stating: without
   // the rig `translate: 0 0 z` lands in a flat parent, is projected by no lens, and moves the layer by
-  // exactly zero pixels — input accepted and then ignored. core/fx/plane.js refuses that case rather than
+  // exactly zero pixels, input accepted and then ignored. core/fx/plane.js refuses that case rather than
   // rendering it, so this is what keeps a depth from ever reaching it.
   const RIG = tiltFx.length > 0 || topFx('plane').length > 0
     || camKf.some((k) => Math.abs(k.rx || 0) > 1e-3 || Math.abs(k.ry || 0) > 1e-3 || Math.abs(k.roll || 0) > 1e-3);
   // THE LENS HAS ONE OWNER. `tilt.dist` and the camera's `p` are the same focal distance, and under the
-  // rig only one of them can be on the stage — so a scene that states both is refused with both values
+  // rig only one of them can be on the stage, so a scene that states both is refused with both values
   // named, rather than one of them silently losing. Without a camera `p`, a top-level tilt's `dist` IS
   // the lens, which is what keeps `dist` meaningful instead of quietly ignored.
   const tiltDists = [...new Set(tiltFx.map((f) => f.spec && f.spec.dist).filter((d) => d != null))];
   if (RIG && tiltDists.length > 1)
     throw new Error(`tilt: top-level layers asked for different camera distances (${tiltDists.join(', ')}px). `
-      + `One frame is one lens — give them the same \`dist\`, or set it once as the camera's \`p\`.`);
+      + `One frame is one lens, give them the same \`dist\`, or set it once as the camera's \`p\`.`);
   if (RIG && tiltDists.length && camKf.some((k) => k.p != null))
     throw new Error(`the camera declares a lens (\`p\`) and a tilted layer declares another (\`dist\`: ${tiltDists[0]}px). `
       + `Under a moving camera the lens belongs to the camera: drop \`dist\` and keep \`p\`.`);
   // A LENS RAMP WITH NOTHING OFF THE PICTURE PLANE IS A MOVE THAT CANNOT EXIST. `p` only reaches the
-  // frame under the rig, and the rig turns on for a tilt, a `plane` depth or a camera angle — never for
+  // frame under the rig, and the rig turns on for a tilt, a `plane` depth or a camera angle, never for
   // `p` alone. Turning it on here would not help: at z = 0 the magnification is `s` whatever the lens
   // says, so every layer would project identically and the author would watch a still frame with
   // nothing to tell them why. That is dollyZoom's one failure mode, and it is the engine's cardinal sin
@@ -949,7 +949,7 @@ boot((data, fps, theme, canvas) => {
   if (!RIG && new Set(camKf.map((k) => k.p).filter((v) => v != null)).size > 1)
     throw new Error(`the camera ramps its lens (\`p\`) but nothing in this frame stands off the picture `
       + `plane, so there is no depth for the lens to counter-scale and every layer would project at `
-      + `exactly \`s\`. Give the layers behind the subject a depth — "modifiers": [{ "plane": -800 }] — `
+      + `exactly \`s\`. Give the layers behind the subject a depth, "modifiers": [{ "plane": -800 }], `
       + `or drop the \`p\` keys.`);
   const rigLens = tiltDists.length ? tiltDists[0] : null;   // null → the camera's own `p` (keyable)
   // …and the vanishing point the same way. `tilt.origin` is where the eye sits IN THE FRAME, which under
@@ -961,7 +961,7 @@ boot((data, fps, theme, canvas) => {
     throw new Error(`tilt: top-level layers asked for different camera origins (${tiltOrigins.join(' and ')}). `
       + `One frame is one vanishing point.`);
   // The identity camera. Under the rig `scene.camera` is always a value, because a tilted scene with no
-  // camera keyframes still HAS a camera — one standing still at the default distance — and a modifier
+  // camera keyframes still HAS a camera (one standing still at the default distance) and a modifier
   // asking where it is should not have to tell "no keyframes" apart from "at the origin".
   const CAM_REST = { s: 1, x: 0, y: 0, rx: 0, ry: 0, roll: 0, persp: 1600 };
   if (RIG) {
@@ -973,24 +973,24 @@ boot((data, fps, theme, canvas) => {
   }
 
   // ---- SEAMS: two-scene shader transitions (core/seams.js) ----
-  // [{t, fx, dur, dir?, seed?, intensity?}] — the two beats either side of the boundary are
+  // [{t, fx, dur, dir?, seed?, intensity?}]. The two beats either side of the boundary are
   // rasterised ONCE (bakeSeams, at build) into u_from/u_to; renderFrame only SAMPLES them, so
   // the whole thing stays pure in n. The compositor is created ONLY when a scene declares seams,
   // so a scene without them adds no DOM and renders byte-identical to before.
   // timing shapes how progress 0→1 evolves across the seam (core/cuts.js TIMINGS, shared with
-  // scene cuts). Default `smooth` (ease-in-out) — a transition that MOVES content reads mechanical
+  // scene cuts). Default `smooth` (ease-in-out). A transition that MOVES content reads mechanical
   // at constant speed; ease-in-out gives it the accelerate-then-settle velocity (MOTION-CRAFT:
   // "never linear on visible moves"). `linear` is opt-in for a deliberately constant sweep. An
   // unknown timing is rejected loudly, not silently coerced (MISTAKES: silent substitution).
   const seams = (data.seams || [])
     .map((s) => {
       if (s.timing != null && !CUT_TIMINGS[s.timing])
-        throw new Error(`unknown seam timing "${s.timing}" at t=${s.t} — known: ${Object.keys(CUT_TIMINGS).join(', ')}`);
-      // `SEAM_FX.includes(s.fx) ? s.fx : 'fade'` until now — a silent swap at a JUNCTION, two lines
+        throw new Error(`unknown seam timing "${s.timing}" at t=${s.t}, known: ${Object.keys(CUT_TIMINGS).join(', ')}`);
+      // `SEAM_FX.includes(s.fx) ? s.fx : 'fade'` until now, a silent swap at a JUNCTION, two lines
       // below a guard that already throws on an unknown seam TIMING. One half of the same object was
       // checked and the other was not. docs/MISTAKES.md #361.
       if (s.fx != null && !SEAM_FX.includes(s.fx))
-        throw new Error(`unknown seam fx "${s.fx}" at t=${s.t} — one of: ${SEAM_FX.join(', ')}`);
+        throw new Error(`unknown seam fx "${s.fx}" at t=${s.t}, one of: ${SEAM_FX.join(', ')}`);
       return { t: +s.t, fx: s.fx ?? 'fade', dur: +(s.dur ?? 0.5),
         dir: s.dir, seed: s.seed ?? 0, intensity: s.intensity ?? 1, timing: s.timing || 'smooth',
         _from: null, _to: null, _fallback: false };
@@ -999,7 +999,7 @@ boot((data, fps, theme, canvas) => {
     .sort((a, b) => a.t - b.t);
   const seamCompositor = seams.length ? createSeamCompositor($('root'), W, H) : null;
 
-  // THE FILM'S JOINTS, as one sorted list of { t, kind } — the last piece of the scene view, built
+  // THE FILM'S JOINTS, as one sorted list of { t, kind }. The last piece of the scene view, built
   // here because it is the first point at which cuts, stings and seams all exist. Nothing exposed
   // where a film TURNS, so an effect could not fire on one: a punch on every cut had to be authored as
   // a hand-copied list of times that silently rots the moment a cut moves. Read by core/fx/punch.js.
@@ -1013,7 +1013,7 @@ boot((data, fps, theme, canvas) => {
     ...stings.map((s) => ({ t: +s.t, kind: 'sting' })),
   ].filter((m) => Number.isFinite(m.t)).sort((a, b) => a.t - b.t).map(Object.freeze));
 
-  // drawBg — the theme bg on canvas (last matching window wins) + a continuous slow breathe.
+  // drawBg: the theme bg on canvas (last matching window wins) + a continuous slow breathe.
   // A hand-authored (`html`) window paints in the DOM instead, so the canvas is hidden for its span.
   function drawBg(t) {
     if (!bgWins.length || ALPHA) return; // alpha export: no backdrop, so unpainted pixels stay transparent
@@ -1021,7 +1021,7 @@ boot((data, fps, theme, canvas) => {
     const authored = bgHtml ? bgHtml.frame(t, w, duration) : false;
     cv.style.display = authored ? 'none' : '';
     // CLEAR IT, do not just hide it. Returning early left the canvas holding the last frame it painted,
-    // so its pixels were a function of WHICH FRAME RENDERED BEFORE THIS ONE — the one thing renderFrame(n)
+    // so its pixels were a function of WHICH FRAME RENDERED BEFORE THIS ONE, the one thing renderFrame(n)
     // promises they are not. Invisible today, because the element is display:none while an authored
     // backdrop owns the frame; not invisible to the determinism net, which quarantined `refstudy` for it
     // and therefore left that scene with no regression baseline at all. And latent: the day anything
@@ -1031,7 +1031,7 @@ boot((data, fps, theme, canvas) => {
     cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
   }
 
-  // THE PER-FRAME PIPELINE is core/tracks/ — everything a single layer does at time t, including its
+  // THE PER-FRAME PIPELINE is core/tracks/: everything a single layer does at time t, including its
   // primitive's own frame(), as one file per job with a declared slot in a single ordered list. It
   // used to be this function: nine statements whose sequence WAS the composition order, so adding any
   // cross-cutting per-frame behaviour meant editing the right paragraph of a 940-line file and the
@@ -1045,8 +1045,8 @@ boot((data, fps, theme, canvas) => {
     const t = f / fps;
     drawBg(t);
     driveClips(CLIPS, t); // declarative clip timing + enter/exit + z-order
-    driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits) — no-op otherwise
-    // EVERY box for this frame, before ANY layer's frame() runs — see resolveBoxes.
+    driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits), no-op otherwise
+    // EVERY box for this frame, before ANY layer's frame() runs, see resolveBoxes.
     resolveBoxes(t);
     // The camera is sampled ONCE and both consumers read that value: the view a layer sees and the
     // transform drawCameraAndCut writes cannot disagree about where the camera is on this frame.
@@ -1058,7 +1058,7 @@ boot((data, fps, theme, canvas) => {
       ? { ...CAM_REST, ...keyed, rig: true, lens: rigLens ?? (keyed || CAM_REST).persp }
       : keyed;
     // THE CLOCK. A layer was handed t and nothing to measure it against, so "how far through the film
-    // am I" could only be answered by the author restating the runtime inside the layer — a second
+    // am I" could only be answered by the author restating the runtime inside the layer, a second
     // copy of a number the scene already owns, which stops being true the moment the film is re-cut.
     // `frame` is the INTEGER frame, and it is here rather than left to `t * fps` because that product
     // re-derives a number f/fps already lost precision from: an event on frame 60 tested as t >= 2.0
@@ -1075,7 +1075,7 @@ boot((data, fps, theme, canvas) => {
     seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
   }
 
-  // drawCaptions — show the caption whose window contains t. `captionStyle` layers a word-timed
+  // drawCaptions: show the caption whose window contains t. `captionStyle` layers a word-timed
   // treatment on the pop layout. DOM is rebuilt only when the LINE changes (the memo key is a pure
   // function of t), then every style prop is rewritten every frame (authoritative writes), so a cold
   // seek renders byte-identical to a warm one.
@@ -1173,7 +1173,7 @@ boot((data, fps, theme, canvas) => {
     } else { capEl.style.opacity = '0'; capEl.__key = null; }
   }
 
-  // drawCameraAndCut — the global camera transform, plus any SCENE CUT (a transition between beats
+  // drawCameraAndCut: the global camera transform, plus any SCENE CUT (a transition between beats
   // applied to the camera root so the whole beat moves as one). cutStyle ALWAYS returns the full
   // style set (identity in steady state) so a cut property can never stick into a later frame,
   // whatever order frames render in. See MISTAKES #29 (the top-level `cuts` array was once inert).
@@ -1193,13 +1193,13 @@ boot((data, fps, theme, canvas) => {
     }
     let cutS = null;
     // sceneUnits mode drives the transition on the per-beat WRAPPERS (driveSceneUnits), not the whole
-    // cam — so skip the cam-level cut entirely and let the wrappers swap the two beats as units.
+    // cam, so skip the cam-level cut entirely and let the wrappers swap the two beats as units.
     if (!sceneUnits) for (const cu of sceneCuts) {
       const half = (cu.dur ?? 0.36) / 2, ct = +cu.t;   // `dur` is the TOTAL window, split around t
       if (t <= ct - half || t >= ct + half) continue;
       const o = { timing: cu.timing, dir: cu.dir, dist: cu.dist, cx: cu.cx, cy: cu.cy };
-      // SOLO: one root carries the whole frame, so exit-then-enter must not touch opacity/clip/mask —
-      // sequencing those two halves on a single element blanks the frame at the midpoint. soloCutStyle
+      // SOLO: one root carries the whole frame, so exit-then-enter must not touch opacity/clip/mask.
+      // Sequencing those two halves on a single element blanks the frame at the midpoint. soloCutStyle
       // keeps the transform/filter character (a punch still punches) and holds visibility open.
       cutS = t < ct
         ? soloCutStyle(cu.style, { exit: (t - (ct - half)) / half, enter: 1 }, o)   // beat leaving
@@ -1212,7 +1212,7 @@ boot((data, fps, theme, canvas) => {
     cam.style.transform = [camTf, cutTf && cutTf !== 'none' ? cutTf : ''].filter(Boolean).join(' ') || 'none';
   }
 
-  // driveSceneUnits — move each BEAT WRAPPER as one unit across a cut boundary: the outgoing beat plays
+  // driveSceneUnits, move each BEAT WRAPPER as one unit across a cut boundary: the outgoing beat plays
   // the cut's EXIT, the incoming beat its ENTER, using the same cutStyle vocabulary. A real A-out/B-in
   // scene swap (vs the cam-level bump). Pure in t (cutStyle is closed-form). No-op unless sceneUnits.
   function driveSceneUnits(t) {
@@ -1220,7 +1220,7 @@ boot((data, fps, theme, canvas) => {
     // steady state: identity + fully visible (each beat's own layers handle their in-window visibility)
     for (const w of beatWrap) { w.style.transform = 'none'; w.style.opacity = '1'; w.style.filter = 'none'; w.style.clipPath = 'none'; }
     for (let k = 0; k < sceneCuts.length; k++) {
-      // window runs [ct, ct+dur] — the cut time is when the SWAP STARTS. The incoming beat's own layers
+      // window runs [ct, ct+dur]: the cut time is when the SWAP STARTS. The incoming beat's own layers
       // start at ct (its beat boundary), so they are present and slide IN as the outgoing slides OUT.
       const cu = sceneCuts[k], ct = +cu.t, dur = cu.dur ?? 0.4;
       if (t < ct || t >= ct + dur) continue;
@@ -1234,7 +1234,7 @@ boot((data, fps, theme, canvas) => {
     }
   }
 
-  // drawStings — the WebGL shader stings (single-scene boundary FX), each spanning its dur centered on t.
+  // drawStings: the WebGL shader stings (single-scene boundary FX), each spanning its dur centered on t.
   function drawStings(t) {
     let drew = false;
     for (const s of stings) {
@@ -1245,7 +1245,7 @@ boot((data, fps, theme, canvas) => {
     if (!drew) fxo.clear();
   }
 
-  // drawSeams — inside a seam window [t, t+dur] the compositor blends the two BAKED beats over the
+  // drawSeams: inside a seam window [t, t+dur] the compositor blends the two BAKED beats over the
   // whole stage (the live DOM/canvas underneath is covered by the opaque composite). Outside every
   // window the compositor is hidden, so normal frames render untouched.
   function drawSeams(t) {
@@ -1267,7 +1267,7 @@ boot((data, fps, theme, canvas) => {
 
   // bakeSeams(): rasterise the OUTGOING beat (frame just before the window) and the INCOMING beat
   // (frame just after it) for every seam, into static textures. Runs ONCE, awaited in boot before
-  // the render loop — impure (async raster) is fine here; the per-frame path only samples the
+  // the render loop, impure (async raster) is fine here; the per-frame path only samples the
   // result, so renderFrame stays pure in n. Mirrors the bake-then-pure pattern of core/canvas-fx.js.
   async function bakeSeams() {
     if (!seams.length) return;
@@ -1303,10 +1303,10 @@ boot((data, fps, theme, canvas) => {
     }
     seamCompositor && seamCompositor.clear();
   }
-  // buildSfx — derive SFX cues deterministically from the scene's own cuts/stings/seams (when
+  // buildSfx: derive SFX cues deterministically from the scene's own cuts/stings/seams (when
   // audio:{auto:true}), plus author-placed cues and the per-keystroke click train. Pure: cue times
   // are a function of the JSON, so the mix is reproducible; it does NOT touch renderFrame, so frames
-  // stay byte-identical (audio is a separate track). `auto` gates only the DERIVED cues — author
+  // stay byte-identical (audio is a separate track). `auto` gates only the DERIVED cues, author
   // cues and keystrokes always fire (MISTAKES #70, where `auto` used to gate everything).
   // An explicit `null` in CUT_CUE means SILENCE and must survive the fallback; only a MISSING key
   // (a presentation nobody has voiced yet) falls back, and lib-test now fails when one exists.
@@ -1317,11 +1317,11 @@ boot((data, fps, theme, canvas) => {
   function buildSfx() {
     let sfx = [];
     const audioCfg = data.audio || {};
-    // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) come from /core/audio-cues.js — one
+    // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) come from /core/audio-cues.js, one
     // shared source of truth, so the render mix and the baked catalogue cannot drift.
     const cues = [];
     if (audioCfg.auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: cutCue(L.cut) });
-    // TOP-LEVEL cuts / seams were once silently dropped from sound design — they are how a scene
+    // TOP-LEVEL cuts / seams were once silently dropped from sound design, they are how a scene
     // actually cuts between beats, so an auto-scored film came out with no transition sound at all.
     if (audioCfg.auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: cutCue(c.style) });
     if (audioCfg.auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
@@ -1331,7 +1331,7 @@ boot((data, fps, theme, canvas) => {
     cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));
     for (const c of cues) if (!sfx.length || c.t - sfx[sfx.length - 1].t > 0.09) sfx.push(c); // merge simultaneous
     // KEYSTROKES. core/layers/text.js reveals character i at exactly start + (i+1)/cps, so the click
-    // for that character is that same expression — the sound is derived from the formula that draws
+    // for that character is that same expression. The sound is derived from the formula that draws
     // the picture, the only way a typing sound stays in sync when the copy or the speed changes.
     const keyCues = [];
     for (const { L } of layers) {
@@ -1350,7 +1350,7 @@ boot((data, fps, theme, canvas) => {
           gain: +(((L.keyGain ?? 0.13)) * (full[i] === ' ' ? 1.25 : vary)).toFixed(3) });
       }
     }
-    // A key train is legitimately dense, so it gets its own tighter floor — the 0.09 structural
+    // A key train is legitimately dense, so it gets its own tighter floor, the 0.09 structural
     // merge above, applied to keystrokes, would silently drop every other letter at real typing speed.
     if (keyCues.length) {
       keyCues.sort((a, b) => a.t - b.t);

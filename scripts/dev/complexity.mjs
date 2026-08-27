@@ -1,4 +1,4 @@
-// scripts/dev/complexity.mjs — where is this codebase hard to change?
+// scripts/dev/complexity.mjs, where is this codebase hard to change?
 //
 //   node scripts/dev/complexity.mjs                 # the worst 30 functions
 //   node scripts/dev/complexity.mjs --all           # every function over the threshold

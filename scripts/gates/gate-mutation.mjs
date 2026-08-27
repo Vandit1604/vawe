@@ -1,10 +1,10 @@
-// gate-mutation.mjs — who checks the checkers?
+// gate-mutation.mjs, who checks the checkers?
 //
 //   node scripts/gates/gate-mutation.mjs        run every case
 //   make gate-test
 //
 // A gate that cannot fail is worse than no gate: it reports green forever and everyone believes it.
-// That is not hypothetical here — the image legibility floor guarded on `b.height > 1`, so the ONE
+// That is not hypothetical here: the image legibility floor guarded on `b.height > 1`, so the ONE
 // case it existed to catch (an image occupying no space) was the one case it skipped (MISTAKES #26).
 // Nothing noticed, because a gate being quiet looks exactly like a gate being satisfied.
 //
@@ -68,8 +68,8 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
   '- type: payoff_withheld',
   ...(beatObject ? ['- object: the pill flattens into a row, then unfolds into a note card'] : []),
   // two named changes by default, so the long second beat is a build and not a hold
-  // endsOnClaim: a final becomes that names no change at all, while `onscreen:` still puts copy up —
-  // the closing sentence is the whole last act. Worded clear of animation vocabulary so this knob
+  // endsOnClaim: a final becomes that names no change at all, while `onscreen:` still puts copy up.
+  // The closing sentence is the whole last act. Worded clear of animation vocabulary so this knob
   // trips ends-on-a-claim and nothing else.
   ...(becomes ? [endsOnClaim ? '- becomes: the note card, holding still under the headline'
     : held ? '- becomes: the capsule becomes a note card'
@@ -81,7 +81,7 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
 ].join('\n');
 
 /** A `.intent.json` sidecar, the shape `make intent` writes. plan-vs-render reads exactly two fields off
- *  each beat — the `span` and the `becomes:` — so those are what the cases vary; the rest is carried so a
+ *  each beat (the `span` and the `becomes:`) so those are what the cases vary; the rest is carried so a
  *  fixture stays a plausible sidecar rather than a stub shaped to one gate. */
 const B = (name, span, becomes) => ({
   at: span ? +((span[0] + span[1]) / 2).toFixed(2) : 0, ...(span ? { span } : {}), name,
@@ -100,7 +100,7 @@ const MOVER = (o = {}) => ({ type: 'html', w: 800, x: 200, y: 700, start: 0, dur
 // gate was deleted: it measured a single-axis layer by squaring it, so it passed the exact defect it
 // existed to catch. A pinned gate is only worth pinning if what it measures is true. See docs/TASTE.md.
 
-/** One html layer holding two strings at the SAME point with their opacities on the same variable — the
+/** One html layer holding two strings at the SAME point with their opacities on the same variable, the
  *  exact shape dissolve-check reads. `clip` wraps each string in a clip-path wrapper, which is the WIPE
  *  the gate exempts on purpose; nothing else about the pair changes, so the mirror differs from the
  *  must-fail case in the one thing the exemption turns on and cannot pass for some other reason. */
@@ -155,7 +155,7 @@ const CASES = [
   //
   // An inline <svg> inside a layer that is BOTH on the camera's 3D rig (a `s` zoom is a translateZ under
   // perspective) and tilted in 3D itself. getScreenCTM() is not composed through either, so the ink rect
-  // it yields lands somewhere else on the frame entirely — here the tick really draws at (412,895) and
+  // it yields lands somewhere else on the frame entirely, here the tick really draws at (412,895) and
   // measured as (152,343). `buried` then sampled 81 points of empty canvas, found the white rect that is
   // genuinely painted there, and called a fully visible graphic 100% buried on a frame holding nothing
   // else. The white rect is what makes this case bite: remove the clamp in inkRect and it fires again.
@@ -209,7 +209,7 @@ const CASES = [
     scene: scene([{ type: 'text', text: '1.2M', x: 200, y: 400, w: 600, size: 120, weight: 700, start: 0, duration: 2 },
                   { type: 'text', text: 'cups poured', x: 200, y: 508, w: 600, size: 20, font: 'mono', start: 0, duration: 2 }]) },
   { gate: 'audit', name: 'overlap · text hidden behind an opaque card is NOT a collision', expect: 'pass',
-    // the card is LIGHT so the text beneath it still clears contrast against it — otherwise this
+    // the card is LIGHT so the text beneath it still clears contrast against it, otherwise this
     // fixture fails on contrast and tells you nothing about occlusion (which is what it did first).
     scene: scene([{ type: 'text', text: 'behind the card', x: 300, y: 430, w: 600, size: 40, start: 0, duration: 2 },
                   { type: 'rect', x: 260, y: 380, w: 700, h: 200, bg: '#f4f7fa', radius: 12, start: 0, duration: 2 },
@@ -323,7 +323,7 @@ const CASES = [
   // ---- beat-check · BEAT WRAPPING TRUNCATES A LAYER. The same wrapping the two cases above model has a
   // second consequence nobody was told about: a layer authored ACROSS a cut is silently shortened to its
   // own beat, so the JSON's `duration` is not the rendered one. The finding used to sit in direction-floor
-  // and went invisible the day that gate became opt-in, which is why it is here — it is a fact about the
+  // and went invisible the day that gate became opt-in, which is why it is here, it is a fact about the
   // render, not a verdict on the film. All three directions pinned, because a WARN-tier false positive is
   // invisible to an exit code (#25, #159) and this one would fire on almost every cut film if it read
   // "wrapped" instead of "actually truncated".
@@ -350,7 +350,7 @@ const CASES = [
       { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
 
   // ---- beat-check · THE SAME WRAPPING, THE OTHER WAY. `setLayerTiming` REPLACES the authored duration,
-  // so a layer written to leave early is HELD to the end of its beat instead — the mirror of truncation,
+  // so a layer written to leave early is HELD to the end of its beat instead, the mirror of truncation,
   // and the half that had no finding at all: the DOM carried only the rewritten number, so no gate and no
   // picture could see the author's. Pinned in both directions because the threshold is the whole design:
   // carrying a layer through its beat's cut window is the wrapper's documented job and must stay quiet.
@@ -377,7 +377,7 @@ const CASES = [
   { gate: 'layerprops', name: 'a prop no layer type reads is still caught', expect: 'fail',
     match: /nothing reads it/, scene: scene([TXT({ notARealProp: 7 })]) },
   // THE GUARD, both directions. `preset` is the kinetic reveal's, and the units track only runs on a
-  // layer that asked to be split — so the same prop is live on one layer and dead on the next, which is
+  // layer that asked to be split, so the same prop is live on one layer and dead on the next, which is
   // the half the old source scan could not express at all and the half ~66 authored props sit on.
   { gate: 'layerprops', name: 'a split preset without the split is inert', expect: 'fail',
     match: /`preset` is read only when the layer sets/, scene: scene([TXT({ preset: 'rise' })]) },
@@ -412,7 +412,7 @@ const CASES = [
   // panWith copies another layer's motion on the same wall clock. A dangling reference used to be a
   // silent no-op, which is the shape of bug where a layer just quietly stops panning with the page.
   // `becomes` is a claim about a boundary. If the two layers do not meet there the handover happens over
-  // a gap (empty frame) or an overlap (both on screen), and the match silently stops reading — the exact
+  // a gap (empty frame) or an overlap (both on screen), and the match silently stops reading, the exact
   // failure the feature exists to remove, so it is checked rather than trusted.
   { gate: 'validate', name: 'becomes across a gap instead of a boundary', expect: 'fail',
     match: /handover|becomes/,
@@ -430,7 +430,7 @@ const CASES = [
     scene: scene([TXT({ text: 'Rides along', start: 0.3, duration: 2.4, panWith: 'nope' })],
       { duration: 3 }) },
   // A layer that rides a pan and then states its own position continues from where the PAN left it, not
-  // from its own origin — and the pan's accumulated value appears nowhere in the JSON, so the number is
+  // from its own origin, and the pan's accumulated value appears nowhere in the JSON, so the number is
   // unguessable by eye. Getting it wrong reverses the travel for one or two frames. Both cases below are
   // the same film with one number changed, which is the whole point: nothing else distinguishes them.
   { gate: 'validate', name: 'a peel key that fights the pan it rode in on', expect: 'fail',
@@ -501,7 +501,7 @@ const CASES = [
   // and was invisible to it (MISTAKES #163). Boundaries are now inferred from the layer windows: a
   // moment where ≥2 content layers leave and ≥2 unrelated ones arrive. All three directions pinned,
   // because this half's whole risk is crying wolf, and a WARN-tier false positive is invisible to an
-  // exit code (#25, #159) — hence `notMatch` on the mirrors.
+  // exit code (#25, #159), hence `notMatch` on the mirrors.
   { gate: 'directionfloor', name: 'no-continuous-object · cross-faded islands with no declared cut', expect: 'fail',
     match: /no-continuous-object-inferred/, outputOnly: true,   // WARN tier: assert it SPOKE
     scene: scene([TXT({ text: 'First island', y: 300, start: 0.1, duration: 1.6, split: 'word', preset: 'up' }),
@@ -526,7 +526,7 @@ const CASES = [
       { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
   // The second mirror, pinning the clause that keeps the inference narrow: a junction the STANDING SET
   // outnumbers is a busy overlap, not an island break. Three elements hold the frame while one pair of
-  // lines swaps for another — a persistent set, so no boundary is inferred and nothing is said.
+  // lines swaps for another. A persistent set, so no boundary is inferred and nothing is said.
   { gate: 'directionfloor', name: 'a standing set outnumbering the swap is not an island junction', expect: 'pass',
     notMatch: /no-continuous-object/,
     scene: scene([{ type: 'rect', x: 140, y: 700, w: 300, h: 120, bg: '#c2f23b', radius: 20, start: 0, duration: 6 },
@@ -599,11 +599,11 @@ const CASES = [
   { gate: 'storyboard', name: 'becomes · a short film whose beats name no transformation', expect: 'fail', ext: 'md',
     match: /is missing `becomes:`/, scene: SB({ becomes: false }) },
   { gate: 'storyboard', name: 'becomes-is-a-preset · the change written as the animation', expect: 'fail', ext: 'md',
-    match: /becomes-is-a-preset —/, outputOnly: true, scene: SB({ presetBecomes: true }) },
+    match: /becomes-is-a-preset, /, outputOnly: true, scene: SB({ presetBecomes: true }) },
   { gate: 'storyboard', name: 'held-state-too-long · a 3s+ beat carrying one change', expect: 'fail', ext: 'md',
-    match: /held-state-too-long —/, outputOnly: true, scene: SB({ held: true }) },
+    match: /held-state-too-long, /, outputOnly: true, scene: SB({ held: true }) },
   { gate: 'storyboard', name: 'stub-why · a why that restates the beat category', expect: 'fail', ext: 'md',
-    match: /stub-why —/, outputOnly: true, scene: SB({ stubWhy: true }) },
+    match: /stub-why, /, outputOnly: true, scene: SB({ stubWhy: true }) },
 
   // ---- storyboard-check · ends-on-a-claim. The surviving defect behind all three recreations: the film
   // closes on a typed sentence naming a capability, and the seconds that would demonstrate it are not
@@ -623,7 +623,7 @@ const CASES = [
   { gate: 'storyboard', name: 'timeline-hole · the beats run out before the film does', expect: 'fail', ext: 'md',
     match: /of the film is unplanned/, scene: SB({ t2: '1.6s-3.2s' }) },
   { gate: 'storyboard', name: 'partial-timeline · only some beats declare a range', expect: 'fail', ext: 'md',
-    match: /partial-timeline —/, outputOnly: true, scene: SB({ t2: '' }) },
+    match: /partial-timeline, /, outputOnly: true, scene: SB({ t2: '' }) },
   // ...and the mirror: a storyboard with NO ranges at all is the world before this rule existed, and
   // must stay silent. A gate that retro-fails every plan written before it is a gate nobody keeps.
   { gate: 'storyboard', name: 'a storyboard that declares no times at all is not judged on the clock', expect: 'pass', ext: 'md',
@@ -695,8 +695,8 @@ const CASES = [
   { gate: 'dissolve', name: 'the same pair wiped from opposite sides is the fix, not the defect', expect: 'pass',
     notMatch: /\[crossfade-mud\]/, scene: scene([XFADE('var(--n)', 'calc(1 - var(--n))', { clip: true })]) },
   // The other correct answer for a few glyphs: a swap steep enough that the two are never both legible.
-  // NB the gate cannot currently EVALUATE this form — its clamp reader gives up once a var sits inside a
-  // calc inside the clamp, and an unparseable pair is passed over in silence — so this case pins the
+  // NB the gate cannot currently EVALUATE this form: its clamp reader gives up once a var sits inside a
+  // calc inside the clamp, and an unparseable pair is passed over in silence, so this case pins the
   // right verdict while the case below pins it for the right reason. See the report on dissolve-check.
   { gate: 'dissolve', name: 'a clamped threshold swap crosses too fast to be mud', expect: 'pass',
     notMatch: /\[crossfade-mud\]/,
@@ -735,7 +735,7 @@ for (const c of CASES) {
   // `ext` lets a case feed a gate something that is not a scene (storyboard-check eats markdown).
   // NB the fixture is named after the case, and every gate prints the path it read, so a case whose name
   // contains its own finding code can be satisfied by the FILENAME. Anchor `match` on the printed shape
-  // of the finding (`[tiny-text]`, `stub-why —`), never on the bare code, or the case proves nothing.
+  // of the finding (`[tiny-text]`, `stub-why, `), never on the bare code, or the case proves nothing.
   const f = path.join(FIX, `mut-${c.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.${c.ext || 'json'}`);
   fs.writeFileSync(f, c.scene);
   const rel = path.relative(repoRoot, f);
@@ -774,7 +774,7 @@ for (const c of CASES) {
   for (const rel of Object.keys(c.aux || {})) { try { fs.unlinkSync(path.join(repoRoot, rel)); } catch { } }
 }
 
-/** A minimal, CURRENT bake of `sim` under assets/baked/<name>/ — the fixture the sim cases mutate. */
+/** A minimal, CURRENT bake of `sim` under assets/baked/<name>/. The fixture the sim cases mutate. */
 function fakeBake(name, sim) {
   const dir = path.join(repoRoot, 'assets/baked', name);
   fs.mkdirSync(dir, { recursive: true });
@@ -788,7 +788,7 @@ function fakeBake(name, sim) {
 }
 
 /** A snap baseline the CASE owns. `verify/snap/` is gitignored, so a fresh clone, a worktree or a CI
- *  box has none — and all three snap cases then reported "fired for the wrong reason" (the gate said
+ *  box has none, and all three snap cases then reported "fired for the wrong reason" (the gate said
  *  "no baseline, so this checked NOTHING"), which reads in the summary exactly like a rotted fixture
  *  and unproves three gates on every machine but the one that happened to run `make snap-all SAVE=1`.
  *  Same reasoning as fakeBake: a case must not lean on a machine-local artifact. A baseline already on
@@ -841,7 +841,7 @@ const srcCases = [
   { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds.js',
     // The preset is READ OFF THE SNAPSHOTTED SCENE, never named here. This case pinned
     // `intensity: 0.46` inside `case 'aurora'` and sample.json's backdrop later became `soft`, so the
-    // mutation kept applying — to a preset the snapshot does not paint — and snap answered IDENTICAL
+    // mutation kept applying (to a preset the snapshot does not paint) and snap answered IDENTICAL
     // while the summary read it as "the gate stayed silent after its guard was removed". A stale anchor
     // that still MATCHES is the worst kind: the `mutated === orig` guard cannot see it, so the case
     // accused a healthy gate. Deriving the subject makes the fixture follow the scene.
@@ -867,12 +867,12 @@ const srcCases = [
     mutate: (s) => s.replace("export function loadingBar({", "export function loadingBar({ note = 'Ready in 1.2s',"),
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /claim-default|baked-claim/ },
   // THE SUBJECT IS INJECTED, NOT BORROWED. This case used to mutate `badge`'s literal `bg: '#3A3A38'`,
-  // and d2fe7fc correctly replaced that literal with a theme token — a good change that silently
+  // and d2fe7fc correctly replaced that literal with a theme token, a good change that silently
   // unproved the rule. Every shipped block is token-driven now and blocks/ holds NO literal hex pair
   // for the contrast rule to judge, so re-anchoring on another block would only queue up the next
   // de-hardcoding to kill this again: there is no way to pin a literal in a library whose whole
   // direction is away from literals. So the fixture BRINGS its own unreadable pair and the anchor is a
-  // SHAPE — the file's first `export function` — which cannot go stale while the file holds blocks.
+  // SHAPE (the file's first `export function`) which cannot go stale while the file holds blocks.
   // (A fixture FILE in blocks/ was tried first and is the wrong answer: index.mjs holds every
   // blocks/*.mjs to a CATEGORY + schema-table contract, correctly, so a fixture file has to satisfy a
   // growing contract that has nothing to do with contrast.)
@@ -887,7 +887,7 @@ const srcCases = [
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /brand-default/ },
   { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'formats/scene/sample.json',
     // NB: the injected prop must be a name NO layer accepts. `fill` was used here until it became a real
-    // svg-layer prop (docs/MISTAKES.md #143) — pick a prop that can never be legitimised.
+    // svg-layer prop (docs/MISTAKES.md #143), pick a prop that can never be legitimised.
     mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "notARealProp": "#000" },'),
     cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
   { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/three-fx.js',
@@ -912,7 +912,7 @@ const srcCases = [
     cmd: ['node', ['scripts/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
   // The fixture layer sets `pulseAmp`, which ONLY core/layers/glow.js reads, and the mutation deletes
   // its DECLARATION. The gate answers from the declarations now, so deleting the read itself would
-  // prove nothing about the gate — it is the statement that has to be load-bearing, and this is the
+  // prove nothing about the gate. It is the statement that has to be load-bearing, and this is the
   // case that says so. (It used to pin a prop `r` that no build of the engine reads, which made it
   // pass whether or not the mutation applied; a case that cannot tell the two states apart is noise.)
   { name: 'layer-props · a prop the engine never reads', file: 'core/layers/glow.js',
@@ -931,7 +931,7 @@ const srcCases = [
     mutate: (s) => s.replace(/^  start: \{\}.*$/m, ''),
     cmd: ['node', ['scripts/gates/layer-props.mjs', `${SCENE_DIR}/higgsfield-recreation.json`]], match: /layer-props is blind/ },
   // THE SHAPE THE OLD MEASUREMENT WAS WORST AT, pinned deliberately (#234): a prop read ONLY inside a
-  // registry directory that did not exist when the gate was written. core/tracks/ is that directory —
+  // registry directory that did not exist when the gate was written. core/tracks/ is that directory,
   // 1454 live props reported as dropped the day it landed, because a scanner can only look where its
   // author knew to point it. The declaration travels with the track, so this must fail on its removal.
   { name: 'layer-props · a prop read only by a track', file: 'core/tracks/vars.js',
@@ -1025,7 +1025,7 @@ const srcCases = [
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /DRIFT/ },
   // Pinned per MODIFIER, not once for the slot. The key-set check compares two sorted lists, so a
   // fixture on `mixBlend` alone proves the comparison runs and proves nothing about whether the second
-  // modifier is in either list — which is exactly how a registry entry ships with no schema entry.
+  // modifier is in either list, which is exactly how a registry entry ships with no schema entry.
   { name: 'schema-drift · the shadow modifier is missing from the schema', file: 'formats/scene/schema.json',
     mutate: (s) => s.replace('"shadow": {\n              "type": "number|object"', '"shdow": {\n              "type": "number|object"'),
     cmd: ['node', ['scripts/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
@@ -1053,7 +1053,7 @@ const srcCases = [
     cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /bg is required/ },
   // A hand-authored backdrop that animates in a browser and renders a dead still is the exact failure
   // the message exists to prevent; if the check stops firing, nothing else in the pipeline notices.
-  // `untype` (reverse typing) used to be checked only for WIRING — that the engine reads the prop the
+  // `untype` (reverse typing) used to be checked only for WIRING, that the engine reads the prop the
   // schema advertises. That proved the props were not no-ops and nothing more: the count itself, the
   // part that can actually be wrong, was untestable while it lived inside frame() (which needs a DOM).
   // It is now the exported pure typedLen(), so this case drops the delete term and demands lib-test
@@ -1104,7 +1104,7 @@ try { fs.writeFileSync(LOCK, String(process.pid), { flag: 'wx' }); }
 catch {
   console.error(`✗ another gate-mutation run holds ${path.relative(repoRoot, LOCK)} (pid ${fs.readFileSync(LOCK, 'utf8')}).\n`
     + `  These cases edit tracked source in place, so two runs at once corrupt the checkout. Wait for it,\n`
-    + `  or delete the lock if that process is gone — then check \`git status\` before trusting the tree.`);
+    + `  or delete the lock if that process is gone, then check \`git status\` before trusting the tree.`);
   process.exit(2);
 }
 // The restore below is per-case; this is the backstop for the ways a case never reaches it (a throw, a
@@ -1125,7 +1125,7 @@ for (const c of srcCases) {
   // forever" failure this whole harness exists to prevent, reproduced inside the harness itself.
   if (mutated === orig) {
     console.log(`   ✗ ${'source'.padEnd(9)} must-fail  ${c.name}`);
-    broken.push({ name: c.name, why: 'FIXTURE IS STALE — the mutation no longer applies, so this gate is UNPROVEN. Re-anchor it on text that still exists in ' + c.file, out: '' });
+    broken.push({ name: c.name, why: 'FIXTURE IS STALE. The mutation no longer applies, so this gate is UNPROVEN. Re-anchor it on text that still exists in ' + c.file, out: '' });
     continue;
   }
   inFlight.set(p, orig);
@@ -1146,7 +1146,7 @@ for (const c of srcCases) {
 
 const total = CASES.length + srcCases.length;
 console.log('\n' + '='.repeat(72));
-if (!broken.length) { console.log(`✓ gate mutation OK — ${pass}/${total} gates proven able to fire (and to stay quiet when correct)`); process.exit(0); }
+if (!broken.length) { console.log(`✓ gate mutation OK: ${pass}/${total} gates proven able to fire (and to stay quiet when correct)`); process.exit(0); }
 console.log(`GATE MUTATION FAILURES (${broken.length}/${total})\n`);
 for (const b of broken) console.log(`  ✗ ${b.name}\n      ${b.why}\n      ${b.out}\n`);
 console.log('A gate that cannot fail reports green forever and everyone believes it (MISTAKES #26).');

@@ -1,4 +1,4 @@
-// scripts/author/quiz.mjs — THE BRIEF, asked before anything is authored.
+// scripts/author/quiz.mjs: THE BRIEF, asked before anything is authored.
 //
 //   node scripts/author/quiz.mjs --ask [--url … --name … --slug …]   ·   make quiz
 //   node scripts/author/quiz.mjs --self-test
@@ -9,8 +9,8 @@
 //
 // WHY THIS EXISTS. `.claude/skills/vawe-video-planning/SKILL.md` Step 1b already specifies a five-question
 // brief and Step 3c already specifies the lock sheet it produces. Neither was ever encoded, so the brief
-// ran differently every session and the one decision `storyboard-check` HARD-ERRORS on for a short film —
-// `threads:`, what holds the film across its cuts — was not among the five questions.
+// ran differently every session and the one decision `storyboard-check` HARD-ERRORS on for a short film,
+// `threads:`, what holds the film across its cuts, was not among the five questions.
 //
 // THREE RULES, and the first two come from what studios actually do (23 published briefs were read; the
 // consensus core is audience · goal · distribution · message · references · tone, and every strong
@@ -18,7 +18,7 @@
 //
 //   1. NEVER ASK ABOUT MOTION IN THE ABSTRACT. Not one published brief does. Motion is elicited as clips
 //      on a board, as a per-shot field beside framing, or as a reaction to a rough cut. So the look is
-//      settled by RENDERING two or three directions and asking which — never by naming an effect. There
+//      settled by RENDERING two or three directions and asking which, never by naming an effect. There
 //      are 465 of them; a person cannot answer that question and should not be asked to.
 //   2. BOUND THE NEGATIVE BY CATEGORY. "What do you hate?" returns nothing; "which of these would make
 //      you say that's not us" returns a decision. Anti-references narrow the space faster than
@@ -26,8 +26,8 @@
 //   3. QUOTE THE SITE BACK. A generic question wastes the answer. When a site study exists the options
 //      are built from that site's own sections, and this file REFUSES to ask genericly instead (exit 2).
 //
-// The options are rendered from the registries — DIRECTIONS (threads + pace + look), PROFILES (the motion
-// policy and its anti-blurb), and the brand's own sections.json — so they cannot drift from what the
+// The options are rendered from the registries, DIRECTIONS (threads + pace + look), PROFILES (the motion
+// policy and its anti-blurb), and the brand's own sections.json, so they cannot drift from what the
 // engine can actually do. `--self-test` proves every option still resolves.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -60,7 +60,7 @@ export function study(name) {
 
 // ── the questions ─────────────────────────────────────────────────────────────────────────────────
 // A question is { header, question, options: [{label, description}] }. `description` is the CONSEQUENCE,
-// never a restatement of the label — that is the whole difference between a choice and a menu.
+// never a restatement of the label. That is the whole difference between a choice and a menu.
 
 // The ONE fixed question. Platform, orientation and duration are asked TOGETHER because they are one
 // decision: splitting them is how a 60s vertical happens. Nothing in a site study can answer it, so it is
@@ -89,7 +89,7 @@ export const JOBS = [
     description: 'Buys mood and holds. Buys no explanation: a newcomer will not learn what the product does.' },
 ];
 
-// The anti-reference, rendered from each profile's own antiBlurb. ELIMINATION, not aspiration — asked the
+// The anti-reference, rendered from each profile's own antiBlurb. ELIMINATION, not aspiration, asked the
 // other way round every answer lands on the same premium-calm profile. The user never sees a profile name.
 export function antiOptions(profiles = PROFILES) {
   const pick = ['duolingo', 'a24', 'bloomberg', 'apple'];
@@ -108,7 +108,7 @@ export function antiOptions(profiles = PROFILES) {
 }
 
 // The thread question, rendered from DIRECTIONS. Only asked on a SHORT film, because that is where
-// `storyboard-check` hard-errors without `threads:` — and it is the one answer no amount of site study can
+// `storyboard-check` hard-errors without `threads:`, and it is the one answer no amount of site study can
 // guess. Each option's consequence is the direction's own `why`, verbatim.
 export function threadOptions(job, dirs = DIRECTIONS) {
   const drop = new Set();
@@ -124,7 +124,7 @@ export function proofOptions(st) {
   if (!st || !st.sections.length) return null;
   const rich = st.sections.filter((s) => s.kind === 'rich').slice(0, 3);
   // `title` is the heading verbatim; `label` is its 28-char filename slug. Older studies predate `title`,
-  // so de-slugging is the fallback rather than the plan — re-run `make sections` and the real words return.
+  // so de-slugging is the fallback rather than the plan, re-run `make sections` and the real words return.
   const opts = rich.map((s) => ({ key: s.label, label: s.title || deslug(s.label),
     description: `A real section of ${st.brand || 'the site'}, captured live${s.shot ? ' (a screenshot already exists)' : ''}. Costs one capture and about 2s of runtime.` }));
   // NEVER TRIM THIS OPTION. Without it the question quietly licenses inventing a figure, and the honesty
@@ -141,7 +141,7 @@ export function ask({ name = null, url = null, slug = null } = {}) {
   // prose cannot stop anyone. A generic question asked of somebody who has a site is a wasted answer.
   if (url && !st) {
     const n = name || '<brand>';
-    return { error: 'no-study', message: `study the site before asking — a generic question wastes the answer.\n`
+    return { error: 'no-study', message: `study the site before asking. A generic question wastes the answer.\n`
       + `  make sections URL=${url} NAME=${n}\n  make brandspec URL=${url}\n`
       + `then re-run. (Looked for assets/brands/${n}/sections/sections.json)` };
   }
@@ -157,7 +157,7 @@ export function ask({ name = null, url = null, slug = null } = {}) {
   return {
     context: {
       brand: name, url: url || (st && st.url) || null, slug: slug || name || null,
-      study: st ? `${st.sections.length} sections inventoried` : 'none — questions are unavoidably generic',
+      study: st ? `${st.sections.length} sections inventoried` : 'none, questions are unavoidably generic',
       skipped: st ? [] : ['proof (needs a site study)'],
       note: 'Round 2 is emitted by --ask --round 2 with round 1\'s answers, and emits nothing already decided.',
     },
@@ -181,7 +181,7 @@ export function round2({ placement, job } = {}) {
       { label: 'Star, story, solution', description: 'A named subject carries it. Strongest when there is a real customer; hollow when the star is the product itself.' },
     ] });
   }
-  return { questions: out, note: out.length ? null : 'nothing left to ask — round 1 and the study decided it all' };
+  return { questions: out, note: out.length ? null : 'nothing left to ask. Round 1 and the study decided it all' };
 }
 
 // ── apply ─────────────────────────────────────────────────────────────────────────────────────────
@@ -208,13 +208,13 @@ export function frontmatter(a) {
   };
 }
 
-// THE NO-SITE BRANCH. A topic film has no sections to walk, so `storyboard-draft` — which is one beat per
-// real section, in the site's order — has nothing to iterate. This is a SECOND writer, deliberately, for a
+// THE NO-SITE BRANCH. A topic film has no sections to walk, so `storyboard-draft`, which is one beat per
+// real section, in the site's order. Has nothing to iterate. This is a SECOND writer, deliberately, for a
 // genuinely different input: there the structure comes from the site, here it comes from the arc and the
 // chosen pace. Keeping one writer would have meant faking a sections.json, which is a lie on disk.
 //
 // It writes a SKELETON and says so. Every line a person must own is a `<fill:>`, because a brief can lock
-// the shape of a film and cannot invent its words — and the honesty rule in CLAUDE.md means the tool must
+// the shape of a film and cannot invent its words, and the honesty rule in CLAUDE.md means the tool must
 // not put a claim on screen that nobody has stood behind.
 const ROLES = {
   'hook → build → proof → payoff → CTA': ['hook', 'build', 'proof', 'payoff', 'cta'],
@@ -229,15 +229,15 @@ function applyNoStudy({ a, fm, name, out }) {
   const roles = ROLES[fm.arc] || ROLES['hook → build → proof → payoff → CTA'];
   const per = +(dur / n).toFixed(1);
   const L = ['---'];
-  L.push(`message: ${a.message || '<fill: the ONE sentence this film lands — the spine, not a feature list>'}`);
-  L.push(`audience: ${a.audience || '<fill: who this is for — role and context>'}`);
+  L.push(`message: ${a.message || '<fill: the ONE sentence this film lands, the spine, not a feature list>'}`);
+  L.push(`audience: ${a.audience || '<fill: who this is for, role and context>'}`);
   L.push(`arc: ${fm.arc}`);
   if (fm.framework) L.push(`framework: ${fm.framework}`);
   if (fm.threads) L.push(`threads: ${fm.threads}`);
   L.push(`format: ${fm.format}`);
   L.push(`duration: ${dur}s`);
   L.push('---', '');
-  L.push(`# ${name || 'untitled'} — storyboard SKELETON (from the brief, no site study)`);
+  L.push(`# ${name || 'untitled'}: storyboard SKELETON (from the brief, no site study)`);
   L.push('');
   L.push('> The brief fixed the shape: arc, duration, beat count and what holds it across the cuts. Every');
   L.push('> `<fill:>` below is a decision a person still owes. Blueprints: `make blueprints`.');
@@ -245,17 +245,17 @@ function applyNoStudy({ a, fm, name, out }) {
   for (let i = 0; i < n; i++) {
     const role = roles[Math.min(i, roles.length - 1)];
     const start = +(i * per).toFixed(1), end = +((i + 1) * per).toFixed(1);
-    L.push(`## Beat ${i + 1} — <fill: name this beat>  (${start}s–${end}s)`, '');
+    L.push(`## Beat ${i + 1}, <fill: name this beat>  (${start}s–${end}s)`, '');
     L.push(`- type: ${role}`);
     L.push(`- onscreen: "<fill: the exact words on screen${i === 0 ? ', ≤12 and front-load the strong one' : ''}>"`);
-    L.push(`- why: <fill: what this beat PROVES that no other does — cut it, and what is lost?>`);
+    L.push(`- why: <fill: what this beat PROVES that no other does, cut it, and what is lost?>`);
     L.push(`- becomes: <fill: the change at this junction, as "the X becomes the Y">`);
-    L.push(`- picture: <fill: what is SHOWN here — a graphic is the subject at ~8% of the frame or more>`);
+    L.push(`- picture: <fill: what is SHOWN here. A graphic is the subject at ~8% of the frame or more>`);
     L.push('');
   }
   fs.writeFileSync(dest, L.join('\n'));
   const g = spawnSync(process.execPath, [path.join(ROOT, 'scripts/gates/storyboard-check.mjs'), dest], { encoding: 'utf8' });
-  return { dest, fm, draft: `✓ wrote ${dest} — ${n} beat skeleton from the brief (no site study)`, warnings: '',
+  return { dest, fm, draft: `✓ wrote ${dest}, ${n} beat skeleton from the brief (no site study)`, warnings: '',
     gate: `${(g.stdout || '').trim()}\n${(g.stderr || '').trim()}`.trim(), gateOk: g.status === 0 };
 }
 
@@ -286,7 +286,7 @@ function apply({ answersPath, name, slug, out }) {
   const parsed = parseStoryboard(fs.readFileSync(dest, 'utf8'));
   const lost = ['arc', 'format', 'duration'].filter((k) => !String(parsed[k] ?? '').trim())
     .concat(fm.threads && !String(parsed.field('threads') || '').trim() ? ['threads'] : []);
-  if (lost.length) return { error: 'round-trip', message: `wrote ${dest} but ${lost.join(', ')} did not parse back out of it — `
+  if (lost.length) return { error: 'round-trip', message: `wrote ${dest} but ${lost.join(', ')} did not parse back out of it, `
     + `the brief's decision was lost between here and storyboard-parse.mjs.` };
   // …and run the gate rather than telling the author to. It never claims a green plan: whatever the gate
   // says is passed straight through, blockers included.
@@ -302,7 +302,7 @@ function apply({ answersPath, name, slug, out }) {
 // THE LOOK IS SETTLED BY PICTURE, NOT BY QUESTION. Of 23 published studio briefs, not one asks a client
 // to describe motion in the abstract: it is elicited as clips on a board, as a per-shot field beside
 // framing, or as a reaction to a rough cut. The governing rule across all of them is that every good
-// instrument replaces an adjective with an artefact, and style frames are the contract — "if the client
+// instrument replaces an adjective with an artefact, and style frames are the contract, "if the client
 // approves the styleframe, they have approved the look".
 //
 // So this renders the candidate directions and asks which, rather than naming an effect at anybody. The
@@ -310,7 +310,7 @@ function apply({ answersPath, name, slug, out }) {
 // and MEASURES their divergence with similarity.mjs; `panels` draws the storyboard stop as a picture.
 // Nothing had put them in one line.
 //
-// TWO OR THREE, NEVER FIVE — "one polished concept and one meaningful alternative" is the published
+// TWO OR THREE, NEVER FIVE, "one polished concept and one meaningful alternative" is the published
 // standard, and a fourth option is where a decision turns back into a menu.
 function look({ sb, n = 3 }) {
   if (!sb || !fs.existsSync(sb)) return { error: 'no-storyboard', message: `--look needs a storyboard (got ${sb || 'nothing'}). Run --apply first.` };
@@ -359,13 +359,13 @@ function selfTest() {
   // NO EFFECT NAMES, EVER. The whole design rests on this: a person cannot choose between 465 effects,
   // and an option naming one has smuggled the author's job into the brief.
   const EFFECTY = /\b(easeOut|easeIn|whipPan|cinematicZoom|riseBlur|sdfIris|dotmatrix|gradientWash|kineticHook|slowPush|diveIn)\b/;
-  for (const o of all) ok(!EFFECTY.test(`${o.label} ${o.description}`), `option "${o.label}" names an effect — ask about intent, not vocabulary`);
+  for (const o of all) ok(!EFFECTY.test(`${o.label} ${o.description}`), `option "${o.label}" names an effect, ask about intent, not vocabulary`);
   for (const k of Object.keys(PROFILES)) {
     const shown = [...antiOptions()].some((o) => `${o.label} ${o.description}`.includes(k));
-    ok(!shown, `a profile NAME ("${k}") is visible to the user — show its antiBlurb, never the key`);
+    ok(!shown, `a profile NAME ("${k}") is visible to the user. Show its antiBlurb, never the key`);
   }
   if (errs.length) { console.error('✗ quiz self-test\n' + errs.map((e) => `  - ${e}`).join('\n')); process.exit(1); }
-  console.log(`✓ quiz self-test — ${PLACEMENT.length} placements · ${JOBS.length} jobs · ${antiOptions().length} anti-refs · ${DIRECTIONS.length} directions, every option resolves`);
+  console.log(`✓ quiz self-test: ${PLACEMENT.length} placements · ${JOBS.length} jobs · ${antiOptions().length} anti-refs · ${DIRECTIONS.length} directions, every option resolves`);
 }
 
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
@@ -376,11 +376,11 @@ if (isMain) {
   } else if (argv.includes('--look')) {
     const res = look({ sb: flag('--sb'), n: flag('--n', '3') });
     if (res.error) { console.error(`✗ ${res.message}`); process.exit(2); }
-    for (const f of res.failed) console.error(`  ⚠ ${f.slug}: panels failed — ${f.err || 'no sheet'}`);
+    for (const f of res.failed) console.error(`  ⚠ ${f.slug}: panels failed, ${f.err || 'no sheet'}`);
     console.log(`\n  ${res.sheets.length} direction(s) drawn. READ THE SHEETS, then pick one:\n`);
     for (const s of res.sheets) console.log(`  ${s.thread.padEnd(24)} ${s.sheet}\n      ${s.why}\n`);
     console.log(JSON.stringify({ questions: [{ header: 'Direction', question: 'Which of these is the film?',
-      options: res.sheets.map((s) => ({ label: s.thread, description: `${s.why} Drawn at ${s.pace}s a beat — see ${s.sheet}.` })) }] }, null, 2));
+      options: res.sheets.map((s) => ({ label: s.thread, description: `${s.why} Drawn at ${s.pace}s a beat. See ${s.sheet}.` })) }] }, null, 2));
     console.log(`\n  then: make concept-pick SB=<storyboard> OPTION=<direction>`);
   } else if (argv.includes('--apply')) {
     const res = apply({ answersPath: flag('--answers'), name: flag('--name'), slug: flag('--slug'), out: flag('--out') });
@@ -394,7 +394,7 @@ if (isMain) {
     console.log(`\n${res.gate}`);
     console.log(res.gateOk ? '' : `  ↑ the gate's blockers are yours to fill; the brief locked the frontmatter, not the copy.`);
     console.log(`\n  next: make intent SB=${shown(res.dest)} D=<scene.json>   → then make plan-check`);
-    console.log(`        then make concept SB=${shown(res.dest)} N=3 — three directions, rendered, so the LOOK is picked from pictures`);
+    console.log(`        then make concept SB=${shown(res.dest)} N=3. Three directions, rendered, so the LOOK is picked from pictures`);
   } else if (argv.includes('--ask')) {
     const payload = ask({ name: flag('--name'), url: flag('--url'), slug: flag('--slug') });
     if (payload.error) { console.error(`✗ ${payload.message}`); process.exit(2); }

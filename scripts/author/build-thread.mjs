@@ -1,4 +1,4 @@
-// scripts/author/build-thread.mjs — generate formats/scene/thread.json.
+// scripts/author/build-thread.mjs: generate formats/scene/thread.json.
 //
 // The first film here held together by a SENTENCE rather than a prop. Nothing survives a cut: every beat
 // is its own world, its own palette, its own graphic. What stops it being a slideshow is that no clause
@@ -11,7 +11,7 @@
 // Every prop is drawn from real primitives and every one does EXPLANATORY work (docs/CRAFT/SHOW-DONT-TELL):
 //   1 bars placed by hand, each one landing separately and none of them quite square
 //   2 the same bars, squared up and lit, because the setup has to actually look good
-//   3 one figure rolling while the bars beneath it go out of true — the damage, not a word for it
+//   3 one figure rolling while the bars beneath it go out of true, the damage, not a word for it
 //   4 a wall of identical days filling in faster than the eye tracks
 //   5 the wall collapsing into one file
 import fs from 'node:fs';

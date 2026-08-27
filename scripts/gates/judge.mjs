@@ -1,4 +1,4 @@
-// scripts/gates/judge.mjs — the VISION JUDGE (prep half). Static gates (validate/critique/slop/audit) can't SEE
+// scripts/gates/judge.mjs: the VISION JUDGE (prep half). Static gates (validate/critique/slop/audit) can't SEE
 // composition or asset fidelity; this preps exactly what a vision model must look at + the criteria, and the
 // agent-in-the-loop scores it. It renders the KEY frames (each beat's mid + hook + CTA) into one labeled
 // sheet and writes the rubric (the brand house-style + the 7 craft dimensions + a verdict template). The
@@ -23,7 +23,7 @@ if (inp.endsWith('.json')) {
   scene = JSON.parse(fs.readFileSync(inp, 'utf8'));
   mp4 = renderOf(inp);
 }
-if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at ${mp4} — render first (\`make video D=${inp}\`), then judge.`); process.exit(1); }
+if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at ${mp4}, render first (\`make video D=${inp}\`), then judge.`); process.exit(1); }
 const brand = arg('--vs', scene?.theme && typeof scene.theme === 'string' ? scene.theme : '');
 
 const dur = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', mp4]).toString().trim());
@@ -35,7 +35,7 @@ const { tw: TW, th: TH } = tileBox(landscape);
 const mids = scene ? beatsOf(scene, dur) : evenSamples(dur);
 
 // Per-scene directory. It used to be a bare /tmp/judge wiped on every run, so judging a second film
-// destroyed the first — which makes comparing two cuts, the entire point of a judging campaign, impossible.
+// destroyed the first, which makes comparing two cuts, the entire point of a judging campaign, impossible.
 const dir = path.join('/tmp/judge', baseOf(mp4));
 fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
 const tiles = mids.map((m, i) => frameTile(mp4, m.t, path.join(dir, `f${String(i).padStart(2, '0')}.png`),
@@ -53,4 +53,4 @@ console.log(`\n  AGENT: Read ${dir}/sheet.png AGAINST the rubric, score each fra
 // Same contract as the beats receipt: producing the sheet for THIS scene content is the checkable
 // proxy for having looked at it. Editing the scene withdraws it, which is the whole point.
 writeReceipt('judge', inp, { sheet: `${dir}/sheet.png` });
-console.log(`  Be adversarial — this is the gate that SEES what validate/critique/slop/audit cannot.\n`);
+console.log(`  Be adversarial: this is the gate that SEES what validate/critique/slop/audit cannot.\n`);

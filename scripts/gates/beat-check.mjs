@@ -146,7 +146,7 @@ if (deadAir.length) {
 //
 // WARN, not FAIL. A held empty frame during a long move is a real choice (a beat of travel between two
 // places), and this gate cannot tell that from a mistake. `sceneView` returns null on a rotated stage or
-// a camera-less scene, and null means no opinion — the whole check is then skipped rather than guessed.
+// a camera-less scene, and null means no opinion. The whole check is then skipped rather than guessed.
 const camMoves = Array.isArray(d.camera) && d.camera.length > 1
   && d.camera.some((k) => (k.s ?? 1) !== (d.camera[0].s ?? 1) || (k.x ?? 0) !== (d.camera[0].x ?? 0) || (k.y ?? 0) !== (d.camera[0].y ?? 0));
 if (camMoves && !allow.has('camera-aimed-at-nothing')) {
@@ -227,7 +227,7 @@ if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion)
 // layer authored across a cut is truncated at it, silently, and the JSON keeps saying otherwise.
 //
 // This finding used to live in direction-floor, and went invisible when that gate became opt-in. It is
-// not a taste call — it describes what the renderer does to a specific layer, and it names the fix — so
+// not a taste call. It describes what the renderer does to a specific layer, and it names the fix, so
 // it belongs in the gate that walks the clock and is always on.
 //
 // It fires only on REAL truncation: a layer whose engine end is EARLIER than its authored end. A layer
@@ -265,7 +265,7 @@ const heldOpen = content.map((L) => {
 if (heldOpen.length) {
   const label = (L) => `${L.type || 'text'}${L.text ? ` "${snippet(L.text)}"` : ''}`;
   const list = heldOpen.slice(0, 5).map(({ L, b, u }) => `${label(L)} authored to ${s(b)}, rendered to ${s(u)}`).join(' · ');
-  warn('beats-held-open', `${heldOpen.length} layer(s) stay on screen far past their authored \`duration\` because BEAT WRAPPING replaced it: ${list}${heldOpen.length > 5 ? ` · and ${heldOpen.length - 5} more` : ''}. This film wraps each beat as a unit, and the wrapper runs every layer in a non-last beat to that beat's cut so it can slide the whole beat out together — it does not keep the shorter of the two windows. The frame therefore holds content the JSON says has already gone, and no other gate can see the difference. If the layer really should hold the beat, write its \`duration\` to say so. If it should leave when you wrote it to leave, mark it \`"acrossBeats": true\`: it attaches to the camera instead of the beat wrapper and keeps its authored window (it then fades out on its own rather than sliding with the beat).`);
+  warn('beats-held-open', `${heldOpen.length} layer(s) stay on screen far past their authored \`duration\` because BEAT WRAPPING replaced it: ${list}${heldOpen.length > 5 ? ` · and ${heldOpen.length - 5} more` : ''}. This film wraps each beat as a unit, and the wrapper runs every layer in a non-last beat to that beat's cut so it can slide the whole beat out together. It does not keep the shorter of the two windows. The frame therefore holds content the JSON says has already gone, and no other gate can see the difference. If the layer really should hold the beat, write its \`duration\` to say so. If it should leave when you wrote it to leave, mark it \`"acrossBeats": true\`: it attaches to the camera instead of the beat wrapper and keeps its authored window (it then fades out on its own rather than sliding with the beat).`);
 }
 
 // ---------- 6. beats-unseen: the receipt ----------
@@ -278,7 +278,7 @@ if (heldOpen.length) {
 //
 // TWO FACTS, NOT ONE. `make dev` and `make ship` now produce both sheets automatically, so "a sheet
 // exists for this content" stopped being evidence that a person looked. A receipt written by that
-// automatic pass carries `auto: true`, and this gate still fires on it — otherwise every scene in the
+// automatic pass carries `auto: true`, and this gate still fires on it, otherwise every scene in the
 // loop would be permanently, silently green for a look nobody took, which is the shape of a gate that
 // manufactures confidence. What changes is the ASK: the sheet is already on disk, so the finding names
 // the file to open rather than a command that has already been run.

@@ -1,4 +1,4 @@
-// scripts/site/blocks-docs.mjs — regenerate the block table in docs/BLOCKS.md from the manifest, so the docs
+// scripts/site/blocks-docs.mjs: regenerate the block table in docs/BLOCKS.md from the manifest, so the docs
 // never drift from the registry. Replaces everything between <!-- BLOCKS:START --> and <!-- BLOCKS:END -->.
 // Run via `make blocks-docs` (or directly). Deterministic; no network.
 import fs from 'node:fs';
@@ -24,4 +24,4 @@ const i = src.indexOf(S), j = src.indexOf(E);
 if (i < 0 || j < 0) { console.error(`markers ${S} / ${E} not found in ${DOC}`); process.exit(1); }
 const out = src.slice(0, i + S.length) + '\n' + table + '\n' + src.slice(j);
 fs.writeFileSync(DOC, out);
-console.log(`regenerated ${DOC} — ${CATALOG.length} entries, ${byFamily.size} families`);
+console.log(`regenerated ${DOC}: ${CATALOG.length} entries, ${byFamily.size} families`);

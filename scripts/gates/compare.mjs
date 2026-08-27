@@ -1,6 +1,6 @@
-// scripts/gates/compare.mjs — VARIANT SELECTION. Render/extract a frame from each candidate and tile them
+// scripts/gates/compare.mjs: VARIANT SELECTION. Render/extract a frame from each candidate and tile them
 // into one labeled sheet so the author (human or agent) can pick the best. This is how taste gets
-// applied without shipping the first draft — another engine' `compare`, adapted.
+// applied without shipping the first draft, another engine' `compare`, adapted.
 //
 // Usage:
 //   node scripts/gates/compare.mjs a.json b.json c.json --at 3 --out /tmp/compare.png

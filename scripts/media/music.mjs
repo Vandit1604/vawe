@@ -1,19 +1,19 @@
-// music.mjs — fetch a real soundtrack for a launch video, and record where it came from.
+// music.mjs: fetch a real soundtrack for a launch video, and record where it came from.
 //
 //   node scripts/media/music.mjs ambient 0 calm      genre, rank, local name
 //   node scripts/media/music.mjs --id 738 calm       a specific Mixkit track id
 //   make music GENRE=ambient N=0 NAME=calm
 //
-// LICENSING — read this before shipping a video publicly. Tracks come from Mixkit's free stock music
+// LICENSING, read this before shipping a video publicly. Tracks come from Mixkit's free stock music
 // under the "Mixkit Stock Music Free License", which is a DIFFERENT licence from the Sound Effects
 // Free License this repo already uses for assets/sfx. That music licence is rendered client-side on
 // mixkit.co/license and could not be read programmatically here, so it has NOT been verified by this
 // tool. What this script does instead is make the provenance impossible to lose:
 //   • every download is recorded in assets/music/credits.json with its source and licence page
-//   • assets/music/ is gitignored, so the repo never REDISTRIBUTES a track — the main licence risk
+//   • assets/music/ is gitignored, so the repo never REDISTRIBUTES a track, the main licence risk
 //   • the track is fetched on demand, exactly like fonts and sfx
 // Confirm the licence yourself before publishing commercially, or drop in your own file at the same
-// path — nothing downstream cares where the wav came from.
+// path. Nothing downstream cares where the wav came from.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -29,11 +29,11 @@ const LICENCE = 'https://mixkit.co/license/#musicFree';
 // The curated pack: the real beat-driven loops the engine ships as the DEFAULT sound (replacing the
 // synthesized drone the `warm`/`calm`/`tense` beds used to auto-select). `make music-pack` fetches
 // all of them; core/audio-select.js maps the music profiles onto these files. Each row is a fixed
-// (genre-slug, rank) so the same track downloads every time — page order is Mixkit's own ranking.
+// (genre-slug, rank) so the same track downloads every time. Page order is Mixkit's own ranking.
 const PACK = [
-  { name: 'lofi',  genre: 'lo-fi-beats', rank: 0 }, // calm, jazzy — the premium mid-energy bed
-  { name: 'chill', genre: 'chillout',    rank: 0 }, // brighter, bouncier — sunny/major-key moods
-  { name: 'beat',  genre: 'hip-hop',     rank: 0 }, // real drums with a pulse — energetic drops
+  { name: 'lofi',  genre: 'lo-fi-beats', rank: 0 }, // calm, jazzy, the premium mid-energy bed
+  { name: 'chill', genre: 'chillout',    rank: 0 }, // brighter, bouncier, sunny/major-key moods
+  { name: 'beat',  genre: 'hip-hop',     rank: 0 }, // real drums with a pulse, energetic drops
 ];
 
 const argv = process.argv.slice(2);
@@ -62,7 +62,7 @@ async function fetchTrack({ genre, rank = 0, id = null, name }) {
   const res = await fetch(`https://assets.mixkit.co/music/${trackId}/${trackId}.mp3`, { headers: UA });
   if (!res.ok) throw new Error(`track ${trackId} -> HTTP ${res.status}`);
   const buf = Buffer.from(await res.arrayBuffer());
-  if (buf.length < 20000) throw new Error(`track ${trackId} came back too small (${buf.length}b) — not audio`);
+  if (buf.length < 20000) throw new Error(`track ${trackId} came back too small (${buf.length}b), not audio`);
   fs.writeFileSync(mp3, buf);
 
   // The Go mixer reads WAV. Decode to 44.1k mono so beat detection and mixing share one representation.
@@ -72,7 +72,7 @@ async function fetchTrack({ genre, rank = 0, id = null, name }) {
   const credits = fs.existsSync(CREDITS) ? JSON.parse(fs.readFileSync(CREDITS, 'utf8')) : {};
   credits[name] = { id: trackId, genre: genre || 'direct', source: `https://assets.mixkit.co/music/${trackId}/${trackId}.mp3`,
     page: 'https://mixkit.co/free-stock-music/', licence: LICENCE,
-    licenceVerified: false, note: 'Mixkit Stock Music Free License — confirm terms before commercial release',
+    licenceVerified: false, note: 'Mixkit Stock Music Free License. Confirm terms before commercial release',
     seconds: +dur.toFixed(2) };
   fs.writeFileSync(CREDITS, JSON.stringify(credits, null, 1) + '\n');
   console.log(`✓ ${name}.wav  (mixkit #${trackId}${genre ? ` · ${genre} #${rank}` : ''} · ${dur.toFixed(1)}s · ${(buf.length / 1024 / 1024).toFixed(1)}MB mp3)`);
@@ -85,12 +85,12 @@ if (argv.includes('--pack')) {
     catch (e) { console.error(`  ✗ ${t.name}: ${e.message}`); process.exitCode = 1; }
   }
   console.log(`  → assets/music/{${PACK.map((t) => t.name).join(',')}}.wav   credits → assets/music/credits.json`);
-  console.log(`  ⚠ licence NOT verified programmatically (${LICENCE}) — confirm before publishing commercially.`);
+  console.log(`  ⚠ licence NOT verified programmatically (${LICENCE}), confirm before publishing commercially.`);
 } else {
   const genre = explicitId ? null : (rest[0] || 'ambient');
   const rank = explicitId ? 0 : parseInt(rest[1] || '0', 10);
   const name = (explicitId ? rest[0] : rest[2]) || 'track';
   await fetchTrack({ genre, rank, id: explicitId, name });
   console.log(`  → assets/music/${name}.wav   credits → assets/music/credits.json`);
-  console.log(`  ⚠ licence NOT verified programmatically (${LICENCE}) — confirm before publishing commercially.`);
+  console.log(`  ⚠ licence NOT verified programmatically (${LICENCE}), confirm before publishing commercially.`);
 }

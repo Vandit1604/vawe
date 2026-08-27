@@ -1,10 +1,10 @@
-// gh-wrapped.mjs — a GitHub year in review, as DATA. Pulls one account's real contribution record and
+// gh-wrapped.mjs: a GitHub year in review, as DATA. Pulls one account's real contribution record and
 // derives the handful of facts a film can carry, plus the contribution heatmap as an SVG fragment.
 //
 //   node scripts/media/gh-wrapped.mjs <login> [--from 2025-08-19] [--to 2026-08-19]
 //
 // Writes:
-//   formats/scene/_data/gh-wrapped.json          the batch row(s) — scalars only, see below
+//   formats/scene/_data/gh-wrapped.json          the batch row(s), scalars only, see below
 //   assets/gen/gh-heat-<login>.html              the 366-cell heatmap as an inline SVG fragment
 //
 // WHY THE HEATMAP IS A FILE AND NOT A FIELD. scripts/author/batch.mjs substitutes `{{key}}` into the
@@ -13,7 +13,7 @@
 // scalar. Anything richer than a number or a bare word has to travel this way.
 //
 // Every figure here comes from the API. Nothing is estimated, and a number the query does not return is
-// absent rather than filled in — an on-screen number that nobody can trace is the one thing the content
+// absent rather than filled in. An on-screen number that nobody can trace is the one thing the content
 // rules in CLAUDE.md refuse outright.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -58,7 +58,7 @@ const byMonth = {};
 for (const d of days) byMonth[d.date.slice(0, 7)] = (byMonth[d.date.slice(0, 7)] || 0) + d.contributionCount;
 const months = Object.entries(byMonth).sort();
 // The QUIET SPELL: the longest run of consecutive months at or under a token count. This is the film's
-// hook, so it is derived rather than eyeballed — a month with two commits is not activity.
+// hook, so it is derived rather than eyeballed. A month with two commits is not activity.
 let qRun = 0, qBest = 0, qFrom = null, qTo = null, runStart = null;
 for (const [m, n] of months) {
   if (n <= 5) { if (!qRun) runStart = m; qRun++; if (qRun > qBest) { qBest = qRun; qFrom = runStart; qTo = m; } } else qRun = 0;

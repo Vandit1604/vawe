@@ -2,12 +2,12 @@
 // Bring up BOTH dev servers: the marketing site (:3080) and the docs app (:3001).
 //
 // The site serves /docs by rewriting to the docs app (see site/next.config.mjs). With only the
-// site running, /docs returns a 500 that looks like a code bug and is not one — it is just nothing
+// site running, /docs returns a 500 that looks like a code bug and is not one, it is just nothing
 // listening on the other end. Rather than document that trap, remove it: one command, both apps.
 //
 //   npm --prefix site run dev:all
 //
-// No dependency on concurrently — this is a few lines of child_process and it keeps the site's
+// No dependency on concurrently. This is a few lines of child_process and it keeps the site's
 // install lean.
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
