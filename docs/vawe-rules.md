@@ -1,4 +1,4 @@
-# vawe-rules.md — how to write a scene.json
+# vawe-rules.md: how to write a scene.json
 
 Paste this whole file into Claude (or any model) and ask for a scene. Paste the JSON it returns into
 the editor at **/editor** and watch it render live in your browser. Nothing is uploaded; the engine
@@ -34,8 +34,8 @@ JSON *is* the video.
 }
 ```
 
-- `module` is always `"scene"`. `aspect` **must be in the JSON** (`16:9` · `9:16` · `1:1` · `4:5`) —
-  a scene that needs a CLI flag to come out right is not reproducible.
+- `module` is always `"scene"`. `aspect` **must be in the JSON** (`16:9` · `9:16` · `1:1` · `4:5`).
+  A scene that needs a CLI flag to come out right is not reproducible.
 - The frame is **1920×1080** at `16:9` (1080×1920 at `9:16`). All `x`/`y`/`size` are real frame pixels.
 - `start`/`duration` are **seconds**. 30fps.
 
@@ -47,7 +47,7 @@ JSON *is* the video.
 
 | prop | type | notes |
 |---|---|---|
-| `type` | string | Layer type — one of: `text` `count` `image` `video` `group` `rect` `glow` `beam` `svg` `cursor` `clip` `html` `component` `board` `doc` `shader` `lottie` `paint` `raymarch` `three` `globe` `composition` |
+| `type` | string | Layer type. One of: `text` `count` `image` `video` `group` `rect` `glow` `beam` `svg` `cursor` `clip` `html` `component` `board` `doc` `shader` `lottie` `paint` `raymarch` `three` `globe` `composition` |
 | `text` | string | Text (may use <b>/<em>) |
 | `x` | number|string | Left: px number, or relative "50%" / "50%-40" / center / left / right (resolve |
 | `y` | number|string | Top: px number, or relative "50%" / center / top / bottom (resolved per aspect |
@@ -56,20 +56,20 @@ JSON *is* the video.
 | `size` | number | Font size (px). Up to 560 for frame-filling hero words (real launch films let  |
 | `weight` | number | Font weight |
 | `color` | string|boolean | Glow color / text color (glow accepts true = the theme accent glow) |
-| `align` | string | Text align — one of: `left` `center` `right` |
-| `font` | string | Face — one of: `sans` `serif` `mono` `num` |
-| `split` | string | Kinetic split ('path' = SVG strokes, for the `draw` preset) — one of: `char` `word` `line` `path` |
+| `align` | string | Text align. One of: `left` `center` `right` |
+| `font` | string | Face. One of: `sans` `serif` `mono` `num` |
+| `split` | string | Kinetic split ('path' = SVG strokes, for the `draw` preset). One of: `char` `word` `line` `path` |
 | `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h |
 | `presetOpts` | object | Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wav |
 | `stagger` | number | Per-unit delay (s) |
 | `each` | number | Per-unit duration (s) |
 | `start` | ? | Window start: seconds, or relative "otherId+0.5" / "otherId.end-0.2" |
 | `duration` | number|string | Window length (s), or a duration word (core/vocab.js): instant / fast / medium |
-| `anim` | string | Enter anim. EXACT names (core/clips.js ANIM): fade / up / rise / pop / scale / — one of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
+| `anim` | string | Enter anim. EXACT names (core/clips.js ANIM): fade / up / rise / pop / scale /. One of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
 | `out` | string | driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONT |
 | `enterDur` | number|string | Enter window (s, cut layers), or a duration word (core/vocab.js): instant / fa |
 | `exitDur` | number|string | Exit window (s; 0 = hold to end), or a duration word (core/vocab.js): instant  |
-| `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds — one of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` |
+| `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds. One of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` |
 | `critical` | boolean | Force include/exclude from layout audit |
 | `track` | number | z-order track |
 | `to` | number | Count end value (count) |
@@ -87,7 +87,7 @@ Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `
 `weight` · `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold` · `strike` · `flap`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
-  lines). The SVG must be inline in `text` — an `<img>` has no reachable paths.
+  lines). The SVG must be inline in `text`, an `<img>` has no reachable paths.
 - `presetOpts` passes per-preset knobs, e.g. `{"px":30}` for `blur`, `{"ease":"easeOutQuint"}` for `draw`.
 
 ## Easings (41)
@@ -99,7 +99,7 @@ Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are 
 
 ## Cuts (26)
 
-`"cuts": [{ "t": 3.2, "style": "punch" }]` — `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `jitter`
+`"cuts": [{ "t": 3.2, "style": "punch" }]`, `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `jitter`
 
 ## Shader stings (35)
 
@@ -111,7 +111,7 @@ A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 
 ## Backgrounds (22)
 
-`"bg": [{ "t": 0, "preset": "plain" }]` — `plain` · `paper` · `paperDots` · `paperShapes` · `soft` · `accent` · `accentPlain` · `shapes` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `brandglow` · `spotlight` · `dark` · `deep` · `ink` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid`
+`"bg": [{ "t": 0, "preset": "plain" }]`, `plain` · `paper` · `paperDots` · `paperShapes` · `soft` · `accent` · `accentPlain` · `shapes` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `brandglow` · `spotlight` · `dark` · `deep` · `ink` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid`
 
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
@@ -136,7 +136,7 @@ Colours come from the theme, never hardcoded: `var(--text)` `var(--text-2)` `var
 
 - **Hook → build → payoff.** Never spoil the payoff. Order beats so the most surprising one is last.
 - **Every frame fights for its value.** If cutting a beat loses nothing, it was slop.
-- **Show, never say.** A word in a box proves nothing. Do not label your effects ("fade", "flash") —
+- **Show, never say.** A word in a box proves nothing. Do not label your effects ("fade", "flash"),
   let them land. Do not open with an eyebrow naming the topic.
 - **Never claim on screen what the video does not show.** An unbacked number invites the viewer to
   notice its absence.

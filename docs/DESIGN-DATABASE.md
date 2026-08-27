@@ -68,7 +68,7 @@ beat does) lives in [`CRAFT/STORY.md`](CRAFT/STORY.md).
 | Expo-out | `cubic-bezier(.16,1,.3,1)` | premium snap |
 | Back-out (overshoot) | `cubic-bezier(.34,1.56,.64,1)` | settle-with-bounce |
 | Back-in (anticipation) | `cubic-bezier(.36,0,.66,-.56)` | pre-move |
-| Linear |: | continuous loops only (bg drift) |
+| Linear | n/a | continuous loops only (bg drift) |
 
 In-engine: `easeOutExpo` (snap), `easeOutBack` (overshoot), `spring({bounce,settle})` (natural settle), `easeOutCubic` (calm).
 
@@ -129,7 +129,7 @@ Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light 
 
 | Concept / beat | Background | Layout | Value | Motion character | Transition in |
 |---|---|---|---|---|---|
-| **Hook / cold-open** | aurora or spotlight | centred or left macro | dark | slow build, staggered word-rise |, |
+| **Hook / cold-open** | aurora or spotlight | centred or left macro | dark | slow build, staggered word-rise | n/a |
 | **Name / brand reveal** | brandglow + conic aura | centred, logo + word | dark | mask-reveal + spring overshoot | dip-to-brand |
 | **Problem / tension** | spotlight | centred statement | dark | slow, minimal, hold | crossfade |
 | **How it works** | dotmatrix (light) | 3-up card flow + connectors | **light** (value break) | staggered card pops (spring), lines draw | dip-to-white |

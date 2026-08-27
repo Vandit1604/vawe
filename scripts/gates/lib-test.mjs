@@ -724,7 +724,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       for (let t = 0; t <= 1; t += 0.05) { const v = fn(t); if (v < -1e-6 || v > 1 + 1e-6) { bad.push(`${name} out of range at ${t.toFixed(2)}`); break; } }
     }
   }
-  ok(`easings: all ${Object.keys(EASINGS).length} land 0->1${bad.length ? ', ' + bad.slice(0, 4).join(', ') : ''}`, bad.length === 0);
+  ok(`easings: all ${Object.keys(EASINGS).length} land 0->1${bad.length ? ': ' + bad.slice(0, 4).join(', ') : ''}`, bad.length === 0);
   // the sine family closes a documented gap: the planning skill says "ambient loops sinusoidal"
   ok('easing sine family present', ['easeInSine', 'easeOutSine', 'easeInOutSine'].every((k) => typeof EASINGS[k] === 'function'));
   ok('easeOutSine is gentler than easeOutQuint early', EASINGS.easeOutSine(0.25) < EASINGS.easeOutQuint(0.25));
@@ -789,7 +789,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const s = safeArea(w, h, name);
     if (!(s.x0 >= 0 && s.y0 >= 0 && s.x1 <= w && s.y1 <= h && s.x1 > s.x0 && s.y1 > s.y0)) bad.push(name);
   }
-  ok(`safe: all ${DESTINATION_NAMES.length} destinations yield a valid box${bad.length ? ', ' + bad.join(', ') : ''}`, bad.length === 0);
+  ok(`safe: all ${DESTINATION_NAMES.length} destinations yield a valid box${bad.length ? ': ' + bad.join(', ') : ''}`, bad.length === 0);
   ok('safe: nativeAspect is null for the canvas-agnostic ones',
     nativeAspect('web') === null && nativeAspect('feed') === null && nativeAspect('tiktok') === '9:16');
 }
@@ -810,7 +810,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     if (JSON.stringify(f.safe) !== JSON.stringify(s)) wrong.push(`${key}/${dest}: safe box`);
   }
   ok(`frame: frameOf agrees with sceneDims+safeArea at ${ratios.length} ratios x ${DESTINATION_NAMES.length} destinations`
-    + (wrong.length ? ', ' + wrong.slice(0, 3).join('; ') : ''), wrong.length === 0);
+    + (wrong.length ? ': ' + wrong.slice(0, 3).join('; ') : ''), wrong.length === 0);
   ok('frame: a 4:3 canvas is 1440x1080, not the long-edge fallback',
     frameOf({ aspect: '4:3' }).W === 1440 && frameOf({ aspect: '4:3' }).H === 1080);
   ok('frame: explicit pixel dims win, so a view outside boot gets its real canvas',
@@ -879,14 +879,14 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const small = out.filter((L) => typeof L.size === 'number' && L.size < 18).map((L) => L.size);
     if (small.length) bad.push(`${e.name}: top-level text size ${small.join(',')} < the schema's 18px min`);
   }
-  ok(`registry: all ${CATALOG.length} manifest rows resolve + build${bad.length ? ', ' + bad.slice(0, 3).join(' · ') : ''}`, bad.length === 0);
+  ok(`registry: all ${CATALOG.length} manifest rows resolve + build${bad.length ? ': ' + bad.slice(0, 3).join(' · ') : ''}`, bad.length === 0);
 
   // determinism is the product; a block that reads a clock or Math.random breaks every render.
   const drift = CATALOG.filter((e) => BLOCKS[e.family]).filter((e) => {
     try { return JSON.stringify(build(e, { x: 10, start: 1 })) !== JSON.stringify(build(e, { x: 10, start: 1 })); }
     catch { return false; }
   });
-  ok(`registry: every block is deterministic${drift.length ? ', ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
+  ok(`registry: every block is deterministic${drift.length ? ': ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
 
   // ── A BLOCK THAT DEPICTS A REAL OBJECT KEEPS ITS PROPORTIONS ──────────────────────────────────
   // Every one of these was a shipped defect: a constant that happened to look right at one size and
@@ -1199,7 +1199,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const implemented = [...code.matchAll(/^  ([a-zA-Z][a-zA-Z0-9]*)\(L, colors\) \{/gm)].map((m) => m[1]);
   const missing = THREE_FX.filter((n) => !implemented.includes(n));
   const extra = implemented.filter((n) => !THREE_FX.includes(n));
-  ok(`three: every name in THREE_FX has a SCENES implementation${missing.length ? ' (missing: ' + missing.join(', ') : ''}${extra.length ? ') orphaned: ' + extra.join(', ') : ''}`,
+  ok(`three: every name in THREE_FX has a SCENES implementation${missing.length ? ', missing: ' + missing.join(', ') : ''}${extra.length ? ', orphaned: ' + extra.join(', ') : ''}`,
      missing.length === 0 && extra.length === 0);
   const BANNED = ['THREE.Clock', 'T().Clock', 'performance.now', 'Date.now', 'new Date', 'Math.random', 'requestAnimationFrame', 'AnimationMixer'];
   const used = BANNED.filter((b) => code.includes(b));
@@ -1545,7 +1545,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // 2. NO LOOK MAY BLUR THE ALPHA CHANNEL. #112 stated this rule and fixed one call site; `hStreak`
   // and `chromaPair` carried it for another two hundred entries. Stated once, for the whole registry.
   const alphaBlur = LOOK_NAMES.filter((n) => resolveComposite(n).filter.includes('drop-shadow('));
-  ok(`looks: no look blurs the ALPHA channel (drop-shadow)${alphaBlur.length ? ', ' + alphaBlur.join(', ') : ''}`, alphaBlur.length === 0);
+  ok(`looks: no look blurs the ALPHA channel (drop-shadow)${alphaBlur.length ? ': ' + alphaBlur.join(', ') : ''}`, alphaBlur.length === 0);
   ok('looks: vintageAnamorphic streaks the HIGHLIGHTS via a directional bloom (wide x, narrow y)',
     /f-bloom-[\d_]+-t[\d_]+-r[\d_]+-ry[\d_]+/.test(resolveComposite('vintageAnamorphic').filter));
   ok('looks: chromatic looks use a per-pixel channel split', resolveComposite('cyberpunk').filter.includes('#f-chroma-'));
@@ -1588,7 +1588,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const t = JSON.parse(fsMod.readFileSync(new URL(f, themeDir), 'utf8'));
     return !t.bg && !bgPaletteFrom(t.palette);
   });
-  ok(`themes: every theme resolves a background palette (authored or derived)${noPal.length ? ', ' + noPal.join(', ') : ''}`, noPal.length === 0);
+  ok(`themes: every theme resolves a background palette (authored or derived)${noPal.length ? ': ' + noPal.join(', ') : ''}`, noPal.length === 0);
 }
 
 // ---- the registry primitive (core/registry.js) ----
@@ -3074,7 +3074,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       let d; try { d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return false; }
       return d.module === 'scene' && knobErrors(d).length > 0;
     });
-    ok(`knobs: no shipped scene is refused by the new rule${guilty.length ? ', ' + guilty.join(', ') : ''}`, guilty.length === 0);
+    ok(`knobs: no shipped scene is refused by the new rule${guilty.length ? ': ' + guilty.join(', ') : ''}`, guilty.length === 0);
   }
 }
 

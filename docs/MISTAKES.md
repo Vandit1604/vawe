@@ -15810,3 +15810,52 @@ SAVE=1` first, apply the patch, run it again, and diff.
 **A gate is the wrong answer here** and it is worth saying so, because it is the reflex. A checker
 that greps two `html` layers for a shared class name would notice this collision and leave the
 engine perfectly able to produce it again tomorrow (CLAUDE.md, "ARCHITECTURE: fix it at the root").
+
+## #489: the engine wrote 7,345 em dashes, and its own error message told you not to
+
+The house rule is one line and it is global: never write an em dash, in code, comments, docs, commit
+messages or output. `core/validate.mjs` enforces it on the ONE surface it could see, on-screen copy in a
+scene JSON, and rejected any scene carrying one. Everything else in the repo wrote it freely: 7,345
+of them across 367 files, including 363 in strings the engine PRINTS. The validator's own message
+carried one. It was noticed only when a docs page tried to quote a real engine error and could not do
+so without breaking the rule the error was enforcing.
+
+**Root cause: a rule with exactly one enforcement point, on the narrowest surface it applies to.**
+`noEmdash` in `core/validate.mjs` reads author data. Nothing read the repo. So the half of the rule
+that covers the engine's own writing had no owner, and a rule with no owner is a rule that has already
+been repealed with nobody writing it down. The tell was visible for a long time: an author reading
+`docs/PRIMITIVES.md` saw the character on 112 lines of the same document that forbids it.
+
+**Fix.** Every occurrence in `core/` `blocks/` `scripts/` `formats/` `verify/` `blueprints/` `cli/`
+`docs/` plus the Makefile and the markdown at the root now reads as a colon, a comma, a full stop or a
+pair of parentheses, chosen per site. It is not one character swap: a label wants a colon
+(`springWindow: maps the seconds-based spring…`), a tight aside wants parentheses, two independent
+clauses want a full stop, and an appositive wants a comma. A blanket one-character substitution would have produced
+comma splices by the thousand.
+
+**Three things were data, not prose, and stayed or moved sideways.** A quoted single em dash is an
+empty-table-cell marker in seven generated tables (`scripts/author/animatic.mjs` and friends): those
+became a hyphen, which is one column wide too. A lone em dash in a markdown table cell means "not
+applicable": those became `n/a`, and the first automated pass got sixteen of them wrong by reading the
+row as prose. The four generated docs (`EFFECTS.md` `BLOCKS.md` `INDEX.md` `CRAFT/VOCABULARY.md`) were
+never hand-edited; their GENERATORS were fixed and the docs regenerated.
+
+**Two anchors moved and one gate caught it.** `scripts/gates/craft-coverage.mjs` finds the stings table
+in `docs/CRAFT/SELECTION.md` by the literal string `Stings: the shader AT the seam`. Rewriting the
+heading in the doc and the anchor in the gate to different punctuation broke the parse, and the gate
+reported 35 unclassified stings. `scripts/gates/lib-test.mjs` survived only because the same rules ran
+over the assertions and the messages, producing the same text on both sides. A string an assertion
+compares is not a comment: it changes with its assertion, in the same edit.
+
+**The gate that now catches it: `node scripts/dev/no-emdash.mjs`.** It reports every remaining em dash
+in scope with its file, line and surrounding text, and exits non-zero. Its exclusions are explicit and
+commented, not hidden: `site/` and `docs-site/` are another codebase with their own pass, vendored
+files are not ours, and `docs/MISTAKES.md` entries below #400 are the historical record. It also PRINTS
+the count still owed by `cmd/` `internal/` `mcp/` `themes/` `presets/` `registry/`, which no pass has
+reached, so the remaining debt cannot go quiet.
+
+**Why a gate here rather than a fix at the root, given CLAUDE.md says the gate is the last resort.**
+There is no single write site. The character can be typed into any comment in any file by any author,
+so the property is only knowable across the whole repo, which is exactly the case the architecture
+rule names as a gate's job. The validator stays where it is: it refuses the character in author data,
+at the entry point, and that half of the rule was never the broken half.

@@ -81,7 +81,7 @@ for (const b of blocks) {
 }
 
 if (!beats.length) { console.error('✗ no beats with a time range found, is this a storyboard from make storyboard-draft / STORYBOARD-TEMPLATE.md?'); process.exit(1); }
-if (!spine.object) warns.push('frontmatter has no object:, the intent records no spine, so nothing states what the film is about.');
+if (!spine.object) warns.push('frontmatter has no `object:` key, so the intent records no spine and nothing states what the film is about.');
 const out = JSON.stringify({ ...(Object.keys(spine).length ? { spine } : {}), beats }, null, 2) + '\n';
 
 let dest = process.env.OUT || null;

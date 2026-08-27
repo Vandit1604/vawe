@@ -46,7 +46,7 @@ a 30fps render.
 |---|---|---|---|---|---|
 | Per-unit reveal | `each` | 0.25-0.35s | 0.5s | 0.75-1.2s | payoff / thesis / ambient (Rule 1) |
 | Reveal stagger | `stagger` | 0.04s | 0.06s | 0.10-0.12s | Rule 3's 60-120ms; below 0.04 the sweep stops reading as a sweep |
-| **Stagger sequence total** | `(units - 1) x stagger` |, |, | **cap 0.5s** | the per-item band above has no ceiling; 8 items at 0.10s take 0.8s. See "Arrival rhythm" |
+| **Stagger sequence total** | `(units - 1) x stagger` | n/a | n/a | **cap 0.5s** | the per-item band above has no ceiling; 8 items at 0.10s take 0.8s. See "Arrival rhythm" |
 | Cut length | `cutTiming` | `snappy`/`pop` | `smooth` | `out` | velocity contrast between beats (Rule 8) |
 | **Ransom re-roll** | `ransom.cycle` | 0.5s | **1.2s** | 1.6-2.0s | see below |
 | **Ransom re-roll offset** | `ransom.stagger` | 0.08s | 0.16s | 0.2s | keeps letters from flipping in unison |

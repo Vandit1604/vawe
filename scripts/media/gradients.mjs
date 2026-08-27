@@ -69,5 +69,5 @@ console.log(`\ngradients: ${index.length} backgrounds at ${WIDTH}px → assets/g
 console.log('  use one full-bleed under a scene:');
 console.log('    { "type":"image", "src":"/assets/gradients/0001.jpg", "x":0, "y":0, "w":1920, "h":1080,');
 console.log('      "ken":{"from":1.0,"to":1.08}, "start":0, "duration":6 }');
-console.log('  NOTE: royalty-free to use, but redistributing the files themselves is not permitted, ');
+console.log('  NOTE: royalty-free to use, but redistributing the files themselves is not permitted:');
 console.log('  assets/gradients is gitignored. Bake locally; never commit the images.');

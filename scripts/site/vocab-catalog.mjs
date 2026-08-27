@@ -50,6 +50,11 @@ const WHEN = {
   sweep: 'plain lateral travel. Reads as tracking, never as a lurch.',
   tour: 'fly station to station across a canvas bigger than the frame. The camera IS the cut.',
   circle: 'a gentle 3D swing around the frame.',
+  'pan stations': 'the same travel, spelled the way a board describes it.',
+  'ui focus zoom': 'go into one control of a captured interface, not the whole screen.',
+  'punch in': 'a hard, short push on a beat. The camera reacting, not travelling.',
+  shake: 'an impact. One hit, on the frame that takes it, never as texture.',
+  'drift hold': 'a held shot that must stay alive. The smallest move the eye still reads.',
 };
 
 const FAMILIES = [
@@ -73,7 +78,7 @@ const bad = [
   ...FAMILIES.flatMap(([, , , rows]) => rows.filter(([w]) => !WHEN[w]).map(([w]) => `no "when" line for "${w}"`)),
 ];
 if (bad.length) {
-  console.error('✗ vocab-catalog: the registry and this generator disagree, ');
+  console.error('✗ vocab-catalog: the registry and this generator disagree:');
   for (const b of bad) console.error(`    ${b}`);
   process.exit(1);
 }

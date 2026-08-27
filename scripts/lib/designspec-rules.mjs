@@ -137,7 +137,7 @@ export const RULES = [
       for (let i = 1; i < seen.length; i++) if (+seen[i] === +seen[i - 1] + 1) run++;
       return run >= 2 ? `sequence ${seen.slice(0, 6).join(' · ')}` : null;
     },
-    fires: '01 Capture (02 Compose) 03 Render, the three steps.',
+    fires: '01 Capture · 02 Compose · 03 Render, the three steps.',
     clean: 'Shot on 2026-03-01, exported at 12:05, engine v1.02.3.',
   },
   {

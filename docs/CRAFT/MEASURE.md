@@ -77,8 +77,8 @@ Measured signature transitions, to seed a faithful recreation (see the recreatio
 |---|---|---|---|---|---|---|
 | "Send" hero | 47.55–48.35 | area (scale) | **0.43s** | `spring-stiff` / `easeOutSine` | 0.034 tight | a fast ease-out scale-in; author as a `text` scale-in @0.43s `snappy`, or a `whipPan` seam `snappy` |
 | Deel→Revolut card morph | 47.5–48.2 | area | **0.57s** | `smooth` / `easeInOutCubic` / `ramp` | 0.058 close | a ~0.57s ease-in-out cross-dissolve of the card content (a `cut:blur`/dissolve, `smooth`) |
-| "Today" hero | 0.0–1.0 |: |, |, | loose | window spanned two beats (the black "6 days" card crashes in); blur-in-place → tighten + use luma |
-| Typed reveal "Let's change" | 6.4–7.2 |: |, | (| loose | discrete typing + caret + marker highlight) a stagger/cadence, not one tween (author as a `type` layer) |
+| "Today" hero | 0.0–1.0 | n/a | n/a | n/a | loose | window spanned two beats (the black "6 days" card crashes in); blur-in-place → tighten + use luma |
+| Typed reveal "Let's change" | 6.4–7.2 | n/a | n/a | n/a | loose | discrete typing + caret + marker highlight: a stagger/cadence, not one tween (author as a `type` layer) |
 
 The tight fits are directly authorable numbers; the loose ones are the tool correctly refusing to invent
 a curve for motion that isn't one. That distinction is the whole point.

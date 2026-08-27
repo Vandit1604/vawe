@@ -87,7 +87,7 @@ export function registersOf(selection) {
   const LOOKS = 'Looks: the held texture';
   const reg = {
     look: parse(selectionTableRows(selection, LOOKS, nextBold(LOOKS))),
-    sting: parse(selectionTableRows(selection, 'Stings, the shader AT the seam')),
+    sting: parse(selectionTableRows(selection, 'Stings: the shader AT the seam')),
   };
   // …and prove the split landed where it was meant to. A key that is not a member of the registry its
   // table is FOR means the region boundaries slipped, which no missing-key check can see: `coverageErrors`

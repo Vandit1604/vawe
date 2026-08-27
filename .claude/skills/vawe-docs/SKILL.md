@@ -27,7 +27,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 ## Vocabulary & reference
 
-*what a scene may contain: look the answer up, do not guess it*
+*what a scene may contain. Look the answer up, do not guess it*
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|

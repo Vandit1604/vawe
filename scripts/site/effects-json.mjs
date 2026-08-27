@@ -218,7 +218,7 @@ const families = sections.map(([title, intro, list, tag, meta]) => {
 });
 
 if (gaps.length) {
-  console.error('✗ effects-json: a family is not described, ');
+  console.error('✗ effects-json: a family is not described:');
   for (const g of gaps) console.error(`    ${g}`);
   console.error('  Add its authoring form to USAGE, and either a PREVIEW scene or a NO_PREVIEW reason.');
   process.exit(1);

@@ -171,7 +171,7 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
   use a unit suffix for small numbers (`unit: "$B"`, value `880` → `$880B`).
 
 ## Hard rules
-- **No em-dashes ( () in any on-screen text**) the validator rejects them. Use a comma, period, or ·.
+- **No em-dashes (U+2014) in any on-screen text**: the validator rejects them. Use a comma, period, or ·.
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - Text may contain `<b>…</b>` / `<em>…</em>` (rendered as HTML). Keep names short (they sit in cards).
 
@@ -267,7 +267,7 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
    `tryFetch` already gets this right: it requires 200, a minimum size AND a literal `<svg` before it
    writes, which is why `make assets` is the answer and a bare curl is not:
    `curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>`
-3. **Drawn icons** (`svgIcon(name)`. 4. **Generated cards**) `make assets`. 5. **Emoji**, last resort.
+3. **Drawn icons**: `svgIcon(name)`. 4. **Generated cards**: `make assets`. 5. **Emoji**: last resort.
 
 **Never embed copyrighted material** into a published video: movie/TV posters, album covers, film
 stills, news photos, paid stock. They trigger Content ID claims. Capture the real product UI instead.

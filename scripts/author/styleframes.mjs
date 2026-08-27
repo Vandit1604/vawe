@@ -145,7 +145,7 @@ for (const f of frames) console.log(`    ${f.t.toFixed(2).padStart(6)}s   ${f.fi
 console.log(`\n  sheet: ${sheet}`);
 for (const l of look) {
   const bad = l.code !== 0;
-  console.log(`  ${bad ? '✗' : '✓'} ${l.gate}${bad ? ', ' + (l.out.split('\n').find((x) => /[✗×]/.test(x)) || 'failed').trim() : ''}`);
+  console.log(`  ${bad ? '✗' : '✓'} ${l.gate}${bad ? ': ' + (l.out.split('\n').find((x) => /[✗×]/.test(x)) || 'failed').trim() : ''}`);
 }
 console.log('\n  These are the LOOK, not the motion. Open them full size and answer only: is this the film');
 console.log('  I want to have made? Composition, hierarchy, palette, type. Approve, then animate.\n');

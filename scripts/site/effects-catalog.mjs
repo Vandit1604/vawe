@@ -233,7 +233,7 @@ function emit() {
     if (miss.length) gaps.push(`${title}: ${miss.join(', ')}`);
   }
   if (gaps.length) {
-    console.error('✗ effects-catalog: a family with a blurb map has entries missing from it, ');
+    console.error('✗ effects-catalog: a family with a blurb map has entries missing from it:');
     for (const g of gaps) console.error(`    ${g}`);
     console.error('  Add the blurb beside the registry (that is where it lives), then re-run.');
     process.exit(1);

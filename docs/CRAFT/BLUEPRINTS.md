@@ -125,16 +125,16 @@ defaults reproduce those tracks exactly.
 
 | Prop | Type | Default | What |
 |---|---|---|---|
-| `text` | string |: | the word. Pass this or `src`; passing neither throws. |
-| `src` | string |: | a mark (logo/wordmark) to punctuate with instead of a word. |
+| `text` | string | n/a | the word. Pass this or `src`; passing neither throws. |
+| `src` | string | n/a | a mark (logo/wordmark) to punctuate with instead of a word. |
 | `x`, `y` | number | `160`, `380` | stage position (1920x1080). |
 | `w` | number | `1600` for text, unset for a mark | text box width; the mark's rendered width. |
-| `h` | number |: | mark height only. |
+| `h` | number | n/a | mark height only. |
 | `size` | number | `380` | type size. Text only. |
 | `weight` | number | `600` | type weight. Text only. |
 | `color` | string | `var(--text)` | text colour, semantic. Text only. |
 | `align` | string | `center` | text alignment inside `w`. Text only. |
-| `font` | string |: | font role, omitted unless given. Text only. |
+| `font` | string | n/a | font role, omitted unless given. Text only. |
 | `arrive` | number | `1.5` text, `1.4` mark | scale on the first key. A wide mark cannot take the word's amplitude. |
 | `settle` | number | `1` | the settled scale, i.e. the reading. |
 | `drift` | number | `settle + 0.04` text, `+0.03` mark | the creep. Drop it and the hold reads as a freeze frame. |

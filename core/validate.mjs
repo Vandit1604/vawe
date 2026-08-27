@@ -718,7 +718,7 @@ function noEmdash(v, path, errors) {
     const at = seen.indexOf('\u2014');
     // Quote the RENDERED text around the offence, not the head of the source: an em-dash 900
     // characters into a fragment was reported with a 48-character snippet that did not contain it.
-    if (at >= 0) errors.push(`${path || 'data'} contains an em-dash ( (): "${seen.slice(Math.max(0, at - 24), at + 25).trim()}") use , . or ·`);
+    if (at >= 0) errors.push(`${path || 'data'} contains an em-dash: "${seen.slice(Math.max(0, at - 24), at + 25).trim()}". Use , . or ·`);
   }
   else if (Array.isArray(v)) v.forEach((x, i) => noEmdash(x, `${path}[${i}]`, errors));
   else if (isObj(v)) for (const [k, x] of Object.entries(v)) { if (k === 'module' || k === 'theme') continue; noEmdash(x, path ? `${path}.${k}` : k, errors); }

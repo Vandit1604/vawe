@@ -4,7 +4,7 @@ answers: "the block registry (`make catalog`) · the contract each block honours
 group: reference
 ---
 
-# Block catalog — the taste library
+# Block catalog: the taste library
 
 `blocks/index.mjs` is our **vetted UI component library** for scenes (a registry, like shadcn but each
 entry returns scene-layer JSON). Agent-authored beats regress to hollow (a word in a box, a static list,
@@ -14,13 +14,13 @@ timed, animated) that is already tasteful.
 
 **The registry is manifest-driven** (`blocks/catalog.mjs`): every named entry is a data row, so adding a
 block = adding a row (+ a factory or a `variant` branch). `make catalog` auto-renders the whole arsenal to
-paged sheets — browse it before authoring. Two kinds of name: bare (`card`) and namespaced `family.variant`
-(`card.pricing`, `lineChart.area`) — a namespaced entry is the family with preset props you can still
+paged sheets, browse it before authoring. Two kinds of name: bare (`card`) and namespaced `family.variant`
+(`card.pricing`, `lineChart.area`): a namespaced entry is the family with preset props you can still
 override. See [`TASTE.md`](TASTE.md) for where blocks sit in the quality loop.
 
 **Two ways to use them:**
 
-**1. First-class in `scene.json`** (recommended) — author a `block` layer, then expand before render:
+**1. First-class in `scene.json`** (recommended), author a `block` layer, then expand before render:
 
 ```json
 { "type": "block", "block": "stripeCard", "x": 1260, "y": 400, "w": 420, "start": 40, "dur": 3 }
@@ -43,7 +43,7 @@ layers.push(...B.stripeCard({ x: 1200, y: 260, start: 40 }));
 
 **Preview the whole library:** `make catalog` (auto-renders every entry to paged sheets).
 
-**Gate a scene for value:** `make critique D=formats/scene/<file>.json` — flags placeholder words,
+**Gate a scene for value:** `make critique D=formats/scene/<file>.json`, flags placeholder words,
 false claims (e.g. "22 shader stings" with no shader layer), static lists, illegible stings, lonely beats.
 
 ## Contract
@@ -53,7 +53,7 @@ false claims (e.g. "22 shader stings" with no shader layer), static lists, illeg
   SAME block reskins to any brand theme. Multi-series charts default from a `SERIES` ramp derived from
   the theme. Preview under any brand: `make catalog THEME=<name>`. (Overridable per call; Stripe hexes in
   `stripeCard` stay literal on purpose.)
-- Deterministic — no `Date`/random, var strings are static. Same props → same layers.
+- Deterministic: no `Date`/random, var strings are static. Same props → same layers.
 
 ## The option contract (`blocks/schema.mjs`)
 
@@ -88,7 +88,7 @@ the factory really destructures, every parameter is declared or listed in `OMIT`
 
 ## Blocks
 
-Auto-generated from `blocks/catalog.mjs` — run `make blocks-docs` after editing the manifest. Browse
+Auto-generated from `blocks/catalog.mjs`, run `make blocks-docs` after editing the manifest. Browse
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
@@ -122,7 +122,7 @@ _188 entries across 100 families._
 | `deploySuccess` | CI cascade → green "Deployed to production" card |
 | `browserFrame` | window chrome (traffic dots + URL bar) |
 | `pillRow` | horizontal row of chip tags |
-| `statBig` | scale-contrast stat — huge count + tiny label |
+| `statBig` | scale-contrast stat, huge count + tiny label |
 | `statBig.currency` | stat with a $ unit |
 | `statBig.time` | stat, ms unit |
 | `colorCycle` | one word cycling through hues |
@@ -230,8 +230,8 @@ _188 entries across 100 families._
 | `nowPlaying` | music-player card · artwork, progress, transport |
 | `videoLowerThird` | creator lower third · avatar, subs, red CTA |
 | `followCard` | name over handle, pill CTA |
-| `searchEngine.home` | search home — wordmark + pill, query types in (keys click) |
-| `searchEngine.results` | search results — ranked links, cursor clicks one |
+| `searchEngine.home` | search home. Wordmark + pill, query types in (keys click) |
+| `searchEngine.results` | search results, ranked links, cursor clicks one |
 | `feedRow` | feed item · avatar, name, timestamp, body |
 | `listRow` | generic list item · icon tile, title over sub, trailing detail |
 | `settingsRow` | settings row · label + toggle, chevron or value |
@@ -286,7 +286,7 @@ _188 entries across 100 families._
 | `uiReveal3d` | UI rows folding up out of depth: each hinges at its top edge in real perspective, one after another |
 <!-- BLOCKS:END -->
 
-## Comps — reusable sub-compositions (instance a cluster many times/places)
+## Comps: reusable sub-compositions (instance a cluster many times/places)
 
 A **block** is a library factory (shared across films). A **comp** is a cluster you define once inside
 *this* scene and instance repeatedly. Define them under a top-level `comps` map (each entry is
@@ -306,7 +306,7 @@ A **block** is a library factory (shared across films). A **comp** is a cluster 
 ```
 
 The instance's `x/y/start` **offset** every layer in the comp (group children flow, so they're
-untouched). Comps may contain blocks and other comps — expansion is recursive and cycle-guarded.
+untouched). Comps may contain blocks and other comps, expansion is recursive and cycle-guarded.
 Like blocks, comps are **build-time sugar**: run `make expand D=<file>` → `<file>.expanded.json`,
 then validate/render that. `make validate` errors on any un-expanded `block`/`comp` layer.
 
@@ -318,4 +318,4 @@ then validate/render that. `make validate` errors on any un-expanded `block`/`co
 ## Adding a block
 Keep it a pure `(props) => layers[]`. Respect the schema (font size ≥ 18; layer fonts `sans|serif|mono`;
 `elevation ≥ 1` when present). Add a row above + a tile in `scripts/site/blocks-catalog.mjs`, then re-preview.
-A block earns its place in the library only if it makes a beat *demonstrate* something — never a decorative shell.
+A block earns its place in the library only if it makes a beat *demonstrate* something, never a decorative shell.

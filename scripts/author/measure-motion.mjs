@@ -132,7 +132,7 @@ console.log(`  delta            : ${px(y0, dom.k)} → ${px(yF, dom.k)}  (span $
 if (dom.k === 'cx' || dom.k === 'cy') console.log(`  in source px     : ${(span * SRCW / W).toFixed(0)}px of ${dom.k === 'cx' ? SRCW : SRCH}  (${(100 * Math.abs(span) / W).toFixed(0)}% of frame)`);
 console.log(`\n  measured curve   : ${spark(yNorm)}`);
 console.log(`  best-fit preset  : ${spark(bestCurve)}   ← ${best.name}`);
-console.log(`\n  ▶ nearest engine easing: "${best.name}"  (residual ${best.rms.toFixed(3)} ${best.rms < 0.03 ? ' (tight' : best.rms < 0.07 ? ') close' : ', loose, see note'})`);
+console.log(`\n  ▶ nearest engine easing: "${best.name}"  (residual ${best.rms.toFixed(3)} ${best.rms < 0.03 ? ', tight' : best.rms < 0.07 ? ', close' : ', loose, see note'})`);
 console.log(`    runners-up: ${ranked.slice(1, 4).map((r) => `${r.name} ${r.rms.toFixed(3)}`).join(' · ')}`);
 if (overshoot) console.log(`    ⤴ overshoot to ${overshoot} → an anticipation/back/elastic ease (pop / easeOutBack / spring-bouncy)`);
 if (best.rms > 0.07) console.log(`    ~ loose fit: likely TWO stacked tweens (e.g. position + scale), a mid-hold, or a mask/dissolve the single-channel tracker can't split, confirm on the filmstrip.`);
