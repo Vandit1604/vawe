@@ -1,3 +1,9 @@
+---
+when: you want to change this repo rather than use it
+answers: the licence you are contributing under, how to run the suite, and the four things this repo pushes back on
+group: project
+---
+
 # Contributing to Vawe
 
 Thanks for looking. This file is short because the repo explains itself: `CLAUDE.md` is the authoring

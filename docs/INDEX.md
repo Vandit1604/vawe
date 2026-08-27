@@ -14,6 +14,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | you want to change this repo rather than use it | the licence you are contributing under, how to run the suite, and the four things this repo pushes back on |
 | [CREDITS.md](../CREDITS.md) | shipping a video that uses bundled assets | the attribution the fonts, icons and photo sources require |
 | [DESIGN.md](../DESIGN.md) | you want the reasoning behind the engine design, not the API | the design rationale: why one module, why JSON, why determinism is the constraint everything bends to |
 | [LICENSE-FAQ.md](../LICENSE-FAQ.md) | asking what you may do with output from this repo | the licence in plain answers: commercial use, redistribution, the bundled assets |

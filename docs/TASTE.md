@@ -45,7 +45,7 @@ palette · motion · shape · signature details · **NEVERs**). The planning ski
 isn't re-derived every video and every render for that brand stays consistent. Generate/refresh it with
 `make house-style NAME=<brand>` (measured facts auto-fill from the theme; sharpen the judgment lines by
 hand). This is the engine's brand memory — the thing that makes the second video for a brand fast and the
-tenth still on-brand. Example: [`assets/brands/creed/house-style.md`](../assets/brands/creed/house-style.md).
+tenth still on-brand. Example: [`assets/brands/argus/house-style.md`](../assets/brands/argus/house-style.md).
 
 ## The block registry (our component library)
 
