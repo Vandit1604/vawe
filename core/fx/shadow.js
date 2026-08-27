@@ -1,4 +1,4 @@
-// core/fx/shadow.js — a shadow that knows where the light is. Every drop shadow in this engine before
+// core/fx/shadow.js: a shadow that knows where the light is. Every drop shadow in this engine before
 // now pointed the same way on every layer, because `L.shadow` and `L.elevation` are fixed offsets
 // written once at build: down and slightly back, forever, whatever else is in the frame. That reads as
 // a style, not as a scene. Two cards on opposite sides of a lamp throw their shadows in OPPOSITE
@@ -44,26 +44,26 @@ const num = (v) => typeof v === 'number' && Number.isFinite(v);
 function resolve(spec) {
   const s = typeof spec === 'number' ? { dist: spec } : spec;
   if (!s || typeof s !== 'object' || Array.isArray(s))
-    throw new Error(`shadow: expected a distance in px or an object like { "dist": 30, "blur": 48 } — `
+    throw new Error(`shadow: expected a distance in px or an object like { "dist": 30, "blur": 48 }, `
       + `got ${JSON.stringify(spec)}. Keys: ${SHADOW_KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
     if (!SHADOW_KEYS.includes(k))
-      throw new Error(`shadow: unknown key "${k}" — known: ${SHADOW_KEYS.join(', ')}. `
+      throw new Error(`shadow: unknown key "${k}", known: ${SHADOW_KEYS.join(', ')}. `
         + `The DIRECTION is not a key: it comes from the scene's \`lighting\`.`);
   const dist = s.dist == null ? 26 : s.dist;
   if (!num(dist) || dist < 0)
-    throw new Error(`shadow: dist must be a distance in px, 0 or more — got ${JSON.stringify(s.dist)}. `
+    throw new Error(`shadow: dist must be a distance in px, 0 or more, got ${JSON.stringify(s.dist)}. `
       + `It is how far the shadow falls, directly away from the light.`);
   const blur = s.blur == null ? dist * 1.6 : s.blur;
-  if (!num(blur) || blur < 0) throw new Error(`shadow: blur must be px, 0 or more — got ${JSON.stringify(s.blur)}.`);
+  if (!num(blur) || blur < 0) throw new Error(`shadow: blur must be px, 0 or more, got ${JSON.stringify(s.blur)}.`);
   const spread = s.spread == null ? 0 : s.spread;
-  if (!num(spread)) throw new Error(`shadow: spread must be a number of px — got ${JSON.stringify(s.spread)}.`);
+  if (!num(spread)) throw new Error(`shadow: spread must be a number of px, got ${JSON.stringify(s.spread)}.`);
   const color = s.color == null ? 'auto' : s.color;
   if (typeof color !== 'string' || !color)
-    throw new Error(`shadow: color must be "auto", a palette role, or a CSS colour — got ${JSON.stringify(s.color)}.`);
+    throw new Error(`shadow: color must be "auto", a palette role, or a CSS colour, got ${JSON.stringify(s.color)}.`);
   const opacity = s.opacity == null ? 0.3 : s.opacity;
   if (!num(opacity) || opacity < 0 || opacity > 1)
-    throw new Error(`shadow: opacity must be 0..1 — got ${JSON.stringify(s.opacity)}. `
+    throw new Error(`shadow: opacity must be 0..1, got ${JSON.stringify(s.opacity)}. `
       + `The scene's \`lighting.intensity\` scales it, so a dimmer light dims every shadow at once.`);
   return { dist, blur, spread, color, opacity };
 }
@@ -73,12 +73,12 @@ export function build(kit, el, L, spec) {
   const clash = ['elevation', 'shadow', 'glow'].filter((k) => L[k] != null && L[k] !== false);
   if (clash.length)
     throw new Error(`shadow: this layer also sets \`${clash.join('`, `')}\`, which ${clash.length > 1 ? 'write' : 'writes'} `
-      + `box-shadow at build — the modifier would overwrite ${clash.length > 1 ? 'them' : 'it'} and the `
+      + `box-shadow at build. The modifier would overwrite ${clash.length > 1 ? 'them' : 'it'} and the `
       + `${clash[0]} would silently stop being there. `
       + `Drop the static one; the modifier's own \`spread\` and \`color\` cover the same ground and its `
       + `direction comes from the light.`);
   if (!L.id)
-    throw new Error(`shadow: this layer needs an \`id\` — the light's direction is measured to the `
+    throw new Error(`shadow: this layer needs an \`id\`. The light's direction is measured to the `
       + `layer's own centre, which is looked up through scene.boxOf, and boxOf knows only layers an `
       + `author named.`);
 }
@@ -87,13 +87,13 @@ export function build(kit, el, L, spec) {
 // palette, and neither was reachable from a modifier until the scene view carried them. Three ways in,
 // in order of how specific the author is being:
 //
-//   "auto" (the default) — read the backdrop at t. Over a light field the shadow is the theme's own
+//   "auto" (the default), read the backdrop at t. Over a light field the shadow is the theme's own
 //        ink, which is the darkest colour the film is allowed to use and always the right neutral for
 //        it; over a dark field ink IS the field, so it falls back to black, which still darkens. Over
 //        an ACCENT field a neutral shadow goes muddy, so it takes the accent's own hue.
-//   a PALETTE ROLE ("accent", "ink", "line") — resolved through the theme, so the shadow moves with
+//   a PALETTE ROLE ("accent", "ink", "line"): resolved through the theme, so the shadow moves with
 //        the brand instead of pinning a hex the theme already owns into a second place.
-//   any other string — a CSS colour, passed through untouched.
+//   any other string: a CSS colour, passed through untouched.
 //
 // A theme with no palette at all leaves ROLE lookups impossible; that is an error naming the theme
 // rather than a silent pass-through, because "accent" as a CSS colour is not a colour and the browser
@@ -119,12 +119,12 @@ export function frame(kit, el, L, t, scene, spec) {
   const { dist, blur, spread, color: rawColor, opacity } = resolve(spec);
   if (!scene.light)
     throw new Error(`shadow: the scene declares no \`lighting\`, so there is no direction to cast away `
-      + `from. Add "lighting": { "x": <px>, "y": <px> } at the top level — it is the whole point of this `
+      + `from. Add "lighting": { "x": <px>, "y": <px> } at the top level, it is the whole point of this `
       + `modifier that one light aims every shadow in the film.`);
   const b = scene.boxOf(L.id);
   if (!b)
     throw new Error(`shadow: no box for this layer's own id "${L.id}". Either nothing declares that id, `
-      + `or this is a child of a group whose motion track keys \`w\`/\`h\` — resizing a flex or grid box `
+      + `or this is a child of a group whose motion track keys \`w\`/\`h\`, resizing a flex or grid box `
       + `reflows its children, so their measured offsets are stale and the direction computed from them `
       + `would be silently wrong. Put the modifier on the group, or resize with \`scale\`.`);
   const color = resolveColor(rawColor, scene);

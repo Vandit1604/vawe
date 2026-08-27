@@ -1,4 +1,4 @@
-// core/surfaces/raymarch.js — a raymarched 3D subject. The `raymarch` layer type's pixels.
+// core/surfaces/raymarch.js: a raymarched 3D subject. The `raymarch` layer type's pixels.
 //
 // Unlike `shader`, this is a LIT SUBJECT with a silhouette, not an ambient field: give it a box
 // roughly the size you want the object to occupy and let its transparent surround do the compositing.

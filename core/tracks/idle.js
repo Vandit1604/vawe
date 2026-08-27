@@ -1,4 +1,4 @@
-// core/tracks/idle.js — the idle track: ambient motion across a layer's SETTLED MIDDLE, so a held
+// core/tracks/idle.js. The idle track: ambient motion across a layer's SETTLED MIDDLE, so a held
 // frame can be alive without the author hand-keying a motion track for it. The generators, the
 // envelope and the reason any of this exists are core/idle.js; this file is where they meet an element.
 //
@@ -18,7 +18,7 @@ export const PROPS = { idle: {} };
 // `undefined` means "not looked yet" and `null` is the real answer "this layer has no idle", so a
 // scene with the default off pays one property read per layer per frame and nothing else.
 //
-// The phase is keyed on what identifies the layer to a human — its `id`, or its content and where it
+// The phase is keyed on what identifies the layer to a human, its `id`, or its content and where it
 // sits. Two layers breathing in lockstep read as one mechanism driving both, and the same layer must
 // breathe identically on every render and in every worker, so the offset is hashed, never drawn.
 const idleOf = (kit, el, L) => {
@@ -44,7 +44,7 @@ export function frame(kit, el, L, units, t, f, start, end) {
 
   // AUTHORITATIVE, and this is the part that is not obvious. Most entrances rewrite `transform` from
   // scratch on every frame, so composing onto whatever is on the element is safe. `wipe`, `iris` and
-  // `clock` do not — they write clipPath and never touch transform — so on one of those layers the
+  // `clock` do not (they write clipPath and never touch transform) so on one of those layers the
   // string sitting on the element is the one THIS track wrote on whichever frame the worker rendered
   // before, and frames render out of order. Composing onto that would stack idle onto idle and make
   // frame N depend on frame N-1, which is defect #41's exact shape.
@@ -60,7 +60,7 @@ export function frame(kit, el, L, units, t, f, start, end) {
   // READ BACK, do not store what was written. CSSOM re-serialises an inline transform on the way in
   // (`scale(1.000000)` comes back as `scale(1)`), so the string handed to the setter never equals the
   // string the getter returns, the comparison above could never fire, and every frame took the
-  // PREVIOUS frame's idle as its base and added to it — a drift that walked 300px off its layout by
+  // PREVIOUS frame's idle as its base and added to it. A drift that walked 300px off its layout by
   // the end and did it differently depending on which frames a worker had already rendered. Storing
   // the browser's own spelling is what makes the two sides of the comparison the same language.
   el.__hsIdle = { out: el.style.transform, base };

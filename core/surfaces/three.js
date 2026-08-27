@@ -1,6 +1,6 @@
-// core/surfaces/three.js — a three.js scene. The `three` layer type's pixels.
+// core/surfaces/three.js: a three.js scene. The `three` layer type's pixels.
 //
-// The determinism contract lives in core/three-fx.js — read its header before adding a scene. The
+// The determinism contract lives in core/three-fx.js, read its header before adding a scene. The
 // short version: pose everything absolutely from t, never accumulate, never touch a clock.
 import { createThreeLayer, THREE_FX, PROPS as FX_PROPS } from '../three-fx.js';
 import { mergeProps } from '../props.js';
@@ -15,7 +15,7 @@ export const resamplable = false;
 export const PROPS = mergeProps({ colors: {} }, FX_PROPS);
 
 export function validate(L) {
-  if (!THREE_FX.includes(L.three)) throw new Error(`unknown three scene "${L.three}" — one of: ${THREE_FX.join(', ')}`);
+  if (!THREE_FX.includes(L.three)) throw new Error(`unknown three scene "${L.three}", one of: ${THREE_FX.join(', ')}`);
 }
 
 // The whole layer goes to createThreeLayer: a three scene reads its own dials (dolly, pointSize,

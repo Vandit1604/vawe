@@ -1,4 +1,4 @@
-// blocks/geo.mjs — the MAP family: a hex-tile cartogram, a world choropleth, a US choropleth, a
+// blocks/geo.mjs. The MAP family: a hex-tile cartogram, a world choropleth, a US choropleth, a
 // proportional-bubble map and an origin→destination flow map.
 //
 // WHY THIS FAMILY EXISTS. Half the scene library carries no pictorial layer at all, and a claim about
@@ -11,7 +11,7 @@
 // library, goes near the render loop. `renderFrame(n)` stays a pure function of n.
 //
 // THE GEOMETRY IS BAKED, NOT FETCHED. assets/geo/us-states.js and assets/geo/world.js are generated
-// files holding outer rings only, Douglas-Peucker simplified and quantised to 3 decimal degrees — 32 KB
+// files holding outer rings only, Douglas-Peucker simplified and quantised to 3 decimal degrees, 32 KB
 // and 61 KB against 112 KB and 819 KB of source. A build that reaches the network is a build that fails
 // on the day the network does.
 //   us-states.js ← assets/geo/us-states.json   (us-atlas@3 states-10m, US Census TIGER, public domain)
@@ -26,7 +26,7 @@
 import { geoAlbersUsa, geoNaturalEarth1, geoPath } from 'd3-geo';
 import { TOKENS as T, HAIR, R, TYPE, SPACE, r2 } from './kit.mjs';
 // EVERY LABEL IS TYPE.body, NOT TYPE.fine. `verify/audit.mjs` floors readable text at 1.3% of frame
-// height — 14.04px at 1080 — and TYPE.fine is 14, so a map labelled at the small step fails the floor
+// height (14.04px at 1080) and TYPE.fine is 14, so a map labelled at the small step fails the floor
 // by four hundredths of a pixel on every single label. The next step up is the only one that passes.
 import { US_STATES } from '../assets/geo/us-states.js';
 import { WORLD_COUNTRIES } from '../assets/geo/world.js';
@@ -91,12 +91,12 @@ const titleEl = (title, sub, w) => (title || sub)
 // THE MAP OWNS ITS OWN GROUND, and that is not decoration.
 //
 // Every other data family here paints a card under itself (`cardChrome`, blocks/charts.mjs:132). This
-// one did not, so its legend and callout labels — `T.sub`, a mid-grey chosen for a light surface — were
+// one did not, so its legend and callout labels, `T.sub`, a mid-grey chosen for a light surface, were
 // painted straight onto whatever the scene put behind them. Over the theme's own pale ground that reads;
 // over a living dark backdrop, which is exactly what CLAUDE.md tells authors to use, the same grey
 // measured 1.9:1 and the audit refused it.
 //
-// The defect is not the grey. It is a colour decision made against an ASSUMED background — the same
+// The defect is not the grey. It is a colour decision made against an ASSUMED background, the same
 // class as docs/MISTAKES.md #373, where a preset's lightness was read off a hand-kept name list instead
 // of being measured. A block cannot know what a scene will put behind it, so it must not depend on it.
 // Painting the card removes the question rather than answering it.
@@ -104,7 +104,7 @@ const wrap = ({ x, y, w, html, start, dur, parts }) =>
   [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'fade', enterDur: 0.3, exitDur: 0.35,
     // NO `pad` HERE. The block computes its whole geometry from `w` BEFORE this wrapper sees it, and a
     // layer that declares a box plus padding is laid out border-box (core/layers/html.js), so padding
-    // shrinks the painted card while the content keeps its full width — the map then overflows its own
+    // shrinks the painted card while the content keeps its full width, the map then overflows its own
     // card to the right and lands back on the raw backdrop, which is the exact bug this card fixes.
     // The inner markup already carries its own margins.
     out: 'defocus', bg: T.card, radius: R.card, border: HAIR, elevation: 1,
@@ -112,7 +112,7 @@ const wrap = ({ x, y, w, html, start, dur, parts }) =>
 
 // ── 1 · usMapHex ─────────────────────────────────────────────────────────────────────────────────
 // THE LAYOUT IS AN ASCII MAP ON PURPOSE. A hex cartogram is 51 (col, row) pairs, and a table of 51
-// numbers is unreadable and unreviewable — a transposed pair looks exactly like a correct one. Written
+// numbers is unreadable and unreviewable. A transposed pair looks exactly like a correct one. Written
 // as the picture it describes, a misplaced state is visible in the source.
 const HEX_GRID = `
 AK .  .  .  .  .  .  .  .  .  ME
@@ -129,7 +129,7 @@ const HEX_CELLS = HEX_GRID.trim().split('\n').flatMap((line, row) =>
 const HEX_COLS = 11;
 const HEX_ROWS = HEX_GRID.trim().split('\n').length;
 
-// usMapHex — every state the SAME SIZE, so the reading is the value and not the acreage. The honest
+// usMapHex: every state the SAME SIZE, so the reading is the value and not the acreage. The honest
 // shape for a per-state rate: a true choropleth makes Montana shout and Rhode Island vanish.
 export function usMapHex({ x, y, w = 1180, data = [], title = '', sub = '', legend = '',
   showLegend = true, unit = '', showValues = true, start = 0, dur = 5 } = {}) {
@@ -149,7 +149,7 @@ export function usMapHex({ x, y, w = 1180, data = [], title = '', sub = '', lege
     const fill = f === null ? EMPTY : rampAt(f);
     // Ink over a heavy accent wash stops being readable; the light end keeps the theme's own text.
     // `--accent-ink` is the WRONG TOKEN with the right intent: it is the accent used as text, and on
-    // brew it is #b83a0f — dark orange placed on an orange fill. `--on-accent` is ink FOR an accent
+    // brew it is #b83a0f, dark orange placed on an orange fill. `--on-accent` is ink FOR an accent
     // ground. Graded against the full-strength accent, so on a heavy wash it is directionally right
     // rather than exactly measured.
     const ink = f !== null && f > 0.55 ? T.onAccent : T.ink;   // see the halo note in choropleth()
@@ -218,7 +218,7 @@ function choropleth({ items, projection, x, y, w, h, data, title, sub, legend, s
 }
 
 // ── 2 · worldMap ─────────────────────────────────────────────────────────────────────────────────
-// worldMap — a world choropleth keyed by ISO 3166-1 alpha-3. Natural Earth I projection: the compromise
+// worldMap. A world choropleth keyed by ISO 3166-1 alpha-3. Natural Earth I projection: the compromise
 // that keeps the tropics the right shape without Mercator's polar lie.
 export function worldMap({ x, y, w = 1360, h = 700, data = [], title = '', sub = '', legend = '',
   showLegend = true, unit = '', labels = false, labelMin = 0.6, start = 0, dur = 5 } = {}) {
@@ -227,7 +227,7 @@ export function worldMap({ x, y, w = 1360, h = 700, data = [], title = '', sub =
 }
 
 // ── 3 · usMap ────────────────────────────────────────────────────────────────────────────────────
-// usMap — the true-geography US choropleth, keyed by two-letter postal code. Albers USA, so Alaska and
+// usMap. The true-geography US choropleth, keyed by two-letter postal code. Albers USA, so Alaska and
 // Hawaii are inset instead of missing.
 export function usMap({ x, y, w = 1200, h = 720, data = [], title = '', sub = '', legend = '',
   showLegend = true, unit = '', labels = true, labelMin = 0, start = 0, dur = 5 } = {}) {
@@ -258,7 +258,7 @@ function lonlatOf(p, where) {
 }
 
 // ── 4 · usMapBubble ──────────────────────────────────────────────────────────────────────────────
-// usMapBubble — proportional circles over the outline. AREA is proportional to the value, not radius:
+// usMapBubble, proportional circles over the outline. AREA is proportional to the value, not radius:
 // scaling the radius linearly overstates the big ones by the square, which is the oldest lie in
 // thematic cartography.
 export function usMapBubble({ x, y, w = 1200, h = 720, points = [], title = '', sub = '',
@@ -302,7 +302,7 @@ export function usMapBubble({ x, y, w = 1200, h = 720, points = [], title = '', 
 }
 
 // ── 5 · usMapFlow ────────────────────────────────────────────────────────────────────────────────
-// usMapFlow — origin→destination arcs that DRAW ON. The curve is a quadratic bowed perpendicular to the
+// usMapFlow, origin→destination arcs that DRAW ON. The curve is a quadratic bowed perpendicular to the
 // chord: not a real great circle, but at continental scale the difference is under a pixel and a
 // projected great circle costs a geoInterpolate sample loop for nothing.
 export function usMapFlow({ x, y, w = 1200, h = 720, flows = [], title = '', sub = '',

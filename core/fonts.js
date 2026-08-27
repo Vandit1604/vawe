@@ -1,4 +1,4 @@
-// fonts.js — the font registry + the fallback detector.
+// fonts.js: the font registry + the fallback detector.
 //
 // THE BUG THIS KILLS: a theme or a captured component names a family that has no @font-face.
 // The browser silently substitutes a generic and the video renders in the wrong typeface. It has
@@ -8,7 +8,7 @@
 // So nothing here is hardcoded. The load set is DERIVED from the @font-face rules in the CSS, and
 // the audit is derived from the families the rendered DOM actually asks for.
 //
-// WHY NOT document.fonts.check() — it is inverted for this job. Measured in headless Chrome:
+// WHY NOT document.fonts.check(). It is inverted for this job. Measured in headless Chrome:
 //   check("600 100px 'NoSuchFaceXYZ'") -> true    (a family that does not exist anywhere)
 //   check("600 100px 'Manrope'")       -> false   (registered + vendored, merely not loaded yet)
 // It answers "can these glyphs be drawn somehow", not "is the face I asked for the one painting".
@@ -124,7 +124,7 @@ export function auditFonts(root) {
   return [...usedFamilies(root)].sort().map((f) => verdictOf(f, reg, status));
 }
 
-// assertFamilies(families, where) — THE READ-BACK for the font boundary.
+// assertFamilies(families, where): THE READ-BACK for the font boundary.
 //
 // WHY. `document.fonts.load()` is a boundary we do not own, and it shrugs by contract: a face whose
 // file 404s leaves the FontFace at status "error" and the browser paints a generic instead. Measured
@@ -149,12 +149,12 @@ export function assertFamilies(families, where = 'theme') {
   const bad = rows.filter((r) => r.verdict !== 'OK');
   if (bad.length) {
     const why = {
-      BROKEN: (r) => `its @font-face file never loaded (${r.src || 'no src'}) — run \`make fonts\``,
+      BROKEN: (r) => `its @font-face file never loaded (${r.src || 'no src'}), run \`make fonts\``,
       FALLBACK: (r) => (r.registered
-        ? `declared by an @font-face (${r.src || 'no src'}) that never resolved — run \`make fonts\``
+        ? `declared by an @font-face (${r.src || 'no src'}) that never resolved, run \`make fonts\``
         : 'no @font-face declares it: add one to core/tokens.css, or name a family that has one'),
       'SYSTEM-LUCK': () => 'it paints only because this machine happens to have it installed, and no '
-        + '@font-face declares it — every other machine renders a substitute',
+        + '@font-face declares it: every other machine renders a substitute',
     };
     throw new Error(`${where}: ${bad.length} font famil${bad.length > 1 ? 'ies' : 'y'} would render as a substitute:\n`
       + bad.map((r) => `  - "${r.family}" (${r.verdict}, FontFace ${r.loaded}): ${why[r.verdict](r)}`).join('\n')

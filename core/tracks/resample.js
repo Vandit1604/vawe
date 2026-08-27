@@ -1,12 +1,12 @@
-// core/tracks/resample.js — drive whatever resampler a layer attached, once per layer per frame.
+// core/tracks/resample.js: drive whatever resampler a layer attached, once per layer per frame.
 //
 // It is a track and not a modifier for the reason the registry gives: it runs for every layer whether
-// the author asked or not, and it has to interleave at an exact point — immediately after `primitive`,
+// the author asked or not, and it has to interleave at an exact point, immediately after `primitive`,
 // because a `paint` or `shader` layer draws its own canvas there and the pass must read THIS frame's
 // pixels, never the last frame's.
 //
 // It used to be two call sites: core/layers/image.js and core/layers/canvas.js each ticked their own,
-// which is why no other layer type could be resampled at all — a text layer has no frame() to hang it
+// which is why no other layer type could be resampled at all, a text layer has no frame() to hang it
 // off. One owner, every type, and the ordering fact lives in one place (docs/MISTAKES.md #425).
 import { tickResample } from '../resample.js';
 

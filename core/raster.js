@@ -1,4 +1,4 @@
-// core/raster.js — THE ONE PLACE A DOM SUBTREE BECOMES PIXELS.
+// core/raster.js: THE ONE PLACE A DOM SUBTREE BECOMES PIXELS.
 //
 // Lifted out of core/seams.js, which owned it alone for as long as the only thing that wanted a
 // DOM raster was a seam. A second caller now wants one (core/resample.js, so a resample pass can be
@@ -7,7 +7,7 @@
 // seams.js imports from this file and nothing else changed about what a seam bakes.
 //
 // CHOICE: in-browser SVG <foreignObject> serialisation, over a Go screenshot pre-pass.
-//   • self-contained in the page — no Go/JS coordination, so `make probe`/`make snap`/`make
+//   • self-contained in the page: no Go/JS coordination, so `make probe`/`make snap`/`make
 //     canvas-purity` on existing scenes are untouched (a scene that bakes nothing never calls here).
 //   • the bake is one-shot at build; the result is a static canvas, so renderFrame(n) stays pure in n.
 // The two <foreignObject> gotchas are both handled here: (1) external stylesheets and CSS custom
@@ -85,7 +85,7 @@ function usedFamilies(el) {
 export async function buildInlinedCss(el) {
   const families = usedFamilies(el);
   // base sheet: the scene's own <style> blocks + tokens.css, minus their @font-face (url()s that
-  // would not resolve in the isolated raster — the data: versions below replace them).
+  // would not resolve in the isolated raster, the data: versions below replace them).
   let base = '';
   for (const st of document.querySelectorAll('style')) base += '\n' + st.textContent;
   if (_tokensCss === null) {
@@ -101,7 +101,7 @@ export async function buildInlinedCss(el) {
 }
 
 // domToCanvas(el, w, h): serialise `el` into an SVG <foreignObject> with the inlined CSS, rasterise
-// it through an <img>, and return a canvas. Async (image decode) — build-time only.
+// it through an <img>, and return a canvas. Async (image decode), build-time only.
 export async function domToCanvas(el, w, h, css) {
   const xml = new XMLSerializer().serializeToString(el);
   const svg =
@@ -116,7 +116,7 @@ export async function domToCanvas(el, w, h, css) {
   const img = new Image();
   img.width = w; img.height = h;
   // Time-bound the decode with a REAL timer (scene setTimeout is virtualized and would never fire
-  // during boot): a raster that never resolves must not deadlock the render — it becomes a bake miss.
+  // during boot): a raster that never resolves must not deadlock the render, it becomes a bake miss.
   const timer = window.__realTimeout || setTimeout;
   await new Promise((res, rej) => {
     let done = false;
@@ -133,10 +133,10 @@ export async function domToCanvas(el, w, h, css) {
   return c;
 }
 
-// rasterStats(canvas) — the two things a caller wants to know about a bake, sampled on a stride:
+// rasterStats(canvas): the two things a caller wants to know about a bake, sampled on a stride:
 // how much of it is opaque at all, and how much of it differs from its own first pixel. They are
 // separate questions and conflating them was a bug waiting for its caller: a seam wants both (a flat
-// field means the beat did not rasterise), while a single resampled layer wants only the first — a
+// field means the beat did not rasterise), while a single resampled layer wants only the first, a
 // `rect` layer IS one flat colour, and grading that as a failed bake refused a perfectly good source.
 export function rasterStats(canvas) {
   try {
@@ -155,8 +155,8 @@ export function rasterStats(canvas) {
   } catch (e) { return null; }   // unreadable (tainted) → the caller assumes it painted
 }
 
-// isBlankRaster(canvas): a bake that produced essentially nothing (all one colour / transparent) —
-// the signal to fall back to the plain cross-fade rather than flashing an empty frame.
+// isBlankRaster(canvas): a bake that produced essentially nothing (all one colour / transparent).
+// The signal to fall back to the plain cross-fade rather than flashing an empty frame.
 export function isBlankRaster(canvas) {
   const s = rasterStats(canvas);
   if (!s) return false; // unreadable (tainted) → assume it painted; the GL path can still use it

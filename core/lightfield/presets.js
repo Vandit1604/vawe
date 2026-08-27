@@ -1,4 +1,4 @@
-// core/lightfield/presets.js — the committed fields. Each is a full option set, so it doubles as a
+// core/lightfield/presets.js: the committed fields. Each is a full option set, so it doubles as a
 // worked example of the API. Nothing here is special-cased inside the generator: a preset is just an
 // argument.
 //

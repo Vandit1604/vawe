@@ -1,19 +1,19 @@
-// core/prop-audit.js — refuse a layer prop that was WRITTEN and never READ.
+// core/prop-audit.js: refuse a layer prop that was WRITTEN and never READ.
 //
 // The bug class (docs/MISTAKES.md #428, #424): an author sets a real, documented prop, the engine
 // accepts it, no code consults it, and a still frame comes out with nothing to say why. The static
-// vocabulary check (core/layers/vocabulary.js) cannot see this. Statically `bg` IS read — by
+// vocabulary check (core/layers/vocabulary.js) cannot see this. Statically `bg` IS read, by
 // group.js, rect.js and text.js, through kit.chipBox. #428 was that the builder for THIS type never
 // reached for it. Only a per-LAYER record of what was actually read answers that.
 //
 // Same idea as `paramsOf` (core/camera-moves.js:216), which refuses an unknown camera parameter by
-// reading the generator's OWN signature so no table can drift — generalised from parameters to props.
+// reading the generator's OWN signature so no table can drift, generalised from parameters to props.
 // There is no list of props here and none to maintain: the layer object itself is the list, and a
 // prop that does not exist yet is covered on the day it is written.
 
 const READS = new WeakMap();
 
-// watchProps — wrap a layer (and its children, depth-first, so wrapping a child is not itself
+// watchProps: wrap a layer (and its children, depth-first, so wrapping a child is not itself
 // recorded as a read of `children`) in a Proxy that records every string key read off it.
 export function watchProps(L) {
   if (!L || typeof L !== 'object' || Array.isArray(L)) return L;
@@ -43,12 +43,12 @@ export function watchedTree(p, out = []) {
 //
 // A layer object is read in three phases and only one of them is inside the window this record covers:
 //   · BOOT, before the scene orchestrator sees the data (core/boot.js resolves the placement grammar).
-//   · BUILD, which is `buildLayer` — the pre-passes, the primitive's build(), the kit, decorate().
+//   · BUILD, which is `buildLayer`: the pre-passes, the primitive's build(), the kit, decorate().
 //   · FRAME, `renderFrame(n)`: the twelve-track pipeline, the modifier registry, each type's frame().
 //
 // Only BUILD is deterministic to check. A real render runs about eight parallel workers and each draws
 // a SUBSET of the frames, so a read set accumulated across frames is partial and partial in a different
-// way per worker — a gate whose verdict depends on which worker saw which frame is worse than no gate,
+// way per worker. A gate whose verdict depends on which worker saw which frame is worse than no gate,
 // and `renderFrame(n)` purity is this engine's central contract. Sampling a few frames instead trades
 // that for a check that misses whatever it did not sample. So the record is snapshotted at the end of
 // BUILD, and the props the other two phases read are exempt.
@@ -56,8 +56,8 @@ export function watchedTree(p, out = []) {
 // THAT EXEMPTION IS DERIVED, NEVER TYPED. Every module already declares the props it reads, beside the
 // read (core/props.js). The six modules that read outside the build window declare their own sets; the
 // kit is the build window's own vocabulary; and a layer TYPE that exports `frame` cannot say which of
-// its props are read there, so a type's own declarations are exempt too. What is left — the props the
-// kit reads and this type does not declare — is exactly the surface #428 lived on: `bg`, `border`,
+// its props are read there, so a type's own declarations are exempt too. What is left, the props the
+// kit reads and this type does not declare, is exactly the surface #428 lived on: `bg`, `border`,
 // `radius`, `shadow`, `elevation` and `pad`, advertised on every layer, painted by `kit.chipBox`, and
 // consulted by `html` never.
 //
@@ -77,7 +77,7 @@ import { PROPS as LOWER_PROPS } from './transitions-lower.js';
 const OUTSIDE_BUILD = new Set([ORCHESTRATOR_PROPS, TRACK_PROPS, BOOT_PROPS, PAN_PROPS, FX_PROPS, LOWER_PROPS]
   .flatMap((s) => Object.keys(s)));
 
-// THE DRIFT GUARD. The partition above names the six modules a second time — core/layers/vocabulary.js
+// THE DRIFT GUARD. The partition above names the six modules a second time, core/layers/vocabulary.js
 // names them first, to build SHARED_PROPS. Two lists of the same thing is how a gate and the renderer
 // come to disagree, so the day a seventh module joins the shared vocabulary and not this line, this
 // throws at boot instead of quietly widening what the audit will refuse.
@@ -103,7 +103,7 @@ function auditedProps(type) {
   return s;
 }
 
-// auditLayer — refuse a prop this layer's build accepted and never read. Called the instant one
+// auditLayer: refuse a prop this layer's build accepted and never read. Called the instant one
 // layer's build finishes, so the verdict is a function of that layer alone.
 const labelOf = (L) => {
   if (L.id) return `layer "${L.id}"`;
@@ -120,9 +120,9 @@ export function auditLayer(p, label = labelOf(p)) {
   if (!dead.length) return;
   throw new Error(`${label} (type "${type}"): ${dead.map((k) => `\`${k}\``).join(', ')} `
     + `${dead.length === 1 ? 'was' : 'were'} set and never read while this layer was built.\n`
-    + `The prop is real and the schema advertises it — nothing in the \`${type}\` builder reached for `
+    + `The prop is real and the schema advertises it. Nothing in the \`${type}\` builder reached for `
     + `it, so it would be accepted and then ignored and the frame would come out with nothing to say `
     + `why (docs/MISTAKES.md #428).\n`
-    + `Either the builder should consume it (these are the box props kit.chipBox paints — text, rect, `
+    + `Either the builder should consume it (these are the box props kit.chipBox paints, text, rect, `
     + `group and html all call it), or the layer should not carry it.`);
 }

@@ -1,4 +1,4 @@
-// core/surfaces/globe.js — a dotted planet with routes drawn on it. The `globe` layer type's pixels.
+// core/surfaces/globe.js: a dotted planet with routes drawn on it. The `globe` layer type's pixels.
 //
 // This is cobe (MIT, 12.9 KB, zero dependencies), vendored at /assets/vendor/cobe.module.js and
 // loaded lazily by preloadCobe the way three.js is.
@@ -11,7 +11,7 @@
 // reach for otherwise.
 //
 // WHY IT IS SAFE, which is the only question that mattered. cobe's published build contains ZERO
-// requestAnimationFrame, ZERO performance.now and ZERO Date.now — measured, not assumed. It owns no
+// requestAnimationFrame, ZERO performance.now and ZERO Date.now, measured, not assumed. It owns no
 // clock at all: `createGlobe(canvas, opts)` then `update(state)`, and the caller decides everything.
 // So `phi = f(t)` is the whole integration, and it is deterministic by construction rather than by a
 // contract someone has to remember. Proven forwards, backwards and replayed, byte-identical.
@@ -21,7 +21,7 @@
 // looks exactly like a layer that drew nothing.
 import { palette } from './palette.js';
 
-export const size = () => [1080, 1080];   // a subject you place, like raymarch — not a field
+export const size = () => [1080, 1080];   // a subject you place, like raymarch, not a field
 export const stamp = 4;
 export const resamplable = false;
 
@@ -42,7 +42,7 @@ export function validate(L) {
   for (const k of ['origin', 'dest']) {
     const v = L[k];
     if (v !== undefined && !(Array.isArray(v) && v.length === 2 && v.every((n) => typeof n === 'number'))) {
-      throw new Error(`globe ${k} must be [lon, lat] — got ${JSON.stringify(v)}`);
+      throw new Error(`globe ${k} must be [lon, lat]: got ${JSON.stringify(v)}`);
     }
   }
 }
@@ -53,7 +53,7 @@ const ease = (p) => p * p * (3 - 2 * p);
 //
 // cobe's arcs are STATIC: it draws the whole path or none of it, and there is no progress dial. But
 // `update()` takes a fresh `arcs` array, so a route that draws on is just an arc whose far end is
-// f(t) — and the same point is where the aircraft is. One expression, so the line and the marker
+// f(t), and the same point is where the aircraft is. One expression, so the line and the marker
 // cannot disagree, which is the mistake the flat film made with countDur.
 const D = Math.PI / 180;
 function along(a, b, p) {
@@ -76,7 +76,7 @@ export function create(kit, L, w, h) {
   if (!make) {
     // Loud, not blank. A globe layer that silently draws nothing is indistinguishable from one whose
     // rotation happens to point at empty ocean, which is a whole afternoon nobody should spend.
-    throw new Error('globe: cobe is not loaded — preloadCobe only runs when the scene declares a `globe` layer, so this layer was built outside the normal boot path');
+    throw new Error('globe: cobe is not loaded, preloadCobe only runs when the scene declares a `globe` layer, so this layer was built outside the normal boot path');
   }
 
   const pal = palette(L) || [];

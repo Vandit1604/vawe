@@ -1,9 +1,9 @@
-// core/tracks/vars.js — ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and
-// nothing else, so a block could only ever ENTER — every one of them wore the same `anim:'rise'`
+// core/tracks/vars.js: ANIMATED CSS VARIABLES. The engine could drive transform, opacity and blur and
+// nothing else, so a block could only ever ENTER. Every one of them wore the same `anim:'rise'`
 // because there was no way to animate what the block actually DOES. A gauge cannot sweep to its
 // reading, a bar cannot grow, a line cannot draw on. Interpolating a custom property fixes the whole
 // class at once: the block writes `var(--p)` into its own CSS or SVG and the engine drives the number.
-// Pure in n — the value is a function of t and nothing else.
+// Pure in n: the value is a function of t and nothing else.
 //   vars: { '--p': [0, 1] }, varsDur: 1.2, varsDelay: 0.15, varsEase: 'easeOutCubic'
 //
 // Custom properties are its own namespace, so no other track can collide with it. It runs before

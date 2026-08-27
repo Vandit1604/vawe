@@ -1,4 +1,4 @@
-// core/safe.js — THE safe area. One definition, four consumers, no second opinion.
+// core/safe.js: THE safe area. One definition, four consumers, no second opinion.
 //
 // WHY THIS EXISTS: "safe" was one word doing three different jobs, defined four times, and the four
 // disagreed:
@@ -14,11 +14,11 @@
 // THE FIX IS CONCEPTUAL, NOT ARITHMETIC. The four numbers could never be reconciled because they
 // answer different questions:
 //
-//   1. MARGIN — don't let content kiss the frame edge. Aesthetic. A property of the CANVAS.
-//   2. CHROME — TikTok paints a rail down the right and captions across the bottom. A property of the
+//   1. MARGIN, don't let content kiss the frame edge. Aesthetic. A property of the CANVAS.
+//   2. CHROME, TikTok paints a rail down the right and captions across the bottom. A property of the
 //      DESTINATION, not of the shape. 9:16 for a website hero and 9:16 for TikTok are the same canvas
 //      with completely different unusable regions.
-//   3. ANCHOR — what `pin:"bottom"` resolves to.
+//   3. ANCHOR, what `pin:"bottom"` resolves to.
 //
 // Conflating 1 and 2 under the word "portrait" is the bug. So safe CANNOT be derived from aspect
 // alone: it needs to know where the video is going. A scene declares `destination`; the default is
@@ -40,13 +40,13 @@
 export const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350], '4:3': [1440, 1080] };
 
 /**
- * sceneDims(cfg, key?) — the canvas a scene renders at, in pixels. An explicit key (an --aspect flag)
+ * sceneDims(cfg, key?): the canvas a scene renders at, in pixels. An explicit key (an --aspect flag)
  * wins; else the scene's own `aspect`; else the legacy `orientation`; else portrait. A ratio the
  * ASPECTS table doesn't name is still honoured, sized to fit the long edge at 1920.
  *
  * WHY THIS IS HERE and not in each tool: the header above describes four copies of the SAFE box that
  * disagreed. The same thing had already happened one level down, to the question of how big the frame
- * is — eight call sites, three of which read `aspect` and five of which knew only about `orientation`.
+ * is: eight call sites, three of which read `aspect` and five of which knew only about `orientation`.
  * Since scenes declare `aspect` and almost none declare `orientation`, those five silently rendered
  * every landscape scene into a 1080x1920 portrait viewport and cropped it: `make frame`, `make beats`,
  * `make slop`, `make motion` and `make snap` were all judging a canvas the renderer never produces.
@@ -71,7 +71,7 @@ export function sceneDims(cfg = {}, key = '') {
 export const MARGIN = 0.06;
 
 /**
- * MAX_ZOOM — the largest uniform zoom the margin can absorb before edge-pinned content is CROPPED.
+ * MAX_ZOOM: the largest uniform zoom the margin can absorb before edge-pinned content is CROPPED.
  *
  * WHY THIS IS HERE. `core/produce.js` gives every scene that declares no camera a `slowPush` to 1.06,
  * and this file sets `MARGIN` to 0.06. The two numbers were written independently and both describe
@@ -102,7 +102,7 @@ export const MAX_ZOOM = 0.5 / (0.5 - MARGIN);
 // platform numbers here with any provenance. reels/shorts are conservative interpolations of the same
 // shape and should be re-measured against the real apps before anyone trusts them for a launch.
 export const DESTINATIONS = {
-  // margin only — a website hero, an X/LinkedIn post, a docs clip. Nothing is painted over the frame.
+  // margin only: a website hero, an X/LinkedIn post, a docs clip. Nothing is painted over the frame.
   web: { native: null, top: 0, bottom: 0, left: 0, right: 0 },
   // Instagram/X feed: the player chrome sits OUTSIDE the media, so the whole frame is usable.
   feed: { native: null, top: 0, bottom: 0, left: 0, right: 0 },
@@ -120,7 +120,7 @@ export const DESTINATION_NAMES = Object.keys(DESTINATIONS);
 // a platform's rail already includes the frame edge, so adding a margin on top would double-count it.
 export function safeArea(W, H, destination = 'web') {
   const d = DESTINATIONS[destination];
-  if (!d) throw new Error(`unknown destination "${destination}" — known: ${DESTINATION_NAMES.join(', ')}`);
+  if (!d) throw new Error(`unknown destination "${destination}", known: ${DESTINATION_NAMES.join(', ')}`);
   const margin = Math.round(Math.min(W, H) * MARGIN);
   const inset = (frac, dim) => Math.max(margin, Math.round(dim * frac));
   return {
@@ -152,12 +152,12 @@ export const CAPTION_SKINS = {
 // How many caption lines the band reserves. TWO, because that is what a burnt-in caption is written
 // to be, and a band sized for the longest line a scene could hold would reserve a third of the frame
 // and stop being a keep-out anyone respects. Measured at 1080x1920: a 46px caption lays out at 48px
-// per line and a 64px one at 66px, so 1.05 is `line-height: normal` rounded UP — a band that is a
+// per line and a 64px one at 66px, so 1.05 is `line-height: normal` rounded UP, a band that is a
 // pixel generous is a band, a band that is a pixel short is a near miss nobody sees.
 export const CAPTION_LINES = 2;
 const CAPTION_LEADING = 1.05;
 
-// captionSkin(cfg) — which skin a scene's caption settings select. One mapping, read by anyone who
+// captionSkin(cfg), which skin a scene's caption settings select. One mapping, read by anyone who
 // needs the band, so `captionStyle` overriding `captionMode` is not re-guessed per caller
 // (formats/scene/scene.js:909 is the renderer's own copy of this precedence).
 export const captionSkin = (cfg = {}) =>
@@ -168,7 +168,7 @@ export const captionSkin = (cfg = {}) =>
  * The horizontal strip a burnt-in caption occupies. Vertical only when nothing is placed: an
  * unplaced caption is centred and its width follows its text, so the useful keep-out is the strip.
  *
- * skin defaults to 'any', the UNION of the three skins — the widest strip a caption could occupy on
+ * skin defaults to 'any', the UNION of the three skins. The widest strip a caption could occupy on
  * this canvas. Pass a named skin when the scene has declared one and the answer can be exact.
  *
  * `caps` is the scene's caption array WITH PLACEMENT ALREADY RESOLVED (core/boot.js resolveCoords
@@ -220,14 +220,14 @@ export function captionBand(W, H, destination = 'web', skin = 'any', caps = []) 
 // two different ways nine lines apart from safeArea, which throws. docs/MISTAKES.md #360.
 export const nativeAspect = (destination) => {
   const d = DESTINATIONS[destination];
-  if (!d) throw new Error(`unknown destination "${destination}" — known: ${DESTINATION_NAMES.join(', ')}`);
+  if (!d) throw new Error(`unknown destination "${destination}", known: ${DESTINATION_NAMES.join(', ')}`);
   return d.native ?? null;   // null still means "this destination serves any canvas"
 };
 
 // ── THE FRAME OBJECT ────────────────────────────────────────────────────────────────────────────
 // One object, built once at boot, carrying every answer about the canvas an effect could need: how
 // big it is, which ratio it is, where it is going, and where content may live. It exists because an
-// effect author had no way to ask any of those questions — createKit() carried theme and ink and no
+// effect author had no way to ask any of those questions, createKit() carried theme and ink and no
 // frame at all, so block factories hardcoded 1920 and the diveIn headroom guard could only fire when
 // a caller remembered to pass the size.
 //
@@ -274,7 +274,7 @@ export const isSettled = (L, t) => { const w = settleWindow(L); return !!w && t 
  * outOfFrame(L, frame, t?) → null | { type, id, box, frame, over, at }
  * Does this layer's SETTLED box hang outside the canvas, and by how much? It answers null for
  * everything that is not a verdict: an unplaced layer (the stylesheet owns it), a layer that never
- * settles, and any time inside an entrance or a moving exit. Coordinates must already be px — this
+ * settles, and any time inside an entrance or a moving exit. Coordinates must already be px, this
  * reads what resolveCoords produced and resolves nothing of its own, because a second copy of the
  * placement grammar is how the boxes in the header drifted apart.
  */

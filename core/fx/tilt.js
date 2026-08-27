@@ -1,4 +1,4 @@
-// core/fx/tilt.js — turn a layer out of the picture plane. A card that leans away, a phone held at an
+// core/fx/tilt.js: turn a layer out of the picture plane. A card that leans away, a phone held at an
 // angle, a wall of panels receding: the difference between a graphic laid on glass and an object with a
 // side to it. docs/MISTAKES.md #59 rejected this and concluded "there is no per-layer angle that
 // composes correctly". Its DIAGNOSIS was exactly right and its CONCLUSION was wrong, and the gap
@@ -17,7 +17,7 @@
 //
 //   1. ANY intervening element flattens the 3D context, including a bare <div> with no clip, no filter
 //      and no opacity. `transform-style: flat` is the default on every element, and that, not overflow
-//      and not filter, is the rule. The camera must therefore sit on the layer's DIRECT parent — which
+//      and not filter, is the rule. The camera must therefore sit on the layer's DIRECT parent, which
 //      is `#cam` for a plain layer, the `.hs-beat` wrapper under `sceneUnits`, and the group element for
 //      a group child. This modifier writes it to `el.parentNode` and to nothing else.
 //   2. overflow, filter and opacity ON the tilted layer itself are all harmless. The engine puts at
@@ -27,7 +27,7 @@
 // The composition-order contract in core/fx/index.js forbids a modifier from touching `transform`: the
 // cross-cutting tracks own it, and a modifier that read it and appended would be appending to its own
 // value from whichever frame ran last. `rotate` is a SEPARATE CSS property (Transforms Level 2), the
-// engine writes it nowhere, and the used transform is `translate · rotate · scale · transform` — so the
+// engine writes it nowhere, and the used transform is `translate · rotate · scale · transform`, so the
 // tilt lands OUTSIDE everything the tracks compose, is never read back, and renderFrame(n) stays pure
 // in n without this modifier needing an element of its own.
 //
@@ -40,8 +40,8 @@
 // siblings inside one group share a vanishing point that belongs to the GROUP, not to the canvas. That
 // is the right answer for a fan of cards inside a group and the wrong one for a child meant to line up
 // with a tilted top-level layer. `origin` therefore defaults to the group's own centre there (50% 50%)
-// rather than to the canvas centre. Note this is NOT because the child's canvas position is unknown —
-// scene.boxOf answers for a group child now — but because perspective-origin resolves against the
+// rather than to the canvas centre. Note this is NOT because the child's canvas position is unknown,
+// scene.boxOf answers for a group child now, but because perspective-origin resolves against the
 // PARENT's padding box, and the parent here is the group, so canvas px would land somewhere else
 // entirely. To tilt a whole group as ONE plane, put the modifier on
 // the group layer instead; its children then ride the group's single rotation, which is usually what a
@@ -52,13 +52,13 @@
 // the STAGE instead and turns `#cam` into a rig standing inside it (formats/scene/scene.js). This
 // modifier then contributes its rotation alone; `dist` and `origin` are read at build and become the
 // stage's lens and vanishing point, so nothing an author wrote is dropped, and the camera can travel
-// past the layer with the perspective changing as it goes — which the per-parent camera cannot do,
+// past the layer with the perspective changing as it goes, which the per-parent camera cannot do,
 // because it projects before the camera moves. A group child is unaffected: it keeps its own camera.
 //
 // KNOWN INTERACTION, because it is invisible until it bites: a few `cut` presets (flip, cube) animate a
 // `perspective(...)` transform FUNCTION of their own. Under a parent camera those layers are projected
-// twice and lean harder than they did. It only ever happens inside a scene that opted into tilt — a
-// scene with no tilt gets no camera written anywhere and renders byte-identical — but within such a
+// twice and lean harder than they did. It only ever happens inside a scene that opted into tilt, a
+// scene with no tilt gets no camera written anywhere and renders byte-identical, but within such a
 // scene it reaches layers that never asked for it. Pair tilt with a cut that translates, not one that
 // flips.
 
@@ -89,31 +89,31 @@ function axisAngle(ax, ay, az) {
 // Resolved at BUILD as well as per frame, so a malformed spec throws before a single frame is drawn.
 function resolve(spec) {
   if (!spec || typeof spec !== 'object' || Array.isArray(spec))
-    throw new Error(`tilt: expected an object like { "tilt": { "y": 18 } } — got ${JSON.stringify(spec)}. `
+    throw new Error(`tilt: expected an object like { "tilt": { "y": 18 } }, got ${JSON.stringify(spec)}. `
       + `Keys: ${TILT_KEYS.join(', ')}.`);
   for (const k of Object.keys(spec))
     if (!TILT_KEYS.includes(k))
-      throw new Error(`tilt: unknown key "${k}" — known: ${TILT_KEYS.join(', ')}. `
+      throw new Error(`tilt: unknown key "${k}", known: ${TILT_KEYS.join(', ')}. `
         + `x/y/z are degrees about the layer's own centre; dist is the shared camera distance in px.`);
   if (!AXES.some((k) => k in spec))
-    throw new Error(`tilt: needs at least one of x, y, z (degrees) — got ${JSON.stringify(spec)}. `
+    throw new Error(`tilt: needs at least one of x, y, z (degrees), got ${JSON.stringify(spec)}. `
       + `A tilt with no angle would install a camera and rotate nothing.`);
   const a = {};
   for (const k of AXES) {
     if (spec[k] == null) { a[k] = 0; continue; }
-    if (!num(spec[k])) throw new Error(`tilt: ${k} must be a number of DEGREES — got ${JSON.stringify(spec[k])}.`);
+    if (!num(spec[k])) throw new Error(`tilt: ${k} must be a number of DEGREES, got ${JSON.stringify(spec[k])}.`);
     a[k] = spec[k];
   }
   const dist = spec.dist == null ? DEFAULT_DIST : spec.dist;
   // A camera at or behind the layer plane inverts the projection into something no author asked for,
   // and CSS accepts it without a word.
   if (!num(dist) || dist <= 0)
-    throw new Error(`tilt: dist must be a POSITIVE number of px (the camera distance) — got ${JSON.stringify(spec.dist)}. `
+    throw new Error(`tilt: dist must be a POSITIVE number of px (the camera distance), got ${JSON.stringify(spec.dist)}. `
       + `Smaller is a wider lens; ${DEFAULT_DIST} is the default.`);
   let origin = spec.origin == null ? 'center' : spec.origin;
   if (origin !== 'center') {
     if (!Array.isArray(origin) || origin.length !== 2 || !origin.every(num))
-      throw new Error(`tilt: origin must be "center" or [x, y] in px — got ${JSON.stringify(spec.origin)}. `
+      throw new Error(`tilt: origin must be "center" or [x, y] in px. Got ${JSON.stringify(spec.origin)}. `
         + `It is the point every tilted layer under the same camera leans toward.`);
   }
   return { ...a, dist, origin, rot: axisAngle(a.x, a.y, a.z) };
@@ -129,7 +129,7 @@ export function frame(kit, el, L, t, scene, spec) {
   // (formats/scene/scene.js). Writing a second `perspective` here would project the layer once through
   // its parent and again through the stage, and a doubly-projected card leans about twice as hard as
   // the angle asks for. So a top-level tilt contributes its ROTATION and nothing else, and the camera
-  // owns the vanishing point — which is the whole reason it can now be travelled past.
+  // owns the vanishing point, which is the whole reason it can now be travelled past.
   //
   // A GROUP CHILD keeps its own camera, because that was always its contract (see the header): a group
   // is its own diorama with its own vanishing point at its own centre. It is flattened into the group's

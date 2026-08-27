@@ -1,25 +1,25 @@
-// blocks/codeanim.mjs — SIX WAYS TO MAKE CODE MOVE.
+// blocks/codeanim.mjs: SIX WAYS TO MAKE CODE MOVE.
 //
 // The library already had excellent code CHROME (blocks/dev.mjs: codeBlock's 16 palettes, diff,
 // logLines, fileTree, terminal). What it did not have was code that MOVES: codeBlock sits still and
-// `diff` arrives whole. Nothing here adds a card style, a font or a seventeenth theme — every block
+// `diff` arrives whole. Nothing here adds a card style, a font or a seventeenth theme, every block
 // borrows dev.mjs's own palette (see `palette()` below) so a codeTyping card and a codeBlock card are
 // visibly the same family, and spends its whole surface area on motion.
 //
 // WHY HTML AND NOT LAYER PRIMITIVES: every effect here needs a number to move CONTINUOUSLY inside a
-// text run — a character frontier, a scroll offset, a line's collapsing height, a token's column. A
+// text run. A character frontier, a scroll offset, a line's collapsing height, a token's column. A
 // group child's geometry is written as inline px by the engine (blocks/charts.mjs:44), so it cannot be
 // a calc(), and a text layer's glyphs are not addressable. This is the same argument
 // blocks/terminal-html.mjs makes for the same medium, and it is the reason that file is the model here.
 //
 // MOTION LAW: CSS transition/animation are dead in this engine (core/sanitize-html.js refuses both at
 // boot). Everything that moves below is one of exactly three engine-driven things:
-//   * `vars` — named channels the engine ramps and seeks, per channel timing (core/tracks/vars.js).
+//   * `vars`: named channels the engine ramps and seeks, per channel timing (core/tracks/vars.js).
 //     Five of the six blocks use this, because a frontier / an offset / a morph parameter IS a number.
-//   * `parts` — a CSS selector into this file's own markup; every matched element gets a seeked,
+//   * `parts`: a CSS selector into this file's own markup; every matched element gets a seeked,
 //     staggered entrance and (with `out: true`) its paired exit (core/parts.js). codeFlight is built
 //     on it: N discrete cards arriving in order is exactly what it is for.
-//   * `var(--t)` — the raw scene clock, used only for the caret blink, which is genuinely periodic and
+//   * `var(--t)`: the raw scene clock, used only for the caret blink, which is genuinely periodic and
 //     therefore something a one-shot vars ramp cannot express.
 // Nothing here reads Date or Math.random. Same props → same layers → same pixels.
 import { TOKENS, HAIR, r2, R } from './kit.mjs';
@@ -37,7 +37,7 @@ const P_EASE = 'easeOutCubic';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// palette(theme) — dev.mjs's CODE_THEMES, harvested rather than copied.
+// palette(theme): dev.mjs's CODE_THEMES, harvested rather than copied.
 //
 // CODE_THEMES is module-private to blocks/dev.mjs, so the only two ways to reach it are to duplicate
 // twelve palettes here (which drifts the moment anyone edits one) or to ASK the factory that owns
@@ -54,7 +54,7 @@ export function palette(theme = 'midnight') {
     label: kids[0].color, syntax: kids.slice(1).map((k) => k.color),
   };
 }
-// One line's colour: the palette's syntax ring, cycled by line index — the identical rule codeBlock
+// One line's colour: the palette's syntax ring, cycled by line index, the identical rule codeBlock
 // uses, so the same lines pick up the same hues in a still card and a moving one.
 const tok = (P, i) => P.syntax[i % P.syntax.length];
 // LIFT A STATUS COLOUR ONTO A CODE THEME'S OWN PLATE. `--down` and `--up` are graded against the app
@@ -88,7 +88,7 @@ const rowStyle = (i, top, color, extra = '') =>
 const htmlLayer = (o) => ({ type: 'html', anim: 'fade', enterDur: 0.3, exitDur: 0.35, ...o });
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 1. codeTyping — LIVE CODING. One character frontier crosses the whole snippet and the caret rides
+// 1. codeTyping, LIVE CODING. One character frontier crosses the whole snippet and the caret rides
 // it, wrapping from the end of one line to the start of the next.
 //
 // MOTION: one `vars` channel, `--type`, ramped linearly from 0 to the total character count. Each
@@ -96,13 +96,13 @@ const htmlLayer = (o) => ({ type: 'html', anim: 'fade', enterDur: 0.3, exitDur: 
 // function of one number and every line's share of it is arithmetic, not a second tween. `round(down,
 // …, 1)` snaps to whole characters so no glyph is ever caught half-drawn.
 //
-// WHY NOT `parts`: parts staggers a named entrance across ELEMENTS. A typing frontier is sub-element
-// — it lives inside a text run, at character granularity — and the caret has to sit exactly on it. No
+// WHY NOT `parts`: parts staggers a named entrance across ELEMENTS. A typing frontier is sub-element:
+// it lives inside a text run, at character granularity, and the caret has to sit exactly on it. No
 // selector can address the boundary between two characters.
 // A CODE BLOCK WITH NO CODE IS NOT A BLOCK, IT IS AN EMPTY PLATE.
 //
 // Every factory here defaults its content to `[]`, and an empty list rendered a dark rounded bar with
-// no text, no caret and no error — found by cropping a frame, not by any gate. The catalog's demo
+// no text, no caret and no error. Found by cropping a frame, not by any gate. The catalog's demo
 // content does NOT rescue it: `blocks/index.mjs` merges a catalog row's `props` only for a NAMESPACED
 // name, so `{"type":"block","block":"codeTyping"}` reaches the raw factory with nothing in it while
 // `make catalog` and the site render the same name WITH the props and look perfect.
@@ -154,12 +154,12 @@ export function codeTyping({ x, y, w = 720, lines = [], label = '', theme = 'mid
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 2. codeHighlight — SPOTLIGHT ONE LINE. A band sweeps down from the top of the snippet and parks on
+// 2. codeHighlight, SPOTLIGHT ONE LINE. A band sweeps down from the top of the snippet and parks on
 // the target line while everything around it dims out of the way.
 //
 // MOTION: two `vars` channels. `--band` travels the band's `top` from row 0 to the target row (eased,
 // so it decelerates into place); `--dim` fades every other row towards `dim`. Two channels rather than
-// one because the dim should still be settling after the band has arrived — per-channel `varsDelay`
+// one because the dim should still be settling after the band has arrived, per-channel `varsDelay`
 // and `varsDur` are exactly what core/tracks/vars.js is for.
 export function codeHighlight({ x, y, w = 720, lines = [], line = 0, label = '', theme = 'midnight',
   dim = 0.28, start = 0, dur = 4 } = {}) {
@@ -190,7 +190,7 @@ export function codeHighlight({ x, y, w = 720, lines = [], line = 0, label = '',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 3. codeScroll — WALK THROUGH A REAL MODULE. The card is a viewport onto a file longer than it, and
+// 3. codeScroll, WALK THROUGH A REAL MODULE. The card is a viewport onto a file longer than it, and
 // the file travels until the target line sits on the viewport's centre row; then the spotlight lands.
 //
 // MOTION: two `vars` channels in sequence. `--scroll` drives the content's `top` by a computed pixel
@@ -211,8 +211,8 @@ export function codeScroll({ x, y, w = 720, lines = [], line = 0, rows = 9, labe
   // A ROW OUTSIDE THE VIEWPORT IS INVISIBLE, AND THE MARKUP HAS TO SAY SO. Clipping it with the
   // container's `overflow` hides it from the eye and from nothing else: every gate that samples a
   // colour against the backdrop still reads it as painted, and reads it against the PAGE, because the
-  // audit resolves no ancestor clip. So each row carries its own distance-to-the-viewport fade — two
-  // clamped ramps on the same `--scroll` that moves it — which is both honest and a softer edge than
+  // audit resolves no ancestor clip. So each row carries its own distance-to-the-viewport fade, two
+  // clamped ramps on the same `--scroll` that moves it, which is both honest and a softer edge than
   // a hard cut. The numbers are unitless on purpose: px cannot be divided in CSS calc().
   const at = (i) => `(${i * LINE_H} - var(--scroll,0) * ${offset})`;
   const inView = (i) => `clamp(0, ${at(i)} * 0.07 + 1, 1) * clamp(0, (${view - LINE_H} - ${at(i)}) * 0.07 + 1, 1)`;
@@ -247,14 +247,14 @@ export function codeScroll({ x, y, w = 720, lines = [], line = 0, rows = 9, labe
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 4. codeDiff — AN EDIT SHOWN AS MOTION. dev.mjs's `diff` paints the finished patch; this one performs
+// 4. codeDiff. AN EDIT SHOWN AS MOTION. dev.mjs's `diff` paints the finished patch; this one performs
 // it. Removed lines go red and COLLAPSE to nothing, added lines EXPAND from nothing and go green, one
 // after another in the order they appear, and the untouched lines reflow around them because the rows
 // are in normal flow rather than absolutely placed.
 //
 // MOTION: one `vars` channel PER CHANGED LINE (`--c0`, `--c1`, …), each with its own `varsDelay`, so
 // the order is real time order and not a stagger applied to the whole set. Row height is
-// `calc(var(--cN) * LINE_H)` for an addition and `calc((1 - var(--cN)) * LINE_H)` for a removal — the
+// `calc(var(--cN) * LINE_H)` for an addition and `calc((1 - var(--cN)) * LINE_H)` for a removal, the
 // same channel read in two directions, which is what makes a collapse and an expansion one gesture.
 export function codeDiff({ x, y, w = 720, lines = [], label = '', theme = 'midnight',
   step = 0.34, start = 0, dur } = {}) {
@@ -298,12 +298,12 @@ export function codeDiff({ x, y, w = 720, lines = [], label = '', theme = 'midni
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 5. codeMorph — A REFACTOR AS A TRANSFORMATION, NOT A CUT. Every token that survives the edit is
+// 5. codeMorph. A REFACTOR AS A TRANSFORMATION, NOT A CUT. Every token that survives the edit is
 // rendered ONCE and GLIDES from where it was to where it ends up; tokens only the old snippet has fade
 // out in place, tokens only the new one has fade in where they land.
 //
 // MOTION: one `vars` channel, `--m`, 0→1. A shared token's position is
-// `calc(fromCol ch + --m * deltaCol ch)` horizontally and the same shape in px vertically — `ch` is
+// `calc(fromCol ch + --m * deltaCol ch)` horizontally and the same shape in px vertically, `ch` is
 // what makes this expressible at build time, since a monospace column IS a unit and needs no
 // measurement. The two fades are the same `--m` read through clamps at opposite ends of the ramp, so
 // the old text is gone before the new text arrives and the shared tokens carry the eye across.
@@ -355,11 +355,11 @@ export function codeMorph({ x, y, w = 720, from = [], to = [], label = '', theme
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 6. codeFlight — DISCRETE SNIPPETS ASSEMBLE INTO ONE PROGRAM. Each fragment arrives from alternating
+// 6. codeFlight, DISCRETE SNIPPETS ASSEMBLE INTO ONE PROGRAM. Each fragment arrives from alternating
 // sides and settles into the stack, in order, until the whole module is on screen.
 //
-// MOTION: `parts`, and this is the block it was written for. Two specs — one selecting the snippets
-// that come from the left, one those from the right — each a seeked, staggered entrance with `out:
+// MOTION: `parts`, and this is the block it was written for. Two specs, one selecting the snippets
+// that come from the left, one those from the right. Each a seeked, staggered entrance with `out:
 // true` for its paired exit, so the assembly comes apart the way it went together instead of the card
 // fading out whole (core/parts.js, and docs/MISTAKES.md #410 for why that exit slot exists).
 // Nothing in this block declares `transform` on a snippet: gsap owns that property on any element

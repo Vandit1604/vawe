@@ -1,4 +1,4 @@
-// core/captions.js — caption STYLE kit (wave 1). PURE in t: capWords() turns one caption line
+// core/captions.js, caption STYLE kit (wave 1). PURE in t: capWords() turns one caption line
 // into absolute per-word windows; CAP_STYLES map per-word progress u∈[0,1] → a style object,
 // the same contract as core/type.js PRESETS (and `highlight` literally reuses that preset).
 // Degradation is built in: a line with no `words` array gets deterministic per-word windows
@@ -34,7 +34,7 @@ export function capWords(cap) {
 // wordU(t, win): karaoke progress of one word at absolute time t.
 export const wordU = (t, win) => clamp01((t - win.t0) / Math.max(0.001, win.t1 - win.t0));
 
-// lineU(t, wins): whole-line progress for clipWipe — each word contributes its CHARACTER share
+// lineU(t, wins): whole-line progress for clipWipe. Each word contributes its CHARACTER share
 // scaled by its own progress, so the wipe front tracks the spoken word, not wall-clock time.
 export function lineU(t, wins) {
   const total = wins.reduce((n, w) => n + w.w.length + 1, 0);
@@ -46,7 +46,7 @@ export function lineU(t, wins) {
 // ---------- styles: (u, active) → style object. Every prop is written EVERY frame by the caller
 // (authoritative writes, the same rule as the motion-blur filter recompose in scene.html), so a
 // cold seek renders byte-identical to a warm one. ----------
-// CONTRAST DOCTRINE (this repo has shipped sub-4.5:1 dimming before — never again):
+// CONTRAST DOCTRINE (this repo has shipped sub-4.5:1 dimming before, never again):
 //  * inactive ink is a color-mix toward the theme bg, NEVER an opacity drop over unknown video;
 //  * styled captions sit on a 78% var(--bg) scrim plate (scene.html CSS), so contrast is computed
 //    against a KNOWN backdrop. The 76% / 42% / 28% mixes below are chosen by WCAG arithmetic at
@@ -254,7 +254,7 @@ export const CAP_STYLES = {
   // would reach for it INSTEAD of one we ship. The surface the accent is painted ON (glyph, not
   // plate), the FOCUS channel, and a per-CHARACTER cascade that is not a typewriter. Everything
   // else on the reference list turned out to be one of ours under a different name, or a look the
-  // contrast doctrine or the 14px plate pad cannot hold — see the rejected list in the report.
+  // contrast doctrine or the 14px plate pad cannot hold, see the rejected list in the report.
 
   // KARAOKE THE WAY KARAOKE ACTUALLY LOOKS: the fill runs through the GLYPHS, not behind them.
   // `highlight` and `pillKaraoke` both paint a shape under the ink; nothing here recoloured the ink
@@ -283,7 +283,7 @@ export const CAP_STYLES = {
   // A RACK FOCUS. The engine had no style that used the focus channel at all: every one of the 15
   // says its state with ink, light, size, position or presence. An upcoming word is OUT OF FOCUS
   // rather than faint, which is the same argument flipUp and typeOn make with rotation and with
-  // visibility — the state is carried by something that is not contrast.
+  // visibility. The state is carried by something that is not contrast.
   // Blur is bounded at 2.8px so the spread stays well inside the plate's 14px pad, and it is not a
   // contrast dodge: the ink still dims by the same colour mix, the blur is the second channel on top.
   focusPull: withBlurb('a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size', (u, active) => {
@@ -321,7 +321,7 @@ export const CAP_STYLES = {
   // fake at all, and the closest thing this engine has to what current practice calls kinetic
   // typography: a continuously interpolated outline rather than a slide or a fade.
   // The read state is carried by INK, deliberately, because the crest returns to where it started
-  // and would say nothing at u=1 — the same argument waveRide makes about its half-sine.
+  // and would say nothing at u=1. The same argument waveRide makes about its half-sine.
   // A caveat an author should know before choosing it: weight is a LAYOUT property whichever channel
   // writes it, so the words after the current one shift as the crest passes. On a centred caption
   // plate that reads as the line breathing. It is the cost of the register, not a bug, and it is why
@@ -367,7 +367,7 @@ export const CAP_STYLE_SHAPE = {
 };
 export const capShape = (name) => CAP_STYLE_SHAPE[name] || { unit: 'word', mode: 'line' };
 
-// capUnitWins(cap, unit) — the windows the renderer styles, one per unit.
+// capUnitWins(cap, unit): the windows the renderer styles, one per unit.
 // 'char' subdivides each WORD window across that word's characters, which keeps speech pacing: a
 // long word still holds longer, and its letters land inside its own window rather than at a flat
 // rate across the line. The order matches core/type.js splitText('char') exactly, which emits one
@@ -386,7 +386,7 @@ export function capUnitWins(cap, unit = 'word') {
   return out;
 }
 
-// CAPTION_BLURBS — derived from the styles, which each carry their own blurb (core/registry.js).
+// CAPTION_BLURBS: derived from the styles, which each carry their own blurb (core/registry.js).
 // Consumed by the generated docs table and by any catalog/MCP surface. There is no second list to keep
 // in step: a style with no blurb throws here, naming itself.
 // Each blurb carries the style's own contrast fact, because that is the half an author cannot see in a

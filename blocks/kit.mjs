@@ -1,7 +1,7 @@
-// blocks/kit.mjs — the shared vocabulary every factory in blocks/index.mjs is built from.
+// blocks/kit.mjs: the shared vocabulary every factory in blocks/index.mjs is built from.
 //
-// WHY: the same four things were retyped in fifty places and drifted apart in every one of them —
-// four avatar implementations with two different fallback strategies, three html-card wrappers whose
+// WHY: the same four things were retyped in fifty places and drifted apart in every one of them.
+// Four avatar implementations with two different fallback strategies, three html-card wrappers whose
 // inner width disagreed with their own padding, ~15 copies of the hairline-card chrome carrying three
 // radii with no rule, and two tone→colour maps where `ok` and `success` were the same state under two
 // names. Drift is the failure mode: a copy is only correct until someone fixes one of them.
@@ -10,7 +10,7 @@
 // Math.random. Same props → same objects, which is what makes a render reproducible.
 
 // THEME-AWARE tokens: blocks emit CSS vars (resolved at render from :root, set by applyTheme) and
-// color-mix() for tints — so the SAME block reskins to any brand theme. Still deterministic: the
+// color-mix() for tints, so the SAME block reskins to any brand theme. Still deterministic: the
 // strings are static. The Stripe hexes stay literal because stripeCard is a deliberate "reflect
 // Stripe" demo, not a generic surface.
 export const TOKENS = {
@@ -25,12 +25,12 @@ export const TOKENS = {
   accentInk: 'var(--accent)',
   // Text that READS on an accent fill. core/boot.js computes it per theme from that theme's own
   // accent (25 of 38 could not carry white; higgsfield's lime scored 1.16:1). NOT the same thing as
-  // `accentInk`, which is the accent used AS text — the names invite confusion and five themes already
+  // `accentInk`, which is the accent used AS text. The names invite confusion and five themes already
   // override `--accent-ink`, which is why this does not reuse that name.
   onAccent: 'var(--on-accent)',
   // The same answer for the three STATUS fills. Same reason, same computation, same file: core/boot.js
   // picks white or black per theme off that theme's own `--up` / `--down` / `--warn`. `--warn` was the
-  // worst of them — `badge` painted `--text` on amber, which is dark only on a LIGHT theme and measured
+  // worst of them, `badge` painted `--text` on amber, which is dark only on a LIGHT theme and measured
   // 1.87:1 on higgsfield, 1.93:1 on linear.
   onUp: 'var(--on-up)', onDown: 'var(--on-down)', onWarn: 'var(--on-warn)',
   green: 'var(--up)', greenBright: 'var(--up)',
@@ -40,7 +40,7 @@ export const TOKENS = {
 };
 const T = TOKENS;
 
-// SERIES — the CATEGORICAL chart palette, and it is a SINGLE-HUE RAMP on purpose.
+// SERIES: the CATEGORICAL chart palette, and it is a SINGLE-HUE RAMP on purpose.
 // It used to be [accent, up, down, …], which spent the SEMANTIC colours on categories: a
 // three-segment donut of Direct/Search/Social rendered blue/green/red, so a reader saw a verdict
 // where the data carried none. `up` and `down` mean direction, and only `toneColor()` may spend them.
@@ -97,18 +97,18 @@ export const box = (o) => ({ type: 'group', radius: 0, ...o });    // a coloured
 export const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
   text({ text: t, size: 17, weight: 500, color: fg, bg, radius: 100, pad: '6px 16px' });
 
-// onColor(bg) — pick a foreground that can actually be READ on `bg`. A block that hardcodes '#fff'
+// onColor(bg): pick a foreground that can actually be READ on `bg`. A block that hardcodes '#fff'
 // over a caller-supplied colour is fine until the caller passes a light one: `banner` put white on an
 // arbitrary `accent` with no check, and on the amber tone that measures 2.05:1.
 //
 // THE ACCENT CASE WAS A GUARD THAT NEVER RAN. `TOKENS.accent` is the STRING 'var(--accent)', so the
-// hex regex below misses it and this returned `light` — '#fff' — every single time. Four blocks called
+// hex regex below misses it and this returned `light` ('#fff') every single time. Four blocks called
 // it on the accent believing they were protected, and blocks/social.mjs even carried a comment saying
 // it "picks its ink with onColor rather than assuming white clears it", describing a check that did
 // not happen. The old note here claimed the theme contract requires an accent to carry white; it never
 // did, and 25 of 38 themes could not (higgsfield's lime: 1.16:1).
 //
-// A var still cannot be judged at build time — it resolves in the browser — so the answer is not to
+// A var still cannot be judged at build time (it resolves in the browser) so the answer is not to
 // measure it here but to defer to the one that was already computed: core/boot.js writes --on-accent,
 // --on-up, --on-down and --on-warn per theme from that theme's own colours.
 //
@@ -139,10 +139,10 @@ export function onColor(bg, light = '#fff', dark = TOKENS.ink) {
 // RADIUS. Three values shipped across the library with no rule behind them, so which one a new block
 // got was whichever block its author happened to copy. The rule now: RADIUS ENCODES THE SURFACE'S
 // REGISTER, not its size.
-//   tight — instrument surfaces. Mono readouts and technical chrome: a terminal, a log stream, a
+//   tight, instrument surfaces. Mono readouts and technical chrome: a terminal, a log stream, a
 //           status strip. Corners stay close to square because the content is machine output.
-//   card  — the default content card. Anything in a hairline card gets this and nothing else.
-//   soft  — person-facing surfaces. Social, identity and commerce cards a human is meant to read as
+//   card: the default content card. Anything in a hairline card gets this and nothing else.
+//   soft: person-facing surfaces. Social, identity and commerce cards a human is meant to read as
 //           an object rather than a panel: a post, a profile, a player, a price.
 // A new block picks the role, never the number.
 // ── THE SCALES ───────────────────────────────────────────────────────────────────────────────────
@@ -181,10 +181,10 @@ export const TYPE_STEPS = Object.values(TYPE);
 export const R = { none: 0, micro: 4, chip: 8, tight: 12, card: 14, soft: 16, round: 24, pill: 100 };
 export const R_STEPS = Object.values(R);
 
-// needData(prop, value, block) — a block whose SUBJECT is missing refuses instead of rendering a shell.
+// needData(prop, value, block): a block whose SUBJECT is missing refuses instead of rendering a shell.
 //
 // WHY THIS IS NOT PEDANTRY. A catalog row's `props` are the block's documented example, and
-// blocks/index.mjs merges them only for a NAMESPACED name — a BARE name gets the raw factory with
+// blocks/index.mjs merges them only for a NAMESPACED name, a BARE name gets the raw factory with
 // nothing in it (docs/MISTAKES.md #429). So the site renders `barChart` WITH its demo data and an
 // author writing {"type":"block","block":"barChart"} gets an empty track, `statBig` counts to 0, and
 // `quote` printed the literal string "undefined" on screen. The site was showing one thing and the
@@ -201,29 +201,29 @@ export const needData = (what, v, block) => {
     + `Pass \`${what}\`, or copy the example from this block's catalog row.`);
 };
 
-// cardChrome — the hairline card. `{bg, border, elevation, anim}` was retyped in ~15 factories; every
+// cardChrome: the hairline card. `{bg, border, elevation, anim}` was retyped in ~15 factories; every
 // one of those was a chance for the set to drift, and it did. Timing stays at the call site because
 // entrance duration is a per-block motion decision, not chrome.
 export function cardChrome({ radius = R.card, elevation = 1, border = HAIR, bg = T.card, anim = 'rise' } = {}) {
-  // `elevation: 0` means NO shadow, and the schema's minimum is 1 — so a flat card omits the key
+  // `elevation: 0` means NO shadow, and the schema's minimum is 1, so a flat card omits the key
   // rather than emitting a value the validator rejects. Asking for flat is legitimate (an empty-state
   // surface is meant to read as unfilled); a block that silently emits an unrenderable layer is not.
   return { bg, radius, border, ...(elevation ? { elevation } : {}), anim };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOTION. Every factory in the library wore `anim: 'rise'` — a CONTAINER entrance — because the
+// MOTION. Every factory in the library wore `anim: 'rise'` (a CONTAINER entrance) because the
 // engine could only animate transform/opacity, so a block could only ever ARRIVE. That made the
 // registry unbrowsable: 101 tiles all swiped up and none of them showed what the block is FOR.
 // Three shapes cover the whole library, and each is a pure function of the layer's own window.
 //
-//   sweep()   — the CONTENT performs. The engine interpolates `--p` across the layer's window and
+//   sweep(). The CONTENT performs. The engine interpolates `--p` across the layer's window and
 //               the block writes var(--p) into its own CSS/SVG (an arc's dash, a line's dashoffset).
 //               The card just fades in, fast, and gets out of the way.
-//   stagger() — one row's own start INSIDE its group. Group children are driven off `delay`
+//   stagger(): one row's own start INSIDE its group. Group children are driven off `delay`
 //               (relative to the group's start), never `start`: the engine overwrites a child's
 //               `start` with the group's, so an authored one is accepted and silently ignored.
-//   growUp() / fillRight() — a bar grows from its baseline / a fill wipes L→R. A group child's
+//   growUp() / fillRight(): a bar grows from its baseline / a fill wipes L→R. A group child's
 //               height is written as inline px so it cannot be a calc(); the honest equivalent is a
 //               hard-edged mask whose visible fraction IS `--p`, measured from the anchored edge.
 
@@ -247,7 +247,7 @@ const reveal = (dir) => ({ delay = 0.15, dur = 0.75, ease = P_EASE } = {}) => ({
 export const growUp = reveal('top');
 export const fillRight = reveal('right');
 
-// stackWindows — N transient surfaces that arrive in order, sit for `life`, and EXPIRE.
+// stackWindows: N transient surfaces that arrive in order, sit for `life`, and EXPIRE.
 // `toast` and `notification` each rendered exactly one card that lived for the whole beat, so a scene
 // showing two alerts had to place two blocks and hand-compute the second one's y and start. Both of
 // those are geometry, and geometry belongs to the block. One definition, because a second copy of
@@ -261,7 +261,7 @@ export const stackWindows = ({ n = 0, start = 0, dur = 4, step = 0.9, life = 2.2
     return { start: st, dur: Math.max(0.4, r2(Math.min(life, start + dur - st))), dy: i * (rowH + gap) };
   });
 
-// htmlCard — the same hairline card for the html+SVG blocks (charts and gauges, which need curves).
+// htmlCard: the same hairline card for the html+SVG blocks (charts and gauges, which need curves).
 // THE INNER WIDTH IS DERIVED FROM THE PAD. It used to be restated by hand and two of the three
 // wrappers were wrong against their own padding (`w - 48` on padding 22, `w - 44` on padding 24).
 // `body` receives the real inner width so a caller cannot restate it either.
@@ -275,53 +275,53 @@ export function htmlCard({ w, pad = 22, label: caption = '', align = '', body = 
     + (caption ? `<div style="${capCss()};margin-bottom:10px">${caption}</div>` : '')
     + body(inner) + '</div>';
 }
-// the vertical space htmlCard's own chrome consumes — what a plot area has to subtract from `h`.
+// the vertical space htmlCard's own chrome consumes: what a plot area has to subtract from `h`.
 export const cardInsetY = ({ pad = 22, label = '' } = {}) => 2 * pad + (label ? CARD_LABEL_H : 0);
 
-// barWidth — one bar's width inside a padded, gapped row. Shared by the bar families, which had the
+// barWidth: one bar's width inside a padded, gapped row. Shared by the bar families, which had the
 // identical expression with the pad and gap baked in as 44 and 14.
 export const barWidth = ({ w, n, pad = 22, gap = 14, min = 22, inset = 8 }) =>
   Math.max(min, (w - 2 * pad - gap * Math.max(0, n - 1)) / Math.max(1, n) - inset);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATA TREATMENT — the product-surface register, owned here so all 176 blocks read as one system.
+// DATA TREATMENT. The product-surface register, owned here so all 176 blocks read as one system.
 //
 // The whole idiom is ONE HUE AT TWO WEIGHTS: a solid mark carries the reading, a soft tint of the
 // SAME hue carries the ground it is read against (a bar's track, a line's area, a ring's remainder).
 // Every family had a private answer to that and they disagreed: lineChart washed a flat
 // `opacity:0.12` polygon, the bar families drew onto empty card with no ground at all, and gauge and
-// progressRing used `--line` — a BORDER colour — for a track, so the unfilled part of a meter was
+// progressRing used `--line` (a BORDER colour) for a track, so the unfilled part of a meter was
 // painted with the same ink as a divider and read as chrome instead of as the rest of the reading.
 
-// tint — one hue, lighter. The percentage is the only dial, so a track and an area fill can be
+// tint: one hue, lighter. The percentage is the only dial, so a track and an area fill can be
 // deliberately different weights and still be obviously the same system.
 export const tint = (c, pct = 12) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
 export const TINT = { track: 8, area: 16, chip: 8 };   // the three weights the families actually need
 
 // TWO QUESTIONS, TWO HELPERS, AND THE NAMES DO NOT TELL THEM APART. Read this before reaching for
 // either.
-//   `onColor(fill)` — "what ink reads ON this fill?" The fill is the subject; the answer is a
+//   `onColor(fill)`: "what ink reads ON this fill?" The fill is the subject; the answer is a
 //     contrasting ink, and for a token fill it defers to `--on-accent`/`--on-up`/`--on-down`/
 //     `--on-warn`, which core/boot.js computes per theme.
-//   `onInk(c)`      — "this status colour IS the glyph; make it readable on a card." The colour is
+//   `onInk(c)`: "this status colour IS the glyph; make it readable on a card." The colour is
 //     the subject and it stays that hue. There is no token for this direction, and none of
 //     `--accent`/`--up`/`--down` clears 4.5:1 against a card ground: `--up` measured 2.5:1 on
 //     linear and 1.3:1 on higgsfield's lime, both HARD `make audit` failures. `onColor` cannot see
 //     it, because a `var()` has no value at build time.
-// Mixing toward `--text` raises contrast in BOTH directions — it brightens the hue on a dark theme
-// and deepens it on a light one — so a block never has to know which kind of theme it is in.
+// Mixing toward `--text` raises contrast in BOTH directions, it brightens the hue on a dark theme
+// and deepens it on a light one, so a block never has to know which kind of theme it is in.
 export const onInk = (c) => `color-mix(in srgb, ${c} 66%, var(--text))`;
 
-// DATA_CAP — the radius on a data mark's free end. Named because a bar, its track and a stacked
+// DATA_CAP: the radius on a data mark's free end. Named because a bar, its track and a stacked
 // band must agree: a track squarer than the bar inside it shows a sliver of the wrong shape at the
 // top. 6 is one step under R.chip; at 0..4 a bar reads as default chart-library output.
 export const DATA_CAP = 6;
 
-// STROKE — how heavy an arc or a plotted line is drawn. The families each guessed (15 / 10 / 9 / 2.6),
+// STROKE: how heavy an arc or a plotted line is drawn. The families each guessed (15 / 10 / 9 / 2.6),
 // which is why a donut read as a thick toy ring beside a hairline-thin trend line in the same film.
 export const STROKE = { line: 2.4, arc: 9 };
 
-// SHADOW_CARD — ONE step of elevation, matching what `elevation: 1` stacks in core/layers/util.js:216
+// SHADOW_CARD. ONE step of elevation, matching what `elevation: 1` stacks in core/layers/util.js:216
 // for a native layer. html cards had NO shadow at all, so an html chart and a native stat card sat at
 // visibly different depths on the same stage. Drop shadow only: the inset ring the engine adds needs
 // to know light-from-dark, and CSS in a fragment cannot.
@@ -329,8 +329,8 @@ export const SHADOW_CARD = '0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.0
 
 // THE THREE TEXT ROLES INSIDE A DATA SURFACE, as CSS `font:` shorthands so an html block and a native
 // `text` layer cannot drift apart on them. The split is the register's: MONO CARRIES NUMBERS, SANS
-// CARRIES WORDS. The library had it exactly backwards — axis ticks ("Mon", "Q3") were set in mono and
-// the figures above them in sans — which loses the one thing mono is for, a column of digits that
+// CARRIES WORDS. The library had it exactly backwards, axis ticks ("Mon", "Q3") were set in mono and
+// the figures above them in sans, which loses the one thing mono is for, a column of digits that
 // lines up.
 //   capCss()   the surface's own caption: what this instrument reads. Mono, muted, small.
 //   labelCss() an axis tick or a legend name. Sans, muted, same size as cap so a card has one small step.
@@ -348,7 +348,7 @@ export const labelCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 500 } 
 export const numCss = ({ size = TYPE.lead, color = TOKENS.ink, weight = 700 } = {}) =>
   `font:${weight} ${size}px var(--font-num);color:${color};letter-spacing:-0.01em;font-variant-numeric:tabular-nums`;
 
-// deltaChip — the verdict on a reading: a tinted pill carrying an arrow and a figure, in the tone's
+// deltaChip. The verdict on a reading: a tinted pill carrying an arrow and a figure, in the tone's
 // own colour. It is a PAIR with the value it sits under and must never outweigh it, so it is one
 // TYPE step down and its fill is the lightest tint weight. `up`/`down` are spent here, on real
 // direction, which is the only place SERIES is forbidden from spending them.
@@ -407,7 +407,7 @@ export function avatarEl({ avatar = '', initials = '', name = '', size = 56, rad
 //
 // It lives HERE, in the shared vocabulary, for one reason: a CONTAINER block (splitScreen, screenSwap)
 // resolves another block BY NAME, and a family module importing index.mjs back would deadlock the
-// discovery — index.mjs awaits the family, the family awaits index.mjs. kit.mjs is imported by every
+// discovery, index.mjs awaits the family, the family awaits index.mjs. kit.mjs is imported by every
 // family and imports none of them, so it is the only place with no cycle to make.
 export const BLOCKS = {};
 
@@ -417,7 +417,7 @@ export function blockFactory(name, at) {
   if (typeof f === 'function') return f;
   if (!Object.keys(BLOCKS).length) {
     throw new Error(`${at}: the block registry is empty. A container resolves another block by name, and `
-      + 'the names are filled in by blocks/index.mjs — import that (not the family module) before calling it.');
+      + 'the names are filled in by blocks/index.mjs: import that (not the family module) before calling it.');
   }
   throw new Error(`${at}: unknown block "${name}". A side is { block, props }.`);
 }

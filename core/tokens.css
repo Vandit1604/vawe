@@ -1,16 +1,16 @@
-/* tokens.css — PLUMBING ONLY: font registration, frame geometry, determinism reset, and the few
-   engine classes every scene shares. Contains NO look values — no colors, no font choices, no
+/* tokens.css, PLUMBING ONLY: font registration, frame geometry, determinism reset, and the few
+   engine classes every scene shares. Contains NO look values, no colors, no font choices, no
    scales, no shadows. The theme owns 100% of the look: applyTheme() (core/boot.js) writes every
    --font-* and palette var onto :root, and core/theme-contract.js guarantees a theme is complete
    before a single frame renders. A missing theme key is a loud error, never a fallback pixel. */
 
-/* ---------- frame geometry — PRE-BOOT FALLBACK ONLY ----------
+/* ---------- frame geometry: PRE-BOOT FALLBACK ONLY ----------
    boot() overwrites all six of these on :root before the first frame: --vw/--vh from the resolved
    aspect, --safe-* from core/safe.js (the single safe-area definition). They live here only so the
    page is not zero-sized in the instant before boot runs, and for fragment previews that never boot.
 
    They used to be the real source, keyed on [data-orient], and that was the bug. data-orient is
-   `width > height` — a binary that cannot describe five ratios. 1:1 and 4:5 both resolved to
+   `width > height`: a binary that cannot describe five ratios. 1:1 and 4:5 both resolved to
    "portrait", so a square got a 1080x1920 stage (cropped to 1080 tall) and TikTok's 240/580 safe
    inset, which reserved 76% of its height. Do NOT reintroduce a per-orientation table here: the
    canvas is a function of the aspect, and the safe area is a function of the aspect AND the
@@ -24,7 +24,7 @@
   --safe-right: 65px;
 }
 
-/* determinism: every frame is set explicitly — kill all time-based motion */
+/* determinism: every frame is set explicitly, kill all time-based motion */
 * { margin: 0; padding: 0; box-sizing: border-box; transition: none !important; animation: none !important; }
 
 html, body {
@@ -36,33 +36,33 @@ html, body {
   -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
 }
 
-/* the render surface: geometry only — the theme's bg paints it, bg presets add texture */
+/* the render surface: geometry only. The theme's bg paints it, bg presets add texture */
 .stage { position: relative; width: var(--vw); height: var(--vh); overflow: hidden; background: var(--bg); }
 
 /* alpha export (--alpha): drop every opaque backdrop so unpainted pixels render transparent.
    The motion graphics (text/images/cards) still paint normally → a compositable overlay layer. */
 html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { background: transparent !important; }
 
-/* ---------- font REGISTRATION (capability, not choice — the theme picks which are used) ---------- */
+/* ---------- font REGISTRATION (capability, not choice: the theme picks which are used) ---------- */
 /* Inter = Linear's EXACT self-hosted variable font (static.linear.app/fonts/InterVariable.woff2, full
    100–900 axis) so a 540 headline is Linear's real medium, byte-for-byte their type. "Inter Variable"/
    "Inter Display" are the names captured Linear components request; all map to the same real file. */
 @font-face { font-family: 'Inter'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InterVariable.woff2') format('woff2'); }
 @font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InterVariable.woff2') format('woff2'); }
 @font-face { font-family: 'Inter Display'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InterVariable.woff2') format('woff2'); }
-/* captured code UIs request "Berkeley Mono" (Linear's code font) — alias to installed Geist Mono so a
+/* captured code UIs request "Berkeley Mono" (Linear's code font), alias to installed Geist Mono so a
    diff/terminal capture renders in a real monospace, not the browser default. */
 @font-face { font-family: 'Berkeley Mono'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 500; font-display: block; src: url('/assets/fonts/space-500.woff2') format('woff2'); }
 @font-face { font-family: 'Space Grotesk'; font-weight: 700; font-display: block; src: url('/assets/fonts/space-700.woff2') format('woff2'); }
-/* Anybody — the vawe landing page's actual sans. Variable TTF from google/fonts.
+/* Anybody: the vawe landing page's actual sans. Variable TTF from google/fonts.
    AXES: `wght` ONLY. Upstream Anybody ships wdth+wght and this line used to claim both, but the
-   SUBSET WE VENDOR HAS NO wdth — fontkit reports one axis on our woff2, and on all 19 other
+   SUBSET WE VENDOR HAS NO wdth: fontkit reports one axis on our woff2, and on all 19 other
    variable faces we ship. A width ramp is therefore a no-op here, silently: CSS accepts
    `font-variation-settings: 'wdth' 75`, the face has nothing to vary, and the frame renders
    unchanged with nothing said. Re-subset before writing anything that reaches for wdth. */
 @font-face { font-family: 'Anybody'; font-weight: 100 900; font-stretch: 75% 125%; font-display: block; src: url('/assets/fonts/Anybody.woff2') format('woff2'); }
-/* Manrope + Fraunces — tpot.cc's real pair (next/font). Manrope 600 carries the headline at -2px
+/* Manrope + Fraunces: tpot.cc's real pair (next/font). Manrope 600 carries the headline at -2px
    tracking; Fraunces is the site's serif accent (the event-date numerals). Variable, OFL. */
 @font-face { font-family: 'Manrope'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/Manrope.woff2') format('woff2'); }
 @font-face { font-family: 'Fraunces'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Fraunces.woff2') format('woff2'); }
@@ -91,16 +91,16 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
 .dbg .zr { top: 0; bottom: 0; right: 0; width: var(--safe-right); }
 .dbg .box { position: absolute; left: var(--safe-left); right: var(--safe-right);
   top: var(--safe-top); bottom: var(--safe-bottom); border: 3px solid rgba(120, 240, 60, 0.9); }
-/* Hanken Grotesk (free, open) — a distinctive neo-grotesque; stand-in for brands on licensed faces
+/* Hanken Grotesk (free, open): a distinctive neo-grotesque; stand-in for brands on licensed faces
    (e.g. Stripe's Söhne, which we can't redistribute). Variable weight axis. */
 @font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
-/* Bricolage Grotesque (free, open) — tokenjam.dev's real DISPLAY face: a characterful variable
+/* Bricolage Grotesque (free, open). Tokenjam.dev's real DISPLAY face: a characterful variable
    grotesque (opsz+wght). Vendored for the tokenjam theme's headlines. */
 @font-face { font-family: 'Bricolage Grotesque'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/BricolageGrotesque.woff2') format('woff2'); }
-/* Sohne (Stripe's licensed Klim face) — the file lives in assets/fonts/local/ which is GITIGNORED.
+/* Sohne (Stripe's licensed Klim face): the file lives in assets/fonts/local/ which is GITIGNORED.
    Never commit it.
    The second src IS the fallback, and it has to live here rather than in a font stack: a theme names
-   ONE family ("Sohne"), and boot() does document.fonts.load("400 100px 'Sohne'") — so a CSS stack
+   ONE family ("Sohne"), and boot() does document.fonts.load("400 100px 'Sohne'"), so a CSS stack
    would never be consulted for the load and the name would simply fail to resolve. Chaining src
    means 'Sohne' resolves to Hanken Grotesk wherever the licensed file is absent, which is every
    deploy: the browser editor was rendering the Stripe scene in a raw system sans and 404ing.
@@ -110,7 +110,7 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
 @font-face { font-family: 'Sohne'; font-weight: 100 900; font-display: block;
   src: url('/assets/fonts/local/Sohne.woff2') format('woff2'),
        url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
-/* Archivo (OFL, Google Fonts) — argushq.cc's real display face (headline weight 300, tight tracking). */
+/* Archivo (OFL, Google Fonts): argushq.cc's real display face (headline weight 300, tight tracking). */
 @font-face { font-family: 'Archivo'; font-weight: 300 700; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
 
 /* ---- invented faces (generated by scripts/author/invent-look.mjs) ---- */

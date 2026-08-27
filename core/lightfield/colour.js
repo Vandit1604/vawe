@@ -11,7 +11,7 @@ export const isHex = (v) => typeof v === 'string' && HEX.test(v);
 // parser also reads #rgb, #rgba, #rrggbbaa and rgb(), and this file deliberately reads none of
 // them: the reason in the header still holds, so the gate stays here and only the maths is shared.
 // options.js already rejects anything non-hex with a message naming the field, so a throw here is a
-// backstop that should never fire — and it fires loudly rather than returning NaN channels, which
+// backstop that should never fire, and it fires loudly rather than returning NaN channels, which
 // is how a bad lightfield colour used to reach a gradient string as "rgba(NaN,NaN,NaN,1)".
 export function toRgb(hex) {
   if (!isHex(hex)) throw new Error(`lightfield colour: expected a 6-digit hex like "#ee7c56". Got ${JSON.stringify(hex)}.`);

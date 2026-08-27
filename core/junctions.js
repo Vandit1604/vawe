@@ -1,14 +1,14 @@
-// core/junctions.js — ONE grammar for naming a moment in a film by its JOINT rather than by its time.
+// core/junctions.js: ONE grammar for naming a moment in a film by its JOINT rather than by its time.
 //
 // `core/audio-bridges.js` established this and states the reason best: "The junction is NAMED, never
 // timed. The film already knows where it turns." A bridge says `at: "cut@1"`, and moving that cut moves
 // the sound with it. Nothing to keep in sync, because there is only one copy of the number.
 //
 // It is extracted here because BACKGROUNDS need the same thing and a second copy of the grammar would
-// drift — which is precisely MISTAKES #159, where two hand-kept copies of the snap signature diverged and
+// drift, which is precisely MISTAKES #159, where two hand-kept copies of the snap signature diverged and
 // one went blind. `brew-launch-act1` is the case that prompted it: its backdrop cuts per beat, which is
-// the film's main structural device, and every boundary was written TWICE — once in `bg`, once in
-// `transitions` — with nothing keeping them equal. Move one and the register change silently detaches
+// the film's main structural device, and every boundary was written TWICE, once in `bg`, once in
+// `transitions`, with nothing keeping them equal. Move one and the register change silently detaches
 // from the junction that was punctuating it. docs/MISTAKES.md #358.
 //
 //   "cut@0" · "seam@2" · "sting@1" · "junction@3"   (junction = all kinds, merged and time-ordered)
@@ -29,12 +29,12 @@ export function junctionTable(marks) {
   return table;
 }
 
-/** Human list of what this film actually has — every error names it, so a typo is answerable. */
+/** Human list of what this film actually has: every error names it, so a typo is answerable. */
 export function describeJunctions(table) {
   return Object.keys(table)
     .filter((k) => table[k].length)
     .map((k) => `${k}@0..${table[k].length - 1} (${table[k].map((t) => t.toFixed(2)).join(', ')})`)
-    .join(' · ') || 'none — this film has no cuts, seams or stings to hang anything on';
+    .join(' · ') || 'none: this film has no cuts, seams or stings to hang anything on';
 }
 
 /** Is this value a junction reference rather than a time? Lets a caller accept either. */
@@ -50,10 +50,10 @@ export function resolveJunction(ref, table, where = 'junction reference') {
   if (!m) throw new Error(`${where}: must be "<kind>@<index>" (e.g. "cut@1", "seam@0", "sting@2", `
     + `"junction@3"), got ${JSON.stringify(ref)}. This film has: ${describeJunctions(table)}`);
   const [, kind, idx] = m;
-  if (!table[kind]) throw new Error(`${where}: unknown junction kind "${kind}" in "${ref}" — known: `
+  if (!table[kind]) throw new Error(`${where}: unknown junction kind "${kind}" in "${ref}", known: `
     + `junction, ${JUNCTION_KINDS.join(', ')}. This film has: ${describeJunctions(table)}`);
   const times = table[kind];
-  if (+idx >= times.length) throw new Error(`${where}: "${ref}" does not exist — this film has `
+  if (+idx >= times.length) throw new Error(`${where}: "${ref}" does not exist, this film has `
     + `${times.length} ${kind}${times.length === 1 ? '' : 's'}. Available: ${describeJunctions(table)}`);
   return times[+idx];
 }
@@ -63,7 +63,7 @@ export function resolveJunction(ref, table, where = 'junction reference') {
  * own joints: window i runs from junction i-1 to junction i, and the last one runs to the end.
  *
  * WHY THIS IS THE DEFAULT AND NOT A FEATURE. `bg` is a required field, so the backdrop is always a
- * decision — and the measured library says the decision is almost never made: 134 of 144 scenes paint
+ * decision, and the measured library says the decision is almost never made: 134 of 144 scenes paint
  * ONE window for the whole runtime. The two films this repo is proudest of do the opposite; brew
  * inverts the tone of the world on four of its five cuts. Writing that by hand meant naming the same
  * boundary twice, so the cheap thing to write was the flat backdrop, and the flat backdrop is what
@@ -93,7 +93,7 @@ export function bindWindowsToJunctions(windows, table, duration = Infinity) {
   const j = shotWindows(table, duration).slice(1).map((w) => w.start);
   if (j.length < windows.length - 1)
     throw new Error(`bg: ${windows.length} windows declare no times, so each one is bound to the joint `
-      + `after it — that needs ${windows.length - 1} cuts or seams and this film has ${j.length}. `
+      + `after it: that needs ${windows.length - 1} cuts or seams and this film has ${j.length}. `
       + `Either cut the film where the backdrop should turn, or give each window its own from/to. `
       + `This film has: ${describeJunctions(table)}`);
   return windows.map((b, i) => ({
@@ -136,7 +136,7 @@ export function shotWindows(table, duration) {
 }
 
 /**
- * THE MATCH CUT — the joint owns the handover, and the engine PRODUCES the alignment.
+ * THE MATCH CUT: the joint owns the handover, and the engine PRODUCES the alignment.
  *
  * `becomes` already carries one layer's final pose onto the next layer's opening pose, which is the
  * geometry half of a match cut and the hard half. What it never had was a JOINT. The handover landed
@@ -156,8 +156,8 @@ export function shotWindows(table, duration) {
  * `at` takes the junction grammar every other surface here takes, so a match can hang on a seam or a
  * sting as readily as a cut, and it takes a plain number for the rare case with no joint to name.
  *
- * SOUND is the joint's, not the match's. A match cut is not a mechanism of its own — it is two layers
- * agreeing across a boundary the film already has — so it is voiced by whatever CUT_CUE/SEAM_CUE gives
+ * SOUND is the joint's, not the match's. A match cut is not a mechanism of its own, it is two layers
+ * agreeing across a boundary the film already has, so it is voiced by whatever CUT_CUE/SEAM_CUE gives
  * the junction it hangs on. A match at a `none` cut is silent on purpose: that is the hard match cut,
  * where the only event is the form changing.
  */
@@ -203,10 +203,10 @@ export function bindMatchesToJunctions(data, table) {
     const cut = cutAt(t);
     if (data.sceneUnits === true && cut && cut.style && cut.style !== 'none')
       throw new Error(`${where}: this film sets "sceneUnits": true and the cut at ${t}s presents as `
-        + `"${cut.style}", which travels each beat away as a whole unit — "${M.from}" and "${M.to}" would `
+        + `"${cut.style}", which travels each beat away as a whole unit, "${M.from}" and "${M.to}" would `
         + `be carried apart at the very frame they are meant to coincide. Write "sceneUnits": false at the `
         + `top level (a whole-frame cut transforms both forms together, so the match survives it), or set `
-        + `that cut's style to "none" — a match cut is a HARD cut, the form changing IS the transition. `
+        + `that cut's style to "none": a match cut is a HARD cut, the form changing IS the transition. `
         + `If this scene never declared sceneUnits, "produced": true injected it (core/produce.js).`);
 
     const aStart = Number.isFinite(+A.start) ? +A.start : 0;
@@ -218,7 +218,7 @@ export function bindMatchesToJunctions(data, table) {
     const shot = (next != null ? next : (+data.duration || t + dur)) - t;
     if (shot > 0 && dur > shot * MATCH_HANDOVER_SHARE)
       throw new Error(`${where}: the handover takes ${dur}s and the shot it lands in is only ${shot.toFixed(2)}s, `
-        + `so "${M.to}" spends ${Math.round((dur / shot) * 100)}% of its own shot still arriving — the eye reads `
+        + `so "${M.to}" spends ${Math.round((dur / shot) * 100)}% of its own shot still arriving, the eye reads `
         + `a move, not a match. Keep it under ${(shot * MATCH_HANDOVER_SHARE).toFixed(2)}s (a third of the shot), `
         + `or give "${M.to}" more room before the next joint.`);
 
@@ -239,7 +239,7 @@ export function bindMatchesToJunctions(data, table) {
     if (A.exitDur != null && +A.exitDur !== 0) clash.push(`"${M.from}" declares exitDur:${A.exitDur}`);
     if (B.anim != null && B.anim !== 'none') clash.push(`"${M.to}" declares anim:"${B.anim}"`);
     if (B.enterDur != null && +B.enterDur !== 0) clash.push(`"${M.to}" declares enterDur:${B.enterDur}`);
-    if (clash.length) throw new Error(`${where}: a match cut has no entrance and no exit — the outgoing `
+    if (clash.length) throw new Error(`${where}: a match cut has no entrance and no exit, the outgoing `
       + `form is whole on the cut frame and the incoming one opens already wearing its pose. `
       + `${clash.join(' and ')}, which would fade the two forms out and back in across the very joint `
       + `they coincide on. Drop ${clash.length === 1 ? 'it' : 'them'}, or drop the match and cut normally.`);

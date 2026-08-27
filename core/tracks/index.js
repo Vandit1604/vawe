@@ -1,17 +1,17 @@
-// core/tracks/index.js — the TRACK registry, the third application of the pattern in core/layers/
+// core/tracks/index.js: the TRACK registry, the third application of the pattern in core/layers/
 // index.js and core/fx/index.js. A layer TYPE answers "what is this thing"; a MODIFIER answers "what
 // is done to it"; a TRACK answers "what does the engine do to EVERY layer on every frame".
 //
 // Each track is a file exporting `slot` (where it runs) and `frame(kit, el, L, units, t, f, start,
 // end, scene)`. Until now the whole list was written out as statements in the body of `updateLayer`
-// in formats/scene/scene.js, which meant every cross-cutting per-frame job — the thing a motion
-// engine is mostly made of — had to be added by editing a 940-line file in the exact right place,
+// in formats/scene/scene.js, which meant every cross-cutting per-frame job, the thing a motion
+// engine is mostly made of, had to be added by editing a 940-line file in the exact right place,
 // with nothing but a neighbouring comment to say where the right place was.
 //
 // WHERE THE LINE FALLS between a track and a modifier, because the next author will need it:
 //   A MODIFIER is opt-in per layer (`modifiers: [{ tilt: … }]`), runs LAST, and changes how the
-//   finished layer LOOKS. It may not write `transform`, `opacity` or `filter` on the layer element —
-//   those belong to the tracks, and core/fx/index.js says so as a purity rule.
+//   finished layer LOOKS. It may not write `transform`, `opacity` or `filter` on the layer element.
+//   Those belong to the tracks, and core/fx/index.js says so as a purity rule.
 //   A TRACK runs for EVERY layer whether or not the author asked, and it BUILDS the frame: it writes
 //   the very properties a modifier is forbidden to touch, and it has to interleave with the other
 //   tracks at an exact point to do it. If a feature needs to land between two existing tracks, it is
@@ -25,7 +25,7 @@
 //
 // Named slots rather than integer priorities because integers invite `order: 45` wedged between 40
 // and 50 and say nothing about WHY a track goes there, and rather than declared before/after edges
-// because those only produce a PARTIAL order — two tracks with no edge between them would be run in
+// because those only produce a PARTIAL order. Two tracks with no edge between them would be run in
 // whatever sequence the topological sort happened to emit, which is the same implicit ordering this
 // registry exists to delete, just harder to read.
 //
@@ -56,17 +56,17 @@ const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimit
   borderTrail: tBorderTrail, circle: tCircle, vars: tVars, react: tReact, box: tBox,
   follow: tFollow, motion: tMotion, idle: tIdle, modifiers: tModifiers };
 
-// Exported so a gate can DERIVE the pipeline instead of restating it — the contract LAYER_TYPES and
+// Exported so a gate can DERIVE the pipeline instead of restating it, the contract LAYER_TYPES and
 // FX_TYPES already have. A hand-typed copy of this list is how `make coverage` reported 14/14 while a
 // 15th layer type existed (docs/MISTAKES.md #21, #65).
 export const TRACK_TYPES = Object.keys(REGISTRY);
 
-// The props the PIPELINE reads, merged from the tracks themselves — every layer rides all twelve, so
+// The props the PIPELINE reads, merged from the tracks themselves, every layer rides all twelve, so
 // this is a flat set rather than a per-track one. Derived for the same reason TRACK_TYPES is: a gate
 // asking "does anything read `motionBlur`?" must read the answer off the code that reads it.
 for (const name of TRACK_TYPES)
   if (REGISTRY[name].PROPS === undefined)
-    throw new Error(`track "${name}" declares no PROPS — a track that reads layer props without saying `
+    throw new Error(`track "${name}" declares no PROPS: a track that reads layer props without saying `
       + `which ones puts them back out of a gate's reach. Export \`PROPS = {}\` if it reads none.`);
 export const TRACK_PROPS = Object.freeze(mergeProps(...TRACK_TYPES.map((n) => REGISTRY[n].PROPS)));
 
@@ -75,17 +75,17 @@ export const SLOTS = Object.freeze([
   'enter',      // a declared `cut` owns this layer's enter/exit styling, over driveClips's fade
   'split',      // kinetic split-text reveal on the layer's local clock
   'glyphs',     // per-glyph re-roll (ransom `cycle`)
-  'primitive',  // the layer type's own frame() — count / typing / cursor / clip / ken
-  'resample',   // re-sample the layer through a fragment shader — AFTER its own canvas drew this frame
+  'primitive',  // the layer type's own frame(): count / typing / cursor / clip / ken
+  'resample',   // re-sample the layer through a fragment shader. AFTER its own canvas drew this frame
   'orbit',      // the borderTrail arc's rotation
   'spin',       // circular text: rotate the whole ring
   'vars',       // animated custom properties the layer's own CSS reads
   'react',      // audio-driven modulation from the baked spectrum
-  'box',        // w / h / depth over time — the layer's SIZE, not its scale
+  'box',        // w / h / depth over time, the layer's SIZE, not its scale
   'follow',     // pin to another layer's live box, before that layer's own choreography plays
   'transform',  // the motion track and motion blur
   'idle',       // ambient motion across the settled middle, riding outside the choreography above
-  'post',       // modifiers (core/fx) — always last, on a finished frame
+  'post',       // modifiers (core/fx), always last, on a finished frame
 ]);
 
 // Resolved at MODULE LOAD, not per frame. updateLayer used to run for every layer on every frame of
@@ -98,15 +98,15 @@ export const ORDER = (() => {
     const trk = REGISTRY[name];
     const slot = trk.slot;
     if (!SLOTS.includes(slot))
-      throw new Error(`track "${name}" declares slot "${slot}", which is not a slot — known: ${SLOTS.join(', ')}. `
+      throw new Error(`track "${name}" declares slot "${slot}", which is not a slot, known: ${SLOTS.join(', ')}. `
         + `A track whose slot the pipeline does not know has no defined place to run.`);
     const prior = claimed.get(slot);
     if (prior)
       throw new Error(`tracks "${prior}" and "${name}" both claim slot "${slot}". A slot holds exactly one `
-        + `track. Resolving this silently would put two tracks in an order nothing declares — the state `
+        + `track. Resolving this silently would put two tracks in an order nothing declares, the state `
         + `this registry replaced. Give one of them its own slot in SLOTS, at the point it belongs.`);
     if (typeof trk.frame !== 'function')
-      throw new Error(`track "${name}" exports no frame() — a track that runs nothing is a slot held open.`);
+      throw new Error(`track "${name}" exports no frame(): a track that runs nothing is a slot held open.`);
     claimed.set(slot, name);
   }
   return Object.freeze(SLOTS.map((slot) => {
@@ -118,7 +118,7 @@ export const ORDER = (() => {
   }));
 })();
 
-// runTracks — one layer, one frame. `start`/`end` are computed here rather than in each track because
+// runTracks: one layer, one frame. `start`/`end` are computed here rather than in each track because
 // nine of the twelve need them and re-deriving them nine times is the one cost this loop cannot spend.
 //
 // Arguments are POSITIONAL and no options object is built: this runs once per layer per frame, and an

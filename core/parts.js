@@ -1,4 +1,4 @@
-// core/parts.js — the `parts` vocabulary: named entrances for the SUB-ELEMENTS of a hand-authored
+// core/parts.js. The `parts` vocabulary: named entrances for the SUB-ELEMENTS of a hand-authored
 // html/svg layer. A figure grows its bars, then draws its line, then pops its dots.
 //
 // It lived inline inside formats/scene/scene.js's build path until docs/MISTAKES.md #355. That is why it
@@ -52,11 +52,11 @@ export const PARTS = {
   };
 
 export const PART_BLURBS = {
-  growUp: 'scales up from its own bottom edge — a bar growing to its reading',
-  widen: 'scales out from its left edge — a row, a rule, a progress track filling',
-  popIn: 'scales from nothing at its centre with a fade — dots, chips, markers',
-  fadeUp: 'a short rise with a fade — the quiet default for any part',
-  riseIn: 'a longer rise with a fade — for parts that should feel like they arrive',
+  growUp: 'scales up from its own bottom edge, a bar growing to its reading',
+  widen: 'scales out from its left edge. A row, a rule, a progress track filling',
+  popIn: 'scales from nothing at its centre with a fade, dots, chips, markers',
+  fadeUp: 'a short rise with a fade, the quiet default for any part',
+  riseIn: 'a longer rise with a fade, for parts that should feel like they arrive',
   drawOn: 'an SVG stroke draws itself along its own path (pathLength=1, no measurement)',
   fade: 'opacity alone, no displacement · the quiet default when a part should arrive without moving',
   'slide-left': 'enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat',

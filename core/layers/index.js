@@ -1,4 +1,4 @@
-// core/layers/index.js — the layer registry. Each primitive is a file exporting build(kit,el,L) and
+// core/layers/index.js: the layer registry. Each primitive is a file exporting build(kit,el,L) and
 // optionally frame(kit,el,L,t). `createRenderer(ctx)` binds the shared kit and dispatches by L.type, so
 // scene.html stays a thin orchestrator (bg/camera/stings/timing) and adding a primitive = adding a file.
 import { mergeProps } from '../props.js';
@@ -27,18 +27,18 @@ import * as composition from './composition.js';
 import { canvasLayer } from './canvas.js';
 
 // The four types whose whole output is a canvas are ONE primitive with four backends (core/surfaces/).
-// They are still four names in scene JSON and four entries here — the collapse was internal, and 101
+// They are still four names in scene JSON and four entries here, the collapse was internal, and 101
 // scenes are written in the names.
 const shader = canvasLayer('shader', 'a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it');
-const paint = canvasLayer('paint', 'a generative Canvas 2D field drawn per frame from local time — the canvas family written in JS rather than GLSL, and the one you can resample');
-const raymarch = canvasLayer('raymarch', 'a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine — one hero shot, sized to what it needs');
-const three = canvasLayer('three', 'a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t — for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud');
+const paint = canvasLayer('paint', 'a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample');
+const raymarch = canvasLayer('raymarch', 'a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs');
+const three = canvasLayer('three', 'a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud');
 const globe = canvasLayer('globe', 'a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector');
 
 const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, composition };
 
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
-// hand-typed list and silently reported 14/14 while a 15th type existed — the same failure as the
+// hand-typed list and silently reported 14/14 while a 15th type existed, the same failure as the
 // schema advertising an anim that never existed (docs/MISTAKES.md #21, #65).
 export const LAYER_TYPES = Object.keys(REGISTRY);
 
@@ -51,16 +51,16 @@ export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 // The props each TYPE reads, taken off the modules that read them. Same contract as LAYER_TYPES, applied
 // to the vocabulary inside a layer rather than the vocabulary of layers: a gate answers "does anything
 // read `preset` on a glow?" by asking glow.js, never by scanning for it. `layer-props` used to scan, and
-// a scan is a map of where the code lived on the day it was written — the day core/tracks/ appeared it
+// a scan is a map of where the code lived on the day it was written, the day core/tracks/ appeared it
 // reported 1454 live props as dropped (core/props.js has the full account).
 //
 // The four canvas types get theirs from core/layers/canvas.js, which merges the shared canvas procedure
-// with its surface's own pixels vocabulary — so `paint` and `three` declare different sets under one
+// with its surface's own pixels vocabulary, so `paint` and `three` declare different sets under one
 // primitive, exactly as they read different ones.
 const declared = (t) => {
   const P = REGISTRY[t].PROPS;
   if (P === undefined)
-    throw new Error(`layer type "${t}" declares no PROPS — a builder that reads layer props without `
+    throw new Error(`layer type "${t}" declares no PROPS: a builder that reads layer props without `
       + `saying which ones puts them out of a gate's reach, and a prop nothing reads is the most `
       + `expensive bug class in this repo. Export \`PROPS = {}\` if it reads none.`);
   return P;
@@ -85,17 +85,17 @@ const pick = (L) => {
     // Deliberately does not name WHICH block/beat/comp this was. schema-drift guards the set of layer
     // props the ENGINE reads, and those three are author-facing build-time sugar the schema omits on
     // purpose, so reading one here would widen what the renderer claims to consume for a nicer string.
-    throw new Error(`layer type "${t}" is build-time sugar, not a renderable primitive — `
+    throw new Error(`layer type "${t}" is build-time sugar, not a renderable primitive, `
       + `run \`make expand D=<scene.json>\` and render the .expanded.json. Rendering it directly would `
       + `silently draw nothing.`);
   }
-  throw new Error(`unknown layer type "${t}" — known: ${LAYER_TYPES.join(', ')}. `
+  throw new Error(`unknown layer type "${t}", known: ${LAYER_TYPES.join(', ')}. `
     + `An unknown type used to fall back to the text builder, which paints nothing.`);
 };
 
 export function createRenderer(ctx) {
   const kit = createKit(ctx);
-  // Injected AFTER the kit exists (util.js cannot import this file — that would be circular). This is
+  // Injected AFTER the kit exists (util.js cannot import this file, that would be circular). This is
   // what lets a group child run the same builder as a top-level layer instead of a re-implemented
   // subset of it (docs/MISTAKES.md #70).
   // The primitive builds the thing; its `modifiers` then modify what was built, in that order and never
@@ -107,7 +107,7 @@ export function createRenderer(ctx) {
   // "which layer types can be resampled" is not a list anybody maintains.
   const buildOne = (el, L) => { pick(L).build(kit, el, L); buildFx(kit, el, L); attachResample(kit, el, L); };
   kit.buildLeaf = buildOne;
-  // A NESTED GROUP does not go through buildLeaf — addGroupChild lays it out itself and recurses — so
+  // A NESTED GROUP does not go through buildLeaf: addGroupChild lays it out itself and recurses, so
   // for as long as this slot has existed its modifiers were never built, silently. Not "refused": the
   // frame half still ran, so `tilt` half-worked and `mixBlend` did nothing at all, which is the exact
   // shape (input accepted and then ignored) the registry's hard-error dispatch was written to kill.
@@ -124,12 +124,12 @@ export function createRenderer(ctx) {
     build(el, L) { checkLayerTree(L, LAYER_PROPS); buildOne(el, L); },
     // per-TYPE frame update (typing/count/cursor/clip/ken). Cross-cutting effects (cut, kinetic units,
     // motion track) are the per-frame pipeline in core/tracks/, which calls this from the `primitive`
-    // slot — in the MIDDLE of that list, not before or after it (core/tracks/primitive.js says why).
+    // slot, in the MIDDLE of that list, not before or after it (core/tracks/primitive.js says why).
     //
     // `scene` is a FROZEN read-only view of the rest of the frame: geometry (boxOf · specOf · ids), the
     // frame's own properties (light · camera · canvas · safe · bg), the clock, the theme's palette, and
     // the film's joints. A primitive used to be handed itself and the clock and nothing else, which is why
-    // occlusion, a shadow keyed to a light, and per-layer 3D could not be written at all — none of
+    // occlusion, a shadow keyed to a light, and per-layer 3D could not be written at all, none of
     // them is a property of one layer. It is frozen because a layer that could write to it would be
     // writing into the next layer's inputs, and renderFrame(n) has to stay pure in n.
     frame(el, L, t, scene) { const m = pick(L); if (m.frame) m.frame(kit, el, L, t, scene); },

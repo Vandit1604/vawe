@@ -1,26 +1,26 @@
-// core/layers/glow.js — soft light: radial centre-glow, a directional beam, or a named light
+// core/layers/glow.js, soft light: radial centre-glow, a directional beam, or a named light
 // PHENOMENON via `preset`. Pure gradient div(s), no WebGL.
 //
 // Why these five presets: they are the light jobs a motion-graphics scene actually needs, and each
 // reads as a distinct phenomenon rather than "another blob":
-//   bloom     — light overflowing a bright source; puts energy AT a point (behind a logo, a number).
-//   halation  — film-style warm ring + tight core; nostalgia/glamour on a highlight, quiet by default.
-//   diffusion — a broad veil that lifts blacks over an area (screen blend); softens a busy region.
-//   rimLight  — an off-centre crescent; edge-lights a subject placed beside it, gives it dimension.
-//   spotlight — a directional soft-edged cone (angle in degrees); stages a reveal, directs the eye.
-// Colours come from color-mix over var(--accent) / white so every theme reskins them — never a
+//   bloom: light overflowing a bright source; puts energy AT a point (behind a logo, a number).
+//   halation: film-style warm ring + tight core; nostalgia/glamour on a highlight, quiet by default.
+//   diffusion: a broad veil that lifts blacks over an area (screen blend); softens a busy region.
+//   rimLight: an off-centre crescent; edge-lights a subject placed beside it, gives it dimension.
+//   spotlight: a directional soft-edged cone (angle in degrees); stages a reveal, directs the eye.
+// Colours come from color-mix over var(--accent) / white so every theme reskins them, never a
 // hardcoded brand colour. All geometry/colour maths lives in exported PURE string builders
 // (smoke-testable with plain node, no DOM).
 //
-// Pulse purity: L.pulse breathes opacity sinusoidally from LOCAL t inside frame(kit,el,L,t) — a pure
+// Pulse purity: L.pulse breathes opacity sinusoidally from LOCAL t inside frame(kit,el,L,t), a pure
 // function of t (no wall clock, no state), so renderFrame(n) stays deterministic and seek-safe.
 // Amplitude is capped at 0.15 (a breath, not a strobe). The pulse writes to an INNER node, because
 // scene.html's driveClips owns el.style.opacity for enter/exit fades. As in shader.js, frame() stamps
-// el.dataset so a pulse-only frame always changes the DOM signature — otherwise the render's
+// el.dataset so a pulse-only frame always changes the DOM signature, otherwise the render's
 // static-frame dedup could wrongly reuse a frame.
 //
 // Back-compat: a glow with NO preset takes the exact original code path (same node, same background
-// string) — existing scenes render byte-identical; the snap gate would catch any drift.
+// string), existing scenes render byte-identical; the snap gate would catch any drift.
 
 // ---- pure helpers (exported for lib tests) -------------------------------------------------------
 
@@ -125,8 +125,8 @@ export function pulseOpacity(lt, p, amp = 0.12) {
 
 // pure FLASH envelope: a finite attack→decay bloom (a light SWELLING once, then settling), unlike the
 // continuous breathe of pulseOpacity. Rises 0→peak over `attack`s, decays peak→0 over `decay`s, then
-// holds 0. Peak capped ≤0.45 (HF doctrine: a swell, not a strobe). Absolute opacity, not a multiplier —
-// the caller adds it to a base. Pure in lt → seek-safe.
+// holds 0. Peak capped ≤0.45 (HF doctrine: a swell, not a strobe). Absolute opacity, not a multiplier.
+// The caller adds it to a base. Pure in lt → seek-safe.
 export function flashEnvelope(lt, { attack = 0.35, decay = 0.9, peak = 0.4 } = {}) {
   const pk = Math.min(0.45, Math.max(0, peak));
   if (lt < 0) return 0;
@@ -180,21 +180,21 @@ export function build(kit, el, L) {
     inner.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
                                  : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
   }
-  // .hs-layer is already position:absolute (a containing block) — never override it here
+  // .hs-layer is already position:absolute (a containing block), never override it here
   el.appendChild(inner);
   el.__glowInner = inner;
 }
 
 // breathe from LOCAL t (pure in t → deterministic, seek-safe). Stamp el.dataset.gp so a pulse-only
-// frame always changes the DOM signature — same rationale as shader.js: without it the render's
+// frame always changes the DOM signature, same rationale as shader.js: without it the render's
 // static-frame dedup could wrongly reuse a frame.
 export function frame(kit, el, L, t) {
   const cycling = L.preset === 'chromaCycle';
   if ((!L.pulse && !cycling && !L.flash) || !el.__glowInner) return;
-  // Set the inner DETERMINISTICALLY for EVERY t — never early-return and leave a STALE value. Outside the
+  // Set the inner DETERMINISTICALLY for EVERY t, never early-return and leave a STALE value. Outside the
   // layer's own window driveClips normally hides the layer, so a stale inner used to be invisible; but
   // sceneUnits can EXTEND the visible window past L.duration, and then the stale inner shows AND becomes
-  // render-order-dependent (a latent purity break sceneUnits exposed — MISTAKES). So compute a resting
+  // render-order-dependent (a latent purity break sceneUnits exposed, MISTAKES). So compute a resting
   // value outside the window instead of skipping.
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   const inWindow = t >= start && t < end;

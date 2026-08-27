@@ -1,7 +1,7 @@
-// blocks/interact.mjs — the INTERACTION vocabulary: the four things a product demo does to a screen.
+// blocks/interact.mjs. The INTERACTION vocabulary: the four things a product demo does to a screen.
 //
 // WHY: the registry could depict interfaces but not USING them. The `cursor` layer type has existed
-// since the demo work (core/layers/cursor.js — a path of {t,x,y} keyframes plus click times), and
+// since the demo work (core/layers/cursor.js. A path of {t,x,y} keyframes plus click times), and
 // exactly ONE block emitted it: `searchEngine.results`, with a two-point path hardcoded inside the
 // family. So any other click in any other scene had to be hand-authored as a raw layer, timed against
 // a magic offset the author had to rediscover. A touch tap had no shape at all, a phone keyboard did
@@ -14,7 +14,7 @@
 //
 // THE PRESS AND THE RIPPLE ARE ONE MECHANISM, not two. Both are a state that goes somewhere over a
 // window, which is exactly what the engine's animated custom properties are for (scene.html: `vars`
-// interpolates `--p` per frame and the block writes `var(--p)` into its own CSS — see `gauge` and
+// interpolates `--p` per frame and the block writes `var(--p)` into its own CSS, see `gauge` and
 // `lineChart` for the reference use). Pure in n: the value is a function of t and nothing else.
 //
 // A press is the one shape that has to come BACK, and `vars` sweeps one direction only. The triangle
@@ -32,7 +32,7 @@ export const CATEGORY = 'Interaction';
 const DIP = 'min(var(--p,0), 1 - var(--p,0))';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// pointer — the mouse. Travels from {x,y} to `to` and clicks there.
+// pointer. The mouse. Travels from {x,y} to `to` and clicks there.
 //
 // The default `path` is DERIVED from `clickAt` rather than authored: the pointer must ARRIVE before
 // it clicks, so the travel leg lands `SETTLE` seconds early and the click fires on a pointer that is
@@ -63,10 +63,10 @@ export function pointer({ x = 0, y = 0, to = null, clickAt = 0.9, clicks = null,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// tapRipple — the finger. A phone demo has no arrow to follow, so the ONLY evidence a touch happened
+// tapRipple. The finger. A phone demo has no arrow to follow, so the ONLY evidence a touch happened
 // is the mark it leaves: a dot at the contact point and a ring expanding out of it.
 //
-// {x,y} IS THE POINT TOUCHED, not a top-left corner — the one deliberate exception to the library's
+// {x,y} IS THE POINT TOUCHED, not a top-left corner. The one deliberate exception to the library's
 // box-anchored rule, and it applies to `pointer` too (a cursor's {x,y} is its tip). An interaction
 // happens AT a place; a box around it is an implementation detail the author should never have to
 // subtract half of. Stated here because it is a deviation, and a silent deviation is a defect.
@@ -91,13 +91,13 @@ export function tapRipple({ x = 0, y = 0, at = 0.4, size = 120, color = T.accent
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// keyboard — the phone keyboard, so a mobile typing beat has somewhere for the typing to come from.
+// keyboard. The phone keyboard, so a mobile typing beat has somewhere for the typing to come from.
 //
 // Native boxes rather than one html blob: the keys are the theme's surfaces, and a tray built from
 // tokens reskins with the brand the way every other block in the library does.
 //
 // RISE IS CORRECT HERE, and it is the one place in the library that is true. `anim:'rise'` is the
-// house default that means nothing (see the note in scene.html) — but a phone keyboard genuinely
+// house default that means nothing (see the note in scene.html), but a phone keyboard genuinely
 // enters by sliding up from the bottom edge of the screen, so `slide-up` is depicting the real
 // behaviour rather than decorating an entrance.
 const LAYOUTS = {
@@ -129,11 +129,11 @@ export function keyboard({ x, y, w = 420, layout = 'qwerty', start = 0, dur = 4 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// pressButton — a CTA that is actually PRESSED. `card`'s CTA has no press state, so a scene could
+// pressButton. A CTA that is actually PRESSED. `card`'s CTA has no press state, so a scene could
 // point a cursor at a button and the button never acknowledged it: the gesture had no payoff and the
 // cut had to carry the whole beat. Here the surface travels down into its own shadow and comes back.
 //
-// `pressAt` is the moment of CONTACT, and the dip is centred on it — so a `pointer` clicking at the
+// `pressAt` is the moment of CONTACT, and the dip is centred on it, so a `pointer` clicking at the
 // same second lands on a button that moves under it, with no offset to work out at the call site.
 export function pressButton({ x, y, w = 260, label = '', pressAt = 0.8, color = T.accent,
   radius = R.tight, start = 0, dur = 3 } = {}) {

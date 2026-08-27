@@ -1,4 +1,4 @@
-// blocks/camera-chrome.mjs — VIEWFINDER FURNITURE. A camcorder OSD and an autofocus scan gate, as
+// blocks/camera-chrome.mjs: VIEWFINDER FURNITURE. A camcorder OSD and an autofocus scan gate, as
 // blocks rather than camera moves.
 //
 // WHY HERE AND NOT core/camera-moves.js: a camera move in this engine is (params) → keyframe[], a
@@ -9,10 +9,10 @@
 // MOTION, AND THE TRAP. CSS transitions and animations are dead engine-wide (core/tokens.css, and
 // core/validate.mjs refuses a fragment that uses them), so a `@keyframes … infinite` REC lamp renders
 // as a still. Two channels are real and both are used here:
-//   * `parts` (core/parts.js) — a CSS selector into this markup; every match gets a seeked entrance
+//   * `parts` (core/parts.js): a CSS selector into this markup; every match gets a seeked entrance
 //     with a stagger, and `out: true` gives it the paired exit. The brackets and the OSD chips arrive
 //     and leave that way.
-//   * `var(--t)` — the scene clock in SECONDS, written on every html layer (core/layers/html.js).
+//   * `var(--t)`: the scene clock in SECONDS, written on every html layer (core/layers/html.js).
 //     Geometry computed off it in a calc() is deterministic and seeks correctly.
 // The blinking lamp is a SQUARE WAVE off `--t`, the same round()/mod() idiom the caret in
 // blocks/terminal-html.mjs uses, because a one-shot `vars` ramp eases from a to b once and never
@@ -28,8 +28,8 @@ export const CATEGORY = 'Camera';
 const T = TOKENS;
 
 // TWO LITERALS, both under kit.mjs's own test for a legitimate one. A camcorder REC lamp is red
-// because the hardware is red, not because a brand chose it — the "operating system's chrome" case.
-// The fringe is red+cyan because a channel misregistration has no other colours — the "physical
+// because the hardware is red, not because a brand chose it. The "operating system's chrome" case.
+// The fringe is red+cyan because a channel misregistration has no other colours, the "physical
 // phenomenon" case. Neither is a colour a theme should ever repaint.
 const REC_RED = '#FF3B30';
 const FRINGE = 'text-shadow:1px 0 rgba(255,0,0,0.5),-1px 0 rgba(0,255,255,0.5)';
@@ -60,11 +60,11 @@ function bracket({ cx, cy, arm, weight, color, inset = 0, transform = '', part =
     + `${transform ? `;transform:${transform}` : ''}"></div>`;
 }
 
-// camcorderHud — the viewfinder overlay: corner brackets, a blinking REC lamp, a running timecode, a
+// camcorderHud. The viewfinder overlay: corner brackets, a blinking REC lamp, a running timecode, a
 // battery gauge, a zoom readout, and the lens vignette that sells all of it as glass.
 export function camcorderHud({ x = 0, y = 0, w = 1920, h = 1080, rec = true, zoom = '2.4', battery = 68,
   label = 'SP', from = 0, start = 0, dur = 5 } = {}) {
-  const inset = SPACE.xxl;                 // 48 — the brackets sit inside the safe area, like real chrome
+  const inset = SPACE.xxl;                 // 48: the brackets sit inside the safe area, like real chrome
   const arm = 96;                          // the bracket's arm length
   // The rails clear the brackets rather than guessing at a margin: previewed at 48+24 the battery
   // readout sat ON the top-right bracket's vertical arm.
@@ -115,12 +115,12 @@ export function camcorderHud({ x = 0, y = 0, w = 1920, h = 1080, rec = true, zoo
 
   return [{
     type: 'html', x, y, w, h, html, start, duration: dur, anim: 'fade', enterDur: 0.3, exitDur: 0.35,
-    // the chrome assembles piece by piece and leaves the same way — `parts`, not a card fade.
+    // the chrome assembles piece by piece and leaves the same way, `parts`, not a card fade.
     parts: { select: '[data-part]', anim: 'popIn', each: 0.34, stagger: 0.06, delay: 0.1, ease: P_EASE, out: true },
   }];
 }
 
-// scanGate — an autofocus gate: a band travels the box, then the brackets contract onto the target
+// scanGate. An autofocus gate: a band travels the box, then the brackets contract onto the target
 // and the lock reads out. `--scan` is the travel, `--lock` the snap; both are engine `vars` channels,
 // so both seek.
 export function scanGate({ x, y, w = 760, h = 460, label = 'LOCK', ticks = 7, start = 0, dur = 5 } = {}) {

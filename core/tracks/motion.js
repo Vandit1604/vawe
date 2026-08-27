@@ -1,4 +1,4 @@
-// core/tracks/motion.js — the motion track: compose element choreography ON TOP of the enter/exit/cut
+// core/tracks/motion.js. The motion track: compose element choreography ON TOP of the enter/exit/cut
 // transform (which driveClips and the `enter` track already wrote to el.style), and multiply into the
 // composed opacity. Last before the modifiers, because every track above it writes a transform this
 // one is meant to carry rather than replace.
@@ -16,7 +16,7 @@ const AUTO_SHUTTER = 0.16;   // higgsfield-recreation's own hand-picked value fo
 export const slot = 'transform';
 
 // `motionBlur` is derived from the DISTANCE between two samples of the motion track, so without a track
-// there is nothing to differentiate and the prop decides nothing — including `motionBlur: false`, which
+// there is nothing to differentiate and the prop decides nothing, including `motionBlur: false`, which
 // opts out of an automatic blur that a still layer would never have had.
 export const PROPS = { motion: {}, motionBlur: { when: 'motion' } };
 
@@ -28,14 +28,14 @@ export function frame(kit, el, L, units, t, f, start, end) {
   el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
   el.style.opacity = (baseOpacity(el) * m.opacity).toFixed(3);
   // TWO blur materials, summed into one blur():
-  //  (a) focus-pull — the authored m.blur track (depth / rack-focus).
-  //  (b) motion blur — velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
+  //  (a) focus-pull: the authored m.blur track (depth / rack-focus).
+  //  (b) motion blur, velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
   //      at t AND t-1frame, both PURE functions of the frame, so blur(n) is order-independent.
   //      Opt-in per layer: motionBlur:true (shutter 0.5) or a 0..1 strength. Needs a motion track.
   //      Opt-in was the whole policy, and across this entire library exactly ONE layer ever set it,
   //      so every fast move in every other film is a hard-edged slide. Blur is physics: a thing
   //      crossing the frame in a few frames smears whether or not the author remembered. So it is
-  //      now AUTOMATIC above a speed the eye already reads as fast, and still fully controllable —
+  //      now AUTOMATIC above a speed the eye already reads as fast, and still fully controllable,
   //      `motionBlur: false` opts out, a number overrides the shutter (KEYED-MOTION.md).
   let blurPx = m.blur > 0.01 ? m.blur : 0;
   if (L.motionBlur !== false) {
@@ -58,14 +58,14 @@ export function frame(kit, el, L, units, t, f, start, end) {
   // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
   // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.
   //
-  // The WRITE stays unconditional — that is what "authoritative" means, and skipping it is how a blur
+  // The WRITE stays unconditional. That is what "authoritative" means, and skipping it is how a blur
   // from another frame survives a seek backwards (MISTAKES #41). Only the STRIP is conditional: every
   // layer with a motion track pays this on every frame it is on screen, and the great majority of them
-  // never carry a blur at all — an authored `filter`, or nothing. `replace` on a string with no match
+  // never carry a blur at all. An authored `filter`, or nothing. `replace` on a string with no match
   // returns the string, so the guarded form is the same value by construction, without the scan.
   // `none` is the KEYWORD for "no filter", not a filter function, so it may never be concatenated with
   // one: this line used to write the literal `none` on an unblurred frame, and the next frame that DID
-  // blur produced `none blur(2.97px)` — an invalid declaration the browser drops WHOLE, so the layer
+  // blur produced `none blur(2.97px)`. An invalid declaration the browser drops WHOLE, so the layer
   // rendered with no filter at all. Silent, and invisible until the snap signature learned to record
   // `filter` (docs/MISTAKES.md #351): motion blur simply failed on any frame following an unblurred one,
   // and which frames those were depended on RENDER ORDER, so it was a purity bug as well as a dropped

@@ -1,4 +1,4 @@
-// blocks/ui.mjs — extracted from blocks/index.mjs (see that file's contract). Pure factories
+// blocks/ui.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
@@ -14,9 +14,9 @@ export const CATEGORY = 'Interface';
 const T = TOKENS;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// browserFrame — window chrome (traffic dots + URL bar). Draw content on top via other layers.
+// browserFrame, window chrome (traffic dots + URL bar). Draw content on top via other layers.
 // `url` defaulted to a real company's domain, which put a brand into every caller that did not think
-// to override it — the repo's rule is to ship the SHAPE, never a brand lockup. `children` is the
+// to override it. The repo's rule is to ship the SHAPE, never a brand lockup. `children` is the
 // content slot: without it a caller had to hand-stack absolute coordinates over the chrome and any
 // change to w/h silently broke the alignment.
 export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', children = [], start = 0, dur = 4 } = {}) {
@@ -31,11 +31,11 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
         // them. Close / minimise / zoom is danger / warn / ok, which is exactly what `toneColor` maps,
         // and going through it is the same route every sibling in this file takes for a status colour
         // (`notification`, `badge`, `shield`): one tone map, one place to repaint. Not the phone
-        // bezel's case below — a bezel is near-black because it is unlit glass, and that colour belongs
+        // bezel's case below. A bezel is near-black because it is unlit glass, and that colour belongs
         // to the hardware; a window button is chrome the host application owns and re-skins.
         ...['error', 'warn', 'ok'].map((tone) => box({ w: 12, h: 12, radius: R.pill, bg: toneColor(tone) })),
         { type: 'group', grow: 1, layout: 'row', justify: 'center', children: [
-          // A URL is machine text, so it stays mono — that is the one place mono is right for a word.
+          // A URL is machine text, so it stays mono. That is the one place mono is right for a word.
           { type: 'group', bg: T.surface, radius: R.pill, pad: `${SPACE.snug}px ${SPACE.md}px`, children: [text({ text: url, font: 'mono', size: TYPE.body, color: T.sub })] },
         ] },
       ] },
@@ -49,22 +49,22 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// pillRow — a horizontal row of chip tags.
+// pillRow, a horizontal row of chip tags.
 export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft, start = 0, dur = 4 } = {}) {
-  // the chips POP IN one after another — a tag row filling, not a slab sliding up
+  // the chips POP IN one after another: a tag row filling, not a slab sliding up
   return [{ type: 'group', x, y, layout: 'row', wrap: true, gap: SPACE.xs, items: 'center',
     start, duration: dur, anim: 'fade', enterDur: 0.2, children: items.map((p, i) => ({
       ...pill(p, fg, bg), ...stagger(i, { step: 0.08, delay: 0.1, anim: 'pop', enterDur: 0.26 }) })) }];
 }
 
-// notification — a toast card (icon + title + body). Good for "it just happened" beats.
-// `icon` was in this signature, documented by its presence, and rendered NOWHERE — the block drew a
+// notification: a toast card (icon + title + body). Good for "it just happened" beats.
+// `icon` was in this signature, documented by its presence, and rendered NOWHERE, the block drew a
 // bare dot and dropped the glyph. `toast` drew the same dot WITH the glyph in it. So the two halves of
 // one family disagreed about whether a prop existed, and the half that accepted it lied. Same chip,
 // same rule in both: a glyph if one is given, a plain dot if not.
 //
 // `items` stacks: N alerts arriving in order and EXPIRING, which is what an alert actually does. The
-// recursion is the point — one card is the block calling itself with the stack flattened away, so the
+// recursion is the point. One card is the block calling itself with the stack flattened away, so the
 // stacked and single forms cannot render differently.
 export function notification({ x, y, w = 460, title, message = '', body, desc = '', icon = null, accent = TOKENS.accent,
   items = null, life = 2.4, step = 1, rowH = 96, gap = 12, start = 0, dur = 4 } = {}) {
@@ -83,7 +83,7 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
         children: [text({ text: String(icon), size: TYPE.body, weight: 700, color: onColor(accent) })] })
     : box({ w: 12, h: 12, radius: R.pill, bg: accent });
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: SPACE.sm, pad: SPACE.md,
-    // a notification ARRIVES FROM THE EDGE and leaves the way it came — the short, correct entrance
+    // a notification ARRIVES FROM THE EDGE and leaves the way it came, the short, correct entrance
     // for a chip. Nothing inside it should perform; it is one small statement.
     ...cardChrome({ elevation: E.card, anim: 'slide-right' }), out: 'slide-right',
     start, duration: dur, enterDur: 0.4, exitDur: 0.3, children: [
@@ -95,16 +95,16 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
     ] }];
 }
 
-// callout — an info/success/warn strip with a leading bar (full-height, per shape lock).
+// callout: an info/success/warn strip with a leading bar (full-height, per shape lock).
 export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone = 'info', start = 0, dur = 4 } = {}) {
   msg = msg ?? body ?? title;
   const ac = toneColor(tone);
-  // the strip WIPES OPEN from its leading rule, then the message reads in — the short entrance a
+  // the strip WIPES OPEN from its leading rule, then the message reads in, the short entrance a
   // status strip is for (a plate arrives edge-first; it does not fly)
   // THE STRIP IS TINTED IN ITS OWN TONE, not painted on the neutral `--surface-2`. A status strip
   // whose only coloured mark is a 4px rule reads as a grey box with a stripe: the tone has to be in
   // the GROUND for the strip to say anything before it is read. Same one-hue-at-two-weights idiom the
-  // data family uses — solid rule, soft fill, one colour.
+  // data family uses, solid rule, soft fill, one colour.
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.md, pad: `${SPACE.md}px ${SPACE.lg}px`,
     bg: tint(ac, TINT.chip), radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.4, children: [
       box({ w: 4, h: 30, radius: R.none, bg: ac }),
@@ -112,9 +112,9 @@ export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone 
     ] }];
 }
 
-// phoneFrame — a phone shell (dark bezel, dynamic-island notch, light screen). Draw content on top.
+// phoneFrame: a phone shell (dark bezel, dynamic-island notch, light screen). Draw content on top.
 // `children` is the SCREEN. Without it the block was a bezel around an empty card, so any app content
-// had to be absolutely placed over it from the scene using coordinates derived by hand from the pad —
+// had to be absolutely placed over it from the scene using coordinates derived by hand from the pad,
 // arithmetic that broke silently the moment w or h changed. `status` draws the clock/indicator row,
 // without which the frame reads as a black rectangle rather than a phone in use.
 export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = true, time = '10:24',
@@ -129,7 +129,7 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
   // two arcs are not parallel and the bezel reads as thicker at the corners than along the sides. The
   // gap here is the frame's own `pad`, SPACE.xs.
   const screenR = Math.max(R.micro, bezelR - SPACE.xs);
-  // the notch is a PROPORTION of the device, not a fixed 116px — at the catalog's w:230 that constant
+  // the notch is a PROPORTION of the device, not a fixed 116px. At the catalog's w:230 that constant
   // covered more than half the screen. 0.39 / 0.087 of w reproduce the shipped look at w:300.
   //
   // #0A0A0A ON BOTH, and it is one of this library's few legitimate literals, on the same test
@@ -141,7 +141,7 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
   // measures 2.6:1 on higgsfield, which `make audit` fails HARD. Quiet is a colour; unread is a bug.
   // THE STATUS TYPE IS PROPORTIONAL UNTIL IT STOPS BEING READABLE, then it floors. At the catalog's
   // own w:230 the clock came out 10px and the indicator 9px, and `make audit` fails anything under
-  // 14.04px as unreadable — so did the DEFAULT w:300, at 13.5px. Below about w:380 a phone prop
+  // 14.04px as unreadable, so did the DEFAULT w:300, at 13.5px. Below about w:380 a phone prop
   // cannot be both proportional and legible, and legible wins: a status bar nobody can read is not
   // depicting a phone in use, it is depicting a smudge.
   const statusSize = (k) => Math.max(TYPE.body, Math.round(w * k));
@@ -155,19 +155,19 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
       children: screen }] }];
 }
 
-// tabBar — a segmented control / app tab bar. `active` is the selected index; `activeFrom`+`activeTo`
+// tabBar: a segmented control / app tab bar. `active` is the selected index; `activeFrom`+`activeTo`
 // make the selection MOVE, which is the only thing a tab bar ever does.
 //
 // TWO DEFECTS, one shape. `active` was a frozen index, so a scene could show a tab bar before a switch
-// or after one and never the switch itself — the single most-filmed interaction in a product demo was
+// or after one and never the switch itself. The single most-filmed interaction in a product demo was
 // the one state this block could not reach. And `tabs` were text-only while every real app tab bar is
 // icon-over-label, so the block depicted a segmented control and was catalogued as a tab bar.
 //
 // THE SELECTION SLIDES, IT DOES NOT CROSS-FADE, and that is why this is one `html` layer rather than
 // the native group it used to be. The lit pill translates by `var(--p)` (the engine's animated custom
-// properties — the same mechanism `gauge` and `pressButton` use), and the ACTIVE-styled copy of the
+// properties. The same mechanism `gauge` and `pressButton` use), and the ACTIVE-styled copy of the
 // label row lives INSIDE the pill, counter-translated by the same expression. So whichever tab the
-// pill is currently over renders in the active style, for free, at every frame — no per-label opacity
+// pill is currently over renders in the active style, for free, at every frame, no per-label opacity
 // arithmetic, and no second timeline that can fall out of sync with the first.
 //
 // `tabs` items are a plain string, or `{ label, icon }` for the icon-over-label form.
@@ -182,16 +182,16 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null
   const withIcons = items.some((t) => t.icon);
   const rowH = withIcons ? 64 : 40, innerW = r2(w - 2 * PAD);
   // the pill's offset, as ONE expression used three times (pill, clip window, counter-translate).
-  // `var(--p, 1)` rests at 1 so a bar with no sweep sits on `to` — the settled state, which is what a
+  // `var(--p, 1)` rests at 1 so a bar with no sweep sits on `to`, the settled state, which is what a
   // still of a tab bar should show.
   const pos = `calc((${from} + ${r2(to - from)} * var(--p, 1)) * ${step}px)`;
   // THE TWO COPIES MUST BE THE SAME WIDTH, so they differ in COLOUR ONLY. Weighting the active copy
   // heavier made it wider than the copy beneath it, and since the clip window's alignment depends on
   // the two rows being metrically identical, the lit label drifted out of its own pill as the pill
-  // travelled — a bold half-word sticking out of a white box. Colour carries the state; the pill
+  // travelled. A bold half-word sticking out of a white box. Colour carries the state; the pill
   // carries the emphasis. (Real tab bars do exactly this, for exactly this reason.)
   // A tab's icon and its label are both WORDS-side, so both are sans and both come from `labelCss`
-  // rather than a hand-written `font:` shorthand — that is what keeps this html block on the same
+  // rather than a hand-written `font:` shorthand. That is what keeps this html block on the same
   // type scale as the native ones. The inactive icon was `--dim` (2.6:1 on higgsfield, a HARD audit
   // failure); it is `--text-2` now, which is the muted TEXT role and clears 4.5:1 on every theme.
   const cell = (t, activeStyle) => `<div style="width:${tabW}px;height:${rowH}px;flex:none;display:flex;`
@@ -219,9 +219,9 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null
   }];
 }
 
-// checklist — items with checked/unchecked boxes; done rows dim (reads as completed).
+// checklist: items with checked/unchecked boxes; done rows dim (reads as completed).
 export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
-  // ITEMS TICK OFF ONE AFTER ANOTHER, top to bottom — the motion a checklist is FOR. The card only
+  // ITEMS TICK OFF ONE AFTER ANOTHER, top to bottom. The motion a checklist is FOR. The card only
   // fades in; the rows perform.
   //
   // The box is a LEAF (a chip on a text layer) rather than a group wrapping a glyph, because only a
@@ -236,7 +236,7 @@ export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}
       it.done
         // A TINTED CHIP WITH A MIXED TICK, not a solid `--up` fill with white on it. `onColor` was
         // called here believing it would pick a legible ink and it cannot: `--up` is a `var()`, so the
-        // hex branch misses and it returned '#fff' every time — 2.5:1 on linear, 1.3:1 on higgsfield's
+        // hex branch misses and it returned '#fff' every time, 2.5:1 on linear, 1.3:1 on higgsfield's
         // lime, HARD failures both. The tinted form is guaranteed on every theme AND is the register's
         // own idiom: one hue at two weights, soft fill, solid mark.
         ? text({ ...CHIP, color: onInk(T.green), bg: tint(T.green, TINT.chip), border: `2px solid ${tint(T.green, 30)}`, ...beat(i, { anim: 'pop', delay: 0.34 }) })
@@ -247,15 +247,15 @@ export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}
     ] })) }];
 }
 
-// table — a data table: `cols` header + `rows` of cells, hairline-divided.
+// table. A data table: `cols` header + `rows` of cells, hairline-divided.
 export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 } = {}) {
-  // ROWS FILL IN ONE AFTER ANOTHER under a header that is already there — how a table actually
+  // ROWS FILL IN ONE AFTER ANOTHER under a header that is already there, how a table actually
   // populates. The timing rides the CELLS, not the row: only a leaf child is registered with the clip
   // driver, so a row wrapper cannot carry its own window. Every cell in a row shares one delay, so
   // the row still reads as a single arrival.
   // MONO CARRIES NUMBERS, SANS CARRIES WORDS, and this block had it backwards: the column HEADINGS
   // ("Plan", "Seats") were set in mono and the cells under them in sans, which spends the one thing
-  // mono is for — a column of digits that lines up — on the one row that never holds a figure. A cell
+  // mono is for (a column of digits that lines up) on the one row that never holds a figure. A cell
   // that is entirely numeric now gets the theme's tabular face; a heading is a word, so it is sans.
   const NUMERIC = /^[-+]?[$€£]?[\d,]+(\.\d+)?%?$/;
   const cell = (t, head, beat) => { const v = String(t); return text({ text: v, grow: 1,
@@ -269,7 +269,7 @@ export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 
         row(r, false, stagger(i, { step: 0.16, delay: 0.3, anim: 'slide-left', enterDur: 0.32 }))].filter(Boolean))] }];
 }
 
-// timeline — a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
+// timeline: a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
 export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
   // THE RAIL ADVANCES DOWN THE SEQUENCE: each dot lands and its entry arrives beside it, in order,
   // so the eye travels the timeline instead of being handed the whole thing at once. The dot is a
@@ -281,8 +281,8 @@ export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {})
     children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: SPACE.md, children: [
       { type: 'group', layout: 'column', items: 'center', gap: 0, w: 18, children: [
         // An unreached dot sits on a TINT of the accent, not on `--line`. `--line` is the BORDER
-        // colour: painting the rest of a sequence with it says "divider", not "step not yet taken" —
-        // the same correction the meters got when their tracks stopped being hairline-coloured.
+        // colour: painting the rest of a sequence with it says "divider", not "step not yet taken".
+        // The same correction the meters got when their tracks stopped being hairline-coloured.
         text({ text: '', w: 14, h: 14, radius: R.pill, bg: it.done ? T.accent : tint(T.accent, TINT.track), ...beat(i, { anim: 'pop', enterDur: 0.26 }) }),
         i < items.length - 1 && box({ w: 2, grow: 1, bg: T.hair }),
       ].filter(Boolean) },
@@ -294,7 +294,7 @@ export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {})
     ] })) }];
 }
 
-// stepFlow — a horizontal numbered progress track; `active` is the current step (connectors fill behind it).
+// stepFlow: a horizontal numbered progress track; `active` is the current step (connectors fill behind it).
 // `active` is where the track STANDS; `activeFrom` + `activeTo` are where it TRAVELS between, so the
 // build sequence a step flow describes can actually be watched instead of only reported finished.
 //
@@ -315,14 +315,14 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
   const lit = (i) => `clamp(0, calc((${pos} - ${i}) * 6 + 1), 1)`;   // ring i reached
   const done = (i) => lit(i + 1);                                     // ...and passed
   // A STEP NUMBER IS A FIGURE, so all three copies of it are set in the theme's tabular face via
-  // `numCss` — they were sans, which is the inversion this register exists to fix, and it showed:
+  // `numCss`. They were sans, which is the inversion this register exists to fix, and it showed:
   // "1" and "4" sat at different optical widths inside a fixed 44px ring. The unreached digit was
   // `--dim` (2.6:1 on higgsfield, a HARD audit failure) and is `--text-2` now.
   const digit = (color) => `${numCss({ size: TYPE.base, color, weight: 700 })};letter-spacing:0`;
   const ring = (i) => `<div style="position:relative;width:${RING}px;height:${RING}px;flex:none">`
     + `<div style="position:absolute;inset:0;border-radius:100%;background:${T.surface};display:flex;`
     // The unreached digit FADES OUT as the ring lights. It used to stay fully painted and simply be
-    // covered by the accent disc drawn over it — invisible to the eye, but still a live element, and
+    // covered by the accent disc drawn over it, invisible to the eye, but still a live element, and
     // the contrast probe read it as `--text-2` sitting on the accent and failed it HARD on all three
     // themes. A thing that is meant to be gone should be gone.
     + `align-items:center;justify-content:center;${digit(T.sub)};opacity:calc(1 - ${lit(i)})">${i + 1}</div>`
@@ -339,7 +339,7 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
     + `opacity:${lit(i)}">${s}</div></div>`;
   // THE UNFILLED RAIL IS A TINT OF THE FILL, not `--line`. Painting the part of a track still to be
   // crossed with the theme's BORDER colour made it read as a divider between two rings instead of as
-  // the rest of the journey — and on a dark theme it vanished into the card. Same correction `gauge`
+  // the rest of the journey, and on a dark theme it vanished into the card. Same correction `gauge`
   // and `progressRing` got, and the same reason.
   const connector = (i) => `<div style="flex:1 1 auto;height:${RAIL}px;margin-top:${(RING - RAIL) / 2}px;`
     + `border-radius:${RAIL / 2}px;background:${tint(T.accent, TINT.track)};position:relative;overflow:hidden">`
@@ -356,17 +356,17 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
   }];
 }
 
-// kanban — columns of small cards. columns = [{title, cards:[string]}].
+// kanban: columns of small cards. columns = [{title, cards:[string]}].
 export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {}) {
   const colW = (w - 16 * (columns.length - 1)) / columns.length;
-  // THE BOARD DEALS ITSELF: column headers first, then the cards drop in reading order — across the
-  // columns, then down — so the eye is led through the board instead of watching it arrive as a slab.
+  // THE BOARD DEALS ITSELF: column headers first, then the cards drop in reading order, across the
+  // columns, then down, so the eye is led through the board instead of watching it arrive as a slab.
   // Each card is a LEAF with the card chrome on it (a group child is never registered with the clip
   // driver, so a card wrapping its own text could not be timed).
   return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: SPACE.md, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
     children: columns.map((col, ci) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: SPACE.xs, children: [
       // A column heading is a WORD ("In review"), so it is sans. It was mono, which is the library's
-      // standing inversion — and `--dim`, which `make audit` fails HARD on a dark theme.
+      // standing inversion, and `--dim`, which `make audit` fails HARD on a dark theme.
       text({ text: col.title, size: TYPE.body, weight: 600, color: T.sub, ...stagger(ci, { step: 0.09, delay: 0.15, enterDur: 0.28 }) }),
       // reading order across the board: card row `ri` in every column lands before row `ri + 1` does
       // HAIRLINE, NO SHADOW. A card sitting inside a board already has a boundary; giving it a drop
@@ -377,7 +377,7 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
     ] })) }];
 }
 
-// OPTICAL_NUDGE — one line of type, centred by eye rather than by box.
+// OPTICAL_NUDGE: one line of type, centred by eye rather than by box.
 //
 // A line box is not symmetric around its own type. Measured on the toast plate: the row is centred to
 // 0.01px (the 27px status disc sits 16.84 above and 16.84 below), and the words still read high,
@@ -396,14 +396,14 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
 // drop is the same bug that clipped the badge's label, and it is worth a fix at the write site.
 const OPTICAL_NUDGE = { paddingTop: `${SPACE.snug}px` };
 
-// toast — a dark snackbar: status dot · message · action link. (notification is the light card variant.)
+// toast. A dark snackbar: status dot · message · action link. (notification is the light card variant.)
 // The alert family (notification · toast · callout · banner) now shares ONE vocabulary: `title` and
 // `body`. Each block had invented its own words for the same two slots, so an author relearned the
-// block every time. Old names stay as aliases — a shared vocabulary is worth nothing if adopting it
+// block every time. Old names stay as aliases. A shared vocabulary is worth nothing if adopting it
 // breaks every caller (MISTAKES #67).
 export function toast({ x, y, w = 420, title, message = '', body = '', action = '', icon = '✓', accent = TOKENS.green,
   items = null, life = 2.2, step = 0.9, rowH = 58, gap = 12, start = 0, dur = 4 } = {}) {
-  // see `notification` — same stack, same helper, same recursion into the single-card form.
+  // see `notification`, same stack, same helper, same recursion into the single-card form.
   if (items && items.length) {
     return stackWindows({ n: items.length, start, dur, step, life, rowH, gap }).flatMap((wnd, i) => {
       const it = items[i];
@@ -413,7 +413,7 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
       // same shadow, so three of them read as a list of three things rather than as one thing that
       // grew. They cannot be inset or overlapped to say so: `w` is a floor here (the row's own content
       // sets the real width), and cards that overlap bury the older messages and fail the layout
-      // audit. Depth is the register left, and it is the honest one — the newest card holds full
+      // audit. Depth is the register left, and it is the honest one, the newest card holds full
       // weight and full light, each older one sits back a step.
       const back = items.length - 1 - i;   // 0 is the newest
       return [{ ...card, elevation: back ? E.card : E.raised, opacity: r2(1 - Math.min(back, 2) * 0.1) }];
@@ -429,11 +429,11 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
       // 26/TYPE.body, not 22/14: `make audit` fails anything under 14.04px, so the status glyph was
       // the one unreadable mark on a card whose whole job is to report a status.
       // THE DOT IS MIXED TOWARD THE PLATE, AND ITS GLYPH IS THE PLATE'S OWN INK. This card is
-      // INVERTED — `--text` is the ground and `--bg` is the type — so every other trick in this file
+      // INVERTED (`--text` is the ground and `--bg` is the type) so every other trick in this file
       // runs backwards here: `onInk` pulls toward `--text`, which on this plate is the BACKGROUND, and
       // the tick came out 1.8:1. Holding the fill at 45% of the status colour over the plate colour
       // keeps the disc close enough to the plate that `--bg` on it reads exactly as well as `--bg` on
-      // the plate does — and `--bg` on `--text` is the theme contract's own guaranteed pair. The disc
+      // the plate does, and `--bg` on `--text` is the theme contract's own guaranteed pair. The disc
       // still carries the status hue; it just stops pretending it can host arbitrary ink.
       box({ w: 26, h: 26, radius: R.pill, bg: `color-mix(in srgb, ${accent} 45%, ${T.ink})`, layout: 'row', justify: 'center', items: 'center',
         children: [text({ text: icon, size: TYPE.body, weight: 700, color: T.paper, css: OPTICAL_NUDGE })] }),
@@ -443,7 +443,7 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
       // measured 1.1:1 on it. Mixing toward the plate's OWN text colour lifts the link on a dark
       // plate and a light one alike.
       // 40%, NOT 55%, AND THE NUMBER WAS MEASURED RATHER THAN CHOSEN. At 55% the link fails 4.5:1 on
-      // 7 of the 38 themes and bottoms out at 3.26:1 on ledgerline-neon — the same near-3:1 a reader
+      // 7 of the 38 themes and bottoms out at 3.26:1 on ledgerline-neon, the same near-3:1 a reader
       // reported off a rendered frame. Mixed at 45% every theme clears, by 0.01, which is not a
       // margin; at 40% the worst theme in the library measures 5.32:1 and the link is still plainly
       // the accent. There is no on-dark accent token to reach for: `--on-accent` is ink FOR an accent
@@ -454,7 +454,7 @@ export function toast({ x, y, w = 420, title, message = '', body = '', action = 
     ].filter(Boolean) }];
 }
 
-// logoWall — a grid of wordmark (or logo image) cells. logos = [{text}] or [{src}].
+// logoWall: a grid of wordmark (or logo image) cells. logos = [{text}] or [{src}].
 export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur = 4 } = {}) {
   const rows = []; for (let i = 0; i < logos.length; i += cols) rows.push(logos.slice(i, i + cols));
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.sm, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
@@ -465,21 +465,21 @@ export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur =
         children: [lg.src ? { type: 'image', src: lg.src, h: 28 } : text({ text: lg.text, size: TYPE.lead, weight: 700, color: T.sub, ls: '-0.02em' })] })) })) }];
 }
 
-// badge — a CI-shield token: dark label + a coloured value chip. tone picks the value colour.
+// badge. A CI-shield token: dark label + a coloured value chip. tone picks the value colour.
 export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, dur = 4 } = {}) {
   const ac = toneColor(tone);
   // EVERY TONE IS A CSS VAR, so `onColor` cannot grade it and used to return white for all four:
   // 2.05:1 on the amber `warn` fill, and `make audit` failed the badge HARD on it. The stopgap here
-  // was `--text` on amber, which is dark only on a LIGHT theme — on linear and higgsfield `--text` is
+  // was `--text` on amber, which is dark only on a LIGHT theme. On linear and higgsfield `--text` is
   // nearly white and it still measured 1.9:1, no better than the white it replaced.
   //
   // The repair it asked for now exists. core/boot.js writes `--on-up`, `--on-down` and `--on-warn`
-  // beside `--on-accent`, each white-or-black chosen per theme off that theme's own fill — the only
+  // beside `--on-accent`, each white-or-black chosen per theme off that theme's own fill, the only
   // rule that clears all 152 theme x tone pairs (floor 4.69:1; white alone fails 112, black alone a
   // different 40). `onColor` defers to them, so all four tones are answered by one call and this block
   // holds no colour opinion of its own. Amber now reads 8.9:1 on every theme, dark ones included.
   const onAc = onColor(ac);
-  // a shield STAMPS IN, and its value chip lands a beat later — the whole motion of a status token.
+  // a shield STAMPS IN, and its value chip lands a beat later. The whole motion of a status token.
   // Nothing more: over-animating a static chip is how a registry stops reading as a vocabulary.
   // THEME TOKENS, NOT LITERALS. The plate was `#3A3A38` and its text `#fff`, so the block rendered a
   // dark grey rectangle on every theme, including the dark ones where it disappears into the ground.
@@ -494,7 +494,7 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
   // "shadows for elevation, borders for structure" and KEPT, because that rule endorses it rather
   // than merely tolerating it: the shadow here separates no two regions and states no boundary, it
   // says the sticker sits above the frame. A border in its place would be the wrong instrument, and
-  // the seam INSIDE the badge — the one thing here that IS structure — is drawn with a colour change
+  // the seam INSIDE the badge (the one thing here that IS structure) is drawn with a colour change
   // and no rule at all.
   // Mono on BOTH halves is deliberate and is not the library's inversion: a CI shield is machine
   // chrome end to end ("build | passing", "v2.4.1"), the same register as a terminal.
@@ -523,7 +523,7 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
     ] }];
 }
 
-// banner — a full-width accent announcement bar: icon · message · CTA.
+// banner. A full-width accent announcement bar: icon · message · CTA.
 export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
   msg = msg || body || title;
   const ink = onColor(accent);

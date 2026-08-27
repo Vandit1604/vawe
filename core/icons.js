@@ -1,5 +1,5 @@
 import { defineRegistry } from './registry.js';
-// icons.js — inline stroke SVG icons (currentColor, deterministic, no network). Premium 24px grid.
+// icons.js: inline stroke SVG icons (currentColor, deterministic, no network). Premium 24px grid.
 // Use in scenes: svgIcon('bolt', { size: 40, color: '#1f3bff' }). Named separately from motion.js icon()
 // (which renders image paths) to avoid collision.
 export const ICONS = {

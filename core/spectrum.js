@@ -1,6 +1,6 @@
-// core/spectrum.js — per-frame band energy, so a scene can move ON the music instead of near it.
+// core/spectrum.js: per-frame band energy, so a scene can move ON the music instead of near it.
 //
-// Pure maths, no deps, no I/O — the same arrangement as core/beats.js, and for the same reason: the
+// Pure maths, no deps, no I/O. The same arrangement as core/beats.js, and for the same reason: the
 // analysis runs ONCE offline (scripts/media/spectrum.mjs writes a sidecar) and the render only ever
 // reads a lookup table. That is what keeps audio-reactivity inside the determinism claim. Reacting to
 // audio LIVE would mean the frame depends on a decoder's state; reacting to a baked table means
@@ -8,7 +8,7 @@
 //
 // Bands rather than an FFT: three envelopes (low/mid/high) is what motion design actually consumes,
 // and band-pass energy gets there with a biquad and an RMS instead of a transform. If a future effect
-// needs real bins, this is the file that grows — the sidecar shape already carries N bands.
+// needs real bins, this is the file that grows. The sidecar shape already carries N bands.
 
 /** Default band splits in Hz. Kick/bass · body/vocal · air/cymbals. */
 export const BANDS = [

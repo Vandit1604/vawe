@@ -8,15 +8,15 @@ import { lit } from './color.js';
 // BRAND decision, not a physical fact, and it was answered for every brand. docs/MISTAKES.md #364.
 const THEME_PAPER = () => `rgb(${glowRGB('var(--bg)').join(',')})`;
 const THEME_INK = () => `rgb(${glowRGB('var(--ink)').join(',')})`;
-// core/canvas-fx.js — Tier 2 Canvas-2D per-pixel image passes (halftone, dither, mosaic, …).
+// core/canvas-fx.js: Tier 2 Canvas-2D per-pixel image passes (halftone, dither, mosaic, …).
 //
 // DETERMINISM: these are BAKED ONCE at build (boot.js, inside the awaited image-preload phase) into a
 // static PNG data-URL that replaces the <img> src. The source bitmap is static and each pass is a PURE
-// function of (pixels, opts, seed), so after the bake every renderFrame(n) returns identical bytes —
-// no wall clock, no per-frame canvas, no state. This is why Tier 2 is safe: static source, one-shot
+// function of (pixels, opts, seed), so after the bake every renderFrame(n) returns identical bytes.
+// No wall clock, no per-frame canvas, no state. This is why Tier 2 is safe: static source, one-shot
 // transform (unlike Tier 5 sim/audio). `make probe`/`make snap` are the judges.
 //
-// A pass is `(srcCtx, dstCtx, W, H, opts, seed) => void` — read the source, draw the result on dst.
+// A pass is `(srcCtx, dstCtx, W, H, opts, seed) => void`, read the source, draw the result on dst.
 // Pure numeric helpers (luma, Bayer, cell average) are exported for node lib-tests (no DOM needed).
 
 // ---- pure helpers (node-testable) ----------------------------------------------------------------
@@ -41,7 +41,7 @@ export function cellAverage(data, width, x0, y0, cw, ch, imgH) {
   return count ? [r / count, g / count, b / count] : [0, 0, 0];
 }
 
-// a deterministic seeded hash in [0,1) (for stipple jitter etc.) — pure, no Math.random
+// a deterministic seeded hash in [0,1) (for stipple jitter etc.), pure, no Math.random
 export function hash01(x, y, seed) {
   let h = (x * 374761393 + y * 668265263 + seed * 2246822519) >>> 0;
   h = (h ^ (h >>> 13)) * 1274126177 >>> 0;
@@ -64,7 +64,7 @@ export const CANVAS_FX = {
     }
   }),
   // Bayer ordered dither: per-pixel luma thresholded against the 4x4 matrix → 2-tone (ink on paper)
-  dither: withBlurb('Bayer 4x4 ordered dither down to TWO tones, theme ink on theme paper — no greys anywhere', function dither(srcCtx, dstCtx, W, H, o) {
+  dither: withBlurb('Bayer 4x4 ordered dither down to TWO tones, theme ink on theme paper. No greys anywhere', function dither(srcCtx, dstCtx, W, H, o) {
     const paper = o.paper || THEME_PAPER(), ink = o.ink || THEME_INK();
     dstCtx.fillStyle = paper; dstCtx.fillRect(0, 0, W, H);
     const { data } = srcCtx.getImageData(0, 0, W, H);
@@ -117,7 +117,7 @@ export const CANVAS_FX = {
     const ramp = o.ramp || ' .:-=+*#%@';
     // NOT tokenised: this pass IS the dark-terminal look, and a near-black ground under phosphor green
     // is the effect, not a default standing in for the theme's. lit() records that as a decision.
-    dstCtx.fillStyle = o.paper || lit('#0b0b0b', 'the dark ground this pass IS — a phosphor screen, not the theme paper');
+    dstCtx.fillStyle = o.paper || lit('#0b0b0b', 'the dark ground this pass IS. A phosphor screen, not the theme paper');
     dstCtx.fillRect(0, 0, W, H);
     dstCtx.fillStyle = o.ink || lit('#d8ffd0', 'phosphor green, the other half of the same look');
     dstCtx.font = `${cell}px monospace`; dstCtx.textBaseline = 'top';
@@ -159,7 +159,7 @@ export const CANVAS_FX = {
   }),
   // pixelSort: within each scan line, sort contiguous bright spans by luma → signature glitch smear.
   // Pure/deterministic: a span is bounded by a luma threshold, then reordered in place (no randomness).
-  pixelSort: withBlurb('sorts each contiguous BRIGHT run of a scan line by luma — the signature glitch smear, and deterministic: the span is bounded by a threshold, nothing is random', function pixelSort(srcCtx, dstCtx, W, H, o) {
+  pixelSort: withBlurb('sorts each contiguous BRIGHT run of a scan line by luma. The signature glitch smear, and deterministic: the span is bounded by a threshold, nothing is random', function pixelSort(srcCtx, dstCtx, W, H, o) {
     const vertical = !!o.vertical;
     const thr = (o.thresh ?? 0.55) * 255;               // luma cutoff that bounds a sortable span
     const img = srcCtx.getImageData(0, 0, W, H);
@@ -192,7 +192,7 @@ export const CANVAS_FX = {
   // crosshatch: diagonal strokes whose density steps with darkness (pencil/engraving)
   crosshatch: withBlurb('pencil / engraving: diagonal strokes whose density STEPS up with darkness (one, then a cross, then a vertical), ink on a warm paper stock', function crosshatch(srcCtx, dstCtx, W, H, o) {
     const cell = Math.max(4, Math.round(o.cell ?? 6));
-    dstCtx.fillStyle = o.paper || lit('#f4f1e8', 'a warm paper STOCK this pass simulates, like film stock — not the brand\'s white');
+    dstCtx.fillStyle = o.paper || lit('#f4f1e8', 'a warm paper STOCK this pass simulates, like film stock, not the brand\'s white');
     dstCtx.strokeStyle = o.ink || lit('#20242c', 'the plate ink of that same stock'); dstCtx.lineWidth = 1;
     const { data } = srcCtx.getImageData(0, 0, W, H);
     for (let y = 0; y < H; y += cell) {
@@ -235,7 +235,7 @@ export function bakeCanvasFx(img, spec) {
   // Absence and a WRONG NAME shared one `return null`, so a typo baked no pass and said nothing.
   // Absence keeps its meaning; an unknown name is refused. #361.
   if (o.fx != null && !Object.prototype.hasOwnProperty.call(CANVAS_FX, o.fx))
-    throw new Error(`unknown canvasFx "${o.fx}" — one of: ${Object.keys(CANVAS_FX).join(', ')}`);
+    throw new Error(`unknown canvasFx "${o.fx}". One of: ${Object.keys(CANVAS_FX).join(', ')}`);
   const pass = CANVAS_FX[o.fx];
   if (!pass || typeof document === 'undefined') return null;
   const nw = img.naturalWidth || img.width, nh = img.naturalHeight || img.height;

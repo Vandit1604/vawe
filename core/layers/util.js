@@ -1,4 +1,4 @@
-// core/layers/util.js — shared helpers for the layer primitives (core/layers/*). `createKit(ctx)` binds
+// core/layers/util.js: shared helpers for the layer primitives (core/layers/*). `createKit(ctx)` binds
 // them to the scene's services (theme, inkAt, cam, splitText, …) so every primitive builder is a small
 // pure-ish file that takes the kit. Ported verbatim from scene.html's inline helpers (byte-identical).
 
@@ -20,7 +20,7 @@ export function hexA(hex, a) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 
-// GLYPH_PAINTERS — the effects that repaint every CHARACTER against a ground of their own, so the
+// GLYPH_PAINTERS: the effects that repaint every CHARACTER against a ground of their own, so the
 // layer's resolved ink is not the ink any glyph is actually drawn in.
 //   • `ransom` (core/ransom.js) cuts each letter as a tile: a dark ink on a light paper swatch, chosen
 //     per glyph from a fixed table. A ransom headline whose LAYER colour is a light one is therefore
@@ -34,7 +34,7 @@ export function hexA(hex, a) {
 export const GLYPH_PAINTERS = ['ransom'];
 export const paintsOwnGlyphs = (L) => !!L && GLYPH_PAINTERS.some((k) => L[k]);
 
-// The props the SHARED KIT reads, for every layer type that calls it — the type styling, the chip box,
+// The props the SHARED KIT reads, for every layer type that calls it, the type styling, the chip box,
 // the decoration pass, the group layout, and a group child's own timing. A prop honoured here is honoured
 // everywhere, which is why it is one flat set and not a per-type one.
 //
@@ -90,16 +90,16 @@ export function createKit(ctx) {
   // the ctx object that already exists, so no call site changes signature.
   //
   // Built once at boot (core/boot.js frameOf) and RECEIVED here. The fallback covers a kit built
-  // outside boot — a test, a standalone view — and is the only place in the engine allowed to derive
+  // outside boot (a test, a standalone view) and is the only place in the engine allowed to derive
   // one, because there is no boot to receive it from. It still calls the one builder.
   const frame = ctx.frame
     || (ctx.W && ctx.H ? frameOf({ W: ctx.W, H: ctx.H, destination: ctx.destination }) : null);
 
-  // inkIsLight(c) — is the colour this layer settled on a LIGHT one? Asked of a real colour, never of a
+  // inkIsLight(c): is the colour this layer settled on a LIGHT one? Asked of a real colour, never of a
   // token name: `inkAt` hands back theme tokens (`var(--ink)` over a light window, the theme's own light
   // ground over a dark one), and a token name is not a lightness. `themes/vawe.json` sets `text` and
   // `ink` to the same dark hex, so reading the name would call that theme's light-on-dark type dark-on-
-  // light — the same trap formats/scene/scene.js documents at its ON_DARK. So resolve the token back
+  // light. The same trap formats/scene/scene.js documents at its ON_DARK. So resolve the token back
   // through the palette first, then ask core/motion.js.
   //
   // Unresolvable → false, NOT isLightBg's own "unreadable → light" default. This answer only ever adds
@@ -110,7 +110,7 @@ export function createKit(ctx) {
     return m ? (theme?.palette || {})[m[1]] : v;
   };
   const inkIsLight = (c) => { const r = paletteOf(c); return parseColor(r) != null && isLightBg(r); };
-  // onDark(L, midT) — TRUE when this layer's type is light ink on a dark ground at second `midT`. It is
+  // onDark(L, midT): TRUE when this layer's type is light ink on a dark ground at second `midT`. It is
   // the layer's settled colour asked of the palette, and it is one named function rather than an inline
   // expression because more than one place has to ask the same question and get the same answer.
   //
@@ -119,7 +119,7 @@ export function createKit(ctx) {
   // answer is "this layer cannot say".
   const onDark = (L, midT) => (paintsOwnGlyphs(L) ? false : inkIsLight(L.color || inkAt(midT) || 'var(--text)'));
 
-  // trackingCss(L, midT) — THE ONE RESOLUTION of a layer's settled letter-spacing, and the only thing
+  // trackingCss(L, midT): THE ONE RESOLUTION of a layer's settled letter-spacing, and the only thing
   // `styleText` writes into `el.style.letterSpacing`. Everything with an opinion is folded in here:
   // the author's prop, the size ramp, the light-on-dark lift, mono, `raw`, and the theme's optical flag.
   //
@@ -129,7 +129,7 @@ export function createKit(ctx) {
   // threading one more argument into the second writer, which left the trap set for a third. It is one
   // write now. A new opinion goes in this function, not in a new statement somewhere else.
   //
-  // `trackingFor` is a RAMP, not a decision — it turns (size, polarity) into ems. The decision is here.
+  // `trackingFor` is a RAMP, not a decision. It turns (size, polarity) into ems. The decision is here.
   function trackingCss(L, midT) {
     // An explicit `tracking`/`ls` always wins: everything below is a DEFAULT, never an override.
     // They are two declared names for one CSS property. The old guard in microType named only `ls`,
@@ -138,8 +138,8 @@ export function createKit(ctx) {
     if (L.ls != null) return L.ls;
     const size = L.size ?? 96;
     // The micro-typography path: every text/count layer except mono (tracking is wrong for code) and
-    // `raw:true` (the author asked for no refinements). It takes the optical ramp unconditionally —
-    // it does not consult `theme.type.optical` or the serif case, and that is the rule as SHIPPED,
+    // `raw:true` (the author asked for no refinements). It takes the optical ramp unconditionally.
+    // It does not consult `theme.type.optical` or the serif case, and that is the rule as SHIPPED,
     // preserved deliberately. Changing it is a taste decision, not part of making the write single.
     if (L.font !== 'mono' && !L.raw) return trackingFor(size, onDark(L, midT));
     // Everything else (mono · raw · a group child built without the text primitive) keeps the older
@@ -160,7 +160,7 @@ export function createKit(ctx) {
     el.style.fontWeight = String(L.weight ?? (serif ? 400 : 800));
     // The ink is resolved BEFORE the tracking because the tracking depends on it. `inkAt(midT)` is
     // the engine's own answer to "what colour must type be at this second", and it is chosen for
-    // contrast against the ground — so a light answer means a dark ground underneath it, and that is
+    // contrast against the ground, so a light answer means a dark ground underneath it, and that is
     // the polarity the optical correction needs. Where there is no bg window to ask (a theme-gradient
     // stage, or a hand-authored backdrop that declared no tone) `inkAt` returns null and the layer
     // falls back to the theme's own text colour, which is the right ground to judge against there.
@@ -174,7 +174,7 @@ export function createKit(ctx) {
     if (L.w != null) el.style.width = L.w + 'px';
     if (L.align) el.style.textAlign = L.align;
     if (L.color) el.style.color = L.color; else if (auto) el.style.color = auto;
-    // <b> emphasis colour: explicit emColor wins; else the brand accent for the POP — EXCEPT over an
+    // <b> emphasis colour: explicit emColor wins; else the brand accent for the POP, EXCEPT over an
     // accent-coloured field, where accent-on-accent vanishes, so emphasis falls back to the layer's OWN
     // colour (bold, always visible). Guard against blue-on-blue. (Must be a real colour, not `inherit`.)
     const w = bgWinAt(midT);
@@ -183,7 +183,7 @@ export function createKit(ctx) {
     // --layer-ink: the colour this layer ACTUALLY settled on, published for the kinetic presets.
     // `colorWave` sweeps the accent through a phrase and settles each word to a "resting colour" that
     // defaulted to `var(--ink)`. A preset writes `color` on every unit span every frame, so it wins over
-    // whatever `auto` put on the layer — which means a colour-wave headline over a DARK bg window
+    // whatever `auto` put on the layer, which means a colour-wave headline over a DARK bg window
     // settled to the dark ink and was not there, while the identical headline without the preset was
     // fine. Same shape as #373: a token name standing in for a decision that depends on the window.
     // The resting colour is not the preset's to choose; it is the colour this layer would have had.
@@ -193,7 +193,7 @@ export function createKit(ctx) {
   }
 
   function chipBox(el, L) { // shared box treatment: bg/pad/radius/border/shadow/elevation on ANY layer
-    // `css` can paint a background of its own — a gradient, an image, a conic sweep — and a painted
+    // `css` can paint a background of its own (a gradient, an image, a conic sweep) and a painted
     // box is a box, so `radius` has to reach it. Before `css` existed no layer could paint without one
     // of the props below, so `radius` alone was nothing to round and its absence here was invisible.
     // The feature made the combination legal and turned the omission into a silent drop: the corners
@@ -215,7 +215,7 @@ export function createKit(ctx) {
     el.style.borderRadius = (L.radius ?? 16) + 'px';
     if (L.border && !L.elevation) el.style.border = L.border === true ? '1px solid var(--line)' : L.border;
     // `glow` used to be reachable ONLY from inside the elevation branch, so a layer that asked for a
-    // glow and no elevation got silently nothing — schema.json advertises it as a standalone prop.
+    // glow and no elevation got silently nothing, schema.json advertises it as a standalone prop.
     // It composes now: elevation (or `shadow`) writes the depth stack, glow appends the bloom.
     const stack = [];
     if (L.elevation) {
@@ -240,11 +240,11 @@ export function createKit(ctx) {
 
   function applyFade(el, L) { // static edge mask; MUTUALLY EXCLUSIVE with `cut`
     // filter routing rides here because scene.html calls applyFade for EVERY layer right after it
-    // writes the raw L.filter string — resolving named grade presets (core/filters.js) at this hook
+    // writes the raw L.filter string, resolving named grade presets (core/filters.js) at this hook
     // needs no consumption-point edit. Raw CSS filter strings resolve to themselves (no-op).
     if (L.filter) { if (isLook(L.filter)) applyComposite(el, L.filter, L.lookOpts); else applyLayerFilter(el, L.filter); }
     if (!L.fade) return;
-    if (L.cut) throw new Error(`layer "${L.text || L.type}": fade and cut are mutually exclusive — put the fade on an inner layer`);
+    if (L.cut) throw new Error(`layer "${L.text || L.type}": fade and cut are mutually exclusive, put the fade on an inner layer`);
     const g = { right: 'linear-gradient(90deg, #000 55%, transparent 98%)',
                 left: 'linear-gradient(270deg, #000 55%, transparent 98%)',
                 bottom: 'linear-gradient(180deg, #000 55%, transparent 98%)',
@@ -255,10 +255,10 @@ export function createKit(ctx) {
 
   // The per-layer decoration that scene.html applied to top-level layers and to nothing else, so
   // `filter`, `mask`, `fade`, `lookOpts`, `reflect` and `logotype` were all silently dropped the moment
-  // a layer moved inside a group. Extracted so there is ONE definition and both paths call it — the
+  // a layer moved inside a group. Extracted so there is ONE definition and both paths call it, the
   // same reason the safe box and the canvas size each had to be collapsed to one (MISTAKES #70).
   // GLASS. `backdrop-filter` reads the pixels BEHIND an element, which is the one thing the shader
-  // path cannot do — core/stings.js and core/shaders-ambient.js are generative overlays with no
+  // path cannot do, core/stings.js and core/shaders-ambient.js are generative overlays with no
   // sampler2D, so frosted glass and everything in that family was blocked on a structural
   // layer-as-texture change. CSS has had the capability all along and the repo had zero occurrences
   // of it. This is the cheap half: blur/saturate what is behind. It does NOT give radial/zoom/spin
@@ -274,7 +274,7 @@ export function createKit(ctx) {
     el.style.webkitBackdropFilter = f;
   }
 
-  // progressiveBlur — a DIRECTIONAL blur fog on the backdrop that ramps toward an edge (motion-primitives
+  // progressiveBlur: a DIRECTIONAL blur fog on the backdrop that ramps toward an edge (motion-primitives
   // ProgressiveBlur). Fades a dense grid / list / feed into an edge far more cleanly than one flat blur
   // or a vignette. Built on the SAME structure as glass (backdrop-filter on the layer itself, which the
   // compositor honours; nested transparent child divs get skipped) plus a directional MASK: where the
@@ -299,7 +299,7 @@ export function createKit(ctx) {
     el.style.pointerEvents = 'none';
   }
 
-  // borderTrail — a glowing arc orbits the layer's border (motion-primitives BorderTrail): a ring mask
+  // borderTrail: a glowing arc orbits the layer's border (motion-primitives BorderTrail): a ring mask
   // (padding + mask-composite:exclude) over a spinning conic wedge. The spin is a WAAPI animation, which
   // seekAll(t) pauses and seeks every frame → deterministic. Great emphasis for a CTA / end card.
   //   borderTrail: true | { color, width (px), period (s/orbit), arc (deg) }
@@ -388,7 +388,7 @@ export function createKit(ctx) {
   // tokens still resolve (a `var(--line)` value is plain CSS text, so the cascade resolves it exactly
   // as it would any other declaration), and per-child engine timing survives.
   //
-  // Written ONCE here, at build time, same as every other decorate() call — never per frame. That is
+  // Written ONCE here, at build time, same as every other decorate() call, never per frame. That is
   // why `core/validate.mjs`'s `cssErrors` REFUSES any key the engine itself rewrites every frame
   // (opacity, transform, left/top/width/height, zIndex, pointerEvents) or that core/tokens.css kills
   // globally (animation, transition): a build-time write to one of those is silently erased the moment
@@ -396,18 +396,18 @@ export function createKit(ctx) {
   // this feature exists not to be (docs/MISTAKES.md #213, #369, #373, #375).
   //
   // camelCase in (`boxShadow`), CSS out: `el.style` is a CSSStyleDeclaration, so assigning its camelCase
-  // property IS how a browser accepts a JS write for a hyphenated CSS property — no hand conversion.
+  // property IS how a browser accepts a JS write for a hyphenated CSS property, no hand conversion.
   function applyCss(el, L) {
     if (!L.css || typeof L.css !== 'object' || Array.isArray(L.css)) return;
     // REFUSE A VALUE THE BROWSER WOULD DROP, here, where it is written. Assigning an invalid value to
     // `el.style` is a silent no-op: the property keeps its old value and the author is told nothing.
     // That is this engine's cardinal sin, and `css` is the one door through which arbitrary author CSS
-    // reaches the DOM, so it is the door that checks. Build-time only — this runs once per layer, not
+    // reaches the DOM, so it is the door that checks. Build-time only, this runs once per layer, not
     // per frame, because `css` is a settled style and never a motion channel.
     const bad = droppedProps(L.css);
     if (bad.length)
       throw new Error(`layer${L.id ? ` "${L.id}"` : ''} (type "${L.type || 'text'}"): the browser drops `
-        + `${bad.length === 1 ? 'this css declaration' : 'these css declarations'} — ${bad.join(' · ')}. `
+        + `${bad.length === 1 ? 'this css declaration' : 'these css declarations'}, ${bad.join(' · ')}. `
         + `It would keep the rest and render on, so nothing would fail and the layer would simply never `
         + `do it. A leading minus outside calc() is the usual cause: write \`calc(-1 * …)\`, not \`-calc(…)\`.`);
     Object.assign(el.style, L.css);
@@ -416,12 +416,12 @@ export function createKit(ctx) {
   function layoutGroup(el, L) { // layout-by-containment: a flex OR grid box, or FREE placement
     // `free`: children carry their own x/y inside the group instead of flowing. Without it, any
     // composition whose positions are computed (a bubble map, a ring, a scatter) costs ONE TOP-LEVEL
-    // LAYER PER ELEMENT — 46 for tpot's map — and slams into the 120-layer cap for a reason that has
+    // LAYER PER ELEMENT (46 for tpot's map) and slams into the 120-layer cap for a reason that has
     // nothing to do with complexity. Flow layouts cannot express "at this coordinate", so authors had
     // no way down. With `free` + per-child `delay` the same composition is a single layer.
     if (L.layout === 'free') {
       el.style.display = 'block';
-      el.dataset.free = '1'; // read by addGroupChild — children must place themselves
+      el.dataset.free = '1'; // read by addGroupChild: children must place themselves
     } else if (L.layout === 'grid') {
       el.style.display = 'grid';
       el.style.gridTemplateColumns = `repeat(${L.gridCols ?? 2}, ${L.colw ? L.colw + 'px' : '1fr'})`;
@@ -448,7 +448,7 @@ export function createKit(ctx) {
 
   function addGroupChild(parentEl, C, rootL) { // recursive: nested group OR a text/image/count leaf
     const c = document.createElement('div');
-    // A nested GROUP used to return here — before decorate(), before the timing dataset, before the
+    // A nested GROUP used to return here: before decorate(), before the timing dataset, before the
     // extra[] push. So `delay`, `anim`, `out`, `enterDur`, `mask`, `filter` and `vars` were accepted on
     // a nested group and silently ignored, while the identical props worked one node down on a leaf.
     // MISTAKES #69 fixed exactly this and fixed it for LEAVES ONLY; the early return was two lines
@@ -515,7 +515,7 @@ export function createKit(ctx) {
     // driveClips owns every timed element and it finds them by `[data-start]` (core/clips.js). A group
     // child never had those attributes, so its ENTRANCE came from the group's window no matter what the
     // child declared: `delay` shifted a start that only the cut/motion/units paths read, and the child
-    // still faded in with its siblings. 69 authored uses, every one inert — including the one this prop
+    // still faded in with its siblings. 69 authored uses, every one inert, including the one this prop
     // was added for, which was signed off from a settled frame where the stagger was already over
     // (MISTAKES #69). Writing the dataset hands the child to the same driver as a top-level layer, so
     // delay/anim/out/enterDur/exitDur mean here exactly what they mean out there.

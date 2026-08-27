@@ -1,33 +1,33 @@
-// compositions/index.js — the PER-BEAT TIMELINE registry (the safe form of another engine' "one worker
+// compositions/index.js: the PER-BEAT TIMELINE registry (the safe form of another engine' "one worker
 // hand-writes a GSAP timeline per beat" model).
 //
-// A composition is a FIRST-PARTY builder that authors a bespoke, multi-tween GSAP timeline for one beat
-// — the expressiveness `parts` (per-child stagger) and blueprints (fixed shapes) cannot reach: overlapping
+// A composition is a FIRST-PARTY builder that authors a bespoke, multi-tween GSAP timeline for one beat,
+// the expressiveness `parts` (per-child stagger) and blueprints (fixed shapes) cannot reach: overlapping
 // tweens, cross-timed hand-offs, a token travelling a path while a counter ticks and a check draws. The
 // JSON only NAMES it (`{ "type":"composition", "comp":"pipelineFlow", "props":{…} }`) and passes DATA via
-// `props`; the CODE lives here, never in the JSON. That is the whole security boundary — untrusted MCP
+// `props`; the CODE lives here, never in the JSON. That is the whole security boundary, untrusted MCP
 // input can name a comp and fill in labels, but cannot inject code (unlike an inline `<script>`, the real
 // past exploit). Comps therefore treat every `props` string as DATA (textContent / attr), never innerHTML.
 //
 // Determinism contract (identical to every hook in formats/scene/scene.js):
 //   • build(ctx) constructs the beat's STATIC DOM into `el`, then authors PAUSED tweens via `ctx.gsap`
 //     with `delay` offset by `ctx.start` and `immediateRender:true` so the start values are pinned.
-//   • No `Date.now()`, no `Math.random()`, no reading prior DOM/frame state — pure in the frame.
+//   • No `Date.now()`, no `Math.random()`, no reading prior DOM/frame state, pure in the frame.
 //   • `seekAll(t)` (core/clips.js) pauses+seeks `gsap.globalTimeline` each frame, so the whole timeline
 //     is a pure function of t regardless of render order. `make probe` guards it.
 // SVG draw-on uses the pathLength=1 / dasharray "1 1" trick (as PARTS.drawOn) so it needs no getTotalLength
-// (the layer is not in the document yet at build() time — scene.js appends AFTER renderer.build).
+// (the layer is not in the document yet at build() time, scene.js appends AFTER renderer.build).
 
 const NS = 'http://www.w3.org/2000/svg';
 
-// small helpers kept local — a comp reaches for these, nothing global.
+// small helpers kept local: a comp reaches for these, nothing global.
 const svgEl = (name, attrs = {}) => { const e = document.createElementNS(NS, name); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
 const drawable = (path) => { path.setAttribute('pathLength', '1'); path.style.strokeDasharray = '1 1'; path.style.strokeDashoffset = '1'; return path; };
 
 // ---- pipelineFlow ---------------------------------------------------------------------------------
 // A staged pipeline: N stage cards pop in, each connector DRAWS between them, a token TRAVELS the
 // connector into the next card, and the final card blooms with a check that draws on. One hand-authored
-// timeline — a genuine motion-graphics beat, not an assembly of primitives.
+// timeline. A genuine motion-graphics beat, not an assembly of primitives.
 //   props: { stages:[string,string,string] (labels), accent?:cssColor }
 function pipelineFlow(ctx) {
   const { el, gsap, start } = ctx;
@@ -45,7 +45,7 @@ function pipelineFlow(ctx) {
     const g = svgEl('g', { 'data-part': 'card' });
     // Scale about the card's OWN centre, stated in user units, not `fill-box` + `50% 50%`. fill-box
     // resolves against the element's bounding box, and at build() time this layer is not in the document
-    // yet (see the note at the top of this file), so it has no box to resolve against — while
+    // yet (see the note at the top of this file), so it has no box to resolve against, while
     // `immediateRender: true` pins the tween's start value at exactly that moment. The card therefore
     // scaled about the wrong point and swung in from a position it never occupies at rest, dragging a
     // connector stub into empty space behind it. Both numbers here are known at build time.
@@ -75,12 +75,12 @@ function pipelineFlow(ctx) {
   el.appendChild(svg);
 
   // ---- the hand-authored timeline (paused, absolute delays from `start`) ----
-  // EVERY tween is a fromTo with immediateRender:true so its start value is PINNED at build time —
+  // EVERY tween is a fromTo with immediateRender:true so its start value is PINNED at build time,
   // seeking the paused global timeline to any t then yields the same DOM regardless of which frames
   // rendered before it (pure in n). No `gsap.to(...immediateRender:false)`: that leaves the END value
   // stuck when the timeline is seeked backwards, which is exactly the render-order impurity `make probe`
   // exists to catch. The travelling token appears/moves/vanishes in ONE keyframed fromTo for the same
-  // reason. No colour tween between two `var()` strings — GSAP can't interpolate them (it snaps/NaNs).
+  // reason. No colour tween between two `var()` strings, GSAP can't interpolate them (it snaps/NaNs).
   cards.forEach((g, i) => {
     gsap.fromTo(g, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 * R, ease: 'back.out(1.7)', delay: start + i * 0.55 * R, immediateRender: true });
   });
@@ -100,7 +100,7 @@ function pipelineFlow(ctx) {
   const checkAt = start + (0.5 + (links.length) * 0.55 + 0.2) * R;
   gsap.fromTo(check, { strokeDashoffset: 1, opacity: 1 }, { strokeDashoffset: 0, duration: 0.4 * R, ease: 'power2.out', delay: checkAt, immediateRender: true });
   // emphasise the final card with a stroke-width pulse on its RECT (a child not otherwise tweened, so
-  // no immediateRender start-value conflict with the card <g>'s entrance) — numeric attr, deterministic.
+  // no immediateRender start-value conflict with the card <g>'s entrance), numeric attr, deterministic.
   gsap.fromTo(cards[cards.length - 1].querySelector('rect'), { attr: { 'stroke-width': 1.5 } },
     { attr: { 'stroke-width': 3.5 }, duration: 0.24, yoyo: true, repeat: 1, ease: 'power2.inOut', delay: checkAt, immediateRender: true });
 }
@@ -211,7 +211,7 @@ function commaSplit(ctx) {
 export const COMPOSITIONS = { pipelineFlow, commaSplit };
 export const COMPOSITION_NAMES = Object.keys(COMPOSITIONS);
 
-// COMPOSITION_BLURBS — one line per comp, next to the registry (the `blurb` pattern of
+// COMPOSITION_BLURBS: one line per comp, next to the registry (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
 // no comp, or a comp with no key, is a bug the effects catalog reports.
 export const COMPOSITION_BLURBS = {

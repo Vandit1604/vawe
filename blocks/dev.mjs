@@ -1,4 +1,4 @@
-// blocks/dev.mjs — extracted from blocks/index.mjs (see that file's contract). Pure factories
+// blocks/dev.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
@@ -8,7 +8,7 @@ import {
 } from './kit.mjs';
 
 // THE CODE FAMILY IS THE INSTRUMENT REGISTER. `R.tight` is what the radius scale reserves for machine
-// output — a terminal, a log stream, a diff, a file tree — so corners stay close to square because
+// output (a terminal, a log stream, a diff, a file tree) so corners stay close to square because
 // the content is not a document. `R.card` is kept for the two surfaces here that are content rather
 // than output: a commit list and a deploy result. Picking the ROLE, never the number (kit.mjs).
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
@@ -19,9 +19,9 @@ export const CATEGORY = 'Code';
 const T = TOKENS;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CODE_THEMES — curated editor palettes for codeBlock. Hex literals on purpose: like the stripeCard
+// CODE_THEMES, curated editor palettes for codeBlock. Hex literals on purpose: like the stripeCard
 // hexes, a code theme IS its exact colours (theme tokens would dissolve twelve looks into one).
-// Every fg/label/syntax colour was checked against its bg with the WCAG formula — the minimum in the
+// Every fg/label/syntax colour was checked against its bg with the WCAG formula, the minimum in the
 // set is 4.68:1, so nothing here can murk out on render. Names are descriptive, not editor brands.
 // `light: true` flips the card chrome (hairline + elevation instead of the dark inner border).
 const CODE_THEMES = {
@@ -39,13 +39,13 @@ const CODE_THEMES = {
   frost:    { bg: '#EFF4F8', fg: '#22303C', label: '#5D6E7E', light: true, syntax: ['#155FB0', '#0F6E62', '#7A3FA0', '#A03050', '#6B5A10'] },
 };
 
-// codeBlock — a code card. `lines` are strings OR {text,color} for syntax colour. Optional `theme`
+// codeBlock: a code card. `lines` are strings OR {text,color} for syntax colour. Optional `theme`
 // names a CODE_THEMES palette; it overrides dark/light, and lines that don't bring a colour get the
 // palette's syntax colours cycled by line index (deterministic: same lines → same paint).
 export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size = 24, theme,
   start = 0, dur = 4, anim = 'fade', enterDur = 0.25 } = {}) {
   const P = theme ? CODE_THEMES[theme] : null;
-  if (theme && !P) throw new Error(`codeBlock: unknown theme "${theme}" — one of ${Object.keys(CODE_THEMES).join(', ')}`);
+  if (theme && !P) throw new Error(`codeBlock: unknown theme "${theme}". One of ${Object.keys(CODE_THEMES).join(', ')}`);
   const isDark = P ? !P.light : dark;
   // dark mode's plate is the fixed T.stripeNavy (not a theme var), so its ink must be computed off
   // that same fixed literal via onColor, not a separately-guessed literal that can drift from it.
@@ -56,7 +56,7 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
   // where `--dim` measures 2.6:1 on higgsfield and fails `make audit` HARD. A CODE_THEMES palette
   // brings its own measured label colour and keeps it.
   if (label) kids.push(text({ text: label, font: 'mono', size: TYPE.body, color: P ? P.label : (dark ? T.stripeGrey : T.sub) }));
-  // THE CODE WRITES ITSELF IN, line after line, off the top of the block — the motion a code card is
+  // THE CODE WRITES ITSELF IN, line after line, off the top of the block, the motion a code card is
   // FOR. The label (if any) is already there, so the reveal starts at the first line of code.
   // cycle index advances per line (not per uncoloured line) so each line's hue is stable under edits
   // to its neighbours' explicit colours
@@ -73,10 +73,10 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// terminal — a command prompt + output card. `command` types in; `output` reveals after.
+// terminal. A command prompt + output card. `command` types in; `output` reveals after.
 // `cps` is the typing speed in characters per second; the output waits for the command to finish.
 export function terminal({ x, y, w = 720, command, output = [], cps = 18, start = 0, dur = 4 } = {}) {
-  // THE COMMAND TYPES IN, CHARACTER BY CHARACTER, AND THEN THE OUTPUT ANSWERS IT — the one motion a
+  // THE COMMAND TYPES IN, CHARACTER BY CHARACTER, AND THEN THE OUTPUT ANSWERS IT, the one motion a
   // terminal is for, and the reason the prompt has to land before anything below it does. `typing` is
   // the engine's own char reveal (chars/sec, pure in t), so the output's start is DERIVED from the
   // command's length rather than guessed.
@@ -100,22 +100,22 @@ export function terminal({ x, y, w = 720, command, output = [], cps = 18, start 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// loadingBar — a track + a fill that wipes L→R (determinate) and lands GREEN.
+// loadingBar. A track + a fill that wipes L→R (determinate) and lands GREEN.
 // Returns [track, fill]; add `label`+`done` for a "✓ done" that pops on completion.
 // `color` IS GONE FROM THIS SIGNATURE. It was destructured, defaulted, declared in no schema and read
-// by nothing — the fill has always been painted with `settle`. A prop the engine accepts and then
+// by nothing. The fill has always been painted with `settle`. A prop the engine accepts and then
 // ignores is the exact silent-substitution failure this repo forbids, and leaving it in place would
 // have documented a dial that does nothing. A caller still passing it is unaffected: an extra key on
 // an options object was already discarded.
 export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5,
   settle = T.green, label, done = true } = {}) {
   // The fill is DRIVEN, not entered. It used to ride `anim:'wipe'` with `enterDur: fillDur`, which
-  // put the whole fill inside the entrance envelope — so the bar spent the entire 1.5s fading up from
+  // put the whole fill inside the entrance envelope, so the bar spent the entire 1.5s fading up from
   // transparent while it wiped, and the determinate fill this block exists to show read as a haze.
   // `--p` is independent of the enter/exit fade: the bar arrives instantly, then FILLS.
   const life = fillDur + (done ? 1.2 : 0.4);
   // THE TRACK IS A TINT OF THE FILL, not the neutral `--surface-2`. The unfilled part of a meter is
-  // the rest of the reading, so it belongs to the fill's own hue at the lighter weight — the same
+  // the rest of the reading, so it belongs to the fill's own hue at the lighter weight, the same
   // one-hue-at-two-weights idiom `gauge`, `progressRing` and every bar track already use. On
   // `--surface-2` the bar read as a coloured mark sitting on unrelated chrome.
   const out = [
@@ -138,10 +138,10 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// deploySuccess — a CI pipeline that cascades queued→building→deploying→live, then a success card
+// deploySuccess. A CI pipeline that cascades queued→building→deploying→live, then a success card
 // with a green check, live URL, and "Ready in Xs". The canonical "a click had a consequence" payoff.
 // `title`/`note`/`steps` are PROPS. They used to be constants, which meant every caller shipped the
-// words "Deployed to production" and — worse — "Ready in 1.2s", an invented statistic baked into the
+// words "Deployed to production" and (worse) "Ready in 1.2s", an invented statistic baked into the
 // factory. This repo's own rule is that an unbacked number is worse than no number, so `note` now
 // defaults to nothing: a timing claim only appears when a caller can stand behind it.
 //
@@ -169,8 +169,8 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
         color: i === lead ? T.ink : T.sub, start: t, duration: 6 }));
       return;
     }
-    // THE CASCADE RUNS. Each step is three short-lived layers — queued `·`, running `•`, finished `✓`
-    // — whose windows tile the block's life, so the glyph a frame shows is a pure function of t and
+    // THE CASCADE RUNS. Each step is three short-lived layers, queued `·`, running `•`, finished `✓`,
+    // whose windows tile the block's life, so the glyph a frame shows is a pure function of t and
     // the pipeline visibly advances instead of rendering pre-completed. A glyph is one layer per
     // STATE rather than one layer that changes, because a layer's text is fixed at build time and
     // the frame loop is not allowed to step from a previous frame.
@@ -178,7 +178,7 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
       font: 'mono', size: TYPE.lead, weight: 700, color, start: r2(from), duration: r2(life), anim, enterDur: 0.18, exitDur: 0.12 });
     out.push(...[
       // A QUEUED step is `--text-2`, not `--dim`. A pipeline that has not started yet still has to be
-      // readable — that is the whole point of showing the queue — and `--dim` measures 2.6:1 on
+      // readable (that is the whole point of showing the queue) and `--dim` measures 2.6:1 on
       // higgsfield, which `make audit` fails HARD.
       glyph('·', T.sub, start, r2(t - start), 'fade'),
       glyph('•', T.green, t, STEP, 'pop'),
@@ -204,7 +204,7 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
     children: [
       // A TINTED DISC WITH A MIXED TICK, not a solid `--up` fill with assumed-white ink. `onColor`
       // was called here believing it would pick a legible colour and it cannot: `--up` is a `var()`,
-      // so the hex branch misses and it returned '#fff' — 1.4:1 on higgsfield's lime, 2.8:1 on
+      // so the hex branch misses and it returned '#fff', 1.4:1 on higgsfield's lime, 2.8:1 on
       // linear, HARD failures both. Soft fill, solid mark: the register's own idiom.
       { type: 'group', bg: tint(T.green, 22), radius: R.pill, pad: `${SPACE.xs}px ${SPACE.sm}px`, children: [text({ text: '✓', size: TYPE.lead, weight: 700, color: onInk(T.green) })] },
       { type: 'group', layout: 'column', gap: SPACE.tight, items: 'flex-start', children: [
@@ -220,7 +220,7 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
   return out;
 }
 
-// diff — a code diff card. `lines` = [{sign:'+'|'-'|' ', text}] with add/del colouring.
+// diff: a code diff card. `lines` = [{sign:'+'|'-'|' ', text}] with add/del colouring.
 export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
   const col = { '+': T.green, '-': T.down, ' ': T.sub };
   // EVERY CHANGED LINE SITS IN ITS OWN TINTED BAND, which is what a diff looks like everywhere it is
@@ -235,11 +235,11 @@ export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
       pad: `${SPACE.tight}px ${SPACE.snug}px` })) }];
 }
 
-// fileTree — an indented file/folder list; `active` highlights the focused row.
+// fileTree: an indented file/folder list; `active` highlights the focused row.
 export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {}) {
   // THE TREE EXPANDS: rows arrive top-down, each sliding in from its own indent. The highlight moved
   // off the row wrapper and onto the row's own text leaf, because the wrapper is a nested group and
-  // the engine never registers one — the lit row would have been lit from the first frame while its
+  // the engine never registers one. The lit row would have been lit from the first frame while its
   // label was still arriving.
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.hair, pad: SPACE.md,
     ...cardChrome({ radius: R.tight, anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
@@ -255,13 +255,13 @@ export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {})
       ] })) }];
 }
 
-// logLines — a log stream with optional timestamp + level colour. dark = terminal surface.
+// logLines: a log stream with optional timestamp + level colour. dark = terminal surface.
 export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, dur = 4 } = {}) {
   const bg = dark ? T.stripeNavy : T.card;
   // Two palettes, because one set of level colours cannot clear 4.5:1 on both a near-black card and a
   // white one. Measured against their own surface: light info 5.46:1, light warn 5.93:1, dark stamp
-  // 6.00:1. The file already proved it knows how to do this — CODE_THEMES records a measured 4.68:1
-  // minimum — and nothing else got the same treatment (MISTAKES #71).
+  // 6.00:1. The file already proved it knows how to do this, CODE_THEMES records a measured 4.68:1
+  // minimum, and nothing else got the same treatment (MISTAKES #71).
   const lc = dark
     ? { info: '#8898AA', ok: T.greenBright, warn: '#F6A417', error: '#FF6B6B' }
     : { info: '#5A6B7F', ok: '#1F6B3A', warn: '#8A5A00', error: '#B02A37' };
@@ -272,14 +272,14 @@ export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, du
     bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: E.flat }), start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.3,
     children: lines.map((ln, i) => ({ type: 'group', layout: 'row', items: 'baseline', gap: SPACE.sm, children: [
       // A timestamp is a FIGURE, so mono stays. The LIGHT card's stamp was `--dim` while the dark
-      // card's was a measured literal — the two halves of one block disagreeing about whether a
+      // card's was a measured literal. The two halves of one block disagreeing about whether a
       // timestamp has to be readable.
       ln.t && text({ text: ln.t, font: 'mono', size: TYPE.body, color: dark ? '#8FA3BA' : T.sub, ...beat(i) }),
       text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: TYPE.base, color: lc[ln.level] || base, ...beat(i) }),
     ].filter(Boolean) })) }];
 }
 
-// commitRow — a git history list (hash · message · author · time), hairline-divided.
+// commitRow: a git history list (hash · message · author · time), hairline-divided.
 export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 0,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
@@ -291,7 +291,7 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
         i > 0 && box({ h: 1, bg: T.hair }),
         { type: 'group', layout: 'row', items: 'center', gap: SPACE.sm, pad: `${SPACE.md}px ${SPACE.lg}px`, children: [
           // A hash IS a figure, so it keeps mono. The byline under it is a NAME and a phrase
-          // ("Ada Lovelace · 2h ago"), which is words, so it moves to sans — and off `--dim`, which
+          // ("Ada Lovelace · 2h ago"), which is words, so it moves to sans, and off `--dim`, which
           // `make audit` fails HARD at 2.6:1 on higgsfield.
           text({ text: c.hash, font: 'mono', size: TYPE.body, weight: 600, color: onInk(T.accent), ...beat }),
           { type: 'group', grow: 1, layout: 'column', items: 'flex-start', gap: 2, children: [
@@ -303,7 +303,7 @@ export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = 
     }) }];
 }
 
-// spinner — a looping Lottie animation (deterministic seek). Any bodymovin .json; defaults to the sample.
+// spinner: a looping Lottie animation (deterministic seek). Any bodymovin .json; defaults to the sample.
 export function spinner({ x, y, size = 90, src = '/assets/lottie/spin.json', label = '', start = 0, dur = 4 } = {}) {
   const out = [{ type: 'lottie', src, x, y, w: size, h: size, loop: true, start, duration: dur }];
   // A spinner's caption is a WORD ("Rendering"), so it is sans, and `--text-2` rather than `--dim`.

@@ -1,15 +1,15 @@
-// blocks/board.mjs — the SPLIT-FLAP BOARD: a mechanical departure board that is a THING on the
+// blocks/board.mjs. The SPLIT-FLAP BOARD: a mechanical departure board that is a THING on the
 // screen, with a drum and a hinge line per character, not another full-frame wash.
 //
 // WHY A BLOCK AND NOT A PRESET. The MOTION is the `flap` preset (core/type.js) and it works on any
-// text layer; what a preset cannot be is an OBJECT. A board is cells — a drum per character, each
-// with its own plate and its own hinge line across the middle — and cells are geometry, which is
+// text layer; what a preset cannot be is an OBJECT. A board is cells, a drum per character, each
+// with its own plate and its own hinge line across the middle, and cells are geometry, which is
 // what a factory makes. The two halves are deliberately separable: reach for the preset when a
 // headline should turn over, and for this when the board itself is the subject.
 //
 // ONE LAYER PER CHARACTER, and that is the point rather than a cost. A single text layer with
 // letter-spacing dialled to a cell width would have to agree with a font's advance width, which is a
-// measurement, at render time, after the fonts load — the bug shape this repo logs most. A character
+// measurement, at render time, after the fonts load. The bug shape this repo logs most. A character
 // placed at its own x needs no measurement and lands on its drum in every one of the 31 faces.
 //
 // A SPACE KEEPS ITS DRUM. A board does not skip a position when a word ends; it shows a blank plate.
@@ -20,7 +20,7 @@ export const CATEGORY = 'Type';
 // The plate is the theme's MAXIMUM-CONTRAST PAIR: `--text` for the drum, `--bg` for the glyph. Two
 // halves meeting at a lighter hinge line across the middle.
 //
-// Built from `--surface-2` it was theme-correct and completely invisible on a white-first theme — the
+// Built from `--surface-2` it was theme-correct and completely invisible on a white-first theme, the
 // drums washed into the paper and the board stopped being an object, which is the one thing this block
 // is for. The contrast pair fixes that and costs one thing, said plainly: WHICH WAY ROUND THE BOARD
 // LANDS IS THE THEME'S, not this block's. Dark plates on vawe, light plates on higgsfield. The letters
@@ -31,7 +31,7 @@ const PLATE = 'linear-gradient(180deg, var(--text) 0 calc(50% - 1px), '
   + 'color-mix(in srgb, var(--text) 55%, var(--bg)) calc(50% - 1px) calc(50% + 1px), '
   + 'color-mix(in srgb, var(--text) 88%, var(--bg)) calc(50% + 1px) 100%)';
 
-// splitFlapBoard — `word` turns over on the drums and lands. `steps` is how many flaps each drum runs
+// splitFlapBoard: `word` turns over on the drums and lands. `steps` is how many flaps each drum runs
 // (also its speed: the run is fitted into `each` however many you ask for), `stagger` is the delay
 // between neighbouring drums, which is what makes the row settle left to right.
 export function splitFlapBoard({ x, y, word = 'DEPARTING', label, size = 88, gap = 6, radius = 6,
@@ -50,7 +50,7 @@ export function splitFlapBoard({ x, y, word = 'DEPARTING', label, size = 88, gap
       anim: 'pop', enterDur: 0.28, out: 'defocus', exitDur: 0.35 }));
     if (!ch.trim()) return;                       // a blank position still owns its drum
     // NO `anim` on the drum: `split` owns a layer's entrance and the engine refuses the pair outright.
-    // The flap IS the entrance — a drum that also faded in would be turning behind a curtain.
+    // The flap IS the entrance: a drum that also faded in would be turning behind a curtain.
     out.push(text({ x: cx, y: top + Math.round((cellH - size * 1.04) / 2), w: cellW, align: 'center',
       text: ch, font: 'mono', size, weight: 700, color: T.paper,
       split: 'char', preset: 'flap', presetOpts: { steps }, each, stagger: 0,

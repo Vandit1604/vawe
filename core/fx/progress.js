@@ -1,4 +1,4 @@
-// core/fx/progress.js — hand the layer the FILM's own progress, 0 at the first frame and 1 at the
+// core/fx/progress.js: hand the layer the FILM's own progress, 0 at the first frame and 1 at the
 // last, as a CSS custom property its markup can draw with. A runtime bar, a chapter dot that walks a
 // rule, a ring that closes as the film ends, a readout of minutes remaining: all of them are one
 // number, and until now that number did not exist anywhere a layer could reach.
@@ -9,7 +9,7 @@
 //
 // NOT `vars`, and the difference is the whole point. `L.vars` interpolates over the LAYER's window,
 // which is what an entrance wants; this is the FILM's clock, which is what a progress bar wants. An
-// author could only fake it by writing the runtime into the layer as a literal — a second copy of a
+// author could only fake it by writing the runtime into the layer as a literal, a second copy of a
 // number the scene already owns, which is wrong the first time anyone adds a beat and says nothing.
 // FIRST CONSUMER OF scene.clock: `t` and `duration` together are what `t` alone could never answer.
 //
@@ -27,20 +27,20 @@ function resolve(spec) {
   const s = spec === true ? {} : typeof spec === 'string' ? { var: spec } : spec;
   if (!s || typeof s !== 'object' || Array.isArray(s))
     throw new Error(`progress: expected true, a custom property name, or an object like `
-      + `{ "var": "--bar" } — got ${JSON.stringify(spec)}. Keys: ${PROGRESS_KEYS.join(', ')}.`);
+      + `{ "var": "--bar" }, got ${JSON.stringify(spec)}. Keys: ${PROGRESS_KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
     if (!PROGRESS_KEYS.includes(k))
-      throw new Error(`progress: unknown key "${k}" — known: ${PROGRESS_KEYS.join(', ')}.`);
+      throw new Error(`progress: unknown key "${k}", known: ${PROGRESS_KEYS.join(', ')}.`);
   const name = s.var == null ? '--film' : s.var;
   // A property name without the two dashes is not a custom property; CSS drops the declaration and
   // the layer draws with an unset variable, which looks exactly like the modifier never ran.
   if (typeof name !== 'string' || !name.startsWith('--'))
-    throw new Error(`progress: \`var\` must be a CSS custom property, so it starts with "--" — got `
+    throw new Error(`progress: \`var\` must be a CSS custom property, so it starts with "--", got `
       + `${JSON.stringify(s.var)}. Anything else is silently discarded by the CSS parser.`);
   // This used to re-implement the membership test because resolveEasing warned-and-substituted, and
   // the note here said that was "right for a prop authored in a hundred scenes and wrong for this
-  // registry". The premise was measured and was false — no scene in the library names an unknown
-  // easing — so resolveEasing throws for everyone now and this asks it instead of copying it. Two
+  // registry". The premise was measured and was false. No scene in the library names an unknown
+  // easing, so resolveEasing throws for everyone now and this asks it instead of copying it. Two
   // hand-kept copies of one rule is #159. docs/MISTAKES.md #367.
   const ease = s.ease == null ? null : resolveEasing(s.ease);
   return { name, ease };

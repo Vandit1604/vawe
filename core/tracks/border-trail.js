@@ -1,4 +1,4 @@
-// core/tracks/border-trail.js — rotate the orbiting arc of a `borderTrail` by an INLINE transform.
+// core/tracks/border-trail.js: rotate the orbiting arc of a `borderTrail` by an INLINE transform.
 // Inline, in the DOM, so the frame signature sees it and it stays pure in t: a WAAPI animation's state
 // is not serialised, which is what broke the render's frame dedup.
 //
@@ -9,7 +9,7 @@ export const slot = 'orbit';
 export const PROPS = { borderTrail: {} };
 
 // The arc node is found ONCE and remembered on the element. A track has no build hook (core/tracks/
-// index.js: a track is frame() and nothing else), so the memo is taken on the first frame instead —
+// index.js: a track is frame() and nothing else), so the memo is taken on the first frame instead,
 // which is the same thing, because the node is written by the layer's build() and the DOM under a
 // layer does not change after that. `undefined` is the "not looked yet" sentinel and `null` a real
 // answer, so a layer that declares `borderTrail` and has no arc stops searching too.

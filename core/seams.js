@@ -2,7 +2,7 @@ import { glContext } from './webgl.js';
 import { buildInlinedCss, domToCanvas } from './raster.js';
 import { DIRS } from './cuts.js';
 import { defineRegistry } from './registry.js';
-// core/seams.js — SEAM D: two-scene shader transitions.
+// core/seams.js, SEAM D: two-scene shader transitions.
 //
 // A `sting` (core/stings.js) paints a GENERATIVE overlay on top of one beat; a `cut` (core/cuts.js)
 // transforms ONE scene root. Neither can blend the OUTGOING beat INTO the INCOMING one, because
@@ -17,7 +17,7 @@ import { defineRegistry } from './registry.js';
 //   seam.clear();                                        // every frame otherwise
 //
 // DETERMINISM: from/to are baked ONCE from two fixed frames and are STATIC rasters. draw() is a pure
-// function of (fx, progress, from, to, opts) — no wall clock, no per-frame rasterisation, no feedback.
+// function of (fx, progress, from, to, opts). No wall clock, no per-frame rasterisation, no feedback.
 // So renderFrame(n) stays pure in n and 8 out-of-order workers agree. This is the bake-then-pure
 // pattern of core/canvas-fx.js / core/resample-fx.js, applied to the whole stage.
 //
@@ -28,28 +28,28 @@ import { defineRegistry } from './registry.js';
 // model). `fade` is always available and is the fallback everything degrades to.
 // Basics first (fade + the directional set every tool has), then the expressive shaders. Appended so
 // existing indices never shift. The directional five (slide/push/uncover/wipe + the grainy dissolve)
-// are the "cover the basics" set — real two-scene transitions, dir-aware via u_dir (left/right/up/down).
+// are the "cover the basics" set, real two-scene transitions, dir-aware via u_dir (left/right/up/down).
 export const SEAM_FX = ['fade', 'dissolve', 'slide', 'push', 'uncover', 'wipe', 'crossWarp', 'whipPan', 'sdfIris', 'dispersion', 'lens', 'flashWhite', 'cinematicZoom', 'portal'];
 
-// SEAM_BLURBS — one line per fx, next to the thing it describes (the `blurb` pattern of
+// SEAM_BLURBS: one line per fx, next to the thing it describes (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and any catalog/MCP surface; a name in
 // SEAM_FX with no entry here is a bug the transitions catalog reports.
 // Read every line knowing what only a seam can do: it samples BOTH beats as textures, so it can carry
 // the leaving beat INTO the arriving one. A cut transforms one root; a sting paints over one beat.
 // `dir` (left/right/up/down) steers the directional five; `seed` varies noise and shape; `intensity`
-// scales strength. Browser file — plain data only, no node APIs.
+// scales strength. Browser file, plain data only, no node APIs.
 export const SEAM_BLURBS = {
-  fade: 'flat cross-dissolve of both beats — the universal fallback every seam degrades to with no WebGL or a blank raster',
-  dissolve: 'grainy film dissolve, each pixel flipping as a noise front passes it — time/place change',
-  slide: 'the arriving beat slides in over a held outgoing one (cover), dir-aware — the basic every tool has',
-  push: 'both beats shove together toward dir, the arriving one following the leaving one off screen — dir-aware basic',
-  uncover: 'the leaving beat slides off toward dir and reveals a held arriving beat under it — dir-aware basic',
-  wipe: 'a soft-edged line sweeps toward dir, the arriving beat revealed behind it — playful, "notice the cut"',
-  crossWarp: 'both beats drag toward the centre and swap through a soft noise front — a wipe with grit, for organic brands and dark scenes',
+  fade: 'flat cross-dissolve of both beats. The universal fallback every seam degrades to with no WebGL or a blank raster',
+  dissolve: 'grainy film dissolve, each pixel flipping as a noise front passes it, time/place change',
+  slide: 'the arriving beat slides in over a held outgoing one (cover), dir-aware, the basic every tool has',
+  push: 'both beats shove together toward dir, the arriving one following the leaving one off screen, dir-aware basic',
+  uncover: 'the leaving beat slides off toward dir and reveals a held arriving beat under it, dir-aware basic',
+  wipe: 'a soft-edged line sweeps toward dir, the arriving beat revealed behind it, playful, "notice the cut"',
+  crossWarp: 'both beats drag toward the centre and swap through a soft noise front. A wipe with grit, for organic brands and dark scenes',
   whipPan: 'momentum swipe between beats',
-  sdfIris: 'the arriving beat revealed through an expanding seeded polygon iris (star, hex, diamond or triangle) with a bright rim — playful reveal, the shape is the personality',
-  dispersion: 'prism channel-split across the seam along a seeded axis, peaking mid-way — optical, techy pivots',
-  lens: 'one moving optical centre bends BOTH beats through a single lens, with a warm flare — premium product glamour, dark scenes',
+  sdfIris: 'the arriving beat revealed through an expanding seeded polygon iris (star, hex, diamond or triangle) with a bright rim. Playful reveal, the shape is the personality',
+  dispersion: 'prism channel-split across the seam along a seeded axis, peaking mid-way, optical, techy pivots',
+  lens: 'one moving optical centre bends BOTH beats through a single lens, with a warm flare. Premium product glamour, dark scenes',
   flashWhite: 'white flash on an energy pivot',
   cinematicZoom: 'dive-in zoom into a screen',
   portal: 'glowing portal reveal (once)',
@@ -117,7 +117,7 @@ void main(){
     col = mix(getTo(uv), getFrom(uv), m);
 
   } else if (fx == FX_SLIDE) {
-    /* the arriving beat slides IN over a static outgoing (a.k.a. cover). Its panel is rigid — it shows
+    /* the arriving beat slides IN over a static outgoing (a.k.a. cover). Its panel is rigid, it shows
        its own content, entering from the u_dir edge. */
     vec2 tp = uv + (1.0 - p) * u_dir;
     float inr = step(0.0, tp.x) * step(tp.x, 1.0) * step(0.0, tp.y) * step(tp.y, 1.0);
@@ -148,7 +148,7 @@ void main(){
     col = mix(getFrom(uv), getTo(uv), m);
 
   } else if (fx == FX_CROSSWARP) {
-    /* gl-transitions: crosswarp — both beats drag toward the centre and swap through a soft front */
+    /* gl-transitions: crosswarp, both beats drag toward the centre and swap through a soft front */
     float x = smoothstep(0.0, 1.0, p*2.0 + uv.x - 1.0);
     col = mix(getFrom((uv - 0.5)*(1.0 - x) + 0.5), getTo((uv - 0.5)*x + 0.5), x);
 
@@ -210,7 +210,7 @@ void main(){
 
   } else if (fx == FX_FLASHWHITE) {
     /* independent in/out windows: leaving beat blows to white, then white resolves to the arriving
-       beat. The exposure blow-out hides the swap — a classic music-video hard cut. */
+       beat. The exposure blow-out hides the swap, a classic music-video hard cut. */
     if (p < 0.5) {
       float k = smoothstep(0.0, 1.0, p * 2.0);
       col = mix(getFrom(uv), vec4(1.0), k);
@@ -283,19 +283,19 @@ function buildProgram(gl, fxIndex) {
 }
 
 // The shader's uv.y is GL y-UP (uv.y=1 is the top of the frame), so "up" is +y and "down" is -y here.
-// (Screen-space y-down would invert the vertical seams — up would push down. MISTAKES: seam y-flip.)
+// (Screen-space y-down would invert the vertical seams, up would push down. MISTAKES: seam y-flip.)
 const DIR_VEC = { left: [-1, 0], right: [1, 0], up: [0, 1], down: [0, -1] };
 // One direction vocabulary for the whole engine (core/cuts.js). This file held the third copy of the
 // same four names and the same silent fall back to left.
 export const okDir = (d) => { if (d == null) return 'left'; if (DIRS.includes(d)) return d;
-  throw new Error(`unknown seam direction "${d}" — one of: ${DIRS.join(', ')}`); };
+  throw new Error(`unknown seam direction "${d}", one of: ${DIRS.join(', ')}`); };
 
 // createSeamCompositor(parent, w, h): a full-frame canvas above the stings overlay (z 85, below the
 // caption bar at z 90) that either runs the two-scene shader or, without GL, cross-fades in 2D.
 export function createSeamCompositor(parent, w = 1920, h = 1080) {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
-  canvas.setAttribute('data-motion', 'loop'); // transition chrome — exempt from motion-audit reveal rules
+  canvas.setAttribute('data-motion', 'loop'); // transition chrome. Exempt from motion-audit reveal rules
   Object.assign(canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', zIndex: 85, pointerEvents: 'none', display: 'none' });
   parent.appendChild(canvas);
 
@@ -315,7 +315,7 @@ export function createSeamCompositor(parent, w = 1920, h = 1080) {
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 
-  // upload a baked raster canvas to a GL texture ONCE (cached on the element — the raster is static).
+  // upload a baked raster canvas to a GL texture ONCE (cached on the element, the raster is static).
   const uploadTex = (srcCanvas) => {
     if (!srcCanvas) return null;
     if (srcCanvas.__seamTex) return srcCanvas.__seamTex;
@@ -372,7 +372,7 @@ export function createSeamCompositor(parent, w = 1920, h = 1080) {
   };
 }
 
-// 2D cross-fade compositor — the required no-GL fallback. draw() ignores fx and dissolves from→to.
+// 2D cross-fade compositor: the required no-GL fallback. draw() ignores fx and dissolves from→to.
 function make2dFallback(canvas, w, h) {
   const ctx = canvas.getContext('2d');
   let shown = false;
@@ -393,7 +393,7 @@ function make2dFallback(canvas, w, h) {
 // ---- stage rasterisation (the DOM-as-texture bake) -----------------------------------------------
 // CHOICE: in-browser SVG <foreignObject> serialisation, compositing the 2D background canvas UNDER the
 // DOM layers. Reasons this path (option (a)) over a Go screenshot pre-pass (option (b)):
-//   • self-contained in the page — no Go/JS coordination, so `make probe`/`make snap`/`make
+//   • self-contained in the page: no Go/JS coordination, so `make probe`/`make snap`/`make
 //     canvas-purity` on existing scenes are untouched (a scene with no `seams` never bakes).
 //   • the bake is one-shot at build; the textures are static, so renderFrame(n) stays pure in n.
 // The two <foreignObject> gotchas are both handled here: (1) external stylesheets and CSS custom
@@ -425,7 +425,7 @@ export async function stageToCanvas({ w, h, cv, cam, root, useCanvasBg }) {
   } else {
     // No canvas bg window: the live frame's background comes from the .hs-stage CSS (the theme --bg
     // fallback). Rasterising `root` ALONE yields a TRANSPARENT snapshot, which the seam's WebGL then
-    // composites as BLACK — a black flash on every seam of a white-first scene (docs/MISTAKES.md #138).
+    // composites as BLACK. A black flash on every seam of a white-first scene (docs/MISTAKES.md #138).
     // Fill the theme base bg first so the snapshot matches what the viewer actually sees.
     const stage = (root.closest && root.closest('.hs-stage')) || document.body;
     const cs = getComputedStyle(stage);

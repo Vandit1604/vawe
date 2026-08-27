@@ -1,4 +1,4 @@
-// core/surfaces/palette.js — `L.colors` as GL float triples, or null for "use the effect's own
+// core/surfaces/palette.js: `L.colors` as GL float triples, or null for "use the effect's own
 // colourful default". Its own file rather than a helper in index.js so a surface importing it does
 // not import the registry that imports the surface.
 //

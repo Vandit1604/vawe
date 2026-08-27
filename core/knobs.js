@@ -1,4 +1,4 @@
-// core/knobs.js — the machine-readable map of every preset's dials.
+// core/knobs.js: the machine-readable map of every preset's dials.
 //
 // WHY THIS EXISTS. Every preset in the engine reads knobs (colours, speed, count, angle…), but an
 // author could not FIND them: kinetic knob names lived in a label string, a look's pass knobs lived
@@ -19,7 +19,7 @@ const col = (name, def, desc) => ({ name, type: 'color', default: def, desc });
 const en = (name, values, def, desc) => ({ name, type: 'enum', values, default: def, desc });
 
 export const KNOBS = {
-  // ── kinetic presets (core/type.js) — set on a split text layer via `preset` + `presetOpts` ──────
+  // ── kinetic presets (core/type.js): set on a split text layer via `preset` + `presetOpts` ──────
   // Every preset also takes the shared timing dials; only the per-preset ones are listed here.
   kinetic: {
     _shared: [
@@ -56,7 +56,7 @@ export const KNOBS = {
     decode: [],
   },
 
-  // ── three.js scenes (core/three-fx.js) — `three: "name"`, per-scene knobs ────────────────────────
+  // ── three.js scenes (core/three-fx.js), `three: "name"`, per-scene knobs ────────────────────────
   three: {
     _shared: [col('colors', '#8ab4ff', 'palette (array); colors[0] subject, colors[1] fill light'), n('speed', 1, 'motion speed')],
     deviceShowcase: [en('device', ['phone', 'laptop', 'tablet'], 'phone', 'device shell'), col('bodyColor', '#1b1d22', 'shell colour'), n('spin', 1, 'auto-rotate'), n('yaw', 0, 'yaw deg'), n('pitch', 0, 'pitch deg'), { name: 'screen', type: 'string', default: '', desc: 'image put on the screen face' }],
@@ -67,14 +67,14 @@ export const KNOBS = {
     magnetic: [n('poles', 2, '2 = dipole, 1 = a single source', [1, 2]), n('count', 18, 'field lines'), n('seed', 3, 'launch-angle seed'), n('pointSize', 0.05, 'travelling charge size'), n('spin', 1, 'orbit rate'), n('yaw', 0, 'yaw'), n('pitch', 0.18, 'pitch')],
     // The code-* trio share ONE layout builder (`codeBoard` in core/three-fx.js), so they share their
     // dials too: `lines` is the snippet the board is derived from, and breakAt/breakDur are that
-    // scene's single event — a build-in, a burn, an assembly.
+    // scene's single event, a build-in, a burn, an assembly.
     codeExtrude: [{ name: 'lines', type: 'string', default: '', desc: 'the snippet, one string per line (array)' }, n('breakAt', 0.3, 'seconds before the first row rises'), n('breakDur', 1.1, 'seconds one row takes to land'), n('travel', 1, 'row-to-row delay multiplier'), n('depth', 1.8, 'how far back a row starts'), n('seed', 5, 'per-token constants seed'), n('spin', 1, 'drift rate'), n('roughness', 0.34, 'surface roughness'), n('metalness', 0.5, 'metalness'), n('yaw', -0.34, 'yaw'), n('pitch', 0.16, 'pitch')],
     codeDissolve: [{ name: 'lines', type: 'string', default: '', desc: 'the snippet, one string per line (array)' }, n('breakAt', 0.8, 'seconds before the burn starts'), n('breakDur', 2, 'seconds the burn takes'), n('seed', 5, 'grain seed'), n('spin', 1, 'drift rate'), n('yaw', -0.28, 'yaw'), n('pitch', 0.14, 'pitch')],
     codeAssemble: [{ name: 'lines', type: 'string', default: '', desc: 'the snippet, one string per line (array)' }, n('breakAt', 0.3, 'seconds before the first token flies in'), n('breakDur', 1.2, 'seconds one token takes to land'), n('travel', 1, 'how far apart the arrivals are spread'), n('seed', 5, 'scatter seed'), n('spin', 1, 'tumble rate'), n('roughness', 0.34, 'surface roughness'), n('metalness', 0.5, 'metalness'), n('yaw', -0.3, 'yaw'), n('pitch', 0.15, 'pitch')],
     liquidBackground: [n('count', 96, 'plane subdivisions per side'), n('amp', 0.34, 'swell height'), n('morphSpeed', 1, 'churn rate'), n('seed', 11, 'wave-set seed'), n('roughness', 0.22, 'surface roughness'), n('metalness', 0.62, 'metalness'), n('pitch', 0.62, 'tilt away from camera'), n('yaw', 0, 'roll')],
   },
 
-  // ── raymarch (core/raymarch-fx.js) — `raymarch: "name"`, SAME dials for all 5 ────────────────────
+  // ── raymarch (core/raymarch-fx.js), `raymarch: "name"`, SAME dials for all 5 ────────────────────
   raymarch: {
     _shared: [
       col('colors', '#8ab4ff', 'palette (array)'),
@@ -85,7 +85,7 @@ export const KNOBS = {
     ],
   },
 
-  // ── ambient shader fields (core/shaders-ambient.js) — `shader: "name"`, SAME dials for all 17 ────
+  // ── ambient shader fields (core/shaders-ambient.js), `shader: "name"`, SAME dials for all 17 ────
   ambient: {
     _shared: [
       col('colors', '#8ab4ff', 'palette (array)'),
@@ -95,7 +95,7 @@ export const KNOBS = {
     ],
   },
 
-  // ── shader stings (core/stings.js) — `fx` in a stings[] entry, SAME dials for all 35 ─────────────
+  // ── shader stings (core/stings.js): `fx` in a stings[] entry, SAME dials for all 35 ─────────────
   sting: {
     _shared: [
       col('color', '#ffffff', 'tint colour'),
@@ -105,7 +105,7 @@ export const KNOBS = {
     ],
   },
 
-  // ── composite looks (core/looks.js) — `filter: "name"` or "name:0.8"; strength + lookOpts ────────
+  // ── composite looks (core/looks.js), `filter: "name"` or "name:0.8"; strength + lookOpts ────────
   look: {
     _shared: [
       n('strength', 0.7, 'master 0..1; also the positional "neon:0.8"', [0, 1]),
@@ -115,7 +115,7 @@ export const KNOBS = {
       n('grain', null, 'grain amount'),
       n('vignette', null, 'vignette strength'),
       // No `warmth`: it was listed here, in core/looks.js and in docs/PRIMITIVES.md, and no pass in
-      // any of the 31 looks ever read it. Not every look takes every knob either — `liveKnobs(name)`
+      // any of the 31 looks ever read it. Not every look takes every knob either, `liveKnobs(name)`
       // says which, and passing one a look cannot apply now throws. docs/MISTAKES.md #351.
     ],
   },
@@ -124,7 +124,7 @@ export const KNOBS = {
 // The families whose whole preset list shares one dial set (no per-preset overrides).
 export const UNIFORM_FAMILIES = ['raymarch', 'ambient', 'sting', 'look'];
 
-/** Every knob NAME that any preset in a family reads — the set a dead-knob check measures against. */
+/** Every knob NAME that any preset in a family reads. The set a dead-knob check measures against. */
 export function knobNames(family) {
   const fam = KNOBS[family];
   if (!fam) return new Set();
@@ -149,7 +149,7 @@ export function knobsFor(family, preset) {
 // the question one level up: of all the dials a film sets, which ONE is allowed to sit at the top of
 // its range. A film that shouts on four beats has no loud moment, it has a volume setting, and
 // neither `effect-soup` (the ceiling) nor `plain-slideshow` (the floor) ever asks the author to
-// NOMINATE the peak — so a film can sit safely between them and still be shapeless.
+// NOMINATE the peak, so a film can sit safely between them and still be shapeless.
 //
 // The clause is two-sided and that is the whole point. Naming the loud moment is simultaneously a
 // promise that every other beat stays restrained, and a promise nobody enforces is a comment. So the
@@ -160,31 +160,31 @@ export function knobsFor(family, preset) {
 // The walk that applies these numbers to a scene is core/spectacle.js; the vocabulary and the
 // arithmetic are here, beside the other dials, and they are pure so a gate can test them.
 
-// THE DEVICES, and every one of them already ships. `device` names a SHADER STING (core/stings.js) —
-// the engine's existing vocabulary for a loud instant at an arbitrary time, which is exactly the
+// THE DEVICES, and every one of them already ships. `device` names a SHADER STING (core/stings.js).
+// The engine's existing vocabulary for a loud instant at an arbitrary time, which is exactly the
 // shape of the thing being declared. No new effect: the twelve below are the subset of SHADER_FX
 // that read as a PEAK rather than as a transition, and a name outside it is refused rather than
-// substituted (core/registry.js — a `pick` takes no fallback).
+// substituted (core/registry.js, a `pick` takes no fallback).
 const DEVICE_BLURBS = {
-  flash: 'a single bright bloom over the whole frame, up and gone — the plainest peak there is',
-  chromaticSplit: 'the frame tears into red/green/blue and snaps back — impact, energy, a hard landing',
-  glitch: 'a stepped horizontal shear, no smoothing — alarm, breakage, a system under load',
-  streak: 'a bright bar sweeps the frame — a specular pass over a mark, the cheapest premium peak',
-  whipPan: 'the frame smears sideways as if the camera whipped to it — motion the picture cannot carry alone',
-  ripple: 'a ring travels out from the centre and distorts what it crosses — an impact you can watch spread',
-  sdfIris: 'a hard iris opens from the centre — a shutter on the moment, theatrical and exact',
-  vortex: 'the frame twists about its centre and unwinds — the loudest of the radial family',
-  lens: 'a wide optical bulge and release — the frame bending under the weight of the moment',
-  dispersion: 'the picture separates into its spectrum and reassembles — glass, prisms, luxury',
-  iridescence: 'an oil-slick sheen washes across the frame once — colour as the event',
-  cinematicZoom: 'a fast push with the blur that comes off it — the frame lunging at the subject',
+  flash: 'a single bright bloom over the whole frame, up and gone, the plainest peak there is',
+  chromaticSplit: 'the frame tears into red/green/blue and snaps back, impact, energy, a hard landing',
+  glitch: 'a stepped horizontal shear, no smoothing. Alarm, breakage, a system under load',
+  streak: 'a bright bar sweeps the frame. A specular pass over a mark, the cheapest premium peak',
+  whipPan: 'the frame smears sideways as if the camera whipped to it, motion the picture cannot carry alone',
+  ripple: 'a ring travels out from the centre and distorts what it crosses, an impact you can watch spread',
+  sdfIris: 'a hard iris opens from the centre. A shutter on the moment, theatrical and exact',
+  vortex: 'the frame twists about its centre and unwinds, the loudest of the radial family',
+  lens: 'a wide optical bulge and release. The frame bending under the weight of the moment',
+  dispersion: 'the picture separates into its spectrum and reassembles, glass, prisms, luxury',
+  iridescence: 'an oil-slick sheen washes across the frame once, colour as the event',
+  cinematicZoom: 'a fast push with the blur that comes off it, the frame lunging at the subject',
 };
 
 // A device that is not a real sting would resolve to nothing at render, so the list is asserted
 // against its source at load rather than trusted to stay in step with a rename.
 for (const d of Object.keys(DEVICE_BLURBS))
   if (!SHADER_FX.includes(d))
-    throw new Error(`spectacle device "${d}" is not a shader sting — core/knobs.js and core/stings.js have drifted.`);
+    throw new Error(`spectacle device "${d}" is not a shader sting, core/knobs.js and core/stings.js have drifted.`);
 
 export const SPECTACLE_DEVICES = defineRegistry('spectacle device',
   Object.fromEntries(Object.keys(DEVICE_BLURBS).map((k) => [k, k])),
@@ -195,7 +195,7 @@ export const SPECTACLE_DEVICES = defineRegistry('spectacle device',
 //
 // 0.55 rather than something gentler because the gesture has to survive being watched once. A film
 // that drops its other effects by a tenth has not made room for anything, and the author will simply
-// go back to hand-tuning — which is the behaviour this dial exists to replace. Roughly half is the
+// go back to hand-tuning, which is the behaviour this dial exists to replace. Roughly half is the
 // point at which a beat stops competing and starts supporting.
 export const SPECTACLE_GAIN = Object.freeze({ peak: 1.35, rest: 0.55 });
 

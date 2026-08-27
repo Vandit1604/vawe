@@ -1,5 +1,5 @@
-// core/layers/cursor.js — a pointer that follows a `path` ([{t,x,y}] keyframes) and clicks at
-// `clicks:[t…]` — the core of a product demo. macOS arrow + a ripple ring that fires on click.
+// core/layers/cursor.js: a pointer that follows a `path` ([{t,x,y}] keyframes) and clicks at
+// `clicks:[t…]`. The core of a product demo. macOS arrow + a ripple ring that fires on click.
 export const PROPS = { size: {}, x: {}, y: {}, color: {}, rippleColor: {}, path: {}, clicks: {} };
 
 export function build(kit, el, L) {
@@ -28,4 +28,4 @@ export function frame(kit, el, L, t) {
 }
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
-export const blurb = "a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time — the spine of a product demo";
+export const blurb = "a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo";

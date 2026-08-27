@@ -1,7 +1,7 @@
-// blocks/app.mjs — APP-SURFACE families. The registry could depict a music player and nothing else:
+// blocks/app.mjs: APP-SURFACE families. The registry could depict a music player and nothing else:
 // `nowPlaying` was the only block describing the INSIDE of a product, so a product-demo film could
-// only ever be about a music app. These six are the generic surfaces every app is built from — a feed
-// item, a list row, a settings row, a profile header, an onboarding pane, an empty state — so a scene
+// only ever be about a music app. These six are the generic surfaces every app is built from, a feed
+// item, a list row, a settings row, a profile header, an onboarding pane, an empty state, so a scene
 // can show ANY app instead of the one the vocabulary happened to cover.
 //
 // Same contract as blocks/index.mjs: a factory is a PURE function props → an ARRAY of scene layers,
@@ -13,7 +13,7 @@
 // anything and without an import cycle back through the registry.
 //
 // CONTENT RULE: no figure a caller cannot stand behind. These surfaces carry counts and metadata by
-// nature, so every count is a PROP that defaults to empty — the block never invents one.
+// nature, so every count is a PROP that defaults to empty, the block never invents one.
 
 import { TOKENS as T, text, box, r2, R, cardChrome, avatarEl, onColor } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
@@ -32,7 +32,7 @@ const surface = ({ x, y, w, start, dur, pad, gap, radius = R.card, layout = 'row
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// feedRow — one item in a social/activity feed: avatar · name · handle · timestamp · body.
+// feedRow. One item in a social/activity feed: avatar · name · handle · timestamp · body.
 // The generic sibling of tweetCard, minus the engagement counts: a feed item is not always a post.
 export function feedRow({ x, y, w = 520, avatar = '', initials = '', name = '', sub = '', time = '', body = '',
   start = 0, dur = 4 } = {}) {
@@ -51,7 +51,7 @@ export function feedRow({ x, y, w = 520, avatar = '', initials = '', name = '', 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// listRow — one row of a generic list (a mail item, a file, a track): leading icon tile · title over
+// listRow. One row of a generic list (a mail item, a file, a track): leading icon tile · title over
 // sub · trailing meta. The workhorse: three of these stacked read as "an app" faster than any card.
 export function listRow({ x, y, w = 520, icon = '', title = '', sub = '', meta = '', start = 0, dur = 4 } = {}) {
   return [{ ...surface({ x, y, w, start, dur, pad: '16px 16px', gap: 16 }), children: [
@@ -66,7 +66,7 @@ export function listRow({ x, y, w = 520, icon = '', title = '', sub = '', meta =
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// settingsRow — label (+ optional sub) with a control on the right.
+// settingsRow, label (+ optional sub) with a control on the right.
 //   control: 'toggle'  → a switch; `value` is its state (anything but `false` reads as on)
 //            'chevron' → a disclosure arrow into a sub-screen
 //            'value'   → the current setting, as text
@@ -93,7 +93,7 @@ export function settingsRow({ x, y, w = 520, label = '', sub = '', control = 'ch
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// profileHeader — the top of an account screen: avatar over name · @handle · a small stat row.
+// profileHeader. The top of an account screen: avatar over name · @handle · a small stat row.
 // `stats` is [{value, label}] and defaults to empty: a caller with no counts ships no counts.
 export function profileHeader({ x, y, w = 460, avatar = '', initials = '', name = '', handle = '',
   stats = [], start = 0, dur = 4 } = {}) {
@@ -113,7 +113,7 @@ export function profileHeader({ x, y, w = 460, avatar = '', initials = '', name 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// onboardCard — one pane of a first-run flow: progress dots · position · title · body · CTA.
+// onboardCard. One pane of a first-run flow: progress dots · position · title · body · CTA.
 // The dots carry the position visually; the mono label states it for anyone counting.
 export function onboardCard({ x, y, w = 460, step = 1, of = 1, title = '', body = '', cta = '',
   start = 0, dur = 4 } = {}) {
@@ -137,7 +137,7 @@ export function onboardCard({ x, y, w = 460, step = 1, of = 1, title = '', body 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// emptyState — the zero state: an icon tile, a line saying what is missing, a line saying what fills
+// emptyState. The zero state: an icon tile, a line saying what is missing, a line saying what fills
 // it, and the action that does. Dashed chrome and no elevation so the surface itself reads as unfilled.
 export function emptyState({ x, y, w = 460, icon = '', title = '', body = '', cta = '', start = 0, dur = 4 } = {}) {
   return [{ ...surface({ x, y, w, start, dur, pad: 32, gap: 16, radius: R.soft, layout: 'column', items: 'center',

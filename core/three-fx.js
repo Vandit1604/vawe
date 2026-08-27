@@ -1,6 +1,6 @@
-// core/three-fx.js — REAL GEOMETRY. Where `raymarch` renders implicit surfaces from a distance field,
+// core/three-fx.js: REAL GEOMETRY. Where `raymarch` renders implicit surfaces from a distance field,
 // this is a scene graph: meshes, materials, lights, a camera. It exists for the things an SDF
-// structurally cannot express — a font outline, a device body, a captured UI plane, a point cloud.
+// structurally cannot express. A font outline, a device body, a captured UI plane, a point cloud.
 //
 // THE DETERMINISM CONTRACT, and why three.js does not break it:
 // three.js is only non-deterministic if you let it be. The engine's rule is that renderFrame(n) is a
@@ -31,7 +31,7 @@ export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, 
   // shatter · magnetic · liquidBackground · the code-* trio (which reuse breakAt/breakDur for their
   // own single event: an assembly, a build-in and a burn are all one span with one start).
   breakAt: {}, breakDur: {}, poles: {}, amp: {},
-  // codeExtrude · codeDissolve · codeAssemble — the snippet the board's layout is derived from
+  // codeExtrude · codeDissolve · codeAssemble: the snippet the board's layout is derived from
   lines: {},
   // globe
   origin: {}, dest: {}, arcHeight: {}, drawStart: {}, drawDur: {},
@@ -40,7 +40,7 @@ export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, 
 export { THREE_FX };
 const T = () => {
   if (typeof window === 'undefined' || !window.THREE) {
-    throw new Error('three.js is not loaded — boot only imports it when a scene declares a `three` layer, so this means the layer was built outside the normal boot path');
+    throw new Error('three.js is not loaded: boot only imports it when a scene declares a `three` layer, so this means the layer was built outside the normal boot path');
   }
   return window.THREE;
 };
@@ -54,7 +54,7 @@ const hex = (h, dflt) => new (T().Color)(typeof h === 'string' ? h : dflt);
 // THE THEME'S OWN PALETTE, so a new scene's defaults reskin instead of being four hexes somebody liked.
 // Read ONCE at build, never per frame: core/boot.js applies the theme before any layer is built, and
 // core/filters.js resolves its duotone defaults the same way for the same reason. `--accent-dim` is
-// deliberately not read — every theme ships it as an rgba(), which three's Color parses as a colour
+// deliberately not read. Every theme ships it as an rgba(), which three's Color parses as a colour
 // with the alpha thrown away, i.e. a wash silently rendered at full strength.
 // Author-supplied `colors` always wins; this only fills the holes.
 // The literals are the DOM-less fallback (a node test, a standalone view), matching filters.js's
@@ -105,7 +105,7 @@ function textureFrom(src, what) {
   tex.colorSpace = T().SRGBColorSpace;
   tex.anisotropy = 4;
   return { tex, ensure() {
-    if (!img.complete || !img.naturalWidth) throw new Error(`three ${what}: image not decoded at render time (${src}) — boot preloads every image-like string, so this means the path is wrong or unreachable`);
+    if (!img.complete || !img.naturalWidth) throw new Error(`three ${what}: image not decoded at render time (${src}), boot preloads every image-like string, so this means the path is wrong or unreachable`);
     tex.needsUpdate = true;
   } };
 }
@@ -119,8 +119,8 @@ function studio(scene, colors) {
 
 // ---- the code board, shared by the three code-* scenes ------------------------------------------
 // A snippet laid out as SLABS: one per whitespace-delimited token, sized and placed from the real
-// characters of the real `lines`. So the silhouette is the actual code's shape — indentation,
-// declining line lengths, a blank line — which is what makes an abstract stack of bars read as code
+// characters of the real `lines`. So the silhouette is the actual code's shape, indentation,
+// declining line lengths, a blank line, which is what makes an abstract stack of bars read as code
 // without needing a mono typeface nobody has generated. (`extrudeText` needs a real font and throws
 // without one; `make glyphs` ships Anybody and Fraunces, neither of which is a code face.)
 //
@@ -131,7 +131,7 @@ const CODE_W = 3.4;                                 // the board's width in worl
 function codeBoard(L, what) {
   const lines = Array.isArray(L.lines) ? L.lines.map((s) => String(s ?? '')) : null;
   if (!lines || !lines.length) {
-    throw new Error(`three ${what}: \`lines\` must be a non-empty array of code lines — the layout is `
+    throw new Error(`three ${what}: \`lines\` must be a non-empty array of code lines, the layout is `
       + `derived from the real characters, so there is nothing to build without them.`);
   }
   const cols = Math.max(1, ...lines.map((s) => s.length));
@@ -250,7 +250,7 @@ const SCENES = {
   //
   // Every dot is a real coordinate: core/globe-dots.js is baked from Natural Earth by
   // `make globe-dots`, so the continents are SAMPLED rather than drawn, and a texture is deliberately
-  // not used. That is not only taste — a photographic earth would make the film that carries this
+  // not used. That is not only taste. A photographic earth would make the film that carries this
   // prettier and its claim ("computed, not drawn") false.
   //
   // Nothing here accumulates. The rotation, the route's draw-on and the aircraft's position are all
@@ -465,14 +465,14 @@ const SCENES = {
   // than drawn: each one is integrated along the real field direction at build time, so the curvature
   // is the physics and not a bezier somebody eyeballed. Charges travel the traced paths.
   //
-  // PURE IN t. The trace happens ONCE, in the builder, with a fixed step count — the geometry is frozen
+  // PURE IN t. The trace happens ONCE, in the builder, with a fixed step count, the geometry is frozen
   // by the time a frame renders. Per frame only the travellers move, and each one's position is
   // frac(t * its own rate + its own phase) indexed into its line. No integration per frame, so seeking
   // backwards lands on the identical sample.
   magnetic(L, colors) {
     const poles = L.poles ?? 2;
     if (poles !== 1 && poles !== 2) {
-      throw new Error(`three magnetic: \`poles\` must be 1 or 2, got ${JSON.stringify(L.poles)} — 2 is a dipole (field lines arc from one pole to the other), 1 is a single source (they run straight out).`);
+      throw new Error(`three magnetic: \`poles\` must be 1 or 2, got ${JSON.stringify(L.poles)}, 2 is a dipole (field lines arc from one pole to the other), 1 is a single source (they run straight out).`);
     }
     const pal = paletteOf(colors);
     const lines = Math.max(3, Math.min(120, Math.round(L.count ?? 18)));
@@ -557,7 +557,7 @@ const SCENES = {
     const pal = paletteOf(colors);
     const seg = Math.max(8, Math.min(160, Math.round(L.count ?? 96)));
     // DELIBERATELY OVERSIZED. This is a backdrop and the author owns `dolly` and `pitch`, so a plane cut
-    // to one framing shows its own edge at the next one — which it did, as a white band down the right.
+    // to one framing shows its own edge at the next one, which it did, as a white band down the right.
     // Off-screen quads are cheap; a visible seam is not.
     const geo = new (T().PlaneGeometry)(22, 16, seg, seg);
     const attr = geo.attributes.position;
@@ -631,7 +631,7 @@ const SCENES = {
   // this repo has already logged once, so a missing font is a LOUD error rather than a fallback.
   extrudeText(L, colors) {
     const data = (typeof window !== 'undefined' && window.__typefaces) ? window.__typefaces[L.font] : null;
-    if (!data) throw new Error(`three extrudeText: no typeface loaded for "${L.font}" — run \`make glyphs\` to generate assets/fonts/3d/${L.font}.typeface.json. Refusing to substitute a different face.`);
+    if (!data) throw new Error(`three extrudeText: no typeface loaded for "${L.font}", run \`make glyphs\` to generate assets/fonts/3d/${L.font}.typeface.json. Refusing to substitute a different face.`);
     const font = new (T().Font)(data);
     const grp = new (T().Group)();
     const shapes = font.generateShapes(String(L.text ?? ''), L.size ?? 1);
@@ -651,7 +651,7 @@ const SCENES = {
   // ARRIVE: each one rises out of depth into its place, top line first, so the snippet builds itself
   // downward the way it was written.
   //
-  // PURE IN t. Row r's own progress is p = (t - breakAt - r * stagger) / breakDur, clamped — a pure
+  // PURE IN t. Row r's own progress is p = (t - breakAt - r * stagger) / breakDur, clamped, a pure
   // function of t and of constants baked at build. Nothing accumulates, so seeking backwards lands on
   // the identical pose.
   codeExtrude(L, colors) {
@@ -830,7 +830,7 @@ function codeGeometry(board, colors) {
   // keyword · string · identifier · punctuation, off the theme's own four. `--text` dimmed toward the
   // ink is the quiet role; nothing here is a literal.
   const key = hex(pal[0]), ink = hex(pal[2]);
-  // Only 4 of 38 themes declare an `accent2`, so pal[1] is usually pal[0] again — which paints two
+  // Only 4 of 38 themes declare an `accent2`, so pal[1] is usually pal[0] again, which paints two
   // of the four roles the same colour and leaves the board reading as two tones. When they match,
   // the second is DERIVED by stepping the accent toward the text, the same move SERIES makes in
   // blocks/kit.mjs and for the same reason: value is the only axis a one-hue theme has.
@@ -866,7 +866,7 @@ export function createThreeLayer(w, h, L, colors) {
   studio(scene, colors);
 
   const make = SCENES[L.three];
-  if (!make) throw new Error(`unknown three scene "${L.three}" — one of: ${THREE_FX.join(', ')}`);
+  if (!make) throw new Error(`unknown three scene "${L.three}", one of: ${THREE_FX.join(', ')}`);
   const built = make(L, colors);
   scene.add(built.obj);
 

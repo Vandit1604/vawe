@@ -1,9 +1,9 @@
-// core/tracks/follow.js — pin a layer to another layer's LIVE box, every frame.
+// core/tracks/follow.js: pin a layer to another layer's LIVE box, every frame.
 //
 // `anchor` already places a layer against the canvas and `becomes` already hands one layer's final
 // pose to another, and both are build-time geometry: they resolve once, against numbers, before any
-// frame exists. Neither can express the commonest note in a review — "the label should stay under the
-// card" — once the card is moving, because the card's position after its motion track is only known at
+// frame exists. Neither can express the commonest note in a review, "the label should stay under the
+// card", once the card is moving, because the card's position after its motion track is only known at
 // t. Authors solved it by copying the card's motion keys into the label and re-copying them by hand
 // whenever the card was retimed, which is the same duplicate-source-of-truth shape `becomes` was
 // written to kill for the other half of the problem.
@@ -36,11 +36,11 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   const spec = L.follow;
   if (spec == null) return;
   if (typeof spec !== 'object' || Array.isArray(spec) || typeof spec.id !== 'string')
-    throw new Error(`\`follow\` is an object like { "id": "card", "edge": "below", "gap": 24 } — `
+    throw new Error(`\`follow\` is an object like { "id": "card", "edge": "below", "gap": 24 }, `
       + `got ${JSON.stringify(spec)}.`);
   const edge = spec.edge ?? 'center';
   if (!EDGES.includes(edge))
-    throw new Error(`follow edge "${edge}" — known: ${EDGES.join(', ')}.`);
+    throw new Error(`follow edge "${edge}", known: ${EDGES.join(', ')}.`);
   if (!L.id)
     throw new Error(`layer following "${spec.id}" has no \`id\`. A follower is placed by its own size, `
       + `and only an identified layer has a measured box.`);
@@ -56,7 +56,7 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
       + `directly, or give "${spec.id}" the motion instead of a pin.`);
   const b = scene.boxOf(spec.id);
   if (!b)
-    throw new Error(`follow: no box for "${spec.id}" — known ids: ${scene.ids.join(', ')}. `
+    throw new Error(`follow: no box for "${spec.id}", known ids: ${scene.ids.join(', ')}. `
       + `A child of a group whose motion track keys w/h has no box either: that group reflows, so the `
       + `child's measured offset is stale and a pin to it would be a wrong answer rather than none.`);
   const me = scene.boxOf(L.id);
@@ -72,11 +72,11 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   else if (edge === 'right') cx = b.cx + hw + gap + me.w / 2;
   else if (edge === 'left') cx = b.cx - hw - gap - me.w / 2;
   // Centres, not corners: two boxes of different sizes sharing a top-left corner visibly jump, and
-  // sharing a centre does not — the same reason `becomes` matches centres.
+  // sharing a centre does not. The same reason `becomes` matches centres.
   const tx = cx - me.w / 2 - (L.x ?? 60) + (spec.dx ?? 0);
   const ty = cy - me.h / 2 - (L.y ?? 240) + (spec.dy ?? 0);
   // Composed onto whatever the enter/exit and the primitive left, never replacing it, and safe to
-  // prepend because driveClips rewrites `transform` from scratch every frame — the same invariant the
+  // prepend because driveClips rewrites `transform` from scratch every frame, the same invariant the
   // motion track relies on to avoid appending to its own value from the previous frame.
   const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
   el.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)${base}`;

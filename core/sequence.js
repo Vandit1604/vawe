@@ -1,4 +1,4 @@
-// core/sequence.js — the pure timeline evaluators, lifted out of scene.html so they can be
+// core/sequence.js: the pure timeline evaluators, lifted out of scene.html so they can be
 // unit-tested without a browser. Every export is a pure function of time (→ pure in frame n),
 // with zero DOM access. Mirrors another engine' packages/engine split (pure (config,t)→value math
 // beside the DOM/capture layer, not entangled with it). scene.html imports these and does the
@@ -8,20 +8,20 @@ import { clamp01, lerp, easeInOutCubic, resolveEasing } from './motion.js';
 // THE CAMERA IS A POSITION IN SPACE, and `s` is where it stands.
 //
 // Under a lens of focal length L, a camera at distance d from the canvas plane magnifies that plane by
-// L/d. So a magnification and a distance are the same number in two units, and `s` — which this engine
-// has always called a scale — was never a second idea beside depth. It was depth, written in the unit an
+// L/d. So a magnification and a distance are the same number in two units, and `s`, which this engine
+// has always called a scale, was never a second idea beside depth. It was depth, written in the unit an
 // author frames in, and implemented as a 2D scale of an already-projected picture. That implementation
 // is what could not dolly: scaling a finished projection leaves every vanishing point exactly where it
 // was, so a tilted card grew without ever turning.
 //
 // dollyZ is the whole conversion: the CSS translateZ that puts the camera at the distance `s` asks for.
 // There is deliberately NO `z` keyframe key. A `z` beside `s` would be two knobs for one idea that
-// disagree with each other under perspective — the failure core/fx/index.js describes for layer types
+// disagree with each other under perspective. The failure core/fx/index.js describes for layer types
 // wearing five costumes, reproduced in the camera.
 export function dollyZ(s, lens) {
   // s → 0 puts the camera infinitely far away and s ≥ ... well past the plane inverts the projection.
   // CSS accepts the resulting translateZ without a word and renders something no author asked for.
-  if (!(s > 0)) throw new Error(`camera: s must be a POSITIVE magnification — got ${JSON.stringify(s)}. `
+  if (!(s > 0)) throw new Error(`camera: s must be a POSITIVE magnification, got ${JSON.stringify(s)}. `
     + `s is where the camera STANDS (distance = lens / s), so 0 is a camera at infinite distance.`);
   return lens * (1 - 1 / s);
 }
@@ -38,13 +38,13 @@ export function cameraAt(camKf, t) {
   // per-keyframe `ease` drives the segment INTO b (mirrors motionAt). Default easeInOutCubic keeps every
   // existing camera byte-identical; set `ease:"linear"` on interior keyframes for a velocity-CONTINUOUS
   // multi-keyframe push. The old hardcoded ease-in-out zeroed velocity at every keyframe, so a chained
-  // push pulsed (accelerate→stop→accelerate) — the "not smooth / shaking zoom" (docs/MISTAKES.md #125).
+  // push pulsed (accelerate→stop→accelerate). The "not smooth / shaking zoom" (docs/MISTAKES.md #125).
   const p = a === b ? 1 : resolveEasing(b.ease || 'easeInOutCubic')(clamp01((t - a.t) / (b.t - a.t)));
   // rx/ry/roll are the camera's ORIENTATION and they belong to the camera rather than to a layer for a
   // geometric reason: CSS `perspective()` takes its vanishing point from the element it is applied to,
   // so tilting sibling layers individually rotates each about its OWN centre and the composition comes
   // apart. Applied once on the camera root, every layer shares one vanishing point and the frame reads
-  // as a single plane in space — which is what "perspective on the frame" means (docs/MISTAKES.md #59).
+  // as a single plane in space, which is what "perspective on the frame" means (docs/MISTAKES.md #59).
   // `persp` is the LENS: the focal distance the projection is taken through, not the camera's position.
   // Position is `s` (see dollyZ); confusing the two is the dolly-zoom, and it is authored by keying both.
   return { s: lerp(a.s ?? 1, b.s ?? 1, p), x: lerp(a.x ?? 0, b.x ?? 0, p), y: lerp(a.y ?? 0, b.y ?? 0, p),
@@ -71,13 +71,13 @@ export function cameraAt(camKf, t) {
 // It answers for the CAMERA, and the camera is not the only thing that can rotate the stage: a top-level
 // `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all (formats/scene/scene.js:705,
 // and formats/scene/playhead.json is a shipped film that does exactly that). Layers are not visible from
-// here, so THE CALLER must refuse that case as well — this returns a rect for it, and the rect is a lie.
+// here, so THE CALLER must refuse that case as well. This returns a rect for it, and the rect is a lie.
 export function cameraView(camKf, t, CW, CH) {
   const c = cameraAt(camKf, t);
   if (!c) return null;
   // A ROTATED STAGE has no axis-aligned preimage: the frame maps back to a projected quad, and that quad's
-  // AABB is not the shape. verify/audit.mjs refuses to measure through exactly this and says why at length
-  // — a projection MANUFACTURES findings on the very frames a film is doing its most deliberate camera
+  // AABB is not the shape. verify/audit.mjs refuses to measure through exactly this and says why at length:
+  // a projection MANUFACTURES findings on the very frames a film is doing its most deliberate camera
   // work, and the only way to clear one is to make the film worse. A gate must not guess through it.
   if (Math.abs(c.rx) > 1e-3 || Math.abs(c.ry) > 1e-3 || Math.abs(c.roll) > 1e-3) return null;
   // s <= 0 is a camera the renderer itself refuses (dollyZ throws on it), so there is no view to report
@@ -94,12 +94,12 @@ export function cameraView(camKf, t, CW, CH) {
 // ~4 frames at 30fps. Below this a segment is not a span with a shape, it is one step of a traced path.
 export const DENSE_KEY_SEC = 0.14;
 
-// LAYER-OWNED KEYED PROPERTIES — the ones whose neutral value lives on the layer, not in the evaluator.
+// LAYER-OWNED KEYED PROPERTIES: the ones whose neutral value lives on the layer, not in the evaluator.
 //
 // x, y, scale, rot, opacity and blur each have a constant identity: an omitted `x` means 0, and 0 means
 // "where it was authored". These three do not. Identity for `w` is the layer's own authored `w`;
 // identity for `track` is the layer's own z-order. A pure evaluator cannot know either, so an omitted
-// value inside motionAt could only ever mean "hold the neighbour" — a second, different interpretation
+// value inside motionAt could only ever mean "hold the neighbour", a second, different interpretation
 // rule, in the one file where a second rule already cost this repo a day (docs/MISTAKES.md #195, the
 // per-property motionAt that would have made a button invisible for a whole film).
 //
@@ -113,8 +113,8 @@ export function resolveKeyedProps(layers) {
     if (!Array.isArray(L.motion) || !L.motion.length) return;
     for (const prop of LAYER_OWNED) {
       if (!L.motion.some((k) => k && k[prop] != null)) continue;
-      // `track` always has an identity — scene.js defaults a layer's z-order to its position in the
-      // array — so keying depth on a layer that never declared it is ordinary, not an error. A BOX has
+      // `track` always has an identity: scene.js defaults a layer's z-order to its position in the
+      // array, so keying depth on a layer that never declared it is ordinary, not an error. A BOX has
       // no such default: a key animating a size the layer never declared has nothing to animate from,
       // and inventing one is the silent substitution this repo treats as the worst failure.
       const base = prop === 'track' ? (L.track ?? idx) : L[prop];
@@ -135,7 +135,7 @@ export function motionAt(kfs, lt) {
     if (lt >= a.t && lt <= b.t) {
       // DENSE KEYS MEAN MECHANICAL, so interpolate them linearly unless told otherwise. easeInOutCubic
       // zeroes velocity at BOTH ends of every segment, so a chain of closely-spaced keys accelerates and
-      // stops once per key and the move pulses — the same defect fixed for the camera in #125, left
+      // stops once per key and the move pulses. The same defect fixed for the camera in #125, left
       // standing as the per-layer default. A hand-keyed cursor or drag lands keys every 2-4 frames and
       // its shape comes from WHERE the keys are, not from a curve fitted over each gap. Above the
       // threshold the old default stands, because a sparse key really is a span with a shape.

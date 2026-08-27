@@ -1,5 +1,5 @@
 import { defineRegistry } from './registry.js';
-// core/three-scenes.js — the `three` scene NAME registry, and nothing else.
+// core/three-scenes.js: the `three` scene NAME registry, and nothing else.
 //
 // It is split out for one concrete reason: core/three-fx.js imports the vendored three.js by its
 // BROWSER-absolute path (/assets/vendor/three.module.js), which Node cannot resolve. Every gate that
@@ -13,7 +13,7 @@ import { defineRegistry } from './registry.js';
 // actually implements match it name for name. Splitting the file does not get to mean splitting the
 // source of truth.
 // EACH SCENE DESCRIBES ITSELF. This was a bare array of names, so all eleven rendered their blurb as
-// an em-dash in docs/EFFECTS.md and on the site — a capability an author is never shown and therefore
+// an em-dash in docs/EFFECTS.md and on the site. A capability an author is never shown and therefore
 // cannot choose. Same shape as SHADER_ID -> SHADER_FX (core/stings.js): the map is the source, the
 // array is derived, and the two cannot drift because one is computed from the other.
 export const THREE_SCENES = {

@@ -1,8 +1,8 @@
-// pan-resolve — `panWith: "<layerId>"` copies another layer's motion track onto this one, keeping the
+// pan-resolve, `panWith: "<layerId>"` copies another layer's motion track onto this one, keeping the
 // SAME wall clock and this layer's OWN origin. A pan of the page is not a camera move: a camera
 // transforms the whole frame, scrim included, so a film that wants the page to slide under a fixed
 // frame has to move the chosen layers together. Doing that by hand means writing the same deltas once
-// per layer and time-shifting each by its own start, which is what the exemplar does — twice, across
+// per layer and time-shifting each by its own start, which is what the exemplar does, twice, across
 // five of its six moving layers (docs/CRAFT/KEYED-MOTION.md). Six identical delta lists kept in sync by
 // hand, where a one-key drift is invisible in the JSON and obvious on screen.
 //
@@ -20,13 +20,13 @@ const near = (a, b) => Math.abs(a - b) < 1e-6;
 // A layer rides the page until it LEAVES it, and it leaves by stating a position of its own. After that
 // the source's remaining keys must stop applying: a thing that has peeled off cannot still be dragged
 // along by what it peeled off from. Before this rule the pan kept contributing past the break, so the
-// page's later keys yanked the layer back onto a path it had already left — 194px of reversal in two
+// page's later keys yanked the layer back onto a path it had already left, 194px of reversal in two
 // frames in `cadence`, which is what the snap at 2.87s was (docs/MISTAKES.md #194).
 //
 // Only x/y count as leaving, because x/y are the only properties a pan supplies. A key that states just
 // `rot` or `scale` is the layer doing its own thing WHILE it rides (the spinner turns as it travels),
 // and must not end the pan.
-// The origin key is own[0] — identified BY INDEX, the same way ox/oy read it, never by comparing its
+// The origin key is own[0]: identified BY INDEX, the same way ox/oy read it, never by comparing its
 // time to the pan's first key. The spinner's origin sits at t=0 while the track it rides opens at
 // t=-0.08, so a time comparison read that origin as a peel and silently stopped the spinner panning.
 // `panWith` names the source; the merge then reads this layer's own track and clock to place the copy.
@@ -55,7 +55,7 @@ export function mergePan(L, src) {
   const ox = num(own[0]?.x, 0), oy = num(own[0]?.y, 0);// ...applied from THIS layer's own origin
 
   // A merged track is read key-to-key, so every key the merge FABRICATES has to state the layer's whole
-  // pose — an omitted property is not "unchanged", it is identity, and the next key snaps to it. The
+  // pose. An omitted property is not "unchanged", it is identity, and the next key snaps to it. The
   // fabricated keys are the pan's, and they must therefore carry what the layer's OWN track is doing at
   // that instant. Sampling own[0] instead (it was the layer's first key, held constant) pinned the
   // spinner's `rot:0` onto all six pan keys, so its rotation ran 0 → 214 → 0 → 286 → 0 against the
@@ -84,7 +84,7 @@ export function mergePan(L, src) {
     }
     // ...and the layer may declare its OWN key at a shared time: the spinner rotates while it travels,
     // and the button states its own x/y at the moment it peels off the page. What the author writes
-    // WINS, x and y included — the pan only supplies what the layer did not state. Letting the pan win
+    // WINS, x and y included. The pan only supplies what the layer did not state. Letting the pan win
     // on position instead put the button back on the page at the exact key where it leaves.
     const mine = own.find((o) => near(num(o.t, 0), t));
     if (mine) for (const p of Object.keys(mine)) if (p !== 't') out[p] = mine[p];
@@ -97,7 +97,7 @@ export function mergePan(L, src) {
   //
   // These need the same completion as the fabricated ones, in the other direction: an own key that
   // states only `rot` says nothing about x, and once it is spliced into the merged track that silence
-  // reads as x=0. The spinner's three rot keys each yanked it back to its origin and out again — the
+  // reads as x=0. The spinner's three rot keys each yanked it back to its origin and out again, the
   // rotation was fixed and the travel still shuddered, because the two halves of the merge are the same
   // bug seen from either end. So the pan's x/y at that instant is written in.
   const extra = own.filter((o) => !shared.some((sh) => near(sh.t, num(o.t, 0)))).map((o) => {
@@ -121,7 +121,7 @@ export function resolvePans(data) {
     const src = byId[L.panWith];
     if (!src) throw new Error(`layer "${L.id || '?'}" panWith: no layer with id "${L.panWith}"`);
     if (src === L) throw new Error(`layer "${L.id}" panWith: a layer cannot pan with itself`);
-    if (typeof src.panWith === 'string') throw new Error(`layer "${L.id}" panWith "${src.id}", which itself pans with another layer — chain them off the ORIGIN so one track stays the source of truth`);
+    if (typeof src.panWith === 'string') throw new Error(`layer "${L.id}" panWith "${src.id}", which itself pans with another layer. Chain them off the ORIGIN so one track stays the source of truth`);
     if (!Array.isArray(src.motion) || !src.motion.length) throw new Error(`layer "${L.id}" panWith "${src.id}", but "${src.id}" has no motion track to share`);
     L.motion = mergePan(L, src);
   }

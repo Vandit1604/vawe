@@ -1,4 +1,4 @@
-// blocks/diagram.mjs — the DIAGRAM family: a flow that DRAWS ITSELF. Nodes arrive, then the
+// blocks/diagram.mjs. The DIAGRAM family: a flow that DRAWS ITSELF. Nodes arrive, then the
 // connectors between them stroke on in order, then the arrowheads land and the edge labels read out.
 //
 // WHY IT IS ONE `html` LAYER AND NOT A STACK OF `rect`s: a connector is a path with a corner radius
@@ -9,13 +9,13 @@
 // MOTION, AND THE TRAP. CSS `transition`/`animation` are dead engine-wide (core/sanitize-html.js
 // refuses them at boot), so a connector "animated" in CSS renders as a finished still. Everything
 // here moves through `parts` (core/parts.js): a CSS selector into this markup, one seeked GSAP
-// fromTo per matched element, staggered. `drawOn` is the entry that matters — it stamps
+// fromTo per matched element, staggered. `drawOn` is the entry that matters, it stamps
 // `pathLength="1"` on each path and ramps `stroke-dashoffset` 1→0, so a per-path staggered draw-on
 // costs one spec and needs no measurement. `parts` accepts an ARRAY (formats/scene/scene.js:390), so
 // nodes / edges / arrowheads / labels are four passes on one layer with their own delays.
 //
 // THE ARROWHEAD IS A SEPARATE PATH ON PURPOSE. `marker-end` paints at the path's end from frame one,
-// dash offset or not — the head would sit there pointing at nothing while the line was still growing.
+// dash offset or not. The head would sit there pointing at nothing while the line was still growing.
 // A sibling path with its own `popIn` lands after its line arrives, which is what the eye expects.
 //
 // ONE ROUTER. `routeEdge` is the whole geometry surface: two boxes in, an orthogonal path between
@@ -250,7 +250,7 @@ export function flowchart({ x = 0, y = 0, variant = '', nodes = FLOW_DEFAULT.nod
 
 // ── nodeGraph ────────────────────────────────────────────────────────────────────────────────────
 // A NON-hierarchical graph: the author places every node, the same router draws every edge, and one
-// node can be lit. Use it for a topology, a dependency web, a map of parts — anything whose shape is
+// node can be lit. Use it for a topology, a dependency web, a map of parts, anything whose shape is
 // not a rank.
 export const GRAPH_DEFAULT = {
   nodes: [

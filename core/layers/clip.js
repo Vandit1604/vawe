@@ -1,4 +1,4 @@
-// core/layers/clip.js — a generated/any VIDEO played DETERMINISTICALLY as a preloaded PNG frame
+// core/layers/clip.js: a generated/any VIDEO played DETERMINISTICALLY as a preloaded PNG frame
 // sequence (scripts/gen-clip.mjs → manifest). No <video>: renderFrame(n) swaps the <img> src.
 export const PROPS = { src: {}, w: {}, radius: {}, fit: {}, speed: {}, loop: {} };
 
@@ -19,7 +19,7 @@ export function frame(kit, el, L, t) {
   // element its own build() never touched: core/layers/util.js `addGroupChild` delegates to buildLeaf
   // when the kit has one and falls back to its own two-line builder when it does not. A memo written
   // only in build() would be permanently absent on that path and the layer would quietly stop
-  // advancing — silent substitution, which is the failure this codebase pays for most (MISTAKES #21).
+  // advancing, silent substitution, which is the failure this codebase pays for most (MISTAKES #21).
   // `undefined` = not looked yet, `null` = looked and there is none.
   if (el.__clipImg === undefined) el.__clipImg = el.querySelector('img');
   const img = el.__clipImg;

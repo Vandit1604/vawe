@@ -1,4 +1,4 @@
-// core/audio-cues.js — the cue tables for auto sound-design, as PURE DATA (no side effects).
+// core/audio-cues.js: the cue tables for auto sound-design, as PURE DATA (no side effects).
 //
 // A transition is not one whoosh on everything: a punch snaps, a softwipe breathes, an iris blooms,
 // a whip is loud air. These maps name the Cuelume voicing (see core/audio-kit.mjs) each transition
@@ -23,7 +23,7 @@ export const CUT_CUE = {
 };
 
 // Seam fx -> cue. Consumed for `data.seams` (the two-scene GPU blends core/seams.js SEAM_FX; the premium
-// transitions the unified `transitions` surface lowers into seams). Must cover every SEAM_FX — lib-test
+// transitions the unified `transitions` surface lowers into seams). Must cover every SEAM_FX, lib-test
 // asserts it, so a new seam fx can never ship silent again.
 export const SEAM_CUE = {
   fade: 'whisper', dissolve: 'whisper', slide: 'whisper', uncover: 'whisper', wipe: 'whisper',

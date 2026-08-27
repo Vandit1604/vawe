@@ -1,4 +1,4 @@
-// blocks/index.mjs — the TASTE LIBRARY's assembly point. It holds no factories: it DISCOVERS them.
+// blocks/index.mjs. The TASTE LIBRARY's assembly point. It holds no factories: it DISCOVERS them.
 //
 // WHY THIS EXISTS: agent-authored beats regress to hollow (a word in a box, a static list, an
 // unbacked claim). The fix another engine proved: compose from pre-vetted blocks instead of authoring
@@ -13,15 +13,15 @@
 //   - deterministic: no Date/random. Same props → same layers.
 //
 // CONTRACT (per MODULE, and this file enforces all three at load)
-//   1. `export const CATEGORY = '<label>'`  — the site rail's grouping, owned by the module that
+//   1. `export const CATEGORY = '<label>'`. The site rail's grouping, owned by the module that
 //      owns the blocks, so nothing keeps a name-to-category table in sync by hand.
-//   2. `export const <FAM>_SCHEMAS = { … }` — the option contract (blocks/schema.mjs).
+//   2. `export const <FAM>_SCHEMAS = { … }`. The option contract (blocks/schema.mjs).
 //   3. a factory name is exported by exactly ONE module.
 //
 // ADDING A BLOCK IS TWO EDITS: write blocks/<family>.mjs (factory + CATEGORY + <FAM>_SCHEMAS), and
 // add its row to blocks/catalog.mjs. This file needs no line, and blocks/schema.mjs needs no import.
 // It used to need both, plus two Object.assign calls, and nine identical registration lines sat here
-// differing only in a name — carrying no information the module did not already have.
+// differing only in a name, carrying no information the module did not already have.
 //
 // This module is NODE-ONLY (nothing in core/ or formats/ imports it), so reading the directory is
 // available and top-level await is fine: an ESM importer awaits it before its own body runs.
@@ -49,7 +49,7 @@ const FAMILY_FILES = fs.readdirSync(HERE)
 
 // Every named export of every family module, merged. Identifier-safe keys only (BLOCKS also holds
 // namespaced `family.variant` names, which are not identifiers), so this is the object to spread when
-// something needs a SCOPE to evaluate a factory default in — scripts/gates/block-schema.mjs does.
+// something needs a SCOPE to evaluate a factory default in, scripts/gates/block-schema.mjs does.
 export const EXPORTS = {};
 // family → its module's CATEGORY. What the site groups the browsing rail by.
 export const CATEGORY_OF = {};
@@ -69,7 +69,7 @@ for (const file of FAMILY_FILES) {
 
   if (typeof mod.CATEGORY !== 'string' || !mod.CATEGORY) {
     throw new Error(`blocks/${file} exports ${factories.length} factor(y/ies) but declares no CATEGORY. `
-      + `Add \`export const CATEGORY = '<label>'\` beside its imports — the module that owns the blocks `
+      + `Add \`export const CATEGORY = '<label>'\` beside its imports, the module that owns the blocks `
       + `owns their label, so nothing keeps a name-to-category table in sync by hand.`);
   }
 
@@ -101,7 +101,7 @@ Object.assign(BLOCKS, EXPORTS);
 // opts, so a scene can still override anything. Adding a variant = a row in blocks/catalog.mjs (+ a
 // `variant` branch in the family). See docs/BLOCKS.md (auto-generated) and docs/TASTE.md.
 for (const e of CATALOG) {
-  // A BARE NAME USES THE RAW FACTORY, AND THAT IS NOT "IDENTICAL BEHAVIOUR" — this line said it was.
+  // A BARE NAME USES THE RAW FACTORY, AND THAT IS NOT "IDENTICAL BEHAVIOUR", this line said it was.
   // Measured: 82 of the 88 bare catalog rows render DIFFERENTLY without their `props`, because a row's
   // props are demo CONTENT the factory does not carry. `blocks-catalog.mjs:30` and `blocks-scenes.mjs:58`
   // both pass `e.props` explicitly, so the catalog sheets and the site show the rich version while an

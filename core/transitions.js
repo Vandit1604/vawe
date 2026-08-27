@@ -1,11 +1,11 @@
-// core/transitions.js — THE TRANSITION DATABASE. One catalog of every transition the engine has,
+// core/transitions.js: THE TRANSITION DATABASE. One catalog of every transition the engine has,
 // across all four mechanisms, DERIVED from their source registries so it can never drift out of sync.
 //
-// FOUR MECHANISMS (a transition is exactly one of these — they are not interchangeable):
-//   • anim  — per-LAYER entrance/exit (`anim` / `out` on a layer).          core/clips.js  ANIM_NAMES
-//   • cut   — transforms ONE scene root over a window (`cut`, dir-aware).    core/cuts.js   PRESENTATIONS
-//   • sting — a generative shader OVERLAY painted over one beat.             core/stings.js SHADER_FX
-//   • seam  — a two-scene GPU blend of BOTH beats across a boundary.         core/seams.js  SEAM_FX
+// FOUR MECHANISMS (a transition is exactly one of these, they are not interchangeable):
+//   • anim: per-LAYER entrance/exit (`anim` / `out` on a layer).          core/clips.js  ANIM_NAMES
+//   • cut, transforms ONE scene root over a window (`cut`, dir-aware).    core/cuts.js   PRESENTATIONS
+//   • sting. A generative shader OVERLAY painted over one beat.             core/stings.js SHADER_FX
+//   • seam. A two-scene GPU blend of BOTH beats across a boundary.         core/seams.js  SEAM_FX
 //
 // WHICH TO REACH FOR (short version; full theory in docs/CRAFT/TRANSITIONS.md):
 //   a real scene-to-scene transition → SEAM. a one-beat element move → ANIM. a whole-stage cut → CUT.
@@ -36,7 +36,7 @@ const FAMILY_OF = (name) => {
   return 'other';
 };
 
-// the BASIC set — the fundamentals every editor/motion tool ships. "Cover the basics" = these exist.
+// the BASIC set: the fundamentals every editor/motion tool ships. "Cover the basics" = these exist.
 const BASIC = new Set([
   'none', 'fade', 'dissolve', 'slide', 'push', 'uncover', 'wipe', 'iris', 'zoom', 'blur',
   'slide-left', 'slide-right', 'slide-up', 'slide-down', 'wipe-left', 'wipe-right', 'wipe-up', 'wipe-down',
@@ -54,7 +54,7 @@ function entry(name, mechanism) {
   return { name, mechanism, family: FAMILY_OF(name), basic: BASIC.has(name), dir };
 }
 
-// THE CATALOG — derived from the live registries, so adding an effect to any registry auto-lists it.
+// THE CATALOG: derived from the live registries, so adding an effect to any registry auto-lists it.
 export const TRANSITIONS = [
   ...ANIM_NAMES.map((n) => entry(n, 'anim')),
   ...Object.keys(PRESENTATIONS).filter((n) => n !== 'none').map((n) => entry(n, 'cut')),
@@ -69,5 +69,5 @@ export const FAMILIES = [...new Set(TRANSITIONS.map((t) => t.family))].sort();
 export const basics = () => TRANSITIONS.filter((t) => t.basic);
 export const byMechanism = (m) => TRANSITIONS.filter((t) => t.mechanism === m);
 export const byFamily = (f) => TRANSITIONS.filter((t) => t.family === f);
-// names with no family match (would-be 'other') — a gate can flag these so the classifier stays honest.
+// names with no family match (would-be 'other'): a gate can flag these so the classifier stays honest.
 export const unclassified = () => TRANSITIONS.filter((t) => t.family === 'other');

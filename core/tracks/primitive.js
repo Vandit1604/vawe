@@ -1,4 +1,4 @@
-// core/tracks/primitive.js — the layer type's OWN frame(): the count number, the typing cursor, the
+// core/tracks/primitive.js. The layer type's OWN frame(): the count number, the typing cursor, the
 // pointer path, the clip's frame, the image's ken burns (core/layers/<type>.js).
 //
 // It is a track, and the reason is the only reason anything here is a track: the primitive does not

@@ -1,5 +1,5 @@
 import { gsapEase } from './motion.js';
-// core/morph.js — TextMorph: letters MIGRATE from word A -> word B. Shared characters glide to their
+// core/morph.js, TextMorph: letters MIGRATE from word A -> word B. Shared characters glide to their
 // new position; letters only in A leave (fade/lift), letters only in B enter (fade). Built on GSAP
 // (deterministic, seeked by seekAll), which owns the per-char tweens. The two layouts are measured once
 // at build. The layer must set `w` + `align:"center"` so the char row centres (same rule as `circle`).

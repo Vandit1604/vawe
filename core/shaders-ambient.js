@@ -1,20 +1,20 @@
 import { glContext } from './webgl.js';
 import { defineRegistry } from './registry.js';
-// core/shaders-ambient.js — smooth LOOPING ambient shaders for the `shader` layer primitive. Where
+// core/shaders-ambient.js: smooth LOOPING ambient shaders for the `shader` layer primitive. Where
 // core/stings.js is transient cut-covers, these are continuous, slow, low-contrast colour fields you
 // place behind content. Pure in (time, seed) so renderFrame(n) stays deterministic.
 //
 // BEAUTY RECIPE (why these look premium, not like noise soup):
 //   • FEW colours (2-4 palette stops), never a rainbow.
-//   • VERY LOW frequency — a handful of big soft gaussian blobs, not high-octave fbm.
+//   • VERY LOW frequency: a handful of big soft gaussian blobs, not high-octave fbm.
 //   • Blobs DRIFT slowly (sin/cos on small coefficients) and BLEND (mix by exp falloff) → mesh gradient.
 //   • Slight desaturation + intensity as a brightness dial. No hard edges anywhere.
 //
 // WAVE 3 adds an analog/retro + distortion-styled family. These are OVERLAY looks: place them ON TOP
 // of content (high track) at intensity ~0.6-0.9, not behind it. Because this layer composites over its
 // siblings without sampling them (a WebGL canvas cannot read the DOM beneath it), the "distortion"
-// members are honestly self-generated veils — a heat-haze shimmer, water caustics, a lens vignette,
-// a mirrored mandala — not true screen-space warps of the pixels below. All still pure in (time, seed).
+// members are honestly self-generated veils. A heat-haze shimmer, water caustics, a lens vignette,
+// a mirrored mandala, not true screen-space warps of the pixels below. All still pure in (time, seed).
 //   Persistent:  vhs (tracking/chroma/scanlines) · crt (phosphor mask + roll) · filmGrain (grain+dust)
 //                · lightLeak (looping warm blobs from an edge, palette-aware)
 //   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
@@ -23,28 +23,28 @@ import { defineRegistry } from './registry.js';
 // EACH FIELD DESCRIBES ITSELF, and the ORDER IS THE WIRE FORMAT: the index of a name here is the
 // `u_fx` the fragment shader branches on, so this map is read positionally as well as by key and a
 // name may not be moved or inserted mid-list. It was a bare array, so 17 of the 18 rendered their
-// blurb as an em-dash in docs/EFFECTS.md and on the site — a capability an author is never shown and
+// blurb as an em-dash in docs/EFFECTS.md and on the site. A capability an author is never shown and
 // therefore never reaches for. Same shape as THREE_SCENES (core/three-scenes.js): the map is the
 // source, the array is derived, and the two cannot drift because one is computed from the other.
 export const AMBIENT_SHADERS = {
-  flow: 'a soft mesh gradient: three big blobs drifting slowly over a vertical wash — the premium default',
+  flow: 'a soft mesh gradient: three big blobs drifting slowly over a vertical wash, the premium default',
   aurora: 'drifting colour aurora (moves)',
   plasma: 'two crossed sine waves interfering into a slow two-tone swell',
   drift: 'seven big soft bokeh discs rising up the frame and blending as they pass',
-  mist: 'near-still layered noise haze — the quietest field here, for a backdrop that must move without being noticed',
-  vhs: 'tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY — place it ABOVE content',
+  mist: 'near-still layered noise haze. The quietest field here, for a backdrop that must move without being noticed',
+  vhs: 'tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY, place it ABOVE content',
   crt: 'a tube: 4px RGB phosphor stripes, scanlines, a corner vignette and a refresh bar rolling down. an OVERLAY',
   filmGrain: 'grain re-struck 24 times a second per ~2px cell, plus dust specks; bright or dark only, never mid-grey, so contrast survives. an OVERLAY',
   lightLeak: 'three warm blobs drifting in from the edges on a loop, tinted from the palette. an OVERLAY',
   barrel: 'the LENS, not the picture: a corner vignette with a faint violet chromatic fringe riding the far edge only',
-  heatShimmer: 'rising warm haze in fine wavy bands, strongest low in the frame and thinning as it climbs. self-generated — it does not warp what is beneath it',
+  heatShimmer: 'rising warm haze in fine wavy bands, strongest low in the frame and thinning as it climbs. self-generated. It does not warp what is beneath it',
   ripple: 'gentle water caustics: three rings of cool light expanding and overlapping',
-  kaleidoscope: 'a 6-fold mirrored mandala turning slowly and fading out toward the corners — a symmetric field of its own, never a mirror of your content',
+  kaleidoscope: 'a 6-fold mirrored mandala turning slowly and fading out toward the corners. A symmetric field of its own, never a mirror of your content',
   matrixDecode: 'digital rain: near-white heads falling down 44 glyph columns at per-column speeds, each dragging a fading tail. palette stop 0 tints it',
   nebula: 'deep-field gas clouds from three octaves of noise with a hot core, dusted with twinkling stars off a hashed grid',
   dotCrawl: 'the NTSC artifact: a fine diagonal chroma lattice creeping one subcarrier phase per frame, concentrated where there is detail. an OVERLAY',
   gateWeave: 'a projector gate: the soft dark frame border, dust re-struck each projected frame and a hair that catches for a second or two, all riding ONE drifting offset so the picture appears to float',
-  bands: 'a ramp repeated over a scalar field — rotated panels, concentric arcs or nested rounded boxes — tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md',
+  bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md',
 };
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
 
@@ -172,34 +172,34 @@ void main(){
        c2=P(2,vec3(0.95,0.58,0.36)), c3=P(3,vec3(0.84,0.36,0.52));
   vec3 col = vec3(0.0); float alpha = 1.0;
 
-  if(u_fx==0){                                            // flow — soft mesh gradient (the premium one)
+  if(u_fx==0){                                            // flow, soft mesh gradient (the premium one)
     col = mix(c0, c1, smoothstep(0.0,1.0,uv.y));          // gentle base wash
     col = mix(col, c2, blob(p, vec2((0.30+0.16*sin(t*0.10))*ar, 0.34+0.13*cos(t*0.08)), 2.4)*0.8);
     col = mix(col, c3, blob(p, vec2((0.74+0.13*sin(t*0.07+2.1))*ar, 0.64+0.15*cos(t*0.09+1.0)), 2.7)*0.75);
     col = mix(col, c1, blob(p, vec2((0.50+0.20*sin(t*0.06+4.0))*ar, 0.80+0.11*cos(t*0.11+3.0)), 3.0)*0.6);
-  } else if(u_fx==1){                                     // aurora — soft undulating curtain
+  } else if(u_fx==1){                                     // aurora, soft undulating curtain
     float w = noise(vec2(p.x*1.1, t*0.07))*0.6 + noise(vec2(p.x*2.2+9.0, t*0.045))*0.4;
     float y = uv.y + (w-0.5)*0.55;
     col = mix(c0, c1, smoothstep(0.12,0.9,y));
     col = mix(col, c2, smoothstep(0.55,1.05,y)*0.55);
     alpha = 0.35 + 0.65*exp(-pow((y-0.55)*2.0, 2.0));
-  } else if(u_fx==2){                                     // plasma — gentle two-tone interference
+  } else if(u_fx==2){                                     // plasma, gentle two-tone interference
     float v = 0.5 + 0.5*sin(p.x*1.8+t*0.14) + 0.5*sin(p.y*2.0-t*0.11); v *= 0.5;
     col = mix(c0, c2, smoothstep(0.15,0.85,v));
     col = mix(col, c1, 0.35 + 0.35*sin(v*3.14159 + t*0.1));
-  } else if(u_fx==3){                                     // drift — big soft bokeh, blended
+  } else if(u_fx==3){                                     // drift, big soft bokeh, blended
     col = mix(c0, c1, uv.y) * 0.7;
     for(int i=0;i<7;i++){ float fi=float(i);
       vec2 c = vec2(hash(vec2(fi,u_seed))*ar, fract(hash(vec2(fi*1.7,u_seed)) - t*0.02*(0.5+hash(vec2(fi,9.0)))));
       float r = 0.20 + 0.14*hash(vec2(fi,3.0));
       col = mix(col, P(int(mod(fi,4.0)), c2), blob(p, c, 1.0/(r*r))*0.5); }
-  } else if(u_fx==4){                                     // mist — near-still soft haze
+  } else if(u_fx==4){                                     // mist, near-still soft haze
     float n = noise(p*1.2 + vec2(t*0.025,-t*0.018))*0.6 + noise(p*0.6 + t*0.012)*0.4;
     col = mix(c0, c1, smoothstep(0.32,0.68,n));
     alpha = 0.5 + 0.4*n;
 
   // ---- wave 3: analog / retro looks (overlay ON TOP of content) ----
-  } else if(u_fx==5){                                     // vhs — scanlines, chroma fringe, tracking band, dropouts
+  } else if(u_fx==5){                                     // vhs, scanlines, chroma fringe, tracking band, dropouts
     float tstep = floor(t*12.0);                          // static resamples in steps → tape jitter, not smear
     float scan = 0.5 - 0.5*cos(uv.y*u_res.y*0.9);         // 0 at each scanline centre → darkens
     float band = smoothstep(0.05, 0.0, abs(fract(uv.y*0.5 - t*0.05) - 0.5) - 0.05); // a soft tracking band creeps up
@@ -209,7 +209,7 @@ void main(){
     vec3 warm = mix(c2, c0, 0.35);                        // tape carries a faint palette warmth
     col = mix(warm * 0.25, fringe, 0.6) + vec3(1.0) * drop;
     alpha = 0.42 * scan + 0.32 * band + 0.22 * snow * band + drop * 0.75;
-  } else if(u_fx==6){                                     // crt — phosphor stripe mask, scanlines, vignette, roll bar
+  } else if(u_fx==6){                                     // crt, phosphor stripe mask, scanlines, vignette, roll bar
     float scan = 0.5 - 0.5*cos(uv.y*u_res.y*1.3);
     float tri = mod(floor(uv.x * u_res.x / 4.0), 3.0);    // 4px phosphor stripes survive compression better than 1px
     vec3 mask = tri < 1.0 ? vec3(1.0, 0.25, 0.25) : tri < 2.0 ? vec3(0.25, 1.0, 0.25) : vec3(0.25, 0.25, 1.0);
@@ -217,14 +217,14 @@ void main(){
     float roll = smoothstep(0.05, 0.0, abs(fract(uv.y - t*0.10) - 0.5));                       // a bright refresh bar rolls down
     col = mask * 0.5 + vec3(1.0) * roll * 0.4;
     alpha = 0.26 * scan + 0.30 * vig + roll * 0.22;
-  } else if(u_fx==7){                                     // filmGrain — animated grain + dust, luminance-only (no greying)
+  } else if(u_fx==7){                                     // filmGrain, animated grain + dust, luminance-only (no greying)
     float tstep = floor(t*24.0);
     float g = rhash(floor(uv*u_res/2.0) + tstep*11.0) - 0.5;                         // decorrelated per ~2px cell, new each frame → true grain, no stripes
     float dust = step(0.9994, rhash(vec2(floor(uv.x*380.0), floor(uv.y*380.0) + tstep*3.0)));
     col = g > 0.0 ? vec3(1.0) : vec3(0.0);               // bright/dark specks, never mid-grey → keeps contrast
     col += vec3(1.0) * dust;
     alpha = abs(g) * 0.55 + dust * 0.85;
-  } else if(u_fx==8){                                     // lightLeak — warm blobs drift in from an edge, looping (palette-aware)
+  } else if(u_fx==8){                                     // lightLeak, warm blobs drift in from an edge, looping (palette-aware)
     vec3 lc = vec3(0.0); float a = 0.0;
     for(int i=0;i<3;i++){ float fi=float(i);
       float ph = t*0.05*(0.6 + hash(vec2(fi, u_seed))) + hash(vec2(fi+3.0, u_seed))*6.2831;
@@ -235,19 +235,19 @@ void main(){
     col = lc; alpha = clamp(a, 0.0, 1.0) * 0.8;
 
   // ---- wave 3: distortion-styled veils (self-generated; see header note on why not true warps) ----
-  } else if(u_fx==9){                                     // barrel — lens vignette + faint edge chromatic fringe
+  } else if(u_fx==9){                                     // barrel, lens vignette + faint edge chromatic fringe
     vec2 d = uv - 0.5; float r = length(d);               // uv-radial (no ar) → corners fall darkest, like a lens
     float vig = smoothstep(0.42, 0.94, r);
     float rim = smoothstep(0.58, 0.92, r);                // a thin coloured fringe rides only the far edge
     col = vec3(rim*0.55, rim*0.12, rim*0.75) * 0.5;       // faint violet CA, not a magenta wash
     alpha = vig * 0.6;
-  } else if(u_fx==10){                                    // heatShimmer — rising warm haze in fine wavy bands
+  } else if(u_fx==10){                                    // heatShimmer, rising warm haze in fine wavy bands
     float n = noise(vec2(p.x*3.0, p.y*2.0 - t*0.7));
     float wv = sin(p.y*40.0 + n*9.0 - t*2.4);             // fine horizontal ripples that rise
     float band = smoothstep(0.25, 0.95, 0.5 + 0.5*wv) * smoothstep(0.0, 0.45, n);
     col = mix(c2, vec3(1.0, 0.84, 0.55), 0.5);            // warm air
     alpha = band * 0.34 * (0.35 + 0.65*(1.0 - uv.y));     // strongest low in frame, thins as it rises
-  } else if(u_fx==11){                                    // ripple — gentle water caustics, looping overlapping rings
+  } else if(u_fx==11){                                    // ripple, gentle water caustics, looping overlapping rings
     float v = 0.0;
     for(int i=0;i<3;i++){ float fi=float(i);
       vec2 cc = vec2((0.3 + 0.4*hash(vec2(fi, u_seed)))*ar, 0.3 + 0.4*hash(vec2(fi+5.0, u_seed)));
@@ -257,7 +257,7 @@ void main(){
     float caust = smoothstep(0.25, 0.9, 0.5 + 0.5*v);
     col = mix(c1, vec3(0.7, 0.85, 1.0), 0.4);            // cool water light
     alpha = caust * 0.24;
-  } else if(u_fx==12){                                    // kaleidoscope — mirrored rotating mandala
+  } else if(u_fx==12){                                    // kaleidoscope, mirrored rotating mandala
 
     vec2 d = uv - 0.5; d.x *= ar; float rad = length(d);
     float ang = atan(d.y, d.x) + t*0.10;
@@ -268,7 +268,7 @@ void main(){
     kc = mix(kc, c3, blob(q, vec2(0.18, 0.0), 20.0));
     float m = 0.5 + 0.5*sin(q.x*24.0)*sin(q.y*24.0 + t*0.2);
     col = kc; alpha = (0.3 + 0.45*smoothstep(0.2, 0.8, m)) * smoothstep(0.78, 0.08, rad);
-  } else if(u_fx==13){                                    // matrixDecode — digital rain: bright heads fall down glyph columns
+  } else if(u_fx==13){                                    // matrixDecode, digital rain: bright heads fall down glyph columns
     float cols = 44.0, rows = 28.0;
     float cx = floor(uv.x*cols), cy = floor(uv.y*rows);
     float speed = 0.18 + 0.5*rhash(vec2(cx, 3.0));       // per-column fall speed (rhash: no banding at big coords)
@@ -281,9 +281,9 @@ void main(){
     vec3 body = P(0, vec3(0.16, 0.95, 0.42));            // palette stop 0 tints the rain (default matrix green)
     col = mix(body, vec3(0.75, 1.0, 0.85), lead);
     alpha = (trail*0.65 + lead) * (0.4 + 0.6*flick);
-  } else if(u_fx==14){                                     // nebula — deep-field gas clouds with a star dusting
+  } else if(u_fx==14){                                     // nebula, deep-field gas clouds with a star dusting
     // Same fbm family as flow/plasma but weighted dark: broad low-frequency clouds, a hot core, and a
-    // sparse star field from a hashed grid. Pure in (t, seed) like every member — no accumulation.
+    // sparse star field from a hashed grid. Pure in (t, seed) like every member, no accumulation.
     vec2 q = p*1.6 + vec2(t*0.020, -t*0.014);
     float n1 = noise(q), n2 = noise(q*2.3 + 4.0), n3 = noise(q*4.7 - 2.0);
     float cloud = n1*0.55 + n2*0.30 + n3*0.15;
@@ -293,8 +293,8 @@ void main(){
     float star = step(0.997, rhash(sg)) * (0.6 + 0.4*sin(t*2.0 + rhash(sg+9.0)*6.28));
     col = nb + vec3(star);
     alpha = smoothstep(0.18, 0.9, cloud) * 0.85 + star*0.9;
-  } else if(u_fx==15){                                    // dotCrawl — the NTSC chroma artifact that crawls along edges
-    // A fine diagonal chroma lattice drifting one subcarrier phase per frame — the companion artifact
+  } else if(u_fx==15){                                    // dotCrawl. The NTSC chroma artifact that crawls along edges
+    // A fine diagonal chroma lattice drifting one subcarrier phase per frame, the companion artifact
     // to the shipped vhs/crt pair, which reproduce tracking and phosphor but never this.
     float ph = (p.x + p.y)*180.0 - t*7.0;                           // diagonal subcarrier
     float lat = sin(ph);
@@ -302,10 +302,10 @@ void main(){
     float edge = smoothstep(0.35, 0.95, noise(p*7.0 + t*0.05));     // crawl concentrates on detail
     col = 0.5 + 0.5*chroma;
     alpha = edge * (0.10 + 0.10*abs(lat));
-  } else if(u_fx==16){                                    // gateWeave — film dust + gate weave
+  } else if(u_fx==16){                                    // gateWeave, film dust + gate weave
     // A frame never sits still in a projector gate: the sprockets let it drift a pixel or two, and it
     // is the GATE EDGE moving that the eye reads as weave. This layer cannot move the content beneath
-    // it, so the weave is carried by everything it CAN draw — the soft dark frame border, the dust and
+    // it, so the weave is carried by everything it CAN draw. The soft dark frame border, the dust and
     // the hair all ride ONE offset, and the picture appears to float inside it.
     vec2 wv = vec2(sin(t*1.7)*0.0018 + sin(t*0.43 + 1.7)*0.0034,
                    sin(t*2.3 + 1.1)*0.0024 + sin(t*0.61 + 2.2)*0.0042);  // two detuned sines = never repeats visibly
@@ -324,7 +324,7 @@ void main(){
     float hair = hon * smoothstep(0.0026, 0.0, abs(q.x - (hx + sway))) * step(1.0 - hlen, q.y);
     col = mix(vec3(1.0), vec3(0.02), max(dust*dirt, max(gate, hair)));
     alpha = gate*0.6 + dust*0.85 + hair*0.75;
-  } else {                                                // bands — a ramp repeated over a scalar field
+  } else {                                                // bands, a ramp repeated over a scalar field
     float bt = t * 0.06;                                  // the clock, first line, see note below
     vec2  drift = vec2(0.05*sin(t*0.07), 0.03*cos(t*0.05));
     // Index 17, the trailing else. The clock is on the FIRST line because lib-test reads the opening

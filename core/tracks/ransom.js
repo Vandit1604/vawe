@@ -1,4 +1,4 @@
-// core/tracks/ransom.js — ransom with `cycle`: re-roll each letter into a different cutout of the same
+// core/tracks/ransom.js, ransom with `cycle`: re-roll each letter into a different cutout of the same
 // glyph, in place, every frame. Stateless and derived from t, so it stays pure in n.
 //
 // After `split` and not before it: both write the same unit spans, and the reveal is the pose while

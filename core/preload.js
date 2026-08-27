@@ -1,4 +1,4 @@
-// core/preload.js — the awaited readiness phase, one async pass per asset kind. Every function here
+// core/preload.js: the awaited readiness phase, one async pass per asset kind. Every function here
 // runs BEFORE the virtual clock is installed and before the first frame is captured, so whatever it
 // puts on `window.__*` is a plain, static table by render time and renderFrame(n) stays pure in n.
 //
@@ -16,7 +16,7 @@ export function walkData(node, visit) {
 }
 
 // fetchJson(url, what): the ONE place a JSON URL becomes an object. A non-OK response still has a
-// BODY, and `res.json()` parses it happily — so a 404 whose body is "not found" was reported as
+// BODY, and `res.json()` parses it happily, so a 404 whose body is "not found" was reported as
 // `SyntaxError: Unexpected token 'o'`, naming the first character of the error page instead of the
 // missing file. Every JSON fetch in the engine goes through here so the three outcomes stay distinct:
 // the request failed, the server refused it, or the file really is malformed.
@@ -25,7 +25,7 @@ export async function fetchJson(url, what = 'file') {
   try { res = await fetch(url); }
   catch (e) { throw new Error(`${what}: ${url} could not be fetched (${e.message})`); }
   if (!res.ok) {
-    throw new Error(`${what}: ${url} → HTTP ${res.status} — the render server did not serve it. `
+    throw new Error(`${what}: ${url} → HTTP ${res.status}, the render server did not serve it. `
       + `Either the file does not exist, or its path is outside the roots the server allows `
       + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
   }
@@ -42,16 +42,16 @@ const decodeImage = (src, crossOrigin) => new Promise((res, rej) => {
 });
 
 // AUDIO-REACTIVITY: `audio.spectrum` names a sidecar written offline by scripts/media/spectrum.mjs;
-// the render reads row n and never touches a decoder. A missing sidecar is a warning, not a throw —
-// the scene still renders, the reactive layers simply hold still.
+// the render reads row n and never touches a decoder. A missing sidecar is a warning, not a throw.
+// The scene still renders, the reactive layers simply hold still.
 export async function preloadSpectrum(data) {
   window.__spectrum = null;
   if (!(data.audio && data.audio.spectrum)) return;
   try {
     const r = await fetch(data.audio.spectrum.startsWith('/') ? data.audio.spectrum : '/' + data.audio.spectrum);
     if (r.ok) window.__spectrum = await r.json();
-    else console.warn(`spectrum: ${data.audio.spectrum} not found (${r.status}) — react layers will hold still`);
-  } catch (e) { console.warn(`spectrum: ${data.audio.spectrum} unreadable — react layers will hold still`); }
+    else console.warn(`spectrum: ${data.audio.spectrum} not found (${r.status}), react layers will hold still`);
+  } catch (e) { console.warn(`spectrum: ${data.audio.spectrum} unreadable, react layers will hold still`); }
 }
 
 // cobe is LAZY and AWAITED, for the same two reasons three is: a `globe` layer builds synchronously
@@ -65,7 +65,7 @@ export async function preloadCobe(data) {
 }
 
 // three.js is LAZY and AWAITED. Lazy because it is 635KB and most scenes never touch it; awaited
-// because a `three` layer builds synchronously and would otherwise race the module load — a layer that
+// because a `three` layer builds synchronously and would otherwise race the module load, a layer that
 // renders empty on the workers that got there first is a purity break, not a glitch. Extruded type
 // needs glyph outlines (make glyphs); a missing typeface is a LOUD failure in three-fx.js, not a swap.
 export async function preloadThree(data) {
@@ -106,7 +106,7 @@ export async function preloadComponents(data) {
   walkData(data, (o) => { if (typeof o === 'string' && /\/(components|scenes)\/[^/]+\.json$/.test(o)) paths.add(o); });
   // A component that fails to load leaves its `component` layer EMPTY. Warn (matches lottie/gsap) so a
   // moved/mistyped capture path is visible, not a silently blank box.
-  for (const p of paths) { try { const r = await fetch(p); if (r.ok) window.__components[p] = await r.json(); else console.warn(`component: ${p} → ${r.status} — layer renders EMPTY`); } catch (e) { console.warn(`component: ${p} unreadable — layer renders EMPTY`); } }
+  for (const p of paths) { try { const r = await fetch(p); if (r.ok) window.__components[p] = await r.json(); else console.warn(`component: ${p} → ${r.status}, layer renders EMPTY`); } catch (e) { console.warn(`component: ${p} unreadable, layer renders EMPTY`); } }
 }
 
 // Preload the images INSIDE captured components and hand-authored fragments.
@@ -152,7 +152,7 @@ export async function preloadEmbeddedImages() {
   // Warn per URL rather than silently preloading it, so the dependency is visible in the render log
   // instead of only in a frame. Run `node scripts/brand/localize-assets.mjs --write` to clear it.
   const remote = [...urls].filter((u) => { try { return new URL(u).origin !== location.origin; } catch { return false; } });
-  for (const u of remote) console.warn(`embedded image is REMOTE: ${u} — this render depends on the network. Fix: node scripts/brand/localize-assets.mjs --write`);
+  for (const u of remote) console.warn(`embedded image is REMOTE: ${u}. This render depends on the network. Fix: node scripts/brand/localize-assets.mjs --write`);
   await Promise.all([...urls].map((src) => decodeImage(src, true).catch(() => {})));
 }
 
@@ -182,7 +182,7 @@ async function fetchHtmlText(src) {
   try { res = await fetch(url); }
   catch (e) { throw new Error(`html fragment: ${url} could not be fetched (${e.message})`); }
   if (!res.ok) {
-    throw new Error(`html fragment: ${url} → HTTP ${res.status} — the render server did not serve it. `
+    throw new Error(`html fragment: ${url} → HTTP ${res.status}, the render server did not serve it. `
       + `Either the file does not exist, or its path is outside the roots the server allows `
       + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
   }
@@ -191,7 +191,7 @@ async function fetchHtmlText(src) {
 
 // Preload generated CLIPS (scripts/gen-clip.mjs): any "/…/manifest.json" string is a frame-sequence
 // manifest {fps,w,h,frames:[url]}. Decode EVERY frame up front so the `clip` layer can swap an <img>
-// src per renderFrame(n) with zero async — deterministic playback of a generated/any video.
+// src per renderFrame(n) with zero async, deterministic playback of a generated/any video.
 export async function preloadClips(data) {
   window.__clips = {};
   const paths = new Set();
@@ -199,17 +199,17 @@ export async function preloadClips(data) {
   for (const p of paths) {
     try {
       const r = await fetch(p);
-      if (!r.ok) { console.warn(`clip: ${p} → ${r.status} — layer renders EMPTY`); continue; }
+      if (!r.ok) { console.warn(`clip: ${p} → ${r.status}, layer renders EMPTY`); continue; }
       const man = await r.json();
       window.__clips[p] = man;
       await Promise.all((man.frames || []).map((src) => decodeImage(src).catch(() => {})));
-    } catch (e) { console.warn(`clip: ${p} unreadable — layer renders EMPTY`); }
+    } catch (e) { console.warn(`clip: ${p} unreadable, layer renders EMPTY`); }
   }
 }
 
 // Preload the RANSOM SPRITE SET (assets/ransom/manifest.json + every letter PNG), when a scene opts
 // into `ransom: { sprites: true }`. Decoded up front so ransomStyle can size each scrap from its own
-// aspect synchronously at build — a real cutout set has a different width per letter, and measuring it
+// aspect synchronously at build. A real cutout set has a different width per letter, and measuring it
 // at frame time would be async, which frame n cannot be.
 export async function preloadRansomSprites(data) {
   window.__ransomSprites = null;
@@ -217,19 +217,19 @@ export async function preloadRansomSprites(data) {
   const base = '/assets/ransom/';
   let manifest;
   try { manifest = await fetchJson(base + 'manifest.json', 'ransom sprites'); }
-  catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable — run `make ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/'); }
+  catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable, run `make ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/'); }
   await Promise.all(Object.values(manifest).flat().map((v) => decodeImage(base + v.file).catch(() => {})));
   window.__ransomSprites = { base, manifest };
 }
 
-// Load GSAP (the tween engine) ONLY when a scene uses it — a `gsap` layer field or a `morph`. Loaded
+// Load GSAP (the tween engine) ONLY when a scene uses it. A `gsap` layer field or a `morph`. Loaded
 // before the virtual clock like the other runtimes; seekAll(t) pauses gsap.globalTimeline and seeks it
 // per frame, so tweens stay pure in n. The ticker is stopped so GSAP never self-advances (we drive it).
 const loadScript = (src) => new Promise((res) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = res; document.head.appendChild(s); });
 
 // The formerly-paid bonus plugins (free since GSAP 3.13). Each is loaded + registered ONLY when a scene
 // declares its field, so a text-only render never parses them. A plugin file exposes a UMD global that
-// gsap.registerPlugin() then wires in. A missing/failed file warns (the layer degrades) — never silent.
+// gsap.registerPlugin() then wires in. A missing/failed file warns (the layer degrades), never silent.
 const GSAP_PLUGINS = {
   motionPath: { file: 'MotionPathPlugin.min.js', global: 'MotionPathPlugin' },
   physics:    { file: 'Physics2DPlugin.min.js', global: 'Physics2DPlugin' },
@@ -261,12 +261,12 @@ export async function preloadGsap(data) {
   // autoRemoveChildren=false IS THE PURITY OF renderFrame(n), not a memory tweak. GSAP's ROOT timeline
   // ships with autoRemoveChildren:true: the instant a tween's playhead passes its end, GSAP unlinks it
   // from the timeline. For a PLAYING page that is right (a finished tween is garbage). For a SEEKED page
-  // it is fatal — the tween is gone, so a later seek back to before its start can never restore the
+  // it is fatal. The tween is gone, so a later seek back to before its start can never restore the
   // from-state, and its targets stay frozen at the end values for every earlier frame drawn afterwards.
   // renderFrame(n) is then a function of n AND of the highest n this tab has already drawn.
   //
   // That is not hypothetical and it is not about one feature. The capture's dedup pre-pass calls
-  // frameSig() over EVERY frame, in order, on the meta tab (internal/scene/scene.go) — and worker 0
+  // frameSig() over EVERY frame, in order, on the meta tab (internal/scene/scene.go), and worker 0
   // then borrows that same tab and draws frames 0, 6, 12, … from a timeline whose playhead has already
   // been at the last frame. So one frame in six came back with every completed tween stuck at its end
   // state, which read as a 366-cell grid blinking five times a second (docs/MISTAKES.md #370).
@@ -277,7 +277,7 @@ export async function preloadGsap(data) {
     if (!new RegExp(`"${field}"\\s*:`).test(json)) continue;
     if (!window[p.global]) await loadScript('/assets/vendor/' + p.file);
     if (window[p.global]) { try { window.gsap.registerPlugin(window[p.global]); } catch (e) {} }
-    else console.warn(`gsap: /assets/vendor/${p.file} failed to load — "${field}" layers render unanimated`);
+    else console.warn(`gsap: /assets/vendor/${p.file} failed to load, "${field}" layers render unanimated`);
   }
 }
 
@@ -296,7 +296,7 @@ export async function preloadLottie(data) {
   // an empty box with NO warning (the exact silent substitution the doctrine forbids). Normalise + warn.
   for (const p of srcs) {
     const url = /^(https?:)?\//.test(p) ? p : '/' + p;
-    try { const r = await fetch(url); if (r.ok) window.__lottie[p] = await r.json(); else console.warn(`lottie: ${url} → ${r.status} — layer renders EMPTY`); }
-    catch (e) { console.warn(`lottie: ${url} unreadable — layer renders EMPTY`); }
+    try { const r = await fetch(url); if (r.ok) window.__lottie[p] = await r.json(); else console.warn(`lottie: ${url} → ${r.status}, layer renders EMPTY`); }
+    catch (e) { console.warn(`lottie: ${url} unreadable, layer renders EMPTY`); }
   }
 }

@@ -1,4 +1,4 @@
-// core/tracks/modifiers.js — the per-layer modifier pass (core/fx/index.js). LAST, so a modifier acts
+// core/tracks/modifiers.js: the per-layer modifier pass (core/fx/index.js). LAST, so a modifier acts
 // on the finished frame rather than on a half-composed one. A layer that declares none never enters
 // this call.
 //
@@ -7,7 +7,7 @@
 // load rather than a diff somebody notices in a render.
 export const slot = 'post';
 
-// Reads nothing itself — `modifiers` is read by core/fx/index.js, which declares it.
+// Reads nothing itself: `modifiers` is read by core/fx/index.js, which declares it.
 export const PROPS = {};
 
 export function frame(kit, el, L, units, t, f, start, end, scene) {

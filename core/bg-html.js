@@ -1,10 +1,10 @@
-// core/bg-html.js — a HAND-AUTHORED living background: raw HTML/CSS as the backdrop, instead of a
+// core/bg-html.js. A HAND-AUTHORED living background: raw HTML/CSS as the backdrop, instead of a
 // canvas preset.
 //
 // WHY this exists alongside the presets. `bgPreset` paints on canvas from a fixed vocabulary (gradients ·
 // dots · aurora · metallic · softwash). That vocabulary is good and it is finite, and a backdrop the
 // vocabulary cannot express had exactly one escape hatch: add another preset to the engine. Reflecting a
-// real site — where the hero background IS hand-written CSS — hit that wall every time. This is the
+// real site (where the hero background IS hand-written CSS) hit that wall every time. This is the
 // escape hatch, with the engine's contracts kept intact.
 //
 // DETERMINISM, which is the whole question for a hand-authored backdrop. A frame here is SEEKED, not
@@ -12,13 +12,13 @@
 // transition and animation, which core/tokens.css already disables engine-wide.
 //
 // What replaces them: `--t` (seconds into the video) and `--p` (0→1 across this bg's own window),
-// written onto the element every frame and usable anywhere calc() is — transforms, gradient angles,
+// written onto the element every frame and usable anywhere calc() is, transforms, gradient angles,
 // colour mixes, offsets:
 //   transform: rotate(calc(var(--t) * 12deg));
 //   background: radial-gradient(40% 30% at calc(20% + var(--p) * 60%) 50%, …);
 // Both are pure functions of t, so the same frame number always paints the same pixels.
 //
-// A CSS animation here would not error, it would silently render a still — so the authoring gate
+// A CSS animation here would not error, it would silently render a still, so the authoring gate
 // rejects it by name and points at `--t` (timeCssUsed() in core/sanitize-html.js).
 import { sanitizeHtml, htmlSource } from './sanitize-html.js';
 
@@ -46,7 +46,7 @@ export function createBgHtml(root, windows, table) {
     // Returns true when a hand-authored window owns time t, so the caller knows to hide the canvas.
     // `filmDur` is the scene's own length, and it is what a window with no explicit `to` ends at.
     // Without it `--p` was pinned to 0 for the whole film: the fallback `to` is the sentinel 1e9, so
-    // `span < 1e9` was false and the guard returned 0 — while this file's header promised "0 -> 1
+    // `span < 1e9` was false and the guard returned 0, while this file's header promised "0 -> 1
     // across this bg's own window". One backdrop spanning the film is the COMMONEST shape there is,
     // so the variable was frozen exactly where it was most likely to be used, and a page written
     // against it rendered a still. docs/MISTAKES.md #353.

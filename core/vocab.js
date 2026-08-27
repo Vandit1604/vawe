@@ -1,4 +1,4 @@
-// core/vocab.js — the plain words an author is allowed to write where a concrete engine value goes.
+// core/vocab.js: the plain words an author is allowed to write where a concrete engine value goes.
 //
 // WHY THIS EXISTS. Every motion vocabulary in this engine is named by MECHANISM: `easeOutQuart`,
 // `workspaceZoomOut`, `0.3`. An author reaching for the right one pays a document read; an author
@@ -24,7 +24,7 @@ import { defineRegistry } from './registry.js';
 // ---- FEEL: a word → an easing name in core/motion.js EASINGS ------------------------------------
 // Chosen by what the engine can already do, not by what reads well: every value below is a key of
 // EASINGS, checked by lib-test. Words that ARE already EASINGS keys (`linear`, `spring`, `settle`,
-// `snap`, `rush`, `brake`, `ramp`) are deliberately absent — resolveEasing finds those first, and a
+// `snap`, `rush`, `brake`, `ramp`) are deliberately absent. ResolveEasing finds those first, and a
 // word shadowing a curve is exactly the ambiguity this file exists to remove.
 export const FEEL = {
   snappy: 'easeOutQuart',        // the cut timing `snappy`, as an easing. Decisive, no overshoot.
@@ -41,7 +41,7 @@ export const FEEL = {
 };
 
 // ---- DURATION: a word → seconds ----------------------------------------------------------------
-// `medium` is 0.3 because that is BASE_ENTER (core/clips.js) — the house default this engine already
+// `medium` is 0.3 because that is BASE_ENTER (core/clips.js), the house default this engine already
 // gives every layer that names nothing. Not imported: core/clips.js imports core/motion.js, which
 // imports this file, and the cycle is not worth a constant. lib-test asserts the two agree.
 //
@@ -51,7 +51,7 @@ export const FEEL = {
 export const DURATION = {
   instant: 0.08,     // under the threshold where the eye reads travel. A state change, not a move.
   fast: 0.18,        // read as quick but still a move.
-  medium: 0.3,       // BASE_ENTER — the engine's own default entrance.
+  medium: 0.3,       // BASE_ENTER, the engine's own default entrance.
   slow: 0.6,         // deliberate. The eye has time to follow the whole path.
   luxurious: 1.2,    // a held gesture. One per film, on the beat that deserves the screen time.
 };
@@ -79,13 +79,13 @@ export const CAMERA_WORDS = {
 // Registered through the same primitive as every other vocabulary, so a word written into the WRONG
 // slot is diagnosed rather than merely rejected: `anim: "snappy"` now answers "that is a feel word,
 // try `ease`" instead of listing thirty anims it is not among. The registry also owns the near-miss
-// list and the "never a fallback" contract — there is no `pick(name, default)` to reach for.
+// list and the "never a fallback" contract. There is no `pick(name, default)` to reach for.
 export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease' });
 export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur' });
 export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move' });
 
 /**
- * resolveSeconds(v) — a duration slot's value, whatever spelling it arrived in.
+ * resolveSeconds(v): a duration slot's value, whatever spelling it arrived in.
  *   a number  → itself (a scene that names 0.42 keeps naming 0.42)
  *   absent    → itself, so the caller's own default still decides
  *   a word    → its seconds
@@ -97,14 +97,14 @@ export const resolveSeconds = (v) => {
   return DURATION_REGISTRY.pick(v);
 };
 
-/** resolveCameraMove(name) — a move name passes through; a shot word becomes its move name. */
+/** resolveCameraMove(name): a move name passes through; a shot word becomes its move name. */
 export const resolveCameraMove = (name) => {
   if (typeof name !== 'string') return name;
   return Object.prototype.hasOwnProperty.call(CAMERA_WORDS, name) ? CAMERA_WORDS[name] : name;
 };
 
 /**
- * verifyVocab({ easings, cameraMoves }) — every word's target still exists.
+ * verifyVocab({ easings, cameraMoves }): every word's target still exists.
  * Called by lib-test rather than at import time: this file must stay a leaf (core/motion.js imports
  * it), so it cannot import the registries it aliases. A rename on the far side is caught by the
  * gate, not by a crash inside a render worker.

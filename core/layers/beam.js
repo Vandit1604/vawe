@@ -1,4 +1,4 @@
-// core/layers/beam.js — a per-frame ANIMATED accent: a light that travels a rounded-rect BORDER
+// core/layers/beam.js. A per-frame ANIMATED accent: a light that travels a rounded-rect BORDER
 // (border-beam) or a SHEEN that sweeps across the box (shine). The whole point of this file is to prove
 // the killer web-styles (border-beam, shine) belong in a DETERMINISTIC engine: CSS @keyframes are killed
 // (tokens.css), so the travel angle / sheen position is a CLOSED-FORM function of local time, recomputed

@@ -1,5 +1,5 @@
-// Vawe Company License 1.0 — see LICENSE at the repository root.
-// core/boot.js — the scene RUNTIME lifted out of core/motion.js: theme resolution + CSS apply,
+// Vawe Company License 1.0: see LICENSE at the repository root.
+// core/boot.js. The scene RUNTIME lifted out of core/motion.js: theme resolution + CSS apply,
 // the deterministic virtual clock, image/component preload, and boot() (fetch data → validate →
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
 import { FPS, isLightBg } from './motion.js';
@@ -23,7 +23,7 @@ const hexToRgb = (h) => { let s = String(h).replace('#', ''); if (s.length === 3
 const rgbToHex = (a) => '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
 const mixHex = (a, b, t) => { try { const A = hexToRgb(a), B = hexToRgb(b); return rgbToHex(A.map((v, i) => v + (B[i] - v) * t)); } catch { return a; } };
 // deriveCard: a raised CARD surface. Lighten the theme's surface toward white on light themes, lift it
-// gently on dark — so elevated block cards read correctly on any brand that didn't declare palette.card.
+// gently on dark, so elevated block cards read correctly on any brand that didn't declare palette.card.
 const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return mixHex(base, '#ffffff', isLightBg(P.bg || base) ? 0.55 : 0.1); };
 
 // ---- multi-aspect: canvas sizes + a pure relative-coordinate resolver ----
@@ -56,7 +56,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
   //     would push every hero off the visual centre to dodge chrome the viewer can see past anyway.
   //     If centred content collides with chrome, that is a composition call, and the audit says so.
   // `size` is the layer's declared extent on this axis, 0 when unset. `est` is the same thing with a
-  // text-height fallback, and ONLY the far edges (right/bottom) use it — they are the two keywords that
+  // text-height fallback, and ONLY the far edges (right/bottom) use it, they are the two keywords that
   // must subtract a size to work at all, so with size 0 they placed the layer's NEAR edge on the far
   // safe line and hung the whole layer outside it. (`pin:"bottom"` set top=1340 on a 1340 safe bottom.)
   // centre/optical/thirds keep using the raw `size`: feeding them `est` would shift every centred layer
@@ -85,7 +85,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
     'thirds-br': ['third2', 'third2'], 'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
     'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'] };
   // Children were never walked, so `pin`, `col`, `gutter` and string coords ("50%", "center") were
-  // inert inside a group — and in a `layout:"free"` group a "50%" string reached CSS as `left:50%px`,
+  // inert inside a group, and in a `layout:"free"` group a "50%" string reached CSS as `left:50%px`,
   // which is not a coordinate at all. `applyAt` already recurses; this did not (MISTAKES #70).
   const allLayers = [];
   (function walk(ls) { for (const L of ls || []) { if (!isObj(L)) continue; allLayers.push(L); if (L.children) walk(L.children); } })(data.layers);
@@ -108,7 +108,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
     const w = typeof L.w === 'number' ? L.w : 0, h = typeof L.h === 'number' ? L.h : 0;
     // A text layer rarely declares `h`, so estimate it from the font size for the bottom edge. size*1.2
     // is not a new invention: formats/scene/scene.html uses exactly this fallback to anchor layers to
-    // each other. There is deliberately NO equivalent for width — a string's rendered width cannot be
+    // each other. There is deliberately NO equivalent for width, a string's rendered width cannot be
     // known before layout, so `pin:"right"` without `w` stays an authoring error the audit reports.
     const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
     if (L.x != null) L.x = num(L.x, W, w, safe.x0, safe.x1);
@@ -130,7 +130,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
     // A PIN MOVES THE CAPTION VERTICALLY AND, WITHOUT A WIDTH, ONLY VERTICALLY. `pin` centres a BOX,
     // and a caption declares no width by default: scene.css pins its left AND right edges, so the box
     // is the stylesheet's. Applying the pin's x-keyword anyway releases the right edge, leaves the
-    // width to shrink-to-fit, and lands the text's LEFT edge on the centre line — which is exactly the
+    // width to shrink-to-fit, and lands the text's LEFT edge on the centre line, which is exactly the
     // `degenerate-pin` failure CLAUDE.md already names for layers, reproduced here on the first frame
     // this hook ever rendered. So the x-keyword waits for a `w` to centre against, and `pin:"top"`
     // does the obvious thing: same box, moved to the top. A pin that names a horizontal EDGE and
@@ -167,7 +167,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
 }
 
 // preloadImages: walk the data JSON for image-like strings (local paths, /…, or http(s)
-// URLs — incl. user-supplied web image links) and fully load+decode them BEFORE the scene
+// URLs, incl. user-supplied web image links) and fully load+decode them BEFORE the scene
 // reports ready. Without this the Go renderer can screenshot a frame mid-download → a missing
 // image on some frames. onerror also resolves so a dead link falls back (icon()) without hanging.
 // A REPO-LOCAL IMAGE THAT 404s IS INVALID INPUT, AND IT THROWS. This used to degrade quietly: the
@@ -175,24 +175,24 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
 // the render. That is the same failure `htmlSource` refuses one file over (a fragment `src` that never
 // loaded), graded differently only because images happened to be preloaded here.
 //
-// WHAT THROWS: a path INSIDE this repo — `/assets/…`, `assets/…`, `./assets/…`. The author wrote a
+// WHAT THROWS: a path INSIDE this repo, `/assets/…`, `assets/…`, `./assets/…`. The author wrote a
 // file that is not there, the write site is theirs, and nothing downstream can recover it.
 // WHAT STAYS SOFT, deliberately:
-//   · an `http(s)` URL — a dead CDN or an offline render is not an author error, and hard-failing a
+//   · an `http(s)` URL: a dead CDN or an offline render is not an author error, and hard-failing a
 //     film because a network hiccup ate one logo trades a hole in a frame for no film at all.
-//   · a `data:` URI — it cannot 404; if it fails to decode the string itself is the bug and the
+//   · a `data:` URI. It cannot 404; if it fails to decode the string itself is the bug and the
 //     decoder says so.
 //   · anything that is not a repo path. This walk reads EVERY string in the scene, not just image
 //     slots, so a text layer reading "hero.png" is picked up too (one shipped film does exactly that,
 //     formats/scene/ab-skill-shotcode.json). A bare filename is not a path into this repo, so it is
-//     never grounds to refuse a film — the shape of the string is what separates the two, and it is
+//     never grounds to refuse a film. The shape of the string is what separates the two, and it is
 //     the only thing this walk knows.
 // Measured across the 147 scenes in formats/scene/: zero of them name a repo-local image that is
 // absent, so nothing shipped changes.
 export async function preloadImages(data) {
   const urls = new Map(); // src → where it was written, for the refusal
   // an image extension (any source) OR an http(s) URL (web logos can be extensionless).
-  // NOT bare assets/ or / paths — those also match audio (assets/music.wav) and aren't images.
+  // NOT bare assets/ or / paths: those also match audio (assets/music.wav) and aren't images.
   const isImg = (v) => typeof v === 'string' &&
     (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^https?:\/\/\S+$/.test(v));
   const walk = (o, at) => {
@@ -214,7 +214,7 @@ export async function preloadImages(data) {
       + `${missing.map((s) => `${urls.get(s)} → "${s}"`).join(' · ')}. `
       + `Either the file does not exist, or its path is outside the roots the render server allows `
       + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/). `
-      + `Capture or fetch it (\`make assets D=<scene> WRITE=1\`), or drop the layer — a repo path that `
+      + `Capture or fetch it (\`make assets D=<scene> WRITE=1\`), or drop the layer, a repo path that `
       + `404s renders as a hole in the frame and says nothing.`);
 }
 
@@ -241,23 +241,23 @@ async function preloadVideos(data) {
   })));
 }
 
-// resolveTheme(spec): spec is "name" (→ fetch themes/name.json) | inline object. REQUIRED —
-// no spec or a failed fetch throws; nothing silently substitutes a look.
+// resolveTheme(spec): spec is "name" (→ fetch themes/name.json) | inline object. REQUIRED.
+// No spec or a failed fetch throws; nothing silently substitutes a look.
 export async function resolveTheme(spec) {
   if (typeof spec === 'string' && spec) {
     const res = await fetch(`/themes/${spec}.json`);
-    if (!res.ok) throw new Error(`theme "${spec}" not found (themes/${spec}.json) — no default look exists`);
+    if (!res.ok) throw new Error(`theme "${spec}" not found (themes/${spec}.json), no default look exists`);
     return await res.json();
   }
   if (isObj(spec)) return spec;
-  throw new Error('data.theme is required (a theme name or an inline theme object) — no default look exists');
+  throw new Error('data.theme is required (a theme name or an inline theme object), no default look exists');
 }
 
 // applyTheme(theme): assert the contract, then write the palette/gradient/font vars onto :root.
-// The ONLY writer of look CSS — tokens.css carries fonts + geometry, never colors or type choices.
+// The ONLY writer of look CSS: tokens.css carries fonts + geometry, never colors or type choices.
 export function applyTheme(theme) {
   const missing = themeErrors(theme, { parseColor, contrastRatio });
-  if (missing.length) throw new Error(`theme "${theme?.name || 'inline'}" incomplete — missing ${missing.join(', ')}`);
+  if (missing.length) throw new Error(`theme "${theme?.name || 'inline'}" incomplete, missing ${missing.join(', ')}`);
   const root = document.documentElement.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
   const P = theme.palette || {};
@@ -278,15 +278,15 @@ export function applyTheme(theme) {
   // WHAT COLOUR READS *ON* A FILL. Nothing could answer that, so every block that filled a surface
   // with a theme colour guessed, and they all guessed white: pricingCard's featured CTA is white on
   // higgsfield's acid lime at 1.16:1, and a checklist tick was white on `--up` at 1.25:1 there and
-  // 2.50:1 on linear. `onColor()` in blocks/kit.mjs cannot help — it grades a literal hex, and a block
+  // 2.50:1 on linear. `onColor()` in blocks/kit.mjs cannot help, it grades a literal hex, and a block
   // only ever holds `var(--accent)` or `var(--up)`, a string that becomes a colour in the browser long
   // after the factory returned. The theme is the one place these ARE values, so the decision is made
   // here, once per fill, and every consumer receives it.
   // NOT the theme's own `ink`: `ink` is the primary text colour, which on a dark theme is nearly WHITE
   // (higgsfield ships #f4f5f0), so white-vs-ink leaves 11 of 38 themes below 4.5:1 with both candidates
-  // light — and on the amber `--warn` it measures 1.87:1 on higgsfield, which is what `badge` shipped.
+  // light, and on the amber `--warn` it measures 1.87:1 on higgsfield, which is what `badge` shipped.
   // White vs black, winner takes it, clears all 152 theme x fill pairs with a floor of 4.69:1 (white
-  // alone fails 112 of them, black alone a different 40) — white preferred wherever it already reads.
+  // alone fails 112 of them, black alone a different 40). White preferred wherever it already reads.
   // Defaulted rather than required, exactly as `--warn` above: a theme with an opinion declares
   // `palette.onAccent` / `onUp` / `onDown` / `onWarn`, and theme-contract.js refuses that opinion if it
   // cannot be read. The four are enumerated in ON_INK there, so this loop and the validator agree by
@@ -318,10 +318,10 @@ export function applyTheme(theme) {
 export function installVirtualClock() {
   if (typeof window === 'undefined' || window.__vt) return window?.__vt;
   const vt = { ms: 0, frame: 0 };
-  // the renderer needs REAL frame callbacks to await paint before screenshots — keep a handle
+  // the renderer needs REAL frame callbacks to await paint before screenshots, keep a handle
   // to the native rAF before we virtualize it for scene code.
   window.__realRaf = window.requestAnimationFrame.bind(window);
-  // a REAL timer too — scene code sees a virtualized setTimeout (fires only on __vt.set), but the
+  // a REAL timer too: scene code sees a virtualized setTimeout (fires only on __vt.set), but the
   // seam bake needs a wall-clock fallback to time-bound async work during boot (old --headless
   // starves rAF before first paint, so nothing that awaits a real frame can be relied on there).
   window.__realTimeout = window.setTimeout.bind(window);
@@ -345,10 +345,10 @@ export function installVirtualClock() {
   let rnd = 0;
   Math.random = () => { rnd = (rnd + 0x6d2b79f5) | 0; let t = Math.imul(rnd ^ (rnd >>> 15), 1 | rnd); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   // Timers (rAF / setTimeout / setInterval) are virtualized LAZILY, on the first real render. chromedp
-  // waits for window.__engineReady in "raf" polling mode — it re-checks inside requestAnimationFrame.
+  // waits for window.__engineReady in "raf" polling mode. It re-checks inside requestAnimationFrame.
   // If rAF is virtualized during boot (queued, flushed only on __vt.set), that Poll starves and the
   // render deadlocks whenever readiness is delayed (e.g. by the awaited seam bake). So page timers stay
-  // NATIVE through boot+bake — Poll ticks, readiness is observed — and only flip to virtual when the
+  // NATIVE through boot+bake (Poll ticks, readiness is observed) and only flip to virtual when the
   // render loop actually begins, where scene rAF/timer code must be frame-pure. (MISTAKES: seam bake.)
   let timersVirtual = false;
   const virtualizeTimers = () => {
@@ -356,7 +356,7 @@ export function installVirtualClock() {
     window.requestAnimationFrame = (cb) => { rafQ.set(++rafId, cb); return rafId; };
     window.cancelAnimationFrame = (id) => { rafQ.delete(id); };
     window.setTimeout = (cb, delay = 0, ...a) => { if (typeof cb !== 'function') return 0; timers.set(++timerId, { at: vt.ms + Number(delay || 0), cb, a }); return timerId; };
-    window.setInterval = (cb, every = 1e9, ...a) => window.setTimeout(cb, every, ...a); // one-shot per pass — enough for chrome spinners
+    window.setInterval = (cb, every = 1e9, ...a) => window.setTimeout(cb, every, ...a); // one-shot per pass, enough for chrome spinners
     window.clearTimeout = window.clearInterval = (id) => { timers.delete(id); };
   };
   window.__vt = {
@@ -368,7 +368,7 @@ export function installVirtualClock() {
       for (const [id, tm] of [...timers]) if (tm.at <= vt.ms) { timers.delete(id); tm.cb(...tm.a); }
       const q = [...rafQ.values()]; rafQ.clear(); for (const cb of q) cb(vt.ms);
     },
-    // the BAKE path: advance frame time + reseed RNG ONLY, WITHOUT virtualizing timers — so the
+    // the BAKE path: advance frame time + reseed RNG ONLY, WITHOUT virtualizing timers, so the
     // readiness Poll's native rAF keeps ticking while the bake runs. No timer/rAF flush is needed:
     // renderFrame is pure in the frame it is given and the bake never awaits a scene timer.
     setBake(frame, fps) {
@@ -383,7 +383,7 @@ export function installVirtualClock() {
 
 // boot a scene: load fonts, fetch the data param, build the scene, expose window.__engine.
 //   build(data, fps, theme) -> { fps, duration, stings, sfx, renderFrame(n) }
-// Film grain is applied as a post-process at encode time (ffmpeg), not here — the CSS/canvas
+// Film grain is applied as a post-process at encode time (ffmpeg), not here, the CSS/canvas
 // approach never composited in headless Chrome, so it was removed.
 export async function boot(build) {
   const params = new URLSearchParams(location.search);
@@ -392,14 +392,14 @@ export async function boot(build) {
   try {
     try {
       // Load every face the CSS declares. This list used to be hardcoded, which meant a newly
-      // vendored family rendered as a generic until someone remembered to add it here — that is
+      // vendored family rendered as a generic until someone remembered to add it here, that is
       // exactly how Geist, Anybody and Manrope each shipped wrong. It is now DERIVED from the
       // @font-face rules, so vendoring a font is the only step. See core/fonts.js.
       await loadRegistered();
     } catch (e) {}
-    if (!dataUrl) throw new Error('no ?data= in the scene URL — nothing names the JSON to render');
+    if (!dataUrl) throw new Error('no ?data= in the scene URL, nothing names the JSON to render');
     const data = await fetchJson(dataUrl, 'scene data');
-    // validate data + inline theme against the format's schema BEFORE building/rendering — a bad
+    // validate data + inline theme against the format's schema BEFORE building/rendering, a bad
     // JSON fails here with a readable message instead of a broken video (or a wasted render).
     if (data.module) {
       try {
@@ -413,11 +413,11 @@ export async function boot(build) {
     }
     // canvas SIZE by aspect. Priority: ?aspect= URL param (multi-output render) > data.aspect >
     // orientation fallback (the historic 16:9 / 9:16 defaults). The meta dims flow to the Go renderer,
-    // which sizes its screenshot to them — so one source renders at any aspect with no engine change.
+    // which sizes its screenshot to them, so one source renders at any aspect with no engine change.
     const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
     const aspectKey = params.get('aspect') || data.aspect || (landscape ? '16:9' : '9:16');
     // ONE FRAME OBJECT, built once, pre-first-frame: size, ratio, destination and the safe box in a
-    // single value that everything downstream RECEIVES. Nothing computes the frame twice — this used
+    // single value that everything downstream RECEIVES. Nothing computes the frame twice, this used
     // to be a sceneDims() call here and a safeArea() call thirty lines below, which is the shape that
     // let the audit overlay and resolveCoords disagree about where the bottom edge was.
     const frame = frameOf(data, aspectKey);
@@ -425,7 +425,7 @@ export async function boot(build) {
     document.documentElement.dataset.orient = width > height ? 'landscape' : 'portrait';
     document.documentElement.dataset.aspect = aspectKey;
     // The canvas is set HERE, from the aspect we just resolved, never inferred from data-orient. It used
-    // to come only from tokens.css, which keys on portrait/landscape — a binary that cannot describe five
+    // to come only from tokens.css, which keys on portrait/landscape, a binary that cannot describe five
     // ratios. So 1:1 and 4:5 got a 1080x1920 stage and 4:3 got a 1920x1080 one: the stage was not the
     // frame, it was a standard stage with the overflow cropped off. Anything anchored to the stage rather
     // than to a layer (a background, the .hs-cap bar at bottom:300px) landed outside the visible frame.
@@ -462,14 +462,14 @@ export async function boot(build) {
     resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     produceBaseline(data, theme, frame); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
-    // scene that didn't specify it — absent-only, theme-aware, additive (never rewrites an authored layer),
+    // scene that didn't specify it: absent-only, theme-aware, additive (never rewrites an authored layer),
     // `"produced":false` opts out. Pure: mutates data once, pre-first-frame, so renderFrame stays deterministic.
     // Nothing downstream reads `cameraMove` (renderFrame reads data.camera). If one survives this far it
-    // is a field written and then ignored — the failure this whole path exists to make impossible.
-    if (data.cameraMove) throw new Error('cameraMove survived produceBaseline — it would render as nothing');
-    applyTheme(theme); // once, pre-first-frame — pure (identical every frame)
+    // is a field written and then ignored. The failure this whole path exists to make impossible.
+    if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
+    applyTheme(theme); // once, pre-first-frame: pure (identical every frame)
     // load the fonts the THEME actually declares (not just the static list above) at every weight a
-    // scene might use — so a brand's face is never silently swapped for the generic fallback. This is
+    // scene might use, so a brand's face is never silently swapped for the generic fallback. This is
     // the "load what you use" rule (how another engine ties each font to a render-blocking handle).
     try {
       const fams = [...new Set(Object.values(theme.type || {}))].filter(Boolean);
@@ -480,7 +480,7 @@ export async function boot(build) {
       if (JSON.stringify(data).includes('"ransom"')) {
         // Load the NORMAL file for every face unconditionally: an italic face whose @font-face is
         // normal-only (Fraunces) is painted as a synthesised oblique of the normal file, so THAT is
-        // what must be ready — awaiting only the italic variant matches nothing and leaves the real
+        // what must be ready, awaiting only the italic variant matches nothing and leaves the real
         // font racing. Where a true italic file exists (Instrument Serif) load it too. allSettled so
         // one unmatched style never aborts the batch.
         await Promise.allSettled(RANSOM_FACES.flatMap((f) => {
@@ -491,20 +491,20 @@ export async function boot(build) {
       }
       await document.fonts.ready;
     } catch (e) {}
-    // READ BACK. document.fonts.load() does not refuse a face it cannot fetch — it leaves the FontFace
+    // READ BACK. document.fonts.load() does not refuse a face it cannot fetch, it leaves the FontFace
     // at status "error" and the browser paints a generic. Every await above sits in a catch-all, so
     // that rejection went on the floor. Ask the browser which of the theme's OWN families is actually
     // painting, before the first frame is captured. See assertFamilies in core/fonts.js.
     // The CONTRACT's four roles, not Object.values(theme.type): a theme may park a non-family flag in
     // there (themes/ledgerline-*.json carry `"optical": true`), and the load loop above turns that into
-    // document.fonts.load("400 100px 'true'") — a nonsense request nobody reads the answer to.
+    // document.fonts.load("400 100px 'true'"). A nonsense request nobody reads the answer to.
     assertFamilies(REQUIRED.type.map((k) => (theme.type || {})[k]), `theme "${theme?.name || 'inline'}"`);
     // The awaited readiness phase: one preloader per asset kind (core/preload.js), each populating a
     // static window.__* table BEFORE the virtual clock, so renderFrame(n) never touches async and stays
     // pure in n. Order preserved from when these were inlined here (spectrum → images → three → canvasFx
-    // → components → clips → lottie). three, html and images throw loudly if what they need is absent —
-    // a missing runtime, a missing fragment or a repo-local file that 404s leaves a hole nothing can
-    // recover — the rest degrade quietly. Images name the write site and the path (preloadImages above);
+    // → components → clips → lottie). three, html and images throw loudly if what they need is absent.
+    // A missing runtime, a missing fragment or a repo-local file that 404s leaves a hole nothing can
+    // recover. The rest degrade quietly. Images name the write site and the path (preloadImages above);
     // a REMOTE image stays soft on purpose, since a dead CDN is not the author's mistake.
     await preloadSpectrum(data);
     await preloadImages(data); // web/local images ready before any frame is captured
@@ -520,7 +520,7 @@ export async function boot(build) {
     await preloadGsap(data);
     await preloadRansomSprites(data);
     // The beat grid the scene names, fetched ONCE here (I/O belongs at boot, never in a frame).
-    // The snap itself happens inside build(), after the unified transition surface is lowered — a
+    // The snap itself happens inside build(), after the unified transition surface is lowered, a
     // cut written as `transitions` does not exist as a cut time until then. core/beat-bind.js.
     const beats = await loadBeatGrid(data, fetchJson);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
@@ -534,10 +534,10 @@ export async function boot(build) {
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame, beats });
     // SEAM D: rasterise the beats either side of every seam into static textures ONCE, before the
     // render loop. Awaited here (async raster is fine at build); renderFrame then only samples them,
-    // so it stays pure in n. A scene with no `seams` returns immediately — zero cost, zero DOM change.
+    // so it stays pure in n. A scene with no `seams` returns immediately, zero cost, zero DOM change.
     // RESAMPLE BAKE: a resample aimed at a layer that owns no raster (text · rect · group · svg ·
     // component · html) turns that subtree into a static texture here, ONCE. Before bakeSeams on
-    // purpose — bakeSeams drives renderFrame itself and would leave the DOM on an arbitrary frame,
+    // purpose, bakeSeams drives renderFrame itself and would leave the DOM on an arbitrary frame,
     // which would make what a bake captured depend on how many seams the film has. It throws rather
     // than degrades: a source that will not serialise must name itself, not render a hole.
     await bakeResamples();
@@ -558,7 +558,7 @@ export async function boot(build) {
       // so it must run against a rendered frame (layers that are not up yet declare nothing).
       auditFonts: () => auditFonts(document.querySelector('.stage')),
     };
-    // frameSig(n): cheap content signature for the renderer's static-frame dedup — covers every
+    // frameSig(n): cheap content signature for the renderer's static-frame dedup, covers every
     // per-frame write (inline styles/text/attrs via innerHTML) plus canvas pixels (downsampled
     // through a 24×14 probe; drawImage works for 2d AND webgl-with-preserveDrawingBuffer).
     // Unreadable canvases poison the hash with the frame number → those frames never dedup.
@@ -571,10 +571,10 @@ export async function boot(build) {
         let h = fnv(2166136261, document.body.innerHTML);
         for (const cv of document.querySelectorAll('canvas')) {
           if (!cv.width || cv.style.display === 'none') continue;
-          // visible 2D canvases repaint time-varying fx (grain/drift) BELOW probe resolution —
+          // visible 2D canvases repaint time-varying fx (grain/drift) BELOW probe resolution,
           // proven by an anchor-verification failure. Never dedup frames where one is live.
           if (cv.getContext('2d')) { h = fnv(h, 'live2d:' + n); continue; }
-          try { // webgl overlays (shader stings) are keyed draws — sampling them is sound
+          try { // webgl overlays (shader stings) are keyed draws, sampling them is sound
             pctx.clearRect(0, 0, 24, 14); pctx.drawImage(cv, 0, 0, 24, 14);
             const d = pctx.getImageData(0, 0, 24, 14).data;
             let acc = '';
@@ -586,13 +586,13 @@ export async function boot(build) {
       };
     }
     // Signal readiness BEFORE the warm first frame. renderFrame() is what first virtualizes the page
-    // timers (via the clock), and chromedp observes __engineReady in rAF-polling mode — so readiness
+    // timers (via the clock), and chromedp observes __engineReady in rAF-polling mode, so readiness
     // must be visible while rAF is still native. The warm renderFrame(0) then flips timers to virtual;
     // the Poll's already-scheduled native rAF callback still fires and catches the flag.
     // A LOST CONTEXT IS THE CAP ARRIVING BY THE OTHER DOOR, and until now nothing said so. glContext
     // refuses a context the browser DECLINES to create, which is what core/webgl.js was written for.
     // But past the cap some drivers hand one out and then drop an older one instead: 21 resampled
-    // layers came back `{live:21, lost:5}` — five surfaces that will paint nothing, exit 0, no error.
+    // layers came back `{live:21, lost:5}`. Five surfaces that will paint nothing, exit 0, no error.
     // The loss counter existed and only the counter did. `__engineError` is read exactly once, at
     // readiness (internal/scene/scene.go:200), so the check belongs HERE, before the flag goes up, and
     // it names the number rather than recovering: recovery would make a frame depend on when the loss

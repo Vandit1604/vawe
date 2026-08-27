@@ -1,4 +1,4 @@
-// core/beats.js — find the pulse of a track, so cuts can land ON the beat instead of near it.
+// core/beats.js: find the pulse of a track, so cuts can land ON the beat instead of near it.
 //
 // Pure maths, no deps, no I/O: every function here is a deterministic transform of a sample array,
 // so the same track always yields the same grid and a beat-matched video stays reproducible.
@@ -8,7 +8,7 @@
 //   samples -> onset envelope -> tempo by autocorrelation -> phase by pulse-train correlation -> grid
 // Energy flux rather than spectral flux: no FFT, and for the mixed music a launch video actually uses
 // (drums or a clear rhythmic pulse) the onset peaks land in the same places. Where it cannot find a
-// convincing pulse it says so via `confidence` instead of inventing a grid — an ambient pad has no
+// convincing pulse it says so via `confidence` instead of inventing a grid, an ambient pad has no
 // beat, and pretending otherwise would scatter cuts at meaningless times.
 
 /** Frame the signal and return a half-wave-rectified energy-flux onset envelope (one value per hop). */
@@ -21,7 +21,7 @@ export function onsetEnvelope(samples, sampleRate, hop = 512, win = 1024) {
     for (let i = 0; i < win; i++) { const v = samples[o + i]; s += v * v; }
     energy[f] = Math.sqrt(s / win);
   }
-  // flux = positive change in energy against a short moving average (a local, not global, threshold —
+  // flux = positive change in energy against a short moving average (a local, not global, threshold,
   // so a quiet intro and a loud chorus both produce usable onsets)
   const env = new Float64Array(frames);
   const W = 8;
@@ -36,7 +36,7 @@ export function onsetEnvelope(samples, sampleRate, hop = 512, win = 1024) {
 
 /**
  * Tempo by autocorrelation of the onset envelope, searched over a musical BPM range.
- * Returns { bpm, periodFrames, confidence } — confidence is the winning lag's correlation relative
+ * Returns { bpm, periodFrames, confidence }: confidence is the winning lag's correlation relative
  * to the mean, so a track with no pulse scores near 1 and can be rejected by the caller.
  */
 export function estimateTempo(env, hopSeconds, { minBpm = 70, maxBpm = 180 } = {}) {
@@ -57,7 +57,7 @@ export function estimateTempo(env, hopSeconds, { minBpm = 70, maxBpm = 180 } = {
   }
   const avg = n ? sum / n : 0;
   // Octave check: autocorrelation happily locks to half-tempo. If double-time correlates nearly as
-  // well, prefer it — 140bpm cuts feel right where 70bpm cuts feel like the video is dragging.
+  // well, prefer it, 140bpm cuts feel right where 70bpm cuts feel like the video is dragging.
   const half = Math.round(best / 2);
   if (half >= minLag && cor[half] > bestV * 0.82) best = half;
   const confidence = avg !== 0 ? Math.abs(bestV / avg) : 0;
@@ -66,7 +66,7 @@ export function estimateTempo(env, hopSeconds, { minBpm = 70, maxBpm = 180 } = {
 
 /**
  * Phase: slide a pulse train of the detected period across the envelope and keep the offset whose
- * pulses collect the most onset energy. Tempo alone is not enough — a grid at the right spacing but
+ * pulses collect the most onset energy. Tempo alone is not enough, a grid at the right spacing but
  * the wrong phase puts every cut exactly between the beats.
  */
 export function estimatePhase(env, periodFrames) {
@@ -101,5 +101,5 @@ export function snapToBeat(t, beats, maxShift = 0.12) {
   return Math.abs(best - t) <= maxShift ? +best.toFixed(3) : t;
 }
 
-/** Every Nth beat — the bar line. Cuts on a downbeat read as intentional; off-bar reads as drift. */
+/** Every Nth beat: the bar line. Cuts on a downbeat read as intentional; off-bar reads as drift. */
 export const downbeats = (beats, per = 4, offset = 0) => beats.filter((_, i) => (i - offset) % per === 0);

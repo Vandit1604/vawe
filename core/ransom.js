@@ -1,7 +1,7 @@
-// core/ransom.js — the ransom-note / comic-cutout text treatment. Each glyph is cut from a DIFFERENT
+// core/ransom.js: the ransom-note / comic-cutout text treatment. Each glyph is cut from a DIFFERENT
 // source: its own typeface, paper swatch, rotation and torn edge, so the word reads as pieces glued
 // down rather than typed. PURE: every per-glyph choice is a function of (seed, index), so the note is
-// byte-identical across render order. Orthogonal to motion — pair with any entrance preset (`fall`,
+// byte-identical across render order. Orthogonal to motion, pair with any entrance preset (`fall`,
 // `bounce`, `scale`): the preset animates the outer split unit, ransom styles an inner paper tile.
 //
 // Determinism note: the per-glyph rotation promotes each tile to its own compositing layer. The
@@ -27,7 +27,7 @@ export const RANSOM_FACES = [
 ];
 
 // Two swatch palettes. `paper` is muted newsprint/kraft (a kidnapper note); `color` is the vivid
-// magazine-cutout look — saturated construction-paper grounds, wood-type, a neon tile, colored ink on
+// magazine-cutout look, saturated construction-paper grounds, wood-type, a neon tile, colored ink on
 // colored stock. `accent` seeds one tile from the theme so either palette still reskins per brand.
 // `w` is the pick weight; `mat` marks a material the applier renders specially (neon glow / wood grain).
 export function ransomSwatches(accent = '#c8342b') {
@@ -74,7 +74,7 @@ function pickWeighted(list, r) {
 //
 // Only near-axis-aligned tears here, deliberately. Steeper cuts (a pennant point, a sheared
 // parallelogram) read great on paper but their long diagonal edges rasterise non-deterministically
-// under the per-glyph rotation — the production render was byte-identical 4/4 with torn edges and
+// under the per-glyph rotation. The production render was byte-identical 4/4 with torn edges and
 // varied across runs the moment a diagonal shape entered. Determinism wins; the shape stays ragged.
 function tornClip(rnd, depth = 7) {
   const n = 4, jit = () => rnd() * depth, pts = [];
@@ -106,16 +106,16 @@ export function ransomGlyph(seed, i, { accent, faces = RANSOM_FACES, swatches, t
   };
 }
 
-// SPRITE MODE — the real thing. When a cut-out letter pack has been baked (`make ransom-sprites`),
+// SPRITE MODE: the real thing. When a cut-out letter pack has been baked (`make ransom-sprites`),
 // each glyph is a photograph of actual torn paper instead of a webfont glyph on a coloured box. That
 // is the whole difference in look: real fibre, real ink, and a tear no clip-path polygon imitates.
 // Sizing is in `em` so one `size` on the layer drives the line, and the WIDTH comes from the sprite's
-// own aspect — a real set has a different width per letter, which is what stops it reading as typed.
+// own aspect. A real set has a different width per letter, which is what stops it reading as typed.
 function paintSprite(img, glyph, g, sprites) {
   const key = glyph.toUpperCase();
   const variants = sprites.manifest[key];
   if (!variants || !variants.length) {
-    throw new Error(`ransom sprites: no cutout for "${glyph}" in assets/ransom/manifest.json — add one to assets/ransom-src/${key}/ and re-run \`make ransom-sprites\``);
+    throw new Error(`ransom sprites: no cutout for "${glyph}" in assets/ransom/manifest.json, add one to assets/ransom-src/${key}/ and re-run \`make ransom-sprites\``);
   }
   const v = variants[Math.min(variants.length - 1, Math.floor(g.pick * variants.length))];
   img.src = sprites.base + v.file;
@@ -131,14 +131,14 @@ function paintSprite(img, glyph, g, sprites) {
 //        └ span.rns   (paper tile: face + bg + ink + rotation + torn clip-path)
 // Three levels so appearance and motion never fight over `transform`/`filter`. Pure in n.
 export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', sprites = false } = {}) {
-  // Fail loud if a ransom face is not registered — a silent fallback would make every letter the body
+  // Fail loud if a ransom face is not registered. A silent fallback would make every letter the body
   // font, which is exactly the effect's opposite. Skipped only where there is no DOM (Node gates).
   const pack = sprites ? (window.__ransomSprites || null) : null;
-  if (sprites && !pack) throw new Error('ransom: sprites:true but no sprite set loaded — run `make ransom-sprites` (see assets/ransom-src/)');
+  if (sprites && !pack) throw new Error('ransom: sprites:true but no sprite set loaded, run `make ransom-sprites` (see assets/ransom-src/)');
   if (!sprites && typeof document !== 'undefined') {
     const reg = registeredFamilies();
     const missing = [...new Set(faces.map((f) => f.family))].filter((f) => !reg.has(f));
-    if (missing.length) throw new Error(`ransom: face(s) not registered in tokens.css: ${missing.join(', ')} — add an @font-face or drop them from RANSOM_FACES`);
+    if (missing.length) throw new Error(`ransom: face(s) not registered in tokens.css: ${missing.join(', ')}. Add an @font-face or drop them from RANSOM_FACES`);
   }
   // Colour cutouts sit on a real surface, so they cast a stronger, more directional shadow than the
   // flat paper scraps; the vivid grounds also carry a hard-edge letterpress bite.
@@ -166,7 +166,7 @@ export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, sw
 // two can never drift. `pop` (0..1) is a momentary swell applied right after a swap.
 // Materials give a colour note its variety of SOURCES: `neon` is a lit tube (dark card, the ink colour
 // glowing through a thin stroke), `wood` is letterpress block (a faint grain over the ground). Both are
-// pure CSS layered onto the same tile — no assets, still deterministic in n.
+// pure CSS layered onto the same tile, no assets, still deterministic in n.
 function paintTile(tile, g, pop = 0) {
   let material = `background:${g.bg};color:${g.ink};`;
   if (g.mat === 'neon') {
@@ -195,7 +195,7 @@ function paintTile(tile, g, pop = 0) {
 //
 // It stays pure in n despite the cached `data-v`: the painted style is a function of `variant` ALONE,
 // and whenever the computed variant differs from the applied one the tile is fully repainted. So any
-// render order converges on the same DOM for frame n — which is why there is no easing/pop term here;
+// render order converges on the same DOM for frame n, which is why there is no easing/pop term here;
 // a per-frame swell would reintroduce the per-frame write it exists to avoid.
 export function ransomTick(units, t, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', sprites = false, cycle = 1.2, stagger = 0.16 } = {}) {
   if (!(cycle > 0)) return;

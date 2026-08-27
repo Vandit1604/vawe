@@ -1,4 +1,4 @@
-// core/type.js — kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
+// core/type.js: kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
 import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
@@ -21,7 +21,7 @@ const mixHex = (a, b, t) => { const pa = _hx(a), pb = _hx(b); return `rgb(${Math
 // element shells are kept in place and their text split inside them, so `.big em` styling reaches
 // the units. Plain-text inputs produce the exact same DOM as before.
 export function splitText(el, mode = 'word') {
-  // 'path': the units are SVG strokes, not glyphs — for the `draw` preset (a logo/icon/chart line
+  // 'path': the units are SVG strokes, not glyphs, for the `draw` preset (a logo/icon/chart line
   // drawing itself on). Stamping pathLength="1" here NORMALISES every path to a unit length, so the
   // preset is a pure function of u with no getTotalLength() measurement and no layout read. Returns
   // early: the DOM is not restructured at all, so nothing else about the element changes.
@@ -79,7 +79,7 @@ export function unitProgress(t, i, n, { each = 0.5, stagger = 0.06 } = {}) {
 // like a look, where no helper is needed.
 const preset = (fn, blurb) => withBlurb(blurb, fn);
 
-// wght(n) — one weight, said in BOTH channels, because the two are not interchangeable and neither
+// wght(n): one weight, said in BOTH channels, because the two are not interchangeable and neither
 // alone is safe. `font-variation-settings` is the only one that can express 634, and 20 of the 31
 // vendored woff2 carry a `wght` axis it drives continuously; on the other 11 (CourierPrime, the two
 // InstrumentSerif cuts, IosevkaCharon, FiraSansExtraCondensed and the static inter-*/space-* subsets)
@@ -98,7 +98,7 @@ export const wght = (n) => {
 
 // ---------- presets: u∈[0,1] → style object (compositor-friendly props only) ----------
 export const PRESETS = {
-  // weight — the font's own `wght` axis IS the entrance. Every other preset here moves a glyph or fades
+  // weight: the font's own `wght` axis IS the entrance. Every other preset here moves a glyph or fades
   // it; this one redraws the outline, which is the one register a static face cannot fake and the thing
   // current practice means by kinetic typography. Staggered per unit, the ramp reads as a CREST OF
   // WEIGHT travelling the headline rather than as a line of type arriving.
@@ -107,7 +107,7 @@ export const PRESETS = {
   // `font-variation-settings` is silently ignored by a face with no axis, so on CourierPrime, the two
   // InstrumentSerif cuts, IosevkaCharon, FiraSansExtraCondensed and the static inter-*/space-* subsets
   // the `fontWeight` half lands instead and the ramp degrades to the nearest 100-step cut. Coarse, and
-  // never a dead still — the failure this repo logs most.
+  // never a dead still, the failure this repo logs most.
   //
   // NO WIDTH TWIN. No face this engine ships keeps a `wdth` axis (core/tokens.css:58): the width axis
   // did not survive subsetting, so a width ramp would be a no-op on all 31 and is deliberately unbuilt.
@@ -123,35 +123,35 @@ export const PRESETS = {
     'the glyphs THICKEN into place along the font\'s own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still'),
   // rise + fade (default kinetic reveal)
   up: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
-    'words/chars rise into place — the default kinetic headline'),
+    'words/chars rise into place: the default kinetic headline'),
   down: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${(-(1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
-    'words/chars drop into place from above — the mirror of `up`'),
+    'words/chars drop into place from above: the mirror of `up`'),
   // typewriter: hard on/off (unit is fully in once its progress passes ~0)
   // the zero-motion preset: a hard snap on, no transform. `at` chooses WHERE in the entrance it
   // snaps (default 0 = the moment it starts). Raise it for a delayed hard cut in a staggered line.
   type: preset((u, { at = 0 } = {}) => ({ opacity: u > at ? 1 : 0, transform: 'none' }),
-    'typewriter hard on/off, no transform — terminals, timers, code'),
+    'typewriter hard on/off, no transform: terminals, timers, code'),
   // scale up from small
   scale: preset((u, { from = 0.4 } = {}) => ({ opacity: clamp01(u * 2), transform: `scale(${(from + (1 - from) * easeOutBack(u)).toFixed(3)})` }),
     'punch in from small (overshoot)'),
   // blur + fade in
   blur: preset((u, { px = 16 } = {}) => ({ opacity: clamp01(u), filter: `blur(${((1 - easeOutCubic(u)) * px).toFixed(2)}px)` }),
-    'resolve out of blur — calm, premium'),
+    'resolve out of blur: calm, premium'),
   // springy bounce in
   // `settle` used to scale the spring INPUT (`u * settle * 2`) while spring's own omega is 2π/settle,
   // so the two cancelled and the dial did nothing (docs/MISTAKES.md #115). Input is a constant now, so
   // settle drives the settle time as named; the constant 1.0 keeps the default (settle 0.5) identical.
   bounce: preset((u, { bounce = 0.5, settle = 0.5, dist = 60 } = {}) => { const s = spring(u, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `translateY(${((1 - s) * dist).toFixed(2)}px)` }; },
-    'springy bounce in — playful brands only'),
+    'springy bounce in: playful brands only'),
   // slide from a side
   slide: preset((u, { dir = 'left', dist = 80 } = {}) => { const k = 1 - easeOutSettle(u); const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist; const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist; return { opacity: clamp01(u), transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` }; },
-    'slides in from one side (`dir`) — pair it with the opposite exit'),
+    'slides in from one side (`dir`): pair it with the opposite exit'),
   // persistent sinusoidal wave (u is used as raw phase, not a one-shot). No `loop:true` needed: this
   // preset and `shimmerWave` are force-looped by name at animateUnits (line ~255), so the instruction
   // this comment used to carry was redundant and read as a requirement.
   wave: preset((u, { amp = 14, phase = 0 } = {}) => ({ opacity: 1, transform: `translateY(${(Math.sin(u * Math.PI * 2 + phase) * amp).toFixed(2)}px)` }),
-    'sinusoidal wave across units — a LOOP that never settles; ambient only'),
-  // shimmerWave — a 3D traveling shimmer over live text (motion-primitives TextShimmerWave). Each glyph
+    'sinusoidal wave across units: a LOOP that never settles; ambient only'),
+  // shimmerWave: a 3D traveling shimmer over live text (motion-primitives TextShimmerWave). Each glyph
   // rides a bump (translate + scale + rotateY + brightness) and the bump travels across the word via the
   // per-unit phase offset. Looping (u is raw phase); pair with a small `phaseStep` (~0.12) so the wave
   // reads as one crest moving, not every letter pulsing together. Pure in the phase → pure in n.
@@ -161,7 +161,7 @@ export const PRESETS = {
       transform: `perspective(600px) translateY(${(-8 * b * amp).toFixed(2)}px) translateZ(${(24 * b * amp).toFixed(1)}px) rotateY(${(12 * b * amp).toFixed(2)}deg) scale(${(1 + 0.12 * b * amp).toFixed(3)})`,
       filter: `brightness(${(1 + 0.5 * b).toFixed(3)})` };
   },
-    'looping light wave (per-unit) — a 3D crest travelling across the word; never settles'),
+    'looping light wave (per-unit): a 3D crest travelling across the word; never settles'),
   // 3D flip-up per unit (cards/letters somersault into place)
   // a 3D card flip in. `axis` picks the hinge (x = top-over, y = door-swing) and `deg` the start
   // angle (bigger = more severe). Defaults reproduce the old fixed behaviour exactly.
@@ -170,21 +170,21 @@ export const PRESETS = {
     const rot = String(axis).toLowerCase() === 'y' ? `rotateY(${a.toFixed(1)}deg)` : `rotateX(${a.toFixed(1)}deg)`;
     return { opacity: clamp01(u * 1.5), transform: `perspective(900px) ${rot}` };
   },
-    '3D flip-up per unit, letters somersault into place — `axis` picks the hinge'),
+    '3D flip-up per unit, letters somersault into place: `axis` picks the hinge'),
   // fall from above with gravity (accelerating), tiny overshoot squash at landing
   fall: preset((u, { dist = 90 } = {}) => { const e = easeOutBack(clamp01(u)); return { opacity: clamp01(u * 2), transform: `translateY(${(-(1 - e) * dist).toFixed(2)}px)` }; },
     'falls from above under gravity and lands with a small squash'),
   // elastic pop: springy scale with visible wobble
   elastic: preset((u, { bounce = 0.62, settle = 0.5 } = {}) => { const s = spring(clamp01(u) * 1.2, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `scale(${(0.3 + 0.7 * s).toFixed(3)})` }; },
-    'elastic scale pop with visible wobble — playful brands only'),
+    'elastic scale pop with visible wobble: playful brands only'),
   // skew slide: italic shear that straightens as it lands (editorial/sporty)
   skew: preset((u, { dist = 70 } = {}) => { const k = 1 - easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateX(${(-k * dist).toFixed(2)}px) skewX(${(-k * 14).toFixed(1)}deg)` }; },
-    'italic shear that straightens as it lands — editorial, sporty'),
+    'italic shear that straightens as it lands: editorial, sporty'),
   // focus pull: heavy blur + slight over-scale resolving to crisp
   focus: preset((u, { px = 22 } = {}) => ({ opacity: clamp01(u * 1.3), transform: `scale(${(1 + (1 - easeOutCubic(clamp01(u))) * 0.06).toFixed(3)})`, filter: `blur(${((1 - easeOutCubic(clamp01(u))) * px).toFixed(2)}px)` }),
-    'focus pull, heavy blur and over-scale resolving to crisp — dreamy, premium'),
+    'focus pull, heavy blur and over-scale resolving to crisp, dreamy, premium'),
   // decode: deterministic scramble -> resolve (tech reveal; hero words only). Uses data-final
-  // stashed by animateUnits on first call; character choice = hashSeed(unit index, step) — pure.
+  // stashed by animateUnits on first call; character choice = hashSeed(unit index, step), pure.
   decode: preset((u, { i = 0 } = {}) => {
     const uu = clamp01(u);
     return { opacity: uu > 0 ? 1 : 0, __decode: uu, transform: 'none' }; // resolved in animateUnits (needs textContent)
@@ -195,7 +195,7 @@ export const PRESETS = {
     '3D tilt-in'),
   // stretch: horizontal smear that snaps true (impact words)
   stretch: preset((u, { from = 1.6 } = {}) => { const e = easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 2), transform: `scaleX(${(from + (1 - from) * e).toFixed(3)})`, filter: `blur(${((1 - e) * 6).toFixed(2)}px)` }; },
-    'horizontal smear that snaps true — impact words'),
+    'horizontal smear that snaps true: impact words'),
   // gradient sweep: background-clip text, gradient slides through (ONE hero word per film)
   gradient: preset((u, { c1 = '#8a8f98', c2 = '#ffffff' } = {}) => { const pos = (100 - clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(100deg, ${c1} 20%, ${c2} 50%, ${c1} 80%)`, backgroundSize: '250% 100%', backgroundPosition: `${pos}% 0`, webkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', transform: 'none' }; },
     'gradient sweeps through letterforms'),
@@ -219,7 +219,7 @@ export const PRESETS = {
     const e = easeOutCubic(clamp01((clamp01(u) - hold) / (1 - hold)));
     // The resting colour DEFAULTS TO THE LAYER'S OWN, not to `var(--ink)`. This preset paints `color` on
     // every unit every frame, so it overrides the per-window automatic ink that core/layers/util.js just
-    // resolved — and `--ink` is the dark one in a white-first theme, so a colour-wave headline over a
+    // resolved, and `--ink` is the dark one in a white-first theme, so a colour-wave headline over a
     // dark bg window settled to invisible while the same headline without the preset read fine.
     // `--layer-ink` is that layer's settled colour, published by util.js. An explicit `to` still wins.
     const f = flash || 'var(--accent)', rest = to || 'var(--layer-ink, var(--ink))';
@@ -235,23 +235,23 @@ export const PRESETS = {
   // underline: draws left -> right beneath the unit
   underline: preset((u, { color = 'currentColor', h = 3 } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% ${h}px`, backgroundPosition: '0 100%', transform: 'none' }; },
     'underline draws on'),
-  // shadow: poster lift — long shadow collapses as the word settles
+  // shadow: poster lift, long shadow collapses as the word settles
   shadow: preset((u, { dist = 14 } = {}) => { const k = (1 - easeOutCubic(clamp01(u))); return { opacity: clamp01(u * 1.5), transform: `translateY(${(-k * 6).toFixed(2)}px)`, textShadow: `0 ${(k * dist).toFixed(1)}px ${(k * dist * 1.6).toFixed(1)}px rgba(0,0,0,0.55)` }; },
-    'a long poster shadow collapses as the word settles — poster statements'),
+    'a long poster shadow collapses as the word settles, poster statements'),
   // riseClip: the word rises out from behind a mask at its own baseline.
   // `dist` is a PERCENTAGE of the unit's own height, not px. It was 44px, which is a different
-  // fraction of a 40px caption than of a 150px headline — at large sizes the word was already
+  // fraction of a 40px caption than of a 150px headline, at large sizes the word was already
   // half-visible at u=0, so the mask read as a smudge instead of an edge. A percentage is
   // self-scaling and needs no measurement, so the preset stays a pure function of u.
   riseClip: preset((u, { dist = 130 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutSettle(clamp01(u))) * dist).toFixed(2)}%)` }),
     'mask-rise reveal'),
   // draw: an SVG stroke draws itself on. Pairs with splitText(el,'path'), which stamps
-  // pathLength="1" so dash units are normalised — the offset is then a pure function of u with no
+  // pathLength="1" so dash units are normalised. The offset is then a pure function of u with no
   // measurement. `back:true` draws from the far end. Hidden at u=0, exact identity at u=1 (dash
-  // cleared, not left at 0, so the stroke renders as authored — dasharray:1 on a closed shape
+  // cleared, not left at 0, so the stroke renders as authored, dasharray:1 on a closed shape
   // would otherwise round-trip a hairline seam).
   draw: preset((u, { ease = 'easeOutCubic', back = false } = {}) => {
-    // presetOpts arrive from JSON, so `ease` is a NAME here, not a function — resolveEasing takes
+    // presetOpts arrive from JSON, so `ease` is a NAME here, not a function, resolveEasing takes
     // either. (Every other preset takes only numbers, so this is the first one that needed it.)
     const k = clamp01(u);
     if (k >= 1) return { opacity: 1, strokeDasharray: 'none', strokeDashoffset: '0' };
@@ -276,15 +276,15 @@ export const PRESETS = {
     const s = spring(clamp01(u), { bounce, settle });
     return { opacity: clamp01(u * 2.5), transformOrigin: 'top center', transform: `rotate(${((1 - s) * deg).toFixed(2)}deg)` };
   },
-    'each unit hinges from its top edge and swings upright — playful, short words'),
-  // unfold: each unit opens from edge-on (rotateY) about its left hinge to lie flat — a card/panel
+    'each unit hinges from its top edge and swings upright, playful, short words'),
+  // unfold: each unit opens from edge-on (rotateY) about its left hinge to lie flat, a card/panel
   // turning to face you. Premium; reads well on serif or heavy display faces.
   unfold: preset((u, { deg = 90 } = {}) => {
     const e = easeOutCubic(clamp01(u));
     return { opacity: clamp01(u * 2), transformOrigin: 'left center', transform: `perspective(820px) rotateY(${((1 - e) * -deg).toFixed(1)}deg)` };
   },
-    'opens from edge-on about its left hinge, a panel turning to face you — premium'),
-  // strike — a rule DRAWS THROUGH the unit and the word dims behind it. This is the "not X, Y" beat,
+    'opens from edge-on about its left hinge, a panel turning to face you, premium'),
+  // strike: a rule DRAWS THROUGH the unit and the word dims behind it. This is the "not X, Y" beat,
   // and it is the half of it the engine could not say: rejecting a word out loud, on screen, so the
   // replacement means something. `grep strike core/` returned nothing before this entry.
   //
@@ -305,8 +305,8 @@ export const PRESETS = {
       backgroundSize: `${w}% ${h}px`,
       backgroundPosition: `0 ${at}%`, transform: 'none' };
   },
-    'a rule draws THROUGH the word and it dims behind the line, still legible — the "not X, Y" beat, where the rejection is the content'),
-  // flap — a SPLIT-FLAP BOARD: the glyph steps FORWARD through the board's own alphabet, one flap at a
+    'a rule draws THROUGH the word and it dims behind the line, still legible. The "not X, Y" beat, where the rejection is the content'),
+  // flap. A SPLIT-FLAP BOARD: the glyph steps FORWARD through the board's own alphabet, one flap at a
   // time, and lands on its letter. Every unit hinges as it turns, so a staggered line reads as a
   // mechanical row settling left to right.
   //
@@ -314,7 +314,7 @@ export const PRESETS = {
   // sequence is ORDERED, so a viewer can see the letter coming three flaps out. Different rhythm
   // (mechanical, not techy) and a different read, which is why it is a second preset and not a knob.
   //
-  // The character is mutated by flapText in animateUnits — the same seam `decode` uses, because a
+  // The character is mutated by flapText in animateUnits, the same seam `decode` uses, because a
   // preset returns a STYLE and the board's subject is the text. `steps` is how many flaps it runs, so
   // it is also the speed: the whole run is fitted into `each`, however many flaps you ask for.
   flap: preset((u, { steps = 12 } = {}) => {
@@ -326,7 +326,7 @@ export const PRESETS = {
     return { opacity: 1, transformOrigin: 'center center',
       transform: `perspective(420px) rotateX(${(-72 * frac).toFixed(2)}deg)` };
   },
-    'the glyph steps FORWARD through the board\'s alphabet one flap at a time and lands on its letter, hinging as it turns — an airport board, ordered where `decode` is random'),
+    'the glyph steps FORWARD through the board\'s alphabet one flap at a time and lands on its letter, hinging as it turns. An airport board, ordered where `decode` is random'),
 };
 
 // Read off the presets themselves; blurbsOf throws at load naming any preset that forgot one.
@@ -350,7 +350,7 @@ export function decodeText(el, u, unitIndex) {
 
 // flap support: the split-flap alphabet, and the ordered walk up to the final character. A board only
 // carries the glyphs on its drums, so lowercase is shown as its capital while the drum is turning and
-// the AUTHOR'S text is restored exactly at the end — a lowercase headline still renders as written.
+// the AUTHOR'S text is restored exactly at the end. A lowercase headline still renders as written.
 // A character the board has no drum for (an emoji, a CJK glyph) never flaps: it is simply there.
 const FLAPS = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,:!?-/&$%+#@';
 export function flapText(el, u, steps = 12) {
@@ -377,7 +377,7 @@ export function circleText(el, units, { radius = 220 } = {}) {
   el.style.overflow = 'visible';
   el.style.textAlign = 'center';
   // pin centred the box while its height was still 0 (this runs after positioning), so it sits `radius`
-  // too low — pull it back up so the ring is centred on the pin.
+  // too low, pull it back up so the ring is centred on the pin.
   el.style.marginTop = -radius + 'px';
   units.forEach((u, i) => {
     const ang = (i / n) * 360;
@@ -412,8 +412,8 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
         // clip wrapper on demand (only for riseClip; keeps every other preset's DOM unchanged)
         const w = document.createElement('span');
         w.style.display = 'inline-block'; w.style.overflow = 'hidden'; w.style.verticalAlign = 'bottom'; w.__clip = true;
-        // THE MASK MUST CONTAIN THE FONT'S FULL INK, NOT ITS LINE BOX. .hs-text sets line-height 1.04
-        // — tighter than the descender depth of any real face — so `overflow: hidden` sliced 13px off
+        // THE MASK MUST CONTAIN THE FONT'S FULL INK, NOT ITS LINE BOX. .hs-text sets line-height 1.04,
+        // tighter than the descender depth of any real face, so `overflow: hidden` sliced 13px off
         // EVERY word at 76px, which is why g/y/p rendered with flat bottoms in shipped video. Pad the
         // mask downward and pull the identical amount back with a negative margin: the clip region
         // grows, the layout does not move a pixel. 0.3em clears the deepest descenders we ship.

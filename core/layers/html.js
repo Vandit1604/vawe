@@ -1,4 +1,4 @@
-// core/layers/html.js — RAW hand-authored HTML/CSS as ONE layer (full design freedom for a beat, still
+// core/layers/html.js: RAW hand-authored HTML/CSS as ONE layer (full design freedom for a beat, still
 // positioned/animated by the engine). MUST be static: any <script> is stripped so renderFrame(n) stays
 // pure. The sanitiser and the reasoning behind it live in core/sanitize-html.js, shared with the `html`
 // background so the layer and the backdrop cannot drift to different rules.
@@ -7,7 +7,7 @@ import { sanitizeHtml, htmlSource, droppedDecls } from '../sanitize-html.js';
 // `h` used to be accepted and then ignored: build() set width and not height, and the `.hs-html` wrapper
 // had no height of its own, so hand-authored CSS saying `height:100%` resolved against an auto-height
 // parent and collapsed to its own content height. A layer declaring a 580px box rendered 310px of card
-// and no gate said anything — the silent-substitution class again (docs/MISTAKES.md #210).
+// and no gate said anything. The silent-substitution class again (docs/MISTAKES.md #210).
 //
 // `height:100%` on the wrapper is deliberately a no-op when the layer declares no height: 100% against
 // an auto-height parent computes to auto, which is exactly today's behaviour. It changes the render only
@@ -15,7 +15,7 @@ import { sanitizeHtml, htmlSource, droppedDecls } from '../sanitize-html.js';
 // `html` is the layer. `--t` is written every frame with nothing read off the layer to decide it, so
 // there is no per-frame prop here.
 //
-// `src` is the SAME markup, in a file instead of escaped into the JSON — the alternative to `html`, never
+// `src` is the SAME markup, in a file instead of escaped into the JSON, the alternative to `html`, never
 // its replacement (the block generators build their fragments in memory and have no file to point at).
 // Exactly one of the two, enforced in core/validate.mjs; a `src` that never loaded throws in htmlSource.
 export const PROPS = { html: {}, src: {}, w: {}, h: {} };
@@ -27,7 +27,7 @@ export function build(kit, el, L) {
   // props the schema advertises and this layer accepted and then ignored: nothing here called chipBox,
   // so an html panel asking for a frosted surface painted no surface, no edge and square corners while
   // `glass` (which decorate() applies to every layer) blurred the backdrop behind nothing. Documented
-  // input, silently dropped — the same class as `h` above, found the same way. One call, and the
+  // input, silently dropped. The same class as `h` above, found the same way. One call, and the
   // fragment gets the identical box treatment text/rect/group already get.
   kit.chipBox(el, L);
   // The layer states its box in `w`/`h`; padding must eat into it rather than grow it, or a panel
@@ -38,13 +38,13 @@ export function build(kit, el, L) {
   const src = htmlSource(L, kit.html, where);
   // REFUSE A DECLARATION THE BROWSER WOULD DROP, at the moment this fragment becomes DOM. The parser
   // rejects the one declaration, keeps the rest of the rule and renders on, so a hand-authored style
-  // that is subtly malformed produces no error anywhere — the element just never does the thing. That
+  // that is subtly malformed produces no error anywhere. The element just never does the thing. That
   // is the same failure the transition/animation refusal above exists for (CSS that reads correctly and
   // silently no-ops), so it is refused in the same breath rather than found later by looking at a frame.
   const bad = droppedDecls(src);
   if (bad.length)
     throw new Error(`${where}: the browser drops ${bad.length === 1 ? 'this style declaration' : 'these style declarations'} `
-      + `— ${bad.join(' · ')}. It keeps the rest of the rule and renders on, so nothing fails and the `
+      + `: ${bad.join(' · ')}. It keeps the rest of the rule and renders on, so nothing fails and the `
       + `element simply never does it. A leading minus outside calc() is the usual cause: write `
       + `\`calc(-1 * …)\`, not \`-calc(…)\`.`);
   el.innerHTML = `<div class="hs-html" style="height:100%">${sanitizeHtml(src)}</div>`;
@@ -52,7 +52,7 @@ export function build(kit, el, L) {
 
 // `--t` is the scene clock in seconds, the one thing hand-authored CSS can be a function of. It was
 // written only on the html BACKGROUND, so an html LAYER using `var(--t)` fell back to its default and
-// rendered a permanently dead still — while core/sanitize-html.js, shared by both, told the author that
+// rendered a permanently dead still, while core/sanitize-html.js, shared by both, told the author that
 // `var(--t)` was what worked. Documented input, silently ignored: the worst failure mode in this
 // codebase, and 12 layers across the library were already sitting on it. Pure in t, so purity holds.
 export function frame(kit, el, L, t) {
@@ -60,4 +60,4 @@ export function frame(kit, el, L, t) {
 }
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
-export const blurb = "raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused — use `parts` to give its pieces the clock";
+export const blurb = "raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock";

@@ -1,4 +1,4 @@
-// core/surfaces/index.js — the SURFACE registry, the fourth application of the pattern in core/layers/
+// core/surfaces/index.js: the SURFACE registry, the fourth application of the pattern in core/layers/
 // index.js, core/fx/index.js and core/tracks/index.js. A layer TYPE answers "what is this thing"; a
 // MODIFIER answers "what is done to it"; a TRACK answers "what the engine does to every layer"; a
 // SURFACE answers "what draws the pixels", for the layer types whose whole output is a canvas.
@@ -19,7 +19,7 @@
 //
 // WHERE THE LINE FALLS, because the next author will need it: a surface owns PIXELS and nothing else.
 // It does not size itself, style its canvas, append it, decide the stamp, or know that resample
-// exists — core/layers/canvas.js does all of that once, for all four. A surface that needed its own
+// exists, core/layers/canvas.js does all of that once, for all four. A surface that needed its own
 // build order would not belong here; it would be a layer type, like `glow` and `beam`, which paint
 // with CSS gradients and own no canvas at all.
 import { mergeProps } from '../props.js';
@@ -31,7 +31,7 @@ import * as three from './three.js';
 
 const REGISTRY = { paint, shader, raymarch, three, globe };
 
-// Exported so a gate can DERIVE this vocabulary instead of restating it — the contract LAYER_TYPES,
+// Exported so a gate can DERIVE this vocabulary instead of restating it, the contract LAYER_TYPES,
 // FX_TYPES and TRACK_TYPES already have. A hand-typed copy of such a list is how `make coverage`
 // reported 14/14 while a 15th layer type existed (docs/MISTAKES.md #21, #65).
 export const SURFACE_TYPES = Object.keys(REGISTRY);
@@ -49,15 +49,15 @@ const REQUIRED = ['size', 'stamp', 'resamplable', 'validate', 'create', 'PROPS']
 for (const name of SURFACE_TYPES)
   for (const k of REQUIRED)
     if (REGISTRY[name][k] === undefined)
-      throw new Error(`surface "${name}" declares no \`${k}\` — a surface owes core/layers/canvas.js `
+      throw new Error(`surface "${name}" declares no \`${k}\`: a surface owes core/layers/canvas.js `
         + `all of: ${REQUIRED.join(', ')}.`);
 
 // An unknown name is a HARD ERROR. Reachable only from core/layers/canvas.js at module load, so a
-// surface name that does not resolve is a wiring mistake caught before a scene is ever parsed —
+// surface name that does not resolve is a wiring mistake caught before a scene is ever parsed,
 // never a layer that builds and draws nothing.
 export const pick = (name) => {
   const s = REGISTRY[name];
-  if (!s) throw new Error(`unknown surface "${name}" — known: ${SURFACE_TYPES.join(', ')}. `
+  if (!s) throw new Error(`unknown surface "${name}", known: ${SURFACE_TYPES.join(', ')}. `
     + `A surface is bound at module load by core/layers/canvas.js; a name the registry does not know `
     + `would build a layer whose canvas nothing ever draws into.`);
   return s;

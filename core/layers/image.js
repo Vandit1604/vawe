@@ -1,4 +1,4 @@
-// core/layers/image.js — an <img> layer: ken-burns slow zoom (clipped) + edgeFade edge dissolve.
+// core/layers/image.js. An <img> layer: ken-burns slow zoom (clipped) + edgeFade edge dissolve.
 // `canvasFx` (halftone/dither/mosaic/…) is baked to a static PNG in boot.js; swap the src to it here.
 import { canvasFxKey } from '../canvas-fx.js';
 import { mergeProps } from '../props.js';
@@ -20,7 +20,7 @@ export function build(kit, el, L) {
     if (baked) im.src = baked;
   }
   // `radius` used to be honoured ONLY under `ken`, so a plain image with radius rendered square and
-  // said nothing — an author asking for a circle got a rectangle. That shipped tpot (a brand whose
+  // said nothing. An author asking for a circle got a rectangle. That shipped tpot (a brand whose
   // entire motif is circular avatars) with square faces. Radius now clips ANY image; cover-fit rides
   // along so a non-square source fills the shape instead of letter-boxing or distorting inside it.
   if ((L.ken || L.radius != null) && im) {
@@ -28,7 +28,7 @@ export function build(kit, el, L) {
     if (L.w) el.style.width = L.w + 'px';
     if (L.h) el.style.height = L.h + 'px';
     // Cover-fit ONLY when the layer actually defines a box to fill. With no explicit height the
-    // wrapper has nothing for `height:100%` to resolve against and the image collapses to zero —
+    // wrapper has nothing for `height:100%` to resolve against and the image collapses to zero,
     // which is what a width-only mascot layer (w:420, no h) would have done.
     if (L.ken || (L.w && L.h)) { im.style.objectFit = 'cover'; im.style.width = '100%'; im.style.height = '100%'; }
   }
@@ -48,8 +48,8 @@ export function frame(kit, el, L, t) {
     // Memoised on the element: the <img> comes from build() and is never swapped (core/resample.js
     // hides it and appends a canvas beside it, it does not replace it), so re-finding it every frame
     // buys nothing. Taken here rather than in build() because a group child reaches this frame()
-    // through core/layers/util.js, which has a fallback path that does not call this build() at all —
-    // a memo written there would be missing exactly where ken already had to be fixed once.
+    // through core/layers/util.js, which has a fallback path that does not call this build() at all.
+    // A memo written there would be missing exactly where ken already had to be fixed once.
     if (el.__kenImg === undefined) el.__kenImg = el.querySelector('img');
     const im = el.__kenImg;
     if (im) Object.assign(im.style, active
@@ -58,7 +58,7 @@ export function frame(kit, el, L, t) {
   }
   // NOTE ken + resample do not compose: ken is a CSS transform on the <img>, and the texture is the
   // img's own pixels, which a CSS transform does not touch. Rejected at validate rather than
-  // rendered as a silently-ignored ken (docs/MISTAKES.md — silence is the worst failure).
+  // rendered as a silently-ignored ken (docs/MISTAKES.md, silence is the worst failure).
   // The resample TICK is core/tracks/resample.js now, one slot later, so every layer type gets one.
 }
 

@@ -1,8 +1,8 @@
-// core/sanitize-html.js — the ONE definition of "hand-authored markup we are willing to render".
+// core/sanitize-html.js: the ONE definition of "hand-authored markup we are willing to render".
 //
 // Two callers: the `html` LAYER (raw markup as one layer) and the `html` BACKGROUND (raw markup as the
-// backdrop). Both take bytes somebody else wrote and turn them into markup on our machine — which is
-// exactly what the MCP product does — so they must agree on what is allowed. They lived as one inline
+// backdrop). Both take bytes somebody else wrote and turn them into markup on our machine, which is
+// exactly what the MCP product does, so they must agree on what is allowed. They lived as one inline
 // regex set in core/layers/html.js; the background would have been a second copy, and two copies of a
 // security rule is one copy that gets fixed.
 //
@@ -36,8 +36,8 @@ export function sanitizeHtml(src) {
 // `html` (inline, escaped into the scene JSON) or `src` (a .html file, preloaded by preloadHtml into a
 // path→text table). ONE resolver, so a layer and a backdrop cannot drift on which source wins.
 //
-// A `src` with no entry in the table THROWS. Every other asset here degrades to something — an empty
-// box, a grey placeholder — because a missing photo still leaves a film. A fragment IS the beat, or the
+// A `src` with no entry in the table THROWS. Every other asset here degrades to something, an empty
+// box, a grey placeholder, because a missing photo still leaves a film. A fragment IS the beat, or the
 // whole backdrop, so there is nothing left to degrade to and guessing is how a scene ships blank.
 export function htmlSource(o, table, where) {
   if (o == null || typeof o.src !== 'string') return o && o.html;
@@ -58,13 +58,13 @@ export function htmlSource(o, table, where) {
 // nothing. The fragment animates perfectly in a browser, renders as a dead still in the mp4, and the
 // author has no way to find out why. Silent substitution is the worst failure mode this codebase has
 // (docs/MISTAKES.md), so the authoring gate names it and points at what does work: `var(--t)` (seconds),
-// written every frame, and `var(--p)`, 0→1 across the window — but ONLY if the layer DECLARES it:
+// written every frame, and `var(--p)`, 0→1 across the window, but ONLY if the layer DECLARES it:
 //   "vars": { "--p": [0, 1] }, "varsDur": 1.5, "varsDelay": 0.12, "varsEase": "easeOutQuart"
 // Without that declaration `--p` is simply undefined, `var(--p, 1)` falls back to 1, and the fragment
 // renders permanently settled: the same silent no-op this comment exists to warn about, one level down.
 // `blocks/kit.mjs`'s `sweep()` exists to stamp exactly those four fields onto a block's html layer.
 // The anchor also accepts a QUOTE, because `style="transition:opacity .3s"` is how hand-authored markup
-// and captured site UI write this far more often than a stylesheet rule does — and an inline style is
+// and captured site UI write this far more often than a stylesheet rule does, and an inline style is
 // the one spelling that opens on a quote. Anchored on nothing at all, the check would fire on the word
 // inside a sentence; anchored only on `;{` and whitespace, it read every stylesheet and no attribute.
 const TIME_CSS = /(?:^|[;{"'\s])(transition|animation)(?:-[a-z-]+)?\s*:|@keyframes\b/i;
@@ -75,8 +75,8 @@ export function timeCssUsed(src) {
 
 // A CSS DECLARATION THE PARSER REJECTS IS NOT AN ERROR ANYWHERE. It drops that one declaration, keeps
 // the rest of the rule, and renders on: nothing throws, nothing warns, and the element simply never
-// does the thing. It is the same family as the `transition`/`animation` ban above — hand-authored CSS
-// that reads correctly and silently no-ops — so it is refused in the same place, at the same moment,
+// does the thing. It is the same family as the `transition`/`animation` ban above, hand-authored CSS
+// that reads correctly and silently no-ops, so it is refused in the same place, at the same moment,
 // rather than by a separate pass that runs after the damage is written.
 //
 // The case that named it: a block emitted `left: -calc(...)`. A leading minus outside calc() is invalid

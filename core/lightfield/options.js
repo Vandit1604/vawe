@@ -33,7 +33,7 @@ export const DIRECTIONS = ['left', 'right', 'top', 'bottom', 'center',
   'top-left', 'top-right', 'bottom-left', 'bottom-right'];
 export const MOTIONS = ['still', 'drift', 'breathe', 'shimmer'];
 
-// LIGHTFIELD_BLURBS — one line per name in the five vocabularies above, next to the vocabularies
+// LIGHTFIELD_BLURBS: one line per name in the five vocabularies above, next to the vocabularies
 // themselves (the `blurb` pattern of blocks/catalog.mjs). Consumed by the generated docs table and by
 // any catalog/MCP surface; a name with no blurb, or a blurb with no name, is a bug the catalog reports.
 // The text is the per-entry prose of docs/LIGHTFIELD.md and of the comments above, moved rather than
@@ -41,33 +41,33 @@ export const MOTIONS = ['still', 'drift', 'breathe', 'shimmer'];
 // `top` and `bottom` are BOTH an anchor and a direction, and one flat table has one row per name, so
 // those two blurbs say both meanings.
 export const LIGHTFIELD_BLURBS = {
-  // pattern — the structure of the field
-  slats: 'a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge — the eye travels across',
-  rings: 'concentric bands round a point, like light on water — the eye travels outwards',
-  shards: 'a fan of rays from a pivot below the frame — the eye travels up and out',
-  // envelope shape — each element's extent as a curve in where it sits
+  // pattern: the structure of the field
+  slats: 'a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across',
+  rings: 'concentric bands round a point, like light on water, the eye travels outwards',
+  shards: 'a fan of rays from a pivot below the frame, the eye travels up and out',
+  // envelope shape: each element's extent as a curve in where it sits
   full: 'the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does',
   ramp: 'a straight climb across the row, so the extents rise steadily from one side to the other',
-  arch: 'a sine hump — it leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome',
+  arch: 'a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome',
   valley: 'the sine hump run upside down: a dip in the middle with both ends tall',
   wave: 'sinusoidal wave across units',
-  circle: 'the unit semicircular arc, which leaves the baseline UPRIGHT — a symmetric dome, a planet limb, an eclipse',
-  crescent: 'one circular arc with a second equal arc bitten out of it — a moon horn: empty on one side, a concave inner edge, a point at the tip',
-  scallops: 'the same semicircle repeated five times. Odd, so one arc sits centred — a scalloped horizon when shallow, an arcade when tall',
-  hills: 'three gaussians of unequal width and height summed — rolling ground: three summits with soft saddles between them',
+  circle: 'the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse',
+  crescent: 'one circular arc with a second equal arc bitten out of it. A moon horn: empty on one side, a concave inner edge, a point at the tip',
+  scallops: 'the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall',
+  hills: 'three gaussians of unequal width and height summed, rolling ground: three summits with soft saddles between them',
   // anchor (which edge an element grows from) · direction (which way "away" is)
   bottom: 'as an anchor, the element grows up from the bottom edge and its free end is the top; as a direction, away is downward',
   top: 'as an anchor, the element hangs down from the top edge and its free end is the bottom; as a direction, away is upward',
-  left: 'a linear fall away to the left — a direction and no centre, so only the move along it reaches the fall',
-  right: 'a linear fall away to the right — the default bearing',
+  left: 'a linear fall away to the left. A direction and no centre, so only the move along it reaches the fall',
+  right: 'a linear fall away to the right, the default bearing',
   center: 'a radial: away in EVERY direction at once, so no edge can darken without the others darkening too',
-  'top-and-bottom': 'a lit band across the middle with darkness above and below it and nothing taken off the sides — the shape a low sun makes',
+  'top-and-bottom': 'a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes',
   'left-and-right': 'a lit vertical band with darkness at both sides and nothing taken off the top or bottom',
-  'top-left': 'a diagonal fall away to the top left — light rarely leaves along an axis, and no edge keyword says this',
-  'top-right': 'a diagonal fall away to the top right — light rarely leaves along an axis, and no edge keyword says this',
-  'bottom-left': 'a diagonal fall away to the bottom left — light rarely leaves along an axis, and no edge keyword says this',
-  'bottom-right': 'a diagonal fall away to the bottom right — light rarely leaves along an axis, and no edge keyword says this',
-  // motion — how the field lives against the frame clock
+  'top-left': 'a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this',
+  'top-right': 'a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this',
+  'bottom-left': 'a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this',
+  'bottom-right': 'a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this',
+  // motion: how the field lives against the frame clock
   still: 'nothing moves: the output reads no clock at all',
   drift: 'the field travels as one body, the cells holding station against each other',
   breathe: 'idle breathe',

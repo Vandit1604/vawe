@@ -1,4 +1,4 @@
-// core/layers/board.js — a believable populated workspace from pure data: columns of mini issue-cards
+// core/layers/board.js. A believable populated workspace from pure data: columns of mini issue-cards
 // with the elevation-1 treatment. Hard caps (4 cols × 5 cards); enters as ONE clip.
 // `cols` carries the whole board (titles, counts, cards, labels); its inner shape is the column's
 // vocabulary, not the layer's.

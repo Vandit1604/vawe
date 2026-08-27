@@ -1,4 +1,4 @@
-// core/resample.js — the wiring that lets a LAYER opt into being re-sampled through core/resample-fx.js.
+// core/resample.js: the wiring that lets a LAYER opt into being re-sampled through core/resample-fx.js.
 //
 // One helper pair, shared by every layer type that owns a raster (image · paint · shader), so the
 // contract lives in exactly one place rather than being re-implemented three times and drifting.
@@ -8,12 +8,12 @@
 //   { type:'paint', paint:'waves', resample:'refract' }
 //
 // `amount` may be a number (constant) or [from, to] (eased across the layer's own window), because
-// half of these effects are only interesting while they MOVE — a dissolve frozen at 0.5 is just a
+// half of these effects are only interesting while they MOVE, a dissolve frozen at 0.5 is just a
 // hole. Interpolation is on the layer's local progress, so it stays a pure function of t.
 //
 // A LAYER THAT OWNS NO RASTER IS BAKED INTO ONE. Until now this file refused every type that is not an
 // image or a canvas, so eight passes could be aimed at a photograph and at nothing we compose
-// ourselves — the whole "take arbitrary content and transform it" family was out of reach. A built
+// ourselves. The whole "take arbitrary content and transform it" family was out of reach. A built
 // subtree now becomes a texture the same way a seam does: SVG <foreignObject> serialisation ONCE at
 // boot (core/raster.js), before the render loop, awaited by core/boot.js. What the pass reads per
 // frame is then a constant canvas, indistinguishable from a still <img>, so renderFrame(n) stays a
@@ -21,14 +21,14 @@
 //
 // THE COST, said plainly because it decides whether you should use this: the bake is ONE INSTANT of
 // the layer, taken from the built DOM before any frame has been drawn. A `count` that ticks or a
-// `type` that types is frozen at the state build left it in. The MOTION comes from the pass — the
-// amount ramp, the noise clock — not from the source. That is a hero device on a settled beat, not a
+// `type` that types is frozen at the state build left it in. The MOTION comes from the pass, the
+// amount ramp, the noise clock, not from the source. That is a hero device on a settled beat, not a
 // wrapper you put around a moving one.
 import { createResampler, RESAMPLE_FX } from './resample-fx.js';
 import { buildInlinedCss, domToCanvas, rasterStats } from './raster.js';
 
 const SPECS = new WeakMap();   // el → { r, src, fx, amount, speed, seed, isStatic }
-// Layers whose raster has to be BAKED out of the DOM. Filled at build (nothing is measurable then —
+// Layers whose raster has to be BAKED out of the DOM. Filled at build (nothing is measurable then,
 // buildLayer appends the element AFTER the primitive builds it), drained once by bakeResamples().
 const PENDING = [];
 
@@ -55,7 +55,7 @@ export function attachResample(kit, el, L) {
   if (SPECS.has(el) || PENDING.some((p) => p.el === el)) return;
   const spec = typeof L.resample === 'string' ? { fx: L.resample } : L.resample;
   if (!RESAMPLE_FX.includes(spec.fx)) {
-    throw new Error(`unknown resample "${spec.fx}" — one of: ${RESAMPLE_FX.join(', ')}`);
+    throw new Error(`unknown resample "${spec.fx}", one of: ${RESAMPLE_FX.join(', ')}`);
   }
   const src = sourceOf(el);
   if (!src) { PENDING.push({ el, L, spec }); return; }   // no raster of its own → bake the subtree
@@ -91,14 +91,14 @@ export function attachResample(kit, el, L) {
 // the effect simply did not fire. That is the accepted-then-ignored class this repo logs most.
 const UNSERIALISABLE = 'canvas, video';
 
-// The inheritable properties worth carrying across the detachment. Not every inherited property —
-// `visibility` is one and copying it would undo the very thing the bake sets — just the ones that
+// The inheritable properties worth carrying across the detachment. Not every inherited property,
+// `visibility` is one and copying it would undo the very thing the bake sets, just the ones that
 // decide how type is set and coloured.
 const INHERITED = ['font-family', 'font-size', 'font-weight', 'font-style', 'font-stretch',
   'font-variation-settings', 'font-feature-settings', 'line-height', 'letter-spacing', 'word-spacing',
   'color', 'text-align', 'text-transform', 'text-indent', 'white-space', 'direction', 'writing-mode'];
 
-// bakeResamples() — drain the queue. Async, one-shot, awaited by core/boot.js BEFORE the render loop
+// bakeResamples(): drain the queue. Async, one-shot, awaited by core/boot.js BEFORE the render loop
 // and before bakeSeams (which drives renderFrame itself and would leave the DOM on some other frame).
 // After it returns, every resampled layer reads a constant canvas and the per-frame path is pure.
 export async function bakeResamples() {
@@ -112,7 +112,7 @@ async function bakeOne(el, L, spec) {
   const bad = el.querySelector(UNSERIALISABLE);
   if (bad) {
     throw new Error(`resample on layer "${name}": a <${bad.tagName.toLowerCase()}> inside it cannot be `
-      + `serialised into the offscreen raster — its bitmap is not part of the DOM, so the bake would `
+      + `serialised into the offscreen raster: its bitmap is not part of the DOM, so the bake would `
       + `produce a hole and the pass would look like it never ran. Put the resample on the raster `
       + `layer itself (image · paint · shader), or take that element out of this subtree.`);
   }
@@ -149,14 +149,14 @@ async function bakeOne(el, L, spec) {
   const stats = rasterStats(raster);
   if (stats && stats.opaque < 0.005) {
     throw new Error(`resample on layer "${name}": the offscreen raster came back empty. A cross-origin `
-      + `image or a captured component that will not serialise is the usual cause — the pass would `
+      + `image or a captured component that will not serialise is the usual cause, the pass would `
       + `render a blank rectangle, which is not an acceptable frame.`);
   }
 
   const r = createResampler(w, h);
   // visibility is INHERITED and overridable per element, which is what lets the layer's own paint (a
   // rect's background, the glyphs of a text layer) go quiet while this child keeps painting. The
-  // element itself stays in place, so every track — cut, motion, modifiers — still drives it.
+  // element itself stays in place, so every track (cut, motion, modifiers) still drives it.
   r.canvas.style.cssText = `position:absolute;left:0;top:0;display:block;width:${w}px;height:${h}px;visibility:visible`;
   el.style.visibility = 'hidden';
   el.appendChild(r.canvas);
@@ -166,7 +166,7 @@ async function bakeOne(el, L, spec) {
     amount: spec.amount ?? 0.5,
     speed: spec.speed ?? 1,
     seed: spec.seed ?? L.seed ?? 0,
-    isStatic: true,   // a baked subtree is the same texels on every frame — upload once, like an <img>
+    isStatic: true,   // a baked subtree is the same texels on every frame, upload once, like an <img>
   });
 }
 

@@ -4,19 +4,19 @@ import { lit } from './color.js';
 
 // These draw to a CANVAS, which cannot read a CSS custom property, so a token has to be resolved to
 // components. glowRGB already does exactly that against the live theme and caches it (core/filters.js),
-// so the theme is read once at build and never per frame — the determinism contract is unchanged.
+// so the theme is read once at build and never per frame, the determinism contract is unchanged.
 const ACCENT = () => `rgb(${glowRGB('var(--accent)').join(',')})`;
-// core/paint-fx.js — GENERATIVE Canvas 2D effects: draw(ctx, w, h, lt, seed, opts), pure in `lt`.
+// core/paint-fx.js, GENERATIVE Canvas 2D effects: draw(ctx, w, h, lt, seed, opts), pure in `lt`.
 //
 // WHY THIS EXISTS, separately from core/canvas-fx.js: canvasFx transforms a SOURCE IMAGE and is baked
 // once at build into a static PNG, so the pixels never change per frame. That carve-out is what makes
 // halftone/dither deterministic, and it is also why canvasFx cannot express anything that MOVES.
 // Matrix rain, a starfield, a travelling wave field have no source image and must be redrawn each
-// frame — which is only safe if the frame is a pure function of `lt`, never of the previous frame.
+// frame, which is only safe if the frame is a pure function of `lt`, never of the previous frame.
 //
 // THE CONTRACT every effect here keeps:
 //   • no accumulation. Nothing reads the canvas it is drawing onto; each frame is drawn from scratch.
-//   • no Math.random / Date. Randomness is hash(seed, i) — same seed, same picture, forever.
+//   • no Math.random / Date. Randomness is hash(seed, i), same seed, same picture, forever.
 //   • closed-form motion. A particle's position at `lt` is f(lt), not "last position + velocity",
 //     because renderFrame(412) cannot step 411 frames first. That single rule is the difference
 //     between this file and the particle sims parked in ROADMAP Tier 5.
@@ -31,17 +31,17 @@ const GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナ�
 
 // The option names every effect below reads OFF THE LAYER. A paint layer's `o` IS the layer object
 // (core/surfaces/paint.js passes it straight through), so these are layer props, not a nested options
-// bag — which is why they are declared here rather than left to the effect that reads them.
+// bag, which is why they are declared here rather than left to the effect that reads them.
 export const PROPS = { size: {}, color: {}, headColor: {}, tail: {}, rate: {}, speed: {}, count: {},
   amp: {}, angle: {}, hue: {}, hues: {}, length: {}, opacity: {}, weight: {} };
 
 export const PAINT_FX = {
-  // matrix rain — the effect ROADMAP names as needing this layer. Each column falls at its own seeded
+  // matrix rain: the effect ROADMAP names as needing this layer. Each column falls at its own seeded
   // speed; the head position is (lt * speed + offset) wrapped, so it is f(lt) and never integrated.
   // The glyph in a cell changes on a quantised clock, so it flickers without being random per frame.
   matrix(ctx, w, h, lt, seed, o = {}) {
     const size = o.size ?? 20, cols = Math.ceil(w / size), rows = Math.ceil(h / size) + 2;
-    const color = o.color || lit('#3ddc84', 'glyph rain is green because the film it quotes is green — an homage, not a brand colour'), tail = o.tail ?? 14, rate = o.rate ?? 12;
+    const color = o.color || lit('#3ddc84', 'glyph rain is green because the film it quotes is green. An homage, not a brand colour'), tail = o.tail ?? 14, rate = o.rate ?? 12;
     ctx.font = `${size - 4}px ui-monospace, monospace`;
     ctx.textBaseline = 'top';
     for (let c = 0; c < cols; c++) {
@@ -62,7 +62,7 @@ export const PAINT_FX = {
     ctx.globalAlpha = 1;
   },
 
-  // starfield — radial travel. Each star's radius is (r0 + lt*speed) wrapped, so a star's position is
+  // starfield: radial travel. Each star's radius is (r0 + lt*speed) wrapped, so a star's position is
   // computed directly from lt rather than advanced frame by frame.
   starfield(ctx, w, h, lt, seed, o = {}) {
     const n = o.count ?? 220, cx = w / 2, cy = h / 2, maxR = Math.hypot(cx, cy);
@@ -79,7 +79,7 @@ export const PAINT_FX = {
     ctx.globalAlpha = 1;
   },
 
-  // aurora — soft colour blobs drifting through a sum of sines. Each blob's centre is f(lt) (two
+  // aurora: soft colour blobs drifting through a sum of sines. Each blob's centre is f(lt) (two
   // detuned sines per axis, so the path never simply repeats), its radius breathes on a third sine,
   // and its hue is seeded per blob. Drawn as additive radial gradients (lighter blend) so overlaps
   // bloom to white the way real aurora does. Closed-form → seek-safe; nothing reads the prior frame.
@@ -107,9 +107,9 @@ export const PAINT_FX = {
     ctx.globalCompositeOperation = prev;
   },
 
-  // meteor — index-seeded ballistic streaks falling on a shared diagonal. Each meteor's progress along
+  // meteor: index-seeded ballistic streaks falling on a shared diagonal. Each meteor's progress along
   // its path is ((offset + lt/period) mod 1), so the head position is computed directly from lt (no
-  // integration). The tail is a gradient stroke drawn BEHIND the head each frame — a deterministic echo,
+  // integration). The tail is a gradient stroke drawn BEHIND the head each frame, a deterministic echo,
   // not accumulated pixels. Head fades in/out at the path ends so streaks don't pop at the wrap.
   meteor(ctx, w, h, lt, seed, o = {}) {
     const n = o.count ?? 14, sp = o.speed ?? 1, color = o.color || lit('#eaf2ff', 'the cool edge of a spark, not a brand tint');
@@ -138,7 +138,7 @@ export const PAINT_FX = {
     ctx.globalAlpha = 1;
   },
 
-  // wave field — stacked contour lines travelling through a sum of sines. Closed form by definition.
+  // wave field: stacked contour lines travelling through a sum of sines. Closed form by definition.
   waves(ctx, w, h, lt, seed, o = {}) {
     const lines = o.count ?? 26, amp = o.amp ?? 26, sp = o.speed ?? 1;
     ctx.lineWidth = o.weight ?? 1.5;
@@ -146,7 +146,7 @@ export const PAINT_FX = {
       const y0 = ((l + 0.5) / lines) * h;
       const ph = hash01(l, seed) * Math.PI * 2;
       ctx.globalAlpha = (o.opacity ?? 0.5) * (0.35 + 0.65 * Math.sin((l / lines) * Math.PI));
-      ctx.strokeStyle = o.color || ACCENT();   // was '#2563eb' — literally this project's accent, frozen into an effect
+      ctx.strokeStyle = o.color || ACCENT();   // was '#2563eb', literally this project's accent, frozen into an effect
       ctx.beginPath();
       for (let x = 0; x <= w; x += 8) {
         const u = x / w;

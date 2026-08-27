@@ -1,4 +1,4 @@
-// core/layers/lottie.js — an After Effects (Bodymovin) animation rendered DETERMINISTICALLY.
+// core/layers/lottie.js: an After Effects (Bodymovin) animation rendered DETERMINISTICALLY.
 // No autoplay, no internal ticker: renderFrame(n) drives it by ABSOLUTE seek (goToAndStop with a
 // frame index), so a frame is a pure function of n and order-independent (verified by `make probe`).
 // The animationData is preloaded in boot() into kit.lottie[src]; lottie-web is the global window.lottie
@@ -31,4 +31,4 @@ export function frame(kit, el, L, t) {
 }
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
-export const blurb = "an After Effects (Bodymovin) export driven by ABSOLUTE seek — goToAndStop at a frame index, never autoplay";
+export const blurb = "an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay";

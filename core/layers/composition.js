@@ -1,4 +1,4 @@
-// core/layers/composition.js — the `composition` layer: a bespoke, hand-authored per-beat GSAP timeline,
+// core/layers/composition.js. The `composition` layer: a bespoke, hand-authored per-beat GSAP timeline,
 // named from JSON. This is the safe form of another engine' "one worker writes a timeline per frame" model:
 // the JSON carries only `comp` (a registry name) + `props` (DATA), never code, so untrusted input can name
 // a comp and fill labels but cannot inject script. The code lives in first-party `compositions/*.js`.
@@ -21,8 +21,8 @@ export function build(kit, el, L) {
   const comp = COMPOSITIONS[L.comp];
   // was console.warn + return, so the beat's whole hand-authored timeline silently did not run. A
   // warning in a headless render nobody reads is silence with extra steps. #361.
-  if (!comp) throw new Error(`unknown composition "${L.comp}" — one of: ${Object.keys(COMPOSITIONS).join(', ')}`);
-  if (!window.gsap) { console.warn('composition: window.gsap missing — cannot author the timeline'); return; }
+  if (!comp) throw new Error(`unknown composition "${L.comp}". One of: ${Object.keys(COMPOSITIONS).join(', ')}`);
+  if (!window.gsap) { console.warn('composition: window.gsap missing, cannot author the timeline'); return; }
   // props is DATA the comp treats as textContent/attr, never innerHTML (same boundary as the html layer).
   comp({ el, gsap: window.gsap, start: L.start ?? 0, W: kit.W, H: kit.H, kit, ...(L.props && typeof L.props === 'object' ? L.props : {}) });
 }

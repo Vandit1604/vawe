@@ -1,9 +1,9 @@
-// core/beat-bind.js — a scene names a beat grid, and the film's joints land ON the pulse.
+// core/beat-bind.js: a scene names a beat grid, and the film's joints land ON the pulse.
 //
 // core/beats.js has computed a grid since it was written, `make beatmap` has written the sidecar,
 // and NOTHING on the render path ever read either: the comment in scripts/media/beatmap.mjs told
 // authors to snap cut times "by hand". That is the `cameraMove` failure again (docs/MISTAKES.md
-// #424) — a value produced and never consumed — so the repair has the same shape: the binding
+// #424) (a value produced and never consumed) so the repair has the same shape: the binding
 // happens once, at boot, on the one path every render goes through, and a scene that ASKS to be
 // beat-matched and cannot be throws instead of quietly rendering unmatched.
 //
@@ -14,14 +14,14 @@
 import { snapToBeat } from './beats.js';
 
 // Below this the pulse is not a pulse. Same threshold scripts/media/beatmap.mjs prints as
-// "WEAK — ambient/rubato, do not snap to this"; snapping to a grid that weak scatters cuts at
+// "WEAK, ambient/rubato, do not snap to this"; snapping to a grid that weak scatters cuts at
 // times that mean nothing, which is worse than leaving them where the author put them.
 const MIN_CONFIDENCE = 1.6;
 
 // HOW FAR A JOINT MAY TRAVEL, and there is one answer. `snapToBeat` in core/beats.js already carries
 // this as its own default, with the reason: past this the time the author wrote means more than the
 // grid does. `scripts/media/beatsync.mjs` used to hold a second opinion (half a beat, capped at
-// 0.18s), which at any tempo above 60 BPM is wider than the gap between beats — so nothing was ever
+// 0.18s), which at any tempo above 60 BPM is wider than the gap between beats, so nothing was ever
 // left alone and the tool's own "left as-is" report could not fire. A scene overrides per film with
 // `audio.beatSync.maxShift`; the CLI with `SNAP=`.
 export const DEFAULT_MAX_SHIFT = 0.12;
@@ -57,7 +57,7 @@ export async function loadBeatGrid(data, fetchJson) {
   try {
     return await fetchJson(p.startsWith('/') ? p : '/' + p, 'beat grid');
   } catch (e) {
-    throw new Error(`audio.beatSync names a beat grid that will not load: ${p} — ${FIX}. (${e.message})`);
+    throw new Error(`audio.beatSync names a beat grid that will not load: ${p}, ${FIX}. (${e.message})`);
   }
 }
 
@@ -114,7 +114,7 @@ export function beatPeriod(grid) {
  *  - beat boundaries and bg windows need nothing: they are DERIVED from the cuts (core/junctions.js
  *    marksOf runs on the lowered scene, after this), so they follow for free. One fact, one owner.
  *
- * A joint further than `maxShift` from any beat is LEFT ALONE — snapToBeat's own refusal, honoured
+ * A joint further than `maxShift` from any beat is LEFT ALONE, snapToBeat's own refusal, honoured
  * and reported, never widened. An author who means a time writes `"snap": false` on that joint.
  */
 export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT) {
@@ -161,11 +161,11 @@ export function bindBeats(data, sidecar) {
   const cfg = beatSyncOf(data);
   if (!cfg) return null;
   if (!sidecar || typeof sidecar !== 'object')
-    throw new Error(`audio.beatSync is set but no beat grid reached the render (${beatGridPath(data)}) — ${FIX}.`);
+    throw new Error(`audio.beatSync is set but no beat grid reached the render (${beatGridPath(data)}), ${FIX}.`);
   const unit = cfg.bar ? 'downbeats' : 'beats';
   const pulse = sidecar[unit];
   if (!Array.isArray(pulse) || !pulse.length)
-    throw new Error(`the beat grid ${beatGridPath(data)} carries no \`${unit}\` — ${FIX}.`);
+    throw new Error(`the beat grid ${beatGridPath(data)} carries no \`${unit}\`, ${FIX}.`);
   const conf = Number(sidecar.confidence);
   if (!(conf >= MIN_CONFIDENCE))
     throw new Error(`the beat grid ${beatGridPath(data)} scored confidence ${sidecar.confidence} `

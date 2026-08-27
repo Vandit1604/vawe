@@ -1,5 +1,5 @@
-// core/filters.js — named colour-grade looks for any scene layer (`filter: "duotone"` instead of a
-// hand-rolled CSS string). WHY: a grade is a creative decision, not plumbing — authors should say
+// core/filters.js, named colour-grade looks for any scene layer (`filter: "duotone"` instead of a
+// hand-rolled CSS string). WHY: a grade is a creative decision, not plumbing, authors should say
 // "duotone in brand colours", not paste matrix math into JSON. Raw CSS filter strings still pass
 // through untouched (back-compat with the schema's "CSS filter" contract).
 //
@@ -10,13 +10,13 @@
 // WHY vignette is NOT a filter: a filter transforms the layer's own pixels; a vignette is a
 // darkening FIELD composited over the layer's box, independent of its content. Faking it with
 // filters would be dishonest (and blurry at the edges), so it resolves to an inset radial-gradient
-// overlay div (the ::after a stylesheet would use — but layers are built imperatively, so it is a
+// overlay div (the ::after a stylesheet would use, but layers are built imperatively, so it is a
 // real child) that inherits the layer's border-radius and ignores pointer/layout.
 //
 // DETERMINISM: everything here runs at BUILD time, once per layer, before frame 0. Theme colours
 // are resolved from getComputedStyle(document.documentElement) exactly then (SVG tableValues need
 // literal rgb components, not var()), params are static per scene, and renderFrame never calls into
-// this file — so renderFrame(n) stays pure in n and frames can shard across tabs.
+// this file, so renderFrame(n) stays pure in n and frames can shard across tabs.
 //
 // SPEC SYNTAX (resolveFilter):
 //   "duotone"                      → theme defaults (shadows → --ink, highlights → --accent)
@@ -56,22 +56,22 @@ export const FILTER_PRESETS = {
 // shipped as a blank row the day it was added. A family with no map cannot be found incomplete.
 // These are the PRIMITIVES; the composite looks in core/looks.js stack them into a house style.
 export const FILTER_BLURBS = {
-  sepia: 'the plain CSS sepia, an amount 0..1 — the cheapest warm-and-dated pass there is',
-  duotone: 'luminance remapped to TWO colours, shadows to highlights — the poster/press look; defaults to --ink and --accent, so it reskins per theme',
+  sepia: 'the plain CSS sepia, an amount 0..1. The cheapest warm-and-dated pass there is',
+  duotone: 'luminance remapped to TWO colours, shadows to highlights. The poster/press look; defaults to --ink and --accent, so it reskins per theme',
   tritone: 'duotone with a third stop in the middle, which is what stops the midtones going muddy',
-  gradientMap: 'luminance remapped across any number of stops — the general case the two above are special cases of: a heat ramp, a risograph, a false-colour read',
-  posterize: 'each channel quantised to N discrete levels IN PLACE, hues kept — banding as a decision, not an artefact',
+  gradientMap: 'luminance remapped across any number of stops. The general case the two above are special cases of: a heat ramp, a risograph, a false-colour read',
+  posterize: 'each channel quantised to N discrete levels IN PLACE, hues kept. Banding as a decision, not an artefact',
   chromaGlow: 'a stack of zero-offset drop-shadows: white core, warm mid halo, cool outer. It follows the ALPHA, so it is right on GLYPHS and wrong on an opaque picture, where it haloes the rectangle. For a photo use `bloom`',
-  displace: 'static turbulence drives a displacement map — the pixels are pushed around by a fixed noise field. `freq` sets lump size (low = few big lumps), `scale` sets how far',
-  bloom: 'thresholds LUMINANCE and blooms the bright parts at two scales — light comes out of the picture, so a dark edge emits nothing. `ry` makes it directional (an anamorphic streak)',
-  chromaSplit: 'the colour channels pulled apart per pixel and summed back — real fringing on the picture, not a coloured silhouette of its alpha. `warm`/`cool` tint each direction',
+  displace: 'static turbulence drives a displacement map. The pixels are pushed around by a fixed noise field. `freq` sets lump size (low = few big lumps), `scale` sets how far',
+  bloom: 'thresholds LUMINANCE and blooms the bright parts at two scales, light comes out of the picture, so a dark edge emits nothing. `ry` makes it directional (an anamorphic streak)',
+  chromaSplit: 'the colour channels pulled apart per pixel and summed back, real fringing on the picture, not a coloured silhouette of its alpha. `warm`/`cool` tint each direction',
   convolve: 'a 3x3 kernel reading NEIGHBOURING pixels: emboss (a lit rubbing), edge (flat areas cancel to black, only boundaries survive), sharpen',
-  morph: 'dilate or erode — swell the bright pixels into their neighbours, or eat them away. Type gains or loses weight',
+  morph: 'dilate or erode, swell the bright pixels into their neighbours, or eat them away. Type gains or loses weight',
   relief: 'a light source over a luminance bump map. Diffuse MULTIPLIES (ink pressed into stock), specular ADDS (a highlight on metal): same primitive, opposite composite',
-  vignette: 'NOT a filter — a darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges',
+  vignette: 'NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges',
 };
 
-// chromaGlow: the reference "chromatic glow" is a soft neon BLOOM in the layer's own shape — a clean
+// chromaGlow: the reference "chromatic glow" is a soft neon BLOOM in the layer's own shape, a clean
 // white glow that warms in the mid halo and cools at the outer edge, with NO hard coloured border on
 // the glyph. It is just a stack of CSS drop-shadows (each follows the glyph alpha), so it needs no SVG
 // and no per-frame work: every pass is a 0-offset blur (radial, no directional fringe), from a tight
@@ -89,11 +89,11 @@ export function chromaGlowFilter(size = 1) {
 
 // ---- colour plumbing (pure) ----
 
-// One parser for the whole engine, in core/motion.js — read the comment there for what drifted.
+// One parser for the whole engine, in core/motion.js, read the comment there for what drifted.
 // Re-exported here because this module's own public surface has always carried `parseColor`.
 export { parseColor };
 
-// Theme defaults, resolved ONCE at build (getComputedStyle cannot run per frame — it would still be
+// Theme defaults, resolved ONCE at build (getComputedStyle cannot run per frame, it would still be
 // deterministic, but the contract is: filters.js is build-only). Cached because the theme is static
 // for the life of a scene (applyTheme runs before any layer is built).
 let themeCache = null;
@@ -134,7 +134,7 @@ function rampStops(name, colors) {
   return [ink, accent]; // duotone
 }
 
-// Deterministic id from the resolved params — same look, same id, so injection is idempotent and
+// Deterministic id from the resolved params, same look, same id, so injection is idempotent and
 // two layers sharing a grade share one def.
 function defId(name, stops, levels) {
   const parts = [name];
@@ -176,7 +176,7 @@ export function glowRGB(color) {
   return parseColor(s) || [255, 255, 255];
 }
 
-// bloom — the AFTER EFFECTS model, not the CSS one. `drop-shadow` blurs the ALPHA channel, so on an
+// bloom: the AFTER EFFECTS model, not the CSS one. `drop-shadow` blurs the ALPHA channel, so on an
 // opaque photo it blurs a rectangle and paints a glowing box around the frame; the picture is never
 // even consulted. A real glow thresholds LUMINANCE, so light comes out of the bright parts INSIDE the
 // image and a dark edge emits nothing:
@@ -222,7 +222,7 @@ function buildBloom(f, { rgb, threshold, radius, ry, intensity, key }) {
 
   // the LIT highlights that will bloom. Two colour models:
   //   • rgb null (default) → keep the bright pixels' OWN colour: SourceGraphic masked by the highlight
-  //     alpha, so a red neon sign bleeds red and a blue one blue — how a real bloom works.
+  //     alpha, so a red neon sign bleeds red and a blue one blue, how a real bloom works.
   //   • rgb set → flood that single tint through the mask (a stylised, uniformly-coloured glow).
   if (rgb) {
     f.appendChild(el('feFlood', { 'flood-color': `rgb(${rgb.join(',')})`, result: 'tint' }));
@@ -244,7 +244,7 @@ function buildBloom(f, { rgb, threshold, radius, ry, intensity, key }) {
   }));
 }
 
-// chromatic split — the same lesson as bloom, one primitive over. `drop-shadow(2px 0 0 red)` paints a
+// chromatic split: the same lesson as bloom, one primitive over. `drop-shadow(2px 0 0 red)` paints a
 // flat silhouette of the ALPHA channel, offset: on an opaque photo the alpha is the whole rectangle,
 // so it drew a red bar down one edge and never looked at the picture. See docs/MISTAKES.md #112, #351.
 //
@@ -253,7 +253,7 @@ function buildBloom(f, { rgb, threshold, radius, ry, intensity, key }) {
 //   2. the warm copy offset +px, the cool copy -px, the middle copy left where it is
 //   3. summed additively (feComposite arithmetic k2=k3=1)
 // The three diagonals PARTITION each channel (warm + cool + mid = 1 per channel), so at px=0 the sum
-// reconstructs the source exactly and the pass costs no exposure — the old drop-shadow pair painted
+// reconstructs the source exactly and the pass costs no exposure, the old drop-shadow pair painted
 // BEHIND the layer and lightening was not an issue, so this is the property that had to be designed
 // in rather than tuned. With warm=red and cool=blue it degenerates to a true R/B split; the signature
 // magenta/cyan of cyberpunk and hologram are just a different partition of the same three copies.
@@ -282,18 +282,18 @@ function buildChromaSplit(f, { px, warm, cool }) {
   f.appendChild(el('feOffset', { in: 'cc', dx: -px, dy: 0, result: 'co' }));
   // An arithmetic SUM, not `screen`. The three diagonals partition each channel, so summing them at
   // zero offset returns the source exactly; screen is a+b-ab, which over-brightens wherever the two
-  // tints share a channel — with the default red/blue that washed the whole picture pale.
+  // tints share a channel, with the default red/blue that washed the whole picture pale.
   f.appendChild(el('feComposite', { in: 'wo', in2: 'co', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0, result: 'wc2' }));
   f.appendChild(el('feComposite', { in: 'wc2', in2: 'mc', operator: 'arithmetic', k1: 0, k2: 1, k3: 1, k4: 0 }));
 }
 
-// chromaSplitFilter — the CSS filter value for a per-pixel colour split. `px` is the separation, and
+// chromaSplitFilter: the CSS filter value for a per-pixel colour split. `px` is the separation, and
 // `warm`/`cool` are the two directions' tints (alpha included, and it acts as that side's strength).
 export function chromaSplitFilter({ px, warm, cool } = {}) {
   return `url(#${ensureFilterDef('chromaSplit', { px, warm, cool })})`;
 }
 
-// bloomFilter — the CSS filter value for a luminance bloom. Injects the def on first use and returns
+// bloomFilter: the CSS filter value for a luminance bloom. Injects the def on first use and returns
 // `url(#id)`, so it drops straight into a filter list beside saturate()/contrast().
 export function bloomFilter({ color, threshold, radius, ry, intensity, key } = {}) {
   return `url(#${ensureFilterDef('bloom', { color, threshold, radius, ry, intensity, key })})`;
@@ -309,7 +309,7 @@ export const KERNELS = {
   sharpen: { k: [0, -1, 0, -1, 5, -1, 0, -1, 0], bias: 0 },
 };
 
-// convolveFilter / morphFilter / reliefFilter — CSS filter values for the three SVG primitives the
+// convolveFilter / morphFilter / reliefFilter: CSS filter values for the three SVG primitives the
 // engine had never used. Each injects its def on first use and returns `url(#id)`.
 export function convolveFilter({ kernel = 'emboss', amount = 1 } = {}) {
   return `url(#${ensureFilterDef('convolve', { kernel, amount })})`;
@@ -335,7 +335,7 @@ function buildPrimitive(f, { conv, morph, relief }) {
     // How `amount` scales depends on what the kernel SUMS TO, and getting this wrong is silent.
     //   sum ~1 (sharpen, emboss): scale around the identity, so 0 is a no-op and 1 is the textbook
     //     kernel. The sum stays 1, so overall brightness is preserved.
-    //   sum ~0 (edge): scale the whole matrix. The sum MUST stay 0 or flat areas no longer cancel —
+    //   sum ~0 (edge): scale the whole matrix. The sum MUST stay 0 or flat areas no longer cancel,
     //     scaling around identity took the edge kernel to a sum of -0.3, a net negative that dragged
     //     the entire frame to black, edges included, and rendered `edgeGlow` as a black rectangle.
     const base = k.reduce((a, b) => a + b, 0);

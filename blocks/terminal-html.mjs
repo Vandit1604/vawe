@@ -1,9 +1,9 @@
-// blocks/terminal-html.mjs — a terminal window as ONE hand-authored `html` layer.
+// blocks/terminal-html.mjs: a terminal window as ONE hand-authored `html` layer.
 //
 // WHY HTML AND NOT LAYER PRIMITIVES: everything here is a CONTINUOUS surface, not a stack of boxes.
 // The window body is a real CSS gradient (box background, not the text-only `gradient` prop a layer
 // has), lit with an inset `box-shadow` a layer cannot declare at all. The command line is ONE string
-// clipped by `clip-path` so its per-token syntax colour stays intact while it types in — a layer would
+// clipped by `clip-path` so its per-token syntax colour stays intact while it types in, a layer would
 // need one child per token AND a way to grow each child's width off the clock, and a group child's
 // size is written as inline px by the engine (`blocks/charts.mjs:44`), so it cannot be a `calc()`.
 // The caret is a `mod()`/`round()` blink against the engine's own `--t` clock: genuinely periodic
@@ -11,7 +11,7 @@
 // loops), so this is a place html can do something a layer's timeline literally cannot.
 //
 // MOTION: every number that moves is either the engine's `vars` track (named channels: `--type` for
-// the char count, `--done` as a typing→idle step, `--o<i>`/`--bar<i>` per output row — all driven the
+// the char count, `--done` as a typing→idle step, `--o<i>`/`--bar<i>` per output row, all driven the
 // same way `sweep()` drives `--p` in blocks/charts.mjs) or the always-on `--t` scene clock the engine
 // writes on every `html` layer (core/layers/html.js), used only for the caret's and the scanlines'
 // genuinely periodic drift. Nothing here is wall-clock or random: same props, same frame, same pixels.
@@ -26,7 +26,7 @@ const T = TOKENS;
 const PAD = 26, TITLE_H = 40, FONT = 21, LINE_H = 27, GAP_PO = 20, ROW_GAP = 13, BAR_H = 52;
 const P_EASE = 'easeOutCubic';
 
-// A command token is a bare string (painted T.ink) or {text,color} for syntax colour — same oneOf
+// A command token is a bare string (painted T.ink) or {text,color} for syntax colour, same oneOf
 // shape codeBlock's `lines` already uses, so an author who knows one knows the other.
 const normTokens = (command) => (Array.isArray(command) ? command : [command || ''])
   .map((t) => (typeof t === 'string' ? { text: t, color: T.ink } : { text: t.text || '', color: t.color || T.ink }));
@@ -35,7 +35,7 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 
 const rowHeight = (row) => row.bar ? BAR_H : row.diff ? row.diff.length * LINE_H : LINE_H;
 
-// terminalHtml — a terminal window that types a command, then answers with staggered output.
+// terminalHtml: a terminal window that types a command, then answers with staggered output.
 // `output` rows: {text} plain, {text,tone} a coloured status line, {bar:{label,pct}} a fill that is a
 // genuine fraction of the clock, {diff:[{sign,text}]} +/- lines. `command` is a string or a token list.
 export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command = '', cps = 22,
@@ -46,7 +46,7 @@ export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command =
   const typeDur = r2(len / cps);
   const settle = 0.4;
 
-  // Layout is computed once, in JS, from the real row heights — the same discipline
+  // Layout is computed once, in JS, from the real row heights, the same discipline
   // `cardInsetY`/`barWidth` enforce for the native charts: geometry never disagrees with its own
   // content because nothing restates it by hand.
   // Measured from the BODY wrapper's own top (which sits at TITLE_H+1 in the card), not the card's.
@@ -75,13 +75,13 @@ export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command =
 
   // ---- the command line: one clip-path reveal over real per-token colour, so typing never disturbs
   // syntax highlighting the way a per-character DOM rebuild would. `round(down, var(--type), 1)`
-  // snaps to whole characters — no fractional glyph half-drawn mid-frame.
+  // snaps to whole characters. No fractional glyph half-drawn mid-frame.
   const spans = tokens.map((t) => `<span style="color:${t.color}">${esc(t.text)}</span>`).join('');
   const promptLine = `<div style="position:relative;height:${LINE_H}px;display:flex;align-items:center;font:600 ${FONT}px var(--font-mono);white-space:pre">`
     + `<span style="color:${T.accent};margin-right:10px">$</span>`
     + `<span style="position:relative;display:inline-block">`
     + `<span style="clip-path:inset(0 calc(100% - round(down, var(--type,0), 1) * 1ch) 0 0)">${spans}</span>`
-    // the caret: solid while typing, then genuinely BLINKS off the raw --t clock once idle — the one
+    // the caret: solid while typing, then genuinely BLINKS off the raw --t clock once idle, the one
     // periodic motion a one-shot `vars` ramp cannot give, and the reason this reaches for --t at all.
     + `<span style="position:absolute;top:2px;left:calc(round(down, var(--type,0), 1) * 1ch);width:0.55ch;height:${FONT + 2}px;`
     + `background:${T.accent};opacity:calc((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2))"></span>`
@@ -116,7 +116,7 @@ export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command =
   const dot = (tone) => `<div style="width:11px;height:11px;border-radius:100px;background:${toneColor(tone)}"></div>`;
 
   // ---- chrome: a real gradient body (lit from the top), an inset+outset box-shadow for depth, and a
-  // slow-drifting scanline field over `--t` — three things a layer's flat fill/border/elevation cannot
+  // slow-drifting scanline field over `--t`. Three things a layer's flat fill/border/elevation cannot
   // reach at once, which is the whole argument for spending this beat in html.
   const html = `<div style="position:relative;width:${w}px;height:${h}px;border-radius:${R.tight}px;`
     + `border:${HAIR};overflow:hidden;`

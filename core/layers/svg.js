@@ -1,6 +1,6 @@
-// core/layers/svg.js — a vector layer for LOGOS and ICONS with two signature moves:
-//   • draw   — the stroke draws itself on (a mark assembling line-by-line), dashoffset 1→0.
-//   • morph  — one shape MELTS into another (a blob into the logo, one icon into the next), the true
+// core/layers/svg.js: a vector layer for LOGOS and ICONS with two signature moves:
+//   • draw: the stroke draws itself on (a mark assembling line-by-line), dashoffset 1→0.
+//   • morph: one shape MELTS into another (a blob into the logo, one icon into the next), the true
 //              shape-morph from core/path-morph.js, with an optional spin as it resolves.
 // Both are pure functions of local time t (draw = dashoffset f(t); morph = a precomputed point-lerp f(t)),
 // so renderFrame(n) stays seek-safe. Like glow/shader, frame() stamps el.dataset so a motion-only frame
@@ -38,7 +38,7 @@ export function build(kit, el, L) {
   p.setAttribute('stroke-linejoin', 'round');
   // Stroke WIDTH used to be reachable only through `draw.weight`, so a stroked path that was not also
   // drawing itself on took the browser default of 1px and said nothing. The only way to get a thick
-  // static stroke was `draw:{weight:30}` for the side effect — a hack written to route around the
+  // static stroke was `draw:{weight:30}` for the side effect, a hack written to route around the
   // engine, which CLAUDE.md calls a bug report rather than an answer. `strokeWidth` is the honest
   // spelling; `draw.weight` still wins when present so no existing scene moves.
   if (L.strokeWidth != null) p.setAttribute('stroke-width', L.strokeWidth);
@@ -56,7 +56,7 @@ export function build(kit, el, L) {
 
   if (L.morph && L.morph.to) {
     // resample BOTH shapes to equal point counts ONCE (build-time DOM read), align by best rotation, and
-    // stash the arrays. From here morphD(u) is pure — no per-frame getPointAtLength.
+    // stash the arrays. From here morphD(u) is pure, no per-frame getPointAtLength.
     const n = L.morph.points ?? 180;
     const tmp = document.createElementNS(SVGNS, 'path');
     tmp.setAttribute('d', L.morph.to); tmp.setAttribute('fill', 'none'); tmp.style.visibility = 'hidden';

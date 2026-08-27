@@ -1,7 +1,7 @@
-// core/idle.js — AUTHORED IDLE: the small continuous motion a layer carries while it is at REST.
+// core/idle.js, AUTHORED IDLE: the small continuous motion a layer carries while it is at REST.
 //
 // WHY THIS EXISTS. Measured across this library and the reference films: the reference frame is
-// near-static 41% of its runtime, ours 20%, and `higgsfield-recreation` 0.0% — nothing in it is ever at
+// near-static 41% of its runtime, ours 20%, and `higgsfield-recreation` 0.0%, nothing in it is ever at
 // rest for its whole five seconds. That reads as genre until you read the reference's own prompting
 // guide, which asks for it by name on every example: "nothing ever fully stops. Every hold carries a
 // little ambient idle motion, a 1-2% breathing scale, a slow drift."
@@ -40,12 +40,12 @@ export const IDLE = {
   // scene-level default on one layer, and a name the registry does not know is refused, not defaulted.
   none: () => IDLE_IDENTITY,
 
-  // BREATHE — the 1-2% scale the reference guide names. Scales the layer's BOX about its centre, so a
+  // BREATHE: the 1-2% scale the reference guide names. Scales the layer's BOX about its centre, so a
   // card grows and shrinks as one object. Slow: a 4.6s period is roughly a resting human breath, and
   // anything under ~3s reads as a pulse animation rather than as a thing being alive.
   breathe: (u, { amp = 0.015, period = 4.6, phase = 0 } = {}) => ({ scale: pulse(u + phase * period, { period, amt: amp }) }),
 
-  // DRIFT — a slow translate on two incommensurate periods, so the path never closes into a visible
+  // DRIFT: a slow translate on two incommensurate periods, so the path never closes into a visible
   // loop over a beat's length. The vertical axis is deliberately the smaller one: a frame that slides
   // sideways reads as camera, a frame that bobs reads as a mistake.
   drift: (u, { amp = 9, period = 11, phase = 0 } = {}) => {
@@ -60,12 +60,12 @@ export const IDLE_NAMES = IDLE_REGISTRY.names;
 // One line per name, beside the registry, on the contract every other vocabulary in this engine keeps:
 // a name with no description is a name an author cannot choose from.
 export const IDLE_BLURBS = {
-  none: 'no idle — the layer is truly still on its hold (the default)',
-  breathe: '1.5% scale, ~4.6s — the held frame stays alive without moving',
-  drift: 'slow translate on two periods, ~9px — the frame is never quite parked',
+  none: 'no idle. The layer is truly still on its hold (the default)',
+  breathe: '1.5% scale, ~4.6s. The held frame stays alive without moving',
+  drift: 'slow translate on two periods, ~9px, the frame is never quite parked',
 };
 
-// normalizeIdle(spec) — the three spellings an author may write, to one shape or null.
+// normalizeIdle(spec): the three spellings an author may write, to one shape or null.
 //   "breathe" · { name: "drift", amp: 14 } · "none" / false / null / undefined
 // Returns null for "no idle", which is what every caller branches on. An unknown NAME throws through
 // the registry rather than resolving to `none`, because a silently ignored idle looks exactly like a
@@ -81,12 +81,12 @@ export function normalizeIdle(spec) {
   return s;
 }
 
-// idlePhase(key) — the per-layer offset, in turns [0,1). Two layers that breathe in lockstep read as one
+// idlePhase(key): the per-layer offset, in turns [0,1). Two layers that breathe in lockstep read as one
 // mechanism driving both; out of step they read as two live things. Hashed from the layer's own
 // identity so it is the same number on every render, in every worker, at every frame rate.
 export const idlePhase = (key) => hashSeed(String(key)) / 4294967296;
 
-// idleAt(spec, u, phase) — the delta this idle contributes at `u` seconds into the layer's life.
+// idleAt(spec, u, phase): the delta this idle contributes at `u` seconds into the layer's life.
 // Pure: same arguments, same object. `gain` is applied by the caller, not here, so the generator and
 // the settled-window envelope stay separately testable.
 export function idleAt(spec, u, phase = 0) {
@@ -96,7 +96,7 @@ export function idleAt(spec, u, phase = 0) {
   return { dx: d.dx ?? 0, dy: d.dy ?? 0, scale: d.scale ?? 1, rot: d.rot ?? 0 };
 }
 
-// settledGain(u, {dur, enterDur, exitDur}) — how much of the idle is live at `u`. Zero through the
+// settledGain(u, {dur, enterDur, exitDur}): how much of the idle is live at `u`. Zero through the
 // entrance and through the exit, one across the middle, eased at both joins.
 //
 // The ramps are NOT re-derived here. `enterDur`/`exitDur` are the same two numbers core/clips.js
@@ -112,7 +112,7 @@ export function settledGain(u, { dur = Infinity, enterDur = 0, exitDur = 0 } = {
   return easeInOutSine(Math.min(clamp01((u - from) / blend), clamp01((to - u) / blend)));
 }
 
-// idleTransform(d, gain) — the CSS, or '' when this frame contributes nothing. Written as a leading
+// idleTransform(d, gain): the CSS, or '' when this frame contributes nothing. Written as a leading
 // `translate(...) scale(...)` pair so it composes OUTSIDE whatever the entrance and the motion track
 // already put on the element.
 //

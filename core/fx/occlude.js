@@ -1,4 +1,4 @@
-// core/fx/occlude.js — hide this layer where another layer covers it. The move a compositor makes to
+// core/fx/occlude.js: hide this layer where another layer covers it. The move a compositor makes to
 // put something BEHIND something else without stacking order being able to say it: a caption that
 // disappears under a card as the card slides over, a rule that runs behind a portrait, a label that
 // dives under the panel it belongs to. z-index can only ever answer "in front or behind, always"; this
@@ -27,7 +27,7 @@
 // the engine emits, so the test needs no marker and no state.
 //
 // IT WORKS ON A GROUP CHILD. It used to refuse on the argument that a child's x/y are relative to a
-// flex box whose position only layout knows — true of the AUTHORED x/y and not of the child, which is
+// flex box whose position only layout knows, true of the AUTHORED x/y and not of the child, which is
 // laid out and therefore measurable. scene.js measures that offset once at build and composes it with
 // the group's per-frame box, so a group child has a real canvas box like anything else. The refusal
 // survives for ONE case, where the measurement really is stale: a group whose own motion track keys
@@ -46,23 +46,23 @@ const num = (v) => typeof v === 'number' && Number.isFinite(v);
 function resolve(spec) {
   const s = typeof spec === 'string' ? { by: spec } : spec;
   if (!s || typeof s !== 'object' || Array.isArray(s))
-    throw new Error(`occlude: expected a layer id or an object like { "by": "card", "pad": 8 } — `
+    throw new Error(`occlude: expected a layer id or an object like { "by": "card", "pad": 8 }, `
       + `got ${JSON.stringify(spec)}. Keys: ${OCCLUDE_KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
     if (!OCCLUDE_KEYS.includes(k))
-      throw new Error(`occlude: unknown key "${k}" — known: ${OCCLUDE_KEYS.join(', ')}.`);
+      throw new Error(`occlude: unknown key "${k}", known: ${OCCLUDE_KEYS.join(', ')}.`);
   const by = typeof s.by === 'string' ? [s.by] : s.by;
   if (!Array.isArray(by) || !by.length || !by.every((v) => typeof v === 'string' && v))
-    throw new Error(`occlude: \`by\` must be "above", "below", a layer id, or a list of ids — got `
+    throw new Error(`occlude: \`by\` must be "above", "below", a layer id, or a list of ids, got `
       + `${JSON.stringify(s.by)}. It names the layer(s) whose box punches the hole.`);
   if (by.length > 1 && by.some((v) => STACK.includes(v)))
     throw new Error(`occlude: "${by.find((v) => STACK.includes(v))}" already means every layer on that `
       + `side of this one, so mixing it with named ids is either redundant or a contradiction. Use it `
       + `alone, or list the ids.`);
   const pad = s.pad == null ? 0 : s.pad;
-  if (!num(pad)) throw new Error(`occlude: pad must be a number of px grown around the occluder — got ${JSON.stringify(s.pad)}.`);
+  if (!num(pad)) throw new Error(`occlude: pad must be a number of px grown around the occluder, got ${JSON.stringify(s.pad)}.`);
   if (s.invert != null && typeof s.invert !== 'boolean')
-    throw new Error(`occlude: invert must be true or false (show ONLY where covered) — got ${JSON.stringify(s.invert)}.`);
+    throw new Error(`occlude: invert must be true or false (show ONLY where covered), got ${JSON.stringify(s.invert)}.`);
   return { by, pad, invert: s.invert === true };
 }
 
@@ -71,7 +71,7 @@ export function build(kit, el, L, spec) {
   // Checked here rather than at frame time because it is a property of the JSON, not of t, and this is
   // the pass that runs before any frame is drawn.
   if (!L.id)
-    throw new Error(`occlude: this layer needs an \`id\` — its own box is looked up through scene.boxOf, `
+    throw new Error(`occlude: this layer needs an \`id\`. Its own box is looked up through scene.boxOf, `
       + `which only knows layers an author named. Add "id" to the layer carrying the modifier.`);
 }
 
@@ -93,12 +93,12 @@ export function frame(kit, el, L, t, scene, spec) {
   // build no longer describe its children.
   if (!me)
     throw new Error(`occlude: no box for this layer's own id "${L.id}". Either nothing declares that id, `
-      + `or this is a child of a group whose motion track keys \`w\`/\`h\` — resizing a flex or grid box `
+      + `or this is a child of a group whose motion track keys \`w\`/\`h\`, resizing a flex or grid box `
       + `reflows its children, so their measured offsets are stale and a hole placed from them would be `
       + `silently wrong. Put the modifier on the group, or resize with \`scale\` instead of w/h.`);
   const prior = el.style.clipPath;
   if (prior && prior !== 'none' && !prior.startsWith('path('))
-    throw new Error(`occlude: layer "${L.id}" already has a clip-path from something else (${prior}) — `
+    throw new Error(`occlude: layer "${L.id}" already has a clip-path from something else (${prior}), `
       + `almost certainly a \`cut\` that wipes or irises. Modifiers run last, so this one would win and `
       + `that cut would silently stop happening. Use a cut that moves or fades instead.`);
 
@@ -124,7 +124,7 @@ export function frame(kit, el, L, t, scene, spec) {
   for (const id of occluders) {
     const o = scene.boxOf(id);
     if (!o)
-      throw new Error(`occlude: no layer with id "${id}" — boxOf resolves TOP-LEVEL layers that declare `
+      throw new Error(`occlude: no layer with id "${id}", boxOf resolves TOP-LEVEL layers that declare `
         + `an id and group children whose group is not resized by its motion track. Known here: `
         + `${scene.ids.join(', ') || '(no layer declares an id)'}.`);
     if (!o.visible || o.opacity <= 0) continue;   // outside its own window: it is not covering anything

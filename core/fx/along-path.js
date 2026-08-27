@@ -1,4 +1,4 @@
-// core/fx/along-path.js — TYPE SET ON A CURVE, and travelling along it.
+// core/fx/along-path.js: TYPE SET ON A CURVE, and travelling along it.
 //
 //   "modifiers": [{ "alongPath": { "curve": "arc", "w": 900, "h": 260 } }]
 //   "modifiers": [{ "alongPath": { "curve": "wave", "from": -20, "to": 120, "dur": 3 } }]
@@ -9,7 +9,7 @@
 // under a mark, a word crawling round a bend. There was no substitute, only a different effect.
 //
 // WHY A MODIFIER AND NOT A PRESET. A preset maps a per-unit progress to a STYLE, and the units are
-// spans in the flow — no style makes a span follow a curve. This has to REBUILD the layer as SVG, and
+// spans in the flow. No style makes a span follow a curve. This has to REBUILD the layer as SVG, and
 // rebuilding the DOM once at build time and driving one attribute per frame is exactly the two-pass
 // shape core/fx exists for. Nor a layer type: the thing being curved is text that already has a
 // colour, a face, a size and a clock; a `curvedText` layer would restate all four.
@@ -43,9 +43,9 @@ function resolve(spec) {
   const s = typeof spec === 'string' ? { curve: spec } : spec;
   if (!s || typeof s !== 'object' || Array.isArray(s))
     throw new Error(`alongPath: expected a curve name or an object like { "curve": "arc", "w": 900 } `
-      + `— got ${JSON.stringify(spec)}. Keys: ${KEYS.join(', ')}.`);
+      + `, got ${JSON.stringify(spec)}. Keys: ${KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
-    if (!KEYS.includes(k)) throw new Error(`alongPath: unknown key "${k}" — known: ${KEYS.join(', ')}.`);
+    if (!KEYS.includes(k)) throw new Error(`alongPath: unknown key "${k}", known: ${KEYS.join(', ')}.`);
   const w = s.w == null ? 900 : s.w, h = s.h == null ? 260 : s.h;
   if (!Number.isFinite(w) || w <= 0 || !Number.isFinite(h) || h <= 0)
     throw new Error(`alongPath: "w" and "h" are the box the curve is drawn in, in pixels; got ${w}x${h}`);
@@ -53,7 +53,7 @@ function resolve(spec) {
   if (d == null) {
     const curve = s.curve == null ? 'arc' : s.curve;
     if (!CURVES[curve])
-      throw new Error(`alongPath: unknown curve "${curve}" — known: ${NAMES.join(', ')}. `
+      throw new Error(`alongPath: unknown curve "${curve}", known: ${NAMES.join(', ')}. `
         + `Pass \`d\` instead to set your own path, in a ${w}x${h} box.`);
     d = CURVES[curve](w, h);
   } else if (typeof d !== 'string' || !d.trim()) {
@@ -68,7 +68,7 @@ function resolve(spec) {
       + `got from=${from} to=${to} dur=${dur} delay=${delay}`);
   const anchor = s.anchor == null ? 'middle' : s.anchor;
   if (!['start', 'middle', 'end'].includes(anchor))
-    throw new Error(`alongPath: "anchor" is "start", "middle" or "end" — which end of the line sits at `
+    throw new Error(`alongPath: "anchor" is "start", "middle" or "end", which end of the line sits at `
       + `the offset. Got ${JSON.stringify(anchor)}.`);
   return { d, w, h, from, to, dur, delay, ease: s.ease || 'easeInOutCubic', anchor };
 }
@@ -79,8 +79,8 @@ export function build(kit, el, L, spec) {
   const { d, w, h, from, anchor } = resolve(spec);
   if (L.split)
     throw new Error(`alongPath: this layer also sets \`split: "${L.split}"\`, and the splitter runs `
-      + `AFTER this and would wrap HTML spans inside the SVG, which renders nothing. Drop \`split\` — `
-      + `the curve is the treatment — or put the kinetic line in a layer of its own.`);
+      + `AFTER this and would wrap HTML spans inside the SVG, which renders nothing. Drop \`split\`, `
+      + `the curve is the treatment, or put the kinetic line in a layer of its own.`);
   const words = el.textContent.trim();
   if (!words)
     throw new Error(`alongPath: the layer has no text to set on the curve. Give it \`text\`, or apply `
@@ -101,8 +101,8 @@ export function build(kit, el, L, spec) {
   path.setAttribute('fill', 'none');
   defs.appendChild(path);
   const text = document.createElementNS(NS, 'text');
-  // currentColor, so the layer's own ink — including the per-window automatic ink core/layers/util.js
-  // resolves — reaches the glyphs. A fill of its own would override a colour the engine just decided.
+  // currentColor, so the layer's own ink, including the per-window automatic ink core/layers/util.js
+  // resolves, reaches the glyphs. A fill of its own would override a colour the engine just decided.
   text.setAttribute('fill', 'currentColor');
   text.setAttribute('text-anchor', anchor);
   const tp = document.createElementNS(NS, 'textPath');
@@ -117,7 +117,7 @@ export function build(kit, el, L, spec) {
   el.appendChild(svg);
 }
 
-// FNV-1a. Deterministic, and only ever used to make an element id unique — never to vary a look.
+// FNV-1a. Deterministic, and only ever used to make an element id unique, never to vary a look.
 function hash(s) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }

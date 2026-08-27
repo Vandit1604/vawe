@@ -1,4 +1,4 @@
-// blocks/core.mjs — the plain cards and statements (card · quote · stripeCard · kpiRow · comparison ·
+// blocks/core.mjs: the plain cards and statements (card · quote · stripeCard · kpiRow · comparison ·
 // pricingCard · captions · colorCycle), the big variant families (lowerThird · searchEngine) and the
 // COMPOSITION containers (splitScreen · screenSwap) that hold another block.
 //
@@ -7,8 +7,8 @@
 // to become a sibling too. Same contract as every other family: a PURE function props → an ARRAY of
 // scene layers, absolute-positioned on the 1920x1080 stage, deterministic.
 
-// The shared vocabulary — tokens, layer primitives, card chrome, the radius scale, tone colours and
-// the one avatar implementation — lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
+// The shared vocabulary: tokens, layer primitives, card chrome, the radius scale, tone colours and
+// the one avatar implementation, lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
 // exists because every one of those things had been copied per-block and had drifted per-copy.
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
@@ -22,9 +22,9 @@ export const CATEGORY = 'Core';
 const T = TOKENS;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// card — one product surface: hairline + a single step of elevation, content, a footer row.
+// card. One product surface: hairline + a single step of elevation, content, a footer row.
 // The tinted inner panel it used to draw is gone by DEFAULT (`tint` now matches the card fill), because
-// a panel inside a panel is two surfaces saying one thing — the 2021 SaaS tile. `tint` still paints
+// a panel inside a panel is two surfaces saying one thing, the 2021 SaaS tile. `tint` still paints
 // when a caller passes a real one, so the prop keeps its meaning; only the default moved.
 export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc, pills = [],
   cta = 'Explore', start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
@@ -53,7 +53,7 @@ export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// colorCycle — one word rendered in a SEQUENCE of hues so it visibly cycles colour (proof of "any
+// colorCycle. One word rendered in a SEQUENCE of hues so it visibly cycles colour (proof of "any
 // colour" WITHOUT reintroducing colour everywhere). Deterministic: fixed palette, fixed timing.
 //
 // The DEFAULT six sit in one luminance band (relative L ≈ 0.13..0.22), which buys two things at once.
@@ -74,7 +74,7 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// stripeCard — a recognizably-"Stripe" payments card: amount + mini bar chart + blurple Pay button.
+// stripeCard. A recognizably-"Stripe" payments card: amount + mini bar chart + blurple Pay button.
 // Uses Stripe's real product hexes. The "reads a site → rebuilds its look" payoff.
 // `amount` is a prop because it is the only figure on the card and it reaches every caller. It was
 // baked, so every video that used this block published the same invented number (MISTAKES #67).
@@ -100,7 +100,7 @@ export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = 
   }];
 }
 
-// quote — a pull quote with attribution. The one place big italic-ish restraint reads as premium.
+// quote: a pull quote with attribution. The one place big italic-ish restraint reads as premium.
 export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {}) {
   // Without this the template literal below stringified `undefined` and printed the WORD
   // "undefined" in quotation marks, at display size, in the finished film. An empty block is bad;
@@ -114,10 +114,10 @@ export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {
   ].filter(Boolean) }];
 }
 
-// kpiRow — a row of stat cells (value + label). Scale contrast without a card grid.
+// kpiRow: a row of stat cells (value + label). Scale contrast without a card grid.
 export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) {
   // THE FIGURES COUNT UP, cell by cell across the row. An item that gives a numeric `to` becomes a
-  // `count` layer and runs; one that gives a formatted string `value` (`$2.4M`, `42ms` — shapes the
+  // `count` layer and runs; one that gives a formatted string `value` (`$2.4M`, `42ms`, shapes the
   // count layer cannot render) lands as text, so a caller opts into the counting by giving a number
   // rather than by rewriting the row.
   const figure = (it, beat) => (it.to != null
@@ -134,12 +134,12 @@ export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) 
     }) }];
 }
 
-// comparison — two columns (e.g. Before / After, Others / Vawe). Rows are simple strings.
+// comparison: two columns (e.g. Before / After, Others / Vawe). Rows are simple strings.
 //
 // …OR TWO SCREENS. A before/after beat is the most standard product-demo shape there is, and this
 // block could only hold two lists of sentences: it could SAY the interface changed and never show it.
 // `leftScreen`/`rightScreen` are block descriptors (`{ block, props }`), and when either is present
-// the columns become panes and `splitScreen` owns the geometry — one definition of "two things, side
+// the columns become panes and `splitScreen` owns the geometry, one definition of "two things, side
 // by side, aligned", not a second one living here.
 //
 // The string form is untouched and takes precedence by absence, so every existing caller renders
@@ -173,7 +173,7 @@ export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = '
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// captions — timed subtitle chips at the bottom (accessibility + muted-autoplay reach). Each line
+// captions, timed subtitle chips at the bottom (accessibility + muted-autoplay reach). Each line
 // is {t, text, dur?}; `t` is relative to `start`. Deterministic. Pair with a future VO track.
 export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } = {}) {
   return lines.map((ln) => ({ type: 'text', text: ln.text, x, y, size, weight: 600, color: '#fff',
@@ -182,10 +182,10 @@ export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } 
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 1 families — charts + card variants. Charts that need curves/arcs use ONE `html`+SVG layer
+// WAVE 1 families, charts + card variants. Charts that need curves/arcs use ONE `html`+SVG layer
 // (crisp, deterministic, animates as a unit); bar-family stays native boxes for per-bar life.
 
-// pricingCard — plan · price · feature ticks · CTA. highlight = the featured plan (accent border + CTA).
+// pricingCard: plan · price · feature ticks · CTA. highlight = the featured plan (accent border + CTA).
 // `price` defaults to nothing. A DEFAULT price is a figure published by every caller who forgets to
 // set one, which is the same defect as deploySuccess's baked "Ready in 1.2s".
 export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
@@ -205,37 +205,37 @@ export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = 
           text({ text: '✓', size: TYPE.body, weight: 700, color: T.accent }), text({ text: f, size: TYPE.body, color: T.sub })] })) },
       { type: 'group', bg: highlight ? T.accent : T.surface, radius: R.chip, pad: `${SPACE.sm}px 0`, layout: 'row', justify: 'center',
         // T.onAccent, not '#fff'. This CTA is filled with the accent, and on higgsfield's acid lime
-        // white measured 1.16:1 — shipped, unreadable. The theme computes a readable ink for its own
+        // white measured 1.16:1, shipped, unreadable. The theme computes a readable ink for its own
         // accent (core/boot.js); the block asks for it rather than assuming.
         children: [text({ text: cta, size: TYPE.body, weight: 600, color: highlight ? T.onAccent : T.ink })] },
     ] }];
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 2 families — dev blocks + device/UI chrome.
+// WAVE 2 families, dev blocks + device/UI chrome.
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 3 families — lists & structure.
+// WAVE 3 families, lists & structure.
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 4 families — social & messaging.
+// WAVE 4 families, social & messaging.
 
-// ── social SHAPES — player card, creator lower third, follow card. Shapes only, on purpose: no
+// ── social SHAPES: player card, creator lower third, follow card. Shapes only, on purpose: no
 //    platform logos, wordmarks, or lockups (licence rule). The silhouette carries the recognition.
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 5 families — brand & motion. Arcs/rings use html+SVG; spinner wraps the lottie runtime.
+// WAVE 5 families, brand & motion. Arcs/rings use html+SVG; spinner wraps the lottie runtime.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// lowerThird — the name/role identifier broadcast has used for sixty years: who is speaking, while
+// lowerThird. The name/role identifier broadcast has used for sixty years: who is speaking, while
 // they speak. ONE component, twelve chromes, because what differs between a BILD front page and a
 // Vercel keynote caption is not the layout (name over role, lower left) but the material around it.
 // `variant` picks the material; everything else is shared.
 //
 // The spine every variant honours:
-//   name — the identifier (a person, a product, a place). Always the dominant element.
-//   role — the qualifier underneath. Always subordinate: smaller, dimmer, or set in mono. Optional.
-//   x, y — TOP-LEVEL of the block, as everywhere in this file. y ~820 sits it in the lower third of a
+//   name: the identifier (a person, a product, a place). Always the dominant element.
+//   role. The qualifier underneath. Always subordinate: smaller, dimmer, or set in mono. Optional.
+//   x, y: TOP-LEVEL of the block, as everywhere in this file. y ~820 sits it in the lower third of a
 //          1080 stage; the caller places it, because "lower third" is a convention, not a rule.
 //
 // Motion: `wipe` for anything with a plate (a plate arrives edge-first, which is what reads as
@@ -251,8 +251,8 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
   const wipeIn = { start, duration: dur, anim: 'wipe', enterDur: 0.42, exitDur: 0.28 };
   const riseIn = { start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3 };
   // Two group defaults actively fight a lower third, so every variant states its intent:
-  //   radius ?? 16    — a "hard block" silently arrives with soft corners (util.js chipBox).
-  //   items ?? center — a column CENTRES its children, so the role floats under the name instead of
+  //   radius ?? 16. A "hard block" silently arrives with soft corners (util.js chipBox).
+  //   items ?? center. A column CENTRES its children, so the role floats under the name instead of
   //                     sharing its left edge. A lower third is a left-aligned form; the edge IS the design.
   const HARD = { radius: 0 };
   const stackL = { layout: 'column', items: 'flex-start' };
@@ -331,7 +331,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
           start: r2(start + 0.35), duration: r2(dur - 0.35), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
       ].filter(Boolean);
 
-    // The name rises out of a clipped baseline, one word at a time (kinetic `riseClip`) — type moving
+    // The name rises out of a clipped baseline, one word at a time (kinetic `riseClip`), type moving
     // the way it reads. The most "designed" entrance in the set; give it a slow beat.
     case 'maskReveal':
       return [
@@ -384,14 +384,14 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
         ] }];
 
     default:
-      throw new Error(`lowerThird: unknown variant "${variant}" — see blocks/catalog.mjs for the twelve`);
+      throw new Error(`lowerThird: unknown variant "${variant}", see blocks/catalog.mjs for the twelve`);
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The REGISTRY. Bare family factories + namespaced `family.variant` entries from the manifest.
 // ─────────────────────────────────────────────────────────────────────────────
-// searchEngine — a search page in the two states that actually tell a story:
+// searchEngine. A search page in the two states that actually tell a story:
 //   variant 'home'    → the wordmark over an empty pill, the query TYPING into it
 //   variant 'results' → a compact bar carrying the query, ranked results, a cursor clicking one
 //
@@ -399,7 +399,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
 // that company, not a reusable piece: pass `brand` for a plain wordmark, or `word` for a per-letter
 // coloured one. Every layer is top-level and absolutely placed rather than flowed inside a group,
 // because the query is a `typing` layer and its per-character key clicks are derived by the engine
-// from (start, cps, text) — keeping it top-level keeps that timing readable at the call site.
+// from (start, cps, text). Keeping it top-level keeps that timing readable at the call site.
 const SEARCH_LINK = 'color-mix(in srgb, var(--accent) 82%, var(--text))';
 
 export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
@@ -410,7 +410,7 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
   const BAR_H = 60, PAD = 22, ICON = 24;
 
   // THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in whatever face
-  // the theme happens to ship is a lookalike, not the brand — the authoring rules call this out
+  // the theme happens to ship is a lookalike, not the brand, the authoring rules call this out
   // directly ("recreating a brand asset from memory is off-brand by definition"). `word` (per-letter
   // colours) and `brand` (plain text) remain for marks you do not have a file for.
   // `logotype` applies the WCAG 1.4.3 contrast exemption; centring is the engine's job, never arithmetic.
@@ -430,7 +430,7 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
       size: h, weight: 700, color: T.ink, ls: '-0.04em', ...common });
   };
 
-  // THE BAR. One pill, a magnifier inset at the leading edge, a mic at the trailing edge — the real
+  // THE BAR. One pill, a magnifier inset at the leading edge, a mic at the trailing edge, the real
   // furniture of a search field. The icons are Lucide (ISC) with the stroke baked, because an SVG
   // loaded as an <img> has no currentColor to inherit and would render invisible.
   const bar = (bx, by, bw, st, d, textSize) => {
@@ -487,7 +487,7 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
   });
 
   // the pointer travels to the chosen result and clicks it. A click needs a consequence, so callers
-  // cut on `cursorStart + 0.9` — the block places the click, the scene pays it off.
+  // cut on `cursorStart + 0.9`. The block places the click, the scene pays it off.
   if (results.length && clickIndex != null) {
     const cs = cursorStart != null ? cursorStart : r2(start + dur - 1.5);
     out.push({ type: 'cursor', size: 36, start: cs, duration: r2(start + dur - cs),
@@ -499,7 +499,7 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 6 — COMPOSITION. Blocks whose content is OTHER BLOCKS.
+// WAVE 6, COMPOSITION. Blocks whose content is OTHER BLOCKS.
 //
 // Everything above places itself and draws itself. Nothing above places anything ELSE, so every
 // "split" archetype in every scene was two blocks at two hand-chosen x coordinates, and the rule
@@ -511,12 +511,12 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
 // the pane box and injects `x`/`y`/`w`/`start`/`dur`; the pane's own props decide everything else.
 //
 // IT INJECTS `w` AND NOT `h`, deliberately. Most factories in this library size themselves off their
-// content and accept no `h` at all, and a prop a factory does not destructure is dropped in silence —
-// the exact failure this repo has logged repeatedly. `h` is used for the container's own geometry
+// content and accept no `h` at all, and a prop a factory does not destructure is dropped in silence.
+// The exact failure this repo has logged repeatedly. `h` is used for the container's own geometry
 // (the divider, the inset), never handed to a pane that may not understand it.
 const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen')({ ...(side.props || {}), ...at }) : []);
 
-// splitScreen — two panes, one geometry. `orient:'row'` splits left|right, `'column'` splits top/bottom,
+// splitScreen: two panes, one geometry. `orient:'row'` splits left|right, `'column'` splits top/bottom,
 // and `pip` insets the second pane into a corner of the first instead of sitting beside it.
 //
 // `split` is the FRACTION of the long axis the first pane gets, so a 60/40 is `split: 0.6` and not two
@@ -549,11 +549,11 @@ export function splitScreen({ x = 0, y = 0, w = 1200, h = 560, orient = 'row', s
   return [...pane(left, { x, y, w: aW, start, dur }), ...rule, ...pane(right, { x: bX, y: bY, w: bW, ...second })];
 }
 
-// screenSwap — screen A becomes screen B (becomes C…) in one place. The single most common motion in
+// screenSwap: screen A becomes screen B (becomes C…) in one place. The single most common motion in
 // a product demo, and the registry could not make it: `phoneFrame` held content and nothing changed
 // the content, so a demo could show one screen per beat and never the move between two.
 //
-// EVERY SCREEN SHARES ONE BOX. That is the whole point — a swap is two screens at the SAME coordinates
+// EVERY SCREEN SHARES ONE BOX. That is the whole point. A swap is two screens at the SAME coordinates
 // with handed-over windows, and hand-authoring it means writing the same x/y twice and the handover
 // arithmetic once per pair, which is where it goes wrong.
 //

@@ -1,4 +1,4 @@
-// blocks/social.mjs — extracted from blocks/index.mjs (see that file's contract). Pure factories
+// blocks/social.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
@@ -7,7 +7,7 @@ import {
   tint, TINT,
 } from './kit.mjs';
 
-// THE SOCIAL FAMILY IS THE PERSON-FACING REGISTER, so every card here is `R.soft` — the radius scale
+// THE SOCIAL FAMILY IS THE PERSON-FACING REGISTER, so every card here is `R.soft`, the radius scale
 // reserves it for surfaces a human reads as an OBJECT (a post, a profile, a player, a listing)
 // rather than as a panel. Two blocks were still on the generic `R.card` default and now are not.
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
@@ -18,16 +18,16 @@ export const CATEGORY = 'Social';
 const T = TOKENS;
 
 // AVATAR INITIALS ARE THE SAME CASE, and the default is in the kit. `avatarEl` falls back to
-// `{ bg: accentSoft, color: accentInk }` — the accent as TEXT on a tint of itself, which is the
+// `{ bg: accentSoft, color: accentInk }`. The accent as TEXT on a tint of itself, which is the
 // lowest-contrast pairing available and measured 2.6:1 on linear across four of this file's blocks.
 // Every call site here passes the corrected ink instead. THE FIX BELONGS IN `avatarEl`'s DEFAULT
 // (kit.mjs), not in six call sites. Still outstanding: changing that default moves every block that
 // draws an avatar, so it is a behaviour change and not part of the `onInk` move.
 const AV_INK = { color: onInk(T.accent) };
 
-// profileCard — avatar (image or initials) · name · role. For testimonials / team / "who said it".
+// profileCard: avatar (image or initials) · name · role. For testimonials / team / "who said it".
 // One of the five identity blocks. They all speak the SAME surface now: {name, handle?, sub?, avatar,
-// initials}, with each block's old prop name kept as an alias — a shared vocabulary is worth nothing
+// initials}, with each block's old prop name kept as an alias. A shared vocabulary is worth nothing
 // if adopting it breaks the callers (MISTAKES #67). `role` is this block's word for `sub`.
 export function profileCard({ x, y, w = 360, name = '', sub = '', role = '', avatar = '', initials = '', start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.md, pad: SPACE.lg,
@@ -38,15 +38,15 @@ export function profileCard({ x, y, w = 360, name = '', sub = '', role = '', ava
     ] }];
 }
 
-// chatBubble — a message thread; `me:true` bubbles right in accent, others left in a hairline card.
+// chatBubble: a message thread; `me:true` bubbles right in accent, others left in a hairline card.
 export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } = {}) {
-  // BUBBLES ARRIVE IN SEQUENCE, each from its own side — a conversation happening, not a transcript
+  // BUBBLES ARRIVE IN SEQUENCE, each from its own side. A conversation happening, not a transcript
   // appearing. The bubble is a LEAF carrying its own chrome: the row wrapper that used to hold it is
   // a nested group, and a nested group is built but never registered with the clip driver, so the
   // per-message `start` this block used to set was accepted and silently ignored on all four bubbles.
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.xs, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
     children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start', children: [
-      // The "me" bubble sits on T.accent, so its ink is `onColor` — which now resolves to the
+      // The "me" bubble sits on T.accent, so its ink is `onColor`, which now resolves to the
       // `--on-accent` token `core/boot.js` computes per theme, rather than assuming white clears a
       // lime. HAIRLINE, NO SHADOW on the other side: a bubble already has a boundary, and a drop
       // shadow on every message turns a thread into a stack of loose cards.
@@ -55,11 +55,11 @@ export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } 
         ...stagger(i, { step: 0.42, delay: 0.2, anim: m.me ? 'slide-right' : 'slide-left', enterDur: 0.35 }) })] })) }];
 }
 
-// tweetCard — a post card: avatar · name · @handle · body · repost/like counts.
+// tweetCard. A post card: avatar · name · @handle · body · repost/like counts.
 export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = '', avatar = '', initials = '', likes = '', reposts = '', start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.sm, pad: SPACE.lg,
     ...cardChrome({ radius: R.soft }), start, duration: dur, enterDur: 0.5, exitDur: 0.35, children: [
-      // A handle is an IDENTIFIER and the counts are FIGURES, so all three keep mono — that is the
+      // A handle is an IDENTIFIER and the counts are FIGURES, so all three keep mono, that is the
       // half of the split mono is for. Their colour was `--dim`, which measures 2.6:1 on higgsfield
       // and fails `make audit` HARD; `--text-2` is the muted TEXT role and clears 4.5:1 everywhere.
       { type: 'group', layout: 'row', items: 'center', gap: SPACE.sm, children: [avatarEl({ avatar, initials, name, size: 48, ...AV_INK }),
@@ -79,9 +79,9 @@ export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = 
 // last fifth of the glyphs and cut them. 0.75 clears them by a point.
 const AV_STEP = 0.75;
 
-// avatarStack — overlapping avatar circles (initials or images) + an optional "+N" overflow.
+// avatarStack: overlapping avatar circles (initials or images) + an optional "+N" overflow.
 export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 0, dur = 4 } = {}) {
-  // THE AVATARS LAND ONE AFTER ANOTHER, each dropping onto the edge of the last — a team assembling.
+  // THE AVATARS LAND ONE AFTER ANOTHER, each dropping onto the edge of the last, a team assembling.
   // These are TOP-LEVEL layers, so the stagger is a real `start` (0.07s apart was fast enough to read
   // as one block arriving; 0.14 with a `pop` reads as individual people).
   const step = size * AV_STEP; const out = [];
@@ -100,7 +100,7 @@ export function avatarStack({ x, y, avatars = [], extra = 0, size = 48, start = 
   return out;
 }
 
-// socialProof — the avatar stack AND the line that says what it proves.
+// socialProof: the avatar stack AND the line that says what it proves.
 //
 // `avatarStack` renders circles and a `+N` and stops there, so on its own it asserts nothing: every
 // scene that used it hand-placed a text layer beside it at coordinates derived from the stack's own
@@ -116,7 +116,7 @@ export function socialProof({ x, y, avatars = [], extra = 0, size = 44, caption 
   const step = size * AV_STEP;
   const cells = avatars.length + (extra > 0 ? 1 : 0);
   const stackW = cells > 0 ? r2((cells - 1) * step + size) : 0;
-  // the caption arrives AFTER the last avatar lands — the stack assembles, then it is named.
+  // the caption arrives AFTER the last avatar lands: the stack assembles, then it is named.
   const said = r2(start + cells * 0.14 + 0.12);
   const lines = [
     caption && text({ text: caption, size: TYPE.base, weight: 600, color: T.ink }),
@@ -134,7 +134,7 @@ export function socialProof({ x, y, avatars = [], extra = 0, size = 44, caption 
   ];
 }
 
-// reactionBar — a row of reaction count-pills; `mine:true` highlights the one you picked.
+// reactionBar: a row of reaction count-pills; `mine:true` highlights the one you picked.
 export function reactionBar({ x, y, reactions = [], start = 0, dur = 4 } = {}) {
   return [{ type: 'group', x, y, layout: 'row', gap: SPACE.xs, items: 'center', start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
     // An unpicked chip carries a HAIRLINE too, not only a fill. Without one the picked chip differed
@@ -145,7 +145,7 @@ export function reactionBar({ x, y, reactions = [], start = 0, dur = 4 } = {}) {
       children: [text({ text: r.emoji, size: TYPE.base }), text({ text: String(r.count), size: TYPE.body, weight: 600, color: r.mine ? T.accentInk : T.sub, font: 'num' })] })) }];
 }
 
-// nowPlaying — a music-player card: square artwork (accent gradient + initials if no art), title over
+// nowPlaying. A music-player card: square artwork (accent gradient + initials if no art), title over
 // artist, a progress bar, transport glyphs. `progress` is 0..1 of the track.
 export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', artist = '', avatar = '', art = '',
   initials = '', progress = 0.4, start = 0, dur = 4 } = {}) {
@@ -155,11 +155,11 @@ export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', art
   // The artwork square is the same identity element as the other blocks' avatars, only square.
   // SOLID on purpose. A gradient is a background-IMAGE: the computed background-color under the
   // initials stays transparent, so any contrast probe (ours included) falls through to the white
-  // card behind and reads white-on-white — unmeasurable even when it looks fine. A var() colour
+  // card behind and reads white-on-white, unmeasurable even when it looks fine. A var() colour
   // appended to the shorthand does not survive to a computed background-color either (tried).
   // THE TILE IS THE ACCENT ITSELF, and its ink is the `--on-accent` token core/boot.js computes per
   // theme. It used to be an 88%-toward-`--text` mix whose comment claimed it "carries the same
-  // always-supports-white guarantee kit.mjs documents for accent" — that guarantee never existed
+  // always-supports-white guarantee kit.mjs documents for accent", that guarantee never existed
   // (25 of 38 themes cannot carry white on their accent), and `onColor` fell through to white for
   // the mix because it is not a hex, so the initials measured 1.2:1 on higgsfield's lime. The token
   // is the answer the engine now ships for exactly this case: text ON an accent fill.
@@ -180,7 +180,7 @@ export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', art
       { type: 'group', layout: 'column', items: 'flex-start', gap: 0, start: r2(start + 0.15), duration: dur, anim: 'wipe', enterDur: 0.4,
         // THE TRACK IS A TINT OF THE FILL, not the neutral `--surface-2`: the part of the track still
         // to play is the rest of the reading, so it belongs to the fill's own hue at the lighter
-        // weight — the same correction every meter in the data family got.
+        // weight. The same correction every meter in the data family got.
         children: [box({ w: innerW, h: 5, radius: R.pill, bg: tint(T.accent, TINT.track), layout: 'row', justify: 'flex-start', items: 'stretch',
           children: [box({ w: r2(innerW * p), h: 5, radius: R.pill, bg: T.accent })] })] },
       { type: 'group', layout: 'row', justify: 'center', items: 'center', gap: SPACE.xl,
@@ -194,11 +194,11 @@ export function nowPlaying({ x, y, w = 380, name = '', track = '', sub = '', art
   }];
 }
 
-// videoLowerThird — creator identifier: avatar circle · channel over subscriber count · a CTA chip.
+// videoLowerThird, creator identifier: avatar circle · channel over subscriber count · a CTA chip.
 //
 // THE CHIP IS THE ACCENT NOW, AND IT USED TO BE `var(--down)`. That was semantic colour spent on a
-// LOOK: `--down` means failure — it is the token a falling metric and a deleted line are painted with
-// — and the old comment said so plainly, that the red was chosen "to keep it in the subscribe-red
+// LOOK: `--down` means failure. It is the token a falling metric and a deleted line are painted with,
+// and the old comment said so plainly, that the red was chosen "to keep it in the subscribe-red
 // family". A subscribe button is not a failure, and a theme that repaints `--down` to signal a
 // regression had that meaning quietly borrowed by an unrelated CTA. The accent is what a primary
 // action is for, and `onColor` resolves its ink from the per-theme `--on-accent` token.
@@ -219,7 +219,7 @@ export function videoLowerThird({ x, y, w = 520, name = '', channel = '', sub = 
     ] }];
 }
 
-// followCard — name over @handle, a pill CTA on the right. The pill is ink-on-paper inverted (not
+// followCard, name over @handle, a pill CTA on the right. The pill is ink-on-paper inverted (not
 // accent) so it reads as THE button of the card, not another tinted chip.
 // It speaks the shared identity surface, so it can now carry an avatar. It only draws one when the
 // caller supplies `avatar` or `initials`: a card designed without a portrait must not sprout an
@@ -238,7 +238,7 @@ export function followCard({ x, y, w = 360, handle = '', name = '', avatar = '',
     ] }];
 }
 
-// installCard — the app-store listing row: icon tile · name over category · a star rating that FILLS
+// installCard. The app-store listing row: icon tile · name over category · a star rating that FILLS
 // · the rating count · the install button. The registry had no proof surface of this shape at all, so
 // a product film could show the app and never show anyone choosing it.
 //
@@ -284,7 +284,7 @@ export function installCard({ x, y, w = 400, icon = '', name = '', sub = '', rat
       // The icon tile is ONE radius step under the card it sits in (R.tight inside R.soft), which is
       // what keeps a nested corner from reading as squarer than its container.
       box({ w: 62, h: 62, radius: R.tight, bg: T.accentSoft, layout: 'row', justify: 'center', items: 'center',
-        // The glyph is the accent as TEXT on a tint of itself — the same 2.6:1 pairing `avatarEl`'s
+        // The glyph is the accent as TEXT on a tint of itself, the same 2.6:1 pairing `avatarEl`'s
         // default carried, and the last one left in this file. `onInk` clears it.
         children: [text({ text: icon, size: 28, weight: 700, color: onInk(T.accent) })] }),
       { type: 'group', layout: 'column', items: 'flex-start', gap: SPACE.tight, grow: 1, children: [

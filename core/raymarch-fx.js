@@ -1,6 +1,6 @@
 import { glContext } from './webgl.js';
 import { defineRegistry } from './registry.js';
-// core/raymarch-fx.js — REAL 3D, without a 3D engine. A fullscreen quad plus a distance field is a
+// core/raymarch-fx.js: REAL 3D, without a 3D engine. A fullscreen quad plus a distance field is a
 // renderer: march a ray per pixel, hit an implicit surface, shade it. No geometry, no scene graph, no
 // three.js, and no new determinism story, because a raymarched frame is already a pure function of
 // (uv, time) exactly like every other shader in this repo.
@@ -11,7 +11,7 @@ import { defineRegistry } from './registry.js';
 // surface normal, a specular highlight and a silhouette. Mixing them into the veil registry would
 // have meant one of the two families lying about what it is.
 //
-// WHAT THIS DOES NOT COVER: anything needing real geometry — extruded 3D text, a device showcase, a
+// WHAT THIS DOES NOT COVER: anything needing real geometry, extruded 3D text, a device showcase, a
 // point cloud, cloth. An SDF cannot import a font outline or a mesh. That half of Tier 4 is where a
 // three.js dependency would actually earn itself; see docs/ROADMAP.md.
 //
@@ -67,7 +67,7 @@ vec3 pal(int i, vec3 dflt){
 // ---- distance fields, one per scene -------------------------------------------------------------
 float mapMetaballs(vec3 p){
   float d = 1e9;
-  // Closed form: each ball's position is f(t). Never "last position + velocity" — that would make the
+  // Closed form: each ball's position is f(t). Never "last position + velocity", that would make the
   // frame depend on how many frames ran before it, which is the one thing this engine cannot allow.
   for (int i = 0; i < 5; i++) {
     float fi = float(i);
@@ -180,22 +180,22 @@ void main(){
     float fres = pow(1.0 - max(dot(n, -rd), 0.0), 3.0);
     vec3 refl = reflect(rd, n);
 
-    if (u_fx == 0) {                                   // metaballs — soft glossy candy
+    if (u_fx == 0) {                                   // metaballs, soft glossy candy
       vec3 a = pal(0, vec3(0.29, 0.47, 0.95)), b = pal(1, vec3(0.95, 0.35, 0.62));
       col = mix(a, b, clamp(n.y * 0.5 + 0.5, 0.0, 1.0));
       col = col * (0.30 + 0.70 * diff) + envColor(refl) * (0.16 + 0.55 * fres);
 
-    } else if (u_fx == 1) {                            // mandelbulb — depth-shaded, palette-tinted
+    } else if (u_fx == 1) {                            // mandelbulb, depth-shaded, palette-tinted
       float ao = 1.0 - clamp(t / MAX_DIST, 0.0, 1.0);
       vec3 a = pal(0, vec3(0.95, 0.62, 0.22)), b = pal(1, vec3(0.35, 0.18, 0.55));
       col = mix(b, a, ao) * (0.25 + 0.85 * diff) + envColor(refl) * fres * 0.35;
 
-    } else if (u_fx == 2) {                            // chromeGlass — mirror metal
+    } else if (u_fx == 2) {                            // chromeGlass, mirror metal
       col = envColor(refl) * (0.90 + 0.55 * fres);
       col += vec3(1.0) * pow(max(dot(refl, ld), 0.0), 64.0) * 2.2;
       col = mix(col, col * pal(0, vec3(0.82, 0.88, 1.0)), 0.25);
 
-    } else if (u_fx == 3) {                            // caustics — water, lit from below the surface
+    } else if (u_fx == 3) {                            // caustics, water, lit from below the surface
       // caustic bands from the same wave field that shapes the surface, so the light agrees with the
       // geometry instead of being a texture laid over it
       float c = sin(p.x * 6.0 + u_time * 1.6) * sin(p.z * 6.6 - u_time * 1.2);
@@ -203,7 +203,7 @@ void main(){
       vec3 deep = pal(0, vec3(0.04, 0.22, 0.38)), lit = pal(1, vec3(0.55, 0.92, 0.98));
       col = mix(deep, lit, c * 0.85) * (0.35 + 0.65 * diff) + envColor(refl) * fres * 0.55;
 
-    } else {                                           // holoFoil — iridescent, angle-shifted hue
+    } else {                                           // holoFoil, iridescent, angle-shifted hue
       // thin-film interference over metal. The hue band is NARROW (x2.6, not x7) and sits on a
       // bright silver base: a full-spectrum sweep reads as a pride gradient, not as foil.
       // Balance matters more than either term: the env is bright, so weighting metal above the film
@@ -267,7 +267,7 @@ export function createRaymarchLayer(w = 1080, h = 1080) {
     canvas,
     draw(fx, time, seed = 0, palette = null, intensity = 1, spin = 1) {
       const idx = RAYMARCH_FX.indexOf(fx);
-      if (idx < 0) throw new Error(`unknown raymarch "${fx}" — one of: ${RAYMARCH_FX.join(', ')}`);
+      if (idx < 0) throw new Error(`unknown raymarch "${fx}", one of: ${RAYMARCH_FX.join(', ')}`);
       gl.useProgram(prog);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform1f(U.time, time); gl.uniform1f(U.seed, seed); gl.uniform1i(U.fx, idx);

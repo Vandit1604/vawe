@@ -1,5 +1,5 @@
-// core/motion.js — pure motion math + scene helpers (easing, spring, interpolate,
-// transforms, text-fit, colour, formatters). No DOM, no fetch — safe to import in node (lib-test).
+// core/motion.js: pure motion math + scene helpers (easing, spring, interpolate,
+// transforms, text-fit, colour, formatters). No DOM, no fetch, safe to import in node (lib-test).
 // The theme/clock/boot RUNTIME lives in core/boot.js.
 // just time->data transforms + the scene boot.
 
@@ -36,13 +36,13 @@ export const punch = (t, amt = 0.14) => 1 + amt * Math.sin(clamp01(t) * Math.PI)
 export const easeInCubic = (t) => t * t * t;
 export const easeOutElastic = (t) => { if (t <= 0) return 0; if (t >= 1) return 1; const p = 0.3; return Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) + 1; };
 export const easeInQuart = (t) => t * t * t * t;
-// sine family — MOTION-CRAFT / the planning skill prescribe "ambient loops sinusoidal", which was
+// sine family: MOTION-CRAFT / the planning skill prescribe "ambient loops sinusoidal", which was
 // unexpressable until now: the registry had no sine curve at all. This is the gentlest ease there
 // is (no hard stop), which is exactly what a drifting/breathing loop wants.
 export const easeInSine = (t) => 1 - Math.cos((t * Math.PI) / 2);
 export const easeOutSine = (t) => Math.sin((t * Math.PI) / 2);
 export const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
-// quint: one notch sharper than quart, softer than expo — the "luxurious settle" for hero moves.
+// quint: one notch sharper than quart, softer than expo. The "luxurious settle" for hero moves.
 export const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
 export const easeInOutQuart = (t) => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2);
 
@@ -54,28 +54,28 @@ export const easeOutQuad = (t) => 1 - (1 - t) * (1 - t);
 export const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 export const easeInQuint = (t) => t * t * t * t * t;
 export const easeInOutQuint = (t) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2);
-// circ: mechanical/geometric — starts or stops very hard. Good for wipes and mechanical UI.
+// circ: mechanical/geometric, starts or stops very hard. Good for wipes and mechanical UI.
 export const easeInCirc = (t) => 1 - Math.sqrt(1 - Math.pow(t, 2));
 export const easeOutCirc = (t) => Math.sqrt(1 - Math.pow(t - 1, 2));
 export const easeInOutCirc = (t) => (t < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2);
-// back: anticipation — dips BELOW 0 before launching (easeIn) / past 1 before settling (easeOut).
+// back: anticipation, dips BELOW 0 before launching (easeIn) / past 1 before settling (easeOut).
 export const easeInBack = (t) => { const c1 = 1.70158, c3 = c1 + 1; return c3 * t * t * t - c1 * t * t; };
 export const easeInOutBack = (t) => { const c1 = 1.70158, c2 = c1 * 1.525; return t < 0.5 ? (Math.pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2 : (Math.pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2; };
 // elastic: rubber band. Endpoints snapped so it lands exactly (the raw formula rings past 1).
 export const easeInElastic = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : -Math.pow(2, 10 * t - 10) * Math.sin((t * 10 - 10.75) * ((2 * Math.PI) / 3)));
 export const easeInOutElastic = (t) => { const c5 = (2 * Math.PI) / 4.5; return t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * c5)) / 2 : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * c5)) / 2 + 1; };
-// bounce: ball drop. Stays inside [0,1] — it never overshoots, it rebounds.
+// bounce: ball drop. Stays inside [0,1], it never overshoots, it rebounds.
 export const easeOutBounce = (t) => { const n1 = 7.5625, d1 = 2.75; if (t < 1 / d1) return n1 * t * t; if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75; if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375; return n1 * (t -= 2.625 / d1) * t + 0.984375; };
 export const easeInBounce = (t) => 1 - easeOutBounce(1 - t);
 export const easeInOutBounce = (t) => (t < 0.5 ? (1 - easeOutBounce(1 - 2 * t)) / 2 : (1 + easeOutBounce(2 * t - 1)) / 2);
 export const easeInExpo = (t) => (t <= 0 ? 0 : Math.pow(2, 10 * (t - 1)));
 export const easeInOutExpo = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : 1 - Math.pow(2, -20 * t + 10) / 2);
 
-// springStiff — critically-damped settle (NO overshoot); for Creed / restrained brands.
+// springStiff: critically-damped settle (NO overshoot); for Creed / restrained brands.
 // Complements the existing overshooting spring() below. Pure, terminal at t≥1 → safe for renderFrame(n).
 export const springStiff = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : 1 - Math.exp(-6.5 * t) * (1 + 6.5 * t));
 
-// springEase({response, dampingFraction}) — the iOS/SwiftUI spring as a closed-form EASING FACTORY: a
+// springEase({response, dampingFraction}). The iOS/SwiftUI spring as a closed-form EASING FACTORY: a
 // damped harmonic oscillator over normalised progress u∈[0,1]. `response` sets snappiness (lower = faster,
 // more frequency); `dampingFraction` (ζ) sets bounce. another engine doctrine: ζ=1.0 house default (no
 // overshoot), 0.8-0.85 "alive" (a whisper of overshoot), <0.55 don't (visible bounce). Returns a pure
@@ -95,10 +95,10 @@ export function springEase({ response = 0.5, dampingFraction = 1 } = {}) {
 }
 
 // ---------- velocity ramping ----------
-// accel/decel: pure power curves — k is the acceleration exponent (k=1 linear, k=3 hard launch/brake).
+// accel/decel: pure power curves, k is the acceleration exponent (k=1 linear, k=3 hard launch/brake).
 export const accel = (t, k = 2.4) => Math.pow(clamp01(t), k);
 export const decel = (t, k = 2.4) => 1 - Math.pow(1 - clamp01(t), k);
-// speedRamp(t, {peak, sharp}) — the editor's speed ramp: velocity is LOW at both ends and peaks at
+// speedRamp(t, {peak, sharp}). The editor's speed ramp: velocity is LOW at both ends and peaks at
 // `peak` (0..1); `sharp` is how violent the acceleration is. Use to remap any progress before it
 // hits a transform: slow-out → rush → slow-in reads as intentional camera work, not a lerp.
 export function speedRamp(t, { peak = 0.5, sharp = 2.4 } = {}) {
@@ -108,7 +108,7 @@ export function speedRamp(t, { peak = 0.5, sharp = 2.4 } = {}) {
   return t < peak ? peak * Math.pow(t / peak, sharp) : 1 - (1 - peak) * Math.pow((1 - t) / (1 - peak), sharp);
 }
 
-// easing registry — lets a theme name its easing as a string (motion.easing) that the scene
+// easing registry: lets a theme name its easing as a string (motion.easing) that the scene
 // resolves to a function. resolveEasing() also accepts a function (passthrough).
 export const EASINGS = {
   linear: (t) => t, easeInCubic, easeOutCubic, easeInOutCubic,
@@ -123,36 +123,36 @@ export const EASINGS = {
   // spring physics (another engine-style): premium settle by default, springStiff = no overshoot
   spring: (t) => spring(t), springStiff: (t) => springStiff(t),
 };
-// GSAP's easing vocabulary, which this engine also carries — `parts[].ease` and `morph.ease` go
+// GSAP's easing vocabulary, which this engine also carries: `parts[].ease` and `morph.ease` go
 // straight to gsap.fromTo and never arrive here. Detected only to give a WRONG-SLOT name a useful
 // error instead of a list of 41 names it is not in. Same cross-registry hint as core/type.js.
 const GSAP_EASE = /^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|rough|slow)\b/;
 
-// isEasingName(n) — would resolveEasing accept this string? The ONE membership test, so a gate can ask
+// isEasingName(n): would resolveEasing accept this string? The ONE membership test, so a gate can ask
 // instead of re-deriving it. core/validate.mjs held its own copy and it was already one registry behind.
 export const isEasingName = (n) => typeof n === 'string'
   && (Object.prototype.hasOwnProperty.call(EASINGS, n) || Object.prototype.hasOwnProperty.call(FEEL, n));
 
-// gsapEase(e, fallback, where) — an author-supplied easing for a GSAP-DRIVEN field → something GSAP
+// gsapEase(e, fallback, where): an author-supplied easing for a GSAP-DRIVEN field → something GSAP
 // will actually honour.
 //
 // WHY THIS EXISTS. `parts[].ease`, `parts[].exitEase`, `morph.ease` and the sting/motion-path eases go
 // straight into `gsap.fromTo`, and GSAP does not refuse a name it does not know: `parseEase` returns
 // undefined and the tween silently runs on GSAP's default. So the two vocabularies were asymmetric.
 // resolveEasing (below) throws on a GSAP name and even explains that GSAP eases are real on these
-// fields — while these fields accepted an ENGINE name and quietly rendered a different curve.
+// fields, while these fields accepted an ENGINE name and quietly rendered a different curve.
 // `blocks/camera-chrome.mjs` names `easeOutCubic` twice and has been running on GSAP's default ever
 // since it was written. Measured: gsap.parseEase('easeOutCubic') is undefined, exactly like
 // gsap.parseEase('totalNonsenseXYZ').
 //
 // An ENGINE name resolves to its own FUNCTION rather than to a GSAP look-alike, because GSAP accepts a
-// function as an ease. So the author gets the curve they named, not the nearest approximation — there
+// function as an ease. So the author gets the curve they named, not the nearest approximation, there
 // is no mapping table to maintain and none to drift.
 export const gsapEase = (e, fallback, where = '') => {
   if (typeof e === 'function') return e;
   if (e == null || e === '') return fallback;
   // GSAP's own vocabulary, asked of GSAP itself when it is loaded (authoritative), and matched by
-  // shape when it is not — this module is imported by tools that never boot a browser.
+  // shape when it is not. This module is imported by tools that never boot a browser.
   const g = typeof window !== 'undefined' && window.gsap;
   if (g ? !!g.parseEase(e) : GSAP_EASE.test(String(e))) return e;
   if (EASINGS[e]) return EASINGS[e];
@@ -166,12 +166,12 @@ export const gsapEase = (e, fallback, where = '') => {
     + ' unchecked name here renders a plausible frame that is not the one asked for.');
 };
 
-// resolveEasing — an easing name or a function → a pure easing function.
+// resolveEasing: an easing name or a function → a pure easing function.
 //
 // ABSENT → easeOutCubic. A WRONG NAME → throw. Those are different questions and this used to answer
 // them the same way: first silently, then (after the typo `ease:"eastOutQuart"` rendered the wrong
 // curve) with a warn-once-and-substitute. But a warning printed once per process, from one of eight
-// render workers, into a log nobody reads, is the same as silence — the argument this repo already
+// render workers, into a log nobody reads, is the same as silence, the argument this repo already
 // makes at formats/scene/scene.js about `fx`. The frame still rendered on the wrong curve.
 //
 // core/fx/progress.js saw this and hand-rolled its own membership test above its call, with the note
@@ -202,9 +202,9 @@ export const resolveEasing = (e) => {
     + 'so it is refused rather than substituted.');
 };
 
-// ---------- motion primitives — all PURE in their input (no state); safe for the purity probe ----------
+// ---------- motion primitives: all PURE in their input (no state); safe for the purity probe ----------
 
-// interpolate(t, inRange, outRange, {easing, clamp}) — multi-stop value mapping. Replaces the
+// interpolate(t, inRange, outRange, {easing, clamp}): multi-stop value mapping. Replaces the
 // repeated `lerp(a, b, clamp01((f - s) / (e - s)))` pattern. easing is applied within each segment.
 export function interpolate(t, inR, outR, { easing = (x) => x, clamp = true } = {}) {
   const n = inR.length;
@@ -215,7 +215,7 @@ export function interpolate(t, inR, outR, { easing = (x) => x, clamp = true } = 
   return lerp(outR[i - 1], outR[i], easing(clamp01(b === a ? 0 : (t - a) / (b - a))));
 }
 
-// spring(t, {bounce, settle}) — analytic underdamped step response (closed-form, PURE in t-seconds).
+// spring(t, {bounce, settle}): analytic underdamped step response (closed-form, PURE in t-seconds).
 // Returns 0 → ~1 with natural overshoot. bounce∈[0,1): 0 = no overshoot, higher = bouncier.
 export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
   if (t <= 0) return 0;
@@ -225,16 +225,16 @@ export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
   return 1 - env * (Math.cos(wd * t) + (zeta * omega / wd) * Math.sin(wd * t));
 }
 
-// spring as a t→t EASING (settles by t=1), so any keyframe track — `motion[].ease`, count `ease`,
-// cut timing — can overshoot-and-settle organically. Same idea as another engine's Easing.spring /
+// spring as a t→t EASING (settles by t=1), so any keyframe track, `motion[].ease`, count `ease`,
+// cut timing, can overshoot-and-settle organically. Same idea as another engine's Easing.spring /
 // another engine' springEase, pure in t. Overshoots >1 mid-way (that's the point); lands exactly at 1.
 //
-// spring() is a damped oscillator in SECONDS, and it has not stopped ringing at t=1 — sampling it
+// spring() is a damped oscillator in SECONDS, and it has not stopped ringing at t=1, sampling it
 // directly over [0,1] made `spring-bouncy` land at 0.96 and STAY there, i.e. an element eased with
 // it never actually reached its keyframe (breaking MOTION-CRAFT rule 5, "settle and hold"). Map t
 // onto each spring's own settle window so the ring completes inside [0,1], and snap the endpoints
 // exactly the way easeOutSettle does. Guarded by the easing-registry contract in lib-test.
-// springWindow — maps the seconds-based spring() into its own settle window so the ring completes inside
+// springWindow: maps the seconds-based spring() into its own settle window so the ring completes inside
 // [0,1] (distinct from the exported springEase({response,dampingFraction}) factory above, which is the
 // iOS-parameterised spring). Renamed off `springEase` to free that name for the public API.
 const springWindow = (o) => { const T = springSettle(o); return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(clamp01(t) * T, o)); };
@@ -242,29 +242,29 @@ Object.assign(EASINGS, {
   spring: springWindow({ bounce: 0.35, settle: 0.92 }),
   'spring-bouncy': springWindow({ bounce: 0.55, settle: 0.94 }),
   'spring-stiff': springWindow({ bounce: 0.12, settle: 0.72 }),
-  // iOS-parameterised spring, house default (ζ=1, no overshoot) — usable by name in any `ease:` slot.
+  // iOS-parameterised spring, house default (ζ=1, no overshoot). Usable by name in any `ease:` slot.
   springEase: springEase(),
 });
-// easeOutSettle — the DEFAULT entrance feel: a SMOOTH decelerate with just a whisper of settle (premium,
-// not bouncy). Low bounce (0.08) so type glides to rest instead of overshooting/wobbling — a visible
+// easeOutSettle. The DEFAULT entrance feel: a SMOOTH decelerate with just a whisper of settle (premium,
+// not bouncy). Low bounce (0.08) so type glides to rest instead of overshooting/wobbling, a visible
 // bounce on every word reads as "too much movement". Endpoints are SNAPPED exactly (0 and 1) so the held
-// state sits at true rest — no sub-pixel residual that would blur text on hold.
+// state sits at true rest. No sub-pixel residual that would blur text on hold.
 export const easeOutSettle = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.08, settle: 0.7 }));
 EASINGS.settle = easeOutSettle;
-// easeOutSnap — the default LAYER entrance feel: a touch more overshoot than easeOutSettle so a card
+// easeOutSnap. The default LAYER entrance feel: a touch more overshoot than easeOutSettle so a card
 // or headline visibly snaps-past-and-settles (the single most recognizable motion-graphics tell)
 // instead of gliding in floaty. Bounce stays modest (0.16) so it reads premium, not toy, and it is
-// used ONLY by the layer-level `rise` — the per-unit type presets keep easeOutSettle so a whole line
+// used ONLY by the layer-level `rise`. The per-unit type presets keep easeOutSettle so a whole line
 // of words does not wobble. Endpoints snapped exactly (true rest on hold, no sub-pixel text blur).
 export const easeOutSnap = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.2, settle: 0.58 }));
 EASINGS.snap = easeOutSnap;
-// springSettle(opts) — seconds for the spring's envelope to decay below eps (size your holds with this).
+// springSettle(opts): seconds for the spring's envelope to decay below eps (size your holds with this).
 export function springSettle({ bounce = 0.3, settle = 0.6, eps = 0.02 } = {}) {
   const omega = (Math.PI * 2) / settle, zeta = Math.min(0.999, Math.max(0.0001, 1 - bounce));
   return -Math.log(eps) / (zeta * omega);
 }
 
-// track(n, fps, beats) — given [{name, dur(seconds)}], return the active beat + its progress.
+// track(n, fps, beats): given [{name, dur(seconds)}], return the active beat + its progress.
 // Replaces hand-rolled PER/FLIP/ENTER/EXIT window math. t01 = normalized [0..1] within the beat.
 export function track(n, fps, beats) {
   const t = n / fps; let acc = 0;
@@ -285,7 +285,7 @@ export function track(n, fps, beats) {
 export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${((1 - easeOutSnap(clamp01(t))) * dist).toFixed(2)}px)` });
 export const fade = (t) => ({ opacity: clamp01(t), transform: 'none' });
 export const pop = (t, from = 0.86) => ({ opacity: clamp01(t * 3), transform: `scale(${from + (1 - from) * easeOutBack(clamp01(t))})` });
-// lift — the entrance for things that should feel ALIVE arriving (faces, cards, chips) rather than
+// lift: the entrance for things that should feel ALIVE arriving (faces, cards, chips) rather than
 // merely appearing. `pop` scales from 0.86, a 14% change that reads as flat at avatar size; this
 // travels further (0.68), rises as it grows, and settles with a small overshoot, so a staggered row
 // reads as a wave rather than a checklist. Pure in t like every other entrance.
@@ -294,13 +294,13 @@ export const lift = (t, { from = 0.68, dist = 30 } = {}) => {
   return { opacity: clamp01(u * 2.2),
     transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px) scale(${(from + (1 - from) * e).toFixed(4)})` };
 };
-// defocus — enters/leaves through focus rather than through space. Paired with `out:"defocus"` it
+// defocus: enters/leaves through focus rather than through space. Paired with `out:"defocus"` it
 // gives the blur exit that reads as "this is done" without moving anything, which is what you want
 // when the layer is a card or a face and sliding it would fight the content.
 export const defocus = (t, { max = 14 } = {}) => {
   const u = clamp01(t);
   // At rest this MUST be `none`, not `blur(0px)`. A zero-radius blur is still a filter, so the
-  // compositor promotes the layer and rasterizes it through the filter pipeline every frame — with
+  // compositor promotes the layer and rasterizes it through the filter pipeline every frame, with
   // ~50 image layers carrying a resting defocus that alone pushed frames past the render timeout.
   // Identity has to be free, because the resting value is written on every frame of the scene.
   if (u >= 1) return { opacity: 1, filter: 'none' };
@@ -314,7 +314,7 @@ export const slide = (t, dir = 'left', dist = 60) => {
 };
 export const applyT = (el, styles) => { if (el) Object.assign(el.style, styles); };
 
-// ---------- seeded, deterministic randomness (another engine `random()` parity — safe for purity) ----------
+// ---------- seeded, deterministic randomness (another engine `random()` parity, safe for purity) ----------
 // hashSeed: number|string -> uint32. random(seed) -> [0,1). Same seed always yields the same value,
 // so per-item jitter/scatter stays byte-identical across render order.
 export function hashSeed(seed) {
@@ -326,7 +326,7 @@ export function hashSeed(seed) {
   return seedFrom(String(seed)); // FNV-1a for strings (defined below, hoisted)
 }
 export const random = (seed) => hashSeed(seed) / 4294967296;
-// value noise in 1D: smooth deterministic wander in [0,1) — good for organic drift/parallax.
+// value noise in 1D: smooth deterministic wander in [0,1), good for organic drift/parallax.
 export function noise(x, seed = 0) {
   const i = Math.floor(x), f = x - i;
   const a = random(`${seed}:${i}`), b = random(`${seed}:${i + 1}`);
@@ -335,7 +335,7 @@ export function noise(x, seed = 0) {
 // stagger(i, step): delay in seconds for item i (step defaults to a gentle 60ms).
 export const stagger = (i, step = 0.06) => i * step;
 
-// shake(t, {amp, freq, decay, seed}) — deterministic camera/impact shake: two incommensurate
+// shake(t, {amp, freq, decay, seed}). Deterministic camera/impact shake: two incommensurate
 // noise() channels, exponentially decaying from t=0. Returns {x, y} px offsets. Apply on impact
 // beats: `translate(${s.x}px, ${s.y}px)` where s = shake(t - hitT, {...}) (zero before the hit).
 export function shake(t, { amp = 14, freq = 11, decay = 3.2, seed = 0 } = {}) {
@@ -346,29 +346,29 @@ export function shake(t, { amp = 14, freq = 11, decay = 3.2, seed = 0 } = {}) {
     y: (noise(t * freq * 1.37, seed + 2) * 2 - 1) * env,
   };
 }
-// pulse(t, {period, amt}) — continuous breathing scale for idle chrome (logos, badges, CTAs).
+// pulse(t, {period, amt}): continuous breathing scale for idle chrome (logos, badges, CTAs).
 export const pulse = (t, { period = 2.4, amt = 0.03 } = {}) => 1 + amt * Math.sin((t / period) * Math.PI * 2);
 
-// trackingFor(px, dark) — optical letter-spacing: display type tightens as it grows (measured off
+// trackingFor(px, dark). Optical letter-spacing: display type tightens as it grows (measured off
 // linear.app's real ramp: −0.008em body → −0.022em hero). Themes opt in via type.optical.
 //
 // `dark` is the POLARITY of the type: true when light ink sits on a dark ground. That is not a taste
 // dial, it is an optics fact about the eye and about the encoder. A light glyph on a dark ground
-// spreads — the bright form irradiates into the dark counters around it — so it reads heavier and the
+// spreads (the bright form irradiates into the dark counters around it) so it reads heavier and the
 // gaps between letters read smaller than the identical pair inverted. The ramp above was measured on
 // dark-on-light type, so on a dark ground it is already too tight before the size term is applied.
 // The correction OPENS the tracking again, and it grows with the type: 0 at 14px body, the full
-// +0.010em the rule names by 120px hero. Body is left alone on purpose — the source fixes body for a
+// +0.010em the rule names by 120px hero. Body is left alone on purpose, the source fixes body for a
 // dark ground with weight and line-height, not with tracking.
 //
 // The lift rides the SAME knots as the base ramp, and rises more slowly than the base falls, so dark
 // tracking is still monotone: bigger type is still tighter type. A flat +0.010em above 32px is the
-// obvious first shape and it is wrong — the base only travels 0.010em across that whole span, so a
+// obvious first shape and it is wrong. The base only travels 0.010em across that whole span, so a
 // flat lift cancels it and re-expands it, and 64px type came out LOOSER than 32px type. That reads as
 // a size ramp with a dent in it.
 //
 // The one-argument form is byte-identical to the ramp it always was: the `dark` branch is not taken,
-// so no caller that has not opted in can move a single glyph. That is deliberate — 21 of 37 themes
+// so no caller that has not opted in can move a single glyph. That is deliberate, 21 of 37 themes
 // here carry a dark palette, and a silent global re-tracking of the library is not a bug fix.
 const DARK_TRACK_LIFT = (px) => interpolate(px, [14, 32, 64, 120], [0, 0.002, 0.006, 0.010]);
 export const trackingFor = (px, dark = false) => {
@@ -376,7 +376,7 @@ export const trackingFor = (px, dark = false) => {
   return (dark ? base + DARK_TRACK_LIFT(px) : base).toFixed(4) + 'em';
 };
 
-// kenBurns(t, dur, {from, to, fx, fy, easing}) — the tasteful photo/image zoom: a slow continuous
+// kenBurns(t, dur, {from, to, fx, fy, easing}). The tasteful photo/image zoom: a slow continuous
 // scale from → to over the layer's window, anchored at focus point (fx, fy in 0..1). Rules that
 // keep it tasteful: total travel ≤ 8% (from 1.0, to ≤ 1.08), NEVER reverses mid-window, eased
 // inOut so velocity is invisible at both ends. Returns {transform, transformOrigin}.
@@ -385,7 +385,7 @@ export function kenBurns(t, dur, { from = 1.0, to = 1.07, fx = 0.5, fy = 0.42, e
   return { transform: `scale(${lerp(from, to, p).toFixed(4)})`, transformOrigin: `${(fx * 100).toFixed(1)}% ${(fy * 100).toFixed(1)}%` };
 }
 
-// ---------- text measuring (another engine measureText/fitText parity — browser only) ----------
+// ---------- text measuring (another engine measureText/fitText parity, browser only) ----------
 // measureText: pixel width of `text` in CSS `font` shorthand. fitText: largest px size (stepping
 // down) whose rendered width fits maxWidth. Call at build time (fonts already loaded in boot).
 let _measureCtx;
@@ -399,7 +399,7 @@ export function fitText(text, maxWidth, { font = (px) => `800 ${px}px Inter`, ma
   while (px > min && measureText(text, font(px)) > maxWidth) px -= step;
   return px;
 }
-// fitBox(el, {maxW, maxH, max, min}) — MULTI-LINE overflow-safe fit (another engine fitTextOnNLines parity).
+// fitBox(el, {maxW, maxH, max, min}): MULTI-LINE overflow-safe fit (another engine fitTextOnNLines parity).
 // `el` must be in-DOM. Binary-searches the largest font-size where the element (wrapping at maxW) fits
 // within maxH AND no word overflows the width. Layout-only → deterministic at build time. Sets + returns px.
 export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
@@ -415,12 +415,12 @@ export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
   return best;
 }
 
-// ---------- sequencing (another engine Sequence/TransitionSeries parity) — pure in n ----------
+// ---------- sequencing (another engine Sequence/TransitionSeries parity), pure in n ----------
 // sequence(n, fps, segments): like track() but with cross-segment transition windows. Each segment
 // = { name, dur, transition? }. Returns the active segment plus `enter` (0→1 over the leading
 // transition) and `exit` (0→1 over the trailing transition), so a scene can drive an in/out
 // transition on each segment. `active` = combined visibility (enter × (1 − exit)).
-// holdLast (default true): the LAST segment never exits — there is no next scene to hand off to,
+// holdLast (default true): the LAST segment never exits, there is no next scene to hand off to,
 // so the ending (usually the CTA) holds at full visibility through the final frame.
 // Pass { holdLast: false } for looping content that should fade back out.
 // ---------- colour parsing (THE one parser) ----------
@@ -506,8 +506,8 @@ export function parseColorRGB(c) {
  *  between dark ink and light ink.
  *
  *  There were two answers and they disagreed on 5.8% of the sRGB cube. `core/boot.js` and
- *  `core/produce.js` both weighted the GAMMA-ENCODED channels — `0.2126r + 0.7152g + 0.0722b` on the
- *  raw 0-1 values — while the four copies that grade contrast linearise first, as WCAG requires. The
+ *  `core/produce.js` both weighted the GAMMA-ENCODED channels, `0.2126r + 0.7152g + 0.0722b` on the
+ *  raw 0-1 values, while the four copies that grade contrast linearise first, as WCAG requires. The
  *  disagreement is concentrated exactly where it hurts: SATURATED colours. `#ef720b`, a hot orange,
  *  reads 0.522 gamma (dark) and 0.304 linear (light), so a brand shipping an orange backdrop got the
  *  producer choosing dark ink for a surface the auditor then graded as light. Neutrals agree, which is
@@ -515,7 +515,7 @@ export function parseColorRGB(c) {
  *  classification under this fix.
  *
  *  The threshold is 0.26 because that is where the old ones already sat. Gamma 0.55 and 140/255 = 0.549
- *  are the same point, and 0.55 in sRGB linearises to ≈0.26 — so this is the SAME line, drawn in the
+ *  are the same point, and 0.55 in sRGB linearises to ≈0.26, so this is the SAME line, drawn in the
  *  space where the weights mean something. */
 export const isLightBg = (c) => {
   const rgb = parseColor(c);
@@ -554,7 +554,7 @@ export function wipe(t, dir = 'left') {
   // `m[dir] || m.left` silently wiped leftward for any unrecognised direction. core/cuts.js owns the
   // vocabulary; this is the same rule at the other call site (docs/MISTAKES.md #360).
   const c = m[dir];
-  if (!c) throw new Error(`wipe: unknown direction "${dir}" — one of: ${Object.keys(m).join(', ')}`);
+  if (!c) throw new Error(`wipe: unknown direction "${dir}", one of: ${Object.keys(m).join(', ')}`);
   return { clipPath: c, WebkitClipPath: c };
 }
 export function circleWipe(t, cx = 50, cy = 50) {
@@ -627,10 +627,10 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 }
 
 // ---------- taste: swappable theme (palette + gradient + fonts + motion personality) ----------
-// A theme is data and OWNS the entire look — there is no default look and no merge-over-defaults.
+// A theme is data and OWNS the entire look. There is no default look and no merge-over-defaults.
 // Named themes (themes/<name>.json) are brand kits; an inline object on data.theme is the one-off
 // escape hatch. A theme missing required keys (core/theme-contract.js) throws at boot, so a video
-// can never render with fallback CSS. Motion personality alone keeps engine defaults — it tunes
+// can never render with fallback CSS. Motion personality alone keeps engine defaults, it tunes
 // HOW primitives move, not what the video looks like.
 export const DEFAULT_MOTION = { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045 };
 

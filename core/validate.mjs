@@ -1,4 +1,4 @@
-// core/validate.mjs — ENGINE CODE, not tooling: core/boot.js imports it, so the browser must be
+// core/validate.mjs, ENGINE CODE, not tooling: core/boot.js imports it, so the browser must be
 // able to resolve it (it ships to the site with the rest of core/). The node:fs use below is a lazy
 // dynamic import in the CLI branch and is never reached in a browser.
 //
@@ -49,7 +49,7 @@ const typeOf = (v) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof
 
 // ---------- LAYOUT: a centring keyword needs something to centre ----------
 // resolveCoords places a box of size `size` on a canvas line. With `w` unset that size is 0, so
-// `x:"center"` puts the layer's LEFT EDGE on the centre line and `x:"right"` hangs it off the frame —
+// `x:"center"` puts the layer's LEFT EDGE on the centre line and `x:"right"` hangs it off the frame,
 // silently, and only visibly wrong at some aspects. The audit has flagged this on the x axis for a
 // while; the rule lives HERE now so it fails at `make validate` AND in boot (which imports this
 // module) before a single frame renders, and so there is exactly one copy of it. Two copies is how
@@ -57,7 +57,7 @@ const typeOf = (v) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof
 //
 // The Y axis is the same trap. It is enforced only where no honest estimate exists: a text layer's
 // height is reliably ~size*1.2 and scenes have tuned around the current behaviour, so applying that
-// estimate would MOVE shipped content. That is the deliberate "measure later" half — see ROADMAP.
+// estimate would MOVE shipped content. That is the deliberate "measure later" half, see ROADMAP.
 const PIN_AXIS = {
   center: ['center', 'optical'], top: ['center', 'top'], bottom: ['center', 'bottom'],
   left: ['left', 'center'], right: ['right', 'center'],
@@ -70,20 +70,20 @@ const PIN_AXIS = {
 };
 // keywords that SUBTRACT the layer's size, and are therefore meaningless without one
 const NEEDS_SIZE = new Set(['center', 'optical', 'third1', 'third2', 'right', 'bottom']);
-// types whose extent the engine can estimate from `size` — excluded from the y rule for now
+// types whose extent the engine can estimate from `size`, excluded from the y rule for now
 const TEXTISH = new Set(['text', 'count']);
 
 export function layoutErrors(cfg) {
   const out = [];
   // `panWith` names another layer's `id`, and the engine throws on a bad reference at BUILD time. That
   // is loud but late: the author has already rendered. Same class as a bad relative `start`, and cheap
-  // to answer here, so the gate answers it. A pan source with no motion is the other half — the layer
+  // to answer here, so the gate answers it. A pan source with no motion is the other half, the layer
   // would silently stop panning, which is exactly the failure the feature exists to remove.
   const ids = new Set((cfg.layers || []).filter((L) => isObj(L) && L.id).map((L) => L.id));
   (cfg.layers || []).forEach((L, i) => {
     if (!isObj(L) || typeof L.panWith !== 'string') return;
     const label = `layers[${i}] (${L.type || 'text'})`;
-    if (!ids.has(L.panWith)) out.push(`${label}: panWith "${L.panWith}" — no layer has that \`id\`. Known ids: ${[...ids].join(', ') || '(none — give the pan source an \`id\`)'}.`);
+    if (!ids.has(L.panWith)) out.push(`${label}: panWith "${L.panWith}". No layer has that \`id\`. Known ids: ${[...ids].join(', ') || '(none, give the pan source an \`id\`)'}.`);
     else {
       const src = (cfg.layers || []).find((x) => isObj(x) && x.id === L.panWith);
       if (src === L) out.push(`${label}: panWith "${L.panWith}" is this layer itself.`);
@@ -91,28 +91,28 @@ export function layoutErrors(cfg) {
       else if (!Array.isArray(src.motion) || !src.motion.length) out.push(`${label}: panWith "${L.panWith}", but that layer has no \`motion\` track to share.`);
     }
   });
-  // `anchor` names another layer's `id`, and a name that matches nothing is skipped in SILENCE —
+  // `anchor` names another layer's `id`, and a name that matches nothing is skipped in SILENCE,
   // `resolveAnchors` does `const T = L.anchor && byId[L.anchor]; if (!T) continue;`, so a typo leaves the
   // layer at whatever x/y it happened to carry and the annotation quietly stops pointing at anything.
   // This is the identical shape `panWith` had, and `panWith` got a hard error for it while `anchor`,
   // three lines away in the same file, kept the silent skip (docs/MISTAKES.md #199).
   (cfg.layers || []).forEach((L, i) => {
     if (!isObj(L) || typeof L.anchor !== 'string' || ids.has(L.anchor)) return;
-    out.push(`layers[${i}] (${L.type || 'text'}): anchor "${L.anchor}" — no layer has that \`id\`, so the anchoring is skipped and this layer stays wherever its own x/y put it. Known ids: ${[...ids].join(', ') || '(none — give the target an `id`)'}.`);
+    out.push(`layers[${i}] (${L.type || 'text'}): anchor "${L.anchor}". No layer has that \`id\`, so the anchoring is skipped and this layer stays wherever its own x/y put it. Known ids: ${[...ids].join(', ') || '(none, give the target an `id`)'}.`);
   });
 
-  // `gsap:{from,to}` was accepted for as long as it existed and never interpolated — it rendered a
+  // `gsap:{from,to}` was accepted for as long as it existed and never interpolated, it rendered a
   // layer flickering between its start and end poses. Removed, not repaired, because `motion` is a
   // real keyframe track and strictly stronger. A hard error rather than silence: an author reaching
   // for it has a moving layer in mind and deserves to be pointed at the thing that moves it (#208).
   (cfg.layers || []).forEach((L, i) => {
     if (!isObj(L) || !isObj(L.gsap)) return;
-    // GSAP's property names are not ours, so translate rather than echoing them back — a message that
+    // GSAP's property names are not ours, so translate rather than echoing them back, a message that
     // suggests `"width":…` inside a motion key is telling the author to write the next silent no-op.
     const RENAME = { width: 'w', height: 'h', rotation: 'rot', rotate: 'rot', autoAlpha: 'opacity' };
     const g = L.gsap;
     const keys = [...new Set([...Object.keys(g.from || {}), ...Object.keys(g.to || {})])].map((k) => RENAME[k] || k);
-    out.push(`layers[${i}] (${L.type || 'text'}): \`gsap\` is no longer a layer prop — it never interpolated under the seek model and rendered flicker. Use a \`motion\` track instead: "motion": [{"t":0,${keys.map((k) => `"${k}":…`).join(',')}}, {"t":${(L.duration ?? 2).toFixed(2)},${keys.map((k) => `"${k}":…`).join(',')},"ease":"easeOutCubic"}]. Keys take x, y, scale, rot, opacity, blur, w, h, track.`);
+    out.push(`layers[${i}] (${L.type || 'text'}): \`gsap\` is no longer a layer prop. It never interpolated under the seek model and rendered flicker. Use a \`motion\` track instead: "motion": [{"t":0,${keys.map((k) => `"${k}":…`).join(',')}}, {"t":${(L.duration ?? 2).toFixed(2)},${keys.map((k) => `"${k}":…`).join(',')},"ease":"easeOutCubic"}]. Keys take x, y, scale, rot, opacity, blur, w, h, track.`);
   });
 
   // A `w`/`h` key animates the layer's BOX, and there are exactly two ways it can be authored so that
@@ -138,13 +138,13 @@ export function layoutErrors(cfg) {
   // A motion track that REVERSES at speed is a snap, and no easing hides it: the layer is travelling one
   // way and the next frame throws it back the other. Measured on the RESOLVED track (pans merged in) by
   // SAMPLING AT 30fps, because neither of the cheaper tests works. Key-to-key average velocity calls an
-  // eased arc a reversal — `rec2-gates`' dot swings 777px out and 525px back with easeInOutCubic on both
+  // eased arc a reversal, `rec2-gates`' dot swings 777px out and 525px back with easeInOutCubic on both
   // sides, so its velocity passes through zero at the turn and it is perfectly smooth. Peak acceleration
   // alone is no better: `creed-launch` hits 134 px/frame^2 accelerating in a straight line, harder than
   // the defect this exists to catch. Only direction-change AND magnitude together separate them.
   //
   // The defect: `cadence`'s button rode a shared pan to -512 while its own next key said -318, so it
-  // jumped 194px right in two frames — 126 px/frame^2 against the travel — and every gate stayed green
+  // jumped 194px right in two frames (126 px/frame^2 against the travel) and every gate stayed green
   // (docs/MISTAKES.md #194). The author cannot see the pan's accumulated value, so the arithmetic has to
   // be done for them.
   const FPS = 30, REV_ACCEL = 60;
@@ -168,25 +168,25 @@ export function layoutErrors(cfg) {
     for (let n = 2; n < pts.length; n++) {
       const v1 = [pts[n - 1][0] - pts[n - 2][0], pts[n - 1][1] - pts[n - 2][1]];
       const v2 = [pts[n][0] - pts[n - 1][0], pts[n][1] - pts[n - 1][1]];
-      if (v1[0] * v2[0] + v1[1] * v2[1] >= 0) continue;                  // same direction — accelerating, not snapping
+      if (v1[0] * v2[0] + v1[1] * v2[1] >= 0) continue;                  // same direction, accelerating, not snapping
       const accel = Math.hypot(v2[0] - v1[0], v2[1] - v1[1]);
       if (accel < REV_ACCEL) continue;                                   // a settle reverses gently; let it
       const at = (t0 + n / FPS).toFixed(2);
       const label = `layers[${i}] (${L.type || 'text'}${L.id ? ` #${L.id}` : ''})`;
-      out.push(`${label}: motion reverses at t=${at}s — moving (${v1[0].toFixed(0)}, ${v1[1].toFixed(0)})px/frame, then (${v2[0].toFixed(0)}, ${v2[1].toFixed(0)})px/frame the other way (${accel.toFixed(0)} px/frame\u00b2). That is a snap, not a move.${typeof L.panWith === 'string' ? ` This layer pans with "${L.panWith}", which has already carried it somewhere by then — your own keys continue from THERE, not from the layer's origin. Peel off before the pan passes your destination.` : ' A settle should reverse gently; check the key before it.'}`);
+      out.push(`${label}: motion reverses at t=${at}s, moving (${v1[0].toFixed(0)}, ${v1[1].toFixed(0)})px/frame, then (${v2[0].toFixed(0)}, ${v2[1].toFixed(0)})px/frame the other way (${accel.toFixed(0)} px/frame\u00b2). That is a snap, not a move.${typeof L.panWith === 'string' ? ` This layer pans with "${L.panWith}", which has already carried it somewhere by then. Your own keys continue from THERE, not from the layer's origin. Peel off before the pan passes your destination.` : ' A settle should reverse gently; check the key before it.'}`);
       break;                                                             // one report per layer; the first is the cause
     }
   });
 
   // `becomes` is a claim about a BOUNDARY: this form ends and that one takes it over. If the incoming
   // layer does not start where the outgoing one ends, the handover happens over a gap or an overlap and
-  // the match silently stops reading — which is the whole failure the feature exists to remove, so it is
+  // the match silently stops reading, which is the whole failure the feature exists to remove, so it is
   // checked rather than trusted.
   (cfg.layers || []).forEach((A, i) => {
     if (!isObj(A) || typeof A.becomes !== 'string') return;
     const label = `layers[${i}] (${A.type || 'text'}${A.id ? ` #${A.id}` : ''})`;
     if (!ids.has(A.becomes)) {
-      out.push(`${label}: becomes "${A.becomes}" — no layer has that \`id\`. Known ids: ${[...ids].join(', ') || '(none)'}.`);
+      out.push(`${label}: becomes "${A.becomes}". No layer has that \`id\`. Known ids: ${[...ids].join(', ') || '(none)'}.`);
       return;
     }
     const B = (cfg.layers || []).find((x) => isObj(x) && x.id === A.becomes);
@@ -204,11 +204,11 @@ export function layoutErrors(cfg) {
     if (L0.anchor) return;                      // anchor overwrites x/y downstream
     const label0 = `layers[${i}] (${L0.type || 'text'}${typeof L0.text === 'string' ? ` "${onScreenText(L0.text).slice(0, 20)}"` : ''})`;
     // `aspects` is checked as the MERGED layer, once per declared aspect. An override that drops `w` while
-    // keeping a centring keyword is the same trap, visible only at that one canvas — which is the
+    // keeping a centring keyword is the same trap, visible only at that one canvas, which is the
     // failure mode per-aspect overrides exist to prevent, so it cannot be the failure mode they add.
     const variants = [[L0, label0]];
     if (isObj(L0.aspects)) for (const [k, over] of Object.entries(L0.aspects)) {
-      if (!ASPECTS[k]) { out.push(`${label0}: aspects."${k}" is not a known aspect — one of ${Object.keys(ASPECTS).join(', ')}`); continue; }
+      if (!ASPECTS[k]) { out.push(`${label0}: aspects."${k}" is not a known aspect. One of ${Object.keys(ASPECTS).join(', ')}`); continue; }
       if (!isObj(over)) { out.push(`${label0}: aspects."${k}" must be an object of layer props`); continue; }
       variants.push([{ ...L0, ...over }, `${label0} at "${k}"`]);
     }
@@ -228,7 +228,7 @@ function check(L, label, out) {
     if (kwy && NEEDS_SIZE.has(kwy) && L.h == null && !TEXTISH.has(L.type || 'text'))
       out.push(`${label}: ${how(kwy, 'y')} positions a box of height \`h\`, but \`h\` is unset (=0), so the layer's top edge lands on the ${kwy} line. Set \`h\`.`);
     // `dx`/`dy` are RELATIVE offsets, read only when the layer is anchored to another (scene.html:177).
-    // Without `anchor` they are dead config that reads as an intended offset and silently does nothing —
+    // Without `anchor` they are dead config that reads as an intended offset and silently does nothing,
     // which is how two pin-centred lines land on top of each other (they both ignore dy). Fail loudly.
     if ((L.dx != null || L.dy != null) && L.anchor == null)
       out.push(`${label}: \`dx\`/\`dy\` are offsets from an anchored layer and are IGNORED without \`anchor\` (they will not nudge a \`pin\`ned/\`x\`/\`y\` layer). To stack or offset here: set \`anchor\` (+ \`at\`), or put the lines in one text layer with \`<br>\`, or use \`pin\`/\`y\`.`);
@@ -338,14 +338,14 @@ export function captionErrors(cfg) {
     if (!isFinite(t0) || !isFinite(t1)) return;   // the schema reports a missing/NaN t0/t1
     // `align` and the shape of `words` are the schema's job (fields.captions.item), and duplicating
     // an enum here printed the same refusal twice under two wordings.
-    if (t1 <= t0) out.push(`captions[${i}] window [${t0}, ${t1}] is empty (t1 must be > t0) — it would never draw`);
+    if (t1 <= t0) out.push(`captions[${i}] window [${t0}, ${t1}] is empty (t1 must be > t0), it would never draw`);
     // A horizontal pin needs a box to pin. `top`, `bottom` and `center` only ask for a vertical
     // position and the stylesheet's box still applies, so those are complete on their own. `left`,
     // `right` and the corners are asking to move an edge, and a caption has no width until one is
     // declared, so the request cannot be honoured. core/boot.js therefore leaves it alone, and this
     // says so out loud rather than letting the caption render where it always did.
     if (H_PINS.includes(c.pin) && c.w == null)
-      out.push(`captions[${i}] pin "${c.pin}" moves a horizontal edge but the caption declares no w — `
+      out.push(`captions[${i}] pin "${c.pin}" moves a horizontal edge but the caption declares no w, `
         + 'add w (px or "45%"), or use pin "top" / "bottom" / "center", which need no box');
   });
   // Sorted by start, so one pass finds every overlap and the message names the pair in author order.
@@ -354,7 +354,7 @@ export function captionErrors(cfg) {
   for (let k = 1; k < order.length; k++) {
     const prev = order[k - 1], cur = order[k];
     if (+cur.c.t0 < +prev.c.t1 - 1e-6)
-      out.push(`captions[${cur.i}] starts at ${+cur.c.t0} while captions[${prev.i}] runs to ${+prev.c.t1} — `
+      out.push(`captions[${cur.i}] starts at ${+cur.c.t0} while captions[${prev.i}] runs to ${+prev.c.t1}, `
         + 'the renderer draws the FIRST match and one caption element, so the later line is dropped for the overlap');
   }
   return out;
@@ -375,7 +375,7 @@ export function htmlLayerErrors(cfg) {
     // ONE source per fragment, and at least one. `html` is the markup inline; `src` names a .html file
     // preloaded into the same place. Both is ambiguous rather than layered, and neither renders nothing.
     if (L.html != null && L.src != null)
-      out.push(`${at} (html) declares BOTH \`html\` and \`src\` — a fragment has ONE source. \`html\` is the markup inline; \`src\` is the same markup in a file. Delete whichever is the leftover.`);
+      out.push(`${at} (html) declares BOTH \`html\` and \`src\`. A fragment has ONE source. \`html\` is the markup inline; \`src\` is the same markup in a file. Delete whichever is the leftover.`);
     if (L.html == null && L.src == null)
       out.push(`${at} (html) declares neither \`html\` nor \`src\`, so it renders an empty box. Put the markup inline in \`html\`, or point \`src\` at a .html fragment.`);
     if (L.html == null) return;
@@ -387,7 +387,7 @@ export function htmlLayerErrors(cfg) {
 }
 
 // CSS PASSTHROUGH. `css` on a layer reaches CSS the layer vocabulary does not name (a box gradient,
-// `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration) — see
+// `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration), see
 // core/layers/util.js's `applyCss`, which is the ONLY place that reads it, and reads it ONCE, at build
 // time. That is exactly why a key the ENGINE rewrites every frame must be refused here rather than
 // applied: a build-time write to `opacity`/`transform`/etc. is silently erased the instant the render
@@ -395,17 +395,17 @@ export function htmlLayerErrors(cfg) {
 // ignores (docs/MISTAKES.md #213, #369, #373, #375). Every refusal names the vocabulary that already
 // owns the job, never just "no".
 const OWNED_CSS = {
-  opacity: 'written every frame from the enter/exit envelope (core/clips.js:220) — use `anim` / `motion`',
-  transform: 'written every frame by motion tracks and named entrances (core/clips.js, GSAP) — use `motion`',
-  animation: 'killed engine-wide (core/tokens.css:28, `* { animation: none !important }`) because a frame is seeked, not played — use `parts` for a seeked entrance into your own markup, or drive a value from `vars`',
-  transition: 'killed engine-wide (core/tokens.css:28, `* { transition: none !important }`) for the same reason as `animation` — use `parts` or `vars`',
-  position: 'the coordinate system the engine lays the layer out with (formats/scene/scene.js) — use `x` / `y` / `w`',
-  left: "written from the layer's `x` on every build (formats/scene/scene.js) — set `x` instead",
-  top: "written from the layer's `y` on every build (formats/scene/scene.js) — set `y` instead",
-  width: "written from the layer's `w`, and again by the type-specific builder — set `w` instead",
-  height: "written from the layer's `h` by the type-specific builder (core/layers/*.js) — set `h` instead",
-  zIndex: "written every frame from the layer's stacking order (core/clips.js:150, driven by `track`) — set `track` instead",
-  pointerEvents: 'written every frame from the layer\'s on/off-window state (core/clips.js) — there is no authoring override for it',
+  opacity: 'written every frame from the enter/exit envelope (core/clips.js:220), use `anim` / `motion`',
+  transform: 'written every frame by motion tracks and named entrances (core/clips.js, GSAP), use `motion`',
+  animation: 'killed engine-wide (core/tokens.css:28, `* { animation: none !important }`) because a frame is seeked, not played, use `parts` for a seeked entrance into your own markup, or drive a value from `vars`',
+  transition: 'killed engine-wide (core/tokens.css:28, `* { transition: none !important }`) for the same reason as `animation`, use `parts` or `vars`',
+  position: 'the coordinate system the engine lays the layer out with (formats/scene/scene.js), use `x` / `y` / `w`',
+  left: "written from the layer's `x` on every build (formats/scene/scene.js), set `x` instead",
+  top: "written from the layer's `y` on every build (formats/scene/scene.js), set `y` instead",
+  width: "written from the layer's `w`, and again by the type-specific builder, set `w` instead",
+  height: "written from the layer's `h` by the type-specific builder (core/layers/*.js), set `h` instead",
+  zIndex: "written every frame from the layer's stacking order (core/clips.js:150, driven by `track`), set `track` instead",
+  pointerEvents: 'written every frame from the layer\'s on/off-window state (core/clips.js), there is no authoring override for it',
 };
 
 export function cssErrors(cfg) {
@@ -415,14 +415,14 @@ export function cssErrors(cfg) {
     (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
     if (!isObj(L.css)) return;
     for (const k of Object.keys(L.css)) {
-      if (OWNED_CSS[k]) out.push(`${at}: css.${k} is engine-owned — ${OWNED_CSS[k]}.`);
+      if (OWNED_CSS[k]) out.push(`${at}: css.${k} is engine-owned, ${OWNED_CSS[k]}.`);
     }
   };
   (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
   return out;
 }
 
-// EXTERNAL HTML — markup a scene NAMES but does not contain. Two kinds: a `src` fragment on an html
+// EXTERNAL HTML, markup a scene NAMES but does not contain. Two kinds: a `src` fragment on an html
 // layer or a bg window, and a CAPTURED component's markup. Both hit the same dead-CSS trap the inline
 // `html` string has been checked for all along, and neither was ever looked at: `grep component` in this
 // file returned nothing, while core/tokens.css:28 disables transition and animation for all three alike.
@@ -440,7 +440,7 @@ export function externalHtmlErrors(cfg, read) {
     const text = read(src);
     if (text == null) return; // existence is asset-check's question, and the render's
     let markup;
-    try { markup = pick(text); } catch (e) { out.push({ level: 'error', msg: `${at} "${src}" is unreadable — ${e.message}` }); return; }
+    try { markup = pick(text); } catch (e) { out.push({ level: 'error', msg: `${at} "${src}" is unreadable, ${e.message}` }); return; }
     const timeCss = timeCssUsed(markup);
     if (timeCss) out.push({ level, msg: `${at} "${src}" uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive the motion from \`var(--t)\` / a \`vars\` custom property instead.` });
   };
@@ -495,7 +495,7 @@ export function bgErrors(cfg) {
     if (!isObj(b)) return;
     const at = `bg[${i}]`;
     // ONE source per window. `html` paints in the DOM and `preset` paints on canvas; a window naming
-    // both looks like a layered backdrop and is not one — the html wins and the preset is silently
+    // both looks like a layered backdrop and is not one. The html wins and the preset is silently
     // dropped, which is the silent-substitution failure this codebase keeps paying for.
     // `src` is `html` in a file, so it belongs in the same one-source set: it does not layer over a
     // preset, and naming it beside `html` is the same ambiguity one level down.
@@ -504,21 +504,21 @@ export function bgErrors(cfg) {
       // The message names the PAIR that actually collided. It used to explain html-versus-preset
       // whatever the conflict was, so `html` beside `src` was refused with a sentence about canvas
       // that had nothing to do with it. A gate that names the wrong cause costs more than silence.
-      out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')} — a window has ONE backdrop. `
+      out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')}, a window has ONE backdrop. `
         + (b.html != null && b.src != null
           ? '`src` IS `html`, in a file, so naming both says the same backdrop twice and only one can win. Keep the file and drop the inline copy, or the other way round.'
           : '`html` and `src` paint in the DOM, `preset` and `use` paint on canvas; they do not layer. Split them into two windows (with `from`/`to`) if you want both in one video.'));
     const authored = b.html != null || b.src != null;
     if (!authored) {
-      if (b.tone != null) out.push(`${at} sets \`tone\` but has no \`html\` — tone declares the lightness of a HAND-AUTHORED backdrop so the engine knows which text ink to default to. A preset's lightness is already known.`);
+      if (b.tone != null) out.push(`${at} sets \`tone\` but has no \`html\`, tone declares the lightness of a HAND-AUTHORED backdrop so the engine knows which text ink to default to. A preset's lightness is already known.`);
       // `opts` tunes the fx a preset is made of, so the vocabulary is PER PRESET: `liquid` takes
       // scale/speed/warp/edge0…, `paperDots` takes spacing/period/drift…. Anything else used to be
-      // accepted by the schema, dropped by applyBgOver and never read — correct-looking JSON, unchanged
+      // accepted by the schema, dropped by applyBgOver and never read, correct-looking JSON, unchanged
       // render (docs/MISTAKES.md #157). Say which keys this preset actually has.
       // A `use:"theme"` window names no preset here (it comes from themes/<name>.json), so it cannot be
       // resolved without the theme; applyBgOver throws on it at build time instead.
       // bgPreset now THROWS on an unknown preset (#361). The validator must REPORT a bad name, never
-      // crash on one, so it only resolves a preset the registry knows — the enum check above has
+      // crash on one, so it only resolves a preset the registry knows, the enum check above has
       // already recorded the error for anything else.
       const bgKnown = BG_NAMES.includes(b.preset || 'paper');
       if (isObj(b.opts) && b.use == null && bgKnown)
@@ -543,12 +543,12 @@ export function bgErrors(cfg) {
       return;
     }
     if (b.opts != null)
-      out.push(`${at} sets \`opts\` on a hand-authored (\`html\`) backdrop — \`opts\` tunes the canvas fx a PRESET is built from, and an html window paints no fx, so nothing would read it. Style the fragment itself.`);
+      out.push(`${at} sets \`opts\` on a hand-authored (\`html\`) backdrop, \`opts\` tunes the canvas fx a PRESET is built from, and an html window paints no fx, so nothing would read it. Style the fragment itself.`);
     const timeCss = b.html != null ? timeCssUsed(b.html) : null; // a `src` fragment is read off disk by fragmentFileErrors
     if (timeCss)
       out.push(`${at} uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive motion from \`var(--t)\` (seconds) or \`var(--p)\` (0→1 across this window) instead, e.g. \`transform: rotate(calc(var(--t) * 12deg))\`. Both are written every frame.`);
     if (b.tone == null)
-      out.push(`${at} is hand-authored but declares no \`tone\` ("light" or "dark") — the engine cannot read the lightness out of your CSS, so a layer with no explicit \`color\` falls back to the theme's ink and may land white-on-white. Say which it is.`);
+      out.push(`${at} is hand-authored but declares no \`tone\` ("light" or "dark"). The engine cannot read the lightness out of your CSS, so a layer with no explicit \`color\` falls back to the theme's ink and may land white-on-white. Say which it is.`);
   });
   return out;
 }
@@ -556,7 +556,7 @@ export function bgErrors(cfg) {
 // NAMED GSAP EFFECTS: `fx` (entrance/loop/text) and `fxOut` (exit) reference stored effects by name.
 // scene.html only console.warns on a typo (a warn the render swallows), so an unknown name shipped an
 // unanimated layer silently. Catch it here, loudly, with a "did you mean" pointer. Also: `fxOut` and a
-// motion `out` both drive the exit transform — a layer may declare only one, else they fight.
+// motion `out` both drive the exit transform. A layer may declare only one, else they fight.
 export function fxErrors(cfg) {
   const out = [];
   const layers = Array.isArray(cfg.layers) ? cfg.layers : [];
@@ -564,7 +564,7 @@ export function fxErrors(cfg) {
   layers.forEach((L, i) => {
     if (!isObj(L)) return;
     // ASK THE REGISTRY, do not keep a second copy of what it knows. This used to import GSAP_FX and
-    // re-implement the membership test, so the vocabulary lived in two places — the shape that made the
+    // re-implement the membership test, so the vocabulary lived in two places, the shape that made the
     // snap signature go blind (#159) and the silent-fallback gate miss its own blind spot (#363).
     // GSAP_REGISTRY.has() is the same knowledge, asked rather than duplicated. docs/MISTAKES.md #364.
     if (L.fx != null) {
@@ -578,18 +578,18 @@ export function fxErrors(cfg) {
       const nm = nameOf(L.fxOut);
       if (nm == null) out.push(`layers[${i}].fxOut needs a name (string or {name})`);
       else if (!GSAP_EXIT_REGISTRY.has(nm)) out.push(`layers[${i}].fxOut "${nm}" is not a known exit.${nearest(nm, EXIT_FX)}`);
-      if (L.out != null) out.push(`layers[${i}] declares both "out" and "fxOut" — they both own the exit. Keep one.`);
+      if (L.out != null) out.push(`layers[${i}] declares both "out" and "fxOut", they both own the exit. Keep one.`);
     }
-    // splitText (GSAP line reveal) re-wraps the layer AFTER the engine's own `split` already did — the two
+    // splitText (GSAP line reveal) re-wraps the layer AFTER the engine's own `split` already did, the two
     // splitters fight. splitText is line-level only; char/word stay with `split`.
-    if (L.splitText != null && L.split != null) out.push(`layers[${i}] declares both "split" and "splitText" — they both re-wrap the text. Use "split" for char/word, "splitText" for masked lines.`);
+    if (L.splitText != null && L.split != null) out.push(`layers[${i}] declares both "split" and "splitText". They both re-wrap the text. Use "split" for char/word, "splitText" for masked lines.`);
   });
   return out;
 }
 
 // A KNOB SET ON A PRESET THAT IGNORES IT. Same bug class as an unknown layer PROP, which
 // core/layers/vocabulary.js has thrown on for a long time: a value written, accepted, and then read by
-// nobody. The two were graded differently for no reason anybody could defend — the prop was refused at
+// nobody. The two were graded differently for no reason anybody could defend, the prop was refused at
 // boot, the knob was a warning from `scripts/gates/knobs-audit.mjs` that only appeared if you ran it.
 // So it moved here, beside every other refusal, and the gate kept only its manifest half.
 //
@@ -599,11 +599,11 @@ export function fxErrors(cfg) {
 // WHERE IT REFUSES, AND WHERE IT DELIBERATELY STAYS QUIET. Only a preset core/knobs.js LISTS is
 // graded. A preset with no manifest entry (`colorWave`, `shimmerWave`, `globe` today) is one the
 // manifest has nothing to say about, and refusing a dial on the strength of a list that does not
-// cover it is guessing, not checking — all three read real per-preset opts in core/type.js and
+// cover it is guessing, not checking. All three read real per-preset opts in core/type.js and
 // core/three-fx.js, and grading them against `_shared` alone would refuse four shipped films for a
 // hole in the manifest. Fill the manifest and they start being checked, with no change here.
 const KNOB_SLOTS = [
-  // `presetOpts` holds ONLY dials, so any key that is not one is dead — typos included.
+  // `presetOpts` holds ONLY dials, so any key that is not one is dead, typos included.
   { family: 'kinetic', preset: (L) => L.preset, opts: (L) => (isObj(L.presetOpts) ? L.presetOpts : null), where: 'presetOpts' },
   // A three scene's dials sit on the LAYER, beside generic props (x, y, start…), so only a key that is
   // a real knob for a SIBLING scene can be called misused. Anything else is somebody's layout.
@@ -632,7 +632,7 @@ export function knobErrors(cfg) {
         if (names.has(key)) continue;
         if (siblings && !siblings.has(key)) continue;
         const site = slot.where ? `${at}.${slot.where}` : at;
-        out.push(`${site} sets \`${key}\`, which the ${slot.family} preset "${preset}" does not read — it reads `
+        out.push(`${site} sets \`${key}\`, which the ${slot.family} preset "${preset}" does not read, it reads `
           + `${legal.map((k) => `\`${k.name}\``).join(', ')}. Written where you have it the render is unchanged and `
           + `nothing says so.${nearest(key, [...names])}`);
       }
@@ -652,7 +652,7 @@ export function seamErrors(cfg) {
   const out = [];
   const seams = Array.isArray(cfg.seams) ? cfg.seams : [];
   if (!seams.length) return out;
-  // effective duration: explicit, else the last layer's end (+0.4 tail) — mirrors scene.html.
+  // effective duration: explicit, else the last layer's end (+0.4 tail), mirrors scene.html.
   let dur = typeof cfg.duration === 'number' ? cfg.duration : 0;
   if (!dur) for (const L of cfg.layers || []) { if (isObj(L) && typeof L.start !== 'string') dur = Math.max(dur, (L.start ?? 0) + (L.duration ?? 2)); }
   dur = +(dur + (typeof cfg.duration === 'number' ? 0 : 0.4)).toFixed(2);
@@ -661,7 +661,7 @@ export function seamErrors(cfg) {
     const t = +s.t, d = +(s.dur ?? 0.5);
     if (!isFinite(t)) return; // schema reports the missing/NaN t
     if (t < 0) out.push(`seams[${i}] t must be ≥ 0 (got ${s.t})`);
-    if (dur && t + d > dur + 1e-6) out.push(`seams[${i}] window [${t}, ${(t + d).toFixed(2)}] runs past the video (${dur}s) — move it earlier or shorten dur`);
+    if (dur && t + d > dur + 1e-6) out.push(`seams[${i}] window [${t}, ${(t + d).toFixed(2)}] runs past the video (${dur}s), move it earlier or shorten dur`);
   });
   return out;
 }
@@ -718,7 +718,7 @@ function noEmdash(v, path, errors) {
     const at = seen.indexOf('\u2014');
     // Quote the RENDERED text around the offence, not the head of the source: an em-dash 900
     // characters into a fragment was reported with a 48-character snippet that did not contain it.
-    if (at >= 0) errors.push(`${path || 'data'} contains an em-dash (—): "${seen.slice(Math.max(0, at - 24), at + 25).trim()}" — use , . or ·`);
+    if (at >= 0) errors.push(`${path || 'data'} contains an em-dash ( (): "${seen.slice(Math.max(0, at - 24), at + 25).trim()}") use , . or ·`);
   }
   else if (Array.isArray(v)) v.forEach((x, i) => noEmdash(x, `${path}[${i}]`, errors));
   else if (isObj(v)) for (const [k, x] of Object.entries(v)) { if (k === 'module' || k === 'theme') continue; noEmdash(x, path ? `${path}.${k}` : k, errors); }
@@ -730,7 +730,7 @@ function noEmdash(v, path, errors) {
 // own interpolator and takes an EASINGS name. Both are correct, and a name from one in a field of the
 // other is the #355 wrong-slot mistake, which is the single most-repeated defect in this log.
 //
-// resolveEasing now throws on an unknown name (#367), so this is not about catching it at all — it is
+// resolveEasing now throws on an unknown name (#367), so this is not about catching it at all, it is
 // about catching it in a second at author-check instead of mid-render on whichever frame first samples
 // that key. The exclusion list below is the whole rule: get it wrong in the other direction and this
 // invents findings on `showcase-lumen` and `showcase-type-labour`, which name GSAP eases correctly.
@@ -748,18 +748,18 @@ function easeNames(v, path, errors, underGsap = false) {
       : [];
     if (!gsap) for (const nm of leaves) {
       // ASK THE RESOLVER'S OWN PREDICATE. This used to test `EASINGS[nm]` by hand, which is a second
-      // copy of the membership rule — and the day feel words became resolvable, the copy would have
+      // copy of the membership rule, and the day feel words became resolvable, the copy would have
       // reported every one of them as unknown while the renderer accepted it. Same argument as #367.
       if (isEasingName(nm)) continue;
       errors.push(`${at}: unknown easing "${nm}". This field is driven by the engine's own interpolator, `
         + `so it takes an EASINGS name.${/^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|rough|slow)\b/.test(nm)
-          ? ` "${nm}" is a GSAP ease — real here, but only on a GSAP-driven field (parts[].ease, morph.ease, fx:{ease}).`
+          ? ` "${nm}" is a GSAP ease, real here, but only on a GSAP-driven field (parts[].ease, morph.ease, fx:{ease}).`
           : nearest(nm, [...Object.keys(EASINGS), ...Object.keys(FEEL)])}`);
     }
     easeNames(x, at, errors, gsap);
   }
 }
-/** easeErrors(cfg) → messages[]. Exported so the exclusion list is testable on its own — it is the
+/** easeErrors(cfg) → messages[]. Exported so the exclusion list is testable on its own, it is the
  *  half of this rule that can rot silently, because getting it wrong reads as a stricter gate. */
 export function easeErrors(cfg) { const out = []; easeNames(cfg, '', out); return out; }
 
@@ -779,10 +779,10 @@ function deprecatedEntranceWarns(data) {
   for (const [i, L] of (data.layers || []).entries()) {
     const names = L.fx == null ? [] : (Array.isArray(L.fx) ? L.fx : [L.fx]).map((x) => (typeof x === 'string' ? x : x && x.name));
     for (const nm of names) if (nm && DEPRECATED_FX[nm])
-      warns.push(`layers[${i}].fx "${nm}" is deprecated — use ${DEPRECATED_FX[nm]}. It does the same thing, works on any layer type, and there are four vocabularies for an entrance already (#364).`);
+      warns.push(`layers[${i}].fx "${nm}" is deprecated, use ${DEPRECATED_FX[nm]}. It does the same thing, works on any layer type, and there are four vocabularies for an entrance already (#364).`);
     const outNm = L.fxOut == null ? null : (typeof L.fxOut === 'string' ? L.fxOut : L.fxOut.name);
     if (outNm && DEPRECATED_EXIT[outNm])
-      warns.push(`layers[${i}].fxOut "${outNm}" is deprecated — use ${DEPRECATED_EXIT[outNm]} (#364).`);
+      warns.push(`layers[${i}].fxOut "${outNm}" is deprecated, use ${DEPRECATED_EXIT[outNm]} (#364).`);
   }
   return warns;
 }
@@ -800,7 +800,7 @@ function becomesHandoverWarns(data) {
     const dur = Math.max(0.05, typeof A.becomesDur === 'number' ? A.becomesDur : 0.42);
     const lost = B.motion.filter((k) => isObj(k) && (typeof k.t === 'number' ? k.t : 0) <= dur + 1e-6);
     if (lost.length) {
-      warns.push(`layers[${i}]${A.id ? ` #${A.id}` : ''}: becomes "${B.id}", and the handover takes ${dur}s — so ${lost.length} of "${B.id}"'s own motion key(s) at t≤${dur} (${lost.map((k) => `t=${k.t ?? 0}`).join(', ')}) are DROPPED and replaced by the computed match. Move them past ${dur}s, or shorten \`becomesDur\`.`);
+      warns.push(`layers[${i}]${A.id ? ` #${A.id}` : ''}: becomes "${B.id}", and the handover takes ${dur}s, so ${lost.length} of "${B.id}"'s own motion key(s) at t≤${dur} (${lost.map((k) => `t=${k.t ?? 0}`).join(', ')}) are DROPPED and replaced by the computed match. Move them past ${dur}s, or shorten \`becomesDur\`.`);
     }
   }
   return warns;
@@ -810,15 +810,15 @@ function omittedKeyResetWarns(data) {
   const warns = [];
   // A key states what changes and says nothing about the rest, and `motionAt`/`cameraAt` read that
   // silence as IDENTITY, not as "unchanged" (core/sequence.js). That contract is deliberate and scenes
-  // depend on it — a layer whose only `opacity` key sits at the end fades over the last segment precisely
+  // depend on it. A layer whose only `opacity` key sits at the end fades over the last segment precisely
   // because the keys before it read as opacity 1. But it means a track that declares a property, moves it
   // somewhere, and then stops mentioning it SNAPS it home, and nothing about the JSON looks wrong.
   //
   // So it is warned about rather than changed. Changing the reader was tried and measured: per-property
   // interpolation altered 19 scenes and made one film's button invisible throughout (#195). Splitting the
   // semantics so camera and layer tracks behave differently would be a worse trap than either. One
-  // contract, stated out loud when it is about to bite. Only when the reset actually MOVES something —
-  // a property dropped while it already sat at identity changes nothing and is not worth a word.
+  // contract, stated out loud when it is about to bite. Only when the reset actually MOVES something.
+  // A property dropped while it already sat at identity changes nothing and is not worth a word.
   {
     const IDENT = { x: 0, y: 0, scale: 1, rot: 0, opacity: 1, blur: 0, s: 1, rx: 0, ry: 0, p: 1600 };
     const scan = (keys, props, label) => {
@@ -830,7 +830,7 @@ function omittedKeyResetWarns(data) {
           if (!isObj(keys[i]) || keys[i][pr] != null) continue;
           const prior = keys.slice(0, i).reverse().find((k) => isObj(k) && k[pr] != null);
           if (prior && Math.abs(prior[pr] - IDENT[pr]) > 1e-9) {
-            warns.push(`${label}: \`${pr}\` is ${prior[pr]} at t=${prior.t}, and the key at t=${keys[i].t} does not mention it — a key that omits a property RESETS it to ${IDENT[pr]}, it does not hold it. Restate \`${pr}\` on that key (and every later one) unless you mean it to snap back.`);
+            warns.push(`${label}: \`${pr}\` is ${prior[pr]} at t=${prior.t}, and the key at t=${keys[i].t} does not mention it. A key that omits a property RESETS it to ${IDENT[pr]}, it does not hold it. Restate \`${pr}\` on that key (and every later one) unless you mean it to snap back.`);
           }
           break;
         }
@@ -851,31 +851,31 @@ function omittedKeyResetWarns(data) {
 function inertPropWarns(data) {
   const warns = [];
   // A prop that is read only INSIDE a conditional on another prop does nothing when that other prop is
-  // absent — and does it silently, which is the failure class this repo hates most. Three of them live
+  // absent, and does it silently, which is the failure class this repo hates most. Three of them live
   // in the anchor/align code, and CLAUDE.md already describes two as things that "render silently"
   // rather than fixing them (docs/MISTAKES.md #199). `at` is skipped for blocks, where it is an
-  // unrelated block param (`tapRipple` uses `at: 2.1` as a time) — the prop is overloaded, and a check
+  // unrelated block param (`tapRipple` uses `at: 2.1` as a time), the prop is overloaded, and a check
   // that did not know that would have fired on innocent scenes.
   for (const [i, L] of (data.layers || []).entries()) {
     if (!isObj(L)) continue;
     const label = `layers[${i}]${L.id ? ` #${L.id}` : ''}`;
     // `elevation` writes an inset 1px ring as part of its depth stack, so `border` is DROPPED beside it
-    // (core/layers/util.js). That is the right pixel answer — two rings on one edge read as a mistake —
+    // (core/layers/util.js). That is the right pixel answer. Two rings on one edge read as a mistake,
     // but it is a prop the author wrote being discarded without a word, and on a DARK surface the ring
     // it substitutes is rgba(255,255,255,0.06), which is not the visible 1px line the author asked for.
     // Said out loud rather than changed: 132 layers across this library already set both, and honouring
     // the border would restyle every one of them.
     if (L.border && L.elevation) {
-      warns.push(`${label}: sets both \`border\` and \`elevation\`, and elevation wins — the border is DROPPED and replaced by elevation's inset ring (${L.on === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)'}). On a dark surface that ring is nearly invisible. Drop one: \`elevation\` for depth, or \`border\` + \`glow\` for a lit edge.`);
+      warns.push(`${label}: sets both \`border\` and \`elevation\`, and elevation wins. The border is DROPPED and replaced by elevation's inset ring (${L.on === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)'}). On a dark surface that ring is nearly invisible. Drop one: \`elevation\` for depth, or \`border\` + \`glow\` for a lit edge.`);
     }
     if (typeof L.at === 'string' && !L.anchor && L.type !== 'block') {
-      warns.push(`${label}: \`at: "${L.at}"\` positions a layer against its \`anchor\`, and there is no \`anchor\` — so it is IGNORED and the layer sits at its own x/y. Add \`anchor: "<id>"\`, or drop \`at\`.`);
+      warns.push(`${label}: \`at: "${L.at}"\` positions a layer against its \`anchor\`, and there is no \`anchor\`, so it is IGNORED and the layer sits at its own x/y. Add \`anchor: "<id>"\`, or drop \`at\`.`);
     }
     if (typeof L.at === 'string' && L.anchor && L.at.endsWith('center') && L.w == null) {
-      warns.push(`${label}: \`at: "${L.at}"\` centres this layer on its anchor by subtracting half its OWN width, and it has no \`w\` — so it silently falls back to a plain left offset. Give it \`w\`.`);
+      warns.push(`${label}: \`at: "${L.at}"\` centres this layer on its anchor by subtracting half its OWN width, and it has no \`w\`, so it silently falls back to a plain left offset. Give it \`w\`.`);
     }
     if ((L.align === 'center' || L.align === 'right') && L.w == null && L.type !== 'block') {
-      warns.push(`${label}: \`align: "${L.align}"\` aligns text inside the layer's box, and without \`w\` that box shrink-wraps the text — so the alignment does nothing. Give it \`w\`, or drop \`align\`.`);
+      warns.push(`${label}: \`align: "${L.align}"\` aligns text inside the layer's box, and without \`w\` that box shrink-wraps the text, so the alignment does nothing. Give it \`w\`, or drop \`align\`.`);
     }
   }
   return warns;
@@ -885,7 +885,7 @@ function panWithRestWarns(data) {
   const warns = [];
   // `panWith` copies a track as DELTAS, so the x/y an author writes is where the layer STARTS and the
   // pan carries it somewhere else. That total is computable and appears nowhere: not in the layer, not
-  // in the source, not in any error. Two separate bugs came from guessing it — the button snapping
+  // in the source, not in any error. Two separate bugs came from guessing it, the button snapping
   // 194px backwards (#194) and, in the very next edit, three dots parked 274px off the end of the word
   // they belong to. Both times the file read as intended. So the arithmetic is simply printed.
   // Only when the shift is big enough to matter: a pan that moves a layer a few px needs no announcing.
@@ -902,7 +902,7 @@ function panWithRestWarns(data) {
       if (Math.hypot(dx, dy) < REST_MIN) continue;
       const bx = typeof L.x === 'number' ? L.x : null, by = typeof L.y === 'number' ? L.y : null;
       warns.push(`layers[${i}]${L.id ? ` #${L.id}` : ''}: pans with "${L.panWith}", so its x/y is where it STARTS`
-        + `${bx != null ? ` (${bx}${by != null ? `, ${by}` : ''})` : ''} — it comes to rest ${dx ? `${dx > 0 ? '+' : ''}${dx}px across` : ''}`
+        + `${bx != null ? ` (${bx}${by != null ? `, ${by}` : ''})` : ''}. It comes to rest ${dx ? `${dx > 0 ? '+' : ''}${dx}px across` : ''}`
         + `${dx && dy ? ' and ' : ''}${dy ? `${dy > 0 ? '+' : ''}${dy}px down` : ''}`
         + `${bx != null ? `, at (${bx + dx}${by != null ? `, ${by + dy}` : ''})` : ''}. Place it by where it STARTS, not where you want it to land.`);
     }
@@ -913,7 +913,7 @@ function panWithRestWarns(data) {
 function missingWindowWarns(data) {
   const warns = [];
   const layers = Array.isArray(data?.layers) ? data.layers : [];
-  // (1) MISSING WINDOW — a layer with no `duration` renders for the ENTIRE video (engine default). Almost
+  // (1) MISSING WINDOW: a layer with no `duration` renders for the ENTIRE video (engine default). Almost
   //     always a slip (the "+" gutter that leaked for 53s). Full-bleed backdrops opt out with track:0.
   // A layer named as a match cut's OUTGOING form is retimed to end on the joint at boot
   // (core/junctions.js bindMatchesToJunctions), so writing a `duration` here would be the second copy
@@ -921,7 +921,7 @@ function missingWindowWarns(data) {
   const matchFrom = new Set((Array.isArray(data?.matches) ? data.matches : []).map((m) => m && m.from).filter(Boolean));
   layers.forEach((L, i) => {
     if (!isObj(L)) return;
-    if (L.duration == null && L.track !== 0 && !matchFrom.has(L.id)) warns.push(`${layerName(L, i)} has no "duration" — renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
+    if (L.duration == null && L.track !== 0 && !matchFrom.has(L.id)) warns.push(`${layerName(L, i)} has no "duration". Renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
   });
   return warns;
 }
@@ -937,8 +937,8 @@ function countWindowWarns(data) {
   layers.forEach((L, i) => {
     if (!isObj(L) || L.type !== 'count') return;
     const dur = L.duration ?? 2, cs = L.countStart ?? 0, cd = L.countDur ?? 1.2;
-    if (cs >= dur) warns.push(`${layerName(L, i)} has countStart ${cs} ≥ its duration ${dur}. countStart is LOCAL to the layer's start (t - start), not an absolute scene time — the count never animates and freezes at "from". Use a small local offset (e.g. countStart 0.2) and set the layer's own start to when it appears.`);
-    else if (cs + cd > dur + 0.05) warns.push(`${layerName(L, i)} count window (countStart ${cs} + countDur ${cd} = ${(cs + cd).toFixed(1)}) runs past its duration ${dur} — the count-up gets cut off before it lands. Shorten countDur or lengthen duration.`);
+    if (cs >= dur) warns.push(`${layerName(L, i)} has countStart ${cs} ≥ its duration ${dur}. countStart is LOCAL to the layer's start (t - start), not an absolute scene time. The count never animates and freezes at "from". Use a small local offset (e.g. countStart 0.2) and set the layer's own start to when it appears.`);
+    else if (cs + cd > dur + 0.05) warns.push(`${layerName(L, i)} count window (countStart ${cs} + countDur ${cd} = ${(cs + cd).toFixed(1)}) runs past its duration ${dur}. The count-up gets cut off before it lands. Shorten countDur or lengthen duration.`);
   });
   return warns;
 }
@@ -946,7 +946,7 @@ function countWindowWarns(data) {
 function sceneCollisionWarns(data) {
   const warns = [];
   const layers = Array.isArray(data?.layers) ? data.layers : [];
-  // (3) SCENE COLLISION — two CONTENT layers overlapping in BOTH space and time, not in a
+  // (3) SCENE COLLISION: two CONTENT layers overlapping in BOTH space and time, not in a
   //     containment/group/anchor relationship = one scene bleeding into the next (the Preferences↔agents
   //     overlap). Pure geometry; needs an explicit w to bound a box (numeric starts only).
   const CONTENT = new Set(['text', 'count', 'doc', 'image', 'group', 'board', 'html']);
@@ -977,7 +977,7 @@ function sceneCollisionWarns(data) {
     const size = L.size ?? 40;
     // GLYPHS, not words: this multiplies a character count by an average advance to guess how wide the
     // ink runs, so it must count what the DOM counts. onScreenText yields a space for a `<br>`, which
-    // is right for reading and wrong here — it padded every emphasised line by a character per tag.
+    // is right for reading and wrong here. It padded every emphasised line by a character per tag.
     const copy = typeof L.text === 'string' ? glyphText(L.text).trim()
       : L.value != null ? String(L.value) : null;
     if (!copy) return null;                              // nothing readable to measure: fall back to `w`
@@ -1010,7 +1010,7 @@ function sceneCollisionWarns(data) {
       if (ix <= 0 || iy <= 0) continue; // boxes disjoint in space
       const frac = (ix * iy) / Math.min((A.b.x1 - A.b.x0) * (A.b.y1 - A.b.y0), (B.b.x1 - B.b.x0) * (B.b.y1 - B.b.y0));
       // full containment (chip inside a card) is intentional; flag the PARTIAL-overlap band only.
-      if (frac >= 0.3 && frac <= 0.95) warns.push(`${layerName(A.L, A.i)} and ${layerName(B.L, B.i)} overlap ~${Math.round(frac * 100)}% in space and ${(t1 - t0).toFixed(1)}s in time (t=${t0.toFixed(1)}-${t1.toFixed(1)}) — a scene may be colliding with the next.`);
+      if (frac >= 0.3 && frac <= 0.95) warns.push(`${layerName(A.L, A.i)} and ${layerName(B.L, B.i)} overlap ~${Math.round(frac * 100)}% in space and ${(t1 - t0).toFixed(1)}s in time (t=${t0.toFixed(1)}-${t1.toFixed(1)}). A scene may be colliding with the next.`);
     }
   }
   return warns;
@@ -1024,12 +1024,12 @@ export function lintData(data) {
     ...inertPropWarns(data),
     ...panWithRestWarns(data),
     ...missingWindowWarns(data),
-    // (2) TYPING + MARKUP — RETIRED, and the retirement is the point. This rule warned that `typing`
+    // (2) TYPING + MARKUP: RETIRED, and the retirement is the point. This rule warned that `typing`
     //     reveals characters literally so `<b>`/`<em>` show as visible tags. That was true when it was
     //     written and stopped being true on 2026-07-24, when core/layers/text.js gained an HTML-safe
     //     typing path (`revealHtml`): the VISIBLE characters are counted and revealed while the tags stay
     //     intact, so an accent word types in ITS OWN COLOUR. The rule outlived the bug by a fortnight and
-    //     went on telling authors to strip markup the engine handles correctly — a gate that manufactures
+    //     went on telling authors to strip markup the engine handles correctly, a gate that manufactures
     //     a defect, which is worse than one that misses it, because the author pays by making the film
     //     plainer. docs/MISTAKES.md #85.
     //     Nothing replaces it: `stripLen`/`revealHtml` are exercised by `make lib-test`, and lint-test
@@ -1045,7 +1045,7 @@ function walk(fields, obj, path, errors) {
     const val = obj?.[key];
     const at = `${path}${key}`;
     if (val == null) {
-      if (spec.required) errors.push(`${at} is required${spec.hint ? ` — ${spec.hint}` : ''}`);
+      if (spec.required) errors.push(`${at} is required${spec.hint ? `, ${spec.hint}` : ''}`);
       continue;
     }
     // `type` may be a union like "number|string" (relative coords: 40 or "50%"). Any member matches.
@@ -1075,10 +1075,10 @@ function checkField(spec, val, at, errors) {
       if (spec.pattern && !new RegExp(spec.pattern).test(val)) errors.push(`${at} must match /${spec.pattern}/ (got "${val}")`);
       break;
     case 'array':
-      if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} needs ≥ ${spec.minItems} item(s) (got ${val.length})${spec.hint ? ` — ${spec.hint}` : ''}`);
+      if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} needs ≥ ${spec.minItems} item(s) (got ${val.length})${spec.hint ? `, ${spec.hint}` : ''}`);
       if (spec.maxItems != null && val.length > spec.maxItems) errors.push(`${at} allows ≤ ${spec.maxItems} item(s) (got ${val.length})`);
       // A block/comp layer carries the BLOCK's props (a pointer's `to:{x,y}`, a kpiRow's `items:[…]`),
-      // NOT the base layer schema — blocks-audit owns those. The unknown-prop pass already exempts
+      // NOT the base layer schema, blocks-audit owns those. The unknown-prop pass already exempts
       // block/comp; this TYPE pass must too, or a valid block prop (`to` object vs the layer's `to`
       // number) fails and the scene cannot boot (this silently broke showcase-spot/flight). Same intent
       // as the note at the layers checkLayer pass below.
@@ -1094,12 +1094,12 @@ function checkField(spec, val, at, errors) {
 }
 
 // validateTheme(theme): shape-check a theme spec. A data JSON MUST declare its theme (name or
-// inline object) — there is no default look (core/theme-contract.js). Inline objects are
+// inline object). There is no default look (core/theme-contract.js). Inline objects are
 // completeness-checked here; named themes are completeness-checked by the CLI below (it can read
 // the file) and again at boot by applyTheme.
 export function validateTheme(spec) {
   const errors = [];
-  if (spec == null) return ['data.theme is required (a theme name or an inline theme object) — no default look exists'];
+  if (spec == null) return ['data.theme is required (a theme name or an inline theme object), no default look exists'];
   if (typeof spec === 'string') return errors;
   if (!isObj(spec)) return [`theme must be a string name or an object (got ${typeOf(spec)})`];
   errors.push(...themeErrors(spec, { parseColor, contrastRatio }).map((m) => `theme incomplete: ${m}`));
@@ -1132,7 +1132,7 @@ if (isMain) {
 
   const strict = process.argv.includes('--strict'); // treat lint warnings as failures
   let targets = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-  // No args used to mean "formats/*/sample.json" — with one format, that is ONE file, while 60
+  // No args used to mean "formats/*/sample.json", with one format, that is ONE file, while 60
   // authored scenes and every theme pack went unchecked. So a scene could carry an anim name that
   // never existed (silently resolving to fade) and a theme could be missing half the contract, for
   // as long as nobody happened to re-render it by hand. Default is now EVERY authored scene and
@@ -1171,25 +1171,25 @@ if (isMain) {
   const CUE_NAMES = Object.keys(CUES);
 
   // Anti-rot guard: the cue enum in schema.json is DISCOVERABILITY only (so authors + MCP can see the
-  // valid names); CUES is the source of truth. If they drift, the schema lies — fail loudly to resync.
+  // valid names); CUES is the source of truth. If they drift, the schema lies, fail loudly to resync.
   try {
     const ss = readJSON(path.join(root, 'formats/scene/schema.json'));
     const el = ss?.fields?.audio?.fields?.cues?.item?.name?.enum || [];
     // Superset guard: every live CUE must be documented. The enum MAY also carry baked ALIASES
     // (whoosh/reveal/click/pop, scripts/media/audio-bake.mjs) that are not CUES keys, so only a CUE
-    // the enum OMITS is drift — extra alias names are legal.
+    // the enum OMITS is drift, extra alias names are legal.
     const missing = CUE_NAMES.filter((n) => !el.includes(n));
-    if (el.length && missing.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}) — add them.`); failed++; }
+    if (el.length && missing.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}), add them.`); failed++; }
   } catch { }
 
   for (const file of targets) {
     let data, schema;
-    try { data = readJSON(file); } catch (e) { console.error(`✗ ${file}: unreadable JSON — ${e.message}`); failed++; continue; }
+    try { data = readJSON(file); } catch (e) { console.error(`✗ ${file}: unreadable JSON, ${e.message}`); failed++; continue; }
     const mod = data.module;
     const schemaPath = mod && path.join(root, 'formats', mod, 'schema.json');
     try { schema = schemaPath && fs.existsSync(schemaPath) ? readJSON(schemaPath) : null; } catch (e) { schema = null; }
     const errors = validateAll(schema, data);
-    // build-time sugar must be expanded before render — the engine's layer registry has no
+    // build-time sugar must be expanded before render: the engine's layer registry has no
     // `block`/`comp` type, so a leftover one renders as NOTHING. Fail loud → run `make expand`.
     // UNKNOWN PROPS. The engine reads the props it knows and ignores the rest in silence, so
     // `fill` instead of `bg`, or `colour` instead of `color`, renders a layer that is quietly wrong
@@ -1198,7 +1198,7 @@ if (isMain) {
     //
     // Scoped deliberately:
     //   · `block`/`comp` layers carry the BLOCK's props, which this schema does not describe and
-    //     must not police — blocks-audit owns those.
+    //     must not police, blocks-audit owns those.
     //   · `_`-prefixed keys are authoring scratch (`_card`, `_img`) and are conventionally ignored.
     //   · group children are checked against the child schema PLUS the layer schema, because a child
     //     is built by the same builder as a top-level layer (kit.buildLeaf).
@@ -1213,7 +1213,7 @@ if (isMain) {
         // "not valid. Did you mean 'text'?". Green validate followed by a boot crash is a worse
         // experience than either outcome alone, because the author trusts the first one.
         if (isChild && L.type != null && CHILD_TYPES.length && !CHILD_TYPES.includes(L.type)) {
-          errors.push(`${where} type "${L.type}" is not valid as a group child — one of: ${CHILD_TYPES.join(', ')}.`);
+          errors.push(`${where} type "${L.type}" is not valid as a group child, one of: ${CHILD_TYPES.join(', ')}.`);
         }
         if (L.type !== 'block' && L.type !== 'comp') {
           const known = isChild ? [...CI, ...LI] : LI;
@@ -1221,7 +1221,7 @@ if (isMain) {
             if (k.startsWith('_') || known.includes(k)) continue;
             const near = known.filter((n) => n.toLowerCase() === k.toLowerCase()
               || (k.length > 3 && (n.startsWith(k.slice(0, 3)) || k.startsWith(n.slice(0, 3)))));
-            errors.push(`${where} has unknown prop "${k}" — the engine will ignore it silently.${near.length ? ' Did you mean: ' + near.slice(0, 3).join(' / ') + '?' : ''}`);
+            errors.push(`${where} has unknown prop "${k}". The engine will ignore it silently.${near.length ? ' Did you mean: ' + near.slice(0, 3).join(' / ') + '?' : ''}`);
           }
         }
         for (const key of ['children', 'layers']) {
@@ -1234,24 +1234,24 @@ if (isMain) {
     // `resample` reads a raster. A layer that owns one (image · paint · shader) is sampled live; every
     // other type is BAKED out of the DOM once at boot (core/resample.js) and sampled as a still. The
     // two that CANNOT go either way are refused by name: `raymarch` and `three` own their own WebGL
-    // context, and `video` a bitmap — none of the three serialises into the offscreen raster, so they
+    // context, and `video` a bitmap. None of the three serialises into the offscreen raster, so they
     // would bake a hole. The engine throws at build time; catching it here names the file and index.
     const RASTER = ['image', 'paint', 'shader'];
     const UNSAMPLABLE = ['raymarch', 'three', 'globe', 'video'];
     (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
       if (!isObj(L) || !L.resample) return;
       if (UNSAMPLABLE.includes(L.type))
-        errors.push(`layer[${i}] has \`resample\` on a "${L.type}" layer. Its pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither the live path nor the offscreen bake can read them — the pass would render nothing. Raster layers sample live (${RASTER.join(' · ')}); every other type is baked from its built DOM.`);
+        errors.push(`layer[${i}] has \`resample\` on a "${L.type}" layer. Its pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither the live path nor the offscreen bake can read them. The pass would render nothing. Raster layers sample live (${RASTER.join(' · ')}); every other type is baked from its built DOM.`);
       else if (L.type === 'image' && (!L.w || !L.h))
         errors.push(`layer[${i}] resample on an image needs explicit w and h (the GL buffer is sized at build time).`);
       // ken is a CSS transform on the <img>; the texture is the img's pixels, which the transform
       // never touches. Rendering both would silently drop the ken. Refuse instead.
       if (L.type === 'image' && L.ken)
-        errors.push(`layer[${i}] combines \`ken\` with \`resample\` — ken is a CSS transform and does not reach the sampled pixels, so it would be silently ignored. Pick one.`);
+        errors.push(`layer[${i}] combines \`ken\` with \`resample\`, ken is a CSS transform and does not reach the sampled pixels, so it would be silently ignored. Pick one.`);
     });
     (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
       if (isObj(L) && (L.type === 'block' || L.type === 'comp'))
-        errors.push(`layer[${i}] is an un-expanded ${L.type} ("${L.block || L.ref}") — run \`make expand D=${path.relative(root, file)}\` and render the .expanded.json.`);
+        errors.push(`layer[${i}] is an un-expanded ${L.type} ("${L.block || L.ref}"), run \`make expand D=${path.relative(root, file)}\` and render the .expanded.json.`);
     });
     // named themes: the CLI can read the file, so completeness-check it here (boot re-checks).
     if (typeof data.theme === 'string') {
@@ -1281,22 +1281,22 @@ if (isMain) {
       const A = data.audio;
       const bases = [path.dirname(file), root];
       const resolves = (p) => !!p && bases.some((b) => fs.existsSync(path.isAbsolute(p) ? p : path.join(b, p)));
-      // music — a bed name or path must resolve or the bed drops to silence. A warning, not a failure:
+      // music: a bed name or path must resolve or the bed drops to silence. A warning, not a failure:
       //     a scene can name a bed baked on another machine. `music:"auto"` is resolved at authoring
       //     time (`make audio-bed`), NOT at render, so an unresolved "auto" reaching the mixer = silence.
       const m = A.music;
       if (m === 'auto') {
-        audioWarns.push(`audio.music:"auto" is unresolved — run \`make audio-bed D=… WRITE=1\` to bake the profile's bed in, or the mixer falls back to SILENCE.`);
+        audioWarns.push(`audio.music:"auto" is unresolved, run \`make audio-bed D=… WRITE=1\` to bake the profile's bed in, or the mixer falls back to SILENCE.`);
       } else if (typeof m === 'string') {
         // `auto` is the auto-SOUND-DESIGN flag (derives SFX cues); it has NOTHING to do with music
         // resolution. Skipping the music check when auto:true is how vawe-identity's bare "tense" bed
         // shipped SILENT for so long (docs/MISTAKES.md #132). The mixer now resolves a bare bed name
-        // to assets/music/<name>.wav, so mirror EXACTLY that here — the two must agree.
+        // to assets/music/<name>.wav, so mirror EXACTLY that here, the two must agree.
         const ok = resolves(m) || (!/[\\/]/.test(m) && !path.extname(m) && fs.existsSync(path.join(root, 'assets/music', m + '.wav')));
-        if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file — the mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`);
+        if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file. The mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`);
       }
       // Sound bridges (J/L-cuts). The SPAN is resolved in the browser, where the junctions live, and
-      // throws there — nothing is duplicated here, because a second copy of that arithmetic would
+      // throws there. Nothing is duplicated here, because a second copy of that arithmetic would
       // drift. What is checked here is the half the browser cannot see: whether the texture is on
       // disk. The mixer fails the render on a missing one, so this is an error, not a warning.
       for (const [i, b] of (Array.isArray(A.bridges) ? A.bridges : []).entries()) {
@@ -1304,20 +1304,20 @@ if (isMain) {
         if (typeof s !== 'string' || !s.trim()) { errors.push(`audio.bridges[${i}].sound must name a bed, a cue, or a .wav path.`); continue; }
         const bare = !/[\\/]/.test(s) && !path.extname(s);
         const ok = resolves(s) || (bare && ['music', 'sfx'].some((d) => fs.existsSync(path.join(root, 'assets', d, s + '.wav'))));
-        if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav) — the render fails rather than dropping the bridge. Run make audio / make music-pack.`);
+        if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav). The render fails rather than dropping the bridge. Run make audio / make music-pack.`);
         if (!/^[a-z]+@\d+$/.test(String(b?.at ?? ''))) errors.push(`audio.bridges[${i}].at must be "<kind>@<index>" (cut@1 · seam@0 · sting@2 · junction@3), got ${JSON.stringify(b?.at)}.`);
       }
       // (b2) BEAT GRID. `audio.beatSync` moves real cut times at boot, and boot THROWS when the grid
-      //      it names will not load — so catching it here turns a failed render into a named error at
+      //      it names will not load, so catching it here turns a failed render into a named error at
       //      author time. Same posture as the spectrum sidecar below: an error, never a warning.
       try {
         const gp = beatGridPath(data);
-        if (gp && !resolves(gp)) errors.push(`audio.beatSync names a beat grid that is not on disk: ${gp} — run \`make beatmap MUSIC=<the track>.wav\` to write it. The render fails rather than leaving the film unmatched.`);
+        if (gp && !resolves(gp)) errors.push(`audio.beatSync names a beat grid that is not on disk: ${gp}, run \`make beatmap MUSIC=<the track>.wav\` to write it. The render fails rather than leaving the film unmatched.`);
       } catch (e) { errors.push(e.message); }
       // (c) VO + sidecars named but absent → the mixer skips them without a word. Fail instead.
       for (const k of ['vo', 'voWords', 'spectrum']) {
         if (typeof A[k] === 'string' && !resolves(A[k]))
-          errors.push(`audio.${k} "${A[k]}" not found (looked in ${path.relative(root, path.dirname(file)) || '.'}/ and repo root) — the mixer would silently drop it.`);
+          errors.push(`audio.${k} "${A[k]}" not found (looked in ${path.relative(root, path.dirname(file)) || '.'}/ and repo root). The mixer would silently drop it.`);
       }
     }
 
@@ -1328,7 +1328,7 @@ if (isMain) {
     } else {
       console.log(`✓ ${path.relative(root, file)} (${mod})`);
     }
-    // lint warnings (non-failing unless --strict) — authoring smells the schema can't express
+    // lint warnings (non-failing unless --strict): authoring smells the schema can't express
     const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns];
     if (warns.length) {
       if (strict) failed++;

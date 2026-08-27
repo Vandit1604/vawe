@@ -1,4 +1,4 @@
-// core/layers/video.js — a <video> layer: real footage with in/out points, SEEKED per frame, never played.
+// core/layers/video.js. A <video> layer: real footage with in/out points, SEEKED per frame, never played.
 //
 // THE WHOLE DESIGN IS THE SEEK. A played video advances on wall-clock time, so frame 400 would hold
 // whatever the decoder reached, which differs between the six capture workers and between two renders of
@@ -37,11 +37,11 @@ export function sourceTime(L, t) {
 export function build(kit, el, L) {
   if (!L.src) throw new Error('video layer: `src` is required (a path under assets/, e.g. assets/video/clip.mp4)');
   if (L.out != null && L.out <= (L.in ?? 0))
-    throw new Error(`video layer: out (${L.out}) must be greater than in (${L.in ?? 0}) — an empty cut cannot be rendered`);
+    throw new Error(`video layer: out (${L.out}) must be greater than in (${L.in ?? 0}), an empty cut cannot be rendered`);
   const v = document.createElement('video');
   v.className = 'hs-video';
   // ROOT-RELATIVE, ALWAYS. The page is served from /formats/scene/, so a bare `assets/clip.mp4`
-  // resolves to /formats/scene/assets/clip.mp4 and 404s — and a <video> that cannot load its source
+  // resolves to /formats/scene/assets/clip.mp4 and 404s, and a <video> that cannot load its source
   // fires no error the frame pass can see, so the layer renders as an empty box and the film looks
   // like the layer was never written. Both spellings mean the same file and the assets preflight
   // already checks the repo-relative one, so the resolver belongs here rather than in the author's

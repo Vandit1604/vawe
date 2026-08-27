@@ -1,4 +1,4 @@
-// core/tracks/box.js — the layer's SIZE over time (w/h), which is a different material from `scale`.
+// core/tracks/box.js: the layer's SIZE over time (w/h), which is a different material from `scale`.
 // Scale magnifies a layer and everything drawn in it; a box track changes the frame the content lives
 // in and lets the content re-fit. That is the difference between zooming a photo grid and reflowing
 // one, and it is the move every collapsing sidebar, expanding card and FLIP transition is made of.
@@ -25,7 +25,7 @@ export function frame(kit, el, L, units, t, f, start, end) {
   if (bw != null) el.style.width = bw.toFixed(2) + 'px';
   if (bh != null) el.style.height = bh.toFixed(2) + 'px';
   // DEPTH over time. core/clips.js:83 writes zIndex from the static data-track on every frame, so this
-  // has to land after it and does — driveClips runs before any track. Rounded because z-index is an
+  // has to land after it and does, driveClips runs before any track. Rounded because z-index is an
   // integer: a track keyed across several siblings crosses them one at a time, which is what makes a
   // ribbon pass BEHIND the thing it is orbiting and then in front of it again.
   if (inWin && b.track != null) el.style.zIndex = String(Math.round(b.track));

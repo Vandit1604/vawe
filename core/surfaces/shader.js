@@ -1,6 +1,6 @@
-// core/surfaces/shader.js — a smooth ambient WebGL field (flow/aurora/plasma/drift/mist/…). The
+// core/surfaces/shader.js: a smooth ambient WebGL field (flow/aurora/plasma/drift/mist/…). The
 // `shader` layer type's pixels. Colourful by default, palette-tintable via L.colors. Not the
-// cut-cover stings — those live in core/stings.js.
+// cut-cover stings, those live in core/stings.js.
 import { createAmbientLayer, AMBIENT_FX, AMBIENT_REGISTRY } from '../shaders-ambient.js';
 import { palette } from './palette.js';
 
@@ -12,8 +12,8 @@ export const PROPS = { shader: {}, seed: {}, intensity: {}, colors: {}, params: 
 
 // The ambient draw call resolves a name to a uniform index and RETURNS on a miss, so `shader:"aurara"`
 // has always produced an empty canvas that passes every gate. `validate` refuses the scene instead
-// (`make validate` already rejects it, and the renderer being the lenient one is the wrong way round —
-// core/layers/index.js makes the same argument about an unknown layer type).
+// (`make validate` already rejects it, and the renderer being the lenient one is the wrong way round.
+// Core/layers/index.js makes the same argument about an unknown layer type).
 export function validate(L) {
   const name = L.shader || 'flow';
   AMBIENT_REGISTRY.pick(name);   // throws, and diagnoses a wrong-slot name

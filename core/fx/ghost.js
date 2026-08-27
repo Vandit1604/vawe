@@ -1,4 +1,4 @@
-// core/fx/ghost.js — THE FIRST EFFECT IN THIS ENGINE THAT READS TIME AS A MATERIAL.
+// core/fx/ghost.js: THE FIRST EFFECT IN THIS ENGINE THAT READS TIME AS A MATERIAL.
 //
 // Every one of the other 558 effects is a function of `t` evaluated once, at `t`. Not one of them ever
 // asks where the layer WAS. This one does: it evaluates the layer's own motion track at t, and again at
@@ -11,14 +11,14 @@
 //   "modifiers": [{ "ghost": { "mode": "blur", "k": 8 } }]
 //
 // WHY THIS IS SAFE HERE AND EXPENSIVE ELSEWHERE. Sampling an earlier frame is normally an accumulator,
-// and an accumulator makes frame n a function of n AND of every frame drawn before it — exactly the bug
+// and an accumulator makes frame n a function of n AND of every frame drawn before it, exactly the bug
 // that GSAP's `autoRemoveChildren` shipped into this engine (docs/MISTAKES.md #370), where a backward
 // seek could not restore a tween the playhead had already passed. Nothing is remembered here. `motionAt`
 // (core/sequence.js) is a pure function of local time, so the pose at n-k is COMPUTED from the same
 // keyframes at every visit, in any order, from a cold DOM or a warm one. renderFrame(n) stays pure.
 //
 // WHY THE GHOSTS ARE CHILDREN OF THE LAYER, which is the decision the whole file turns on. A ghost drawn
-// as a SIBLING would need the layer's FULL composed transform at t-k — the cut, the entrance, the motion
+// as a SIBLING would need the layer's FULL composed transform at t-k, the cut, the entrance, the motion
 // track and the camera, recomposed outside the tracks that own them. That is a second owner of the
 // composition, and core/fx/index.js already forbids a modifier from touching the composed transform for
 // the same reason. As a CHILD, the ghost inherits everything the pipeline wrote to the layer this frame
@@ -40,7 +40,7 @@ import { clamp01, FPS } from '../motion.js';
 const MARK = 'data-ghost';
 
 // Below this much separation between the pose now and the pose then, the ghost is sitting ON the layer
-// and can only fatten it — which is what a trail on a STILL layer would be. The weight ramps in across
+// and can only fatten it, which is what a trail on a STILL layer would be. The weight ramps in across
 // it, so a stationary layer renders byte-identical to one carrying no ghost at all, and nobody has to
 // remember to turn the effect off between moves.
 const SEP_PX = 2;
@@ -75,22 +75,22 @@ function resolve(spec, L) {
     : spec;
   if (!s || typeof s !== 'object' || Array.isArray(s))
     throw new Error(`ghost on ${name(L)}: expected true, a mode name, or an object like `
-      + `{ "mode": "trail", "k": 6 } — got ${JSON.stringify(spec)}. Keys: ${GHOST_KEYS.join(', ')}.`);
+      + `{ "mode": "trail", "k": 6 }. Got ${JSON.stringify(spec)}. Keys: ${GHOST_KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
     if (!GHOST_KEYS.includes(k))
-      throw new Error(`ghost on ${name(L)}: unknown key "${k}" — known: ${GHOST_KEYS.join(', ')}.`);
+      throw new Error(`ghost on ${name(L)}: unknown key "${k}", known: ${GHOST_KEYS.join(', ')}.`);
   const mode = s.mode ?? 'trail';
   if (!MODES[mode])
-    throw new Error(`ghost on ${name(L)}: unknown mode "${mode}" — known: ${Object.keys(MODES).join(', ')}. `
+    throw new Error(`ghost on ${name(L)}: unknown mode "${mode}", known: ${Object.keys(MODES).join(', ')}. `
       + `\`trail\` draws the past poses as faded copies; \`blur\` samples them inside one frame so they `
       + `smear along the direction of travel. Both read the same motion track.`);
   const out = { ...MODES[mode], ...s, mode };
   if (!Number.isInteger(out.k) || out.k < 1 || out.k > K_MAX)
     throw new Error(`ghost on ${name(L)}: \`k\` is the number of samples, a whole number from 1 to `
-      + `${K_MAX} — got ${JSON.stringify(out.k)}. Each one is a copy of the layer in the DOM.`);
+      + `${K_MAX}: got ${JSON.stringify(out.k)}. Each one is a copy of the layer in the DOM.`);
   for (const key of ['back', 'alpha', 'fade'])
     if (typeof out[key] !== 'number' || !Number.isFinite(out[key]) || out[key] <= 0)
-      throw new Error(`ghost on ${name(L)}: \`${key}\` must be a positive number — got ${JSON.stringify(out[key])}.`);
+      throw new Error(`ghost on ${name(L)}: \`${key}\` must be a positive number, got ${JSON.stringify(out[key])}.`);
   return out;
 }
 

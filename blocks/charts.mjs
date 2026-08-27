@@ -1,4 +1,4 @@
-// blocks/charts.mjs — extracted from blocks/index.mjs (see that file's contract). Pure factories
+// blocks/charts.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
   TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
@@ -13,7 +13,7 @@ export const CATEGORY = 'Data';
 const T = TOKENS;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// statBig — scale-contrast stat: a huge animated number + a tiny label. `to` counts up.
+// statBig, scale-contrast stat: a huge animated number + a tiny label. `to` counts up.
 export function statBig({ x, y, to = 0, from = 0, unit = '', prefix = '', label, size = 150, color = T.ink,
   start = 0, dur = 4 } = {}) {
   // THE NUMBER COUNTS UP and the label is already there to receive it. The layer only fades in: a
@@ -41,7 +41,7 @@ const CHART_ROW = TYPE.body;   // a caption row's font size, which is what it co
                                // scale now (was a bare 18); TYPE.body is the smallest step `make audit`
                                // will pass, since TYPE.fine (14) sits under its 14.04px floor.
 
-// barChart — labeled bars with values. `data` = [{label, value}]. Scales to the max.
+// barChart: labeled bars with values. `data` = [{label, value}]. Scales to the max.
 // `label` is the card's own caption. lineChart and donutChart have always taken one and barChart did
 // not, which left every bar chart's value captions bare: "620" with no way to say 620 of what. An author
 // can only reach for a chart if the chart can state its own units.
@@ -55,7 +55,7 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
   // bars out of the card. With no label it is exactly `2 * CHART_PAD`, i.e. byte-identical to before.
   const plot = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label }) - 2 * (CHART_ROW + CHART_GAP_Y));
   const bw = barWidth({ w, n: data.length, pad: CHART_PAD, gap: CHART_GAP, min: 22 });
-  // THE BARS GROW FROM THE BASELINE — the motion a bar chart is FOR. The value captions sit on ONE
+  // THE BARS GROW FROM THE BASELINE: the motion a bar chart is FOR. The value captions sit on ONE
   // fixed row above the track rather than riding each bar's own top: with a full-height track behind
   // every bar, a caption floating at a different height per column reads as six loose numbers instead
   // of a row you can compare across. `html` rather than native boxes because a bar's height has to be a
@@ -79,7 +79,7 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 0.9 }) }];
 }
 
-// lineChart — a trend line (optional area fill) in a hairline card. data = [{label,value}].
+// lineChart: a trend line (optional area fill) in a hairline card. data = [{label,value}].
 export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0], area = false, label = '', start = 0, dur = 4 } = {}) {
   needData('data', data, 'lineChart');
   const cw = Math.max(0, w - 2 * CHART_PAD), ch = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label })), pad = 8;
@@ -90,7 +90,7 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
   const pts = data.map((d, i) => `${PX(i)},${PY(d.value)}`).join(' ');
   // ONE DOT, ON THE LAST READING. A dot on every vertex is chart-library furniture: it fights the line
   // it is meant to sit on and says nothing, because every vertex is already a bend. The last point is
-  // the CURRENT value, which is the one a product surface marks — a filled dot in a card-coloured ring
+  // the CURRENT value, which is the one a product surface marks. A filled dot in a card-coloured ring
   // so it stays legible where the line doubles back under it.
   const lastI = data.length - 1;
   const dots = lastI < 0 ? '' : `<circle cx="${PX(lastI)}" cy="${PY(data[lastI].value)}" r="4.5" fill="${color}"`
@@ -112,12 +112,12 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
     + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="${STROKE.line}" stroke-linejoin="round" stroke-linecap="round"`
     + ` stroke-dasharray="${len.toFixed(1)}" stroke-dashoffset="calc(${len.toFixed(1)} * (1 - var(--p, 1)))"/>${dots}</svg>`;
   const html = htmlCard({ w, pad: CHART_PAD, label, body: () => svg });
-  // the line DRAWS ON rather than the card sliding in — the motion a line chart is for. `len` is the
+  // the line DRAWS ON rather than the card sliding in. The motion a line chart is for. `len` is the
   // polyline's own length, so the dash sweep is exact rather than a guess that breaks with the data.
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 1.2 }) }];
 }
 
-// donutChart — a ring split into segments + a legend. segments = [{value,color,label}].
+// donutChart: a ring split into segments + a legend. segments = [{value,color,label}].
 export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0, dur = 4 } = {}) {
   needData('segments', segments, 'donutChart');
   const total = segments.reduce((s, d) => s + d.value, 0) || 1;
@@ -127,7 +127,7 @@ export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0
   const rad = 40, C = 2 * Math.PI * rad, sw = STROKE.arc;
   // The ring SWEEPS round once, revealing each segment in turn, instead of the card sliding in.
   // The trick that makes one driven variable do it: every segment is drawn as a FULL arc from 12
-  // o'clock out to its own cumulative end, clipped to how far `--p` has travelled — then painted
+  // o'clock out to its own cumulative end, clipped to how far `--p` has travelled, then painted
   // BACK TO FRONT, so the shorter arcs land on top and each colour owns exactly its own wedge at
   // every value of --p. One variable, no per-segment timeline, pure in t.
   let cum = 0;
@@ -150,7 +150,7 @@ export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 1.3 }) }];
 }
 
-// stackedBar — multi-series bars. data = [{label,values:[..]}], series = [{name,color}].
+// stackedBar: multi-series bars. data = [{label,values:[..]}], series = [{name,color}].
 export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], start = 0, dur = 4 } = {}) {
   const totals = data.map((d) => d.values.reduce((s, v) => s + v, 0)); const max = Math.max(...totals, 1);
   // one caption row here, not two: a stack carries no value label above it (see barChart).
@@ -178,10 +178,10 @@ export function stackedBar({ x, y, w = 520, h = 280, data = [], series = [], sta
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 0.9 }) }];
 }
 
-// statCard — a boxed KPI: label · animated count · optional delta chip.
+// statCard. A boxed KPI: label · animated count · optional delta chip.
 export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '', delta = '', deltaUp = true, start = 0, dur = 4 } = {}) {
   // THE NUMBER COUNTS UP inside a card that is already there, and the delta chip lands after it has
-  // settled — the reading first, then the verdict on it.
+  // settled. The reading first, then the verdict on it.
   return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.xs, pad: SPACE.lg,
     ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.3, children: [
       text({ text: label, size: TYPE.body, weight: 600, ls: '0.02em', color: T.sub, font: 'mono' }),
@@ -194,17 +194,17 @@ export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '
     ].filter(Boolean) }];
 }
 
-// gauge — a semicircular meter (value / max) in a card.
+// gauge: a semicircular meter (value / max) in a card.
 export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
   const pct = Math.max(0, Math.min(1, value / max)); const semi = Math.PI * 42;
   const arc = 'M8 52 A42 42 0 0 1 92 52';
   // The arc SWEEPS to its reading instead of the whole card sliding in. `--p` is driven by the engine
-  // over the layer's window (0 → pct), and the dash length is computed from it in CSS — so the motion
+  // over the layer's window (0 → pct), and the dash length is computed from it in CSS, so the motion
   // is the thing the block is FOR, which is what makes the registry browsable: you see what a gauge
   // does, not that a card can rise. Deterministic: --p is a pure function of t.
   // THE TRACK IS A TINT OF THE READING, not `--line`. It used to be painted with the theme's BORDER
   // colour, so the unfilled half of a meter was the same ink as a divider and read as chrome rather
-  // than as the rest of the scale — and on a dark theme it vanished into the card entirely.
+  // than as the rest of the scale, and on a dark theme it vanished into the card entirely.
   const svg = (inner) => `<svg viewBox="0 0 100 60" width="${inner}" style="display:block;margin:0 auto 4px">`
     + `<path d="${arc}" fill="none" stroke="${tint(color, TINT.track)}" stroke-width="${STROKE.arc}" stroke-linecap="round"/>`
     + `<path d="${arc}" fill="none" stroke="${color}" stroke-width="${STROKE.arc}" stroke-linecap="round"`
@@ -216,7 +216,7 @@ export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color =
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
 }
 
-// progressRing — a circular progress ring with a % centre label (bare, for overlaying).
+// progressRing: a circular progress ring with a % centre label (bare, for overlaying).
 export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
   const pct = Math.max(0, Math.min(1, value / max)); const C = 2 * Math.PI * 42;
   // The ring FILLS to its reading (the same `--p` mechanism as gauge), rather than the whole card

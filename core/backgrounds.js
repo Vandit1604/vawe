@@ -1,4 +1,4 @@
-// backgrounds.js — animated background library for premium motion graphics. Everything draws to a
+// backgrounds.js: animated background library for premium motion graphics. Everything draws to a
 // <canvas> deterministically from the time input t (seconds) → PURE in n (no Math.random per call;
 // particle seeds come from the seeded random() in motion.js). Composed per scene so no two scenes
 // share a background (the variety rule). Techniques + parameter ranges are from motion-design refs:
@@ -116,11 +116,11 @@ export function aurora(ctx, w, h, t, o = {}) {
 }
 
 // ---- softwash: big soft colour blobs that TINT the base (source-over, moderate alpha) into a smooth
-// gradient WASH — orange-into-white / green-into-white, the "mesh gradient" look. Blobs drift on slow
+// gradient WASH, orange-into-white / green-into-white, the "mesh gradient" look. Blobs drift on slow
 // sine paths (pure in t). Unlike aurora it does NOT use 'lighter', so on a LIGHT base it reads as colour
 // pooling into white (not blowing out). `grid` overlays a faint technical line grid (the blueprint look).
 // A pool needs a CORE and a TAIL. A single 0→transparent stop spreads the colour evenly over the whole
-// radius, and three of those on one frame average out into flat haze — which is exactly how the first cut
+// radius, and three of those on one frame average out into flat haze, which is exactly how the first cut
 // of gradientWash/blobs rendered: pale, and near-indistinguishable from each other. Holding most of the
 // alpha inside the first third gives each pool a readable centre, and the long tail still blends.
 const WASH_CORE = 0.34;
@@ -151,7 +151,7 @@ export function softwash(ctx, w, h, t, o = {}) {
   if (o.grid) { // a technical line grid drifting slowly under the wash (the blueprint feel)
     const sp = o.gridSpacing ?? 96, gc = o.gridColor || o.color || '46,224,160', ga = o.gridAlpha ?? 0.10;
     const ox = (Math.sin(t * 0.12) * 10) % sp, oy = (Math.cos(t * 0.1) * 8) % sp;
-    // A 1px hairline at low alpha is below the noise floor of the wash under it — the grid was there and
+    // A 1px hairline at low alpha is below the noise floor of the wash under it, the grid was there and
     // you could not see it. Scale the line with the frame so it survives both the wash and the encoder.
     ctx.strokeStyle = `rgba(${gc},${ga})`; ctx.lineWidth = Math.max(1, Math.round(d / 1400)); ctx.beginPath();
     for (let x = ox; x < w; x += sp) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
@@ -173,7 +173,7 @@ export function spotlight(ctx, w, h, t, o = {}) {
   ctx.globalCompositeOperation = 'source-over';
 }
 
-// ---- metallic: a curtain of vertical light RODS with a travelling SHIMMER — a bright band sweeps
+// ---- metallic: a curtain of vertical light RODS with a travelling SHIMMER, a bright band sweeps
 // horizontally across the bars (a sine wave in the per-bar brightness, advanced by t). Reads as brushed
 // metal / a lit equaliser. Deterministic (pure in t). Colour from the brand accent; a soft glow pools at
 // the light source (default lower-centre) so the top falls to black, like the reference. `speed` = shimmer
@@ -221,7 +221,7 @@ export function metallic(ctx, w, h, t, o = {}) {
   ctx.globalCompositeOperation = 'source-over';
 }
 
-// ---- liquid: a domain-warped colour field — smooth folds of a single hue against pure black, the
+// ---- liquid: a domain-warped colour field, smooth folds of a single hue against pure black, the
 // "liquid light" / blurred-mesh look. What separates it from `aurora` and `softwash` is the RAMP:
 // overlapping soft blobs average into haze, whereas pushing one warped field through two smoothsteps
 // keeps the valleys at true black and the peaks saturated, so the folds read as folds.
@@ -229,7 +229,7 @@ export function metallic(ctx, w, h, t, o = {}) {
 // It renders into a small offscreen buffer and is drawn up to full size with smoothing on. That is the
 // blur: an honest bilinear upscale of a low-res field, not a filter pass over a big one. 160x90 costs
 // ~14k pixels a frame instead of 2M, so a per-pixel field is affordable at all, and the interpolation
-// gives exactly the soft gradient the look needs. Pure in t (no state, no randomness) — the buffer is
+// gives exactly the soft gradient the look needs. Pure in t (no state, no randomness), the buffer is
 // cached on the ctx only to avoid reallocating it every frame.
 export function liquid(ctx, w, h, t, o = {}) {
   const [lr, lg, lb] = rgbTriple(o.color || '200,255,30');
@@ -288,7 +288,7 @@ function rgbTriple(c) { return String(c).split(',').map((n) => +n); }
 export function grain(ctx, w, h, t, o = {}) {
   // hold each grain pattern for `every` frames (default 2) instead of reseeding every frame: full
   // per-frame grain crawls over static text edges and reads as the type "shaking". Still pure in n
-  // (frame derives from t) and still moves — just at half the rate. `every:1` restores per-frame.
+  // (frame derives from t) and still moves, just at half the rate. `every:1` restores per-frame.
   const n = o.count ?? 1400, a = o.alpha ?? 0.05, every = o.every ?? 2;
   const frame = Math.round(t * (o.fps ?? 30) / every) * every;
   ctx.fillStyle = `rgba(255,255,255,${a})`;
@@ -302,7 +302,7 @@ export function grain(ctx, w, h, t, o = {}) {
 // brand rule: use ONLY the site's colours). A palette supplies rgb accents + base hex pairs; pass the
 // brand's palette and every preset (aurora/dots/shapes/plain/glow…) recolours. Dot/shape fields DRIFT.
 // accent/tint/tint2/dotLight = "r,g,b" strings; dark/darkMesh/light/ink/paper = [fromHex, toHex].
-// PAL_PLINTH — the REAL plinthai.xyz palette (from CSS tokens). WHITE-dominant: paper #fff /
+// PAL_PLINTH. The REAL plinthai.xyz palette (from CSS tokens). WHITE-dominant: paper #fff /
 // surface #f4f4f1 · ink #181815 · accent #1f3bff · accentSoft #ebedff · border #e6e6e1 · muted #6e6e68.
 export const PAL_PLINTH = {
   accent: '31,59,255', tint: '110,110,104', tint2: '31,59,255', dotLight: '150,150,142',
@@ -315,11 +315,11 @@ export const PAL_PLINTH = {
 };
 export const PAL = PAL_PLINTH; // back-compat
 
-// bgPaletteFrom(palette) — build the background palette OUT OF the theme's own palette.
+// bgPaletteFrom(palette): build the background palette OUT OF the theme's own palette.
 //
 // WHY THIS EXISTS. The presets above are palette-driven so that one colours-pack reskins every
 // background, and 30 of the 34 themes in this repo hand-author a `bg` block to supply it. The four
-// that do not fell through to `PAL_PLINTH` — one specific brand's blue — and one of the four is
+// that do not fell through to `PAL_PLINTH` (one specific brand's blue) and one of the four is
 // `default`, the theme an author gets when they declare nothing. So the engine's OWN default painted
 // `dark` and `deep` as plinthai.xyz indigo against a near-black `#0a0a0c` palette that calls itself
 // "mono + lime", and `ink` scattered dots in plinth BLUE at 6% alpha over near-black, where they read
@@ -327,7 +327,7 @@ export const PAL = PAL_PLINTH; // back-compat
 // brand's colours. docs/MISTAKES.md #352.
 //
 // Derived, not hand-written, because themes/default.json's own note says "Copy this file to start a
-// new brand kit" — a second palette that must be kept in sync with the first is a palette that drifts.
+// new brand kit". A second palette that must be kept in sync with the first is a palette that drifts.
 // A theme may still declare `bg` explicitly and it wins; this is only the floor.
 const _rgb = (hex) => parseColor(hex) || [0, 0, 0];
 const _hex = ([r, g, b]) => '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
@@ -342,7 +342,7 @@ export function bgPaletteFrom(palette) {
   const light = isLightBg(bg);
   // The DARK end and the LIGHT end of the theme, whichever way round the theme itself is. A light
   // theme still needs somewhere for `dark`/`deep`/`ink` to go, and a dark theme still needs `paper`
-  // to be paper — the preset names describe the FIELD, not the brand's dominance.
+  // to be paper. The preset names describe the FIELD, not the brand's dominance.
   const deepEnd = light ? (p.ink || p.text) : bg;
   const paleEnd = light ? bg : text;
   return {
@@ -363,14 +363,14 @@ export function bgPaletteFrom(palette) {
     accentBase: [accent, _mix(accent, deepEnd, 0.42)],
   };
 }
-// BG_NAMES — the background presets bgPreset() understands. Keep in sync with the switch below (there's
+// BG_NAMES: the background presets bgPreset() understands. Keep in sync with the switch below (there's
 // no way to enumerate a switch); the EFFECTS.md catalog + coverage derive the vocabulary from this so the
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
   'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink',
   'metallic', 'metallicSheen', 'gradientWash', 'blobs', 'liquid'];
 
-// BG_BLURBS — one line per preset, next to the switch that paints it (the `blurb` pattern of
+// BG_BLURBS: one line per preset, next to the switch that paints it (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key here
 // with no preset, or a preset with no key, is a bug the effects catalog reports.
 // EVERY blurb says whether the field MOVES, because that is the fact an author cannot read off a still
@@ -378,27 +378,27 @@ export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', '
 // film grain and no moving fx: `plain` `paper` `accentPlain` `dark` `deep`. Everything else animates.
 export const BG_BLURBS = {
   plain: 'flat theme field',
-  paper: 'the paper gradient with grain only — FLAT, the white-first default when the motion lives in the content',
+  paper: 'the paper gradient with grain only, FLAT, the white-first default when the motion lives in the content',
   paperDots: 'faint drifting dot grid (light)',
   paperShapes: 'faint drifting geometric shapes (light, subtle)',
   soft: 'gentle light radial with faint accent rings and discs drifting over it (moves)',
-  accent: 'the brand accent as a radial with rippling dots and a slow spotlight (moves) — the loud brand field',
-  accentPlain: 'the brand accent as a clean full-bleed field, grain only — FLAT, for plain sites whose hero is one colour',
-  shapes: 'accent rings and discs drifting over paper or dark (moves) — `value` picks the treatment',
+  accent: 'the brand accent as a radial with rippling dots and a slow spotlight (moves), the loud brand field',
+  accentPlain: 'the brand accent as a clean full-bleed field, grain only. FLAT, for plain sites whose hero is one colour',
+  shapes: 'accent rings and discs drifting over paper or dark (moves), `value` picks the treatment',
   dotmatrix: 'dot matrix grid',
   aurora: 'drifting colour aurora (moves)',
-  mesh: 'soft gradient mesh (dark/saturated — check contrast)',
-  constellation: 'drifting connected nodes (moves) — telemetry/data feel',
+  mesh: 'soft gradient mesh (dark/saturated, check contrast)',
+  constellation: 'drifting connected nodes (moves), telemetry/data feel',
   brandglow: 'breathing accent glow',
   spotlight: 'radial spotlight glow',
-  dark: 'a plain dark radial, no dots — FLAT, the quiet backdrop for busy content',
-  deep: 'the deepest plain radial, no dots — FLAT, when the content must own the whole frame',
-  ink: 'dark radial with slow accent-tinted dots pulsing in place (moves) — for a clean flat dark use `plain` + value:"dark"',
-  metallic: 'vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser) — dramatic dark bg, brand-coloured',
-  metallicSheen: 'the quieter metallic: fewer, slower rods with a sweep crossing them (moves) — a dark field type can sit on',
-  gradientWash: 'one big saturated pool bleeding off a corner into white, a mesh gradient (moves) — light and premium',
+  dark: 'a plain dark radial, no dots. FLAT, the quiet backdrop for busy content',
+  deep: 'the deepest plain radial, no dots. FLAT, when the content must own the whole frame',
+  ink: 'dark radial with slow accent-tinted dots pulsing in place (moves), for a clean flat dark use `plain` + value:"dark"',
+  metallic: 'vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser), dramatic dark bg, brand-coloured',
+  metallicSheen: 'the quieter metallic: fewer, slower rods with a sweep crossing them (moves), a dark field type can sit on',
+  gradientWash: 'one big saturated pool bleeding off a corner into white, a mesh gradient (moves), light and premium',
   blobs: 'the airier light wash: smaller separated pools with a technical grid reading through the white (moves)',
-  liquid: 'folds of the brand hue against true black (moves) — it OWNS the frame, so quiet type on it and nothing else',
+  liquid: 'folds of the brand hue against true black (moves). It OWNS the frame, so quiet type on it and nothing else',
 };
 // `name` defaults to `paper` HERE rather than at each call site, where `b.preset || 'paper'` was
 // written three times. Absence has one documented answer; a WRONG name throws (#361).
@@ -423,10 +423,10 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
       // trough for the pulse to be a modulation of something.
       { type: 'dots', mode: 'pulse', color: P.accent, baseAlpha: 0.11, peakAlpha: 0.22, spacing: 64, period: 5, driftX: 8, driftY: 5 }, grain ] };
     case 'plain': return { base: dark ? { kind: 'solid', color: P.inkBase[1] } : { kind: 'solid', color: P.paperBase[0] }, fx: [grain] };
-    // accentPlain — the brand's accent colour as a clean full-bleed field (grain only, no dots/spotlight).
+    // accentPlain: the brand's accent colour as a clean full-bleed field (grain only, no dots/spotlight).
     // For PLAIN sites whose hero is a flat/gradient colour, not a textured one: match plain with plain.
     case 'accentPlain': return { base: { kind: 'radial', from: P.accentBase[0], to: P.accentBase[1], cx: 0.5, cy: 0.4 }, fx: [grain] };
-    // clean dark radial gradients (NO dots) — what you reach for when you want a plain deep backdrop
+    // clean dark radial gradients (NO dots): what you reach for when you want a plain deep backdrop
     case 'deep': return { base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.42 }, fx: [grain] };
     case 'dark': return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.5, cy: 0.44 }, fx: [grain] };
     case 'shapes': return { base: dark ? { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.5, cy: 0.45 } : { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
@@ -446,7 +446,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
       { type: 'metallic', color: P.accent, count: 70, speed: 0.9, waves: 2.2, glow: 0.5, alpha: 0.2, gx: 0.5, gy: 0.78 }, { type: 'grain', alpha: 0.04 } ] };
     case 'metallicSheen': return { base: { kind: 'solid', color: '#040806' }, fx: [
       { type: 'metallic', color: P.accent, count: 58, speed: 0.7, waves: 1.8, glow: 0.42, alpha: 0.16, gx: 0.78, gy: 0.6, sweep: 0.16, sweepSpeed: 0.1 }, { type: 'grain', alpha: 0.07 } ] };
-    // gradientWash — one big saturated pool bleeding off a corner into white. A MESH GRADIENT, so the
+    // gradientWash: one big saturated pool bleeding off a corner into white. A MESH GRADIENT, so the
     // colour has somewhere to come from and somewhere to go; three even pools just average to haze.
     case 'gradientWash': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
       { type: 'softwash', intensity: 1, blobs: [
@@ -454,7 +454,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
         { color: P.tint2, x: 0.72, y: 0.16, rf: 0.32, ax: 0.045, ay: 0.038, px: 19, py: 23, ph: 2, a: 0.5 },
         { color: P.accent, x: 0.94, y: 0.62, rf: 0.2, ax: 0.03, ay: 0.026, px: 27, py: 17, ph: 4, a: 0.34 } ] },
       { type: 'grain', alpha: 0.03 } ] };
-    // blobs — the OTHER light look: airier and more open, with the technical grid as the actual motif.
+    // blobs. The OTHER light look: airier and more open, with the technical grid as the actual motif.
     // Smaller, better-separated pools leave white space for the grid to read through.
     case 'blobs': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
       { type: 'softwash', intensity: 1, grid: true, gridColor: P.accent, gridAlpha: 0.16, gridSpacing: 104, blobs: [
@@ -462,7 +462,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
         { color: P.tint2, x: 0.8, y: 0.72, rf: 0.26, ax: 0.045, ay: 0.038, px: 25, py: 19, ph: 2.4, a: 0.44 },
         { color: P.accent, x: 0.52, y: 0.9, rf: 0.18, ax: 0.03, ay: 0.028, px: 17, py: 23, ph: 4.2, a: 0.3 } ] },
       { type: 'grain', alpha: 0.03 } ] };
-    // liquid — folds of the brand hue against true black (the "liquid light" backdrop). Dramatic and
+    // liquid: folds of the brand hue against true black (the "liquid light" backdrop). Dramatic and
     // full-bleed by design: it OWNS the frame, so put quiet type on it, nothing else.
     case 'liquid': return { base: { kind: 'solid', color: '#000000' }, fx: [
       { type: 'liquid', color: P.accent }, { type: 'grain', alpha: 0.03 } ] };
@@ -472,7 +472,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     case 'aurora': return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
     default:
-      throw new Error(`unknown background preset "${name}" — one of: ${BG_NAMES.join(', ')}. `
+      throw new Error(`unknown background preset "${name}", one of: ${BG_NAMES.join(', ')}. `
         + `An unknown name used to render aurora, which looks deliberate and is not what was asked for.`);
   }
 }

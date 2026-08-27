@@ -1,4 +1,4 @@
-// blocks/sleek.mjs — the SLEEK SURFACE library: glassy, mesh, spotlit, grain, bento. Modern-web card
+// blocks/sleek.mjs. The SLEEK SURFACE library: glassy, mesh, spotlit, grain, bento. Modern-web card
 // treatments that read premium under the determinism reset. The rule (docs/MISTAKES.md): a block holds
 // only STATIC CSS; anything that MOVES comes from a Phase-2 engine effect (a `beam` layer for the border
 // beam, an `aurora` paint behind a glass panel), never a frozen CSS @keyframe. Colours are semantic theme
@@ -15,7 +15,7 @@ export const CATEGORY = 'Surfaces';
 
 const WHITE_HAIR = 'rgba(255,255,255,0.14)';
 
-// glassCard — a frosted glass panel: it BLURS whatever moves behind it (put an aurora/mesh/paint under it),
+// glassCard. A frosted glass panel: it BLURS whatever moves behind it (put an aurora/mesh/paint under it),
 // a hairline white edge, a top sheen. The signature glassmorphism surface. Give it a living background.
 export function glassCard({ x, y, w = 640, h = 360, title, desc, kicker, tint = 0.06,
   radius = 22, start = 0, dur = 4, anim = 'pop', enterDur = 0.5 } = {}) {
@@ -24,7 +24,7 @@ export function glassCard({ x, y, w = 640, h = 360, title, desc, kicker, tint = 
     bg: `rgba(255,255,255,${tint})`, radius, border: `1.5px solid ${WHITE_HAIR}`, glass: 16,
     shadow: true, start, duration: dur, anim, enterDur, out: 'defocus', exitDur: 0.4,
     children: [
-      // top sheen — a thin bright gradient bar reading as a light edge on glass
+      // top sheen: a thin bright gradient bar reading as a light edge on glass
       { type: 'rect', w: w - 80, h: 2, bg: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)', radius: 0 },
       kicker && text({ text: kicker, font: 'mono', size: 22, weight: 600, color: 'var(--accent)', ls: '0.08em' }),
       title && text({ text: title, size: 52, weight: 700, color: '#fff', ls: '-0.02em' }),
@@ -33,7 +33,7 @@ export function glassCard({ x, y, w = 640, h = 360, title, desc, kicker, tint = 
   }];
 }
 
-// meshPanel — a rounded panel whose fill is a soft MESH GRADIENT (stacked radial blobs in accent hues).
+// meshPanel: a rounded panel whose fill is a soft MESH GRADIENT (stacked radial blobs in accent hues).
 // Static (the drift version is the `aurora` paint field); use this as a calm branded surface behind copy.
 export function meshPanel({ x, y, w = 720, h = 420, title, desc, radius = 26, start = 0, dur = 4,
   anim = 'scale', enterDur = 0.55 } = {}) {
@@ -53,7 +53,7 @@ export function meshPanel({ x, y, w = 720, h = 420, title, desc, radius = 26, st
   }];
 }
 
-// spotlightCard — a dark card with a soft SPOTLIGHT glow washing down from a corner (a radial highlight
+// spotlightCard: a dark card with a soft SPOTLIGHT glow washing down from a corner (a radial highlight
 // over a dark surface). Stages a single hero line; the light directs the eye. Pair `from` to aim it.
 export function spotlightCard({ x, y, w = 640, h = 360, title, desc, from = 'top', radius = 22,
   start = 0, dur = 4, anim = 'pop', enterDur = 0.5 } = {}) {
@@ -70,7 +70,7 @@ export function spotlightCard({ x, y, w = 640, h = 360, title, desc, from = 'top
   }];
 }
 
-// borderBeamCard — a card with a light TRAVELLING its border (the animated Phase-2 `beam` layer over a
+// borderBeamCard: a card with a light TRAVELLING its border (the animated Phase-2 `beam` layer over a
 // glass panel). The one sleek surface that MOVES. Returns [panel, content group, beam] so the beam sits on top.
 export function borderBeamCard({ x, y, w = 640, h = 300, title, desc, radius = 22, thickness = 2.5,
   speed = 0.55, start = 0, dur = 4 } = {}) {
@@ -85,7 +85,7 @@ export function borderBeamCard({ x, y, w = 640, h = 300, title, desc, radius = 2
   ];
 }
 
-// grainOverlay — a fine FILM GRAIN texture over the frame or a region (feTurbulence, screen-blended, low
+// grainOverlay: a fine FILM GRAIN texture over the frame or a region (feTurbulence, screen-blended, low
 // opacity). The finishing touch that lifts flat digital gradients into something shot. Static, pure in n.
 export function grainOverlay({ x = 0, y = 0, w = 1080, h = 1920, opacity = 0.08, freq = 0.9,
   start = 0, dur = 4 } = {}) {
@@ -95,8 +95,8 @@ export function grainOverlay({ x = 0, y = 0, w = 1080, h = 1920, opacity = 0.08,
   return [{ type: 'rect', x, y, w, h, bg: `url("${svg}")`, opacity, blend: 'overlay', start, duration: dur, track: 9 }];
 }
 
-// bento — an asymmetric BENTO grid: one hero cell + supporting cells, sizes deliberately unequal (scale
-// contrast, not a uniform card grid — the AI-slop tell the taste system fights). `cells` are placed into a
+// bento. An asymmetric BENTO grid: one hero cell + supporting cells, sizes deliberately unequal (scale
+// contrast, not a uniform card grid. The AI-slop tell the taste system fights). `cells` are placed into a
 // 2-col layout with the first spanning tall. Each cell = { title, desc, kind:'glass'|'mesh'|'spotlight' }.
 export function bento({ x, y, w = 900, h = 560, gap = 20, cells = [], start = 0, dur = 5 } = {}) {
   const colW = (w - gap) / 2, out = [];

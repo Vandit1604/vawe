@@ -1,8 +1,8 @@
-// core/audio-bridges.js — the J-cut / L-cut resolver, as a PURE function (no side effects, no IO).
+// core/audio-bridges.js: the J-cut / L-cut resolver, as a PURE function (no side effects, no IO).
 //
 // A sound bridge is audio that crosses a picture change: a J-cut starts the next shot's sound BEFORE
 // its picture, an L-cut lets the last shot's sound run UNDER the new one. Both are the same object
-// seen from two sides — a span of sound hung off a junction, longer on one side than the picture is.
+// seen from two sides. A span of sound hung off a junction, longer on one side than the picture is.
 //
 // The junction is NAMED, never timed. The film already knows where it turns (core marks: cuts, seams,
 // stings) and those times move whenever a beat is retimed; an author writing `t: 4.37` by hand is
@@ -11,12 +11,12 @@
 // Everything here throws rather than coerces. A bridge that resolves to the wrong span does not look
 // wrong, it SOUNDS slightly off, which is the failure nobody catches in review.
 
-// The grammar moved to core/junctions.js when BACKGROUNDS needed it too — one copy, because two
+// The grammar moved to core/junctions.js when BACKGROUNDS needed it too, one copy, because two
 // hand-kept copies of a definition is MISTAKES #159 exactly.
 import { JUNCTION_KINDS as KINDS, junctionTable, describeJunctions as describe } from './junctions.js';
 
 // resolveBridges turns `audio.bridges` into concrete spans the Go mixer can lay down.
-//   marks:    [{t, kind}] — the film's joints (scene.js MARKS)
+//   marks:    [{t, kind}], the film's joints (scene.js MARKS)
 //   duration: film length in seconds
 // Returns [{ sound, start, end, fade, gain, duck, at, kind }], sorted by start.
 export function resolveBridges(audio, marks, duration) {
@@ -42,11 +42,11 @@ export function resolveBridges(audio, marks, duration) {
     const m = /^([a-z]+)@(\d+)$/.exec(ref);
     if (!m) bad(`"at" must be "<kind>@<index>" (e.g. "cut@1", "seam@0", "sting@2", "junction@3"), got ${JSON.stringify(b.at)}. This film has: ${describe(table)}`);
     const [, refKind, refIdx] = m;
-    if (!table[refKind]) bad(`unknown junction kind "${refKind}" in "${ref}" — known: junction, ${KINDS.join(', ')}. This film has: ${describe(table)}`);
+    if (!table[refKind]) bad(`unknown junction kind "${refKind}" in "${ref}", known: junction, ${KINDS.join(', ')}. This film has: ${describe(table)}`);
     const times = table[refKind];
     const idx = +refIdx;
     if (idx >= times.length)
-      bad(`"${ref}" does not exist — this film has ${times.length} ${refKind}${times.length === 1 ? '' : 's'}. Available: ${describe(table)}`);
+      bad(`"${ref}" does not exist. This film has ${times.length} ${refKind}${times.length === 1 ? '' : 's'}. Available: ${describe(table)}`);
     const at = times[idx];
 
     // Neighbours bound the span. A bridge may lean past its junction, never past the junction on the
@@ -59,20 +59,20 @@ export function resolveBridges(audio, marks, duration) {
     const lag = +(b.lag ?? 0);
     let start, end;
     if (kind === 'j') {
-      if (!(lead > 0)) bad(`a J-cut is defined by its lead — set "lead" to the seconds of sound that arrive BEFORE the picture at ${ref} (t=${at.toFixed(2)})`);
+      if (!(lead > 0)) bad(`a J-cut is defined by its lead, set "lead" to the seconds of sound that arrive BEFORE the picture at ${ref} (t=${at.toFixed(2)})`);
       if (at - lead < prev - 1e-6)
-        bad(`"lead" ${lead}s reaches back past the previous junction at t=${prev.toFixed(2)} — the beat before ${ref} is only ${(at - prev).toFixed(2)}s long. Shorten the lead or move the junction.`);
+        bad(`"lead" ${lead}s reaches back past the previous junction at t=${prev.toFixed(2)}. The beat before ${ref} is only ${(at - prev).toFixed(2)}s long. Shorten the lead or move the junction.`);
       const span = b.span != null ? +b.span : next - at;
-      if (!(span > 0)) bad(`"span" must be positive — it is how long the sound holds AFTER ${ref}`);
+      if (!(span > 0)) bad(`"span" must be positive: it is how long the sound holds AFTER ${ref}`);
       if (at + span > duration + 1e-6) bad(`the bridge would run to t=${(at + span).toFixed(2)}, past the film's ${duration.toFixed(2)}s`);
       start = at - lead;
       end = at + span;
     } else {
-      if (!(lag > 0)) bad(`an L-cut is defined by its lag — set "lag" to the seconds of sound that continue AFTER the picture at ${ref} (t=${at.toFixed(2)})`);
+      if (!(lag > 0)) bad(`an L-cut is defined by its lag, set "lag" to the seconds of sound that continue AFTER the picture at ${ref} (t=${at.toFixed(2)})`);
       if (at + lag > next + 1e-6)
-        bad(`"lag" ${lag}s runs past the next junction at t=${next.toFixed(2)} — the beat after ${ref} is only ${(next - at).toFixed(2)}s long. Shorten the lag or move the junction.`);
+        bad(`"lag" ${lag}s runs past the next junction at t=${next.toFixed(2)}. The beat after ${ref} is only ${(next - at).toFixed(2)}s long. Shorten the lag or move the junction.`);
       const span = b.span != null ? +b.span : at - prev;
-      if (!(span > 0)) bad(`"span" must be positive — it is how long the sound has been running BEFORE ${ref}`);
+      if (!(span > 0)) bad(`"span" must be positive: it is how long the sound has been running BEFORE ${ref}`);
       if (at - span < -1e-6) bad(`the bridge would start at t=${(at - span).toFixed(2)}, before the film begins`);
       start = at - span;
       end = at + lag;
@@ -80,11 +80,11 @@ export function resolveBridges(audio, marks, duration) {
 
     // A hard butt is the one shape a bridge must never have: the point of the device is that the ear
     // crosses over, not that a second file switches on. So a fade is a default, not an option, and it
-    // has to fit inside the span twice — once at each end.
+    // has to fit inside the span twice, once at each end.
     const fade = b.fade != null ? +b.fade : 0.35;
     if (!(fade >= 0)) bad(`"fade" must be >= 0 seconds`);
     if (fade * 2 > end - start + 1e-6)
-      bad(`"fade" ${fade}s twice over does not fit the ${(end - start).toFixed(2)}s the bridge spans — the sound would never reach full level`);
+      bad(`"fade" ${fade}s twice over does not fit the ${(end - start).toFixed(2)}s the bridge spans. The sound would never reach full level`);
     const gain = b.gain != null ? +b.gain : 0.5;
     if (!(gain >= 0)) bad(`"gain" must be >= 0`);
     const duck = b.duck != null ? +b.duck : 1;

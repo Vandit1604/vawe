@@ -1,4 +1,4 @@
-// core/tracks/units.js — kinetic split-text on the layer's LOCAL clock: the clip appears at once and
+// core/tracks/units.js, kinetic split-text on the layer's LOCAL clock: the clip appears at once and
 // the units reveal themselves. presetOpts spreads any per-preset knob (gradient c1/c2, highlight
 // colour, blur px, tilt deg…).
 //
@@ -9,7 +9,7 @@ import { animateUnits } from '../type.js';
 
 export const slot = 'split';
 
-// `units` exist only where the layer asked to be split, so every knob below is guarded on `split` — with
+// `units` exist only where the layer asked to be split, so every knob below is guarded on `split`, with
 // `ransom` beside it, because scene.js implies a char split for a ransom layer and the reveal then runs
 // on those units. `circle` implies a split too and is deliberately NOT here: it lays the units out on a
 // ring and this track yields to it, so a preset on a circle layer is inert for the opposite reason.

@@ -1,10 +1,10 @@
-// core/layers/vocabulary.js — the COMPLETE set of props an author may write on one layer, assembled
+// core/layers/vocabulary.js: the COMPLETE set of props an author may write on one layer, assembled
 // from the declarations (core/props.js) rather than listed anywhere, and the boot-time refusal built
 // on top of it.
 //
 // A layer's vocabulary has two halves and both are declared:
-//   · the TYPE half — what `rect` reads is not what `image` reads (core/layers/index.js LAYER_PROPS).
-//   · the SHARED half — what EVERY layer reads whatever its type: the orchestrator's timing and
+//   · the TYPE half: what `rect` reads is not what `image` reads (core/layers/index.js LAYER_PROPS).
+//   · the SHARED half, what EVERY layer reads whatever its type: the orchestrator's timing and
 //     declared relationships, the twelve-track per-frame pipeline, the shared kit, boot's placement
 //     grammar, the pan resolver, the modifier registry, and the unified transition sugar that is
 //     lowered away before any builder runs.
@@ -65,7 +65,7 @@ function nearest(word, known) {
 // are the one thing the engine is supposed to ignore. Everything else is either read or a bug.
 const isAnnotation = (k) => k.startsWith('_');
 
-// checkLayer — one layer, no recursion. `typeProps` is LAYER_PROPS[type]; the caller owns the
+// checkLayer: one layer, no recursion. `typeProps` is LAYER_PROPS[type]; the caller owns the
 // registry, so this file does not import core/layers/index.js and there is no cycle.
 //
 // UNKNOWN, NOT INERT. A prop nothing declares is refused. A prop declared behind a guard the layer
@@ -80,7 +80,7 @@ export function checkLayer(L, typeProps, where) {
     const t = L.type || 'text';
     throw new Error(`${where} (type "${t}"): unknown prop \`${k}\`.`
       + (near ? ` Did you mean \`${near}\`?` : '')
-      + `\nNothing in the engine reads it, so it would be accepted and then ignored — the JSON looks `
+      + `\nNothing in the engine reads it, so it would be accepted and then ignored, the JSON looks `
       + `right and the render is wrong, which is the most expensive bug class in this repo.`
       + `\n\`${t}\` reads: ${Object.keys(typeProps).sort().join(', ') || '(nothing of its own)'}`
       + `\nplus the ${Object.keys(SHARED_PROPS).length} props every layer carries (timing · placement · `
@@ -89,7 +89,7 @@ export function checkLayer(L, typeProps, where) {
   }
 }
 
-// checkLayerTree — a layer and every descendant, under the SAME rule. A group child is built by the
+// checkLayerTree: a layer and every descendant, under the SAME rule. A group child is built by the
 // same builder as a top-level layer (kit.buildLeaf), so it must be judged by the same vocabulary; the
 // nested-group path does not go through buildLeaf at all, which is how nested groups have twice ended
 // up silently supporting less than their leaves (docs/MISTAKES.md #69, #70). Walking the tree from
@@ -113,7 +113,7 @@ export function checkLayerTree(L, layerProps, where = label(L)) {
   if (!L || typeof L !== 'object') return;
   if (SUGAR_TYPES.has(L.type)) return;
   const typeProps = layerProps[L.type == null || L.type === '' ? 'text' : L.type];
-  if (!typeProps) return;                       // unknown TYPE — index.js owns that refusal
+  if (!typeProps) return;                       // unknown TYPE, index.js owns that refusal
   checkLayer(L, typeProps, where);
   if (Array.isArray(L.children))
     L.children.forEach((C, i) => checkLayerTree(C, layerProps, `${where}.children[${i}]`));

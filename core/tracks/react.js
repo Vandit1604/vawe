@@ -1,4 +1,4 @@
-// core/tracks/react.js — AUDIO REACT: modulate a property from the baked per-frame band energy, read
+// core/tracks/react.js, AUDIO REACT: modulate a property from the baked per-frame band energy, read
 // from a table indexed by the integer frame. The frame never analyses audio, so purity is untouched.
 //
 // Composed BEFORE `transform` so an authored choreography still wins the outer transform. Two further

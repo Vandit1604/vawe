@@ -1,5 +1,5 @@
-// core/layers/component.js — a REAL UI capture (capture-component.mjs), or one PART of a captured
-// animated scene (capture-scene.mjs) — parts carry their own w/h and are re-animated here.
+// core/layers/component.js: a REAL UI capture (capture-component.mjs), or one PART of a captured
+// animated scene (capture-scene.mjs), parts carry their own w/h and are re-animated here.
 export const PROPS = { src: {}, part: {}, w: {} };
 
 export function build(kit, el, L) {

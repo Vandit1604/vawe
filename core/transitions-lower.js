@@ -1,4 +1,4 @@
-// core/transitions-lower.js — the UNIFIED transition surface, lowered to the four raw mechanisms.
+// core/transitions-lower.js: the UNIFIED transition surface, lowered to the four raw mechanisms.
 //
 // An author has ONE way to declare a transition; the engine routes it to the correct mechanism:
 //   • boundary (between two beats)  →  data.transitions: [{ at, fx, dur, dir, timing, mech? }]
@@ -6,7 +6,7 @@
 //
 // This is PURE SUGAR: lowerScene() expands the unified surface into the raw fields the engine already
 // renders (data.cuts / data.stings / data.seams / layer.anim|out), then the existing parsers take over
-// untouched. So the render path, the seam bake, cutStyle and every gate are unchanged — the unified API
+// untouched. So the render path, the seam bake, cutStyle and every gate are unchanged, the unified API
 // adds a normalisation pass, it does not rewrite anything. Determinism is preserved (a pure data→data
 // transform in array order), and a scene that uses no unified key lowers to a byte-identical no-op.
 //
@@ -28,7 +28,7 @@ for (const t of TRANSITIONS) {
 }
 
 // A BOUNDARY transition is scene-level: cut · seam · sting (anim is layer-level, never a boundary).
-// Precedence when a name exists in several mechanisms: CUT first — so the ambiguous basics
+// Precedence when a name exists in several mechanisms: CUT first, so the ambiguous basics
 // (fade/slide/wipe/dissolve/push/uncover) are a cheap root cut by default and `mech:"seam"` upgrades to
 // the real two-scene GPU blend. seam-only names (whipPan/crossWarp/cinematicZoom) resolve to seam;
 // sting-only (glitch/chromaticSplit) to sting.
@@ -36,15 +36,15 @@ const BOUNDARY_ORDER = ['cut', 'seam', 'sting'];
 
 export function boundaryMechanism(fx, mech) {
   const have = MECHS_OF.get(fx);
-  if (!have) throw new Error(`unknown transition fx "${fx}" — see \`make transitions\` for the catalog`);
+  if (!have) throw new Error(`unknown transition fx "${fx}", see \`make transitions\` for the catalog`);
   if (mech) {
-    if (mech === 'anim') throw new Error(`transition "${fx}": mech "anim" is a LAYER transition, not a boundary — put it in a layer's transition.in/out`);
-    if (!have.has(mech)) throw new Error(`transition "${fx}" is not a ${mech} — it is a ${[...have].join('/')} (drop \`mech\`, or pick a ${mech} fx)`);
+    if (mech === 'anim') throw new Error(`transition "${fx}": mech "anim" is a LAYER transition, not a boundary. Put it in a layer's transition.in/out`);
+    if (!have.has(mech)) throw new Error(`transition "${fx}" is not a ${mech}. It is a ${[...have].join('/')} (drop \`mech\`, or pick a ${mech} fx)`);
     return mech;
   }
   for (const m of BOUNDARY_ORDER) if (have.has(m)) return m;
   // only anim implements it → it is a layer entrance, not a boundary
-  throw new Error(`"${fx}" is a layer entrance (anim), not a boundary transition — use it in a layer's transition.in/out`);
+  throw new Error(`"${fx}" is a layer entrance (anim), not a boundary transition, use it in a layer's transition.in/out`);
 }
 
 // A STING TINT IS A COLOUR, NOT A HEX STRING, and it used to be read as one. The renderer turned
@@ -81,13 +81,13 @@ const clean = (o) => { for (const k of Object.keys(o)) if (o[k] === undefined) d
 //
 // LAYER TIMING ONLY, and the boundary is a real one rather than a first cut. A junction `dur` (a cut,
 // a seam, a sting) carries min/max in the schema, and the schema's range check switches on the
-// declared type — a string value would pass through unranged, so `instant` (0.08s) would slip under a
+// declared type. A string value would pass through unranged, so `instant` (0.08s) would slip under a
 // cut's own 0.1s floor with nothing to say so. The layer slots below declare no range, so widening
 // them to accept a word loses no check at all.
 const durs = (o, keys) => { for (const k of keys) if (o && o[k] != null) o[k] = resolveSeconds(o[k]); return o; };
 
 // lowerScene(data): expand the unified surface into the raw fields, in place, and CONSUME the unified
-// keys so re-lowering is a no-op (idempotent — validate and the engine may each call it). Hand-written
+// keys so re-lowering is a no-op (idempotent, validate and the engine may each call it). Hand-written
 // raw fields are preserved; a unified entry is appended alongside them (a beat carrying both is an
 // authoring error a gate flags, not something this silently reconciles).
 export function lowerScene(data) {
@@ -121,8 +121,8 @@ export function lowerScene(data) {
       s.colors.forEach((c, i) => checkStingColor(c, `stings[] at t=${s.t}: colors[${i}]`));
   }
 
-  // A group's children are layers with the same timing props, so the words have to reach them too —
-  // a word that works at the top level and silently NaNs one nesting level down is worse than no word.
+  // A group's children are layers with the same timing props, so the words have to reach them too.
+  // A word that works at the top level and silently NaNs one nesting level down is worse than no word.
   const timings = (L) => {
     if (!L || typeof L !== 'object') return;
     durs(L, ['enterDur', 'exitDur', 'duration']);

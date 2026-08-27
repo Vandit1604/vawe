@@ -1,15 +1,15 @@
-// core/produce.js — PRODUCE THE BASELINE. The engine's "go all-in" default: inject the universal produced
+// core/produce.js, PRODUCE THE BASELINE. The engine's "go all-in" default: inject the universal produced
 // motion into a scene that didn't specify it, so EVERY video is rich by default (a moving camera · scene-unit
-// transitions) — the another engine posture, forced at BUILD time.
+// transitions). The another engine posture, forced at BUILD time.
 // ADDITIVE ONLY: it adds camera/sceneUnits fields; it NEVER rewrites a layer the author wrote (auto-
 // splitting text for kinetic reveals mutated structure and broke motion-track layers + the contrast audit,
-// so kinetic type is nudged by the direction floor instead — MISTAKES).
+// so kinetic type is nudged by the direction floor instead, MISTAKES).
 //
 // The BACKGROUND is deliberately NOT here. It used to be injected (light brand → dotmatrix, dark → aurora),
-// which meant the backdrop — the single largest area of the frame — was the one design decision no author
+// which meant the backdrop (the single largest area of the frame) was the one design decision no author
 // ever made. `bg` is now a required field (core/validate.mjs); this pass supplies motion, not taste.
 //
-// Determinism: it only mutates the scene DATA once, before the first frame — renderFrame(n) stays pure.
+// Determinism: it only mutates the scene DATA once, before the first frame, renderFrame(n) stays pure.
 // ABSENT-ONLY: an explicitly set field is the author's opt-out (set `cameraMove` yourself to override).
 // `"produced": false` disables the whole pass. Applies to the `scene` module only. Pure JS → runs in the
 // browser AND in node gates, so the gates evaluate the SAME produced scene the renderer does.
@@ -37,47 +37,47 @@ if (BASELINE_PUSH > MAX_ZOOM)
   throw new Error(`core/produce.js injects a slowPush to ${BASELINE_PUSH}, and core/safe.js's MARGIN `
     + `absorbs only ${MAX_ZOOM.toFixed(4)}. Every scene that declares no camera would have content `
     + 'pinned to the safe edge cropped by the frame edge. Lower the push, or widen MARGIN and re-run '
-    + '`node scripts/gates/snap-scenes.mjs` — widening it moves every pinned layer in the library.');
+    + '`node scripts/gates/snap-scenes.mjs`: widening it moves every pinned layer in the library.');
 
 export function produceBaseline(data, theme, frame) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
   if (data.produced === false) return bakeCameraMove(data, frame);  // opts out of the INJECTED baseline, not of
-  // the author's own `cameraMove` sugar — that must still become real keys or it renders as nothing.
-  // NOTE — the baseline no longer INJECTS a background. `bg` is a REQUIRED authoring field
+  // the author's own `cameraMove` sugar: that must still become real keys or it renders as nothing.
+  // NOTE: the baseline no longer INJECTS a background. `bg` is a REQUIRED authoring field
   // (core/validate.mjs): the author must declare a preset or an explicit `plain`, so the backdrop is
   // always a deliberate choice, never a silent default that can be brand-wrong (the paperShapes lesson).
 
-  // A scene that already choreographs layers with `motion` tracks is ALREADY directed — and its tracks often
+  // A scene that already choreographs layers with `motion` tracks is ALREADY directed, and its tracks often
   // span beats and use absolute times, which fight the injected camera and the beat-wrapper model. So the
   // DIRECTED injections (camera + sceneUnits) SKIP such a scene (a camera×motion / sceneUnits×motion
-  // interaction produced non-deterministic garbage on motion-reel-v2 — MISTAKES). The author can still opt in.
+  // interaction produced non-deterministic garbage on motion-reel-v2, MISTAKES). The author can still opt in.
   const choreographed = (data.layers || []).some(function has(L) { return L && typeof L === 'object' && (Array.isArray(L.motion) && L.motion.length > 1 || (L.children || []).some(has)); });
 
-  // 2. CAMERA — a gentle slow push if the scene declares no camera move at all (the frame stays alive).
+  // 2. CAMERA. A gentle slow push if the scene declares no camera move at all (the frame stays alive).
   const hasCam = (Array.isArray(data.cameraMove) && data.cameraMove.length) || (Array.isArray(data.camera) && data.camera.length);
   if (!hasCam && !choreographed) {
     data.cameraMove = [{ move: 'slowPush', start: 0, dur: data.duration || 12, from: 1, to: BASELINE_PUSH }];
   }
 
-  // 3. SCENE-UNIT TRANSITIONS — a film WITH cuts that hasn't opted into unit transitions gets them, so the
+  // 3. SCENE-UNIT TRANSITIONS. A film WITH cuts that hasn't opted into unit transitions gets them, so the
   //    beats swap as whole units (the produced default over a flat cam-bump). Skip choreographed scenes.
   if (Array.isArray(data.cuts) && data.cuts.length && data.sceneUnits == null && !choreographed) {
     data.sceneUnits = true;
   }
 
-  // NOTE — kinetic headlines are NOT injected here. Auto-splitting an existing text layer MUTATES its
+  // NOTE: kinetic headlines are NOT injected here. Auto-splitting an existing text layer MUTATES its
   // structure, which broke a layer carrying a `motion` track (non-determinism) and masked the audit's
   // weak-headline contrast check (it measures the whole layer, not per-word units). Structure-changing
   // baselines are unsafe to inject blindly; kinetic type is nudged by the direction floor (no-kinetic-type)
-  // and authored per-headline instead. The baseline stays ADDITIVE (bg · camera · sceneUnits) — it never
+  // and authored per-headline instead. The baseline stays ADDITIVE (bg · camera · sceneUnits), it never
   // rewrites a layer the author already wrote.
   bakeCameraMove(data, frame);
   return data;
 }
 
 // THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (formats/scene/scene.js reads
-// `data.camera`). It used to be resolved only by scripts/author/expand-blocks.mjs, at AUTHOR time — so the
+// `data.camera`). It used to be resolved only by scripts/author/expand-blocks.mjs, at AUTHOR time, so the
 // baseline push produce.js injects at BOOT time, after expansion, was written and never once read: a static
 // scene rendered identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes
 // through, means the field cannot be written and ignored again. Runs even under `produced: false`, because
@@ -93,7 +93,7 @@ export function bakeCameraMove(data, frame) {
   if (!data || !data.cameraMove) return data;
   const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
   if (Array.isArray(data.camera) && data.camera.length)
-    throw new Error('scene declares BOTH `camera` keyframes and `cameraMove` sugar — one would silently'
+    throw new Error('scene declares BOTH `camera` keyframes and `cameraMove` sugar, one would silently'
       + ' overwrite the other. Keep one: the sugar, or the keys it builds.');
   // sceneDims so a move that centres a point centres it in the REAL canvas (core/camera-moves.js can only
   // default to landscape). Same call expand-blocks.mjs makes; the math stays in camera-moves.js.

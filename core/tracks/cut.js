@@ -1,4 +1,4 @@
-// core/tracks/cut.js — a declared `cut` owns this layer's enter and exit styling, in place of the
+// core/tracks/cut.js: a declared `cut` owns this layer's enter and exit styling, in place of the
 // plain fade driveClips wrote a moment earlier. FIRST in the pipeline for that reason: it writes a
 // whole style block (transform, opacity, clip-path, filter) and everything after it composes onto
 // what it left, so anything running before it would be overwritten without a word.

@@ -1,4 +1,4 @@
-// core/frame-settle.js — the barrier for per-frame work that CANNOT finish synchronously.
+// core/frame-settle.js: the barrier for per-frame work that CANNOT finish synchronously.
 //
 // `renderFrame(n)` is synchronous by contract, and the capture waits two real rAFs after it so the
 // browser has painted (internal/scene/scene.go). That is enough for a DOM write and a CSS transform,

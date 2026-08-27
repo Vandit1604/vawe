@@ -1,6 +1,6 @@
-// blocks/vfx.mjs — the VFX family: five treatments that are ABOUT the motion rather than about the
+// blocks/vfx.mjs. The VFX family: five treatments that are ABOUT the motion rather than about the
 // data. Everything else in blocks/ draws a surface and lets a container entrance carry it; these five
-// each own a specific gesture — a caret that bleeds light, a card that eats the frame, a word that
+// each own a specific gesture. A caret that bleeds light, a card that eats the frame, a word that
 // melts into the next one, a post being read, a stack of rows folding up out of depth.
 //
 // Same contract as every sibling module: PURE factories (props → array of scene-layer JSON), no DOM,
@@ -25,7 +25,7 @@ const T = TOKENS;
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // A stable id for a fragment-local SVG filter. Two morphText layers in one scene would otherwise both
-// define `#goo` and every reference would resolve to whichever the DOM saw first — a silent wrong
+// define `#goo` and every reference would resolve to whichever the DOM saw first, a silent wrong
 // filter, not an error. Derived from the content so it is a pure function of the props.
 const idOf = (parts) => {
   let h = 2166136261;
@@ -40,13 +40,13 @@ const progress = ({ delay = 0.25, dur = 1.4, ease = 'easeInOutCubic', to = 1 } =
 });
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 1 · textCursor — A CARET THAT BLEEDS LIGHT. A line of type with a live caret; the glyphs carry a
+// 1 · textCursor. A CARET THAT BLEEDS LIGHT. A line of type with a live caret; the glyphs carry a
 // chromatic fringe that CONVERGES as the line settles, and the caret throws an accent glow onto the
 // words beside it.
 //
 // THE RED/CYAN LITERALS ARE LEGITIMATE and kit.mjs names the test they pass: a colour that IS the
 // identity of something outside this theme. A chromatic aberration is red and cyan or it is not a
-// chromatic aberration — pushing it through the accent would make it a coloured blur instead. The
+// chromatic aberration, pushing it through the accent would make it a coloured blur instead. The
 // GLOW is the theme's accent, because that is decoration and decoration reskins.
 //
 // MOTION: `--p` 0→1 pulls the fringe in from `spread` to nothing and lifts the glow to full. The
@@ -57,7 +57,7 @@ export function textCursor({ x, y, w = 900, body = '', size = TYPE.hero, spread 
   needData('body', body, 'textCursor');
   const CURSORS = ['block', 'bar', 'underline'];
   if (!CURSORS.includes(cursor)) {
-    throw new Error(`block "textCursor": unknown cursor "${cursor}" — one of: ${CURSORS.join(', ')}. `
+    throw new Error(`block "textCursor": unknown cursor "${cursor}", one of: ${CURSORS.join(', ')}. `
       + `block is a filled cell, bar is a thin vertical rule, underline sits under the last glyph.`);
   }
   // The fringe distance, in px, as a function of the settle. Written once: two declarations read it.
@@ -71,7 +71,7 @@ export function textCursor({ x, y, w = 900, body = '', size = TYPE.hero, spread 
   const caret = `<span style="display:inline-block;width:${caretW}px;height:${caretH}px;`
     + `vertical-align:${cursor === 'underline' ? 'baseline' : 'text-bottom'};margin-left:${r2(size * 0.12)}px;`
     + `background:${T.accent};border-radius:${R.micro}px;`
-    // The glow is the caret's own light thrown outward — two shadows, tight and wide, so it reads as a
+    // The glow is the caret's own light thrown outward. Two shadows, tight and wide, so it reads as a
     // source rather than as a blurred rectangle.
     + `box-shadow:0 0 ${r2(size * 0.22)}px ${T.accent}, 0 0 ${r2(size * 0.7)}px var(--accent-glow, ${T.accent});`
     + `opacity:calc(${beat} * (0.35 + var(--p,0) * 0.65))"></span>`;
@@ -86,7 +86,7 @@ export function textCursor({ x, y, w = 900, body = '', size = TYPE.hero, spread 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 2 · parallaxZoom — ONE CARD EATS THE FRAME. A 3x3 board of product cards; the centre one scales
+// 2 · parallaxZoom. ONE CARD EATS THE FRAME. A 3x3 board of product cards; the centre one scales
 // until it fills the whole board while its eight neighbours travel OUTWARD, each along its own vector
 // away from centre, and dim on the way. One 0→1 progress drives all nine, so the push and the parallax
 // cannot drift apart the way nine hand-keyed motion tracks would.
@@ -164,7 +164,7 @@ function parallaxBoard({ x, y, w = 1200, h = 760, title = '', caption = '', tile
 // These were `(o = {}) => parallaxBoard({ ...o, reverse })`, which works and hides the contract: a
 // factory's SIGNATURE is what `paramsOf` reads (core/camera-moves.js:216) and what
 // scripts/gates/block-schema.mjs checks a declared option table against. Forwarding an opaque bag left
-// the gate unable to see fourteen real props and it called every one of them dead — correctly, because
+// the gate unable to see fourteen real props and it called every one of them dead, correctly, because
 // from the outside they were unverifiable. A contract nothing can read is not a contract.
 // EXPORTED so scripts/gates/block-schema.mjs can evaluate the defaults that reference it: its SCOPE
 // spreads the registry's own exports, and a module-private constant is unreadable from there.
@@ -180,11 +180,11 @@ export function parallaxUnzoom({ x, y, w = BOARD.w, h = BOARD.h, title = '', cap
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 3 · morphText — A WORD MELTS INTO THE NEXT. A list of words in one place, cycled, with the outgoing
+// 3 · morphText. A WORD MELTS INTO THE NEXT. A list of words in one place, cycled, with the outgoing
 // and incoming word BLURRED and then re-thresholded so their edges fuse before they separate.
 //
 // WHY NOT core/morph.js. That is a different device and both should exist. `morph` on a text layer
-// migrates individual GLYPHS from word A to word B — shared characters glide to their new slot, which
+// migrates individual GLYPHS from word A to word B, shared characters glide to their new slot, which
 // reads as the same word being rearranged. It takes exactly ONE pair (`morph.to`) and it is per-letter
 // and crisp. This is the liquid register: whole words, an arbitrary-length cycle, and no letter
 // correspondence at all. Reach for `morph` when the two words share letters and you want the reader to
@@ -197,7 +197,7 @@ export function parallaxUnzoom({ x, y, w = BOARD.w, h = BOARD.h, title = '', cap
 //
 // MOTION: one `--i` channel ramping LINEARLY from 0 to words.length - 1. Every word derives its own
 // opacity and blur from its distance to `--i`, so nothing is scheduled per word and adding a tenth
-// word changes no other word's arithmetic. `max(a, -a)` is the absolute value — CSS `abs()` is too new
+// word changes no other word's arithmetic. `max(a, -a)` is the absolute value, CSS `abs()` is too new
 // to rely on and this is exactly equivalent inside a math function.
 export function morphText({ x, y, w = 900, words = [], size = TYPE.display, hold = 0.9,
   goo = 1, color = 'var(--text)', start = 0, dur } = {}) {
@@ -231,20 +231,20 @@ export function morphText({ x, y, w = 900, words = [], size = TYPE.display, hold
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 4 · redditPost — a link-aggregator post: the vote column, the subreddit line, the title, the body,
+// 4 · redditPost. A link-aggregator post: the vote column, the subreddit line, the title, the body,
 // and the comment count. Native layers, not html, because every part of it is a row of type in a card
 // and that is what `group` is for.
 //
 // THE VOTE COLUMN IS THE WHOLE POINT of the shape and it is why this is not a tweet card with
 // different words: the score sits to the LEFT of the title, vertically between its two arrows, and
 // that column is what makes a reader recognise the surface before reading a single word. The score is
-// `num`'s job — mono, tabular — because it is a figure; everything else is sans.
+// `num`'s job (mono, tabular) because it is a figure; everything else is sans.
 export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', title = '', body = '',
   votes = 0, comments = 0, voted = 'up', start = 0, dur = 4 } = {}) {
   needData('title', title, 'redditPost');
   const VOTES = { up: 1, down: -1, none: 0 };
   if (!(voted in VOTES)) {
-    throw new Error(`block "redditPost": unknown voted "${voted}" — one of: ${Object.keys(VOTES).join(', ')}. `
+    throw new Error(`block "redditPost": unknown voted "${voted}". One of: ${Object.keys(VOTES).join(', ')}. `
       + `It lights one arrow to show the reader's own vote; "none" leaves both quiet.`);
   }
   const lit = VOTES[voted];
@@ -258,7 +258,7 @@ export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', tit
   // The arrow is the SAME size as the score beside it, for the reason deltaChip's is: `make audit`
   // fails text under 14.04px, so a glyph shrunk to look secondary is the part nobody can read.
   // THE QUIET ARROW IS `--text-2`, NOT `--dim`. `--dim` is the de-emphasised CHROME role and it does not
-  // clear 4.5:1 on a tinted ground — `make audit` measured the un-lit arrow at 4.4:1 on this very rail.
+  // clear 4.5:1 on a tinted ground, `make audit` measured the un-lit arrow at 4.4:1 on this very rail.
   // kit.mjs already says this about captions and ticks; an arrow a reader has to see is the same case.
   const arrow = (glyph, on, tone) => text({ text: glyph, size: TYPE.base, weight: 700, color: on ? onInk(tone) : quietInk });
   const meta = (t) => text({ text: t, font: 'mono', size: TYPE.body, color: T.sub, weight: 500 });
@@ -292,14 +292,14 @@ export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', tit
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 5 · uiReveal3d — UI ROWS FOLDING UP OUT OF DEPTH. A stack of product rows lying flat and away from
+// 5 · uiReveal3d, UI ROWS FOLDING UP OUT OF DEPTH. A stack of product rows lying flat and away from
 // the camera, each hinging up to face the viewer in turn. The perspective is on each row's OWN
 // transform rather than on the parent, so nothing depends on a stacking context surviving the engine's
 // own transforms; the hinge is at the row's TOP edge, which is what makes it read as unfolding rather
 // than as tumbling.
 //
 // MOTION: one `--p` channel and per-row arithmetic. Row i's own progress is the shared `--p` shifted by
-// i * step and re-normalised, clamped to 0..1 — the same trick the code family uses for a typing
+// i * step and re-normalised, clamped to 0..1. The same trick the code family uses for a typing
 // frontier. So the stagger costs nothing per row, and `--p` reaching 1 always means the LAST row has
 // landed, whatever `items` is.
 export function uiReveal3d({ x, y, w = 680, items = [], rowH = 76, gap = SPACE.xs, tilt = 72,
@@ -384,7 +384,7 @@ export const VFX_SCHEMAS = {
     body: { kind: 'str', max: 240, def: '' },
     votes: { kind: 'num', min: -1e9, max: 1e9, def: 0 },
     comments: { kind: 'num', min: 0, max: 1e9, def: 0 },
-    // which arrow is lit — the reader's own vote
+    // which arrow is lit: the reader's own vote
     voted: { kind: 'enum', of: ['up', 'down', 'none'], def: 'up' },
   },
 

@@ -1,6 +1,6 @@
-// blocks/terminal-layers.mjs — a terminal window built entirely from scene-layer primitives (no
+// blocks/terminal-layers.mjs: a terminal window built entirely from scene-layer primitives (no
 // `type: 'html'` anywhere). Every row below is its OWN TOP-LEVEL layer with its own start/duration/
-// anim — deliberately flat rather than one big nested container. A group child's timing derives from
+// anim, deliberately flat rather than one big nested container. A group child's timing derives from
 // its TOP ancestor's start, not its immediate parent's (`core/layers/util.js` addGroupChild always
 // threads the original `rootL` through recursion), so a deeply nested row cannot carry an offset of
 // its own without fighting that rule. Top-level siblings sidestep it entirely and are exactly the
@@ -14,9 +14,9 @@ export const CATEGORY = 'Code';
 
 const T = TOKENS;
 
-const DOT_TONES = ['danger', 'warn', 'ok'];   // chrome, not content — theme tones, not literal RGB
+const DOT_TONES = ['danger', 'warn', 'ok'];   // chrome, not content, theme tones, not literal RGB
 
-// terminalPro — window chrome (dots + session title) · a command that TYPES itself in with a native
+// terminalPro: window chrome (dots + session title) · a command that TYPES itself in with a native
 // blinking/holding caret · a status line that EXITS the instant its own success line ENTERS · a live
 // `count` layer counting a build percentage in lockstep with its own fill bar · a diff block where
 // every +/- row is its own staggered, individually-coloured chip · a draw-on spinner that resolves
@@ -62,7 +62,7 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
   out.push(text({ text: title, x: x + 90, y: y + 12, w: w - 180, align: 'center', font: 'mono', size: 18, color: T.dim, start, duration: D, anim: 'fade', enterDur: 0.2 }));
 
   // ── prompt: native `typing` + `caret` + `caretHold`. The engine reveals the command char by char
-  // and keeps the caret blinking after it lands — an `html` block has to reconstruct that from a CSS
+  // and keeps the caret blinking after it lands. An `html` block has to reconstruct that from a CSS
   // steps() animation plus a manually-timed `calc(width)`; here it is two layer props.
   out.push({ type: 'group', x: contentX, y: promptY, layout: 'row', gap: 8, items: 'center',
     start, duration: D, anim: 'fade', enterDur: 0.15, children: [
@@ -71,13 +71,13 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
     ] });
 
   // ── the swap: "Installing…" occupies this line, then EXITS on its own clock while its replacement
-  // ENTERS in the same slot — two independently scheduled layers, not one element with rewritten text.
+  // ENTERS in the same slot. Two independently scheduled layers, not one element with rewritten text.
   out.push(text({ text: 'Installing dependencies…', x: contentX, y: statusY, font: 'mono', size: 19, color: T.sub,
     start: t0, duration: installDur, anim: 'fade', out: 'fade', exitDur: 0.2 }));
   out.push(text({ text: '✓ Dependencies installed', x: contentX, y: statusY, font: 'mono', size: 19, color: toneColor('ok'),
     start: status2Start, duration: runsTo(status2Start), anim: 'rise', enterDur: 0.22 }));
 
-  // ── a `count` layer ticking a real percentage in lockstep with its own fill bar — the counter and
+  // ── a `count` layer ticking a real percentage in lockstep with its own fill bar, the counter and
   // the fill share one window, so they read as ONE measurement rather than two coincidentally-timed FX.
   out.push(text({ text: 'Building bundle', x: contentX, y: barY, font: 'mono', size: 18, color: T.dim,
     start: barStart, duration: runsTo(barStart), anim: 'fade', enterDur: 0.15 }));
@@ -90,7 +90,7 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
     start: barStart, duration: runsTo(barStart), anim: 'fade', enterDur: 0.1, ...fillRight({ delay: 0.05, dur: barDur }) }));
 
   // ── diff: every file is its OWN top-level row, staggered in on its own start, each +/- a real
-  // coloured chip (a box, not a coloured span) — a line `make audit` can measure on its own, which one
+  // coloured chip (a box, not a coloured span). A line `make audit` can measure on its own, which one
   // opaque `html` panel covering the whole diff cannot be.
   diff.forEach((f, i) => {
     const rs = r2(diffStart + i * diffRowStep);
@@ -106,7 +106,7 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
   });
 
   // ── spinner → tick: a draw-on arc strokes itself in over its own short life, then EXITS the instant
-  // a settled checkmark ENTERS in its place — a resolve, not a repaint. An idle keeps the
+  // a settled checkmark ENTERS in its place. A resolve, not a repaint. An idle keeps the
   // final success line alive through its held middle instead of sitting dead once the motion stops.
   out.push({ type: 'svg', x: contentX, y: tickY, d: 'M 50 5 A 45 45 0 1 1 5 50', viewBox: '0 0 100 100', w: 20, h: 20,
     stroke: toneColor('ok'), strokeWidth: 10, fill: 'none',
@@ -125,7 +125,7 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TERMINAL_SCHEMAS — the option contract for this file's one factory, in the shape blocks/schema.mjs
+// TERMINAL_SCHEMAS. The option contract for this file's one factory, in the shape blocks/schema.mjs
 // expects (imported and spread into SCHEMA there, same as every other family table).
 export const TERMINAL_SCHEMAS = {
   terminalPro: {

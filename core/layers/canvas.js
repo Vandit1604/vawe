@@ -1,4 +1,4 @@
-// core/layers/canvas.js — the ONE primitive behind every layer type whose output is a canvas:
+// core/layers/canvas.js: the ONE primitive behind every layer type whose output is a canvas:
 // `paint` (Canvas 2D), `shader` (ambient WebGL), `raymarch` (distance fields) and `three` (three.js).
 // Each was its own file repeating this procedure, and each said so in its header. The pixels are the
 // only part that differed, and they now live in core/surfaces/, one file per backend.
@@ -34,12 +34,12 @@ export function canvasLayer(name, blurb) {
       if (L.radius) el.style.overflow = 'hidden';
       el.appendChild(s.canvas);
       el.__surface = s;
-      // `resample` on a surface that cannot be sampled was accepted and then ignored — the bug class
-      // logged most in this repo — because raymarch and three simply never called attachResample and
+      // `resample` on a surface that cannot be sampled was accepted and then ignored, the bug class
+      // logged most in this repo, because raymarch and three simply never called attachResample and
       // nothing noticed. It is a refusal now, and core/resample.js refuses the non-raster types the
       // same way.
       if (L.resample && !S.resamplable) {
-        throw new Error(`resample cannot sample a "${name}" layer — it owns its own WebGL context. `
+        throw new Error(`resample cannot sample a "${name}" layer, it owns its own WebGL context. `
           + `Sampleable canvas layers: paint, shader (and any image layer).`);
       }
       if (S.resamplable) attachResample(kit, el, L);
@@ -50,7 +50,7 @@ export function canvasLayer(name, blurb) {
       const s = el.__surface; if (!s) return;
       const start = L.start ?? 0, end = start + (L.duration ?? 2);
       // OFF-WINDOW MUST CLEAR. Returning early leaves the last frame's pixels in the canvas, so the
-      // element's contents depend on which frames were rendered before it — and frames render across
+      // element's contents depend on which frames were rendered before it, and frames render across
       // 8 workers in arbitrary order. driveClips hides the layer at opacity 0, which is exactly why
       // it would never be noticed: it is impurity waiting for the day a canvas layer is given a
       // non-zero resting opacity, or for sceneUnits to extend its visible window. MISTAKES #41, #64.
@@ -64,7 +64,7 @@ export function canvasLayer(name, blurb) {
       // write three.
       el.dataset.st = lt.toFixed(S.stamp);
       // The resample TICK is core/tracks/resample.js, which occupies the slot immediately after
-      // `primitive` — so it still runs AFTER this draw and still samples THIS frame's pixels. It moved
+      // `primitive`, so it still runs AFTER this draw and still samples THIS frame's pixels. It moved
       // because a text or group layer has no frame() of its own to hang a tick off, and this call
       // being one of two hand-placed sites is why nothing but a raster could ever be resampled.
     },

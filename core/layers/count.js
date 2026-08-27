@@ -1,10 +1,10 @@
-// core/layers/count.js — a number that counts from→to over local time (stats, timers). Build is the
+// core/layers/count.js: a number that counts from→to over local time (stats, timers). Build is the
 // text build (styleText renders count content); this adds the per-frame value.
 import { mergeProps } from '../props.js';
 import { PROPS as TEXT_PROPS } from './text.js';
 export { build } from './text.js';
 
-// The count's own vocabulary, on top of the text build it reuses — the same shape as `export { build }`.
+// The count's own vocabulary, on top of the text build it reuses. The same shape as `export { build }`.
 export const PROPS = mergeProps(TEXT_PROPS, {
   from: {}, to: {}, countStart: {}, countDur: {}, ease: {},
   unit: {}, suffix: {}, prefix: {}, decimals: {},
@@ -17,7 +17,7 @@ export function frame(kit, el, L, t) {
   const v = kit.interpolate(t - start, [cs, cs + cd], [L.from ?? 0, L.to ?? 100], { easing: kit.resolveEasing(L.ease || 'easeOutCubic') });
   // A leading currency symbol in `unit` is hoisted to the front: `unit:"$B"` reads "$880B", which is
   // what CLAUDE.md documents and what the catalog's own statBig.currency assumed. Appending it
-  // verbatim produced "880$B" — the doc, the manifest and the engine each said something different
+  // verbatim produced "880$B". The doc, the manifest and the engine each said something different
   // (docs/MISTAKES.md #76). Plain units (%/k/ms) are untouched.
   const rawUnit = L.unit || L.suffix || '';
   const cur = /^([$€£¥])(.*)$/.exec(rawUnit);
@@ -44,4 +44,4 @@ function fmtCount(v, L) {
 }
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
-export const blurb = "a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals) — the text build plus a per-frame value";
+export const blurb = "a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value";

@@ -1,4 +1,4 @@
-// core/generators.js — the registry of PLAYABLE GENERATORS.
+// core/generators.js: the registry of PLAYABLE GENERATORS.
 //
 // A generator is a pure function from an options object to markup. It knows nothing about scenes,
 // layers or the renderer, which is what lets the same function run in the Go render, in `make
@@ -289,7 +289,7 @@ function bandLayers(o, S, { gradient, w, h }) {
   const shape = pick(o, 'shape', S) ?? 'panels';
   const lname = pick(o, 'lightShape', S);
   const lshape = LIGHT_SHAPES[lname];
-  if (lshape === undefined) throw new Error(`unknown lightShape "${lname}" — one of: ${LIGHT_SHAPE_NAMES.join(', ')}`);
+  if (lshape === undefined) throw new Error(`unknown lightShape "${lname}". One of: ${LIGHT_SHAPE_NAMES.join(', ')}`);
   const width = pick(o, 'lightWidth', S);
   // `round` has no second radius to give, so it is the ratio 1 whatever the height dial says. This is
   // the same reset `normalise` performs on the option object; doing it here as well means a caller who

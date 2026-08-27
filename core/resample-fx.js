@@ -1,4 +1,4 @@
-// core/resample-fx.js — LAYER AS TEXTURE. A layer whose content is already a raster (an <img>, or the
+// core/resample-fx.js: LAYER AS TEXTURE. A layer whose content is already a raster (an <img>, or the
 // canvas a `paint`/`shader` layer draws into) is bound as a GL texture and re-sampled through a
 // fragment shader. That is the one thing the sting/ambient shaders cannot do: they are fullscreen
 // veils generated from uniforms, with no access to any pixels (core/shaders-ambient.js:13).
@@ -6,11 +6,11 @@
 // Why this is the whole feature and not a pile of separate ones: radial blur, spin blur, fisheye,
 // bit-crush, macroblocking, dissolve and glass refraction are all "read neighbouring pixels of an
 // existing image". None of them can be expressed procedurally, and all of them are three lines once
-// you can sample. See docs/ROADMAP.md — this cluster was blocked on exactly this.
+// you can sample. See docs/ROADMAP.md. This cluster was blocked on exactly this.
 //
 // THE DETERMINISM CONTRACT (same as core/paint-fx.js):
 //   · the shader is a pure function of (uv, u_amt, u_time, u_seed) and the source texture;
-//   · the source is itself pure in local time — a static <img>, or a canvas whose own frame() drew it
+//   · the source is itself pure in local time. A static <img>, or a canvas whose own frame() drew it
 //     from lt before we sample it. There is NO feedback: we never sample our own previous output.
 //   · so renderFrame(n) is byte-identical regardless of which frames ran before it, on any worker.
 // Sampling the COMPOSITED frame would break that (it is one frame behind, and Go-side); that is
@@ -22,25 +22,25 @@
 
 export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift'];
 
-// RESAMPLE_BLURBS — one line per fx, next to the list the shader switches on (the `blurb` pattern of
+// RESAMPLE_BLURBS: one line per fx, next to the list the shader switches on (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
 // no fx, or an fx with no key, is a bug the effects catalog reports.
 // THE STANDING CAUTION, true of every entry: each resampled layer takes its own GL context (see
-// createResampler below), so this is a HERO-SHOT effect — one per film, not decoration on fifty layers.
-// The source may now be a BUILT layer and not only a raster one — core/resample.js bakes a text, rect,
-// group or component subtree into a texture at boot — which makes over-reaching cheaper to write than
+// createResampler below), so this is a HERO-SHOT effect. One per film, not decoration on fifty layers.
+// The source may now be a BUILT layer and not only a raster one, core/resample.js bakes a text, rect,
+// group or component subtree into a texture at boot, which makes over-reaching cheaper to write than
 // it used to be. Ten resampled layers is ten contexts; the cap is around sixteen and core/boot.js
 // refuses the frame that crosses it.
 // And a constant `amount` is usually the wrong call: half of these only read as motion while they MOVE,
 // so ramp them across the layer's window.
 export const RESAMPLE_BLURBS = {
-  zoomBlur: 'radial smear out from the centre, near samples kept crisp — an impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp',
-  spinBlur: 'smear along the arc with the radius preserved, so the pivot itself stays sharp — a rotating badge or seal',
-  fisheye: 'real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity — outside the source reads empty, never a stretched edge',
-  bitCrush: 'quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth — a degrade beat, never decoration',
-  macroblock: 'the flat blocks and dropped tiles of a starved codec — a glitch/degrade beat, never decoration',
-  dissolve: 'noise-thresholded erosion lit by an ember front — the way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away',
-  refract: 'liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint — what a blur cannot do',
+  zoomBlur: 'radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp',
+  spinBlur: 'smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal',
+  fisheye: 'real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge',
+  bitCrush: 'quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration',
+  macroblock: 'the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration',
+  dissolve: 'noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away',
+  refract: 'liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do',
   chromaShift: 'radial RGB separation, the channels pulling apart from the centre outwards',
 };
 
@@ -51,13 +51,13 @@ varying vec2 v;
 uniform sampler2D u_tex;
 uniform vec2  u_res;
 uniform int   u_fx;
-uniform float u_amt;    // 0..1, the effect's strength — the only dial most effects need
+uniform float u_amt;    // 0..1, the effect's strength: the only dial most effects need
 uniform float u_time;   // local seconds, for the effects that move
 uniform float u_seed;
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + u_seed) * 43758.5453123); }
 
-// value noise — smooth enough to differentiate for a refraction normal
+// value noise: smooth enough to differentiate for a refraction normal
 float vnoise(vec2 p){
   vec2 i = floor(p), f = fract(p);
   f = f*f*(3.0-2.0*f);
@@ -70,7 +70,7 @@ void main(){
   float ar = u_res.x / max(u_res.y, 1.0);
   vec4 col;
 
-  if (u_fx == 0) {                                      // zoomBlur — smear along the radius from centre
+  if (u_fx == 0) {                                      // zoomBlur, smear along the radius from centre
     vec2 dir = (uv - 0.5) * (u_amt * 0.30);
     col = vec4(0.0); float wsum = 0.0;
     for (int i = 0; i < 16; i++) {
@@ -80,7 +80,7 @@ void main(){
     }
     col /= wsum;
 
-  } else if (u_fx == 1) {                               // spinBlur — smear along the arc, radius preserved
+  } else if (u_fx == 1) {                               // spinBlur, smear along the arc, radius preserved
     vec2 d = uv - 0.5; d.x *= ar;
     float r = length(d), a0 = atan(d.y, d.x);
     float sweep = u_amt * 0.45 * min(1.0, r * 3.0);     // scaled by r: the pivot itself must not smear
@@ -94,7 +94,7 @@ void main(){
     }
     col /= wsum;
 
-  } else if (u_fx == 2) {                               // fisheye — barrel (amt>0.5) or pincushion (amt<0.5)
+  } else if (u_fx == 2) {                               // fisheye, barrel (amt>0.5) or pincushion (amt<0.5)
     vec2 d = uv - 0.5; d.x *= ar;
     float r = length(d) * 2.0;
     float k = (u_amt - 0.5) * 2.0;                      // centred dial: 0.5 is the identity transform
@@ -106,7 +106,7 @@ void main(){
     // outside the source is empty, not clamped: a stretched edge pixel reads as a smear artefact
     col = (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0) ? vec4(0.0) : texture2D(u_tex, p);
 
-  } else if (u_fx == 3) {                               // bitCrush — quantise the palette, 8-bit downgrade
+  } else if (u_fx == 3) {                               // bitCrush, quantise the palette, 8-bit downgrade
     col = texture2D(u_tex, uv);
     // Bit DEPTH, not level count: colour banding is perceived geometrically, so a linear 32→3 ramp
     // spends most of the dial in a range where nothing visibly changes. Each 0.25 of amt now halves
@@ -118,7 +118,7 @@ void main(){
     straight = floor(straight * levels + 0.5) / levels;
     col = vec4(straight * col.a, col.a);
 
-  } else if (u_fx == 4) {                               // macroblock — the block artefact of a starved codec
+  } else if (u_fx == 4) {                               // macroblock, the block artefact of a starved codec
     float blocks = mix(160.0, 12.0, clamp(u_amt, 0.0, 1.0));
     vec2 g = vec2(blocks, blocks / ar);
     vec2 cell = floor(uv * g) / g + 0.5 / g;            // sample the block CENTRE, so blocks read flat
@@ -127,14 +127,14 @@ void main(){
     float drop = step(0.985 - u_amt * 0.06, hash(floor(uv * g)));
     col = mix(col, texture2D(u_tex, cell + vec2(0.03, 0.0)) * vec4(1.1, 0.95, 1.05, 1.0), drop * 0.7);
 
-  } else if (u_fx == 5) {                               // dissolve — noise-thresholded erosion, edge-lit
+  } else if (u_fx == 5) {                               // dissolve, noise-thresholded erosion, edge-lit
     col = texture2D(u_tex, uv);
     float n = vnoise(uv * vec2(48.0 * ar, 48.0) ) * 0.65 + vnoise(uv * vec2(11.0 * ar, 11.0)) * 0.35;
     float edge = smoothstep(u_amt - 0.10, u_amt + 0.02, n);
     col *= edge;
     col.rgb += vec3(1.0, 0.72, 0.34) * (1.0 - edge) * step(0.001, edge) * 1.4;  // ember at the burn front
 
-  } else if (u_fx == 6) {                               // refract — liquid glass: bend by a noise gradient
+  } else if (u_fx == 6) {                               // refract, liquid glass: bend by a noise gradient
     float sc = 6.0;
     vec2 q = uv * vec2(sc * ar, sc) + vec2(u_time * 0.10, u_time * 0.07);
     float e = 0.004;
@@ -153,7 +153,7 @@ void main(){
     col.a = texture2D(u_tex, uv + off).a;
     col.rgb += clamp(length(grad) * 0.06, 0.0, 1.0) * u_amt * 0.5 * col.a;      // specular glint along the ridges
 
-  } else {                                              // chromaShift — radial RGB separation
+  } else {                                              // chromaShift, radial RGB separation
     vec2 d = uv - 0.5;
     float s = u_amt * 0.035;
     col.r = texture2D(u_tex, uv + d * s).r;
@@ -212,17 +212,17 @@ export function createResampler(w, h) {
 
   return {
     canvas,
-    // src: an HTMLImageElement or HTMLCanvasElement. `once` skips re-upload for static sources —
-    // a still image is the same texels on every frame and re-uploading it 900 times is pure waste.
+    // src: an HTMLImageElement or HTMLCanvasElement. `once` skips re-upload for static sources.
+    // A still image is the same texels on every frame and re-uploading it 900 times is pure waste.
     draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false) {
       const idx = RESAMPLE_FX.indexOf(fx);
-      if (idx < 0) throw new Error(`unknown resample "${fx}" — one of: ${RESAMPLE_FX.join(', ')}`);
-      // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded —
-      // a 404'd image reports width 1400 and naturalWidth 0. Uploading it leaves the texture
+      if (idx < 0) throw new Error(`unknown resample "${fx}", one of: ${RESAMPLE_FX.join(', ')}`);
+      // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded.
+      // A 404'd image reports width 1400 and naturalWidth 0. Uploading it leaves the texture
       // INCOMPLETE, and an incomplete texture samples as opaque black, so the layer renders as a
       // black rectangle with no error. Ask the source what it actually decoded.
       const sw = src.naturalWidth ?? src.width, shh = src.naturalHeight ?? src.height;
-      if (!sw || !shh) throw new Error(`resample source has no pixels (${src.tagName === 'IMG' ? 'image failed to load: ' + src.src : 'empty canvas'}) — a black rectangle is not an acceptable render`);
+      if (!sw || !shh) throw new Error(`resample source has no pixels (${src.tagName === 'IMG' ? 'image failed to load: ' + src.src : 'empty canvas'}). A black rectangle is not an acceptable render`);
       gl.useProgram(prog);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, tex);

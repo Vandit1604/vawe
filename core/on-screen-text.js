@@ -1,4 +1,4 @@
-// core/on-screen-text.js — THE definition of "what does this string READ AS on screen".
+// core/on-screen-text.js: THE definition of "what does this string READ AS on screen".
 //
 // It lives in core/, not scripts/lib/, for one reason: core/validate.mjs and core/captions.js both
 // need it and both ship to the BROWSER with the rest of core/. Engine code cannot reach into
@@ -15,9 +15,9 @@
 // Tags that do NOT break a word. Everything else does.
 //
 // THIS DISTINCTION IS THE WHOLE POINT, and neither of the two previous answers had it. Substituting
-// EMPTY for every tag glued `"Financial infrastructure to<br>grow"` into `"...togrow"` — 5 words where
+// EMPTY for every tag glued `"Financial infrastructure to<br>grow"` into `"...togrow"`, 5 words where
 // the frame shows 6, in stripe.json and 21 other live strings. Substituting a SPACE for every tag split
-// `"North<b>wind</b>"` into `"North wind"` — 2 words where the frame shows 1. HTML already answers
+// `"North<b>wind</b>"` into `"North wind"`, 2 words where the frame shows 1. HTML already answers
 // this: an inline element does not interrupt the run of text, a block-level one does. So `<br>` and
 // `<div>` yield a space and `<b>` and `<span>` yield nothing, and both strings read as they look.
 // Unknown or custom tags fall to the block side deliberately: a `<div>` is the overwhelmingly likely

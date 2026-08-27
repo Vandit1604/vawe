@@ -1,4 +1,4 @@
-// blocks/catalog.mjs — the REGISTRY MANIFEST. One data row per named block entry. This is the single
+// blocks/catalog.mjs: the REGISTRY MANIFEST. One data row per named block entry. This is the single
 // source of truth for (a) what the registry contains, (b) how each renders in `make catalog`, and
 // (c) the auto-generated docs/BLOCKS.md table. Adding a block = adding a row here (+ a `variant` branch
 // in its family factory if it's a family.variant). No hand-placement, no per-block catalog code.
@@ -9,7 +9,7 @@
 //               called with props merged UNDER call-time opts (so a scene can still override anything).
 //   - family  : which factory in blocks/index.mjs renders it.
 //   - blurb   : one line for the catalog label + the docs table.
-//   - props   : example/default content props (NO x/y/start/dur — the catalog + expander supply those).
+//   - props   : example/default content props (NO x/y/start/dur, the catalog + expander supply those).
 //   - overlay : true → a full-frame overlay (captions); skipped in the grid catalog.
 //
 // Hex literals (not TOKENS) on purpose: index.mjs imports THIS, so this must not import index.mjs.
@@ -37,7 +37,7 @@ export const CATALOG = [
     props: { w: 540, h: 300, url: 'example.com' } },
   { name: 'pillRow', family: 'pillRow', blurb: 'horizontal row of chip tags',
     props: { items: ['deterministic', 'pure(n)', 'no timeline'] } },
-  { name: 'statBig', family: 'statBig', blurb: 'scale-contrast stat — huge count + tiny label',
+  { name: 'statBig', family: 'statBig', blurb: 'scale-contrast stat, huge count + tiny label',
     props: { to: 1950, label: 'frames', size: 120 } },
   { name: 'colorCycle', family: 'colorCycle', blurb: 'one word cycling through hues',
     props: { word: 'colour', size: 64, each: 0.4 } },
@@ -69,7 +69,7 @@ export const CATALOG = [
     props: { lines: [{ t: 0.2, text: 'every frame fights for its value' }] } },
 
   // ── namespaced variants: distinct registry entries built PURELY from preset props (no factory code).
-  //    This is the cheapest way to grow the arsenal — a data row is a new named block.
+  //    This is the cheapest way to grow the arsenal, a data row is a new named block.
   { name: 'codeBlock.light', family: 'codeBlock', blurb: 'code card, light surface',
     props: { w: 540, dark: false, label: 'terminal', size: 19, lines: ['./bin/vawe video.json', '✓ out/video.mp4'] } },
   { name: 'callout.info', family: 'callout', blurb: 'info strip (blurple)',
@@ -93,8 +93,8 @@ export const CATALOG = [
       { label: 'Q1', value: 12 }, { label: 'Q2', value: 22 }, { label: 'Q3', value: 30 }, { label: 'Q4', value: 55 }] } },
   { name: 'donutChart', family: 'donutChart', blurb: 'ring segments + legend',
     props: { w: 320, label: 'traffic', segments: [
-      // NO per-segment colours. They used to be [accent, --up, #F6A417] — the SEMANTIC green plus a
-      // literal amber that no theme can reskin — so the catalog demo overrode SERIES and rendered the
+      // NO per-segment colours. They used to be [accent, --up, #F6A417], the SEMANTIC green plus a
+      // literal amber that no theme can reskin, so the catalog demo overrode SERIES and rendered the
       // stoplight the ramp exists to remove. Omitted, the block uses seriesAt() and follows the brand.
       { value: 52, label: 'Direct' }, { value: 30, label: 'Search' }, { value: 18, label: 'Social' }] } },
   { name: 'stackedBar', family: 'stackedBar', blurb: 'multi-series stacked bars',
@@ -178,7 +178,7 @@ export const CATALOG = [
   { name: 'spinner', family: 'spinner', blurb: 'looping Lottie (deterministic)',
     props: { size: 90, label: 'rendering' } },
 
-  // ══ variant-fill pass — distinct presets/states, pure manifest rows (factories already exist) ══
+  // ══ variant-fill pass: distinct presets/states, pure manifest rows (factories already exist) ══
   { name: 'codeBlock.py', family: 'codeBlock', blurb: 'code card, python',
     props: { w: 540, dark: true, label: 'render.py', size: 19, lines: [
       { text: 'from vawe import render', color: '#8898AA' }, { text: 'render("video.json")', color: '#E8ECF1' }] } },
@@ -316,22 +316,22 @@ export const CATALOG = [
     props: {"w": 520, "channel": "Studio Vawe", "subscribers": "128K subscribers", "cta": "Subscribe"} },
   { name: 'followCard', family: 'followCard', blurb: 'name over handle, pill CTA',
     props: {"w": 360, "name": "Ana Roth", "handle": "anaroth", "cta": "Follow"} },
-  { name: 'searchEngine.home', family: 'searchEngine', blurb: 'search home — wordmark + pill, query types in (keys click)',
+  { name: 'searchEngine.home', family: 'searchEngine', blurb: 'search home. Wordmark + pill, query types in (keys click)',
     props: { variant: 'home', w: 540, cps: 11, query: 'deterministic video from json',
       // THE LETTERS WERE GOOGLE'S. The word read "Search", but the six colours were Google's exact
-      // brand hexes in Google's exact order — blue, red, yellow, blue, green, red — which is the
+      // brand hexes in Google's exact order (blue, red, yellow, blue, green, red) which is the
       // wordmark's colour signature with the letters swapped. The FACTORY was always clean
       // (`word = null`); only this demo row carried them, and the catalog is the most-copied code in
       // the repo. Same class as the brand recreations already removed from formats/scene.
       // The ramp also makes the demo honest: this is a search-engine block, not one company's.
       word: [{ c: 'S' }, { c: 'e' }, { c: 'a' }, { c: 'r' }, { c: 'c' }, { c: 'h' }] } },
-  { name: 'searchEngine.results', family: 'searchEngine', blurb: 'search results — ranked links, cursor clicks one',
+  { name: 'searchEngine.results', family: 'searchEngine', blurb: 'search results, ranked links, cursor clicks one',
     props: { variant: 'results', w: 540, query: 'video from json', clickIndex: 0, results: [
       { url: 'vawe.dev › docs', title: 'One JSON. Any brand.', snippet: 'Same input, same frames, every time.' },
       { url: 'vawe.dev › blocks', title: 'The block registry', snippet: 'Vetted blocks you compose, not author.' }] } },
   // The other six CODE_THEMES. All twelve palettes were authored and WCAG-checked together (the set's
   // minimum is 4.68:1); six of them had no catalog row, so nothing could render them and they were
-  // invisible on the site — authored work sitting one manifest line away from being usable.
+  // invisible on the site, authored work sitting one manifest line away from being usable.
   { name: 'codeBlock.ink', family: 'codeBlock', blurb: 'code theme · indigo dark, violet-blue syntax',
     props: {"w": 540, "theme": "ink", "label": "scene.ts", "size": 19, "lines": ["export const scene = {", "  module: 'scene',", "  layers: [text, image],", "}"]} },
   { name: 'codeBlock.dusk', family: 'codeBlock', blurb: 'code theme · plum dark, orchid and rose',
@@ -362,11 +362,11 @@ export const CATALOG = [
   // INTERACTION (blocks/interact.mjs). The registry could depict interfaces but not USING them: the
   // `cursor` layer type was reachable from exactly one block (searchEngine.results) with its path
   // hardcoded, a touch tap had no shape, and nothing in the library could be pressed. Appended at the
-  // END for the same reason as the app surfaces — the site crops thumbnails by cell index.
+  // END for the same reason as the app surfaces. The site crops thumbnails by cell index.
   { name: 'pointer', family: 'pointer', blurb: 'mouse pointer · travels to a target and clicks it (ripple)',
     props: { to: { dx: 300, dy: 190 }, clickAt: 1.3, size: 44 } },
   // `at` is late on purpose: a tap is over in half a second, and the sheet samples a block's still at
-  // the last moment it is on screen — an early ripple has already faded by then and the thumbnail is
+  // the last moment it is on screen. An early ripple has already faded by then and the thumbnail is
   // a blank square. Tapping near the end of the window puts the ring mid-flight in the still.
   { name: 'tapRipple', family: 'tapRipple', blurb: 'touch tap · contact dot and an expanding ring, for phone demos',
     props: { at: 4.2, size: 150 } },
@@ -380,7 +380,7 @@ export const CATALOG = [
   // COMPOSITION, STATE AND PROOF. The gaps an App Showcase storyboard found (docs/ROADMAP.md): no
   // container owned a split, no block could move between two states, no screen became another screen,
   // and the proof surfaces proved nothing without a hand-placed caption beside them. Appended at the
-  // END for the same reason as every wave before it — the site crops thumbnails by cell index.
+  // END for the same reason as every wave before it. The site crops thumbnails by cell index.
   { name: 'splitScreen', family: 'splitScreen', blurb: 'two panes, one geometry · second pane lands behind the first',
     props: { w: 540, h: 96, split: 0.5, gap: 32, divider: true,
       left: { block: 'listRow', props: { icon: '✉', title: 'Digest', sub: 'Kite Studio', meta: 'Today' } },
@@ -426,7 +426,7 @@ export const CATALOG = [
       leftScreen: { block: 'emptyState', props: { icon: '☐', title: 'No drafts', body: 'Nothing has been saved to this list.' } },
       rightScreen: { block: 'listRow', props: { icon: '✓', title: 'Draft saved', sub: 'Fieldwork', meta: 'now' } } } },
 
-  // SLEEK SURFACES (blocks/sleek.mjs) — glassy/mesh/spotlit/grain/bento. Static CSS; movement comes from a
+  // SLEEK SURFACES (blocks/sleek.mjs): glassy/mesh/spotlit/grain/bento. Static CSS; movement comes from a
   // Phase-2 engine effect (a beam layer, an aurora paint behind the glass). Put a living bg behind glass.
   { name: 'glassCard', family: 'glassCard', blurb: 'frosted glass panel (blurs the moving bg behind it) + sheen',
     props: { w: 560, h: 300, kicker: 'GLASS', title: 'Backdrop blur', desc: 'It blurs whatever moves behind it.' } },
@@ -442,14 +442,14 @@ export const CATALOG = [
     props: { w: 760, h: 420, cells: [
       { kind: 'mesh', title: 'Hero', desc: 'The big one.' }, { kind: 'glass', title: 'Cell', desc: 'Support.' },
       { kind: 'spotlight', title: 'Cell', desc: 'Support.' }] } },
-  // CAMERA CHROME — frame FURNITURE, not camera motion: a viewfinder draws chrome, a camera move
+  // CAMERA CHROME, frame FURNITURE, not camera motion: a viewfinder draws chrome, a camera move
   // returns keyframes. blocks/camera-chrome.mjs says why they are filed here.
   { name: 'camcorderHud', family: 'camcorderHud', blurb: 'viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom',
     props: { w: 1920, h: 1080, zoom: '2.4', battery: 68, label: 'SP' }, overlay: true },
   { name: 'scanGate', family: 'scanGate', blurb: 'autofocus gate: a band travels the frame, the brackets contract onto the target and lock',
     props: { w: 760, h: 460, label: 'LOCK · f/1.8' } },
 
-  // DIAGRAM (blocks/diagram.mjs) — nodes arrive, then connectors DRAW ON between them in order.
+  // DIAGRAM (blocks/diagram.mjs): nodes arrive, then connectors DRAW ON between them in order.
   { name: 'flowchart', family: 'flowchart', blurb: 'landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges',
     props: { step: 0.16 } },
   { name: 'flowchart.vertical', family: 'flowchart', blurb: 'the same flow turned 90 degrees for a phone feed · cols run down, lanes across, type raised to the portrait floor',
@@ -457,7 +457,7 @@ export const CATALOG = [
   { name: 'nodeGraph', family: 'nodeGraph', blurb: 'non-hierarchical graph · author-placed nodes, routed edges, one node lit',
     props: { highlight: 'core', step: 0.14 } },
 
-  // GLASS SURFACES (blocks/glass.mjs) — frosted panels that BLUR WHAT MOVES BEHIND THEM. Generic frosted
+  // GLASS SURFACES (blocks/glass.mjs): frosted panels that BLUR WHAT MOVES BEHIND THEM. Generic frosted
   // vocabulary, no OS and no vendor marks. Every one needs a LIVING bg; over a flat fill they are grey boxes.
   { name: 'glassWidgets', family: 'glassWidgets', blurb: 'frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid)',
     props: { w: 1080, h: 520, title: 'Frosted surfaces', desc: 'The field behind the panel never stops moving.',
@@ -483,7 +483,7 @@ export const CATALOG = [
     props: { magnify: 2, items: [{ icon: 'file', label: 'Files' }, { icon: 'braces', label: 'Code' },
       { icon: 'spark', label: 'Compose' }, { icon: 'globe', label: 'Publish' }, { icon: 'clock', label: 'History' }] } },
 
-  // CODE MOTION (blocks/codeanim.mjs) — the chrome is dev.mjs's; what is new here is code that MOVES.
+  // CODE MOTION (blocks/codeanim.mjs): the chrome is dev.mjs's; what is new here is code that MOVES.
   { name: 'codeTyping', family: 'codeTyping', blurb: 'live coding: one character frontier crosses the snippet, the caret riding it',
     props: { w: 620, label: 'server.ts', theme: 'midnight', cps: 26, lines: [
       'export function serve(req) {', '  const t = route(req.url);', '  return t.handle(req);', '}'] } },
@@ -508,7 +508,7 @@ export const CATALOG = [
       { label: 'state', lines: ['const table = new Map();'] },
       { label: 'entry', lines: ['serve(table);', 'export default table;'] }] } },
 
-  // MAPS (blocks/geo.mjs) — d3-geo projects at factory time; the page gets finished `d` strings.
+  // MAPS (blocks/geo.mjs): d3-geo projects at factory time; the page gets finished `d` strings.
   { name: 'usMapHex', family: 'usMapHex', blurb: 'US hex cartogram: every state the same size, so the reading is the value not the acreage',
     props: { w: 820, legend: 'M', data: [{ code: 'CA', value: 39 }, { code: 'TX', value: 30 }, { code: 'FL', value: 22 }, { code: 'NY', value: 20 }, { code: 'IL', value: 13 }, { code: 'PA', value: 13 }, { code: 'OH', value: 12 }, { code: 'GA', value: 11 }, { code: 'MI', value: 10 }, { code: 'WA', value: 8 }, { code: 'AZ', value: 7 }, { code: 'MA', value: 7 }, { code: 'CO', value: 6 }, { code: 'MN', value: 6 }, { code: 'WY', value: 1 }, { code: 'VT', value: 1 }, { code: 'AK', value: 1 }, { code: 'HI', value: 1 }] } },
   { name: 'usMap', family: 'usMap', blurb: 'US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend',
@@ -520,7 +520,7 @@ export const CATALOG = [
   { name: 'usMapFlow', family: 'usMapFlow', blurb: 'origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out',
     props: { w: 820, h: 500, hub: 'Denver', flows: [{ from: 'Denver', to: 'New York', value: 9 }, { from: 'Denver', to: 'Seattle', value: 6 }, { from: 'Denver', to: 'Miami', value: 5 }, { from: 'Denver', to: 'Dallas', value: 4 }] } },
 
-  // VFX (blocks/vfx.mjs) — treatments that are about the MOTION, not the data.
+  // VFX (blocks/vfx.mjs): treatments that are about the MOTION, not the data.
   { name: 'textCursor', family: 'textCursor', blurb: 'a caret that bleeds light: an accent glow on the cell, a red/cyan fringe on the type converging as the line settles',
     props: { w: 900, body: 'Ship it', size: 150, cursor: 'block', spread: 18 } },
   { name: 'textCursor.bar', family: 'textCursor', blurb: 'the same treatment with a thin vertical rule instead of a filled cell',

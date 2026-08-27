@@ -1,11 +1,11 @@
-// core/audio-kit.mjs — the framework's OWN audio synthesis engine.
+// core/audio-kit.mjs: the framework's OWN audio synthesis engine.
 //
 // Every sound a video uses is SYNTHESIZED here from parameters, never downloaded. That buys three
 // things a sample library cannot:
-//   • determinism — a cue is a pure function of its spec + seed, so the same JSON always scores the
+//   • determinism: a cue is a pure function of its spec + seed, so the same JSON always scores the
 //     same mix, byte for byte. (Math.random is banned; noise runs off a seeded PRNG.)
-//   • licensing — nothing to attribute, nothing to re-license, nothing that 404s on a fresh clone.
-//   • control — a brand's sound is a set of numbers, so it can be tuned per video the way the
+//   • licensing. Nothing to attribute, nothing to re-license, nothing that 404s on a fresh clone.
+//   • control: a brand's sound is a set of numbers, so it can be tuned per video the way the
 //     palette and motion curves already are.
 //
 // The cue voicings are ported from Cuelume (MIT © Daniel White, https://github.com/dnlwhtly/cuelume,
@@ -42,7 +42,7 @@ export function osc(type, f, t, phase = 0) {
 
 // ---------------------------------------------------------------- biquad (RBJ cookbook)
 // Cuelume shapes its noise layers with BiquadFilterNode (lowpass/bandpass/highpass). A one-pole
-// filter is not close enough — the bandpass Q is what makes `tick` a click and not a thud.
+// filter is not close enough. The bandpass Q is what makes `tick` a click and not a thud.
 export function biquad(type, f0, Q) {
   const w0 = TAU * clamp(f0, 20, SR / 2 - 100) / SR;
   const c = Math.cos(w0), s = Math.sin(w0), alpha = s / (2 * Math.max(0.0001, Q));
@@ -56,7 +56,7 @@ export function biquad(type, f0, Q) {
 }
 
 // ---------------------------------------------------------------- envelope
-// Linear attack to `peak`, then exponential decay — Web Audio's setTargetAtTime shape.
+// Linear attack to `peak`, then exponential decay, Web Audio's setTargetAtTime shape.
 const env = (t, attack, decay, peak) => (t < attack ? (attack ? (t / attack) * peak : peak)
   : peak * Math.exp(-(t - attack) / Math.max(1e-4, decay)));
 
@@ -115,14 +115,14 @@ export function renderCue(spec, seed = 1) {
 
 /**
  * Peak-normalize to a ceiling. Cuelume's `peak` values are Web Audio gains for a UI sound playing
- * alone at system volume — they bake out at -25..-40 dBFS, which is inaudible under a music bed.
+ * alone at system volume: they bake out at -25..-40 dBFS, which is inaudible under a music bed.
  * Normalizing preserves timbre and envelope (the shape that makes a tick a tick) and moves the
  * loudness decision to the mixer's per-cue gain, which is where balance belongs.
  */
 export function normalize(samples, ceiling = 0.8) {
   let peak = 0;
   for (let i = 0; i < samples.length; i++) { const a = Math.abs(samples[i]); if (a > peak) peak = a; }
-  if (peak < 1e-6) return samples; // silence in, silence out — never divide by ~0
+  if (peak < 1e-6) return samples; // silence in, silence out, never divide by ~0
   const g = ceiling / peak;
   for (let i = 0; i < samples.length; i++) samples[i] *= g;
   return samples;
@@ -148,16 +148,16 @@ export function writeWav(file, samples, { stereo = false } = {}) {
 
 // ---------------------------------------------------------------- CUE LIBRARY
 // Voicings ported from Cuelume (MIT © Daniel White). Grouped by the role a video actually needs.
-// THE CUE LIBRARY — ported VERBATIM from Cuelume v0.1.2 (MIT, (c) 2026 Daniel Belyi),
+// THE CUE LIBRARY: ported VERBATIM from Cuelume v0.1.2 (MIT, (c) 2026 Daniel Belyi),
 // https://github.com/Danilaa1/cuelume · https://cuelume-site.pages.dev
 //
 // Cuelume ships no audio files: every cue is a synthesis spec played live through Web Audio. So
-// "using Cuelume's sounds" means using its PARAMETERS, which is what these are — the same schema
+// "using Cuelume's sounds" means using its PARAMETERS, which is what these are, the same schema
 // renderCue() already consumed, copied exactly rather than approximated.
 //
 // They were previously hand-ported and had DRIFTED: 7 of the 14 differed from the real library
 // (success was a whole different interval) and `page` and `loading` were missing entirely. That drift
-// is why they were described as sounding bad — they were an impression of Cuelume, not Cuelume
+// is why they were described as sounding bad. They were an impression of Cuelume, not Cuelume
 // (docs/MISTAKES.md #58). Do not hand-edit these; re-extract from the library if it versions up.
 export const CUES = {
   chime: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1046.5, "attack":0.006, "decay":0.22, "peak":0.09}, {"kind":"tone","waveform":"sine","frequency":1568, "offset":0.09, "attack":0.006, "decay":0.26, "peak":0.08}], "shimmer":{"delay":0.12, "feedback":0.25, "wet":0.18, "lowpass":4000.0}},
@@ -169,8 +169,8 @@ export const CUES = {
   press: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":1700, "filterQ":1.4, "attack":0.001, "decay":0.02, "peak":0.13}]},
   // `key` is the TYPING keystroke (distinct from `press`, which stays a sharp punch for cut/seam hits).
   // A soft membrane tap: a low body that drops in pitch + a gentle low-passed click, highs rolled off so
-  // a fast train is unobtrusive under a headline/VO instead of a buzzy machine-gun. NOT a Cuelume voicing
-  // — designed here for this engine (the ported set had no keystroke that sounded good in a train).
+  // a fast train is unobtrusive under a headline/VO instead of a buzzy machine-gun. NOT a Cuelume voicing,
+  // designed here for this engine (the ported set had no keystroke that sounded good in a train).
   key: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":180, "glideTo":130, "glideTime":0.035, "attack":0.0012, "decay":0.04, "peak":0.12}, {"kind":"noise","filterType":"lowpass","filterFrequency":2000, "filterQ":0.6, "attack":0.0006, "decay":0.012, "peak":0.05}]},
   release: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":4600, "filterQ":1.8, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"tone","waveform":"sine","frequency":3200, "offset":0.006, "attack":0.001, "decay":0.05, "peak":0.02}]},
   toggle: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":2200, "filterQ":1.6, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"noise","filterType":"bandpass","filterFrequency":3800, "filterQ":1.6, "offset":0.024, "attack":0.001, "decay":0.02, "peak":0.1}]},
@@ -182,7 +182,7 @@ export const CUES = {
 };;
 
 /**
- * Music bed — a seamless ambient loop built from a chord, a slow tremolo and an optional pulse.
+ * Music bed: a seamless ambient loop built from a chord, a slow tremolo and an optional pulse.
  * Every partial is snapped to an integer number of cycles over the loop so the seam is inaudible.
  * Parameterized so a brand's bed is numbers, not a downloaded track.
  */
