@@ -17,9 +17,9 @@ export const metadata: Metadata = {
     'Documentation for Vawe: one self-describing JSON becomes one rendered video. Scene primitives, motion, blocks, themes, and the quality gates.',
   // Relative, and deliberately the SITE's copy: in production this app is proxied under the site's
   // origin, so /assets/favicon.svg resolves to the one favicon there is. Hardcoding an absolute
-  // origin would bake in a domain (the site currently answers on vawe.upsurge.cc, not vawe.dev),
-  // and a second copy in this app's public/ would be a duplicate free to drift. Declaring any icon
-  // is also what stops the browser probing /favicon.ico, which 404s.
+  // origin would bake in a domain (the site answers on vawe.dev, and answered on vawe.upsurge.cc
+  // before that), and a second copy in this app's public/ would be a duplicate free to drift.
+  // Declaring any icon is also what stops the browser probing /favicon.ico, which 404s.
   icons: { icon: '/assets/favicon.svg' },
 };
 
