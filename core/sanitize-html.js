@@ -32,6 +32,31 @@ export function sanitizeHtml(src) {
     .replace(ON_HANDLER, '');
 }
 
+// SCOPE A FRAGMENT'S OWN STYLESHEET TO ITS OWN SUBTREE. A `<style>` block inside hand-authored markup
+// lands in the DOCUMENT, not in the layer, so two `html` layers that happen to share a class name fight
+// and the LATER stylesheet silently wins on every frame. That cost an author three rounds: a card set to
+// 40px rendered at 25px because a smaller copy of the same card, later in paint order, declared the same
+// class (docs/MISTAKES.md #425). Same global namespace, last one wins, nothing said a word.
+//
+// A prelude-less `@scope { … }` limits the block to the subtree of the style element's PARENT, which is
+// why the blocks are HOISTED to the front of the fragment first: the caller drops the result straight
+// into its own wrapper (`.hs-html` for a layer, `.hs-bghtml` for a bg window), so hoisting makes that
+// wrapper the scoping root and every element the author wrote a descendant of it. Left where it was
+// written, a `<style>` nested inside `<div class="j">` would take `.j` as the root, and Chrome does not
+// match an ordinary selector against the root itself (only `:scope` reaches it), so the fragment's own
+// `.j { … }` rule would stop applying. Ten fragments in this library are written exactly that way.
+//
+// Relative order between blocks is kept, so a fragment that overrides itself still cascades as written.
+const STYLE_BLOCK = /<style([^>]*)>([\s\S]*?)<\/style>/gi;
+export function scopeStyles(src) {
+  let styles = '';
+  const rest = String(src || '').replace(STYLE_BLOCK, (_, attrs, css) => {
+    styles += `<style${attrs}>@scope {${css}}</style>`;
+    return '';
+  });
+  return styles + rest;
+}
+
 // htmlSource(o, table, where) → the markup an `html` layer or an html bg window is made of, from either
 // `html` (inline, escaped into the scene JSON) or `src` (a .html file, preloaded by preloadHtml into a
 // path→text table). ONE resolver, so a layer and a backdrop cannot drift on which source wins.

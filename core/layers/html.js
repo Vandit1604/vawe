@@ -2,7 +2,7 @@
 // positioned/animated by the engine). MUST be static: any <script> is stripped so renderFrame(n) stays
 // pure. The sanitiser and the reasoning behind it live in core/sanitize-html.js, shared with the `html`
 // background so the layer and the backdrop cannot drift to different rules.
-import { sanitizeHtml, htmlSource, droppedDecls } from '../sanitize-html.js';
+import { sanitizeHtml, scopeStyles, htmlSource, droppedDecls } from '../sanitize-html.js';
 
 // `h` used to be accepted and then ignored: build() set width and not height, and the `.hs-html` wrapper
 // had no height of its own, so hand-authored CSS saying `height:100%` resolved against an auto-height
@@ -47,7 +47,9 @@ export function build(kit, el, L) {
       + `— ${bad.join(' · ')}. It keeps the rest of the rule and renders on, so nothing fails and the `
       + `element simply never does it. A leading minus outside calc() is the usual cause: write `
       + `\`calc(-1 * …)\`, not \`-calc(…)\`.`);
-  el.innerHTML = `<div class="hs-html" style="height:100%">${sanitizeHtml(src)}</div>`;
+  // scopeStyles hoists the fragment's <style> blocks to the front and scopes each one to this wrapper,
+  // so one layer's class names cannot reach another layer's DOM (docs/MISTAKES.md #425).
+  el.innerHTML = `<div class="hs-html" style="height:100%">${scopeStyles(sanitizeHtml(src))}</div>`;
 }
 
 // `--t` is the scene clock in seconds, the one thing hand-authored CSS can be a function of. It was
