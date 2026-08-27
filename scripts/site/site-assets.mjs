@@ -102,7 +102,21 @@ const probe = (f) => {
 const hasAudio = (f) => sh('ffprobe', ['-v', 'error', '-select_streams', 'a', '-show_entries',
   'stream=codec_type', '-of', 'csv=p=0', f]).trim().length > 0;
 
-const rows = MANIFEST.filter((r) => !only || r[0] === only);
+// `--only` matches a GROUP or a SINGLE ROW, by scene name or by destination. It used to match the
+// group alone, which is how one film got re-encoded along with five others, twice in one day: asking
+// for `--only films` when you meant one film hands you every film, and every one of them encodes from
+// whatever happens to be sitting in out/. Naming the row is the fix, and it is what anyone actually
+// means when they say --only.
+const rows = MANIFEST.filter((r) => !only
+  || r[0] === only                                   // a group: films, strip, showcase, hero
+  || r[1] === only                                   // the scene name
+  || r[3] === only || path.basename(r[3], '.mp4') === only);  // the destination, with or without .mp4
+if (only && !rows.length) {
+  console.error(`✗ --only ${only} matched no group, scene or destination.`);
+  console.error(`  groups: ${[...new Set(MANIFEST.map((r) => r[0]))].join(' ')}`);
+  console.error(`  or name one row, e.g. --only plinth-ad`);
+  process.exit(2);
+}
 if (!rows.length) { console.error(`no rows for --only ${only}`); process.exit(1); }
 
 // 1. optionally re-render each distinct scene through the engine (which runs the gates)
@@ -121,7 +135,7 @@ if (has('--render')) {
 }
 
 // 2. encode each row to its web size + poster
-let wrote = 0, stale = 0;
+let wrote = 0, stale = 0, stalerender = 0;
 let mismatched = 0;
 const missingRenders = [];
 for (const [group, scene, render, dest, width, poster, ar] of rows) {
@@ -142,6 +156,19 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
     console.error(`✗ ${dest}: ${render}.mp4 is ${w}x${h} (${actual.toFixed(3)}) but the layout expects ${ar.toFixed(3)}.`);
     console.error(`  → the scene is rendering the wrong shape. Check "aspect" in formats/scene/${scene}.json.`);
     mismatched++;
+    continue;
+  }
+
+  // A RENDER OLDER THAN ITS SCENE IS NOT A RENDER OF THAT SCENE. out/ is a scratch directory holding
+  // whatever anyone last rendered, and nothing here asked whether the file in it came from the JSON on
+  // disk today. So encoding took the newest bytes it could find and shipped them. Cheap to check,
+  // because the scene path is already known and mtime is free.
+  const sceneJson = path.join(root, 'formats/scene', `${scene}.json`);
+  if (fs.existsSync(sceneJson) && fs.statSync(sceneJson).mtimeMs > fs.statSync(src).mtimeMs) {
+    console.error(`✗ ${dest}: out/${render}.mp4 is OLDER than formats/scene/${scene}.json.`);
+    console.error(`  → that render predates the scene, so it is not a render of it. Re-render first:`);
+    console.error(`     ./bin/vawe formats/scene/${scene}.json`);
+    stalerender++;
     continue;
   }
 
@@ -186,6 +213,12 @@ if (missingRenders.length) {
   for (const d of missingRenders) console.error(`    ${d}`);
   console.error('  Re-run with --render, or drop the row. Rows still in the manifest but absent from');
   console.error('  out/ mean the site is serving whatever was committed last, which nothing re-checks.');
+  process.exitCode = 1;
+}
+if (stalerender) {
+  console.error(`\n✗ ${stalerender} render(s) are OLDER than the scene they claim to come from, NOT written.`);
+  console.error(`  Re-render those scenes, then re-run. out/ is a scratch directory: what is in it is`);
+  console.error(`  whatever anyone rendered last, not necessarily a render of the JSON on disk today.`);
   process.exitCode = 1;
 }
 if (mismatched) {
