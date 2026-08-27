@@ -875,6 +875,18 @@ films-json: ## check site/lib/films.json against the rendered films (WRITE=1 to 
 # lost in a merge, one committed before its sound existed, one still 9:16 while its film was 16:9.
 # A gate nobody runs is not a gate.
 site-check: scenes-json films-json site-counts ## check every published artifact against its source
+
+# make code-quality — the codebase may get simpler, never more tangled.
+# A RATCHET, not a threshold: 334 findings exist today, and a threshold would fail every build on day
+# one, which is how a rule gets waived by reflex and quietly repealed. This holds the current line and
+# lets it move only downward. WRITE=1 accepts the current state, which is how you bank a cleanup.
+code-quality: ## refuse code that is more tangled than the baseline (WRITE=1 to accept the current state)
+	node scripts/gates/code-quality.mjs $(if $(WRITE),--write,)
+
+# make code-quality-top — what is worst right now, ranked. A number here is a question, not a verdict.
+code-quality-top: ## the 25 most tangled functions in the repo
+	node scripts/gates/code-quality.mjs --top
+
 	@echo "\u2713 site: published scenes, films and counts all agree with their sources"
 
 # make blocks-sync — after adding a block: docs table, the site's grid, and the site's per-block

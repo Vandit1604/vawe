@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "ignorePatterns": ["node_modules", "site", "out", "docs-site", "**/*.expanded.json"],
+  "categories": { "correctness": "error" },
+  "rules": {
+    "complexity": ["error", { "max": 20 }],
+    "max-lines-per-function": ["error", { "max": 80, "skipComments": true, "skipBlankLines": true }],
+    "max-depth": ["error", { "max": 4 }],
+    "max-nested-callbacks": ["error", { "max": 3 }],
+    "max-params": ["error", { "max": 6 }],
+    "no-unused-vars": "error"
+  }
+}
