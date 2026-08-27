@@ -2,8 +2,8 @@
 message: "One sentence, the single thing this video must communicate."
 audience: "Who it is for (role, context)."
 arc: "hook → build → proof → payoff → CTA"
-framework: "PAS | BAB | AIDA | FAB | Star-Story-Solution — CHOSEN, with a reason, not defaulted"
-threads: "what holds this film across its cuts — two devices from docs/CRAFT/FILM-STRUCTURE.md"
+framework: "PAS | BAB | AIDA | FAB | Star-Story-Solution, CHOSEN, with a reason, not defaulted"
+threads: "what holds this film across its cuts. Two devices from docs/CRAFT/FILM-STRUCTURE.md"
 object: "ONLY if a continuous object is one of them: the noun that survives every cut"
 object_t0: "what it looks like before anything happens"
 object_states: "what it becomes at each cut, in order"
@@ -11,8 +11,8 @@ object_last: "the last frame: the payoff, or the moment just before it"
 format: 1920x1080
 theme: "themes/<brand>.json (or: preset <name> remixed via make theme-remix)"
 duration: 29s
-pace: "showreel | explainer | held — CHOSEN before any beat is written, with a seconds-per-idea budget"
-spectacle: "beat N · which layer · which device · what the moment is for — the ONE loud moment"
+pace: "showreel | explainer | held, CHOSEN before any beat is written, with a seconds-per-idea budget"
+spectacle: "beat N · which layer · which device · what the moment is for, the ONE loud moment"
 not: "the defaults this film refuses, in your own words"
 ---
 
@@ -34,7 +34,7 @@ not: "the defaults this film refuses, in your own words"
 
   THE PEAK AND THE EXCLUSION, BOTH REQUIRED, BOTH PRESENCE-CHECKED ONLY. `spectacle:` names the one
   exaggerated moment: which beat, which layer, which device, what it is for. It is two-sided and that is
-  the whole point — naming the peak is at the same time a promise that every other beat stays restrained,
+  the whole point: naming the peak is at the same time a promise that every other beat stays restrained,
   so a film that names none has not chosen restraint, it has chosen one flat volume for its whole runtime.
   `not:` names the defaults this film refuses. Most generic output is not a wrong decision, it is an
   un-excluded default: the centred type, the even grid, the fade on everything.
@@ -99,7 +99,7 @@ not: "the defaults this film refuses, in your own words"
   frame (`dead-air`) and nothing on the other side, so the cheap answer was always more motion rather
   than better motion. `rest: none` is a legal answer and it is the right one on the spectacle beat.
 
-    either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md — a
+    either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md, a
   match cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence, an open
   question. Carry two, not one. `object:` is the one device the scene-side gate can also see: one noun
   stays on screen across the cuts and every cut is a state change of it. Declare `object:` only if that
@@ -107,14 +107,14 @@ not: "the defaults this film refuses, in your own words"
   on every beat are required too, and the scene-side mirror is direction-floor's `no-continuous-object`
   (opt-in, `TASTE=1`). Doctrine for the object device: .claude/skills/vawe-continuous-action/SKILL.md.
 
-  THE THIRD QUESTION, AND THE ONE NOTHING USED TO ASK. `trigger:` is WHAT MADE THIS BEAT HAPPEN —
-  the act in the beat before that forced this one. "the cursor hits Send on the card in beat 1". It is
+  THE THIRD QUESTION, AND THE ONE NOTHING USED TO ASK. `trigger:` is WHAT MADE THIS BEAT HAPPEN.
+  The act in the beat before that forced this one. "the cursor hits Send on the card in beat 1". It is
   not `becomes:` (what the thing turned into) and it is not `mechanism:` (how it moves), and the cheap
   answer to it is either of those two again. A film where every beat has a `becomes:` and no beat
   causes the next is a run of unrelated changes, which is the slideshow failure written on paper.
   OPTIONAL, AND IT WILL STAY OPTIONAL. Not every film has a causal spine: a manifesto, a vignette
   anthology and a metric-cut list film are held by something else and have no answer to "what caused
-  beat 3". The gate never blocks on it. What it always prints is the CHAIN — one link per junction,
+  beat 3". The gate never blocks on it. What it always prints is the CHAIN, one link per junction,
   every unstated link drawn as a break, and a count of fragments. It warns on `trigger-is-a-sequence`
   ("then", "next": that says when, not why), on `trigger-is-a-mechanism` ("it cuts to the next shot"),
   and on `chain-breaks` once some junctions state a cause and others do not. Full register, and what
@@ -158,7 +158,7 @@ not: "the defaults this film refuses, in your own words"
   `picture:` is the other half, and it is the one that matters most here. Short-form advertising
   research is blunt about it: the visual and copy channels must carry a beat SIMULTANEOUSLY, not
   sequentially, because that is the only way to fit a whole beat into three seconds. A beat with copy
-  and no picture is one channel doing all the work in series. That is not a style preference — it is
+  and no picture is one channel doing all the work in series. That is not a style preference, it is
   the mechanical reason 29 films in this library used to waive the deleted show floor. State what the frame
   SHOWS, separately from what it SAYS, and if you cannot, you have found the beat's real problem while
   it is still a line of markdown.

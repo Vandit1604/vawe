@@ -3,7 +3,7 @@ name: vawe-effects
 description: "See the WHOLE effect arsenal and pick by what you need, instead of defaulting to rise+fade. Load while authoring a scene JSON when you need to choose an effect: a kinetic reveal, a living background, a border-beam/shine, a shape-morph logo, a paint field (aurora/meteor/matrix), a cut/sting/seam. Points at the generated docs/EFFECTS.md (240 effects, 15 families) so it never drifts from the code."
 ---
 
-# vawe-effects — pick from the whole arsenal, don't default
+# vawe-effects: pick from the whole arsenal, don't default
 
 The proven failure: with 240 effects available, authoring from a blank JSON still regresses to `rise`+`fade`.
 This skill is the map. **Read [`docs/EFFECTS.md`](../../../docs/EFFECTS.md) first** (regenerate with `make effects`);
@@ -26,13 +26,13 @@ it is generated from the engine registries, so every effect that exists is liste
 
 ## The three per-frame mechanisms (know which one moves)
 
-- **`paint` fields** (`core/paint-fx.js`) — generative full-canvas, closed-form in t, **can move** (aurora
+- **`paint` fields** (`core/paint-fx.js`): generative full-canvas, closed-form in t, **can move** (aurora
   drifts, meteor streaks, matrix rains). Author `{"type":"paint","paint":"<name>", ...opts}`.
-- **`beam` / `glow` / `svg` layers** — DOM effects driven per frame by their `frame()` hook (border-beam
+- **`beam` / `glow` / `svg` layers**: DOM effects driven per frame by their `frame()` hook (border-beam
   angle, sheen position, glow flash envelope, svg draw/morph). Pure in t, dataset-stamped.
-- **`canvasFx` / `filter` looks** — baked ONCE, **cannot move** (halftone, dither, colour grades). Static only.
+- **`canvasFx` / `filter` looks**: baked ONCE, **cannot move** (halftone, dither, colour grades). Static only.
 
-If you want motion, never reach for a `canvasFx`/`filter` and expect it to animate — it is frozen by design.
+If you want motion, never reach for a `canvasFx`/`filter` and expect it to animate, it is frozen by design.
 
 ## Rules
 

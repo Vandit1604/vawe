@@ -4,7 +4,7 @@ answers: "the sleek block library · the build-HTML-first loop · the design spe
 group: look
 ---
 
-# SURFACES — sleek components, the build-first loop, and the design spec
+# SURFACES: sleek components, the build-first loop, and the design spec
 
 The finishing layer: the actual *surfaces* copy sits on (glass, mesh, spotlight, bento), how to build a
 bespoke one before you drop it in, and a one-page design spec to lock a look. Load this after the frame's
@@ -18,14 +18,14 @@ behind glass), never a frozen CSS `@keyframes`. Drop via `{ "type":"block", "blo
 
 | Block | What it is | Give it |
 |---|---|---|
-| `glassCard` | frosted glass — BLURS whatever moves behind it, hairline edge, top sheen | a living background (aurora/mesh/paint) to blur |
+| `glassCard` | frosted glass: BLURS whatever moves behind it, hairline edge, top sheen | a living background (aurora/mesh/paint) to blur |
 | `meshPanel` | a soft mesh-gradient surface (stacked accent blobs) | a calm branded surface behind a hero line |
 | `spotlightCard` | a dark card with a soft spotlight washing from a corner (`from`) | one hero line the light points at |
 | `borderBeamCard` | a glass card with a light TRAVELLING its border (the animated `beam`) | the one sleek surface that moves |
 | `grainOverlay` | fine film grain over the frame (feTurbulence, screen-blended) | any flat gradient that needs to read as "shot" |
 | `bento` | an asymmetric bento grid: one hero cell + supporting cells | scale contrast, not a uniform card grid |
 
-Glass needs something behind it — put an `aurora` paint or a `meshPanel` under a `glassCard` or the blur has
+Glass needs something behind it: put an `aurora` paint or a `meshPanel` under a `glassCard` or the blur has
 nothing to work on. `make catalog` renders the whole registry; browse it before hand-rolling a surface.
 
 ## Build the HTML FIRST (the default loop)
@@ -33,18 +33,18 @@ nothing to work on. `make catalog` renders the whole registry; browse it before 
 A surface you'll reuse or that must look impeccable is built and gated BEFORE it enters the scene, not
 tweaked blind inside a 2000-frame render. The loop:
 
-1. **Author the fragment** — a `blocks/sleek.mjs` factory (preferred, reusable + gated) OR a hand-written
+1. **Author the fragment**: a `blocks/sleek.mjs` factory (preferred, reusable + gated) OR a hand-written
    HTML fragment for true connective tissue (a hook, a CTA). Hand-writing? Load [`taste-skill`] +
    [`impeccable`] first (Anti-Default Discipline), then this guide's design spec.
-2. **Preview it standalone** — `make preview HTML=<file> THEME=<brand>` → `/tmp/preview.png`. Read the shot.
-3. **Gate the craft** — `make designspec-check D=<file>` (impeccable detector, 41 rules, no LLM) must be clean.
-4. **Drop it in** — only a vetted surface enters the scene. Now the render is composing known-good parts.
+2. **Preview it standalone**: `make preview HTML=<file> THEME=<brand>` → `/tmp/preview.png`. Read the shot.
+3. **Gate the craft**: `make designspec-check D=<file>` (impeccable detector, 41 rules, no LLM) must be clean.
+4. **Drop it in**, only a vetted surface enters the scene. Now the render is composing known-good parts.
 
 Building first is what stops the "tweak coords blind, re-render, repeat" spiral that eats a session.
 
 ## The design spec (lock a look in one page)
 
-Before authoring a bespoke surface, fill this — it is the frame's contract, and every block/fragment obeys it.
+Before authoring a bespoke surface, fill this: it is the frame's contract, and every block/fragment obeys it.
 Adapted from another engine' design-spec; the values come from the brand study ([`../DESIGN-DATABASE.md`], `make brandspec`).
 
 | Token | Decide | Example |
@@ -78,15 +78,15 @@ a spec nobody re-reads is a spec that was decoration.
 
 Pick ONE as the register; it sets colors/typography/components together. Don't mix.
 
-1. **Editorial** — serif hero, generous whitespace, hairline rules, no fills. (calm, authoritative)
-2. **Technical** — mono, tight grid, terminal chrome, dark. (precise, developer)
-3. **Glass / depth** — frosted glass over a living gradient, soft light. (premium, modern)
-4. **Brutalist** — huge sans, hard edges, high contrast, one loud accent. (bold, confident)
-5. **Mesh / gradient** — soft mesh fields, rounded, luminous. (friendly, consumer)
-6. **Kinetic / broadcast** — fast cuts, big kinetic type, whip pans. (energetic, launch)
-7. **Analog / warm** — grain, film halation, warm palette, slight imperfection. (human, crafted)
-8. **Data / dashboard** — real UI surfaces, count-ups, dive-ins, telemetry motion. (proof, product)
+1. **Editorial**: serif hero, generous whitespace, hairline rules, no fills. (calm, authoritative)
+2. **Technical**: mono, tight grid, terminal chrome, dark. (precise, developer)
+3. **Glass / depth**: frosted glass over a living gradient, soft light. (premium, modern)
+4. **Brutalist**: huge sans, hard edges, high contrast, one loud accent. (bold, confident)
+5. **Mesh / gradient**: soft mesh fields, rounded, luminous. (friendly, consumer)
+6. **Kinetic / broadcast**: fast cuts, big kinetic type, whip pans. (energetic, launch)
+7. **Analog / warm**: grain, film halation, warm palette, slight imperfection. (human, crafted)
+8. **Data / dashboard**: real UI surfaces, count-ups, dive-ins, telemetry motion. (proof, product)
 
-A register that can't be justified by the brand's own site is the wrong one — restudy, don't guess.
+A register that can't be justified by the brand's own site is the wrong one, restudy, don't guess.
 
 Effects to move over these surfaces: [EFFECTS.md](../EFFECTS.md) · skills: `vawe-effects` · `vawe-animation` · `vawe-camera`.

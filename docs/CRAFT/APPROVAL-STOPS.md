@@ -4,7 +4,7 @@ answers: "the points where the work gets shown before it is finished: concept ·
 group: crosscutting
 ---
 
-# Approval stops — show the work before it is finished
+# Approval stops: show the work before it is finished
 
 Points in the pipeline where the author **stops**, shows one screen, and does not start the next
 phase until the person who asked for the film answers: approve, deny, or change it.
@@ -19,7 +19,7 @@ earlier and far cheaper:
 
 | what was rejected | the stop that would have caught it | cost there |
 |---|---|---|
-| "wtf concept was that" — a glass film that was four frosted rectangles drifting | **concept** | one line of text |
+| "wtf concept was that": a glass film that was four frosted rectangles drifting | **concept** | one line of text |
 | Instrument Serif, a saturated AI-default face | **style frames** | one token |
 | an explainer whose first slide carried nothing | **style frames** | one element |
 | a scroll-driven deck whose motion was the point and was wrong | **concept** | a sentence |
@@ -30,7 +30,7 @@ momentum carried the work past the moment when redirecting it was free.
 
 ## The stops
 
-### 1. Concept — before any JSON exists
+### 1. Concept, before any JSON exists
 
 Show **three genuinely different directions**, one line each and one frame each. Different in
 structure, not only in colour: a different message, a different object, a different shape.
@@ -45,7 +45,7 @@ how likely each direction is to be the FIRST thing anybody proposes for the brie
 away unless two of them score under 0.10** ([SELECTION.md](SELECTION.md) Part 3). Asked for three, a
 generator produces the first thing three times in three palettes.
 
-### 1a. Storyboard panels — before any JSON exists
+### 1a. Storyboard panels, before any JSON exists
 
 `make panels SB=<storyboard.md>` draws one rough grey still per beat and tiles them into a sheet.
 
@@ -76,7 +76,7 @@ dashed box.
 `storyboard-check` warns when no panels exist for a storyboard, or when they were drawn from an older
 version of it. It never blocks: panels are advisory, and a gate that blocks on advice gets waived.
 
-### 1b. The hand-written fragment — before it goes into a film
+### 1b. The hand-written fragment, before it goes into a film
 
 Every `html` layer and every hand-authored `bg` is somebody's raw HTML. It is the least reviewed thing
 in the pipeline and the easiest to review: one file, one command, one picture.
@@ -92,7 +92,7 @@ Put the fragment in a FILE and point the layer at it with `src` instead of escap
 ```
 
 `html` and `src` are alternatives, never both. A `src` that is not on disk stops the render, naming the
-path and the roots the server serves — a fragment is the whole beat, so there is nothing to degrade to.
+path and the roots the server serves: a fragment is the whole beat, so there is nothing to degrade to.
 
 The preview runs `impeccable`'s anti-pattern detector over the file on its way to the PNG and prints
 what it finds. That is the half of this stop a picture cannot do: it is what caught the flat type
@@ -107,7 +107,7 @@ hierarchy and the cobalt glow in `docs/animation.html`.
   that renders in your browser renders empty in the film. The preview shows the fragment BEFORE the
   sanitiser, so a picture that is right here can still be wrong in the render. Check the beats sheet.
 
-### 2. Style frames — before any motion exists
+### 2. Style frames, before any motion exists
 
 Show two or three stills at **final quality** via `make styleframes`. The reviewer approves the LOOK:
 palette, face, composition, density, how much is on screen.
@@ -117,7 +117,7 @@ that rendered as loud blue blooms, and one still showed it in three seconds.
 
 A wrong call here costs a theme edit. The same wrong call found after animating costs the film.
 
-### 3. The 85% draft — structure and timing locked, polish open
+### 3. The 85% draft, structure and timing locked, polish open
 
 `make draft D=<scene.json> STAGE=85`. It records the bar cleared **and every warning carried to clear
 it**, so the reviewer reads what was knowingly accepted instead of re-deriving it, and does not flag

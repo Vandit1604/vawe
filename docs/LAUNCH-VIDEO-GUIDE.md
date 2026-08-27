@@ -4,7 +4,7 @@ answers: the launch workflow end to end · what to crawl · the references it is
 group: process
 ---
 
-# LAUNCH-VIDEO-GUIDE — making a product-launch video for a brand/website
+# LAUNCH-VIDEO-GUIDE: making a product-launch video for a brand/website
 
 There are no launch "formats" anymore. A launch video is a **`scene` JSON** composed from
 primitives, reflecting the real site. The old `demo`/`brandfilm` templates were removed (no templates).
@@ -29,7 +29,7 @@ make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero 
      `image` layer with `ken`. Both keep the real logos/gradients/copy.
    - Stage each as a layer with a window / cut / camera push. Re-type copy by overlaying a `type`
      layer, never by editing captured glyphs.
-4. **Hand-write HTML only for connective tissue** — the hook, the CTA, number counters. Preview every
+4. **Hand-write HTML only for connective tissue**: the hook, the CTA, number counters. Preview every
    hand fragment before rendering: `make preview HTML=frag.html THEME=<brand>` → `/tmp/preview.png`.
 5. **Verify:** `make beats D=<file> VS=<brand>` (fidelity vs source) → render → `make audit` →
    `make motion` → `make ledger`. See `CLAUDE.md` for the full loop.

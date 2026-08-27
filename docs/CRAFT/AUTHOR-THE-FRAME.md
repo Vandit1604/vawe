@@ -4,16 +4,16 @@ answers: "authoring a bespoke inline-SVG beat · the `window.__timelines` seek b
 group: look
 ---
 
-# AUTHOR-THE-FRAME — bespoke SVG/HTML beats (the another engine expressiveness)
+# AUTHOR-THE-FRAME: bespoke SVG/HTML beats (the another engine expressiveness)
 
-another engine' single biggest edge is that a beat is a **hand-authored HTML+SVG file** — a bespoke dataviz,
-a spatial org-tree, exact coordinates, any CSS — rather than an assembly of generic layer primitives. This
+another engine' single biggest edge is that a beat is a **hand-authored HTML+SVG file**, a bespoke dataviz,
+a spatial org-tree, exact coordinates, any CSS, rather than an assembly of generic layer primitives. This
 guide is how to get that expressiveness in our engine, what already works, and the one honest gap.
 
 ## We already share the mechanism
 
 another engine seeks a **paused GSAP timeline per frame**, registered on `window.__timelines`. **Our engine
-does the identical thing** — `core/clips.js` `seekAll(t)` seeks every timeline in `window.__timelines` and
+does the identical thing**: `core/clips.js` `seekAll(t)` seeks every timeline in `window.__timelines` and
 pauses+seeks `gsap.globalTimeline`. So our motion is the same deterministic seek model theirs is; we are
 not behind on the mechanism, only on how a bespoke frame is authored.
 
@@ -21,7 +21,7 @@ not behind on the mechanism, only on how a bespoke frame is authored.
 
 The `html` layer takes raw hand-authored HTML/CSS, and **static SVG survives sanitization** (only
 `<script>`/`<iframe>`/embedding tags and escaping URLs are stripped, for the untrusted-input security
-boundary — see `core/layers/html.js`). So a bespoke chart, tree, or diagram is a first-class beat:
+boundary: see `core/layers/html.js`). So a bespoke chart, tree, or diagram is a first-class beat:
 
 ```json
 { "type": "html", "x": 300, "y": 600, "w": 480, "start": 0.2, "duration": 2.6, "anim": "rise",
@@ -34,14 +34,14 @@ That renders a real dataviz (bespoke bars + a trend line) and passes `make probe
 - a `paint`/`aurora` field or `beam` for living motion behind/around it,
 - engine-seeked `fx`/`gsap:{}` and kinetic `split`+`preset` for the type.
 
-Most of what a another engine composition does — bespoke SVG structure, camera choreography, path draw-on,
-count-ups, morph — is expressible this way, deterministically.
+Most of what a another engine composition does: bespoke SVG structure, camera choreography, path draw-on,
+count-ups, morph: is expressible this way, deterministically.
 
-## Dense per-CHILD choreography — the DEFAULT via `parts`
+## Dense per-CHILD choreography: the DEFAULT via `parts`
 
-another engine animates **individual children of one figure on a single timeline** — bar 1 grows, then bar 2,
+another engine animates **individual children of one figure on a single timeline**, bar 1 grows, then bar 2,
 the line draws, the dots pop, all staggered (`01-divergence.html`). **That density is our default now, via
-`parts`.** Put a named entrance on a layer's children and they animate piece by piece, staggered — pure in
+`parts`.** Put a named entrance on a layer's children and they animate piece by piece, staggered, pure in
 n (it builds a paused GSAP tween that `seekAll` drives, the same mechanism as `fx`), and it works on ANY
 layer's children (an `html` inline-SVG, a `group`, an `svg`). No `<script>` in the untrusted html layer
 (that was a real exploit surface); `parts` is the safe, declarative path.
@@ -64,14 +64,14 @@ grow, then the line draws, then the dots pop.
 Named entrances: **growUp** (bars from a baseline), **widen** (bars left→right), **popIn** (scale+fade),
 **fadeUp** / **riseIn**, **drawOn** (SVG stroke draws itself). Pass one spec or an ARRAY (bars, THEN line,
 THEN dots) so a single figure develops across its beat instead of arriving as one block. **Author figures
-this way by default** — a static figure that lands in one frame is the flat tell `parts` exists to kill.
+this way by default**: a static figure that lands in one frame is the flat tell `parts` exists to kill.
 
 Still layer-level when you want it: `anim`/`motion`/`fx`/`split`+`preset` for the whole layer or its text.
 
-## The full ceiling — a hand-authored timeline per beat via `composition`
+## The full ceiling: a hand-authored timeline per beat via `composition`
 
-`parts` staggers a figure's children; when a beat needs MORE than that — overlapping tweens, cross-timed
-hand-offs, a token travelling a path while a counter ticks and a check draws — reach for a **composition**.
+`parts` staggers a figure's children; when a beat needs MORE than that, overlapping tweens, cross-timed
+hand-offs, a token travelling a path while a counter ticks and a check draws, reach for a **composition**.
 This is another engine' "one worker writes a GSAP timeline per beat" model, made safe: the bespoke timeline is
 a FIRST-PARTY builder in [`core/compositions/index.js`](../../core/compositions/index.js); the scene only
 NAMES it and passes DATA.
@@ -82,13 +82,13 @@ NAMES it and passes DATA.
   "props": { "stages": ["Capture", "Compose", "Render"] } }
 ```
 
-The JSON carries only `comp` (a registry name) + `props` (DATA — labels, numbers), never code, so untrusted
+The JSON carries only `comp` (a registry name) + `props` (DATA, labels, numbers), never code, so untrusted
 input can name a comp and fill labels but cannot inject script (the inline-`<script>` boundary the html
 layer defends). To ADD a comp, write a builder in `core/compositions/index.js` that: (1) builds the beat's
 static DOM into `el` (any `props` string as `textContent`/attr, never innerHTML); (2) authors PAUSED tweens
 via `ctx.gsap` with `delay` offset by `ctx.start` and `immediateRender:true`, no `Date.now`/`Math.random`.
 `seekAll` drives it → pure in n (`make probe` proves it). Rules learned the hard way (MISTAKES #148): every
-tween is a `fromTo` (never `gsap.to(...immediateRender:false)` — it sticks the end value on backward seek);
+tween is a `fromTo` (never `gsap.to(...immediateRender:false)`. It sticks the end value on backward seek);
 a travelling element uses ONE keyframed `fromTo`; never tween between two `var()` colour strings.
 
 Effects: [EFFECTS.md](../EFFECTS.md) · camera: `vawe-camera` · the storyboard/spec discipline that makes a

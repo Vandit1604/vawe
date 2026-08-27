@@ -71,12 +71,12 @@ re-acquisition costs "a fraction of a second" and publish no number.
 Re-acquisition costs time, so a run of short beats each demanding a jump never lets the viewer catch
 up. Three ways to measure that, and only two of them discriminate.
 
-- **`reacquire`** — the share of runtime the eye spends travelling. This separates films. The busiest
+- **`reacquire`**: the share of runtime the eye spends travelling. This separates films. The busiest
   in this library sits at 1.8%; most sit under 1%.
-- **`peak`** — the classic running debt in seconds, a jump adding cost and the next beat paying it off.
+- **`peak`**: the classic running debt in seconds, a jump adding cost and the next beat paying it off.
   It is **INERT** here and probably everywhere: it peaks at 0.38s across the whole library, because one
   saccade never outruns one beat. Kept and printed so nobody rebuilds it expecting it to fire.
-- **`no-time-to-catch-up`** — a jump over `JUMP_FAR` followed by a beat SHORTER than that film's own
+- **`no-time-to-catch-up`**: a jump over `JUMP_FAR` followed by a beat SHORTER than that film's own
   median. This is the pairing the source names and it fires. Two films in this library trip it.
 
 Grading each film against its own median beat is deliberate. A wall-clock constant would grade a 3s
@@ -110,8 +110,8 @@ In order of how cheap it is.
 
 ## Sources
 
-- Derek Lieu, "Good Eye Trace For Smooth Editing" — https://www.derek-lieu.com/blog/4/6/good-eye-trace-for-smooth-editing
-- EditMentor, "Eye Trace in Filmmaking" — https://editmentor.com/blog/eye-trace-in-filmmaking-a-visual-journey/
-- Murch's Rule of Six, via PremiumBeat — https://www.premiumbeat.com/blog/when-and-where-to-make-the-cut-inspired-by-walter-murchs-in-the-blink-of-an-eye/
-- A challenge to the Rule of Six's treatment of eye-trace exists and is recorded here unread —
+- Derek Lieu, "Good Eye Trace For Smooth Editing": https://www.derek-lieu.com/blog/4/6/good-eye-trace-for-smooth-editing
+- EditMentor, "Eye Trace in Filmmaking": https://editmentor.com/blog/eye-trace-in-filmmaking-a-visual-journey/
+- Murch's Rule of Six, via PremiumBeat: https://www.premiumbeat.com/blog/when-and-where-to-make-the-cut-inspired-by-walter-murchs-in-the-blink-of-an-eye/
+- A challenge to the Rule of Six's treatment of eye-trace exists and is recorded here unread,
   https://nofilmschool.com/2018/08/editing-eye-trace-mind-rule-six-incorrect

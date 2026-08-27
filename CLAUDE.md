@@ -1,4 +1,4 @@
-# CLAUDE.md — authoring videos for this engine
+# CLAUDE.md: authoring videos for this engine
 
 This repo turns **one self-describing JSON → one rendered video** (30fps mp4, at any of **five**
 canvases: `16:9` 1920×1080 · `9:16` 1080×1920 · `1:1` 1080×1080 · `4:5` 1080×1350 · `4:3` 1440×1080,
@@ -46,7 +46,7 @@ make video D=path/to/video.json        # author-check → render → audit. NOCH
 
 Every JSON **must** start with `"module": "scene"`. Save new videos as
 `formats/scene/<topic>.json` (siblings of `sample.json`). Always read `sample.json` and an existing
-video (e.g. `linear-launch.json`) first as working references, then compose — never copy a structure wholesale
+video (e.g. `linear-launch.json`) first as working references, then compose, never copy a structure wholesale
 (that would re-introduce a template; the ledger flags it).
 
 > **Planning any fan-out? Read [`docs/CRAFT/SUBAGENT-BUDGET.md`](docs/CRAFT/SUBAGENT-BUDGET.md) first.**
@@ -63,7 +63,7 @@ video (e.g. `linear-launch.json`) first as working references, then compose — 
 > reveal · fidelity · copy · seam) is **[`docs/CRAFT/SUBAGENTS.md`](docs/CRAFT/SUBAGENTS.md)**. Overkill for
 > a one-line tweak; required for a full pass, a recreation, or anything you intend to ship.
 
-> **Making something good?** Read **[`docs/TASTE.md`](docs/TASTE.md)** first — the front door to the
+> **Making something good?** Read **[`docs/TASTE.md`](docs/TASTE.md)** first, the front door to the
 > taste system (house-style · composition · motion · story-spine), the block registry (`make catalog`),
 > and the author→gate→render quality loop. Everything below is the doctrine it indexes.
 
@@ -83,7 +83,7 @@ FEELING   one reference, or one word ("brew act 1", "cinematic", "loud")
 
 **Everything else is yours to decide and defend:** palette, typography, layout, motion, camera, cuts,
 backdrop, sound, pacing, structure. If a missing field would change the film, ASK BEFORE BUILDING, not
-after — one small forced-choice question with real consequences beats a rebuild.
+after: one small forced-choice question with real consequences beats a rebuild.
 
 **Two more lines, and they are YOURS to fill, not theirs to supply.** Write them into the storyboard
 before you author, every time, even when the requester says nothing about either:
@@ -106,7 +106,7 @@ un-excluded default: nothing said "no gradient hero", so a gradient hero was fre
 **And DO NOT hand-author a film from a blank JSON.** That is the #1 failure named two sections below,
 and it has been committed here: a 28s film of 31 hand-written layers, 74% of them text, `anim:"fade"`
 on nearly every one, one backdrop window for the whole runtime, and one hand-keyed motion track. It was
-rejected twice by the person who asked for it, and it was not below the house standard — the library
+rejected twice by the person who asked for it, and it was not below the house standard, the library
 median is **8% picture and 0% hand-keyed motion**, so it was AT it. Compose from `make blueprints`.
 Measured against the two films this repo is proudest of. **Every cell is a percentage of that film's
 top-level layers**, because the row below used to mix counts and percentages and read as nonsense
@@ -159,7 +159,7 @@ still a slide.
 > places many pictorial ELEMENTS", never as "brew's frame is half picture", and when you want the second
 > thing, measure area.
 
-## Content philosophy (what makes these good — follow it)
+## Content philosophy (what makes these good: follow it)
 
 Every video is built on **hook → suspense → payoff**. The data must earn attention:
 
@@ -171,30 +171,30 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
   use a unit suffix for small numbers (`unit: "$B"`, value `880` → `$880B`).
 
 ## Hard rules
-- **No em-dashes (—) in any on-screen text** — the validator rejects them. Use a comma, period, or ·.
+- **No em-dashes ( () in any on-screen text**) the validator rejects them. Use a comma, period, or ·.
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - Text may contain `<b>…</b>` / `<em>…</em>` (rendered as HTML). Keep names short (they sit in cards).
 
-## Launch-video rules (standing, asked for directly — apply to every launch film)
+## Launch-video rules (standing, asked for directly: apply to every launch film)
 
 1. **Check EVERY page, not the homepage.** `make sections` inventories one URL. Crawl the whole site
-   (routes, view modes, empty states) before storyboarding — tpot's real product turned out to be
+   (routes, view modes, empty states) before storyboarding. Tpot's real product turned out to be
    `/dir` with its LIST/CARD/BUBBLE toggle, which the homepage never shows, and the payoff shot came
    from a view no landing page links to.
 2. **Give the logo prominence.** A mark sized like a bullet next to a headline reads as punctuation.
    It should be a deliberate element (~100px+ beside a title, 150px+ on the end card), not a marker.
 3. **Pair entrances with their exits, directionally.** A layer that enters from the right should leave
-   to the left — one continuous direction of travel per beat, never enter-and-retreat. Use
+   to the left. One continuous direction of travel per beat, never enter-and-retreat. Use
    `anim:"slide-right"` + `out:"slide-left"`.
 4. **Blur out when moving would fight the content.** `out:"defocus"` leaves through focus instead of
    through space. Correct for faces, cards and dense grids, where sliding 50 elements reads as chaos.
 5. **A changing word belongs in a fixed box.** If one word swaps mid-sentence, put it in a fixed-width
-   chip so nothing after it reflows — and the chip is the natural place for the brand colour.
+   chip so nothing after it reflows, and the chip is the natural place for the brand colour.
 
-## Reflecting a real website (capture-first — the taste is already on the page)
+## Reflecting a real website (capture-first: the taste is already on the page)
 
 Never rewrite a site's sections by hand; you'll lose its taste and ignore half its assets. Instead:
-1. `make sections URL=… NAME=<brand>` — inventory every section (screenshot each + `sections.json`
+1. `make sections URL=… NAME=<brand>`: inventory every section (screenshot each + `sections.json`
    with a stable selector + a ready `make capture` command per block). **Look at the shots.**
 2. Storyboard **one beat per section, in the site's order.** `make capture` the real block → a crisp,
    live `component` (target the UI cluster, e.g. `SEL='section:nth-of-type(2) [class*=illustration]'`,
@@ -203,7 +203,7 @@ Never rewrite a site's sections by hand; you'll lose its taste and ignore half i
    `image` layer with `ken`. Animate it OUR way (window / cut / camera / staggered parts); re-type copy
    with an overlaid `type` layer, never by editing captured glyphs (purity + font faithfulness).
    Preview any capture standalone first: `make preview HTML=<component>.json THEME=<brand>`.
-3. Hand-write HTML **only** for connective tissue — hook, CTA, counters. Preview every hand fragment
+3. Hand-write HTML **only** for connective tissue: hook, CTA, counters. Preview every hand fragment
    before rendering: `make preview HTML=frag.html THEME=<brand>` → `/tmp/preview.png` (Read it, fix, repeat).
 
 > **Reflecting a real FILM? `make study VIDEO=refs/ref.mp4 NAME=ref`.** `make sections` reads a website;
@@ -229,7 +229,7 @@ Never rewrite a site's sections by hand; you'll lose its taste and ignore half i
 > figure in both media reached for neither, and both reported "an html layer leaves as one card" as a
 > fact about the medium. It was a missing feature (`docs/MISTAKES.md` #410).
 
-Hand-authored HTML regresses to the mean — centered text, Inter, blue/purple gradient, equal card grid.
+Hand-authored HTML regresses to the mean: centered text, Inter, blue/purple gradient, equal card grid.
 Before writing any by hand, **load the relevant [`docs/CRAFT/`](docs/CRAFT/README.md) guide** (how to choose
 a face / palette / layout / image), then the **`taste-skill`** (state the Design Read + set VARIANCE/MOTION/
 DENSITY dials, obey Anti-Default Discipline), then **`impeccable`** for craft. Skills are vendored in `.claude/skills/`.
@@ -242,7 +242,7 @@ with real computed styles. That is where it works, and it is the only place it i
 scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
 <!-- doc-refs-allow: make slop · this line records the target's retirement -->
 > `make slop` was RETIRED in 2026-08 (`docs/MISTAKES.md` #326). It ran the 41 borrowed rules over a DOM
-> dump that inlined three CSS properties — `font-family`, `color`, `background` — so every rule about a
+> dump that inlined three CSS properties (`font-family`, `color`, `background`) so every rule about a
 > border, a shadow, a glow or spacing had no evidence and returned nothing. Its silence read as a pass on
 > the whole library. The two counts in this paragraph are different things, and reading them as one is
 > why they look contradictory: the retired gate RAN **41** rules, and **38** were then examined
@@ -254,8 +254,8 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 ## Icons & images (real assets first, emoji last)
 
 **Always prefer a real image.** Order of preference:
-1. **Captured real UI** — `make capture` (a live component) is the highest-taste source.
-2. **Free/openly-licensed images** — brand logos, flags `flagcdn.com/<iso2>.svg` → `assets/flags/`;
+1. **Captured real UI**: `make capture` (a live component) is the highest-taste source.
+2. **Free/openly-licensed images**: brand logos, flags `flagcdn.com/<iso2>.svg` → `assets/flags/`;
    CC0/CC-BY photos via `make photos` (attribution auto-recorded; CC-BY needs visible credit).
    **Use `make assets` for logos, and if you curl one by hand, use `-f`.** This line used to read
    ``curl https://cdn.simpleicons.org/<slug>/<hex>`` with no failure flag, and `curl -o` writes the
@@ -264,10 +264,10 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
    passes every path check, and renders as an invisible hole. Two shipped assets were in exactly that
    state (`assets/icons/amazon.svg`, one of them tracked), breaking three scenes, and nothing said so
    until `core/boot.js` started refusing an asset that never loaded. `scripts/media/assets.mjs`
-   `tryFetch` already gets this right — it requires 200, a minimum size AND a literal `<svg` before it
-   writes — which is why `make assets` is the answer and a bare curl is not:
+   `tryFetch` already gets this right: it requires 200, a minimum size AND a literal `<svg` before it
+   writes, which is why `make assets` is the answer and a bare curl is not:
    `curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>`
-3. **Drawn icons** — `svgIcon(name)`. 4. **Generated cards** — `make assets`. 5. **Emoji** — last resort.
+3. **Drawn icons** (`svgIcon(name)`. 4. **Generated cards**) `make assets`. 5. **Emoji**, last resort.
 
 **Never embed copyrighted material** into a published video: movie/TV posters, album covers, film
 stills, news photos, paid stock. They trigger Content ID claims. Capture the real product UI instead.
@@ -276,9 +276,9 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 
 1. **Images:** `make assets D=formats/scene/<topic>.json` fills any missing icons. Dry-run; add `WRITE=1`.
 2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats/<name>.png` (first/mid/last of every
-   beat; `VS` stacks each beside its source section). Read it — catch murk/overlap/off beats before rendering.
+   beat; `VS` stacks each beside its source section). Read it, catch murk/overlap/off beats before rendering.
    **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
-   space plays) — edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render. Under the
+   space plays): edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render. Under the
    scrubber is a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, the
    enter/exit ramps shaded off the settled middle, and every dead-air hole painted as a hazard band. Drag
    it to seek. It is where you SEE the structure the contact sheets can only sample.
@@ -408,32 +408,32 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 2a. **See the REVEAL, not just the hold:** `make reveal D=<file>` → `/tmp/reveal/<name>.png` (per beat: the ENTER
    arc + settled + EXIT arc, from exact layer starts). `make beats` samples the middle and hides the
    entrance motion; this shows HOW each beat animates in (dolly direction, typing, a colour-wave). Mandatory
-   when recreating a reference — judging the settled frame is how the dolly/gradient/colour-wave got missed.
+   when recreating a reference: judging the settled frame is how the dolly/gradient/colour-wave got missed.
 0. **Compose from blueprints (don't re-derive motion):** `make blueprints` lists directed-motion beats
    (`{type:"beat","beat":"kineticHook",…}`, `docs/CRAFT/BLUEPRINTS.md`). Drop one per beat + fill brand
    content so kinetic reveals / count-ups / cascades / dashboard dives are the DEFAULT, then `make expand`.
-   Authoring plain `rise`+`fade` from a blank JSON is the #1 failure — blueprints + the floor prevent it.
+   Authoring plain `rise`+`fade` from a blank JSON is the #1 failure, blueprints + the floor prevent it.
 0a. **See the whole arsenal, then choose:** `make effects` → `docs/EFFECTS.md` (518 effects, 35 families,
    generated from the registries). The killer per-frame effects: border-beam / shine (`{type:"beam"}`),
    aurora / meteor paint fields (`{type:"paint"}`), a one-shot glow `flash`, an svg logo that draws-on or
    shape-morphs (`{type:"svg","morph":{"to":…}}` / the `logoReveal` beat), and calculated camera moves
    (`"cameraMove":{"move":"diveIn",…}`, `core/camera-moves.js`). For a HERO beat whose choreography
    `parts`/blueprints can't express (overlapping tweens, a token travelling a path while a counter ticks
-   and a check draws), author a bespoke **`composition`** — a first-party hand-authored per-beat GSAP
+   and a check draws), author a bespoke **`composition`**: a first-party hand-authored per-beat GSAP
    timeline in `core/compositions/index.js`, named from the JSON (`{type:"composition","comp":…,"props":…}`)
    so untrusted input can't inject (`docs/CRAFT/AUTHOR-THE-FRAME.md`). Skills: **`vawe-effects`** (pick from
    the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
-2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]` — one command, one process,
+2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]`, one command, one process,
    **every step, every time** (15, or 16 when an intent sidecar or a landscape canvas adds one). There is no opt-in half. The run lists every step before it
    starts, numbers each one as it goes, says what that step reads, warns before the one slow step, and
    prints "nothing found" when a step is clean. Measured end to end on a 19.6s film: **1.4s**, browser
    launch included.
    What is not uniform is what a finding COSTS, and that separation is the design:
-   **BLOCKS** — **validate · beats · inspect · plan-vs-render** (plus **assets** under `STRICT=1`). These
+   **BLOCKS**: **validate · beats · inspect · plan-vs-render** (plus **assets** under `STRICT=1`). These
    say the film is broken. Two more things block that this list used to hide: **a waiver with no `_why`
    blocks** (see the shape below), and under `STRICT=1` a **missing `.intent.json` blocks** as
    `no-intent-sidecar`.
-   **REPORTS** — **storyboard · critique · direct · direction-floor · dissolve · designspec · copy · pace ·
+   **REPORTS**: **storyboard · critique · direct · direction-floor · dissolve · designspec · copy · pace ·
    hero · treatment · waiver-drift**. They run on every scene and print in full; they do not stop you.
    `TASTE=1 make author-check D=<file>` gives them teeth. (`slop` is NOT among them. It was retired in
    2026-08, its script is deleted, and this line listed it as live for months.) `pace`
@@ -449,14 +449,14 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    top-level `"storyboard": "formats/scene/<topic>.storyboard.md"`; without that field the step falls back
    to `<base>.storyboard.md` beside the scene, then `_concepts/<base>.storyboard.md`. Found, it runs
    `storyboard-check` over the plan and hands the path to plan-vs-render so `spectacle:` and `pace:` are
-   joined to the film. Not found, it reports `no-storyboard` — never silence. It REPORTS rather than blocks
+   joined to the film. Not found, it reports `no-storyboard`, never silence. It REPORTS rather than blocks
    because **130 of 141 scenes have no plan**, and it is promoted to BLOCKS on a written condition, not a
    wish: when fewer than a quarter of `formats/scene/` is missing a storyboard (`docs/TASTE.md`).
    The **designspec lock** flags off-palette colours / non-role fonts (the
    theme is the locked look). The **copy** gate flags on-screen writing tells (weak hook, marketing jargon,
    restated headline, a big number as flat text). The **assets** preflight confirms every referenced image /
    icon / capture / VO exists before you render. The **inspect** step verifies a `.intent.json` value
-   contract — generate one from the storyboard with `make intent SB=<storyboard.md> D=<file>` so "every beat
+   contract: generate one from the storyboard with `make intent SB=<storyboard.md> D=<file>` so "every beat
    earns its frame" is checked. **plan-vs-render** runs next, off the same sidecar (skip the sidecar and you
    skip both): it lays the plan's beat spans over the film's clock and asks whether anything happens where the
    plan said something turns. It FAILS `junction-is-static` (a beat opens on a promised change and the render
@@ -509,7 +509,7 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    and your eyes. Same doc carries the rest of the composition vocabulary for a MOVING frame: lead room
    (a subject needs space in the direction it travels, and that is fixed at the START of the shot), visual
    weight, leading lines, and three-plane depth. **[`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md)**.
-4. **Layout audit:** `make audit` — overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
+4. **Layout audit:** `make audit`, overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
    **Shipping more than one ratio? `make audit M=<file> ASPECT=16:9,9:16,1:1,4:5` (or `ASPECT=all`).**
    A scene passes at its own aspect and is wrong at every other one: `pin` centres a *box*, so a text
    layer needs `w` (+ `align`) or it lands left-edge-on-centre; and `dx`/`dy` only apply with `anchor`.
@@ -521,19 +521,19 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    destination is what keeps content out from under the chrome. One definition: `core/safe.js`.
 5. **Check frames** before declaring done: `make look M=scene` / `make frame M=scene N=<n>`.
    Eyeball the hook, a reveal, and the end screen. Never silently ship an unverified video.
-5a. **QA THE SEAMS, not the centers:** `make seam-check D=<file>` — pulls the frames straddling every
+5a. **QA THE SEAMS, not the centers:** `make seam-check D=<file>`, pulls the frames straddling every
    transition (cut/seam/sting/beat boundary) out of the rendered mp4 and flags a luminance FLASH in the
    overlap (the black-flash / collision class every center-sampling gate misses, `docs/MISTAKES.md` #138).
    Read `/tmp/seams/<name>.png`. This is the cheapest catch for the worst bugs (another engine' hardest-won lesson).
-6. **THE GATE THAT SEES — mandatory post-render:** `make judge D=<file> [VS=<brand>]` preps
+6. **THE GATE THAT SEES: mandatory post-render:** `make judge D=<file> [VS=<brand>]` preps
    `/tmp/judge/sheet.png` + a rubric. READ the sheet and score every frame (readability · hierarchy ·
    composition · brand + asset fidelity · produced · value). `make author-check` is necessary but NOT
-   sufficient — the static gates can't see composition or fidelity; this is the backstop. If your eye
+   sufficient: the static gates can't see composition or fidelity; this is the backstop. If your eye
    catches a flaw, it's a FIX, never a rationalization (`docs/JUDGE.md`, `docs/MISTAKES.md` #15).
 7. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.
 8. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one);
    `make ledger-add D=<file>` after the user approves it.
-9. **FRAMEWORK HARVEST — mandatory, every render, without being asked.** See below.
+9. **FRAMEWORK HARVEST: mandatory, every render, without being asked.** See below.
 
 ## ARCHITECTURE: fix it at the root, or fail there. A gate is the last resort.
 
@@ -564,7 +564,7 @@ places author CSS reaches the DOM (`core/layers/util.js`, `core/layers/html.js`)
 layer. The gate was deleted. Full write-up: `docs/MISTAKES.md` #422.
 
 **Every gate has a running cost, and this repo has paid it twice.** `visual-vocabulary` was deleted for
-measuring size wrongly — it squared a 590x18 rule into 590x590 and credited a hairline with a tenth of
+measuring size wrongly: it squared a 590x18 rule into 590x590 and credited a hairline with a tenth of
 the frame. `make slop` ran 41 borrowed rules against a DOM dump carrying evidence for three of them and
 reported its silence as a pass. **A gate is another thing that can be quietly wrong, and a wrong gate is
 worse than no gate** because it manufactures confidence. Before adding one, read `docs/TASTE.md` on that
@@ -575,14 +575,14 @@ cull.
 An authoring convenience that needs a build step to work is a trap: the author writes something real,
 skips a step they did not know about, and watches a still frame with nothing to tell them why.
 
-`make expand` resolves four sugars. Three of them — `block`, `beat`, `comp` — become layer TYPES, so a
+`make expand` resolves four sugars. Three of them (`block`, `beat`, `comp`) become layer TYPES, so a
 scene rendered without expanding is refused by name at boot. That is a build step failing LOUDLY, and it
 is acceptable: expansion imports all 156 block factories, which has no business in every render.
 
 The fourth, `cameraMove`, was written into `data.cameraMove` and read by nobody: `formats/scene/scene.js`
 reads `data.camera`. So an author who wrote a camera move and rendered without expanding got no camera
 and no error. It now bakes at boot (`bakeCameraMove` in `core/produce.js`), and `core/boot.js` THROWS if
-`cameraMove` survives to render — because the failure was a field written and never read, so the repair
+`cameraMove` survives to render, because the failure was a field written and never read, so the repair
 is not "convert it here", it is "make surviving unconverted impossible" (`docs/MISTAKES.md` #424).
 
 **The rule: sugar either resolves at boot, or its absence fails loudly. Silence is never the third option.**
@@ -593,11 +593,11 @@ The engine should let you add an effect, a layer type, a block, a beat or a came
 handling everything again**. Where that is true today it is because of one of three primitives, and a
 new extension point should use one of them rather than invent a fourth:
 
-- **`defineRegistry(...)`** (`core/vocab.js`) — a named vocabulary that refuses an unknown name and says
+- **`defineRegistry(...)`** (`core/vocab.js`): a named vocabulary that refuses an unknown name and says
   which slot it was reaching for.
-- **`paramsOf`** (`core/camera-moves.js:216`) — refuses an unknown parameter by reading the generator's
+- **`paramsOf`** (`core/camera-moves.js:216`), refuses an unknown parameter by reading the generator's
   OWN signature. Nobody maintains that list, so it cannot drift.
-- **`createKit(ctx)`** (`core/layers/util.js`) — dependency injection for layer builders. A capability
+- **`createKit(ctx)`** (`core/layers/util.js`): dependency injection for layer builders. A capability
   added to the ctx reaches every primitive at once, with no signature change at any call site. The frame
   (`frameOf` in `core/safe.js`) arrived exactly this way.
 
@@ -612,7 +612,7 @@ suggestion is weighed against that first. Validate at the entry point rather tha
 Return the error; never log and continue. Prefer the boring, obvious construction: an abstraction with
 one caller is not decoupling, it is a second thing to read.
 
-## The framework harvest (do this EVERY render — the engine must compound)
+## The framework harvest (do this EVERY render: the engine must compound)
 
 Authoring a video always surfaces friction. If that friction is only patched inside the JSON, the
 next author hits the identical wall and the engine never improves. So **after every render, before
@@ -627,7 +627,7 @@ declaring done, list every problem hit this pass and classify each one**:
 Rules that make this real, not ceremonial:
 - **A workaround is a bug report.** If you wrote something odd to route around the engine
   (`ken:{from:1,to:1}` purely to get a border-radius), that IS a framework bug. Fix the engine and
-  remove the hack — never leave the hack as the answer.
+  remove the hack, never leave the hack as the answer.
 - **Silence is the worst failure.** Any input the engine accepts and then ignores must either work or
   fail loudly. Silent substitution is how the wrong font and square avatars both shipped.
 - **Log it.** Append every framework-class finding to `docs/MISTAKES.md` (what · root cause · fix ·
@@ -646,7 +646,7 @@ Rules that make this real, not ceremonial:
 - **FINISH THE FIX. Reverting is not a resolution.** Having found an engine or gate bug, you fix it in
   this pass. "I could not get it working so I put it back and logged it" is the one outcome that is
   never acceptable: the next author inherits the same wall plus a note saying it is known. If a first
-  attempt does not fire, DEBUG IT — instrument the thing, print what the code actually sees, and find
+  attempt does not fire, DEBUG IT: instrument the thing, print what the code actually sees, and find
   out why. Every fix in this file that looked impossible was one measurement away (#211 took three
   distinct root causes, and stopping after the first two would have shipped half a fix that changed
   nothing). Abandon only when you can state what makes it genuinely infeasible, and then say so to the
@@ -658,7 +658,7 @@ Rules that make this real, not ceremonial:
 - **A gate change must never invent findings.** Run the whole scene library before and after and diff the
   counts. The only acceptable shapes are "no scene changes" and "these N changed, FAIL to PASS, here is
   why each was a false positive". A single scene going PASS to FAIL is a regression, not a discovery,
-  until you have proven otherwise — an unclamped bound in #211 turned one clean scene into 7 failures.
+  until you have proven otherwise: an unclamped bound in #211 turned one clean scene into 7 failures.
 
 > **Editing `scene.html`?** Read the `vawe-scene-authoring` skill first (render-frame purity,
 > tokens, motion primitives, image/capture system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.

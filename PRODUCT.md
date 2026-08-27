@@ -16,11 +16,11 @@ Three audiences that look different on paper and behave identically in practice:
 
 What unifies them: **they all work through AI.** None of them will hand-author a timeline. They arrive expecting to describe a video and get a video, and the question they're really asking is "can I trust the thing on the other end of that description?" The site's job is to answer that in the first five seconds, without a signup.
 
-The job to be done: **decide whether vawe is real.** Not "learn the API" — decide. Everything else is downstream of that verdict.
+The job to be done: **decide whether vawe is real.** Not "learn the API", decide. Everything else is downstream of that verdict.
 
 ## Product Purpose
 
-Vawe turns one self-describing JSON into one video, deterministic to the frame. It exists because the two available options are both bad: click a timeline by hand (doesn't scale, can't be automated), or let a model generate pixels (non-reproducible, off-brand, uncontrollable). Vawe is the third thing — a real engine with a real contract, authored by an agent, verified by gates.
+Vawe turns one self-describing JSON into one video, deterministic to the frame. It exists because the two available options are both bad: click a timeline by hand (doesn't scale, can't be automated), or let a model generate pixels (non-reproducible, off-brand, uncontrollable). Vawe is the third thing. A real engine with a real contract, authored by an agent, verified by gates.
 
 Success is a visitor who understands three things without reading a paragraph: it renders real video, the JSON is the whole interface, and the same input always produces the same output.
 
@@ -38,12 +38,12 @@ Voice: direct, lowercase-comfortable, technically literal. Claims are specific a
 - **Dark "creative tool" cliché.** Black canvas, neon accents, glassmorphism, the After Effects / Framer look. Vawe is white-first and stays white-first.
 - **Dry open-source README-as-website.** All prose and code fences, no craft. Actively self-defeating: a taste engine whose own site has no taste refutes itself.
 
-**Deliberately NOT an anti-reference:** expressive, motion-forward design. Ambition is allowed here. What's banned is *hollow* ambition — motion that decorates instead of demonstrating. Scroll-hijacking and cursor followers are still out, because they'd contradict the restraint claim while proving nothing.
+**Deliberately NOT an anti-reference:** expressive, motion-forward design. Ambition is allowed here. What's banned is *hollow* ambition. Motion that decorates instead of demonstrating. Scroll-hijacking and cursor followers are still out, because they'd contradict the restraint claim while proving nothing.
 
 ## Design Principles
 
 **1. The chrome is restrained so the content can shout.**
-The resolution of bold-personality-plus-Linear-reference. Hairlines, tight type, one accent, no decorative gradients — that's the *frame*. Inside the frame: wall-to-wall rendered motion at full expressive range. The site is quiet exactly where the product is loud. Never invert this.
+The resolution of bold-personality-plus-Linear-reference. Hairlines, tight type, one accent, no decorative gradients. That's the *frame*. Inside the frame: wall-to-wall rendered motion at full expressive range. The site is quiet exactly where the product is loud. Never invert this.
 
 **2. Show the engine running; never describe it.**
 The `/editor` route runs the real `renderFrame(n)` in the browser. The showcase is real encodes from real scene JSON. Every claim on this site should be a thing the visitor can watch happen. A feature described in prose that could have been demonstrated is a failure, not a shortcut.
@@ -63,4 +63,4 @@ Don't apologize for having no timeline UI. No-timeline is *why* an agent can dri
 
 - Contrast: body text ≥4.5:1, large text ≥3:1. The committed tokens already pass (`--ink` #0f1620 ≈ 17:1, `--ink-2` #454f5e ≈ 8:1, `--muted` #697182 ≈ 5:1, `--accent` #2563eb ≈ 5.17:1 on white). Any new colour must be checked before it lands, not after.
 - Full keyboard reach on every interactive surface, `/editor` included. Visible focus states, never `outline:none` without a replacement.
-- **Reduced motion is not optional.** Every animation needs a `prefers-reduced-motion: reduce` alternative — typically a crossfade or an instant state. This includes autoplaying showcase video, which should respect the preference rather than claim an exemption. A motion engine that ignores a user's stated motion preference is making an argument against itself.
+- **Reduced motion is not optional.** Every animation needs a `prefers-reduced-motion: reduce` alternative, typically a crossfade or an instant state. This includes autoplaying showcase video, which should respect the preference rather than claim an exemption. A motion engine that ignores a user's stated motion preference is making an argument against itself.

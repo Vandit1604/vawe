@@ -4,17 +4,17 @@ answers: "the stored rules of good motion: timing, physics, the gates that enfor
 group: process
 ---
 
-# MOTION-CRAFT — the stored rules of great motion animation
+# MOTION-CRAFT: the stored rules of great motion animation
 
-> **How should it FEEL, and what not to do?** See [`CRAFT/TASTE-RULES.md`](CRAFT/TASTE-RULES.md) — the cause→feeling layer and the failure-modes catalog. This file is the mechanics; that one is the taste.
-> **Which effect for which FEELING (intent-first), grounded in design theory?** See [`CRAFT/SELECTION.md`](CRAFT/SELECTION.md) — this file is the effect→use index; that one is the intent→effect picker + the named reference profiles (linear/apple/nike/a24/…).
-> **Just want the copy-paste JSON?** See [`MOTION-RECIPES.md`](MOTION-RECIPES.md) — the atomic recipe index (one line per motion pattern: slug · exact JSON · tags). This file is the rules; that one applies them.
+> **How should it FEEL, and what not to do?** See [`CRAFT/TASTE-RULES.md`](CRAFT/TASTE-RULES.md). The cause→feeling layer and the failure-modes catalog. This file is the mechanics; that one is the taste.
+> **Which effect for which FEELING (intent-first), grounded in design theory?** See [`CRAFT/SELECTION.md`](CRAFT/SELECTION.md). This file is the effect→use index; that one is the intent→effect picker + the named reference profiles (linear/apple/nike/a24/…).
+> **Just want the copy-paste JSON?** See [`MOTION-RECIPES.md`](MOTION-RECIPES.md). The atomic recipe index (one line per motion pattern: slug · exact JSON · tags). This file is the rules; that one applies them.
 
 Distilled July 2026 from motion-design craft literature and from our own shipped-film findings.
 **Consult before storyboarding** (the planning skill points here). The right column says which of our
-gates enforces each rule — everything else is judgment the ledger can't save you from.
+gates enforces each rule: everything else is judgment the ledger can't save you from.
 
-> **The principles behind these rules, with sources:** see [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md) —
+> **The principles behind these rules, with sources:** see [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md),
 > the direction spine (pacing · restraint · story placement), each rule traced to its book: Disney's 12
 > (Thomas & Johnston, _The Illusion of Life_), Murch's Rule of Six (_In the Blink of an Eye_), Shaw
 > (_Design for Motion_), Google Material Motion, McKee (_Story_), Ogilvy, Loewenstein's curiosity gap.
@@ -35,25 +35,25 @@ gates enforces each rule — everything else is judgment the ledger can't save y
 | 9 | **Cover the hard cut** | Background jumps (dark↔light) want a sting peaking AT the cut; same-bg scenes can whip/slide raw. | judgment (stings exist) |
 | 10 | **Type moves like it reads** | Text enters in reading order (L→R, top→down), rises from its own baseline, never crosses another line's path. The motion IS part of the meaning (kinetic-type first law). | judgment |
 
-## Speed dials — the numbers, in one place
+## Speed dials: the numbers, in one place
 
 Rule 1 says timing is a voice; these are the ranges that voice speaks in. Measured against the
 external consensus (Quiet UI text-reveal defaults: duration 100-2000ms, default 600; stagger 5-100ms,
-default 20 — https://next.quietui.org/docs/components/text-reveal), and against what actually reads on
+default 20: https://next.quietui.org/docs/components/text-reveal), and against what actually reads on
 a 30fps render.
 
 | Dial | JSON | Fast | Default | Calm | Notes |
 |---|---|---|---|---|---|
 | Per-unit reveal | `each` | 0.25-0.35s | 0.5s | 0.75-1.2s | payoff / thesis / ambient (Rule 1) |
 | Reveal stagger | `stagger` | 0.04s | 0.06s | 0.10-0.12s | Rule 3's 60-120ms; below 0.04 the sweep stops reading as a sweep |
-| **Stagger sequence total** | `(units - 1) x stagger` | — | — | **cap 0.5s** | the per-item band above has no ceiling; 8 items at 0.10s take 0.8s. See "Arrival rhythm" |
+| **Stagger sequence total** | `(units - 1) x stagger` |, |, | **cap 0.5s** | the per-item band above has no ceiling; 8 items at 0.10s take 0.8s. See "Arrival rhythm" |
 | Cut length | `cutTiming` | `snappy`/`pop` | `smooth` | `out` | velocity contrast between beats (Rule 8) |
 | **Ransom re-roll** | `ransom.cycle` | 0.5s | **1.2s** | 1.6-2.0s | see below |
 | **Ransom re-roll offset** | `ransom.stagger` | 0.08s | 0.16s | 0.2s | keeps letters from flipping in unison |
 
 **`ransom.cycle` deserves its own note, because it is the one dial that is NOT an entrance.** Everything
 else here fires once and settles; a cycling ransom note changes *for the whole shot*, so the eye never
-gets a rest frame. The instinct to reuse entrance timings (0.5s) is wrong — at 12 glyphs that is ~24
+gets a rest frame. The instinct to reuse entrance timings (0.5s) is wrong, at 12 glyphs that is ~24
 changes a second across the line and reads as noise, not as a note being re-pinned. **Start at 1.2s.**
 Under ~0.8s it stops reading as deliberate; over ~2s it reads as broken. Scale UP with glyph count: the
 more letters on screen, the more total churn per second at the same cycle.
@@ -109,7 +109,7 @@ correct. Speed in the JSON cannot tell a travelling subject from a sweeping reve
 So `make direct` prints your fastest keyed move and where it sits, as a note, and never as a finding.
 Look at the frames.
 
-## Arrival rhythm — four measures, and the tension between two of them
+## Arrival rhythm: four measures, and the tension between two of them
 
 Rules 1, 3 and 4 above were judgment for a year. These four measures make them countable. All four
 **warn**; none blocks. Run them with `make direct D=<file>` (also inside `TASTE=1 make author-check`).
@@ -143,7 +143,7 @@ they measure different scopes.
 
 The two can never fire on the same run, and the arithmetic says so: a shared start is an interval of
 zero, and `uneven-cascade` skips any run whose average interval is zero. A cascade is also defined
-narrowly on purpose — three or more sibling layers of the same `type`, `anim`, `preset`, `enterDur` and
+narrowly on purpose: three or more sibling layers of the same `type`, `anim`, `preset`, `enterDur` and
 `split`, each within 0.3s of the last, the whole run inside 1.2s. Anything looser is a running order,
 not an arrival, and grading a film's running order for evenness would be wrong.
 
@@ -151,25 +151,25 @@ not an arrival, and grading a film's running order for evenness would be wrong.
 
 `make motion` adds two findings that read the rendered frames rather than the JSON, both WARN:
 
-- **`xi:degenerate`** — an element laid out for every frame of its life that never once has both a
+- **`xi:degenerate`**. An element laid out for every frame of its life that never once has both a
   width and a height. It animates with no box.
-- **`xii:invisible`** — an element with a box for every frame of its life that never reaches 1%
+- **`xii:invisible`**. An element with a box for every frame of its life that never reaches 1%
   opacity. It animates its whole life and is never seen.
 
 `dead-air` in `beat-check` asks whether a FRAME is empty and passes any frame that holds other content.
 These ask about an ELEMENT across its whole life, which is a different question, and it is the question
 that catches a layer nobody has ever seen.
 
-## Snap — the overshoot-and-settle (what separates ours from real motion graphics)
+## Snap: the overshoot-and-settle (what separates ours from real motion graphics)
 
 The single most recognizable "this was directed" tell in professional motion graphics is **overshoot**:
 an element moves fast, passes slightly beyond its rest point, and settles back. A curve that only
 decelerates to its target (easeOutCubic) reads floaty; a curve that overshoots and settles reads alive.
-This is not a new capability — the engine ships it — it just has to be USED.
+This is not a new capability (the engine ships it) it just has to be USED.
 
 - **Entrances overshoot; the default now does it for you.** The layer-level `rise`/`up` entrance uses
   `easeOutSnap` (a modest spring, bounce 0.20): the translate carries past rest and settles. `pop`/`scale`
-  use `easeOutBack`. You get snap for free on any `anim:"rise"`/`"pop"` layer — reach for a flat curve
+  use `easeOutBack`. You get snap for free on any `anim:"rise"`/`"pop"` layer, reach for a flat curve
   only when you deliberately want calm.
 - **Snap lands in the 0.2-0.3s band.** Default enter is now **0.30s** (was 0.45), exit **0.26s** (was 0.4).
   A move that takes half a second reads floaty; a third of a second reads confident. Stretch only with intent.
@@ -183,19 +183,19 @@ This is not a new capability — the engine ships it — it just has to be USED.
   rule this repo does not bend ("use real, accurate figures"). This line used to say the opposite, and
   said it twice; `core/layers/count.js` obeys whatever ease it is given, so the doc was the whole bug.
   Reach for `easeOutExpo` or `easeOutQuart` on a count: the deceleration IS the weight.
-- **The theme owns the personality — and it now applies.** `theme.motion`
+- **The theme owns the personality, and it now applies.** `theme.motion`
   `{easing,bounce,settle,enter,durationScale,stagger}` scales every default at render time (a punchy brand
   tightens `durationScale`/`stagger`; a calm one stretches them). It was defined-but-unwired before; it is
   live now, so set it per brand rather than hand-tuning every layer.
 - **Keep it premium, not toy.** Bounce is deliberately modest (0.14-0.16). A big visible bounce on every
   word reads as a children's app. Overshoot should be felt, not counted.
 
-## Easing — which curve, and what it FEELS like (the vocabulary, in our names)
+## Easing, which curve, and what it FEELS like (the vocabulary, in our names)
 
 An easing curve is the *acceleration* of a move: how it starts and stops. It is the single biggest
 difference between motion that feels alive and motion that feels cheap, and it is chosen by INTENT, not
 by taste. The one law under everything below: **an entrance decelerates, an exit accelerates, and a
-visible position move is NEVER linear.** Linear on a moving object is the tell of amateur motion — real
+visible position move is NEVER linear.** Linear on a moving object is the tell of amateur motion, real
 things have mass, so they ease. (Linear is correct only for *continuous* motion with no start/stop: a
 looping marquee, a steady rotation.)
 
@@ -204,35 +204,35 @@ pure and land exactly at rest. Reach into this table by the FEELING you want, th
 
 | Feeling you want | Use | What the curve does | Where |
 |---|---|---|---|
-| **Default entrance — premium, calm** | `settle` | decelerate with a whisper of overshoot; glides to rest, no wobble | any layer, split-text (default) |
-| **Directed entrance — visible snap** | `snap` | carries slightly PAST rest and settles back (the "this was directed" tell) | headlines, hero cards (`rise` uses it) |
+| **Default entrance: premium, calm** | `settle` | decelerate with a whisper of overshoot; glides to rest, no wobble | any layer, split-text (default) |
+| **Directed entrance: visible snap** | `snap` | carries slightly PAST rest and settles back (the "this was directed" tell) | headlines, hero cards (`rise` uses it) |
 | **Clean decelerate, zero overshoot** | `easeOutQuart` / `easeOutQuint` | fast in, long smooth settle, never passes the target | restrained brands, dense grids |
 | **Dramatic arrival** | `easeOutExpo` | very fast then a long tail; feels weighty and cinematic | a single hero statement |
 | **Anticipation / spring** | `spring` · `spring-bouncy` · `spring-stiff` | overshoots and rings to rest; bouncy = playful, stiff = no overshoot | payoffs, count/`motion[]`/camera keyframes |
 | **Alive object (card/avatar/chip)** | `easeOutBack` (via `pop`/`lift`) | dips-then-launches / launches-then-settles past 1 | things that should feel physical |
-| **Ambient loop — breathing, drifting** | `easeInOutSine` | gentlest curve, no hard stop at either end | pulses, glows, background drift (tiny amplitude) |
+| **Ambient loop: breathing, drifting** | `easeInOutSine` | gentlest curve, no hard stop at either end | pulses, glows, background drift (tiny amplitude) |
 | **Mechanical / geometric** | `easeOutCirc` · `easeInCirc` | stops or starts very HARD (near-vertical at one end) | wipes, bars, technical/UI reveals |
-| **Exit — launch away** | mirror of the entrance (automatic), or `rush` / `easeInCubic` | accelerates out; departures leave fast | any `out:` (the engine mirrors by default) |
+| **Exit: launch away** | mirror of the entrance (automatic), or `rush` / `easeInCubic` | accelerates out; departures leave fast | any `out:` (the engine mirrors by default) |
 | **Speed ramp inside one move** | `ramp` (slow→fast→slow) · `rush` (accel) · `brake` (decel) | remaps progress so a camera/counter reads as intentional, not a lerp | camera moves, counters, velocity contrast |
 | **Rebound (ball drop)** | `easeOutBounce` | rebounds inside [0,1]; never overshoots, bounces down to rest | rare; a literal drop, a playful accent |
 
-### Reading the tells — good vs bad, at the easing level
+### Reading the tells: good vs bad, at the easing level
 
 | Good | Bad (and why) |
 |---|---|
-| Entrance on `settle`/`snap` (ease-OUT) | Entrance on `easeInOutQuad` — starts slow, so it feels sluggish and never snaps |
-| A visible slide on `easeOutQuart` | A visible slide on `linear` — robotic, weightless, the amateur tell |
-| Overshoot ONLY on things that then hold still | Overshoot (`snap`/`spring`) on text held for reading — it wobbles = looks like shaking |
-| Modest bounce (0.14-0.20) felt once | Big bounce on every word — reads as a toy / children's app |
-| Curve + duration VARIED by intent (Rule 1) | One curve + one duration on everything — monotone, no hierarchy |
-| Exit accelerates away (mirror / `rush`) | Exit on the same ease-out as the entrance — the layer "arrives" while leaving, reads backwards |
+| Entrance on `settle`/`snap` (ease-OUT) | Entrance on `easeInOutQuad`, starts slow, so it feels sluggish and never snaps |
+| A visible slide on `easeOutQuart` | A visible slide on `linear`, robotic, weightless, the amateur tell |
+| Overshoot ONLY on things that then hold still | Overshoot (`snap`/`spring`) on text held for reading, it wobbles = looks like shaking |
+| Modest bounce (0.14-0.20) felt once | Big bounce on every word, reads as a toy / children's app |
+| Curve + duration VARIED by intent (Rule 1) | One curve + one duration on everything, monotone, no hierarchy |
+| Exit accelerates away (mirror / `rush`) | Exit on the same ease-out as the entrance. The layer "arrives" while leaving, reads backwards |
 
 **How to pick, in one line:** entrances → `settle` (calm) or `snap` (directed); exits → leave them to the
 engine's mirror, or `rush` for a hard launch; ambient → `easeInOutSine`; a value that should feel physical
 (bar, card, camera) → `spring`; a COUNTER → `easeOutExpo`, never a spring (see above). Everything else is a deviation you should be able to justify by intent.
 
 > A name the registry does not know now **warns** (`resolveEasing`) instead of silently rendering
-> `easeOutCubic`, so a typo'd or imagined ease (including GSAP names like `power3.out` — we don't use that
+> `easeOutCubic`, so a typo'd or imagined ease (including GSAP names like `power3.out`, we don't use that
 > vocabulary; the equivalent is `easeOutQuart`) fails loud instead of looking right while doing the wrong thing.
 
 ## Genre pacing tables
@@ -256,7 +256,7 @@ engine's mirror, or `rush` for a hard launch; ambient → `easeInOutSine`; a val
 
 Before reaching for a seam/sting, ask whether the beat wants a plain CUT. Grounded in School of Motion's
 six essential transitions (https://schoolofmotion.com/blog/six-essential-motion-design-transitions-tutorial):
-*"Simplicity is the ultimate sophistication"* — the hard cut is the professional default, and a transition
+*"Simplicity is the ultimate sophistication"*: the hard cut is the professional default, and a transition
 has to EARN its place. Map the editorial intent to the mechanism:
 
 | Intent between two beats | Use | In the engine |
@@ -264,15 +264,15 @@ has to EARN its place. Map the editorial intent to the mechanism:
 | Fast pace / on the beat / raw impact | **Hard cut** (no transition) | just adjacent beats; `cut:"none"`; `make beatsync` puts it on the beat |
 | Passage of time · location change · montage | **Dissolve** | `seam:"dissolve"` / `fade` |
 | Punch / launch / hide-then-reveal (matched action) | **Cut on action** | a hard cut placed ON the motion (e.g. at a click's impact frame) |
-| Visual continuity — a shape/object carries over | **Match cut** | align the two beats' hero shape + `seam:"fade"`, or a `morph` when a real shape tweens |
+| Visual continuity: a shape/object carries over | **Match cut** | align the two beats' hero shape + `seam:"fade"`, or a `morph` when a real shape tweens |
 | Element is sub-framed / diving into a screen | **Dynamic zoom** | `seam:"cinematicZoom"` / camera push into the artifact |
-| Logo / icon / "awe" flourish | **Morph** | reserve it (the article calls it "the most complicated") — logos and one hero moment only |
+| Logo / icon / "awe" flourish | **Morph** | reserve it (the article calls it "the most complicated"), logos and one hero moment only |
 
 Rules of thumb from the article, as engine doctrine:
 - **Default to the hard cut.** If a transition would overcomplicate the boundary, cut. A film is mostly cuts
   with a few earned transitions, not a transition on every seam (that reads as a template, and the ledger
   flags it).
-- **Cut TO the beat.** A hard cut re-times a boundary to the music — this is exactly what `make beatsync`
+- **Cut TO the beat.** A hard cut re-times a boundary to the music, this is exactly what `make beatsync`
   automates now that beds have a real beat. On-beat cuts read directed; off-beat ones read sloppy.
 - **A transition states a relationship** (time passed, place changed, this-becomes-that). If there is no
   relationship to state, the cut is the honest choice.
@@ -299,16 +299,16 @@ Rules of thumb from the article, as engine doctrine:
   sideways · `chromaticSplit` impact with a tech accent (softer than `glitch`) · `dispersion`
   spectral flourish for color/light stories only · `gridPixelateWipe` a digital/retro-game or
   data-glitch cut (tint with `color` to a brand accent; the block front reads as "loading/decoding").
-- **Ambient shader looks** (`shader` layer, looping): fields BEHIND content at intensity ~0.3 — `flow`
+- **Ambient shader looks** (`shader` layer, looping): fields BEHIND content at intensity ~0.3, `flow`
   premium default · `aurora` soft/organic · `plasma` retro/energetic · `drift` calm/dreamy · `mist`
   barely-there · `matrixDecode` hacker/terminal/AI-code backdrop (`colors[0]` sets the rain hue; keep
-  body copy in the darker gutters). Overlay looks ON TOP at intensity ~0.6-0.9, one per film — `vhs` lo-fi/nostalgic ·
+  body copy in the darker gutters). Overlay looks ON TOP at intensity ~0.6-0.9, one per film, `vhs` lo-fi/nostalgic ·
   `crt` retro-tech/terminal · `filmGrain` texture on flat frames (keeps contrast) · `lightLeak` warm
   analog warmth over a hero · `barrel` a lens-shot feel · `heatShimmer` tension/heat/desert · `ripple`
   calm water/reflection · `kaleidoscope` a music/psychedelic flourish. Place overlays on a high track;
   they veil, they don't warp the pixels beneath. Don't stack two, and never behind small body copy.
 - **Motion blur** (`"motionBlur": true` on a layer with a `motion` track): a velocity-derived streak on
-  fast moves — the layer smears while travelling, snaps crisp when it settles. Reach for it on whip-ins,
+  fast moves. The layer smears while travelling, snaps crisp when it settles. Reach for it on whip-ins,
   fast slides, and hard slams to sell speed and hide the discrete-frame stutter; a `0..1` number tunes
   strength (default `true` = half-shutter). Skip it on slow/ambient drifts (no streak to earn) and on
   small body text held mid-move (it dissolves). Pure in the frame → seek-safe, capped so text never melts.
@@ -325,36 +325,36 @@ Don't hand-scatter effects. **`make direct D=<file>`** reads the brand's motion 
 and applies these rules per transition: cover a hard background jump with a sting · whip/punch only when the
 background *doesn't* change · rotate one cut family (no archetype twice) · punchy brands snap, calm brands
 dissolve. It prints a report; `WRITE=1` applies the picks → `<file>.directed.json`. This is how you kill the
-"too many effects" tell — the director chooses fewer, righter effects than an author reaching for variety.
+"too many effects" tell: the director chooses fewer, righter effects than an author reaching for variety.
 
 ## The enforcement map (what code already guarantees)
 
 Purity probe (determinism) · motion contract i–v (holds/settles/monotonic/counters/typing) ·
 shimmer viii (no shaking text) · rhythm ix (no monotone entries) · layout audit (overlap /
 safe-zone / clipping) · contrast gates (text 4.5+, images 3+, headline dominance 7+) ·
-no-emdash · similarity + ledger (cross-video sameness). Everything else in this file is taste —
+no-emdash · similarity + ledger (cross-video sameness). Everything else in this file is taste,
 which is why it's written down.
 
 
 ## Wave-1 effect selection (colour grades · glow · captions)
 
-Colour-grade filter presets (any layer, `filter:` — core/filters.js):
-- **duotone** — collapse a busy photo into two brand colours so it reads as graphic, not photographic; the bare default (ink to accent) makes any image on-brand instantly.
-- **tritone** — duotone with a mid-tone, for photos that lose too much in two colours (faces, product shots).
-- **gradientMap** — a full stylised grade for hero imagery that should feel art-directed, not filtered.
-- **posterize** — screen-print bands for a punchy retro beat; keep levels 4-6, below 4 gets muddy.
-- **sepia** — the archive-footage cue; partial (`sepia:0.6`) reads warmer, less costume-y.
-- **vignette** — pull the eye to centre on full-bleed imagery; keep under 0.6 or it reads as a tunnel.
+Colour-grade filter presets (any layer, `filter:`, core/filters.js):
+- **duotone**: collapse a busy photo into two brand colours so it reads as graphic, not photographic; the bare default (ink to accent) makes any image on-brand instantly.
+- **tritone**: duotone with a mid-tone, for photos that lose too much in two colours (faces, product shots).
+- **gradientMap**: a full stylised grade for hero imagery that should feel art-directed, not filtered.
+- **posterize**: screen-print bands for a punchy retro beat; keep levels 4-6, below 4 gets muddy.
+- **sepia**: the archive-footage cue; partial (`sepia:0.6`) reads warmer, less costume-y.
+- **vignette**: pull the eye to centre on full-bleed imagery; keep under 0.6 or it reads as a tunnel.
 
-Glow presets (`type:"glow"`, `preset:` — core/layers/glow.js):
-- **bloom** — energy AT a bright point: behind a logo, a lit number, a payoff word.
-- **halation** — film-warm glamour on a single highlight; keep intensity low, felt not seen.
-- **diffusion** — soften a busy dark region so foreground text floats; an area treatment, not a point.
-- **rimLight** — edge-light a subject placed to the crescent's upper-right; gives a cutout dimension.
-- **spotlight** — stage a reveal: aim the cone (angle, default from above-left) at what enters next.
+Glow presets (`type:"glow"`, `preset:`, core/layers/glow.js):
+- **bloom**, energy AT a bright point: behind a logo, a lit number, a payoff word.
+- **halation**: film-warm glamour on a single highlight; keep intensity low, felt not seen.
+- **diffusion**: soften a busy dark region so foreground text floats; an area treatment, not a point.
+- **rimLight**: edge-light a subject placed to the crescent's upper-right; gives a cutout dimension.
+- **spotlight**, stage a reveal: aim the cone (angle, default from above-left) at what enters next.
 
-Caption styles (`captionStyle:` — core/captions.js; word-timed, degrade to length-proportional pacing):
-- **highlight** — marker-pen emphasis with a read trail; the default when the caption IS the content.
-- **pillKaraoke** — the loudest, most social; fast hype cuts over busy footage, never over dense UI.
-- **weightShift** — the quietest; product demos and calm brand films; needs a multi-weight face.
-- **clipWipe** — lyric-video energy for one hero line; only on themes whose accent clears 4.5:1.
+Caption styles (`captionStyle:`, core/captions.js; word-timed, degrade to length-proportional pacing):
+- **highlight**: marker-pen emphasis with a read trail; the default when the caption IS the content.
+- **pillKaraoke**: the loudest, most social; fast hype cuts over busy footage, never over dense UI.
+- **weightShift**: the quietest; product demos and calm brand films; needs a multi-weight face.
+- **clipWipe**: lyric-video energy for one hero line; only on themes whose accent clears 4.5:1.

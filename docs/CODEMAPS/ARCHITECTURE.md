@@ -4,10 +4,10 @@ answers: "the system map: JSON → validate → scene.html → renderFrame(n) �
 group: engine
 ---
 
-# Vawe — architecture codemap
+# Vawe: architecture codemap
 
 > One self-describing JSON → one rendered Short (1080×1920 / 1920×1080, 30fps, mp4).
-> Keep this current as the system grows — it's the shared map. See the
+> Keep this current as the system grows: it's the shared map. See the
 > `vawe-scene-authoring` skill for *how to write* scenes.
 
 ## Pipeline (one render)
@@ -98,11 +98,11 @@ it are `make probe`, `make canvas-purity` and `make snap-all`.
 | `blocks/` | build-time BLOCK/COMP sugar | `index.mjs` = the assembly point + registry (`BLOCKS`); factories live in family siblings sharing `kit.mjs` (`charts`/`dev`/`social`/`ui`/`app`/`interact`), plus `catalog.mjs` (variants). A `type:"block"` layer (pointer/kpiRow/browserFrame/…) carries the BLOCK's own props, expanded by `make expand` into real layers. Block props are validated by `make blocks-audit`, NOT the base layer schema (validate.mjs exempts block/comp). |
 | `core/tokens.css` | design system | color (themeable `--bg/--accent/…` + `--font-*`), **type scale** (`--fs-*`), **spacing scale** (`--sp-*`), radii/shadows, safe-zone vars, `.stage/.act/.safe` scaffold, `.debug-safe` overlay, `html.alpha` transparent-export mode. |
 | `themes/<name>.json` | brand kits / taste | palette + gradient + fonts + motion personality. `data.theme` = name or inline object. `default.json` = current look. |
-| `core/theme-contract.js` | required theme keys (no default look) | `themeErrors()` — shared by validate (node) + applyTheme (browser). |
+| `core/theme-contract.js` | required theme keys (no default look) | `themeErrors()`, shared by validate (node) + applyTheme (browser). |
 | `formats/<name>/scene.html` | one format's HTML/CSS/JS | exposes `window.__engine`; builds `{fps, duration, stings, sfx, segments, renderFrame}`. Mark key text `data-layer="critical"`. |
 | `formats/scene/schema.json` | field schema | the authoring vocabulary; `make schema-check` asserts the engine reads nothing undefined. |
 | `formats/<name>/sample.json` + siblings | data JSONs | `sample.json` is the reference; topics are siblings. |
-| `formats/scene/` | generic data-driven format | layered composition from `data.layers[]` (text/image/block/… + timing + `anim`/`out` + kinetic `split`/`preset` + GSAP `fx`/`fxOut`/`gsap`/`morph`/`motionPath`/`physics`/`splitText` + `circle`/`ransom`) + `cuts`/`seams`/`stings` + `data.captions[]`. No per-topic code — the JSON is the video. |
+| `formats/scene/` | generic data-driven format | layered composition from `data.layers[]` (text/image/block/… + timing + `anim`/`out` + kinetic `split`/`preset` + GSAP `fx`/`fxOut`/`gsap`/`morph`/`motionPath`/`physics`/`splitText` + `circle`/`ransom`) + `cuts`/`seams`/`stings` + `data.captions[]`. No per-topic code, the JSON is the video. |
 | `core/validate.mjs` | data + theme validator | `validateData`/`validateTheme`/`validateAll`/`fxErrors`/`lintData` against `schema.json`; runs in `boot()` pre-first-frame (fail fast) + `make validate`. Browser-safe (boot imports it). |
 | `cmd/render` (Go) | CLI entry | `--data/--module/--out`, `--all`, `--list`, `--workers`, `--alpha` (transparent VP9 `.webm` overlay). |
 | `internal/scene` (Go) | frame capture | parallel tabs; relies on purity. |
@@ -111,7 +111,7 @@ it are `make probe`, `make canvas-purity` and `make snap-all`.
 | `internal/queue` (Go) | concurrency runner | foundation for batch (wired to `--all`). |
 | `scripts/` | authoring tools + gates | `scripts/author/` (preview/storyboards/captions), `scripts/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `scripts/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`. |
 | `verify/` | review tooling | `run.js` (`make verify`: integrity + safe-zone + contact sheets), `audit.mjs` (`make audit`: overlap/overflow/spacing), `review.mjs` (`make review`: fast snapshot). |
-| `scripts/media/kie.mjs` | **planned AI-media client** (kie.ai) | createTask → poll → download for `tts / music / gen-image / gen-video / transcribe`. **Intentional future infra** for another engine-level output (sound, vocals, generated imagery) — no consumers yet; do not delete as "dead code". |
+| `scripts/media/kie.mjs` | **planned AI-media client** (kie.ai) | createTask → poll → download for `tts / music / gen-image / gen-video / transcribe`. **Intentional future infra** for another engine-level output (sound, vocals, generated imagery). No consumers yet; do not delete as "dead code". |
 | `.githooks/pre-push` | pre-push gate | runs `make schema-check lib-test`; install with `make install-hooks`. |
 
 ## Contracts (don't break these)

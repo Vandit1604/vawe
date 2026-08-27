@@ -4,14 +4,14 @@ answers: "cause→feeling ease table · the failure-modes catalog · restraint �
 group: story
 ---
 
-# TASTE RULES — what not to do, and how each choice makes the viewer feel
+# TASTE RULES: what not to do, and how each choice makes the viewer feel
 
 `MOTION-CRAFT.md` says HOW to move a thing (the 10 rules, the speed dials). This file says WHAT it
 feels like when you do, and WHAT NOT TO DO. It is the cause→feeling layer: you reach for it when the
 video "renders fine but feels cheap." Modelled on the another engine taste system (doctrine in prose,
 the source-decidable subset backstopped by a gate).
 
-Two things a from-scratch video lacks that a brand site hands you for free — a taste anchor and a
+Two things a from-scratch video lacks that a brand site hands you for free, a taste anchor and a
 story spine. This file is the anchor when there is no site. Its companion [`SELECTION.md`](SELECTION.md) turns an intent into the specific transition/font/effect to reach for. Read it before authoring, not after.
 
 ---
@@ -93,7 +93,7 @@ launch (`easeIn*` / `accel`). Linear on a visible move is the tell of no taste.
 
 ---
 
-## The failure-modes catalog — name the smell, then the fix
+## The failure-modes catalog, name the smell, then the fix
 
 Each is a real way from-scratch videos go wrong. Name → why it reads bad → the fix. Several are bugs
 this engine actually shipped (`docs/MISTAKES.md`).
@@ -129,7 +129,7 @@ this engine actually shipped (`docs/MISTAKES.md`).
 
 ---
 
-## Restraint — an effect must be EARNED
+## Restraint: an effect must be EARNED
 
 ~95% of cuts are hard cuts. A shader transition or a composite look is for 2–3 key moments: the hero
 reveal, an act break, the CTA, a music punctuation. Everything else is a hard cut on the beat.
@@ -144,17 +144,17 @@ One cut family per film. One accent hue. Mixing whip and iris in one piece, or a
 is the video equivalent of five fonts on a slide.
 
 The effect budget flexes with the video's PURPOSE (a launch film is restrained; an effects showreel is
-allowed to be dense — but even it earns each beat), and the director gate judges busyness against that
+allowed to be dense, but even it earns each beat), and the director gate judges busyness against that
 purpose rather than a fixed count.
 
 ---
 
-## Continuity — one continuous film
+## Continuity: one continuous film
 
 - **Shared elements travel.** The strongest "directed" signal: a persistent layer with a motion track
   that repositions/resizes it across beats, not two separate layers that cut-replace. The headline
   becomes the label; the card slides to its next mark.
-- **Match the seam.** Cut at peak velocity, and match direction + speed on both sides — an element
+- **Match the seam.** Cut at peak velocity, and match direction + speed on both sides, an element
   leaving left hands off to one entering from the same motion. Pair exits with entrances directionally
   (`slide-right` in → `slide-left` out), never enter-and-retreat.
 - **Cover a hard backdrop jump** (dark↔light) with a sting peaking AT the cut; leave same-bg cuts raw.
@@ -166,9 +166,9 @@ purpose rather than a fixed count.
 Borrowed from another engine' story model: a beat that cannot say what it is DOING to the viewer is
 decoration. In the storyboard / lock sheet, every beat states two things:
 
-- **persuasion** — the rhetorical move: `pain agitation` · `negative contrast` · `future pacing` ·
+- **persuasion**. The rhetorical move: `pain agitation` · `negative contrast` · `future pacing` ·
   `social proof` · `risk reversal` · `inevitability`.
-- **feeling** — the emotion arc: `anxiety → relief` · `aspiration → trust` · `curiosity → payoff`.
+- **feeling**. The emotion arc: `anxiety → relief` · `aspiration → trust` · `curiosity → payoff`.
 
 If a beat has neither, it is not a beat; it is a frame occupying time, and it should be cut (the value
 gate in `vawe-video-planning`).

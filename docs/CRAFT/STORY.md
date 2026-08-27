@@ -4,7 +4,7 @@ answers: "the spine · beat-role→persuasion→feeling · named spines + timing
 group: story
 ---
 
-# STORY — why these beats, in this order, doing what
+# STORY: why these beats, in this order, doing what
 
 The four other spines answer how a frame looks, fills, moves, and sounds. This one answers the
 question that comes first: **what beats, in what order, and what each one is DOING to the viewer.**
@@ -49,7 +49,7 @@ in TASTE-RULES.)
 ## Beat role → persuasion → feeling (the layering lookup)
 
 This is the table the other docs point back to. Every beat in the lock sheet declares a **persuasion**
-(the rhetorical move) and a **feeling** (the emotion arc) — TASTE-RULES makes those required fields.
+(the rhetorical move) and a **feeling** (the emotion arc), TASTE-RULES makes those required fields.
 This says which ones fit which role, so you pick a coherent chain instead of guessing per beat.
 
 | Beat role | Persuasion move | Feeling arc | Hands off to |
@@ -68,7 +68,7 @@ the value gate.
 
 ---
 
-## Choose a spine — named frameworks with beat timing (30s / 60s)
+## Choose a spine: named frameworks with beat timing (30s / 60s)
 
 Pick by what the viewer already knows and how they should feel. Each maps onto Hook→…→CTA.
 
@@ -121,8 +121,8 @@ If a piece of material maps to no beat, it does not go in the video. A launch fi
 
 ## Per-beat recipe (role → the rest of the stack)
 
-The starting recipe for each role. These are defaults to depart from with intent, not a template —
-the actual transition/density/sound come from the linked docs, chosen by the brand.
+The starting recipe for each role. These are defaults to depart from with intent, not a template.
+The actual transition/density/sound come from the linked docs, chosen by the brand.
 
 | Beat role | Background | Layout | Value | Motion character |
 |---|---|---|---|---|

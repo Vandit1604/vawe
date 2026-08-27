@@ -4,7 +4,7 @@ answers: the simulation harness, what it guarantees about determinism, and how a
 group: engine
 ---
 
-# `sims/` — stateful simulation, baked offline
+# `sims/`: stateful simulation, baked offline
 
 `renderFrame(n)` is a pure function of `n`. Eight workers render frames in arbitrary order and the
 bytes must match. A simulation is the opposite of that: it is iterative, frame 412 exists only
@@ -41,7 +41,7 @@ export function draw(ctx) {}               // paint the CURRENT state onto ctx.g
 
 The runner calls `setup`, then for each frame `step(ctx, i)` followed by `draw(ctx)`, then writes the
 canvas out. `step` and `draw` are split so that "advance the world" and "look at the world" stay
-separable — a sim that draws inside `step` still works, but cannot be re-rendered at a different size
+separable: a sim that draws inside `step` still works, but cannot be re-rendered at a different size
 without re-simulating.
 
 ### `ctx`
@@ -66,9 +66,9 @@ entire point of moving the work offline.
 
 ### What a sim MUST NOT do
 
-- `Math.random()` — use `ctx.rng` (or `rng(seed)` from `sims/lib/rng.mjs`).
-- `Date.now()`, `new Date()`, `performance.now()` — a bake that depends on when it ran is not a bake.
-- `crypto.getRandomValues()` — same reason.
+- `Math.random()`, use `ctx.rng` (or `rng(seed)` from `sims/lib/rng.mjs`).
+- `Date.now()`, `new Date()`, `performance.now()`: a bake that depends on when it ran is not a bake.
+- `crypto.getRandomValues()`, same reason.
 
 `make sim-audit` fails on all of these by static scan, because the failure mode otherwise is silent:
 the sequence still renders, still plays, and simply differs every time somebody re-bakes it.
@@ -77,7 +77,7 @@ the sequence still renders, still plays, and simply differs every time somebody 
 
 The baker writes both files the two consumers need:
 
-- `manifest.json` — `{fps, w, h, count, frames: [url…]}`, the shape `core/boot.js` preloads and
+- `manifest.json`, `{fps, w, h, count, frames: [url…]}`, the shape `core/boot.js` preloads and
   `core/layers/clip.js` plays. Author it straight into a scene:
 
   ```json
@@ -88,7 +88,7 @@ The baker writes both files the two consumers need:
   The clip layer derives its own frame index from `t`, `manifest.fps` and `speed`, so nothing in the
   scene has to restate the frame count. `loop: true` wraps; without it the last frame holds.
 
-- `meta.json` — provenance. fps, count, dims, seed, and a SHA-256 of the sim source **and every local
+- `meta.json`: provenance. fps, count, dims, seed, and a SHA-256 of the sim source **and every local
   module it imports**. `make sim-audit` recomputes that hash and fails if it moved, because a bake
   that silently keeps playing the frames of a sim you have since edited is the exact shape of failure
   this repo keeps writing gates against.

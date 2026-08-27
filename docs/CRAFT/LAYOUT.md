@@ -4,7 +4,7 @@ answers: grid · one hero · asymmetry vs centered · archetype→intent · safe
 group: look
 ---
 
-# LAYOUT — composing a frame
+# LAYOUT: composing a frame
 
 Layout is where hand-authored work most often regresses to slop (centered everything, equal card grid). This is
 how to place layers and compose an `html` layer with intent.
@@ -44,7 +44,7 @@ arguing with these.
   calls it **the invisible effect**: if it does not read at its size and duration, it is not a feature.
   An effect nobody can see is not restraint.
 
-## 1. One thing dominant — scale contrast
+## 1. One thing dominant, scale contrast
 - **Make ONE element the hero** via *scale contrast*: one huge headline + one tiny caption beats three medium
   things. Emphasize with **size, then weight, then colour/contrast**; de-emphasize secondary text with lower
   contrast (`text2`/`dim`), not just smaller size.
@@ -61,9 +61,9 @@ arguing with these.
 ## 3. Whitespace and the spacing scale
 - **Start with too much whitespace, then remove.** Negative space is an active element; dense-by-default looks
   cheap. Give the hero room to breathe.
-- **Space on a scale, not arbitrary px** — e.g. 8 · 16 · 24 · 32 · 48 · 64 · 96 · 128. Any two values should be
+- **Space on a scale, not arbitrary px**: e.g. 8 · 16 · 24 · 32 · 48 · 64 · 96 · 128. Any two values should be
   *visibly* different. (Design tokens live in `core/tokens.css`.)
-- **Relative spacing signals grouping** — *less* space inside a group, *more* between groups. Proximity does the
+- **Relative spacing signals grouping**: *less* space inside a group, *more* between groups. Proximity does the
   work of borders (Gestalt). Reach for proximity / similarity / a shared container (`group`, a card) before a divider line.
 
 ## 4. Grid, focal point, the eye
@@ -73,7 +73,7 @@ arguing with these.
   direction of gaze/motion to guide the eye. Motion order = reading order (the most important element moves last).
 - **Composition is built into placement** (resolves per aspect, deterministic): `pin:"thirds-tl|thirds-br|…"`
   drops a layer on a power point; `pin:"center"` uses OPTICAL center (~46%, reads centered); `col:"2-7"` places
-  it on a 12-column grid (sets x + w). Reach for these instead of eyeballed px — well-composed by default.
+  it on a 12-column grid (sets x + w). Reach for these instead of eyeballed px, well-composed by default.
 
 ## 5. Video safe zones (this engine)
 - Keep essential text/hero inside **title-safe ≈ inner 90%** of the frame; for social keep key content out of the
@@ -81,12 +81,12 @@ arguing with these.
 - **Portrait 9:16:** anchor the hero in the **upper-middle third** (the lower third gets covered by captions/UI).
 - **Landscape 16:9:** hero on a thirds intersection, never hugging edges.
 - **Measure, on BODY and captions only:** set text-layer `w` so lines are 45-75 chars (~66 ideal);
-  full-bleed body text loses the return sweep. **Display type is exempt** — 60px and up, anything
+  full-bleed body text loses the return sweep. **Display type is exempt**, 60px and up, anything
   `data-layer="critical"`, or any line read in one fixation. A hook has no return sweep to protect, so it
   is governed by the 60-80% frame fill in §0 instead. Full rule and the boundary:
   [TYPOGRAPHY.md](TYPOGRAPHY.md) §4.
 
-### 5a. The caption band — where a burnt-in caption will be painted
+### 5a. The caption band, where a burnt-in caption will be painted
 
 The safe box says where content MAY live. It says nothing about the strip a caption lands in, so a
 headline could sit squarely under one and every layout check stayed green. `core/safe.js` now exports
@@ -126,11 +126,11 @@ beat is *doing* (see [STORY.md](STORY.md) for the beat role), not by habit. Marg
 | **Left-aligned macro** | states one idea, wants tension | the anti-centered default; hero on the left third |
 | **Centered statement** | is a lone title / CTA / single hero line | only when genuinely symmetric (rule §2) |
 | **Split (text \| artifact)** | pairs a claim with a real UI capture / image | headline left, artifact right; the workhorse |
-| **Full-bleed number/statement** | is the payoff — one big stat or line | strip it bare; let it breathe |
+| **Full-bleed number/statement** | is the payoff: one big stat or line | strip it bare; let it breathe |
 | **3-up card row / flow** | shows a process (how-it-works, ≤3 steps) | cards + connectors, staggered |
 | **2-col feature grid** | lists capabilities (a Build/FAB beat) | quick staggered fades; cut weak features |
 | **Quote block** | is a testimonial / pull-quote | serif, cite fades last |
-| **Asymmetric card-over-board** | wants depth — a card floating over context | anchor with intent, never random-float |
+| **Asymmetric card-over-board** | wants depth: a card floating over context | anchor with intent, never random-float |
 | **Lower-third** | labels/annotates without stealing focus | over a running artifact |
 
 (See [../MOTION-CRAFT.md](../MOTION-CRAFT.md) for the rhythm side; the `impeccable` skill flags

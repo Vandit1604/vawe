@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vawe — how we animate things</title>
+<title>Vawe: how we animate things</title>
 <meta name="description" content="Nothing in the vawe engine ever plays. It draws one still picture, photographs it, and draws the next.">
 <style>
 /* A deck: one slide on screen at a time, next and back, nothing else. No scrolling, no snapping, no
-   scroll hijacking — earlier drafts spent their complexity on movement instead of on being read.
+   scroll hijacking, earlier drafts spent their complexity on movement instead of on being read.
    Tokens are the site's (site/app/globals.css) so this belongs to vawe rather than sitting beside it. */
 :root{
   --accent:#2563eb; --accent-2:#1d4ed8; --accent-soft:#eef3ff; --accent-line:#cfe0ff;
@@ -283,7 +283,7 @@ let EASINGS = LOCAL;
 try {
   const m = await import('../core/motion.js');
   if (typeof m?.EASINGS?.brake === 'function') EASINGS = m.EASINGS;
-} catch { /* not served — the copy above stands in */ }
+} catch { /* not served: the copy above stands in */ }
 
 /* ---- the deck ---------------------------------------------------------------------------------- */
 const slides = [...document.querySelectorAll('.slide')];

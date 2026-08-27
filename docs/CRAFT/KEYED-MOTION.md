@@ -4,12 +4,12 @@ answers: "how the exemplar actually MOVES, as numbers from its JSON: dense keys 
 group: crosscutting
 ---
 
-# KEYED MOTION — how the exemplar actually moves
+# KEYED MOTION: how the exemplar actually moves
 
 `formats/scene/higgsfield-recreation.json` is cited across this repo as the exemplar, and everything
 written about it so far is about its **grammar**: one object, on screen from the first frame, and every
 cut is that object changing state ([`../../.claude/skills/vawe-continuous-action/SKILL.md`](../../.claude/skills/vawe-continuous-action/SKILL.md)).
-That is the *what*. This file is the *how* — the motion mechanics that make it read as a product film
+That is the *what*. This file is the *how*. The motion mechanics that make it read as a product film
 rather than a competent slideshow, stated as numbers you can check in the JSON rather than as taste.
 
 **Read this when** a film has the right structure and still feels amateur, or when you are recreating a
@@ -19,12 +19,12 @@ reference and cannot work out why yours drifts while the original snaps.
 > carries 73 hand-written motion keys. Most films should not pay that. Choose it deliberately, for a
 > hero beat or a recreation, and know what you are buying. Nothing here is gated and nothing should be.
 
-**Three of these are now DEFAULTS — you get them without asking:**
+**Three of these are now DEFAULTS: you get them without asking:**
 
 | mechanic | how it became automatic |
 |---|---|
 | linear between dense keys | `motionAt` interpolates a segment shorter than `DENSE_KEY_SEC` (0.14s, ~4 frames) linearly unless you name an `ease`. Dense keys mean mechanical. |
-| motion blur on fast movers | applies itself above `AUTO_BLUR_FLOOR` (16px/frame) at a gentle `AUTO_SHUTTER` of 0.16 — the exemplar author's own hand-picked value. `motionBlur: false` opts out; a number overrides the shutter. |
+| motion blur on fast movers | applies itself above `AUTO_BLUR_FLOOR` (16px/frame) at a gentle `AUTO_SHUTTER` of 0.16. The exemplar author's own hand-picked value. `motionBlur: false` opts out; a number overrides the shutter. |
 | exits faster than entrances | `theme.motion.exitRatio` scales the default exit. Defaults to `1` so no theme changes until it opts in; `themes/higgsfield.json` sets `0.45`. |
 
 **Two more are one line away:** `panWith` (below) and the `typedHook` / `morphButton` blueprints.
@@ -62,7 +62,7 @@ Through the cursor drag, `btn`'s keys land **every 2 frames at 30fps**: gaps of
 The rule this encodes: **a curve is a decision about a whole span, and a mechanical motion has no such
 span.** A cursor does not ease. It moves where the hand moved. So you key it densely and interpolate
 linearly, and the shape of the motion comes from *where the keys are*, not from a curve fitted over
-them. Easing appears only where the motion genuinely settles — `easeOutCubic` at the arrival keys,
+them. Easing appears only where the motion genuinely settles, `easeOutCubic` at the arrival keys,
 `easeInOutSine` on the one slow drift at the start.
 
 `ring` is the deliberate opposite: 5 keys, zero linear, all cubic. It is a physical bloom, not a
@@ -70,8 +70,8 @@ mechanical move, so it gets curves.
 
 **The failure this prevents.** Two keys plus `easeInOutCubic` produces a glide. Glide is right for a
 card arriving and wrong for anything a hand or a machine is doing. `easeInOutCubic` also zeroes velocity
-at BOTH ends of every segment, so a dense chain accelerates and stops once per key and the move pulses —
-the same defect fixed for the camera in [`../MISTAKES.md`](../MISTAKES.md) #125 and left standing as the
+at BOTH ends of every segment, so a dense chain accelerates and stops once per key and the move pulses.
+The same defect fixed for the camera in [`../MISTAKES.md`](../MISTAKES.md) #125 and left standing as the
 per-layer default until now. **This is automatic below 0.14s per segment.**
 
 ---
@@ -147,7 +147,7 @@ The same discipline shows in the chrome: the app UI is hand-authored HTML at mea
 
 - The hook **types in at 33 cps and un-types at 60 cps** (`typing: 33, untype: 1.03, untypeRate: 60,
   caret: true`). It erases itself, faster than it arrived. It does not fade.
-- `exitDur: 0` on `hook` and `gen` — cut, not faded.
+- `exitDur: 0` on `hook` and `gen`, cut, not faded.
 - The scrim is **asymmetric**: `enterDur: 0.32`, `exitDur: 0.07`. It arrives as a fade and leaves as a
   snap.
 
@@ -158,7 +158,7 @@ object would actually do.
 
 ## 6. Motion blur, once
 
-`motionBlur: 0.16` appears on exactly one layer — `btn`, the fast traveller. Blur on everything is
+`motionBlur: 0.16` appears on exactly one layer, `btn`, the fast traveller. Blur on everything is
 mud; blur on the one thing moving fast enough to smear is physics.
 
 ---
@@ -178,8 +178,8 @@ keys show as ticks on the bar. `undo` walks back through the session.
 
 Why it works on tracked files: edits are **surgical text patches**, never a re-serialise
 (`scripts/author/patch-motion.mjs`). A save that changes nothing is a zero-byte diff, moving one key
-changes one line, and the file's hand formatting — including which of the three keyframe layouts it
-uses — survives. `lib-test` holds that invariant across four scenes.
+changes one line, and the file's hand formatting, including which of the three keyframe layouts it
+uses: survives. `lib-test` holds that invariant across four scenes.
 
 The honest limit: this is one interaction. There is no curve editor, no motion path, no onion skin, and
 no key deletion in the UI yet. It makes dense keys cheap to place, which is the thing that was stopping
@@ -191,7 +191,7 @@ Worth being precise about what the boundary machinery actually does:
 
 | | what it does | what it does not |
 |---|---|---|
-| `cuts` | transforms ONE root — the frame slides, blurs, punches | the two scenes never touch |
+| `cuts` | transforms ONE root: the frame slides, blurs, punches | the two scenes never touch |
 | `seams` | genuinely samples both scenes as textures and blends in a shader | bakes ONE frame either side, so it blends two **frozen stills** |
 
 So a seam is a real merge of two photographs. Neither joins the *content*, and the thing that actually
@@ -204,8 +204,8 @@ makes a boundary disappear is a form the eye can follow across it.
 { "id": "dot",  "w": 80,  "h": 80 }
 ```
 
-The incoming layer opens on the outgoing one's **final pose** — centres matched, size matched by scale,
-rotation carried — then animates away into its own geometry. Exact by construction instead of two sets
+The incoming layer opens on the outgoing one's **final pose**, centres matched, size matched by scale,
+rotation carried, then animates away into its own geometry. Exact by construction instead of two sets
 of coordinates you aligned by hand and hoped stayed aligned.
 
 Centres, not corners: two boxes of different sizes sharing a top-left corner visibly jump. And the
@@ -237,12 +237,12 @@ When a film has the right spine and still feels cheap, in order of how often it 
 
 ## See also
 
-- [`../../.claude/skills/vawe-continuous-action/SKILL.md`](../../.claude/skills/vawe-continuous-action/SKILL.md) — the grammar: one object, every cut a state change
-- [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md) — which curve, which cut, when
-- [`DIRECTION.md`](DIRECTION.md) — pacing and restraint, and the gates that enforce them
-- [`../MISTAKES.md`](../MISTAKES.md) #164 — this film trips the continuity gate at its sensitive threshold; the exemplar is not gate-clean, and that is a fact about the gate
+- [`../../.claude/skills/vawe-continuous-action/SKILL.md`](../../.claude/skills/vawe-continuous-action/SKILL.md). The grammar: one object, every cut a state change
+- [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md), which curve, which cut, when
+- [`DIRECTION.md`](DIRECTION.md): pacing and restraint, and the gates that enforce them
+- [`../MISTAKES.md`](../MISTAKES.md) #164: this film trips the continuity gate at its sensitive threshold; the exemplar is not gate-clean, and that is a fact about the gate
 
-## The box track (`w` / `h`) — resizing is not scaling
+## The box track (`w` / `h`): resizing is not scaling
 
 `scale` magnifies a layer and everything drawn in it. A **box track** changes the frame the content
 lives in and lets the content re-fit. That is the difference between zooming a photo grid and

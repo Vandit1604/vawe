@@ -1,4 +1,4 @@
-# House style — argus
+# House style: argus
 
 > The persisted **Design Read** for argus. The planning skill reads this FIRST so taste isn't
 > re-derived each video and every render stays on-brand. The measured block is auto-filled from
@@ -6,7 +6,7 @@
 > lines below are yours to sharpen from the site study (`make sections`/`make lookbook`).
 
 ## Measured facts
-<!-- MEASURED:START (auto-filled from themes/argus.json — safe to regenerate) -->
+<!-- MEASURED:START (auto-filled from themes/argus.json, safe to regenerate) -->
 - **Dominance:** light-first (bg `#ffffff`, luma 1.00)
 - **Faces:** sans `Archivo` · serif `Archivo` · mono `JetBrains Mono`
 - **Palette (use ONLY these):** bg `#ffffff` · text `#16181d` · accent `#4772f5` · up `#1a9e57` · down `#e5484d`
@@ -19,18 +19,18 @@
 - **The extremes** (details WRONG for any other brand): the **8-bit pixel-eye mascot** (Argus, the many-eyed watchman) · a **hand-drawn cobalt underline** under a key word · the **X logo inline in the headline** as a black chip.
 
 ## Type
-- **Headline:** `Archivo` **300** (light!), tracking -0.035em. A light, tightly-tracked display — confident but airy, never bold-shouty.
+- **Headline:** `Archivo` **300** (light!), tracking -0.035em. A light, tightly-tracked display. Confident but airy, never bold-shouty.
 - **Rule:** one big light-weight statement + a tiny `JetBrains Mono` label. Numbers/metrics in JetBrains Mono.
 
 ## Colour
-- **Accent usage:** cobalt `#4772f5` is the ONLY colour on an otherwise black-on-white page — the mascot, the CTA, the underline, the "start" link. Use it for exactly the payoff element per beat, nothing decorative.
+- **Accent usage:** cobalt `#4772f5` is the ONLY colour on an otherwise black-on-white page. The mascot, the CTA, the underline, the "start" link. Use it for exactly the payoff element per beat, nothing decorative.
 - **Dominance:** light / white-first. Pure white fields, near-black ink.
 
 ## Shape & surface
 - Pill buttons/chips (radius 999px). Soft, rounded, friendly. Cards are white with a hairline; minimal shadow.
 
 ## Motion
-- Clean with a wink — a small bounce (0.08) on the mascot/payoff, snappy elsewhere. Not austere, not cartoon.
+- Clean with a wink: a small bounce (0.08) on the mascot/payoff, snappy elsewhere. Not austere, not cartoon.
 
 ## Signature details (what this brand does that nothing else does)
 - The pixel-eye mascot (blinks, watches). · The hand-drawn cobalt underline. · X-native surfaces (tweets, replies, analytics). · lowercase everything.

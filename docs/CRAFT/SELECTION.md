@@ -4,7 +4,7 @@ answers: intent→effect (cited) · complete look/sting coverage · 8 named refe
 group: story
 ---
 
-# SELECTION — intent → the right effect, and why
+# SELECTION: intent → the right effect, and why
 
 `MOTION-CRAFT.md` is effect-first ("`whip` = momentum"). This file is **intent-first**: you know the
 feeling a beat wants, and it tells you which transition, font, look, easing and colour is correct,
@@ -26,7 +26,7 @@ Three parts: **the decision procedures** (how to pick within one family), **the 
 
 ---
 
-## 1. Transitions — the grammar of the cut
+## 1. Transitions, the grammar of the cut
 
 **The decision procedure (Walter Murch's question first):**
 
@@ -38,23 +38,23 @@ Three parts: **the decision procedures** (how to pick within one family), **the 
 
 | The beat wants… | Reach for | Why (cited) |
 |---|---|---|
-| invisible continuity | hard cut | "the most basic edit; preserves narrative flow" — edit grammar |
-| time passing / reflection | `fade`/`blur` dissolve, sting `dissolve`/`ink` | "a dissolve implies the passing of time" — Murch / dissolve convention |
-| an act break, finality | `fade` (to dark), sting `leak` | "a fade marks significant story breaks, finality" — edit grammar |
-| energy, momentum | `whip`/`skewWhip`, sting `whipPan` | "whip pan masks the cut through motion blur; energetic" — edit grammar |
-| playful, "notice me" | `wipe`, sting `sdfIris` | "a wipe is dynamic, playful; draws attention to the cut" — edit grammar |
-| a hidden connection between two shots | match the framing across a hard cut | "match cut reveals hidden connections; elegant" — edit grammar |
+| invisible continuity | hard cut | "the most basic edit; preserves narrative flow", edit grammar |
+| time passing / reflection | `fade`/`blur` dissolve, sting `dissolve`/`ink` | "a dissolve implies the passing of time", Murch / dissolve convention |
+| an act break, finality | `fade` (to dark), sting `leak` | "a fade marks significant story breaks, finality", edit grammar |
+| energy, momentum | `whip`/`skewWhip`, sting `whipPan` | "whip pan masks the cut through motion blur; energetic", edit grammar |
+| playful, "notice me" | `wipe`, sting `sdfIris` | "a wipe is dynamic, playful; draws attention to the cut", edit grammar |
+| a hidden connection between two shots | match the framing across a hard cut | "match cut reveals hidden connections; elegant", edit grammar |
 | product focus, a push-in | `punch`/`zoom`, resample `zoomBlur` | scale draws the eye to one subject |
 | dramatic pivot, "everything changes" | sting `vortex`, `letterbox` open | a heavy transition earns a heavy story turn |
 
 **One cut family per film.** Mixing `whip` and `iris` in one piece is five fonts on a slide. The
 director rotates within a family; it does not mix families.
 
-> **Deep dive:** this table is the summary. [`TRANSITIONS.md`](TRANSITIONS.md) is the full theory —
+> **Deep dive:** this table is the summary. [`TRANSITIONS.md`](TRANSITIONS.md) is the full theory,
 > the complete transition taxonomy, Murch's Rule of Six (emotion 51%), continuity-vs-montage, J/L cuts,
 > shared-element morph, and the ordered per-seam decision procedure. Read it when you can't say *why*.
 
-## 2. Fonts — the register of the voice
+## 2. Fonts, the register of the voice
 
 **The decision procedure:**
 
@@ -66,7 +66,7 @@ director rotates within a family; it does not mix families.
 
 | The video wants to feel… | Face role | Why (cited) |
 |---|---|---|
-| trusted, established, luxury | **serif** | "serif = stable, mature, formal, timeless authority" — font psychology |
+| trusted, established, luxury | **serif** | "serif = stable, mature, formal, timeless authority", font psychology |
 | modern, clean, a startup/tech | **humanist sans** | "sans = modern, clear, efficient; humanist sans highest for trust" |
 | strong, bold, editorial headline | **slab / heavy sans** | "slab = strength, boldness, confidence" |
 | technical, precise, a terminal | **mono** | "mono = technical precision, retro, utilitarian" |
@@ -75,21 +75,21 @@ director rotates within a family; it does not mix families.
 In this engine `font` is a ROLE (`sans`/`serif`/`mono`); the actual face comes from the theme. So the
 *profile* below sets the face; the layer just names the role.
 
-## 3. Easing — the physics of the feeling
+## 3. Easing, the physics of the feeling
 
 The full table lives in `TASTE-RULES.md`. The rule: **ease-out for arrivals** (a landing),
 **ease-in for departures** (a launch), never linear on a visible move, and **bounce is a seasoning
-for one accent, never a default** — a novice reads bounce as emphasis; it reads as cheap. (12
+for one accent, never a default**: a novice reads bounce as emphasis; it reads as cheap. (12
 principles of animation: slow-in/slow-out, anticipation, follow-through.)
 
-## 4. Composite looks / stings / shaders — the texture and era
+## 4. Composite looks / stings / shaders, the texture and era
 
 Reach for one only on the **2–3 earned beats** (hero reveal · act break · CTA). **Pick the era of the
 story, not the loudest effect.** Two registries: *looks* (`core/looks.js`, a held texture over a beat)
 and *stings* (`SHADER_FX` in `core/stings.js`, a shader that peaks AT a cut). Complete coverage below,
-grouped by the register each evokes — pick the group your story is in, then one member.
+grouped by the register each evokes: pick the group your story is in, then one member.
 
-**Looks — the held texture (register → the looks that carry it):**
+**Looks: the held texture (register → the looks that carry it):**
 
 | Register / era | Looks (pick one) |
 |---|---|
@@ -101,7 +101,7 @@ grouped by the register each evokes — pick the group your story is in, then on
 | dreamy / soft-focus | `dreamyHaze` · `watercolor` |
 | distortion / physical FX | `melt` · `glassWarp` · `heatWarp` · `rippleGlass` · `timeFreeze` · `fatten` |
 
-**Stings — the shader AT the seam (what the cut should MEAN → the stings that say it):**
+**Stings: the shader AT the seam (what the cut should MEAN → the stings that say it):**
 
 | The seam should read as… | Stings (pick one) |
 |---|---|
@@ -120,51 +120,51 @@ Match the sting's register to the look and the profile: an `apple` beat that ear
 
 ---
 
-## Part 2 — Reference profiles (name the target, get the whole look)
+## Part 2: Reference profiles (name the target, get the whole look)
 
 An adjective is vague; a brand is a spec. Pick the ONE reference a video should feel like, and every
 family is chosen at once, coherently. This is the taste anchor when there is no brand site.
 
 Each profile is `{ face · pace · easing · cut family · sting policy · look policy · accent }`.
 
-### `linear` — technical, dark, restrained (dev tools)
+### `linear`: technical, dark, restrained (dev tools)
 Dark-first. **mono + tight sans.** Fast, snappy (`easeOutQuart`, cuts `snappy`). **Hard cuts**, almost
-no stings — 1 at the hero reveal max. Looks: none, or a single `crt`/`matrixDecode` backdrop at low
+no stings, 1 at the hero reveal max. Looks: none, or a single `crt`/`matrixDecode` backdrop at low
 intensity. One cool accent (cobalt/indigo). *Restraint is the personality.* Bounce: never.
 
-### `apple` — premium, calm, generous (product launch)
+### `apple`: premium, calm, generous (product launch)
 Light or deep-black, huge whitespace. **Clean sans**, one hero per beat. Slow and smooth
 (`easeOutCubic`/`easeInOutSine`, 0.5–0.9s), cuts `fade`/`riseBlur`. **Dissolves, never whips.** One
-product is the hero; effects are almost absent — a single `lens`/`chrome` glamour moment. One accent,
+product is the hero; effects are almost absent: a single `lens`/`chrome` glamour moment. One accent,
 often none. Held frames. Bounce: never.
 
-### `stripe` — clean-tech, warm-serious (developer brand)
+### `stripe`: clean-tech, warm-serious (developer brand)
 Light, gradient-mesh backdrops. **Humanist sans.** Smooth, confident (`easeOutCubic`), cuts `blur`.
 Stings sparingly (`dissolve`). Looks: a soft `flow`/`aurora` field behind, gradient accents (cobalt→
 violet). Trust + a little warmth. Bounce: never.
 
-### `nike` — energetic, kinetic, high-contrast (sports ad)
+### `nike`: energetic, kinetic, high-contrast (sports ad)
 Bold, full-bleed. **Heavy sans / slab**, kinetic type is the star (`up`/`stretch`/`skew`). Punchy
 (`easeOutExpo`, cuts `whip`/`punch`, motion blur ON). Stings on reveals (`flash`/`streak`). One loud
 accent on black/white. Motion drives everything; nothing sits still long. Bounce: only on one accent.
 
-### `a24` — dramatic, editorial, tense (film trailer)
+### `a24`: dramatic, editorial, tense (film trailer)
 Dark, letterboxed. **Serif** (or a stark condensed sans). Slow, deliberate (`easeOutExpo` on hero
 lines, long holds), cuts `fade`/`letterbox`, `grain`/`filmGrain` throughout. Stings `ink`/`leak`,
 one `vortex` at the turn. One muted accent. Silence and stillness are the tension. Bounce: never.
 
-### `bloomberg` — dense, mechanical, functional (data/finance)
+### `bloomberg`: dense, mechanical, functional (data/finance)
 Light, information-dense. **mono + sans.** Fast, mechanical (`easeInOutQuart`, steps-like), cuts
 `collapse`/`punch`. Counters and charts are the content; the `count` easing IS the story. Minimal
 stings (`scan`). One functional accent (amber/green for up/down). Bounce: never.
 
-### `duolingo` — playful, bright, rounded (consumer app)
-Light, saturated, rounded. **Rounded sans.** Bouncy — **the one profile where bounce is correct**
+### `duolingo`: playful, bright, rounded (consumer app)
+Light, saturated, rounded. **Rounded sans.** Bouncy, **the one profile where bounce is correct**
 (`easeOutBack`/`elastic`, `bounce`/`pop` presets). Cuts `wipe`/`sdfIris`, `confetti` on wins. Multiple
 bright accents allowed. Motion is joyful, overshoot everywhere. This is the exception the other seven
 prove.
 
-### `vercel` — keynote restraint, black, sharp (developer keynote)
+### `vercel`: keynote restraint, black, sharp (developer keynote)
 Pure black. **Geometric sans + mono.** Snappy but spare (`easeOutQuart`), **hard cuts only**, a single
 dramatic `glitch`/`chromaticSplit` at the one reveal. No looks, no backdrop. One white/one accent.
 Maximum restraint, maximum contrast. Bounce: never.
@@ -189,7 +189,7 @@ The profile is the coordination; `vawe_reflect` is the colour precision.
 
 ---
 
-## Part 3 — Choosing between whole directions (`make concept`)
+## Part 3: Choosing between whole directions (`make concept`)
 
 Everything above picks WITHIN a family once the film is decided. This part is the step before: you have
 a storyboard, and several different films could be made from it. `make concept SB=<storyboard.md> N=3`
@@ -304,11 +304,11 @@ whether the film is any good stays where it has always been: `make judge` and yo
 
 A pick that fights the intent is the tell of no system. These are wrong by rule:
 
-- **bounce on `linear`/`apple`/`vercel`/`a24`** — cheap on a serious brand (the #1 turn-off).
-- **a whip/wipe on `apple`/`a24`** — announces an edit a calm/tense film wants hidden.
-- **a script or serif on `linear`/`bloomberg`** — wrong register (technical wants mono).
-- **more than one cut family in a film** — no film mixes them.
-- **a look on every beat** — effects are earned 2–3 times, never the wallpaper.
-- **a loud sting on `apple`/`linear`** — restraint IS the brand.
+- **bounce on `linear`/`apple`/`vercel`/`a24`**: cheap on a serious brand (the #1 turn-off).
+- **a whip/wipe on `apple`/`a24`**: announces an edit a calm/tense film wants hidden.
+- **a script or serif on `linear`/`bloomberg`**: wrong register (technical wants mono).
+- **more than one cut family in a film**: no film mixes them.
+- **a look on every beat**: effects are earned 2–3 times, never the wallpaper.
+- **a loud sting on `apple`/`linear`**: restraint IS the brand.
 
 `make direct` reads the profile and reports any of these, with the rule that caught it.

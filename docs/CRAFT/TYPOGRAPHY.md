@@ -4,13 +4,13 @@ answers: which face signals which personality · pairing · the size scale · we
 group: look
 ---
 
-# TYPOGRAPHY — choosing and setting type
+# TYPOGRAPHY: choosing and setting type
 
 A good face does ~90% of the work; spend the effort *before* styling (Butterick). When reflecting a brand,
-the face is decided for you — use the site's real font. This guide is for choosing when it's open, and for
+the face is decided for you, use the site's real font. This guide is for choosing when it's open, and for
 sizing/spacing well either way. Maps to the theme's `type.{sans, serif, mono, num}` keys.
 
-## 0. MEASURE first — never guess the weight/face
+## 0. MEASURE first, never guess the weight/face
 **You will look at the site's big headline, decide it is 800, and type 800. Don't. Run `make brandspec
 URL=…` BEFORE you author the theme.** That is not a suggested first step, it is the step that makes the
 rest of this file true. Creed's headline is **600**. It was authored as 800 by eye and shipped wrong
@@ -18,7 +18,7 @@ rest of this file true. Creed's headline is **600**. It was authored as 800 by e
 
 `make brandspec` reads the site's real CSS + computed styles and reports the actual faces, **the weights
 they're set at**, sizes, tracking, and declared `--font-*`/`--color-*` tokens. Eyedrop (`make palette`)
-reads pixels — good for dominance, but it read creed's accent as the *sky-photo* blue; the CSS says
+reads pixels: good for dominance, but it read creed's accent as the *sky-photo* blue; the CSS says
 `#2563eb`. **CSS tokens beat pixels for anything declared.**
 
 ## 0a. Guardrails: you know these rules but you violate them. Stop.
@@ -64,21 +64,21 @@ before you argue with any of it.
   -0.02 to -0.03 in §4 below. Video encoding compresses letter detail. Theirs is the more extreme claim
   and it is theirs, not a measurement of ours; §4 stays as written until somebody measures it here.
 
-## 0b. The font SYSTEM — 1 to 3 faces, like the colour system
+## 0b. The font SYSTEM, 1 to 3 faces, like the colour system
 Pick a small, deliberate set of faces with roles, exactly like primary/secondary/accent colours. **Three is
 the ceiling; one is often enough.** More than three fragments the piece.
 
 | Role | Job | Theme key | creed |
 |---|---|---|---|
-| **primary** | headlines + most body — the brand's voice | `type.sans` | Geist |
-| **secondary** | *optional* — a contrasting body/support face (only if the brand truly uses two) | `type.serif` or a 2nd sans | (same: Geist) |
+| **primary** | headlines + most body: the brand's voice | `type.sans` | Geist |
+| **secondary** | *optional*: a contrasting body/support face (only if the brand truly uses two) | `type.serif` or a 2nd sans | (same: Geist) |
 | **accent** | data / code / filenames / counters / one special line | `type.mono` (or a display/serif) | Geist Mono |
 
 Rules: pair for **contrast, not conflict** (§2); a **superfamily** (Geist + Geist Mono) is the safest 2-face
-system. Numbers use `type.num` (tabular mono). Don't reach for a face without a role — if a beat doesn't need
+system. Numbers use `type.num` (tabular mono). Don't reach for a face without a role, if a beat doesn't need
 the accent face, use the primary. `make brandspec` maps the site's real faces to these roles for you.
 
-Emphasis (`<b>`) inside a line is **recolour only, same weight** (it inherits the layer weight, not UA bold) —
+Emphasis (`<b>`) inside a line is **recolour only, same weight** (it inherits the layer weight, not UA bold),
 so accent words never sit heavier than their own line. Emphasise by colour or a deliberate weight step, not an
 accidental one.
 
@@ -97,7 +97,7 @@ used. Don't.** Those three are the default on every AI landing page, so they rea
 reaching for the theme you saw most recently is recall, not a decision. Neither is a choice you made about
 this brand. Reflecting a real site? The face is already decided and `make brandspec` has told you what it
 is. Nothing to reflect? Pick from the table above by the SIGNAL you want, name the signal out loud, and
-commit. (This is also an `impeccable` rule — `make designspec-check` flags overused faces.)
+commit. (This is also an `impeccable` rule, `make designspec-check` flags overused faces.)
 
 ## 2. Pair with contrast, not conflict
 - **Two faces max; one is often enough.** Differ *clearly* by class or weight (serif + sans, or black + regular),
@@ -111,10 +111,10 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
 - **Editorial / display drama:** ratio **1.333–1.618** (perfect fourth → golden). Big hero, tiny caption.
 - **Dense / dashboard:** ratio **1.2–1.25** (minor third) so sizes stay close.
 - A landscape hero headline lives around **96–140px**; a supporting line **44–64px**; a caption/label **28–36px**.
-  The gap between hero and caption should be *obvious* (scale contrast is the #1 hierarchy tool — see [LAYOUT.md](LAYOUT.md)).
+  The gap between hero and caption should be *obvious* (scale contrast is the #1 hierarchy tool, see [LAYOUT.md](LAYOUT.md)).
 
 ## 4. Weight, tracking, leading
-- **Hierarchy via weight + colour, not size alone** — supporting text = lighter weight or `dim`/`text2` colour,
+- **Hierarchy via weight + colour, not size alone**: supporting text = lighter weight or `dim`/`text2` colour,
   not merely smaller. Body never below 400.
 - **Tracking is optical:** tighten large display (negative letter-spacing, ~-0.02 to -0.03em on big headings);
   open UPPERCASE and small caps; never letterspace lowercase. The engine's `trackingFor(px)` already scales this
@@ -137,7 +137,7 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
     scene needs them, and note that the weight advice fights the "body never below 400" line above: 350 is a
     correction for white-on-black only, not a floor to lower everywhere.
 - **Leading:** body **1.2–1.45×**; tighter for big headlines (1.02–1.1), looser for long measure.
-- **Measure (line length): 45-75 chars, ~66 ideal — BODY AND CAPTIONS ONLY. Display type is exempt.**
+- **Measure (line length): 45-75 chars, ~66 ideal. BODY AND CAPTIONS ONLY. Display type is exempt.**
   Set the text layer `w` on a paragraph, a caption, a card body or any label so the lines don't run edge to
   edge. Butterick's measure protects the RETURN SWEEP: the eye has to find the start of the next line, and
   past about 75 characters it loses its place. **A line nobody returns from has no sweep to protect.**
@@ -145,7 +145,7 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
     `data-layer="critical"`, or any line short enough to read in one fixation (roughly under 12 words).**
     That is a hook, a headline, a payoff line, a stat, an end-card line. For those the governing rule is
     §0a: **fill 60-80% of frame width.**
-  - **Where it still binds: anything under 60px, and anything the viewer reads line after line** — a
+  - **Where it still binds: anything under 60px, and anything the viewer reads line after line**, a
     paragraph, a quote body, a caption stack, a list of rows. There the measure is right and widening the
     box makes the text worse.
   - **Why this needed writing down.** Applied to display type the measure is one mechanical route to a thin
@@ -158,7 +158,7 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
     landscape films in five currently trip it.
 
 ## 4b. The face must actually LOAD (engine gotcha)
-Referencing a face isn't enough — it must be **loaded before the first frame** or it silently falls back
+Referencing a face isn't enough. It must be **loaded before the first frame** or it silently falls back
 to the generic sans (`font-display: block`). `boot()` loads every bundled face + whatever the theme
 declares; if you add a NEW face to `tokens.css`, confirm it renders with
 `document.fonts.check("800 100px '<Face>'")` in a headless boot. A "why does my headline look generic"
@@ -167,7 +167,7 @@ symptom is almost always an unloaded face, not a wrong choice. See [`../MISTAKES
 ## 5. Motion-graphics specifics
 - Video type is read at a distance and over grain/compression → favour **heavier weights and generous size**;
   thin weights shimmer.
-- **No em-dashes on screen** (validator-enforced) — comma, period, or ·.
+- **No em-dashes on screen** (validator-enforced): comma, period, or ·.
 - Numbers use `type.num` (mono, tabular) so counters don't jitter width. The `count`/`num` layers already do this.
 
 **Sources:** Butterick *Practical Typography*; Refactoring UI (type system, font weight); Material 3 typography

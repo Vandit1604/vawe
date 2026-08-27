@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vawe — how the engine works</title>
+<title>Vawe: how the engine works</title>
 <style>
   :root {
     --ground:#f1f3f7; --panel:#ffffff; --ink:#141c28; --muted:#5c6980; --line:#d8dde7;
@@ -65,7 +65,7 @@
 
   .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.3rem 1.4rem; }
 
-  /* pipeline flow — CSS, not hand-authored SVG */
+  /* pipeline flow: CSS, not hand-authored SVG */
   .flow { display:flex; flex-direction:column; gap:0; font-family:var(--mono); font-size:var(--fs-s); }
   .stage { display:grid; grid-template-columns:11rem minmax(0,1fr); gap:1rem; align-items:baseline;
            padding:.75rem 0; border-top:1px solid var(--line); }
@@ -152,7 +152,7 @@
       <div class="note">
         <b>What it forbids.</b> No accumulating state, no <code>Math.random()</code>, no wall-clock
         reads, no animation that advances by being ticked. Everything is a closed-form function of the
-        frame. GSAP is vendored and used as a tween engine, but its ticker is <em>stopped</em> — the
+        frame. GSAP is vendored and used as a tween engine, but its ticker is <em>stopped</em>, the
         engine seeks its global timeline to <code>t</code> each frame rather than letting it run.
       </div>
       <p>Guarded by <code>make probe</code> (render-order DOM purity, per scene),
@@ -225,7 +225,7 @@
           <tr><td><code>core/clips.js</code></td><td>Reads <code>data-start/-duration/-track/-anim/-out</code> off the DOM and drives timed multi-layer clips with enter/exit and z-order. Also the seek interface that drives paused WAAPI and GSAP.</td></tr>
           <tr><td><code>core/layers/*</code></td><td>One file per layer type. Each exports <code>build()</code> (once) and optionally <code>frame()</code> (per frame).</td></tr>
           <tr><td><code>core/preload.js</code></td><td>The one async phase, before the virtual clock starts. Images, fonts, components, GSAP, shaders. After it, every lookup is a static table, so purity holds.</td></tr>
-          <tr><td><code>core/safe.js</code></td><td>Canvas dimensions and the safe box. Crucially, the safe box depends on <code>destination</code> — a 9:16 web hero and a 9:16 reel are the same shape with different chrome.</td></tr>
+          <tr><td><code>core/safe.js</code></td><td>Canvas dimensions and the safe box. Crucially, the safe box depends on <code>destination</code>. A 9:16 web hero and a 9:16 reel are the same shape with different chrome.</td></tr>
           <tr><td><code>core/validate.mjs</code></td><td>Schema + theme validation. Runs in <code>boot()</code> before the first frame, so a bad scene fails fast rather than rendering wrong.</td></tr>
         </tbody>
       </table>
@@ -243,11 +243,11 @@
           <tr><td>Content</td><td><code>text</code> <code>image</code> <code>count</code> <code>svg</code> <code>html</code></td>
               <td><code>text</code> carries the kinetic system (split by char/word/line, per-unit presets). <code>html</code> is raw authored markup, sanitised, static.</td></tr>
           <tr><td>Surfaces</td><td><code>rect</code> <code>group</code> <code>board</code> <code>doc</code> <code>component</code></td>
-              <td><code>component</code> is a captured real UI fragment — the highest-fidelity source available.</td></tr>
+              <td><code>component</code> is a captured real UI fragment. The highest-fidelity source available.</td></tr>
           <tr><td>Light &amp; FX</td><td><code>glow</code> <code>beam</code> <code>paint</code> <code>shader</code> <code>raymarch</code> <code>three</code></td>
               <td>Shader-backed types are guarded separately by <code>make canvas-purity</code>.</td></tr>
           <tr><td>Motion</td><td><code>clip</code> <code>lottie</code> <code>cursor</code> <code>composition</code></td>
-              <td><code>clip</code> plays video as a preloaded PNG sequence — no <code>&lt;video&gt;</code>, because a video element cannot be seeked deterministically.</td></tr>
+              <td><code>clip</code> plays video as a preloaded PNG sequence. No <code>&lt;video&gt;</code>, because a video element cannot be seeked deterministically.</td></tr>
         </tbody>
       </table>
       </div>
@@ -269,10 +269,10 @@
           <tr><td>Script</td><td><code>make script</code></td><td>Laid out as audio beside visual: are the two channels saying different things?</td></tr>
           <tr><td>Animatic</td><td><code>make animatic</code></td><td>Do the planned beats have <em>time</em> to happen? Speech is measured by TTS, on-screen copy by reading speed.</td></tr>
           <tr><td>Style frames</td><td><code>make styleframes</code></td><td>At full size, is this the film you want to have made?</td></tr>
-          <tr><td>Author</td><td>—</td><td>Write the JSON, usually via a build script under <code>scripts/author/</code>.</td></tr>
+          <tr><td>Author</td><td>: </td><td>Write the JSON, usually via a build script under <code>scripts/author/</code>.</td></tr>
           <tr><td>Iterate</td><td><code>make studio</code></td><td>Scrub the timeline live, without paying for a render.</td></tr>
           <tr><td>Gate</td><td><code>make author-check</code></td><td>Eleven static checks. See below.</td></tr>
-          <tr><td>Render</td><td><code>make video</code></td><td>—</td></tr>
+          <tr><td>Render</td><td><code>make video</code></td><td>: </td></tr>
           <tr><td>Verify</td><td><code>make seam-check</code> · <code>make judge</code></td><td>Flashes at transitions; then a human reads the sheet.</td></tr>
         </tbody>
       </table>
@@ -295,7 +295,7 @@
           <tr><td><code>beats</code></td><td>Dead air, a film ending on nothing, an empty beat</td><td><span class="tag stop">blocks</span></td></tr>
           <tr><td><code>critique</code></td><td>Transition dips, beats with no focal point</td><td><span class="tag gate">warns</span></td></tr>
           <tr><td><code>direct</code></td><td>Linear motion, monotone timing, enter-and-retreat, effect soup</td><td><span class="tag stop">blocks</span></td></tr>
-          <tr><td><code>floor</code></td><td>Too <em>little</em> motion — the plain-slideshow floor</td><td><span class="tag stop">blocks</span></td></tr>
+          <tr><td><code>floor</code></td><td>Too <em>little</em> motion. The plain-slideshow floor</td><td><span class="tag stop">blocks</span></td></tr>
           <tr><td><code>visuals</code></td><td>All type and no picture large enough to be the subject</td><td><span class="tag stop">blocks</span></td></tr>
           <tr><td><code>slop</code></td><td>41 AI-design tells, no model involved</td><td><span class="tag gate">warns</span></td></tr>
           <tr><td><code>designspec</code></td><td>Off-palette colours, non-role fonts</td><td><span class="tag gate">warns</span></td></tr>
@@ -310,7 +310,7 @@
          flashes, and <code>make audit</code> checks overlap, clipping, safe zones and contrast.</p>
       <div class="note">
         <b>The gates are themselves tested.</b> <code>gate-mutation</code> deliberately breaks 119
-        scenes and asserts each gate fires — and stays quiet when the scene is correct. A gate that
+        scenes and asserts each gate fires, and stays quiet when the scene is correct. A gate that
         cannot fail is decoration.
       </div>
     </section>
@@ -319,7 +319,7 @@
       <h2>07 · Where render time goes</h2>
       <p class="lede">The cost model, measured rather than assumed.</p>
       <p>Render time is roughly <b>frames × capture pixels</b>. Painting the frame is a rounding
-         error — under one percent. Essentially all of it is getting pixels <em>out</em> of the
+         error: under one percent. Essentially all of it is getting pixels <em>out</em> of the
          browser and through the encoder.</p>
       <div class="scroll">
       <table>
@@ -342,13 +342,13 @@
 
     <section id="seams">
       <h2>08 · Open seams</h2>
-      <p class="lede">The honest list — known-weak places, so you can push where it will actually move.</p>
+      <p class="lede">The honest list: known-weak places, so you can push where it will actually move.</p>
       <div class="seams">
 
         <div class="seam"><span class="tag stop">silent</span><div>
           <h4>The unknown-prop check is type-agnostic</h4>
           <p>The validator tests layer keys against one flat list of every prop in the schema. So a
-             prop that is real on one layer type passes silently on a type that ignores it —
+             prop that is real on one layer type passes silently on a type that ignores it,
              <code>fill</code> on a <code>rect</code> did exactly this. The fix needs per-type prop
              lists in the schema. This is the single most likely source of the next silent bug.</p>
         </div></div>
@@ -357,7 +357,7 @@
           <h4>Gates keep measuring the wrong unit</h4>
           <p>Three of the last four framework findings were not wrong rules but wrong measurements: a
              rotating layer measured by its empty bounding box, kinetic typography counted as an echo,
-             a label on a card counted as a collision. The tell is always the same — satisfying the
+             a label on a card counted as a collision. The tell is always the same, satisfying the
              gate requires making the film worse.</p>
         </div></div>
 

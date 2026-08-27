@@ -41,7 +41,7 @@ handed.
 | **fidelity** | recreations only: how close each beat is to its source | render frames + the source frames, side by side | per beat: `{beat, score 0-10, gaps: [...]}` |
 | **copy** | on-screen writing only | the strings from the scene JSON, in beat order | per line: `{beat, line, tell, rewrite}` |
 | **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
-| **ab** | which of two cuts is better, and does the graphic explain anything | *built, then cut.* `make ab` + `ab-record` + `AB-JUDGE.md` shipped in `05a5123` and were removed in `cc2dfc2` (2026-08-05) along with five other tools that only inspected the engine. Nothing runs today. Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. | — |
+| **ab** | which of two cuts is better, and does the graphic explain anything | *built, then cut.* `make ab` + `ab-record` + `AB-JUDGE.md` shipped in `05a5123` and were removed in `cc2dfc2` (2026-08-05) along with five other tools that only inspected the engine. Nothing runs today. Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. |, |
 <!-- doc-refs-allow: make ab · the row above exists to record that this critic was planned and never built -->
 
 Notes that matter per critic:

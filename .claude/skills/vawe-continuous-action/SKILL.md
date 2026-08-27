@@ -25,7 +25,7 @@ that hold a short film together, across four registers: spatial (a match cut, a 
 masking, cloning, a dolly-zoom, and this one), verbal and aural (an unfinished sentence, a sound bridge,
 a bookend, an open question), temporal (metric cutting, rhythmic cutting, a track that IS the structure),
 conceptual (a motif, intellectual montage, escalation, a through-line). Murch's Rule of Six ranks the one
-this skill teaches — three-dimensional spatial continuity — **last of six**, at 4%, and says to sacrifice
+this skill teaches (three-dimensional spatial continuity) **last of six**, at 4%, and says to sacrifice
 your way up from the bottom.
 
 **Use it when the content is genuinely continuous:** one subject, one process, a product film, a demo
@@ -43,7 +43,7 @@ that is evidence about the rule, not about the films.
 `BLUEPRINTS.md` gives you excellent *beats*, and beats are independent units by design. That
 independence is exactly why a from-scratch plan comes out as a slideshow: three good beats with
 nothing travelling between them. Blueprints are still how you author the motion inside a beat.
-This skill decides what survives *across* the cuts — **when the answer is an object.** Carry a second
+This skill decides what survives *across* the cuts: **when the answer is an object.** Carry a second
 thread from the catalogue anyway: a single thread has to be literal and obvious to work, which is how a
 film ends up as a rectangle that resizes four times.
 

@@ -1,5 +1,5 @@
 {
-  "_note": "Design database for the video engine — concept → technique. Human version: docs/DESIGN-DATABASE.md. Backgrounds map to core/backgrounds.js bgPreset() ids. Narrative structure + beat roles live in docs/CRAFT/STORY.md; layout archetypes in docs/CRAFT/LAYOUT.md.",
+  "_note": "Design database for the video engine, concept → technique. Human version: docs/DESIGN-DATABASE.md. Backgrounds map to core/backgrounds.js bgPreset() ids. Narrative structure + beat roles live in docs/CRAFT/STORY.md; layout archetypes in docs/CRAFT/LAYOUT.md.",
   "palette": {
     "accent": "#1F3BFF",
     "periwinkle": "#757dbb",

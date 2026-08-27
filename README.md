@@ -13,7 +13,7 @@ group: project
 **Vawe** is a deterministic, data-driven motion-graphics engine. You write one self-describing JSON;
 it renders one video (mp4, H.264 + AAC, portrait / landscape / square). A Go service drives headless
 Chrome to seek an HTML/CSS scene **frame-by-frame** and ffmpeg to encode and mux. No timeline, no
-editor — the JSON *is* the video, and the same input always produces byte-identical output.
+editor: the JSON *is* the video, and the same input always produces byte-identical output.
 
 ![Vawe demo](docs/media/vawe-demo.gif)
 
@@ -25,11 +25,11 @@ editor — the JSON *is* the video, and the same input always produces byte-iden
 
 ## Why Vawe
 
-- **Deterministic.** `renderFrame(n)` is a pure function of the frame number — same JSON, same bytes,
+- **Deterministic.** `renderFrame(n)` is a pure function of the frame number, same JSON, same bytes,
   any render order. That's what lets frames shard across parallel browser tabs, and what makes every
   video reproducible and diff-able. Guarded by `make probe`.
 - **Agent-native.** Built to be authored by an AI agent from a schema + a taste system, not clicked
-  together in a UI. One open canvas (`scene`) of composable primitives — **no templates**.
+  together in a UI. One open canvas (`scene`) of composable primitives, **no templates**.
 - **Taste built in.** A 100-block component registry, per-brand memory, composition + micro-typography
   systems, and a gate ladder (static + a vision judge) that keeps output on-brand and un-generic.
 - **Any aspect, one source.** `--aspect 9:16,1:1,16:9` renders every platform ratio in one pass.
@@ -38,17 +38,17 @@ editor — the JSON *is* the video, and the same input always produces byte-iden
 
 Three ways in. Pick by what you already have on the machine.
 
-**npm** — needs Node 18+, a Chrome or Chromium, and ffmpeg (either on `PATH`, or
+**npm**: needs Node 18+, a Chrome or Chromium, and ffmpeg (either on `PATH`, or
 `npm i ffmpeg-static` for a bundled copy). The published package carries a renderer binary built for
 **linux x64**, the platform the release job publishes from; on any other platform the CLI says so and
-tells you to build it. Scenes that reference your own image files are not supported yet — the render
+tells you to build it. Scenes that reference your own image files are not supported yet, the render
 server only serves paths inside the engine (`cli/vawe.mjs`).
 
 ```bash
 npx vawe my-scene.json --draft     # renders into the current directory
 ```
 
-**Docker** — needs nothing but Docker. Chrome, ffmpeg and the free faces are inside the image.
+**Docker**: needs nothing but Docker. Chrome, ffmpeg and the free faces are inside the image.
 
 ```bash
 docker build -f Dockerfile.cli -t vawe-cli .
@@ -62,7 +62,7 @@ GPU: nothing in the Chrome flags selects software rasterisation, so rasterised o
 differ between hosts. Three of the large variables are fixed. Renders are not byte-identical across
 machines.
 
-**From source** — needs Go 1.26+, Node 18+, ffmpeg, and a Chrome or Chromium.
+**From source**: needs Go 1.26+, Node 18+, ffmpeg, and a Chrome or Chromium.
 
 ```bash
 make build                              # → bin/vawe  (also runs `make fonts` to fetch the free faces)
@@ -74,9 +74,9 @@ A scene is one JSON:
 
 ```jsonc
 { "module": "scene",
-  "theme": "argus",                 // palette + fonts (themes/<name>.json) — only the brand's colours
+  "theme": "argus",                 // palette + fonts (themes/<name>.json), only the brand's colours
   "aspect": "16:9",                 // 16:9 · 9:16 · 1:1 · 4:5  (or --aspect a,b,c for all at once)
-  "layers": [                       // the open canvas — see formats/scene/schema.json
+  "layers": [                       // the open canvas, see formats/scene/schema.json
     { "type": "text", "text": "one JSON, one video", "pin": "center", "size": 96 },
     { "type": "block", "block": "barChart", "x": 1080, "y": 300, "start": 1, "dur": 4 }
   ],
@@ -96,25 +96,25 @@ Reflecting a real brand? `make brandspec URL=…` reads its real CSS, `make sect
 and eyedrop it, and `make house-style NAME=…` persists the brand's Design Read so the next video stays
 on-brand automatically.
 
-## What makes the output good — the taste system
+## What makes the output good: the taste system
 
 Static engines make *technically-correct, visually-generic* video. Vawe's differentiator is a taste
 system that fights that:
 
 | Layer | What it does |
 |---|---|
-| **[Blocks](docs/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…) — vetted, deterministic, and **theme-aware** (they reskin to any brand). `make catalog` to browse. |
+| **[Blocks](docs/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make catalog` to browse. |
 | **[Per-brand house style](docs/TASTE.md)** | `make house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
-| **Composition** | `pin:"thirds-*"`, a 12-column grid, and optical centering — beats are well-composed by default, not by eyeballing pixels. |
-| **Micro-typography** | optical tracking by size, balanced/pretty wrapping, real kerning + ligatures — on every text layer. |
-| **Motion director** | `make direct` picks cuts/stings per transition from the brand's motion personality — restraint by default. |
-| **Gate ladder** | `validate` → `critique` (value) → `slop` (anti-slop) → `audit` (contrast/overlap) → **`make judge`** — a vision gate that *sees* the rendered frames and scores composition + brand fidelity, catching what static gates can't. See [`docs/JUDGE.md`](docs/JUDGE.md). |
+| **Composition** | `pin:"thirds-*"`, a 12-column grid, and optical centering. Beats are well-composed by default, not by eyeballing pixels. |
+| **Micro-typography** | optical tracking by size, balanced/pretty wrapping, real kerning + ligatures, on every text layer. |
+| **Motion director** | `make direct` picks cuts/stings per transition from the brand's motion personality, restraint by default. |
+| **Gate ladder** | `validate` → `critique` (value) → `slop` (anti-slop) → `audit` (contrast/overlap) → **`make judge`**. A vision gate that *sees* the rendered frames and scores composition + brand fidelity, catching what static gates can't. See [`docs/JUDGE.md`](docs/JUDGE.md). |
 
 ## Determinism
 
 `renderFrame(n)` is pure in `n`: no wall-clock, no un-seeded randomness (a virtual clock coerces
 `Date`/`rAF`/`Math.random` to frame-time). The same JSON renders byte-identical frames regardless of
-order — verified by `make probe` (renders sampled frames in scrambled order and diffs the DOM).
+order: verified by `make probe` (renders sampled frames in scrambled order and diffs the DOM).
 
 ## Architecture
 
@@ -145,12 +145,12 @@ frame looks. They meet at exactly one function.
           │
           ▼
   internal/audio (Go)                PCM mixer: music bed · sfx cues · VO ducking · limiter
-          │                          (silent by default — audio is opt-in per scene)
+          │                          (silent by default: audio is opt-in per scene)
           ▼
   encode.Mux ──► out/<name>.mp4
 ```
 
-**Parallel capture is only correct because `renderFrame(n)` is pure in `n`** — frame 400 is
+**Parallel capture is only correct because `renderFrame(n)` is pure in `n`**, frame 400 is
 byte-identical whether it is rendered first or last, and whether frame 399 was ever rendered at all.
 That single invariant is what every gate ultimately protects. See
 [Determinism](#determinism) below, and [`docs/architecture.html`](docs/architecture.html) for the
@@ -170,11 +170,11 @@ Each stage catches something the next cannot, so a green ladder is **necessary a
 the static gates cannot see composition or fidelity, which is what `make judge` and your eyes are for.
 
 ```
-core/            THE ENGINE — pure, browser+node, self-contained (imports nothing outside core/):
+core/            THE ENGINE: pure, browser+node, self-contained (imports nothing outside core/):
                  motion.js (math + 39 easings), boot.js (runtime + virtual clock), type.js (kinetic
                  presets), cuts.js, stings.js, backgrounds.js, sequence.js, validate.mjs (the schema
-                 validator — boot.js imports it, so it is engine code, not tooling), theme-contract.js
-core/layers/     the LAYER REGISTRY — one file per primitive (text/image/rect/glow/group/count/clip/
+                 validator: boot.js imports it, so it is engine code, not tooling), theme-contract.js
+core/layers/     the LAYER REGISTRY: one file per primitive (text/image/rect/glow/group/count/clip/
                  cursor/component/html/board/doc/shader/lottie), each exporting build()/frame()
 blocks/          the taste library: manifest-driven component registry (index.mjs + catalog.mjs)
 formats/scene/   scene.html (thin orchestrator) · schema.json (the contract) · sample.json
@@ -182,15 +182,15 @@ themes/          brand palettes + fonts + motion personality (theme-contract.js 
 cmd/render,      the Go render service: chromedp capture · ffmpeg encode/mux · audio mixer · queue
   internal/
 assets/          fonts · icons · vendored runtimes (lottie) · music/sfx · brand packs
-                 (served at /assets/… — the browser fetches fonts from here)
+                 (served at /assets/…: the browser fetches fonts from here)
 out/             rendered mp4s (gitignored)
 
 scripts/         CLI tooling, grouped by WHAT YOU ARE DOING:
-  gates/           prove it is good — lib-test · motion-audit · slop · snap · probe · judge · ledger · schema-drift
-  brand/           study a real site — brandspec · sections · lookbook · palette · house-style · photos
-  media/           fetch or make assets — fonts · sfx · gen-audio · assets · cards
-  author/          compose a scene — beats · expand · batch · captions · preview · capture-*
-  site/            build the website — site-assets · site-engine · rules-build · blocks-*
+  gates/           prove it is good: lib-test · motion-audit · slop · snap · probe · judge · ledger · schema-drift
+  brand/           study a real site: brandspec · sections · lookbook · palette · house-style · photos
+  media/           fetch or make assets: fonts · sfx · gen-audio · assets · cards
+  author/          compose a scene: beats · expand · batch · captions · preview · capture-*
+  site/            build the website: site-assets · site-engine · rules-build · blocks-*
 docs/            TASTE.md · PRIMITIVES.md · BLOCKS.md · MOTION-CRAFT.md · JUDGE.md · CRAFT/ · CODEMAPS/
 ```
 
@@ -212,7 +212,7 @@ make validate [D=…]                     schema + no-em-dash + build-time sugar
 make critique D=…                       value gate (hollow/scattered/mis-centre beats)
 make designspec-check D=…                           anti-slop detector (brand-face aware)
 make audit [M=…]                        overlap / clipped text / safe-zone / WCAG contrast
-make judge D=… VS=<brand>               THE VISION GATE — rubric + house-style, agent scores the frames
+make judge D=… VS=<brand>               THE VISION GATE: rubric + house-style, agent scores the frames
 make probe [M=…]                        render-order purity (determinism)
 
 # author
@@ -233,7 +233,7 @@ registry), [`docs/MOTION-CRAFT.md`](docs/MOTION-CRAFT.md) (motion rules), and
 
 ## Status & license
 
-Vawe is under active development. It's released under the **[Vawe Company License 1.0](LICENSE)** — a
+Vawe is under active development. It's released under the **[Vawe Company License 1.0](LICENSE)**, a
 source-available license in the spirit of Fair Source and the another engine model:
 
 > **Free for individuals and teams of 3 developers or fewer. Larger companies need a paid license for

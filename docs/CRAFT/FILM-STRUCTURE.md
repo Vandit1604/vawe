@@ -4,7 +4,7 @@ answers: the devices a short film can be held by (spatial · verbal · temporal 
 group: crosscutting
 ---
 
-# Film structure — what holds a short film together
+# Film structure: what holds a short film together
 
 This library has one answer to that question. One object survives every cut and changes there.
 `direction-floor` blocks on `no-continuous-object` when it cannot find that object, and
@@ -36,7 +36,7 @@ Part 4 is my synthesis and is labelled as such.
 
 ---
 
-## Part 1 — the devices
+## Part 1: the devices
 
 Each device answers the same question: at a cut, what does the viewer carry across? Grouped by the
 register the answer lives in. A film can and should run several registers at once.
@@ -185,7 +185,7 @@ picture.** They are held by the voice and the pulse. Our gate blocks both.
 
 ---
 
-## Part 2 — how practitioners decide
+## Part 2: how practitioners decide
 
 This half is much thinner than Part 1, and that is the honest finding. Named studios publish process
 pages and give podcast interviews, and they talk about collaboration, trust, timelines and sound. They do
@@ -238,7 +238,7 @@ including mine below, as inference.
 
 ---
 
-## Part 3 — where our rule came from, and what it costs
+## Part 3, where our rule came from, and what it costs
 
 `no-continuous-object` came from one reference. The `vawe-continuous-action` skill states its own
 provenance: "The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
@@ -285,7 +285,7 @@ until the author sets `acrossBeats`.
 
 ---
 
-## Part 4 — a decision aid
+## Part 4: a decision aid
 
 **This is synthesis, not a sourced framework.** Ingredients: Murch's ranking (what to sacrifice first),
 Ordinary Folk's message-first order, Laura Nicolas on music-as-structure, Willenskomer's continuity
@@ -335,7 +335,7 @@ film.
 
 ---
 
-## Part 5 — causality, the register none of the devices covers
+## Part 5: causality, the register none of the devices covers
 
 Every device in Part 1 answers the question "what survives the cut". None of them answers "what made the
 cut happen". Those are different questions, and a film can pass the first and fail the second: four beats
@@ -361,9 +361,9 @@ Four of those five columns our storyboard already carries. The fourth it did not
 
 ### The three fields, and how to tell them apart
 
-- `mechanism:` — HOW it moves. A preset. "panel unfold, staggered rows".
-- `becomes:` — WHAT it turned into. The change the viewer sees. "the request becomes work in progress".
-- `trigger:` — WHAT MADE IT HAPPEN. The cause. "the cursor hits Send on the card in beat 1".
+- `mechanism:`, HOW it moves. A preset. "panel unfold, staggered rows".
+- `becomes:`, WHAT it turned into. The change the viewer sees. "the request becomes work in progress".
+- `trigger:`, WHAT MADE IT HAPPEN. The cause. "the cursor hits Send on the card in beat 1".
 
 A beat can have all three, and a good one usually does. A film where every beat has a `becomes:` and no
 beat causes the next is a run of unrelated changes, which is the slideshow failure written down on paper
@@ -383,11 +383,11 @@ where each beat forces the next. Four fragments is four films in a row.
 
 It warns, and it never blocks:
 
-- **`trigger-is-a-sequence`** — the value says WHEN, not why. "then", "next", "the beat starts". Every
+- **`trigger-is-a-sequence`**: the value says WHEN, not why. "then", "next", "the beat starts". Every
   slideshow already has an order.
-- **`trigger-is-a-mechanism`** — the value names the transition. "it cuts to the next shot". That is how
+- **`trigger-is-a-mechanism`**: the value names the transition. "it cuts to the next shot". That is how
   the film arrives, not why it had to.
-- **`chain-breaks`** — some junctions state a cause and some do not, so the spine is in pieces. It fires
+- **`chain-breaks`**: some junctions state a cause and some do not, so the spine is in pieces. It fires
   only once an author has opted in, because a presence check on a field nobody has filled in yet is a rule
   that gets waived by reflex inside a week.
 
@@ -407,41 +407,41 @@ and your eyes.
 ## Sources
 
 Editing and structure theory:
-- Walter Murch, *In the Blink of an Eye* (2001) — the Rule of Six and its percentages, summarised at
+- Walter Murch, *In the Blink of an Eye* (2001). The Rule of Six and its percentages, summarised at
   [StudioBinder](https://www.studiobinder.com/blog/walter-murch-rule-of-six/)
-- Eisenstein's five methods of montage — [Media Studies](https://media-studies.com/eisenstein-montage/),
+- Eisenstein's five methods of montage: [Media Studies](https://media-studies.com/eisenstein-montage/),
   [StudioBinder](https://www.studiobinder.com/blog/soviet-montage-theory/)
-- Match cut and its types — [Wikipedia](https://en.wikipedia.org/wiki/Match_cut),
+- Match cut and its types: [Wikipedia](https://en.wikipedia.org/wiki/Match_cut),
   [StudioBinder](https://www.studiobinder.com/blog/match-cuts-creative-transitions-examples/)
-- Long take and the pseudo-oner — [Wikipedia](https://en.wikipedia.org/wiki/Long_take)
-- Sound bridge, J-cut and L-cut — [StudioBinder](https://www.studiobinder.com/blog/what-is-a-sound-bridge-definition/),
+- Long take and the pseudo-oner: [Wikipedia](https://en.wikipedia.org/wiki/Long_take)
+- Sound bridge, J-cut and L-cut: [StudioBinder](https://www.studiobinder.com/blog/what-is-a-sound-bridge-definition/),
   [FilmDaft](https://filmdaft.com/what-is-a-sound-bridge-in-film-definition-and-transition-guide/)
-- Bookends — [Filmmakers Academy](https://www.filmmakersacademy.com/glossary/bookends/)
-- Motif — [FilmDaft](https://filmdaft.com/motif-in-film-explained/)
-- Montage as a device for motifs and rhythm — [Peter D. Marshall](https://filmdirectingcoach.substack.com/p/50-techniques-that-contribute-to-e83)
+- Bookends: [Filmmakers Academy](https://www.filmmakersacademy.com/glossary/bookends/)
+- Motif: [FilmDaft](https://filmdaft.com/motif-in-film-explained/)
+- Montage as a device for motifs and rhythm: [Peter D. Marshall](https://filmdirectingcoach.substack.com/p/50-techniques-that-contribute-to-e83)
 
 Motion design practice:
-- [School of Motion — match cuts in animation](https://schoolofmotion.com/blog/match-cuts)
-- [School of Motion — Explainer Camp, storyboard and animatic before animation](https://www.schoolofmotion.com/blog/inside-explainer-camp-course-art-visual-essays)
-- [Ordinary Folk — process: message, design, animation, audio](https://www.ordinaryfolk.co/process)
-- [Issara Willenskomer — Creating Usability with Motion: the UX in Motion Manifesto](https://medium.com/ux-in-motion/creating-usability-with-motion-the-ux-in-motion-manifesto-a87a4584ddc)
-- [We Design Motion — kinetic typography, when and why it works](https://wedesignmotion.com/blog/design/kinetic-typography-when-and-why-it-works/)
-- [MOWE — storyboard and animatic in a motion project](https://medium.com/mowestudio-for-creatives/why-most-motion-designers-ignore-both-storyboard-and-animatic-75f6d34fe26e)
+- [School of Motion: match cuts in animation](https://schoolofmotion.com/blog/match-cuts)
+- [School of Motion: Explainer Camp, storyboard and animatic before animation](https://www.schoolofmotion.com/blog/inside-explainer-camp-course-art-visual-essays)
+- [Ordinary Folk, process: message, design, animation, audio](https://www.ordinaryfolk.co/process)
+- [Issara Willenskomer, Creating Usability with Motion: the UX in Motion Manifesto](https://medium.com/ux-in-motion/creating-usability-with-motion-the-ux-in-motion-manifesto-a87a4584ddc)
+- [We Design Motion: kinetic typography, when and why it works](https://wedesignmotion.com/blog/design/kinetic-typography-when-and-why-it-works/)
+- [MOWE: storyboard and animatic in a motion project](https://medium.com/mowestudio-for-creatives/why-most-motion-designers-ignore-both-storyboard-and-animatic-75f6d34fe26e)
 
 Title design:
-- [Art of the Title — The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)
-- [Art of the Title — Lolo, music as the structure](https://www.artofthetitle.com/title/lolo/)
+- [Art of the Title: The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)
+- [Art of the Title: Lolo, music as the structure](https://www.artofthetitle.com/title/lolo/)
 
 Advertising shapes (names only; the advice is marketing content):
-- [shots — manifesto ads](https://shots.net/news/view/manifesto-ads-has-corporate-poetry-outstayed-its-welcome)
-- [Storylane — vignette demo](https://www.storylane.io/blog/vignette-demo)
-- [SocialKit — short-form hooks and the first three seconds](https://socialk.it/en/blog/video-hooks-first-three-seconds)
+- [shots: manifesto ads](https://shots.net/news/view/manifesto-ads-has-corporate-poetry-outstayed-its-welcome)
+- [Storylane: vignette demo](https://www.storylane.io/blog/vignette-demo)
+- [SocialKit: short-form hooks and the first three seconds](https://socialk.it/en/blog/video-hooks-first-three-seconds)
 
 Checked and found not to answer the question:
-- [animations.dev](https://animations.dev/) and [emilkowal.ski](https://emilkowal.ski/ui/great-animations)
-  — rigorous on single-transition feel, silent on film structure
-- [School of Motion podcast with Giant Ant's Jay Grandin](https://www.schoolofmotion.com/blog/were-we-wrong-about-studios-giant-ant-jay-grandin)
-  — studio economics, no structural craft
+- [animations.dev](https://animations.dev/) and [emilkowal.ski](https://emilkowal.ski/ui/great-animations):
+  rigorous on single-transition feel, silent on film structure
+- [School of Motion podcast with Giant Ant's Jay Grandin](https://www.schoolofmotion.com/blog/were-we-wrong-about-studios-giant-ant-jay-grandin):
+  studio economics, no structural craft
 - Buck and Golden Wolf process searches returned studio rankings, not process
 
 ## What is missing from this page

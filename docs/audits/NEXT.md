@@ -56,7 +56,7 @@ Two additive changes:
 - **Add a modifier slot** to any layer, so an effect is a modifier applied to something rather
   than a new type: `{"type":"image","modifiers":[{"occlude":"cardId"},{"shadow":{"dist":30}}]}`.
 
-**Why.** Today a layer is handed `(kit, el, L, t)` — itself and the clock, nothing else. It cannot read
+**Why.** Today a layer is handed `(kit, el, L, t)`. Itself and the clock, nothing else. It cannot read
 another layer's box, the camera, the light, or what is behind it. That single signature explains every
 wall hit recently: occlusion impossible, shadows impossible, 3D awkward, glass forced into an `html`
 layer to borrow the browser's `backdrop-filter`, group children second-class in 5 of the 61 audit

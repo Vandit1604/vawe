@@ -1,13 +1,13 @@
 ---
-when: starting a video — lock the contract BEFORE the JSON
+when: starting a video, lock the contract BEFORE the JSON
 answers: "the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`)."
 group: look
 ---
 
-# FRAME-SPEC — the per-video contract (design system + storyboard) authored BEFORE the JSON
+# FRAME-SPEC: the per-video contract (design system + storyboard) authored BEFORE the JSON
 
 The another engine lesson: a great video is not authored frame-first. Two artifacts are locked first and every
-frame then *obeys them line by line* — a **design-system spec** (their `frame.md`) and a **scene-by-scene
+frame then *obeys them line by line*: a **design-system spec** (their `frame.md`) and a **scene-by-scene
 storyboard** (their `STORYBOARD.md`) where each beat names its blueprint, its mechanism, its persuasion, and
 its emotion. Our engine already has the pieces (themes, blueprints, EFFECTS.md, the direction-floor); this
 doc is the contract that ties them into a front-door you fill before writing a single layer.
@@ -15,22 +15,22 @@ doc is the contract that ties them into a front-door you fill before writing a s
 > This complements [`vawe-video-planning`](../../.claude/skills/vawe-video-planning/SKILL.md) (the lock-sheet)
 > and [`DIRECTION.md`](DIRECTION.md) (pacing/restraint). Lock BOTH artifacts below and get sign-off before authoring.
 
-## Part 1 — The design-system spec (our `frame.md`)
+## Part 1: The design-system spec (our `frame.md`)
 
 One page, authored from the brand study (`make brandspec` + `make palette`). It is normative: the storyboard
 and every layer use ONLY these values. Fill the design-spec table in [SURFACES.md](SURFACES.md#the-design-spec)
 plus these video-scale rules another engine proved:
 
 - **Colour ROLES, not hexes.** Ground / text / text-muted / **one scarce accent** / positive / negative.
-  The accent is *voltage*: eyebrows, numerals, one rule per frame, the CTA — **no frame lets it dominate by
+  The accent is *voltage*: eyebrows, numerals, one rule per frame, the CTA, **no frame lets it dominate by
   area.** (Their line: "the absent shadow is the premium signal.") Encode it in `themes/<brand>.json`.
 - **Type by role, in fixed faces.** Display / body / **mono for every numeral** ("a dollar figure in
   anything but mono is a bug"). Author at the MEASURED weights from `make brandspec`, never a default 800.
 - **A negative list.** Name what this video will NOT do: no nav/footer/cursor chrome, no AI gradients/bokeh/
   glow washes, no second accent. Banned easings by name: no `back`/`bounce`/`elastic` unless the brand IS toy.
-- **A pre-render self-audit** (squint / silence / restraint / reference) — copy the one in `frame.md`'s spirit.
+- **A pre-render self-audit** (squint / silence / restraint / reference), copy the one in `frame.md`'s spirit.
 
-## Part 2 — The storyboard (our `STORYBOARD.md`), one block per beat
+## Part 2: The storyboard (our `STORYBOARD.md`), one block per beat
 
 Author this as a table/list BEFORE the JSON. Every field maps to our vocabulary:
 
@@ -49,7 +49,7 @@ Author this as a table/list BEFORE the JSON. Every field maps to our vocabulary:
 push-THROUGH signature") and the single thing you change for this brand ("it lands inside the chart's gap").
 That is how you stay directed without re-deriving motion or copying a template.
 
-## Part 3 — The reveal model (anti-front-load) — now gated
+## Part 3 (The reveal model (anti-front-load)) now gated
 
 > **Every scene has three phases: build · breathe · resolve. You dump everything in the build and leave
 > nothing for breathe or resolve.** Borrowed verbatim from the reference system's
@@ -59,18 +59,18 @@ That is how you stay directed without re-deriving motion or copying a template.
 > exactly the first half of that sentence.
 
 A directed video weights its cues **across its length**; the two failure modes, banned by name:
-- **slideshow** — everything dumped in the first ~25%, then frozen.
-- **screensaver** — elements floating independently to fake life during a hold.
+- **slideshow**: everything dumped in the first ~25%, then frozen.
+- **screensaver**: elements floating independently to fake life during a hold.
 
 Rule: **each on-screen cue is its own reveal window**, weighted into the back ~50% of a beat. At a beat's
 t=0 only its first cue is present; later cues enter on their own beats. Aliveness during a hold is *subtle
-jitter only* — not drift, not breathing.
+jitter only*, not drift, not breathing.
 
 `make author-check` now enforces the floor of this: **`front-loaded`** fires when nearly all reveals land in
 the first 30% and the back half is frozen; **`motion-monotony`** fires when every kinetic line uses the same
 preset ("no two beats move alike"). Reach past both.
 
-## Part 4 — Editing & rhythm (the film, not the frame)
+## Part 4: Editing & rhythm (the film, not the frame)
 
 - **Held reads vs developing frames.** Designate 1-2 frames that settle to a dead-still lockup (the release);
   the rest develop across their full duration. A film that never holds never lands.
@@ -79,11 +79,11 @@ preset ("no two beats move alike"). Reach past both.
   as intent.
 - **No two beats move alike.** Aim for a distinct blueprint/mechanism per beat across the film.
 
-## Part 5 — QA the SEAMS, not the centers
+## Part 5: QA the SEAMS, not the centers
 
 The highest-value render bugs (a black flash, a morph that reads as a collision) hide inside the transition
-overlap, where every center-sampling gate steps over them. After rendering, run **`make seam-check D=<file>`**
-— it pulls the frames straddling every transition out of the mp4 and flags a luminance flash, and writes
+overlap, where every center-sampling gate steps over them. After rendering, run **`make seam-check D=<file>`**:
+it pulls the frames straddling every transition out of the mp4 and flags a luminance flash, and writes
 `/tmp/seams/<name>.png` for the eye. Sample the seams, always.
 
 ---

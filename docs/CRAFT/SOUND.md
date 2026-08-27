@@ -4,7 +4,7 @@ answers: "sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact dr
 group: crosscutting
 ---
 
-# SOUND — the structural register we have not been using
+# SOUND: the structural register we have not been using
 
 Measured across `formats/scene/`: **25 films carry a real track, 90 declare `audio.silent:true`, 20 name
 no `audio` block at all, and 1 has a block that produces nothing.** Not one of the 90 says why. Run
@@ -15,7 +15,7 @@ reversed. **Sound is the default. Silence is a device, and a device has a reason
 
 The reason is not that a bed makes a film nicer. It is that
 [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) sorts the ways a short film can be held together into four
-families, and one of them — the sound bridge, music-led structure, the unfinished sentence — is
+families, and one of them: the sound bridge, music-led structure, the unfinished sentence, is
 **verbal and aural**. Shipping mute does not cost us polish. It closes a quarter of the structural
 vocabulary, and it closed it silently, by habit, with no decision anywhere.
 
@@ -34,7 +34,7 @@ bed may make it better."* Half of that survives and half of it was doing damage.
 makes sense over a voice has failed for most of its audience. That is still true and still binding.
 
 **What was wrong:** "therefore ship it mute" does not follow. A film that works silent AND has sound is
-strictly better than the same film mute, and the argument for the default was never made — it was
+strictly better than the same film mute, and the argument for the default was never made, it was
 inherited from a real engine bug. The mixer used to auto-discover any `assets/music.wav` and put it
 under everything, which produced the buzzing-under-everything failure, and the fix was to make music
 opt-in (`internal/audio/audio.go`). That was the right fix for that bug. It then hardened into
@@ -58,17 +58,17 @@ decision. Nothing judges whether the reason is good. Nothing can. It only has to
 
 ---
 
-## 2. The sound bridge — the device this whole file exists for
+## 2. The sound bridge, the device this whole file exists for
 
 A **sound bridge** is audio carrying across a picture change. It has two forms, named for the shape
 they cut on a timeline.
 
-- **J-cut — the audio leads.** The next scene's sound starts *before* its picture.
+- **J-cut: the audio leads.** The next scene's sound starts *before* its picture.
   Wikipedia's definition: "the audio from a following scene overlaps the picture from the preceding
   scene, so that the audio portion of the later scene starts playing before its picture as a lead-in
   to the visual cut." Also called an *audio advance* or *audio lead*.
   <https://en.wikipedia.org/wiki/J_cut>
-- **L-cut — the picture leads.** The previous scene's sound runs *under* the new picture. "the audio
+- **L-cut: the picture leads.** The previous scene's sound runs *under* the new picture. "the audio
   from the preceding scene overlaps the picture from the following scene, so that the audio cuts after
   the picture." <https://en.wikipedia.org/wiki/L_cut>
 
@@ -87,19 +87,19 @@ anticipation for an incoming visual" and an L-cut "holds the viewer in an emotio
 *Sourcing note:* that perceptual explanation is craft consensus repeated across the trade blogs. No
 textbook passage stating the mechanism in those terms was found. Treat it as doctrine, not as finding.
 
-**Named examples practitioners actually cite.** *Whiplash* — the drum roll starts the film before any
-picture has earned it. *Saving Private Ryan* — Spielberg bridges gunfire into rainfall, one continuous
+**Named examples practitioners actually cite.** *Whiplash*: the drum roll starts the film before any
+picture has earned it. *Saving Private Ryan*, Spielberg bridges gunfire into rainfall, one continuous
 texture reinterpreted by a new image. Also *Good Will Hunting*, *Blue Valentine*, *Kill Bill Vol. 1*,
 *Star Wars: Episode V*, *Better Call Saul* (an L-cut holding on a reaction).
 <https://www.filmsupply.com/articles/j-cut-vs-l-cut/>
 
 **Why this matters here specifically.** This repo's standing rule bans the slideshow: a short film must
 carry a continuous object across its cuts, and `direction-floor` blocks on `no-continuous-object`.
-Every answer we have reached for so far is visual — a prop that survives a cut, a camera that travels,
+Every answer we have reached for so far is visual. A prop that survives a cut, a camera that travels,
 a match cut. **A sound bridge is a continuous object too, and it is the one kind that costs the picture
 nothing.** A film whose beats are visually unrelated is still held together if one texture runs under
 all of them and changes across the junctions. That is the register we have not been using, because we
-have been shipping mute — and, until `audio.bridges` landed, because the engine could not express it.
+have been shipping mute, and, until `audio.bridges` landed, because the engine could not express it.
 
 Know the limit honestly: `direction-floor` cannot see it. The gate reads layers, so a film held
 together purely by sound will still trip `no-continuous-object` and need a waiver. Write the waiver
@@ -137,7 +137,7 @@ rises on. Without it the two simply add.
 
 **It fails loudly, on purpose.** A junction the film does not have names every junction it does have.
 A `lead` that reaches back past the previous junction is refused rather than clipped, because a bridge
-leaning over two shots is not the device. A `sound` that is not on disk fails the render — a film whose
+leaning over two shots is not the device. A `sound` that is not on disk fails the render, a film whose
 continuity is carried by a texture that never plays is not a quieter film, it is a different one.
 
 Resolved by `core/audio-bridges.js` (in the browser, where the junctions live) into spans of seconds;
@@ -145,7 +145,7 @@ mixed by `internal/audio/audio.go`, which never has to know what a cut is.
 
 ---
 
-## 3. Sync points — which frame lands on which beat
+## 3. Sync points, which frame lands on which beat
 
 Michel Chion's *Audio-Vision* supplies the two terms worth having. A **point of synchronization** is
 where a sound event and an image event meet and fuse. The fusion is **synchresis**, "a blend of the
@@ -249,7 +249,7 @@ into unwanted noise," and "the audience will eventually stop noticing the clever
 > believed.** This is the audio form of the `effect-soup` ceiling, and it fails the same way.
 
 **On the beat, or a few frames before it?** The argument for cutting early is that the eye needs time to
-find the new subject, so the *visual event* should be finished by the beat — which means it starts
+find the new subject, so the *visual event* should be finished by the beat, which means it starts
 before it. Anticipation rather than simultaneity. The trade writing also warns that rigid beat-cutting
 "can easily become quite hard visually and predictable."
 
@@ -271,7 +271,7 @@ belongs in a short piece:
 | **impact / hit** | *something arrived and stopped* | on a hard stop in the motion, never on an ease-out |
 | **riser / build** | *something is coming* | the only element about frames you have not shown yet |
 | **sub-drop / LFE** | *scale* | a reveal you want to feel large; felt more than heard |
-| **braam** | *2010s trailer* | avoid — it now dates a piece to a decade of fashion |
+| **braam** | *2010s trailer* | avoid: it now dates a piece to a decade of fashion |
 | **UI tick / click** | *this interface is real and being operated* | the highest-value sound in a product film |
 | **foley** | *a person is present* | handling, cloth, a hand entering frame |
 | **room tone** | *this frame is a place* | under everything, as glue |
@@ -283,7 +283,7 @@ Sources: <https://blog.prosoundeffects.com/sound-effects-terms-explained-part-1>
 
 **The UI tick deserves the emphasis.** It is *diegetic*: it asserts that the interface on screen is real
 and that somebody is operating it. That is precisely the claim a product film wants made, and it is the
-one sound that cannot be accused of decoration. Our whole cue library is built for this — see §6.
+one sound that cannot be accused of decoration. Our whole cue library is built for this, see §6.
 
 **Why a whoosh on every transition is amateurish.** No authoritative essay makes this argument; the
 practitioner comment is scattered ("A whoosh should connect motion, not announce that you pulled a free
@@ -292,8 +292,8 @@ to be borrowed from mickey-mousing: **a whoosh on every transition makes every t
 important, which means none of them are.** It is mickey-mousing applied to editorial structure instead
 of to on-screen action, and it dies of the same saturation.
 
-Which is exactly why `audio.auto:true` — which scores a `whoosh` on every cut and a `reveal` on every
-sting — is a *draft* setting, not a finish. It is the right way to hear the shape of an edit quickly.
+Which is exactly why `audio.auto:true`, which scores a `whoosh` on every cut and a `reveal` on every
+sting: is a *draft* setting, not a finish. It is the right way to hear the shape of an edit quickly.
 It is the wrong thing to ship, because it is definitionally a cue on every junction. **22 of our 25
 sounded scenes ship with it on**, and that is a to-do, not a house style.
 
@@ -326,7 +326,7 @@ product film's payoff beat.
 
 ---
 
-## 6. The mechanism — what this engine can actually do
+## 6. The mechanism, what this engine can actually do
 
 Everything above is *what*; this is *how*. It all lives in the scene's top-level `audio` block
 (`formats/scene/schema.json`), and the Go mixer (`internal/audio/audio.go`) builds the whole track in
@@ -353,15 +353,15 @@ memory before ffmpeg muxes it.
 
 **The cues** (`core/audio-kit.mjs`, baked by `make audio`): `chime · sparkle · droplet · bloom ·
 whisper · tick · press · key · release · toggle · success · error · page · loading · ready`, plus the
-baked aliases `whoosh · reveal · click · pop`. They are **synthesized from parameters** — noise, a
-biquad, an envelope, seeded and deterministic — so they carry no licence at all and same params always
+baked aliases `whoosh · reveal · click · pop`. They are **synthesized from parameters**, noise, a
+biquad, an envelope, seeded and deterministic, so they carry no licence at all and same params always
 give same bytes. That is a genuinely good property and it is worth keeping.
 
 A cue is honest only when it names something the viewer SEES happen. A `press` with no button on screen
 is a lie; cut it.
 
-**A cue is heard OVER the bed, and the mixer guarantees it.** A cue is causal — it says the button was
-pressed, the row landed, the thing arrived — and a bed is atmosphere. When atmosphere covers causality
+**A cue is heard OVER the bed, and the mixer guarantees it.** A cue is causal, it says the button was
+pressed, the row landed, the thing arrived, and a bed is atmosphere. When atmosphere covers causality
 the film stops explaining itself, so a cue's table gain is a floor, not a level: `internal/audio/audio.go`
 raises it until the cue's loudest 50ms sits 6dB over the bed in that same 50ms, and never lowers it.
 Three things follow, and they are the whole contract:
@@ -379,8 +379,8 @@ A film with no bed, or a cue landing where the bed has ducked, mixes exactly as 
 
 **A film cannot end on a silent hold today**, and it is worth knowing before you plan one.
 `musicFade.out` ramps the bed to zero AT `duration`, never before it; nothing says "cut the bed N
-seconds early". The nearest existing mechanism is a sting on the last mark — micro-silence ramps the bed
-to nothing over the 0.3s before every sting — but that couples the audio tail to a visual device, so it
+seconds early". The nearest existing mechanism is a sting on the last mark, micro-silence ramps the bed
+to nothing over the 0.3s before every sting, but that couples the audio tail to a visual device, so it
 is a workaround rather than the dial.
 
 **The commands:**
@@ -455,8 +455,8 @@ old doctrine and now contradicts this document. It is listed as open work in §9
 Plainly: **the structural claims above are craft doctrine, not measurement, and the best-known
 controlled study points the other way.** This section exists so nobody cites §1-§5 as science.
 
-**Audiovisual fusion is real, and pre-conscious.** The McGurk effect — audio /ba/ plus visual /ga/ is
-*heard* as /da/ — is one of the most replicated findings in perception, cited over 4,800 times since
+**Audiovisual fusion is real, and pre-conscious.** The McGurk effect, audio /ba/ plus visual /ga/ is
+*heard* as /da/: is one of the most replicated findings in perception, cited over 4,800 times since
 McGurk & MacDonald, "Hearing lips and seeing voices," *Nature* 264(5588), 746-748, 1976.
 <https://en.wikipedia.org/wiki/McGurk_effect> · 40-year retrospective:
 <https://pubmed.ncbi.nlm.nih.gov/31264593/>
@@ -484,13 +484,13 @@ Limits: 1999 telecoms codec degradation, a fidelity-rating task rather than an e
 task. It measures fidelity judgements, not craft. The same asymmetry replicates for music video:
 <https://www.dhi.ac.uk/openbook/chapter/ICMEM2015-Hammerschmidt>
 
-**"Sound is half the picture" — who says it, and how sound is the attribution.** The version with a real
+**"Sound is half the picture", who says it, and how sound is the attribution.** The version with a real
 citation is George Lucas: "Sound is half the experience of seeing a film. That's why I have been
 bothered by the poor sound re-production in many theaters and most homes," cited to "In the Action With
 'Star Wars' Sound," *The New York Times*, 3 May 1992. <https://en.wikiquote.org/wiki/George_Lucas>
 *Caveat:* the citation was verified as specific and dated; the NYT article itself could not be opened.
 
-The version everybody actually quotes — "Sound is 50 percent of the moviegoing experience" — is repeated
+The version everybody actually quotes ("Sound is 50 percent of the moviegoing experience") is repeated
 by *Variety*, the Motion Picture Editors Guild's own *Local 695* magazine, and the Academy's account,
 and **not one of them gives a date or a venue.** Treat it as a widely repeated paraphrase, not a verbatim
 quote. <https://www.local695.com/magazine/from-the-editors-19/>
@@ -500,24 +500,24 @@ Wars* is what produced THX in 1982. <https://en.wikipedia.org/wiki/THX>
 
 **Better voices for our purposes.** David Lynch: "Films are 50 percent visual and 50 percent sound.
 Sometimes sound even overplays the visual." And on room tone, which is the most useful thing said here
-for a motion designer — it is "the sound that you hear when there's silence, in between words or
+for a motion designer: it is "the sound that you hear when there's silence, in between words or
 sentences," and "in this seemingly kind of quiet sound, some feelings can be brought in, and a certain
 kind of picture of a bigger world can be made." <http://www.thecityofabsurdity.com/quotecollection/sound.html>
 
 Walter Murch, in his foreword to *Audio-Vision*, makes the developmental argument: "We begin to hear
 before we are born, four and a half months after conception," and for the next four and a half months
-"Sound rules as solitary Queen of our senses." His point is not sentimental — hearing is the older and
+"Sound rules as solitary Queen of our senses." His point is not sentimental, hearing is the older and
 more continuously trained sense, so audiences audit sound for plausibility more harshly and more
 unconsciously than they audit pictures. *Caveat:* verified only through indexed excerpts; the full
 foreword could not be retrieved.
 
-**Sonic-branding effectiveness numbers: do not cite these.** The circulated figures — Ipsos's "3.44x
+**Sonic-branding effectiveness numbers: do not cite these.** The circulated figures, Ipsos's "3.44x
 more effective," "8.53x more likely to appear in top-performing ads," Mastercard's "77% more
-trustworthy" — are vendor and agency publications with no disclosed sample, control condition or
+trustworthy": are vendor and agency publications with no disclosed sample, control condition or
 confound handling. The 3.44x and 8.53x describe *association with high-performing ads*, which is
 correlation, and high-performing ads have bigger budgets, which also buys sound. The one serious
 academic treatment is Spence & Keller, "Sonic branding: A narrative review at the intersection of art
-and science," *Psychology & Marketing*, 2024 <https://onlinelibrary.wiley.com/doi/full/10.1002/mar.21995> —
+and science," *Psychology & Marketing*, 2024 <https://onlinelibrary.wiley.com/doi/full/10.1002/mar.21995>,
 and note that it is a *narrative review*, not a meta-analysis, whose own framing concedes that demand
 for evidence currently exceeds supply.
 
@@ -526,7 +526,7 @@ claims muted video reaches "up to 30% higher completion rates"; the other claims
 more engaging." Both cannot be findings. **No independent randomised test of identical creative with and
 without sound was found.**
 
-**What could not be found at all** — and this is itself a result. No writing on sound structure from
+**What could not be found at all**, and this is itself a result. No writing on sound structure from
 Motionographer, School of Motion, Ben Marriott or Andrew Kramer surfaced. The motion-design field has
 essentially not written about this, which is part of why we drifted into shipping mute without noticing.
 
@@ -538,7 +538,7 @@ essentially not written about this, which is part of why we drifted into shippin
 
 ---
 
-## 8. Licensing — what we may actually put under a commercial film
+## 8. Licensing, what we may actually put under a commercial film
 
 `CLAUDE.md` is absolute about visual assets: never embed copyrighted material into a published video.
 **That applies to music with more force than to anything else**, because music is the one asset class
@@ -565,10 +565,10 @@ Two consequences, both already true of this repo and both important:
 
 | Category | What it means | Safe for a client product film? |
 |---|---|---|
-| **Subscription royalty-free** (Artlist, Epidemic Sound, Musicbed, Soundstripe, Uppbeat, Marmoset) | you pay a period fee, not a fee per broadcast | yes, **while the subscription is live** — read the trap below |
-| **CC0 / public domain** | all rights waived worldwide | yes. The safest paid-nothing option — but CC0 gives freedom, never a warranty |
+| **Subscription royalty-free** (Artlist, Epidemic Sound, Musicbed, Soundstripe, Uppbeat, Marmoset) | you pay a period fee, not a fee per broadcast | yes, **while the subscription is live**, read the trap below |
+| **CC0 / public domain** | all rights waived worldwide | yes. The safest paid-nothing option, but CC0 gives freedom, never a warranty |
 | **CC-BY** | free, **attribution required**, commercial and adaptation both permitted | yes, if the credit really goes in the description permanently. Note the no-endorsement clause: you may not imply the composer backs the client's product |
-| **CC-NC or CC-ND** | non-commercial, or no derivatives | **no, and ND is absolute** — see below |
+| **CC-NC or CC-ND** | non-commercial, or no derivatives | **no, and ND is absolute**, see below |
 | **Sync licence** (Musicbed, Marmoset) | negotiated per project, media, territory and term | yes, and it is the only one that comes with a warranty and indemnity |
 
 "Royalty-free" is a **pricing** model, not a rights model. It means no *per-use* royalty. It says
@@ -579,7 +579,7 @@ priced per project by your client's headcount and predicted reach.
 ### ND is the rule nobody knows, and it is decisive
 
 **Syncing music to moving image is *always* a derivative work under Creative Commons.** Not arguably.
-By definition, in the licence text itself — CC BY-ND 4.0 §1:
+By definition, in the licence text itself: CC BY-ND 4.0 §1:
 
 > "For purposes of this Public License, where the Licensed Material is a musical work, performance, or
 > sound recording, **Adapted Material is always produced where the Licensed Material is synched in
@@ -591,13 +591,13 @@ CC's FAQ restates it: this holds "**whether or not it would be considered so und
 So **every ND track is unusable in every film we publish**, commercial or not, edited or not. Playing an
 ND track untouched under picture still creates Adapted Material, and ND forbids sharing adaptations.
 This is the most-missed rule in free-music sourcing, and it is missed because ND tracks are routinely
-labelled "commercial use allowed" — which they are, for redistributing the *audio*. Never for a film.
+labelled "commercial use allowed", which they are, for redistributing the *audio*. Never for a film.
 
 **NC is nearly as blunt.** CC defines NonCommercial as use "primarily intended for or directed toward
 commercial advantage or monetary compensation", and adds the part people assume saves them: "**CC's
 definition does not turn on the type of user:** if you are a nonprofit or charitable organization, your
 use of an NC-licensed work could still run afoul of the NC restriction." CC then declines to draw the
-line for you — "**CC cannot advise you on what is and is not commercial use**"
+line for you: "**CC cannot advise you on what is and is not commercial use**"
 <https://creativecommons.org/faq/>. A paid client product film is the paradigm case. CC's own refusal to
 define the boundary is itself the reason not to gamble on it.
 
@@ -611,8 +611,8 @@ The perpetuity clause is the most misunderstood term in the industry, and the ho
 
 | Vendor | The trap in its own paperwork |
 |---|---|
-| **Musicbed** | **Early cancellation voids licences already issued.** The 12-month term must complete or "any licenses issued under the subscription [become] null and void" — cancel in month 7 and delivered client films retroactively become unlicensed. Separately, §3: "paid media rights are **not** granted in perpetuity"; you get archival rights to leave the film where it is, not to keep running it as an ad |
-| **Artlist** | Perpetual, but frozen to "**the same media**" — a re-cut, a new platform or a re-upload is a new project. Publication must occur *during* the term, so a finished-but-unpublished film loses cover. Clearlist closes at expiry |
+| **Musicbed** | **Early cancellation voids licences already issued.** The 12-month term must complete or "any licenses issued under the subscription [become] null and void", cancel in month 7 and delivered client films retroactively become unlicensed. Separately, §3: "paid media rights are **not** granted in perpetuity"; you get archival rights to leave the film where it is, not to keep running it as an ad |
+| **Artlist** | Perpetual, but frozen to "**the same media**". A re-cut, a new platform or a re-upload is a new project. Publication must occur *during* the term, so a finished-but-unpublished film loses cover. Clearlist closes at expiry |
 | **Epidemic Sound** | Licence persists, but safelisting requires an active subscription and must happen **before posting**. Creator tier **cannot be used for brand work at all**; Pro is the client-work tier |
 | **Soundstripe** | Projects perpetual, but if you did not List a project before cancelling you can never do so without re-subscribing. Business is limited to a **single designated market area**, which a public website breaks |
 | **Uppbeat** | Published work survives; safelist protection covers only videos uploaded during the paid term |
@@ -626,7 +626,7 @@ The perpetuity clause is the most misunderstood term in the industry, and the ho
   apply that restriction only to Personal, and its own plan table sells Pro for "advertising". Both
   cannot be true. Get it in writing before relying on it.
 
-*Verification note:* **Epidemic Sound's actual licence contracts could not be reached** — the terms
+*Verification note:* **Epidemic Sound's actual licence contracts could not be reached**, the terms
 routes 404 and the policy page renders an empty shell. Everything above for Epidemic comes from its
 marketing and help centre, not the contract. Given that Soundstripe's marketing and contract
 demonstrably disagree, assume Epidemic's may too. Prices were also unverifiable for several vendors and
@@ -636,7 +636,7 @@ are deliberately omitted here; they move, and they geo-localise.
 **50 employees**, to Max Business. Epidemic pushes agencies and production companies over **$5M
 turnover** to Enterprise.
 
-### Content ID — claims are normal, even when you are correct
+### Content ID: claims are normal, even when you are correct
 
 This is the part everyone gets wrong. Every one of these platforms registers its catalogue *into*
 Content ID, so **a claim on correctly licensed music is the expected outcome, not an anomaly**. Artlist
@@ -646,7 +646,7 @@ email from YouTube that your video has a claim, SyncID is already working." Soun
 process "may still accidentally and incorrectly interpret your use ... to be unlicensed."
 
 **Whitelists attach to a channel, not to a film.** So a track clean on our channel gets claimed the
-moment the same film goes up on a **client's** channel — which is exactly what a product film is for.
+moment the same film goes up on a **client's** channel, which is exactly what a product film is for.
 Artlist and Epidemic both handle this with per-video client invite links valid 30 days; Soundstripe uses
 per-video clearance codes. Treat safelisting the destination channel as a **delivery checklist item**.
 
@@ -663,11 +663,11 @@ Stock, with appeals citing a valid Adobe licence number **rejected**, and Adobe 
   nothing published is at risk later, and every download ships a **License Certificate** to fight claims
   with. The catch is the inverse of a paid library: content is warranted **"AS IS", no warranty**, and
   **you indemnify Pixabay**. Claims still happen and disputes take up to 30 days, unmonetised.
-- **Freesound (SFX)** — filter to **Free Cultural Works approved**, i.e. CC0 and CC BY only. Two traps:
+- **Freesound (SFX)**: filter to **Free Cultural Works approved**, i.e. CC0 and CC BY only. Two traps:
   the legacy **Sampling+** licence specifically bans commercial advertising ("You can't make a track
   with Sampling+ samples to sell a car") and is **not** caught by an "avoid NC" habit; and when layering
   sounds, **the strictest input licence governs the output**.
-- **YouTube Audio Library — do not let it leave YouTube.** Google grants no off-platform rights and
+- **YouTube Audio Library: do not let it leave YouTube.** Google grants no off-platform rights and
   says plainly it "can't give legal guidance ... off the platform". Every permissive sentence scopes
   itself to "videos uploaded to YouTube". Only the CC-licensed subset travels, and it travels on the
   artist's CC BY terms, so the attribution comes with it. Treat off-YouTube use as unlicensed.
@@ -675,11 +675,11 @@ Stock, with appeals citing a valid Adobe licence number **rejected**, and Adobe 
   FMA says so itself: "FMA cannot license original work to you for commercial, private, or other use."
   Licence differs per track and includes NC and ND, so **you must read the licence on every single
   track**. ccMixter's terms go further than the CC deed and forbid using a track "to advertise or
-  promote anything other than the work you create from it" — which is a problem for a client ad even on
+  promote anything other than the work you create from it", which is a problem for a client ad even on
   a CC BY track. Also treat the widely repeated "$5/month FMA plan" as **false**; no FMA page confirms
   it.
 
-### AI-generated music — no, and the reason is not the one you expect
+### AI-generated music: no, and the reason is not the one you expect
 
 The training-data litigation is real and partly unresolved (Sony still litigating against Udio; UMG and
 Sony against Suno). But the decisive problem is ownership. The US Copyright Office's *Copyright and
@@ -688,7 +688,7 @@ Artificial Intelligence, Part 2: Copyrightability* (29 Jan 2025)
 concludes that **material generated purely by entering prompts is not copyrightable**, however elaborate
 the prompt.
 
-So if the bed is purely prompt-generated, **nobody owns it — not us, not the vendor, not the client.**
+So if the bed is purely prompt-generated, **nobody owns it, not us, not the vendor, not the client.**
 Suno's own terms say the quiet part: it assigns "all of its right, title and interest" and then adds
 "**Suno makes no representation or warranty to you that any copyright will vest in any Output.**" It
 assigns a possibly empty set. Soundraw and Mubert retain ownership outright and grant only a use
@@ -709,10 +709,10 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
 
 1. **`core/audio-select.js` still encodes the old doctrine.** Five of eight profiles map to `bed: null`,
    and an unknown profile yields silence, so `music:"auto"` mostly resolves to nothing. It should map
-   every profile to *something* — a bed, or an explicit held tone — before "sound by default" is real.
+   every profile to *something* (a bed, or an explicit held tone) before "sound by default" is real.
 2. **`audio.auto:true` is on in 22 of 25 sounded films.** By §4 that is a cue on every junction, which
    is mickey-mousing. Those films want hand-placed cues on two or three beats instead.
-3. ~~**Nothing in the engine can author a J-cut or an L-cut.**~~ **Done** — `audio.bridges`, §2. The
+3. ~~**Nothing in the engine can author a J-cut or an L-cut.**~~ **Done**, `audio.bridges`, §2. The
    remaining gap is that `direction-floor` still cannot see a bridge, so a film held together by sound
    alone trips `no-continuous-object` and needs a waiver. Teaching the gate to read `audio.bridges` as a
    continuous object is the next piece: it would have to reason about junctions rather than layers.

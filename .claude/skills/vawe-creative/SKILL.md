@@ -1,16 +1,16 @@
 ---
 name: vawe-creative
-description: "FORCE a creative, directed video (not a plain slideshow) when authoring in this repo. Load AFTER vawe-video-planning locks the brief and BEFORE/while writing the scene JSON, whenever the goal is a launch film, promo, or 'make it amazing' — it mandates blueprints, kinetic motion, a living background, rich layout, and an impeccable pass, then gates it with the ambition floor."
+description: "FORCE a creative, directed video (not a plain slideshow) when authoring in this repo. Load AFTER vawe-video-planning locks the brief and BEFORE/while writing the scene JSON, whenever the goal is a launch film, promo, or 'make it amazing'. It mandates blueprints, kinetic motion, a living background, rich layout, and an impeccable pass, then gates it with the ambition floor."
 ---
 
-# vawe-creative — the anti-slideshow forcing layer
+# vawe-creative: the anti-slideshow forcing layer
 
 The proven failure (docs/MISTAKES.md #137): with the full arsenal in hand, authoring from a blank JSON
-regresses to `rise`+`fade` on flat white — a slideshow that passes the correctness gates. Planning owns
-*what*; scene-authoring owns *how*; **this skill owns AMBITION** — it forces the video to reach for the
+regresses to `rise`+`fade` on flat white: a slideshow that passes the correctness gates. Planning owns
+*what*; scene-authoring owns *how*; **this skill owns AMBITION**, it forces the video to reach for the
 range. Directed lives between two walls: not a slideshow (the ambition floor), not effect-soup (the ceiling).
 
-## The mandates (every one is gate-backed — not suggestions)
+## The mandates (every one is gate-backed, not suggestions)
 
 1. **Compose from BLUEPRINTS, don't hand-roll motion.** `make blueprints` lists directed beats
    (`{type:"beat"}`, docs/CRAFT/BLUEPRINTS.md): kineticHook, statReveal, cardCascade, chipGrid,
@@ -20,14 +20,14 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 2. **Kinetic typography, always.** Key lines reveal word-by-word or char-by-char (`split`+`preset`), never
    a flat fade. Numbers COUNT up. `make direction-floor` FAILS `plain-slideshow` if you skip this.
 
-3. **A LIVING background — move the viewer.** Flat static white is the tell. Add a moving backdrop that
+3. **A LIVING background: move the viewer.** Flat static white is the tell. Add a moving backdrop that
    fits the brand (this is a taste call, not a default):
-   - **Minimal / technical brand** (black-on-white, austere): a *light* subtle mover — `paperShapes`,
-     `paperDots`, or `soft` — as SEASONING on statement beats; keep content beats (cards/terminal/UI shots)
-     plain for legibility. Heavy/dark bg (`mesh`/`aurora`) fails contrast on white — the audit blocks it.
-   - **Warm / expressive brand**: a richer field — `mesh`, `aurora`, `brandglow`, glassmorphism, floating
-     shapes — brand-coloured. (Brew's warm peach glassmorphism is the reference for THIS register, not for
-     an austere one — match the brand, don't copy Brew onto everything.)
+   - **Minimal / technical brand** (black-on-white, austere): a *light* subtle mover, `paperShapes`,
+     `paperDots`, or `soft`, as SEASONING on statement beats; keep content beats (cards/terminal/UI shots)
+     plain for legibility. Heavy/dark bg (`mesh`/`aurora`) fails contrast on white, the audit blocks it.
+   - **Warm / expressive brand**: a richer field, `mesh`, `aurora`, `brandglow`, glassmorphism, floating
+     shapes, brand-coloured. (Brew's warm peach glassmorphism is the reference for THIS register, not for
+     an austere one: match the brand, don't copy Brew onto everything.)
    Windows it (`bg:[{preset,from,to}]`), and always re-audit contrast. `make direction-floor` warns
    `no-bg-motion` when the field is static.
 
@@ -35,17 +35,17 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
    shot (zoom into the real UI, don't show a static card); 1-3 earned seams between beats. Never flat cuts
    for a whole film.
 
-5. **Rich layout — kill the centered slideshow.** Asymmetry over centered; scale contrast (one huge hero +
+5. **Rich layout: kill the centered slideshow.** Asymmetry over centered; scale contrast (one huge hero +
    one tiny caption, ~5-8×), not three medium lines. Off-center anchors with a compositional reason. See
    docs/CRAFT/DIRECTION.md §5 + LAYOUT.md.
 
 6. **Terminals show real OUTPUT.** A CLI beat types the command AND shows what the tool actually prints
-   (read the repo's real output — never a placeholder line). `terminalReveal` bakes the type→cursor→output→
+   (read the repo's real output, never a placeholder line). `terminalReveal` bakes the type→cursor→output→
    result rhythm.
 
 7. **Hand-written HTML is BUILT through impeccable, never by eye.** For any `html` fragment / hook / CTA:
    load the `impeccable` skill (its `polish`/`audit`/`quieter` register-craft), and run
-   `make impeccable D=<fragment.html>` (the bundled detector, local + token-efficient) — plus `make designspec-check`
+   `make impeccable D=<fragment.html>` (the bundled detector, local + token-efficient), plus `make designspec-check`
    on the rendered scene. Clear every tell before rendering (overused font, gradient text, card-in-card,
    centered defaults).
 
@@ -57,12 +57,12 @@ make blueprints                 # browse directed beats → pick one per storybo
 make expand   D=<x>.json        # beats → real layers
 make author-check D=<x>.json    # validate · critique · direct(effect-soup ceiling) · FLOOR(slideshow) · slop
 make video    D=<x>.json        # render (author-check runs first; NOCHECK=1 to skip during iteration)
-make reveal   D=<x>.json        # SEE the entrance motion (mid-frames hide it) — is it kinetic, not fading?
-make judge    D=<x>.json VS=<brand>   # the gate that SEES — score every frame; a flaw you notice is a FIX
+make reveal   D=<x>.json        # SEE the entrance motion (mid-frames hide it), is it kinetic, not fading?
+make judge    D=<x>.json VS=<brand>   # the gate that SEES, score every frame; a flaw you notice is a FIX
 ```
 
 ## Reach for the full arsenal
-Don't stop at kinetic type + a bg. The killer per-frame effects now exist and are DETERMINISTIC — use them:
+Don't stop at kinetic type + a bg. The killer per-frame effects now exist and are DETERMINISTIC, use them:
 border-beam / shine (`{type:"beam"}`), aurora / meteor paint fields (`{type:"paint"}`), a one-shot glow
 `flash`, an svg logo that draws-on or shape-morphs (the `logoReveal` beat / `{type:"svg","morph":{…}}`), and
 calculated camera moves (`"cameraMove":{"move":"diveIn",…}`). Companion skills: **`vawe-effects`** (see the
@@ -71,5 +71,5 @@ work). Full list: `make effects` → `docs/EFFECTS.md`.
 
 ## The bar
 Study `formats/scene/brew-native.json` (warm, expressive) and `formats/scene/preface-launch.json`
-(minimal, technical) before authoring — one of them is your register. If your draft would look at home as
+(minimal, technical) before authoring: one of them is your register. If your draft would look at home as
 a Keynote slide deck, it has failed this skill. Make the viewer feel the motion.

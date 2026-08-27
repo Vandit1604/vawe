@@ -4,7 +4,7 @@ answers: "concept→technique catalog: backgrounds, motion character, transition
 group: reference
 ---
 
-# Design database — animation & style catalog (concept → technique)
+# Design database: animation & style catalog (concept → technique)
 
 A working "design brain" for the video engine: given a **concept/beat**, look up which
 background, layout, motion, transition, colour and value to use. Grounded in UI/UX + motion-design
@@ -14,7 +14,7 @@ needs it. This file is the **technique catalog**; the narrative side (beat order
 beat does) lives in [`CRAFT/STORY.md`](CRAFT/STORY.md).
 
 > **How to use:** decide the beats in [`CRAFT/STORY.md`](CRAFT/STORY.md), then look up each beat's
-> techniques in §9 (Concept → recipe) here — background, motion character, transition. Pull exact
+> techniques in §9 (Concept → recipe) here, background, motion character, transition. Pull exact
 > params from §2–§8. Hold the cohesion anchors (§8) constant across a film; vary ≥3 axes between
 > adjacent scenes (§10).
 
@@ -37,11 +37,11 @@ beat does) lives in [`CRAFT/STORY.md`](CRAFT/STORY.md).
 | Noise / grain only | tinted specks over a flat field | either | calm | filmic, restrained, editorial | minimalist type scenes | ✅ `grain` (as a layer) |
 | Waveform / audio bars | bars reacting to a curve | dark | energetic | audio, music, voice | podcast/voice products | add |
 
-**Dot-animation math (for `dotmatrix`/ripple/pulse):** spacing 48–64px, r 1.5–3 → peak 4–6, base α 0.06–0.20, peak α 0.3–0.6. `wave`: value = 0.5+0.5·sin(t·ω − (x+y)·k), k≈0.03. `ripple`: replace (x+y) with dist-from-centre. Always add **drift** (8–14 px/s) — a static dot field looks dead; the grid period = spacing so the modulo wrap is seamless.
+**Dot-animation math (for `dotmatrix`/ripple/pulse):** spacing 48–64px, r 1.5–3 → peak 4–6, base α 0.06–0.20, peak α 0.3–0.6. `wave`: value = 0.5+0.5·sin(t·ω − (x+y)·k), k≈0.03. `ripple`: replace (x+y) with dist-from-centre. Always add **drift** (8–14 px/s). A static dot field looks dead; the grid period = spacing so the modulo wrap is seamless.
 
 ---
 
-## 2. Motion — the 12 principles, applied
+## 2. Motion, the 12 principles, applied
 
 | Principle | Apply as | Param |
 |---|---|---|
@@ -54,7 +54,7 @@ beat does) lives in [`CRAFT/STORY.md`](CRAFT/STORY.md).
 | Timing & spacing | durations below | |
 | Squash & stretch | 2–5% only (premium) | more = playful |
 
-**Durations:** micro 150–200ms · element enter 300–400ms · full-screen transition 375–500ms · **exit ≈ 0.7× enter**. **Stagger** 40–80ms/item (60–80 = luxurious), cap cascade ≈300ms. **Hold** ≈0.3s/word, floor 1.2–1.8s for a line — never exit type before it's read.
+**Durations:** micro 150–200ms · element enter 300–400ms · full-screen transition 375–500ms · **exit ≈ 0.7× enter**. **Stagger** 40–80ms/item (60–80 = luxurious), cap cascade ≈300ms. **Hold** ≈0.3s/word, floor 1.2–1.8s for a line, never exit type before it's read.
 
 ---
 
@@ -68,7 +68,7 @@ beat does) lives in [`CRAFT/STORY.md`](CRAFT/STORY.md).
 | Expo-out | `cubic-bezier(.16,1,.3,1)` | premium snap |
 | Back-out (overshoot) | `cubic-bezier(.34,1.56,.64,1)` | settle-with-bounce |
 | Back-in (anticipation) | `cubic-bezier(.36,0,.66,-.56)` | pre-move |
-| Linear | — | continuous loops only (bg drift) |
+| Linear |: | continuous loops only (bg drift) |
 
 In-engine: `easeOutExpo` (snap), `easeOutBack` (overshoot), `spring({bounce,settle})` (natural settle), `easeOutCubic` (calm).
 
@@ -94,14 +94,14 @@ Hard-cut on the audio beat + a 2-frame accent flash = punchy and cheap.
 
 The archetypes (left-macro · centred statement · split · full-bleed number · 3-up flow · 2-col grid ·
 quote · card-over-board · lower-third) now live as an **archetype→intent** table in
-[`CRAFT/LAYOUT.md`](CRAFT/LAYOUT.md) §6 — pick by the beat's job, then rotate (never two alike in a row).
+[`CRAFT/LAYOUT.md`](CRAFT/LAYOUT.md) §6: pick by the beat's job, then rotate (never two alike in a row).
 
 ---
 
-## 6. Scene types — retired (the engine has no scene types)
+## 6. Scene types, retired (the engine has no scene types)
 
 The old `title`/`statement`/`steps`/`stats`/… types belonged to the removed `brandfilm` template.
-There is now **one module: `scene`**, an open canvas — no templates, no scene types. Compose each beat
+There is now **one module: `scene`**, an open canvas. No templates, no scene types. Compose each beat
 from the primitive vocabulary. For **beat roles** (hook/proof/payoff/…) and which technique each maps
 to, see [`CRAFT/STORY.md`](CRAFT/STORY.md) and §9 above.
 
@@ -113,7 +113,7 @@ to, see [`CRAFT/STORY.md`](CRAFT/STORY.md) and §9 above.
 > type), see [`CRAFT/COLOR.md`](CRAFT/COLOR.md). Below is the worked plinth example.
 
 
-Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light `#c7cbe8` · off-white `#f5f5f2` · ink `#16161a`. **60-30-10:** dark periwinkle field (60) → structural periwinkle tone (30) → electric blue (10, the thing that moves/reveals last). Dark scenes = shades of the periwinkle hue (never pure `#000`). **WCAG:** white text needs bg L ≤ 45% (dark scenes ✓); on light scenes use ink text + blue accent. Vary hue only *within* the periwinkle→blue family; flip **value** (dark↔light) for drama — the value flip is itself a transition.
+Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light `#c7cbe8` · off-white `#f5f5f2` · ink `#16161a`. **60-30-10:** dark periwinkle field (60) → structural periwinkle tone (30) → electric blue (10, the thing that moves/reveals last). Dark scenes = shades of the periwinkle hue (never pure `#000`). **WCAG:** white text needs bg L ≤ 45% (dark scenes ✓); on light scenes use ink text + blue accent. Vary hue only *within* the periwinkle→blue family; flip **value** (dark↔light) for drama. The value flip is itself a transition.
 
 ---
 
@@ -121,7 +121,7 @@ Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light 
 
 **Families you can dial toward:** Swiss/editorial (grids, big type, whitespace) · kinetic-typography (word/char reveals) · data-viz (charts, count-ups, constellation) · cinematic (aurora, slow, dark) · gradient-mesh SaaS (aurora/mesh) · minimal (grain + type). This engine's default = **cinematic-editorial + kinetic type**.
 
-**Cohesion anchors — hold constant across a whole film:** one accent (`#1F3BFF` in every scene) · one type system (Inter / Instrument Serif / Geist Mono) · consistent margins · a grain layer on every scene · one transition vocabulary · the brand mark present.
+**Cohesion anchors: hold constant across a whole film:** one accent (`#1F3BFF` in every scene) · one type system (Inter / Instrument Serif / Geist Mono) · consistent margins · a grain layer on every scene · one transition vocabulary · the brand mark present.
 
 ---
 
@@ -129,7 +129,7 @@ Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light 
 
 | Concept / beat | Background | Layout | Value | Motion character | Transition in |
 |---|---|---|---|---|---|
-| **Hook / cold-open** | aurora or spotlight | centred or left macro | dark | slow build, staggered word-rise | — |
+| **Hook / cold-open** | aurora or spotlight | centred or left macro | dark | slow build, staggered word-rise |, |
 | **Name / brand reveal** | brandglow + conic aura | centred, logo + word | dark | mask-reveal + spring overshoot | dip-to-brand |
 | **Problem / tension** | spotlight | centred statement | dark | slow, minimal, hold | crossfade |
 | **How it works** | dotmatrix (light) | 3-up card flow + connectors | **light** (value break) | staggered card pops (spring), lines draw | dip-to-white |
@@ -141,7 +141,7 @@ Palette: blue `#1F3BFF` (accent/10%) · periwinkle `#757dbb`/`#454e92` · light 
 | **CTA / close** | brandglow | centred, logo + url button | dark | logo spring, url last | dip-to-brand |
 
 This table maps a beat role to its *techniques* (which bg engine, which transition). The narrative
-side — spine order, beat timing, what each beat DOES to the viewer, the pacing arc — lives in
+side: spine order, beat timing, what each beat DOES to the viewer, the pacing arc, lives in
 [`CRAFT/STORY.md`](CRAFT/STORY.md). Reach there first to decide the beats, here to build each one.
 
 ---
@@ -151,7 +151,7 @@ side — spine order, beat timing, what each beat DOES to the viewer, the pacing
 Change **≥3 of 6** between neighbours, holding the anchors (§8):
 1. **Layout** (centred ↔ left ↔ grid ↔ split ↔ full-bleed)
 2. **Scale** (macro type ↔ small/dense)
-3. **Value** (dark ↔ light) — the strongest lever
+3. **Value** (dark ↔ light): the strongest lever
 4. **Background engine** (never the same twice in a row)
 5. **Hue** (walk periwinkle→blue within family)
 6. **Motion character** (snappy expo ↔ slow settle ↔ staggered build)
@@ -160,7 +160,7 @@ Change **≥3 of 6** between neighbours, holding the anchors (§8):
 
 ---
 
-## 11. Microinteractions (product-demo scenes) — Saffer model
+## 11. Microinteractions (product-demo scenes), Saffer model
 
 Every micro-animation = **Trigger → Rules → Feedback → Loops/Modes**; you animate the *feedback*.
 UI micro-motion **100–300ms, never >400ms**; **ease-out** for anything triggered, spring (low bounce ≤0.1) for physical feel. Built into the `demo` format.
@@ -177,35 +177,35 @@ UI micro-motion **100–300ms, never >400ms**; **ease-out** for anything trigger
 | Success pulse/glow | 300–600ms one-shot | ease-out | scale 1→1.05→1 + glow |
 | Shake on error | 300–400ms | ease-in-out | translateX ±6–10px, decaying |
 
-Overshoot/bounce is **seasoning** — 1–2 per scene max. Everything bouncing = amateur.
+Overshoot/bounce is **seasoning**: 1–2 per scene max. Everything bouncing = amateur.
 
-## 12. Cursor / pointer (scripted demos) — Fitts's Law
+## 12. Cursor / pointer (scripted demos), Fitts's Law
 
-Move time ∝ log2(distance/size). Motion is **ballistic**: fast launch, decelerate into target (`ease-out`), slight arc/overshoot — never a ruler-straight line. Move durations: short hop 0.4–0.6s · cross-screen 0.7–1.0s · from off-screen ~1.0s. **Click** = cursor dip + scale ~0.9 → `back.out` overshoot back + a ripple ring on the target at contact. **Dwell ~200–400ms arriving before pressing**; **pause ~100–300ms after click before the UI reacts** (instant = fake). After a major action, **hold ~1.0–1.4s** so the viewer registers the change — removing these pauses is the #1 demo mistake. Built into `demo` (`cursor` waypoints + ripple).
+Move time ∝ log2(distance/size). Motion is **ballistic**: fast launch, decelerate into target (`ease-out`), slight arc/overshoot, never a ruler-straight line. Move durations: short hop 0.4–0.6s · cross-screen 0.7–1.0s · from off-screen ~1.0s. **Click** = cursor dip + scale ~0.9 → `back.out` overshoot back + a ripple ring on the target at contact. **Dwell ~200–400ms arriving before pressing**; **pause ~100–300ms after click before the UI reacts** (instant = fake). After a major action, **hold ~1.0–1.4s** so the viewer registers the change. Removing these pauses is the #1 demo mistake. Built into `demo` (`cursor` waypoints + ripple).
 
 ## 13. Zoom / scale storytelling
 
-Camera moves = **ease-in-out (emphasized), 400–800ms, transform only**. **Zoom-to-focus** scale 1.0→1.3–1.4 + translate element to center ("look here"). **Zoom-out** reveals context/where-you-are. **Ken Burns** = slow continuous 3–8% zoom (1.0→1.05–1.08) over 5–15s so nothing is ever dead. **Match-zoom** = zoom INTO an element that becomes the next scene (cleanest "deeper"). **Snap zoom** 150–250ms = energetic punch. Zoom earns its place only when it directs attention, shows hierarchy, or bridges via a shared element — otherwise it's gimmicky. Built into `demo` (`camera` keyframes + canvas Ken-Burns).
+Camera moves = **ease-in-out (emphasized), 400–800ms, transform only**. **Zoom-to-focus** scale 1.0→1.3–1.4 + translate element to center ("look here"). **Zoom-out** reveals context/where-you-are. **Ken Burns** = slow continuous 3–8% zoom (1.0→1.05–1.08) over 5–15s so nothing is ever dead. **Match-zoom** = zoom INTO an element that becomes the next scene (cleanest "deeper"). **Snap zoom** 150–250ms = energetic punch. Zoom earns its place only when it directs attention, shows hierarchy, or bridges via a shared element. Otherwise it's gimmicky. Built into `demo` (`camera` keyframes + canvas Ken-Burns).
 
 ## 14. "Feels alive" checklist
 
-Never a fully static frame · idle Ken-Burns drift on bg (3–8%, 10–20s) · breathing/pulse on the live/CTA element (scale 1↔1.03, 2–4s) · staggered entrances (40–80ms/item) · parallax between layers on camera moves · secondary motion (shadow/icon settle a beat after the card) · springs over linear · ease-out reactive / ease-in-out camera · **restraint pass: after adding it all, cut half** — one clear focal motion per beat (NN/g: gratuitous animation distracts).
+Never a fully static frame · idle Ken-Burns drift on bg (3–8%, 10–20s) · breathing/pulse on the live/CTA element (scale 1↔1.03, 2–4s) · staggered entrances (40–80ms/item) · parallax between layers on camera moves · secondary motion (shadow/icon settle a beat after the card) · springs over linear · ease-out reactive / ease-in-out camera · **restraint pass: after adding it all, cut half**. One clear focal motion per beat (NN/g: gratuitous animation distracts).
 
 *Sources: Saffer Microinteractions · Material 3 · Emil Kowalski animations.dev · motion.dev · Fitts (IxDF) · Ken Burns · NN/g · StudioBinder.*
 
 ---
 
-## 14b. Focus techniques — draw the eye to ONE thing
+## 14b. Focus techniques, draw the eye to ONE thing
 
 Ways to spotlight a word/element (pick per brand's personality; annotations suit warm/editorial, clean wipes suit tech):
-- **Highlighter sweep** — a translucent accent rect behind text, `transform-origin:left; scaleX 0→1` (~0.4s ease-out). Left→right.
-- **Underline** — a rule (straight for tech, hand-drawn SVG `stroke-dashoffset 100→0` for editorial) draws L→R (~0.5s).
-- **Color-change wipe** — the word recolours to the accent **left→right** (or up→down): overlay the same text in accent, clip it with `inset()`/`clip-path` animating `0→100%`. Directional = reveals meaning (progress, arrival).
-- **Circle / arrow annotation** — hand-drawn SVG loop or arrow (`pathLength=100`, animate `stroke-dashoffset`) around/at the focal element, + a **Caveat** handwritten label. Signature of `formats/threadcite` (marks up a Reddit card / AI-source pill).
-- **Scale-punch / glow pulse** — one-shot `scale 1→1.05→1` (§11) for arrivals.
-- **De-emphasize the rest** — dim/blur non-focal elements so the one thing wins (staging).
+- **Highlighter sweep**: a translucent accent rect behind text, `transform-origin:left; scaleX 0→1` (~0.4s ease-out). Left→right.
+- **Underline**: a rule (straight for tech, hand-drawn SVG `stroke-dashoffset 100→0` for editorial) draws L→R (~0.5s).
+- **Color-change wipe**. The word recolours to the accent **left→right** (or up→down): overlay the same text in accent, clip it with `inset()`/`clip-path` animating `0→100%`. Directional = reveals meaning (progress, arrival).
+- **Circle / arrow annotation**: hand-drawn SVG loop or arrow (`pathLength=100`, animate `stroke-dashoffset`) around/at the focal element, + a **Caveat** handwritten label. Signature of `formats/threadcite` (marks up a Reddit card / AI-source pill).
+- **Scale-punch / glow pulse**: one-shot `scale 1→1.05→1` (§11) for arrivals.
+- **De-emphasize the rest**: dim/blur non-focal elements so the one thing wins (staging).
 
-These are *bespoke-design tools*, not a template — e.g. ThreadCite uses circle+arrow+highlighter+handwriting to feel like *annotating/citing*; a clean tech brand uses a color-wipe underline. **Design the focus treatment from the brand, don't reuse one.**
+These are *bespoke-design tools*, not a template: e.g. ThreadCite uses circle+arrow+highlighter+handwriting to feel like *annotating/citing*; a clean tech brand uses a color-wipe underline. **Design the focus treatment from the brand, don't reuse one.**
 
 ## 15. Storyboard & narrative structure → moved to CRAFT/STORY.md
 

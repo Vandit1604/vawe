@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gist — animation explainer</title>
+<title>Gist: animation explainer</title>
 <style>
 /* ==================================================================================================
    Tokens and components lifted from site/app/globals.css, not re-invented. Where this file and the
@@ -12,7 +12,7 @@
    Three things the site had already decided, which earlier drafts of this page got wrong:
 
    1. THE MEDIA WELL IS DARK, AND THE PAGE IS NOT. `.demo-media` is `background:#0f1620` inside a
-      white-first site. So "dark cinematic room" was never a choice between the two — the site already
+      white-first site. So "dark cinematic room" was never a choice between the two, the site already
       frames dark media in white chrome, and that is where the shot belongs.
    2. BUTTONS ARE THE BRAND FACE AT 15.5/600 ON A 12px RADIUS, not mono on a sharp corner. A control
       that looks like a readout tells the reader the wrong thing about what it does.
@@ -164,8 +164,8 @@ input[type=range]{flex:1;min-width:14rem;accent-color:var(--accent);height:2px}
 (() => {
   'use strict';
   // Copied VERBATIM from core/motion.js so the demo cannot teach a curve the engine does not have.
-  // The built page will `import { EASINGS } from '../core/motion.js'` — a pure module with no DOM
-  // dependency — which removes the drift risk the direction named as its one risk.
+  // The built page will `import { EASINGS } from '../core/motion.js'`, a pure module with no DOM
+  // dependency, which removes the drift risk the direction named as its one risk.
   const clamp01 = (t) => t < 0 ? 0 : t > 1 ? 1 : t;
   const decel = (t, k = 2.4) => 1 - Math.pow(1 - clamp01(t), k);   // EASINGS.brake
   const EASE = { brake: decel, linear: (t) => t };
@@ -176,7 +176,7 @@ input[type=range]{flex:1;min-width:14rem;accent-color:var(--accent);height:2px}
   let ease = 'brake';
 
   // The renderer's contract in miniature: the picture is a function of the number and nothing else.
-  // Nothing reads a previous position, nothing accumulates — which is why scramble lands correctly.
+  // Nothing reads a previous position, nothing accumulates, which is why scramble lands correctly.
   const draw = (n) => {
     const p = EASE[ease](clamp01(n / LAST));
     const span = shot.clientWidth - 136 - 48;
