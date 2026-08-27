@@ -3417,5 +3417,24 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the harness resolves the repo root', fs.existsSync(path.join(REPO_ROOT, 'core/motion.js')));
 }
 
+// ---- a fragment's stylesheet stops at its own layer (docs/MISTAKES.md #425) ----
+{
+  const { scopeStyles } = await import('../../core/sanitize-html.js');
+  ok('markup with no stylesheet is handed back unchanged',
+    scopeStyles('<div class="g">hi</div>') === '<div class="g">hi</div>');
+  ok('a style block is wrapped in a bare @scope',
+    scopeStyles('<style>.g{color:red}</style>') === '<style>@scope {.g{color:red}}</style>');
+  // The hoist is the half that matters: left inside `<div class="g">`, the scoping root would be that
+  // div, and Chrome does not match an ordinary selector against the root itself, so the fragment's own
+  // `.g` rule would stop applying. Hoisted, the root is the caller's wrapper and `.g` is a descendant.
+  ok('a nested style block is hoisted to the front of the fragment',
+    scopeStyles('<div class="g"><style>.g{color:red}</style>x</div>')
+      === '<style>@scope {.g{color:red}}</style><div class="g">x</div>');
+  ok('two blocks keep their order, so a fragment that overrides itself still cascades',
+    scopeStyles('<style>a{}</style><b><style>c{}</style></b>')
+      === '<style>@scope {a{}}</style><style>@scope {c{}}</style><b></b>');
+  ok('a style attribute is not a style block', scopeStyles('<i style="color:red"></i>') === '<i style="color:red"></i>');
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

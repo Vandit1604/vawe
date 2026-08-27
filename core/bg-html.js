@@ -20,7 +20,7 @@
 //
 // A CSS animation here would not error, it would silently render a still, so the authoring gate
 // rejects it by name and points at `--t` (timeCssUsed() in core/sanitize-html.js).
-import { sanitizeHtml, htmlSource } from './sanitize-html.js';
+import { sanitizeHtml, scopeStyles, htmlSource } from './sanitize-html.js';
 
 // createBgHtml(root, windows) → a controller, or null when no window is hand-authored.
 // One element per html window, built ONCE at build time and only shown/hidden per frame: rebuilding
@@ -38,7 +38,9 @@ export function createBgHtml(root, windows, table) {
   for (const w of html) {
     const el = document.createElement('div');
     el.className = 'hs-bghtml';
-    el.innerHTML = sanitizeHtml(htmlSource(w, table, 'bg window'));
+    // Same scoping as the html LAYER: `el` is this window's own wrapper, so the fragment's stylesheet
+    // stops at its edge and two bg windows cannot fight over a class name (docs/MISTAKES.md #425).
+    el.innerHTML = scopeStyles(sanitizeHtml(htmlSource(w, table, 'bg window')));
     root.insertBefore(el, root.firstChild); // behind the canvas and the camera
     els.set(w, el);
   }

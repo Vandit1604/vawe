@@ -15788,24 +15788,55 @@ namespaced under its own prefix (`.hp-` and `.sp-`), and the `parts` selectors f
 and it has to be remembered by every future author, which CLAUDE.md already names as the thing a
 root fix is not.
 
-**The root fix, named and NOT yet applied.** The refusal belongs where author CSS reaches the DOM,
-beside the `transition`/`animation` refusal that is already there. `core/layers/html.js` builds
-`<div class="hs-html">…</div>` around the fragment, and the `<style>` is inside that wrapper, so
-wrapping each block's contents in a bare `@scope { … }` scopes it to exactly that subtree:
+**The root fix, applied.** The scoping belongs where author CSS reaches the DOM, beside the
+`transition`/`animation` refusal that is already there. `scopeStyles()` in `core/sanitize-html.js`
+pulls every `<style>` block out of the fragment, wraps each one in a bare `@scope { … }`, and returns
+the blocks in their original order followed by the rest of the markup. Both DOM sites call it:
+`core/layers/html.js` drops the result into its `.hs-html` wrapper, `core/bg-html.js` into the
+`.hs-bghtml` wrapper it builds per bg window. A prelude-less `@scope` limits a block to the subtree of
+the style element's PARENT, so the wrapper becomes the scoping root and the fragment's rules stop at
+the layer's own edge.
 
-```js
-const scoped = sanitizeHtml(src).replace(/<style([^>]*)>([\s\S]*?)<\/style>/gi,
-  (_, attrs, css) => `<style${attrs}>@scope {${css}}</style>`);
-```
+**The hoist is not decoration, and the patch sketched here before did not have it.** Ten fragments in
+this library write `<div class="j"><style>.j{ … }</style>…</div>`, with the style INSIDE the element it
+styles. Left there, the scoping root is `.j` itself, and Chrome does not match an ordinary selector
+against the scoping root: only `:scope` reaches it. Measured on Chrome 131 (the puppeteer build the
+gates drive) and Chrome 151 (the system browser chromedp renders with), `@scope { .j{color:X} }` owned
+by a style inside `.j` leaves `.j` uncoloured while `:scope{ … }` on the same block applies. So the
+in-place wrap would have silently dropped each of those ten fragments' root rule, which is the same
+class of failure as the bug. Hoisting first makes the scoping root the engine's wrapper and every
+element the author wrote a descendant of it.
 
-**Why it is not in the commit that found it.** Its blast radius is every `html` layer and every
-hand-authored `html` background in the library, and `@scope` changes what a `:root`/`html` selector
-inside one of those blocks can reach. CLAUDE.md's own rule for a change of that shape is a
-before/after sweep of the whole scene library (`make snap-all`) with the counts diffed, and the only
-acceptable outcomes are "no scene changes" or a named list of scenes that changed with a reason for
-each. That sweep is the work, not the three-line edit, and it wants its own pass rather than riding
-in on a brand conversion whose deploy was already red. Anyone picking this up: run `make snap-all
-SAVE=1` first, apply the patch, run it again, and diff.
+**What the sweep found.** `@scope` is supported by both browsers this engine drives, so the fix is not
+a no-op. `snap-scenes` over the whole library, baselined on the old code and diffed on the new:
+**98 identical, 7 changed, 0 quarantined, 1 pre-existing error** (`showcase-data.expanded`, which does
+not validate either way). Every one of the 7 diffs is the `<style>` element's own textContent gaining
+its `@scope {` prefix. **Not one geometry, opacity, transform or clip field moved in any of the 106
+scenes.**
+
+Pixels were compared separately, at 8 frames each on the 64 renderable scenes carrying an `html` layer
+or a hand-authored `html` bg. That comparison needs its own control and this is why: run the SAME code
+twice and 29 of the 64 scenes differ, some by a max channel delta of 173. Screenshot capture is not
+byte-reproducible for a GPU-backed backdrop (#102 again). Against that control, two scenes carry a
+reproducible change and the other 62 do not:
+
+- **`glass`** (max delta 25, four frames of eight, control 0). This is the bug, in a shipped film. Its
+  four `html` panes all use class `.g`, and each declares a DIFFERENT gradient angle (140/165/190/215
+  deg) and a DIFFERENT blur (30/26/22/18px). The last stylesheet won, so all four panes rendered with
+  pane four's angle and blur. They now render as four distinct panes, which is what the JSON always
+  said. Frames read: `/tmp/fix425/before/glass.f23.png` against `/tmp/fix425/after/glass.f23.png`.
+- **`_arcfall-test`** (max delta 3, twelve isolated pixels across three frames of eight). A single bg
+  fragment with no collision to fix. The changed pixels are single channels off by two on a dark
+  gradient (`8,30,113` → `8,32,113`), which is rasteriser dither under a different style-resolution
+  path, not a design change. Frames read: `/tmp/fix425/before/_arcfall-test.f488.png` against
+  `/tmp/fix425/after/_arcfall-test.f488.png`.
+
+`preface-launch`, the film that FOUND this, renders byte-identical, because its `.hp-`/`.sp-` prefixes
+already worked around the bug by hand. Those prefixes are now redundant and were left alone.
+
+`lib-test` went 1168 → 1173 (the five new asserts cover the identity case, the wrap, the hoist, the
+order between two blocks, and a style ATTRIBUTE not being a style block), 0 failed both before and
+after. `probe-purity scene` passes: 25 sampled frames, identical DOM regardless of render order.
 
 **A gate is the wrong answer here** and it is worth saying so, because it is the reflex. A checker
 that greps two `html` layers for a shared class name would notice this collision and leave the
