@@ -887,6 +887,13 @@ code-quality: ## refuse code that is more tangled than the baseline (WRITE=1 to 
 code-quality-top: ## the 25 most tangled functions in the repo
 	node scripts/gates/code-quality.mjs --top
 
+# make og — the social card. Its source is site/og/card.html, which reads the SITE's tokens and the
+# SITE's vendored fonts, so the card cannot drift from the site it advertises the way an exported PNG
+# does. The three frames it shows are pulled from three shipped films, not mocked up.
+og: ## render site/public/assets/og.png from site/og/card.html
+	node scripts/site/og-image.mjs
+
+
 	@echo "\u2713 site: published scenes, films and counts all agree with their sources"
 
 # make blocks-sync — after adding a block: docs table, the site's grid, and the site's per-block

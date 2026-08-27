@@ -17,6 +17,17 @@ export const metadata: Metadata = {
     title: "Vawe · one JSON, one video",
     description: "A deterministic motion-graphics engine. Write a scene, render a frame-perfect video.",
     type: "website",
+    url: "/",
+    siteName: "Vawe",
+    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "Vawe: one JSON, one video" }],
+  },
+  // summary_large_image is the only card that shows a 1200x630 at full width; the default "summary"
+  // crops it to a small square and the headline is on the left, so it would crop the claim away.
+  twitter: {
+    card: "summary_large_image",
+    title: "Vawe · one JSON, one video",
+    description: "A deterministic motion-graphics engine. Write a scene, render a frame-perfect video.",
+    images: ["/assets/og.png"],
   },
 };
 
