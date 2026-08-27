@@ -429,9 +429,18 @@ const CRT_SCHEMA = {
   // so this lands at about a twelfth of full strength, which is a screen with a cast rather than a
   // screen painted one colour.
   tintAmount:{ kind: 'unit', def: 0.25, primary: true, note: 'how much of the phosphor colour is laid over the whole picture. 0 leaves the colours alone.' },
+  // THREE COLOURS, BECAUSE THEY ARE THREE DECISIONS. The last pass made the phosphor tint work and
+  // stopped there, so a red tint still could not produce red WORDS: the text was a literal in the
+  // markup and the only reachable dial washed the whole picture. Asking for red text on a white tube
+  // was unanswerable. The tube's ground, the words on it, and the phosphor laid over both are now
+  // separate fields, which is what lets a red line sit inside a white bloom.
   colour: {
     kind: 'group', primary: true,
-    fields: { tint: { kind: 'hex', def: '#1e46ff', primary: true, note: 'the phosphor colour. `tintAmount` decides how much of it lands.' } },
+    fields: {
+      text:   { kind: 'hex', def: '#bfe3ff', primary: true, note: 'the words on the screen. The bloom takes its hue from this, because a phosphor glows the colour of what is lit.' },
+      ground: { kind: 'hex', def: '#050b1e', primary: true, note: 'the tube behind the words, before any scanline or falloff.' },
+      tint:   { kind: 'hex', def: '#1e46ff', primary: true, note: 'the phosphor colour laid over the whole picture. `tintAmount` decides how much of it lands.' },
+    },
   },
   // THE SCREEN'S OWN WORDS. Every other card here has no content to speak of, because a field IS its
   // own subject. This one is a treatment, and a treatment needs something to treat, so the stand-in
@@ -476,10 +485,19 @@ const CRT = {
     // core/sanitize-html.js exists for. `<b>` and `<em>` survive; a script or an iframe does not.
     const line = sanitizeHtml(o?.text ?? CRT_SCHEMA.text.def);
     const sub = sanitizeHtml(o?.sub ?? CRT_SCHEMA.sub.def);
-    return `<div style="position:absolute;inset:0;overflow:hidden;background:#050b1e">
+    const F = CRT_SCHEMA.colour.fields;
+    const ink = o?.colour?.text ?? F.text.def;
+    const ground = o?.colour?.ground ?? F.ground.def;
+    // The sub-line is DERIVED from the main one rather than being a fourth dial. It has always been a
+    // dimmer version of the same light, and two independent colours a user has to keep in agreement is
+    // a way to make the card look wrong, not a way to give them control. Note the limit: the derivation
+    // assumes the words are lighter than the tube. On a LIGHT ground the sub-line goes quiet, which is
+    // the honest consequence of one dial driving two things, not a bug to chase with a fourth field.
+    const subInk = hexToRgba(ink, 0.72);
+    return `<div style="position:absolute;inset:0;overflow:hidden;background:${ground}">
   <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center;
-    font:800 clamp(28px,8.5vw,96px)/1 var(--font-sans,system-ui),sans-serif;color:#bfe3ff;letter-spacing:.01em">${line}
-    ${sub ? `<div style="font:400 clamp(8px,1.6vw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:#5aa6ff;margin-top:.7em;letter-spacing:.22em">${sub}</div>` : ''}
+    font:800 clamp(28px,8.5vw,96px)/1 var(--font-sans,system-ui),sans-serif;color:${ink};letter-spacing:.01em">${line}
+    ${sub ? `<div style="font:400 clamp(8px,1.6vw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:${subInk};margin-top:.7em;letter-spacing:.22em">${sub}</div>` : ''}
   </div>
   <div style="position:absolute;inset:0;pointer-events:none;backdrop-filter:${filter};-webkit-backdrop-filter:${filter};background-image:${background || 'none'}"></div>
 </div>`;
