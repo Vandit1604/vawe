@@ -4,9 +4,22 @@ description: Build the binary, render the sample video, and write your first sce
 icon: Rocket
 ---
 
-## Build the engine
+## What you need first
 
-Vawe is a Go binary that drives headless Chrome and ffmpeg. You need Go, a Chrome or Chromium install, and ffmpeg on your path.
+Go, a Chrome or Chromium install, ffmpeg on your path, and Node. Vawe is a Go binary that drives
+headless Chrome and pipes frames to ffmpeg.
+
+```bash
+npm install
+```
+
+<Callout>
+`make build` and a plain render work without this, because the font fetcher uses only Node built-ins.
+**Everything else does not.** The contact sheets, the live preview and every quality gate drive a real
+browser through puppeteer, which lives in `node_modules`. Run it once and forget it.
+</Callout>
+
+## Build the engine
 
 ```bash
 make build

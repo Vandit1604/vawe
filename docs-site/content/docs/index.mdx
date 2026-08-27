@@ -34,13 +34,29 @@ data.json
 
 The output is a 30fps H.264 mp4 with AAC audio, in portrait (1080×1920), landscape (1920×1080), or square. One source can render [every aspect ratio in a single pass](/docs/aspect-ratios).
 
+## Read these in order, or jump to your gap
+
+| If you want to | Read |
+|---|---|
+| get a video out of it in ten minutes | [Quickstart](/docs/quickstart) |
+| **describe a film and let an agent build it** | [**Prompting**](/docs/prompting) |
+| understand what the JSON actually is | [The scene file](/docs/the-scene), [Layers](/docs/layers) |
+| know why the same input always gives the same bytes | [Determinism](/docs/determinism) |
+| make it move well rather than merely move | [Motion](/docs/motion), [Blocks](/docs/blocks) |
+| make it look like your brand | [Themes](/docs/themes), [Brand reflection](/docs/brand-reflection) |
+| ship it without shipping something broken | [Quality gates](/docs/quality-gates) |
+
+Most people never hand-write a scene file. If that is you, **Prompting** is the page that matters and
+the rest is reference you can reach for when a render surprises you.
+
 ## Where to go next
 
 <Cards>
+  <Card title="Prompting" href="/docs/prompting" description="The five line brief, and what to leave to the agent." />
   <Card title="Quickstart" href="/docs/quickstart" description="Install, render the sample, and write your first scene." />
   <Card title="The scene file" href="/docs/the-scene" description="The top-level fields every JSON scene is built from." />
   <Card title="Layer reference" href="/docs/layers" description="Every layer type and the fields it accepts." />
   <Card title="Motion" href="/docs/motion" description="Kinetic type presets, cuts, and shader stings." />
 </Cards>
 
-These docs describe what the engine does today, drawn straight from the code. The source is not public yet, so nothing here links into it. Everything on these pages runs in the [editor](/editor) in the meantime, on the same engine.
+These docs describe what the engine does today, drawn straight from the code. Everything on these pages runs in the [editor](/editor) on the same engine, so you can try a page's example without installing anything.

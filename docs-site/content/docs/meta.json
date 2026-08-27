@@ -4,6 +4,7 @@
   "pages": [
     "index",
     "quickstart",
+    "prompting",
     "---Concepts---",
     "the-scene",
     "layers",

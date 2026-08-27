@@ -1,0 +1,112 @@
+---
+title: Prompting
+description: You do not write the JSON by hand. You write a five line brief and let an agent compose the scene. Here is what to say, and what to leave alone.
+icon: MessageSquare
+---
+
+Most people never hand-write a scene file. They describe the film and let an AI agent compose the JSON,
+then iterate on the render. Vawe is built for that: `CLAUDE.md` at the repo root is a long standing
+brief the agent reads before it writes anything, so the agent already knows the house rules, the
+vocabulary and the quality gates.
+
+Your job is much smaller than you think.
+
+## The five lines
+
+This is the whole prompt. Any of them may be missing, and the agent will ask if a missing one would
+change the film.
+
+```
+SUBJECT   what it is about, in one line
+DATA      where the facts come from (a URL, a file, an API, or "here they are")
+PAYOFF    the one thing to remember, and it lands LAST
+AUDIENCE  who watches, and where they see it
+FEELING   one reference, or one word ("cinematic", "loud", "like Linear's launch page")
+```
+
+<Callout type="warn">
+**If you find yourself naming a colour, an easing, a layer type or a preset, stop.** That is the
+agent's job, not yours. Reaching for engine vocabulary is a sign the brief above is underspecified,
+and the fix is a better PAYOFF or FEELING line, not a hex code.
+</Callout>
+
+## What you are NOT deciding
+
+Palette, typography, layout, motion, camera, cuts, backdrop, sound, pacing, structure. All of it
+belongs to whoever composes the scene, and all of it is defensible from the brief. A film that gets
+these wrong got a thin brief, not a wrong colour.
+
+Two lines are the agent's to fill in, not yours, and they are written into the plan before authoring:
+
+| Line | What it does |
+|---|---|
+| `SPECTACLE` | the ONE exaggerated moment, named: which beat, which layer, which device |
+| `NOT` | what this film explicitly does not do (no narration, no stock photos, no gradient hero) |
+
+`SPECTACLE` is two-sided on purpose. Naming the loud moment is also a promise that every other beat
+stays restrained. A film where four beats shout has no loud moment, it has a volume setting.
+
+`NOT` is cheaper than it looks. Most generic output is not a wrong decision, it is an un-excluded
+default: nothing said "no gradient hero", so a gradient hero was free.
+
+## Two shapes of prompt
+
+**Cold start.** You have an idea and nothing else.
+
+```
+SUBJECT   why deterministic rendering matters for CI
+PAYOFF    the same input always produces the same bytes
+AUDIENCE  developers, on a landing page, muted autoplay
+FEELING   dry and technical, like a good changelog
+```
+
+**Warm start.** You have a source: a website, a dataset, a script, a competitor's film.
+
+```
+SUBJECT   our launch, reflecting the real product UI
+DATA      https://example.com  (crawl it, do not just read the homepage)
+PAYOFF    it ships in one click
+AUDIENCE  X and LinkedIn, 16:9 and 9:16
+FEELING   like the site itself, no louder
+```
+
+A warm start is usually better, because a real source carries taste the agent does not have to invent.
+When you point at a website, say **crawl it**, not "look at it": the interesting surface is rarely the
+homepage.
+
+## The loop
+
+Once the brief is agreed, the work is a loop, not a single shot.
+
+```bash
+make dev  D=formats/scene/<film>.json    # build, draft render, open. No gates, no waiting.
+make check D=formats/scene/<film>.json   # every gate, every finding, ZERO consequence
+make ship  D=formats/scene/<film>.json   # the ladder with its teeth in
+```
+
+`make dev` is where nearly all the time goes. `make ship` is the one command that says a film is done:
+it runs the author checks, renders, audits the layout and inspects the transitions, in that order.
+
+<Callout>
+**Green gates do not mean the film is good.** They read structure. They cannot see murk, a weak focal
+point, or a beat that lands wrong. Read the contact sheets: `make beats` for what each beat holds,
+`make reveal` for how each one enters and exits, `make judge` for a scored sheet and a rubric.
+</Callout>
+
+## What to say when it is wrong
+
+Be concrete about the SYMPTOM and leave the cause alone. "Beat three reads as a slide, nothing moves
+but the text" is worth ten times "make it more dynamic". The agent can find the cause; it cannot guess
+what you saw.
+
+If you want a different direction rather than a fix, go back to `FEELING` and `NOT`. Those two lines
+move a film further than any note about a specific layer.
+
+## Where to go next
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" description="Install, render the sample, and write your first scene by hand." />
+  <Card title="The scene file" href="/docs/the-scene" description="What the agent is actually writing, when you want to read it." />
+  <Card title="Quality gates" href="/docs/quality-gates" description="What `make ship` checks, and which findings block." />
+  <Card title="Brand reflection" href="/docs/brand-reflection" description="Pointing the agent at a real website and keeping its taste." />
+</Cards>
