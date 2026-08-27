@@ -15657,3 +15657,30 @@ and `params` over all 195 real factories: no difference anywhere.
 the measurement, and a gate on a complexity number would fail dozens of honest functions.
 `splitParam` still scores 27 after the split, because it is a character scanner and cyclomatic
 complexity counts branches: a tokenizer branches. That is the score being a question, not a verdict.
+
+## #486: a comment inside devDependencies broke `npm install` for every fresh clone
+
+**What.** `npm install` failed outright at the repo root:
+`EINVALIDPACKAGENAME · Invalid package name "//puppeteer"`. Not a warning, not a partial install. No
+dependency could be installed from a clean checkout, and the failure was found by accident while adding
+an unrelated tool.
+
+**Root cause.** `package.json` used this repo's `//name` comment convention INSIDE `devDependencies`:
+
+```json
+"devDependencies": { "//puppeteer": "REPO-DEV ONLY, and it must stay here. ...", "puppeteer": "..." }
+```
+
+The convention is fine and the comment it carried is genuinely valuable (it records why puppeteer must
+stay a devDependency: its postinstall downloads 473MB of Chrome unconditionally). The mistake is
+LOCATION. npm treats every key in a dependencies map as a package name, so `//puppeteer` is parsed as a
+package to install and rejected. A `//` key at the ROOT of `package.json` is ignored harmlessly, which
+is where the same convention already lives elsewhere in the file.
+
+**Fix.** Hoist the comment to the root as `//puppeteer-note`. Same text, same intent, and `npm install`
+resolves. Verified with `npm install --dry-run` before and after.
+
+**Why nobody noticed.** Everyone working here already had `node_modules/` populated from before the
+comment moved, and nothing in the gate suite runs `npm install`. The one machine that would have caught
+it is a fresh clone, and a fresh clone is exactly the case nobody tests. It is the same shape as the
+gitignored-films problem: the checkout everyone has is not the checkout a newcomer gets.
