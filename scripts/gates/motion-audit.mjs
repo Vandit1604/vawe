@@ -71,93 +71,94 @@ const parseNum = (t) => {
   return v * ({ K: 1e3, M: 1e6, B: 1e9 }[m[2]] || 1);
 };
 
-async function audit(format, dataArg) {
-  const dataPath = dataArg || `formats/${format}/sample.json`;
-  const dataName = dataPath.split('/').pop();
-  const data = JSON.parse(fs.readFileSync(path.join(repoRoot, dataPath), 'utf8'));
-  const [VW, VH] = sceneDims(data);
-  const page = await browser.newPage();
-  await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
-  await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
-  const err = await page.evaluate(() => window.__engineError);
-  if (err) { await page.close(); return { format, data: dataName, error: String(err), findings: [] }; }
-  const meta = await page.evaluate(() => window.__engine.meta);
-  const total = meta.totalFrames;
-  const TOTAL_SEC = total / FPS;   // runtime in seconds — the frozen-span budget scales with it
+// ---- capture: per-element time series across every (strided) frame ----
+// Renders every strided frame and records, per tracked element, one row of {centre x, centre y,
+// effective opacity, text length, text head, descendant-transform hash, rig hash} plus the life
+// tallies (xi)/(xii) need. Everything below this line runs INSIDE the page.
+const captureSeries = (page, total, stride) => page.evaluate(async (total, stride) => {
+  const els = [...document.querySelectorAll('[id], [data-layer="critical"]')];
+  const keys = els.map((el, i) => el.id || ((typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName) + '#' + i));
+  const chains = els.map((el) => { const c = [el]; let p = el.parentElement; while (p && p !== document.body) { c.push(p); p = p.parentElement; } return c; });
+  const loop = els.map((el) => !!el.closest('[data-motion]')); // any data-motion (loop/swap/…) opts out of motion checks
+  // Markup that is not meant to paint: the SVG filter-definition host (core/filters.js stamps it
+  // aria-hidden, 0x0), anything inside <defs>, and script/style/template. It is boxless by design, so
+  // asking whether it ever had a box is asking the wrong question of it.
+  const nonVisual = els.map((el) => el.getAttribute('aria-hidden') === 'true'
+    || !!el.closest('defs') || ['STYLE', 'SCRIPT', 'TEMPLATE', 'DEFS'].includes(el.tagName));
 
-  // ---- capture: per-element time series across every (strided) frame ----
-  const series = await page.evaluate(async (total, stride) => {
-    const els = [...document.querySelectorAll('[id], [data-layer="critical"]')];
-    const keys = els.map((el, i) => el.id || ((typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName) + '#' + i));
-    const chains = els.map((el) => { const c = [el]; let p = el.parentElement; while (p && p !== document.body) { c.push(p); p = p.parentElement; } return c; });
-    const loop = els.map((el) => !!el.closest('[data-motion]')); // any data-motion (loop/swap/…) opts out of motion checks
-    // Markup that is not meant to paint: the SVG filter-definition host (core/filters.js stamps it
-    // aria-hidden, 0x0), anything inside <defs>, and script/style/template. It is boxless by design, so
-    // asking whether it ever had a box is asking the wrong question of it.
-    const nonVisual = els.map((el) => el.getAttribute('aria-hidden') === 'true'
-      || !!el.closest('defs') || ['STYLE', 'SCRIPT', 'TEMPLATE', 'DEFS'].includes(el.tagName));
-    // life tallies, alongside the per-frame rows: how many sampled frames this element was laid out for,
-    // had a real box for, and was above 1% opacity for. The rows answer "what happened at 4.2s"; these
-    // answer "was this element ever anything", which no per-frame check can ask.
-    const out = { keys, loop, nonVisual, frames: [], rows: keys.map(() => []), live: keys.map(() => 0), box: keys.map(() => 0), zero: keys.map(() => 0), seen: keys.map(() => 0) };
-    for (let f = 0; f < total; f += stride) {
-      window.__engine.renderFrame(f);
-      out.frames.push(f);
-      els.forEach((el, i) => {
-        const b = el.getBoundingClientRect();
-        const laidOut = el.getClientRects().length > 0;
-        // `rig` hashes the transform of the CAMERA and the cut wrapper above this element — never the
-        // element's own, and never a `group`'s, whose motion really is the layer's motion. A layer
-        // standing perfectly still inside a travelling frame measures as travelling, because a
-        // bounding rect is read in screen space. This is the one field that can tell those apart.
-        let eop = 1, hidden = false, rig = 0;
-        if (laidOut) for (const node of chains[i]) {
-          const s = getComputedStyle(node);
-          if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; }
-          eop *= +s.opacity;
-          if ((node.id === 'cam' || node.classList?.contains('hs-beat') || node.classList?.contains('stage'))
-            && s.transform && s.transform !== 'none')
-            for (let c = 0; c < s.transform.length; c++) rig = (rig * 31 + s.transform.charCodeAt(c)) | 0;
-        }
-        if (laidOut && !hidden && !nonVisual[i]) {
-          out.live[i]++;
-          // A wrapper whose own rect collapses is not boxless if something inside it occupies space: a
-          // `morph` text layer measures 780x0 while its glyphs paint. The pixels are on screen, and the
-          // question this tally exists to answer is whether ANY were. The descendant walk only runs on
-          // the rare frame where the element's own rect is degenerate, so it costs nothing in the common case.
-          let boxed = b.width >= 1 && b.height >= 1;
-          if (!boxed) for (const kid of el.querySelectorAll('*')) { const kb = kid.getBoundingClientRect(); if (kb.width >= 1 && kb.height >= 1) { boxed = true; break; } }
-          if (boxed) out.box[i]++; else out.zero[i]++;
-          if (eop >= 0.01) out.seen[i]++;
-        }
-        if (!laidOut || hidden || (b.width < 1 && b.height < 1)) { out.rows[i].push(null); return; }
-        const t = (el.textContent || '').trim();
-        // A layer can be busy inside its own box: an svg whose bars scale on var(--t) animates hard while
-        // its bounding rect, opacity and text all sit perfectly still. Measuring only the outside made
-        // `cadence`'s waveform read as frozen through the exact seconds it was drawing itself on. So a
-        // cheap fingerprint of descendant transforms rides along, capped so a 90-layer film stays cheap.
-        let sig = 0, seen = 0;
-        for (const kid of el.querySelectorAll('*')) {
-          if (seen++ >= 24) break;
-          const tr = getComputedStyle(kid).transform;
-          if (tr && tr !== 'none') for (let c = 0; c < tr.length; c++) sig = (sig * 31 + tr.charCodeAt(c)) | 0;
-        }
-        out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32), sig, rig]);
-      });
+  const hash = (s, h) => { for (let c = 0; c < s.length; c++) h = (h * 31 + s.charCodeAt(c)) | 0; return h; };
+  // `rig` hashes the transform of the CAMERA and the cut wrapper above this element — never the
+  // element's own, and never a `group`'s, whose motion really is the layer's motion. A layer
+  // standing perfectly still inside a travelling frame measures as travelling, because a
+  // bounding rect is read in screen space. This is the one field that can tell those apart.
+  const isRig = (node) => node.id === 'cam' || node.classList?.contains('hs-beat') || node.classList?.contains('stage');
+  // one walk up the ancestor chain: effective opacity, whether anything hides this element, and the rig.
+  const chainState = (chain) => {
+    let eop = 1, hidden = false, rig = 0;
+    for (const node of chain) {
+      const s = getComputedStyle(node);
+      if (s.display === 'none' || s.visibility === 'hidden') { hidden = true; break; }
+      eop *= +s.opacity;
+      if (isRig(node) && s.transform && s.transform !== 'none') rig = hash(s.transform, rig);
     }
-    return out;
-  }, total, STRIDE);
-  await page.close();
+    return { eop, hidden, rig };
+  };
+  // A wrapper whose own rect collapses is not boxless if something inside it occupies space: a
+  // `morph` text layer measures 780x0 while its glyphs paint. The pixels are on screen, and the
+  // question this tally exists to answer is whether ANY were. The descendant walk only runs on
+  // the rare frame where the element's own rect is degenerate, so it costs nothing in the common case.
+  const boxedNow = (el, b) => {
+    if (b.width >= 1 && b.height >= 1) return true;
+    for (const kid of el.querySelectorAll('*')) { const kb = kid.getBoundingClientRect(); if (kb.width >= 1 && kb.height >= 1) return true; }
+    return false;
+  };
+  // A layer can be busy inside its own box: an svg whose bars scale on var(--t) animates hard while
+  // its bounding rect, opacity and text all sit perfectly still. Measuring only the outside made
+  // `cadence`'s waveform read as frozen through the exact seconds it was drawing itself on. So a
+  // cheap fingerprint of descendant transforms rides along, capped so a 90-layer film stays cheap.
+  const kidSig = (el) => {
+    let sig = 0, seen = 0;
+    for (const kid of el.querySelectorAll('*')) {
+      if (seen++ >= 24) break;
+      const tr = getComputedStyle(kid).transform;
+      if (tr && tr !== 'none') sig = hash(tr, sig);
+    }
+    return sig;
+  };
 
-  // ---- windows: the film's OWN JOINTS ----
-  // This used to read `meta.segments`, and NO SCENE HAS EVER SET IT: core/boot.js read
-  // `scene.segments || []`, formats/scene never returns the key, and there is exactly one format. So
-  // every segment-scoped FAIL was rewritten to WARN before a reader saw it and the run printed a tick.
-  // `segments` was never a missing declaration — it was a SECOND way to say what `cuts` already says,
-  // and the film's cuts and seams are the joints, so core/junctions.js owns the reading of them
-  // (docs/MISTAKES.md #159, #358: one fact, one owner). A film with no cuts is genuinely one shot.
-  // Lowered first: a scene written with the unified `transitions` surface has no `cuts` key yet.
+  // life tallies, alongside the per-frame rows: how many sampled frames this element was laid out for,
+  // had a real box for, and was above 1% opacity for. The rows answer "what happened at 4.2s"; these
+  // answer "was this element ever anything", which no per-frame check can ask.
+  const out = { keys, loop, nonVisual, frames: [], rows: keys.map(() => []), live: keys.map(() => 0), box: keys.map(() => 0), zero: keys.map(() => 0), seen: keys.map(() => 0) };
+  for (let f = 0; f < total; f += stride) {
+    window.__engine.renderFrame(f);
+    out.frames.push(f);
+    els.forEach((el, i) => {
+      const b = el.getBoundingClientRect();
+      const laidOut = el.getClientRects().length > 0;
+      const { eop, hidden, rig } = laidOut ? chainState(chains[i]) : { eop: 1, hidden: false, rig: 0 };
+      if (laidOut && !hidden && !nonVisual[i]) {
+        out.live[i]++;
+        if (boxedNow(el, b)) out.box[i]++; else out.zero[i]++;
+        if (eop >= 0.01) out.seen[i]++;
+      }
+      if (!laidOut || hidden || (b.width < 1 && b.height < 1)) { out.rows[i].push(null); return; }
+      const t = (el.textContent || '').trim();
+      out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32), kidSig(el), rig]);
+    });
+  }
+  return out;
+}, total, stride);
+
+// ---- windows: the film's OWN JOINTS ----
+// This used to read `meta.segments`, and NO SCENE HAS EVER SET IT: core/boot.js read
+// `scene.segments || []`, formats/scene never returns the key, and there is exactly one format. So
+// every segment-scoped FAIL was rewritten to WARN before a reader saw it and the run printed a tick.
+// `segments` was never a missing declaration — it was a SECOND way to say what `cuts` already says,
+// and the film's cuts and seams are the joints, so core/junctions.js owns the reading of them
+// (docs/MISTAKES.md #159, #358: one fact, one owner). A film with no cuts is genuinely one shot.
+// Lowered first: a scene written with the unified `transitions` surface has no `cuts` key yet.
+function shotWindowsOf(data, total) {
   const lowered = lowerScene(structuredClone(data));
   const table = junctionTable(marksOf(lowered));
   // The transition duration belongs to the joint that ENDS a shot: `visEnd` is where the exit begins,
@@ -177,9 +178,252 @@ async function audit(format, dataArg) {
     const visEnd = isLast ? end : end - Math.round(trans * FPS);              // content window ends; exit starts
     return { name: shots.length > 1 ? 'shot' + i : 'all', trans, i, start, end, visEnd, isLast };
   });
+  return { windows, windowSource };
+}
+
+// the sample nearest at or after frame `f` (the last one when the film has already ended)
+const sampleAt = (series, F, i, f) => { const idx = F.findIndex((x) => x >= f); return series.rows[i][idx < 0 ? F.length - 1 : idx]; };
+
+// ---- ONE CLAUSE, ONE FUNCTION ---------------------------------------------------------------------
+// Each of these takes one element's row of samples and answers one question. `elementFindings` below
+// asks them in turn; nothing here knows about severities, windows or the report.
+
+// A LAYER'S OWN EXIT IS A FADE TOO, and (ii) could not tell it from the defect it hunts. Its only
+// exclusion was the SEGMENT's transition window, so every ordinary layer leaving mid-shot read as
+// a mid-scene fade — two of them on formats/scene/sample.json, the canonical clean scene. The
+// window was never the missing piece: this clause is scoped to a LAYER'S LIFE, not to a shot.
+// An exit is a TERMINAL DESCENT: from some frame on the opacity never rises again and the element
+// does reach nothing. A dip comes back, and a dip is the bug. Scanning back from the end of the
+// FULL window (not visEnd) because an exit ramp legitimately finishes inside the transition.
+function exitFrameOf(row, lo, hiFull) {
+  let exitFrom = hiFull, gone = false, later = null;
+  for (let j = hiFull - 1; j >= lo; j--) {
+    const v = row[j], o = v ? v[2] : null;
+    if (o === null || o <= 0.05) { gone = true; later = 0; exitFrom = j; continue; }
+    if (!gone) break;                        // it never reaches nothing: nothing here is an exit
+    if (later !== null && o < later - 1e-9) break;  // rose going forward — the descent starts later
+    later = o; exitFrom = j;
+  }
+  return gone ? exitFrom : hiFull;
+}
+
+// One walk over the window's samples, for the three things a step-to-step comparison can see: the
+// deepest opacity drop before the exit (ii), the numbers a counter passed through (iv), and every
+// position jump (vii).
+function scanSteps(row, F, w, lo, hi, exitFrom) {
+  let prev = null, prevF = -1, maxDrop = 0, dropAt = 0;
+  const nums = [], jumps = [];
+  for (let j = lo; j < hi; j++) {
+    const v = row[j]; const f = F[j];
+    if (v) { const n = parseNum(v[4]); if (n !== null && v[3] < 24) nums.push(n); }
+    if (v && prev && prevF === F[j - 1]) {
+      const dop = prev[2] - v[2];
+      if (dop > maxDrop && f - w.start > w.trans * FPS && j < exitFrom) { maxDrop = dop; dropAt = f; }
+      const dx = Math.abs(v[0] - prev[0]), dy = Math.abs(v[1] - prev[1]);
+      if ((dx > 80 || dy > 80) && f - w.start > 2 && w.end - f > 2) jumps.push({ f, px: Math.max(dx, dy) });
+    }
+    prev = v; prevF = f;
+  }
+  return { maxDrop, dropAt, nums, jumps };
+}
+
+// (viii) SHIMMER — sustained sub-pixel motion on settled text reads as "shaking glyphs":
+// slow camera scales and coarse rounding move text 0.05–1.5px EVERY frame with little net
+// travel. Flag any ≥1s span where ≥80% of steps are tiny but nonzero and net travel < 4px.
+function shimmerStart(row, F, lo, hi) {
+  const winN = Math.max(4, Math.round(FPS / STRIDE));  // ~1s of samples
+  const pts = [];
+  for (let j = lo; j < hi; j++) { const v = row[j]; pts.push(v ? [v[0], v[1]] : null); }
+  for (let s0 = 0; s0 + winN < pts.length; s0 += Math.max(2, winN >> 1)) {
+    let tiny = 0, total = 0;
+    for (let j = s0 + 1; j <= s0 + winN; j++) {
+      if (!pts[j] || !pts[j - 1]) { total = 0; break; }
+      const d = Math.abs(pts[j][0] - pts[j - 1][0]) + Math.abs(pts[j][1] - pts[j - 1][1]);
+      total++;
+      if (d > 0.04 && d < 1.5) tiny++;
+    }
+    if (total >= winN - 1 && tiny / total >= 0.8) {
+      const net = Math.abs(pts[s0 + winN][0] - pts[s0][0]) + Math.abs(pts[s0 + winN][1] - pts[s0][1]);
+      if (net < 4) return F[lo + s0];
+    }
+  }
+  return null;
+}
+
+// (iv) count-up sanity — a counter must be monotone (up OR down: timers count down,
+// data-tracking values may dip legitimately → only flag when it reverses BOTH ways)
+function countupReversal(nums) {
+  if (new Set(nums).size < 3) return null;
+  const range = Math.max(...nums) - Math.min(...nums), eps = Math.max(range * 0.01, 0.001);
+  let up = false, down = false, at = null;
+  for (let j = 1; j < nums.length; j++) { if (nums[j] > nums[j - 1] + eps) up = true; if (nums[j] < nums[j - 1] - eps) { down = true; if (up) at = `${nums[j - 1]} → ${nums[j]}`; } }
+  return up && down && at ? at : null;
+}
+
+// (v) typewriter completes — text reaches its max length before the exit.
+// Only a MONOTONE-growing text is a typewriter; count-ups wobble in length ("999,999" → "1.2M").
+function typingIncomplete(row, lo, hi, maxTl, endV) {
+  if (!(maxTl >= 8 && endV && maxTl - endV[3] > 0)) return false;
+  const grew = row.slice(lo, hi).filter(Boolean).map((v) => v[3]);
+  const monotone = grew.every((v, j) => j === 0 || v >= grew[j - 1]);
+  return monotone && grew.length > 2 && grew[grew.length - 1] < maxTl && grew[grew.length - 1] - grew[0] >= 8;
+}
+
+// (iii) settle before exit — steady over the last HOLDW s of the content window
+function settleBreak(row, F, sIdx0, hi) {
+  let pv = null, pf = -1;
+  for (let j = sIdx0; j < hi; j++) {
+    const v = row[j];
+    if (!v) { pv = null; continue; }
+    if (pv && pf === F[j - 1]) {
+      let why = '';
+      // Where the rig moved between these two samples, the frame travelled and the layer's screen
+      // position moved with it. (iii) asks whether the LAYER settled, and that question has no
+      // answer here, so it is not asked. Opacity and text are unaffected by the camera and still are.
+      if (v[6] !== pv[6]) { /* the world moved: this step says nothing about the layer's pose */ }
+      else if (Math.abs(v[0] - pv[0]) > 0.7 || Math.abs(v[1] - pv[1]) > 0.7) why = `still moving (Δ${Math.max(Math.abs(v[0] - pv[0]), Math.abs(v[1] - pv[1])).toFixed(1)}px/f)`;
+      else if (Math.abs(v[2] - pv[2]) > 0.02) why = `opacity still changing (Δ${Math.abs(v[2] - pv[2]).toFixed(3)}/f)`;
+      else if (v[3] !== pv[3]) why = 'text still changing';
+      if (why) return { why, f: F[j] };
+    }
+    pv = v; pf = F[j];
+  }
+  return null;
+}
+
+// Every clause that is scoped to ONE element inside ONE window, in the order the report reads them.
+function elementFindings(series, F, w, i, lastVisF) {
+  const row = series.rows[i];
+  const idx0 = F.findIndex((f) => f >= w.start), idx1 = F.findIndex((f) => f >= w.visEnd), idx2 = F.findIndex((f) => f >= w.end);
+  const lo = idx0 < 0 ? F.length : idx0, hi = idx1 < 0 ? F.length : idx1, hiFull = idx2 < 0 ? F.length : idx2;
+  // typewriter length over the FULL segment — typing that spills into the exit window is the bug
+  let maxTl = 0;
+  for (let j = lo; j < hiFull; j++) { const v = row[j]; if (v) maxTl = Math.max(maxTl, v[3]); }
+
+  const out = [];
+  const { maxDrop, dropAt, nums, jumps } = scanSteps(row, F, w, lo, hi, exitFrameOf(row, lo, hiFull));
+  for (const j of jumps) out.push(['WARN', 'vii:jump', `${j.px.toFixed(0)}px jump at ${(j.f / FPS).toFixed(2)}s`]);
+  const shimmerF = shimmerStart(row, F, lo, hi);
+  if (shimmerF !== null) out.push(['WARN', 'viii:shimmer', `sub-pixel motion every frame ~${(shimmerF / FPS).toFixed(1)}s (slow camera scale or coarse rounding) — text shakes`]);
+  // (ii) reveal monotonicity — opacity must not visibly dip mid-scene
+  if (maxDrop > 0.15) out.push(['FAIL', 'ii:monotonic', `opacity drops ${maxDrop.toFixed(2)} at ${(dropAt / FPS).toFixed(2)}s (mid-scene fade)`]);
+  const reversal = countupReversal(nums);
+  if (reversal) out.push(['WARN', 'iv:countup', `counter reverses direction (${reversal}) — overshoot or wrong easing?`]);
+  const endV = sampleAt(series, F, i, lastVisF);
+  if (typingIncomplete(row, lo, hi, maxTl, endV)) out.push(['FAIL', 'v:typing', `text ends at ${endV[3]}/${maxTl} chars before the exit`]);
+  const sIdx0 = F.findIndex((f) => f >= w.visEnd - Math.round(HOLDW * FPS));
+  const unsettled = sIdx0 >= 0 ? settleBreak(row, F, sIdx0, hi) : null;
+  if (unsettled) out.push(['FAIL', 'iii:settle', `${unsettled.why} at ${(unsettled.f / FPS).toFixed(2)}s — payoff not settled ${HOLDW}s before exit`]);
+  return out;
+}
+
+// (vi) frozen span — nothing tracked changes for >2s inside the content window
+function frozenSpans(series, K, content, F, lo, hi, TOTAL_SEC) {
+  const stepMoved = (j) => {
+    for (let i = 0; i < K.length; i++) {
+      if (!content[i]) continue;
+      const a = series.rows[i][j - 1], b = series.rows[i][j];
+      if (!!a !== !!b) return true;
+      if (a && b && (Math.abs(a[0] - b[0]) > 0.3 || Math.abs(a[1] - b[1]) > 0.3 || Math.abs(a[2] - b[2]) > 0.005 || a[3] !== b[3] || a[5] !== b[5])) return true;
+    }
+    return false;
+  };
+  const spans = [];
+  let lastChange = lo;
+  for (let j = lo + 1; j < hi; j++) {
+    if (stepMoved(j)) lastChange = j;
+    // A flat 2s misses the whole short-film end of the library, and "how long is too long to be still"
+    // is a fraction of the runtime, not an absolute. `cadence` held a perfectly frozen frame for 0.9s
+    // out of 5s — a fifth of the film — and sat under this threshold while `beat-check` called the
+    // span covered because the layers were still present. A short dead tail fell between the two
+    // gates, and only a person watching found it (docs/MISTAKES.md #196, #200).
+    else if (F[j] - F[lastChange] > Math.min(2, Math.max(0.6, TOTAL_SEC * 0.15)) * FPS) { spans.push({ from: F[lastChange], to: F[j] }); lastChange = j; }
+  }
+  return spans;
+}
+
+// (ix) rhythm data: per-element entry duration in this window = first frame opacity >= 0.9
+function entryDurations(series, K, content, F, w) {
+  const out = [];
+  K.forEach((k, i) => {
+    if (!content[i]) return;
+    const lo = F.findIndex((f) => f >= w.start);
+    if (lo < 0) return;
+    for (let jj = lo; jj < F.length && F[jj] <= w.visEnd; jj++) {
+      const v = series.rows[i][jj];
+      if (v && v[2] >= 0.9) { const d = (F[jj] - w.start) / FPS; if (d <= 2 && d > 0) out.push(+d.toFixed(2)); break; }
+    }
+  });
+  return out;
+}
+
+// global final frame (whole video must not end faded)
+function finalHoldFinding(series, K, content, F) {
+  let gMax = 0, gAny = false;
+  K.forEach((k, i) => { if (!content[i]) return; const v = series.rows[i][F.length - 1]; if (v) { gAny = true; gMax = Math.max(gMax, v[2]); } });
+  if (!(gAny && gMax < 0.9)) return null;
+  return { level: 'FAIL', check: 'i:final-hold', seg: '(video)', key: '', msg: `final frame max content opacity ${gMax.toFixed(2)} < 0.9 — the video ends faded out` };
+}
+
+// (xi)/(xii) per-ELEMENT life. Judged over the whole render, not inside a segment window: an element
+// that is on the timeline start to finish and never lands a pixel is invisible to every frame-level
+// check, because every frame it spoils is full of other content.
+function lifeFindings(series, K, content) {
+  const out = [];
+  K.forEach((k, i) => {
+    if (!content[i]) return;
+    if (series.live[i] === 0) return;                     // never laid out at all — it has no life to judge
+    if (series.box[i] === 0 && series.zero[i] > 0)
+      out.push({ level: 'WARN', check: 'xi:degenerate', seg: '(video)', key: k, msg: `laid out for all ${series.live[i]} sampled frame(s) of its life and never has both a width and a height. It animates with no box` });
+    else if (series.box[i] > 0 && series.seen[i] === 0)
+      out.push({ level: 'WARN', check: 'xii:invisible', seg: '(video)', key: k, msg: `boxed for ${series.box[i]} sampled frame(s) and never once reaches 1% opacity. It animates its whole life and is never seen` });
+  });
+  return out;
+}
+
+// (ix) rhythm monotony — timing is a voice, not a constant (MOTION-CRAFT rule 1)
+function rhythmFinding(ENTRIES) {
+  if (ENTRIES.length < 8) return null;
+  const buckets = {};
+  for (const e of ENTRIES) { const bk = (Math.round(e / 0.1) * 0.1).toFixed(1); buckets[bk] = (buckets[bk] || 0) + 1; }
+  const top = Object.entries(buckets).sort((x, y) => y[1] - x[1])[0];
+  if (top[1] / ENTRIES.length <= 0.8) return null;
+  return { level: 'WARN', check: 'ix:rhythm', seg: '(video)', key: '', msg: top[1] + '/' + ENTRIES.length + ' entrances land in the same ~' + top[0] + 's bucket — uniform rhythm reads monotone; vary enterDur/stagger per beat' };
+}
+
+// (x) preset monotony — one entrance device for the whole film = the "all text just rises" failure.
+// Static read of the data (the preset isn't visible in frames). MOTION-CRAFT: one device per scene role.
+function presetFinding(data) {
+  const presets = (data.layers || []).filter((L) => L.split).map((L) => L.preset || 'up');
+  if (presets.length < 5) return null;
+  const cnt = {}; for (const p of presets) cnt[p] = (cnt[p] || 0) + 1;
+  const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
+  if (top[1] / presets.length <= 0.7) return null;
+  return { level: 'WARN', check: 'x:preset', seg: '(video)', key: '', msg: top[1] + '/' + presets.length + ' kinetic text layers use preset "' + top[0] + '" — vary the entrance device per scene (decode/riseClip/tilt/stretch/…), not one global reveal' };
+}
+
+async function audit(format, dataArg) {
+  const dataPath = dataArg || `formats/${format}/sample.json`;
+  const dataName = dataPath.split('/').pop();
+  const data = JSON.parse(fs.readFileSync(path.join(repoRoot, dataPath), 'utf8'));
+  const [VW, VH] = sceneDims(data);
+  const page = await browser.newPage();
+  await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
+  await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
+  await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
+  const err = await page.evaluate(() => window.__engineError);
+  if (err) { await page.close(); return { format, data: dataName, error: String(err), findings: [] }; }
+  const meta = await page.evaluate(() => window.__engine.meta);
+  const total = meta.totalFrames;
+  const TOTAL_SEC = total / FPS;   // runtime in seconds — the frozen-span budget scales with it
+
+  const series = await captureSeries(page, total, STRIDE);
+  await page.close();
+
+  const { windows, windowSource } = shotWindowsOf(data, total);
 
   // ---- checks ----
-  const F = series.frames, at = (i, f) => { const idx = F.findIndex((x) => x >= f); return series.rows[i][idx < 0 ? F.length - 1 : idx]; };
+  const F = series.frames;
   const findings = [];
   // No downgrade any more. The windows above come from joints the film actually declares, so a
   // FAIL-tier clause fired against one is adjudicable and says what it means. TIER is a separate
@@ -195,7 +439,7 @@ async function audit(format, dataArg) {
 
     // Does the gate see ANYTHING in this shot? The finding that used to hang off this tally is gone:
     let any = false;
-    K.forEach((k, i) => { if (!content[i]) return; if (at(i, lastVisF)) any = true; });
+    K.forEach((k, i) => { if (!content[i]) return; if (sampleAt(series, F, i, lastVisF)) any = true; });
     // PER-SHOT (i) IS GONE, and it is the one clause this pass found to be measuring the wrong thing.
     // It asks "does this shot end faded" and can only see `[id], [data-layer="critical"]`, which is not
     // the frame: a `group` or an `html` mock carries the picture while the tracked layers of that shot
@@ -207,174 +451,29 @@ async function audit(format, dataArg) {
     // were all checked against the render and all four end on an empty frame.
     if (!any) add('WARN', 'coverage', w, '', 'no tracked content elements — add data-layer="critical" to key elements');
 
-    // (ix) rhythm data: per-element entry duration in this window = first frame opacity >= 0.9
-    K.forEach((k, i) => {
-      if (!content[i]) return;
-      const lo = F.findIndex((f) => f >= w.start);
-      if (lo < 0) return;
-      for (let jj = lo; jj < F.length && F[jj] <= w.visEnd; jj++) {
-        const v = series.rows[i][jj];
-        if (v && v[2] >= 0.9) { const d = (F[jj] - w.start) / FPS; if (d <= 2 && d > 0) ENTRIES.push(+d.toFixed(2)); break; }
-      }
-    });
+    ENTRIES.push(...entryDurations(series, K, content, F, w));
 
     K.forEach((k, i) => {
       if (!content[i]) return;
-      const idx0 = F.findIndex((f) => f >= w.start), idx1 = F.findIndex((f) => f >= w.visEnd), idx2 = F.findIndex((f) => f >= w.end);
-      const lo = idx0 < 0 ? F.length : idx0, hi = idx1 < 0 ? F.length : idx1, hiFull = idx2 < 0 ? F.length : idx2;
-      // typewriter length over the FULL segment — typing that spills into the exit window is the bug
-      let maxTl = 0;
-      for (let j = lo; j < hiFull; j++) { const v = series.rows[i][j]; if (v) maxTl = Math.max(maxTl, v[3]); }
-      // A LAYER'S OWN EXIT IS A FADE TOO, and (ii) could not tell it from the defect it hunts. Its only
-      // exclusion was the SEGMENT's transition window, so every ordinary layer leaving mid-shot read as
-      // a mid-scene fade — two of them on formats/scene/sample.json, the canonical clean scene. The
-      // window was never the missing piece: this clause is scoped to a LAYER'S LIFE, not to a shot.
-      // An exit is a TERMINAL DESCENT: from some frame on the opacity never rises again and the element
-      // does reach nothing. A dip comes back, and a dip is the bug. Scanning back from the end of the
-      // FULL window (not visEnd) because an exit ramp legitimately finishes inside the transition.
-      let exitFrom = hiFull;
-      {
-        let gone = false, later = null;
-        for (let j = hiFull - 1; j >= lo; j--) {
-          const v = series.rows[i][j], o = v ? v[2] : null;
-          if (o === null || o <= 0.05) { gone = true; later = 0; exitFrom = j; continue; }
-          if (!gone) break;                        // it never reaches nothing: nothing here is an exit
-          if (later !== null && o < later - 1e-9) break;  // rose going forward — the descent starts later
-          later = o; exitFrom = j;
-        }
-        if (!gone) exitFrom = hiFull;
-      }
-      let prev = null, prevF = -1, nums = [], maxDrop = 0, dropAt = 0;
-      for (let j = lo; j < hi; j++) {
-        const v = series.rows[i][j]; const f = F[j];
-        if (v) { const n = parseNum(v[4]); if (n !== null && v[3] < 24) nums.push(n); }
-        if (v && prev && prevF === F[j - 1]) {
-          const dop = prev[2] - v[2];
-          if (dop > maxDrop && f - w.start > w.trans * FPS && j < exitFrom) { maxDrop = dop; dropAt = f; }
-          const dx = Math.abs(v[0] - prev[0]), dy = Math.abs(v[1] - prev[1]);
-          if ((dx > 80 || dy > 80) && f - w.start > 2 && w.end - f > 2) add('WARN', 'vii:jump', w, k, `${Math.max(dx, dy).toFixed(0)}px jump at ${(f / FPS).toFixed(2)}s`);
-        }
-        prev = v; prevF = f;
-      }
-      // (viii) SHIMMER — sustained sub-pixel motion on settled text reads as "shaking glyphs":
-      // slow camera scales and coarse rounding move text 0.05–1.5px EVERY frame with little net
-      // travel. Flag any ≥1s span where ≥80% of steps are tiny but nonzero and net travel < 4px.
-      {
-        const winN = Math.max(4, Math.round(FPS / STRIDE));  // ~1s of samples
-        const pts = [];
-        for (let j = lo; j < hi; j++) { const v = series.rows[i][j]; pts.push(v ? [v[0], v[1]] : null); }
-        let flagged = false;
-        for (let s0 = 0; s0 + winN < pts.length && !flagged; s0 += Math.max(2, winN >> 1)) {
-          let tiny = 0, total = 0;
-          for (let j = s0 + 1; j <= s0 + winN; j++) {
-            if (!pts[j] || !pts[j - 1]) { total = 0; break; }
-            const d = Math.abs(pts[j][0] - pts[j - 1][0]) + Math.abs(pts[j][1] - pts[j - 1][1]);
-            total++;
-            if (d > 0.04 && d < 1.5) tiny++;
-          }
-          if (total >= winN - 1 && tiny / total >= 0.8) {
-            const net = Math.abs(pts[s0 + winN][0] - pts[s0][0]) + Math.abs(pts[s0 + winN][1] - pts[s0][1]);
-            if (net < 4) { add('WARN', 'viii:shimmer', w, k, `sub-pixel motion every frame ~${((F[lo + s0]) / FPS).toFixed(1)}s (slow camera scale or coarse rounding) — text shakes`); flagged = true; }
-          }
-        }
-      }
-      // (ii) reveal monotonicity — opacity must not visibly dip mid-scene
-      if (maxDrop > 0.15) add('FAIL', 'ii:monotonic', w, k, `opacity drops ${maxDrop.toFixed(2)} at ${(dropAt / FPS).toFixed(2)}s (mid-scene fade)`);
-      // (iv) count-up sanity — a counter must be monotone (up OR down: timers count down,
-      // data-tracking values may dip legitimately → only flag when it reverses BOTH ways)
-      if (new Set(nums).size >= 3) {
-        const range = Math.max(...nums) - Math.min(...nums), eps = Math.max(range * 0.01, 0.001);
-        let up = false, down = false, at = null;
-        for (let j = 1; j < nums.length; j++) { if (nums[j] > nums[j - 1] + eps) up = true; if (nums[j] < nums[j - 1] - eps) { down = true; if (up) at = `${nums[j - 1]} → ${nums[j]}`; } }
-        if (up && down && at) add('WARN', 'iv:countup', w, k, `counter reverses direction (${at}) — overshoot or wrong easing?`);
-      }
-      // (v) typewriter completes — text reaches its max length before the exit.
-      // Only a MONOTONE-growing text is a typewriter; count-ups wobble in length ("999,999" → "1.2M").
-      const endV = at(i, lastVisF);
-      if (maxTl >= 8 && endV && maxTl - endV[3] > 0) {
-        const grew = series.rows[i].slice(lo, hi).filter(Boolean).map((v) => v[3]);
-        const monotone = grew.every((v, j) => j === 0 || v >= grew[j - 1]);
-        if (monotone && grew.length > 2 && grew[grew.length - 1] < maxTl && grew[grew.length - 1] - grew[0] >= 8)
-          add('FAIL', 'v:typing', w, k, `text ends at ${endV[3]}/${maxTl} chars before the exit`);
-      }
-      // (iii) settle before exit — steady over the last HOLDW s of the content window
-      const sIdx0 = F.findIndex((f) => f >= w.visEnd - Math.round(HOLDW * FPS));
-      if (sIdx0 >= 0) {
-        let ok = true, why = '';
-        let pv = null, pf = -1;
-        for (let j = sIdx0; j < hi; j++) {
-          const v = series.rows[i][j];
-          if (!v) { pv = null; continue; }
-          if (pv && pf === F[j - 1]) {
-            // Where the rig moved between these two samples, the frame travelled and the layer's screen
-            // position moved with it. (iii) asks whether the LAYER settled, and that question has no
-            // answer here, so it is not asked. Opacity and text are unaffected by the camera and still are.
-            if (v[6] !== pv[6]) { /* the world moved: this step says nothing about the layer's pose */ }
-            else if (Math.abs(v[0] - pv[0]) > 0.7 || Math.abs(v[1] - pv[1]) > 0.7) { ok = false; why = `still moving (Δ${Math.max(Math.abs(v[0] - pv[0]), Math.abs(v[1] - pv[1])).toFixed(1)}px/f)`; }
-            else if (Math.abs(v[2] - pv[2]) > 0.02) { ok = false; why = `opacity still changing (Δ${Math.abs(v[2] - pv[2]).toFixed(3)}/f)`; }
-            else if (v[3] !== pv[3]) { ok = false; why = 'text still changing'; }
-            if (!ok) { add('FAIL', 'iii:settle', w, k, `${why} at ${(F[j] / FPS).toFixed(2)}s — payoff not settled ${HOLDW}s before exit`); break; }
-          }
-          pv = v; pf = F[j];
-        }
-      }
+      for (const [level, check, msg] of elementFindings(series, F, w, i, lastVisF)) add(level, check, w, k, msg);
     });
 
     // (vi) frozen span — nothing tracked changes for >2s inside the content window
     const idx0 = F.findIndex((f) => f >= w.start), idx1 = F.findIndex((f) => f >= w.visEnd);
     const lo = idx0 < 0 ? F.length : idx0, hi = idx1 < 0 ? F.length : idx1;
-    let lastChange = lo;
-    for (let j = lo + 1; j < hi; j++) {
-      let changed = false;
-      for (let i = 0; i < K.length; i++) {
-        if (!content[i]) continue;
-        const a = series.rows[i][j - 1], b = series.rows[i][j];
-        if (!!a !== !!b) { changed = true; break; }
-        if (a && b && (Math.abs(a[0] - b[0]) > 0.3 || Math.abs(a[1] - b[1]) > 0.3 || Math.abs(a[2] - b[2]) > 0.005 || a[3] !== b[3] || a[5] !== b[5])) { changed = true; break; }
-      }
-      if (changed) lastChange = j;
-      // A flat 2s misses the whole short-film end of the library, and "how long is too long to be still"
-      // is a fraction of the runtime, not an absolute. `cadence` held a perfectly frozen frame for 0.9s
-      // out of 5s — a fifth of the film — and sat under this threshold while `beat-check` called the
-      // span covered because the layers were still present. A short dead tail fell between the two
-      // gates, and only a person watching found it (docs/MISTAKES.md #196, #200).
-      else if (F[j] - F[lastChange] > Math.min(2, Math.max(0.6, TOTAL_SEC * 0.15)) * FPS) { add('WARN', 'vi:frozen', w, '', `nothing moves ${(F[lastChange] / FPS).toFixed(1)}s → ${(F[j] / FPS).toFixed(1)}s (${((F[j] - F[lastChange]) / FPS / TOTAL_SEC * 100).toFixed(0)}% of a ${TOTAL_SEC.toFixed(1)}s film)`); lastChange = j; }
-    }
+    for (const s of frozenSpans(series, K, content, F, lo, hi, TOTAL_SEC))
+      add('WARN', 'vi:frozen', w, '', `nothing moves ${(s.from / FPS).toFixed(1)}s → ${(s.to / FPS).toFixed(1)}s (${((s.to - s.from) / FPS / TOTAL_SEC * 100).toFixed(0)}% of a ${TOTAL_SEC.toFixed(1)}s film)`);
   }
 
-  // global final frame (whole video must not end faded)
-  let gMax = 0, gAny = false;
-  K.forEach((k, i) => { if (!content[i]) return; const v = series.rows[i][F.length - 1]; if (v) { gAny = true; gMax = Math.max(gMax, v[2]); } });
-  if (gAny && gMax < 0.9) findings.unshift({ level: 'FAIL', check: 'i:final-hold', seg: '(video)', key: '', msg: `final frame max content opacity ${gMax.toFixed(2)} < 0.9 — the video ends faded out` });
-
-  // (xi)/(xii) per-ELEMENT life. Judged over the whole render, not inside a segment window: an element
-  // that is on the timeline start to finish and never lands a pixel is invisible to every frame-level
-  // check, because every frame it spoils is full of other content.
-  K.forEach((k, i) => {
-    if (!content[i]) return;
-    if (series.live[i] === 0) return;                     // never laid out at all — it has no life to judge
-    if (series.box[i] === 0 && series.zero[i] > 0)
-      findings.push({ level: 'WARN', check: 'xi:degenerate', seg: '(video)', key: k, msg: `laid out for all ${series.live[i]} sampled frame(s) of its life and never has both a width and a height. It animates with no box` });
-    else if (series.box[i] > 0 && series.seen[i] === 0)
-      findings.push({ level: 'WARN', check: 'xii:invisible', seg: '(video)', key: k, msg: `boxed for ${series.box[i]} sampled frame(s) and never once reaches 1% opacity. It animates its whole life and is never seen` });
-  });
-
-  // (ix) rhythm monotony — timing is a voice, not a constant (MOTION-CRAFT rule 1)
-  if (ENTRIES.length >= 8) {
-    const buckets = {};
-    for (const e of ENTRIES) { const bk = (Math.round(e / 0.1) * 0.1).toFixed(1); buckets[bk] = (buckets[bk] || 0) + 1; }
-    const top = Object.entries(buckets).sort((x, y) => y[1] - x[1])[0];
-    if (top[1] / ENTRIES.length > 0.8) findings.push({ level: 'WARN', check: 'ix:rhythm', seg: '(video)', key: '', msg: top[1] + '/' + ENTRIES.length + ' entrances land in the same ~' + top[0] + 's bucket — uniform rhythm reads monotone; vary enterDur/stagger per beat' });
-  }
-
-  // (x) preset monotony — one entrance device for the whole film = the "all text just rises" failure.
-  // Static read of the data (the preset isn't visible in frames). MOTION-CRAFT: one device per scene role.
-  const presets = (data.layers || []).filter((L) => L.split).map((L) => L.preset || 'up');
-  if (presets.length >= 5) {
-    const cnt = {}; for (const p of presets) cnt[p] = (cnt[p] || 0) + 1;
-    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
-    if (top[1] / presets.length > 0.7) findings.push({ level: 'WARN', check: 'x:preset', seg: '(video)', key: '', msg: top[1] + '/' + presets.length + ' kinetic text layers use preset "' + top[0] + '" — vary the entrance device per scene (decode/riseClip/tilt/stretch/…), not one global reveal' });
-  }
+  // The whole-video clauses. `i:final-hold` goes to the FRONT: it is the verdict on the film, not on
+  // one of its shots, and it was written to be read first.
+  const held = finalHoldFinding(series, K, content, F);
+  if (held) findings.unshift(held);
+  findings.push(...lifeFindings(series, K, content));
+  const rhythm = rhythmFinding(ENTRIES);
+  if (rhythm) findings.push(rhythm);
+  const preset = presetFinding(data);
+  if (preset) findings.push(preset);
 
   return { format, data: dataName, total, segments: windows.length, findings, windowSource };
 }
