@@ -15609,3 +15609,51 @@ edge is no longer reported here. The layer-level safe-zone and overflow checks s
 **Blast radius, measured.** The whole audit sweep, 105 scenes, before and after: 103 identical, 0 scenes
 changed exit code, no finding added or removed in kind. Two scenes report the SAME finding one sample
 frame later, because the earliest frame was the one holding a mask at rest.
+
+## #485: the validator's lint was one 225-line body, so adding a rule was surgery
+
+`lintData` in `core/validate.mjs` scored cyclomatic complexity 84 across 225 lines, the highest in the
+repo. It is a LIST of eight independent authoring rules, and every one of them was inlined in one
+function body with its own local helpers, its own shape of loop, and shared mutable `warns`. Nothing
+was wrong with the rules. What was wrong was that reading one meant scrolling past seven, and adding
+one meant editing the middle of a function nobody could hold in their head.
+
+`checkValue` in `blocks/schema.mjs` had the same shape at cx 52: a fourteen-case switch over value
+kinds where each case is a self-contained validator. So did `checkRule` (cx 34) and `params` (cx 30,
+nesting depth 6) in `scripts/gates/block-schema.mjs`.
+
+**Root cause: no seam where the code already had one.** A list of rules, a table of kinds and a
+tokenizer inside a loop are three things with obvious boundaries, and in each case the boundary was
+written as a comment instead of a function. A comment does not stop the next rule being appended to
+the same body.
+
+**The fix.** `lintData` is now the list it always was: eight named rule functions, each taking `data`
+and returning its own warnings, spread in the original order. `checkValue` is a `CHECK` table with one
+validator per kind and a three-line dispatch. `checkRule` is a `SHAPE` table with one shape check per
+kind. `params` hands one destructured parameter to `splitParam`. Adding a rule or a kind is now one
+entry, not an edit inside a long body.
+
+**Blast radius, measured.** `node core/validate.mjs` over the whole library, before and after: the
+complete output is byte-identical (137 ok, 5 failed, every warning in the same order). Same for
+`node scripts/gates/block-schema.mjs` (100 families, 100 tables, 589 declared keys, PASS).
+`lib-test` 1161 passed 0 failed both ways, `lint-test` all pass. Beyond the diffs, `checkValue` was
+run against its pre-refactor self over 396 rule/value pairs, `checkRule` over 48 rule/needDef pairs
+and `params` over all 195 real factories: no difference anywhere.
+
+**Two things found and deliberately NOT fixed**, because this was a behaviour-preserving pass:
+
+- `checkValue` has no case for `kind: 'group'`, though `group` is the seventh entry in `KINDS` and
+  `blocks/terminal-html.mjs:166` declares one. A caller passing that field gets
+  `declares kind "group", which is not one of int, unit, num, hex, hexlist, enum, group, …` — an
+  error that lists the kind it just refused. The table check (`checkRule`) handles `group` fine, so
+  only a real caller trips it, which is why it has survived.
+- `checkValue` looked its kind up on a plain object literal, so a rule declaring `kind: "constructor"`
+  or `kind: "toString"` would have found `Object.prototype` and called it as a validator. No table
+  does, and `checkRule` refuses any kind outside `KINDS` first. The new dispatch uses `Object.hasOwn`,
+  which is a guard, not a behaviour change: every case that reached the old default still reaches the
+  same message.
+
+**What catches it now:** nothing new, and that is the right answer. `scripts/dev/complexity.mjs` is
+the measurement, and a gate on a complexity number would fail dozens of honest functions.
+`splitParam` still scores 27 after the split, because it is a character scanner and cyclomatic
+complexity counts branches: a tokenizer branches. That is the score being a question, not a verdict.
