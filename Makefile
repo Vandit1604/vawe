@@ -887,6 +887,13 @@ code-quality: ## refuse code that is more tangled than the baseline (WRITE=1 to 
 code-quality-top: ## the 25 most tangled functions in the repo
 	node scripts/gates/code-quality.mjs --top
 
+# make no-emdash: the house rule, enforced. The owner's standing rule bans the em dash everywhere,
+# and this repo held about 6000 of them, including inside the engine's own error messages. The gate
+# prints what is still out of scope rather than hiding it, so the remaining debt is never silent.
+no-emdash: ## refuse an em dash anywhere the house rule covers
+	node scripts/dev/no-emdash.mjs
+
+
 # make og: the social card. Its source is site/og/card.html, which reads the SITE's tokens and the
 # SITE's vendored fonts, so the card cannot drift from the site it advertises the way an exported PNG
 # does. The three frames it shows are pulled from three shipped films, not mocked up.

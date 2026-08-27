@@ -19,7 +19,7 @@
 # serves its own copy of a scene, so a film fixed in formats/scene/ keeps playing broken on the site
 # until someone notices by hand. Nobody did for forty days (docs/MISTAKES.md #455). It reads 15 files.
 echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + arsenal + scenes) …"
-if ! make schema-check lib-test craft-coverage doc-refs arsenal-check scenes-json; then
+if ! make schema-check lib-test craft-coverage doc-refs arsenal-check scenes-json no-emdash; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi
