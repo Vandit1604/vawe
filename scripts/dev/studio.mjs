@@ -13,13 +13,13 @@
 //
 // DEV TOOLING ONLY — it does not touch the renderer or the determinism contract; it just calls the engine's
 // own renderFrame(n) from the parent frame (same-origin), exactly as the Go capture loop does per frame.
-import http from 'node:http';
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { patchMotion, upsertKey } from '../author/patch-motion.mjs';
+import { serveRepo } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.env.D || process.argv[2];
@@ -27,8 +27,6 @@ if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: make studio D=f
 const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/');
 const PORT = Number(process.env.PORT) || 8799;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2',
-  '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.wav': 'audio/wav' };
 
 // ---------- the timeline model ----------
 // Where "dead air" comes from. The definition (which layers count as content: a full-canvas opaque rect
@@ -385,9 +383,10 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  document.getElementById('tgl').addEventListener('click',()=>document.getElementById('tl').classList.toggle('off'));
 </script></body></html>`;
 
-const server = http.createServer((req, res) => {
+// Studio's own endpoints. Anything it does not answer falls through to the shared static handler.
+const studioRoutes = (req, res) => {
   const url = req.url.split('?')[0];
-  if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html' }); return res.end(studioPage('scene')); }
+  if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(studioPage('scene')); return true; }
   // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
   // ---- the WRITE side: a drag in the browser becomes a keyframe on disk --------------------------
   // Studio was read-only, so every one of the exemplar's 73 keys was a number typed into JSON by hand,
@@ -419,24 +418,23 @@ const server = http.createServer((req, res) => {
         return reply({ ok: true, keys: keys.length, changed: out !== src, undo: undoStack.length });
       } catch (e) { return reply({ ok: false, error: String(e.message) }, 500); }
     });
-    return;
+    return true;
   }
   if (url === '/api/timeline') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    try { return res.end(JSON.stringify(timelineModel(dataArg))); }
-    catch (e) { return res.end(JSON.stringify({ file: path.basename(dataArg), marks: [], layers: [], gate: { deadAir: [], emptyBeat: [], codes: [], error: String(e.message) } })); }
+    try { res.end(JSON.stringify(timelineModel(dataArg))); }
+    catch (e) { res.end(JSON.stringify({ file: path.basename(dataArg), marks: [], layers: [], gate: { deadAir: [], emptyBeat: [], codes: [], error: String(e.message) } })); }
+    return true;
   }
-  const p = path.join(repoRoot, decodeURIComponent(url).replace(/^\/+/, ''));
-  if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end('not found'); }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-  fs.createReadStream(p).pipe(res);
-});
-server.on('error', (e) => { console.error(e.code === 'EADDRINUSE' ? `✗ port ${PORT} is busy — set a free one: make studio D=${dataArg} PORT=8800` : e.message); process.exit(1); });
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`\n  ▶ vawe studio — ${path.basename(dataArg)}`);
-  console.log(`    open  http://127.0.0.1:${PORT}/studio`);
-  console.log(`    scrub the slider · ← → step a frame · space plays · edit the JSON + reload to see changes`);
-  console.log(`    timeline below: drag it to seek · hazard bands are dead air (beat-check) · hover a bar for its ramps`);
-  console.log(`    theme: light (◐ toggles to dark, and it sticks) · start dark with THEME=dark`);
-  console.log(`    Ctrl-C to stop.\n`);
-});
+  return false;
+};
+
+const oops = (e) => { console.error(e.code === 'EADDRINUSE' ? `✗ port ${PORT} is busy — set a free one: make studio D=${dataArg} PORT=8800` : e.message); process.exit(1); };
+const { server } = await serveRepo({ port: PORT, route: studioRoutes }).catch((e) => (oops(e), {}));
+server.on('error', oops);
+console.log(`\n  ▶ vawe studio — ${path.basename(dataArg)}`);
+console.log(`    open  http://127.0.0.1:${PORT}/studio`);
+console.log(`    scrub the slider · ← → step a frame · space plays · edit the JSON + reload to see changes`);
+console.log(`    timeline below: drag it to seek · hazard bands are dead air (beat-check) · hover a bar for its ramps`);
+console.log(`    theme: light (◐ toggles to dark, and it sticks) · start dark with THEME=dark`);
+console.log(`    Ctrl-C to stop.\n`);

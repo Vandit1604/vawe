@@ -16,28 +16,17 @@
 // Rasterising happens in headless Chromium, the same engine the renderer uses, so a sim can be
 // written against exactly the Canvas 2D the rest of the repo draws with. GPU is disabled: software
 // raster is the deterministic path, and a bake that depends on which machine baked it is not a bake.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sourceHash } from './provenance.mjs';
+import { serveRepo } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const BAKE_ROOT = path.join(repoRoot, 'assets/baked');
 
-// ---- the static file server the browser imports the sim from -------------------------------------
-const MIME = { '.mjs': 'text/javascript', '.js': 'text/javascript', '.json': 'application/json', '.html': 'text/html' };
-function serve() {
-  const server = http.createServer((req, res) => {
-    const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-    fs.createReadStream(p).pipe(res);
-  });
-  return new Promise((r) => server.listen(0, '127.0.0.1', () => r(server)));
-}
 
 const pad = (n) => String(n).padStart(4, '0');
 
@@ -53,8 +42,7 @@ export async function bake(entry, { write = false, onFrame = null } = {}) {
   const rel = '/' + path.relative(repoRoot, abs).split(path.sep).join('/');
   const prov = sourceHash(abs);
 
-  const server = await serve();
-  const port = server.address().port;
+  const { server, port } = await serveRepo();
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-gpu', '--force-device-scale-factor=1'],

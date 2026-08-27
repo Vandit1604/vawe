@@ -7,18 +7,13 @@
 import puppeteer from 'puppeteer'; import fs from 'node:fs';
 import http from 'node:http'; import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { serveRepo } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PORT = 8917;
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css' };
 // file:// cannot load an ES module, so the proof needs an origin. Its own server rather than a make
 // target, so this stays one command with nothing to remember.
-const server = http.createServer((req, res) => {
-  const f = path.join(ROOT, decodeURIComponent(req.url.split('?')[0]));
-  if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream' });
-  res.end(fs.readFileSync(f));
-}).listen(PORT);
+const { server } = await serveRepo({ port: PORT });
 
 const b = await puppeteer.launch({ args: ['--no-sandbox'] });
 const p = await b.newPage(); await p.setCacheEnabled(false);
