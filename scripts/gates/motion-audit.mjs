@@ -318,7 +318,11 @@ function elementFindings(series, F, w, i, lastVisF) {
 }
 
 // (vi) frozen span — nothing tracked changes for >2s inside the content window
-function frozenSpans(series, K, content, F, lo, hi, TOTAL_SEC) {
+function frozenSpans(series, K, content, F, w, TOTAL_SEC) {
+  // The window's own frame indices, derived here rather than at the call site: the caller already
+  // hands over `w`, and computing lo/hi outside made this the only clause needing seven arguments.
+  const idx0 = F.findIndex((f) => f >= w.start), idx1 = F.findIndex((f) => f >= w.visEnd);
+  const lo = idx0 < 0 ? F.length : idx0, hi = idx1 < 0 ? F.length : idx1;
   const stepMoved = (j) => {
     for (let i = 0; i < K.length; i++) {
       if (!content[i]) continue;
@@ -459,9 +463,7 @@ async function audit(format, dataArg) {
     });
 
     // (vi) frozen span — nothing tracked changes for >2s inside the content window
-    const idx0 = F.findIndex((f) => f >= w.start), idx1 = F.findIndex((f) => f >= w.visEnd);
-    const lo = idx0 < 0 ? F.length : idx0, hi = idx1 < 0 ? F.length : idx1;
-    for (const s of frozenSpans(series, K, content, F, lo, hi, TOTAL_SEC))
+    for (const s of frozenSpans(series, K, content, F, w, TOTAL_SEC))
       add('WARN', 'vi:frozen', w, '', `nothing moves ${(s.from / FPS).toFixed(1)}s → ${(s.to / FPS).toFixed(1)}s (${((s.to - s.from) / FPS / TOTAL_SEC * 100).toFixed(0)}% of a ${TOTAL_SEC.toFixed(1)}s film)`);
   }
 
