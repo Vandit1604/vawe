@@ -15609,3 +15609,48 @@ edge is no longer reported here. The layer-level safe-zone and overflow checks s
 **Blast radius, measured.** The whole audit sweep, 105 scenes, before and after: 103 identical, 0 scenes
 changed exit code, no finding added or removed in kind. Two scenes report the SAME finding one sample
 frame later, because the earliest frame was the one holding a mask at rest.
+
+---
+
+## #485 — one static file server, copied 22 times, with 22 hand-rolled path guards
+
+**What.** A structural-duplication scan found the same eight-line static file server in 22 scripts
+under `scripts/` and `verify/`: `scripts/author/preview.mjs`, `scripts/author/scene-page.mjs`,
+`scripts/author/preview-fragment.mjs`, `scripts/author/transition-preview.mjs`,
+`scripts/brand/design-sheet.mjs`, `scripts/dev/seam-c-proto.mjs`, `scripts/dev/spike-depth.mjs`,
+`scripts/dev/studio.mjs`, `scripts/fonts/verify-render.mjs`, `scripts/sim/run.mjs`, seven gates
+(`canvas-purity`, `conformance`, `font-audit`, `motion-audit`, `paints-nothing`, `probe-purity`,
+`scene-snap`, `snap-scenes`), the three site builders and both `verify/` entry points. The wait for
+the engine to boot was copied 17 times in two shapes, and the puppeteer launch + newPage + setViewport
+three more.
+
+**Why it is more than untidiness.** Every one of those 22 copies carried its own path-traversal guard,
+`p.startsWith(repoRoot)`. Twenty-two separately maintained answers to one security question is a drift
+hazard by construction: fixing the guard means finding every copy, so nobody does. And the guard they
+all shared was subtly wrong in the same way, because it was copied: `startsWith` accepts a SIBLING
+whose name merely extends the root's, so a checkout at `/repo` also served `/repo-evil`. One bug, 22
+places, and no test anywhere.
+
+**Root fix.** `scripts/lib/render-harness.mjs` owns the three facts: `serveRepo` (one server, one
+guard, an optional `route(req, res)` hook for the five callers that serve a virtual path from memory),
+`launchPage` and `waitForEngine`. The guard now asks `path.relative` whether a path is at or below the
+root. All 22 call sites receive the server instead of building one; not one of them constructs a
+filesystem path from a request any more. `lib-test` covers the guard, including the sibling case.
+
+**Where the design came from.** The Go renderer had already solved this one level up: `served` in
+`internal/scene/scene.go` is a default-deny prefix allowlist, and its comment says why (that process
+renders scenes written by strangers, so the SERVER, not the layer, decides what may leave). These
+scripts are author-side tools run against your own checkout and every one of them needs the whole repo,
+so the rule here stays root containment. What was borrowed is the principle: one owner decides, callers
+receive.
+
+**Kept, not flattened.** `throwOnTimeout: false` for the four sweeps that record a scene's boot timeout
+and carry on, against the default throw for a single-scene tool. `route` for conformance's `/__conf/`,
+preview-fragment's `/__frag`, design-sheet's `/__sheet`, spike-depth's scene URL and studio's whole
+endpoint set. `port` for studio and seam-c-proto, which need a fixed one, and `serveRepo` now rejects
+on a listen error so studio still prints its EADDRINUSE hint instead of hanging. `args` for scene-page,
+whose capture needs sRGB and hinting off.
+
+**Flattened deliberately, and it is visible here.** One MIME table, the union of all 22: a narrower
+copy served a real file as `application/octet-stream`. And studio's 404 body is now empty rather than
+`not found`.

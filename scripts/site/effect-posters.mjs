@@ -31,9 +31,8 @@
 // genuine miss. No poster ships for an effect that stayed blank at every time tried.
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import puppeteer from 'puppeteer';
+import { serveRepo, launchPage, waitForEngine } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const EFFECTS_JSON = path.join(repoRoot, 'site/lib/effects.json');
@@ -127,23 +126,10 @@ if (!targets.length) {
 }
 
 // ── static server + browser, same shape as scripts/site/type-specimens.mjs ────────────────────────
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
-  '.woff2': 'font/woff2', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
-const server = await new Promise((r) => {
-  const s = http.createServer((req, res) => {
-    const p = path.join(repoRoot, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!p.startsWith(repoRoot) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
-    fs.createReadStream(p).pipe(res);
-  });
-  s.listen(0, '127.0.0.1', () => r(s));
-});
-const port = server.address().port;
-const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
-const page = await browser.newPage();
+const { server, port } = await serveRepo();
 // A card on the page is ~400px wide. 1920x1080 native canvas at a third scale is 640x360, already
 // ~1.6x that card, so a full-size capture (960x540+) would only be extra bytes for 227 files.
-await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 / 3 });
+const { browser, page } = await launchPage({ width: 1920, height: 1080, scale: 1 / 3 });
 
 let shot = 0, failed = 0;
 const failures = [];
@@ -154,16 +140,7 @@ for (const { familyId, stem } of targets) {
   const candidates = candidatesFor(scene, rule(scene));
 
   await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/site/public/assets/effects/${stem}.json&fps=30&aspect=16:9`, { waitUntil: 'load' });
-  const boot = await page.evaluate(() => new Promise((res) => {
-    const t0 = Date.now();
-    const tick = () => {
-      if (window.__engineError) return res(String(window.__engineError));
-      if (window.__engineReady) return res(null);
-      if (Date.now() - t0 > 30000) return res('timeout');
-      requestAnimationFrame(tick);
-    };
-    tick();
-  }));
+  const boot = await waitForEngine(page, { throwOnTimeout: false });
   if (boot) {
     console.error(`  boot fail ${stem}: ${boot}`);
     failures.push({ stem, reason: `boot error: ${boot}` });
