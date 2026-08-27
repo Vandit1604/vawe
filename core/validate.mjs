@@ -766,7 +766,12 @@ export function easeErrors(cfg) { const out = []; easeNames(cfg, '', out); retur
 // lintData(data) → warnings[]: authoring smells the schema can't express. Non-failing (CLI prints ⚠;
 // boot never calls this). Each rule below maps to a real bug that shipped this session and slipped
 // every existing gate. Pure. Scene layers only.
-export function lintData(data) {
+
+// The label the window, count and collision rules report a layer with. Three of the rules below share
+// it, so it is declared once here rather than inside each.
+const layerName = (L, i) => `layer[${i}] (${L.type || 'text'}${typeof L.text === 'string' ? ` "${onScreenText(L.text).slice(0, 24)}"` : ''})`;
+
+function deprecatedEntranceWarns(data) {
   const warns = [];
   // A DEPRECATED entrance still renders, so it is a warning, not an error. It names its replacement,
   // because "deprecated" without one is just a scolding. The engine carries four vocabularies for an
@@ -779,6 +784,11 @@ export function lintData(data) {
     if (outNm && DEPRECATED_EXIT[outNm])
       warns.push(`layers[${i}].fxOut "${outNm}" is deprecated — use ${DEPRECATED_EXIT[outNm]} (#364).`);
   }
+  return warns;
+}
+
+function becomesHandoverWarns(data) {
+  const warns = [];
   // `becomes` overwrites the incoming layer's opening keys: during the handover the layer is not itself
   // yet, so `resolveBecomes` replaces everything it declared inside the window with the computed
   // open/settle pair. That is right, and it is DATA THE AUTHOR WROTE BEING DISCARDED, which has to be
@@ -793,7 +803,11 @@ export function lintData(data) {
       warns.push(`layers[${i}]${A.id ? ` #${A.id}` : ''}: becomes "${B.id}", and the handover takes ${dur}s — so ${lost.length} of "${B.id}"'s own motion key(s) at t≤${dur} (${lost.map((k) => `t=${k.t ?? 0}`).join(', ')}) are DROPPED and replaced by the computed match. Move them past ${dur}s, or shorten \`becomesDur\`.`);
     }
   }
+  return warns;
+}
 
+function omittedKeyResetWarns(data) {
+  const warns = [];
   // A key states what changes and says nothing about the rest, and `motionAt`/`cameraAt` read that
   // silence as IDENTITY, not as "unchanged" (core/sequence.js). That contract is deliberate and scenes
   // depend on it — a layer whose only `opacity` key sits at the end fades over the last segment precisely
@@ -831,7 +845,11 @@ export function lintData(data) {
     });
     walk(data.layers);
   }
+  return warns;
+}
 
+function inertPropWarns(data) {
+  const warns = [];
   // A prop that is read only INSIDE a conditional on another prop does nothing when that other prop is
   // absent — and does it silently, which is the failure class this repo hates most. Three of them live
   // in the anchor/align code, and CLAUDE.md already describes two as things that "render silently"
@@ -860,7 +878,11 @@ export function lintData(data) {
       warns.push(`${label}: \`align: "${L.align}"\` aligns text inside the layer's box, and without \`w\` that box shrink-wraps the text — so the alignment does nothing. Give it \`w\`, or drop \`align\`.`);
     }
   }
+  return warns;
+}
 
+function panWithRestWarns(data) {
+  const warns = [];
   // `panWith` copies a track as DELTAS, so the x/y an author writes is where the layer STARTS and the
   // pan carries it somewhere else. That total is computable and appears nowhere: not in the layer, not
   // in the source, not in any error. Two separate bugs came from guessing it — the button snapping
@@ -885,9 +907,12 @@ export function lintData(data) {
         + `${bx != null ? `, at (${bx + dx}${by != null ? `, ${by + dy}` : ''})` : ''}. Place it by where it STARTS, not where you want it to land.`);
     }
   }
-  const layers = Array.isArray(data?.layers) ? data.layers : [];
-  const name = (L, i) => `layer[${i}] (${L.type || 'text'}${typeof L.text === 'string' ? ` "${onScreenText(L.text).slice(0, 24)}"` : ''})`;
+  return warns;
+}
 
+function missingWindowWarns(data) {
+  const warns = [];
+  const layers = Array.isArray(data?.layers) ? data.layers : [];
   // (1) MISSING WINDOW — a layer with no `duration` renders for the ENTIRE video (engine default). Almost
   //     always a slip (the "+" gutter that leaked for 53s). Full-bleed backdrops opt out with track:0.
   // A layer named as a match cut's OUTGOING form is retimed to end on the joint at boot
@@ -896,20 +921,14 @@ export function lintData(data) {
   const matchFrom = new Set((Array.isArray(data?.matches) ? data.matches : []).map((m) => m && m.from).filter(Boolean));
   layers.forEach((L, i) => {
     if (!isObj(L)) return;
-    if (L.duration == null && L.track !== 0 && !matchFrom.has(L.id)) warns.push(`${name(L, i)} has no "duration" — renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
+    if (L.duration == null && L.track !== 0 && !matchFrom.has(L.id)) warns.push(`${layerName(L, i)} has no "duration" — renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
   });
+  return warns;
+}
 
-  // (2) TYPING + MARKUP — RETIRED, and the retirement is the point. This rule warned that `typing`
-  //     reveals characters literally so `<b>`/`<em>` show as visible tags. That was true when it was
-  //     written and stopped being true on 2026-07-24, when core/layers/text.js gained an HTML-safe
-  //     typing path (`revealHtml`): the VISIBLE characters are counted and revealed while the tags stay
-  //     intact, so an accent word types in ITS OWN COLOUR. The rule outlived the bug by a fortnight and
-  //     went on telling authors to strip markup the engine handles correctly — a gate that manufactures
-  //     a defect, which is worse than one that misses it, because the author pays by making the film
-  //     plainer. docs/MISTAKES.md #85.
-  //     Nothing replaces it: `stripLen`/`revealHtml` are exercised by `make lib-test`, and lint-test
-  //     now pins that typed markup is SILENT so this cannot be reintroduced by reflex.
-
+function countWindowWarns(data) {
+  const warns = [];
+  const layers = Array.isArray(data?.layers) ? data.layers : [];
   // (2b) countStart is LOCAL to the layer's own `start` (count.js: interpolate(t - start, [cs, cs+cd])),
   //      NOT an absolute scene time. Setting it to the wall-clock second the count should fire is the
   //      classic footgun: the animation window falls outside the layer's visible span, so the number
@@ -918,10 +937,15 @@ export function lintData(data) {
   layers.forEach((L, i) => {
     if (!isObj(L) || L.type !== 'count') return;
     const dur = L.duration ?? 2, cs = L.countStart ?? 0, cd = L.countDur ?? 1.2;
-    if (cs >= dur) warns.push(`${name(L, i)} has countStart ${cs} ≥ its duration ${dur}. countStart is LOCAL to the layer's start (t - start), not an absolute scene time — the count never animates and freezes at "from". Use a small local offset (e.g. countStart 0.2) and set the layer's own start to when it appears.`);
-    else if (cs + cd > dur + 0.05) warns.push(`${name(L, i)} count window (countStart ${cs} + countDur ${cd} = ${(cs + cd).toFixed(1)}) runs past its duration ${dur} — the count-up gets cut off before it lands. Shorten countDur or lengthen duration.`);
+    if (cs >= dur) warns.push(`${layerName(L, i)} has countStart ${cs} ≥ its duration ${dur}. countStart is LOCAL to the layer's start (t - start), not an absolute scene time — the count never animates and freezes at "from". Use a small local offset (e.g. countStart 0.2) and set the layer's own start to when it appears.`);
+    else if (cs + cd > dur + 0.05) warns.push(`${layerName(L, i)} count window (countStart ${cs} + countDur ${cd} = ${(cs + cd).toFixed(1)}) runs past its duration ${dur} — the count-up gets cut off before it lands. Shorten countDur or lengthen duration.`);
   });
+  return warns;
+}
 
+function sceneCollisionWarns(data) {
+  const warns = [];
+  const layers = Array.isArray(data?.layers) ? data.layers : [];
   // (3) SCENE COLLISION — two CONTENT layers overlapping in BOTH space and time, not in a
   //     containment/group/anchor relationship = one scene bleeding into the next (the Preferences↔agents
   //     overlap). Pure geometry; needs an explicit w to bound a box (numeric starts only).
@@ -986,10 +1010,33 @@ export function lintData(data) {
       if (ix <= 0 || iy <= 0) continue; // boxes disjoint in space
       const frac = (ix * iy) / Math.min((A.b.x1 - A.b.x0) * (A.b.y1 - A.b.y0), (B.b.x1 - B.b.x0) * (B.b.y1 - B.b.y0));
       // full containment (chip inside a card) is intentional; flag the PARTIAL-overlap band only.
-      if (frac >= 0.3 && frac <= 0.95) warns.push(`${name(A.L, A.i)} and ${name(B.L, B.i)} overlap ~${Math.round(frac * 100)}% in space and ${(t1 - t0).toFixed(1)}s in time (t=${t0.toFixed(1)}-${t1.toFixed(1)}) — a scene may be colliding with the next.`);
+      if (frac >= 0.3 && frac <= 0.95) warns.push(`${layerName(A.L, A.i)} and ${layerName(B.L, B.i)} overlap ~${Math.round(frac * 100)}% in space and ${(t1 - t0).toFixed(1)}s in time (t=${t0.toFixed(1)}-${t1.toFixed(1)}) — a scene may be colliding with the next.`);
     }
   }
   return warns;
+}
+
+export function lintData(data) {
+  return [
+    ...deprecatedEntranceWarns(data),
+    ...becomesHandoverWarns(data),
+    ...omittedKeyResetWarns(data),
+    ...inertPropWarns(data),
+    ...panWithRestWarns(data),
+    ...missingWindowWarns(data),
+    // (2) TYPING + MARKUP — RETIRED, and the retirement is the point. This rule warned that `typing`
+    //     reveals characters literally so `<b>`/`<em>` show as visible tags. That was true when it was
+    //     written and stopped being true on 2026-07-24, when core/layers/text.js gained an HTML-safe
+    //     typing path (`revealHtml`): the VISIBLE characters are counted and revealed while the tags stay
+    //     intact, so an accent word types in ITS OWN COLOUR. The rule outlived the bug by a fortnight and
+    //     went on telling authors to strip markup the engine handles correctly — a gate that manufactures
+    //     a defect, which is worse than one that misses it, because the author pays by making the film
+    //     plainer. docs/MISTAKES.md #85.
+    //     Nothing replaces it: `stripLen`/`revealHtml` are exercised by `make lib-test`, and lint-test
+    //     now pins that typed markup is SILENT so this cannot be reintroduced by reflex.
+    ...countWindowWarns(data),
+    ...sceneCollisionWarns(data),
+  ];
 }
 
 function walk(fields, obj, path, errors) {
