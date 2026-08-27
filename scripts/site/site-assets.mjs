@@ -81,7 +81,7 @@ const MANIFEST = [
   ['films',  'argus-launch',       'argus-launch',           'films/argus-launch.mp4',     1280, 3.0, 16 / 9],
   ['films',  'preface-launch',     'preface-launch',         'films/preface-launch.mp4',   1280, 25.6, 16 / 9],
   ['films',  'threadcite-open',    'threadcite-open',        'films/threadcite-open.mp4', 1280, 8.0, 16 / 9],
-  ['films',  'plinth-ad',          'plinth-ad',              'films/plinth-ad.mp4',       1280, 22.0, 16 / 9],
+  ['films',  'plinth-ad',          'plinth-ad',              'films/plinth-ad.mp4',       1280, 12.0, 16 / 9],
 ];
 
 // showcase-aspect is the one scene that intentionally renders three ratios in one pass.
