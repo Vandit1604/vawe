@@ -15644,7 +15644,7 @@ and `params` over all 195 real factories: no difference anywhere.
 
 - `checkValue` has no case for `kind: 'group'`, though `group` is the seventh entry in `KINDS` and
   `blocks/terminal-html.mjs:166` declares one. A caller passing that field gets
-  `declares kind "group", which is not one of int, unit, num, hex, hexlist, enum, group, …` — an
+  `declares kind "group", which is not one of int, unit, num, hex, hexlist, enum, group, …`, an
   error that lists the kind it just refused. The table check (`checkRule`) handles `group` fine, so
   only a real caller trips it, which is why it has survived.
 - `checkValue` looked its kind up on a plain object literal, so a rule declaring `kind: "constructor"`
