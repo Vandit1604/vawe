@@ -53,6 +53,14 @@ assets/brands/**
 !assets/brands/creed/components/
 !assets/brands/creed/components/filepane.json
 
+# The subject of the `looks` film, for the same reason as the capture above: the site serves looks.json
+# in its editor, and site-engine.mjs refuses to build a site whose scenes name an asset the clone will
+# not have. The previous file here was tracked only because it predated this rule, and it carried no
+# licence record at all. This one is CC0 with its source URL in the folder's credits.json.
+!assets/brands/looks/photos/
+!assets/brands/looks/photos/michelangelo-david-sculpture-head-2.webp
+!assets/brands/looks/photos/credits.json
+
 # paid/licensed fonts — used locally for fidelity, never committed (redistribution)
 assets/fonts/local/
 
