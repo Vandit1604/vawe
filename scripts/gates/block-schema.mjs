@@ -91,32 +91,40 @@ const SCOPE = { ...KIT, ...EXPORTS, T: TOKENS };
 const MISSING = Symbol('no default');
 const UNREADABLE = Symbol('unreadable default');
 
+// One destructured parameter: `name`, `name = expr`, `key: local`, `key: local = expr`. Split at the
+// FIRST top-level `=` (never `==`), then at the first top-level `:` in what is left of the head.
+// Returns null for a rest element and the like: nothing to dial.
+function splitParam(part) {
+  let depth = 0, quote = null, eq = -1, colon = -1;
+  for (let i = 0; i < part.length; i++) {
+    const c = part[i];
+    if (quote) { if (c === '\\') i++; else if (c === quote) quote = null; continue; }
+    if (c === "'" || c === '"' || c === '`') { quote = c; continue; }
+    if (c === '{' || c === '(' || c === '[') depth++;
+    else if (c === '}' || c === ')' || c === ']') depth--;
+    else if (depth === 0 && eq < 0 && c === '=' && part[i + 1] !== '=' && part[i - 1] !== '=') eq = i;
+    else if (depth === 0 && eq < 0 && colon < 0 && c === ':') colon = i;
+  }
+  const head = eq < 0 ? part : part.slice(0, eq);
+  const name = (colon >= 0 ? head.slice(0, colon) : head).trim();
+  if (!/^[A-Za-z_$][\w$]*$/.test(name)) return null;
+  return { name, expr: eq < 0 ? null : part.slice(eq + 1).trim() };
+}
+
+// fn → Map(parameter name → its real default): the value the factory itself falls back to, MISSING when
+// it declares none, UNREADABLE when the expression will not evaluate in the kit scope.
 function params(fn) {
   const body = destructured(fn);
   if (body == null) return null;
   const out = new Map();
   for (const part of splitTop(body)) {
-    // `name`, `name = expr`, `key: local`, `key: local = expr`. Split at the FIRST top-level `=`
-    // (never `==`), then at the first top-level `:` in what is left of the head.
-    let depth = 0, quote = null, eq = -1, colon = -1;
-    for (let i = 0; i < part.length; i++) {
-      const c = part[i];
-      if (quote) { if (c === '\\') i++; else if (c === quote) quote = null; continue; }
-      if (c === "'" || c === '"' || c === '`') { quote = c; continue; }
-      if (c === '{' || c === '(' || c === '[') depth++;
-      else if (c === '}' || c === ')' || c === ']') depth--;
-      else if (depth === 0 && eq < 0 && c === '=' && part[i + 1] !== '=' && part[i - 1] !== '=') eq = i;
-      else if (depth === 0 && eq < 0 && colon < 0 && c === ':') colon = i;
-    }
-    const head = eq < 0 ? part : part.slice(0, eq);
-    const name = (colon >= 0 ? head.slice(0, colon) : head).trim();
-    if (!/^[A-Za-z_$][\w$]*$/.test(name)) continue;   // rest elements and the like: nothing to dial
-    if (eq < 0) { out.set(name, MISSING); continue; }
-    const expr = part.slice(eq + 1).trim();
+    const p = splitParam(part);
+    if (!p) continue;
+    if (p.expr == null) { out.set(p.name, MISSING); continue; }
     try {
       // eslint-disable-next-line no-new-func
-      out.set(name, new Function(...Object.keys(SCOPE), `return (${expr});`)(...Object.values(SCOPE)));
-    } catch { out.set(name, UNREADABLE); }
+      out.set(p.name, new Function(...Object.keys(SCOPE), `return (${p.expr});`)(...Object.values(SCOPE)));
+    } catch { out.set(p.name, UNREADABLE); }
   }
   return out;
 }
@@ -125,6 +133,46 @@ const same = (a, b) => JSON.stringify(a === undefined ? null : a) === JSON.strin
 const show = (v) => (v === MISSING ? '(no default)' : v === UNREADABLE ? '(unreadable)' : JSON.stringify(v));
 
 // ── rule shape ──────────────────────────────────────────────────────────────────────────────────
+// One shape check per kind that has one, so adding a kind is one entry rather than another branch in
+// the middle of checkRule. Each pushes its own issues and recurses through checkRule, which keeps the
+// `needDef` decision in one place.
+function numberShape(rule, at, issues) {
+  if (typeof rule.min !== 'number' || typeof rule.max !== 'number') {
+    issues.push({ kind: 'unbounded-number', at, detail: `a ${rule.kind} must declare min and max. A number with no range is the JS default again, in a longer form.` });
+  }
+  if (typeof rule.min === 'number' && typeof rule.max === 'number' && rule.min > rule.max) {
+    issues.push({ kind: 'inverted-range', at, detail: `min ${rule.min} is above max ${rule.max}.` });
+  }
+}
+
+function fieldsShape(rule, at, issues) {
+  if (!rule.fields || typeof rule.fields !== 'object') {
+    issues.push({ kind: 'fieldless-row', at, detail: `a ${rule.kind} must declare its keys in \`fields\`.` });
+  } else for (const [k, r] of Object.entries(rule.fields)) checkRule(r, `${at}.${k}`, issues, { needDef: rule.kind === 'group' });
+}
+
+const SHAPE = {
+  int: numberShape,
+  num: numberShape,
+  enum(rule, at, issues) {
+    if (!Array.isArray(rule.of) || !rule.of.length) {
+      issues.push({ kind: 'empty-enum', at, detail: 'an enum must name its values in `of`.' });
+    }
+  },
+  list(rule, at, issues) {
+    if (!rule.of || typeof rule.of !== 'object' || Array.isArray(rule.of)) {
+      issues.push({ kind: 'listless-list', at, detail: 'a list must declare its element rule in `of`.' });
+    } else checkRule(rule.of, `${at}[]`, issues, { needDef: false });
+  },
+  oneOf(rule, at, issues) {
+    if (!Array.isArray(rule.of) || rule.of.length < 2) {
+      issues.push({ kind: 'empty-oneof', at, detail: 'a oneOf must list at least two accepted shapes in `of`.' });
+    } else rule.of.forEach((alt, i) => checkRule(alt, `${at}|${i}`, issues, { needDef: false }));
+  },
+  row: fieldsShape,
+  group: fieldsShape,
+};
+
 function checkRule(rule, at, issues, { needDef }) {
   if (rule === null || typeof rule !== 'object' || Array.isArray(rule)) {
     issues.push({ kind: 'bad-rule', at, detail: 'a rule must be an object like { kind, def, … }.' });
@@ -134,32 +182,7 @@ function checkRule(rule, at, issues, { needDef }) {
     issues.push({ kind: 'unknown-kind', at, detail: `kind "${rule.kind}" is not one of ${KINDS.join(', ')}.` });
     return;
   }
-  if ((rule.kind === 'int' || rule.kind === 'num') && (typeof rule.min !== 'number' || typeof rule.max !== 'number')) {
-    issues.push({ kind: 'unbounded-number', at, detail: `a ${rule.kind} must declare min and max. A number with no range is the JS default again, in a longer form.` });
-  }
-  if (rule.kind === 'int' || rule.kind === 'num') {
-    if (typeof rule.min === 'number' && typeof rule.max === 'number' && rule.min > rule.max) {
-      issues.push({ kind: 'inverted-range', at, detail: `min ${rule.min} is above max ${rule.max}.` });
-    }
-  }
-  if (rule.kind === 'enum' && (!Array.isArray(rule.of) || !rule.of.length)) {
-    issues.push({ kind: 'empty-enum', at, detail: 'an enum must name its values in `of`.' });
-  }
-  if (rule.kind === 'list') {
-    if (!rule.of || typeof rule.of !== 'object' || Array.isArray(rule.of)) {
-      issues.push({ kind: 'listless-list', at, detail: 'a list must declare its element rule in `of`.' });
-    } else checkRule(rule.of, `${at}[]`, issues, { needDef: false });
-  }
-  if (rule.kind === 'oneOf') {
-    if (!Array.isArray(rule.of) || rule.of.length < 2) {
-      issues.push({ kind: 'empty-oneof', at, detail: 'a oneOf must list at least two accepted shapes in `of`.' });
-    } else rule.of.forEach((alt, i) => checkRule(alt, `${at}|${i}`, issues, { needDef: false }));
-  }
-  if (rule.kind === 'row' || rule.kind === 'group') {
-    if (!rule.fields || typeof rule.fields !== 'object') {
-      issues.push({ kind: 'fieldless-row', at, detail: `a ${rule.kind} must declare its keys in \`fields\`.` });
-    } else for (const [k, r] of Object.entries(rule.fields)) checkRule(r, `${at}.${k}`, issues, { needDef: rule.kind === 'group' });
-  }
+  SHAPE[rule.kind]?.(rule, at, issues);
   if (!needDef) {
     if ('def' in rule) issues.push({ kind: 'nested-def', at, detail: 'a nested element rule carries no default: an absent field stays absent rather than being invented.' });
     return;
