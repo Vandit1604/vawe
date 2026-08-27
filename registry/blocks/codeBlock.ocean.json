@@ -28,7 +28,7 @@
       "size": 19,
       "lines": [
         "{ \"module\": \"scene\",",
-        "  \"theme\": \"creed\",",
+        "  \"theme\": \"argus\",",
         "  \"fps\": 30 }"
       ]
     },

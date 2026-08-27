@@ -65,7 +65,7 @@
         {
           "type": "text",
           "weight": 400,
-          "text": "  \"theme\": \"creed\",",
+          "text": "  \"theme\": \"argus\",",
           "color": "var(--up)",
           "font": "mono",
           "size": 19,

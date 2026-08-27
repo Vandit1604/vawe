@@ -747,7 +747,7 @@
         },
         "filename": {
           "type": "string",
-          "label": "doc: filename shown in the card header (e.g. creed.md)"
+          "label": "doc: filename shown in the card header (e.g. notes.md)"
         },
         "diff": {
           "type": "string",

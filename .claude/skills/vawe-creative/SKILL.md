@@ -70,6 +70,6 @@ whole catalog + pick), **`vawe-animation`** (easing feel + `springEase`), **`vaw
 work). Full list: `make effects` → `docs/EFFECTS.md`.
 
 ## The bar
-Study `formats/scene/brew-native.json` (warm, expressive) and `formats/scene/creed-launch.json`
+Study `formats/scene/brew-native.json` (warm, expressive) and `formats/scene/preface-launch.json`
 (minimal, technical) before authoring — one of them is your register. If your draft would look at home as
 a Keynote slide deck, it has failed this skill. Make the viewer feel the motion.

@@ -289,8 +289,8 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    content: **DECORATION** dresses the frame and carries no information (a glow, a gradient, a hairline
    rule, a corner tick, a scanline, a logo mark beside a wordmark); **EXPLANATION** does work the words
    cannot. A film can be drowning in the first and have none of the second, and all three Ledgerline cuts
-   were. Size is the whole point: `creed-launch` carries **18 `image` layers (20 counting its two
-   `component`s) of 106**, and every one is a small logo, so a graphic is only the subject at roughly 8% of
+   were. Size is the whole point: `preface-launch` carries **17 `image` layers of 103**,
+   and every one is a small agent logo, so a graphic is only the subject at roughly 8% of
    the canvas or more. **That 8% is a deleted gate's constant and no derivation for it survives**, so use it
    as a rule of thumb you argue with, never a threshold you satisfy. How to decide what to show and how:
    **[`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md)**. The old claim here was "52 of the 93

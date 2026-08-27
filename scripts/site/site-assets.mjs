@@ -79,7 +79,7 @@ const MANIFEST = [
   ['films',  'saas-hero-launch.expanded', 'saas-hero-launch', 'films/saas-hero-launch.mp4', 1280, 28.0, 16 / 9],
   ['films',  'product-feature-tour', 'product-feature-tour', 'films/product-feature-tour.mp4', 1280, 9.0, 16 / 9],
   ['films',  'argus-launch',       'argus-launch',           'films/argus-launch.mp4',     1280, 3.0, 16 / 9],
-  ['films',  'creed-launch',       'creed-launch',           'films/creed-launch.mp4',     1280, 3.0, 16 / 9],
+  ['films',  'preface-launch',     'preface-launch',         'films/preface-launch.mp4',   1280, 25.6, 16 / 9],
   ['films',  'threadcite-open',    'threadcite-open',        'films/threadcite-open.mp4', 1280, 8.0, 16 / 9],
   ['films',  'plinth-ad',          'plinth-ad',              'films/plinth-ad.mp4',       1280, 22.0, 16 / 9],
 ];

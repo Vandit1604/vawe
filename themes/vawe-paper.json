@@ -1,6 +1,6 @@
 {
-  "name": "vawe-creed",
-  "note": "Vawe launch film in CREED art-direction: 90% paper-white typographic stage, ONE terracotta accent used only as thin marks (left-edge bar, ticks, underlines), white hairline cards (no shadows, elevation = 1px line), Geist / Geist Mono. Motion is punchy but never overshoots (bounce 0, ease-out only, faster than creed's base).",
+  "name": "vawe-paper",
+  "note": "Vawe launch film, paper register: 90% paper-white typographic stage, ONE terracotta accent used only as thin marks (left-edge bar, ticks, underlines), white hairline cards (no shadows, elevation = 1px line), Geist / Geist Mono. Motion is punchy but never overshoots (bounce 0, ease-out only, faster than the preface base).",
   "palette": {
     "bg": "#FCFCFC",
     "bg2": "#F7F7F5",

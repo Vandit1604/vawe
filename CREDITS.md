@@ -54,11 +54,18 @@ the scene JSON, not the rendered mp4, not the poster frame, not the palette file
 `site/public/scenes/`, `site/public/assets/films/` and `themes/` blocks near the end of the file), so
 a new brand study cannot ship by being named something nobody thought to exclude.
 
-Two such recreations were published for a while, and were **converted rather than deleted**. What was
-worth keeping in them was never the brand: it was the composition, the timing, the camera and the
+Three such recreations were published for a while, and were **converted rather than deleted**. What
+was worth keeping in them was never the brand: it was the composition, the timing, the camera and the
 beat structure. Those are now
-`formats/scene/saas-hero-launch.json` and `formats/scene/product-feature-tour.json` — fillable
-templates for a fictional product, drawing every colour from a theme token and every mark from an
-inline SVG. Nothing in either file traces to a real company.
+`formats/scene/saas-hero-launch.json`, `formats/scene/product-feature-tour.json` and
+`formats/scene/preface-launch.json` — fillable films for a fictional product, drawing every colour
+from a theme token and every mark from an inline SVG. Nothing in any of the three traces to a real
+company.
+
+The third one keeps one class of real mark and it is worth naming. `preface-launch` shows ten agent
+logos in a compatibility ring, under `assets/brands/preface/agents/`. That is nominative use: the
+film says which tools read the file, and each mark refers to the company that owns it. The captured
+DOM that film used to reach for is gone; its file pane is now built from this engine's own
+primitives.
 
 If you believe something here is misattributed, please open an issue.

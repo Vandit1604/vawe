@@ -47,11 +47,13 @@ assets/brands/**
 !assets/brands/
 !assets/brands/*/
 !assets/brands/*/house-style.md
-# A capture a PLAYABLE scene reaches for. The site serves creed-launch in its editor, and
-# site-engine.mjs refuses to build a site whose scenes reference assets the clone will not have.
-# 347KB of captured DOM, and the alternative is dropping the film from the site.
-!assets/brands/creed/components/
-!assets/brands/creed/components/filepane.json
+# The agent marks the preface-launch compatibility ring names. They are tracked (so a clone has
+# them) and the site serves preface-launch in its editor; site-engine.mjs refuses to build a site
+# whose scenes reference assets the clone will not have. 144K, and every one is the mark of the
+# tool it names. The captured DOM that used to be allowlisted here is gone: the film builds its
+# file pane from our own primitives.
+!assets/brands/preface/agents/
+!assets/brands/preface/agents/*.svg
 
 # The subject of the `looks` film, for the same reason as the capture above: the site serves looks.json
 # in its editor, and site-engine.mjs refuses to build a site whose scenes name an asset the clone will
@@ -79,7 +81,7 @@ formats/scene/*.json
 # ...but the repo's OWN demos are framework presentation, not content: the README film and the
 # showcase clips are what the project ships to explain itself, and an untracked source means a
 # clean clone cannot rebuild them (the same "not reproducible from the repo" bug class as a scene
-# whose aspect lived in shell history). Brand films (argus/stripe/creed) stay untracked — those
+# whose aspect lived in shell history). Brand films (argus/stripe/linear) stay untracked — those
 # are content.
 !formats/scene/vawe-intro.json
 !formats/scene/hero-site.json
@@ -173,8 +175,8 @@ assets/cutouts/
 site/public/assets/films/*
 !site/public/assets/films/argus-launch.mp4
 !site/public/assets/films/argus-launch.jpg
-!site/public/assets/films/creed-launch.mp4
-!site/public/assets/films/creed-launch.jpg
+!site/public/assets/films/preface-launch.mp4
+!site/public/assets/films/preface-launch.jpg
 !site/public/assets/films/plinth-ad.mp4
 !site/public/assets/films/plinth-ad.jpg
 !site/public/assets/films/threadcite-open.mp4
@@ -187,7 +189,7 @@ site/public/assets/films/*
 # Site scene sources (what "view source" opens and the editor loads): same allowlist.
 site/public/scenes/*
 !site/public/scenes/argus-launch.json
-!site/public/scenes/creed-launch.json
+!site/public/scenes/preface-launch.json
 !site/public/scenes/plinth-ad.json
 !site/public/scenes/threadcite-open.json
 !site/public/scenes/ditherkit.json

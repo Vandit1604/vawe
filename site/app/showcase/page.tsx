@@ -33,18 +33,18 @@ export const metadata: Metadata = {
 type Film = { slug: string; brand: string; template?: boolean };
 
 // THE DURATION IS READ FROM THE FILM, NEVER TYPED. Each `dur` used to sit in the array below and go
-// stale the moment a film was recut: `creed-launch` went from 53s to 36s and this page said 0:53,
+// stale the moment a film was recut: `preface-launch` went from 53s to 36s and this page said 0:53,
 // `plinth-ad` said 0:27 against a 0:28 render. Same class as the eight stale counts `site-counts`
 // exists to catch. `scripts/site/films-json.mjs` ffprobes the mp4s the site actually serves.
 const durOf = (slug: string) => (films as Record<string, { label: string }>)[slug]?.label ?? "";
 
-// Two of these used to be pixel recreations of other companies' marketing pages, shipped whole:
+// Three of these used to be pixel recreations of other companies' marketing pages, shipped whole:
 // their headlines, their gradients, their copy. A recreation is also useless to anybody else, because
-// a finished film of someone else's website is not a starting point. Both were converted rather than
-// deleted: same composition, same timing, same camera, same beat structure, with the borrowed
+// a finished film of someone else's website is not a starting point. All three were converted rather
+// than deleted: same composition, same timing, same camera, same beat structure, with the borrowed
 // identity taken out and the copy, palette and mark made fillable. They are the templates below.
 const FILMS: Film[] = [
-  { slug: "creed-launch", brand: "Creed" },
+  { slug: "preface-launch", brand: "Preface", template: true },
   { slug: "saas-hero-launch", brand: "SaaS hero launch", template: true },
   { slug: "product-feature-tour", brand: "Product feature tour", template: true },
   { slug: "argus-launch", brand: "Argus" },

@@ -20,7 +20,7 @@ export const CATALOG = [
   { name: 'codeBlock', family: 'codeBlock', blurb: 'code card; syntax-coloured lines',
     props: { w: 540, dark: true, label: 'scene.json', size: 19, lines: [
       { text: '{', color: '#8898AA' }, { text: '  "module": "scene",', color: '#E8ECF1' },
-      { text: '  "theme": "creed",', color: 'var(--up)' }, { text: '}', color: '#8898AA' }] } },
+      { text: '  "theme": "argus",', color: 'var(--up)' }, { text: '}', color: '#8898AA' }] } },
   { name: 'terminal', family: 'terminal', blurb: 'command prompt; command types in, output answers after it',
     props: { w: 540, command: 'make video', output: ['rendering 1950 frames...', 'done → out.mp4'] } },
   // The two halves of the layers-vs-html head-to-head (docs/MISTAKES.md #410), kept as a matched pair
@@ -187,7 +187,7 @@ export const CATALOG = [
   { name: 'terminal.install', family: 'terminal', blurb: 'install command',
     props: { w: 540, command: 'npm i vawe', output: ['added 1 package', 'added 1 package'] } },
   { name: 'diff.config', family: 'diff', blurb: 'config diff',
-    props: { w: 520, lines: [{ sign: '-', text: '"fps": 30' }, { sign: '+', text: '"fps": 60' }, { sign: ' ', text: '"theme": "creed"' }] } },
+    props: { w: 520, lines: [{ sign: '-', text: '"fps": 30' }, { sign: '+', text: '"fps": 60' }, { sign: ' ', text: '"theme": "argus"' }] } },
   { name: 'barChart.green', family: 'barChart', blurb: 'bars in success green',
     props: { w: 520, h: 240, color: 'var(--up)', data: [{ label: 'Q1', value: 40 }, { label: 'Q2', value: 55 }, { label: 'Q3', value: 68 }, { label: 'Q4', value: 90 }] } },
   { name: 'lineChart.down', family: 'lineChart', blurb: 'declining trend (red)',
@@ -305,7 +305,7 @@ export const CATALOG = [
   { name: 'codeBlock.forest', family: 'codeBlock', blurb: 'code theme · deep green, mossy accents',
     props: {"w": 540, "theme": "forest", "label": "deploy.sh", "size": 19, "lines": ["make video D=launch.json", "make audit", "git push origin main"]} },
   { name: 'codeBlock.ocean', family: 'codeBlock', blurb: 'code theme · deep blue, cyan-led',
-    props: {"w": 540, "theme": "ocean", "label": "scene.json", "size": 19, "lines": ["{ \"module\": \"scene\",", "  \"theme\": \"creed\",", "  \"fps\": 30 }"]} },
+    props: {"w": 540, "theme": "ocean", "label": "scene.json", "size": 19, "lines": ["{ \"module\": \"scene\",", "  \"theme\": \"argus\",", "  \"fps\": 30 }"]} },
   { name: 'codeBlock.neon', family: 'codeBlock', blurb: 'code theme · near-black, vivid signage hues',
     props: {"w": 540, "theme": "neon", "label": "worker.js", "size": 19, "lines": ["onmessage = async (e) => {", "  const f = await renderFrame(e.data.n)", "  postMessage(f) }"]} },
   { name: 'codeBlock.paper', family: 'codeBlock', blurb: 'code theme · warm light, print-ink syntax',

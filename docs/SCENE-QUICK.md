@@ -140,8 +140,8 @@ One cut family per film. Do not mix whip and iris in the same piece.
 
 ## Themes
 
-`vawe` `default` `linear` `stripe` `creed` `argus` `plinth` `threadcite` `tpot` `mercury` `northwind`
-`satara` `ditherkit` `vawe-inter` `vawe-site` `vawe-creed` `creed-launch` `plinth-auto`
+`vawe` `default` `linear` `stripe` `argus` `plinth` `threadcite` `tpot` `mercury` `northwind`
+`satara` `ditherkit` `vawe-inter` `vawe-site` `vawe-paper` `preface` `plinth-auto`
 
 ## Pacing
 

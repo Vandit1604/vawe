@@ -1,17 +1,82 @@
 {
  "module": "scene",
  "orientation": "landscape",
- "theme": "creed-launch",
+ "theme": "preface",
  "duration": 53,
  "audio": {
-  "silent": true
+  "silent": true,
+  "_why": "the film is a person reading their own file over the shoulder of an agent. Every beat is typing, a diff or a count, and a bed would put a mood on a frame whose whole argument is restraint. It plays on a site page and in a feed, where sound is off by default."
  },
  "bg": [
   {
-   "preset": "paper",
-   "from": 0,
-   "to": 53,
+   "preset": "plain",
    "value": "light"
+  },
+  {
+   "preset": "paper",
+   "value": "light"
+  },
+  {
+   "preset": "paper",
+   "value": "light",
+   "opts": {
+    "grain": 0.5
+   }
+  },
+  {
+   "preset": "paperDots",
+   "value": "light",
+   "opts": {
+    "dotAlpha": 0.35,
+    "drift": 0.6
+   }
+  },
+  {
+   "preset": "paperShapes",
+   "value": "light",
+   "opts": {
+    "intensity": 0.4
+   }
+  },
+  {
+   "preset": "paper",
+   "value": "light"
+  },
+  {
+   "preset": "soft",
+   "value": "light",
+   "opts": {
+    "intensity": 0.45
+   }
+  },
+  {
+   "preset": "paperDots",
+   "value": "light",
+   "opts": {
+    "dotAlpha": 0.4,
+    "drift": 0.9
+   }
+  },
+  {
+   "preset": "soft",
+   "value": "light",
+   "opts": {
+    "intensity": 0.5
+   }
+  },
+  {
+   "preset": "paperShapes",
+   "value": "light",
+   "opts": {
+    "intensity": 0.5
+   }
+  },
+  {
+   "preset": "gradientWash",
+   "value": "light",
+   "opts": {
+    "intensity": 0.35
+   }
   }
  ],
  "camera": [
@@ -79,7 +144,7 @@
  "layers": [
   {
    "type": "text",
-   "text": "Every agent <b>forgets who you are.</b>",
+   "text": "Every agent <b>starts from zero.</b>",
    "font": "sans",
    "size": 42,
    "weight": 600,
@@ -112,7 +177,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/claude.svg",
+   "src": "/assets/brands/preface/agents/claude.svg",
    "x": 169,
    "y": 427,
    "w": 56,
@@ -125,7 +190,7 @@
   },
   {
    "type": "text",
-   "text": "so, quick context about me",
+   "text": "again, here is who I am",
    "font": "mono",
    "size": 24,
    "weight": 400,
@@ -159,7 +224,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/chatgpt.svg",
+   "src": "/assets/brands/preface/agents/chatgpt.svg",
    "x": 1209,
    "y": 407,
    "w": 56,
@@ -172,7 +237,7 @@
   },
   {
    "type": "text",
-   "text": "so, quick context about me",
+   "text": "again, here is who I am",
    "font": "mono",
    "size": 24,
    "weight": 400,
@@ -205,7 +270,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/cursor.svg",
+   "src": "/assets/brands/preface/agents/cursor.svg",
    "x": 689,
    "y": 767,
    "w": 56,
@@ -218,7 +283,7 @@
   },
   {
    "type": "text",
-   "text": "so, quick context about me",
+   "text": "again, here is who I am",
    "font": "mono",
    "size": 24,
    "weight": 400,
@@ -236,84 +301,74 @@
   },
   {
    "type": "text",
-   "text": "Your context file for all agents",
+   "text": "One file. Every agent.",
    "font": "sans",
-   "size": 72,
+   "size": 104,
    "weight": 700,
    "color": "#0A0A0A",
    "tracking": "-0.03em",
-   "x": 360,
+   "x": 240,
    "y": 70,
-   "w": 1200,
+   "w": 1440,
    "align": "center",
    "split": "word",
-   "preset": "riseClip",
+   "preset": "blur",
    "each": 0.55,
    "stagger": 0.05,
    "start": 5.4,
-   "duration": 5.4,
+   "duration": 5,
    "exitDur": 0.35
   },
   {
    "type": "text",
-   "text": "One markdown file every agent reads before it answers.",
+   "text": "Write it once. Everything reads it.",
    "font": "sans",
    "size": 28,
    "weight": 400,
    "color": "#5C5C58",
    "x": 360,
-   "y": 162,
+   "y": 212,
    "w": 1200,
    "align": "center",
    "start": 5.9,
-   "duration": 4.9,
+   "duration": 4,
    "anim": "rise",
    "enterDur": 0.6,
    "exitDur": 0.3
   },
   {
-   "type": "component",
-   "src": "/assets/brands/creed/components/filepane.json",
+   "type": "html",
+   "id": "heropane",
    "x": 361,
-   "y": 214,
+   "y": 272,
    "w": 1198,
-   "h": 790,
+   "h": 732,
    "start": 6.1,
-   "duration": 4.7,
+   "duration": 4.9,
    "anim": "rise",
    "enterDur": 0.6,
    "out": "defocus",
-   "exitDur": 0.4
-  },
-  {
-   "type": "rect",
-   "x": -6,
-   "y": 0,
-   "w": 2,
-   "h": 1080,
-   "bg": "#C96442",
-   "radius": 0,
-   "start": 11,
-   "duration": 0.55,
-   "anim": "none",
-   "track": 90,
-   "motion": [
+   "exitDur": 0.4,
+   "parts": [
     {
-     "t": 0,
-     "x": 0,
-     "opacity": 1
+     "select": ".hp-rule",
+     "anim": "widen",
+     "each": 0.5,
+     "delay": 0.15
     },
     {
-     "t": 0.4,
-     "x": 1932,
-     "opacity": 1
-    },
-    {
-     "t": 0.5,
-     "x": 1932,
-     "opacity": 0
+     "select": ".hp-row",
+     "anim": "fadeUp",
+     "each": 0.5,
+     "stagger": 0.09,
+     "delay": 0.25,
+     "out": true,
+     "exitDur": 0.3
     }
-   ]
+   ],
+   "html": "<style>\n  .hp-pane{box-sizing:border-box;width:100%;height:100%;background:var(--paper);\n    border:1px solid #D6D6D2;border-radius:14px;padding:44px 66px;\n    display:flex;flex-direction:column;gap:16px;overflow:hidden}\n  .hp-bar{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:22px;color:#757570}\n  .hp-dot{width:9px;height:9px;border-radius:50%;background:#C96442}\n  .hp-row{display:flex;flex-direction:column;gap:8px}\n  .hp-h{font-family:var(--font-sans);font-weight:600;font-size:36px;color:#0A0A0A}\n  .hp-b{font-family:var(--font-mono);font-weight:400;font-size:23px;color:#5C5C58}\n  .hp-rule{height:1px;background:#E8E8E5}\n</style><div class=\"hp-pane\"><div class=\"hp-bar\"><span class=\"hp-dot\"></span>preface.md</div><div class=\"hp-rule\"></div><div class=\"hp-row\"><div class=\"hp-h\">Person</div><div class=\"hp-b\">Solo founder. Building a deploy dashboard. Based in Porto.</div></div><div class=\"hp-row\"><div class=\"hp-h\">Aims</div><div class=\"hp-b\">Ship v2 this quarter without burning weekends.</div></div><div class=\"hp-row\"><div class=\"hp-h\">Craft</div><div class=\"hp-b\">Reviews everything in one block after standup.</div></div><div class=\"hp-row\"><div class=\"hp-h\">Voice</div><div class=\"hp-b\">Answer first, then what backs it.</div></div><div class=\"hp-row\"><div class=\"hp-h\">Rhythm</div><div class=\"hp-b\">Deep work 7 to 11am. No meetings Wednesdays.</div></div><div class=\"hp-row\"><div class=\"hp-h\">Limits</div><div class=\"hp-b\">Never commits to a date without a spare week.</div></div></div>",
+   "becomes": "filecard",
+   "becomesDur": 0.42
   },
   {
    "type": "rect",
@@ -354,7 +409,7 @@
    "children": [
     {
      "type": "text",
-     "text": "Identity",
+     "text": "Person",
      "font": "mono",
      "size": 25,
      "weight": 500,
@@ -362,7 +417,7 @@
     },
     {
      "type": "text",
-     "text": "Goals",
+     "text": "Aims",
      "font": "mono",
      "size": 25,
      "weight": 400,
@@ -370,7 +425,7 @@
     },
     {
      "type": "text",
-     "text": "Work",
+     "text": "Craft",
      "font": "mono",
      "size": 25,
      "weight": 400,
@@ -378,7 +433,7 @@
     },
     {
      "type": "text",
-     "text": "Preferences",
+     "text": "Voice",
      "font": "mono",
      "size": 25,
      "weight": 400,
@@ -386,7 +441,7 @@
     },
     {
      "type": "text",
-     "text": "Routines",
+     "text": "Rhythm",
      "font": "mono",
      "size": 25,
      "weight": 400,
@@ -394,13 +449,15 @@
     },
     {
      "type": "text",
-     "text": "Constraints",
+     "text": "Limits",
      "font": "mono",
      "size": 25,
      "weight": 400,
      "color": "#757570"
     }
-   ]
+   ],
+   "each": 0.45,
+   "stagger": 0.08
   },
   {
    "type": "rect",
@@ -411,14 +468,15 @@
    "bg": "#FFFFFF",
    "border": "1px solid #D6D6D2",
    "radius": 14,
-   "start": 11.2,
-   "duration": 8.3,
+   "start": 11,
+   "duration": 8.5,
    "anim": "fade",
-   "exitDur": 0.4
+   "exitDur": 0.4,
+   "id": "filecard"
   },
   {
    "type": "text",
-   "text": "creed.md",
+   "text": "preface.md",
    "font": "mono",
    "size": 24,
    "weight": 500,
@@ -434,7 +492,7 @@
   },
   {
    "type": "text",
-   "text": "Identity",
+   "text": "Person",
    "font": "sans",
    "size": 32,
    "weight": 600,
@@ -451,7 +509,7 @@
   },
   {
    "type": "text",
-   "text": "Founder building Helm, a CI dashboard. Ex-Stripe, based in Lisbon.",
+   "text": "Solo founder. Building a deploy dashboard. Based in Porto.",
    "font": "mono",
    "size": 22,
    "weight": 400,
@@ -467,7 +525,7 @@
   },
   {
    "type": "text",
-   "text": "Goals",
+   "text": "Aims",
    "font": "sans",
    "size": 32,
    "weight": 600,
@@ -484,7 +542,7 @@
   },
   {
    "type": "text",
-   "text": "Ship Helm v2 this quarter without burning weekends.",
+   "text": "Ship v2 this quarter without burning weekends.",
    "font": "mono",
    "size": 22,
    "weight": 400,
@@ -500,7 +558,7 @@
   },
   {
    "type": "text",
-   "text": "Work",
+   "text": "Craft",
    "font": "sans",
    "size": 32,
    "weight": 600,
@@ -517,7 +575,7 @@
   },
   {
    "type": "text",
-   "text": "Batches every review into one block after standup.",
+   "text": "Reviews everything in one block after standup.",
    "font": "mono",
    "size": 22,
    "weight": 400,
@@ -533,9 +591,9 @@
   },
   {
    "type": "text",
-   "text": "Preferences",
+   "text": "Voice",
    "font": "sans",
-   "size": 32,
+   "size": 54,
    "weight": 600,
    "color": "#0A0A0A",
    "x": 560,
@@ -550,7 +608,7 @@
   },
   {
    "type": "text",
-   "text": "Lead with the answer. Skip filler and over-praise.",
+   "text": "Answer first, then what backs it.",
    "font": "mono",
    "size": 22,
    "weight": 400,
@@ -566,7 +624,7 @@
   },
   {
    "type": "text",
-   "text": "Routines",
+   "text": "Rhythm",
    "font": "sans",
    "size": 32,
    "weight": 600,
@@ -583,13 +641,13 @@
   },
   {
    "type": "text",
-   "text": "Constraints",
+   "text": "Limits",
    "font": "sans",
    "size": 32,
    "weight": 600,
    "color": "#0A0A0A",
    "x": 560,
-   "y": 762,
+   "y": 806,
    "w": 900,
    "align": "left",
    "anim": "rise",
@@ -600,7 +658,39 @@
   },
   {
    "type": "text",
-   "text": "Preferences",
+   "text": "Deep work 7 to 11am. No meetings Wednesdays.",
+   "font": "mono",
+   "size": 22,
+   "weight": 400,
+   "color": "#5C5C58",
+   "x": 560,
+   "y": 742,
+   "w": 940,
+   "align": "left",
+   "anim": "fade",
+   "start": 15.9,
+   "duration": 3.6,
+   "exitDur": 0.4
+  },
+  {
+   "type": "text",
+   "text": "Never commits to a date without a spare week.",
+   "font": "mono",
+   "size": 22,
+   "weight": 400,
+   "color": "#5C5C58",
+   "x": 560,
+   "y": 856,
+   "w": 940,
+   "align": "left",
+   "anim": "fade",
+   "start": 17,
+   "duration": 2.5,
+   "exitDur": 0.4
+  },
+  {
+   "type": "text",
+   "text": "Voice",
    "font": "sans",
    "size": 44,
    "weight": 600,
@@ -610,7 +700,7 @@
    "w": 900,
    "align": "left",
    "split": "word",
-   "preset": "riseClip",
+   "preset": "up",
    "each": 0.5,
    "stagger": 0.05,
    "start": 19.8,
@@ -632,17 +722,17 @@
   },
   {
    "type": "text",
-   "text": "Lead with the answer, then the supporting detail.",
+   "text": "Answer first, then the detail.",
    "font": "mono",
-   "size": 32,
+   "size": 40,
    "weight": 400,
    "color": "#0A0A0A",
    "x": 560,
-   "y": 370,
+   "y": 386,
    "w": 1100,
    "align": "left",
    "split": "word",
-   "preset": "riseClip",
+   "preset": "up",
    "each": 0.4,
    "stagger": 0.028,
    "start": 20.2,
@@ -651,17 +741,17 @@
   },
   {
    "type": "text",
-   "text": "Keep replies tight unless depth genuinely helps.",
+   "text": "Short unless depth helps.",
    "font": "mono",
-   "size": 32,
+   "size": 40,
    "weight": 400,
    "color": "#0A0A0A",
    "x": 560,
-   "y": 448,
+   "y": 476,
    "w": 1100,
    "align": "left",
    "split": "word",
-   "preset": "riseClip",
+   "preset": "up",
    "each": 0.4,
    "stagger": 0.028,
    "start": 20.7,
@@ -670,17 +760,17 @@
   },
   {
    "type": "text",
-   "text": "Skip filler, hedging, and over-praise.",
+   "text": "Skip the flattery.",
    "font": "mono",
-   "size": 32,
+   "size": 40,
    "weight": 400,
    "color": "#0A0A0A",
    "x": 560,
-   "y": 526,
+   "y": 566,
    "w": 1100,
    "align": "left",
    "split": "word",
-   "preset": "riseClip",
+   "preset": "up",
    "each": 0.4,
    "stagger": 0.028,
    "start": 21.2,
@@ -730,11 +820,27 @@
    "out": "defocus",
    "exitDur": 0.35,
    "track": 3,
-   "html": "<svg viewBox=\"0 0 1356 796\" width=\"1356\" height=\"796\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M 678 208 L 678 118\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"90\" style=\"stroke-dashoffset:calc(90px * (1 - clamp(0,(var(--t,0) - 24.05) * 2.2,1)))\"/><path d=\"M 930.2 208 L 995.1 159.1\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"81.3\" style=\"stroke-dashoffset:calc(81.3px * (1 - clamp(0,(var(--t,0) - 24.10) * 2.2,1)))\"/><path d=\"M 956 348.5 L 1208.9 303.5\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"256.9\" style=\"stroke-dashoffset:calc(256.9px * (1 - clamp(0,(var(--t,0) - 24.15) * 2.2,1)))\"/><path d=\"M 956 447.5 L 1208.9 492.5\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"256.9\" style=\"stroke-dashoffset:calc(256.9px * (1 - clamp(0,(var(--t,0) - 24.20) * 2.2,1)))\"/><path d=\"M 930.2 588 L 995.1 636.9\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"81.3\" style=\"stroke-dashoffset:calc(81.3px * (1 - clamp(0,(var(--t,0) - 24.25) * 2.2,1)))\"/><path d=\"M 678 588 L 678 678\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"90\" style=\"stroke-dashoffset:calc(90px * (1 - clamp(0,(var(--t,0) - 24.30) * 2.2,1)))\"/><path d=\"M 425.8 588 L 360.9 636.9\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"81.3\" style=\"stroke-dashoffset:calc(81.3px * (1 - clamp(0,(var(--t,0) - 24.35) * 2.2,1)))\"/><path d=\"M 400 447.5 L 147.1 492.5\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"256.9\" style=\"stroke-dashoffset:calc(256.9px * (1 - clamp(0,(var(--t,0) - 24.40) * 2.2,1)))\"/><path d=\"M 400 348.5 L 147.1 303.5\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"256.9\" style=\"stroke-dashoffset:calc(256.9px * (1 - clamp(0,(var(--t,0) - 24.45) * 2.2,1)))\"/><path d=\"M 425.8 208 L 360.9 159.1\" fill=\"none\" stroke=\"#D6D6D2\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-dasharray=\"81.3\" style=\"stroke-dashoffset:calc(81.3px * (1 - clamp(0,(var(--t,0) - 24.50) * 2.2,1)))\"/><circle cx=\"678\" cy=\"58\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.05) * 2.2,1)\"/><circle cx=\"678\" cy=\"58\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 24.95) * 3,1) * 0.55)\"/><circle cx=\"1043\" cy=\"123\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.10) * 2.2,1)\"/><circle cx=\"1043\" cy=\"123\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.00) * 3,1) * 0.55)\"/><circle cx=\"1268\" cy=\"293\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.15) * 2.2,1)\"/><circle cx=\"1268\" cy=\"293\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.05) * 3,1) * 0.55)\"/><circle cx=\"1268\" cy=\"503\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.20) * 2.2,1)\"/><circle cx=\"1268\" cy=\"503\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.10) * 3,1) * 0.55)\"/><circle cx=\"1043\" cy=\"673\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.25) * 2.2,1)\"/><circle cx=\"1043\" cy=\"673\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.15) * 3,1) * 0.55)\"/><circle cx=\"678\" cy=\"738\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.30) * 2.2,1)\"/><circle cx=\"678\" cy=\"738\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.20) * 3,1) * 0.55)\"/><circle cx=\"313\" cy=\"673\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.35) * 2.2,1)\"/><circle cx=\"313\" cy=\"673\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.25) * 3,1) * 0.55)\"/><circle cx=\"88\" cy=\"503\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.40) * 2.2,1)\"/><circle cx=\"88\" cy=\"503\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.30) * 3,1) * 0.55)\"/><circle cx=\"88\" cy=\"293\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.45) * 2.2,1)\"/><circle cx=\"88\" cy=\"293\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.35) * 3,1) * 0.55)\"/><circle cx=\"313\" cy=\"123\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\" style=\"opacity:clamp(0,(var(--t,0) - 24.50) * 2.2,1)\"/><circle cx=\"313\" cy=\"123\" r=\"52\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" style=\"opacity:calc(clamp(0,(var(--t,0) - 25.40) * 3,1) * 0.55)\"/><path d=\"M 678 208 L 678 118\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 150\" style=\"stroke-dashoffset:calc(-1 * 120px * clamp(0,(var(--t,0) - 24.40) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.40) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.40) * 1.8,1)))\"/><path d=\"M 930.2 208 L 995.1 159.1\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 141.3\" style=\"stroke-dashoffset:calc(-1 * 111.3px * clamp(0,(var(--t,0) - 24.45) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.45) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.45) * 1.8,1)))\"/><path d=\"M 956 348.5 L 1208.9 303.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 316.9\" style=\"stroke-dashoffset:calc(-1 * 286.9px * clamp(0,(var(--t,0) - 24.50) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.50) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.50) * 1.8,1)))\"/><path d=\"M 956 447.5 L 1208.9 492.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 316.9\" style=\"stroke-dashoffset:calc(-1 * 286.9px * clamp(0,(var(--t,0) - 24.55) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.55) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.55) * 1.8,1)))\"/><path d=\"M 930.2 588 L 995.1 636.9\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 141.3\" style=\"stroke-dashoffset:calc(-1 * 111.3px * clamp(0,(var(--t,0) - 24.60) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.60) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.60) * 1.8,1)))\"/><path d=\"M 678 588 L 678 678\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 150\" style=\"stroke-dashoffset:calc(-1 * 120px * clamp(0,(var(--t,0) - 24.65) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.65) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.65) * 1.8,1)))\"/><path d=\"M 425.8 588 L 360.9 636.9\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 141.3\" style=\"stroke-dashoffset:calc(-1 * 111.3px * clamp(0,(var(--t,0) - 24.70) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.70) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.70) * 1.8,1)))\"/><path d=\"M 400 447.5 L 147.1 492.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 316.9\" style=\"stroke-dashoffset:calc(-1 * 286.9px * clamp(0,(var(--t,0) - 24.75) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.75) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.75) * 1.8,1)))\"/><path d=\"M 400 348.5 L 147.1 303.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 316.9\" style=\"stroke-dashoffset:calc(-1 * 286.9px * clamp(0,(var(--t,0) - 24.80) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.80) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.80) * 1.8,1)))\"/><path d=\"M 425.8 208 L 360.9 159.1\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-dasharray=\"30 141.3\" style=\"stroke-dashoffset:calc(-1 * 111.3px * clamp(0,(var(--t,0) - 24.85) * 1.8,1));opacity:calc(clamp(0,(var(--t,0) - 24.85) * 14,1) * (1 - clamp(0,(var(--t,0) - 24.85) * 1.8,1)))\"/></svg>"
+   "parts": [
+    {
+     "select": "path.spoke",
+     "anim": "drawOn",
+     "each": 0.5,
+     "stagger": 0.05,
+     "delay": 0.25
+    },
+    {
+     "select": "circle.node",
+     "anim": "popIn",
+     "each": 0.42,
+     "stagger": 0.05,
+     "delay": 0.45
+    }
+   ],
+   "html": "<svg viewBox=\"0 0 1356 796\" width=\"1356\" height=\"796\" xmlns=\"http://www.w3.org/2000/svg\"><path class=\"spoke\" d=\"M 678 208 L 678 118\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 930.2 208 L 995.1 159.1\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 956 348.5 L 1208.9 303.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 956 447.5 L 1208.9 492.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 930.2 588 L 995.1 636.9\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 678 588 L 678 678\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 425.8 588 L 360.9 636.9\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 400 447.5 L 147.1 492.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 400 348.5 L 147.1 303.5\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><path class=\"spoke\" d=\"M 425.8 208 L 360.9 159.1\" fill=\"none\" stroke=\"#C96442\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle class=\"node\" cx=\"678\" cy=\"58\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"1043\" cy=\"123\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"1268\" cy=\"293\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"1268\" cy=\"503\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"1043\" cy=\"673\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"678\" cy=\"738\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"313\" cy=\"673\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"88\" cy=\"503\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"88\" cy=\"293\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/><circle class=\"node\" cx=\"313\" cy=\"123\" r=\"52\" fill=\"#FCFCFC\" stroke=\"#E8E8E5\" stroke-width=\"1.5\"/></svg>",
+   "id": "agentring"
   },
   {
-   "type": "component",
-   "src": "/assets/brands/creed/components/filepane.json",
+   "type": "html",
    "x": 694,
    "y": 372,
    "w": 520,
@@ -745,11 +851,21 @@
    "enterDur": 0.5,
    "out": "defocus",
    "exitDur": 0.35,
-   "track": 5
+   "track": 5,
+   "parts": [
+    {
+     "select": ".sp-row",
+     "anim": "fadeUp",
+     "each": 0.42,
+     "stagger": 0.08,
+     "delay": 0.2
+    }
+   ],
+   "html": "<style>\n  .sp-pane{box-sizing:border-box;width:100%;height:100%;background:var(--paper);\n    border:1px solid #D6D6D2;border-radius:14px;padding:26px 30px;\n    display:flex;flex-direction:column;gap:14px;overflow:hidden}\n  .sp-bar{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:15px;color:#757570}\n  .sp-dot{width:7px;height:7px;border-radius:50%;background:#C96442}\n  .sp-row{display:flex;flex-direction:column;gap:5px}\n  .sp-h{font-family:var(--font-sans);font-weight:600;font-size:22px;color:#0A0A0A}\n  .sp-b{font-family:var(--font-mono);font-weight:400;font-size:15px;color:#5C5C58}\n  .sp-rule{height:1px;background:#E8E8E5}\n</style><div class=\"sp-pane\"><div class=\"sp-bar\"><span class=\"sp-dot\"></span>preface.md</div><div class=\"sp-rule\"></div><div class=\"sp-row\"><div class=\"sp-h\">Person</div><div class=\"sp-b\">Solo founder. Deploy dashboard.</div></div><div class=\"sp-row\"><div class=\"sp-h\">Voice</div><div class=\"sp-b\">Answer first, then what backs it.</div></div><div class=\"sp-row\"><div class=\"sp-h\">Rhythm</div><div class=\"sp-b\">Deep work 7 to 11am.</div></div><div class=\"sp-row\"><div class=\"sp-h\">Limits</div><div class=\"sp-b\">No date without a spare week.</div></div></div>"
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/claude.svg",
+   "src": "/assets/brands/preface/agents/claude.svg",
    "x": 918,
    "y": 168,
    "w": 72,
@@ -784,7 +900,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/chatgpt.svg",
+   "src": "/assets/brands/preface/agents/chatgpt.svg",
    "x": 1283,
    "y": 233,
    "w": 72,
@@ -819,7 +935,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/cursor.svg",
+   "src": "/assets/brands/preface/agents/cursor.svg",
    "x": 1508,
    "y": 403,
    "w": 72,
@@ -854,7 +970,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/codex.svg",
+   "src": "/assets/brands/preface/agents/codex.svg",
    "x": 1508,
    "y": 613,
    "w": 72,
@@ -889,7 +1005,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/devin.svg",
+   "src": "/assets/brands/preface/agents/devin.svg",
    "x": 1283,
    "y": 783,
    "w": 72,
@@ -924,7 +1040,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/replit.svg",
+   "src": "/assets/brands/preface/agents/replit.svg",
    "x": 918,
    "y": 848,
    "w": 72,
@@ -959,7 +1075,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/v0.svg",
+   "src": "/assets/brands/preface/agents/v0.svg",
    "x": 553,
    "y": 783,
    "w": 72,
@@ -994,7 +1110,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/grok.svg",
+   "src": "/assets/brands/preface/agents/grok.svg",
    "x": 328,
    "y": 613,
    "w": 72,
@@ -1029,7 +1145,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/opencode.svg",
+   "src": "/assets/brands/preface/agents/opencode.svg",
    "x": 328,
    "y": 403,
    "w": 72,
@@ -1064,7 +1180,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/claudecode.svg",
+   "src": "/assets/brands/preface/agents/claudecode.svg",
    "x": 553,
    "y": 233,
    "w": 72,
@@ -1099,52 +1215,33 @@
   },
   {
    "type": "text",
-   "text": "Every agent <b>reads it first.</b>",
+   "text": "Your {} travels with you.",
    "font": "sans",
    "size": 46,
    "weight": 600,
    "color": "#0A0A0A",
-   "emColor": "#C96442",
    "x": 360,
-   "y": 968,
+   "y": 938,
    "w": 1200,
    "align": "center",
-   "split": "word",
-   "preset": "riseClip",
-   "each": 0.5,
-   "stagger": 0.045,
-   "start": 25.3,
-   "duration": 1.5,
+   "anim": "rise",
+   "enterDur": 0.45,
    "exitDur": 0.3,
-   "track": 7
-  },
-  {
-   "type": "rect",
-   "x": -6,
-   "y": 0,
-   "w": 2,
-   "h": 1080,
-   "bg": "#C96442",
-   "radius": 0,
-   "start": 26.9,
-   "duration": 0.55,
-   "anim": "none",
-   "track": 90,
-   "motion": [
+   "start": 23.5,
+   "duration": 3.4,
+   "track": 7,
+   "modifiers": [
     {
-     "t": 0,
-     "x": 0,
-     "opacity": 1
-    },
-    {
-     "t": 0.4,
-     "x": 1932,
-     "opacity": 1
-    },
-    {
-     "t": 0.5,
-     "x": 1932,
-     "opacity": 0
+     "wordSlot": {
+      "words": [
+       "voice",
+       "limits",
+       "rhythm"
+      ],
+      "every": 0.8,
+      "swap": 0.24,
+      "chip": true
+     }
     }
    ]
   },
@@ -1164,7 +1261,7 @@
   },
   {
    "type": "text",
-   "text": "Plan my week so I actually ship Helm v2.",
+   "text": "Plan my week so I actually ship v2.",
    "font": "mono",
    "size": 26,
    "weight": 400,
@@ -1181,7 +1278,7 @@
   },
   {
    "type": "text",
-   "text": "Read creed.md",
+   "text": "Reading preface.md",
    "font": "mono",
    "size": 22,
    "weight": 500,
@@ -1191,7 +1288,7 @@
    "radius": 8,
    "x": 140,
    "y": 390,
-   "w": 260,
+   "w": 340,
    "align": "center",
    "anim": "rise",
    "enterDur": 0.4,
@@ -1232,7 +1329,7 @@
   },
   {
    "type": "text",
-   "text": "Block 7 to 11am for Helm. No meetings Wednesdays.",
+   "text": "Block 7 to 11am. No meetings Wednesdays.",
    "font": "mono",
    "size": 26,
    "weight": 400,
@@ -1263,7 +1360,7 @@
   },
   {
    "type": "text",
-   "text": "Routines",
+   "text": "Rhythm",
    "font": "sans",
    "size": 30,
    "weight": 600,
@@ -1365,7 +1462,7 @@
   },
   {
    "type": "text",
-   "text": "Routines",
+   "text": "Rhythm",
    "font": "sans",
    "size": 36,
    "weight": 600,
@@ -1435,8 +1532,8 @@
    "h": 58,
    "bg": "#148A4E",
    "radius": 0,
-   "start": 33.4,
-   "duration": 1.3,
+   "start": 33.46,
+   "duration": 1.24,
    "anim": "fade",
    "out": "fade",
    "exitDur": 0.3
@@ -1452,8 +1549,8 @@
    "y": 478,
    "w": 30,
    "align": "left",
-   "start": 33.4,
-   "duration": 1.3,
+   "start": 33.52,
+   "duration": 1.18,
    "anim": "rise",
    "enterDur": 0.4,
    "out": "fade",
@@ -1461,7 +1558,7 @@
   },
   {
    "type": "text",
-   "text": "Batch code review into a single block after standup.",
+   "text": "Batch code review into one block after standup.",
    "font": "mono",
    "size": 24,
    "weight": 400,
@@ -1472,13 +1569,13 @@
    "align": "left",
    "anim": "rise",
    "enterDur": 0.4,
-   "start": 33.4,
-   "duration": 5.1,
+   "start": 33.6,
+   "duration": 4.9,
    "exitDur": 0.4
   },
   {
    "type": "text",
-   "text": "You batched every review into one block in our last session.",
+   "text": "You did exactly this in our last two sessions.",
    "font": "mono",
    "size": 20,
    "weight": 400,
@@ -1507,8 +1604,8 @@
    "w": 200,
    "align": "center",
    "anim": "fade",
-   "start": 33.6,
-   "duration": 4.9,
+   "start": 33.72,
+   "duration": 4.78,
    "exitDur": 0.4
   },
   {
@@ -1526,8 +1623,8 @@
    "w": 200,
    "align": "center",
    "anim": "fade",
-   "start": 33.6,
-   "duration": 4.9,
+   "start": 33.82,
+   "duration": 4.68,
    "exitDur": 0.4
   },
   {
@@ -1556,38 +1653,8 @@
    "track": 200
   },
   {
-   "type": "rect",
-   "x": -6,
-   "y": 0,
-   "w": 2,
-   "h": 1080,
-   "bg": "#C96442",
-   "radius": 0,
-   "start": 38.7,
-   "duration": 0.55,
-   "anim": "none",
-   "track": 90,
-   "motion": [
-    {
-     "t": 0,
-     "x": 0,
-     "opacity": 1
-    },
-    {
-     "t": 0.4,
-     "x": 1932,
-     "opacity": 1
-    },
-    {
-     "t": 0.5,
-     "x": 1932,
-     "opacity": 0
-    }
-   ]
-  },
-  {
    "type": "text",
-   "text": "Every session, it gets sharper.",
+   "text": "It gets <b>sharper</b> every session.",
    "font": "sans",
    "size": 40,
    "weight": 600,
@@ -1597,11 +1664,11 @@
    "w": 1200,
    "align": "center",
    "split": "word",
-   "preset": "riseClip",
+   "preset": "decode",
    "each": 0.5,
    "stagger": 0.045,
    "start": 39,
-   "duration": 3,
+   "duration": 3.1,
    "exitDur": 0.35
   },
   {
@@ -1620,7 +1687,7 @@
    "children": [
     {
      "type": "text",
-     "text": "+2  Goals",
+     "text": "+2  Aims",
      "font": "mono",
      "size": 22,
      "weight": 500,
@@ -1632,7 +1699,7 @@
     },
     {
      "type": "text",
-     "text": "+4  Work",
+     "text": "+4  Craft",
      "font": "mono",
      "size": 22,
      "weight": 500,
@@ -1644,7 +1711,7 @@
     },
     {
      "type": "text",
-     "text": "+1  Identity",
+     "text": "+1  Person",
      "font": "mono",
      "size": 22,
      "weight": 500,
@@ -1656,7 +1723,7 @@
     },
     {
      "type": "text",
-     "text": "+3  Routines",
+     "text": "+3  Rhythm",
      "font": "mono",
      "size": 22,
      "weight": 500,
@@ -1668,7 +1735,7 @@
     },
     {
      "type": "text",
-     "text": "+5  Prefs",
+     "text": "+5  Voice",
      "font": "mono",
      "size": 22,
      "weight": 500,
@@ -1690,7 +1757,9 @@
      "pad": "22px 28px",
      "radius": 10
     }
-   ]
+   ],
+   "each": 0.45,
+   "stagger": 0.08
   },
   {
    "type": "count",
@@ -1731,38 +1800,8 @@
    "exitDur": 0.35
   },
   {
-   "type": "rect",
-   "x": -6,
-   "y": 0,
-   "w": 2,
-   "h": 1080,
-   "bg": "#C96442",
-   "radius": 0,
-   "start": 42.2,
-   "duration": 0.55,
-   "anim": "none",
-   "track": 90,
-   "motion": [
-    {
-     "t": 0,
-     "x": 0,
-     "opacity": 1
-    },
-    {
-     "t": 0.4,
-     "x": 1932,
-     "opacity": 1
-    },
-    {
-     "t": 0.5,
-     "x": 1932,
-     "opacity": 0
-    }
-   ]
-  },
-  {
    "type": "text",
-   "text": "Identity",
+   "text": "Person",
    "font": "sans",
    "size": 36,
    "weight": 600,
@@ -1912,7 +1951,9 @@
      "pad": "10px 18px",
      "radius": 20
     }
-   ]
+   ],
+   "each": 0.45,
+   "stagger": 0.08
   },
   {
    "type": "text",
@@ -1970,36 +2011,6 @@
   },
   {
    "type": "rect",
-   "x": -6,
-   "y": 0,
-   "w": 2,
-   "h": 1080,
-   "bg": "#C96442",
-   "radius": 0,
-   "start": 47.4,
-   "duration": 0.55,
-   "anim": "none",
-   "track": 90,
-   "motion": [
-    {
-     "t": 0,
-     "x": 0,
-     "opacity": 1
-    },
-    {
-     "t": 0.4,
-     "x": 1932,
-     "opacity": 1
-    },
-    {
-     "t": 0.5,
-     "x": 1932,
-     "opacity": 0
-    }
-   ]
-  },
-  {
-   "type": "rect",
    "x": 620,
    "y": 210,
    "w": 680,
@@ -2015,7 +2026,7 @@
   },
   {
    "type": "text",
-   "text": "creed.md",
+   "text": "preface.md",
    "font": "mono",
    "size": 22,
    "weight": 500,
@@ -2031,7 +2042,7 @@
   },
   {
    "type": "text",
-   "text": "Identity",
+   "text": "Person",
    "font": "sans",
    "size": 26,
    "weight": 600,
@@ -2047,7 +2058,7 @@
   },
   {
    "type": "text",
-   "text": "Preferences",
+   "text": "Voice",
    "font": "sans",
    "size": 26,
    "weight": 600,
@@ -2063,7 +2074,7 @@
   },
   {
    "type": "text",
-   "text": "Routines",
+   "text": "Rhythm",
    "font": "sans",
    "size": 26,
    "weight": 600,
@@ -2079,7 +2090,7 @@
   },
   {
    "type": "text",
-   "text": "Constraints",
+   "text": "Limits",
    "font": "sans",
    "size": 26,
    "weight": 600,
@@ -2095,7 +2106,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/claude.svg",
+   "src": "/assets/brands/preface/agents/claude.svg",
    "x": 500,
    "y": 290,
    "w": 54,
@@ -2113,7 +2124,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/chatgpt.svg",
+   "src": "/assets/brands/preface/agents/chatgpt.svg",
    "x": 1370,
    "y": 290,
    "w": 54,
@@ -2131,7 +2142,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/cursor.svg",
+   "src": "/assets/brands/preface/agents/cursor.svg",
    "x": 500,
    "y": 620,
    "w": 54,
@@ -2149,7 +2160,7 @@
   },
   {
    "type": "image",
-   "src": "/assets/brands/creed/agents/codex.svg",
+   "src": "/assets/brands/preface/agents/codex.svg",
    "x": 1370,
    "y": 620,
    "w": 54,
@@ -2166,8 +2177,7 @@
    ]
   },
   {
-   "type": "image",
-   "src": "/assets/brands/creed/brandmark.svg",
+   "type": "html",
    "x": 900,
    "y": 300,
    "w": 120,
@@ -2176,11 +2186,21 @@
    "duration": 2.8,
    "anim": "rise",
    "enterDur": 0.5,
-   "exitDur": 0.3
+   "exitDur": 0.3,
+   "html": "<svg viewBox=\"0 0 100 100\" width=\"120\" height=\"120\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M20 6 h38 l24 24 v64 a6 6 0 0 1 -6 6 h-56 a6 6 0 0 1 -6 -6 v-82 a6 6 0 0 1 6 -6 Z\" fill=\"#0A0A0A\"/><path d=\"M58 6 l24 24 h-18 a6 6 0 0 1 -6 -6 Z\" fill=\"#5C5C58\"/><rect x=\"32\" y=\"46\" width=\"36\" height=\"7\" rx=\"3.5\" fill=\"#C96442\"/><rect x=\"32\" y=\"62\" width=\"26\" height=\"6\" rx=\"3\" fill=\"#757570\"/></svg>",
+   "parts": [
+    {
+     "select": "path, rect",
+     "anim": "popIn",
+     "each": 0.4,
+     "stagger": 0.08,
+     "delay": 0.1
+    }
+   ]
   },
   {
    "type": "text",
-   "text": "Stop starting from scratch",
+   "text": "Stop explaining yourself",
    "font": "sans",
    "size": 92,
    "weight": 700,
@@ -2191,16 +2211,16 @@
    "w": 1200,
    "align": "center",
    "split": "word",
-   "preset": "riseClip",
+   "preset": "fall",
    "each": 0.55,
    "stagger": 0.05,
-   "start": 50.4,
+   "start": 50.3,
    "duration": 2.6,
    "exitDur": 0.3
   },
   {
    "type": "text",
-   "text": "Every agent you use, already up to speed.",
+   "text": "Already in context.",
    "font": "sans",
    "size": 30,
    "weight": 400,
@@ -2211,13 +2231,13 @@
    "align": "center",
    "anim": "rise",
    "enterDur": 0.5,
-   "start": 50.9,
-   "duration": 2.1,
+   "start": 50.8,
+   "duration": 2.2,
    "exitDur": 0.3
   },
   {
    "type": "text",
-   "text": "Get Started",
+   "text": "Start writing",
    "font": "mono",
    "size": 30,
    "weight": 600,
@@ -2225,9 +2245,9 @@
    "bg": "#C96442",
    "pad": "20px 44px",
    "radius": 12,
-   "x": 810,
+   "x": 760,
    "y": 690,
-   "w": 300,
+   "w": 400,
    "align": "center",
    "anim": "rise",
    "enterDur": 0.45,
@@ -2238,7 +2258,7 @@
   },
   {
    "type": "text",
-   "text": "creed.md",
+   "text": "preface.example",
    "font": "mono",
    "size": 24,
    "weight": 400,
@@ -2252,5 +2272,65 @@
    "duration": 1.5,
    "exitDur": 0
   }
- ]
+ ],
+ "cuts": [
+  {
+   "t": 5.2,
+   "style": "blur",
+   "dur": 0.4
+  },
+  {
+   "t": 11,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 19.6,
+   "style": "blur",
+   "dur": 0.4
+  },
+  {
+   "t": 23.5,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 27,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 32.2,
+   "style": "blur",
+   "dur": 0.4
+  },
+  {
+   "t": 38.8,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 42.3,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 47.4,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 50,
+   "style": "blur",
+   "dur": 0.4
+  }
+ ],
+ "_template": "A launch film for PREFACE, a FICTIONAL product: a markdown file an AI coding agent reads before it answers. Nothing here is anyone's brand. Every colour is a themes/preface.json token, the mark is an inline SVG, the domain is a reserved .example name, and the only real marks on screen are the agent logos in the compatibility ring, which name the tools the file works with. To reskin, change `theme`; to refill, replace the copy strings and the six file sections.",
+ "spectacle": {
+  "at": 24.4,
+  "of": "agentring",
+  "device": "ripple",
+  "why": "the one moment the film is allowed to shout: ten spokes leave the file at once and the ring of agents lights up. Every other beat holds one idea at one volume."
+ },
+ "storyboard": "formats/scene/preface-launch.storyboard.md"
 }

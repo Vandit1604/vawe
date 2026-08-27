@@ -15766,3 +15766,47 @@ whose capture needs sRGB and hinting off.
 **Flattened deliberately, and it is visible here.** One MIME table, the union of all 22: a narrower
 copy served a real file as `application/octet-stream`. And studio's 404 body is now empty rather than
 `not found`.
+
+## #425 — two `html` layers, one document, and the later stylesheet silently won
+
+**The symptom.** Authoring `preface-launch`, the hero file pane was set to `.h { font-size: 40px }`
+and rendered at about 25px. Raising it to 60px changed nothing. Every gate was green, the JSON on
+disk held the value I wrote, and `core/layers/html.js` does no scaling.
+
+**The cause.** An `html` layer's markup may carry a `<style>` block, and `sanitizeHtml` keeps it.
+That block lands in the DOCUMENT, not in the layer. The film carried a second `html` layer, a
+smaller copy of the same card, whose stylesheet declared the same class names at 0.62 of the size.
+It sits later in paint order, so its rules won on every frame the big card was on screen. Two
+layers, one global namespace, last one wins, nothing said a word.
+
+**What it is an instance of.** Documented input accepted and then silently discarded, which is the
+class this file logs most (#210, #213, #369, #373, #422). It is also the exact shape of #422: hand
+authored CSS that reads correctly and does nothing.
+
+**The workaround in the film, and why it is not the fix.** Every rule in both panes is now
+namespaced under its own prefix (`.hp-` and `.sp-`), and the `parts` selectors follow. That works
+and it has to be remembered by every future author, which CLAUDE.md already names as the thing a
+root fix is not.
+
+**The root fix, named and NOT yet applied.** The refusal belongs where author CSS reaches the DOM,
+beside the `transition`/`animation` refusal that is already there. `core/layers/html.js` builds
+`<div class="hs-html">…</div>` around the fragment, and the `<style>` is inside that wrapper, so
+wrapping each block's contents in a bare `@scope { … }` scopes it to exactly that subtree:
+
+```js
+const scoped = sanitizeHtml(src).replace(/<style([^>]*)>([\s\S]*?)<\/style>/gi,
+  (_, attrs, css) => `<style${attrs}>@scope {${css}}</style>`);
+```
+
+**Why it is not in the commit that found it.** Its blast radius is every `html` layer and every
+hand-authored `html` background in the library, and `@scope` changes what a `:root`/`html` selector
+inside one of those blocks can reach. CLAUDE.md's own rule for a change of that shape is a
+before/after sweep of the whole scene library (`make snap-all`) with the counts diffed, and the only
+acceptable outcomes are "no scene changes" or a named list of scenes that changed with a reason for
+each. That sweep is the work, not the three-line edit, and it wants its own pass rather than riding
+in on a brand conversion whose deploy was already red. Anyone picking this up: run `make snap-all
+SAVE=1` first, apply the patch, run it again, and diff.
+
+**A gate is the wrong answer here** and it is worth saying so, because it is the reflex. A checker
+that greps two `html` layers for a shared class name would notice this collision and leave the
+engine perfectly able to produce it again tomorrow (CLAUDE.md, "ARCHITECTURE: fix it at the root").

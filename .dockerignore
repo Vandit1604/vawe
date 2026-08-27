@@ -63,9 +63,7 @@ site/public/scripts
 # themselves and FAILS the build when one is absent — but it looks in the build CONTEXT, and this file
 # decides what is in it. So an asset can exist in the repo, pass every local run, and simply not be in
 # the image (docs/MISTAKES.md #275). Add a scene that names a new mark, add its line here.
-!assets/brands/creed/agents
-!assets/brands/creed/brandmark.svg
-!assets/brands/creed/components/filepane.json
+!assets/brands/preface/agents
 !assets/brands/argus/mascot.png
 !assets/brands/linear/icon.png
 !assets/brands/looks/photos/michelangelo-david-sculpture-head-2.webp

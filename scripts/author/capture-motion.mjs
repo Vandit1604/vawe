@@ -4,7 +4,7 @@
 // (a motion track composes on top of the layer's final position), and reduces to keyframes. Same
 // "measure, don't guess" idea as brandspec — reproduce the site's actual move, not an invented one.
 //
-//   node scripts/author/capture-motion.mjs https://creed.md/home 'main section:nth-of-type(3)'   [--onload] [--dur 2.5]
+//   node scripts/author/capture-motion.mjs https://example.com/home 'main section:nth-of-type(3)'   [--onload] [--dur 2.5]
 import puppeteer from 'puppeteer';
 
 const [url, sel, ...rest] = process.argv.slice(2);

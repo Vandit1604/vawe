@@ -294,7 +294,7 @@ function buildPalette(stance, hue) {
 //
 // The threshold is in OKLab ΔE×100 and it is CALIBRATED against this repo's own 35 themes, not chosen.
 // Over the 595 pairs those themes make: p05 is 3.7, p10 is 6.9, p25 is 15.6, the median is 44. The
-// closest pairs score 0.0 (default vs vawe vs vawe-inter, creed-launch vs vawe-creed) and they are
+// closest pairs score 0.0 (default vs vawe vs vawe-inter, preface vs vawe-paper) and they are
 // genuinely one look wearing two names. 16 sits just above p25, so two candidates here must be further
 // apart than three quarters of the pairs the library already ships.
 const CHIP_MIN = 16;

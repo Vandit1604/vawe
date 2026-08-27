@@ -1,6 +1,6 @@
 {
   "module": "scene",
-  "theme": "creed-launch",
+  "theme": "preface",
   "duration": 10,
   "layers": [
     { "type": "text", "text": "no duration here", "x": 100, "y": 100, "w": 400, "size": 40, "start": 0 },

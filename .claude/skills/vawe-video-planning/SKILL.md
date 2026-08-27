@@ -145,7 +145,7 @@ make palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero �
 **`make brandspec` is the source of truth for TYPE + declared COLOURS — read it, don't guess.** It gives the
 1-3 real faces mapped to primary/secondary/accent, **the weights actually used** (author the headline at the
 MEASURED weight, never a default 800), and the site's `--color-*` tokens (accurate where eyedrop reads a
-photo, e.g. creed's accent is `#2563eb` in CSS, not the sky blue). Use `make palette` for DOMINANCE only.
+photo: a site's declared accent is the hex in its CSS, not the nearest colour in its hero image). Use `make palette` for DOMINANCE only.
 Author the font system per [`docs/CRAFT/TYPOGRAPHY.md`](../../../docs/CRAFT/TYPOGRAPHY.md) §0b (1-3 roles) and
 validate every colour pair's contrast per [`COLOR.md`](../../../docs/CRAFT/COLOR.md) before locking.
 
@@ -234,7 +234,7 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   or a Lucide UI icon (`assets/icons/ui/`, MIT, stroke color baked) — text-only lists of
   named things are a missed layer of craft.
 - **Background = the site's real surface, used sparingly**: the bg texture must EXIST on the real
-  site. A plain/flat site (creed) gets a plain field (`plain`/`paper`/`accentPlain`), never invented
+  site. A plain/flat technical site gets a plain field (`plain`/`paper`/`accentPlain`), never invented
   dots/shapes. Only use a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/
   `paperShapes`) if the site itself has that texture. And even then a pattern is a SEASONING, not the
   wallpaper: at most one or two beats (a hook or one accent moment), never throughout. Content/proof
@@ -287,7 +287,7 @@ each image, and every cut's reason.
 
 | Field | Locked value | Filled by |
 |---|---|---|
-| Orientation / duration / theme | e.g. landscape · 22s · `themes/creed.json` | **the brief** (placement) |
+| Orientation / duration / theme | e.g. landscape · 22s · `themes/preface.json` | **the brief** (placement) |
 | **Taste anchor** (no-site videos) | the reference **`profile`** (`apple`/`linear`/…) + which real site was `vawe_reflect`ed for colour | the brief (anti-reference) |
 | **Story spine** | the named arc + each beat's role (hook/build/proof/payoff/CTA) | **the brief** (job → arc) |
 | Palette + fonts | the exact hexes + face names (from the study OR the profile's reflected reference) | the study |

@@ -27,7 +27,7 @@ const GROUPS: { group: string; items: { id: string; label: string }[] }[] = [
     group: "films",
     items: [
       { id: "argus-launch", label: "argus · launch film" },
-      { id: "creed-launch", label: "creed · launch film" },
+      { id: "preface-launch", label: "template · preface launch" },
       { id: "saas-hero-launch", label: "template · saas hero launch" },
       { id: "product-feature-tour", label: "template · product feature tour" },
     ],

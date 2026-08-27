@@ -80,11 +80,11 @@ JSON *is* the video.
 | `bg` | string | Fill (rect) |
 | `border` | string|boolean | Border (rect) (true = a 1px hairline in var(--line)) |
 
-## Kinetic presets (28)
+## Kinetic presets (30)
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
-`weight` · `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold`
+`weight` · `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold` · `strike` · `flap`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
   lines). The SVG must be inline in `text` — an `<img>` has no reachable paths.
@@ -116,9 +116,9 @@ A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Themes (35)
+## Themes (34)
 
-`ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `argus` · `brew` · `brew-dark` · `cadence` · `creed` · `creed-launch` · `default` · `ditherkit` · `emberyear` · `glassatmos` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `satara` · `threadcite` · `tpot` · `vawe` · `vawe-creed` · `vawe-dark` · `vawe-inter` · `vawe-site`
+`ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `argus` · `brew` · `brew-dark` · `cadence` · `default` · `ditherkit` · `emberyear` · `glassatmos` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `preface` · `satara` · `threadcite` · `tpot` · `vawe` · `vawe-dark` · `vawe-inter` · `vawe-paper` · `vawe-site`
 
 Colours come from the theme, never hardcoded: `var(--text)` `var(--text-2)` `var(--dim)`
 `var(--accent)` `var(--surface)` `var(--line)`. `<b>` inside `text` renders in the accent.

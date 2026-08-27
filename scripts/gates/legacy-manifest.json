@@ -193,14 +193,6 @@
           "since": "2026-08-21",
           "hash": "73c714a261d0acbc"
         },
-        "creed-launch": {
-          "since": "2026-08-21",
-          "hash": "c5173041ce8fecda"
-        },
-        "creed": {
-          "since": "2026-08-21",
-          "hash": "9c2e2b45be1e1531"
-        },
         "cuts-demo": {
           "since": "2026-08-21",
           "hash": "affc95cc3be4fc5c"
@@ -494,6 +486,6 @@
     }
   },
   "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",
-  "_stamp": "node scripts/gates/author-check.mjs --legacy [--adopt <rule>|--stamp]   ·   make legacy",
+  "_stamp": "node scripts/gates/author-check.mjs --legacy [--adopt <rule>|--stamp]   \u00b7   make legacy",
   "_legacy_is_not_a_waiver": "A row here means NOBODY HAS LOOKED at this film against this rule. It carries no reason because there is no reason yet. A waiver is the opposite: a person decided, and wrote why, in the scene's own authoring.allow/_why."
 }

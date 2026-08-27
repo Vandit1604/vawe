@@ -76,7 +76,7 @@ for (const [src, dst] of FILES) put(path.join(root, src), path.join(PUB, dst));
 
 // ── whatever the playable scenes actually reference ──────────────────────────────────────────
 // assets/brands is 59M of section shots and lookbooks and stays out, but the scenes the editor can
-// load reach into it for a handful of real marks: creed's agent logos, argus's mascot, linear's
+// load reach into it for a handful of real marks: preface's agent logos, argus's mascot, linear's
 // icon. 144K of the 59M. They were not shipped, so every one 404'd in production the moment the
 // editor could load a film — invisible locally, where the whole 59M is on disk.
 //
@@ -97,7 +97,7 @@ if (fs.existsSync(sceneDir)) {
 // therefore passed on every developer machine and failed only inside the build container, where the
 // repo is a fresh clone. Six consecutive production deploys failed that way and nobody saw it,
 // because the only place the message appeared was a Coolify build log
-// (`assets/brands/creed/components/filepane.json`, referenced by creed-launch, ignored by
+// (`assets/brands/creed/components/filepane.json`, referenced by the film that became preface-launch, ignored by
 // `.gitignore:46 assets/brands/**`).
 //
 // So ask git, not the filesystem. `git check-ignore` answers the question the message actually
