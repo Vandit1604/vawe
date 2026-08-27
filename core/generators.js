@@ -413,9 +413,9 @@ const SPECTRUM = {
 const CRT_SCHEMA = {
   bloom:     { kind: 'num', min: 0, max: 8, def: 1.6, primary: true,
                note: 'how far the picture underneath spreads, in pixels. This is the phosphor, and it is the part an overlay cannot do. Brightness rises with it, because blurring a bright shape over more area would otherwise dim it.' },
-  lines:     { kind: 'unit', def: 0.34, primary: true,
+  lines:     { kind: 'unit', def: 0.42, primary: true,
                note: 'how dark each scanline is. 0 removes them.' },
-  gap:       { kind: 'num', min: 2, max: 12, def: 3, primary: true,
+  gap:       { kind: 'num', min: 2, max: 12, def: 4, primary: true,
                note: 'pixels from one scanline to the next. Bigger is a coarser, older tube.' },
   scan:      { kind: 'num', min: 0, max: 6, def: 1,
                note: 'pixels of dark in each line. It can never exceed the gap, or the field would be solid black.' },
@@ -437,9 +437,9 @@ const CRT_SCHEMA = {
   colour: {
     kind: 'group', primary: true,
     fields: {
-      text:   { kind: 'hex', def: '#bfe3ff', primary: true, note: 'the words on the screen. The bloom takes its hue from this, because a phosphor glows the colour of what is lit.' },
-      ground: { kind: 'hex', def: '#050b1e', primary: true, note: 'the tube behind the words, before any scanline or falloff.' },
-      tint:   { kind: 'hex', def: '#1e46ff', primary: true, note: 'the phosphor colour laid over the whole picture. `tintAmount` decides how much of it lands.' },
+      text:   { kind: 'hex', def: '#5cff9d', primary: true, note: 'the words on the screen. The bloom takes its hue from this, because a phosphor glows the colour of what is lit.' },
+      ground: { kind: 'hex', def: '#04140b', primary: true, note: 'the tube behind the words, before any scanline or falloff.' },
+      tint:   { kind: 'hex', def: '#19ff7a', primary: true, note: 'the phosphor colour laid over the whole picture. `tintAmount` decides how much of it lands.' },
     },
   },
   // THE SCREEN'S OWN WORDS. Every other card here has no content to speak of, because a field IS its
@@ -448,8 +448,8 @@ const CRT_SCHEMA = {
   //
   // `str` is the right kind rather than `text`: the randomiser skips it by declaration, because
   // content is not a dial and rolling somebody's words is not a variation of the look.
-  text:    { kind: 'str', def: 'CRT', note: 'the big line on the screen. <b> and <em> work.' },
-  sub:     { kind: 'str', def: 'PHOSPHOR · SCANLINE · BLOOM', note: 'the small line under it. Leave it empty to drop it.' },
+  text:    { kind: 'str', def: 'VHS', note: 'the big line on the screen. <b> and <em> work.' },
+  sub:     { kind: 'str', def: 'GREEN PHOSPHOR · SCANLINE · BLOOM', note: 'the small line under it. Leave it empty to drop it.' },
 };
 
 const hexToRgba = (hex, a) => {
@@ -494,12 +494,34 @@ const CRT = {
     // assumes the words are lighter than the tube. On a LIGHT ground the sub-line goes quiet, which is
     // the honest consequence of one dial driving two things, not a bug to chase with a fourth field.
     const subInk = hexToRgba(ink, 0.72);
-    return `<div style="position:absolute;inset:0;overflow:hidden;background:${ground}">
-  <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center;
-    font:800 clamp(28px,8.5vw,96px)/1 var(--font-sans,system-ui),sans-serif;color:${ink};letter-spacing:.01em">${line}
-    ${sub ? `<div style="font:400 clamp(8px,1.6vw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:${subInk};margin-top:.7em;letter-spacing:.22em">${sub}</div>` : ''}
+    // THE BLOOM IS A `filter` ON THE PICTURE, NOT A `backdrop-filter` OVER IT, and that is a decision
+    // about EXPORT rather than about the look. The playground rasterises a card by wrapping its markup
+    // in an SVG <foreignObject> and drawing that to a canvas, and backdrop-filter does not composite
+    // inside a foreignObject: it needs a backdrop from the page, and there is no page in there. So a
+    // downloaded or copied CRT arrived with its scanlines, its vignette and its tint (all plain
+    // gradients, which do render) and NO PHOSPHOR, which is the one part of a cathode ray tube that
+    // cannot be faked with an overlay. Silently, because nothing errors.
+    //
+    // Filtering the picture instead gives the identical result in both places. The ground and the
+    // words sit together inside one filtered element, which is exactly the stack backdrop-filter was
+    // sampling, so brightness and saturate still land on the ground and not only on the glyphs.
+    //
+    // The engine's `crt` LAYER prop still uses backdrop-filter, and correctly: there it is a treatment
+    // over arbitrary content it does not own, and it renders in a real browser, never through a
+    // foreignObject. Same crtSpec, same numbers, two mounts.
+    // THE TYPE IS SIZED FROM THE CARD, NOT THE VIEWPORT, and that is the second export bug in this
+    // card. `vw` resolves against whatever viewport the markup finds itself in: the browser window in
+    // the live preview, and the SVG's own width inside the exporter's foreignObject. A 560px card on a
+    // 1220px page therefore rendered its headline at the 96px clamp ceiling live and at 47px in the
+    // downloaded PNG. Container units ask the card instead, and the card is the same box in both.
+    return `<div style="position:absolute;inset:0;overflow:hidden;container-type:size">
+  <div style="position:absolute;inset:0;background:${ground};${filter ? `filter:${filter};` : ''}">
+    <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center;
+      font:800 clamp(28px,17cqw,96px)/1 var(--font-sans,system-ui),sans-serif;color:${ink};letter-spacing:.01em">${line}
+      ${sub ? `<div style="font:400 clamp(8px,3.2cqw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:${subInk};margin-top:.7em;letter-spacing:.22em">${sub}</div>` : ''}
+    </div>
   </div>
-  <div style="position:absolute;inset:0;pointer-events:none;backdrop-filter:${filter};-webkit-backdrop-filter:${filter};background-image:${background || 'none'}"></div>
+  <div style="position:absolute;inset:0;pointer-events:none;background-image:${background || 'none'}"></div>
 </div>`;
   },
 };
