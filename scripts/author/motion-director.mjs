@@ -72,21 +72,17 @@ const VMAX = 1232;          // px per second · this library's 95th percentile a
 
 const r2 = (n) => Math.round(n * 100) / 100;
 
-// ---- ONE SCENE, MEASURED ---------------------------------------------------------------------------
-// Returns findings, the beats the report needs, and `metrics`: the scalar behind each rule, computed
-// whether or not the rule fired. The census needs the whole distribution, not just the failures, so a
-// metric is recorded any time it is DEFINED — `undefined` means "this film has no such measure".
-function analyse(d) {
-  const layers = d.layers || [];
-  // flatten nested children so the mechanical motion tells see every layer, not just the top level.
-  const allLayers = (() => { const out = []; const rec = (ls) => { for (const l of ls || []) if (l && typeof l === 'object') { out.push(l); if (l.children) rec(l.children); } }; rec(layers); return out; })();
-  const duration = d.duration || 0;
-  const metrics = {};
-  const findings = [];
-  const fail = (code, msg) => findings.push({ sev: 'FAIL', code, msg });
-  const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
+// ---- ONE TELL, ONE FUNCTION -------------------------------------------------------------------------
+// Every rule below takes the evidence it needs and returns the same shape: `metrics` (the scalar behind
+// the rule, recorded whether or not the rule fired) and `findings` (what fired). `analyse` gathers the
+// evidence once and asks each tell in turn, so a rule can be read, moved or retired on its own.
+const warn = (code, msg) => ({ sev: 'WARN', code, msg });
+const fail = (code, msg) => ({ sev: 'FAIL', code, msg });
+const nothing = { metrics: {}, findings: [] };
 
-  // resolve the brand's motion personality from its theme (string name → themes/<name>.json, or inline).
+// The brand's motion personality, read from its theme (string name → themes/<name>.json, or inline),
+// and the cut/sting family that personality speaks in.
+function resolveFamily(d) {
   let motion = {};
   try { motion = typeof d.theme === 'string' ? (JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', d.theme + '.json'), 'utf8')).motion || {}) : (d.theme?.motion || {}); } catch {}
   const settle = motion.settle ?? 0.5, bounce = motion.bounce ?? 0;
@@ -106,53 +102,66 @@ function analyse(d) {
   const profile = PROFILES[d.profile] || null;
   if (profile) { FAMILY.cuts = profile.cuts.length ? profile.cuts : FAMILY.cuts; FAMILY.stings = profile.stings; }
 
-  // Contradiction check: a choice that fights the named profile is flagged with the rule that caught it.
-  const contradictions = [];
-  if (profile) {
-    const bounceUsed = layers.some((l) => ['bounce', 'elastic'].includes(l.preset));
-    if (bounceUsed && profile.bounceOk === false) contradictions.push(`bounce/elastic preset on "${d.profile}" — cheap on a serious brand (SELECTION §contradictions)`);
-    for (const l of layers) {
-      if (l.cut && profile.banCuts.includes(l.cut)) contradictions.push(`cut "${l.cut}" on "${d.profile}" — announces an edit this profile hides`);
-      // …and the ENTRANCE, which banCuts could never reach: `pop` is an anim and `bounce` is a preset, so
-      // both sat in a cut list being compared against cut styles and never matched anything.
-      for (const k of ['anim', 'preset']) {
-        if (l[k] && (profile.banMotion || []).includes(l[k])) contradictions.push(`${k} "${l[k]}" on "${d.profile}" — this profile's entrances do not overshoot`);
-      }
-    }
-    for (const c of d.cuts || []) {
-      if (profile.banCuts.includes(c.style)) contradictions.push(`cut "${c.style}" @${c.t}s on "${d.profile}" — wrong for this profile's restraint`);
-    }
-    const families = new Set((d.cuts || []).map((c) => c.style));
-    if (families.size > 2) contradictions.push(`${families.size} cut families in one film (${[...families].join(', ')}) — one film, one family`);
-  }
+  return { personality, settle, bounce, FAMILY, profile };
+}
 
-  // beats = clusters of layer start-times (a >1.4s gap starts a new beat), same as critique.
+// Contradiction check: a choice that fights the named profile is flagged with the rule that caught it.
+// Wrong-by-rule → FAIL tier.
+function tellProfile(d, layers, profile) {
+  if (!profile) return nothing;
+  const contradictions = [];
+  const bounceUsed = layers.some((l) => ['bounce', 'elastic'].includes(l.preset));
+  if (bounceUsed && profile.bounceOk === false) contradictions.push(`bounce/elastic preset on "${d.profile}" — cheap on a serious brand (SELECTION §contradictions)`);
+  for (const l of layers) {
+    if (l.cut && profile.banCuts.includes(l.cut)) contradictions.push(`cut "${l.cut}" on "${d.profile}" — announces an edit this profile hides`);
+    // …and the ENTRANCE, which banCuts could never reach: `pop` is an anim and `bounce` is a preset, so
+    // both sat in a cut list being compared against cut styles and never matched anything.
+    for (const k of ['anim', 'preset']) {
+      if (l[k] && (profile.banMotion || []).includes(l[k])) contradictions.push(`${k} "${l[k]}" on "${d.profile}" — this profile's entrances do not overshoot`);
+    }
+  }
+  for (const c of d.cuts || []) {
+    if (profile.banCuts.includes(c.style)) contradictions.push(`cut "${c.style}" @${c.t}s on "${d.profile}" — wrong for this profile's restraint`);
+  }
+  const families = new Set((d.cuts || []).map((c) => c.style));
+  if (families.size > 2) contradictions.push(`${families.size} cut families in one film (${[...families].join(', ')}) — one film, one family`);
+  return { metrics: {}, findings: contradictions.map((c) => fail('profile', c)) };
+}
+
+// beats = clusters of layer start-times (a >1.4s gap starts a new beat), same as critique.
+function beatsOf(layers) {
   const s0 = (l) => l.start ?? 0;
   const starts = [...new Set(layers.filter((l) => l.track !== 0).map(s0))].sort((a, b) => a - b);
   const beats = [];
   for (const t of starts) { const last = beats[beats.length - 1]; if (!last || t - last > 1.4) beats.push(t); }
+  return beats;
+}
 
-  // ---- DIRECTION AUDIT (the pre-render gate) ------------------------------------------------------
-  // Source-decidable checks for the direction failure-modes in docs/CRAFT/TASTE-RULES.md. Severity:
-  // FAIL = wrong by rule (blocks, exit 1); WARN = judgment (informs).
-  // Effect budget flexes with purpose (TASTE-RULES), so busyness is WARN, not a fixed hard count.
+// ---- DIRECTION AUDIT (the pre-render gate) ------------------------------------------------------
+// Source-decidable checks for the direction failure-modes in docs/CRAFT/TASTE-RULES.md. Severity:
+// FAIL = wrong by rule (blocks, exit 1); WARN = judgment (informs).
+// Effect budget flexes with purpose (TASTE-RULES), so busyness is WARN, not a fixed hard count.
 
-  // one cut family per film. Group the cut vocabulary by edit-grammar meaning (SELECTION §1).
-  const CUT_FAMILY = {
-    soft: ['none', 'fade', 'blur', 'riseBlur', 'softwipe', 'softiris'],       // dissolves — hide the seam
-    motion: ['whip', 'skewWhip', 'punch', 'zoom', 'slide', 'squeeze', 'drop', 'rise', 'jitter'], // directional pushes
-    shape: ['wipe', 'iris', 'clock', 'blinds', 'barn', 'letterbox'],          // matte reveals — notice the cut
-    spatial: ['cube', 'flip', 'spin', 'roll', 'collapse'],                    // 3D dimensional turns
-  };
+// one cut family per film. Group the cut vocabulary by edit-grammar meaning (SELECTION §1).
+const CUT_FAMILY = {
+  soft: ['none', 'fade', 'blur', 'riseBlur', 'softwipe', 'softiris'],       // dissolves — hide the seam
+  motion: ['whip', 'skewWhip', 'punch', 'zoom', 'slide', 'squeeze', 'drop', 'rise', 'jitter'], // directional pushes
+  shape: ['wipe', 'iris', 'clock', 'blinds', 'barn', 'letterbox'],          // matte reveals — notice the cut
+  spatial: ['cube', 'flip', 'spin', 'roll', 'collapse'],                    // 3D dimensional turns
+};
+function tellCutFamilies(d, layers) {
   const familyOf = (style) => Object.keys(CUT_FAMILY).find((f) => CUT_FAMILY[f].includes(style)) || 'other';
   const cutStyles = [...(d.cuts || []).map((c) => c.style), ...layers.map((l) => l.cut)].filter((s) => s && s !== 'none');
   const usedFamilies = [...new Set(cutStyles.map(familyOf))];
-  if (cutStyles.length) metrics['cut-families'] = usedFamilies.length;
-  if (usedFamilies.length >= 3) fail('cut-families', `${usedFamilies.length} cut families (${usedFamilies.join(', ')}) — one film, one family (TASTE-RULES: restraint)`);
-  else if (usedFamilies.length === 2) warn('cut-families', `2 cut families (${usedFamilies.join(', ')}) — prefer one; the director rotates WITHIN a family`);
+  const metrics = cutStyles.length ? { 'cut-families': usedFamilies.length } : {};
+  if (usedFamilies.length >= 3) return { metrics, findings: [fail('cut-families', `${usedFamilies.length} cut families (${usedFamilies.join(', ')}) — one film, one family (TASTE-RULES: restraint)`)] };
+  if (usedFamilies.length === 2) return { metrics, findings: [warn('cut-families', `2 cut families (${usedFamilies.join(', ')}) — prefer one; the director rotates WITHIN a family`)] };
+  return { metrics, findings: [] };
+}
 
-  // effect soup: heavy effects are a composite look (layer.filter), an ambient shader, a 3D toy, or a
-  // sting. Effects are seasoning (2-3 earned moments), not a per-beat texture.
+// effect soup: heavy effects are a composite look (layer.filter), an ambient shader, a 3D toy, or a
+// sting. Effects are seasoning (2-3 earned moments), not a per-beat texture.
+function tellEffectSoup(d, layers, beats) {
   const isLook = (s) => s && LOOK_NAMES.includes(String(s).split(':')[0].trim());
   const effectsPerBeat = beats.map((t) => {
     const inBeat = (start) => start >= t - 0.05 && start < (beats[beats.indexOf(t) + 1] ?? 1e9);
@@ -167,57 +176,68 @@ function analyse(d) {
   });
   const distinctEffects = new Set(effectsPerBeat.flatMap((s) => [...s]));
   const effectBeats = effectsPerBeat.filter((s) => s.size).length;
-  if (beats.length) metrics['effect-soup'] = effectBeats / beats.length;
+  const metrics = beats.length ? { 'effect-soup': effectBeats / beats.length } : {};
   if (beats.length >= 3 && effectBeats / beats.length > 0.6)
-    warn('effect-soup', `an effect on ${effectBeats}/${beats.length} beats — most beats should be clean type; effects are 2-3 earned moments (TASTE-RULES: effect soup)`);
-  else if (distinctEffects.size > Math.max(4, Math.ceil(beats.length / 2)))
-    warn('effect-soup', `${distinctEffects.size} distinct effects across ${beats.length} beats — a new look every beat is a demo reel, not a film`);
+    return { metrics, findings: [warn('effect-soup', `an effect on ${effectBeats}/${beats.length} beats — most beats should be clean type; effects are 2-3 earned moments (TASTE-RULES: effect soup)`)] };
+  if (distinctEffects.size > Math.max(4, Math.ceil(beats.length / 2)))
+    return { metrics, findings: [warn('effect-soup', `${distinctEffects.size} distinct effects across ${beats.length} beats — a new look every beat is a demo reel, not a film`)] };
+  return { metrics, findings: [] };
+}
 
-  // continuity: a shared element that travels (a motion track, or a layer spanning a beat boundary).
+// continuity: a shared element that travels (a motion track, or a layer spanning a beat boundary).
+function tellContinuity(d, layers, beats) {
   const spansABeat = (l) => { const a = l.start ?? 0, b = a + (l.dur ?? l.enterDur ?? 0); return beats.some((t) => t > a + 0.05 && t < b - 0.05); };
   const travelers = layers.filter((l) => l.track !== 0 && (Array.isArray(l.motion) && l.motion.length > 1 || spansABeat(l)));
   // sceneUnits carries continuity BY CONSTRUCTION: every boundary moves the whole outgoing beat out and the
   // incoming beat in as units, so the scene itself travels across each cut (the strongest continuity there is).
-  if (beats.length >= 4) metrics.continuity = travelers.length;
-  if (beats.length >= 4 && travelers.length === 0 && d.sceneUnits !== true)
-    warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat) — reads as a slideshow (TASTE-RULES: continuity). Or set "sceneUnits":true so each beat slides in/out as one unit.`);
+  if (beats.length < 4) return nothing;
+  const metrics = { continuity: travelers.length };
+  if (travelers.length === 0 && d.sceneUnits !== true)
+    return { metrics, findings: [warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat) — reads as a slideshow (TASTE-RULES: continuity). Or set "sceneUnits":true so each beat slides in/out as one unit.`)] };
+  return { metrics, findings: [] };
+}
 
-  // beats too short to read. Only real cut times give a true beat-hold duration (start-clusters are
-  // ≥1.4s apart by construction, so they can't measure this). WARN, since a fast montage is legitimate.
+// beats too short to read. Only real cut times give a true beat-hold duration (start-clusters are
+// ≥1.4s apart by construction, so they can't measure this). WARN, since a fast montage is legitimate.
+function tellPacing(d, duration) {
   const cutTimes = [...new Set((d.cuts || []).map((c) => c.t).filter((t) => typeof t === 'number'))].sort((a, b) => a - b);
-  if (cutTimes.length >= 2) {
-    const holds = cutTimes.map((t, i) => (cutTimes[i + 1] ?? (duration || t + 3)) - t);
-    const tiny = holds.filter((h) => h > 0 && h < 0.9).length;
-    const unreadable = holds.filter((h) => h > 0 && h < 0.5).length;
-    if (unreadable >= 2) warn('pacing', `${unreadable} cuts less than 0.5s apart — too fast to read unless a deliberate montage`);
-    else if (tiny / cutTimes.length > 0.5) warn('pacing', `${tiny}/${cutTimes.length} cut-to-cut holds under 0.9s — chaotic pacing unless intentional`);
-  }
+  if (cutTimes.length < 2) return nothing;
+  const holds = cutTimes.map((t, i) => (cutTimes[i + 1] ?? (duration || t + 3)) - t);
+  const tiny = holds.filter((h) => h > 0 && h < 0.9).length;
+  const unreadable = holds.filter((h) => h > 0 && h < 0.5).length;
+  if (unreadable >= 2) return { metrics: {}, findings: [warn('pacing', `${unreadable} cuts less than 0.5s apart — too fast to read unless a deliberate montage`)] };
+  if (tiny / cutTimes.length > 0.5) return { metrics: {}, findings: [warn('pacing', `${tiny}/${cutTimes.length} cut-to-cut holds under 0.9s — chaotic pacing unless intentional`)] };
+  return nothing;
+}
 
-  // dead final frame: the payoff should hold to the end, never fade out (TASTE-RULES).
-  if (duration > 0 && layers.length) {
-    const holdsEnd = layers.some((l) => l.track !== 0 && (l.exitDur === 0 || (l.start ?? 0) + (l.dur ?? 1e9) >= duration - 0.15));
-    if (!holdsEnd) warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s) — end on a held frame, exitDur:0, never fade the payoff`);
-  }
+// dead final frame: the payoff should hold to the end, never fade out (TASTE-RULES).
+function tellDeadFinalFrame(layers, duration) {
+  if (!(duration > 0 && layers.length)) return nothing;
+  const holdsEnd = layers.some((l) => l.track !== 0 && (l.exitDur === 0 || (l.start ?? 0) + (l.dur ?? 1e9) >= duration - 0.15));
+  if (holdsEnd) return nothing;
+  return { metrics: {}, findings: [warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s) — end on a held frame, exitDur:0, never fade the payoff`)] };
+}
 
-  // ---- MOTION MECHANICS: the book-grounded amateur tells (docs/CRAFT/DIRECTION.md) ----------------
-  // linear-motion: a visible move that runs at a FLAT rate from rest to rest. Real motion accelerates
-  // in and decelerates out (Disney slow-in/slow-out; Material asymmetric easing).
-  //
-  // WHAT THIS RULE USED TO MEASURE, AND WHY THAT WAS THE WRONG THING. It counted every authored
-  // `ease:"linear"`, and `linear` is 348 of 833 eases in this library because a CONSTANT RATE IS
-  // CORRECT for a whole family of moves: a camera pan, a page scroll, a marquee, a progress ring, an
-  // ambient drift, a spinner. Curving those is the defect, not the fix. The blueprints say so at the
-  // write site, and the rule fired on them anyway: recordedPan eases only the settle before the
-  // scroll "so the scroll never has a standing start" and writes every interior key linear on purpose
-  // (blueprints/beats-track.mjs),
-  // and the rule fired on all of them. A gate that fires on the house's own correct construction is
-  // measuring a proxy for its rule, not the rule.
-  //
-  // WHAT SEPARATES THEM. Slow-in/slow-out governs a move that STARTS and STOPS: the ramp exists
-  // because the pose goes from rest to rest and the eye needs the two ends softened. A constant-rate
-  // move has no such ends inside the shot. So judge the RUN, not the key: a maximal chain of
-  // consecutive linear moving segments is flat only when it is entered from rest AND left at rest.
-  // Entered or left in motion, the rate is constant by construction and the ramp lives either side.
+// ---- MOTION MECHANICS: the book-grounded amateur tells (docs/CRAFT/DIRECTION.md) ----------------
+// linear-motion: a visible move that runs at a FLAT rate from rest to rest. Real motion accelerates
+// in and decelerates out (Disney slow-in/slow-out; Material asymmetric easing).
+//
+// WHAT THIS RULE USED TO MEASURE, AND WHY THAT WAS THE WRONG THING. It counted every authored
+// `ease:"linear"`, and `linear` is 348 of 833 eases in this library because a CONSTANT RATE IS
+// CORRECT for a whole family of moves: a camera pan, a page scroll, a marquee, a progress ring, an
+// ambient drift, a spinner. Curving those is the defect, not the fix. The blueprints say so at the
+// write site, and the rule fired on them anyway: recordedPan eases only the settle before the
+// scroll "so the scroll never has a standing start" and writes every interior key linear on purpose
+// (blueprints/beats-track.mjs),
+// and the rule fired on all of them. A gate that fires on the house's own correct construction is
+// measuring a proxy for its rule, not the rule.
+//
+// WHAT SEPARATES THEM. Slow-in/slow-out governs a move that STARTS and STOPS: the ramp exists
+// because the pose goes from rest to rest and the eye needs the two ends softened. A constant-rate
+// move has no such ends inside the shot. So judge the RUN, not the key: a maximal chain of
+// consecutive linear moving segments is flat only when it is entered from rest AND left at rest.
+// Entered or left in motion, the rate is constant by construction and the ramp lives either side.
+function tellLinearMotion(layers) {
   const linearHits = [];
   const LINEAR = (e) => typeof e === 'string' && /^(linear|none)$/i.test(e.trim());
   // A HOLD IS NOT A MOVE. The rule is about a visible move running flat, and a motion track states
@@ -286,20 +306,22 @@ function analyse(d) {
       else if (v && typeof v === 'object') scanEase(v, `${where}.${k}`); }
   };
   layers.forEach((l, i) => scanEase(l, `layer[${i}]`));
-  metrics['linear-motion'] = linearHits.length;
-  if (linearHits.length) warn('linear-motion', `${linearHits.length} move(s) run FLAT from rest to rest on ease "linear"/"none". A move that starts and stops must decelerate in / accelerate out (DIRECTION.md: slow-in/slow-out). A pan, scroll, marquee, spinner or ambient drift is exempt: it is entered or left in motion, it turns a full circle, it stays inside the ambient band, or its keys are spaced so the run already decelerates. At: ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? ', …' : ''}`);
+  const metrics = { 'linear-motion': linearHits.length };
+  if (!linearHits.length) return { metrics, findings: [] };
+  return { metrics, findings: [warn('linear-motion', `${linearHits.length} move(s) run FLAT from rest to rest on ease "linear"/"none". A move that starts and stops must decelerate in / accelerate out (DIRECTION.md: slow-in/slow-out). A pan, scroll, marquee, spinner or ambient drift is exempt: it is entered or left in motion, it turns a full circle, it stays inside the ambient band, or its keys are spaced so the run already decelerates. At: ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? ', …' : ''}`)] };
+}
 
-  // ---- DURATION AGAINST DISTANCE (measured, never a finding — see the header) ---------------------
-  // Nothing else here relates a move's LENGTH to its TIME, so a 40px nudge and a 900px sweep both take
-  // whatever the author typed. This measures every keyed move so the report can place the fastest one.
-  //
-  // Only sparse segments count. The engine itself draws the line: below DENSE_KEY_SEC a segment "is not
-  // a span with a shape, it is one step of a traced path" (core/sequence.js), and it interpolates those
-  // linearly for that reason. A hand-keyed cursor lands keys every two or three frames, and reading each
-  // hop as a move would report a click as a 2500 px/s whip. Borrowing the engine's own constant keeps
-  // one owner for that judgement instead of a second number here that could drift from it.
+// ---- DURATION AGAINST DISTANCE (measured, never a finding — see the header) ---------------------
+// Nothing else here relates a move's LENGTH to its TIME, so a 40px nudge and a 900px sweep both take
+// whatever the author typed. This measures every keyed move so the report can place the fastest one.
+//
+// Only sparse segments count. The engine itself draws the line: below DENSE_KEY_SEC a segment "is not
+// a span with a shape, it is one step of a traced path" (core/sequence.js), and it interpolates those
+// linearly for that reason. A hand-keyed cursor lands keys every two or three frames, and reading each
+// hop as a move would report a click as a 2500 px/s whip. Borrowing the engine's own constant keeps
+// one owner for that judgement instead of a second number here that could drift from it.
+function measureKeyedSpeed(allLayers) {
   const moves = [];
-  let fastest = null;
   for (const l of allLayers) {
     if (!Array.isArray(l.motion) || l.motion.length < 2) continue;
     for (let i = 1; i < l.motion.length; i++) {
@@ -311,29 +333,35 @@ function analyse(d) {
       moves.push({ l, i, dt, dist, v: dist / dt });
     }
   }
-  if (moves.length) {
-    // Ties are real here: five identical layers carry the same track. Sort on the layer index too, so
-    // the fastest move names the same one on every run.
-    moves.sort((a, b) => b.v - a.v || allLayers.indexOf(a.l) - allLayers.indexOf(b.l) || a.i - b.i);
-    metrics['keyed-speed'] = moves[0].v;
-    fastest = { ...moves[0], over: moves.filter((m) => m.v > VMAX).length };
-  }
+  if (!moves.length) return { metrics: {}, findings: [], fastest: null };
+  // Ties are real here: five identical layers carry the same track. Sort on the layer index too, so
+  // the fastest move names the same one on every run.
+  moves.sort((a, b) => b.v - a.v || allLayers.indexOf(a.l) - allLayers.indexOf(b.l) || a.i - b.i);
+  return {
+    metrics: { 'keyed-speed': moves[0].v },
+    findings: [],
+    fastest: { ...moves[0], over: moves.filter((m) => m.v > VMAX).length },
+  };
+}
 
-  // monotone-timing: fires ONLY when the author took manual control of tempo and made it uniform.
-  // A default-timed scene is fine (the engine default IS one deliberate snap band); this needs ≥6 layers
-  // EXPLICITLY setting enterDur to one identical value — hand-set monotony (Murch: rhythm variety).
+// monotone-timing: fires ONLY when the author took manual control of tempo and made it uniform.
+// A default-timed scene is fine (the engine default IS one deliberate snap band); this needs ≥6 layers
+// EXPLICITLY setting enterDur to one identical value — hand-set monotony (Murch: rhythm variety).
+function tellMonotoneTiming(allLayers) {
   const explicitDurs = allLayers.map((l) => l.enterDur).filter((v) => typeof v === 'number');
-  if (explicitDurs.length >= 6 && new Set(explicitDurs).size === 1)
-    warn('monotone-timing', `${explicitDurs.length} entrances all set enterDur:${explicitDurs[0]} — uniform tempo reads as monotone. Timing is a voice: ambient drifts slow (0.6-1s), payoffs snap (0.25-0.35s), thesis lines luxurious (DIRECTION.md: timing)`);
+  if (!(explicitDurs.length >= 6 && new Set(explicitDurs).size === 1)) return nothing;
+  return { metrics: {}, findings: [warn('monotone-timing', `${explicitDurs.length} entrances all set enterDur:${explicitDurs[0]} — uniform tempo reads as monotone. Timing is a voice: ambient drifts slow (0.6-1s), payoffs snap (0.25-0.35s), thesis lines luxurious (DIRECTION.md: timing)`)] };
+}
 
-  // ---- ARRIVAL RHYTHM: four measures nothing else here can see (docs/MOTION-CRAFT.md rules 1, 3, 4) --
-  // All four are WARN. They grade rhythm, which is an argument; and the library trips the first one on
-  // roughly a third of its scenes, so blocking would teach the reflex waive that repeals a rule silently.
+// ---- ARRIVAL RHYTHM: four measures nothing else here can see (docs/MOTION-CRAFT.md rules 1, 3, 4) --
+// All four are WARN. They grade rhythm, which is an argument; and the library trips the first one on
+// roughly a third of its scenes, so blocking would teach the reflex waive that repeals a rule silently.
 
-  // (1) shared-start: three or more layers that begin on the SAME frame arrive as one block, so the beat
-  // states no reading order. Two together is a pair (a card and the label sitting on it); three is a row.
-  // `monotone-timing` above measures identical DURATIONS and is blind to this — those layers may each run
-  // a different length and still all leave the gate together.
+// (1) shared-start: three or more layers that begin on the SAME frame arrive as one block, so the beat
+// states no reading order. Two together is a pair (a card and the label sitting on it); three is a row.
+// `monotone-timing` above measures identical DURATIONS and is blind to this — those layers may each run
+// a different length and still all leave the gate together.
+function tellSharedStart(layers) {
   const startClumps = new Map();
   for (const l of layers) {
     if (l.track === 0) continue;
@@ -341,21 +369,22 @@ function analyse(d) {
     if (!startClumps.has(s)) startClumps.set(s, []);
     startClumps.get(s).push(l);
   }
-  if (startClumps.size) metrics['shared-start'] = Math.max(...[...startClumps.values()].map((ls) => ls.length));
+  const metrics = startClumps.size ? { 'shared-start': Math.max(...[...startClumps.values()].map((ls) => ls.length)) } : {};
   const blocked = [...startClumps.entries()].filter(([, ls]) => ls.length >= 3).sort((a, b) => b[1].length - a[1].length);
-  if (blocked.length) {
-    const [t0, ls0] = blocked[0];
-    const rest = blocked.length > 1 ? ` (and ${blocked.length - 1} more start${blocked.length > 2 ? 's' : ''} carrying 3+)` : '';
-    warn('shared-start', `${ls0.length} layers all start at ${t0}s${rest}. They arrive as one block, so nothing tells the eye what to read first. Stagger entrances at irregular offsets; begin the next while the last is still settling (MOTION-CRAFT rule 3). At ${t0}s: ${[...new Set(ls0.map(label))].slice(0, 4).join(' · ')}`);
-  }
+  if (!blocked.length) return { metrics, findings: [] };
+  const [t0, ls0] = blocked[0];
+  const rest = blocked.length > 1 ? ` (and ${blocked.length - 1} more start${blocked.length > 2 ? 's' : ''} carrying 3+)` : '';
+  return { metrics, findings: [warn('shared-start', `${ls0.length} layers all start at ${t0}s${rest}. They arrive as one block, so nothing tells the eye what to read first. Stagger entrances at irregular offsets; begin the next while the last is still settling (MOTION-CRAFT rule 3). At ${t0}s: ${[...new Set(ls0.map(label))].slice(0, 4).join(' · ')}`)] };
+}
 
-  // (2) stagger-total: a per-unit step inside the 0.04-0.12s band still overruns when the unit count is
-  // high — 8 items at 0.10s take 0.8s to leave the gate and stop reading as ONE arrival. The dial table in
-  // MOTION-CRAFT gives the per-item band and no total, which is exactly the hole this closes. The measure
-  // is the STAGGER SEQUENCE, first unit start to last unit start: (n-1) x stagger.
-  // A RATE is not a stagger. `type` is a typewriter and `wave` is a looping phase (core/type.js), so for
-  // both the step IS the effect's speed and its total is the shot length by design.
-  const RATE_PRESET = new Set(['type', 'wave']);
+// (2) stagger-total: a per-unit step inside the 0.04-0.12s band still overruns when the unit count is
+// high — 8 items at 0.10s take 0.8s to leave the gate and stop reading as ONE arrival. The dial table in
+// MOTION-CRAFT gives the per-item band and no total, which is exactly the hole this closes. The measure
+// is the STAGGER SEQUENCE, first unit start to last unit start: (n-1) x stagger.
+// A RATE is not a stagger. `type` is a typewriter and `wave` is a looping phase (core/type.js), so for
+// both the step IS the effect's speed and its total is the shot length by design.
+const RATE_PRESET = new Set(['type', 'wave']);
+function tellStaggerTotal(allLayers) {
   const staggerUnits = (l) => {
     if (l.split) {
       const t = glyphText(String(l.text ?? ''));
@@ -380,19 +409,20 @@ function analyse(d) {
     staggerTotals.push(total);
     if (total > STAGGER_CAP) longStaggers.push({ l, n, step, total });
   }
-  if (staggerTotals.length) metrics['stagger-total'] = Math.max(...staggerTotals);
-  if (longStaggers.length) {
-    longStaggers.sort((a, b) => b.total - a.total);
-    const w = longStaggers[0];
-    warn('stagger-total', `${longStaggers.length} staggered arrival(s) run past ${STAGGER_CAP}s end to end. Worst, ${label(w.l)}: ${w.n} units x ${w.step}s = ${w.total.toFixed(2)}s. Past about half a second the last unit lands in a different beat from the first. Cut the step, or split the group.`);
-  }
+  const metrics = staggerTotals.length ? { 'stagger-total': Math.max(...staggerTotals) } : {};
+  if (!longStaggers.length) return { metrics, findings: [] };
+  longStaggers.sort((a, b) => b.total - a.total);
+  const w = longStaggers[0];
+  return { metrics, findings: [warn('stagger-total', `${longStaggers.length} staggered arrival(s) run past ${STAGGER_CAP}s end to end. Worst, ${label(w.l)}: ${w.n} units x ${w.step}s = ${w.total.toFixed(2)}s. Past about half a second the last unit lands in a different beat from the first. Cut the step, or split the group.`)] };
+}
 
-  // (3) uneven-cascade: WITHIN one cascade the interval must be even. A cascade is a run of sibling layers
-  // of the same kind, entering the same way, close together — one list arriving, hand-keyed instead of
-  // authored with `stagger`. Reference test: consistent = maxDrift < avgInterval * 0.3.
-  // This does NOT contradict (1). Different scopes: (1) wants DIFFERENT elements to arrive at irregular
-  // offsets across a beat; (3) wants ONE cascade of like elements to keep its own metre. Both stated in
-  // docs/MOTION-CRAFT.md. The two can never fire on the same run — an exact clump has a zero interval.
+// (3) uneven-cascade: WITHIN one cascade the interval must be even. A cascade is a run of sibling layers
+// of the same kind, entering the same way, close together — one list arriving, hand-keyed instead of
+// authored with `stagger`. Reference test: consistent = maxDrift < avgInterval * 0.3.
+// This does NOT contradict (1). Different scopes: (1) wants DIFFERENT elements to arrive at irregular
+// offsets across a beat; (3) wants ONE cascade of like elements to keep its own metre. Both stated in
+// docs/MOTION-CRAFT.md. The two can never fire on the same run — an exact clump has a zero interval.
+function tellUnevenCascade(layers) {
   const CASCADE_GAP = 0.3;      // a wider hole is a new beat, not the next item
   const CASCADE_SPAN = 1.2;     // an arrival, not the film's whole running order
   const DRIFT_FLOOR = 0.04;     // one frame at 30fps rounds; under ~40ms unevenness is not seen
@@ -416,37 +446,73 @@ function analyse(d) {
       if (drift >= avg * 0.3 && drift >= DRIFT_FLOOR) uneven.push({ run, iv, avg, drift, layer: ls.find((l) => (l.start ?? 0) === run[0]) });
     }
   }
-  if (cascadeRatios.length) metrics['uneven-cascade'] = Math.max(...cascadeRatios);
-  if (uneven.length) {
-    uneven.sort((a, b) => b.drift - a.drift);
-    const u = uneven[0];
-    const ms = (v) => `${Math.round(v * 1000)}ms`;
-    warn('uneven-cascade', `${uneven.length} cascade(s) of like layers keep an uneven beat. Worst, ${u.run.length} x ${label(u.layer)} from ${r2(u.run[0])}s at ${u.iv.map(ms).join(' / ')} (average ${ms(u.avg)}, drift ${ms(u.drift)}). One cascade holds ONE interval; vary the offset BETWEEN beats, not inside a single sweep (MOTION-CRAFT rule 3).`);
-  }
+  const metrics = cascadeRatios.length ? { 'uneven-cascade': Math.max(...cascadeRatios) } : {};
+  if (!uneven.length) return { metrics, findings: [] };
+  uneven.sort((a, b) => b.drift - a.drift);
+  const u = uneven[0];
+  const ms = (v) => `${Math.round(v * 1000)}ms`;
+  return { metrics, findings: [warn('uneven-cascade', `${uneven.length} cascade(s) of like layers keep an uneven beat. Worst, ${u.run.length} x ${label(u.layer)} from ${r2(u.run[0])}s at ${u.iv.map(ms).join(' / ')} (average ${ms(u.avg)}, drift ${ms(u.drift)}). One cascade holds ONE interval; vary the offset BETWEEN beats, not inside a single sweep (MOTION-CRAFT rule 3).`)] };
+}
 
-  // (4) tempo-flat: `monotone-timing` fires only on a dead heat (every enterDur identical) and names no
-  // target. This measures the SPREAD. The speed-dial table already gives the band a directed film speaks
-  // in — payoffs 0.25-0.35s, ambient 0.75-1.2s — which is about 3x end to end.
+// (4) tempo-flat: `monotone-timing` fires only on a dead heat (every enterDur identical) and names no
+// target. This measures the SPREAD. The speed-dial table already gives the band a directed film speaks
+// in — payoffs 0.25-0.35s, ambient 0.75-1.2s — which is about 3x end to end.
+function tellTempoFlat(allLayers) {
   const TEMPO_TARGET = 3, TEMPO_FLOOR = 1.5;
   const durs = allLayers.map((l) => l.enterDur).filter((v) => typeof v === 'number' && v > 0);
-  if (durs.length >= 4) metrics['tempo-flat'] = Math.max(...durs) / Math.min(...durs);
-  if (durs.length >= 4 && new Set(durs).size > 1) {   // a dead heat is monotone-timing's finding, not this one
-    const lo = Math.min(...durs), hi = Math.max(...durs), ratio = hi / lo;
-    if (ratio < TEMPO_FLOOR)
-      warn('tempo-flat', `${durs.length} entrances span only ${lo}s to ${hi}s (${ratio.toFixed(2)}x). One speed for the whole film reads as narration. Aim for about ${TEMPO_TARGET}x between the slowest and the fastest: payoffs snap 0.25-0.35s, ambient drifts 0.75-1.2s (MOTION-CRAFT rule 1 + the speed dials).`);
-  }
+  if (durs.length < 4) return nothing;
+  const metrics = { 'tempo-flat': Math.max(...durs) / Math.min(...durs) };
+  if (new Set(durs).size === 1) return { metrics, findings: [] };   // a dead heat is monotone-timing's finding, not this one
+  const lo = Math.min(...durs), hi = Math.max(...durs), ratio = hi / lo;
+  if (ratio >= TEMPO_FLOOR) return { metrics, findings: [] };
+  return { metrics, findings: [warn('tempo-flat', `${durs.length} entrances span only ${lo}s to ${hi}s (${ratio.toFixed(2)}x). One speed for the whole film reads as narration. Aim for about ${TEMPO_TARGET}x between the slowest and the fastest: payoffs snap 0.25-0.35s, ambient drifts 0.75-1.2s (MOTION-CRAFT rule 1 + the speed dials).`)] };
+}
 
-  // enter-and-retreat: a layer that enters from a side and leaves back the SAME side. Pro motion travels
-  // one continuous direction (enter right → exit left) — the launch rule + staging continuity.
+// enter-and-retreat: a layer that enters from a side and leaves back the SAME side. Pro motion travels
+// one continuous direction (enter right → exit left) — the launch rule + staging continuity.
+function tellEnterAndRetreat(allLayers) {
   const DIR = /^slide-(left|right|up|down)$/;
   const retreats = allLayers.filter((l) => DIR.test(l.anim || '') && DIR.test(l.out || '') && l.anim.split('-')[1] === l.out.split('-')[1]);
-  metrics['enter-and-retreat'] = retreats.length;
-  if (retreats.length) warn('enter-and-retreat', `${retreats.length} layer(s) enter and exit on the same side (e.g. anim:"${retreats[0].anim}" + out:"${retreats[0].out}") — travel ONE continuous direction: enter a side, exit the opposite (DIRECTION.md: paired directional exits)`);
+  const metrics = { 'enter-and-retreat': retreats.length };
+  if (!retreats.length) return { metrics, findings: [] };
+  return { metrics, findings: [warn('enter-and-retreat', `${retreats.length} layer(s) enter and exit on the same side (e.g. anim:"${retreats[0].anim}" + out:"${retreats[0].out}") — travel ONE continuous direction: enter a side, exit the opposite (DIRECTION.md: paired directional exits)`)] };
+}
 
-  // profile contradictions are wrong-by-rule → FAIL tier.
-  for (const c of contradictions) fail('profile', c);
+// ---- ONE SCENE, MEASURED ---------------------------------------------------------------------------
+// Returns findings, the beats the report needs, and `metrics`: the scalar behind each rule, computed
+// whether or not the rule fired. The census needs the whole distribution, not just the failures, so a
+// metric is recorded any time it is DEFINED — `undefined` means "this film has no such measure".
+function analyse(d) {
+  const layers = d.layers || [];
+  // flatten nested children so the mechanical motion tells see every layer, not just the top level.
+  const allLayers = (() => { const out = []; const rec = (ls) => { for (const l of ls || []) if (l && typeof l === 'object') { out.push(l); if (l.children) rec(l.children); } }; rec(layers); return out; })();
+  const duration = d.duration || 0;
+  const { personality, settle, bounce, FAMILY, profile } = resolveFamily(d);
+  const beats = beatsOf(layers);
+  const speed = measureKeyedSpeed(allLayers);
 
-  return { layers, allLayers, beats, duration, findings, metrics, fastest, personality, settle, bounce, FAMILY, profile };
+  // Each tell in turn, in the order the report reads them. Profile contradictions are wrong-by-rule,
+  // so they come last and at FAIL tier.
+  const metrics = {};
+  const findings = [];
+  for (const tell of [
+    tellCutFamilies(d, layers),
+    tellEffectSoup(d, layers, beats),
+    tellContinuity(d, layers, beats),
+    tellPacing(d, duration),
+    tellDeadFinalFrame(layers, duration),
+    tellLinearMotion(layers),
+    speed,
+    tellMonotoneTiming(allLayers),
+    tellSharedStart(layers),
+    tellStaggerTotal(allLayers),
+    tellUnevenCascade(layers),
+    tellTempoFlat(allLayers),
+    tellEnterAndRetreat(allLayers),
+    tellProfile(d, layers, profile),
+  ]) { Object.assign(metrics, tell.metrics); findings.push(...tell.findings); }
+
+  return { layers, allLayers, beats, duration, findings, metrics, fastest: speed.fastest, personality, settle, bounce, FAMILY, profile };
 }
 
 const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(String(l.text))}"` : ''}`;

@@ -15684,3 +15684,40 @@ resolves. Verified with `npm install --dry-run` before and after.
 comment moved, and nothing in the gate suite runs `npm install`. The one machine that would have caught
 it is a fresh clone, and a fresh clone is exactly the case nobody tests. It is the same shape as the
 gitignored-films problem: the checkout everyone has is not the checkout a newcomer gets.
+
+## #487: two motion gates where one function held every rule
+
+`scripts/dev/complexity.mjs` put four functions from the motion pair in the repo's worst band:
+`motion-director.mjs` `analyse` at cx 108 over 372 lines, and in `motion-audit.mjs` the per-element
+check at cx 68 with a nesting depth of 7, `audit` at cx 39 over 307 lines, and the in-page sampler at
+cx 31. Nothing was broken. The cost was the reading: `analyse` computed twelve independent rules
+(cut-families, effect-soup, continuity, pacing, dead-final-frame, linear-motion, monotone-timing,
+shared-start, stagger-total, uneven-cascade, tempo-flat, enter-and-retreat, plus the profile
+contradictions) in one body, sharing one `findings` array and one `metrics` object, so no rule could be
+read, moved or retired without reading all of them.
+
+**Root cause: no seam between gathering the evidence and asking a question of it.** Every rule reached
+straight into `layers`, `allLayers`, `beats` and `d`, and wrote its answer into shared state. That is
+what makes a body grow: each new rule is cheapest to add exactly where the last one sits.
+
+**The shape now.** Each tell is a named function taking the evidence it needs and returning the same
+pair, `{ metrics, findings }`. `analyse` gathers the evidence once and asks each tell in turn, in the
+order the report reads them (cx 4). A depth of 7 in the audit was the same signal one level down: the
+per-element loop body is now `exitFrameOf`, `scanSteps`, `shimmerStart`, `countupReversal`,
+`typingIncomplete` and `settleBreak`, with `elementFindings` asking them in turn; `captureSeries`,
+`shotWindowsOf`, `frozenSpans`, `entryDurations`, `finalHoldFinding`, `lifeFindings`, `rhythmFinding`
+and `presetFinding` came out of `audit` the same way. No severity moved: the four direction tells are
+still `warn()`, `cut-families` and `profile` are still the only FAIL-tier codes, and `MOTION_TIER`
+still decides whether the audit's FAIL tier blocks.
+
+**Blast radius, measured.** Both tools swept over all 135 gate-visible scenes before and after, the
+director per scene plus its census mode, the audit at both tiers: the output is byte-identical. The one
+difference between two runs of the UNCHANGED audit is the ephemeral port in a stack trace, so the diff
+is taken with the port normalised. `lib-test`: 1161 passed, 0 failed, before and after.
+
+**Two things noticed and deliberately left alone**, because a refactor that also changes behaviour
+cannot be verified. (1) The `vii:jump` guard reads `f - w.start > 2 && w.end - f > 2`, comparing FRAMES
+against 2 while the opacity guard beside it scales by `w.trans * FPS`; if 2 was meant as seconds the
+clause is 30x more permissive at the shot edges than it reads. (2) `label` in the director is a `const`
+arrow declared after every function that calls it, which works only because no call happens during
+module evaluation.
