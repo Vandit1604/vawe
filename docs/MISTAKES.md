@@ -15609,3 +15609,46 @@ edge is no longer reported here. The layer-level safe-zone and overflow checks s
 **Blast radius, measured.** The whole audit sweep, 105 scenes, before and after: 103 identical, 0 scenes
 changed exit code, no finding added or removed in kind. Two scenes report the SAME finding one sample
 frame later, because the earliest frame was the one holding a mask at rest.
+
+## #485: the audit's one function did eleven jobs, because puppeteer only ships one
+
+`auditFrameFn` in `verify/audit.mjs` was 927 lines with a cyclomatic complexity of 166: the hardest
+function to change in this repo, and the gate that grades every film in the library. Inside it sat
+eleven separate checks (overflow, safe zone, caption band, the image and text floors, clipped glyphs,
+clipped components, vertical mass, overlap and tight pairs, buried headlines, thin heroes) plus four
+contrast probe collectors, all reading one another's local variables.
+
+**The root cause is a real constraint, not neglect.** `page.evaluate(fn)` ships a function by
+STRINGIFYING it. The source crosses the browser boundary; the environment does not. So a helper in the
+module scope is unreachable from the page, and for as long as that was the only mechanism, a nested
+helper was the only kind of helper available. Every new rule had exactly one place to go.
+
+**The fix is a bundle, not a plugin system.** Each page function is now a top-level declaration.
+`PAGE_FNS` names them, `PAGE_SRC` concatenates their sources into one page-side scope, and that scope
+is installed once per page instead of once per frame. From inside it the checks call each other by
+name exactly as nested ones did. The frame's evidence is collected once by `frameContext` (the layer
+info list, the clock, the cut window, the rotated-stage flag, the camera scale, the travelling set,
+the layer index) and every check reads it, so nothing is measured twice and no two checks can drift
+apart about what "settled" means.
+
+**The order of the checks is output.** Findings print in push order and de-dup to the FIRST
+occurrence, so the list in `auditFrame` is the order the old function pushed in, and the layer walk
+stays ONE function emitting three kinds: splitting it into three walks would silently re-sort every
+report this gate has ever written.
+
+**Nothing was fixed while it was moved.** One comment now says something different, and only because
+its stated reason expired: the local alpha test inside the occlusion escape began as a scoping
+accident (`parse` was declared further down the same function, so calling it there threw), and it
+stays because `parse` also reads `color(srgb …)` and adopting it would widen what counts as an opaque
+cover. That is a behaviour change, so it was recorded and not made.
+
+**Blast radius, measured.** The full sweep over all 105 auditable scenes, before and after: the two
+outputs are BYTE-IDENTICAL, same md5, including every exit code. Also byte-identical: the no-argument
+run over every format sample, `--hero`, `--aspect all`, and hand-built probes for the four finding
+kinds no shipped scene exercises (`caption-band`, `buried`, `degenerate-pin`, `dead-offset`).
+`lib-test` 1161 passed before and after; `contrast-regression` and `measure-regression` identical.
+
+Complexity, from `node scripts/dev/complexity.mjs verify`: the file's worst function goes from
+**cx 166 / 927 lines** to **cx 26 / 42 lines** (`decodePNG`, untouched and pre-existing). The
+`unholdable (50+)` bucket for the whole `verify` tree is now empty, and `hard to test (21-50)` holds
+one function instead of three.
