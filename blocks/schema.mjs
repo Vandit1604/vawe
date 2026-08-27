@@ -59,76 +59,95 @@ const HEX = /^#[0-9a-fA-F]{6}$/;
 const THEME_COLOUR = /^(var|color-mix|rgb|rgba|hsl|hsla|linear-gradient|radial-gradient)\(/;
 export const isBlockColour = (v) => typeof v === 'string' && (HEX.test(v) || THEME_COLOUR.test(v));
 
-// Check one value against one rule and return it. Nothing is silently dropped or replaced: an
-// out-of-range number, a malformed colour or an unknown enum value throws and names itself.
+// One validator per KIND, each holding the whole rule for its own shape: what the value must be, what
+// bounds apply, and what comes back. Nothing is silently dropped or replaced: an out-of-range number, a
+// malformed colour or an unknown enum value throws and names itself.
+//
+// A kind with no entry here is refused by name in checkValue below, which is how a table that declares
+// a shape this file cannot check says so instead of passing the value through.
+const CHECK = {
+  hex(rule, value, at) {
+    if (!HEX.test(String(value))) fail(`block: ${at} must be a 6-digit hex colour like "#4C8DFF". Got ${JSON.stringify(value)}.`);
+    return value;
+  },
+  color(rule, value, at) {
+    if (!isBlockColour(value)) fail(`block: ${at} must be a hex colour or a theme expression like "var(--accent)". Got ${JSON.stringify(value)}.`);
+    return value;
+  },
+  hexlist(rule, value, at) {
+    if (!Array.isArray(value)) fail(`block: ${at} must be an array of 6-digit hex colours. Got ${JSON.stringify(value)}.`);
+    if (rule.max != null && value.length > rule.max) fail(`block: ${at} takes at most ${rule.max} colours. Got ${value.length}.`);
+    value.forEach((v, i) => { if (!HEX.test(String(v))) fail(`block: ${at}[${i}] must be a 6-digit hex colour. Got ${JSON.stringify(v)}.`); });
+    return [...value];
+  },
+  enum(rule, value, at) {
+    if (!rule.of.includes(value)) fail(`block: ${at} must be one of ${list(rule.of)}. Got ${JSON.stringify(value)}.`);
+    return value;
+  },
+  str(rule, value, at) {
+    if (typeof value !== 'string') fail(`block: ${at} must be a string. Got ${JSON.stringify(value)}.`);
+    if (rule.max != null && value.length > rule.max) fail(`block: ${at} must be at most ${rule.max} characters. Got ${value.length}.`);
+    return value;
+  },
+  bool(rule, value, at) {
+    if (typeof value !== 'boolean') fail(`block: ${at} must be true or false. Got ${JSON.stringify(value)}.`);
+    return value;
+  },
+  int(rule, value, at) {
+    if (!Number.isInteger(value)) fail(`block: ${at} must be a whole number. Got ${JSON.stringify(value)}.`);
+    if (value < rule.min || value > rule.max) fail(`block: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
+    return value;
+  },
+  unit(rule, value, at) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) fail(`block: ${at} must be a number from 0 to 1. Got ${JSON.stringify(value)}.`);
+    if (value < 0 || value > 1) fail(`block: ${at} must be between 0 and 1. Got ${value}.`);
+    return value;
+  },
+  num(rule, value, at) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) fail(`block: ${at} must be a number. Got ${JSON.stringify(value)}.`);
+    if (value < rule.min || value > rule.max) fail(`block: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
+    return value;
+  },
+  list(rule, value, at) {
+    if (!Array.isArray(value)) fail(`block: ${at} must be an array. Got ${JSON.stringify(value)}.`);
+    if (rule.max != null && value.length > rule.max) fail(`block: ${at} takes at most ${rule.max} entries. Got ${value.length}.`);
+    return value.map((v, i) => checkValue(rule.of, v, `${at}[${i}]`));
+  },
+  row(rule, value, at) {
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+      fail(`block: ${at} must be an object with keys ${list(Object.keys(rule.fields))}. Got ${JSON.stringify(value)}.`);
+    }
+    for (const key of Object.keys(value)) {
+      if (!(key in rule.fields)) fail(`block: unknown key ${at}.${key}. Valid keys here: ${list(Object.keys(rule.fields))}.`);
+    }
+    // A row is caller content, so an absent field stays absent. Filling it would invent data.
+    const out = {};
+    for (const [k, r] of Object.entries(rule.fields)) {
+      if (k in value && value[k] !== undefined) out[k] = checkValue(r, value[k], `${at}.${k}`);
+    }
+    return out;
+  },
+  oneOf(rule, value, at) {
+    const why = [];
+    for (const alt of rule.of) {
+      try { return checkValue(alt, value, at); } catch (e) { why.push(e.message); }
+    }
+    return fail(`block: ${at} matched none of its accepted shapes (${rule.of.map((a) => a.kind).join(' or ')}). ${why.join(' ')}`);
+  },
+  block(rule, value, at) {
+    if (value === null || typeof value !== 'object' || Array.isArray(value) || typeof value.block !== 'string') {
+      fail(`block: ${at} must be a block descriptor { block, props }. Got ${JSON.stringify(value)}.`);
+    }
+    return value;
+  },
+};
+
+// Check one value against one rule and return it.
 export function checkValue(rule, value, at) {
-  switch (rule.kind) {
-    case 'hex':
-      if (!HEX.test(String(value))) fail(`block: ${at} must be a 6-digit hex colour like "#4C8DFF". Got ${JSON.stringify(value)}.`);
-      return value;
-    case 'color':
-      if (!isBlockColour(value)) fail(`block: ${at} must be a hex colour or a theme expression like "var(--accent)". Got ${JSON.stringify(value)}.`);
-      return value;
-    case 'hexlist':
-      if (!Array.isArray(value)) fail(`block: ${at} must be an array of 6-digit hex colours. Got ${JSON.stringify(value)}.`);
-      if (rule.max != null && value.length > rule.max) fail(`block: ${at} takes at most ${rule.max} colours. Got ${value.length}.`);
-      value.forEach((v, i) => { if (!HEX.test(String(v))) fail(`block: ${at}[${i}] must be a 6-digit hex colour. Got ${JSON.stringify(v)}.`); });
-      return [...value];
-    case 'enum':
-      if (!rule.of.includes(value)) fail(`block: ${at} must be one of ${list(rule.of)}. Got ${JSON.stringify(value)}.`);
-      return value;
-    case 'str':
-      if (typeof value !== 'string') fail(`block: ${at} must be a string. Got ${JSON.stringify(value)}.`);
-      if (rule.max != null && value.length > rule.max) fail(`block: ${at} must be at most ${rule.max} characters. Got ${value.length}.`);
-      return value;
-    case 'bool':
-      if (typeof value !== 'boolean') fail(`block: ${at} must be true or false. Got ${JSON.stringify(value)}.`);
-      return value;
-    case 'int':
-      if (!Number.isInteger(value)) fail(`block: ${at} must be a whole number. Got ${JSON.stringify(value)}.`);
-      if (value < rule.min || value > rule.max) fail(`block: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
-      return value;
-    case 'unit':
-      if (typeof value !== 'number' || !Number.isFinite(value)) fail(`block: ${at} must be a number from 0 to 1. Got ${JSON.stringify(value)}.`);
-      if (value < 0 || value > 1) fail(`block: ${at} must be between 0 and 1. Got ${value}.`);
-      return value;
-    case 'num':
-      if (typeof value !== 'number' || !Number.isFinite(value)) fail(`block: ${at} must be a number. Got ${JSON.stringify(value)}.`);
-      if (value < rule.min || value > rule.max) fail(`block: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
-      return value;
-    case 'list':
-      if (!Array.isArray(value)) fail(`block: ${at} must be an array. Got ${JSON.stringify(value)}.`);
-      if (rule.max != null && value.length > rule.max) fail(`block: ${at} takes at most ${rule.max} entries. Got ${value.length}.`);
-      return value.map((v, i) => checkValue(rule.of, v, `${at}[${i}]`));
-    case 'row': {
-      if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-        fail(`block: ${at} must be an object with keys ${list(Object.keys(rule.fields))}. Got ${JSON.stringify(value)}.`);
-      }
-      for (const key of Object.keys(value)) {
-        if (!(key in rule.fields)) fail(`block: unknown key ${at}.${key}. Valid keys here: ${list(Object.keys(rule.fields))}.`);
-      }
-      // A row is caller content, so an absent field stays absent. Filling it would invent data.
-      const out = {};
-      for (const [k, r] of Object.entries(rule.fields)) {
-        if (k in value && value[k] !== undefined) out[k] = checkValue(r, value[k], `${at}.${k}`);
-      }
-      return out;
-    }
-    case 'oneOf': {
-      const why = [];
-      for (const alt of rule.of) {
-        try { return checkValue(alt, value, at); } catch (e) { why.push(e.message); }
-      }
-      return fail(`block: ${at} matched none of its accepted shapes (${rule.of.map((a) => a.kind).join(' or ')}). ${why.join(' ')}`);
-    }
-    case 'block':
-      if (value === null || typeof value !== 'object' || Array.isArray(value) || typeof value.block !== 'string') {
-        fail(`block: ${at} must be a block descriptor { block, props }. Got ${JSON.stringify(value)}.`);
-      }
-      return value;
-    default:
-      return fail(`block: ${at} declares kind "${rule.kind}", which is not one of ${list(KINDS)}.`);
-  }
+  // hasOwn, not a bare lookup: a rule naming "constructor" would otherwise reach Object.prototype and
+  // be called as a validator.
+  if (!Object.hasOwn(CHECK, rule.kind)) return fail(`block: ${at} declares kind "${rule.kind}", which is not one of ${list(KINDS)}.`);
+  return CHECK[rule.kind](rule, value, at);
 }
 
 // Check the given options for one family against its table and return a filled, key-ordered copy.
