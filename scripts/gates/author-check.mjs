@@ -63,6 +63,7 @@ import crypto from 'node:crypto';
 import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
+import { codesEmitted } from '../lib/finding-codes.mjs';
 import { sceneDims } from '../../core/safe.js';
 import { population, LIBRARY } from '../lib/census.mjs';
 
@@ -160,6 +161,59 @@ const RATCHET_RULES = {
 const CONTENT_TYPES = new Set(['text', 'image', 'svg', 'html', 'component', 'count', 'doc',
   'lottie', 'video', 'board', 'canvas', 'clip', 'group', 'composition']);
 
+// ---- RATCHETED CODES: the same ratchet, for rules whose verdict only a gate can give ------------
+//
+// `RATCHET_RULES` above requires a predicate that is CHEAP and PURE, and that is right for the hot
+// path: the census runs it over every scene on every author-check run. But almost every rule worth
+// tightening is not expressible that way. `plain-slideshow` needs a motion vocabulary counted,
+// `crossfade-mud` needs the transition windows walked, `off-colour` needs the theme resolved. Writing
+// pure twins of those predicates would put one rule in two places, which is the drift this repo logs
+// more than anything else, and the twin would be the copy that goes stale.
+//
+// So the split follows where the cost actually falls:
+//   ADOPT TIME (rare, a maintenance command): run the OWNING GATE over the library, once. Slow and
+//     honest, and it is the only moment the whole library has to be evaluated.
+//   CHECK TIME (every run): re-run NOTHING. The gate already ran in the ladder above and its codes are
+//     in `results`, so severity is a manifest lookup on a code we already have.
+//
+// Which gate owns a code is DERIVED, never listed: scripts/lib/finding-codes.mjs already scans the gate
+// sources for exactly this, and a hand-kept map would rot the first time a rule moved file.
+const RATCHET_CODES = {
+  'plain-slideshow': 'the film reaches past a slideshow: kinetic type, a camera move, or real transitions',
+  'crossfade-mud': 'no transition dissolves one text state into another in place',
+  'no-continuous-object': 'something survives the film\'s cuts',
+  'effect-soup': 'the film does not stack more effect families than it can spend',
+  'linear-motion': 'motion carries easing, not a constant rate',
+  'monotone-timing': 'the film varies its timing rather than moving everything alike',
+  'enter-and-retreat': 'a layer leaves the way it came, in one direction of travel',
+  // NOT RATCHETED, and the measurement is the reason. `off-colour` fires on BOTH exemplars, because a
+  // recreation carries the captured brand's colours and those are not in our theme palette. A rule that
+  // fails the two films this repo argues from is a wrong rule for a whole class of film, not a
+  // discovery, and adopting it would teach authors to deform a faithful recreation until a number
+  // moved. It stays a report. This is the check `visual-vocabulary` did not run.
+  'off-font': 'every face is one of the theme roles',
+  'restated-headline': 'a beat does not repeat the line above it',
+  'jargon': 'the on-screen words are specific, not marketing filler',
+};
+
+/** The gate script that emits a code, read from the sources rather than a list. */
+function gateForCode(code) {
+  const files = codesEmitted().get(code);
+  if (!files) return null;
+  // Prefer a real gate over a shared helper, and never point at the ladder itself.
+  const cands = [...files].filter((f) => f !== 'scripts/gates/author-check.mjs');
+  return cands.find((f) => f.startsWith('scripts/gates/')) || cands.find((f) => f.startsWith('scripts/author/')) || cands[0] || null;
+}
+
+/** Does `code` fire on this scene? Runs the owning gate. ADOPT-TIME ONLY: never on the hot path. */
+function codeFiresOn(code, sceneFile) {
+  const gate = gateForCode(code);
+  if (!gate) return false;
+  const r = spawnSync('node', [path.join(repoRoot, gate), sceneFile], { encoding: 'utf8', cwd: repoRoot, timeout: 60000 });
+  const out = `${r.stdout || ''}${r.stderr || ''}`;
+  return new RegExp(`[✗~]\\s*\\[${code}\\]`).test(out);
+}
+
 // The identity of a scene for legacy purposes is its CONTENT, canonicalised, not its bytes. Sorting keys
 // means a reformat or a key reorder does not cost a film its grandfathering, while any change to what the
 // film actually is does.
@@ -191,11 +245,14 @@ const libraryScenes = () => {
 
 // One scene, one rule: legacy / new / current. `edited` is reported separately from `absent` because they
 // are different arguments. One film was never looked at, the other was looked at this week.
-function ratchetStatus(rule, sceneFile, sceneJson, manifest = readManifest()) {
+function ratchetStatus(rule, sceneFile, sceneJson, manifest = readManifest(), fired = true) {
   const spec = RATCHET_RULES[rule];
   const entry = manifest.rules?.[rule];
-  if (!spec || !entry) return { ratcheted: false, state: 'current' };
-  if (!spec.fails(sceneFile, sceneJson)) return { ratcheted: true, adopted: entry.adopted, state: 'current' };
+  if ((!spec && !RATCHET_CODES[rule]) || !entry) return { ratcheted: false, state: 'current' };
+  // A CODE rule is only ever asked about a scene whose gate ALREADY fired it, so there is nothing to
+  // re-evaluate here and running the gate would put a subprocess on the hot path. `fired` lets the
+  // census (which does have to evaluate) pass the answer in.
+  if (spec ? !spec.fails(sceneFile, sceneJson) : fired === false) return { ratcheted: true, adopted: entry.adopted, state: 'current' };
   const row = entry.legacy?.[path.basename(sceneFile, '.json')];
   if (!row) return { ratcheted: true, adopted: entry.adopted, state: 'new', why: 'absent' };
   if (row.hash !== sceneHash(sceneJson)) return { ratcheted: true, adopted: entry.adopted, state: 'new', why: 'edited', since: row.since };
@@ -208,7 +265,7 @@ function census(rule, manifest = readManifest()) {
   const c = { legacy: 0, current: 0, new: 0, total: 0, newNames: [], editedNames: [] };
   for (const s of libraryScenes()) {
     c.total++;
-    const st = ratchetStatus(rule, s.p, s.d, manifest);
+    const st = ratchetStatus(rule, s.p, s.d, manifest, RATCHET_CODES[rule] ? codeFiresOn(rule, s.p) : true);
     if (st.state === 'legacy') c.legacy++;
     else if (st.state === 'new') { c.new++; c.newNames.push(s.name); if (st.why === 'edited') c.editedNames.push(s.name); }
     else c.current++;
@@ -233,22 +290,40 @@ if (process.argv.includes('--legacy')) {
   m._legacy_is_not_a_waiver = 'A row here means NOBODY HAS LOOKED at this film against this rule. It carries no reason because there is no reason yet. A waiver is the opposite: a person decided, and wrote why, in the scene\'s own authoring.allow/_why.';
   m.rules ||= {};
   if (adopt) {
-    if (!RATCHET_RULES[adopt]) { console.error(`✗ ${adopt} is not a ratcheted rule. Known: ${Object.keys(RATCHET_RULES).join(', ')}`); process.exit(2); }
+    const isCode = !RATCHET_RULES[adopt] && !!RATCHET_CODES[adopt];
+    if (!RATCHET_RULES[adopt] && !isCode) { console.error(`✗ ${adopt} is not a ratcheted rule. Known: ${[...Object.keys(RATCHET_RULES), ...Object.keys(RATCHET_CODES)].join(', ')}`); process.exit(2); }
     if (m.rules[adopt]) { console.error(`✗ ${adopt} was already adopted on ${m.rules[adopt].adopted}. A ratchet only tightens: re-adopting would grandfather today's films, which is the one thing this mechanism exists to prevent.`); process.exit(2); }
     const legacy = {};
-    for (const s of libraryScenes()) if (RATCHET_RULES[adopt].fails(s.p, s.d)) legacy[s.name] = { since: TODAY(), hash: sceneHash(s.d) };
-    m.rules[adopt] = { adopted: TODAY(), what: RATCHET_RULES[adopt].what, legacy };
+    const scenes = libraryScenes();
+    if (isCode) {
+      const gate = gateForCode(adopt);
+      if (!gate) { console.error(`✗ no gate emits [${adopt}]. A rule with no gate cannot be ratcheted, and a waiver for it would excuse nothing.`); process.exit(2); }
+      // The one moment the whole library is evaluated by the real gate. Slow on purpose: the alternative
+      // is a pure twin of the rule, which is one rule in two places and the copy that goes stale.
+      console.log(`\n  adopting [${adopt}] via ${gate} over ${scenes.length} scene(s). This runs the real gate, so it is slow.`);
+      let n = 0;
+      for (const sc of scenes) {
+        if (++n % 25 === 0) process.stdout.write(`    …${n}/${scenes.length}\n`);
+        if (codeFiresOn(adopt, sc.p)) legacy[sc.name] = { since: TODAY(), hash: sceneHash(sc.d) };
+      }
+    } else {
+      for (const sc of scenes) if (RATCHET_RULES[adopt].fails(sc.p, sc.d)) legacy[sc.name] = { since: TODAY(), hash: sceneHash(sc.d) };
+    }
+    m.rules[adopt] = { adopted: TODAY(), what: (RATCHET_RULES[adopt] || RATCHET_CODES[adopt] && { what: RATCHET_CODES[adopt] }).what, legacy, viaGate: isCode ? gateForCode(adopt) : undefined };
     console.log(`\n  ADOPTED ${adopt} · ${Object.keys(legacy).length} scene(s) grandfathered on ${TODAY()}.`);
   }
   if (stamp) {
     for (const [rule, entry] of Object.entries(m.rules)) {
       const spec = RATCHET_RULES[rule];
-      if (!spec) continue;
+      // A code-ratcheted rule prunes through its GATE, not through a predicate. Same rule as above:
+      // rows may only leave.
+      const fails = spec ? (sc) => spec.fails(sc.p, sc.d) : (RATCHET_CODES[rule] ? (sc) => codeFiresOn(rule, sc.p) : null);
+      if (!fails) continue;
       const live = new Map(libraryScenes().map((s) => [s.name, s]));
       for (const name of Object.keys(entry.legacy || {})) {
         const s = live.get(name);
         // Pruning only. A row can leave (the film complied, was edited, or is gone); none can arrive.
-        const gone = !s ? 'deleted' : !spec.fails(s.p, s.d) ? 'now complies' : entry.legacy[name].hash !== sceneHash(s.d) ? 'edited since it was grandfathered' : null;
+        const gone = !s ? 'deleted' : !fails(s) ? 'now complies' : entry.legacy[name].hash !== sceneHash(s.d) ? 'edited since it was grandfathered' : null;
         if (gone) { delete entry.legacy[name]; console.log(`  − ${rule}: ${name} loses legacy status (${gone}).`); }
       }
       entry.stamped = TODAY();
@@ -256,7 +331,7 @@ if (process.argv.includes('--legacy')) {
   }
   if (adopt || stamp) fs.writeFileSync(MANIFEST, JSON.stringify(m, null, 2) + '\n');
   console.log(`\n  RATCHET · ${path.relative(repoRoot, MANIFEST)}\n`);
-  for (const rule of Object.keys(RATCHET_RULES)) {
+  for (const rule of [...Object.keys(RATCHET_RULES), ...Object.keys(RATCHET_CODES)]) {
     const entry = m.rules[rule];
     if (!entry) { console.log(`  ○ ${rule} · not adopted. It has no legacy set, so it blocks every scene it fires on.`); continue; }
     const c = census(rule, m);
@@ -436,27 +511,28 @@ const runGate = (name, label, script, args, opts = {}) => {
   // browsing an index. Routing here rather than in each gate means all of them gain it at once, and it
   // reads the SAME `codes:` frontmatter `make doc-index` already validates, so there is one owner.
   // Warnings are included: `continuity` fired as a warning on the film that prompted all of this.
-  printDocs([...blockCodes, ...[...out.matchAll(/~\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1])]);
+  const warnCodes = [...out.matchAll(/~\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1]);
+  printDocs([...blockCodes, ...warnCodes]);
   // A STEP THAT FINDS NOTHING MUST SAY SO. Silence and a clean run look identical in a log, and a person
   // reading this cannot tell a gate that passed from a gate that fell over.
   const findings = (out.match(/^\s*[✗~⚠]/gm) || []).length;
   process.stdout.write(findings === 0 && code === 0
     ? `  → nothing found.\n`
     : `  → ${findings} finding(s)${blockCodes.length ? `: ${[...new Set(blockCodes)].join(', ')}` : ''}.\n`);
-  return { code, out, blockCodes, findings };
+  return { code, out, blockCodes, warnCodes, findings };
 };
 
 const results = [];
 // tier decides what a finding COSTS, and it is the only thing TASTE=1 moves. `reports` steps still run,
 // still print and still land in the verdict table; they simply cannot fail the build unless asked to.
-const record = (name, { code, blockCodes, findings = 0 }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
+const record = (name, { code, blockCodes, warnCodes = [], findings = 0 }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
   const teeth = tier === 'blocks' || taste;
   const failed = exitMeansFail && teeth ? code !== 0 : false;
   // if the gate failed only on findings the scene explicitly allows, downgrade to a waiver.
   const unwaived = waivable ? blockCodes.filter((c) => !allow.has(c)) : blockCodes;
   const waived = waivable && failed && blockCodes.length > 0 && unwaived.length === 0;
   const reported = tier === 'reports' && !teeth && code !== 0;
-  results.push({ name, tier, failed: failed && !waived, waived, reported, findings, unwaived, blockCodes });
+  results.push({ name, tier, failed: failed && !waived, waived, reported, findings, unwaived, blockCodes, warnCodes });
 };
 
 // TASTE GATES ARE OPT-IN. Seven of the steps below do not check that a film is BROKEN; they check that
@@ -785,13 +861,58 @@ console.log(`      then READ /tmp/judge/${path.basename(file, '.json')}/sheet.pn
 console.log(`      (readability · hierarchy · composition · brand + asset fidelity · produced · value).`);
 console.log(`      If your eye catches a flaw, it is a FIX, never ship one you noticed. See docs/JUDGE.md.`);
 
-if (failed.length) {
+// ---- STRICTNESS, per code, decided from what already ran -----------------------------------------
+// A ratcheted code blocks a film that is NOT grandfathered for it, whatever tier its step sits in. This
+// re-runs nothing: every code below came out of a gate that already ran in the ladder above, so the
+// cost of maximum strictness on the hot path is a manifest lookup.
+//
+// A waiver still works, and is the point. Legacy says nobody has looked; a waiver says somebody looked,
+// decided the rule is wrong for THIS film, and wrote why. The second is a decision a person can argue
+// with later, which is the only reason to make a rule strict at all.
+{
+  const seen = new Map();
+  for (const r of results) for (const c of [...(r.blockCodes || []), ...(r.warnCodes || [])]) {
+    if (RATCHET_CODES[c] && !seen.has(c)) seen.set(c, r.name);
+  }
+  // A DERIVATIVE CANNOT OWE THIS DEBT. `scripts/lib/census.mjs` excludes generated siblings
+  // (.beatsync/.expanded/.animatic/.captioned/.directed/.intent) from the library, so the adopt pass
+  // never saw them and no legacy row can exist for one. Ratcheting them anyway made every derivative
+  // permanently "new", which is a population mismatch, not a finding: you would fix the SOURCE. Found
+  // by sweeping the library after the wave, where it was the only newly-blocked file of 140.
+  const inLibrary = LIBRARY(path.basename(file), file);
+  const blocked = [], grandfathered = [];
+  for (const [c, step] of seen) {
+    if (!inLibrary) continue;
+    if (allow.has(c)) continue;                       // waived, with a `_why` the always-on half checks
+    const st = ratchetStatus(c, file, scene);
+    if (!st.ratcheted) continue;                      // not adopted yet: it is still only a report
+    (st.state === 'legacy' ? grandfathered : blocked).push([c, step, st]);
+  }
+  if (grandfathered.length) {
+    console.log(`\n  ▪ ${grandfathered.length} ratcheted rule(s) fire here and are GRANDFATHERED, so they do not stop you:`);
+    for (const [c, step, st] of grandfathered) console.log(`      [${c}] (step ${step}) · legacy since ${st.since}. Edit this film and it must comply.`);
+  }
+  if (blocked.length) {
+    console.log(`\n  ✗ ${blocked.length} ratcheted rule(s) BLOCK this film. They are not new rules: they are the`);
+    console.log(`    house-style findings above, made binding for work written after they were adopted.`);
+    for (const [c, step, st] of blocked) {
+      console.log(`      [${c}] (step ${step}) · adopted ${st.adopted}${st.why === 'edited' ? `, and this film lost its legacy status when it was edited` : ''}`);
+      const d = docFor(c); if (d) console.log(`          read: ${d}`);
+    }
+    console.log(`\n    Fix them, or decide against one in the scene and say why:`);
+    console.log(`      "authoring": { "allow": ["${blocked[0][0]}"], "_why": { "${blocked[0][0]}": "…" } }`);
+    for (const [c, step] of blocked) results.push({ name: `strict:${c}`, tier: 'blocks', failed: true, waived: false, reported: false, findings: 0, unwaived: [c], blockCodes: [c], warnCodes: [] });
+  }
+}
+const failedStrict = results.filter((r) => r.failed);
+
+if (failedStrict.length) {
   if (iterate) {
-    console.log(`\n~ iterating: ${failed.map((r) => r.name).join(', ')} WOULD block at ship. Nothing stopped here.`);
+    console.log(`\n~ iterating: ${failedStrict.map((r) => r.name).join(', ')} WOULD block at ship. Nothing stopped here.`);
     console.log(`  Run \`make ship D=${file}\` when you want the ladder to mean something.\n`);
     process.exit(0);
   }
-  console.log(`\n✗ author-check FAILED: ${failed.map((r) => r.name).join(', ')}. Fix, or waive a deliberate break via {"authoring":{"allow":[...]}}. ${strict ? '(--strict: warnings also block.)' : ''}\n`);
+  console.log(`\n✗ author-check FAILED: ${failedStrict.map((r) => r.name).join(', ')}. Fix, or waive a deliberate break via {"authoring":{"allow":[...]}}. ${strict ? '(--strict: warnings also block.)' : ''}\n`);
   process.exit(1);
 }
 console.log(`\n✓ author-check passed${waivers.length ? ` (${waivers.length} waived)` : ''}. Static ladder green, now do the judge step above before shipping.\n`);

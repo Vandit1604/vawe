@@ -1,553 +1,855 @@
 {
- "version": 1,
- "rules": {
-  "no-storyboard": {
-   "adopted": "2026-08-21",
-   "what": "the film has a written plan (a storyboard, declared or found beside it)",
-   "legacy": {
-    "_arcfall-test": {
-     "since": "2026-08-21",
-     "hash": "561bf2debe140306"
-    },
-    "_bands-c6": {
-     "since": "2026-08-21",
-     "hash": "c6276b97db262b91"
-    },
-    "_catalog-1": {
-     "since": "2026-08-21",
-     "hash": "4721c98d7c40f854"
-    },
-    "_catalog-10": {
-     "since": "2026-08-21",
-     "hash": "bb06572bd5b9d0dc"
-    },
-    "_catalog-11": {
-     "since": "2026-08-21",
-     "hash": "3d50dae2854f5173"
-    },
-    "_catalog-12": {
-     "since": "2026-08-21",
-     "hash": "e8bedd775b62d471"
-    },
-    "_catalog-13": {
-     "since": "2026-08-21",
-     "hash": "bc7b5e07847cbcb0"
-    },
-    "_catalog-14": {
-     "since": "2026-08-21",
-     "hash": "71ce196da9a03b47"
-    },
-    "_catalog-15": {
-     "since": "2026-08-21",
-     "hash": "9623529960d516f2"
-    },
-    "_catalog-16": {
-     "since": "2026-08-21",
-     "hash": "e04a0ccf417fb087"
-    },
-    "_catalog-17": {
-     "since": "2026-08-21",
-     "hash": "85d807728f160987"
-    },
-    "_catalog-18": {
-     "since": "2026-08-21",
-     "hash": "6b66fffd4743f34d"
-    },
-    "_catalog-19": {
-     "since": "2026-08-21",
-     "hash": "99decac61680cf64"
-    },
-    "_catalog-2": {
-     "since": "2026-08-21",
-     "hash": "b90041375c0f242f"
-    },
-    "_catalog-20": {
-     "since": "2026-08-21",
-     "hash": "38285c1485697e7f"
-    },
-    "_catalog-21": {
-     "since": "2026-08-21",
-     "hash": "2d5e20eb4a8b3976"
-    },
-    "_catalog-22": {
-     "since": "2026-08-21",
-     "hash": "039d99448f55834c"
-    },
-    "_catalog-23": {
-     "since": "2026-08-21",
-     "hash": "64ec98749bff3c84"
-    },
-    "_catalog-24": {
-     "since": "2026-08-21",
-     "hash": "148d77d6465ba339"
-    },
-    "_catalog-25": {
-     "since": "2026-08-21",
-     "hash": "c10d5a512d765084"
-    },
-    "_catalog-26": {
-     "since": "2026-08-21",
-     "hash": "5f2366e3e90b7802"
-    },
-    "_catalog-3": {
-     "since": "2026-08-21",
-     "hash": "f7019762466a8e6c"
-    },
-    "_catalog-4": {
-     "since": "2026-08-21",
-     "hash": "36d799324e820f43"
-    },
-    "_catalog-5": {
-     "since": "2026-08-21",
-     "hash": "b1f6b218046c98f0"
-    },
-    "_catalog-6": {
-     "since": "2026-08-21",
-     "hash": "39ec4b6d2cc6bd4b"
-    },
-    "_catalog-7": {
-     "since": "2026-08-21",
-     "hash": "e81411ae7d51fb29"
-    },
-    "_catalog-8": {
-     "since": "2026-08-21",
-     "hash": "d207766c30196fac"
-    },
-    "_catalog-9": {
-     "since": "2026-08-21",
-     "hash": "d177e0e220fd910d"
-    },
-    "_glowA": {
-     "since": "2026-08-21",
-     "hash": "55417171b2dc7fe4"
-    },
-    "_glowB": {
-     "since": "2026-08-21",
-     "hash": "816d74ba01273ec7"
-    },
-    "_lightfall-test": {
-     "since": "2026-08-21",
-     "hash": "399144602188a6af"
-    },
-    "_playhead-subject": {
-     "since": "2026-08-21",
-     "hash": "0040be511013aa71"
-    },
-    "_scratch-depth": {
-     "since": "2026-08-21",
-     "hash": "e207237bfb80bc6a"
-    },
-    "_studio-demo": {
-     "since": "2026-08-21",
-     "hash": "d090eafe81d40df9"
-    },
-    "ab-control-shotcode": {
-     "since": "2026-08-21",
-     "hash": "e20b108be45e9716"
-    },
-    "ab2-control-tenor": {
-     "since": "2026-08-21",
-     "hash": "da8b3ef876fd7926"
-    },
-    "ab3-nogate-tenor": {
-     "since": "2026-08-21",
-     "hash": "9579a0808752ca2b"
-    },
-    "app-showcase": {
-     "since": "2026-08-21",
-     "hash": "3d2aa3c3a58b688f"
-    },
-    "argus-launch": {
-     "since": "2026-08-21",
-     "hash": "27051605627d2109"
-    },
-    "aspects-demo": {
-     "since": "2026-08-21",
-     "hash": "6006621435a9eea1"
-    },
-    "brew-launch-act1": {
-     "since": "2026-08-21",
-     "hash": "c8a337ce9e08ecc9"
-    },
-    "brew-launch": {
-     "since": "2026-08-21",
-     "hash": "faf81330648d7fe1"
-    },
-    "brew-native": {
-     "since": "2026-08-21",
-     "hash": "6c9fe070582e1261"
-    },
-    "cadence-film": {
-     "since": "2026-08-21",
-     "hash": "a96bdb8966eef4a6"
-    },
-    "cadence": {
-     "since": "2026-08-21",
-     "hash": "f89fc09dd015e1ff"
-    },
-    "canvasfx-reel": {
-     "since": "2026-08-21",
-     "hash": "2ffa8929ee00c323"
-    },
-    "chromatic": {
-     "since": "2026-08-21",
-     "hash": "73c714a261d0acbc"
-    },
-    "cuts-demo": {
-     "since": "2026-08-21",
-     "hash": "affc95cc3be4fc5c"
-    },
-    "demo-interactions": {
-     "since": "2026-08-21",
-     "hash": "21f4cf39967f08f1"
-    },
-    "ditherkit": {
-     "since": "2026-08-21",
-     "hash": "2d9d5669ec8efa91"
-    },
-    "example-html-bg": {
-     "since": "2026-08-21",
-     "hash": "94c0fd17009683c5"
-    },
-    "example-kinetic-type": {
-     "since": "2026-08-21",
-     "hash": "b53d433a2e72d6cd"
-    },
-    "example-metallic-bg": {
-     "since": "2026-08-21",
-     "hash": "ea2e7ae593c62c1f"
-    },
-    "example-product-promo": {
-     "since": "2026-08-21",
-     "hash": "324aaf5921dcf4fc"
-    },
-    "example-swiss-grid": {
-     "since": "2026-08-21",
-     "hash": "2b838e269b8516be"
-    },
-    "glass": {
-     "since": "2026-08-21",
-     "hash": "a872366d85e9a4bf"
-    },
-    "gradient-showcase": {
-     "since": "2026-08-21",
-     "hash": "8a390702924d1771"
-    },
-    "hero-site": {
-     "since": "2026-08-21",
-     "hash": "b1bd11f6fdf0f979"
-    },
-    "higgsfield-recreation": {
-     "since": "2026-08-21",
-     "hash": "46c1563350f1884b"
-    },
-    "kanban-drag": {
-     "since": "2026-08-21",
-     "hash": "97c69ab2ca07fce1"
-    },
-    "keyframe": {
-     "since": "2026-08-21",
-     "hash": "91b703f9c01f5334"
-    },
-    "ledgerline-cyber": {
-     "since": "2026-08-21",
-     "hash": "4fe2b80f7a341a0e"
-    },
-    "ledgerline-neon": {
-     "since": "2026-08-21",
-     "hash": "654fe23b926e8e9c"
-    },
-    "ledgerline-shown": {
-     "since": "2026-08-21",
-     "hash": "2cdf6db344974089"
-    },
-    "linear-agents": {
-     "since": "2026-08-21",
-     "hash": "6389877bc1711964"
-    },
-    "linear-journey": {
-     "since": "2026-08-21",
-     "hash": "74f0191ba44090b3"
-    },
-    "linear-launch": {
-     "since": "2026-08-21",
-     "hash": "60963f20eceb5523"
-    },
-    "looks-reel": {
-     "since": "2026-08-21",
-     "hash": "e9d5df2acd31e421"
-    },
-    "looks": {
-     "since": "2026-08-21",
-     "hash": "ef9f8c2f44e1588e"
-    },
-    "motion-reel-v2": {
-     "since": "2026-08-21",
-     "hash": "47adc12596753592"
-    },
-    "motion-reel": {
-     "since": "2026-08-21",
-     "hash": "4bd6dc209267c020"
-    },
-    "motion-showcase": {
-     "since": "2026-08-21",
-     "hash": "9bfc9afaab9a4345"
-    },
-    "motion-test": {
-     "since": "2026-08-21",
-     "hash": "072e01f671c6d3f2"
-    },
-    "northwind": {
-     "since": "2026-08-21",
-     "hash": "96492d548ceb4589"
-    },
-    "orbit-proof": {
-     "since": "2026-08-21",
-     "hash": "178f4f8b8c216254"
-    },
-    "paint-demo": {
-     "since": "2026-08-21",
-     "hash": "6e455e46c0621fb8"
-    },
-    "plinth-ad": {
-     "since": "2026-08-21",
-     "hash": "aa02e2073dae6f91"
-    },
-    "ransom-color-demo": {
-     "since": "2026-08-21",
-     "hash": "71c16042dc1fa739"
-    },
-    "ransom-demo": {
-     "since": "2026-08-21",
-     "hash": "e6ed48355f42aea2"
-    },
-    "ransom-internal": {
-     "since": "2026-08-21",
-     "hash": "4e786301d14e612f"
-    },
-    "ransom-intro": {
-     "since": "2026-08-21",
-     "hash": "16591ac629d13366"
-    },
-    "react-demo": {
-     "since": "2026-08-21",
-     "hash": "2907bc8816d86b19"
-    },
-    "rec1-nogate": {
-     "since": "2026-08-21",
-     "hash": "a82939c6f6136f25"
-    },
-    "rec2-gates": {
-     "since": "2026-08-21",
-     "hash": "f2b865cf2bf4e345"
-    },
-    "refstudy": {
-     "since": "2026-08-21",
-     "hash": "cd91a88ce87cfb55"
-    },
-    "sample": {
-     "since": "2026-08-21",
-     "hash": "4d015aa566096c92"
-    },
-    "seam-demo": {
-     "since": "2026-08-21",
-     "hash": "01f01ee149643bc2"
-    },
-    "search-demo": {
-     "since": "2026-08-21",
-     "hash": "7331611c0bc0c561"
-    },
-    "showcase-aspect": {
-     "since": "2026-08-21",
-     "hash": "83443675446bc795"
-    },
-    "showcase-composition": {
-     "since": "2026-08-21",
-     "hash": "361fab02aa24f860"
-    },
-    "showcase-count": {
-     "since": "2026-08-21",
-     "hash": "23b67b094635e189"
-    },
-    "showcase-cuts": {
-     "since": "2026-08-21",
-     "hash": "82ad171cc0f9df2f"
-    },
-    "showcase-data": {
-     "since": "2026-08-21",
-     "hash": "4049c9c65b049cb7"
-    },
-    "showcase-flight-globe": {
-     "since": "2026-08-21",
-     "hash": "88a7f74e0a62e3f0"
-    },
-    "showcase-globe": {
-     "since": "2026-08-21",
-     "hash": "f48114281a606a3f"
-    },
-    "showcase-intro": {
-     "since": "2026-08-21",
-     "hash": "b5c3cda482de8858"
-    },
-    "showcase-lumen": {
-     "since": "2026-08-21",
-     "hash": "37d55be0d995ba81"
-    },
-    "showcase-scenecut": {
-     "since": "2026-08-21",
-     "hash": "61e161521f7cff67"
-    },
-    "showcase-spot": {
-     "since": "2026-08-21",
-     "hash": "8108e54fb33a593c"
-    },
-    "showcase-stings": {
-     "since": "2026-08-21",
-     "hash": "8538cfeb5d6583de"
-    },
-    "showcase-type-labour": {
-     "since": "2026-08-21",
-     "hash": "643f7352a9259dff"
-    },
-    "showcase-type": {
-     "since": "2026-08-21",
-     "hash": "6992b79d6b90325f"
-    },
-    "showcase-ui": {
-     "since": "2026-08-21",
-     "hash": "8c4e8397d42f14f2"
-    },
-    "showcase-vawe-reel": {
-     "since": "2026-08-21",
-     "hash": "ea1437639b8d489a"
-    },
-    "showcase-vocabulary": {
-     "since": "2026-08-21",
-     "hash": "b0de579b7dd5f988"
-    },
-    "showcase": {
-     "since": "2026-08-21",
-     "hash": "cdbf4534c2d20687"
-    },
-    "site-backdrop": {
-     "since": "2026-08-21",
-     "hash": "3a66f6a6d7dfeb1d"
-    },
-    "stings-demo": {
-     "since": "2026-08-21",
-     "hash": "1dec506e421c1183"
-    },
-    "stripe": {
-     "since": "2026-08-21",
-     "hash": "d0d800f24f6d1eed"
-    },
-    "threadcite-3s": {
-     "since": "2026-08-21",
-     "hash": "bfc3ac4212b59df7"
-    },
-    "threadcite-open": {
-     "since": "2026-08-21",
-     "hash": "3f1ee843196cd4e0"
-    },
-    "three-showcase": {
-     "since": "2026-08-21",
-     "hash": "ff5a6cc4939a212a"
-    },
-    "tierc-reel": {
-     "since": "2026-08-21",
-     "hash": "bcde952bdc39b06e"
-    },
-    "tpot-launch": {
-     "since": "2026-08-21",
-     "hash": "6a458a6939e5b558"
-    },
-    "type-demo": {
-     "since": "2026-08-21",
-     "hash": "5471aa9990ba45b1"
-    },
-    "vawe-identity": {
-     "since": "2026-08-21",
-     "hash": "e76508903ef7d2d6"
-    },
-    "vawe-intro": {
-     "since": "2026-08-21",
-     "hash": "3b0ca8e539420081"
-    },
-    "vawe-launch": {
-     "since": "2026-08-21",
-     "hash": "34d7b6bf9ae55c02"
-    },
-    "zerochrome": {
-     "since": "2026-08-21",
-     "hash": "f8b75e08c531e47b"
+  "version": 1,
+  "rules": {
+    "no-storyboard": {
+      "adopted": "2026-08-21",
+      "what": "the film has a written plan (a storyboard, declared or found beside it)",
+      "legacy": {
+        "_arcfall-test": {
+          "since": "2026-08-21",
+          "hash": "561bf2debe140306"
+        },
+        "_bands-c6": {
+          "since": "2026-08-21",
+          "hash": "c6276b97db262b91"
+        },
+        "_catalog-1": {
+          "since": "2026-08-21",
+          "hash": "4721c98d7c40f854"
+        },
+        "_catalog-10": {
+          "since": "2026-08-21",
+          "hash": "bb06572bd5b9d0dc"
+        },
+        "_catalog-11": {
+          "since": "2026-08-21",
+          "hash": "3d50dae2854f5173"
+        },
+        "_catalog-12": {
+          "since": "2026-08-21",
+          "hash": "e8bedd775b62d471"
+        },
+        "_catalog-13": {
+          "since": "2026-08-21",
+          "hash": "bc7b5e07847cbcb0"
+        },
+        "_catalog-14": {
+          "since": "2026-08-21",
+          "hash": "71ce196da9a03b47"
+        },
+        "_catalog-15": {
+          "since": "2026-08-21",
+          "hash": "9623529960d516f2"
+        },
+        "_catalog-16": {
+          "since": "2026-08-21",
+          "hash": "e04a0ccf417fb087"
+        },
+        "_catalog-17": {
+          "since": "2026-08-21",
+          "hash": "85d807728f160987"
+        },
+        "_catalog-18": {
+          "since": "2026-08-21",
+          "hash": "6b66fffd4743f34d"
+        },
+        "_catalog-19": {
+          "since": "2026-08-21",
+          "hash": "99decac61680cf64"
+        },
+        "_catalog-2": {
+          "since": "2026-08-21",
+          "hash": "b90041375c0f242f"
+        },
+        "_catalog-20": {
+          "since": "2026-08-21",
+          "hash": "38285c1485697e7f"
+        },
+        "_catalog-21": {
+          "since": "2026-08-21",
+          "hash": "2d5e20eb4a8b3976"
+        },
+        "_catalog-22": {
+          "since": "2026-08-21",
+          "hash": "039d99448f55834c"
+        },
+        "_catalog-23": {
+          "since": "2026-08-21",
+          "hash": "64ec98749bff3c84"
+        },
+        "_catalog-24": {
+          "since": "2026-08-21",
+          "hash": "148d77d6465ba339"
+        },
+        "_catalog-25": {
+          "since": "2026-08-21",
+          "hash": "c10d5a512d765084"
+        },
+        "_catalog-26": {
+          "since": "2026-08-21",
+          "hash": "5f2366e3e90b7802"
+        },
+        "_catalog-3": {
+          "since": "2026-08-21",
+          "hash": "f7019762466a8e6c"
+        },
+        "_catalog-4": {
+          "since": "2026-08-21",
+          "hash": "36d799324e820f43"
+        },
+        "_catalog-5": {
+          "since": "2026-08-21",
+          "hash": "b1f6b218046c98f0"
+        },
+        "_catalog-6": {
+          "since": "2026-08-21",
+          "hash": "39ec4b6d2cc6bd4b"
+        },
+        "_catalog-7": {
+          "since": "2026-08-21",
+          "hash": "e81411ae7d51fb29"
+        },
+        "_catalog-8": {
+          "since": "2026-08-21",
+          "hash": "d207766c30196fac"
+        },
+        "_catalog-9": {
+          "since": "2026-08-21",
+          "hash": "d177e0e220fd910d"
+        },
+        "_glowA": {
+          "since": "2026-08-21",
+          "hash": "55417171b2dc7fe4"
+        },
+        "_glowB": {
+          "since": "2026-08-21",
+          "hash": "816d74ba01273ec7"
+        },
+        "_lightfall-test": {
+          "since": "2026-08-21",
+          "hash": "399144602188a6af"
+        },
+        "_playhead-subject": {
+          "since": "2026-08-21",
+          "hash": "0040be511013aa71"
+        },
+        "_scratch-depth": {
+          "since": "2026-08-21",
+          "hash": "e207237bfb80bc6a"
+        },
+        "_studio-demo": {
+          "since": "2026-08-21",
+          "hash": "d090eafe81d40df9"
+        },
+        "ab-control-shotcode": {
+          "since": "2026-08-21",
+          "hash": "e20b108be45e9716"
+        },
+        "ab2-control-tenor": {
+          "since": "2026-08-21",
+          "hash": "da8b3ef876fd7926"
+        },
+        "ab3-nogate-tenor": {
+          "since": "2026-08-21",
+          "hash": "9579a0808752ca2b"
+        },
+        "app-showcase": {
+          "since": "2026-08-21",
+          "hash": "3d2aa3c3a58b688f"
+        },
+        "argus-launch": {
+          "since": "2026-08-21",
+          "hash": "27051605627d2109"
+        },
+        "aspects-demo": {
+          "since": "2026-08-21",
+          "hash": "6006621435a9eea1"
+        },
+        "brew-launch-act1": {
+          "since": "2026-08-21",
+          "hash": "c8a337ce9e08ecc9"
+        },
+        "brew-launch": {
+          "since": "2026-08-21",
+          "hash": "faf81330648d7fe1"
+        },
+        "brew-native": {
+          "since": "2026-08-21",
+          "hash": "6c9fe070582e1261"
+        },
+        "cadence-film": {
+          "since": "2026-08-21",
+          "hash": "a96bdb8966eef4a6"
+        },
+        "cadence": {
+          "since": "2026-08-21",
+          "hash": "f89fc09dd015e1ff"
+        },
+        "canvasfx-reel": {
+          "since": "2026-08-21",
+          "hash": "2ffa8929ee00c323"
+        },
+        "chromatic": {
+          "since": "2026-08-21",
+          "hash": "73c714a261d0acbc"
+        },
+        "cuts-demo": {
+          "since": "2026-08-21",
+          "hash": "affc95cc3be4fc5c"
+        },
+        "demo-interactions": {
+          "since": "2026-08-21",
+          "hash": "21f4cf39967f08f1"
+        },
+        "ditherkit": {
+          "since": "2026-08-21",
+          "hash": "2d9d5669ec8efa91"
+        },
+        "example-html-bg": {
+          "since": "2026-08-21",
+          "hash": "94c0fd17009683c5"
+        },
+        "example-kinetic-type": {
+          "since": "2026-08-21",
+          "hash": "b53d433a2e72d6cd"
+        },
+        "example-metallic-bg": {
+          "since": "2026-08-21",
+          "hash": "ea2e7ae593c62c1f"
+        },
+        "example-product-promo": {
+          "since": "2026-08-21",
+          "hash": "324aaf5921dcf4fc"
+        },
+        "example-swiss-grid": {
+          "since": "2026-08-21",
+          "hash": "2b838e269b8516be"
+        },
+        "glass": {
+          "since": "2026-08-21",
+          "hash": "a872366d85e9a4bf"
+        },
+        "gradient-showcase": {
+          "since": "2026-08-21",
+          "hash": "8a390702924d1771"
+        },
+        "hero-site": {
+          "since": "2026-08-21",
+          "hash": "b1bd11f6fdf0f979"
+        },
+        "higgsfield-recreation": {
+          "since": "2026-08-21",
+          "hash": "46c1563350f1884b"
+        },
+        "kanban-drag": {
+          "since": "2026-08-21",
+          "hash": "97c69ab2ca07fce1"
+        },
+        "keyframe": {
+          "since": "2026-08-21",
+          "hash": "91b703f9c01f5334"
+        },
+        "ledgerline-cyber": {
+          "since": "2026-08-21",
+          "hash": "4fe2b80f7a341a0e"
+        },
+        "ledgerline-neon": {
+          "since": "2026-08-21",
+          "hash": "654fe23b926e8e9c"
+        },
+        "ledgerline-shown": {
+          "since": "2026-08-21",
+          "hash": "2cdf6db344974089"
+        },
+        "linear-agents": {
+          "since": "2026-08-21",
+          "hash": "6389877bc1711964"
+        },
+        "linear-journey": {
+          "since": "2026-08-21",
+          "hash": "74f0191ba44090b3"
+        },
+        "linear-launch": {
+          "since": "2026-08-21",
+          "hash": "60963f20eceb5523"
+        },
+        "looks-reel": {
+          "since": "2026-08-21",
+          "hash": "e9d5df2acd31e421"
+        },
+        "looks": {
+          "since": "2026-08-21",
+          "hash": "ef9f8c2f44e1588e"
+        },
+        "motion-reel-v2": {
+          "since": "2026-08-21",
+          "hash": "47adc12596753592"
+        },
+        "motion-reel": {
+          "since": "2026-08-21",
+          "hash": "4bd6dc209267c020"
+        },
+        "motion-showcase": {
+          "since": "2026-08-21",
+          "hash": "9bfc9afaab9a4345"
+        },
+        "motion-test": {
+          "since": "2026-08-21",
+          "hash": "072e01f671c6d3f2"
+        },
+        "northwind": {
+          "since": "2026-08-21",
+          "hash": "96492d548ceb4589"
+        },
+        "orbit-proof": {
+          "since": "2026-08-21",
+          "hash": "178f4f8b8c216254"
+        },
+        "paint-demo": {
+          "since": "2026-08-21",
+          "hash": "6e455e46c0621fb8"
+        },
+        "plinth-ad": {
+          "since": "2026-08-21",
+          "hash": "aa02e2073dae6f91"
+        },
+        "ransom-color-demo": {
+          "since": "2026-08-21",
+          "hash": "71c16042dc1fa739"
+        },
+        "ransom-demo": {
+          "since": "2026-08-21",
+          "hash": "e6ed48355f42aea2"
+        },
+        "ransom-internal": {
+          "since": "2026-08-21",
+          "hash": "4e786301d14e612f"
+        },
+        "ransom-intro": {
+          "since": "2026-08-21",
+          "hash": "16591ac629d13366"
+        },
+        "react-demo": {
+          "since": "2026-08-21",
+          "hash": "2907bc8816d86b19"
+        },
+        "rec1-nogate": {
+          "since": "2026-08-21",
+          "hash": "a82939c6f6136f25"
+        },
+        "rec2-gates": {
+          "since": "2026-08-21",
+          "hash": "f2b865cf2bf4e345"
+        },
+        "refstudy": {
+          "since": "2026-08-21",
+          "hash": "cd91a88ce87cfb55"
+        },
+        "sample": {
+          "since": "2026-08-21",
+          "hash": "4d015aa566096c92"
+        },
+        "seam-demo": {
+          "since": "2026-08-21",
+          "hash": "01f01ee149643bc2"
+        },
+        "search-demo": {
+          "since": "2026-08-21",
+          "hash": "7331611c0bc0c561"
+        },
+        "showcase-aspect": {
+          "since": "2026-08-21",
+          "hash": "83443675446bc795"
+        },
+        "showcase-composition": {
+          "since": "2026-08-21",
+          "hash": "361fab02aa24f860"
+        },
+        "showcase-count": {
+          "since": "2026-08-21",
+          "hash": "23b67b094635e189"
+        },
+        "showcase-cuts": {
+          "since": "2026-08-21",
+          "hash": "82ad171cc0f9df2f"
+        },
+        "showcase-data": {
+          "since": "2026-08-21",
+          "hash": "4049c9c65b049cb7"
+        },
+        "showcase-flight-globe": {
+          "since": "2026-08-21",
+          "hash": "88a7f74e0a62e3f0"
+        },
+        "showcase-globe": {
+          "since": "2026-08-21",
+          "hash": "f48114281a606a3f"
+        },
+        "showcase-intro": {
+          "since": "2026-08-21",
+          "hash": "b5c3cda482de8858"
+        },
+        "showcase-lumen": {
+          "since": "2026-08-21",
+          "hash": "37d55be0d995ba81"
+        },
+        "showcase-scenecut": {
+          "since": "2026-08-21",
+          "hash": "61e161521f7cff67"
+        },
+        "showcase-spot": {
+          "since": "2026-08-21",
+          "hash": "8108e54fb33a593c"
+        },
+        "showcase-stings": {
+          "since": "2026-08-21",
+          "hash": "8538cfeb5d6583de"
+        },
+        "showcase-type-labour": {
+          "since": "2026-08-21",
+          "hash": "643f7352a9259dff"
+        },
+        "showcase-type": {
+          "since": "2026-08-21",
+          "hash": "6992b79d6b90325f"
+        },
+        "showcase-ui": {
+          "since": "2026-08-21",
+          "hash": "8c4e8397d42f14f2"
+        },
+        "showcase-vawe-reel": {
+          "since": "2026-08-21",
+          "hash": "ea1437639b8d489a"
+        },
+        "showcase-vocabulary": {
+          "since": "2026-08-21",
+          "hash": "b0de579b7dd5f988"
+        },
+        "showcase": {
+          "since": "2026-08-21",
+          "hash": "cdbf4534c2d20687"
+        },
+        "site-backdrop": {
+          "since": "2026-08-21",
+          "hash": "3a66f6a6d7dfeb1d"
+        },
+        "stings-demo": {
+          "since": "2026-08-21",
+          "hash": "1dec506e421c1183"
+        },
+        "stripe": {
+          "since": "2026-08-21",
+          "hash": "d0d800f24f6d1eed"
+        },
+        "threadcite-3s": {
+          "since": "2026-08-21",
+          "hash": "bfc3ac4212b59df7"
+        },
+        "threadcite-open": {
+          "since": "2026-08-21",
+          "hash": "3f1ee843196cd4e0"
+        },
+        "three-showcase": {
+          "since": "2026-08-21",
+          "hash": "ff5a6cc4939a212a"
+        },
+        "tierc-reel": {
+          "since": "2026-08-21",
+          "hash": "bcde952bdc39b06e"
+        },
+        "tpot-launch": {
+          "since": "2026-08-21",
+          "hash": "6a458a6939e5b558"
+        },
+        "type-demo": {
+          "since": "2026-08-21",
+          "hash": "5471aa9990ba45b1"
+        },
+        "vawe-identity": {
+          "since": "2026-08-21",
+          "hash": "e76508903ef7d2d6"
+        },
+        "vawe-intro": {
+          "since": "2026-08-21",
+          "hash": "3b0ca8e539420081"
+        },
+        "vawe-launch": {
+          "since": "2026-08-21",
+          "hash": "34d7b6bf9ae55c02"
+        },
+        "zerochrome": {
+          "since": "2026-08-21",
+          "hash": "f8b75e08c531e47b"
+        }
+      },
+      "stamped": "2026-08-22"
+    },
+    "no-authored-motion": {
+      "adopted": "2026-08-28",
+      "what": "something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction",
+      "legacy": {
+        "app-showcase": {
+          "since": "2026-08-28",
+          "hash": "3d2aa3c3a58b688f"
+        },
+        "chromatic": {
+          "since": "2026-08-28",
+          "hash": "73c714a261d0acbc"
+        },
+        "example-product-promo": {
+          "since": "2026-08-28",
+          "hash": "324aaf5921dcf4fc"
+        },
+        "example-swiss-grid": {
+          "since": "2026-08-28",
+          "hash": "a283d5fcc8bdbeb8"
+        },
+        "motion-reel": {
+          "since": "2026-08-28",
+          "hash": "4d3e29ad09513b30"
+        },
+        "showcase-count": {
+          "since": "2026-08-28",
+          "hash": "23b67b094635e189"
+        },
+        "showcase-scenecut": {
+          "since": "2026-08-28",
+          "hash": "61e161521f7cff67"
+        },
+        "showcase-spot": {
+          "since": "2026-08-28",
+          "hash": "8108e54fb33a593c"
+        },
+        "showcase-type": {
+          "since": "2026-08-28",
+          "hash": "d0f0b8c0441cc635"
+        },
+        "showcase-vawe-reel": {
+          "since": "2026-08-28",
+          "hash": "ea1437639b8d489a"
+        },
+        "showcase-vocabulary": {
+          "since": "2026-08-28",
+          "hash": "b0de579b7dd5f988"
+        },
+        "three-showcase": {
+          "since": "2026-08-28",
+          "hash": "ff5a6cc4939a212a"
+        },
+        "tpot-launch": {
+          "since": "2026-08-28",
+          "hash": "6a458a6939e5b558"
+        },
+        "vawe-intro": {
+          "since": "2026-08-28",
+          "hash": "f8c1f8a975b6bc81"
+        }
+      }
+    },
+    "plain-slideshow": {
+      "adopted": "2026-08-28",
+      "what": "the film reaches past a slideshow: kinetic type, a camera move, or real transitions",
+      "legacy": {
+        "_arcfall-test": {
+          "since": "2026-08-28",
+          "hash": "561bf2debe140306"
+        },
+        "_bands-c6": {
+          "since": "2026-08-28",
+          "hash": "c6276b97db262b91"
+        },
+        "_campush": {
+          "since": "2026-08-28",
+          "hash": "a94ace0ccd6eeb45"
+        },
+        "_catalog-1": {
+          "since": "2026-08-28",
+          "hash": "4721c98d7c40f854"
+        },
+        "_catalog-10": {
+          "since": "2026-08-28",
+          "hash": "bb06572bd5b9d0dc"
+        },
+        "_catalog-11": {
+          "since": "2026-08-28",
+          "hash": "3d50dae2854f5173"
+        },
+        "_catalog-12": {
+          "since": "2026-08-28",
+          "hash": "e8bedd775b62d471"
+        },
+        "_catalog-13": {
+          "since": "2026-08-28",
+          "hash": "bc7b5e07847cbcb0"
+        },
+        "_catalog-14": {
+          "since": "2026-08-28",
+          "hash": "71ce196da9a03b47"
+        },
+        "_catalog-15": {
+          "since": "2026-08-28",
+          "hash": "9623529960d516f2"
+        },
+        "_catalog-16": {
+          "since": "2026-08-28",
+          "hash": "e04a0ccf417fb087"
+        },
+        "_catalog-17": {
+          "since": "2026-08-28",
+          "hash": "85d807728f160987"
+        },
+        "_catalog-19": {
+          "since": "2026-08-28",
+          "hash": "99decac61680cf64"
+        },
+        "_catalog-2": {
+          "since": "2026-08-28",
+          "hash": "b90041375c0f242f"
+        },
+        "_catalog-20": {
+          "since": "2026-08-28",
+          "hash": "38285c1485697e7f"
+        },
+        "_catalog-21": {
+          "since": "2026-08-28",
+          "hash": "2d5e20eb4a8b3976"
+        },
+        "_catalog-22": {
+          "since": "2026-08-28",
+          "hash": "039d99448f55834c"
+        },
+        "_catalog-23": {
+          "since": "2026-08-28",
+          "hash": "64ec98749bff3c84"
+        },
+        "_catalog-24": {
+          "since": "2026-08-28",
+          "hash": "148d77d6465ba339"
+        },
+        "_catalog-25": {
+          "since": "2026-08-28",
+          "hash": "c10d5a512d765084"
+        },
+        "_catalog-26": {
+          "since": "2026-08-28",
+          "hash": "5f2366e3e90b7802"
+        },
+        "_catalog-3": {
+          "since": "2026-08-28",
+          "hash": "f7019762466a8e6c"
+        },
+        "_catalog-4": {
+          "since": "2026-08-28",
+          "hash": "36d799324e820f43"
+        },
+        "_catalog-5": {
+          "since": "2026-08-28",
+          "hash": "b1f6b218046c98f0"
+        },
+        "_catalog-6": {
+          "since": "2026-08-28",
+          "hash": "39ec4b6d2cc6bd4b"
+        },
+        "_catalog-7": {
+          "since": "2026-08-28",
+          "hash": "e81411ae7d51fb29"
+        },
+        "_catalog-8": {
+          "since": "2026-08-28",
+          "hash": "d207766c30196fac"
+        },
+        "_catalog-9": {
+          "since": "2026-08-28",
+          "hash": "d177e0e220fd910d"
+        },
+        "_glowA": {
+          "since": "2026-08-28",
+          "hash": "55417171b2dc7fe4"
+        },
+        "_lightfall-test": {
+          "since": "2026-08-28",
+          "hash": "399144602188a6af"
+        },
+        "app-showcase": {
+          "since": "2026-08-28",
+          "hash": "3d2aa3c3a58b688f"
+        },
+        "aspects-demo": {
+          "since": "2026-08-28",
+          "hash": "6006621435a9eea1"
+        },
+        "canvasfx-reel": {
+          "since": "2026-08-28",
+          "hash": "2ffa8929ee00c323"
+        },
+        "example-html-bg": {
+          "since": "2026-08-28",
+          "hash": "94c0fd17009683c5"
+        },
+        "looks-reel": {
+          "since": "2026-08-28",
+          "hash": "e9d5df2acd31e421"
+        },
+        "ransom-color-demo": {
+          "since": "2026-08-28",
+          "hash": "71c16042dc1fa739"
+        },
+        "ransom-demo": {
+          "since": "2026-08-28",
+          "hash": "e6ed48355f42aea2"
+        },
+        "seam-demo": {
+          "since": "2026-08-28",
+          "hash": "01f01ee149643bc2"
+        },
+        "showcase-globe": {
+          "since": "2026-08-28",
+          "hash": "f48114281a606a3f"
+        },
+        "site-backdrop": {
+          "since": "2026-08-28",
+          "hash": "3a66f6a6d7dfeb1d"
+        },
+        "stings-demo": {
+          "since": "2026-08-28",
+          "hash": "1dec506e421c1183"
+        },
+        "tierc-reel": {
+          "since": "2026-08-28",
+          "hash": "bcde952bdc39b06e"
+        }
+      },
+      "viaGate": "scripts/gates/direction-floor.mjs"
+    },
+    "crossfade-mud": {
+      "adopted": "2026-08-28",
+      "what": "no transition dissolves one text state into another in place",
+      "legacy": {},
+      "viaGate": "scripts/gates/dissolve-check.mjs"
+    },
+    "no-continuous-object": {
+      "adopted": "2026-08-28",
+      "what": "something survives the film's cuts",
+      "legacy": {},
+      "viaGate": "scripts/gates/direction-floor.mjs"
+    },
+    "effect-soup": {
+      "adopted": "2026-08-28",
+      "what": "the film does not stack more effect families than it can spend",
+      "legacy": {
+        "looks-reel": {
+          "since": "2026-08-28",
+          "hash": "e9d5df2acd31e421"
+        },
+        "looks": {
+          "since": "2026-08-28",
+          "hash": "ebb9564eba0b7bf0"
+        },
+        "motion-reel": {
+          "since": "2026-08-28",
+          "hash": "4d3e29ad09513b30"
+        },
+        "stings-demo": {
+          "since": "2026-08-28",
+          "hash": "1dec506e421c1183"
+        },
+        "three-showcase": {
+          "since": "2026-08-28",
+          "hash": "ff5a6cc4939a212a"
+        }
+      },
+      "viaGate": "scripts/author/motion-director.mjs"
+    },
+    "linear-motion": {
+      "adopted": "2026-08-28",
+      "what": "motion carries easing, not a constant rate",
+      "legacy": {
+        "onefile": {
+          "since": "2026-08-28",
+          "hash": "96ae5ade453d68d4"
+        },
+        "rec3-skill": {
+          "since": "2026-08-28",
+          "hash": "b65009bc0e6f3382"
+        }
+      },
+      "viaGate": "scripts/author/motion-director.mjs"
+    },
+    "monotone-timing": {
+      "adopted": "2026-08-28",
+      "what": "the film varies its timing rather than moving everything alike",
+      "legacy": {
+        "cuts-demo": {
+          "since": "2026-08-28",
+          "hash": "affc95cc3be4fc5c"
+        },
+        "looks-reel": {
+          "since": "2026-08-28",
+          "hash": "e9d5df2acd31e421"
+        }
+      },
+      "viaGate": "scripts/author/motion-director.mjs"
+    },
+    "enter-and-retreat": {
+      "adopted": "2026-08-28",
+      "what": "a layer leaves the way it came, in one direction of travel",
+      "legacy": {
+        "_catalog-12": {
+          "since": "2026-08-28",
+          "hash": "e8bedd775b62d471"
+        },
+        "_catalog-25": {
+          "since": "2026-08-28",
+          "hash": "c10d5a512d765084"
+        },
+        "_catalog-3": {
+          "since": "2026-08-28",
+          "hash": "f7019762466a8e6c"
+        },
+        "_catalog-4": {
+          "since": "2026-08-28",
+          "hash": "36d799324e820f43"
+        }
+      },
+      "viaGate": "scripts/author/motion-director.mjs"
+    },
+    "off-font": {
+      "adopted": "2026-08-28",
+      "what": "every face is one of the theme roles",
+      "legacy": {},
+      "viaGate": "scripts/gates/designspec-check.mjs"
+    },
+    "restated-headline": {
+      "adopted": "2026-08-28",
+      "what": "a beat does not repeat the line above it",
+      "legacy": {
+        "_catalog-17": {
+          "since": "2026-08-28",
+          "hash": "85d807728f160987"
+        },
+        "_catalog-18": {
+          "since": "2026-08-28",
+          "hash": "6b66fffd4743f34d"
+        },
+        "_catalog-2": {
+          "since": "2026-08-28",
+          "hash": "b90041375c0f242f"
+        },
+        "showcase-intro": {
+          "since": "2026-08-28",
+          "hash": "b5c3cda482de8858"
+        }
+      },
+      "viaGate": "scripts/gates/copy-check.mjs"
+    },
+    "jargon": {
+      "adopted": "2026-08-28",
+      "what": "the on-screen words are specific, not marketing filler",
+      "legacy": {},
+      "viaGate": "scripts/gates/copy-check.mjs"
     }
-   },
-   "stamped": "2026-08-22"
   },
-  "no-authored-motion": {
-   "adopted": "2026-08-28",
-   "what": "something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction",
-   "legacy": {
-    "app-showcase": {
-     "since": "2026-08-28",
-     "hash": "3d2aa3c3a58b688f"
-    },
-    "chromatic": {
-     "since": "2026-08-28",
-     "hash": "73c714a261d0acbc"
-    },
-    "example-product-promo": {
-     "since": "2026-08-28",
-     "hash": "324aaf5921dcf4fc"
-    },
-    "example-swiss-grid": {
-     "since": "2026-08-28",
-     "hash": "a283d5fcc8bdbeb8"
-    },
-    "motion-reel": {
-     "since": "2026-08-28",
-     "hash": "4d3e29ad09513b30"
-    },
-    "showcase-count": {
-     "since": "2026-08-28",
-     "hash": "23b67b094635e189"
-    },
-    "showcase-scenecut": {
-     "since": "2026-08-28",
-     "hash": "61e161521f7cff67"
-    },
-    "showcase-spot": {
-     "since": "2026-08-28",
-     "hash": "8108e54fb33a593c"
-    },
-    "showcase-type": {
-     "since": "2026-08-28",
-     "hash": "d0f0b8c0441cc635"
-    },
-    "showcase-vawe-reel": {
-     "since": "2026-08-28",
-     "hash": "ea1437639b8d489a"
-    },
-    "showcase-vocabulary": {
-     "since": "2026-08-28",
-     "hash": "b0de579b7dd5f988"
-    },
-    "three-showcase": {
-     "since": "2026-08-28",
-     "hash": "ff5a6cc4939a212a"
-    },
-    "tpot-launch": {
-     "since": "2026-08-28",
-     "hash": "6a458a6939e5b558"
-    },
-    "vawe-intro": {
-     "since": "2026-08-28",
-     "hash": "f8c1f8a975b6bc81"
-    }
-   }
-  }
- },
- "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",
- "_stamp": "node scripts/gates/author-check.mjs --legacy [--adopt <rule>|--stamp]   \u00b7   make legacy",
- "_legacy_is_not_a_waiver": "A row here means NOBODY HAS LOOKED at this film against this rule. It carries no reason because there is no reason yet. A waiver is the opposite: a person decided, and wrote why, in the scene's own authoring.allow/_why."
+  "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",
+  "_stamp": "node scripts/gates/author-check.mjs --legacy [--adopt <rule>|--stamp]   ·   make legacy",
+  "_legacy_is_not_a_waiver": "A row here means NOBODY HAS LOOKED at this film against this rule. It carries no reason because there is no reason yet. A waiver is the opposite: a person decided, and wrote why, in the scene's own authoring.allow/_why."
 }
