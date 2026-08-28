@@ -122,7 +122,42 @@ const RATCHET_RULES = {
     what: 'the film has a written plan (a storyboard, declared or found beside it)',
     fails: (sceneFile, sceneJson) => !resolveStoryboard(sceneFile, sceneJson).path,
   },
+  // A film cut into beats where NOTHING is choreographed and NOTHING crosses a junction is a slideshow,
+  // whatever else is true of it. This is the one defect the two films this repo argues from do not have
+  // and the median film here does: `higgsfield-recreation` keys 6 of its 8 layers and cuts zero times,
+  // `brew-launch-act1` keys 4 and punctuates with camera fx, and the library median is 0 keyed layers.
+  //
+  // Measured before it was written, which is the lesson `visual-vocabulary` cost: it fires on 16 of 140
+  // scenes and spares BOTH exemplars. It is deliberately generous, because the cheap wrong version of
+  // this rule counts pictures or layer area and a hairline defeats it. It asks only whether the author
+  // choreographed ANYTHING: one keyed track, or one layer that survives a junction via `becomes`,
+  // `follow` or `acrossBeats`. One is enough. A film that cannot answer yes has not been directed.
+  //
+  // The legacy set it freezes is mostly showcase reels, and a reel really is a list: that is a fair
+  // waiver with a reason, and it is exactly why this is a ratchet and not a promotion. CLAUDE.md's own
+  // note stands, this rule is wrong about a metric-cut list film, and being wrong there now costs a
+  // sentence in `_why` instead of a repealed rule nobody wrote down.
+  'no-authored-motion': {
+    what: 'something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction',
+    fails: (_sceneFile, d) => {
+      const L = Array.isArray(d && d.layers) ? d.layers : [];
+      const joints = (d.cuts || []).length + (d.transitions || []).length + (d.seams || []).length;
+      if (joints < 2) return false;                       // no junctions, nothing to read as a slideshow
+      const content = L.filter((l) => l && CONTENT_TYPES.has(l.type || 'text')).length;
+      if (content < 6) return false;                      // too small to be a slideshow of anything
+      const keyed = L.some((l) => Array.isArray(l && l.motion) && l.motion.length >= 2);
+      const carried = L.some((l) => l && (l.becomes || l.follow || l.acrossBeats));
+      return !keyed && !carried;
+    },
+  },
 };
+
+// The layer types that carry MEANING, as opposed to dressing the frame. `rect`, `glow`, `beam` and the
+// paint fields are deliberately absent: a film made of five rectangles is not a film with five ideas in
+// it, and counting them would let decoration buy a pass. Same split CLAUDE.md draws between DECORATION
+// and EXPLANATION, applied to the layer table.
+const CONTENT_TYPES = new Set(['text', 'image', 'svg', 'html', 'component', 'count', 'doc',
+  'lottie', 'video', 'board', 'canvas', 'clip', 'group', 'composition']);
 
 // The identity of a scene for legacy purposes is its CONTENT, canonicalised, not its bytes. Sorting keys
 // means a reformat or a key reorder does not cost a film its grandfathering, while any change to what the
@@ -313,6 +348,12 @@ const { declared: declaredSb, candidates: sbCandidates, path: sbPath } = resolve
 // ladder prints its own contents: a step that announces itself as a report and then blocks is a liar.
 const sbRatchet = ratchetStatus('no-storyboard', file, scene);
 const sbCensus = sbRatchet.ratcheted ? census('no-storyboard') : null;
+// Same shape, same reason, for the defect that is one tier below "has a plan": has anything been
+// CHOREOGRAPHED. Known before the ladder prints itself, because a step that announces itself as a
+// report and then blocks is a liar.
+const moRatchet = ratchetStatus('no-authored-motion', file, scene);
+const moFails = RATCHET_RULES['no-authored-motion'].fails(file, scene);
+const moCensus = moRatchet.ratcheted ? census('no-authored-motion') : null;
 const sidecarPath = file.replace(/\.json$/, '.intent.json');
 const hasSidecar = fs.existsSync(sidecarPath);
 const [sceneW, sceneH] = sceneDims(scene, '');
@@ -328,6 +369,7 @@ const LADDER = [
   ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
   ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
+  ['motion', moRatchet.state === 'new' ? 'blocks' : 'reports', 'whether anything in this film is choreographed rather than named'],
   ['dissolve', 'reports', 'transitions: two text states cross-dissolved into mud'],
   ['designspec', 'reports', 'the look lock: colours off the theme palette, fonts outside its roles'],
   ['copy', 'reports', 'the words: weak hook, jargon, a restated headline, a number set flat'],
@@ -478,6 +520,35 @@ styleGate('critique', 'critique (value gate)', 'scripts/gates/critique.mjs', str
 styleGate('direct', 'direct (direction gate)', 'scripts/author/motion-director.mjs', [], { waivable: true });
 // 3b. direction floor. The AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
 styleGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.mjs', strict ? ['--strict'] : [], { waivable: true });
+
+// 3c. AUTHORED MOTION. The floor above measures a VOCABULARY: it counts techniques and clears a film
+//     that names three of them. This one asks a narrower question the count cannot reach: did anybody
+//     choreograph anything, or was every move selected from a menu. A film can name four techniques,
+//     pass the floor, and still be five slides joined by cuts, because `"preset": "up"` is a technique.
+//     That is not hypothetical: it is what shipped as this repo's own launch film, and the two films
+//     the doctrine argues from fail it in the opposite direction, keying 6 of 8 and 4 of 30 layers.
+//     No subprocess: the predicate is fs + JSON, and it already ran for the census.
+{
+  const relief = moRatchet.state === 'legacy'
+    ? `  · grandfathered on ${moRatchet.since}. It reports here and blocks nothing.\n` : '';
+  openStep('motion', 'authored motion (choreography)', {});
+  if (moFails) {
+    process.stdout.write(
+      `  ✗ [no-authored-motion] ${(scene.cuts || []).length + (scene.transitions || []).length + (scene.seams || []).length} junction(s), and not one layer is choreographed:\n`
+      + `      no keyed \`motion\` track, and nothing carried across a junction by becomes / follow / acrossBeats.\n`
+      + `      Every move in this film was SELECTED (anim, preset, cut), not authored. That is a slideshow,\n`
+      + `      and no other gate can see it: presets satisfy the ambition floor by being counted.\n`
+      + `      Cheapest fix, and the numbers are measured off the two exemplars rather than invented:\n`
+      + `        node scripts/author/track.mjs pan   --to -600 --dur 1.25 --scene ${target} --layer <n>\n`
+      + `        node scripts/author/track.mjs blast --dur 1.5              --scene ${target} --layer <n>\n`
+      + `      Or reach for a keyed BEAT: recordedPan / scrollStory / focusRack / echoRing (make blueprints).\n`
+      + `      Theory and the measurements: docs/CRAFT/KEYED-MOTION.md.\n${relief}`);
+  } else {
+    process.stdout.write(`  → nothing found.\n`);
+  }
+  record('motion', { code: moFails ? 1 : 0, blockCodes: moFails ? ['no-authored-motion'] : [], findings: moFails ? 1 : 0 },
+    { waivable: true, tier: moRatchet.state === 'new' ? 'blocks' : 'reports' });
+}
 
 // 4c. dissolve. The TRANSITION gate. Everything else here samples settled frames by construction, so a
 //     crossfade between two text states (a double exposure: both strings at half strength through the

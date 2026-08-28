@@ -338,6 +338,52 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
    because even at its best the gate could prove a picture was on screen and large and could never prove it
    explained anything, a big decorative photograph passed it and deserved to fail a human.
 
+2a0000a. **AUTHOR THE MOTION. DO NOT NAME IT. This is the difference between the two films this file
+   argues from and everything else in the library, and it is one measurement, not a matter of taste:**
+
+   | | higgsfield | brew | the launch film this rule was written for |
+   |---|---|---|---|
+   | layers with a hand-keyed `motion` track | **6 of 8** | 4 of 30 | **0 of 16** |
+   | cuts between beats | **0** | 0 (camera fx instead) | 4 |
+   | text share of layers | 38% | 37% | **75%** |
+
+   higgsfield is five seconds, eight layers, **no transitions at all**, and its subject travels
+   `x: 30 → 0 → -155 → -288 → -447 → -542 → -600` across seven hand-placed keys whose interior is
+   `linear`. brew's punctuation is four keys, `scale 1.5 → 1 → 1.04 → 1.9`, arriving over-size and
+   leaving THROUGH the frame. Neither of those is reachable from a preset, because a preset animates
+   ONE layer over ONE span with ONE curve, and what makes both films read as directed is the opposite.
+   The launch film said `"preset": "up"` sixteen times, passed every gate, and was correctly called a
+   slideshow with sounds by the person who asked for it.
+
+   **Why this keeps happening, stated so it can be watched for: a preset is one word and a track is
+   seven lines.** Every time both are available the cheap one wins, and the ambition floor cannot tell
+   them apart because it COUNTS techniques and a preset is a technique. So the floor stays green while
+   the film stays undirected.
+
+   **The track is now the cheap one. `scripts/author/track.mjs` emits the exemplars' own numbers:**
+
+   ```bash
+   node scripts/author/track.mjs pan   --to -600 --dur 1.25   # higgsfield's scroll rhythm, irregular
+   node scripts/author/track.mjs blast --dur 1.5              # brew's four-key punctuation
+   node scripts/author/track.mjs drift --dur 3 --amp 12       # an ambient hold that still moves
+   node scripts/author/track.mjs enter --from 40 --dur 0.9    # a keyed entrance, not a preset name
+   … --offset 0.12                     # weld a rider to the subject's track (higgsfield shares one pan six ways)
+   … --scene <f.json> --layer <n>      # write it in, surgically, no reformat
+   ```
+
+   It exists because `make studio`'s keyframe mode is **drag on a stage**, which is cheap for a person
+   and unreachable for the agent writing most of the scenes here. Deterministic, so the same command
+   twice is the same bytes. **`make blueprints` also carries four keyed BEATS harvested from higgsfield
+   itself** (`recordedPan` · `scrollStory` · `focusRack` · `echoRing`, `blueprints/beats-track.mjs`), so
+   the reference film's mechanics are reachable without having the reference film.
+
+   **`no-authored-motion` now BLOCKS a new film** (step `motion` in `make author-check`): two or more
+   junctions, six or more content layers, and not one keyed track nor one layer carried across a
+   junction by `becomes` / `follow` / `acrossBeats`. One is enough to clear it. It is a RATCHET, adopted
+   2026-08-28 over 14 legacy scenes (mostly showcase reels, where a list is a fair answer and a `_why`
+   is the right cost), so it fires on what you write next and not on the library's debt. Measured before
+   it was written: it spares both exemplars and fires on 16 of 140. `docs/CRAFT/KEYED-MOTION.md`.
+
 2a000. **A SLIDESHOW IS STILL A FAILURE. A CONTINUOUS OBJECT IS ONE OF ABOUT EIGHTEEN WAYS OUT.**
    The failure is real and it is easy to feel: every beat is born and dies inside its own window, so each
    cut is a jump between unrelated shots and the film is a stack of cards read aloud. Do not ship that.
