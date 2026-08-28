@@ -2,7 +2,7 @@
 // transform (which driveClips and the `enter` track already wrote to el.style), and multiply into the
 // composed opacity. Last before the modifiers, because every track above it writes a transform this
 // one is meant to carry rather than replace.
-import { motionAt } from '../sequence.js';
+import { motionAt, velocityAt } from '../sequence.js';
 import { baseOpacity } from './util.js';
 
 // PX PER SECOND, not per frame. It was 16 px/frame, which sounds fps-neutral and is not: at 30fps that
@@ -11,7 +11,12 @@ import { baseOpacity } from './util.js';
 // threw away the blur that makes its fastest moves read, which is the opposite of what the author
 // asked for and nothing would have said a word (docs/MISTAKES.md #204).
 const AUTO_BLUR_FLOOR_PER_SEC = 480;
-const AUTO_SHUTTER = 0.16;   // higgsfield-recreation's own hand-picked value for its fastest layer
+// The DEFAULT shutter, and only the default. higgsfield-recreation's own hand-picked value for its
+// fastest layer, which is 0.16 of the frame, about a 58 degree shutter angle in a camera's units.
+// A scene sets its own with a top-level `shutter` in DEGREES (180 is the film standard, 360 is double
+// the smear, 0 turns the automatic half off), and that is the whole of item 6 in
+// docs/CRAFT/AFTER-EFFECTS-RECIPES.md: the sampler was already automatic and had no dial.
+const AUTO_SHUTTER = 0.16;
 
 export const slot = 'transform';
 
@@ -19,6 +24,18 @@ export const slot = 'transform';
 // there is nothing to differentiate and the prop decides nothing, including `motionBlur: false`, which
 // opts out of an automatic blur that a still layer would never have had.
 export const PROPS = { motion: {}, motionBlur: { when: 'motion' } };
+
+// The scene's shutter, in the units a camera states it in, converted once. Exported so the one place
+// that builds the track kit reads the conversion rather than restating it (formats/scene/scene.js).
+export const DEFAULT_SHUTTER = AUTO_SHUTTER;
+export function resolveShutter(deg) {
+  if (deg == null) return AUTO_SHUTTER;
+  if (typeof deg !== 'number' || !Number.isFinite(deg) || deg < 0 || deg > 360)
+    throw new Error(`\`shutter\` is a SHUTTER ANGLE in degrees, 0 to 360: 180 is the film standard, `
+      + `360 is twice the smear, 0 turns the automatic motion blur off for the whole film. Got `
+      + `${JSON.stringify(deg)}. It is the default only; a layer still overrides it with \`motionBlur\`.`);
+  return deg / 360;
+}
 
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(L.motion && L.motion.length && t >= start && t < end)) return;
@@ -39,8 +56,8 @@ export function frame(kit, el, L, units, t, f, start, end) {
   //      `motionBlur: false` opts out, a number overrides the shutter (KEYED-MOTION.md).
   let blurPx = m.blur > 0.01 ? m.blur : 0;
   if (L.motionBlur !== false) {
-    const p = motionAt(L.motion, Math.max(0, (t - start) - 1 / fps));
-    const speed = Math.hypot(m.dx - p.dx, m.dy - p.dy); // px travelled in one frame
+    // ONE OWNER for the velocity read (core/sequence.js), shared with the ghost trail and squash.
+    const speed = velocityAt(L.motion, t - start, 1 / fps).speed / fps; // px travelled in one frame
     // ~a quarter of the frame per second: below it nothing smears in life either, and a floor is
     // what keeps this from softening every gentle drift in the library. Converted to this frame's
     // budget so the rule means the same thing at any frame rate.
@@ -50,7 +67,7 @@ export function frame(kit, el, L, units, t, f, start, end) {
       // reached for blur deliberately; applied automatically it peaked at the 24px cap on five
       // creed-launch rects and put 18px on a moving headline, which is dissolved, not smeared.
       // AUTO_SHUTTER is the value the exemplar's own author chose by eye for its fastest layer.
-      const shutter = L.motionBlur == null ? AUTO_SHUTTER
+      const shutter = L.motionBlur == null ? kit.shutter
         : L.motionBlur === true ? 0.5 : +L.motionBlur;
       blurPx += Math.min(24, shutter * speed * 0.5);    // half-shutter, capped so text never dissolves
     }

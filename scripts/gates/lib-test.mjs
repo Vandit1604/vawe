@@ -2,10 +2,11 @@
 // No browser needed (the primitives are pure). Run: node scripts/gates/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
-  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
+  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
+  anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
-import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt } from '../../core/clips.js';
+import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/clips.js';
 import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
   normalizeIdle, settledGain } from '../../core/idle.js';
 import { SEAM_BLURBS } from '../../core/seams.js';
@@ -17,7 +18,10 @@ import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { PROFILES } from '../author/profiles.mjs';
 import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs } from '../../core/layers/util.js';
-import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '../../core/sequence.js';
+import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt } from '../../core/sequence.js';
+import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
+import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
+import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
@@ -347,6 +351,178 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   }
   return true;
 })());
+
+// ---- THE ENTRANCE WARP: anticipation (#5) and the overshoot dial (#3), docs/CRAFT/AFTER-EFFECTS-RECIPES.md
+// Both dials ARE the easing of an entrance, so they are asserted on the curve AND through clipStyleAt,
+// which is the only thing that composes them onto a real layer.
+{
+  const probe = () => () => 2;   // a warp that ignores the anim's own curve and returns a constant
+  const changes = ANIM_NAMES.filter((n) => JSON.stringify(ANIM[n](0.5, probe)) !== JSON.stringify(ANIM[n](0.5)));
+  ok('WARPABLE names exactly the entrances that honour a warp, no more and no fewer',
+     JSON.stringify([...changes].sort()) === JSON.stringify([...WARPABLE].sort()));
+
+  // ANTICIPATION: back along the travel first, then straight into the move, landing exactly at rest.
+  const a = anticipateEase(easeOutCubic, { amount: 0.15, windup: 0.25 });
+  ok('anticipateEase is terminal at both ends', a(0) === 0 && a(1) === 1);
+  ok('anticipateEase winds BACK before it moves forward', a(0.1) < 0 && a(0.2) < 0);
+  ok('anticipateEase reaches the asked-for counter-move and no more',
+     Math.abs(a(0.25) + 0.15) < 1e-9 && [0.05, 0.1, 0.15, 0.2, 0.25].every((u) => a(u) >= -0.1501));
+  ok('anticipateEase has no hold at the turn: it is climbing again one frame later', a(0.28) > a(0.25));
+
+  // OVERSHOOT: the amount an author asks for is the amount the curve delivers.
+  for (const amt of [0.08, 0.12, 0.15]) {
+    const o = overshootEase(amt);
+    let peak = 0; for (let i = 0; i <= 1000; i++) peak = Math.max(peak, o(i / 1000));
+    ok(`overshootEase(${amt}) peaks within a point of the amount asked for (got ${(peak - 1).toFixed(4)})`,
+       Math.abs((peak - 1) - amt) < 0.01);
+    ok(`overshootEase(${amt}) lands exactly at rest`, o(1) === 1 && o(0) === 0);
+  }
+
+  // THE REFUSAL. A dial on an entrance with no travel is named, not dropped.
+  ok('a dial on a non-directional entrance is refused by name', (() => {
+    try { entranceWarp({ dataset: { anim: 'fade', overshoot: '0.12' } }, 0.3); return false; }
+    catch (e) { return /has no travel to bend/.test(e.message) && /fade/.test(e.message); }
+  })());
+  ok('an entrance with neither dial gets no warp at all', entranceWarp({ dataset: { anim: 'rise' } }, 0.3) === null);
+
+  // COMPOSED ONTO A REAL LAYER. `rise` starts 48px below its box; with a wind-up it starts there and
+  // goes FURTHER down before it comes up, and with an overshoot it passes rest and comes back.
+  const yOf = (st) => parseFloat(st.transform.match(/translateY\(([-\d.]+)px\)/)[1]);
+  const clipW = (d) => ({ dataset: { start: '0', duration: '3', enter: '0.3', anim: 'rise', ...d } });
+  const plain = clipW({}), wound = clipW({ anticipate: '0.15' }), over = clipW({ overshoot: '0.12' });
+  ok('anticipate: the layer is FURTHER from rest two frames in than it was at t=0',
+     yOf(clipStyleAt(wound, 2 / 30)) > yOf(clipStyleAt(plain, 0)));
+  ok('anticipate: it still lands exactly at rest when the ramp ends',
+     Math.abs(yOf(clipStyleAt(wound, 0.3))) < 1e-6);
+  ok('overshoot: the layer passes rest and comes back (a negative translate mid-entrance)',
+     (() => { for (let f = 1; f < 9; f++) if (yOf(clipStyleAt(over, f / 30)) < -0.5) return true; return false; })());
+  ok('overshoot: 12% of the 48px travel is about 5.8px past rest',
+     (() => { let m = 0; for (let f = 0; f <= 9; f++) m = Math.min(m, yOf(clipStyleAt(over, f / 30))); return Math.abs(-m - 48 * 0.12) < 1.2; })());
+  ok('neither dial changes a layer that sets neither',
+     JSON.stringify(clipStyleAt(plain, 0.12)) === JSON.stringify(clipStyleAt(clipW({}), 0.12)));
+
+  // ANIMATE ON TWOS (#24): the clock quantises, anchored on the layer's own start.
+  ok('stepClock holds each pose for a whole step, anchored on the layer start',
+     stepClock(2.0, 15, 2) === 2 && stepClock(2.04, 15, 2) === 2 && Math.abs(stepClock(2.07, 15, 2) - (2 + 1 / 15)) < 1e-9);
+  ok('stepClock refuses a rate that is not a positive number', (() => {
+    try { stepClock(1, 0); return false; } catch (e) { return /updates per second/.test(e.message); }
+  })());
+  const stepped = clipW({ step: '15' });
+  ok('a stepped layer renders the SAME pose for both frames of its step',
+     JSON.stringify(clipStyleAt(stepped, 2 / 30)) === JSON.stringify(clipStyleAt(stepped, 3 / 30)));
+  ok('a stepped layer still MOVES between steps',
+     JSON.stringify(clipStyleAt(stepped, 2 / 30)) !== JSON.stringify(clipStyleAt(stepped, 4 / 30)));
+  ok('a stepped clock is pure: the same t answers the same after a seek away',
+     (() => { const x = JSON.stringify(clipStyleAt(stepped, 0.17)); clipStyleAt(stepped, 2.4); return x === JSON.stringify(clipStyleAt(stepped, 0.17)); })());
+}
+
+// ---- THE VELOCITY READ (core/sequence.js), and the three modifiers built on it -------------------
+{
+  // LINEAR on purpose: motionAt eases a sparse segment, so a track written without `ease` has an
+  // instantaneous velocity at its midpoint nearly three times its average, and every number below
+  // would then be asserting the shape of easeInOutCubic rather than the shape of the velocity read.
+  const kf = [{ t: 0, x: 0, ease: 'linear' }, { t: 1, x: 600, ease: 'linear' }, { t: 2, x: 600, ease: 'linear' }];
+  ok('velocityAt reports px per SECOND, not per frame',
+     Math.abs(velocityAt(kf, 0.5, 1 / 30).speed - 600) < 1);
+  ok('velocityAt tapers to zero at the layer\'s first frame rather than extrapolating',
+     velocityAt(kf, 0, 1 / 30).speed === 0);
+  ok('velocityAt is the read the motion track already made: hypot over one frame, divided by that frame',
+     (() => { const p = poseBack(kf, 0.5, 1 / 30), n = motionAt(kf, 0.5);
+       return Math.abs(velocityAt(kf, 0.5, 1 / 30).speed / 30 - Math.hypot(n.dx - p.dx, n.dy - p.dy)) < 1e-9; })());
+  ok('velocityAt refuses a window that is not a positive number of seconds', (() => {
+    try { velocityAt(kf, 0.5, 0); return false; } catch (e) { return /positive lookback/.test(e.message); }
+  })());
+
+  // SQUASH: the perpendicular axis is the RECIPROCAL, which is the difference between a squash and a zoom.
+  const scene = { clock: { fps: 30, t: 0, frame: 0, duration: 3 } };
+  const sq = (L, t, spec = true) => { const el = { style: {} }; squashFrame(null, el, L, t, scene, spec); return el.style.scale; };
+  const mover = { id: 'ball', start: 0, motion: kf };
+  ok('squash conserves volume: the two axes multiply to 1', (() => {
+    const [a, b] = sq(mover, 0.5).split(' ').map(Number); return Math.abs(a * b - 1) < 1e-4;
+  })());
+  ok('squash stretches the axis it is TRAVELLING on', (() => {
+    const [a, b] = sq(mover, 0.5).split(' ').map(Number); return a > 1 && b < 1;
+  })());
+  ok('squash stretches vertically for a layer that falls', (() => {
+    const [a, b] = sq({ id: 'drop', start: 0, motion: [{ t: 0, y: 0, ease: 'linear' }, { t: 1, y: 600, ease: 'linear' }] }, 0.5).split(' ').map(Number);
+    return b > 1 && a < 1;
+  })());
+  ok('a still layer renders identically to one carrying no squash at all', sq(mover, 1.5) === 'none');
+  ok('squash reaches the amount asked for at the speed asked for', (() => {
+    const [a] = sq(mover, 0.5, { amount: 0.25, at: 600 }).split(' ').map(Number);
+    return Math.abs(a - 1.25) < 1e-3;
+  })());
+  ok('squash refuses an unknown option key by name', (() => {
+    try { sq(mover, 0.5, { ammount: 0.2 }); return false; } catch (e) { return /unknown key "ammount"/.test(e.message); }
+  })());
+  ok('squash refuses a layer with no motion track, at BUILD', (() => {
+    try { squashBuild(null, { style: {} }, { id: 'x' }, true); return false; }
+    catch (e) { return /no `motion` track/.test(e.message); }
+  })());
+  ok('squash and kick may not share the `scale` longhand in silence', (() => {
+    try { squashBuild(null, { style: {} }, { id: 'x', motion: kf, modifiers: [{ squash: true }, { kick: true }] }, true); return false; }
+    catch (e) { return /also carries `kick`/.test(e.message); }
+  })());
+
+  // LAG: the trailing layer carries the leader's pose, late, and rings past its stop.
+  const view = { clock: scene.clock, ids: ['ball', 'tail'], specOf: (id) => (id === 'ball' ? mover : null) };
+  const lg = (t, spec = { of: 'ball' }) => { const el = { style: {} }; lagFrame(null, el, { id: 'tail' }, t, view, spec); return el.style.translate; };
+  ok('lag carries the leader\'s pose from `delay` frames ago', (() => {
+    const got = parseFloat(lg(0.5, { of: 'ball', delay: 3, amp: 0 }));
+    return Math.abs(got - motionAt(kf, 0.5 - 3 / 30).dx) < 0.01;
+  })());
+  ok('lag with a longer delay is further behind', (() => {
+    const a = parseFloat(lg(0.5, { of: 'ball', delay: 1, amp: 0 })), b = parseFloat(lg(0.5, { of: 'ball', delay: 3, amp: 0 }));
+    return b < a;
+  })());
+  ok('lag overruns the leader\'s stop and rings back through it', (() => {
+    const xs = []; for (let f = 31; f < 48; f++) xs.push(parseFloat(lg(f / 30)));
+    return xs.some((x) => x > 600.5) && xs.some((x) => x < 599.5);
+  })());
+  ok('lag\'s overrun decays: the last ring is smaller than the first', (() => {
+    const at = (f) => Math.abs(parseFloat(lg(f / 30)) - 600);
+    return at(46) < at(34);
+  })());
+  ok('lag refuses a leader with no motion track', (() => {
+    try { lagFrame(null, { style: {} }, { id: 'tail' }, 0.5, { ...view, specOf: () => ({ id: 'ball' }) }, { of: 'ball' }); return false; }
+    catch (e) { return /no `motion` track/.test(e.message); }
+  })());
+  ok('lag refuses a chain, because it reads keyframes and would land where nothing is', (() => {
+    try { lagFrame(null, { style: {} }, { id: 'tail' }, 0.5, { ...view, specOf: () => ({ id: 'ball', motion: kf, modifiers: [{ lag: 'other' }] }) }, { of: 'ball' }); return false; }
+    catch (e) { return /itself lagging/.test(e.message); }
+  })());
+  ok('lag refuses a layer trailing itself', (() => {
+    try { lagBuild(null, { style: {} }, { id: 'tail' }, { of: 'tail' }); return false; }
+    catch (e) { return /cannot trail itself/.test(e.message); }
+  })());
+
+  // MATTE: the mask follows the SOURCE's live box, which is what makes a gradient into a wipe.
+  const boxes = { sweep: { cx: 300, cy: 100, w: 400, h: 200, scale: 1 }, plate: { cx: 500, cy: 100, w: 1000, h: 200, scale: 1 } };
+  const mview = { clock: scene.clock, ids: ['sweep', 'plate'],
+    specOf: (id) => (id === 'sweep' ? { id: 'sweep', type: 'rect', bg: 'linear-gradient(90deg,#000,#fff)' } : null),
+    boxOf: (id) => boxes[id] };
+  const mt = (spec = 'sweep') => { const el = { style: {} }; matteFrame(null, el, { id: 'plate' }, 0, mview, spec); return el.style; };
+  ok('matte takes the source layer\'s gradient as the mask image', mt().maskImage === 'linear-gradient(90deg,#000,#fff)');
+  ok('matte defaults to LUMINANCE, which is what a luma matte means', mt().maskMode === 'luminance');
+  ok('matte sizes and places the mask from the source\'s box, relative to its own',
+     mt().maskSize === '400.00px 200.00px' && mt().maskPosition === '100.00px 0.00px');
+  ok('matte moves with the source: shift the source box and the mask position follows', (() => {
+    boxes.sweep = { ...boxes.sweep, cx: 700 }; const p = mt().maskPosition;
+    boxes.sweep = { ...boxes.sweep, cx: 300 }; return p === '500.00px 0.00px';
+  })());
+  ok('matte refuses a source that paints nothing a mask can use', (() => {
+    try { matteFrame(null, { style: {} }, { id: 'plate' }, 0, { ...mview, specOf: () => ({ id: 'sweep', type: 'paint' }) }, 'sweep'); return false; }
+    catch (e) { return /paints nothing a mask can use/.test(e.message); }
+  })());
+  ok('matte refuses an unknown mode by name', (() => {
+    try { matteFrame(null, { style: {} }, { id: 'plate' }, 0, mview, { from: 'sweep', mode: 'luma' }); return false; }
+    catch (e) { return /unknown mode "luma"/.test(e.message); }
+  })());
+  ok('matte refuses to share `mask-image` with the layer\'s own `mask`', (() => {
+    try { matteBuild(null, { style: {} }, { id: 'plate', mask: 'linear-gradient(#000,#fff)' }, 'sweep'); return false; }
+    catch (e) { return /also sets `mask`/.test(e.message); }
+  })());
+}
 
 // ---- background `opts`: a knob a window declares must be READ, or refused by name (MISTAKES #157).
 // The accepted set is derived from the fx implementations, so these also pin that the derivation is

@@ -1,5 +1,5 @@
 {
-  "total": 563,
+  "total": 566,
   "previewed": 255,
   "families": 36,
   "tags": [
@@ -53,7 +53,7 @@
     ],
     [
       "per-layer",
-      55
+      58
     ],
     [
       "per-layer/scene",
@@ -2911,7 +2911,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.",
-      "count": 10,
+      "count": 13,
       "undescribed": 0,
       "entries": [
         {
@@ -2932,6 +2932,20 @@
           "name": "kick",
           "stem": "per-layer-modifiers--kick",
           "desc": "hit · the · layer · on · the · film's · own · joints. · A · cut, · a · seam · or · a · sting · shoves · it, · so · the · frame · feels · the · edit",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "lag",
+          "stem": "per-layer-modifiers--lag",
+          "desc": "FOLLOW-THROUGH · this · layer · trails · another · layer's · motion · by · a · frame · or · three · and · overruns · its · stop · before · settling. · Stagger · delays · a · sibling's · entrance; · this · makes · one · layer · drag · behind · another's · continuous · motion, · which · is · half · of · what · separates · an · animated · object · from · a · moved · image",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "matte",
+          "stem": "per-layer-modifiers--matte",
+          "desc": "a · LUMA · MATTE · another · layer's · brightness · is · this · layer's · alpha, · white · shows · and · black · hides. · The · general · case · of · the · whole · wipe · family, · and · the · matte · MOVES, · because · it · is · placed · from · the · source · layer's · live · box",
           "scene": null,
           "noPreview": null
         },
@@ -2967,6 +2981,13 @@
           "name": "shadow",
           "stem": "per-layer-modifiers--shadow",
           "desc": "a · drop · shadow · that · knows · where · the · light · is, · so · every · layer · does · not · point · the · same · way",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "squash",
+          "stem": "per-layer-modifiers--squash",
+          "desc": "SQUASH · AND · STRETCH · read · off · the · layer's · own · velocity · the · travel · axis · stretches · and · the · perpendicular · one · squeezes · by · exactly · the · reciprocal, · so · the · volume · holds. · Scale · both · and · it · is · a · zoom, · not · a · squash",
           "scene": null,
           "noPreview": null
         },

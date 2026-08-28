@@ -1,8 +1,8 @@
 import { boot } from '/core/boot.js';
 import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions, bindMatchesToJunctions } from '/core/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
-import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg } from '/core/motion.js';
-import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
+import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg, stepClock } from '/core/motion.js';
+import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, entranceWarp, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
 import { splitText, circleText, decodeText } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/gsap-effects.js';
@@ -26,6 +26,7 @@ import { resolvePans } from '/core/pan-resolve.mjs';
 import { watchProps, auditLayer, watchedTree } from '/core/prop-audit.js';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';
+import { resolveShutter } from '/core/tracks/motion.js';
 import { normalizeIdle } from '/core/idle.js';
 import { resolveSpectacle } from '/core/spectacle.js';
 const $ = (id) => document.getElementById(id);
@@ -531,6 +532,29 @@ boot((data, fps, theme, canvas) => {
     // `idle: "breath"` would first throw on whichever frame that layer reaches its settled middle,
     // which is a dead render one third of the way in with a stack trace instead of an authoring error.
     normalizeIdle(L.idle !== undefined ? L.idle : data.idle);
+    // THE TWO ENTRANCE DIALS (core/motion.js: anticipation and the overshoot amount). Written here,
+    // refused here for the same layers that already lose their `anim`: a split or cut layer's entrance
+    // is owned by something else, so a dial on it would be an input accepted and dropped.
+    for (const [prop, lo, hi] of [['anticipate', 0.01, 0.6], ['overshoot', 0.01, 0.6]]) {
+      const v = L[prop];
+      if (v == null) continue;
+      if (L.split || L.cut)
+        throw new Error(`layer ${idx} (${L.type}) sets ${prop}: ${JSON.stringify(v)} with ${owner}. The engine cannot honour it: ${owner.split(':')[0]} owns this layer's entrance, so the dial would be discarded. Remove it, ${instead}.`);
+      if (typeof v !== 'number' || !(v >= lo && v <= hi))
+        throw new Error(`layer ${idx} (${L.type}) sets ${prop}: ${JSON.stringify(v)}. It is a FRACTION of the travel, ${lo} to ${hi} (${prop === 'anticipate' ? '0.1 to 0.2 is the band motion designers quote' : '0.08 to 0.15 is the band motion designers quote'}).`);
+      el.dataset[prop] = String(v);
+    }
+    // Resolve the dials once, at BUILD, and throw the result away: what this call buys is WHEN a dial
+    // on an entrance that cannot carry it is refused. Left to the first frame, `anim:"fade"` with an
+    // `overshoot` would fail one third of the way into a render instead of at authoring time.
+    entranceWarp(el, BASE_ENTER);
+    // `step` quantises this layer's clock (animate on twos = 15 in a 30fps film). On the element as
+    // well as on the layer because the entrance is composed by core/clips.js, which sees only the DOM.
+    if (L.step != null) {
+      if (typeof L.step !== 'number' || !(L.step > 0) || L.step > fps)
+        throw new Error(`layer ${idx} (${L.type}) sets step: ${JSON.stringify(L.step)}. It is UPDATES PER SECOND, above 0 and no faster than the film's own ${fps}fps: 15 is "on twos", 10 is "on threes". A step at or above the frame rate changes nothing.`);
+      el.dataset.step = String(L.step);
+    }
     if (L.split) el.dataset.enter = '0';
     else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
     if (L.out) el.dataset.out = L.out;
@@ -1044,7 +1068,7 @@ boot((data, fps, theme, canvas) => {
   // `data.idle` is the film's scene-level idle: one line opts the whole cast into ambient hold motion
   // (core/idle.js). Normalized HERE so a misspelled name fails at boot with the registry's message,
   // rather than on whichever frame the first layer happens to reach its settled middle.
-  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(data.idle) });
+  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(data.idle), shutter: resolveShutter(data.shutter) });
 
   function renderFrame(f) {
     const t = f / fps;
@@ -1072,7 +1096,14 @@ boot((data, fps, theme, canvas) => {
     const clock = Object.freeze({ t, frame: f, fps, duration });
     const view = Object.freeze({ boxOf, specOf, ids: IDS, light: LIGHT, camera: camNow,
       canvas: CANVAS, safe: SAFE, clock, theme: THEME, bg: bgAt(t), marks: MARKS });
-    for (const { L, el, units } of layers) runTracks(trackKit, el, L, units, t, f, view);
+    // A layer carrying `step` runs its whole track pipeline on a QUANTISED clock: same seconds, held
+    // for the whole step, so the layer updates 15 times a second inside a 30fps film. Pure, because the
+    // quantised time is a function of t alone (core/motion.js stepClock), and the entrance half of the
+    // same layer is stepped identically inside clipStyleAt.
+    for (const { L, el, units } of layers) {
+      const lt = L.step != null ? stepClock(t, L.step, L.start ?? 0) : t;
+      runTracks(trackKit, el, L, units, lt, L.step != null ? Math.round(lt * fps) : f, view);
+    }
     drawCaptions(t);
     drawCameraAndCut(t, camNow);
     drawStings(t);

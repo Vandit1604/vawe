@@ -138,6 +138,10 @@ const WAIVED = new Map(Object.entries({
   LAYER_OWNED: 'which props a layer owns versus its sequence, internal to the sequencer',
   DENSE_KEY_SEC: 'a density threshold constant',
   GHOST_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  LAG_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  MATTE_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  SQUASH_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  WARPABLE: 'the entrances that accept the `anticipate` / `overshoot` dials. Every one of them is ALREADY catalogued, by name, under "Enter / exit anims"; this is a property of those names, not a vocabulary beside them, and the two dials are documented on the anim rows and in formats/scene/schema.json',
   // Not a vocabulary a scene can name: it is the set of props whose PRESENCE makes preload fetch
   // GSAP. It is exported only so lib-test can re-derive it and refuse to drift (#467, and #148
   // is what drift cost last time). An author never writes GSAP_PROPS; they write `fx` or `parts`,

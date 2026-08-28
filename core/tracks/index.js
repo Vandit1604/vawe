@@ -49,6 +49,7 @@ import * as tReact from './react.js';
 import * as tBox from './box.js';
 import * as tFollow from './follow.js';
 import * as tMotion from './motion.js';
+import { DEFAULT_SHUTTER } from './motion.js';
 import * as tIdle from './idle.js';
 import * as tModifiers from './modifiers.js';
 
@@ -141,6 +142,11 @@ export function runTracks(kit, el, L, units, t, f, scene) {
 // It belongs here rather than on the layer because it is a property of the FILM, and the alternative
 // (copying it onto every layer at build) would make a scene default indistinguishable from an author
 // who wrote it out fifty times.
-export function createTrackKit({ renderer, theme, M, fps, idle = null }) {
-  return Object.freeze({ renderer, theme, M, fps, idle });
+//
+// `shutter` is the film's motion-blur shutter, for the same reason `idle` is here: it is a property of
+// the FILM, one line for the whole cast, and the per-layer override (`motionBlur`) is what says a
+// single layer disagrees. A default that every author has to remember to set on every layer is not a
+// default, it is a per-call-site opt-in (docs/CRAFT/AFTER-EFFECTS-RECIPES.md item 6).
+export function createTrackKit({ renderer, theme, M, fps, idle = null, shutter = DEFAULT_SHUTTER }) {
+  return Object.freeze({ renderer, theme, M, fps, idle, shutter });
 }

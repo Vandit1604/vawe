@@ -278,21 +278,84 @@ export function track(n, fps, beats) {
   return { name: null, index: -1, t01: 0, localT: 0, elapsed: t, start: 0, dur: 0 };
 }
 
+// ---------- THE ENTRANCE WARP: anticipation and the overshoot dial ----------
+//
+// Both are one idea. An entrance moves a layer from an offset to rest, and the SHAPE of that travel is
+// its easing. Anticipation is that curve dipping BELOW 0 for two or three frames (the layer winds back
+// along its own travel axis before it comes forward); an overshoot is the same curve passing 1 and
+// ringing down. Neither needs a new transform, a new layer or a new track: they are the ease.
+//
+// So an entrance takes an optional WARP, a function of its OWN easing, and every directional entrance
+// resolves it through `warpEase` below. The warp receives the anim's own curve because the anim is the
+// only thing that knows it: `rise` settles on easeOutSnap and `slide` on easeOutCubic, and a caller
+// that had to name the curve to wind it up would be a second owner of that fact.
+//
+// PURE, and terminal at both ends: every warp here returns exactly 0 at u<=0 and exactly 1 at u>=1, so
+// the resting keys the clip pipeline writes are unchanged and a warped layer holds at true rest.
+export const warpEase = (own, warp) => (typeof warp === 'function' ? warp(own) : own);
+
+// anticipateEase(ease, {amount, windup}). The wind-up, after the Disney principle as motion designers
+// apply it: the layer travels `amount` of its distance BACKWARDS over `windup` of the entrance, then
+// goes straight into the main move with no hold between them. 10 to 20% over 2 to 4 frames is the band
+// practitioners quote; `amount` is a fraction of the travel, `windup` a fraction of the enter ramp.
+//
+// The wind-back rides easeOutSine, which arrives at the turn with its speed already bled off, so the
+// reversal reads as a hinge rather than a bounce off a wall. The main move then launches on the anim's
+// own curve over the remaining window, rescaled by (1 + amount) so it still lands exactly at rest.
+export function anticipateEase(ease = easeOutCubic, { amount = 0.15, windup = 0.25 } = {}) {
+  const a = Math.min(0.6, Math.max(0.01, amount));
+  const w = Math.min(0.6, Math.max(0.05, windup));
+  return (u) => {
+    if (u <= 0) return 0;
+    if (u >= 1) return 1;
+    if (u < w) return -a * easeOutSine(u / w);
+    return -a + (1 + a) * ease((u - w) / (1 - w));
+  };
+}
+
+// overshootEase(amount). The dial the presets bake. `amount` is the FIRST overshoot, as a fraction of
+// the travel: 0.12 passes the target by 12% and rings down to rest inside the entrance window. Every
+// overshooting entrance in this engine picks a `bounce` and takes whatever peak that produces; this
+// inverts the relation instead, so an author states the number they can see.
+//
+// The inversion is the standard second-order step response, Mp = exp(-pi*zeta / sqrt(1 - zeta^2)),
+// solved for zeta. spring() below is that step response and `bounce` is 1 - zeta, so the amount an
+// author asks for is the amount the curve delivers rather than a number fitted by eye.
+//
+// The SETTLE TIME is deliberately not a second dial here. It is `enterDur`, which already exists, is
+// already the window this curve is mapped into, and is already what an author sets to make an entrance
+// take 0.4s. A `settle` prop beside it would be two ways to say one thing, which is the drift this
+// codebase logs most.
+export function overshootEase(amount = 0.12) {
+  const a = Math.min(0.6, Math.max(0.01, amount));
+  const L = Math.log(a);
+  const zeta = -L / Math.sqrt(Math.PI * Math.PI + L * L);
+  return springWindow({ bounce: 1 - zeta, settle: 0.6 });
+}
+
+// stepClock(t, rate, start): quantise a clock to `rate` updates per second, anchored on the layer's own
+// start so its first frame is exact. "Animate on twos" is 15 in a 30fps film, "on threes" is 10.
+// Pure in t, which is the whole reason a layer may have a clock of its own at all.
+export function stepClock(t, rate, start = 0) {
+  if (!(rate > 0) || !Number.isFinite(rate)) throw new Error(`step: rate must be a positive number of updates per second, got ${JSON.stringify(rate)}.`);
+  return start + Math.floor((t - start) * rate) / rate;
+}
+
 // transition helpers → {opacity, transform} (compositor-friendly only). Object.assign onto el.style.
 // rise uses easeOutSnap (not easeOutSettle): the modest overshoot carries the translate slightly
 // PAST its rest point and settles back, which is what makes a default entrance read as directed
 // rather than floaty. The overshoot is deterministic and lands exactly at rest by t=1.
-export const rise = (t, dist = 48) => ({ opacity: clamp01(t), transform: `translateY(${((1 - easeOutSnap(clamp01(t))) * dist).toFixed(2)}px)` });
+export const rise = (t, dist = 48, warp = null) => ({ opacity: clamp01(t), transform: `translateY(${((1 - warpEase(easeOutSnap, warp)(clamp01(t))) * dist).toFixed(2)}px)` });
 export const fade = (t) => ({ opacity: clamp01(t), transform: 'none' });
-export const pop = (t, from = 0.86) => ({ opacity: clamp01(t * 3), transform: `scale(${from + (1 - from) * easeOutBack(clamp01(t))})` });
+export const pop = (t, from = 0.86, warp = null) => ({ opacity: clamp01(t * 3), transform: `scale(${from + (1 - from) * warpEase(easeOutBack, warp)(clamp01(t))})` });
 // lift: the entrance for things that should feel ALIVE arriving (faces, cards, chips) rather than
 // merely appearing. `pop` scales from 0.86, a 14% change that reads as flat at avatar size; this
 // travels further (0.68), rises as it grows, and settles with a small overshoot, so a staggered row
 // reads as a wave rather than a checklist. Pure in t like every other entrance.
-export const lift = (t, { from = 0.68, dist = 30 } = {}) => {
-  const u = clamp01(t), e = easeOutBack(u);
+export const lift = (t, { from = 0.68, dist = 30, warp = null } = {}) => {
+  const u = clamp01(t), e = warpEase(easeOutBack, warp)(u), r = warpEase(easeOutSettle, warp)(u);
   return { opacity: clamp01(u * 2.2),
-    transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px) scale(${(from + (1 - from) * e).toFixed(4)})` };
+    transform: `translateY(${((1 - r) * dist).toFixed(2)}px) scale(${(from + (1 - from) * e).toFixed(4)})` };
 };
 // defocus: enters/leaves through focus rather than through space. Paired with `out:"defocus"` it
 // gives the blur exit that reads as "this is done" without moving anything, which is what you want
@@ -306,8 +369,8 @@ export const defocus = (t, { max = 14 } = {}) => {
   if (u >= 1) return { opacity: 1, filter: 'none' };
   return { opacity: u, filter: `blur(${((1 - easeOutCubic(u)) * max).toFixed(2)}px)` };
 };
-export const slide = (t, dir = 'left', dist = 60) => {
-  const k = 1 - easeOutCubic(clamp01(t));
+export const slide = (t, dir = 'left', dist = 60, warp = null) => {
+  const k = 1 - warpEase(easeOutCubic, warp)(clamp01(t));
   const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist;
   const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist;
   return { opacity: clamp01(t), transform: `translate(${x}px, ${y}px)` };
