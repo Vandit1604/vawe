@@ -1,2211 +1,2666 @@
 {
-  "title": "Hyperscene (open canvas)",
-  "description": "Generic data-driven composition. The JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
-  "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080×1920 portrait, 1920×1080 landscape).",
-  "layerProps": {
-    "_generated": "node scripts/gates/schema-drift.mjs --write - do not hand-edit",
-    "_source": "the PROPS declarations beside each read (core/props.js - core/layers/vocabulary.js)",
-    "shared": ["acrossBeats", "align", "align2", "anchor", "anim", "aspects", "at", "basis", "becomes", "becomesDur", "becomesEase", "bg", "border", "borderTrail", "children", "circle", "col", "colGap", "color", "cols", "colw", "critical", "crt", "css", "cut", "cutTiming", "cx", "cy", "decimals", "delay", "dir", "direction", "dist", "duration", "dx", "dy", "each", "elevation", "emColor", "enterDur", "exitDur", "fade", "filter", "follow", "font", "from", "fx", "fxOut", "gap", "glass", "glow", "gridCols", "grow", "gutter", "h", "id", "idle", "intensity", "italic", "items", "justify", "keyClicks", "keyCue", "keyGain", "layout", "logotype", "lookOpts", "loop", "ls", "mask", "modifiers", "morph", "motion", "motionBlur", "motionPath", "on", "opacity", "out", "pad", "panWith", "parts", "phaseStep", "physics", "pin", "prefix", "preset", "presetOpts", "progressiveBlur", "radius", "ransom", "ransomSeed", "react", "reflect", "resample", "rowGap", "seed", "shadow", "size", "speed", "split", "splitText", "stagger", "start", "suffix", "text", "track", "tracking", "transition", "type", "typing", "vars", "varsDelay", "varsDur", "varsEase", "w", "weight", "wrap", "x", "y"],
-    "byType": {
-      "text": ["caret", "caretHold", "fit", "fitH", "font", "gradient", "h", "ls", "maxLines", "raw", "size", "text", "tracking", "typing", "untype", "untypeRate", "w", "weight"],
-      "count": ["caret", "caretHold", "countDur", "countStart", "decimals", "ease", "fit", "fitH", "font", "from", "gradient", "h", "ls", "maxLines", "prefix", "raw", "size", "suffix", "text", "to", "tracking", "typing", "unit", "untype", "untypeRate", "w", "weight"],
-      "image": ["canvasFx", "edgeFade", "edgeFadeColor", "h", "ken", "radius", "resample", "seed", "src", "w"],
-      "video": ["fit", "h", "in", "out", "poster", "radius", "rate", "src", "w"],
-      "group": ["children"],
-      "rect": ["color", "fill", "h"],
-      "glow": ["angle", "beam", "color", "cx", "cy", "cycle", "flash", "h", "intensity", "preset", "pulse", "pulseAmp"],
-      "beam": ["angle", "color", "glow", "h", "intensity", "mode", "period", "radius", "speed", "tail", "thickness", "w"],
-      "svg": ["d", "draw", "fill", "h", "morph", "stroke", "strokeWidth", "viewBox", "w"],
-      "cursor": ["clicks", "color", "path", "rippleColor", "size", "x", "y"],
-      "clip": ["fit", "loop", "radius", "speed", "src", "w"],
-      "html": ["h", "html", "src", "w"],
-      "component": ["part", "src", "w"],
-      "board": ["cardSize", "cols", "gap", "headSize", "w"],
-      "doc": ["bg", "blockGap", "blocks", "bodySize", "diff", "filename", "gap", "hSize", "nameSize", "pad", "radius", "w"],
-      "shader": ["colors", "h", "intensity", "params", "params2", "params3", "params4", "params5", "params6", "radius", "resample", "seed", "shader", "speed", "w"],
-      "lottie": ["fit", "h", "loop", "speed", "src", "w"],
-      "paint": ["amp", "angle", "bg", "color", "count", "h", "headColor", "hue", "hues", "length", "opacity", "paint", "radius", "rate", "resample", "seed", "size", "speed", "tail", "w", "weight"],
-      "raymarch": ["colors", "h", "intensity", "radius", "raymarch", "resample", "seed", "speed", "spin", "w"],
-      "three": ["amp", "arcHeight", "bodyColor", "breakAt", "breakDur", "colors", "count", "dawnWidth", "depth", "dest", "device", "dolly", "drawDur", "drawStart", "font", "fov", "h", "lines", "metalness", "morphSpeed", "origin", "pitch", "planes", "pointSize", "poles", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "spinDur", "spinFrom", "spinTo", "sunFrom", "sunLat", "sunTo", "swing", "text", "three", "travel", "w", "yaw"],
-      "globe": ["arcHeight", "arcWidth", "colors", "dark", "dest", "diffuse", "drawDur", "drawStart", "globe", "h", "mapBrightness", "mapSamples", "markerSize", "origin", "phi", "phiDur", "phiTo", "radius", "resample", "scale", "seed", "speed", "theta", "w"],
-      "composition": ["comp", "props"]
-    }
+ "title": "Hyperscene (open canvas)",
+ "description": "Generic data-driven composition. The JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
+ "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080\u00d71920 portrait, 1920\u00d71080 landscape).",
+ "layerProps": {
+  "_generated": "node scripts/gates/schema-drift.mjs --write - do not hand-edit",
+  "_source": "the PROPS declarations beside each read (core/props.js - core/layers/vocabulary.js)",
+  "shared": [
+   "acrossBeats",
+   "align",
+   "align2",
+   "anchor",
+   "anim",
+   "aspects",
+   "at",
+   "basis",
+   "becomes",
+   "becomesDur",
+   "becomesEase",
+   "bg",
+   "border",
+   "borderTrail",
+   "children",
+   "circle",
+   "col",
+   "colGap",
+   "color",
+   "cols",
+   "colw",
+   "critical",
+   "crt",
+   "css",
+   "cut",
+   "cutTiming",
+   "cx",
+   "cy",
+   "decimals",
+   "delay",
+   "dir",
+   "direction",
+   "dist",
+   "duration",
+   "dx",
+   "dy",
+   "each",
+   "elevation",
+   "emColor",
+   "enterDur",
+   "exitDur",
+   "fade",
+   "filter",
+   "follow",
+   "font",
+   "from",
+   "fx",
+   "fxOut",
+   "gap",
+   "glass",
+   "glow",
+   "gridCols",
+   "grow",
+   "gutter",
+   "h",
+   "id",
+   "idle",
+   "intensity",
+   "italic",
+   "items",
+   "justify",
+   "keyClicks",
+   "keyCue",
+   "keyGain",
+   "layout",
+   "logotype",
+   "lookOpts",
+   "loop",
+   "ls",
+   "mask",
+   "modifiers",
+   "morph",
+   "motion",
+   "motionBlur",
+   "motionPath",
+   "on",
+   "opacity",
+   "out",
+   "pad",
+   "panWith",
+   "parts",
+   "phaseStep",
+   "physics",
+   "pin",
+   "prefix",
+   "preset",
+   "presetOpts",
+   "progressiveBlur",
+   "radius",
+   "ransom",
+   "ransomSeed",
+   "react",
+   "reflect",
+   "resample",
+   "rowGap",
+   "seed",
+   "shadow",
+   "size",
+   "speed",
+   "split",
+   "splitText",
+   "stagger",
+   "start",
+   "suffix",
+   "text",
+   "track",
+   "tracking",
+   "transition",
+   "type",
+   "typing",
+   "vars",
+   "varsDelay",
+   "varsDur",
+   "varsEase",
+   "w",
+   "weight",
+   "wrap",
+   "x",
+   "y"
+  ],
+  "byType": {
+   "text": [
+    "caret",
+    "caretHold",
+    "fit",
+    "fitH",
+    "font",
+    "gradient",
+    "h",
+    "ls",
+    "maxLines",
+    "raw",
+    "size",
+    "text",
+    "tracking",
+    "typing",
+    "untype",
+    "untypeRate",
+    "w",
+    "weight"
+   ],
+   "count": [
+    "caret",
+    "caretHold",
+    "countDur",
+    "countStart",
+    "decimals",
+    "ease",
+    "fit",
+    "fitH",
+    "font",
+    "from",
+    "gradient",
+    "h",
+    "ls",
+    "maxLines",
+    "prefix",
+    "raw",
+    "size",
+    "suffix",
+    "text",
+    "to",
+    "tracking",
+    "typing",
+    "unit",
+    "untype",
+    "untypeRate",
+    "w",
+    "weight"
+   ],
+   "image": [
+    "canvasFx",
+    "edgeFade",
+    "edgeFadeColor",
+    "h",
+    "ken",
+    "radius",
+    "resample",
+    "seed",
+    "src",
+    "w"
+   ],
+   "video": [
+    "fit",
+    "h",
+    "in",
+    "out",
+    "poster",
+    "radius",
+    "rate",
+    "src",
+    "w"
+   ],
+   "group": [
+    "children"
+   ],
+   "rect": [
+    "color",
+    "fill",
+    "h"
+   ],
+   "glow": [
+    "angle",
+    "beam",
+    "color",
+    "cx",
+    "cy",
+    "cycle",
+    "flash",
+    "h",
+    "intensity",
+    "preset",
+    "pulse",
+    "pulseAmp"
+   ],
+   "beam": [
+    "angle",
+    "color",
+    "glow",
+    "h",
+    "intensity",
+    "mode",
+    "period",
+    "radius",
+    "speed",
+    "tail",
+    "thickness",
+    "w"
+   ],
+   "svg": [
+    "d",
+    "draw",
+    "fill",
+    "h",
+    "morph",
+    "stroke",
+    "strokeWidth",
+    "viewBox",
+    "w"
+   ],
+   "cursor": [
+    "clicks",
+    "color",
+    "path",
+    "rippleColor",
+    "size",
+    "x",
+    "y"
+   ],
+   "clip": [
+    "fit",
+    "loop",
+    "radius",
+    "speed",
+    "src",
+    "w"
+   ],
+   "html": [
+    "h",
+    "html",
+    "src",
+    "w"
+   ],
+   "component": [
+    "part",
+    "src",
+    "w"
+   ],
+   "board": [
+    "cardSize",
+    "cols",
+    "gap",
+    "headSize",
+    "w"
+   ],
+   "doc": [
+    "bg",
+    "blockGap",
+    "blocks",
+    "bodySize",
+    "diff",
+    "filename",
+    "gap",
+    "hSize",
+    "nameSize",
+    "pad",
+    "radius",
+    "w"
+   ],
+   "shader": [
+    "colors",
+    "h",
+    "intensity",
+    "params",
+    "params2",
+    "params3",
+    "params4",
+    "params5",
+    "params6",
+    "radius",
+    "resample",
+    "seed",
+    "shader",
+    "speed",
+    "w"
+   ],
+   "lottie": [
+    "fit",
+    "h",
+    "loop",
+    "speed",
+    "src",
+    "w"
+   ],
+   "paint": [
+    "amp",
+    "angle",
+    "bg",
+    "color",
+    "count",
+    "h",
+    "headColor",
+    "hue",
+    "hues",
+    "length",
+    "opacity",
+    "paint",
+    "radius",
+    "rate",
+    "resample",
+    "seed",
+    "size",
+    "speed",
+    "tail",
+    "w",
+    "weight"
+   ],
+   "raymarch": [
+    "colors",
+    "h",
+    "intensity",
+    "radius",
+    "raymarch",
+    "resample",
+    "seed",
+    "speed",
+    "spin",
+    "w"
+   ],
+   "three": [
+    "amp",
+    "arcHeight",
+    "bodyColor",
+    "breakAt",
+    "breakDur",
+    "colors",
+    "count",
+    "dawnWidth",
+    "depth",
+    "dest",
+    "device",
+    "dolly",
+    "drawDur",
+    "drawStart",
+    "font",
+    "fov",
+    "h",
+    "lines",
+    "metalness",
+    "morphSpeed",
+    "origin",
+    "pitch",
+    "planes",
+    "pointSize",
+    "poles",
+    "radius",
+    "resample",
+    "roughness",
+    "screen",
+    "seed",
+    "size",
+    "speed",
+    "spin",
+    "spinDur",
+    "spinFrom",
+    "spinTo",
+    "sunFrom",
+    "sunLat",
+    "sunTo",
+    "swing",
+    "text",
+    "three",
+    "travel",
+    "w",
+    "yaw"
+   ],
+   "globe": [
+    "arcHeight",
+    "arcWidth",
+    "colors",
+    "dark",
+    "dest",
+    "diffuse",
+    "drawDur",
+    "drawStart",
+    "globe",
+    "h",
+    "mapBrightness",
+    "mapSamples",
+    "markerSize",
+    "origin",
+    "phi",
+    "phiDur",
+    "phiTo",
+    "radius",
+    "resample",
+    "scale",
+    "seed",
+    "speed",
+    "theta",
+    "w"
+   ],
+   "composition": [
+    "comp",
+    "props"
+   ]
+  }
+ },
+ "fields": {
+  "orientation": {
+   "type": "string",
+   "label": "Orientation",
+   "enum": [
+    "portrait",
+    "landscape"
+   ]
   },
-  "fields": {
-    "orientation": {
-      "type": "string",
-      "label": "Orientation",
-      "enum": [
-        "portrait",
-        "landscape"
-      ]
+  "aspect": {
+   "type": "string",
+   "label": "Canvas aspect (overrides orientation). CLI --aspect a,b,c renders multiple in one pass.",
+   "enum": [
+    "16:9",
+    "9:16",
+    "1:1",
+    "4:5",
+    "4:3"
+   ]
+  },
+  "destination": {
+   "type": "string",
+   "label": "Where this ships. Decides the safe area: a phone feed paints chrome over the frame, a website does not. Default web (margin only).",
+   "enum": [
+    "web",
+    "feed",
+    "tiktok",
+    "reels",
+    "shorts",
+    "broadcast"
+   ]
+  },
+  "idle": {
+   "type": "string",
+   "label": "The film's DEFAULT idle: ambient motion every layer carries across its settled middle, so held frames read as confident rather than dead. One line opts the whole cast in; a layer's own `idle` overrides it, and `idle: \"none\"` on a layer opts that one back out. Off unless asked.",
+   "enum": [
+    "none",
+    "breathe",
+    "drift"
+   ]
+  },
+  "duration": {
+   "type": "number",
+   "label": "Total duration (s)",
+   "min": 0.5,
+   "max": 120
+  },
+  "fps": {
+   "type": "number",
+   "label": "Frame rate (default 30; use 60 for smoother fast motion)",
+   "enum": [
+    24,
+    30,
+    60
+   ]
+  },
+  "captionMode": {
+   "type": "string",
+   "label": "Caption style",
+   "enum": [
+    "sentence",
+    "word",
+    "pop"
+   ]
+  },
+  "captionStyle": {
+   "type": "string",
+   "label": "Word-timed caption treatment on the pop layout (core/captions.js). Optional per-line words:[{t0,t1}].",
+   "enum": [
+    "highlight",
+    "pillKaraoke",
+    "weightShift",
+    "clipWipe",
+    "neonEdge",
+    "kineticSlam",
+    "underlineDraw",
+    "flipUp",
+    "ghostSplit",
+    "waveRide",
+    "scramble",
+    "wordFlash",
+    "wordSlide",
+    "typeOn",
+    "readerFocus",
+    "inkFill",
+    "focusPull",
+    "letterRise",
+    "weightWave"
+   ]
+  },
+  "bg": {
+   "type": "array",
+   "label": "Background windows (canvas, theme palette)",
+   "required": true,
+   "minItems": 1,
+   "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix \u00b7 gradientWash \u00b7 blobs \u00b7 metallic \u00b7 metallicSheen \u00b7 aurora \u00b7 \u2026), or `{ \"html\": \"\u2026\" }` to hand-author one. See docs backgrounds-and-images.",
+   "item": {
+    "html": {
+     "type": "string",
+     "label": "Hand-authored living background (raw HTML/CSS instead of a preset)"
     },
-    "aspect": {
-      "type": "string",
-      "label": "Canvas aspect (overrides orientation). CLI --aspect a,b,c renders multiple in one pass.",
-      "enum": [
-        "16:9",
-        "9:16",
-        "1:1",
-        "4:5",
-        "4:3"
-      ]
+    "src": {
+     "type": "string",
+     "label": "Path to a .html fragment holding that hand-authored background, instead of the inline `html` string (exactly one of the two)"
     },
-    "destination": {
-      "type": "string",
-      "label": "Where this ships. Decides the safe area: a phone feed paints chrome over the frame, a website does not. Default web (margin only).",
-      "enum": [
-        "web",
-        "feed",
-        "tiktok",
-        "reels",
-        "shorts",
-        "broadcast"
-      ]
+    "tone": {
+     "type": "string",
+     "label": "Is the hand-authored backdrop light or dark? (picks the default text ink)",
+     "enum": [
+      "light",
+      "dark"
+     ]
     },
-    "idle": {
-      "type": "string",
-      "label": "The film's DEFAULT idle: ambient motion every layer carries across its settled middle, so held frames read as confident rather than dead. One line opts the whole cast in; a layer's own `idle` overrides it, and `idle: \"none\"` on a layer opts that one back out. Off unless asked.",
-      "enum": [
-        "none",
-        "breathe",
-        "drift"
-      ]
+    "preset": {
+     "type": "string",
+     "label": "bgPreset name",
+     "enum": [
+      "plain",
+      "paper",
+      "paperDots",
+      "paperShapes",
+      "soft",
+      "accent",
+      "accentPlain",
+      "shapes",
+      "dotmatrix",
+      "aurora",
+      "mesh",
+      "constellation",
+      "brandglow",
+      "spotlight",
+      "dark",
+      "deep",
+      "ink",
+      "metallic",
+      "metallicSheen",
+      "gradientWash",
+      "blobs",
+      "liquid"
+     ]
     },
-    "duration": {
-      "type": "number",
-      "label": "Total duration (s)",
-      "min": 0.5,
-      "max": 120
+    "from": {
+     "type": "number|string",
+     "label": "Window start: seconds, OR a junction reference like \"cut@1\" so the joint owns the number. OMIT IT on EVERY window and the engine binds them to the film's cuts in order, one window per beat, which is how a backdrop changes without naming a boundary twice (core/junctions.js)"
     },
-    "fps": {
-      "type": "number",
-      "label": "Frame rate (default 30; use 60 for smoother fast motion)",
-      "enum": [
-        24,
-        30,
-        60
-      ]
+    "to": {
+     "type": "number|string",
+     "label": "Window end: seconds, OR a junction reference like \"cut@2\". Omitted on every window = bound to the joints; see `from`"
     },
-    "captionMode": {
-      "type": "string",
-      "label": "Caption style",
-      "enum": [
-        "sentence",
-        "word",
-        "pop"
-      ]
+    "value": {
+     "type": "string",
+     "label": "Force light/dark treatment",
+     "enum": [
+      "light",
+      "dark"
+     ]
     },
-    "captionStyle": {
-      "type": "string",
-      "label": "Word-timed caption treatment on the pop layout (core/captions.js). Optional per-line words:[{t0,t1}].",
-      "enum": [
-        "highlight",
-        "pillKaraoke",
-        "weightShift",
-        "clipWipe",
-        "neonEdge",
-        "kineticSlam",
-        "underlineDraw",
-        "flipUp",
-        "ghostSplit",
-        "waveRide",
-        "scramble",
-        "wordFlash",
-        "wordSlide",
-        "typeOn",
-        "readerFocus",
-        "inkFill",
-        "focusPull",
-        "letterRise",
-        "weightWave"
-      ]
+    "opts": {
+     "type": "object",
+     "label": "Per-video tuning of THIS preset's fx. Meta knobs scale what the preset baked in: { intensity, dotAlpha, drift, grain }. Every other key is passed straight to the fx that reads it, so the fx's own parameters work by name (liquid: scale, speed, warp, edge0, edge1, gloss, res \u00b7 dots: spacing, period, k, driftX, driftY \u00b7 metallic: count, waves, glow, sweep \u00b7 particles: count, speed, connectDist). A key this preset's fx do not read is an ERROR, and the message lists the ones they do."
+    },
+    "seed": {
+     "type": "number",
+     "label": "Vary the preset's positions/phase (default = hash of theme+preset, so brands differ)"
+    },
+    "use": {
+     "type": "string",
+     "label": "use:\"theme\" \u2192 pull the brand\u2019s own authored backdrop (themes/<name>.json bgDefault)"
+    }
+   }
+  },
+  "cuts": {
+   "type": "array",
+   "label": "Hard cuts between beats (timing x presentation, from core/cuts.js)",
+   "item": {
+    "t": {
+     "type": "number",
+     "label": "Cut time (s)",
+     "required": true
+    },
+    "snap": {
+     "type": "boolean",
+     "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beat-bind.js)."
+    },
+    "style": {
+     "type": "string",
+     "label": "Presentation",
+     "required": true,
+     "enum": [
+      "none",
+      "fade",
+      "slide",
+      "whip",
+      "punch",
+      "wipe",
+      "iris",
+      "clock",
+      "flip",
+      "rise",
+      "blur",
+      "zoom",
+      "cube",
+      "barn",
+      "softwipe",
+      "softiris",
+      "squeeze",
+      "roll",
+      "letterbox",
+      "drop",
+      "blinds",
+      "skewWhip",
+      "spin",
+      "collapse",
+      "riseBlur",
+      "jitter"
+     ]
+    },
+    "dur": {
+     "type": "number",
+     "label": "Cut span (s)",
+     "min": 0.1,
+     "max": 2
+    },
+    "timing": {
+     "type": "string",
+     "label": "Timing curve"
+    },
+    "cx": {
+     "type": "number",
+     "label": "Origin x (0-1)",
+     "min": 0,
+     "max": 1
+    },
+    "cy": {
+     "type": "number",
+     "label": "Origin y (0-1)",
+     "min": 0,
+     "max": 1
+    },
+    "dir": {
+     "type": "string",
+     "label": "Direction the cut travels (left|right|up|down)",
+     "enum": [
+      "left",
+      "right",
+      "up",
+      "down"
+     ]
+    },
+    "dist": {
+     "type": "number",
+     "label": "Travel distance in px for a directional cut"
+    }
+   }
+  },
+  "matches": {
+   "type": "array",
+   "label": "Match cuts: two forms that coincide on a joint (core/junctions.js bindMatchesToJunctions)",
+   "item": {
+    "at": {
+     "type": "string",
+     "label": "The joint the match lands on: \"cut@1\" / \"seam@0\" / \"sting@2\" / \"junction@3\", or a time in seconds",
+     "required": true
+    },
+    "from": {
+     "type": "string",
+     "label": "id of the OUTGOING layer, the form that ends on the joint",
+     "required": true
+    },
+    "to": {
+     "type": "string",
+     "label": "id of the INCOMING layer, which opens on the outgoing form's last pose and settles into its own",
+     "required": true
+    },
+    "dur": {
+     "type": "number",
+     "label": "Handover span (s, default 0.42). Refused above a third of the shot it lands in.",
+     "min": 0.05,
+     "max": 2
+    },
+    "ease": {
+     "type": "string",
+     "label": "Easing of the settle (default easeOutCubic)"
+    }
+   }
+  },
+  "stings": {
+   "type": "array",
+   "label": "Shader boundary effects",
+   "item": {
+    "t": {
+     "type": "number",
+     "label": "Center time (s)",
+     "required": true
+    },
+    "fx": {
+     "type": "string",
+     "label": "Effect",
+     "required": true,
+     "enum": [
+      "flash",
+      "burn",
+      "leak",
+      "grain",
+      "dissolve",
+      "ink",
+      "glitch",
+      "streak",
+      "pixel",
+      "confetti",
+      "ripple",
+      "scan",
+      "warp",
+      "bokeh",
+      "wipe",
+      "circle",
+      "blinds",
+      "squares",
+      "pinwheel",
+      "doors",
+      "polka",
+      "swirl",
+      "crossWarp",
+      "domainWarp",
+      "sdfIris",
+      "vortex",
+      "ridgedBurn",
+      "lens",
+      "thermal",
+      "whipPan",
+      "chromaticSplit",
+      "dispersion",
+      "gridPixelateWipe",
+      "iridescence",
+      "cinematicZoom"
+     ]
+    },
+    "dur": {
+     "type": "number",
+     "label": "Effect span (s)",
+     "min": 0.3,
+     "max": 3
+    },
+    "seed": {
+     "type": "number",
+     "label": "Noise seed"
+    },
+    "color": {
+     "type": "string",
+     "label": "Tint hex (recolours the effect; omit for native colours)"
+    },
+    "intensity": {
+     "type": "number",
+     "label": "Strength multiplier (1 = default)"
+    },
+    "colors": {
+     "type": "array",
+     "label": "leak: up to 4 hex colours the leak is built from (seed only arranges them)"
+    }
+   }
+  },
+  "seams": {
+   "type": "array",
+   "label": "Two-scene shader transitions (blend the beats either side of a boundary, from core/seams.js)",
+   "item": {
+    "t": {
+     "type": "number",
+     "label": "Seam start time (s), the window is [t, t+dur]",
+     "required": true,
+     "min": 0
+    },
+    "snap": {
+     "type": "boolean",
+     "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beat-bind.js)."
+    },
+    "fx": {
+     "type": "string",
+     "label": "Transition (samples BOTH beats as textures). Basics: fade \u00b7 dissolve \u00b7 slide \u00b7 push \u00b7 uncover \u00b7 wipe (dir-aware). Expressive: crossWarp \u00b7 whipPan \u00b7 sdfIris \u00b7 dispersion \u00b7 lens \u00b7 flashWhite \u00b7 cinematicZoom \u00b7 portal.",
+     "required": true,
+     "enum": [
+      "fade",
+      "dissolve",
+      "slide",
+      "push",
+      "uncover",
+      "wipe",
+      "crossWarp",
+      "whipPan",
+      "sdfIris",
+      "dispersion",
+      "lens",
+      "flashWhite",
+      "cinematicZoom",
+      "portal"
+     ]
+    },
+    "dur": {
+     "type": "number",
+     "label": "Seam span (s)",
+     "min": 0.1,
+     "max": 3
+    },
+    "dir": {
+     "type": "string",
+     "label": "Travel direction for whipPan (left|right|up|down)",
+     "enum": [
+      "left",
+      "right",
+      "up",
+      "down"
+     ]
+    },
+    "seed": {
+     "type": "number",
+     "label": "Noise/shape seed"
+    },
+    "intensity": {
+     "type": "number",
+     "label": "Strength multiplier (1 = default)",
+     "min": 0
+    },
+    "timing": {
+     "type": "string",
+     "label": "Easing of the transition progress (default smooth = ease-in-out). linear = constant-speed (mechanical); smooth/out/snappy/pop/rush/brake/ramp shape the blend's velocity. Same curves as a scene cut's timing (core/cuts.js).",
+     "enum": [
+      "linear",
+      "smooth",
+      "out",
+      "snappy",
+      "pop",
+      "rush",
+      "brake",
+      "ramp"
+     ]
+    }
+   }
+  },
+  "produced": {
+   "type": "boolean",
+   "label": "Set false to OPT OUT of the produced baseline the engine injects by default (core/produce.js): a living/brand-appropriate background, a gentle camera push, and sceneUnits on cut films. Additive only (never rewrites your layers). Absent = produced (rich by default); false = render exactly what the JSON declares. Any field you set explicitly (bg, cameraMove, sceneUnits) already overrides its part of the baseline."
+  },
+  "sceneUnits": {
+   "type": "boolean",
+   "label": "Make `cuts` move each BEAT as a WHOLE UNIT (the outgoing beat slides/pushes out while the incoming slides in, as separate scenes) instead of transforming the whole camera at once. Turns beat boundaries from a per-layer-fade slideshow into real scene swaps. Beats are the intervals between cut times; layers are grouped by their start. Opt-in; a scene without it renders byte-identical. See core/cuts.js PRESENTATIONS for the styles."
+  },
+  "transitions": {
+   "type": "array",
+   "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut \u00b7 seam \u00b7 sting) via core/transitions.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
+   "item": {
+    "at": {
+     "type": "number",
+     "label": "Boundary time (s). The transition plays over [at, at+dur]",
+     "required": true,
+     "min": 0
+    },
+    "fx": {
+     "type": "string",
+     "label": "Transition name (any from `make transitions`). Routed by mechanism: whipPan/crossWarp/cinematicZoom \u2192 seam; whip/punch/zoom \u2192 cut; glitch/chromaticSplit \u2192 sting; fade/slide/wipe/dissolve \u2192 cut by default (add mech:\"seam\" for the two-scene blend).",
+     "required": true
+    },
+    "mech": {
+     "type": "string",
+     "label": "Force the mechanism (default = auto). seam = two-scene GPU blend; cut = transform the scene root; sting = generative overlay.",
+     "enum": [
+      "cut",
+      "seam",
+      "sting"
+     ]
+    },
+    "dur": {
+     "type": "number",
+     "label": "Transition span (s)",
+     "min": 0.1,
+     "max": 3
+    },
+    "dir": {
+     "type": "string",
+     "label": "Travel direction (left|right|up|down)",
+     "enum": [
+      "left",
+      "right",
+      "up",
+      "down"
+     ]
+    },
+    "timing": {
+     "type": "string",
+     "label": "Easing of the transition progress (default smooth = ease-in-out; linear = constant). Same curves as a cut/seam timing.",
+     "enum": [
+      "linear",
+      "smooth",
+      "out",
+      "snappy",
+      "pop",
+      "rush",
+      "brake",
+      "ramp"
+     ]
+    },
+    "seed": {
+     "type": "number",
+     "label": "Noise/shape seed (seam/sting)"
+    },
+    "intensity": {
+     "type": "number",
+     "label": "Strength multiplier (seam/sting; 1 = default)",
+     "min": 0
+    }
+   }
+  },
+  "cameraMove": {
+   "label": "Author sugar: { move, ...params } (or an array of them) \u2192 data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves.js is the source of truth, and lib-test asserts the two agree."
+  },
+  "spectacle": {
+   "type": "object",
+   "label": "The film's ONE loud moment, nominated: { at, of, device, why }. `device` is a shader sting name (flash | chromaticSplit | glitch | streak | whipPan | ripple | sdfIris | vortex | lens | dispersion | iridescence | cinematicZoom) written at `at`. The other half is what makes it real: with a spectacle declared the engine pulls EVERY competing amplitude dial in the film down to 55% (other stings, seams, composite-look strength, glow/beam intensity, kick scale), and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained, and the engine keeps it. core/spectacle.js.",
+   "fields": {
+    "at": {
+     "type": "number",
+     "label": "The second the moment lands on",
+     "required": true
+    },
+    "of": {
+     "type": "string",
+     "label": "The id of the layer the moment is ABOUT. It is the one layer the attenuation exempts.",
+     "required": true
+    },
+    "device": {
+     "type": "string",
+     "label": "The gesture, from what the engine already ships",
+     "required": true,
+     "enum": [
+      "flash",
+      "chromaticSplit",
+      "glitch",
+      "streak",
+      "whipPan",
+      "ripple",
+      "sdfIris",
+      "vortex",
+      "lens",
+      "dispersion",
+      "iridescence",
+      "cinematicZoom"
+     ]
+    },
+    "why": {
+     "type": "string",
+     "label": "What the moment is for, in one line. Required: a peak nobody can name is a volume setting.",
+     "required": true
+    }
+   }
+  },
+  "lighting": {
+   "type": "object",
+   "label": "The scene's KEY LIGHT: { x, y } in canvas px, plus optional { intensity } (default 1, scales every shadow at once). Read by the `shadow` modifier, which points each layer's shadow directly away from this point, so two cards either side of it throw their shadows in opposite directions, and one number re-lights the whole film. A light outside the canvas is normal.",
+   "fields": {
+    "x": {
+     "type": "number",
+     "label": "Light X in canvas px",
+     "required": true
+    },
+    "y": {
+     "type": "number",
+     "label": "Light Y in canvas px",
+     "required": true
+    },
+    "intensity": {
+     "type": "number",
+     "label": "Multiplies every shadow's opacity (default 1). 0 puts the lights out."
+    }
+   }
+  },
+  "camera": {
+   "type": "array",
+   "label": "Global camera keyframes",
+   "item": {
+    "t": {
+     "type": "number",
+     "label": "Time (s)",
+     "required": true
+    },
+    "s": {
+     "type": "number",
+     "label": "Where the camera stands, as the magnification of the canvas plane (1 = the default distance, 1.4 = closer). This is the camera's DEPTH, not a scale of the picture: with anything tilted in frame it dollies, so vanishing points move. There is deliberately no separate z key."
+    },
+    "ease": {
+     "type": "string",
+     "label": "Easing INTO this keyframe (default easeInOutCubic). Use \"linear\" on interior keyframes for a velocity-continuous multi-keyframe push (a chained ease-in-out pulses/shakes because it zeroes velocity at each keyframe)."
+    },
+    "x": {
+     "type": "number",
+     "label": "Pan X (px)"
+    },
+    "y": {
+     "type": "number",
+     "label": "Pan Y (px)"
+    },
+    "rx": {
+     "type": "number",
+     "label": "Camera pitch, degrees (orientation)",
+     "min": -45,
+     "max": 45
+    },
+    "ry": {
+     "type": "number",
+     "label": "Camera yaw, degrees (orientation)",
+     "min": -45,
+     "max": 45
+    },
+    "roll": {
+     "type": "number",
+     "label": "Camera roll about the view axis, degrees. Turns the whole frame without flattening anything tilted inside it.",
+     "min": -180,
+     "max": 180
+    },
+    "p": {
+     "type": "number",
+     "label": "The LENS: focal distance in px (default 1600; lower = wider). Not the camera's position. That is s. Keying both at once is the dolly zoom.",
+     "min": 200,
+     "max": 6000
+    },
+    "aspects": {
+     "type": "object",
+     "label": "Per-aspect overrides for this camera keyframe"
+    }
+   }
+  },
+  "layers": {
+   "type": "array",
+   "label": "Layers",
+   "required": true,
+   "minItems": 1,
+   "maxItems": 120,
+   "item": {
+    "type": {
+     "type": "string",
+     "label": "Layer type",
+     "enum": [
+      "text",
+      "count",
+      "image",
+      "video",
+      "group",
+      "rect",
+      "glow",
+      "beam",
+      "svg",
+      "cursor",
+      "clip",
+      "html",
+      "component",
+      "board",
+      "doc",
+      "shader",
+      "lottie",
+      "paint",
+      "raymarch",
+      "three",
+      "globe",
+      "composition"
+     ]
+    },
+    "shader": {
+     "type": "string",
+     "label": "shader: ambient WebGL look. Fields BEHIND content: flow/aurora/plasma/drift/mist/matrixDecode. Overlay looks ON TOP (high track, intensity 0.6-0.9): vhs/crt/filmGrain/lightLeak + barrel/heatShimmer/ripple/kaleidoscope. Tune with speed \u00b7 intensity \u00b7 colors \u00b7 seed",
+     "enum": [
+      "flow",
+      "aurora",
+      "plasma",
+      "drift",
+      "mist",
+      "vhs",
+      "crt",
+      "filmGrain",
+      "lightLeak",
+      "barrel",
+      "heatShimmer",
+      "ripple",
+      "kaleidoscope",
+      "matrixDecode",
+      "nebula",
+      "dotCrawl",
+      "gateWeave",
+      "bands"
+     ]
+    },
+    "html": {
+     "type": "string",
+     "label": "html: raw hand-authored HTML/CSS for the layer, inline (static; <script> stripped). Put it in a file with `src` instead when it is long enough to want reading, diffing or previewing"
+    },
+    "speed": {
+     "type": "number",
+     "label": "clip: playback rate multiplier (1 = realtime; 0.5 = half speed)"
+    },
+    "typing": {
+     "type": "number|boolean",
+     "label": "text: type it out at N chars/sec (true = 24) with a blinking caret"
+    },
+    "caret": {
+     "type": "boolean",
+     "label": "typing: show the blinking caret (default true)"
+    },
+    "caretHold": {
+     "type": "boolean",
+     "label": "typing: keep the caret after the text finishes"
+    },
+    "untype": {
+     "type": "number",
+     "label": "typing: seconds into the layer at which the text starts DELETING backwards (backspace). Omit for forward-only typing."
+    },
+    "untypeRate": {
+     "type": "number",
+     "label": "untype: delete speed in chars/sec (default = the `typing` rate)"
+    },
+    "path": {
+     "type": "array",
+     "label": "cursor: [{t,x,y,ease}] keyframes the pointer follows (x,y = absolute screen px when no layer x/y is set; relative to x/y if it is)"
+    },
+    "clicks": {
+     "type": "array",
+     "label": "cursor: [t, \u2026] local times to fire a click (dip + ripple)"
+    },
+    "rippleColor": {
+     "type": "string",
+     "label": "cursor: click-ripple ring colour"
+    },
+    "filename": {
+     "type": "string",
+     "label": "doc: filename shown in the card header (e.g. notes.md)"
+    },
+    "diff": {
+     "type": "string",
+     "label": "doc: diff chip in the header (e.g. +18 -0)"
+    },
+    "blocks": {
+     "type": "array",
+     "label": "doc: content blocks, {h,accent} heading \u00b7 {body} mono lines \u00b7 {code} \u00b7 {bullets:[]}"
+    },
+    "nameSize": {
+     "type": "number",
+     "label": "doc: filename / diff-chip font px (default 30)"
+    },
+    "hSize": {
+     "type": "number",
+     "label": "doc: block-heading font px (default 40)"
+    },
+    "bodySize": {
+     "type": "number",
+     "label": "doc: body / code / bullet font px (default 30)"
+    },
+    "blockGap": {
+     "type": "number",
+     "label": "doc: vertical gap above each heading block (default 22)"
+    },
+    "text": {
+     "type": "string",
+     "label": "Text (may use <b>/<em>)"
+    },
+    "src": {
+     "type": "string",
+     "label": "Path to the layer's source file: an image, a captured component (.json), a lottie (.json), or (on an `html` layer) a hand-authored fragment (.html) instead of the inline `html` string (exactly one of the two)"
+    },
+    "x": {
+     "type": "number|string",
+     "label": "Left: px number, or relative \"50%\" / \"50%-40\" / center / left / right (resolved per aspect)"
+    },
+    "y": {
+     "type": "number|string",
+     "label": "Top: px number, or relative \"50%\" / center / top / bottom (resolved per aspect)"
+    },
+    "w": {
+     "type": "number|string",
+     "label": "Width: px number or \"50%\" of canvas"
+    },
+    "h": {
+     "type": "number|string",
+     "label": "Height: px number or \"50%\" of canvas"
+    },
+    "pin": {
+     "type": "string",
+     "label": "Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds power point",
+     "enum": [
+      "center",
+      "top",
+      "bottom",
+      "left",
+      "right",
+      "top-left",
+      "top-right",
+      "bottom-left",
+      "bottom-right",
+      "thirds-tl",
+      "thirds-tr",
+      "thirds-bl",
+      "thirds-br",
+      "thirds-t",
+      "thirds-b",
+      "thirds-l",
+      "thirds-r"
+     ]
+    },
+    "col": {
+     "type": "number|string",
+     "label": "12-col grid placement: \"3\" (one column) or \"2-7\" (a span) \u2192 sets x + w"
+    },
+    "cols": {
+     "type": "array",
+     "label": "Board columns (\u22644): {title, count, cards:[{id,title,labels:[{t,c}]}] \u22645}",
+     "item": {
+      "title": {
+       "type": "string",
+       "label": "Column title"
+      }
+     }
+    },
+    "gutter": {
+     "type": "number",
+     "label": "Grid gutter px (default = half the safe inset)"
+    },
+    "ls": {
+     "type": "string",
+     "label": "Letter-spacing (e.g. \"-0.03em\"); unset = auto optical tracking by size"
+    },
+    "raw": {
+     "type": "boolean",
+     "label": "Opt out of the micro-typography pass (tracking/balance/kerning)"
+    },
+    "align": {
+     "type": "string",
+     "label": "Text align",
+     "enum": [
+      "left",
+      "center",
+      "right"
+     ]
+    },
+    "font": {
+     "type": "string",
+     "label": "Face",
+     "enum": [
+      "sans",
+      "serif",
+      "mono",
+      "num"
+     ]
+    },
+    "italic": {
+     "type": "boolean",
+     "label": "Force italic on/off (default: serif is italic, others upright). italic:false = upright serif."
+    },
+    "size": {
+     "type": "number",
+     "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame, scale contrast). The auto-fit safety + `make audit` still catch true overflow/clipping.",
+     "min": 18,
+     "max": 560
+    },
+    "weight": {
+     "type": "number",
+     "label": "Font weight",
+     "min": 100,
+     "max": 900
+    },
+    "color": {
+     "type": "string|boolean",
+     "label": "Glow color / text color (glow accepts true = the theme accent glow)"
+    },
+    "emColor": {
+     "type": "string",
+     "label": "<b> emphasis colour (default: brand accent, or inherit over an accent bg)"
+    },
+    "tracking": {
+     "type": "string",
+     "label": "Letter-spacing"
+    },
+    "fit": {
+     "type": "boolean",
+     "label": "Auto-size text down to fit w"
     },
     "bg": {
-      "type": "array",
-      "label": "Background windows (canvas, theme palette)",
-      "required": true,
-      "minItems": 1,
-      "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix · gradientWash · blobs · metallic · metallicSheen · aurora · …), or `{ \"html\": \"…\" }` to hand-author one. See docs backgrounds-and-images.",
-      "item": {
-        "html": {
-          "type": "string",
-          "label": "Hand-authored living background (raw HTML/CSS instead of a preset)"
-        },
-        "src": {
-          "type": "string",
-          "label": "Path to a .html fragment holding that hand-authored background, instead of the inline `html` string (exactly one of the two)"
-        },
-        "tone": {
-          "type": "string",
-          "label": "Is the hand-authored backdrop light or dark? (picks the default text ink)",
-          "enum": [
-            "light",
-            "dark"
-          ]
-        },
-        "preset": {
-          "type": "string",
-          "label": "bgPreset name",
-          "enum": [
-            "plain",
-            "paper",
-            "paperDots",
-            "paperShapes",
-            "soft",
-            "accent",
-            "accentPlain",
-            "shapes",
-            "dotmatrix",
-            "aurora",
-            "mesh",
-            "constellation",
-            "brandglow",
-            "spotlight",
-            "dark",
-            "deep",
-            "ink",
-            "metallic",
-            "metallicSheen",
-            "gradientWash",
-            "blobs",
-            "liquid"
-          ]
-        },
-        "from": {
-          "type": "number|string",
-          "label": "Window start: seconds, OR a junction reference like \"cut@1\" so the joint owns the number. OMIT IT on EVERY window and the engine binds them to the film's cuts in order, one window per beat, which is how a backdrop changes without naming a boundary twice (core/junctions.js)"
-        },
-        "to": {
-          "type": "number|string",
-          "label": "Window end: seconds, OR a junction reference like \"cut@2\". Omitted on every window = bound to the joints; see `from`"
-        },
-        "value": {
-          "type": "string",
-          "label": "Force light/dark treatment",
-          "enum": [
-            "light",
-            "dark"
-          ]
-        },
-        "opts": {
-          "type": "object",
-          "label": "Per-video tuning of THIS preset's fx. Meta knobs scale what the preset baked in: { intensity, dotAlpha, drift, grain }. Every other key is passed straight to the fx that reads it, so the fx's own parameters work by name (liquid: scale, speed, warp, edge0, edge1, gloss, res · dots: spacing, period, k, driftX, driftY · metallic: count, waves, glow, sweep · particles: count, speed, connectDist). A key this preset's fx do not read is an ERROR, and the message lists the ones they do."
-        },
-        "seed": {
-          "type": "number",
-          "label": "Vary the preset's positions/phase (default = hash of theme+preset, so brands differ)"
-        },
-        "use": {
-          "type": "string",
-          "label": "use:\"theme\" → pull the brand’s own authored backdrop (themes/<name>.json bgDefault)"
-        }
+     "type": "string",
+     "label": "Fill (rect)"
+    },
+    "radius": {
+     "type": "number",
+     "label": "Corner radius (rect/ken-image)"
+    },
+    "border": {
+     "type": "string|boolean",
+     "label": "Border (rect) (true = a 1px hairline in var(--line))"
+    },
+    "shadow": {
+     "type": "boolean",
+     "label": "Soft shadow (rect)"
+    },
+    "start": {
+     "label": "Window start: seconds, or relative \"otherId+0.5\" / \"otherId.end-0.2\""
+    },
+    "duration": {
+     "type": "number|string",
+     "label": "Window length (s), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
+    },
+    "track": {
+     "type": "number",
+     "label": "z-order track"
+    },
+    "transition": {
+     "type": "object",
+     "label": "UNIFIED layer transition (sugar over anim/out): { in, out, dir, dur }. Lowered to anim/out/dir/enterDur/exitDur at load. `in`/`out` are anim names (core/clips.js); a raw anim/out you also set wins.",
+     "fields": {
+      "in": {
+       "type": "string",
+       "label": "Enter anim (same names as `anim`)"
+      },
+      "out": {
+       "type": "string",
+       "label": "Exit anim (same names as `out`)"
+      },
+      "dir": {
+       "type": "string",
+       "label": "Travel direction where the anim reads one",
+       "enum": [
+        "left",
+        "right",
+        "up",
+        "down"
+       ]
+      },
+      "dur": {
+       "type": "number|string",
+       "label": "Enter/exit duration (s), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
       }
+     }
     },
-    "cuts": {
-      "type": "array",
-      "label": "Hard cuts between beats (timing x presentation, from core/cuts.js)",
-      "item": {
-        "t": {
-          "type": "number",
-          "label": "Cut time (s)",
-          "required": true
-        },
-        "snap": {
-          "type": "boolean",
-          "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beat-bind.js)."
-        },
-        "style": {
-          "type": "string",
-          "label": "Presentation",
-          "required": true,
-          "enum": [
-            "none",
-            "fade",
-            "slide",
-            "whip",
-            "punch",
-            "wipe",
-            "iris",
-            "clock",
-            "flip",
-            "rise",
-            "blur",
-            "zoom",
-            "cube",
-            "barn",
-            "softwipe",
-            "softiris",
-            "squeeze",
-            "roll",
-            "letterbox",
-            "drop",
-            "blinds",
-            "skewWhip",
-            "spin",
-            "collapse",
-            "riseBlur",
-            "jitter"
-          ]
-        },
-        "dur": {
-          "type": "number",
-          "label": "Cut span (s)",
-          "min": 0.1,
-          "max": 2
-        },
-        "timing": {
-          "type": "string",
-          "label": "Timing curve"
-        },
-        "cx": {
-          "type": "number",
-          "label": "Origin x (0-1)",
-          "min": 0,
-          "max": 1
-        },
-        "cy": {
-          "type": "number",
-          "label": "Origin y (0-1)",
-          "min": 0,
-          "max": 1
-        },
-        "dir": {
-          "type": "string",
-          "label": "Direction the cut travels (left|right|up|down)",
-          "enum": [
-            "left",
-            "right",
-            "up",
-            "down"
-          ]
-        },
-        "dist": {
-          "type": "number",
-          "label": "Travel distance in px for a directional cut"
-        }
+    "anim": {
+     "type": "string",
+     "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | lift | defocus | slide-left | slide-right | slide-up | slide-down | wipe | wipe-left | wipe-right | wipe-up | wipe-down | iris | clock | none. Unknown names fall back to fade silently. There is no 'slide', and direction is part of the name, not a separate prop. A slide is named for the edge it comes FROM; a wipe is named for the edge its reveal TRAVELS TOWARD (wipe-up grows upward from the bottom; plain `wipe` = `wipe-right`).",
+     "enum": [
+      "fade",
+      "up",
+      "rise",
+      "pop",
+      "scale",
+      "lift",
+      "defocus",
+      "slide-left",
+      "slide-right",
+      "slide-up",
+      "slide-down",
+      "wipe",
+      "wipe-right",
+      "wipe-left",
+      "wipe-down",
+      "wipe-up",
+      "iris",
+      "clock",
+      "none"
+     ]
+    },
+    "out": {
+     "type": "string",
+     "label": "driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONTINUES the travel is the oppositely named one: anim:\"slide-right\" + out:\"slide-left\", anim:\"wipe-right\" + out:\"wipe-left\"."
+    },
+    "exitDur": {
+     "type": "number|string",
+     "label": "Exit window (s; 0 = hold to end), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
+    },
+    "enterDur": {
+     "type": "number|string",
+     "label": "Enter window (s, cut layers), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
+    },
+    "idle": {
+     "type": "string",
+     "label": "Ambient motion across this layer's SETTLED MIDDLE (between the enter ramp and the exit ramp), so a held frame stays alive without a hand-keyed motion track. A name, or { name, amp, period }. Off unless asked. Set the scene-level `idle` to opt a whole cast in, and `idle: \"none\"` here to opt one layer back out. Runs on TOP-LEVEL layers only, as the whole per-frame track pipeline does: put it on the group, not on a group child, and the group carries its children with it.",
+     "enum": [
+      "none",
+      "breathe",
+      "drift"
+     ]
+    },
+    "cut": {
+     "type": "string",
+     "label": "Cut-kit presentation",
+     "enum": [
+      "none",
+      "fade",
+      "slide",
+      "whip",
+      "punch",
+      "wipe",
+      "iris",
+      "clock",
+      "flip",
+      "rise",
+      "blur",
+      "zoom",
+      "cube",
+      "barn",
+      "softwipe",
+      "softiris",
+      "squeeze",
+      "roll",
+      "letterbox",
+      "drop",
+      "blinds",
+      "skewWhip",
+      "spin",
+      "collapse",
+      "riseBlur",
+      "jitter"
+     ]
+    },
+    "dir": {
+     "type": "string",
+     "label": "Cut direction",
+     "enum": [
+      "left",
+      "right",
+      "up",
+      "down"
+     ]
+    },
+    "dist": {
+     "type": "number",
+     "label": "Cut travel (px)"
+    },
+    "cutTiming": {
+     "type": "string",
+     "label": "Cut timing curve",
+     "enum": [
+      "linear",
+      "smooth",
+      "out",
+      "snappy",
+      "pop",
+      "rush",
+      "brake",
+      "ramp"
+     ]
+    },
+    "cx": {
+     "type": "number",
+     "label": "Iris/soft-iris centre X (0-100%)"
+    },
+    "cy": {
+     "type": "number",
+     "label": "Iris/soft-iris centre Y (0-100%)"
+    },
+    "split": {
+     "type": "string",
+     "label": "Kinetic split ('path' = SVG strokes, for the `draw` preset)",
+     "enum": [
+      "char",
+      "word",
+      "line",
+      "path"
+     ]
+    },
+    "preset": {
+     "type": "string",
+     "label": "Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/halation/diffusion/rimLight/spotlight/chromatic/chromaCycle on a glow layer)"
+    },
+    "stagger": {
+     "type": "number",
+     "label": "Per-unit delay (s)"
+    },
+    "each": {
+     "type": "number",
+     "label": "Per-unit duration (s)"
+    },
+    "loop": {
+     "type": "boolean",
+     "label": "Loop the kinetic preset"
+    },
+    "morph": {
+     "type": "object",
+     "label": "text layer TextMorph: letters migrate `text`->word { to, dur, ease } (needs w+align:center, GSAP). svg layer shape-morph: one path melts into another { to, dur, spin, points, closed }."
+    },
+    "fx": {
+     "type": "string|object|array",
+     "label": "Named GSAP effect(s) from core/gsap-effects.js: popIn | {name,dur,ease} | [blurIn,float]. Entrances (popIn/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none."
+    },
+    "fxOut": {
+     "type": "string|object",
+     "label": "Named GSAP EXIT from core/gsap-effects.js, anchored to the layer's end: fadeOut | fadeOutUp | flyOutLeft | popOut | zoomOut | blurOut | dropOut | collapseOut | spinOut | {name,dur,ease}. Mutually exclusive with `out`."
+    },
+    "modifiers": {
+     "type": "array",
+     "label": "Modifier stack applied to this layer, in array order, after every motion track: [{ \"mixBlend\": \"difference\" }]. Each key names a modifier from core/fx; an unknown name is a hard error, never a no-op. NOT `fx`, which is the named-GSAP-effect slot.",
+     "item": {
+      "mixBlend": {
+       "type": "string|object",
+       "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }. Refused on a group child: CSS blends against the nearest stacking context, which is the group, so it would reach nothing behind the group. Put it on the group.",
+       "enum": [
+        "normal",
+        "multiply",
+        "screen",
+        "overlay",
+        "darken",
+        "lighten",
+        "color-dodge",
+        "color-burn",
+        "hard-light",
+        "soft-light",
+        "difference",
+        "exclusion",
+        "hue",
+        "saturation",
+        "color",
+        "luminosity",
+        "plus-lighter"
+       ]
+      },
+      "ghost": {
+       "type": "boolean|string|object",
+       "label": "THE ONE EFFECT THAT READS TIME AS A MATERIAL: evaluate this layer's own `motion` track a few frames BACK and draw from the difference. \"trail\" leaves faded copies at the poses the layer just left; \"blur\" samples the same poses inside a single frame so the layer smears along its REAL direction of travel (unlike spinBlur/zoomBlur, which resample around a fixed centre). { mode: \"trail\" | \"blur\", k: samples 1..12 (default 6), back: lookback WINDOW in seconds, alpha: nearest copy's opacity, fade: per-copy falloff }. Needs a `motion` track and is refused without one; refused on a layer that draws into a <canvas>, whose pixels a clone does not carry. The copies are children of the layer, so cut, entrance, camera and ken ride along; a still layer renders identically to one carrying no ghost."
+      },
+      "shadow": {
+       "type": "number|object",
+       "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. `color` defaults to \"auto\" (read off the backdrop at t: the theme's ink over a light field, black over a dark one, the accent over an accent field) and also accepts a PALETTE ROLE name (\"accent\", \"ink\") so the shadow moves with the brand. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property). Works on a group child, whose box is measured once at build and composed with its group's; the exception is a group whose motion track keys `w`/`h`, which reflows its children."
+      },
+      "occlude": {
+       "type": "string|object",
+       "label": "Hide this layer where another layer's box covers it: \"cardId\" or { by: \"cardId\" | [ids] | \"above\" | \"below\", pad: px grown around the occluder, invert: show ONLY the overlap }. \"above\"/\"below\" mean every layer painted in front of / behind this one, read from the scene's paint order, so the set is never a hand-written list that rots when a layer is added. The hole tracks the occluder's motion track (position, scale, rotation) and closes while it is outside its own window. Needs an `id` on this layer. Works on a group child; the exception is a group whose motion track keys `w`/`h`, which reflows its children and makes their measured offsets stale."
+      },
+      "progress": {
+       "type": "boolean|string|object",
+       "label": "Write the FILM's progress (0 at the first frame, 1 at the last) into a CSS custom property this layer's markup draws with: true (writes --film), \"--bar\", or { var, ease }. Not `vars`, which runs over the LAYER's own window; this is the scene's clock, so a runtime bar or a chapter dot re-times itself when the film is re-cut."
+      },
+      "kick": {
+       "type": "boolean|object",
+       "label": "Kick this layer on the film's own joints: true, or { on: \"cut\" | \"seam\" | \"sting\" | \"any\" | [kinds], scale: multiplier (default 1.06), frames: settle length in FRAMES (default 5) }. The times come from the scene's own cuts/seams/stings, so moving a cut re-times every kick in the film. Named `kick` because `punch` is already a whole-frame CUT STYLE."
+      },
+      "tilt": {
+       "type": "object",
+       "label": "Turn the layer out of the picture plane: { x, y, z } degrees about its own centre, projected through ONE camera shared by every tilted layer with the same parent. { dist } px is that camera's distance (default 1600, smaller = wider lens); { origin } is its vanishing point, \"center\" or [x, y] in canvas px. Siblings must agree on dist/origin or it is a hard error. On a group child the camera belongs to the group, not the canvas."
+      },
+      "plane": {
+       "type": "number|object",
+       "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size, because a depth that does not is a scale: it is drawn at lens / (lens - z), so size it for the distance. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
+      },
+      "alongPath": {
+       "type": "string|object",
+       "label": "Set this layer's line of type ON A CURVE, and send it travelling along one: { curve: \"arc\" | \"dip\" | \"wave\" | \"ramp\", w, h, from, to, dur, delay, ease, anchor } or just \"arc\". `w`/`h` declare the box the curve is drawn in, and the viewBox matches it one-to-one so the layer's own font-size lands unchanged and nothing is measured. `from`/`to` are percentages ALONG the path and default to the same value, so the line simply sits on the curve and travels only when you ask; `anchor` says which end of the line sits at the offset. Pass `d` for your own path instead of a named curve. Refused with `split`, whose spans would be wrapped inside the SVG and render nothing."
+      },
+      "wordSlot": {
+       "type": "array|object",
+       "label": "One word of this layer's sentence swaps for the next while NOTHING after it reflows: { words: [\"docs\", \"dashboards\"], every: 1.1, swap: 0.26, chip: true, loop: false, at: \"{}\", delay: 0, rise: 0.42 }. The layer's own text carries the placeholder (\"Ship {} in seconds\"). Every candidate sits in the SAME grid cell, so the slot is auto-sized by layout to the WIDEST of them from the first frame, with no measurement and no font metric. `chip: true` gives it the accent plate with `--on-accent` ink, which is where the brand colour belongs. Refused with `split`, which would drive the same spans from a second clock, and refused with fewer than two words."
       }
+     }
     },
-    "matches": {
-      "type": "array",
-      "label": "Match cuts: two forms that coincide on a joint (core/junctions.js bindMatchesToJunctions)",
-      "item": {
-        "at": {
-          "type": "string",
-          "label": "The joint the match lands on: \"cut@1\" / \"seam@0\" / \"sting@2\" / \"junction@3\", or a time in seconds",
-          "required": true
-        },
-        "from": {
-          "type": "string",
-          "label": "id of the OUTGOING layer, the form that ends on the joint",
-          "required": true
-        },
-        "to": {
-          "type": "string",
-          "label": "id of the INCOMING layer, which opens on the outgoing form's last pose and settles into its own",
-          "required": true
-        },
-        "dur": {
-          "type": "number",
-          "label": "Handover span (s, default 0.42). Refused above a third of the shot it lands in.",
-          "min": 0.05,
-          "max": 2
-        },
-        "ease": {
-          "type": "string",
-          "label": "Easing of the settle (default easeOutCubic)"
-        }
+    "motionPath": {
+     "type": "object",
+     "label": "Fly the layer along an SVG path (GSAP MotionPathPlugin): { path:'M0,0 C...', align, autoRotate, curviness, dur, ease }. Deterministic (closed-form position per frame)."
+    },
+    "physics": {
+     "type": "object",
+     "label": "Velocity/gravity/friction scatter (GSAP Physics2DPlugin): { velocity, angle, gravity, friction, spread, dur }. On a split layer each letter gets an index-based angle spread (explode outward). Deterministic (no random)."
+    },
+    "parts": {
+     "label": "THE BRIDGE BETWEEN HAND-WRITTEN HTML AND THE ENGINE'S CLOCK. Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards, the rows of an `html` fragment) so a figure animates piece by piece. On an `html` layer this is how markup keeps the whole CSS surface AND still gets engine-driven, seekable per-element timing, instead of one opacity on the whole card. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease, out, exitDur, exitEase } OR an array of them (bars, then line, then dots). `out: true` gives each part its paired exit (a translate continues, a scale reverses) anchored to the layer's end. Pure (seeked GSAP)."
+    },
+    "comp": {
+     "type": "string",
+     "label": "Composition name (type:\"composition\"). A FIRST-PARTY hand-authored per-beat GSAP timeline from core/compositions/index.js (the safe form of another engine' one-timeline-per-beat model). The JSON names the comp + passes DATA via `props`; the code lives first-party, so untrusted input cannot inject. Use for bespoke multi-tween motion `parts`/blueprints can't reach (a token travelling a path while a check draws). e.g. \"pipelineFlow\"."
+    },
+    "props": {
+     "type": "object",
+     "label": "DATA passed to a `composition` comp (labels, numbers, accent). Treated as textContent/attr, never markup. e.g. { stages:[\"Input\",\"Engine\",\"Render\"] }."
+    },
+    "splitText": {
+     "type": "object",
+     "label": "Masked LINE reveals (GSAP SplitText): { mask, stagger, dur, ease }. Each line slides up from behind a clip. Line-level only; use `split` for char/word. Do not combine with `split`."
+    },
+    "circle": {
+     "type": "boolean|object",
+     "label": "Lay the text CHARS on a rotating circular path (badge/seal). { radius: px, period: s/turn }. Set w = 2*radius so pin centres it."
+    },
+    "phaseStep": {
+     "type": "number",
+     "label": "Per-unit phase offset for looping presets (wave/shimmerWave); ~0.12 = a crest travels the word"
+    },
+    "ransom": {
+     "type": "boolean|object",
+     "label": "Comic/ransom cutout: each glyph a different face, paper swatch + torn edge (implies split:char; pair with fall/bounce). Object form: { palette: 'paper'|'color', sprites, accent, faces, swatches, cycle, stagger }. `sprites:true` uses REAL cut-out letter photos baked by `make ransom-sprites` instead of CSS tiles. `cycle` (s) re-rolls each letter into a different cutout of the SAME glyph in place"
+    },
+    "ransomSeed": {
+     "type": "string|number",
+     "label": "Seed for the ransom cutout choices (defaults to the text, so the same word looks the same)"
+    },
+    "presetOpts": {
+     "type": "object",
+     "label": "Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wave amp, spring bounce/settle)"
+    },
+    "gradient": {
+     "type": "object",
+     "label": "STATIC gradient text fill via background-clip (distinct from preset:\"gradient\" which sweeps): { from, to, angle? }. angle 180 = top\u2192bottom (a dark-top\u2192light-bottom hero word). e.g. {\"from\":\"#1c1613\",\"to\":\"#f3763b\",\"angle\":180}"
+    },
+    "lookOpts": {
+     "type": "object",
+     "label": "Composite-look knobs (core/looks.js): color \u00b7 color2 \u00b7 strength (0..1 master dial) \u00b7 grain \u00b7 vignette \u00b7 warmth. Defaults reskin to the theme."
+    },
+    "filter": {
+     "type": "string",
+     "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow) OR a composite LOOK (neon/dreamyHaze/vhs/crt/filmNoir/cyberpunk/thermal/lomo/\u2026 core/looks.js). One positional arg = strength 0..1 (e.g. \"neon:0.9\"); full knobs via lookOpts"
+    },
+    "mask": {
+     "type": "string",
+     "label": "CSS mask-image"
+    },
+    "css": {
+     "type": "object",
+     "label": "Raw CSS the layer vocabulary does not name (a box gradient via `background`, `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration). camelCase keys in (`boxShadow`), applied once at build time. REFUSES opacity/transform/animation/transition/position/left/top/width/height/zIndex/pointerEvents (the engine owns and rewrites those every frame), use anim/motion/parts/vars/x/y/w/h/track instead."
+    },
+    "critical": {
+     "type": "boolean",
+     "label": "Force include/exclude from layout audit"
+    },
+    "becomes": {
+     "type": "string",
+     "label": "Declare that this layer CONTINUES as another (by its `id`) across a boundary. A cut transforms one root and a seam blends two frozen stills; neither joins the CONTENT, so the only thing that truly connects two scenes is a form that persists. The named layer opens on THIS layer's final pose (centres matched, size matched by scale, rotation carried) and then animates away into its own geometry, so the handover is exact by construction instead of hand-aligned and hoped for. `becomesDur` (default 0.42) and `becomesEase` shape the handover. validate fails if the two do not meet at the boundary. See docs/CRAFT/KEYED-MOTION.md."
+    },
+    "becomesDur": {
+     "type": "number",
+     "label": "Seconds the incoming layer takes to settle from the handed-over pose into its own (default 0.42)."
+    },
+    "becomesEase": {
+     "type": "string",
+     "label": "Easing for the handover settle (default easeOutCubic)."
+    },
+    "panWith": {
+     "type": "string",
+     "label": "Share another layer's motion track by its `id`, on the SAME wall clock, from THIS layer's own origin. A pan of the page is not a camera move (a camera transforms the whole frame, scrim included), so moving a surface means moving its layers together. Copied as deltas and time-shifted by the difference in `start`, so each layer keeps its own position. Anything this layer declares WINS: state your own key at a shared time to peel away from the pan, and any key at a time the pan does not cover is kept. Worked example and the reasoning: docs/CRAFT/KEYED-MOTION.md."
+    },
+    "follow": {
+     "type": "object",
+     "label": "Pin this layer to another layer's LIVE box, every frame: { id, edge, gap, dx, dy }. `anchor` places against the canvas and `becomes` hands one pose to another, and both resolve ONCE at build against numbers; neither can keep a label under a card that is moving, because the card's position after its motion track is only known at t. edge is center (default) \u00b7 above \u00b7 below \u00b7 left \u00b7 right, and `gap` is the space outside that edge. Centres are matched, not corners. The pin lands BEFORE this layer's own motion track, so the follower may still have choreography of its own and it plays about the pinned position. This layer needs an `id` (it is placed by its own measured size). Following a layer that is itself following a third pins you to the middle one's UNPINNED position."
+    },
+    "acrossBeats": {
+     "type": "boolean",
+     "label": "This layer belongs to the FILM, not to one beat. Only meaningful under `sceneUnits`, where every other layer is wrapped with its beat and truncated at that beat's cut. Set true and the layer attaches flat to the camera instead, keeping its authored duration and its own exit, so it can survive a cut and change across it. This is how you author a continuous object in a cut film. It paints ABOVE beat content by default (its z-index is `track` or its array index, against wrappers at auto); give it `\"track\": -1` to sit behind."
+    },
+    "ken": {
+     "label": "Ken Burns zoom (image): true or {from,to,fx,fy}"
+    },
+    "edgeFade": {
+     "label": "Image: fade the LEFT+RIGHT edges into the bg (white by default). true or fade-width %"
+    },
+    "edgeFadeColor": {
+     "type": "string",
+     "label": "Image: colour the edgeFade dissolves into (default #ffffff; set to the bg for dark scenes)"
+    },
+    "canvasFx": {
+     "label": "Image: Tier-2 Canvas pass baked once at build (deterministic). Name (halftone/dither/mosaic/pixelSort/stipple/ascii/edgeDetect/crosshatch) or { fx, cell, ink, paper, seed }. core/canvas-fx.js"
+    },
+    "from": {
+     "type": "number",
+     "label": "Count start value (count)"
+    },
+    "to": {
+     "type": "number",
+     "label": "Count end value (count)"
+    },
+    "decimals": {
+     "type": "number",
+     "label": "Decimal places (count)",
+     "min": 0,
+     "max": 3
+    },
+    "prefix": {
+     "type": "string",
+     "label": "Count prefix (e.g. +, $)"
+    },
+    "suffix": {
+     "type": "string",
+     "label": "Count suffix (e.g. %, s)"
+    },
+    "unit": {
+     "type": "string",
+     "label": "Count unit appended after the number (e.g. %, k, $B); raw \u22651e6 auto-compacts (2.5B) when no unit"
+    },
+    "countStart": {
+     "type": "number",
+     "label": "Count begins (s into window)"
+    },
+    "countDur": {
+     "type": "number",
+     "label": "Count duration (s)"
+    },
+    "ease": {
+     "type": "string",
+     "label": "Count easing (EASINGS name, e.g. ramp)"
+    },
+    "id": {
+     "type": "string",
+     "label": "Layer id (anchor target)"
+    },
+    "anchor": {
+     "type": "string",
+     "label": "Position relative to layer with this id"
+    },
+    "at": {
+     "type": "string",
+     "label": "Placement",
+     "enum": [
+      "below",
+      "below-center",
+      "above",
+      "above-center",
+      "right",
+      "left"
+     ]
+    },
+    "dx": {
+     "type": "number",
+     "label": "Anchor offset x (px)"
+    },
+    "dy": {
+     "type": "number",
+     "label": "Anchor offset y (px)"
+    },
+    "direction": {
+     "type": "string",
+     "label": "Group flow",
+     "enum": [
+      "row",
+      "column"
+     ]
+    },
+    "gap": {
+     "type": "number",
+     "label": "Group gap (px)"
+    },
+    "pad": {
+     "label": "Padding (px or CSS string), groups and text chips"
+    },
+    "justify": {
+     "type": "string",
+     "label": "Group justify-content"
+    },
+    "children": {
+     "type": "array",
+     "label": "Group children, text/image/count, or a nested group (layout by flow)",
+     "item": {
+      "type": {
+       "type": "string",
+       "label": "Child type. addGroupChild delegates to kit.buildLeaf, which dispatches the SAME layer registry as a top-level layer, so a child may be any layer type.",
+       "enum": [
+        "text",
+        "count",
+        "image",
+        "video",
+        "group",
+        "rect",
+        "glow",
+        "beam",
+        "svg",
+        "cursor",
+        "clip",
+        "html",
+        "component",
+        "board",
+        "doc",
+        "shader",
+        "lottie",
+        "paint",
+        "raymarch",
+        "three",
+        "globe",
+        "composition"
+       ]
+      },
+      "x": {
+       "type": "number",
+       "label": "Child x inside a `free` group (ignored by flow layouts)"
+      },
+      "y": {
+       "type": "number",
+       "label": "Child y inside a `free` group (ignored by flow layouts)"
+      },
+      "delay": {
+       "type": "number",
+       "label": "Stagger this child's entrance N seconds into the group's window",
+       "min": 0
       }
+     }
     },
-    "stings": {
-      "type": "array",
-      "label": "Shader boundary effects",
-      "item": {
-        "t": {
-          "type": "number",
-          "label": "Center time (s)",
-          "required": true
-        },
-        "fx": {
-          "type": "string",
-          "label": "Effect",
-          "required": true,
-          "enum": [
-            "flash",
-            "burn",
-            "leak",
-            "grain",
-            "dissolve",
-            "ink",
-            "glitch",
-            "streak",
-            "pixel",
-            "confetti",
-            "ripple",
-            "scan",
-            "warp",
-            "bokeh",
-            "wipe",
-            "circle",
-            "blinds",
-            "squares",
-            "pinwheel",
-            "doors",
-            "polka",
-            "swirl",
-            "crossWarp",
-            "domainWarp",
-            "sdfIris",
-            "vortex",
-            "ridgedBurn",
-            "lens",
-            "thermal",
-            "whipPan",
-            "chromaticSplit",
-            "dispersion",
-            "gridPixelateWipe",
-            "iridescence",
-            "cinematicZoom"
-          ]
-        },
-        "dur": {
-          "type": "number",
-          "label": "Effect span (s)",
-          "min": 0.3,
-          "max": 3
-        },
-        "seed": {
-          "type": "number",
-          "label": "Noise seed"
-        },
-        "color": {
-          "type": "string",
-          "label": "Tint hex (recolours the effect; omit for native colours)"
-        },
-        "intensity": {
-          "type": "number",
-          "label": "Strength multiplier (1 = default)"
-        },
-        "colors": {
-          "type": "array",
-          "label": "leak: up to 4 hex colours the leak is built from (seed only arranges them)"
-        }
+    "layout": {
+     "type": "string",
+     "label": "Group layout: row | column | grid | free (children place themselves at x/y)",
+     "enum": [
+      "row",
+      "column",
+      "grid",
+      "free"
+     ]
+    },
+    "gridCols": {
+     "type": "number",
+     "label": "Grid column count (layout:grid)",
+     "min": 1,
+     "max": 8
+    },
+    "colw": {
+     "type": "number",
+     "label": "Grid column width in px (layout:grid; default 1fr)"
+    },
+    "fitH": {
+     "type": "number",
+     "label": "Max height (px) for multi-line auto-fit (with fit+w), binary-search font to fit"
+    },
+    "maxLines": {
+     "type": "number",
+     "label": "Auto-fit safety: shrink a headline that wraps past this many lines (default 5)"
+    },
+    "items": {
+     "type": "string",
+     "label": "align-items for a group (flex/grid): flex-start | center | flex-end | stretch | baseline"
+    },
+    "align2": {
+     "type": "string",
+     "label": "DEPRECATED alias of `items` (align-items), use `items`"
+    },
+    "wrap": {
+     "type": "boolean",
+     "label": "Flex-wrap the row"
+    },
+    "colGap": {
+     "type": "number",
+     "label": "Grid column gap (px)"
+    },
+    "rowGap": {
+     "type": "number",
+     "label": "Grid row gap (px)"
+    },
+    "grow": {
+     "type": "number",
+     "label": "Child flex-grow (in a group)"
+    },
+    "basis": {
+     "label": "Child flex-basis (px or CSS length)"
+    },
+    "motion": {
+     "type": "array",
+     "label": "Keyframe track, element choreography (pure in t). Offsets on the base position.",
+     "item": {
+      "t": {
+       "type": "number",
+       "label": "Seconds from layer start"
+      },
+      "x": {
+       "type": "number",
+       "label": "X offset (px)"
+      },
+      "y": {
+       "type": "number",
+       "label": "Y offset (px)"
+      },
+      "scale": {
+       "type": "number",
+       "label": "Scale multiplier"
+      },
+      "rot": {
+       "type": "number",
+       "label": "Rotation (deg)"
+      },
+      "opacity": {
+       "type": "number",
+       "label": "Opacity multiplier"
+      },
+      "w": {
+       "type": "number",
+       "label": "Width (px) at this key. The layer's BOX, not a scale: content re-fits instead of magnifying, which is how a sidebar collapses or a grid reflows. Needs a base `w` on the layer; state it on one key and every key inherits it."
+      },
+      "h": {
+       "type": "number",
+       "label": "Height (px) at this key. Same rule as `w`."
+      },
+      "track": {
+       "type": "number",
+       "label": "Z-order at this key. Depth over TIME: key it across a neighbour's track and the layer passes behind that neighbour and out again, which is how a ribbon orbits the thing it circles. Rounded to an integer when applied. Defaults to the layer's own `track`, or its index."
+      },
+      "ease": {
+       "type": "string",
+       "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)"
       }
+     }
     },
-    "seams": {
-      "type": "array",
-      "label": "Two-scene shader transitions (blend the beats either side of a boundary, from core/seams.js)",
-      "item": {
-        "t": {
-          "type": "number",
-          "label": "Seam start time (s), the window is [t, t+dur]",
-          "required": true,
-          "min": 0
-        },
-        "snap": {
-          "type": "boolean",
-          "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beat-bind.js)."
-        },
-        "fx": {
-          "type": "string",
-          "label": "Transition (samples BOTH beats as textures). Basics: fade · dissolve · slide · push · uncover · wipe (dir-aware). Expressive: crossWarp · whipPan · sdfIris · dispersion · lens · flashWhite · cinematicZoom · portal.",
-          "required": true,
-          "enum": [
-            "fade",
-            "dissolve",
-            "slide",
-            "push",
-            "uncover",
-            "wipe",
-            "crossWarp",
-            "whipPan",
-            "sdfIris",
-            "dispersion",
-            "lens",
-            "flashWhite",
-            "cinematicZoom",
-            "portal"
-          ]
-        },
-        "dur": {
-          "type": "number",
-          "label": "Seam span (s)",
-          "min": 0.1,
-          "max": 3
-        },
-        "dir": {
-          "type": "string",
-          "label": "Travel direction for whipPan (left|right|up|down)",
-          "enum": [
-            "left",
-            "right",
-            "up",
-            "down"
-          ]
-        },
-        "seed": {
-          "type": "number",
-          "label": "Noise/shape seed"
-        },
-        "intensity": {
-          "type": "number",
-          "label": "Strength multiplier (1 = default)",
-          "min": 0
-        },
-        "timing": {
-          "type": "string",
-          "label": "Easing of the transition progress (default smooth = ease-in-out). linear = constant-speed (mechanical); smooth/out/snappy/pop/rush/brake/ramp shape the blend's velocity. Same curves as a scene cut's timing (core/cuts.js).",
-          "enum": [
-            "linear",
-            "smooth",
-            "out",
-            "snappy",
-            "pop",
-            "rush",
-            "brake",
-            "ramp"
-          ]
-        }
-      }
+    "motionBlur": {
+     "label": "Velocity motion blur on this layer's motion track (streak on fast moves; crisp when settled). true = half-shutter; a 0..1 number sets strength. Needs a motion track."
     },
-    "produced": {
-      "type": "boolean",
-      "label": "Set false to OPT OUT of the produced baseline the engine injects by default (core/produce.js): a living/brand-appropriate background, a gentle camera push, and sceneUnits on cut films. Additive only (never rewrites your layers). Absent = produced (rich by default); false = render exactly what the JSON declares. Any field you set explicitly (bg, cameraMove, sceneUnits) already overrides its part of the baseline."
+    "elevation": {
+     "type": "number",
+     "label": "Physical depth 1\u20134 (ring + lit edge + stacked shadows)",
+     "min": 1,
+     "max": 4
     },
-    "sceneUnits": {
-      "type": "boolean",
-      "label": "Make `cuts` move each BEAT as a WHOLE UNIT (the outgoing beat slides/pushes out while the incoming slides in, as separate scenes) instead of transforming the whole camera at once. Turns beat boundaries from a per-layer-fade slideshow into real scene swaps. Beats are the intervals between cut times; layers are grouped by their start. Opt-in; a scene without it renders byte-identical. See core/cuts.js PRESENTATIONS for the styles."
+    "on": {
+     "type": "string",
+     "label": "Elevation surface variant",
+     "enum": [
+      "light",
+      "dark"
+     ]
     },
-    "transitions": {
-      "type": "array",
-      "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut · seam · sting) via core/transitions.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
-      "item": {
-        "at": {
-          "type": "number",
-          "label": "Boundary time (s). The transition plays over [at, at+dur]",
-          "required": true,
-          "min": 0
-        },
-        "fx": {
-          "type": "string",
-          "label": "Transition name (any from `make transitions`). Routed by mechanism: whipPan/crossWarp/cinematicZoom → seam; whip/punch/zoom → cut; glitch/chromaticSplit → sting; fade/slide/wipe/dissolve → cut by default (add mech:\"seam\" for the two-scene blend).",
-          "required": true
-        },
-        "mech": {
-          "type": "string",
-          "label": "Force the mechanism (default = auto). seam = two-scene GPU blend; cut = transform the scene root; sting = generative overlay.",
-          "enum": [
-            "cut",
-            "seam",
-            "sting"
-          ]
-        },
-        "dur": {
-          "type": "number",
-          "label": "Transition span (s)",
-          "min": 0.1,
-          "max": 3
-        },
-        "dir": {
-          "type": "string",
-          "label": "Travel direction (left|right|up|down)",
-          "enum": [
-            "left",
-            "right",
-            "up",
-            "down"
-          ]
-        },
-        "timing": {
-          "type": "string",
-          "label": "Easing of the transition progress (default smooth = ease-in-out; linear = constant). Same curves as a cut/seam timing.",
-          "enum": [
-            "linear",
-            "smooth",
-            "out",
-            "snappy",
-            "pop",
-            "rush",
-            "brake",
-            "ramp"
-          ]
-        },
-        "seed": {
-          "type": "number",
-          "label": "Noise/shape seed (seam/sting)"
-        },
-        "intensity": {
-          "type": "number",
-          "label": "Strength multiplier (seam/sting; 1 = default)",
-          "min": 0
-        }
-      }
+    "glow": {
+     "label": "Ambient glow: hex color, or true for theme accent"
     },
-    "cameraMove": {
-      "label": "Author sugar: { move, ...params } (or an array of them) → data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves.js is the source of truth, and lib-test asserts the two agree."
+    "intensity": {
+     "type": "number",
+     "label": "Effect strength: glow opacity (0.05-0.6) \u00b7 shader visibility (up to 1)",
+     "min": 0.05,
+     "max": 1
     },
-    "spectacle": {
-      "type": "object",
-      "label": "The film's ONE loud moment, nominated: { at, of, device, why }. `device` is a shader sting name (flash | chromaticSplit | glitch | streak | whipPan | ripple | sdfIris | vortex | lens | dispersion | iridescence | cinematicZoom) written at `at`. The other half is what makes it real: with a spectacle declared the engine pulls EVERY competing amplitude dial in the film down to 55% (other stings, seams, composite-look strength, glow/beam intensity, kick scale), and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained, and the engine keeps it. core/spectacle.js.",
-      "fields": {
-        "at": {
-          "type": "number",
-          "label": "The second the moment lands on",
-          "required": true
-        },
-        "of": {
-          "type": "string",
-          "label": "The id of the layer the moment is ABOUT. It is the one layer the attenuation exempts.",
-          "required": true
-        },
-        "device": {
-          "type": "string",
-          "label": "The gesture, from what the engine already ships",
-          "required": true,
-          "enum": ["flash", "chromaticSplit", "glitch", "streak", "whipPan", "ripple", "sdfIris", "vortex", "lens", "dispersion", "iridescence", "cinematicZoom"]
-        },
-        "why": {
-          "type": "string",
-          "label": "What the moment is for, in one line. Required: a peak nobody can name is a volume setting.",
-          "required": true
-        }
-      }
+    "beam": {
+     "type": "string",
+     "label": "Glow becomes a directional beam",
+     "enum": [
+      "right",
+      "left",
+      "up",
+      "down"
+     ]
     },
-    "lighting": {
-      "type": "object",
-      "label": "The scene's KEY LIGHT: { x, y } in canvas px, plus optional { intensity } (default 1, scales every shadow at once). Read by the `shadow` modifier, which points each layer's shadow directly away from this point, so two cards either side of it throw their shadows in opposite directions, and one number re-lights the whole film. A light outside the canvas is normal.",
-      "fields": {
-        "x": {
-          "type": "number",
-          "label": "Light X in canvas px",
-          "required": true
-        },
-        "y": {
-          "type": "number",
-          "label": "Light Y in canvas px",
-          "required": true
-        },
-        "intensity": {
-          "type": "number",
-          "label": "Multiplies every shadow's opacity (default 1). 0 puts the lights out."
-        }
-      }
+    "mode": {
+     "type": "string",
+     "label": "beam layer: 'border' (a light travelling the border) or 'shine' (a sheen sweep)",
+     "enum": [
+      "border",
+      "shine"
+     ]
     },
-    "camera": {
-      "type": "array",
-      "label": "Global camera keyframes",
-      "item": {
-        "t": {
-          "type": "number",
-          "label": "Time (s)",
-          "required": true
-        },
-        "s": {
-          "type": "number",
-          "label": "Where the camera stands, as the magnification of the canvas plane (1 = the default distance, 1.4 = closer). This is the camera's DEPTH, not a scale of the picture: with anything tilted in frame it dollies, so vanishing points move. There is deliberately no separate z key."
-        },
-        "ease": {
-          "type": "string",
-          "label": "Easing INTO this keyframe (default easeInOutCubic). Use \"linear\" on interior keyframes for a velocity-continuous multi-keyframe push (a chained ease-in-out pulses/shakes because it zeroes velocity at each keyframe)."
-        },
-        "x": {
-          "type": "number",
-          "label": "Pan X (px)"
-        },
-        "y": {
-          "type": "number",
-          "label": "Pan Y (px)"
-        },
-        "rx": {
-          "type": "number",
-          "label": "Camera pitch, degrees (orientation)",
-          "min": -45,
-          "max": 45
-        },
-        "ry": {
-          "type": "number",
-          "label": "Camera yaw, degrees (orientation)",
-          "min": -45,
-          "max": 45
-        },
-        "roll": {
-          "type": "number",
-          "label": "Camera roll about the view axis, degrees. Turns the whole frame without flattening anything tilted inside it.",
-          "min": -180,
-          "max": 180
-        },
-        "p": {
-          "type": "number",
-          "label": "The LENS: focal distance in px (default 1600; lower = wider). Not the camera's position. That is s. Keying both at once is the dolly zoom.",
-          "min": 200,
-          "max": 6000
-        },
-        "aspects": {
-          "type": "object",
-          "label": "Per-aspect overrides for this camera keyframe"
-        }
-      }
+    "thickness": {
+     "type": "number",
+     "label": "beam layer: border-beam ring thickness in px"
     },
-    "layers": {
-      "type": "array",
-      "label": "Layers",
-      "required": true,
-      "minItems": 1,
-      "maxItems": 120,
-      "item": {
-        "type": {
-          "type": "string",
-          "label": "Layer type",
-          "enum": [
-            "text",
-            "count",
-            "image",
-            "video",
-            "group",
-            "rect",
-            "glow",
-            "beam",
-            "svg",
-            "cursor",
-            "clip",
-            "html",
-            "component",
-            "board",
-            "doc",
-            "shader",
-            "lottie",
-            "paint",
-            "raymarch",
-            "three",
-            "globe",
-            "composition"
-          ]
-        },
-        "shader": {
-          "type": "string",
-          "label": "shader: ambient WebGL look. Fields BEHIND content: flow/aurora/plasma/drift/mist/matrixDecode. Overlay looks ON TOP (high track, intensity 0.6-0.9): vhs/crt/filmGrain/lightLeak + barrel/heatShimmer/ripple/kaleidoscope. Tune with speed · intensity · colors · seed",
-          "enum": [
-            "flow",
-            "aurora",
-            "plasma",
-            "drift",
-            "mist",
-            "vhs",
-            "crt",
-            "filmGrain",
-            "lightLeak",
-            "barrel",
-            "heatShimmer",
-            "ripple",
-            "kaleidoscope",
-            "matrixDecode",
-            "nebula",
-            "dotCrawl",
-            "gateWeave",
-            "bands"
-          ]
-        },
-        "html": {
-          "type": "string",
-          "label": "html: raw hand-authored HTML/CSS for the layer, inline (static; <script> stripped). Put it in a file with `src` instead when it is long enough to want reading, diffing or previewing"
-        },
-        "speed": {
-          "type": "number",
-          "label": "clip: playback rate multiplier (1 = realtime; 0.5 = half speed)"
-        },
-        "typing": {
-          "type": "number|boolean",
-          "label": "text: type it out at N chars/sec (true = 24) with a blinking caret"
-        },
-        "caret": {
-          "type": "boolean",
-          "label": "typing: show the blinking caret (default true)"
-        },
-        "caretHold": {
-          "type": "boolean",
-          "label": "typing: keep the caret after the text finishes"
-        },
-        "untype": {
-          "type": "number",
-          "label": "typing: seconds into the layer at which the text starts DELETING backwards (backspace). Omit for forward-only typing."
-        },
-        "untypeRate": {
-          "type": "number",
-          "label": "untype: delete speed in chars/sec (default = the `typing` rate)"
-        },
-        "path": {
-          "type": "array",
-          "label": "cursor: [{t,x,y,ease}] keyframes the pointer follows (x,y = absolute screen px when no layer x/y is set; relative to x/y if it is)"
-        },
-        "clicks": {
-          "type": "array",
-          "label": "cursor: [t, …] local times to fire a click (dip + ripple)"
-        },
-        "rippleColor": {
-          "type": "string",
-          "label": "cursor: click-ripple ring colour"
-        },
-        "filename": {
-          "type": "string",
-          "label": "doc: filename shown in the card header (e.g. notes.md)"
-        },
-        "diff": {
-          "type": "string",
-          "label": "doc: diff chip in the header (e.g. +18 -0)"
-        },
-        "blocks": {
-          "type": "array",
-          "label": "doc: content blocks, {h,accent} heading · {body} mono lines · {code} · {bullets:[]}"
-        },
-        "nameSize": {
-          "type": "number",
-          "label": "doc: filename / diff-chip font px (default 30)"
-        },
-        "hSize": {
-          "type": "number",
-          "label": "doc: block-heading font px (default 40)"
-        },
-        "bodySize": {
-          "type": "number",
-          "label": "doc: body / code / bullet font px (default 30)"
-        },
-        "blockGap": {
-          "type": "number",
-          "label": "doc: vertical gap above each heading block (default 22)"
-        },
-        "text": {
-          "type": "string",
-          "label": "Text (may use <b>/<em>)"
-        },
-        "src": {
-          "type": "string",
-          "label": "Path to the layer's source file: an image, a captured component (.json), a lottie (.json), or (on an `html` layer) a hand-authored fragment (.html) instead of the inline `html` string (exactly one of the two)"
-        },
-        "x": {
-          "type": "number|string",
-          "label": "Left: px number, or relative \"50%\" / \"50%-40\" / center / left / right (resolved per aspect)"
-        },
-        "y": {
-          "type": "number|string",
-          "label": "Top: px number, or relative \"50%\" / center / top / bottom (resolved per aspect)"
-        },
-        "w": {
-          "type": "number|string",
-          "label": "Width: px number or \"50%\" of canvas"
-        },
-        "h": {
-          "type": "number|string",
-          "label": "Height: px number or \"50%\" of canvas"
-        },
-        "pin": {
-          "type": "string",
-          "label": "Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds power point",
-          "enum": [
-            "center",
-            "top",
-            "bottom",
-            "left",
-            "right",
-            "top-left",
-            "top-right",
-            "bottom-left",
-            "bottom-right",
-            "thirds-tl",
-            "thirds-tr",
-            "thirds-bl",
-            "thirds-br",
-            "thirds-t",
-            "thirds-b",
-            "thirds-l",
-            "thirds-r"
-          ]
-        },
-        "col": {
-          "type": "number|string",
-          "label": "12-col grid placement: \"3\" (one column) or \"2-7\" (a span) → sets x + w"
-        },
-        "cols": {
-          "type": "array",
-          "label": "Board columns (≤4): {title, count, cards:[{id,title,labels:[{t,c}]}] ≤5}",
-          "item": {
-            "title": {
-              "type": "string",
-              "label": "Column title"
-            }
-          }
-        },
-        "gutter": {
-          "type": "number",
-          "label": "Grid gutter px (default = half the safe inset)"
-        },
-        "ls": {
-          "type": "string",
-          "label": "Letter-spacing (e.g. \"-0.03em\"); unset = auto optical tracking by size"
-        },
-        "raw": {
-          "type": "boolean",
-          "label": "Opt out of the micro-typography pass (tracking/balance/kerning)"
-        },
-        "align": {
-          "type": "string",
-          "label": "Text align",
-          "enum": [
-            "left",
-            "center",
-            "right"
-          ]
-        },
-        "font": {
-          "type": "string",
-          "label": "Face",
-          "enum": [
-            "sans",
-            "serif",
-            "mono",
-            "num"
-          ]
-        },
-        "italic": {
-          "type": "boolean",
-          "label": "Force italic on/off (default: serif is italic, others upright). italic:false = upright serif."
-        },
-        "size": {
-          "type": "number",
-          "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame, scale contrast). The auto-fit safety + `make audit` still catch true overflow/clipping.",
-          "min": 18,
-          "max": 560
-        },
-        "weight": {
-          "type": "number",
-          "label": "Font weight",
-          "min": 100,
-          "max": 900
-        },
-        "color": {
-          "type": "string|boolean",
-          "label": "Glow color / text color (glow accepts true = the theme accent glow)"
-        },
-        "emColor": {
-          "type": "string",
-          "label": "<b> emphasis colour (default: brand accent, or inherit over an accent bg)"
-        },
-        "tracking": {
-          "type": "string",
-          "label": "Letter-spacing"
-        },
-        "fit": {
-          "type": "boolean",
-          "label": "Auto-size text down to fit w"
-        },
-        "bg": {
-          "type": "string",
-          "label": "Fill (rect)"
-        },
-        "radius": {
-          "type": "number",
-          "label": "Corner radius (rect/ken-image)"
-        },
-        "border": {
-          "type": "string|boolean",
-          "label": "Border (rect) (true = a 1px hairline in var(--line))"
-        },
-        "shadow": {
-          "type": "boolean",
-          "label": "Soft shadow (rect)"
-        },
-        "start": {
-          "label": "Window start: seconds, or relative \"otherId+0.5\" / \"otherId.end-0.2\""
-        },
-        "duration": {
-          "type": "number|string",
-          "label": "Window length (s), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
-        },
-        "track": {
-          "type": "number",
-          "label": "z-order track"
-        },
-        "transition": {
-          "type": "object",
-          "label": "UNIFIED layer transition (sugar over anim/out): { in, out, dir, dur }. Lowered to anim/out/dir/enterDur/exitDur at load. `in`/`out` are anim names (core/clips.js); a raw anim/out you also set wins.",
-          "fields": {
-            "in": {
-              "type": "string",
-              "label": "Enter anim (same names as `anim`)"
-            },
-            "out": {
-              "type": "string",
-              "label": "Exit anim (same names as `out`)"
-            },
-            "dir": {
-              "type": "string",
-              "label": "Travel direction where the anim reads one",
-              "enum": [
-                "left",
-                "right",
-                "up",
-                "down"
-              ]
-            },
-            "dur": {
-              "type": "number|string",
-              "label": "Enter/exit duration (s), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
-            }
-          }
-        },
-        "anim": {
-          "type": "string",
-          "label": "Enter anim. EXACT names (core/clips.js ANIM): fade | up | rise | pop | scale | lift | defocus | slide-left | slide-right | slide-up | slide-down | wipe | wipe-left | wipe-right | wipe-up | wipe-down | iris | clock | none. Unknown names fall back to fade silently. There is no 'slide', and direction is part of the name, not a separate prop. A slide is named for the edge it comes FROM; a wipe is named for the edge its reveal TRAVELS TOWARD (wipe-up grows upward from the bottom; plain `wipe` = `wipe-right`).",
-          "enum": [
-            "fade",
-            "up",
-            "rise",
-            "pop",
-            "scale",
-            "lift",
-            "defocus",
-            "slide-left",
-            "slide-right",
-            "slide-up",
-            "slide-down",
-            "wipe",
-            "wipe-right",
-            "wipe-left",
-            "wipe-down",
-            "wipe-up",
-            "iris",
-            "clock",
-            "none"
-          ]
-        },
-        "out": {
-          "type": "string",
-          "label": "driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONTINUES the travel is the oppositely named one: anim:\"slide-right\" + out:\"slide-left\", anim:\"wipe-right\" + out:\"wipe-left\"."
-        },
-        "exitDur": {
-          "type": "number|string",
-          "label": "Exit window (s; 0 = hold to end), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
-        },
-        "enterDur": {
-          "type": "number|string",
-          "label": "Enter window (s, cut layers), or a duration word (core/vocab.js): instant | fast | medium | slow | luxurious"
-        },
-        "idle": {
-          "type": "string",
-          "label": "Ambient motion across this layer's SETTLED MIDDLE (between the enter ramp and the exit ramp), so a held frame stays alive without a hand-keyed motion track. A name, or { name, amp, period }. Off unless asked. Set the scene-level `idle` to opt a whole cast in, and `idle: \"none\"` here to opt one layer back out. Runs on TOP-LEVEL layers only, as the whole per-frame track pipeline does: put it on the group, not on a group child, and the group carries its children with it.",
-          "enum": [
-            "none",
-            "breathe",
-            "drift"
-          ]
-        },
-        "cut": {
-          "type": "string",
-          "label": "Cut-kit presentation",
-          "enum": [
-            "none",
-            "fade",
-            "slide",
-            "whip",
-            "punch",
-            "wipe",
-            "iris",
-            "clock",
-            "flip",
-            "rise",
-            "blur",
-            "zoom",
-            "cube",
-            "barn",
-            "softwipe",
-            "softiris",
-            "squeeze",
-            "roll",
-            "letterbox",
-            "drop",
-            "blinds",
-            "skewWhip",
-            "spin",
-            "collapse",
-            "riseBlur",
-            "jitter"
-          ]
-        },
-        "dir": {
-          "type": "string",
-          "label": "Cut direction",
-          "enum": [
-            "left",
-            "right",
-            "up",
-            "down"
-          ]
-        },
-        "dist": {
-          "type": "number",
-          "label": "Cut travel (px)"
-        },
-        "cutTiming": {
-          "type": "string",
-          "label": "Cut timing curve",
-          "enum": [
-            "linear",
-            "smooth",
-            "out",
-            "snappy",
-            "pop",
-            "rush",
-            "brake",
-            "ramp"
-          ]
-        },
-        "cx": {
-          "type": "number",
-          "label": "Iris/soft-iris centre X (0-100%)"
-        },
-        "cy": {
-          "type": "number",
-          "label": "Iris/soft-iris centre Y (0-100%)"
-        },
-        "split": {
-          "type": "string",
-          "label": "Kinetic split ('path' = SVG strokes, for the `draw` preset)",
-          "enum": [
-            "char",
-            "word",
-            "line",
-            "path"
-          ]
-        },
-        "preset": {
-          "type": "string",
-          "label": "Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/halation/diffusion/rimLight/spotlight/chromatic/chromaCycle on a glow layer)"
-        },
-        "stagger": {
-          "type": "number",
-          "label": "Per-unit delay (s)"
-        },
-        "each": {
-          "type": "number",
-          "label": "Per-unit duration (s)"
-        },
-        "loop": {
-          "type": "boolean",
-          "label": "Loop the kinetic preset"
-        },
-        "morph": {
-          "type": "object",
-          "label": "text layer TextMorph: letters migrate `text`->word { to, dur, ease } (needs w+align:center, GSAP). svg layer shape-morph: one path melts into another { to, dur, spin, points, closed }."
-        },
-        "fx": {
-          "type": "string|object|array",
-          "label": "Named GSAP effect(s) from core/gsap-effects.js: popIn | {name,dur,ease} | [blurIn,float]. Entrances (popIn/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none."
-        },
-        "fxOut": {
-          "type": "string|object",
-          "label": "Named GSAP EXIT from core/gsap-effects.js, anchored to the layer's end: fadeOut | fadeOutUp | flyOutLeft | popOut | zoomOut | blurOut | dropOut | collapseOut | spinOut | {name,dur,ease}. Mutually exclusive with `out`."
-        },
-        "modifiers": {
-          "type": "array",
-          "label": "Modifier stack applied to this layer, in array order, after every motion track: [{ \"mixBlend\": \"difference\" }]. Each key names a modifier from core/fx; an unknown name is a hard error, never a no-op. NOT `fx`, which is the named-GSAP-effect slot.",
-          "item": {
-            "mixBlend": {
-              "type": "string|object",
-              "label": "How this layer's pixels combine with what is painted behind it: \"difference\" or { mode: \"difference\" }. Refused on a group child: CSS blends against the nearest stacking context, which is the group, so it would reach nothing behind the group. Put it on the group.",
-              "enum": [
-                "normal",
-                "multiply",
-                "screen",
-                "overlay",
-                "darken",
-                "lighten",
-                "color-dodge",
-                "color-burn",
-                "hard-light",
-                "soft-light",
-                "difference",
-                "exclusion",
-                "hue",
-                "saturation",
-                "color",
-                "luminosity",
-                "plus-lighter"
-              ]
-            },
-            "ghost": {
-              "type": "boolean|string|object",
-              "label": "THE ONE EFFECT THAT READS TIME AS A MATERIAL: evaluate this layer's own `motion` track a few frames BACK and draw from the difference. \"trail\" leaves faded copies at the poses the layer just left; \"blur\" samples the same poses inside a single frame so the layer smears along its REAL direction of travel (unlike spinBlur/zoomBlur, which resample around a fixed centre). { mode: \"trail\" | \"blur\", k: samples 1..12 (default 6), back: lookback WINDOW in seconds, alpha: nearest copy's opacity, fade: per-copy falloff }. Needs a `motion` track and is refused without one; refused on a layer that draws into a <canvas>, whose pixels a clone does not carry. The copies are children of the layer, so cut, entrance, camera and ken ride along; a still layer renders identically to one carrying no ghost."
-            },
-            "shadow": {
-              "type": "number|object",
-              "label": "Cast a shadow AWAY from the scene's `lighting`, so two layers either side of the light throw their shadows in opposite directions: 30 (px of throw) or { dist, blur, spread, color, opacity }. `color` defaults to \"auto\" (read off the backdrop at t: the theme's ink over a light field, black over a dark one, the accent over an accent field) and also accepts a PALETTE ROLE name (\"accent\", \"ink\") so the shadow moves with the brand. Needs a top-level `lighting`; follows the layer's BOX, not its glyphs. Refuses alongside `elevation`/`shadow`/`glow` (they write the same property). Works on a group child, whose box is measured once at build and composed with its group's; the exception is a group whose motion track keys `w`/`h`, which reflows its children."
-            },
-            "occlude": {
-              "type": "string|object",
-              "label": "Hide this layer where another layer's box covers it: \"cardId\" or { by: \"cardId\" | [ids] | \"above\" | \"below\", pad: px grown around the occluder, invert: show ONLY the overlap }. \"above\"/\"below\" mean every layer painted in front of / behind this one, read from the scene's paint order, so the set is never a hand-written list that rots when a layer is added. The hole tracks the occluder's motion track (position, scale, rotation) and closes while it is outside its own window. Needs an `id` on this layer. Works on a group child; the exception is a group whose motion track keys `w`/`h`, which reflows its children and makes their measured offsets stale."
-            },
-            "progress": {
-              "type": "boolean|string|object",
-              "label": "Write the FILM's progress (0 at the first frame, 1 at the last) into a CSS custom property this layer's markup draws with: true (writes --film), \"--bar\", or { var, ease }. Not `vars`, which runs over the LAYER's own window; this is the scene's clock, so a runtime bar or a chapter dot re-times itself when the film is re-cut."
-            },
-            "kick": {
-              "type": "boolean|object",
-              "label": "Kick this layer on the film's own joints: true, or { on: \"cut\" | \"seam\" | \"sting\" | \"any\" | [kinds], scale: multiplier (default 1.06), frames: settle length in FRAMES (default 5) }. The times come from the scene's own cuts/seams/stings, so moving a cut re-times every kick in the film. Named `kick` because `punch` is already a whole-frame CUT STYLE."
-            },
-            "tilt": {
-              "type": "object",
-              "label": "Turn the layer out of the picture plane: { x, y, z } degrees about its own centre, projected through ONE camera shared by every tilted layer with the same parent. { dist } px is that camera's distance (default 1600, smaller = wider lens); { origin } is its vanishing point, \"center\" or [x, y] in canvas px. Siblings must agree on dist/origin or it is a hard error. On a group child the camera belongs to the group, not the canvas."
-            },
-            "plane": {
-              "type": "number|object",
-              "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size, because a depth that does not is a scale: it is drawn at lens / (lens - z), so size it for the distance. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
-            },
-            "alongPath": {
-              "type": "string|object",
-              "label": "Set this layer's line of type ON A CURVE, and send it travelling along one: { curve: \"arc\" | \"dip\" | \"wave\" | \"ramp\", w, h, from, to, dur, delay, ease, anchor } or just \"arc\". `w`/`h` declare the box the curve is drawn in, and the viewBox matches it one-to-one so the layer's own font-size lands unchanged and nothing is measured. `from`/`to` are percentages ALONG the path and default to the same value, so the line simply sits on the curve and travels only when you ask; `anchor` says which end of the line sits at the offset. Pass `d` for your own path instead of a named curve. Refused with `split`, whose spans would be wrapped inside the SVG and render nothing."
-            },
-            "wordSlot": {
-              "type": "array|object",
-              "label": "One word of this layer's sentence swaps for the next while NOTHING after it reflows: { words: [\"docs\", \"dashboards\"], every: 1.1, swap: 0.26, chip: true, loop: false, at: \"{}\", delay: 0, rise: 0.42 }. The layer's own text carries the placeholder (\"Ship {} in seconds\"). Every candidate sits in the SAME grid cell, so the slot is auto-sized by layout to the WIDEST of them from the first frame, with no measurement and no font metric. `chip: true` gives it the accent plate with `--on-accent` ink, which is where the brand colour belongs. Refused with `split`, which would drive the same spans from a second clock, and refused with fewer than two words."
-            }
-          }
-        },
-        "motionPath": {
-          "type": "object",
-          "label": "Fly the layer along an SVG path (GSAP MotionPathPlugin): { path:'M0,0 C...', align, autoRotate, curviness, dur, ease }. Deterministic (closed-form position per frame)."
-        },
-        "physics": {
-          "type": "object",
-          "label": "Velocity/gravity/friction scatter (GSAP Physics2DPlugin): { velocity, angle, gravity, friction, spread, dur }. On a split layer each letter gets an index-based angle spread (explode outward). Deterministic (no random)."
-        },
-        "parts": {
-          "label": "THE BRIDGE BETWEEN HAND-WRITTEN HTML AND THE ENGINE'S CLOCK. Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards, the rows of an `html` fragment) so a figure animates piece by piece. On an `html` layer this is how markup keeps the whole CSS surface AND still gets engine-driven, seekable per-element timing, instead of one opacity on the whole card. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease, out, exitDur, exitEase } OR an array of them (bars, then line, then dots). `out: true` gives each part its paired exit (a translate continues, a scale reverses) anchored to the layer's end. Pure (seeked GSAP)."
-        },
-        "comp": {
-          "type": "string",
-          "label": "Composition name (type:\"composition\"). A FIRST-PARTY hand-authored per-beat GSAP timeline from core/compositions/index.js (the safe form of another engine' one-timeline-per-beat model). The JSON names the comp + passes DATA via `props`; the code lives first-party, so untrusted input cannot inject. Use for bespoke multi-tween motion `parts`/blueprints can't reach (a token travelling a path while a check draws). e.g. \"pipelineFlow\"."
-        },
-        "props": {
-          "type": "object",
-          "label": "DATA passed to a `composition` comp (labels, numbers, accent). Treated as textContent/attr, never markup. e.g. { stages:[\"Input\",\"Engine\",\"Render\"] }."
-        },
-        "splitText": {
-          "type": "object",
-          "label": "Masked LINE reveals (GSAP SplitText): { mask, stagger, dur, ease }. Each line slides up from behind a clip. Line-level only; use `split` for char/word. Do not combine with `split`."
-        },
-        "circle": {
-          "type": "boolean|object",
-          "label": "Lay the text CHARS on a rotating circular path (badge/seal). { radius: px, period: s/turn }. Set w = 2*radius so pin centres it."
-        },
-        "phaseStep": {
-          "type": "number",
-          "label": "Per-unit phase offset for looping presets (wave/shimmerWave); ~0.12 = a crest travels the word"
-        },
-        "ransom": {
-          "type": "boolean|object",
-          "label": "Comic/ransom cutout: each glyph a different face, paper swatch + torn edge (implies split:char; pair with fall/bounce). Object form: { palette: 'paper'|'color', sprites, accent, faces, swatches, cycle, stagger }. `sprites:true` uses REAL cut-out letter photos baked by `make ransom-sprites` instead of CSS tiles. `cycle` (s) re-rolls each letter into a different cutout of the SAME glyph in place"
-        },
-        "ransomSeed": {
-          "type": "string|number",
-          "label": "Seed for the ransom cutout choices (defaults to the text, so the same word looks the same)"
-        },
-        "presetOpts": {
-          "type": "object",
-          "label": "Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wave amp, spring bounce/settle)"
-        },
-        "gradient": {
-          "type": "object",
-          "label": "STATIC gradient text fill via background-clip (distinct from preset:\"gradient\" which sweeps): { from, to, angle? }. angle 180 = top→bottom (a dark-top→light-bottom hero word). e.g. {\"from\":\"#1c1613\",\"to\":\"#f3763b\",\"angle\":180}"
-        },
-        "lookOpts": {
-          "type": "object",
-          "label": "Composite-look knobs (core/looks.js): color · color2 · strength (0..1 master dial) · grain · vignette · warmth. Defaults reskin to the theme."
-        },
-        "filter": {
-          "type": "string",
-          "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow) OR a composite LOOK (neon/dreamyHaze/vhs/crt/filmNoir/cyberpunk/thermal/lomo/… core/looks.js). One positional arg = strength 0..1 (e.g. \"neon:0.9\"); full knobs via lookOpts"
-        },
-        "mask": {
-          "type": "string",
-          "label": "CSS mask-image"
-        },
-        "css": {
-          "type": "object",
-          "label": "Raw CSS the layer vocabulary does not name (a box gradient via `background`, `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration). camelCase keys in (`boxShadow`), applied once at build time. REFUSES opacity/transform/animation/transition/position/left/top/width/height/zIndex/pointerEvents (the engine owns and rewrites those every frame), use anim/motion/parts/vars/x/y/w/h/track instead."
-        },
-        "critical": {
-          "type": "boolean",
-          "label": "Force include/exclude from layout audit"
-        },
-        "becomes": {
-          "type": "string",
-          "label": "Declare that this layer CONTINUES as another (by its `id`) across a boundary. A cut transforms one root and a seam blends two frozen stills; neither joins the CONTENT, so the only thing that truly connects two scenes is a form that persists. The named layer opens on THIS layer's final pose (centres matched, size matched by scale, rotation carried) and then animates away into its own geometry, so the handover is exact by construction instead of hand-aligned and hoped for. `becomesDur` (default 0.42) and `becomesEase` shape the handover. validate fails if the two do not meet at the boundary. See docs/CRAFT/KEYED-MOTION.md."
-        },
-        "becomesDur": {
-          "type": "number",
-          "label": "Seconds the incoming layer takes to settle from the handed-over pose into its own (default 0.42)."
-        },
-        "becomesEase": {
-          "type": "string",
-          "label": "Easing for the handover settle (default easeOutCubic)."
-        },
-        "panWith": {
-          "type": "string",
-          "label": "Share another layer's motion track by its `id`, on the SAME wall clock, from THIS layer's own origin. A pan of the page is not a camera move (a camera transforms the whole frame, scrim included), so moving a surface means moving its layers together. Copied as deltas and time-shifted by the difference in `start`, so each layer keeps its own position. Anything this layer declares WINS: state your own key at a shared time to peel away from the pan, and any key at a time the pan does not cover is kept. Worked example and the reasoning: docs/CRAFT/KEYED-MOTION.md."
-        },
-        "follow": {
-          "type": "object",
-          "label": "Pin this layer to another layer's LIVE box, every frame: { id, edge, gap, dx, dy }. `anchor` places against the canvas and `becomes` hands one pose to another, and both resolve ONCE at build against numbers; neither can keep a label under a card that is moving, because the card's position after its motion track is only known at t. edge is center (default) · above · below · left · right, and `gap` is the space outside that edge. Centres are matched, not corners. The pin lands BEFORE this layer's own motion track, so the follower may still have choreography of its own and it plays about the pinned position. This layer needs an `id` (it is placed by its own measured size). Following a layer that is itself following a third pins you to the middle one's UNPINNED position."
-        },
-        "acrossBeats": {
-          "type": "boolean",
-          "label": "This layer belongs to the FILM, not to one beat. Only meaningful under `sceneUnits`, where every other layer is wrapped with its beat and truncated at that beat's cut. Set true and the layer attaches flat to the camera instead, keeping its authored duration and its own exit, so it can survive a cut and change across it. This is how you author a continuous object in a cut film. It paints ABOVE beat content by default (its z-index is `track` or its array index, against wrappers at auto); give it `\"track\": -1` to sit behind."
-        },
-        "ken": {
-          "label": "Ken Burns zoom (image): true or {from,to,fx,fy}"
-        },
-        "edgeFade": {
-          "label": "Image: fade the LEFT+RIGHT edges into the bg (white by default). true or fade-width %"
-        },
-        "edgeFadeColor": {
-          "type": "string",
-          "label": "Image: colour the edgeFade dissolves into (default #ffffff; set to the bg for dark scenes)"
-        },
-        "canvasFx": {
-          "label": "Image: Tier-2 Canvas pass baked once at build (deterministic). Name (halftone/dither/mosaic/pixelSort/stipple/ascii/edgeDetect/crosshatch) or { fx, cell, ink, paper, seed }. core/canvas-fx.js"
-        },
-        "from": {
-          "type": "number",
-          "label": "Count start value (count)"
-        },
-        "to": {
-          "type": "number",
-          "label": "Count end value (count)"
-        },
-        "decimals": {
-          "type": "number",
-          "label": "Decimal places (count)",
-          "min": 0,
-          "max": 3
-        },
-        "prefix": {
-          "type": "string",
-          "label": "Count prefix (e.g. +, $)"
-        },
-        "suffix": {
-          "type": "string",
-          "label": "Count suffix (e.g. %, s)"
-        },
-        "unit": {
-          "type": "string",
-          "label": "Count unit appended after the number (e.g. %, k, $B); raw ≥1e6 auto-compacts (2.5B) when no unit"
-        },
-        "countStart": {
-          "type": "number",
-          "label": "Count begins (s into window)"
-        },
-        "countDur": {
-          "type": "number",
-          "label": "Count duration (s)"
-        },
-        "ease": {
-          "type": "string",
-          "label": "Count easing (EASINGS name, e.g. ramp)"
-        },
-        "id": {
-          "type": "string",
-          "label": "Layer id (anchor target)"
-        },
-        "anchor": {
-          "type": "string",
-          "label": "Position relative to layer with this id"
-        },
-        "at": {
-          "type": "string",
-          "label": "Placement",
-          "enum": [
-            "below",
-            "below-center",
-            "above",
-            "above-center",
-            "right",
-            "left"
-          ]
-        },
-        "dx": {
-          "type": "number",
-          "label": "Anchor offset x (px)"
-        },
-        "dy": {
-          "type": "number",
-          "label": "Anchor offset y (px)"
-        },
-        "direction": {
-          "type": "string",
-          "label": "Group flow",
-          "enum": [
-            "row",
-            "column"
-          ]
-        },
-        "gap": {
-          "type": "number",
-          "label": "Group gap (px)"
-        },
-        "pad": {
-          "label": "Padding (px or CSS string), groups and text chips"
-        },
-        "justify": {
-          "type": "string",
-          "label": "Group justify-content"
-        },
-        "children": {
-          "type": "array",
-          "label": "Group children, text/image/count, or a nested group (layout by flow)",
-          "item": {
-            "type": {
-              "type": "string",
-              "label": "Child type. addGroupChild delegates to kit.buildLeaf, which dispatches the SAME layer registry as a top-level layer, so a child may be any layer type.",
-              "enum": [
-                "text",
-                "count",
-                "image",
-                "video",
-                "group",
-                "rect",
-                "glow",
-                "beam",
-                "svg",
-                "cursor",
-                "clip",
-                "html",
-                "component",
-                "board",
-                "doc",
-                "shader",
-                "lottie",
-                "paint",
-                "raymarch",
-                "three",
-                "globe",
-                "composition"
-              ]
-            },
-            "x": {
-              "type": "number",
-              "label": "Child x inside a `free` group (ignored by flow layouts)"
-            },
-            "y": {
-              "type": "number",
-              "label": "Child y inside a `free` group (ignored by flow layouts)"
-            },
-            "delay": {
-              "type": "number",
-              "label": "Stagger this child's entrance N seconds into the group's window",
-              "min": 0
-            }
-          }
-        },
-        "layout": {
-          "type": "string",
-          "label": "Group layout: row | column | grid | free (children place themselves at x/y)",
-          "enum": [
-            "row",
-            "column",
-            "grid",
-            "free"
-          ]
-        },
-        "gridCols": {
-          "type": "number",
-          "label": "Grid column count (layout:grid)",
-          "min": 1,
-          "max": 8
-        },
-        "colw": {
-          "type": "number",
-          "label": "Grid column width in px (layout:grid; default 1fr)"
-        },
-        "fitH": {
-          "type": "number",
-          "label": "Max height (px) for multi-line auto-fit (with fit+w), binary-search font to fit"
-        },
-        "maxLines": {
-          "type": "number",
-          "label": "Auto-fit safety: shrink a headline that wraps past this many lines (default 5)"
-        },
-        "items": {
-          "type": "string",
-          "label": "align-items for a group (flex/grid): flex-start | center | flex-end | stretch | baseline"
-        },
-        "align2": {
-          "type": "string",
-          "label": "DEPRECATED alias of `items` (align-items), use `items`"
-        },
-        "wrap": {
-          "type": "boolean",
-          "label": "Flex-wrap the row"
-        },
-        "colGap": {
-          "type": "number",
-          "label": "Grid column gap (px)"
-        },
-        "rowGap": {
-          "type": "number",
-          "label": "Grid row gap (px)"
-        },
-        "grow": {
-          "type": "number",
-          "label": "Child flex-grow (in a group)"
-        },
-        "basis": {
-          "label": "Child flex-basis (px or CSS length)"
-        },
-        "motion": {
-          "type": "array",
-          "label": "Keyframe track, element choreography (pure in t). Offsets on the base position.",
-          "item": {
-            "t": {
-              "type": "number",
-              "label": "Seconds from layer start"
-            },
-            "x": {
-              "type": "number",
-              "label": "X offset (px)"
-            },
-            "y": {
-              "type": "number",
-              "label": "Y offset (px)"
-            },
-            "scale": {
-              "type": "number",
-              "label": "Scale multiplier"
-            },
-            "rot": {
-              "type": "number",
-              "label": "Rotation (deg)"
-            },
-            "opacity": {
-              "type": "number",
-              "label": "Opacity multiplier"
-            },
-            "w": {
-              "type": "number",
-              "label": "Width (px) at this key. The layer's BOX, not a scale: content re-fits instead of magnifying, which is how a sidebar collapses or a grid reflows. Needs a base `w` on the layer; state it on one key and every key inherits it."
-            },
-            "h": {
-              "type": "number",
-              "label": "Height (px) at this key. Same rule as `w`."
-            },
-            "track": {
-              "type": "number",
-              "label": "Z-order at this key. Depth over TIME: key it across a neighbour's track and the layer passes behind that neighbour and out again, which is how a ribbon orbits the thing it circles. Rounded to an integer when applied. Defaults to the layer's own `track`, or its index."
-            },
-            "ease": {
-              "type": "string",
-              "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)"
-            }
-          }
-        },
-        "motionBlur": {
-          "label": "Velocity motion blur on this layer's motion track (streak on fast moves; crisp when settled). true = half-shutter; a 0..1 number sets strength. Needs a motion track."
-        },
-        "elevation": {
-          "type": "number",
-          "label": "Physical depth 1–4 (ring + lit edge + stacked shadows)",
-          "min": 1,
-          "max": 4
-        },
-        "on": {
-          "type": "string",
-          "label": "Elevation surface variant",
-          "enum": [
-            "light",
-            "dark"
-          ]
-        },
-        "glow": {
-          "label": "Ambient glow: hex color, or true for theme accent"
-        },
-        "intensity": {
-          "type": "number",
-          "label": "Effect strength: glow opacity (0.05-0.6) · shader visibility (up to 1)",
-          "min": 0.05,
-          "max": 1
-        },
-        "beam": {
-          "type": "string",
-          "label": "Glow becomes a directional beam",
-          "enum": [
-            "right",
-            "left",
-            "up",
-            "down"
-          ]
-        },
-        "mode": {
-          "type": "string",
-          "label": "beam layer: 'border' (a light travelling the border) or 'shine' (a sheen sweep)",
-          "enum": [
-            "border",
-            "shine"
-          ]
-        },
-        "thickness": {
-          "type": "number",
-          "label": "beam layer: border-beam ring thickness in px"
-        },
-        "tail": {
-          "type": "number",
-          "label": "Trail length in cells (paint matrix)"
-        },
-        "period": {
-          "type": "number",
-          "label": "beam layer (shine): seconds per sheen sweep"
-        },
-        "viewBox": {
-          "type": "string",
-          "label": "svg layer: the path coordinate system (default '0 0 100 100')"
-        },
-        "d": {
-          "type": "string",
-          "label": "svg layer: the path `d` string (the from-shape when morphing)"
-        },
-        "fill": {
-          "type": "string",
-          "label": "svg layer: fill colour (default var(--accent); 'none' for draw-on)"
-        },
-        "stroke": {
-          "type": "string",
-          "label": "svg layer: stroke colour (default var(--accent) for draw-on)"
-        },
-        "strokeWidth": {
-          "type": "number",
-          "label": "svg layer: stroke thickness in viewBox units. Works on any stroked path, not just a draw-on one (`draw.weight` still wins when both are set)."
-        },
-        "draw": {
-          "label": "svg layer: stroke draws itself on. {dur, weight}"
-        },
-        "fade": {
-          "type": "string",
-          "label": "Static edge fade (exclusive with cut)",
-          "enum": [
-            "right",
-            "left",
-            "top",
-            "bottom",
-            "edges"
-          ]
-        },
-        "reflect": {
-          "label": "Floor reflection: true or opacity 0.05–0.3"
-        },
-        "headSize": {
-          "type": "number",
-          "label": "Board column-header px"
-        },
-        "cardSize": {
-          "type": "number",
-          "label": "Board card base px"
-        },
-        "part": {
-          "type": "string",
-          "label": "Scene part name (capture-scene JSONs)"
-        },
-        "pulse": {
-          "type": "number",
-          "label": "glow: gentle breathing, sine period in seconds (amplitude <= 0.15; off by default)",
-          "min": 0.5
-        },
-        "pulseAmp": {
-          "type": "number",
-          "label": "glow: pulse amplitude 0-0.15 (default 0.12)",
-          "min": 0,
-          "max": 0.15
-        },
-        "flash": {
-          "label": "glow: one-shot attack-decay bloom. true, or {attack,decay,peak} seconds/peak<=0.45"
-        },
-        "hue": {
-          "type": "number",
-          "label": "paint aurora: ONE hue (degrees) for every blob. Overrides `hues`, which is the per-blob list."
-        },
-        "hues": {
-          "type": "array",
-          "label": "paint aurora: per-blob hue list (degrees)"
-        },
-        "headColor": {
-          "type": "string",
-          "label": "Leading-character colour (paint matrix)"
-        },
-        "length": {
-          "type": "number",
-          "label": "paint meteor: streak length in px"
-        },
-        "angle": {
-          "type": "number",
-          "label": "glow spotlight: beam direction in degrees (0 = up, clockwise; default 150 = from above-left)"
-        },
-        "cycle": {
-          "type": "number",
-          "label": "glow chromaCycle: seconds for the hue to sweep the full spectrum (default 6)",
-          "min": 0.5
-        },
-        "logotype": {
-          "type": "boolean",
-          "label": "Text is part of a logo/brand mark, exempt from the CONTRAST bar only (WCAG 1.4.3)"
-        },
-        "keyClicks": {
-          "type": "boolean",
-          "label": "Set false to silence the per-character key clicks a `typing` layer emits"
-        },
-        "keyGain": {
-          "type": "number",
-          "label": "Gain of the per-character key click (default 0.3)",
-          "min": 0,
-          "max": 1
-        },
-        "keyCue": {
-          "type": "string",
-          "label": "Which cue a `typing` layer clicks with (default 'key')"
-        },
-        "aspects": {
-          "type": "object",
-          "label": "Per-aspect overrides: { \"9:16\": { …props… } } merged over this layer at that canvas only"
-        },
-        "paint": {
-          "type": "string",
-          "label": "Generative canvas effect (paint layer)",
-          "enum": [
-            "matrix",
-            "starfield",
-            "aurora",
-            "meteor",
-            "waves"
-          ]
-        },
-        "count": {
-          "type": "number",
-          "label": "Particle/line count (paint)"
-        },
-        "amp": {
-          "type": "number",
-          "label": "Wave amplitude (paint) \u00b7 three liquidBackground: swell height"
-        },
-        "rate": {
-          "type": "number",
-          "label": "Glyph changes per second (paint matrix) · on a `video` layer: how fast the source runs against the scene clock (1 = real time, 0.5 = half speed)"
-        },
-        "in": {
-          "type": "number",
-          "label": "video: the IN point in the source, seconds. Where the clip starts, not where the layer starts."
-        },
-        "poster": {
-          "type": "string",
-          "label": "video: a still shown before the first seek resolves. Optional; the engine seeks on frame one, so this is rarely visible."
-        },
-        "react": {
-          "type": "object|array",
-          "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] }, needs audio.spectrum"
-        },
-        "vars": {
-          "type": "object",
-          "label": "Animate CSS custom properties over the layer's window: { \"--p\": [from, to] }"
-        },
-        "varsDur": {
-          "type": "number|object",
-          "label": "Seconds the `vars` sweep takes (default 1). A NUMBER applies to every channel; an OBJECT keyed by channel name gives each its own, with `*` as that map's default",
-          "min": 0
-        },
-        "varsDelay": {
-          "type": "number|object",
-          "label": "Seconds into the layer before the `vars` sweep starts",
-          "min": 0
-        },
-        "varsEase": {
-          "type": "string|object",
-          "label": "Easing for the `vars` sweep (default easeOutCubic). A STRING applies to every channel; an OBJECT keyed by channel name gives each its own curve, with `*` as that map's default"
-        },
-        "crt": {
-          "type": "boolean|object",
-          "label": "Cathode ray tube: softens and blooms what is BEHIND this layer, then lays scanlines and a corner falloff over it. { bloom: px, lines: 0-1, gap: px, scan: px, vignette: 0-1, tint }"
-        },
-        "glass": {
-          "type": "boolean|number|string",
-          "label": "Frosted glass: blur what is BEHIND this layer. true = default, a number = blur px, a string = raw backdrop-filter"
-        },
-        "progressiveBlur": {
-          "type": "boolean|object",
-          "label": "Directional blur fog on the backdrop that ramps toward an edge. { dir: top|bottom|left|right, layers: 2-12, max: px }. Fades a dense grid/list into an edge."
-        },
-        "borderTrail": {
-          "type": "boolean|object",
-          "label": "A glowing arc orbiting the layer border. { color, width: px, period: s/orbit, arc: deg }. CTA/end-card emphasis."
-        },
-        "resample": {
-          "label": "LAYER AS TEXTURE: re-sample this layer's own pixels through a shader. Raster layers only (image/paint/shader). String, or {fx, amount, speed, seed}. amount may be [from,to] to animate.",
-          "enum": [
-            "zoomBlur",
-            "spinBlur",
-            "fisheye",
-            "bitCrush",
-            "macroblock",
-            "dissolve",
-            "refract",
-            "chromaShift"
-          ]
-        },
-        "raymarch": {
-          "type": "string",
-          "label": "raymarch: a lit 3D subject rendered by a distance field (no geometry, no 3D engine). Give it a box the size the object should occupy; its surround is transparent. Dials: colors, intensity, speed (subject), spin (camera orbit), seed.",
-          "enum": [
-            "metaballs",
-            "mandelbulb",
-            "chromeGlass",
-            "caustics",
-            "holoFoil"
-          ]
-        },
-        "spin": {
-          "label": "raymarch: camera orbit speed (0 holds the camera still while the subject moves)"
-        },
-        "seed": {
-          "type": "number",
-          "label": "Deterministic seed for generative layers (shader / paint / raymarch)"
-        },
-        "colors": {
-          "type": "array",
-          "label": "Palette for a generative layer (shader / raymarch), as hex strings"
-        },
-        "opacity": {
-          "type": "number",
-          "label": "Base opacity for the layer's whole life, multiplied into the enter/exit fade"
-        },
-        "three": {
-          "type": "string",
-          "label": "three: a real 3D scene (geometry, materials, lights, camera). For what an SDF cannot express: a device body with captured UI on its screen, extruded type from the real brand font, UI planes in depth, a point cloud. Posed absolutely from t, so it stays pure in n.",
-          "enum": [
-            "deviceShowcase",
-            "uiParallax",
-            "pointCloud",
-            "extrudeText",
-            "globe",
-            "shatter",
-            "magnetic",
-            "liquidBackground",
-            "codeExtrude",
-            "codeDissolve",
-            "codeAssemble"
-          ]
-        },
-        "lines": {
-          "label": "three codeExtrude / codeDissolve / codeAssemble: the snippet, one string per line \u00b7 the slab layout is derived from the real characters"
-        },
-        "device": {
-          "label": "three deviceShowcase: 'phone' (default) or 'laptop'"
-        },
-        "screen": {
-          "label": "three deviceShowcase: image src mapped onto the device screen \u00b7 three shatter: image mapped across the surface that breaks"
-        },
-        "breakAt": {
-          "type": "number",
-          "label": "three shatter: seconds into the layer before the surface breaks"
-        },
-        "breakDur": {
-          "type": "number",
-          "label": "three shatter: seconds the break takes"
-        },
-        "poles": {
-          "type": "number",
-          "label": "three magnetic: 2 = a dipole (lines arc pole to pole), 1 = a single source (lines run straight out)"
-        },
-        "bodyColor": {
-          "label": "three deviceShowcase: device body colour"
-        },
-        "planes": {
-          "label": "three uiParallax: image srcs or {src,x,y,z} placed in depth"
-        },
-        "travel": {
-          "label": "three uiParallax: how far the camera dollies over the layer's window"
-        },
-        "swing": {
-          "label": "three uiParallax: gentle yaw amplitude"
-        },
-        "pointSize": {
-          "label": "three pointCloud / globe / magnetic: point size in world units"
-        },
-        "globe": {
-          "type": "boolean",
-          "label": "globe: a dotted planet with a great-circle route drawn on it (cobe). Set the layer type to \"globe\"; this key is the marker. Route endpoints are `origin`/`dest` as [lon, lat]."
-        },
-        "phi": {
-          "label": "globe: rotation in radians at t=0. 4.8 puts the North Atlantic facing the camera"
-        },
-        "phiTo": {
-          "label": "globe: rotation it EASES TO, then holds. A constant spin turns the subject out of frame"
-        },
-        "phiDur": {
-          "label": "globe: seconds the settle takes"
-        },
-        "theta": {
-          "label": "globe: tilt in radians, how far the pole leans toward the camera"
-        },
-        "arcWidth": {
-          "label": "globe: thickness of the route"
-        },
-        "mapSamples": {
-          "label": "globe: how many dots the land is sampled into (default 16000)"
-        },
-        "mapBrightness": {
-          "label": "globe: how bright the land dots are against the sea"
-        },
-        "diffuse": {
-          "label": "globe: how hard the day/night shading falls across the sphere"
-        },
-        "dark": {
-          "label": "globe: overall darkness of the unlit side"
-        },
-        "scale": {
-          "label": "globe: how much of its box the planet fills (1 = default)"
-        },
-        "markerSize": {
-          "label": "globe: size of the two endpoint markers"
-        },
-        "origin": {
-          "label": "three globe: [lon, lat] of the route's start. NOT `from`, which is a number on `count`"
-        },
-        "dest": {
-          "label": "three globe: [lon, lat] of the route's end"
-        },
-        "spinFrom": {
-          "label": "three globe: rotation in radians at t=0"
-        },
-        "spinTo": {
-          "label": "three globe: rotation it EASES TO, then holds. A constant spin turns the subject out of frame; this arrives and stays"
-        },
-        "spinDur": {
-          "label": "three globe: seconds the settle takes"
-        },
-        "sunFrom": {
-          "label": "three globe: sun longitude in degrees at t=0. The terminator is computed from it, so the lit land and the lit sea cannot disagree"
-        },
-        "sunTo": {
-          "label": "three globe: sun longitude at the end of the layer. Decreasing sends the terminator WEST, which is the direction the real one moves"
-        },
-        "sunLat": {
-          "label": "three globe: the sun's declination in degrees. The seasonal tilt of the day/night line"
-        },
-        "dawnWidth": {
-          "label": "three globe: how soft the terminator is, in cosine units. 0 is a hard edge, 0.22 is a band of dawn"
-        },
-        "arcHeight": {
-          "label": "three globe: how far the route lifts off the surface, as a fraction of the radius (default 0.18)"
-        },
-        "drawStart": {
-          "label": "three globe: local time in seconds at which the route begins drawing (default 0)"
-        },
-        "drawDur": {
-          "label": "three globe: seconds the route takes to draw. The aircraft rides the SAME parameter, so the line and the marker cannot disagree (default 4)"
-        },
-        "morphSpeed": {
-          "label": "three pointCloud: shape morph rate"
-        },
-        "depth": {
-          "label": "three extrudeText: extrusion depth"
-        },
-        "metalness": {
-          "label": "three: PBR metalness"
-        },
-        "roughness": {
-          "label": "three: PBR roughness"
-        },
-        "fov": {
-          "label": "three: camera field of view"
-        },
-        "dolly": {
-          "label": "three: camera distance"
-        },
-        "yaw": {
-          "label": "three: base yaw offset"
-        },
-        "pitch": {
-          "label": "three: base pitch offset"
-        },
-        "params": {
-          "type": "array",
-          "label": "Per-effect parameters",
-          "of": "number",
-          "max": 4,
-          "note": "shader only: up to four numbers, meaning whatever that effect's branch says. `bands` reads them as (slat count, angle in turns, glow radius, glow softness)."
-        },
-        "params2": {
-          "type": "array",
-          "label": "Per-effect parameters, second vector",
-          "of": "number",
-          "max": 4,
-          "note": "shader only. `bands` reads it as (field: 0 linear / 1 radial / 2 box, centre x, centre y as a fraction of the frame from the middle, light sign)."
-        },
-        "params3": {
-          "type": "array",
-          "label": "Per-effect parameters, third vector",
-          "of": "number",
-          "max": 4,
-          "note": "shader only. `bands` reads it as (gradient: 0 along the bands / 1 on its own axis, that axis in turns, per-band convergence, band phase)."
-        },
-        "params4": {
-          "type": "array",
-          "label": "Per-effect parameters, fourth vector",
-          "of": "number",
-          "max": 4,
-          "note": "shader only. `bands` reads it as (mirror the bands about the field centre, light x offset, light y offset, light shape: 0 round or oval / 1 bar / 2 rounded)."
-        },
-        "params5": {
-          "type": "array",
-          "label": "Per-effect parameters, fifth vector",
-          "of": "number",
-          "max": 4,
-          "note": "shader only. `bands` reads it as (the light's y radius as a fraction of its x radius, the light's angle in turns, within-band shading depth, how much of the per-band convergence step leans across the band)."
-        },
-        "params6": {
-          "type": "array",
-          "label": "Per-effect parameters, sixth vector",
-          "of": "number",
-          "max": 4,
-          "note": "shader only. `bands` reads it as (light ring radius, light star points, light star depth, zoom around the light). Every field is 0 for the behaviour that predates them."
-        }
-      }
+    "tail": {
+     "type": "number",
+     "label": "Trail length in cells (paint matrix)"
     },
-    "captions": {
-      "type": "array",
-      "label": "Caption windows",
-      "item": {
-        "t0": {
-          "type": "number",
-          "label": "Start (s)",
-          "required": true
-        },
-        "t1": {
-          "type": "number",
-          "label": "End (s)",
-          "required": true
-        },
-        "text": {
-          "type": "string",
-          "label": "Caption text",
-          "required": true
-        },
-        "words": {
-          "type": "array",
-          "label": "Optional per-word timings [{t0,t1}], aligned to this line's markup-stripped word list. Drives every captionStyle. Omit and core/captions.js distributes the line proportionally to word length, which still reads as intentional karaoke. Written for you by scripts/media/vo-captions.mjs from a TTS sidecar."
-        },
-        "pin": {
-          "type": "string",
-          "label": "Where this caption sits, in the SAME placement grammar as a layer (core/boot.js resolveCoords): center | top | bottom | left | right | top-left | top-right | bottom-left | bottom-right | thirds-*. Omit and formats/scene/scene.css places it, which is the bottom band it has always used."
-        },
-        "x": {
-          "type": "number|string",
-          "label": "Left edge in px, or a relative form: \"50%\", \"50%-40\", \"center\", \"left\", \"right\", \"third1\", \"third2\". Edge keywords resolve against the SAFE box for this destination, so an edge-pinned caption can never land under platform chrome. Setting x releases the stylesheet's right edge."
-        },
-        "y": {
-          "type": "number|string",
-          "label": "Top edge in px or a relative form (see x). The two-line caption band (core/safe.js CAPTION_LINES) is the extent \"bottom\" subtracts, so pin:\"bottom\" lands the band inside the safe box rather than hanging it off the line."
-        },
-        "w": {
-          "type": "number|string",
-          "label": "Caption box width in px or \"60%\". Omit and the stylesheet's margins decide."
-        },
-        "align": {
-          "type": "string",
-          "label": "Text alignment inside the box: left | center | right. Default center.",
-          "enum": ["left", "center", "right"]
-        },
-        "size": {
-          "type": "number",
-          "label": "Font size in px for this caption only. Default is the skin's (46 plain, 64 pop/styled, core/safe.js CAPTION_SKINS). Changing it changes the band this caption reserves."
-        }
-      }
+    "period": {
+     "type": "number",
+     "label": "beam layer (shine): seconds per sheen sweep"
     },
-    "grain": {
-      "type": "boolean",
-      "label": "Opt in to the in-engine canvas grain (default off, matching the ffmpeg pass)"
+    "viewBox": {
+     "type": "string",
+     "label": "svg layer: the path coordinate system (default '0 0 100 100')"
     },
-    "audio": {
-      "type": "object",
-      "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio-select.js. The CUES are synthesized and carry no licence (core/audio-kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See docs/CRAFT/SOUND.md.",
-      "fields": {
-        "music": {
-          "type": "string",
-          "label": "Music bed. Silence is the default, so this is opt-in: \"auto\" (audio-select picks a bed by mood), a baked bed NAME (calm | warm | tense → assets/music/<name>.wav), or a path to a .wav. Omit for no bed. `make validate` resolves it against assets/music/ and the scene dir and warns if it will not."
-        },
-        "auto": {
-          "type": "boolean",
-          "label": "Auto-pick a music bed AND auto-derive sfx cues from cuts/stings (core/audio-select.js). Same as music:\"auto\"."
-        },
-        "musicGain": {
-          "type": "number",
-          "label": "Music bed level (0 = muted, ~0.5 typical). Ducks automatically under VO.",
-          "min": 0
-        },
-        "musicFade": {
-          "type": "object",
-          "label": "Music fade envelope (seconds).",
-          "fields": {
-            "in": {
-              "type": "number",
-              "label": "Fade-in (s)",
-              "min": 0
-            },
-            "out": {
-              "type": "number",
-              "label": "Fade-out (s)",
-              "min": 0
-            }
-          }
-        },
-        "musicDuck": {
-          "type": "number",
-          "label": "Duck floor: how far the bed drops while VO plays (0..1, e.g. 0.15).",
-          "min": 0,
-          "max": 1
-        },
-        "loudness": {
-          "type": "number",
-          "label": "Integrated loudness target in LUFS (negative, e.g. -14 for social). Absent = peak-normalize only.",
-          "min": -60,
-          "max": 0
-        },
-        "vo": {
-          "type": "string",
-          "label": "Voice-over WAV path (resolved against the scene dir + repo root). A named-but-missing file fails `make validate` (the mixer would silently drop it)."
-        },
-        "voWords": {
-          "type": "string",
-          "label": "VO word-timing sidecar JSON: [{ \"w\": \"hello\", \"t\": 1.2 }], drives word captions."
-        },
-        "sfxGain": {
-          "type": "number",
-          "label": "Master multiplier over EVERY sfx cue (authored + auto-derived).",
-          "min": 0
-        },
-        "bridges": {
-          "type": "array",
-          "label": "Sound bridges, J-cuts and L-cuts. A bridge is a texture that crosses a picture change instead of stopping at it: a J-cut starts the next shot's sound BEFORE its picture, an L-cut lets the last shot's sound run UNDER the new one. It is the one continuous object that costs the picture nothing, so a film whose beats are visually unrelated is still held together. Each bridge names a JUNCTION, never a timestamp, so retiming a beat moves the sound with it. Resolved by core/audio-bridges.js, mixed by internal/audio/audio.go. See docs/CRAFT/SOUND.md §2.",
-          "item": {
-            "bridge": {
-              "type": "string",
-              "label": "\"j\" = the audio leads (new sound over old picture) · \"l\" = the picture leads (old sound under new picture).",
-              "required": true,
-              "enum": [
-                "j",
-                "l"
-              ]
-            },
-            "at": {
-              "type": "string",
-              "label": "The junction, as \"<kind>@<index>\": cut@1 · seam@0 · sting@2 · junction@3 (junction = all of them merged). The index counts in TIME order within that kind. An index the film does not have fails the render and lists what it does have.",
-              "required": true
-            },
-            "sound": {
-              "type": "string",
-              "label": "The texture: a bed name (\"tense\" → assets/music/tense.wav), a synthesized cue name (\"loading\" → assets/sfx/loading.wav), or a path to a .wav. Looped to fill the span. A source that is not on disk FAILS the render. A bridge that never plays is not a quieter film.",
-              "required": true
-            },
-            "lead": {
-              "type": "number",
-              "label": "J-cut only, required: seconds of sound that arrive before the picture cuts. A lead longer than the beat before the junction is rejected, not clipped.",
-              "min": 0
-            },
-            "lag": {
-              "type": "number",
-              "label": "L-cut only, required: seconds the sound keeps running after the picture cuts. A lag past the next junction is rejected.",
-              "min": 0
-            },
-            "span": {
-              "type": "number",
-              "label": "How long the sound holds on its OWN side of the junction (after it for a J-cut, before it for an L-cut). Default: to the neighbouring junction, or the edge of the film.",
-              "min": 0
-            },
-            "fade": {
-              "type": "number",
-              "label": "Equal-power crossfade at both ends of the span, seconds (default 0.35). A bridge never butts: the point is that the ear crosses over, not that a second file switches on.",
-              "min": 0
-            },
-            "gain": {
-              "type": "number",
-              "label": "Bridge level (default 0.5).",
-              "min": 0
-            },
-            "duck": {
-              "type": "number",
-              "label": "Floor the MUSIC bed drops to under this bridge, 0..1 (default 1 = no duck). Setting it is what makes the join a cross rather than a stack: the bed dips on the same curve the bridge rises on.",
-              "min": 0,
-              "max": 1
-            }
-          }
-        },
-        "cues": {
-          "type": "array",
-          "label": "Sound-effect cues, each { t, name, gain }. THIS is where cues live (the engine reads `audio.cues`); there is no top-level `sfx`.",
-          "item": {
-            "t": {
-              "type": "number",
-              "label": "Cue time (s)",
-              "required": true
-            },
-            "name": {
-              "type": "string",
-              "label": "Cue name: a synthesized cue (core/audio-kit.mjs CUES) or a baked alias (whoosh/reveal/click/pop, see scripts/media/audio-bake.mjs). `make validate` guards this list against the live CUES registry.",
-              "required": true,
-              "enum": [
-                "chime",
-                "sparkle",
-                "droplet",
-                "bloom",
-                "whisper",
-                "tick",
-                "press",
-                "key",
-                "release",
-                "toggle",
-                "success",
-                "error",
-                "page",
-                "loading",
-                "ready",
-                "whoosh",
-                "reveal",
-                "click",
-                "pop"
-              ]
-            },
-            "gain": {
-              "type": "number",
-              "label": "Per-cue gain (default 0.6)",
-              "min": 0
-            }
-          }
-        },
-        "spectrum": {
-          "type": "string",
-          "label": "Precomputed spectrum sidecar JSON for audio-reactive layers (layer `react:{}`)."
-        },
-        "beatSync": {
-          "type": "boolean|object",
-          "label": "Snap the film's picture joints to the music's pulse. `true` takes the grid `make beatmap` wrote beside audio.music (assets/music/<bed>.beats.json); an object may set `grid` (an explicit .beats.json), `maxShift` (how far a joint may travel, default 0.12s) and `bar` (snap to downbeats, not every beat). Cuts snap their time and seams snap the centre of their blend; stings never snap, because an author offsets one from its cut on purpose. A grid that is missing, empty or below confidence 1.6 FAILS the render rather than quietly leaving the film unmatched. core/beat-bind.js, docs/CRAFT/SOUND.md.",
-          "fields": {
-            "grid": { "type": "string", "label": "Explicit path to a .beats.json (default: derived from audio.music)." },
-            "maxShift": { "type": "number", "label": "How far a joint may travel to reach a beat, in seconds (default 0.12). Beyond it the joint stays where it was written and the run says so.", "min": 0, "max": 1 },
-            "bar": { "type": "boolean", "label": "Snap to downbeats (bar lines) instead of every beat." }
-          }
-        },
-        "silent": {
-          "type": "boolean",
-          "label": "Render with NO audio track at all. A real device (a film can be better mute) but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make audio-check` says so."
-        },
-        "_why": {
-          "type": "string",
-          "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
-        }
-      }
+    "d": {
+     "type": "string",
+     "label": "svg layer: the path `d` string (the from-shape when morphing)"
+    },
+    "fill": {
+     "type": "string",
+     "label": "svg layer: fill colour (default var(--accent); 'none' for draw-on)"
+    },
+    "stroke": {
+     "type": "string",
+     "label": "svg layer: stroke colour (default var(--accent) for draw-on)"
+    },
+    "strokeWidth": {
+     "type": "number",
+     "label": "svg layer: stroke thickness in viewBox units. Works on any stroked path, not just a draw-on one (`draw.weight` still wins when both are set)."
+    },
+    "draw": {
+     "label": "svg layer: stroke draws itself on. {dur, weight}"
+    },
+    "fade": {
+     "type": "string",
+     "label": "Static edge fade (exclusive with cut)",
+     "enum": [
+      "right",
+      "left",
+      "top",
+      "bottom",
+      "edges"
+     ]
+    },
+    "reflect": {
+     "label": "Floor reflection: true or opacity 0.05\u20130.3"
+    },
+    "headSize": {
+     "type": "number",
+     "label": "Board column-header px"
+    },
+    "cardSize": {
+     "type": "number",
+     "label": "Board card base px"
+    },
+    "part": {
+     "type": "string",
+     "label": "Scene part name (capture-scene JSONs)"
+    },
+    "pulse": {
+     "type": "number",
+     "label": "glow: gentle breathing, sine period in seconds (amplitude <= 0.15; off by default)",
+     "min": 0.5
+    },
+    "pulseAmp": {
+     "type": "number",
+     "label": "glow: pulse amplitude 0-0.15 (default 0.12)",
+     "min": 0,
+     "max": 0.15
+    },
+    "flash": {
+     "label": "glow: one-shot attack-decay bloom. true, or {attack,decay,peak} seconds/peak<=0.45"
+    },
+    "hue": {
+     "type": "number",
+     "label": "paint aurora: ONE hue (degrees) for every blob. Overrides `hues`, which is the per-blob list."
+    },
+    "hues": {
+     "type": "array",
+     "label": "paint aurora: per-blob hue list (degrees)"
+    },
+    "headColor": {
+     "type": "string",
+     "label": "Leading-character colour (paint matrix)"
+    },
+    "length": {
+     "type": "number",
+     "label": "paint meteor: streak length in px"
+    },
+    "angle": {
+     "type": "number",
+     "label": "glow spotlight: beam direction in degrees (0 = up, clockwise; default 150 = from above-left)"
+    },
+    "cycle": {
+     "type": "number",
+     "label": "glow chromaCycle: seconds for the hue to sweep the full spectrum (default 6)",
+     "min": 0.5
+    },
+    "logotype": {
+     "type": "boolean",
+     "label": "Text is part of a logo/brand mark, exempt from the CONTRAST bar only (WCAG 1.4.3)"
+    },
+    "keyClicks": {
+     "type": "boolean",
+     "label": "Set false to silence the per-character key clicks a `typing` layer emits"
+    },
+    "keyGain": {
+     "type": "number",
+     "label": "Gain of the per-character key click (default 0.3)",
+     "min": 0,
+     "max": 1
+    },
+    "keyCue": {
+     "type": "string",
+     "label": "Which cue a `typing` layer clicks with (default 'key')"
+    },
+    "aspects": {
+     "type": "object",
+     "label": "Per-aspect overrides: { \"9:16\": { \u2026props\u2026 } } merged over this layer at that canvas only"
+    },
+    "paint": {
+     "type": "string",
+     "label": "Generative canvas effect (paint layer)",
+     "enum": [
+      "matrix",
+      "starfield",
+      "aurora",
+      "meteor",
+      "waves"
+     ]
+    },
+    "count": {
+     "type": "number",
+     "label": "Particle/line count (paint)"
+    },
+    "amp": {
+     "type": "number",
+     "label": "Wave amplitude (paint) \u00b7 three liquidBackground: swell height"
+    },
+    "rate": {
+     "type": "number",
+     "label": "Glyph changes per second (paint matrix) \u00b7 on a `video` layer: how fast the source runs against the scene clock (1 = real time, 0.5 = half speed)"
+    },
+    "in": {
+     "type": "number",
+     "label": "video: the IN point in the source, seconds. Where the clip starts, not where the layer starts."
+    },
+    "poster": {
+     "type": "string",
+     "label": "video: a still shown before the first seek resolves. Optional; the engine seeks on frame one, so this is rarely visible."
+    },
+    "react": {
+     "type": "object|array",
+     "label": "Audio react: { band:'low'|'mid'|'high', prop:'scale'|'opacity'|'blur', range:[lo,hi] }, needs audio.spectrum"
+    },
+    "vars": {
+     "type": "object",
+     "label": "Animate CSS custom properties over the layer's window: { \"--p\": [from, to] }"
+    },
+    "varsDur": {
+     "type": "number|object",
+     "label": "Seconds the `vars` sweep takes (default 1). A NUMBER applies to every channel; an OBJECT keyed by channel name gives each its own, with `*` as that map's default",
+     "min": 0
+    },
+    "varsDelay": {
+     "type": "number|object",
+     "label": "Seconds into the layer before the `vars` sweep starts",
+     "min": 0
+    },
+    "varsEase": {
+     "type": "string|object",
+     "label": "Easing for the `vars` sweep (default easeOutCubic). A STRING applies to every channel; an OBJECT keyed by channel name gives each its own curve, with `*` as that map's default"
+    },
+    "crt": {
+     "type": "boolean|object",
+     "label": "Cathode ray tube: softens and blooms what is BEHIND this layer, then lays scanlines and a corner falloff over it. { bloom: px, lines: 0-1, gap: px, scan: px, vignette: 0-1, tint }"
+    },
+    "glass": {
+     "type": "boolean|number|string",
+     "label": "Frosted glass: blur what is BEHIND this layer. true = default, a number = blur px, a string = raw backdrop-filter"
+    },
+    "progressiveBlur": {
+     "type": "boolean|object",
+     "label": "Directional blur fog on the backdrop that ramps toward an edge. { dir: top|bottom|left|right, layers: 2-12, max: px }. Fades a dense grid/list into an edge."
+    },
+    "borderTrail": {
+     "type": "boolean|object",
+     "label": "A glowing arc orbiting the layer border. { color, width: px, period: s/orbit, arc: deg }. CTA/end-card emphasis."
+    },
+    "resample": {
+     "label": "LAYER AS TEXTURE: re-sample this layer's own pixels through a shader. Raster layers only (image/paint/shader). String, or {fx, amount, speed, seed}. amount may be [from,to] to animate.",
+     "enum": [
+      "zoomBlur",
+      "spinBlur",
+      "fisheye",
+      "bitCrush",
+      "macroblock",
+      "dissolve",
+      "refract",
+      "chromaShift"
+     ]
+    },
+    "raymarch": {
+     "type": "string",
+     "label": "raymarch: a lit 3D subject rendered by a distance field (no geometry, no 3D engine). Give it a box the size the object should occupy; its surround is transparent. Dials: colors, intensity, speed (subject), spin (camera orbit), seed.",
+     "enum": [
+      "metaballs",
+      "mandelbulb",
+      "chromeGlass",
+      "caustics",
+      "holoFoil"
+     ]
+    },
+    "spin": {
+     "label": "raymarch: camera orbit speed (0 holds the camera still while the subject moves)"
+    },
+    "seed": {
+     "type": "number",
+     "label": "Deterministic seed for generative layers (shader / paint / raymarch)"
+    },
+    "colors": {
+     "type": "array",
+     "label": "Palette for a generative layer (shader / raymarch), as hex strings"
+    },
+    "opacity": {
+     "type": "number",
+     "label": "Base opacity for the layer's whole life, multiplied into the enter/exit fade"
+    },
+    "three": {
+     "type": "string",
+     "label": "three: a real 3D scene (geometry, materials, lights, camera). For what an SDF cannot express: a device body with captured UI on its screen, extruded type from the real brand font, UI planes in depth, a point cloud. Posed absolutely from t, so it stays pure in n.",
+     "enum": [
+      "deviceShowcase",
+      "uiParallax",
+      "pointCloud",
+      "extrudeText",
+      "globe",
+      "shatter",
+      "magnetic",
+      "liquidBackground",
+      "codeExtrude",
+      "codeDissolve",
+      "codeAssemble"
+     ]
+    },
+    "lines": {
+     "label": "three codeExtrude / codeDissolve / codeAssemble: the snippet, one string per line \u00b7 the slab layout is derived from the real characters"
+    },
+    "device": {
+     "label": "three deviceShowcase: 'phone' (default) or 'laptop'"
+    },
+    "screen": {
+     "label": "three deviceShowcase: image src mapped onto the device screen \u00b7 three shatter: image mapped across the surface that breaks"
+    },
+    "breakAt": {
+     "type": "number",
+     "label": "three shatter: seconds into the layer before the surface breaks"
+    },
+    "breakDur": {
+     "type": "number",
+     "label": "three shatter: seconds the break takes"
+    },
+    "poles": {
+     "type": "number",
+     "label": "three magnetic: 2 = a dipole (lines arc pole to pole), 1 = a single source (lines run straight out)"
+    },
+    "bodyColor": {
+     "label": "three deviceShowcase: device body colour"
+    },
+    "planes": {
+     "label": "three uiParallax: image srcs or {src,x,y,z} placed in depth"
+    },
+    "travel": {
+     "label": "three uiParallax: how far the camera dollies over the layer's window"
+    },
+    "swing": {
+     "label": "three uiParallax: gentle yaw amplitude"
+    },
+    "pointSize": {
+     "label": "three pointCloud / globe / magnetic: point size in world units"
+    },
+    "globe": {
+     "type": "boolean",
+     "label": "globe: a dotted planet with a great-circle route drawn on it (cobe). Set the layer type to \"globe\"; this key is the marker. Route endpoints are `origin`/`dest` as [lon, lat]."
+    },
+    "phi": {
+     "label": "globe: rotation in radians at t=0. 4.8 puts the North Atlantic facing the camera"
+    },
+    "phiTo": {
+     "label": "globe: rotation it EASES TO, then holds. A constant spin turns the subject out of frame"
+    },
+    "phiDur": {
+     "label": "globe: seconds the settle takes"
+    },
+    "theta": {
+     "label": "globe: tilt in radians, how far the pole leans toward the camera"
+    },
+    "arcWidth": {
+     "label": "globe: thickness of the route"
+    },
+    "mapSamples": {
+     "label": "globe: how many dots the land is sampled into (default 16000)"
+    },
+    "mapBrightness": {
+     "label": "globe: how bright the land dots are against the sea"
+    },
+    "diffuse": {
+     "label": "globe: how hard the day/night shading falls across the sphere"
+    },
+    "dark": {
+     "label": "globe: overall darkness of the unlit side"
+    },
+    "scale": {
+     "label": "globe: how much of its box the planet fills (1 = default)"
+    },
+    "markerSize": {
+     "label": "globe: size of the two endpoint markers"
+    },
+    "origin": {
+     "label": "three globe: [lon, lat] of the route's start. NOT `from`, which is a number on `count`"
+    },
+    "dest": {
+     "label": "three globe: [lon, lat] of the route's end"
+    },
+    "spinFrom": {
+     "label": "three globe: rotation in radians at t=0"
+    },
+    "spinTo": {
+     "label": "three globe: rotation it EASES TO, then holds. A constant spin turns the subject out of frame; this arrives and stays"
+    },
+    "spinDur": {
+     "label": "three globe: seconds the settle takes"
+    },
+    "sunFrom": {
+     "label": "three globe: sun longitude in degrees at t=0. The terminator is computed from it, so the lit land and the lit sea cannot disagree"
+    },
+    "sunTo": {
+     "label": "three globe: sun longitude at the end of the layer. Decreasing sends the terminator WEST, which is the direction the real one moves"
+    },
+    "sunLat": {
+     "label": "three globe: the sun's declination in degrees. The seasonal tilt of the day/night line"
+    },
+    "dawnWidth": {
+     "label": "three globe: how soft the terminator is, in cosine units. 0 is a hard edge, 0.22 is a band of dawn"
+    },
+    "arcHeight": {
+     "label": "three globe: how far the route lifts off the surface, as a fraction of the radius (default 0.18)"
+    },
+    "drawStart": {
+     "label": "three globe: local time in seconds at which the route begins drawing (default 0)"
+    },
+    "drawDur": {
+     "label": "three globe: seconds the route takes to draw. The aircraft rides the SAME parameter, so the line and the marker cannot disagree (default 4)"
+    },
+    "morphSpeed": {
+     "label": "three pointCloud: shape morph rate"
+    },
+    "depth": {
+     "label": "three extrudeText: extrusion depth"
+    },
+    "metalness": {
+     "label": "three: PBR metalness"
+    },
+    "roughness": {
+     "label": "three: PBR roughness"
+    },
+    "fov": {
+     "label": "three: camera field of view"
+    },
+    "dolly": {
+     "label": "three: camera distance"
+    },
+    "yaw": {
+     "label": "three: base yaw offset"
+    },
+    "pitch": {
+     "label": "three: base pitch offset"
+    },
+    "params": {
+     "type": "array",
+     "label": "Per-effect parameters",
+     "of": "number",
+     "max": 4,
+     "note": "shader only: up to four numbers, meaning whatever that effect's branch says. `bands` reads them as (slat count, angle in turns, glow radius, glow softness)."
+    },
+    "params2": {
+     "type": "array",
+     "label": "Per-effect parameters, second vector",
+     "of": "number",
+     "max": 4,
+     "note": "shader only. `bands` reads it as (field: 0 linear / 1 radial / 2 box, centre x, centre y as a fraction of the frame from the middle, light sign)."
+    },
+    "params3": {
+     "type": "array",
+     "label": "Per-effect parameters, third vector",
+     "of": "number",
+     "max": 4,
+     "note": "shader only. `bands` reads it as (gradient: 0 along the bands / 1 on its own axis, that axis in turns, per-band convergence, band phase)."
+    },
+    "params4": {
+     "type": "array",
+     "label": "Per-effect parameters, fourth vector",
+     "of": "number",
+     "max": 4,
+     "note": "shader only. `bands` reads it as (mirror the bands about the field centre, light x offset, light y offset, light shape: 0 round or oval / 1 bar / 2 rounded)."
+    },
+    "params5": {
+     "type": "array",
+     "label": "Per-effect parameters, fifth vector",
+     "of": "number",
+     "max": 4,
+     "note": "shader only. `bands` reads it as (the light's y radius as a fraction of its x radius, the light's angle in turns, within-band shading depth, how much of the per-band convergence step leans across the band)."
+    },
+    "params6": {
+     "type": "array",
+     "label": "Per-effect parameters, sixth vector",
+     "of": "number",
+     "max": 4,
+     "note": "shader only. `bands` reads it as (light ring radius, light star points, light star depth, zoom around the light). Every field is 0 for the behaviour that predates them."
     }
+   }
+  },
+  "captions": {
+   "type": "array",
+   "label": "Caption windows",
+   "item": {
+    "t0": {
+     "type": "number",
+     "label": "Start (s)",
+     "required": true
+    },
+    "t1": {
+     "type": "number",
+     "label": "End (s)",
+     "required": true
+    },
+    "text": {
+     "type": "string",
+     "label": "Caption text",
+     "required": true
+    },
+    "words": {
+     "type": "array",
+     "label": "Optional per-word timings [{t0,t1}], aligned to this line's markup-stripped word list. Drives every captionStyle. Omit and core/captions.js distributes the line proportionally to word length, which still reads as intentional karaoke. Written for you by scripts/media/vo-captions.mjs from a TTS sidecar."
+    },
+    "pin": {
+     "type": "string",
+     "label": "Where this caption sits, in the SAME placement grammar as a layer (core/boot.js resolveCoords): center | top | bottom | left | right | top-left | top-right | bottom-left | bottom-right | thirds-*. Omit and formats/scene/scene.css places it, which is the bottom band it has always used."
+    },
+    "x": {
+     "type": "number|string",
+     "label": "Left edge in px, or a relative form: \"50%\", \"50%-40\", \"center\", \"left\", \"right\", \"third1\", \"third2\". Edge keywords resolve against the SAFE box for this destination, so an edge-pinned caption can never land under platform chrome. Setting x releases the stylesheet's right edge."
+    },
+    "y": {
+     "type": "number|string",
+     "label": "Top edge in px or a relative form (see x). The two-line caption band (core/safe.js CAPTION_LINES) is the extent \"bottom\" subtracts, so pin:\"bottom\" lands the band inside the safe box rather than hanging it off the line."
+    },
+    "w": {
+     "type": "number|string",
+     "label": "Caption box width in px or \"60%\". Omit and the stylesheet's margins decide."
+    },
+    "align": {
+     "type": "string",
+     "label": "Text alignment inside the box: left | center | right. Default center.",
+     "enum": [
+      "left",
+      "center",
+      "right"
+     ]
+    },
+    "size": {
+     "type": "number",
+     "label": "Font size in px for this caption only. Default is the skin's (46 plain, 64 pop/styled, core/safe.js CAPTION_SKINS). Changing it changes the band this caption reserves."
+    }
+   }
+  },
+  "grain": {
+   "type": "boolean",
+   "label": "Opt in to the in-engine canvas grain (default off, matching the ffmpeg pass)"
+  },
+  "audio": {
+   "type": "object",
+   "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio-select.js. The CUES are synthesized and carry no licence (core/audio-kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See docs/CRAFT/SOUND.md.",
+   "fields": {
+    "music": {
+     "type": "string",
+     "label": "Music bed. Silence is the default, so this is opt-in: \"auto\" (audio-select picks a bed by mood), a baked bed NAME (calm | warm | tense \u2192 assets/music/<name>.wav), or a path to a .wav. Omit for no bed. `make validate` resolves it against assets/music/ and the scene dir and warns if it will not."
+    },
+    "auto": {
+     "type": "boolean",
+     "label": "Auto-pick a music bed AND auto-derive sfx cues from cuts/stings (core/audio-select.js). Same as music:\"auto\"."
+    },
+    "musicGain": {
+     "type": "number",
+     "label": "Music bed level (0 = muted, ~0.5 typical). Ducks automatically under VO.",
+     "min": 0
+    },
+    "musicFade": {
+     "type": "object",
+     "label": "Music fade envelope (seconds).",
+     "fields": {
+      "in": {
+       "type": "number",
+       "label": "Fade-in (s)",
+       "min": 0
+      },
+      "out": {
+       "type": "number",
+       "label": "Fade-out (s)",
+       "min": 0
+      }
+     }
+    },
+    "musicDuck": {
+     "type": "number",
+     "label": "Duck floor: how far the bed drops while VO plays (0..1, e.g. 0.15).",
+     "min": 0,
+     "max": 1
+    },
+    "loudness": {
+     "type": "number",
+     "label": "Integrated loudness target in LUFS (negative, e.g. -14 for social). Absent = peak-normalize only.",
+     "min": -60,
+     "max": 0
+    },
+    "vo": {
+     "type": "string",
+     "label": "Voice-over WAV path (resolved against the scene dir + repo root). A named-but-missing file fails `make validate` (the mixer would silently drop it)."
+    },
+    "voWords": {
+     "type": "string",
+     "label": "VO word-timing sidecar JSON: [{ \"w\": \"hello\", \"t\": 1.2 }], drives word captions."
+    },
+    "sfxGain": {
+     "type": "number",
+     "label": "Master multiplier over EVERY sfx cue (authored + auto-derived).",
+     "min": 0
+    },
+    "bridges": {
+     "type": "array",
+     "label": "Sound bridges, J-cuts and L-cuts. A bridge is a texture that crosses a picture change instead of stopping at it: a J-cut starts the next shot's sound BEFORE its picture, an L-cut lets the last shot's sound run UNDER the new one. It is the one continuous object that costs the picture nothing, so a film whose beats are visually unrelated is still held together. Each bridge names a JUNCTION, never a timestamp, so retiming a beat moves the sound with it. Resolved by core/audio-bridges.js, mixed by internal/audio/audio.go. See docs/CRAFT/SOUND.md \u00a72.",
+     "item": {
+      "bridge": {
+       "type": "string",
+       "label": "\"j\" = the audio leads (new sound over old picture) \u00b7 \"l\" = the picture leads (old sound under new picture).",
+       "required": true,
+       "enum": [
+        "j",
+        "l"
+       ]
+      },
+      "at": {
+       "type": "string",
+       "label": "The junction, as \"<kind>@<index>\": cut@1 \u00b7 seam@0 \u00b7 sting@2 \u00b7 junction@3 (junction = all of them merged). The index counts in TIME order within that kind. An index the film does not have fails the render and lists what it does have.",
+       "required": true
+      },
+      "sound": {
+       "type": "string",
+       "label": "The texture: a bed name (\"tense\" \u2192 assets/music/tense.wav), a synthesized cue name (\"loading\" \u2192 assets/sfx/loading.wav), or a path to a .wav. Looped to fill the span. A source that is not on disk FAILS the render. A bridge that never plays is not a quieter film.",
+       "required": true
+      },
+      "lead": {
+       "type": "number",
+       "label": "J-cut only, required: seconds of sound that arrive before the picture cuts. A lead longer than the beat before the junction is rejected, not clipped.",
+       "min": 0
+      },
+      "lag": {
+       "type": "number",
+       "label": "L-cut only, required: seconds the sound keeps running after the picture cuts. A lag past the next junction is rejected.",
+       "min": 0
+      },
+      "span": {
+       "type": "number",
+       "label": "How long the sound holds on its OWN side of the junction (after it for a J-cut, before it for an L-cut). Default: to the neighbouring junction, or the edge of the film.",
+       "min": 0
+      },
+      "fade": {
+       "type": "number",
+       "label": "Equal-power crossfade at both ends of the span, seconds (default 0.35). A bridge never butts: the point is that the ear crosses over, not that a second file switches on.",
+       "min": 0
+      },
+      "gain": {
+       "type": "number",
+       "label": "Bridge level (default 0.5).",
+       "min": 0
+      },
+      "duck": {
+       "type": "number",
+       "label": "Floor the MUSIC bed drops to under this bridge, 0..1 (default 1 = no duck). Setting it is what makes the join a cross rather than a stack: the bed dips on the same curve the bridge rises on.",
+       "min": 0,
+       "max": 1
+      }
+     }
+    },
+    "cues": {
+     "type": "array",
+     "label": "Sound-effect cues, each { t, and then either `name` for a baked sample or `voice` + `params` for a synthesised one }. THIS is where cues live (the engine reads `audio.cues`); there is no top-level `sfx`.",
+     "item": {
+      "t": {
+       "type": "number",
+       "label": "Cue time (s)",
+       "required": true
+      },
+      "name": {
+       "type": "string",
+       "label": "Cue name: a baked sample under assets/sfx. OPTIONAL when `voice` is set, and exactly one of `name` or `voice` must be present. A sample is a recording nobody can tune and a fresh clone does not have; prefer `voice`.",
+       "required": false,
+       "enum": [
+        "chime",
+        "sparkle",
+        "droplet",
+        "bloom",
+        "whisper",
+        "tick",
+        "press",
+        "key",
+        "release",
+        "toggle",
+        "success",
+        "error",
+        "page",
+        "loading",
+        "ready",
+        "whoosh",
+        "reveal",
+        "click",
+        "pop"
+       ]
+      },
+      "gain": {
+       "type": "number",
+       "label": "Per-cue gain (default 0.6)",
+       "min": 0
+      },
+      "voice": {
+       "type": "string",
+       "label": "Synthesised voice, generated from parameters rather than loaded from a file, so it is deterministic and needs no asset. internal/audio/synth.go owns this list (VoiceNames).",
+       "values": [
+        "tick",
+        "thud",
+        "whoosh",
+        "riser",
+        "pluck",
+        "sweep"
+       ],
+       "enum": [
+        "tick",
+        "thud",
+        "whoosh",
+        "riser",
+        "pluck",
+        "sweep"
+       ]
+      },
+      "params": {
+       "type": "object",
+       "label": "Synth parameters for `voice`, all numbers: freq, freqSweep (octaves per second), attack, decay, noise (0..1), punch, lowpass, gain, seed. Omitted keys take the voice's preset value."
+      }
+     }
+    },
+    "spectrum": {
+     "type": "string",
+     "label": "Precomputed spectrum sidecar JSON for audio-reactive layers (layer `react:{}`)."
+    },
+    "beatSync": {
+     "type": "boolean|object",
+     "label": "Snap the film's picture joints to the music's pulse. `true` takes the grid `make beatmap` wrote beside audio.music (assets/music/<bed>.beats.json); an object may set `grid` (an explicit .beats.json), `maxShift` (how far a joint may travel, default 0.12s) and `bar` (snap to downbeats, not every beat). Cuts snap their time and seams snap the centre of their blend; stings never snap, because an author offsets one from its cut on purpose. A grid that is missing, empty or below confidence 1.6 FAILS the render rather than quietly leaving the film unmatched. core/beat-bind.js, docs/CRAFT/SOUND.md.",
+     "fields": {
+      "grid": {
+       "type": "string",
+       "label": "Explicit path to a .beats.json (default: derived from audio.music)."
+      },
+      "maxShift": {
+       "type": "number",
+       "label": "How far a joint may travel to reach a beat, in seconds (default 0.12). Beyond it the joint stays where it was written and the run says so.",
+       "min": 0,
+       "max": 1
+      },
+      "bar": {
+       "type": "boolean",
+       "label": "Snap to downbeats (bar lines) instead of every beat."
+      }
+     }
+    },
+    "silent": {
+     "type": "boolean",
+     "label": "Render with NO audio track at all. A real device (a film can be better mute) but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make audio-check` says so."
+    },
+    "_why": {
+     "type": "string",
+     "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
+    }
+   }
   }
+ }
 }

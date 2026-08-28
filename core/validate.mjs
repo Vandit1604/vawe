@@ -1308,6 +1308,25 @@ if (isMain) {
         const ok = resolves(m) || (!/[\\/]/.test(m) && !path.extname(m) && fs.existsSync(path.join(root, 'assets/music', m + '.wav')));
         if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file. The mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`);
       }
+      // A CUE IDENTIFIES ITS SOUND EXACTLY ONE WAY. Since a cue may now be a synthesised `voice`
+      // instead of a baked `name`, `name` is no longer unconditionally required in the schema, and a
+      // schema cannot say "one of these two". So the rule lives here: neither is a cue that plays
+      // nothing, and both is a cue whose author disagrees with themselves about which sound it is.
+      const VOICES = schema?.fields?.audio?.fields?.cues?.item?.voice?.enum || [];
+      for (const [i, c] of (Array.isArray(A.cues) ? A.cues : []).entries()) {
+        if (!isObj(c)) continue;
+        const hasName = typeof c.name === 'string' && c.name.trim();
+        const hasVoice = typeof c.voice === 'string' && c.voice.trim();
+        if (!hasName && !hasVoice)
+          errors.push(`audio.cues[${i}] names no sound: give it a baked \`name\`, or a synthesised \`voice\` (${VOICES.join(', ')}).`);
+        if (hasName && hasVoice)
+          errors.push(`audio.cues[${i}] sets BOTH \`name\` ("${c.name}") and \`voice\` ("${c.voice}"). One cue is one sound: drop whichever you did not mean.`);
+        if (hasVoice && VOICES.length && !VOICES.includes(c.voice))
+          errors.push(`audio.cues[${i}].voice "${c.voice}" is not a voice the synth knows: ${VOICES.join(', ')}.`);
+        if (c.params != null && (!isObj(c.params) || Object.values(c.params).some((v) => typeof v !== 'number')))
+          errors.push(`audio.cues[${i}].params must be an object of NUMBERS; the synth reads them as numbers and a string would be dropped silently.`);
+      }
+
       // Sound bridges (J/L-cuts). The SPAN is resolved in the browser, where the junctions live, and
       // throws there. Nothing is duplicated here, because a second copy of that arithmetic would
       // drift. What is checked here is the half the browser cannot see: whether the texture is on

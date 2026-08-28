@@ -16,27 +16,6 @@ export function paintBase(ctx, w, h, { kind = 'radial', from = '#0b0e26', to = '
   ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
 }
 
-// ---- geometric shapes: big soft rings / circles / pills drifting slowly. Reads editorial/premium
-// on a plain base. Deterministic (seeded), colours from the brand palette only.
-export function shapes(ctx, w, h, t, o = {}) {
-  const c1 = o.color || '225,80,15', c2 = o.color2 || c1, dark = o.dark;
-  const a = o.alpha ?? (dark ? 0.14 : 0.10), lw = o.lineWidth ?? 3, seed = o.seed ?? 4;
-  const defs = o.items || [
-    { k: 'ring', x: 0.16, y: 0.24, r: 210, c: c1, sp: 17, amp: 26 },
-    { k: 'ring', x: 0.86, y: 0.7, r: 300, c: c2, sp: 21, amp: 34 },
-    { k: 'disc', x: 0.78, y: 0.2, r: 120, c: c2, sp: 15, amp: 22 },
-    { k: 'disc', x: 0.22, y: 0.82, r: 90, c: c1, sp: 19, amp: 18 },
-    { k: 'ring', x: 0.5, y: 0.5, r: 460, c: c1, sp: 25, amp: 20 },
-  ];
-  defs.forEach((d, i) => {
-    const dx = Math.sin(t * (2 * Math.PI / d.sp) + i) * d.amp, dy = Math.cos(t * (2 * Math.PI / (d.sp * 1.3)) + i) * d.amp;
-    const x = d.x * w + dx, y = d.y * h + dy;
-    ctx.beginPath(); ctx.arc(x, y, d.r, 0, Math.PI * 2);
-    if (d.k === 'disc') { ctx.fillStyle = `rgba(${d.c},${(a * 0.7).toFixed(3)})`; ctx.fill(); }
-    else { ctx.lineWidth = lw; ctx.strokeStyle = `rgba(${d.c},${a.toFixed(3)})`; ctx.stroke(); }
-  });
-}
-
 // ---- dot matrix. mode: 'pulse' (uniform breathe) | 'wave' (diagonal sweep) | 'ripple' (radial rings).
 // Per-dot value ∈[0,1] drives radius + alpha. spacing 40–72, r 1.5–3 → peak 4–6. Premium = sparse + low alpha.
 export function dotGrid(ctx, w, h, t, o = {}) {
@@ -367,7 +346,7 @@ export function bgPaletteFrom(palette) {
 // no way to enumerate a switch); the EFFECTS.md catalog + coverage derive the vocabulary from this so the
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
-  'shapes', 'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink',
+  'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink',
   'metallic', 'metallicSheen', 'gradientWash', 'blobs', 'liquid'];
 
 // BG_BLURBS: one line per preset, next to the switch that paints it (the `blurb` pattern of
@@ -384,7 +363,6 @@ export const BG_BLURBS = {
   soft: 'gentle light radial with faint accent rings and discs drifting over it (moves)',
   accent: 'the brand accent as a radial with rippling dots and a slow spotlight (moves), the loud brand field',
   accentPlain: 'the brand accent as a clean full-bleed field, grain only. FLAT, for plain sites whose hero is one colour',
-  shapes: 'accent rings and discs drifting over paper or dark (moves), `value` picks the treatment',
   dotmatrix: 'dot matrix grid',
   aurora: 'drifting colour aurora (moves)',
   mesh: 'soft gradient mesh (dark/saturated, check contrast)',
@@ -410,11 +388,11 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     // ---- LIGHT-FIRST presets (for white/editorial brands: paper bg + accent on top) ----
     case 'paper': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [grain] };
     case 'paperShapes': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
-      { type: 'shapes', color: P.accent, color2: P.accent, dark: false, alpha: 0.07, seed: 4 }, grain ] };
+      { type: 'dots', mode: 'wave', color: P.accent, baseAlpha: 0.05, peakAlpha: 0.13, spacing: 64, r: 1.3, rPeak: 2.0 }, grain ] };
     case 'paperDots': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
       { type: 'dots', mode: 'wave', color: P.dotLight, baseAlpha: 0.14, peakAlpha: 0.34, spacing: 54, r: 1.5, rPeak: 4, k: 0.03, period: 5, driftX: 11, driftY: 6 }, grain ] };
     case 'soft': return { base: { kind: 'radial', from: P.softBase[0], to: P.softBase[1], cx: 0.5, cy: 0.44 }, fx: [
-      { type: 'shapes', color: P.accent, color2: P.accent, dark: false, alpha: 0.07, seed: 6 }, grain ] };
+      { type: 'softwash', color: P.accent, alpha: 0.15, seed: 6 }, grain ] };
     case 'accent': return { base: { kind: 'radial', from: P.accentBase[0], to: P.accentBase[1], cx: 0.5, cy: 0.42 }, fx: [
       { type: 'dots', mode: 'ripple', color: '255,255,255', baseAlpha: 0.05, peakAlpha: 0.22, spacing: 60, cx: 0.5, cy: 0.42, k: 0.024, period: 4, driftX: 6, driftY: -6 }, { type: 'spotlight', intensity: 0.08, period: 7, y: 0.42 }, grain ] };
     case 'ink': return { base: { kind: 'radial', from: P.inkBase[0], to: P.inkBase[1], cx: 0.5, cy: 0.44 }, fx: [
@@ -429,8 +407,6 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     // clean dark radial gradients (NO dots): what you reach for when you want a plain deep backdrop
     case 'deep': return { base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.42 }, fx: [grain] };
     case 'dark': return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.5, cy: 0.44 }, fx: [grain] };
-    case 'shapes': return { base: dark ? { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.5, cy: 0.45 } : { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
-      { type: 'shapes', color: P.accent, color2: P.tint, dark, alpha: dark ? 0.14 : 0.08, seed: 4 }, grain ] };
     case 'dotmatrix': return { base: { kind: 'linear', from: P.light[0], to: P.light[1] }, fx: [
       { type: 'dots', mode: 'wave', color: P.dotLight, baseAlpha: 0.06, peakAlpha: 0.24, spacing: 52, r: 1.6, rPeak: 4.5, k: 0.03, period: 5, driftX: 12, driftY: 6 }, grain ] };
     case 'constellation': return { base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.46 }, fx: [
@@ -483,7 +459,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
 // goes stale the moment an fx grows a parameter, and the stale half fails silently (docs/MISTAKES.md
 // #159). Each fx takes its options as its LAST parameter and reads them as `bag.<key>`, so the keys are
 // exactly the property reads on that parameter.
-const FX_IMPL = { shapes, dots: dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain };
+const FX_IMPL = { dots: dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain };
 function paramsOf(fn) {
   const src = String(fn);
   const sig = src.slice(src.indexOf('(') + 1, src.indexOf(')'));
@@ -502,7 +478,7 @@ for (const [k, v] of Object.entries(FX_PARAMS))
 // present. Each maps to the fx types it can act on; a window naming one with no such fx is an error, the
 // same as naming a knob that does not exist.
 const META = {
-  intensity: ['dots', 'aurora', 'spotlight', 'shapes', 'softwash'],
+  intensity: ['dots', 'aurora', 'spotlight', 'softwash'],
   dotAlpha: ['dots'], drift: ['dots'], grain: ['grain'],
 };
 
@@ -546,8 +522,6 @@ export function applyBgOver(spec, over) {
       if (over.drift != null) { fx.driftX = (fx.driftX ?? 0) * over.drift; fx.driftY = (fx.driftY ?? 0) * over.drift; }
     } else if (fx.type === 'aurora' || fx.type === 'spotlight' || fx.type === 'softwash') {
       if (over.intensity != null) fx.intensity = +((fx.intensity ?? (fx.type === 'softwash' ? 1 : 0.5)) * over.intensity).toFixed(3);
-    } else if (fx.type === 'shapes') {
-      if (over.intensity != null) fx.alpha = +((fx.alpha ?? 0.1) * over.intensity).toFixed(3);
     } else if (fx.type === 'grain') {
       if (over.grain != null) fx.alpha = over.grain;
     }
@@ -567,7 +541,6 @@ export function renderBg(ctx, w, h, t, spec) {
     else if (fx.type === 'dots') dotGrid(ctx, w, h, t, fx);
     else if (fx.type === 'particles') particles(ctx, w, h, t, fx);
     else if (fx.type === 'spotlight') spotlight(ctx, w, h, t, fx);
-    else if (fx.type === 'shapes') shapes(ctx, w, h, t, fx);
     else if (fx.type === 'metallic') metallic(ctx, w, h, t, fx);
     else if (fx.type === 'softwash') softwash(ctx, w, h, t, fx);
     else if (fx.type === 'liquid') liquid(ctx, w, h, t, fx);
