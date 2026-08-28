@@ -11,11 +11,83 @@
  "bg": [
   {
    "preset": "plain",
-   "value": "light",
-   "from": 0,
-   "to": 23
+   "value": "light"
+  },
+  {
+   "preset": "paperDots",
+   "value": "light"
+  },
+  {
+   "preset": "paper",
+   "value": "light"
+  },
+  {
+   "preset": "soft",
+   "value": "light"
+  },
+  {
+   "preset": "paperShapes",
+   "value": "light"
   }
  ],
+ "cuts": [
+  {
+   "t": 4.35,
+   "style": "blur",
+   "dur": 0.4
+  },
+  {
+   "t": 10.1,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 16.1,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 20.05,
+   "style": "blur",
+   "dur": 0.4
+  }
+ ],
+ "cameraMove": [
+  {
+   "move": "slowPush",
+   "start": 0.1,
+   "dur": 4.2,
+   "from": 1,
+   "to": 1.05
+  },
+  {
+   "move": "punchIn",
+   "start": 10.1,
+   "dur": 0.34,
+   "from": 0.9,
+   "to": 1
+  },
+  {
+   "move": "slowPush",
+   "start": 16.1,
+   "dur": 3.9,
+   "from": 1.04,
+   "to": 1
+  },
+  {
+   "move": "punchIn",
+   "start": 20.05,
+   "dur": 0.34,
+   "from": 0.9,
+   "to": 1
+  }
+ ],
+ "spectacle": {
+  "at": 16.1,
+  "of": "growth",
+  "device": "streak",
+  "why": "the one moment the film is allowed to shout: the falling week flips to a climbing month and the feed starts working. Every other beat states one fact at one volume."
+ },
  "layers": [
   {
    "type": "text",
@@ -28,7 +100,16 @@
    "size": 26,
    "start": 0,
    "duration": 23,
-   "track": 1
+   "track": 1,
+   "id": "wordmark",
+   "acrossBeats": true,
+   "modifiers": [
+    {
+     "kick": {
+      "scale": 1.06
+     }
+    }
+   ]
   },
   {
    "type": "image",
@@ -39,7 +120,7 @@
    "start": 0.1,
    "duration": 4.2,
    "anim": "rise",
-   "enterDur": 0.5,
+   "enterDur": 0.95,
    "exitDur": 0.3
   },
   {
@@ -55,8 +136,10 @@
    "ls": "-0.035em",
    "start": 0.4,
    "duration": 4.2,
-   "anim": "rise",
-   "enterDur": 0.55
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.07,
+   "each": 0.5
   },
   {
    "type": "text",
@@ -71,8 +154,10 @@
    "ls": "-0.035em",
    "start": 0.6,
    "duration": 4,
-   "anim": "rise",
-   "enterDur": 0.55
+   "split": "word",
+   "preset": "blur",
+   "stagger": 0.07,
+   "each": 0.55
   },
   {
    "type": "text",
@@ -85,8 +170,11 @@
    "ls": "-0.03em",
    "start": 4.4,
    "duration": 5.6,
-   "enterDur": 0.5,
-   "cut": "punch"
+   "cut": "punch",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.06,
+   "each": 0.45
   },
   {
    "type": "text",
@@ -99,8 +187,10 @@
    "ls": "-0.03em",
    "start": 4.5,
    "duration": 5.5,
-   "anim": "rise",
-   "enterDur": 0.5
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.06,
+   "each": 0.45
   },
   {
    "type": "text",
@@ -113,8 +203,10 @@
    "ls": "-0.03em",
    "start": 5,
    "duration": 5,
-   "anim": "rise",
-   "enterDur": 0.4
+   "split": "word",
+   "preset": "scale",
+   "stagger": 0.06,
+   "each": 0.4
   },
   {
    "type": "html",
@@ -124,8 +216,16 @@
    "start": 5.5,
    "duration": 3,
    "html": "<svg viewBox=\"0 0 590 18\" width=\"590\" height=\"18\" style=\"display:block\"><path d=\"M3 12 Q 177 4, 324 10 T 585 8\" stroke=\"#4772f5\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
-   "anim": "wipe",
-   "enterDur": 0.5
+   "anim": "none",
+   "enterDur": 0.5,
+   "parts": [
+    {
+     "select": "path",
+     "anim": "drawOn",
+     "each": 0.7,
+     "delay": 0.05
+    }
+   ]
   },
   {
    "type": "group",
@@ -144,7 +244,7 @@
    "start": 4.8,
    "duration": 5.2,
    "anim": "rise",
-   "enterDur": 0.5,
+   "enterDur": 0.8,
    "exitDur": 0.35,
    "children": [
     {
@@ -297,7 +397,8 @@
       }
      ]
     }
-   ]
+   ],
+   "id": "leakchart"
   },
   {
    "type": "group",
@@ -315,7 +416,7 @@
    "start": 5.4,
    "duration": 4.6,
    "anim": "rise",
-   "enterDur": 0.45,
+   "enterDur": 0.7,
    "exitDur": 0.3,
    "children": [
     {
@@ -381,7 +482,7 @@
    "start": 5.7,
    "duration": 4.3,
    "anim": "rise",
-   "enterDur": 0.45,
+   "enterDur": 0.62,
    "exitDur": 0.3,
    "children": [
     {
@@ -444,8 +545,11 @@
    "ls": "-0.03em",
    "start": 10.2,
    "duration": 5.8,
-   "enterDur": 0.5,
-   "cut": "whip"
+   "cut": "whip",
+   "split": "word",
+   "preset": "blur",
+   "stagger": 0.05,
+   "each": 0.42
   },
   {
    "type": "group",
@@ -463,7 +567,7 @@
    "start": 10.4,
    "duration": 5.6,
    "anim": "rise",
-   "enterDur": 0.5,
+   "enterDur": 0.85,
    "exitDur": 0.35,
    "children": [
     {
@@ -561,7 +665,7 @@
    "start": 11.4,
    "duration": 4.6,
    "anim": "rise",
-   "enterDur": 0.4
+   "enterDur": 0.55
   },
   {
    "type": "group",
@@ -638,8 +742,11 @@
    "ls": "-0.03em",
    "start": 16.2,
    "duration": 3.8,
-   "enterDur": 0.5,
-   "cut": "slide"
+   "cut": "slide",
+   "split": "word",
+   "preset": "scale",
+   "stagger": 0.06,
+   "each": 0.32
   },
   {
    "type": "group",
@@ -651,7 +758,7 @@
    "start": 16.6,
    "duration": 3.4,
    "anim": "rise",
-   "enterDur": 0.45,
+   "enterDur": 0.3,
    "children": [
     {
      "type": "group",
@@ -738,7 +845,7 @@
    "start": 17.2,
    "duration": 2.8,
    "anim": "rise",
-   "enterDur": 0.4
+   "enterDur": 0.36
   },
   {
    "type": "group",
@@ -755,9 +862,9 @@
    "border": "1px solid var(--line)",
    "elevation": 1,
    "start": 16.8,
-   "duration": 3.2,
+   "duration": 3.25,
    "anim": "rise",
-   "enterDur": 0.5,
+   "enterDur": 0.34,
    "exitDur": 0.35,
    "children": [
     {
@@ -880,7 +987,10 @@
       }
      ]
     }
-   ]
+   ],
+   "id": "growth",
+   "becomes": "mascot2",
+   "becomesDur": 0.5
   },
   {
    "type": "image",
@@ -890,9 +1000,10 @@
    "w": 183,
    "start": 20.1,
    "duration": 3,
-   "anim": "rise",
+   "anim": "none",
    "enterDur": 0.5,
-   "exitDur": 0.3
+   "exitDur": 0.3,
+   "id": "mascot2"
   },
   {
    "type": "html",
@@ -902,8 +1013,16 @@
    "start": 20.2,
    "duration": 2.8,
    "anim": "rise",
-   "enterDur": 0.5,
-   "html": "<div style=\"font:400 107px var(--font-sans);letter-spacing:-0.035em;color:var(--ink);text-align:center;line-height:1.05;white-space:nowrap\">grow on X, on <span style=\"position:relative;display:inline-block\">purpose.<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" style=\"position:absolute;left:0;top:98%;width:100%;height:18px;overflow:visible\"><path d=\"M4 12 Q 90 4, 150 10 T 296 8\" stroke=\"#4772f5\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/></svg></span></div>"
+   "enterDur": 0.9,
+   "html": "<div style=\"font:400 107px var(--font-sans);letter-spacing:-0.035em;color:var(--ink);text-align:center;line-height:1.05;white-space:nowrap\">grow on X, on <span style=\"position:relative;display:inline-block\">purpose.<svg viewBox=\"0 0 300 18\" preserveAspectRatio=\"none\" style=\"position:absolute;left:0;top:98%;width:100%;height:18px;overflow:visible\"><path d=\"M4 12 Q 90 4, 150 10 T 296 8\" stroke=\"#4772f5\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/></svg></span></div>",
+   "parts": [
+    {
+     "select": "path",
+     "anim": "drawOn",
+     "each": 0.65,
+     "delay": 0.45
+    }
+   ]
   },
   {
    "type": "group",
@@ -919,7 +1038,7 @@
    "start": 20.6,
    "duration": 2.4,
    "anim": "rise",
-   "enterDur": 0.45,
+   "enterDur": 0.28,
    "children": [
     {
      "type": "text",
@@ -944,7 +1063,7 @@
    "start": 20.9,
    "duration": 2.1,
    "anim": "rise",
-   "enterDur": 0.4
+   "enterDur": 0.3
   }
  ]
 }

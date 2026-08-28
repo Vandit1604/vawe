@@ -2,6 +2,80 @@
  "module": "scene",
  "theme": "plinth",
  "duration": 15,
+ "audio": {
+  "silent": true
+ },
+ "bg": [
+  {
+   "preset": "aurora",
+   "value": "dark"
+  },
+  {
+   "preset": "dark"
+  },
+  {
+   "preset": "deep"
+  },
+  {
+   "preset": "accent",
+   "value": "dark"
+  },
+  {
+   "preset": "aurora",
+   "value": "dark"
+  }
+ ],
+ "cuts": [
+  {
+   "t": 3.15,
+   "style": "blur",
+   "dur": 0.4
+  },
+  {
+   "t": 5.3,
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 10.8,
+   "style": "punch",
+   "dur": 0.36
+  },
+  {
+   "t": 13,
+   "style": "riseBlur",
+   "dur": 0.42
+  }
+ ],
+ "cameraMove": [
+  {
+   "move": "slowPush",
+   "start": 0,
+   "dur": 3.1,
+   "from": 1,
+   "to": 1.06
+  },
+  {
+   "move": "punchIn",
+   "start": 10.8,
+   "dur": 0.34,
+   "from": 0.86,
+   "to": 1
+  },
+  {
+   "move": "slowPush",
+   "start": 13,
+   "dur": 2,
+   "from": 1,
+   "to": 1.05
+  }
+ ],
+ "spectacle": {
+  "at": 10.8,
+  "of": "statA",
+  "device": "streak",
+  "why": "the one moment the film shouts: the marketplace stops describing itself and shows its size. Every other beat holds one line at one volume."
+ },
  "layers": [
   {
    "type": "image",
@@ -15,7 +89,16 @@
    "duration": 15,
    "anim": "fade",
    "exitDur": 0.6,
-   "track": 1
+   "track": 1,
+   "id": "figure",
+   "modifiers": [
+    {
+     "kick": {
+      "scale": 1.035
+     }
+    }
+   ],
+   "acrossBeats": true
   },
   {
    "type": "text",
@@ -28,7 +111,8 @@
    "anim": "fade",
    "start": 0.35,
    "duration": 14.3,
-   "track": 6
+   "track": 6,
+   "acrossBeats": true
   },
   {
    "type": "text",
@@ -60,7 +144,10 @@
    "each": 0.5,
    "start": 0.8,
    "duration": 2.3,
-   "track": 5
+   "track": 5,
+   "id": "hook2",
+   "becomes": "payper",
+   "becomesDur": 0.45
   },
   {
    "type": "text",
@@ -77,7 +164,8 @@
    "start": 3.2,
    "duration": 2.05,
    "anim": "none",
-   "track": 5
+   "track": 5,
+   "id": "payper"
   },
   {
    "type": "text",
@@ -93,7 +181,8 @@
    "each": 0.42,
    "start": 5.35,
    "duration": 1.65,
-   "track": 5
+   "track": 5,
+   "acrossBeats": true
   },
   {
    "type": "text",
@@ -109,7 +198,8 @@
    "each": 0.42,
    "start": 7.05,
    "duration": 1.7,
-   "track": 5
+   "track": 5,
+   "acrossBeats": true
   },
   {
    "type": "text",
@@ -126,7 +216,8 @@
    "start": 8.8,
    "duration": 1.95,
    "track": 5,
-   "emColor": "#f5f5f2"
+   "emColor": "#f5f5f2",
+   "acrossBeats": true
   },
   {
    "type": "text",
@@ -142,7 +233,8 @@
    "stagger": 0.02,
    "start": 10.85,
    "duration": 2.15,
-   "track": 5
+   "track": 5,
+   "id": "statA"
   },
   {
    "type": "text",
@@ -189,15 +281,6 @@
    "start": 13.75,
    "duration": 1.25,
    "track": 5
-  }
- ],
- "audio": {
-  "silent": true
- },
- "bg": [
-  {
-   "t": 0,
-   "preset": "aurora"
   }
  ]
 }
