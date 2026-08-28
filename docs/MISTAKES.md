@@ -16038,3 +16038,43 @@ would have rewritten the sound of every film that already uses it. Silence stays
 **What no gate catches.** Whether the sound is GOOD. `lib-test` proves the derivation is a function of
 the motion and that the density invariant holds; it cannot prove a thud belongs there. That is ears,
 and it is the same split this repo already draws between `make author-check` and `make judge`.
+
+## #494: author-check expanded two sugars of three, so a film built from blueprints failed step one
+
+**What.** `make author-check` expands `block` and `comp` sugar before it validates, and did not expand
+`beat`. So a film composed the way CLAUDE.md tells you to compose one, from `make blueprints`, failed
+step 1 of the ladder as an un-expanded layer type, while step 6 of the SAME run read the blueprint off
+the same file and reported on it happily. The instruction and the gate disagreed, and the gate lost.
+
+**Root cause, and it is the shape not the omission.** Three sugars exist and the expansion list named
+two. Nothing tied the list to the registry that defines what sugar is, so adding the third to the
+engine could not add it here. `scripts/author/expand-blocks.mjs` already knew all three; only
+author-check's call site was short.
+
+**A second one found beside it.** The unknown-prop warning exempted `note` on the beat arm and nothing
+on the block arm, so an `_`-prefixed author note warned in one place and was silent in the other. Two
+arms of one check disagreeing about what counts as a comment.
+
+**Found by** an agent upgrading `product-feature-tour` to use a `wordBlast` blueprint. It could not get
+past author-check on a film the docs told it to build that way.
+
+## #495: four defects in two films that every gate passed
+
+**What.** Two films were upgraded with cuts, camera moves and backdrops. Every blocking gate went green,
+`seam-check` read 16 boundaries clean, and the films were still wrong in four ways. All four were found
+by reading `make judge` sheets and beats contact sheets, and none by a gate.
+
+1. **A camera dive cropped the copy off the frame.** At scale `s` centred on `tx` the visible left edge
+   is `tx - 960/s`, and both films place their text column at x=150. A `diveIn` to 1.2 put the column
+   outside the frame for about five seconds. The audit measures a layer's declared box, which had not
+   moved; the CAMERA moved.
+2. **Every new cut landed on a bare backdrop.** Each beat ended 0.4 to 0.8s before the next began, so
+   the junction fell in a gap. `beat-check` looks for dead air over a threshold and these were under it.
+3. **A loud backdrop swamped a film that already had its own glow.** `brandglow` read as a second,
+   blurrier copy of a glow the beat already carried.
+4. **A spectacle sting buried the moment it was announcing.** Written at the cut, and `SPECTACLE_DUR` is
+   0.9s, so it covered the payoff number's entire entrance. Moved to where the counter settles.
+
+**The point.** These are exactly the four things CLAUDE.md says the gates cannot see: composition, a
+frame that holds nothing, one loud thing on top of another, and timing against intent. The instruction
+to READ THE SHEETS is not ceremony, and a film can be green and wrong at the same time.
