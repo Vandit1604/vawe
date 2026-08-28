@@ -16078,3 +16078,65 @@ by reading `make judge` sheets and beats contact sheets, and none by a gate.
 **The point.** These are exactly the four things CLAUDE.md says the gates cannot see: composition, a
 frame that holds nothing, one loud thing on top of another, and timing against intent. The instruction
 to READ THE SHEETS is not ceremony, and a film can be green and wrong at the same time.
+
+## #496: `schema-drift --write` could never write the block it exists to write
+
+**What.** `node scripts/gates/schema-drift.mjs --write` is the command CLAUDE.md names as the way to
+regenerate `formats/scene/schema.json`. It has been unable to do so. The splice anchor was
+`/\n {2}"layerProps": \{/`, a two-space indent, and schema.json is written with one. The match failed,
+the code fell through to the "no `fields` anchor either" branch, printed an error about a DIFFERENT
+anchor, and exited 2 without writing the layerProps block OR the fifteen registry-owned enums.
+
+**Root cause.** The generator assumed the formatting of the file it edits instead of reading it. The
+renderer hardcoded the same two spaces, so even a successful splice would have re-indented the file.
+
+**Fix.** The indent is captured off the file (`/\n( +)"layerProps": \{[\s\S]*?\n\1\},/`) and passed to
+the renderer. `--write` now writes both halves, and the first successful run reformatted the committed
+block into the generator's own one-line-per-key shape, which is what its header says it wants.
+
+**Which gate catches it.** The gate's own check half was always right, because it compares parsed JSON
+and formatting cannot fool it. What was missing was any use of `--write` at all: adding three layer
+props is what surfaced it, three years of props having been added by hand.
+
+## #497: `iris` was registered as a bare `circleWipe`, so its second argument was the iris centre
+
+**What.** `core/clips.js` ANIM held `iris: circleWipe` and `defocus` and `clock` the same way. Every
+entry in that registry is called as `fn(enterT)`, so nothing had ever passed a second argument and the
+extra positional parameters of those three functions (`circleWipe(t, cx, cy)`, `defocus(t, {max})`)
+sat exposed in a slot the registry did not own.
+
+**Root cause.** A registry of functions whose call shape is narrower than the functions' own
+signatures. It is latent until the day the registry gains an argument.
+
+**Fix.** Adding the entrance warp gave the registry a second argument, and `iris` silently read it as
+`cx`: a warped iris opened from the wrong point, with a plausible frame and no error. Every entry that
+takes an argument of its own is wrapped to arity 1 now.
+
+**Which gate catches it.** `make lib-test` asserts `WARPABLE` is EXACTLY the set of anims whose output
+changes when a warp is handed to them. `iris` appearing in that set is what found this, and the same
+assertion refuses a future entrance that leaks a parameter into the slot.
+
+## #498: the recipes doc said motion blur was opt-in per layer, and the engine had made it automatic
+
+**What.** `docs/CRAFT/AFTER-EFFECTS-RECIPES.md` item 4 reads "`ghost` in blur mode does the right
+physics ... but it is opt-in per layer and driven off an authored motion track, so a layer entering
+with `anim: "slide-left"` and no `motion` array gets nothing. After Effects makes this a scene default
+with a single angle; here it is a per-layer decision most authors never make."
+
+Half of that is out of date. `core/tracks/motion.js` has applied a velocity-derived blur to EVERY layer
+with a motion track above 480 px/s since docs/MISTAKES.md #204, using the same sampler, with
+`motionBlur: false` as the opt-out. The paragraph describes the engine before that change.
+
+**Root cause.** A research document naming an engine file, written from the file it named
+(`core/fx/ghost.js`) and not from the file that does the work.
+
+**Fix.** The real gap was the one the paragraph's LAST sentence points at: a scene had no angle. Films
+carry `shutter` in degrees now (180 the film standard, 0 off), defaulting to the 0.16 the engine already
+used, so the default is unchanged and the dial exists. Measured on `thread.json`, 65 sampled frames: the
+change moves 192,621 of 404,352,000 channels with a maximum delta of 15, and rendering the SAME code
+twice moves 122,849 with a maximum of 11 on the same eleven frames. The difference is that film's own
+rasteriser noise, not this change.
+
+**Which gate catches it.** None, and none can: a doc that misdescribes code is a reading, not a
+measurement. What is checked is the behaviour, in `make lib-test` (the shared velocity read is asserted
+to be arithmetically the read the motion track already made) and by the pixel diff above.

@@ -562,11 +562,14 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 | `alongPath` | set the line of type ON A CURVE and, if you ask, send it travelling along one. The general case `circle` is one point of, and the only way to bend a headline |
 | `ghost` | the only effect that reads TIME AS A MATERIAL: it evaluates the layer's own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre |
 | `kick` | hit the layer on the film's own joints. A cut, a seam or a sting shoves it, so the frame feels the edit |
+| `lag` | FOLLOW-THROUGH: this layer trails another layer's motion by a frame or three and overruns its stop before settling. Stagger delays a sibling's entrance; this makes one layer drag behind another's continuous motion, which is half of what separates an animated object from a moved image |
+| `matte` | a LUMA MATTE: another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
 | `mixBlend` | how this layer's pixels combine with what is already painted behind it, knock a headline out of a photo |
 | `occlude` | hide this layer where another one covers it, put something BEHIND something else without reordering the stack |
 | `plane` | stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax |
 | `progress` | hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with |
 | `shadow` | a drop shadow that knows where the light is, so every layer does not point the same way |
+| `squash` | SQUASH AND STRETCH read off the layer's own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash |
 | `tilt` | turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding |
 | `wordSlot` | one word of the sentence swaps for the next while NOTHING after it reflows. The slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for |
 
@@ -843,4 +846,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_563 effects across 36 families. Regenerate: `make effects`._
+_566 effects across 36 families. Regenerate: `make effects`._

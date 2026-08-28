@@ -26,8 +26,11 @@ import * as plane from './plane.js';
 import * as wordSlot from './word-slot.js';
 import * as alongPath from './along-path.js';
 import * as ghost from './ghost.js';
+import * as squash from './squash.js';
+import * as matte from './matte.js';
+import * as lag from './lag.js';
 
-const REGISTRY = { alongPath, ghost, kick, mixBlend, occlude, plane, progress, shadow, tilt, wordSlot };
+const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, shadow, squash, tilt, wordSlot };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it, the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
@@ -44,6 +47,9 @@ export const FX_TYPES = Object.keys(REGISTRY);
 export const FX_BLURBS = {
   alongPath: 'set the line of type ON A CURVE and, if you ask, send it travelling along one. The general case `circle` is one point of, and the only way to bend a headline',
   ghost: 'the only effect that reads TIME AS A MATERIAL: it evaluates the layer\'s own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre',
+  lag: 'FOLLOW-THROUGH: this layer trails another layer\'s motion by a frame or three and overruns its stop before settling. Stagger delays a sibling\'s entrance; this makes one layer drag behind another\'s continuous motion, which is half of what separates an animated object from a moved image',
+  matte: 'a LUMA MATTE: another layer\'s brightness is this layer\'s alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer\'s live box',
+  squash: 'SQUASH AND STRETCH read off the layer\'s own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash',
   kick: 'hit the layer on the film\'s own joints. A cut, a seam or a sting shoves it, so the frame feels the edit',
   mixBlend: 'how this layer\'s pixels combine with what is already painted behind it, knock a headline out of a photo',
   occlude: 'hide this layer where another one covers it, put something BEHIND something else without reordering the stack',

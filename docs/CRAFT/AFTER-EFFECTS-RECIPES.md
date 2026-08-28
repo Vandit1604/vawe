@@ -37,15 +37,15 @@ Ranked by how often the recipe appears in real commercial motion work, most-used
 |---|---|---|---|---|
 | 1 | **Slow in / slow out** | never start or stop at full speed | **HAVE** | `core/motion.js`, the full easing set |
 | 2 | **Offset / stagger** | one animation down a list with a delay per item | **HAVE** | `stagger` on `split` text and on `parts` |
-| 3 | **Overshoot** | the value passes its target and settles back | **PARTLY** | easings exist, the amount/settle pair is not a dial |
-| 4 | **Motion blur (180 shutter)** | anything moving fast smears along its travel | **PARTLY** | `ghost` blur mode, per-layer, opt-in |
-| 5 | **Anticipation** | a small move against the travel before the move | **LACK** | a new easing, or an entrance dial |
-| 6 | **Follow-through / overlap** | the trailing part starts late and stops later | **LACK** | a `lag` modifier |
+| 3 | **Overshoot** | the value passes its target and settles back | **HAVE** | `overshoot: 0.12` on any directional entrance; the settle is `enterDur` |
+| 4 | **Motion blur (180 shutter)** | anything moving fast smears along its travel | **HAVE** | automatic above 480 px/s; the film's angle is `shutter` |
+| 5 | **Anticipation** | a small move against the travel before the move | **HAVE** | `anticipate: 0.15` on any directional entrance |
+| 6 | **Follow-through / overlap** | the trailing part starts late and stops later | **HAVE** | the `lag` modifier |
 | 7 | **Kinetic typography** | words scaled and placed to a rhythm, one idea per hold | **HAVE** | 33 text presets, `split`, `wordBlast` |
 | 8 | **Write-on** | a mask or stroke reveals type or a path as if drawn | **HAVE** | `draw` preset, `drawOn` part, `logoReveal` |
 | 9 | **Camera shake** | a decaying handheld wobble on the whole frame | **HAVE** | `cameraMove: cameraShake`, cut `jitter`, `kick` |
 | 10 | **Masked text reveal** | type uncovered in place by a hard edge, no fade | **HAVE** | `clipUp`, `riseClip`, `maskReveal`, `revealUp` |
-| 11 | **Squash and stretch** | scale non-uniformly along the travel, volume kept | **PARTLY** | `stretch` preset, `squeeze` cut, no velocity link |
+| 11 | **Squash and stretch** | scale non-uniformly along the travel, volume kept | **HAVE** | the `squash` modifier, read off the layer's own velocity |
 | 12 | **2.5D parallax** | flat layers at depths, near ones move further | **HAVE** | `plane` modifier plus a camera move |
 | 13 | **Whip pan** | the frame smears sideways and lands on the next shot | **HAVE** | `whipPan` sting/seam, `whip` and `skewWhip` cuts |
 | 14 | **Rack focus** | one plane pulls sharp while the other goes soft | **HAVE** | `focusRack` beat, `defocus`, `zoomBlur` |
@@ -54,11 +54,11 @@ Ranked by how often the recipe appears in real commercial motion work, most-used
 | 17 | **Moving hold** | a "still" frame that never fully stops | **HAVE** | `idle: breathe/drift`, `cameraMove: driftHold` |
 | 18 | **Echo / motion trail** | copies of the layer at earlier times | **HAVE** | `ghost` trail mode, `echoRing` beat |
 | 19 | **Arcs** | travel on a curve, never a ruler-straight line | **PARTLY** | `alongPath` bends type; position keys stay straight |
-| 20 | **Luma matte reveal** | one layer's brightness is another layer's alpha | **PARTLY** | `clip`, `occlude`, no arbitrary luma matte |
+| 20 | **Luma matte reveal** | one layer's brightness is another layer's alpha | **HAVE** | the `matte` modifier, and the matte moves |
 | 21 | **Shape morph** | one path becomes another, vertex to vertex | **PARTLY** | svg `morph`, `morphButton`; one layer only |
 | 22 | **Match cut on shape** | a silhouette carries across the cut into a new thing | **PARTLY** | doctrine exists, no device |
 | 23 | **Trim-paths bar growth** | a bar, ring or rule whose length IS the number | **HAVE** | `growUp`, `widen`, `progress`, `parts` |
-| 24 | **Animate on twos** | the clock steps at 12fps inside a 30fps film | **LACK** | a `step` modifier |
+| 24 | **Animate on twos** | the clock steps at 12fps inside a 30fps film | **HAVE** | `step: 15` on any layer |
 | 25 | **Speed ramp** | the clock itself accelerates and brakes | **LACK** | a time-remap on a layer's own track |
 | 26 | **Screen dive** | a real product surface pushed into as the subject | **HAVE** | `screenDive` beat, `component` capture, `ken` |
 
@@ -761,6 +761,18 @@ as the default.
 
 Ranked by value over cost. Each says which of the three shelves it belongs on, because the shelf decides
 who writes it.
+
+> **ITEMS 1 TO 7 ARE BUILT.** The per-recipe sections below still carry the verdict they were
+> researched with; the TABLE above is the current one. What shipped, and where it differs from the plan:
+> `anticipate` and `overshoot` are one mechanism (both ARE the easing of an entrance, so both are a warp
+> of the anim's own curve, `core/motion.js`); `settle` is NOT a second prop, because `enterDur` already
+> owns that number and a second spelling of it would be a fork; `step` is a layer prop rather than a
+> modifier, because a modifier runs LAST and a clock has to be quantised before anything reads it;
+> `squash` deforms along the DOMINANT axis, because an arbitrary axis needs a three-function transform
+> and the tracks own `transform`; `matte` takes the source layer's own image or gradient, because a
+> browser cannot read one live element's pixels as another's alpha; and item 4 was half wrong about the
+> engine, which had made the blur automatic already and only lacked the angle (docs/MISTAKES.md #498).
+> Items 8, 9 and 10 are not built.
 
 **A new easing or entrance dial. Cheapest shelf, changes every film.**
 
