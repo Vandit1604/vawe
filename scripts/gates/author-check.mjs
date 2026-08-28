@@ -276,14 +276,21 @@ const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) 
 }
 const vs = vsArg || (typeof scene.theme === 'string' ? scene.theme : null);
 
-// Blocks and comps are BUILD-TIME sugar: `validate` rejects an un-expanded one outright, and every gate
-// that walks layers sees `{type:"block"}` as one opaque thing rather than the chart it becomes. So a scene
-// written with the repo's own vocabulary could not pass its own mandatory ladder: the source failed
+// Blocks, beats and comps are BUILD-TIME sugar: `validate` rejects an un-expanded one outright, and every
+// gate that walks layers sees `{type:"block"}` as one opaque thing rather than the chart it becomes. So a
+// scene written with the repo's own vocabulary could not pass its own mandatory ladder: the source failed
 // validate, and the `.expanded.json` is a derivative some gates skip by name. Neither file could be
 // green. Expand to a temp that keeps the BASENAME (receipts and theme resolution key off it) and is not
 // named `.expanded` (so nothing skips it), then gate that.
+//
+// `beat` was missing from this list, and it is the same sugar with the same refusal at boot. A film that
+// composed one beat from `make blueprints`, which CLAUDE.md step 0 asks every author to do, therefore
+// failed step 1 of its own mandatory ladder while step 6 read the blueprint happily off the same file.
+// The three names are one vocabulary (scripts/author/expand-blocks.mjs resolves them together), so they
+// are listed together here rather than two of three.
 let target = file;
-const hasSugar = (L) => Array.isArray(L) && L.some((l) => l && (l.type === 'block' || l.type === 'comp' || hasSugar(l.children)));
+const SUGAR_TYPES = ['block', 'beat', 'comp'];
+const hasSugar = (L) => Array.isArray(L) && L.some((l) => l && (SUGAR_TYPES.includes(l.type) || hasSugar(l.children)));
 if (hasSugar(scene.layers)) {
   const dir = path.join('/tmp/.author-check', String(process.pid));
   fs.mkdirSync(dir, { recursive: true });
