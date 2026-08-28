@@ -160,6 +160,50 @@ export function writeWav(file, samples, { stereo = false } = {}) {
 // is why they were described as sounding bad. They were an impression of Cuelume, not Cuelume
 // (docs/MISTAKES.md #58). Do not hand-edit these; re-extract from the library if it versions up.
 export const CUES = {
+  // ---- MOTION voices -----------------------------------------------------------------------------
+  // The fifteen cues below this block are INTERACTION sounds, ported from Cuelume: press, toggle,
+  // success, error. They are for a UI, where a person did something. A film has nobody clicking, and
+  // its events are physical: a card LANDS, a camera TRAVELS, a number COUNTS, a peak ARRIVES.
+  //
+  // These five are that vocabulary, and core/audio-tactile.js derives them from the timeline the
+  // engine already has. Voiced with the same primitives as the rest of this file so there is one
+  // synthesiser, not two: a Go copy was written and retired for exactly that reason (#492).
+
+  // Something with weight arrives. A low sine dropping in pitch is the whole trick: the ear reads a
+  // falling fundamental as mass, which is why it works at 60Hz and not at 600.
+  thud: { masterGain: 0.5, layers: [
+    { kind: 'tone', waveform: 'sine', frequency: 150, glideTo: 62, glideTime: 0.09, attack: 0.002, decay: 0.10, peak: 0.5 },
+    { kind: 'noise', filterType: 'lowpass', filterFrequency: 900, filterQ: 0.7, attack: 0.001, decay: 0.035, peak: 0.13 },
+  ] },
+
+  // Travel. Filtered noise whose band OPENS then closes: the movement is in the filter, not the level,
+  // which is what separates a whoosh from a burst of static.
+  travel: { masterGain: 1.9, layers: [
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 500, filterQ: 1.1, attack: 0.07, decay: 0.10, peak: 0.30 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1700, filterQ: 1.4, offset: 0.05, attack: 0.09, decay: 0.09, peak: 0.22 },
+  ] },
+
+  // A build INTO a moment. It has to end where the moment is, so it is short enough to place by hand:
+  // core/audio-tactile.js leads it by RISER_LEAD and the two must stay in step.
+  riser: { masterGain: 0.55, layers: [
+    { kind: 'tone', waveform: 'triangle', frequency: 180, glideTo: 760, glideTime: 0.62, attack: 0.16, decay: 0.10, peak: 0.30 },
+    { kind: 'noise', filterType: 'highpass', filterFrequency: 900, filterQ: 0.8, attack: 0.30, decay: 0.09, peak: 0.16 },
+  ] },
+
+  // A wipe. A noise band travelling up through the spectrum, wider and slower than a whoosh so it
+  // reads as the frame changing rather than an object moving.
+  sweep: { masterGain: 2.0, layers: [
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 340, filterQ: 0.9, attack: 0.03, decay: 0.075, peak: 0.30 },
+    { kind: 'noise', filterType: 'bandpass', filterFrequency: 2300, filterQ: 1.2, offset: 0.09, attack: 0.05, decay: 0.06, peak: 0.18 },
+  ] },
+
+  // Punctuation. A small element, a counter digit. Quiet on purpose: this is the one that becomes a
+  // machine gun if it is loud, and the density rules exist because of it.
+  pluck: { masterGain: 0.30, layers: [
+    { kind: 'tone', waveform: 'triangle', frequency: 920, glideTo: 780, glideTime: 0.05, attack: 0.001, decay: 0.045, peak: 0.34 },
+    { kind: 'tone', waveform: 'sine', frequency: 1840, attack: 0.001, decay: 0.020, peak: 0.09 },
+  ] },
+
   chime: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1046.5, "attack":0.006, "decay":0.22, "peak":0.09}, {"kind":"tone","waveform":"sine","frequency":1568, "offset":0.09, "attack":0.006, "decay":0.26, "peak":0.08}], "shimmer":{"delay":0.12, "feedback":0.25, "wet":0.18, "lowpass":4000.0}},
   sparkle: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1760, "offset":0, "attack":0.003, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"sine","frequency":2217, "offset":0.045, "attack":0.003, "decay":0.09, "peak":0.04}, {"kind":"tone","waveform":"sine","frequency":2637, "offset":0.09, "attack":0.003, "decay":0.1, "peak":0.038}, {"kind":"tone","waveform":"sine","frequency":3520, "offset":0.135, "attack":0.003, "decay":0.12, "peak":0.032}], "shimmer":{"delay":0.07, "feedback":0.35, "wet":0.22, "lowpass":6000.0}},
   droplet: {"masterGain":0.55, "layers":[{"kind":"tone","waveform":"sine","frequency":1200, "glideTo":550, "glideTime":0.14, "attack":0.004, "decay":0.2, "peak":0.075}], "shimmer":{"delay":0.09, "feedback":0.2, "wet":0.15, "lowpass":3000.0}},

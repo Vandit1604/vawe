@@ -2,7 +2,7 @@
  "calm": {
   "generated": "scripts/media/audio-bake.mjs",
   "genre": "synth pad",
-  "licence": "none — synthesized from parameters, carries no rights",
+  "licence": "none, synthesized from parameters, carries no rights",
   "licenceVerified": true,
   "seconds": 8
  },
@@ -79,14 +79,14 @@
  "warm": {
   "generated": "scripts/media/audio-bake.mjs",
   "genre": "synth pad",
-  "licence": "none — synthesized from parameters, carries no rights",
+  "licence": "none, synthesized from parameters, carries no rights",
   "licenceVerified": true,
   "seconds": 8
  },
  "tense": {
   "generated": "scripts/media/audio-bake.mjs",
   "genre": "synth pad",
-  "licence": "none — synthesized from parameters, carries no rights",
+  "licence": "none, synthesized from parameters, carries no rights",
   "licenceVerified": true,
   "seconds": 8
  }

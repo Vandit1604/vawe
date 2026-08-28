@@ -29,6 +29,11 @@ const ROLES = {
   chime: 'chime', sparkle: 'sparkle', droplet: 'droplet', bloom: 'bloom', whisper: 'whisper',
   tick: 'tick', press: 'press', key: 'key', release: 'release', toggle: 'toggle',
   success: 'success', error: 'error', page: 'page', loading: 'loading', ready: 'ready',
+  // MOTION roles, voiced in core/audio-kit.mjs. The fifteen above are INTERACTION sounds, for a UI
+  // where a person clicked. These are for a film, where a card lands and a camera travels, and
+  // core/audio-tactile.js derives them from the timeline rather than asking an author to place them.
+  thud: 'thud', travel: 'travel',
+  riser: 'riser', sweep: 'sweep', pluck: 'pluck',
   // aliases onto the real cues, NOT new voicings. `click` and `pop` are names people reach for;
   // both resolve to Cuelume cues rather than to something invented alongside them.
   click: 'press', pop: 'droplet',

@@ -28,7 +28,7 @@ import { resolveEasing } from './motion.js';
 
 // The cue names this module reaches for. `tick` and the rest of the interaction vocabulary already
 // bake; the five motion voices are being added to CUES in core/audio-kit.mjs alongside this work.
-export const MOTION_CUES = ['thud', 'whoosh', 'riser', 'sweep', 'pluck'];
+export const MOTION_CUES = ['thud', 'travel', 'riser', 'sweep', 'pluck'];
 
 // DENSITY IS THE DESIGN PROBLEM, not the mapping. A 53s film with 103 layers offers ~150 events; every
 // one voiced is a hailstorm, and the hailstorm is what makes derived sound feel cheap. Three rules,
@@ -127,7 +127,7 @@ function cameraCues(camera, out) {
     const dur = +kf[j].t - +kf[i].t;
     // A longer move is a bigger gesture, so it is louder. It cannot be LONGER: the cue is a baked
     // wav of fixed length and nothing here can stretch it (see the report note on parameters).
-    if (dur >= 0.2) out.push({ t: +kf[i].t, name: 'whoosh', w: 0.7,
+    if (dur >= 0.2) out.push({ t: +kf[i].t, name: 'travel', w: 0.7,
       gain: r3(0.16 + 0.16 * Math.min(1, dur / 2)) });
     i = j;
   }

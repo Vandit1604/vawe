@@ -40,8 +40,6 @@ type Cue struct {
 	T      float64            `json:"t"`
 	Name   string             `json:"name"`
 	Gain   *float64           `json:"gain,omitempty"`
-	Voice  string             `json:"voice,omitempty"`
-	Params map[string]float64 `json:"params,omitempty"`
 }
 
 // Bridge is one sound bridge, already resolved to a span of seconds by core/audio-bridges.js. A
@@ -294,19 +292,11 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 		return clip
 	}
 	for _, cue := range sfx {
-		var clip []float64
+		// SYNTHESIS LIVES IN JS, in core/audio-kit.mjs, which is the framework's own audio engine and
+		// bakes every cue to assets/sfx via `make audio`. A second synthesiser briefly lived here and
+		// was retired: one fact with two owners (docs/MISTAKES.md #492).
 		label := cue.Name
-		if cue.Voice != "" {
-			// An unknown voice FAILS the render. A cue is causal: it says the thing arrived, so
-			// dropping one silently would ship a film missing an event nobody could hear was gone.
-			c, err := Synth(cue.Voice, cue.Params)
-			if err != nil {
-				return false, fmt.Errorf("audio cue at t=%.2f: %w", cue.T, err)
-			}
-			clip, label = c, cue.Voice
-		} else {
-			clip = loadSfx(cue.Name)
-		}
+		clip := loadSfx(cue.Name)
 		if clip == nil {
 			continue
 		}

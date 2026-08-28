@@ -2594,7 +2594,12 @@
         "whoosh",
         "reveal",
         "click",
-        "pop"
+        "pop",
+        "thud",
+        "travel",
+        "riser",
+        "sweep",
+        "pluck"
        ]
       },
       "gain": {

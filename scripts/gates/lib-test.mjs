@@ -2291,8 +2291,8 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const camCues = tactileCues({ duration: 30, camera: [
     { t: 0, s: 1, x: 0, y: 0 }, { t: 10, s: 1, x: 0, y: 0 },
     { t: 10.3, s: 1.13, x: 0, y: -10 }, { t: 12.3, s: 1, x: 0, y: 0 }, { t: 20, s: 1, x: 0, y: 0 }] }, { canvas });
-  ok('tactile: a punch-in and its release are ONE whoosh, not two',
-     camCues.length === 1 && camCues[0].name === 'whoosh' && camCues[0].t === 10);
+  ok('tactile: a punch-in and its release are ONE travel, not two',
+     camCues.length === 1 && camCues[0].name === 'travel' && camCues[0].t === 10);
   ok('tactile: a camera that only sits still says nothing',
      tactileCues({ duration: 20, camera: [{ t: 0, s: 1 }, { t: 19, s: 1 }] }, { canvas }).length === 0);
   ok('tactile: a longer move is a bigger gesture, so it is louder',
