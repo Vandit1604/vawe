@@ -72,15 +72,22 @@ const vocabulary = {
 };
 
 // One line per key, so a type gaining a prop is a one-line diff rather than a re-indent.
-function renderVocabulary(v) {
+//
+// THE INDENT IS READ OFF THE FILE, not assumed. It was hardcoded to two spaces here and in the splice
+// regex below, and formats/scene/schema.json is written with ONE, so the anchor never matched: `--write`
+// found no block, fell through to the "no `fields` anchor" branch and exited 2 without writing the
+// layerProps block OR the registry-owned enums. The command CLAUDE.md names as the way to regenerate the
+// schema could not regenerate it, and the only symptom was an error message about a different anchor.
+function renderVocabulary(v, pad = '  ') {
+  const p2 = pad + pad, p3 = pad + pad + pad;
   const arr = (a) => `[${a.map((x) => JSON.stringify(x)).join(', ')}]`;
-  const types = Object.entries(v.byType).map(([t, ps]) => `      ${JSON.stringify(t)}: ${arr(ps)}`);
-  return '  "layerProps": {\n'
-    + `    "_generated": ${JSON.stringify(v._generated)},\n`
-    + `    "_source": ${JSON.stringify(v._source)},\n`
-    + `    "shared": ${arr(v.shared)},\n`
-    + '    "byType": {\n' + types.join(',\n') + '\n    }\n'
-    + '  },';
+  const types = Object.entries(v.byType).map(([t, ps]) => `${p3}${JSON.stringify(t)}: ${arr(ps)}`);
+  return `${pad}"layerProps": {\n`
+    + `${p2}"_generated": ${JSON.stringify(v._generated)},\n`
+    + `${p2}"_source": ${JSON.stringify(v._source)},\n`
+    + `${p2}"shared": ${arr(v.shared)},\n`
+    + `${p2}"byType": {\n` + types.join(',\n') + `\n${p2}}\n`
+    + `${pad}},`;
 }
 
 // schema prop name -> the registry that owns it. `extra` covers documented sentinels the registry
@@ -174,16 +181,18 @@ function rewriteOwnedEnums(src) {
 // Splice by anchor rather than re-serialising the whole schema: schema.json carries hand-formatted
 // inline objects that a JSON.stringify round-trip would explode, and a generator that reformats the
 // file it edits makes every regeneration look like a rewrite.
-const BLOCK = /\n {2}"layerProps": \{[\s\S]*?\n {2}\},/;
+const BLOCK = /\n( +)"layerProps": \{[\s\S]*?\n\1\},/;
 if (process.argv.includes('--write')) {
   const src = fs.readFileSync(SCHEMA_PATH, 'utf8');
-  const block = '\n' + renderVocabulary(vocabulary);
   // Presence of an anchor, not "did the text change": a re-run over an already-current file changes
   // nothing, and reading that as a missing anchor made --write fail the second time it was called.
-  const hasBlock = BLOCK.test(src);
-  const FIELDS = /\n {2}"fields": \{/;
-  if (!hasBlock && !FIELDS.test(src)) { console.error('\u2717 could not place the layerProps block - no existing block and no `"fields": {` anchor'); process.exit(2); }
-  const spliced = hasBlock ? src.replace(BLOCK, block) : src.replace(FIELDS, `${block}\n  "fields": {`);
+  const found = BLOCK.exec(src);
+  const FIELDS = /\n( +)"fields": \{/;
+  const fields = FIELDS.exec(src);
+  if (!found && !fields) { console.error('\u2717 could not place the layerProps block - no existing block and no `"fields": {` anchor'); process.exit(2); }
+  const pad = (found ? found[1] : fields[1]);
+  const block = '\n' + renderVocabulary(vocabulary, pad);
+  const spliced = found ? src.replace(BLOCK, block) : src.replace(FIELDS, `${block}\n${pad}"fields": {`);
   const { out: next, targets } = rewriteOwnedEnums(spliced);
   fs.writeFileSync(SCHEMA_PATH, next);
   console.log('✓ wrote formats/scene/schema.json layerProps (generated from the declarations)');
