@@ -177,6 +177,9 @@ assets/cutouts/
 
 # Site film clips: only the repo's OWN products and the fillable TEMPLATES ship.
 site/public/assets/films/*
+# the launch film itself, the one this repo is announced with
+!site/public/assets/films/vawe-launch.mp4
+!site/public/assets/films/vawe-launch.jpg
 !site/public/assets/films/argus-launch.mp4
 !site/public/assets/films/argus-launch.jpg
 !site/public/assets/films/preface-launch.mp4
