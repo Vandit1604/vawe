@@ -5,7 +5,114 @@
   "orientation": "landscape",
   "theme": "northwind",
   "duration": 50,
-  "camera": [{ "t": 0, "s": 1 }, { "t": 22.2, "s": 1 }, { "t": 31.7, "s": 1.05 }, { "t": 32.1, "s": 1 }, { "t": 50, "s": 1 }],
+  "_sceneUnits": "OFF deliberately. A cut film with no choreographed motion track gets beat wrapping by default (core/produce.js), and this film has layers that outlive their own beat: the roadmap bars, their beams and the agent-panel captions. Wrapping truncated five of them and held five others open past the duration the JSON states. The cuts transform the root instead, and every layer keeps the window it was written with.",
+  "sceneUnits": false,
+  "_camera": "The camera is written as MOVES, not keys: core/camera-moves.js owns the arithmetic, so retiming a chapter is one number. The dive is the only large one, and it lands on the agent panel because chapter 3 is what the film is arguing. A dive is bounded by the copy it must not push off the frame. At scale s centred on tx the left edge of the visible stage is tx - 960/s, and both films set their text column at x=150, so tx must stay at or under 150 + 960/s. The first pass dove to 1.2 on the panel centre and cropped the whole left column for five seconds with every gate green; `make judge` was the only thing that saw it.",
+  "cameraMove": [
+    {
+      "move": "slowPush",
+      "start": 0,
+      "dur": 5.4,
+      "from": 1,
+      "to": 1.04
+    },
+    {
+      "move": "slowPush",
+      "start": 5.8,
+      "dur": 7.6,
+      "from": 1,
+      "to": 1.03
+    },
+    {
+      "move": "slowPush",
+      "start": 13.9,
+      "dur": 8,
+      "from": 1,
+      "to": 1.04
+    },
+    {
+      "move": "diveIn",
+      "start": 22.9,
+      "dur": 2.4,
+      "tx": 980,
+      "ty": 420,
+      "to": 1.1,
+      "targetW": 790,
+      "targetH": 200
+    },
+    {
+      "move": "workspaceZoomOut",
+      "start": 29.3,
+      "dur": 2.1,
+      "from": 1.1,
+      "to": 1,
+      "tx": 980,
+      "ty": 420
+    },
+    {
+      "move": "slowPush",
+      "start": 32.7,
+      "dur": 5.3,
+      "from": 1,
+      "to": 1.04
+    },
+    {
+      "move": "slowPush",
+      "start": 38.3,
+      "dur": 5.6,
+      "from": 1,
+      "to": 1.05
+    },
+    {
+      "move": "slowPush",
+      "start": 44.1,
+      "dur": 5.9,
+      "from": 1.03,
+      "to": 1
+    }
+  ],
+  "_cuts": "The MOTION family, which is what the motion director picks for this theme's punchy personality, rotated across its members. A matte cut (wipe, iris, blinds) would have matched the three roadmap bars, but core/cuts.js refuses one on a whole-frame root and the only way to earn it is beat wrapping, which this film opts out of one field up. So the film carries two cut families: shape inside the beat, motion between them. Each cut sits on a chapter boundary, and the backdrop windows at the foot of the file carry no times because they bind to these joints (core/junctions.js).",
+  "cuts": [
+    {
+      "t": 5.6,
+      "style": "whip",
+      "dur": 0.32,
+      "dir": "left"
+    },
+    {
+      "t": 13.7,
+      "style": "zoom",
+      "dur": 0.36
+    },
+    {
+      "t": 22.15,
+      "style": "whip",
+      "dur": 0.32,
+      "dir": "right"
+    },
+    {
+      "t": 31.7,
+      "style": "punch",
+      "dur": 0.3
+    },
+    {
+      "t": 38.2,
+      "style": "zoom",
+      "dur": 0.36
+    },
+    {
+      "t": 44,
+      "style": "slide",
+      "dur": 0.34,
+      "dir": "left"
+    }
+  ],
+  "spectacle": {
+    "at": 34.4,
+    "of": "adoptionCount",
+    "device": "streak",
+    "why": "Three chapters have followed ONE issue from an inbox to a merged change. The peak lands where the counter stops rather than at the cut, so the sting punctuates the finished figure instead of covering it while it counts. It is the only beat allowed to raise its voice."
+  },
   "audio": {
     "silent": true,
     "_why": "Template ships mute so a fork can drop its own bed in without fighting a mix it did not choose. Replace with a real audio block before shipping."
@@ -71,7 +178,6 @@
       "anim": "fade",
       "exitDur": 0.35
     },
-
     {
       "type": "text",
       "text": "<img src=\"/assets/icons/ui/inbox.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />1.0&nbsp;&nbsp;Intake →",
@@ -82,9 +188,9 @@
       "x": 150,
       "y": 180,
       "start": 5.6,
-      "duration": 8,
+      "duration": 8.1,
       "anim": "fade",
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "text",
@@ -101,8 +207,8 @@
       "stagger": 0.045,
       "each": 0.38,
       "start": 5.8,
-      "duration": 7.8,
-      "exitDur": 0.35
+      "duration": 7.9,
+      "exitDur": 0.2
     },
     {
       "type": "text",
@@ -114,9 +220,9 @@
       "x": 150,
       "y": 470,
       "start": 6.4,
-      "duration": 7.2,
+      "duration": 7.3,
       "anim": "fade",
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "board",
@@ -129,9 +235,9 @@
       "filter": "brightness(0.38)",
       "fade": "edges",
       "start": 6.2,
-      "duration": 7.4,
+      "duration": 7.5,
       "anim": "fade",
-      "exitDur": 0.35,
+      "exitDur": 0.2,
       "cols": [
         {
           "title": "Todo",
@@ -141,19 +247,35 @@
               "id": "ENG-926",
               "title": "Remove UI inconsistencies",
               "labels": [
-                { "t": "Bug", "c": "var(--down)" },
-                { "t": "Design", "c": "var(--accent)" }
+                {
+                  "t": "Bug",
+                  "c": "var(--down)"
+                },
+                {
+                  "t": "Design",
+                  "c": "var(--accent)"
+                }
               ]
             },
             {
               "id": "ENG-2088",
               "title": "TypeError: cannot read properties",
-              "labels": [{ "t": "Bug", "c": "var(--down)" }]
+              "labels": [
+                {
+                  "t": "Bug",
+                  "c": "var(--down)"
+                }
+              ]
             },
             {
               "id": "ENG-1882",
               "title": "Optimize load times",
-              "labels": [{ "t": "Performance", "c": "var(--up)" }]
+              "labels": [
+                {
+                  "t": "Performance",
+                  "c": "var(--up)"
+                }
+              ]
             }
           ]
         },
@@ -161,11 +283,20 @@
           "title": "In Progress",
           "count": 3,
           "cards": [
-            { "id": "ENG-1487", "title": "Drop legacy fields from the API", "labels": [] },
+            {
+              "id": "ENG-1487",
+              "title": "Drop legacy fields from the API",
+              "labels": []
+            },
             {
               "id": "MKT-1028",
               "title": "Launch page assets",
-              "labels": [{ "t": "Design", "c": "var(--accent)" }]
+              "labels": [
+                {
+                  "t": "Design",
+                  "c": "var(--accent)"
+                }
+              ]
             }
           ]
         }
@@ -184,9 +315,9 @@
       "w": 790,
       "radius": 14,
       "start": 6.6,
-      "duration": 7,
+      "duration": 7.1,
       "anim": "rise",
-      "exitDur": 0.35,
+      "exitDur": 0.2,
       "children": [
         {
           "type": "text",
@@ -236,7 +367,6 @@
       "y": 600,
       "w": 560
     },
-
     {
       "type": "text",
       "text": "<img src=\"/assets/icons/ui/map.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />2.0&nbsp;&nbsp;Plan →",
@@ -247,9 +377,9 @@
       "x": 150,
       "y": 180,
       "start": 13.7,
-      "duration": 8.4,
+      "duration": 8.45,
       "anim": "fade",
-      "exitDur": 0.35,
+      "exitDur": 0.2,
       "w": 1620,
       "align": "center"
     },
@@ -268,8 +398,8 @@
       "stagger": 0.045,
       "each": 0.38,
       "start": 13.9,
-      "duration": 8.2,
-      "exitDur": 0.35,
+      "duration": 8.25,
+      "exitDur": 0.2,
       "align": "center"
     },
     {
@@ -282,9 +412,9 @@
       "x": 150,
       "y": 370,
       "start": 14.5,
-      "duration": 7.6,
+      "duration": 7.65,
       "anim": "fade",
-      "exitDur": 0.35,
+      "exitDur": 0.2,
       "align": "center"
     },
     {
@@ -297,9 +427,9 @@
       "x": 560,
       "y": 470,
       "start": 14.3,
-      "duration": 7.8,
+      "duration": 7.85,
       "anim": "fade",
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "rect",
@@ -309,9 +439,9 @@
       "h": 1,
       "bg": "var(--line-strong)",
       "start": 14.3,
-      "duration": 7.8,
+      "duration": 7.85,
       "anim": "fade",
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "text",
@@ -351,11 +481,11 @@
       "radius": 8,
       "bg": "color-mix(in srgb, var(--warn) 55%, transparent)",
       "start": 15.4,
-      "duration": 6.5,
+      "duration": 6.75,
       "cut": "wipe",
       "dir": "left",
       "enterDur": 0.9,
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "text",
@@ -445,7 +575,6 @@
       "enterDur": 0.9,
       "exitDur": 0.35
     },
-
     {
       "type": "text",
       "text": "<img src=\"/assets/icons/ui/bot.svg\" style=\"width:26px;height:26px;vertical-align:-4px;margin-right:14px\" />3.0&nbsp;&nbsp;Build →",
@@ -456,9 +585,9 @@
       "x": 150,
       "y": 180,
       "start": 22.2,
-      "duration": 9.4,
+      "duration": 9.5,
       "anim": "fade",
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "text",
@@ -475,8 +604,8 @@
       "stagger": 0.045,
       "each": 0.38,
       "start": 22.4,
-      "duration": 9.2,
-      "exitDur": 0.35
+      "duration": 9.3,
+      "exitDur": 0.2
     },
     {
       "type": "text",
@@ -488,9 +617,9 @@
       "x": 150,
       "y": 470,
       "start": 23,
-      "duration": 8.6,
+      "duration": 8.7,
       "anim": "fade",
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "glow",
@@ -501,13 +630,17 @@
       "color": "var(--accent)",
       "intensity": 0.09,
       "start": 22.6,
-      "duration": 9,
+      "duration": 9.1,
       "anim": "fade",
-      "exitDur": 0.35
+      "exitDur": 0.2
     },
     {
       "type": "group",
       "id": "agentPanel",
+      "becomes": "adoptionCount",
+      "becomesDur": 0.52,
+      "becomesEase": "easeOutQuart",
+      "_becomes": "The panel does not fade out and the number does not fade in: the one issue HANDS OVER to the thirty-three thousand teams, opening in the panel's own pose and settling into its own. `becomes` resolves the pose from the measured boxes, so retiming or resizing either side cannot drift the match.",
       "direction": "column",
       "align2": "flex-start",
       "gap": 18,
@@ -517,9 +650,9 @@
       "w": 790,
       "radius": 14,
       "start": 22.8,
-      "duration": 8.8,
+      "duration": 8.9,
       "anim": "rise",
-      "exitDur": 0.35,
+      "exitDur": 0.2,
       "children": [
         {
           "type": "text",
@@ -614,9 +747,9 @@
       "exitDur": 0.35,
       "elevation": 1
     },
-
     {
       "type": "count",
+      "id": "adoptionCount",
       "from": 0,
       "to": 33,
       "decimals": 0,
@@ -669,27 +802,21 @@
       "anim": "fade",
       "exitDur": 0.35
     },
-
     {
-      "type": "text",
+      "_beat": "wordBlast is scale punctuation: the line arrives already too big, falls into its reading, creeps so the held frame is never a freeze, then grows THROUGH the camera into the end card. The statement beat is the one place in this film that wants a full stop rather than a fade.",
+      "type": "beat",
+      "beat": "wordBlast",
       "text": "Built for the future. <b>Available today.</b>",
       "size": 80,
       "weight": 590,
-      "tracking": "-0.02em",
+      "color": "var(--text)",
       "w": 1620,
       "align": "center",
       "x": 150,
       "y": 440,
-      "split": "word",
-      "preset": "up",
-      "dist": 22,
-      "stagger": 0.07,
-      "each": 0.5,
       "start": 38.2,
-      "duration": 5.9,
-      "exitDur": 0.35
+      "dur": 5.9
     },
-
     {
       "type": "svg",
       "x": 916,
@@ -759,9 +886,28 @@
       "exitDur": 0
     }
   ],
+  "_bg": "Seven windows, one per beat, and not one of them names a time: the engine binds window i to the joint after it, so the cuts own the numbers and retiming a chapter moves the backdrop with it. Three windows used to carry hand-typed edges, which is the same boundary written twice. `brandglow` was tried on the build chapter and read as a second, blurrier copy of that beat's own glow layer, so that window is a plain dark radial and the beat keeps one light source. The close returns to the hook's constellation: the film ends where it opened.",
   "bg": [
-    { "from": 0, "to": 13.7, "preset": "constellation" },
-    { "from": 13.7, "to": 31.7, "preset": "mesh" },
-    { "from": 31.7, "to": 50, "preset": "spotlight" }
+    {
+      "preset": "constellation"
+    },
+    {
+      "preset": "ink"
+    },
+    {
+      "preset": "mesh"
+    },
+    {
+      "preset": "dark"
+    },
+    {
+      "preset": "spotlight"
+    },
+    {
+      "preset": "deep"
+    },
+    {
+      "preset": "constellation"
+    }
   ]
 }

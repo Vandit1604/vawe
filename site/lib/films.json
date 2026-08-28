@@ -18,12 +18,12 @@
  "product-feature-tour": {
   "seconds": 50,
   "label": "0:50",
-  "sourceHash": "1f200ecd2190f9da18eeaa26bf5d97de4cd4d0da0fc83c2bf642bbae13a17362"
+  "sourceHash": "fe1041b0363a45f62f0670b12933df9b2ce7ab4169a5f5f088697f3e2357d45a"
  },
  "saas-hero-launch": {
   "seconds": 45,
   "label": "0:45",
-  "sourceHash": "273412bf408b254b0c2a60b4b2492dd75bdcae036dc8cf69c1286b61bae25fc2"
+  "sourceHash": "ce512a4eadb5dafb68f961276287a60d8ee1594cfac5900ede94570b148ce893"
  },
  "threadcite-open": {
   "seconds": 30,

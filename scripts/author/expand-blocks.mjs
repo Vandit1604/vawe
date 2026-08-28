@@ -44,6 +44,12 @@ const shift = (layer, dx, dy, dt) => ({
   start: (layer.start ?? 0) + dt,
 });
 
+// A prop the factory never reads is a real finding, but an AUTHOR NOTE is not one. This repo writes notes
+// as `_`-prefixed keys everywhere (`_why`, `_template`, `_camera`), and `note` was exempted by hand on the
+// beat arm and not at all on the block arm, so the identical comment warned in one place and was silent in
+// the other. One predicate, both arms: an underscore key is a note, and nothing else is.
+const isNote = (k) => k === 'note' || k.startsWith('_');
+
 // expand one layer into 0+ concrete layers. `stack` carries the comp-ref path to catch cycles.
 function expand(layer, stack) {
   if (layer.type === 'block') {
@@ -64,7 +70,7 @@ function expand(layer, stack) {
     const sig = famFn && /\(\s*\{([^}]*)\}/.exec(famFn.toString());
     if (sig) {
       const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));
-      const unknown = Object.keys(opts).filter((k) => !known.has(k));
+      const unknown = Object.keys(opts).filter((k) => !known.has(k) && !isNote(k));
       if (unknown.length) warnings.push(`block "${layer.block}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')}, not a prop it accepts (known: ${[...known].join(', ')})`);
     }
     nBlocks++;
@@ -80,7 +86,7 @@ function expand(layer, stack) {
     const sig = /\(\s*\{([^}]*)\}/.exec(f.toString());
     if (sig) {
       const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));
-      const unknown = Object.keys(opts).filter((k) => !known.has(k) && k !== 'note');
+      const unknown = Object.keys(opts).filter((k) => !known.has(k) && !isNote(k));
       if (unknown.length) warnings.push(`beat "${layer.beat}" ignores ${unknown.map((u) => `\`${u}\``).join(', ')}, not a prop it accepts (known: ${[...known].join(', ')})`);
     }
     nBeats++;
