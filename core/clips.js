@@ -4,7 +4,8 @@
 // Both are PURE in the time input: driveClips(clips, t) is a deterministic function of t; seeking a
 // paused timeline to t is deterministic. This lets a scene be authored declaratively (fill HTML with
 // timed clips) OR bring its own animation runtime, exactly like another engine' adapter model.
-import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe } from './motion.js';
+import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe,
+  anticipateEase, overshootEase, stepClock, FPS } from './motion.js';
 import { defineRegistry } from './registry.js';
 
 // enter/exit animation registry: data-anim / data-out name → (t)=>styleObject.
@@ -12,9 +13,22 @@ import { defineRegistry } from './registry.js';
 // registry entry whose motion contradicts its own name is invisible to every gate that only counts
 // names, and that is exactly how `wipe-right` revealed right-to-left for as long as it did.
 export const ANIM = {
-  fade, up: rise, rise, pop, scale: pop, lift, defocus,
-  'slide-left': (t) => slide(t, 'left'), 'slide-right': (t) => slide(t, 'right'),
-  'slide-up': (t) => slide(t, 'up'), 'slide-down': (t) => slide(t, 'down'),
+  // THE SECOND ARGUMENT IS THE ENTRANCE WARP (core/motion.js), and only the entries that pass it on
+  // accept `anticipate` / `overshoot`. Both dials ARE the easing, so an entrance that moves nothing
+  // through space (fade), leaves through focus (defocus) or uncovers a fixed edge (the wipes, iris,
+  // clock) has nothing for them to bend. Those entries take one argument and WARPABLE below names the
+  // ones that take two, so asking for a wind-up on a fade is refused rather than silently dropped.
+  fade,
+  up: (t, warp) => rise(t, 48, warp), rise: (t, warp) => rise(t, 48, warp),
+  pop: (t, warp) => pop(t, 0.86, warp), scale: (t, warp) => pop(t, 0.86, warp),
+  lift: (t, warp) => lift(t, { warp }),
+  // WRAPPED, arity 1, deliberately. `defocus`, `iris` and `clock` all take a second positional or
+  // options argument of their OWN (blur radius, iris centre), and the second argument of an ANIM entry
+  // is now the entrance warp. Naming them bare would hand the warp to whichever slot happened to be
+  // second: `iris: circleWipe` was doing exactly that, and read the warp as its `cx`.
+  defocus: (t) => defocus(t),
+  'slide-left': (t, warp) => slide(t, 'left', 60, warp), 'slide-right': (t, warp) => slide(t, 'right', 60, warp),
+  'slide-up': (t, warp) => slide(t, 'up', 60, warp), 'slide-down': (t, warp) => slide(t, 'down', 60, warp),
   // WIPES ARE NAMED FOR THE EDGE THE REVEAL TRAVELS TOWARD. `wipe-right` grows rightward from the left
   // edge, `wipe-down` grows downward from the top, `wipe-up` grows upward from the bottom (the one a bar
   // chart wants). Plain `wipe` is the default direction, rightward, the same function as `wipe-right`.
@@ -31,7 +45,7 @@ export const ANIM = {
   wipe: (t) => wipe(t, 'left'),
   'wipe-right': (t) => wipe(t, 'left'), 'wipe-left': (t) => wipe(t, 'right'),
   'wipe-down': (t) => wipe(t, 'up'), 'wipe-up': (t) => wipe(t, 'down'),
-  iris: circleWipe, clock: clockWipe,
+  iris: (t) => circleWipe(t), clock: (t) => clockWipe(t),
   // `none` is a REAL entry, not a hole. The schema has always listed it for `anim`/`out`, but the
   // registry had no key for it, so resolveAnim fell through to fade: an author writing out:"none" to
   // stop a layer fading got the fade anyway, with nothing said. That is the silent-substitution class
@@ -75,6 +89,39 @@ export const ANIM_BLURBS = {
   clock: 'radial sweep from 12 o\'clock, clockwise',
   none: 'no move and no fade. The layer just appears at its window edges',
 };
+
+// The entrances that accept a WARP, and therefore the ones `anticipate` and `overshoot` are real on.
+// Written out rather than probed, because a hand-written list of a registry's members is exactly what
+// drifts here: `make lib-test` asserts this set is precisely the set of ANIM entries whose output
+// actually CHANGES when a warp is handed to them, so a new entrance that threads one and is not named
+// here fails the build, and a name here that quietly ignores the warp fails it too.
+export const WARPABLE = Object.freeze(['up', 'rise', 'pop', 'scale', 'lift',
+  'slide-left', 'slide-right', 'slide-up', 'slide-down']);
+
+// The wind-up, in FRAMES, because that is the unit the recipe is stated in (2 to 4 at 24fps) and it is
+// the unit that stays right when an author lengthens the entrance: a wind-up expressed as a fraction of
+// the ramp would grow with it and stop reading as a flick.
+const WINDUP_FRAMES = 3;
+
+// entranceWarp(el, enterDur): the layer's two dials → one warp function, or null when it set neither.
+// Read off the dataset like every other clip input, so clipStyleAt stays a pure function of t and of
+// attributes written once at build (formats/scene/scene.js setLayerTiming).
+export function entranceWarp(el, enterDur) {
+  const aRaw = el.dataset.anticipate, oRaw = el.dataset.overshoot;
+  if (aRaw == null && oRaw == null) return null;
+  const anim = el.dataset.anim || 'fade';
+  if (!WARPABLE.includes(anim))
+    throw new Error(`layer with anim "${anim}" sets ${aRaw != null ? '`anticipate`' : '`overshoot`'}, and `
+      + `that entrance has no travel to bend: both dials ARE the easing of a move through space or scale. `
+      + `They are real on: ${WARPABLE.join(', ')}. Change the anim, or drop the dial.`);
+  const a = aRaw != null ? parseFloat(aRaw) : 0;
+  const o = oRaw != null ? parseFloat(oRaw) : 0;
+  // The main move: the anim's own curve, or an overshoot of the asked-for amount replacing it.
+  const main = (own) => (o > 0 ? overshootEase(o) : own);
+  if (!(a > 0)) return (own) => main(own);
+  const windup = enterDur > 0 ? (WINDUP_FRAMES / FPS) / enterDur : 0.25;
+  return (own) => anticipateEase(main(own), { amount: a, windup });
+}
 
 // Base enter/exit durations, in seconds. Snap band (0.2-0.3s): a default entrance that lands in ~a
 // third of a second reads as directed; the old 0.45/0.4 read as floaty. Exported so scene.html can
@@ -151,6 +198,10 @@ export function collectClips(root) {
 // core/layers/util.js `addGroupChild`), and writes nothing.
 export function clipStyleAt(el, t) {
   const start = parseFloat(el.dataset.start) || 0;
+  // ANIMATE ON TWOS. `step` quantises this layer's own clock, and it has to happen HERE as well as in
+  // the track pipeline, because the entrance is composed by this function and not by a track. Anchored
+  // on the layer's start so its first frame is exact rather than half a step early.
+  if (el.dataset.step != null) t = stepClock(t, parseFloat(el.dataset.step), start);
   const dur = el.dataset.duration != null ? parseFloat(el.dataset.duration) : Infinity;
   const end = start + dur;
   const enterDur = enterDurOf(el);
@@ -180,7 +231,10 @@ export function clipStyleAt(el, t) {
     return { ...z, ...(off ? off(1) : {}), ...resolveAnim(el.dataset.anim)(1), opacity: '0', pointerEvents: 'none' };
   }
   const enterT = enterDur > 0 ? clamp01((t - start) / enterDur) : 1;
-  let s = resolveAnim(el.dataset.anim)(enterT), exitT = 0;
+  // The warp bends the ENTRANCE only. An exit plays an entrance backwards, and a wind-up on the way out
+  // is the enter-and-retreat the house rules already refuse; an overshoot on an exit is a layer that
+  // leaves and comes back to say goodbye.
+  let s = resolveAnim(el.dataset.anim)(enterT, entranceWarp(el, enterDur)), exitT = 0;
   if (Number.isFinite(end)) {
     exitT = exitDur > 0 ? clamp01((t - (end - exitDur)) / exitDur) : 0;
     // DEFAULT exit = a calm fade in place (element stays at rest, only opacity drops). A moving exit

@@ -10,6 +10,9 @@
 export const PROPS = {
   // the clip timing every layer element carries (setLayerTiming → core/clips.js)
   start: {}, duration: {}, track: {}, anim: {}, out: {}, enterDur: {}, exitDur: {},
+  // the two entrance dials and the layer's own clock rate (core/motion.js). setLayerTiming writes all
+  // three onto the element, because core/clips.js composes the entrance and sees only the DOM.
+  anticipate: {}, overshoot: {}, step: {},
   split: {}, cut: {}, acrossBeats: {},
   // the element itself: box, class, text alignment, the look, and the audit's visibility opt-in
   type: {}, id: {}, x: {}, y: {}, w: {}, h: {}, align: {}, filter: {}, size: {}, critical: {},

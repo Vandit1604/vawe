@@ -2,10 +2,11 @@
 // No browser needed (the primitives are pure). Run: node scripts/gates/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
-  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase } from '../../core/motion.js';
+  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
+  anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
-import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt } from '../../core/clips.js';
+import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/clips.js';
 import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
   normalizeIdle, settledGain } from '../../core/idle.js';
 import { SEAM_BLURBS } from '../../core/seams.js';
@@ -347,6 +348,70 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   }
   return true;
 })());
+
+// ---- THE ENTRANCE WARP: anticipation (#5) and the overshoot dial (#3), docs/CRAFT/AFTER-EFFECTS-RECIPES.md
+// Both dials ARE the easing of an entrance, so they are asserted on the curve AND through clipStyleAt,
+// which is the only thing that composes them onto a real layer.
+{
+  const probe = () => () => 2;   // a warp that ignores the anim's own curve and returns a constant
+  const changes = ANIM_NAMES.filter((n) => JSON.stringify(ANIM[n](0.5, probe)) !== JSON.stringify(ANIM[n](0.5)));
+  ok('WARPABLE names exactly the entrances that honour a warp, no more and no fewer',
+     JSON.stringify([...changes].sort()) === JSON.stringify([...WARPABLE].sort()));
+
+  // ANTICIPATION: back along the travel first, then straight into the move, landing exactly at rest.
+  const a = anticipateEase(easeOutCubic, { amount: 0.15, windup: 0.25 });
+  ok('anticipateEase is terminal at both ends', a(0) === 0 && a(1) === 1);
+  ok('anticipateEase winds BACK before it moves forward', a(0.1) < 0 && a(0.2) < 0);
+  ok('anticipateEase reaches the asked-for counter-move and no more',
+     Math.abs(a(0.25) + 0.15) < 1e-9 && [0.05, 0.1, 0.15, 0.2, 0.25].every((u) => a(u) >= -0.1501));
+  ok('anticipateEase has no hold at the turn: it is climbing again one frame later', a(0.28) > a(0.25));
+
+  // OVERSHOOT: the amount an author asks for is the amount the curve delivers.
+  for (const amt of [0.08, 0.12, 0.15]) {
+    const o = overshootEase(amt);
+    let peak = 0; for (let i = 0; i <= 1000; i++) peak = Math.max(peak, o(i / 1000));
+    ok(`overshootEase(${amt}) peaks within a point of the amount asked for (got ${(peak - 1).toFixed(4)})`,
+       Math.abs((peak - 1) - amt) < 0.01);
+    ok(`overshootEase(${amt}) lands exactly at rest`, o(1) === 1 && o(0) === 0);
+  }
+
+  // THE REFUSAL. A dial on an entrance with no travel is named, not dropped.
+  ok('a dial on a non-directional entrance is refused by name', (() => {
+    try { entranceWarp({ dataset: { anim: 'fade', overshoot: '0.12' } }, 0.3); return false; }
+    catch (e) { return /has no travel to bend/.test(e.message) && /fade/.test(e.message); }
+  })());
+  ok('an entrance with neither dial gets no warp at all', entranceWarp({ dataset: { anim: 'rise' } }, 0.3) === null);
+
+  // COMPOSED ONTO A REAL LAYER. `rise` starts 48px below its box; with a wind-up it starts there and
+  // goes FURTHER down before it comes up, and with an overshoot it passes rest and comes back.
+  const yOf = (st) => parseFloat(st.transform.match(/translateY\(([-\d.]+)px\)/)[1]);
+  const clipW = (d) => ({ dataset: { start: '0', duration: '3', enter: '0.3', anim: 'rise', ...d } });
+  const plain = clipW({}), wound = clipW({ anticipate: '0.15' }), over = clipW({ overshoot: '0.12' });
+  ok('anticipate: the layer is FURTHER from rest two frames in than it was at t=0',
+     yOf(clipStyleAt(wound, 2 / 30)) > yOf(clipStyleAt(plain, 0)));
+  ok('anticipate: it still lands exactly at rest when the ramp ends',
+     Math.abs(yOf(clipStyleAt(wound, 0.3))) < 1e-6);
+  ok('overshoot: the layer passes rest and comes back (a negative translate mid-entrance)',
+     (() => { for (let f = 1; f < 9; f++) if (yOf(clipStyleAt(over, f / 30)) < -0.5) return true; return false; })());
+  ok('overshoot: 12% of the 48px travel is about 5.8px past rest',
+     (() => { let m = 0; for (let f = 0; f <= 9; f++) m = Math.min(m, yOf(clipStyleAt(over, f / 30))); return Math.abs(-m - 48 * 0.12) < 1.2; })());
+  ok('neither dial changes a layer that sets neither',
+     JSON.stringify(clipStyleAt(plain, 0.12)) === JSON.stringify(clipStyleAt(clipW({}), 0.12)));
+
+  // ANIMATE ON TWOS (#24): the clock quantises, anchored on the layer's own start.
+  ok('stepClock holds each pose for a whole step, anchored on the layer start',
+     stepClock(2.0, 15, 2) === 2 && stepClock(2.04, 15, 2) === 2 && Math.abs(stepClock(2.07, 15, 2) - (2 + 1 / 15)) < 1e-9);
+  ok('stepClock refuses a rate that is not a positive number', (() => {
+    try { stepClock(1, 0); return false; } catch (e) { return /updates per second/.test(e.message); }
+  })());
+  const stepped = clipW({ step: '15' });
+  ok('a stepped layer renders the SAME pose for both frames of its step',
+     JSON.stringify(clipStyleAt(stepped, 2 / 30)) === JSON.stringify(clipStyleAt(stepped, 3 / 30)));
+  ok('a stepped layer still MOVES between steps',
+     JSON.stringify(clipStyleAt(stepped, 2 / 30)) !== JSON.stringify(clipStyleAt(stepped, 4 / 30)));
+  ok('a stepped clock is pure: the same t answers the same after a seek away',
+     (() => { const x = JSON.stringify(clipStyleAt(stepped, 0.17)); clipStyleAt(stepped, 2.4); return x === JSON.stringify(clipStyleAt(stepped, 0.17)); })());
+}
 
 // ---- background `opts`: a knob a window declares must be READ, or refused by name (MISTAKES #157).
 // The accepted set is derived from the fx implementations, so these also pin that the derivation is
