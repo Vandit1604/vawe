@@ -70,8 +70,13 @@ const timelineModel = (file) => {
     duration: d.duration || null,
     marks: [...marks('cuts'), ...marks('seams'), ...marks('stings')].sort((a, b) => a.t - b.t),
     layers: (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object')
+      // `raw` is the authored object, carried whole. The picker hands it back when you click the
+      // picture, and the point is that what you copy is EXACTLY what is in the file: a summary you
+      // then have to reconcile with the JSON is worth less than the JSON.
       .map((L, i) => ({ i, type: L.type || 'text', label: label(L), start: L.start ?? 0, dur: L.duration ?? L.dur ?? 2,
-        keys: Array.isArray(L.motion) ? L.motion.map((k) => k.t ?? 0) : [] })),
+        keys: Array.isArray(L.motion) ? L.motion.map((k) => k.t ?? 0) : [], raw: L })),
+    // The backdrop is a layer of the film in every sense that matters, so it is selectable too.
+    bg: Array.isArray(d.bg) ? d.bg : (d.bg ? [d.bg] : []),
     gate: beatCheck(file),
   };
 };
@@ -115,6 +120,17 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  /* ---- timeline ---- */
  #tl{background:var(--panel);border-top:1px solid var(--line);display:flex;flex-direction:column;max-height:58vh}
  #tl.off #lanes,#tl.off #alerts{display:none}
+ #pick{position:fixed;right:14px;top:14px;width:390px;max-height:74vh;display:none;flex-direction:column;
+   background:#12151c;color:#e8ecf3;border:1px solid #2a3140;border-radius:8px;z-index:40;
+   font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
+ #pick.on{display:flex}
+ #pickhead{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid #2a3140}
+ #pickname{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #pickhead button{background:#1c2130;color:#cfd6e2;border:1px solid #2a3140;border-radius:5px;
+   padding:.32em .6em;cursor:pointer;font:11px/1 ui-monospace,monospace}
+ #pickhead button:hover{background:#243044}
+ #pickjson{margin:0;padding:11px;overflow:auto;user-select:text;white-space:pre-wrap;color:#cfd6e2}
+ #stage{cursor:crosshair}
  #tlhead{display:flex;align-items:center;gap:10px;padding:8px 16px;color:var(--ink-2);font-size:12px;border-bottom:1px solid var(--line)}
  #tlhead b{font-family:Anybody,system-ui,sans-serif;font-variation-settings:'wdth' 105;font-weight:700;font-size:13px;color:var(--ink)}
  #tlhead .sp{flex:1} #tlhead .k{display:inline-flex;align-items:center;gap:4px;margin-left:10px}
@@ -176,6 +192,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  #ph{position:absolute;top:0;bottom:0;width:1px;background:var(--play);z-index:5;pointer-events:none}
  #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--play)}
 </style></head><body>
+ <div id=pick><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>x</button></div><pre id=pickjson></pre></div>
  <div id=stage><iframe id=sc src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=drag></div><div id=err hidden></div></div>
  <div id=bar>
   <button id=play>▶ play</button>
@@ -208,6 +225,52 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
  // a key lands at the layer's LOCAL time, so that is the number the readout has to show, live. Before
  // this it froze at whatever it was when you clicked, which is the one moment it does not matter.
+ // ---- THE PICKER: click the picture, get the JSON that made it ----------------------------------
+ // The timeline could already select a layer by its BAR. Nothing could select one by looking at it, so
+ // describing a problem meant describing where it was on screen and hoping. Now a click hit-tests the
+ // rendered frame and hands back the exact object, which is the thing you paste to somebody who can
+ // change it. The backdrop is selectable too: it is a layer of the film in every sense that matters.
+ const pick=document.getElementById('pick'), pickName=document.getElementById('pickname'),
+       pickJson=document.getElementById('pickjson');
+ function bgAt(t){ if(!model) return null;
+   const bg=model.bg||[]; if(!bg.length) return null;
+   // Windows bound to junctions carry no from/to, so which one is showing has to come from the ENGINE,
+   // never re-derived here: core/junctions.js owns that and a second answer would drift from it.
+   let i=0; for(let k=0;k<bg.length;k++){ const w=bg[k]; if(w&&w.from!=null&&t>=w.from) i=k; }
+   // Windows with no from/to are bound to the film's joints by core/junctions.js, one each in order,
+   // so the marks studio already parsed give the same answer without re-deriving it here.
+   if(bg.length>1 && bg.every(w=>w&&w.from==null)){
+     const joints=(model.marks||[]).filter(m=>m.kind!=='sting').map(m=>m.t).sort((a,b)=>a-b);
+     i=0; for(let k=0;k<joints.length && t>=joints[k];k++) i=Math.min(k+1,bg.length-1); }
+   return { i, win: bg[i], count: bg.length }; }
+ function showPick(kind, name, obj, extra){
+   pick.classList.add('on'); pickName.textContent=name;
+   pickJson.textContent=(extra?extra+String.fromCharCode(10):'')+JSON.stringify(obj,null,2); }
+ document.getElementById('pickclose').addEventListener('click',()=>pick.classList.remove('on'));
+ document.getElementById('pickcopy').addEventListener('click',()=>{
+   const b=document.getElementById('pickcopy');
+   navigator.clipboard.writeText(pickJson.textContent).then(()=>{
+     b.textContent='copied'; setTimeout(()=>b.textContent='copy JSON',1200); }); });
+ sc.addEventListener('load',()=>{ try{
+   const doc=sc.contentDocument; if(!doc) return;
+   doc.addEventListener('click',(ev)=>{
+     if(!model) return;
+     // topmost FIRST: elementsFromPoint is painted order reversed, which is what "the thing you
+     // clicked on" means when layers overlap.
+     const hit=(doc.elementsFromPoint(ev.clientX,ev.clientY)||[])
+       .map(el=>el.closest && el.closest('.hs-layer')).find(Boolean);
+     const t=n/fps;
+     if(hit && hit.dataset.idx!=null){
+       const i=+hit.dataset.idx, m=model.layers.find(l=>l.i===i), L=m&&m.raw;
+       if(L){ setSel(i);
+         showPick('layer','layers['+i+']  '+(L.type||'?'),L,
+           '// frame '+n+' ('+t.toFixed(2)+'s) of '+total+'   layers['+i+']'); return; } }
+     const b=bgAt(t);
+     if(b) showPick('bg','bg['+b.i+']  backdrop',b.win,
+       '// frame '+n+' ('+t.toFixed(2)+'s)   bg window '+(b.i+1)+' of '+b.count+
+       ', bound to the film'+String.fromCharCode(39)+'s own cuts');
+   },true);
+ }catch(err){ /* a cross-origin doc cannot be picked; the timeline still selects */ } });
  function selReadout(){ if(selIdx<0){ selOut.textContent=''; return; }
    const lt=n/fps-selStart;
    selOut.textContent='▸ '+selLabel+'  ·  key at '+lt.toFixed(2)+'s'+(lt<0?'  (before it starts)':''); }

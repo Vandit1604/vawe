@@ -502,6 +502,10 @@ boot((data, fps, theme, canvas) => {
   // Enter/exit default to the base snap durations scaled by the theme's durationScale; a split layer
   // enters instantly (units reveal themselves), and fxOut zeroes the fade so GSAP owns the exit alone.
   function setLayerTiming(el, L, idx) {
+    // THE LAYER'S INDEX IN THE AUTHORED ARRAY. Nothing in the render reads it. It exists so a tool can
+    // map a painted pixel back to the JSON that produced it: studio's picker hit-tests the frame and
+    // needs to answer "which layer is this", and `track` cannot answer it because an author may set it.
+    el.dataset.idx = String(idx);
     el.dataset.start = String(L.start ?? 0);
     if (L.duration != null) el.dataset.duration = String(L.duration);
     el.dataset.track = String(L.track ?? idx);
