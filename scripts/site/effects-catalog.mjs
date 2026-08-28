@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PRESETS } from '../../core/type.js';
+import { MOTION_CUES } from '../../core/audio-tactile.js';
 import { ANIM_NAMES } from '../../core/clips.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
@@ -175,6 +176,7 @@ export const sections = [
   // about 80KB of engine, reached by 3 of 135 scenes and by 0 of 30 block files. Documentation alone
   // does not fix adoption (`parts` went 0 to 5 block files and its scenes stayed at 2), but a
   // catalogue that names the wrong key guarantees the opposite.
+  ['Motion voices (tactile sound)', 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.', names(MOTION_CUES), 'audio', { skip: null }],
   ['Per-layer modifiers', '`"modifiers"` on a layer, applied in array order after every motion track. A physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow. NOT `"fx"`, which is the named-GSAP-effect slot and refuses an entry with no name.', names(FX_TYPES), 'per-layer', { blurbs: FX_BLURBS }],
   ['Part entrances', 'THE BRIDGE between hand-written markup and the engine\'s clock. `parts: [{ select, anim, each, stagger, delay, out, exitDur }]` on a hand-authored html/svg layer. A CSS SELECTOR into your own markup, and every matched element gets an engine-driven, SEEKED entrance with a stagger, so a figure can grow its bars, then draw its line, then pop its dots. `out: true` gives each part its paired exit, anchored to the layer\'s end, so a hand-authored figure leaves piece by piece instead of fading as one card. That is the whole point on an `html` layer: the markup keeps the entire CSS surface AND the clock still owns each piece, which a hand-rolled `calc()` off `var(--t)` never gives back. A translate exit CONTINUES and a scale exit REVERSES, the same never-enter-and-retreat rule layers follow. Selectors default to `rect, circle, path, polyline, line, [data-part]`.', names(PART_NAMES), 'per-layer', { blurbs: PART_BLURBS }],
   ['Blend modes', '`mixBlend`: how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it, MDN `mix-blend-mode`' }],

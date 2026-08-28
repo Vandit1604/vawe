@@ -363,7 +363,6 @@
 | `paperDots` | faint drifting dot grid (light) |
 | `paperShapes` | faint drifting geometric shapes (light, subtle) |
 | `plain` | flat theme field |
-| `shapes` | accent rings and discs drifting over paper or dark (moves), `value` picks the treatment |
 | `soft` | gentle light radial with faint accent rings and discs drifting over it (moves) |
 | `spotlight` | radial spotlight glow |
 
@@ -541,6 +540,18 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 | `plasma` | two crossed sine waves interfering into a slow two-tone swell |
 | `ripple` | gentle water caustics: three rings of cool light expanding and overlapping |
 | `vhs` | tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY, place it ABOVE content |
+
+## Motion voices (tactile sound)  `[audio]`
+
+The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.
+
+| name | what / when |
+|---|---|
+| `pluck` | - |
+| `riser` | - |
+| `sweep` | - |
+| `thud` | - |
+| `travel` | - |
 
 ## Per-layer modifiers  `[per-layer]`
 
@@ -832,4 +843,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_559 effects across 35 families. Regenerate: `make effects`._
+_563 effects across 36 families. Regenerate: `make effects`._

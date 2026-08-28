@@ -44,6 +44,12 @@ const text = (extra) => j({ type: 'text', text: 'Deterministic by design', x: 16
 const full = (extra) => j({ x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6, ...extra });
 
 const USAGE = {
+  // PRE-EXISTING GAP, closed while adding the family above: `make effects` was already red on this
+  // one, so the catalogue could not regenerate at all. A modifier is an array entry on a layer.
+  'per-layer-modifiers': (n) => text({ anim: 'rise', modifiers: [{ [n]: true }] }),
+  // A motion voice is placed by the DERIVATION, not usually by hand, but it can be named directly and
+  // an author reading the catalogue needs to see how.
+  'motion-voices-tactile-sound': (n) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
   'kinetic-text-presets': (n) => text({ split: 'word', preset: n, each: 0.5, stagger: 0.05 }),
   'enter-exit-anims': (n) => text({ anim: n, enterDur: 0.6, out: 'defocus' }),
   'idles-ambient-hold-motion': (n) => text({ idle: n }),
@@ -156,6 +162,11 @@ const UNPLAYABLE = {
 
 // Why a family cannot be played here. Stated on the page, per family, in the author's own terms.
 const NO_PREVIEW = {
+  'per-layer-modifiers': 'each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.',
+  // A SOUND has no still and no moving preview. The site could play it, but the arsenal's preview slot
+  // renders a scene to frames, and frames cannot show a thud. Listed with its reason rather than left
+  // as a gap, which is what this table is for.
+  'motion-voices-tactile-sound': 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
   'spectacle-devices': 'a spectacle is a whole film turning its other dials down. One clip cannot show the restraint that makes it work.',
   'composite-looks-static': 'a grade needs a photographic source, and the index ships no photographs. See it on the looks clip on /showcase.',
   'canvas-image-passes-baked': 'a baked image pass needs a photographic source, and the index ships no photographs.',
