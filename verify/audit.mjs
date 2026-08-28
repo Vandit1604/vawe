@@ -647,6 +647,15 @@ function overflowFinding(el, s, id, li, t) {
 // Agreeing means the layer is outside the margin as authored AND outside it as delivered.
 function safeFinding(sb, ctx, id, li, t) {
   const { SAFE, FW, FH } = ctx;
+  // OFF CAMERA IS NOT OFF SAFE. This rule asks two things: is content sitting outside the margin, and
+  // is it CROSSING the frame edge. A box that does not touch the frame at all is doing neither. It is
+  // somewhere else in the world, which is precisely what a film with a travelling camera is made of:
+  // five stations laid out in stage coordinates, four of them off screen at any instant by design.
+  // Judging those reported seven HARD failures about layers nobody could see, on a film whose visible
+  // frames were clean. The comment above is right that there must be no frame-wide camera exemption
+  // (it switched this rule off for 90 of 147 scenes); this is the opposite of that, decided per BOX
+  // from the render, and it can only ever drop a finding about content that is not in the picture.
+  if (sb.right <= 0 || sb.left >= FW || sb.bottom <= 0 || sb.top >= FH) return null;
   const cb = unCam(sb, ctx);
   const outside = (r) => r.left < SAFE.x0 - 1 || r.right > SAFE.x1 + 1 || r.top < SAFE.y0 - 1 || r.bottom > SAFE.y1 + 1;
   const offSafe = outside(sb) && outside(cb);

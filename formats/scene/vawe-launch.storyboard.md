@@ -1,15 +1,15 @@
 ---
 message: "The engine writes video the way you write code, and here it is doing it."
 audience: "Developers and design engineers scrolling X and LinkedIn with the sound off, deciding in two seconds."
-arc: "name it → write the scene → watch it render → see the whole vocabulary → the claim"
-framework: "Show, then name. Four beats of the product working, then four words."
-threads: "a bookend (the film opens on cobalt and closes on cobalt, with white in between) + a motif (the ground flips white to cobalt on every single cut, so the world turns with the edit) + a through-line (one scene is written in beat 2, renders in beat 3, and its effects are the wall in beat 4)"
+arc: "one world, flown through: the name → the scene being written → the frame it renders → the wall of everything it can do → the claim, back where we started"
+framework: "A oner. The camera is the only transition, so the film cannot be a stack of cards."
+threads: "a oner (ONE continuous world, laid out in stage coordinates, with no cuts anywhere: the camera travels station to station and IS the transition) + a through-line (the scene written at station 2 is the frame rendered at station 3, and its effects are the wall at station 4) + a bookend (the flight starts and ends on the wordmark, having gone somewhere)"
 format: 1920x1080
 theme: "themes/vawe.json, the shipped brand unmodified: white ground, cobalt #2563eb, Anybody and JetBrains Mono"
 duration: 20s
-pace: explainer, about 4 seconds per idea. Five ideas in 20s, four cuts at 2.5 / 7.5 / 11.5 / 16.0, no shot over 4.5s.
-spectacle: "beat 4 at 11.5s. The arsenal wall arrives all at once: 25 real rendered frames staggered in over 0.6s, the only moment the film shows more than one thing. Every other beat holds one idea at one volume, which is what makes this one the peak."
-not: "no narration, no stock photography, no third-party logos, no dark mode, no invented or mocked UI, no shot over five seconds, and no claim the film has not already shown."
+pace: explainer, about 4 seconds per idea. Five stations in 20s. ZERO cuts: every junction is a camera flight of about 1.1s, and no dwell runs past 3.5s.
+spectacle: "beat 4 (station 4) at 12.0s. The camera PULLS BACK for the only time in the film and a dark slab opens out of the cobalt carrying fifteen real rendered frames. Every other station is a push or a hold at one idea, so the single retreat is the peak."
+not: "no cuts of any kind, no narration, no stock photography, no third-party logos, no invented or mocked UI, no preset used where a keyed track belongs, and no claim the film has not already shown."
 ---
 
 Twenty seconds, silent, to somebody who has scrolled past a hundred product videos this week.

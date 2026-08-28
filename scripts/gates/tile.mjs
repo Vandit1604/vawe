@@ -16,8 +16,16 @@ export function frameTile(src, t, out, { tw, th, label } = {}) {
   const vf = [`scale=${tw}:${th}:force_original_aspect_ratio=decrease`,
     `pad=${tw}:${th}:(ow-iw)/2:(oh-ih)/2:white`];
   if (label) vf.push(`drawtext=text='${safeLabel(label)}':x=10:y=10:fontsize=22:fontcolor=black:box=1:boxcolor=white@0.85:boxborderw=6`);
+  // -ss AFTER -i, which is the frame-accurate seek. Before -i, ffmpeg does the fast one: it jumps to
+  // the nearest KEYFRAME and decodes from there, and a draft render has sparse keyframes, so a tile
+  // labelled 13.4s could be seconds off or come back blank. That is not a cosmetic difference here:
+  // every sheet this builds is read BY EYE and treated as what the film does at that moment, so an
+  // inaccurate seek makes the judging gate lie about the thing it exists to show. It cost a false
+  // reading of two defects that were not in the film. Accurate seeking decodes from the last keyframe
+  // and is slower per tile; a sheet is a handful of tiles, so the cost is invisible and the alternative
+  // is a gate you cannot trust.
   const at = src.endsWith('.png') ? [] : ['-ss', Number(t).toFixed(2)];
-  ff(['-y', ...at, '-i', src, '-frames:v', '1', '-vf', vf.join(','), out]);
+  ff(['-y', '-i', src, ...at, '-frames:v', '1', '-vf', vf.join(','), out]);
   return out;
 }
 
