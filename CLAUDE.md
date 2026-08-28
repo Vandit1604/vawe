@@ -67,6 +67,29 @@ video (e.g. `linear-launch.json`) first as working references, then compose, nev
 > taste system (house-style · composition · motion · story-spine), the block registry (`make catalog`),
 > and the author→gate→render quality loop. Everything below is the doctrine it indexes.
 
+## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS, NOT A REQUEST TO START
+
+**Load `vawe-video-planning` and follow it. Do not open a JSON file first.** The skill exists because
+authoring without a locked plan produces the same generic video for everyone, and it states the contract
+in one line: *nothing is rendered until the plan is LOCKED and the user signs off*, and *if you find
+yourself trying things in the JSON, the plan wasn't locked*.
+
+That is written here rather than left to the skill because the failure it prevents is a failure of the
+FIRST MOVE, and by the time you have opened the scene file you have already made it. It has happened:
+a launch film went eight renders deep with the requester watching each one, because a storyboard was
+written, the LOCK SHEET was skipped, and the JSON became the place decisions got made. Every render
+after that was exploration performed in public.
+
+**Four questions belong to the requester and one of them is the one that gets skipped.** Audience,
+payoff and feeling are easy to remember to ask. The one that decides whether the film looks like
+anything is the STYLE ANCHOR: a real site to study, or a named reference to manufacture one from. Skip
+it and "cinematic" becomes your guess at cinematic, which is a dark gradient and some type.
+
+**The lock sheet is the artefact, not the storyboard.** Per-beat copy in exact words, the theme's
+colours and fonts, the layout archetype, the coordinate band, the treatment per beat, the motion
+personality, the cuts, the CTA. Present it and WAIT. Then authoring is transcription, and a render is
+something you show once rather than something you iterate in front of somebody.
+
 ## THE BRIEF: what the person asking is allowed to say, and what is YOUR job
 
 The person asking for a film should never have to name a colour, an easing, a layer type or a preset.
