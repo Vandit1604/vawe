@@ -26,6 +26,7 @@ import { resolvePans } from '/core/pan-resolve.mjs';
 import { watchProps, auditLayer, watchedTree } from '/core/prop-audit.js';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';
+import { resolveShutter } from '/core/tracks/motion.js';
 import { normalizeIdle } from '/core/idle.js';
 import { resolveSpectacle } from '/core/spectacle.js';
 const $ = (id) => document.getElementById(id);
@@ -1063,7 +1064,7 @@ boot((data, fps, theme, canvas) => {
   // `data.idle` is the film's scene-level idle: one line opts the whole cast into ambient hold motion
   // (core/idle.js). Normalized HERE so a misspelled name fails at boot with the registry's message,
   // rather than on whichever frame the first layer happens to reach its settled middle.
-  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(data.idle) });
+  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(data.idle), shutter: resolveShutter(data.shutter) });
 
   function renderFrame(f) {
     const t = f / fps;

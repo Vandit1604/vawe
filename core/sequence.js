@@ -153,3 +153,40 @@ export function motionAt(kfs, lt) {
   }
   return norm(last);
 }
+
+// ---------- THE VELOCITY READ: one owner, three consumers ----------
+//
+// Three things in this engine ask how fast a layer is going, and each of them asks by evaluating the
+// motion track twice and subtracting: the automatic motion blur (core/tracks/motion.js), the ghost
+// trail and its blur (core/fx/ghost.js), and squash (core/fx/squash.js). Written out three times that
+// is three chances to disagree about the window, the clamp and the units, which is the fact-with-two-
+// owners shape this codebase logs most (docs/MISTAKES.md #423).
+//
+// PURE, and that is the whole reason a velocity is allowed here at all. Nothing is remembered between
+// frames: the earlier pose is COMPUTED from the same keyframes at every visit, so a backwards seek and
+// a cold DOM give the same answer as a forward render. An accumulator would not.
+
+// poseBack(kfs, lt, dt): the pose `dt` seconds before local time `lt`, CLAMPED at the layer's own
+// first pose. A film that opens on a move therefore opens with zero velocity rather than an
+// extrapolated one, because a thing that has not moved yet has not been anywhere else.
+export const poseBack = (kfs, lt, dt) => motionAt(kfs, Math.max(0, lt - dt));
+
+// velocityAt(kfs, lt, dt): the layer's travel over the window ENDING at lt, in px per SECOND.
+// Per second and not per frame: 16px per frame is 480px/s at 30fps and 960px/s at 60, so a threshold
+// in frames means two different speeds in two renders of the same film (docs/MISTAKES.md #204).
+// `now` and `prev` ride along because every caller wants at least one of them and re-sampling the
+// track to get it back would be a fourth evaluation per layer per frame. Named `prev` and not `then`
+// because an object with a `then` key is a THENABLE: `await` on it, or a promise resolved with it,
+// would call the pose as a callback.
+// DIVIDED BY THE WINDOW ASKED FOR, not by the truncated one. Before the layer's own first keyframe the
+// lookback is clamped, so the two samples sit closer together than `dt` and the quotient reports a
+// SMALLER velocity, tapering to zero at the layer's first frame. That is the same clamp ghost states
+// for the same reason: a thing that has not moved yet has not been anywhere else, and dividing by the
+// short window instead would make the opening frame of a film that starts on a move the fastest one in
+// it.
+export function velocityAt(kfs, lt, dt) {
+  if (!(dt > 0)) throw new Error(`velocityAt: dt must be a positive lookback in seconds, got ${JSON.stringify(dt)}.`);
+  const now = motionAt(kfs, lt), prev = poseBack(kfs, lt, dt);
+  const vx = (now.dx - prev.dx) / dt, vy = (now.dy - prev.dy) / dt;
+  return { vx, vy, speed: Math.hypot(vx, vy), now, prev };
+}

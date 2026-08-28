@@ -34,7 +34,7 @@
 // WHY IT NEEDS A `motion` TRACK AND SAYS SO. The past pose is read off the keys the author wrote. A layer
 // with no motion track has no pose to look back at, and an effect that silently rendered nothing is the
 // single most-logged bug class in this repo (#210 #213 #215 #217). It throws, naming the layer.
-import { motionAt } from '../sequence.js';
+import { motionAt, poseBack } from '../sequence.js';
 import { clamp01, FPS } from '../motion.js';
 
 const MARK = 'data-ghost';
@@ -174,7 +174,9 @@ export function frame(kit, el, L, t, scene, spec) {
   const m = motionAt(L.motion, lt);
   const step = back / k;
   for (let i = 0; i < k; i++) {
-    const p = motionAt(L.motion, Math.max(0, lt - (i + 1) * step));
+    // `poseBack` (core/sequence.js) is the shared lookback, the one `velocityAt` and squash read
+    // through too. It carries the clamp this comment describes, so there is one owner of it.
+    const p = poseBack(L.motion, lt, (i + 1) * step);
     // The ghost is a CHILD, so it already carries the layer's pose at t. Undo that and apply the pose at
     // t-k: G = M⁻¹·P, which in a CSS transform list reads left to right as rotate/scale undone, the
     // translation difference, then the past scale and rotation.
