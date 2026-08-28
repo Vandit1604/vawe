@@ -8,41 +8,58 @@
  },
  "bg": [
   {
-   "preset": "paperShapes",
-   "from": 0,
-   "to": 4.2
+   "preset": "paperShapes"
   },
   {
-   "preset": "paper",
-   "from": 4.2,
-   "to": 25.4
+   "preset": "paper"
+  },
+  {
+   "preset": "paperDots"
+  },
+  {
+   "preset": "paper"
+  },
+  {
+   "preset": "soft"
   },
   {
    "preset": "accent",
-   "value": "dark",
-   "from": 25.4,
-   "to": 30
+   "value": "dark"
   }
  ],
- "stings": [
+ "cuts": [
   {
    "t": 4.2,
-   "fx": "flash",
-   "dur": 0.9
+   "style": "blur",
+   "dur": 0.4
+  },
+  {
+   "t": 8.5,
+   "style": "riseBlur",
+   "dur": 0.42
   },
   {
    "t": 14.6,
-   "fx": "leak",
-   "dur": 1.1,
-   "seed": 3
+   "style": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "t": 20.3,
+   "style": "blur",
+   "dur": 0.4
   },
   {
    "t": 25.4,
-   "fx": "burn",
-   "dur": 1.1,
-   "seed": 7
+   "style": "riseBlur",
+   "dur": 0.42
   }
  ],
+ "spectacle": {
+  "at": 25.4,
+  "of": "endmark",
+  "device": "sdfIris",
+  "why": "the one moment the film is allowed to shout: the world flips to the brand field and the mark drops in. Every other beat holds one line on paper at one volume."
+ },
  "camera": [
   {
    "t": 0,
@@ -160,7 +177,10 @@
    "duration": 6,
    "cut": "punch",
    "exitDur": 0.4,
-   "critical": true
+   "critical": true,
+   "id": "howcard",
+   "becomes": "step1",
+   "becomesDur": 0.5
   },
   {
    "type": "text",
@@ -183,12 +203,13 @@
    "bg": "#ffffff",
    "border": "1px solid #dad9d7",
    "shadow": true,
-   "start": 15,
-   "duration": 5.2,
+   "start": 14.6,
+   "duration": 5.6,
    "cut": "whip",
    "dir": "left",
    "dist": 60,
-   "exitDur": 0.3
+   "exitDur": 0.3,
+   "id": "step1"
   },
   {
    "type": "rect",
@@ -200,8 +221,8 @@
    "bg": "#ffffff",
    "border": "1px solid #dad9d7",
    "shadow": true,
-   "start": 15.35,
-   "duration": 4.85,
+   "start": 14.95,
+   "duration": 5.25,
    "cut": "whip",
    "dir": "right",
    "dist": 60,
@@ -217,8 +238,8 @@
    "bg": "#ffffff",
    "border": "1px solid #dad9d7",
    "shadow": true,
-   "start": 15.7,
-   "duration": 4.5,
+   "start": 15.3,
+   "duration": 4.9,
    "cut": "whip",
    "dir": "left",
    "dist": 60,
@@ -234,8 +255,8 @@
    "bg": "#ffffff",
    "border": "1px solid #dad9d7",
    "shadow": true,
-   "start": 16.05,
-   "duration": 4.15,
+   "start": 15.65,
+   "duration": 4.55,
    "cut": "whip",
    "dir": "right",
    "dist": 60,
@@ -249,8 +270,8 @@
    "x": 520,
    "y": 288,
    "w": 900,
-   "start": 15,
-   "duration": 5.2,
+   "start": 14.6,
+   "duration": 5.6,
    "cut": "whip",
    "dir": "left",
    "dist": 60,
@@ -265,8 +286,8 @@
    "x": 520,
    "y": 468,
    "w": 900,
-   "start": 15.35,
-   "duration": 4.85,
+   "start": 14.95,
+   "duration": 5.25,
    "cut": "whip",
    "dir": "right",
    "dist": 60,
@@ -281,8 +302,8 @@
    "x": 520,
    "y": 648,
    "w": 900,
-   "start": 15.7,
-   "duration": 4.5,
+   "start": 15.3,
+   "duration": 4.9,
    "cut": "whip",
    "dir": "left",
    "dist": 60,
@@ -297,8 +318,8 @@
    "x": 520,
    "y": 828,
    "w": 900,
-   "start": 16.05,
-   "duration": 4.15,
+   "start": 15.65,
+   "duration": 4.55,
    "cut": "whip",
    "dir": "right",
    "dist": 60,
@@ -360,9 +381,39 @@
    "h": 72,
    "start": 26.05,
    "duration": 3.95,
-   "anim": "pop",
+   "anim": "none",
    "exitDur": 0,
-   "critical": true
+   "critical": true,
+   "id": "endmark",
+   "motion": [
+    {
+     "t": 0,
+     "y": -90,
+     "opacity": 0
+    },
+    {
+     "t": 0.3,
+     "y": 0,
+     "opacity": 1,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 3.95,
+     "y": 0,
+     "opacity": 1
+    }
+   ],
+   "modifiers": [
+    {
+     "ghost": {
+      "mode": "trail",
+      "k": 6,
+      "back": 0.35,
+      "alpha": 0.32,
+      "fade": 0.6
+     }
+    }
+   ]
   },
   {
    "type": "rect",
