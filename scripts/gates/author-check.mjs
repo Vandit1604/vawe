@@ -338,6 +338,28 @@ if (process.argv.includes('--legacy')) {
     console.log(`  ${rule} (adopted ${entry.adopted}): ${censusLine(rule, c)}`);
     if (c.new) console.log(`      NEW: ${c.newNames.join(', ')}${c.editedNames.length ? `   (edited since grandfathering: ${c.editedNames.join(', ')})` : ''}`);
   }
+  // THE DEBT BOARD. The per-rule lines above answer "is this rule holding?"; this answers the question
+  // an author actually has, which is "what should I fix next, and is the pile shrinking?". Without it,
+  // grandfathering reads as a permanent amnesty rather than a backlog: the counts only ever appear
+  // beside the rule that granted them, never beside the FILM that owes them.
+  const owed = new Map();
+  for (const [rule, entry] of Object.entries(m.rules)) {
+    for (const name of Object.keys(entry.legacy || {})) {
+      if (!owed.has(name)) owed.set(name, []);
+      owed.get(name).push(rule);
+    }
+  }
+  if (owed.size) {
+    const rows = [...owed].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+    const total = rows.reduce((n, r) => n + r[1].length, 0);
+    console.log(`\n  DEBT · ${total} row(s) across ${rows.length} film(s). Not forgiven, just not blocking yet.`);
+    console.log(`  Worst first, because fixing one film can clear several rules at once:\n`);
+    for (const [name, rules] of rows.slice(0, 12)) {
+      console.log(`      ${String(rules.length).padStart(2)}  ${name.padEnd(30)} ${rules.join(' ')}`);
+    }
+    if (rows.length > 12) console.log(`      … and ${rows.length - 12} more film(s) owing 1 rule each.`);
+    console.log(`\n  Pay one off: fix the film, then \`make legacy STAMP=1\` drops its row. Rows can only ever leave.`);
+  }
   console.log(`\n  legacy = nobody has looked yet. waived = somebody decided and wrote why. Never the same thing.\n`);
   process.exit(0);
 }
@@ -888,9 +910,17 @@ console.log(`      If your eye catches a flaw, it is a FIX, never ship one you n
     if (!st.ratcheted) continue;                      // not adopted yet: it is still only a report
     (st.state === 'legacy' ? grandfathered : blocked).push([c, step, st]);
   }
+  // LEGACY IS A DEBT, AND IT IS PRINTED LIKE ONE. A grandfathered rule that passes quietly is
+  // indistinguishable from a rule nobody has, which is the repeal-by-silence this whole mechanism
+  // exists to prevent. So it warns, every run, names what this film owes, and says what paying it
+  // costs. Nothing is excused for life: the row leaves the manifest the moment the film complies.
   if (grandfathered.length) {
-    console.log(`\n  ▪ ${grandfathered.length} ratcheted rule(s) fire here and are GRANDFATHERED, so they do not stop you:`);
-    for (const [c, step, st] of grandfathered) console.log(`      [${c}] (step ${step}) · legacy since ${st.since}. Edit this film and it must comply.`);
+    console.log(`\n  ⚠ THIS FILM OWES ${grandfathered.length} rule(s). Grandfathered, not forgiven, and not blocking today:`);
+    for (const [c, step, st] of grandfathered) {
+      console.log(`      [${c}] (step ${step}) · owed since ${st.since}`);
+      const d = docFor(c); if (d) console.log(`          read: ${d}`);
+    }
+    console.log(`      Fix one and the row disappears: make legacy STAMP=1. Edit the film without fixing it and it BLOCKS.`);
   }
   if (blocked.length) {
     console.log(`\n  ✗ ${blocked.length} ratcheted rule(s) BLOCK this film. They are not new rules: they are the`);
