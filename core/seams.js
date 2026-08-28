@@ -446,4 +446,4 @@ export { isBlankRaster } from './raster.js';
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a seam fx" when someone writes it somewhere else. core/registry.js.
-export const SEAM_REGISTRY = defineRegistry('seam fx', Object.fromEntries(SEAM_FX.map((n) => [n, n])), { slot: 'seam' });
+export const SEAM_REGISTRY = defineRegistry('seam fx', Object.fromEntries(SEAM_FX.map((n) => [n, n])), { slot: 'seam', blurbs: SEAM_BLURBS });

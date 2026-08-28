@@ -782,6 +782,28 @@ impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
 blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs)
 	node scripts/site/blueprints-catalog.mjs
 
+# make arsenal Q="a page scrolling under a tilt", ONE ranked search across every vocabulary the engine
+# names: beats, effects, camera moves, cuts, seams, looks, anims. It owns no list; `defineRegistry`
+# already carries each name's kind, slot and blurb, and blueprints/index.mjs already carries a prose
+# sentence per beat. Built because the census is unambiguous: the {type:"beat"} mechanism is used by 2
+# of 153 scenes and EXIT_FX by none, which is what happens when 337 named things are reachable only by
+# reading an 849-line generated file. CENSUS=1 lists what nothing uses.
+arsenal: ## search the whole arsenal in plain english (Q="..."), or CENSUS=1 for what is never used
+ifeq ($(CENSUS),1)
+	node scripts/author/arsenal.mjs --census
+else
+	node scripts/author/arsenal.mjs "$(Q)" $(if $(KIND),--kind "$(KIND)") $(if $(N),--n $(N))
+endif
+
+# make track SHAPE=pan TO=-600 DUR=1.25 [D=<scene.json> LAYER=<n>], a hand-keyed motion track from a
+# MEASURED shape rather than a preset name. studio's keyframe mode writes keys by DRAGGING on the stage,
+# which an agent cannot do, so the cheap path existed for a person and not for the author who writes
+# most of these scenes. docs/CRAFT/KEYED-MOTION.md.
+track: ## emit a keyed motion track (SHAPE=pan|blast|drift|enter|exit), optionally patch it into D
+	node scripts/author/track.mjs $(or $(SHAPE),pan) $(if $(TO),--to $(TO)) $(if $(DUR),--dur $(DUR)) \
+	  $(if $(FROM),--from $(FROM)) $(if $(AMP),--amp $(AMP)) $(if $(AXIS),--axis $(AXIS)) \
+	  $(if $(OFFSET),--offset $(OFFSET)) $(if $(D),--scene $(D)) $(if $(LAYER),--layer $(LAYER))
+
 # make mcp-smoke, end-to-end over the real MCP server: connects, reads the guide, refuses three leak
 # vectors, drafts a scene. It is the only thing that exercises that path, and it sat FAILING for a while
 # because it was wired to no target and nobody ran it (its scene declared no `bg`, which is required).

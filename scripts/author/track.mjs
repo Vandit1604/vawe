@@ -67,6 +67,17 @@ const SHAPES = {
     { t: r3(dur * 0.71), [axis]: r3(-amp * 0.55), ease: 'easeInOutSine' },
     { t: r3(dur), [axis]: r3(amp * 0.22), ease: 'easeInOutSine' },
   ]),
+  // A KEYED DEPARTURE. `EXIT_FX` ships eleven named exits and 153 scenes use none of them, while the
+  // engine's default exit is a fade in place, so almost every layer in this library leaves the same way.
+  // The exemplars do not: brew's punctuation leaves by growing THROUGH the frame, and higgsfield's
+  // leave diegetically, carried off by the pan they arrived on. This is the cheap middle: accelerate
+  // out of the frame on one axis, opacity trailing the move rather than leading it, so the layer is
+  // gone because it LEFT and not because it dimmed.
+  exit: ({ dur = 0.55, to = -260, axis = 'y' }) => ([
+    { t: 0, [axis]: 0, opacity: 1 },
+    { t: r3(dur * 0.34), [axis]: r3(to * 0.12), opacity: 1, ease: 'easeInCubic' },
+    { t: r3(dur), [axis]: r3(to), opacity: 0, ease: 'easeInCubic' },
+  ]),
   // a keyed entrance, so a beat can open on choreography instead of on a preset name.
   enter: ({ dur = 0.9, from = 40, axis = 'y' }) => ([
     { t: 0, [axis]: r3(from), opacity: 0 },
@@ -91,6 +102,7 @@ if (!shape || !SHAPES[shape]) {
   blast  --dur 1.5 [--peak 1.5] [--out 1.9]           the brew four-key punctuation
   drift  --dur 3 [--amp 12] [--axis y]                an ambient hold that still moves
   enter  --dur 0.9 [--from 40] [--axis y]             a keyed entrance, not a preset
+  exit   --dur 0.55 [--to -260] [--axis y]           a keyed departure: leaves, does not just dim
 
   --offset 0.12                 shift every key later, to weld a rider onto a subject's track
   --scene <f.json> --layer <n>  write it into that layer, surgically (no reformat)`);

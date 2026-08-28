@@ -189,10 +189,15 @@ export const FX_DUR = Object.fromEntries(
 
 // Registered so a name in the WRONG SLOT is diagnosable: `anim:"popIn"` is told popIn is a gsap effect.
 // Three shipped layers made exactly that mistake and silently faded for months (docs/MISTAKES.md #355).
+// The blurbs are PASSED, not merely exported. They were written (48 of them, above) and both
+// registries were built without them, so `defineRegistry` carried `blurbs: null` and every tool that
+// asks a registry what a name MEANS got nothing for the two largest effect families. Measured the day
+// this was found: `EXIT_FX` had zero users across 153 scenes and `GSAP_FX` 31 of 37 unused, which is
+// what an undescribed vocabulary looks like from the outside. Written and unread is the same as unwritten.
 export const GSAP_REGISTRY = defineRegistry('gsap effect',
-  Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx' });
+  Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx', blurbs: GSAP_BLURBS });
 export const GSAP_EXIT_REGISTRY = defineRegistry('gsap exit',
-  Object.fromEntries(EXIT_FX.map((n) => [n, n])), { slot: 'fxOut' });
+  Object.fromEntries(EXIT_FX.map((n) => [n, n])), { slot: 'fxOut', blurbs: GSAP_EXIT_BLURBS });
 
 // ---- DEPRECATED: names that duplicate an `anim` exactly ------------------------------------------
 //

@@ -54,8 +54,6 @@ export const IDLE = {
   },
 };
 
-export const IDLE_REGISTRY = defineRegistry('idle', IDLE, { slot: 'idle' });
-export const IDLE_NAMES = IDLE_REGISTRY.names;
 
 // One line per name, beside the registry, on the contract every other vocabulary in this engine keeps:
 // a name with no description is a name an author cannot choose from.
@@ -64,6 +62,13 @@ export const IDLE_BLURBS = {
   breathe: '1.5% scale, ~4.6s. The held frame stays alive without moving',
   drift: 'slow translate on two periods, ~9px, the frame is never quite parked',
 };
+
+// Declared AFTER the blurbs so the registry can CARRY them. It used to sit above, so
+// `defineRegistry` got `blurbs: null` and every reader that asks the registry what a name means
+// got nothing, while the blurbs three lines below were rendered into docs and enforced by
+// lib-test. Written and unread is the same as unwritten.
+export const IDLE_REGISTRY = defineRegistry('idle', IDLE, { slot: 'idle', blurbs: IDLE_BLURBS });
+export const IDLE_NAMES = IDLE_REGISTRY.names;
 
 // normalizeIdle(spec): the three spellings an author may write, to one shape or null.
 //   "breathe" · { name: "drift", amp: 14 } · "none" / false / null / undefined

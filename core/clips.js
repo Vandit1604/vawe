@@ -59,8 +59,6 @@ export const ANIM = {
 // Exported so the schema and the conformance sweep can DERIVE the valid names instead of restating
 // them. A hand-copied list is how the schema came to advertise "slideL", an anim that never existed
 // and therefore silently resolved to fade (MISTAKES #21).
-export const ANIM_REGISTRY = defineRegistry('anim', ANIM, { slot: 'anim' });
-export const ANIM_NAMES = ANIM_REGISTRY.names;
 
 // One line per enter/exit anim, beside the registry itself. docs/EFFECTS.md renders these, and
 // scripts/gates/lib-test.mjs fails when a name has no blurb, a name with no description is a
@@ -89,6 +87,13 @@ export const ANIM_BLURBS = {
   clock: 'radial sweep from 12 o\'clock, clockwise',
   none: 'no move and no fade. The layer just appears at its window edges',
 };
+
+// Declared AFTER the blurbs so the registry can CARRY them. It used to sit above, so
+// `defineRegistry` got `blurbs: null` and every reader that asks the registry what a name means
+// got nothing, while the blurbs three lines below were rendered into docs and enforced by
+// lib-test. Written and unread is the same as unwritten.
+export const ANIM_REGISTRY = defineRegistry('anim', ANIM, { slot: 'anim', blurbs: ANIM_BLURBS });
+export const ANIM_NAMES = ANIM_REGISTRY.names;
 
 // The entrances that accept a WARP, and therefore the ones `anticipate` and `overshoot` are real on.
 // Written out rather than probed, because a hand-written list of a registry's members is exactly what

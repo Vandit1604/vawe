@@ -261,4 +261,4 @@ export const CANVAS_FX_BLURBS = blurbsOf('canvas fx', CANVAS_FX);
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a canvas fx" when someone writes it somewhere else. core/registry.js.
-export const CANVAS_REGISTRY = defineRegistry('canvas fx', CANVAS_FX, { slot: 'canvasFx' });
+export const CANVAS_REGISTRY = defineRegistry('canvas fx', CANVAS_FX, { slot: 'canvasFx', blurbs: CANVAS_FX_BLURBS });

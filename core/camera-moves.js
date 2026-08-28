@@ -417,4 +417,4 @@ export function buildCameraMove(spec, canvas = null) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a camera move" when someone writes it somewhere else. core/registry.js.
-export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove' });
+export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove', blurbs: CAMERA_MOVE_BLURBS });
