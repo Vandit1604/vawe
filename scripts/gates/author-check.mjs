@@ -180,6 +180,7 @@ const CONTENT_TYPES = new Set(['text', 'image', 'svg', 'html', 'component', 'cou
 // sources for exactly this, and a hand-kept map would rot the first time a rule moved file.
 const RATCHET_CODES = {
   'plain-slideshow': 'the film reaches past a slideshow: kinetic type, a camera move, or real transitions',
+  'no-preflight': 'the film went through the decision chain before the JSON existed',
   'crossfade-mud': 'no transition dissolves one text state into another in place',
   'no-continuous-object': 'something survives the film\'s cuts',
   'effect-soup': 'the film does not stack more effect families than it can spend',
@@ -461,6 +462,7 @@ const landscape = sceneW > sceneH;
 // A person watching this needs to know where it is and what is left. So the whole run is listed first,
 // with what each step reads and whether it can stop you, and every step then announces its own position.
 const LADDER = [
+  ['preflight', 'reports', 'whether the decisions that belong BEFORE the JSON were made for this version'],
   ['validate', 'blocks', 'the schema, the vocabulary, and em-dashes in on-screen text'],
   ['storyboard', sbRatchet.state === 'new' ? 'blocks' : 'reports', 'whether this film has a written plan, and whether the plan holds together'],
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
@@ -574,6 +576,11 @@ const styleGate = (name, label, script, args, opts) =>
   record(name, runGate(name, label, script, args), { ...opts, tier: 'reports' });
 
 // 1. validate, correctness, never waivable.
+// 0. preflight. The one step that is not about the JSON in front of you: it asks whether the nine
+//    decisions in docs/CRAFT/README.md were put in front of somebody for THIS version. It cannot grade
+//    the answers and does not pretend to, the same way `make beats` proves a sheet was looked at and
+//    not that the beats are good. Ratcheted like the rest, so the library warns and new work complies.
+record('preflight', runGate('preflight', 'preflight (the decisions before the JSON)', 'scripts/gates/preflight.mjs', []), { waivable: true, tier: 'reports' });
 record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
 
 // 1a. storyboard, DOES THIS FILM HAVE A PLAN, AND DOES THE PLAN HOLD TOGETHER?

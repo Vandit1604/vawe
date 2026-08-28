@@ -434,6 +434,13 @@ waivers:
 # waiver is a decision with a reason in the scene, legacy means nobody has looked yet.
 # ADOPT freezes a rule's legacy set once, on the day it is promoted, and refuses to run twice. STAMP can
 # only remove rows (fixed, deleted, or EDITED since). Nothing can add one, so the ratchet only tightens.
+# make preflight D=<scene.json>, the nine decisions from docs/CRAFT/README.md put in front of you for
+# THIS film, plus the arsenal ranked against what the film says it is, then a receipt. It records only
+# with --record: the ratchet runs gates bare to see which films fail them, and a checker that certifies
+# on that invocation would excuse the whole library (it did, once, for all 134).
+preflight: ## the decisions that belong BEFORE the JSON, recorded for this version of the scene
+	node scripts/gates/preflight.mjs $(D) --record
+
 legacy:
 	node scripts/gates/author-check.mjs --legacy $(if $(ADOPT),--adopt $(ADOPT)) $(if $(filter 1,$(STAMP)),--stamp)
 

@@ -847,6 +847,545 @@
       "what": "the on-screen words are specific, not marketing filler",
       "legacy": {},
       "viaGate": "scripts/gates/copy-check.mjs"
+    },
+    "no-preflight": {
+      "adopted": "2026-08-28",
+      "what": "the film went through the decision chain before the JSON existed",
+      "legacy": {
+        "_arcfall-test": {
+          "since": "2026-08-28",
+          "hash": "561bf2debe140306"
+        },
+        "_bands-c6": {
+          "since": "2026-08-28",
+          "hash": "c6276b97db262b91"
+        },
+        "_campush": {
+          "since": "2026-08-28",
+          "hash": "a94ace0ccd6eeb45"
+        },
+        "_catalog-1": {
+          "since": "2026-08-28",
+          "hash": "4721c98d7c40f854"
+        },
+        "_catalog-10": {
+          "since": "2026-08-28",
+          "hash": "bb06572bd5b9d0dc"
+        },
+        "_catalog-11": {
+          "since": "2026-08-28",
+          "hash": "3d50dae2854f5173"
+        },
+        "_catalog-12": {
+          "since": "2026-08-28",
+          "hash": "e8bedd775b62d471"
+        },
+        "_catalog-13": {
+          "since": "2026-08-28",
+          "hash": "bc7b5e07847cbcb0"
+        },
+        "_catalog-14": {
+          "since": "2026-08-28",
+          "hash": "71ce196da9a03b47"
+        },
+        "_catalog-15": {
+          "since": "2026-08-28",
+          "hash": "9623529960d516f2"
+        },
+        "_catalog-16": {
+          "since": "2026-08-28",
+          "hash": "e04a0ccf417fb087"
+        },
+        "_catalog-17": {
+          "since": "2026-08-28",
+          "hash": "85d807728f160987"
+        },
+        "_catalog-18": {
+          "since": "2026-08-28",
+          "hash": "6b66fffd4743f34d"
+        },
+        "_catalog-19": {
+          "since": "2026-08-28",
+          "hash": "99decac61680cf64"
+        },
+        "_catalog-2": {
+          "since": "2026-08-28",
+          "hash": "b90041375c0f242f"
+        },
+        "_catalog-20": {
+          "since": "2026-08-28",
+          "hash": "38285c1485697e7f"
+        },
+        "_catalog-21": {
+          "since": "2026-08-28",
+          "hash": "2d5e20eb4a8b3976"
+        },
+        "_catalog-22": {
+          "since": "2026-08-28",
+          "hash": "039d99448f55834c"
+        },
+        "_catalog-23": {
+          "since": "2026-08-28",
+          "hash": "64ec98749bff3c84"
+        },
+        "_catalog-24": {
+          "since": "2026-08-28",
+          "hash": "148d77d6465ba339"
+        },
+        "_catalog-25": {
+          "since": "2026-08-28",
+          "hash": "c10d5a512d765084"
+        },
+        "_catalog-26": {
+          "since": "2026-08-28",
+          "hash": "5f2366e3e90b7802"
+        },
+        "_catalog-3": {
+          "since": "2026-08-28",
+          "hash": "f7019762466a8e6c"
+        },
+        "_catalog-4": {
+          "since": "2026-08-28",
+          "hash": "36d799324e820f43"
+        },
+        "_catalog-5": {
+          "since": "2026-08-28",
+          "hash": "b1f6b218046c98f0"
+        },
+        "_catalog-6": {
+          "since": "2026-08-28",
+          "hash": "39ec4b6d2cc6bd4b"
+        },
+        "_catalog-7": {
+          "since": "2026-08-28",
+          "hash": "e81411ae7d51fb29"
+        },
+        "_catalog-8": {
+          "since": "2026-08-28",
+          "hash": "d207766c30196fac"
+        },
+        "_catalog-9": {
+          "since": "2026-08-28",
+          "hash": "d177e0e220fd910d"
+        },
+        "_glowA": {
+          "since": "2026-08-28",
+          "hash": "55417171b2dc7fe4"
+        },
+        "_glowB": {
+          "since": "2026-08-28",
+          "hash": "816d74ba01273ec7"
+        },
+        "_lightfall-test": {
+          "since": "2026-08-28",
+          "hash": "399144602188a6af"
+        },
+        "_playhead-subject": {
+          "since": "2026-08-28",
+          "hash": "0040be511013aa71"
+        },
+        "_scratch-depth": {
+          "since": "2026-08-28",
+          "hash": "e207237bfb80bc6a"
+        },
+        "_studio-demo": {
+          "since": "2026-08-28",
+          "hash": "d090eafe81d40df9"
+        },
+        "ab-control-shotcode": {
+          "since": "2026-08-28",
+          "hash": "e20b108be45e9716"
+        },
+        "ab-skill-shotcode": {
+          "since": "2026-08-28",
+          "hash": "1ed86b90e40e06b9"
+        },
+        "ab2-control-tenor": {
+          "since": "2026-08-28",
+          "hash": "da8b3ef876fd7926"
+        },
+        "ab2-skill-tenor": {
+          "since": "2026-08-28",
+          "hash": "8b65847ee38fb12e"
+        },
+        "ab3-nogate-tenor": {
+          "since": "2026-08-28",
+          "hash": "9579a0808752ca2b"
+        },
+        "ab4-a-ledgerline": {
+          "since": "2026-08-28",
+          "hash": "ec1baeb35cacd263"
+        },
+        "ab4-b-ledgerline": {
+          "since": "2026-08-28",
+          "hash": "16a6cef2711b6926"
+        },
+        "app-showcase": {
+          "since": "2026-08-28",
+          "hash": "3d2aa3c3a58b688f"
+        },
+        "argus-launch": {
+          "since": "2026-08-28",
+          "hash": "2e0aaa4a17bd402f"
+        },
+        "aspects-demo": {
+          "since": "2026-08-28",
+          "hash": "6006621435a9eea1"
+        },
+        "brew-launch-act1": {
+          "since": "2026-08-28",
+          "hash": "50bfc823db211ccc"
+        },
+        "brew-launch": {
+          "since": "2026-08-28",
+          "hash": "faf81330648d7fe1"
+        },
+        "brew-native": {
+          "since": "2026-08-28",
+          "hash": "580d7f7e32091426"
+        },
+        "cadence-film": {
+          "since": "2026-08-28",
+          "hash": "a96bdb8966eef4a6"
+        },
+        "cadence": {
+          "since": "2026-08-28",
+          "hash": "f89fc09dd015e1ff"
+        },
+        "canvasfx-reel": {
+          "since": "2026-08-28",
+          "hash": "2ffa8929ee00c323"
+        },
+        "chromatic": {
+          "since": "2026-08-28",
+          "hash": "73c714a261d0acbc"
+        },
+        "cuts-demo": {
+          "since": "2026-08-28",
+          "hash": "affc95cc3be4fc5c"
+        },
+        "demo-interactions": {
+          "since": "2026-08-28",
+          "hash": "d791b6c61b742a6f"
+        },
+        "ditherkit": {
+          "since": "2026-08-28",
+          "hash": "2d9d5669ec8efa91"
+        },
+        "example-html-bg": {
+          "since": "2026-08-28",
+          "hash": "94c0fd17009683c5"
+        },
+        "example-kinetic-type": {
+          "since": "2026-08-28",
+          "hash": "b53d433a2e72d6cd"
+        },
+        "example-metallic-bg": {
+          "since": "2026-08-28",
+          "hash": "ea2e7ae593c62c1f"
+        },
+        "example-product-promo": {
+          "since": "2026-08-28",
+          "hash": "324aaf5921dcf4fc"
+        },
+        "example-swiss-grid": {
+          "since": "2026-08-28",
+          "hash": "a283d5fcc8bdbeb8"
+        },
+        "gh-wrapped": {
+          "since": "2026-08-28",
+          "hash": "368b5a0af8bb90e6"
+        },
+        "glass": {
+          "since": "2026-08-28",
+          "hash": "a872366d85e9a4bf"
+        },
+        "gradient-showcase": {
+          "since": "2026-08-28",
+          "hash": "8a390702924d1771"
+        },
+        "hero-site": {
+          "since": "2026-08-28",
+          "hash": "b1bd11f6fdf0f979"
+        },
+        "higgsfield-recreation": {
+          "since": "2026-08-28",
+          "hash": "46c1563350f1884b"
+        },
+        "kanban-drag": {
+          "since": "2026-08-28",
+          "hash": "97c69ab2ca07fce1"
+        },
+        "keyframe": {
+          "since": "2026-08-28",
+          "hash": "91b703f9c01f5334"
+        },
+        "ledgerline-cyber": {
+          "since": "2026-08-28",
+          "hash": "4fe2b80f7a341a0e"
+        },
+        "ledgerline-neon": {
+          "since": "2026-08-28",
+          "hash": "654fe23b926e8e9c"
+        },
+        "ledgerline-shown": {
+          "since": "2026-08-28",
+          "hash": "2cdf6db344974089"
+        },
+        "linear-agents": {
+          "since": "2026-08-28",
+          "hash": "6389877bc1711964"
+        },
+        "linear-journey": {
+          "since": "2026-08-28",
+          "hash": "74f0191ba44090b3"
+        },
+        "linear-launch": {
+          "since": "2026-08-28",
+          "hash": "60963f20eceb5523"
+        },
+        "looks-reel": {
+          "since": "2026-08-28",
+          "hash": "e9d5df2acd31e421"
+        },
+        "looks": {
+          "since": "2026-08-28",
+          "hash": "ebb9564eba0b7bf0"
+        },
+        "motion-reel-v2": {
+          "since": "2026-08-28",
+          "hash": "c7c64958c8476dbb"
+        },
+        "motion-reel": {
+          "since": "2026-08-28",
+          "hash": "4d3e29ad09513b30"
+        },
+        "motion-showcase": {
+          "since": "2026-08-28",
+          "hash": "9bfc9afaab9a4345"
+        },
+        "motion-test": {
+          "since": "2026-08-28",
+          "hash": "072e01f671c6d3f2"
+        },
+        "northwind": {
+          "since": "2026-08-28",
+          "hash": "96492d548ceb4589"
+        },
+        "onefile": {
+          "since": "2026-08-28",
+          "hash": "96ae5ade453d68d4"
+        },
+        "onefilm": {
+          "since": "2026-08-28",
+          "hash": "abcfc814f825db32"
+        },
+        "orbit-proof": {
+          "since": "2026-08-28",
+          "hash": "178f4f8b8c216254"
+        },
+        "paint-demo": {
+          "since": "2026-08-28",
+          "hash": "6e455e46c0621fb8"
+        },
+        "playhead": {
+          "since": "2026-08-28",
+          "hash": "dfdfb039289f3c13"
+        },
+        "plinth-ad": {
+          "since": "2026-08-28",
+          "hash": "329616d546459251"
+        },
+        "preface-launch": {
+          "since": "2026-08-28",
+          "hash": "8f82841de41666b6"
+        },
+        "process": {
+          "since": "2026-08-28",
+          "hash": "88c2eefbdd40f50f"
+        },
+        "product-feature-tour": {
+          "since": "2026-08-28",
+          "hash": "c993fa7b3c2ba75e"
+        },
+        "ransom-color-demo": {
+          "since": "2026-08-28",
+          "hash": "71c16042dc1fa739"
+        },
+        "ransom-demo": {
+          "since": "2026-08-28",
+          "hash": "e6ed48355f42aea2"
+        },
+        "ransom-internal": {
+          "since": "2026-08-28",
+          "hash": "4e786301d14e612f"
+        },
+        "ransom-intro": {
+          "since": "2026-08-28",
+          "hash": "16591ac629d13366"
+        },
+        "react-demo": {
+          "since": "2026-08-28",
+          "hash": "2907bc8816d86b19"
+        },
+        "rec1-nogate": {
+          "since": "2026-08-28",
+          "hash": "a82939c6f6136f25"
+        },
+        "rec2-gates": {
+          "since": "2026-08-28",
+          "hash": "f2b865cf2bf4e345"
+        },
+        "rec3-skill": {
+          "since": "2026-08-28",
+          "hash": "b65009bc0e6f3382"
+        },
+        "refstudy": {
+          "since": "2026-08-28",
+          "hash": "cd91a88ce87cfb55"
+        },
+        "saas-hero-launch": {
+          "since": "2026-08-28",
+          "hash": "f7f3cc46910170de"
+        },
+        "sample": {
+          "since": "2026-08-28",
+          "hash": "4d015aa566096c92"
+        },
+        "seam-demo": {
+          "since": "2026-08-28",
+          "hash": "01f01ee149643bc2"
+        },
+        "search-demo": {
+          "since": "2026-08-28",
+          "hash": "7331611c0bc0c561"
+        },
+        "showcase-aspect": {
+          "since": "2026-08-28",
+          "hash": "83443675446bc795"
+        },
+        "showcase-composition": {
+          "since": "2026-08-28",
+          "hash": "361fab02aa24f860"
+        },
+        "showcase-count": {
+          "since": "2026-08-28",
+          "hash": "23b67b094635e189"
+        },
+        "showcase-cuts": {
+          "since": "2026-08-28",
+          "hash": "4e39173ca2793def"
+        },
+        "showcase-data": {
+          "since": "2026-08-28",
+          "hash": "57790588e8c239dc"
+        },
+        "showcase-flight-globe": {
+          "since": "2026-08-28",
+          "hash": "b4379f3dada5e9a8"
+        },
+        "showcase-globe": {
+          "since": "2026-08-28",
+          "hash": "f48114281a606a3f"
+        },
+        "showcase-intro": {
+          "since": "2026-08-28",
+          "hash": "b5c3cda482de8858"
+        },
+        "showcase-lumen": {
+          "since": "2026-08-28",
+          "hash": "37d55be0d995ba81"
+        },
+        "showcase-scenecut": {
+          "since": "2026-08-28",
+          "hash": "61e161521f7cff67"
+        },
+        "showcase-spot": {
+          "since": "2026-08-28",
+          "hash": "8108e54fb33a593c"
+        },
+        "showcase-stings": {
+          "since": "2026-08-28",
+          "hash": "a23380448b3ddff5"
+        },
+        "showcase-type-labour": {
+          "since": "2026-08-28",
+          "hash": "268f4b77928812d5"
+        },
+        "showcase-type": {
+          "since": "2026-08-28",
+          "hash": "d0f0b8c0441cc635"
+        },
+        "showcase-ui": {
+          "since": "2026-08-28",
+          "hash": "8fe1fff3e18f7591"
+        },
+        "showcase-vawe-reel": {
+          "since": "2026-08-28",
+          "hash": "ea1437639b8d489a"
+        },
+        "showcase-vocabulary": {
+          "since": "2026-08-28",
+          "hash": "b0de579b7dd5f988"
+        },
+        "showcase": {
+          "since": "2026-08-28",
+          "hash": "cdbf4534c2d20687"
+        },
+        "site-backdrop": {
+          "since": "2026-08-28",
+          "hash": "3a66f6a6d7dfeb1d"
+        },
+        "stings-demo": {
+          "since": "2026-08-28",
+          "hash": "1dec506e421c1183"
+        },
+        "stripe": {
+          "since": "2026-08-28",
+          "hash": "989588c577a8dc8f"
+        },
+        "thread": {
+          "since": "2026-08-28",
+          "hash": "5302bf14396e08e0"
+        },
+        "threadcite-3s": {
+          "since": "2026-08-28",
+          "hash": "bfc3ac4212b59df7"
+        },
+        "threadcite-open": {
+          "since": "2026-08-28",
+          "hash": "24093bc9a2bfc8b4"
+        },
+        "three-showcase": {
+          "since": "2026-08-28",
+          "hash": "ff5a6cc4939a212a"
+        },
+        "tierc-reel": {
+          "since": "2026-08-28",
+          "hash": "bcde952bdc39b06e"
+        },
+        "tpot-launch": {
+          "since": "2026-08-28",
+          "hash": "6a458a6939e5b558"
+        },
+        "type-demo": {
+          "since": "2026-08-28",
+          "hash": "5471aa9990ba45b1"
+        },
+        "vawe-identity": {
+          "since": "2026-08-28",
+          "hash": "02bc3e9fca87e0ac"
+        },
+        "vawe-intro": {
+          "since": "2026-08-28",
+          "hash": "f8c1f8a975b6bc81"
+        },
+        "zerochrome": {
+          "since": "2026-08-28",
+          "hash": "f8b75e08c531e47b"
+        }
+      },
+      "viaGate": "scripts/gates/preflight.mjs"
     }
   },
   "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",
