@@ -18,6 +18,7 @@ import { lowerScene, checkStingColor } from '/core/transitions-lower.js';
 import { glowRGB } from '/core/filters.js';
 import { bindBeats, describeBind } from '/core/beat-bind.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
+import { tactileCues } from '/core/audio-tactile.js';
 import { resolveBridges } from '/core/audio-bridges.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '/core/sequence.js';
 import { specsOf } from '/core/fx/index.js';
@@ -1314,22 +1315,42 @@ boot((data, fps, theme, canvas) => {
     const v = CUT_CUE[style];
     return v === null ? null : (v || 'whoosh');
   };
+  // How many elements a `parts` selector matched. The ONE fact core/audio-tactile.js cannot read off
+  // the JSON, because only the built DOM knows it. Deterministic: the markup is static.
+  const partCount = (el, sel) => { try { return el.querySelectorAll(sel).length; } catch { return 0; } };
+  const withPartCounts = ({ L, el }) => (Array.isArray(L.parts) && L.parts.length
+    ? { ...L, parts: L.parts.map((p) => ({ ...p, count: partCount(el, p.select) })) } : L);
+  // TOP-LEVEL layers, plus the group children that declare a `delay`. A group is ONE object and it
+  // lands once: voicing its six children as six arrivals at the identical instant is the hailstorm
+  // core/audio-tactile.js exists to avoid. A child with a delay is different, it is a declared
+  // stagger, the same rhythm argument as `parts`, so it keeps its own cue.
+  const tactileLayers = () => layers.slice(0, topCount)
+    .concat(layers.slice(topCount).filter(({ L }) => +L.delay > 0)).map(withPartCounts);
   function buildSfx() {
     let sfx = [];
     const audioCfg = data.audio || {};
+    // `tactile` IMPLIES `auto`. Motion cues without the cuts under them would be a film that thuds
+    // and plucks through junctions it never marks, so asking for the richer sound design cannot mean
+    // asking for less of the existing one.
+    const auto = !!(audioCfg.auto || audioCfg.tactile);
     // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) come from /core/audio-cues.js, one
     // shared source of truth, so the render mix and the baked catalogue cannot drift.
     const cues = [];
-    if (audioCfg.auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: cutCue(L.cut) });
+    if (auto) for (const { L } of layers) if (L.cut && L.cut !== 'none') cues.push({ t: +(L.start ?? 0).toFixed(2), name: cutCue(L.cut) });
     // TOP-LEVEL cuts / seams were once silently dropped from sound design, they are how a scene
     // actually cuts between beats, so an auto-scored film came out with no transition sound at all.
-    if (audioCfg.auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: cutCue(c.style) });
-    if (audioCfg.auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
-    if (audioCfg.auto) for (const s of (data.seams || [])) if (s && s.fx && s.fx !== 'none') cues.push({ t: +(+(s.t ?? s.at ?? 0)).toFixed(2), name: SEAM_CUE[s.fx] || 'whoosh' });
+    if (auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: cutCue(c.style) });
+    if (auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
+    if (auto) for (const s of (data.seams || [])) if (s && s.fx && s.fx !== 'none') cues.push({ t: +(+(s.t ?? s.at ?? 0)).toFixed(2), name: SEAM_CUE[s.fx] || 'whoosh' });
     // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }
     for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c.name, gain: c.gain });
     cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));
     for (const c of cues) if (!sfx.length || c.t - sfx[sfx.length - 1].t > 0.09) sfx.push(c); // merge simultaneous
+    // The STRUCTURAL cues, snapshotted before the keystroke train joins. Read by the tactile pass
+    // below as the fixed points it must rank around. The keystrokes are deliberately NOT in it: a
+    // typed line is legitimately dense and has its own tighter floor, so counting it as density
+    // would silence every arrival that happens while anything is typing.
+    const structural = sfx.slice();
     // KEYSTROKES. core/layers/text.js reveals character i at exactly start + (i+1)/cps, so the click
     // for that character is that same expression. The sound is derived from the formula that draws
     // the picture, the only way a typing sound stays in sync when the copy or the speed changes.
@@ -1357,6 +1378,19 @@ boot((data, fps, theme, canvas) => {
       const keys = [];
       for (const c of keyCues) if (!keys.length || c.t - keys[keys.length - 1].t > 0.03) keys.push(c);
       sfx = sfx.concat(keys).sort((a, b) => a.t - b.t);
+    }
+    // TACTILE SOUND DESIGN (`audio.tactile`). The film's own motion, voiced: core/audio-tactile.js
+    // reads layer arrivals, camera moves, counters and `parts` staggers off the timeline the engine
+    // already holds. It runs LAST and it is handed `structural`, the cut/seam/sting cues that just
+    // survived the merge above, so its density rules can rank a card's arrival against the cut it
+    // lands on. Those are passed for ranking only and come back untouched.
+    // `parts[].count` is the one fact the JSON does not hold: only the DOM knows how many elements a
+    // selector matched. Read once, off the elements this build just finished.
+    if (audioCfg.tactile) {
+      sfx = sfx.concat(tactileCues(
+        { camera: camKf, spectacle: data.spectacle, duration, layers: tactileLayers() },
+        { canvas: { w: W, h: H }, config: audioCfg.tactile, fixed: structural },
+      )).sort((a, b) => a.t - b.t);
     }
     return sfx;
   }
