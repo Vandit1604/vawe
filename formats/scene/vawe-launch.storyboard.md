@@ -7,7 +7,7 @@ threads: "a bookend (the film opens on cobalt and closes on cobalt, with white i
 format: 1920x1080
 theme: "themes/vawe.json, the shipped brand unmodified: white ground, cobalt #2563eb, Anybody and JetBrains Mono"
 duration: 20s
-pace: "feed pace, four cuts at 2.5 / 7.5 / 11.5 / 16.0. No shot over 4.5s. The first cut lands at 2.5s because a feed decides before that."
+pace: explainer, about 4 seconds per idea. Five ideas in 20s, four cuts at 2.5 / 7.5 / 11.5 / 16.0, no shot over 4.5s.
 spectacle: "beat 4 at 11.5s. The arsenal wall arrives all at once: 25 real rendered frames staggered in over 0.6s, the only moment the film shows more than one thing. Every other beat holds one idea at one volume, which is what makes this one the peak."
 not: "no narration, no stock photography, no third-party logos, no dark mode, no invented or mocked UI, no shot over five seconds, and no claim the film has not already shown."
 ---
