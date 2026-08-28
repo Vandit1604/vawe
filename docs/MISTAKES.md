@@ -16013,3 +16013,42 @@ the six it knows, because a cue is causal and a dropped one ships a film missing
 
 **The shape.** A recording is data you cannot check, cannot ship and cannot tune. Where a deterministic
 engine can generate the thing instead, the file was never the asset, it was the dependency.
+
+## #493: the engine knew every event in its own timeline and turned none of it into sound
+
+**What.** `buildSfx` scored a film from its cuts, its stings and its seams, and nothing else. Layer
+entrances, camera moves, counters and `parts` staggers were all silent, on every film, always. So a
+card the size of the frame could land in total silence half a second after a hairline rule ticked,
+because the rule happened to sit on a cut and the card did not.
+
+**Root cause, and it is not "sound was not a priority".** The engine already holds a complete
+description of what moves and when: `layers[].start`, `anim`, `w`/`h`, `data.camera`, `countStart` and
+`countDur`, `parts[].stagger`, `spectacle.at`. Every one of those is read by the picture and by
+nothing else. The sound path read a different, much smaller set (the junction list) and never asked
+the timeline what else it contained. One fact, two consumers, and the second consumer was never
+wired: the same shape as #423 (the audit read a camera the renderer had already baked differently)
+and #213 (a `SPECTACLE` field an author had to fill that no code read).
+
+**Fix.** `core/audio-tactile.js` derives motion cues from the timeline the engine already holds, in
+the `{ t, name, gain }` shape `buildSfx` has always carried. A layer's SIZE and TRAVEL pick its cue
+and set its level, so a hero card thuds and a chip plucks and the same card is louder when it slides
+than when it fades. A camera move is one whoosh for the whole contiguous run of changing keyframes. A
+counter plucks where its EASED value crosses each step, so the rhythm is the number's own velocity. A
+`parts` train plucks per part on the stagger the eye is already following. A declared `spectacle` gets
+a riser that ends on the moment. Cuts and seams are deliberately NOT re-derived: `CUT_CUE` and
+`SEAM_CUE` already voice them, and a second table would be two ways to say one thing.
+
+**The hard part was density, not mapping.** A 53s film with 103 layers offers 85 motion events. Voiced
+without a rule that is a hailstorm, and a hailstorm is what makes derived sound feel cheap. Three
+rules: no two cues inside 0.05s, no more than five in any one second, and nothing below 0.15% of the
+frame. The cap drops by PROMINENCE rather than by arrival order, so a headline survives a second that
+a hairline does not. The greedy pass needed a repair sweep to be true: measuring only against the cues
+already kept counts a burst's past and never its future, so 120 arrivals 0.12s apart each saw four
+predecessors, none saw its four successors, and every one was accepted.
+
+**Opt in, `audio.tactile`, and that is the whole reason it can ship.** Folding this into `audio.auto`
+would have rewritten the sound of every film that already uses it. Silence stays the engine default.
+
+**What no gate catches.** Whether the sound is GOOD. `lib-test` proves the derivation is a function of
+the motion and that the density invariant holds; it cannot prove a thud belongs there. That is ears,
+and it is the same split this repo already draws between `make author-check` and `make judge`.

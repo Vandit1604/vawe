@@ -2659,6 +2659,32 @@
     "_why": {
      "type": "string",
      "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
+    },
+    "tactile": {
+     "type": "boolean|object",
+     "label": "Opt in to TACTILE sound design (core/audio-tactile.js): the engine reads its own timeline and voices the MOTION, not just the junctions. A layer arriving thuds or plucks by its size and how far it travels, a camera move whooshes, a counter plucks on the number's own easing curve, a `parts` stagger plucks per part, and a declared `spectacle` gets a riser that ends on the moment. Implies `auto`, so cuts and seams keep their CUT_CUE voicing. Off by default: silence stays the engine default and no existing mix changes. An object tunes the density rules: { maxPerSec (5), minGap (0.05), gain (1), riserLead (0.9) }.",
+     "fields": {
+      "maxPerSec": {
+       "type": "number",
+       "label": "Most derived cues allowed in any one second. Default 5. The lightest cue in an over-full second is dropped first, so a headline survives and a hairline does not.",
+       "min": 0
+      },
+      "minGap": {
+       "type": "number",
+       "label": "Two cues closer than this flam into one smeared attack, so the lighter one is dropped. Default 0.05s.",
+       "min": 0
+      },
+      "gain": {
+       "type": "number",
+       "label": "Multiplier over every derived motion cue. Default 1. Structural cut/seam cues are unaffected (use `sfxGain` for those).",
+       "min": 0
+      },
+      "riserLead": {
+       "type": "number",
+       "label": "How long before `spectacle.at` the riser starts, which must match the baked riser's own length. Default 0.9s.",
+       "min": 0
+      }
+     }
     }
    }
   }

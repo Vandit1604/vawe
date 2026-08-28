@@ -81,6 +81,7 @@ import { THREE_FX } from '../../core/three-scenes.js';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 let pass = 0, fail = 0;
+const r2gain = (v) => Math.round(v * 1000) / 1000;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
 const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.error('✗ ' + name); } };
 
@@ -2218,6 +2219,161 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // (audio derived cuts+stings only). If a new SEAM_FX ships without a SEAM_CUE row, this fails loudly.
   ok('audio: SEAM_CUE covers every SEAM_FX (no silent seam)', SEAM_FX.every((fx) => typeof SEAM_CUE[fx] === 'string'));
   ok('audio: every SEAM_CUE voicing resolves to a baked wav', Object.values(SEAM_CUE).every((c) => c === 'whoosh' || c === 'reveal' || c in CUES));
+}
+
+// ---- TACTILE sound design: the film's own motion, voiced (core/audio-tactile.js) -----------------
+{
+  const { tactileCues, capDensity, derive, travelOf, prominenceOf, MOTION_CUES, DENSITY, RISER_LEAD } =
+    await import('../../core/audio-tactile.js');
+  const canvas = { w: 1920, h: 1080 };
+
+  // The five motion voices are being added to CUES in core/audio-kit.mjs alongside this module, so
+  // this reports rather than fails: a name that has not baked yet renders silent, and the day one of
+  // them is renamed this line is what says so.
+  const unbaked = MOTION_CUES.filter((n) => !(n in CUES));
+  if (unbaked.length) console.log(`  · tactile: motion cues not baked yet (pending core/audio-kit.mjs): ${unbaked.join(', ')}`);
+  ok('tactile: `tick` and the interaction vocabulary it borrows already bake', 'tick' in CUES);
+
+  ok('tactile: nothing sounds without a scene', tactileCues({}).length === 0);
+
+  // THE CONTRACT SHAPE. The same { t, name, gain } every other cue in buildSfx carries: no second
+  // pipeline, no schema change, and the Go mixer loads the baked wav by name exactly as it does today.
+  const shaped = tactileCues({ duration: 6,
+    layers: [{ type: 'rect', start: 0, w: 1200, h: 700, anim: 'slide-left' }] }, { canvas });
+  ok('tactile: every cue is {t, name, gain} and nothing else',
+     shaped.length > 0 && shaped.every((c) => Object.keys(c).sort().join() === 'gain,name,t'
+       && typeof c.t === 'number' && typeof c.name === 'string' && typeof c.gain === 'number'));
+  ok('tactile: cues come back sorted by time', shaped.every((c, i) => i === 0 || shaped[i - 1].t <= c.t));
+  ok('tactile: every derived cue names a motion voice',
+     derive({ duration: 30, spectacle: { at: 12 }, camera: [{ t: 0, s: 1 }, { t: 3, s: 1.4 }],
+       layers: [{ type: 'rect', start: 1, w: 1400, h: 700 }, { type: 'rect', start: 4, w: 120, h: 60 },
+         { type: 'count', start: 6, to: 40 }, { type: 'html', start: 9, w: 800, h: 400,
+           parts: [{ select: '.r', stagger: 0.3, count: 3 }] }] }, { canvas })
+       .every((c) => MOTION_CUES.includes(c.name)));
+
+  // THE WHOLE POINT: the sound is a FUNCTION OF THE MOTION. Same entrance, different size.
+  const one = (L) => tactileCues({ duration: 4, layers: [L] }, { canvas })[0];
+  const big = one({ type: 'rect', start: 1, w: 1600, h: 800, anim: 'rise' });
+  const small = one({ type: 'rect', start: 1, w: 160, h: 60, anim: 'rise' });
+  ok('tactile: a big layer thuds, a chip plucks', big.name === 'thud' && small.name === 'pluck');
+  ok('tactile: the bigger layer lands louder', big.gain > small.gain);
+  // ...and same size, different travel. With no per-cue parameters, LEVEL is the only handle on how
+  // hard a thing lands, so a slide has to be louder than a fade of the identical card.
+  const slid = one({ type: 'rect', start: 1, w: 1600, h: 800, anim: 'slide-left' });
+  const faded = one({ type: 'rect', start: 1, w: 1600, h: 800, anim: 'fade' });
+  ok('tactile: travel sets the level', slid.gain > faded.gain && slid.name === faded.name);
+  ok('tactile: travelOf reads the entrance vocabulary',
+     travelOf('slide-left') > travelOf('rise') && travelOf('rise') > travelOf('pop') && travelOf('fade') === 0);
+  ok('tactile: an unsized picture falls back to a stated size, never to zero',
+     prominenceOf({ type: 'image' }, canvas).area > 0);
+  ok('tactile: a headline is measured from its own copy, so it outweighs a caption',
+     one({ type: 'text', start: 1, text: 'THE ONE THING TO REMEMBER', size: 140 }).gain
+     > one({ type: 'text', start: 1, text: 'a footnote', size: 24 }).gain);
+  ok('tactile: a hairline rule is decoration and never sounds',
+     tactileCues({ duration: 4, layers: [{ type: 'rect', start: 1, w: 1600, h: 3 }] }, { canvas }).length === 0);
+  ok('tactile: a glow is a condition of the frame, not an event',
+     tactileCues({ duration: 4, layers: [{ type: 'glow', start: 1, w: 900, h: 900 }] }, { canvas }).length === 0);
+  ok('tactile: a layer can opt out by name',
+     tactileCues({ duration: 4, layers: [{ type: 'rect', start: 1, w: 1600, h: 800, sound: false }] }, { canvas }).length === 0);
+
+  // CUTS AND SEAMS ARE NOT DERIVED HERE. CUT_CUE already voices them and a second table would be two
+  // ways to say one thing. They arrive as `fixed`, rank against the motion, and come back untouched.
+  ok('tactile: a cut is not re-voiced here',
+     tactileCues({ duration: 6, cuts: [{ t: 2, style: 'punch' }] }, { canvas }).length === 0);
+  ok('tactile: the fixed structural cues are never handed back',
+     tactileCues({ duration: 6, layers: [{ type: 'rect', start: 4, w: 1200, h: 700 }] },
+       { canvas, fixed: [{ t: 2, name: 'press' }] }).every((c) => c.name !== 'press'));
+  ok('tactile: an arrival that flams against a cut is dropped, and the cut is not',
+     tactileCues({ duration: 6, layers: [{ type: 'rect', start: 2.01, w: 1200, h: 700 }] },
+       { canvas, fixed: [{ t: 2, name: 'press' }] }).length === 0);
+
+  // A CAMERA MOVE. Contiguous changing keys are ONE move, and its size sets the level.
+  const camCues = tactileCues({ duration: 30, camera: [
+    { t: 0, s: 1, x: 0, y: 0 }, { t: 10, s: 1, x: 0, y: 0 },
+    { t: 10.3, s: 1.13, x: 0, y: -10 }, { t: 12.3, s: 1, x: 0, y: 0 }, { t: 20, s: 1, x: 0, y: 0 }] }, { canvas });
+  ok('tactile: a punch-in and its release are ONE whoosh, not two',
+     camCues.length === 1 && camCues[0].name === 'whoosh' && camCues[0].t === 10);
+  ok('tactile: a camera that only sits still says nothing',
+     tactileCues({ duration: 20, camera: [{ t: 0, s: 1 }, { t: 19, s: 1 }] }, { canvas }).length === 0);
+  ok('tactile: a longer move is a bigger gesture, so it is louder',
+     tactileCues({ duration: 9, camera: [{ t: 0, s: 1 }, { t: 4, s: 1.6 }] }, { canvas })[0].gain
+     > tactileCues({ duration: 9, camera: [{ t: 0, s: 1 }, { t: 0.5, s: 1.6 }] }, { canvas })[0].gain);
+
+  // A COUNTER. Plucks on the number's own velocity curve, so an easeOut crowds them at the start.
+  const cnt = tactileCues({ duration: 8, layers: [
+    { type: 'count', start: 1, duration: 3, from: 0, to: 84, countStart: 0.2, countDur: 2, ease: 'easeOutCubic' }] }, { canvas });
+  ok('tactile: a counter plucks, and never more than a handful',
+     cnt.length >= 3 && cnt.length <= 7 && cnt.every((c) => c.name === 'pluck'));
+  ok('tactile: a counter is quiet, or it is a machine gun', cnt.every((c) => c.gain <= 0.15));
+  ok('tactile: the plucks follow the EASE, spreading as an easeOut settles',
+     cnt[1].t - cnt[0].t < cnt[cnt.length - 1].t - cnt[cnt.length - 2].t);
+  ok('tactile: the counter lands inside its own window',
+     cnt[0].t >= 1.2 - 1e-9 && cnt[cnt.length - 1].t <= 3.2 + 1e-9);
+  ok('tactile: the last pluck is the one that lands', cnt[cnt.length - 1].gain > cnt[0].gain);
+
+  // A `parts` STAGGER. Thinned EVENLY when it is too fast to hear, never chewed into holes.
+  const trainLayer = (count, stagger) => ({ type: 'html', start: 2, w: 900, h: 500,
+    parts: [{ select: '.x', anim: 'fadeUp', stagger, delay: 0, count }] });
+  const fast = tactileCues({ duration: 8, layers: [trainLayer(12, 0.05)] }, { canvas });
+  ok('tactile: a 12-part train at 0.05s is thinned, never voiced 12 times', fast.length <= 6 && fast.length >= 2);
+  ok('tactile: the thinned train stays EVENLY spaced',
+     new Set(fast.slice(1).map((c, i) => +(c.t - fast[i].t).toFixed(3))).size === 1);
+  ok('tactile: the thinned train is never faster than the ear can follow',
+     fast.every((c, i) => i === 0 || c.t - fast[i - 1].t >= 0.2 - 1e-9));
+  ok('tactile: a slow train keeps its own stagger',
+     tactileCues({ duration: 8, layers: [trainLayer(4, 0.3)] }, { canvas })
+       .every((c, i, a) => i === 0 || Math.abs((c.t - a[i - 1].t) - 0.3) < 1e-6));
+  ok('tactile: a parts layer does not ALSO thud as one card', fast.every((c) => c.name === 'pluck'));
+  ok('tactile: an unmatched selector sounds nothing, rather than guessing a count',
+     tactileCues({ duration: 8, layers: [{ type: 'html', start: 2, w: 900, h: 500,
+       parts: [{ select: '.x', stagger: 0.1 }] }] }, { canvas }).length === 0);
+
+  // THE SPECTACLE. A riser that ENDS on the nominated moment, and the cap may not drop it.
+  const spec = tactileCues({ duration: 30, spectacle: { at: 12, of: 'ring', device: 'ripple' },
+    layers: Array.from({ length: 40 }, (_, i) => ({ type: 'rect', start: 11 + i * 0.02, w: 900, h: 500 })) }, { canvas });
+  const riser = spec.find((c) => c.name === 'riser');
+  ok('tactile: the spectacle rises INTO its moment and ends there',
+     !!riser && Math.abs(riser.t + RISER_LEAD - 12) < 1e-6);
+  ok('tactile: the density cap may not drop the moment the film nominated', !!riser);
+  ok('tactile: no spectacle, no riser',
+     tactileCues({ duration: 6, layers: [{ type: 'rect', start: 2, w: 900, h: 500 }] }, { canvas })
+       .every((c) => c.name !== 'riser'));
+
+  // DENSITY. The design problem, not the mapping.
+  const hail = { duration: 30, layers: Array.from({ length: 120 },
+    (_, i) => ({ type: 'rect', start: +(i * 0.12).toFixed(2), w: 700, h: 300, anim: 'rise' })) };
+  const capped = tactileCues(hail, { canvas });
+  ok('tactile: 120 events do not become 120 cues',
+     derive(hail, { canvas }).length === 120 && capped.length < 120);
+  ok('tactile: two cues never flam inside the merge gap',
+     capped.every((c, i) => i === 0 || c.t - capped[i - 1].t >= DENSITY.minGap));
+  ok('tactile: no second of the film carries more than the cap',
+     capped.every((c) => capped.filter((k) => Math.abs(k.t - c.t) < 0.5).length <= DENSITY.maxPerSec));
+  ok('tactile: the cap is authorable', tactileCues(hail, { canvas, config: { maxPerSec: 1 } }).length
+     < tactileCues(hail, { canvas, config: { maxPerSec: 8 } }).length);
+  ok('tactile: `gain` scales the whole mix',
+     tactileCues(hail, { canvas, config: { gain: 0.5 } })
+       .every((c, i) => Math.abs(c.gain - r2gain(capped[i].gain * 0.5)) < 1e-9));
+  // Weight, not arrival order, decides who survives. A hairline that happens first must not silence
+  // the headline that happens 10ms later: that is the whole reason cues carry a prominence.
+  const clash = capDensity([
+    { t: 1.0, name: 'pluck', gain: 0.1, w: 0.2 },
+    { t: 1.01, name: 'thud', gain: 0.4, w: 0.7 }]);
+  ok('tactile: at the same instant the more prominent cue wins',
+     clash.length === 1 && clash[0].name === 'thud');
+
+  // DETERMINISM. The same scene derives the identical list, every run.
+  const rich = { duration: 20, camera: [{ t: 0, s: 1 }, { t: 6, s: 1.4 }],
+    spectacle: { at: 12, of: 'x', device: 'ripple' },
+    layers: [{ type: 'rect', start: 1, w: 1400, h: 700, anim: 'slide-left' },
+      { type: 'text', start: 3, text: 'a headline that carries the frame', size: 120 },
+      { type: 'count', start: 7, duration: 3, to: 900, ease: 'easeOutExpo' },
+      { type: 'html', start: 10, w: 800, h: 400, parts: [{ select: '.r', stagger: 0.25, count: 5 }] }] };
+  const runA = JSON.stringify(tactileCues(rich, { canvas }));
+  ok('tactile: the same scene derives the identical cue list, every run',
+     runA === JSON.stringify(tactileCues(rich, { canvas })));
+  ok('tactile: the list does not depend on the order the scene declares its layers',
+     JSON.stringify(tactileCues({ ...rich, layers: rich.layers.slice().reverse() }, { canvas })) === runA);
 }
 
 // ---- springEase (iOS-parameterised spring easing) ------------------------------------------------
