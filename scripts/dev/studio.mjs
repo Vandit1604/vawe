@@ -265,7 +265,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    pre.textContent=detail; pre.style.cssText='white-space:pre-wrap;user-select:text;margin:.5em 0;font:12px/1.5 ui-monospace,monospace';
    const btn=errBox.querySelector('.ecopy');
    btn.style.cssText='font:11px/1 ui-monospace,monospace;padding:.4em .7em;cursor:pointer';
-   btn.onclick=()=>{ navigator.clipboard.writeText(title+'\n'+detail).then(()=>{btn.textContent='copied';setTimeout(()=>btn.textContent='copy',1200);}); };
+   btn.onclick=()=>{ navigator.clipboard.writeText(title+'\\n'+detail).then(()=>{btn.textContent='copied';setTimeout(()=>btn.textContent='copy',1200);}); };
    read.textContent='scene did not load';
    try{ fetch('/__err',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title:title,detail:detail})}); }catch(e){}
