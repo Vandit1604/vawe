@@ -1,20 +1,20 @@
 ---
 message: "The engine writes video the way you write code, and here it is doing it."
 audience: "Developers and design engineers scrolling X and LinkedIn with the sound off, deciding in two seconds."
-arc: "one world, flown through: the name → the scene being written → the frame it renders → the wall of everything it can do → the claim, back where we started"
-framework: "A oner. The camera is the only transition, so the film cannot be a stack of cards."
-threads: "a oner (ONE continuous world, laid out in stage coordinates, with no cuts anywhere: the camera travels station to station and IS the transition) + a through-line (the scene written at station 2 is the frame rendered at station 3, and its effects are the wall at station 4) + a bookend (the flight starts and ends on the wordmark, having gone somewhere)"
+arc: "the name becomes the surface, the surface becomes the frame it rendered, that frame becomes fifteen, and the wall resolves to the claim"
+framework: "One frame, one continuous action. Nothing is off camera and nothing travels: each object BECOMES the next in the same space, the way the reference film does."
+threads: "a transforming subject (one surface persists and changes identity four times: editor -> its output -> a wall of outputs -> the claim, each growing out of the last at its predecessor's size and position) + a turning world (the ground flips cobalt/light/cobalt/dark/cobalt under the content, five windows in 20s) + a bookend (the wordmark opens the film and closes it)"
 format: 1920x1080
 theme: "themes/vawe.json, the shipped brand unmodified: white ground, cobalt #2563eb, Anybody and JetBrains Mono"
 duration: 20s
-pace: explainer, about 4 seconds per idea. Five stations in 20s. ZERO cuts: every junction is a camera flight of about 1.1s, and no dwell runs past 3.5s.
-spectacle: "beat 4 (station 4) at 12.0s. The camera PULLS BACK for the only time in the film and a dark slab opens out of the cobalt carrying fifteen real rendered frames. Every other station is a push or a hold at one idea, so the single retreat is the peak."
-not: "no cuts of any kind, no narration, no stock photography, no third-party logos, no invented or mocked UI, no preset used where a keyed track belongs, and no claim the film has not already shown."
+pace: explainer, about 4 seconds per idea. Five ideas in 20s. ZERO cuts and ZERO camera travel: every junction is one object growing out of the one before it.
+spectacle: "beat 4 at 12.85s. The one moment a single frame becomes fifteen: the wall opens out of the rendered frame at that frame's own size and centre. Everything before it is one surface at a time, so the multiplication is the peak."
+not: "no cuts, no camera travel between locations, no narration, no stock photography, no third-party logos, no invented UI, no preset where a keyed track belongs, and no claim the film has not already shown."
 ---
 
 Twenty seconds, silent, to somebody who has scrolled past a hundred product videos this week.
 
-## Beat 1: The name (0s-2.5s)
+## Beat 1: The name (0s-2.7s)
 - type: hook
 - shot: full cobalt field, the wordmark on the optical centre
 - camera: hold
@@ -26,7 +26,7 @@ Twenty seconds, silent, to somebody who has scrolled past a hundred product vide
 - style: cobalt ground, white ink, nothing else on screen
 - why: name it in two seconds, then get out of the way
 
-## Beat 2: Write it (2.5s-7.5s)
+## Beat 2: Write it (2.7s-8.3s)
 - type: mechanism
 - shot: split on the frame's own third, the editor pane left, the rendered output right
 - camera: hold
@@ -38,7 +38,7 @@ Twenty seconds, silent, to somebody who has scrolled past a hundred product vide
 - style: white ground, the first flip out of cobalt
 - why: the product's own hero device, doing the one thing the whole film is about
 
-## Beat 3: Render it (7.5s-11.5s)
+## Beat 3: Render it (8.3s-12.55s)
 - type: proof
 - shot: the output alone, full frame
 - camera: one slow push, the only camera move in the film
@@ -50,7 +50,7 @@ Twenty seconds, silent, to somebody who has scrolled past a hundred product vide
 - style: cobalt ground, the second flip
 - why: the word deterministic means nothing; a counter running frame by frame means it exactly
 
-## Beat 4: The whole vocabulary (11.5s-16s)  ← SPECTACLE
+## Beat 4: The whole vocabulary (12.55s-17.05s)  ← SPECTACLE
 - type: spectacle
 - shot: a five by five wall of real rendered frames
 - camera: hold, no move, so every bit of the motion is the wall arriving
@@ -62,7 +62,7 @@ Twenty seconds, silent, to somebody who has scrolled past a hundred product vide
 - style: white ground, the loudest frame in the film
 - why: it answers "is this just templates" with evidence instead of a sentence
 
-## Beat 5: The claim (16s-20s)
+## Beat 5: The claim (17.05s-20s)
 - type: end card
 - shot: cobalt again, left aligned and low
 - camera: hold
