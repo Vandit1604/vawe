@@ -16,10 +16,10 @@
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { patchMotion, upsertKey } from '../author/patch-motion.mjs';
-import { serveRepo } from '../lib/render-harness.mjs';
+import { serveRepo, REPO_ROOT } from '../lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.env.D || process.argv[2];
@@ -124,6 +124,16 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    background:#12151c;color:#e8ecf3;border:1px solid #2a3140;border-radius:8px;z-index:40;
    font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 18px 50px -12px rgba(0,0,0,.6)}
  #pick.on{display:flex}
+ #planel{position:fixed;inset:36px;display:none;flex-direction:column;z-index:60;background:#0e1116;
+   border:1px solid #2a3140;border-radius:10px;box-shadow:0 30px 90px -20px rgba(0,0,0,.7)}
+ #planel.on{display:flex}
+ #planhead{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #2a3140;
+   color:#e8ecf3;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+ #planhead b{font-weight:600} #planpath{flex:1;color:#7d8798;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #planhead button{background:#1c2130;color:#cfd6e2;border:1px solid #2a3140;border-radius:5px;
+   padding:.34em .66em;cursor:pointer;font:11px/1 ui-monospace,monospace}
+ #planbody{flex:1;overflow:auto;background:#fff;display:flex;align-items:flex-start;justify-content:center}
+ #planimg{max-width:100%;display:block}
  #pickhead{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid #2a3140}
  #pickname{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  #pickhead button{background:#1c2130;color:#cfd6e2;border:1px solid #2a3140;border-radius:5px;
@@ -192,6 +202,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  #ph{position:absolute;top:0;bottom:0;width:1px;background:var(--play);z-index:5;pointer-events:none}
  #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--play)}
 </style></head><body>
+ <div id=planel><div id=planhead><b>the plan, drawn from the storyboard</b><span id=planpath></span><button id=planclose>x</button></div><div id=planbody><img id=planimg alt="storyboard panels"></div></div>
  <div id=pick><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>x</button></div><pre id=pickjson></pre></div>
  <div id=stage><iframe id=sc src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=drag></div><div id=err hidden></div></div>
  <div id=bar>
@@ -201,6 +212,7 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
   <button id=key>◇ key: off</button>
   <button id=undo>⤺ undo</button>
   <span id=sel></span>
+  <button id=plan>▤ panels</button>
   <button id=tgl>timeline</button>
   <button id=theme>◐ light</button>
  </div>
@@ -225,6 +237,27 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
    [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
  // a key lands at the layer's LOCAL time, so that is the number the readout has to show, live. Before
  // this it froze at whatever it was when you clicked, which is the one moment it does not matter.
+ // ---- THE PLAN, one keypress away ---------------------------------------------------------------
+ // The storyboard decided these beats and the film is the answer to it. Studio showed only the answer.
+ const planel=document.getElementById('planel'), planImg=document.getElementById('planimg'),
+       planPath=document.getElementById('planpath');
+ function openPlan(){
+   planel.classList.add('on'); planPath.textContent='drawing...';
+   // cache-busted every open, because the server redraws when the storyboard is newer than the sheet
+   // and a browser holding the old png would show a plan that has already changed.
+   fetch('/__panels?t='+Date.now()).then(r=>{
+     if(!r.ok) return r.text().then(t=>{ planPath.textContent=t.split(String.fromCharCode(10))[0]; planImg.removeAttribute('src'); });
+     planPath.textContent=r.headers.get('X-Storyboard')||'';
+     return r.blob().then(b=>{ planImg.src=URL.createObjectURL(b); }); })
+    .catch(e=>{ planPath.textContent='could not draw the panels: '+e.message; });
+ }
+ document.getElementById('plan').addEventListener('click',openPlan);
+ document.getElementById('planclose').addEventListener('click',()=>planel.classList.remove('on'));
+ window.addEventListener('keydown',(e)=>{
+   if(e.key==='Escape') planel.classList.remove('on');
+   // The p key opens the plan, the way space plays. Not while typing in a field.
+   if((e.key==='p'||e.key==='P') && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))
+     planel.classList.contains('on')?planel.classList.remove('on'):openPlan(); });
  // ---- THE PICKER: click the picture, get the JSON that made it ----------------------------------
  // The timeline could already select a layer by its BAR. Nothing could select one by looking at it, so
  // describing a problem meant describing where it was on screen and hoping. Now a click hit-tests the
@@ -465,6 +498,44 @@ const studioRoutes = (req, res) => {
   const url = req.url.split('?')[0];
   if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(studioPage('scene')); return true; }
   // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
+  // ---- the PLAN, drawn ---------------------------------------------------------------------------
+  // A film has two artefacts and studio only ever showed one. The storyboard is where the beats were
+  // decided and `make panels` renders it as a sheet, but that sheet lived in /tmp and nobody opened
+  // it: the gate that asks for it has been warning "no panels have been drawn" on this very film.
+  // Putting it behind a button in the tool that shows the RESULT is the whole point, because the
+  // question worth asking is whether the result matches the plan.
+  if (url === '/__panels') {
+    // Same resolution order as author-check: an explicit `storyboard` field, then a sibling file.
+    let sbPath = null;
+    try {
+      const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
+      const named = typeof d.storyboard === 'string' ? path.join(REPO_ROOT, d.storyboard) : null;
+      const sibling = dataArg.replace(/\.json$/, '.storyboard.md');
+      sbPath = [named, sibling].find((f) => f && fs.existsSync(f)) || null;
+    } catch (e) {
+      // NOT swallowed. A bare catch here returned "no storyboard for this scene" over a
+      // ReferenceError and sent me looking at path resolution for ten minutes.
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      return res.end('could not resolve the storyboard: ' + e.message), true;
+    }
+    if (!sbPath) { res.writeHead(404, { 'Content-Type': 'text/plain' });
+      return res.end('no storyboard for this scene: add a top-level "storyboard" field, or put <name>.storyboard.md beside it'), true; }
+    const out = path.join('/tmp/panels', path.basename(sbPath).replace(/\.storyboard\.md$/, ''), '..');
+    const png = path.join('/tmp/panels', path.basename(sbPath).replace(/\.storyboard\.md$/, '') + '.png');
+    // Redrawn when the storyboard is NEWER than the sheet, so the plan on screen is never stale.
+    const stale = !fs.existsSync(png) || fs.statSync(sbPath).mtimeMs > fs.statSync(png).mtimeMs;
+    if (stale) {
+      const r = spawnSync(process.execPath, [path.join(REPO_ROOT, 'scripts/author/panels.mjs'), sbPath],
+        { cwd: REPO_ROOT, encoding: 'utf8' });
+      if (!fs.existsSync(png)) { res.writeHead(500, { 'Content-Type': 'text/plain' });
+        return res.end('panels failed:\n' + String(r.stderr || r.stdout).slice(0, 900)), true; }
+    }
+    res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store',
+                         'X-Storyboard': path.relative(REPO_ROOT, sbPath) });
+    fs.createReadStream(png).pipe(res);
+    return true;
+  }
+
   // ---- the page reports its own failure to the terminal ------------------------------------------
   // A boot error used to exist only inside the iframe. The terminal that started studio printed its
   // banner and then sat silent while the page showed a stack trace, so whoever was watching the shell

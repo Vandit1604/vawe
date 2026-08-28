@@ -127,7 +127,7 @@ const fmt = /(\d+)\s*[x×]\s*(\d+)/.exec(sb.format || '');
 const W = fmt ? +fmt[1] : 1920, H = fmt ? +fmt[2] : 1080;
 const INK = '#111111', GREY = '#c9c9c9', SLOT = '#e6e6e6', MUTED = '#8a8a8a';
 const PAD = Math.round(W * 0.055);
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/[, –]/g, ',');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/–/g, ',');
 const layers = [];
 
 for (const r of timed) {

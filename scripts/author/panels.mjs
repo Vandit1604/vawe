@@ -245,7 +245,7 @@ const g = gcd(W, H);
 const ASPECT = `${W / g}:${H / g}`;
 
 const INK = '#111111', GREY = '#bdbdbd', SLOT = '#e8e8e8', MUTED = '#7a7a7a', FAINT = '#a8a8a8', RED = '#b00020';
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/[, –]/g, ',');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/–/g, ',')   // an en dash between clauses reads as a comma at panel scale;
 const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
 
 // The drawn frame, inset so the panel can carry a slate above it and a caption below without either

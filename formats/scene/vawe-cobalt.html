@@ -1,0 +1,21 @@
+<!-- The vawe.dev hero ground: a cobalt field with a slow radial drift.
+     Driven by var(--t) because the engine disables CSS animation, so a
+     hand-authored backdrop that keys off nothing renders as a dead still. -->
+<div class="cobalt"></div>
+<style>
+  .cobalt {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(
+        120% 90% at calc(50% + var(--t) * 6%) calc(38% - var(--t) * 4%),
+        #3b6cf5 0%, #2563eb 42%, #1b47b8 100%);
+  }
+  /* A second, counter-drifting sheen so the field reads as lit, not flat. */
+  .cobalt::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(
+        70% 55% at calc(28% + var(--t) * 9%) calc(78% + var(--t) * 5%),
+        rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 62%);
+  }
+</style>
