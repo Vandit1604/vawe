@@ -2,6 +2,7 @@
 when: "picking `type.sans/serif/mono`, sizing headlines"
 answers: which face signals which personality · pairing · the size scale · weight/tracking/leading
 group: look
+codes: off-font, weak-headline
 ---
 
 # TYPOGRAPHY: choosing and setting type

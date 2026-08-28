@@ -2,6 +2,7 @@
 when: deciding the beats and their order
 answers: "the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats"
 group: story
+codes: hook-emoji, hook-length, hook-weak-opener, jargon, no-spectacle-nominated, no-storyboard, plan-has-no-spans, plan-overruns-render, restated-headline, spectacle-beat-unnamed, spectacle-in-wrong-beat, spectacle-not-built, unplanned-junction, vague-quantifier
 ---
 
 # STORY: why these beats, in this order, doing what

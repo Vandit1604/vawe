@@ -2,6 +2,7 @@
 when: "it \"renders fine but feels cheap\""
 answers: "cause→feeling ease table · the failure-modes catalog · restraint · continuity"
 group: story
+codes: effect-soup
 ---
 
 # TASTE RULES: what not to do, and how each choice makes the viewer feel

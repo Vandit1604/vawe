@@ -2,6 +2,7 @@
 when: "\"what holds this film together across its cuts\""
 answers: the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last
 group: crosscutting
+codes: continuity, no-continuous-object, no-continuous-object-inferred
 ---
 
 # Film structure: what holds a short film together

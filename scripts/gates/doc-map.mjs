@@ -28,6 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { codesEmitted } from '../lib/finding-codes.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -181,7 +182,8 @@ export function docMap() {
     }
     if (isSkill(f)) {
       if (!fm.description) { problems.push({ kind: 'fail', msg: `${f}: a SKILL.md with no \`description\`. Nothing can surface it` }); continue; }
-      entries.push({ file: f, source: 'skill', group: 'skill', when: fm.description, answers: '', name: fm.name || path.basename(path.dirname(f)) });
+      entries.push({ file: f, source: 'skill', group: 'skill', when: fm.description, answers: '',
+        name: fm.name || path.basename(path.dirname(f)), codes: parseCodes(fm.codes) });
       continue;
     }
     if (!fm.when || !fm.answers || !fm.group) {
@@ -194,9 +196,46 @@ export function docMap() {
     for (const k of ['when', 'answers']) {
       if (/\]\([^)\s]+\.md/.test(fm[k])) problems.push({ kind: 'fail', msg: `${f}: \`${k}\` contains a markdown link to a .md file. Relative links break in the generated views. Write the name in backticks instead.` });
     }
-    entries.push({ file: f, source: 'frontmatter', group: fm.group, when: fm.when, answers: fm.answers });
+    entries.push({ file: f, source: 'frontmatter', group: fm.group, when: fm.when, answers: fm.answers,
+      codes: parseCodes(fm.codes) });
   }
   return { entries, problems };
+}
+
+// ── which finding routes to which doc ────────────────────────────────────────────────────────────
+// A gate that says what is wrong and not where the answer lives is half a gate. Measured before this
+// existed: 10 of 64 gates cited a doc, and 12 of the 33 CRAFT docs were named by nothing except the
+// generated index. So the knowledge was written, indexed, and unreachable at the only moment it was
+// needed, which is the moment a finding fires.
+//
+// `codes:` on a doc's frontmatter names the findings that doc settles. The mapping is enforced ONE WAY
+// as an error and the other way as a report, and the asymmetry is deliberate. A doc claiming a code no
+// gate emits is a DEAD POINTER: it sends an author to a page about a rule that no longer runs, which is
+// the exact rot `waiver-drift`'s hand-kept RETIRED map exists to catch and keeps having to be told
+// about. That fails. A code with no doc is merely UNROUTED, and since scripts/lib/finding-codes.mjs
+// chooses precision over recall, a recall gap there would otherwise block every build over a pointer
+// nobody had written yet. That reports.
+const parseCodes = (v) => (v == null ? [] : String(v).replace(/^\[|\]$/g, '')
+  .split(',').map((c) => c.trim().replace(/^['"`]|['"`]$/g, '')).filter(Boolean));
+
+/** Map<code, docFile>, for any gate runner that wants to print the pointer beside the finding. */
+export function codeDocMap(entries) {
+  const map = new Map();
+  for (const e of entries) for (const c of e.codes || []) if (!map.has(c)) map.set(c, e.file);
+  return map;
+}
+
+/** A doc that claims a code nothing emits. Fails: the pointer is already rotten. */
+export function codeErrors(entries) {
+  const emitted = codesEmitted();
+  const errs = [];
+  for (const e of entries) for (const c of e.codes || []) {
+    if (!emitted.has(c)) errs.push(`${e.file}: \`codes:\` names "${c}", which no gate emits. `
+      + `Remove it, or fix the code's spelling. A pointer to a retired rule reads as a live argument.`);
+  }
+  const claimed = new Set(entries.flatMap((e) => e.codes || []));
+  const unrouted = [...emitted.keys()].filter((c) => !claimed.has(c)).sort();
+  return { errs, unrouted };
 }
 
 // ── link integrity, repo-wide ────────────────────────────────────────────────────────────────────
@@ -365,7 +404,11 @@ export function run({ write = false } = {}) {
     return { ok: !fails.length, fails, pending, wrote, entries };
   }
 
-  const errs = [...fails, ...linkErrors(entries), ...staleViews(entries), ...orphanErrors(entries)];
+  const codeCheck = codeErrors(entries);
+  const errs = [...fails, ...linkErrors(entries), ...staleViews(entries), ...orphanErrors(entries), ...codeCheck.errs];
+  if (codeCheck.unrouted.length) pending.push(`${codeCheck.unrouted.length} finding code(s) route to no doc: `
+    + `${codeCheck.unrouted.slice(0, 8).join(', ')}${codeCheck.unrouted.length > 8 ? ', …' : ''}. `
+    + `Add each to the \`codes:\` frontmatter of the CRAFT doc that settles it.`);
   return { ok: !errs.length, fails: errs, pending, wrote: [], entries };
 }
 

@@ -2,6 +2,7 @@
 when: "authoring a `theme` palette, choosing bg/accent"
 answers: "build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG"
 group: look
+codes: contrast, contrast-unmeasurable, dead-token, off-colour
 ---
 
 # COLOR: building a palette

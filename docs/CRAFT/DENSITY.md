@@ -2,6 +2,7 @@
 when: "a beat looks flat / slide-like"
 answers: "hero + support + metadata triad · the \"produced\" tell · thin-beat rule"
 group: density
+codes: dead-air, empty-beat, ends-on-nothing
 ---
 
 # Density: "produced, not generated"

@@ -2,6 +2,7 @@
 when: it "reads amateur" though every layer renders fine
 answers: "the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it"
 group: crosscutting
+codes: pace, pace-not-chosen, pace-not-kept, pacing
 ---
 
 # DIRECTION: the spine that turns effects into a directed film

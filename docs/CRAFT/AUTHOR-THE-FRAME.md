@@ -2,6 +2,7 @@
 when: a beat needs a bespoke SVG/HTML dataviz or diagram
 answers: "authoring a bespoke inline-SVG beat · the `window.__timelines` seek bridge · the per-child-choreography gap"
 group: look
+codes: paints-nothing, static-figure
 ---
 
 # AUTHOR-THE-FRAME: bespoke SVG/HTML beats (the another engine expressiveness)

@@ -2,6 +2,7 @@
 when: choosing the SURFACE copy sits on (glass/mesh/spotlight/bento)
 answers: "the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker"
 group: look
+codes: no-bg-motion, off-radius, off-shadow, static-bg
 ---
 
 # SURFACES: sleek components, the build-first loop, and the design spec

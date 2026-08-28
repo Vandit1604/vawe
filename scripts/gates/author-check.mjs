@@ -62,6 +62,7 @@ import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
+import { codeDocMap, docMap } from './doc-map.mjs';
 import { sceneDims } from '../../core/safe.js';
 import { population, LIBRARY } from '../lib/census.mjs';
 
@@ -403,6 +404,20 @@ const openStep = (name, label, { slow } = {}) => {
   if (slow) process.stdout.write(`  this one is slow: it launches a browser, about 1.4s. Everything above cost milliseconds.\n`);
 };
 
+// The code → doc map, read once from the frontmatter `make doc-index` already gates. Built lazily and
+// cached: a run touches it up to 19 times, and a doc-map failure must not take the ladder down with it,
+// so a broken map costs the pointers and nothing else.
+let DOCS = null;
+const docFor = (code) => {
+  if (DOCS === null) { try { DOCS = codeDocMap(docMap().entries); } catch { DOCS = new Map(); } }
+  return DOCS.get(code);
+};
+const printDocs = (codes) => {
+  const seen = new Map();
+  for (const c of codes) { const d = docFor(c); if (d && !seen.has(d)) seen.set(d, c); }
+  for (const [doc, code] of seen) process.stdout.write(`  read: ${doc}   (settles [${code}])\n`);
+};
+
 // run one gate as a child; stream its output; return {code, blockCodes}. A "blocking" finding is a line
 // the gate marks with ✗ and a [code] tag (critique errors, direct FAILs use exactly this format).
 const runGate = (name, label, script, args, opts = {}) => {
@@ -415,6 +430,13 @@ const runGate = (name, label, script, args, opts = {}) => {
   const code = r.status ?? 1;
   process.stdout.write(out.endsWith('\n') ? out : out + '\n');
   const blockCodes = [...out.matchAll(/✗\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1]);
+  // WHAT IS WRONG, AND WHERE THE ANSWER LIVES. A gate names a defect in a sentence it had to fit on one
+  // line; the reasoning behind it is a page somebody already wrote and nobody opens. Measured before
+  // this line existed: 10 of 64 gates cited a doc, and 12 of 33 CRAFT docs were reachable only by
+  // browsing an index. Routing here rather than in each gate means all of them gain it at once, and it
+  // reads the SAME `codes:` frontmatter `make doc-index` already validates, so there is one owner.
+  // Warnings are included: `continuity` fired as a warning on the film that prompted all of this.
+  printDocs([...blockCodes, ...[...out.matchAll(/~\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1])]);
   // A STEP THAT FINDS NOTHING MUST SAY SO. Silence and a clean run look identical in a log, and a person
   // reading this cannot tell a gate that passed from a gate that fell over.
   const findings = (out.match(/^\s*[✗~⚠]/gm) || []).length;
@@ -543,6 +565,7 @@ styleGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.
       + `        node scripts/author/track.mjs blast --dur 1.5              --scene ${target} --layer <n>\n`
       + `      Or reach for a keyed BEAT: recordedPan / scrollStory / focusRack / echoRing (make blueprints).\n`
       + `      Theory and the measurements: docs/CRAFT/KEYED-MOTION.md.\n${relief}`);
+    printDocs(['no-authored-motion']);
   } else {
     process.stdout.write(`  → nothing found.\n`);
   }

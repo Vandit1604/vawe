@@ -2,6 +2,7 @@
 when: "you know the FEELING you want and not the engine name for it"
 answers: "the plain words the engine resolves in a real slot: feel to an easing, duration to seconds, a shot description to a camera move"
 group: crosscutting
+codes: low-vocab
 ---
 
 # VOCABULARY: plain words the engine accepts
