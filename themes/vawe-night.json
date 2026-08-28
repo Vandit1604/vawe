@@ -1,0 +1,98 @@
+{
+ "name": "vawe-night",
+ "note": "THE BRAND AFTER DARK, for the launch film. Derived from themes/vawe.json, not invented, and deliberately NOT vawe-dark: that ships accent #5ee0c8, and near-black plus one teal accent is the exact look this project's own design read rules out. vawe.json already solved the dark case in prose: 'cobalt on #0f1620 is ~2.5:1 and unreadable. Two-surface accent: cobalt on light, ice-blue #8fc0ff on a charcoal code slab.' So this carries TWO blues at two roles rather than one flat accent. #8fc0ff is the readable accent on the ground; the real brand cobalt #2563eb survives as the caret and the glow, where it is a light source rather than something to read. The ground is #0d1117, cool rather than neutral, so it belongs to the blue rather than sitting under it.",
+ "palette": {
+  "bg": "#0d1117",
+  "bg2": "#11161f",
+  "surface": "#161b26",
+  "surface2": "#1b212e",
+  "line": "#232b39",
+  "lineStrong": "#313b4d",
+  "text": "#e8ecf3",
+  "text2": "#aab4c5",
+  "dim": "#7d8798",
+  "accent": "#8fc0ff",
+  "accentDim": "rgba(143,192,255,0.12)",
+  "accentGlow": "rgba(37,99,235,0.42)",
+  "up": "#84e06a",
+  "down": "#ff4d6d",
+  "ink": "#e8ecf3"
+ },
+ "gradient": [
+  "#0d1117",
+  "#11161f",
+  "#161b26"
+ ],
+ "type": {
+  "sans": "Anybody",
+  "serif": "Anybody",
+  "mono": "JetBrains Mono",
+  "num": "JetBrains Mono"
+ },
+ "motion": {
+  "easing": "easeOutExpo",
+  "bounce": 0.08,
+  "settle": 0.5,
+  "enter": 36,
+  "durationScale": 0.88,
+  "stagger": 0.045
+ },
+ "bg": {
+  "accent": "143,192,255",
+  "tint": "35,43,57",
+  "tint2": "22,27,38",
+  "dotLight": "143,192,255",
+  "paperBase": [
+   "#11161f",
+   "#0d1117"
+  ],
+  "softBase": [
+   "#11161f",
+   "#080b10"
+  ],
+  "accentBase": [
+   "#12233d",
+   "#080b10"
+  ],
+  "inkBase": [
+   "#080b10",
+   "#05070a"
+  ],
+  "border": "#232b39",
+  "dark": [
+   "#0d1117",
+   "#080b10"
+  ],
+  "darkMesh": [
+   "#101827",
+   "#080b10"
+  ],
+  "deep": [
+   "#080b10",
+   "#05070a"
+  ],
+  "light": [
+   "#161b26",
+   "#0d1117"
+  ],
+  "ink": [
+   "#080b10",
+   "#05070a"
+  ],
+  "paper": "#0d1117"
+ },
+ "vars": {
+  "--ink": "#e6e9ef",
+  "--paper": "#0b0d12",
+  "--muted": "#7c8797",
+  "--em": "#5ee0c8",
+  "--on-light": "#0b0d12",
+  "--on-dark": "#e6e9ef",
+  "--border": "#222831",
+  "--accent-soft": "rgba(94,224,200,0.12)"
+ },
+ "bgDefault": {
+  "preset": "plain",
+  "value": "dark"
+ }
+}

@@ -15933,3 +15933,43 @@ Complexity, from `node scripts/dev/complexity.mjs verify`: the file's worst func
 **cx 166 / 927 lines** to **cx 26 / 42 lines** (`decodePNG`, untouched and pre-existing). The
 `unholdable (50+)` bucket for the whole `verify` tree is now empty, and `hard to test (21-50)` holds
 one function instead of three.
+
+## #491: the validator passed a scene the engine refuses at boot, and studio hid the reason
+
+**What.** A scene declaring `spectacle` with an `of` naming no layer passed `make validate` clean, then
+died at boot. The whole report the author got was three stack frames in a browser panel:
+
+```
+this scene does not render
+resolveSpectacle@/core/spectacle.js:104:11
+boot@/core/boot.js:534:24
+```
+
+No file name, no line of JSON, and no way to select the text. The terminal running `make studio`
+printed its banner and then sat there looking healthy.
+
+**Two root causes, and they compound.**
+
+The first is a gate gap. `core/spectacle.js` refuses three things that are knowable from the JSON alone:
+an unknown device, an `of` that names no layer id, and a sting already sitting on the moment. Its error
+for the second even LISTS the available ids, which is exactly the message an author needs. `core/validate.mjs`
+never called it. So the one check that could have named the problem ran too late to name the file it
+was in. It now calls `resolveSpectacle` on a structuredClone, beside the `bindWindowsToJunctions` call
+that was already there for the same reason, and for the same reason clones: the resolver attenuates
+amplitude dials and appends a sting in place, and a validator must not rewrite what it grades.
+
+The second is that studio's failure never left the iframe. The error box printed the message into a
+`<span>`: not selectable as a block, no copy affordance, and nothing outside the browser ever heard.
+Anyone watching the shell rather than the page, a person on a call or an agent driving remotely, saw a
+healthy server. The box is now a `<pre>` with a copy button, and the page POSTs the failure to `/__err`
+so it prints in the terminal once.
+
+**A third bug, found while fixing the second.** The new route returned a bare `return` instead of
+`return true`. `serveRepo`'s contract is that a route claims a request by returning true, and a handler
+that answers ASYNCHRONOUSLY still has to claim it synchronously. The static handler 404'd the request
+first and the callback then wrote to a response already sent: `ERR_HTTP_HEADERS_SENT`, which killed the
+server. Worth remembering wherever that hook is used again.
+
+**The shape.** An engine that refuses something at boot should refuse it in the validator too, or the
+refusal arrives with no file name attached. And an error a human cannot copy is an error a human
+retypes by hand, badly.

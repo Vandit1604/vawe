@@ -253,9 +253,23 @@ const studioPage = (fmt) => `<!doctype html><html data-theme=${THEME0}><head><me
  // frame and parks the reason on __engineError. Waiting only on __engineReady turned that into a blank
  // stage, which is the same picture a slow load gives, so the one state that needs a message had none.
  // The deadline covers the third case: neither flag ever arrives (a syntax error before boot even runs).
- function fail(title,detail){ errBox.hidden=false; errBox.innerHTML='<b></b><span></span>';
-   errBox.querySelector('b').textContent=title; errBox.querySelector('span').textContent=detail;
-   read.textContent='scene did not load'; }
+ // AN ERROR YOU CANNOT COPY IS AN ERROR YOU RETYPE BY HAND. The box printed the engine's message and
+ // nothing else: no way to select it cleanly, and nothing outside the browser ever heard about it, so
+ // the terminal that started studio sat there looking healthy while the page showed a stack trace. Now
+ // the text is selectable, one button copies it, and it is POSTed to the server so it lands in the
+ // terminal too. That last part is the one that matters when somebody else is driving.
+ function fail(title,detail){ errBox.hidden=false;
+   errBox.innerHTML='<b></b><pre></pre><button class="ecopy">copy</button>';
+   errBox.querySelector('b').textContent=title;
+   const pre=errBox.querySelector('pre');
+   pre.textContent=detail; pre.style.cssText='white-space:pre-wrap;user-select:text;margin:.5em 0;font:12px/1.5 ui-monospace,monospace';
+   const btn=errBox.querySelector('.ecopy');
+   btn.style.cssText='font:11px/1 ui-monospace,monospace;padding:.4em .7em;cursor:pointer';
+   btn.onclick=()=>{ navigator.clipboard.writeText(title+'\n'+detail).then(()=>{btn.textContent='copied';setTimeout(()=>btn.textContent='copy',1200);}); };
+   read.textContent='scene did not load';
+   try{ fetch('/__err',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({title:title,detail:detail})}); }catch(e){}
+ }
  function ready(deadline){ const w=sc.contentWindow;
    if(w.__engineError) return fail('this scene does not render',String(w.__engineError));
    if(!w.__engineReady||!w.__engine){
@@ -388,6 +402,27 @@ const studioRoutes = (req, res) => {
   const url = req.url.split('?')[0];
   if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(studioPage('scene')); return true; }
   // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
+  // ---- the page reports its own failure to the terminal ------------------------------------------
+  // A boot error used to exist only inside the iframe. The terminal that started studio printed its
+  // banner and then sat silent while the page showed a stack trace, so whoever was watching the shell
+  // (a person on a call, an agent driving this remotely) had no idea the scene was dead. The page now
+  // POSTs its failure here and it prints once.
+  if (req.method === 'POST' && url === '/__err') {
+    let body = '';
+    req.on('data', (c) => { body += c; if (body.length > 1e5) req.destroy(); });
+    req.on('end', () => {
+      let e = {};
+      try { e = JSON.parse(body); } catch { /* a malformed report is still a report */ }
+      const detail = String(e.detail || '').split('\n').map((l) => '   ' + l).join('\n');
+      console.error(`\n\u2717 ${e.title || 'the scene failed'}\n${detail}\n`);
+      res.writeHead(204); res.end();
+    });
+    // TRUE, not a bare return. serveRepo's contract is "return true when you answered", and a handler
+    // that answers ASYNCHRONOUSLY still has to claim the request synchronously. Returning undefined let
+    // the static handler 404 it first, and this callback then wrote to a response already sent.
+    return true;
+  }
+
   // ---- the WRITE side: a drag in the browser becomes a keyframe on disk --------------------------
   // Studio was read-only, so every one of the exemplar's 73 keys was a number typed into JSON by hand,
   // and the library has exactly one film with dense keys as a result. These two endpoints are the whole

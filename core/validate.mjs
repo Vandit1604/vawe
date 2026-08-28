@@ -25,6 +25,7 @@ import { parseColor, contrastRatio } from '../core/motion.js';
 import { ASPECTS } from '../core/safe.js';
 import { boundaryMechanism, lowerScene } from '../core/transitions-lower.js';
 import { junctionTable, marksOf, bindWindowsToJunctions, bindMatchesToJunctions } from '../core/junctions.js';
+import { resolveSpectacle } from '../core/spectacle.js';
 import { beatGridPath } from '../core/beat-bind.js';
 import { GSAP_FX, EXIT_FX, GSAP_REGISTRY, GSAP_EXIT_REGISTRY, DEPRECATED_FX, DEPRECATED_EXIT } from '../core/gsap-effects.js';
 import { timeCssUsed } from '../core/sanitize-html.js';
@@ -490,6 +491,18 @@ export function bgErrors(cfg) {
     // is grading changes what every later check sees, and the author's own data with it.
     const table = junctionTable(marksOf(lowerScene(structuredClone(cfg))));
     try { bindWindowsToJunctions(bgList, table, Number(cfg.duration) || Infinity); } catch (e) { out.push(e.message); }
+  }
+
+  // SPECTACLE, checked here because boot REFUSES it and this file did not. `resolveSpectacle` throws on
+  // an unknown device, on a `spectacle.of` that names no layer id, and on a sting already sitting on the
+  // moment. Every one of those is knowable from the JSON alone, so every one of them belongs in the
+  // validator, and none of them was: a scene naming a subject that does not exist passed `make validate`
+  // clean and then died at boot with a stack trace and no file name. Found by writing one.
+  //
+  // CLONED for the same reason as the binder above: resolveSpectacle attenuates amplitude dials and
+  // appends a sting IN PLACE, and a validator must not rewrite the thing it is grading.
+  if (isObj(cfg.spectacle)) {
+    try { resolveSpectacle(structuredClone(cfg)); } catch (e) { out.push(e.message); }
   }
   bgList.forEach((b, i) => {
     if (!isObj(b)) return;
