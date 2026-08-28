@@ -6,7 +6,7 @@ the table at `core/safe.js:35`; a ratio it does not name is still honoured, size
 at 1920). There is exactly **one module: `scene`**, an open canvas of **18 composable layer types**
 (`ls core/layers/`: beam · board · canvas · clip · component · composition · count · cursor · doc ·
 glow · group · html · image · lottie · rect · svg · text · video) plus camera · cuts · stings ·
-captions. `html` counts as a picture, and that matters: it is what makes the 46% two sections below.
+captions. `html` counts as a picture, and that matters: it is what makes brew's 46% further down.
 **No templates.** You do not pour data into a canned layout; you compose each video from the vocabulary in
 `docs/PRIMITIVES.md`. Your job when asked to "make a video about X" is to **write a scene JSON**
 (and capture the real assets it needs), then render it. You do **not** edit `scene.html` or the Go
@@ -26,13 +26,15 @@ in this file, so read them here.
 ```bash
 make list                       # shows the scene module + its schema/sample
 make dev   D=path/to/video.json # THE ITERATION LOOP. Build, draft-render, open. No gates, no audit.
+make studio D=path/to/video.json # the same scene with a frame scrubber + a timeline. Edit, reload, watch.
 make check D=path/to/video.json # every gate, every finding, ZERO consequence. Nothing blocks.
 make ship  D=path/to/video.json # the ladder with its teeth in: author-check → render → audit → seams.
 ```
 
-`make ship` (`Makefile:168`) is steps 2b, 3, 4 and 5a of the ladder below, in order, and it is the one
-command that says a film is done. The section "After writing a JSON" explains what each of those steps
-MEANS; it is not a second list of commands to type by hand.
+`make ship` is the one command that says a film is done: author-check, render, audit, seams, in order.
+It DECLARES its own ladder before it runs, so what each step reads and whether it can stop you is
+printed by the thing that does it, not restated here. Start at `make preflight D=<file>`, though: the
+decisions that belong before the JSON are the ones this file kept mis-ordering.
 
 Single-shot forms, when you want one thing and not the ladder:
 
@@ -126,7 +128,7 @@ which is why a film can sit safely between them and still be shapeless.
 The `NOT` line is cheaper than it looks. Most generic output is not a wrong decision, it is an
 un-excluded default: nothing said "no gradient hero", so a gradient hero was free.
 
-**And DO NOT hand-author a film from a blank JSON.** That is the #1 failure named two sections below,
+**And DO NOT hand-author a film from a blank JSON.** That is the #1 failure, and `make arsenal` exists for it,
 and it has been committed here: a 28s film of 31 hand-written layers, 74% of them text, `anim:"fade"`
 on nearly every one, one backdrop window for the whole runtime, and one hand-keyed motion track. It was
 rejected twice by the person who asked for it, and it was not below the house standard, the library
@@ -137,11 +139,11 @@ either way:
 
 | | brew-launch-act1 | higgsfield-recreation | that film | library median |
 |---|---|---|---|---|
-| pictorial LAYERS (see the warning below) | 46% (16/35) | 38% (3/8) | 3% (unverified) | **8%** |
+| pictorial LAYERS (see the warning below) | 46% (16/35) | 38% (3/8) | 3% (unverified) | **6%** |
 | layers with a hand-keyed `motion` track | 11% (4/35) | **75%** (6/8) | 10% (unverified) | **0%** |
-| `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | 1 in 92% of films |
+| `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | 1 in 84% of films |
 
-**The population, named once so every figure here can be re-run.** "The library" means the **132
+**The population, named once so every figure here can be re-run.** "The library" means the **134
 gate-visible scenes** the gates themselves reason over: `formats/scene/*.json` with `module=="scene"`,
 minus derivatives and `schema.json`, `_`-prefixed scratch included. `node scripts/gates/waiver-drift.mjs`
 prints that count on its first line, so it is one command away and it is the number to quote. Three
@@ -149,9 +151,9 @@ other populations exist (98 without scratch, 154 raw files in the directory) and
 file once cited 93, 130 and 144 as the size of the same library in three sentences. **"that film" is not
 named anywhere and I could not identify it, so its two cells are unverified and marked so.**
 
-**A FRESH CLONE SEES 36, NOT 132, AND NOTHING IS BROKEN.** Films are gitignored on purpose
+**A FRESH CLONE SEES A THIRD OF 134, AND NOTHING IS BROKEN.** Films are gitignored on purpose
 (`.gitignore:61`: a video instance is not the framework), with an allowlist for the handful the site
-needs. So `waiver-drift.mjs` prints `WAIVER CENSUS · 132 scenes` on this machine and about a third of
+needs. So `waiver-drift.mjs` prints `WAIVER CENSUS · 134 scenes` on this machine and about a third of
 that on a clean checkout, and EVERY census in this file behaves the same way. If your count is smaller,
 the gates are fine and the number here is not stale: you are looking at a smaller library.
 
@@ -295,314 +297,176 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 **Never embed copyrighted material** into a published video: movie/TV posters, album covers, film
 stills, news photos, paid stock. They trigger Content ID claims. Capture the real product UI instead.
 
-## After writing a JSON
+## THE PROCESS HAS ONE OWNER, AND IT IS NOT THIS FILE
 
-1. **Images:** `make assets D=formats/scene/<topic>.json` fills any missing icons. Dry-run; add `WRITE=1`.
-2. **See it beat-by-beat:** `make beats D=<file> [VS=<brand>]` → `/tmp/beats/<name>.png` (first/mid/last of every
-   beat; `VS` stacks each beside its source section). Read it, catch murk/overlap/off beats before rendering.
-   **Iterate live, no render:** `make studio D=<file>` serves the scene with a frame scrubber (scrub/step ·
-   space plays): edit the JSON, reload, watch the motion, before you spend a 30-60s mp4 render. Under the
-   scrubber is a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, the
-   enter/exit ramps shaded off the settled middle, and every dead-air hole painted as a hazard band. Drag
-   it to seek. It is where you SEE the structure the contact sheets can only sample.
-2a0000. **SHOW, DO NOT ONLY TELL. A FILM OF PURE TYPE IS A FAILED FILM.** Every beat that makes a claim
-   must be asked what it could SHOW instead of set in type: a bar whose length IS the number, a ring whose
-   arc IS the share, a captured real product surface, a diagram of the flow, a map, a photo, an svg that
-   draws on or morphs. This is the same split CLAUDE.md already makes about backgrounds, applied to the
-   content: **DECORATION** dresses the frame and carries no information (a glow, a gradient, a hairline
-   rule, a corner tick, a scanline, a logo mark beside a wordmark); **EXPLANATION** does work the words
-   cannot. A film can be drowning in the first and have none of the second, and all three Ledgerline cuts
-   were. Size is the whole point: `preface-launch` carries **17 `image` layers of 103**,
-   and every one is a small agent logo, so a graphic is only the subject at roughly 8% of
-   the canvas or more. **That 8% is a deleted gate's constant and no derivation for it survives**, so use it
-   as a rule of thumb you argue with, never a threshold you satisfy. How to decide what to show and how:
-   **[`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md)**. The old claim here was "52 of the 93
-   scenes carried no large picture", and it is not checkable: 93 matches no population, and "large" needs an
-   area measurement no tool in this repo performs any more. What IS checkable, and says the same thing:
-   **50 of the 132 gate-visible scenes carry ZERO pictorial layers of any size**, and the median film gives
-   8% of its layers to picture. That was nobody's decision, and it is debt, not a pattern to copy.
+`make ship D=<file>` is the process. It **declares its own ladder before it runs**: every step, in
+order, what that step reads, and whether it can stop you. Twenty steps today, and the number moves
+without this paragraph having to be edited, which is the entire reason it is stated there and not here.
 
-   **NOTHING ENFORCES THIS. There is no show floor any more, and you should know why.** A gate called
-   `visual-vocabulary` used to fail `no-visual-vocabulary` here, and it was deleted in 2026-08. It measured
-   a layer's area, and its size helper squared any layer that declared one axis and had no readable
-   intrinsic aspect: a 590x18 decorative underline was scored as 590x590 and credited with a tenth of the
-   frame. So the one gate whose entire job was to tell a mark from a picture handed a pass to a hairline.
-   It was also waived by 30 of 130 films at the time of the cull, which is a rule that has already been
-   repealed with nobody writing it down. Fixing the arithmetic would have made it true and then failed
-   dozens of shipped films, so it went. **Both of those are historical figures and neither can be re-run**:
-   the gate is gone and the scenes were cleaned, so today `node scripts/gates/waiver-drift.mjs` finds one
-   `no-visual-vocabulary` waiver left, flagged DEAD. `docs/TASTE.md` records the cull and what would have
-   to be true to bring it back.
-   The reasoning above is unchanged and still worth following. What changed is who checks: **you do, with
-   `make judge` and your eyes.** No green tick will tell you a film is only type. That was always the case,
-   because even at its best the gate could prove a picture was on screen and large and could never prove it
-   explained anything, a big decorative photograph passed it and deserved to fail a human.
+```bash
+make preflight D=<file>   # BEFORE the JSON: the nine decisions, and the arsenal aimed at this film
+make dev  D=<file>        # the iteration loop: build, draft-render, open. No gates, no audit
+make check D=<file>       # every gate, every finding, ZERO consequence. Nothing blocks
+make ship D=<file>        # the ladder with its teeth in, then the seams
+make judge D=<file>       # MANDATORY, post-render, and the only step that SEES
+```
 
-2a0000a. **AUTHOR THE MOTION. DO NOT NAME IT. This is the difference between the two films this file
-   argues from and everything else in the library, and it is one measurement, not a matter of taste:**
+This file used to carry its own copy of that ladder: twenty-two numbered steps whose numbering did not
+sort, in which `0` and `0a` (compose from blueprints · see the whole arsenal) were printed **eleventh
+and twelfth**, inside a section titled "After writing a JSON", when both must happen before one exists.
+Three descriptions of one process, and the two that were prose went stale. The gates now say what they
+check, and a finding **names the doc that settles it**, so what is left here is the part no gate can
+hold: why, and what to do when the gate is quiet.
 
-   | | higgsfield | brew | the launch film this rule was written for |
-   |---|---|---|---|
-   | layers with a hand-keyed `motion` track | **6 of 8** | 4 of 30 | **0 of 16** |
-   | cuts between beats | **0** | 0 (camera fx instead) | 4 |
-   | text share of layers | 38% | 37% | **75%** |
+### Where to start, every time
 
-   higgsfield is five seconds, eight layers, **no transitions at all**, and its subject travels
-   `x: 30 → 0 → -155 → -288 → -447 → -542 → -600` across seven hand-placed keys whose interior is
-   `linear`. brew's punctuation is four keys, `scale 1.5 → 1 → 1.04 → 1.9`, arriving over-size and
-   leaving THROUGH the frame. Neither of those is reachable from a preset, because a preset animates
-   ONE layer over ONE span with ONE curve, and what makes both films read as directed is the opposite.
-   The launch film said `"preset": "up"` sixteen times, passed every gate, and was correctly called a
-   slideshow with sounds by the person who asked for it.
+**`make preflight D=<file>`.** It puts the nine-step decision chain from
+[`docs/CRAFT/README.md`](docs/CRAFT/README.md) in front of you for THIS film, ranks the arsenal against
+what the film says it is, and records a receipt that goes stale the moment the scene changes. The chain
+is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
+type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-   **Why this keeps happening, stated so it can be watched for: a preset is one word and a track is
-   seven lines.** Every time both are available the cheap one wins, and the ambition floor cannot tell
-   them apart because it COUNTS techniques and a preset is a technique. So the floor stays green while
-   the film stays undirected.
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 337 named things at once and
+prints the snippet with the key it goes in (`make effects` regenerates the full reference,
+`docs/EFFECTS.md`, 566 effects across 36 families). Reach for it before you invent anything. The measured cost
+of not doing so: the `{type:"beat"}` blueprint mechanism is used by **2 of the 134 gate-visible scenes**, and 12 of its
+19 beats have never been used once.
 
-   **The track is now the cheap one. `scripts/author/track.mjs` emits the exemplars' own numbers:**
+**`make track SHAPE=pan|blast|drift|enter|exit`** emits a hand-keyed `motion` track from a shape
+measured off the two reference films. Use it instead of naming a preset. See the next section for why.
 
-   ```bash
-   node scripts/author/track.mjs pan   --to -600 --dur 1.25   # higgsfield's scroll rhythm, irregular
-   node scripts/author/track.mjs blast --dur 1.5              # brew's four-key punctuation
-   node scripts/author/track.mjs drift --dur 3 --amp 12       # an ambient hold that still moves
-   node scripts/author/track.mjs enter --from 40 --dur 0.9    # a keyed entrance, not a preset name
-   … --offset 0.12                     # weld a rider to the subject's track (higgsfield shares one pan six ways)
-   … --scene <f.json> --layer <n>      # write it in, surgically, no reformat
-   ```
+## AUTHOR THE MOTION. DO NOT NAME IT.
 
-   It exists because `make studio`'s keyframe mode is **drag on a stage**, which is cheap for a person
-   and unreachable for the agent writing most of the scenes here. Deterministic, so the same command
-   twice is the same bytes. **`make blueprints` also carries four keyed BEATS harvested from higgsfield
-   itself** (`recordedPan` · `scrollStory` · `focusRack` · `echoRing`, `blueprints/beats-track.mjs`), so
-   the reference film's mechanics are reachable without having the reference film.
+The one measurement that separates the two films this file argues from and everything else:
 
-   **`no-authored-motion` now BLOCKS a new film** (step `motion` in `make author-check`): two or more
-   junctions, six or more content layers, and not one keyed track nor one layer carried across a
-   junction by `becomes` / `follow` / `acrossBeats`. One is enough to clear it. It is a RATCHET, adopted
-   2026-08-28 over 14 legacy scenes (mostly showcase reels, where a list is a fair answer and a `_why`
-   is the right cost), so it fires on what you write next and not on the library's debt. Measured before
-   it was written: it spares both exemplars and fires on 16 of 140. `docs/CRAFT/KEYED-MOTION.md`.
+| | higgsfield | brew | a launch film that passed every gate |
+|---|---|---|---|
+| layers with a hand-keyed `motion` track | **6 of 8** | 4 of 35 | **0 of 16** |
+| cuts between beats | **0** | 0 (camera fx instead) | 4 |
+| text share of layers | 38% | 37% | **75%** |
 
-2a000. **A SLIDESHOW IS STILL A FAILURE. A CONTINUOUS OBJECT IS ONE OF ABOUT EIGHTEEN WAYS OUT.**
-   The failure is real and it is easy to feel: every beat is born and dies inside its own window, so each
-   cut is a jump between unrelated shots and the film is a stack of cards read aloud. Do not ship that.
-   What was wrong in this section for a year was the prescription, not the diagnosis. It used to say that
-   a film under 15s with cuts MUST carry a CONTINUOUS OBJECT, one content layer that survives a cut and
-   CHANGES across it, and it called that the floor. That is one device, and it is the cheapest one.
-   **Murch ranks it last.** A cut serves, in order, emotion 51% · story 23% · rhythm 10% · eye-trace 7% ·
-   the screen plane 5% · three-dimensional space 4%, and the instruction is to sacrifice your way up from
-   the bottom. `no-continuous-object` measures spatial persistence plus a state change. It is the 4% item,
-   and it was the only structural rule in this engine that blocked.
-   **The registers it cannot see.** Spatial: a match cut, a oner, camera travel, masking and reveal,
-   cloning, a dolly-zoom. Verbal and aural: an unfinished sentence, a sound bridge, a bookend, an open
-   question. Temporal: metric cutting, rhythmic cutting, a track that IS the structure. Conceptual: a
-   motif, intellectual montage, escalation, a through-line. A film held by a motif and an escalation is
-   properly structured and fails `no-continuous-object` every time. The catalogue, its sources, and a
-   six-question decision aid: **[`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md)**.
-   Count your threads before you author, and carry two. One thread has to be literal and obvious to work,
-   which is exactly how a film ends up as a resizing box.
-   **The gate now RUNS on every scene and REPORTS**: it is step 6 of `make author-check`, and
-   `make direction-floor D=<file>` runs it alone. Inside the gate `no-continuous-object` is a FAIL, so
-   `TASTE=1` turns it into a wall; if the film declares no cuts, boundaries are INFERRED from where the
-   visible content set turns over wholesale, and that half warns (`no-continuous-object-inferred`,
-   promoted under `STRICT=1`), because a build should not fail over a cut the author never wrote.
-   **Believe it when the CONTENT is continuous**: a single-subject product film, a process shown end to
-   end, a demo where the UI is the subject. There the rule is right, and it is right because of the
-   content, not because films must be that shape. Read past it on a manifesto, a vignette anthology, a
-   comparison built on the junction, or a metric-cut list film. It will be wrong about all four, and it
-   reports rather than blocks precisely so being wrong about four film shapes costs you a paragraph of
-   reading instead of a waiver.
-   **Know the limit.** The gate can see that a prop survives a junction and moves. It cannot see whether
-   that prop BECOMES the next thing, which is the difference between a travelling card and a subject.
-   **Read the waivers as evidence about the rule, not about the films.** **14 films, 11% of the 132
-   gate-visible scenes**, carry a `no-continuous-object` waiver (`node scripts/gates/waiver-drift.mjs`;
-   this line said "eighteen" and that was the raw file count, derivatives included). It is the
-   most-waived rule in the library by a distance, and the only one within sight of the 15% threshold
-   `waiver-drift.mjs:58` calls habitual. A rule waived by reflex has already been repealed and nobody
-   wrote it down. It did not merely fail to see the alternatives: it made one alternative free and the
-   other seventeen expensive, because a keyed `w`/`h` on a rectangle passes and a motif does not.
-   Planning follows the same shape. `storyboard-check` asks a short film to NAME what holds it, in
-   frontmatter: `object:` if it is a continuous object, `threads:` for anything else in the catalogue. It
-   no longer demands an object. If you do declare one, every beat must still say where it is.
-   For the object device itself: **[`vawe-continuous-action`](.claude/skills/vawe-continuous-action/SKILL.md)**.
+higgsfield is five seconds, eight layers, **no transitions at all**, and its subject travels
+`x: 30 → 0 → -155 → -288 → -447 → -542 → -600` across seven hand-placed keys whose interior is
+`linear`. brew's punctuation is four keys, `scale 1.5 → 1 → 1.04 → 1.9`, arriving over-size and leaving
+THROUGH the frame. Neither is reachable from a preset, because a preset animates ONE layer over ONE
+span with ONE curve, and what makes both films read as directed is the opposite of that.
 
-2a001. **NAME THE THREAD, AND REJECT THE FIRST ANSWER YOU THOUGHT OF.** The rule above rejects the
-   slideshow; it does not prescribe "one card that resizes four times". What it asks for is a subject the
-   film STAYS WITH, and a subject can be stayed with while the film does almost anything. A shared world,
-   a match cut on shape or motion, a camera that travels between two places, a colour or a rhythm that
-   survives the junction, a thing that turns into a different thing: all of these hold a film, and a box
-   whose `w` and `h` are keyed is the cheapest of them and usually the least interesting. Three consecutive
-   films in this library were one rectangle changing size, and each passed every gate.
-   The test, before you author: **name three ways this film could hold its subject, and reject the first
-   one.** If the answer to "what carries this" is always "the layer resizes", you are writing a gate's
-   minimum rather than a film. `make blueprints` and `docs/EFFECTS.md` put the other answers one command
-   away; `docs/CRAFT/FILM-STRUCTURE.md` names the ones no command can reach.
-   Where this meets the section above: holding the subject is necessary and proves nothing about whether
-   the film is worth watching. Ambition is graded separately, by `direction-floor` and by your eyes.
+**Why this keeps happening, so it can be watched for: a preset is one word and a track is seven lines.**
+Every time both are available the cheap one wins. The ambition floor cannot tell them apart because it
+COUNTS techniques, and a preset is a technique, so the floor stays green while the film stays
+undirected. `no-authored-motion` closes that hole and BLOCKS new work.
 
-2a00. **CHECK THE BEATS, AND FIX WHAT YOU SEE.** `make beats D=<file>` → `/tmp/beats/<name>.png`, then READ it and
-   fix every beat that does not carry its frame. This is a rule, not a suggestion, and it is now enforced two
-   ways. The mechanical half is a blocking gate (`make beat-check`, also step `beats` inside `author-check`):
-   it fails `dead-air` (a hole where the frame holds only the backdrop), `ends-on-nothing`, `empty-beat` and
-   a hand-authored `html` bg that cannot animate. The half only eyes can do is enforced by a RECEIPT:
-   `make beats`/`make reveal` record the scene's content hash, and the gate warns (fails under `STRICT=1`)
-   when the scene has changed since you last looked. Editing a scene and skipping the sheet is therefore
-   visible. A `dead-air` waiver is for a deliberate held frame, never for "I did not look".
+## SHOW, DO NOT ONLY TELL. NOTHING ENFORCES THIS.
 
-2a2. **SILENCE IS A DEVICE, NOT A DEFAULT.** **114 of the 132 gate-visible scenes ship mute, 86%**: 17
-   carry no `audio` key at all and 97 declare `silent: true`. Of those 97, **only 9 say why**. So the
-   sentence to remember is not "nobody declares the silence", it is **"nearly everybody declares it and
-   almost nobody justifies it"**. `audio-check` accepts a bare `silent: true`, and 88 films took the
-   offer. That closes the whole aural family of structural device (`docs/CRAFT/FILM-STRUCTURE.md`): the sound
-   bridge, music-led structure, the unfinished sentence. A sound bridge is also a continuous object the
-   picture never has to carry. Give every film sound, or state the silence:
-   `"audio": {"silent": true, "_why": "…"}`. `make audio-check D=<file>` grades it; `make audio-check`
-   alone prints the census. Know the limit: the gate proves a decision was made, never that the sound is
-   good. How: **[`docs/CRAFT/SOUND.md`](docs/CRAFT/SOUND.md)**.
-2a0. **THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE.** `bg` is a required field, so the backdrop
-   is always your decision. Make it a living one, a preset or hand-authored (`{"html":…}` driven by
-   `var(--t)`); a static field is not a default, it is a choice you have to justify.
-   **A backdrop that changes PER BEAT is now the cheap thing to write.** List the windows in the order
-   the film turns and give none of them a `from`/`to`, and the engine binds window i to the joint after
-   it, so the cuts you already wrote own the numbers (`core/junctions.js`, `docs/MISTAKES.md` #371).
-   This is the single strongest lever in the file: brew inverts the tone of the world on four of its
-   five cuts, and **122 of the 132 gate-visible scenes, 92%**, paint ONE window for the whole runtime. A pictorial beat on a
-   dead backdrop is still a slide. Then **judge it across
-   frames, never on one still**: pull the same 4+ timestamps and compare them as a strip. A still hides
-   speed, scale and direction of the motion. Recreating a reference? Strip the reference and your render
-   side by side and match the pace and the size of the shapes before touching colour. This is written down
-   because a background was "matched" on one frame and was, in motion, twice too fast with folds half the
-   size (docs/MISTAKES.md #155).
-2a. **See the REVEAL, not just the hold:** `make reveal D=<file>` → `/tmp/reveal/<name>.png` (per beat: the ENTER
-   arc + settled + EXIT arc, from exact layer starts). `make beats` samples the middle and hides the
-   entrance motion; this shows HOW each beat animates in (dolly direction, typing, a colour-wave). Mandatory
-   when recreating a reference: judging the settled frame is how the dolly/gradient/colour-wave got missed.
-0. **Compose from blueprints (don't re-derive motion):** `make blueprints` lists directed-motion beats
-   (`{type:"beat","beat":"kineticHook",…}`, `docs/CRAFT/BLUEPRINTS.md`). Drop one per beat + fill brand
-   content so kinetic reveals / count-ups / cascades / dashboard dives are the DEFAULT, then `make expand`.
-   Authoring plain `rise`+`fade` from a blank JSON is the #1 failure, blueprints + the floor prevent it.
-0a. **See the whole arsenal, then choose:** `make effects` → `docs/EFFECTS.md` (518 effects, 35 families,
-   generated from the registries). The killer per-frame effects: border-beam / shine (`{type:"beam"}`),
-   aurora / meteor paint fields (`{type:"paint"}`), a one-shot glow `flash`, an svg logo that draws-on or
-   shape-morphs (`{type:"svg","morph":{"to":…}}` / the `logoReveal` beat), and calculated camera moves
-   (`"cameraMove":{"move":"diveIn",…}`, `core/camera-moves.js`). For a HERO beat whose choreography
-   `parts`/blueprints can't express (overlapping tweens, a token travelling a path while a counter ticks
-   and a check draws), author a bespoke **`composition`**: a first-party hand-authored per-beat GSAP
-   timeline in `core/compositions/index.js`, named from the JSON (`{type:"composition","comp":…,"props":…}`)
-   so untrusted input can't inject (`docs/CRAFT/AUTHOR-THE-FRAME.md`). Skills: **`vawe-effects`** (pick from
-   the arsenal), **`vawe-animation`** (how motion should feel + `springEase`), **`vawe-camera`** (camera work).
-2b. **MANDATORY authoring ladder:** `make author-check D=<file> [VS=<brand>]`, one command, one process,
-   **every step, every time** (15, or 16 when an intent sidecar or a landscape canvas adds one). There is no opt-in half. The run lists every step before it
-   starts, numbers each one as it goes, says what that step reads, warns before the one slow step, and
-   prints "nothing found" when a step is clean. Measured end to end on a 19.6s film: **1.4s**, browser
-   launch included.
-   What is not uniform is what a finding COSTS, and that separation is the design:
-   **BLOCKS**: **validate · beats · inspect · plan-vs-render** (plus **assets** under `STRICT=1`). These
-   say the film is broken. Two more things block that this list used to hide: **a waiver with no `_why`
-   blocks** (see the shape below), and under `STRICT=1` a **missing `.intent.json` blocks** as
-   `no-intent-sidecar`.
-   **REPORTS**: **storyboard · critique · direct · direction-floor · dissolve · designspec · copy · pace ·
-   hero · treatment · waiver-drift**. They run on every scene and print in full; they do not stop you.
-   `TASTE=1 make author-check D=<file>` gives them teeth. (`slop` is NOT among them. It was retired in
-   2026-08, its script is deleted, and this line listed it as live for months.) `pace`
-   (`scripts/gates/pace-check.mjs`) measures events per second: it catches a film that is asleep.
-   **Why they report rather than block, measured rather than argued:** give the REPORTS tier teeth and
-   **116 of the 141 scenes in this library fail**, four films in five, which is the reflex-waiver trap this
-   file already names two sections up. These gates were opt-in until 2026-08-21, and that was the same
-   reasoning applied to the wrong thing: skipping a step never protected an author from a rule fitted to a
-   debt-ridden library, it only protected the rule from being read. Full record: **`docs/TASTE.md` · "One
-   process, two severities"**.
-   **The storyboard is part of the process now, not a printed suggestion.** Step 2 always looks for the
-   plan this film came from and always says what it found. A scene declares it explicitly with a
-   top-level `"storyboard": "formats/scene/<topic>.storyboard.md"`; without that field the step falls back
-   to `<base>.storyboard.md` beside the scene, then `_concepts/<base>.storyboard.md`. Found, it runs
-   `storyboard-check` over the plan and hands the path to plan-vs-render so `spectacle:` and `pace:` are
-   joined to the film. Not found, it reports `no-storyboard`, never silence. It REPORTS rather than blocks
-   because **130 of 141 scenes have no plan**, and it is promoted to BLOCKS on a written condition, not a
-   wish: when fewer than a quarter of `formats/scene/` is missing a storyboard (`docs/TASTE.md`).
-   The **designspec lock** flags off-palette colours / non-role fonts (the
-   theme is the locked look). The **copy** gate flags on-screen writing tells (weak hook, marketing jargon,
-   restated headline, a big number as flat text). The **assets** preflight confirms every referenced image /
-   icon / capture / VO exists before you render. The **inspect** step verifies a `.intent.json` value
-   contract: generate one from the storyboard with `make intent SB=<storyboard.md> D=<file>` so "every beat
-   earns its frame" is checked. **plan-vs-render** runs next, off the same sidecar (skip the sidecar and you
-   skip both): it lays the plan's beat spans over the film's clock and asks whether anything happens where the
-   plan said something turns. It FAILS `junction-is-static` (a beat opens on a promised change and the render
-   puts no event there) and `plan-overruns-render`; it WARNS `held-through-the-change` (two consecutive motion
-   keys carry the same values across seconds the plan says something turns, with nothing else arriving or
-   leaving), plus `beat-holds-still`, `unplanned-junction` and `plan-has-no-spans`. Every warning blocks
-   under `STRICT=1`. On its own:
-   `make plan-check D=<file>`. **A green `storyboard-check` proves nothing about the film.** It grades the plan
-   against itself, and in the A/B test the losing film named the change correctly on the very beat whose frame
-   never moves. Every gate stayed green until this one existed. Even plan-vs-render only proves the film is not
-   empty where it promised to be full, never that it kept the promise: that is `make judge` and your eyes.
-   Narrated video? Pace it to the voice: `make pace-from-vo VO=<file>.words.json`.
-   It **blocks** on schema/em-dash and on timeline holes.
-   **THE DIRECTION TELLS DO NOT BLOCK, AND THIS FILE SAID THEY DID.** `linear-motion`,
-   `monotone-timing`, `enter-and-retreat` and `effect-soup` are every one of them `warn()` in
-   `scripts/author/motion-director.mjs`; that gate exits only on `fails`, and the string `strict` does
-   not appear in it. Its only two FAIL-tier codes are `cut-families` (at ≥3) and `profile`. So the backstop
-   this paragraph promised for months does not exist, and a film can carry all four tells and pass
-   `TASTE=1` clean. Treat them as what they are: a report you have to read, not a wall that stops you.
-   **The ambition floor is sharper inside its own gate: `plain-slideshow` really does fail**, in
-   `direction-floor.mjs:118-120,349-359`, alongside `no-continuous-object`. So does `crossfade-mud`
-   (dissolve), and so do the designspec codes, which author-check hardcodes to `--strict`. All three sit
-   in the REPORTS tier of the ladder, so they name the defect on every run and stop you only under
-   `TASTE=1`. Two-sided: `effect-soup` is the ceiling, `plain-slideshow` the floor; directed lives between.
-   There is **no show floor**: `visual-vocabulary` was deleted for measuring size wrongly (see 2a0000).
-   Reach past every WARN. **A waiver must state its reason or the always-on half stops the render**
-   (`author-check.mjs:74-83`, blocking, ≥12 characters per waived code). The bare `allow` array this line
-   used to show is not a working incantation. The shape is:
+Every beat that makes a claim must be asked what it could SHOW instead of set in type: a bar whose
+length IS the number, a ring whose arc IS the share, a captured product surface, a diagram, a map, an
+svg that draws on. **DECORATION** dresses the frame and carries no information (a glow, a hairline, a
+scanline). **EXPLANATION** does work the words cannot. A film can drown in the first and have none of
+the second.
 
-   ```json
-   "authoring": {
-     "allow": ["dead-air"],
-     "_why": { "dead-air": "the held frame IS the beat: the room empties and nothing replaces it" }
-   }
-   ```
+**There is no show floor, and you should know why.** `visual-vocabulary` measured a layer's area and
+its size helper squared any layer that declared one axis: a 590x18 underline scored as 590x590 and was
+credited with a tenth of the frame. So the one gate whose job was to tell a mark from a picture handed
+a pass to a hairline. Fixing the arithmetic would have failed dozens of shipped films, so it was
+deleted. **You are the check now**, with `make judge` and your eyes. No green tick will tell you a film
+is only type. That was always true: even at its best the gate could prove a picture was large and never
+that it explained anything.
 
-   One `_why` key per code in `allow`; a missing or too-short one names itself and exits non-zero.
-   Measured today: **33 of the 44 scenes carrying waivers have at least one bare code** and therefore fail
-   author-check as they stand, which is what a documented incantation that skips half the contract buys
-   you. Nothing judges whether the reason is GOOD; the cost of one sentence is the whole mechanism, because
-   that cost is what turns a reflex back into a decision.
-   Principles: `docs/CRAFT/DIRECTION.md`. From scratch? `docs/CRAFT/AUTHORING-WALKTHROUGH.md`.
-3. **Render:** `make video D=formats/scene/<topic>.json` (runs author-check first unless `NOCHECK=1`).
-3a. **IS THE EMPTY PART OF THE FRAME DOING A JOB?** Whitespace is ACTIVE (isolating the subject,
-   directing the eye) or PASSIVE (what merely happened between two things placed independently). Passive
-   space does not read as minimal, it reads as unfinished. Two tests, and the second decides: name what
-   the emptiness is doing in one clause, then ask whether enlarging the subject removes it and improves
-   the frame. If it does, that space was never working. NO GATE SEES THIS: `make audit` fires on things
-   COLLIDING, never on a frame that is half empty because nobody decided anything. It is `make judge`
-   and your eyes. Same doc carries the rest of the composition vocabulary for a MOVING frame: lead room
-   (a subject needs space in the direction it travels, and that is fixed at the START of the shot), visual
-   weight, leading lines, and three-plane depth. **[`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md)**.
-4. **Layout audit:** `make audit`, overlap / clipped text / safe-zone / WCAG contrast (overlay → `/tmp/audit/scene.png`).
-   **Shipping more than one ratio? `make audit M=<file> ASPECT=16:9,9:16,1:1,4:5` (or `ASPECT=all`).**
-   A scene passes at its own aspect and is wrong at every other one: `pin` centres a *box*, so a text
-   layer needs `w` (+ `align`) or it lands left-edge-on-centre; and `dx`/`dy` only apply with `anchor`.
-   Both render silently. Audit every canvas you intend to ship.
-   **Going to a phone feed? Set `"destination": "tiktok" | "reels" | "shorts"`** (default `web`).
-   It decides the safe area, and the safe area is not a property of the shape: 9:16 for a website hero
-   and 9:16 for TikTok are the same canvas, but TikTok paints a rail down the right and captions across
-   the bottom. Edge keywords (`pin:"bottom"` etc.) and `col` resolve against that box, so declaring the
-   destination is what keeps content out from under the chrome. One definition: `core/safe.js`.
-5. **Check frames** before declaring done: `make look M=scene` / `make frame M=scene N=<n>`.
-   Eyeball the hook, a reveal, and the end screen. Never silently ship an unverified video.
-5a. **QA THE SEAMS, not the centers:** `make seam-check D=<file>`, pulls the frames straddling every
-   transition (cut/seam/sting/beat boundary) out of the rendered mp4 and flags a luminance FLASH in the
-   overlap (the black-flash / collision class every center-sampling gate misses, `docs/MISTAKES.md` #138).
-   Read `/tmp/seams/<name>.png`. This is the cheapest catch for the worst bugs (another engine' hardest-won lesson).
-6. **THE GATE THAT SEES: mandatory post-render:** `make judge D=<file> [VS=<brand>]` preps
-   `/tmp/judge/sheet.png` + a rubric. READ the sheet and score every frame (readability · hierarchy ·
-   composition · brand + asset fidelity · produced · value). `make author-check` is necessary but NOT
-   sufficient: the static gates can't see composition or fidelity; this is the backstop. If your eye
-   catches a flaw, it's a FIX, never a rationalization (`docs/JUDGE.md`, `docs/MISTAKES.md` #15).
-7. **Motion craft:** consult `docs/MOTION-CRAFT.md` when picking presets/cuts/stings.
-8. **Anti-sameness:** `make ledger D=<file>` before shipping (fails if the design repeats a shipped one);
-   `make ledger-add D=<file>` after the user approves it.
-9. **FRAMEWORK HARVEST: mandatory, every render, without being asked.** See below.
+Measured over the 134 gate-visible scenes: **56 carry zero pictorial layers of any size**, and the
+median film gives **6% of its layers to picture**. That was nobody's decision. It is debt, not a
+pattern to copy. How to decide what to show: [`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
+
+## A SLIDESHOW IS A FAILURE, AND A RESIZING BOX IS NOT THE ONLY WAY OUT
+
+The failure is easy to feel: every beat is born and dies inside its own window, so each cut is a jump
+between unrelated shots and the film is a stack of cards read aloud.
+
+The prescription used to be a CONTINUOUS OBJECT: one layer that survives a cut and changes across it.
+That is one device and it is the cheapest one. **Murch ranks it last**: a cut serves emotion 51% ·
+story 23% · rhythm 10% · eye-trace 7% · the screen plane 5% · three-dimensional space 4%, and you
+sacrifice up from the bottom. `no-continuous-object` measures spatial persistence plus a state change.
+It is the 4% item.
+
+The registers it cannot see: a match cut, a oner, camera travel, masking, cloning · an unfinished
+sentence, a sound bridge, a bookend · metric cutting, a track that IS the structure · a motif,
+escalation, a through-line. A film held by a motif and an escalation is properly structured and fails
+that rule every time. The catalogue: [`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md).
+
+**Name three ways this film could hold its subject, and reject the first one.** If the answer is always
+"the layer resizes", you are writing a gate's minimum rather than a film. Three consecutive films here
+were one rectangle changing size, and each passed everything.
+
+## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE
+
+`bg` is required, so the backdrop is always your decision. A static field is a choice you have to
+justify, never a default. **A backdrop that changes PER BEAT is the cheap thing to write**: list the
+windows in the order the film turns, give none of them a `from`/`to`, and the engine binds window i to
+the joint after it (`core/junctions.js`), so the cuts you already wrote own the numbers.
+
+This is the strongest single lever in the file. brew inverts the tone of the world on four of its five
+cuts and spends its one accent window on the logo reveal, while **112 of the 134 gate-visible scenes,
+84%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
+
+Then **judge it across frames, never on one still**: pull 4+ timestamps and compare them as a strip. A
+still hides speed, scale and direction. A background was once "matched" on one frame and was, in
+motion, twice too fast with folds half the size (`docs/MISTAKES.md` #155).
+
+## SILENCE IS A DEVICE, NOT A DEFAULT
+
+**110 of the 134 gate-visible scenes ship mute, 82%**: 17 carry no `audio` key at all and 93 declare
+`silent: true`. Of those 93, **only 13 say why**. So the sentence to remember is not "nobody declares
+the silence", it is "nearly everybody declares it and almost nobody justifies it". That closes the
+whole aural family of structural device: the sound bridge, music-led structure, the unfinished
+sentence. A sound bridge is also a continuous object the picture never has to carry.
+
+Give every film sound, or state the silence: `"audio": {"silent": true, "_why": "…"}`.
+[`docs/CRAFT/SOUND.md`](docs/CRAFT/SOUND.md).
+
+## IS THE EMPTY PART OF THE FRAME DOING A JOB?
+
+Whitespace is ACTIVE (isolating the subject, directing the eye) or PASSIVE (what merely happened
+between two things placed independently). Passive space does not read as minimal, it reads as
+unfinished. Two tests, and the second decides: name what the emptiness is doing in one clause, then ask
+whether enlarging the subject removes it and improves the frame. If it does, that space was never
+working.
+
+**NO GATE SEES THIS.** `make audit` fires on things COLLIDING, never on a frame that is half empty
+because nobody decided anything. Same doc carries lead room, visual weight and three-plane depth:
+[`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md).
+
+## What the gates cannot do, so you must
+
+- **Read the sheets.** `make beats` (where each beat lands) and `make reveal` (how it arrives) are
+  scored by nothing. `make beats` signs the look off with a receipt; skipping it is visible.
+- **QA the seams, not the centres.** `make seam-check` pulls the frames straddling every transition out
+  of the rendered mp4. Cheapest catch for the worst class of bug.
+- **Audit every canvas you ship.** `make audit M=<file> ASPECT=all`. A scene passes at its own aspect
+  and is wrong at every other: `pin` centres a *box*, so a text layer needs `w` (+ `align`). Going to a
+  phone feed? Set `"destination": "tiktok"|"reels"|"shorts"`: the safe area is not a property of the
+  shape (`core/safe.js`).
+- **`make judge`, and read the sheet.** The static gates cannot see composition or fidelity. If your
+  eye catches a flaw, it is a FIX, never a rationalisation (`docs/JUDGE.md`).
+- **Eyeball real frames**: `make look M=scene` / `make frame M=scene N=<n>`. Never ship a film whose
+  hook, reveal and end card you have not actually looked at.
+- **Narrated?** Pace the picture to the voice: `make pace-from-vo VO=<file>.words.json`.
+- **`make ledger`** before shipping, `make ledger-add` after the user approves.
+
+## Waivers, legacy, and the difference
+
+A rule you deliberately break is waived IN THE SCENE, with a reason, and **a waiver with no `_why`
+blocks**:
+
+```json
+"authoring": {
+  "allow": ["dead-air"],
+  "_why": { "dead-air": "the held frame IS the beat: the room empties and nothing replaces it" }
+}
+```
+
+**LEGACY IS NOT A WAIVER.** A waiver says somebody looked and decided. Legacy says nobody has looked
+yet: it is a debt, it warns on every run, and it disappears the moment the film complies
+(`make legacy` for the board, `make legacy STAMP=1` to pay one off). Edit a legacy film without fixing
+it and it BLOCKS. Nothing is excused for life.
 
 ## ARCHITECTURE: fix it at the root, or fail there. A gate is the last resort.
 
@@ -646,7 +510,7 @@ skips a step they did not know about, and watches a still frame with nothing to 
 
 `make expand` resolves four sugars. Three of them (`block`, `beat`, `comp`) become layer TYPES, so a
 scene rendered without expanding is refused by name at boot. That is a build step failing LOUDLY, and it
-is acceptable: expansion imports all 156 block factories, which has no business in every render.
+is acceptable: expansion imports all 217 block factories, which has no business in every render.
 
 The fourth, `cameraMove`, was written into `data.cameraMove` and read by nobody: `formats/scene/scene.js`
 reads `data.camera`. So an author who wrote a camera move and rendered without expanding got no camera

@@ -797,6 +797,9 @@ if (hasSidecar) {
   process.stdout.write(`  ⚠ no .intent.json sidecar: this scene declares no per-beat value contract.\n` +
     `      A sidecar states, per beat, the artifact that earns the frame + what must show/animate;\n` +
     `      inspect then verifies the render delivers it. Add ${path.basename(sidecar)} to make value checkable.\n` +
+    // NAME THE COMMAND. A gate that says what is missing and not how to produce it sends the reader
+    // back to a prose file to look it up, which is the round trip this ladder exists to remove.
+    `      Generate one from the plan: make intent SB=<storyboard.md> D=${target}\n` +
     `  → 1 finding: no value contract to verify.\n`);
   if (strict) results.push({ name: 'inspect', tier: 'blocks', failed: true, waived: false, reported: false, unwaived: ['no-intent-sidecar'], blockCodes: [] });
   // AND RUN plan vs render ANYWAY. Skipping it here meant the film with no plan was the one film never
