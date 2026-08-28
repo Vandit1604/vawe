@@ -15973,3 +15973,43 @@ server. Worth remembering wherever that hook is used again.
 **The shape.** An engine that refuses something at boot should refuse it in the validator too, or the
 refusal arrives with no file name attached. And an error a human cannot copy is an error a human
 retypes by hand, badly.
+
+## #492: a commercial product's sound design was 19 unlicensed recordings a fresh clone never had
+
+Every cue this engine could place resolved to a WAV in `assets/sfx/`, fetched from Mixkit and recorded
+in the asset ledger as `licenceVerified:false`. Three failures sat on top of each other and each one
+hid the next.
+
+The licence is the first. A file whose terms nobody checked is not an asset, it is a liability, and it
+was wired into a product that renders films for other people.
+
+The distribution is the second. `assets/sfx/` is gitignored, so a fresh clone had none of the 19 files.
+`loadSfx` returns nil for a missing file and the mix loop skips a nil clip, so every cue in the film
+disappeared with no message at all. The scene still declared its sound design, the render still said
+done, and the mp4 measured -91 dB. That is the silent substitution this file already names twice, in
+the same package: the music bed at #132 and the missing bridge source that now fails the render.
+
+The control is the third, and it is the one nobody would have filed a bug about. A recording cannot be
+tuned. An author who wants the same landing sound a semitone lower, or half as long, or brighter under
+a bed, has no move except finding a different recording. So the sound design of every film in the
+library was 19 fixed points, and the cue table's per-name gain was the only dial in the whole system.
+
+**The fix is synthesis, and it is the same answer the picture side already gave.** `renderFrame(n)` is
+a pure function of `n`; the audio had no reason to be different. `internal/audio/synth.go` builds each
+cue from parameters with an sfxr-shaped generator: one oscillator blending tone with seeded noise, one
+frequency sweep that drives the lowpass as well as the pitch, an attack/decay envelope and a punch
+spike. Six voices (`tick`, `thud`, `whoosh`, `riser`, `pluck`, `sweep`) are presets over that one
+generator, and a cue may override any parameter. Noise comes from a seeded xorshift the package owns,
+never `math/rand`'s global source, so two renders of one scene are byte-identical on any machine.
+
+Three properties are enforced rather than hoped for. Every voice starts on a ramp from zero and ends on
+a forced ramp to zero, because a waveform that stops on a non-zero sample pops, and that is the most
+common defect in synthesized UI sound. Every voice is peak-normalised to its `gain`, so a parameter set
+cannot clip and a voice's level is a number an author chose. An unknown voice FAILS the render, naming
+the six it knows, because a cue is causal and a dropped one ships a film missing an event.
+
+`Cue` was extended, not replaced: `Name` still loads `assets/sfx/<name>.wav` exactly as before, and
+`Voice` synthesizes instead. Nothing that renders today changes.
+
+**The shape.** A recording is data you cannot check, cannot ship and cannot tune. Where a deterministic
+engine can generate the thing instead, the file was never the asset, it was the dependency.

@@ -33,11 +33,15 @@ const (
 // entries for cues that cannot be emitted are dead config, so they are gone too.
 var sfxGain = map[string]float64{"tick": 0.45, "whoosh": 0.45, "reveal": 0.82}
 
-// Cue is one placed sound effect.
+// Cue is one placed sound effect. It is a file OR a synthesized voice: `Name` loads
+// assets/sfx/<name>.wav exactly as it always has, `Voice` builds the sound from parameters instead
+// (see synth.go) so nothing has to be on disk. Voice wins when both are set.
 type Cue struct {
-	T    float64  `json:"t"`
-	Name string   `json:"name"`
-	Gain *float64 `json:"gain,omitempty"`
+	T      float64            `json:"t"`
+	Name   string             `json:"name"`
+	Gain   *float64           `json:"gain,omitempty"`
+	Voice  string             `json:"voice,omitempty"`
+	Params map[string]float64 `json:"params,omitempty"`
 }
 
 // Bridge is one sound bridge, already resolved to a span of seconds by core/audio-bridges.js. A
@@ -290,12 +294,24 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 		return clip
 	}
 	for _, cue := range sfx {
-		clip := loadSfx(cue.Name)
+		var clip []float64
+		label := cue.Name
+		if cue.Voice != "" {
+			// An unknown voice FAILS the render. A cue is causal: it says the thing arrived, so
+			// dropping one silently would ship a film missing an event nobody could hear was gone.
+			c, err := Synth(cue.Voice, cue.Params)
+			if err != nil {
+				return false, fmt.Errorf("audio cue at t=%.2f: %w", cue.T, err)
+			}
+			clip, label = c, cue.Voice
+		} else {
+			clip = loadSfx(cue.Name)
+		}
 		if clip == nil {
 			continue
 		}
 		start := int(math.Round(cue.T * sr))
-		g := sfxGain[cue.Name]
+		g := sfxGain[label]
 		if g == 0 {
 			g = 0.6
 		}
@@ -306,7 +322,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 			// explicit `keyGain`, and a typed line lifted to clear the bed would machine-gun.
 			g = *cue.Gain
 		} else {
-			g = overTheBed(clip, bed, start, g, cue.Name, cue.T)
+			g = overTheBed(clip, bed, start, g, label, cue.T)
 		}
 		if cfg.SfxGain != nil {
 			g *= *cfg.SfxGain
