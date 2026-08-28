@@ -106,6 +106,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/DENSITY.md](CRAFT/DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
 | [docs/CRAFT/READING.md](CRAFT/READING.md) | a line is on screen and you do not know if anyone can read it | hold by word count · the flicker gap · what counts as prose · why the library reads once, not twice |
 | [docs/CRAFT/SHOW-DONT-TELL.md](CRAFT/SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes |
+| [docs/CRAFT/STUDIO-DESIGN.md](CRAFT/STUDIO-DESIGN.md) | you are about to add a feature to `make studio`, or you want to know why a feature the other video editors have is deliberately absent here | what another engine Studio and another engine Studio really do (interaction model, timeline, refresh loop, assets) · a COPY / REJECT table with a reason per row · a ranked build list for `scripts/dev/studio.mjs` with costs · the three to build first |
 
 ## Process & QA
 

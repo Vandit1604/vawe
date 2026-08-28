@@ -34,6 +34,7 @@ the downstream choices for you.
 | 4 | **How each frame looks**: type · colour · layout · imagery | [TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) · [LAYOUT](LAYOUT.md) · [IMAGERY](IMAGERY.md) | the composed frame, on the brand's palette + face |
 | 5 | **How full each frame is**: produced, not a slide | [DENSITY.md](DENSITY.md) | hero + support + metadata on the content beats |
 | 5b | **Whether the frame SHOWS or only tells** | [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | a quantity, proportion or real surface drawn as a graphic, not set in type |
+| [STUDIO-DESIGN.md](STUDIO-DESIGN.md) | you are about to add a feature to `make studio`, or you want to know why a feature the other video editors have is deliberately absent here | what another engine Studio and another engine Studio really do (interaction model, timeline, refresh loop, assets) · a COPY / REJECT table with a reason per row · a ranked build list for `scripts/dev/studio.mjs` with costs · the three to build first |
 | 5c | **What holds the film together across its cuts** | [CONTINUITY-WITHOUT-AN-OBJECT.md](CONTINUITY-WITHOUT-AN-OBJECT.md) | a thread that is a sentence, a match cut or a rhythm, not only a resizing prop |
 | 6 | **The restraint pass**: cut what doesn't earn its place | [TASTE-RULES.md](TASTE-RULES.md) | a film with 2–3 earned effects, not fifteen |
 | 7 | **The sound**: sound by default, silence only with a stated reason | [SOUND.md](SOUND.md) | a film held together aurally, and a licence we can produce |
