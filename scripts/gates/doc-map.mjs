@@ -109,12 +109,13 @@ const GROUPS = [
   ['engine', 'The engine & its history', 'for changing the engine, not a video'],
   ['skill', 'Skills', 'loaded on demand by name; each carries its own trigger description'],
 ];
-const CRAFT_GROUPS = ['crosscutting', 'story', 'look', 'density'];
+const CRAFT_GROUPS = ['crosscutting', 'story', 'look', 'density', 'reference'];
 const CRAFT_HEADINGS = {
   crosscutting: 'Front-to-back & cross-cutting:',
   story: 'What & why (the story layer):',
   look: 'How it looks (the house-style layer):',
   density: 'How full · how it sounds:',
+  reference: 'Reference (look it up):',
 };
 
 // ── reading ──────────────────────────────────────────────────────────────────────────────────────

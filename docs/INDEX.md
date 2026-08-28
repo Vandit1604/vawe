@@ -28,6 +28,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | Doc | Reach for it when… | It answers |
 |---|---|---|
 | [docs/BLOCKS.md](BLOCKS.md) | you want a ready-made composed block instead of stacking primitives by hand | the block registry (`make catalog`) · the contract each block honours · what every block renders |
+| [docs/CRAFT/AFTER-EFFECTS-RECIPES.md](CRAFT/AFTER-EFFECTS-RECIPES.md) | you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one) | 26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine · the ten worth building first, split into easing, modifier, blueprint and composition |
 | [docs/DESIGN-DATABASE.md](DESIGN-DATABASE.md) | a beat has a role and you need the technique that serves it | concept→technique catalog: backgrounds, motion character, transitions, with exact recipes per concept |
 | [docs/EFFECTS.md](EFFECTS.md) | choosing an effect and you want to see the whole arsenal before defaulting to rise+fade | every registered effect across 15 families, generated from the engine registries so it cannot drift |
 | [docs/MOTION-RECIPES.md](MOTION-RECIPES.md) | you know the motion you want and need the exact keys to type | copy-paste atomic recipes keyed to the schema: entrances · overshoot/spring · counts · cameras |
