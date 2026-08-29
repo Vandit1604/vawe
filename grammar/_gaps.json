@@ -1,0 +1,35 @@
+{
+ "_": "Capabilities a reference film uses that we cannot do, or can only do awkwardly. Found by READING a film and then probing the engine, so each one names the film that motivated it and how it was verified. `status`: verified means a probe was rendered; suspected means it has not been built yet and building is how it will be settled. Rendered into docs/CRAFT/GRAMMAR.md.",
+ "gaps": [
+  {
+   "name": "A glow cannot animate its intensity",
+   "status": "verified",
+   "from": "pin-72761350251141725 shot 3: a halo CONTRACTS toward the word across the shot. The light tightens; the type never moves.",
+   "why": "`core/layers/glow.js` bakes intensity into a gradient string at BUILD (`kit.hexA(L.color, L.intensity)`), so it is a constant for the layer's life. Probed: a `vars` track on the layer changes nothing, because nothing reads a custom property.",
+   "fix": "Emit the gradient against a custom property and let the `vars` track drive it. That is the mechanism core/tracks/vars.js exists for and glow is the obvious consumer that never adopted it.",
+   "workaround": "Key `scale` on the glow layer, which resizes the whole box rather than tightening the falloff. It is not the same picture."
+  },
+  {
+   "name": "Inverting the frame by LIGHT rather than by backdrop",
+   "status": "suspected",
+   "from": "pin-333759022406760643 spends 80 seconds on pure black and inverts three times using only light: blue streaks, an orange flood, a white bloom. The world never changes.",
+   "why": "We invert by swapping a `bg` window, which changes the world. Doing it by light needs a full-frame source whose colour and intensity are both keyed, and the intensity half is the gap above.",
+   "fix": "Falls out of the glow fix, plus an `adjust` layer to grade what is beneath.",
+   "workaround": "A full-frame `rect` with a keyed colour through `vars`. Untested."
+  },
+  {
+   "name": "Letters settling from scattered positions",
+   "status": "suspected",
+   "from": "pin-333759022406760643 shot 5 and pin-72761350251141725: a wordmark assembles from letters that were somewhere else.",
+   "why": "`split` + a kinetic preset reveals letters in place with a stagger. Arriving from scattered positions is a different move and `make arsenal` returns near-misses (charOvershoot, roll) rather than a match.",
+   "fix": "Unknown until built. It may already be reachable through `parts` with a per-unit motion, which nothing in the library uses."
+  },
+  {
+   "name": "Flat colour flooding the whole frame as the transition",
+   "status": "suspected",
+   "from": "pin-924363892282992611 floods edge to edge with one purple twice, and those are its two loudest measured frames (68.7 and 40.2). It costs one rectangle.",
+   "why": "Nothing prevents it. Nobody does it: 0 films in our library use a full-frame colour flood as a cut.",
+   "fix": "None needed. It is a discovery gap, not a capability gap, which is why it is worth writing down."
+  }
+ ]
+}

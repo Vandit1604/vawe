@@ -182,6 +182,31 @@ function renderDoc(all) {
     }
   } catch { /* no patterns file yet */ }
 
+  // GAPS: what a reference does that we cannot. The other half of reading a film, and the half that
+  // turns a study into engine work. Each names the film that motivated it and says whether a probe was
+  // actually rendered, because "we cannot do this" asserted without a probe is how a capability gets
+  // rebuilt beside the one that already existed.
+  try {
+    const G = JSON.parse(fs.readFileSync(path.join(DIR, '_gaps.json'), 'utf8'));
+    if (G.gaps && G.gaps.length) {
+      const v = G.gaps.filter((x) => x.status === 'verified').length;
+      L.push('## What we cannot do yet');
+      L.push('');
+      L.push(`${G.gaps.length} gap(s) found by reading these films and probing the engine, ${v} confirmed by a rendered probe.`);
+      L.push('');
+      for (const g of G.gaps) {
+        L.push(`### ${g.name}  ·  ${g.status === 'verified' ? '**verified by a probe**' : 'suspected, not yet built'}`);
+        L.push('');
+        L.push(`**Seen in.** ${g.from}`);
+        L.push('');
+        L.push(`**Why we cannot.** ${g.why}`);
+        L.push('');
+        if (g.fix) { L.push(`**The fix.** ${g.fix}`); L.push(''); }
+        if (g.workaround) { L.push(`**Today.** ${g.workaround}`); L.push(''); }
+      }
+    }
+  } catch { /* no gaps file yet */ }
+
   L.push('## How to add one');
   L.push('');
   L.push('```bash');

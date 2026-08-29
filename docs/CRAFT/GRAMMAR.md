@@ -442,6 +442,46 @@ The film starts on single words at under a second and ends on sentences at four,
 
 **In our engine.** Nothing stops this today; nothing suggests it either. It is a storyboard decision, not an engine feature.
 
+## What we cannot do yet
+
+4 gap(s) found by reading these films and probing the engine, 1 confirmed by a rendered probe.
+
+### A glow cannot animate its intensity  ·  **verified by a probe**
+
+**Seen in.** pin-72761350251141725 shot 3: a halo CONTRACTS toward the word across the shot. The light tightens; the type never moves.
+
+**Why we cannot.** `core/layers/glow.js` bakes intensity into a gradient string at BUILD (`kit.hexA(L.color, L.intensity)`), so it is a constant for the layer's life. Probed: a `vars` track on the layer changes nothing, because nothing reads a custom property.
+
+**The fix.** Emit the gradient against a custom property and let the `vars` track drive it. That is the mechanism core/tracks/vars.js exists for and glow is the obvious consumer that never adopted it.
+
+**Today.** Key `scale` on the glow layer, which resizes the whole box rather than tightening the falloff. It is not the same picture.
+
+### Inverting the frame by LIGHT rather than by backdrop  ·  suspected, not yet built
+
+**Seen in.** pin-333759022406760643 spends 80 seconds on pure black and inverts three times using only light: blue streaks, an orange flood, a white bloom. The world never changes.
+
+**Why we cannot.** We invert by swapping a `bg` window, which changes the world. Doing it by light needs a full-frame source whose colour and intensity are both keyed, and the intensity half is the gap above.
+
+**The fix.** Falls out of the glow fix, plus an `adjust` layer to grade what is beneath.
+
+**Today.** A full-frame `rect` with a keyed colour through `vars`. Untested.
+
+### Letters settling from scattered positions  ·  suspected, not yet built
+
+**Seen in.** pin-333759022406760643 shot 5 and pin-72761350251141725: a wordmark assembles from letters that were somewhere else.
+
+**Why we cannot.** `split` + a kinetic preset reveals letters in place with a stagger. Arriving from scattered positions is a different move and `make arsenal` returns near-misses (charOvershoot, roll) rather than a match.
+
+**The fix.** Unknown until built. It may already be reachable through `parts` with a per-unit motion, which nothing in the library uses.
+
+### Flat colour flooding the whole frame as the transition  ·  suspected, not yet built
+
+**Seen in.** pin-924363892282992611 floods edge to edge with one purple twice, and those are its two loudest measured frames (68.7 and 40.2). It costs one rectangle.
+
+**Why we cannot.** Nothing prevents it. Nobody does it: 0 films in our library use a full-frame colour flood as a cut.
+
+**The fix.** None needed. It is a discovery gap, not a capability gap, which is why it is worth writing down.
+
 ## How to add one
 
 ```bash
