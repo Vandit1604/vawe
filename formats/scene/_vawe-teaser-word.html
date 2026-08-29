@@ -23,13 +23,18 @@
     <div class="mass" style="color:#2f6bff"></div></div>
   <div class="halo" style="filter:blur(calc(34px + var(--g) * 16px));opacity:.7;transform:scale(1.1)">
     <div class="mass" style="color:#1b4fd8"></div></div>
-  <div class="halo" style="filter:blur(calc(13px + var(--g) * 9px));opacity:1;transform:scale(1.012)">
+  <div class="halo" style="filter:blur(calc(9px + var(--g) * 7px));opacity:1;transform:scale(1.028)">
     <div class="mass" style="color:#ff6a00"></div></div>
-  <div class="halo" style="filter:blur(calc(6px + var(--g) * 5px));opacity:.9">
-    <div class="mass" style="color:#ffc247"></div></div>
+  <div class="halo" style="filter:blur(calc(5px + var(--g) * 4px));opacity:.85;transform:scale(1.014)">
+    <div class="mass" style="color:#ffb03a"></div></div>
 
   <!-- THE FACE. Gooed hard only through the middle, so the words MELT into one mass and re-form. -->
-  <div class="goo" style="filter:blur(calc(2px + var(--g) * 15px)) contrast(calc(1 + var(--g) * 26))">
+  <!-- Drawn TWICE so the interior is unambiguously white: one gooed copy for the melt, one clean copy
+       screened over it. Without the second, the warm rim bleeds through the soft face and the whole
+       word reads cream instead of white with a hot edge. -->
+  <div class="goo" style="filter:blur(calc(1px + var(--g) * 15px)) contrast(calc(1 + var(--g) * 26)) brightness(1.15)">
+    <div class="mass" style="color:#fff"></div></div>
+  <div class="halo" style="filter:blur(calc(var(--g) * 6px));opacity:calc(1 - var(--g) * 0.55)">
     <div class="mass" style="color:#fff"></div></div>
 
   <!-- GRAIN, not a grid. A repeating radial reads as dots in rows; two offset layers at coprime sizes
