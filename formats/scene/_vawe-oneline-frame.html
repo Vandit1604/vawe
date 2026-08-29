@@ -1,0 +1,22 @@
+<!-- The payoff frame: what the JSON above became. Hand-authored because it is connective tissue, and
+     driven by var(--t) rather than CSS animation, which core/sanitize-html.js refuses engine-wide. -->
+<div style="position:absolute;inset:0;border-radius:26px;overflow:hidden;
+  background:radial-gradient(120% 90% at 22% 8%, #17325e 0%, #0d1830 42%, #070c17 100%);
+  container-type:size">
+  <div style="position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(to right, rgba(255,255,255,.045) 0 1px, transparent 1px 88px),
+      repeating-linear-gradient(to bottom, rgba(255,255,255,.045) 0 1px, transparent 1px 88px)"></div>
+  <!-- a light that travels with the clock, so the frame is alive without a keyframe -->
+  <div style="position:absolute;top:-40%;left:calc(-30% + var(--t,0) * 26%);width:70%;height:180%;
+    background:radial-gradient(closest-side, rgba(37,99,235,.55), transparent 72%);filter:blur(38px)"></div>
+  <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center">
+    <div style="font:800 clamp(38px,11cqw,120px)/0.94 var(--font-sans,system-ui),sans-serif;
+      color:#f2f5fa;letter-spacing:-.03em">8.6 seconds</div>
+    <div style="font:500 clamp(12px,2.4cqw,26px)/1.5 var(--font-mono,ui-monospace),monospace;
+      color:#7fa6f0;letter-spacing:.16em;text-transform:uppercase;margin-top:.9em">rendered · deterministic</div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:3px;
+    background:linear-gradient(90deg,#2563eb, #7fa6f0);
+    transform-origin:0 50%;transform:scaleX(calc(var(--t,0)))"></div>
+</div>

@@ -444,7 +444,27 @@ The film starts on single words at under a second and ends on sentences at four,
 
 ## What we cannot do yet
 
-4 gap(s) found by reading these films and probing the engine, 1 confirmed by a rendered probe.
+6 gap(s) found by reading these films and probing the engine, 3 confirmed by a rendered probe.
+
+### `plane` silently beats `track`, and nothing says so  ·  **verified by a probe**
+
+**Seen in.** Recreating pin-583145851797705243. The continuous object carried `plane: 180` (toward the eye) and `track: 4`; the payoff frame it becomes sat at `track: 6`, on the picture plane.
+
+**Why we cannot.** A depth puts the layer in a real 3D rig, so occlusion is decided by DISTANCE and z-index stops meaning anything against it. The vessel at +180 covered the frame at z=0 for two full seconds. Every gate was green, the DOM reported the frame at opacity 1 with its text, and it was invisible. Found by looking at a frame, not by a check.
+
+**The fix.** core/fx/plane.js should refuse, or at least warn, when a layer with a depth has a LOWER `track` than a layer it now occludes. The docs should say the plainer thing first: once anything in the frame has depth, `track` orders only the layers that share a plane.
+
+**Today.** Give both layers the same depth, or drop the depth. Here the vessel gained nothing from it: there is no camera move to give parallax against.
+
+### A living ground can hide a dead film  ·  **verified by a probe**
+
+**Seen in.** The same recreation. It measured 2% still and motion 1.25 on `aurora`, comfortably alive.
+
+**Why we cannot.** Swapping to a near-static ground dropped it to 75% still and 0.29 with NOT ONE LAYER CHANGED. The aurora was contributing almost the whole number and the layers were nearly inert underneath it. The renderer's motion figure is a property of the FRAME, so a moving backdrop flatters it exactly as much as moving content does.
+
+**The fix.** Report the film's motion with the backdrop excluded, or beside it. `internal/scene/scene.go` measures the composited frame and could measure a second pass with `bg` suppressed; that difference is the number an author actually needs.
+
+**Today.** Measure twice by hand, once on the authored ground and once on `plain`, and read the second number as what the layers are doing.
 
 ### A glow cannot animate its intensity  ·  **verified by a probe**
 
