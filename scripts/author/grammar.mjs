@@ -121,7 +121,7 @@ function renderDoc(all) {
   L.push('|---|---|---|---|---|---|---|');
   for (const g of all) {
     const m = g.motionBand ? `${g.motionBand.lo}–${g.motionBand.hi}` : '?';
-    const sc = sampled(g) ? '— | — | —' : `${g.measured.shots} | ${g.measured.medianShot}s | ${g.measured.cutsPerMinute}`;
+    const sc = sampled(g) ? '· | · | ·' : `${g.measured.shots} | ${g.measured.medianShot}s | ${g.measured.cutsPerMinute}`;
     L.push(`| ${g.deepStudy ? `[${g.name}](${path.relative(path.join(ROOT, 'docs/CRAFT'), path.join(ROOT, g.deepStudy))})` : g.name} | ${g.measured.duration}s | ${sc} | ${m} | ${g.groundPattern || '?'} |`);
   }
   L.push('');
@@ -132,7 +132,7 @@ function renderDoc(all) {
   }
   const guessed = all.filter(sampled);
   if (guessed.length) {
-    L.push(`**\`—\` means no hard cut was found** (peak scene score below threshold), so the tool fell back to`);
+    L.push(`**\`·\` means no hard cut was found** (peak scene score below threshold), so the tool fell back to`);
     L.push('fixed sampling. Ground and motion stay real: they are measured over spans and do not care where the');
     L.push('spans came from. A shot count is not, so it is not printed. That is often the finding rather than a');
     L.push(`failure: ${guessed.map((g) => `\`${g.name}\``).join(', ')} ${guessed.length === 1 ? 'is' : 'are'} built on travel and dissolves.`);
@@ -152,7 +152,7 @@ function renderDoc(all) {
       L.push('| # | in | len | ground | motion | what moves | what triggers the next |');
       L.push('|---|---|---|---|---|---|---|');
       for (const s of withMoves)
-        L.push(`| ${s.i} | ${s.t0}s | ${s.len}s | ${s.ground} ${s.luma} | ${s.motion} | ${s.moves} | ${s.trigger || '—'} |`);
+        L.push(`| ${s.i} | ${s.t0}s | ${s.len}s | ${s.ground} ${s.luma} | ${s.motion} | ${s.moves} | ${s.trigger || '·'} |`);
       L.push('');
     }
   }
@@ -259,13 +259,13 @@ for (const g of all) {
   const m = g.motionBand ? `${g.motionBand.lo}–${g.motionBand.hi}` : '?';
   const mark = read(g) === (g.shots || []).length && g.takeaway ? ' ' : '·';
   const cells = sampled(g)
-    ? `${'—'.padStart(5)} ${'—'.padStart(7)} ${'—'.padStart(5)}`
+    ? `${'·'.padStart(5)} ${'·'.padStart(7)} ${'·'.padStart(5)}`
     : `${String(g.measured.shots).padStart(5)} ${String(g.measured.medianShot).padStart(6)}s ${String(g.measured.cutsPerMinute).padStart(5)}`;
   console.log(`${mark} ${g.name.padEnd(24)} ${String(g.measured.duration).padStart(5)}s ${cells}  ${m.padStart(11)}  ${(g.groundPattern || '').slice(0, 44)}`);
 }
 const guessed = all.filter(sampled);
 if (guessed.length) {
-  console.log(`\n  — means this tool found NO hard cut in that film (peak scene score below the threshold), so it`);
+  console.log(`\n  · means this tool found NO hard cut in that film (peak scene score below the threshold), so it`);
   console.log(`  fell back to fixed sampling. The ground and motion columns are still real, because they are`);
   console.log(`  measured over spans. The shot count is not a shot count, so it is not printed as one:`);
   for (const g of guessed) console.log(`    ${g.name.padEnd(24)} peak score ${g.measured.peakSceneScore} < ${g.measured.threshold}. It dissolves, or it is one shot.`);

@@ -19,8 +19,8 @@ every render**, so this table is a target and not a mood.
 
 | film | dur | shots | median | /min | motion | ground |
 |---|---|---|---|---|---|---|
-| arc-space-swiping | 3s | — | — | — | 0.71–1.41 | light → light |
-| arc-zero-chrome | 3s | — | — | — | 1.18–1.43 | light → light |
+| arc-space-swiping | 3s | · | · | · | 0.71–1.41 | light → light |
+| arc-zero-chrome | 3s | · | · | · | 1.18–1.43 | light → light |
 | framer-hero | 21.03s | 2 | 10.52s | 5.7 | 1.66–3.78 | dark → dark |
 | pin-1119918632363453012 | 5.44s | 2 | 2.72s | 22.1 | 0.83–2.14 | dark → light |
 | pin-310748443060787071 | 30.86s | 3 | 9.01s | 5.8 | 1.23–10.21 | dark? → light → dark |
@@ -29,17 +29,17 @@ every render**, so this table is a target and not a mood.
 | pin-333759022407965800 | 70.38s | 15 | 2.67s | 12.8 | 0.48–13.49 | light → light → mid → light → light → light → light → light → light → light → light → light → light → light → light |
 | pin-415034921941332045 | 76.03s | 3 | 18.57s | 2.4 | 1.83–5.26 | light → light → light |
 | pin-522769469268499616 | 17.87s | 10 | 1.48s | 33.6 | 0.69–10.67 | light → mid → dark → light → dark → light → dark → light → light → dark |
-| pin-583145851797705243 | 8.64s | — | — | — | 1.37–4.07 | dark → dark → dark → dark → dark? |
+| pin-583145851797705243 | 8.64s | · | · | · | 1.37–4.07 | dark → dark → dark → dark → dark? |
 | pin-72761350251141725 | 12.54s | 7 | 1s | 33.5 | 0.52–2.83 | dark → light → dark → light → dark → light → dark |
 | pin-924363892282992611 | 19.11s | 7 | 1.63s | 22 | 0.59–8.89 | light → light → light → light → light → mid → light |
 | pin-933230354045109691 | 37.86s | 8 | 3s | 12.7 | 1.14–6.56 | dark → dark → dark → light → dark → light → mid? → dark |
 | rebuilt | 29.23s | 5 | 4.07s | 10.3 | 0.41–6.04 | dark → light → dark → light → dark |
-| together-chat | 19.78s | — | — | — | 0.93–3.54 | light → light → light → light → light → light → light → light → light → light |
+| together-chat | 19.78s | · | · | · | 0.93–3.54 | light → light → light → light → light → light → light → light → light → light |
 
 **A shot in work that reads well measures 0.37 to 13.49.**
 Across the films whose cuts are measurable, the median shot runs **4.07s**.
 
-**`—` means no hard cut was found** (peak scene score below threshold), so the tool fell back to
+**`·` means no hard cut was found** (peak scene score below threshold), so the tool fell back to
 fixed sampling. Ground and motion stay real: they are measured over spans and do not care where the
 spans came from. A shot count is not, so it is not printed. That is often the finding rather than a
 failure: `arc-space-swiping`, `arc-zero-chrome`, `pin-583145851797705243`, `together-chat` are built on travel and dissolves.
