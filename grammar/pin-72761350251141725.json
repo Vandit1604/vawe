@@ -6,7 +6,7 @@
   "duration": 12.54,
   "width": 726,
   "height": 396,
-  "fps": 120,
+  "fps": 31.575,
   "aspect": "726:396",
   "hasAudio": false,
   "shotDetection": "scene-score",
@@ -35,9 +35,9 @@
     0.7,
     8.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. One word, white, in a heavy sans with a soft inner glow.",
+   "moves": "The word grows and its glow settles. Nothing travels.",
+   "trigger": "Hard cut, straight into an inverted ground."
   },
   {
    "i": 2,
@@ -57,9 +57,9 @@
     1.8,
     2.6
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "A light lavender wash. The same shape of word, now blue, with a blurred bloom behind it.",
+   "moves": "The bloom drifts and brightens under a word that holds.",
+   "trigger": "Hard cut back to black."
   },
   {
    "i": 3,
@@ -79,9 +79,9 @@
     0.8,
     5.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. One word in lavender with a large soft halo around it.",
+   "moves": "The halo CONTRACTS toward the word over the shot: the light tightens rather than the type moving.",
+   "trigger": "Hard cut to white."
   },
   {
    "i": 4,
@@ -101,9 +101,9 @@
     1.7,
     5.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Near-white. Two lines of black sans, centred, the first full sentence in the film.",
+   "moves": "The block scales down slightly and settles. The film's first held statement.",
+   "trigger": "Hard cut to black, and the film changes register: single words become sentences."
   },
   {
    "i": 5,
@@ -135,9 +135,9 @@
     0.9,
     5.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark. A phone mockup, then a bare vertical caret, then a line assembling beside a sparkle mark.",
+   "moves": "A phone leaves, a caret is left alone in an empty frame, and a line writes itself out from it. Peak 14.0, the loudest frame in the film, is the phone leaving.",
+   "trigger": "Hard cut to white on the finished line."
   },
   {
    "i": 6,
@@ -156,9 +156,9 @@
     1.2,
     0.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Near-white. A sentence TYPING, one word at a time, caret visible.",
+   "moves": "The caret. This is the first shot where the mechanism is literally shown rather than implied.",
+   "trigger": "Hard cut to black, mid-sentence: the same sentence continues on the opposite ground."
   },
   {
    "i": 7,
@@ -190,21 +190,22 @@
     3.9,
     3.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. The sentence continues, then scrolls horizontally while new lines arrive.",
+   "moves": "The line travels LEFT out of frame while the next arrives, so reading and moving are the same action.",
+   "trigger": "Nothing: it is the last shot and it ends on a held line."
   }
  ],
  "pace": {
   "medianShot": 1,
   "perMinute": 33.5
  },
- "groundPattern": "dark → light → dark → light → dark → light → dark",
+ "groundPattern": "dark \u2192 light \u2192 dark \u2192 light \u2192 dark \u2192 light \u2192 dark",
  "motionBand": {
   "lo": 0.52,
   "hi": 2.83
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE GROUND ITSELF. It inverts on every one of the six cuts (dark, light, dark, light, dark, light, dark) and nothing else is continuous: different words, different colours, different subjects. The alternation IS the through-line, and it is the second film in this store to do that.",
+ "spectacle": "Shot 5 at 4.97s, peak 14.0: the phone mockup leaves and the frame is briefly EMPTY except for a single caret. The loudest moment in the film is an emptying, not an arrival.",
+ "takeaway": "A FILM CAN BE HELD TOGETHER BY ITS GROUND ALONE. Seven shots, six cuts, and the ground flips on every one. There is no continuous object, no camera, no shared subject. Ours would fail `no-continuous-object` and it reads as one film.\nIT ESCALATES ITS UNIT. Shots 1-3 are single words at 0.65 to 1s. Shot 4 is the first sentence. Shots 5-7 are sentences that build, at 4s. The beat length roughly quadruples across the film and the unit of meaning grows with it, so the pacing change is legible rather than arbitrary.\nAND IT SHOWS ITS MECHANISM LATE. The caret does not appear until 7.76s, more than halfway. The early shots imply typing; the late ones prove it.",
+ "about": "A motion-graphics / text-animation tool demo. Pinterest pin 72761350251141725."
 }

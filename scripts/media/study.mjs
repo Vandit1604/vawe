@@ -86,14 +86,20 @@ for (const bin of ['ffprobe', 'ffmpeg']) {
 // here, a 17.867s container held 445 video frames at 25fps, so the last one starts at 17.76 and every
 // seek past that wrote nothing while ffmpeg exited 0. Two of thirteen references died on it.
 const probe = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
-  'stream=width,height,r_frame_rate,nb_frames', '-show_entries', 'format=duration',
+  'stream=width,height,r_frame_rate,avg_frame_rate,nb_frames', '-show_entries', 'format=duration',
   '-of', 'default=noprint_wrappers=1', VIDEO], { encoding: 'utf8' });
 const fields = Object.fromEntries(String(probe.stdout).trim().split('\n').filter(Boolean)
   .map((l) => l.split('=')).map(([k, v]) => [k, v]));
 const width = +fields.width, height = +fields.height;
 const duration = +fields.duration;
-const fpsM = /^(\d+)(?:\/(\d+))?$/.exec(String(fields.r_frame_rate || ''));
-const fps = fpsM ? +fpsM[1] / (fpsM[2] ? +fpsM[2] : 1) : 0;
+// `r_frame_rate` IS A CEILING, NOT A RATE. On a variable-frame-rate file it reports the container's
+// nominal maximum: one reference here declares 120 and holds 396 frames across 12.54s, which is 31.6.
+// `avg_frame_rate` is the real one. Measured on that file, believing r_frame_rate put the last frame at
+// (396-2)/120 = 3.28s, and every extraction after 3.28s was clamped to it, so three of its seven shots
+// showed the SAME frame for their in and their out and the sheet read as a film that stops halfway.
+const rate = (v) => { const m = /^(\d+)(?:\/(\d+))?$/.exec(String(v || '')); return m ? +m[1] / (m[2] ? +m[2] : 1) : 0; };
+const rFps = rate(fields.r_frame_rate), aFps = rate(fields.avg_frame_rate);
+const fps = aFps > 0 ? aFps : rFps;
 // Entry-point validation: anything without a real video stream stops here, named. A text file handed
 // to the sampler further down produces a stack trace from ffmpeg, which reads as a tool bug.
 if (!width || !height || !(duration > 0)) {
@@ -381,9 +387,11 @@ const CELLS = Number(flag('--cells', 4));       // frames per shot row, includin
 // refuses. The margin is in FRAMES rather than in seconds because that is the unit the problem is in.
 // The last frame's own start time, from the video stream's frame count where the file states one, and
 // otherwise a three-frame margin off the container. Never `duration` itself.
+// DERIVED WITHOUT fps AT ALL where the frame count is known, which is what makes it immune to the lie
+// above: the last frame is a FRACTION of the duration, and both numbers come off the same stream.
 const nbFrames = Number(fields.nb_frames) || 0;
-const LAST_FRAME = nbFrames > 1 && fps > 0
-  ? (nbFrames - 2) / fps
+const LAST_FRAME = nbFrames > 2
+  ? duration * ((nbFrames - 2) / nbFrames)
   : duration - 3 / (fps || 30);
 const seekable = (t) => Math.max(0, Math.min(t, LAST_FRAME));
 

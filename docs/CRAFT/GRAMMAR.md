@@ -10,7 +10,7 @@ group: crosscutting
 > (or re-run `make study`) and regenerate. The measured half comes off the film; the authored half
 > is written by a person into the JSON and merged forward on every re-study.
 
-16 reference film(s) measured. 2 carry a written reading.
+16 reference film(s) measured. 5 carry a written reading.
 
 ## The numbers, on one scale
 
@@ -56,11 +56,33 @@ _Measured, never read. The numbers above are real; nobody has written down what 
 
 ### framer-hero
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** A PRODUCT DEMO CAN BE ONE CONTINUOUS PROOF. Prompt, generation, result, and the result then re-shown from angles that each answer a different doubt. Only 2 hard cuts in 21s and a median beat of 10.5s, the longest in this store, yet its motion runs 1.66 to 3.78 because the SURFACES move even when the frame does not.
+
+ITS PEAKS ARE ARRIVALS, NOT DEPARTURES. 28.1, 16.8, 30.8, 40.2 are all something appearing. Compare pin-72761350251141725, whose loudest frame is an emptying.
+
+**Carries across the cuts.** THE ARTEFACT BEING BUILT. One website exists from 3.4s to the end and every shot is a different view of it: in a pane, full frame, in the agent that made it, in three sizes. Nothing else carries.
+
+**The loud moment.** 17.20s, peak 40.2: the site appears in three viewports at once. The film's argument is 'it is really finished', and that is the frame that makes it.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 5.8s | dark 31 | 1.66 | The typing, and then the generated page building itself in a second pane. Peaks of 28.1 and 16.8 are the page appearing, not the type. | No hard cut: the detected boundary at 5.88s is the built page taking the full frame. |
+| 2 | 5.8s | 15.23s | dark 38.8 | 3.78 | The camera moves over real product surfaces and the surfaces themselves change. Peak 40.2 at 17.2s is the multi-viewport reveal. | Nothing: it ends on the three viewports held. |
 
 ### pin-1119918632363453012
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** BLUR IS THE ENTRANCE, and it is the whole vocabulary. Nothing slides, nothing fades, nothing scales: type is smeared and then sharp. That reads as speed in a way a slide does not, and it is legible in a single frame, which a fade is not.
+
+A CONTAINER CAN BE THE CONSTANT. Shot 2 holds two braces still and changes what is between them. The eye has somewhere to rest while the content swaps, which is the cheapest continuity device in this store.
+
+**Carries across the cuts.** A BLUE that survives the ground inversion: it is the caret and the bloom on the dark half, and the braces on the light half. The only element in both shots.
+
+**The loud moment.** 0.87s, peak 10.4: the question arrives so blurred it is barely a word. The film is 5.44s and spends its loudest moment in the first second.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 3.77s | dark 27.8 | 2.14 | The type arrives OUT OF FOCUS and resolves. It does not slide or fade: it is smeared and then sharp, so the motion is legible in a still. | Hard cut to white on the resolved line. |
+| 2 | 3.77s | 1.67s | light 233.6 | 0.83 | The braces hold still and the CONTENTS change inside them, so the container is the constant and the list is the variable. | Nothing: it ends on the filled braces. |
 
 ### pin-310748443060787071
 
@@ -92,7 +114,25 @@ _Measured, never read. The numbers above are real; nobody has written down what 
 
 ### pin-72761350251141725
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** A FILM CAN BE HELD TOGETHER BY ITS GROUND ALONE. Seven shots, six cuts, and the ground flips on every one. There is no continuous object, no camera, no shared subject. Ours would fail `no-continuous-object` and it reads as one film.
+
+IT ESCALATES ITS UNIT. Shots 1-3 are single words at 0.65 to 1s. Shot 4 is the first sentence. Shots 5-7 are sentences that build, at 4s. The beat length roughly quadruples across the film and the unit of meaning grows with it, so the pacing change is legible rather than arbitrary.
+
+AND IT SHOWS ITS MECHANISM LATE. The caret does not appear until 7.76s, more than halfway. The early shots imply typing; the late ones prove it.
+
+**Carries across the cuts.** THE GROUND ITSELF. It inverts on every one of the six cuts (dark, light, dark, light, dark, light, dark) and nothing else is continuous: different words, different colours, different subjects. The alternation IS the through-line, and it is the second film in this store to do that.
+
+**The loud moment.** Shot 5 at 4.97s, peak 14.0: the phone mockup leaves and the frame is briefly EMPTY except for a single caret. The loudest moment in the film is an emptying, not an arrival.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 0.65s | dark 26.9 | 1.37 | The word grows and its glow settles. Nothing travels. | Hard cut, straight into an inverted ground. |
+| 2 | 0.65s | 1s | light 165.9 | 2.09 | The bloom drifts and brightens under a word that holds. | Hard cut back to black. |
+| 3 | 1.65s | 1s | dark 34.6 | 1.46 | The halo CONTRACTS toward the word over the shot: the light tightens rather than the type moving. | Hard cut to white. |
+| 4 | 2.65s | 1s | light 225.9 | 2.83 | The block scales down slightly and settles. The film's first held statement. | Hard cut to black, and the film changes register: single words become sentences. |
+| 5 | 3.65s | 4.03s | dark 25.5 | 1.4 | A phone leaves, a caret is left alone in an empty frame, and a line writes itself out from it. Peak 14.0, the loudest frame in the film, is the phone leaving. | Hard cut to white on the finished line. |
+| 6 | 7.68s | 0.83s | light 231.7 | 0.52 | The caret. This is the first shot where the mechanism is literally shown rather than implied. | Hard cut to black, mid-sentence: the same sentence continues on the opposite ground. |
+| 7 | 8.51s | 4.03s | dark 21.3 | 2.03 | The line travels LEFT out of frame while the next arrives, so reading and moving are the same action. | Nothing: it is the last shot and it ends on a held line. |
 
 ### pin-924363892282992611
 

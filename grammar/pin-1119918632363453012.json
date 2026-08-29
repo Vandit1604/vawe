@@ -47,9 +47,9 @@
     0.3,
     0.5
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark navy with a blue bloom low in the frame. A bare caret, then a question typing in, heavily MOTION-BLURRED, resolving to a small settled line.",
+   "moves": "The type arrives OUT OF FOCUS and resolves. It does not slide or fade: it is smeared and then sharp, so the motion is legible in a still.",
+   "trigger": "Hard cut to white on the resolved line."
   },
   {
    "i": 2,
@@ -72,21 +72,22 @@
     1.1,
     0.3
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Near-white. Blue curly braces, and words filling the space between them, each arriving blurred and settling.",
+   "moves": "The braces hold still and the CONTENTS change inside them, so the container is the constant and the list is the variable.",
+   "trigger": "Nothing: it ends on the filled braces."
   }
  ],
  "pace": {
   "medianShot": 2.72,
   "perMinute": 22.1
  },
- "groundPattern": "dark → light",
+ "groundPattern": "dark \u2192 light",
  "motionBand": {
   "lo": 0.83,
   "hi": 2.14
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "A BLUE that survives the ground inversion: it is the caret and the bloom on the dark half, and the braces on the light half. The only element in both shots.",
+ "spectacle": "0.87s, peak 10.4: the question arrives so blurred it is barely a word. The film is 5.44s and spends its loudest moment in the first second.",
+ "takeaway": "BLUR IS THE ENTRANCE, and it is the whole vocabulary. Nothing slides, nothing fades, nothing scales: type is smeared and then sharp. That reads as speed in a way a slide does not, and it is legible in a single frame, which a fade is not.\nA CONTAINER CAN BE THE CONSTANT. Shot 2 holds two braces still and changes what is between them. The eye has somewhere to rest while the content swaps, which is the cheapest continuity device in this store.",
+ "about": "A short title card. Pinterest pin 1119918632363453012."
 }

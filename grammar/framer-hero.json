@@ -55,9 +55,9 @@
     0.7,
     3.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark. A prompt box, then a prompt TYPING over a blue gradient wash, then the page it generates arriving beside it.",
+   "moves": "The typing, and then the generated page building itself in a second pane. Peaks of 28.1 and 16.8 are the page appearing, not the type.",
+   "trigger": "No hard cut: the detected boundary at 5.88s is the built page taking the full frame."
   },
   {
    "i": 2,
@@ -134,21 +134,22 @@
     5.2,
     13.3
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark. The finished site, the agent panel that made it, then the same site in three viewports at once.",
+   "moves": "The camera moves over real product surfaces and the surfaces themselves change. Peak 40.2 at 17.2s is the multi-viewport reveal.",
+   "trigger": "Nothing: it ends on the three viewports held."
   }
  ],
  "pace": {
   "medianShot": 10.52,
   "perMinute": 5.7
  },
- "groundPattern": "dark → dark",
+ "groundPattern": "dark \u2192 dark",
  "motionBand": {
   "lo": 1.66,
   "hi": 3.78
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE ARTEFACT BEING BUILT. One website exists from 3.4s to the end and every shot is a different view of it: in a pane, full frame, in the agent that made it, in three sizes. Nothing else carries.",
+ "spectacle": "17.20s, peak 40.2: the site appears in three viewports at once. The film's argument is 'it is really finished', and that is the frame that makes it.",
+ "takeaway": "A PRODUCT DEMO CAN BE ONE CONTINUOUS PROOF. Prompt, generation, result, and the result then re-shown from angles that each answer a different doubt. Only 2 hard cuts in 21s and a median beat of 10.5s, the longest in this store, yet its motion runs 1.66 to 3.78 because the SURFACES move even when the frame does not.\nITS PEAKS ARE ARRIVALS, NOT DEPARTURES. 28.1, 16.8, 30.8, 40.2 are all something appearing. Compare pin-72761350251141725, whose loudest frame is an emptying.",
+ "about": "An AI website-builder product demo, captured from the real UI."
 }
