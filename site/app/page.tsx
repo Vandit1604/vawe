@@ -116,8 +116,8 @@ export default function Home() {
                 a motion designer.
               </h1>
               <p className="sub">
-                One JSON, one video. Write the scene as data, render it byte-identical at any canvas,
-                and re-render it the day the numbers change.
+                One JSON, one video. Write the scene as data, and re-render it the day the numbers
+                change.
               </p>
               <div className="hero-cta">
                 <Link className="btn btn-white" href="/editor">
@@ -153,27 +153,24 @@ export default function Home() {
             <div className="kicker">what you can promise a client</div>
             <h2 className="h2">The frame you approved is the frame that ships.</h2>
             <p className="lead">
-              Determinism is enforced, not promised. There is no rule asking you to avoid a wall clock:
-              a frame is seeked, not played, so anything that runs on real time is refused at boot, by
-              name, before a pixel is drawn.
-              Two things follow from that, and both are worth more than the guarantee itself.
+              Nothing here asks you to be careful. Anything that reads a real clock is refused before a
+              pixel is drawn, so a film cannot drift between renders.
+              Two things fall out of that, and both matter more than the guarantee.
             </p>
             <div className="pf">
               <div>
                 <h3>Any render order.</h3>
                 <p>
-                  renderFrame(n) is pure in n, so frame 412 comes out the same whether it renders
-                  first or last. That is what lets one film shard across parallel tabs, and what
-                  makes two renders of the same scene diff-able.
+                  Frame 412 looks the same whether it renders first or last. That is what lets one film
+                  split across parallel workers, and what lets you diff two renders of it.
                 </p>
                 <ProofHash />
               </div>
               <div>
                 <h3>Any canvas.</h3>
                 <p>
-                  Pin keywords, a 12-column grid and percentages resolve to pixels per canvas.
-                  Compose in those and one source renders 16:9, 9:16, 1:1 and 4:5 in a single pass.
-                  Hand-place absolute pixels instead and you have tuned it to one ratio.
+                  Place things by grid and percentage and one file renders 16:9, 9:16, 1:1 and 4:5 in a
+                  single pass. Hand-place raw pixels and you have tuned it to one shape.
                 </p>
                 <ProofAspect />
               </div>
