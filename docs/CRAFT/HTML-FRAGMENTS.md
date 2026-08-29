@@ -1,7 +1,7 @@
 ---
 when: you are writing an `html` layer by hand, or a fragment renders as a dead still and nothing says why
 answers: "what a layer actually wraps · the four ways a fragment moves · the three things the engine refuses and what to use instead · the traps that cost a render each"
-group: engine
+group: look
 ---
 
 # Writing HTML fragments, and making them move
