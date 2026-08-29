@@ -1,55 +1,61 @@
-<!-- THE GOO MORPH, and the one detail that makes it work: `contrast()` thresholds LUMINANCE, so the
-     gooed stack needs an OPAQUE BLACK backdrop to push against. On a transparent one the contrast has
-     nothing to bite and the two words simply overlap, which is what the first attempt produced.
-     `mix-blend-mode: screen` then drops that black back out, because screen with black is a no-op.
-     Chosen for this look because it is the SAME MATERIAL: the reference is already made of blur, so the
-     transition and the treatment are one idea rather than two.
-     `--t` is the scene clock in seconds. `--p` is the morph's 0..1, cut out once so every layer below
-     reads the same number; `--g` peaks at the midpoint, which is where the letters are one mass. -->
+<!-- Read against the reference frame side by side, four things were wrong and the third is the one
+     that makes it look like a different technique:
+       1. SCALE. The reference type fills ~70% of the frame width. Ours filled ~55% and was thinner.
+       2. INTENSITY. Its glow is blown out and saturated; ours was a thin even rim at low opacity.
+       3. THE GLOW EATS THE LETTERS. In the reference the halo overwhelms parts of the glyphs, so the
+          word is barely legible on the right. That is a HIGH-intensity glow at a LOW threshold, and
+          it is the whole character of the look. A uniform rim that politely traces the outline is a
+          different effect that happens to use the same colours.
+       4. GRAIN. Its black is film, not #000 with nothing on it.
+     The goo morph is unchanged: blur + contrast on a container, so the two words melt into one mass
+     and re-form. `--t` is the scene clock in seconds; `--p` is the morph, `--g` peaks at its middle. -->
 <div style="position:absolute;inset:0;display:grid;place-items:center;container-type:size;
   --p:clamp(0, calc((var(--t,0) - 2.5) / 1.15), 1);
   --g:calc(1 - abs(var(--p) * 2 - 1))">
 
-  <!-- THE HALO: two gooed copies at bigger radii, coloured. AE calls this a Glow with Color Looping
-       A>B>A; here it is the same mass drawn twice, blue wide and orange tight, screened over the black. -->
-  <!-- NO CONTRAST ON THE COLOURED COPIES. contrast() thresholds LUMINANCE, so on a coloured layer it
-       crushes the hue toward whichever channel is strongest: the first version gooed all four copies
-       and every one of them came out red. Only the white face needs the threshold. The halo is blur
-       and screen, nothing else, which is also what makes the blue survive next to the orange. -->
-  <!-- THE BLUE IS AN OUTER RIM, NOT A WASH. In the reference it sits OUTSIDE the orange, so it has to
-       be drawn LARGER as well as blurred wider: at the same size a wide blue blur just sits under the
-       orange and is swamped by it, which is what the first two attempts produced. -->
-  <div class="halo" style="filter:blur(calc(22px + var(--g) * 12px));opacity:1;transform:scale(1.055)">
+  <!-- THE HEAT RAMP. Three rules, each learned by getting it wrong:
+       NO brightness(). On #ff5a00, (255,90,0) scaled 3.1x is (255,255,0): red is already clipped and
+       green is the only channel with room, so the whole halo turned yellow. A filter that boosts a
+       channel cannot intensify a colour that has maxed one out. Intensity comes from stacking each
+       band twice under `screen`, which accumulates along the colour's own hue.
+       BLUR SPREADS, SCALE PLACES. Radius is how far the light reaches; scale is where the band SITS.
+       Raising the radii alone put every band exactly on the glyph, so the white face screened over all
+       of them and the warm vanished into a pink wash. Both are needed: the warm has to be pushed
+       clear of the white edge AND spread.
+       THE WHITE CORE IS THE SMALLEST THING IN THE STACK, which is what leaves a visible warm band
+       between it and the blue, exactly as the reference has. -->
+  <div class="halo" style="filter:blur(calc(58px + var(--g) * 26px)) saturate(1.6);transform:scale(1.16);opacity:.9">
     <div class="mass" style="color:#2f6bff"></div></div>
-  <div class="halo" style="filter:blur(calc(34px + var(--g) * 16px));opacity:.7;transform:scale(1.1)">
-    <div class="mass" style="color:#1b4fd8"></div></div>
-  <div class="halo" style="filter:blur(calc(9px + var(--g) * 7px));opacity:1;transform:scale(1.028)">
+  <div class="halo" style="filter:blur(calc(40px + var(--g) * 19px)) saturate(1.6);transform:scale(1.13)">
+    <div class="mass" style="color:#2f6bff"></div></div>
+  <div class="halo" style="filter:blur(calc(27px + var(--g) * 14px)) saturate(1.5);transform:scale(1.10)">
+    <div class="mass" style="color:#1f4fe0"></div></div>
+
+  <div class="halo" style="filter:blur(calc(20px + var(--g) * 11px)) saturate(1.5);transform:scale(1.075)">
+    <div class="mass" style="color:#ff2000"></div></div>
+  <div class="halo" style="filter:blur(calc(15px + var(--g) * 9px)) saturate(1.5);transform:scale(1.062)">
+    <div class="mass" style="color:#ff2000"></div></div>
+  <div class="halo" style="filter:blur(calc(11px + var(--g) * 7px)) saturate(1.4);transform:scale(1.05)">
     <div class="mass" style="color:#ff6a00"></div></div>
-  <div class="halo" style="filter:blur(calc(5px + var(--g) * 4px));opacity:.85;transform:scale(1.014)">
-    <div class="mass" style="color:#ffb03a"></div></div>
+  <div class="halo" style="filter:blur(calc(8px + var(--g) * 6px)) saturate(1.4);transform:scale(1.04)">
+    <div class="mass" style="color:#ff8a00"></div></div>
+  <div class="halo" style="filter:blur(calc(5px + var(--g) * 4px));transform:scale(1.026)">
+    <div class="mass" style="color:#ffb43a"></div></div>
+  <div class="halo" style="filter:blur(calc(3px + var(--g) * 3px));transform:scale(1.014)">
+    <div class="mass" style="color:#ffdc8a"></div></div>
 
-  <!-- THE FACE. Gooed hard only through the middle, so the words MELT into one mass and re-form. -->
-  <!-- Drawn TWICE so the interior is unambiguously white: one gooed copy for the melt, one clean copy
-       screened over it. Without the second, the warm rim bleeds through the soft face and the whole
-       word reads cream instead of white with a hot edge. -->
-  <div class="goo" style="filter:blur(calc(1px + var(--g) * 15px)) contrast(calc(1 + var(--g) * 26)) brightness(1.15)">
-    <div class="mass" style="color:#fff"></div></div>
-  <div class="halo" style="filter:blur(calc(var(--g) * 6px));opacity:calc(1 - var(--g) * 0.55)">
+  <!-- THE FACE, blown out to pure white. Gooed through the middle of the morph for the melt. -->
+  <div class="goo" style="filter:blur(calc(1px + var(--g) * 15px)) contrast(calc(1 + var(--g) * 26)) brightness(1.6)">
     <div class="mass" style="color:#fff"></div></div>
 
-  <!-- GRAIN, not a grid. A repeating radial reads as dots in rows; two offset layers at coprime sizes
-       and a slight rotation read as noise, which is what the reference has. -->
-  <div style="position:absolute;inset:-45%;pointer-events:none;opacity:.10;mix-blend-mode:screen;
+  <!-- GRAIN, at the reference's strength. Two offset radial layers at coprime sizes, rotated so
+       neither reads as rows. `inset:-45%` so the rotation never shows its own edge. -->
+  <div style="position:absolute;inset:-45%;pointer-events:none;opacity:.26;mix-blend-mode:screen;
     transform:rotate(11deg);
-    background-image:radial-gradient(#fff .4px,transparent .5px),radial-gradient(#fff .35px,transparent .45px);
+    background-image:radial-gradient(#fff .45px,transparent .55px),radial-gradient(#fff .4px,transparent .5px);
     background-size:3px 3px,7px 5px;background-position:0 0,1px 2px"></div>
 
   <style>
-    /* The opaque black is load-bearing: contrast() thresholds luminance and needs something to push
-       against. `screen` removes it again, because screen against black returns the source unchanged. */
-    /* The opaque black is load-bearing on the GOO only: contrast() thresholds luminance and needs
-       something to push against. `screen` removes it again, because screen against black is a no-op.
-       The halo needs no backdrop, because it is not being thresholded. */
     .goo  { grid-area:1/1; width:100%; height:100%; background:#000; mix-blend-mode:screen;
             display:grid; place-items:center; }
     .halo { grid-area:1/1; width:100%; height:100%; mix-blend-mode:screen;
@@ -57,8 +63,9 @@
     .mass { position:relative; display:grid; place-items:center; }
     .mass::before, .mass::after {
       grid-area:1/1;
-      font:800 clamp(30px,10.5cqw,150px)/1 var(--font-sans,system-ui),sans-serif;
-      letter-spacing:-.02em; white-space:nowrap; color:inherit;
+      /* 15.5cqw, not 10.5: the reference word spans about 70% of the frame. */
+      font:900 clamp(40px,15.5cqw,215px)/1 var(--font-sans,system-ui),sans-serif;
+      letter-spacing:-.045em; white-space:nowrap; color:inherit;
     }
     .mass::before { content:"launching soon"; opacity:calc(1 - var(--p)); transform:scale(calc(1 - var(--p) * 0.08)); }
     .mass::after  { content:"vawe.dev";       opacity:var(--p);           transform:scale(calc(0.92 + var(--p) * 0.08)); }
