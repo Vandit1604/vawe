@@ -1,0 +1,286 @@
+<title>Vawe Engine Map</title>
+<style>
+:root{
+  --ground:#fbfaf7; --panel:#ffffff; --edge:#e3e0d8; --edge-soft:#eeebe4;
+  --ink:#1b1a17; --ink-2:#4d4a43; --ink-3:#807c72;
+  --hot:#b0461f; --cool:#2c5c74; --ok:#3f6b45; --warn:#946400;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --sans:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --ui:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14140f; --panel:#1c1c17; --edge:#33332b; --edge-soft:#26261f;
+  --ink:#efece3; --ink-2:#b3afa3; --ink-3:#807c70;
+  --hot:#e8794a; --cool:#7ab4d0; --ok:#8cc294; --warn:#d8a63a;
+}}
+:root[data-theme="dark"]{
+  --ground:#14140f; --panel:#1c1c17; --edge:#33332b; --edge-soft:#26261f;
+  --ink:#efece3; --ink-2:#b3afa3; --ink-3:#807c70;
+  --hot:#e8794a; --cool:#7ab4d0; --ok:#8cc294; --warn:#d8a63a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px 120px}
+header.top{padding:72px 0 40px;border-bottom:1px solid var(--edge)}
+h1{font-family:var(--sans);font-size:clamp(34px,5.5vw,58px);line-height:1.02;margin:0 0 14px;
+  letter-spacing:-.02em;font-weight:400;text-wrap:balance}
+.lede{font-family:var(--sans);font-size:19px;line-height:1.55;color:var(--ink-2);max-width:62ch;margin:0}
+.stamp{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 22px}
+h2{font-family:var(--sans);font-weight:400;font-size:28px;letter-spacing:-.01em;
+  margin:64px 0 6px;padding-top:26px;border-top:1px solid var(--edge-soft)}
+h2 .n{font-family:var(--mono);font-size:12px;color:var(--hot);letter-spacing:.1em;
+  display:block;margin-bottom:8px;text-transform:uppercase}
+h3{font-family:var(--ui);font-size:15px;font-weight:650;margin:32px 0 6px;letter-spacing:-.005em}
+p{max-width:70ch;color:var(--ink-2)}
+p.tight{margin:6px 0 0}
+code,.m{font-family:var(--mono);font-size:.87em}
+code{background:var(--edge-soft);padding:1px 5px;border-radius:3px;color:var(--ink)}
+pre{background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:18px 20px;
+  overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--ink-2)}
+pre b{color:var(--ink);font-weight:600}
+pre .c{color:var(--ink-3)}
+table{border-collapse:collapse;width:100%;margin:18px 0;font-size:13.5px}
+.scroll{overflow-x:auto}
+th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;padding:0 14px 8px 0;border-bottom:1px solid var(--edge)}
+td{padding:10px 14px 10px 0;border-bottom:1px solid var(--edge-soft);vertical-align:top;color:var(--ink-2)}
+td:first-child{color:var(--ink)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.big{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--ink)}
+.hot{color:var(--hot)}.ok{color:var(--ok)}.warn{color:var(--warn)}.cool{color:var(--cool)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:24px 0}
+.stat{background:var(--panel);border:1px solid var(--edge);border-radius:6px;padding:16px 18px}
+.stat .v{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;line-height:1;color:var(--ink)}
+.stat .k{font-size:12px;color:var(--ink-3);margin-top:7px;line-height:1.4}
+.slots{display:grid;gap:0;margin:20px 0;border:1px solid var(--edge);border-radius:6px;overflow:hidden}
+.slot{display:grid;grid-template-columns:34px 118px 1fr;gap:14px;padding:9px 16px;
+  border-bottom:1px solid var(--edge-soft);background:var(--panel);align-items:baseline}
+.slot:last-child{border-bottom:0}
+.slot .i{font-family:var(--mono);font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.slot .nm{font-family:var(--mono);font-size:13px;color:var(--ink)}
+.slot .d{font-size:12.5px;color:var(--ink-2)}
+.slot.acc{background:color-mix(in srgb,var(--hot) 7%,var(--panel))}
+.slot.acc .nm{color:var(--hot)}
+.find{border:1px solid var(--edge);border-left:3px solid var(--edge);border-radius:5px;
+  background:var(--panel);padding:18px 20px;margin:16px 0}
+.find.p1{border-left-color:var(--hot)}
+.find.p2{border-left-color:var(--warn)}
+.find.p3{border-left-color:var(--cool)}
+.find.done{border-left-color:var(--ok);opacity:.85}
+.find h3{margin:0 0 4px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--edge);border-radius:20px;padding:2px 9px;color:var(--ink-3);font-weight:400}
+.find.p1 .tag{color:var(--hot);border-color:color-mix(in srgb,var(--hot) 40%,transparent)}
+.find.done .tag{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.find p{margin:8px 0 0;font-size:14px;max-width:76ch}
+.find .ev{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-top:10px;
+  padding-top:10px;border-top:1px dashed var(--edge-soft)}
+.find .ev b{color:var(--ink-2);font-weight:500}
+.note{font-size:13px;color:var(--ink-3);max-width:74ch;font-style:italic}
+hr.rule{border:0;border-top:1px solid var(--edge);margin:56px 0 0}
+footer{padding:40px 0 0;color:var(--ink-3);font-size:12.5px;font-family:var(--mono)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="stamp">vawe · engine map · measured 2026-08-29</p>
+  <h1>One JSON in, one film out, and one promise holding it up.</h1>
+  <p class="lede">Every number on this page was counted from this checkout on the day it was written,
+  not carried over from a doc. Where a figure could not be re-derived, it says so.</p>
+</header>
+
+<h2><span class="n">The invariant</span>renderFrame(n) is a pure function of n</h2>
+<p>Everything else is downstream of this one sentence. The Go renderer opens several headless tabs and
+gives each a different slice of the timeline, so a frame must not depend on which frame was drawn
+before it. Break that and the film is wrong in a way no single frame reveals.</p>
+<div class="grid">
+  <div class="stat"><div class="v">3</div><div class="k">gates guard it: <span class="m">probe-purity</span> (DOM order), <span class="m">canvas-purity</span> (shader pixels), <span class="m">snap-scenes</span> (the whole library, forwards and backwards)</div></div>
+  <div class="stat"><div class="v">106</div><div class="k">scenes swept by the determinism net</div></div>
+  <div class="stat"><div class="v hot">1</div><div class="k">order-dependence bug found today, by turning one default on</div></div>
+</div>
+
+<h2><span class="n">Stage one</span>The pipeline</h2>
+<pre><b>data.json</b>
+   │  core/validate.mjs   refuses a bad scene before the first frame
+   ▼
+<b>cmd/render</b> (Go) ──► chromedp: N headless tabs, each seeking renderFrame(n)
+   │                        <span class="c">purity is what makes the sharding legal</span>
+   ▼
+<b>internal/scene</b>   capture PNGs · now also measures how much the film moves
+   ▼
+<b>internal/encode</b>  ffmpeg: PNG sequence → H.264 + film grain
+   ▼
+<b>internal/audio</b>   Go PCM mixer: bed + cues + VO duck + limiter
+   ▼
+<b>out/&lt;name&gt;.mp4</b>
+</pre>
+<p class="note">10 Go files. 20,252 lines of JavaScript under core/. The Go half does capture, encode
+and mix; it holds no opinion about what a film looks like.</p>
+
+<h2><span class="n">Stage two</span>One frame, in order</h2>
+<p>Two bugs in one week were ordering rather than arithmetic, so the order is now written down and
+<span class="m">lib-test</span> parses it out of the doc. BUILD runs once at boot. FRAME is
+<span class="m">renderFrame(n)</span>, top to bottom.</p>
+<pre><b>build</b>   measure → becomes → childOffsets
+<b>frame</b>   drawBg → driveClips → driveSceneUnits → resolveBoxes → <b>runTracks</b>
+        → drawCaptions → drawCameraAndCut → drawStings → drawSeams → seekAll
+</pre>
+<p><code>resolveBoxes</code> runs before any track, so <code>scene.boxOf(id)</code> is authored
+geometry plus the motion track plus the enter pose, and nothing a track wrote. It is not a live DOM
+read. A <code>follow</code> therefore cannot chain, and chaining is refused by name rather than left
+to arithmetic.</p>
+
+<h3>The fourteen per-layer slots</h3>
+<p class="tight">Highlighted rows are <span class="hot">accumulators</span>: they read
+<code>el.style.transform</code> back and prepend to it. The element's inline style is the pipeline's
+accumulator, not its output.</p>
+<div class="slots">
+  <div class="slot"><span class="i">01</span><span class="nm">enter</span><span class="d">a declared <span class="m">cut</span> owns this layer's entrance, over driveClips's fade</span></div>
+  <div class="slot"><span class="i">02</span><span class="nm">split</span><span class="d">kinetic split-text reveal on the layer's local clock</span></div>
+  <div class="slot"><span class="i">03</span><span class="nm">glyphs</span><span class="d">per-glyph re-roll (ransom cycle)</span></div>
+  <div class="slot"><span class="i">04</span><span class="nm">primitive</span><span class="d">the layer type's own frame(): count, typing, cursor, clip, ken</span></div>
+  <div class="slot"><span class="i">05</span><span class="nm">resample</span><span class="d">re-sample the layer through a fragment shader, after its own canvas drew</span></div>
+  <div class="slot"><span class="i">06</span><span class="nm">orbit</span><span class="d">the borderTrail arc's rotation</span></div>
+  <div class="slot"><span class="i">07</span><span class="nm">spin</span><span class="d">circular text: rotate the whole ring</span></div>
+  <div class="slot"><span class="i">08</span><span class="nm">vars</span><span class="d">animated custom properties the layer's own CSS reads</span></div>
+  <div class="slot acc"><span class="i">09</span><span class="nm">react</span><span class="d">audio-driven modulation from the baked spectrum</span></div>
+  <div class="slot"><span class="i">10</span><span class="nm">box</span><span class="d">w / h / depth over time: the layer's SIZE, not its scale</span></div>
+  <div class="slot acc"><span class="i">11</span><span class="nm">follow</span><span class="d">pin to another layer's box, before that layer's own choreography plays</span></div>
+  <div class="slot acc"><span class="i">12</span><span class="nm">transform</span><span class="d">the motion track, the focus pull, and motion blur</span></div>
+  <div class="slot acc"><span class="i">13</span><span class="nm">idle</span><span class="d">ambient motion across the settled middle, riding outside everything above</span></div>
+  <div class="slot"><span class="i">14</span><span class="nm">post</span><span class="d">modifiers (core/fx), always last, on a finished frame</span></div>
+</div>
+
+<h2><span class="n">Stage three</span>The vocabularies</h2>
+<p>Nothing here keeps a hand-written list of its own names. <code>defineRegistry</code> refuses an
+unknown name and says which slot it was reaching for; <code>paramsOf</code> derives the valid
+parameters from the generator's own signature, so no list can drift.</p>
+<div class="scroll"><table>
+<tr><th>vocabulary</th><th>count</th><th>where</th></tr>
+<tr><td>layer types</td><td class="num">20</td><td class="m">core/layers/</td></tr>
+<tr><td>per-frame tracks</td><td class="num">14 slots / 16 files</td><td class="m">core/tracks/</td></tr>
+<tr><td>modifiers (post fx)</td><td class="num">12</td><td class="m">core/fx/</td></tr>
+<tr><td>named effects, all families</td><td class="num">566</td><td class="m">make effects → docs/EFFECTS.md</td></tr>
+<tr><td>things <span class="m">make arsenal</span> searches</td><td class="num">337</td><td class="m">scripts/author/arsenal.mjs</td></tr>
+<tr><td>build-time blocks</td><td class="num">21 families</td><td class="m">blocks/</td></tr>
+<tr><td>brand themes</td><td class="num">38</td><td class="m">themes/</td></tr>
+<tr><td>gates</td><td class="num">65</td><td class="m">scripts/gates/</td></tr>
+</table></div>
+
+<h2><span class="n">Stage four</span>The library, as it actually is</h2>
+<p>136 files under <span class="m">formats/scene/</span> declare <code>"module": "scene"</code>,
+carrying 3,719 layers once groups are flattened. These are not targets. They are the debt, counted.</p>
+<div class="grid">
+  <div class="stat"><div class="v hot">6.4%</div><div class="k">of layers carry a hand-keyed <span class="m">motion</span> track. The two films the doctrine argues from run 75% and 11%.</div></div>
+  <div class="stat"><div class="v hot">14%</div><div class="k">of layers are pictorial. The rest is type and rectangles.</div></div>
+  <div class="stat"><div class="v hot">84%</div><div class="k">of films paint one background window for the whole runtime (114 of 136).</div></div>
+  <div class="stat"><div class="v hot">81%</div><div class="k">ship mute: 93 declare <span class="m">silent</span>, 17 carry no audio key at all.</div></div>
+  <div class="stat"><div class="v">66%</div><div class="k">of layers declare an absolute <span class="m">start</span>. Nothing scopes a child's clock to its group.</div></div>
+  <div class="stat"><div class="v">41%</div><div class="k">of keyed easings are <span class="m">linear</span> (317 of 768).</div></div>
+</div>
+
+<h2><span class="n">The board</span>What is worth fixing, ranked</h2>
+<p>Each item names its evidence and where the fix belongs. The house rule is that a gate is the last
+resort: if the bad value has a write site, the refusal goes there and the class of bug ends.</p>
+
+<div class="find done">
+  <h3>The transform accumulator was never emptied <span class="tag">fixed today</span></h3>
+  <p>Four tracks prepend to <code>el.style.transform</code>, which is only safe if something clears it
+  each frame. <code>driveClips</code> cleared a property only when one of the layer's own animations
+  wrote it, so a layer entering on <code>wipe</code>, <code>iris</code> or <code>clock</code> (all
+  clip-path, no transform) composed onto whatever string the previously rendered frame left behind.
+  Order-dependent by construction.</p>
+  <p><code>clipStyleAt</code> now returns <code>transform: "none"</code> unconditionally, before the
+  resting keys and the composed style, so any animation that does write a transform still wins.</p>
+  <div class="ev"><b>evidence</b> · turning the idle default on quarantined <span class="m">linear-agents</span>
+  at scale 0.9897 forwards, 0.9694 backwards. The bug predated the idle; the idle gave it a second voice.
+  <br><b>fix</b> · <span class="m">core/clips.js</span>, one frozen constant, two spread sites.</div>
+</div>
+
+<div class="find p1">
+  <h3>There is no relative time <span class="tag">p1 · structural</span></h3>
+  <p>A group does not scope its children's clock, so every layer states an absolute second. Move a beat
+  and you re-type every number under it, or you do not move the beat. This is the single largest reason
+  a film here is expensive to re-cut, and re-cutting is most of what authoring is.</p>
+  <div class="ev"><b>evidence</b> · 2,442 of 3,719 layers declare an explicit <span class="m">start</span>.
+  <br><b>fix</b> · the group layer and the clip clock, not a gate. A child's <span class="m">start</span>
+  becomes an offset from its parent's window when the parent declares one.</div>
+</div>
+
+<div class="find p1">
+  <h3>Depth exists and is unreachable <span class="tag">p1 · adoption</span></h3>
+  <p><code>core/fx/plane.js</code> diagnoses this in its own header: every layer sits at z = 0, so a
+  camera move turns the whole composition as one rigid pane. That is the tell that reads as a picture of
+  a scene rather than a scene. Four scenes of 136 use it.</p>
+  <div class="ev"><b>fix</b> · not a default (a wrong depth is worse than none). Make
+  <span class="m">make preflight</span> name depth when a scene has a camera move and every layer at z = 0.</div>
+</div>
+
+<div class="find p2">
+  <h3>No adjustment layer <span class="tag">p2 · missing primitive</span></h3>
+  <p>Every effect here is per-layer. There is no way to say "grade, blur or tint everything beneath
+  this". It is the one After Effects primitive the engine genuinely lacks, and the mechanism is already
+  load-bearing: <code>core/layers/util.js:273</code> uses <code>backdrop-filter</code> for the glass
+  look, and its own comment says it reads the pixels behind an element. An adjustment layer is that,
+  sized to the frame, with no card. The work is the z-order contract, not the effect.</p>
+  <div class="ev"><b>note</b> · a keyable blur is NOT missing. <span class="m">motionAt</span>
+  interpolates a <span class="m">blur</span> channel, verified by render:
+  <span class="m">[{t:0,blur:24},{t:1.6,blur:0}]</span> pulls focus correctly. The
+  <span class="m">focusRack</span> blueprint that uses it has zero users, so that is a discovery
+  problem, not a capability one.</div>
+</div>
+
+<div class="find p2">
+  <h3>Snapshots cannot be compared across machines <span class="tag">p2 · gate ceiling</span></h3>
+  <p><code>verify/snap/</code> is gitignored, so a runner starts with nothing to diff against, and a
+  baseline is only valid inside one font state while <code>scripts/media/fonts.mjs</code> fetches from
+  a CDN with no version in any URL. Two machines can hold different bytes under identical filenames.</p>
+  <p>Read a green CI run as "every scene is deterministic", never as "nothing changed". Pinning the
+  fetcher to exact versions is what would make cross-machine comparison mean anything.</p>
+</div>
+
+<div class="find p2">
+  <h3>"The library" has more than one size <span class="tag">p2 · one fact, two owners</span></h3>
+  <p>134, 136, 106 and 161 are all true of this checkout and mean different things: gate-visible scenes,
+  files declaring <code>module: "scene"</code>, scenes the snapshot net sweeps, and raw <code>.json</code>
+  files in the directory. Films are gitignored on purpose, so a fresh clone sees about a third of any of
+  them and nothing is broken.</p>
+  <div class="ev"><b>fix</b> · one exported population per question in <span class="m">scripts/lib/census.mjs</span>,
+  each named for what it answers, and every doc quotes a name rather than a number.</div>
+</div>
+
+<div class="find p3">
+  <h3>41% of keyed easings are linear, and nobody has looked <span class="tag">p3 · unaudited</span></h3>
+  <p>317 of 768. Part of that is correct and deliberate: <code>scripts/author/track.mjs</code> emits
+  <code>linear</code> for the interior keys of a measured shape, because a segment shorter than 0.14s is
+  interpolated linearly anyway and naming it keeps the file honest. The rest is unexamined. The share
+  written by a tool versus by a hand has never been separated.</p>
+</div>
+
+<div class="find p3">
+  <h3>Sixty-five gates is a surface, not only a net <span class="tag">p3 · watch</span></h3>
+  <p>Two have already been deleted for measuring the wrong thing. <code>visual-vocabulary</code> squared
+  a 590&times;18 rule into 590&times;590 and credited a hairline with a tenth of the frame;
+  <code>make slop</code> ran 41 borrowed rules against a DOM dump carrying evidence for three of them and
+  reported its silence as a pass. A wrong gate is worse than no gate, because it manufactures
+  confidence.</p>
+</div>
+
+<h2><span class="n">Today</span>What changed while this was written</h2>
+<div class="scroll"><table>
+<tr><th>change</th><th>where</th><th>effect</th></tr>
+<tr><td>The layer lifecycle gained its third phase</td><td class="m">core/motion.js · formats/scene/scene.js</td><td><code>clipStyleAt</code> computes an entrance ramp and an exit ramp and has no branch for the middle, so stillness was never a decision, it was the shape of the data model. <span class="m">motionDefaults</span> now carries <span class="m">idle</span>, resolved layer → scene → theme → engine default.</td></tr>
+<tr><td>The transform accumulator is emptied every frame</td><td class="m">core/clips.js</td><td>Fixes an order-dependence older than the idle. See the board.</td></tr>
+<tr><td>The aurora family got the motion knob it never had</td><td class="m">core/backgrounds.js</td><td>aurora 0.14 → 1.31, mesh 0.12 → 1.02. Amplitude and period move together, or the field sloshes.</td></tr>
+<tr><td>Every render reports how much of it moves</td><td class="m">internal/scene · internal/render</td><td><span class="m">78% still, motion 0.30</span> beside the duration. It refuses nothing.</td></tr>
+</table></div>
+<p class="note">The stillness figure measures change between consecutive frames, which is why a breath
+does not move it: a 1.5% scale over 4.6 seconds is a sub-pixel step per frame. It reads grounds and
+travel, and it is blind to the slow. Both facts are worth holding at once.</p>
+
+<hr class="rule">
+<footer>docs/design/architecture.html · derived from this checkout, not from docs/CODEMAPS/ARCHITECTURE.md · re-measure before quoting</footer>
+</div>
