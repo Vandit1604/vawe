@@ -43,6 +43,7 @@
 // causal skeleton. Copying the skeleton is study. Copying the pixels is a Content ID claim.
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { drawtext } from '../author/sheets.mjs';
@@ -80,8 +81,12 @@ for (const bin of ['ffprobe', 'ffmpeg']) {
 }
 
 // ── probe: the facts that come off the file ──────────────────────────────────────────────────────
+// `nb_frames` IS ASKED FOR, and it is what makes the last frame findable. `format=duration` is the
+// CONTAINER's length, and on a file whose audio runs past its video it overstates the picture: measured
+// here, a 17.867s container held 445 video frames at 25fps, so the last one starts at 17.76 and every
+// seek past that wrote nothing while ffmpeg exited 0. Two of thirteen references died on it.
 const probe = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
-  'stream=width,height,r_frame_rate', '-show_entries', 'format=duration',
+  'stream=width,height,r_frame_rate,nb_frames', '-show_entries', 'format=duration',
   '-of', 'default=noprint_wrappers=1', VIDEO], { encoding: 'utf8' });
 const fields = Object.fromEntries(String(probe.stdout).trim().split('\n').filter(Boolean)
   .map((l) => l.split('=')).map(([k, v]) => [k, v]));
@@ -96,6 +101,17 @@ if (!width || !height || !(duration > 0)) {
 }
 const hasAudio = !!String(spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a:0',
   '-show_entries', 'stream=codec_name', '-of', 'default=nw=1:nk=1', VIDEO], { encoding: 'utf8' }).stdout).trim();
+
+// THE SAME FILM UNDER TWO NAMES IS THE STORE'S OWN VERSION OF THE DRIFT IT EXISTS TO PREVENT, and it
+// happened on the first day: a reference arrived by link, was downloaded as `rebuilt.mp4`, studied, and
+// read carefully, and it was already sitting in refs/ as `pin-333759022407379112.mp4`, byte-identical
+// and never studied. Two grammar rows, one film, and a corpus that counts it twice when it says what
+// films like this measure.
+//
+// A content hash is the only thing that catches that, because the names, the sizes on disk and the
+// download dates all differ. Stored in the grammar row so a re-study of the twin says so.
+const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex').slice(0, 16);
+const VIDEO_HASH = sha(path.resolve(VIDEO));
 
 const NAME = positional[1] || path.basename(VIDEO).replace(/\.[^.]+$/, '');
 const dir = path.join(ROOT, 'refs', NAME);
@@ -343,9 +359,21 @@ const median = lens.length % 2 ? lens[(lens.length - 1) / 2] : (lens[lens.length
 // and on an 11s shot it is the same instant three times.
 const CELLS = Number(flag('--cells', 4));       // frames per shot row, including the in and out frames
 
+// A CONTAINER'S DURATION IS NOT THE LAST DECODABLE FRAME, and two of thirteen references died on the
+// difference. `format=duration` is the stream's stated length; seeking to `duration - 0.08` can land
+// past the final frame, and ffmpeg then exits 0 having written nothing, which `ffmpegOrDie` correctly
+// refuses. The margin is in FRAMES rather than in seconds because that is the unit the problem is in.
+// The last frame's own start time, from the video stream's frame count where the file states one, and
+// otherwise a three-frame margin off the container. Never `duration` itself.
+const nbFrames = Number(fields.nb_frames) || 0;
+const LAST_FRAME = nbFrames > 1 && fps > 0
+  ? (nbFrames - 2) / fps
+  : duration - 3 / (fps || 30);
+const seekable = (t) => Math.max(0, Math.min(t, LAST_FRAME));
+
 function eventFrames(s, n) {
   const inT = Math.min(s.t0 + 0.08, s.t1 - 0.01);
-  const outT = Math.max(s.t1 - 0.08, s.t0);
+  const outT = Math.max(Math.min(s.t1 - 0.08, LAST_FRAME), s.t0);
   const want = Math.max(0, n - 2);
   if (want === 0) return [inT, outT];
   const sep = Math.max(0.25, s.len / (n + 1));
@@ -372,7 +400,7 @@ fs.mkdirSync(frames, { recursive: true });
 const tileW = 300, tileH = Math.round((tileW * height) / width);
 const rows = [];
 for (const s of shots) {
-  const ts = eventFrames(s, CELLS).map((t) => Math.max(s.t0, Math.min(s.t1 - 0.01, t)));
+  const ts = eventFrames(s, CELLS).map((t) => seekable(Math.max(s.t0, Math.min(s.t1 - 0.01, t))));
   const cells = ts.map((t, k) => {
     // The label says WHY this frame is in the sheet. A cell captioned `peak 12.4` is a claim the reader
     // can check against the picture; one captioned `mid` was only ever a coordinate.
@@ -436,6 +464,14 @@ const GRAMMAR_DIR = path.join(ROOT, 'grammar');
 
 function writeGrammar(study, shots) {
   fs.mkdirSync(GRAMMAR_DIR, { recursive: true });
+  // Reported, never resolved automatically: which of two names is the right one is a judgement, and
+  // deleting somebody's authored reading to enforce a hash would be the cure being worse.
+  for (const f of fs.readdirSync(GRAMMAR_DIR).filter((x) => x.endsWith('.json') && x !== `${NAME}.json`)) {
+    let other = null; try { other = JSON.parse(fs.readFileSync(path.join(GRAMMAR_DIR, f), 'utf8')); } catch { continue; }
+    if (other && other.hash === VIDEO_HASH)
+      console.log(`  ⚠ THE SAME FILM is already in the store as "${other.name}" (identical bytes).\n`
+        + `    Two rows for one film double it in every comparison. Keep the better NAME and delete the other.`);
+  }
   const file = path.join(GRAMMAR_DIR, `${NAME}.json`);
   let prior = null;
   try { prior = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { /* first study of this film */ }
@@ -446,6 +482,7 @@ function writeGrammar(study, shots) {
     // The FILENAME, never the file. A reader who has the film can point study at it again; a reader who
     // does not still gets every number and every judgement, which is the whole point of committing this.
     source: path.basename(study.source),
+    hash: VIDEO_HASH,
     measured: study.measured,
     shots: shots.map((s) => ({
       i: s.i, t0: Number(s.t0.toFixed(2)), len: Number(s.len.toFixed(2)),

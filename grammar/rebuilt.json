@@ -1,6 +1,7 @@
 {
  "name": "rebuilt",
  "source": "rebuilt.mp4",
+ "hash": "77f59ca64378da39",
  "measured": {
   "duration": 29.23,
   "width": 736,
@@ -229,7 +230,7 @@
   "medianShot": 4.07,
   "perMinute": 10.3
  },
- "groundPattern": "dark \u2192 light \u2192 dark \u2192 light \u2192 dark",
+ "groundPattern": "dark → light → dark → light → dark",
  "motionBand": {
   "lo": 0.41,
   "hi": 6.04

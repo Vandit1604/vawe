@@ -1,0 +1,47 @@
+{
+ "_": "Claims this repo's own doctrine makes about how films behave, each written as a TEST over the grammar corpus. `make claims` evaluates every one against grammar/*.json and reports SUPPORTED / CONTRADICTED / SPLIT / UNTESTABLE with the evidence count. A claim is only as strong as the films that have been studied, so a verdict here strengthens or reverses as references arrive. Add a claim by adding a row; add a metric by adding one to METRICS in scripts/author/claims.mjs.",
+ "claims": [
+  {
+   "id": "ref-motion-band",
+   "claim": "Reference films run motion 1.7 to 2.0.",
+   "source": ".claude/plans/ancient-hatching-dolphin.md, and I repeated it in this session",
+   "metric": "filmMotion", "op": "within", "lo": 1.7, "hi": 2.0
+  },
+  {
+   "id": "ref-still-share",
+   "claim": "Reference films are still for 13 to 24 percent of their frames.",
+   "source": "CLAUDE.md and the motion plan",
+   "metric": "heldShare", "op": "within", "lo": 0.13, "hi": 0.24
+  },
+  {
+   "id": "beat-length",
+   "claim": "Beats run 2.5 to 4 seconds.",
+   "source": "docs/CRAFT/REFERENCE-STUDY.md",
+   "metric": "medianShot", "op": "within", "lo": 2.5, "hi": 4.0
+  },
+  {
+   "id": "ground-turns",
+   "claim": "The backdrop should change per beat. A static field is a choice to justify, never a default.",
+   "source": "CLAUDE.md, THE BACKGROUND MUST MOVE",
+   "metric": "groundTurns", "op": "is", "value": true
+  },
+  {
+   "id": "one-loud-moment",
+   "claim": "A film nominates ONE loud moment and keeps every other beat restrained. Four beats shouting is a volume setting, not a spectacle.",
+   "source": "CLAUDE.md, the SPECTACLE clause",
+   "metric": "peakConcentration", "op": "atLeast", "value": 1.6
+  },
+  {
+   "id": "cuts-are-rare",
+   "claim": "Cuts are a last resort: the strongest reference films are built on travel, not on cutting.",
+   "source": "docs/CRAFT/REF-together-chat.md",
+   "metric": "cutsPerMinute", "op": "atMost", "value": 12
+  },
+  {
+   "id": "held-beat-exists",
+   "claim": "A film that reads well contains at least one genuinely HELD beat, so its loud beats have something to be loud against.",
+   "source": "core/idle.js, and the rebuilt reading",
+   "metric": "hasHeldShot", "op": "is", "value": true
+  }
+ ]
+}
