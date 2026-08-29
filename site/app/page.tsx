@@ -151,7 +151,7 @@ export default function Home() {
         <section className="section">
           <div className="wrap">
             <div className="kicker">what you can promise a client</div>
-            <h2 className="h2">The frame you approved is the frame that ships.</h2>
+            <h2 className="h2">What you approve is what ships.</h2>
             <p className="lead">
               Nothing here asks you to be careful. Anything that reads a real clock is refused before a
               pixel is drawn, so a film cannot drift between renders.
