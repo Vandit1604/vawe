@@ -1,6 +1,6 @@
 ---
 when: "you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one)"
-answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine · the ten worth building first, split into easing, modifier, blueprint and composition"
+answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (23 HAVE, 3 PARTLY, 0 LACK as of 2026-08-29) · what is left and where it would live"
 group: reference
 ---
 
@@ -53,13 +53,13 @@ Ranked by how often the recipe appears in real commercial motion work, most-used
 | 16 | **Light sweep / shine** | a bright bar crosses a mark and leaves | **HAVE** | `beam` layer, `streak` sting and spectacle |
 | 17 | **Moving hold** | a "still" frame that never fully stops | **HAVE** | `idle: breathe/drift`, `cameraMove: driftHold` |
 | 18 | **Echo / motion trail** | copies of the layer at earlier times | **HAVE** | `ghost` trail mode, `echoRing` beat |
-| 19 | **Arcs** | travel on a curve, never a ruler-straight line | **PARTLY** | `alongPath` bends type; position keys stay straight |
+| 19 | **Arcs** | travel on a curve, never a ruler-straight line | **HAVE** | `ease: "through"` on a motion key: neighbour tangents round the corner at every key. Measured, a three-key apex turns 22 degrees where `linear` turns 66 |
 | 20 | **Luma matte reveal** | one layer's brightness is another layer's alpha | **HAVE** | the `matte` modifier, and the matte moves |
 | 21 | **Shape morph** | one path becomes another, vertex to vertex | **PARTLY** | svg `morph`, `morphButton`; one layer only |
 | 22 | **Match cut on shape** | a silhouette carries across the cut into a new thing | **PARTLY** | doctrine exists, no device |
 | 23 | **Trim-paths bar growth** | a bar, ring or rule whose length IS the number | **HAVE** | `growUp`, `widen`, `progress`, `parts` |
 | 24 | **Animate on twos** | the clock steps at 12fps inside a 30fps film | **HAVE** | `step: 15` on any layer |
-| 25 | **Speed ramp** | the clock itself accelerates and brakes | **LACK** | a time-remap on a layer's own track |
+| 25 | **Speed ramp** | the clock itself accelerates and brakes | **HAVE** | `timeWarp: "easeInQuint"`: an easing on the LAYER'S CLOCK, applied in runTracks before any track reads it, so its motion, size, idle, typing and count all ramp together |
 | 26 | **Screen dive** | a real product surface pushed into as the subject | **HAVE** | `screenDive` beat, `component` capture, `ken` |
 
 ---

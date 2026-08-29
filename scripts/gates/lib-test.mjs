@@ -3777,8 +3777,22 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 {
   const { ADJUST_REGISTRY, ADJUST_BLURBS } = await import('../../core/layers/adjust.js');
   const { LAYER_TYPES } = await import('../../core/layers/index.js');
-  ok('the adjustment kinds are a registry, not a switch', ADJUST_REGISTRY.names.length === 5
-    && ADJUST_REGISTRY.has('blur') && ADJUST_REGISTRY.has('desaturate'));
+  // Asserted on SHAPE, not on a count. The first version pinned `length === 5` and broke the moment
+  // `bloom` was added, which is a test failing for the one reason it should not: the thing it guards
+  // growing. A registry that refuses an unknown name is the property worth holding.
+  ok('the adjustment kinds are a registry, not a switch', ADJUST_REGISTRY.names.length >= 5
+    && ADJUST_REGISTRY.has('blur') && ADJUST_REGISTRY.has('desaturate') && ADJUST_REGISTRY.has('bloom'));
+  // BLOOM IS THE ONLY KIND THAT COMPOSITES BACK. Every other replaces what is beneath; a bloom that did
+  // that would erase its own subject, which is exactly what the un-blended version did on screen.
+  ok('bloom brightens as well as blurring', /brightness/.test(ADJUST_REGISTRY.pick('bloom')('1')));
+  {
+    const src = fs.readFileSync(new URL('../../core/layers/adjust.js', import.meta.url), 'utf8');
+    ok('bloom screen-blends, and only bloom', /=== 'bloom'\) el\.style\.mixBlendMode = 'screen'/.test(src));
+    // An authored w/h must reach the element. It did not: `h` was written only when ABSENT, so an
+    // adjust layer given an explicit box measured 950x0, covered nothing, and rendered a frame
+    // identical to one with no grade. Width arrives from the shared box helper; height never does.
+    ok('an authored height is honoured', /el\.style\.height = L\.h == null \?/.test(src));
+  }
   ok('every adjustment kind carries a blurb', ADJUST_REGISTRY.names.every((n) => typeof ADJUST_BLURBS[n] === 'string' && ADJUST_BLURBS[n].length > 10));
   // The engine's own answer to an unknown name: refuse and say what it knows, never resolve to a
   // default. A grade that silently did nothing would be indistinguishable from one that did.

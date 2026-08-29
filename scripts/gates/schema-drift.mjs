@@ -25,6 +25,7 @@ import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS } from '../../core/layers/vocabulary.js';
 import { FX_TYPES } from '../../core/fx/index.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
+import { ADJUST_REGISTRY } from '../../core/layers/adjust.js';
 import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { SEAM_FX } from '../../core/seams.js';
@@ -118,6 +119,10 @@ const OWNED = [
   { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },
   { path: 'layers.item.cutTiming', want: Object.keys(TIMINGS),                 src: 'core/cuts.js TIMINGS (via TIMING_REGISTRY)' },
   { path: 'layers.item.modifiers.item.mixBlend', want: BLEND_MODES,            src: 'core/fx/mix-blend.js BLEND_MODES' },
+  // The adjustment layer's kinds. Added because the first version of that enum was hand-typed into the
+  // schema and went stale the moment a kind was added: the registry knew `bloom`, the validator did not,
+  // and a correct scene was refused at boot. Every enum on this list exists because that happened once.
+  { path: 'layers.item.kind',   want: ADJUST_REGISTRY.names,                   src: 'core/layers/adjust.js ADJUST_REGISTRY' },
   // MISTAKES #400 logged the schema enum as a hand-written second copy of the caption registry and
   // left lib-test comparing the two. Comparing is not owning: the gate said "they differ" and the
   // author still hand-edited schema.json. The registry owns it here, so --write derives it.

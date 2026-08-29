@@ -41,6 +41,18 @@ import { defineRegistry } from '../registry.js';
 // whatever unit that kind needs. `--adjust` runs 0..1 and `amount` carries the strength, so a keyed
 // `--adjust` always ramps from NOTHING to the authored grade, in every kind, in the same direction.
 const KINDS = {
+  // BLOOM IS THE ONE THAT NEEDED A NAME. Every other kind here REPLACES what is beneath it; a bloom has
+  // to be blurred and brightened and then composited BACK OVER the sharp original, or the subject
+  // disappears into its own halo. That takes three parts which are individually obvious and jointly
+  // not: a blur, a brightness above 1, and `mix-blend-mode: screen` on the layer. Reached for by hand it
+  // is easy to get two of the three and see nothing.
+  //
+  // Verified by render: text with a bloom adjust over it keeps its sharp glyphs AND gains a soft halo,
+  // where the same filter without the blend erases the text completely.
+  //
+  // The blend is set in `build` rather than being part of this string, because it is a compositing mode
+  // and not a filter, and putting it here would mean this table returned two different kinds of thing.
+  bloom:      (u) => `blur(calc(${u} * 0.9px)) brightness(calc(1 + ${u} * 0.09)) saturate(1.25)`,
   blur:       (u) => `blur(calc(${u} * 1px))`,
   desaturate: (u) => `saturate(calc(1 - ${u}))`,
   darken:     (u) => `brightness(calc(1 - ${u} * 0.01))`,
@@ -50,9 +62,10 @@ const KINDS = {
 
 // Defaults per kind, because the natural unit differs: blur is pixels, and the other three are
 // percentages of their own scale. One shared default would make `darken` either invisible or total.
-const AMOUNT = { blur: 14, desaturate: 1, darken: 45, brighten: 30, contrast: 25 };
+const AMOUNT = { bloom: 16, blur: 14, desaturate: 1, darken: 45, brighten: 30, contrast: 25 };
 
 export const ADJUST_BLURBS = {
+  bloom:      'a real GLOW over everything beneath: the light spills past its edges and the subject stays sharp. The one kind that composites back rather than replacing',
   blur:       'soften everything beneath, in pixels. The rack-focus of a whole beat, not of one layer',
   desaturate: 'drain the colour beneath. 1 is fully grey',
   darken:     'dim everything beneath, as a percentage',
@@ -73,8 +86,14 @@ export function build(kit, el, L) {
   // FULL FRAME BY DEFAULT. A grade is normally the whole picture, and the frame is already in the kit
   // (core/layers/util.js seeds it from core/boot.js), so nothing here re-derives a canvas size. An
   // author who wants a graded REGION states w/h like any other layer.
-  if (L.w == null) el.style.width = `${kit.frame ? kit.frame.W : 1920}px`;
-  if (L.h == null) el.style.height = `${kit.frame ? kit.frame.H : 1080}px`;
+  // WIDTH ARRIVES FROM THE SHARED BOX HELPER AND HEIGHT DOES NOT, which is a trap this layer fell
+  // straight into. `w` is applied for every layer type; `h` is written by each type that wants it
+  // (core/layers/rect.js does it on its first line). The first version of this file set a height ONLY
+  // when the author omitted one, so an authored `h` was accepted and silently dropped: an adjust layer
+  // given an explicit box measured 950x0 in the DOM, covered nothing, and produced a frame identical to
+  // one with no grade at all. Every gate green.
+  el.style.width = L.w == null ? `${kit.frame ? kit.frame.W : 1920}px` : `${L.w}px`;
+  el.style.height = L.h == null ? `${kit.frame ? kit.frame.H : 1080}px` : `${L.h}px`;
 
   // The raw form wins, and it is NOT keyable: an author handing in a whole filter string owns it, and
   // rewriting somebody's CSS to thread a variable through it would be the engine editing author input.
@@ -96,6 +115,10 @@ export function build(kit, el, L) {
   }
   el.style.backdropFilter = css;
   el.style.webkitBackdropFilter = css;
+  // SCREEN, so the halo ADDS to the sharp picture instead of standing in front of it. Only for `bloom`:
+  // every other kind is a grade and a grade that blended would be a different effect wearing the name.
+  // An author can still set any blend on any kind through `css`, which is how this recipe was found.
+  if (L.filter == null && (L.kind ?? 'desaturate') === 'bloom') el.style.mixBlendMode = 'screen';
 }
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.

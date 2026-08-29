@@ -311,6 +311,14 @@
 | `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
 | `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
 
+## Interpolation modes (not easings)  `[motion key]`
+
+On a `motion` key's `ease`, but NOT a curve. An easing is a function of one segment's own progress, so it necessarily starts and ends that segment at zero velocity and an interior keyframe becomes a dead stop. A MODE decides how the value is computed at all and may read the keys either side. `{ "t":0.6, "x":400, "ease":"through" }`
+
+| name | what / when |
+|---|---|
+| `through` | velocity carries THROUGH the key: a cubic Hermite with neighbour tangents, so a travel across several keys is one gesture rather than a stop at each |
+
 ## Depths (parallax planes)  `[per-layer]`
 
 `{ "depth": "back" }` on any layer. Stands it at a DISTANCE from the picture plane, so a camera move gives it parallax instead of turning the whole frame as one rigid pane. Each name is a fraction of the film's own lens, so it means the same distance under any camera, and it lowers to the `plane` modifier at boot. A raw number of px still works. Refused on a group CHILD, which sits in a flat parent: put it on the group.
@@ -328,6 +336,7 @@
 
 | name | what / when |
 |---|---|
+| `bloom` | a real GLOW over everything beneath: the light spills past its edges and the subject stays sharp. The one kind that composites back rather than replacing |
 | `blur` | soften everything beneath, in pixels. The rack-focus of a whole beat, not of one layer |
 | `brighten` | lift everything beneath, as a percentage |
 | `contrast` | harden the tones beneath, as a percentage |
@@ -870,4 +879,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_576 effects across 38 families. Regenerate: `make effects`._
+_578 effects across 39 families. Regenerate: `make effects`._
