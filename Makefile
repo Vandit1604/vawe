@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes claims study-verify
+.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes claims study-verify recreate
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -243,6 +243,12 @@ claims:
 # on a film whose answers the scene file already declares (duration, boundary times, backdrop runs).
 study-verify:
 	node scripts/gates/study-verify.mjs $(D) $(if $(NORENDER),--no-render)
+
+# make recreate NAME=<grammar> [THEME=vawe] [OUT=path]: a scene SKELETON from a studied reference.
+# Emits only what was MEASURED (duration, boundary times, backdrop lightness, a motion target per beat).
+# Every composition decision is left as a hole, on purpose: see the header for why.
+recreate:
+	node scripts/author/recreate.mjs $(NAME) $(if $(THEME),--theme $(THEME)) $(if $(OUT),--out $(OUT))
 
 # make census: every named population in formats/scene, with the question each one answers.
 # Quote a NAME in prose and print this to get the number (scripts/lib/census.mjs owns the definitions).
