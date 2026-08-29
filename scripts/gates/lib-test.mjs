@@ -3966,5 +3966,25 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the base is recognised by comparing against its own output', /cur === prior\.out \? prior\.base : cur/.test(src));
 }
 
+// ---- the effects catalogue can still be built --------------------------------------------------
+// THIS ASSERT EXISTS BECAUSE THE CATALOGUE FAILED CORRECTLY AND FAR TOO LATE. `effects-json.mjs`
+// refuses a family that has no authoring form and no preview (or a stated reason for having none),
+// which is right. But nothing in the gate ladder ran it, so three families were added with no rows and
+// the fault sat there until somebody typed `make effects` by hand and found the whole catalogue could
+// not regenerate. Failing loudly is only half of failing early: a check nobody runs is a check that
+// reports at a time of the author's choosing, which is exactly when they are not looking.
+//
+// Spawned rather than imported: the script is a build, and importing it would write 255 preview scenes
+// as a side effect of running the tests. `--check` is the gap check and nothing else.
+{
+  const { execFileSync } = await import('node:child_process');
+  let built = true, why = '';
+  try {
+    execFileSync(process.execPath, [new URL('../site/effects-json.mjs', import.meta.url).pathname, '--check'],
+      { stdio: 'pipe', cwd: new URL('../..', import.meta.url).pathname });
+  } catch (e) { built = false; why = String(e.stderr || e.message).trim().split('\n').slice(0, 6).join(' · '); }
+  ok(`the effects catalogue still builds: every family has a usage form and a preview or a reason${built ? '' : ' → ' + why}`, built);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

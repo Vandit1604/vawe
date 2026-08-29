@@ -252,6 +252,17 @@ if (gaps.length) {
   process.exit(1);
 }
 
+// `--check`: the gap check above and nothing else, so a GATE can run it without regenerating 255
+// preview scenes. It exists because this file failed correctly and far too late. Three families were
+// added with no rows and the fault sat there until somebody happened to type `make effects`, which
+// nothing in the ladder does, so the whole catalogue could not rebuild and no run said so. A check
+// that only fires when a human invokes the build is not fail-early, it is fail-eventually.
+// lib-test spawns this, so the run that ADDS a vocabulary is the run that goes red.
+if (process.argv.includes('--check')) {
+  console.log(`✓ effects-json: ${families.length} families, every one has a usage form and a preview or a reason`);
+  process.exit(0);
+}
+
 const tags = [...families.reduce((m, f) => m.set(f.tag, (m.get(f.tag) ?? 0) + f.count), new Map())]
   .sort((a, z) => a[0].localeCompare(z[0]));
 const total = families.reduce((n, f) => n + f.count, 0);
