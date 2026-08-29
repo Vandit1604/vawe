@@ -16140,3 +16140,142 @@ rasteriser noise, not this change.
 **Which gate catches it.** None, and none can: a doc that misdescribes code is a reading, not a
 measurement. What is checked is the behaviour, in `make lib-test` (the shared velocity read is asserted
 to be arithmetically the read the motion track already made) and by the pixel diff above.
+
+## #499: three name collisions in one session, and the check that would have caught all three
+
+**What.** Three separate times I introduced a name that already meant something else, and every time the
+engine accepted it and did the wrong thing silently.
+
+- `ease: "smooth"` for the new velocity-continuous interpolation. `smooth` is already a FEEL WORD in
+  `core/vocab.js` resolving to `easeInOutCubic`, so `resolveEasing` knew it, accepted it, and the new
+  behaviour never ran. Renamed `through`.
+- `origin` for a transform-origin. A `three` globe has had `origin` as the `[lon, lat]` of a route's
+  start for a long time, **and the schema entry saying so is the one I read while writing the prop**.
+  `showcase-flight-globe` failed at boot with my own error message quoting an array back at me.
+- `bg[].html` given a PATH. That key takes markup; `src` takes a path. It rendered the path as literal
+  text on a white frame.
+
+**Root cause.** In all three I checked whether the name felt free rather than asking whether anything
+answered to it. CLAUDE.md already says "grep the concept, not your name for it"; the failure is that a
+grep for `smooth` in a 20,000-line engine returns too much to read, so it gets skimmed.
+
+**Fix.** The cheap check that would have caught all three, in order of cost: try to RESOLVE the name
+(`resolveEasing('smooth')` returns a function, which is the whole answer in one line); then read the
+schema entry for the prop you are about to add (which existed, for `origin`, and I read it); then check
+the sibling keys on the same object (`html` sits next to `src`). `through` is now declared in its own
+`INTERP` registry rather than smuggled into `EASINGS`, because calling a mode an easing is what made the
+first name collide.
+
+**Which gate catches it.** `lib-test` pins that `resolveEasing` REFUSES `through`, so a future edit
+cannot quietly make a mode resolvable again. Nothing catches the general class, and nothing can: a name
+that already exists is a fact about the reader, not about the code.
+
+## #500: the motion instrument lied twice, and I was fooled by it within the hour
+
+**What.** `./bin/vawe` prints a motion figure beside every render, added this session so authoring has a
+number instead of an opinion. It was wrong in two independent ways.
+
+- **The background could carry it.** The figure is a property of the FRAME, so a moving backdrop
+  flatters it exactly as much as moving content does. A recreation measured 2% still and 1.25 on
+  `aurora`; swapping to a near-static ground gave 75% still and 0.29 **with not one layer changed**. I
+  had already read the 1.25 as evidence my fix worked.
+- **Frame rate scaled it.** A frame difference measures the gap BETWEEN frames, so the same film read
+  0.43 at 30fps and 0.22 at 60. Every reference in `grammar/` is about 30fps, so our 60fps output looked
+  half as alive as it is against the only numbers there are to compare to.
+
+**Root cause.** Both are the same error: reporting a raw measurement without normalising for the two
+things that trivially move it. The instrument was built and quoted in the same session, so nobody had
+yet had the chance to be surprised by it.
+
+**Fix.** Normalised to change-per-thirtieth-of-a-second in `internal/scene/scene.go`, so the number is
+comparable across frame rates and the still floor means one thing. `make motion-split` renders the same
+film twice in one browser, once with `?nobg=1`, and reports the ground's share: on a probe with a living
+ground and one still headline it says "the GROUND is 95% of this film's measured motion".
+
+**Which gate catches it.** None, deliberately: it is an instrument, not a rule. What is pinned is that
+`motion-split` reuses the Go renderer's own grid and sub-step, so the two agree (0.28 here, 0.27 there
+on the same film).
+
+## #501: a filter and a height, both authored, both silently dropped
+
+**What.** Two props accepted and discarded on the same afternoon, found by building one title card.
+
+- **`filter` on any layer with a `motion` track.** The motion track owns `style.filter` and composed
+  with what it found by stripping every `blur(...)` out first, assuming any blur present was its own
+  from a previous frame. It cannot tell an authored `blur(38px)` from its own: same six characters.
+- **`h` on an `adjust` layer.** Width arrives from the shared box helper for every layer type; height is
+  written by each type that wants it. `adjust` set one only when the author OMITTED it, so an adjust
+  layer given an explicit box measured 950x0, covered nothing, and rendered a frame identical to one
+  with no grade at all.
+
+**Root cause.** The first is a shared property with two writers and no protocol between them. The second
+is an asymmetry in the layer API (`w` is handled centrally, `h` is not) that every layer type has to
+know about, and a new one will not.
+
+**Fix.** The motion track stashes its base beside the OUTPUT it produced, the same shape
+`core/tracks/idle.js` already used, so a fresh write from build is recognised rather than guessed at.
+`adjust` writes both axes unconditionally. Six shipped scenes changed on the filter fix and every diff
+was `"" → "blur(0.52px)"`: the old code was losing its own contribution too.
+
+**Which gate catches it.** `lib-test` asserts the stash exists and that the pattern-match is gone, and
+asserts `adjust` honours an authored height. Neither is catchable by a gate in general, which is the
+argument for the rule the layer API should follow: **if `w` is handled centrally, `h` must be too.**
+
+## #502: green ticks read as passes, twice, in the gate for reading green ticks as passes
+
+**What.** Adding a drift check for a generated doc took three attempts. The first insert silently did not
+apply, and I read the resulting green run as a pass. Re-applied, it landed BELOW the clean-path exit
+where no finding it recorded could ever print, and the gate reported "docs in sync" over a page I had
+deliberately corrupted. I read that green tick as a pass too.
+
+**Root cause.** A string replacement that does not match writes nothing and returns the original, and
+the only evidence is the absence of a change nobody looked for. Then: a gate with an early success exit
+has a region where recording a finding is a no-op, and the region is not marked.
+
+**Fix.** Assert the insert landed (`assert 'MARKER' in open(p).read()`), and prove a check in BOTH
+directions before trusting it: corrupt the input, watch it fail by name, restore, watch it clear. Both
+are now done for `grammar --check`.
+
+**Which gate catches it.** Nothing catches an edit that did not apply. The habit is the fix, and it is
+cheap: one grep after every scripted edit.
+
+## #503: a claim tested against the wrong population, and a test pinned to a count
+
+**What.** Two smaller errors in the claims system, both of which produce a confident wrong answer.
+
+- `FILM-STRUCTURE.md` says "**Our films** sit at 2.5 to 4 seconds a beat; the reference we admire runs a
+  1.52s median". I tested it against the REFERENCE corpus and reported the doc CONTRADICTED at 3/12.
+  Against our own 41 films that declare a boundary it is SPLIT at 22/41 with a median of 3.35s, inside
+  the claimed band. **The doc was right and the test was wrong.**
+- A `lib-test` assert pinned `ADJUST_REGISTRY.names.length === 5` and failed the moment a sixth kind was
+  added: a test failing for the one reason it should not, the thing it guards growing.
+
+**Root cause.** A claim with no declared population is ambiguous by construction, and a wrong-population
+verdict reads exactly like a true one. An assert on a count is an assert on today's inventory rather
+than on the property worth holding.
+
+**Fix.** Every claim now declares `scope` (`reference` or `ours`) and the two are measured differently:
+theirs from a rendered shot list, ours from the declared boundaries in the JSON. The assert checks the
+SHAPE, that the vocabulary is a registry which refuses an unknown name.
+
+**Which gate catches it.** `make claims` prints the scope beside every verdict, so a mismatch is visible
+in the output rather than only in the file.
+
+## #504: a fork of a store that already existed, twenty lines from a doc that documented it
+
+**What.** I built `grammar/` to hold what we learn from reference films.
+`docs/CRAFT/REF-together-chat.md` is a 346-line hand study of exactly that, and it documents the same
+curl-the-pin-metadata technique I re-derived from scratch an hour after reading it.
+
+**Root cause.** I searched for my own word (`grammar`) rather than the concept. The repo's word was
+"reference study".
+
+**Fix.** Resolved as one owner with two views rather than by deleting either: the store owns the
+measurements and the per-film reading, a DEEP study owns one film in depth and names itself in
+`deepStudy`, and `docs/CRAFT/GRAMMAR.md` is generated from the store. The fork had already produced a
+contradiction: the store printed 10 shots for a film the hand study counted 15 in, with nothing to say
+which to believe. Both were right, and the disagreement is the finding.
+
+**Which gate catches it.** `docs-drift` now runs `grammar --check`, so the generated page cannot drift
+from the store it is generated from. Nothing catches a second store being created; `make grammar` and
+`make census` exist so the first one is easy to find.
