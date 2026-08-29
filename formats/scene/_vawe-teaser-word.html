@@ -1,50 +1,61 @@
-<!-- THE WHOLE FILM, IN ONE FRAGMENT. `--t` is the scene clock in SECONDS (core/layers/html.js), so a
-     hand-authored transition can be a function of absolute time and stay seekable: renderFrame(n) sets
-     --t, the CSS is a pure function of it, and no clock but the engine's exists.
-     `--p` is the crossfade's own 0..1 progress, cut out of --t once and reused, so the two states
-     cannot drift apart the way two separately-written calcs would. -->
+<!-- THE GOO MORPH, and the one detail that makes it work: `contrast()` thresholds LUMINANCE, so the
+     gooed stack needs an OPAQUE BLACK backdrop to push against. On a transparent one the contrast has
+     nothing to bite and the two words simply overlap, which is what the first attempt produced.
+     `mix-blend-mode: screen` then drops that black back out, because screen with black is a no-op.
+     Chosen for this look because it is the SAME MATERIAL: the reference is already made of blur, so the
+     transition and the treatment are one idea rather than two.
+     `--t` is the scene clock in seconds. `--p` is the morph's 0..1, cut out once so every layer below
+     reads the same number; `--g` peaks at the midpoint, which is where the letters are one mass. -->
 <div style="position:absolute;inset:0;display:grid;place-items:center;container-type:size;
-  --p:clamp(0, calc((var(--t,0) - 2.55) / 0.85), 1)">
+  --p:clamp(0, calc((var(--t,0) - 2.5) / 1.15), 1);
+  --g:calc(1 - abs(var(--p) * 2 - 1))">
 
-  <!-- STATE ONE: the wordmark. Leaves by blurring and growing THROUGH the frame, not by fading in
-       place: the reference films in grammar/ all leave through something. -->
-  <div style="grid-area:1/1;text-align:center;
-    opacity:calc(1 - var(--p));
-    filter:blur(calc(var(--p) * 26px));
-    transform:scale(calc(1 + var(--p) * 0.28))">
-    <div style="position:relative">
-      <div style="position:absolute;inset:0;display:grid;place-items:center;
-        filter:blur(calc(30px + var(--t,0) * 4px));mix-blend-mode:screen;opacity:.92;transform:scale(1.03)">
-        <span class="wm">vawe</span>
-      </div>
-      <div style="position:relative;filter:blur(3px)"><span class="wm">vawe</span></div>
-    </div>
-    <div style="font:600 clamp(12px,2.1cqw,40px)/1 var(--font-sans,system-ui),sans-serif;
-      letter-spacing:.30em;color:#e9eaf2;margin-top:1.1em;
-      opacity:clamp(0, calc((var(--t,0) - 1.35) / 0.5), 1)">motion animation engine</div>
-  </div>
+  <!-- THE HALO: two gooed copies at bigger radii, coloured. AE calls this a Glow with Color Looping
+       A>B>A; here it is the same mass drawn twice, blue wide and orange tight, screened over the black. -->
+  <!-- NO CONTRAST ON THE COLOURED COPIES. contrast() thresholds LUMINANCE, so on a coloured layer it
+       crushes the hue toward whichever channel is strongest: the first version gooed all four copies
+       and every one of them came out red. Only the white face needs the threshold. The halo is blur
+       and screen, nothing else, which is also what makes the blue survive next to the orange. -->
+  <!-- THE BLUE IS AN OUTER RIM, NOT A WASH. In the reference it sits OUTSIDE the orange, so it has to
+       be drawn LARGER as well as blurred wider: at the same size a wide blue blur just sits under the
+       orange and is swamped by it, which is what the first two attempts produced. -->
+  <div class="halo" style="filter:blur(calc(22px + var(--g) * 12px));opacity:1;transform:scale(1.055)">
+    <div class="mass" style="color:#2f6bff"></div></div>
+  <div class="halo" style="filter:blur(calc(34px + var(--g) * 16px));opacity:.7;transform:scale(1.1)">
+    <div class="mass" style="color:#1b4fd8"></div></div>
+  <div class="halo" style="filter:blur(calc(13px + var(--g) * 9px));opacity:1;transform:scale(1.012)">
+    <div class="mass" style="color:#ff6a00"></div></div>
+  <div class="halo" style="filter:blur(calc(6px + var(--g) * 5px));opacity:.9">
+    <div class="mass" style="color:#ffc247"></div></div>
 
-  <!-- STATE TWO: arrives out of focus and larger, and resolves. The same gesture the wordmark left on,
-       reversed, so the two states read as one move rather than as a cut. -->
-  <div style="grid-area:1/1;text-align:center;
-    opacity:var(--p);
-    filter:blur(calc((1 - var(--p)) * 30px));
-    transform:scale(calc(1.3 - var(--p) * 0.3))">
-    <div style="position:relative">
-      <div style="position:absolute;inset:0;display:grid;place-items:center;
-        filter:blur(30px);mix-blend-mode:screen;opacity:.9;transform:scale(1.03)">
-        <span class="ls">launching soon</span>
-      </div>
-      <div style="position:relative;filter:blur(2px)"><span class="ls">launching soon</span></div>
-    </div>
-  </div>
+  <!-- THE FACE. Gooed hard only through the middle, so the words MELT into one mass and re-form. -->
+  <div class="goo" style="filter:blur(calc(2px + var(--g) * 15px)) contrast(calc(1 + var(--g) * 26))">
+    <div class="mass" style="color:#fff"></div></div>
+
+  <!-- GRAIN, not a grid. A repeating radial reads as dots in rows; two offset layers at coprime sizes
+       and a slight rotation read as noise, which is what the reference has. -->
+  <div style="position:absolute;inset:-45%;pointer-events:none;opacity:.10;mix-blend-mode:screen;
+    transform:rotate(11deg);
+    background-image:radial-gradient(#fff .4px,transparent .5px),radial-gradient(#fff .35px,transparent .45px);
+    background-size:3px 3px,7px 5px;background-position:0 0,1px 2px"></div>
 
   <style>
-    .wm { font:900 clamp(60px,23cqw,320px)/0.9 var(--font-sans,system-ui),sans-serif; letter-spacing:-.05em;
-          background:linear-gradient(96deg,#6d3df0,#a86ce8 18%,#eef0ff 36%,#fff4d6 50%,#ffb257 64%,#ff5fa2 80%,#9b3cd8);
-          -webkit-background-clip:text;background-clip:text;color:transparent; }
-    .ls { font:800 clamp(30px,9.4cqw,132px)/0.95 var(--font-sans,system-ui),sans-serif; letter-spacing:-.02em;
-          background:linear-gradient(96deg,#a86ce8,#eef0ff 34%,#fff4d6 52%,#ffb257 70%,#ff5fa2);
-          -webkit-background-clip:text;background-clip:text;color:transparent; }
+    /* The opaque black is load-bearing: contrast() thresholds luminance and needs something to push
+       against. `screen` removes it again, because screen against black returns the source unchanged. */
+    /* The opaque black is load-bearing on the GOO only: contrast() thresholds luminance and needs
+       something to push against. `screen` removes it again, because screen against black is a no-op.
+       The halo needs no backdrop, because it is not being thresholded. */
+    .goo  { grid-area:1/1; width:100%; height:100%; background:#000; mix-blend-mode:screen;
+            display:grid; place-items:center; }
+    .halo { grid-area:1/1; width:100%; height:100%; mix-blend-mode:screen;
+            display:grid; place-items:center; }
+    .mass { position:relative; display:grid; place-items:center; }
+    .mass::before, .mass::after {
+      grid-area:1/1;
+      font:800 clamp(30px,10.5cqw,150px)/1 var(--font-sans,system-ui),sans-serif;
+      letter-spacing:-.02em; white-space:nowrap; color:inherit;
+    }
+    .mass::before { content:"launching soon"; opacity:calc(1 - var(--p)); transform:scale(calc(1 - var(--p) * 0.08)); }
+    .mass::after  { content:"vawe.dev";       opacity:var(--p);           transform:scale(calc(0.92 + var(--p) * 0.08)); }
   </style>
 </div>
