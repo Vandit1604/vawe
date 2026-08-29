@@ -162,5 +162,34 @@ export function bakeDepth(data) {
     }
   };
   walk(data && data.layers, false);
+
+  // ONCE ANYTHING HAS DEPTH, `track` STOPS BEING THE ANSWER, and nothing used to say so. A depth puts
+  // the layer in a real 3D rig, where occlusion is decided by DISTANCE, so a layer standing toward the
+  // eye covers a layer at the picture plane no matter how high that layer's `track` is.
+  //
+  // It cost a real debugging session: a subject at z +180 with track 4 covered the payoff at track 6 for
+  // two full seconds. Every gate was green, the DOM reported the covered layer at opacity 1 with its
+  // text present, and it was invisible. Found by looking at a frame, which is the expensive way.
+  //
+  // A WARNING AND NOT A THROW, deliberately. Standing something in front of the frame is a legitimate
+  // composition and the engine cannot know whether the layer underneath was meant to be seen. What it
+  // can know is that the author wrote a `track` which is now being ignored, and that is worth saying out
+  // loud on the run that introduces it rather than after a render nobody can explain.
+  const top = (data && data.layers) || [];
+  const trackOf = (L, i) => (typeof L.track === 'number' ? L.track : i);
+  const near = top.map((L, i) => ({ L, i, z: (L.modifiers || []).find((m) => m && m.plane)?.plane?.z }))
+    .filter((r) => typeof r.z === 'number' && r.z > 0);
+  for (const n of near)
+    for (let i = 0; i < top.length; i++) {
+      const other = top[i];
+      if (other === n.L) continue;
+      const flat = !(other.modifiers || []).some((m) => m && m.plane);
+      if (flat && trackOf(other, i) > trackOf(n.L, n.i))
+        console.warn(`depth beats track: "${n.L.id || n.L.type || 'a layer'}" stands ${n.z}px toward the `
+          + `camera, so it is drawn IN FRONT of "${other.id || other.type || 'a layer'}" even though that `
+          + `layer's track (${trackOf(other, i)}) is higher (${trackOf(n.L, n.i)}). Once anything in the `
+          + `frame has depth, track orders only the layers sharing a plane. Give both the same depth, or `
+          + `drop it from the one in front.`);
+    }
   return data;
 }
