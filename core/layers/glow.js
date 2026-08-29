@@ -141,7 +141,7 @@ export function flashEnvelope(lt, { attack = 0.35, decay = 0.9, peak = 0.4 } = {
 // only reach a named PRESET, `pulseAmp` only scales a `pulse`, `cycle` only times the chromaCycle preset.
 // `beam` and `intensity` are read on the preset-less path too, so they stay unconditional.
 export const PROPS = {
-  color: {}, intensity: {}, beam: {}, preset: {}, pulse: {}, flash: {},
+  color: {}, color2: {}, intensity: {}, beam: {}, preset: {}, pulse: {}, flash: {},
   cx: { when: 'preset' }, cy: { when: 'preset' }, angle: { when: 'preset' },
   cycle: { when: 'preset' }, pulseAmp: { when: 'pulse' },
   h: {},
@@ -166,7 +166,21 @@ export const PROPS = {
 // Written as `rgb(r g b / calc(...))` rather than `rgba(...)`, because an alpha has to be a calc for a
 // variable to reach it and the legacy comma form does not take one. `hexA` keeps its own shape: it has
 // other callers and this is the only one that needs a live alpha.
-const GLOW_VARS = { i: '--glow-i', r: '--glow-r' };
+// --glow-c JOINED THEM, and it is the third question a light can be asked. Intensity says how much
+// light; radius says how far it reaches; colour says WHAT KIND of light, and it was the one still
+// resolved at build. The reference technique that wanted it animates a ray from cold to hot ACROSS a
+// beat, so the light does not merely appear, it changes character while the eye is on it.
+//
+//   --glow-c   crossfades from `color` toward `color2`. 0 is the authored colour, 1 is the second one.
+//
+//   { "type":"glow", "color":"#2b4cff", "color2":"#ff6a00",
+//     "vars":{ "--glow-c":[0,1] }, "varsDur":1.2 }
+//
+// `color2` is REQUIRED when this var is keyed, and the absence throws by name. A crossfade with
+// nothing to cross to is a var that drives a value nobody supplied: it would resolve to the authored
+// colour on every frame and read as a light that simply refuses to change, which is the silent
+// substitution this repo logs more than any other class of defect.
+const GLOW_VARS = { i: '--glow-i', r: '--glow-r', c: '--glow-c' };
 
 // ONLY EMITTED WHERE IT CAN BE DRIVEN, which is the difference between a safe change and a diff across
 // the library. A `calc(72%)` computes to exactly `72%`, so the pixels never moved, but the SERIALISED
@@ -177,14 +191,27 @@ const GLOW_VARS = { i: '--glow-i', r: '--glow-r' };
 // and the plain form is emitted for it. Nothing existing changes at all.
 const drives = (L, name) => !!(L.vars && Object.prototype.hasOwnProperty.call(L.vars, name));
 
-/** The layer's glow colour, with a LIVE alpha only when this layer keys one. */
+/** One colour at this layer's alpha, live only when the layer keys --glow-i. */
+function atAlpha(kit, L, color, a) {
+  const m = /^#([0-9a-f]{6})$/i.exec(color || '');
+  if (!m || !drives(L, GLOW_VARS.i)) return kit.hexA(color, a);
+  const n = parseInt(m[1], 16);
+  return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / calc(var(${GLOW_VARS.i}, 1) * ${a}))`;
+}
+
+/** The layer's glow colour: a live alpha, and a live HUE when the layer keys one. */
 function liveColor(kit, L) {
   if (L.color === true || L.color == null) return 'var(--accent-glow)';
   const a = L.intensity ?? 0.25;
-  const m = /^#([0-9a-f]{6})$/i.exec(L.color || '');
-  if (!m || !drives(L, GLOW_VARS.i)) return kit.hexA(L.color, a);
-  const n = parseInt(m[1], 16);
-  return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / calc(var(${GLOW_VARS.i}, 1) * ${a}))`;
+  const base = atAlpha(kit, L, L.color, a);
+  if (!drives(L, GLOW_VARS.c)) return base;
+  if (L.color2 == null)
+    throw new Error(`glow "${L.id || 'layer'}" keys \`${GLOW_VARS.c}\` but declares no \`color2\`. `
+      + `That var crossfades \`color\` toward \`color2\`, so with only one colour it would resolve to `
+      + `the authored one on every frame and render a light that never changes. Add \`color2\`, or drop `
+      + `the var.`);
+  // color-mix carries the alpha of both sides, so a keyed --glow-i still reaches the result.
+  return `color-mix(in srgb, ${atAlpha(kit, L, L.color2, a)} calc(var(${GLOW_VARS.c}, 0) * 100%), ${base})`;
 }
 
 /** The radial stop, scaled by --glow-r only when this layer keys one. */
