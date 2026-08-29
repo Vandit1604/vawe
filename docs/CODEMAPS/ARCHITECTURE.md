@@ -70,6 +70,14 @@ accumulate  core/tracks/motion.js
 accumulate  core/tracks/idle.js
 ```
 
+**THE ACCUMULATOR HAS TO BE EMPTIED, and for a long time nothing did it.** The four tracks above read
+`el.style.transform` back and PREPEND to it, which is only safe if the element starts each frame clean.
+`driveClips` clears a property only when one of the layer's OWN anims writes it, so a layer entering on
+`wipe`, `iris` or `clock` (all clip-path, no transform) composed onto the string left by whichever frame
+a worker rendered before. Order-dependent by construction, and invisible until a second accumulator ran
+on such a layer. `clipStyleAt` now returns `transform: "none"` unconditionally, ahead of the resting
+keys and the composed style, so an anim that does write a transform still wins.
+
 `resolveKeyedProps` is deliberately absent from BUILD: it runs twice, before the measurement and again
 after `becomes`, because the handover injects new keys and `core/sequence.js` holds one rule for a
 keyed track (both endpoints state `w`/`h`, or neither). A step that runs twice has no place in an
@@ -96,6 +104,9 @@ it are `make probe`, `make canvas-purity` and `make snap-all`.
 | `core/gsap-effects.js` + `core/morph.js` | GSAP as an INTERNAL tween engine | `gsap-effects.js` = a NAMED effect library (`registerGsapEffects`): entrances/text/loops referenced from JSON by `fx`, exits by `fxOut` (`GSAP_FX`/`EXIT_FX`/`FX_DUR` exports). `morph.js` = TextMorph (letters migrate A→B). GSAP is vendored (`assets/vendor/gsap.min.js` 3.13 + MotionPath/Physics2D/SplitText); scenes can't bring JS, so GSAP is engine-internal, seeked per frame → pure. |
 | `core/seams.js` · `core/stings.js` · `core/cuts.js` | beat-to-beat transitions | `seams.js` = two-scene GPU blends (`SEAM_FX`, incl. `portal`); `stings.js` = single-scene shader FX (`SHADER_FX`); `cuts.js` = hard-cut timing. All shader-based → guarded by `make canvas-purity`. |
 | `blocks/` | build-time BLOCK/COMP sugar | `index.mjs` = the assembly point + registry (`BLOCKS`); factories live in family siblings sharing `kit.mjs` (`charts`/`dev`/`social`/`ui`/`app`/`interact`), plus `catalog.mjs` (variants). A `type:"block"` layer (pointer/kpiRow/browserFrame/…) carries the BLOCK's own props, expanded by `make expand` into real layers. Block props are validated by `make blocks-audit`, NOT the base layer schema (validate.mjs exempts block/comp). |
+| `core/layers/adjust.js` | ONE grade over everything BENEATH | `{ "type":"adjust","kind":"blur" }`. Grades every layer with a LOWER `track` and leaves everything above crisp, so `track` (already the z-index) IS the z-order contract. Built on the same `backdrop-filter` the GLASS look uses. Keyed through the `vars` track on `--adjust`, never a mechanism of its own. |
+| `core/fx/plane.js` | DEPTH, and its named planes | The modifier stands a layer off the picture plane so a camera move gives parallax instead of turning the frame as one pane. `depth: "back"` is the reachable spelling: four names, each a FRACTION of the film's lens, baked to the modifier by `bakeDepth` in `core/produce.js` (and `core/boot.js` throws if one survives). |
+| `core/idle.js` | how a layer LIVES between its ramps | `clipStyleAt` computes an entrance ramp and an exit ramp and has no branch for the middle, so stillness was the shape of the data model rather than anyone's decision. `motionDefaults` carries `idle`, resolved layer → scene → theme → engine default. |
 | `core/tokens.css` | design system | color (themeable `--bg/--accent/…` + `--font-*`), **type scale** (`--fs-*`), **spacing scale** (`--sp-*`), radii/shadows, safe-zone vars, `.stage/.act/.safe` scaffold, `.debug-safe` overlay, `html.alpha` transparent-export mode. |
 | `themes/<name>.json` | brand kits / taste | palette + gradient + fonts + motion personality. `data.theme` = name or inline object. `default.json` = current look. |
 | `core/theme-contract.js` | required theme keys (no default look) | `themeErrors()`, shared by validate (node) + applyTheme (browser). |
@@ -133,6 +144,7 @@ make video D=…            # render one JSON → out/<name>.mp4
 make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
 make look M=… / frame M=… N=…   # storyboard / one frame
 make validate [D=…]       # data + theme against schema.json (boot runs it too)
+make census               # every named population in formats/scene, and the question each answers
 make lib-test             # motion-primitive + easing asserts (instant)
 make lint-test            # regression asserts for validate's lint/fx/ease/block rules (instant)
 make audit [M=…]          # overlap/overflow/safe-zone/spacing  → /tmp/audit/<fmt>.png
@@ -168,15 +180,29 @@ cache it against `package-lock.json`. `CHROME_BIN` steers `allocOpts` in `intern
 that path belongs to the Go renderer, which no workflow invokes.
 
 **`doc-refs` is missing from CI on purpose, and it is not a softened gate.** `formats/scene/*.json` is
-gitignored, so a clone carries 40 of the 146 scenes a maintainer's tree holds. `doc-refs` resolves every
+gitignored, so a clone carries a fraction of the scenes a maintainer's tree holds (`make census` prints
+both numbers, and names which population each answers, because four different counts of this directory
+are all true and mean different things). `doc-refs` resolves every
 repo path the docs cite, and on a fresh clone 20 of its 22 findings are scene files no clone will ever
 have. It keeps its teeth in `.githooks/pre-push`, where the author has the content on disk.
 
-**Snapshot comparison does not work in CI, and `snap-scenes.yml` says so in its own header.** Two
-reasons, both structural. `verify/snap/` is gitignored, so a runner starts with no baselines and diff
-mode has nothing to diff. And a baseline is only valid inside one font state, while
-`scripts/media/fonts.mjs` fetches from jsDelivr with no version in any URL, so two machines can hold
-different bytes under identical filenames. `SAVE=1` still proves something font-independent: it renders
-each scene ascending and descending and quarantines any scene whose signature depends on the order.
-Read a green run as "every scene is deterministic", never as "nothing changed". Pinning the fetcher to
-exact Fontsource versions is what would make cross-machine comparison mean anything.
+**Snapshot comparison in CI is a DIGEST, and knowing which half you have is the point.** This section
+used to say the comparison could not work at all, for two structural reasons, and both have since been
+answered, in opposite ways.
+
+The font half is simply fixed. `scripts/media/fonts.mjs` now carries an exact version AND a sha256 for
+every face (`scripts/media/fonts.lock.json`), and a mismatch FAILS rather than warns, so two machines
+hold identical bytes. One pin is deliberately behind the others: GeistMono sits on 5.2.8 because 5.3.0
+re-subset the face and the baselines were not saved against it.
+
+The baseline half was a SIZE problem wearing a structural one's clothes. A full signature is ~170KB per
+scene and the set is 20MB, most of it describing films that are themselves gitignored, so the baselines
+cannot be committed. A hash can. `verify/snap/digest.json` is one sha256 per scene plus the font state,
+about 4KB, and it is the single tracked file inside a gitignored directory (`.gitignore` re-includes it
+by name). A checkout with no local baselines falls back to it and gets a real verdict.
+
+**What the digest can and cannot say, because the difference is the whole value.** It answers WHETHER a
+scene moved. It cannot say what moved inside it, and it says so in the finding rather than implying the
+full net ran. The `what` stays local, where the 20MB lives and a person can read a diff. `SAVE=1` still
+proves the font-independent thing on top: every scene rendered ascending and descending, with any
+order-dependent scene quarantined.

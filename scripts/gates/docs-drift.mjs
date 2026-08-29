@@ -26,8 +26,8 @@ const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
 const PRIM_PATH = path.join(repoRoot, 'docs', 'PRIMITIVES.md');
 const prim = fs.readFileSync(PRIM_PATH, 'utf8');
 const HEADING_COUNTS = [
-  { re: /## Shader stings \(`core\/stings\.js`\), (\d+)/,          reg: 'SHADER_FX' },
-  { re: /## Ambient shader looks \(`core\/shaders-ambient\.js`\), (\d+)/, reg: 'AMBIENT_FX' },
+  { re: /## Shader stings \(`core\/stings\.js`\)[,:] (\d+)/,          reg: 'SHADER_FX' },
+  { re: /## Ambient shader looks \(`core\/shaders-ambient\.js`\)[,:] (\d+)/, reg: 'AMBIENT_FX' },
   { re: /the `raymarch` layer type, (\d+)/,                         reg: 'RAYMARCH_FX' },
 ];
 
