@@ -5,7 +5,13 @@
 // make reveal, make seam-check, make judge) points at our OWN output, so a reference is studied by
 // eye, once, and the study is lost. This writes the study down.
 //
-//   node scripts/media/study.mjs <video> [name] [--threshold 0.3] [--min-shot 0.4] [--fixed 2]
+//   node scripts/media/study.mjs <video> [name] [--threshold 0.3] [--min-shot 0.4] [--fixed 2] [--cells 4]
+//
+// NAME IT FOR A PERSON. The name becomes grammar/<name>.json, a row in docs/CRAFT/GRAMMAR.md and, if
+// the film earns a deep study, docs/CRAFT/REF-<name>.md. The first one written here was called
+// `pin-16818198602994243`, which is the id in a URL: it says nothing about a film anyone might be
+// looking for, and it was the filename of a download rather than a decision. `together-chat` is the
+// same film.
 //   make study VIDEO=refs/brew.mp4 NAME=brew
 //
 // It writes refs/<name>/: sheet.png (one row per shot: in · mid · out), study.json (the measured
@@ -143,6 +149,67 @@ function detectCuts() {
   return { peak, near, cuts: clustered };
 }
 
+// ── the film as two per-frame series, in two decodes ─────────────────────────────────────────────
+//
+// WHY THIS REPLACED PER-SHOT SAMPLING. The old shape asked ffmpeg a question per shot per statistic,
+// so a 5-shot film cost 11 decodes, and each answer was one number for a span. That is the wrong shape
+// twice over: it is slower, and a mean over 3.5 seconds cannot tell a shot that moves steadily from one
+// that holds for three seconds and then explodes. In a 20s film a great deal happens and a per-shot
+// average is a summary of a summary.
+//
+// Two decodes now, over the WHOLE film, at its own frame rate:
+//   LUMA   how light the frame is, per frame
+//   DELTA  how much it changed from the frame before, per frame
+//
+// Every per-shot figure is then a slice of an array we already hold, and the arrays are what make the
+// rest possible: choosing which frames are worth LOOKING at, and storing the film's shape rather than
+// its average.
+//
+// COST. Two full decodes at 160x90 of a 30s file is about a second. The sheet after it is unchanged.
+// Nothing here costs an agent a token: ffmpeg reads every frame, and tokens are only spent on the
+// handful of frames that end up in the sheet, which is exactly the split to want.
+function frameSeries(chain) {
+  const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', VIDEO, '-an', '-vf',
+    `${chain},metadata=mode=print:key=lavfi.signalstats.YAVG`, '-f', 'null', '-'],
+    { encoding: 'utf8', maxBuffer: 1 << 28 });
+  const out = [];
+  let t = null;
+  for (const line of String(r.stderr).split('\n')) {
+    const p = /pts_time:\s*([0-9.]+)/.exec(line);
+    if (p) { t = +p[1]; continue; }
+    const v = /lavfi\.signalstats\.YAVG=([\d.]+)/.exec(line);
+    if (v && t != null) { out.push({ t, v: +v[1] }); t = null; }
+  }
+  return out;
+}
+
+const LUMA = frameSeries('scale=160:90,signalstats');
+// The first difference frame is the frame against itself and reads 0. Dropped rather than averaged in,
+// because "how much did this change from the one before" has no answer for the first frame.
+const DELTA = frameSeries('scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
+
+const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+const between = (series, t0, t1) => series.filter((x) => x.t >= t0 && x.t < t1).map((x) => x.v);
+
+// A CUT IS A PROPERTY OF THE JOINT, NOT OF THE SHOT AFTER IT. The first difference frame inside a shot
+// is that shot's opening frame measured against the CLOSING FRAME OF THE PREVIOUS ONE, so on a hard cut
+// it is enormous and it belongs to neither shot. Measured on the first film through here: shots 2 to 5
+// reported peaks of 218, 215, 203 and 192 while their loudest real frame was 33, and a 1.17s shot whose
+// own peak is 6.9 reported a mean of 6.64 because one cut frame dominated its 35.
+//
+// So a shot's own statistics start after the joint, and the joint's size is kept separately, where it
+// is worth having: it is the measurement of how hard the film cuts.
+const CUT_GUARD = 2;   // difference frames to drop at a shot's head. Two, because a cut can smear one.
+const insideShot = (t0, t1, isFirst) => {
+  const xs = DELTA.filter((x) => x.t >= t0 && x.t < t1);
+  return (isFirst ? xs : xs.slice(CUT_GUARD)).map((x) => x.v);
+};
+const jointSize = (t0, isFirst) => {
+  if (isFirst) return null;
+  const head = DELTA.filter((x) => x.t >= t0).slice(0, CUT_GUARD).map((x) => x.v);
+  return head.length ? Number(Math.max(...head).toFixed(1)) : null;
+};
+
 // ── per-shot measurement: ground · motion · tone ─────────────────────────────────────────────────
 // Three numbers a person was reading off the contact sheet by eye, two of which a still cannot show.
 //
@@ -202,16 +269,37 @@ const toneOf = (t0, len) => {
 };
 
 const measureShot = (s) => {
-  const luma = statOf(s.t0, s.len, `fps=${SAMPLE_FPS},scale=160:90,signalstats`);
-  // The FIRST difference frame is the frame against itself and reads 0, which drags a short shot's
-  // average down by 1/n. Dropped rather than corrected for, because "how much does this change between
-  // frames" has no answer for the first frame and averaging a placeholder in is inventing one.
-  const delta = statOf(s.t0, s.len, `scale=160:90,tblend=all_mode=difference,signalstats,select='gt(n\\,0)'`);
+  const luma = mean(between(LUMA, s.t0, s.t1));
+  const deltas = insideShot(s.t0, s.t1, s.i === 1);
+  const delta = mean(deltas);
+  const joint = jointSize(s.t0, s.i === 1);
   const tone = toneOf(s.t0, s.len);
+  // THE SHAPE, not just the average. A shot that holds for three seconds and then explodes has the same
+  // mean as one that moves steadily, and they are different shots. `peak` is the loudest single frame
+  // and `held` is the share of the shot below the still floor, so "3.0 average, peak 14, 60% held"
+  // describes a beat that a single number cannot.
+  const peak = deltas.length ? Math.max(...deltas) : null;
+  const held = deltas.length ? deltas.filter((d) => d < STILL_FLOOR).length / deltas.length : null;
+  // Downsampled by MAX, never by mean. A mean over a quarter-second erases the single-frame burst that
+  // is the whole point of keeping a curve at all: the bloom in shot 1 peaks at 49 for a few frames and
+  // averages to 3, and it is the 49 that tells you what the shot does.
+  const BUCKETS = Math.max(1, Math.round(s.len * 4));
+  const guarded = DELTA.filter((x) => x.t >= s.t0 && x.t < s.t1);
+  const body = s.i === 1 ? guarded : guarded.slice(CUT_GUARD);
+  const curve = Array.from({ length: BUCKETS }, (_, b) => {
+    const lo = s.t0 + (b / BUCKETS) * s.len, hi = s.t0 + ((b + 1) / BUCKETS) * s.len;
+    const win = body.filter((x) => x.t >= lo && x.t < hi).map((x) => x.v);
+    return win.length ? Number(Math.max(...win).toFixed(1)) : 0;
+  });
   return {
     luma: luma == null ? null : Number(luma.toFixed(1)),
     ground: luma == null ? null : (luma > 128 ? 'light' : luma > 60 ? 'mid' : 'dark'),
     motion: delta == null ? null : Number(delta.toFixed(2)),
+    peak: peak == null ? null : Number(peak.toFixed(2)),
+    joint,
+    held: held == null ? null : Number(held.toFixed(2)),
+    frames: deltas.length,
+    curve,
     alive: delta == null ? null : delta >= STILL_FLOOR,
     accent: tone && tone.sat > 0.12 ? tone.hex : null,
     saturation: tone ? Number(tone.sat.toFixed(3)) : null,
@@ -237,6 +325,45 @@ for (const s of shots) Object.assign(s, measureShot(s));
 const lens = shots.map((s) => s.len).sort((a, b) => a - b);
 const median = lens.length % 2 ? lens[(lens.length - 1) / 2] : (lens[lens.length / 2 - 1] + lens[lens.length / 2]) / 2;
 
+// ── which frames are worth LOOKING at ────────────────────────────────────────────────────────────
+//
+// THE ONE PLACE TOKENS ARE SPENT, so it is the one place the choice matters. ffmpeg reads every frame
+// for free; an agent reads the contact sheet. The old sheet took in · mid · out of each shot, which is
+// a choice by POSITION, and position is uncorrelated with what happens. On a 9.5s shot the midpoint is
+// a frame chosen because it is halfway, and a lot happens in nine seconds.
+//
+// EVENTS, instead. The delta series is the film's change curve, and its local maxima are the moments
+// something starts, stops or lands: an entrance settling, a word arriving, a camera braking. Picking
+// those costs no more tokens than picking the midpoint and shows the shot's structure rather than its
+// middle. The first and last frame of a shot are always kept, because "what it opens on" and "what it
+// leaves on" are questions about position and are answered correctly by position.
+//
+// SEPARATED, so three peaks 100ms apart do not spend three cells on one event. The separation is a
+// fraction of the shot rather than a constant: on a 1.2s shot 0.4s apart is three distinct moments,
+// and on an 11s shot it is the same instant three times.
+const CELLS = Number(flag('--cells', 4));       // frames per shot row, including the in and out frames
+
+function eventFrames(s, n) {
+  const inT = Math.min(s.t0 + 0.08, s.t1 - 0.01);
+  const outT = Math.max(s.t1 - 0.08, s.t0);
+  const want = Math.max(0, n - 2);
+  if (want === 0) return [inT, outT];
+  const sep = Math.max(0.25, s.len / (n + 1));
+  // Rank every frame in the shot by how much it changed, then take them greedily while keeping them
+  // `sep` apart. Greedy is the right algorithm here and not a shortcut: the question is "show me the
+  // n loudest distinct moments", which is exactly what greedy-by-rank-with-a-spacing-rule answers.
+  const inner = DELTA.filter((x) => x.t > inT + sep * 0.5 && x.t < outT - sep * 0.5)
+    .sort((a, b) => b.v - a.v);
+  const picked = [];
+  for (const cand of inner) {
+    if (picked.length >= want) break;
+    if (picked.every((p) => Math.abs(p - cand.t) >= sep)) picked.push(cand.t);
+  }
+  // A shot with nothing happening in it has no events, and padding with midpoints would invent
+  // structure. It gets a shorter row, and a shorter row IS the reading: nothing happened here.
+  return [inT, ...picked.sort((a, b) => a - b), outT];
+}
+
 // ── contact sheet: one row per shot, in · mid · out ───────────────────────────────────────────────
 // Same shape as make beats, and for the same reason: the middle of a shot is the frame that hides the
 // entrance, which is exactly what a study is looking for (docs/CRAFT/REFERENCE-STUDY.md, MISTAKES #124).
@@ -245,9 +372,12 @@ fs.mkdirSync(frames, { recursive: true });
 const tileW = 300, tileH = Math.round((tileW * height) / width);
 const rows = [];
 for (const s of shots) {
-  const ts = [s.t0 + 0.08, (s.t0 + s.t1) / 2, s.t1 - 0.08].map((t) => Math.max(s.t0, Math.min(s.t1 - 0.01, t)));
+  const ts = eventFrames(s, CELLS).map((t) => Math.max(s.t0, Math.min(s.t1 - 0.01, t)));
   const cells = ts.map((t, k) => {
-    const tag = k === 0 ? 'in' : k === 1 ? 'mid' : 'out';
+    // The label says WHY this frame is in the sheet. A cell captioned `peak 12.4` is a claim the reader
+    // can check against the picture; one captioned `mid` was only ever a coordinate.
+    const d = DELTA.reduce((best, x) => (Math.abs(x.t - t) < Math.abs(best.t - t) ? x : best), DELTA[0] || { t: 0, v: 0 });
+    const tag = k === 0 ? 'in' : k === ts.length - 1 ? 'out' : `peak ${d.v.toFixed(1)}`;
     const out = path.join(frames, `s${String(s.i).padStart(2, '0')}_${tag}.png`);
     ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', VIDEO, '-frames:v', '1', '-vf',
       `scale=${tileW}:${tileH},drawtext=text='${drawtext(`${s.i}.${tag} ${t.toFixed(2)}s`)}':x=8:y=8:fontsize=20:fontcolor=white:box=1:boxcolor=black@0.65`,
@@ -255,8 +385,12 @@ for (const s of shots) {
     return out;
   });
   const row = path.join(frames, `row_${String(s.i).padStart(2, '0')}.png`);
+  // PADDED TO A COMMON WIDTH, because a shot with no events gets fewer cells and `vstack` refuses rows
+  // of different widths. The pad is on the right and is black, so a short row reads as what it is:
+  // a shot where nothing happened worth looking at.
   ffmpegOrDie(['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]),
-    '-filter_complex', `hstack=inputs=${cells.length}`, '-frames:v', '1', row], row, `row ${s.i}`);
+    '-filter_complex', `hstack=inputs=${cells.length},pad=${tileW * CELLS}:${tileH}:0:0:black`,
+    '-frames:v', '1', row], row, `row ${s.i}`);
   rows.push(row);
 }
 const sheet = path.join(dir, 'sheet.png');
@@ -315,7 +449,13 @@ function writeGrammar(study, shots) {
     measured: study.measured,
     shots: shots.map((s) => ({
       i: s.i, t0: Number(s.t0.toFixed(2)), len: Number(s.len.toFixed(2)),
-      ground: s.ground, luma: s.luma, motion: s.motion, accent: s.accent,
+      ground: s.ground, luma: s.luma, accent: s.accent,
+      // THE SHAPE, not just the average. Two shots with the same mean are different shots if one holds
+      // and then explodes. `peak` is the loudest single frame, `held` the share of frames below the
+      // still floor, and `curve` is the change series itself at 4 samples a second: enough to see a
+      // build, a stop and a burst, small enough that a whole film is a few dozen numbers.
+      motion: s.motion, peak: s.peak, held: s.held, frames: s.frames, joint: s.joint,
+      curve: s.curve,
       // authored, merged forward
       onScreen: priorShot(s.i).onScreen ?? null,
       moves: priorShot(s.i).moves ?? null,
@@ -362,9 +502,13 @@ frame-to-frame luma delta on the same scale \`./bin/vawe\` prints beside a rende
 The three right-hand columns are yours, and they are judgements no measurement reaches: WHICH object
 moves and where it goes, what makes the next shot arrive, and what sits under it.
 
-| # | time | length | ground | motion | tone | on screen | what moves where | what triggers the next |
-|---|------|--------|--------|--------|------|-----------|------------------|------------------------|
-${shots.map((s) => `| ${s.i} | ${fx(s.t0)}s | ${fx(s.len)}s | ${s.ground ?? '?'} ${s.luma ?? ''} | ${s.motion ?? '?'}${s.alive === false ? ' HELD' : ''} | ${s.accent || '·'} | <…> | <…> | <…> |`).join('\n')}
+| # | time | length | ground | motion | peak | held | tone | on screen | what moves where | what triggers the next |
+|---|------|--------|--------|--------|------|------|------|-----------|------------------|------------------------|
+${shots.map((s) => `| ${s.i} | ${fx(s.t0)}s | ${fx(s.len)}s | ${s.ground ?? '?'} ${s.luma ?? ''} | ${s.motion ?? '?'} | ${s.peak ?? '?'} | ${s.held == null ? '?' : Math.round(s.held * 100) + '%'} | ${s.accent || '·'} | <…> | <…> | <…> |`).join('\n')}
+
+\`peak\` is the loudest single frame and \`held\` is the share of frames below the still floor. Two shots
+with the same \`motion\` are different shots when one of them holds for three seconds and then explodes,
+and the contact sheet is now cut AT those peaks rather than at each shot's midpoint.
 
 **The film's own motion, for comparison with ours.** Reference films in \`refs/\` run 1.7 to 2.0 and are
 still for 13-24% of their frames; this library's median film runs far below that. \`./bin/vawe <scene>\`

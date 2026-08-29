@@ -1,5 +1,5 @@
 {
- "name": "pin-16818198602994243",
+ "name": "together-chat",
  "source": "pin-16818198602994243.mp4",
  "measured": {
   "duration": 19.78,
@@ -150,5 +150,6 @@
  "threads": "FOUR at once. The primary is ONE CONTINUOUS SPACE travelled by a camera: every surface sits on a single white plane tilted out of the picture plane, and the camera flies over it in x, y and z. There is never a change of world. The others are a shape match (wordmark to header logo, send circle to service circle) used as the spine, a word-level grey-to-ink reveal, and one accent colour.",
  "spectacle": "The send-to-datacentre handoff at 15.4-16.4s: the film's ONLY hard cut, placed at 78%, and it is a jump cut inside one object. Then the badge arrives from depth at almost zero size and grows toward camera with pale blue halo rings expanding behind it.",
  "takeaway": "THIS FILM HAS NO CUTS AND THAT IS THE POINT. Peak scene score 0.113 against a 0.3 threshold, and no lower threshold recovers a shot list: at 0.08 it finds two. The tool is right. The hand study counted 15 shots by eye and is also right, because they are camera moves and dissolves, not cuts. A state change every ~1.4s, with hard stops between changes, carried by CAMERA TRAVEL over real product surfaces. It is the strongest argument in the store for building a film out of travel rather than out of cuts.\nPALETTE, measured by pixel share rather than by eye: 67% one near-white, pixels under 128 luma are 1.56% of the whole film, and the single accent #0D6EFD holds 0.13%. White-first is a measurement here, not a mood.\nDO NOT TAKE its static background as a default. It is earned by a subject that never stops moving, and it is an exemption to argue per film.",
- "deepStudy": "docs/CRAFT/REF-pin-16818198602994243.md"
+ "deepStudy": "docs/CRAFT/REF-together-chat.md",
+ "about": "Together.ai Chat product demo. Pinterest pin 16818198602994243."
 }

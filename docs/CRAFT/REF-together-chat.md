@@ -4,7 +4,7 @@ answers: "a frame-by-frame study of one product film: shot timings, palette domi
 group: crosscutting
 ---
 
-# Reference study: `refs/pin-16818198602994243.mp4`
+# Reference study: Together.ai Chat (`refs/together-chat.mp4`)
 
 A Together.ai **Chat** product demo. 19.78s, landscape, white-first. It is the strongest argument in
 `refs/` for a film built out of **camera travel over real product surfaces** instead of out of cuts.
@@ -25,7 +25,7 @@ rendition Pinterest serves; the HLS ladder tops out at the same size.
 > argument is that it is built out of travel rather than out of cuts.
 
 Everything below is measured off the file, not remembered. Frames live in
-`refs/frames/pin-16818198602994243/`, which is **local only**: `.gitignore:106` keeps third-party
+`refs/together-chat/frames/`, which is **local only**: `.gitignore:106` keeps third-party
 marketing films out of the repo on purpose, and that covers their frames too. Section 11 rebuilds the
 video and every strip in one paste.
 
@@ -48,14 +48,14 @@ on screen.
 ## 2. The cut list, and why it is nearly empty
 
 ```
-ffmpeg -an -i refs/pin-16818198602994243.mp4 -vf "select='gte(scene,0)',metadata=print:file=scores.txt" -f null -
+ffmpeg -an -i refs/together-chat.mp4 -vf "select='gte(scene,0)',metadata=print:file=scores.txt" -f null -
 ```
 
 Highest scene score in the whole film: **0.113 at 15.40s**. Everything else is under 0.05. So the usual
 `gt(scene,0.25)` cut detector returns nothing, and a first read of "this film has no structure" would be
 wrong in the other direction.
 
-Frame-stepping 460-468 (`refs/frames/pin-16818198602994243/strip_F.png`) proves it:
+Frame-stepping 460-468 (`refs/together-chat/frames/strip_F.png`) proves it:
 
 - frame **461 → 462** is a **hard cut**. The prompt bar at hero scale jumps to the send button at hero
   scale. Same surface, different part of it.
@@ -87,7 +87,7 @@ as fast.
 
 ## 3. Shot list, measured
 
-A "shot" here is a distinct subject, not a cut. `refs/frames/pin-16818198602994243/sheet.png` is the
+A "shot" here is a distinct subject, not a cut. `refs/together-chat/frames/sheet.png` is the
 20-frame overview; the dense strips are named per section.
 
 | # | in | out | len | subject | motion |
@@ -311,7 +311,7 @@ back from this. `yt-dlp` is not installed here; the pin page carries the direct 
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-V=refs/pin-16818198602994243.mp4
+V=refs/together-chat.mp4
 D=refs/frames/pin-16818198602994243
 mkdir -p refs "$D"
 

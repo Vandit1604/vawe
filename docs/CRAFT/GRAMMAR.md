@@ -22,18 +22,18 @@ every render**, so this table is a target and not a mood.
 | arc-space-swiping | 3s | — | — | — | 0.71–1.41 | light → light |
 | arc-zero-chrome | 3s | — | — | — | 1.18–1.43 | light → light |
 | framer-hero | 21.03s | 2 | 10.52s | 5.7 | 1.66–3.78 | dark → dark |
-| [pin-16818198602994243](REF-pin-16818198602994243.md) | 19.78s | — | — | — | 0.93–3.48 | light → light → light → light → light → light → light → light → light → light |
 | pin-333759022406760643 | 79.95s | 5 | 5.03s | 3.8 | 2.19–5.9 | dark → dark → dark → dark → dark |
 | pin-415034921941332045 | 76.03s | 3 | 18.57s | 2.4 | 1.83–5.41 | light → light → light |
-| rebuilt | 29.23s | 5 | 4.07s | 10.3 | 3.05–7.58 | dark → light → dark → light → dark |
+| rebuilt | 29.23s | 5 | 4.07s | 10.3 | 0.41–6.04 | dark → light → dark → light → dark |
+| [together-chat](REF-together-chat.md) | 19.78s | — | — | — | 0.93–3.48 | light → light → light → light → light → light → light → light → light → light |
 
-**A shot in work that reads well measures 0.71 to 7.58.**
+**A shot in work that reads well measures 0.41 to 6.04.**
 Across the films whose cuts are measurable, the median shot runs **10.52s**.
 
 **`—` means no hard cut was found** (peak scene score below threshold), so the tool fell back to
 fixed sampling. Ground and motion stay real: they are measured over spans and do not care where the
 spans came from. A shot count is not, so it is not printed. That is often the finding rather than a
-failure: `arc-space-swiping`, `arc-zero-chrome`, `pin-16818198602994243` are built on travel and dissolves.
+failure: `arc-space-swiping`, `arc-zero-chrome`, `together-chat` are built on travel and dissolves.
 
 ## What each film does
 
@@ -49,18 +49,6 @@ _Measured, never read. The numbers above are real; nobody has written down what 
 
 _Measured, never read. The numbers above are real; nobody has written down what causes what._
 
-### pin-16818198602994243 · [deep study](REF-pin-16818198602994243.md)
-
-**Takeaway.** THIS FILM HAS NO CUTS AND THAT IS THE POINT. Peak scene score 0.113 against a 0.3 threshold, and no lower threshold recovers a shot list: at 0.08 it finds two. The tool is right. The hand study counted 15 shots by eye and is also right, because they are camera moves and dissolves, not cuts. A state change every ~1.4s, with hard stops between changes, carried by CAMERA TRAVEL over real product surfaces. It is the strongest argument in the store for building a film out of travel rather than out of cuts.
-
-PALETTE, measured by pixel share rather than by eye: 67% one near-white, pixels under 128 luma are 1.56% of the whole film, and the single accent #0D6EFD holds 0.13%. White-first is a measurement here, not a mood.
-
-DO NOT TAKE its static background as a default. It is earned by a subject that never stops moving, and it is an exemption to argue per film.
-
-**Carries across the cuts.** FOUR at once. The primary is ONE CONTINUOUS SPACE travelled by a camera: every surface sits on a single white plane tilted out of the picture plane, and the camera flies over it in x, y and z. There is never a change of world. The others are a shape match (wordmark to header logo, send circle to service circle) used as the spine, a word-level grey-to-ink reveal, and one accent colour.
-
-**The loud moment.** The send-to-datacentre handoff at 15.4-16.4s: the film's ONLY hard cut, placed at 78%, and it is a jump cut inside one object. Then the badge arrives from depth at almost zero size and grows toward camera with pale blue halo rings expanding behind it.
-
 ### pin-333759022406760643
 
 _Measured, never read. The numbers above are real; nobody has written down what causes what._
@@ -73,17 +61,31 @@ _Measured, never read. The numbers above are real; nobody has written down what 
 
 **Takeaway.** THE GROUND INVERTS ON EVERY CUT: dark 39 / light 234 / dark 31 / light 228 / dark 36. That is not a flourish, it is the film's transition mechanism, and it means no cut needs an effect on it. Second: a SANS + SERIF-ITALIC pairing carries the entire typographic identity, used at every scale from a 20px annotation to a frame-crossing word. Third: the film's motion runs 3.0 to 7.6 and our most active film measures 1.78, so it is 2x to 4x more active than anything in our library.
 
+AND IT IS NOT UNIFORMLY BUSY, which only the per-frame curve shows. Shot 2 is 88% held at a mean of 0.41, sitting between shot 1 (peak 49, the bloom) and shot 3 (a ramp from 3.9 to 32.8). The film's loud shots are loud because a near-still 1.17s shot sits between them. A per-shot average hides that completely: shot 2 averages the same as shot 5.
+
 **Carries across the cuts.** A BLUE DOT. It is the joint between two words in shot 1, the seed the light grows from, and the bullet on the annotation in shot 4. It survives every cut and every ground inversion, and it is the smallest object in the film.
 
 **The loud moment.** Shot 4: one word at roughly eight times the frame's own type size crossing the whole canvas motion-blurred. It is loud because every other shot is restrained, and it lasts under a second.
 
 | # | in | len | ground | motion | what moves | what triggers the next |
 |---|---|---|---|---|---|---|
-| 1 | 0s | 9.53s | dark 39.4 | 3.05 | The type does not travel: it ACCUMULATES, word by word, on a held frame. The move is the GROUND blooming from black to a bright wash under the last line and closing again. | The bloom collapses and the frame is black. A hard cut lands on the light shot. |
-| 2 | 9.53s | 1.17s | light 234.3 | 6.74 | One word types. Measured motion 6.74 on a 1.17s shot, so it is dense rather than held: the shot is short and the typing fills it. | Hard cut. It is the shortest shot in the film by 3x and reads as a beat of punctuation, not a scene. |
-| 3 | 10.7s | 3.5s | dark 30.9 | 5.77 | The grid TRAVELS as one object while individual cells carry their own content. Words cross cell boundaries, which is what makes it read as one surface rather than a collage. | Hard cut to white. The inversion is the transition. |
-| 4 | 14.2s | 4.07s | light 227.6 | 7.58 | Scale contrast IS the move: one word at roughly 8x the frame's type size crossing it, then everything after it small and still. The blue dot returns as the annotation's bullet. | Hard cut to dark on the payoff line's last frame. |
-| 5 | 18.27s | 10.97s | dark 36.4 | 4.38 | Objects at visibly DIFFERENT DEPTHS: the cards turn in space while the tiles drift slowly behind them. The letters of the wordmark settle from scattered positions. | Nothing: it is the last shot. It ends by fading the ground to black under a held mark, 11s, the longest shot in the film. |
+| 1 | 0s | 9.53s | dark 39.1 | 3.05 | The type does not travel: it ACCUMULATES, word by word, on a held frame. The move is the GROUND blooming from black to a bright wash under the last line and closing again. | The bloom collapses and the frame is black. A hard cut lands on the light shot. |
+| 2 | 9.53s | 1.17s | light 234.4 | 0.41 | Almost nothing: mean 0.41 and 88% of its frames are below the still floor. One word types, in one 6.9 burst, on an otherwise HELD frame. My first reading called this shot dense and it was reading the CUT INTO it (218) as the shot's own motion. | Hard cut. The shortest shot in the film by 3x, and the stillest: it is a beat of punctuation between two loud shots, not a scene. |
+| 3 | 10.7s | 3.5s | dark 31.1 | 5.77 | The grid TRAVELS as one object while individual cells carry their own content. Words cross cell boundaries, which is what makes it read as one surface rather than a collage. | Hard cut to white. The inversion is the transition. |
+| 4 | 14.2s | 4.07s | light 228.3 | 6.04 | Scale contrast IS the move: one word at roughly 8x the frame's type size crossing it, then everything after it small and still. The blue dot returns as the annotation's bullet. | Hard cut to dark on the payoff line's last frame. |
+| 5 | 18.27s | 10.97s | dark 35.8 | 4.38 | Objects at visibly DIFFERENT DEPTHS: the cards turn in space while the tiles drift slowly behind them. The letters of the wordmark settle from scattered positions. | Nothing: it is the last shot. It ends by fading the ground to black under a held mark, 11s, the longest shot in the film. |
+
+### together-chat · [deep study](REF-together-chat.md)
+
+**Takeaway.** THIS FILM HAS NO CUTS AND THAT IS THE POINT. Peak scene score 0.113 against a 0.3 threshold, and no lower threshold recovers a shot list: at 0.08 it finds two. The tool is right. The hand study counted 15 shots by eye and is also right, because they are camera moves and dissolves, not cuts. A state change every ~1.4s, with hard stops between changes, carried by CAMERA TRAVEL over real product surfaces. It is the strongest argument in the store for building a film out of travel rather than out of cuts.
+
+PALETTE, measured by pixel share rather than by eye: 67% one near-white, pixels under 128 luma are 1.56% of the whole film, and the single accent #0D6EFD holds 0.13%. White-first is a measurement here, not a mood.
+
+DO NOT TAKE its static background as a default. It is earned by a subject that never stops moving, and it is an exemption to argue per film.
+
+**Carries across the cuts.** FOUR at once. The primary is ONE CONTINUOUS SPACE travelled by a camera: every surface sits on a single white plane tilted out of the picture plane, and the camera flies over it in x, y and z. There is never a change of world. The others are a shape match (wordmark to header logo, send circle to service circle) used as the spine, a word-level grey-to-ink reveal, and one accent colour.
+
+**The loud moment.** The send-to-datacentre handoff at 15.4-16.4s: the film's ONLY hard cut, placed at 78%, and it is a jump cut inside one object. Then the badge arrives from depth at almost zero size and grows toward camera with pale blue halo rings expanding behind it.
 
 ## How to add one
 
