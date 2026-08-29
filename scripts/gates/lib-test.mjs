@@ -3837,5 +3837,25 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('depth on a group child is refused, naming the group', g != null && /group/i.test(g) && /depth/.test(g));
 }
 
+// ---------- a glow that can change ----------
+// The intensity was baked into the gradient at build, so a glow was a constant for the layer's life.
+// `pin-583145851797705243` measures its light swelling to fill the frame (mean luma down the frame
+// 60·64·69·46·55·86·84) and collapsing once the subject settles (7·8·7·17·40·29·77): the glow is the
+// picture, not a trim. Verified by render before this was written; what is pinned here is the CONTRACT
+// that made it safe, because that is what a future edit will break.
+{
+  const src = fs.readFileSync(new URL('../../core/layers/glow.js', import.meta.url), 'utf8');
+  ok('glow declares both live properties', /--glow-i/.test(src) && /--glow-r/.test(src));
+  // THE WHOLE REASON THE LIBRARY DID NOT MOVE. `calc(72%)` computes to `72%`, so pixels never changed,
+  // but the SERIALISED string did and eight shipped scenes reported a snapshot change for a rendering
+  // that was byte-identical. A baseline that moves for a cosmetic reason is one nobody reads next time.
+  ok('the calc form is gated on the layer declaring the var', /const drives = \(L, name\)/.test(src)
+    && /drives\(L, GLOW_VARS\.i\)/.test(src) && /drives\(L, GLOW_VARS\.r\)/.test(src));
+  ok('an undriven radius keeps the plain percentage', /: `\${pct}%`/.test(src));
+  // Both default to 1 inside the calc, so a var that is declared but not yet reached still renders as
+  // authored rather than as nothing.
+  ok('both properties default to 1', (src.match(/var\(\$\{GLOW_VARS\.[ir]\}, 1\)/g) || []).length === 2);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -147,6 +147,49 @@ export const PROPS = {
   h: {},
 };
 
+// A GLOW THAT CANNOT CHANGE IS HALF A GLOW, and it took a recreation to make that concrete. The
+// intensity was baked into the gradient string here at BUILD, so it was a constant for the layer's
+// life: `pin-72761350251141725` contracts a halo toward a word across a whole shot and we could only
+// fake it by scaling the box, which resizes the falloff instead of tightening it. Measured on
+// `pin-583145851797705243`, the light is not a detail at all: its mean luma down the frame runs
+// 60·64·69·46·55·86·84 while the subject arrives and collapses to 7·8·7·17·40·29·77 once it settles.
+// The glow swelling and contracting IS the picture, and we had no way to author it.
+//
+// TWO CUSTOM PROPERTIES, BOTH DEFAULTING TO 1, so every existing film renders exactly as before and
+// the `vars` track (core/tracks/vars.js) can drive either:
+//
+//   --glow-i   multiplies the ALPHA.  0 is out, 1 is as authored, above 1 is brighter
+//   --glow-r   multiplies the RADIUS. The falloff tightens or spreads without the box changing size
+//
+//   { "type":"glow", "intensity":0.5, "vars":{ "--glow-i":[0,1], "--glow-r":[1.6,0.7] }, "varsDur":0.8 }
+//
+// Written as `rgb(r g b / calc(...))` rather than `rgba(...)`, because an alpha has to be a calc for a
+// variable to reach it and the legacy comma form does not take one. `hexA` keeps its own shape: it has
+// other callers and this is the only one that needs a live alpha.
+const GLOW_VARS = { i: '--glow-i', r: '--glow-r' };
+
+// ONLY EMITTED WHERE IT CAN BE DRIVEN, which is the difference between a safe change and a diff across
+// the library. A `calc(72%)` computes to exactly `72%`, so the pixels never moved, but the SERIALISED
+// string differs and eight shipped scenes reported a change in their snapshot for a rendering that was
+// byte-identical. A baseline that moves for a cosmetic reason is a baseline nobody reads next time.
+//
+// The `vars` track is per-layer, so a layer that does not declare the property cannot have it driven,
+// and the plain form is emitted for it. Nothing existing changes at all.
+const drives = (L, name) => !!(L.vars && Object.prototype.hasOwnProperty.call(L.vars, name));
+
+/** The layer's glow colour, with a LIVE alpha only when this layer keys one. */
+function liveColor(kit, L) {
+  if (L.color === true || L.color == null) return 'var(--accent-glow)';
+  const a = L.intensity ?? 0.25;
+  const m = /^#([0-9a-f]{6})$/i.exec(L.color || '');
+  if (!m || !drives(L, GLOW_VARS.i)) return kit.hexA(L.color, a);
+  const n = parseInt(m[1], 16);
+  return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / calc(var(${GLOW_VARS.i}, 1) * ${a}))`;
+}
+
+/** The radial stop, scaled by --glow-r only when this layer keys one. */
+const liveStop = (L, pct) => (drives(L, GLOW_VARS.r) ? `calc(var(${GLOW_VARS.r}, 1) * ${pct}%)` : `${pct}%`);
+
 export function build(kit, el, L) {
   if (L.h != null) el.style.height = L.h + 'px';
   el.style.pointerEvents = 'none';
@@ -158,10 +201,10 @@ export function build(kit, el, L) {
 
   if (!spec && !L.pulse && !L.flash) {
     // ORIGINAL path, untouched: no preset, no pulse → identical output to the pre-preset builder
-    const c = L.color === true || L.color == null ? 'var(--accent-glow)' : kit.hexA(L.color, L.intensity ?? 0.25);
+    const c = liveColor(kit, L);
     const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
     el.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
-                              : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
+                              : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent ${liveStop(L, 72)})`;
     return;
   }
 
@@ -175,10 +218,10 @@ export function build(kit, el, L) {
     if (spec.mask) { inner.style.maskImage = spec.mask; inner.style.webkitMaskImage = spec.mask; }
   } else {
     // pulse on a classic (preset-less) glow: same gradient as the original path, one node deeper
-    const c = L.color === true || L.color == null ? 'var(--accent-glow)' : kit.hexA(L.color, L.intensity ?? 0.25);
+    const c = liveColor(kit, L);
     const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
     inner.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
-                                 : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent 72%)`;
+                                 : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent ${liveStop(L, 72)})`;
   }
   // .hs-layer is already position:absolute (a containing block), never override it here
   el.appendChild(inner);

@@ -18,12 +18,12 @@
    "workaround": "Measure twice by hand, once on the authored ground and once on `plain`, and read the second number as what the layers are doing."
   },
   {
-   "name": "A glow cannot animate its intensity",
-   "status": "verified",
+   "name": "A glow cannot animate its intensity  \u00b7  FIXED",
+   "status": "fixed",
    "from": "pin-72761350251141725 shot 3: a halo CONTRACTS toward the word across the shot. The light tightens; the type never moves.",
    "why": "`core/layers/glow.js` bakes intensity into a gradient string at BUILD (`kit.hexA(L.color, L.intensity)`), so it is a constant for the layer's life. Probed: a `vars` track on the layer changes nothing, because nothing reads a custom property.",
-   "fix": "Emit the gradient against a custom property and let the `vars` track drive it. That is the mechanism core/tracks/vars.js exists for and glow is the obvious consumer that never adopted it.",
-   "workaround": "Key `scale` on the glow layer, which resizes the whole box rather than tightening the falloff. It is not the same picture."
+   "fix": "FIXED. core/layers/glow.js emits two custom properties, `--glow-i` (alpha) and `--glow-r` (falloff radius), both defaulting to 1, so the existing `vars` track drives either. Written as `rgb(r g b / calc(...))` because a legacy `rgba()` comma form cannot take a calc in its alpha. The calc form is emitted ONLY when the layer declares that var: a `calc(72%)` computes to `72%` and moved no pixels, but it changed the serialised string and eight shipped scenes reported a snapshot diff for a byte-identical rendering. Gated, the library is 105 identical, 0 changed.",
+   "workaround": null
   },
   {
    "name": "Inverting the frame by LIGHT rather than by backdrop",

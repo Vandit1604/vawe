@@ -190,12 +190,14 @@ function renderDoc(all) {
     const G = JSON.parse(fs.readFileSync(path.join(DIR, '_gaps.json'), 'utf8'));
     if (G.gaps && G.gaps.length) {
       const v = G.gaps.filter((x) => x.status === 'verified').length;
+      const fx = G.gaps.filter((x) => x.status === 'fixed').length;
       L.push('## What we cannot do yet');
       L.push('');
-      L.push(`${G.gaps.length} gap(s) found by reading these films and probing the engine, ${v} confirmed by a rendered probe.`);
+      L.push(`${G.gaps.length} gap(s) found by reading these films and probing the engine: ${v} confirmed by a rendered probe, ${fx} since fixed.`);
       L.push('');
       for (const g of G.gaps) {
-        L.push(`### ${g.name}  ·  ${g.status === 'verified' ? '**verified by a probe**' : 'suspected, not yet built'}`);
+        const badge = g.status === 'fixed' ? '**fixed**' : g.status === 'verified' ? '**verified by a probe**' : 'suspected, not yet built';
+        L.push(`### ${g.name.replace(/\s+·\s+FIXED$/, '')}  ·  ${badge}`);
         L.push('');
         L.push(`**Seen in.** ${g.from}`);
         L.push('');

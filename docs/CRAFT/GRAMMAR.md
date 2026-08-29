@@ -444,7 +444,7 @@ The film starts on single words at under a second and ends on sentences at four,
 
 ## What we cannot do yet
 
-6 gap(s) found by reading these films and probing the engine, 3 confirmed by a rendered probe.
+6 gap(s) found by reading these films and probing the engine: 2 confirmed by a rendered probe, 1 since fixed.
 
 ### `plane` silently beats `track`, and nothing says so  ·  **verified by a probe**
 
@@ -466,15 +466,13 @@ The film starts on single words at under a second and ends on sentences at four,
 
 **Today.** Measure twice by hand, once on the authored ground and once on `plain`, and read the second number as what the layers are doing.
 
-### A glow cannot animate its intensity  ·  **verified by a probe**
+### A glow cannot animate its intensity  ·  **fixed**
 
 **Seen in.** pin-72761350251141725 shot 3: a halo CONTRACTS toward the word across the shot. The light tightens; the type never moves.
 
 **Why we cannot.** `core/layers/glow.js` bakes intensity into a gradient string at BUILD (`kit.hexA(L.color, L.intensity)`), so it is a constant for the layer's life. Probed: a `vars` track on the layer changes nothing, because nothing reads a custom property.
 
-**The fix.** Emit the gradient against a custom property and let the `vars` track drive it. That is the mechanism core/tracks/vars.js exists for and glow is the obvious consumer that never adopted it.
-
-**Today.** Key `scale` on the glow layer, which resizes the whole box rather than tightening the falloff. It is not the same picture.
+**The fix.** FIXED. core/layers/glow.js emits two custom properties, `--glow-i` (alpha) and `--glow-r` (falloff radius), both defaulting to 1, so the existing `vars` track drives either. Written as `rgb(r g b / calc(...))` because a legacy `rgba()` comma form cannot take a calc in its alpha. The calc form is emitted ONLY when the layer declares that var: a `calc(72%)` computes to `72%` and moved no pixels, but it changed the serialised string and eight shipped scenes reported a snapshot diff for a byte-identical rendering. Gated, the library is 105 identical, 0 changed.
 
 ### Inverting the frame by LIGHT rather than by backdrop  ·  suspected, not yet built
 
