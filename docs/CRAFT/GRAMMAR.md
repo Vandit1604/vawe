@@ -10,7 +10,7 @@ group: crosscutting
 > (or re-run `make study`) and regenerate. The measured half comes off the film; the authored half
 > is written by a person into the JSON and merged forward on every re-study.
 
-7 reference film(s) measured. 2 carry a written reading.
+12 reference film(s) measured. 2 carry a written reading.
 
 ## The numbers, on one scale
 
@@ -22,13 +22,18 @@ every render**, so this table is a target and not a mood.
 | arc-space-swiping | 3s | — | — | — | 0.71–1.41 | light → light |
 | arc-zero-chrome | 3s | — | — | — | 1.18–1.43 | light → light |
 | framer-hero | 21.03s | 2 | 10.52s | 5.7 | 1.66–3.78 | dark → dark |
+| pin-310748443060787071 | 30.86s | 3 | 9.01s | 5.8 | 1.23–10.21 | dark? → light → dark |
 | pin-333759022406760643 | 79.95s | 5 | 5.03s | 3.8 | 2.19–5.9 | dark → dark → dark → dark → dark |
-| pin-415034921941332045 | 76.03s | 3 | 18.57s | 2.4 | 1.83–5.41 | light → light → light |
+| pin-333759022406800725 | 47.35s | 6 | 7s | 7.6 | 0.37–4.13 | mid → light → light → mid → mid → light |
+| pin-415034921941332045 | 76.03s | 3 | 18.57s | 2.4 | 1.83–5.26 | light → light → light |
+| pin-522769469268499616 | 17.87s | 10 | 1.48s | 33.6 | 0.69–10.67 | light → mid → dark → light → dark → light → dark → light → light → dark |
+| pin-924363892282992611 | 19.11s | 7 | 1.63s | 22 | 0.59–8.89 | light → light → light → light → light → mid → light |
+| pin-933230354045109691 | 37.86s | 8 | 3s | 12.7 | 1.14–6.56 | dark → dark → dark → light → dark → light → mid? → dark |
 | rebuilt | 29.23s | 5 | 4.07s | 10.3 | 0.41–6.04 | dark → light → dark → light → dark |
-| [together-chat](REF-together-chat.md) | 19.78s | — | — | — | 0.93–3.48 | light → light → light → light → light → light → light → light → light → light |
+| together-chat | 19.78s | — | — | — | 0.93–3.54 | light → light → light → light → light → light → light → light → light → light |
 
-**A shot in work that reads well measures 0.41 to 6.04.**
-Across the films whose cuts are measurable, the median shot runs **10.52s**.
+**A shot in work that reads well measures 0.37 to 10.67.**
+Across the films whose cuts are measurable, the median shot runs **5.03s**.
 
 **`—` means no hard cut was found** (peak scene score below threshold), so the tool fell back to
 fixed sampling. Ground and motion stay real: they are measured over spans and do not care where the
@@ -49,11 +54,31 @@ _Measured, never read. The numbers above are real; nobody has written down what 
 
 _Measured, never read. The numbers above are real; nobody has written down what causes what._
 
+### pin-310748443060787071
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
 ### pin-333759022406760643
 
 _Measured, never read. The numbers above are real; nobody has written down what causes what._
 
+### pin-333759022406800725
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
 ### pin-415034921941332045
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### pin-522769469268499616
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### pin-924363892282992611
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### pin-933230354045109691
 
 _Measured, never read. The numbers above are real; nobody has written down what causes what._
 
@@ -75,7 +100,7 @@ AND IT IS NOT UNIFORMLY BUSY, which only the per-frame curve shows. Shot 2 is 88
 | 4 | 14.2s | 4.07s | light 228.3 | 6.04 | Scale contrast IS the move: one word at roughly 8x the frame's type size crossing it, then everything after it small and still. The blue dot returns as the annotation's bullet. | Hard cut to dark on the payoff line's last frame. |
 | 5 | 18.27s | 10.97s | dark 35.8 | 4.38 | Objects at visibly DIFFERENT DEPTHS: the cards turn in space while the tiles drift slowly behind them. The letters of the wordmark settle from scattered positions. | Nothing: it is the last shot. It ends by fading the ground to black under a held mark, 11s, the longest shot in the film. |
 
-### together-chat · [deep study](REF-together-chat.md)
+### together-chat
 
 **Takeaway.** THIS FILM HAS NO CUTS AND THAT IS THE POINT. Peak scene score 0.113 against a 0.3 threshold, and no lower threshold recovers a shot list: at 0.08 it finds two. The tool is right. The hand study counted 15 shots by eye and is also right, because they are camera moves and dissolves, not cuts. A state change every ~1.4s, with hard stops between changes, carried by CAMERA TRAVEL over real product surfaces. It is the strongest argument in the store for building a film out of travel rather than out of cuts.
 

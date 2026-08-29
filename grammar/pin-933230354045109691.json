@@ -1,6 +1,7 @@
 {
  "name": "pin-933230354045109691",
  "source": "pin-933230354045109691.mp4",
+ "hash": "46dfb0570cb69880",
  "measured": {
   "duration": 37.86,
   "width": 720,
@@ -201,7 +202,7 @@
    "i": 7,
    "t0": 17.9,
    "len": 7.37,
-   "ground": "mid",
+   "ground": "mid?",
    "luma": 60.1,
    "accent": "#171450",
    "motion": 3.46,
@@ -317,7 +318,7 @@
   "medianShot": 3,
   "perMinute": 12.7
  },
- "groundPattern": "dark → dark → dark → light → dark → light → mid → dark",
+ "groundPattern": "dark → dark → dark → light → dark → light → mid? → dark",
  "motionBand": {
   "lo": 1.14,
   "hi": 6.56

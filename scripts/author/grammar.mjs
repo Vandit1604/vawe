@@ -22,7 +22,9 @@ const DIR = path.join(ROOT, 'grammar');
 const ONE = process.argv.slice(2).find((a) => !a.startsWith('--'));
 
 let files = [];
-try { files = fs.readdirSync(DIR).filter((f) => f.endsWith('.json')).sort(); } catch { /* none yet */ }
+// `claims.json` lives here too and is not a film. Excluded by NAME rather than by shape, so a real
+// grammar file that is missing `measured` still crashes loudly instead of being quietly skipped.
+try { files = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && f !== 'claims.json').sort(); } catch { /* none yet */ }
 if (!files.length) {
   console.log(`\n  No grammar yet. \`make study VIDEO=refs/<file>.mp4 NAME=<name>\` measures a reference and`);
   console.log(`  writes grammar/<name>.json, which is committed and outlives refs/.\n`);

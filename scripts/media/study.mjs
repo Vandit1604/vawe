@@ -284,6 +284,13 @@ const toneOf = (t0, len) => {
   return best;
 };
 
+const GROUND_EDGES = [[60, 'dark', 'mid'], [128, 'mid', 'light']];
+const GROUND_DOUBT = 4;
+const bucket = (luma) => {
+  const name = luma > 128 ? 'light' : luma > 60 ? 'mid' : 'dark';
+  return GROUND_EDGES.some(([e]) => Math.abs(luma - e) < GROUND_DOUBT) ? `${name}?` : name;
+};
+
 const measureShot = (s) => {
   const luma = mean(between(LUMA, s.t0, s.t1));
   const deltas = insideShot(s.t0, s.t1, s.i === 1);
@@ -309,7 +316,16 @@ const measureShot = (s) => {
   });
   return {
     luma: luma == null ? null : Number(luma.toFixed(1)),
-    ground: luma == null ? null : (luma > 128 ? 'light' : luma > 60 ? 'mid' : 'dark'),
+    // GROUND IS THE WHOLE FRAME'S LIGHTNESS, not the backdrop's. Mean luma counts every pixel, so a
+    // bright card entering a dark frame raises it and the backdrop never moved. That is the right
+    // measurement for a study (a viewer sees the frame, not the bg window) and the wrong thing to
+    // compare against a scene's declared `bg` list, which is a mistake study-verify made first.
+    //
+    // A BUCKET EDGE IS A COIN TOSS AND MUST NOT PRINT AS A FACT. brew's accent window measured 128.4
+    // against a light/mid edge at 128 and was called "light" with total confidence. Within 4 of an
+    // edge the name carries a `?`, so a reader sees the uncertainty in the value rather than having to
+    // know the thresholds. Fixed here, at the write site, rather than gated afterwards.
+    ground: luma == null ? null : bucket(luma),
     motion: delta == null ? null : Number(delta.toFixed(2)),
     peak: peak == null ? null : Number(peak.toFixed(2)),
     joint,
