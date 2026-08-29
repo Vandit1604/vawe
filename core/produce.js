@@ -124,6 +124,22 @@ export function bakeCameraMove(data, frame) {
 // whose author wrote `depth`, and an error that names a word the author did not type is half an error.
 const LENS_DEFAULT = 1600;
 
+// bakeFocus: a camera keyframe may name its focus with a DEPTH NAME rather than a number, because an
+// author who placed a layer on `front` should be able to focus on `front` without looking up what that
+// resolved to. Resolved here, at boot, beside the depth bake that resolves the other half of the same
+// vocabulary: one place knows the lens, one place turns names into distances, and a name that survives
+// to render is impossible rather than silently ignored.
+export function bakeFocus(data) {
+  const cam = Array.isArray(data && data.camera) ? data.camera : null;
+  if (!cam) return data;
+  const lens = (cam.find((k) => k && typeof k.p === 'number')?.p) || LENS_DEFAULT;
+  for (const k of cam) {
+    if (!k || k.f == null || typeof k.f === 'number') continue;
+    k.f = depthZ(k.f, lens);   // an unknown name throws here, by name, with the menu
+  }
+  return data;
+}
+
 export function bakeDepth(data) {
   const cam = Array.isArray(data && data.camera) ? data.camera : null;
   const lens = (cam && cam.find((k) => k && typeof k.p === 'number')?.p) || LENS_DEFAULT;

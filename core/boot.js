@@ -9,7 +9,7 @@ import './frame-settle.js'; // installs window.__frameSettle, the capture's asyn
 import { themeErrors, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from './theme-contract.js';
 import { parseColor, contrastRatio, ensureContrast } from './motion.js';
 import { validateAll } from './validate.mjs';
-import { produceBaseline, bakeCameraMove, bakeDepth } from './produce.js';
+import { produceBaseline, bakeCameraMove, bakeDepth, bakeFocus } from './produce.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -489,6 +489,7 @@ export async function boot(build) {
     // `depth` sugar -> the real `plane` modifier. AFTER the camera is baked, because the lens it resolves
     // against is the camera's, and before the first frame, because nothing at render time reads the word.
     bakeDepth(data);
+    bakeFocus(data);
     // Same refusal as the line above, for the same reason: a field written and then ignored is the one
     // outcome this path exists to make impossible. `make expand` is not an escape here, the bake is at
     // boot, so a scene that still carries one has hit a bug rather than skipped a step.

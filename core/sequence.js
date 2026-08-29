@@ -50,7 +50,17 @@ export function cameraAt(camKf, t) {
   return { s: lerp(a.s ?? 1, b.s ?? 1, p), x: lerp(a.x ?? 0, b.x ?? 0, p), y: lerp(a.y ?? 0, b.y ?? 0, p),
     rx: lerp(a.rx ?? 0, b.rx ?? 0, p), ry: lerp(a.ry ?? 0, b.ry ?? 0, p),
     roll: lerp(a.roll ?? 0, b.roll ?? 0, p),
-    persp: lerp(a.p ?? 1600, b.p ?? 1600, p) };
+    persp: lerp(a.p ?? 1600, b.p ?? 1600, p),
+    // FOCUS AND APERTURE, the camera's depth of field. `f` is the distance the lens is focused at, in
+    // the same z as a layer's `depth`; `a` is how fast things go soft as they leave it, in blur pixels
+    // per 100px of defocus. Keyed like everything else here, so a rack focus is two keyframes.
+    //
+    // `focus: null` when NO keyframe names one, and that is the difference between "focused at the
+    // picture plane" and "this film has no depth of field". Lerping a missing `f` to 0 would silently
+    // give every film a lens focused on z 0, which is a working-looking default nobody asked for and
+    // would soften the whole library the moment it shipped.
+    focus: (a.f == null && b.f == null) ? null : lerp(a.f ?? b.f ?? 0, b.f ?? a.f ?? 0, p),
+    aperture: lerp(a.a ?? 0, b.a ?? 0, p) };
 }
 
 // cameraView(camKf, t, CW, CH): the stage-space rectangle the camera is LOOKING AT, or null when there

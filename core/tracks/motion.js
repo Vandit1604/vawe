@@ -37,8 +37,45 @@ export function resolveShutter(deg) {
   return deg / 360;
 }
 
-export function frame(kit, el, L, units, t, f, start, end) {
-  if (!(L.motion && L.motion.length && t >= start && t < end)) return;
+// planeZ(L): where this layer stands, in the camera's z. A layer with no depth is on the picture plane.
+// Read off the modifier the depth sugar bakes into (core/produce.js bakeDepth), because that is the one
+// place the distance is recorded once the film is produced.
+function planeZ(L) {
+  for (const mod of L.modifiers || []) if (mod && mod.plane && typeof mod.plane.z === 'number') return mod.plane.z;
+  return 0;
+}
+
+// focusBlur(L, cam): how soft the camera's depth of field leaves this layer, in pixels.
+//
+// A NAMED FAILURE INSTEAD OF A WRONG NUMBER. Once `--plane-z` keys a layer's distance, that distance
+// lives in CSS and nothing here can read it, so the blur would be computed from the layer's AUTHORED z
+// while the layer sat somewhere else entirely: a slam would fly at the camera and stay sharp because
+// the focus thought it had never moved. Refused by name rather than rendered, because a plausible
+// wrong softness is exactly the silent substitution this engine logs more than any other defect.
+function focusBlur(L, cam) {
+  if (L.vars && Object.prototype.hasOwnProperty.call(L.vars, '--plane-z'))
+    throw new Error(`this film's camera declares a focus (\`f\`) and layer "${L.id || L.type || 'a layer'}" `
+      + `keys \`--plane-z\`, so its distance changes in CSS where the focus cannot read it. The blur `
+      + `would be computed from the depth you authored while the layer stood somewhere else. Key the `
+      + `layer's own \`motion.blur\` instead, which overrides the camera focus, or drop one of the two.`);
+  return Math.min(40, Math.abs(planeZ(L) - cam.focus) / 100 * cam.aperture);
+}
+
+export function frame(kit, el, L, units, t, f, start, end, scene) {
+  const cam = scene && scene.camera;
+  const live = t >= start && t < end;
+  // The camera's depth of field, and it applies to EVERY layer, not only the ones carrying a motion
+  // track: that is the whole difference between a lens and a per-layer blur. Computed before the early
+  // return so a still layer at the wrong distance still goes soft.
+  //
+  // Gated on the film DECLARING a focus, which keeps every existing scene byte-identical: with no `f`
+  // on any camera keyframe this function returns exactly where it always did, and never touches
+  // `filter` on a layer that has no motion track.
+  const dof = live && cam && cam.focus != null && cam.aperture > 0 ? focusBlur(L, cam) : 0;
+  if (!(L.motion && L.motion.length && live)) {
+    if (dof > 0.4) writeBlur(el, dof);
+    return;
+  }
   const fps = kit.fps;
   const m = motionAt(L.motion, t - start);
   const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
@@ -54,7 +91,12 @@ export function frame(kit, el, L, units, t, f, start, end) {
   //      crossing the frame in a few frames smears whether or not the author remembered. So it is
   //      now AUTOMATIC above a speed the eye already reads as fast, and still fully controllable,
   //      `motionBlur: false` opts out, a number overrides the shutter (KEYED-MOTION.md).
-  let blurPx = m.blur > 0.01 ? m.blur : 0;
+  // THE AUTHOR'S OWN FOCUS WINS. A keyed `motion.blur` is a rack focus somebody wrote on purpose, and
+  // adding the camera's depth of field on top would mean an author who asked for a sharp layer got a
+  // soft one because of a lens setting somewhere else in the file. Stated here rather than resolved by
+  // whichever ran last, which is how two owners of one property usually get settled and why it usually
+  // goes wrong.
+  let blurPx = m.blur > 0.01 ? m.blur : dof;
   if (L.motionBlur !== false) {
     // ONE OWNER for the velocity read (core/sequence.js), shared with the ghost trail and squash.
     const speed = velocityAt(L.motion, t - start, 1 / fps).speed / fps; // px travelled in one frame
@@ -99,6 +141,13 @@ export function frame(kit, el, L, units, t, f, start, end) {
   // is remembered beside the output it produced, so if the element still holds that exact output the
   // stash is still the truth, and anything else on it is a fresh write from build or an earlier track.
   // Reading it back rather than storing what was written, because CSSOM re-serialises on the way in.
+  writeBlur(el, blurPx);
+}
+
+// ONE WRITER FOR `filter`, because there are now two callers (a layer with a motion track, and one that
+// only carries the camera's depth of field) and two places composing the same property is the bug this
+// stash exists to have fixed.
+function writeBlur(el, blurPx) {
   const raw = el.style.filter || '';
   const cur = raw === 'none' ? '' : raw;
   const prior = el.__hsBlur;
