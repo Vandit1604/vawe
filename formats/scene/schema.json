@@ -13,7 +13,7 @@
    "video": ["fit", "h", "in", "out", "poster", "radius", "rate", "src", "w"],
    "group": ["children"],
    "rect": ["color", "fill", "h"],
-   "glow": ["angle", "beam", "color", "cx", "cy", "cycle", "flash", "h", "intensity", "preset", "pulse", "pulseAmp"],
+   "glow": ["angle", "beam", "color", "color2", "cx", "cy", "cycle", "flash", "h", "intensity", "preset", "pulse", "pulseAmp"],
    "beam": ["angle", "color", "glow", "h", "intensity", "mode", "period", "radius", "speed", "tail", "thickness", "w"],
    "svg": ["d", "draw", "fill", "h", "morph", "stroke", "strokeWidth", "viewBox", "w"],
    "cursor": ["clicks", "color", "path", "rippleColor", "size", "x", "y"],
