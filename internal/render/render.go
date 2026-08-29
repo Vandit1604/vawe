@@ -192,6 +192,21 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	} else if err := encode.Copy(tmpVideo, out); err != nil {
 		return err
 	}
+	// STILLNESS RIDES OUT WITH THE DURATION, on every render, for every caller. Both are facts about the
+	// film rather than opinions about it, and this one answers the question no static gate can: is
+	// anything happening. The reference films in refs/ measure 13% to 24% still; a film of ours that
+	// passed the whole ladder measured 84%. An author who never sees the number optimises for the numbers
+	// that print. Measured off the frames still on disk (they are deleted a few lines from here), so it
+	// costs no second decode of the mp4 and no extra ffmpeg pass.
+	if still, med, ok := scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent)); ok {
+		fmt.Printf("✓ done → %s  (%.1fs, %d frames · %.0f%% still, motion %.2f)\n",
+			out, meta.Duration, meta.TotalFrames, still, med)
+		if still > 60 {
+			fmt.Printf("  ⚠ %.0f%% of sampled frames are unchanged from the one before. The films in refs/ sit at 13-24%%.\n", still)
+			fmt.Printf("    Nothing is blocking you. The usual causes are a ground that does not move and layers with no idle.\n")
+		}
+		return nil
+	}
 	fmt.Printf("✓ done → %s  (%.1fs, %d frames)\n", out, meta.Duration, meta.TotalFrames)
 	return nil
 }

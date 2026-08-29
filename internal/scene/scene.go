@@ -804,3 +804,110 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	}
 	return meta, nil
 }
+
+// ---- STILLNESS: how much of this film actually moves -------------------------------------------
+//
+// A film can pass every static gate and still read as a slideshow, because every gate we have looks at
+// one frame at a time, or at the structure that produced it. None of them asks the only question a
+// viewer answers instantly: is anything happening right now.
+//
+// Measured against the reference films the owner keeps (refs/), the gap is not subtle. They are still
+// for 13% to 24% of their frames; a launch film of ours that passed the whole ladder was still for 84%.
+// Drawn over time theirs is a solid bar and ours was dead, spike, dead. That number belongs beside the
+// duration, printed by the renderer on every run, for the same reason the duration is: it is a fact
+// about the film, not an opinion about it, and an author who never sees it optimises for the gates that
+// do print.
+//
+// NOT A GATE, deliberately. It refuses nothing and blocks nobody. CLAUDE.md's architecture rule is that
+// a gate is the last resort and the fix belongs where the value is written; the fix here is the engine's
+// own motion defaults, and this is the instrument that says whether they worked.
+//
+// Modelled on TransparentPixels above: same directory, same already-captured frames, decoded once more
+// before they are deleted. No second ffmpeg pass and no new channel out of the page, because unlike
+// beatSync (docs/MISTAKES.md #477) this property does not exist in the page at all. It is a difference
+// BETWEEN two rendered frames, and only the Go side ever holds two.
+const (
+	stillPairs = 48  // consecutive pairs sampled across the film. 48 is enough to shape a 20s cut.
+	stillGrid  = 12  // cell size per axis: a 1920x1080 frame becomes ~160x90 cells.
+	stillSub   = 3   // sub-sample step INSIDE each cell, so every reading is an average, not a point.
+	stillFloor = 0.5 // mean |luma delta| below this reads as "the same picture", matching the ffmpeg
+	// probe this was calibrated against (scale=160:90,tblend=difference,signalstats).
+)
+
+// Stillness samples consecutive frame PAIRS and reports what share of them are unchanged, plus the
+// median per-pair change. Returns ok=false when the film is too short to say anything useful.
+func Stillness(framesDir string, total int, ext string) (stillPct float64, median float64, ok bool) {
+	if total < 4 {
+		return 0, 0, false
+	}
+	step := total / stillPairs
+	if step < 1 {
+		step = 1
+	}
+	readGray := func(n int) []float64 {
+		b, err := os.ReadFile(filepath.Join(framesDir, fmt.Sprintf("%05d%s", n, ext)))
+		if err != nil {
+			return nil
+		}
+		img, _, err := image.Decode(bytes.NewReader(b))
+		if err != nil {
+			return nil
+		}
+		r := img.Bounds()
+		out := make([]float64, 0, 16384)
+		// AREA-AVERAGE each cell, do not point-sample it. The first cut read one pixel per 12x12 block
+		// and disagreed with the ffmpeg probe these numbers are compared against by twenty points
+		// (58% still vs 77% on the same file), because a single pixel lands on a glyph edge or a grain
+		// speck and reports change where the eye sees none. `scale=160:90` box-filters, so this has to.
+		// An instrument that does not agree with the measurement it is quoted beside is worse than none.
+		for y := r.Min.Y; y < r.Max.Y; y += stillGrid {
+			for x := r.Min.X; x < r.Max.X; x += stillGrid {
+				sum, n := 0.0, 0.0
+				for dy := 0; dy < stillGrid && y+dy < r.Max.Y; dy += stillSub {
+					for dx := 0; dx < stillGrid && x+dx < r.Max.X; dx += stillSub {
+						cr, cg, cb, _ := img.At(x+dx, y+dy).RGBA()
+						// Rec. 601 luma on the 0-255 scale, which is what signalstats YAVG reports.
+						sum += (0.299*float64(cr) + 0.587*float64(cg) + 0.114*float64(cb)) / 257
+						n++
+					}
+				}
+				if n > 0 {
+					out = append(out, sum/n)
+				}
+			}
+		}
+		return out
+	}
+	deltas := make([]float64, 0, stillPairs)
+	for n := 0; n+1 < total; n += step {
+		a, b := readGray(n), readGray(n+1)
+		if a == nil || b == nil || len(a) != len(b) || len(a) == 0 {
+			continue // a gap in the sequence is the encoder's error to report, not this measurement's
+		}
+		sum := 0.0
+		for i := range a {
+			d := a[i] - b[i]
+			if d < 0 {
+				d = -d
+			}
+			sum += d
+		}
+		deltas = append(deltas, sum/float64(len(a)))
+	}
+	if len(deltas) < 3 {
+		return 0, 0, false
+	}
+	still := 0
+	for _, d := range deltas {
+		if d < stillFloor {
+			still++
+		}
+	}
+	sorted := append([]float64(nil), deltas...)
+	for i := 1; i < len(sorted); i++ { // insertion sort: the slice is at most stillPairs long
+		for j := i; j > 0 && sorted[j] < sorted[j-1]; j-- {
+			sorted[j], sorted[j-1] = sorted[j-1], sorted[j]
+		}
+	}
+	return 100 * float64(still) / float64(len(deltas)), sorted[len(sorted)/2], true
+}
