@@ -80,6 +80,28 @@ export const CAMERA_WORDS = {
 // slot is diagnosed rather than merely rejected: `anim: "snappy"` now answers "that is a feel word,
 // try `ease`" instead of listing thirty anims it is not among. The registry also owns the near-miss
 // list and the "never a fallback" contract. There is no `pick(name, default)` to reach for.
+// ---- INTERPOLATION MODES: not curves, and that is the whole distinction --------------------------
+//
+// An EASING is a function of one segment's own progress: it cannot see the keys either side, so it
+// necessarily starts and ends that segment at zero velocity. A FEEL WORD is another spelling of one.
+// An interpolation MODE is a third thing: it decides how the value between two keys is computed at all,
+// and it is allowed to read the neighbours.
+//
+// `through` is the speed graph. It fits a cubic Hermite whose tangent at each key comes from that key's
+// NEIGHBOURS, so the velocity entering a key equals the velocity leaving it and a travel through
+// several keys reads as one gesture instead of stopping at each. Measured on three sparse keys, the
+// default curve passes the interior key at 2 px/s and `through` passes it at 770 (core/sequence.js).
+//
+// They live in the same `ease` field because that is where an author reaches for them, and they are
+// listed separately because calling one an easing is what made the first attempt name it `smooth`,
+// which is already a feel word for easeInOutCubic. `resolveEasing` never sees these: core/sequence.js
+// dispatches them before it is called, and a mode reaching resolveEasing would be a bug.
+export const INTERP = {
+  through: 'velocity carries THROUGH the key: a cubic Hermite with neighbour tangents, so a travel across several keys is one gesture rather than a stop at each',
+};
+
+export const INTERP_REGISTRY = defineRegistry('interpolation mode', INTERP, { slot: 'ease' });
+
 export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease' });
 export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur' });
 export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move' });

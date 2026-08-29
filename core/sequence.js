@@ -125,6 +125,52 @@ export function resolveKeyedProps(layers) {
   return layers;
 }
 
+// ---------- SMOOTH: velocity that survives a keyframe ----------
+//
+// THE GAP THIS CLOSES, measured before it was written. A layer travelling through three sparse keys
+// (0 → 300 → 900 px) reads, in px/s either side of the interior key at t = 0.60:
+//
+//   default easeInOutCubic   1418 · 168 · 8 · 2 · 16 · 336 · 2836     a DEAD STOP in the middle
+//   linear                    500 · 500 · 500 · 750 · 1000 · 1000     an instant jump: a visible kink
+//   easeOutQuint              157 · 2 · 0 · 2365 · 4373 · 2417        a stop, then a jerk
+//
+// Every per-segment easing zeroes velocity at BOTH ends of its own segment, so an interior keyframe is
+// a full stop by construction. `linear` avoids the stop and buys a discontinuity instead. Neither is
+// what a motion designer means by a keyframe in the middle of a move, and this file's own comment
+// already names the symptom for the dense case ("the move pulses") and fixes it there by defaulting to
+// linear. Sparse keys were left with the stop.
+//
+// This is the SPEED GRAPH. In After Effects a keyframe carries an incoming and an outgoing velocity,
+// and the reason their curves read as one gesture is that those two match. `ease: "through"` computes
+// the tangent at each key from its NEIGHBOURS instead of fitting a curve inside one gap, so the
+// velocity entering a key equals the velocity leaving it and the move reads as one travel.
+//
+// NAMED `through` AND NOT `smooth`, WHICH IS THE OBVIOUS WORD AND IS TAKEN. `smooth` is already a feel
+// word in core/motion.js (it resolves to a real curve, 0 · 0.063 · 0.5 · 0.938 · 1), so the first cut
+// of this shadowed a live name and `resolveEasing` accepted it happily because it knew it. That is the
+// third name collision written in one session, after `origin` (a globe's lon/lat) and `html` on a bg
+// window (markup, not a path). The lesson is not "check the enum"; it is that the enum is the LAST
+// place to look, and the first is to try resolving the name and see if anything answers.
+//
+// A cubic Hermite with finite-difference tangents, non-uniform in t because our keys are not evenly
+// spaced and a uniform Catmull-Rom would overshoot wherever they are not. The tangent at key i is
+// (P[i+1] - P[i-1]) / (t[i+1] - t[i-1]). The FIRST and LAST tangents are zero, so a move still eases out
+// of rest and back into it: the hitch removed is the one INSIDE the travel, which is the only one that
+// was never wanted.
+const hermite = (p0, p1, m0, m1, h, u) => {
+  const u2 = u * u, u3 = u2 * u;
+  return (2 * u3 - 3 * u2 + 1) * p0 + (u3 - 2 * u2 + u) * h * m0
+       + (-2 * u3 + 3 * u2) * p1 + (u3 - u2) * h * m1;
+};
+
+/** The finite-difference tangent of `prop` at key `i`, in units per second. Zero at either end. */
+function tangentAt(kfs, i, prop, dflt) {
+  if (i <= 0 || i >= kfs.length - 1) return 0;
+  const span = kfs[i + 1].t - kfs[i - 1].t;
+  if (!(span > 0)) return 0;
+  return ((kfs[i + 1][prop] ?? dflt) - (kfs[i - 1][prop] ?? dflt)) / span;
+}
+
 export function motionAt(kfs, lt) {
   const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1, blur: k.blur ?? 0, w: k.w ?? null, h: k.h ?? null, track: k.track ?? null });
   if (lt <= kfs[0].t) return norm(kfs[0]);
@@ -140,6 +186,20 @@ export function motionAt(kfs, lt) {
       // its shape comes from WHERE the keys are, not from a curve fitted over each gap. Above the
       // threshold the old default stands, because a sparse key really is a span with a shape.
       const seg = b.t - a.t;
+      // `smooth` is not an easing and cannot be one: an easing is a function of one segment's own
+      // progress, and the whole point here is to read the keys either side. So it is dispatched before
+      // resolveEasing ever sees it, and `resolveEasing` still refuses every unknown name as before.
+      if (b.ease === 'through' && seg > 0) {
+        const u = clamp01((lt - a.t) / seg);
+        const at = (prop, dflt) => hermite(a[prop] ?? dflt, b[prop] ?? dflt,
+          tangentAt(kfs, i, prop, dflt), tangentAt(kfs, i + 1, prop, dflt), seg, u);
+        // A layer-owned prop still animates only when BOTH endpoints state it, exactly as below: the
+        // rule is about whether the track owns the property, not about how it interpolates.
+        const ownS = (prop) => (a[prop] == null || b[prop] == null ? null : at(prop, 0));
+        return { dx: at('x', 0), dy: at('y', 0), scale: at('scale', 1), rot: at('rot', 0),
+          opacity: at('opacity', 1), blur: at('blur', 0),
+          w: ownS('w'), h: ownS('h'), track: ownS('track') };
+      }
       const p = a.t === b.t ? 1
         : resolveEasing(b.ease || (seg < DENSE_KEY_SEC ? 'linear' : 'easeInOutCubic'))(clamp01((lt - a.t) / seg));
       // Layer-owned props: one rule, no fallback. Both endpoints carry a number (resolveKeyedProps saw

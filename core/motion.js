@@ -6,7 +6,7 @@
 // core/ is self-contained: the validator lives here too (core/validate.mjs), because boot.js
 // imports it and the browser must be able to resolve it. It is engine code, not tooling.
 
-import { FEEL } from './vocab.js';
+import { FEEL, INTERP } from './vocab.js';
 import { nearMisses } from './registry.js';
 
 export const FPS = 30;
@@ -130,8 +130,14 @@ const GSAP_EASE = /^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|ro
 
 // isEasingName(n): would resolveEasing accept this string? The ONE membership test, so a gate can ask
 // instead of re-deriving it. core/validate.mjs held its own copy and it was already one registry behind.
+// INTERPOLATION MODES COUNT AS VALID HERE AND NOWHERE ELSE. `through` is not a curve and
+// `resolveEasing` must never be asked for it (core/sequence.js dispatches it first), but it IS a legal
+// value of the `ease` field, so the one membership test has to say so or the validator refuses a
+// working scene. Kept in this predicate rather than added to EASINGS, because a mode in the easing
+// table would be resolvable, and something would eventually resolve it.
 export const isEasingName = (n) => typeof n === 'string'
-  && (Object.prototype.hasOwnProperty.call(EASINGS, n) || Object.prototype.hasOwnProperty.call(FEEL, n));
+  && (Object.prototype.hasOwnProperty.call(EASINGS, n) || Object.prototype.hasOwnProperty.call(FEEL, n)
+      || Object.prototype.hasOwnProperty.call(INTERP, n));
 
 // gsapEase(e, fallback, where): an author-supplied easing for a GSAP-DRIVEN field → something GSAP
 // will actually honour.

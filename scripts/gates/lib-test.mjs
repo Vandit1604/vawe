@@ -3895,5 +3895,45 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   }
 }
 
+// ---------- `through`: the speed graph ----------
+// An easing is a function of ONE segment's progress, so it necessarily starts and ends that segment at
+// zero velocity, and an interior keyframe becomes a dead stop. Measured on three sparse keys
+// (0 → 300 → 900px, key at t=0.60) in px/s either side of it: the default curve reads 8 · 2 · 16,
+// `linear` reads 500 · 750 · 1000 (no stop, but a discontinuity), and `through` reads 749 · 770 · 845.
+// That difference IS the feature, so it is what gets asserted rather than the implementation.
+{
+  const { motionAt } = await import('../../core/sequence.js');
+  const { INTERP } = await import('../../core/vocab.js');
+  const { isEasingName } = await import('../../core/motion.js');
+  const track = (ease) => [{ t: 0, x: 0 }, { t: 0.6, x: 300, ease }, { t: 1.2, x: 900, ease }];
+  const vel = (t, ease) => { const k = track(ease), h = 1 / 60;
+    return (motionAt(k, t + h).dx - motionAt(k, t - h).dx) / (2 * h); };
+
+  ok('the default curve stops dead at an interior key', Math.abs(vel(0.6, undefined)) < 20);
+  ok('`through` carries real velocity across that key', vel(0.6, 'through') > 400);
+  // C1: the velocity either side of the key must MATCH, which is the actual definition of the fix. A
+  // curve that merely happened to be fast at the key would pass the assert above and fail this one.
+  const before = vel(0.585, 'through'), after = vel(0.615, 'through');
+  ok('velocity is continuous through the key, not merely non-zero',
+    Math.abs(after - before) / Math.max(before, after) < 0.15);
+  // And it still comes to rest at both ends, so a travel eases out of and back into stillness.
+  ok('`through` still starts and ends at rest',
+    Math.abs(vel(0.005, 'through')) < 60 && Math.abs(vel(1.195, 'through')) < 120);
+  // It reaches the authored values exactly: an interpolation that smoothed the KEYS would be wrong.
+  ok('`through` passes through its keys exactly',
+    Math.abs(motionAt(track('through'), 0.6).dx - 300) < 0.01
+    && Math.abs(motionAt(track('through'), 1.2).dx - 900) < 0.01);
+
+  // NOT AN EASING, and the separation is the point. `smooth` is a FEEL WORD for easeInOutCubic and the
+  // first version of this shadowed it, which resolveEasing accepted because it knew the name.
+  ok('`through` is a declared interpolation mode', Object.prototype.hasOwnProperty.call(INTERP, 'through'));
+  ok('`through` is a legal `ease` value', isEasingName('through'));
+  let threw = null;
+  try { (await import('../../core/motion.js')).resolveEasing('through'); } catch (e) { threw = e.message; }
+  ok('resolveEasing REFUSES it: a mode is not a curve', threw != null);
+  ok('`smooth` is still the feel word it always was',
+    Math.abs(vel(0.6, 'smooth') - vel(0.6, undefined)) < 1);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
