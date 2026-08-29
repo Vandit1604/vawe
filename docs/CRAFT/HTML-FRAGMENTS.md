@@ -135,11 +135,11 @@ right? Then render.
 
 ## Worked examples in this repo
 
-- **`formats/scene/_vawe-teaser-word.html`** — an entire six-second film in one fragment: a plain state,
+- **`formats/scene/_vawe-teaser-word.html`**: an entire six-second film in one fragment: a plain state,
   a thermal ramp that fades in and out, and a goo morph between two words. Carries the four After
   Effects steps of the effect in its own comments, which is the shape to copy: the recipe lives beside
   the implementation, so the next author inherits the name rather than the guess.
-- **`core/generators.js`, the `thermalBlur` card** — a fragment that inlines its own SVG filter, and
+- **`core/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
   says in its comments why it does that rather than referencing one on the page.
 
 ## The one thing to remember
