@@ -101,8 +101,34 @@ export function frame(kit, el, L, t, scene, spec) {
       + `THROUGH the camera. Move it back (z < ${cam.lens}), or open the lens with the camera's \`p\`.`);
   // Written in full on every frame and never appended to: the value is a function of the spec alone, so
   // a cold render and a warm one agree and any render order gives the same string.
-  el.style.translate = `0 0 ${z.toFixed(2)}px`;
+  //
+  // KEYABLE, THROUGH THE VARS TRACK AND NOT THROUGH A SECOND MECHANISM. A depth was a static plane: the
+  // sugar baked at boot and this wrote one number for the layer's whole life. So the standard slam,
+  // which every motion-graphics guide teaches as "animate Z, never scale, because scale flattens and
+  // distance does not", could not be authored at all. `--plane-z` MULTIPLIES the authored z, so
+  // `depth:"near"` with `--plane-z` running 0 to 1 travels from the picture plane to that plane and the
+  // perspective divide does the work.
+  //
+  //   { "depth":"near", "vars":{ "--plane-z":[0,1] }, "varsDur":0.4, "varsEase":"easeOutQuint" }
+  //
+  // `vars` because it is already the answer to "animate a number this layer's own CSS reads", and a
+  // second keying path for one modifier is the fork this codebase logs as the source of most drift.
+  //
+  // THE THROUGH-THE-CAMERA GUARD SURVIVES, as CSS rather than as a check. A var cannot be read here, so
+  // the throw above could no longer see the live value; `min()` clamps the product below the lens
+  // instead, which is stronger than the check it replaces because it holds on every frame rather than
+  // on the one the author declared. A layer keyed past the lens stops at the lens and stays a picture,
+  // rather than being projected through zero and out the far side, mirrored, silently.
+  el.style.translate = drivesZ(L)
+    ? `0 0 min(calc(var(${PLANE_Z}, 1) * ${z.toFixed(2)}px), ${(cam.lens - 1).toFixed(2)}px)`
+    : `0 0 ${z.toFixed(2)}px`;
 }
+
+// The multiplier, and the same emit-only-where-driven gate every other keyable value in this engine
+// uses: a `calc()` that computes to the identical number moves no pixels but changes the serialised
+// string, and a snapshot that moves for a cosmetic reason is a baseline nobody reads next time.
+const PLANE_Z = '--plane-z';
+const drivesZ = (L) => !!(L && L.vars && Object.prototype.hasOwnProperty.call(L.vars, PLANE_Z));
 
 // ---------- the named depths, so a plane is reachable without arithmetic ----------
 //
