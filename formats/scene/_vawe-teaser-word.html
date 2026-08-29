@@ -1,21 +1,50 @@
-<!-- The wordmark: two copies of the same gradient-filled word, the one behind blurred hard and
-     screened back over the front. The front carries a 3px blur so the edges bleed without the
-     letterforms going soft. Driven by var(--t): CSS animation is disabled engine-wide. -->
-<div style="position:absolute;inset:0;display:grid;place-items:center;container-type:size">
-  <div style="position:relative;grid-area:1/1;text-align:center">
-    <div style="position:absolute;inset:0;display:grid;place-items:center;
-      filter:blur(calc(34px + var(--t,0) * 16px));mix-blend-mode:screen;opacity:.92;
-      transform:scale(calc(1.01 + var(--t,0) * 0.06))">
-      <span style="font:900 clamp(60px,23cqw,320px)/0.9 var(--font-sans,system-ui),sans-serif;
-        letter-spacing:-.05em;
-        background:linear-gradient(96deg,#6d3df0,#a86ce8 18%,#eef0ff 36%,#fff4d6 50%,#ffb257 64%,#ff5fa2 80%,#9b3cd8);
-        -webkit-background-clip:text;background-clip:text;color:transparent">vawe</span>
+<!-- THE WHOLE FILM, IN ONE FRAGMENT. `--t` is the scene clock in SECONDS (core/layers/html.js), so a
+     hand-authored transition can be a function of absolute time and stay seekable: renderFrame(n) sets
+     --t, the CSS is a pure function of it, and no clock but the engine's exists.
+     `--p` is the crossfade's own 0..1 progress, cut out of --t once and reused, so the two states
+     cannot drift apart the way two separately-written calcs would. -->
+<div style="position:absolute;inset:0;display:grid;place-items:center;container-type:size;
+  --p:clamp(0, calc((var(--t,0) - 2.55) / 0.85), 1)">
+
+  <!-- STATE ONE: the wordmark. Leaves by blurring and growing THROUGH the frame, not by fading in
+       place: the reference films in grammar/ all leave through something. -->
+  <div style="grid-area:1/1;text-align:center;
+    opacity:calc(1 - var(--p));
+    filter:blur(calc(var(--p) * 26px));
+    transform:scale(calc(1 + var(--p) * 0.28))">
+    <div style="position:relative">
+      <div style="position:absolute;inset:0;display:grid;place-items:center;
+        filter:blur(calc(30px + var(--t,0) * 4px));mix-blend-mode:screen;opacity:.92;transform:scale(1.03)">
+        <span class="wm">vawe</span>
+      </div>
+      <div style="position:relative;filter:blur(3px)"><span class="wm">vawe</span></div>
     </div>
-    <div style="position:relative;filter:blur(3px)">
-      <span style="font:900 clamp(60px,23cqw,320px)/0.9 var(--font-sans,system-ui),sans-serif;
-        letter-spacing:-.05em;
-        background:linear-gradient(96deg,#6d3df0,#a86ce8 18%,#eef0ff 36%,#fff4d6 50%,#ffb257 64%,#ff5fa2 80%,#9b3cd8);
-        -webkit-background-clip:text;background-clip:text;color:transparent">vawe</span>
+    <div style="font:600 clamp(12px,2.1cqw,40px)/1 var(--font-sans,system-ui),sans-serif;
+      letter-spacing:.30em;color:#e9eaf2;margin-top:1.1em;
+      opacity:clamp(0, calc((var(--t,0) - 1.35) / 0.5), 1)">motion animation engine</div>
+  </div>
+
+  <!-- STATE TWO: arrives out of focus and larger, and resolves. The same gesture the wordmark left on,
+       reversed, so the two states read as one move rather than as a cut. -->
+  <div style="grid-area:1/1;text-align:center;
+    opacity:var(--p);
+    filter:blur(calc((1 - var(--p)) * 30px));
+    transform:scale(calc(1.3 - var(--p) * 0.3))">
+    <div style="position:relative">
+      <div style="position:absolute;inset:0;display:grid;place-items:center;
+        filter:blur(30px);mix-blend-mode:screen;opacity:.9;transform:scale(1.03)">
+        <span class="ls">launching soon</span>
+      </div>
+      <div style="position:relative;filter:blur(2px)"><span class="ls">launching soon</span></div>
     </div>
   </div>
+
+  <style>
+    .wm { font:900 clamp(60px,23cqw,320px)/0.9 var(--font-sans,system-ui),sans-serif; letter-spacing:-.05em;
+          background:linear-gradient(96deg,#6d3df0,#a86ce8 18%,#eef0ff 36%,#fff4d6 50%,#ffb257 64%,#ff5fa2 80%,#9b3cd8);
+          -webkit-background-clip:text;background-clip:text;color:transparent; }
+    .ls { font:800 clamp(30px,9.4cqw,132px)/0.95 var(--font-sans,system-ui),sans-serif; letter-spacing:-.02em;
+          background:linear-gradient(96deg,#a86ce8,#eef0ff 34%,#fff4d6 52%,#ffb257 70%,#ff5fa2);
+          -webkit-background-clip:text;background-clip:text;color:transparent; }
+  </style>
 </div>
