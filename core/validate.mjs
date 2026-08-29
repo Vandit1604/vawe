@@ -894,6 +894,45 @@ function inertPropWarns(data) {
   return warns;
 }
 
+// A GROUP CHILD'S WINDOW IS ITS GROUP'S WINDOW. `addGroupChild` computes it as
+// `(rootL.start ?? 0) + delay` and `(rootL.duration ?? 0) - delay`, both read off the GROUP, so a
+// child's own `start` and `duration` are never looked at. 30 starts and 14 durations across 9 films are
+// written today and every one of them renders as the parent's window.
+//
+// Warned rather than honoured, and warned rather than refused. Honouring an absolute start would let a
+// child outlive the group that contains it, which ends containment in the one dimension it still held,
+// and `delay` already expresses the offset, so a second spelling would be the fork this codebase logs
+// as the source of most of its drift. Refusing would break nine shipped films at boot over a prop that
+// has never done anything, and a debt is not an emergency.
+//
+// Same shape and the same reasoning as the `border`/`elevation` pair in inertPropWarns: said out loud,
+// on every run, rather than changed underneath the layers that already rely on the current answer.
+//
+// RECURSIVE, unlike its neighbours. inertPropWarns walks `data.layers` and stops, which is right for a
+// rule about a top-level layer's own props; this one is about the CONTAINMENT relationship, and that
+// relationship exists at every depth. A one-level walk would have reported 28 of the 30.
+function childWindowWarns(data) {
+  const warns = [];
+  const walk = (ls, path) => {
+    for (const [i, L] of (ls || []).entries()) {
+      if (!isObj(L)) continue;
+      const label = `${path}[${i}]${L.id ? ` #${L.id}` : ''}`;
+      for (const [ci, C] of (L.children || []).entries()) {
+        if (!isObj(C)) continue;
+        const wrote = [C.start != null && '`start`', C.duration != null && '`duration`'].filter(Boolean);
+        if (wrote.length) warns.push(`${label}.children[${ci}]${C.id ? ` #${C.id}` : ''}: sets ${wrote.join(' and ')}, `
+          + `and a group child's window IS its group's window, so ${wrote.length > 1 ? 'both are' : 'it is'} read off the `
+          + `group and the child's ${wrote.length > 1 ? 'are' : 'is'} DISCARDED. Use \`delay\` (seconds into the group's `
+          + `window) for the child's own timing, and put the window on the group.`);
+      }
+      walk(L.children, `${label}.children`);
+      walk(L.layers, `${label}.layers`);
+    }
+  };
+  walk(data.layers, 'layers');
+  return warns;
+}
+
 function panWithRestWarns(data) {
   const warns = [];
   // `panWith` copies a track as DELTAS, so the x/y an author writes is where the layer STARTS and the
@@ -1035,6 +1074,7 @@ export function lintData(data) {
     ...becomesHandoverWarns(data),
     ...omittedKeyResetWarns(data),
     ...inertPropWarns(data),
+    ...childWindowWarns(data),
     ...panWithRestWarns(data),
     ...missingWindowWarns(data),
     // (2) TYPING + MARKUP: RETIRED, and the retirement is the point. This rule warned that `typing`

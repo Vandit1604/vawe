@@ -221,6 +221,11 @@ look:
 frame:
 	node scripts/author/preview.mjs $(M) $(N) $(if $(D),--data $(D))
 
+# make census: every named population in formats/scene, with the question each one answers.
+# Quote a NAME in prose and print this to get the number (scripts/lib/census.mjs owns the definitions).
+census:
+	node scripts/lib/census.mjs
+
 # make assets D=formats/x/topic.json [WRITE=1], fill missing icons: country→flag, brand→logo,
 # else a generated topic card. Dry-run without WRITE.
 assets:

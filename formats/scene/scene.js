@@ -35,23 +35,64 @@ const $ = (id) => document.getElementById(id);
 // stagger chains are declared relationships (the temporal twin of `anchor`) instead of hand-added
 // arithmetic. Multi-pass (a target may itself be relative); an unresolvable/circular ref fails loud.
 // Pure in `data`: mutates the layers' start fields in place before any DOM exists.
+//
+// IT WALKS THE WHOLE TREE, and it used to walk `data.layers` only. Everything nested (a group's
+// `children`, a composition's `layers`) was invisible to it in both directions: such a layer could not
+// BE a target, and its own relative start was never resolved. The second half is the dangerous one,
+// because nothing failed. `setLayerTiming` writes `String(L.start ?? 0)` to the dataset, so the string
+// "hero+0.4" reached the DOM intact, and `parseFloat("hero+0.4")` is NaN, and `NaN || 0` is 0. The
+// layer started at zero, on screen, silently, with every gate green. That is the silent-substitution
+// class this engine logs more than any other: an input accepted and then ignored.
+//
+// Nothing in the library was hurt, because 0 of 1,305 nested layers had reached for it: 26 relative
+// starts exist and all 26 are top-level. A feature that is broken everywhere it is not yet used is
+// still broken, and the containment rule it was breaking is one the geometry already keeps, since a
+// group child's x/y are relative to its group.
+//
+// TWO REFUSALS REPLACE TWO GUESSES.
+//   `.end` on a target with no `duration` used to score `?? 2`, an invented two seconds that read as
+//   an answer. No film in the library uses `.end` at all, so nothing depended on the guess.
+//   A start that survives every pass as a string used to be handed downstream to become that NaN.
+//   Both now throw, naming the layer.
+function eachLayerDeep(ls, fn) {
+  for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    fn(L);
+    eachLayerDeep(L.children, fn);
+    eachLayerDeep(L.layers, fn);
+  }
+}
+
 function resolveRelativeStarts(data) {
   const byId = {};
-  for (const L of data.layers || []) if (L.id) byId[L.id] = L;
+  const all = [];
+  eachLayerDeep(data.layers, (L) => { all.push(L); if (L.id) byId[L.id] = L; });
   const RX = /^([\w-]+?)(\.end)?\s*([+-]\s*[\d.]+)?$/;
+  const nameOf = (L) => `${L.id ? `"${L.id}"` : `a ${L.type || 'text'} layer`}`;
   for (let pass = 0; pass < 8; pass++) {
     let pending = 0;
-    for (const L of data.layers || []) {
+    for (const L of all) {
       if (typeof L.start !== 'string') continue;
       const m = RX.exec(L.start.trim());
-      if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}": unknown reference`);
+      if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}" on ${nameOf(L)}: unknown reference `
+        + `"${m ? m[1] : L.start}". A relative start names another layer's \`id\`. Known ids: ${Object.keys(byId).join(', ') || '(none: no layer in this scene declares an id)'}.`);
       const T = byId[m[1]];
       if (typeof T.start === 'string') { pending++; continue; } // resolve target first
-      L.start = (T.start ?? 0) + (m[2] ? (T.duration ?? 2) : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
+      // `.end` IS the target's start plus its duration, so a target with no duration has no end. It
+      // scored an invented 2s here, which is a number nobody wrote reading as one somebody did.
+      if (m[2] && T.duration == null) throw new Error(`layer start "${L.start}" on ${nameOf(L)}: `
+        + `"${m[1]}" declares no \`duration\`, so it has no end to hang this off. Give "${m[1]}" a duration, `
+        + `or hang this off its START instead ("${m[1]}${m[3] || ''}").`);
+      L.start = (T.start ?? 0) + (m[2] ? T.duration : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
     }
     if (!pending) break;
     if (pass === 7) throw new Error('relative starts: circular reference');
   }
+  // NOTHING LEAVES HERE AS A STRING. Downstream is `String(L.start ?? 0)` into the dataset and a
+  // `parseFloat` back out, and that pair turns an unresolved reference into a layer at t=0 rather than
+  // into an error. The pass either resolved it or says which layer it could not.
+  for (const L of all) if (typeof L.start === 'string')
+    throw new Error(`layer start "${L.start}" on ${nameOf(L)} did not resolve. It would render at t=0 with nothing to say so.`);
 }
 
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);

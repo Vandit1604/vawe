@@ -29,7 +29,10 @@ verify/frames/
 verify/fixtures/.gate-mutation.lock
 
 # transient DOM snapshot baselines (make snap)
-verify/snap/
+verify/snap/*
+# …except the digest: one sha256 per scene plus the font state, ~10KB. It is what lets a fresh clone
+# and CI answer "did this scene move" when the 20MB of full signatures beside it cannot be committed.
+!verify/snap/digest.json
 
 # review receipts: proof a beats/reveal sheet was rendered for a given scene content hash
 # (make beats / make reveal write them, scripts/gates/beat-check.mjs reads them). Local, per-machine.

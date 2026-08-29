@@ -32,6 +32,24 @@ const slack = lintData({ module: 'scene', layers: [
 ] });
 ok(!slack.some((w) => /colliding/.test(w)), `rule 3: declared boxes that overlap only in empty slack are silent (got ${slack.filter((w) => /colliding/.test(w)).join('; ') || 'none'})`);
 
+// --- childWindowWarns: a group child's own start/duration is discarded, and must say so ---
+// `addGroupChild` reads the window off the GROUP, so these two props have never done anything on a
+// child. 49 children across 13 films write one today. The rule is pinned in BOTH directions, because a
+// warn-only rule that stops firing is indistinguishable from a library that got fixed.
+const childWin = lintData({ module: 'scene', layers: [
+  { type: 'group', id: 'g', x: 100, y: 400, start: 1, duration: 4, children: [
+    { type: 'text', id: 'kid', text: 'A', start: 3, duration: 2 },
+    { type: 'group', children: [{ type: 'text', text: 'B', duration: 1 }] },   // nested: the walk is recursive
+    { type: 'text', text: 'C', delay: 0.4 },                                    // the CORRECT spelling
+  ] },
+] });
+const disc = childWin.filter((w) => /DISCARDED/.test(w));
+ok(disc.length === 2, `child window: both an own start/duration and a NESTED one are reported (got ${disc.length}: ${disc.join(' | ') || 'none'})`);
+ok(disc.some((w) => /#kid.*`start` and `duration`/.test(w)), 'child window: names the child and both props it discarded');
+ok(disc.every((w) => /`delay`/.test(w)), 'child window: every message names the prop that DOES work');
+ok(!disc.some((w) => /'C'|text: 'C'/.test(w)) && childWin.filter((w) => /DISCARDED/.test(w)).length === 2,
+  'child window: a child using `delay` is silent');
+
 // committed clean scene must stay silent (no false positives)
 const clean = lintData(read('formats/scene/sample.json'));
 ok(clean.length === 0, `clean sample.json is silent (got ${clean.length}: ${clean.join('; ') || 'none'})`);

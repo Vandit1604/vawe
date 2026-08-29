@@ -57,6 +57,26 @@ const fontState = () => {
   return { n: names.length, hash: crypto.createHash('sha256').update(names.join('\n')).digest('hex').slice(0, 12) };
 };
 const STAMP = path.join(SNAP, '.font-state.json');
+// THE ONE TRACKED ARTEFACT IN A GITIGNORED DIRECTORY, and the reason is what CI can and cannot do.
+// A full signature is ~170KB per scene and the whole set is 20MB, most of it describing films that are
+// themselves gitignored, so committing the baselines is not on. Without them a runner has nothing to
+// diff and this gate can only prove determinism, never "nothing changed", which is exactly the ceiling
+// the architecture doc has been stating for months as if it were permanent.
+//
+// It is not permanent, it is a size problem, and a hash is not big. The digest is one sha256 per scene
+// plus the font state: about 10KB, and it answers the question CI actually asks, which is WHETHER a
+// scene moved, not what moved inside it. The what stays local, where the 20MB lives and where a person
+// can read a diff. A digest row for a scene this checkout does not have is inert, not an error.
+//
+// This is only honest because the faces are pinned. scripts/media/fonts.mjs carries an exact version
+// and a sha256 for every one of them, so two machines hold identical bytes and a hash mismatch is
+// evidence about the code. Under the unversioned URLs this file used to fetch, the same comparison
+// would have been noise wearing a regression's clothes.
+const DIGEST = path.join(repoRoot, 'verify', 'snap', 'digest.json');
+const sha = (v) => crypto.createHash('sha256').update(v).digest('hex').slice(0, 16);
+let digest = null;
+try { digest = JSON.parse(fs.readFileSync(DIGEST, 'utf8')); } catch { /* no digest yet */ }
+const digestNow = {};
 const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one scene by name
 
 // Every shipped SCENE: formats/scene/*.json with module:"scene", except the schema and _-prefixed
@@ -166,8 +186,19 @@ for (const scene of scenes) {
 
     // deterministic → baseline
     const file = path.join(SNAP, `${name}.json`);
+    const sigHash = sha(JSON.stringify(sigAsc));
+    digestNow[name] = sigHash;
     if (SAVE) { fs.writeFileSync(file, JSON.stringify(sigAsc)); saved.push(name); await page.close(); continue; }
-    if (!fs.existsSync(file)) { nobaseline.push(name); await page.close(); continue; }
+    if (!fs.existsSync(file)) {
+      // NO LOCAL BASELINE, BUT THE DIGEST IS TRACKED, so a fresh clone and every CI runner still get a
+      // verdict instead of a shrug. It says WHETHER the scene moved and cannot say what moved; the
+      // message says so rather than letting a reader assume the full net ran.
+      const was = digest && digest.scenes && digest.scenes[name];
+      if (!was) nobaseline.push(name);
+      else if (was === sigHash) identical.push(name);
+      else changed.push({ name, diffs: [`signature ${was} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make snap-all SAVE=1\` on a tree with the films to see it.)`] });
+      await page.close(); continue;
+    }
     const base = JSON.parse(fs.readFileSync(file, 'utf8'));
     const d = diffSig(base, sigAsc);
     if (d.length) changed.push({ name, diffs: d }); else identical.push(name);
@@ -208,6 +239,9 @@ if (!SAVE) {
 if (SAVE) {
   const fsNow = fontState();
   fs.writeFileSync(STAMP, JSON.stringify({ ...fsNow, root: repoRoot }, null, 2) + '\n');
+  // Sorted, because an unsorted map re-orders itself on every save and the tracked file would show a
+  // diff on a run that changed nothing. Deterministic output is the same rule the renders obey.
+  fs.writeFileSync(DIGEST, JSON.stringify({ font: fsNow, scenes: Object.fromEntries(Object.keys(digestNow).sort().map((k) => [k, digestNow[k]])) }, null, 1) + '\n');
   console.log(`✓ ${saved.length} baselines saved → verify/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s))`);
   if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic, NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }

@@ -93,6 +93,53 @@ else {
   }
 }
 
+// ---- WHAT THIS FILM HAS NOT REACHED FOR --------------------------------------------------------
+// The chain above says what to decide. This says which capability the film currently declines, and it
+// is deliberately NOT a gate: `make check` already carries eight ratcheted codes, and the doctrine is
+// that a gate is the last resort. A capability nobody knows exists is a discovery problem, and the
+// answer to a discovery problem is to put the thing in front of the author at the moment they are
+// deciding, not to refuse the film afterwards.
+//
+// Each row is a pure function of the scene, and each carries the share of the library in the same
+// state, because "you could use depth" is advice and "44 of the 47 films with a camera move have every
+// layer at z = 0" is a fact about the house. Re-derive the shares with `make census` and the counters
+// beside it; they are quoted, so they go stale, and a stale share is the failure mode this repo logs
+// most often.
+const flat = (ls) => (ls || []).flatMap((L) => [L, ...flat(L.layers), ...flat(L.children)]);
+const ALL = flat(scene.layers);
+const REACH = [
+  {
+    when: () => (scene.camera || scene.cameraMove) && !ALL.some((L) => (L.modifiers || []).some((m) => m && m.plane != null)),
+    say: 'DEPTH. This film moves the camera and every layer sits at z = 0, so the whole composition turns as one rigid pane.',
+    how: '"modifiers": [{ "plane": -600 }] puts a layer behind the picture plane. Parallax is a DIFFERENCE of depth and cannot exist while there is only one depth to have.',
+    read: 'core/fx/plane.js',
+    share: '44 of the 47 films with a camera move are in this state, and 3 of 134 use depth at all.',
+  },
+  {
+    when: () => !Array.isArray(scene.bg) || scene.bg.length <= 1,
+    say: 'THE BACKDROP. One window paints the whole runtime, so the ground never turns with the film.',
+    how: 'List the windows in the order the film turns and give none of them a from/to: the engine binds window i to the joint after it, so the cuts you already wrote own the numbers.',
+    read: 'core/junctions.js',
+    share: '112 of 134 films paint one window for their whole runtime.',
+  },
+  {
+    when: () => scene.audio && scene.audio.silent === true && !scene.audio._why,
+    say: 'SILENCE, undeclared. Mute is a device and this film does not say which one.',
+    how: '"audio": { "silent": true, "_why": "…" }. The sound bridge, the unfinished sentence and music-led structure are all closed while the track is empty.',
+    read: 'docs/CRAFT/SOUND.md',
+    share: '110 of 134 films ship mute and 13 of the 93 that declare it say why.',
+  },
+];
+const missed = REACH.filter((r) => { try { return r.when(); } catch { return false; } });
+if (missed.length) {
+  console.log(`\n  NOT REACHED FOR. Each of these is available, costs one line, and this film declines it:\n`);
+  for (const r of missed) {
+    console.log(`   · ${r.say}`);
+    console.log(`       ${r.how}`);
+    console.log(`       read ${r.read}  ·  ${r.share}`);
+  }
+}
+
 // The arsenal, aimed at this film. `make blueprints` lists 19 beats and 12 have never been used, so
 // listing them all again would be the same non-event. Rank them against what the film SAYS it is.
 const feel = [scene.note, scene.spectacle && scene.spectacle.of, sb && fs.readFileSync(sb, 'utf8').slice(0, 600)]

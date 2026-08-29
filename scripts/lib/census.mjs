@@ -156,3 +156,52 @@ export const LIBRARY_WITH_DERIVATIVES = (f, abs) => f !== 'schema.json' && !isTe
 //   similarity · layer-props · feature-audit     carry their own extra exclusions (sample.json,
 //                                                cuts-demo, un-parseable files) on top.
 //   sfx-audit · snap-blocks                      different directory entirely: not scenes at all.
+
+// ---------- the populations, by NAME, so a doc can quote one ----------
+//
+// The code had one owner for "the library" and the DOCS still did not, because there was no way to
+// ASK. Four numbers were all true of this checkout on the same afternoon and meant different things:
+// 134 (the library), 136 (a hand-rolled walk that forgot two derivative suffixes), 106 (what the
+// snapshot net sweeps) and 161 (every .json in the directory). Each got quoted somewhere as "the
+// library", including on the architecture page written the same day, which is the tell: the person
+// with the definitions in front of them still produced a fifth number by hand.
+//
+// So the fix is not another definition. It is making the existing ones REACHABLE:
+//
+//   node scripts/lib/census.mjs      (make census)
+//
+// Quote a NAME in prose and print the number here. A number typed into a doc is a copy with no owner,
+// and this repo has already logged eight of those going stale across five files.
+export const POPULATIONS = [
+  ['library', LIBRARY,
+   'films a person authored and the engine can render on its own. THIS is what CLAUDE.md means by "the library".'],
+  ['library+derivatives', LIBRARY_WITH_DERIVATIVES,
+   'the above plus generated siblings (.expanded, .beatsync, …). What a sweep grading the RENDERABLE artifact walks.'],
+  ['every scene file', (f) => f.endsWith('.json') && f !== 'schema.json' && !isTemplate(f),
+   'every .json in formats/scene bar the schema. Bigger than either population above and never the right answer to "how many films".'],
+];
+
+// A COUNT ON A DEVELOPER MACHINE IS NOT A COUNT ON A CLONE, and saying so is half the point of this
+// output. Films are gitignored on purpose (.gitignore:61: a video instance is not the framework), so a
+// fresh checkout legitimately sees roughly a third of these numbers with nothing broken. Printing the
+// tracked share beside the total is what stops the next reader reading a smaller number as a fault.
+const trackedCount = (dir, names) => {
+  try {
+    const set = new Set(git(['ls-files', '--', `${dir}/*.json`], ROOT).split('\n').filter(Boolean).map((r) => path.basename(r)));
+    return names.filter((f) => set.has(f)).length;
+  } catch { return null; }
+};
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  console.log(`\n  CENSUS · ${SCENE_DIR}\n`);
+  for (const [name, filter, why] of POPULATIONS) {
+    const names = listing(ROOT, SCENE_DIR, '.json', filter) || [];
+    const tracked = trackedCount(SCENE_DIR, names);
+    console.log(`  ${String(names.length).padStart(4)}  ${name}`);
+    console.log(`        ${why}`);
+    if (tracked !== null) console.log(`        ${tracked} of them are git-tracked, so a fresh clone sees ${tracked}.`);
+    console.log('');
+  }
+  console.log(`  Quote a NAME in prose, and print this to get the number. A number typed into a doc is a`);
+  console.log(`  copy with no owner.\n`);
+}

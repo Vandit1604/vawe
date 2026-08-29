@@ -457,6 +457,18 @@ export function createKit(ctx) {
     // COMPUTED BEFORE the branch, because a group has to know its own window before it can hand it to
     // its children. It used to be computed at the bottom, after the recursion had already run with the
     // wrong one.
+    // A CHILD'S CLOCK IS ITS PARENT'S, OFFSET BY `delay`, AND THAT IS THE WHOLE VOCABULARY.
+    // Containment scopes time here exactly as it scopes geometry, which is the point of a group: a
+    // child's x/y are relative to the group's box and its window is relative to the group's window. It
+    // works and it is used, by 279 children in this library.
+    //
+    // A child writing its own `start` or `duration` is READ OFF `rootL` two lines down and its own
+    // values never looked at, so 30 starts and 14 durations across 9 films are accepted, discarded, and
+    // rendered as the parent's window. That is said out loud in core/validate.mjs (inertPropWarns)
+    // rather than fixed here, for the reason the `border`/`elevation` pair beside it gives: honouring
+    // an absolute start would let a child outlive the group containing it, which ends containment in
+    // the one dimension it still held, and `delay` already says the thing, so honouring `start` would
+    // be a second spelling of one idea.
     const d = Math.max(0, +C.delay || 0);
     const cStart = (rootL.start ?? 0) + d, cDur = Math.max(0, (rootL.duration ?? 0) - d);
     if (isGroup) {
