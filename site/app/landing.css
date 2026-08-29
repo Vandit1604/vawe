@@ -34,7 +34,7 @@
 .on-accent .eyebrow .dot{background:#fff}
 /* Anybody sets wider and squarer than a normal grotesk, so it needs less negative tracking than
    Space Grotesk did (-.038em closed the counters). Wide + heavy is the commitment. */
-.hero-head h1{color:var(--ink);font-size:clamp(2.9rem,7.2vw,6rem);line-height:1;font-weight:700;letter-spacing:-.022em;
+.hero-head h1{color:var(--ink);font-size:clamp(2.35rem,6.2vw,4.75rem);line-height:1.02;font-weight:700;letter-spacing:-.022em;
   font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:0 auto 20px}
 .hero-head .sub{color:var(--ink-2);font-size:clamp(1.05rem,1.7vw,1.35rem);font-weight:400;
   max-width:44ch;margin:0 auto 30px}
