@@ -1,73 +1,96 @@
-<!-- Read against the reference frame side by side, four things were wrong and the third is the one
-     that makes it look like a different technique:
-       1. SCALE. The reference type fills ~70% of the frame width. Ours filled ~55% and was thinner.
-       2. INTENSITY. Its glow is blown out and saturated; ours was a thin even rim at low opacity.
-       3. THE GLOW EATS THE LETTERS. In the reference the halo overwhelms parts of the glyphs, so the
-          word is barely legible on the right. That is a HIGH-intensity glow at a LOW threshold, and
-          it is the whole character of the look. A uniform rim that politely traces the outline is a
-          different effect that happens to use the same colours.
-       4. GRAIN. Its black is film, not #000 with nothing on it.
-     The goo morph is unchanged: blur + contrast on a container, so the two words melt into one mass
-     and re-form. `--t` is the scene clock in seconds; `--p` is the morph, `--g` peaks at its middle. -->
-<div style="position:absolute;inset:0;display:grid;place-items:center;container-type:size;
-  --p:clamp(0, calc((var(--t,0) - 2.5) / 1.15), 1);
-  --g:calc(1 - abs(var(--p) * 2 - 1))">
+<!-- THE EFFECT HAS A NAME AND A RECIPE: it is a THERMAL BLUR, and every earlier attempt here failed
+     because I was guessing at it instead of looking it up. In After Effects it is:
+       white text -> Fast Box Blur -> COLORAMA with a thermal ramp -> Glow -> grain.
+     The colour does NOT come from stacking coloured copies, which is what I kept building. It comes
+     from a GRADIENT MAP applied to LUMINANCE: blur white text and the falloff is greyscale, then remap
+     that greyscale through the ramp so bright becomes white, mid becomes orange, dim becomes blue, and
+     the far field becomes black. That single fact explains everything the stacked version could not:
+     the continuous transition, the organic edge, and the letters being EATEN, because the ramp remaps
+     the glyph's own soft edge along with everything around it.
 
-  <!-- THE HEAT RAMP. Three rules, each learned by getting it wrong:
-       NO brightness(). On #ff5a00, (255,90,0) scaled 3.1x is (255,255,0): red is already clipped and
-       green is the only channel with room, so the whole halo turned yellow. A filter that boosts a
-       channel cannot intensify a colour that has maxed one out. Intensity comes from stacking each
-       band twice under `screen`, which accumulates along the colour's own hue.
-       BLUR SPREADS, SCALE PLACES. Radius is how far the light reaches; scale is where the band SITS.
-       Raising the radii alone put every band exactly on the glyph, so the white face screened over all
-       of them and the warm vanished into a pink wash. Both are needed: the warm has to be pushed
-       clear of the white edge AND spread.
-       THE WHITE CORE IS THE SMALLEST THING IN THE STACK, which is what leaves a visible warm band
-       between it and the blue, exactly as the reference has. -->
-  <div class="halo" style="filter:blur(calc(58px + var(--g) * 26px)) saturate(1.6);transform:scale(1.16);opacity:.9">
-    <div class="mass" style="color:#2f6bff"></div></div>
-  <div class="halo" style="filter:blur(calc(40px + var(--g) * 19px)) saturate(1.6);transform:scale(1.13)">
-    <div class="mass" style="color:#2f6bff"></div></div>
-  <div class="halo" style="filter:blur(calc(27px + var(--g) * 14px)) saturate(1.5);transform:scale(1.10)">
-    <div class="mass" style="color:#1f4fe0"></div></div>
+     Colorama's job is done here by `feComponentTransfer` with per-channel `tableValues`, which is
+     literally a gradient map. The stops are the tutorial's own eight:
+       #000000 #214F89 #4A8497 #E5504C #EF7E01 #F9BA3B #FDEBD1 #FFFFFF
+     converted to 0..1 tables below.
 
-  <div class="halo" style="filter:blur(calc(20px + var(--g) * 11px)) saturate(1.5);transform:scale(1.075)">
-    <div class="mass" style="color:#ff2000"></div></div>
-  <div class="halo" style="filter:blur(calc(15px + var(--g) * 9px)) saturate(1.5);transform:scale(1.062)">
-    <div class="mass" style="color:#ff2000"></div></div>
-  <div class="halo" style="filter:blur(calc(11px + var(--g) * 7px)) saturate(1.4);transform:scale(1.05)">
-    <div class="mass" style="color:#ff6a00"></div></div>
-  <div class="halo" style="filter:blur(calc(8px + var(--g) * 6px)) saturate(1.4);transform:scale(1.04)">
-    <div class="mass" style="color:#ff8a00"></div></div>
-  <div class="halo" style="filter:blur(calc(5px + var(--g) * 4px));transform:scale(1.026)">
-    <div class="mass" style="color:#ffb43a"></div></div>
-  <div class="halo" style="filter:blur(calc(3px + var(--g) * 3px));transform:scale(1.014)">
-    <div class="mass" style="color:#ffdc8a"></div></div>
+     `--g` uses max(x, -x) and not abs(x): CSS `abs()` is recent and this renderer's Chrome does not
+     have it, so `--g` resolved to an invalid value, `calc(var(--g) * 9px)` failed with it, and the
+     browser dropped the ENTIRE filter declaration. Both plates computed `filter: none` and the thermal
+     map never ran, with the frame looking merely plain and nothing reporting anything.
 
-  <!-- THE FACE, blown out to pure white. Gooed through the middle of the morph for the melt. -->
-  <div class="goo" style="filter:blur(calc(1px + var(--g) * 15px)) contrast(calc(1 + var(--g) * 26)) brightness(1.6)">
-    <div class="mass" style="color:#fff"></div></div>
+     `--t` is the scene clock in seconds. `--p` is the morph, `--h` is how much THERMAL is applied, kept
+     separate so the text can arrive clean, heat up, morph, and cool down. -->
+<div style="position:absolute;inset:0;container-type:size;
+  --p:clamp(0, calc((var(--t,0) - 2.7) / 1.1), 1);
+  --heat:clamp(0, calc((var(--t,0) - 1.45) / 0.85), 1);
+  --cool:clamp(0, calc((var(--t,0) - 4.45) / 0.8), 1);
+  --h:calc(var(--heat) - var(--cool));
+  --g:calc(1 - max(calc(var(--p) * 2 - 1), calc(1 - var(--p) * 2)));
+  --pa:clamp(0, calc((var(--p) - 0.42) / 0.28), 1);
+  --pb:clamp(0, calc((var(--p) - 0.30) / 0.28), 1)">
 
-  <!-- GRAIN, at the reference's strength. Two offset radial layers at coprime sizes, rotated so
-       neither reads as rows. `inset:-45%` so the rotation never shows its own edge. -->
-  <div style="position:absolute;inset:-45%;pointer-events:none;opacity:.26;mix-blend-mode:screen;
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <filter id="thermal" x="-40%" y="-70%" width="180%" height="240%" color-interpolation-filters="sRGB">
+      <!-- Fast Box Blur. Three box passes is what AE's iterations do, and what makes it a BOX blur
+           rather than a gaussian: the falloff is flatter and reaches further, which is why the reference
+           glow has body instead of trailing off. -->
+      <feGaussianBlur stdDeviation="2.5" edgeMode="none" result="b1"/>
+      <feGaussianBlur in="b1" stdDeviation="3.5" edgeMode="none" result="b2"/>
+      <feGaussianBlur in="b2" stdDeviation="4.5" edgeMode="none" result="soft"/>
+      <!-- THE FAR FIELD, and why a chain of gaussians alone could not produce the blue rim. A box
+           blur falls off LINEARLY and so carries real luminance a long way from the glyph; a gaussian
+           dies exponentially. Chained gaussians stay gaussian, so at the radius that keeps the letter
+           cores white the falloff was already black two stops before the ramp's blue, and the word came
+           out orange with no rim at all. This is the missing tail: one wide pass, scaled down, ADDED to
+           the tight one. Added and not merged: feMerge composites, and this plate is opaque, so a merge
+           would simply cover the tight result instead of summing with it. -->
+      <feGaussianBlur in="SourceGraphic" stdDeviation="15" edgeMode="none" result="wide"/>
+      <feColorMatrix in="wide" type="matrix" result="tail"
+        values="0.42 0 0 0 0  0 0.42 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/>
+      <feComposite in="soft" in2="tail" operator="arithmetic" k2="1" k3="1" result="field"/>
+      <!-- COLORAMA. A gradient map on luminance: the blurred grey falloff becomes the thermal ramp. -->
+      <feComponentTransfer in="field" result="hot">
+        <feFuncR type="table" tableValues="0.0 0.129 0.29 0.898 0.937 0.976 0.992 1.0"/>
+        <feFuncG type="table" tableValues="0.0 0.31 0.518 0.314 0.494 0.729 0.922 1.0"/>
+        <feFuncB type="table" tableValues="0.0 0.537 0.592 0.298 0.004 0.231 0.82 1.0"/>
+        <feFuncA type="table" tableValues="0 1 1 1 1 1 1 1"/>
+      </feComponentTransfer>
+      <!-- NO Composite Original. Merging the sharp SourceGraphic back on top covers the very band the
+           ramp exists to create: the map's own top stop is #FFFFFF, so the glyph cores come out white
+           from the ramp itself and laying the original over them only hides the orange. AE's Composite
+           Original is for a glow that sits BESIDE the source; a gradient map replaces the source, which
+           is the whole point of it. -->
+    </filter>
+  </defs></svg>
+
+  <!-- THE PLATE. White text on opaque black, because a gradient map reads LUMINANCE and needs a real
+       black to map the far field from. `screen` drops that black back out over the scene. -->
+  <div class="plate" style="filter:url(#thermal) blur(calc(var(--g) * 14px)) contrast(calc(1 + var(--g) * 9));
+    opacity:var(--h)">
+    <div class="mass"></div>
+  </div>
+  <!-- THE CLEAN STATE. Before the heat arrives and after it cools, the word is plain white with no
+       effect at all, which is what was asked for and what the reference's own opening does. -->
+  <div class="plate" style="opacity:calc(1 - var(--h));
+    filter:blur(calc(var(--g) * 14px)) contrast(calc(1 + var(--g) * 9))">
+    <div class="mass"></div>
+  </div>
+
+  <div style="position:absolute;inset:-45%;pointer-events:none;opacity:.20;mix-blend-mode:screen;
     transform:rotate(11deg);
     background-image:radial-gradient(#fff .45px,transparent .55px),radial-gradient(#fff .4px,transparent .5px);
     background-size:3px 3px,7px 5px;background-position:0 0,1px 2px"></div>
 
   <style>
-    .goo  { grid-area:1/1; width:100%; height:100%; background:#000; mix-blend-mode:screen;
-            display:grid; place-items:center; }
-    .halo { grid-area:1/1; width:100%; height:100%; mix-blend-mode:screen;
-            display:grid; place-items:center; }
-    .mass { position:relative; display:grid; place-items:center; }
+    .plate { position:absolute; inset:0; background:#000; mix-blend-mode:screen;
+             display:grid; place-items:center; }
+    .mass  { position:relative; display:grid; place-items:center; }
     .mass::before, .mass::after {
-      grid-area:1/1;
-      /* 15.5cqw, not 10.5: the reference word spans about 70% of the frame. */
-      font:900 clamp(40px,15.5cqw,215px)/1 var(--font-sans,system-ui),sans-serif;
-      letter-spacing:-.045em; white-space:nowrap; color:inherit;
+      grid-area:1/1; color:#fff;
+      font:700 clamp(40px,14cqw,196px)/1 var(--font-sans,system-ui),sans-serif;
+      letter-spacing:-.04em; white-space:nowrap;
     }
-    .mass::before { content:"launching soon"; opacity:calc(1 - var(--p)); transform:scale(calc(1 - var(--p) * 0.08)); }
-    .mass::after  { content:"vawe.dev";       opacity:var(--p);           transform:scale(calc(0.92 + var(--p) * 0.08)); }
+    .mass::before { content:"launching soon"; opacity:calc(1 - var(--pa)); }
+    .mass::after  { content:"vawe.dev";       opacity:var(--pb); }
   </style>
 </div>

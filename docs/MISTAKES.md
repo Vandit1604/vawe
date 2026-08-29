@@ -16279,3 +16279,34 @@ which to believe. Both were right, and the disagreement is the finding.
 **Which gate catches it.** `docs-drift` now runs `grammar --check`, so the generated page cannot drift
 from the store it is generated from. Nothing catches a second store being created; `make grammar` and
 `make census` exist so the first one is easy to find.
+
+## #505: four blind attempts at an effect that has a name and a published recipe
+
+**What:** the user asked for the look in a reference frame: white text with an orange body and a blue
+rim. I built it four times by eye. Every attempt stacked coloured copies of the same text, offset and
+blurred, and every one was rejected, because a stack of copies cannot produce a continuous transition
+between three colours. The user finally said the thing that fixed it: *"if you dont know what it is
+called learn it and search how to make it and then make it, rather than keep on trying."*
+
+**Root cause:** I treated an unfamiliar effect as a shape to approximate rather than as a technique
+with a name. It has one. It is a **thermal blur**, and its recipe is four steps: white text, Fast Box
+Blur, **Colorama**, glow. The step I could not have guessed is the third: the colour is a **gradient
+map applied to luminance**, so the blur's own grey falloff is remapped through a ramp where bright
+becomes white, mid becomes orange and dim becomes blue. One search returned that. It also explained
+every symptom the stack could not: the continuous transition, the organic edge, and the letters being
+eaten, all of which are the ramp acting on the glyph's own soft edge.
+
+Iterating by eye is not free. It costs a render and a judgement each time, and it converges on
+whatever the first guess was near. Four renders bought nothing; the name bought the whole answer.
+
+**Fix:** the behaviour is now written down as a standing rule in `CLAUDE.md`, "NAME THE EFFECT BEFORE
+YOU BUILD IT". No gate can catch this: nothing in the repo knows what an author was looking at. The
+worked build lives in `formats/scene/_vawe-teaser-word.html`, where the filter chain carries the four
+AE steps and their SVG equivalents in its own comments.
+
+**Three separate bugs surfaced only because the technique was finally right**, and each is logged
+where it belongs rather than here: CSS `abs()` is unsupported in this renderer's Chrome, so `--g`
+resolved invalid and the browser dropped the entire `filter` declaration, both plates computing
+`filter: none` with nothing reporting it; `droppedDecls` parsed a CSS comment as a declaration;
+and `feMerge` over an opaque plate covers rather than sums, which is why the wide tail that produces
+the blue rim is added with `feComposite operator="arithmetic"`.

@@ -127,7 +127,12 @@ export function droppedDecls(src) {
   const out = [];
   // Style ATTRIBUTES only. A <style> block's rules are the stylesheet's business and are not parsed here.
   for (const m of String(src || '').matchAll(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/gi)) {
-    const raw = m[2] ?? m[3] ?? '';
+    // COMMENTS ARE NOT DECLARATIONS, and this check read them as ones. A `/* … */` inside a style
+    // attribute is legal CSS and the browser ignores it, but the splitter below saw the first colon in
+    // its prose and reported the words around it as a dropped declaration. It fired on a comment that
+    // quoted `left: -calc(...)` while explaining THIS defect, which is as clean a demonstration as the
+    // bug is likely to get. Stripped first, so the parse below only ever sees real declarations.
+    const raw = String(m[2] ?? m[3] ?? '').replace(/\/\*[\s\S]*?\*\//g, ' ');
     // Split on top-level semicolons: a url() or a data: URI may carry one inside parentheses.
     const decls = []; let depth = 0, cur = '';
     for (const ch of raw) {

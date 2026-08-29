@@ -273,6 +273,40 @@ a lit world and wrong for one whose only light is the subject. A pitch-black gro
 hand-authored HTML (`background:#000`) with `tone: "dark"` on the window, and the tone is required
 because the engine cannot read lightness out of your CSS.
 
+## NAME THE EFFECT BEFORE YOU BUILD IT
+
+When a reference shows a look you cannot immediately construct, **find out what it is called and read
+its recipe.** Do not approximate it by eye and iterate. An effect a designer has made before has a name,
+and the name leads to a sequence of steps, and one of those steps is always the thing you would never
+have guessed.
+
+The worked example is `docs/MISTAKES.md` #505, and it is exact. A reference frame showed white text with
+an orange body and a blue rim. I built it four times by stacking coloured, offset, blurred copies of the
+same text, and it was rejected four times, because a stack of copies cannot make a continuous transition
+between three colours. The effect is called a **thermal blur**. Its recipe is white text, Fast Box Blur,
+**Colorama**, glow, and the third step is the whole answer: the colour is a **gradient map on luminance**,
+so the blur's own grey falloff is remapped, bright to white, mid to orange, dim to blue. One search
+returned that. It also explained every symptom the stack could not produce: the continuous transition,
+the organic edge, and the letters being eaten, all of which are the ramp acting on the glyph's own edge.
+
+**Why the pull toward guessing is real.** Iterating looks like progress: each attempt is a render you can
+show. Searching produces nothing to show and feels like a detour. But an approximation converges on
+whatever the first guess was near, so four renders can leave you exactly where one did, and here they did.
+
+Three questions, in order, before you build an unfamiliar look:
+
+1. **What is it called?** Describe it in plain words and search. Motion work has a shared vocabulary,
+   most of it borrowed from After Effects: thermal blur, gradient map, displacement map, luma matte,
+   echo, chromatic aberration, goo morph, posterize time.
+2. **What are its steps?** A recipe is a chain of operations in an order. Write the chain down before you
+   write any markup, because the order is usually load-bearing.
+3. **Which step could you not have guessed?** There is nearly always one, and it is the reason your
+   approximation failed. In the thermal blur it is that the colour comes from a MAP and not from paint.
+
+Then build it once. `formats/scene/_vawe-teaser-word.html` carries the four AE steps and their SVG
+equivalents in its own comments, which is the shape to copy: the recipe lives beside the implementation,
+so the next author inherits the name rather than the guess.
+
 ## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
 
 > **FIRST: `parts` IS HOW HAND-WRITTEN HTML GETS THE ENGINE'S CLOCK, and almost nobody uses it.**
