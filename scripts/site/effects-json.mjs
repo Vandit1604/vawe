@@ -51,6 +51,17 @@ const USAGE = {
   // an author reading the catalogue needs to see how.
   'motion-voices-tactile-sound': (n) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
   'kinetic-text-presets': (n) => text({ split: 'word', preset: n, each: 0.5, stagger: 0.05 }),
+  // THREE FAMILIES ADDED WITHOUT THEIR ROWS, and `make effects` was red for all three at once, so the
+  // catalogue could not regenerate at all. A family is not shipped until it can be looked up: this
+  // table is the only place that says how to WRITE one.
+  // An interpolation mode is not an easing and does not go in `ease`'s usual slot mentally, so the
+  // form matters: it is the key on a motion KEY, and it governs the segment arriving at that key.
+  'interpolation-modes-not-easings': (n) => text({ anim: 'none', motion: [{ t: 0, x: -300 }, { t: 0.8, x: 0, ease: n }, { t: 1.6, x: 300, ease: n }] }),
+  // A depth is a NAMED PLANE, so it is one word on the layer and the camera does the rest.
+  'depths-parallax-planes': (n) => text({ depth: n }),
+  // An adjustment layer is a LAYER, not a prop, and `track` is the whole contract: everything with a
+  // lower track is graded, everything above it is untouched.
+  'adjustment-layers-grade-what-is-beneath': (n) => j({ layers: [{ type: 'adjust', kind: n, amount: 18, track: 6, start: 1.2, duration: 1.5 }] }),
   'enter-exit-anims': (n) => text({ anim: n, enterDur: 0.6, out: 'defocus' }),
   'idles-ambient-hold-motion': (n) => text({ idle: n }),
   'gsap-named-effects': (n) => text({ anim: 'none', fx: n }),
@@ -171,7 +182,13 @@ const NO_PREVIEW = {
   'composite-looks-static': 'a grade needs a photographic source, and the index ships no photographs. See it on the looks clip on /showcase.',
   'canvas-image-passes-baked': 'a baked image pass needs a photographic source, and the index ships no photographs.',
   'layer-as-texture-resample': 'resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.',
-  'filter-presets': 'a colour grade needs a photographic source, and the index ships no photographs.',
+  // MOSTLY TRUE AND NOT ENTIRELY, which is worth saying rather than leaving the blanket claim: most of
+  // this family regrades a picture, but `thermalBlur` is built for TYPE and needs no photograph at all.
+  // Its card is in the playground (`core/generators.js`), where its radius dial is on screen.
+  'filter-presets': 'most of these regrade a photographic source, and the index ships no photographs. The exception is `thermalBlur`, which is a type effect: its live card with a radius dial is in the playground.',
+  'interpolation-modes-not-easings': 'a mode is the SHAPE of the segment between two keys. A still frame is a point on that curve and shows nothing about it; it is only itself in motion.',
+  'depths-parallax-planes': 'a plane only reads when the camera moves past it. One frame of a parallax is a frame with nothing parallaxing in it.',
+  'adjustment-layers-grade-what-is-beneath': 'a grade has no subject of its own: it is whatever is already under it. The arsenal shows them through the scenes that use them.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
   'beat-blueprints': 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
   'camera-moves': 'a camera move is only legible against a scene laid out for it, which is the film, not a swatch.',

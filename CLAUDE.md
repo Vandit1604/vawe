@@ -303,9 +303,20 @@ Three questions, in order, before you build an unfamiliar look:
 3. **Which step could you not have guessed?** There is nearly always one, and it is the reason your
    approximation failed. In the thermal blur it is that the colour comes from a MAP and not from paint.
 
-Then build it once. `formats/scene/_vawe-teaser-word.html` carries the four AE steps and their SVG
-equivalents in its own comments, which is the shape to copy: the recipe lives beside the implementation,
-so the next author inherits the name rather than the guess.
+Then build it once, **and then put it in the arsenal.** An effect built inside one film is an effect
+the next author rebuilds by guessing, so the second half is not optional: a filter chain over a layer's
+own pixels becomes a `FILTER_PRESETS` entry in `core/filters.js` with a blurb (`make arsenal` finds it
+the moment it has one), a stack of existing passes becomes a `LOOKS` entry in `core/looks.js`, and a
+`core/generators.js` entry gives it a card in the playground with its dial on screen. The thermal blur
+is `filter: "thermalBlur"` and a playground card today because of exactly that step.
+
+The full procedure, including the plain-words to AE-vocabulary table and the two rules that stop a
+second copy of the recipe existing, is the **`vawe-name-the-effect`** skill. Load it when a reference
+arrives and you cannot name what you are looking at.
+
+`formats/scene/_vawe-teaser-word.html` carries the four AE steps and their SVG equivalents in its own
+comments, which is the shape to copy: the recipe lives beside the implementation, so the next author
+inherits the name rather than the guess.
 
 ## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
 

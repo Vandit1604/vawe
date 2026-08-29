@@ -29,6 +29,7 @@
 //   anything else                  → passed through as a raw CSS filter string.
 
 import { parseColor, colorAlpha } from './motion.js';
+import { defineRegistry } from './registry.js';
 
 const LUMA = '0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -40,6 +41,7 @@ export const FILTER_PRESETS = {
   duotone: { kind: 'svg', mode: 'ramp', stops: 2 },
   tritone: { kind: 'svg', mode: 'ramp', stops: 3 },
   gradientMap: { kind: 'svg', mode: 'ramp', stops: 0 },
+  thermalBlur: { kind: 'svg', mode: 'thermal', stops: 0 },
   posterize: { kind: 'svg', mode: 'posterize' },
   chromaGlow: { kind: 'css', mode: 'glow' },
   displace: { kind: 'svg', mode: 'displace' },
@@ -59,6 +61,7 @@ export const FILTER_BLURBS = {
   sepia: 'the plain CSS sepia, an amount 0..1. The cheapest warm-and-dated pass there is',
   duotone: 'luminance remapped to TWO colours, shadows to highlights. The poster/press look; defaults to --ink and --accent, so it reskins per theme',
   tritone: 'duotone with a third stop in the middle, which is what stops the midtones going muddy',
+  thermalBlur: 'the After Effects THERMAL BLUR: blur first, then remap the falloff. White cores, an orange body, a red rim, thin strokes eaten by the ramp. On a TRANSPARENT layer the ramp bottom stops land where the alpha has already gone, so the blue rim needs the type on an opaque black plate under `screen` (see the header). `gradientMap` recolours a picture that already has midtones; this one MAKES the midtones, which is why it is the one that works on TYPE. `thermalBlur:8` sets the near radius',
   gradientMap: 'luminance remapped across any number of stops. The general case the two above are special cases of: a heat ramp, a risograph, a false-colour read',
   posterize: 'each channel quantised to N discrete levels IN PLACE, hues kept. Banding as a decision, not an artefact',
   chromaGlow: 'a stack of zero-offset drop-shadows: white core, warm mid halo, cool outer. It follows the ALPHA, so it is right on GLYPHS and wrong on an opaque picture, where it haloes the rectangle. For a photo use `bloom`',
@@ -70,6 +73,16 @@ export const FILTER_BLURBS = {
   relief: 'a light source over a luminance bump map. Diffuse MULTIPLIES (ink pressed into stock), specular ADDS (a highlight on metal): same primitive, opposite composite',
   vignette: 'NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges',
 };
+
+// THE FILTER FAMILY WAS UNSEARCHABLE UNTIL THIS LINE EXISTED, and that is a bug in the arsenal's
+// terms rather than in this file's. `make arsenal` discovers vocabularies by looking for a
+// `*_REGISTRY` export, which is exactly the loose-coupling contract the rest of the engine keeps, and
+// this module had FILTER_PRESETS and FILTER_BLURBS and no registry. So fourteen named filters, every
+// one of them documented right above, answered "not found" to an author searching for the thing they
+// could not name. Declaring the registry is the whole fix: nothing here is restated, and a preset
+// added to the table above is searchable the moment it has a blurb.
+export const FILTER_REGISTRY = defineRegistry('filter', FILTER_PRESETS, { slot: 'filter', blurbs: FILTER_BLURBS });
+export const FILTER_NAMES = FILTER_REGISTRY.names;
 
 // chromaGlow: the reference "chromatic glow" is a soft neon BLOOM in the layer's own shape, a clean
 // white glow that warms in the mid halo and cools at the outer edge, with NO hard coloured border on
@@ -126,11 +139,20 @@ function parseSpec(spec) {
   return { name, colors, nums };
 }
 
+// The recipe's own eight stops, black through blue and orange to white. Exported because the
+// playground card builds the same look from markup and must not carry a second copy of the ramp.
+export const THERMAL_RAMP = Object.freeze([[0, 0, 0], [33, 79, 137], [74, 132, 151], [229, 80, 76],
+  [239, 126, 1], [249, 186, 59], [253, 235, 209], [255, 255, 255]]);
+
 function rampStops(name, colors) {
   const { ink, accent } = themeColors();
   if (colors.length >= 2) return colors;
   if (name === 'tritone') return [ink, accent, [255, 255, 255]];
   if (name === 'gradientMap') return [ink, accent, [255, 255, 255]];
+  // The thermal ramp is the recipe's own eight stops and does NOT follow the theme, for the reason
+  // every fixed-palette look here states: the ramp IS the effect. A thermal blur in the brand's two
+  // colours is a duotone blur. Override with an explicit `colors` when you want a different heat.
+  if (name === 'thermalBlur') return THERMAL_RAMP;
   return [ink, accent]; // duotone
 }
 
@@ -174,6 +196,67 @@ export function glowRGB(color) {
   if (/^var\(\s*--accent/.test(s)) return themeColors().accent;
   if (/^var\(\s*--ink/.test(s)) return themeColors().ink;
   return parseColor(s) || [255, 255, 255];
+}
+
+// thermalBlur: the After Effects THERMAL BLUR, and the whole recipe lives in this one def on purpose.
+//
+// The AE chain is: white text -> Fast Box Blur -> COLORAMA -> Glow. The step that cannot be guessed is
+// the third: the colour is a GRADIENT MAP ON LUMINANCE, not paint. Blur a white glyph and its falloff
+// is greyscale; remap that greyscale through a ramp and bright becomes white, mid becomes orange, dim
+// becomes blue. Every symptom follows from that one fact, including the letters being EATEN, which is
+// the ramp acting on the glyph's own soft edge.
+//
+// WHY IT IS NOT A STACK OF PASSES. It was written first as a `looks` entry, `blurSoft` then `bloom`
+// then `gradientMap`, and the three chained CSS `url()` filters resolved correctly and rendered grey:
+// the map had already been handed an image whose every visible pixel sat in its top stop. Chaining
+// three filter regions also clips the tail the ramp needs. One def owns the whole chain, so what the
+// map reads is what this file decided it should read.
+//
+// WHY TWO BLUR SCALES. The tail IS the effect. A gaussian falls off exponentially, so at the radius
+// that keeps the glyph cores on the ramp's white stop it is already black two stops before the blue,
+// and the word comes out white-and-orange with no rim at all; a radius wide enough to reach blue has
+// eaten the cores. So a tight chain for the near falloff, one wide pass for the far one, ADDED rather
+// than merged (feMerge composites, and over an opaque subject a merge covers instead of summing).
+//
+// THE ALPHA LIFT AT THE END is what makes this work on TYPE rather than on an opaque plate. A glyph
+// layer is transparent around its letters, so the rim's alpha follows the same falloff its colour
+// does and the band would arrive at 15% opacity, which is invisible. The linear feFuncA lifts it to
+// solid while leaving the true far field at zero, so the effect never paints the layer's box.
+//
+// AND HERE IS WHAT IT CANNOT DO, stated rather than faked. On a transparent layer alpha and luminance
+// fall away TOGETHER, so the ramp's bottom stops always land where there is nothing left to paint:
+// you get white cores, an orange body and a red rim, and the blue never arrives. Raising the tail to
+// reach blue lifts the whole field into gold instead, which was tried and is worse. The blue needs the
+// construction the reference uses and this one cannot: the type on an OPAQUE BLACK plate with
+// `mix-blend-mode: screen`, so the far field has full alpha at near-zero luminance and the black is
+// dropped back out at composite time. That is four lines of an `html` layer, and
+// formats/scene/_vawe-teaser-word.html is the worked example. Use this preset for the effect on any
+// layer; reach for the plate when the blue rim is the point.
+// ONE OWNER FOR THE CHAIN, AS A STRING, because it has exactly two mounts and they need different
+// media. The engine builds a <filter> into the page's def host (DOM), and the playground card inlines
+// its own <svg> so the look survives being rasterised through a foreignObject, where a reference to a
+// def that lives on the page resolves to nothing. Two hand-written copies of an eight-primitive chain
+// is the "one fact, two places" drift this codebase logs more than any other defect, so the primitives
+// are authored once here and both mounts read them.
+export function thermalPrimitives({ radius = 5, stops }) {
+  const table = (chan, i) => `<feFunc${chan} type="table" tableValues="${stops.map((c) => +(c[i] / 255).toFixed(4)).join(' ')}"/>`;
+  return `<feGaussianBlur in="SourceGraphic" stdDeviation="${(radius * 0.5).toFixed(2)}" edgeMode="none" result="b1"/>`
+    + `<feGaussianBlur in="b1" stdDeviation="${(radius * 0.7).toFixed(2)}" edgeMode="none" result="b2"/>`
+    + `<feGaussianBlur in="b2" stdDeviation="${(radius * 0.9).toFixed(2)}" edgeMode="none" result="soft"/>`
+    + `<feGaussianBlur in="SourceGraphic" stdDeviation="${(radius * 4.5).toFixed(2)}" edgeMode="none" result="wide"/>`
+    + `<feColorMatrix in="wide" type="matrix" result="tail" values="0.42 0 0 0 0  0 0.42 0 0 0  0 0 0.42 0 0  0 0 0 1 0"/>`
+    + `<feComposite in="soft" in2="tail" operator="arithmetic" k2="1" k3="1" result="field"/>`
+    + `<feColorMatrix in="field" type="matrix" values="${LUMA}" result="lum"/>`
+    + `<feComponentTransfer in="lum">${table('R', 0)}${table('G', 1)}${table('B', 2)}`
+    + `<feFuncA type="linear" slope="6" intercept="0"/></feComponentTransfer>`;
+}
+
+// The region the chain needs. Clipped tighter than this and the rim ends in a straight edge.
+export const THERMAL_REGION = { x: '-60%', y: '-120%', width: '220%', height: '340%' };
+
+function buildThermal(f, { stops, radius }) {
+  for (const [k, v] of Object.entries(THERMAL_REGION)) f.setAttribute(k, v);
+  f.innerHTML = thermalPrimitives({ radius, stops });
 }
 
 // bloom: the AFTER EFFECTS model, not the CSS one. `drop-shadow` blurs the ALPHA channel, so on an
@@ -384,7 +467,9 @@ function buildPrimitive(f, { conv, morph, relief }) {
 export function ensureFilterDef(name, opts = {}) {
   const preset = FILTER_PRESETS[name];
   if (!preset || preset.kind !== 'svg') throw new Error(`ensureFilterDef: "${name}" is not an SVG-filter preset`);
-  const stops = preset.mode === 'ramp' ? (opts.colors && opts.colors.length >= 2 ? opts.colors : rampStops(name, opts.colors || [])) : null;
+  const stops = (preset.mode === 'ramp' || preset.mode === 'thermal')
+    ? (opts.colors && opts.colors.length >= 2 ? opts.colors : rampStops(name, opts.colors || [])) : null;
+  const thermal = preset.mode === 'thermal' ? { stops, radius: +Math.max(1, opts.radius ?? 5).toFixed(2) } : null;
   const levels = preset.mode === 'posterize' ? Math.max(2, Math.round(opts.levels || 4)) : null;
   const disp = preset.mode === 'displace'
     ? { freq: +(opts.freq > 0 ? opts.freq : 0.012).toFixed(4), scale: +(opts.scale > 0 ? opts.scale : 16).toFixed(1) } : null;
@@ -427,6 +512,7 @@ export function ensureFilterDef(name, opts = {}) {
     : morph ? `f-morph-${morph.op}-r${morph.radius}`.replace(/\./g, '_')
     : relief ? `f-relief-${relief.mode}-${relief.azimuth}-${relief.elevation}-s${relief.surface}-e${relief.exponent}-c${relief.constant}-${relief.rgb.join('_')}`.replace(/\./g, '_')
     : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}${bloom.key === 'value' ? '-val' : ''}-t${bloom.threshold}-r${bloom.radius}${bloom.ry == null ? '' : `-ry${bloom.ry}`}-i${bloom.intensity}`.replace(/\./g, '_')
+    : thermal ? `${defId(name, stops, null)}-r${thermal.radius}`.replace(/\./g, '_')
     : defId(name, stops, levels);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
   if (document.getElementById(id)) return id;
@@ -443,6 +529,12 @@ export function ensureFilterDef(name, opts = {}) {
 
   if (bloom) {
     buildBloom(f, bloom);
+    defsHost().appendChild(f);
+    return id;
+  }
+
+  if (thermal) {
+    buildThermal(f, thermal);
     defsHost().appendChild(f);
     return id;
   }
@@ -511,7 +603,8 @@ export function resolveFilter(spec) {
   }
 
   const opts = preset.mode === 'posterize' ? { levels: nums[0] }
-    : preset.mode === 'displace' ? { freq: nums[0], scale: nums[1] } : { colors };
+    : preset.mode === 'displace' ? { freq: nums[0], scale: nums[1] }
+    : preset.mode === 'thermal' ? { colors, radius: nums[0] } : { colors };
   return { filter: `url("#${ensureFilterDef(name, opts)}")`, overlay: null };
 }
 

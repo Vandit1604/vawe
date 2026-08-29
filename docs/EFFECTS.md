@@ -663,6 +663,7 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `posterize` | each channel quantised to N discrete levels IN PLACE, hues kept. Banding as a decision, not an artefact |
 | `relief` | a light source over a luminance bump map. Diffuse MULTIPLIES (ink pressed into stock), specular ADDS (a highlight on metal): same primitive, opposite composite |
 | `sepia` | the plain CSS sepia, an amount 0..1. The cheapest warm-and-dated pass there is |
+| `thermalBlur` | the After Effects THERMAL BLUR: blur first, then remap the falloff. White cores, an orange body, a red rim, thin strokes eaten by the ramp. On a TRANSPARENT layer the ramp bottom stops land where the alpha has already gone, so the blue rim needs the type on an opaque black plate under `screen` (see the header). `gradientMap` recolours a picture that already has midtones; this one MAKES the midtones, which is why it is the one that works on TYPE. `thermalBlur:8` sets the near radius |
 | `tritone` | duotone with a third stop in the middle, which is what stops the midtones going muddy |
 | `vignette` | NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges |
 
@@ -843,6 +844,7 @@ Parametric field generators with declared option schemas, turnable at /playgroun
 | `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
 | `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
 | `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
+| `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
 
 ## Lightfield dials  `[generator]`
 
@@ -879,4 +881,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_578 effects across 39 families. Regenerate: `make effects`._
+_580 effects across 39 families. Regenerate: `make effects`._

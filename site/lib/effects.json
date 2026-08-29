@@ -1,7 +1,7 @@
 {
-  "total": 566,
+  "total": 580,
   "previewed": 255,
-  "families": 36,
+  "families": 39,
   "tags": [
     [
       "asset",
@@ -41,11 +41,15 @@
     ],
     [
       "generator",
-      31
+      32
     ],
     [
       "layer",
-      38
+      39
+    ],
+    [
+      "motion key",
+      1
     ],
     [
       "per-frame",
@@ -53,7 +57,7 @@
     ],
     [
       "per-layer",
-      58
+      68
     ],
     [
       "per-layer/scene",
@@ -69,7 +73,7 @@
     ],
     [
       "static",
-      52
+      53
     ],
     [
       "text",
@@ -1742,6 +1746,122 @@
       ]
     },
     {
+      "id": "interpolation-modes-not-easings",
+      "title": "Interpolation modes (not easings)",
+      "tag": "motion key",
+      "intro": "On · a · `motion` · key's · `ease`, · but · NOT · a · curve. · An · easing · is · a · function · of · one · segment's · own · progress, · so · it · necessarily · starts · and · ends · that · segment · at · zero · velocity · and · an · interior · keyframe · becomes · a · dead · stop. · A · MODE · decides · how · the · value · is · computed · at · all · and · may · read · the · keys · either · side. · `{ · \"t\" · 0.6, · \"x\" · 400, · \"ease\" · \"through\" · }`",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a mode is the SHAPE of the segment between two keys. A still frame is a point on that curve and shows nothing about it; it is only itself in motion.",
+      "count": 1,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "through",
+          "stem": "interpolation-modes-not-easings--through",
+          "desc": "velocity · carries · THROUGH · the · key · a · cubic · Hermite · with · neighbour · tangents, · so · a · travel · across · several · keys · is · one · gesture · rather · than · a · stop · at · each",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "depths-parallax-planes",
+      "title": "Depths (parallax planes)",
+      "tag": "per-layer",
+      "intro": "`{ · \"depth\" · \"back\" · }` · on · any · layer. · Stands · it · at · a · DISTANCE · from · the · picture · plane, · so · a · camera · move · gives · it · parallax · instead · of · turning · the · whole · frame · as · one · rigid · pane. · Each · name · is · a · fraction · of · the · film's · own · lens, · so · it · means · the · same · distance · under · any · camera, · and · it · lowers · to · the · `plane` · modifier · at · boot. · A · raw · number · of · px · still · works. · Refused · on · a · group · CHILD, · which · sits · in · a · flat · parent · put · it · on · the · group.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a plane only reads when the camera moves past it. One frame of a parallax is a frame with nothing parallaxing in it.",
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "back",
+          "stem": "depths-parallax-planes--back",
+          "desc": "behind · the · picture · plane · the · layer · the · camera · passes, · the · one · that · gives · the · move · its · parallax. · 0.73x",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "far",
+          "stem": "depths-parallax-planes--far",
+          "desc": "the · far · plane · a · backdrop, · a · wall, · a · field · the · subject · stands · in · front · of. · Drawn · at · 0.57x",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "front",
+          "stem": "depths-parallax-planes--front",
+          "desc": "just · in · front · of · the · picture · plane · a · caption · or · a · chip · that · rides · ahead · of · the · subject. · 1.18x",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "near",
+          "stem": "depths-parallax-planes--near",
+          "desc": "nearest · the · eye · the · thing · that · crosses · the · frame · fastest · and · leaves · it · first. · 1.39x",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "adjustment-layers-grade-what-is-beneath",
+      "title": "Adjustment layers (grade what is BENEATH)",
+      "tag": "per-layer",
+      "intro": "`{ · \"type\" · \"adjust\", · \"kind\" · \"<name>\" · }`. · One · grade · over · every · layer · with · a · LOWER · `track`, · so · a · whole · beat · can · go · soft · or · grey · from · a · single · layer · instead · of · the · same · filter · written · onto · fifteen. · `amount` · is · the · strength · in · that · kind's · own · unit, · and · the · CSS · reads · `var(--adjust)`, · so · the · existing · `vars` · track · keys · it · `{ · \"type\" · \"adjust\",\"kind\" · \"blur\",\"amount\" · 20,\"vars\" · {\"--adjust\" · [0,1]},\"varsDur\" · 0.8 · }`. · A · raw · `filter` · string · is · the · escape · hatch · and · is · static.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a grade has no subject of its own: it is whatever is already under it. The arsenal shows them through the scenes that use them.",
+      "count": 6,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bloom",
+          "stem": "adjustment-layers-grade-what-is-beneath--bloom",
+          "desc": "a · real · GLOW · over · everything · beneath · the · light · spills · past · its · edges · and · the · subject · stays · sharp. · The · one · kind · that · composites · back · rather · than · replacing",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "blur",
+          "stem": "adjustment-layers-grade-what-is-beneath--blur",
+          "desc": "soften · everything · beneath, · in · pixels. · The · rack-focus · of · a · whole · beat, · not · of · one · layer",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "brighten",
+          "stem": "adjustment-layers-grade-what-is-beneath--brighten",
+          "desc": "lift · everything · beneath, · as · a · percentage",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "contrast",
+          "stem": "adjustment-layers-grade-what-is-beneath--contrast",
+          "desc": "harden · the · tones · beneath, · as · a · percentage",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "darken",
+          "stem": "adjustment-layers-grade-what-is-beneath--darken",
+          "desc": "dim · everything · beneath, · as · a · percentage",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "desaturate",
+          "stem": "adjustment-layers-grade-what-is-beneath--desaturate",
+          "desc": "drain · the · colour · beneath. · 1 · is · fully · grey",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "canvas-image-passes-baked",
       "title": "Canvas image passes (baked)",
       "tag": "static",
@@ -2350,9 +2470,16 @@
       "mode": "table",
       "note": null,
       "noPreview": "a layer type is the noun, not the effect. Every preview on this page is already one of them.",
-      "count": 22,
+      "count": 23,
       "undescribed": 0,
       "entries": [
+        {
+          "name": "adjust",
+          "stem": "layer-types--adjust",
+          "desc": "one · grade · over · everything · BENEATH · it · blur, · desaturate, · darken, · brighten · or · contrast · the · whole · frame · from · a · single · layer, · keyable · through · `vars` · on · `--adjust`",
+          "scene": null,
+          "noPreview": null
+        },
         {
           "name": "beam",
           "stem": "layer-types--beam",
@@ -3222,8 +3349,8 @@
       "intro": "`filter · \"<name>\"`. · A · named · colour · grade. · Composite · LOOKS · are · the · richer · set · above; · these · are · the · primitives.",
       "mode": "table",
       "note": null,
-      "noPreview": "a colour grade needs a photographic source, and the index ships no photographs.",
-      "count": 13,
+      "noPreview": "most of these regrade a photographic source, and the index ships no photographs. The exception is `thermalBlur`, which is a type effect: its live card with a radius dial is in the playground.",
+      "count": 14,
       "undescribed": 0,
       "entries": [
         {
@@ -3300,6 +3427,13 @@
           "name": "sepia",
           "stem": "filter-presets--sepia",
           "desc": "the · plain · CSS · sepia, · an · amount · 0..1. · The · cheapest · warm-and-dated · pass · there · is",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thermalBlur",
+          "stem": "filter-presets--thermalblur",
+          "desc": "the · After · Effects · THERMAL · BLUR · blur · first, · then · remap · the · falloff. · White · cores, · an · orange · body, · a · red · rim, · thin · strokes · eaten · by · the · ramp. · On · a · TRANSPARENT · layer · the · ramp · bottom · stops · land · where · the · alpha · has · already · gone, · so · the · blue · rim · needs · the · type · on · an · opaque · black · plate · under · `screen` · (see · the · header). · `gradientMap` · recolours · a · picture · that · already · has · midtones; · this · one · MAKES · the · midtones, · which · is · why · it · is · the · one · that · works · on · TYPE. · `thermalBlur · 8` · sets · the · near · radius",
           "scene": null,
           "noPreview": null
         },
@@ -4280,7 +4414,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "generators have their own surface with every dial attached: /playground.",
-      "count": 4,
+      "count": 5,
       "undescribed": 0,
       "entries": [
         {
@@ -4308,6 +4442,13 @@
           "name": "spectrum",
           "stem": "generators-the-playground--spectrum",
           "desc": "Upright · bands · with · a · colour · ramp · falling · down · the · frame, · each · band · showing · less · of · it · than · the · one · inside · it.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thermalBlur",
+          "stem": "generators-the-playground--thermalblur",
+          "desc": "White · type · blurred, · then · remapped · through · a · heat · ramp · white · cores, · an · orange · body, · a · blue · rim, · and · the · thin · strokes · eaten · away.",
           "scene": null,
           "noPreview": null
         }

@@ -8,6 +8,13 @@
      the continuous transition, the organic edge, and the letters being EATEN, because the ramp remaps
      the glyph's own soft edge along with everything around it.
 
+     THE ENGINE OWNS THIS EFFECT NOW: `filter: "thermalBlur"` (core/filters.js), built from the same
+     eight stops by `thermalPrimitives`, with a playground card carrying its radius dial. This fragment
+     keeps its own inline copy for one reason: the film crossfades a THERMAL plate against a CLEAN one,
+     so the filter has to land on one of two children rather than on the layer, and a static .html file
+     cannot call the function that owns the chain. If you are reaching for this effect anywhere else,
+     reach for the preset. If you edit the ramp here, edit THERMAL_RAMP in core/filters.js too.
+
      Colorama's job is done here by `feComponentTransfer` with per-channel `tableValues`, which is
      literally a gradient map. The stops are the tutorial's own eight:
        #000000 #214F89 #4A8497 #E5504C #EF7E01 #F9BA3B #FDEBD1 #FFFFFF
@@ -23,7 +30,7 @@
 <div style="position:absolute;inset:0;container-type:size;
   --p:clamp(0, calc((var(--t,0) - 2.7) / 1.1), 1);
   --heat:clamp(0, calc((var(--t,0) - 1.45) / 0.85), 1);
-  --cool:clamp(0, calc((var(--t,0) - 4.45) / 0.8), 1);
+  --cool:clamp(0, calc((var(--t,0) - 4.15) / 0.5), 1);
   --h:calc(var(--heat) - var(--cool));
   --g:calc(1 - max(calc(var(--p) * 2 - 1), calc(1 - var(--p) * 2)));
   --pa:clamp(0, calc((var(--p) - 0.42) / 0.28), 1);
@@ -69,9 +76,17 @@
     opacity:var(--h)">
     <div class="mass"></div>
   </div>
-  <!-- THE CLEAN STATE. Before the heat arrives and after it cools, the word is plain white with no
-       effect at all, which is what was asked for and what the reference's own opening does. -->
-  <div class="plate" style="opacity:calc(1 - var(--h));
+  <!-- THE CLEAN STATE, and it is CUBED for a reason. Before the heat arrives and after it cools the
+       word is plain white with no effect at all. A straight `1 - h` crossfade against the thermal plate
+       looked fine at both ends and was wrong through the middle: at h = 0.5 both plates sat at half
+       opacity, so the letters screened to a dull grey and the thermal plate's wide tail was left as a
+       bare halo around them with no bright glyph to belong to. That halo is what read as cheap on the
+       way out of the morph, and it was worst exactly where the eye was waiting for the address.
+       Cubing holds the clean plate near full opacity until the heat is nearly total, so the two
+       overlap at high brightness rather than crossing at low. The cores stay near white the whole way
+       through, and at h = 1 the clean copy is gone entirely, which is what lets the ramp eat the thin
+       strokes instead of a sharp copy showing through them. -->
+  <div class="plate" style="opacity:calc(1 - var(--h) * var(--h) * var(--h));
     filter:blur(calc(var(--g) * 14px)) contrast(calc(1 + var(--g) * 9))">
     <div class="mass"></div>
   </div>

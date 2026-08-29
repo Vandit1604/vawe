@@ -44,6 +44,7 @@ import { lightfield } from './lightfield/index.js';
 import { crtSpec } from './layers/util.js';
 import { blurbsOf } from './registry.js';
 import { sanitizeHtml } from './sanitize-html.js';
+import { thermalPrimitives, THERMAL_REGION, THERMAL_RAMP } from './filters.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
 // The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
@@ -526,7 +527,68 @@ const CRT = {
   },
 };
 
-export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT];
+
+// THERMAL BLUR, the After Effects effect of that name, with its one dial on screen.
+//
+// It is here as a generator and not only as the `thermalBlur` filter preset because the preset cannot
+// show you its best form. On a transparent layer the ramp's bottom stops land where the alpha has
+// already gone, so the blue rim never arrives; the full three-band look needs the type on an OPAQUE
+// BLACK plate under `mix-blend-mode: screen`, which is a construction and not a prop. This card is
+// that construction, so the playground shows what the effect actually looks like and hands you the
+// markup that produces it.
+//
+// The filter chain is NOT re-authored here: `thermalPrimitives` in core/filters.js is the one owner,
+// and the engine's `filter: "thermalBlur"` builds the identical primitives from the same function. So
+// a card that looks right is evidence about the preset, not about this file. The <svg> is inlined
+// rather than referenced because the playground rasterises a card through an SVG foreignObject, where
+// a `url(#id)` pointing at a def on the page resolves to nothing and the look silently vanishes: the
+// same export trap the CRT card's phosphor hit, and the reason its bloom is a filter and not a
+// backdrop-filter.
+const THERMAL_SCHEMA = {
+  radius:  { kind: 'num', min: 1, max: 24, def: 6, primary: true,
+             note: 'the near blur, in pixels, and the only dial that matters. Small keeps the letters legible with a hot edge; large lets the ramp EAT the thin strokes, which is the reference look.' },
+  heat:    { kind: 'unit', def: 1, primary: true,
+             note: 'how much of the thermal plate shows over the plain white one. 0 is untreated type, so this is the dial an animation would key from 0 to 1.' },
+  colour: {
+    kind: 'group', primary: true,
+    fields: {
+      ground: { kind: 'hex', def: '#000000', primary: true, note: 'the ground behind the type. The plate itself is always true black, because a gradient map reads luminance and needs a real black to map its far field from; this is what the card sits on.' },
+    },
+  },
+  text:    { kind: 'str', def: 'thermal blur', note: 'the words. <b> and <em> work.' },
+};
+
+const THERMAL = {
+  name: 'thermalBlur',
+  group: 'treatment',
+  blurb: 'White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away.',
+  docs: 'docs/EFFECTS.md',
+  reference: null,
+  schema: THERMAL_SCHEMA,
+  presets: { heat: {} },
+  produces: 'html',
+  ready: true,
+  render: (o) => {
+    const radius = pick(o, 'radius', THERMAL_SCHEMA);
+    const heat = pick(o, 'heat', THERMAL_SCHEMA);
+    const ground = o?.colour?.ground ?? THERMAL_SCHEMA.colour.fields.ground.def;
+    const line = sanitizeHtml(o?.text ?? THERMAL_SCHEMA.text.def);
+    const region = Object.entries(THERMAL_REGION).map(([k, v]) => `${k}="${v}"`).join(' ');
+    // Sized from the CARD and not the viewport: `cqw` asks the container, which is the same box live
+    // and inside the exporter's foreignObject. `vw` is not, and it renders one size in each.
+    const type = 'font:700 clamp(24px,15cqw,180px)/1 var(--font-sans,system-ui),sans-serif;letter-spacing:-.03em;white-space:nowrap';
+    const plate = `position:absolute;inset:0;background:#000;mix-blend-mode:screen;display:grid;place-items:center;color:#fff;${type}`;
+    return `<div style="position:absolute;inset:0;overflow:hidden;container-type:size;background:${ground}">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <filter id="pg-thermal" ${region} color-interpolation-filters="sRGB">${thermalPrimitives({ radius, stops: THERMAL_RAMP })}</filter>
+  </defs></svg>
+  <div style="${plate};filter:url(#pg-thermal);opacity:${heat.toFixed(3)}">${line}</div>
+  <div style="${plate};opacity:${(1 - heat ** 3).toFixed(3)}">${line}</div>
+</div>`;
+  },
+};
+
+export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT, THERMAL];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);
