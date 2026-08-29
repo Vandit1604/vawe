@@ -3949,5 +3949,22 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     Math.abs(vel(0.6, 'smooth') - vel(0.6, undefined)) < 1);
 }
 
+// ---------- an authored filter survives a motion track ----------
+// The motion track owns `style.filter` (it writes the velocity blur there) and used to strip EVERY
+// `blur(...)` out of the current value before adding its own, on the assumption that any blur it found
+// was its own from a previous frame. It cannot tell the two apart: an authored `filter: "blur(38px)"`
+// is the same six characters. A layer that declared a blur AND carried a motion track lost the blur
+// completely, on every frame, silently, with `filter: none` on the element and no error anywhere.
+{
+  const src = fs.readFileSync(new URL('../../core/tracks/motion.js', import.meta.url), 'utf8');
+  ok('the motion track stashes its base filter rather than pattern-matching it',
+    /el\.__hsBlur = \{ out: el\.style\.filter, base: fBase \}/.test(src));
+  ok('it no longer strips blur\(\) out of whatever it finds', !/replace\(\/blur\\\(\[\^\)\]\*\\\)\/g/.test(src));
+  // The stash is compared against the OUTPUT it produced, so a fresh write from build or an earlier
+  // track is recognised as a new base. Storing what was written instead of reading it back is the bug
+  // the idle track already logged: CSSOM re-serialises on the way in and the two never compare equal.
+  ok('the base is recognised by comparing against its own output', /cur === prior\.out \? prior\.base : cur/.test(src));
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -87,8 +87,22 @@ export function frame(kit, el, L, units, t, f, start, end) {
   // `filter` (docs/MISTAKES.md #351): motion blur simply failed on any frame following an unblurred one,
   // and which frames those were depended on RENDER ORDER, so it was a purity bug as well as a dropped
   // effect. Treat the keyword as the empty base it means.
+  // STASH THE BASE, DO NOT PATTERN-MATCH IT. This used to strip every `blur(...)` out of the current
+  // filter before adding its own, on the assumption that any blur it found was its own from a previous
+  // frame. It cannot tell the two apart: an AUTHORED `filter: "blur(38px)"` is the same six characters,
+  // so a layer that declared a blur and also carried a motion track lost the blur completely, on every
+  // frame, silently. Building a title card was how it surfaced: the word rendered razor sharp with
+  // `filter: none` on the element and no error anywhere, and the same fragment written as an `html`
+  // layer looked correct, which pointed at the layer path rather than at CSS.
+  //
+  // Same shape as the idle track's base stash (core/tracks/idle.js) and for the same reason: the base
+  // is remembered beside the output it produced, so if the element still holds that exact output the
+  // stash is still the truth, and anything else on it is a fresh write from build or an earlier track.
+  // Reading it back rather than storing what was written, because CSSOM re-serialises on the way in.
   const raw = el.style.filter || '';
   const cur = raw === 'none' ? '' : raw;
-  const fBase = (cur.includes('blur(') ? cur.replace(/blur\([^)]*\)/g, '') : cur).trim();
+  const prior = el.__hsBlur;
+  const fBase = (prior && cur === prior.out ? prior.base : cur).trim();
   el.style.filter = blurPx > 0.4 ? (fBase ? fBase + ' ' : '') + `blur(${blurPx.toFixed(2)}px)` : (fBase || 'none');
+  el.__hsBlur = { out: el.style.filter, base: fBase };
 }
