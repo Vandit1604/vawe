@@ -101,14 +101,21 @@ export default function Home() {
                 <span className="dot" />
                 deterministic motion-graphics engine
               </span>
+              {/* OUTCOME FIRST, MECHANISM SECOND. This read "One JSON, one video." for a long time, and
+                  that is a good line in the wrong slot: it describes how the thing WORKS, and a reader
+                  deciding whether to care needs to know what they GET. Every heading on this page had
+                  the same shape (Determinism is enforced · Any render order · Any canvas · Three films,
+                  three text files), so the page argued its architecture to someone who had not yet been
+                  told why to want it. The old h1 is now the first line of the sub, where a mechanism
+                  belongs: it answers "how" for a reader the headline has already convinced. */}
               <h1>
-                One JSON,
+                Ship the film
                 <br />
-                one video.
+                with the feature.
               </h1>
               <p className="sub">
-                Write a scene as data. The engine renders it frame by frame, byte-identical every
-                run, at any canvas.
+                One JSON, one video. Write the scene as data, render it byte-identical at any canvas,
+                and re-render it the day the numbers change.
               </p>
               <div className="hero-cta">
                 <Link className="btn btn-white" href="/editor">
@@ -142,10 +149,11 @@ export default function Home() {
         <section className="section">
           <div className="wrap">
             <div className="kicker">guarantees</div>
-            <h2 className="h2">Determinism is enforced, not promised.</h2>
+            <h2 className="h2">The frame you approved is the frame that ships.</h2>
             <p className="lead">
-              There is no rule asking you to avoid a wall clock. A frame is seeked, not played, so
-              anything that runs on real time is refused at boot, by name, before a pixel is drawn.
+              Determinism is enforced, not promised. There is no rule asking you to avoid a wall clock:
+              a frame is seeked, not played, so anything that runs on real time is refused at boot, by
+              name, before a pixel is drawn.
               Two things follow from that, and both are worth more than the guarantee itself.
             </p>
             <div className="pf">
@@ -180,7 +188,7 @@ export default function Home() {
             <div className="gal-head">
               <div>
                 <div className="kicker">made with vawe</div>
-                <h2 className="h2">Three films. Three text files.</h2>
+                <h2 className="h2">Made without a timeline or a designer.</h2>
               </div>
               <Link href="/showcase">
                 See the full showcase <span className="arw">→</span>
@@ -212,7 +220,7 @@ export default function Home() {
             <div className="gal-head">
               <div>
                 <div className="kicker">the arsenal</div>
-                <h2 className="h2">No templates. A vocabulary.</h2>
+                <h2 className="h2">Two films here never look alike.</h2>
               </div>
               <Link href="/arsenal">
                 Browse the arsenal <span className="arw">→</span>
