@@ -13,6 +13,15 @@ import { alphaMix } from './glow.js';
 // pure: the beam head angle (deg) at local time lt; `speed` = full loops per second.
 export const beamAngle = (lt, speed = 0.5) => (((lt * speed * 360) % 360) + 360) % 360;
 // pure: sheen sweep position (%), travels -20 → 120 every `period` seconds.
+// The sheen is WIDER THAN ITS BOX and slides across it; that ratio is named because two readers need
+// it now, this file's own paint and the matte's mask geometry, and a second literal `260%` somewhere
+// else is the one-fact-two-places drift that generates most of the defects logged here.
+export const SHINE_SCALE = 2.6;
+
+/** The sheen itself, as a CSS gradient. The ONE owner: frame() paints it, maskPaint() masks with it. */
+export const shineGradient = (L, c) =>
+  `linear-gradient(${L.angle ?? 18}deg, transparent 38%, ${alphaMix(c, L.intensity ?? 0.55)} 50%, transparent 62%)`;
+
 export const shinePos = (lt, period = 1.6) => { const u = (((lt / Math.max(0.1, period)) % 1) + 1) % 1; return -20 + u * 140; };
 
 // pure: the conic-gradient string for the border ring at head angle `a`.
@@ -35,10 +44,8 @@ export function build(kit, el, L) {
   inner.style.cssText = `position:absolute;inset:0;pointer-events:none;border-radius:${r}`;
 
   if (L.mode === 'shine') {
-    const ang = L.angle ?? 18;
-    inner.style.background =
-      `linear-gradient(${ang}deg, transparent 38%, ${alphaMix(c, L.intensity ?? 0.55)} 50%, transparent 62%)`;
-    inner.style.backgroundSize = '260% 100%';
+    inner.style.background = shineGradient(L, c);
+    inner.style.backgroundSize = `${SHINE_SCALE * 100}% 100%`;
     inner.style.backgroundPosition = '-20% 0';
     inner.style.mixBlendMode = 'screen';
   } else {
@@ -73,6 +80,37 @@ export function frame(kit, el, L, t) {
     el.__beamInner.style.background = beamConic(a, c, L.tail ?? 90);
     el.dataset.ba = a.toFixed(1);
   }
+}
+
+// maskPaint: THIS LAYER, USED AS A LUMA MATTE. The reference technique is one move, draw a beam of
+// light and reveal the text with it, and the two halves both existed here and could not be joined:
+// `core/fx/matte.js` reveals a layer through another layer's brightness, and it read the SCENE JSON to
+// find the source's paint, so it only ever accepted an image file or a declared gradient `bg`. A beam
+// generates its gradient at frame time, so the layer built to make travelling light was refused by the
+// effect built to reveal through light.
+//
+// The contract is `maskPaint(L, lt, geom) -> { image, size, position } | null`, and the type returns
+// FINISHED CSS. It gets the geometry the matte already computed (the source's scaled extents and its
+// origin relative to the masked layer) and hands back where its paint actually sits, because only the
+// type knows that: a sheen is 2.6x its own box and slides, and no generic box maths would guess it.
+//
+// A BORDER BEAM RETURNS NULL, deliberately. It is a ring of light around a rounded rect, so as a matte
+// it would reveal a hairline outline of the layer beneath and nothing else. Returning it because it is
+// technically an image would be a working-looking answer to a question nobody meant to ask; null makes
+// the matte say what it says for any other unusable source, by name.
+export function maskPaint(L, lt, geom) {
+  if ((L.mode || 'border') !== 'shine') return null;
+  const c = L.color && L.color !== true ? L.color : 'var(--accent)';
+  const w = geom.w * SHINE_SCALE;
+  // CSS percentage positioning places the image so that p% of (container - image) is the offset. The
+  // container here is the source's own box, which is what the live beam positions against, so the
+  // travel is derived the same way rather than re-derived in pixels and drifting from it.
+  const travel = (shinePos(lt, L.period ?? 1.6) / 100) * (geom.w - w);
+  return {
+    image: shineGradient(L, c),
+    size: `${w.toFixed(2)}px ${geom.h.toFixed(2)}px`,
+    position: `${(geom.x + travel).toFixed(2)}px ${geom.y.toFixed(2)}px`,
+  };
 }
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.

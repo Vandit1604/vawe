@@ -678,6 +678,36 @@ boot((data, fps, theme, canvas) => {
   }
 
   const layers = (data.layers || []).map(buildLayer);
+
+  // A MATTE SOURCE IS CONSUMED, NOT DRAWN, which is what a track matte means everywhere else and what
+  // this engine did not do. A `beam` used to reveal a headline was still painting its own sheen over
+  // the frame, so the light you cut with was also a bright band sitting on top of the shot. Nobody
+  // wants both: the light IS the reveal.
+  //
+  // `visibility` and not `opacity` or `display`, and the difference is load-bearing. `display:none`
+  // takes the element out of layout and the matte places its mask FROM the source's live box, so the
+  // mask would lose its geometry. `opacity` is owned by driveClips, which writes the enter/exit
+  // envelope there every frame and would overwrite this. `visibility:hidden` keeps the box, paints
+  // nothing, and nothing else in the engine writes it.
+  //
+  // Done ONCE here rather than per frame, because the set of matte sources is a property of the scene
+  // JSON and is known before frame 0. Writing to another layer's element from inside a frame() would
+  // make the picture depend on which layer the render loop reached first, which is the one thing
+  // renderFrame(n) promises it does not.
+  //
+  // Safe to make the default: no shipped scene used `matte` at all when this landed, so it changes
+  // nothing that exists and matches what an author coming from After Effects already expects.
+  {
+    const consumed = new Set();
+    for (const { L } of layers)
+      for (const m of L.modifiers || []) {
+        const spec = m && m.matte;
+        const from = typeof spec === 'string' ? spec : (spec && spec.from);
+        if (from) consumed.add(from);
+      }
+    if (consumed.size)
+      for (const { L, el } of layers) if (L.id && consumed.has(L.id)) el.style.visibility = 'hidden';
+  }
   const topCount = layers.length; // group children follow; their x/y are relative to their group
   layers.push(...extra); // group children join the per-frame animation loop
 

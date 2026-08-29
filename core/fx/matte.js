@@ -60,7 +60,10 @@ function maskImage(src, L) {
     + `alpha, so the matte must be an \`image\` or \`svg\` layer's own file, or a \`rect\` / \`html\` `
     + `layer whose \`bg\` is a gradient. A paint, shader or three layer draws into a <canvas> and `
     + `cannot be the source; put its look on a rect with a gradient \`bg\` instead, or reach for `
-    + `\`clip\` / \`occlude\`, which cut by geometry rather than by brightness.`);
+    + `\`clip\` / \`occlude\`, which cut by geometry rather than by brightness.\n`
+    + `A layer TYPE can also opt in by exporting \`maskPaint(L, lt, geom)\` (core/layers/beam.js is the `
+    + `worked example), which is how a per-frame paint becomes a matte source without this file `
+    + `learning its name.`);
 }
 
 export function build(kit, el, L, spec) {
@@ -81,7 +84,6 @@ export function frame(kit, el, L, t, scene, spec) {
   const src = scene.specOf(from);
   if (!src)
     throw new Error(`matte on ${name(L)}: no layer with id "${from}", known ids: ${scene.ids.join(', ')}.`);
-  const img = maskImage(src, L);
   const b = scene.boxOf(from), me = scene.boxOf(L.id);
   if (!b)
     throw new Error(`matte on ${name(L)}: no box for "${from}". A child of a group whose motion track `
@@ -92,11 +94,22 @@ export function frame(kit, el, L, t, scene, spec) {
   // would move the top-left corner with nothing on screen moving), so the scale is applied here.
   const w = b.w * b.scale, h = b.h * b.scale;
   const x = (b.cx - w / 2) - (me.cx - me.w / 2), y = (b.cy - h / 2) - (me.cy - me.h / 2);
+  // ASK THE TYPE FIRST. A layer that generates its paint per frame (a `beam`'s travelling sheen) knows
+  // both its image AND where that image sits, and no box arithmetic here could guess the second: a
+  // sheen is 2.6x its own box and slides across it. So the type is handed the geometry this function
+  // already computed and returns finished CSS, or null to mean "read me from the JSON as before".
+  // The source's own local time, because a live paint travels on its own clock, not the scene's.
+  // `kit &&` is not defensive padding: lib-test drives this function with a null kit, because the
+  // geometry above is pure arithmetic and testing it needs no renderer. A type that wants a live paint
+  // needs the registry, and a caller with no kit has no registry to offer, so it reads the JSON.
+  const live = kit && typeof kit.maskPaintOf === 'function'
+    ? kit.maskPaintOf(src, t - (src.start ?? 0), { w, h, x, y }) : null;
+  const img = live ? live.image : maskImage(src, L);
   // Authoritative writes, every frame, every property: a mask left from another frame is exactly the
   // render-order dependence renderFrame(n) promises it is not (docs/MISTAKES.md #41).
   for (const p of ['maskImage', 'webkitMaskImage']) el.style[p] = img;
-  for (const p of ['maskSize', 'webkitMaskSize']) el.style[p] = `${w.toFixed(2)}px ${h.toFixed(2)}px`;
-  for (const p of ['maskPosition', 'webkitMaskPosition']) el.style[p] = `${x.toFixed(2)}px ${y.toFixed(2)}px`;
+  for (const p of ['maskSize', 'webkitMaskSize']) el.style[p] = live ? live.size : `${w.toFixed(2)}px ${h.toFixed(2)}px`;
+  for (const p of ['maskPosition', 'webkitMaskPosition']) el.style[p] = live ? live.position : `${x.toFixed(2)}px ${y.toFixed(2)}px`;
   for (const p of ['maskRepeat', 'webkitMaskRepeat']) el.style[p] = 'no-repeat';
   // `mask-mode` has no -webkit- alias; the prefixed path takes the source's alpha, which is the other
   // mode, so a luminance matte needs the unprefixed property and modern Chrome has it.

@@ -96,6 +96,23 @@ const pick = (L) => {
 
 export function createRenderer(ctx) {
   const kit = createKit(ctx);
+  // THE MATTE SOURCE PROTOCOL, injected here for the same reason the builder below is: util.js cannot
+  // import this file, and this is the only place that holds the type registry.
+  //
+  // Before it, `core/fx/matte.js` decided what could be a mask by reading the SCENE JSON for an image
+  // file or a declared gradient `bg`, which is a hardcoded list of four types inside the one effect
+  // that should not care what it is masking with. So a `beam`, the layer whose entire job is making
+  // travelling light, could not feed the matte, the effect whose entire job is revealing through light.
+  // Two features built for one technique with no way to connect.
+  //
+  // A type opts in by exporting `maskPaint(L, lt, geom)`. Nothing else changes: the matte asks, and
+  // falls back to reading the JSON exactly as before for every type that stays quiet. Adding the next
+  // live matte source is one function in one file and no edit to matte.js at all, which is the whole
+  // point of doing it this way rather than adding `beam` to the list.
+  kit.maskPaintOf = (spec, lt, geom) => {
+    const mod = REGISTRY[spec && spec.type];
+    return mod && typeof mod.maskPaint === 'function' ? mod.maskPaint(spec, lt, geom) : null;
+  };
   // Injected AFTER the kit exists (util.js cannot import this file, that would be circular). This is
   // what lets a group child run the same builder as a top-level layer instead of a re-implemented
   // subset of it (docs/MISTAKES.md #70).
