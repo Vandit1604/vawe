@@ -82,10 +82,17 @@ export function aurora(ctx, w, h, t, o = {}) {
   ];
   ctx.globalCompositeOperation = 'lighter';
   const so = o.seed ?? 0; // seed jitters blob positions + phase so the SAME preset differs per video
+  // motionScale: ONE knob for how alive this field is. It widens the drift AND shortens the period
+  // together, because raising amplitude alone makes a field slosh rather than move (docs/MISTAKES.md
+  // #155, logged for `liquid` and true here for the same reason). Until this existed the aurora family
+  // had no motion knob AT ALL: the drift was baked per blob and reachable only by handing in a whole
+  // replacement `blobs` array, which is why four presets named after living things measured 0.02-0.14
+  // against `liquid`'s 0.96 (median per-frame luma delta, the number `./bin/vawe` now prints).
+  const ms = o.motionScale ?? 1;
   blobs.forEach((b, i) => {
     const jx = Math.sin(so * 7.3 + i * 2.1) * 0.12, jy = Math.cos(so * 5.7 + i * 1.7) * 0.12, jp = so * 0.9 + i;
-    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / b.px) + b.ph + jp) * b.ax;
-    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / b.py) + b.ph + jp) * b.ay;
+    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / (b.px / ms)) + b.ph + jp) * b.ax * ms;
+    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / (b.py / ms)) + b.ph + jp) * b.ay * ms;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, b.r);
     g.addColorStop(0, `rgba(${b.color},${o.intensity ?? 0.5})`);
     g.addColorStop(1, `rgba(${b.color},0)`);
@@ -117,9 +124,11 @@ export function softwash(ctx, w, h, t, o = {}) {
   blobs.forEach((b, i) => {
     const jx = Math.sin(so * 6.1 + i * 2.3) * 0.08, jy = Math.cos(so * 4.9 + i * 1.9) * 0.08;
     const r = b.rf != null ? b.rf * d : b.r;                       // `r` (px) still honoured if given
-    const ax = b.ax <= 1 ? b.ax * d : b.ax, ay = b.ay <= 1 ? b.ay * d : b.ay;
-    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / b.px) + b.ph) * ax;
-    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / b.py) + b.ph) * ay;
+    const ms = o.motionScale ?? 1;                                 // see aurora: widen the drift and
+    const ax = (b.ax <= 1 ? b.ax * d : b.ax) * ms;                 // shorten the period together
+    const ay = (b.ay <= 1 ? b.ay * d : b.ay) * ms;
+    const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / (b.px / ms)) + b.ph) * ax;
+    const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / (b.py / ms)) + b.ph) * ay;
     const a = (b.a ?? 0.45) * (o.intensity ?? 1);
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
     g.addColorStop(0, `rgba(${b.color},${a.toFixed(3)})`);
@@ -410,14 +419,14 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     case 'dotmatrix': return { base: { kind: 'linear', from: P.light[0], to: P.light[1] }, fx: [
       { type: 'dots', mode: 'wave', color: P.dotLight, baseAlpha: 0.06, peakAlpha: 0.24, spacing: 52, r: 1.6, rPeak: 4.5, k: 0.03, period: 5, driftX: 12, driftY: 6 }, grain ] };
     case 'constellation': return { base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.46 }, fx: [
-      { type: 'particles', count: 78, connect: true, color: P.tint2, speed: 9, connectDist: 150, seed: 7 }, grain ] };
+      { type: 'particles', count: 78, connect: true, speed: 9, color: P.tint2, speed: 9, connectDist: 150, seed: 7 }, grain ] };
     case 'brandglow': return { base: { kind: 'radial', from: P.ink[0], to: P.ink[1], cx: 0.5, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.5, blobs: [ { color: P.accent, x: 0.5, y: 0.42, r: 820, ax: 70, ay: 46, px: 13, py: 17, ph: 1 }, { color: P.tint, x: 0.32, y: 0.6, r: 560, ax: 100, ay: 66, px: 16, py: 12, ph: 3 } ] },
       { type: 'dots', mode: 'ripple', color: P.tint2, baseAlpha: 0.06, peakAlpha: 0.32, spacing: 60, cx: 0.5, cy: 0.42, k: 0.024, period: 4, driftX: 6, driftY: -6 }, grain ] };
     case 'spotlight': return { base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.4 }, fx: [
       { type: 'dots', mode: 'pulse', color: P.tint2, baseAlpha: 0.06, peakAlpha: 0.22, spacing: 64, period: 5, driftX: 9, driftY: 5 }, { type: 'spotlight', intensity: 0.12, period: 8 }, grain ] };
     case 'mesh': return { base: { kind: 'radial', from: P.darkMesh[0], to: P.darkMesh[1], cx: 0.4, cy: 0.5 }, fx: [
-      { type: 'aurora', intensity: 0.42, blobs: [ { color: P.tint, x: 0.3, y: 0.4, r: 680, ax: 140, ay: 96, px: 14, py: 19, ph: 0 }, { color: P.accent, x: 0.72, y: 0.55, r: 600, ax: 160, ay: 116, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.55, y: 0.3, r: 500, ax: 110, ay: 76, px: 12, py: 21, ph: 4 } ] }, grain ] };
+      { type: 'aurora', intensity: 0.42, motionScale: 3.2, blobs: [ { color: P.tint, x: 0.3, y: 0.4, r: 680, ax: 140, ay: 96, px: 14, py: 19, ph: 0 }, { color: P.accent, x: 0.72, y: 0.55, r: 600, ax: 160, ay: 116, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.55, y: 0.3, r: 500, ax: 110, ay: 76, px: 12, py: 21, ph: 4 } ] }, grain ] };
     case 'metallic': return { base: { kind: 'solid', color: '#05070a' }, fx: [
       { type: 'metallic', color: P.accent, count: 70, speed: 0.9, waves: 2.2, glow: 0.5, alpha: 0.2, gx: 0.5, gy: 0.78 }, { type: 'grain', alpha: 0.04 } ] };
     case 'metallicSheen': return { base: { kind: 'solid', color: '#040806' }, fx: [
@@ -425,7 +434,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     // gradientWash: one big saturated pool bleeding off a corner into white. A MESH GRADIENT, so the
     // colour has somewhere to come from and somewhere to go; three even pools just average to haze.
     case 'gradientWash': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
-      { type: 'softwash', intensity: 1, blobs: [
+      { type: 'softwash', intensity: 1, motionScale: 3.0, blobs: [
         { color: P.accent, x: 0.14, y: 0.82, rf: 0.46, ax: 0.035, ay: 0.03, px: 24, py: 29, ph: 0, a: 0.78 },
         { color: P.tint2, x: 0.72, y: 0.16, rf: 0.32, ax: 0.045, ay: 0.038, px: 19, py: 23, ph: 2, a: 0.5 },
         { color: P.accent, x: 0.94, y: 0.62, rf: 0.2, ax: 0.03, ay: 0.026, px: 27, py: 17, ph: 4, a: 0.34 } ] },
@@ -433,7 +442,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     // blobs. The OTHER light look: airier and more open, with the technical grid as the actual motif.
     // Smaller, better-separated pools leave white space for the grid to read through.
     case 'blobs': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
-      { type: 'softwash', intensity: 1, grid: true, gridColor: P.accent, gridAlpha: 0.16, gridSpacing: 104, blobs: [
+      { type: 'softwash', intensity: 1, motionScale: 3.0, grid: true, gridColor: P.accent, gridAlpha: 0.16, gridSpacing: 104, blobs: [
         { color: P.accent, x: 0.2, y: 0.26, rf: 0.24, ax: 0.04, ay: 0.034, px: 21, py: 26, ph: 0, a: 0.5 },
         { color: P.tint2, x: 0.8, y: 0.72, rf: 0.26, ax: 0.045, ay: 0.038, px: 25, py: 19, ph: 2.4, a: 0.44 },
         { color: P.accent, x: 0.52, y: 0.9, rf: 0.18, ax: 0.03, ay: 0.028, px: 17, py: 23, ph: 4.2, a: 0.3 } ] },
@@ -446,7 +455,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     // The backdrop is the largest area of the frame, and the schema enum only catches a typo when the
     // author-check runs - under NOCHECK=1 the render is unsupervised. docs/MISTAKES.md #361.
     case 'aurora': return { base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
-      { type: 'aurora', intensity: 0.46, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
+      { type: 'aurora', intensity: 0.46, motionScale: 3.2, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] };
     default:
       throw new Error(`unknown background preset "${name}", one of: ${BG_NAMES.join(', ')}. `
         + `An unknown name used to render aurora, which looks deliberate and is not what was asked for.`);
