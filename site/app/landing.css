@@ -208,3 +208,28 @@
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:900px){ .fxwall{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:640px){ .fxwall{gap:10px} }
+
+/* ===== MOBILE: TOUCH TARGETS AND THE SMALLEST TEXT ==========================================
+ * Measured on the live site in a real browser rather than guessed at. Two findings, both real,
+ * neither visible on a desktop pass:
+ *
+ *   1. Twelve tap targets under 44px. The inline arrow links ("open the editor", "See the full
+ *      showcase") measured 19 and 22px tall, which is under even the WCAG 2.5.8 floor of 24 and
+ *      well under the 44 a thumb wants. They are the two links that carry the page's whole
+ *      call to action, so they were the worst ones to have made hard to hit.
+ *   2. Ten text nodes under 14px, several at 10 and 11. The hero editor's own chrome is a code
+ *      surface and 10px mono is legitimate there, so it is left alone. `dd` and the film-card
+ *      captions are prose, and prose at 10px on a phone is a decision nobody made.
+ *
+ * Scoped to the breakpoint the design contract names (site/CLAUDE.md picks from {640, 760, 900}),
+ * and nothing here touches the desktop rendering.
+ */
+@media (max-width:760px){
+  /* The vertical padding is what earns the height; `inline-flex` is what lets padding apply to an
+     inline link at all, which is why the raw font-size fix alone would not have moved these. */
+  .lead a, .gal-head a, .hm-cta a, a.srcopen, a.mark{
+    display:inline-flex; align-items:center; min-height:44px;
+  }
+  /* Prose, not chrome. The hero editor's mono panes keep their own scale on purpose. */
+  dd, .hm-cta span, .hm-cta a{ font-size:12px }
+}
