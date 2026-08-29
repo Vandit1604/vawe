@@ -99,19 +99,21 @@ export default function Home() {
             <div className="wrap hero-head on-accent" id="content" tabIndex={-1}>
               <span className="eyebrow">
                 <span className="dot" />
-                deterministic motion-graphics engine
+                for teams with no motion designer
               </span>
-              {/* OUTCOME FIRST, MECHANISM SECOND. This read "One JSON, one video." for a long time, and
-                  that is a good line in the wrong slot: it describes how the thing WORKS, and a reader
-                  deciding whether to care needs to know what they GET. Every heading on this page had
-                  the same shape (Determinism is enforced · Any render order · Any canvas · Three films,
-                  three text files), so the page argued its architecture to someone who had not yet been
-                  told why to want it. The old h1 is now the first line of the sub, where a mechanism
-                  belongs: it answers "how" for a reader the headline has already convinced. */}
+              {/* OUTCOME FIRST, MECHANISM SECOND, and it took two tries to get right. It read
+                  "One JSON, one video.", which is how the thing WORKS. Then "Ship the film with the
+                  feature.", which is WHEN it ships. Neither says what the reader GETS. This one names
+                  the thing (motion graphics, the real category) and the cost it removes (the designer,
+                  the agency, the round trips), and carries no mechanism at all.
+                  Every heading on this page had the first shape, so the site argued its architecture
+                  to someone who had not yet been told why to want it. The mechanism did not go away:
+                  "One JSON, one video" is now the first line of the sub, where it answers "how" for a
+                  reader the headline has already convinced. */}
               <h1>
-                Ship the film
+                Motion graphics without
                 <br />
-                with the feature.
+                a motion designer.
               </h1>
               <p className="sub">
                 One JSON, one video. Write the scene as data, render it byte-identical at any canvas,
@@ -119,7 +121,7 @@ export default function Home() {
               </p>
               <div className="hero-cta">
                 <Link className="btn btn-white" href="/editor">
-                  Try the editor <span className="arw">→</span>
+                  Make one now <span className="arw">→</span>
                 </Link>
               </div>
             </div>
@@ -148,7 +150,7 @@ export default function Home() {
             reader has already watched the engine refuse, one screen up. */}
         <section className="section">
           <div className="wrap">
-            <div className="kicker">guarantees</div>
+            <div className="kicker">what you can promise a client</div>
             <h2 className="h2">The frame you approved is the frame that ships.</h2>
             <p className="lead">
               Determinism is enforced, not promised. There is no rule asking you to avoid a wall clock:
@@ -187,7 +189,7 @@ export default function Home() {
           <div className="wrap">
             <div className="gal-head">
               <div>
-                <div className="kicker">made with vawe</div>
+                <div className="kicker">what came out of it</div>
                 <h2 className="h2">Made without a timeline or a designer.</h2>
               </div>
               <Link href="/showcase">
@@ -219,7 +221,7 @@ export default function Home() {
           <div className="wrap">
             <div className="gal-head">
               <div>
-                <div className="kicker">the arsenal</div>
+                <div className="kicker">why they do not look alike</div>
                 <h2 className="h2">Two films here never look alike.</h2>
               </div>
               <Link href="/arsenal">
@@ -227,8 +229,8 @@ export default function Home() {
               </Link>
             </div>
             <p className="lead">
-              You do not pour data into a layout someone else composed. You compose the film from
-              primitives, the way you would write anything else. {EFFECTS.total} effects ship today,{" "}
+              Your film looks like yours. You compose it from primitives the way you would write
+              anything else, rather than pouring data into a layout someone else already composed. {EFFECTS.total} effects ship today,{" "}
               {EFFECTS.previewed} of them with a rendered preview. Below is one frame from each
               family that has one.
             </p>
