@@ -2,57 +2,101 @@
  "_": "Devices seen in MORE THAN ONE film. A pattern is authored, not measured: it is what a person noticed after reading every sheet. Each cites the films it was seen in, so a reader can check it and so its weight is visible. One film is an idea; three is a technique. Rendered into docs/CRAFT/GRAMMAR.md by `make grammar DOC=1`.",
  "patterns": [
   {
+   "name": "A beat is a BURST then a REST, never a constant rate",
+   "seen": [
+    "pin-583145851797705243",
+    "rebuilt",
+    "pin-72761350251141725"
+   ],
+   "what": "Inside one shot the change curve rises to a peak and then decays to near-nothing before the next beat arrives. It is not sustained motion; it is an event followed by silence.",
+   "why": "The per-frame curve of pin-583145851797705243 says it plainly. Shot 2 runs 3.9 \u00b7 2.4 \u00b7 2.5 \u00b7 5.7 \u00b7 2.1 \u00b7 1.6 \u00b7 0.9, shot 3 runs 4.7 \u00b7 8.1 \u00b7 6.6 \u00b7 7.1 \u00b7 5.9 \u00b7 2.7 \u00b7 0.8, and shot 5 sits at 1.1 \u00b7 1.5 \u00b7 0.6 for three quarters of a second before exploding to 18.4. Every shot ends quieter than its middle. The rest is what makes the next arrival read as an arrival, and the held share of 6 to 20% is where that rest shows up in the average.\nTHIS IS THE PATTERN I GOT BACKWARDS. Reading a low mean as the defect, I filled every flat segment of my own tracks with drift and produced a uniform churn: the number moved and the film got worse, because nothing landed. A mean is the wrong statistic for this entirely. The `curve` field exists so the SHAPE can be read, and the shape is what to copy.",
+   "ours": "A keyed track that reaches its pose and then STOPS, with the next event starting later. Hold the pose with no keys rather than adding small ones to keep a number up. `idle` is the right amount of life for a rest: a 1.5% breath is below the still floor and does not fill the silence."
+  },
+  {
    "name": "Blur-resolve as the entrance",
-   "seen": ["pin-1119918632363453012", "pin-415034921941332045", "pin-333759022406760643"],
+   "seen": [
+    "pin-1119918632363453012",
+    "pin-415034921941332045",
+    "pin-333759022406760643"
+   ],
    "what": "Type arrives heavily motion-blurred and settles into focus. Nothing slides, fades or scales.",
    "why": "It reads as speed in a SINGLE FRAME, which a fade never does: a blurred still looks fast, a half-opacity still looks broken. Two of the three also use it to bracket the film, opening and closing on the same gesture.",
    "ours": "`motionAt` interpolates a `blur` channel, so this is one keyed track: [{t:0,blur:24},{t:0.4,blur:0}]. The `focusRack` blueprint does it and has zero users."
   },
   {
    "name": "The ground inverts on every cut",
-   "seen": ["rebuilt", "pin-72761350251141725", "pin-333759022406800725"],
+   "seen": [
+    "rebuilt",
+    "pin-72761350251141725",
+    "pin-333759022406800725"
+   ],
    "what": "Consecutive beats alternate dark and light, so no cut needs an effect on it.",
    "why": "The inversion IS the transition. `pin-72761350251141725` has no continuous object, no camera and no shared subject across seven shots, and still reads as one film purely because the ground alternates. `pin-333759022406800725` does it within a single hue, which is the gentler form.",
    "ours": "bg windows with no from/to bind to the joints in order (core/junctions.js), so the cuts own the numbers. 84% of our library paints ONE window for the whole runtime."
   },
   {
    "name": "There are three ways to invert a frame, not one",
-   "seen": ["rebuilt", "pin-310748443060787071", "pin-333759022406760643"],
+   "seen": [
+    "rebuilt",
+    "pin-310748443060787071",
+    "pin-333759022406760643"
+   ],
    "what": "The BACKDROP changes (rebuilt), the SUBJECT changes value (slabs go bright-on-black to dark-on-white), or the LIGHT changes over an unchanging world (80 seconds of black lit by blue, then orange, then white).",
    "why": "Only the first is a new world. The second reads as the same objects under different light; the third keeps the world identical and still gets the punctuation. We only ever reach for the first.",
    "ours": "The first is `bg` windows. The second is a rect or image whose colour is keyed. The third is a `glow` or `beam` layer, or an `adjust` layer grading everything beneath."
   },
   {
    "name": "Hold the picture, move the type",
-   "seen": ["pin-522769469268499616", "pin-924363892282992611", "pin-333759022406800725"],
+   "seen": [
+    "pin-522769469268499616",
+    "pin-924363892282992611",
+    "pin-333759022406800725"
+   ],
    "what": "Every photographic or rendered object is STILL. All the motion is type arriving and the ground changing.",
    "why": "It is what lets a film cut 33 times a minute without reading as frantic: the cut rate is high while the rate of change INSIDE a shot is low. `pin-924363892282992611` runs seven unrelated subjects in 19s and never feels busy.",
    "ours": "An `image` layer with no `ken` and no motion track, under text that carries the beat. We reflexively add a ken burns push and it costs us this."
   },
   {
    "name": "One accent colour, one word at a time",
-   "seen": ["pin-522769469268499616", "pin-924363892282992611", "pin-333759022406800725", "together-chat"],
+   "seen": [
+    "pin-522769469268499616",
+    "pin-924363892282992611",
+    "pin-333759022406800725",
+    "together-chat"
+   ],
    "what": "Exactly one hue carries every emphasis in the film, and usually one word per beat wears it.",
    "why": "It tells the eye where to land in the 200ms a fast beat gives it. Measured in together-chat: the single accent holds 0.13% of all pixels and carries every emphasis in the film.",
    "ours": "The theme's `accent`, and nothing else. `designspec-check` already locks this; the discipline is using it on ONE word rather than on a whole line."
   },
   {
    "name": "The loudest frame is often an absence",
-   "seen": ["pin-72761350251141725", "arc-zero-chrome", "pin-924363892282992611"],
+   "seen": [
+    "pin-72761350251141725",
+    "arc-zero-chrome",
+    "pin-924363892282992611"
+   ],
    "what": "The peak measured frame is something LEAVING, or the frame flooding with flat colour, rather than something arriving.",
    "why": "It is the opposite reflex to ours. framer-hero is the counter-example where all four peaks are arrivals, so both work, but an emptying is available and we never use it.",
    "ours": "A keyed `exit` track (scripts/author/track.mjs exit), or an `adjust`/rect flooding the frame for a few frames."
   },
   {
    "name": "A container that holds while its contents change",
-   "seen": ["pin-1119918632363453012", "pin-583145851797705243", "arc-space-swiping", "pin-333759022406800725"],
+   "seen": [
+    "pin-1119918632363453012",
+    "pin-583145851797705243",
+    "arc-space-swiping",
+    "pin-333759022406800725"
+   ],
    "what": "One frame, pill, ring or window stays put and what is inside it swaps.",
    "why": "The cheapest continuity device in the store: the eye has somewhere to rest while the content changes, so a full swap does not read as a cut. arc-space-swiping recolours the container to match its new contents, which is the detail that makes it look designed.",
    "ours": "A `rect` or `group` that outlives its children's windows. It is also the honest way to pass `no-continuous-object`."
   },
   {
    "name": "Escalate the unit, not just the pace",
-   "seen": ["pin-72761350251141725", "pin-333759022407965800"],
+   "seen": [
+    "pin-72761350251141725",
+    "pin-333759022407965800"
+   ],
    "what": "The film starts on single words at under a second and ends on sentences at four, so beat length and meaning grow together.",
    "why": "A pacing change that tracks the unit of meaning reads as structure. A pacing change on its own reads as arbitrary.",
    "ours": "Nothing stops this today; nothing suggests it either. It is a storyboard decision, not an engine feature."

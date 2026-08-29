@@ -1,0 +1,21 @@
+<!-- The wordmark: two copies of the same gradient-filled word, the one behind blurred hard and
+     screened back over the front. The front carries a 3px blur so the edges bleed without the
+     letterforms going soft. Driven by var(--t): CSS animation is disabled engine-wide. -->
+<div style="position:absolute;inset:0;display:grid;place-items:center;container-type:size">
+  <div style="position:relative;grid-area:1/1;text-align:center">
+    <div style="position:absolute;inset:0;display:grid;place-items:center;
+      filter:blur(calc(34px + var(--t,0) * 16px));mix-blend-mode:screen;opacity:.92;
+      transform:scale(calc(1.01 + var(--t,0) * 0.06))">
+      <span style="font:900 clamp(60px,23cqw,320px)/0.9 var(--font-sans,system-ui),sans-serif;
+        letter-spacing:-.05em;
+        background:linear-gradient(96deg,#6d3df0,#a86ce8 18%,#eef0ff 36%,#fff4d6 50%,#ffb257 64%,#ff5fa2 80%,#9b3cd8);
+        -webkit-background-clip:text;background-clip:text;color:transparent">vawe</span>
+    </div>
+    <div style="position:relative;filter:blur(3px)">
+      <span style="font:900 clamp(60px,23cqw,320px)/0.9 var(--font-sans,system-ui),sans-serif;
+        letter-spacing:-.05em;
+        background:linear-gradient(96deg,#6d3df0,#a86ce8 18%,#eef0ff 36%,#fff4d6 50%,#ffb257 64%,#ff5fa2 80%,#9b3cd8);
+        -webkit-background-clip:text;background-clip:text;color:transparent">vawe</span>
+    </div>
+  </div>
+</div>

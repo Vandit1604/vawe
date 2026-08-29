@@ -455,7 +455,15 @@ The film starts on single words at under a second and ends on sentences at four,
 
 ## What we cannot do yet
 
-7 gap(s) found by reading these films and probing the engine: 2 confirmed by a rendered probe, 2 since fixed.
+8 gap(s) found by reading these films and probing the engine: 2 confirmed by a rendered probe, 5 since fixed.
+
+### An authored `filter` was destroyed by a motion track  ·  **fixed**
+
+**Seen in.** Building the `vawe` teaser. A gradient word with a declared blur rendered razor sharp, three different ways.
+
+**Why we cannot.** The motion track owns `style.filter` (it writes the velocity blur there) and composed with what it found by STRIPPING every `blur(...)` out first, assuming any blur present was its own from a previous frame. It cannot tell an authored `blur(38px)` from its own: same six characters. Any layer with both a declared blur and a motion track lost the blur on every frame, `filter: none` on the element, no error.
+
+**The fix.** FIXED. The base is stashed beside the OUTPUT it produced, the same shape core/tracks/idle.js already used, so a fresh write from build is recognised instead of guessed at. Six shipped scenes changed and every diff was `"" → "blur(0.52px)"`: the old code was losing its OWN contribution too.
 
 ### Origin-aware motion is not authorable  ·  **fixed**
 
@@ -494,13 +502,13 @@ IT WALKED STRAIGHT INTO A NAME COLLISION. A `three` globe has had `origin` as th
 
 **The fix.** FIXED. core/layers/glow.js emits two custom properties, `--glow-i` (alpha) and `--glow-r` (falloff radius), both defaulting to 1, so the existing `vars` track drives either. Written as `rgb(r g b / calc(...))` because a legacy `rgba()` comma form cannot take a calc in its alpha. The calc form is emitted ONLY when the layer declares that var: a `calc(72%)` computes to `72%` and moved no pixels, but it changed the serialised string and eight shipped scenes reported a snapshot diff for a byte-identical rendering. Gated, the library is 105 identical, 0 changed.
 
-### Inverting the frame by LIGHT rather than by backdrop  ·  suspected, not yet built
+### Inverting the frame by LIGHT rather than by backdrop  ·  **fixed**
 
 **Seen in.** pin-333759022406760643 spends 80 seconds on pure black and inverts three times using only light: blue streaks, an orange flood, a white bloom. The world never changes.
 
 **Why we cannot.** We invert by swapping a `bg` window, which changes the world. Doing it by light needs a full-frame source whose colour and intensity are both keyed, and the intensity half is the gap above.
 
-**The fix.** Falls out of the glow fix, plus an `adjust` layer to grade what is beneath.
+**The fix.** FIXED. Two ways now. `core/layers/glow.js` gained `--glow-i` and `--glow-r`, so a light can brighten and tighten over time; and the `adjust` layer's `bloom` kind grades everything beneath and screen-blends it back, so a frame can be lit by its own subject.
 
 **Today.** A full-frame `rect` with a keyed colour through `vars`. Untested.
 
@@ -512,13 +520,13 @@ IT WALKED STRAIGHT INTO A NAME COLLISION. A `three` globe has had `origin` as th
 
 **The fix.** Unknown until built. It may already be reachable through `parts` with a per-unit motion, which nothing in the library uses.
 
-### Flat colour flooding the whole frame as the transition  ·  suspected, not yet built
+### Flat colour flooding the whole frame as the transition  ·  **fixed**
 
 **Seen in.** pin-924363892282992611 floods edge to edge with one purple twice, and those are its two loudest measured frames (68.7 and 40.2). It costs one rectangle.
 
 **Why we cannot.** Nothing prevents it. Nobody does it: 0 films in our library use a full-frame colour flood as a cut.
 
-**The fix.** None needed. It is a discovery gap, not a capability gap, which is why it is worth writing down.
+**The fix.** Never was a capability gap: a full-frame `rect` does it. Recorded so it stops being invisible.
 
 ## How to add one
 

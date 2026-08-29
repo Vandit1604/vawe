@@ -239,6 +239,40 @@ Never rewrite a site's sections by hand; you'll lose its taste and ignore half i
 > Hard cuts come back exact, dissolves score nothing and it says so instead of inventing a list. `refs/`
 > is gitignored on purpose: take the grammar, never the frames. **[`docs/CRAFT/REFERENCE-STUDY.md`](docs/CRAFT/REFERENCE-STUDY.md)**.
 
+## REACH FOR HTML FIRST. A LAYER IS FOR WHERE IT HELPS.
+
+The layer vocabulary is 20 types and ~197 props, and it is worth having: `text` measures and fits and
+carries the theme's ink, `count` counts, `component` captures a real product surface, `group` scopes a
+box AND a clock. Reach for one when it does something you would otherwise hand-roll.
+
+**For a LOOK, write the HTML.** A gradient-filled word with a bloom behind it is four CSS declarations
+and it took three failed attempts through the layer vocabulary to not get it: `filter` through `css`
+(refused, engine-owned), `filter` as a layer prop (silently destroyed by the motion track, a real bug
+now fixed), and a glow layer orbiting the word (the wrong idea entirely). Written as an `html` layer it
+was fifteen lines and correct first time. The signal is not subtle: **if you are hunting for the prop
+that does the thing CSS already does, stop and write the CSS.**
+
+**EVERY LAYER EFFECT WORKS ON AN `html` LAYER, and that is the architecture, not a coincidence.**
+Verified by render: `filter`, `modifiers` (tilt/plane/kick/matte/…), `depth`, `origin`, `timeWarp`,
+`motion`, `vars` and the camera all apply to an `html` layer exactly as they do to a `text` one, because
+they are written on the LAYER ELEMENT and the fragment is its content. So the choice is never
+"HTML or effects". It is HTML for what the frame LOOKS like, and the engine for what it DOES over time.
+
+Two things the fragment does not get, and both are deliberate:
+- **No CSS animation or transition.** `core/sanitize-html.js` refuses them at boot, because they run on
+  a clock the renderer does not own and a seeked frame would be wrong. Use `var(--t)` in a `calc()`, or
+  `parts` for an engine-driven per-element entrance, or put a `motion` track on the layer.
+- **No `opacity` or `filter` in `css`.** The engine writes both every frame (the enter/exit envelope and
+  the velocity blur). The validator refuses them by name and says what to use instead.
+
+## BLACK MEANS `#000000`
+
+When a brief says black, it means black. Every dark preset in `core/backgrounds.js` carries a tint or a
+wash: `dark`, `deep` and `ink` all sample well above zero at the corners, which is right for a film with
+a lit world and wrong for one whose only light is the subject. A pitch-black ground is two lines of
+hand-authored HTML (`background:#000`) with `tone: "dark"` on the window, and the tone is required
+because the engine cannot read lightness out of your CSS.
+
 ## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
 
 > **FIRST: `parts` IS HOW HAND-WRITTEN HTML GETS THE ENGINE'S CLOCK, and almost nobody uses it.**
