@@ -83,7 +83,7 @@ const sampled = (g) => g.measured.shotDetection !== 'scene-score';
 // a deep study owns one film in depth and names itself in `deepStudy`; this page is a VIEW over the
 // store and is overwritten every run. Editing it by hand is the one thing to not do, which is why it
 // says so in its own first line.
-function writeDoc(all) {
+function renderDoc(all) {
   const sampled = (g) => g.measured.shotDetection !== 'scene-score';
   const readN = (g) => (g.shots || []).filter((s) => s.moves).length;
   const cut = all.filter((g) => !sampled(g));
@@ -165,9 +165,27 @@ function writeDoc(all) {
   L.push('the reading stops dying with the checkout.');
   L.push('');
 
+  return L.join('\n');
+}
+
+function writeDoc(all) {
   const out = path.join(ROOT, 'docs/CRAFT/GRAMMAR.md');
-  fs.writeFileSync(out, L.join('\n'));
+  fs.writeFileSync(out, renderDoc(all));
   return out;
+}
+
+// A GENERATED DOC WITH NO DRIFT CHECK IS A HAND-WRITTEN DOC THAT LOOKS GENERATED. GRAMMAR.md is
+// rebuilt by `--doc`, and until this existed the rebuild happened when somebody remembered, which is
+// the same "one fact, two owners" the page itself is about. `--check` regenerates in memory and
+// compares; docs-drift runs it, so studying a film and not regenerating the page now fails.
+if (process.argv.includes('--check')) {
+  const out = path.join(ROOT, 'docs/CRAFT/GRAMMAR.md');
+  const want = renderDoc(all);
+  const have = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : null;
+  if (have === want) { console.log(`  ✓ docs/CRAFT/GRAMMAR.md matches the ${all.length} grammar file(s) it is generated from`); process.exit(0); }
+  console.error(`  ✗ docs/CRAFT/GRAMMAR.md is ${have === null ? 'missing' : 'stale'}: it does not match the ${all.length} grammar file(s).`);
+  console.error(`    Fix: make grammar DOC=1`);
+  process.exit(1);
 }
 
 if (process.argv.includes('--doc')) {

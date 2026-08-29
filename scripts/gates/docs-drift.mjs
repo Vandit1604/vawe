@@ -9,6 +9,7 @@
 // registry, because a gate that nags about wording gets ignored and takes the real findings with it.
 import fs from 'fs';
 import path from 'path';
+import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { SHADER_FX } from '../../core/stings.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
@@ -97,6 +98,20 @@ if (fs.existsSync(BG_MDX)) {
   else if (+cm[1] !== BG_NAMES.length) findings.push(`docs-site backgrounds-and-images.mdx says ${cm[1]} bg presets, but core/backgrounds.js BG_NAMES holds ${BG_NAMES.length}`);
   const missing = BG_NAMES.filter((n) => !mdx.includes('`' + n + '`'));
   if (missing.length) findings.push(`docs-site backgrounds-and-images.mdx never lists bg preset(s): ${missing.join(', ')} (in core/backgrounds.js BG_NAMES)`);
+}
+
+// GRAMMAR.md IS GENERATED, so the only way it can be wrong is by being stale. Delegated to the
+// generator's own `--check` rather than re-implementing the comparison here: a second renderer would be
+// the exact drift this gate exists to catch, inside the gate that catches it.
+//
+// It must sit ABOVE the clean-path exit. The first attempt put it below, where no finding it recorded
+// could ever be printed, and the gate went on reporting "docs in sync" over a deliberately corrupted
+// page. The insert had also silently failed to apply before that, and I read the green tick as a pass
+// twice. Absence read as a pass, in the gate for absence read as a pass.
+{
+  const r = spawnSync('node', [path.join(repoRoot, 'scripts/author/grammar.mjs'), '--check'],
+    { cwd: repoRoot, encoding: 'utf8' });
+  if (r.status !== 0) findings.push(String(r.stderr || r.stdout).replace(/✗/g, "").trim().split("\n").map((l) => l.trim()).filter(Boolean).join(" "));
 }
 
 if (!findings.length) {

@@ -30,6 +30,40 @@ const STILL_FLOOR = 0.5;   // the floor internal/scene/scene.go and study.mjs bo
 
 const films = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && f !== 'claims.json')
   .map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')));
+
+// ---- OUR OWN LIBRARY, the second population ------------------------------------------------------
+//
+// A claim names the films it is about, and testing one population against the other produces a false
+// verdict that reads exactly like a true one. This file shipped with one for a day: FILM-STRUCTURE.md
+// says "OUR films sit at 2.5 to 4 seconds a beat; the reference we admire runs a 1.52s median", making
+// a claim about our library and a separate observation about a reference, and I tested it against the
+// references and reported the doc CONTRADICTED. The doc was right.
+//
+// MEASURED FROM THE JSON, NOT FROM A RENDER. A beat boundary is declared (`cuts` · `transitions` ·
+// `seams`), so the beat lengths are readable without rendering 134 films. That is a different fact from
+// a reference's MEASURED shot list, and the difference is stated rather than smoothed over: ours is
+// what the author asked for, theirs is what a viewer sees.
+const SCENES = path.join(ROOT, 'formats/scene');
+const ours = fs.readdirSync(SCENES).filter((f) => f.endsWith('.json') && f !== 'schema.json'
+  && !/\.(animatic|intent|expanded|beatsync|captioned|directed|template)\./.test(f))
+  .map((f) => { try { return JSON.parse(fs.readFileSync(path.join(SCENES, f), 'utf8')); } catch { return null; } })
+  .filter((d) => d && d.module === 'scene')
+  .map((d, i) => ({ name: `ours[${i}]`, scene: d }));
+
+const OURS_METRICS = {
+  declaredBeat: ({ scene }) => {
+    const b = [...(scene.cuts || []).map((c) => c.t), ...(scene.transitions || []).map((t) => t.at),
+      ...(scene.seams || []).map((x) => x.t)].filter((t) => typeof t === 'number').sort((a, b2) => a - b2);
+    if (!b.length) return null;               // a one-shot film has no beat length to report
+    const edges = [0, ...b, scene.duration].filter((t) => typeof t === 'number');
+    const lens = edges.slice(1).map((t, i) => t - edges[i]).filter((l) => l > 0).sort((a, b2) => a - b2);
+    return lens.length ? lens[Math.floor(lens.length / 2)] : null;
+  },
+  declaredCutsPerMinute: ({ scene }) => {
+    const n = (scene.cuts || []).length + (scene.transitions || []).length + (scene.seams || []).length;
+    return scene.duration > 0 ? (n / scene.duration) * 60 : null;
+  },
+};
 const { claims } = JSON.parse(fs.readFileSync(path.join(DIR, 'claims.json'), 'utf8'));
 
 const cutsFound = (g) => g.measured.shotDetection === 'scene-score';
@@ -79,17 +113,20 @@ const fmt = (v) => (typeof v === 'number' ? (Math.abs(v) < 10 ? v.toFixed(2) : v
 const expectation = (c) => (c.op === 'within' ? `${c.lo} to ${c.hi}`
   : c.op === 'atLeast' ? `at least ${c.value}` : c.op === 'atMost' ? `at most ${c.value}` : String(c.value));
 
-console.log(`\n  CLAIMS · ${claims.length} checked against ${films.length} studied film(s)\n`);
+console.log(`\n  CLAIMS · ${claims.length} checked · ${films.length} studied reference(s) · ${ours.length} of our own films\n`);
 const rows = [];
 for (const c of claims) {
-  const metric = METRICS[c.metric];
-  if (!metric) { console.error(`✗ claim "${c.id}" names metric "${c.metric}", which does not exist. Known: ${Object.keys(METRICS).join(', ')}`); process.exit(2); }
-  const evidence = films.map((g) => ({ name: g.name, v: metric(g) })).filter((x) => x.v !== null && x.v !== undefined);
+  const scope = c.scope || 'reference';
+  const table = scope === 'ours' ? OURS_METRICS : METRICS;
+  const pop = scope === 'ours' ? ours : films;
+  const metric = table[c.metric];
+  if (!metric) { console.error(`✗ claim "${c.id}" (scope ${scope}) names metric "${c.metric}", which does not exist. Known for that scope: ${Object.keys(table).join(', ')}`); process.exit(2); }
+  const evidence = pop.map((g) => ({ name: g.name, v: metric(g) })).filter((x) => x.v !== null && x.v !== undefined);
   const agree = evidence.filter((x) => OPS[c.op](x.v, c));
   const n = evidence.length;
   const share = n ? agree.length / n : 0;
   const verdict = !n ? 'UNTESTABLE' : share >= 0.7 ? 'SUPPORTED' : share <= 0.3 ? 'CONTRADICTED' : 'SPLIT';
-  rows.push({ c, verdict, n, agree: agree.length, evidence, share });
+  rows.push({ c, verdict, n, agree: agree.length, evidence, share, scope });
 }
 
 const order = { CONTRADICTED: 0, SPLIT: 1, UNTESTABLE: 2, SUPPORTED: 3 };
@@ -97,7 +134,7 @@ rows.sort((a, b) => order[a.verdict] - order[b.verdict]);
 
 for (const r of rows) {
   const weight = r.n === 0 ? 'no evidence' : r.n < 4 ? `weak: ${r.n} film(s)` : `${r.n} films`;
-  console.log(`  ${r.verdict.padEnd(13)} ${r.c.id.padEnd(20)} ${r.agree}/${r.n} agree   (${weight})`);
+  console.log(`  ${r.verdict.padEnd(13)} ${r.c.id.padEnd(20)} ${r.agree}/${r.n} agree   (${weight}, ${r.scope === 'ours' ? 'OUR films' : 'reference films'})`);
   console.log(`      "${r.c.claim}"`);
   console.log(`      claimed ${expectation(r.c)} · source ${r.c.source}`);
   if (r.n) {

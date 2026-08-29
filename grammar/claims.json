@@ -5,43 +5,69 @@
    "id": "ref-motion-band",
    "claim": "Reference films run motion 1.7 to 2.0.",
    "source": ".claude/plans/ancient-hatching-dolphin.md, and I repeated it in this session",
-   "metric": "filmMotion", "op": "within", "lo": 1.7, "hi": 2.0
+   "metric": "filmMotion",
+   "op": "within",
+   "lo": 1.7,
+   "hi": 2.0,
+   "scope": "reference"
   },
   {
    "id": "ref-still-share",
    "claim": "Reference films are still for 13 to 24 percent of their frames.",
    "source": "CLAUDE.md and the motion plan",
-   "metric": "heldShare", "op": "within", "lo": 0.13, "hi": 0.24
+   "metric": "heldShare",
+   "op": "within",
+   "lo": 0.13,
+   "hi": 0.24,
+   "scope": "reference"
   },
   {
    "id": "beat-length",
-   "claim": "Beats run 2.5 to 4 seconds.",
-   "source": "docs/CRAFT/REFERENCE-STUDY.md",
-   "metric": "medianShot", "op": "within", "lo": 2.5, "hi": 4.0
+   "claim": "Our films sit at 2.5 to 4 seconds a beat.",
+   "source": "docs/CRAFT/FILM-STRUCTURE.md Q4",
+   "metric": "declaredBeat",
+   "op": "within",
+   "lo": 2.5,
+   "hi": 4.0,
+   "scope": "ours",
+   "_note": "I first tested this against REFERENCE films and reported it CONTRADICTED. The doc says \"OUR films sit at 2.5 to 4 seconds a beat; the reference we admire runs a 1.52s median\", so it makes a claim about our library and a separate observation about a reference, and I tested one against the other. The doc was right and the test was wrong. That is why every claim now declares its `scope`."
   },
   {
    "id": "ground-turns",
    "claim": "The backdrop should change per beat. A static field is a choice to justify, never a default.",
    "source": "CLAUDE.md, THE BACKGROUND MUST MOVE",
-   "metric": "groundTurns", "op": "is", "value": true
+   "metric": "groundTurns",
+   "op": "is",
+   "value": true,
+   "scope": "reference"
   },
   {
    "id": "one-loud-moment",
    "claim": "A film nominates ONE loud moment and keeps every other beat restrained. Four beats shouting is a volume setting, not a spectacle.",
    "source": "CLAUDE.md, the SPECTACLE clause",
-   "metric": "peakConcentration", "op": "atLeast", "value": 1.6
+   "metric": "peakConcentration",
+   "op": "atLeast",
+   "value": 1.6,
+   "scope": "reference"
   },
   {
    "id": "cuts-are-rare",
    "claim": "Cuts are a last resort: the strongest reference films are built on travel, not on cutting.",
    "source": "docs/CRAFT/REF-together-chat.md",
-   "metric": "cutsPerMinute", "op": "atMost", "value": 12
+   "metric": "cutsPerMinute",
+   "op": "atMost",
+   "value": 12,
+   "scope": "reference"
   },
   {
    "id": "held-beat-exists",
    "claim": "A film that reads well contains at least one genuinely HELD beat, so its loud beats have something to be loud against.",
    "source": "core/idle.js, and the rebuilt reading",
-   "metric": "hasHeldShot", "op": "is", "value": true
+   "metric": "hasHeldShot",
+   "op": "is",
+   "value": true,
+   "scope": "reference"
   }
- ]
+ ],
+ "_scope": "Every claim names the POPULATION it is about. `reference` tests grammar/*.json, the films we studied. `ours` tests formats/scene/*.json, the films we wrote. Testing a claim about one against the other is a false verdict that reads exactly like a true one, and this file shipped with one for a day."
 }
