@@ -55,7 +55,7 @@ export const PROPS = {
   layout: {}, gridCols: { when: 'layout' }, colw: { when: 'layout' }, colGap: {}, gap: {}, rowGap: {},
   items: {}, align2: {}, direction: {}, wrap: {}, justify: {}, h: {},
   // a group child's own box and timing (addGroupChild / sizeChild)
-  grow: {}, basis: {}, delay: {}, critical: {}, x: {}, y: {}, split: {},
+  grow: {}, basis: {}, delay: {}, critical: {}, x: {}, y: {}, split: {}, origin: {},
 };
 
 // crtSpec(o) -> { filter, background }. Pure, and exported so the arithmetic is testable without a
@@ -364,7 +364,44 @@ export function createKit(ctx) {
     el.style.pointerEvents = 'none';
   }
 
+  // ORIGIN-AWARE MOTION: which point a scale or a rotation grows OUT OF.
+  //
+  // The outside standards call this the strongest single technique they have (docs/CRAFT/MOTION-STANDARDS.md):
+  // a popover that scales from the button that opened it EXPLAINS where it came from, and one that
+  // scales from its own centre explains nothing. The engine writes `transformOrigin` in six files for
+  // its own purposes and no layer prop reached any of them, so every scale in every film in this
+  // library grows from its own centre. Measured before this existed: 1 of 4,530 layers declared
+  // `origin`, and that one was a globe's route start, an unrelated prop that shares the word.
+  //
+  // Takes what CSS takes, because CSS already has the vocabulary and inventing a second one would be
+  // the fork this repo logs most: a keyword pair (`"top left"`, `"bottom center"`), a length pair
+  // (`"40px 12px"`), or a percentage pair (`"0% 50%"`). Refused rather than guessed if it is not a
+  // string: a silently ignored origin looks exactly like a centre origin, which is the one outcome
+  // indistinguishable from not having asked.
+  //
+  // Written as a STYLE and not a dataset, because nothing animates it. It is where the motion starts
+  // from, not part of the motion, so the tracks never touch it and it survives every frame untouched.
+  // ONE WORD, TWO MEANINGS, AND THE OLDER ONE WINS. A `three` globe has had `origin` as the [lon, lat]
+  // of its route's start since long before this, and the schema entry said so. I read that entry, wrote
+  // the collision into the same prop anyway, and `showcase-flight-globe` failed at boot with my own
+  // error message quoting an array back at me. That is the "two ways to say one thing" fork this repo
+  // logs more than any other class, committed by the person who had just finished counting them.
+  //
+  // Dispatched on the VALUE and not on the layer type, because the two forms cannot be confused: a CSS
+  // transform-origin is never an array, and a lon/lat pair is never a string. An array is the globe's,
+  // read by core/surfaces/globe.js, and is left alone here.
+  function applyOrigin(el, L) {
+    if (L.origin == null || Array.isArray(L.origin)) return;
+    if (typeof L.origin !== 'string')
+      throw new Error(`\`origin\` is a CSS transform-origin: a keyword pair ("top left"), a length pair `
+        + `("40px 12px") or percentages ("0% 50%"). Got ${JSON.stringify(L.origin)}. It decides which point `
+        + `a scale or rotation grows out of; written wrong it would silently stay at the centre. `
+        + `(On a \`three\` globe, \`origin\` is a different prop entirely: the [lon, lat] of a route's start.)`);
+    el.style.transformOrigin = L.origin;
+  }
+
   function decorate(el, L) {
+    applyOrigin(el, L);
     applyGlass(el, L);
     applyCrt(el, L);
     applyProgressiveBlur(el, L);

@@ -35,6 +35,8 @@
     "settle": 0.62,
     "enter": 52,
     "durationScale": 1,
-    "stagger": 0.08
+    "stagger": 0.08,
+    "exitRatio": 0.5,
+    "_exitRatio": "product-led and even-tempered, mid-band. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
   }
 }

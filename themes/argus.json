@@ -1,6 +1,6 @@
 {
   "name": "argus",
-  "note": "argushq.cc — 'grow on X, on purpose'. White-first, cobalt accent (the pixel-eye mascot + primary CTA), Archivo light-display + JetBrains Mono. Near-monochrome; cobalt is the only colour.",
+  "note": "argushq.cc \u2014 'grow on X, on purpose'. White-first, cobalt accent (the pixel-eye mascot + primary CTA), Archivo light-display + JetBrains Mono. Near-monochrome; cobalt is the only colour.",
   "palette": {
     "bg": "#ffffff",
     "bg2": "#f7f9ff",
@@ -41,7 +41,9 @@
     "settle": 0.4,
     "enter": 34,
     "durationScale": 0.9,
-    "stagger": 0.04
+    "stagger": 0.04,
+    "exitRatio": 0.45,
+    "_exitRatio": "a security brand: things leave decisively. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
   },
   "bg": {
     "accent": "71,114,245",

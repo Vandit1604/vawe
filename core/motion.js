@@ -700,7 +700,16 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // has NO branch for the middle, so stillness was never a decision anyone made, it was the shape of the
 // data model. Measured: the reference films in refs/ are still for 13-24% of their frames and ours for
 // 84%. The default is live, and `idle: "none"` on a theme, a scene or a layer is the opt-out.
-export const DEFAULT_MOTION = { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045, idle: 'breathe' };
+// THE DEFAULT EASE IS THE STRONG ONE, and the change is one word with a measurable reason behind it.
+// The outside standards argue the built-in CSS curves are too weak and name a custom ease-out,
+// `cubic-bezier(0.23, 1, 0.32, 1)`. Sampled at 21 points against all 41 of our easings, the nearest is
+// `easeOutQuint` at a mean error of 0.0044: we have shipped their curve under another name the whole
+// time and defaulted to `easeOutCubic`, which is the weaker built-in they specifically argue against
+// (docs/CRAFT/MOTION-STANDARDS.md).
+//
+// `stagger` 0.045 is 45ms, mid-band of their 30 to 80. `exitRatio` defaults to 1 and is the one knob
+// here a theme should almost always override; the seven themes behind shipped films now do.
+export const DEFAULT_MOTION = { easing: 'easeOutQuint', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045, idle: 'breathe' };
 
 // motionDefaults(theme): the theme's motion personality with `easing` resolved to a function.
 // Scenes pass these into primitives, e.g. interpolate(t, inR, outR, { easing: M.easing }),

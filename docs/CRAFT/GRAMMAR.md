@@ -455,17 +455,16 @@ The film starts on single words at under a second and ends on sentences at four,
 
 ## What we cannot do yet
 
-7 gap(s) found by reading these films and probing the engine: 3 confirmed by a rendered probe, 1 since fixed.
+7 gap(s) found by reading these films and probing the engine: 2 confirmed by a rendered probe, 2 since fixed.
 
-### Origin-aware motion is not authorable  ·  **verified by a probe**
+### Origin-aware motion is not authorable  ·  **fixed**
 
 **Seen in.** The outside standards (animations.dev / emilkowal.ski) name it as the strongest single technique: a thing scales from the point it CAME FROM, not from its own centre, so the motion explains the relationship.
 
 **Why we cannot.** `transformOrigin` is written in six engine files (core/type.js, core/parts.js, core/gsap-effects.js, core/compositions, core/layers/image.js, core/motion.js) and NO layer prop reaches it. Measured: 1 of 4,530 layers declares `origin`, and that one is a globe's route start, which is a different prop entirely and is how this was nearly missed. Every scale in every film we have grows from its own centre.
 
-**The fix.** A layer prop that writes `transform-origin`, taking a keyword pair or a point. It composes with the existing tracks because none of them touch that property.
-
-**Today.** None that is honest. A scale from a corner can be faked by keying x and y against the scale, and keeping them in agreement by hand is the arithmetic the prop would do.
+**The fix.** FIXED. `origin` on any layer writes `transform-origin`, taking what CSS takes: a keyword pair ("top left"), a length pair or percentages. Written as a style and never animated, because it is where the motion starts FROM rather than part of the motion.
+IT WALKED STRAIGHT INTO A NAME COLLISION. A `three` globe has had `origin` as the [lon, lat] of a route's start for a long time and the schema entry said so; I read that entry and wrote the second meaning into the same prop anyway, and showcase-flight-globe failed at boot with my own error message quoting an array back at me. Dispatched on the VALUE now: a transform-origin is never an array and a lon/lat pair is never a string, so neither can be mistaken for the other.
 
 ### `plane` silently beats `track`, and nothing says so  ·  **verified by a probe**
 

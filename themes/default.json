@@ -35,7 +35,9 @@
     "settle": 0.5,
     "enter": 36,
     "durationScale": 0.88,
-    "stagger": 0.045
+    "stagger": 0.045,
+    "exitRatio": 0.5,
+    "_exitRatio": "the house default: half, which is the middle of the band the five existing themes already use. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
   },
   "bg": {
     "accent": "37,99,235",

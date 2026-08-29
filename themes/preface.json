@@ -35,23 +35,52 @@
     "settle": 0.62,
     "enter": 34,
     "durationScale": 1.0,
-    "stagger": 0.05
+    "stagger": 0.05,
+    "exitRatio": 0.55,
+    "_exitRatio": "editorial; an exit that snaps would fight the reading pace. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
   },
   "bg": {
     "accent": "201,100,66",
     "tint": "154,154,148",
     "tint2": "154,154,148",
     "dotLight": "170,170,164",
-    "paperBase": ["#FCFCFC", "#F1F1EF"],
-    "softBase": ["#F7F7F5", "#F1F1EF"],
-    "accentBase": ["#C96442", "#B4532F"],
-    "inkBase": ["#0F0F0E", "#050504"],
+    "paperBase": [
+      "#FCFCFC",
+      "#F1F1EF"
+    ],
+    "softBase": [
+      "#F7F7F5",
+      "#F1F1EF"
+    ],
+    "accentBase": [
+      "#C96442",
+      "#B4532F"
+    ],
+    "inkBase": [
+      "#0F0F0E",
+      "#050504"
+    ],
     "border": "#E8E8E5",
-    "dark": ["#0F0F0E", "#050504"],
-    "darkMesh": ["#14110F", "#050504"],
-    "deep": ["#0F0F0E", "#050504"],
-    "light": ["#FCFCFC", "#F1F1EF"],
-    "ink": ["#0F0F0E", "#050504"],
+    "dark": [
+      "#0F0F0E",
+      "#050504"
+    ],
+    "darkMesh": [
+      "#14110F",
+      "#050504"
+    ],
+    "deep": [
+      "#0F0F0E",
+      "#050504"
+    ],
+    "light": [
+      "#FCFCFC",
+      "#F1F1EF"
+    ],
+    "ink": [
+      "#0F0F0E",
+      "#050504"
+    ],
     "paper": "#FCFCFC"
   },
   "vars": {

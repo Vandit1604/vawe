@@ -3857,5 +3857,43 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('both properties default to 1', (src.match(/var\(\$\{GLOW_VARS\.[ir]\}, 1\)/g) || []).length === 2);
 }
 
+// ---------- the three motion-standard changes ----------
+// docs/CRAFT/MOTION-STANDARDS.md audits this engine against animations.dev / emilkowal.ski. Three
+// things came out of it, and all three are pinned here because all three are one-line reversions.
+{
+  ok('the default ease is the STRONG one', DEFAULT_MOTION.easing === 'easeOutQuint');
+  // Their `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)` against ours, sampled at 21 points. This is the
+  // measurement the change was made on, so it is the measurement that should fail if either moves.
+  {
+    const bez = (x1, y1, x2, y2) => (t) => {
+      let lo = 0, hi = 1, u = t;
+      for (let i = 0; i < 24; i++) {
+        u = (lo + hi) / 2; const mt = 1 - u;
+        const x = 3 * mt * mt * u * x1 + 3 * mt * u * u * x2 + u * u * u;
+        if (x < t) lo = u; else hi = u;
+      }
+      const mt = 1 - u; return 3 * mt * mt * u * y1 + 3 * mt * u * u * y2 + u * u * u;
+    };
+    const theirs = bez(0.23, 1, 0.32, 1), ours = EASINGS.easeOutQuint;
+    let err = 0; for (let i = 0; i <= 20; i++) { const t = i / 20; err += Math.abs(theirs(t) - ours(t)); }
+    ok('easeOutQuint IS their custom ease-out, within 0.01', err / 21 < 0.01);
+    // And the one we moved away from is measurably weaker, which is the whole reason for the change.
+    let errOld = 0; for (let i = 0; i <= 20; i++) { const t = i / 20; errOld += Math.abs(theirs(t) - EASINGS.easeOutCubic(t)); }
+    ok('easeOutCubic is the weaker curve they argue against', errOld / 21 > (err / 21) * 3);
+  }
+  // Stagger sits mid-band of their 30-80ms. Pinned because it is right by accident, not by decision.
+  ok('the default stagger is inside the 30-80ms band', DEFAULT_MOTION.stagger >= 0.03 && DEFAULT_MOTION.stagger <= 0.08);
+  // ORIGIN, AND THE COLLISION IT WALKED INTO. `origin` is a CSS transform-origin on every layer and the
+  // [lon, lat] of a route's start on a `three` globe. Dispatched on the value's SHAPE, because a
+  // transform-origin is never an array and a lon/lat pair is never a string. The first version threw on
+  // the array and failed showcase-flight-globe at boot.
+  {
+    const src = fs.readFileSync(new URL('../../core/layers/util.js', import.meta.url), 'utf8');
+    ok('origin reaches transformOrigin', /el\.style\.transformOrigin = L\.origin/.test(src));
+    ok('an ARRAY origin is left to the globe', /Array\.isArray\(L\.origin\)\) return/.test(src));
+    ok('a non-string, non-array origin is refused by name', /`\\`origin\\` is a CSS transform-origin/.test(src));
+  }
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

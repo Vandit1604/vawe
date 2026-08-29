@@ -1,6 +1,6 @@
 {
   "name": "vawe",
-  "note": "THE VAWE BRAND — derived from the real site (site/app/globals.css + layout.tsx), not invented. WHITE-first with one cobalt accent: bg #ffffff, accent #2563eb (5.17:1 on white, so it clears AA at any size). The site's ACTUAL faces are Anybody (next/font, wdth+wght axes) for sans + JetBrains Mono for mono/numbers — NOT Space Grotesk (that was the prior guess; corrected 2026-07). up/down mirror the site's --ok #2f7d55 / --bad #a3282d. Two-surface accent: cobalt on light, ice-blue #8fc0ff on a charcoal code slab (cobalt on #0f1620 is ~2.5:1 and unreadable). Flat field, no texture: the site is plain white, so bgDefault is `plain` (MISTAKES.md #2).",
+  "note": "THE VAWE BRAND \u2014 derived from the real site (site/app/globals.css + layout.tsx), not invented. WHITE-first with one cobalt accent: bg #ffffff, accent #2563eb (5.17:1 on white, so it clears AA at any size). The site's ACTUAL faces are Anybody (next/font, wdth+wght axes) for sans + JetBrains Mono for mono/numbers \u2014 NOT Space Grotesk (that was the prior guess; corrected 2026-07). up/down mirror the site's --ok #2f7d55 / --bad #a3282d. Two-surface accent: cobalt on light, ice-blue #8fc0ff on a charcoal code slab (cobalt on #0f1620 is ~2.5:1 and unreadable). Flat field, no texture: the site is plain white, so bgDefault is `plain` (MISTAKES.md #2).",
   "palette": {
     "bg": "#ffffff",
     "bg2": "#f6f8fb",
@@ -18,7 +18,11 @@
     "down": "#a3282d",
     "ink": "#0f1620"
   },
-  "gradient": ["#ffffff", "#f8fafc", "#f1f4f9"],
+  "gradient": [
+    "#ffffff",
+    "#f8fafc",
+    "#f1f4f9"
+  ],
   "type": {
     "sans": "Anybody",
     "serif": "Anybody",
@@ -31,23 +35,52 @@
     "settle": 0.5,
     "enter": 36,
     "durationScale": 0.88,
-    "stagger": 0.045
+    "stagger": 0.045,
+    "exitRatio": 0.4,
+    "_exitRatio": "the fastest of the seven: this engine is about determinism and speed, and its own theme already runs durationScale 0.88. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
   },
   "bg": {
     "accent": "37,99,235",
     "tint": "180,190,205",
     "tint2": "205,214,226",
     "dotLight": "150,163,182",
-    "paperBase": ["#ffffff", "#f6f8fb"],
-    "softBase": ["#f8fafc", "#eef2f8"],
-    "accentBase": ["#eef3ff", "#f8fafc"],
-    "inkBase": ["#0f1620", "#0a0f16"],
+    "paperBase": [
+      "#ffffff",
+      "#f6f8fb"
+    ],
+    "softBase": [
+      "#f8fafc",
+      "#eef2f8"
+    ],
+    "accentBase": [
+      "#eef3ff",
+      "#f8fafc"
+    ],
+    "inkBase": [
+      "#0f1620",
+      "#0a0f16"
+    ],
     "border": "#e7eaf0",
-    "dark": ["#0f1620", "#0a0f16"],
-    "darkMesh": ["#141d2a", "#0a0f16"],
-    "deep": ["#0f1620", "#080c12"],
-    "light": ["#ffffff", "#f6f8fb"],
-    "ink": ["#0f1620", "#0a0f16"],
+    "dark": [
+      "#0f1620",
+      "#0a0f16"
+    ],
+    "darkMesh": [
+      "#141d2a",
+      "#0a0f16"
+    ],
+    "deep": [
+      "#0f1620",
+      "#080c12"
+    ],
+    "light": [
+      "#ffffff",
+      "#f6f8fb"
+    ],
+    "ink": [
+      "#0f1620",
+      "#0a0f16"
+    ],
     "paper": "#ffffff"
   },
   "vars": {
