@@ -463,6 +463,20 @@ export async function boot(build) {
     if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
     // `?bounds` turns on the settled-off-frame REPORT inside resolveCoords. Read before it runs, and it
     // only prints: nothing about a render changes, so renderFrame(n) stays a pure function of n.
+    // `?nobg=1` PAINTS NO BACKDROP, so the film's motion can be measured with the ground removed.
+    // The renderer's motion figure is a property of the FRAME, so a moving backdrop flatters it exactly
+    // as much as moving content does: a film here measured 2% still and 1.25 on `aurora` and 75% still
+    // and 0.29 on a static ground with NOT ONE LAYER CHANGED, and I read the 1.25 as evidence a fix had
+    // worked. The difference between the two renders is the number an author actually needs.
+    //
+    // A PARAM AND NOT A SECOND SCENE FILE, because the thing being measured has to be the same film
+    // with one variable removed. Substituting `plain` keeps `bg` a required field and keeps the tone
+    // the layers were written against, so the ink does not flip and the measurement stays about motion.
+    if (params.get('nobg') != null) {
+      const tone = (Array.isArray(data.bg) ? data.bg[0] : data.bg)?.tone;
+      const dark = tone === 'dark' || /dark|deep|ink/.test(String((Array.isArray(data.bg) ? data.bg[0] : data.bg)?.preset || ''));
+      data.bg = [{ preset: dark ? 'dark' : 'plain' }];
+    }
     if (params.get('bounds') != null) globalThis.__FRAME_BOUNDS_CHECK = true;
     resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion

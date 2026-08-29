@@ -198,7 +198,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// passed the whole ladder measured 84%. An author who never sees the number optimises for the numbers
 	// that print. Measured off the frames still on disk (they are deleted a few lines from here), so it
 	// costs no second decode of the mp4 and no extra ffmpeg pass.
-	if still, med, ok := scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent)); ok {
+	if still, med, ok := scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent), meta.FPS); ok {
 		fmt.Printf("✓ done → %s  (%.1fs, %d frames · %.0f%% still, motion %.2f)\n",
 			out, meta.Duration, meta.TotalFrames, still, med)
 		if still > 60 {

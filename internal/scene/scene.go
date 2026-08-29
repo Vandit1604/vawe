@@ -836,7 +836,18 @@ const (
 
 // Stillness samples consecutive frame PAIRS and reports what share of them are unchanged, plus the
 // median per-pair change. Returns ok=false when the film is too short to say anything useful.
-func Stillness(framesDir string, total int, ext string) (stillPct float64, median float64, ok bool) {
+// A FRAME DIFFERENCE IS A MEASUREMENT OF THE GAP BETWEEN FRAMES, so the number it returns depends on
+// how far apart they are. The same film measured 0.43 rendered at 30fps and 0.22 at 60: consecutive
+// frames are half as far apart, so roughly half the change lands between them. Every reference in
+// grammar/ was measured at about 30fps, so an un-normalised figure made our 60fps output look half as
+// alive as it is, against the only numbers there are to compare it to.
+//
+// Normalised to change-per-thirtieth-of-a-second, which is the rate the references were read at and
+// the rate `scripts/media/study.mjs` still reads them at. `stillFloor` is applied to the NORMALISED
+// value for the same reason: a floor on a raw delta means a different thing at every frame rate.
+const normFPS = 30.0
+
+func Stillness(framesDir string, total int, ext string, fps float64) (stillPct float64, median float64, ok bool) {
 	if total < 4 {
 		return 0, 0, false
 	}
@@ -892,7 +903,11 @@ func Stillness(framesDir string, total int, ext string) (stillPct float64, media
 			}
 			sum += d
 		}
-		deltas = append(deltas, sum/float64(len(a)))
+		d := sum / float64(len(a))
+		if fps > 0 {
+			d *= fps / normFPS // change per 1/30s, whatever this film was rendered at
+		}
+		deltas = append(deltas, d)
 	}
 	if len(deltas) < 3 {
 		return 0, 0, false

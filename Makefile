@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes claims study-verify recreate ref
+.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes claims study-verify recreate ref motion-split
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -254,6 +254,11 @@ recreate:
 # lands in refs/ (gitignored); the committed artefact is grammar/<name>.json.
 ref:
 	node scripts/media/ref.mjs $(URL) $(if $(NAME),--name $(NAME))
+
+# make motion-split D=formats/scene/<scene>.json: how much of a film's measured motion is its GROUND
+# and how much is its LAYERS. Two sampled renders in one browser, seconds not minutes.
+motion-split:
+	node scripts/gates/motion-split.mjs $(D)
 
 # make census: every named population in formats/scene, with the question each one answers.
 # Quote a NAME in prose and print this to get the number (scripts/lib/census.mjs owns the definitions).
