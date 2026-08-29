@@ -94,7 +94,10 @@ const NONE = Object.freeze([]);
 // The one layer prop this registry reads. What is INSIDE a modifier's options bag is that modifier's
 // own vocabulary and not a layer prop, `{ tilt: { dist: 900 } }` and a layer's `dist` are two different
 // things that share a spelling, and merging them would make each excuse the other.
-export const PROPS = { modifiers: {} };
+// `depth` rides here because it LOWERS to a modifier (core/produce.js bakeDepth turns it into
+// `modifiers: [{ plane: { z } }]` at boot). Declared beside the thing it becomes so one file owns the
+// pair, and declared at all so the validator accepts a word the engine genuinely reads.
+export const PROPS = { modifiers: {}, depth: {} };
 
 export function specsOf(L) {
   const raw = L.modifiers;

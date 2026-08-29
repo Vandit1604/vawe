@@ -311,6 +311,17 @@
 | `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
 | `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
 
+## Depths (parallax planes)  `[per-layer]`
+
+`{ "depth": "back" }` on any layer. Stands it at a DISTANCE from the picture plane, so a camera move gives it parallax instead of turning the whole frame as one rigid pane. Each name is a fraction of the film's own lens, so it means the same distance under any camera, and it lowers to the `plane` modifier at boot. A raw number of px still works. Refused on a group CHILD, which sits in a flat parent: put it on the group.
+
+| name | what / when |
+|---|---|
+| `back` | behind the picture plane: the layer the camera passes, the one that gives the move its parallax. 0.73x |
+| `far` | the far plane: a backdrop, a wall, a field the subject stands in front of. Drawn at 0.57x |
+| `front` | just in front of the picture plane: a caption or a chip that rides ahead of the subject. 1.18x |
+| `near` | nearest the eye: the thing that crosses the frame fastest and leaves it first. 1.39x |
+
 ## Adjustment layers (grade what is BENEATH)  `[per-layer]`
 
 `{ "type":"adjust", "kind":"<name>" }`. One grade over every layer with a LOWER `track`, so a whole beat can go soft or grey from a single layer instead of the same filter written onto fifteen. `amount` is the strength in that kind's own unit, and the CSS reads `var(--adjust)`, so the existing `vars` track keys it: `{ "type":"adjust","kind":"blur","amount":20,"vars":{"--adjust":[0,1]},"varsDur":0.8 }`. A raw `filter` string is the escape hatch and is static.
@@ -859,4 +870,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_572 effects across 37 families. Regenerate: `make effects`._
+_576 effects across 38 families. Regenerate: `make effects`._

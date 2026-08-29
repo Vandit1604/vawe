@@ -26,20 +26,40 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// Every module that defines a vocabulary. Listed because an import cannot be discovered without one,
-// but the CONTENTS of each are read, never restated.
-const MODULES = ['backgrounds', 'camera-moves', 'canvas-fx', 'clips', 'cuts', 'gsap-effects', 'icons',
-  'idle', 'paint-fx', 'parts', 'raymarch-fx', 'seams', 'shaders-ambient', 'stings', 'three-scenes',
-  'type', 'vocab'];
+// Every module that defines a vocabulary, DISCOVERED rather than listed. The list used to be
+// hand-kept, with a comment saying an import cannot be discovered without one. It can: readdir names
+// the files, and a module that will not import in node is skipped by the try/catch that was already
+// there for exactly that case.
+//
+// The hand-kept version had already gone stale in the way this whole tool exists to prevent. It named
+// only files directly under `core/`, so a vocabulary declared in `core/fx/` or `core/layers/` was
+// unsearchable, and an author looking for the thing they could not name was told it did not exist. Two
+// registries were in that state the day this changed. A search tool with a manual index is a search
+// tool that answers for the index and not for the engine.
+const dirsOf = (rel) => {
+  try {
+    return fs.readdirSync(path.join(repoRoot, rel))
+      .filter((f) => f.endsWith('.js'))
+      .map((f) => `${rel}/${f}`);
+  } catch { return []; }
+};
+const MODULE_PATHS = ['core', 'core/fx', 'core/layers'].flatMap(dirsOf);
 
 /** Every entry the engine can name: {name, kind, slot, blurb}. */
 async function collect() {
   const out = [];
-  for (const m of MODULES) {
-    let mod; try { mod = await import(`../../core/${m}.js`); } catch { continue; }
+  const seen = new Set();
+  for (const m of MODULE_PATHS) {
+    let mod; try { mod = await import(`../../${m}`); } catch { continue; }
     for (const [expName, reg] of Object.entries(mod)) {
       if (!expName.endsWith('_REGISTRY') || !reg || !Array.isArray(reg.names)) continue;
+      // A registry re-exported from a second module would otherwise be listed twice. Keyed on the
+      // registry's own kind plus the name, so two vocabularies that legitimately share a word (a `blur`
+      // depth and a `blur` look) both survive.
       for (const name of reg.names) {
+        const key = `${reg.kind}\u0000${name}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
         out.push({ name, kind: reg.kind, slot: reg.slot || null, blurb: (reg.blurbs && reg.blurbs[name]) || '' });
       }
     }

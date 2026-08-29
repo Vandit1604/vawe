@@ -17,6 +17,7 @@
 import { isLightBg as bgIsLight } from './motion.js';
 import { buildCameraMove } from './camera-moves.js';
 import { sceneDims, MAX_ZOOM } from './safe.js';
+import { depthZ } from './fx/plane.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
@@ -100,5 +101,50 @@ export function bakeCameraMove(data, frame) {
   const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
   data.camera = specs.flatMap((s) => buildCameraMove(s, dims));
   delete data.cameraMove;
+  return data;
+}
+
+
+// bakeDepth(data): `depth` sugar -> the real `plane` modifier, resolved against THIS film's lens.
+//
+// The same shape as bakeCameraMove above and for the same reason: a field written by an author and read
+// by nothing at render time is the failure this whole path exists to make impossible. Nothing downstream
+// knows the word `depth`; core/fx/plane.js reads `modifiers: [{ plane: { z } }]`, so the sugar either
+// becomes that here or core/boot.js throws.
+//
+// THE LENS IS THE CAMERA'S, so it is read here rather than guessed per layer. A name is a fraction of it
+// (core/fx/plane.js), which is what makes "back" mean the same distance under a 900px lens and a 1600px
+// one. `p` is keyable, so a film that ramps its lens has more than one; the FIRST key is used, because a
+// depth is a place a layer stands and not something that moves when the lens does, and the alternative
+// is a layer whose z changes mid-shot for a reason nobody wrote down.
+//
+// A GROUP CHILD IS REFUSED HERE, not left to the modifier. core/fx/plane.js already refuses one, with a
+// good message (a group is a flat parent, so the child would be projected by nothing: put the plane on
+// the GROUP). Lowering it and letting that fire would work, but the error would name `plane` at a layer
+// whose author wrote `depth`, and an error that names a word the author did not type is half an error.
+const LENS_DEFAULT = 1600;
+
+export function bakeDepth(data) {
+  const cam = Array.isArray(data && data.camera) ? data.camera : null;
+  const lens = (cam && cam.find((k) => k && typeof k.p === 'number')?.p) || LENS_DEFAULT;
+  const walk = (ls, inGroup) => {
+    for (const L of ls || []) {
+      if (!L || typeof L !== 'object') continue;
+      if (L.depth != null) {
+        if (inGroup) throw new Error(`a group child (${L.id ? `"${L.id}"` : `a ${L.type || 'text'}`}) sets `
+          + `\`depth\`. A group is its own flat parent, so a child standing behind it would be projected by `
+          + `nothing and drawn at exactly the size and place it already has. Put the \`depth\` on the GROUP: `
+          + `the whole composed card then stands at that distance and its children ride it.`);
+        const z = depthZ(L.depth, lens);
+        if (z === 0) throw new Error(`\`depth\` resolved to z 0, which is the picture plane every layer is `
+          + `already on. Drop the prop rather than declaring the distance you are already at.`);
+        (L.modifiers || (L.modifiers = [])).push({ plane: { z } });
+        delete L.depth;
+      }
+      walk(L.children, true);
+      walk(L.layers, inGroup);
+    }
+  };
+  walk(data && data.layers, false);
   return data;
 }

@@ -111,8 +111,8 @@ const REACH = [
   {
     when: () => (scene.camera || scene.cameraMove) && !ALL.some((L) => (L.modifiers || []).some((m) => m && m.plane != null)),
     say: 'DEPTH. This film moves the camera and every layer sits at z = 0, so the whole composition turns as one rigid pane.',
-    how: '"modifiers": [{ "plane": -600 }] puts a layer behind the picture plane. Parallax is a DIFFERENCE of depth and cannot exist while there is only one depth to have.',
-    read: 'core/fx/plane.js',
+    how: '"depth": "back" on a layer stands it behind the picture plane (far · back · front · near, each a fraction of this film\'s lens). Parallax is a DIFFERENCE of depth and cannot exist while there is only one depth to have.',
+    read: 'core/fx/plane.js  ·  make arsenal Q="depth"',
     share: '44 of the 47 films with a camera move are in this state, and 3 of 134 use depth at all.',
   },
   {

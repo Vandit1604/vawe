@@ -3792,5 +3792,50 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('every kind is a no-op at --adjust 0', zeroed.every((css) => /\(calc\(/.test(css) && css.includes('0')));
 }
 
+// ---------- named depths: a plane you can reach without arithmetic ----------
+// The modifier worked and 3 films of 134 used it, while 44 of the 47 films that move the camera had
+// every layer at z = 0. `depth` is the same modifier behind a name resolved against the film's lens.
+// That it PROJECTS rather than scales was verified by render, and the rendered numbers are pinned as
+// the arithmetic here: far/back/near are drawn at 0.571 / 0.727 / 1.389 of their authored width and
+// travel 228.6 / 290.9 / 555.5px against the picture plane's 400 under the same camera. Travel and
+// magnification are the same ratio, which is what makes it a distance.
+{
+  const { DEPTH_PLANES, DEPTH_REGISTRY, DEPTH_BLURBS, depthZ } = await import('../../core/fx/plane.js');
+  const DEPTH_NAMES = DEPTH_REGISTRY.names;
+  const { bakeDepth } = await import('../../core/produce.js');
+  ok('every named depth carries a blurb', DEPTH_NAMES.every((n) => typeof DEPTH_BLURBS[n] === 'string'));
+  // A FRACTION OF THE LENS, NEVER A PIXEL COUNT. A film that keys `p` changes what 600px behind the
+  // picture plane means; it must not change what "back" means.
+  ok('a name is a fraction of the lens', depthZ('back', 1600) === -600 && depthZ('back', 800) === -300);
+  ok('a raw number passes through as px', depthZ(-900, 1600) === -900);
+  ok('near and front are toward the eye, far and back away',
+    depthZ('near', 1600) > 0 && depthZ('front', 1600) > 0 && depthZ('far', 1600) < 0 && depthZ('back', 1600) < 0);
+  // The magnification each name lands on, which is the number an author actually has to decide about.
+  const mag = (n, lens = 1600) => lens / (lens - depthZ(n, lens));
+  ok('far/back/near magnify by 0.571 / 0.727 / 1.389, as rendered',
+    approx(mag('far'), 0.5714, 1e-3) && approx(mag('back'), 0.7273, 1e-3) && approx(mag('near'), 1.3889, 1e-3));
+  ok('no name reaches the lens itself', DEPTH_NAMES.every((n) => Math.abs(DEPTH_PLANES[n]) < 1));
+  // An unknown name is refused with the whole menu AND each option's magnification, because making the
+  // author compute lens/(lens - z) to find out what a name does is the barrier this exists to remove.
+  let m = null; try { depthZ('mid', 1600); } catch (e) { m = e.message; }
+  ok('an unknown depth is refused with the menu and its magnifications',
+    m != null && /far/.test(m) && /0\.57x/.test(m) && /1\.39x/.test(m));
+  // THE SUGAR BECOMES THE MODIFIER, or core/boot.js throws. A field written and read by nothing is the
+  // failure the whole bake path exists to make impossible (docs/MISTAKES.md #424).
+  const d = { layers: [{ type: 'rect', depth: 'back' }] };
+  bakeDepth(d);
+  ok('depth lowers to the plane modifier', d.layers[0].depth === undefined
+    && JSON.stringify(d.layers[0].modifiers) === JSON.stringify([{ plane: { z: -600 } }]));
+  const keyed = { camera: [{ t: 0, p: 800 }], layers: [{ type: 'rect', depth: 'back' }] };
+  bakeDepth(keyed);
+  ok('the bake reads the lens off the camera', keyed.layers[0].modifiers[0].plane.z === -300);
+  // A group is a flat parent, so a child standing behind it is projected by nothing. Refused where the
+  // author's own word is, not one lowering later where the message would name `plane` instead.
+  let g = null;
+  try { bakeDepth({ layers: [{ type: 'group', children: [{ type: 'rect', depth: 'back' }] }] }); }
+  catch (e) { g = e.message; }
+  ok('depth on a group child is refused, naming the group', g != null && /group/i.test(g) && /depth/.test(g));
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

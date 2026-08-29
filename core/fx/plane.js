@@ -44,6 +44,8 @@
 // projected by nothing. Put the plane on the GROUP: the whole composed card then stands at that depth
 // and its children ride it, which is what a card at a distance is.
 
+import { defineRegistry } from '../registry.js';
+
 export const PLANE_KEYS = ['z'];
 
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -100,4 +102,71 @@ export function frame(kit, el, L, t, scene, spec) {
   // Written in full on every frame and never appended to: the value is a function of the spec alone, so
   // a cold render and a warm one agree and any render order gives the same string.
   el.style.translate = `0 0 ${z.toFixed(2)}px`;
+}
+
+// ---------- the named depths, so a plane is reachable without arithmetic ----------
+//
+// THE MODIFIER WORKS AND NOBODY USES IT: 3 films of 134, while 44 of the 47 films that move the camera
+// have every layer at z = 0. That is not indifference to depth, it is four separate barriers between an
+// author and one of these, and the header above happily describes three of them as correct:
+//
+//   1. it lives in `core/fx/` and is spelled `modifiers: [{ plane: … }]`, which is a nested form nobody
+//      reaches for by accident;
+//   2. `z` is a RAW DISTANCE IN PIXELS, and picking one means knowing the lens;
+//   3. the magnification is `lens / (lens - z)`, so a number that looks reasonable can halve a layer;
+//   4. and the size change is real, so the author is told to compensate by hand.
+//
+// A capability behind four barriers is a capability the library does not have. `depth` removes the first
+// three: a NAME, resolved against the lens actually in force, so the same word means the same distance
+// under any camera. The fourth stays the author's, because the header is right that depth without
+// magnification is a translation rather than a distance, and `kick` already owns scale. The multiplier
+// is printed in the refusal below rather than left to be derived.
+//
+//   { "type": "rect", "depth": "back" }        // 0.375 lens behind, drawn at 0.73x
+//   { "type": "text", "depth": "near" }        // 0.28 lens in front, drawn at 1.39x
+//   { "type": "rect", "depth": -900 }          // still a raw distance, when a name is not the point
+//
+// Named as FRACTIONS OF THE LENS, never as pixels. A film that keys `p` from 1600 to 900 changes what
+// 600px behind the picture plane means; it does not change what "the back plane" means. The one fact
+// with one owner, again: the lens is the camera's, so the depth is read through it.
+export const DEPTH_PLANES = Object.freeze({
+  far:   -0.75,
+  back:  -0.375,
+  front:  0.15,
+  near:   0.28,
+});
+
+export const DEPTH_BLURBS = Object.freeze({
+  far:   'the far plane: a backdrop, a wall, a field the subject stands in front of. Drawn at 0.57x',
+  back:  'behind the picture plane: the layer the camera passes, the one that gives the move its parallax. 0.73x',
+  front: 'just in front of the picture plane: a caption or a chip that rides ahead of the subject. 1.18x',
+  near:  'nearest the eye: the thing that crosses the frame fastest and leaves it first. 1.39x',
+});
+
+// A REGISTRY, not a bare object, because that is what makes it FINDABLE. `make arsenal` searches every
+// `*_REGISTRY` the engine exports, which is the one place an author goes when they do not yet know the
+// name of the thing they want. A vocabulary that is not one is a vocabulary nobody can search for, and
+// being unfindable is the entire defect this file is fixing.
+export const DEPTH_REGISTRY = defineRegistry('depth', DEPTH_PLANES, { blurbs: DEPTH_BLURBS, slot: 'depth' });
+// NOT EXPORTED. The registry IS the vocabulary's public face, and a second exported spelling of the
+// same list is a second thing for a caller to reach for and for the catalogue to have to mention.
+// `arsenal-check` said so out loud, which is the gate doing its job.
+const DEPTH_NAMES = DEPTH_REGISTRY.names;
+
+/** depthZ(spec, lens) -> z in px. A name is a fraction of THIS lens; a number is already a distance. */
+export function depthZ(spec, lens = 1600) {
+  if (num(spec)) return spec;
+  if (typeof spec === 'string' && Object.prototype.hasOwnProperty.call(DEPTH_PLANES, spec))
+    return Math.round(DEPTH_PLANES[spec] * lens);
+  // The magnification is quoted for every name, because the one thing an author has to decide here is
+  // whether they want the layer at that size, and making them compute `lens / (lens - z)` to find out is
+  // barrier 3 wearing a friendlier name.
+  const menu = DEPTH_NAMES.map((n) => {
+    const z = Math.round(DEPTH_PLANES[n] * lens);
+    return `${n} (z ${z > 0 ? '+' : ''}${z}, drawn at ${(lens / (lens - z)).toFixed(2)}x)`;
+  }).join(' · ');
+  throw new Error(`depth: expected one of ${DEPTH_NAMES.join(' · ')}, or a distance in px, got `
+    + `${JSON.stringify(spec)}. Under this film's ${lens}px lens: ${menu}. `
+    + `Negative is away from the eye, positive is toward it, and there is no "mid": the picture plane is `
+    + `where every layer already stands, so drop the prop instead.`);
 }
