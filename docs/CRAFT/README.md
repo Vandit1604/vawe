@@ -73,6 +73,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 |---|---|---|
 | [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this") | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · the honest 1:1 ceiling |
+| [GRAMMAR.md](GRAMMAR.md) | before authoring, or when a film reads flat and you cannot say why | GENERATED from `grammar/*.json`: every studied reference on ONE scale (shot length, motion, whether the ground turns, what carries across), and the same motion figure `./bin/vawe` prints for ours |
 | [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
 | [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling, or picking between whole directions | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make concept` forces a round off the median |
 | [STORY.md](STORY.md) | deciding the beats and their order | the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats |

@@ -224,8 +224,9 @@ frame:
 # make grammar [N=<name>]: what we have learned about how good films are BUILT, from the committed
 # grammar/ store that `make study` writes. No argument prints every reference as one comparison table
 # and names the ones nobody has read.
+# DOC=1 regenerates docs/CRAFT/GRAMMAR.md, the cross-film page, from the same store.
 grammar:
-	node scripts/author/grammar.mjs $(N)
+	node scripts/author/grammar.mjs $(if $(DOC),--doc,$(N))
 
 # make census: every named population in formats/scene, with the question each one answers.
 # Quote a NAME in prose and print this to get the number (scripts/lib/census.mjs owns the definitions).

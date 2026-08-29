@@ -1,0 +1,154 @@
+{
+ "name": "pin-16818198602994243",
+ "source": "pin-16818198602994243.mp4",
+ "measured": {
+  "duration": 19.78,
+  "width": 736,
+  "height": 414,
+  "fps": 30,
+  "aspect": "736:414",
+  "hasAudio": true,
+  "shotDetection": "fixed-sampling",
+  "threshold": 0.3,
+  "peakSceneScore": 0.113,
+  "nearMisses": 0,
+  "shots": 10,
+  "medianShot": 1.98,
+  "cutsPerMinute": 30.3
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 232.9,
+   "motion": 1.26,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 2,
+   "t0": 1.98,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 230.7,
+   "motion": 1.41,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 3,
+   "t0": 3.96,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 232,
+   "motion": 1.33,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 4,
+   "t0": 5.93,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 233.1,
+   "motion": 0.93,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 5,
+   "t0": 7.91,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 229.4,
+   "motion": 2.73,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 6,
+   "t0": 9.89,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 228.2,
+   "motion": 1.43,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 7,
+   "t0": 11.87,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 230.9,
+   "motion": 1.11,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 8,
+   "t0": 13.84,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 224.9,
+   "motion": 3.48,
+   "accent": null,
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 9,
+   "t0": 15.82,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 225.9,
+   "motion": 1.54,
+   "accent": "#b3cded",
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 10,
+   "t0": 17.8,
+   "len": 1.98,
+   "ground": "light",
+   "luma": 225.1,
+   "motion": 0.99,
+   "accent": "#cbe0f2",
+   "onScreen": "(fixed sample, not a shot: this film has no hard cuts. See the deep study.)",
+   "moves": null,
+   "trigger": null
+  }
+ ],
+ "pace": {
+  "medianShot": 1.98,
+  "perMinute": 30.3
+ },
+ "groundPattern": "light \u2192 light \u2192 light \u2192 light \u2192 light \u2192 light \u2192 light \u2192 light \u2192 light \u2192 light",
+ "motionBand": {
+  "lo": 0.93,
+  "hi": 3.48
+ },
+ "threads": "FOUR at once. The primary is ONE CONTINUOUS SPACE travelled by a camera: every surface sits on a single white plane tilted out of the picture plane, and the camera flies over it in x, y and z. There is never a change of world. The others are a shape match (wordmark to header logo, send circle to service circle) used as the spine, a word-level grey-to-ink reveal, and one accent colour.",
+ "spectacle": "The send-to-datacentre handoff at 15.4-16.4s: the film's ONLY hard cut, placed at 78%, and it is a jump cut inside one object. Then the badge arrives from depth at almost zero size and grows toward camera with pale blue halo rings expanding behind it.",
+ "takeaway": "THIS FILM HAS NO CUTS AND THAT IS THE POINT. Peak scene score 0.113 against a 0.3 threshold, and no lower threshold recovers a shot list: at 0.08 it finds two. The tool is right. The hand study counted 15 shots by eye and is also right, because they are camera moves and dissolves, not cuts. A state change every ~1.4s, with hard stops between changes, carried by CAMERA TRAVEL over real product surfaces. It is the strongest argument in the store for building a film out of travel rather than out of cuts.\nPALETTE, measured by pixel share rather than by eye: 67% one near-white, pixels under 128 luma are 1.56% of the whole film, and the single accent #0D6EFD holds 0.13%. White-first is a measurement here, not a mood.\nDO NOT TAKE its static background as a default. It is earned by a subject that never stops moving, and it is an exemption to argue per film.",
+ "deepStudy": "docs/CRAFT/REF-pin-16818198602994243.md"
+}
