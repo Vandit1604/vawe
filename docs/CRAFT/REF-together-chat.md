@@ -19,7 +19,7 @@ rendition Pinterest serves; the HLS ladder tops out at the same size.
 > half no table holds: the palette by pixel share, the type crops, the continuity register, and the
 > command block that rebuilds every strip.
 >
-> One number differs between the two on purpose. This page counts **15 shots**; the store prints `—`,
+> One number differs between the two on purpose. This page counts **15 shots**; the store prints `·`,
 > because `study.mjs` finds no frame scoring above the cut threshold and no lower threshold recovers a
 > list (0.08 finds two). Both are right. These 15 are camera moves and dissolves, and the film's own
 > argument is that it is built out of travel rather than out of cuts.
