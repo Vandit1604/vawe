@@ -1,0 +1,93 @@
+{
+ "name": "pin-333759022406760643",
+ "source": "pin-333759022406760643.mp4",
+ "measured": {
+  "duration": 79.95,
+  "width": 736,
+  "height": 414,
+  "fps": 30,
+  "aspect": "736:414",
+  "hasAudio": true,
+  "shotDetection": "scene-score",
+  "threshold": 0.3,
+  "peakSceneScore": 0.504,
+  "nearMisses": 20,
+  "shots": 5,
+  "medianShot": 5.03,
+  "cutsPerMinute": 3.8
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 4.77,
+   "ground": "dark",
+   "luma": 21.1,
+   "motion": 2.85,
+   "accent": "#0c1933",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 2,
+   "t0": 4.77,
+   "len": 49.23,
+   "ground": "dark",
+   "luma": 29.3,
+   "motion": 3.05,
+   "accent": "#35a0e5",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 3,
+   "t0": 54,
+   "len": 5.03,
+   "ground": "dark",
+   "luma": 45.8,
+   "motion": 4.44,
+   "accent": "#d4a770",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 4,
+   "t0": 59.03,
+   "len": 16.3,
+   "ground": "dark",
+   "luma": 31.4,
+   "motion": 5.9,
+   "accent": "#7d3d30",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 5,
+   "t0": 75.33,
+   "len": 4.61,
+   "ground": "dark",
+   "luma": 29.4,
+   "motion": 2.19,
+   "accent": "#445f81",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  }
+ ],
+ "pace": {
+  "medianShot": 5.03,
+  "perMinute": 3.8
+ },
+ "groundPattern": "dark → dark → dark → dark → dark",
+ "motionBand": {
+  "lo": 2.19,
+  "hi": 5.9
+ },
+ "threads": null,
+ "spectacle": null,
+ "takeaway": null
+}

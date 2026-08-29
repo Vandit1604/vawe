@@ -1,0 +1,69 @@
+{
+ "name": "pin-415034921941332045",
+ "source": "pin-415034921941332045.mp4",
+ "measured": {
+  "duration": 76.03,
+  "width": 736,
+  "height": 414,
+  "fps": 30,
+  "aspect": "736:414",
+  "hasAudio": true,
+  "shotDetection": "scene-score",
+  "threshold": 0.3,
+  "peakSceneScore": 0.688,
+  "nearMisses": 4,
+  "shots": 3,
+  "medianShot": 18.57,
+  "cutsPerMinute": 2.4
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 9.57,
+   "ground": "light",
+   "luma": 217.3,
+   "motion": 2.16,
+   "accent": "#cbb684",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 2,
+   "t0": 9.57,
+   "len": 18.57,
+   "ground": "light",
+   "luma": 155.4,
+   "motion": 5.41,
+   "accent": "#e5b573",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 3,
+   "t0": 28.13,
+   "len": 47.9,
+   "ground": "light",
+   "luma": 220.3,
+   "motion": 1.83,
+   "accent": "#bc8a94",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  }
+ ],
+ "pace": {
+  "medianShot": 18.57,
+  "perMinute": 2.4
+ },
+ "groundPattern": "light → light → light",
+ "motionBand": {
+  "lo": 1.83,
+  "hi": 5.41
+ },
+ "threads": null,
+ "spectacle": null,
+ "takeaway": null
+}

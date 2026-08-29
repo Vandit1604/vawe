@@ -1,0 +1,57 @@
+{
+ "name": "framer-hero",
+ "source": "framer-hero.mp4",
+ "measured": {
+  "duration": 21.03,
+  "width": 2320,
+  "height": 1300,
+  "fps": 30,
+  "aspect": "2320:1300",
+  "hasAudio": true,
+  "shotDetection": "scene-score",
+  "threshold": 0.3,
+  "peakSceneScore": 0.386,
+  "nearMisses": 4,
+  "shots": 2,
+  "medianShot": 10.52,
+  "cutsPerMinute": 5.7
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 5.8,
+   "ground": "dark",
+   "luma": 30.5,
+   "motion": 1.66,
+   "accent": "#1329ad",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 2,
+   "t0": 5.8,
+   "len": 15.23,
+   "ground": "dark",
+   "luma": 38.8,
+   "motion": 3.78,
+   "accent": "#2894f4",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  }
+ ],
+ "pace": {
+  "medianShot": 10.52,
+  "perMinute": 5.7
+ },
+ "groundPattern": "dark → dark",
+ "motionBand": {
+  "lo": 1.66,
+  "hi": 3.78
+ },
+ "threads": null,
+ "spectacle": null,
+ "takeaway": null
+}

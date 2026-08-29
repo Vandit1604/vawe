@@ -159,6 +159,10 @@ build/
 # easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel — a
 # recreation reproduces INTENT with our own assets (docs/CRAFT/RECREATION.md).
 refs/
+# grammar/ is NOT ignored, and the pair is the point. `refs/` holds other people's films; `grammar/`
+# holds what we measured and concluded about them: shot lengths, luma, motion, one accent hex, and the
+# sentences a person wrote about what causes what. No frame, no crop, no copy, no mark. The pixels stay
+# out of the repo and the reading stops dying with the checkout.
 .venv-tools/
 assets/cutouts/
 

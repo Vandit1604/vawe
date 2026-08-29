@@ -12,9 +12,22 @@
 // facts) and study.md (the table an author fills in). refs/ is gitignored, which is the point below.
 //
 // WHAT IT MEASURES, AND WHERE THAT STOPS. Duration, resolution, fps and shot boundaries come off the
-// file. "What is on screen", "what moves", "what triggers the next shot" and "what sound sits there"
-// do not, and a tool that guessed them would produce a confident wrong answer that reads like a
-// measurement. So study.md ships those four columns EMPTY. A human fills them from the sheet.
+// file. So do three facts per shot that used to be left blank, because a person filling them in was
+// reading them off the sheet by eye anyway, and an eye reads a still while two of the three are
+// properties of MOTION:
+//
+//   GROUND    mean luma across the shot. Which way the world is lit, and therefore which `bg` window
+//             the recreation needs. Read off a still, correctly, so this one was only ever tedious.
+//   MOTION    mean |luma delta| between consecutive frames, the SAME measurement internal/scene/scene.go
+//             prints beside a render's duration and on the same 0.5 floor, so a reference and our
+//             attempt at it are two numbers on one scale rather than two impressions.
+//   TONE      the most saturated colour in the shot, and how saturated. A still shows you the hue; it
+//             does not tell you whether the shot is carrying one accent or is simply grey.
+//
+// WHAT STAYS BLANK, and it is the important half. "What is on screen", "what MOVES" (as in which
+// object and in which direction, not how much), "what triggers the next shot" and "what sound sits
+// there" are judgements. A tool that guessed them would produce a confident wrong answer wearing a
+// measurement's clothes, which is the failure mode this repo has already deleted two gates for.
 //
 // COPYRIGHT. This reads someone else's film to learn its GRAMMAR: shot lengths, the cut rate, what
 // triggers what. It is not a lifting tool. The sheet and the frames stay in refs/, which .gitignore
@@ -130,6 +143,81 @@ function detectCuts() {
   return { peak, near, cuts: clustered };
 }
 
+// ── per-shot measurement: ground · motion · tone ─────────────────────────────────────────────────
+// Three numbers a person was reading off the contact sheet by eye, two of which a still cannot show.
+//
+// THE MOTION FIGURE IS THE SAME ONE THE RENDERER PRINTS, deliberately. internal/scene/scene.go
+// measures mean |luma delta| between consecutive frames on a downscaled grid and calls a frame still
+// below 0.5; the same scale here is what lets "the reference runs 1.7 and ours runs 0.3" be one
+// sentence instead of two unrelated impressions. Both are calibrated against the same ffmpeg
+// expression (scale,tblend=difference,signalstats YAVG), which is what this asks ffmpeg for directly.
+//
+// Sampled, not exhaustive: a 3fps read over the shot. A shot is a held idea, so the difference between
+// sampling it and decoding every frame is noise, and decoding every frame of a 30s file five times
+// over is thirty seconds a study does not need to cost.
+const SAMPLE_FPS = 3;             // enough for a shot's mean LUMA: a shot is a held idea.
+const STILL_FLOOR = 0.5;          // the same floor internal/scene/scene.go uses. One owner, two readers.
+
+// MOTION IS READ AT THE FILM'S OWN RATE, and the first cut of this read it at SAMPLE_FPS with a comment
+// claiming the result was on the renderer's scale. It was not, and the error is instructive: a frame
+// difference is a difference between CONSECUTIVE frames, so sampling at 3fps puts ten times the time
+// between them and returns roughly ten times the number. The shots came back at 18 and 21 against a
+// renderer that prints 0.3 to 1.7, and both numbers were captioned as comparable.
+//
+// A luma AVERAGE is indifferent to how often you sample it. A luma DELTA is a measurement of the gap.
+// So `ground` keeps the cheap sampling and `motion` decodes every frame of the shot.
+
+// `signalstats` computes YAVG into FRAME METADATA and prints nothing on its own: the `metadata=print`
+// filter after it is what puts a number on stderr, and `-v error` then suppresses the very lines being
+// parsed. Both were wrong in the first cut of this, and the symptom was a table of `?` rather than an
+// error, which is this repo's most-logged failure shape wearing a study's clothes.
+const statOf = (t0, len, chain) => {
+  const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-ss', t0.toFixed(3), '-t', Math.max(0.2, len).toFixed(3),
+    '-i', VIDEO, '-vf', `${chain},metadata=mode=print:key=lavfi.signalstats.YAVG`, '-f', 'null', '-'],
+    { encoding: 'utf8', maxBuffer: 1 << 24 });
+  const vals = [...String(r.stderr).matchAll(/lavfi\.signalstats\.YAVG=([\d.]+)/g)].map((m) => Number(m[1]));
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+};
+
+// The most saturated pixel of an 8x8 reduction, per shot. Eight by eight because a 1x1 average of a
+// black frame with one blue mark on it is black, which is true and useless: the question a recreation
+// asks is "is this shot carrying an accent", and an average answers "no" to every shot that is mostly
+// ground. Reduced rather than full-res so one dead pixel cannot be the answer.
+const toneOf = (t0, len) => {
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-ss', t0.toFixed(3), '-t', Math.max(0.2, len).toFixed(3),
+    '-i', VIDEO, '-vf', `fps=1,scale=8:8`, '-pix_fmt', 'rgb24', '-f', 'rawvideo', '-'],
+    { encoding: 'buffer', maxBuffer: 1 << 24 });
+  const buf = r.stdout;
+  if (!buf || buf.length < 3) return null;
+  let best = null;
+  for (let i = 0; i + 2 < buf.length; i += 3) {
+    const [R, G, B] = [buf[i], buf[i + 1], buf[i + 2]];
+    const mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+    // Saturation on the HSV definition, weighted by value: a saturated near-black is noise, not an
+    // accent, and without the weight the answer to every dark shot is whichever pixel is least black.
+    const sat = mx === 0 ? 0 : ((mx - mn) / mx) * (mx / 255);
+    if (!best || sat > best.sat) best = { sat, hex: `#${[R, G, B].map((c) => c.toString(16).padStart(2, '0')).join('')}` };
+  }
+  return best;
+};
+
+const measureShot = (s) => {
+  const luma = statOf(s.t0, s.len, `fps=${SAMPLE_FPS},scale=160:90,signalstats`);
+  // The FIRST difference frame is the frame against itself and reads 0, which drags a short shot's
+  // average down by 1/n. Dropped rather than corrected for, because "how much does this change between
+  // frames" has no answer for the first frame and averaging a placeholder in is inventing one.
+  const delta = statOf(s.t0, s.len, `scale=160:90,tblend=all_mode=difference,signalstats,select='gt(n\\,0)'`);
+  const tone = toneOf(s.t0, s.len);
+  return {
+    luma: luma == null ? null : Number(luma.toFixed(1)),
+    ground: luma == null ? null : (luma > 128 ? 'light' : luma > 60 ? 'mid' : 'dark'),
+    motion: delta == null ? null : Number(delta.toFixed(2)),
+    alive: delta == null ? null : delta >= STILL_FLOOR,
+    accent: tone && tone.sat > 0.12 ? tone.hex : null,
+    saturation: tone ? Number(tone.sat.toFixed(3)) : null,
+  };
+};
+
 const { peak, near, cuts } = detectCuts();
 const detected = cuts.length > 0;
 // Fall back rather than ship a wrong cut list. A film built on dissolves scores nothing at any usable
@@ -141,6 +229,10 @@ const shots = bounds.map((t0, i) => ({
   i: i + 1, t0, t1: i + 1 < bounds.length ? bounds[i + 1] : duration,
   score: detected ? (i === 0 ? null : cuts[i - 1].score) : null,
 })).filter((s) => s.t1 - s.t0 > 0.05).map((s) => ({ ...s, len: s.t1 - s.t0 }));
+
+// Measured once, here, so study.json, the sheet and the table all read the same numbers rather than
+// each asking ffmpeg its own question. One fact, one owner: the failure this repo logs most often.
+for (const s of shots) Object.assign(s, measureShot(s));
 
 const lens = shots.map((s) => s.len).sort((a, b) => a - b);
 const median = lens.length % 2 ? lens[(lens.length - 1) / 2] : (lens[lens.length / 2 - 1] + lens[lens.length / 2]) / 2;
@@ -183,9 +275,66 @@ const study = {
     threshold: THRESHOLD, peakSceneScore: fx(peak, 3), nearMisses: near,
     shots: shots.length, medianShot: fx(median), cutsPerMinute: fx((shots.length / duration) * 60, 1),
   },
-  shots: shots.map((s) => ({ i: s.i, t0: fx(s.t0), t1: fx(s.t1), len: fx(s.len), score: s.score == null ? null : fx(s.score, 3) })),
+  shots: shots.map((s) => ({ i: s.i, t0: fx(s.t0), t1: fx(s.t1), len: fx(s.len),
+    score: s.score == null ? null : fx(s.score, 3),
+    luma: s.luma, ground: s.ground, motion: s.motion, alive: s.alive, accent: s.accent, saturation: s.saturation })),
 };
 fs.writeFileSync(path.join(dir, 'study.json'), JSON.stringify(study, null, 2) + '\n');
+
+// ── the grammar store: the one artefact that OUTLIVES the checkout ───────────────────────────────
+//
+// `refs/` is gitignored, on purpose and correctly: it holds other people's films. So everything this
+// tool learns has been dying with the working copy. Eleven reference films sat in that directory the
+// day this was written and not one had a study beside it, which is the same evaporation the tool was
+// built to stop, one level up: the sheet stopped the reading being lost inside a session, and nothing
+// stopped it being lost between them.
+//
+// `grammar/<name>.json` is COMMITTED, and what makes that safe is exactly what makes it useful. It
+// carries no frame, no crop, no copy and no mark: shot lengths, mean luma, frame-to-frame motion, one
+// accent hex per shot, and the sentences a person wrote about what causes what. That is the causal
+// skeleton the study method says to keep and the pixels are the half it says to throw away, so the
+// committed artefact is the legal one by construction rather than by care.
+//
+// The measured half is written every run and overwrites. The AUTHORED half is merged forward, never
+// clobbered: a re-study after a threshold change must not silently delete the judgements somebody made
+// against the old one.
+const GRAMMAR_DIR = path.join(ROOT, 'grammar');
+
+function writeGrammar(study, shots) {
+  fs.mkdirSync(GRAMMAR_DIR, { recursive: true });
+  const file = path.join(GRAMMAR_DIR, `${NAME}.json`);
+  let prior = null;
+  try { prior = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { /* first study of this film */ }
+  const priorShot = (i) => (prior && prior.shots || []).find((x) => x.i === i) || {};
+
+  const out = {
+    name: NAME,
+    // The FILENAME, never the file. A reader who has the film can point study at it again; a reader who
+    // does not still gets every number and every judgement, which is the whole point of committing this.
+    source: path.basename(study.source),
+    measured: study.measured,
+    shots: shots.map((s) => ({
+      i: s.i, t0: Number(s.t0.toFixed(2)), len: Number(s.len.toFixed(2)),
+      ground: s.ground, luma: s.luma, motion: s.motion, accent: s.accent,
+      // authored, merged forward
+      onScreen: priorShot(s.i).onScreen ?? null,
+      moves: priorShot(s.i).moves ?? null,
+      trigger: priorShot(s.i).trigger ?? null,
+    })),
+    // Film-level judgements. `pace` and `motionBand` are derived; the rest are a person's.
+    pace: { medianShot: study.measured.medianShot, perMinute: study.measured.cutsPerMinute },
+    groundPattern: shots.map((s) => s.ground || '?').join(' → '),
+    motionBand: (() => {
+      const ms = shots.map((s) => s.motion).filter((m) => typeof m === 'number');
+      return ms.length ? { lo: Math.min(...ms), hi: Math.max(...ms) } : null;
+    })(),
+    threads: (prior && prior.threads) ?? null,
+    spectacle: (prior && prior.spectacle) ?? null,
+    takeaway: (prior && prior.takeaway) ?? null,
+  };
+  fs.writeFileSync(file, JSON.stringify(out, null, 1) + '\n');
+  return { file, filled: out.shots.filter((x) => x.onScreen).length, total: out.shots.length };
+}
 
 const rel = (p) => path.relative(ROOT, p);
 const note = detected
@@ -206,11 +355,20 @@ ${shots.length} ${detected ? 'shots' : 'samples'} · median ${study.measured.med
 
 ## The table
 
-The first two columns are measured. The last four are yours: fill them from the sheet, one line each.
+Everything left of \`on screen\` is MEASURED. \`ground\` is the shot's mean luma, \`motion\` is the mean
+frame-to-frame luma delta on the same scale \`./bin/vawe\` prints beside a render (still below ${STILL_FLOOR}), and
+\`tone\` is the most saturated colour in the shot, or blank when the shot carries no accent at all.
 
-| # | time | length | on screen | what moves | what triggers the next | sound |
-|---|------|--------|-----------|------------|------------------------|-------|
-${shots.map((s) => `| ${s.i} | ${fx(s.t0)}s | ${fx(s.len)}s | <…> | <…> | <…> | <…> |`).join('\n')}
+The three right-hand columns are yours, and they are judgements no measurement reaches: WHICH object
+moves and where it goes, what makes the next shot arrive, and what sits under it.
+
+| # | time | length | ground | motion | tone | on screen | what moves where | what triggers the next |
+|---|------|--------|--------|--------|------|-----------|------------------|------------------------|
+${shots.map((s) => `| ${s.i} | ${fx(s.t0)}s | ${fx(s.len)}s | ${s.ground ?? '?'} ${s.luma ?? ''} | ${s.motion ?? '?'}${s.alive === false ? ' HELD' : ''} | ${s.accent || '·'} | <…> | <…> | <…> |`).join('\n')}
+
+**The film's own motion, for comparison with ours.** Reference films in \`refs/\` run 1.7 to 2.0 and are
+still for 13-24% of their frames; this library's median film runs far below that. \`./bin/vawe <scene>\`
+prints the same number for our attempt, so the recreation has a target rather than an impression.
 
 ## Then cut it
 
@@ -244,4 +402,6 @@ for (const s of shots) {
   console.log(`  ${String(s.i).padStart(2, ' ')}. ${fx(s.t0).toFixed(2)}s  ${fx(s.len).toFixed(2)}s${s.score == null ? '' : `  (score ${fx(s.score, 3)})`}`);
 }
 console.log(`\n  median shot ${study.measured.medianShot}s · ${study.measured.cutsPerMinute}/min${hasAudio ? '' : ' · NO audio track: the sound column is empty by fact, not by omission'}`);
+const g = writeGrammar(study, shots);
+console.log(`  grammar → ${rel(g.file)}  (${g.filled}/${g.total} shots carry an authored reading; it is COMMITTED and outlives refs/)`);
 console.log(`  Read ${rel(sheet)}, fill the four authored columns in ${rel(dir)}/study.md, then storyboard.`);

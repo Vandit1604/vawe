@@ -1,0 +1,57 @@
+{
+ "name": "arc-zero-chrome",
+ "source": "arc-zero-chrome.mp4",
+ "measured": {
+  "duration": 3,
+  "width": 3300,
+  "height": 2200,
+  "fps": 60,
+  "aspect": "3300:2200",
+  "hasAudio": false,
+  "shotDetection": "fixed-sampling",
+  "threshold": 0.3,
+  "peakSceneScore": 0.12,
+  "nearMisses": 0,
+  "shots": 2,
+  "medianShot": 1.5,
+  "cutsPerMinute": 40
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 1.5,
+   "ground": "light",
+   "luma": 172.9,
+   "motion": 1.18,
+   "accent": "#8db0b4",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 2,
+   "t0": 1.5,
+   "len": 1.5,
+   "ground": "light",
+   "luma": 178.2,
+   "motion": 1.43,
+   "accent": "#92b5b9",
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  }
+ ],
+ "pace": {
+  "medianShot": 1.5,
+  "perMinute": 40
+ },
+ "groundPattern": "light → light",
+ "motionBand": {
+  "lo": 1.18,
+  "hi": 1.43
+ },
+ "threads": null,
+ "spectacle": null,
+ "takeaway": null
+}
