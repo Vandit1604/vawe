@@ -53,6 +53,58 @@ component's internal composition, what an `html` fragment paints, or where a fac
 layers it scores carry a colour it cannot resolve, and it says so on every verdict. If it disagrees
 with your eyes, your eyes win: `make beats`.
 
+## The eye is STEERED, not only ranked
+
+Everything above answers one question: at the instant of a cut, who wins. That is a ranking taken on a
+single frame, and it is the whole of what a static gate can ask.
+
+It is not the whole of the craft, and the gap is not small. A ranking says where the eye lands. It says
+nothing about **moving the eye on purpose while the shot is running**, which is what a motion designer
+means by controlling a viewer. The instrument for that is almost always light: you make one thing the
+brightest thing in the frame, then you move which thing that is. The eye follows because it has no
+choice. Nothing in this document used to say so, and the reason was simple: none of it was authorable
+here.
+
+**All four terms are now animatable, and that is new.** The ranking is `brighter > larger > in focus >
+moving`, and until recently three of the four were decided once, at build, for a layer's whole life.
+
+| term | how you move it | where |
+|---|---|---|
+| brighter | a glow whose intensity, radius AND colour key over the shot: cold to hot, wide to tight | `--glow-i` · `--glow-r` · `--glow-c` |
+| larger | travel in Z rather than scale, so the thing grows by approaching and stays crisp | `depth` + `--plane-z` |
+| in focus | the camera's own focus, racked from one plane to another | camera `f` and `a` |
+| moving | a hand-keyed track, or a beam of light that sweeps and reveals what it touches | `motion` · `beam` + `matte` |
+
+**"In focus" was named here and did not exist.** This document listed it as one of the four things the
+eye ranks by, and for a long time the engine had no camera focus at all: softness was a per-layer blur
+an author keyed by hand on each layer, so "the frame focuses somewhere else now" was not a sentence you
+could write. A camera focus is one keyframe pair and the whole cast reacts by where it stands.
+
+### How to actually use it
+
+Three moves, in the order they are worth reaching for:
+
+1. **Light the subject, then move the light.** Not a glow parked on the hero for the whole beat, which
+   the eye stops seeing within a second. A glow that arrives cold and wide, tightens, and goes hot as
+   the beat resolves. The change is the instrument; the light on its own is decoration.
+2. **Rack, do not cut.** When two things share a frame and the second one matters now, focusing on it
+   moves the eye without moving the camera or spending a cut. Murch's ranking is why this is worth
+   knowing: a cut costs you the top of the list, and a rack costs nothing.
+3. **Reveal with the light rather than under it.** A beam used as a matte means the words do not fade
+   in, they are *found*. The eye is already tracking the light, so it is looking at each word as it
+   arrives instead of being handed a finished line.
+
+### What no gate here will ever tell you
+
+`eye-trace.mjs` scores the junctions. It cannot see the journey **between** them, because a journey is
+a sequence of intentions and the gate reads one frame at a time. A beat can pass every junction and
+still leave the viewer's eye parked in the middle of the frame for four seconds because nothing ever
+asked it to move.
+
+So the question this document cannot answer for you, and the one worth asking of every beat: **where is
+the eye at the START of this shot, where should it be at the END, and what moves it.** If the answer is
+"it stays where the cut put it", that is a legitimate choice on a held beat and a failure on any other.
+
 ## The two constants, and both are ours
 
 No source publishes a distance threshold. Every one says "avoid making the eye travel" and none says

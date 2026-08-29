@@ -1,7 +1,7 @@
 ---
 when: "motion is technically correct and still feels wrong, or you are choosing an easing or a duration"
 answers: "the outside standards for why motion reads well, which of them transfer to FILM, and what this engine already has against what it is missing"
-group: motion
+group: look
 ---
 
 # Why some motion feels right

@@ -61,6 +61,27 @@
    "from": "pin-924363892282992611 floods edge to edge with one purple twice, and those are its two loudest measured frames (68.7 and 40.2). It costs one rectangle.",
    "why": "Nothing prevents it. Nobody does it: 0 films in our library use a full-frame colour flood as a cut.",
    "fix": "Never was a capability gap: a full-frame `rect` does it. Recorded so it stops being invisible."
+  },
+  {
+   "name": "Light could not be used to steer the eye  \u00b7  FIXED",
+   "status": "fixed",
+   "from": "A reference tutorial whose whole thesis is animating light to control where a viewer looks. Cross-checked against docs/CRAFT/EYE-TRACE.md, which ranks the eye's targets as brighter > larger > in focus > moving and treats every one of them as a STATIC property measured at a cut.",
+   "why": "Three of the four terms were decided once, at build, for a layer's whole life. A glow's colour was baked, a depth was a fixed plane, and there was no camera focus at all, so the doc named `in focus` as an instrument the engine did not have. The eye could be ranked and never steered.",
+   "fix": "FIXED, all four. `--glow-c` crossfades a light's colour; `--plane-z` travels a layer in Z so it grows by approaching rather than by scaling; camera `f`/`a` rack the focus through the depth planes and every layer reacts by where it stands; and a `beam` can now feed a `matte`, so light reveals what it touches. docs/CRAFT/EYE-TRACE.md gained the section that says which knob moves which term."
+  },
+  {
+   "name": "A beam of light could not reveal anything  \u00b7  FIXED",
+   "status": "fixed",
+   "from": "The standard track-matte text reveal: draw a beam, sweep it across the words, the words appear where the light lands.",
+   "why": "Both halves shipped and could not be joined. `core/fx/matte.js` decided what could be a mask by reading the SCENE JSON for an image file or a declared gradient `bg`, a hardcoded list of four types living inside the one effect that should not care what it is masking with. A beam generates its gradient at frame time, so it was refused by name.",
+   "fix": "FIXED as a protocol, not a special case. A layer type opts in by exporting `maskPaint(L, lt, geom)` and returns finished CSS, the image AND where it sits, because only the type knows the second. The next live matte source is one function in one file with no edit to matte.js. A matte source is also consumed rather than drawn now, as it is everywhere else."
+  },
+  {
+   "name": "Depth was a place to stand, never a place to travel  \u00b7  FIXED",
+   "status": "fixed",
+   "from": "The standard slam: push type toward the camera instead of scaling it, because scale flattens and distance does not.",
+   "why": "The `depth` sugar baked at boot into a static plane and the modifier wrote one number for the layer's life.",
+   "fix": "FIXED. `--plane-z` multiplies the authored z through the existing vars track. The through-the-camera guard became a CSS `min()` clamp, which is stronger than the check it replaced because it holds on every frame rather than on the one the author declared."
   }
  ]
 }
