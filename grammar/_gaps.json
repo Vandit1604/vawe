@@ -2,6 +2,14 @@
  "_": "Capabilities a reference film uses that we cannot do, or can only do awkwardly. Found by READING a film and then probing the engine, so each one names the film that motivated it and how it was verified. `status`: verified means a probe was rendered; suspected means it has not been built yet and building is how it will be settled. Rendered into docs/CRAFT/GRAMMAR.md.",
  "gaps": [
   {
+   "name": "Origin-aware motion is not authorable",
+   "status": "verified",
+   "from": "The outside standards (animations.dev / emilkowal.ski) name it as the strongest single technique: a thing scales from the point it CAME FROM, not from its own centre, so the motion explains the relationship.",
+   "why": "`transformOrigin` is written in six engine files (core/type.js, core/parts.js, core/gsap-effects.js, core/compositions, core/layers/image.js, core/motion.js) and NO layer prop reaches it. Measured: 1 of 4,530 layers declares `origin`, and that one is a globe's route start, which is a different prop entirely and is how this was nearly missed. Every scale in every film we have grows from its own centre.",
+   "fix": "A layer prop that writes `transform-origin`, taking a keyword pair or a point. It composes with the existing tracks because none of them touch that property.",
+   "workaround": "None that is honest. A scale from a corner can be faked by keying x and y against the scale, and keeping them in agreement by hand is the arithmetic the prop would do."
+  },
+  {
    "name": "`plane` silently beats `track`, and nothing says so",
    "status": "verified",
    "from": "Recreating pin-583145851797705243. The continuous object carried `plane: 180` (toward the eye) and `track: 4`; the payoff frame it becomes sat at `track: 6`, on the picture plane.",

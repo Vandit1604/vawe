@@ -362,6 +362,17 @@ DO NOT TAKE its static background as a default. It is earned by a subject that n
 A device seen in one film is an idea; in three it is a technique. Every pattern names the films
 it was read in, so its weight is visible and you can go and check it.
 
+### A beat is a BURST then a REST, never a constant rate
+
+**Seen in 3:** `pin-583145851797705243` · `rebuilt` · `pin-72761350251141725`
+
+Inside one shot the change curve rises to a peak and then decays to near-nothing before the next beat arrives. It is not sustained motion; it is an event followed by silence.
+
+**Why it works.** The per-frame curve of pin-583145851797705243 says it plainly. Shot 2 runs 3.9 · 2.4 · 2.5 · 5.7 · 2.1 · 1.6 · 0.9, shot 3 runs 4.7 · 8.1 · 6.6 · 7.1 · 5.9 · 2.7 · 0.8, and shot 5 sits at 1.1 · 1.5 · 0.6 for three quarters of a second before exploding to 18.4. Every shot ends quieter than its middle. The rest is what makes the next arrival read as an arrival, and the held share of 6 to 20% is where that rest shows up in the average.
+THIS IS THE PATTERN I GOT BACKWARDS. Reading a low mean as the defect, I filled every flat segment of my own tracks with drift and produced a uniform churn: the number moved and the film got worse, because nothing landed. A mean is the wrong statistic for this entirely. The `curve` field exists so the SHAPE can be read, and the shape is what to copy.
+
+**In our engine.** A keyed track that reaches its pose and then STOPS, with the next event starting later. Hold the pose with no keys rather than adding small ones to keep a number up. `idle` is the right amount of life for a rest: a 1.5% breath is below the still floor and does not fill the silence.
+
 ### Blur-resolve as the entrance
 
 **Seen in 3:** `pin-1119918632363453012` · `pin-415034921941332045` · `pin-333759022406760643`
@@ -444,7 +455,17 @@ The film starts on single words at under a second and ends on sentences at four,
 
 ## What we cannot do yet
 
-6 gap(s) found by reading these films and probing the engine: 2 confirmed by a rendered probe, 1 since fixed.
+7 gap(s) found by reading these films and probing the engine: 3 confirmed by a rendered probe, 1 since fixed.
+
+### Origin-aware motion is not authorable  ·  **verified by a probe**
+
+**Seen in.** The outside standards (animations.dev / emilkowal.ski) name it as the strongest single technique: a thing scales from the point it CAME FROM, not from its own centre, so the motion explains the relationship.
+
+**Why we cannot.** `transformOrigin` is written in six engine files (core/type.js, core/parts.js, core/gsap-effects.js, core/compositions, core/layers/image.js, core/motion.js) and NO layer prop reaches it. Measured: 1 of 4,530 layers declares `origin`, and that one is a globe's route start, which is a different prop entirely and is how this was nearly missed. Every scale in every film we have grows from its own centre.
+
+**The fix.** A layer prop that writes `transform-origin`, taking a keyword pair or a point. It composes with the existing tracks because none of them touch that property.
+
+**Today.** None that is honest. A scale from a corner can be faked by keying x and y against the scale, and keeping them in agreement by hand is the arithmetic the prop would do.
 
 ### `plane` silently beats `track`, and nothing says so  ·  **verified by a probe**
 

@@ -1,0 +1,25 @@
+<!-- The ground, matched to the reference by MEASUREMENT rather than by eye. Sampled off
+     pin-583145851797705243: corners #4d4f85 · #050f22 · #18213e · #1b4493 · #434f84 · #0b183e, and the
+     most saturated pixel per beat #2348b4 · #1930a6 · #3375f5 · #629ef0 · #7d69d7. Near-black navy with
+     a violet-blue wash across it and NO texture: the reference has no dot grid, and `brandglow` does.
+     Driven by var(--t) because CSS animation is disabled engine-wide (core/sanitize-html.js). -->
+<div style="position:absolute;inset:0;background:#060a18;overflow:hidden">
+  <!-- the violet corner, top-left, the film's warmest value -->
+  <div style="position:absolute;top:-30%;left:-18%;width:85%;height:110%;
+    background:radial-gradient(closest-side, #4d4f85 0%, rgba(77,79,133,.42) 45%, transparent 78%);
+    filter:blur(30px);
+    transform:translate(calc(var(--t,0) * 5%), calc(var(--t,0) * -3%))"></div>
+  <!-- the cobalt corner, lower-right -->
+  <div style="position:absolute;bottom:-34%;right:-14%;width:78%;height:112%;
+    background:radial-gradient(closest-side, #1b4493 0%, rgba(27,68,147,.45) 46%, transparent 76%);
+    filter:blur(34px);
+    transform:translate(calc(var(--t,0) * -4%), calc(var(--t,0) * 2%))"></div>
+  <!-- a cool wash through the middle so the frame is never flat black between the two -->
+  <div style="position:absolute;top:12%;left:8%;width:84%;height:70%;
+    background:radial-gradient(closest-side, rgba(53,90,190,.34) 0%, transparent 72%);
+    filter:blur(46px);
+    transform:translateX(calc(var(--t,0) * 6% - 3%))"></div>
+  <!-- the deep floor, so the lower third stays as dark as the reference's #050f22 -->
+  <div style="position:absolute;inset:0;
+    background:linear-gradient(to bottom, transparent 38%, rgba(5,9,23,.72) 82%, rgba(4,7,18,.92) 100%)"></div>
+</div>
