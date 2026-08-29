@@ -7,26 +7,39 @@ import "./globals.css";
 const sans = Anybody({ subsets: ["latin"], variable: "--font-sans", display: "swap", axes: ["wdth"] });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
+// METADATA IS THE HEADLINE FOR PEOPLE WHO NEVER REACH THE PAGE. It read "one JSON, one video" and
+// "a deterministic motion-graphics engine", which is the mechanism, and it is what a search result and
+// a shared link show. The rule the page itself now follows applies here first: name the OUTCOME, and
+// name WHO it is for. An agent or a coding session is the audience that can actually use a text file
+// as a video format, so the title says so.
+const TITLE = "Vawe · make videos by vibe coding";
+const BLURB =
+  "Motion graphics without a motion designer. Vawe renders video from a text file, so you or an AI "
+  + "agent can write a film the way you write anything else, and re-render it the day the numbers change.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://vawe.dev"),
-  title: "Vawe · one JSON, one video",
-  description:
-    "Vawe is a deterministic motion-graphics engine. Write one self-describing JSON, render one frame-perfect video. Same input, same bytes, every time.",
+  title: TITLE,
+  description: BLURB,
+  keywords: [
+    "video from code", "AI video generation", "motion graphics engine", "programmatic video",
+    "vibe coding", "AI agent video", "video as code", "deterministic rendering",
+  ],
   icons: { icon: "/assets/favicon.svg" },
   openGraph: {
-    title: "Vawe · one JSON, one video",
-    description: "A deterministic motion-graphics engine. Write a scene, render a frame-perfect video.",
+    title: TITLE,
+    description: BLURB,
     type: "website",
     url: "/",
     siteName: "Vawe",
-    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "Vawe: one JSON, one video" }],
+    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "Vawe: make videos by vibe coding" }],
   },
   // summary_large_image is the only card that shows a 1200x630 at full width; the default "summary"
   // crops it to a small square and the headline is on the left, so it would crop the claim away.
   twitter: {
     card: "summary_large_image",
-    title: "Vawe · one JSON, one video",
-    description: "A deterministic motion-graphics engine. Write a scene, render a frame-perfect video.",
+    title: TITLE,
+    description: BLURB,
     images: ["/assets/og.png"],
   },
 };

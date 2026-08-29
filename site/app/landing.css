@@ -24,7 +24,7 @@
    clears the absolutely-positioned pill nav. */
 .hero-head{position:relative;z-index:var(--z-raise);text-align:center;
   padding:clamp(104px,11vw,132px) 0 clamp(90px,11vw,150px)}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;font-size:12.5px;
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;font-size:12px;
   letter-spacing:.02em;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
   padding:6px 13px;border-radius:999px;margin-bottom:26px}
 .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
@@ -34,7 +34,7 @@
 .on-accent .eyebrow .dot{background:#fff}
 /* Anybody sets wider and squarer than a normal grotesk, so it needs less negative tracking than
    Space Grotesk did (-.038em closed the counters). Wide + heavy is the commitment. */
-.hero-head h1{color:var(--ink);font-size:clamp(2.9rem,7.2vw,6rem);line-height:1;font-weight:800;letter-spacing:-.022em;
+.hero-head h1{color:var(--ink);font-size:clamp(2.9rem,7.2vw,6rem);line-height:1;font-weight:700;letter-spacing:-.022em;
   font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:0 auto 20px}
 .hero-head .sub{color:var(--ink-2);font-size:clamp(1.05rem,1.7vw,1.35rem);font-weight:400;
   max-width:44ch;margin:0 auto 30px}
@@ -63,20 +63,20 @@
 .hb-dots{display:flex;gap:7px;flex:none}
 .hb-dots i{width:11px;height:11px;border-radius:50%;display:block}
 .hb-dots i:nth-child(1){background:#ff5f57}.hb-dots i:nth-child(2){background:#febc2e}.hb-dots i:nth-child(3){background:#28c840}
-.hb-url{flex:1;text-align:center;font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--muted);
+.hb-url{flex:1;text-align:center;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);
   background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;max-width:320px;margin:0 auto;
   transition:border-color .2s var(--ease),color .2s}
 .hb-url:hover{border-color:var(--accent);color:var(--accent)}
 /* 41x18 measured, and WCAG 2.5.8 wants 24 tall. It is a standalone control in the chrome row, not
    a link inside a sentence, so the inline exception does not cover it. */
-.hb-open{flex:none;font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--accent);font-weight:600;
+.hb-open{flex:none;font-family:var(--font-mono),monospace;font-size:11px;color:var(--accent);font-weight:600;
   display:inline-flex;align-items:center;min-height:24px}
 .hb-open:hover{text-decoration:underline}
 /* browser proportions: the code pane sets the height, so the window lands ~16:10 like a real one */
 .hb-body{display:grid;grid-template-columns:1fr 1.2fr;background:#fff}
 .hb-pane{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line)}
 .hb-code{flex:1;width:100%;min-height:500px;resize:none;display:block;border:0;
-  font-family:var(--font-mono),monospace;font-size:11.5px;line-height:1.7;color:var(--ink-2);
+  font-family:var(--font-mono),monospace;font-size:11px;line-height:1.7;color:var(--ink-2);
   background:#fff;padding:14px 14px 10px;white-space:pre;overflow:auto;tab-size:1}
 /* The house ring, keyed to :focus-visible. This control used to answer focus with a background
    tint and `outline:none` on :focus, which gave a keyboard user less than a mouse user got.
@@ -90,7 +90,7 @@
  * The status strip carries the engine's own words; the control beside it is cobalt with a verb,
  * per THE AFFORDANCE RULE, and it reads on both the ok tint and the bad tint. */
 .hb-status{display:flex;align-items:center;gap:12px;
-  font-family:var(--font-mono),monospace;font-size:10.5px;color:var(--ok);background:var(--ok-bg);
+  font-family:var(--font-mono),monospace;font-size:10px;color:var(--ok);background:var(--ok-bg);
   border-top:1px solid var(--line);padding:5px 8px 5px 12px}
 .hb-status.bad{color:var(--bad);background:var(--bad-bg)}
 /* Two lines, not one with an ellipsis. The message IS the payoff here, so it has to be readable;
@@ -119,7 +119,7 @@
 /* Boot state, which DESIGN.md names as the one sanctioned exception to the One Voice Rule: "the
    render failed" and "this is a link" must not be the same colour. Same tokens as the strip below. */
 .hb-badge.bad{color:var(--bad);background:var(--bad-bg);border-color:#f0c9c9}
-.hb-meta{display:grid;gap:6px;font-family:var(--font-mono),monospace;font-size:10.5px}
+.hb-meta{display:grid;gap:6px;font-family:var(--font-mono),monospace;font-size:10px}
 .hb-meta div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:5px}
 .hb-meta dt{color:var(--muted)}
 .hb-meta dd{color:var(--accent)}
@@ -145,7 +145,7 @@
 /* ===== SECTION HEAD =======================================================================
    Title on the left, the route that carries more of it on the right, on one baseline. */
 .gal-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px}
-.gal-head a{color:var(--accent);font-weight:600;font-size:14.5px}
+.gal-head a{color:var(--accent);font-weight:600;font-size:14px}
 .gal-head a .arw{display:inline-block;transition:transform .25s var(--ease)}
 .gal-head a:hover .arw{transform:translateX(3px)}
 
@@ -158,7 +158,7 @@
 .pf{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,4vw,56px);margin-top:34px}
 .pf > * + *{border-left:1px solid var(--line);padding-left:clamp(28px,4vw,56px)}
 .pf h3{font-size:1.18rem;font-weight:700;letter-spacing:-.018em;margin-bottom:8px}
-.pf p{color:var(--ink-2);font-size:14.5px;line-height:1.55;max-width:46ch;margin-bottom:22px}
+.pf p{color:var(--ink-2);font-size:14px;line-height:1.55;max-width:46ch;margin-bottom:22px}
 @media (max-width:760px){
   .pf{grid-template-columns:1fr;gap:34px}
   .pf > * + *{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:34px}
@@ -174,7 +174,7 @@
 .dg text{font-family:var(--font-mono),monospace}
 .dg-lab{font-size:11px;fill:var(--muted);letter-spacing:.01em}
 .dg-lab.is-on{fill:var(--accent);font-weight:600}
-.dg-dim{font-size:9.5px;fill:var(--muted)}
+.dg-dim{font-size:9px;fill:var(--muted)}
 .dg-hash{font-size:12px;fill:var(--ink-2)}
 .dg-hash.is-key{fill:var(--accent);font-weight:600}
 /* the filmstrip: paper, with the frame under discussion filled */

@@ -40,7 +40,7 @@
    we wrote should not be dressed as part of it. */
 .pgerr > .pgheld {
   margin-top: 6px; color: var(--ink-2);
-  font-family: var(--font-sans), system-ui, sans-serif; font-size: 12.5px;
+  font-family: var(--font-sans), system-ui, sans-serif; font-size: 12px;
 }
 
 /* ── focus ─────────────────────────────────────────────────────────────────────────────────────

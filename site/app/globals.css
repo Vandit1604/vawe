@@ -67,7 +67,7 @@ a{color:inherit;text-decoration:none}
 :root{ --wd-display:105; --wd-body:100; }
 /* WCAG 2.4.1 — visible only on focus, but always the first tab stop. */
 .skip{position:absolute;left:-9999px;top:0;z-index:var(--z-skip);
-  background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:14.5px;
+  background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:14px;
   padding:11px 18px;border-radius:0 0 10px 0}
 .skip:focus{left:0}
 /* THE HOUSE RING, FOR LINKS. Every button, input, select and summary already carries
@@ -153,7 +153,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* ===== FOOTER BAND ===== */
 .foot-band{padding:clamp(56px,7vw,96px) 0 clamp(28px,3vw,40px)}
 .foot-in{display:flex;flex-direction:column;gap:24px}
-.foot-cta{font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:800;letter-spacing:-.02em;line-height:1.06;
+.foot-cta{font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:700;letter-spacing:-.02em;line-height:1.06;
   font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;max-width:16ch}
 .foot-sub{font-size:1.02rem;line-height:1.55;max-width:46ch;margin-top:-10px}
 .foot-act{display:flex;gap:12px;flex-wrap:wrap;margin:2px 0 8px}
@@ -161,7 +161,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .btn-onaccent{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
 .btn-onaccent:hover{background:rgba(11,31,84,.34);border-color:#fff}
 .foot-links{display:flex;flex-wrap:wrap;gap:8px}
-.foot-links a{padding:8px 15px;border-radius:999px;font-size:14.5px;font-weight:500;color:#fff;
+.foot-links a{padding:8px 15px;border-radius:999px;font-size:14px;font-weight:500;color:#fff;
   background:rgba(11,31,84,.22);border:1px solid rgba(255,255,255,.26);
   transition:background .2s var(--ease)}
 .foot-links a:hover{background:rgba(11,31,84,.4)}
@@ -179,7 +179,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .bar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;position:relative;z-index:var(--z-sticky)}
 .mark{display:flex;align-items:center;gap:10px;font-weight:600;font-size:20px;letter-spacing:-.02em}
 .glyph{width:24px;height:13px}
-.nav{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:500}
+.nav{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500}
 /* No state on this site changes a nav link's opacity, so the third segment transitioned nothing. */
 .nav a{padding:8px 12px;border-radius:9px;color:inherit;transition:background .2s var(--ease),color .2s}
 .ghbtn{display:inline-flex;align-items:center;gap:7px;margin-left:8px;padding:8px 13px;border-radius:10px;
@@ -195,7 +195,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* =========================================================
    BUTTONS
    ========================================================= */
-.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:15.5px;font-weight:600;
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;
   letter-spacing:-.01em;padding:13px 22px;border-radius:12px;cursor:pointer;border:1px solid transparent;
 /* The lift and its shadow are ONE event, so they share one curve and one duration: at .14s against
    .25s the shadow visibly trailed the button it belongs to. The two colour segments keep the CSS
@@ -218,8 +218,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    ========================================================= */
 .section{padding:70px 0}
 .section.alt{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.kicker{font-family:var(--font-mono),monospace;font-size:12.5px;letter-spacing:.02em;color:var(--accent);margin-bottom:14px}
-.h2{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:800;letter-spacing:-.018em;line-height:1.06;text-wrap:balance;
+.kicker{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.02em;color:var(--accent);margin-bottom:14px}
+.h2{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:700;letter-spacing:-.018em;line-height:1.06;text-wrap:balance;
   font-variation-settings:"wdth" var(--wd-display)}
 .lead{color:var(--ink-2);font-size:1.08rem;line-height:1.6;max-width:56ch}
 .foot{border-top:1px solid var(--line);padding:28px 0;display:flex;align-items:center;justify-content:space-between;
@@ -256,9 +256,9 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .media:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
 .media video{width:100%;display:block;aspect-ratio:16/9;object-fit:contain}
-.num{font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--accent);letter-spacing:.03em;margin-bottom:12px}
+.num{font-family:var(--font-mono),monospace;font-size:12px;color:var(--accent);letter-spacing:.03em;margin-bottom:12px}
 .copy h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
-.copy p{color:var(--ink-2);font-size:15.5px;line-height:1.55;max-width:40ch}
+.copy p{color:var(--ink-2);font-size:15px;line-height:1.55;max-width:40ch}
 /* Inert metadata, per THE AFFORDANCE RULE below: no box, no accent, no verb. It was a bordered
    chip identical to the control beneath it. These strings already announce themselves as specs
    ("cut: whip · punch"), so they need no chrome to be read as data, only to be kept quiet.
@@ -280,7 +280,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* The head lost its paragraph ("rendered 16:9, 9:16 and 1:1 from the same source, in one pass").
    The three ratio captions and the `--aspect` chip in the foot say it in the product's own words. */
 .aspects > h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.04;letter-spacing:-.028em;
-  font-weight:800;font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:8px 0 26px}
+  font-weight:700;font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:8px 0 26px}
 .aspects-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px}
 .trio{display:flex;gap:clamp(10px,1.4vw,18px);align-items:flex-end;justify-content:center;padding:0}
 .trio .ar{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;
@@ -299,7 +299,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   .trio .a11{flex:0 1 55%}
 }
 /* opaque for the same reason as .clip .lab: its backdrop is video */
-.trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10.5px;color:#fff;
+.trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10px;color:#fff;
   background:rgba(15,22,32,.94);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
 /* ===== THE FILMS ==========================================================================
    The page opens on a film, not on type. There is ONE headline and no lead paragraph: the page
@@ -333,8 +333,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* brand · runtime · source, on one line. Everything else the clip says better. */
 .film figcaption{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;padding:13px 2px 0}
 .fbrand{font-weight:700;font-size:1.05rem;letter-spacing:-.015em}
-.fdur{font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.02em}
-.film .srcopen{margin:0 0 0 auto;font-size:11.5px;padding:5px 11px}
+.fdur{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.02em}
+.film .srcopen{margin:0 0 0 auto;font-size:11px;padding:5px 11px}
 .film .srcopen .srclabel{display:none}
 .film-hero .srcopen .srclabel{display:inline}
 @media (max-width:860px){
@@ -366,7 +366,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 
 /* the action: cobalt, a verb, an arrow. Navigates to the editor with the scene loaded. */
 .srcopen{display:flex;width:fit-content;align-items:center;gap:8px;margin-top:15px;
-  font-family:var(--font-mono),monospace;font-size:12.5px;font-weight:600;color:var(--accent);
+  font-family:var(--font-mono),monospace;font-size:12px;font-weight:600;color:var(--accent);
   background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:8px;padding:7px 12px;
   transition:border-color .2s var(--ease),background .2s var(--ease)}
 .srcopen:hover{border-color:var(--accent);background:#e2ebff}
@@ -443,7 +443,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .demo-media video{width:100%;display:block;aspect-ratio:16/9;object-fit:contain}
 .codeblock{background:#0f1620;border-radius:12px;padding:18px 20px;margin:26px 0 6px;box-shadow:var(--shadow-1);overflow-x:auto;max-width:560px}
 .codeblock .lbl{font-family:var(--font-mono),monospace;font-size:11px;color:#5a6478;margin-bottom:11px}
-.codeblock pre{font-family:var(--font-mono),monospace;font-size:12.5px;line-height:1.75;color:#c8cfdb;white-space:pre;margin:0}
+.codeblock pre{font-family:var(--font-mono),monospace;font-size:12px;line-height:1.75;color:#c8cfdb;white-space:pre;margin:0}
 /* =========================================================
    PRIMITIVES — the patterns more than one route needs
    A rule earns a place here by having two consumers. Everything with one consumer stays in that
@@ -481,7 +481,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 @media (prefers-reduced-motion:reduce){.rail a{transition:none}}
 /* ── the fold: an explainer that is available and not in the way ─────────────────────────────────
    A <details> with the disclosure triangle replaced by a +/- that reads at 12.5px. */
-.fold>summary{cursor:pointer;list-style:none;font-size:12.5px;color:var(--muted);
+.fold>summary{cursor:pointer;list-style:none;font-size:12px;color:var(--muted);
   padding:2px 0;width:fit-content}
 .fold>summary::-webkit-details-marker{display:none}
 .fold>summary::before{content:"+ ";font-family:var(--font-mono),monospace}
@@ -614,7 +614,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .pgerr {
   margin-top: 12px; padding: 12px 14px; border-radius: 10px;
   background: var(--bad-bg); color: var(--bad); border: 1px solid #f0d3d4;
-  font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.5;
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 12px; line-height: 1.5;
 }
 /* the control wall */
 .pgpanel { margin-top: 16px; }
@@ -626,7 +626,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* the per-section roll sits in the legend, so it reads as belonging to that group */
 .pggroup legend {
   grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 0 2px;
-  font-family: var(--font-mono), ui-monospace, monospace; font-size: 11.5px; color: var(--muted);
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; color: var(--muted);
   letter-spacing: .06em; text-transform: uppercase;
 }
 /* every dial is a chip: its name on the left, its control on the right, one line */
@@ -644,18 +644,18 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .pgnum { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .pgnum input[type="range"] { width: 4.2rem; accent-color: var(--accent); height: 2px; }
 .pgnum input[type="number"], .pgrow select, .pgtext {
-  font: inherit; font-size: 12.5px; padding: 4px 7px; width: 5.4rem;
+  font: inherit; font-size: 12px; padding: 4px 7px; width: 5.4rem;
   border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg); color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 .pgrow select { width: 6.6rem; }
-.pgtext-sm { width: 5.4rem; font-family: var(--font-mono), ui-monospace, monospace; font-size: 11.5px; }
+.pgtext-sm { width: 5.4rem; font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; }
 .pghex { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .pghex input[type="color"] {
   width: 26px; height: 26px; padding: 0; border: 1px solid var(--line-2);
   border-radius: 6px; background: none; cursor: pointer;
 }
-.pghex code { font-size: 11.5px; color: var(--muted); }
+.pghex code { font-size: 11px; color: var(--muted); }
 .pgadd {
   width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 13px;
   border: 1px solid var(--line-2); background: var(--bg); color: var(--ink-2);
@@ -671,13 +671,13 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 }
 .pgroll:hover { border-color: var(--accent); color: var(--accent); }
 .pgmore {
-  font: inherit; font-size: 12.5px; color: var(--accent); background: none; border: 0; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--accent); background: none; border: 0; cursor: pointer;
   padding: 8px 0 4px; text-align: left; width: 100%;
 }
 .pgmore:hover { text-decoration: underline; }
 .pgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .pgbar .btn { font-size: 14px; padding: 9px 15px; }
-.pgmeta { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+.pgmeta { color: var(--muted); font-size: 12px; margin-left: auto; }
 .pgnote { color: var(--muted); padding: 28px 0; }
 .pgnote.pgbad { color: var(--bad); }
 .pgtodo { font-size: 12px; color: var(--muted); font-style: normal; }
@@ -690,7 +690,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 }
 .pgpresets { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
 .pgpresets button {
-  font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 12px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
   background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line-2);
 }
 .pgpresets button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
@@ -699,7 +699,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .pgjson pre {
   margin-top: 10px; padding: 14px; border-radius: 10px; overflow-x: auto;
   background: var(--bg-2); border: 1px solid var(--line);
-  font-family: var(--font-mono), ui-monospace, monospace; font-size: 12.5px; line-height: 1.55;
+  font-family: var(--font-mono), ui-monospace, monospace; font-size: 12px; line-height: 1.55;
 }
 @media (prefers-reduced-motion: reduce) { .pgadd { transition: none; } }
 /* Stacked, the panel sits UNDER the preview, so a tall preview pushes every control off the screen.
@@ -730,7 +730,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .lcard-shot { display: block; position: relative; aspect-ratio: 16/10; overflow: hidden; background: #05070c; }
 .lcard-name { padding: 8px 11px 0; font-size: 13.5px; font-weight: 600; color: var(--ink); }
 .lcard-blurb {
-  padding: 0 11px; font-size: 11.5px; line-height: 1.4; color: var(--muted);
+  padding: 0 11px; font-size: 11px; line-height: 1.4; color: var(--muted);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .lback { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; font-size: 13px; }
@@ -739,7 +739,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 }
 .lback button:hover { text-decoration: underline; }
 .lback strong { color: var(--ink); font-size: 15px; }
-.lback span { color: var(--muted); margin-left: auto; font-size: 12.5px; }
+.lback span { color: var(--muted); margin-left: auto; font-size: 12px; }
 /* browsing shows more of the wall, so the cards get more room than they do beside a panel.
    TWO UP, NOT FOUR. `minmax(232px, 1fr)` put four generators across at 1440 and each one landed at
    ~380px, which is a swatch. The subject of this page is a light FIELD: a soft mass under a glow, a
@@ -757,7 +757,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    different states of arrival instead of the same settled word repeated. */
 .tyderived{list-style:none;margin:0;padding:16px 18px;background:var(--bg-2);
   border:1px solid var(--line);border-radius:var(--r)}
-.tyderived li{font-size:12.5px;color:var(--ink-2);padding:5px 0;border-bottom:1px dashed var(--line);
+.tyderived li{font-size:12px;color:var(--ink-2);padding:5px 0;border-bottom:1px dashed var(--line);
   word-break:break-word}
 .tyderived li:last-child{border-bottom:0}
 .tyderived-h{font-size:11px!important;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)!important;
@@ -769,7 +769,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink)}
 .tysearch:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
 .tyjump{display:flex;flex-wrap:wrap;gap:6px}
-.tyjump a{font-size:12.5px;color:var(--ink-2);text-decoration:none;padding:6px 11px;border-radius:999px;
+.tyjump a{font-size:12px;color:var(--ink-2);text-decoration:none;padding:6px 11px;border-radius:999px;
   border:1px solid var(--line);background:var(--surface);white-space:nowrap}
 .tyjump a:hover{border-color:var(--accent-line);color:var(--accent);background:var(--accent-soft)}
 .tycount{color:var(--muted);font-size:14px;margin:16px 0 0}
@@ -777,7 +777,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .tyghead{max-width:70ch;margin-bottom:20px}
 .tyghead h2{font-size:clamp(22px,2.3vw,30px);letter-spacing:-.02em;margin:0 0 8px}
 .tyghead p{color:var(--ink-2);margin:0 0 10px}
-.tysrc{font-size:11.5px;color:var(--muted)}
+.tysrc{font-size:11px;color:var(--muted)}
 /* align-items:start — opening one card's JSON must not stretch the two beside it into tall boxes
    with a hole in the middle. */
 .tygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;align-items:start}
@@ -800,7 +800,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* Play carries a WORD as well as a glyph. On /blocks the icon alone is enough because the card is
    already a link somewhere; here the press is the only thing the card does, so it says so. */
 .typlay{position:absolute;right:10px;bottom:10px;z-index:var(--z-raise);display:inline-flex;align-items:center;gap:7px;
-  padding:6px 13px 6px 10px;border-radius:999px;cursor:pointer;font:inherit;font-size:12.5px;font-weight:600;
+  padding:6px 13px 6px 10px;border-radius:999px;cursor:pointer;font:inherit;font-size:12px;font-weight:600;
   color:#fff;background:var(--accent);border:1px solid var(--accent);
   box-shadow:0 2px 10px rgb(15 23 42 / .18);opacity:0;transition:opacity .2s var(--ease),transform .2s var(--ease)}
 .tycard:hover .typlay,.typlay:focus-visible,.typlay[data-on]{opacity:1}
@@ -820,8 +820,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 @media (any-hover:none){.typlay{opacity:1}}
 .tycard figcaption{padding:16px 17px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
 .tyname{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-.tyname .mono{font-size:15.5px;font-weight:600;color:var(--ink)}
-.tykind{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tyname .mono{font-size:15px;font-weight:600;color:var(--ink)}
+.tykind{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .tyblurb{margin:0;font-size:14px;line-height:1.5;color:var(--ink-2)}
 .tyask{margin:0;font-size:13px;line-height:1.5;color:var(--ink-2);font-style:italic;
   border-left:2px solid var(--accent-line);padding-left:11px}
@@ -829,18 +829,18 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .typrops li{display:flex;gap:9px;font-size:12px;color:var(--muted);line-height:1.45}
 .typrops .mono{color:var(--ink);flex:0 0 auto}
 /* The caution is the engine's own warning about the preset, not a design opinion added here. */
-.tycaution{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink-2);
+.tycaution{margin:0;font-size:12px;line-height:1.5;color:var(--ink-2);
   background:var(--bg-2);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
 .tycaution b{color:var(--ink)}
 .tyjson{margin-top:auto;border-top:1px solid var(--line);padding-top:11px;position:relative}
 .tyjson summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;
-  font-size:12.5px;color:var(--ink-2);list-style:none}
+  font-size:12px;color:var(--ink-2);list-style:none}
 .tyjson summary::-webkit-details-marker{display:none}
 .tyjson summary:hover{color:var(--accent)}
-.tylines{color:var(--muted);font-size:11.5px}
+.tylines{color:var(--muted);font-size:11px}
 .tyjson pre{margin:11px 0 0;padding:12px 13px;background:var(--bg-2);border:1px solid var(--line);
-  border-radius:10px;overflow-x:auto;font-size:11.5px;line-height:1.6}
-.tycopy{position:absolute;right:8px;bottom:8px;font:inherit;font-size:11.5px;font-weight:600;
+  border-radius:10px;overflow-x:auto;font-size:11px;line-height:1.6}
+.tycopy{position:absolute;right:8px;bottom:8px;font:inherit;font-size:11px;font-weight:600;
   padding:5px 11px;border-radius:8px;cursor:pointer;color:var(--ink);
   background:var(--surface);border:1px solid var(--line-2)}
 .tycopy:hover{border-color:var(--accent);color:var(--accent)}
@@ -851,7 +851,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .tycovgrid > div{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);padding:20px}
 .tycovgrid h3{font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
 .tycovgrid p{color:var(--ink-2);font-size:14px;margin:0 0 10px}
-.tycovlist{font-size:11.5px;color:var(--muted);line-height:1.7;word-break:break-word}
+.tycovlist{font-size:11px;color:var(--muted);line-height:1.7;word-break:break-word}
 @media (max-width:900px){
   .tybar{position:static}
 }
