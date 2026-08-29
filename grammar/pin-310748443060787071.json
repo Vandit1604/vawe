@@ -112,9 +112,9 @@
     23,
     19.7
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. A small line of type, then tall coloured SLABS filling the frame edge to edge, then a few of them tumbling in a void.",
+   "moves": "The slabs travel THROUGH the frame vertically and turn in space. Peak 46.5 at 12.78s is the frame completely filled by them.",
+   "trigger": "Hard cut to white, on the same objects."
   },
   {
    "i": 2,
@@ -137,9 +137,9 @@
     2.1,
     25.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "White. The same slabs, now dark against light, sweeping through and settling.",
+   "moves": "The identical mechanism with the values inverted. Peak 42.3 in the first quarter-second is the inversion itself.",
+   "trigger": "Hard cut back to black."
   },
   {
    "i": 3,
@@ -191,21 +191,22 @@
     0.1,
     0.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. Two slabs, blue and violet, then a bloom of colour, then a wordmark, then the closing line.",
+   "moves": "The slabs shrink from filling the frame to being two objects, and then to being nothing but the light they cast.",
+   "trigger": "Nothing: it ends on the closing line over the last of the bloom."
   }
  ],
  "pace": {
   "medianShot": 9.01,
   "perMinute": 5.8
  },
- "groundPattern": "dark? → light → dark",
+ "groundPattern": "dark? \u2192 light \u2192 dark",
  "motionBand": {
   "lo": 1.23,
   "hi": 10.21
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE SLABS. The same handful of rectangular objects are in all three shots and nothing else is. They are the subject, the transition and the light source at once.",
+ "spectacle": "12.78s, peak 46.5: the slabs fill the entire frame edge to edge and the composition disappears into pure colour. The loudest frame in the store outside a cut.",
+ "takeaway": "ONE OBJECT CAN BE THE WHOLE FILM. Three shots, 30s, and a set of slabs does every job: it is the subject, it wipes the frame, it inverts the ground and it lights the wordmark. There is no type animation to speak of.\nTHE GROUND INVERSION IS PERFORMED BY THE SUBJECT, not by a backdrop change. The slabs go from bright-on-black to dark-on-white, so the inversion reads as the same objects under different light rather than as a cut to a new world. That is a third distinct way to invert a ground in this store.",
+ "about": "A brand title sequence built from lit 3D slabs. Pinterest pin 310748443060787071."
 }

@@ -10,7 +10,7 @@ group: crosscutting
 > (or re-run `make study`) and regenerate. The measured half comes off the film; the authored half
 > is written by a person into the JSON and merged forward on every re-study.
 
-16 reference film(s) measured. 5 carry a written reading.
+16 reference film(s) measured. 16 carry a written reading.
 
 ## The numbers, on one scale
 
@@ -48,11 +48,37 @@ failure: `arc-space-swiping`, `arc-zero-chrome`, `pin-583145851797705243`, `toge
 
 ### arc-space-swiping
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** A 3-SECOND LOOP IS ONE GESTURE, TWICE. There is no structure to study: it demonstrates a single interaction and reverses it so it can repeat forever.
+
+THE CHROME RECOLOURS WITH THE CONTENT, which is the detail worth stealing. The sidebar shifts from warm to cool as the page arrives, so the interface appears to belong to whatever it is showing. It is a two-line idea that makes a swipe look designed.
+
+KEPT AS A CAPTURE REFERENCE, NOT A FILM. It has no beats, no argument and no type. Its value in this store is the interaction, and its numbers should not be pooled with produced films when a claim is being tested.
+
+**Carries across the cuts.** THE WINDOW CHROME. The browser frame never moves; only its contents and its accent colour do. That fixed frame is what makes a full-page swap read as one product rather than as a cut.
+
+**The loud moment.** 0.50s, peak 9.5: a whole page crosses the frame. In a 3s loop the spectacle is the only event there is.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 1.5s | light 180.3 | 1.41 | The whole page CROSSES the frame horizontally and the chrome recolours to match its destination. Peak 9.5 in the first half-second is the swipe. | Nothing cut it: the boundary at 1.58s is the swipe completing and the next one beginning. |
+| 2 | 1.5s | 1.5s | light 187.1 | 0.71 | The identical move, reversed. The loop closes where it opened. | Nothing: it loops. |
 
 ### arc-zero-chrome
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** THE SPECTACLE IS AN ABSENCE. Its loudest measured moment is the interface DISAPPEARING, and the film is an argument for chrome you cannot see. The measurement and the message agree, which is rare.
+
+PAIRED WITH arc-space-swiping and they are the same 3s two-beat shape from one product. Together they show a house pattern: hold the content, animate only the frame around it.
+
+KEPT AS A CAPTURE REFERENCE, NOT A FILM, for the same reason as its twin: no beats, no argument, no type.
+
+**Carries across the cuts.** THE PHOTOGRAPHS. They never move. Everything that happens is interface arriving over them or leaving them, so the content is the constant and the tool is the variable.
+
+**The loud moment.** 0.47s, peak 10.6: the last piece of interface leaves and the images are alone. The product's whole claim, in one frame.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 1.5s | light 173 | 1.18 | The panel slides away and the images take the whole frame. Peak 10.6 at 0.47s is that removal. | The boundary at 1.58s is the panel returning. |
+| 2 | 1.5s | 1.5s | light 177.7 | 1.43 | The reverse. Peak 6.9 is the panel's return. | Nothing: it loops. |
 
 ### framer-hero
 
@@ -86,31 +112,153 @@ A CONTAINER CAN BE THE CONSTANT. Shot 2 holds two braces still and changes what 
 
 ### pin-310748443060787071
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** ONE OBJECT CAN BE THE WHOLE FILM. Three shots, 30s, and a set of slabs does every job: it is the subject, it wipes the frame, it inverts the ground and it lights the wordmark. There is no type animation to speak of.
+
+THE GROUND INVERSION IS PERFORMED BY THE SUBJECT, not by a backdrop change. The slabs go from bright-on-black to dark-on-white, so the inversion reads as the same objects under different light rather than as a cut to a new world. That is a third distinct way to invert a ground in this store.
+
+**Carries across the cuts.** THE SLABS. The same handful of rectangular objects are in all three shots and nothing else is. They are the subject, the transition and the light source at once.
+
+**The loud moment.** 12.78s, peak 46.5: the slabs fill the entire frame edge to edge and the composition disappears into pure colour. The loudest frame in the store outside a cut.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 19.99s | dark? 57.2 | 3.59 | The slabs travel THROUGH the frame vertically and turn in space. Peak 46.5 at 12.78s is the frame completely filled by them. | Hard cut to white, on the same objects. |
+| 2 | 19.99s | 1.87s | light 197 | 10.21 | The identical mechanism with the values inverted. Peak 42.3 in the first quarter-second is the inversion itself. | Hard cut back to black. |
+| 3 | 21.85s | 9.01s | dark 23.5 | 1.23 | The slabs shrink from filling the frame to being two objects, and then to being nothing but the light they cast. | Nothing: it ends on the closing line over the last of the bloom. |
 
 ### pin-333759022406760643
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** EIGHTY SECONDS AND NOT ONE GROUND CHANGE. Black throughout, and the value changes are done by LIGHT: blue streaks, an orange flood, a white bloom. That is the third distinct way to invert a frame in this store (backdrop, subject, and now light), and it is the only one that keeps the world identical.
+
+BLUR-RESOLVE AGAIN, on hero words at the open and the close, bracketing the product section between them. Three films in this store now open on smeared type settling into focus.
+
+ITS BEATS ARE ENORMOUS: a 5s median but a 49s second beat that carries brand, product and output without a cut. The film's structure is really three acts, and the shot detector sees five because only the type cards score.
+
+**Carries across the cuts.** BLACK, AND THE MARK. The ground never changes in 80 seconds and a small cruciform mark appears at the open, the middle and the close. Everything else is light moving over black.
+
+**The loud moment.** 19.13s, peak 33.1: coloured light floods across the black ground behind a single word. In a film with no ground inversion, light doing the inverting is the whole spectacle.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 4.77s | dark 20.9 | 2.59 | Words arrive smeared and settle. The light behind them moves independently. | No hard cut: the mark takes the frame. |
+| 2 | 4.77s | 49.23s | dark 29.1 | 3.04 | A very long 49s beat that moves from brand to product without a cut. Peaks 33.1 and 30.8 are the light and the UI arriving. | No hard cut. |
+| 3 | 54s | 5.03s | dark 45.7 | 4.44 | Cards accumulate and turn. The clearest 'it produces things' beat. | No hard cut. |
+| 4 | 59.03s | 16.3s | dark 32.1 | 5.9 | The film returns to its opening gesture after the product section. | No hard cut. |
+| 5 | 75.33s | 4.61s | dark 29.8 | 2.19 | The letters SETTLE from scattered positions into the name. | Nothing: the end card. |
 
 ### pin-333759022406800725
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** GROUND INVERSION WITHIN ONE HUE. This film alternates dark and light like the others in the store, but both grounds are the SAME green. So it gets the inversion's punctuation without the change of world, which is a gentler version of the device and the only example of it here.
+
+IT FRAMES ITS PHOTOGRAPHS RATHER THAN MOVING THEM. Shot 3 holds a still photo and rotates a drawn ring around it. Cheaper than a ken-burns push and it reads as designed rather than as stock.
+
+ITS LONGEST BEAT IS ITS ONLY ARGUMENT. Five of six shots are atmosphere; shot 5 carries a five-line statement and runs longest. The film spends 33 seconds earning one sentence.
+
+**Carries across the cuts.** ONE GREEN, AND ONE YELLOW INSIDE IT. Six shots alternate deep green and pale green, and every emphasis in the film is the same yellow. Nothing else is coloured, so the ground can invert without the film changing identity.
+
+**The loud moment.** 27.80s, peak 30.1: interface chips fly toward the eye in perspective after four shots of flat graphics. The only true depth in the film, and it is spent once.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 14.2s | mid 80.7 | 2.4 | Rings of light drift and swell behind held type. Peak 27.1 is a bright form crossing the frame. | Cut to near-white. |
+| 2 | 14.2s | 5.67s | light 222.6 | 1.09 | The ribbon travels across the frame; the word tower behind it holds. | Cut, staying light. |
+| 3 | 19.87s | 3.93s | light 183.4 | 1.01 | The RING turns around a still photo. The picture holds; its frame animates. | Cut back to deep green. |
+| 4 | 23.8s | 9.97s | mid 71.8 | 4.13 | Interface pieces travel in 3D toward the eye. Peaks 30.1 and 28.0 are those arrivals. | Cut, staying dark. |
+| 5 | 33.77s | 8.33s | mid 65.8 | 2.19 | Chips settle, then the film's one long statement builds line by line. | Blow out to near-white. |
+| 6 | 42.1s | 5.25s | light 226.2 | 0.37 | Typing. The stillest beat, and the last. | Nothing: it ends on the question. |
 
 ### pin-333759022407965800
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** WORD, PROOF, WORD, PROOF. The film alternates strictly between a hero TYPE CARD (one gradient word at 1 to 2s) and PRODUCT UI (3 to 5s). The type states a claim and the next shot shows it, so the 15 shots are really 7 claim-and-evidence pairs plus a bracket.
+
+THE SCALE COLLAPSE IS THE RECURRING GESTURE. A word arrives larger than the canvas and resolves to a caption, three times, at the open, the middle and the close. One idea reused as punctuation rather than three different tricks.
+
+IT PUTS THE PRODUCT IN REAL LIGHT. Shots 10 and 11 are a photographed laptop under hard striped daylight. After nine shots of flat UI on flat gradient, a real object with real shadows is the strongest claim in the film that the thing exists.
+
+**Carries across the cuts.** A PASTEL GRADIENT WASH. It is the ground of every type card and it is behind the product UI too, so the software and the poster type share one world. Fifteen shots and it is in almost all of them.
+
+**The loud moment.** 13.67s, peak 28.7: a panel opens under a cursor click inside the real product. The film's loudest moment is the software doing its job, not a piece of type.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 2.67s | light 219.5 | 2.3 | A word larger than the canvas travels through and shrinks to a caption. | Cut to a bordered photo. |
+| 2 | 2.67s | 0.43s | light 186.2 | 3.43 | The card holds and the gradient behind it drifts. | Cut to full-frame footage. |
+| 3 | 3.1s | 1.23s | mid 99 | 3.43 | The footage runs. The only photographic motion in the film. | Cut to a type card. |
+| 4 | 4.33s | 0.77s | light 223.6 | 1.27 | Letters arrive and the gradient inside them shifts. | Cut to product UI. |
+| 5 | 5.1s | 11s | light 219.6 | 1.6 | The cursor drives it. Peak 28.7 is a panel opening under the click. | Cut, still inside the product. |
+| 6 | 16.1s | 1.27s | light 208.7 | 1.44 | Panels and content settle. Almost still: the shot proves detail rather than motion. | Cut, still in the product. |
+| 7 | 17.37s | 3.3s | light 203.4 | 2.47 | Peak 33.6 is the share sheet dropping in. The busiest product beat. | Cut to a type card. |
+| 8 | 20.67s | 11.77s | light 206.8 | 1.98 | A single click, then the result of it. Peak 36.0 is the storefront arriving. | Cut, staying in the product. |
+| 9 | 32.43s | 4.1s | light 212.8 | 3.22 | The publish action itself. Peak 23.0 is the button state changing. | Cut to the photographed laptop. |
+| 10 | 36.53s | 1.07s | light 162.6 | 13.49 | The light and the object are real; the screen content is the product. | Cut, deeper into the same object. |
+| 11 | 37.6s | 1.17s | light 176.1 | 7.57 | The camera moves over a real object under real light. The only photographic camera move in the film. | Cut to a type card. |
+| 12 | 38.77s | 9.67s | light 215.7 | 1.16 | Text settles into a real editor. Peak 23.8 is the quote block landing. | Cut. |
+| 13 | 48.43s | 10.33s | light 209.7 | 1.76 | The grid assembles from nothing. Peak 18.8 is that assembly. | Cut to the last type pair. |
+| 14 | 58.77s | 1.5s | light 225.2 | 0.67 | The scale collapse from hero to caption, the film's recurring gesture. | Cut to the last type card. |
+| 15 | 60.27s | 10.11s | light 223.9 | 0.48 | It ends the way it began, so the film closes its own bracket. | Nothing: the last shot. |
 
 ### pin-415034921941332045
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** THE LONGEST BEATS IN THE STORE, at an 18.6s median, and only two boundaries in 76 seconds. It holds because the SUBJECT changes inside a shot rather than at a cut: shot 2 runs through a landscape, app cards, a glass object and an image grid without a single cut.
+
+A FILM CAN HOLD ONE GROUND FOR 76 SECONDS. Near-white throughout, no inversion, no dark beat. The opposite choice from every other film in this store, and it works because the CONTENT carries the value changes instead.
+
+SAME BLUR VOCABULARY AS pin-1119918632363453012, which is much shorter. Two films now open on smeared type resolving to sharp, which is starting to look like a house style somewhere rather than one director's idea.
+
+**Carries across the cuts.** THE BLUR-RESOLVE. Type arrives smeared and settles into focus at the open and at the close, so the film brackets itself with one gesture. Between them the ground never changes: it is near-white for 76 seconds.
+
+**The loud moment.** 21.33s, peak 44.0: a translucent glass object fills the frame after twenty seconds of flat UI. The one tactile, physical image in the film.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 9.57s | light 217.1 | 1.88 | Words are smeared and then sharp. Peak 13.5 at 1.77s is the blur itself. | No hard cut: the light ground stays and the content becomes photographic. |
+| 2 | 9.57s | 18.57s | light 155.6 | 5.26 | The subject changes completely four times inside one 18.6s shot. Peak 44.0 is the glass object. | No hard cut. |
+| 3 | 28.13s | 47.9s | light 220.3 | 1.83 | The same blur-resolve that opened the film, closing it. | Nothing: the last shot. |
 
 ### pin-522769469268499616
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** THE FASTEST FILM IN THIS STORE: 10 shots in 17.9s, a 1.48s median, 33.6 cuts a minute, and it does not read as frantic. Two reasons, and both are cheap. Every shot holds ONE still image and moves only the type over it, so the cut rate is high while the frame rate of change inside a shot is low. And one word per beat is red, so the eye always knows where to land in the 200ms it is given.
+
+A HELD BEAT AT THE PIVOT. Shot 3 is nearly an empty black frame with two short lines, and it sits exactly at the turn from problem to cause. The stillest beat carries the argument's hinge.
+
+IT IS A DIFFERENT GENRE FROM THE REST OF THE STORE and worth keeping for that: illustration and stock objects rather than product UI, and it earns its pace from stillness inside the shot rather than from motion.
+
+**Carries across the cuts.** ONE RED WORD PER BEAT. Every shot places exactly one word in red and everything else is black or white. It survives ten cuts, ten different subjects and every ground inversion, and it is the only constant in the film.
+
+**The loud moment.** 9.56s, peak 27.9: a brand name is struck through and replaced mid-frame. In a film of held images and arriving type, the one thing that CHANGES is the argument's turn.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 1.44s | light 207.4 | 2.58 | Words arrive on a held illustration. | Hard cut. |
+| 2 | 1.44s | 1.76s | mid 71.1 | 10.67 | The figure holds; the type lands in pieces. | Hard cut to a near-black card. |
+| 3 | 3.2s | 1.68s | dark 22.3 | 0.69 | Almost nothing. The stillest beat, and the pivot of the argument. | Hard cut to light. |
+| 4 | 4.88s | 1.08s | light 214.4 | 4.83 | The line assembles around a held image. | Hard cut. |
+| 5 | 5.96s | 1.52s | dark 33.3 | 1.78 | Type stacks in layers around a held object. | Hard cut to light. |
+| 6 | 7.48s | 5.28s | light 215.6 | 1.75 | Peak 27.9: the strike-through and the swap. The busiest frame in the film. | Hard cut to dark. |
+| 7 | 12.76s | 1.4s | dark 43.6 | 2.7 | The only captured surface in the film. It holds while the UI itself scrolls. | Hard cut to light. |
+| 8 | 14.16s | 1.4s | light 176.6 | 2.38 | Type only. The keyboard never moves. | Hard cut. |
+| 9 | 15.56s | 0.76s | light 213.8 | 2.76 | One word swaps. The film's argument is nearly over. | Hard cut to black. |
+| 10 | 16.32s | 1.55s | dark 25.6 | 1.85 | The last line assembles and holds. | Nothing: it ends on the CTA. |
 
 ### pin-583145851797705243
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** A TRUE CONTINUOUS OBJECT, and the only unambiguous one in this store. An input pill becomes a window becomes an application, on one ground, with no cut anywhere. `no-continuous-object` would pass this film on the first try, and almost nothing else here would.
+
+NO CUTS AT ALL in 8.6s: the shot detector found nothing above threshold and fell back to fixed samples, correctly. Every boundary is a transformation of the same object.
+
+TYPING PLUS TRAVEL. Shot 3 types a prompt INSIDE a pill that is itself sliding into frame. Two motions on one object at once, which nothing else here attempts, and it is what makes an 8-second film feel unhurried.
+
+**Carries across the cuts.** THE GLOWING PILL. The input field arrives at 3.5s and never leaves: it holds the prompt, then becomes the window, then becomes the app. One object carries the whole 8.6s film and every beat is a state of it.
+
+**The loud moment.** 8.13s, peak 18.4: the small window expands into a full interface. It is the payoff and it is the last thing that happens.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 1.73s | dark 44.7 | 2.19 | Typing, with the final word scaling up as it completes so the sentence has a stress. | No hard cut. |
+| 2 | 1.73s | 1.73s | dark 43.9 | 1.66 | The question shrinks out and the answer takes its place. | No hard cut. |
+| 3 | 3.46s | 1.73s | dark 52.2 | 4.07 | The pill TRAVELS into frame and the prompt types while it moves. Two motions at once, and the only place in this store that does that. | No hard cut. |
+| 4 | 5.18s | 1.73s | dark 44.7 | 1.37 | The prompt becomes the thing it asked for, in place, without a cut. | No hard cut. |
+| 5 | 6.91s | 1.73s | dark? 59.2 | 2.79 | The window fills out into a real product screen. Peak 18.4 is that expansion. | Nothing: the last shot. |
 
 ### pin-72761350251141725
 
@@ -136,11 +284,48 @@ AND IT SHOWS ITS MECHANISM LATE. The caret does not appear until 7.76s, more tha
 
 ### pin-924363892282992611
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** A PALETTE CAN BE THE ONLY THREAD. Seven shots, seven unrelated subjects (a brain, sneakers, an eyeball, a television, a column, a chess piece), and nothing carries across but one hue and a serif. It should not hold and it does.
+
+SOLID COLOUR IS A CUT. Twice the film floods the entire frame with flat purple, and both are its loudest measured frames (68.7 and 40.2). It costs one rectangle and it works harder than any transition in the store.
+
+OBJECTS ARE HELD, TYPE MOVES. Every photographic and rendered object in this film is still. All the motion is type arriving and the ground changing. That is why a 19s film with seven subjects never feels busy.
+
+**Carries across the cuts.** ONE PURPLE. Every beat is white-and-purple or solid purple and there is no third colour anywhere in 19s. It is the ground, the tile fill, the type accent and the end card, so seven shots of unrelated objects still read as one film.
+
+**The loud moment.** 3.20s, peak 68.7: the frame floods edge to edge with flat purple. It is the single loudest frame anywhere in this store, and it is a colour, not a movement.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 1.27s | light 201.6 | 8.89 | Tiles fill a grid one after another. Peak 43.9 is the grid completing. | Cut, into solid purple. |
+| 2 | 1.27s | 3.13s | light 166.7 | 4.68 | The ground itself becomes the subject: after a white frame full of objects, one flat colour. Peak 68.7 is that flood. | Cut back to white. |
+| 3 | 4.4s | 2.37s | light 202.4 | 2.41 | Type at hero scale rotates into the frame beside a photographic object. | Cut. |
+| 4 | 6.77s | 7.97s | light 138.4 | 3.23 | Three unrelated objects in one beat, each held briefly. Peak 38.7 is the purple field arriving. | Cut. |
+| 5 | 14.73s | 1.53s | light 185.1 | 4.56 | Objects stack vertically to build a single visual sentence. | Cut into purple. |
+| 6 | 16.27s | 1.63s | mid 81.8 | 2.91 | The arrows point and the line completes under them. | Cut to white. |
+| 7 | 17.9s | 1.21s | light 232.2 | 0.59 | It fades. The only quiet beat in the film. | Nothing: the end card. |
 
 ### pin-933230354045109691
 
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
+**Takeaway.** GRADE AS PUNCTUATION. This film cuts by CHANGING THE COLOUR OF THE SAME FOOTAGE: red, green, blue, neutral, white blow-out, sometimes twice inside one shot. It needs no cut to change register, and the technique costs one filter.
+
+IT ALTERNATES CLAIM AND FIGURE. Speaker beats carry the sentence; graphic beats (a drawing curve, stacking chat bubbles, a rising chart) carry the evidence. Neither runs more than about 4s before the other returns.
+
+ITS PEAKS ARE ALL GRADES OR BLOOMS, never motion: 55.9, 28.2, 22.9. A film can be measured as extremely active while nothing in it actually travels.
+
+**Carries across the cuts.** THE CAPTION LINE. A word-by-word caption runs across every talking-head beat and continues the sentence the graphic beats interrupt, so the argument never stops even when the picture leaves the speaker entirely.
+
+**The loud moment.** 7.87s, peak 55.9: a hard red wash drops over the speaker's face mid-sentence. It is the loudest single frame in this entire store, and it lasts a few frames.
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 6.7s | dark 25.4 | 1.38 | Fragments assemble in a near-empty frame. Peak 28.2 is the plate arriving under the type. | Hard cut to the speaker. |
+| 2 | 6.7s | 1.5s | dark 55.7 | 6.56 | The colour grade itself changes mid-shot. Peak 55.9, the loudest frame in the whole store, is that wash. | Hard cut, staying abstract. |
+| 3 | 8.2s | 2.8s | dark 33.9 | 1.14 | The curve DRAWS. It is the only line-art motion in the film. | Hard cut to a light card. |
+| 4 | 11s | 3.2s | light 196.9 | 2.45 | Bubbles stack one at a time, the clearest 'evidence' beat in the film. | Hard blow-out to white, into the speaker. |
+| 5 | 14.2s | 2.3s | dark 55 | 2.8 | Captions only. The footage runs; the grade holds. | Hard cut to a light graphic card. |
+| 6 | 16.5s | 1.4s | light 208 | 3.39 | The chart rises and the shadow sweeps. Peak 22.9 is that sweep. | Hard cut back to the speaker. |
+| 7 | 17.9s | 7.37s | mid? 60.1 | 3.46 | The grade cycles through three colours inside one shot while the captions continue. | Hard cut. |
+| 8 | 25.27s | 12.59s | dark 53.2 | 1.54 | The frame itself becomes an object: the video is placed inside a card at the end. | Nothing: it ends on the card. |
 
 ### rebuilt
 
@@ -171,6 +356,91 @@ DO NOT TAKE its static background as a default. It is earned by a subject that n
 **Carries across the cuts.** FOUR at once. The primary is ONE CONTINUOUS SPACE travelled by a camera: every surface sits on a single white plane tilted out of the picture plane, and the camera flies over it in x, y and z. There is never a change of world. The others are a shape match (wordmark to header logo, send circle to service circle) used as the spine, a word-level grey-to-ink reveal, and one accent colour.
 
 **The loud moment.** The send-to-datacentre handoff at 15.4-16.4s: the film's ONLY hard cut, placed at 78%, and it is a jump cut inside one object. Then the badge arrives from depth at almost zero size and grows toward camera with pale blue halo rings expanding behind it.
+
+## What recurs across films
+
+A device seen in one film is an idea; in three it is a technique. Every pattern names the films
+it was read in, so its weight is visible and you can go and check it.
+
+### Blur-resolve as the entrance
+
+**Seen in 3:** `pin-1119918632363453012` · `pin-415034921941332045` · `pin-333759022406760643`
+
+Type arrives heavily motion-blurred and settles into focus. Nothing slides, fades or scales.
+
+**Why it works.** It reads as speed in a SINGLE FRAME, which a fade never does: a blurred still looks fast, a half-opacity still looks broken. Two of the three also use it to bracket the film, opening and closing on the same gesture.
+
+**In our engine.** `motionAt` interpolates a `blur` channel, so this is one keyed track: [{t:0,blur:24},{t:0.4,blur:0}]. The `focusRack` blueprint does it and has zero users.
+
+### The ground inverts on every cut
+
+**Seen in 3:** `rebuilt` · `pin-72761350251141725` · `pin-333759022406800725`
+
+Consecutive beats alternate dark and light, so no cut needs an effect on it.
+
+**Why it works.** The inversion IS the transition. `pin-72761350251141725` has no continuous object, no camera and no shared subject across seven shots, and still reads as one film purely because the ground alternates. `pin-333759022406800725` does it within a single hue, which is the gentler form.
+
+**In our engine.** bg windows with no from/to bind to the joints in order (core/junctions.js), so the cuts own the numbers. 84% of our library paints ONE window for the whole runtime.
+
+### There are three ways to invert a frame, not one
+
+**Seen in 3:** `rebuilt` · `pin-310748443060787071` · `pin-333759022406760643`
+
+The BACKDROP changes (rebuilt), the SUBJECT changes value (slabs go bright-on-black to dark-on-white), or the LIGHT changes over an unchanging world (80 seconds of black lit by blue, then orange, then white).
+
+**Why it works.** Only the first is a new world. The second reads as the same objects under different light; the third keeps the world identical and still gets the punctuation. We only ever reach for the first.
+
+**In our engine.** The first is `bg` windows. The second is a rect or image whose colour is keyed. The third is a `glow` or `beam` layer, or an `adjust` layer grading everything beneath.
+
+### Hold the picture, move the type
+
+**Seen in 3:** `pin-522769469268499616` · `pin-924363892282992611` · `pin-333759022406800725`
+
+Every photographic or rendered object is STILL. All the motion is type arriving and the ground changing.
+
+**Why it works.** It is what lets a film cut 33 times a minute without reading as frantic: the cut rate is high while the rate of change INSIDE a shot is low. `pin-924363892282992611` runs seven unrelated subjects in 19s and never feels busy.
+
+**In our engine.** An `image` layer with no `ken` and no motion track, under text that carries the beat. We reflexively add a ken burns push and it costs us this.
+
+### One accent colour, one word at a time
+
+**Seen in 4:** `pin-522769469268499616` · `pin-924363892282992611` · `pin-333759022406800725` · `together-chat`
+
+Exactly one hue carries every emphasis in the film, and usually one word per beat wears it.
+
+**Why it works.** It tells the eye where to land in the 200ms a fast beat gives it. Measured in together-chat: the single accent holds 0.13% of all pixels and carries every emphasis in the film.
+
+**In our engine.** The theme's `accent`, and nothing else. `designspec-check` already locks this; the discipline is using it on ONE word rather than on a whole line.
+
+### The loudest frame is often an absence
+
+**Seen in 3:** `pin-72761350251141725` · `arc-zero-chrome` · `pin-924363892282992611`
+
+The peak measured frame is something LEAVING, or the frame flooding with flat colour, rather than something arriving.
+
+**Why it works.** It is the opposite reflex to ours. framer-hero is the counter-example where all four peaks are arrivals, so both work, but an emptying is available and we never use it.
+
+**In our engine.** A keyed `exit` track (scripts/author/track.mjs exit), or an `adjust`/rect flooding the frame for a few frames.
+
+### A container that holds while its contents change
+
+**Seen in 4:** `pin-1119918632363453012` · `pin-583145851797705243` · `arc-space-swiping` · `pin-333759022406800725`
+
+One frame, pill, ring or window stays put and what is inside it swaps.
+
+**Why it works.** The cheapest continuity device in the store: the eye has somewhere to rest while the content changes, so a full swap does not read as a cut. arc-space-swiping recolours the container to match its new contents, which is the detail that makes it look designed.
+
+**In our engine.** A `rect` or `group` that outlives its children's windows. It is also the honest way to pass `no-continuous-object`.
+
+### Escalate the unit, not just the pace
+
+**Seen in 2:** `pin-72761350251141725` · `pin-333759022407965800`
+
+The film starts on single words at under a second and ends on sentences at four, so beat length and meaning grow together.
+
+**Why it works.** A pacing change that tracks the unit of meaning reads as structure. A pacing change on its own reads as arbitrary.
+
+**In our engine.** Nothing stops this today; nothing suggests it either. It is a storyboard decision, not an engine feature.
 
 ## How to add one
 

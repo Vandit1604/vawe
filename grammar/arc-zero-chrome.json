@@ -38,9 +38,9 @@
     0,
     0
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "A photo gallery filling the frame edge to edge on white, with a translucent panel at the left.",
+   "moves": "The panel slides away and the images take the whole frame. Peak 10.6 at 0.47s is that removal.",
+   "trigger": "The boundary at 1.58s is the panel returning."
   },
   {
    "i": 2,
@@ -62,21 +62,22 @@
     6.9,
     6.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "The full-bleed gallery, then the panel sliding back in.",
+   "moves": "The reverse. Peak 6.9 is the panel's return.",
+   "trigger": "Nothing: it loops."
   }
  ],
  "pace": {
   "medianShot": 1.5,
   "perMinute": 40
  },
- "groundPattern": "light → light",
+ "groundPattern": "light \u2192 light",
  "motionBand": {
   "lo": 1.18,
   "hi": 1.43
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE PHOTOGRAPHS. They never move. Everything that happens is interface arriving over them or leaving them, so the content is the constant and the tool is the variable.",
+ "spectacle": "0.47s, peak 10.6: the last piece of interface leaves and the images are alone. The product's whole claim, in one frame.",
+ "takeaway": "THE SPECTACLE IS AN ABSENCE. Its loudest measured moment is the interface DISAPPEARING, and the film is an argument for chrome you cannot see. The measurement and the message agree, which is rare.\nPAIRED WITH arc-space-swiping and they are the same 3s two-beat shape from one product. Together they show a house pattern: hold the content, animate only the frame around it.\nKEPT AS A CAPTURE REFERENCE, NOT A FILM, for the same reason as its twin: no beats, no argument, no type.",
+ "about": "A 3s browser UI loop: a gallery with no visible chrome. Captured product, not a produced film."
 }

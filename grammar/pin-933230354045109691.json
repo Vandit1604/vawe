@@ -59,9 +59,9 @@
     3.3,
     1.6
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black, almost empty. Small UI fragments and a wordmark, then a dark road plate with a headline over it.",
+   "moves": "Fragments assemble in a near-empty frame. Peak 28.2 is the plate arriving under the type.",
+   "trigger": "Hard cut to the speaker."
   },
   {
    "i": 2,
@@ -83,9 +83,9 @@
     55.9,
     25.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "A person to camera, then a hard RED wash over the same frame, then an abstract dark field with cursors.",
+   "moves": "The colour grade itself changes mid-shot. Peak 55.9, the loudest frame in the whole store, is that wash.",
+   "trigger": "Hard cut, staying abstract."
   },
   {
    "i": 3,
@@ -112,9 +112,9 @@
     1.2,
     4.7
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "A dark field with a glowing orange curve drawing across it, and a two-word headline.",
+   "moves": "The curve DRAWS. It is the only line-art motion in the film.",
+   "trigger": "Hard cut to a light card."
   },
   {
    "i": 4,
@@ -143,9 +143,9 @@
     1.4,
     45.8
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Cream. A black disc, then chat bubbles stacking inside it, then a white bloom.",
+   "moves": "Bubbles stack one at a time, the clearest 'evidence' beat in the film.",
+   "trigger": "Hard blow-out to white, into the speaker."
   },
   {
    "i": 5,
@@ -170,9 +170,9 @@
     4.9,
     23.8
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "The speaker under a GREEN grade, captions arriving word by word.",
+   "moves": "Captions only. The footage runs; the grade holds.",
+   "trigger": "Hard cut to a light graphic card."
   },
   {
    "i": 6,
@@ -194,9 +194,9 @@
     8.6,
     16.5
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Cream. A shadowed object, a rising chart, and a headline where two words are heavy italic.",
+   "moves": "The chart rises and the shadow sweeps. Peak 22.9 is that sweep.",
+   "trigger": "Hard cut back to the speaker."
   },
   {
    "i": 7,
@@ -241,9 +241,9 @@
     8.4,
     68.3
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "The speaker under RED, then neutral, then BLUE, then a white bloom, captions throughout.",
+   "moves": "The grade cycles through three colours inside one shot while the captions continue.",
+   "trigger": "Hard cut."
   },
   {
    "i": 8,
@@ -309,21 +309,22 @@
     0.6,
     0.3
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "The speaker, then the frame shrinking into a phone-shaped card with a year on it.",
+   "moves": "The frame itself becomes an object: the video is placed inside a card at the end.",
+   "trigger": "Nothing: it ends on the card."
   }
  ],
  "pace": {
   "medianShot": 3,
   "perMinute": 12.7
  },
- "groundPattern": "dark → dark → dark → light → dark → light → mid? → dark",
+ "groundPattern": "dark \u2192 dark \u2192 dark \u2192 light \u2192 dark \u2192 light \u2192 mid? \u2192 dark",
  "motionBand": {
   "lo": 1.14,
   "hi": 6.56
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE CAPTION LINE. A word-by-word caption runs across every talking-head beat and continues the sentence the graphic beats interrupt, so the argument never stops even when the picture leaves the speaker entirely.",
+ "spectacle": "7.87s, peak 55.9: a hard red wash drops over the speaker's face mid-sentence. It is the loudest single frame in this entire store, and it lasts a few frames.",
+ "takeaway": "GRADE AS PUNCTUATION. This film cuts by CHANGING THE COLOUR OF THE SAME FOOTAGE: red, green, blue, neutral, white blow-out, sometimes twice inside one shot. It needs no cut to change register, and the technique costs one filter.\nIT ALTERNATES CLAIM AND FIGURE. Speaker beats carry the sentence; graphic beats (a drawing curve, stacking chat bubbles, a rising chart) carry the evidence. Neither runs more than about 4s before the other returns.\nITS PEAKS ARE ALL GRADES OR BLOOMS, never motion: 55.9, 28.2, 22.9. A film can be measured as extremely active while nothing in it actually travels.",
+ "about": "A talking-head social video under a heavy motion-graphics overlay. Pinterest pin 933230354045109691."
 }

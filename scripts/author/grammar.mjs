@@ -22,9 +22,13 @@ const DIR = path.join(ROOT, 'grammar');
 const ONE = process.argv.slice(2).find((a) => !a.startsWith('--'));
 
 let files = [];
-// `claims.json` lives here too and is not a film. Excluded by NAME rather than by shape, so a real
-// grammar file that is missing `measured` still crashes loudly instead of being quietly skipped.
-try { files = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && f !== 'claims.json').sort(); } catch { /* none yet */ }
+// A LEADING UNDERSCORE MEANS "not a film", which is the convention formats/scene already uses for a
+// file that is in the directory but not part of the population. `_claims.json` and `_patterns.json`
+// live here because they are ABOUT the films and belong beside them; they are excluded by RULE rather
+// than by a list of names, because a list of exceptions grows and the second time I added one I had
+// already forgotten the first. Anything without the prefix must be a film, so a real grammar file
+// missing `measured` still crashes loudly instead of being quietly skipped.
+try { files = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && !f.startsWith('_')).sort(); } catch { /* none yet */ }
 if (!files.length) {
   console.log(`\n  No grammar yet. \`make study VIDEO=refs/<file>.mp4 NAME=<name>\` measures a reference and`);
   console.log(`  writes grammar/<name>.json, which is committed and outlives refs/.\n`);
@@ -152,6 +156,32 @@ function renderDoc(all) {
       L.push('');
     }
   }
+  // PATTERNS: what recurs ACROSS films, which is the only thing a corpus can say that a single study
+  // cannot. Authored, never derived: a device seen in three films is a person's judgement that the three
+  // are doing the same thing, and no measurement reaches that. Each cites its films so the weight is
+  // visible and a reader can check it.
+  try {
+    const P = JSON.parse(fs.readFileSync(path.join(DIR, '_patterns.json'), 'utf8'));
+    if (P.patterns && P.patterns.length) {
+      L.push('## What recurs across films');
+      L.push('');
+      L.push('A device seen in one film is an idea; in three it is a technique. Every pattern names the films');
+      L.push('it was read in, so its weight is visible and you can go and check it.');
+      L.push('');
+      for (const p of P.patterns) {
+        L.push(`### ${p.name}`);
+        L.push('');
+        L.push(`**Seen in ${p.seen.length}:** ${p.seen.map((n) => `\`${n}\``).join(' · ')}`);
+        L.push('');
+        L.push(p.what);
+        L.push('');
+        L.push(`**Why it works.** ${p.why}`);
+        L.push('');
+        if (p.ours) { L.push(`**In our engine.** ${p.ours}`); L.push(''); }
+      }
+    }
+  } catch { /* no patterns file yet */ }
+
   L.push('## How to add one');
   L.push('');
   L.push('```bash');

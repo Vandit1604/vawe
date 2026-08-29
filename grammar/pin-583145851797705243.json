@@ -39,9 +39,9 @@
     3.8,
     6.2
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark blue with a soft glow. A line TYPING, the last word arriving in large light type as it lands.",
+   "moves": "Typing, with the final word scaling up as it completes so the sentence has a stress.",
+   "trigger": "No hard cut."
   },
   {
    "i": 2,
@@ -64,9 +64,9 @@
     1.6,
     0.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark blue. The question at hero scale, then the answer beginning below it.",
+   "moves": "The question shrinks out and the answer takes its place.",
+   "trigger": "No hard cut."
   },
   {
    "i": 3,
@@ -89,9 +89,9 @@
     2.7,
     0.8
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark blue. A glowing input pill sliding in from the right with a prompt typing inside it.",
+   "moves": "The pill TRAVELS into frame and the prompt types while it moves. Two motions at once, and the only place in this store that does that.",
+   "trigger": "No hard cut."
   },
   {
    "i": 4,
@@ -114,9 +114,9 @@
     3.8,
     3
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark blue. The pill settles, then becomes a small app window with a cursor clicking a button.",
+   "moves": "The prompt becomes the thing it asked for, in place, without a cut.",
+   "trigger": "No hard cut."
   },
   {
    "i": 5,
@@ -139,21 +139,22 @@
     14.3,
     2.2
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark blue. The app window, a user card, then a full generated interface.",
+   "moves": "The window fills out into a real product screen. Peak 18.4 is that expansion.",
+   "trigger": "Nothing: the last shot."
   }
  ],
  "pace": {
   "medianShot": 1.73,
   "perMinute": 34.7
  },
- "groundPattern": "dark → dark → dark → dark → dark?",
+ "groundPattern": "dark \u2192 dark \u2192 dark \u2192 dark \u2192 dark?",
  "motionBand": {
   "lo": 1.37,
   "hi": 4.07
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE GLOWING PILL. The input field arrives at 3.5s and never leaves: it holds the prompt, then becomes the window, then becomes the app. One object carries the whole 8.6s film and every beat is a state of it.",
+ "spectacle": "8.13s, peak 18.4: the small window expands into a full interface. It is the payoff and it is the last thing that happens.",
+ "takeaway": "A TRUE CONTINUOUS OBJECT, and the only unambiguous one in this store. An input pill becomes a window becomes an application, on one ground, with no cut anywhere. `no-continuous-object` would pass this film on the first try, and almost nothing else here would.\nNO CUTS AT ALL in 8.6s: the shot detector found nothing above threshold and fell back to fixed samples, correctly. Every boundary is a transformation of the same object.\nTYPING PLUS TRAVEL. Shot 3 types a prompt INSIDE a pill that is itself sliding into frame. Two motions on one object at once, which nothing else here attempts, and it is what makes an 8-second film feel unhurried.",
+ "about": "A build-with-AI product demo, one continuous idea. Pinterest pin 583145851797705243."
 }

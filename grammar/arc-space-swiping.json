@@ -38,9 +38,9 @@
     0,
     6.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "A browser window on a pale ground. A warm-toned site, then a cool blue one sliding in over it, sidebar colour changing with it.",
+   "moves": "The whole page CROSSES the frame horizontally and the chrome recolours to match its destination. Peak 9.5 in the first half-second is the swipe.",
+   "trigger": "Nothing cut it: the boundary at 1.58s is the swipe completing and the next one beginning."
   },
   {
    "i": 2,
@@ -62,21 +62,22 @@
     0,
     0
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "The blue site, then the warm one sliding back.",
+   "moves": "The identical move, reversed. The loop closes where it opened.",
+   "trigger": "Nothing: it loops."
   }
  ],
  "pace": {
   "medianShot": 1.5,
   "perMinute": 40
  },
- "groundPattern": "light → light",
+ "groundPattern": "light \u2192 light",
  "motionBand": {
   "lo": 0.71,
   "hi": 1.41
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE WINDOW CHROME. The browser frame never moves; only its contents and its accent colour do. That fixed frame is what makes a full-page swap read as one product rather than as a cut.",
+ "spectacle": "0.50s, peak 9.5: a whole page crosses the frame. In a 3s loop the spectacle is the only event there is.",
+ "takeaway": "A 3-SECOND LOOP IS ONE GESTURE, TWICE. There is no structure to study: it demonstrates a single interaction and reverses it so it can repeat forever.\nTHE CHROME RECOLOURS WITH THE CONTENT, which is the detail worth stealing. The sidebar shifts from warm to cool as the page arrives, so the interface appears to belong to whatever it is showing. It is a two-line idea that makes a swipe look designed.\nKEPT AS A CAPTURE REFERENCE, NOT A FILM. It has no beats, no argument and no type. Its value in this store is the interaction, and its numbers should not be pooled with produced films when a claim is being tested.",
+ "about": "A 3s browser UI loop: swiping between two spaces. Captured product, not a produced film."
 }

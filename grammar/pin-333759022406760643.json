@@ -51,9 +51,9 @@
     2.1,
     3.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black with dark blue light streaks. Single words at hero scale, chrome-lit and heavily blurred, resolving.",
+   "moves": "Words arrive smeared and settle. The light behind them moves independently.",
+   "trigger": "No hard cut: the mark takes the frame."
   },
   {
    "i": 2,
@@ -266,9 +266,9 @@
     0.6,
     2.5
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. The logo mark, then coloured light, then real product UI panels, then a generated image inside the tool.",
+   "moves": "A very long 49s beat that moves from brand to product without a cut. Peaks 33.1 and 30.8 are the light and the UI arriving.",
+   "trigger": "No hard cut."
   },
   {
    "i": 3,
@@ -304,9 +304,9 @@
     1.7,
     10.5
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. Generated image cards multiplying and arranging themselves in perspective.",
+   "moves": "Cards accumulate and turn. The clearest 'it produces things' beat.",
+   "trigger": "No hard cut."
   },
   {
    "i": 4,
@@ -387,9 +387,9 @@
     1,
     1.5
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. Single words again at hero scale, blurred and resolving, then the closing question.",
+   "moves": "The film returns to its opening gesture after the product section.",
+   "trigger": "No hard cut."
   },
   {
    "i": 5,
@@ -423,21 +423,22 @@
     0.1,
     0.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. The mark, letters scattering into place around it, then the wordmark and a closing line.",
+   "moves": "The letters SETTLE from scattered positions into the name.",
+   "trigger": "Nothing: the end card."
   }
  ],
  "pace": {
   "medianShot": 5.03,
   "perMinute": 3.8
  },
- "groundPattern": "dark → dark → dark → dark → dark",
+ "groundPattern": "dark \u2192 dark \u2192 dark \u2192 dark \u2192 dark",
  "motionBand": {
   "lo": 2.19,
   "hi": 5.9
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "BLACK, AND THE MARK. The ground never changes in 80 seconds and a small cruciform mark appears at the open, the middle and the close. Everything else is light moving over black.",
+ "spectacle": "19.13s, peak 33.1: coloured light floods across the black ground behind a single word. In a film with no ground inversion, light doing the inverting is the whole spectacle.",
+ "takeaway": "EIGHTY SECONDS AND NOT ONE GROUND CHANGE. Black throughout, and the value changes are done by LIGHT: blue streaks, an orange flood, a white bloom. That is the third distinct way to invert a frame in this store (backdrop, subject, and now light), and it is the only one that keeps the world identical.\nBLUR-RESOLVE AGAIN, on hero words at the open and the close, bracketing the product section between them. Three films in this store now open on smeared type settling into focus.\nITS BEATS ARE ENORMOUS: a 5s median but a 49s second beat that carries brand, product and output without a cut. The film's structure is really three acts, and the shot detector sees five because only the type cards score.",
+ "about": "A design-tool launch film on black. Pinterest pin 333759022406760643."
 }

@@ -38,9 +38,9 @@
     2,
     3.8
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Light. A rendered lightbulb, with a line typing beside it and two words in red.",
+   "moves": "Words arrive on a held illustration.",
+   "trigger": "Hard cut."
   },
   {
    "i": 2,
@@ -63,9 +63,9 @@
     2.6,
     1.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark. A suited figure in halftone, then a headline where one word is red.",
+   "moves": "The figure holds; the type lands in pieces.",
+   "trigger": "Hard cut to a near-black card."
   },
   {
    "i": 3,
@@ -88,9 +88,9 @@
     1,
     2.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black, nearly empty. One word, then a red phrase.",
+   "moves": "Almost nothing. The stillest beat, and the pivot of the argument.",
+   "trigger": "Hard cut to light."
   },
   {
    "i": 4,
@@ -110,9 +110,9 @@
     4.8,
     13.7
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Light. A clown illustration and a line ending in a red word.",
+   "moves": "The line assembles around a held image.",
+   "trigger": "Hard cut."
   },
   {
    "i": 5,
@@ -134,9 +134,9 @@
     1.1,
     5.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark. A rendered treasure chest, red and white type stacked around it.",
+   "moves": "Type stacks in layers around a held object.",
+   "trigger": "Hard cut to light."
   },
   {
    "i": 6,
@@ -173,9 +173,9 @@
     0.2,
     22.3
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Light. A sticky note, then a brand name struck through, then a red word.",
+   "moves": "Peak 27.9: the strike-through and the swap. The busiest frame in the film.",
+   "trigger": "Hard cut to dark."
   },
   {
    "i": 7,
@@ -197,9 +197,9 @@
     0.6,
     0.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Dark. A real phone UI, an actual profile.",
+   "moves": "The only captured surface in the film. It holds while the UI itself scrolls.",
+   "trigger": "Hard cut to light."
   },
   {
    "i": 8,
@@ -221,9 +221,9 @@
     0.8,
     11.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Light. A photographed keyboard, type arriving above it.",
+   "moves": "Type only. The keyboard never moves.",
+   "trigger": "Hard cut."
   },
   {
    "i": 9,
@@ -242,9 +242,9 @@
     1.6,
     16.8
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Light. An emoji, then a red word.",
+   "moves": "One word swaps. The film's argument is nearly over.",
+   "trigger": "Hard cut to black."
   },
   {
    "i": 10,
@@ -266,21 +266,22 @@
     0.7,
     0.2
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Black. The call to action, one word in red.",
+   "moves": "The last line assembles and holds.",
+   "trigger": "Nothing: it ends on the CTA."
   }
  ],
  "pace": {
   "medianShot": 1.48,
   "perMinute": 33.6
  },
- "groundPattern": "light → mid → dark → light → dark → light → dark → light → light → dark",
+ "groundPattern": "light \u2192 mid \u2192 dark \u2192 light \u2192 dark \u2192 light \u2192 dark \u2192 light \u2192 light \u2192 dark",
  "motionBand": {
   "lo": 0.69,
   "hi": 10.67
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "ONE RED WORD PER BEAT. Every shot places exactly one word in red and everything else is black or white. It survives ten cuts, ten different subjects and every ground inversion, and it is the only constant in the film.",
+ "spectacle": "9.56s, peak 27.9: a brand name is struck through and replaced mid-frame. In a film of held images and arriving type, the one thing that CHANGES is the argument's turn.",
+ "takeaway": "THE FASTEST FILM IN THIS STORE: 10 shots in 17.9s, a 1.48s median, 33.6 cuts a minute, and it does not read as frantic. Two reasons, and both are cheap. Every shot holds ONE still image and moves only the type over it, so the cut rate is high while the frame rate of change inside a shot is low. And one word per beat is red, so the eye always knows where to land in the 200ms it is given.\nA HELD BEAT AT THE PIVOT. Shot 3 is nearly an empty black frame with two short lines, and it sits exactly at the turn from problem to cause. The stillest beat carries the argument's hinge.\nIT IS A DIFFERENT GENRE FROM THE REST OF THE STORE and worth keeping for that: illustration and stock objects rather than product UI, and it earns its pace from stillness inside the shot rather than from motion.",
+ "about": "A portrait social ad, hook to CTA. Pinterest pin 522769469268499616."
 }

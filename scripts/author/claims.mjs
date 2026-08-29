@@ -28,7 +28,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const DIR = path.join(ROOT, 'grammar');
 const STILL_FLOOR = 0.5;   // the floor internal/scene/scene.go and study.mjs both use
 
-const films = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && f !== 'claims.json')
+const films = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && !f.startsWith('_'))
   .map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')));
 
 // ---- OUR OWN LIBRARY, the second population ------------------------------------------------------
@@ -64,7 +64,7 @@ const OURS_METRICS = {
     return scene.duration > 0 ? (n / scene.duration) * 60 : null;
   },
 };
-const { claims } = JSON.parse(fs.readFileSync(path.join(DIR, 'claims.json'), 'utf8'));
+const { claims } = JSON.parse(fs.readFileSync(path.join(DIR, '_claims.json'), 'utf8'));
 
 const cutsFound = (g) => g.measured.shotDetection === 'scene-score';
 const shots = (g) => g.shots || [];

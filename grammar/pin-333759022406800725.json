@@ -89,9 +89,9 @@
     2.6,
     3.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Deep green with soft glowing rings. Small yellow type, then a bloom, then live footage of a workspace with type over it.",
+   "moves": "Rings of light drift and swell behind held type. Peak 27.1 is a bright form crossing the frame.",
+   "trigger": "Cut to near-white."
   },
   {
    "i": 2,
@@ -130,9 +130,9 @@
     1.3,
     2.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Pale green. GROWTH repeated as faint background type, one instance solid yellow, and a dark ribbon sweeping through.",
+   "moves": "The ribbon travels across the frame; the word tower behind it holds.",
+   "trigger": "Cut, staying light."
   },
   {
    "i": 3,
@@ -164,9 +164,9 @@
     0.5,
     4.8
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Pale green. A photograph of a person working, framed inside a drawn ring that rotates around it.",
+   "moves": "The RING turns around a still photo. The picture holds; its frame animates.",
+   "trigger": "Cut back to deep green."
   },
   {
    "i": 4,
@@ -222,9 +222,9 @@
     8.8,
     20.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Deep green. A small card, a loading dot row, then UI chips flying in perspective.",
+   "moves": "Interface pieces travel in 3D toward the eye. Peaks 30.1 and 28.0 are those arrivals.",
+   "trigger": "Cut, staying dark."
   },
   {
    "i": 5,
@@ -273,9 +273,9 @@
     0.7,
     1.2
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Deep green. Rows of chips settling into a grid, then a five-line statement with the last line in bold yellow.",
+   "moves": "Chips settle, then the film's one long statement builds line by line.",
+   "trigger": "Blow out to near-white."
   },
   {
    "i": 6,
@@ -312,21 +312,22 @@
     0,
     0
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Near-white with a green wash. A short question typing beside a small mark.",
+   "moves": "Typing. The stillest beat, and the last.",
+   "trigger": "Nothing: it ends on the question."
   }
  ],
  "pace": {
   "medianShot": 7,
   "perMinute": 7.6
  },
- "groundPattern": "mid → light → light → mid → mid → light",
+ "groundPattern": "mid \u2192 light \u2192 light \u2192 mid \u2192 mid \u2192 light",
  "motionBand": {
   "lo": 0.37,
   "hi": 4.13
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "ONE GREEN, AND ONE YELLOW INSIDE IT. Six shots alternate deep green and pale green, and every emphasis in the film is the same yellow. Nothing else is coloured, so the ground can invert without the film changing identity.",
+ "spectacle": "27.80s, peak 30.1: interface chips fly toward the eye in perspective after four shots of flat graphics. The only true depth in the film, and it is spent once.",
+ "takeaway": "GROUND INVERSION WITHIN ONE HUE. This film alternates dark and light like the others in the store, but both grounds are the SAME green. So it gets the inversion's punctuation without the change of world, which is a gentler version of the device and the only example of it here.\nIT FRAMES ITS PHOTOGRAPHS RATHER THAN MOVING THEM. Shot 3 holds a still photo and rotates a drawn ring around it. Cheaper than a ken-burns push and it reads as designed rather than as stock.\nITS LONGEST BEAT IS ITS ONLY ARGUMENT. Five of six shots are atmosphere; shot 5 carries a five-line statement and runs longest. The film spends 33 seconds earning one sentence.",
+ "about": "A design-studio brand film in one green. Pinterest pin 333759022406800725."
 }

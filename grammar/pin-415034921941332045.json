@@ -70,9 +70,9 @@
     1.5,
     2.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Near-white. Type arriving heavily MOTION-BLURRED and resolving, then a line with one word replaced by an emoji-like mark.",
+   "moves": "Words are smeared and then sharp. Peak 13.5 at 1.77s is the blur itself.",
+   "trigger": "No hard cut: the light ground stays and the content becomes photographic."
   },
   {
    "i": 2,
@@ -162,9 +162,9 @@
     18.2,
     46.1
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Photographic. A forest plate with a typing field over it, then app cards, then a glass object filling the frame, then a full grid of user images.",
+   "moves": "The subject changes completely four times inside one 18.6s shot. Peak 44.0 is the glass object.",
+   "trigger": "No hard cut."
   },
   {
    "i": 3,
@@ -372,21 +372,22 @@
     0,
     6.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null
+   "onScreen": "Near-white. A word arriving blurred with visible colour fringing, resolving to a clean line, then holding empty.",
+   "moves": "The same blur-resolve that opened the film, closing it.",
+   "trigger": "Nothing: the last shot."
   }
  ],
  "pace": {
   "medianShot": 18.57,
   "perMinute": 2.4
  },
- "groundPattern": "light → light → light",
+ "groundPattern": "light \u2192 light \u2192 light",
  "motionBand": {
   "lo": 1.83,
   "hi": 5.26
  },
- "threads": null,
- "spectacle": null,
- "takeaway": null
+ "threads": "THE BLUR-RESOLVE. Type arrives smeared and settles into focus at the open and at the close, so the film brackets itself with one gesture. Between them the ground never changes: it is near-white for 76 seconds.",
+ "spectacle": "21.33s, peak 44.0: a translucent glass object fills the frame after twenty seconds of flat UI. The one tactile, physical image in the film.",
+ "takeaway": "THE LONGEST BEATS IN THE STORE, at an 18.6s median, and only two boundaries in 76 seconds. It holds because the SUBJECT changes inside a shot rather than at a cut: shot 2 runs through a landscape, app cards, a glass object and an image grid without a single cut.\nA FILM CAN HOLD ONE GROUND FOR 76 SECONDS. Near-white throughout, no inversion, no dark beat. The opposite choice from every other film in this store, and it works because the CONTENT carries the value changes instead.\nSAME BLUR VOCABULARY AS pin-1119918632363453012, which is much shorter. Two films now open on smeared type resolving to sharp, which is starting to look like a house style somewhere rather than one director's idea.",
+ "about": "A consumer-app film. Pinterest pin 415034921941332045."
 }
