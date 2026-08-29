@@ -181,6 +181,10 @@ boot((data, fps, theme, canvas) => {
   // makes a brand's snap real at render time (it was defined but never applied before). Layers
   // that set their own enterDur/exitDur/stagger still win; this only supplies the default.
   const M = motionDefaults(theme);
+  // THE FILM'S IDLE, resolved once, at the middle rung of layer -> scene -> theme -> engine default.
+  // `!== undefined` rather than `??` because `null` and `false` are how an author says "no idle", and
+  // `??` would read either as "not set" and hand the theme's answer back over the top of the opt-out.
+  const sceneIdle = data.idle !== undefined ? data.idle : M.idle;
 
   // ---- bg windows: [{preset, from, to, value}] drawn on canvas from the THEME's palette ----
   // bg seed: default = hash(theme name + preset) so the SAME preset looks different across brands;
@@ -531,7 +535,7 @@ boot((data, fps, theme, canvas) => {
     // for itself; what this call buys is WHEN a misspelled name is refused. Left to the track alone,
     // `idle: "breath"` would first throw on whichever frame that layer reaches its settled middle,
     // which is a dead render one third of the way in with a stack trace instead of an authoring error.
-    normalizeIdle(L.idle !== undefined ? L.idle : data.idle);
+    normalizeIdle(L.idle !== undefined ? L.idle : sceneIdle);
     // THE TWO ENTRANCE DIALS (core/motion.js: anticipation and the overshoot amount). Written here,
     // refused here for the same layers that already lose their `anim`: a split or cut layer's entrance
     // is owned by something else, so a dial on it would be an input accepted and dropped.
@@ -1068,7 +1072,7 @@ boot((data, fps, theme, canvas) => {
   // `data.idle` is the film's scene-level idle: one line opts the whole cast into ambient hold motion
   // (core/idle.js). Normalized HERE so a misspelled name fails at boot with the registry's message,
   // rather than on whichever frame the first layer happens to reach its settled middle.
-  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(data.idle), shutter: resolveShutter(data.shutter) });
+  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(sceneIdle), shutter: resolveShutter(data.shutter) });
 
   function renderFrame(f) {
     const t = f / fps;

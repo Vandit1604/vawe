@@ -189,6 +189,25 @@ export function collectClips(root) {
   return Object.freeze([...root.querySelectorAll('[data-start]')]);
 }
 
+// EL.STYLE.TRANSFORM IS AN ACCUMULATOR, SO SOMEBODY HAS TO EMPTY IT. Four tracks PREPEND to it
+// (react, follow, motion, idle: the `accumulate` list in docs/CODEMAPS/ARCHITECTURE.md), each reading
+// back what is already on the element and composing onto it. That is only safe if the element starts
+// every frame clean, and it did not: `restingKeys` clears a property only when one of the layer's OWN
+// anims writes it, so a layer whose entrance is `wipe`, `iris` or `clock` (all clipPath, no transform)
+// never had its transform reset, and each frame composed onto the string left by whichever frame a
+// worker rendered before. Order-dependent by construction, which is the one thing renderFrame(n)
+// promises it is not.
+//
+// It surfaced the moment a second accumulator ran on such a layer: turning the idle default on
+// quarantined `linear-agents`, whose `wipe-right` rect also carries a keyed motion track, at
+// scale 0.9897 forwards and 0.9694 backwards. The bug was older than the idle; the idle only gave it
+// a second voice loud enough to hear.
+//
+// Transform is the ONE property with this shape, because it is the one every compositing track shares,
+// so it is reset unconditionally rather than left to the anim registry. Any anim that does write a
+// transform still wins: this spreads first, and `restingKeys` and the composed style spread after it.
+const TF_RESET = Object.freeze({ transform: 'none' });
+
 // clipStyleAt(el, t): the composition itself, as a VALUE. A clip is visible on
 // [start, start+duration); it plays data-anim on entry and data-out (or a plain fade) on exit.
 // z-order comes from data-track. Off-window clips are fully transparent (layout preserved → pure).
@@ -233,7 +252,7 @@ export function clipStyleAt(el, t) {
   // whole style a pure function of t.
   if (t < start || t >= end) {
     const off = el.dataset.out ? resolveAnim(el.dataset.out) : null;
-    return { ...z, ...(off ? off(1) : {}), ...resolveAnim(el.dataset.anim)(1), opacity: '0', pointerEvents: 'none' };
+    return { ...z, ...TF_RESET, ...(off ? off(1) : {}), ...resolveAnim(el.dataset.anim)(1), opacity: '0', pointerEvents: 'none' };
   }
   const enterT = enterDur > 0 ? clamp01((t - start) / enterDur) : 1;
   // The warp bends the ENTRANCE only. An exit plays an entrance backwards, and a wind-up on the way out
@@ -279,7 +298,7 @@ export function clipStyleAt(el, t) {
   // over the `opacity` key `fade`/`rise`/`pop` put in the composed style.
   const fadeInT = el.dataset.anim === 'none' ? 1 : enterT;
   const fadeOutT = el.dataset.out === 'none' ? 0 : exitT;
-  return { ...z, pointerEvents: '', ...restingKeys, ...s,
+  return { ...z, pointerEvents: '', ...TF_RESET, ...restingKeys, ...s,
     opacity: String((opacityEnvelope(fadeInT, fadeOutT) * base).toFixed(3)) };
 }
 

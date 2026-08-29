@@ -695,7 +695,12 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // escape hatch. A theme missing required keys (core/theme-contract.js) throws at boot, so a video
 // can never render with fallback CSS. Motion personality alone keeps engine defaults, it tunes
 // HOW primitives move, not what the video looks like.
-export const DEFAULT_MOTION = { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045 };
+// `idle` is the ONLY key here that describes how a layer LIVES; the other six all govern an entrance
+// or an exit. That asymmetry was the bug: `clipStyleAt` computes an entrance ramp and an exit ramp and
+// has NO branch for the middle, so stillness was never a decision anyone made, it was the shape of the
+// data model. Measured: the reference films in refs/ are still for 13-24% of their frames and ours for
+// 84%. The default is live, and `idle: "none"` on a theme, a scene or a layer is the opt-out.
+export const DEFAULT_MOTION = { easing: 'easeOutCubic', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045, idle: 'breathe' };
 
 // motionDefaults(theme): the theme's motion personality with `easing` resolved to a function.
 // Scenes pass these into primitives, e.g. interpolate(t, inR, outR, { easing: M.easing }),
@@ -710,6 +715,10 @@ export function motionDefaults(theme) {
     enter: m.enter ?? DEFAULT_MOTION.enter,
     durationScale: m.durationScale ?? 1,
     stagger: m.stagger ?? DEFAULT_MOTION.stagger,
+    // The theme's answer to "how does a layer behave once it has arrived". Read by
+    // formats/scene/scene.js as the third rung of layer -> scene -> theme -> engine default, and
+    // normalized there so a misspelled name is refused at boot rather than on a later frame.
+    idle: m.idle ?? DEFAULT_MOTION.idle,
     // THINGS SHOULD LEAVE FASTER THAN THEY ARRIVE. An entrance is an introduction and deserves its
     // time; an exit is over. The exemplar states this per layer (a scrim that fades in over 0.32 and
     // out over 0.07, a hook that types at 33cps and erases at 60), and every other film in this library
