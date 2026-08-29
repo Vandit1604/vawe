@@ -24,6 +24,7 @@ import * as board from './board.js';
 import * as doc from './doc.js';
 import * as lottie from './lottie.js';
 import * as composition from './composition.js';
+import * as adjust from './adjust.js';
 import { canvasLayer } from './canvas.js';
 
 // The four types whose whole output is a canvas are ONE primitive with four backends (core/surfaces/).
@@ -35,7 +36,7 @@ const raymarch = canvasLayer('raymarch', 'a lit implicit surface from a distance
 const three = canvasLayer('three', 'a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud');
 const globe = canvasLayer('globe', 'a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector');
 
-const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, composition };
+const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, composition, adjust };
 
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed, the same failure as the

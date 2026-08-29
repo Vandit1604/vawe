@@ -311,6 +311,18 @@
 | `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
 | `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
 
+## Adjustment layers (grade what is BENEATH)  `[per-layer]`
+
+`{ "type":"adjust", "kind":"<name>" }`. One grade over every layer with a LOWER `track`, so a whole beat can go soft or grey from a single layer instead of the same filter written onto fifteen. `amount` is the strength in that kind's own unit, and the CSS reads `var(--adjust)`, so the existing `vars` track keys it: `{ "type":"adjust","kind":"blur","amount":20,"vars":{"--adjust":[0,1]},"varsDur":0.8 }`. A raw `filter` string is the escape hatch and is static.
+
+| name | what / when |
+|---|---|
+| `blur` | soften everything beneath, in pixels. The rack-focus of a whole beat, not of one layer |
+| `brighten` | lift everything beneath, as a percentage |
+| `contrast` | harden the tones beneath, as a percentage |
+| `darken` | dim everything beneath, as a percentage |
+| `desaturate` | drain the colour beneath. 1 is fully grey |
+
 ## Canvas image passes (baked)  `[static]`
 
 `canvasFx`: a one-time baked image pass (cannot move).
@@ -444,6 +456,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
+| `adjust` | one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust` |
 | `beam` | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
 | `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
 | `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
@@ -846,4 +859,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_566 effects across 36 families. Regenerate: `make effects`._
+_572 effects across 37 families. Regenerate: `make effects`._

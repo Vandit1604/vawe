@@ -86,7 +86,7 @@ footer{padding:40px 0 0;color:var(--ink-3);font-size:12.5px;font-family:var(--mo
 
 <div class="wrap">
 <header class="top">
-  <p class="stamp">vawe · engine map · measured 2026-08-29</p>
+  <p class="stamp">vawe · engine map · measured 2026-08-29 · board worked the same day</p>
   <h1>One JSON in, one film out, and one promise holding it up.</h1>
   <p class="lede">Every number on this page was counted from this checkout on the day it was written,
   not carried over from a doc. Where a figure could not be re-derived, it says so.</p>
@@ -171,15 +171,19 @@ parameters from the generator's own signature, so no list can drift.</p>
 </table></div>
 
 <h2><span class="n">Stage four</span>The library, as it actually is</h2>
-<p>136 files under <span class="m">formats/scene/</span> declare <code>"module": "scene"</code>,
-carrying 3,719 layers once groups are flattened. These are not targets. They are the debt, counted.</p>
+<p><strong>134 films</strong> carrying <strong>3,677 layers</strong> once groups are flattened, where
+"film" means the population <code>make census</code> calls <span class="m">library</span>. An earlier
+version of this page said 136, a number produced by hand that matched no definition in the code. That is
+the failure this page is supposed to be about, so it is left visible rather than quietly corrected:
+run <code>make census</code>, quote a name, never a number. A fresh clone sees 38 of the 134, because
+films are gitignored on purpose.</p>
 <div class="grid">
-  <div class="stat"><div class="v hot">6.4%</div><div class="k">of layers carry a hand-keyed <span class="m">motion</span> track. The two films the doctrine argues from run 75% and 11%.</div></div>
-  <div class="stat"><div class="v hot">14%</div><div class="k">of layers are pictorial. The rest is type and rectangles.</div></div>
-  <div class="stat"><div class="v hot">84%</div><div class="k">of films paint one background window for the whole runtime (114 of 136).</div></div>
-  <div class="stat"><div class="v hot">81%</div><div class="k">ship mute: 93 declare <span class="m">silent</span>, 17 carry no audio key at all.</div></div>
-  <div class="stat"><div class="v">66%</div><div class="k">of layers declare an absolute <span class="m">start</span>. Nothing scopes a child's clock to its group.</div></div>
-  <div class="stat"><div class="v">41%</div><div class="k">of keyed easings are <span class="m">linear</span> (317 of 768).</div></div>
+  <div class="stat"><div class="v hot">6.5%</div><div class="k">of layers carry a hand-keyed <span class="m">motion</span> track. The two films the doctrine argues from run 75% and 11%.</div></div>
+  <div class="stat"><div class="v hot">15%</div><div class="k">of layers are pictorial. The rest is type and rectangles.</div></div>
+  <div class="stat"><div class="v hot">84%</div><div class="k">of films paint one background window for the whole runtime (112 of 134).</div></div>
+  <div class="stat"><div class="v hot">82%</div><div class="k">ship mute: 93 declare <span class="m">silent</span>, 17 carry no audio key at all.</div></div>
+  <div class="stat"><div class="v">65%</div><div class="k">of layers declare an absolute <span class="m">start</span>, and two mechanisms for not doing so already exist. See the board.</div></div>
+  <div class="stat"><div class="v">28%</div><div class="k">of keyed segments are <span class="m">linear</span> over a span long enough for it to be a decision. A further 15% are linear under 0.14s, where the engine interpolates linearly anyway.</div></div>
 </div>
 
 <h2><span class="n">The board</span>What is worth fixing, ranked</h2>
@@ -200,64 +204,86 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   <br><b>fix</b> · <span class="m">core/clips.js</span>, one frozen constant, two spread sites.</div>
 </div>
 
-<div class="find p1">
-  <h3>There is no relative time <span class="tag">p1 · structural</span></h3>
-  <p>A group does not scope its children's clock, so every layer states an absolute second. Move a beat
-  and you re-type every number under it, or you do not move the beat. This is the single largest reason
-  a film here is expensive to re-cut, and re-cutting is most of what authoring is.</p>
-  <div class="ev"><b>evidence</b> · 2,442 of 3,719 layers declare an explicit <span class="m">start</span>.
-  <br><b>fix</b> · the group layer and the clip clock, not a gate. A child's <span class="m">start</span>
-  becomes an offset from its parent's window when the parent declares one.</div>
+<div class="find done">
+  <h3>Relative time: the diagnosis was wrong, the holes were real <span class="tag">fixed</span></h3>
+  <p>This page said "a group does not scope its children's clock". Two mechanisms already do.
+  <code>resolveRelativeStarts</code> takes <code>start: "otherId+0.5"</code>, used 26 times, and a group
+  child's window is its group's window offset by <code>delay</code>, used <strong>279 times</strong>.
+  Containment scopes time here exactly as it scopes geometry. I named the concept and did not grep the
+  codebase's name for it.</p>
+  <p>Three real holes in the feature that is there, all now closed:</p>
+  <p><code>resolveRelativeStarts</code> walked the top level and stopped, so anything nested could
+  neither be a target nor resolve its own. Nothing failed: the string reached the DOM,
+  <code>parseFloat("hero+0.4")</code> is NaN, <code>NaN || 0</code> is 0, and the layer started at zero
+  with every gate green. It walks the whole tree now and refuses a string that survives the passes.
+  <code>.end</code> on a target with no duration scored an invented <code>?? 2</code>; it names the
+  layer instead. And a group child's own <code>start</code> / <code>duration</code> are read off the
+  group and the child's discarded, which 49 children across 13 films do today: warned in the validator,
+  not refused, because honouring an absolute start would let a child outlive the group containing it.</p>
+  <div class="ev"><b>fix</b> · <span class="m">formats/scene/scene.js</span>,
+  <span class="m">core/validate.mjs</span>, pinned in <span class="m">lint-test</span> in both
+  directions, with the asserts watched failing.</div>
+</div>
+
+<div class="find done">
+  <h3>The adjustment layer <span class="tag">built</span></h3>
+  <p><code>{ "type": "adjust", "kind": "blur", "amount": 22 }</code> grades every layer with a lower
+  <code>track</code> and leaves everything above it crisp. Five kinds (blur, desaturate, darken,
+  brighten, contrast) plus a raw <code>filter</code> escape hatch.</p>
+  <p>Short, because nothing here is new machinery. <code>backdrop-filter</code> was already carrying the
+  glass look; <code>track</code> was already the z-index, so "beneath" needed defining, not building;
+  and the CSS reads <code>var(--adjust)</code>, so the existing <code>vars</code> track keys it rather
+  than a second keying mechanism for one layer type. Adding the type meant one file, one line in the
+  registry, and the schema generator picked up its props on its own.</p>
+  <div class="ev"><b>verified by render</b> · text on track 1 and the ground blur, text on track 3 stays
+  sharp, and <span class="m">--adjust</span> reads 0.0000 → 0.5781 → 1.0000 across an easeOutCubic ramp.</div>
 </div>
 
 <div class="find p1">
-  <h3>Depth exists and is unreachable <span class="tag">p1 · adoption</span></h3>
+  <h3>Depth exists and is unreachable <span class="tag">p1 · named, not fixed</span></h3>
   <p><code>core/fx/plane.js</code> diagnoses this in its own header: every layer sits at z = 0, so a
-  camera move turns the whole composition as one rigid pane. That is the tell that reads as a picture of
-  a scene rather than a scene. Four scenes of 136 use it.</p>
-  <div class="ev"><b>fix</b> · not a default (a wrong depth is worse than none). Make
-  <span class="m">make preflight</span> name depth when a scene has a camera move and every layer at z = 0.</div>
+  camera move turns the whole composition as one rigid pane. Three films of 134 use it, and
+  <strong>44 of the 47 films with a camera move</strong> have every layer at z = 0.</p>
+  <p><code>make preflight</code> now carries a NOT REACHED FOR section that names depth for a film in
+  that state, with the share of the library beside it. Deliberately not a gate: a wrong depth is worse
+  than none, and a capability nobody knows about is a discovery problem, which you answer where the
+  author is deciding rather than by refusing the film afterwards. Adoption is the open half.</p>
 </div>
 
-<div class="find p2">
-  <h3>No adjustment layer <span class="tag">p2 · missing primitive</span></h3>
-  <p>Every effect here is per-layer. There is no way to say "grade, blur or tint everything beneath
-  this". It is the one After Effects primitive the engine genuinely lacks, and the mechanism is already
-  load-bearing: <code>core/layers/util.js:273</code> uses <code>backdrop-filter</code> for the glass
-  look, and its own comment says it reads the pixels behind an element. An adjustment layer is that,
-  sized to the frame, with no card. The work is the z-order contract, not the effect.</p>
-  <div class="ev"><b>note</b> · a keyable blur is NOT missing. <span class="m">motionAt</span>
-  interpolates a <span class="m">blur</span> channel, verified by render:
-  <span class="m">[{t:0,blur:24},{t:1.6,blur:0}]</span> pulls focus correctly. The
-  <span class="m">focusRack</span> blueprint that uses it has zero users, so that is a discovery
-  problem, not a capability one.</div>
+<div class="find done">
+  <h3>CI can compare snapshots now <span class="tag">fixed</span></h3>
+  <p>The ceiling was written down as permanent and it was a size problem. 20MB of full signatures cannot
+  be committed; 4.2KB of sha256 can. <code>verify/snap/digest.json</code> is the one tracked file in a
+  gitignored directory, and a checkout without the baselines falls back to it for a
+  whether-it-moved verdict, saying so rather than implying the full net ran. The what stays local, where
+  the 20MB lives and a person can read a diff.</p>
+  <p>Only honest because the faces are pinned: <code>scripts/media/fonts.mjs</code> carries an exact
+  version and a sha256 per face, and refuses a mismatch. This page said that was still unpinned. It has
+  not been for some time, and one of the pins carries a comment explaining why GeistMono sits on 5.2.8
+  rather than 5.3.0.</p>
 </div>
 
-<div class="find p2">
-  <h3>Snapshots cannot be compared across machines <span class="tag">p2 · gate ceiling</span></h3>
-  <p><code>verify/snap/</code> is gitignored, so a runner starts with nothing to diff against, and a
-  baseline is only valid inside one font state while <code>scripts/media/fonts.mjs</code> fetches from
-  a CDN with no version in any URL. Two machines can hold different bytes under identical filenames.</p>
-  <p>Read a green CI run as "every scene is deterministic", never as "nothing changed". Pinning the
-  fetcher to exact versions is what would make cross-machine comparison mean anything.</p>
-</div>
-
-<div class="find p2">
-  <h3>"The library" has more than one size <span class="tag">p2 · one fact, two owners</span></h3>
-  <p>134, 136, 106 and 161 are all true of this checkout and mean different things: gate-visible scenes,
-  files declaring <code>module: "scene"</code>, scenes the snapshot net sweeps, and raw <code>.json</code>
-  files in the directory. Films are gitignored on purpose, so a fresh clone sees about a third of any of
-  them and nothing is broken.</p>
-  <div class="ev"><b>fix</b> · one exported population per question in <span class="m">scripts/lib/census.mjs</span>,
-  each named for what it answers, and every doc quotes a name rather than a number.</div>
+<div class="find done">
+  <h3>The populations are reachable <span class="tag">fixed</span></h3>
+  <p>The code has had one owner for "the library" since <code>census.mjs</code>. The docs did not,
+  because there was no way to ASK, and this page produced a fifth number by hand on the morning it was
+  written. <code>make census</code> prints each named population, the question it answers, and how many
+  of it a fresh clone sees.</p>
+  <div class="ev"><b>134</b> library &nbsp;·&nbsp; <b>152</b> library+derivatives &nbsp;·&nbsp;
+  <b>159</b> every scene file &nbsp;·&nbsp; <b>106</b> what the snapshot net sweeps. Quote a name.</div>
 </div>
 
 <div class="find p3">
-  <h3>41% of keyed easings are linear, and nobody has looked <span class="tag">p3 · unaudited</span></h3>
-  <p>317 of 768. Part of that is correct and deliberate: <code>scripts/author/track.mjs</code> emits
-  <code>linear</code> for the interior keys of a measured shape, because a segment shorter than 0.14s is
-  interpolated linearly anyway and naming it keeps the file honest. The rest is unexamined. The share
-  written by a tool versus by a hand has never been separated.</p>
+  <h3>The linear easings were a measurement question <span class="tag">p3 · answered</span></h3>
+  <p>"41% of easings are linear" was one number doing two jobs. Split by segment length it is three:
+  <strong>15%</strong> sit on a segment shorter than <code>DENSE_KEY_SEC</code> (0.14s), where
+  <code>core/sequence.js</code> interpolates linearly anyway and naming it is documentation;
+  <strong>28%</strong> sit on a longer span across 22 films, which is the real question; and
+  <strong>58%</strong> carry a named curve.</p>
+  <p>No code change, deliberately. <code>linear-motion</code> is already a ratcheted code, so the
+  blocking case is covered, and <code>higgsfield-recreation</code> is in that 28% on purpose: its
+  interior keys are linear because the surge and give-up of a real hand is what makes the pan read as
+  somebody's. A gate here would manufacture defects.</p>
 </div>
 
 <div class="find p3">
@@ -276,6 +302,10 @@ resort: if the bad value has a write site, the refusal goes there and the class 
 <tr><td>The transform accumulator is emptied every frame</td><td class="m">core/clips.js</td><td>Fixes an order-dependence older than the idle. See the board.</td></tr>
 <tr><td>The aurora family got the motion knob it never had</td><td class="m">core/backgrounds.js</td><td>aurora 0.14 → 1.31, mesh 0.12 → 1.02. Amplitude and period move together, or the field sloshes.</td></tr>
 <tr><td>Every render reports how much of it moves</td><td class="m">internal/scene · internal/render</td><td><span class="m">78% still, motion 0.30</span> beside the duration. It refuses nothing.</td></tr>
+<tr><td>A new layer type: <span class="m">adjust</span></td><td class="m">core/layers/adjust.js</td><td>One grade over everything with a lower <code>track</code>. Five kinds plus a raw filter, keyed through the existing <code>vars</code> track.</td></tr>
+<tr><td>Relative time, three holes closed</td><td class="m">formats/scene/scene.js · core/validate.mjs</td><td>The resolver walks the whole tree, two invented defaults became refusals, and a group child's discarded window is warned.</td></tr>
+<tr><td>A tracked snapshot digest</td><td class="m">verify/snap/digest.json</td><td>4.2KB of sha256, so CI can answer whether a scene moved.</td></tr>
+<tr><td><span class="m">make census</span> · preflight's NOT REACHED FOR</td><td class="m">scripts/lib/census.mjs · scripts/gates/preflight.mjs</td><td>Populations by name; capabilities this film declines, with the library's share beside each.</td></tr>
 </table></div>
 <p class="note">The stillness figure measures change between consecutive frames, which is why a breath
 does not move it: a 1.5% scale over 4.6 seconds is a sub-pixel step per frame. It reads grounds and

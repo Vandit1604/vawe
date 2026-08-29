@@ -3768,5 +3768,29 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('a style attribute is not a style block', scopeStyles('<i style="color:red"></i>') === '<i style="color:red"></i>');
 }
 
+// ---------- the adjustment layer: one grade over everything BENEATH ----------
+// Its whole job happens in build(), against a DOM element, so what is testable without a browser is
+// the vocabulary and the two refusals. That the grade actually LANDS on the layers under it, and only
+// on those, is a rendered fact and was verified as one: a probe with text on track 1, an adjust on
+// track 2 and text on track 3 blurs the first and the ground and leaves the third crisp, and the keyed
+// `--adjust` reads 0.0000 → 0.5781 → 1.0000 across an easeOutCubic ramp.
+{
+  const { ADJUST_REGISTRY, ADJUST_BLURBS } = await import('../../core/layers/adjust.js');
+  const { LAYER_TYPES } = await import('../../core/layers/index.js');
+  ok('the adjustment kinds are a registry, not a switch', ADJUST_REGISTRY.names.length === 5
+    && ADJUST_REGISTRY.has('blur') && ADJUST_REGISTRY.has('desaturate'));
+  ok('every adjustment kind carries a blurb', ADJUST_REGISTRY.names.every((n) => typeof ADJUST_BLURBS[n] === 'string' && ADJUST_BLURBS[n].length > 10));
+  // The engine's own answer to an unknown name: refuse and say what it knows, never resolve to a
+  // default. A grade that silently did nothing would be indistinguishable from one that did.
+  let threw = null; try { ADJUST_REGISTRY.pick('greyscale'); } catch (e) { threw = e.message; }
+  ok('an unknown kind is refused by name', threw != null && /greyscale/.test(threw) && /desaturate/.test(threw));
+  ok('`adjust` is a registered layer type', LAYER_TYPES.includes('adjust'));
+  // EVERY KIND RAMPS FROM NOTHING IN THE SAME DIRECTION. `--adjust` runs 0..1 and carries the strength,
+  // so a keyed grade always starts at no-grade whichever kind it is. A kind whose zero was the strong
+  // end would key backwards and nothing would say so.
+  const zeroed = ADJUST_REGISTRY.names.map((n) => ADJUST_REGISTRY.pick(n)('0'));
+  ok('every kind is a no-op at --adjust 0', zeroed.every((css) => /\(calc\(/.test(css) && css.includes('0')));
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
