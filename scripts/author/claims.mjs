@@ -59,6 +59,20 @@ const OURS_METRICS = {
     const lens = edges.slice(1).map((t, i) => t - edges[i]).filter((l) => l > 0).sort((a, b2) => a - b2);
     return lens.length ? lens[Math.floor(lens.length / 2)] : null;
   },
+  // How many DISTINCT preset names a film reaches for. A preset is a name the engine expands; the
+  // alternative is a keyed track the author typed. The two films this repo argues from use TWO each.
+  presetNames: ({ scene }) => {
+    const KEYS = ['anim', 'out', 'preset', 'fx', 'fxOut', 'cut', 'morph', 'physics', 'motionPath', 'splitText', 'ransom', 'react'];
+    const walk = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object' ? [L, ...walk(L.children), ...walk(L.layers)] : []));
+    const layers = walk(scene.layers);
+    if (!layers.length) return null;
+    const names = new Set();
+    for (const L of layers) for (const k of KEYS) {
+      const v = L[k]; if (typeof v === 'string' && v !== 'none') names.add(`${k}:${v}`);
+    }
+    return names.size;
+  },
+
   declaredCutsPerMinute: ({ scene }) => {
     const n = (scene.cuts || []).length + (scene.transitions || []).length + (scene.seams || []).length;
     return scene.duration > 0 ? (n / scene.duration) * 60 : null;
