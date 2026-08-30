@@ -192,9 +192,18 @@ check:
 # need real pixels, so it is the one command that says a film is actually done.
 # It finishes with both contact sheets (`make sheets`); NOSHEETS=1 skips them. Producing them is not the
 # same as reading them: the receipt is marked `auto` and beat-check still asks you to open the sheet.
+# THE MOTION SPLIT RUNS HERE, right after the render, because the render is what prints the
+# number it corrects. `./bin/vawe` reports one motion figure and that figure is a property of
+# the FRAME, so a moving backdrop flatters it exactly as much as moving content does: one film
+# measured 2% still on `aurora` and 75% still on a static ground with NOT ONE LAYER CHANGED.
+# The tool that separates the two has existed for a while and nothing ran it, which is the same
+# shape as the catalogue check that sat red for hours because it only fired when a human typed
+# the command. A check nobody runs reports at a time of the author's choosing.
+# It costs a second capture pass, so NOSPLIT=1 skips it the way NOSHEETS=1 skips the sheets.
 ship: build
 	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
 	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	@$(if $(NOSPLIT),echo "  · motion split skipped (NOSPLIT=1)",node scripts/gates/motion-split.mjs $(D))
 	node verify/audit.mjs $(D)
 	node scripts/gates/seam-snap.mjs $(D)
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node scripts/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
