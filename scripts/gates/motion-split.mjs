@@ -26,7 +26,26 @@ const abs = path.resolve(ROOT, file);
 if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 const cfg = JSON.parse(fs.readFileSync(abs, 'utf8'));
 const [W, H] = sceneDims(cfg);
-const PAIRS = 22;          // 22 consecutive-frame pairs, spread across the film
+// ONE METRIC, TWO IMPLEMENTATIONS, and they had drifted. internal/scene/scene.go samples 48 pairs and
+// weighs luma with Rec. 601; this file sampled 22 with Rec. 709 and skipped the fps normalisation
+// entirely. So the render and the split answered a different question about the same film and an author
+// comparing either against a reference got a number that depended on which command they had typed.
+// Every constant here now matches that file by name. It is still two implementations of one definition,
+// which is the shape this codebase logs more than any other, and the real repair is the split moving
+// into the renderer that already has the frames on disk. Until then: change one, change both.
+//
+// ALIGNING THEM DID NOT CLOSE THE GAP, and that is the useful finding. This file reported 0.42 for the
+// teaser and the render reported 1.69 to 2.47 for the same film; matching the constants moved it to
+// 0.43. So the formula was never the cause. The two tools measure DIFFERENT PIXELS: the render weighs
+// the frames it captured, and `scene.CaptureExt` writes those as JPEG for every render that is not an
+// alpha export, while this file screenshots the live page as lossless PNG. JPEG quantisation noise
+// differs frame to frame across the whole picture, so it reads as change everywhere and inflates the
+// render's figure several times over. The number is measuring the codec as much as the film.
+//
+// Which one is right: THIS one. A film's motion is a property of what the engine drew, not of how the
+// capture was compressed on the way to the encoder. The repair is for the renderer to measure before
+// the frames are quantised, or to capture PNG when it intends to measure, and then this file goes away.
+const PAIRS = 48;          // internal/scene/scene.go stillPairs
 const GRID = 12, SUB = 3;  // the same cell size and sub-step internal/scene/scene.go uses
 
 const { server, port } = await serveRepo();
@@ -66,7 +85,9 @@ const cells = (buf) => {
     let sum = 0, n = 0;
     for (let dy = 0; dy < GRID && y + dy < h; dy += SUB) for (let dx = 0; dx < GRID && x + dx < w; dx += SUB) {
       const i = ((y + dy) * w + (x + dx)) * ch;
-      sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]; n++;
+      // Rec. 601, because that is what signalstats YAVG reports and what the Go side weighs with. A
+      // 709 luma is not wrong, it is a DIFFERENT grey, and two greys make two numbers.
+      sum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]; n++;
     }
     if (n) out.push(sum / n);
   }
