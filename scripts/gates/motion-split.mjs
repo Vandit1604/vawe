@@ -34,46 +34,32 @@ const [W, H] = sceneDims(cfg);
 // which is the shape this codebase logs more than any other, and the real repair is the split moving
 // into the renderer that already has the frames on disk. Until then: change one, change both.
 //
-// BOTH SIDES ARE WRONG, IN OPPOSITE DIRECTIONS. Measured on vawe-teaser, 180 frames, three ways:
+// WHERE THIS STANDS, and it is not settled. Measured on vawe-teaser, 180 frames:
 //
-//   this file (JS)                      median 0.43
-//   ffmpeg, no repo code involved       median 1.563   (mean 2.72, min 0.92, max 6.28, all 179 pairs)
-//   the render (Go)                     median 2.47
+//   this file, PNG screenshots      n=60  min 0.052  median 0.422  max 2.803
+//   ffmpeg, the render's JPEGs      n=179 min 0.92   median 1.563  max 6.28
+//   the render, its own JPEGs       median 2.47
 //
-// ffmpeg sits BETWEEN them. One reads about 3.6x low and the other about 1.6x high, so neither can be
-// called the reference and the earlier idea that one of them was simply correct is dead.
+// THE MINIMUMS DIFFER BY EIGHTEEN TIMES, and that is the one solid finding. A JPEG carries a
+// quantisation noise floor around 0.9, so on captured frames a completely held frame still reads as
+// moving; a lossless screenshot of the same instant reads 0.05. That floor is why the render reports
+// 25% still where this file reports 67% on the same film: the render's stillness threshold is being
+// compared against a number the codec cannot go below.
 //
-// EVERYTHING CHEAP IS RULED OUT, each by measurement rather than by reading the code:
-//   the constants   aligning pairs, luma and fps moved 0.42 to 0.43
-//   the codec       VAWE_CAPTURE=png renders 2.41 against JPEG's 2.47
-//   the frame size  captured frames are 1920x1080, exactly what this file screenshots at
-//   the pictures    a screenshot and the captured frame for frame 0 differ by ZERO, and pair deltas
-//                   from screenshots match pair deltas from disk (2.65 vs 2.46, 3.32 vs 5.00)
-//   decode          returns 1920x1080x3, and its full-pixel delta of 2.955 matches ffmpeg's 2.654
-//   the grid        averaging changes nothing here: GRID 12, GRID 1 and full-pixel all give 2.955,
-//                   because this film's motion is low-frequency and cell averaging cannot cancel it
-//   the formula     both sides mean-abs-diff the cell array and take the median
+// FOUR EXPLANATIONS IN THIS COMMENT HAVE BEEN WRONG, every one of them reasoned instead of measured:
+//   1. JPEG noise inflates the render's MEDIAN. It does not; PNG renders 2.41 against JPEG's 2.47.
+//      (It does set the FLOOR, which is a different claim and is the finding above.)
+//   2. The render is therefore the number to distrust.
+//   3. This file is the broken one, "proven" because its median sat under ffmpeg's minimum. That
+//      compared a PNG-based median against a JPEG-based minimum. Two sources, two floors, invalid.
+//   4. The screenshots were stale for want of a paint wait. A double rAF was added, copied from the
+//      capturer, and the number did not move at all.
 //
-// THE CULPRIT IS THIS FILE, AND THE PROOF IS ARITHMETIC. ffmpeg measured the MINIMUM delta across all
-// 179 pairs at 0.92: no pair in this film changes by less than that. This file reports a median of
-// 0.43, which is below the smallest value that exists. A median of real pair deltas cannot sit under
-// the minimum, so these are not real pair deltas. The render's 2.47 lands inside the measured range of
-// 0.92 to 6.28 and is plausible; sampling every third pair can median higher than all 179.
-//
-// So `cells` and `score` are not at fault either: run standalone over two screenshots this file's own
-// code gives 2.955 for pair 0->1, which is right. Something between seeking a frame and handing the
-// screenshot to `score` is losing the change. The remaining suspect is the capture loop, where `seek`
-// calls renderFrame and screenshots with nothing awaiting a paint, so a pair can photograph the same
-// painted state twice and score near zero. NOT YET MEASURED, and it is the only thing left: log every
-// delta this file computes and check how many are implausibly small.
-//
-// Two earlier explanations in this comment were wrong, both reasoned rather than measured: that JPEG
-// noise inflated the render, and that the render was therefore the one to distrust. They are named here
-// so nobody walks them again.
-//
-// UNTIL THIS IS SETTLED, quote neither number as a measurement of a film. The SPLIT (ground versus
-// layers) may still be sound, because both halves come from this same path and the ratio can survive a
-// scale error the absolute numbers do not.
+// WHAT IS ACTUALLY UNEXPLAINED, stated narrowly so the next person starts in the right place: the
+// medians are 0.42 here and 2.47 there, and the ~0.9 codec floor accounts for maybe half of that.
+// Nothing measured so far accounts for the rest. The next measurement is the render's OWN delta array
+// on PNG-captured frames, compared pair by pair against this file's, on the same frame indices.
+// SPLIT_DEBUG=1 prints this side's.
 const PAIRS = 48;          // internal/scene/scene.go stillPairs
 const GRID = 12, SUB = 3;  // the same cell size and sub-step internal/scene/scene.go uses
 
@@ -84,7 +70,24 @@ const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', 
 // The first version awaited a double requestAnimationFrame inside the page to let a frame settle, and
 // it hung: `Runtime.callFunctionOn timed out`. renderFrame(n) is synchronous by contract, so there is
 // nothing to wait for, and screenshotting afterwards is what forces the paint.
-const seek = (page, f) => page.evaluate((f) => { window.__engine.renderFrame(f); }, f);
+// SEEK, THEN WAIT FOR THE PAINT. renderFrame(n) mutates the DOM and returns; the browser has not
+// drawn anything yet. Screenshotting straight after photographs whatever was on screen BEFORE the
+// seek, so a pair can capture the same painted state twice and score a delta near zero.
+//
+// That is exactly what this file was doing, and it is why its median came out at 0.43 when ffmpeg
+// measured the smallest real delta in the film at 0.92: a median under the minimum is not a
+// measurement, it is stale pixels.
+//
+// The double rAF is not invented here. internal/scene/scene.go:673 awaits
+// `new Promise(res => __realRaf(() => __realRaf(res)))` before every screenshot for the same reason,
+// and that is the capturer whose numbers this file is meant to be comparable with. One frame of rAF
+// schedules the paint; the second returns after it has happened.
+const seek = async (page, f) => {
+  await page.evaluate((f) => { window.__engine.renderFrame(f); }, f);
+  await page.evaluate(() => (window.__realRaf
+    ? new Promise((res) => window.__realRaf(() => window.__realRaf(res)))
+    : new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)))));
+};
 
 async function series(nobg) {
   const page = await browser.newPage();
@@ -126,6 +129,7 @@ const score = (pairs) => {
   const ds = pairs.map(([a, b]) => {
     const A = cells(a), B = cells(b);
     let s = 0; for (let i = 0; i < A.length; i++) s += Math.abs(A[i] - B[i]);
+    if (process.env.SPLIT_DEBUG) console.error(`    cells=${A.length} delta=${(s / A.length).toFixed(3)}`);
     return s / A.length;
   }).sort((x, y) => x - y);
   return { median: ds[Math.floor(ds.length / 2)], still: ds.filter((d) => d < 0.5).length / ds.length };
