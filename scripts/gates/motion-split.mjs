@@ -54,9 +54,18 @@ const [W, H] = sceneDims(cfg);
 //                   because this film's motion is low-frequency and cell averaging cannot cancel it
 //   the formula     both sides mean-abs-diff the cell array and take the median
 //
-// So identical pictures through an identical formula produce 0.43 here and 2.47 there. The two must be
-// medianing different SETS of deltas, and that is the one thing left to measure: print both delta
-// arrays for the same film and diff them. Everything else has been eliminated.
+// THE CULPRIT IS THIS FILE, AND THE PROOF IS ARITHMETIC. ffmpeg measured the MINIMUM delta across all
+// 179 pairs at 0.92: no pair in this film changes by less than that. This file reports a median of
+// 0.43, which is below the smallest value that exists. A median of real pair deltas cannot sit under
+// the minimum, so these are not real pair deltas. The render's 2.47 lands inside the measured range of
+// 0.92 to 6.28 and is plausible; sampling every third pair can median higher than all 179.
+//
+// So `cells` and `score` are not at fault either: run standalone over two screenshots this file's own
+// code gives 2.955 for pair 0->1, which is right. Something between seeking a frame and handing the
+// screenshot to `score` is losing the change. The remaining suspect is the capture loop, where `seek`
+// calls renderFrame and screenshots with nothing awaiting a paint, so a pair can photograph the same
+// painted state twice and score near zero. NOT YET MEASURED, and it is the only thing left: log every
+// delta this file computes and check how many are implausibly small.
 //
 // Two earlier explanations in this comment were wrong, both reasoned rather than measured: that JPEG
 // noise inflated the render, and that the render was therefore the one to distrust. They are named here
