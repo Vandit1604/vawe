@@ -34,17 +34,23 @@ const [W, H] = sceneDims(cfg);
 // which is the shape this codebase logs more than any other, and the real repair is the split moving
 // into the renderer that already has the frames on disk. Until then: change one, change both.
 //
-// ALIGNING THEM DID NOT CLOSE THE GAP, and that is the useful finding. This file reported 0.42 for the
-// teaser and the render reported 1.69 to 2.47 for the same film; matching the constants moved it to
-// 0.43. So the formula was never the cause. The two tools measure DIFFERENT PIXELS: the render weighs
-// the frames it captured, and `scene.CaptureExt` writes those as JPEG for every render that is not an
-// alpha export, while this file screenshots the live page as lossless PNG. JPEG quantisation noise
-// differs frame to frame across the whole picture, so it reads as change everywhere and inflates the
-// render's figure several times over. The number is measuring the codec as much as the film.
+// ALIGNING THEM DID NOT CLOSE THE GAP, and the cause is still UNKNOWN. This file reports 0.43 for the
+// teaser and the render reports 2.4 for the same film. What has been ruled out, each by measurement:
 //
-// Which one is right: THIS one. A film's motion is a property of what the engine drew, not of how the
-// capture was compressed on the way to the encoder. The repair is for the renderer to measure before
-// the frames are quantised, or to capture PNG when it intends to measure, and then this file goes away.
+//   the constants   aligning pairs, luma and the fps normalisation moved 0.42 to 0.43. Not it.
+//   the codec       VAWE_CAPTURE=png renders 2.41 against JPEG's 2.47. Not it, and an earlier
+//                   version of this comment asserted it WAS, on reasoning alone, before the one
+//                   command that settles it had been run. It was wrong.
+//   the reduction   both sides sort the deltas and take the median. Same shape.
+//   the grid        GRID 12 and SUB 3 on both sides.
+//
+// What is left is the pixel SOURCE: this file screenshots the live page, the render weighs the frames
+// its capture pass wrote. Something between those two differs by roughly five times and nobody has
+// measured what. Until somebody does, the two numbers are not comparable and neither should be quoted
+// against a reference as though the other agrees with it.
+//
+// The repair is still one owner, and it is still the renderer, because it already holds the frames.
+// But the FIRST step is a measurement, not a refactor: capture one frame both ways and diff them.
 const PAIRS = 48;          // internal/scene/scene.go stillPairs
 const GRID = 12, SUB = 3;  // the same cell size and sub-step internal/scene/scene.go uses
 
