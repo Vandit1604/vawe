@@ -34,27 +34,37 @@ const [W, H] = sceneDims(cfg);
 // which is the shape this codebase logs more than any other, and the real repair is the split moving
 // into the renderer that already has the frames on disk. Until then: change one, change both.
 //
-// THE GAP IS THIS FILE'S, NOT THE RENDER'S, and it took an outside measurement to see it. ffmpeg was
-// pointed at the render's own captured frames, with neither tool's code involved:
+// BOTH SIDES ARE WRONG, IN OPPOSITE DIRECTIONS. Measured on vawe-teaser, 180 frames, three ways:
 //
-//   ffmpeg, all 179 consecutive pairs   median 1.563   (mean 2.72, min 0.92, max 6.28)
-//   the render, 48 sampled pairs        2.47
-//   this file                           0.43
+//   this file (JS)                      median 0.43
+//   ffmpeg, no repo code involved       median 1.563   (mean 2.72, min 0.92, max 6.28, all 179 pairs)
+//   the render (Go)                     median 2.47
 //
-// The render and the independent probe sit in the same range; the difference between them is the
-// sampled subset and a median of 48 against a median of 179. THIS file is about four times low, and
-// that is the number that needs explaining.
+// ffmpeg sits BETWEEN them. One reads about 3.6x low and the other about 1.6x high, so neither can be
+// called the reference and the earlier idea that one of them was simply correct is dead.
 //
-// Ruled out by measurement, each: the constants (aligning them moved 0.42 to 0.43), the codec
-// (VAWE_CAPTURE=png renders 2.41 against JPEG's 2.47), the reduction (both sort and take the median),
-// the grid (12 and 3 on both sides), and the frame size (the captured frames are 1920x1080, exactly
-// what this file screenshots at).
+// EVERYTHING CHEAP IS RULED OUT, each by measurement rather than by reading the code:
+//   the constants   aligning pairs, luma and fps moved 0.42 to 0.43
+//   the codec       VAWE_CAPTURE=png renders 2.41 against JPEG's 2.47
+//   the frame size  captured frames are 1920x1080, exactly what this file screenshots at
+//   the pictures    a screenshot and the captured frame for frame 0 differ by ZERO, and pair deltas
+//                   from screenshots match pair deltas from disk (2.65 vs 2.46, 3.32 vs 5.00)
+//   decode          returns 1920x1080x3, and its full-pixel delta of 2.955 matches ffmpeg's 2.654
+//   the grid        averaging changes nothing here: GRID 12, GRID 1 and full-pixel all give 2.955,
+//                   because this film's motion is low-frequency and cell averaging cannot cancel it
+//   the formula     both sides mean-abs-diff the cell array and take the median
 //
-// TWO EARLIER EXPLANATIONS IN THIS COMMENT WERE WRONG, both reasoned rather than measured: that JPEG
-// noise inflated the render, and that the render was therefore the number to distrust. Neither
-// survived the first command that could test it. What is left is inside this file's own capture path:
-// what `page.screenshot` plus `decode` produces is not what the capturer wrote for the same frame.
-// The next step is to diff one screenshot against one captured frame, pixel for pixel.
+// So identical pictures through an identical formula produce 0.43 here and 2.47 there. The two must be
+// medianing different SETS of deltas, and that is the one thing left to measure: print both delta
+// arrays for the same film and diff them. Everything else has been eliminated.
+//
+// Two earlier explanations in this comment were wrong, both reasoned rather than measured: that JPEG
+// noise inflated the render, and that the render was therefore the one to distrust. They are named here
+// so nobody walks them again.
+//
+// UNTIL THIS IS SETTLED, quote neither number as a measurement of a film. The SPLIT (ground versus
+// layers) may still be sound, because both halves come from this same path and the ratio can survive a
+// scale error the absolute numbers do not.
 const PAIRS = 48;          // internal/scene/scene.go stillPairs
 const GRID = 12, SUB = 3;  // the same cell size and sub-step internal/scene/scene.go uses
 
