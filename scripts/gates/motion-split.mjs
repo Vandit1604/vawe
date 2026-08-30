@@ -34,23 +34,27 @@ const [W, H] = sceneDims(cfg);
 // which is the shape this codebase logs more than any other, and the real repair is the split moving
 // into the renderer that already has the frames on disk. Until then: change one, change both.
 //
-// ALIGNING THEM DID NOT CLOSE THE GAP, and the cause is still UNKNOWN. This file reports 0.43 for the
-// teaser and the render reports 2.4 for the same film. What has been ruled out, each by measurement:
+// THE GAP IS THIS FILE'S, NOT THE RENDER'S, and it took an outside measurement to see it. ffmpeg was
+// pointed at the render's own captured frames, with neither tool's code involved:
 //
-//   the constants   aligning pairs, luma and the fps normalisation moved 0.42 to 0.43. Not it.
-//   the codec       VAWE_CAPTURE=png renders 2.41 against JPEG's 2.47. Not it, and an earlier
-//                   version of this comment asserted it WAS, on reasoning alone, before the one
-//                   command that settles it had been run. It was wrong.
-//   the reduction   both sides sort the deltas and take the median. Same shape.
-//   the grid        GRID 12 and SUB 3 on both sides.
+//   ffmpeg, all 179 consecutive pairs   median 1.563   (mean 2.72, min 0.92, max 6.28)
+//   the render, 48 sampled pairs        2.47
+//   this file                           0.43
 //
-// What is left is the pixel SOURCE: this file screenshots the live page, the render weighs the frames
-// its capture pass wrote. Something between those two differs by roughly five times and nobody has
-// measured what. Until somebody does, the two numbers are not comparable and neither should be quoted
-// against a reference as though the other agrees with it.
+// The render and the independent probe sit in the same range; the difference between them is the
+// sampled subset and a median of 48 against a median of 179. THIS file is about four times low, and
+// that is the number that needs explaining.
 //
-// The repair is still one owner, and it is still the renderer, because it already holds the frames.
-// But the FIRST step is a measurement, not a refactor: capture one frame both ways and diff them.
+// Ruled out by measurement, each: the constants (aligning them moved 0.42 to 0.43), the codec
+// (VAWE_CAPTURE=png renders 2.41 against JPEG's 2.47), the reduction (both sort and take the median),
+// the grid (12 and 3 on both sides), and the frame size (the captured frames are 1920x1080, exactly
+// what this file screenshots at).
+//
+// TWO EARLIER EXPLANATIONS IN THIS COMMENT WERE WRONG, both reasoned rather than measured: that JPEG
+// noise inflated the render, and that the render was therefore the number to distrust. Neither
+// survived the first command that could test it. What is left is inside this file's own capture path:
+// what `page.screenshot` plus `decode` produces is not what the capturer wrote for the same frame.
+// The next step is to diff one screenshot against one captured frame, pixel for pixel.
 const PAIRS = 48;          // internal/scene/scene.go stillPairs
 const GRID = 12, SUB = 3;  // the same cell size and sub-step internal/scene/scene.go uses
 
