@@ -16344,6 +16344,28 @@ one. `make motion-split` measures from a single page and is the number to use; i
 This does NOT fix the difference between tabs, which is the real determinism defect and is larger than
 one print statement. It stops the engine stating a measurement it cannot make.
 
+
+**SHARPER EVIDENCE, added after the entry was first written.** Comparing the SAME frame index between a
+one-worker and a six-worker render of the same scene:
+
+```
+frame 0    0.000      frame 1    0.902
+frame 60   0.000      frame 61   4.843
+frame 120  0.033      frame 121  4.864
+frame 150  0.006      frame 151  4.973
+```
+
+**Even frames agree, odd frames differ by about 4.9**, which is the same magnitude as a real pair delta.
+That is not scattered per-tab noise, it is a systematic pattern: in the sharded render some frames are
+drawing the wrong instant. The mechanism is NOT established here and this entry should not be read as
+settling it.
+
+**THIS ENTRY WAS FILED WITHOUT CHECKING FOR DUPLICATES, and there are two.** #190 (eight render workers
+starved raster, and words blinked out) and especially #268 (the worker that drew a frame was decided by
+a race, so no two renders could be compared) are the same territory. #506 is kept because its
+contribution is the MEASUREMENT and the reporting fix, not the discovery, but anybody working this
+should read #268 first. Checking this file before appending to it is one grep and it was skipped.
+
 **The lesson, and it is the expensive one:** four hypotheses were reasoned from reading the code and
 every one survived until a number killed it. The cheapest test, printing both delta arrays, was named
 as "the next step" three times before it was run. Run the measurement that distinguishes the
