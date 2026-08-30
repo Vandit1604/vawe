@@ -198,6 +198,31 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// passed the whole ladder measured 84%. An author who never sees the number optimises for the numbers
 	// that print. Measured off the frames still on disk (they are deleted a few lines from here), so it
 	// costs no second decode of the mp4 and no extra ffmpeg pass.
+	// A NUMBER MEASURED ACROSS WORKERS IS NOT A PROPERTY OF THE FILM, so it is not printed.
+	//
+	// The capture shards across o.Workers tabs and adjacent frames can come from different ones. Those
+	// tabs do not produce identical pixels, so a frame pair that straddles a worker boundary reports a
+	// large change with nothing on screen having moved. Measured on vawe-teaser, same JSON, same
+	// metric, same frame indices, only -workers differing:
+	//
+	//   1 worker    3.19 2.53 2.40 2.37 2.45 1.01 1.05 0.96 0.86 0.97 0.95 0.46   median 1.06
+	//   6 workers   2.47 1.94 3.71 1.26 4.54 4.39 0.49 4.23 0.51 4.41 4.36 4.41   median 4.23
+	//
+	// The one-worker row is the film: high through the entrance settle, about 1.0 across the hold,
+	// falling at the end. The six-worker row swings between 0.49 and 4.54 with no relation to what is
+	// on screen. It is measuring worker boundaries. The printed figure moved 2.47 to 0.97 on a flag
+	// that changes nothing about the film, which is the definition of a number that cannot be quoted.
+	//
+	// This does not fix the underlying difference between tabs, which is a real determinism defect and
+	// is bigger than this line. It stops the engine stating a measurement it cannot make. `make
+	// motion-split` measures from a single page and is the number to use.
+	if o.Workers > 1 {
+		fmt.Printf("✓ done → %s  (%.1fs, %d frames)\n", out, meta.Duration, meta.TotalFrames)
+		fmt.Printf("  · motion not measured: the capture sharded across %d workers, and adjacent frames from\n", o.Workers)
+		fmt.Printf("    different tabs differ in pixels the film never changed. Use `make motion-split D=<scene>`,\n")
+		fmt.Printf("    or re-render with -workers 1 if you want this line to carry a figure.\n")
+		return nil
+	}
 	if still, med, ok := scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent), meta.FPS); ok {
 		fmt.Printf("✓ done → %s  (%.1fs, %d frames · %.0f%% still, motion %.2f)\n",
 			out, meta.Duration, meta.TotalFrames, still, med)

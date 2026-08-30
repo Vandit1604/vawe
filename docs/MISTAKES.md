@@ -16310,3 +16310,41 @@ resolved invalid and the browser dropped the entire `filter` declaration, both p
 `filter: none` with nothing reporting it; `droppedDecls` parsed a CSS comment as a declaration;
 and `feMerge` over an opaque plate covers rather than sums, which is why the wide tail that produces
 the blue rim is added with `feComposite operator="arithmetic"`.
+
+## #506: the motion figure was measuring worker boundaries, not the film
+
+**What:** the render printed one motion number and `make motion-split` printed another for the same
+film, roughly five times apart. Four explanations were written into the code before anybody measured
+the right thing, and all four were wrong: JPEG noise inflating the median, the render being the
+untrustworthy side, the split being provably broken because its median sat under ffmpeg's minimum
+(that compared a PNG median against a JPEG minimum, two sources, two noise floors), and a missing
+paint wait before each screenshot (added, copied from the capturer, moved the number by nothing).
+
+**Root cause:** the capture shards across `-workers` tabs, and those tabs do not produce identical
+pixels. Adjacent frames can come from different workers, so a frame pair straddling a boundary reports
+a large change with nothing on screen having moved. The same metric over the same frame indices, with
+only the worker count differing:
+
+```
+1 worker    3.19 2.53 2.40 2.37 2.45 1.01 1.05 0.96 0.86 0.97 0.95 0.46   median 1.06
+6 workers   2.47 1.94 3.71 1.26 4.54 4.39 0.49 4.23 0.51 4.41 4.36 4.41   median 4.23
+```
+
+The one-worker row IS the film: high through the entrance settle, about 1.0 across the hold, falling
+at the end. The six-worker row swings between 0.49 and 4.54 with no relation to the picture. The
+printed figure moved 2.47 to 0.97 on a flag that changes nothing about the film.
+
+**The measurement that found it, after four that did not:** run ONE metric over TWO sources. The same
+JS code gave 0.42 over single-page screenshots and 4.23 over the render's captured frames. Identical
+formula, identical frame indices, so the pictures had to differ, and the only thing producing those
+pictures differently was the worker pool.
+
+**Fix:** the renderer no longer prints a motion figure when it sharded, and says why and where to get
+one. `make motion-split` measures from a single page and is the number to use; it runs in `make ship`.
+This does NOT fix the difference between tabs, which is the real determinism defect and is larger than
+one print statement. It stops the engine stating a measurement it cannot make.
+
+**The lesson, and it is the expensive one:** four hypotheses were reasoned from reading the code and
+every one survived until a number killed it. The cheapest test, printing both delta arrays, was named
+as "the next step" three times before it was run. Run the measurement that distinguishes the
+candidates FIRST, especially when it is the cheap one. → **Gate: the renderer refuses to report it.**
