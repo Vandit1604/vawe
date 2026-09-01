@@ -227,7 +227,12 @@ const HANDLES = {
   linear: withBlurb('the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped', { ...LINEAR_SIDE }),
   hang: withBlurb('influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state', { influence: 75, speed: 0 }),
   fling: withBlurb('a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move', { influence: 18, speed: 4 }),
-  overshoot: withBlurb('arrives at 1.8x the average speed with a long handle, so the value sails past its key and comes back. The handle version of a back ease, and it needs the far side to stop it', { influence: 62, speed: 1.8 }),
+  // A NEGATIVE arriving speed is the whole trick, and shipping this with a positive one made the name a
+  // lie: `y2 = 1 - speed * influence`, so a positive speed pulls the control point BELOW the key and the
+  // curve peaks at exactly 1.000000, measured over 20,001 samples. It was a plain ease-in wearing an
+  // overshoot's blurb. Negative lifts the control point past the key, which is what sailing past means.
+  // -0.8 at influence 62 peaks at 1.1008, the 10 per cent practitioners state for a snappy overshoot.
+  overshoot: withBlurb('arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it', { influence: 62, speed: -0.8 }),
 };
 
 export const HANDLE_REGISTRY = defineRegistry('keyframe handle', HANDLES, {

@@ -4404,6 +4404,17 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const closed = cubicBezier(0.25, 0.5, 2 / 3, 2 / 3);
   let w2 = 0; for (let i = 0; i <= 100; i++) w2 = Math.max(w2, Math.abs(drawn(i / 100) - closed(i / 100)));
   ok('handleCurve is y = speed * influence/100, with the delta cancelled out', w2 < 1e-9);
+  // A HANDLE NAMED FOR AN OVERSHOOT MUST OVERSHOOT, and `overshoot` shipped for a day not doing it.
+  // `y2 = 1 - speed * influence`, so a POSITIVE arriving speed pulls the control point below the key and
+  // the curve peaks at exactly 1. It was a plain ease-in carrying an overshoot's blurb, and nothing
+  // reported it: a rendered frame looked plausible and an author would have concluded our overshoot was
+  // weak. Sampling the peak is the only thing that can tell those two apart.
+  const peakOf = (name) => { const f = handleCurve('easyEase', name); let p = -Infinity;
+    for (let i = 0; i <= 2000; i++) p = Math.max(p, f(i / 2000)); return p; };
+  ok('the overshoot handle actually sails past its key', peakOf('overshoot') > 1.05);
+  ok('handles that promise no overshoot stay at or under 1',
+    ['easyEase', 'hang', 'fling', 'linear'].every((n) => peakOf(n) <= 1 + 1e-9));
+
   // An ABSENT side is the linear half, so a one-sided handle means what it says.
   ok('handleCurve returns null when neither side authors one', handleCurve(null, null) === null);
   ok('speed 1 both sides IS linear', (() => { const f = handleCurve('linear', 'linear');

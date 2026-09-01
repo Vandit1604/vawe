@@ -92,6 +92,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons | the visual ladder · treatment→intent · licensing · icon choice |
 | [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones · active vs passive whitespace |
 | [MOTION-STANDARDS.md](MOTION-STANDARDS.md) | motion is technically correct and still feels wrong, or you are choosing an easing or a duration | the outside standards for why motion reads well, which of them transfer to FILM, and what this engine already has against what it is missing |
+| [PARITY-AUDIT.md](PARITY-AUDIT.md) | you are about to reach for an effect we already ship, and want to know whether ours is any good | seven of the most-demanded SaaS motion effects, each measured against the recipe practitioners publish, with a verdict and the concrete gap |
 | [SPECIMEN.md](SPECIMEN.md) | you are about to write a scene that PROVES a mechanism works | what a specimen is · why the subject is a picture · the series constants and why each is fixed · when it is `make catalog` instead |
 | [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
