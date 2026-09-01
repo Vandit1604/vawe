@@ -565,6 +565,28 @@ ok('preset unfold opens from edge-on to flat', PRESETS.unfold(0).transform.inclu
 ok('appearance presets deterministic', PRESETS.chroma(0.4).textShadow === PRESETS.chroma(0.4).textShadow && PRESETS.swing(0.4).transform === PRESETS.swing(0.4).transform);
 
 
+// assemble: the scattered-glyph reveal. Every assert below is about the three steps of the AE recipe
+// (own offset, FIXED field, shuffled arrival), because those are the three ways it can be built wrong.
+ok('preset assemble lands at identity', (() => { const t = PRESETS.assemble(1, {}, 3).transform; return /translate\(0\.00px, 0\.00px\) rotate\(-?0\.00deg\)/.test(t) && +PRESETS.assemble(1, {}, 3).opacity === 1; })());
+ok('preset assemble clears its motion blur', PRESETS.assemble(1, {}, 7).filter === 'blur(0.00px)');
+ok('preset assemble blur:0 writes no filter', PRESETS.assemble(0.3, { blur: 0 }, 7).filter === undefined);
+ok('preset assemble scatters each glyph differently', PRESETS.assemble(0.2, {}, 1).transform !== PRESETS.assemble(0.2, {}, 2).transform);
+ok('preset assemble is deterministic in the index', PRESETS.assemble(0.31, {}, 5).transform === PRESETS.assemble(0.31, {}, 5).transform);
+ok('preset assemble seed re-rolls the field', PRESETS.assemble(0.2, {}, 4).transform !== PRESETS.assemble(0.2, { seed: 'other' }, 4).transform);
+ok('preset assemble shuffles the arrival order', (() => {
+  // the hashed delay must leave at least one LATER glyph ahead of an earlier one at mid-run
+  const at = (i) => +PRESETS.assemble(0.5, {}, i).opacity;
+  for (let i = 0; i < 12; i++) for (let j = i + 1; j < 12; j++) if (at(j) > at(i) + 1e-6) return true;
+  return false;
+})());
+ok('preset assemble hidden at 0 for every glyph', (() => { for (let i = 0; i < 20; i++) if (+PRESETS.assemble(0, {}, i).opacity !== 0) return false; return true; })());
+ok('preset assemble travels in from its offset and arrives at zero', (() => {
+  const dist = (u) => { const m = PRESETS.assemble(u, {}, 9).transform.match(/translate\((-?[\d.]+)px, (-?[\d.]+)px\)/); return Math.hypot(+m[1], +m[2]); };
+  // easeOutSettle rings, so the path is not monotonic. What must hold: it starts far, is closing by
+  // mid-run, and lands exactly on the glyph's own slot.
+  return dist(0) > 70 && dist(0.6) < dist(0) && dist(1) === 0;
+})());
+
 // new kinetic presets: hidden at 0, fully landed at 1
 for (const k of ['flip', 'fall', 'elastic', 'skew', 'focus']) {
   ok(`preset ${k} starts hidden`, PRESETS[k](0).opacity === 0);

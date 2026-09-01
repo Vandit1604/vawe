@@ -1,7 +1,7 @@
 // core/type.js: kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
-import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed } from './motion.js';
+import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed, random } from './motion.js';
 import { defineRegistry, blurbsOf, withBlurb } from './registry.js';
 
 // HOW FAR THE INK FALLS BELOW THE LINE BOX, in em, for the deepest descender in the faces we ship.
@@ -327,6 +327,40 @@ export const PRESETS = {
       transform: `perspective(420px) rotateX(${(-72 * frac).toFixed(2)}deg)` };
   },
     'the glyph steps FORWARD through the board\'s alphabet one flap at a time and lands on its letter, hinging as it turns. An airport board, ordered where `decode` is random'),
+  // assemble. THE NAME IS THE POINT: in After Effects this is a Text Animator on Position +
+  // Rotation driven by a Range Selector with Randomize Order on, and reading that recipe is what
+  // stops it being built as a stack of hand-keyed layers. Three steps, and the third is the one
+  // nobody guesses:
+  //   1. every glyph starts at its OWN offset and its OWN rotation, not a shared one,
+  //   2. the offsets are a FIXED random field, sampled once per glyph and held for the whole run,
+  //      so the letters fly a straight path in rather than jittering,
+  //   3. the arrival ORDER is shuffled. A left-to-right stagger reads as a line being typed; the
+  //      scatter only reads as assembly when the glyphs land out of order.
+  //
+  // The field is `random(seed:i:axis)`, a hash of the unit index, so it is identical on every render
+  // and at every seek. `Math.random()` here would break renderFrame(n) purity outright.
+  //
+  // Step 3 without a second timing mechanism: the preset spends part of its OWN window as a hashed
+  // delay (`shuffle`) and fits the move into what is left. Nothing outside the preset changes, so
+  // `each`/`stagger` keep meaning exactly what they mean for every other preset.
+  //
+  // Pair it with `split: "char"`. On `split: "word"` it scatters whole words, which is a different
+  // and much louder gesture: one hero line per film.
+  assemble: preset((u, { dist = 220, spin = 65, shuffle = 0.4, seed = 'assemble', blur = 6 } = {}, i = 0) => {
+    const d = shuffle * random(`${seed}:${i}:d`);
+    const p = clamp01((clamp01(u) - d) / Math.max(1e-3, 1 - d));
+    const e = easeOutSettle(p);
+    const k = 1 - e;
+    const ang = random(`${seed}:${i}:a`) * Math.PI * 2;
+    const rad = dist * (0.35 + 0.65 * random(`${seed}:${i}:r`));
+    const rot = (random(`${seed}:${i}:s`) * 2 - 1) * spin;
+    const st = { opacity: clamp01(p * 2),
+      transform: `translate(${(Math.cos(ang) * rad * k).toFixed(2)}px, ${(Math.sin(ang) * rad * k).toFixed(2)}px) rotate(${(rot * k).toFixed(2)}deg)` };
+    // the motion blur is what sells the travel; `blur: 0` turns it off for a face with fine hairlines
+    if (blur > 0) st.filter = `blur(${(k * blur).toFixed(2)}px)`;
+    return st;
+  },
+    'each glyph flies in from its OWN scattered offset and rotation and settles into the word, arriving in a shuffled order · the AE "text animator + randomize-order range selector" reveal. Pair it with `split: "char"`'),
 };
 
 // Read off the presets themselves; blurbsOf throws at load naming any preset that forgot one.
@@ -420,7 +454,9 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
         w.style.paddingBottom = `${INK_PAD_EM}em`; w.style.marginBottom = `${-INK_PAD_EM}em`;
         el.parentElement.insertBefore(w, el); w.appendChild(el);
       }
-      Object.assign(el.style, fn(u, popts));
+      // the unit INDEX as a third argument: `assemble` hashes it for its per-glyph scatter.
+      // A third parameter rather than a key in popts, so no existing preset's signature moves.
+      Object.assign(el.style, fn(u, popts, i));
     }
   });
 }

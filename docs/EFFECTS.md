@@ -29,6 +29,7 @@
 
 | name | what / when |
 |---|---|
+| `assemble` | each glyph flies in from its OWN scattered offset and rotation and settles into the word, arriving in a shuffled order · the AE "text animator + randomize-order range selector" reveal. Pair it with `split: "char"` |
 | `blur` | resolve out of blur: calm, premium |
 | `bounce` | springy bounce in: playful brands only |
 | `chroma` | R/G/B ghosts split apart and converge to a crisp glyph |
@@ -881,4 +882,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_580 effects across 39 families. Regenerate: `make effects`._
+_581 effects across 39 families. Regenerate: `make effects`._

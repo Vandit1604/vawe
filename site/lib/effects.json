@@ -1,6 +1,6 @@
 {
-  "total": 580,
-  "previewed": 255,
+  "total": 581,
+  "previewed": 256,
   "families": 39,
   "tags": [
     [
@@ -77,7 +77,7 @@
     ],
     [
       "text",
-      38
+      39
     ],
     [
       "timing",
@@ -97,9 +97,16 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 30,
+      "count": 31,
       "undescribed": 0,
       "entries": [
+        {
+          "name": "assemble",
+          "stem": "kinetic-text-presets--assemble",
+          "desc": "each · glyph · flies · in · from · its · OWN · scattered · offset · and · rotation · and · settles · into · the · word, · arriving · in · a · shuffled · order · · · the · AE · \"text · animator · + · randomize-order · range · selector\" · reveal. · Pair · it · with · `split · \"char\"`",
+          "scene": "/assets/effects/kinetic-text-presets--assemble.json",
+          "noPreview": null
+        },
         {
           "name": "blur",
           "stem": "kinetic-text-presets--blur",
