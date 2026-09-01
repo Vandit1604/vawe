@@ -16839,3 +16839,44 @@ reach `__engineError` like every other boot failure, or the next author spends t
 **The lesson.** A dial that lets one author fix a bad default is how a bad default survives. `speed`
 made `flow` usable and therefore made it un-reported for as long as it has existed. When you find
 yourself correcting a shipped default at the call site, the correction IS the bug report.
+
+## 545. a logo reveal that could never end as the logo, because the fill was thrown away at build
+
+**What.** The `svg` layer's `draw` writes a mark on by animating `stroke-dashoffset` from 1 to 0. Build
+forced `fill: none` whenever `draw` was present (`core/layers/svg.js`), and `frame()` never restored it,
+so the mark drew its outline and stayed an outline for the rest of the film. Ten scenes use `draw` and
+none of them ends as a solid mark, because none of them could.
+
+**Root cause.** The standard recipe was half-read. After Effects animates Trim Paths and then uses the
+drawn stroke as an ALPHA MATTE for the real artwork, so the stroke reveals the FILLED logo and then
+disappears. We built the stroke and stopped, and the forced `fill: none` then made the second half
+unreachable rather than merely absent: an author who wrote `fill` beside `draw` had it silently
+discarded at build, which is the accepted-and-ignored shape this file logs more than any other. The
+census proves the silence rather than merely suggesting it: **0 of the 7 `svg` draw layers in the
+library carry a fill**, which is not taste, it is nobody bothering to pass a prop that did nothing.
+
+**Fix.** `core/layers/svg.js`. Build keeps the resolved colour on `el.__drawFill` and paints the path
+with it at `fill-opacity: 0`; `frame()` brings that opacity up over `draw.fillDur` (0.4s) once the
+stroke finishes, and takes the stroke's opacity down over the LAST 65% of the same window. Not the whole
+window, and that is the one non-obvious line: an even cross-fade parks both alphas at 0.5 in the middle,
+which reads as the mark dimming rather than as one thing becoming another. `draw.fill: true` means the
+theme accent, the spelling `fill: true` already had. `draw.ease` was added in the same pass, through
+`resolveEasing`, because the curve was hardcoded `easeOutCubic` and every write-on therefore started at
+maximum speed. `blueprints/beats.mjs` `logoReveal` passes both, so its draw branch now ends as the mark
+exactly as its morph branch always did.
+
+**What the gate now catches.** Eleven assertions in `scripts/gates/lib-test.mjs` over a fake-DOM mount:
+the fill colour survives the build, the fill is invisible while the stroke draws, the mark ends filled
+with the stroke gone, the resolve is monotonic and clamped, the two alphas never sum below 0.9, the
+`draw.ease` reaches the pixels, an unknown ease throws, and a mark with NO fill is exactly what it was.
+Proved by replacing the fill write with a constant `0`: two of them fail, and only those two.
+
+**A second failure worth the line, because it is why nothing shipped moved.** A layer with no fill is
+untouched, so this is a pure capability addition. That is a happy accident of the census, not a design:
+had one film written `fill` beside `draw` in hope, it would have changed under this commit without a
+word. The general rule is to run the census BEFORE calling a change safe, and to say the number.
+
+**The lesson.** When an effect is named after a thing (a logo reveal), ask whether the output IS that
+thing at the last frame. An outline that finished drawing looks finished, and looking finished is how
+half a recipe survives review. The question that finds it is not "does it animate" but "what is left
+on screen when it stops".

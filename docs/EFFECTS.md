@@ -331,7 +331,7 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `fling` | a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move |
 | `hang` | influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state |
 | `linear` | the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped |
-| `overshoot` | arrives at 1.8x the average speed with a long handle, so the value sails past its key and comes back. The handle version of a back ease, and it needs the far side to stop it |
+| `overshoot` | arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it |
 
 ## Depths (parallax planes)  `[per-layer]`
 
@@ -510,7 +510,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
 | `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
 | `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it |
-| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) or MELTS from one path into another (true point-lerp morph, optional spin) |
+| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
 | `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
 | `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
 | `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |

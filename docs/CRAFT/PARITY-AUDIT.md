@@ -24,7 +24,7 @@ less.
 | 2.5D parallax | BEHIND | `depth` appears in 1 of 170 scenes; 44 of 47 camera films sit entirely at z = 0 |
 | device mockup | BEHIND | `metalness: 0.86` with no environment map anywhere in the file |
 | animated gradient | **BEHIND on the default, fixed** | 57 to 105 seconds per cycle against a practitioner band of 6 to 12; now 11.4 to 20.9 |
-| logo reveal | BEHIND | `fill: none` is set for the draw and never restored, so a mark cannot end filled |
+| logo reveal | **BEHIND, fixed** | `fill: none` was set for the draw and never restored, so a mark could not end filled |
 
 **One was fixed the moment it was found.** The `overshoot` keyframe handle shipped with a positive
 arriving speed, and `y2 = 1 - speed * influence` puts that control point BELOW the key, so the curve
@@ -519,26 +519,42 @@ two words (`core/morph.js:1`). The shape morph is `core/path-morph.js`, reached 
 
 Adoption: `logoReveal` in 1 of 170 scenes, `logoLockup` in 0, `"draw"` in 10, `"morph"` in 3.
 
-### Verdict: BEHIND
+### Verdict: BEHIND. Items 1 and 3 FIXED, 2, 4 and 5 deliberately left.
 
-`core/layers/svg.js:46` sets `fill: none` when `draw` is present, and `frame()` never restores it, so a
-mark that draws on **can never end as the filled logo**. That is the matte half of the standard recipe
-missing entirely, and it is why `draw` is an outline effect here rather than a logo reveal.
+`core/layers/svg.js` set `fill: none` when `draw` was present, and `frame()` never restored it, so a
+mark that drew on **could never end as the filled logo**. That was the matte half of the standard recipe
+missing entirely, and it is why `draw` was an outline effect here rather than a logo reveal.
 
-### The gap, concretely
+### What was done
 
-1. **Resolve the fill.** After `u >= 1`, or on a `draw.fill` window, cross-fade the path's fill in and the
-   stroke out. Roughly five lines in `frame()` at `core/layers/svg.js:78`, and it needs the built fill
-   colour stashed at build since `:46` currently discards it.
-2. **Expose Start, not just End.** Trim Paths has Start, End and Offset; we animate the equivalent of End
-   alone. `draw: {from, to}` covers the common case of a stroke that travels rather than grows.
-3. **Ease.** `easeOutCubic` is hardcoded at `core/layers/svg.js:77`, so the write-on starts at maximum
-   speed. The standard is Easy Ease at both ends. Take `draw.ease` and default it to an in-out.
-4. **One path only.** `L.d` is a single `d`, so a multi-element mark has to be flattened into one compound
-   path and gets no per-element stagger. `parts`-style sequencing over several `<path>` children is the
-   shape, and `core/parts.js` already owns staggered entrances.
-5. `logoReveal`'s 1.3s draw sits below the 2 to 5 second band. Defensible in a 20 second film, so I would
-   change it last, and only after the fill resolves.
+1. **The fill resolves.** Give an `svg` layer a `fill` (or `draw.fill`) beside its `draw` and the fill
+   comes up over `draw.fillDur` (0.4s) once the stroke has finished, with the stroke leaving over the
+   last 65% of that window. Not the whole window: crossing the two alphas evenly parks both at 0.5 in
+   the middle, which reads as the mark DIMMING rather than as one becoming the other. `draw.fill: true`
+   means the theme accent. A layer with no fill is untouched, which is why nothing shipped moved: **0
+   of the 7 `svg` draw layers in the library carried a fill**, because carrying one used to do nothing.
+   Looked at, not assumed: frames at 0.6 / 1.2 / 1.5 / 2.0s are a partial outline, a closed outline, a
+   filling mark with the stroke still ghosting, and the solid mark.
+3. **`draw.ease`.** `easeOutCubic` was hardcoded, so every write-on started at maximum speed. The field
+   goes through `resolveEasing` (`core/motion.js`), so absent still means `easeOutCubic` and a wrong
+   name throws instead of substituting. `easeInOutCubic` is the AE Easy Ease the recipe asks for.
+
+`logoReveal` (`blueprints/beats.mjs`) now passes both, so its draw branch ends as the mark exactly as
+its morph branch always did. That is what makes the fix reachable rather than merely present.
+`docs/MISTAKES.md` #545. Eleven assertions in `scripts/gates/lib-test.mjs`, proved by breaking the fill
+write and watching two of them fail.
+
+### Deliberately left, and why
+
+2. **Trim Paths Start and Offset.** We still animate the equivalent of End alone. Worth adding, but it
+   is a second animated endpoint rather than a missing half of an effect, and the fill resolve is what
+   turned this from an outline effect into a logo reveal. `draw: {from, to}` is still the right shape.
+4. **One path only.** `L.d` is a single `d`, so a multi-element mark is flattened into one compound path
+   and gets no per-element stagger. The shape is `parts`-style sequencing over several `<path>`
+   children, and `core/parts.js` already owns staggered entrances; that is a bigger change than this
+   file's cheapest-real-win framing, and `core/parts.js` was another agent's this pass.
+5. `logoReveal`'s 1.3s draw still sits below the 2 to 5 second band, and is still defensible in a
+   20 second film. Unchanged on purpose: it was the item to change last.
 
 ### The step somebody would not guess
 
@@ -562,3 +578,5 @@ the codebase; it is printed in an error message (`core/fx/plane.js:190`) instead
 
 Second, and much cheaper if you want a win in one sitting: the fill resolve on `svg` `draw`
 (`core/layers/svg.js:46`). It is about five lines and it turns an outline effect into a logo reveal.
+**Done.** See effect 4 above; the estimate held, and the only surprise was that crossing the two alphas
+evenly makes the mark dim rather than resolve.
