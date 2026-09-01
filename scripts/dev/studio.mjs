@@ -20,10 +20,13 @@
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFile, execFileSync, spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { patchMotion, upsertKey } from '../author/patch-motion.mjs';
-import { serveRepo, REPO_ROOT } from '../lib/render-harness.mjs';
+import { patchMotion, upsertKey, applyOps } from '../author/patch-motion.mjs';
+import { serveRepo, REPO_ROOT, launchPage, waitForEngine } from '../lib/render-harness.mjs';
+import { sceneDims } from '../../core/safe.js';
+import { resolveBridges } from '../../core/audio-bridges.js';
+import { scratch } from '../lib/scratch.mjs';
 import { studioPage } from './studio-page.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -66,6 +69,42 @@ const label = (L) => L.id || (L.text && onScreenText(L.text))
 // There is no way for it to drift from what is on disk.
 const undoStack = [];
 
+// ---- the AUDIO lane -------------------------------------------------------------------------------
+// A film's sound is not a layer and it never was: it has a bed, a beat grid, one-shot cues and bridges
+// that hang off the film's own joints. Drawn as another grey bar it said nothing at all. What this
+// gathers is what the SCENE declares plus the one thing measured off disk, the beat map, because seams
+// are supposed to land on it and that is checkable by eye the moment the grid is on screen.
+//
+// The bridges are RESOLVED by the engine's own resolver (core/audio-bridges.js), never re-derived: a
+// bridge is hung off a named junction (`at: "cut@2"`) and a second implementation of "where does this
+// film turn" is the drift MISTAKES #159 is about.
+const beatMap = (music) => {
+  if (!music) return null;
+  const p = path.join(REPO_ROOT, String(music).replace(/\.[a-z0-9]+$/i, '.beats.json'));
+  if (!fs.existsSync(p)) return null;
+  try {
+    const b = JSON.parse(fs.readFileSync(p, 'utf8'));
+    return { bpm: b.bpm || null, beats: b.beats || [], downbeats: b.downbeats || [],
+             file: path.relative(REPO_ROOT, p) };
+  } catch { return null; }
+};
+const audioLane = (d, marks, duration) => {
+  const a = d.audio;
+  if (!a || typeof a !== 'object') return { none: true };
+  if (a.silent) return { silent: true, why: a._why || null };
+  let bridges = [], bridgeError = null;
+  // NOT swallowed into an empty lane: a bridge that will not resolve is a scene that will not mix, and
+  // the message the resolver throws names the junction it could not find.
+  try { bridges = resolveBridges(a, marks, duration).map((b) => ({ start: b.start, end: b.end, sound: b.sound, at: b.at })); }
+  catch (e) { bridgeError = String(e.message); }
+  return {
+    music: a.music || null, gain: a.musicGain ?? null, fade: a.musicFade || null, auto: !!a.auto,
+    cues: (Array.isArray(a.cues) ? a.cues : []).filter((c) => c && typeof c.t === 'number')
+      .map((c) => ({ t: c.t, name: c.name || 'cue' })),
+    bridges, bridgeError, beats: beatMap(a.music),
+  };
+};
+
 const timelineModel = (file) => {
   const d = JSON.parse(fs.readFileSync(file, 'utf8'));
   const marks = (key) => (Array.isArray(d[key]) ? d[key] : []).filter((c) => c && typeof c.t === 'number')
@@ -82,6 +121,11 @@ const timelineModel = (file) => {
         keys: Array.isArray(L.motion) ? L.motion.map((k) => k.t ?? 0) : [], raw: L })),
     // The backdrop is a layer of the film in every sense that matters, so it is selectable too.
     bg: Array.isArray(d.bg) ? d.bg : (d.bg ? [d.bg] : []),
+    // Captions are a KIND OF ROW, not a layer: they are authored as [{t0,t1,text}] and were being drawn
+    // as ordinary grey bars, which said they were the same sort of thing as a `text` layer. They are not.
+    captions: (Array.isArray(d.captions) ? d.captions : []).filter((c) => c && typeof c === 'object')
+      .map((c) => ({ t0: c.t0 ?? c.start ?? c.t ?? 0, t1: c.t1 ?? ((c.t0 ?? 0) + (c.dur ?? 2)), text: String(c.text || '') })),
+    audio: audioLane(d, [...marks('cuts'), ...marks('seams'), ...marks('stings')], d.duration || 0),
     gate: beatCheck(file),
   };
 };
@@ -92,10 +136,154 @@ const timelineModel = (file) => {
 const THEME0 = (process.env.THEME || 'light').toLowerCase() === 'dark' ? 'dark' : 'light';
 const page = () => studioPage({ fmt: 'scene', dataUrl, title: path.basename(dataArg), theme: THEME0 });
 
+const SLUG = path.basename(dataArg, '.json');
+const MP4 = path.join(REPO_ROOT, 'out', `${SLUG}.mp4`);
+
+// A JSON body, read once, with the reply the handler owes. Three handlers below wrote this by hand and
+// the fourth is where that stops being worth it.
+const withBody = (req, res, run) => {
+  let body = '';
+  req.on('data', (c) => { body += c; if (body.length > 1e6) req.destroy(); });
+  req.on('end', () => run(body, (o, code = 200) => {
+    res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(o));
+  }));
+};
+
+// ---- the CHOOSER, and the LOOK sheets: three CLIs, spawned ------------------------------------------
+// candidates.mjs, beats.mjs and seam-snap.mjs each open a browser or a decoder, print, and exit. They
+// are spawned rather than imported for the reason beat-check is: they read process.argv and exit at top
+// level. Spawning also keeps them ASYNC, which matters more here than anywhere else in this file: a
+// candidate set takes about fifteen seconds and the page has to stay answerable throughout, not least
+// because the six mp4s it is about to play come off this same server.
+const jobs = new Map();   // name → true while it runs, so a second click cannot fight the first
+const run = (name, args, done) => {
+  if (jobs.get(name)) return done(new Error(`a ${name} run is already going, wait for it`), '', '');
+  jobs.set(name, true);
+  execFile(process.execPath, args, { cwd: REPO_ROOT, maxBuffer: 64 << 20 },
+    (err, stdout, stderr) => { jobs.delete(name); done(err, stdout, stderr); });
+};
+
+// The two contact sheets Look is built out of, each with the file it writes and what it needs first.
+// The paths are the ones those tools choose, read from the same helper they use, never restated as a
+// literal: a sheet the page cannot find is indistinguishable from a sheet that was never drawn.
+// LOOK IS PRE-RENDER, and two of these three prove it: `beats` and `frames` both seek renderFrame in a
+// headless page exactly as the scrubber does, so they are available on a scene that has never been
+// rendered, which is the whole point of looking at a strip. Only `seams` needs an mp4, because a seam is
+// composited during the encode and exists nowhere else. The half that needs a render must never gate the
+// half that does not, so they are three buttons and not one.
+const SHEETS = {
+  beats: { file: () => scratch('beats', `${SLUG}.png`), args: ['scripts/author/beats.mjs', dataArg],
+           what: 'every beat, in · mid · out' },
+  // preview.mjs names its sheet after the FORMAT, not the scene (/tmp/preview_scene.png), so two studios
+  // on two scenes would overwrite each other's. Copied to a per-scene path the moment it lands, which
+  // narrows that to the width of one run rather than the width of a session.
+  frames: { file: () => scratch('look', `${SLUG}.png`), args: ['scripts/author/preview.mjs', 'scene', '--data', dataArg],
+            what: 'the key frames of the whole film',
+            after: () => { const src = '/tmp/preview_scene.png';
+              if (fs.existsSync(src)) fs.copyFileSync(src, scratch('look', `${SLUG}.png`)); } },
+  seams: { file: () => `/tmp/seams/${SLUG}.png`, args: ['scripts/gates/seam-snap.mjs', dataArg],
+           what: 'the frames straddling every transition, out of the rendered mp4',
+           // seam-snap reads PIXELS, so it cannot run without one. Said plainly rather than drawn as
+           // an empty grid, and the page offers the render.
+           needs: () => (fs.existsSync(MP4) ? null : `seams are composited during the render, so they exist only in out/${SLUG}.mp4, and there is no such file yet.`) },
+};
+
+// ---- THE FILMSTRIP: the timeline shows PICTURES, not only names -----------------------------------
+// A browser cannot screenshot itself, so the strip cannot be grabbed out of the preview iframe however
+// convenient that sounds. It is captured the way everything else in this repo captures: a headless page
+// on this same server, seeking the engine's own renderFrame and shooting each frame. That also settles
+// the stutter question by construction, since it happens in another process and the strip is then a set
+// of static images: scrubbing never touches it.
+//
+// MEASURED, on a 15s portrait film: ~1.1s to launch, ~55ms a frame at 74x132, 14 frames, 1.9s all in.
+// The stride is duration/14 with a 0.6s floor, so a 5s film gets 8 thumbs and a 60s film gets 14 wider
+// apart. Cached against the scene's mtime, so it is built once and then free until the film changes.
+const STRIP_N = 14;
+let strip = null;
+async function buildStrip() {
+  const mtime = fs.statSync(dataArg).mtimeMs;
+  if (strip && strip.mtime === mtime) return strip;
+  const t0 = Date.now();
+  const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
+  const dur = Number(d.duration) || 0;
+  if (!dur) return { error: 'this scene declares no `duration`, so there is no span to lay a strip along' };
+  const [VW, VH] = sceneDims(d);
+  const fps = Number(d.fps) || 30;
+  const n = Math.max(3, Math.min(STRIP_N, Math.floor(dur / 0.6)));
+  const dir = path.join(REPO_ROOT, 'out', 'strip', SLUG);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  // 132px tall whatever the canvas is: the band is one height and a portrait film must not get a
+  // thumbnail eight pixels wide.
+  const { page, close } = await launchPage({ width: VW, height: VH, scale: Math.min(1, 132 / VH) });
+  const frames = [], samples = [];
+  try {
+    await page.goto(`http://127.0.0.1:${PORT}/formats/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`,
+      { waitUntil: 'load' });
+    const err = await waitForEngine(page, { timeout: 40000, throwOnTimeout: false });
+    if (err) return { error: `the scene will not boot, so there are no frames to strip: ${err}` };
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) * (dur / n);
+      await page.evaluate((k) => window.__engine.renderFrame(k), Math.round(t * fps));
+      const file = path.join(dir, `${String(i).padStart(2, '0')}.jpg`);
+      await page.screenshot({ path: file, type: 'jpeg', quality: 72, clip: { x: 0, y: 0, width: VW, height: VH } });
+      frames.push({ t: +t.toFixed(3), src: `/out/strip/${SLUG}/${String(i).padStart(2, '0')}.jpg` });
+      // A LAYER THAT NEVER MOVES ACROSS ITS OWN WINDOW, measured while we are already seeking. This is
+      // the fault that gets caught by eye after a render: an image sitting dead still for six seconds.
+      // Per LAYER rather than per frame, which is the difference from the motion figure we already have.
+      samples.push(await page.evaluate(() => [...document.querySelectorAll('.hs-layer[data-idx]')]
+        .filter((el) => !el.parentElement.closest('.hs-layer'))
+        .map((el) => { const s = getComputedStyle(el), r = el.getBoundingClientRect();
+          return { i: +el.dataset.idx, sig: [s.transform, s.filter, Math.round(r.x), Math.round(r.y),
+            Math.round(r.width), Math.round(r.height), (el.textContent || '').slice(0, 60)].join('|') }; })));
+    }
+  } finally { await close(); }
+  strip = { mtime, frames, stride: +(dur / n).toFixed(3), ms: Date.now() - t0, w: VW, h: VH,
+            still: stillLayers(samples) };
+  return strip;
+}
+
+/**
+ * stillLayers(samples) → the layer indices whose every sampled frame is identical.
+ *
+ * A NOTE, NEVER A BLOCK, and the reason is in the films: a held frame is sometimes the beat. What it
+ * can say honestly is "nothing about this layer changed at any time we looked at it", and it only says
+ * it when it looked at least three times, because two samples of a two-second layer prove nothing. It
+ * is a sampled measurement and it says so: a layer that moves and returns between samples reads as
+ * still, which is why this is a note for the eye rather than a number anything is graded on.
+ */
+function stillLayers(samples) {
+  const seen = new Map();
+  for (const frame of samples) for (const { i, sig } of frame) {
+    if (!seen.has(i)) seen.set(i, []);
+    seen.get(i).push(sig);
+  }
+  return [...seen].filter(([, sigs]) => sigs.length >= 3 && sigs.every((s) => s === sigs[0])).map(([i]) => i);
+}
+
+// ---- the render, as a job with a status ---------------------------------------------------------
+// A render is minutes, so it is started and then polled. Holding a fetch open for the whole of one is
+// how a panel ends up frozen with nothing to say for itself.
+let render = null;
+const startRender = () => {
+  render = { started: Date.now(), done: false, error: null, line: 'starting make video' };
+  const p = spawn('make', ['video', `D=${dataArg}`, 'NOCHECK=1', 'NOAUDIT=1'], { cwd: REPO_ROOT });
+  const note = (b) => { const l = String(b).trim().split('\n').filter(Boolean).pop(); if (l) render.line = l.slice(0, 160); };
+  p.stdout.on('data', note); p.stderr.on('data', note);
+  p.on('close', (code) => {
+    render.done = true; render.ms = Date.now() - render.started;
+    if (code !== 0) render.error = `make video exited ${code}: ${render.line}`;
+    else if (!fs.existsSync(MP4)) render.error = `make video exited 0 but wrote no out/${SLUG}.mp4`;
+  });
+  p.on('error', (e) => { render.done = true; render.error = `could not start make: ${e.message}`; });
+};
+
 // Studio's own endpoints. Anything it does not answer falls through to the shared static handler.
 const studioRoutes = (req, res) => {
   const url = req.url.split('?')[0];
-  if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(page()); return true; }
+  // no-store, because this shell is edited while it is being looked at: with no validator on the
+  // response Chrome cached it heuristically and a reload showed the previous version of the tool.
+  if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' }); res.end(page()); return true; }
   // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
   // ---- the PLAN, drawn ---------------------------------------------------------------------------
   // A film has two artefacts and studio only ever showed one. The storyboard is where the beats were
@@ -188,6 +376,89 @@ const studioRoutes = (req, res) => {
     });
     return true;
   }
+  // ---- the CHOOSER: six real takes of THIS film at the playhead ---------------------------------
+  // No search box, by design: the panel asks for a set at a time, and the answer is six clips of the
+  // scene you are already looking at. The reply is candidates.mjs's own JSON, passed through whole, so
+  // the warnings it attaches (a light backdrop under light ink, an `opts` block the new preset has no
+  // knob for) reach the card that offers the take rather than being dropped on the way.
+  if (req.method === 'POST' && url === '/api/candidates') {
+    withBody(req, res, (body, reply) => {
+      let at = 0, n = 6;
+      try { const q = JSON.parse(body || '{}'); at = +q.at || 0; n = Math.max(1, Math.min(8, +q.n || 6)); } catch { /* defaults */ }
+      run('candidates', ['scripts/dev/candidates.mjs', dataArg, '--at', String(+at.toFixed(2)), '--axis', 'bg', '--n', String(n)],
+        (err, stdout, stderr) => {
+          if (err) return reply({ ok: false, error: String(stderr || stdout || err.message).trim().slice(0, 700) });
+          try { reply({ ok: true, ...JSON.parse(stdout) }); }
+          catch (e) { reply({ ok: false, error: `candidates printed something that is not JSON:\n${String(stdout).slice(0, 400)}` }); }
+        });
+    });
+    return true;
+  }
+
+  // ---- accepting one: the patch it came with, applied to the file ---------------------------------
+  // As TEXT (scripts/author/patch-motion.mjs), for the reason the keyframe writer is: these scenes are
+  // hand formatted and a parse/stringify round trip would turn a one-word choice into a whole-file diff.
+  if (req.method === 'POST' && url === '/api/apply') {
+    withBody(req, res, (body, reply) => {
+      try {
+        const { ops } = JSON.parse(body || '{}');
+        const src = fs.readFileSync(dataArg, 'utf8');
+        const out = applyOps(src, ops);
+        if (out !== src) { undoStack.push(src); fs.writeFileSync(dataArg, out); }
+        reply({ ok: true, changed: out !== src, undo: undoStack.length });
+      } catch (e) { reply({ ok: false, error: String(e.message) }, 400); }
+    });
+    return true;
+  }
+
+  // ---- LOOK: a contact sheet, drawn on demand -----------------------------------------------------
+  // Redrawn when the SCENE is newer than the sheet, the same freshness rule /__panels uses: a strip of
+  // a film you have since edited is worse than no strip, because it looks like evidence.
+  if (url.startsWith('/__sheet')) {
+    const kind = new URL(req.url, 'http://x').searchParams.get('kind');
+    const S = SHEETS[kind];
+    const text = (code, msg, headers = {}) => { res.writeHead(code, { 'Content-Type': 'text/plain', ...headers }); res.end(msg); };
+    if (!S) return text(400, `no such sheet "${kind}". Known: ${Object.keys(SHEETS).join(', ')}`), true;
+    const blocked = S.needs && S.needs();
+    if (blocked) return text(409, blocked, { 'X-Needs-Render': '1' }), true;
+    const png = S.file();
+    const send = () => {
+      if (!fs.existsSync(png)) return text(500, `${kind} reported success but wrote no sheet at ${png}`);
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store', 'X-Sheet': png });
+      fs.createReadStream(png).pipe(res);
+    };
+    const stale = !fs.existsSync(png) || fs.statSync(dataArg).mtimeMs > fs.statSync(png).mtimeMs
+      || (kind === 'seams' && fs.statSync(MP4).mtimeMs > fs.statSync(png).mtimeMs);
+    if (!stale) return send(), true;
+    run(kind, S.args, (err, stdout, stderr) => {
+      if (S.after) { try { S.after(); } catch { /* the existence check below is the real verdict */ } }
+      // seam-snap exits 1 when it FINDS a flash and still writes its sheet, which is the run you most
+      // want to look at. So the sheet decides, not the exit code.
+      if (fs.existsSync(png)) return send();
+      text(500, `${kind} drew no sheet:\n${String(stderr || stdout || (err && err.message) || '').trim().slice(0, 900)}`);
+    });
+    return true;
+  }
+
+  // ---- the filmstrip, built on demand and cached against the scene's mtime -------------------------
+  if (url === '/api/strip') {
+    const reply = (o) => { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(o)); };
+    if (jobs.get('strip')) return reply({ busy: true }), true;
+    jobs.set('strip', true);
+    buildStrip().then((s) => reply(s)).catch((e) => reply({ error: String(e.message) }))
+      .finally(() => jobs.delete('strip'));
+    return true;
+  }
+
+  // ---- the render the seam sheet needs, started and then polled ------------------------------------
+  if (url === '/api/render') {
+    if (req.method === 'POST') { if (!render || render.done) startRender(); }
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify(render
+      ? { ...render, secs: Math.round((Date.now() - render.started) / 1000) }
+      : { done: fs.existsSync(MP4), line: fs.existsSync(MP4) ? `out/${SLUG}.mp4 is already on disk` : 'not started' })), true;
+  }
+
   if (url === '/api/timeline') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     try { res.end(JSON.stringify(timelineModel(dataArg))); }

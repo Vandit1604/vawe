@@ -27,7 +27,7 @@ import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
-import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
+import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -3529,6 +3529,28 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const re = upsertKey(up, { t: 0.5, x: 99 });
   ok('upsertKey updates rather than stacking', re.length === 3 && re[1].x === 99);
   ok('upsertKey merges onto the existing key', upsertKey([{ t: 0, x: 1, ease: 'linear' }], { t: 0, x: 2 })[0].ease === 'linear');
+
+  // applyOps: the same no-reformatting promise, for the chooser's RFC 6902 patches. Accepting a
+  // candidate in studio must move ONE preset name, so what is asserted is the size of the diff as much
+  // as the result: a parse/stringify round trip would give the right JSON and the wrong file.
+  {
+    const src = '{\n "bg": [\n  { "preset": "paper", "opts": { "scale": 2 } },\n  { "preset": "dark" }\n ]\n}';
+    const swapped = applyOps(src, [{ op: 'replace', path: '/bg/1/preset', value: 'liquid' }]);
+    ok('applyOps replaces the preset of the window it names', JSON.parse(swapped).bg[1].preset === 'liquid');
+    ok('applyOps touches one line and no other byte',
+      swapped.split('\n').filter((l, i) => l !== src.split('\n')[i]).length === 1);
+    const dropped = applyOps(src, [{ op: 'replace', path: '/bg/0/preset', value: 'paperDots' },
+      { op: 'remove', path: '/bg/0/opts' }]);
+    const d0 = JSON.parse(dropped).bg[0];
+    ok('applyOps removes the `opts` the new preset has no knob for', d0.preset === 'paperDots' && d0.opts === undefined);
+    ok('applyOps leaves the other window untouched', JSON.parse(dropped).bg[1].preset === 'dark');
+    ok('applyOps refuses a path outside the shape it understands',
+      (() => { try { applyOps(src, [{ op: 'replace', path: '/layers/0/text', value: 'x' }]); return false; }
+        catch (e) { return /bg\/<i>/.test(e.message); } })());
+    ok('applyOps refuses a scene with no such window',
+      (() => { try { applyOps(src, [{ op: 'replace', path: '/bg/9/preset', value: 'x' }]); return false; }
+        catch (e) { return /bg\[9\]/.test(e.message); } })());
+  }
 }
 
 
