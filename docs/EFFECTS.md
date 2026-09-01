@@ -694,6 +694,17 @@ What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, wh
 | `tritone` | duotone with a third stop in the middle, which is what stops the midtones going muddy |
 | `vignette` | NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges |
 
+## Time remaps (the layer's own clock)  `[timing]`
+
+`timeRemap` on a layer. After Effects' Time Remapping: the CLOCK accelerates, brakes, holds or reverses, so everything the layer does moves with it (its motion, its size, its idle, its typing, its count). An easing on a motion track cannot do this: it bends one property across one segment while the counter underneath still counts at an even rate. Name one of these shapes, or write your own keys `[{"t":0,"at":0},{"t":1.4,"at":0.3}]`, where `t` is the layer's elapsed second and `at` is the second it believes it is. The neighbouring dials: `timeWarp` is the one-easing form of the same idea, and `stepFps` posterizes the clock to a lower rate (15 in a 30fps film is the hand-drawn "on twos" look).
+
+| name | what / when |
+|---|---|
+| `freeze` | FREEZE FRAME: the layer plays out over the first 60% of its window, then holds dead still on its own last pose for the rest of it |
+| `hold` | the slow-motion HOLD: in fast, down to 30% speed across the middle half, out fast. The part you want the eye to actually read sits in the slow part |
+| `rewind` | plays to the end at double speed, then runs itself BACKWARDS to where it started. One layer, one window, and the return is the same motion reversed |
+| `whip` | SPEED RAMP: crawls at 20% speed, whips through the middle at about 530%, lands slow. The AE three-key ramp, for a dull passage you want crossed fast |
+
 ## Easings  `[timing]`
 
 `ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
@@ -910,4 +921,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_595 effects across 41 families. Regenerate: `make effects`._
+_599 effects across 42 families. Regenerate: `make effects`._

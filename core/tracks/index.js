@@ -51,7 +51,7 @@ import * as tBox from './box.js';
 import * as tFollow from './follow.js';
 import * as tMotion from './motion.js';
 import { DEFAULT_SHUTTER } from './motion.js';
-import { resolveEasing } from '../motion.js';
+import { layerTime } from '../time.js';
 import * as tIdle from './idle.js';
 import * as tModifiers from './modifiers.js';
 
@@ -76,7 +76,7 @@ for (const name of TRACK_TYPES)
 // collects the per-track declarations and an `export const PROPS` in this file is collected by nobody.
 // That was the first attempt and it was silently dead: the prop-audit reported `timeWarp` as written
 // and read by nothing, which is exactly the class it exists to catch, so it caught me.
-const ORCHESTRATOR_TRACK_PROPS = { timeWarp: {} };
+const ORCHESTRATOR_TRACK_PROPS = { timeWarp: {}, timeRemap: {} };
 
 export const TRACK_PROPS = Object.freeze(mergeProps(
   ...TRACK_TYPES.map((n) => REGISTRY[n].PROPS), ORCHESTRATOR_TRACK_PROPS));
@@ -137,39 +137,19 @@ export const ORDER = (() => {
 // object literal here is an allocation per layer per frame that the garbage collector pays for in the
 // middle of a render. `kit` is the scene's own long-lived bindings (renderer · theme · the theme's
 // motion personality · fps), built once by createTrackKit below.
-// ---- THE SPEED RAMP: a layer's own clock, warped ------------------------------------------------
+// ---- THE LAYER'S CLOCK, warped ------------------------------------------------------------------
 //
-// The one recipe docs/CRAFT/AFTER-EFFECTS-RECIPES.md marks LACK. In After Effects it is Time Remapping:
-// the layer's clock itself accelerates and brakes, so everything the layer does slows and speeds
-// TOGETHER, including its primitive. An easing on a motion track cannot do that: it bends one property
-// across one segment, and a `count` still counts at an even rate underneath it while a `typing` layer
-// still types at its own speed.
-//
-// `timeWarp` is a curve applied to the layer's LOCAL time before any track reads it. `"easeInQuint"`
-// starts the whole layer slow and whips it to the end; `"easeOutQuint"` snaps in and glides out;
-// `"easeInOutCubic"` is the classic ramp down and back up. Any easing name, because the vocabulary
-// already exists and inventing a second one for time would be the fork this repo logs most.
+// `timeWarp`, `timeRemap` and `stepFps` all warp the layer's LOCAL time before any track reads it, and
+// core/time.js owns all three: what each one means, and why an easing alone cannot express a hold, is
+// written there rather than restated here.
 //
 // APPLIED HERE AND NOWHERE ELSE, which is what makes it a clock rather than a fifteenth effect. Every
 // per-frame track takes `t` from this one call, so warping it once reaches the motion track, the box
 // track, the idle, the primitive's own frame() and the modifiers, all in agreement. Doing it inside
 // motionAt would have warped the position and left the typing behind.
-//
-// PURE IN t: a monotonic remap of one number, no state, so renderFrame(n) is unchanged in kind. The
-// window itself never moves, only where inside it the layer believes it is, so `start` and `duration`
-// still mean what they say and nothing downstream needs to know.
-function warpedTime(L, t, start, end) {
-  if (!L.timeWarp) return t;
-  const dur = end - start;
-  if (!(dur > 0) || t < start) return t;
-  if (t >= end) return end;
-  const u = (t - start) / dur;
-  return start + resolveEasing(L.timeWarp)(u) * dur;
-}
-
 export function runTracks(kit, el, L, units, t, f, scene) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
-  const lt = warpedTime(L, t, start, end);
+  const lt = layerTime(L, t, start, end);
   for (let i = 0; i < ORDER.length; i++) ORDER[i](kit, el, L, units, lt, f, start, end, scene);
 }
 

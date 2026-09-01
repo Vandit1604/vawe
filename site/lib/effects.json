@@ -1,7 +1,7 @@
 {
-  "total": 595,
-  "previewed": 257,
-  "families": 41,
+  "total": 599,
+  "previewed": 261,
+  "families": 42,
   "tags": [
     [
       "asset",
@@ -81,7 +81,7 @@
     ],
     [
       "timing",
-      71
+      75
     ],
     [
       "transition",
@@ -3566,6 +3566,47 @@
           "stem": "filter-presets--vignette",
           "desc": "NOT · a · filter. · A · darkening · field · composited · over · the · layer · box, · so · it · is · an · inset · radial-gradient · overlay · div · and · stays · sharp · at · the · edges",
           "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "time-remaps-the-layer-s-own-clock",
+      "title": "Time remaps (the layer's own clock)",
+      "tag": "timing",
+      "intro": "`timeRemap` · on · a · layer. · After · Effects' · Time · Remapping · the · CLOCK · accelerates, · brakes, · holds · or · reverses, · so · everything · the · layer · does · moves · with · it · (its · motion, · its · size, · its · idle, · its · typing, · its · count). · An · easing · on · a · motion · track · cannot · do · this · it · bends · one · property · across · one · segment · while · the · counter · underneath · still · counts · at · an · even · rate. · Name · one · of · these · shapes, · or · write · your · own · keys · `[{\"t\" · 0,\"at\" · 0},{\"t\" · 1.4,\"at\" · 0.3}]`, · where · `t` · is · the · layer's · elapsed · second · and · `at` · is · the · second · it · believes · it · is. · The · neighbouring · dials · `timeWarp` · is · the · one-easing · form · of · the · same · idea, · and · `stepFps` · posterizes · the · clock · to · a · lower · rate · (15 · in · a · 30fps · film · is · the · hand-drawn · \"on · twos\" · look).",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "freeze",
+          "stem": "time-remaps-the-layer-s-own-clock--freeze",
+          "desc": "FREEZE · FRAME · the · layer · plays · out · over · the · first · 60% · of · its · window, · then · holds · dead · still · on · its · own · last · pose · for · the · rest · of · it",
+          "scene": "/assets/effects/time-remaps-the-layer-s-own-clock--freeze.json",
+          "noPreview": null
+        },
+        {
+          "name": "hold",
+          "stem": "time-remaps-the-layer-s-own-clock--hold",
+          "desc": "the · slow-motion · HOLD · in · fast, · down · to · 30% · speed · across · the · middle · half, · out · fast. · The · part · you · want · the · eye · to · actually · read · sits · in · the · slow · part",
+          "scene": "/assets/effects/time-remaps-the-layer-s-own-clock--hold.json",
+          "noPreview": null
+        },
+        {
+          "name": "rewind",
+          "stem": "time-remaps-the-layer-s-own-clock--rewind",
+          "desc": "plays · to · the · end · at · double · speed, · then · runs · itself · BACKWARDS · to · where · it · started. · One · layer, · one · window, · and · the · return · is · the · same · motion · reversed",
+          "scene": "/assets/effects/time-remaps-the-layer-s-own-clock--rewind.json",
+          "noPreview": null
+        },
+        {
+          "name": "whip",
+          "stem": "time-remaps-the-layer-s-own-clock--whip",
+          "desc": "SPEED · RAMP · crawls · at · 20% · speed, · whips · through · the · middle · at · about · 530%, · lands · slow. · The · AE · three-key · ramp, · for · a · dull · passage · you · want · crossed · fast",
+          "scene": "/assets/effects/time-remaps-the-layer-s-own-clock--whip.json",
           "noPreview": null
         }
       ]

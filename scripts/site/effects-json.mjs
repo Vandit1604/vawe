@@ -95,6 +95,10 @@ const USAGE = {
   'blend-modes': (n) => text({ mixBlend: n }),
   'filter-presets': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: n }),
   easings: (n) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
+  // A remap is one word on the layer whose clock it warps, and the motion track is there to say what
+  // the clock is FOR: the same three keys read as a whip, a hold, a freeze or a rewind depending on
+  // this one field, which is the whole argument for it being a clock and not a fourth easing.
+  'time-remaps-the-layer-s-own-clock': (n) => j({ timeRemap: n, motion: [{ t: 0, x: -420 }, { t: 4, x: 420, ease: 'linear' }] }),
   // One slot each, and which slot depends on which registry the word came from.
   'plain-words-feel-duration-camera': (n) => (n in FEEL ? j({ ease: n })
     : n in DURATION ? j({ enterDur: n })
@@ -155,6 +159,15 @@ const PREVIEW = {
     captions: [{ t0: 0.3, t1: 5.4, text: 'Ship the payoff last', pin: 'center', size: 96 }],
     layers: [{ ...OVER, text: n, size: 44, y: 940, start: 0, duration: 6 }],
   }),
+  // The subject travels the frame at an even rate under a `linear` track, so everything the eye reads
+  // as speed here comes from the remap alone: `whip` crawls then bolts, `hold` sits in the middle,
+  // `freeze` stops dead, `rewind` comes back. The counter rides along to show the clock reaching a
+  // primitive, which is the part an easing on the motion track could never do.
+  'time-remaps-the-layer-s-own-clock': (n) => base({ layers: [
+    { ...HERO, text: n, y: 380, timeRemap: n, motion: [{ t: 0, x: -520 }, { t: 5.4, x: 520, ease: 'linear' }] },
+    { type: 'count', to: 100, x: 160, y: 640, w: 1600, align: 'center', size: 200, weight: 800,
+      start: 0.3, duration: 5.4, timeRemap: n },
+  ] }),
   'per-frame-accent-layers': (n) => base({ layers: [
     { type: 'text', text: 'border-beam', x: 460, y: 480, w: 1000, align: 'center', size: 72, weight: 700, font: 'mono', bg: 'rgba(255,255,255,0.04)', pad: '44px', radius: 22, start: 0.3, duration: 5.4 },
     { type: 'beam', mode: n.includes('shine') ? 'shine' : 'border', x: 460, y: 470, w: 1000, h: 170, radius: 22, thickness: 3, tail: 90, speed: 0.5, glow: 0.6, start: 0.5, duration: 5.2 },
