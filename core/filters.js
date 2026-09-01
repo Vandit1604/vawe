@@ -49,6 +49,7 @@ export const FILTER_PRESETS = {
   chromaSplit: { kind: 'svg', mode: 'chroma' },   // per-pixel colour fringing (see buildChromaSplit)
   convolve: { kind: 'svg', mode: 'convolve' },     // arbitrary kernel: emboss, edge, sharpen
   morph: { kind: 'svg', mode: 'morph' },           // dilate / erode: fatten or thin the ink
+  goo: { kind: 'svg', mode: 'goo' },               // metaball threshold: separate shapes fuse and split (see buildGoo)
   relief: { kind: 'svg', mode: 'relief' },         // 3D lighting off a luminance bump map
   vignette: { kind: 'overlay' },
 };
@@ -71,6 +72,7 @@ export const FILTER_BLURBS = {
   convolve: 'a 3x3 kernel reading NEIGHBOURING pixels: emboss (a lit rubbing), edge (flat areas cancel to black, only boundaries survive), sharpen',
   morph: 'dilate or erode, swell the bright pixels into their neighbours, or eat them away. Type gains or loses weight',
   relief: 'a light source over a luminance bump map. Diffuse MULTIPLIES (ink pressed into stock), specular ADDS (a highlight on metal): same primitive, opposite composite',
+  goo: 'the GOOEY / METABALL threshold, and the one primitive that can morph SEVERAL elements as one body: blur the group, then push the blurred ALPHA back through a hard ramp, so neighbouring shapes grow a liquid bridge as they approach and snap apart as they part. Put it on the PARENT (a `group`, or an `html` layer whose children move), never on one shape: one shape has nothing to fuse with. `goo:14` sets the blur radius (how far shapes reach for each other), `goo:14,26` also sets the ramp hardness. Bigger radius = longer bridges; softer ramp = wetter edge',
   vignette: 'NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges',
 };
 
@@ -268,6 +270,43 @@ function buildThermal(f, { stops, radius }) {
 //   3. bloom = Σ blur(mask · tint, σᵢ)               → two scales, natural falloff
 //   4. out   = source + intensity · bloom            → feComposite arithmetic (additive)
 // Pure in the frame number: no clock, no feedback, one static def shared by every layer using it.
+// buildGoo: the GOOEY / METABALL threshold (Lucas Bebber's "gooey effect", and the same maths as an
+// AE Fast Blur + Levels on the alpha). It is the multi-element shape morph: the one operation that can
+// make SEVERAL separate elements read as one liquid body, growing a bridge as they approach and
+// snapping apart as they leave.
+//
+// TWO STEPS, AND THE SECOND IS THE ONE NOBODY GUESSES:
+//   1. blur the whole group, so each shape's alpha falls off into its neighbour's and the two overlap,
+//   2. push that blurred ALPHA back through a hard ramp. The overlap sums past the threshold and comes
+//      back solid, so a bridge appears exactly where two falloffs met.
+// Step 2 is the effect. Blur alone is a smudge; it is the re-thresholding that makes an edge again.
+//
+// ALPHA, NOT LUMINANCE. `blur(N) contrast(M)` in plain CSS does the same thing to BRIGHTNESS, which is
+// why that spelling only works on an opaque black plate under `mix-blend-mode: screen`, which is how
+// formats/scene/_vawe-teaser-word.html had to write it and why the technique stayed trapped in one
+// film. The alpha row here needs no plate and no blend mode: it works on a transparent layer over any
+// background, which is what makes it usable from a scene at all.
+//
+// The last row is the ramp: alpha out = hardness * alpha in - hardness/2, so alpha 0.5 is the crossing
+// point, below it goes to nothing and above it goes to solid. Raising `hardness` sharpens that edge.
+//
+// A LAST BLUR-FREE COMPOSITE IS DELIBERATELY ABSENT. Merging SourceGraphic back over the result is the
+// common recipe variant, and it destroys the bridge: the sharp copy paints each shape's own edge back
+// on top of the join. The bridge IS the effect.
+function buildGoo(f, { radius, hardness }) {
+  // the bridge reaches outside the layer box, so the filter region has to as well
+  for (const [k, v] of [['x', '-50%'], ['y', '-50%'], ['width', '200%'], ['height', '200%']]) f.setAttribute(k, v);
+  const blur = document.createElementNS(SVG_NS, 'feGaussianBlur');
+  blur.setAttribute('in', 'SourceGraphic');
+  blur.setAttribute('stdDeviation', String(radius));
+  blur.setAttribute('result', 'goo');
+  const cm = document.createElementNS(SVG_NS, 'feColorMatrix');
+  cm.setAttribute('in', 'goo');
+  cm.setAttribute('type', 'matrix');
+  cm.setAttribute('values', `1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 ${hardness} ${(-hardness / 2).toFixed(3)}`);
+  f.appendChild(blur); f.appendChild(cm);
+}
+
 function buildBloom(f, { rgb, threshold, radius, ry, intensity, key }) {
   const el = (tag, attrs) => {
     const n = document.createElementNS(SVG_NS, tag);
@@ -498,6 +537,10 @@ export function ensureFilterDef(name, opts = {}) {
     op: opts.op === 'erode' ? 'erode' : 'dilate',
     radius: +Math.max(0.1, Math.min(12, opts.radius ?? 1)).toFixed(2),
   } : null;
+  const goo = preset.mode === 'goo' ? {
+    radius: +Math.max(0.5, Math.min(60, opts.radius ?? 12)).toFixed(2),
+    hardness: +Math.max(2, Math.min(80, opts.hardness ?? 19)).toFixed(2),
+  } : null;
   const relief = preset.mode === 'relief' ? {
     mode: opts.mode === 'specular' ? 'specular' : 'diffuse',
     azimuth: Math.round(opts.azimuth ?? 225), elevation: Math.round(opts.elevation ?? 55),
@@ -510,6 +553,7 @@ export function ensureFilterDef(name, opts = {}) {
     : disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_')
     : conv ? `f-conv-${conv.kernel}-a${conv.amount}`.replace(/\./g, '_')
     : morph ? `f-morph-${morph.op}-r${morph.radius}`.replace(/\./g, '_')
+    : goo ? `f-goo-r${goo.radius}-h${goo.hardness}`.replace(/\./g, '_')
     : relief ? `f-relief-${relief.mode}-${relief.azimuth}-${relief.elevation}-s${relief.surface}-e${relief.exponent}-c${relief.constant}-${relief.rgb.join('_')}`.replace(/\./g, '_')
     : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}${bloom.key === 'value' ? '-val' : ''}-t${bloom.threshold}-r${bloom.radius}${bloom.ry == null ? '' : `-ry${bloom.ry}`}-i${bloom.intensity}`.replace(/\./g, '_')
     : thermal ? `${defId(name, stops, null)}-r${thermal.radius}`.replace(/\./g, '_')
@@ -535,6 +579,12 @@ export function ensureFilterDef(name, opts = {}) {
 
   if (thermal) {
     buildThermal(f, thermal);
+    defsHost().appendChild(f);
+    return id;
+  }
+
+  if (goo) {
+    buildGoo(f, goo);
     defsHost().appendChild(f);
     return id;
   }
@@ -604,7 +654,8 @@ export function resolveFilter(spec) {
 
   const opts = preset.mode === 'posterize' ? { levels: nums[0] }
     : preset.mode === 'displace' ? { freq: nums[0], scale: nums[1] }
-    : preset.mode === 'thermal' ? { colors, radius: nums[0] } : { colors };
+    : preset.mode === 'thermal' ? { colors, radius: nums[0] }
+    : preset.mode === 'goo' ? { radius: nums[0], hardness: nums[1] } : { colors };
   return { filter: `url("#${ensureFilterDef(name, opts)}")`, overlay: null };
 }
 

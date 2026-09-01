@@ -29,7 +29,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MARGIN, MAX_ZOOM } from '../../core/safe.js';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/safe.js';
-import { resolveFilter, parseColor, FILTER_PRESETS, ensureFilterDef } from '../../core/filters.js';
+import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
@@ -58,6 +58,7 @@ import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope 
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
+import { rollOffsets, displayNum } from '../../core/layers/count.js';
 import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
@@ -564,6 +565,65 @@ ok('preset swing hinges from top, settles upright', PRESETS.swing(0).transformOr
 ok('preset unfold opens from edge-on to flat', PRESETS.unfold(0).transform.includes('rotateY(-90') && /rotateY\(-?0\.0deg\)/.test(PRESETS.unfold(1).transform) && PRESETS.unfold(0).transformOrigin === 'left center');
 ok('appearance presets deterministic', PRESETS.chroma(0.4).textShadow === PRESETS.chroma(0.4).textShadow && PRESETS.swing(0.4).transform === PRESETS.swing(0.4).transform);
 
+
+// assemble: the scattered-glyph reveal. Every assert below is about the three steps of the AE recipe
+// (own offset, FIXED field, shuffled arrival), because those are the three ways it can be built wrong.
+ok('preset assemble lands at identity', (() => { const t = PRESETS.assemble(1, {}, 3).transform; return /translate\(0\.00px, 0\.00px\) rotate\(-?0\.00deg\)/.test(t) && +PRESETS.assemble(1, {}, 3).opacity === 1; })());
+ok('preset assemble clears its motion blur', PRESETS.assemble(1, {}, 7).filter === 'blur(0.00px)');
+ok('preset assemble blur:0 writes no filter', PRESETS.assemble(0.3, { blur: 0 }, 7).filter === undefined);
+ok('preset assemble scatters each glyph differently', PRESETS.assemble(0.2, {}, 1).transform !== PRESETS.assemble(0.2, {}, 2).transform);
+ok('preset assemble is deterministic in the index', PRESETS.assemble(0.31, {}, 5).transform === PRESETS.assemble(0.31, {}, 5).transform);
+ok('preset assemble seed re-rolls the field', PRESETS.assemble(0.2, {}, 4).transform !== PRESETS.assemble(0.2, { seed: 'other' }, 4).transform);
+ok('preset assemble shuffles the arrival order', (() => {
+  // the hashed delay must leave at least one LATER glyph ahead of an earlier one at mid-run
+  const at = (i) => +PRESETS.assemble(0.5, {}, i).opacity;
+  for (let i = 0; i < 12; i++) for (let j = i + 1; j < 12; j++) if (at(j) > at(i) + 1e-6) return true;
+  return false;
+})());
+ok('preset assemble hidden at 0 for every glyph', (() => { for (let i = 0; i < 20; i++) if (+PRESETS.assemble(0, {}, i).opacity !== 0) return false; return true; })());
+ok('preset assemble travels in from its offset and arrives at zero', (() => {
+  const dist = (u) => { const m = PRESETS.assemble(u, {}, 9).transform.match(/translate\((-?[\d.]+)px, (-?[\d.]+)px\)/); return Math.hypot(+m[1], +m[2]); };
+  // easeOutSettle rings, so the path is not monotonic. What must hold: it starts far, is closing by
+  // mid-run, and lands exactly on the glyph's own slot.
+  return dist(0) > 70 && dist(0.6) < dist(0) && dist(1) === 0;
+})());
+
+// count roll: the odometer. The two asserts that matter are the two steps of the recipe: the last wheel
+// is CONTINUOUS in its place, and every wheel above it is geared, still until the one below crosses 9.
+ok('roll gives one wheel per digit', rollOffsets('12,480', 12480).length === 5);
+ok('roll lands on integers at rest', rollOffsets('12480', 12480).every((o) => Math.abs(o - Math.round(o)) < 1e-9));
+ok('roll reads the digits of its own value', rollOffsets('12480', 12480).join() === '1,2,4,8,0');
+ok('roll drives the last wheel continuously', (() => { const o = rollOffsets('4', 4.5); return Math.abs(o[0] - 4.5) < 1e-9; })());
+ok('roll leaves a higher wheel still while the one below is mid-run', (() => { const o = rollOffsets('43', 43.5); return o[0] === 4 && Math.abs(o[1] - 3.5) < 1e-9; })());
+ok('roll carries the higher wheel as the one below crosses 9', (() => { const o = rollOffsets('49', 49.7); return o[0] > 4 && o[0] < 5; })());
+ok('roll wraps forward past 9 (the strip carries an eleventh cell)', (() => { const o = rollOffsets('9', 9.6); return o[0] > 9 && o[0] < 10; })());
+ok('roll places the decimals below the point', rollOffsets('98.6', 98.6).map((o) => Math.round(o)).join() === '9,8,6');
+ok('roll is deterministic', rollOffsets('98.6', 98.61).join() === rollOffsets('98.6', 98.61).join());
+ok('roll drives the wheels in the units the TEXT is written in', displayNum(2.5e9, { to: 2.5e9 }) === 2.5 && displayNum(41, { unit: '%', to: 100 }) === 41);
+
+// matchCut: the graphic match. The three asserts are the three steps, and the identity contract that
+// every presentation owes cutStyle at its own steady state.
+ok('cut matchCut holds identity at each steady state', (() => {
+  const e = PRESENTATIONS.matchCut.enter(1, { cx: 50, cy: 50 }), x = PRESENTATIONS.matchCut.exit(0, { cx: 50, cy: 50 });
+  return e.clipPath === 'none' && e.opacity === '1' && x.clipPath === 'none' && x.opacity === '1';
+})());
+ok('cut matchCut closes the outgoing beat down to the held shape', (() => {
+  const a = +PRESENTATIONS.matchCut.exit(0.1, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
+  const b = +PRESENTATIONS.matchCut.exit(0.49, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
+  return a > b && b < 25;
+})());
+ok('cut matchCut swaps the content at the midpoint, never crossfades', (() => {
+  const outLate = PRESENTATIONS.matchCut.exit(0.5, { cx: 50, cy: 50 }).opacity;
+  const inEarly = PRESENTATIONS.matchCut.enter(0.49, { cx: 50, cy: 50 }).opacity;
+  return outLate === '0' && inEarly === '0';   // only one beat ever paints
+})());
+ok('cut matchCut opens the incoming beat out of the SAME shape', (() => {
+  const held = +PRESENTATIONS.matchCut.exit(0.4999, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
+  const from = +PRESENTATIONS.matchCut.enter(0.5, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
+  return Math.abs(held - from) < 0.1;
+})());
+ok('cut matchCut aims the shape with cx/cy', PRESENTATIONS.matchCut.enter(0.6, { cx: 30, cy: 70 }).clipPath.includes('at 30% 70%'));
+ok('cut matchCut is registered with a blurb', CUT_BLURBS.matchCut && /match/i.test(CUT_BLURBS.matchCut));
 
 // new kinetic presets: hidden at 0, fully landed at 1
 for (const k of ['flip', 'fall', 'elastic', 'skew', 'focus']) {
@@ -1155,6 +1215,10 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('filter: sepia param', resolveFilter('sepia:0.6').filter === 'sepia(0.6)');
   ok('filter: vignette is an overlay, never a filter', resolveFilter('vignette:0.6').filter === '' && /radial-gradient/.test(resolveFilter('vignette:0.6').overlay));
   ok('filter: deterministic param-addressed ids', resolveFilter('duotone:#141414,#7cffd4').filter === 'url("#f-duotone-141414-7cffd4")');
+  ok('filter: goo is a param-addressed svg def', resolveFilter('goo').filter === 'url("#f-goo-r12-h19")');
+  ok('filter: goo radius and hardness reach the id', resolveFilter('goo:16,26').filter === 'url("#f-goo-r16-h26")');
+  ok('filter: goo clamps a silly radius rather than emitting it', resolveFilter('goo:900').filter === 'url("#f-goo-r60-h19")');
+  ok('filter: goo is registered with a blurb, so `make arsenal` finds it', FILTER_REGISTRY.has('goo') && /metaball/i.test(FILTER_REGISTRY.blurbs.goo));
   ok('filter: null safe', JSON.stringify(resolveFilter(null)) === JSON.stringify({ filter: '', overlay: null }));
   ok('filter: parseColor hex3 + rgb + junk', JSON.stringify(parseColor('#7cf')) === '[119,204,255]' && JSON.stringify(parseColor('rgb(1, 2, 3)')) === '[1,2,3]' && parseColor('nope') === null);
   ok('filter: all six presets exist', ['duotone','tritone','gradientMap','posterize','sepia','vignette'].every((k) => FILTER_PRESETS[k]));

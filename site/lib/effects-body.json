@@ -1,4 +1,5 @@
 {
+  "kinetic-text-presets--assemble": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"assemble\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
   "kinetic-text-presets--blur": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"blur\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
   "kinetic-text-presets--bounce": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"bounce\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
   "kinetic-text-presets--chroma": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"chroma\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
@@ -111,6 +112,7 @@
   "scene-cuts--iris": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"iris\"\n    }\n  ]\n}",
   "scene-cuts--jitter": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"jitter\"\n    }\n  ]\n}",
   "scene-cuts--letterbox": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"letterbox\"\n    }\n  ]\n}",
+  "scene-cuts--matchcut": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"matchCut\"\n    }\n  ]\n}",
   "scene-cuts--none": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"none\"\n    }\n  ]\n}",
   "scene-cuts--punch": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"punch\"\n    }\n  ]\n}",
   "scene-cuts--rise": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"rise\"\n    }\n  ]\n}",
@@ -414,6 +416,7 @@
   "filter-presets--convolve": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"convolve\"\n}",
   "filter-presets--displace": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"displace\"\n}",
   "filter-presets--duotone": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"duotone\"\n}",
+  "filter-presets--goo": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"goo\"\n}",
   "filter-presets--gradientmap": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"gradientMap\"\n}",
   "filter-presets--morph": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"morph\"\n}",
   "filter-presets--posterize": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"posterize\"\n}",
