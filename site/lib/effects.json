@@ -1821,7 +1821,7 @@
         {
           "name": "overshoot",
           "stem": "keyframe-handles-the-graph-editor--overshoot",
-          "desc": "arrives · at · 1.8x · the · average · speed · with · a · long · handle, · so · the · value · sails · past · its · key · and · comes · back. · The · handle · version · of · a · back · ease, · and · it · needs · the · far · side · to · stop · it",
+          "desc": "arrives · from · BEYOND · its · key · and · settles · back · the · value · sails · about · 10 · per · cent · past · and · returns. · The · handle · version · of · a · back · ease, · and · it · needs · the · far · side · to · stop · it",
           "scene": null,
           "noPreview": null
         }
@@ -1841,28 +1841,28 @@
         {
           "name": "back",
           "stem": "depths-parallax-planes--back",
-          "desc": "behind · the · picture · plane · the · layer · the · camera · passes, · the · one · that · gives · the · move · its · parallax. · 0.73x",
+          "desc": "behind · the · picture · plane · the · layer · the · camera · passes, · the · one · that · gives · the · move · its · parallax. · Held, · 0.73x · the · rate",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "far",
           "stem": "depths-parallax-planes--far",
-          "desc": "the · far · plane · a · backdrop, · a · wall, · a · field · the · subject · stands · in · front · of. · Drawn · at · 0.57x",
+          "desc": "the · far · plane · a · backdrop, · a · wall, · a · field · the · subject · stands · in · front · of. · Held · at · its · laid-out · size, · moved · by · the · camera · at · 0.57x · the · picture · plane's · rate",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "front",
           "stem": "depths-parallax-planes--front",
-          "desc": "just · in · front · of · the · picture · plane · a · caption · or · a · chip · that · rides · ahead · of · the · subject. · 1.18x",
+          "desc": "just · in · front · of · the · picture · plane · a · caption · or · a · chip · that · rides · ahead · of · the · subject. · Held, · 1.18x · the · rate",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "near",
           "stem": "depths-parallax-planes--near",
-          "desc": "nearest · the · eye · the · thing · that · crosses · the · frame · fastest · and · leaves · it · first. · 1.39x",
+          "desc": "nearest · the · eye · the · thing · that · crosses · the · frame · fastest · and · leaves · it · first. · Held, · 1.39x · the · rate",
           "scene": null,
           "noPreview": null
         }

@@ -4276,7 +4276,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // travel 228.6 / 290.9 / 555.5px against the picture plane's 400 under the same camera. Travel and
 // magnification are the same ratio, which is what makes it a distance.
 {
-  const { DEPTH_PLANES, DEPTH_REGISTRY, DEPTH_BLURBS, depthZ } = await import('../../core/fx/plane.js');
+  const { DEPTH_PLANES, DEPTH_REGISTRY, DEPTH_BLURBS, depthZ, PLANE_KEYS } = await import('../../core/fx/plane.js');
   const DEPTH_NAMES = DEPTH_REGISTRY.names;
   const { bakeDepth } = await import('../../core/produce.js');
   ok('every named depth carries a blurb', DEPTH_NAMES.every((n) => typeof DEPTH_BLURBS[n] === 'string'));
@@ -4300,8 +4300,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // failure the whole bake path exists to make impossible (docs/MISTAKES.md #444).
   const d = { layers: [{ type: 'rect', depth: 'back' }] };
   bakeDepth(d);
-  ok('depth lowers to the plane modifier', d.layers[0].depth === undefined
-    && JSON.stringify(d.layers[0].modifiers) === JSON.stringify([{ plane: { z: -600 } }]));
+  ok('depth lowers to the plane modifier, holding its size', d.layers[0].depth === undefined
+    && JSON.stringify(d.layers[0].modifiers) === JSON.stringify([{ plane: { z: -600, hold: true } }]));
   const keyed = { camera: [{ t: 0, p: 800 }], layers: [{ type: 'rect', depth: 'back' }] };
   bakeDepth(keyed);
   ok('the bake reads the lens off the camera', keyed.layers[0].modifiers[0].plane.z === -300);
@@ -4311,6 +4311,36 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   try { bakeDepth({ layers: [{ type: 'group', children: [{ type: 'rect', depth: 'back' }] }] }); }
   catch (e) { g = e.message; }
   ok('depth on a group child is refused, naming the group', g != null && /group/i.test(g) && /depth/.test(g));
+
+  // THE SCALE CORRECTION, which is what makes `depth` a multiplane rig rather than a raw distance.
+  // Every AE tool applies it and this one printed the arithmetic in an error message instead, which is
+  // what `depth` in 1 scene of 170 cost. The vocabulary holds; the raw primitive does not, because a
+  // primitive that silently rescales what it was handed is a primitive that lies, and two shipped
+  // films place 28 layers by the projected size they already get.
+  const src = fs.readFileSync(new URL('../../core/fx/plane.js', import.meta.url), 'utf8');
+  ok('hold is a plane key, so the validator and the schema can both see it',
+    PLANE_KEYS.includes('hold') && PLANE_KEYS.includes('z'));
+  ok('the correction is (lens - z) / lens, the same number the refusal quotes',
+    /\(\(cam\.lens - z\) \/ cam\.lens\)/.test(src));
+  // A depth keyed through `--plane-z` TRAVELS, so a build-time constant would hold the size the layer
+  // has at the end of the travel and make the start wrong. The correction is CSS for that reason, and
+  // it carries the same clamp as the translate so the two can never disagree about where the layer is.
+  ok('a keyed depth corrects against the live z, with the translate\'s own clamp',
+    /scale = drivesZ\(L\)/.test(src) && /calc\(\(\$\{cam\.lens\} - min\(/.test(src));
+  ok('an unheld plane never writes the scale longhand', /if \(hold\) \{\n    el\.style\.scale/.test(src));
+  // `kick` and `squash` write the same longhand and modifiers resolve last-writer-wins, so one of them
+  // would silently win by array order. Input accepted and then ignored is the shape this repo ranks
+  // first, so it is refused by name at build.
+  const { build: planeBuild } = await import('../../core/fx/plane.js');
+  let clash = null;
+  try {
+    planeBuild(null, null, { modifiers: [{ plane: { z: -600, hold: true } }, { kick: true }] },
+      { z: -600, hold: true });
+  } catch (e) { clash = e.message; }
+  ok('hold beside kick is refused, naming both', clash != null && /hold/.test(clash) && /kick/.test(clash));
+  let bad = null;
+  try { planeBuild(null, null, {}, { z: -600, hold: 'yes' }); } catch (e) { bad = e.message; }
+  ok('hold must be a boolean', bad != null && /hold must be true or false/.test(bad));
 }
 
 // ---------- a glow that can change ----------

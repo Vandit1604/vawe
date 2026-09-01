@@ -1213,7 +1213,7 @@
       },
       "plane": {
        "type": "number|object",
-       "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size, because a depth that does not is a scale: it is drawn at lens / (lens - z), so size it for the distance. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
+       "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size (drawn at lens / (lens - z)) unless you set `hold: true`, which writes the scale correction every multiplane rig applies so the layer keeps the size you laid it out at and the depth shows up only as a different rate of travel. `hold` is OFF here and ON for the `depth` vocabulary. Refused alongside `kick` or `squash`, which write the same `scale` longhand. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
       },
       "alongPath": {
        "type": "string|object",
@@ -1809,7 +1809,7 @@
      "label": "Frosted glass: blur what is BEHIND this layer. true = default, a number = blur px, a string = raw backdrop-filter"
     },
     "depth": {
-     "label": "three extrudeText: extrusion depth"
+     "label": "Stand this layer at a named DEPTH so a camera move gives it parallax instead of turning the whole frame as one rigid pane: \"far\" | \"back\" | \"front\" | \"near\", each a fraction of the film's own lens, or a raw distance in px. It lowers to the `plane` modifier at boot WITH the scale correction held on, so the layer keeps the size you laid it out at and the depth shows up as a different rate of travel: far 0.57x, back 0.73x, front 1.18x, near 1.39x the picture plane's rate. Want the raw projection instead? Write `modifiers: [{ plane: { z } }]`. Refused on a group child, whose flat parent would project it through nothing. (On a `three` extrudeText layer the same word is the extrusion depth.)"
     },
     "timeRemap": {
      "type": "string|array",

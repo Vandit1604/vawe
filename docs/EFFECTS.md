@@ -331,7 +331,7 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `fling` | a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move |
 | `hang` | influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state |
 | `linear` | the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped |
-| `overshoot` | arrives at 1.8x the average speed with a long handle, so the value sails past its key and comes back. The handle version of a back ease, and it needs the far side to stop it |
+| `overshoot` | arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it |
 
 ## Depths (parallax planes)  `[per-layer]`
 
@@ -339,10 +339,10 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 
 | name | what / when |
 |---|---|
-| `back` | behind the picture plane: the layer the camera passes, the one that gives the move its parallax. 0.73x |
-| `far` | the far plane: a backdrop, a wall, a field the subject stands in front of. Drawn at 0.57x |
-| `front` | just in front of the picture plane: a caption or a chip that rides ahead of the subject. 1.18x |
-| `near` | nearest the eye: the thing that crosses the frame fastest and leaves it first. 1.39x |
+| `back` | behind the picture plane: the layer the camera passes, the one that gives the move its parallax. Held, 0.73x the rate |
+| `far` | the far plane: a backdrop, a wall, a field the subject stands in front of. Held at its laid-out size, moved by the camera at 0.57x the picture plane's rate |
+| `front` | just in front of the picture plane: a caption or a chip that rides ahead of the subject. Held, 1.18x the rate |
+| `near` | nearest the eye: the thing that crosses the frame fastest and leaves it first. Held, 1.39x the rate |
 
 ## Adjustment layers (grade what is BENEATH)  `[per-layer]`
 

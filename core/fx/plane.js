@@ -33,11 +33,35 @@
 // scene containing one turns the rig ON, exactly as a tilt does, and the two cases that cannot are
 // refused by name rather than rendered as a no-op.
 //
-// THE LAYER CHANGES APPARENT SIZE, and it must. Depth without magnification is a translation, not a
-// distance: a layer pushed back 600px under a 1600px lens is drawn at 1600/2200 = 0.727 of its size,
-// and holding that at 1.0 would be exactly the "scale that is not a depth" this modifier exists to stop
-// being. Author the layer at the size the DEPTH asks for, divide by (lens - z) / lens to get back the
-// screen size you had, rather than reaching for a compensating scale, which `kick` owns anyway.
+// THE LAYER CHANGES APPARENT SIZE, and `hold` is how you stop it. A layer pushed back 600px under a
+// 1600px lens is drawn at 1600/2200 = 0.727 of its size. This file used to refuse to correct that, on
+// the argument that "depth without magnification is a translation, not a distance", and told the author
+// to divide by (lens - z) / lens by hand.
+//
+// THAT ARGUMENT IS WRONG, and every After Effects multiplane rig has said so for twenty years. The
+// correction does not remove the depth, because a depth is not a size: it is a DIFFERENT RATE OF TRAVEL
+// under a moving camera. Correct the size and the layer still crosses the frame faster or slower than
+// its neighbours, still converges on the vanishing point, still occludes by distance. All the
+// correction removes is the layout tax, and the tax was the whole reason nobody used this: `depth`
+// appeared in 1 scene of 170. The argument only holds for a camera that never moves, and a `plane`
+// without a rig is refused two functions down.
+//
+//   "modifiers": [{ "plane": { "z": -600, "hold": true } }]   // 600px back, drawn at the size you laid out
+//
+// `hold` writes the `scale` longhand with (lens - z) / lens, exactly the number `depthZ` prints in its
+// own refusal. WHAT IT DOES NOT CORRECT is POSITION: a layer off the frame's centre still converges on
+// the vanishing point, because that convergence IS the parallax and correcting it would leave a layer
+// that changed nothing at all. AE's tools correct the same one thing for the same reason.
+//
+// THE DEFAULTS DIFFER BETWEEN THE PRIMITIVE AND THE VOCABULARY, on purpose, and it is one mechanism
+// either way: `hold` lives here and `depth` only picks a default for it. Raw `plane` keeps hold OFF,
+// because a primitive that quietly rescales the thing it was handed is a primitive that lies, and two
+// shipped films (onefilm, playhead) place 28 layers by the projected size they get today. `depth`, the
+// NAMED vocabulary whose entire job is parallax, holds by default. Want a named distance with its raw
+// magnification? Write the `plane` and the number.
+//
+// `kick` and `squash` also write `scale`, and last-writer-wins would silently eat the correction, so a
+// layer carrying `hold` alongside either is refused at build rather than rendered at the wrong size.
 //
 // ON A GROUP CHILD it is refused. A group is its own diorama with its own camera at its own centre
 // (core/fx/tilt.js), the group element is a flat parent, and a child pushed back inside it would be
@@ -46,7 +70,7 @@
 
 import { defineRegistry } from '../registry.js';
 
-export const PLANE_KEYS = ['z'];
+export const PLANE_KEYS = ['z', 'hold'];
 
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
 
@@ -61,6 +85,10 @@ function resolve(spec) {
       throw new Error(`plane: unknown key "${k}", known: ${PLANE_KEYS.join(', ')}. `
         + `z is a DISTANCE in px from the picture plane, not an angle and not a z-index, layer order is `
         + `\`track\`.`);
+  if (s.hold != null && typeof s.hold !== 'boolean')
+    throw new Error(`plane: hold must be true or false, got ${JSON.stringify(s.hold)}. It is the scale `
+      + `correction every multiplane rig applies: true draws the layer at the size you laid it out and `
+      + `leaves only the parallax, false gives you the raw projection.`);
   if (!num(s.z))
     throw new Error(`plane: z must be a number of px, got ${JSON.stringify(s.z)}. It is how far the layer `
       + `stands from the picture plane: negative into the frame, positive toward the eye.`);
@@ -71,7 +99,7 @@ function resolve(spec) {
     throw new Error(`plane: z is 0, which is the picture plane every layer is already on. A depth of zero `
       + `turns the whole frame into a 3D rendering context and changes nothing you can see; drop the `
       + `modifier, or give it the distance you meant.`);
-  return { z: s.z };
+  return { z: s.z, hold: s.hold === true };
 }
 
 // A group child's parent is the group element, which is flat, so the depth would be silently
@@ -79,7 +107,20 @@ function resolve(spec) {
 // here rather than per frame because the class is set before either build path reaches the modifiers
 // (formats/scene/scene.js, core/layers/util.js), so this can throw before a frame is drawn.
 export function build(kit, el, L, spec) {
-  resolve(spec);
+  const { hold } = resolve(spec);
+  // `kick` and `squash` write the same `scale` longhand, and modifiers resolve last-writer-wins
+  // (core/fx/index.js), so the correction would be dropped or would drop them, silently, depending on
+  // array order. Refused by name instead: that is the input-accepted-then-ignored shape this repo ranks
+  // above every other failure.
+  if (hold) {
+    const clash = (L && Array.isArray(L.modifiers) ? L.modifiers : [])
+      .flatMap((m) => (m && typeof m === 'object' ? Object.keys(m) : []))
+      .find((n) => n === 'kick' || n === 'squash');
+    if (clash)
+      throw new Error(`plane: \`hold\` writes the \`scale\` longhand and so does \`${clash}\`, so one of `
+        + `them would silently win by array order. Drop \`hold\` and size the layer for its depth by `
+        + `hand, or drop \`${clash}\`.`);
+  }
   if (el && el.classList && !el.classList.contains('hs-layer'))
     throw new Error(`plane: this layer is a GROUP CHILD, and a group is a flat parent with its own camera `
       + `at its own centre, so a depth inside it would project through nothing and move the layer by zero `
@@ -87,7 +128,7 @@ export function build(kit, el, L, spec) {
 }
 
 export function frame(kit, el, L, t, scene, spec) {
-  const { z } = resolve(spec);
+  const { z, hold } = resolve(spec);
   const cam = scene.camera;
   if (!(cam && cam.rig))
     throw new Error(`plane: this frame has no camera rig, so there is no space to stand ${z}px into. A `
@@ -122,6 +163,16 @@ export function frame(kit, el, L, t, scene, spec) {
   el.style.translate = drivesZ(L)
     ? `0 0 min(calc(var(${PLANE_Z}, 1) * ${z.toFixed(2)}px), ${(cam.lens - 1).toFixed(2)}px)`
     : `0 0 ${z.toFixed(2)}px`;
+  // THE CORRECTION TRACKS THE LIVE Z, and that is the reason it is CSS rather than a build-time number.
+  // A depth keyed through `--plane-z` travels; a static correction would hold the size the layer has at
+  // the END of that travel and make the start wrong, which is the "start where you laid it out" the
+  // keyed slam exists for. Same clamp as the translate, so the two can never disagree about where the
+  // layer is. Written only when held: an unheld plane must not touch a longhand it does not own.
+  if (hold) {
+    el.style.scale = drivesZ(L)
+      ? `calc((${cam.lens} - min(calc(var(${PLANE_Z}, 1) * ${z}), ${cam.lens - 1})) / ${cam.lens})`
+      : ((cam.lens - z) / cam.lens).toFixed(5);
+  }
 }
 
 // The multiplier, and the same emit-only-where-driven gate every other keyable value in this engine
@@ -140,17 +191,20 @@ const drivesZ = (L) => !!(L && L.vars && Object.prototype.hasOwnProperty.call(L.
 //      reaches for by accident;
 //   2. `z` is a RAW DISTANCE IN PIXELS, and picking one means knowing the lens;
 //   3. the magnification is `lens / (lens - z)`, so a number that looks reasonable can halve a layer;
-//   4. and the size change is real, so the author is told to compensate by hand.
+//   4. and the size change is real, so the author was told to compensate by hand.
 //
-// A capability behind four barriers is a capability the library does not have. `depth` removes the first
-// three: a NAME, resolved against the lens actually in force, so the same word means the same distance
-// under any camera. The fourth stays the author's, because the header is right that depth without
-// magnification is a translation rather than a distance, and `kick` already owns scale. The multiplier
-// is printed in the refusal below rather than left to be derived.
+// A capability behind four barriers is a capability the library does not have. `depth` removes ALL FOUR.
+// The first three go by being a NAME, resolved against the lens actually in force, so the same word
+// means the same distance under any camera. The fourth goes by `hold`, which `depth` turns ON: the layer
+// is drawn at the size you laid it out and the depth shows up where it belongs, in how far the camera
+// moves it. That ratio is the same number the magnification was, so it is still quoted everywhere.
 //
-//   { "type": "rect", "depth": "back" }        // 0.375 lens behind, drawn at 0.73x
-//   { "type": "text", "depth": "near" }        // 0.28 lens in front, drawn at 1.39x
+//   { "type": "rect", "depth": "back" }        // 0.375 lens behind, held, moves at 0.73x the rate
+//   { "type": "text", "depth": "near" }        // 0.28 lens in front, held, moves at 1.39x the rate
 //   { "type": "rect", "depth": -900 }          // still a raw distance, when a name is not the point
+//
+// Want the raw projection under a name's distance? `modifiers: [{ plane: { z: -600 } }]`. The primitive
+// never holds unless asked, so the escape is the primitive, not a second spelling of the vocabulary.
 //
 // Named as FRACTIONS OF THE LENS, never as pixels. A film that keys `p` from 1600 to 900 changes what
 // 600px behind the picture plane means; it does not change what "the back plane" means. The one fact
@@ -163,10 +217,10 @@ export const DEPTH_PLANES = Object.freeze({
 });
 
 export const DEPTH_BLURBS = Object.freeze({
-  far:   'the far plane: a backdrop, a wall, a field the subject stands in front of. Drawn at 0.57x',
-  back:  'behind the picture plane: the layer the camera passes, the one that gives the move its parallax. 0.73x',
-  front: 'just in front of the picture plane: a caption or a chip that rides ahead of the subject. 1.18x',
-  near:  'nearest the eye: the thing that crosses the frame fastest and leaves it first. 1.39x',
+  far:   'the far plane: a backdrop, a wall, a field the subject stands in front of. Held at its laid-out size, moved by the camera at 0.57x the picture plane\'s rate',
+  back:  'behind the picture plane: the layer the camera passes, the one that gives the move its parallax. Held, 0.73x the rate',
+  front: 'just in front of the picture plane: a caption or a chip that rides ahead of the subject. Held, 1.18x the rate',
+  near:  'nearest the eye: the thing that crosses the frame fastest and leaves it first. Held, 1.39x the rate',
 });
 
 // A REGISTRY, not a bare object, because that is what makes it FINDABLE. `make arsenal` searches every
@@ -189,7 +243,7 @@ export function depthZ(spec, lens = 1600) {
   // barrier 3 wearing a friendlier name.
   const menu = DEPTH_NAMES.map((n) => {
     const z = Math.round(DEPTH_PLANES[n] * lens);
-    return `${n} (z ${z > 0 ? '+' : ''}${z}, drawn at ${(lens / (lens - z)).toFixed(2)}x)`;
+    return `${n} (z ${z > 0 ? '+' : ''}${z}, held, moved at ${(lens / (lens - z)).toFixed(2)}x)`;
   }).join(' · ');
   throw new Error(`depth: expected one of ${DEPTH_NAMES.join(' · ')}, or a distance in px, got `
     + `${JSON.stringify(spec)}. Under this film's ${lens}px lens: ${menu}. `
