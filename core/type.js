@@ -65,8 +65,22 @@ export function splitText(el, mode = 'word') {
 
 // unitProgress(t, i, n, {each, stagger, total}): local [0,1] progress for unit i of n at time t(s).
 // each = per-unit animation seconds; stagger = delay step between units.
-export function unitProgress(t, i, n, { each = 0.5, stagger = 0.06 } = {}) {
-  return clamp01((t - i * stagger) / each);
+// SMOOTHNESS is the AE range selector's fourth dial, and it is not an easing. An easing bends the
+// ramp; smoothness decides how WIDE the ramp is at all. At 1 the unit crosses its whole window
+// continuously, which is what every preset here has always done, so 1 is the default and no shipped
+// frame moves. At 0 the unit SWAPS: it is unselected, then it is selected, with nothing in between,
+// and a glyph therefore vanishes rather than scaling away. That is the one value a font morph needs
+// and the one nobody reaches by tuning a curve (docs/CRAFT/AE-TECHNIQUES.md #5, #7).
+//
+// The remap is the transition band centred on the middle of the unit's own window:
+//   u' = clamp01((u - 0.5) / smoothness + 0.5)
+// At smoothness 1 that is the identity, which is why this is free. Below 1 the band narrows around
+// the midpoint; at 0 it is a step.
+export function unitProgress(t, i, n, { each = 0.5, stagger = 0.06, smoothness = 1 } = {}) {
+  const u = clamp01((t - i * stagger) / each);
+  if (smoothness >= 1) return u;
+  if (!(smoothness > 0)) return u >= 0.5 ? 1 : 0;
+  return clamp01((u - 0.5) / smoothness + 0.5);
 }
 
 // Each preset carries its own one-liner, so adding a preset is ONE edit: the blurb rides the entry
@@ -392,7 +406,7 @@ export function circleText(el, units, { radius = 220 } = {}) {
 
 // animateUnits(units, t, opts): apply a preset to each split unit at time t. Presets except `wave`
 // are one-shot staggered reveals; `wave` uses (t * speed + i*phaseStep) as a looping phase.
-export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.06, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
+export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.06, smoothness = 1, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
   // An unknown name is a HARD ERROR. It used to fall back to `up`, so a typo - or a preset renamed out
   // from under a scene - rendered a plausible frame that was not what was asked for, and the schema does
   // not enumerate these names either, so nothing else caught it. Same reasoning as the unknown-modifier
@@ -402,7 +416,7 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
     if (loop || preset === 'wave' || preset === 'shimmerWave') {
       Object.assign(el.style, fn(t * speed + i * phaseStep, popts));
     } else {
-      const u = unitProgress(t, i, units.length, { each, stagger });
+      const u = unitProgress(t, i, units.length, { each, stagger, smoothness });
       if (preset === 'decode') { decodeText(el, u, i); el.style.opacity = u > 0 ? '1' : '0'; return; }
       // `flap` mutates the character too, but unlike decode it also has a hinge to apply, so the
       // preset's own style still runs. Both live here for the same reason: a preset returns a style
