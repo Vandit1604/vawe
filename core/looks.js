@@ -129,6 +129,9 @@ const PASSES = {
   chromatic: (o, s) => ({ fns: [chromaPair((o.px ?? 2) * (0.5 + s), o.warm || WARM_FRINGE, o.cool || COOL_FRINGE)] }),
   // -- texture --
   scanlines: (o, s) => ({ overlays: [{ bg: scanGrad(o.gap ?? 3, (o.alpha ?? 0.28) * (0.4 + 0.9 * s)), blend: 'multiply' }] }),
+  // OPT-IN ONLY, and it stays that way: no look in LOOKS lists this pass. A ruled grid is a design
+  // tool's canvas and a film wearing one reads as a mock-up of itself, so it is never part of a named
+  // look's identity. Same rule `core/backgrounds.js` now follows for the softwash grid. #507.
   grid: (o) => ({ overlays: [{ bg: gridGrad(o.gap ?? 44, o.gridColor || 'color-mix(in srgb, var(--accent) 30%, transparent)', 0.15), blend: 'screen' }] }),
   grain: (o, s) => ({ overlays: [{ bg: grainDataUri(o.seed ?? 7), blend: 'overlay', opacity: clamp((o.grain ?? o.amt ?? 0.3) * (0.5 + 0.9 * s), 0, 0.9) }] }),
   // Falls through to the LOOK'S OWN declared colour before any constant. This is the unfinished half of

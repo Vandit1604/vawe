@@ -16419,3 +16419,48 @@ proof that shipped films stay byte-identical. A change that repaints the whole l
 diff rendered frames when the question is whether the picture changed. **No new gate**: a pixel net
 over 109 films is a render sweep, not a check, and the honest answer is to run one deliberately when a
 change touches rasterization rather than to pretend a DOM diff covers it.
+
+## 533. the `blobs` preset painted a blueprint grid nobody asked for
+
+**What:** an author writing `"preset": "blobs"` on a bg window got a ruled technical line grid behind
+the whole film. Nothing in the scene said `grid`. The preset baked `grid: true` into its own softwash
+fx, and its blurb called the grid "the actual motif", so the substitution was documented in the one
+place an author reading the JSON never looks.
+
+**Why it matters beyond one preset:** a ruled grid is a design tool's canvas. A film wearing one reads
+as a mock-up of itself, and it is the single loudest thing a backdrop can do without being asked. The
+owner reviewed a specimen frame that carried a grid for no reason other than the preset name.
+
+**Root cause:** the same silent-substitution shape as the wrong font and the square avatars. The engine
+accepted an input (`preset: "blobs"`) and then added a decision the input did not carry. CLAUDE.md's
+harvest table calls this class a framework bug, not an authoring choice, and it is fixed at the write
+site rather than gated: `core/backgrounds.js` no longer sets `grid: true`, and an author who wants the
+rules writes `grid: true` on the softwash fx. Opt-out became opt-in, which was the whole instruction.
+
+**Blast radius, measured before the change:** ZERO scenes in the library resolve `preset: "blobs"`, so
+no shipped film changed and the snapshot delta is empty. The four scenes that carry a softwash `grid`
+(`ledgerline-shown`, `ledgerline-neon`, `ledgerline-cyber`, `ab4-a-ledgerline`) already wrote it out by
+hand, so they were already complying with the rule before the rule existed. No migration was needed and
+none was invented.
+
+**The half a write-site fix cannot reach:** a grid hand-ruled in an `html` fragment with two crossed
+`repeating-linear-gradient`s. There is no single write site for that, so it is one of the cases
+CLAUDE.md allows a gate: `designspec-check` warns `ruled-grid`, names the layer or the fragment file,
+and takes a per-scene waiver with a `_why`. It fires on 4 films.
+
+**Two false positives were found and killed while fitting it**, and the split between them is the rule:
+
+1. Pooling every gradient in a file paired a hero scrim's `180deg` with an unrelated `background-size`
+   two rules down and reported a grid in `_arcfall.html`, which has none. The plain-gradient half is
+   judged per DECLARATION now.
+2. Scoping the whole rule per declaration then MISSED `showcase-type-labour`, which rules horizontals
+   on a `.rows` div and verticals on a `.ruler` div. `repeating-linear-gradient` rules lines on its
+   own, so that half is judged over the whole fragment.
+
+One axis alone is scanlines, which `core/looks.js`, `blocks/terminal-html.mjs` and `core/ransom.js` all
+draw on purpose, and all three stay quiet.
+
+**Not banned, and it was checked by reading the code:** the dot fields (`dotGrid`, and the `paperDots` /
+`dotmatrix` / `paperShapes` presets) draw circles of radius 1.3 to 5px at 52 to 64px spacing and never
+a line. A drifting dot field is a texture; a ruled grid is a canvas with a T-square on it. Only the
+second reads as a mock-up, so only the second is opt-in. → **Gate: `ruled-grid` in designspec-check.**

@@ -509,6 +509,19 @@ Then **judge it across frames, never on one still**: pull 4+ timestamps and comp
 still hides speed, scale and direction. A background was once "matched" on one frame and was, in
 motion, twice too fast with folds half the size (`docs/MISTAKES.md` #155).
 
+## NO RULED GRID UNLESS SOMEBODY ASKED FOR ONE
+
+A ruled line grid is a design tool's canvas. Put one behind a film and the film reads as a mock-up of
+itself, which is why it never arrives as a default any more. `blobs` used to bake `grid: true` into the
+preset, so `"preset": "blobs"` painted a blueprint the author never wrote: silent substitution, the
+exact failure the harvest table names. It does not now.
+
+**Want one? Write it: `grid: true` on a `softwash` fx**, with `gridColor`, `gridAlpha` and
+`gridSpacing` beside it, and be able to say in one clause what the grid is doing. Hand-written CSS has
+no single write site, so `make designspec-check` warns on `ruled-grid`: two `repeating-linear-gradient`
+rules crossing axes in one fragment. One axis is scanlines and stays quiet. Waive it in the scene with
+a `_why`. **Four films rule a grid by hand today, and none of them wrote it down.**
+
 ## SILENCE IS A DEVICE, NOT A DEFAULT
 
 **110 of the 134 gate-visible scenes ship mute, 82%**: 17 carry no `audio` key at all and 93 declare

@@ -47,6 +47,15 @@ function sceneTextUnits(d) {
   return parts;
 }
 
+/** The fragment files a scene names, the same `src` rule sceneTextUnits uses. Separate from it because
+ *  that one returns plain TEXT, and CSS is exactly what plainText throws away. */
+function fragmentSrcs(d) {
+  const srcs = new Set();
+  for (const l of flattenLayers(d.layers)) if (l.type === 'html' && typeof l.src === 'string') srcs.add(l.src);
+  for (const b of Array.isArray(d.bg) ? d.bg : []) if (b && typeof b.src === 'string') srcs.add(b.src);
+  return [...srcs].sort();
+}
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 const strict = process.argv.includes('--strict');
@@ -203,6 +212,72 @@ if (tokenLockRan) {
         findings.push({ sev: 'dead-token', msg: `${label(l)} · \`${k}\` reads var(${name}), which nothing defines. CSS answers an undefined custom property by INHERITING, so this renders as whatever the parent was, silently.${near.length ? ` Did you mean var(${near[0]})?` : ' Define it in the theme\'s `vars`, or use a token the engine sets.'}` });
       }
     }
+  }
+}
+
+// ---- the ruled grid: a blueprint canvas nobody asked for ----
+// The write site for the engine's own grid is `core/backgrounds.js` (a softwash `grid: true`), and it
+// is opt-in there. Hand-written CSS has NO single write site: any fragment can rule its own lines with
+// two crossed gradients, so this is the one place the rule has to be a check.
+// NARROW ON PURPOSE. It wants two gradients on PERPENDICULAR axes in one declaration, which is the
+// ruled-grid idiom and nothing else. One axis is scanlines (core/looks.js, blocks/terminal-html.mjs and
+// core/ransom.js all do that deliberately), and a crossed pair with no repeat and no tiling is two
+// washes. Waive it with {"authoring":{"allow":["ruled-grid"],"_why":{"ruled-grid":"..."}}}.
+const GRID_AXIS = (dir) => {
+  const d = dir.trim().toLowerCase();
+  if (/^to\s+(top|bottom)$/.test(d)) return 'v';      // rules stacked down the frame
+  if (/^to\s+(left|right)$/.test(d)) return 'h';
+  const deg = /^(-?[\d.]+)deg$/.exec(d);
+  if (!deg) return null;
+  const a = ((+deg[1] % 180) + 180) % 180;
+  if (a < 12 || a > 168) return 'v';
+  if (Math.abs(a - 90) < 12) return 'h';
+  return null;                                        // a diagonal is a hatch, not a grid
+};
+// TWO SCOPES, AND THE SPLIT IS THE WHOLE ACCURACY OF THIS RULE.
+// `repeating-linear-gradient` RULES LINES, so it is judged over the whole fragment: a film that rules
+// horizontals on one element and verticals on another has drawn a grid, and `showcase-type-labour`
+// does exactly that with a `.rows` div and a `.ruler` div. One axis alone is scanlines and stays quiet.
+// A PLAIN `linear-gradient` rules nothing on its own, it needs `background-size` to tile, so that half
+// is judged per DECLARATION. Pooling it across a file paired a hero scrim's `180deg` with an unrelated
+// `background-size` two rules down and reported a grid in `_arcfall.html`, which has none.
+function ruledGrid(css) {
+  const text = String(css);
+  const ruled = new Set();
+  for (const m of text.matchAll(/repeating-linear-gradient\(\s*([^,)]+)/g)) {
+    const ax = GRID_AXIS(m[1]);
+    if (ax) ruled.add(ax);
+  }
+  if (ruled.size === 2) return 'repeating-linear-gradients ruling both axes';
+  for (const block of text.split('}')) {
+    if (!/background-size\s*:/.test(block)) continue;
+    for (const decl of block.split(';')) {
+      const plain = new Set();
+      for (const m of decl.matchAll(/(?<!repeating-)linear-gradient\(\s*([^,)]+)/g)) {
+        const ax = GRID_AXIS(m[1]);
+        if (ax) plain.add(ax);
+      }
+      if (plain.size === 2) return 'two linear-gradients tiled by background-size on perpendicular axes';
+    }
+  }
+  return null;
+}
+if (!allowed.has('ruled-grid')) {
+  const gridSeen = new Set();
+  const gridSay = (where, how) => {
+    if (gridSeen.has(where)) return; gridSeen.add(where);
+    findings.push({ sev: 'ruled-grid', msg: `${where} · ${how}. A ruled line grid is a design tool's canvas: `
+      + `it makes the film read as a mock-up of itself. Nothing in the engine draws one unless asked, so either `
+      + `delete it or waive it with a \`_why\` saying what the grid is doing.` });
+  };
+  for (const l of scanTargets) {
+    const kv = []; strings(l, '', kv);
+    for (const [k, v] of kv) { const how = ruledGrid(v); if (how) gridSay(`${label(l)} · \`${k}\``, how); }
+  }
+  for (const rel of fragmentSrcs(data)) {
+    let txt; try { txt = fs.readFileSync(path.join(ROOT, rel), 'utf8'); } catch { continue; }
+    const how = ruledGrid(txt);
+    if (how) gridSay(rel, how);
   }
 }
 
