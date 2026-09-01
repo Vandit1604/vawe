@@ -21,7 +21,19 @@ change is an argued piece of work and never a line edit.
 
 ---
 
-## 1. The velocity-hidden cut (the "kinetic cut")
+## 1. The velocity-hidden cut (the source calls it the "kinetic cut")
+
+**THE NAME IS THAT CHANNEL'S, NOT THE FIELD'S.** Searching "kinetic cut" returns "kinetic editing"
+(a fast-cut editorial style) and "cutting on action" (hiding a cut inside a movement), and neither is
+a velocity envelope. So the phrase is used here only to point back at the source video
+(<https://youtu.be/daa5hKgo0Tw>); the technique is filed under what it does. Do not go looking for a
+wider recipe under that name, and do not put it in a blurb: this file's own doctrine is that a wrong
+name sends the next author hunting for a recipe that does not exist.
+
+The parts that ARE standard vocabulary: keyframe **influence** and **speed** are the two numbers AE's
+Keyframe Velocity dialog takes, per side, on every key. Easy Ease is influence 33.33 with speed 0. The
+value practitioners state for a snappy swap is **influence 75 both sides**, and that is the number
+`hang` carries.
 
 **RECIPE**
 1. Parent both shots to one null and animate any transform of that null across the seam. Scale is used
@@ -40,13 +52,39 @@ move and then cut on a beat, which puts the seam exactly where the motion is slo
 **NUMBERS** null scale 100 to 200 percent across the seam. Ease both keys, then pull the in and out
 handles flat so the interior is near vertical. Cut at the steepest frame.
 
-**ENGINE MAPPING** The curve exists: `speedRamp(t, {peak, sharp})` in `core/motion.js:104`, exposed to
-cuts as `ramp` (`core/cuts.js:24`) and as a feel word (`core/motion.js:122`). What does not exist is the
-PLACEMENT. `core/sequence.js` already exports `velocityAt`, which `core/tracks/motion.js` reads for auto
-motion blur, so the frame of peak velocity is computable today and nothing computes it for a cut.
-`make arsenal Q="hide the cut inside the fastest part of a move"` returns `matchCut` and `none`, which
-are shapes of cut, not placements of one. This is a gate or an authoring helper, not a new registry:
-read `velocityAt` at each junction and report seams that land in a velocity trough.
+**ENGINE MAPPING** All three parts are reachable now, and two of the three arrived after this entry
+was first written.
+
+*The shape.* `speedRamp(t, {peak, sharp})` (`core/motion.js`) owns the symmetric flat-ends,
+steep-middle curve and is exposed as `ease: "ramp"` and as a cut timing. **Do not write a second one.**
+Measured: a symmetric keyframe-handle pair at influence 55, speed 0 reproduces `ramp` to within 0.0037
+over the whole segment. What `ramp` cannot do is be ASYMMETRIC, and that is the half this technique
+needs. Per-key, per-side handles (`easeOut` / `easeIn`, `core/motion.js handleCurve`) give it: `hang`
+leaving a key is the flat, held half, and something faster arriving at the next is the other. The doses,
+as peak slope in multiples of the segment's average velocity, so nobody has to pick by feel:
+
+| | peak slope |
+|---|---|
+| `easyEase` both sides (influence 33.3, speed 0) | 1.50x |
+| `ease: "ramp"` (speedRamp, sharp 2.4) | 2.40x |
+| `easeInOutCubic`, the engine's own default | **3.00x** |
+| `hang` both sides (influence 75, speed 0) | 4.00x |
+
+Read the third row before reaching for the second: the DEFAULT is steeper than `ramp`, so naming
+`ramp` to make a move snappier makes it softer.
+
+*The placement.* `core/velocity-cut.js` reads `velocityAt` at each junction and reports a cut sitting
+in a velocity trough; `scripts/author/motion-director.mjs` prints it. It reads authored handles for
+free, because it derives from the one velocity owner rather than re-implementing it.
+
+*The handoff.* **No mechanism, and that is the finding, not a gap.** The second shot's first key takes
+an `easeOut` whose `speed` is the incoming velocity, so the picture leaves the cut still travelling and
+decelerates. What is NOT expressible is absolute velocity continuity across the join: `speed` is a
+multiple of each segment's OWN average velocity, so `speed: 3` on both sides of a cut hands the same
+SHAPE across and not the same degrees per second. Measured on a worked handoff: shot A arrives at
+762.8 deg/s and shot B leaves at 269.9 deg/s from the same authored 3. Matching them absolutely is
+arithmetic the author does (B's fraction = A's arriving speed / B's own average, 8.08 in that case),
+not a cross-layer binding the engine owns.
 
 **DEFAULT OR OPTION** Option per film, but the CHECK deserves to be standing. A film whose cuts all land
 in troughs is a slideshow with easing on it.

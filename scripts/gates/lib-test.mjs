@@ -2040,6 +2040,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const L = { start: 0, duration: 2, motion: [{ t: 0, scale: 1 }, { t: 1, scale: 2, ease: 'linear' }] };
     return layerSpeedAt(L, 0.5, 30) > 400;
   })());
+  // A ROTATION MOVES PIXELS TOO, and this reader could not see one. The technique this file
+  // implements (docs/CRAFT/AE-TECHNIQUES.md #1) hands a fast ROTATION across the seam, so the
+  // advisory scored its own worked example at 0 px/s and called it a velocity trough.
+  ok('velocity-cut: a pure rotation reads as picture speed', (() => {
+    const L = { start: 0, duration: 2, motion: [{ t: 0, rot: 0 }, { t: 2, rot: 720 }] };
+    return layerSpeedAt(L, 1, 30) > 400;
+  })());
+  ok('velocity-cut: a rotating seam is no longer reported as a trough', (() => {
+    const layers = [{ start: 0, duration: 2, motion: [
+      { t: 0, rot: 0, easeOut: 'hang' }, { t: 1.2, rot: 300, easeIn: { influence: 22, speed: 3 } }] }];
+    return cutVelocityAdvice([{ t: 1.15 }], layers, { duration: 2 })[0].trough === false;
+  })());
+  ok('velocity-cut: and it reads an AUTHORED handle, because it derives from velocityAt', (() => {
+    const flat = [{ start: 0, duration: 2, motion: [{ t: 0, x: 0 }, { t: 1.2, x: 900 }] }];
+    const hung = [{ start: 0, duration: 2, motion: [
+      { t: 0, x: 0, easeOut: 'hang' }, { t: 1.2, x: 900, easeIn: { influence: 22, speed: 3 } }] }];
+    // The handle moves WHERE the speed is. The default curve is nearly stopped one frame before its
+    // last key; `hang` out plus a fast arrival is at its fastest there. A reader blind to handles
+    // would report the same number for both.
+    return layerSpeedAt(hung[0], 1.15, 30) > 6 * layerSpeedAt(flat[0], 1.15, 30);
+  })());
   ok('velocity-cut: a layer that is off screen contributes nothing', (() => {
     const L = { start: 1, duration: 1, motion: [{ t: 0, x: 0 }, { t: 1, x: 1000, ease: 'linear' }] };
     return layerSpeedAt(L, 0.5, 30) === 0 && layerSpeedAt(L, 1.5, 30) > 0;
@@ -4320,7 +4341,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // THE VELOCITY READ inherits handles for free, because it derives from motionAt.
   const peak = (kfs) => Math.max(...[...Array(30)].map((_, i) => velocityAt(kfs, i / 30, 1 / 30).speed));
   ok('velocityAt sees an authored handle without being told about it',
-    peak([{ t: 0, x: 0, easeOut: 'hang' }, { t: 1, x: 400, easeIn: 'hang' }]) > 1.7 * peak([{ t: 0, x: 0 }, { t: 1, x: 400 }]));
+    peak([{ t: 0, x: 0, easeOut: 'hang' }, { t: 1, x: 400, easeIn: 'hang' }]) > 1.25 * peak([{ t: 0, x: 0 }, { t: 1, x: 400 }]));
 
   // THE REFUSALS. `through` COMPUTES the tangent, a handle AUTHORS it, a named ease is a third
   // answer. All three refused by name rather than one silently winning.

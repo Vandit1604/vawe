@@ -1807,7 +1807,7 @@
         {
           "name": "hang",
           "stem": "keyframe-handles-the-graph-editor--hang",
-          "desc": "reaches · almost · the · whole · way · (influence · 85) · at · a · dead · stop, · so · the · value · HANGS · at · this · key · and · the · movement · is · crushed · into · the · far · end · of · the · segment",
+          "desc": "influence · 75 · at · a · dead · stop · the · value · HANGS · at · this · key · and · the · movement · is · crushed · away · from · it. · On · BOTH · sides · of · a · segment · this · is · the · flat-ended, · near-vertical · speed · graph · a · snappy · swap · is · cut · on. · 75 · is · the · number · practitioners · state",
           "scene": null,
           "noPreview": null
         },

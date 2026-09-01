@@ -25,10 +25,21 @@ import { velocityAt } from './sequence.js';
 // ranking of moments against each other, not a measurement of anything.
 const SCALE_REACH = 540;
 
+// AND ROTATION MOVES PIXELS, which this file missed and its own source technique proves. The recipe
+// in docs/CRAFT/AE-TECHNIQUES.md #1 hands a fast ROTATION from one element to another across the
+// seam, and a reader that saw only translation and scale scored that exact seam at ZERO px/s and
+// reported it as a velocity trough: the advisory called the technique's own worked example the
+// mistake it exists to catch. ROT_REACH is the radius the turning edge is assumed to sit at, a
+// quarter of the 1080 canvas, so a degree per second becomes ROT_REACH * pi/180 px per second at
+// that edge. Approximate on purpose, exactly as SCALE_REACH is: this ranks moments against each
+// other and measures nothing.
+const ROT_REACH = 270;
+const DEG_TO_PX = (ROT_REACH * Math.PI) / 180;
+
 /**
  * layerSpeedAt(L, t, fps): one layer's picture speed at SCENE time t, in px per second, or 0 when the
- * layer is off screen or carries no motion track. Translation plus the edge travel implied by its
- * scale rate.
+ * layer is off screen or carries no motion track. Translation, plus the edge travel implied by its
+ * scale rate, plus the edge travel implied by its rotation rate.
  */
 export function layerSpeedAt(L, t, fps = 30) {
   if (!L || !Array.isArray(L.motion) || !L.motion.length) return 0;
@@ -37,7 +48,8 @@ export function layerSpeedAt(L, t, fps = 30) {
   if (t < start || t > end) return 0;
   const dt = 1 / fps;
   const v = velocityAt(L.motion, t - start, dt);
-  return v.speed + (Math.abs(v.now.scale - v.prev.scale) / dt) * SCALE_REACH;
+  return v.speed + (Math.abs(v.now.scale - v.prev.scale) / dt) * SCALE_REACH
+    + (Math.abs(v.now.rot - v.prev.rot) / dt) * DEG_TO_PX;
 }
 
 /** pictureSpeedAt(layers, t, fps): the whole frame's speed, summed over whatever is on screen. */

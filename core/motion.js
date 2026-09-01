@@ -211,10 +211,21 @@ const HANDLE_DEFAULT_INFLUENCE = 100 / 3;   // AE's Easy Ease reaches a third of
 // into the next, exactly as applying Easy Ease Out to a single keyframe does.
 const LINEAR_SIDE = { influence: HANDLE_DEFAULT_INFLUENCE, speed: 1 };
 
+// THE SYMMETRIC FLAT-ENDS, STEEP-MIDDLE CURVE ALREADY EXISTS. `speedRamp` (below) owns it and is
+// exposed as `ease: "ramp"`, so a named handle preset that reproduced it on both sides would be a
+// second spelling of a shipped curve. Measured: a symmetric handle pair at influence 55, speed 0
+// reproduces `ramp` to within 0.0037 over the whole segment. `hang` is not that curve at a different
+// name, it is the SIDE of it, and the side is what a named easing cannot give you: the swap the
+// velocity-hidden cut describes is `hang` leaving one key and something else arriving at the next.
+//
+// The doses, measured as peak slope in multiples of the segment's average velocity, so the choice is
+// not by feel: easyEase 1.50x, `ramp` 2.40x, easeInOutCubic (the engine default) 3.00x, `hang` on
+// both sides 4.00x. Note the order: the DEFAULT is already steeper than `ramp`, so reaching for
+// `ramp` to make a move snappier makes it softer.
 const HANDLES = {
   easyEase: withBlurb('AE\'s Easy Ease: reaches a third of the way in and arrives at a DEAD STOP. The default handle, and the one to use when you just want a key to stop being mechanical', { influence: HANDLE_DEFAULT_INFLUENCE, speed: 0 }),
   linear: withBlurb('the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped', { ...LINEAR_SIDE }),
-  hang: withBlurb('reaches almost the whole way (influence 85) at a dead stop, so the value HANGS at this key and the movement is crushed into the far end of the segment', { influence: 85, speed: 0 }),
+  hang: withBlurb('influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state', { influence: 75, speed: 0 }),
   fling: withBlurb('a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move', { influence: 18, speed: 4 }),
   overshoot: withBlurb('arrives at 1.8x the average speed with a long handle, so the value sails past its key and comes back. The handle version of a back ease, and it needs the far side to stop it', { influence: 62, speed: 1.8 }),
 };
