@@ -384,7 +384,7 @@ export const BG_BLURBS = {
   metallic: 'vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser), dramatic dark bg, brand-coloured',
   metallicSheen: 'the quieter metallic: fewer, slower rods with a sweep crossing them (moves), a dark field type can sit on',
   gradientWash: 'one big saturated pool bleeding off a corner into white, a mesh gradient (moves), light and premium',
-  blobs: 'the airier light wash: smaller separated pools with a technical grid reading through the white (moves)',
+  blobs: 'the airier light wash: smaller, separated pools with white between them (moves). No grid: write `grid: true` on a softwash fx if you want the blueprint rules',
   liquid: 'folds of the brand hue against true black (moves). It OWNS the frame, so quiet type on it and nothing else',
 };
 // `name` defaults to `paper` HERE rather than at each call site, where `b.preset || 'paper'` was
@@ -439,10 +439,14 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
         { color: P.tint2, x: 0.72, y: 0.16, rf: 0.32, ax: 0.045, ay: 0.038, px: 19, py: 23, ph: 2, a: 0.5 },
         { color: P.accent, x: 0.94, y: 0.62, rf: 0.2, ax: 0.03, ay: 0.026, px: 27, py: 17, ph: 4, a: 0.34 } ] },
       { type: 'grain', alpha: 0.03 } ] };
-    // blobs. The OTHER light look: airier and more open, with the technical grid as the actual motif.
-    // Smaller, better-separated pools leave white space for the grid to read through.
+    // blobs. The OTHER light look: airier and more open. Smaller, better-separated pools that leave
+    // white space between them.
+    // IT USED TO BAKE `grid: true`. A ruled line grid is a design tool's canvas, and a film wearing one
+    // reads as a mock-up of itself. Nobody who wrote `"preset": "blobs"` asked for a blueprint, so the
+    // grid is opt-in by name now: a softwash fx with `grid: true` on the bg window. Silent substitution
+    // is the failure CLAUDE.md names, and this was one.
     case 'blobs': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
-      { type: 'softwash', intensity: 1, motionScale: 3.0, grid: true, gridColor: P.accent, gridAlpha: 0.16, gridSpacing: 104, blobs: [
+      { type: 'softwash', intensity: 1, motionScale: 3.0, blobs: [
         { color: P.accent, x: 0.2, y: 0.26, rf: 0.24, ax: 0.04, ay: 0.034, px: 21, py: 26, ph: 0, a: 0.5 },
         { color: P.tint2, x: 0.8, y: 0.72, rf: 0.26, ax: 0.045, ay: 0.038, px: 25, py: 19, ph: 2.4, a: 0.44 },
         { color: P.accent, x: 0.52, y: 0.9, rf: 0.18, ax: 0.03, ay: 0.028, px: 17, py: 23, ph: 4.2, a: 0.3 } ] },
