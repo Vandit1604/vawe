@@ -16,6 +16,7 @@ import { produceBaseline, bakeCameraMove, bakeDepth, bakeFocus } from './produce
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
 const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
   ? [L, ...flatDepth(L.children), ...flatDepth(L.layers)] : []);
+import { assertKeyHandles } from './sequence.js';
 import { loadBeatGrid } from './beat-bind.js';
 import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from './safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
@@ -491,6 +492,11 @@ export async function boot(build) {
     // against is the camera's, and before the first frame, because nothing at render time reads the word.
     bakeDepth(data);
     bakeFocus(data);
+    // CAMERA KEYS get the same refusal a layer's motion track gets from resolveKeyedProps, because
+    // they run through the same interpolator (core/sequence.js segmentAt). A camera track is not
+    // walked by resolveKeyedProps, so without this line the handle system would be enforced on layers
+    // and unenforced on the camera, which is the exact drift the interpolator was unified to end.
+    assertKeyHandles(data.camera, 'camera');
     // Same refusal as the line above, for the same reason: a field written and then ignored is the one
     // outcome this path exists to make impossible. `make expand` is not an escape here, the bake is at
     // boot, so a scene that still carries one has hit a bug rather than skipped a step.

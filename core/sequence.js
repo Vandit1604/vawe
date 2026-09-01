@@ -3,7 +3,8 @@
 // with zero DOM access. Mirrors another engine' packages/engine split (pure (config,t)→value math
 // beside the DOM/capture layer, not entangled with it). scene.html imports these and does the
 // DOM writes; the math lives here and is asserted by scripts/lib-test.mjs.
-import { clamp01, lerp, easeInOutCubic, resolveEasing } from './motion.js';
+import { clamp01, lerp, easeInOutCubic, resolveEasing, handleCurve,
+  resolveHandle as resolveHandleSide } from './motion.js';
 
 // THE CAMERA IS A POSITION IN SPACE, and `s` is where it stands.
 //
@@ -124,6 +125,9 @@ export const LAYER_OWNED = ['w', 'h', 'track'];
 export function resolveKeyedProps(layers) {
   (layers || []).forEach((L, idx) => {
     if (!Array.isArray(L.motion) || !L.motion.length) return;
+    // Two authored curves on one segment, refused with the layer in hand. This walk already exists and
+    // already names the layer, so the check goes here instead of in a second pass over the same list.
+    assertKeyHandles(L.motion, `layer "${L.id || L.type || '?'}"`);
     for (const prop of LAYER_OWNED) {
       if (!L.motion.some((k) => k && k[prop] != null)) continue;
       // `track` always has an identity: scene.js defaults a layer's z-order to its position in the
@@ -207,8 +211,64 @@ export function segmentAt(kfs, i, t, dfltEase) {
     return (prop, dflt) => hermite(a[prop] ?? dflt, b[prop] ?? dflt,
       tangentAt(kfs, i, prop, dflt), tangentAt(kfs, i + 1, prop, dflt), seg, u);
   }
-  const p = !(seg > 0) ? 1 : resolveEasing(b.ease || dfltEase)(clamp01((t - a.t) / seg));
+  // PER-KEY, PER-SIDE HANDLES beat the named default when either side of the segment authors one.
+  // `a.easeOut` shapes the value leaving a, `b.easeIn` shapes the value arriving at b, and the side
+  // that says nothing contributes the straight line (core/motion.js handleCurve). A segment that
+  // authors neither takes the identical code path it took before handles existed, which is why
+  // nothing shipped moves. A handle beside a named `ease` on the same segment is REFUSED, at boot,
+  // by keyHandleErrors below, so this never has to decide which of two authored curves wins.
+  const drawn = handleCurve(a.easeOut, b.easeIn);
+  const p = !(seg > 0) ? 1
+    : (drawn || resolveEasing(b.ease || dfltEase))(clamp01((t - a.t) / seg));
   return (prop, dflt) => lerp(a[prop] ?? dflt, b[prop] ?? dflt, p);
+}
+
+// ---------- THE REFUSALS: two authored curves on one segment ----------
+//
+// keyHandleErrors(kfs, who) -> messages[]. Checked at BOOT (core/boot.js) and at author-check
+// (core/validate.mjs), never per frame, and it is ONE function so the two cannot say different
+// things. Nothing here is a preference: `through` COMPUTES a key's tangent from its neighbours and a
+// handle AUTHORS it, so a key wearing both has two answers for one number, and a named `ease` on the
+// segment is a third. Picking one silently is how this repo gets its worst bugs, so all three are
+// refused by name.
+const SIDES = ['easeIn', 'easeOut'];
+export function keyHandleErrors(kfs, who = 'a track') {
+  const out = [];
+  if (!Array.isArray(kfs)) return out;
+  const has = (k, side) => k && k[side] != null;
+  for (let i = 0; i < kfs.length; i++) {
+    const k = kfs[i];
+    if (!k) continue;
+    for (const side of SIDES) {
+      if (!has(k, side)) continue;
+      try { resolveHandleSide(k[side], side, `${who} key ${i}`); }
+      catch (e) { out.push(e.message); }
+    }
+    if (k.ease === 'through' && SIDES.some((sd) => has(k, sd)))
+      out.push(`${who} key ${i} carries both \`ease: "through"\` and a handle. `
+        + '`through` COMPUTES the velocity at this key from its neighbours; a handle AUTHORS it. '
+        + 'They are two answers to one question, so one would silently win. Keep one: drop the handle '
+        + 'to let the neighbours decide, or drop `through` to draw the curve yourself.');
+  }
+  for (let i = 0; i < kfs.length - 1; i++) {
+    const a = kfs[i], b = kfs[i + 1];
+    // `through` is caught by the per-key rule above, which says something sharper about it than
+    // "two curves on one segment" would, so it is skipped here rather than reported twice.
+    if (!a || !b || b.ease == null || b.ease === 'through') continue;
+    const drawn = [has(a, 'easeOut') && `key ${i} \`easeOut\``, has(b, 'easeIn') && `key ${i + 1} \`easeIn\``].filter(Boolean);
+    if (!drawn.length) continue;
+    out.push(`${who}: the segment from key ${i} to key ${i + 1} is shaped twice, by `
+      + `\`ease: ${JSON.stringify(b.ease)}\` on key ${i + 1} and by ${drawn.join(' and ')}. `
+      + 'A named easing is one curve for the whole segment and a handle draws half of it, so they '
+      + 'cannot both hold. Keep one: the name for a stock shape, the handles to draw your own.');
+  }
+  return out;
+}
+
+/** Throws on the first problem, naming the layer. The boot-side spelling of keyHandleErrors. */
+export function assertKeyHandles(kfs, who) {
+  const errs = keyHandleErrors(kfs, who);
+  if (errs.length) throw new Error(errs[0]);
 }
 
 export function motionAt(kfs, lt) {

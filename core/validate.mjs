@@ -34,7 +34,7 @@ import { resolveSeconds, FEEL } from '../core/vocab.js';
 import { bgPreset, bgOverErrors, bgOptKeys , BG_NAMES } from '../core/backgrounds.js';
 import { KNOBS, knobsFor } from '../core/knobs.js';
 import { mergePan } from './pan-resolve.mjs';
-import { motionAt } from './sequence.js';
+import { motionAt, keyHandleErrors } from './sequence.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -243,6 +243,7 @@ export function validateData(schema, data) {
   walk(schema.fields, data || {}, '', errors);
   noEmdash(data, '', errors); // voice rule: no em-dashes in any on-screen copy (schema or not)
   errors.push(...easeErrors(data)); // engine-driven fields take an EASINGS name, not a GSAP one (#367)
+  errors.push(...handleErrors(data || {})); // a keyframe handle and a named ease cannot both shape a segment
   errors.push(...durationWordErrors(data || {})); // a timing slot's word must be one the engine knows
   errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
   errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
@@ -772,6 +773,24 @@ function easeNames(v, path, errors, underGsap = false) {
     easeNames(x, at, errors, gsap);
   }
 }
+/**
+ * handleErrors(data) → messages[]: per-key `easeIn`/`easeOut` handles that contradict something else
+ * on the same segment. It CALLS core/sequence.js keyHandleErrors rather than restating the rule,
+ * because the renderer already refuses these at boot and a second copy here would be free to drift
+ * into saying something different from the thing that actually throws.
+ */
+export function handleErrors(data) {
+  const out = [];
+  out.push(...keyHandleErrors(data.camera, 'camera'));
+  const walkLayers = (ls, path) => (ls || []).forEach((L, i) => {
+    if (!isObj(L)) return;
+    out.push(...keyHandleErrors(L.motion, `${path}[${i}] (${L.type || 'text'})`));
+    if (Array.isArray(L.children)) walkLayers(L.children, `${path}[${i}].children`);
+  });
+  walkLayers(data.layers, 'layers');
+  return out;
+}
+
 /** easeErrors(cfg) → messages[]. Exported so the exclusion list is testable on its own, it is the
  *  half of this rule that can rot silently, because getting it wrong reads as a stricter gate. */
 export function easeErrors(cfg) { const out = []; easeNames(cfg, '', out); return out; }

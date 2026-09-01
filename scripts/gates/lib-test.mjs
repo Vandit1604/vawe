@@ -4266,6 +4266,89 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('y is not clamped, so overshoot survives', cubicBezier(0.3, 0, 0.4, 1.7)(0.72) > 1);
 }
 
+// ---------- keyframe handles: influence AND speed, per key, per side ----------
+// The design decision under test is that SPEED is a multiple of the segment's own average velocity
+// rather than absolute units per second. In absolute units, y1 = (speed * influenceSeconds) / delta,
+// which carries the property's delta: one authored "200 units/sec" gives y1 = 0.125 for a 400px move
+// and y1 = 100 for a 0.5 scale change, and divides by zero on a property that does not move. As a
+// multiple, outSpeed = frac * (delta / dur), the delta and the duration cancel and y1 = frac * x1.
+// These asserts are that cancellation, measured through the shipped code.
+{
+  const { handleCurve, cubicBezier, HANDLE_REGISTRY, resolveHandle } = await import('../../core/motion.js');
+  const { motionAt, keyHandleErrors, velocityAt } = await import('../../core/sequence.js');
+
+  // ONE HANDLE PAIR, EVERY PROPERTY. x, scale and rot share no scale, and the same key drives all
+  // three to the SAME fractional progress. A speed term in absolute units could not do this.
+  const multi = [{ t: 0, x: 0, scale: 1, rot: 0, easeOut: { influence: 20, speed: 4 } },
+                 { t: 1, x: 400, scale: 2, rot: 90, easeIn: 'easyEase' }];
+  const frac = (v, a, b) => (v - a) / (b - a);
+  let sameProgress = true;
+  for (const t of [0.1, 0.3, 0.5, 0.9]) {
+    const m = motionAt(multi, t);
+    const fx = frac(m.dx, 0, 400), fs = frac(m.scale, 1, 2), fr = frac(m.rot, 0, 90);
+    if (Math.abs(fx - fs) > 1e-9 || Math.abs(fx - fr) > 1e-9) sameProgress = false;
+  }
+  ok('one handle pair drives x, scale and rot to identical progress', sameProgress);
+  // And it is the same curve whatever the segment lasts, which absolute units would not be either.
+  const short = [{ t: 0, x: 0, easeOut: { influence: 20, speed: 4 } }, { t: 0.5, x: 400 }];
+  const long = [{ t: 0, x: 0, easeOut: { influence: 20, speed: 4 } }, { t: 4, x: 400 }];
+  ok('the curve is the same shape at any segment duration',
+    Math.abs(motionAt(short, 0.25).dx - motionAt(long, 2).dx) < 1e-6);
+  // A property that does NOT change across the segment must still interpolate, not divide by zero.
+  const still = [{ t: 0, x: 100, easeOut: { influence: 20, speed: 4 } }, { t: 1, x: 100, easeIn: 'easyEase' }];
+  ok('a zero delta is not a special case', motionAt(still, 0.4).dx === 100);
+
+  // easyEase on both sides IS the published Easy Ease, cubic-bezier(1/3, 0, 2/3, 1).
+  const ee = handleCurve('easyEase', 'easyEase'), pub = cubicBezier(1 / 3, 0, 2 / 3, 1);
+  let w = 0; for (let i = 0; i <= 100; i++) w = Math.max(w, Math.abs(ee(i / 100) - pub(i / 100)));
+  ok('easyEase on both sides is AE Easy Ease exactly', w < 1e-9);
+  // The closed form: y1 = speed * influence/100, y2 = 1 - speed * influence/100.
+  const drawn = handleCurve({ influence: 25, speed: 2 }, null);
+  const closed = cubicBezier(0.25, 0.5, 2 / 3, 2 / 3);
+  let w2 = 0; for (let i = 0; i <= 100; i++) w2 = Math.max(w2, Math.abs(drawn(i / 100) - closed(i / 100)));
+  ok('handleCurve is y = speed * influence/100, with the delta cancelled out', w2 < 1e-9);
+  // An ABSENT side is the linear half, so a one-sided handle means what it says.
+  ok('handleCurve returns null when neither side authors one', handleCurve(null, null) === null);
+  ok('speed 1 both sides IS linear', (() => { const f = handleCurve('linear', 'linear');
+    return [0.2, 0.5, 0.8].every((t) => Math.abs(f(t) - t) < 1e-9); })());
+
+  // DEFAULTS ARE SACRED: a track with no handle takes the path it took before handles existed.
+  const plain = [{ t: 0, x: 0 }, { t: 1, x: 300 }, { t: 2, x: 900 }];
+  ok('a handleless track is byte-identical to the old default path',
+    motionAt(plain, 0.37).dx === 60.78359999999999);
+
+  // THE VELOCITY READ inherits handles for free, because it derives from motionAt.
+  const peak = (kfs) => Math.max(...[...Array(30)].map((_, i) => velocityAt(kfs, i / 30, 1 / 30).speed));
+  ok('velocityAt sees an authored handle without being told about it',
+    peak([{ t: 0, x: 0, easeOut: 'hang' }, { t: 1, x: 400, easeIn: 'hang' }]) > 1.7 * peak([{ t: 0, x: 0 }, { t: 1, x: 400 }]));
+
+  // THE REFUSALS. `through` COMPUTES the tangent, a handle AUTHORS it, a named ease is a third
+  // answer. All three refused by name rather than one silently winning.
+  ok('a key with both `through` and a handle is refused',
+    keyHandleErrors([{ t: 0 }, { t: 1, ease: 'through', easeIn: 'easyEase' }], 'L').length === 1);
+  ok('a named ease and a handle on one segment are refused',
+    keyHandleErrors([{ t: 0, easeOut: 'fling' }, { t: 1, ease: 'easeOutQuint' }], 'L').length === 1);
+  ok('a handle on its own is fine', keyHandleErrors([{ t: 0, easeOut: 'fling' }, { t: 1, easeIn: 'easyEase' }], 'L').length === 0);
+  ok('`ease` on a key shapes the PREVIOUS segment, so it does not clash with that key\'s `easeOut`',
+    keyHandleErrors([{ t: 0 }, { t: 1, ease: 'easeOutQuint', easeOut: 'fling' }, { t: 2 }], 'L').length === 0);
+  ok('an out-of-range influence is refused with the unit named',
+    /PER CENT of the segment/.test(keyHandleErrors([{ t: 0, easeOut: { influence: 400 } }, { t: 1 }], 'L')[0] || ''));
+  ok('an unknown handle name is refused, not substituted',
+    /unknown keyframe handle/.test(keyHandleErrors([{ t: 0, easeOut: 'easyEaseOut' }, { t: 1 }], 'L')[0] || ''));
+  // There is ONE name per SHAPE and the SLOT picks the side. easyEaseIn/easyEaseOut would be two
+  // spellings of one thing, which is the fork this repo logs most.
+  ok('there is no side-specific spelling of a handle name',
+    !HANDLE_REGISTRY.names.some((n) => /In$|Out$/.test(n)));
+  ok('every handle name resolves to a real { influence, speed }',
+    HANDLE_REGISTRY.names.every((n) => { const h = resolveHandle(n, 'easeOut');
+      return Number.isFinite(h.influence) && Number.isFinite(h.speed) && h.influence >= 0 && h.influence <= 100; }));
+
+  // And the CAMERA gets all of it, because it shares segmentAt.
+  const { cameraAt } = await import('../../core/sequence.js');
+  const cam = [{ t: 0, s: 1, easeOut: 'hang' }, { t: 1, s: 2, easeIn: 'hang' }];
+  ok('a camera key takes handles too', cameraAt(cam, 0.5).s === 1.5 && cameraAt(cam, 0.15).s < 1.05);
+}
+
 // ---------- an authored filter survives a motion track ----------
 // The motion track owns `style.filter` (it writes the velocity blur there) and used to strip EVERY
 // `blur(...)` out of the current value before adding its own, on the assumption that any blur it found
