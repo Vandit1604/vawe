@@ -152,6 +152,13 @@ if (feel.trim()) {
 } else {
   console.log(`\n  No plan and no note, so the arsenal cannot be aimed at this film.`);
   console.log(`  Write the storyboard first, or search by hand: make arsenal Q="<the feeling>"`);
+  // Aimed at nothing, the arsenal is 397 entries and a wall of names is the same non-event as printing
+  // none. What is still worth showing with no plan to rank against is the part an author CANNOT have
+  // searched for, because it did not exist last time they looked.
+  const r = spawnSync('node', [path.join(repoRoot, 'scripts/author/arsenal.mjs'), '--new'],
+    { encoding: 'utf8', cwd: repoRoot });
+  const out = (r.stdout || '').trim();
+  if (out) console.log(`\n${out}`);
 }
 
 const rec = writeReceipt(STAGE, abs, { file: path.relative(repoRoot, abs), chain: rows.length });

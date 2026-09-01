@@ -866,9 +866,11 @@ blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs
 # sentence per beat. Built because the census is unambiguous: the {type:"beat"} mechanism is used by 2
 # of 153 scenes and EXIT_FX by none, which is what happens when 337 named things are reachable only by
 # reading an 849-line generated file. CENSUS=1 lists what nothing uses.
-arsenal: ## search the whole arsenal in plain english (Q="..."), or CENSUS=1 for what is never used
+arsenal: ## search the arsenal in plain english (Q="..."), CENSUS=1 for what is unused, NEW=1 for what is recent
 ifeq ($(CENSUS),1)
 	node scripts/author/arsenal.mjs --census
+else ifeq ($(NEW),1)
+	node scripts/author/arsenal.mjs --new
 else
 	node scripts/author/arsenal.mjs "$(Q)" $(if $(KIND),--kind "$(KIND)") $(if $(N),--n $(N))
 endif

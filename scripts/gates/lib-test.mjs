@@ -35,6 +35,7 @@ import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, fram
 import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
+import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/junctions.js';
@@ -4832,6 +4833,30 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       try { mount({ type: 'svg', d: TRI, draw: { ease: 'nope' } }); return false; }
       catch (e) { return /unknown easing/.test(e.message); }
     })());
+}
+
+// ---- ARSENAL RECENCY (scripts/author/recency.mjs) ------------------------------------------------
+// The census cannot tell "undiscoverable" from "unwanted", and age is what tells them apart. These
+// assert the two halves that can be wrong: the tree read, and the join onto the census.
+{
+  ok('presentIn finds a name in the tree text and does not invent one that is absent',
+     (() => { const got = presentIn('const X = { wipe: 1 };', ['wipe', 'matchCut']);
+              return got.has('wipe') && !got.has('matchCut') && got.size === 1; })());
+  ok('a name in NO registry file is reported new, whatever the window',
+     newSince(['zzNotARealArsenalEntry']).has('zzNotARealArsenalEntry'));
+  // `wipe` is one of the oldest entries in core/cuts.js. If a fixed window ever calls it new, the
+  // derivation is reading diffs, or reading nothing, and both report the whole arsenal as fresh.
+  ok('an entry that predates the window is never reported new',
+     !newSince(['wipe', 'fade']).has('wipe') && !newSince(['wipe', 'fade']).has('fade'));
+  ok('git that cannot answer reports NOTHING new, rather than everything',
+     existingAt('', ['wipe'], undefined).size === 0 && newSince([], {}).size === 0);
+  ok('the window is a fixed number of days, so a quiet fortnight is allowed to be empty',
+     Number.isInteger(WINDOW_DAYS) && WINDOW_DAYS > 0);
+  // The join the preflight output rests on: new AND unused is the pair worth surfacing, and each half
+  // is measured by a different owner (recency here, the census in scripts/author/arsenal.mjs).
+  ok('newness and usage are independent reads, so an old entry with users is neither',
+     (() => { const fresh = newSince(['wipe', 'zzNotARealArsenalEntry']);
+              return fresh.size === 1 && fresh.has('zzNotARealArsenalEntry'); })());
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
