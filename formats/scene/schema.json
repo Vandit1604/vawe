@@ -549,7 +549,7 @@
    }
   },
   "cameraMove": {
-   "label": "Author sugar: { move, ...params } (or an array of them) \u2192 data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves.js is the source of truth, and lib-test asserts the two agree."
+   "label": "Author sugar: { move, ...params } (or an array of them) \u2192 data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom | followCursor. `followCursor` is the one move that is DERIVED rather than typed: give it `\"cursor\": \"<layer id>\"` and it reads that cursor layer's own `path` and `clicks`, pushes toward each press, arrives just before it, holds, then releases, so the pointer stays the single owner of where the camera goes. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves.js is the source of truth, and lib-test asserts the two agree."
   },
   "spectacle": {
    "type": "object",

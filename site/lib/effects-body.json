@@ -296,6 +296,7 @@
   "camera-moves--divein": "{\n  \"cameraMove\": {\n    \"move\": \"diveIn\"\n  }\n}",
   "camera-moves--dollyzoom": "{\n  \"cameraMove\": {\n    \"move\": \"dollyZoom\"\n  }\n}",
   "camera-moves--drifthold": "{\n  \"cameraMove\": {\n    \"move\": \"driftHold\"\n  }\n}",
+  "camera-moves--followcursor": "{\n  \"cameraMove\": {\n    \"move\": \"followCursor\"\n  }\n}",
   "camera-moves--multiphase": "{\n  \"cameraMove\": {\n    \"move\": \"multiPhase\"\n  }\n}",
   "camera-moves--orbit": "{\n  \"cameraMove\": {\n    \"move\": \"orbit\"\n  }\n}",
   "camera-moves--panfollow": "{\n  \"cameraMove\": {\n    \"move\": \"panFollow\"\n  }\n}",

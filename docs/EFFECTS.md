@@ -466,6 +466,7 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `diveIn` | zoom INTO a target point (it travels to centre) |
 | `dollyZoom` | THE VERTIGO SHOT: the lens ramps while the camera holds its distance, so the subject on the picture plane keeps its exact size and the world BEHIND it rushes in or falls away · the only move here that changes the relationship between planes rather than the framing, and it needs layers standing at a `plane` depth or there is nothing to counter-scale against |
 | `driftHold` | a held frame that is never dead: a sub-12px Lissajous micro-drift, x and y at different frequencies so it breathes instead of walking a diagonal |
+| `followCursor` | THE CAMERA FOLLOWS THE CURSOR: derived from the `path` and `clicks` on a `cursor` layer, so the pointer stays the single owner of where the camera goes. It pushes toward the spot the pointer is about to click, arrives just BEFORE the click, holds across it and releases. Clicks too close in time or space share one framing, so six clicks are never six crash zooms |
 | `multiPhase` | chain legs into one journey (push, hold-drift, settle) |
 | `orbit` | a gentle 3D swing around the frame (ry through 0) |
 | `panFollow` | camera pans to track downward-growing content (terminal) |
@@ -934,4 +935,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_605 effects across 43 families. Regenerate: `make effects`._
+_606 effects across 43 families. Regenerate: `make effects`._

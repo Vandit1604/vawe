@@ -1,5 +1,5 @@
 {
-  "total": 605,
+  "total": 606,
   "previewed": 261,
   "families": 43,
   "tags": [
@@ -21,7 +21,7 @@
     ],
     [
       "camera",
-      12
+      13
     ],
     [
       "canvas",
@@ -2408,7 +2408,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a camera move is only legible against a scene laid out for it, which is the film, not a swatch.",
-      "count": 12,
+      "count": 13,
       "undescribed": 0,
       "entries": [
         {
@@ -2436,6 +2436,13 @@
           "name": "driftHold",
           "stem": "camera-moves--drifthold",
           "desc": "a · held · frame · that · is · never · dead · a · sub-12px · Lissajous · micro-drift, · x · and · y · at · different · frequencies · so · it · breathes · instead · of · walking · a · diagonal",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "followCursor",
+          "stem": "camera-moves--followcursor",
+          "desc": "THE · CAMERA · FOLLOWS · THE · CURSOR · derived · from · the · `path` · and · `clicks` · on · a · `cursor` · layer, · so · the · pointer · stays · the · single · owner · of · where · the · camera · goes. · It · pushes · toward · the · spot · the · pointer · is · about · to · click, · arrives · just · BEFORE · the · click, · holds · across · it · and · releases. · Clicks · too · close · in · time · or · space · share · one · framing, · so · six · clicks · are · never · six · crash · zooms",
           "scene": null,
           "noPreview": null
         },
