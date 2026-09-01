@@ -40,6 +40,8 @@ import (
 	"vawe/internal/scene"
 )
 
+const blankJS = `(async () => { const s = document.getElementById('stage'); s.style.display = 'none'; await new Promise(r => __realRaf(() => __realRaf(r))); s.style.display = ''; })()`
+
 func main() {
 	root := flag.String("root", ".", "repo root")
 	data := flag.String("data", "/formats/scene/_shardtest.json", "scene json path")
@@ -53,6 +55,7 @@ func main() {
 	rafs := flag.Int("rafs", 2, "rAFs to await before the shot")
 	pre1 := flag.String("pre1", "", "history for tab 1")
 	purity := flag.Bool("purity", false, "compare frameSig ascending vs descending in one tab")
+	flush := flag.Bool("flush", false, "hide the stage and let it paint before every renderFrame")
 	purityN := flag.Int("purityN", 150, "frames for -purity")
 	pre := flag.String("pre", "", "on tab 0, paint+shoot this comma list of frames before the measured frame")
 	plain := flag.String("plain", "", "sweep body: render|html|canvas|readback (default frameSig)")
@@ -180,6 +183,12 @@ func main() {
 				list = append(list, v)
 			}
 			for _, f := range list {
+				if *flush {
+					if err := chromedp.Run(ctx, chromedp.Evaluate(blankJS, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) })); err != nil {
+						fmt.Println("flush:", err)
+						return
+					}
+				}
 				if err := chromedp.Run(ctx,
 					chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
 					chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),
@@ -210,6 +219,12 @@ func main() {
 			continue
 		}
 		var buf []byte
+		if *flush {
+			if err := chromedp.Run(ctx, chromedp.Evaluate(blankJS, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) })); err != nil {
+				fmt.Println("flush:", err)
+				return
+			}
+		}
 		if err := chromedp.Run(ctx,
 			chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", *frame), nil),
 			chromedp.Evaluate(fmt.Sprintf(`window.__realRaf ? new Promise(res => { let k = %d; const step = () => (--k <= 0 ? res() : __realRaf(step)); __realRaf(step); }) : true`, *rafs), nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),

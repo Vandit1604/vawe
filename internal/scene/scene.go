@@ -113,6 +113,24 @@ func Serve(root string) (*http.Server, int, error) {
 	return srv, ln.Addr().(*net.TCPAddr).Port, nil
 }
 
+// THE TWO JS BARRIERS OF A CAPTURE, in the order they must run. They are constants because the
+// profiled and the unprofiled path both run them, and two copies of a barrier that disagree is how
+// the unprofiled path came to skip `__frameSettle` entirely: the drain was written into the profiled
+// branch only, so every REAL render shot a <video> frame without waiting for its decode, which is the
+// defect #370 and #383 were fixed for, live again on the path that ships.
+//
+// settleJS: DRAIN THE ASYNC WORK. A <video> seek fires `seeked` whenever the decode is ready, which
+// is routinely longer than two frames; shooting without waiting captures whatever the decoder had
+// lying around, which varies by worker and by machine (docs/MISTAKES.md #370, #383). __frameSettle is
+// installed by core/frame-settle.js for every scene, so the guard is about a stale tab on an older
+// page, not about whether this film uses video.
+const settleJS = `window.__frameSettle ? window.__frameSettle() : true`
+
+// paintJS: WAIT FOR PAINT. Two real rAFs: the first schedules the commit, the second runs after it.
+const paintJS = `window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`
+
+func awaitPromise(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }
+
 func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 	opts := append([]chromedp.ExecAllocatorOption{},
 		chromedp.Headless,
@@ -679,7 +697,8 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			if prof == nil {
 				err := chromedp.Run(ctx,
 					chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
-					chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) }),
+					chromedp.Evaluate(settleJS, nil, awaitPromise),
+					chromedp.Evaluate(paintJS, nil, awaitPromise),
 					capture(capFmt, &buf),
 				)
 				if err != nil {
@@ -692,18 +711,11 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				return nil, err
 			}
 			t1 := time.Now()
-			// DRAIN THE ASYNC WORK, THEN WAIT FOR PAINT. The two rAFs below are a PAINT barrier and are
-			// enough for a DOM write or a CSS transform, which was everything the engine did until
-			// footage arrived. A <video> seek is different: setting currentTime starts a decode that
-			// fires `seeked` whenever it is ready, routinely longer than two frames. Shooting without
-			// waiting captures whatever the decoder had lying around, which varies by worker and by
-			// machine, i.e. a frame that is not a function of n (docs/MISTAKES.md #370, #383).
-			// __frameSettle is installed by core/frame-settle.js for every scene, so the guard is about
-			// an older page in a stale tab, not about whether this film uses video.
-			if err := chromedp.Run(ctx, chromedp.Evaluate(`window.__frameSettle ? window.__frameSettle() : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) })); err != nil {
+			// The same two barriers the unprofiled branch runs, timed separately. See settleJS/paintJS.
+			if err := chromedp.Run(ctx, chromedp.Evaluate(settleJS, nil, awaitPromise)); err != nil {
 				return nil, err
 			}
-			if err := chromedp.Run(ctx, chromedp.Evaluate(`window.__realRaf ? new Promise(res => __realRaf(() => __realRaf(res))) : true`, nil, func(p *runtime.EvaluateParams) *runtime.EvaluateParams { return p.WithAwaitPromise(true) })); err != nil {
+			if err := chromedp.Run(ctx, chromedp.Evaluate(paintJS, nil, awaitPromise)); err != nil {
 				return nil, err
 			}
 			t2 := time.Now()
