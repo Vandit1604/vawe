@@ -1,3 +1,9 @@
+---
+when: "two renders of the same film disagree on a handful of frames and nothing in our code explains it"
+answers: "the reduced case for an upstream Chrome raster bug: what splits two tabs, what does not, and what is still needed to make it minimal"
+group: engine
+---
+
 # Chrome: a blurred `box-shadow` rasterises differently depending on the tab's paint history
 
 Status: **reduced, not yet minimal. NOT filed anywhere.** File it upstream only after the last step

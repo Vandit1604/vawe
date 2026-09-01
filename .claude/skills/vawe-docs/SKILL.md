@@ -125,6 +125,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [docs/BUGS/chrome-boxshadow-raster-history.md](../../../docs/BUGS/chrome-boxshadow-raster-history.md) | two renders of the same film disagree on a handful of frames and nothing in our code explains it | the reduced case for an upstream Chrome raster bug: what splits two tabs, what does not, and what is still needed to make it minimal |
 | [docs/CODEMAPS/ARCHITECTURE.md](../../../docs/CODEMAPS/ARCHITECTURE.md) | changing the engine itself, not a video | the system map: JSON → validate → scene.html → renderFrame(n) → Go renderer → mp4, and who owns what |
 | [docs/CODEMAPS/DOC-DISCOVERY.md](../../../docs/CODEMAPS/DOC-DISCOVERY.md) | changing how docs are indexed, or wondering why the index is generated rather than written | what the sources say about CLAUDE.md size, Agent Skills progressive disclosure, AGENTS.md and llms.txt · the measurement of this repo · why this mechanism over the alternatives |
 | [docs/DESIGN-NOTES/tier5.md](../../../docs/DESIGN-NOTES/tier5.md) | you want an effect the engine refuses to ship | the effects blocked on a determinism story, and what each would cost to unblock |
