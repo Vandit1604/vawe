@@ -57,6 +57,10 @@ const USAGE = {
   // An interpolation mode is not an easing and does not go in `ease`'s usual slot mentally, so the
   // form matters: it is the key on a motion KEY, and it governs the segment arriving at that key.
   'interpolation-modes-not-easings': (n) => text({ anim: 'none', motion: [{ t: 0, x: -300 }, { t: 0.8, x: 0, ease: n }, { t: 1.6, x: 300, ease: n }] }),
+  // A HANDLE is one SIDE of one key, and the slot says which side, so the form has to show both
+  // sides of a segment at once or the name reads as a whole-segment easing, which is the thing it
+  // is not. Written as a name here; the long form is { influence, speed }.
+  'keyframe-handles-the-graph-editor': (n) => text({ anim: 'none', motion: [{ t: 0, x: -300, easeOut: n }, { t: 0.9, x: 300, easeIn: n }] }),
   // A depth is a NAMED PLANE, so it is one word on the layer and the camera does the rest.
   'depths-parallax-planes': (n) => text({ depth: n }),
   // An adjustment layer is a LAYER, not a prop, and `track` is the whole contract: everything with a
@@ -202,6 +206,7 @@ const NO_PREVIEW = {
   // Its card is in the playground (`core/generators.js`), where its radius dial is on screen.
   'filter-presets': 'most of these regrade a photographic source, and the index ships no photographs. The exception is `thermalBlur`, which is a type effect: its live card with a radius dial is in the playground.',
   'interpolation-modes-not-easings': 'a mode is the SHAPE of the segment between two keys. A still frame is a point on that curve and shows nothing about it; it is only itself in motion.',
+  'keyframe-handles-the-graph-editor': 'a handle is half the shape of a segment, so it has the same problem a mode has: a still frame is one point on the curve and says nothing about the curve. The playground card draws the curve itself with both handles on dials.',
   'depths-parallax-planes': 'a plane only reads when the camera moves past it. One frame of a parallax is a frame with nothing parallaxing in it.',
   'adjustment-layers-grade-what-is-beneath': 'a grade has no subject of its own: it is whatever is already under it. The arsenal shows them through the scenes that use them.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',

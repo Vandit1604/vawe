@@ -222,7 +222,6 @@ const HANDLES = {
 export const HANDLE_REGISTRY = defineRegistry('keyframe handle', HANDLES, {
   blurbs: blurbsOf('keyframe handle', HANDLES), slot: 'easeOut',
 });
-export const HANDLE_NAMES = Object.keys(HANDLES);
 
 /**
  * resolveHandle(h, side, who): a handle spec -> { influence, speed }. A NAME resolves through the
@@ -232,7 +231,7 @@ export function resolveHandle(h, side, who = '') {
   if (h == null) return LINEAR_SIDE;
   if (typeof h === 'string') return HANDLE_REGISTRY.pick(h);
   if (typeof h !== 'object' || Array.isArray(h))
-    throw new Error(`${who ? `${who}: ` : ''}\`${side}\` takes a handle name (${HANDLE_NAMES.join(', ')}) `
+    throw new Error(`${who ? `${who}: ` : ''}\`${side}\` takes a handle name (${HANDLE_REGISTRY.names.join(', ')}) `
       + `or { "influence": 0-100, "speed": a multiple of the segment's average velocity }, got ${JSON.stringify(h)}.`);
   const influence = h.influence == null ? HANDLE_DEFAULT_INFLUENCE : h.influence;
   const speed = h.speed == null ? 0 : h.speed;
