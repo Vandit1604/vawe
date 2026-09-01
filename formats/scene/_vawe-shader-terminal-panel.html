@@ -22,7 +22,7 @@
      the browser would drop it. A <style> block gets no such check.
 
      `max(x, -x)` is the spelling for abs() here: this Chrome has no abs(). -->
-<div class="root" style="position:relative;width:100%;height:100%;box-sizing:border-box;container-type:size;--solid:clamp(0, calc((6.698 - var(--t,0)) / 0.337), 1)">
+<div class="root" style="position:relative;width:100%;height:100%;box-sizing:border-box;container-type:size;--fall:clamp(0, calc((6.698 - var(--t,0)) / 0.337), 1); --io:clamp(0, calc((7.371 - var(--t,0)) / 0.337), 1); --solid:calc(var(--fall) * var(--fall) * 0.45 + var(--io) * var(--io) * 0.55)">
   <style>
     .root { --mono: 'JetBrains Mono', ui-monospace, monospace;
             --sans: 'Anybody', system-ui, sans-serif;
@@ -68,16 +68,32 @@
     <!-- THE BODY DISSOLVES, THE TERMINAL DOES NOT. The shader layer sits directly behind this box, at
          exactly its coordinates, so dropping the body's own fill across one beat of the music hands the
          panel's interior to the shader while the chrome, the command and the output stay on top of it.
-         6.361s to 6.698s is one beat of the bed, so the handover happens ON the pulse.
-         That is what makes beat 4 a transformation of one object rather than a cut to a second one. -->
+         IN TWO STEPS, and the middle one is what keeps the type readable. The fill falls to 0.55 over
+         one beat (6.361 to 6.698), so beat 4 is the picture seen THROUGH tinted glass with the command
+         and the output still legible on it; then it clears to nothing over the beat the fold takes.
+         With one step straight to zero the audit was right: the sigil ran 2.5:1 against the lit
+         fractal behind it, because the turn had handed a bright picture to type that was drawn for a
+         near-black ground.
+
+         BOTH STEPS ARE SQUARED, not linear: each falls fast and then lingers, which is a fling rather
+         than an even dissolve. A reveal LANDS. An even ramp across the same beat reads as a fade, and
+         a fade says "time passed" when this seam says "here it is" (docs/CRAFT/TRANSITIONS.md step 4).
+         That is what makes beat 4 a transformation of one object rather than a cut to a second one.
+
+         THE CHROME OUTLIVES THE CONTENT. `--io` empties the bar and the terminal text over ONE beat
+         (7.034 to 7.371), which is when the two wings become visible: over two beats the wings arrived
+         on top of still-readable output and the frame read as clutter. The shell's own hairline and its
+         shadow never go: the
+         panel that lands in the middle of the fan IS this element, folded, not a rectangle drawn to
+         look like it. That is the whole reason the film has a continuous object at all. -->
     <div class="body" style="background:rgba(8,9,11,var(--solid,1))">
-      <div class="bar">
+      <div class="bar" style="opacity:var(--io,1)">
         <div class="mark"></div>
         <div class="name">vawe</div>
         <div class="where">~/vawe · zsh</div>
       </div>
 
-      <div class="term">
+      <div class="term" style="opacity:var(--io,1)">
         <!-- THE PROMPT ROW IS AN EMPTY SPACER, and the command is a real `text` layer sitting in
              it (see the scene JSON). A CSS clip on `--t` drew the same picture and made no sound: key
              clicks are derived from a `typing` layer's own reveal formula in formats/scene/scene.js,
@@ -88,7 +104,7 @@
         <div class="lines">
           <div class="line"><span class="tick">OK</span><span class="key">parse</span><span class="val">shader-path.json · 6 layers · 14.0s</span></div>
           <div class="line"><span class="tick">OK</span><span class="key">theme</span><span class="val">vawe · JetBrains Mono, Anybody</span></div>
-          <div class="line"><span class="tick">OK</span><span class="key">shader</span><span class="val">bands · seed 7 · deterministic</span></div>
+          <div class="line"><span class="tick">OK</span><span class="key">shader</span><span class="val">mandelbulb · seed 11 · deterministic</span></div>
           <div class="line"><span class="tick">&gt;&gt;</span><span class="key">render</span><span class="val">420 frames · 8 workers</span></div>
           <div class="track"><div class="fill"
             style="width:calc(clamp(0, calc((var(--t,0) - 4.04) / 0.638), 1) * 100%)"></div></div>

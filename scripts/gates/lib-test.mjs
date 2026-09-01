@@ -75,6 +75,7 @@ import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
 import { AMBIENT_FX, AMBIENT_SHADERS } from '../../core/shaders-ambient.js';
 import { shaderAt as ambientShaderAt, validate as ambientValidate } from '../../core/surfaces/shader.js';
+import { raymarchAt, validate as raymarchValidate } from '../../core/surfaces/raymarch.js';
 import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks.js';
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
@@ -1696,6 +1697,28 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`raymarch: every scene has a named distance field that depends on time${frozen.length ? ', missing/frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('raymarch: schema enum is exactly RAYMARCH_FX, in order', JSON.stringify(schema.fields.layers.item.raymarch.enum) === JSON.stringify(RAYMARCH_FX));
+  // ---- raymarchKeys: ONE window, several lit surfaces, cut on a chosen instant ----
+  // The same lookup shaderKeys uses (core/surfaces/surface-keys.js), asserted separately because the
+  // two surfaces read DIFFERENT authoring keys and a shared helper wired to the wrong one would still
+  // pass every test written against the other.
+  {
+    const K = { raymarch: 'mandelbulb', raymarchKeys: [{ t: 2, shader: 'caustics' }, { t: 4, shader: 'chromeGlass' }] };
+    ok('raymarchKeys: before the first key the layer shows its own `raymarch`', raymarchAt(K, 0) === 'mandelbulb' && raymarchAt(K, 1.99) === 'mandelbulb');
+    ok('raymarchKeys: the key is inclusive, the swap lands ON its t', raymarchAt(K, 2) === 'caustics' && raymarchAt(K, 3.9) === 'caustics');
+    ok('raymarchKeys: the last key holds to the end of the window', raymarchAt(K, 4) === 'chromeGlass' && raymarchAt(K, 99) === 'chromeGlass');
+    ok('raymarchKeys: absent leaves the static name untouched', raymarchAt({ raymarch: 'holoFoil' }, 7) === 'holoFoil');
+    const refuses = (L) => { try { raymarchValidate({ raymarch: 'metaballs', ...L }); return false; } catch { return true; } };
+    ok('raymarchKeys: an unknown surface in a key is refused, not silently blank', refuses({ raymarchKeys: [{ t: 0, shader: 'mandlebulb' }] }));
+    ok('raymarchKeys: a key with no `t` is refused', refuses({ raymarchKeys: [{ shader: 'caustics' }] }));
+    ok('raymarchKeys: keys running backwards are refused (the later one could never be reached)',
+      refuses({ raymarchKeys: [{ t: 3, shader: 'caustics' }, { t: 1, shader: 'holoFoil' }] }));
+    ok('raymarchKeys: an empty list is refused rather than accepted and ignored', refuses({ raymarchKeys: [] }));
+    ok('raymarchKeys: a valid list passes', !refuses(K));
+    ok('raymarchKeys: the schema documents it as an array of { t, shader }',
+      schema.fields.layers.item.raymarchKeys?.type === 'array'
+      && schema.fields.layers.item.raymarchKeys.item.t.type === 'number'
+      && schema.fields.layers.item.raymarchKeys.item.shader.type === 'string');
+  }
 }
 
 // ---- resample (layer as texture) ----

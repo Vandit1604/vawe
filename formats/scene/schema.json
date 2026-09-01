@@ -361,6 +361,7 @@
     "intensity",
     "radius",
     "raymarch",
+    "raymarchKeys",
     "resample",
     "seed",
     "speed",
@@ -2316,6 +2317,20 @@
       "caustics",
       "holoFoil"
      ]
+    },
+    "raymarchKeys": {
+     "type": "array",
+     "label": "raymarchKeys: cycle ONE raymarch panel through several lit surfaces, on HARD CUTS. [{\"t\":2,\"shader\":\"caustics\"},{\"t\":4,\"shader\":\"chromeGlass\"}]. Before the first key the layer shows its own `raymarch`. Reach for this rather than stacking a layer per surface: raymarch is the most expensive primitive here and every canvas layer holds a WebGL context for the WHOLE film, and stacked windows crossfade, which dissolves two subjects into mud. `seed` \u00b7 `intensity` \u00b7 `colors` \u00b7 `spin` stay the layer's and apply to every surface",
+     "item": {
+      "t": {
+       "type": "number",
+       "label": "Seconds from the layer's start, the same clock as `start`. NOT scaled by `speed`, which dials the subject's own animation. Keys must run forwards"
+      },
+      "shader": {
+       "type": "string",
+       "label": "The lit surface to show from `t` onwards. Same vocabulary as `raymarch` above"
+      }
+     }
     },
     "spin": {
      "label": "raymarch: camera orbit speed (0 holds the camera still while the subject moves)"
