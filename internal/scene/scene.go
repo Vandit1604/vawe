@@ -160,6 +160,12 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// -workers 6. Measured on a 60-frame scene once the will-change promotions were gone (see
 		// formats/scene/scene.css): 1 of 60 frames still differed between the two, and 0 of 60 with this
 		// flag. Cost: none measurable on a 60-frame draft (docs/MISTAKES.md #507).
+		//
+		// PRICED PROPERLY, against a real baseline, once the stopwatch existed. Turning partial raster back
+		// ON (VAWE_CHROME_FLAGS="disable-partial-raster=false", 3 runs each against verify/perf/baseline.json)
+		// moved plinth-ad +4.2% and site-backdrop +1.9%, both INSIDE the run-to-run spread and both in the
+		// slower direction. So this flag buys byte-identical frames for nothing measurable, and that is the
+		// whole record: CLAUDE.md asks for two numbers when the capture path changes, and these are them.
 		chromedp.Flag("disable-partial-raster", true),
 		// GPU RASTERISATION IS NOT A FUNCTION OF THE DISPLAY LIST AT ss=2, AND THAT IS #541.
 		//
