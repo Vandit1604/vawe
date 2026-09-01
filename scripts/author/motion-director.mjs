@@ -226,7 +226,13 @@ function tellPacing(d, duration) {
 function tellCutVelocity(d, allLayers, duration) {
   const cuts = (d.cuts || []).filter((c) => c && typeof c.t === 'number');
   if (!cuts.length) return nothing;
-  const rows = cutVelocityAdvice(cuts, allLayers, { duration: duration || Infinity });
+  // `d.camera` because a camera move covers BOTH shots at once, which is what the technique's null
+  // does; a reader that saw only layer tracks called its own worked example a dead frame.
+  // `d.fps` because the search runs on the FILM'S frame grid, and a scene that pins its own fps does
+  // not render on the 30 the advisory assumes: cmd/render/main.go renders a final pass at 60. A scene
+  // that pins nothing keeps the old default, because there is no single answer to give it.
+  const rows = cutVelocityAdvice(cuts, allLayers,
+    { duration: duration || Infinity, camera: d.camera, ...(d.fps ? { fps: d.fps } : {}) });
   const troughs = rows.filter((r) => r.trough);
   const metrics = { cutsInTrough: troughs.length, cutsRead: rows.length };
   if (!troughs.length) return { metrics, findings: [] };
