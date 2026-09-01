@@ -182,6 +182,17 @@ dev: build
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node scripts/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 
+# make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]: scaffold a SPECIMEN scene
+# and run the dev loop on it. A demo written from a blank file comes out a contact sheet every time (27
+# of the 35 `_*.json` scratch scenes are one), so the archetype arrives with the file: a PICTURE full
+# bleed carrying the effect, a line of type captioning it, two grounds, one cut, one camera move, a
+# hand-keyed track. An effect acts on a subject, so the subject is pictorial: SUBJECT swaps in your own
+# capture or image. Nine variants of one effect is `make catalog`. The scaffold prints the path it
+# wrote on stdout and its notes on stderr.
+demo: ## scaffold a SPECIMEN demo scene (one subject, one shot) and iterate on it
+	@f=$$(node scripts/dev/demo.mjs --print-path --q "$(Q)" $(if $(NAME),--name "$(NAME)") $(if $(FX),--fx "$(FX)") $(if $(SUBJECT),--subject "$(SUBJECT)")) \
+	  && $(MAKE) --no-print-directory dev D=$$f
+
 # make check D=<file>: every gate, every finding, ZERO consequence. Same information `make ship`
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
 check:
