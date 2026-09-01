@@ -98,7 +98,8 @@ GSAP's own `start`/`end` spelling. `from` takes `first` (the default, so nothing
 `last`, `edges`, `random` (hashed, never `Math.random`) or a unit index. `core/validate.mjs`
 `staggerErrors` refuses a fourth key and an unknown order in BOTH slots, which is what made the `parts`
 pass-through an undocumented capability rather than a feature. `STAGGER_FROM_REGISTRY` puts it in
-`make arsenal`, and `formats/scene/_parity-type.json` renders all four orders on one frame.
+`make arsenal`. The four orders were judged on one frame from a throwaway probe scene, since a
+scratch film is not the framework and is not kept.
 
 **`amount` also refuses GSAP's `grid` and `axis`**, deliberately: they order a two-dimensional grid of
 targets, this vocabulary is one-dimensional, and forwarding a word the engine cannot honour is the thing
