@@ -9084,8 +9084,8 @@ regression captured after the boundary reads as fonts, so the author dismisses o
 the answer looks authoritative, which is the failure this repo keeps paying for.
 
 **Fix.** `snap-scenes.mjs` stamps the font state — every file under `assets/fonts/` and
-`assets/fonts/local/` by name and size, hashed — into `verify/snap/scenes/.font-state.json` when
-baselines are saved, and compares it on every diff run. A mismatch prints the face counts and both
+`assets/fonts/local/` by name and size, hashed — into a `.font-state.json` stamp written beside the
+snap baselines when they are saved (generated state, gitignored with the rest of them), and compares it on every diff run. A mismatch prints the face counts and both
 hashes and says plainly that a changed scene below is not evidence about the code. Baselines predating
 the stamp say so rather than pretending.
 
@@ -12266,7 +12266,7 @@ scrolls past on the way to the gate result they came for. Proven both ways: dele
 and re-running restores byte-identical bytes from the pinned URL (`af61b969…`), and appending one byte
 to `Caveat.woff2` fails with the locked and measured hashes printed, exit 1.
 
-**The font stamp did not move.** `verify/snap/scenes/.font-state.json` reads 29 faces, `233cbd803052`,
+**The font stamp did not move.** The `.font-state.json` stamp beside the snap baselines reads 29 faces, `233cbd803052`,
 before and after the pinning, so the baselines saved in #420 are valid against the pinned set.
 
 ## 420. A caption style could be added to the registry and stay unreachable, and one shipped style had two states where it claims three
@@ -17340,3 +17340,40 @@ that matter: a layer with no track SMEARS under a pan, and a layer travelling wi
 `make arsenal Q="blur the frame when the camera whips"` finds it through `CAMERA_DIAL_REGISTRY`, which
 exists for the reason `FILTER_REGISTRY` does: a film-level dial was invisible to the one tool an author
 is told to reach for before inventing anything.
+
+## 560. the arsenal printed a snippet nobody could paste, and two registries named a slot the engine does not read
+
+`make arsenal` prints, under every hit, the JSON an author pastes and the key it goes in. That line was
+built by one string replace over the registry's `slot`, and the replace only knew one shape,
+`bg[].preset`. Three families came out wrong, and one of them was not even JSON:
+
+| family | printed | the engine reads |
+|---|---|---|
+| modifier | `"modifiers[]": "upright" }]` | `"modifiers": [{ "upright": … }]` |
+| effector drive | `"effector.drives": "scale"` | `"effector": { "drives": { "scale": 0.6 } }` |
+| camera move | `"cameraMove": "slowPush"` | `"cameraMove": { "move": "slowPush" }` |
+
+Every other dotted slot printed the same flat key: `stagger.from`, `presetOpts.chars`,
+`effector.falloff`, `cameraMove.move`. Those parse, which is worse than the modifier line failing
+loudly, because a paste that parses and is then ignored is the bug class this file logs most.
+
+**Why nobody saw it.** The modifier family was invisible to the search until the day before (#559's
+sibling finding), so its snippet had never had a reader. The dotted ones had readers and read as
+plausible.
+
+**Two root causes, and only one of them is the renderer.** `CAMERA_REGISTRY` declared `slot:
+'cameraMove'`, but nothing reads a bare string there: `bakeCameraMove` (`core/produce.js`) reads
+`spec.move`. So the tool was faithfully printing a slot that was wrong at its owner. Fixed at the owner,
+to `cameraMove.move`, which is where `CAMERA_WORD_REGISTRY` already pointed.
+
+**Fix.** `slot` is now a documented PATH with two markers, stated once in `core/registry.js` beside the
+option: `bg[].preset` puts the name in the VALUE of `preset`; `modifiers[]` ends at the array, so the
+name is the KEY of the object inside it; `effector.drives{}` ends at an object map, so the name is a key
+there too. `pasteOf`/`snippet` in `scripts/author/arsenal.mjs` build the object from that path and
+render it, so a family added tomorrow gets a correct paste with no edit here.
+
+**What catches it now.** `scripts/gates/lib-test.mjs` parses EVERY entry's snippet (402 of them) and
+walks the slot path to find the name in the position the slot claims, plus a per-family check that the
+only families printing no paste are the two whose slot is prose (`svgIcon()`, `cameraBlur (a top-level
+boolean)`). The walk restates the grammar on purpose: a test calling the renderer's own path builder
+would agree with it whatever it did.

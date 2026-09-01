@@ -28,7 +28,10 @@ const ALL = [];   // every registry built here, so a failed pick can ask the oth
  *   kind: the author-facing noun, used verbatim in the error ("anim", "cut", "kinetic preset")
  *   entries: the name→value map itself
  *   opts.blurbs: the one-line-per-entry map, kept beside its registry (the blocks/catalog.mjs pattern)
- *   opts.slot: how an author writes it in JSON (`anim`, `fx`, `preset`), used to phrase the hint
+ *   opts.slot: how an author writes it in JSON (`anim`, `fx`, `preset`), used to phrase the hint and
+ *     to render the paste `make arsenal` prints. It is a PATH, and two markers say where the NAME goes:
+ *     `bg[].preset` (the value of `preset` in an array of objects), `modifiers[]` (the KEY of an object
+ *     inside the array), `effector.drives{}` (a KEY in an object map).
  * There is deliberately no `fallback` option.
  */
 export function defineRegistry(kind, entries, { blurbs, slot } = {}) {

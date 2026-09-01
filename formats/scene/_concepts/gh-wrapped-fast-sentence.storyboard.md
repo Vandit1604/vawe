@@ -17,7 +17,7 @@ concept: fast-sentence · technical (dark)
      LOOK are decisions this direction makes; every <…> is a decision it deliberately leaves
      to you, because a tool that invents copy produces options that are all wrong alike. -->
 
-## Beat 1: The data, all of it real (`formats/scene/_data/gh-wrapped.json`) (0s-1.33s)
+## Beat 1: The data, all of it real (the batch row `node scripts/media/gh-wrapped.mjs Vandit1604` writes) (0s-1.33s)
 - type: hook
 - object: <what carries the unfinished sentence at this beat>
 - picture: <what this beat SHOWS>

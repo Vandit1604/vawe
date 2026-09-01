@@ -187,6 +187,51 @@ export function coverageIn(all) {
   };
 }
 
+// ---- the paste: slot → the JSON an author actually types -----------------------------------------
+//
+// The slot string is a PATH, and its two markers are what tell a VALUE from a KEY. `bg[].preset` is an
+// array of objects whose `preset` takes the name as its value; `modifiers[]` ends AT the array, so the
+// name is the KEY of the object inside it; `effector.drives{}` ends at an object map, so the name is a
+// key there too and its value is an amount.
+//
+// This was rendered by one string replace, and it got the two key-shaped families wrong. The modifier
+// family printed `"modifiers[]": "upright" }]`, which is not JSON and cannot be pasted anywhere, and no
+// author ever read it because that family was invisible to the search until the day before. Any slot
+// with a dot printed a flat `"cameraMove.move": "push in"`, which parses and is still not what the
+// engine reads. A snippet an author cannot paste is worse than none: it looks authoritative.
+// lib-test now parses one snippet per family and finds the name at the path the slot claims.
+const jsonish = (v) => {
+  if (Array.isArray(v)) return `[${v.map(jsonish).join(', ')}]`;
+  if (v && typeof v === 'object') {
+    const es = Object.entries(v);
+    return es.length ? `{ ${es.map(([k, x]) => `"${k}": ${jsonish(x)}`).join(', ')} }` : '{}';
+  }
+  return JSON.stringify(v);
+};
+
+/** The object an author pastes this entry into, or null when the slot is prose rather than a path. */
+export function pasteOf(entry) {
+  const slot = entry.slot;
+  if (!slot || slot.includes('(')) return null;      // `svgIcon()`, `cameraBlur (a top-level boolean)`
+  const segs = slot.split('.');
+  const last = segs.pop();
+  let node;
+  if (last.endsWith('[]')) node = { [last.slice(0, -2)]: [{ [entry.name]: {} }] };
+  else if (last.endsWith('{}')) node = { [last.slice(0, -2)]: { [entry.name]: 1 } };
+  else node = { [last]: entry.name };
+  for (const seg of segs.reverse()) {
+    node = seg.endsWith('[]') ? { [seg.slice(0, -2)]: [node] } : { [seg]: node };
+  }
+  return node;
+}
+
+/** The same thing as text, without the outer braces, so it drops into a scene as written. */
+export function snippet(entry) {
+  const obj = pasteOf(entry);
+  if (!obj) return null;
+  return Object.entries(obj).map(([k, v]) => `"${k}": ${jsonish(v)}`).join(', ');
+}
+
 function score(entry, qt) {
   const name = entry.name.toLowerCase();
   const hay = toks(`${entry.name} ${entry.kind} ${entry.blurb}`);
@@ -341,7 +386,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${used === 0 ? 'NEVER used in this library' : `${used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   then: make expand D=<file>`);
-    else if (e.slot && !e.slot.includes('(')) console.log(`      "${e.slot.replace(/\[\]\./, '": [{ "')}": "${e.name}"${e.slot.includes('[]') ? ' }]' : ''}`);
+    else { const snip = snippet(e); if (snip) console.log(`      ${snip}`); }
     console.log('');
   }
 
