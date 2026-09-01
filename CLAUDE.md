@@ -486,11 +486,15 @@ ladder fires for a throwaway.
 A shared theme was never the missing piece: **all 35 already declare one**. The missing piece was the
 archetype, and a blank file has none.
 
-- **`make demo Q="what this shows" [NAME=…] [FX=…]`** writes the archetype and runs the dev loop on it:
-  one subject full bleed, two backdrops, one cut, one camera move, a hand-keyed track.
+- **`make demo Q="…" [NAME=…] [FX=…] [SUBJECT=…]`** writes the archetype and runs the dev loop on it:
+  a PICTURE full bleed carrying the effect, a line of type captioning it, two grounds, one cut, one
+  camera move, a hand-keyed track.
+- **An effect acts on a SUBJECT, so the subject is pictorial.** A filter over a headline on a flat
+  field has nothing to act on and comes out a blob; the same filter over a real image reads exactly as
+  designed. A demo whose whole subject is a sentence in large type is a slide.
 - **A contact sheet is `make catalog`, and nothing else.** It is honestly a contact sheet.
-- **The ground is chosen because it is good, never because it reveals the effect.** That choice is what
-  made the scratch library multi-coloured and busy.
+- **The ground is chosen because it is good, never because it reveals the effect, and it carries no
+  ruling.** A grid or a rod field reads as a design tool's canvas, which IS the harness look.
 
 The constants that make a row of demos read as a series: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
 
