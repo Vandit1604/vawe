@@ -113,7 +113,7 @@ export default function Home() {
                   "One JSON, one video" is now the first line of the sub, where it answers "how" for a
                   reader the headline has already convinced. */}
               <h1>
-                Motion graphics without
+                Motion graphics without{" "}
                 <br />
                 a motion designer.
               </h1>

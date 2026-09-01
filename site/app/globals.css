@@ -581,6 +581,11 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
     scrollbar-width:none;-ms-overflow-style:none;font-size:13.5px}
   .bar.pill .nav::-webkit-scrollbar{display:none}
   .bar.pill .nav a{padding:7px 12px;white-space:nowrap;flex:none}
+  /* 44px thumb targets, measured on a 390px viewport: the nav rows came out 35px tall and the
+     footer chips 40px. The nav was under even the 24px floor of WCAG 2.5.8. Padding alone cannot
+     raise an inline link, so these become inline-flex first. Shared chrome, so it is fixed here
+     rather than on the one page that showed it. */
+  .nav a, .bar.pill .nav a, .foot-links a{display:inline-flex;align-items:center;min-height:44px}
 }
 /* ── the generator playground ──────────────────────────────────────────────────────────────────
    The stage is an INK well inside a white page, which is the pattern .demo-media already sets:
