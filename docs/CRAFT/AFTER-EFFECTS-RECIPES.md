@@ -55,11 +55,11 @@ Ranked by how often the recipe appears in real commercial motion work, most-used
 | 18 | **Echo / motion trail** | copies of the layer at earlier times | **HAVE** | `ghost` trail mode, `echoRing` beat |
 | 19 | **Arcs** | travel on a curve, never a ruler-straight line | **HAVE** | `ease: "through"` on a motion key: neighbour tangents round the corner at every key. Measured, a three-key apex turns 22 degrees where `linear` turns 66 |
 | 20 | **Luma matte reveal** | one layer's brightness is another layer's alpha | **HAVE** | the `matte` modifier, and the matte moves |
-| 21 | **Shape morph** | one path becomes another, vertex to vertex | **PARTLY** | svg `morph`, `morphButton`; one layer only |
-| 22 | **Match cut on shape** | a silhouette carries across the cut into a new thing | **PARTLY** | doctrine exists, no device |
+| 21 | **Shape morph** | one path becomes another, vertex to vertex | **HAVE** | svg `morph`, `morphButton`, and `filter: "goo"` for a metaball morph across several elements |
+| 22 | **Match cut on shape** | a silhouette carries across the cut into a new thing | **HAVE** | `cuts[].style: "matchCut"`, one mask carried across the junction |
 | 23 | **Trim-paths bar growth** | a bar, ring or rule whose length IS the number | **HAVE** | `growUp`, `widen`, `progress`, `parts` |
 | 24 | **Animate on twos** | the clock steps at 12fps inside a 30fps film | **HAVE** | `step: 15` on any layer |
-| 25 | **Speed ramp** | the clock itself accelerates and brakes | **HAVE** | `timeWarp: "easeInQuint"`: an easing on the LAYER'S CLOCK, applied in runTracks before any track reads it, so its motion, size, idle, typing and count all ramp together |
+| 25 | **Speed ramp** | the clock itself accelerates and brakes | **HAVE** | `timeRemap` keys for fast-hold-fast, freeze and reverse; `timeWarp: "easeInQuint"`: an easing on the LAYER'S CLOCK, applied in runTracks before any track reads it, so its motion, size, idle, typing and count all ramp together |
 | 26 | **Screen dive** | a real product surface pushed into as the subject | **HAVE** | `screenDive` beat, `component` capture, `ken` |
 
 ---
@@ -618,9 +618,10 @@ can be given its own arc. Typical duration for a mark morph: **12 to 20 frames**
 **When it is wrong.** Between shapes with genuinely different topology (a hole appearing), where no vertex
 mapping is honest and a cut is better.
 
-**Verdict: PARTLY.** `svg` layers take `morph: { to: ... }` and `logoReveal` melts a mark from a blob, so
-the single-layer morph exists. `morphButton` is the beat where the object BECOMES the next thing. What is
-missing is per-vertex control of the route, and morphing across a junction between two different layers.
+**Verdict: HAVE, except per-vertex control.** `svg` layers take `morph: { to: ... }` and `logoReveal` melts
+a mark from a blob, so the single-layer morph exists. `morphButton` is the beat where the object BECOMES
+the next thing. The multi-element case is `filter: "goo"`, a metaball morph on alpha: two shapes grow a
+bridge and snap apart. What is still missing is per-vertex control of the route.
 
 **Sources:** https://lesterbanks.com/2017/10/morph-ae-create-nulls-paths/ ·
 https://helpx.adobe.com/in/after-effects/desktop/drawing-painting-and-paths/null-controllers/create-nulls-for-positional-properties-and-paths.html
@@ -644,10 +645,10 @@ craft is in the alignment: if the shapes are 20px apart the audience sees a jump
 **When it is wrong.** When the two things have no relationship. A graphic match asserts that A is B, and
 asserting that falsely is the loudest way to confuse a viewer.
 
-**Verdict: PARTLY.** The doctrine is here: [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) names the match cut as
-one of the spatial structural devices, and `morphButton` is the one-layer version. But no device places two
-layers in register across a junction, and nothing measures whether they line up. This is the clearest case
-on the list for a bespoke `composition`.
+**Verdict: HAVE.** [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) names the match cut as one of the spatial
+structural devices, and `cuts[].style: "matchCut"` is now the device: both beats are clipped to the same
+shape at the junction, and the content swaps at the midpoint rather than crossfading, so the shape belongs
+to both shots. Nothing yet MEASURES whether two silhouettes line up; that judgement is still the author's.
 
 **Source:** https://en.wikipedia.org/wiki/Match_cut
 
@@ -697,9 +698,10 @@ dropped frames rather than as style. It works on character-ish motion, on line w
 retro register. Mixing stepped elements with smooth ones in one frame is a decision, not an accident: the
 stepped thing must be the SUBJECT.
 
-**Verdict: LACK.** Nothing in this engine can step a layer's clock. `glitchIn` snaps in through five hard
-steps and that is a single baked preset. Since `renderFrame(n)` is a pure function of `n`, quantising a
-layer's own `t` is a small, clean change, and it opens a register the engine currently cannot reach at all.
+**Verdict: HAVE, and this entry was wrong.** `step` quantises a layer's clock and has shipped for some
+time: `step: 15` is on twos in a 30fps film, `step: 10` is on threes. The schema even labels it "ANIMATE
+ON TWOS". The summary row above said HAVE while this section said LACK, which is what a hand-kept verdict
+does when nobody re-reads it.
 
 **Sources:** https://community.adobe.com/t5/after-effects-discussions/after-effects-why-set-posterize-time-to-12-fps-in-24fps-comp/m-p/14382555 ·
 https://www.unterfreiemhimmel.net/en/news/fbf-in-ae/
@@ -723,11 +725,11 @@ smooth the fast section. Whip pans are often built exactly this way, by speeding
 **When it is wrong.** On synchronised material. Ramping the picture desynchronises it from the sound, and
 in a film with a music bed that is audible immediately.
 
-**Verdict: LACK.** No layer here can remap its own clock. A camera move can be multi-phase and a scene can
-change its cut density, but the layer's time is always the film's time. This is the deepest item on the
-list and the least certain: it would touch the purity contract, because a time-remapped layer is still a
-pure function of `n` only if the remap is itself a pure function of `n`. It is, but stating that is the
-whole design.
+**Verdict: HAVE.** `timeRemap` takes `[{t, at}]` keys, where `t` is the layer's elapsed second and `at` is
+the second it believes it is, plus the named shapes `whip`, `hold`, `freeze` and `rewind`. A repeated `at`
+freezes, a falling `at` reverses, and `t` only ever moves forward. The purity worry named here was the
+right one and it is answered by construction: the remap is a pure function of `t`, so a seeked frame is
+correct. Declaring both `timeRemap` and `timeWarp` on one layer is refused by name.
 
 **Sources:** https://helpx.adobe.com/nz/after-effects/using/speed.html ·
 https://www.premiumbeat.com/blog/create-seamless-transitons-whip-pan/
