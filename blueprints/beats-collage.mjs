@@ -129,7 +129,7 @@ export function slotSwap({ passes = [], x = 240, y = 330, badge = 150, badgeRadi
   // re-filling, which is the device this beat is a picture of.
   //
   // `hold` still means what it always meant: a shorter hold than the cadence is the deliberate gap brew
-  // leaves between its passes. docs/MISTAKES.md #381.
+  // leaves between its passes. docs/MISTAKES.md #395.
   const over = 0;
 
   const L = [];

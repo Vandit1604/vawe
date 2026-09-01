@@ -62,7 +62,7 @@ site/public/scripts
 # The marks the PUBLISHED scenes name. scripts/site/site-engine.mjs derives this list from the scenes
 # themselves and FAILS the build when one is absent — but it looks in the build CONTEXT, and this file
 # decides what is in it. So an asset can exist in the repo, pass every local run, and simply not be in
-# the image (docs/MISTAKES.md #275). Add a scene that names a new mark, add its line here.
+# the image (docs/MISTAKES.md #289). Add a scene that names a new mark, add its line here.
 !assets/brands/preface/agents
 !assets/brands/argus/mascot.png
 !assets/brands/linear/icon.png

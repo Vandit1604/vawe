@@ -82,7 +82,7 @@ export async function gates(scenePath) {
 
   // `slop` (the vendored 41-rule detector over a DOM dump) was retired: it inlined three CSS
   // properties, so most of its rules had no evidence and its silence read as a pass
-  // (docs/MISTAKES.md #326). designspec-check is the replacement and reads the scene directly.
+  // (docs/MISTAKES.md #340). designspec-check is the replacement and reads the scene directly.
   const designspec = await step('node', ['scripts/gates/designspec-check.mjs', target], 60_000);
   const ledger = await step('node', ['scripts/gates/ledger.mjs', 'check', target], 120_000);
   const knobs = await step('node', ['scripts/gates/knobs-audit.mjs', scenePath], 30_000);

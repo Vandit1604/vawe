@@ -6,7 +6,7 @@
 // cannot open its output, and nothing notices. SpawnSync's status was dropped on the floor, so
 // `make reveal` printed the sheet's path and exited 0 with no sheet anywhere on disk. Worse, it then
 // stamped a review receipt, so the gate that exists to prove somebody LOOKED was satisfied by an
-// image that was never written (docs/MISTAKES.md #245).
+// image that was never written (docs/MISTAKES.md #254).
 //
 // Both halves of that failure are addressed here rather than at the call site, because the call site
 // is where it was got wrong twice already:

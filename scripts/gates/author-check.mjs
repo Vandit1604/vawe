@@ -227,7 +227,7 @@ const readManifest = () => {
   try { return JSON.parse(fs.readFileSync(MANIFEST, 'utf8')); } catch { return { version: 1, rules: {} }; }
 };
 // The population comes from scripts/lib/census.mjs so the ratchet cannot count a third of the library
-// and print a confident number (docs/MISTAKES.md #377). `quiet` because censusLine below is the line that
+// and print a confident number (docs/MISTAKES.md #391). `quiet` because censusLine below is the line that
 // states N, and two counts of the same thing is how they drift apart.
 //
 // SOFT, not fatal, and the distinction is the point. This census is DISPLAY: it tells an author how many
@@ -387,7 +387,7 @@ const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) 
 // a written cause; the audit says otherwise. Across the tracked library `no-continuous-object` is
 // waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carried a
 // reason on every single one, and that difference is exactly the difference between a rule people
-// argue with and a keyword that makes a gate stop talking (docs/MISTAKES.md #203).
+// argue with and a keyword that makes a gate stop talking (docs/MISTAKES.md #209).
 //
 // Nothing here judges whether the reason is GOOD. It cannot. It only makes waiving cost one sentence,
 // which is the whole mechanism: the cost is what turns a reflex back into a decision, and a bad reason
@@ -684,7 +684,7 @@ styleGate('floor', 'direction floor (ambition)', 'scripts/gates/direction-floor.
 styleGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 4. slop, RETIRED 2026-08. It ran 41 borrowed rules over a DOM dump carrying three of the CSS
 // properties those rules read, so most of them had no evidence to work from and their silence read as
-// a pass across the whole library (docs/MISTAKES.md #326). Its replacement is the designspec rule
+// a pass across the whole library (docs/MISTAKES.md #340). Its replacement is the designspec rule
 // table, which runs in the gate below. The vendored detector is still the right tool for a hand-authored
 // FRAGMENT, where it gets real computed styles, `make preview HTML=<file>` still runs it.
 // 4b. designspec. The LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts. TASTE.
@@ -692,7 +692,7 @@ styleGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-
 // drift ("#8fdcff is 17% from anything in the palette") and I read it and shipped anyway, twice. A
 // gate whose finding is precise and whose severity is advisory teaches the author that warnings are
 // decoration. Every scene in the library passes it: the seven that are legitimately off the brand say
-// so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #323).
+// so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #337).
 styleGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
 // 4c. copy. The WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
 styleGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
@@ -710,7 +710,7 @@ styleGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs
 styleGate('read', 'read gate (can a viewer read it in time)', 'scripts/gates/read-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // PACE. A still film is sometimes right, so this reports rather than blocks. What it is NOT is a matter
 // of opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
-// measured, and the only thing that noticed was a census run by hand afterwards (docs/MISTAKES.md #322).
+// measured, and the only thing that noticed was a census run by hand afterwards (docs/MISTAKES.md #336).
 styleGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/pace-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // EYE-TRACE. Murch ranks it fourth of six at 7% and says to sacrifice upward from the bottom, so a cut
 // that serves the story may fairly cost the eye a journey. It reports for that reason, not because the
@@ -820,7 +820,7 @@ console.log(`\n════════ author-check · ${path.basename(file)} �
 // every vocabulary registry throws during layer build. Those cannot be skipped by anything: a scene
 // that fails them will not render, with or without this target. Everything else here is this target's
 // own judgement about craft, and the engine will happily render a film that fails all of it.
-// docs/MISTAKES.md #365.
+// docs/MISTAKES.md #379.
 const ENGINE_REFUSES = new Set(['validate']);
 // FOUR MARKS, NOT THREE. `○ waived` and `▪ legacy` must never be the same glyph or the same sentence:
 // one says a person decided and wrote why, the other says nobody has looked. Collapse them and legacy

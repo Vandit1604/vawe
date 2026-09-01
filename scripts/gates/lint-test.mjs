@@ -25,7 +25,7 @@ ok(bad.some((w) => /colliding/.test(w)), 'rule 3: scene collision (Preferencesâ†
 // rule 3, the other half: the collision must be measured on the GLYPHS, not on the declared `w`. A
 // centred or left-aligned line needs a `w` (pin centres a box) and mostly does not fill it, so two
 // boxes can intersect over empty slack while nothing on screen touches. Pinned because the same
-// read-the-representation bug has been logged four times (docs/MISTAKES.md #214/#216/#217/#242).
+// read-the-representation bug has been logged four times (docs/MISTAKES.md #220/#216/#217/#242).
 const slack = lintData({ module: 'scene', layers: [
   { type: 'text', text: 'Hi', x: 100, y: 400, w: 1200, size: 70, start: 0, duration: 4 },
   { type: 'text', text: 'There', x: 900, y: 400, w: 600, size: 70, start: 0, duration: 4 },

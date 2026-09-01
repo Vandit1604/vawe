@@ -46,7 +46,7 @@ ln -sfn "$ROOT/.vawe-data" "$WT/.vawe-data" 2>/dev/null || true
 # 16 identical · 61 changed · 29 errored against main's 106 identical, every one of those from a
 # fallback font or an image that was never there, and none of them a real defect.
 #
-# That is docs/MISTAKES.md #430 in another costume: a hand-kept scope drifting from the vocabulary it
+# That is docs/MISTAKES.md #450 in another costume: a hand-kept scope drifting from the vocabulary it
 # claims to cover. A manifest with two implementations has no implementation.
 INCLUDE="$ROOT/.worktreeinclude"
 if [ -f "$INCLUDE" ]; then

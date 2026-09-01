@@ -223,7 +223,7 @@ CLAUSES.forEach((_, i) => { const c = clause(i); if (c) layers.push(c); });
 // Spans OVERLAP by a beat at their trailing edge. Cut to cut they used to abut exactly, and at 7.48s the
 // outgoing light backdrop and the incoming dark one were both mid-fade at the same instant, so neither was
 // opaque and the black root showed through: a dark flash the centre-sampling gates cannot see and
-// `make seam-check` can (docs/MISTAKES.md #138). Holding each span a little past its cut means the frame
+// `make seam-check` can (docs/MISTAKES.md #144). Holding each span a little past its cut means the frame
 // is never uncovered.
 const BG_LAP = 0.2;
 const bg = TONE.map((tone, i) => {

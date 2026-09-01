@@ -771,7 +771,7 @@ who writes it.
 > `squash` deforms along the DOMINANT axis, because an arbitrary axis needs a three-function transform
 > and the tracks own `transform`; `matte` takes the source layer's own image or gradient, because a
 > browser cannot read one live element's pixels as another's alpha; and item 4 was half wrong about the
-> engine, which had made the blur automatic already and only lacked the angle (docs/MISTAKES.md #498).
+> engine, which had made the blur automatic already and only lacked the angle (docs/MISTAKES.md #520).
 > Items 8, 9 and 10 are not built.
 
 **A new easing or entrance dial. Cheapest shelf, changes every film.**

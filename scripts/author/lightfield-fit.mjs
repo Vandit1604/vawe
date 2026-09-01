@@ -80,7 +80,7 @@ base.colour.extra = Array.from({ length: nExtra }, (_, i) => had[i] || '#000000'
 //   mad           where the light is, on average.
 //   tail          where the light is, in the region that is doing WORST. This term is why the
 //                 magenta cannot be traded away again: a pass that abandons one region to shave the
-//                 average now pays for it here (docs/MISTAKES.md #262).
+//                 average now pays for it here (docs/MISTAKES.md #272).
 const cost = (s) => Math.abs(s.stripe.swing - refStripe.swing) / refStripe.swing
   + Math.abs(s.stripe.edge - refStripe.edge) / refStripe.edge
   + Math.abs(s.chroma - refChroma) / refChroma

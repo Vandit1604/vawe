@@ -678,7 +678,7 @@ consequences worth knowing before you author:
 
 - On a **photo or any opaque box**, the glow appears inside the image, around its highlights. It does
   NOT trace the layer's rectangle. (It used to, because the pass was a stack of `drop-shadow`s, which
-  blur the alpha channel. See docs/MISTAKES.md #112.)
+  blur the alpha channel. See docs/MISTAKES.md #115.)
 **The relief family reads neighbouring pixels.** `emboss`, `letterpress`, `chrome`, `edgeGlow` and
 `fatten` are built on `feConvolveMatrix`, `feMorphology` and the SVG lighting primitives, so unlike
 every other look they change a layer's apparent SURFACE rather than its colour. They need texture to

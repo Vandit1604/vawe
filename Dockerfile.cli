@@ -23,7 +23,7 @@
 # --- the Go renderer ---
 FROM golang:1.26-bookworm@sha256:6ef6e30f0ea5c384f6d111cf856e024e3086bbdcb1779da3f3b3fbba0aea53d2 AS builder
 # /src, not /repo: a BuildKit cache entry for a `WORKDIR /repo` layer went unrecoverable on the deploy
-# host and broke every child layer even under --no-cache (see Dockerfile, docs/MISTAKES.md #101).
+# host and broke every child layer even under --no-cache (see Dockerfile, docs/MISTAKES.md #104).
 WORKDIR /src
 
 COPY go.mod go.sum ./

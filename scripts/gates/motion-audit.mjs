@@ -20,7 +20,7 @@
 // pulsing chrome) are skipped by (ii)/(iii). SHOT WINDOWS come from the film's own cuts and seams via
 // core/junctions.js `shotWindows`. A film that cuts nowhere is one shot, which is a true answer and not
 // a fallback. They used to come from `meta.segments`, a field no scene has ever set, which disabled the
-// whole FAIL tier for the life of the gate (docs/MISTAKES.md #425).
+// whole FAIL tier for the life of the gate (docs/MISTAKES.md #472).
 //
 // TIER: MOTION_TIER=enforce makes the FAIL tier block. It reports by default, because it fires on 53 of
 // the 127 buildable scenes in this library and a rule waived by reflex has already been repealed.
@@ -154,7 +154,7 @@ const captureSeries = (page, total, stride) => page.evaluate(async (total, strid
 // every segment-scoped FAIL was rewritten to WARN before a reader saw it and the run printed a tick.
 // `segments` was never a missing declaration: it was a SECOND way to say what `cuts` already says,
 // and the film's cuts and seams are the joints, so core/junctions.js owns the reading of them
-// (docs/MISTAKES.md #159, #358: one fact, one owner). A film with no cuts is genuinely one shot.
+// (docs/MISTAKES.md #165, #372: one fact, one owner). A film with no cuts is genuinely one shot.
 // Lowered first: a scene written with the unified `transitions` surface has no `cuts` key yet.
 function shotWindowsOf(data, total) {
   const lowered = lowerScene(structuredClone(data));
@@ -338,7 +338,7 @@ function frozenSpans(series, K, content, F, w, TOTAL_SEC) {
     // is a fraction of the runtime, not an absolute. `cadence` held a perfectly frozen frame for 0.9s
     // out of 5s (a fifth of the film) and sat under this threshold while `beat-check` called the
     // span covered because the layers were still present. A short dead tail fell between the two
-    // gates, and only a person watching found it (docs/MISTAKES.md #196, #200).
+    // gates, and only a person watching found it (docs/MISTAKES.md #202, #206).
     else if (F[j] - F[lastChange] > Math.min(2, Math.max(0.6, TOTAL_SEC * 0.15)) * FPS) { spans.push({ from: F[lastChange], to: F[j] }); lastChange = j; }
   }
   return spans;

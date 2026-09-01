@@ -293,7 +293,7 @@ audit:
 # make audit-all [SCENE=<name-substring>] [ASPECT=16:9,9:16], the same layout audit, over the WHOLE
 # library. `make audit` grades the one scene you have open, which is a check against NEW defects only:
 # two scenes shipped dark-on-dark and stayed that way because nothing ever asked them again
-# (docs/MISTAKES.md #373). Slow on purpose; an on-demand sweep, never part of the per-edit ladder.
+# (docs/MISTAKES.md #387). Slow on purpose; an on-demand sweep, never part of the per-edit ladder.
 audit-all:
 	node scripts/gates/audit-scenes.mjs $(SCENE) $(if $(ASPECT),--aspect $(ASPECT))
 
@@ -356,7 +356,7 @@ watermark:
 
 # make site-counts: every capability number written on the SITE, checked against the registry it
 # describes. The copy claimed 96 blocks / 44 families / 22 presets / 32 stings long after the
-# registries had moved (docs/MISTAKES.md #111). Hand-typed counts about a growing registry go stale
+# registries had moved (docs/MISTAKES.md #114). Hand-typed counts about a growing registry go stale
 # by default; this is what notices.
 site-counts:
 	node scripts/gates/site-counts.mjs
@@ -425,7 +425,7 @@ mistakes-check:
 
 # make silent-check: is any named vocabulary still resolved with a silent default? A wrong name must
 # not become a plausible substitute; absence may keep its documented default. core/registry.js removes
-# the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #362.
+# the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #376.
 silent-check:
 	node scripts/gates/silent-fallback.mjs
 
@@ -841,7 +841,7 @@ beat-check: ## timeline gate: dead air, empty last frame, empty cut window, dead
 	node scripts/gates/beat-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 # make impeccable D="a.html b.html": the bundled impeccable anti-slop detector on raw HTML fragments
-# (local, no network, token-efficient). the RENDERED-scene twin of this was retired (docs/MISTAKES.md #326);
+# (local, no network, token-efficient). the RENDERED-scene twin of this was retired (docs/MISTAKES.md #340);
 # this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.
 impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
 	node .claude/skills/impeccable/scripts/detect.mjs --json $(D)

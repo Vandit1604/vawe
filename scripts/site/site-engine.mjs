@@ -120,7 +120,7 @@ for (const ref of wanted) {
   candidates.push({ ref, rel });
 }
 // .dockerignore is the SECOND list that decides what the build sees, and it is hand-kept too. Its own
-// comment already points at docs/MISTAKES.md #275 for this exact failure, and the fix recorded there
+// comment already points at docs/MISTAKES.md #289 for this exact failure, and the fix recorded there
 // was a sentence asking the next author to remember. They did not. So read the file rather than trust
 // the sentence: for a path under a `dir/**` exclusion, a bare `!path` negation must exist.
 const dockerNegations = (() => {

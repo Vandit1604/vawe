@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Gate: flags docs/MISTAKES.md entries whose HEADINGS look like duplicates of an
 // earlier entry. A property only knowable across the whole library (CLAUDE.md's
-// own test for when a gate belongs) — two verbatim duplicates and one restatement
-// (#506 of #190/#268) shipped because nobody rereads a 540-entry file before
+// own test for when a gate belongs): two verbatim duplicates and one restatement
+// (#528 of #196/#280) shipped because nobody rereads a 540-entry file before
 // appending. This is the reread, automated.
 //
 // Approach: pull each "## <num><punct> <title>" heading, tokenise the title,
@@ -35,7 +35,7 @@ const ALLOWLIST = new Set([]);
 function parseEntries(text) {
   const lines = text.split('\n');
   const entries = [];
-  const headingRe = /^## (#?)(\d+)\b\s*[.:—·-]?\s*(.*)$/u;
+  const headingRe = /^## (#?)(\d+)\b\s*[.:\u2014·-]?\s*(.*)$/u;
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(headingRe);
     if (!m) continue;

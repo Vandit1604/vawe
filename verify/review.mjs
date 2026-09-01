@@ -26,7 +26,7 @@ results.push(run('doc refs (commands + paths the docs name)', 'node', ['scripts/
 // served a frozen engine while saying it was the real one (docs/MISTAKES.md #271).
 results.push(run('site engine (published copy matches this repo)', 'node', ['scripts/site/site-engine.mjs', '--check']));
 // A path the Dockerfile copies and .dockerignore excludes only ever shows up as a failed deploy: the
-// repo has the file and every local check passes (docs/MISTAKES.md #275).
+// repo has the file and every local check passes (docs/MISTAKES.md #289).
 results.push(run('docker context (the image will carry what the build copies)', 'node', ['scripts/site/docker-context-check.mjs']));
 
 // master sheet: tile the per-format audit overlays (safe-zone + critical-box overlays)

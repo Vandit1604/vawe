@@ -28,7 +28,7 @@ const SCAN = ['core', 'formats/scene'];
 // hides exactly the bug this file exists to find. The first cut of this pattern could not match it,
 // and three of the waivers below described `o?.[k]` code the gate had therefore never once seen,
 // dead entries that made the list look inspected. A check green about what it cannot see is the
-// defect this whole run was about, reproduced in the check written to catch it. docs/MISTAKES.md #363.
+// defect this whole run was about, reproduced in the check written to catch it. docs/MISTAKES.md #377.
 const PATTERN = /\b([A-Za-z_$][\w$]*)\s*\??\.?\s*\[\s*([A-Za-z_$][\w$.?]*)\s*\]\s*(\|\||\?\?)/;
 const POSITIONAL = /^(i|j|k|n|idx|index|len|[0-9]+)$/;
 
@@ -51,7 +51,7 @@ const WAIVED = new Map(Object.entries({
   // WAIVER REMOVED, and the reason it was wrong is worth keeping. It said `corner` is UNREACHABLE
   // from a scene, which was TRUE and not enough: the value comes from a LOOK DEFINITION, our own
   // data, and that is the one place a typo can live forever because no author will ever hit it and
-  // report it. `leakGrad` now throws (docs/MISTAKES.md #434). Judge a fallback by whether a WRONG
+  // report it. `leakGrad` now throws (docs/MISTAKES.md #454). Judge a fallback by whether a WRONG
   // value can reach it, never by whether an AUTHOR can send one.
   'core/looks.js:KNOB_ROUTES[knob]': 'the knob was validated by assertKnobs one call earlier',
   'formats/scene/scene.js:FX_DUR[spec.name]': 'a duration default for an effect that declares none; the NAME is validated by GSAP_EXIT_REGISTRY.pick immediately above',

@@ -147,7 +147,7 @@ const PREVIEW = {
   // below carries no audio at all and every one of the eleven animates.
   // It also places the caption at the CENTRE rather than in the bottom band, which is the only
   // honest way to make a caption the subject of a 640x360 swatch, and is itself a demonstration of
-  // the placement grammar a caption gained in docs/MISTAKES.md #403.
+  // the placement grammar a caption gained in docs/MISTAKES.md #422.
   'caption-styles': (n) => base({
     captionStyle: n,
     captions: [{ t0: 0.3, t1: 5.4, text: 'Ship the payoff last', pin: 'center', size: 96 }],

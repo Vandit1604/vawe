@@ -5,7 +5,7 @@
 // already choreographed, and formats/scene/scene.js (setLayerTiming) then REPLACES every non-last-beat
 // layer's duration with the run to `beatEnd + cutDur`, so the beat wrapper can slide the whole beat out
 // as one unit. A gate that reads the raw fields sees holes the render does not have, and misses ones it
-// does. beat-check learned that the expensive way (docs/MISTAKES.md #166) by modelling it inline.
+// does. beat-check learned that the expensive way (docs/MISTAKES.md #172) by modelling it inline.
 //
 // It lives here because a second gate now needs the same answer. Two copies of a model of someone else's
 // code drift, and the copy that drifts is the one that stops catching the bug. Import it; do not fork it.
@@ -230,7 +230,7 @@ export function inView(L, view, root = ROOT) {
 // engine expands it to cuts/seams/stings before it renders anything (core/transitions-lower.js). A model
 // of the clock that reads raw `cuts` therefore says brew-launch-act1 has no boundaries when it has four,
 // and every gate built on this model inherits that. #380 fixed eight consumers one at a time and missed
-// the ninth; lowering HERE is what makes the tenth impossible. docs/MISTAKES.md #380, #391.
+// the ninth; lowering HERE is what makes the tenth impossible. docs/MISTAKES.md #394, #407.
 //
 // CLONED, because lowerScene mutates and `delete`s `transitions` off what it is given. That is right for
 // the renderer, which lowers once at the top, and wrong for a gate: a check that rewrites the object it

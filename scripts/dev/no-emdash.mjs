@@ -6,7 +6,7 @@
 // WHY THIS EXISTS. The house rule bans the em dash in code, comments, docs, commit messages and
 // engine OUTPUT. The engine broke its own rule 7,345 times, error messages included, and it was
 // noticed only when a docs page tried to quote a real error and could not do so without breaking
-// the rule. A rule nothing checks is a rule that has already been repealed (docs/MISTAKES.md #489).
+// the rule. A rule nothing checks is a rule that has already been repealed (docs/MISTAKES.md #511).
 //
 // EN DASHES AND HYPHENS ARE FINE. An en dash in a number range is explicitly allowed and a hyphen is
 // not a dash at all. Only U+2014 is matched here.
@@ -32,10 +32,13 @@ const EXCLUDE = [
   (f) => f.startsWith('node_modules/') || f.includes('/vendor/'),
 ];
 
-// docs/MISTAKES.md is a LOG. Entries below #400 are history: rewriting them would edit the record of
-// what was written at the time. Only entries from #400 on are held to the rule.
+// docs/MISTAKES.md is a LOG. Entries below #418 are history: rewriting them would edit the record of
+// what was written at the time. Only entries from #418 on are held to the rule.
+// (418, not 400: the file's three numbering schemes were reconciled to one sequential scheme, and 418
+// is where that same historical boundary now falls. Recomputed once by lining up every heading's OLD
+// history status against its NEW number; the split was exact, no entry landed on the wrong side.)
 const MISTAKES = 'docs/MISTAKES.md';
-const HISTORY_BEFORE = 400;
+const HISTORY_BEFORE = 418;
 
 function historyLines(text) {
   const out = new Set();

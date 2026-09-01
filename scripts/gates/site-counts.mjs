@@ -52,7 +52,7 @@ const TRUTH = {
   // still present locally, so `readdirSync` says 38 here and a fresh clone has 35. A copy line reading
   // "38 themes" would therefore pass on the author's machine and fail for every contributor, the
   // stale-count failure this gate exists to prevent, inverted. The site describes the PUBLISHED
-  // product, so the published set is the truth. (Same lesson as docs/MISTAKES.md #423: grade the thing
+  // product, so the published set is the truth. (Same lesson as docs/MISTAKES.md #443: grade the thing
   // that actually ships, never the copy sitting in the working tree.)
   themes: (() => {
     try {

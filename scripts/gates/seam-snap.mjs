@@ -1,6 +1,6 @@
 // scripts/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS.
 //
-// The another engine lesson (and our own docs/MISTAKES.md #138): the highest-value render bugs, a black
+// The another engine lesson (and our own docs/MISTAKES.md #144): the highest-value render bugs, a black
 // flash on a transition, a morph that reads as a collision. Live INSIDE the transition overlap, which
 // every center-sampling gate steps right over. `make beats` samples beat midpoints; `make audit` judges
 // the settled frame; `make probe` checks purity. None of them look at the 3-frame window where two beats
@@ -26,7 +26,7 @@ if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/ga
 // LOWERED, because `transitions: [{at, fx}]` is the documented way to declare a boundary and it lowers
 // to cuts/seams/stings only at render time. Reading the raw file found NO boundaries on the three films
 // that declare them that way, so this gate ran and reported nothing on the exemplar it exists to protect
-// (docs/MISTAKES.md #380 · #391 · #391b). Cloned: lowerScene mutates and deletes what it is handed.
+// (docs/MISTAKES.md #394 · #407 · #408). Cloned: lowerScene mutates and deletes what it is handed.
 const data = lowerScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
@@ -57,7 +57,7 @@ requireTool('ffmpeg');
 // READ the rate from the file rather than assuming it. Finals now render at 60 and drafts at 30, and
 // every use of `fps` below converts a TIME into a FRAME NUMBER, so an assumed 30 seeks to half the
 // intended timestamp on a 60fps final and checks frames that have nothing to do with the seam. Silent,
-// and it would have reported a clean seam by looking at the wrong side of it (docs/MISTAKES.md #205).
+// and it would have reported a clean seam by looking at the wrong side of it (docs/MISTAKES.md #211).
 const probeFps = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
   'stream=r_frame_rate', '-of', 'default=noprint_wrappers=1:nokey=1', mp4], { encoding: 'utf8' });
 const fps = (() => {
@@ -164,6 +164,6 @@ if (!findings.length) {
   console.error('  No flash was found at the ones that decoded, and that is not a verdict on the ones that did not.');
   process.exit(2);
 }
-for (const f of findings) console.error(`  ✗ flash at ${f.t}s (frame ${f.frame}): luma dips to ${f.dip} vs ${f.outside} just outside. A black/dark flash in the transition overlap (docs/MISTAKES.md #138).`);
+for (const f of findings) console.error(`  ✗ flash at ${f.t}s (frame ${f.frame}): luma dips to ${f.dip} vs ${f.outside} just outside. A black/dark flash in the transition overlap (docs/MISTAKES.md #144).`);
 console.error(`\n✗ seam-snap: ${findings.length} transition flash(es). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
 process.exit(1);

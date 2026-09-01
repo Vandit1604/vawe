@@ -76,7 +76,7 @@ const BEDS = {
 // PROVENANCE FOLLOWS THE FILE, not the name. `make music` and this script both write into
 // assets/music/ and only one of them recorded where a bed came from, so baking `calm` over a
 // downloaded `calm` left credits.json describing a track that was no longer on disk, a licence
-// record for the wrong file, which is worse than none (docs/MISTAKES.md #239).
+// record for the wrong file, which is worse than none (docs/MISTAKES.md #246).
 const CREDITS = path.join(MUSIC, 'credits.json');
 const credits = fs.existsSync(CREDITS) ? JSON.parse(fs.readFileSync(CREDITS, 'utf8')) : {};
 for (const [name, opts] of Object.entries(BEDS)) {
