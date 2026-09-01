@@ -2,7 +2,7 @@
 when: "\"we built the whole thing and then it was rejected\""
 answers: "the points where the work gets shown before it is finished: concept · storyboard panels · a hand-written fragment · style frames · the 85% draft"
 group: crosscutting
-codes: all-median, beats-unseen, close-pace, options-collapse, stale-variant, tell-lost-its-source, unscorable
+codes: all-median, beats-unseen, close-pace, no-preflight, options-collapse, stale-variant, tell-lost-its-source, unscorable
 ---
 
 # Approval stops: show the work before it is finished
