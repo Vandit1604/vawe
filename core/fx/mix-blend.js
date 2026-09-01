@@ -25,6 +25,8 @@ export const BLEND_MODES = ['normal', 'multiply', 'screen', 'overlay', 'darken',
   'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion',
   'hue', 'saturation', 'color', 'luminosity', 'plus-lighter'];
 
+import { killedBy } from '../ancestor-kills.js';
+
 export function build(kit, el, L, spec) {
   const mode = typeof spec === 'string' ? spec : (spec && spec.mode);
   // A mode the browser does not know is discarded by the CSS parser without a word, which is the
@@ -33,7 +35,9 @@ export function build(kit, el, L, spec) {
   if (!BLEND_MODES.includes(mode))
     throw new Error(`mixBlend: unknown blend mode ${JSON.stringify(mode)}, one of: ${BLEND_MODES.join(', ')}. `
       + `Write it as { "mixBlend": "difference" } or { "mixBlend": { "mode": "difference" } }.`);
-  if (!el.classList.contains('hs-layer'))
+  // The reason is one row of core/ancestor-kills.js (`transform` takes the `blend` capability away),
+  // read from there rather than restated, so the day that row is re-measured this guard moves with it.
+  if (!el.classList.contains('hs-layer') && killedBy(['transform'], 'blend').length)
     throw new Error(`mixBlend: layer "${L.id || L.type || 'child'}" is a GROUP CHILD, and CSS blends `
       + `against the nearest stacking context, which is the group, because every timed element carries `
       + `a per-frame transform. The blend would reach the group's own pixels and nothing behind it, so `

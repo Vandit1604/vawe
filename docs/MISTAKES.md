@@ -16692,3 +16692,72 @@ in two processes disagree at scale 2 and agree at scale 1, the fault is in the s
 not in anything the capture does with order. Logged rather than fixed because it is a different defect
 from the one this branch was opened for, and mixing them is how #531 came to argue from draft numbers
 without saying so.
+
+## 542. an ANCESTOR's style silently disables a DESCENDANT's capability, and CSS never says so
+
+**What.** `formats/scene/vawe-glass-hero.json` is a film about one thing: a refracting lens crossing a
+hard black horizon. Through the `blur` cut at 8.2s the refraction VANISHED. The horizon ran dead
+straight through the lens, no offset and no fringe, then came back. Nothing errored, nothing warned,
+and the frame reads as a rendering choice rather than a defect.
+
+**Root cause, and it is a CLASS.** `core/cuts.js` writes `filter: blur(...)` onto the scene root. In
+CSS a non-`none` `filter` makes that element a BACKDROP ROOT, so `backdrop-filter` on any descendant
+samples an empty backdrop instead of the film behind it. The glass stops being glass and keeps its
+declaration. That is one instance of a general shape: some capabilities do not act on the element that
+declares them, they act on something the element has to REACH, and any ancestor that becomes a
+boundary cuts the reach in silence.
+
+**Measured, not read off a spec.** `scripts/dev/probe-ancestor-kills.mjs` renders each pair twice, with
+the capability declared and without, and reports how much the declaration actually did. Byte equality
+was the first metric and it was too generous: a `backdrop-filter` over an EMPTY backdrop root still
+darkens its own edge, so "the bytes differ" reported dead glass as alive. The strength ratio against
+the un-ancestored control is what separates "did something" from "did its job".
+
+| ancestor style | backdrop-filter (`glass`, `progressiveBlur`) | mix-blend-mode (`mixBlend`) | translateZ depth (`plane`, `tilt`) |
+|---|---|---|---|
+| `filter` (any) | KILLED | KILLED | KILLED |
+| `opacity < 1` | KILLED | KILLED | KILLED |
+| `mask-image` | KILLED | KILLED | KILLED |
+| `backdrop-filter` | KILLED | KILLED | KILLED |
+| `mix-blend-mode` | KILLED | KILLED | KILLED |
+| `clip-path` | ok | KILLED | KILLED |
+| `overflow: hidden` | ok | ok | KILLED |
+| `isolation: isolate` | ok | KILLED | KILLED |
+| `transform` | ok | KILLED | ok |
+| `perspective` | ok | KILLED | ok |
+| `will-change: transform` | ok | KILLED | ok |
+| `contain: paint` | ok | KILLED | ok |
+
+Two rows are worth stating out loud because everyone guesses them wrong. **`clip-path` and
+`overflow: hidden` do not clip a `backdrop-filter`**, and `overflow: hidden` is the one ancestor
+property in the table that leaves a blend alone.
+
+**Fix: refused at the write site, with one owner.** `core/ancestor-kills.js` holds the table and
+nothing else does. `core/cuts.js` grew `cutWrites(name, {solo})`, DERIVED by probing each presentation
+exactly as `SOLO_BLIND` is, so a presentation added tomorrow classifies itself. `formats/scene/scene.js`
+consults the owner once, beside the existing `SOLO_BLIND` refusal, and throws naming the layer, the
+capability, the cut, its time, and every cut style that would not have the defect. `core/fx/mix-blend.js`
+already carried a correct guard for one pair, hand-written; it now reads its reason from the same table.
+
+**Why refuse rather than make it work.** Making the blur cut compatible with glass means taking the
+filter off the shared ancestor: applying it per top-level layer instead. That blurs N alphas separately
+rather than one composite, so every shipped film with a `whip`/`punch`/`blur`/`zoom`/`squeeze`/
+`skewWhip`/`riseBlur` cut would change picture, and every layer would get harder to reason about. The
+capability is genuinely unreachable through a filtered ancestor in CSS. So this is `sanitize-html`'s
+shape: refuse by name, and say what to use instead. `vawe-glass-hero` now cuts on `rise`, and the bend
+survives its own transitions.
+
+**Caught on the way**, same file, different defect: `driveSceneUnits` reset its beat wrappers from a
+hand-listed four channels while `cutStyle` writes ten, so a `softwipe`/`blinds`/`softiris` cut left its
+MASK on the wrapper for every later frame. Correct on a forward play, wrong on a seek. It now resets
+from `CUT_IDENT`.
+
+**Which gate now catches it.** `scripts/gates/lib-test.mjs` (+27 assertions): the derivation of
+`cutWrites`, the three live rows of the table including the two that must stay `ok`, and the reported
+bug itself as a refusal that names the layer, the conflict and a way out. Re-measure the table with
+`node scripts/dev/probe-ancestor-kills.mjs`; a browser update is allowed to move a row.
+
+**Unresolved, with the next measurement.** A `group` ancestor kills the same capabilities in a child
+and nothing checks it: a group with `filter`, `glass`, a `mask` or an enter/exit `opacity` envelope
+takes a child's glass away. The check needs the group's own per-frame opacity, which is not known at
+build, so measure first whether an entrance envelope is even long enough to see before wiring it.

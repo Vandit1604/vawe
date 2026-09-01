@@ -31,6 +31,8 @@ const CATALOG = 'scripts/site/effects-catalog.mjs';
 // catalogue is the wrong home for it. Named with a reason, because an unexplained waiver list becomes a
 // place to hide the next real one.
 const WAIVED = new Map(Object.entries({
+  CAPABILITIES: 'the measured table of which ANCESTOR style silently disables which DESCENDANT capability (core/ancestor-kills.js). A scene names a capability by writing `glass`/`mixBlend`/`plane`, all of which ARE catalogued; this is the interaction table behind the refusal, not a fifth thing to choose',
+  IDENT: 'the identity style set a cut resets to (core/cuts.js). A reset, not an effect: the CUT vocabulary it belongs to is catalogued in full',
   PROPS: 'per-module prop declarations. Covered by schema-drift and layer-props, which check them against schema.json',
   SHARED_PROPS: 'the props every layer type inherits, a prop list, not a vocabulary',
   LAYER_PROPS: 'the generated prop table behind schema-drift',
