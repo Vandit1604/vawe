@@ -17068,3 +17068,47 @@ leaves the markup after it, a comment quoting `transition:` is not a transition,
 forbids, so any regex that reads authored markup will meet its own vocabulary in prose sooner or
 later. Strip the comments before you pattern-match, or the better a fragment is documented the more
 likely it is to break.
+
+## 551. five capabilities shipped in one day, and none was reachable at the moment it mattered
+
+**What happened.** The effector, `timeRemap`, `cutTiming: "ramp"`, `matchCut` and the `easeOut`/`easeIn`
+keyframe handles all landed on the same day. Every one was registered, documented and findable by
+`make arsenal`. Every one had zero users. On that same day an agent authoring a film hand-varied four
+lines of type because it did not know the stagger dials existed, and reached for a plain crossfade with
+`ramp` sitting in the registry.
+
+**Root cause.** `make arsenal CENSUS=1` reports zero-user entries and says the real problem in its own
+output: nothing distinguishes "undiscoverable" from "genuinely unwanted", so both look the same. Nothing
+in the ladder ran it. `make ship` is author-check, render, motion-split, audit, seam-snap and sheets,
+with no arsenal step, and `scripts/gates/preflight.mjs`, whose whole job is to aim the arsenal at the
+film about to be written, had no notion of recency or of zero use. So a capability could ship, be
+perfect, and never be seen at the one moment an author was choosing.
+
+**Fix.** `scripts/author/recency.mjs` answers one question, "did this name exist 14 days ago", by
+reading git. `make arsenal` now marks a ranked entry `NEW`, tallies matched / new / never-used on the
+line a preflight actually shows, and floats the new entries to the top of the five. `make arsenal
+CENSUS=1` splits its unused list in two: the entries that are merely young, and the ones that have had
+time to be chosen and were not. `make arsenal NEW=1` lists the window on its own, and `make preflight`
+prints it for a film that has no plan to rank against. No gate: a capability nobody knows exists is a
+discovery problem, and refusing the film afterwards does not answer it.
+
+**Two derivations were built and the first one was wrong.** A single `git log -p -U0` over the window,
+flagging any name added on a `+` line, is the obvious pass and it LIES. Adding a new map keyed by
+existing names re-writes every name as a key on a `+` line, so the day the `REQUESTS` table landed,
+eleven blueprint beats that have existed for months were reported as twelve days old. Newness is now
+asked about STATE, not about diffs: `git archive` the registry paths at the commit that was HEAD 14 days
+ago, and a name absent from that tar is new. It cannot be fooled by a line that moved.
+
+**Cost, measured, because a fix that quietly halves a tool's speed is the next entry in this file.**
+`git grep -F -e <name>` for 397 patterns is 10.6s: git builds one alternation and walks every blob with
+it. `git archive` piped into 397 `String.includes` calls is 79ms, and 46ms for the five names a
+preflight actually ranks. End to end, `make preflight` on `preface-launch.json` is 0.27s.
+
+**Which check catches it now.** `scripts/gates/lib-test.mjs` asserts both halves: `presentIn` over a
+tree text, and the join, including that an entry predating the window is never called new and that git
+which cannot answer reports nothing new rather than everything.
+
+**The lesson.** Shipping a capability is not the same as making it reachable, and the gap between them
+is invisible from the inside: everything is registered, documented and searchable, and a search only
+finds what you already suspect is there. Zero users is the symptom, and age is the one cheap fact that
+tells an unwanted thing from an unseen one.

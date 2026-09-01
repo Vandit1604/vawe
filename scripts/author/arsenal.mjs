@@ -23,6 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { newSince, WINDOW_DAYS } from './recency.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -116,6 +117,7 @@ const argv = process.argv.slice(2);
 const VALUE_FLAGS = new Set(['kind', 'n']);
 const flag = (n) => { const i = argv.indexOf('--' + n); return i < 0 ? null : argv[i + 1]; };
 const census = argv.includes('--census');
+const newOnly = argv.includes('--new');
 // Consume `--flag value` pairs by POSITION. Filtering on `argv.indexOf(a)` looked equivalent and is
 // not: indexOf finds the FIRST occurrence, so a repeated word is tested against the wrong neighbour,
 // and any flag but --kind leaked its value into the query ("…static tilt 3").
@@ -142,6 +144,42 @@ if (census) {
     const total = all.filter((e) => e.kind === kind).length;
     console.log(`  ${(kind + ':').padEnd(22)} ${String(names.length).padStart(3)}/${String(total).padEnd(3)} unused   ${names.slice(0, 7).join(' ')}${names.length > 7 ? ' …' : ''}`);
   }
+  // Age is the thing that tells those two apart, so the census now says which of the unused entries are
+  // merely young. An entry with no users that landed this week has not been rejected by anybody.
+  const young = newSince([...dead.values()].flat(), { cwd: repoRoot });
+  if (young.size) {
+    console.log(`\n  Of those, ${young.size} did not exist ${WINDOW_DAYS} days ago, so "unused" says nothing about`);
+    console.log(`  them yet. The rest have had time to be chosen and were not:\n`);
+    for (const name of [...young].sort()) {
+      const e = all.find((x) => x.name === name);
+      console.log(`    ${name.padEnd(18)} ${(e && e.kind) || ''}`);
+    }
+  }
+  console.log('');
+  process.exit(0);
+}
+
+// ---- --new: what landed lately, whether or not you can name it ------------------------------------
+// The other half of the census. Zero users reads two ways and age is what separates them: an entry that
+// arrived this week and has no users is unseen, not unwanted. Nobody can search for a thing they have
+// never heard of, so this is the one view that does not need a query.
+if (newOnly) {
+  const u = usage();
+  const arr = newSince(all.map((e) => e.name), { cwd: repoRoot });
+  const fresh = all.filter((e) => arr.has(e.name))
+    .map((e) => ({ ...e, used: u.count(e.name) }))
+    .sort((a, b) => a.used - b.used || a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
+  console.log(`\n  ARSENAL · what did not exist ${WINDOW_DAYS} days ago\n`);
+  if (!fresh.length) {
+    console.log(`  nothing. Either the window was quiet, or git cannot answer here (a shallow clone).\n`);
+    process.exit(0);
+  }
+  console.log(`  ${fresh.length} of ${all.length} named things. New is not an endorsement, and neither is`);
+  console.log(`  "no users yet". Both only mean you may not know these exist.\n`);
+  for (const e of fresh) {
+    console.log(`  ${e.name.padEnd(18)} ${(e.slot ? `${e.kind} · ${e.slot}` : e.kind).padEnd(40)}`
+      + ` ${e.used === 0 ? 'no users yet' : `${e.used} scene(s)`}`);
+  }
   console.log('');
   process.exit(0);
 }
@@ -150,6 +188,7 @@ if (!query) {
   const kinds = [...new Set(all.map((e) => e.kind))].sort();
   console.error(`usage: node scripts/author/arsenal.mjs "<what you want, in plain english>" [--kind <kind>] [--n 8]
        node scripts/author/arsenal.mjs --census
+       node scripts/author/arsenal.mjs --new
 
   ${all.length} named things across ${kinds.length} vocabularies, read live from the registries:
   ${kinds.join(' · ')}`);
@@ -160,12 +199,19 @@ const kind = flag('kind');
 const n = Number(flag('n') || 8);
 const qt = toks(query);
 const u = usage();
-const ranked = all
+let ranked = all
   .filter((e) => !kind || e.kind === kind)
   .map((e) => ({ ...e, s: score(e, qt) }))
   .filter((e) => e.s > 0)
   .sort((a, b) => b.s - a.s || a.name.localeCompare(b.name))
   .slice(0, n);
+
+// Age, asked for AFTER the ranking and only about the handful that survived it: 46ms for five names
+// against 79ms for all 397, and nobody reads the other 392.
+const fresh = newSince(ranked.map((e) => e.name), { cwd: repoRoot });
+// New entries go first. Relevance already decided WHICH five you see; within five, the one you have
+// never heard of is the one worth putting where the eye lands. Score order is preserved inside each half.
+ranked = [...ranked.filter((e) => fresh.has(e.name)), ...ranked.filter((e) => !fresh.has(e.name))];
 
 if (!ranked.length) {
   console.log(`\n  nothing matched "${query}".`);
@@ -173,10 +219,15 @@ if (!ranked.length) {
   process.exit(0);
 }
 
-console.log(`\n  ARSENAL · "${query}"\n`);
+// The tally is line 2 on purpose: `make preflight` prints its own header and keeps the rest, so this is
+// the line an author skimming a preflight actually reads.
+const nUnused = ranked.filter((e) => u.count(e.name) === 0).length;
+console.log(`\n  ARSENAL · "${query}"`);
+console.log(`  ${ranked.length} matched · ${fresh.size} newer than ${WINDOW_DAYS} days · ${nUnused} never used here.`
+  + `\n  New and unused is not a recommendation. It means you may not know it is there.\n`);
 for (const e of ranked) {
   const used = u.count(e.name);
-  console.log(`  ${e.name}`);
+  console.log(`  ${e.name}${fresh.has(e.name) ? `   ← NEW, added in the last ${WINDOW_DAYS} days` : ''}`);
   console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${used === 0 ? 'NEVER used in this library' : `${used} scene(s)`}`);
   if (e.blurb) console.log(`      ${e.blurb}`);
   if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   then: make expand D=<file>`);
