@@ -920,6 +920,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('capabilitiesOf: glass asks for the backdrop', capabilitiesOf({ glass: 'refract' })[0].cap === 'backdrop');
   ok('capabilitiesOf: glass:false asks for nothing', capabilitiesOf({ glass: false }).length === 0);
   ok('capabilitiesOf: a plane modifier asks for depth', capabilitiesOf({ modifiers: [{ plane: -800 }] })[0].cap === 'depth');
+  ok('capabilitiesOf: an adjust layer asks for the backdrop', capabilitiesOf({ type: 'adjust', kind: 'blur' })[0].cap === 'backdrop');
   ok('capabilitiesOf: a plain layer asks for nothing', capabilitiesOf({ type: 'text', text: 'x' }).length === 0);
 
   // THE REPORTED BUG, as a test: a glass layer under a filter-writing cut must refuse, and the

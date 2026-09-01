@@ -60,6 +60,12 @@ export function capabilitiesOf(L) {
   const out = [];
   if (L.glass != null && L.glass !== false) out.push({ cap: 'backdrop', via: `"glass": ${JSON.stringify(L.glass)}` });
   if (L.progressiveBlur != null && L.progressiveBlur !== false) out.push({ cap: 'backdrop', via: '"progressiveBlur"' });
+  // The adjustment layer is the same mechanism and the easiest one to miss, because it declares no
+  // prop at all: being an `adjust` IS the request. `core/layers/adjust.js:116` writes backdropFilter,
+  // so a grade over everything beneath it dies inside a filtered ancestor exactly as glass does, and
+  // silently. It matters more than the other two: an adjustment layer is the central compositing
+  // device borrowed from After Effects, so it is the one an author reaches for when chasing parity.
+  if (L.type === 'adjust') out.push({ cap: 'backdrop', via: '"type": "adjust"' });
   const mods = MODS(L);
   if (mods.includes('mixBlend')) out.push({ cap: 'blend', via: '"mixBlend"' });
   for (const m of ['plane', 'tilt']) if (mods.includes(m)) out.push({ cap: 'depth', via: `"${m}"` });
