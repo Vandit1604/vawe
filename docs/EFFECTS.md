@@ -622,6 +622,30 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `slide-right` | enters from its right and, with `out`, keeps going left · the mirror of slide-left |
 | `widen` | scales out from its left edge. A row, a rule, a progress track filling |
 
+## Effector falloffs  `[per-layer]`
+
+A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children. `effector: { select, path, radius, falloff, drives, sticky, overshoot }` on any layer with children. A stagger can only express the order the elements sit in; this expresses DISTANCE, in two dimensions, from a point that moves, so one rig gives a wave, a ripple out of a centre and a stroke painted across a grid, and only the point's path changes. `path` is a motion-key list ({t,x,y,ease}) in the layer's own coordinates, so it is keyed exactly like a `motion` track. NO KEYFRAME LANDS ON ANY CLONE. `sticky` (seconds) is what makes it a trail rather than a moving highlight: a clone HOLDS what the pass did to it and releases over that delay, and 1s is the value the technique is built on. These names are the shape of the falloff.
+
+| name | what / when |
+|---|---|
+| `linear` | influence drops straight from 1 at the point to 0 at the radius, the plain ramp |
+| `smooth` | a smoothstep, flat at both ends, so a clone eases into the field and out of it. The default |
+| `sphere` | a dome: full influence held near the point, then a cliff. Reads as an object passing beneath |
+| `step` | no falloff at all, full influence inside the radius and none outside. A hard-edged pass |
+
+## Effector drives  `[per-layer]`
+
+What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, where the number is the amount at full influence. `push` is the one a stagger cannot imitate, because it reads the direction from the point to the clone as well as the distance.
+
+| name | what / when |
+|---|---|
+| `opacity` | added to 1. `opacity: -0.7` dims a fully affected clone to 0.3 |
+| `push` | pixels ALONG the vector from the point to the clone. Positive shoves clones away, negative pulls them in. The only drive that reads the direction as well as the distance |
+| `rotate` | degrees. `rotate: 25` turns a fully affected clone by 25 |
+| `scale` | added to 1. `scale: 0.6` swells a fully affected clone to 1.6 |
+| `x` | pixels, a sideways offset that does not depend on where the point is |
+| `y` | pixels, the same on the other axis |
+
 ## Blend modes  `[per-layer]`
 
 `mixBlend`: how a layer composites with what is beneath it.
@@ -843,6 +867,8 @@ Parametric field generators with declared option schemas, turnable at /playgroun
 | `bands` | A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind. |
 | `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
 | `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
+| `effector` | One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone. |
+| `rangeSelector` | The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs. |
 | `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
 | `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
 
@@ -881,4 +907,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_580 effects across 39 families. Regenerate: `make effects`._
+_592 effects across 41 families. Regenerate: `make effects`._

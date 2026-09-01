@@ -45,6 +45,7 @@ import { crtSpec } from './layers/util.js';
 import { blurbsOf } from './registry.js';
 import { sanitizeHtml } from './sanitize-html.js';
 import { thermalPrimitives, THERMAL_REGION, THERMAL_RAMP } from './filters.js';
+import { FALLOFF_NAMES } from './effector.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
 // The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
@@ -588,7 +589,109 @@ const THERMAL = {
   },
 };
 
-export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT, THERMAL];
+
+// ── the effector card ───────────────────────────────────────────────────────────────────────────
+//
+// The dial worth turning here is `sticky`, and the card exists mostly to make that one legible. At 0
+// the point is a moving highlight and the grid looks like a spotlight passing over it. Above about
+// half a second the same rig paints a TRAIL: the clones the point has already passed are still
+// displaced, so what you see is a stroke drawn across the grid rather than a light sliding under it.
+// Nothing else in the panel changes as much for as small a move.
+const EFFECTOR_SCHEMA = {
+  sticky:    { kind: 'num', min: 0, max: 2, def: 1, primary: true,
+               note: 'seconds a clone HOLDS what the pass did to it before easing back. 0 is a moving highlight; 1 is the value the technique states, and it is what turns the pass into a painted trail.' },
+  radius:    { kind: 'num', min: 60, max: 900, def: 320, primary: true,
+               note: 'how far the point reaches, in pixels. Smaller than the gap between clones and only one reacts at a time.' },
+  falloff:   { kind: 'enum', of: FALLOFF_NAMES, def: 'smooth', primary: true,
+               note: 'how influence drops off with distance. `sphere` reads as an object passing beneath the grid; `step` is a hard edge.' },
+  scale:     { kind: 'num', min: -0.9, max: 1.5, def: 0.75, primary: true,
+               note: 'added to a fully affected clone\'s scale. Negative shrinks the ones the point is nearest.' },
+  push:      { kind: 'num', min: -160, max: 160, def: 0,
+               note: 'pixels shoved ALONG the vector from the point to the clone. This is the drive that reads direction, and the one a stagger cannot express at all.' },
+  rotate:    { kind: 'num', min: -180, max: 180, def: 0, note: 'degrees at full influence.' },
+  overshoot: { kind: 'unit', def: 0, note: 'how far past rest a clone rings on its way back. Needs sticky above 0 to have a window to ring in.' },
+  cols:      { kind: 'int', min: 2, max: 16, def: 8, note: 'clones across.' },
+  rows:      { kind: 'int', min: 1, max: 12, def: 8, note: 'clones down.' },
+  colour:    { kind: 'hex', def: '#e8ff59', note: 'the clone.' },
+};
+
+const EFFECTOR = {
+  name: 'effector',
+  group: 'motion',
+  blurb: 'One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.',
+  docs: 'docs/EFFECTS.md',
+  reference: null,
+  schema: EFFECTOR_SCHEMA,
+  presets: { trail: {}, highlight: { sticky: 0 }, ripple: { falloff: 'sphere', push: 90, scale: 0 } },
+  produces: 'layers',
+  ready: true,
+  render: (o) => {
+    const g = (k) => pick(o, k, EFFECTOR_SCHEMA);
+    const cols = g('cols'), rows = g('rows'), colour = g('colour');
+    const W = 1920, H = 1080, cell = 96, gap = 28;
+    const gw = cols * cell + (cols - 1) * gap, gh = rows * cell + (rows - 1) * gap;
+    const cells = Array.from({ length: cols * rows }, () =>
+      `<div data-clone style="width:${cell}px;height:${cell}px;border-radius:14px;background:${colour}"></div>`).join('');
+    // The path crosses the grid and comes back on a lower line, so one render shows both the leading
+    // edge and the tail the sticky delay leaves behind it.
+    const path = [
+      { t: 0, x: -220, y: gh * 0.28 },
+      { t: 2.2, x: gw + 220, y: gh * 0.28, ease: 'through' },
+      { t: 4.4, x: -220, y: gh * 0.72, ease: 'through' },
+      { t: 6, x: gw * 0.5, y: gh * 0.5 },
+    ];
+    const drives = { scale: g('scale') };
+    if (g('push')) drives.push = g('push');
+    if (g('rotate')) drives.rotate = g('rotate');
+    return [{
+      type: 'html', x: (W - gw) / 2, y: (H - gh) / 2, w: gw, h: gh, start: 0, duration: 6, anim: 'none',
+      html: `<div style="display:grid;grid-template-columns:repeat(${cols},${cell}px);gap:${gap}px">${cells}</div>`,
+      effector: {
+        select: '[data-clone]', path, radius: g('radius'), falloff: g('falloff'),
+        sticky: g('sticky'), overshoot: g('overshoot'), drives,
+      },
+    }];
+  },
+};
+
+// ── the range-selector card ─────────────────────────────────────────────────────────────────────
+//
+// One dial, and it is `smoothness`. Every other control here is context for it. At 1, which is what
+// every kinetic preset in this engine has always done, a glyph crosses its whole window continuously
+// and `up` reads as type sliding into place. At 0 the same preset SWAPS each glyph between its two
+// states with nothing in between, and the line stops being type that moves and becomes type that is
+// replaced. Drag it and watch the middle of the line, not the ends.
+const SELECTOR_SCHEMA = {
+  smoothness: { kind: 'unit', def: 1, primary: true,
+                note: 'how WIDE each glyph\'s transition band is, which is not the same as its curve. 1 is continuous, the engine\'s historic behaviour. 0 is a swap with no interpolation, and it is the value a font morph is built on.' },
+  preset:     { kind: 'enum', of: ['up', 'scale', 'blur', 'weight', 'fall', 'flip'], def: 'scale', primary: true,
+                note: 'the kinetic preset the selector is driving. `scale` and `blur` show the swap most plainly, because at smoothness 0 there is no scaling and no blurring left to see.' },
+  stagger:    { kind: 'num', min: 0, max: 0.3, def: 0.07, primary: true, note: 'seconds between one glyph and the next.' },
+  each:       { kind: 'num', min: 0.1, max: 2, def: 0.6, note: 'seconds one glyph spends crossing its own window.' },
+  text:       { kind: 'str', def: 'swap, do not scale', note: 'the words.' },
+};
+
+const SELECTOR = {
+  name: 'rangeSelector',
+  group: 'type',
+  blurb: 'The AE range selector\'s smoothness dial on this engine\'s kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs.',
+  docs: 'docs/EFFECTS.md',
+  reference: null,
+  schema: SELECTOR_SCHEMA,
+  presets: { swap: { smoothness: 0 }, continuous: {} },
+  produces: 'layers',
+  ready: true,
+  render: (o) => [{
+    type: 'text', x: 160, y: 460, w: 1600, align: 'center', size: 130, weight: 700,
+    color: 'var(--text)', start: 0, duration: 5, anim: 'none',
+    text: sanitizeHtml(pick(o, 'text', SELECTOR_SCHEMA)),
+    split: 'char', preset: pick(o, 'preset', SELECTOR_SCHEMA),
+    stagger: pick(o, 'stagger', SELECTOR_SCHEMA), each: pick(o, 'each', SELECTOR_SCHEMA),
+    smoothness: pick(o, 'smoothness', SELECTOR_SCHEMA),
+  }],
+};
+
+export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT, THERMAL, EFFECTOR, SELECTOR];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);

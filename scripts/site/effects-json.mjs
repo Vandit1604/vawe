@@ -90,6 +90,8 @@ const USAGE = {
   // `modifiers`, NOT `fx`: core/fx/index.js says so in its own header, and `fx` is the GSAP slot.
   'per-layer-fx': (n) => text({ modifiers: [{ type: n }] }),
   'part-entrances': (n) => j({ type: 'html', html: '<svg>…</svg>', x: 160, y: 200, w: 1600, parts: [{ select: 'rect', anim: n, each: 0.4, stagger: 0.06 }] }),
+  'effector-falloffs': (n) => j({ type: 'html', html: '<div data-clone>…</div>×64', x: 160, y: 140, w: 1600, effector: { select: '[data-clone]', falloff: n, radius: 320, sticky: 1, drives: { scale: 0.75 }, path: [{ t: 0, x: -220, y: 300 }, { t: 2.2, x: 1820, y: 300 }] } }),
+  'effector-drives': (n) => j({ type: 'html', html: '<div data-clone>…</div>×64', x: 160, y: 140, w: 1600, effector: { select: '[data-clone]', drives: { [n]: 0.6 }, radius: 320, sticky: 1, path: [{ t: 0, x: -220, y: 300 }, { t: 2.2, x: 1820, y: 300 }] } }),
   'blend-modes': (n) => text({ mixBlend: n }),
   'filter-presets': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: n }),
   easings: (n) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
@@ -196,6 +198,8 @@ const NO_PREVIEW = {
   'layer-types': 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
   'per-layer-fx': 'a modifier acts on whatever layer is already there, so it has nothing to show on its own.',
   'part-entrances': "a part entrance staggers across a figure's own children, so it needs your figure.",
+  'effector-falloffs': "a falloff is the SHAPE of one point's reach, and it is invisible without the clones it acts on. Turn it on the playground's `effector` card, where the same grid is redrawn as you change it.",
+  'effector-drives': "a drive is what the influence is spent on, so it shows nothing without a falloff and a field of clones. The playground's `effector` card carries all six on one grid.",
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
   easings: 'a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.',
   'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',

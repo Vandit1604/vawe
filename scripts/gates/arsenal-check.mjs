@@ -52,6 +52,9 @@ const WAIVED = new Map(Object.entries({
     + 'not a vocabulary of its own',
 
   JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name. Each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
+  FALLOFFS: 'the falloff FUNCTIONS behind FALLOFF_NAMES, which IS catalogued as "Effector falloffs". A scene names a falloff, never the function',
+  FALLOFF_REGISTRY: 'as ANIM_REGISTRY, for FALLOFF_NAMES ("Effector falloffs")',
+  DRIVE_REGISTRY: 'as ANIM_REGISTRY, for DRIVE_NAMES ("Effector drives")',
   ANIM_REGISTRY: 'the registry OBJECT wrapping ANIM, which is catalogued as "Enter / exit anims". A scene names an anim, never a registry',
   BG_REGISTRY: 'as ANIM_REGISTRY, for BG_NAMES ("Backgrounds")',
   SEAM_REGISTRY: 'as ANIM_REGISTRY, for SEAM_FX ("Seams")',
