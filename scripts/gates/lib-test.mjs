@@ -53,7 +53,7 @@ import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/parts.js';
 import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/effector.js';
-import { cutVelocityAdvice, layerSpeedAt } from '../../core/velocity-cut.js';
+import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
 import { parseColorRGB } from '../../core/motion.js';
@@ -2093,6 +2093,24 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 0 }, { t: 1.5, x: 900, ease: 'linear' }] }];
     cutVelocityAdvice(cuts, layers, { duration: 3 });
     return cuts[0].t === 0.9 && cuts[0].fx === 'fade';
+  })());
+
+  // THE CAMERA IS THE NULL. AE-TECHNIQUES #1 parents both shots to one null and animates the NULL;
+  // in this engine the thing that covers both shots at once is the camera. A reader that saw only
+  // layer tracks scored the technique's own construction at ZERO px/s, which is the mistake the
+  // advisory exists to catch, made by the advisory itself.
+  ok('velocity-cut: a camera zoom reads as picture speed', (() => {
+    const cam = [{ t: 0, s: 1 }, { t: 2, s: 2, ease: 'linear' }];
+    return cameraSpeedAt(cam, 1, 30) > 200 && cameraSpeedAt([], 1, 30) === 0;
+  })());
+  ok('velocity-cut: a seam with NOTHING but a camera move under it is not read as dead', (() => {
+    // Two abutting shots, no layer motion at all: the whole move lives on the camera.
+    const layers = [{ start: 0, duration: 1.4 }, { start: 1.4, duration: 1.6 }];
+    const cam = [{ t: 0.4, s: 1, easeOut: 'hang' }, { t: 2.4, s: 2, easeIn: 'hang' }];
+    const blind = cutVelocityAdvice([{ t: 1.4 }], layers, { duration: 3 });
+    const seeing = cutVelocityAdvice([{ t: 1.4 }], layers, { duration: 3, camera: cam });
+    // Blind to the camera the frame reads dead; reading it, the seam sits ON the peak.
+    return blind[0].speed === 0 && seeing[0].speed > 500 && seeing[0].peak.t === 1.4;
   })());
 
   // ---- the range selector's smoothness dial (docs/CRAFT/AE-TECHNIQUES.md #5) ---------------------

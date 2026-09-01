@@ -16,7 +16,7 @@
 // squash all read it, and a second implementation here would be the fact-with-two-owners drift this
 // codebase logs more than any other. What this file adds is the SUM over the layers on screen, and
 // the search for the peak.
-import { velocityAt } from './sequence.js';
+import { velocityAt, cameraAt } from './sequence.js';
 
 // A scale change moves pixels too, and the technique's own demonstration is a scale from 100 to 200
 // per cent, so a reader that saw only translation would score that seam at zero. SCALE_REACH is how
@@ -52,9 +52,34 @@ export function layerSpeedAt(L, t, fps = 30) {
     + (Math.abs(v.now.rot - v.prev.rot) / dt) * DEG_TO_PX;
 }
 
-/** pictureSpeedAt(layers, t, fps): the whole frame's speed, summed over whatever is on screen. */
-export function pictureSpeedAt(layers, t, fps = 30) {
-  let sum = 0;
+/**
+ * cameraSpeedAt(camKf, t, fps): the picture speed the CAMERA alone contributes, in px per second.
+ *
+ * THE CAMERA MOVES EVERY PIXEL, and a reader that saw only layer tracks scored a camera-driven seam
+ * at zero. That is not an edge case here, it is this file's own technique: the recipe in
+ * docs/CRAFT/AE-TECHNIQUES.md #1 parents both shots to one null and animates the NULL, and in this
+ * engine the thing that covers both shots at once is the camera. So the advisory used to read the
+ * one construction it exists to check as a dead frame.
+ *
+ * Differenced off `cameraAt`, the camera's single owner, exactly as layerSpeedAt differences off
+ * `velocityAt`. Nothing re-implements a curve, so an authored handle on a camera key is read for free.
+ * Same two approximations as above: SCALE_REACH for magnification, DEG_TO_PX for roll.
+ */
+export function cameraSpeedAt(camKf, t, fps = 30) {
+  if (!camKf || !camKf.length) return 0;
+  const dt = 1 / fps;
+  const now = cameraAt(camKf, t), prev = cameraAt(camKf, t - dt);
+  return (Math.hypot(now.x - prev.x, now.y - prev.y)
+    + Math.abs(now.s - prev.s) * SCALE_REACH
+    + Math.abs(now.roll - prev.roll) * DEG_TO_PX) / dt;
+}
+
+/**
+ * pictureSpeedAt(layers, t, fps, camKf): the whole frame's speed, summed over whatever is on screen,
+ * plus the camera's own travel. `camKf` is optional so every existing caller reads what it read before.
+ */
+export function pictureSpeedAt(layers, t, fps = 30, camKf = null) {
+  let sum = cameraSpeedAt(camKf, t, fps);
   for (const L of layers) sum += layerSpeedAt(L, t, fps);
   return sum;
 }
@@ -77,16 +102,16 @@ export function pictureSpeedAt(layers, t, fps = 30) {
  * SEARCHED PER FRAME, on the film's own grid, so the answer is a frame the render can actually land
  * on. A finer search would return a time no frame exists at.
  */
-export function cutVelocityAdvice(cuts, layers, { fps = 30, window = 0.5, ratio = 2, floor = 200, duration = Infinity } = {}) {
+export function cutVelocityAdvice(cuts, layers, { fps = 30, window = 0.5, ratio = 2, floor = 200, duration = Infinity, camera = null } = {}) {
   const out = [];
   for (const c of cuts) {
     const t = c && typeof c.t === 'number' ? c.t : null;
     if (t === null) continue;
-    const speed = pictureSpeedAt(layers, t, fps);
+    const speed = pictureSpeedAt(layers, t, fps, camera);
     let peak = { t, speed };
     const lo = Math.max(0, t - window), hi = Math.min(duration, t + window);
     for (let f = Math.ceil(lo * fps); f <= Math.floor(hi * fps); f++) {
-      const s = pictureSpeedAt(layers, f / fps, fps);
+      const s = pictureSpeedAt(layers, f / fps, fps, camera);
       if (s > peak.speed) peak = { t: f / fps, speed: s };
     }
     // A frame with NO motion at all is not a trough, it is a film with nothing moving across that

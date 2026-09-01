@@ -16524,3 +16524,34 @@ Related and separate: `speed` is a multiple of each segment's OWN average veloci
 authored number on both sides of a cut hands the same SHAPE across and not the same units per second.
 Measured on a worked handoff: 762.8 deg/s arriving, 269.9 deg/s leaving, from the same `speed: 3`.
 Absolute continuity across two layers would need a cross-layer velocity binding and is not built.
+
+## 537. The cut-velocity advisory was blind to the camera, so it scored its own recipe at zero
+
+`cutVelocityAdvice` summed `layerSpeedAt` over the layers on screen and nothing else. The camera moves
+every pixel in the frame, and in this engine the camera is the only parent that covers two shots at
+once, because a `group` child shares its parent's window and so two children cannot abut at a seam
+(`core/layers/util.js addGroupChild`).
+
+That matters because the technique the advisory exists to serve, `docs/CRAFT/AE-TECHNIQUES.md` #1,
+parents both shots to one null and animates the NULL. Authored the way the recipe says, the whole move
+lives on the camera and the advisory read the seam at **0 px/s**: it reported the correct construction
+as the velocity trough it exists to catch. Same shape as #535 one entry up, and the second time this
+file's enumeration of "what moves pixels" has been treated as finished.
+
+**Root cause:** a picture-speed reader that enumerated layer tracks and stopped. **Fix:**
+`cameraSpeedAt` in `core/velocity-cut.js`, differenced off `cameraAt` exactly as the layer term is
+differenced off `velocityAt`, so an authored handle on a camera key is read for free and no curve is
+re-implemented. `pictureSpeedAt` takes the keyframes as an optional fourth argument and
+`cutVelocityAdvice` as `opts.camera`, so every existing caller reads what it read before. Blast radius:
+15 of the 50 scenes with cuts carry a camera; two gain a finding (`preface-launch` 2,
+`threadcite-open` 1), both true positives at warn tier, and both films still pass. → **Gate: `lib-test`
+asserts a camera zoom reads as picture speed, and that a seam with nothing but a camera move under it
+is not read as dead.**
+
+**Second bug, found by the same demo.** The advisory searched the peak on a 30fps grid while
+`cmd/render/main.go` renders a final pass at **60**, so "a frame the render can actually land on" was
+not one. `motion-director.mjs` now passes `d.fps` when the scene pins one. A scene that pins nothing
+keeps the old default, because there is no single answer to give it.
+
+**Worked example:** `formats/scene/_kinetic-cut.json` and its one-number twin
+`_kinetic-cut-plain.json`.

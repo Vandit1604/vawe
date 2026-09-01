@@ -23,6 +23,12 @@ change is an argued piece of work and never a line edit.
 
 ## 1. The velocity-hidden cut (the source calls it the "kinetic cut")
 
+**THE SWAP IS A HARD CUT AND NOTHING ABOUT IT ANIMATES.** Shot A ends and shot B begins at one
+instant, in place: no slide, no fade, no crossfade. The move that hides it is not on either shot, it
+is on a SHARED PARENT covering both, and it runs straight through the seam. Two readers in a row
+built this as two texts sliding past each other and both were wrong: if the copy moves, you have
+written a transition, not this. The parent moves; the copy is replaced.
+
 **THE NAME IS THAT CHANNEL'S, NOT THE FIELD'S.** Searching "kinetic cut" returns "kinetic editing"
 (a fast-cut editorial style) and "cutting on action" (hiding a cut inside a movement), and neither is
 a velocity envelope. So the phrase is used here only to point back at the source video
@@ -36,8 +42,10 @@ value practitioners state for a snappy swap is **influence 75 both sides**, and 
 `hang` carries.
 
 **RECIPE**
-1. Parent both shots to one null and animate any transform of that null across the seam. Scale is used
-   in the demonstration; position or rotation work the same.
+1. Parent both shots to ONE null and animate any transform of that null ACROSS the seam, so a single
+   curve spans both shots. Neither shot gets a keyframe of its own. Scale is used in the demonstration;
+   position or rotation work the same. In this engine the parent that covers both shots is the CAMERA
+   (a `group` cannot: its children share its window, so they cannot abut at a seam).
 2. Ease both keys, then open the speed graph and drag the handles so the curve is flat at both ends and
    near vertical in the middle. The move now starts slow, rushes, and settles.
 3. Put the cut on the frame where the graph is steepest, not at a round second and not where the copy
@@ -75,7 +83,28 @@ Read the third row before reaching for the second: the DEFAULT is steeper than `
 
 *The placement.* `core/velocity-cut.js` reads `velocityAt` at each junction and reports a cut sitting
 in a velocity trough; `scripts/author/motion-director.mjs` prints it. It reads authored handles for
-free, because it derives from the one velocity owner rather than re-implementing it.
+free, because it derives from the one velocity owner rather than re-implementing it. It reads the
+CAMERA too, and it used to not: a seam whose whole move lived on the null scored 0 px/s, so the
+advisory called this technique's own construction a dead frame.
+
+*The worked example.* `formats/scene/_kinetic-cut.json`, with `_kinetic-cut-plain.json` as the twin
+that differs in ONE number (the camera's second `x`). Two `text` layers with abutting windows,
+`anim: "none"` and `out: "none"` so nothing fades, `cuts: [{ t: 1.4, style: "none" }]` to declare the
+seam, and a camera keyed `x: 460 -> -460` on `hang` handles either side. The advisory reads the seam at
+**1812 px/s and names it the film's own peak**.
+
+Measured, as the mean absolute luma change between each pair of frames. In the PLAIN film the swap
+pair reads 3.679 against a floor of 0.043, so it is **85x the median frame and the only event in the
+film**; its neighbours are 0.041 and 0.029. In the KINETIC film the swap pair reads 3.273 and its
+neighbours read 3.463 and 2.495: it sits INSIDE the run, **7 of the film's other 59 frame pairs change
+more than it does**. The seam is not smaller, the neighbourhood is 31x louder, which is the whole
+mechanism.
+
+**Pan, do not zoom, when the subject is centred.** Built first as `s: 1 -> 2`, the same seam scored 3x
+its neighbours instead of 0.9x, because a zoom's displacement is ZERO at the frame centre and that is
+where copy sits. A translation moves every pixel by the same amount. The remaining gap to After
+Effects is motion blur: `core/tracks/motion.js` blurs from a LAYER's own track and nothing reads the
+camera, so every frame here is sharp where AE's would smear.
 
 *The handoff.* **No mechanism, and that is the finding, not a gap.** The second shot's first key takes
 an `easeOut` whose `speed` is the incoming velocity, so the picture leaves the cut still travelling and
