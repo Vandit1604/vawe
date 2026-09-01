@@ -1,7 +1,7 @@
 {
-  "total": 606,
-  "previewed": 261,
-  "families": 43,
+  "total": 618,
+  "previewed": 273,
+  "families": 45,
   "tags": [
     [
       "asset",
@@ -77,7 +77,11 @@
     ],
     [
       "text",
-      39
+      46
+    ],
+    [
+      "text/parts",
+      5
     ],
     [
       "timing",
@@ -315,6 +319,116 @@
           "stem": "kinetic-text-presets--weight",
           "desc": "the · glyphs · THICKEN · into · place · along · the · font's · own · `wght` · axis, · a · crest · of · weight · travelling · the · line · · · the · one · register · a · static · face · cannot · fake, · and · it · degrades · to · the · nearest · static · cut · rather · than · to · a · dead · still",
           "scene": "/assets/effects/kinetic-text-presets--weight.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "stagger-order-from",
+      "title": "Stagger order (`from`)",
+      "tag": "text/parts",
+      "intro": "The · ORDER · a · stagger · runs · in, · on · `stagger` · as · an · object · `{ · \"stagger\" · { · \"amount\" · 0.6, · \"from\" · \"center\" · } · }`. · Works · in · BOTH · slots · that · take · a · stagger, · a · split · text · layer · and · `parts[]`. · `each` · is · the · per-unit · delay; · `amount` · is · the · TOTAL · seconds · the · whole · train · may · take · and · derives · that · delay · from · the · unit · count, · so · a · 90-glyph · headline · and · a · 6-word · one · hold · the · same · beat. · A · number · index · is · legal · too · the · wave · starts · at · that · unit.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 5,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "center",
+          "stem": "stagger-order-from--center",
+          "desc": "starts · at · the · middle · unit · and · opens · outward · both · ways, · so · the · word · arrives · as · ONE · object · rather · than · as · a · train",
+          "scene": "/assets/effects/stagger-order-from--center.json",
+          "noPreview": null
+        },
+        {
+          "name": "edges",
+          "stem": "stagger-order-from--edges",
+          "desc": "starts · at · BOTH · ends · and · closes · on · the · middle, · a · line · that · shuts · like · a · door",
+          "scene": "/assets/effects/stagger-order-from--edges.json",
+          "noPreview": null
+        },
+        {
+          "name": "first",
+          "stem": "stagger-order-from--first",
+          "desc": "the · wave · starts · at · the · first · unit · and · runs · to · the · last, · the · default, · and · what · a · line · of · type · being · typed · looks · like",
+          "scene": "/assets/effects/stagger-order-from--first.json",
+          "noPreview": null
+        },
+        {
+          "name": "last",
+          "stem": "stagger-order-from--last",
+          "desc": "starts · at · the · last · unit · and · runs · backwards · to · the · first, · pair · it · with · a · right-to-left · exit",
+          "scene": "/assets/effects/stagger-order-from--last.json",
+          "noPreview": null
+        },
+        {
+          "name": "random",
+          "stem": "stagger-order-from--random",
+          "desc": "a · hashed, · seeded · shuffle · of · the · order, · scattered · arrival · that · is · identical · on · every · render · and · at · every · seek",
+          "scene": "/assets/effects/stagger-order-from--random.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "scramble-charsets-chars",
+      "title": "Scramble charsets (`chars`)",
+      "tag": "text",
+      "intro": "What · `preset · \"decode\"` · scrambles · WITH, · in · `presetOpts` · `{ · \"preset\" · \"decode\", · \"presetOpts\" · { · \"chars\" · \"numbers\", · \"rate\" · 48, · \"revealDelay\" · 0.25 · } · }`. · A · named · set, · or · any · string · of · your · own · glyphs. · `rate` · is · refreshes · per · SECOND · (so · a · slower · reveal · is · no · longer · also · a · slower · scramble) · and · `revealDelay` · is · the · fraction · of · the · window · the · unit · stays · fully · scrambled · before · it · starts · resolving, · which · is · what · makes · the · effect · read · as · decoding · rather · than · as · noisy · type.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 7,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "binary",
+          "stem": "scramble-charsets-chars--binary",
+          "desc": "ones · and · zeros, · the · loudest · cliche · in · the · set, · use · it · once · and · only · where · the · subject · IS · binary",
+          "scene": "/assets/effects/scramble-charsets-chars--binary.json",
+          "noPreview": null
+        },
+        {
+          "name": "blocks",
+          "stem": "scramble-charsets-chars--blocks",
+          "desc": "four · shades · of · block, · so · the · word · dissolves · into · a · bar · of · noise · instead · of · into · other · letters",
+          "scene": "/assets/effects/scramble-charsets-chars--blocks.json",
+          "noPreview": null
+        },
+        {
+          "name": "lowerCase",
+          "stem": "scramble-charsets-chars--lowercase",
+          "desc": "lowercase · only, · quieter · still, · and · the · right · set · under · a · lowercase · headline",
+          "scene": "/assets/effects/scramble-charsets-chars--lowercase.json",
+          "noPreview": null
+        },
+        {
+          "name": "mixed",
+          "stem": "scramble-charsets-chars--mixed",
+          "desc": "capitals, · digits · and · four · symbols, · the · house · default · and · the · busiest · of · the · sets",
+          "scene": "/assets/effects/scramble-charsets-chars--mixed.json",
+          "noPreview": null
+        },
+        {
+          "name": "numbers",
+          "stem": "scramble-charsets-chars--numbers",
+          "desc": "digits · only, · for · a · counter, · a · price, · a · code · or · anything · the · film · is · about · to · state · as · a · number",
+          "scene": "/assets/effects/scramble-charsets-chars--numbers.json",
+          "noPreview": null
+        },
+        {
+          "name": "symbols",
+          "stem": "scramble-charsets-chars--symbols",
+          "desc": "punctuation · and · operators, · a · terminal · or · a · cipher · rather · than · a · word",
+          "scene": "/assets/effects/scramble-charsets-chars--symbols.json",
+          "noPreview": null
+        },
+        {
+          "name": "upperCase",
+          "stem": "scramble-charsets-chars--uppercase",
+          "desc": "capitals · only, · the · calmest · scramble · and · the · one · that · keeps · a · headline · reading · as · type",
+          "scene": "/assets/effects/scramble-charsets-chars--uppercase.json",
           "noPreview": null
         }
       ]

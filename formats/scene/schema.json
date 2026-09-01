@@ -1125,8 +1125,8 @@
      "label": "Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/halation/diffusion/rimLight/spotlight/chromatic/chromaCycle on a glow layer)"
     },
     "stagger": {
-     "type": "number",
-     "label": "Per-unit delay (s)"
+     "type": "number|object",
+     "label": "Per-unit delay (s), OR the three-dial object form { each, amount, from } that `parts[].stagger` takes too, so one vocabulary covers both. `each` is that same per-unit delay; `amount` is the TOTAL seconds the whole train may take and DERIVES the delay from the unit count, which is how a 90-glyph headline and a 6-word one hold the same beat; `from` is the ORDER the wave runs in: first (default, reads as typing) · center (the word arrives as one object) · last · edges · random (hashed, so a seek is exact) · or a unit index. e.g. {\"amount\":0.6,\"from\":\"center\"}"
     },
     "each": {
      "type": "number",
@@ -1234,7 +1234,7 @@
      "label": "Velocity/gravity/friction scatter (GSAP Physics2DPlugin): { velocity, angle, gravity, friction, spread, dur }. On a split layer each letter gets an index-based angle spread (explode outward). Deterministic (no random)."
     },
     "parts": {
-     "label": "THE BRIDGE BETWEEN HAND-WRITTEN HTML AND THE ENGINE'S CLOCK. Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards, the rows of an `html` fragment) so a figure animates piece by piece. On an `html` layer this is how markup keeps the whole CSS surface AND still gets engine-driven, seekable per-element timing, instead of one opacity on the whole card. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease, out, exitDur, exitEase } OR an array of them (bars, then line, then dots). `out: true` gives each part its paired exit (a translate continues, a scale reverses) anchored to the layer's end. Pure (seeked GSAP)."
+     "label": "THE BRIDGE BETWEEN HAND-WRITTEN HTML AND THE ENGINE'S CLOCK. Dense per-CHILD choreography: stagger a named entrance across this layer's child elements (a bespoke SVG's bars/dots/paths, a group's cards, the rows of an `html` fragment) so a figure animates piece by piece. On an `html` layer this is how markup keeps the whole CSS surface AND still gets engine-driven, seekable per-element timing, instead of one opacity on the whole card. One spec { select, anim: growUp|widen|popIn|fadeUp|riseIn|drawOn, each, stagger, delay, ease, out, exitDur, exitEase } OR an array of them (bars, then line, then dots). `out: true` gives each part its paired exit (a translate continues, a scale reverses) anchored to the layer's end. `stagger` is a number of seconds OR the same three-dial object a split text layer takes, { each, amount, from }: `amount` caps the WHOLE train at a total time and `from` orders it (first | center | last | edges | random | an index). Pure (seeked GSAP)."
     },
     "comp": {
      "type": "string",

@@ -52,8 +52,14 @@ export const KNOBS = {
     // the three that USED to be fixed, now knobbed
     type: [n('at', 0, 'fraction of the entrance where it snaps on (0 = instant)', [0, 1])],
     flip: [en('axis', ['x', 'y'], 'x', 'hinge axis: x = top-over, y = door-swing'), n('deg', 80, 'start angle')],
-    // decode's only parameter is engine-injected; nothing author-facing.
-    decode: [],
+    // decode used to read NOTHING: animateUnits returned before it passed popts, so every dial written
+    // here would have been accepted and ignored (docs/MISTAKES.md #542). These three are what the
+    // reference implementations expose and what a brand actually changes.
+    decode: [
+      { name: 'chars', type: 'string', default: 'mixed', desc: 'charset name (core/type.js DECODE_CHARS: mixed, upperCase, lowerCase, numbers, symbols, blocks, binary) or your own string of glyphs' },
+      n('rate', 48, 'junk-character refreshes per SECOND (a rate, so a slower reveal is not also a slower scramble)'),
+      n('revealDelay', 0, 'fraction of the window the unit holds fully scrambled before it starts resolving', [0, 0.95]),
+    ],
   },
 
   // ── three.js scenes (core/three-fx.js), `three: "name"`, per-scene knobs ────────────────────────

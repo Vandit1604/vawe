@@ -61,6 +61,32 @@
 | `wave` | sinusoidal wave across units: a LOOP that never settles; ambient only |
 | `weight` | the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still |
 
+## Stagger order (`from`)  `[text/parts]`
+
+The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`. Works in BOTH slots that take a stagger, a split text layer and `parts[]`. `each` is the per-unit delay; `amount` is the TOTAL seconds the whole train may take and derives that delay from the unit count, so a 90-glyph headline and a 6-word one hold the same beat. A number index is legal too: the wave starts at that unit.
+
+| name | what / when |
+|---|---|
+| `center` | starts at the middle unit and opens outward both ways, so the word arrives as ONE object rather than as a train |
+| `edges` | starts at BOTH ends and closes on the middle, a line that shuts like a door |
+| `first` | the wave starts at the first unit and runs to the last, the default, and what a line of type being typed looks like |
+| `last` | starts at the last unit and runs backwards to the first, pair it with a right-to-left exit |
+| `random` | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
+
+## Scramble charsets (`chars`)  `[text]`
+
+What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "presetOpts": { "chars":"numbers", "rate":48, "revealDelay":0.25 } }`. A named set, or any string of your own glyphs. `rate` is refreshes per SECOND (so a slower reveal is no longer also a slower scramble) and `revealDelay` is the fraction of the window the unit stays fully scrambled before it starts resolving, which is what makes the effect read as decoding rather than as noisy type.
+
+| name | what / when |
+|---|---|
+| `binary` | ones and zeros, the loudest cliche in the set, use it once and only where the subject IS binary |
+| `blocks` | four shades of block, so the word dissolves into a bar of noise instead of into other letters |
+| `lowerCase` | lowercase only, quieter still, and the right set under a lowercase headline |
+| `mixed` | capitals, digits and four symbols, the house default and the busiest of the sets |
+| `numbers` | digits only, for a counter, a price, a code or anything the film is about to state as a number |
+| `symbols` | punctuation and operators, a terminal or a cipher rather than a word |
+| `upperCase` | capitals only, the calmest scramble and the one that keeps a headline reading as type |
+
 ## Enter / exit anims  `[per-layer]`
 
 `anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`
@@ -935,4 +961,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_606 effects across 43 families. Regenerate: `make effects`._
+_618 effects across 45 families. Regenerate: `make effects`._

@@ -5,7 +5,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
   anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/time.js';
-import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type.js';
+import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites } from '../../core/cuts.js';
 import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts.js';
 import { killedBy, capabilitiesOf, checkCuts } from '../../core/ancestor-kills.js';
@@ -599,6 +599,68 @@ ok('unitProgress unit 0 starts at 0', approx(unitProgress(0, 0, 3, { each: 0.5, 
 ok('unitProgress later unit delayed', unitProgress(0.06, 1, 3, { each: 0.5, stagger: 0.06 }) === 0);
 ok('unitProgress completes', unitProgress(2, 2, 3, { each: 0.5, stagger: 0.06 }) === 1);
 ok('unitProgress clamped [0,1]', (() => { for (let t = -1; t < 3; t += 0.1) { const u = unitProgress(t, 1, 4); if (u < 0 || u > 1) return false; } return true; })());
+
+// THE OTHER TWO STAGGER DIALS (docs/CRAFT/PARITY-AUDIT.md). `from` is an ORDER and `amount` a TOTAL
+// time, and the first thing asserted is that neither moves a frame of what shipped.
+ok('a number stagger is exactly what it was: offset i, no remap', (() => {
+  for (let i = 0; i < 6; i++) for (let t = -0.2; t < 2; t += 0.07) {
+    if (Math.abs(unitProgress(t, i, 6, { each: 0.5, stagger: 0.06 }) - Math.max(0, Math.min(1, (t - i * 0.06) / 0.5))) > 1e-12) return false;
+  }
+  return true;
+})());
+ok('from:first is the default and changes nothing',
+  unitProgress(0.3, 3, 8, { each: 0.5, stagger: 0.05 }) === unitProgress(0.3, 3, 8, { each: 0.5, stagger: { each: 0.05, from: 'first' } }));
+// Every order is a RANK inside [0, n-1], so `amount` can normalise it and no order can push a unit
+// outside the train. The four named orders start at 0; `random` is a hashed float, so its earliest
+// unit lands within one step of 0 rather than exactly on it.
+ok('every named order is a rank inside [0, n-1]', STAGGER_FROM.every((f) => {
+  const r = [...Array(7).keys()].map((i) => staggerOffset(i, 7, f));
+  return (f === 'random' || Math.min(...r) === 0) && r.every((x) => x >= 0 && x <= 6);
+}));
+ok('from:center opens outward from the middle unit',
+  staggerOffset(3, 7, 'center') === 0 && staggerOffset(0, 7, 'center') === 3 && staggerOffset(6, 7, 'center') === 3);
+ok('from:last runs backwards', staggerOffset(6, 7, 'last') === 0 && staggerOffset(0, 7, 'last') === 6);
+ok('from:edges closes on the middle', staggerOffset(0, 7, 'edges') === 0 && staggerOffset(6, 7, 'edges') === 0 && staggerOffset(3, 7, 'edges') === 3);
+ok('from: an index starts the wave at that unit', staggerOffset(4, 9, 4) === 0 && staggerOffset(0, 9, 4) === 4);
+ok('from:random is HASHED, never Math.random: identical on a re-read',
+  staggerOffset(5, 20, 'random') === staggerOffset(5, 20, 'random') && staggerOffset(5, 20, 'random') !== staggerOffset(6, 20, 'random'));
+// `amount` is the dial two shipped films hand-computed by dividing a beat by a glyph count.
+ok('amount caps the WHOLE train, whatever the unit count', [6, 30, 90].every((n) => {
+  const step = staggerStep({ amount: 0.6 }, n);
+  return approx(step * (n - 1), 0.6);
+}));
+ok('amount normalises against the ORDER, not the raw index', approx(staggerStep({ amount: 0.6, from: 'center' }, 11) * staggerOffset(0, 11, 'center'), 0.6));
+ok('amount 0.6 on 90 units still lands the last unit inside its own beat',
+  unitProgress(0.6 + 0.5, 89, 90, { each: 0.5, stagger: { amount: 0.6 } }) === 1);
+ok('a stagger object with neither dial falls back to the caller default', staggerStep({ from: 'center' }, 8, 0.045) === 0.045);
+ok('gsapStagger translates only the two words GSAP spells differently',
+  gsapStagger({ each: 0.05, from: 'first' }).from === 'start' && gsapStagger({ from: 'last' }).from === 'end'
+  && gsapStagger({ from: 'center' }).from === 'center' && gsapStagger(0.07) === 0.07 && gsapStagger(undefined, 0.07) === 0.07);
+
+// TEXT SCRAMBLE: a RATE, a charset, and a reveal delay (docs/CRAFT/PARITY-AUDIT.md).
+const scramble = (u, opts) => { const el = { textContent: 'DETERMINISTIC' }; decodeText(el, u, 0, opts); return el.textContent; };
+ok('decode default is byte-identical to the baked 24 steps it replaced', (() => {
+  for (let u = 0; u < 1; u += 0.017) if (scramble(u) !== scramble(u, { rate: 48, each: 0.5 })) return false;
+  return true;
+})());
+ok('decode is pure in u: the same frame twice is the same string', scramble(0.37) === scramble(0.37));
+ok('decode resolves left to right and finishes', scramble(1) === 'DETERMINISTIC' && scramble(0.99).endsWith('C') === false || scramble(1) === 'DETERMINISTIC');
+// The bug the rate fixes: the scramble used to slow down purely because the reveal was longer.
+ok('rate is per SECOND, so a 2s window scrambles as often as a 0.5s one', (() => {
+  const steps = (each) => new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each }))).size;
+  return steps(2) >= steps(0.5) * 0.8;
+})());
+ok('a fixed COUNT is what it is no longer: doubling each doubles the refreshes',
+  new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each: 1 }))).size
+  > new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each: 0.25 }))).size);
+ok('chars takes a named set and uses ONLY that set',
+  [...scramble(0.05, { chars: 'numbers' })].every((c) => DECODE_CHARS.numbers.includes(c) || 'DETERMINISTIC'.includes(c)));
+ok('chars takes a raw string of your own glyphs',
+  [...scramble(0.05, { chars: 'xyz' })].every((c) => 'xyz'.includes(c) || 'DETERMINISTIC'.includes(c)));
+ok('revealDelay holds the word FULLY scrambled before it resolves',
+  scramble(0.2, { revealDelay: 0.5 })[0] !== 'D' || scramble(0.3, { revealDelay: 0.5 })[0] !== 'D');
+ok('revealDelay 0 is what shipped', scramble(0.4) === scramble(0.4, { revealDelay: 0 }));
+
 ok('preset up hidden at 0', PRESETS.up(0).opacity === 0 && PRESETS.up(0).transform.includes('translateY'));
 ok('preset up shown at 1', approx(PRESETS.up(1).opacity, 1) && PRESETS.up(1).transform.includes('translateY(0.00px)'));
 ok('preset type hard on/off', PRESETS.type(0).opacity === 0 && PRESETS.type(0.01).opacity === 1);
