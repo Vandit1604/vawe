@@ -23,9 +23,19 @@ const EMBED_CLOSE = new RegExp(`<\\s*\\/\\s*(?:${EMBEDDING})\\s*>`, 'gi');
 const ESCAPING_URL = /\s(?:src|href|data|srcset|action|formaction)\s*=\s*("|')?\s*(?:[a-z][a-z0-9+.-]*:|\/\/|\/)[^"'\s>]*\1?/gi;
 // on* handlers never fire in a static render, but leaving them is an invitation for the day something does.
 const ON_HANDLER = /\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi;
+// AN HTML COMMENT IS PROSE, AND EVERY REGEX BELOW READS IT AS MARKUP. A fragment's own notes are the
+// natural place to write the word `<style>` or `<script>`, and each one then arms a regex that spans
+// the real element after it: a comment saying "a <style> block gets no such check" made STYLE_BLOCK
+// match from the COMMENT to the first real `</style>`, so the fragment's whole stylesheet and the
+// opening tag of its root div were swallowed into a `@scope {…}` block and the panel rendered as
+// unstyled text on nothing, with no error anywhere (docs/MISTAKES.md #548). Comments paint no pixels,
+// so dropping them first is free, and it disarms EMBED and ESCAPING_URL in the same stroke.
+const COMMENT = /<!--[\s\S]*?-->/g;
+/** A fragment's markup with its author notes removed. ONE owner: the three readers below share it. */
+export const stripComments = (src) => String(src || '').replace(COMMENT, '');
 
 export function sanitizeHtml(src) {
-  return String(src || '')
+  return stripComments(src)
     .replace(EMBED, '')
     .replace(EMBED_CLOSE, '')
     .replace(ESCAPING_URL, '')
@@ -94,7 +104,9 @@ export function htmlSource(o, table, where) {
 // inside a sentence; anchored only on `;{` and whitespace, it read every stylesheet and no attribute.
 const TIME_CSS = /(?:^|[;{"'\s])(transition|animation)(?:-[a-z-]+)?\s*:|@keyframes\b/i;
 export function timeCssUsed(src) {
-  const m = TIME_CSS.exec(String(src || ''));
+  // Comments first, for the reason stripComments gives: a note saying "no CSS transition here" is
+  // prose, and reading it as a declaration refuses the fragment for the sentence explaining the rule.
+  const m = TIME_CSS.exec(stripComments(src));
   return m ? (m[1] ? m[1].toLowerCase() : 'keyframes') : null;
 }
 
@@ -126,7 +138,7 @@ export function droppedDecls(src) {
   scratch ||= document.createElement('div');
   const out = [];
   // Style ATTRIBUTES only. A <style> block's rules are the stylesheet's business and are not parsed here.
-  for (const m of String(src || '').matchAll(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/gi)) {
+  for (const m of stripComments(src).matchAll(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/gi)) {
     // COMMENTS ARE NOT DECLARATIONS, and this check read them as ones. A `/* … */` inside a style
     // attribute is legal CSS and the browser ignores it, but the splitter below saw the first colon in
     // its prose and reported the words around it as a dropped declaration. It fired on a comment that

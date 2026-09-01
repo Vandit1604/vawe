@@ -4290,6 +4290,21 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     scopeStyles('<style>a{}</style><b><style>c{}</style></b>')
       === '<style>@scope {a{}}</style><style>@scope {c{}}</style><b></b>');
   ok('a style attribute is not a style block', scopeStyles('<i style="color:red"></i>') === '<i style="color:red"></i>');
+  // A COMMENT IS PROSE, AND EVERY REGEX IN THAT FILE READ IT AS MARKUP (docs/MISTAKES.md #548). The
+  // word `<style>` in an author's note made STYLE_BLOCK span from the NOTE to the first real
+  // `</style>`, so the fragment's whole stylesheet and the opening tag of its root element were
+  // swallowed into one `@scope {…}` block. The panel rendered as unstyled text and nothing said a word.
+  const { sanitizeHtml, timeCssUsed, stripComments } = await import('../../core/sanitize-html.js');
+  const noted = '<!-- write a <style> block, never a transition: it renders as a dead still -->'
+    + '<style>.g{color:red}</style><div class="g">x</div>';
+  ok('a comment naming <style> does not swallow the real stylesheet',
+    scopeStyles(sanitizeHtml(noted)) === '<style>@scope {.g{color:red}}</style><div class="g">x</div>');
+  ok('a comment naming <script> does not swallow the markup after it',
+    sanitizeHtml('<!-- no <script> here --><div>x</div>') === '<div>x</div>');
+  ok('a comment explaining the transition ban is not a transition',
+    timeCssUsed('<!-- never write transition: .3s --><div style="color:red"></div>') === null);
+  ok('a real transition is still refused', timeCssUsed('<div style="transition:opacity .3s"></div>') === 'transition');
+  ok('stripComments leaves markup carrying no comment alone', stripComments('<b>x</b>') === '<b>x</b>');
 }
 
 // ---------- the adjustment layer: one grade over everything BENEATH ----------

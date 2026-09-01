@@ -1,0 +1,103 @@
+<!-- The terminal panel. It is the film: 60% of the runtime is this box, so it is built to the same
+     standard as a real product surface rather than as a prop.
+
+     CRAFT NOTES, so the next author does not undo them by accident:
+       * CONCENTRIC RADIUS. The shell is radius 20 with 12px of padding, and the body inside it is
+         radius 8. 20 = 8 + 12. Nested radii that do not agree is the single most common thing that
+         makes a panel feel slightly wrong with nobody able to say why.
+       * BORDERS FOR STRUCTURE, SHADOWS FOR ELEVATION. One hairline of pure white at 0.10 alpha marks
+         the shell's edge (a tinted near-black there reads as dirt), and the lift off the ground comes
+         from three stacked transparent shadows, not from a second border.
+       * SIZED FOR A PHONE, NOT FOR THIS MONITOR. The body is 2.75cqw, about 34px in a 1920 frame.
+         The first pass set it at 1.7cqw: a comfortable 21px here, and four pixels wide in an X
+         timeline, which is where this film is watched.
+       * ONE GLYPH SET. Status marks are the mono face's own characters, so their weight matches the
+         text beside them by construction. No icon font, nothing to mismatch.
+
+     MOTION. Nothing here uses a CSS animation or transition; they are refused at boot because they run
+     on a clock the renderer does not own. Two mechanisms instead:
+       * `--t`, the scene clock IN SECONDS, drives the command's type-on width and the render bar.
+       * `parts` (in the scene JSON) gives each `.line` a seeked, staggered entrance.
+     Every --t expression lives in a style ATTRIBUTE, which core/sanitize-html.js parses and refuses if
+     the browser would drop it. A <style> block gets no such check.
+
+     `max(x, -x)` is the spelling for abs() here: this Chrome has no abs(). -->
+<div class="root" style="position:relative;width:100%;height:100%;box-sizing:border-box;container-type:size;--solid:clamp(0, calc((6.698 - var(--t,0)) / 0.337), 1)">
+  <style>
+    .root { --mono: 'JetBrains Mono', ui-monospace, monospace;
+            --sans: 'Anybody', system-ui, sans-serif;
+            --ink: #f2f5f8; --dim: rgba(242,245,248,0.46); --dimmer: rgba(242,245,248,0.28);
+            --ok: #6ee7a8; --accent: #6aa6ff; --u: 1cqw; }
+    .shell { position:absolute; inset:0; padding:12px; border-radius:20px;
+             outline:1px solid rgba(255,255,255,0.10); outline-offset:-1px;
+             box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset,
+                         0 18px 40px -12px rgba(0,0,0,0.9),
+                         0 60px 120px -40px rgba(0,0,0,0.8); }
+    .body { position:absolute; inset:12px; border-radius:8px;
+            display:flex; flex-direction:column; overflow:hidden; }
+    .bar { display:flex; align-items:center; gap:calc(var(--u) * 0.8);
+           padding:calc(var(--u) * 1.15) calc(var(--u) * 1.4);
+           border-bottom:1px solid rgba(255,255,255,0.07); }
+    .mark { width:calc(var(--u) * 1.5); height:calc(var(--u) * 1.5); border-radius:3px;
+            background:var(--accent); box-shadow:0 0 calc(var(--u) * 1.2) rgba(106,166,255,0.55); }
+    .name { font-family:var(--sans); font-weight:600; font-size:calc(var(--u) * 2.05);
+            letter-spacing:0.01em; color:var(--ink); }
+    .where { margin-left:auto; font-family:var(--mono); font-size:calc(var(--u) * 1.65);
+             color:var(--dimmer); letter-spacing:0.02em; }
+    .term { flex:1; padding:calc(var(--u) * 1.9) calc(var(--u) * 1.9) calc(var(--u) * 1.4);
+            font-family:var(--mono); font-size:calc(var(--u) * 2.75); line-height:1.95;
+            color:var(--ink); }
+    .prompt { display:flex; align-items:center; white-space:pre; }
+    .sigil { color:var(--accent); margin-right:0.8ch; }
+    .typed { overflow:hidden; white-space:pre; }
+    .caret { width:0.62ch; height:calc(var(--u) * 2.95); background:var(--ink); flex:none; }
+    .lines { margin-top:calc(var(--u) * 1.5); display:flex; flex-direction:column;
+             gap:calc(var(--u) * 0.55); }
+    .line { display:flex; align-items:baseline; white-space:pre; }
+    .tick { color:var(--ok); width:2.4ch; }
+    .key { color:var(--dim); width:11ch; }
+    .val { color:var(--ink); }
+    .track { position:relative; margin-top:calc(var(--u) * 0.75); margin-left:2.4ch;
+             height:calc(var(--u) * 0.32); border-radius:calc(var(--u) * 0.16);
+             background:rgba(255,255,255,0.07); overflow:hidden; }
+    .fill { position:absolute; left:0; top:0; bottom:0; border-radius:inherit;
+            background:linear-gradient(90deg, #2f6fd0, var(--accent)); }
+  </style>
+
+  <div class="shell" style="background:linear-gradient(180deg, rgba(11,13,16,var(--solid,1)) 0%, rgba(5,6,7,var(--solid,1)) 100%)">
+    <!-- THE BODY DISSOLVES, THE TERMINAL DOES NOT. The shader layer sits directly behind this box, at
+         exactly its coordinates, so dropping the body's own fill across one beat of the music hands the
+         panel's interior to the shader while the chrome, the command and the output stay on top of it.
+         6.361s to 6.698s is one beat of the bed, so the handover happens ON the pulse.
+         That is what makes beat 4 a transformation of one object rather than a cut to a second one. -->
+    <div class="body" style="background:rgba(8,9,11,var(--solid,1))">
+      <div class="bar">
+        <div class="mark"></div>
+        <div class="name">vawe</div>
+        <div class="where">~/vawe · zsh</div>
+      </div>
+
+      <div class="term">
+        <!-- The command types itself. `--typed` runs 0 to 1 between two points of the music's own beat
+             grid (0.637s to 2.320s, five beats at 178.2 BPM) and scales a 35ch clip, so the reveal is
+             exact in a monospace face and the caret rides its edge. -->
+        <div class="prompt"
+             style="--typed:clamp(0, calc((var(--t,0) - 0.637) / 1.683), 1)">
+          <span class="sigil">$</span><span class="typed"
+            style="width:calc(var(--typed) * 35ch)">vawe formats/scene/shader-path.json</span><span
+            class="caret"></span>
+        </div>
+
+        <div class="lines">
+          <div class="line"><span class="tick">OK</span><span class="key">parse</span><span class="val">shader-path.json · 6 layers · 14.0s</span></div>
+          <div class="line"><span class="tick">OK</span><span class="key">theme</span><span class="val">vawe · JetBrains Mono, Anybody</span></div>
+          <div class="line"><span class="tick">OK</span><span class="key">shader</span><span class="val">bands · seed 7 · deterministic</span></div>
+          <div class="line"><span class="tick">&gt;&gt;</span><span class="key">render</span><span class="val">420 frames · 8 workers</span></div>
+          <div class="track"><div class="fill"
+            style="width:calc(clamp(0, calc((var(--t,0) - 4.04) / 0.638), 1) * 100%)"></div></div>
+          <div class="line last"><span class="tick">OK</span><span class="key">write</span><span class="val">out/shader-path.mp4 · 1920x1080 · 30fps</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

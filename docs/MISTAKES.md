@@ -17030,3 +17030,41 @@ saying "the default did not move, the dial did".
 **The lesson.** A count and a rate look interchangeable while one number is fixed. They diverge the
 moment somebody changes the other number, and the author who does has no way to tell that two decisions
 were wired to one dial.
+
+## 550. a fragment's own comment ate its stylesheet, because every regex read prose as markup
+
+**What.** A hand-written terminal panel rendered as unstyled grey text on nothing: no shell, no title
+bar, no sizes, the type at the inherited 14px instead of the 34px the container query asked for. Every
+gate was green, `make preview` on the same file drew the panel correctly, and the fragment had no
+error to find. It cost four renders and a debug pass with a red background before the cause was even
+in the right file.
+
+**Root cause.** The fragment opened with a comment explaining its own rules, and one line of it said
+"A `<style>` block gets no such check". `scopeStyles` matches `/<style([^>]*)>([\s\S]*?)<\/style>/`
+against the raw source, so it started at the word inside the COMMENT and ran to the first real
+`</style>`, sixty lines later. Everything between was swallowed into one `@scope { … }` block: the
+whole stylesheet, and with it the opening tag of the fragment's root element. Chrome then parsed what
+it could of the wreck, which is why some colours survived and no box did.
+
+`sanitizeHtml`'s EMBED regex has the identical hole (a comment naming `<script>` deletes the markup
+after it, up to the next `>`), and so do `ESCAPING_URL`, `timeCssUsed` (a note saying "no CSS
+transition here" refuses the fragment for the sentence explaining the rule) and `droppedDecls`.
+
+**Fix.** `stripComments` in `core/sanitize-html.js`, one owner, called first by `sanitizeHtml`,
+`timeCssUsed` and `droppedDecls`. An HTML comment paints no pixels, so dropping it before any pattern
+runs costs nothing and disarms all five regexes at once. Not a gate: the rule is fixed where the value
+is read, and there is nothing left to notice afterwards.
+
+**Blast radius.** None. `node scripts/gates/snap-scenes.mjs` reports the same 108 identical / 1 changed
+before and after the edit (`search-demo.expanded` was already changed in this checkout, for unrelated
+reasons), because comments never reached a pixel.
+
+**Which check catches it now.** `scripts/gates/lib-test.mjs` asserts all four: a comment naming
+`<style>` leaves the real stylesheet scoped and the root element intact, a comment naming `<script>`
+leaves the markup after it, a comment quoting `transition:` is not a transition, and a real
+`transition:` is still refused.
+
+**The lesson.** A file's own documentation is the text most likely to quote the syntax the file
+forbids, so any regex that reads authored markup will meet its own vocabulary in prose sooner or
+later. Strip the comments before you pattern-match, or the better a fragment is documented the more
+likely it is to break.
