@@ -6,46 +6,6 @@
   "licenceVerified": true,
   "seconds": 8
  },
- "airy": {
-  "id": "588",
-  "genre": "atmospheres",
-  "source": "https://assets.mixkit.co/music/588/588.mp3",
-  "page": "https://mixkit.co/free-stock-music/",
-  "licence": "https://mixkit.co/license/#musicFree",
-  "licenceVerified": false,
-  "note": "Mixkit Stock Music Free License — confirm terms before commercial release",
-  "seconds": 149.31
- },
- "cand-electronica": {
-  "id": "130",
-  "genre": "electronica",
-  "source": "https://assets.mixkit.co/music/130/130.mp3",
-  "page": "https://mixkit.co/free-stock-music/",
-  "licence": "https://mixkit.co/license/#musicFree",
-  "licenceVerified": false,
-  "note": "Mixkit Stock Music Free License — confirm terms before commercial release",
-  "seconds": 102.37
- },
- "cand-corporate": {
-  "id": "623",
-  "genre": "corporate",
-  "source": "https://assets.mixkit.co/music/623/623.mp3",
-  "page": "https://mixkit.co/free-stock-music/",
-  "licence": "https://mixkit.co/license/#musicFree",
-  "licenceVerified": false,
-  "note": "Mixkit Stock Music Free License — confirm terms before commercial release",
-  "seconds": 288.69
- },
- "cand-chill-out": {
-  "id": "443",
-  "genre": "chill-out",
-  "source": "https://assets.mixkit.co/music/443/443.mp3",
-  "page": "https://mixkit.co/free-stock-music/",
-  "licence": "https://mixkit.co/license/#musicFree",
-  "licenceVerified": false,
-  "note": "Mixkit Stock Music Free License — confirm terms before commercial release",
-  "seconds": 113.93
- },
  "lofi": {
   "id": "282",
   "genre": "lo-fi-beats",
@@ -53,7 +13,7 @@
   "page": "https://mixkit.co/free-stock-music/",
   "licence": "https://mixkit.co/license/#musicFree",
   "licenceVerified": false,
-  "note": "Mixkit Stock Music Free License — confirm terms before commercial release",
+  "note": "Mixkit Stock Music Free License \u2014 confirm terms before commercial release",
   "seconds": 98.69
  },
  "chill": {
@@ -63,7 +23,7 @@
   "page": "https://mixkit.co/free-stock-music/",
   "licence": "https://mixkit.co/license/#musicFree",
   "licenceVerified": false,
-  "note": "Mixkit Stock Music Free License — confirm terms before commercial release",
+  "note": "Mixkit Stock Music Free License \u2014 confirm terms before commercial release",
   "seconds": 113.93
  },
  "beat": {
@@ -73,7 +33,7 @@
   "page": "https://mixkit.co/free-stock-music/",
   "licence": "https://mixkit.co/license/#musicFree",
   "licenceVerified": false,
-  "note": "Mixkit Stock Music Free License — confirm terms before commercial release",
+  "note": "Mixkit Stock Music Free License \u2014 confirm terms before commercial release",
   "seconds": 115.02
  },
  "warm": {
@@ -89,5 +49,44 @@
   "licence": "none, synthesized from parameters, carries no rights",
   "licenceVerified": true,
   "seconds": 8
+ },
+ "amb0": {
+  "id": "188",
+  "genre": "atmospheres",
+  "source": "https://assets.mixkit.co/music/188/188.mp3",
+  "page": "https://mixkit.co/free-stock-music/",
+  "licence": "https://mixkit.co/license/#musicFree",
+  "licenceVerified": false,
+  "note": "Mixkit Stock Music Free License. Confirm terms before commercial release",
+  "seconds": 226.3
+ },
+ "amb1": {
+  "id": "588",
+  "genre": "atmospheres",
+  "source": "https://assets.mixkit.co/music/588/588.mp3",
+  "page": "https://mixkit.co/free-stock-music/",
+  "licence": "https://mixkit.co/license/#musicFree",
+  "licenceVerified": false,
+  "note": "Mixkit Stock Music Free License. Confirm terms before commercial release",
+  "seconds": 149.31
+ },
+ "amb2": {
+  "id": "565",
+  "genre": "atmospheres",
+  "source": "https://assets.mixkit.co/music/565/565.mp3",
+  "page": "https://mixkit.co/free-stock-music/",
+  "licence": "https://mixkit.co/license/#musicFree",
+  "licenceVerified": false,
+  "note": "Mixkit Stock Music Free License. Confirm terms before commercial release",
+  "seconds": 294.9
+ },
+ "bed": {
+  "id": "292",
+  "genre": "relax-beat",
+  "source": "https://assets.mixkit.co/music/292/292.mp3",
+  "page": "https://mixkit.co/free-stock-music/",
+  "licence": "https://mixkit.co/license/#musicFree",
+  "licenceVerified": false,
+  "note": "downloaded by the owner and chosen as the bed for vawe-shader-terminal"
  }
 }
