@@ -4223,6 +4223,49 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('segmentAt holds the last key past the end', at('x', 0) === 300);
 }
 
+// ---------- the graph editor's primitive: cubicBezier ----------
+// Asserted against PUBLISHED fixtures rather than against itself. AE's Easy Ease is influence 33.33
+// both sides with zero speed, which is cubic-bezier(0.333, 0, 0.667, 1); CSS `ease-in-out` is
+// cubic-bezier(0.42, 0, 0.58, 1). A solver that agreed only with its own arithmetic would pass a
+// round-trip test and still draw the wrong curve.
+{
+  const { cubicBezier, easeInOutCubic } = await import('../../core/motion.js');
+  // An independent high-iteration bisection solve of the same curve: different algorithm, same answer.
+  const ref = (x1, y1, x2, y2) => {
+    const at = (u, a1, a2) => 3 * (1 - u) * (1 - u) * u * a1 + 3 * (1 - u) * u * u * a2 + u * u * u;
+    return (t) => { let lo = 0, hi = 1;
+      for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (at(m, x1, x2) < t) lo = m; else hi = m; }
+      return at((lo + hi) / 2, y1, y2); };
+  };
+  let worst = 0;
+  for (const c of [[0.333, 0, 0.667, 1], [0.42, 0, 0.58, 1], [0.25, 0.1, 0.25, 1], [0.05, 1.6, 0.2, 1]]) {
+    const mine = cubicBezier(...c), theirs = ref(...c);
+    for (let i = 0; i <= 100; i++) worst = Math.max(worst, Math.abs(mine(i / 100) - theirs(i / 100)));
+  }
+  ok('cubicBezier agrees with an independent solve of the same curve', worst < 1e-5);
+
+  const easyEase = cubicBezier(0.333, 0, 0.667, 1);
+  ok('Easy Ease pins both ends exactly', easyEase(0) === 0 && easyEase(1) === 1);
+  ok('Easy Ease is symmetric about its midpoint', Math.abs(easyEase(0.5) - 0.5) < 1e-9
+    && Math.abs(easyEase(0.25) + easyEase(0.75) - 1) < 1e-6);
+  // The published value: cubic-bezier(0.42, 0, 0.58, 1) reads 0.1292 at t = 0.25. That is NOT
+  // easeInOutCubic (0.0625), which is the confusion this fixture exists to prevent: CSS `ease-in-out`
+  // and a cubic ease-in-out are different curves with nearly the same name.
+  const cssEIO = cubicBezier(0.42, 0, 0.58, 1);
+  ok('cubic-bezier(.42,0,.58,1) reads 0.1292 at t=0.25', Math.abs(cssEIO(0.25) - 0.129162) < 1e-4);
+  ok('and it is NOT easeInOutCubic', Math.abs(cssEIO(0.25) - easeInOutCubic(0.25)) > 0.05);
+  // The diagonal short-circuits to the identity, exactly, with no solve at all.
+  const lin = cubicBezier(0, 0, 1, 1);
+  ok('the diagonal is the identity, bit for bit', [0, 0.13, 0.5, 0.87, 1].every((t) => lin(t) === t));
+  // Monotone in t for any in-range control points: an easing that went backwards would rewind a move.
+  const steep = cubicBezier(0.02, 0, 0.98, 1);
+  let mono = true, prev = -1;
+  for (let i = 0; i <= 500; i++) { const v = steep(i / 500); if (v < prev - 1e-9) mono = false; prev = v; }
+  ok('a near-vertical curve is still monotone in t', mono);
+  // Overshoot is allowed: y outside [0,1] is a real shape (a back ease), so it must NOT be clamped.
+  ok('y is not clamped, so overshoot survives', cubicBezier(0.3, 0, 0.4, 1.7)(0.72) > 1);
+}
+
 // ---------- an authored filter survives a motion track ----------
 // The motion track owns `style.filter` (it writes the velocity blur there) and used to strip EVERY
 // `blur(...)` out of the current value before adding its own, on the assumption that any blur it found

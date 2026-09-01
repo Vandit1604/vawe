@@ -108,6 +108,58 @@ export function speedRamp(t, { peak = 0.5, sharp = 2.4 } = {}) {
   return t < peak ? peak * Math.pow(t / peak, sharp) : 1 - (1 - peak) * Math.pow((1 - t) / (1 - peak), sharp);
 }
 
+// ---------- THE GRAPH EDITOR: a cubic bezier on the unit square ----------
+//
+// Every curve above is a fixed shape with a name. This one is the shape an author DRAWS, and it is the
+// primitive under After Effects' graph editor: two control points on the unit square, P0 (0,0) and
+// P3 (1,1) fixed, P1 = (x1,y1) and P2 = (x2,y2) authored. It is the same maths CSS `cubic-bezier()`
+// runs, so a curve copied off a CSS reference or out of AE reproduces here exactly.
+//
+// THE SOLVE, and why it is not a closed form. The curve is parametric in s, and BOTH axes are cubics
+// in s. What an easing needs is y as a function of x, so x(s) = t has to be inverted first.
+// Newton-Raphson converges in a handful of steps because x(s) is monotone for x1, x2 in [0,1], and a
+// bisection fallback covers the flat spots where the derivative goes to zero and Newton would stall or
+// shoot out of range. Deterministic and allocation-free: the returned closure holds four numbers and
+// creates nothing per call, which matters because it is sampled once per property per layer per frame.
+const bezA = (a1, a2) => 1 - 3 * a2 + 3 * a1;
+const bezB = (a1, a2) => 3 * a2 - 6 * a1;
+const bezC = (a1) => 3 * a1;
+const bezAt = (s, a1, a2) => ((bezA(a1, a2) * s + bezB(a1, a2)) * s + bezC(a1)) * s;
+const bezSlope = (s, a1, a2) => 3 * bezA(a1, a2) * s * s + 2 * bezB(a1, a2) * s + bezC(a1);
+
+/**
+ * cubicBezier(x1, y1, x2, y2) → (t) => y. `x1`/`x2` are clamped to [0,1] because they are TIME and a
+ * control point outside the segment makes x(s) non-monotone, which has no inverse. `y1`/`y2` are NOT
+ * clamped: a y outside [0,1] is an overshoot, which is a real and wanted shape.
+ */
+export function cubicBezier(x1, y1, x2, y2) {
+  const a1 = clamp01(x1), a2 = clamp01(x2);
+  if (a1 === y1 && a2 === y2) return (t) => t;   // the identity line, exactly, with no solve
+  return (t) => {
+    if (!(t > 0)) return 0;
+    if (t >= 1) return 1;
+    // Newton first, from t itself: for a curve near the diagonal that is already close.
+    let s = t;
+    for (let i = 0; i < 8; i++) {
+      const d = bezSlope(s, a1, a2);
+      if (!(Math.abs(d) > 1e-6)) break;
+      const e = bezAt(s, a1, a2) - t;
+      if (Math.abs(e) < 1e-9) return bezAt(s, y1, y2);
+      s -= e / d;
+      if (!(s >= 0) || !(s <= 1)) break;          // out of range, hand it to bisection
+    }
+    let lo = 0, hi = 1;
+    s = t;
+    for (let i = 0; i < 40; i++) {
+      const x = bezAt(s, a1, a2);
+      if (Math.abs(x - t) < 1e-9) break;
+      if (x < t) lo = s; else hi = s;
+      s = (lo + hi) / 2;
+    }
+    return bezAt(s, y1, y2);
+  };
+}
+
 // easing registry: lets a theme name its easing as a string (motion.easing) that the scene
 // resolves to a function. resolveEasing() also accepts a function (passthrough).
 export const EASINGS = {
