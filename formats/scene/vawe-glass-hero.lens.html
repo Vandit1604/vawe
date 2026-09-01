@@ -1,0 +1,21 @@
+<!-- The lens, painted for a WHITE ground. The refraction itself is the layer's `"glass"` preset
+     (core/layers/util.js); this file is only the paint on the shape.
+
+     The one thing that changes on white, and it is the whole reason this is not the dark-ground
+     sphere: the Fresnel rim has to be DARK. Reflectivity climbs at a grazing angle, so the rim is
+     where the shape declares its edge, and a white rim on a white field declares nothing. Ink at
+     22% reads as glass; white at 50% reads as nothing at all.
+     The speculars stay white, because a highlight is the light source and the light source is white.
+     drop = contact. Softer and far lighter than on black: a heavy shadow on paper reads as a sticker. -->
+<style>
+.s{position:absolute;inset:0;border-radius:50%;
+   box-shadow: inset 0 0 0 2px rgba(15,22,32,.30),
+               inset 0 0 0 7px rgba(15,22,32,.07),
+               inset 14px 20px 40px rgba(15,22,32,.10),
+               inset -16px -20px 38px rgba(255,255,255,.26),
+               0 26px 44px rgba(15,22,32,.16)}
+.k{position:absolute;inset:0;border-radius:inherit;background:
+   radial-gradient(17% 8%  at 33% 19%, rgba(255,255,255,.95), transparent 74%),
+   radial-gradient(18% 5%  at 66% 88%, rgba(255,255,255,.22), transparent 80%)}
+</style>
+<div class="s"><div class="k"></div></div>
