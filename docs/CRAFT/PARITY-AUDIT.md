@@ -23,7 +23,7 @@ less.
 | text scramble | BEHIND on dials, AHEAD on determinism | refresh is a fixed count per window, so a 0.5s reveal scrambles at 48/s and a 2s one at 12/s |
 | 2.5D parallax | BEHIND | `depth` appears in 1 of 170 scenes; 44 of 47 camera films sit entirely at z = 0 |
 | device mockup | BEHIND | `metalness: 0.86` with no environment map anywhere in the file |
-| animated gradient | BEHIND on the default | 57 to 105 seconds per cycle against a practitioner band of 6 to 12 |
+| animated gradient | **BEHIND on the default, fixed** | 57 to 105 seconds per cycle against a practitioner band of 6 to 12; now 11.4 to 20.9 |
 | logo reveal | BEHIND | `fill: none` is set for the draw and never restored, so a mark cannot end filled |
 
 **One was fixed the moment it was found.** The `overshoot` keyframe handle shipped with a positive
@@ -437,7 +437,7 @@ Two families again.
 
 **Shader.** `flow` is the documented premium default (`core/shaders-ambient.js:30`): a vertical base wash
 plus three gaussian blobs mixed by `exp` falloff (`core/shaders-ambient.js:175-179`). The drift
-coefficients are 0.06 to 0.11 rad/s, so the blob paths have periods of **57 to 105 seconds**. Palette is
+coefficients WERE 0.06 to 0.11 rad/s, so the blob paths had periods of **57 to 105 seconds**. Palette is
 up to 8 stops with optional positions, mixed in **OKLab** (`core/shaders-ambient.js:104-131`). The layer
 takes `speed` (`core/layers/canvas.js:16`, applied at `:58`), default 1.
 
@@ -448,21 +448,38 @@ source-over, radii as fractions of the frame diagonal (0.21 to 0.34), with a del
 `WASH_CORE = 0.34` so each pool has a readable centre. The `mesh` preset passes `motionScale: 3.2`
 (`core/backgrounds.js:428`), giving periods of 3.8 to 6.9s.
 
-### Verdict: BEHIND on the default, PARITY on the machinery
+### Verdict: BEHIND on the default, PARITY on the machinery. FIXED.
 
 The machinery is arguably ahead: OKLab mixing, positioned stops, aspect-relative radii and a
 `motionScale` knob that shortens the period as it widens the drift are all things the blob shortcut does
-not have. The default is the problem. `flow`, the one the file calls "the premium default", cycles in 57
-to 105 seconds against the 6 to 12 second band, so in a 20 second film it traverses about a fifth of one
+not have. The default was the problem. `flow`, the one the file calls "the premium default", cycled in 57
+to 105 seconds against the 6 to 12 second band, so in a 20 second film it traversed about a fifth of one
 cycle. The repo already measured this class of defect: `core/backgrounds.js:87-90` records four
 "living" presets at 0.02 to 0.14 median per-frame luma delta against `liquid`'s 0.96.
 
-### The gap, concretely
+### What was done
 
-Multiply `flow`'s six drift coefficients (`core/shaders-ambient.js:177-179`) by about 5, landing the
-periods at 11 to 21s, and re-run `make snap`. Do not reach for `speed` as the answer: it is per-layer
-sugar an author has to know exists, and a default that needs a correction is the thing this repo calls a
-bad default. Check the other 17 branches for the same coefficient range while you are in there.
+The six coefficients are multiplied by 5 (`core/shaders-ambient.js`, the `u_fx==0` branch), so the
+periods are **11.4 to 20.9s**. That is deliberately just SLOWER than the 6 to 12 second reference band:
+a mesh gradient run inside 12s sloshes, and a backdrop that pulls the eye has stopped being a backdrop.
+Judged on a strip at 1.0 / 3.5 / 6.0 / 8.5s, not one still, with high-contrast stops so the blobs are
+readable; the field visibly reorganises across the strip and no adjacent pair reads as fast. Objectively,
+mean per-frame luma delta at t=6s went from **0.027 to 0.094** (0 to 255 scale).
+
+`make snap` was NOT cited: it compares the DOM and not pixels (`docs/MISTAKES.md` #532), so for a shader
+it reports nothing whatever the coefficients say. One committed film names `flow`, `site-backdrop.json`,
+and it sets `speed: 0.22`, so its net rate becomes 1.1x its old one and it is visually unchanged. That
+scene is also the proof of the diagnosis: the dial worked, so the author corrected the default at the
+call site instead of reporting it. `docs/MISTAKES.md` #544.
+
+### The other 17 branches, surveyed and deliberately left
+
+Only `plasma` (`t*0.14`, `t*0.11`, periods 45 to 63s) fails the same arithmetic the same way, and it is
+the obvious next candidate. It was left because nobody has looked at what `plasma` should feel like, and
+retuning a second effect on the strength of one measurement of a different one is how a default gets
+replaced by a guess. `mist` is slow ON PURPOSE and says so in its blurb. `aurora` and `drift` advance a
+NOISE field rather than a sine, so the period arithmetic above does not describe them and quoting it for
+them would be wrong.
 
 ### The step somebody would not guess
 

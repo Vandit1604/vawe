@@ -173,10 +173,19 @@ void main(){
   vec3 col = vec3(0.0); float alpha = 1.0;
 
   if(u_fx==0){                                            // flow, soft mesh gradient (the premium one)
+    // DRIFT RATES, in radians per second, and they are the whole reason this effect reads as animated.
+    // They shipped at 0.06 to 0.11, which is 57 to 105 SECONDS for one traverse, so on a 20 second film
+    // flow moved through a fifth of a cycle and rendered as a still gradient. Practitioners building
+    // this exact look pace a hero loop at 6 to 12 seconds (gradients.design). These are those numbers
+    // multiplied by 5: periods of 11.4 to 20.9s, deliberately just SLOWER than the reference band
+    // because a mesh gradient run inside 12s sloshes, and a backdrop that draws the eye has stopped
+    // being a backdrop. The layer's own speed prop still scales this; it is now a correction, not a
+    // prerequisite. docs/CRAFT/PARITY-AUDIT.md, docs/MISTAKES.md #542.
+    // (No backticks in here: this whole shader is a JS template literal and one would end it.)
     col = mix(c0, c1, smoothstep(0.0,1.0,uv.y));          // gentle base wash
-    col = mix(col, c2, blob(p, vec2((0.30+0.16*sin(t*0.10))*ar, 0.34+0.13*cos(t*0.08)), 2.4)*0.8);
-    col = mix(col, c3, blob(p, vec2((0.74+0.13*sin(t*0.07+2.1))*ar, 0.64+0.15*cos(t*0.09+1.0)), 2.7)*0.75);
-    col = mix(col, c1, blob(p, vec2((0.50+0.20*sin(t*0.06+4.0))*ar, 0.80+0.11*cos(t*0.11+3.0)), 3.0)*0.6);
+    col = mix(col, c2, blob(p, vec2((0.30+0.16*sin(t*0.50))*ar, 0.34+0.13*cos(t*0.40)), 2.4)*0.8);
+    col = mix(col, c3, blob(p, vec2((0.74+0.13*sin(t*0.35+2.1))*ar, 0.64+0.15*cos(t*0.45+1.0)), 2.7)*0.75);
+    col = mix(col, c1, blob(p, vec2((0.50+0.20*sin(t*0.30+4.0))*ar, 0.80+0.11*cos(t*0.55+3.0)), 3.0)*0.6);
   } else if(u_fx==1){                                     // aurora, soft undulating curtain
     float w = noise(vec2(p.x*1.1, t*0.07))*0.6 + noise(vec2(p.x*2.2+9.0, t*0.045))*0.4;
     float y = uv.y + (w-0.5)*0.55;

@@ -16798,3 +16798,44 @@ with the shot spacing deliberately broken the writer emitted a DESCENDING keyfra
 writer now has two doors: a hold is dropped, a pose key REFUSES and names both times. The general
 version is that a de-duplicating guard which is right for one caller becomes a corruption engine for the
 next, and the cheap fix is to give the two callers two functions rather than one clever one.
+
+## 544. the premium animated gradient cycled in 57 to 105 seconds, so it shipped as a still image
+
+**What.** `flow` is the documented "premium default" of the `shader` layer and it is what an author gets
+by writing `{"type":"shader"}` with no name (`core/surfaces/shader.js:18`). Its three blobs drifted on
+coefficients of 0.06 to 0.11 radians per second, which is 57 to 105 seconds for one traverse. Rendered
+at 0s, 10s and 20s with the site's own four blues, the three frames are indistinguishable. A 20 second
+film got a fifth of one cycle, which is a gradient that does not move.
+
+**Root cause.** A bad DEFAULT sitting on good code, and the good code is what hid it. The machinery is
+ahead of the references it was measured against: OKLab mixing, positioned stops, aspect-relative radii,
+and a per-layer `speed`. So anyone who noticed had an escape hatch and used it, and the default was
+never re-argued. `formats/scene/site-backdrop.json`, the one film in the library that names `flow`, sets
+`speed: 0.22`, which proves both halves at once: the dial works, and reaching for it is what an author
+does INSTEAD of reporting the default.
+
+**Fix.** The six coefficients are multiplied by 5 (`core/shaders-ambient.js`, the `u_fx==0` branch),
+landing the periods at 11.4 to 20.9s. Practitioners pace this exact look at 6 to 12s per cycle
+(gradients.design), and the choice is deliberately just SLOWER than that band: a mesh gradient run
+inside 12s sloshes, and a backdrop that pulls the eye has stopped being a backdrop. Measured on a
+high-contrast probe, mean per-frame luma delta at t=6s went from **0.027 to 0.094** on a 0 to 255 scale,
+still far below the field this repo calls "living".
+
+**Blast radius, stated because a shader hides from the snapshot gate.** `scripts/gates/snap-scenes.mjs`
+compares the DOM, not pixels (#532), so it reports NOTHING for a change that repaints every frame. It
+was not cited as proof. One committed film names `flow`: `site-backdrop.json` at `speed: 0.22`, whose
+net rate becomes 1.1x its old one, so it is visually unchanged. Any film that reaches `shader` without
+naming one gets the new rate, which is the point.
+
+**A second finding from the same hour, and it cost twenty minutes.** The comment written above the fix
+contained a BACKTICK, quoting the `speed` prop. The whole fragment shader is a JS template literal, so
+the backtick closed it and `core/shaders-ambient.js` stopped parsing. What the render harness reported
+was `TimeoutError: Waiting failed: 30000ms exceeded`, with no module, no line and no mention of a syntax
+error, because `scene.html` never got far enough to park `window.__engineError`. The parse failure was
+one `node -e "import(...)"` away and the harness message pointed nowhere near it. The file now says so
+in the branch it bit. The general repair, for whoever owns the harness: a module-load failure should
+reach `__engineError` like every other boot failure, or the next author spends the same twenty minutes.
+
+**The lesson.** A dial that lets one author fix a bad default is how a bad default survives. `speed`
+made `flow` usable and therefore made it un-reported for as long as it has existed. When you find
+yourself correcting a shipped default at the call site, the correction IS the bug report.
