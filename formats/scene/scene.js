@@ -12,6 +12,8 @@ import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/background
 import { createBgHtml } from '/core/bg-html.js';
 import { htmlSource } from '/core/sanitize-html.js';
 import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts.js';
+import { IDENT as CUT_IDENT } from '/core/cuts.js';
+import { checkCuts } from '/core/ancestor-kills.js';
 import { createShaderOverlay, SHADER_FX } from '/core/stings.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/seams.js';
 import { lowerScene, checkStingColor } from '/core/transitions-lower.js';
@@ -368,6 +370,12 @@ boot((data, fps, theme, canvas) => {
       + `"sceneUnits": true so the two beats cross-fade as units, or use a style that moves: `
       + `${Object.keys(CUT_PRESENTATIONS).filter((k) => !SOLO_BLIND.has(k)).join(', ')}.`);
   }
+  // A cut styles an ANCESTOR of every layer, and some ancestor styles silently disable what a
+  // descendant can do: a `filter` makes the element a backdrop root, so a `glass` layer under it
+  // samples nothing and stops being glass, for exactly the length of the cut. core/ancestor-kills.js
+  // owns which property takes which capability away; this is the one place the film is checked
+  // against it. docs/MISTAKES.md #542.
+  checkCuts({ cuts: sceneCuts, layers: data.layers || [], sceneUnits: data.sceneUnits === true });
   const beatBounds = [], beatWrap = [];
   if (sceneUnits) {
     const ts = [...new Set(sceneCuts.map((c) => +c.t))].sort((a, b) => a - b);
@@ -1331,7 +1339,11 @@ boot((data, fps, theme, canvas) => {
   function driveSceneUnits(t) {
     if (!sceneUnits) return;
     // steady state: identity + fully visible (each beat's own layers handle their in-window visibility)
-    for (const w of beatWrap) { w.style.transform = 'none'; w.style.opacity = '1'; w.style.filter = 'none'; w.style.clipPath = 'none'; }
+    // Reset from CUT_IDENT, never from a hand-listed subset. This line used to name four channels and
+    // cutStyle writes ten, so a `softwipe`/`blinds`/`softiris` cut left its MASK on the wrapper for
+    // every later frame: the beat rendered correctly on a forward play and wrongly on a seek, which is
+    // the exact purity contract renderFrame(n) exists to keep.
+    for (const w of beatWrap) Object.assign(w.style, CUT_IDENT);
     for (let k = 0; k < sceneCuts.length; k++) {
       // window runs [ct, ct+dur]: the cut time is when the SWAP STARTS. The incoming beat's own layers
       // start at ct (its beat boundary), so they are present and slide IN as the outgoing slides OUT.

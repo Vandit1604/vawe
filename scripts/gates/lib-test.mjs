@@ -6,7 +6,9 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/time.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type.js';
-import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
+import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites } from '../../core/cuts.js';
+import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts.js';
+import { killedBy, capabilitiesOf, checkCuts } from '../../core/ancestor-kills.js';
 import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/clips.js';
 import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
   normalizeIdle, settledGain } from '../../core/idle.js';
@@ -890,6 +892,61 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('soloCutStyle deterministic', JSON.stringify(soloCutStyle('punch', { exit: 0.5, enter: 1 }, opts)) === JSON.stringify(soloCutStyle('punch', { exit: 0.5, enter: 1 }, opts)));
   ok('soloCutStyle steady state is visually identity', visible(soloCutStyle('punch', { enter: 1, exit: 0 }, opts))
     && soloCutStyle('punch', { enter: 1, exit: 0 }, opts).filter === 'none');
+}
+
+// ANCESTOR KILLS (core/ancestor-kills.js): an ancestor style that silently disables a descendant
+// capability. Every row is measured by scripts/dev/probe-ancestor-kills.mjs; these assert that the
+// table stays wired to the cut vocabulary, not that the browser still behaves that way.
+{
+  // cutWrites is DERIVED from the presentations, so it must agree with what each one visibly does.
+  ok('cutWrites: blur writes a filter and nothing else in solo', [...cutWrites('blur', { solo: true })].join() === 'filter');
+  ok('cutWrites: blur also fades under sceneUnits', cutWrites('blur').has('opacity') && cutWrites('blur').has('filter'));
+  ok('cutWrites: slide never writes a filter', !cutWrites('slide', { solo: true }).has('filter'));
+  ok('cutWrites: a mask style collapses onto one channel name', cutWrites('softwipe').has('maskImage')
+    && !cutWrites('softwipe').has('WebkitMaskImage'));
+  ok('cutWrites: none writes nothing', cutWrites('none').size === 0);
+  ok('cutWrites: every presentation classifies itself', Object.keys(CUT_PRESENTATIONS_AK).every((k) => cutWrites(k) instanceof Set));
+
+  // the measured matrix, at the three rows the engine actually acts on
+  ok('kills: a filter takes the backdrop away', killedBy(['filter'], 'backdrop').length === 1);
+  ok('kills: a clip does NOT take the backdrop away', killedBy(['clipPath'], 'backdrop').length === 0);
+  ok('kills: overflow does NOT take the backdrop away', killedBy(['overflow'], 'backdrop').length === 0);
+  ok('kills: a transform does NOT take the backdrop away', killedBy(['transform'], 'backdrop').length === 0);
+  ok('kills: a transform DOES take a blend away', killedBy(['transform'], 'blend').length === 1);
+  ok('kills: a clip takes depth away', killedBy(['clipPath'], 'depth').length === 1);
+  ok('kills: a transform does NOT take depth away', killedBy(['transform'], 'depth').length === 0);
+  ok('kills: an unknown capability throws', (() => { try { killedBy([], 'nope'); return false; } catch { return true; } })());
+
+  ok('capabilitiesOf: glass asks for the backdrop', capabilitiesOf({ glass: 'refract' })[0].cap === 'backdrop');
+  ok('capabilitiesOf: glass:false asks for nothing', capabilitiesOf({ glass: false }).length === 0);
+  ok('capabilitiesOf: a plane modifier asks for depth', capabilitiesOf({ modifiers: [{ plane: -800 }] })[0].cap === 'depth');
+  ok('capabilitiesOf: a plain layer asks for nothing', capabilitiesOf({ type: 'text', text: 'x' }).length === 0);
+
+  // THE REPORTED BUG, as a test: a glass layer under a filter-writing cut must refuse, and the
+  // refusal must name the layer, the capability and a way out. docs/MISTAKES.md #542.
+  const glassScene = { cuts: [{ t: 8.2, style: 'blur', dur: 0.34 }], sceneUnits: false,
+    layers: [{ id: 'lens', type: 'html', glass: 'refract', start: 0.35, duration: 10.8 }] };
+  let msg = '';
+  try { checkCuts(glassScene); } catch (e) { msg = e.message; }
+  ok('ancestor-kills refuses blur-cut over a glass layer', msg.length > 0);
+  ok('the refusal names the layer', msg.includes('"lens"'));
+  ok('the refusal names the conflicting thing', msg.includes('blur') && msg.includes('filter'));
+  ok('the refusal names a way out', msg.includes('slide'));
+  ok('the refusal never offers a style that has the same defect', !/\(([^)]*)\)/.test(msg) || !msg.split('(')[1].split(')')[0].split(', ').some((k) => cutWrites(k, { solo: true }).has('filter')));
+  // a cut that writes no filter is fine over the same layer
+  ok('a transform-only cut over glass is allowed',
+    (() => { try { checkCuts({ ...glassScene, cuts: [{ t: 8.2, style: 'slide', dur: 0.34 }] }); return true; } catch { return false; } })());
+  // and a cut OUTSIDE the layer's window is fine, whatever it writes
+  ok('a blur cut outside the layer window is allowed',
+    (() => { try { checkCuts({ ...glassScene, cuts: [{ t: 20, style: 'blur', dur: 0.34 }] }); return true; } catch { return false; } })());
+  // depth is the second live row: the same filter flattens the rig (formats/scene/scene.js says so)
+  let dmsg = '';
+  try { checkCuts({ cuts: [{ t: 1, style: 'blur', dur: 0.3 }], layers: [{ id: 'card', modifiers: [{ plane: -800 }], start: 0, duration: 5 }] }); } catch (e) { dmsg = e.message; }
+  ok('ancestor-kills refuses a filter cut over a depth layer', dmsg.includes('"card"') && dmsg.includes('plane'));
+  // a group CHILD carrying glass is still a descendant of the cut root, so it is checked too
+  let cmsg = '';
+  try { checkCuts({ cuts: [{ t: 1, style: 'blur', dur: 0.3 }], layers: [{ id: 'g', type: 'group', start: 0, duration: 5, children: [{ id: 'pane', glass: true }] }] }); } catch (e) { cmsg = e.message; }
+  ok('ancestor-kills reaches group children', cmsg.includes('"pane"'));
 }
 
 // timeline evaluators (core/sequence.js): pure math lifted out of scene.html

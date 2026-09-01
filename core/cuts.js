@@ -24,7 +24,7 @@ export const TIMINGS = {
   ramp: (p) => speedRamp(clamp01(p)),
 };
 
-const IDENT = { opacity: '1', transform: 'none', filter: 'none', clipPath: 'none', WebkitClipPath: 'none', maskImage: 'none', WebkitMaskImage: 'none', maskSize: 'auto', maskPosition: '0% 0%', WebkitMaskPosition: '0% 0%' };
+export const IDENT = { opacity: '1', transform: 'none', filter: 'none', clipPath: 'none', WebkitClipPath: 'none', maskImage: 'none', WebkitMaskImage: 'none', maskSize: 'auto', maskPosition: '0% 0%', WebkitMaskPosition: '0% 0%' };
 const style = (over) => ({ ...IDENT, ...over });
 // `dir` used to fall through to left/X for ANY unrecognised value, so `dir:"top"` on a wipe cut gave a
 // leftward wipe with no signal - the same collapse of "absent" and "wrong" that cutStyle's own comment
@@ -244,6 +244,35 @@ export const SOLO_BLIND = new Set(Object.keys(PRESENTATIONS).filter((name) => {
   }
   return true;
 }));
+
+// cutWrites(name, {solo}): the CSS channels this presentation actually MOVES away from identity.
+// DERIVED by probing the presentation, exactly like SOLO_BLIND above and for the same reason: a
+// presentation added tomorrow classifies itself and no hand-kept list can drift from it.
+//
+// It exists because a cut writes onto an ANCESTOR of every layer, and some ancestor properties
+// silently disable what a descendant can do (core/ancestor-kills.js). The refusal has to name the
+// property, so something has to know which ones a given cut style touches.
+//
+// The vendor-prefixed and sub-property spellings collapse onto the one name the matrix reasons about:
+// `WebkitMaskImage`, `maskSize` and `maskPosition` are all "this cut masks".
+const CHANNEL = { WebkitClipPath: 'clipPath', WebkitMaskImage: 'maskImage', maskSize: 'maskImage',
+  maskPosition: 'maskImage', WebkitMaskPosition: 'maskImage' };
+export function cutWrites(name, { solo = false } = {}) {
+  const P = PRESENTATIONS[name];
+  if (!P) throw new Error(`cutWrites: unknown cut style "${name}"`);
+  const o = { dir: 'left', dist: 90, cx: 50, cy: 50 }, out = new Set();
+  for (let i = 1; i < 10; i++) {
+    const p = i / 10;
+    for (const s of [P.enter(p, o), P.exit(p, o)]) {
+      for (const k of Object.keys(IDENT)) {
+        if (s[k] === IDENT[k]) continue;
+        if (solo && HIDE_CHANNELS.includes(k)) continue;   // solo pins the visibility channels open
+        out.add(CHANNEL[k] || k);
+      }
+    }
+  }
+  return out;
+}
 
 // soloCutStyle: cutStyle for the single-root path. Same closed-form styles, visibility pinned open.
 export function soloCutStyle(name, seqState, opts) {
