@@ -36,7 +36,10 @@ const has = (k) => process.argv.includes(k);
 const DEFAULT_FILMS = ['plinth-ad', 'site-backdrop'];
 const RUNS = +arg('--runs', 3);
 const BASELINE = 'verify/perf/baseline.json';
-const BUSY = 2.0;   // 1-minute load average above which the machine is not at rest
+// LOAD IS RUNNABLE THREADS, NOT A PERCENTAGE, so the threshold has to scale with the machine. A flat
+// number (this said 2.0) flags a quiet 16-core box and passes a hammered 2-core one. Half the cores
+// busy is the line: below it the render gets the parallelism it asks for, above it the tabs queue.
+const BUSY = Math.max(2, os.cpus().length * 0.5);
 
 const median = (xs) => { const s = [...xs].sort((a, b) => a - b); const m = s.length >> 1;
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
@@ -94,8 +97,9 @@ for (const r of results) {
 }
 
 if (contended) {
-  console.log(`\n  ⚠ At least one run started with load above ${BUSY}. Those numbers describe a busy machine,`);
-  console.log('    not this engine. Re-run when nothing else is rendering before saving or comparing.\n');
+  console.log(`\n  ⚠ At least one run started with load above ${BUSY.toFixed(1)} (half of ${os.cpus().length} cores). Those numbers`);
+  console.log('    describe a busy machine, not this engine.');
+  console.log('    Re-run when nothing else is rendering before saving or comparing.\n');
 }
 
 const stamp = {

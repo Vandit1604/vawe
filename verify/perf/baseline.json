@@ -1,0 +1,37 @@
+{
+ "when": "2026-09-01T20:13:39.081Z",
+ "commit": "281ea16",
+ "cores": 10,
+ "memGB": 17,
+ "runs": 3,
+ "results": [
+  {
+   "film": "plinth-ad",
+   "frames": 450,
+   "runs": [
+    10.7,
+    9.37,
+    9.56
+   ],
+   "median": 9.56,
+   "spread": 1.33,
+   "fps": 47.1,
+   "loadBefore": 3.12,
+   "atRest": true
+  },
+  {
+   "film": "site-backdrop",
+   "frames": 420,
+   "runs": [
+    8.47,
+    8.16,
+    8.74
+   ],
+   "median": 8.47,
+   "spread": 0.58,
+   "fps": 49.6,
+   "loadBefore": 3.83,
+   "atRest": true
+  }
+ ]
+}
