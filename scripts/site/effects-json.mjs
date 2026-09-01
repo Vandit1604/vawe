@@ -51,6 +51,7 @@ const USAGE = {
   // an author reading the catalogue needs to see how.
   'motion-voices-tactile-sound': (n) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
   'kinetic-text-presets': (n) => text({ split: 'word', preset: n, each: 0.5, stagger: 0.05 }),
+  'stagger-order-from': (n) => text({ split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.6, from: n } }),
   // THREE FAMILIES ADDED WITHOUT THEIR ROWS, and `make effects` was red for all three at once, so the
   // catalogue could not regenerate at all. A family is not shipped until it can be looked up: this
   // table is the only place that says how to WRITE one.
@@ -137,6 +138,7 @@ const OVER = { ...HERO, text: '', size: 96, y: 860, start: 0.4, duration: 5.2, a
 
 const PREVIEW = {
   'kinetic-text-presets': (n) => base({ layers: [{ ...HERO, split: 'word', preset: n, each: 0.6, stagger: 0.06 }] }),
+  'stagger-order-from': (n) => base({ layers: [{ ...HERO, split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.9, from: n } }] }),
   'enter-exit-anims': (n) => base({ layers: [{ ...HERO, anim: n, enterDur: 0.8, out: n, exitDur: 0.8, start: 0.4, duration: 5 }] }),
   'idles-ambient-hold-motion': (n) => base({ layers: [{ ...HERO, idle: n }] }),
   'gsap-named-effects': (n) => base({ layers: [{ ...HERO, anim: 'none', fx: n }] }),

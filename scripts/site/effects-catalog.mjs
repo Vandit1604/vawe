@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PRESETS } from '../../core/type.js';
+import { PRESETS, STAGGER_FROM_REGISTRY } from '../../core/type.js';
 import { MOTION_CUES } from '../../core/audio-tactile.js';
 import { ANIM_NAMES } from '../../core/clips.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
@@ -154,6 +154,7 @@ const VOCAB_BLURBS = Object.fromEntries([
 // must read the registries, never rewrite docs/EFFECTS.md.
 export const sections = [
   ['Kinetic text presets', '`split`+`preset` on a text layer. Words/chars reveal with motion. `{ "split":"word", "preset":"up", "each":0.4, "stagger":0.05 }`', names(Object.keys(PRESETS)), 'text', { blurbs: PRESET_BLURBS }],
+  ['Stagger order (`from`)', 'The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`. Works in BOTH slots that take a stagger, a split text layer and `parts[]`. `each` is the per-unit delay; `amount` is the TOTAL seconds the whole train may take and derives that delay from the unit count, so a 90-glyph headline and a 6-word one hold the same beat. A number index is legal too: the wave starts at that unit.', names(STAGGER_FROM_REGISTRY.names), 'text/parts', { blurbs: STAGGER_FROM_REGISTRY.blurbs }],
   ['Enter / exit anims', '`anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`', names(ANIM_NAMES), 'per-layer', { blurbs: ANIM_BLURBS }],
   ['Idles (ambient hold motion)', '`idle` on a layer, or scene-level `idle` for the whole cast. Runs across the SETTLED MIDDLE only, between the enter ramp and the exit ramp, so it never fights an entrance. Off unless asked; `idle:"none"` on a layer opts one back out of a scene default. `{ "idle":"breathe" }` or `{ "idle":{"name":"drift","amp":14,"period":9} }`', names(IDLE_NAMES), 'per-layer/scene', { blurbs: IDLE_BLURBS }],
   ['GSAP named effects', '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`', names(GSAP_FX), 'per-layer/text', { blurbs: GSAP_BLURBS }],

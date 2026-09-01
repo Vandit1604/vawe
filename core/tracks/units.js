@@ -23,5 +23,11 @@ export const PROPS = {
 
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(units && !L.circle && !L.fx && t >= start && t < end)) return;
-  animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : kit.M.stagger), each: L.each ?? 0.5, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
+  // `stagger` may be a NUMBER (the per-unit delay, as always) or the object form { each, from, amount }.
+  // The theme's own default has to survive the object form too: `{ from: "center" }` alone still means
+  // "the theme's delay, ordered from the centre", so it is spread OVER the default rather than past it.
+  const stagger = L.stagger && typeof L.stagger === 'object'
+    ? { each: kit.M.stagger, ...L.stagger }
+    : (L.stagger ?? (L.ransom ? 0.08 : kit.M.stagger));
+  animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger, each: L.each ?? 0.5, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
 }

@@ -63,6 +63,64 @@ export function splitText(el, mode = 'word') {
   return units;
 }
 
+// THE STAGGER ORDER. `from` remaps a unit's index to its RANK in the wave, which is the dial that
+// decides what the eye reads: a left-to-right train reads as typing, a centre-out train reads as the
+// word arriving as one object. Every reference implementation ships it and ours could only ever start
+// at the first glyph (docs/CRAFT/PARITY-AUDIT.md).
+//
+// It is a RANK, not a delay, so `amount` can normalise it: the offsets are pure numbers and the step
+// is seconds. `random` hashes the index, never Math.random(), so a backward seek is exact.
+export const STAGGER_FROM_BLURBS = {
+  first: 'the wave starts at the first unit and runs to the last, the default, and what a line of type being typed looks like',
+  center: 'starts at the middle unit and opens outward both ways, so the word arrives as ONE object rather than as a train',
+  last: 'starts at the last unit and runs backwards to the first, pair it with a right-to-left exit',
+  edges: 'starts at BOTH ends and closes on the middle, a line that shuts like a door',
+  random: 'a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek',
+};
+
+// A REGISTRY, not a bare list, so `make arsenal Q="start the stagger from the middle"` finds it: the
+// search reads *_REGISTRY exports and nothing else. `pick` is deliberately unused here, because a
+// numeric index is legal too and refusing one would be wrong; core/validate.mjs owns that refusal and
+// reads its names from here.
+export const STAGGER_FROM_REGISTRY = defineRegistry('stagger order', STAGGER_FROM_BLURBS,
+  { slot: 'stagger.from', blurbs: STAGGER_FROM_BLURBS });
+export const STAGGER_FROM = STAGGER_FROM_REGISTRY.names;
+
+// staggerOffset(i, n, from): unit i's rank in the wave, 0 = first to move.
+export function staggerOffset(i, n, from = 'first') {
+  const last = Math.max(0, (n || 1) - 1);
+  if (typeof from === 'number') return Math.abs(i - from);
+  if (from === 'last') return last - i;
+  if (from === 'center') return Math.abs(i - last / 2);
+  if (from === 'edges') return last / 2 - Math.abs(i - last / 2);
+  if (from === 'random') return random(`stagger:${i}`) * last;
+  return i;
+}
+
+// staggerFrom / staggerStep: the ONE reader of a stagger spec, so units, parts and the tactile mixer
+// cannot each decide what `{ amount: 0.6 }` means. A bare number is the per-unit delay it always was.
+export const staggerFrom = (spec) => (spec && typeof spec === 'object' ? (spec.from ?? 'first') : 'first');
+
+export function staggerStep(spec, n, fallback = 0.06) {
+  if (spec && typeof spec === 'object') {
+    if (spec.amount > 0) {
+      let max = 0;
+      for (let i = 0; i < (n || 1); i++) max = Math.max(max, staggerOffset(i, n, staggerFrom(spec)));
+      return max > 0 ? spec.amount / max : 0;
+    }
+    return typeof spec.each === 'number' ? spec.each : fallback;
+  }
+  return typeof spec === 'number' ? spec : fallback;
+}
+
+// GSAP names two of the five differently (`start`/`end`). The engine keeps ONE set of author-facing
+// words and translates at the one place a spec reaches GSAP, rather than making `parts` a second
+// dialect of the same dial.
+const GSAP_FROM = { first: 'start', last: 'end' };
+export const gsapStagger = (spec, fallback) => (spec && typeof spec === 'object'
+  ? { ...spec, ...(spec.from != null ? { from: GSAP_FROM[spec.from] ?? spec.from } : {}) }
+  : (spec ?? fallback));
+
 // unitProgress(t, i, n, {each, stagger, total}): local [0,1] progress for unit i of n at time t(s).
 // each = per-unit animation seconds; stagger = delay step between units.
 // SMOOTHNESS is the AE range selector's fourth dial, and it is not an easing. An easing bends the
@@ -76,8 +134,16 @@ export function splitText(el, mode = 'word') {
 //   u' = clamp01((u - 0.5) / smoothness + 0.5)
 // At smoothness 1 that is the identity, which is why this is free. Below 1 the band narrows around
 // the midpoint; at 0 it is a step.
+//
+// STAGGER TAKES THE OTHER TWO DIALS EVERY REFERENCE PRIMITIVE SHIPS (docs/CRAFT/PARITY-AUDIT.md).
+// `stagger: 0.05` is the per-unit delay and stays exactly what it was. The object form is GSAP's own,
+// so the SAME words work in the `parts` slot and an author learns one vocabulary:
+//   "stagger": { "each": 0.05, "from": "center" }   /   "stagger": { "amount": 0.6, "from": "edges" }
+// `from` decides the ORDER (staggerOffset above) and `amount` is the TOTAL time the whole train may
+// take, from which the per-unit delay is derived. Two shipped films hand-computed `amount` by dividing
+// a beat by a glyph count; that arithmetic is this dial.
 export function unitProgress(t, i, n, { each = 0.5, stagger = 0.06, smoothness = 1 } = {}) {
-  const u = clamp01((t - i * stagger) / each);
+  const u = clamp01((t - staggerOffset(i, n, staggerFrom(stagger)) * staggerStep(stagger, n)) / each);
   if (smoothness >= 1) return u;
   if (!(smoothness > 0)) return u >= 0.5 ? 1 : 0;
   return clamp01((u - 0.5) / smoothness + 0.5);
@@ -357,6 +423,13 @@ export const PRESETS = {
   // Step 3 without a second timing mechanism: the preset spends part of its OWN window as a hashed
   // delay (`shuffle`) and fits the move into what is left. Nothing outside the preset changes, so
   // `each`/`stagger` keep meaning exactly what they mean for every other preset.
+  //
+  // `stagger: { from: "random" }` NOW EXISTS AND THIS IS STILL NOT IT. The audit read `shuffle` as the
+  // missing ordering dial reported as a workaround, and half of that is right: `from` is the outer
+  // clock's shuffle, and any preset can have it. `shuffle` is the INNER one, inside a single unit's own
+  // window, so it still scatters at `stagger: 0`, which is how this preset is usually written. They
+  // compose rather than duplicate, and folding one into the other would repaint every shipped
+  // `assemble` layer to buy nothing.
   //
   // Pair it with `split: "char"`. On `split: "word"` it scatters whole words, which is a different
   // and much louder gesture: one hero line per film.

@@ -1,7 +1,7 @@
 {
-  "total": 606,
-  "previewed": 261,
-  "families": 43,
+  "total": 611,
+  "previewed": 266,
+  "families": 44,
   "tags": [
     [
       "asset",
@@ -78,6 +78,10 @@
     [
       "text",
       39
+    ],
+    [
+      "text/parts",
+      5
     ],
     [
       "timing",
@@ -315,6 +319,54 @@
           "stem": "kinetic-text-presets--weight",
           "desc": "the · glyphs · THICKEN · into · place · along · the · font's · own · `wght` · axis, · a · crest · of · weight · travelling · the · line · · · the · one · register · a · static · face · cannot · fake, · and · it · degrades · to · the · nearest · static · cut · rather · than · to · a · dead · still",
           "scene": "/assets/effects/kinetic-text-presets--weight.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "stagger-order-from",
+      "title": "Stagger order (`from`)",
+      "tag": "text/parts",
+      "intro": "The · ORDER · a · stagger · runs · in, · on · `stagger` · as · an · object · `{ · \"stagger\" · { · \"amount\" · 0.6, · \"from\" · \"center\" · } · }`. · Works · in · BOTH · slots · that · take · a · stagger, · a · split · text · layer · and · `parts[]`. · `each` · is · the · per-unit · delay; · `amount` · is · the · TOTAL · seconds · the · whole · train · may · take · and · derives · that · delay · from · the · unit · count, · so · a · 90-glyph · headline · and · a · 6-word · one · hold · the · same · beat. · A · number · index · is · legal · too · the · wave · starts · at · that · unit.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 5,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "center",
+          "stem": "stagger-order-from--center",
+          "desc": "starts · at · the · middle · unit · and · opens · outward · both · ways, · so · the · word · arrives · as · ONE · object · rather · than · as · a · train",
+          "scene": "/assets/effects/stagger-order-from--center.json",
+          "noPreview": null
+        },
+        {
+          "name": "edges",
+          "stem": "stagger-order-from--edges",
+          "desc": "starts · at · BOTH · ends · and · closes · on · the · middle, · a · line · that · shuts · like · a · door",
+          "scene": "/assets/effects/stagger-order-from--edges.json",
+          "noPreview": null
+        },
+        {
+          "name": "first",
+          "stem": "stagger-order-from--first",
+          "desc": "the · wave · starts · at · the · first · unit · and · runs · to · the · last, · the · default, · and · what · a · line · of · type · being · typed · looks · like",
+          "scene": "/assets/effects/stagger-order-from--first.json",
+          "noPreview": null
+        },
+        {
+          "name": "last",
+          "stem": "stagger-order-from--last",
+          "desc": "starts · at · the · last · unit · and · runs · backwards · to · the · first, · pair · it · with · a · right-to-left · exit",
+          "scene": "/assets/effects/stagger-order-from--last.json",
+          "noPreview": null
+        },
+        {
+          "name": "random",
+          "stem": "stagger-order-from--random",
+          "desc": "a · hashed, · seeded · shuffle · of · the · order, · scattered · arrival · that · is · identical · on · every · render · and · at · every · seek",
+          "scene": "/assets/effects/stagger-order-from--random.json",
           "noPreview": null
         }
       ]
@@ -1821,7 +1873,7 @@
         {
           "name": "overshoot",
           "stem": "keyframe-handles-the-graph-editor--overshoot",
-          "desc": "arrives · at · 1.8x · the · average · speed · with · a · long · handle, · so · the · value · sails · past · its · key · and · comes · back. · The · handle · version · of · a · back · ease, · and · it · needs · the · far · side · to · stop · it",
+          "desc": "arrives · from · BEYOND · its · key · and · settles · back · the · value · sails · about · 10 · per · cent · past · and · returns. · The · handle · version · of · a · back · ease, · and · it · needs · the · far · side · to · stop · it",
           "scene": null,
           "noPreview": null
         }

@@ -18,6 +18,7 @@
 
 import { onScreenText, glyphText } from './on-screen-text.js';
 import { IDLE } from './idle.js';
+import { STAGGER_FROM } from '../core/type.js';
 import { themeErrors } from '../core/theme-contract.js';
 // parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
 // absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
@@ -250,6 +251,7 @@ export function validateData(schema, data) {
   errors.push(...transitionErrors(data || {})); // unified transitions must route to a real mechanism
   errors.push(...fxErrors(data || {}));     // named GSAP fx/fxOut must be real effects; no fxOut+out clash
   errors.push(...knobErrors(data || {}));   // a dial set on a preset that does not read it is dead config
+  errors.push(...staggerErrors(data || {})); // a stagger object names three dials, in both slots that take one
   errors.push(...countEaseErrors(data || {})); // a counter must never overshoot its own value
   errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
   errors.push(...matchErrors(data || {})); // a match cut names two real layers and fits inside its shot
@@ -654,6 +656,40 @@ export function knobErrors(cfg) {
     (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
     (Array.isArray(L.parts) ? L.parts : []).forEach((P, j) => visit(P, `${at}.parts[${j}]`));
     (Array.isArray(L.planes) ? L.planes : []).forEach((P, j) => visit(P, `${at}.planes[${j}]`));
+  };
+  (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layers[${i}]`));
+  return out;
+}
+
+// A STAGGER OBJECT IS THE ENGINE'S VOCABULARY, NOT A PASS-THROUGH. `parts[].stagger` used to be
+// handed to GSAP exactly as written: an object with any keys at all was accepted, forwarded, and
+// whatever GSAP made of it was the answer. Nothing documented it and nothing checked it, which is the
+// undocumented-capability shape this repo logs (docs/CRAFT/PARITY-AUDIT.md). Both slots that take a
+// stagger now take the same three dials and refuse a fourth.
+const STAGGER_KEYS = ['each', 'amount', 'from'];
+function staggerSpecErrors(spec, at, out) {
+  if (spec == null || typeof spec === 'number') return;
+  if (!isObj(spec)) { out.push(`${at} must be a number (the per-unit delay) or { each, amount, from }`); return; }
+  for (const k of Object.keys(spec)) {
+    if (!STAGGER_KEYS.includes(k)) out.push(`${at} sets \`${k}\`, which a stagger does not read. It takes \`each\` (the per-unit delay, seconds), \`amount\` (the TOTAL seconds the whole train may take, from which the delay is derived) and \`from\` (the order).${nearest(k, STAGGER_KEYS)}`);
+  }
+  for (const k of ['each', 'amount']) {
+    if (spec[k] != null && !(typeof spec[k] === 'number' && spec[k] >= 0)) out.push(`${at}.${k} must be a number of seconds ≥ 0 (got ${JSON.stringify(spec[k])})`);
+  }
+  const f = spec.from;
+  if (f != null && !(typeof f === 'number') && !STAGGER_FROM.includes(f))
+    out.push(`${at}.from "${f}" is not a stagger order. One of: ${STAGGER_FROM.join(', ')}, or a unit index.${nearest(String(f), STAGGER_FROM)}`);
+}
+
+export function staggerErrors(cfg) {
+  const out = [];
+  const visit = (L, at) => {
+    if (!isObj(L)) return;
+    staggerSpecErrors(L.stagger, `${at}.stagger`, out);
+    (Array.isArray(L.parts) ? L.parts : L.parts ? [L.parts] : []).forEach((P, j) => {
+      if (isObj(P)) staggerSpecErrors(P.stagger, `${at}.parts[${j}].stagger`, out);
+    });
+    (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
   };
   (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layers[${i}]`));
   return out;

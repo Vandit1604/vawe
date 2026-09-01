@@ -3,7 +3,7 @@ import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJu
 import { PART_REGISTRY, PARTS } from '/core/parts.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg, stepClock } from '/core/motion.js';
 import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, entranceWarp, BASE_ENTER, BASE_EXIT } from '/core/clips.js';
-import { splitText, circleText, decodeText } from '/core/type.js';
+import { splitText, circleText, decodeText, gsapStagger } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/gsap-effects.js';
 import { ransomStyle } from '/core/ransom.js';
@@ -513,7 +513,13 @@ boot((data, fps, theme, canvas) => {
         const spec = p.anim == null ? PARTS.fadeUp : PART_REGISTRY.pick(p.anim);
         if (spec[0]) targets.forEach(spec[0]);
         window.gsap.fromTo(targets, { ...spec[1] }, {
-          ...spec[2], duration: p.each ?? 0.5, stagger: p.stagger ?? 0.07,
+          // `stagger` is a number OR the object form { each, from, amount }, the SAME two dials a split
+          // text layer takes. It used to reach GSAP as an unvalidated, undocumented pass-through:
+          // whatever the author wrote arrived at the library and nothing said whether it meant anything
+          // (docs/CRAFT/PARITY-AUDIT.md). It is now the engine's own vocabulary,
+          // refused by `validate` when it is not, and translated here at the single seam where a spec
+          // meets GSAP's two different words for the same two places (`start`/`end`).
+          ...spec[2], duration: p.each ?? 0.5, stagger: gsapStagger(p.stagger, 0.07),
           ease: gsapEase(p.ease, 'power3.out', `layer ${L.type} parts`), delay: (L.start ?? 0) + (p.delay ?? 0.1), immediateRender: true,
         });
         // A PART CAN NOW LEAVE. Every entry used to be a one-way tween, so a hand-authored html figure
@@ -529,7 +535,7 @@ boot((data, fps, theme, canvas) => {
           const exitDur = p.exitDur ?? p.each ?? 0.45;
           const span = L.duration ?? 0;
           window.gsap.fromTo(targets, { ...spec[2] }, {
-            ...spec[3], duration: exitDur, stagger: p.stagger ?? 0.07,
+            ...spec[3], duration: exitDur, stagger: gsapStagger(p.stagger, 0.07),
             ease: gsapEase(p.exitEase ?? p.ease, 'power2.in', `layer ${L.type} parts exit`),
             delay: (L.start ?? 0) + Math.max(0, span - exitDur), immediateRender: false,
           });

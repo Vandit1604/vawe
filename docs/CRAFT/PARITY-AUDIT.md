@@ -18,7 +18,7 @@ less.
 
 | effect | verdict | the number that decided it |
 |---|---|---|
-| stagger / offset reveal | BEHIND | the standard primitive ships three dials, we ship one |
+| stagger / offset reveal | **BEHIND, fixed** | the standard primitive ships three dials, we shipped one; `from` and `amount` now exist in both slots |
 | snappy overshoot | **BEHIND, fixed** | the `overshoot` handle peaked at exactly 1.000000 |
 | text scramble | BEHIND on dials, AHEAD on determinism | refresh is a fixed count per window, so a 0.5s reveal scrambles at 48/s and a 2s one at 12/s |
 | 2.5D parallax | BEHIND | `depth` appears in 1 of 170 scenes; 44 of 47 camera films sit entirely at z = 0 |
@@ -85,10 +85,24 @@ dial being simulated by arithmetic in the scene file.
 
 The 45ms default is in band and is a good default. Nothing else about the mechanism is a dial.
 
-### Verdict: BEHIND
+### Verdict: BEHIND, and now fixed
 
 The delay is right and the two other dials the standard primitive ships with, ordering (`from`) and a
-total-time cap (`amount`), do not exist in either implementation.
+total-time cap (`amount`), did not exist in either implementation.
+
+**CLOSED.** `stagger` takes a number, as always, or the object form `{ each, amount, from }`, and the
+same three words work on a split text layer and in `parts[]`. `staggerOffset` / `staggerStep`
+(`core/type.js`) are the single reader, so the picture, the parts timeline and the tactile mixer cannot
+disagree about what `{ amount: 0.6 }` means; `gsapStagger` translates at the one seam where a spec meets
+GSAP's own `start`/`end` spelling. `from` takes `first` (the default, so nothing shipped moves), `center`,
+`last`, `edges`, `random` (hashed, never `Math.random`) or a unit index. `core/validate.mjs`
+`staggerErrors` refuses a fourth key and an unknown order in BOTH slots, which is what made the `parts`
+pass-through an undocumented capability rather than a feature. `STAGGER_FROM_REGISTRY` puts it in
+`make arsenal`, and `formats/scene/_parity-type.json` renders all four orders on one frame.
+
+**It also refuses GSAP's `grid` and `axis`**, deliberately: they order a two-dimensional grid of
+targets, this vocabulary is one-dimensional, and forwarding a word the engine cannot honour is the thing
+being fixed here, not a feature to keep.
 
 ### The gap, concretely
 
@@ -112,6 +126,11 @@ a left-to-right train reads as typing, a centre-out train reads as the word arri
 `assemble` (`core/type.js:363`) already knew this, and because the engine had no ordering dial it had
 to spend part of its OWN window on a hashed delay to fake a shuffled arrival. That workaround is the
 bug report.
+
+**`assemble` KEEPS its own shuffle, and the two compose.** `from: "random"` is the OUTER clock's
+shuffle, available to every preset; `assemble`'s `shuffle` is inside one unit's own window, so it still
+scatters at `stagger: 0`, which is how the preset is usually written. Folding one into the other would
+repaint every shipped `assemble` layer to buy nothing.
 
 ---
 

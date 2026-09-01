@@ -25,6 +25,11 @@
 // on that mix being what it is; folding motion into `auto` would rewrite the sound of every one of
 // them. Silence stays the engine default and a film asks for this.
 import { resolveEasing } from './motion.js';
+// The per-unit delay of a stagger spec has ONE reader (core/type.js), so the object form
+// `{ each, from, amount }` cannot mean one thing to the picture and another to the sound. Before this
+// import `+(p.stagger)` on an object was NaN, and a NaN step silently collapsed a whole train to one
+// pluck.
+import { staggerStep } from './type.js';
 
 // The cue names this module reaches for. `tick` and the rest of the interaction vocabulary already
 // bake; the five motion voices are being added to CUES in core/audio-kit.mjs alongside this work.
@@ -165,7 +170,7 @@ function partCues(layers, out) {
     for (const p of L.parts) {
       const n = +(p.count ?? 0);
       if (!(n > 0)) continue;
-      const st = +(L.start ?? 0) + +(p.delay ?? 0), step = Math.max(0, +(p.stagger ?? 0.06));
+      const st = +(L.start ?? 0) + +(p.delay ?? 0), step = Math.max(0, staggerStep(p.stagger, n, 0.06));
       // THIN THE TRAIN HERE, not in the density cap. Twelve spokes at a 0.05s stagger is 240 cues a
       // second; handing that to the greedy cap would let it chew arbitrary holes and leave a rhythm
       // that is neither the stagger nor anything else. Taking every kth part keeps the train EVEN,
