@@ -74,6 +74,7 @@ import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../..
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
 import { AMBIENT_FX, AMBIENT_SHADERS } from '../../core/shaders-ambient.js';
+import { shaderAt as ambientShaderAt, validate as ambientValidate } from '../../core/surfaces/shader.js';
 import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks.js';
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
@@ -1735,6 +1736,28 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
+  // ---- shaderKeys: ONE window, several looks, cut on a chosen instant ----
+  // A lookup, never a transition: which look shows at `at` is a pure function of `at`, so a worker
+  // that drew frame 200 before frame 5 cannot change frame 5. Asserted on both sides of a key and at
+  // the key itself, because the boundary is the only part with an off-by-one to get wrong.
+  {
+    const K = { shader: 'voronoi', shaderKeys: [{ t: 2, shader: 'metaballs' }, { t: 4, shader: 'matrixDecode' }] };
+    ok('shaderKeys: before the first key the layer shows its own `shader`', ambientShaderAt(K, 0) === 'voronoi' && ambientShaderAt(K, 1.99) === 'voronoi');
+    ok('shaderKeys: the key is inclusive, the swap lands ON its t', ambientShaderAt(K, 2) === 'metaballs' && ambientShaderAt(K, 3.9) === 'metaballs');
+    ok('shaderKeys: the last key holds to the end of the window', ambientShaderAt(K, 4) === 'matrixDecode' && ambientShaderAt(K, 99) === 'matrixDecode');
+    ok('shaderKeys: absent leaves the static name untouched', ambientShaderAt({ shader: 'flow' }, 7) === 'flow' && ambientShaderAt({}, 7) === 'flow');
+    const refuses = (L) => { try { ambientValidate(L); return false; } catch { return true; } };
+    ok('shaderKeys: an unknown name in a key is refused, not silently blank', refuses({ shaderKeys: [{ t: 0, shader: 'aurara' }] }));
+    ok('shaderKeys: a key with no `t` is refused', refuses({ shaderKeys: [{ shader: 'flow' }] }));
+    ok('shaderKeys: keys running backwards are refused (the later one could never be reached)',
+      refuses({ shaderKeys: [{ t: 3, shader: 'flow' }, { t: 1, shader: 'mist' }] }));
+    ok('shaderKeys: an empty list is refused rather than accepted and ignored', refuses({ shaderKeys: [] }));
+    ok('shaderKeys: a valid list passes', !refuses(K));
+    ok('shaderKeys: the schema documents it as an array of { t, shader }',
+      schema.fields.layers.item.shaderKeys?.type === 'array'
+      && schema.fields.layers.item.shaderKeys.item.t.type === 'number'
+      && schema.fields.layers.item.shaderKeys.item.shader.type === 'string');
+  }
   // THE THREE FIELDS WITH A NAMED TECHNIQUE BEHIND THEM, each asserted on the step of its recipe that
   // is easy to lose and impossible to see in a still: reimplemented from the technique, never ported.
   for (const n of ['domainWarp', 'voronoi', 'metaballs'])

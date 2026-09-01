@@ -17377,3 +17377,53 @@ walks the slot path to find the name in the position the slot claims, plus a per
 only families printing no paste are the two whose slot is prose (`svgIcon()`, `cameraBlur (a top-level
 boolean)`). The walk restates the grammar on purpose: a test calling the renderer's own path builder
 would agree with it whatever it did.
+
+## 561. a shader panel could not change its look, and the workaround cost a WebGL context per look
+
+**What happened.** A film wanted three panels, each cycling through several ambient shader looks. A
+layer's `shader` was a single static name, so the only way to write it was one layer per look, stacked
+in consecutive windows, each crossfading into the one beneath. The question this entry records is
+whether that workaround was in fact the right answer, because "consecutive windows" is how this engine
+sequences everything else and a second mechanism saying the same thing is the drift logged here more
+than any other defect.
+
+**It was not the right answer, and the reason is a hard limit rather than a taste.** Two pieces of
+evidence, both read rather than assumed:
+
+1. **Every canvas layer holds a WebGL context for the whole film.** `core/layers/canvas.js` `build`
+   calls `S.create()` unconditionally, so a look that shows for two seconds still costs a context for
+   the entire runtime. `core/boot.js` already refuses a film that runs past the cap, naming it: browsers
+   allow roughly 16 concurrent contexts and some drivers drop an OLDER one rather than refuse a new
+   one, which renders a surface BLANK with no error. Three panels cycling five looks is fifteen
+   contexts for what is really three fields. Duplicating a `text` layer is free; duplicating this one
+   is not, and no other window-based sequencing in the engine carries that cost.
+2. **Stacked windows crossfade, and two shaders dissolved together are mud.** The clip envelope fades
+   opacity, so the overlap shows both fields at partial alpha over each other. The hard swap the
+   reference work actually does is not expressible by a dissolve at all.
+
+**The fix.** `shaderKeys: [{ t, shader }, …]` on a `shader` layer, in `core/surfaces/shader.js`. Before
+the first key the layer shows its own `shader`; from each key onwards it shows that key's. It is a
+LOOKUP over a sorted list, never a transition carrying state, so which look is showing at frame `n`
+stays a pure function of `n`. One context, one layer, and the swap lands on the instant the author
+names, which is what lets it be cut on a beat.
+
+**Three decisions worth stating.** There is deliberately no crossfade option: a blend needs both fields
+drawn at once, which is the context cost arriving through the other door, and it is the look this
+exists to avoid. `t` is seconds from the layer's start and is NOT scaled by `speed`, which dials the
+field's own loop: a key is a moment in the FILM, so `draw` divides `speed` back out of the local clock.
+And the field's phase is not reset at a swap, so the new look is sampled where its own loop happens to
+be, exactly as if it had been showing all along.
+
+**What catches it now.** 10 assertions in `scripts/gates/lib-test.mjs` (both sides of a key, the key
+itself, an unknown name, a missing `t`, keys running backwards, an empty list, and the schema shape).
+`validate` refuses an unknown name in a key the same way it already refuses a static one, because the
+ambient draw call RETURNS on a miss and would otherwise paint an empty canvas that passes every gate.
+`make arsenal Q="cycle a panel through different shader looks"` finds it through the `shader` layer
+type's blurb. Rendered and looked at: `formats/scene/_shader-keys-probe.json` frames 59/60 and 119/121,
+a clean hard swap on both keys with no dissolve. `make canvas-purity` passes on it, which is the gate
+that can actually see inside a canvas.
+
+**A second thing found on the way.** `AMBIENT_REGISTRY` was built with no `blurbs`, so all 21 ambient
+fields were searchable by name and described by nothing. `AMBIENT_SHADERS` was already the one owner of
+those sentences and was simply not passed. One argument, and `make arsenal` now describes a field
+instead of only naming it.

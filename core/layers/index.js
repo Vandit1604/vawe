@@ -30,7 +30,7 @@ import { canvasLayer } from './canvas.js';
 // The four types whose whole output is a canvas are ONE primitive with four backends (core/surfaces/).
 // They are still four names in scene JSON and four entries here, the collapse was internal, and 101
 // scenes are written in the names.
-const shader = canvasLayer('shader', 'a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it');
+const shader = canvasLayer('shader', 'a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look');
 const paint = canvasLayer('paint', 'a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample');
 const raymarch = canvasLayer('raymarch', 'a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs');
 const three = canvasLayer('three', 'a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud');
