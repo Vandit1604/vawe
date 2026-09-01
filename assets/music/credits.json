@@ -89,5 +89,15 @@
   "licence": "none, synthesized from parameters, carries no rights",
   "licenceVerified": true,
   "seconds": 8
+ },
+ "bed": {
+  "id": "292",
+  "genre": "direct",
+  "source": "https://assets.mixkit.co/music/292/292.mp3",
+  "page": "https://mixkit.co/free-stock-music/",
+  "licence": "https://mixkit.co/license/#musicFree",
+  "licenceVerified": false,
+  "note": "Mixkit Stock Music Free License. Confirm terms before commercial release",
+  "seconds": 108.01
  }
 }
