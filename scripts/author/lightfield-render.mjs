@@ -8,7 +8,7 @@
 //
 // The fix is not "wait longer", which only moves the odds. It is to shoot until two CONSECUTIVE frames
 // are byte-identical: the picture has stopped changing, so nothing is still arriving. The same argument
-// as the deferred-decode finding in docs/MISTAKES.md #267, where waiting longer turned "always wrong"
+// as the deferred-decode finding in docs/MISTAKES.md #279, where waiting longer turned "always wrong"
 // into "sometimes wrong" and settled nothing.
 //
 // A lightfield with motion never settles, because `--t` drives it. The caller pins the clock (the shot

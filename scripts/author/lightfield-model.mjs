@@ -5,7 +5,7 @@
 // ever run: the module was never written and never committed, so both tools have died on
 // `Cannot find module` since the day their imports were typed. They are the two tools that FIT a
 // seed, which is the exact thing every layout change needs, so the library has been tuned by eye
-// with the measuring instruments broken (docs/MISTAKES.md #318).
+// with the measuring instruments broken (docs/MISTAKES.md #332).
 //
 // THE ONE FACT THAT MAKES THIS POSSIBLE. The field is a stack of CSS gradients composited
 // source-over, and source-over is `src*a + dst*(1-a)`. The alphas come from geometry alone: a lobe's

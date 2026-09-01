@@ -1,6 +1,6 @@
 {
   "name": "neutral",
-  "note": "The NEUTRAL reference palette (mono + lime). Not anybody's brand - it exists so a fork, or a new brand kit, has a complete theme to copy that carries no house colours. `default` is the vawe brand; copy THIS one when you want a blank slate. docs/MISTAKES.md #352.",
+  "note": "The NEUTRAL reference palette (mono + lime). Not anybody's brand - it exists so a fork, or a new brand kit, has a complete theme to copy that carries no house colours. `default` is the vawe brand; copy THIS one when you want a blank slate. docs/MISTAKES.md #366.",
   "palette": {
     "bg": "#0a0a0c",
     "bg2": "#0d0e11",

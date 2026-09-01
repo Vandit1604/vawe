@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes claims study-verify recreate ref motion-split
+.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -293,7 +293,7 @@ audit:
 # make audit-all [SCENE=<name-substring>] [ASPECT=16:9,9:16], the same layout audit, over the WHOLE
 # library. `make audit` grades the one scene you have open, which is a check against NEW defects only:
 # two scenes shipped dark-on-dark and stayed that way because nothing ever asked them again
-# (docs/MISTAKES.md #373). Slow on purpose; an on-demand sweep, never part of the per-edit ladder.
+# (docs/MISTAKES.md #387). Slow on purpose; an on-demand sweep, never part of the per-edit ladder.
 audit-all:
 	node scripts/gates/audit-scenes.mjs $(SCENE) $(if $(ASPECT),--aspect $(ASPECT))
 
@@ -356,7 +356,7 @@ watermark:
 
 # make site-counts: every capability number written on the SITE, checked against the registry it
 # describes. The copy claimed 96 blocks / 44 families / 22 presets / 32 stings long after the
-# registries had moved (docs/MISTAKES.md #111). Hand-typed counts about a growing registry go stale
+# registries had moved (docs/MISTAKES.md #114). Hand-typed counts about a growing registry go stale
 # by default; this is what notices.
 site-counts:
 	node scripts/gates/site-counts.mjs
@@ -416,9 +416,16 @@ measure:
 lib-test:
 	node scripts/gates/lib-test.mjs
 
+# make mistakes-check: is a docs/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
+# A property only knowable across the whole library, so it is a gate, not a write-site fix (CLAUDE.md).
+# Two verbatim duplicates and a restatement shipped because nobody rereads a 540-entry file before
+# appending; this is the reread, automated. Exits non-zero on a hit.
+mistakes-check:
+	node scripts/gates/mistakes-dupes.mjs
+
 # make silent-check: is any named vocabulary still resolved with a silent default? A wrong name must
 # not become a plausible substitute; absence may keep its documented default. core/registry.js removes
-# the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #362.
+# the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #376.
 silent-check:
 	node scripts/gates/silent-fallback.mjs
 
@@ -834,7 +841,7 @@ beat-check: ## timeline gate: dead air, empty last frame, empty cut window, dead
 	node scripts/gates/beat-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 # make impeccable D="a.html b.html": the bundled impeccable anti-slop detector on raw HTML fragments
-# (local, no network, token-efficient). the RENDERED-scene twin of this was retired (docs/MISTAKES.md #326);
+# (local, no network, token-efficient). the RENDERED-scene twin of this was retired (docs/MISTAKES.md #340);
 # this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.
 impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
 	node .claude/skills/impeccable/scripts/detect.mjs --json $(D)

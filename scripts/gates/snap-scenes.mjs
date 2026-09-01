@@ -267,7 +267,7 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 // A FEW no-baseline scenes stay soft on purpose: that is just a newly authored film waiting for
 // `SAVE=1`, and failing on it would make writing a scene feel like breaking the build. ZERO
 // comparisons is a different statement, and it is the one that must be loud. Same lesson as the
-// `paints-nothing` census (docs/MISTAKES.md #417): a clean result over an empty denominator is not a
+// `paints-nothing` census (docs/MISTAKES.md #437): a clean result over an empty denominator is not a
 // pass, it is a gate that never ran.
 if (!identical.length && !changed.length && nobaseline.length) {
   console.error(`\n✗ nothing to compare: all ${nobaseline.length} scene(s) lack a baseline, so this gate checked NOTHING.`);

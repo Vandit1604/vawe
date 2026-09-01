@@ -85,7 +85,7 @@ const howto = (v) => {
 // @font-face against each one, the browser cannot find it, and it falls back. Nothing warns. Four
 // render passes were judged for composition, hierarchy and line breaks in a high-contrast serif while
 // the theme declared Anybody, and the only clue was that the frames looked wrong in a way nobody could
-// name (docs/MISTAKES.md #317). A fallback renders perfectly happily, which is what makes it expensive.
+// name (docs/MISTAKES.md #331). A fallback renders perfectly happily, which is what makes it expensive.
 //
 // Derived from the stylesheet rather than listed here, so a face added to tokens.css is checked the
 // day it is added and a list cannot go stale.

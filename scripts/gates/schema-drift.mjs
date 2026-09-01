@@ -40,7 +40,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // is now a 20-line shell that imports scene.js, and it contains zero `L.` reads, so for as long as
 // that split has existed, every prop read only by the orchestrator (cut · vars · react · motionBlur ·
 // borderTrail · circle · becomes · panWith …) was outside the check, and the gate reported green over
-// the blind spot (docs/MISTAKES.md #229).
+// the blind spot (docs/MISTAKES.md #235).
 //
 // So the scan is the orchestrator plus the four REGISTRY DIRECTORIES, each walked whole: a layer prop
 // is read by the thing that DRAWS a layer (core/layers, and core/surfaces for the four types whose
@@ -288,7 +288,7 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
 // once advertised "slideL", an anim that never existed and so silently resolved to fade (#21). This
 // check existed for exactly that, and covered ONE enum out of eight. Adding `nebula` to AMBIENT_FX
 // made the schema reject a valid value and nothing said so until a scene failed to validate
-// (docs/MISTAKES.md #82). Every vocabulary the engine owns is compared here now, both directions.
+// (docs/MISTAKES.md #137). Every vocabulary the engine owns is compared here now, both directions.
 {
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {

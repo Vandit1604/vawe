@@ -38,12 +38,12 @@ func main() {
 	// a full-frame inline SVG): 8 workers gave 8-11 corrupted frames per run and a DIFFERENT set each
 	// run, 4 workers gave zero. Compositor determinism flags, doubling the rAF settle wait, and
 	// capture-until-stable all left it untouched, which is what ruled out the capture path and pointed
-	// at raster starvation. See docs/MISTAKES.md #190 and `make flicker-check`.
+	// at raster starvation. See docs/MISTAKES.md #196 and `make flicker-check`.
 	//
 	// RAISED TO 6 IN 2026-08, BECAUSE THE PREMISE ABOVE STOPPED BEING TRUE. "Each worker is a full
 	// browser" was the whole mechanism: eight browsers meant eight independent raster pipelines
 	// competing for one GPU. Workers are now TABS on one browser sharing one GPU process
-	// (docs/MISTAKES.md #335), so the starvation argument has to be re-measured rather than inherited.
+	// (docs/MISTAKES.md #349), so the starvation argument has to be re-measured rather than inherited.
 	//
 	// Re-measured across three films at 4 versus 6 workers, comparing the CAPTURED FRAMES, not the mp4:
 	//   gradient-showcase (7 images)   25 of 636 frames differ, worst max-delta 2 of 255
@@ -131,7 +131,7 @@ func main() {
 	// READ THE FILE BEFORE SAYING ANYTHING ABOUT ITS CONTENTS. Every reader below (videoGrain,
 	// moduleOf) used to swallow its read error and hand back a zero value, so a path that does not
 	// exist arrived at the "no module field" message — a complaint about the contents of a file
-	// nothing had opened (docs/MISTAKES.md #223).
+	// nothing had opened (docs/MISTAKES.md #229).
 	if _, err := os.Stat(dataPath); err != nil {
 		if os.IsNotExist(err) {
 			fmt.Fprintf(os.Stderr, "✗ %s: no such file\n", dataPath)
@@ -195,7 +195,7 @@ func main() {
 			// gated on `len(aspects) > 1`, so rendering a 16:9 scene with `--aspect 9:16` wrote
 			// out/<name>.mp4 — silently REPLACING the scene's own-aspect render with a
 			// differently-shaped film under the identical filename. Nothing said anything, and the
-			// only way to notice was to open the file (docs/MISTAKES.md #215).
+			// only way to notice was to open the file (docs/MISTAKES.md #221).
 			// An explicit --out still wins: naming the file is the author's call.
 			tag := ""
 			if o.Aspect != "" {

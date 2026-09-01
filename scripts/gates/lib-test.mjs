@@ -275,7 +275,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
 // The engine carries TWO easing vocabularies and the FIELD decides which is in force. The exclusion
 // list is the whole rule, and it can rot in silence: too strict invents findings on scenes that name a
 // GSAP ease correctly (showcase-lumen, showcase-type-labour both do), too loose and the wrong-slot
-// name renders on a curve nobody chose. One assertion per direction. docs/MISTAKES.md #367.
+// name renders on a curve nobody chose. One assertion per direction. docs/MISTAKES.md #381.
 ok('easeErrors: a GSAP ease in an engine field is caught', (() => {
   const e = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'power2.inOut' }] }] });
   return e.length === 1 && /GSAP ease/.test(e[0]);
@@ -1000,7 +1000,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // captionBand: the strip a burnt-in caption occupies, so a headline can be kept off it. Derived from
   // safeArea rather than from a second table, because the platform's chrome is not a property of the
-  // aspect and one definition of that has to be enough (docs/MISTAKES.md #392, #159).
+  // aspect and one definition of that has to be enough (docs/MISTAKES.md #409, #165).
   {
     const web = captionBand(1080, 1920, 'web');
     const tik = captionBand(1080, 1920, 'tiktok');
@@ -1066,7 +1066,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // THE ONE THAT MATTERS. Same box, same layer, graded 0.1s in: it is still sliding on, so there is no
   // verdict to give. A check without this fires on every well-made entrance in the library.
-  ok('bounds: the SAME box mid-entrance is NOT reported (arrived-only, docs/MISTAKES.md #376)',
+  ok('bounds: the SAME box mid-entrance is NOT reported (arrived-only, docs/MISTAKES.md #390)',
     outOfFrame(settled, F, 0.1) === null);
   ok('bounds: settleWindow uses audit.mjs\'s own numbers (start+enter+pad)',
     settleWindow({ start: 1, duration: 5 }).t0 === 1 + 0.45 + 0.06);
@@ -1570,7 +1570,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     ok('text: emphasis INSIDE a word does not split it',
       onScreenText('North<b>wind</b>') === 'Northwind');
     ok('text: a block element separates its neighbours', onScreenText('<div>Mon</div><div>Tue</div>') === 'Mon Tue');
-    // docs/MISTAKES.md #214/#216/#217: a <style> body, a <script> body and a comment are source the
+    // docs/MISTAKES.md #220/#216/#217: a <style> body, a <script> body and a comment are source the
     // frame never shows. Read as copy they became a brand-voice defect, clipped text and tiny type.
     ok('text: a stylesheet is not copy',
       onScreenText('<style>.g{color:red}/* unlock */</style><p>Ship it</p>') === 'Ship it');
@@ -1725,7 +1725,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('looks: every look resolves to a filter or overlays', LOOK_NAMES.every((n) => { const r = resolveComposite(n); return r && (r.filter.length > 0 || r.overlays.length > 0); }));
   ok('looks: deterministic', resolveComposite('vhs', {}, 0.6).filter === resolveComposite('vhs', {}, 0.6).filter);
 
-  // ---- the three guards from docs/MISTAKES.md #351 ----
+  // ---- the three guards from docs/MISTAKES.md #365 ----
   // All derived from LOOKS. A hand-written list is what let `color` be dead on nineteen looks while
   // the test above proved the feature on `neon`. One of the three where it happened to work.
   const sig = (r) => r.filter + '||' + JSON.stringify(r.overlays);
@@ -1750,7 +1750,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // that fixes the same spelling silently shadows it). Sixteen looks declared a colour that never
   // rendered, including vintageAnamorphic's `#a9c8ff`. The exact hex the comment in core/looks.js
   // records finding dead and fixing, where the fix went to the pass and left the look entry behind.
-  // Setting letterpress's to pure red moved zero pixels. docs/MISTAKES.md #366.
+  // Setting letterpress's to pure red moved zero pixels. docs/MISTAKES.md #380.
   const shadowed = [];
   for (const n of LOOK_NAMES) {
     for (const k of Object.keys(LOOKS[n].d)) {
@@ -1810,7 +1810,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- themes: `default` IS the brand, and must stay identical to it ----
 // `default` is the name every author reaches for by habit. It used to hold a mono+lime palette that
-// belonged to no site of ours, so films shipped in a colour nobody chose (docs/MISTAKES.md #352). It
+// belonged to no site of ours, so films shipped in a colour nobody chose (docs/MISTAKES.md #366). It
 // now mirrors themes/vawe.json, and two files holding the same palette is exactly the shape that
 // drifts, so the drift is a test, not a comment.
 {
@@ -1834,7 +1834,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- the registry primitive (core/registry.js) ----
 // Every named vocabulary resolves through `pick()`, which takes no fallback parameter, so a silent
-// default is not expressible. docs/MISTAKES.md #355.
+// default is not expressible. docs/MISTAKES.md #369.
 {
   const r = defineRegistry('widget', { alpha: 1, beta: 2 }, { slot: 'widget' });
   ok('registry: a known name resolves', r.pick('alpha') === 1);
@@ -1916,7 +1916,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // ---- sound: a CUT must have a voicing, exactly as a SEAM does ----
 // lib-test already asserted "SEAM_CUE covers every SEAM_FX (no silent seam)". CUT_CUE had no equivalent,
 // so the next presentation added to core/cuts.js would silently play the generic `whoosh`. The gate for
-// one half of a pair and not the other is how a family goes quietly out of sync. docs/MISTAKES.md #360.
+// one half of a pair and not the other is how a family goes quietly out of sync. docs/MISTAKES.md #374.
 {
   // an explicit null is a DECISION (silence); only a missing KEY is a gap.
   const missing = CUT_REGISTRY.names.filter((n) => !(n in CUT_CUE));
@@ -1924,7 +1924,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     + `${missing.length ? ', missing: ' + missing.join(', ') : ''}`, missing.length === 0);
 }
 
-// ---- blueprints: a HELD element needs idle motion (docs/MISTAKES.md #359) ----
+// ---- blueprints: a HELD element needs idle motion (docs/MISTAKES.md #373) ----
 {
   const cta = BEATS.ctaEnd({ mark: '/a.svg', command: 'npm i', sub: 's', url: 'u' });
   const mark = cta.find((l) => l.type === 'image');
@@ -2271,12 +2271,12 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beat-bind: a pulseless track is refused, not snapped to', throws(() => bindBeats(sc(), { ...G, confidence: 1.2 }), /confidence/));
   ok('beat-bind: an empty grid is refused', throws(() => bindBeats(sc(), { ...G, beats: [] }), /carries no/));
   ok('beat-bind: beatSync with no track to read names the fix', throws(() => beatGridPath({ audio: { beatSync: true, music: 'auto' } }), /audio\.music/));
-  // ONE POLICY (docs/MISTAKES.md #457). scripts/media/beatsync.mjs calls snapJoints/unrollGrid too, so
+  // ONE POLICY (docs/MISTAKES.md #477). scripts/media/beatsync.mjs calls snapJoints/unrollGrid too, so
   // these pin the contract the CLI used to hold a second, wider opinion about.
   ok('beat-bind: the default tolerance IS snapToBeat\'s own', snapToBeat(1.04, bts) === snapToBeat(1.04, bts, DEFAULT_MAX_SHIFT));
   const s6 = { cuts: [{ t: 0.54 }], seams: [{ t: 1.75, dur: 0.5 }], stings: [{ t: 0.54, fx: 'flash' }] };
   const r6 = snapJoints(s6, G.beats, DEFAULT_MAX_SHIFT);
-  // A STING RIDES ITS JOINT (docs/MISTAKES.md #475). It used to keep the time the author wrote, so a
+  // A STING RIDES ITS JOINT (docs/MISTAKES.md #496). It used to keep the time the author wrote, so a
   // sting authored ON a cut drifted off that cut by however far the cut moved.
   ok('beat-bind: a sting authored on a cut is still on that cut after the snap', s6.stings[0].t === s6.cuts[0].t);
   ok('beat-bind: snapJoints reports the drift the CLI prints', r6.moved[0].kind === 'cut' && r6.moved[0].drift === 0.04);
@@ -2444,7 +2444,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('transitions: ambiguous basic lowers to a cut', (() => { const x = lowerScene({ transitions: [{ at: 1, fx: 'slide', dir: 'left' }] }); return Array.isArray(x.cuts) && x.cuts[0].style === 'slide'; })());
   ok('transitions: lowering is idempotent (no-op second pass)', (() => { const x = lowerScene(lowerScene({ transitions: [{ at: 1, fx: 'fade' }] })); return x.cuts.length === 1; })());
   ok('transitions: a scene with no unified keys is untouched', (() => { const src = { layers: [{ text: 'x' }], cuts: [{ t: 1, style: 'fade' }] }; const x = lowerScene(src); return x.cuts.length === 1 && !('transitions' in x); })());
-  // A STING TINT IS A COLOUR, NOT A HEX (docs/MISTAKES.md #476). The renderer read it with
+  // A STING TINT IS A COLOUR, NOT A HEX (docs/MISTAKES.md #497). The renderer read it with
   // parseInt(hex, 16), so a theme token or an rgb() became NaN and then [0,0,0]: a black tint, no error.
   ok('transitions: a sting tint may be a theme token', checkStingColor('var(--accent)', 'x') === 'var(--accent)');
   ok('transitions: a sting tint may be a hex or an rgb()',
@@ -2660,7 +2660,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // `gradient` + `split` rendered NOTHING for as long as both existed. gradientFill paints the container
 // and sets the text transparent; splitText then moves every glyph into a child span, and while `color`
 // and `-webkit-text-fill-color` inherit, `background-image` does not. So the glyphs were transparent
-// with no paint of their own, and a shipped film's headline was invisible (docs/MISTAKES.md #399).
+// with no paint of their own, and a shipped film's headline was invisible (docs/MISTAKES.md #417).
 //
 // ASSERT ON THE RESOLVED PAINT, NEVER ON THE BOX. That is the trap the bug set: a transparent glyph
 // still measures as a full-size opaque box, so every DOM-geometry check in this repo passed a blank
@@ -3381,7 +3381,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   try { produceBaseline({ ...base(), camera: [{ t: 0, s: 1 }], cameraMove: { move: 'slowPush' } }, {}); } catch (e) { msg = e.message; }
   ok('produce: camera + cameraMove together is refused, never silently clobbered', /BOTH/.test(msg));
 
-  // THE PUSH AND THE MARGIN (docs/MISTAKES.md #458). core/safe.js owns how much zoom the margin
+  // THE PUSH AND THE MARGIN (docs/MISTAKES.md #478). core/safe.js owns how much zoom the margin
   // absorbs; produce.js owns the perception-driven 1.06 and reads that limit rather than re-deriving
   // it. If either number is edited alone, one of these two fails before a film is ever rendered.
   ok('safe: MAX_ZOOM is where a safe-edge layer reaches the frame edge',
@@ -3734,7 +3734,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 }
 
-// ---- THE GSAP TRIGGER LOCKSTEP (docs/MISTAKES.md #148, #465) ----
+// ---- THE GSAP TRIGGER LOCKSTEP (docs/MISTAKES.md #154, #487) ----
 // core/preload.js decides whether the tween engine is fetched at all, from the props a scene names. Get
 // that set wrong and the render is silent and STILL: no throw, no warning, a figure that simply does not
 // move. It shipped that way once, because the set was a hand-typed list beside a comment asking the next
@@ -3813,7 +3813,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the harness resolves the repo root', fs.existsSync(path.join(REPO_ROOT, 'core/motion.js')));
 }
 
-// ---- a fragment's stylesheet stops at its own layer (docs/MISTAKES.md #425) ----
+// ---- a fragment's stylesheet stops at its own layer (docs/MISTAKES.md #510) ----
 {
   const { scopeStyles } = await import('../../core/sanitize-html.js');
   ok('markup with no stylesheet is handed back unchanged',
@@ -3899,7 +3899,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('an unknown depth is refused with the menu and its magnifications',
     m != null && /far/.test(m) && /0\.57x/.test(m) && /1\.39x/.test(m));
   // THE SUGAR BECOMES THE MODIFIER, or core/boot.js throws. A field written and read by nothing is the
-  // failure the whole bake path exists to make impossible (docs/MISTAKES.md #424).
+  // failure the whole bake path exists to make impossible (docs/MISTAKES.md #444).
   const d = { layers: [{ type: 'rect', depth: 'back' }] };
   bakeDepth(d);
   ok('depth lowers to the plane modifier', d.layers[0].depth === undefined

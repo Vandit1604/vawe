@@ -20,7 +20,7 @@
 // `ref` preset at a mean sample dE of 12.7 while the render's shadows were warm red and the
 // reference's were violet and navy. The four sample points were all in bright areas, so no number
 // printed here could see the one thing that was wrong. Every mean below is now printed beside its
-// tail, and the dark end of the picture is graded on its own. docs/MISTAKES.md #262.
+// tail, and the dark end of the picture is graded on its own. docs/MISTAKES.md #272.
 //
 // ffmpeg does the decoding, so there is no image library to install and no version to drift.
 

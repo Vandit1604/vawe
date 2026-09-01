@@ -8,7 +8,7 @@
 // the repo with a full three.js scene-graph layer, a written determinism contract and four registered
 // scenes. The author had not read the arsenal doc, which is one failure. The doc did not contain three
 // either, which is the one worth fixing: 0 of 4 THREE_FX scenes were named in it, along with 0 of 5
-// raymarch effects and 0 of 5 playground generators (docs/MISTAKES.md #321).
+// raymarch effects and 0 of 5 playground generators (docs/MISTAKES.md #335).
 //
 // The cause is that `scripts/site/effects-catalog.mjs` imports a HAND-WRITTEN list of registries. Add a
 // vocabulary to core/ and it appears in the catalogue only if someone remembers to add an import line.
@@ -116,7 +116,7 @@ const WAIVED = new Map(Object.entries({
   // A scene never names a caption SKIN: it sets `captionMode`/`captionStyle` and the skin follows from
   // that plus the destination. CAPTION_SKINS is the geometry table captionBand() measures against, so
   // there is nothing here for an author to choose. It reached main uncatalogued, which is why the gate
-  // is right to have asked (docs/MISTAKES.md #392).
+  // is right to have asked (docs/MISTAKES.md #409).
   CAPTION_SKINS: 'the caption geometry captionBand() measures against; a scene sets captionMode/captionStyle and the skin follows',
   CAPTION_LINES: 'as CAPTION_SKINS, how many lines the band reserves, not a name a scene can write',
   // A scene names a caption STYLE and the shape follows it. CAP_STYLE_SHAPE is how the RENDERER

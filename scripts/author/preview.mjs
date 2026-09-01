@@ -9,7 +9,7 @@
 // to put it and the Makefile silently dropped it: both targets rendered sample.json while reporting
 // the scene you asked for. That is the same defect the Makefile records fixing for `make motion`
 // ("without it the target silently audited sample.json instead of your scene"), it survived here
-// because the fix went to one call site. docs/MISTAKES.md #351.
+// because the fix went to one call site. docs/MISTAKES.md #365.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';

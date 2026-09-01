@@ -5,7 +5,7 @@ description: "FORCE a creative, directed video (not a plain slideshow) when auth
 
 # vawe-creative: the anti-slideshow forcing layer
 
-The proven failure (docs/MISTAKES.md #137): with the full arsenal in hand, authoring from a blank JSON
+The proven failure (docs/MISTAKES.md #143): with the full arsenal in hand, authoring from a blank JSON
 regresses to `rise`+`fade` on flat white: a slideshow that passes the correctness gates. Planning owns
 *what*; scene-authoring owns *how*; **this skill owns AMBITION**, it forces the video to reach for the
 range. Directed lives between two walls: not a slideshow (the ambition floor), not effect-soup (the ceiling).

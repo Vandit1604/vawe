@@ -27,7 +27,7 @@
 // the film's one loud moment, and `pace:` budgets its seconds per idea. So this gate reads the storyboard
 // itself as a second input, alongside the sidecar, and joins those two lines to the film. Without that
 // they are fields an author fills and no code reads, which is worse than no field at all, the plan looks
-// complete and the film is unchanged (docs/MISTAKES.md #213, #369, #373, #386).
+// complete and the film is unchanged (docs/MISTAKES.md #219, #383, #387, #400).
 //
 //   node scripts/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
 //   make plan-check D=<file>
@@ -78,7 +78,7 @@ const OVERRUN = 0.5;     // how far the plan's total may sit from the film's bef
 // T.scene is this scene with the unified `transitions` surface already lowered to cuts/seams/stings, on
 // a clone, so nothing below rewrites the object it is grading. Every boundary read in this file goes
 // through it: reading raw `d.cuts` is how a film that declared four boundaries the documented way was
-// graded as a film with none. docs/MISTAKES.md #380, #391.
+// graded as a film with none. docs/MISTAKES.md #394, #407.
 const T = sceneTiming(d);
 const BOUNDARY_KEYS = ['cuts', 'seams', 'stings'];
 const s = (n) => `${(+n).toFixed(2)}s`;

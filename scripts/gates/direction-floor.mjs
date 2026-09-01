@@ -231,7 +231,7 @@ const poseAt = (l, t) => {
     // element and `track` re-letters it, and dropping them made the gate blind to the exact device
     // CLAUDE.md says it makes free: a rectangle whose keyed width IS the spine. A film held by a bar
     // that advances on every cut failed `no-continuous-object` with the bar right there in the track
-    // (docs/MISTAKES.md #338). A null means "this track does not drive that property" and compares
+    // (docs/MISTAKES.md #352). A null means "this track does not drive that property" and compares
     // equal to itself, so a layer that only moves is scored exactly as before.
     p.m = [m.dx, m.dy, m.scale, m.rot, m.opacity, m.blur, m.w, m.h, m.track]
       .map((v) => (v == null ? '-' : round3(v))).join(',');

@@ -185,7 +185,7 @@ export const R_STEPS = Object.values(R);
 //
 // WHY THIS IS NOT PEDANTRY. A catalog row's `props` are the block's documented example, and
 // blocks/index.mjs merges them only for a NAMESPACED name, a BARE name gets the raw factory with
-// nothing in it (docs/MISTAKES.md #429). So the site renders `barChart` WITH its demo data and an
+// nothing in it (docs/MISTAKES.md #449). So the site renders `barChart` WITH its demo data and an
 // author writing {"type":"block","block":"barChart"} gets an empty track, `statBig` counts to 0, and
 // `quote` printed the literal string "undefined" on screen. The site was showing one thing and the
 // engine doing another, silently, for every bare name in the library.

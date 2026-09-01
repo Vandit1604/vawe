@@ -114,7 +114,7 @@ export function terminalPro({ x, y, w = 820, title = 'zsh · deploy', command = 
   out.push({ type: 'group', x: contentX, y: tickY, layout: 'row', gap: 8, items: 'center',
     // `drift`, not `breathe`. A scaling idle on TEXT re-rasterises every glyph each frame, so the edges
   // crawl and it reads as a shimmer rather than as life. That is exactly what a viewer reported seeing
-  // in this block's own render, and core/validate.mjs now refuses it (docs/MISTAKES.md #413). A drift
+  // in this block's own render, and core/validate.mjs now refuses it (docs/MISTAKES.md #432). A drift
   // translates the whole run instead, which is the same intent without the artefact.
   start: tickStart, duration: runsTo(tickStart), anim: 'rise', enterDur: 0.25, idle: 'drift', children: [
       text({ text: '✓', font: 'mono', size: 20, weight: 800, color: toneColor('ok') }),

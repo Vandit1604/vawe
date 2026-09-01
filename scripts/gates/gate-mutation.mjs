@@ -887,7 +887,7 @@ const srcCases = [
     cmd: ['node', ['scripts/gates/blocks-audit.mjs']], match: /brand-default/ },
   { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'formats/scene/sample.json',
     // NB: the injected prop must be a name NO layer accepts. `fill` was used here until it became a real
-    // svg-layer prop (docs/MISTAKES.md #143), pick a prop that can never be legitimised.
+    // svg-layer prop (docs/MISTAKES.md #149), pick a prop that can never be legitimised.
     mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "notARealProp": "#000" },'),
     cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
   { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/three-fx.js',

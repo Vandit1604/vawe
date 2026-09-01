@@ -74,7 +74,7 @@ btn.panWith = 'chrome';
 // The button MUST break away before the pan carries it past -382, and the pan crosses -382 at t≈1.115.
 // Peeling later means travelling left past the destination and coming back, and a reversal is a snap no
 // easing can hide: the previous cut peeled at 1.44, by which time the pan sat at -512, so the first own
-// key threw the button 194px RIGHT in two frames at 3244 px/s (docs/MISTAKES.md #194). So it leaves at
+// key threw the button 194px RIGHT in two frames at 3244 px/s (docs/MISTAKES.md #200). So it leaves at
 // 1.05 carrying the pan's own speed (825 px/s against the pan's 877) and decelerates along its arc,
 // 825 → 601 → 555 → 362 → 183, while the page keeps sliding out from under it. The break reads as the
 // button refusing to leave with the page, which is the whole point of it being the object.

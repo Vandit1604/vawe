@@ -43,7 +43,7 @@ const legacyHolder = (code, name) => Boolean(ratchet.rules?.[code]?.legacy?.[nam
 const tally = new Map();      // code -> [scene names]
 let total = 0;
 // The population comes from scripts/lib/census.mjs, which states N and REFUSES a checkout that cannot
-// see the library rather than counting what is left (docs/MISTAKES.md #377). `quiet` because the census
+// see the library rather than counting what is left (docs/MISTAKES.md #391). `quiet` because the census
 // header below is the line CLAUDE.md quotes, and two counts would invite the drift this gate is about.
 const pop = population('waiver census', { filter: LIBRARY, quiet: true });
 for (const f of pop.names) {

@@ -34,7 +34,7 @@ import { layoutErrors } from '../core/validate.mjs';
 // The renderer's own placement resolver, called rather than re-implemented. See capBandFor below.
 import { resolveCoords } from '../core/boot.js';
 // The SOURCE-side twin of the in-page `inkText()` below. That helper already refuses to read a
-// <style> body as glyphs (docs/MISTAKES.md #216/#217); this file went on doing exactly that when it
+// <style> body as glyphs (docs/MISTAKES.md #222/#217); this file went on doing exactly that when it
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
 import { snippet } from '../scripts/lib/text.mjs';
 import { lowerScene } from '../core/transitions-lower.js';
@@ -92,7 +92,7 @@ const safeFor = (vw, vh, cfg) => safeArea(vw, vh, cfg.destination || 'web');
 // is a decision rather than an oversight: the reference system holds its band even with captions
 // disabled, and held always here it fires on 69 of 103 shipped scenes. A finding two films in three
 // carry is a report about the library, not a gate, and authors learn to ignore it. Measured both ways
-// before choosing (docs/MISTAKES.md #395).
+// before choosing (docs/MISTAKES.md #413).
 // Held for the whole runtime, not only inside a caption window: the strip is a layout commitment the
 // author makes once, and this file samples 14 frames plus layer midpoints, so a window-scoped rule
 // would be a check that only sometimes looks.
@@ -145,13 +145,13 @@ const vis = (el) => { for (let p = el; p && p !== document.body; p = p.parentEle
 // guard at all and graded anything over 5% opacity, so a whole browser mockup 0.067s into its
 // entrance was reported as a contrast defect and the "fix" would have been to recolour a correct
 // frame. A gate that measures the wrong thing does not merely miss defects, it manufactures them.
-// docs/MISTAKES.md #376.
+// docs/MISTAKES.md #390.
 const effOpacity = (el) => { let a = 1; for (let p = el; p && p !== document.body; p = p.parentElement) a *= (+getComputedStyle(p).opacity || 0); return a; };
 const arrived = (el) => { const ARRIVED = 0.85; return effOpacity(el) >= ARRIVED; };
 // OVERLAP looked only at [data-layer="critical"], text >=60px, so a headline that WRAPPED onto a
 // second line and landed on the small mono caption beneath it was never compared with it. Measured
 // on the reproduction: the headline occupied y 400-681 and the caption sat at 500-525, entirely
-// inside it, and the audit said 0 hard (docs/MISTAKES.md #77).
+// inside it, and the audit said 0 hard (docs/MISTAKES.md #78).
 // The rule that holds: two TEXT boxes overlapping is a defect; text over a SHAPE is design (a chip
 // on a rect, a label on a card). So the set is every visible text layer, not every critical one.
 // textContent INCLUDES <style> and <script> source. A hand-authored `html` layer carries its CSS inline,
@@ -292,7 +292,7 @@ const svgInk = (svg) => {
 // else entirely from, the element's own box is not ink, it is a broken measurement, and the honest
 // answer there is the border box. It used to live at ONE call site (the safe-zone walk), where #211
 // added it after an unclamped svg bound turned showcase-cuts from 0 hard failures into 7. `buried`
-// read the same helper unclamped and inherited the identical bug (docs/MISTAKES.md #211/#214/#216/
+// read the same helper unclamped and inherited the identical bug (docs/MISTAKES.md #217/#214/#216/
 // #217 are all this shape: a rule fixed at a call site while another consumer kept reading it raw).
 // So the clamp is now part of inkRect and every consumer gets it.
 //
@@ -336,7 +336,7 @@ const inkRect = (el) => {
 // Uses inkText for the same reason clipped-text and overlap do: a hand-authored `html` layer carries
 // its CSS inline, and counting that source as "content" made every frosted pane earn a safe-zone check
 // it should never have been given, reported against a fragment of its own stylesheet. Third consumer of
-// this bug (docs/MISTAKES.md #214, #216); the rule now lives in one place and all of them read it.
+// this bug (docs/MISTAKES.md #220, #222); the rule now lives in one place and all of them read it.
 const carriesContent = (el) => !!el.querySelector('img, svg') || !!inkText(el).trim();
 // Only measured while the word is AT REST. A transformed descendant contributes to its ancestor's
 // scrollable overflow, so mid-rise every masked word reports a huge scrollHeight, which is the
@@ -735,7 +735,7 @@ function checkClippedText() {
     // <style> SOURCE IS NOT GLYPHS. A hand-authored `html` layer carries its CSS inline, and reading
     // that source as text made the audit report a frosted pane as "287px of clipped descenders" whose
     // supposed content was `.g{position:rela`. Nothing was clipped; nothing was even text. This is the
-    // same mistake as docs/MISTAKES.md #214, which fixed it for the overlap check and missed this one,
+    // same mistake as docs/MISTAKES.md #220, which fixed it for the overlap check and missed this one,
     // so the rule is now shared rather than repeated: only RENDERED text counts.
     const txt = inkText(el).trim();
     if (!txt || !vis(el) || !atRest(el) || maskedByDesign(el)) continue;
@@ -995,7 +995,7 @@ function contentSpan(hero, FW, FH) {
   return { spanL, spanR };
 }
 
-// ── CONTRAST: COLLECT PROBES, THEN HIDE THE GLYPHS (docs/MISTAKES.md #376) ────────────────────
+// ── CONTRAST: COLLECT PROBES, THEN HIDE THE GLYPHS (docs/MISTAKES.md #390) ────────────────────
 // No rule below decides anything. Each one names its SUBJECT, the ink box, the declared ink
 // colour, the size, the structural flags, and the caller measures the backdrop from the
 // composited frame with every subject's own paint hidden. The WCAG arithmetic, the size-aware
@@ -1049,7 +1049,7 @@ function collectSpanProbes(probe) {
   const checkSpan = (span, critical, label) => {
     // inkText, not textContent: this `t` is a GATE as well as a label, and `checkSpan` is called with a
     // whole layer when it is headline-scale, a layer that carries only an inline stylesheet would pass
-    // the emptiness test on its own CSS source (docs/MISTAKES.md #214/#216/#217, same rule again).
+    // the emptiness test on its own CSS source (docs/MISTAKES.md #220/#216/#217, same rule again).
     const t = inkText(span).trim(); if (!t || !vis(span)) return;
     const b = span.getBoundingClientRect(); if (b.width < 2 || b.height < 2) return;
     const cs = getComputedStyle(span);
@@ -1080,7 +1080,7 @@ const onOwnFill = (el, bx) => {
   // behind a component and wrong for the pill a layer draws for itself. tpot's brand-blue chip is
   // ONE div with a background and a white word inside it, so "is there an opaque SIBLING under the
   // glyphs" answered no and a deliberate white-on-brand-blue chip was held to the 7:1 field bar
-  // (docs/MISTAKES.md #376, second face). Walk the element and its ancestors up to the layer first.
+  // (docs/MISTAKES.md #390, second face). Walk the element and its ancestors up to the layer first.
   // A full-bleed surface is the FIELD, not a chip, so it does not count, but it does not veto the
   // sibling walk either: this loop can only ever return true, so it can only relax a bar.
   const stop = el.closest('.hs-layer');
@@ -1285,7 +1285,7 @@ function sourceIssues(cfg) {
   return out;
 }
 
-// ── THE COMPOSITED PIXEL UNDER THE GLYPHS (docs/MISTAKES.md #376) ────────────────────────────
+// ── THE COMPOSITED PIXEL UNDER THE GLYPHS (docs/MISTAKES.md #390) ────────────────────────────
 // The page function above names each contrast SUBJECT and takes its own paint off the frame. What
 // follows measures the backdrop that reveals, which is the thing a viewer actually sees: no DOM
 // search, no paint-order guess, no `pointer-events` trap, and no way for a `pointer-events:none`
@@ -1453,7 +1453,7 @@ const spanContrast = (p, ink, bg, rt) => {
 // film this repo holds up as its reference, is the case. Read at f258: plainly legible.
 // The ink has to be a NEUTRAL EXTREME for this. A pale-orange heading on orange is the
 // washout defect itself and stays at 7:1, which is why this tests the ink and not only the
-// field (docs/MISTAKES.md #376, second face).
+// field (docs/MISTAKES.md #390, second face).
 const headlineContrast = (p, ink, bg, rt) => {
   const bgSat = rgbToHsl(bg)[1];
   const [, inkSat, inkL] = rgbToHsl(ink);

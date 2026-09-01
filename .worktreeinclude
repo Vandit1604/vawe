@@ -51,5 +51,5 @@ assets/gen/**
 # reads its precomputed spectrum from here. Without it the track DEGRADES SILENTLY — it renders, it
 # just reacts to nothing — which is how one scene (react-demo) appeared to render differently in every
 # worktree for a whole session. Four agents investigated it; none found the missing file, because
-# nothing in the output pointed at audio. docs/MISTAKES.md #445.
+# nothing in the output pointed at audio. docs/MISTAKES.md #465.
 assets/music/*.json

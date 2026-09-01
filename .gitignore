@@ -17,7 +17,7 @@ out/**/*.fonts.json
 # were ignored, so shots and logs sat untracked in `git status` waiting to be committed by accident.
 # `**/`, not a bare `*`: `out/*.png` matches out/shot.png and NOT out/flight/shot.png, so a tool that
 # writes into a SUBDIRECTORY of out/ walked straight past this rule. Fourteen contact-sheet frames
-# from `out/flight/` reached main inside an unrelated commit exactly that way (docs/MISTAKES.md #405).
+# from `out/flight/` reached main inside an unrelated commit exactly that way (docs/MISTAKES.md #424).
 out/**/*.png
 out/**/*.log
 out/**/*.html

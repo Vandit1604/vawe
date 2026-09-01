@@ -14,12 +14,15 @@
 # arsenal-check is the same argument once more, and it belongs here rather than in author-check for a
 # specific reason: the commit that ADDS a capability is a framework commit, and framework commits never
 # run an authoring ladder. The three.js layer landed that way and stayed out of the catalogue for as
-# long as it existed, so the author who needed a globe went to npm instead (docs/MISTAKES.md #321).
+# long as it existed, so the author who needed a globe went to npm instead (docs/MISTAKES.md #335).
 # scenes-json is here rather than in a site build because the drift it catches is INVISIBLE: the site
 # serves its own copy of a scene, so a film fixed in formats/scene/ keeps playing broken on the site
-# until someone notices by hand. Nobody did for forty days (docs/MISTAKES.md #455). It reads 15 files.
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + arsenal + scenes) …"
-if ! make schema-check lib-test craft-coverage doc-refs arsenal-check scenes-json no-emdash; then
+# until someone notices by hand. Nobody did for forty days (docs/MISTAKES.md #475). It reads 15 files.
+# mistakes-check is here for the same reason as doc-refs: MISTAKES.md is edited on almost every commit
+# that touches this file's own doctrine, and a duplicate entry is only visible across the whole log, not
+# from the diff being pushed. It reads one file.
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + arsenal + scenes + mistakes) …"
+if ! make schema-check lib-test craft-coverage doc-refs arsenal-check scenes-json no-emdash mistakes-check; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

@@ -1235,7 +1235,7 @@ file boundary is a rule with a hole in it.
 
 ---
 
-## 72. The block gate audited one file while the registry became four
+## 73. The block gate audited one file while the registry became four
 
 **What:** `blocks/index.mjs` was split into `kit.mjs` (shared primitives) and `app.mjs` (app surfaces).
 `make blocks-audit` kept reading the single path it was written against and reported green over both
@@ -1255,7 +1255,7 @@ of the last eight gate bugs were the file list, not the rule.
 
 ---
 
-## 73. Every block could only enter, because the engine could only move a box
+## 74. Every block could only enter, because the engine could only move a box
 
 **What:** 101 of ~130 factories carried `anim: 'rise'`. The block registry — whose entire purpose is
 "see what this does, then use it" — showed 131 tiles all doing the same thing: sliding up.
@@ -1280,7 +1280,7 @@ uniform style across 101 call sites is usually a missing capability wearing a co
 
 ---
 
-## 74. The conformance sweep cannot detect two identical values (OPEN)
+## 75. The conformance sweep cannot detect two identical values (OPEN)
 
 **Status: real defect, evidenced, NOT fixed. My attempted fix was a regression and I reverted it.**
 
@@ -1306,7 +1306,7 @@ would take to MAKE it fail, and then actually try it.
 
 ---
 
-## 75. I diagnosed a flake twice from truncated output
+## 76. I diagnosed a flake twice from truncated output
 
 **What:** `make conformance` failed twice inside a chain of `make` targets. I attributed it first to
 "concurrent browsers" and then to "a subagent mid-edit on blocks/index.mjs", and reported both.
@@ -1314,13 +1314,13 @@ would take to MAKE it fail, and then actually try it.
 Conformance does not import `blocks/` at all — it imports four `core/` registries.
 **Root cause of the misdiagnosis:** every observation came through `| tail -1`, which shows the
 summary line and hides whatever error printed above it. I diagnosed from evidence I had truncated.
-**Outcome:** still unexplained, and now honestly labelled as such. What it produced instead was #74 —
+**Outcome:** still unexplained, and now honestly labelled as such. What it produced instead was #75 —
 trying to force the failure is what exposed the vacuous distinctness check.
 **Rule:** never diagnose from `tail -1`. If a gate fails, read all of it.
 
 ---
 
-## 76. The doc, the manifest and the engine each said something different about `unit`
+## 77. The doc, the manifest and the engine each said something different about `unit`
 
 **What:** `CLAUDE.md` documents `unit: "$B"` with value `880` rendering as **`$880B`**. The catalog
 ships `statBig.currency` with exactly those props. The engine rendered **`880$B`** — the shipped
@@ -1338,7 +1338,7 @@ implementation all describe the same thing, only one of them is executable — c
 
 ---
 
-## 77. The overlap check does not see text that grows by wrapping (OPEN)
+## 78. The overlap check does not see text that grows by wrapping (OPEN)
 
 **What:** a showcase end card had a headline wrap to two lines and land directly on top of the mono
 filepath beneath it. `make audit` reported **0 hard issues**.
@@ -1346,7 +1346,7 @@ filepath beneath it. `make audit` reported **0 hard issues**.
 text layer that wraps grows beyond the box the check reasons about, into the next layer's space.
 **Status: OPEN.** I have the reproduction (widening `w` from 1100 to 1420 so the headline holds one
 line fixed it) but have not confirmed the mechanism, and I am not going to write a third gate patch
-tonight on a hypothesis — see #74, where exactly that produced a regression.
+tonight on a hypothesis — see #75, where exactly that produced a regression.
 **Why it matters:** this is the "renders silently wrong" class the roadmap describes. Two of the four
 showcase films had a composition defect that passed every gate, and both were caught by looking.
 **Related, also open:** nothing measures vertical mass distribution. Six of twelve beats initially put
@@ -1354,7 +1354,7 @@ all content in the upper 60% with a dead bottom third, and every one passed the 
 
 ---
 
-## 78. Non-block layers get no unknown-prop check at all
+## 79. Non-block layers get no unknown-prop check at all
 
 **What:** a scene wrote `{"type":"glow","r":620,"opacity":0.5}` and got no glow. `core/layers/glow.js`
 sizes from `w`/`h` and takes `color`+`intensity`; `r` and `opacity` are not props it reads.
@@ -1367,7 +1367,7 @@ available; it needs care about props that are legitimately type-agnostic.
 
 ---
 
-## 79. `ls` was declared, documented, used 18 times, and never applied
+## 80. `ls` was declared, documented, used 18 times, and never applied
 
 **What:** the schema declares `ls` as "Letter-spacing (e.g. -0.03em)". Eighteen layers across shipped
 scenes set it. `styleText` applied `L.tracking` and never `L.ls`; the only place `ls` was read at all
@@ -1381,9 +1381,9 @@ line that reads it.
 
 ---
 
-## 80. Three composition defects the gates structurally could not see — now two of them can
+## 81. Three composition defects the gates structurally could not see — now two of them can
 
-Closing #77, and the third stays open on purpose.
+Closing #78, and the third stays open on purpose.
 
 **(a) Overlap only compared "critical" layers.** Text under 60px was invisible to it, so a headline
 that WRAPPED onto a second line and landed on the caption beneath it passed. Measured on the
@@ -1406,14 +1406,14 @@ everything in the top 60% with a dead bottom third, and every one passed safe-zo
 answers "is it inside the frame", not "does it USE the frame". New `top-heavy`/`bottom-heavy` warn.
 Warn tier because a deliberately weighted beat is a real choice.
 
-**(c) HALF CLOSED — see #81.** `deploySuccess`'s cascade was unreachable behind a tautological
+**(c) HALF CLOSED — see #82.** `deploySuccess`'s cascade was unreachable behind a tautological
 ternary. The instance is fixed and the identical-arm half is now gated; the always-true-condition half
 still needs real dataflow analysis and stays open.
 
 
 ---
 
-## 81. A decision that decides nothing
+## 82. A decision that decides nothing
 
 **What:** `deploySuccess` shipped `i === last ? T.green : T.green` — a ternary with identical arms —
 beside a condition that was always true. Between them, the step cascade the block exists for could
@@ -1434,7 +1434,7 @@ hypothesis, not a finding.
 
 ---
 
-## #83 — A test that hardcodes a count is edited by whoever breaks it
+## 83. A test that hardcodes a count is edited by whoever breaks it
 
 `lib-test` asserted `SHADER_FX.length === 33` and `AMBIENT_FX.length === 14`. Adding three effects
 failed both. The failure carries no information: nothing is wrong, a number moved. And the fix is
@@ -1454,7 +1454,7 @@ weaken it (36/36 still provable).
 
 ---
 
-## #84 — A positional assertion silently changed what it was testing
+## 84. A positional assertion silently changed what it was testing
 
 The same file asserted matrixDecode's rain moves with time by slicing `frag.lastIndexOf('} else {')`
 — the trailing branch. That was matrixDecode when it was written. Appending nebula and dotCrawl made
@@ -1465,12 +1465,12 @@ been `/\bt\b/` alone, it would have kept passing against the wrong branch foreve
 **Root cause:** addressing a thing by its position in a list that grows.
 
 **Fix:** `branchOf(name)` locates a branch by the effect's own name, and the check now runs over
-matrixDecode, nebula and dotCrawl. Same class as the schema-drift fix (#82): name-matching and
+matrixDecode, nebula and dotCrawl. Same class as the schema-drift fix (#137): name-matching and
 position-matching both drift, exact addressing does not.
 
 ---
 
-## #85 — A gate flagged its own test fixture
+## 85. A gate flagged its own test fixture
 
 `dead-branch` reported `gate-mutation.mjs:183 both arms are 2`. That line is the mutation the harness
 *injects* to prove dead-branch can fire. The gate was correct about the text and wrong about the file:
@@ -1485,7 +1485,7 @@ finding gets missed.
 
 ---
 
-## #86 — An incomplete GL texture samples as opaque black, and says nothing
+## 86. An incomplete GL texture samples as opaque black, and says nothing
 
 The first resample render was a solid black rectangle. The guard was
 `if (!src || !src.width || !src.height) return;`, meant to skip an image that had not decoded. But an
@@ -1507,7 +1507,7 @@ subtle"), but by dumping the live DOM and reading the WebGL console warning.
 
 ---
 
-## #87 — refract ran every line and did nothing
+## 87. refract ran every line and did nothing
 
 `refract` computed a surface normal by finite-differencing a noise field:
 `vec2 grad = vec2(n(q+e) - n(q-e), ...)` with `e = 0.004`. That is a DIFFERENCE, not a derivative.
@@ -1532,7 +1532,7 @@ happens, so it is bit DEPTH now, halving every 0.25.)
 
 ---
 
-## #88 — The comment described the intent; the code did the opposite
+## 88. The comment described the intent; the code did the opposite
 
 `fisheye` was labelled "barrel (amt>0.5) or pincushion (amt<0.5)" and computed
 `d * (1.0 + k*r*r*0.6)`. Sampling FURTHER out at the edges pulls the image inward, which is
@@ -1545,7 +1545,7 @@ looked at, exactly like a number. Nothing in the type system, the schema, or any
 
 ---
 
-## #89 — The gate that proves every other gate can fire silently stopped proving one
+## 89. The gate that proves every other gate can fire silently stopped proving one
 
 Editing `core/surfaces/paint.js` for resample changed the off-window line that
 `gate-mutation` patches to prove `canvas-purity` works. The fixture pinned the ENTIRE line, so it no
@@ -1567,7 +1567,7 @@ behaviour it removes. Pinning a whole line couples the gate's survival to every 
 
 ---
 
-## #90 — The roadmap decayed again, in the exact way its own closing warning describes
+## 90. The roadmap decayed again, in the exact way its own closing warning describes
 
 `docs/ROADMAP.md` ends with a standing warning: three items sat on it as "build first" long after they
 were built, two consecutive planning passes were routed at them, and "a roadmap is a claim about the
@@ -1592,9 +1592,9 @@ it, which is the same lesson as #85.
 
 ---
 
-## #91 — The distinctness check decided its own answer, and the fix for it nearly did too
+## 91. The distinctness check decided its own answer, and the fix for it nearly did too
 
-#74 left this open and honest: `make conformance` printed "layer anim · 17 values · 17 distinct ✓"
+#75 left this open and honest: `make conformance` printed "layer anim · 17 values · 17 distinct ✓"
 while `wipe-down` was byte-identical to `wipe`. The signature is `frameSig`, which hashes
 `document.body.innerHTML`, and scene.html stamps `data-anim="<name>"` on every layer. **The signature
 contained the name of the thing being tested.** Two values that render pixel-identically could never
@@ -1640,9 +1640,9 @@ one for each half of the proof (empty `BLIND_ATTRS`, and a perturbed fnv seed). 
 
 ---
 
-## #92 — The dataflow half of dead-branch, and the rule I had to cut
+## 92. The dataflow half of dead-branch, and the rule I had to cut
 
-#81 shipped `make dead-branch` catching one shape — `cond ? X : X` — and said plainly that the
+#82 shipped `make dead-branch` catching one shape — `cond ? X : X` — and said plainly that the
 dataflow half needed real analysis and that half a linter pretending to be a whole one is worse than
 none. This closes the part that can be closed honestly.
 
@@ -1663,7 +1663,7 @@ the blind spot is never in the rule, it is in the set the rule runs over.
 
 **What it caught on its first run: six.** `clamp` in reimagine, `beatOf` in critique, `inWin` and
 `lastF` in motion-audit, `FONTS` in rules-build, `total` in preview. Four of the six are in gate code.
-Same as #81, where the first run found a dead ternary in the gate being written to find them.
+Same as #82, where the first run found a dead ternary in the gate being written to find them.
 
 **The rule I cut, and why it is worth writing down.** The constant-condition rule started as "a
 comparison anywhere whose operands are all constant". It produced eight false positives immediately,
@@ -1674,7 +1674,7 @@ syntax itself says where the expression begins and ends: only `if (…)` / `whil
 contents are token-operator-token. Nothing is left for precedence to change. Eight false positives
 before the anchor, zero after. The broad version would have been a bigger rule and a worse gate.
 
-**Still not caught, stated so nobody trusts it past its limit:** the multi-hop case #81 named
+**Still not caught, stated so nobody trusts it past its limit:** the multi-hop case #82 named
 (`const done = i < n-1` … later `done || i === n-1`), where the condition is invariant only after
 propagating a non-constant expression through another binding. That needs a real dataflow engine over
 a real AST. This repo has one dependency and intends to keep it.
@@ -1687,7 +1687,7 @@ excluded, now by one shared reasoned predicate: both QUOTE these patterns on pur
 
 ---
 
-## #93 — `opacity` on a layer did nothing, in two shipped scenes, for months
+## 93. `opacity` on a layer did nothing, in two shipped scenes, for months
 
 `paint-demo.json` and `react-demo.json` both set `opacity` on a paint layer. The engine never read it.
 `driveClips` writes `el.style.opacity` from the enter/exit envelope on every single frame, so even a
@@ -1708,7 +1708,7 @@ their authors wrote.
 
 ---
 
-## #94 — The validator accepted any prop name at all
+## 94. The validator accepted any prop name at all
 
 A layer with `fill` (the rect prop is `bg`), `colour` (it is `color`), and a wholly invented key
 validated clean and rendered wrong in silence. I found it by making the mistake myself: my raymarch
@@ -1727,7 +1727,7 @@ condemn the corpus.
 
 ---
 
-## #95 — A gate answered a question it was not asked
+## 95. A gate answered a question it was not asked
 
 `node scripts/gates/scene-snap.mjs scene formats/scene/paint-demo.json` printed
 `✓ IDENTICAL — no DOM/layout change`. It had never opened `paint-demo.json`. Snap takes a FORMAT name
@@ -1747,7 +1747,7 @@ read was not the input it was handed. That is the recurring shape here (#45 samp
 
 ---
 
-## #96 — Coverage lists that do not grow cover less every time you ship
+## 96. Coverage lists that do not grow cover less every time you ship
 
 `lib-test` asserted that stings depend on progress and ambient looks depend on time, over hand-typed
 name lists: `wave2` (10 entries) and `wave3` (8). `SHADER_FX` holds 35 and `AMBIENT_FX` 17. So the
@@ -1767,7 +1767,7 @@ Third instance today of the same root cause, after #83 (hardcoded counts) and #9
 
 ---
 
-## #97 — The docs decayed identically, one file over from the gate watching them
+## 97. The docs decayed identically, one file over from the gate watching them
 
 `make docs-drift` shipped hours earlier to stop ROADMAP.md listing shipped work as missing. It
 watched one file. `docs/PRIMITIVES.md` states counts in its section HEADINGS and had drifted exactly
@@ -1782,7 +1782,7 @@ failure mode.
 
 ---
 
-## #98 — A group child was legal at depth 2 and illegal at depth 1
+## 98. A group child was legal at depth 2 and illegal at depth 1
 
 `boot` rejected `{type:'rect'}` as a direct group child ("not valid. Did you mean 'text'?") while two
 SHIPPED scenes used `rect` and `html` children one level deeper and rendered fine. The engine only
@@ -1804,7 +1804,7 @@ validate.
 
 ---
 
-## #99 — A nested `layout:'free'` group did not position its own children
+## 99. A nested `layout:'free'` group did not position its own children
 
 Reported by a subagent building `splitScreen`. A free group's children are `position:absolute`, which
 resolves against the nearest POSITIONED ancestor. A top-level layer is absolute, so free layout worked
@@ -1823,7 +1823,7 @@ break every one of them.
 
 ---
 
-## #100 — Every vendored font is VARIABLE, and the obvious extractor reads the wrong master
+## 100. Every vendored font is VARIABLE, and the obvious extractor reads the wrong master
 
 Building `scripts/fonts/glyphs.mjs` (woff2 → three.js typeface JSON, so `TextGeometry` can extrude
 real brand type instead of helvetiker). The obvious chain is wawoff2 to decompress, then opentype.js
@@ -1859,7 +1859,7 @@ geometry directly above the same string set in the original woff2 and you look a
 
 ---
 
-## #101 — The shard grid that was already broken before anything hit it
+## 101. The shard grid that was already broken before anything hit it
 
 Building the `sim` tier (Tier B: stateful simulation baked offline to a PNG sequence, played back
 through the existing `clip` layer). `sims/shatter.mjs` disintegrates a panel, so it starts from a
@@ -1885,7 +1885,7 @@ artifact that nobody re-renders casually. Anything wrong in it ships until someo
 
 ---
 
-## #102 — `git stash` in a shared worktree, while other agents were writing to it
+## 102. `git stash` in a shared worktree, while other agents were writing to it
 
 Mine, during the same session. I wanted the pre-change count for `make gate-test`, so I stashed the
 tree, ran the harness, and popped. Two things went wrong at once.
@@ -1907,7 +1907,7 @@ baseline number is never worth putting a shared tree into a state only a diff ca
 
 ---
 
-## #100 — The build context is the working tree, so .gitignore does not protect it
+## 103. The build context is the working tree, so .gitignore does not protect it
 
 `assets/baked` (67M of sim bake output) and `assets/gen` were gitignored, mentioned by no `COPY` in
 the Dockerfile, and shipped to the daemon on **every single build** anyway. Nothing in a diff, a
@@ -1926,7 +1926,7 @@ tool's own output, which is exactly what caught it.
 
 ---
 
-## #101 — I discarded a correct diagnosis because of evidence that never contradicted it
+## 104. I discarded a correct diagnosis because of evidence that never contradicted it
 
 vawe-site had failed every deploy for three days at `COPY scripts ./scripts` with
 `failed to stat active key during commit`. I diagnosed a corrupt BuildKit snapshotter. Then I found
@@ -1960,7 +1960,7 @@ from the repo side.
 
 ---
 
-## #102 — `preview.mjs` is non-deterministic where the production render is not
+## 105. `preview.mjs` is non-deterministic where the production render is not
 
 Building the `ransom` treatment, I checked determinism by rendering a frame 5× through
 `make frame` / `scripts/author/preview.mjs` and hashing the PNGs. Five different hashes. I spent a
@@ -1979,9 +1979,9 @@ stable paint so it stops lying; logged as a follow-up.)
 
 ---
 
-## #103 — A failed render left a stale PNG, and the hash read it as "identical"
+## 106. A failed render left a stale PNG, and the hash read it as "identical"
 
-Chasing #102, I wrote scenes to `/tmp` and rendered them with `preview.mjs`. The preview server only
+Chasing #105, I wrote scenes to `/tmp` and rendered them with `preview.mjs`. The preview server only
 serves files under the repo root, so every `/tmp` scene fetched empty and the render **errored without
 writing a new PNG** — leaving the previous run's image in place. `md5 /tmp/preview_scene_100.png` then
 read that stale file and reported the same hash across totally different inputs, "proving" determinism
@@ -1989,12 +1989,12 @@ about files that never rendered. I nearly concluded the opposite of the truth tw
 
 **The rule:** a measurement over an output file must first guarantee the file was *freshly produced*.
 `rm -f` the target before each run and hard-fail if it is missing afterward — never hash whatever
-happens to be on disk. Same shape as the byte-identical-snapshot-ID trap (#101): an identifier/artifact
+happens to be on disk. Same shape as the byte-identical-snapshot-ID trap (#104): an identifier/artifact
 that cannot have been produced by this run is the loudest signal that the run didn't happen.
 
 ---
 
-## #104 — Diagonal clip-path edges rasterise non-deterministically under per-element rotation
+## 107. Diagonal clip-path edges rasterise non-deterministically under per-element rotation
 
 The vivid `ransom` palette first shipped extra cut shapes (a pennant point, a sheared parallelogram).
 The production render then varied across runs — 4/4 byte-identical with ragged near-rectangular torn
@@ -2010,7 +2010,7 @@ variable.
 
 ---
 
-## #105 — Two shipped scenes do not render the same twice, and nothing was checking
+## 108. Two shipped scenes do not render the same twice, and nothing was checking
 
 Refactoring boot()'s preloaders, I byte-compared renders across the change. `ransom-demo`,
 `ransom-color-demo` and `canvasfx-reel` were identical; `three-showcase` and `_coverage-reel` were
@@ -2039,7 +2039,7 @@ worthless until you know the baseline is itself reproducible.
 
 ---
 
-## #106 — The ransom effect has a determinism ENVELOPE, and I shipped it without knowing where the edge was
+## 109. The ransom effect has a determinism ENVELOPE, and I shipped it without knowing where the edge was
 
 `ransom` was verified byte-identical on two scenes (7 glyphs at size 180, 16 glyphs at size 150) and
 shipped as "pure in n". Authoring a three-line note, the render started varying run to run. My first
@@ -2057,7 +2057,7 @@ identical. 32 glyphs @150 → 3 distinct. 11 glyphs @88 → 3 distinct (small ty
    envelope is now in PRIMITIVES with the measurements.
 2. Four hypotheses, each killed by a cheap discriminating test before moving on (static-vs-cycling,
    re-run the known-good scene, remove the shadow, vary size and count). That is the habit that finally
-   found it, after #101 where I abandoned a correct diagnosis for want of one.
+   found it, after #104 where I abandoned a correct diagnosis for want of one.
 
 The video ships within the envelope: one line on screen at a time, size 150, 3/3 byte-identical. The
 general fix is task #27 — a pixel-level purity gate over every shipped scene, which would have drawn
@@ -2065,7 +2065,7 @@ this boundary automatically instead of me discovering it by surprise.
 
 ---
 
-## #107 — Half of every composite look was thrown away on any top-level layer, silently
+## 110. Half of every composite look was thrown away on any top-level layer, silently
 
 Authoring the looks film, `"filter": "crt"` on an image produced a brightness lift and **no
 scanlines**. The same look on a gradient card inside a `group` (looks-reel) rendered its scanlines
@@ -2100,7 +2100,7 @@ frame 0. Filed as follow-up.
 
 ---
 
-## #108 — The layout audit called Ken Burns a bug, so authors learned to ignore it
+## 111. The layout audit called Ken Burns a bug, so authors learned to ignore it
 
 `make audit` hard-failed the new film with seven `[overflow] hs-img-wrap — content 925x929 clipped to
 900x900`. Ken Burns *works* by scaling the image past its box so the box clips it; `object-fit: cover`
@@ -2119,7 +2119,7 @@ line under it. Measure how often a rule fires on healthy input before trusting t
 
 ---
 
-## #109 — `make photos` wrote WebP bytes into files named `.jpg`
+## 112. `make photos` wrote WebP bytes into files named `.jpg`
 
 Openverse serves whatever the upstream host stored, commonly WebP, from URLs still ending `.jpg`.
 `scripts/brand/photos.mjs` named every download `<slug>-<i>.jpg` regardless of content. Chrome sniffs
@@ -2136,7 +2136,7 @@ consumer in the chain, so passing in a browser proves the least.
 
 ---
 
-## #110 — Two gate messages that describe something other than what they test
+## 113. Two gate messages that describe something other than what they test
 
 Both found while running the ladder on one film; neither is fixed in the gate that reports it.
 
@@ -2156,7 +2156,7 @@ message says it measures and what the code measures.
 
 ---
 
-## #111 — The site quoted nine capability numbers, and the registry had moved past all of them
+## 114. The site quoted nine capability numbers, and the registry had moved past all of them
 
 Asked to bring the site up to date, I found `96 components`, `96 blocks across 44 families`,
 `44 families`, `a 100-block taste library`, a `<meta>` description promising `96 vetted components`,
@@ -2188,7 +2188,7 @@ one, or the number is noise.
 
 ---
 
-## #112 — Every "glow" in the engine was a drop-shadow, which glows the wrong channel
+## 115. Every "glow" in the engine was a drop-shadow, which glows the wrong channel
 
 Six looks (`neon`, `dreamyHaze`, `halationFilm`, `angelic`, `hologram`, `glitchGlow`) built their bloom
 from a stack of four `drop-shadow`s. On text and cut-outs that traces the glyph and looks right, so it
@@ -2231,7 +2231,7 @@ function, so one change fixed all six. Static def, injected once at build, no fr
 
 ---
 
-## #113 — A kernel's `amount` knob has to respect what the kernel sums to
+## 116. A kernel's `amount` knob has to respect what the kernel sums to
 
 Building the relief family, `edgeGlow` rendered as a solid black rectangle. My first read was the
 subject: polished marble is smooth, smooth material has little edge energy, so I amplified after the
@@ -2255,7 +2255,7 @@ around the identity.
 **The lesson.** I reached for a property of the *content* to explain a defect in the *operator*, and
 the content was plausible enough to hold me for one wrong fix. The tell I walked past: brightness
 amplification changing nothing at all. If a gain does literally nothing, the signal is not small, it
-is absent, and those are different diagnoses. Same trap as #101, one level down.
+is absent, and those are different diagnoses. Same trap as #104, one level down.
 
 Also worth stating plainly: this was a knob I added an hour earlier, and it was wrong for one of the
 three kernels I shipped it with. A parameter that means different things to different members of its
@@ -2263,7 +2263,7 @@ own registry needs the branch written the day it is introduced, not the day one 
 
 ---
 
-## #114 — A build step that stops at the first error reports one error per run
+## 117. A build step that stops at the first error reports one error per run
 
 Adding three rows to the site-assets manifest, nothing encoded and the only output was a complaint
 about a different row entirely. `site-assets.mjs` called `process.exit(1)` the moment a manifest row
@@ -2289,7 +2289,7 @@ that every `out/*.mp4` traces to a `formats/scene/*.json` would.
 
 ---
 
-## #115 — Two kinetic knobs cancelled themselves out and did nothing
+## 118. Two kinetic knobs cancelled themselves out and did nothing
 
 Building the knob manifest, a drift guard (set each advertised dial, assert the output moves) flagged
 `bounce.settle` and `elastic.settle` as dead. They were not typos in the manifest; the presets
@@ -2313,11 +2313,11 @@ draft, so the next dead dial fails loud the day it is written instead of years l
 
 The general lesson, again: a parameter that is accepted and silently ignored is the worst kind of bug,
 because the code looks correct and the output looks plausible. The only defence is a check that
-exercises the parameter and asserts an effect (docs/MISTAKES.md #19-28, #107, #113 — same family).
+exercises the parameter and asserts an effect (docs/MISTAKES.md #19-28, #110, #116 — same family).
 
 ---
 
-## #116 — The audit gate was broken for the ENTIRE MCP flow, and only a real session caught it
+## 119. The audit gate was broken for the ENTIRE MCP flow, and only a real session caught it
 
 A fresh MCP session, told to build a video and read the gate verdicts, reported that the audit gate
 returned "file not found · 1 HARD issue" on every revision. Every other check was clean and it shipped
@@ -2343,7 +2343,7 @@ valuable test I have is a real agent driving the product for a real outcome and 
 because it uses the outputs the way a customer will — and it found in one run a gate that had been
 dark for the whole life of the MCP.
 
-## #117 — a direction gate must measure beat-holds from real cut times, not start-clusters
+## 120. a direction gate must measure beat-holds from real cut times, not start-clusters
 
 **What:** the first `make direct` beat-too-short check computed beat durations from layer-start
 clusters, then flagged any span under 0.6s. It fired on `creed` (which has NO cuts at all) and other
@@ -2364,7 +2364,7 @@ the calibration sweep, not shipped.
 **The lesson:** a heuristic that can only fire on an artifact of its own segmentation is worse than no
 check. Before trusting a new gate, run it across the whole corpus and confirm the clean cases pass.
 
-## #118 — a loudness (LUFS) target is not an RMS gain; do it at the mux with ffmpeg loudnorm
+## 121. a loudness (LUFS) target is not an RMS gain; do it at the mux with ffmpeg loudnorm
 
 **What:** the first `audio.loudness` implementation normalized the mixed PCM to the target with a
 single broadband gain computed from the un-weighted mean square. A scene asking for -14 LUFS rendered
@@ -2387,7 +2387,7 @@ reads the true integrated LUFS. A self-estimate that says "on target" is not pro
 encoder already implements it. And verify a loudness knob with a real meter end-to-end, never by the
 same formula that set it.
 
-## #119 — a typed line cut off mid-type because its beat was too short
+## 122. a typed line cut off mid-type because its beat was too short
 
 **What:** a mono `{ "module": "scene", "layers": [ ... ] }` line (`typing: 30`, 40 chars) sat in a
 1.4s beat. At 30 chars/sec it takes 1.33s to type, so it finished at the exact frame the layer began
@@ -2408,7 +2408,7 @@ original (30/s, 1.4s) and passes the fix (48/s, 1.6s).
 hold before its beat ends. A reveal the cut interrupts reads as broken, and the engine will interrupt
 it silently unless a gate checks the arithmetic.
 
-## #120 — beat transitions dipped to an EMPTY stage (jump-cut with a dip)
+## 123. beat transitions dipped to an EMPTY stage (jump-cut with a dip)
 
 **What:** in a fast multi-beat film, every cut showed a ~0.4s frame of blank stage: the outgoing beat
 faded fully out before the incoming beat faded in. Seam screenshots were empty (only the persistent
@@ -2446,7 +2446,7 @@ beats are pulled apart into gaps and passes the overlapping timeline.
 **The lesson:** a transition is an OVERLAP, not a hand-off across a void. The outgoing content must
 still be on screen when the incoming arrives; the motion between them IS the transition. Deeper win
 (roadmap Seam D): true two-scene shader transitions that composite outgoing + incoming on the GPU.
-## #121 — Seam D whole-stage bake deadlocked the render: the virtual clock starved chromedp's readiness Poll
+## 124. Seam D whole-stage bake deadlocked the render: the virtual clock starved chromedp's readiness Poll
 
 Seam D (two-scene shader transitions) rasterises the two beats either side of a boundary into textures
 at build time, inside boot's awaited phase. The scene booted fine in isolation (puppeteer: ready in
@@ -2481,7 +2481,7 @@ independent). The method note that finally worked: reproduce the exact Go/chrome
 `cmd` probe with a watchdog that prints the stuck action — it named `nav+poll` immediately, which no
 amount of puppeteer testing (different, non-starving headless) had revealed.
 
-## #122 — seams ran at LINEAR speed while cuts were eased: every two-scene transition felt mechanical
+## 125. seams ran at LINEAR speed while cuts were eased: every two-scene transition felt mechanical
 
 **What.** A scene `cut` shapes its progress through `TIMINGS` (smooth / snappy / rush / brake …, core/cuts.js),
 so it accelerates and settles. A `seam` did NOT: `renderFrame` drove the compositor with raw
@@ -2507,9 +2507,9 @@ filmstrip so the easing is visible (where the motion bunches) before authoring. 
 suggests ONE eased seam at the payoff, applying the decision procedure (docs/CRAFT/TRANSITIONS.md)
 instead of leaving seams undiscovered.
 
-## #123 — neon bloomed a flat FLOOD colour, not the image's own colours (not how neon works)
+## 126. neon bloomed a flat FLOOD colour, not the image's own colours (not how neon works)
 
-**What.** The luminance-bloom refactor (#112) thresholds luminance for the highlight mask (correct), but
+**What.** The luminance-bloom refactor (#115) thresholds luminance for the highlight mask (correct), but
 then FLOODED a single colour through that mask (`feFlood` + `feComposite operator=in`), throwing the
 source's colours away. So `neon` painted one uniform glow: its default `color: var(--accent)` could not
 encode into the SVG filter id (an id carries literal RGB, a CSS var can't), so it fell to WHITE — a
@@ -2533,7 +2533,7 @@ option: `value` (max(R,G,B) via feBlend "lighten") keys on HSV value, so a neon 
 full strength regardless of luminance. neon + glitchGlow use `value`; every other bloom look stays on
 `luma` (unchanged). Verified by render (red/cyan/blue squares all glow strongly in their own colour).
 
-## #124 — our videos read STATIC and small next to real motion-graphics references
+## 127. our videos read STATIC and small next to real motion-graphics references
 
 **What.** Recreating a real launch film (the Brew film, `twitter.mp4`), the first pass read as "inspired
 by," not a copy. Measuring the reference (`make measure`) and comparing frames named the gap precisely,
@@ -2562,7 +2562,7 @@ Logged here as the next text-layer improvement.
 confirms our render's motion matches the reference's curve; REFERENCE-STUDY.md is the checklist so the
 habits are a deliberate reach, not a rediscovery.
 
-## #125 — the camera zoom "shook" / wasn't smooth: cameraAt eased EVERY segment, zeroing velocity at each keyframe
+## 128. the camera zoom "shook" / wasn't smooth: cameraAt eased EVERY segment, zeroing velocity at each keyframe
 
 **What.** A multi-keyframe camera push read as pulsing/shaking, not a smooth glide. Two compounding
 causes: (1) authored keyframes that REVERSED (zoom in to s1.08, then snap to s1.02 at the next keyframe
@@ -2590,7 +2590,7 @@ per-element push, the another engine way) — the beat now measures `linear`, re
 `ease:"linear"` on interior keyframes (or a single 2-keyframe glide); per-beat push via per-layer
 `motion.scale`, not chained camera resets.
 
-## #126 — seams rendered DEAD SILENT under `audio.auto`: sound design derived cuts + stings but never seams
+## 129. seams rendered DEAD SILENT under `audio.auto`: sound design derived cuts + stings but never seams
 
 **What.** With `audio:{auto:true}`, the scene builder derives an SFX cue per transition — a whoosh on
 each cut, a reveal on each sting. It read `layers[].cut`, `data.cuts`, and `stings`, but NOT `data.seams`.
@@ -2616,7 +2616,7 @@ resolves to a baked wav. A new seam fx added to core/seams.js without a cue row 
 instead of shipping mute. Blast radius: `vawe-identity.json` (seams + auto) gains its seam whooshes;
 frames byte-identical (`make probe` green — audio is meta, not renderFrame).
 
-## #127 — `dy`/`dx` set without `anchor` silently did nothing: two pin-centred lines rendered on top of each other
+## 130. `dy`/`dx` set without `anchor` silently did nothing: two pin-centred lines rendered on top of each other
 
 **What.** Scoring the seam demo, two payoff lines ("every seam" / "is scored"), both `pin:"center"`
 with `dy:-105` / `dy:+105` to stack them, rendered ON TOP of each other — a garbled overlap. The `dy`
@@ -2637,7 +2637,7 @@ still pass. The demo was fixed the `<br>` way (one layer, natural line stacking)
 the engine reads an input conditionally, the validator must assert the condition — "works or fails loudly",
 never "accepted and ignored".
 
-## #128 — beatsync couldn't snap cuts past the music LOOP: a short bed left most of a film off-grid
+## 131. beatsync couldn't snap cuts past the music LOOP: a short bed left most of a film off-grid
 
 **What.** `make beatsync` snapped only 2 of 5 cuts in a 21s film. The bed (warm.wav) is an 8s loop; the
 Go mixer repeats it to fill the film, but the beatmap only covers the 8s track file — so there are no
@@ -2655,7 +2655,7 @@ last is a punch left 0.13s off, under no tolerance). Idempotent and regression-c
 **Lesson.** A grid derived from an asset file is not the grid heard in the render when the engine
 transforms that asset (loops it, time-stretches it). Sync tools must model the transform, not the file.
 
-## #129 — built a sparse TYPE-TEASER when the brief wanted a dense PRODUCT DEMO (told, didn't show)
+## 132. built a sparse TYPE-TEASER when the brief wanted a dense PRODUCT DEMO (told, didn't show)
 
 **What.** Asked for a launch film with the density of a real reference, I shipped 6 big-type-on-black
 beats in 21s ("On brand.", "in minutes.") and used ONE of 15 captured product surfaces. It read as
@@ -2680,7 +2680,7 @@ its time (the value gate). This lesson now lives in docs/CRAFT/RECREATION.md ("D
 + the value gate in the vawe-video-planning lock sheet (every beat names the artifact that earns it) are
 the checks; run them before shipping a launch film.
 
-## #130 — our motion read FLOATY, not because we lacked snap but because the snap was never wired or defaulted
+## 133. our motion read FLOATY, not because we lacked snap but because the snap was never wired or defaulted
 
 **What.** Videos looked soft next to real motion graphics. The instinct was "we need spring/overshoot
 easing." We already HAD it — `core/motion.js` ships `easeOutBack`, elastic, bounce, an analytic
@@ -2703,7 +2703,7 @@ settle. `pop`/`scale` already used `easeOutBack`. This re-baselines every scene'
 `snap`). `make probe`/`make snap` re-baseline the DOM signatures; diff them to see which scenes changed.
 The judged quality is the before/after clip (`formats/scene/motion-test.json`).
 
-## #131 — the music bed BUZZED because it was synthesized oscillators, and it was auto-selected
+## 134. the music bed BUZZED because it was synthesized oscillators, and it was auto-selected
 
 **What.** The default soundtrack read as a drone/buzz. The bed (`warm`/`calm`/`tense`) is not a recording
 — it is stacked sine oscillators summed by `musicBed()` (core/audio-kit.mjs), with no percussion or real
@@ -2726,7 +2726,7 @@ stay available for anyone who names one explicitly, but they are no longer the d
 repo redistributes nothing; `credits.json` records every source + licence (confirm music licence before
 commercial release — it differs from the SFX licence).
 
-## #132 — a bare bed NAME in `audio.music` shipped SILENT: the Go mixer and the validator disagreed on resolution
+## 135. a bare bed NAME in `audio.music` shipped SILENT: the Go mixer and the validator disagreed on resolution
 
 **What.** `vawe-identity.json` set `"music": "tense"` (a bare bed name) and played nothing — silent, with
 no error. The validator reported it fine. Two independent resolution rules had drifted apart.
@@ -2747,7 +2747,7 @@ profile — silence is the score — and "tense" was a retired synth drone), so 
 **Gate.** `make validate` now warns on any `audio.music` that will not resolve, on every scene including
 `auto:true` ones. The rule it checks is byte-for-byte the mixer's rule, so the two cannot drift again.
 
-## #133 — a `lottie` layer with a root-RELATIVE src silently rendered EMPTY (no warning)
+## 136. a `lottie` layer with a root-RELATIVE src silently rendered EMPTY (no warning)
 
 **What.** A `lottie` layer with `src:"assets/lottie/x.json"` (no leading slash) showed nothing — an empty
 box, no error. Same file with `src:"/assets/lottie/x.json"` rendered fine.
@@ -2765,7 +2765,7 @@ lookup still matches. Mirrors how `preloadSpectrum` already normalised its sidec
 **Gate.** Console warning on any lottie src that won't resolve. (A hand-authored Bodymovin JSON —
 assets/lottie/spinner-arc.json — now serves as a live proof that authoring + rendering both work.)
 
-## 82. Named GSAP fx typos degraded silently; two splitters could fight
+## 137. Named GSAP fx typos degraded silently; two splitters could fight
 
 **What.** A layer `fx`/`fxOut` name that didn't match a registered effect only produced a
 `console.warn` at render time — a warning the batch render swallows. So a typo (`"poprIn"`) shipped an
@@ -2785,7 +2785,7 @@ now fails LOUD before any frame renders.
 **Gate.** `make validate` (and boot-time `validateData`) reject unknown/conflicting fx names. The effect
 lists are derived from the code, so a new effect is instantly both usable and validatable.
 
-## 83. resolveEasing swallowed unknown easing names
+## 138. resolveEasing swallowed unknown easing names
 
 **What.** `resolveEasing(e)` was `EASINGS[e] || easeOutCubic` — any name it didn't recognise SILENTLY
 became `easeOutCubic`. So a typo (`"eastOutQuart"`), or a GSAP-style name an author assumed worked
@@ -2807,7 +2807,7 @@ it feels like") is written in OUR names; the warn points a GSAP name at its nati
 **Gate.** `resolveEasing` warns on any unknown ease; `make lib-test` already asserts every registry curve
 holds f(0)=0 / f(1)=1.
 
-## 84. The validator's TYPE pass policed block layers it was meant to exempt
+## 139. The validator's TYPE pass policed block layers it was meant to exempt
 
 **What.** `showcase-spot.json` and `showcase-flight.json` — committed, block-based scenes — could not
 boot: `layers[6].to must be a number (got object)`, `layers[15].items must be a string (got array)`.
@@ -2827,13 +2827,13 @@ unknown-prop pass. Both showcase scenes boot and render again; the full validate
 **Gate.** `make snap-all` boots EVERY scene, so a scene that fails validation shows up as `errored` in the
 sweep instead of hiding until someone happens to render it.
 
-## #134 — every authoring-QUALITY gate was opt-in and WARN-tier, so effect-soup passed everything that ran
+## 140. every authoring-QUALITY gate was opt-in and WARN-tier, so effect-soup passed everything that ran
 
 **What.** An author could ship a maximal "lots of effects, no direction" video and pass every gate the
 render flow actually ran. The only MANDATORY gates were framework-integrity (schema + purity); `make video`
 auto-ran only `verify/audit.mjs`. The quality gates that catch weak direction — `critique` (8 of 10 rules
 WARN), `motion-director` (effect-soup/continuity/pacing all WARN, exit 0), `judge` (opt-in, last) — were
-never in an automatic ladder. This is the structural cause behind #15/#80: "the static gates can't SEE
+never in an automatic ladder. This is the structural cause behind #15/#81: "the static gates can't SEE
 composition, so my eye was the only gate and it blinked" — the eye was ALSO the only thing invoking the
 gates.
 
@@ -2853,7 +2853,7 @@ sources now live in `docs/CRAFT/DIRECTION.md`; the from-scratch narrative in
 agent-in-the-loop — a script cannot force an honest read — but it is now a NUMBERED mandatory step in
 CLAUDE.md's "After writing a JSON", not a trailing "consult if needed".
 
-## #135 — no from-scratch "author a good video" walkthrough existed, so a blank page regressed to priors
+## 141. no from-scratch "author a good video" walkthrough existed, so a blank page regressed to priors
 
 **What.** The taste knowledge was rich but scattered and index-linked. There was no single narrative that
 carried one video from a bare brief to shipped, so authoring with no brand site (the hardest case) meant
@@ -2870,7 +2870,7 @@ use-order (manufacture the four things → lock sheet → JSON in layering order
 **Gate.** `make craft-coverage` fails if a CRAFT guide is orphaned from the README index, so the two new
 docs can't silently fall out of the routing.
 
-## #136 — `make inspect` silently passed when no `.intent.json` sidecar existed
+## 142. `make inspect` silently passed when no `.intent.json` sidecar existed
 
 **What.** The per-beat value contract (inspect vs a `.intent.json` sidecar) printed "nothing to verify" and
 exited 0 whenever the sidecar was absent — which is almost always. So the value gate was invisible: not
@@ -2884,7 +2884,7 @@ behavior is unchanged for scripted use.
 
 **Gate.** `make author-check` (the WARN is part of its report).
 
-## #137 — enforcement only gated the DOWNSIDE (slop); nothing forced ambition, so authoring stayed plain
+## 143. enforcement only gated the DOWNSIDE (slop); nothing forced ambition, so authoring stayed plain
 
 **What.** With the full arsenal in hand (kinetic presets, GSAP char fx, camera, seams, dolly) AND the
 anti-slop/direction gates, the first two passes at the TokenJam launch were a plain `rise`+`fade`
@@ -2905,7 +2905,7 @@ between the soup ceiling and the ambition floor. Doctrine: `docs/CRAFT/BLUEPRINT
 **Gate.** `make direction-floor` (mandatory via `author-check`); `make blueprints` primes the author.
 Covered by `lint-test` (plain fixture FAILS, directed fixture PASSES; a beat emits kinetic layers).
 
-## #138 — seams flashed BLACK on every white-first scene without an explicit bg window
+## 144. seams flashed BLACK on every white-first scene without an explicit bg window
 
 **What.** The TokenJam launch flashed full black (measured luma 0) at every seam boundary — dissolve,
 whipPan, cinematicZoom, flashWhite. The stage is white; the flash was pure black.
@@ -2924,7 +2924,7 @@ not just this one; dark themes are unaffected (the fill is their dark `--bg`). `
 **Gate.** Verified by frame-luminance at seam boundaries (was 0, now 255). A future seam-pixel gate could
 assert no all-black frame appears where the theme bg is light; for now the fix is behavioural + logged.
 
-## #139 — the killer per-frame effects were missing (border-beam, aurora, meteor, flash-bloom)
+## 145. the killer per-frame effects were missing (border-beam, aurora, meteor, flash-bloom)
 
 **What.** Videos read flat next to real motion-graphics because the premium web-motion vocabulary simply
 did not exist in the engine: a light travelling a border, a drifting colour-mesh background, meteor
@@ -2955,7 +2955,7 @@ not testable through `probe`. `canvas-purity` DOES honour `D`. beam/glow DOM pur
 (pure in `t`, dataset-stamped, same contract as the shipped `glow.pulse`). A future `probe` could accept
 `D` to close the seam; for now it is logged so the next author knows `probe`'s `D` is a no-op.
 
-## #140 — `morph` was assumed to be TextMorph for EVERY layer type (svg shape-morph rendered as text)
+## 146. `morph` was assumed to be TextMorph for EVERY layer type (svg shape-morph rendered as text)
 
 **What.** A new `svg` layer with `morph:{to:"<path d>"}` (a true shape-morph) rendered the target path
 STRING as on-screen text, and the shape never melted. The path `d` literally appeared as words in the
@@ -2976,7 +2976,7 @@ and count layers still get TextMorph; svg owns its shape-morph. Pure (build-time
 `d` output). The silent-substitution class itself has no static gate yet — it was caught by the mandatory
 eyeball of a rendered frame (docs/JUDGE.md), which is exactly the backstop the static ladder can't be.
 
-## #141 — camera library + logoReveal: two authoring traps found building the demo (fixed at the source)
+## 147. camera library + logoReveal: two authoring traps found building the demo (fixed at the source)
 
 **What.** Building the motion-showcase demo surfaced two ways an author gets a silently-wrong render:
 1. `kineticHook` hardcoded the hero `word` at size 300 — a long word ("MOTION") overflowed the portrait
@@ -2995,7 +2995,7 @@ Phase 0 — repointed to `creed-launch.json` (a dangling doc ref trains authors 
 logoReveal (shape-morph + bloom + wordmark), diveIn camera, ctaEnd — and passes `make author-check`
 (validate·critique·direct·floor·slop all green).
 
-## #142 — sleek surface library (Phase 5): two gate interactions worth knowing
+## 148. sleek surface library (Phase 5): two gate interactions worth knowing
 
 **What.** Adding `blocks/sleek.mjs` (glassCard · meshPanel · spotlightCard · borderBeamCard · grainOverlay
 · bento) surfaced two gate behaviours, both handled at the source:
@@ -3011,7 +3011,7 @@ the Phase-2 `beam` layer, not a CSS keyframe (which the determinism reset would 
 living background (aurora/mesh/paint) to blur — documented in docs/CRAFT/SURFACES.md, where the build-HTML-first
 loop and the design-spec + 8-visual-styles picker also live.
 
-## #143 — a new valid prop (`fill`) silently disarmed a meta-gate that used it as its "unknown prop"
+## 149. a new valid prop (`fill`) silently disarmed a meta-gate that used it as its "unknown prop"
 
 **What.** After adding `fill` as a real `svg`-layer prop, `gate-mutation`'s self-test "validate catches an
 unknown prop" went red: it injected `fill` as its example of an obviously-bogus prop and asserted validate
@@ -3028,7 +3028,7 @@ comment so the next person who adds a prop doesn't re-collide.
 **Lesson.** When a gate uses a concrete token as a proxy for a whole class, pick one that cannot join the
 class. Blast-radius of adding a schema prop includes the meta-gates that assume that prop is invalid.
 
-## #144 — ported the another engine craft: seam-QA, anti-front-load floor, author-the-frame, the spec contract
+## 150. ported the another engine craft: seam-QA, anti-front-load floor, author-the-frame, the spec contract
 
 **What.** Studied a real another engine-built promo (its storyboard, `frame.md` design spec, per-beat
 HTML+GSAP compositions, rendered frames, and the build session trace) to find what set its output apart,
@@ -3038,9 +3038,9 @@ then ported the transferable lessons into our engine. Four concrete changes:
    lesson: the worst render bugs (a black flash, a morph that reads as a collision) live INSIDE the
    transition overlap, where `make beats`/`make audit`/`make probe` all step over them. The gate pulls the
    frames straddling every transition out of the rendered mp4 and flags a luminance dip present at the seam
-   but absent just outside it (theme-agnostic — compares to local neighbours). Would have caught #138
+   but absent just outside it (theme-agnostic — compares to local neighbours). Would have caught #144
    automatically. Two-sided proof: fires on a synthetic black-flash mp4 (luma 0.000 vs 0.961), clean on the
-   showcase. **Note:** they hit the exact same black-transition-flash bug we fixed as #138 — independent
+   showcase. **Note:** they hit the exact same black-transition-flash bug we fixed as #144 — independent
    confirmation it is a real, easy-to-miss class.
 2. **Anti-front-load + no-two-beats-alike floor checks** — `scripts/gates/direction-floor.mjs` now WARNs
    `front-loaded` (≥80% of reveals in the first 30% with a frozen back half — the "slideshow" failure they
@@ -3065,7 +3065,7 @@ coordinate-target-zoom, path-draw, count-up, morph, bespoke SVG). What set them 
 engine — it was the CONTRACTS (spec + storyboard), the EDITING (held reads, bookends, cut rhythm), and
 QAing the seams. Those are now ported as doctrine + gates, not just admired.
 
-## #145 — ported the full another engine pipeline (Steps 0-6) as local-model tooling
+## 151. ported the full another engine pipeline (Steps 0-6) as local-model tooling
 
 **What.** Studied the authoritative another engine `product-launch-video` skill (its gated Step 0-6 pipeline)
 and built our own version of all five adoptable pieces, offline / local-model only:
@@ -3099,7 +3099,7 @@ verified in a render; full battery green; both new CRAFT docs linked (craft-cove
 design system, remix the brand in, storyboard with a why per beat, narrate, QA the seams). We now have that
 pipeline end to end, local-only.
 
-## #146 — theme-remix emitted an incomplete `bg` block; dark bg presets crashed the render
+## 152. theme-remix emitted an incomplete `bg` block; dark bg presets crashed the render
 
 **What.** A theme from `make theme-remix` rendered fine on a plain ground but crashed the moment a scene
 used a radial/aurora bg preset (`spotlight`, `constellation`, `mesh`, `deep`, …): `bgPreset` read
@@ -3116,7 +3116,7 @@ darkMesh/light key. Verified: the `glass` preset on a `spotlight` bg now renders
 **Gate.** Caught by rendering a remixed theme with a dark bg preset (exactly the author-the-frame eyeball
 step). A cheap future guard: `make theme-remix` could self-render a one-frame probe on a dark bg preset.
 
-## #147 — dense per-child choreography (`parts`), so figures animate piece by piece by default
+## 153. dense per-child choreography (`parts`), so figures animate piece by piece by default
 
 **What.** Our motion read flatter than another engine because a figure (a chart, a diagram) arrived as ONE
 block — we animated at the layer level, they choreograph every child on a timeline (bar 1 grows, then bar
@@ -3138,7 +3138,7 @@ nudge two-sided verified; the Lumen demo's chart builds piece by piece. Small au
 passing: `countStart` is LOCAL to a layer's `start` (`t - start`), not absolute — a count scheduled at an
 absolute time never fires.
 
-## #148 — the composition path (per-beat GSAP timeline), and TWO framework bugs it surfaced
+## 154. the composition path (per-beat GSAP timeline), and TWO framework bugs it surfaced
 
 **What.** Adopted another engine' "one worker hand-writes a GSAP timeline per beat" model — but SAFELY. A
 `composition` layer names a FIRST-PARTY builder in `core/compositions/index.js` (`{type:"composition",
@@ -3172,7 +3172,7 @@ showcase-composition demo renders clean (seam-check clean, audit clean). The les
 gsap-trigger list and the served-prefix allowlist are both hand-maintained lists that a new feature must be
 added to, and BOTH fail SILENTLY (unanimated render / boot timeout) rather than naming the cause.
 
-## #149 — direction-floor nagged "no-camera" on scenes that HAVE a cameraMove (pre-expand blind spot)
+## 155. direction-floor nagged "no-camera" on scenes that HAVE a cameraMove (pre-expand blind spot)
 
 **What.** The ambition floor credits a camera move by reading `d.camera` (the expanded keyframes), but the
 floor runs PRE-expand (inside author-check, before `make expand`). A scene that adds a camera the sanctioned
@@ -3186,7 +3186,7 @@ changes scale/position (from!==to, or a tx/ty target) counts as the `camera` tec
 that reads a POST-expand field must also recognize the PRE-expand sugar that produces it, or it fails the
 author for doing the right thing.
 
-## #150 — first-class scene-unit transitions (A slides out, B slides in) — the missing scene swap
+## 156. first-class scene-unit transitions (A slides out, B slides in) — the missing scene swap
 
 **What.** Our beat boundaries read as a slideshow because the default `cuts` transform the WHOLE `cam` at
 once (a camera bump), and beats were not units — layers attach flat to `cam`, so a boundary was 20 layers
@@ -3212,7 +3212,7 @@ as before. `make snap-all`: 72 scenes IDENTICAL, 0 changed. Probe pure; seam-che
 (showcase-scenecut) visibly swaps beats as units. The continuity gate (motion-director) now CREDITS
 sceneUnits — the scene itself travels every cut, the strongest continuity there is.
 
-## #151 — the produced baseline: force rich-by-default at the ENGINE, additively (go all-in like another engine)
+## 157. the produced baseline: force rich-by-default at the ENGINE, additively (go all-in like another engine)
 
 **What.** The engine was capability-oriented (composition/parts/sceneUnits/camera all opt-in) so authors
 defaulted to thin videos. Flipped it: `core/produce.js` `produceBaseline(data, theme)` runs once at BUILD
@@ -3241,7 +3241,7 @@ renderFrame stays deterministic). THEME-AWARE, ABSENT-ONLY (an explicit field is
 byte-identical); re-baselined. 0 quarantined, probe pure, gate-mutation 50/50, lib-test 421. Any scene
 opts out per-field or with `"produced":false`.
 
-## #152 — glow.frame() left a STALE inner value outside its window; sceneUnits exposed it as non-determinism
+## 158. glow.frame() left a STALE inner value outside its window; sceneUnits exposed it as non-determinism
 
 **What.** A `glow` layer with `flash`/`pulse`/`chromaCycle` inside a `sceneUnits` scene made 1/25 frames
 render-order-dependent (probe red) — right at a scene-unit boundary. Root cause: `core/layers/glow.js`
@@ -3262,7 +3262,7 @@ function of t — never early-return and leave state, because another feature (h
 extension) can make "outside my window" visible. Isolated tests (glow alone, glow+sceneUnits with matching
 windows) BOTH passed; only the extended-window combination triggered it. Reproduce with the exact interaction.
 
-## #153 — the engine PICKED the background, so nobody ever designed one
+## 159. the engine PICKED the background, so nobody ever designed one
 
 **What.** `produceBaseline` injected a bg whenever a scene declared none: light brand → `dotmatrix`, dark
 → `aurora`. It shipped as a "rich by default" win, and it made the largest area of every frame the one
@@ -3286,7 +3286,7 @@ re-renders differently, the migration is a second, unreviewed change riding alon
 
 **Gate.** `gate-mutation` now proves the rule fires (a scene with `bg` removed must fail validate).
 
-## #154 — hand-authored CSS animation renders a DEAD STILL, and said nothing
+## 160. hand-authored CSS animation renders a DEAD STILL, and said nothing
 
 **What.** Building the hand-authored (`html`) background, the plan was to let authors write ordinary CSS
 `@keyframes` on the grounds that `seekAll(t)` pauses and seeks every WAAPI animation each frame. The first
@@ -3307,7 +3307,7 @@ usable inside `calc()`. Two mutation fixtures.
 the reasoning was sound, and a global `!important` three files away made it irrelevant. One render answered
 what an hour of reading the animation code would not have.
 
-## #155 — judged a moving background on ONE still, and got the motion twice too fast
+## 161. judged a moving background on ONE still, and got the motion twice too fast
 
 **What.** Recreating the first 5s of a reference film, the signature is a lime-on-black liquid field. I
 built a `liquid` bg fx, compared ONE frame against ONE reference frame, saw folds and black valleys, and
@@ -3327,7 +3327,7 @@ continuously and fills the frame, the still is the least informative test availa
 frame where a wrong speed looks right. Sample a strip. This generalises past backgrounds to any
 continuous effect (shimmer, drift, grain crawl, camera).
 
-## #156 — "check the beats" was a step in a list, so it got skipped
+## 162. "check the beats" was a step in a list, so it got skipped
 
 **What.** `make beats` has always been step 2 of the authoring ladder, and it is the step that catches the
 things no static gate can see. It was also the easiest step to skip, because nothing failed when you did.
@@ -3353,7 +3353,7 @@ correct answer and the motion lives in the content.
 carry an explicit `authoring.allow` waiver so the gate can block new work without breaking `make video`
 for scenes it did not cause. A waiver there means "known, unfixed", not "fine".
 
-## #157 — `anim: "none"` was a valid schema value the engine did not have
+## 163. `anim: "none"` was a valid schema value the engine did not have
 
 **What.** `"none"` is in the `anim` and `out` enums in `formats/scene/schema.json`, but it was never a key
 in `ANIM` in `core/clips.js`, so `resolveAnim` fell through to `fade`. An author who wrote `out:"none"` to
@@ -3366,9 +3366,9 @@ backspace away without fading; the workaround was `exitDur: 0`, which is a sympt
 as in sync while it carried a value the engine could not honour. A gate that checks two lists agree does
 not check that either list is true. The enum is the promise; the map is the delivery.
 
-## #158 — four shipped scenes had been cross-fading against their own instructions
+## 164. four shipped scenes had been cross-fading against their own instructions
 
-**What.** Fixing #157 (`anim:"none"` was a schema value the engine did not have) changed the output of
+**What.** Fixing #163 (`anim:"none"` was a schema value the engine did not have) changed the output of
 four tracked scenes: `showcase-cuts`, `brew-launch-act1`, `showcase-vawe`, `showcase-vawe-reel`. Every
 diff is an `opacity` value, no transforms. These are the four scenes that actually AUTHORED `anim:"none"`,
 and they had been getting the `fade` fallback all along. `showcase-cuts` says `anim:"none"` on 17 panels
@@ -3387,7 +3387,7 @@ exit half survived across out-of-order frames. `none` now writes `transform: 'no
 code has been leaning on its side effects, and here it was leaning on them for determinism. Expect a
 "pure removal" of a fallback to change output, and diff the whole library rather than assuming it cannot.
 
-## #159 — a gate went blind in a refactor and spent months shouting at everything
+## 165. a gate went blind in a refactor and spent months shouting at everything
 
 **What.** `layer-props` exists to catch the most expensive bug class in this repo: a prop the engine
 accepts and then ignores, so the JSON looks right and the render is wrong. It built its "shared path"
@@ -3417,7 +3417,7 @@ coupled to the file layout: it must either be told the layout is gone, or derive
 harness now carries a case that renames every `L.` in `scene.js` and asserts the gate reports itself
 broken, which would have caught `fd397e1` the day it landed.
 
-## #160 — every short film in the library was a slideshow, and nothing said so
+## 166. every short film in the library was a slideshow, and nothing said so
 
 **What.** Adding a structural test for slideshows (a film under 15s with cuts where no content layer both
 survives a cut and changes across it) found that **18 of 18 eligible scenes trip it.** Not one short
@@ -3439,7 +3439,7 @@ and still be dull. And the tell is blind to a short film that declares no cuts a
 islands with no `cuts` array never becomes eligible. Widening it to infer boundaries from layer starts
 fired on nearly every short scene including the good ones, so it was left out rather than smuggled in.
 
-## #161 — the continuity skill was A/B tested, won on structure, and lost the hook
+## 167. the continuity skill was A/B tested, won on structure, and lost the hook
 
 **What.** Rather than assume the new `vawe-continuous-action` skill worked, it was tested: same blank
 brief ("a 6s launch film for a CLI that turns a screenshot into front-end code"), two agents, one
@@ -3468,7 +3468,7 @@ run the thing and compare against a control. And note the control was already co
 skill-plus-gate against gate-alone. The gate alone bought continuity of a PROP. Only the skill bought a
 subject that transforms.
 
-## #162 — second A/B, the hard case: no product, no UI, nothing to capture
+## 168. second A/B, the hard case: no product, no UI, nothing to capture
 
 **What.** The continuity skill was tested again on the case built to break it: a service with NO app and
 NO dashboard (humans negotiate your software contracts, you forward a quote and get a lower price).
@@ -3481,7 +3481,7 @@ size out of a `Re:` from Tenor with a "Negotiated adjustment" line and the total
 honest reinterpretation of step 4 was that the product's only real surface is the email thread, so it
 showed that and refused to draw a dashboard for a product that has none. It opened on "Never sign the
 first renewal quote.", six words, and the agent volunteered that its first instinct had been a wordless
-opening frame: the fix from #161 caught exactly the failure it was written for.
+opening frame: the fix from #167 caught exactly the failure it was written for.
 
 **The control was decent and lost on two familiar counts:** it closed on a wordmark end card again, and
 its opening headline was CLIPPED by the frame, a defect its own author missed while eyeballing frames.
@@ -3496,7 +3496,7 @@ boundary.
 a brief it was not written against. Two briefs found two: a missing hook rule and a self-contradicting
 ellipsis. Neither was visible by reading the skill.
 
-## #163 — the slideshow ban never evaluated a single one of the three test films
+## 169. the slideshow ban never evaluated a single one of the three test films
 
 **What.** A three-arm test on one brief: no skill and no gates, no skill with gates, and the skill. The
 three-way read was clear and useful. The unconstrained arm produced five typographic cards, a number as
@@ -3507,7 +3507,7 @@ of the service rather than asserting its result.
 
 **The finding that matters more.** All three films declare `cuts: 0`, `seams: 0`, `transitions: 0`. The
 `no-continuous-object` tell requires at least one declared boundary to become eligible, so it never
-evaluated ANY of them. The ban shipped in #160 as "slideshows are banned by default" did not fire once
+evaluated ANY of them. The ban shipped in #166 as "slideshows are banned by default" did not fire once
 across three films, one of which is a textbook slideshow.
 
 **Two corrections to the record.** The claim that the gate "forced the control to keep a layer alive"
@@ -3515,7 +3515,7 @@ holds only for the earlier shotcode brief, where that control did declare cuts a
 brief the gate was silent, so the control's travelling card was its own doing, and what separated the
 unconstrained arm from it was the REST of `author-check`, not the continuity tell.
 
-**The hole is not theoretical.** It was already recorded as the honest limit of #160, and this test shows
+**The hole is not theoretical.** It was already recorded as the honest limit of #166, and this test shows
 an agent with no continuity pressure naturally lands in exactly the shape the gate cannot see. A film of
 cross-faded islands never declares a cut. So the tell catches an author who cuts badly and misses an
 author who never cuts at all, which is the more common way to write a slideshow.
@@ -3525,7 +3525,7 @@ scrutiny as its firing condition. "18 of 18 eligible scenes trip it" says nothin
 are eligible. The next version must infer boundaries from layer windows, and that needs its own
 blast-radius pass, since the first attempt at inferring them fired on nearly every short scene.
 
-## #164 — closing #163: boundaries are inferred now, and the ban is honestly scoped
+## 170. closing #163: boundaries are inferred now, and the ban is honestly scoped
 
 **Fix.** `no-continuous-object-inferred` catches a short film that declares no cuts at all. An island
 boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and
@@ -3549,7 +3549,7 @@ continuity of a prop; only planning with the skill buys a subject.
 two films known to have the grammar and two known to lack it. Threshold work without labelled examples is
 guessing, and the earlier attempt that "fired on nearly every short scene" was exactly that.
 
-## #165 — dead-air counted a black scrim and a 60px dot as "content on screen"
+## 171. dead-air counted a black scrim and a 60px dot as "content on screen"
 
 **Symptom.** `out/rec1-nogate.mp4` and `out/rec2-gates.mp4` hold a black frame at 6.5s with at most a
 single dot on it. `beat-check`'s `dead-air` tell exists to fail exactly that, and both scenes passed.
@@ -3587,7 +3587,7 @@ what a layer PUTS in the frame, and remember that some layers subtract.
 
 ---
 
-## #166 — a global `cut` blanked the whole frame, and the timeline gate called the hole a transition
+## 172. a global `cut` blanked the whole frame, and the timeline gate called the hole a transition
 
 **What.** `out/brew-launch.mp4` holds five consecutive empty frames across the punch cut at t=14.1, and
 in `example-kinetic-type` the headline "MAKE" vanishes for four frames on every one of its five cuts.
@@ -3640,7 +3640,7 @@ gracefully; it degrades into nothing, and nothing looks exactly like a black fra
 written as a belief about the engine ("a transition fills its time") is a guess. Model what the engine
 actually does, then there is nothing left to forgive.
 
-## #167 — the storyboard promised a change, the film never built one, and every gate stayed green
+## 173. the storyboard promised a change, the film never built one, and every gate stayed green
 
 **What.** The A/B test on the `becomes:` field returned a negative result, and the way it lost is the
 finding. A blind judge picked the CONTROL arm: more demonstrations (7 to 4), higher information per
@@ -3691,9 +3691,9 @@ change down is not building it, and the gate that reads only the writing will sa
 you add a planning artefact, the question is not whether the plan is well-formed; it is what compares
 the plan to the thing it planned.
 
-## #168 — six gate fixtures were passing on the fixture's own filename
+## 174. six gate fixtures were passing on the fixture's own filename
 
-**What.** Found while adding fixtures for #167. `gate-mutation` slugifies a case's name into the
+**What.** Found while adding fixtures for #173. `gate-mutation` slugifies a case's name into the
 fixture's filename, and every gate echoes the path it read. So a case named `plan-has-no-spans · …`
 matching on `/plan-has-no-spans/` was satisfied by the echoed path alone. With the gate completely
 silenced, all six new cases still ticked.
@@ -3712,7 +3712,7 @@ fixture-writing site records the hazard.
 can emit. This is the same failure as #86 (a self-fulfilling check reports success forever), one level
 up: the harness that exists to prove gates work had a hole in the same shape as the holes it hunts.
 
-## #169 — the anti-slop detector read every ISO date as an `01 / 02 / 03` section scaffold
+## 175. the anti-slop detector read every ISO date as an `01 / 02 / 03` section scaffold
 
 **What.** `make slop` failed `ab4-a-ledgerline` with `numbered-section-markers · Sequence: 01, 02, 03,
 05, 06, 08`. The scene has no section markers. Those are the day fragments of the CSV rows it renders:
@@ -3737,7 +3737,7 @@ have learned to ignore is worse than no gate.
 characters appear. `\b` answers "is this a token" and never "is this token the whole thing". Any rule
 keyed on bare small integers will meet dates, prices, versions and times before it meets a scaffold.
 
-## #170 — the layout audit was the one gate you could not waive, so a deliberate composition failed it
+## 176. the layout audit was the one gate you could not waive, so a deliberate composition failed it
 
 **What.** `ledgerline-neon` marks its selected transaction row with a bloom instead of a card, which is
 the whole point of the look: on a near-black ground a filled rectangle reads as a hole punched in the
@@ -3763,7 +3763,7 @@ that were not imagined when it was written, and the waiver is what keeps a real 
 into either a mangled design or an abandoned gate. If a check can block, it needs a documented way to be
 overruled, and the overruling needs to stay visible.
 
-## #171 — a dissolve between two text states is illegible at its midpoint, and nothing checks it
+## 177. a dissolve between two text states is illegible at its midpoint, and nothing checks it
 
 **What.** Raised by the user as "settled states are good but during the animation things can be
 calibrated better". Chasing it turned up the same defect in three separate places across two films:
@@ -3794,11 +3794,11 @@ That is a real check and it is not built. Written down here so the next person d
 eye for a fourth time.
 
 **Lesson.** Verify a TRANSITION at a frame where it is mid-flight. This repo already learned that once
-(#77, a stagger that was inert and shipped because only settled frames were checked) and every sampling
+(#78, a stagger that was inert and shipped because only settled frames were checked) and every sampling
 tool it has still lands on settled frames by construction. A gate that samples where the motion is at
 rest is a gate that cannot see motion.
 
-## #172 — every film was type in a box, and no gate had an opinion about it
+## 178. every film was type in a box, and no gate had an opinion about it
 
 **What.** Raised by the user: "the another engine motion was using graphics to portray and explain
 something. we are currently doing everything text in some data fillable thing." Measured across the
@@ -3837,7 +3837,7 @@ defect; they are now mutually exclusive.
 **Lesson.** Decoration is not explanation, and a gate that counts pictorial LAYERS rather than pictorial
 SUBJECTS cannot tell them apart. Ask of every beat what it would look like if the viewer could not read.
 
-## #173 — the mutation harness edits tracked source in place with no lock
+## 179. the mutation harness edits tracked source in place with no lock
 
 **What.** `gate-mutation` reported `conformance` failures that changed count between two identical runs
 (2, then 1), which I had been carrying as a known intermittent flake. It is not a flake.
@@ -3856,14 +3856,14 @@ Recorded so the next person does not spend the time re-diagnosing it as flakines
 working tree is a shared mutable resource, and shared mutable resources do not fail randomly, they fail
 concurrently.
 
-## #174 — the crossfade-to-mud defect came straight back, in the film written to fix everything else
+## 180. the crossfade-to-mud defect came straight back, in the film written to fix everything else
 
 **What.** `ledgerline-shown` was built to replace explanatory sentences with visuals. Its merchant
 resolve and its twenty cascade rows both cross-dissolved a before-string over an after-string in place,
-so the midpoint of every one of them was two half-opacity strings on top of each other. That is #171,
-verbatim, reintroduced by the same person who wrote #171, two commits later.
+so the midpoint of every one of them was two half-opacity strings on top of each other. That is #177,
+verbatim, reintroduced by the same person who wrote #177, two commits later.
 
-**Root cause.** Opacity is the reflex for "A becomes B" and the reflex does not read the changelog. #171
+**Root cause.** Opacity is the reflex for "A becomes B" and the reflex does not read the changelog. #177
 fixed three SITES; it did not change what a hand reaches for when writing the fourth. Writing the lesson
 down demonstrably did not prevent the repeat, which is the actual finding here.
 
@@ -3871,7 +3871,7 @@ down demonstrably did not prevent the repeat, which is the actual finding here.
 with a read head at the seam. The amount, being five glyphs, swaps at a threshold instead, which is
 never mud either.
 
-**Which gate catches it. STILL NONE.** #171 already recorded that no gate sees this and named the
+**Which gate catches it. STILL NONE.** #177 already recorded that no gate sees this and named the
 detectable signature (two elements at the same position with complementary opacities, one carrying a
 blur). That check was not built, and the very next film shipped the defect twice. The cost of leaving a
 known-detectable defect to human vigilance is now measured: one repeat per two commits.
@@ -3880,9 +3880,9 @@ known-detectable defect to human vigilance is now measured: one repeat per two c
 the fix is a gate, writing the entry and skipping the gate buys nothing but the illusion of having
 handled it. Build the check or expect the repeat.
 
-## #175 — the mud detector, and the sixth instance it found immediately
+## 181. the mud detector, and the sixth instance it found immediately
 
-**What.** #171 named a mechanically detectable defect and said the fix was a gate. #174 recorded that
+**What.** #177 named a mechanically detectable defect and said the fix was a gate. #180 recorded that
 skipping the gate cost one repeat within two commits. This is the gate.
 
 `scripts/gates/dissolve-check.mjs`, blocking, wired into `author-check` and standalone as
@@ -3937,7 +3937,7 @@ swaps, which is the right answer when only a word or a figure changes and a wipe
 across characters that are not changing. Across 102 scenes: zero mud, zero unjudged pairs.
 
 
-## #176 — the gate measured area as `w * h` and reported 0% with total confidence
+## 182. the gate measured area as `w * h` and reported 0% with total confidence
 
 **What.** `visual-vocabulary.mjs` decided whether a graphic was the SUBJECT of a beat by computing
 `num(L.w,0) * num(L.h, num(L.w,0))`. Layers are not all sized by `w`/`h`: a `cursor` and a
@@ -3972,7 +3972,7 @@ derived the same way, so the suggestion and the check can no longer disagree.
 DERIVED NAME LIST is still a name list. The registry's own membership is not the property you care
 about; what the thing does is. When a check can call the code instead of reading its label, call it.
 
-## #177 — the tool for comparing two cuts could not hold two cuts
+## 183. the tool for comparing two cuts could not hold two cuts
 
 `judge.mjs` wrote its contact sheet and rubric to a bare `/tmp/judge`, and wiped that directory
 unconditionally on every run. So judging a second film destroyed the first. Judging two cuts of one film,
@@ -3996,7 +3996,7 @@ fall back to even spacing.
 **Lesson.** An instrument used to compare two things must be able to hold two things at once. Check that
 before trusting a comparison it produced.
 
-## #178 — three ways to make a picture that isn't there, found in one afternoon
+## 184. three ways to make a picture that isn't there, found in one afternoon
 
 The show-don't-tell campaign's first two scenes each shipped a graphic that was, at some point, silently
 not drawing. All three failures were invisible on a settled frame.
@@ -4012,7 +4012,7 @@ no-ops contained one.
 **2. A seam blends two BAKED frames.** Closing a `dead-air` hole by pulling the next beat back across a
 seam put one layer on both sides, so the seam blended it with itself at two camera scales: a ghost
 duplicate headline that three blind judges independently named as the worst frame in the film. Every beat
-must open just AFTER its seam does. `beat-check` was right (see #166) and I worked around it instead of
+must open just AFTER its seam does. `beat-check` was right (see #172) and I worked around it instead of
 reading it.
 
 **3. `count` chose its format from the value on screen.** A count to 2.5M spent most of its run as a
@@ -4029,7 +4029,7 @@ chart factories emit no height and `boxOf` falls back to squaring the width: a 1
 `w`/`h`, an html layer with no `h` is invisible to it, which is why the grid diagram was allowed to
 collide with its own headline until a human looked.
 
-## #179 — `var(--t)` worked on the background and did nothing on a layer
+## 185. `var(--t)` worked on the background and did nothing on a layer
 
 `core/bg-html.js:52` wrote `--t` every frame. Nothing wrote it on an html LAYER. So a hand-authored
 fragment in a layer using `var(--t, 0)` fell back to its default and rendered a permanently dead still,
@@ -4048,7 +4048,7 @@ changes and should be looked at.
 **Lesson.** A shared doc comment is a promise made on behalf of every caller of the shared code. This one
 was true for one caller and false for the other, and the false half was the one an author would reach for.
 
-## #180 — the fake waveform three judges believed
+## 186. the fake waveform three judges believed
 
 The beat-grid drawn under "on the beat." used `abs(sin(i * 1.7))` for its background bars, as filler
 behind the real cut marks. Three blind judges each described it as the track's own amplitude envelope,
@@ -4066,7 +4066,7 @@ worse than no graphic at all: it does not merely fail to inform, it actively mis
 has to be true.** The only reason this was caught is that the blind judge is asked what the picture MEANS
 rather than whether it looks good.
 
-## #181 — the A/B sampler landed mid-entrance and three judges scored the still as broken
+## 187. the A/B sampler landed mid-entrance and three judges scored the still as broken
 
 `showcase-vocabulary`'s A/B came back 3-0 for the new cut and `wouldShip: no` on BOTH arms, and all three
 judges named the same worst frame: "'One' has landed and 'JSON.' is still arriving, clipped mid-glyph by
@@ -4086,11 +4086,11 @@ twice is not the same mistake as two models applied once, and the comment now sa
 
 **The standing limit, worth stating plainly.** Any still of a staggered reveal looks broken. A judge
 scoring frames cannot always tell a mid-entrance sample from a defect, and the difference between
-MISTAKES #178's real ghost and this false alarm is only visible by pulling several frames across the
+MISTAKES #184's real ghost and this false alarm is only visible by pulling several frames across the
 entrance. `make reveal` exists for exactly that and should be read before trusting a beat-level verdict
 about type.
 
-## #182 — three gates were blind to motion authored in CSS, and one of them demanded it
+## 188. three gates were blind to motion authored in CSS, and one of them demanded it
 
 `hero-site`'s new graphic is an inline `<svg>` whose every shape is a function of `var(--t)`: eighteen
 bars, each with its own delay, that hold as raw numbers through beat 1 and grow into an easing curve
@@ -4121,7 +4121,7 @@ shared model, because two gates now need one answer to "is this a picture".
 credit what is declared and name the limit, not to fail what cannot be read. The new comment says it: a
 strip that morphs across the cut and a clock ticking in a corner are indistinguishable to this check.
 
-## #183 — the continuity gate passed a spine the renderer had already cut in half
+## 189. the continuity gate passed a spine the renderer had already cut in half
 
 Same film, worse failure. `hero-site` shipped its first render with the strip visible in beat 1 and gone
 in beat 2, while `no-continuous-object` reported clean.
@@ -4143,7 +4143,7 @@ fires. 110/110.
 message sent the author to go author harder. `scene-timing.mjs` exists so gates stop modelling the
 renderer from memory; a gate that reasons about time and does not import it is a bug waiting.
 
-## #184 — the layout audit forgave a headline it could not see
+## 190. the layout audit forgave a headline it could not see
 
 `ransom-intro` shipped a cut where the specimen sheet sat on the second line of `RANSOM NOTES`. Three
 blind judges, independently, all named it: "the payoff title is unreadable". `make audit` said
@@ -4170,7 +4170,7 @@ headlines in one film would otherwise de-dupe into one.
 A gate that treats "cannot be seen" as "meant to be hidden" cannot tell composition from collision;
 ask instead what is covered, and whether the thing covered is the one the viewer must read.
 
-## #185 — four contact-sheet writers shared one filename
+## 191. four contact-sheet writers shared one filename
 
 `make beats`, `make reveal`, `seam-snap` and the layout audit each wrote a single fixed path and wiped
 a single fixed scratch directory: `/tmp/beats.png`, `/tmp/reveal.png`, `/tmp/seams.png`,
@@ -4191,9 +4191,9 @@ overlay. Every doc, Makefile recipe and gate message that quoted the old path no
 **Lesson.** A tool that writes one global path is single-author by construction, and nothing says so.
 The cost was invisible while one agent worked at a time and became a wrong answer the moment two did.
 
-## #186 — the continuity gate printed an instruction that throws
+## 192. the continuity gate printed an instruction that throws
 
-#183 added `beats-wrapped-as-units`, which tells an author whose film wraps beats as units to set
+#189 added `beats-wrapped-as-units`, which tells an author whose film wraps beats as units to set
 `"sceneUnits": false`. For some films that instruction does not compile.
 
 **Root cause.** `formats/scene/scene.js:157` REFUSES a cut whose whole transition lives in the
@@ -4217,9 +4217,9 @@ layer-level flag that attaches to `cam` instead of its beat wrapper, which would
 every cut-heavy film. It changes shared render behaviour, so it needs `make probe` and a full `make
 snap` sweep before it ships.
 
-## #187 — a layer could not opt out of beat wrapping, so the doctrine's central rule was unauthorable
+## 193. a layer could not opt out of beat wrapping, so the doctrine's central rule was unauthorable
 
-#183 and #186 both circled this without fixing it. Under `sceneUnits`, `formats/scene/scene.js` puts
+#189 and #192 both circled this without fixing it. Under `sceneUnits`, `formats/scene/scene.js` puts
 every top-level layer inside its beat's wrapper and rewrites its duration to end at that beat's cut, so
 the wrapper can slide the whole beat out as one unit. Nothing could survive a cut. The engine turns
 `sceneUnits` on by default for any cut film with no choreographed `motion` track, and refuses to turn it
@@ -4240,14 +4240,14 @@ and 0 after. With it, 191745 at all three.
 
 `scene-timing.mjs` learned the flag too, or every gate reasoning about time would keep insisting the
 layer had been truncated. `direction-floor` now names it as the fix, which let the SOLO_BLIND special
-case from #186 be deleted: one answer, no exceptions. A mutation case pins the escape hatch open
+case from #192 be deleted: one answer, no exceptions. A mutation case pins the escape hatch open
 (`acrossBeats lets a spine out of the beat wrapper`, must-pass), 111/111.
 
 **Lesson.** Two gates had already been sharpened to describe this trap precisely, and both stopped at
 describing it. A gate that can only say "you cannot do this here" is a bug report addressed to the
 author instead of to the engine.
 
-## #188 — 37 references to a custom property nothing defines
+## 194. 37 references to a custom property nothing defines
 
 `core/boot.js` writes `--text-2`. Twenty-two files asked for `var(--text2)`. CSS answers an undefined
 custom property by INHERITING, so every one of them painted whatever the parent happened to be, with no
@@ -4275,7 +4275,7 @@ token list would have been a second thing to keep right. And a defect inside a g
 it is one bug per future invocation, so the first question about any repeated typo is which tool is
 typing it.
 
-## #189 — the renderer painted nothing rather than refusing, and looked like the lenient one
+## 195. the renderer painted nothing rather than refusing, and looked like the lenient one
 
 An authoring agent reported this as a gate bug: "`validate` fails any scene containing an un-expanded
 block, but the renderer expands blocks itself, so the gate and the engine disagree." It removed the
@@ -4308,7 +4308,7 @@ inverted, and the only thing that settled it was counting grey levels in a frame
 that disagree, the one that exits 0 is not thereby the correct one; silence is the cheapest way to look
 right.
 
-## #190 — eight render workers starved raster, and words blinked out
+## 196. eight render workers starved raster, and words blinked out
 
 A user watching `showcase-flight` said "words are flickering". Nothing in the ladder could see it.
 
@@ -4349,7 +4349,7 @@ skip it, which is worse than not having one.
 only instrument that found it was rendering twice and comparing, and the only reason anyone looked was
 that a human watched the video.
 
-## #191 — a card scaled about a box that did not exist yet
+## 197. a card scaled about a box that did not exist yet
 
 A viewer watching `showcase-composition` said the 3-6s stretch looked wrong. It did: each pipeline card
 grew from small at a position it never occupies at rest, swinging left into place while its connector
@@ -4372,7 +4372,7 @@ same way.
 either way. It is the wrong pure function. And a constraint written down in a file header protects only
 the line that quotes it; the second place that depends on it fails silently.
 
-## #192 — three craft decisions were opt-in, so the library never made them
+## 198. three craft decisions were opt-in, so the library never made them
 
 `higgsfield-recreation` is the exemplar and the rest of the library does not move like it. Reading its
 JSON against everyone else's, three of the differences were not taste at all — they were defaults
@@ -4380,7 +4380,7 @@ pointing the wrong way, and the evidence is the usage count.
 
 **1. `easeInOutCubic` between every pair of motion keys.** That curve zeroes velocity at BOTH ends of a
 segment, so a chain of closely-spaced keys accelerates and stops once per key and the move pulses. This
-was already diagnosed and fixed for the CAMERA in #125; the per-layer default was left standing.
+was already diagnosed and fixed for the CAMERA in #128; the per-layer default was left standing.
 `motionAt` now interpolates linearly below `DENSE_KEY_SEC` (0.14s, ~4 frames) unless an `ease` is named.
 Dense keys are a traced path, not a span with a shape. Two scenes change.
 
@@ -4407,7 +4407,7 @@ the cause.
 **Lesson.** "It is available, authors can use it" is how a capability stays unused. Before defending an
 opt-in default, count the uses: one, in a hundred-film library, is the whole argument.
 
-## #193 — a layer flashed back to solid on the last frames of its own fade
+## 199. a layer flashed back to solid on the last frames of its own fade
 
 A viewer reported a flicker around 5s in `cadence-film`. Reading the opacity out of the DOM frame by
 frame:
@@ -4458,13 +4458,13 @@ same line already read `L.peak ?? 0.1` correctly, so the distinction was known a
 Both now use `??`.
 
 **No gate was added for this.** A source rule flagging `|| <non-zero>` would fire on all fifteen legitimate
-guards to catch one bug, which is the `flicker-check` mistake (#190) again: a check that cries wolf gets
+guards to catch one bug, which is the `flicker-check` mistake (#196) again: a check that cries wolf gets
 skipped, and then it protects nothing.
 
 
 ---
 
-## #194 — a layer that peels off a shared pan continues from where the PAN left it
+## 200. a layer that peels off a shared pan continues from where the PAN left it
 
 **What.** In `cadence`, the COMPOSE button rides the page via `panWith: "chrome"`, then peels off and
 lifts to centre. On screen it snapped: for two frames at t=2.87s it jumped 194px back to the RIGHT after
@@ -4503,9 +4503,9 @@ JSON reads exactly as intended.
 
 ---
 
-## #195 — a merged motion track must state the whole pose at every key it fabricates
+## 201. a merged motion track must state the whole pose at every key it fabricates
 
-**What.** Found while fixing #194, and worse than it: `cadence`'s spinner shuddered for 27 frames. Its
+**What.** Found while fixing #200, and worse than it: `cadence`'s spinner shuddered for 27 frames. Its
 x ran 89 → 49 → 40 → 140 → 90 → 49 → 173 and its rotation ran 0 → 214 → 0 → 286 → 0 → 352.
 
 **Root cause.** `motionAt` reads a track KEY TO KEY, so an omitted property is not "unchanged" — it is
@@ -4535,7 +4535,7 @@ the blast radius before believing the elegant fix.
 
 ---
 
-## #196 — two elements that mean the same thing, and the dead tail under both gates
+## 202. two elements that mean the same thing, and the dead tail under both gates
 
 **What.** `cadence`'s tail carried a pulse ring blooming out of the vanishing button AND a loading
 spinner beside "Composing". For the twelve frames they overlapped, the frame held two expanding circles
@@ -4565,9 +4565,9 @@ this session.
 
 ---
 
-## #197 — multiPhase's "hold" leg panned the camera home
+## 203. multiPhase's "hold" leg panned the camera home
 
-**Found by prediction, not by watching.** The method: take the bug shapes from #193-#196, enumerate every
+**Found by prediction, not by watching.** The method: take the bug shapes from #199-#202, enumerate every
 site in the engine that has the same shape, and probe each one. First site checked, first hit.
 
 **What.** `multiPhase` chains camera legs into one journey. Its own docstring describes the intended use
@@ -4582,7 +4582,7 @@ kf.push({ t, s: leg.s ?? kf[kf.length - 1].s, x: leg.x ?? 0, y: leg.y ?? 0, … 
 ```
 
 `s` carries forward from the previous keyframe. `x` and `y` reset to identity. The correct idiom was
-known and applied to one axis of three, which is the same tell as the `L.peak ?? 0.1` line in #193.
+known and applied to one axis of three, which is the same tell as the `L.peak ?? 0.1` line in #199.
 
 **Why nothing caught it.** No scene uses `multiPhase` — it is in `schema.json`, so it is author-facing,
 but nothing in the library exercises it, and unused code cannot be caught by rendering. `lib-test` did
@@ -4590,7 +4590,7 @@ cover it, and the coverage is the interesting part: it asserted easing and deter
 on every leg with no position at all. It tested the one input shape that works. A test written from the
 same mental model as the code inherits its blind spot.
 
-**Second face of #195.** The shape has two forms and looking for only one is how the first probe missed
+**Second face of #201.** The shape has two forms and looking for only one is how the first probe missed
 this: (a) the generated key OMITS a property and the READER resets it — `mergePan`; (b) the generated key
 STATES identity and the GENERATOR reset it — this. (b) is invisible to any structural check, because the
 key is complete and well-formed and only the meaning is wrong. Probes must drive a generator with an
@@ -4606,9 +4606,9 @@ and it was checked against a deliberately reintroduced bug to prove it fires.
 
 ---
 
-## #198 — removing an element is not the same as replacing what it did
+## 204. removing an element is not the same as replacing what it did
 
-**What.** #196 cut a loading spinner from `cadence` because it collided with the pulse ring, then filled
+**What.** #202 cut a loading spinner from `cadence` because it collided with the pulse ring, then filled
 the resulting still tail by stretching the waveform's draw-on. The user's verdict: "without the spinner
 the video feels half baked. you cant just remove some element without thinking what it contributed."
 
@@ -4629,8 +4629,8 @@ not a hole filled with meaning: "nothing looks frozen" is a much weaker property
 says what it needs to".
 
 **A second bug, in the fix.** The three dots were placed by where they should REST — and `panWith` means
-the authored x is where a layer STARTS. They landed 274px off the end of the word. That is #194 exactly,
-walked into by the author who had fixed #194 forty minutes earlier, on a feature whose trap he had just
+the authored x is where a layer STARTS. They landed 274px off the end of the word. That is #200 exactly,
+walked into by the author who had fixed #200 forty minutes earlier, on a feature whose trap he had just
 written a gate for. The gate catches a reversal; it says nothing about resting position.
 
 So `lintData` now simply prints the arithmetic for every panning layer: *"pans with 'gen', so its x/y is
@@ -4640,7 +4640,7 @@ guessing it is enough evidence that people will keep guessing it.
 
 ---
 
-## #199 — the silent-prop sweep: four conditionals that swallow an author's input
+## 205. the silent-prop sweep: four conditionals that swallow an author's input
 
 **Class E of the predicted-bug hunt.** A prop read only INSIDE a conditional on another prop does nothing
 when that other prop is absent, and does it in silence. CLAUDE.md already described two of these as
@@ -4666,11 +4666,11 @@ to anchor-vocabulary strings on non-block layers. Library sweep after: 2845 laye
 
 ---
 
-## #200 — a frozen span is a fraction of the runtime, and the gate could not see inside a layer
+## 206. a frozen span is a fraction of the runtime, and the gate could not see inside a layer
 
 **Class D: the gap between two gates' thresholds.** `motion-audit` warned on a frozen span over a flat
 2s. `beat-check` sees a hole only where the frame holds nothing but the backdrop. `cadence` held a
-perfectly still frame for 0.9s of 5s — a fifth of the film — and fell between them (#196). "Too long to
+perfectly still frame for 0.9s of 5s — a fifth of the film — and fell between them (#202). "Too long to
 be still" is a proportion, not a constant, so the budget is now `15% of runtime, clamped to 0.6-2s`.
 
 **And then the tighter threshold immediately produced a false positive**, which is the more useful half.
@@ -4684,7 +4684,7 @@ film stays affordable). Both directions were then proven: quiet on the fixed `ca
 synthetic 5s film with a genuinely dead tail.
 
 **Lesson.** Tightening a threshold without checking what the gate can actually SEE converts a miss into a
-false alarm, and a gate that cries wolf gets waived and then protects nothing (#190). The threshold and
+false alarm, and a gate that cries wolf gets waived and then protects nothing (#196). The threshold and
 the measurement have to move together.
 
 ---
@@ -4705,25 +4705,25 @@ BACKWARDS in seven frames. Left in place: the scene is cited evidence in earlier
 
 **Class B (composed transforms)** produced one confirmed non-bug worth writing down, because the
 reasoning looked airtight and was wrong. `resolveBecomes` reads the outgoing layer's last keyframe as a
-raw object (`num(lastA.x, 0)`), which looked like #195 exactly: a fade-out key stating only `opacity`
+raw object (`num(lastA.x, 0)`), which looked like #201 exactly: a fade-out key stating only `opacity`
 would report x=0 and scale=1 instead of where the layer really ended. It is not a bug, because
 `motionAt` at that same instant returns `norm(last)` — literally `last.x ?? 0`. The two agree BY
 CONSTRUCTION. The layer genuinely does snap home there, the handover matches what is drawn, and the real
-problem is the snap itself, which the #199 lint now reports. A probe comparing raw against resolved can
+problem is the snap itself, which the #205 lint now reports. A probe comparing raw against resolved can
 never fail; writing it is what showed that.
 
 The one real `becomes` finding is a silent discard: keys the incoming layer declares inside the handover
 window are dropped, correctly, and without a word. Now a lint.
 
 **Yield of the whole hunt: 4 classes, 172 automated probes plus targeted checks, 3 real bugs
-(`multiPhase` #197, the `anchor` silent skip, `rec3-skill`'s reversing spinner), 4 silent-input fixes,
+(`multiPhase` #203, the `anchor` silent skip, `rec3-skill`'s reversing spinner), 4 silent-input fixes,
 1 gate blind spot, and 2 confidently-predicted bugs that did not exist.** The miss rate is the honest
 headline: predicting bug shapes finds bugs of shapes already known, and every user-visible defect this
 session still came from someone watching the video.
 
 ---
 
-## #201 — four things between the capture tools and a real brand
+## 207. four things between the capture tools and a real brand
 
 All four found in the first twenty minutes of trying to make a film for an actual company, which is the
 point: they had been in the repo for months and no amount of engine work would have surfaced them.
@@ -4775,7 +4775,7 @@ convenience in this workflow. It is the only source of truth about how a brand l
 
 ---
 
-## #202 — the rules audit: nine of thirty-four rules are not doing what they claim
+## 208. the rules audit: nine of thirty-four rules are not doing what they claim
 
 `scripts/dev/rules-audit.mjs` asks every gate finding the three questions the gates ask films: does it
 
@@ -4832,7 +4832,7 @@ honest note about what it does not buy.
 
 ---
 
-## #203 — the library was already disposable, and I nearly deleted it permanently
+## 209. the library was already disposable, and I nearly deleted it permanently
 
 **What happened.** Asked to clear out the scene library so the rules stop being calibrated against it,
 I triaged 108 scenes into keep/drop and said, in as many words, that deletion was safe because "git
@@ -4854,7 +4854,7 @@ The repo had already made this decision. There is a deliberate, documented split
 allowlisted scenes that ARE the project and the rest, which is local scratch no clone has ever seen.
 "Delete the library" was mostly a request to clear a directory that was never in the repository.
 
-**It also invalidates the numbers in #202, in the direction that matters.** That audit swept 102
+**It also invalidates the numbers in #208, in the direction that matters.** That audit swept 102
 scenes and reported waiver rates over all of them. Rescoped to tracked scenes only, the picture is
 sharper and worse:
 
@@ -4879,7 +4879,7 @@ and this one had the answer written down the whole time.
 
 ---
 
-## #204 — rendering at 60fps silently threw away motion blur
+## 210. rendering at 60fps silently threw away motion blur
 
 **Found by a question, not a gate.** Asked whether we can render at 60fps, I checked instead of
 answering. We can: `-fps 60` produces `r_frame_rate=60/1`, 300 frames for a 5s film, duration exactly
@@ -4908,8 +4908,8 @@ frame rate instead of accidentally meaning "twice as strict at 60".
 
 **Lesson, and it is the third instance this session.** A constant whose NAME omits its unit invites
 exactly this: `AUTO_BLUR_FLOOR = 16` reads as a property of motion and is a property of a frame rate.
-The same shape as `x: leg.x ?? 0` carrying forward on one axis of three (#197), and `L.glideTime || 0.1`
-treating zero as absent (#193). Units and identity values are where this engine's silent bugs live.
+The same shape as `x: leg.x ?? 0` carrying forward on one axis of three (#203), and `L.glideTime || 0.1`
+treating zero as absent (#199). Units and identity values are where this engine's silent bugs live.
 
 **Why no gate catches it.** Every gate runs at 30fps, which is the one rate where the bug is invisible.
 A gate that only ever tests the default cannot find a defect in the non-default, and this is the whole
@@ -4918,7 +4918,7 @@ every 60fps render because nothing renders at 60.
 
 ---
 
-## #205 — the 60fps default, and the two gates that would have read it wrong
+## 211. the 60fps default, and the two gates that would have read it wrong
 
 **The policy.** A final render is 60fps, an iteration render is 30. They are two different jobs: while
 authoring you re-render constantly and want the loop short, and 30 halves both capture and encode; what
@@ -4927,7 +4927,7 @@ reference films are 60). Implemented in `internal/render/render.go` rather than 
 true for anyone running `./bin/vawe` directly and not only for people who go through `make`. Precedence
 is unchanged: an explicit `-fps` wins, then the scene's own `fps`, then the draft split.
 
-This was only safe to automate because #204 landed first. Until the auto-blur floor was expressed per
+This was only safe to automate because #210 landed first. Until the auto-blur floor was expressed per
 SECOND, the same scene rendered at 60 silently lost its motion blur entirely — so a "smoother" final
 would have been quietly worse than the draft it was signed off from, in a way nobody could have traced.
 
@@ -4948,7 +4948,7 @@ an assumption about the environment rather than about the thing being measured: 
 each became a silent lie the moment there were two. The general rule this repo should hold: **if a
 number's meaning depends on a setting, read the setting; do not hard-code the value it usually has.**
 
-## #206 — the engine could move a box and scale a box, but never resize one
+## 212. the engine could move a box and scale a box, but never resize one
 
 **What.** Recreating `refs/arc-zero-chrome.mp4` (a browser whose chrome dissolves while the photo grid
 underneath reflows to fill the space it gave up) turned out to be impossible, not hard. The per-layer
@@ -4968,7 +4968,7 @@ a bug report, it produced films that quietly did not attempt the move.
 
 **Fix.** `w`/`h` are keyable. `core/sequence.js` gains `resolveBoxes()` and `motionAt` returns `w`/`h`.
 
-The contract is the whole design, and it is where #195 nearly repeated. Every other keyed property has
+The contract is the whole design, and it is where #201 nearly repeated. Every other keyed property has
 a constant identity (an omitted `x` means 0, and 0 means "where it was authored"). A WIDTH has no such
 constant: identity for `w` is the layer's own `w`, which a pure evaluator cannot know. Left inside
 `motionAt`, an omitted `w` could only mean "hold the neighbour" — a second, different interpretation
@@ -5011,10 +5011,10 @@ fits the curve against every easing the engine has and answers `brake` (residual
 existed, `docs/CRAFT/RECREATION.md` step 1 says to run it, and reasoning about the numbers felt enough.
 It was not. **Fit the curve; do not name it.**
 
-## #207 — depth was a number, not a track, so nothing could pass behind anything
+## 213. depth was a number, not a track, so nothing could pass behind anything
 
 **What.** Studying a reference (a ribbon sweeping around a photograph, in front on the near side of its
-arc and behind on the far side) found the same shape as #206 one property over. `track` is the z-order,
+arc and behind on the far side) found the same shape as #212 one property over. `track` is the z-order,
 `core/clips.js:83` writes `zIndex` from it on every frame, and it was read from a `data-track` attribute
 stamped once at build. A layer could be entirely in front of another or entirely behind it, forever.
 
@@ -5022,7 +5022,7 @@ stamped once at build. A layer could be entirely in front of another or entirely
 it the only ways to fake the shot are to cut on the crossing (which the reference does not do, and
 which throws away the continuity) or to draw two copies and cross-fade them.
 
-**Fix.** `track` is keyable, on the same contract as `w`/`h` (#206) — `resolveKeyedProps` fills a keyed
+**Fix.** `track` is keyable, on the same contract as `w`/`h` (#212) — `resolveKeyedProps` fills a keyed
 property from the layer once, up front, so `motionAt` keeps ONE interpretation rule. `resolveBoxes` was
 renamed to `resolveKeyedProps` since it no longer only does boxes; `LAYER_OWNED` names the three.
 
@@ -5045,9 +5045,9 @@ for the side effect — structurally identical to the `ken:{from:1,to:1}`-for-a-
 CLAUDE.md names. `strokeWidth` now works on any stroked path; `draw.weight` still wins when both are
 set, so no existing scene moves. Blast radius: zero scenes used either.
 
-## #208 — a documented layer feature that never once worked, and I claimed the gap it left was a wall
+## 214. a documented layer feature that never once worked, and I claimed the gap it left was a wall
 
-**What.** I wrote in #206 that reflowing a grid was "impossible, not hard". Challenged on it, I checked
+**What.** I wrote in #212 that reflowing a grid was "impossible, not hard". Challenged on it, I checked
 instead of arguing, and the truth is worse than the claim. `gsap:{from,to,dur,ease}` WAS a documented
 layer prop, the schema called it "Deterministic (seeked per frame)", and it accepted `width` happily.
 So a path existed. It just produced garbage.
@@ -5069,7 +5069,7 @@ second, weaker, broken way to do the same thing is worse than having one. Reject
 message that translates the author's GSAP property names into ours (`width`→`w`, `rotation`→`rot`),
 because a suggestion telling them to write `"width"` inside a motion key is the next silent no-op.
 
-**The claim, corrected.** Not "impossible". The accurate statement about #206 is: **there was no way to
+**The claim, corrected.** Not "impossible". The accurate statement about #212 is: **there was no way to
 EXPRESS a reflow as motion, and the one escape hatch that accepted it rendered it wrong in silence.**
 That is a worse defect than an honest gap, and stating it as a wall made the engine sound better than
 it was. The `{html}` layer driven by `var(--t)` genuinely could have done it, at the cost of leaving
@@ -5079,7 +5079,7 @@ the layer system entirely — no cover-fit, no geometry for the audit, invisible
 as "no way". Reading the evaluator proves what the evaluator does, never what the engine accepts. The
 question "can a user get this today?" is answered by trying it, and trying it took one render.
 
-## #209 — four lossless compressions per frame, for a lossy file
+## 215. four lossless compressions per frame, for a lossy file
 
 **What.** A 14.6s film took 434s to render and nobody knew where the time went. Profiling it
 (`VAWE_PROFILE=1`, added for this) gave the answer in one table:
@@ -5128,7 +5128,7 @@ and Chrome produces `*image.RGBA`. An identical output proved non-execution and 
 correctness. The profile now prints a fast/slow path count so that cannot happen silently again.
 **Profile before optimising, and make every fix able to report that it fired.**
 
-## #210 — an html layer's `h` was accepted, set, and then ignored by everything inside it
+## 216. an html layer's `h` was accepted, set, and then ignored by everything inside it
 
 **What.** `{"type":"html","h":580}` rendered a 310px card. The layer element really was 580 tall, so
 nothing looked broken from the outside; the content inside it was 310. Twenty-one scenes in this library
@@ -5149,7 +5149,7 @@ probe` clean, `scene-snap` identical.
 discarded. The gate that would have caught it does not exist: nothing compares what a layer asked its box
 to be against what its contents actually occupy.
 
-## #211 — the layout audit measured a rotating layer's empty corners, not the ink it draws
+## 217. the layout audit measured a rotating layer's empty corners, not the ink it draws
 
 **What.** A ribbon layer, an arc inscribed in a square box, failed the safe-zone audit at every rotation.
 Nothing visible ever came near the frame edge. Satisfying the gate meant shrinking the ring by 40%, past
@@ -5180,7 +5180,7 @@ defects, it manufactures them, and the author pays by deforming a good design un
 tell was that the only fix available was to make the film worse. When satisfying a gate requires that,
 suspect the gate.
 
-## #212 — the script gate called kinetic typography an echo
+## 218. the script gate called kinetic typography an echo
 
 **What.** A film whose on-screen words ARE the spoken line failed `channels-echo` on 4 of its 5 beats.
 The gate was reading a deliberate form as a defect, and the only way to satisfy it was to stop making
@@ -5199,11 +5199,11 @@ type carries the read, the picture is the only other channel the film has, so it
 both ways: one echoing beat among distinct ones still fails; a wholly kinetic film passes and is asked the
 harder question. `gate-mutation` 119/119.
 
-**Class.** Gate gap, same shape as #211. The tell was identical: satisfying the gate required abandoning
+**Class.** Gate gap, same shape as #217. The tell was identical: satisfying the gate required abandoning
 something known to be good. A rule that is right for the common case and silent about the existence of
 others will punish exactly the films that are trying something.
 
-## #213 — a rect's `fill` was accepted and thrown away, because the unknown-prop check is type-agnostic
+## 219. a rect's `fill` was accepted and thrown away, because the unknown-prop check is type-agnostic
 
 **What.** `{"type":"rect","fill":"#d33"}` rendered white. The colour was simply discarded, and a pushpin
 meant to be red came out as a white square.
@@ -5224,7 +5224,7 @@ some layer type is silently accepted on all of them, so this class can recur wit
 the schema to carry per-type props; it was not attempted here because it would touch every layer type at
 the tail of a long session.
 
-## #214 — the layout audit called a label on a card a collision
+## 220. the layout audit called a label on a card a collision
 
 **What.** A hand-authored card with three rows placed on it failed `overlap` on every frame. The rows were
 exactly where they were meant to be.
@@ -5246,11 +5246,11 @@ like a text layer in the first place.
 DOWN by exactly one finding, none up. Spot-checked `ab2-skill-tenor` independently: the removed finding was
 a 680x500 painted card against the `$349k` label on it, overlap 592x61. A label on a card.
 
-**Class.** Gate gap. Note the shape it shares with #211 and #212: in all three the rule was right and the
+**Class.** Gate gap. Note the shape it shares with #217 and #218: in all three the rule was right and the
 MEASUREMENT did not match it, and in all three the tell was that satisfying the gate meant making the film
 worse. Three of the last four framework findings are the gate measuring the wrong unit.
 
-## #215 — a single `--aspect` silently overwrote the render it was not asked to replace
+## 221. a single `--aspect` silently overwrote the render it was not asked to replace
 
 **What.** `./bin/vawe scene.json --aspect 9:16` on a 16:9 scene wrote `out/<name>.mp4` — the same
 path the scene's own-aspect render uses. The 16:9 film was replaced by a 9:16 one under an identical
@@ -5265,11 +5265,11 @@ shape of the output did not change the name of the output.
 file is the author's call.
 
 **Class.** Silent substitution, and the most expensive variety: the destructive kind. Elsewhere this
-class discards input (#210 an html layer's `h`, #213 a rect's `fill`). Here it discarded a
+class discards input (#216 an html layer's `h`, #219 a rect's `fill`). Here it discarded a
 previously-rendered deliverable. Worth stating as a rule: **a flag that changes what the output IS
 must change what the output is CALLED.**
 
-## #216 — the audit read a stylesheet as glyphs and called it clipped text
+## 222. the audit read a stylesheet as glyphs and called it clipped text
 
 **What.** A frosted glass pane failed `clipped-text` with "mask is 287px too short for the glyphs" and a
 reported content of `.g{position:rela`. Nothing was clipped. Nothing was even text.
@@ -5281,13 +5281,13 @@ its own corners), so the scrollHeight of the invisible stylesheet text became a 
 **Fix.** The check now uses the shared `inkText()` helper, which walks text nodes and rejects anything
 inside `style` or `script`.
 
-**Class, and the part worth remembering.** This is #214 again, in a second consumer. That entry
+**Class, and the part worth remembering.** This is #220 again, in a second consumer. That entry
 introduced `inkText()` for the OVERLAP check and left every other consumer of `textContent` alone,
 so the same stylesheet went on being read as content one check further down. A fix applied at one call
 site instead of at the rule is half a fix, and the half that is missing looks identical to the half that
 is done until something trips it. Library diff after the change: zero scenes change.
 
-## #217 — the same stylesheet-as-text bug, in a third and fourth consumer
+## 223. the same stylesheet-as-text bug, in a third and fourth consumer
 
 **What.** A frosted pane failed the SAFE-ZONE check, reported against the content
 `/* Near-opaque on `, which is a fragment of its own CSS comment.
@@ -5299,8 +5299,8 @@ text) and the image probe's emptiness test.
 
 **Fix.** All of them read the shared `inkText()` now.
 
-**Class, and why this entry exists at all.** This is the THIRD time. #214 found it in the overlap check
-and fixed that call site. #216 found it in clipped-text, fixed that call site, and its own writeup said
+**Class, and why this entry exists at all.** This is the THIRD time. #220 found it in the overlap check
+and fixed that call site. #222 found it in clipped-text, fixed that call site, and its own writeup said
 "a fix applied at one call site instead of at the rule is half a fix". Then this pass found three more.
 The lesson had been written down twice and applied zero times, because writing a rule and obeying it are
 different acts, and only the second one is work.
@@ -5309,7 +5309,7 @@ CLAUDE.md now carries "fix the rule, not the call site: grep every consumer befo
 in the same session and, notably, added BEFORE this instance was found. The rule was followed here only
 because the failure happened to recur immediately. Library diff after the change: zero scenes change.
 
-## #218 — a modifier slot was nearly added to a prop that was already taken
+## 224. a modifier slot was nearly added to a prop that was already taken
 
 **What.** The plan in `docs/audits/NEXT.md` named the new per-layer modifier slot `fx`, with the example
 `{"type":"image","fx":[{"occlude":"cardId"},{"shadow":"key"}]}`. `L.fx` was already the named-GSAP-effect
@@ -5337,7 +5337,7 @@ and a schema key no modifier implements, are both a failure.
 Worth stating plainly: a plan written in one session and executed in another names props from memory, and
 memory does not hold a 161-prop namespace.
 
-## #219 — the scene's light was going to be handed to every layer unvalidated
+## 225. the scene's light was going to be handed to every layer unvalidated
 
 **What.** `scene.light` is read by `core/fx/shadow.js` to aim every shadow. The obvious construction,
 `Object.freeze({ ...data.lighting })`, accepts `{"x": 540, "Y": 120}` and yields `{x: 540, y: undefined}`.
@@ -5358,7 +5358,7 @@ is what an author's editor sees, the runtime check is what an MCP caller hits.
 **Class.** Silent substitution, caught before shipping rather than after. The tell is the one this file
 keeps recording: an input where every value is plausible and no value is verifiable.
 
-## #220 — the 3D spike proved a construction and said nothing about how the engine is assembled
+## 226. the 3D spike proved a construction and said nothing about how the engine is assembled
 
 **What.** Phase 0 concluded "the camera must sit on the layers' DIRECT parent, because any intervening
 element flattens the 3D context". That is correct, and it is not enough to write the modifier: in this
@@ -5373,7 +5373,7 @@ them, and flattened means the tilt still rotates and simply stops being projecte
 flatter frame.
 
 **Fix.** `core/fx/tilt.js` writes the camera on `el.parentNode`, whatever that turns out to be, at frame
-time (see #221 for why not at build).
+time (see #227 for why not at build).
 
 **Which gate catches it.** None, and that is worth saying: a flattened 3D context renders, so every gate
 stays green. It was found by asking what `parentNode` is in each of the engine's assembly paths.
@@ -5382,7 +5382,7 @@ stays green. It was found by asking what `parentNode` is in each of the engine's
 many elements the real engine puts between the two the spike had, and that count is usually the whole
 problem. Read the spike's conclusion as "this works when X is the parent", never as "X is the parent".
 
-## #221 — what a modifier may not assume at build time: no parent, and no wrapper
+## 227. what a modifier may not assume at build time: no parent, and no wrapper
 
 **What.** Two constraints, one cause, found while writing the first modifiers. A modifier's `build()`
 cannot touch its parent, and it cannot insert a wrapper element around what it modifies.
@@ -5413,7 +5413,7 @@ and a modifier reading it throws on the spot, which is the acceptable outcome.
 **Class.** Not a bug that shipped. It is the shape of this engine's build phase, written down because it is
 invisible from inside a modifier file and both halves are one-line mistakes.
 
-## #222 — two tilted siblings under one parent resolved last-writer-wins, and one silently lost its lens
+## 228. two tilted siblings under one parent resolved last-writer-wins, and one silently lost its lens
 
 **What.** `perspective` and `perspective-origin` are written on the layers' shared parent, so they are the
 scene's camera, not the layer's. Two siblings that each ask for a different `dist` or `origin` are two
@@ -5431,10 +5431,10 @@ move one layer into a group of its own, which gives it a parent of its own).
 `gate-mutation`, which pins that the error fires.
 
 **Class.** The silent-conflict variant of silent substitution. Elsewhere in this file the engine discards
-an input (#210, #213); here CSS picks one of two valid inputs and discards the other. Same result, and
+an input (#216, #219); here CSS picks one of two valid inputs and discards the other. Same result, and
 harder to see, because the discarded layer still tilts. It just tilts through the wrong camera.
 
-## #223 — a 404's body was parsed as the scene, and a file nobody opened was blamed for its contents
+## 229. a 404's body was parsed as the scene, and a file nobody opened was blamed for its contents
 
 **What.** Two error messages, both naming the wrong cause, both current until this pass.
 
@@ -5471,11 +5471,11 @@ unservable scene before it starts a browser, naming the roots and the way out.
 exercises them, and every gate here measures a render that works. What now stands in for a gate is that the
 three outcomes have three different messages, so the next report names its own cause.
 
-**Class, and the shape it shares.** This is #214 → #216 → #217 a fourth time, in a different file pair: one
+**Class, and the shape it shares.** This is #220 → #222 → #223 a fourth time, in a different file pair: one
 primitive misread (a non-OK response is not content; a zero value is not an answer), used at several call
 sites, fixed at the rule and cleared at every consumer rather than patched where it was noticed.
 
-## #224 — `--alpha` exported a fully opaque overlay, and every downstream flag on that path was wrong too
+## 230. `--alpha` exported a fully opaque overlay, and every downstream flag on that path was wrong too
 
 **What.** `./bin/vawe <scene> --alpha` printed `· alpha`, exited 0, and wrote a file whose alpha channel
 was 255 on every pixel of every frame. The same code shipped three more wrong deliverables beside it:
@@ -5524,7 +5524,7 @@ scene using either flag, so nothing else would.
 itself: three rounds read code and none compared rendered pixels against the scene that produced them.
 Every stage of this reported success. The channel was only ever visible in `alphaextract`.
 
-## #225 — the watermark was drawn at twice the frame size and clipped, on every render that was not a draft
+## 231. the watermark was drawn at twice the frame size and clipped, on every render that was not a draft
 
 **What.** `encode.Video` built `[1:v][0:v]scale2ref[wm][base]`, sizing the sheet against `[0:v]`, the RAW
 captured frame. Every non-draft render supersamples 2x, so the sheet was built at 2160x3840, the frame was
@@ -5541,11 +5541,11 @@ chain is now built by `watermarkChain`, split out so its shape can be asserted w
 the scale precedes `scale2ref` and that the reference is the scaled frame.
 
 **Class.** Not silent substitution: the engine did what it was told, and what it was told was wrong. The
-reason it lasted is the same one as #224 though. No gate renders a watermarked frame, `go test ./...` had
+reason it lasted is the same one as #230 though. No gate renders a watermarked frame, `go test ./...` had
 no test in `encode`, `render` or `queue`, and the only instrument that could see it was a human opening
 the file. The MCP server ships free previews down exactly this path.
 
-## #226 — a nested group's modifiers were built by nobody, and only half of each one ran
+## 232. a nested group's modifiers were built by nobody, and only half of each one ran
 
 **What.** `{"type":"group", "modifiers":[…]}` nested inside another group ran its modifiers' `frame()`
 and never their `build()`. `mixBlend`, which is build-only, therefore did nothing at all: accepted,
@@ -5571,7 +5571,7 @@ group-child construction prop by prop) and extending it to modifiers is the dura
 **Class.** Silent non-application, the worst shape in this file, made worse by being half-silent: the
 frame half ran, so the layer looked touched.
 
-## #227 — "a group child has no box" was a conclusion drawn from the authored x/y
+## 233. "a group child has no box" was a conclusion drawn from the authored x/y
 
 **What.** `scene.boxOf` returned null for every group child, so `occlude` and `shadow` refused on one and
 said so in three files' worth of comments. The stated reason — a child's x/y are relative to a flex or
@@ -5600,7 +5600,7 @@ library: 51 identical, 30 changed, 3 quarantined, unchanged from before.
 **Class.** Not silent substitution. A correct diagnosis with the wrong conclusion attached, copied into
 four files as settled fact, where each copy made the next one look better established.
 
-## #228 — the per-frame pipeline's order was the order of nine statements, and three of them were load-bearing in ways nothing said
+## 234. the per-frame pipeline's order was the order of nine statements, and three of them were load-bearing in ways nothing said
 
 **What.** Everything a layer does on a frame lived as statements in `updateLayer`, one ~140-line
 function in `formats/scene/scene.js`. The composition order — which job may overwrite whose transform,
@@ -5646,7 +5646,7 @@ read, which is what a statement list cost too.
 **Class.** Not a wrong pixel. Knowledge that existed only as the physical arrangement of code, where
 any edit that looked harmless could destroy it without a gate having anything to compare against.
 
-## #229 — schema-drift had been reading a 20-line shell and calling it the engine
+## 235. schema-drift had been reading a 20-line shell and calling it the engine
 
 **What.** `scripts/gates/schema-drift.mjs` asserts every layer prop the engine reads is defined in
 `schema.json`. It scanned `formats/scene/scene.html` plus `core/layers/*.js`. `scene.html` is a 20-line
@@ -5659,7 +5659,7 @@ gate printed a green line with a count each time.
 arrangement of the code rather than a property of it. Exactly what this gate exists to stop the SCHEMA
 doing to the registries.
 
-**Found by.** The track extraction (#228). Moving thirty props out of `scene.js` and into
+**Found by.** The track extraction (#234). Moving thirty props out of `scene.js` and into
 `core/tracks/*.js` should have changed the count and did not, which is what gave it away — the props
 had never been in view, so moving them changed nothing.
 
@@ -5678,7 +5678,7 @@ schema.json reports exactly that prop. `gate-mutation` stays 125/125.
 **Class.** A gate measuring the wrong thing and reporting success about it — worse than no gate,
 because the green line is evidence to the next reader.
 
-## #230 — four layer types were one primitive in four copies, and the copies had already drifted apart
+## 236. four layer types were one primitive in four copies, and the copies had already drifted apart
 
 **What.** `paint`, `shader`, `raymarch` and `three` each had their own file in `core/layers/`, and each
 said in its own header that it mirrored `shader.js` "exactly". They did the same five things: size a
@@ -5729,30 +5729,30 @@ off-window clear, so deleting it fails all four types instead of one.
 **Class.** Duplication as an architecture. Not a wrong pixel on the day it was written, and four
 independent wrong behaviours by the time anyone counted.
 
-## #231 — schema-drift read `L.` and `C.` but not `LL.`, which the gate next to it had matched all along
+## 237. schema-drift read `L.` and `C.` but not `LL.`, which the gate next to it had matched all along
 
 **What.** `scripts/gates/schema-drift.mjs` collects the layer props the engine reads with
 `/\b[LC]\.(\w+)/`. A layer under the inner name `LL` — the convention when `L` is already taken, used by
 `core/three-fx.js` since it shipped — matched nothing. `scripts/gates/layer-props.mjs` has matched
 `(?:LL?|C)` since IT shipped, and says so in a comment two lines long.
 
-**Found by.** #230. Moving the per-frame draws into `core/surfaces/`, where the frame's layer arrives as
+**Found by.** #236. Moving the per-frame draws into `core/surfaces/`, where the frame's layer arrives as
 `LL`, dropped the count from 163 to 162: `spin` had no other reader anywhere in the scanned tree.
 
 **Fix.** The same pattern the neighbouring gate uses. Count 163 → 164: `seed` and `spin` come back, and
-`resample` is new because the shared primitive now reads it to refuse it (#230, defect 2). No scene
+`resample` is new because the shared primitive now reads it to refuse it (#236, defect 2). No scene
 changed verdict, and every prop is still defined in the schema — coverage, not a finding.
 
 **Class.** Two gates asking the same question of the same source with different eyes, and the narrower
 one reporting a number as if it were the answer.
 
-## #232 — a gate followed a builder's imports one hop up, but never sideways
+## 238. a gate followed a builder's imports one hop up, but never sideways
 
 **What.** `layer-props.mjs` decides which props a type honours by reading its builder AND the core
 modules the builder imports, because a builder hands the whole layer on (`paint` → `PAINT_FX`, `three` →
 `core/three-fx.js`). It matched `from '../x.js'` only. A builder importing a SIBLING was invisible.
 
-**Found by.** #230. `core/surfaces/palette.js` holds the `L.colors` read that `shader.js` and
+**Found by.** #236. `core/surfaces/palette.js` holds the `L.colors` read that `shader.js` and
 `raymarch.js` had each copied, and the moment it was one file over instead of inline, `colors` on a
 raymarch layer was reported as a prop nothing reads — while the render honoured it.
 
@@ -5766,7 +5766,7 @@ directory`) rather than for the property it was checking (`follow where the prop
 
 ---
 
-## #233 — the camera scaled a finished picture and called it a push
+## 239. the camera scaled a finished picture and called it a push
 
 **What.** `tilt` shipped and a card could lean, but no camera move could get past it. Pan the camera 300px
 across a card tilted 30 degrees and the card's projected shape changed by **0.00%** — it slid and it grew
@@ -5809,7 +5809,7 @@ low, this found the camera one level too high), and a knob whose NAME had drifte
 
 ---
 
-## #234 — a blocking gate squared a layer, and so passed the one defect it existed to catch
+## 240. a blocking gate squared a layer, and so passed the one defect it existed to catch
 
 **What.** `visual-vocabulary` decided whether a film SHOWS anything or is only type, by measuring how
 much of the canvas each pictorial layer covered. `boxOf` in `scripts/gates/scene-timing.mjs` had four
@@ -5844,13 +5844,13 @@ mutation harness proves a gate is wired up; it cannot prove the gate measures th
 fixture that would have caught this is a single-axis decorative layer, and nobody wrote it because the
 helper looked obviously right. **When you pin a gate, pin the shape its measurement is worst at.**
 
-**Class.** Same as #211 and #216: a measurement bug, not a rule bug. Also the second time a helper's
-default has quietly substituted a plausible value for a missing one (#214). Grep for the helper, not
+**Class.** Same as #217 and #222: a measurement bug, not a rule bug. Also the second time a helper's
+default has quietly substituted a plausible value for a missing one (#220). Grep for the helper, not
 the call site.
 
 ---
 
-## #235 — a determinism sweep reported regressions that had not happened, because it shared one browser
+## 241. a determinism sweep reported regressions that had not happened, because it shared one browser
 
 **What.** `make snap-all` drives every scene through Chrome and diffs a DOM signature against a
 baseline. Run twice, back to back, against a tree nobody had touched, it returned `identical: 50 /
@@ -5876,9 +5876,9 @@ That is the only real test for a gate of this shape, and it had never been run.
 engine already applies to `renderFrame(n)`: the renderer was pure all along, and the measuring apparatus
 was not.
 
-## #236 — a factual finding was filed in the taste bucket, and a cull carried it out of sight
+## 242. a factual finding was filed in the taste bucket, and a cull carried it out of sight
 
-`beats-wrapped-as-units` (added by #183) told an author that the engine was truncating their layers at
+`beats-wrapped-as-units` (added by #189) told an author that the engine was truncating their layers at
 every beat boundary and named the one flag that stops it. It lived in `direction-floor`. When the taste
 gates went opt-in (`docs/TASTE.md`, 2026-08), `direction-floor` stopped running by default and the
 warning went silent with it. Authors have been hitting the truncation with nothing said since.
@@ -5902,7 +5902,7 @@ renders to 4.10s), and both are genuine silent truncations nothing had ever repo
 
 `direction-floor` keeps the STRUCTURAL half, which is a different statement: a layer the wrapper confines
 to its own beat is not a spine candidate at all, so `spineCandidates` now excludes it. That closes the
-hole #183 opened at the other end — the old code short-circuited on the whole film, so a film with a
+hole #189 opened at the other end — the old code short-circuited on the whole film, so a film with a
 wrapped "crosser" could still be graded off raw `start`/`duration` in some shapes. One blocking code
 (`no-continuous-object`) instead of two, which means every existing waiver keeps working unchanged;
 `CONTINUITY_ALIASES` drops to one entry. Three new mutation cases pin the beat-check finding in all
@@ -5915,7 +5915,7 @@ The question to ask of every finding in the group is whether two people who disa
 still agree it is true. If they would, it is not a taste gate, and switching it off does not remove an
 opinion — it removes a fact.
 
-## #237 — sound by default was never decided, it was inherited from a bug fix
+## 243. sound by default was never decided, it was inherited from a bug fix
 
 90 of 136 scenes set `audio.silent: true` and 20 more named no `audio` block at all. Not one of the 90
 stated a reason. Five films in six ship mute.
@@ -5949,7 +5949,7 @@ and `vawe-launch.json`'s bed has no provenance entry at all.
 
 ---
 
-## #238 — the only continuity the engine could express was visual, so every film had to carry a prop
+## 244. the only continuity the engine could express was visual, so every film had to carry a prop
 
 **What.** `direction-floor` blocks a short film on `no-continuous-object`: something must survive a cut
 and change across it. Every answer the engine could express was a picture — a prop that travels, a
@@ -5962,7 +5962,7 @@ one. Either one holds two visually unrelated beats together and costs the pictur
 
 **Root cause.** The audio model had no way to say it. A cue is a point event at a time `t` and a bed is
 one continuous file, so "start this texture 0.4s before the cut and cross it under" had no shape to be
-written in. Nobody had noticed, because the doctrine said ship it mute (#237), and a device you cannot
+written in. Nobody had noticed, because the doctrine said ship it mute (#243), and a device you cannot
 use is a device you stop proposing. `docs/CRAFT/FILM-STRUCTURE.md` catalogues four families of
 structural device and one of them is aural: the engine was locked out of a quarter of the vocabulary by
 a missing field.
@@ -5992,7 +5992,7 @@ that the texture is on disk. `make audio-check` counts a bridges-only film as so
 
 ---
 
-## 86. The design-spec lock knew three type roles; the engine has four
+## 245. The design-spec lock knew three type roles; the engine has four
 
 **What happened.** `onefilm` sets `"font": "num"` on its count layer, which is what the vawe theme's
 `type.num` (JetBrains Mono) exists for: tabular figures under a rolling number. `make designspec-check`
@@ -6006,7 +6006,7 @@ engine has had four roles the whole time and says so in four places: `core/theme
 gate restated the list by hand instead of deriving it, and the hand copy was short by one.
 
 **Why it matters more than one warning.** The only way to clear this finding is to move the numbers off
-the numeric face, which is a worse film. Same shape as #85: a gate that measures the wrong thing does
+the numeric face, which is a worse film. Same shape as #250: a gate that measures the wrong thing does
 not miss defects, it manufactures them, and the author pays in design.
 
 **Fix (framework).** `ROLES` extended to the engine's four, and the message names all four so the next
@@ -6021,7 +6021,7 @@ it, or the day the engine grows a fifth role the gate starts arguing against it.
 
 ---
 
-## #239 — the provenance table described a file that was no longer there, and could not survive a clone
+## 246. the provenance table described a file that was no longer there, and could not survive a clone
 
 **What.** `assets/music/credits.json` recorded `calm` as Mixkit track 127, a 133-second ambient loop.
 The `calm.wav` on disk is a 8-second synthesized drone. The licence record pointed at the wrong file.
@@ -6051,7 +6051,7 @@ after), so no mix changed. Only credits.json moved.
 
 ---
 
-## #240 — beat wrapping discarded the authored `duration`, and the DOM kept no record of it
+## 247. beat wrapping discarded the authored `duration`, and the DOM kept no record of it
 
 **What.** Under `sceneUnits`, `formats/scene/scene.js` rewrote every non-last-beat layer's
 `data-duration` to `beatEnd + cutDur`. A layer authored `duration: 2.0` inside a beat running to 9.4s
@@ -6066,7 +6066,7 @@ reports timing off the DOM — `make studio`'s timeline first — therefore drew
 called it the layer. The picture agreed with the render and quietly overruled the JSON, which is exactly
 the shape that makes a substitution invisible: nothing disagrees, so nothing looks wrong.
 
-`beats-wrapped-as-units` (#183) covered the other direction, a layer authored ACROSS a cut and cut short
+`beats-wrapped-as-units` (#189) covered the other direction, a layer authored ACROSS a cut and cut short
 at it. Extension had no finding at all.
 
 **Fix.** Separate what renders from what is reported, rather than change what renders.
@@ -6094,7 +6094,7 @@ warrants in the same pass. The gate now names every scene it would touch.
 
 ---
 
-## #241 — `make studio` showed a blank stage for a scene whose exact error was one property away
+## 248. `make studio` showed a blank stage for a scene whose exact error was one property away
 
 **What.** A scene with `cuts[0].style: "cut"` opened the studio on an empty stage and a readout stuck at
 `frame 0 / 0`, with no message anywhere. `core/validate.mjs` had already produced the reason — *cuts[0].style
@@ -6109,7 +6109,7 @@ ever arrives because the page died before boot could report.
 
 ---
 
-## #242 — `buried` called a fully visible graphic 100% covered, because an ink rect was read raw (a fourth #211/#214/#216/#217)
+## 249. `buried` called a fully visible graphic 100% covered, because an ink rect was read raw (a fourth #211/#214/#216/#217)
 
 **What.** `make audit D=formats/scene/playhead.json` hard-failed four times with
 `[buried] f324/330/341/360 headline@y342 — 100% under an opaque layer`. No headline in the film has ink
@@ -6124,7 +6124,7 @@ refused to deform the film to clear it.
    stage on one for any camera `s` zoom (a translateZ under `perspective`) and again for a layer
    `tilt`. playhead's tick svg really draws at (408,898) 288x73; its screen CTM maps the same paths to
    (150,341) 123x29, a rect on the far side of the frame and the source of the y=342 in the message.
-   The safe-zone walk had a clamp for exactly this, added by **#211** after an unclamped svg bound
+   The safe-zone walk had a clamp for exactly this, added by **#217** after an unclamped svg bound
    turned showcase-cuts from 0 hard failures into 7. The clamp lived at that ONE call site. `buried`
    read `inkRect` raw and inherited the whole bug.
 2. **A dead guard.** `buried` asks `stack.findIndex(e => e === el || el.contains(e) || e.contains(el))`
@@ -6133,9 +6133,9 @@ refused to deform the film to clear it.
    stack at every point on the frame. The guard could never fire. So the check sampled 81 points of
    empty canvas, found the white card that genuinely is painted there, and reported the layer buried.
 
-**This is the fourth time the same shape has been logged.** #214 (`textContent` counts `<style>` source)
-was fixed in the overlap check and left in the clipped-text check, where it came back as #216, then #217.
-#211 is the same story for the ink clamp. Every one was a measuring rule fixed at a call site while
+**This is the fourth time the same shape has been logged.** #220 (`textContent` counts `<style>` source)
+was fixed in the overlap check and left in the clipped-text check, where it came back as #222, then #223.
+#217 is the same story for the ink clamp. Every one was a measuring rule fixed at a call site while
 another consumer kept reading it raw.
 
 **Fix.** The clamp now lives **inside `inkRect`** (`clampToBox`), so an ink rect can only ever shrink the
@@ -6152,7 +6152,7 @@ overlap/tight only for a **rotation**, and a z-translate under perspective is a 
 leaves axis-aligned boxes axis-aligned, so `getBoundingClientRect` stays trustworthy there.
 
 **Which gate catches it now.** `node scripts/gates/gate-mutation.mjs` carries both halves (129 cases):
-a headline under a solid panel that must still FAIL, and, per **#234**, the shape the measurement is
+a headline under a solid panel that must still FAIL, and, per **#240**, the shape the measurement is
 worst at: an svg on a 3D camera rig with a tilt, plus a white rect parked where the bad CTM points,
 which must PASS. Reverting the clamp makes the second case fire again on a frame holding nothing but a
 visible blue tick.
@@ -6161,7 +6161,7 @@ visible blue tick.
 5 hard to 1. The four buried findings were the only ones in the library and all four were false.
 ---
 
-## 85. A validator rule outlived the bug it was written for, and started inventing one
+## 250. A validator rule outlived the bug it was written for, and started inventing one
 
 **What happened.** Authoring `onefilm`, every typed line in the file column carried `<b>` around its
 JSON value so the value read in ink against a grey key. `make validate` warned four times: *uses
@@ -6195,7 +6195,7 @@ for the behaviour you just changed before you close the PR.
 
 ---
 
-## 87. The layout audit read a rotated stage as if it were flat, and manufactured collisions
+## 251. The layout audit read a rotated stage as if it were flat, and manufactured collisions
 
 **What happened.** `onefilm`'s beat 5 is its only camera move: the stage tilts and pushes so the file
 and its results are seen on a plane from an angle. `make audit` failed it with
@@ -6243,7 +6243,7 @@ scene in the library and needs its own before/after sweep.
 
 ---
 
-## #243 — a layer the engine animated for 12.7s and never drew: an overlay bar behind a tilted capture
+## 252. a layer the engine animated for 12.7s and never drew: an overlay bar behind a tilted capture
 
 **What.** `playhead.json` declares its continuous object as one vertical bar: a text caret at 0s, the
 studio playhead from 3.3s, the leading edge of a render fill at 14s. The storyboard is built on it and
@@ -6287,7 +6287,7 @@ component under the 3D rig. `grep -l '"tilt"' formats/scene/*.json` is the candi
 the one confirmed instance, and it was confirmed only because the storyboard promised the bar loudly
 enough that its absence was noticeable.
 
-## #244 — `layer-props` was inverted: 1482 false alarms and ~66 real misses, because it looked for reads instead of asking for them (a fourth #229/#232/#242, and the same shape as #214/#216/#217)
+## 253. `layer-props` was inverted: 1482 false alarms and ~66 real misses, because it looked for reads instead of asking for them (a fourth #229/#232/#242, and the same shape as #214/#216/#217)
 
 `make layer-props` reported **1482 props "accepted and dropped"** — the failure CLAUDE.md names as the
 most expensive in this repo. Every one of the 1482 was a false alarm. 1454 were read in `core/tracks/`,
@@ -6302,7 +6302,7 @@ the gate called every one of them live while shouting about the ones that worked
 **Root cause: a static scanner over a moving file tree.** The scan surface was a hardcoded four-file list
 plus one hop of each builder's *relative* imports. That list is a map of where the engine lived on the day
 it was written, and this engine keeps moving — three registries landed in one day. Each earlier fix widened
-the scan by exactly the shape that had just broken (#232 followed `../` but never a sibling; #229 scanned a
+the scan by exactly the shape that had just broken (#238 followed `../` but never a sibling; #235 scanned a
 20-line shell after a file split) and each was overtaken by the next move. Widening a scan cannot outrun a
 refactor.
 
@@ -6314,7 +6314,7 @@ in the file that does the reading. The guard is declared too — `preset: { when
 lets the gate tell "nothing reads this" from "nothing reads this **here**".
 
 **The gate now catches (verified by mutation, `gate-mutation` 132/132):** deleting a `PROPS` entry for a
-prop a scene uses; deleting one read only inside `core/tracks/`, the exact shape that was invisible (#234);
+prop a scene uses; deleting one read only inside `core/tracks/`, the exact shape that was invisible (#240);
 gutting the shared declarations, which reports the gate blind rather than blaming 4369 layers; and a
 `preset` with no `split`, both directions.
 
@@ -6330,7 +6330,7 @@ can load it.
 `data-anim` alone and has no distance or direction knob — which is 13 layers across four shipped films
 believing they tuned a slide they did not.
 
-## #245 — `make reveal` reported a contact sheet it had not written, and stamped a receipt for it
+## 254. `make reveal` reported a contact sheet it had not written, and stamped a receipt for it
 
 **What happened.** `make reveal D=formats/scene/playhead.json` printed
 `✓ reveal · 5 beats … → /tmp/reveal/playhead.png` and exited 0. No such file existed, anywhere.
@@ -6363,7 +6363,7 @@ literal — and survived only because `/tmp` itself always exists. It now uses t
 another line then claims as a result must check its status and its artifact, or the tool's success
 message is decoration.
 
-## #246 — the film's declared subject was not drawn for seven frames, at the exact moment it hands off
+## 255. the film's declared subject was not drawn for seven frames, at the exact moment it hands off
 
 **What happened.** `playhead.json`'s whole spine is ONE vertical mark the viewer tracks from caret to
 playhead to render fill. Painted magenta and counted, the mark was absent from every frame between
@@ -6403,7 +6403,7 @@ count and bounding box and exits non-zero on any empty frame.
 it". Under a rig with any tilt or depth, occlusion is a rendering outcome no schema check can predict,
 so the only honest proof is a pixel count on a render.
 
-## #247 — the dead-CSS check had three blind spots, and each one was a place hand-written CSS actually lives
+## 256. the dead-CSS check had three blind spots, and each one was a place hand-written CSS actually lives
 
 **What happened.** `core/tokens.css` disables `transition` and `animation` engine-wide, so hand-authored
 CSS motion renders a dead still and says nothing. The authoring gate has named that by hand since the
@@ -6429,11 +6429,11 @@ NAMES but does not carry (`src` fragments, captured component JSON) and runs the
 quote added to the anchor. A fragment is an error, a capture is a warning — the site wrote that CSS, not
 us, and it costs a still, not a broken render. Pinned in `gate-mutation` in both directions.
 
-**Lesson:** the same as #214/#216/#217 and #244, in a smaller place. A measurement bug is never at one
+**Lesson:** the same as #220/#222/#223 and #253, in a smaller place. A measurement bug is never at one
 call site. Before closing one, list every kind of input the rule claims to cover and prove each is
 reached — "hand-authored markup" turned out to mean four things and the check saw one and a half.
 
-## #248 — a missing fragment would have been a grey box, so it throws instead
+## 257. a missing fragment would have been a grey box, so it throws instead
 
 **What happened.** Hand-authored HTML could only be an escaped string inside the scene JSON: 130
 fragments across 53 scenes, one of them 127,467 characters on a single line, none of them readable,
@@ -6458,7 +6458,7 @@ is caught statically as well as at render.
 screen when the asset is missing. If the answer is "the beat", nothing degrades gracefully and the only
 honest option is to stop.
 
-## #249 — two gate runs at once deleted a guard from the engine and left it deleted
+## 258. two gate runs at once deleted a guard from the engine and left it deleted
 
 **What happened.** `gate-mutation`'s source cases edit tracked engine files in place: write the mutation,
 run the gate, write the original back. Two runs overlapped (two agents, one checkout). The second read
@@ -6478,7 +6478,7 @@ hole in the single-run case: a Ctrl-C mid-case left the mutation in the tree wit
 restores" is only true for the paths that reach the restore. Agents run gates in parallel now, so
 serialise anything that writes to a shared file, and run `git status --short` before believing a tree.
 
-## #250 — the anti-pattern detector reports "clean" when it cannot run
+## 259. the anti-pattern detector reports "clean" when it cannot run
 
 **What happened.** Wiring `impeccable`'s detector into `make preview` (approval stop 1b), the first
 result on every fragment and on `docs/animation.html` was zero findings and exit 0. The detector was not
@@ -6497,7 +6497,7 @@ clean".
 that produces the same shape of answer as the healthy one is not a fallback, it is a lie with a
 try/catch around it.
 
-## #250 — the guard against a destructive command matched the prose describing it, twice
+## 260. the guard against a destructive command matched the prose describing it, twice
 
 **What happened.** A `PreToolUse` hook was written to refuse the four git commands that had already
 destroyed work in this repo with several agents in one tree. It blocked its own first commit: the commit
@@ -6508,8 +6508,8 @@ Three self-blocks, all the same misread.
 
 **Root cause.** The check read the SOURCE TEXT of a shell command instead of the commands that text
 would run. A heredoc body, a quoted string and a grep pattern are all data, and none of them is a
-command position. This is the same measurement error as #214 (`<style>` source counted as glyphs), #216
-and #217 — a gate reading the representation rather than the thing.
+command position. This is the same measurement error as #220 (`<style>` source counted as glyphs), #222
+and #223 — a gate reading the representation rather than the thing.
 
 **Fix.** `commandsIn()` in `.claude/hooks/no-blanket-git.mjs` strips heredoc bodies and quoted literals,
 splits on command positions (`;`, newline, `&&`, `||`, `|`) and anchors every pattern with `^`, so a
@@ -6524,7 +6524,7 @@ tripwire is unmaintainable.
 that must block and 9 that must not, five of which are the exact prose forms that caused the self-blocks.
 The cases live in a JSON file rather than in the test source, for the same reason.
 
-## #251 — the schema and the engine compared layer props BY NAME, so a name could mean two things
+## 261. the schema and the engine compared layer props BY NAME, so a name could mean two things
 
 **What.** `schema-drift` asserted "every prop the engine reads is defined somewhere in
 `schema.json`". `layers.item` is a FLAT map of 193 names, so the check could only ask whether a name
@@ -6546,7 +6546,7 @@ labels, types and enums no declaration can, and the gate now compares the two se
 
 ---
 
-## #252 — `hue` was live in the engine and missing from the schema, because the scan only matched `L.`
+## 262. `hue` was live in the engine and missing from the schema, because the scan only matched `L.`
 
 **What.** A `paint` aurora layer reads `hue` (one hue for every blob, overriding the per-blob `hues`
 list). The schema documented `hues` and not `hue`, so `make validate` reported
@@ -6566,7 +6566,7 @@ layers.item does not document".
 
 ---
 
-## #253 — `transition` was documented, read, and declared by nothing
+## 263. `transition` was documented, read, and declared by nothing
 
 **What.** `layers[].transition` (the unified `{ in, out, dir, dur }` sugar) is read by
 `core/transitions-lower.js`, which lowers it to `anim` / `out` / `dir` / `enterDur` / `exitDur` and
@@ -6585,7 +6585,7 @@ declares".
 
 ---
 
-## #254 — an unknown prop on a layer was accepted and then ignored, at render time
+## 264. an unknown prop on a layer was accepted and then ignored, at render time
 
 **What.** `{"type":"rect","colour":"#f00"}` rendered a rect with no colour, exit 0, no warning. The
 CLI `make validate` had an unknown-prop pass, but it (a) ran only from the shell, never at boot, and
@@ -6608,7 +6608,7 @@ findings in the shipped library are of that shape. A build must not die on them.
 
 ---
 
-## #255 — the gate and the renderer each built their own copy of "what the engine accepts"
+## 265. the gate and the renderer each built their own copy of "what the engine accepts"
 
 **What.** `scripts/gates/layer-props.mjs` assembled the shared prop union from six imports. Phase 3
 needed the same union inside the engine. Two unions from the same six sources agree on the day they
@@ -6619,7 +6619,7 @@ have drawn.
 **Fix.** One union, `SHARED_PROPS` in `core/layers/vocabulary.js`. The renderer and the gate both
 read it from there.
 
-## #256 — the docs named commands and files the repo did not have, and two gates that would have said so were red and ignored
+## 266. the docs named commands and files the repo did not have, and two gates that would have said so were red and ignored
 
 **What.** `docs/MISTAKES.md` told an author to run `make schema-drift`, `make roadmap-drift`,
 `make sfx` and `make flicker-check`. None of the four exist. `docs/PRIMITIVES.md`,
@@ -6668,7 +6668,7 @@ caught it). It proves a name resolves. It cannot prove the sentence around the n
 
 ---
 
-## #257 — the gates measured the box the author asked for, not the ink the frame carries (a fifth #214)
+## 267. the gates measured the box the author asked for, not the ink the frame carries (a fifth #214)
 
 **What.** Four separate reproductions, all in gates, all the same shape.
 
@@ -6695,7 +6695,7 @@ from `getBoundingClientRect()` was therefore answering a question about the JSON
 Two of the five were once correct and expired:
 
 - The safe-zone walk deliberately used the INK horizontally and the BOX vertically, because a text
-  ink is a line box that can overhang the border box by the font's half-leading. #242 moved
+  ink is a line box that can overhang the border box by the font's half-leading. #249 moved
   `clampToBox` INSIDE `inkRect`, so an ink rect is now always a subset of the border box and the
   overhang is impossible. The clamp made the axis split obsolete and left it standing, and that
   leftover is the whole of defect 3.
@@ -6743,7 +6743,7 @@ Two of the five were once correct and expired:
 | safe-zone walk | **fixed** |
 | tiny-image | cleared: an `<img>`'s box IS its raster |
 | tiny-text width guard | cleared: an existence guard |
-| `buried` | cleared: already `inkRect(el) || box`, fixed by #242 |
+| `buried` | cleared: already `inkRect(el) || box`, fixed by #249 |
 | per-element contrast | **fixed** (probe point) |
 | `checkSpan` | **fixed** (probe point; it is handed a whole LAYER when the layer is headline-scale) |
 | `overlayFn` | cleared with a caveat: it draws the debug overlay, not a verdict. It still outlines border boxes, so the overlay is now looser than the rule. Worth aligning. |
@@ -6790,17 +6790,17 @@ Its collision pair was "scene A body" / "scene B body", two 12-character lines a
 POSITIVE. The copy is now long enough to fill the boxes, so the fixture pins a collision that would be
 on screen.
 
-**Class.** Gate gap, and the fifth logged instance of one rule. #214 found `<style>` source counted as
-glyphs in the overlap check and fixed that call site; #216 was the same bug in clipped-text; #217 was
-two more consumers; #242 was the ink clamp living at one call site while `buried` read it raw. The
+**Class.** Gate gap, and the fifth logged instance of one rule. #220 found `<style>` source counted as
+glyphs in the overlap check and fixed that call site; #222 was the same bug in clipped-text; #223 was
+two more consumers; #249 was the ink clamp living at one call site while `buried` read it raw. The
 shape is always the same: a measurement primitive is corrected where it was noticed and left alone
 everywhere else, and the untouched half looks exactly like the finished half until something trips it.
 The counter-measure that was missing every time is not a comment. It is a test that fails on the old
 code, which is why this entry ships with one.
 
-## #258 — a load-bearing comment claimed the capture was byte-stable, and it never was
+## 268. a load-bearing comment claimed the capture was byte-stable, and it never was
 
-> **CORRECTED by #267. The conclusion below is wrong where it matters.** This entry says the variance
+> **CORRECTED by #279. The conclusion below is wrong where it matters.** This entry says the variance
 > is "rasteriser jitter, and it is invisible". Most of it was Chrome's deferred image decode dropping
 > WHOLE IMAGES out of frames: two runs of the same code, and one is missing two of three product
 > screenshots. The method lesson below still stands and in fact indicts this entry twice over. It says
@@ -6843,7 +6843,7 @@ non-deterministic draw from a non-deterministic encode.
 cause that has not been diagnosed. It is the same shape and the same magnitude, so it is very likely
 the same rasteriser jitter across processes, but that is a guess and it is written down as one.
 
-## #259 — a captured component's images were never preloaded, and they are somebody else's CDN
+## 269. a captured component's images were never preloaded, and they are somebody else's CDN
 
 **What.** `preloadImages` in `core/boot.js` walks the SCENE DATA for image paths, and its own comment
 says why it exists: "without this the Go renderer can screenshot a frame mid-download, so the image is
@@ -6852,7 +6852,7 @@ inside the component's own HTML, fetched separately by `preloadComponents`. So t
 to prevent mid-download captures never looked where these images live. `brew-launch` carries **16** of
 them, and every one is a live `https://brew.new/...` URL fetched from a third-party CDN at render time.
 
-**Found while chasing #258, and it was NOT the cause of #258.** Preloading them changed the frame count
+**Found while chasing #268, and it was NOT the cause of #268.** Preloading them changed the frame count
 not at all. It is logged and fixed on its own merits: the race is real, the engine guards against
 exactly this race everywhere else, and a render that depends on how fast someone else's CDN answers is
 not deterministic in any useful sense.
@@ -6868,7 +6868,7 @@ without fetching anything. Verified by instrumenting it: 16 URLs, entities decod
 `core/seams.js` already does for fonts. Until it does, every film built on captured UI re-downloads
 someone else's assets on every render, and would render differently offline.
 
-## #260 — `_lightfall.html` moves at frame rates against a clock measured in seconds
+## 270. `_lightfall.html` moves at frame rates against a clock measured in seconds
 
 **What.** `formats/scene/_lightfall.html` drives every value off `sin(var(--t) * f + p)` with `f`
 between 0.04 and 0.33. `core/bg-html.js` writes `--t` as **seconds into the video**, not frames. Over
@@ -6891,7 +6891,7 @@ total phase travelled is under about half a cycle.
 
 ---
 
-## #261 — `make preview` is the wrong page for a full-bleed fragment
+## 271. `make preview` is the wrong page for a full-bleed fragment
 
 **What.** `scripts/author/preview-fragment.mjs` puts the fragment in `#frag { width: 1400px }`
 centred in a flex stage. A backdrop fragment is `position:absolute;inset:0`, so it sizes itself
@@ -6907,7 +6907,7 @@ sets `--t`, so every author gets it rather than every author writing their own.
 **Which gate catches it.** None, and this is a looks-fine failure: the preview renders, it just
 renders the wrong thing.
 
-## #262 — a fidelity metric that averages away the thing it is grading
+## 272. a fidelity metric that averages away the thing it is grading
 
 **What.** `lightfield-compare.mjs` graded a generated field against a reference on a 24x14 block
 grid. It reported 7.1% mean error and every pass looked green. Side by side with the reference the
@@ -6932,7 +6932,7 @@ nothing.
 
 ---
 
-## #263 — four abandoned search processes, all appending to one log
+## 273. four abandoned search processes, all appending to one log
 
 **What.** A long fit was launched, superseded, and relaunched several times. `pkill -f` did not
 account for every one, so four `lightfield-fit.mjs` processes ran at once. Two were appending to the
@@ -6949,7 +6949,7 @@ lock on the log file, so a second run refuses to start rather than corrupting th
 
 **Which gate catches it.** None. Worth knowing because the failure looks exactly like a slow run.
 
-## #264 — a backdrop declared by `src` rendered nothing, and said nothing, the day `src` shipped
+## 274. a backdrop declared by `src` rendered nothing, and said nothing, the day `src` shipped
 
 **What.** `{"bg": [{"t": 0, "src": "formats/scene/_lightfall.html"}]}` painted no backdrop. The file was
 found, fetched and stored: `preloadHtml` handles the bg case explicitly and puts the text in
@@ -6974,7 +6974,7 @@ backdrops by `src`, which makes them the standing test: if this regresses, both 
 fragment. **17,349 bytes to 398, and 14,316 to 405.** A fragment kept in one place can be previewed,
 diffed and linted; the same fragment escaped into a JSON string cannot.
 
-## #265 — the one-source rule explained a collision it was not looking at
+## 275. the one-source rule explained a collision it was not looking at
 
 **What.** A bg window naming both `html` and `src` was refused with: "`html` paints in the DOM and
 `preset` paints on canvas; they do not layer." Neither `preset` nor canvas was involved. The rule
@@ -6988,7 +6988,7 @@ nothing, because it is trusted.
 **Fix.** The message now names the pair that actually collided: `src` IS `html` in a file, so keep one.
 Verified on both branches.
 
-## #260 update — the two hand-authored backdrops moved at frame rates against a clock in seconds
+## 276. update — the two hand-authored backdrops moved at frame rates against a clock in seconds
 
 Fixed in the same pass. Every `var(--t) * K` coefficient in `_lightfall.html` (86 terms) and
 `_arcfall.html` (40 terms) was authored as if `--t` counted frames; `core/bg-html.js` writes SECONDS.
@@ -6998,7 +6998,7 @@ stills wearing motion. Rescaled by 30, which restores the author's intended pace
 Judged the way rule 2a0 demands, across four timestamps rather than on one still: both now visibly
 drift and breathe, and neither flickers.
 
-## #261 closed in part, and one half of it is still open
+## 277. closed in part, and one half of it is still open
 
 **Two real defects in `make preview`, both fixed.**
 
@@ -7026,7 +7026,7 @@ and was not enough to find it.
 Logging it unfinished on purpose. Three eliminated hypotheses are worth more to whoever picks this up
 than a fourth guess dressed as a conclusion, and the two fixes above stand on their own measurements.
 
-## #266 — a capture localizer that only recognised an asset by its file extension
+## 278. a capture localizer that only recognised an asset by its file extension
 
 **What.** `formats/scene/brew-launch.json` re-downloaded five email previews and three product
 screenshots from `brew.new` on every render. The film was not reproducible, degraded silently when the
@@ -7087,12 +7087,12 @@ on the first run, which would mean the snapshot baseline depends on cache warmth
 recorded so the next person does not mistake it for their own regression.
 
 
-## #267 — Chrome painted a blank placeholder where a captured component's images should be, and the screenshot kept it
+## 279. Chrome painted a blank placeholder where a captured component's images should be, and the screenshot kept it
 
 **What.** Two 4-worker renders of `formats/scene/brew-launch.json`, identical code, differed on **925
 of 1890 frames**. Not by a rounding error: the median differing frame moved **0.37% of its pixels**,
 the worst moved **17.0%** with a **max channel delta of 189**, and what was different was **whole
-product screenshots present in one render and absent in the other**. #258 called this class "rasteriser
+product screenshots present in one render and absent in the other**. #268 called this class "rasteriser
 antialiasing on a border radius, 0.001% to 0.007% of pixels, invisible". For the 4-worker gap that was
 wrong. It is missing content, and it ships in the mp4.
 
@@ -7159,7 +7159,7 @@ from **17.0% of pixels to 1.8%**. Measured cost: none. Two timed renders, 76s wi
 and stays green through all of this, because the DOM was always right. The tool below is what catches
 it, and someone has to run it.
 
-## #268 — the worker that drew a frame was decided by a race, so no two renders could be compared
+## 280. the worker that drew a frame was decided by a race, so no two renders could be compared
 
 **What.** Capture workers pulled from one shared job channel, so frame 856 was drawn by a different
 browser in every render. Verified: the dedup representative map was byte-identical between two runs
@@ -7173,11 +7173,11 @@ could always be blamed on "a different browser drew it", and there was no way to
 for. Same balanced interleave, decided once. Two renders now produce byte-identical frame maps, which
 is what let the residue below be attributed with confidence.
 
-## #269 — still open: a second cause, and it is not antialiasing either
+## 281. still open: a second cause, and it is not antialiasing either
 
 With the raster race closed and the worker assignment fixed, **250 of 1890 frames still differ between
 two renders**, and the frame map is identical, so the *same browser* drew each of those frames in both
-runs. The residue is therefore nothing to do with workers, and it is what #258 measured as 373 at one
+runs. The residue is therefore nothing to do with workers, and it is what #268 measured as 373 at one
 worker.
 
 **It is two things, not one.** The 250 frames sit in two spans and three strays:
@@ -7188,11 +7188,11 @@ worker.
 | 1098-1259 | 122 | ~1.8% | ~150 |
 | 105, 149, 153 | 3 | tiny | tiny |
 
-The first span is the small, plausibly-invisible class #258 described. The second is not: it is
+The first span is the small, plausibly-invisible class #268 described. The second is not: it is
 consistent across 122 frames of one beat, at the same magnitude every time, which is a systematic
 difference rather than noise.
 
-**It is bigger than #258 recorded.** Median differing frame moves 0.47% of its pixels; the worst moves
+**It is bigger than #268 recorded.** Median differing frame moves 0.47% of its pixels; the worst moves
 1.8% with a max channel delta of 171. Looking at the worst frame (1105): the content is identical, and
 the whole integrations grid sits about **60 supersampled pixels higher** in one run than the other,
 under a headline that has not moved. That is a position difference of roughly 30 output pixels on a
@@ -7204,7 +7204,7 @@ toward its target by the browser after `renderFrame(n)` has set it, and the doub
 an unpredictable amount. That is a hypothesis. It has not been proven, and the fix would live in
 `core/` or `scene.html`, which this branch does not touch.
 
-**What #258 should be corrected to say.** "The 373 is understood and closed, it is invisible
+**What #268 should be corrected to say.** "The 373 is understood and closed, it is invisible
 antialiasing" is not supported. One crop of one frame was used to characterise 373 frames, and the
 worst of them are two orders of magnitude larger than the number that crop produced. The class is open.
 
@@ -7231,7 +7231,7 @@ is gone, and it is left recorded rather than closed. What is settled is the defe
 which is real, which was losing whole product screenshots, and which is fixed.
 
 
-## #270 — two passes tuned the wrong half, because each inherited the last one's ceiling
+## 282. two passes tuned the wrong half, because each inherited the last one's ceiling
 
 **What.** The lightfield reference reproduction was washed out. Pass one concluded "the ceiling is the
 blend mode". Pass two inherited that, split the composite into seam and sheen, improved the aggregate,
@@ -7265,7 +7265,7 @@ supports.
 inheriting one, run the cheapest experiment that could refute it. Here that experiment was two flags and
 four seconds, and it moved every number on the board.
 
-## #272 — the playground found two engine bugs in its first hour, which is the argument for it
+## 283. the playground found two engine bugs in its first hour, which is the argument for it
 
 The generator playground went up so people could turn the dials in a browser. Its first interaction
 test found both of these, and neither was visible from any gate.
@@ -7277,7 +7277,7 @@ and stopped at a hard reach, so the loop's `size < 260` guard was the real limit
 most-logged bug class in this file.
 
 Fixed by deriving the step FROM count, so the whole declared range means something: 400 now draws 400.
-Then checked the other two builders rather than closing at the call site, because that is the #214
+Then checked the other two builders rather than closing at the call site, because that is the #220
 recurrence: `slats` and `shards` both scale properly and neither needed a change.
 
 **The preset that exposed it had been fitted against the bug.** `tide` says `count: 120` and had always
@@ -7289,11 +7289,11 @@ each one carried `will-change:transform,opacity`, so Chrome was asked for 400 co
 cannot keep that many rastered, so it cycles which ones it paints: consecutive screenshots 90ms apart
 differed forever, the PNG oscillating between 200K and 270K. With the hint removed the same field is
 byte-identical from the eighth attempt on. **A promotion hint the browser cannot honour is worse than
-none**, and this is the same family as #267, where deferred raster cost whole product screenshots.
+none**, and this is the same family as #279, where deferred raster cost whole product screenshots.
 
 **TESTED, and it is not the explanation. Do not spend the experiment again.**
 `formats/scene/scene.css:16` puts `will-change: transform, opacity, filter` on EVERY `.hs-layer`, which
-is the same hint at scene scale, so it was the obvious suspect for #269's residual. Two renders with it
+is the same hint at scene scale, so it was the obvious suspect for #281's residual. Two renders with it
 and two without, `brew-launch`, same machine:
 
 | | frames differing | median ratio | median max-delta |
@@ -7308,9 +7308,9 @@ deliberately. Changing shipped behaviour on evidence this weak is how a gate inv
 
 What is still true: the lightfield case was unambiguous (never settles versus byte-identical from the
 eighth attempt), because 400 promoted layers is a different order of magnitude from a scene's dozen.
-The residue in #269 remains unexplained.
+The residue in #281 remains unexplained.
 
-## #273 — a screenshot taken at `load` is a picture of the browser's timing
+## 284. a screenshot taken at `load` is a picture of the browser's timing
 
 `stableShot` (`scripts/author/lightfield-render.mjs`) shoots until two consecutive frames are
 byte-identical, and throws when that never happens. Before it, `tide` "spent a day looking broken when
@@ -7318,11 +7318,11 @@ only its portrait was": a blended, masked field can return a valid, correctly-si
 because the compositor handed back a frame before everything rastered. Every fidelity number measured
 off such a shot is a measurement of Chrome, not of the generator.
 
-Waiting longer is not the fix and #267 already proved it: there, waiting turned "always wrong" into
+Waiting longer is not the fix and #279 already proved it: there, waiting turned "always wrong" into
 "sometimes wrong" and settled nothing. Waiting for the picture to STOP CHANGING is a different claim
 and a checkable one.
 
-**And it threw immediately, on `tide`, which is how #272's `will-change` bug was found.** A tool that
+**And it threw immediately, on `tide`, which is how #283's `will-change` bug was found.** A tool that
 fails loudly on the first thing it is pointed at has earned its place.
 
 ## The block option contract, and two dead props it exposed
@@ -7331,7 +7331,7 @@ fails loudly on the first thing it is pointed at has earned its place.
 A JS default is a value; a schema entry is a contract, and only a contract can make a control or refuse a
 caller. Reading 70 factories closely enough to declare them found the following.
 
-## #274 — `loadingBar` accepts `color` and never reads it
+## 285. `loadingBar` accepts `color` and never reads it
 
 **What.** `blocks/dev.mjs`:
 
@@ -7359,7 +7359,7 @@ that reason, so it is visible and named rather than silently absent from the opt
 check would be a dead-parameter rule over the factory bodies, which is a natural extension of
 `blocks-audit.mjs` and is not in this pass.
 
-## #275 — `toast` accepts `body` and never renders it
+## 286. `toast` accepts `body` and never renders it
 
 **What.** `blocks/ui.mjs`. The file's own comment says the alert family (`notification` · `toast` ·
 `callout` · `banner`) "now shares ONE vocabulary: `title` and `body`". `notification` renders `body`.
@@ -7381,7 +7381,7 @@ from both the signature and the `items` row and correct the comment.
 **What catches it now.** As above: `OMIT` in `scripts/gates/block-schema.mjs`, plus an explicit note
 in the `UI_SCHEMAS.toast` table saying why there is no dial for it.
 
-## #276 — A range that was tighter than the shipped catalog
+## 287. A range that was tighter than the shipped catalog
 
 **What.** The first draft of `CORE_SCHEMAS.splitScreen.h` set `min: 100`, reasoning from the
 container's own geometry. The catalog's own `splitScreen` row ships `h: 96`, a two-row split of two
@@ -7399,7 +7399,7 @@ range honest.
 
 **What catches it now.** `scripts/gates/block-schema.mjs`, `catalog-fails-schema`.
 
-## #277 — Ranges that could not be derived, and are wide on purpose
+## 288. Ranges that could not be derived, and are wide on purpose
 
 Recorded so nobody reads a wide bound as a considered one:
 
@@ -7416,7 +7416,7 @@ Recorded so nobody reads a wide bound as a considered one:
   engine ever exports its animation names, this should become an enum reading that export, the way
   `codeBlock.theme` reads `CODE_THEMES` and `callout.tone` reads `TONE_NAMES`.
 
-## #275 — the deploy failed on a directory `.dockerignore` excluded, and nothing local could see it
+## 289. the deploy failed on a directory `.dockerignore` excluded, and nothing local could see it
 
 **What.** Adding the playground meant the image needed `blocks/`. The Dockerfile copied it, every gate
 passed, the site built locally, and the deploy failed in 16 seconds:
@@ -7499,7 +7499,7 @@ against a reference at -9.0.
 **Which gate now catches it.** `lightfield-compare.mjs`, TONAL BANDS. Every mean is printed beside
 its worst cell.
 
-**The general rule.** This is `docs/MISTAKES.md` #262 in a third costume. A metric that averages, or
+**The general rule.** This is `docs/MISTAKES.md` #272 in a third costume. A metric that averages, or
 that samples where the subject is easy to read, cannot see the defect it was written to catch. When a
 human rejects something every number passed, the first suspect is the sampling, not the render.
 
@@ -7584,7 +7584,7 @@ still has no shadow term.
 The `make lightfield` loop hardcodes `for p in ref tide fern` and does not know about the two new
 presets. The Makefile was out of this pass's territory.
 
-## #276 — the silhouette is per-element, and the reference's is one landscape
+## 290. the silhouette is per-element, and the reference's is one landscape
 
 Attempted and reverted, twice, and recorded so the next attempt starts past it. `colonnade` reproduces
 ref-b's panels, hairlines and bloom, and its dark masses are separate rounded boxes where the reference
@@ -7601,7 +7601,7 @@ this up should add a field-wide silhouette that elements are drawn against, rath
 again.
 
 
-## #277 — the randomiser could roll an illegal pair, and the person clicking got the blame
+## 291. the randomiser could roll an illegal pair, and the person clicking got the blame
 
 **What.** `lightfield` refuses a dial the chosen structure cannot express: `rings` has no seam WIDTH and
 no left-to-right axis, so `shadow.seamWidth` and `envelope` on a ring field throw and name the patterns
@@ -7625,7 +7625,7 @@ at the end, so a wrong repair table fails loudly instead of shipping a bad optio
 SHOULD have been, or every caller that composes options mechanically has to learn its private rules.
 Strictness without repair pushes the work onto whoever is least able to do it.
 
-## #278 — the playground did not fit on a screen, measured
+## 292. the playground did not fit on a screen, measured
 
 Before, on the live page: 2.4 screens at 1440x900, 2.7 at 1280x800, 3.1 on a phone, and **the preview
 started 455px down and ended at 914px against a 900px viewport**, so the thing the page exists for was
@@ -7660,7 +7660,7 @@ a block is a scene fragment rather than a picture, so previewing one boots a who
 buried the one thing people came to turn. The schemas and their gate stay; `blocks/` came back out of
 the image and the Dockerfile, which is 260K and one COPY line fewer.
 
-## #279 — one score for five looks could not say which one was wrong
+## 293. one score for five looks could not say which one was wrong
 
 `lightfield` was one generator with five presets and ONE fidelity number, taken against one photograph.
 That number read 12.7 while a human said "that is not it", and even if it had been right it could not
@@ -7685,10 +7685,10 @@ reference is REPORTED as such and not scored, because scoring against nothing is
 attached to a picture nobody has compared.
 
 **Narrowing also removes the bug class rather than catching it.** A `rings` look does not show
-`shadow.seamWidth`, so the illegal pair that used to throw in someone's face (#277) cannot be built.
+`shadow.seamWidth`, so the illegal pair that used to throw in someone's face (#291) cannot be built.
 `normalise` stays as the backstop for the paths that still can.
 
-## #281 — the library is the page, and the cards are the real thing
+## 294. the library is the page, and the cards are the real thing
 
 The playground picked a generator from a dropdown, which is fine for one and useless for twenty-seven.
 It is a wall of cards now: browse, open one, turn its dials, go back. Two states rather than one,
@@ -7704,7 +7704,7 @@ so a wall of them costs almost nothing, and none of them animates.
 The honest cost: `fern` is a genuinely dark look, so its card is nearly black and says little. That is
 the real picture, and faking a brighter one would make the library lie about what you are picking.
 
-## #280 — a preview that animates cannot be judged
+## 295. a preview that animates cannot be judged
 
 The playground drove `--t` from a rAF loop, so the field was always moving. A moving picture is the one
 thing you cannot compare to a still reference, and the page exists to be looked at closely.
@@ -7714,7 +7714,7 @@ That keeps `motion.kind` honest: freezing alone would have left it a dial with n
 is the silent-substitution shape this repo logs more than any other. Verified rather than assumed: the
 markup is byte-identical 700ms apart and `--t` reads 0.000.
 
-## #284 — "has a reference" is not "looks good", and I shipped the difference
+## 296. "has a reference" is not "looks good", and I shipped the difference
 
 Having pulled the two invented looks, I kept the other three because each HAD a reference. The user
 asked why, since two of them still looked bad. They were right and the gate was wrong.
@@ -7734,9 +7734,9 @@ substitute. One look qualifies today.
 **Held back is not hidden.** `ALL_GENERATORS` keeps every look, `lightfield-check.mjs` scores all of
 them and prints HELD BACK beside the ones out of the library, and the page says how many exist and why.
 Removing a thing from view without leaving a number to watch is exactly how `tide` and `fern` went
-unexamined for as long as they did (#282).
+unexamined for as long as they did (#297).
 
-## #282 — two of the five looks were invented, and it showed
+## 297. two of the five looks were invented, and it showed
 
 The user opened the library and said everything except `colonnade` looked bad. They were right, and the
 reason is on record in this repo's own tooling: `tide` and `fern` had **no reference**. Nobody ever
@@ -7755,7 +7755,7 @@ on the page is measured against something.
 somebody reads it. It said so on every run for as long as those looks existed. What made the difference
 was a person looking at the pictures, which is the thing no gate replaces.
 
-## #283 — the basic panel is a colour changer, and that is the whole point
+## 298. the basic panel is a colour changer, and that is the whole point
 
 Eight primary dials was still a control panel. A look is its own entry now, so `pattern.kind` is what
 the look IS rather than a dial on it, and `motion` cannot be judged while the preview is deliberately
@@ -7764,9 +7764,9 @@ still. Both moved behind the disclosure.
 What is left is a seed and four colours. Everything else is one click away and labelled with its count.
 Someone who came to see what the thing does gets the control they were going to reach for first.
 
-## #285 — the playground exports what it shows, and nothing on it can move
+## 299. the playground exports what it shows, and nothing on it can move
 
-**No movement, no way to make it move.** The rAF loop went in #280 and the clock slider went with this
+**No movement, no way to make it move.** The rAF loop went in #295 and the clock slider went with this
 change. `--t` is pinned to 0 and there is no control for it: a field is judged against a still
 reference, and a picture that changes while you look cannot be compared to one that does not. Verified
 rather than asserted: markup byte-identical a second apart, `--t` reads 0, zero clock controls in the
@@ -7781,7 +7781,7 @@ things would have silently ruined it, and both are handled because the engine al
   serialising the live node: a fragment that leaned on the page's CSS would rasterise wrong and look
   merely "a bit off".
 - **`--t` has to be written on the wrapper.** Inside the SVG there is no page to inherit it from, so
-  every `calc()` reading it would be invalid and the whole declaration dropped (#261).
+  every `calc()` reading it would be invalid and the whole declaration dropped (#277).
 
 Proved by measurement, not by the file existing: 3840x2160, mean level 72.1, 2013 of 2304 sampled cells
 painted. A blank PNG of the right size is exactly what this would produce if either trap were open.
@@ -7792,7 +7792,7 @@ from the SCHEMA DEFAULTS, which a preset always does, so opening a look and down
 the moment anything changes and holds the name until then. Then it read `colonnade-colonnade`, because a
 look and its only preset share a name. Both fixed. A filename is a claim about its contents.
 
-## #286 — a ceiling reported by a previous pass was a missing operation, not a ceiling
+## 300. a ceiling reported by a previous pass was a missing operation, not a ceiling
 
 **What went wrong.** `ember` shipped as the tonal INVERSE of its own reference for three passes:
 `refs/ref-a.jpg` is black with bright flames on it, and the render was a lit field with black teeth
@@ -7824,7 +7824,7 @@ OPERATION is missing before asking which value is.
 
 ---
 
-## #287 — a layout fitted to one photograph was imposed on every field after it
+## 301. a layout fitted to one photograph was imposed on every field after it
 
 **What went wrong.** `ember`'s light is off the bottom-right corner of the frame. No seed put it
 there. `lightfield-seeds.mjs` had ranked four million layouts and `lightfield-fit.mjs` had confirmed
@@ -7847,7 +7847,7 @@ above it.
 
 ---
 
-## #288 — the mound of light on a face was nailed to one side of every element
+## 302. the mound of light on a face was nailed to one side of every element
 
 **What went wrong.** Every lit field this generator could draw was lit from the same side. A blind is
 brightest a little way in from the seam it trails; a flame is dark at its leading edge and hot at its
@@ -7862,7 +7862,7 @@ than 6% of the bar is now not drawn at all.
 
 ---
 
-## #289 — a landscape is not a row of boxes, and softness could not turn one into the other
+## 303. a landscape is not a row of boxes, and softness could not turn one into the other
 
 **What went wrong.** `colonnade`'s dark masses were twelve separate rounded boxes with steps between
 them; `refs/ref-b.png` is ONE continuous ridge with the panel seams drawn over it. Two previous passes
@@ -7885,7 +7885,7 @@ group: 180 columns each taking their own phase would tear the horizon along ever
 
 ---
 
-## #290 — a mean error cannot see a shadow's temperature, and `blinds` proved it twice
+## 304. a mean error cannot see a shadow's temperature, and `blinds` proved it twice
 
 **What went wrong.** `blinds` scored 20.0 and its lower-left corner read `#5a071f`, a lit crimson,
 where the reference is `#1c0b21`, a dark violet. The seed search was genuinely exhausted here (259
@@ -7905,7 +7905,7 @@ changed, which is the argument for the per-look shadow-warmth column existing at
 
 ---
 
-## #291 — what is still wrong with the three looks, measured
+## 305. what is still wrong with the three looks, measured
 
 * **ember's hottest flames are amber where the reference's are white** (`#a47800` against `#fefff2`).
   An emitted element adds ONE colour, so the field cannot run from saturated red at one end to
@@ -7920,13 +7920,13 @@ changed, which is the argument for the per-look shadow-warmth column existing at
 * **colonnade's ridge has three summits where the reference has about five**, and its sky lacks the
   pale horizontal haze band the reference carries at mid height.
 
-## #292 — unrelated, found on the way: lightfield-seeds.mjs cannot run
+## 306. unrelated, found on the way: lightfield-seeds.mjs cannot run
 
 `scripts/author/lightfield-seeds.mjs` **cannot run**: it imports
 `scripts/author/lightfield-model.mjs`, which is not in the repository. It has been broken since
 `7e0fe03` at the latest. `docs/LIGHTFIELD.md` still documents it as a working command.
 
-## #293 — the randomiser made ugly pictures, and the presets said exactly why
+## 307. the randomiser made ugly pictures, and the presets said exactly why
 
 The user rolled the dice and got a green bloom, a blue blob and a yellow wash in one frame: three
 unrelated light sources and nothing to look at. Two independent causes, both found by MEASURING the
@@ -7950,7 +7950,7 @@ is which colour it is and where the light sits, which is variation. Scrambling e
 more creative, it is noise, and it produced roughly one usable frame in six.
 
 
-## #294 — a backtick inside a GLSL comment silently ended the shader
+## 308. a backtick inside a GLSL comment silently ended the shader
 
 Adding a `blinds` effect to `core/shaders-ambient.js`, the render stopped failing with a named GLSL
 error and started TIMING OUT with nothing in the log. The cause: the fragment shader is a JS TEMPLATE
@@ -7970,7 +7970,7 @@ Two other things this cost, both worth naming because they were self-inflicted:
   `u_intensity`, correctly, because most of these effects are overlays. A backdrop wants intensity 1.
   Nothing was wrong with the shader; I was reading a composite and blaming a term.
 
-## #295 — the blinds generator is ours, and the licence is why
+## 309. the blinds generator is ours, and the licence is why
 
 React Bits ships a "Gradient Blinds" component under **MIT plus the Commons Clause**, which permits use
 and forbids redistributing the component "whether alone, in a bundle, or as a ported version". This repo
@@ -7990,7 +7990,7 @@ wanting more than one knob had to encode it into `u_seed`, which makes the seed 
 is four floats meaning whatever the branch that reads them says. The seventeen effects written before it
 ignore it, and `probe` and `scene-snap` both confirm not one pixel of them moved.
 
-## #296 — The bloom cluster had exactly three lobes, and the three was a constant
+## 310. The bloom cluster had exactly three lobes, and the three was a constant
 
 **What.** `blinds` was held out of the library at block error 20.0. Its shadow temperature had been
 fixed the pass before, from +11.3 to -1.7, and the block error did not move at all. The reference is a
@@ -8010,7 +8010,7 @@ scaling is load-bearing: without it the dial would be a brightness control weari
 control's name, and every palette would blow out as you turned it. At 3 the scale is exactly 1 and
 every committed preset is byte-identical apart from its class hash.
 
-## #297 — Lobe placement was independent, so a cluster is lumpy by construction
+## 311. Lobe placement was independent, so a cluster is lumpy by construction
 
 **What.** `colonnade`'s horizontal luma profile dips at 56% of the width where `refs/ref-b.png` is
 flat from 25% to 75%, because two lobes overlapped into two humps with a valley between them. Adding
@@ -8031,7 +8031,7 @@ count. The rival was being judged in the incumbent's clothes, which is the same 
 `lightfield-seeds.mjs` documents about palettes. Any change to layout has to be scored against a
 re-searched seed or it is scored against nothing.
 
-## #298 — `shadow.direction` could not say "a lit band"
+## 312. `shadow.direction` could not say "a lit band"
 
 **What.** Measured on `refs/ref-b.png` against `out/_check-colonnade.png` at 160x104, the render was
 27 units too bright at the top edge (29.9 against 56.8) and 16 units too dark at the left edge (39.7
@@ -8045,7 +8045,7 @@ darkness above and below a lit band and nothing taken off the sides, was simply 
 **Fix.** `top-and-bottom` and `left-and-right` in `DIRECTIONS`: the existing falloff profile mirrored
 about the middle of the frame. Both are opt-in, so nothing committed moves.
 
-## #299 — A recorded finding said the reference's dark side has no bars. It has more than anywhere else
+## 313. A recorded finding said the reference's dark side has no bars. It has more than anywhere else
 
 **What.** `core/lightfield/index.js` carried this, as the argument for choosing COLOR-DODGE over
 plus-lighter: "`plus-lighter` ADDS, so it lit up the reference's black right-hand side with bars that
@@ -8073,7 +8073,7 @@ needs a human's eye, not this pass's.
 one survived three passes in a comment because nobody cropped the region it was about. Numbers were
 taken over the whole frame the entire time, and a whole-frame number cannot see a third.
 
-## #300 — `lightfield-seeds.mjs` and `lightfield-fit.mjs` have never run
+## 314. `lightfield-seeds.mjs` and `lightfield-fit.mjs` have never run
 
 **What.** Both import `./lightfield-model.mjs`. That file is not in the repository and never has been:
 `git log -- scripts/author/lightfield-model.mjs` is empty. Running either tool dies on
@@ -8089,7 +8089,7 @@ two tools share is a bigger job than the composition fix it was blocking, and th
 another way. Either restore `lightfield-model.mjs` or delete the two tools. A tool that cannot start is
 worse than no tool, because its comments are read as evidence.
 
-## #301 — Every curve in the envelope was a sine or a straight line
+## 315. Every curve in the envelope was a sine or a straight line
 
 **What.** A user looked at `colonnade` and said the dark mass was an angular ridge, a jagged V of
 straight segments, and asked for round. The dial they needed was `envelope.kind`, and it held `full`,
@@ -8118,7 +8118,7 @@ an edge and therefore cannot describe a floating form; the only part of a lens a
 can express is its upper arc, which is a slightly pointier circle. A kind that draws a picture
 another kind already reaches is a dial nobody needs.
 
-## #302 — `shadow.direction` is a bearing, and a bearing is not a place
+## 316. `shadow.direction` is a bearing, and a bearing is not a place
 
 **What.** The light could be moved anywhere in the frame with `colour.originX/originY`. The shadow it
 cast could not be moved at all. Eleven direction keywords say which WAY the dark lies and never how
@@ -8136,7 +8136,7 @@ one-way bearing the component along the fall (which delays or advances it) plus 
 the vignette. That limit is a property of a linear gradient, which has a direction and no centre, and
 it is written into the option comment and the doc rather than left for someone to discover.
 
-## #303 — The silhouette had no position, so authors picked its shape for the wrong reason
+## 317. The silhouette had no position, so authors picked its shape for the wrong reason
 
 **What.** `envelope.from` and `to` say how TALL the mass is and `kind` says what SHAPE it is. Nothing
 said WHERE. So an author who wanted the crest three quarters of the way across had to hunt for a kind
@@ -8154,7 +8154,7 @@ mass. One of them had a position, one had only a bearing, and one had nothing, a
 for in three different languages. When an API can place one thing, check every other thing of the
 same kind before shipping.
 
-## #304 — The committed HTML fragments were stale, and nothing said so
+## 318. The committed HTML fragments were stale, and nothing said so
 
 **What.** `formats/scene/_lightfield-ember.html` and `_lightfield-colonnade.html` in the tree did not
 match what their own presets generate. Colonnade's committed fragment still carried the `center`
@@ -8171,7 +8171,7 @@ cheap gate is a check that re-renders each `formats/scene/_lightfield-*.html` fr
 fails on a diff, which is the same shape as the receipt `make beats` already uses. That belongs in the
 Makefile, which this pass was not allowed to touch.
 
-## #305 — A new parameter vector that the test harness silently dropped, three times running
+## 319. A new parameter vector that the test harness silently dropped, three times running
 
 **What.** The `bands` branch grew from two parameter vectors to six. Each time one was added, the
 first render with it looked exactly like the render without it, and each time the shader was blamed
@@ -8193,7 +8193,7 @@ connected.
 object rather than eleven positions, so a missing key is a missing key rather than a shifted list.
 That is a change to a shared signature with other callers and belongs in its own pass.
 
-## #306 — An enum whose position was not its value, and every shape drew a different shape
+## 320. An enum whose position was not its value, and every shape drew a different shape
 
 **What.** `core/generators.js` offered `lightShape: round | oval | bar | cross | rounded | sweep` and
 sent `LIGHT_SHAPES.indexOf(name)` straight to the shader. The shader's numbering is
@@ -8213,7 +8213,7 @@ TABLE with both sides written down, never an index into one of them.
 **Fix.** `const LIGHT_SHAPES = { round: 0, oval: 0, bar: 1, rounded: 2, cross: 3, sweep: 4 }`, with the
 name list derived from its keys, and `render` throws on a name that is not in it.
 
-## #307 — A zoom of exactly 1 was not the identity
+## 321. A zoom of exactly 1 was not the identity
 
 **What.** `zoom` was added as `if (u_p6.w > 0.0) q = (q - c)/u_p6.w + c`. The generator sends `zoom: 1`
 by default, so the guard passed, and `(q - c)/1.0 + c` is not bit-for-bit `q`. Separately, the
@@ -8232,7 +8232,7 @@ so zoom 1 lands on the old constant by construction rather than by a fitted coef
 compares the hash against the old parameter vector. Every gate in the repo was green while this was
 wrong, because no committed scene uses the effect and the card has no baseline.
 
-## #308 — The pixel metric preferred a softer picture than the reference
+## 322. The pixel metric preferred a softer picture than the reference
 
 **What.** Mean per-channel error against `refs/colonnade/c6.jpg` bottoms out at 14.2 and rises for
 every setting that increases contrast toward the reference. Swept over convergence, the metric picked
@@ -8248,7 +8248,7 @@ the right place, so the number rewards a wash.
 reference, and where the metric disagreed by less than a point the metric was overruled and the
 disagreement written down in `docs/LIGHTFIELD.md`.
 
-## #309 — A backtick in a shader comment, for the fourth time
+## 323. A backtick in a shader comment, for the fourth time
 
 **What.** A comment inside `FRAG` was written as ``so `count` keeps meaning bands``. `FRAG` is a JS
 template literal, so the backtick closed the string. The failure surfaced as `PAGEERR Unexpected
@@ -8262,7 +8262,7 @@ may contain one, whatever it looks like when it goes wrong.
 **A cheap check.** Slice the source between the two delimiters and count backticks. Four lines, and it
 would have caught every instance.
 
-## #310 — `schema-drift.mjs --write` reformats the file it maintains
+## 324. `schema-drift.mjs --write` reformats the file it maintains
 
 **What.** The gate correctly reported three new props missing from `formats/scene/schema.json`.
 Running its own suggested fix produced a 383-line diff: 21 insertions and 362 deletions, because the
@@ -8281,7 +8281,7 @@ gate compares parsed JSON, so it passes either way, which is why the drift went 
 regenerated once so the two agree. Not done here: the file is shared and a 362-line reformat in this
 branch would collide with anyone else editing it.
 
-## #311 — One deliberate behaviour change, stated plainly
+## 325. One deliberate behaviour change, stated plainly
 
 `u_p2.yz`, the band field's centre, was read as raw coordinates and is now read as a FRACTION OF THE
 FRAME with the x half multiplied by the aspect inside the shader. Zero is still the middle, so an
@@ -8294,7 +8294,7 @@ lands on. Baking `16/9` into the mapping would make `shapeOriginX: 25` mean a di
 portrait canvas than on a landscape one, silently. That is the conflict; it is named rather than
 forced, and the alternative is available if the aspect-independence is not wanted.
 
-## #312 — wed: there is no snapshot for the shader effects
+## 326. wed: there is no snapshot for the shader effects
 
 Findings A and C were both caught by throwaway scripts written for this pass and deleted with it: one
 that shoots all eighteen ambient effects at two clocks with and without a palette and prints a hash
@@ -8304,7 +8304,7 @@ lives in `scripts/gates/`. Until one does, the next person to add a uniform to
 `core/shaders-ambient.js` has to write it again, and finding C says plainly what happens when nobody
 does: every gate stays green while a shipped card draws a different picture.
 
-## #313 — `inspect` cannot see through `<b>`, so it fails every film that uses emphasis
+## 327. `inspect` cannot see through `<b>`, so it fails every film that uses emphasis
 
 **What.** `TASTE=1 make author-check` blocked with `0 pass · 5 fail` and, for every beat,
 `missing artifact: "Nothing came near the edge."`. The line was on screen, at full opacity, for three
@@ -8360,7 +8360,7 @@ passes. Across the whole library, 43 scenes by 5 gates, no scene changed verdict
 
 ---
 
-## #314 — `make assets` plans image cards for audio cue names
+## 328. `make assets` plans image cards for audio cue names
 
 **What.** `make assets D=formats/scene/process.json` on a film with a scored `audio.cues` array printed:
 
@@ -8392,7 +8392,7 @@ their shape is what produced the bug. `process.json` went from seven false cards
 
 ---
 
-## #315 — The same script's DRY RUN writes files to disk
+## 329. The same script's DRY RUN writes files to disk
 
 **What.** `scripts/media/assets.mjs` prints `PLAN (dry run — pass --write to apply)` and then writes
 every generated card anyway. Measured, in a clean tree:
@@ -8432,7 +8432,7 @@ top to bottom meets `PLAN (dry run)` last and reads it as a summary of what the 
 
 ---
 
-## #316 — A motion track is layer-relative and nothing shows it in film time
+## 330. A motion track is layer-relative and nothing shows it in film time
 
 **What.** The film's payoff is one snap: a red measured rectangle collapsing onto the ink. It landed
 half a second after the line that announces it. Twelve gates were green, including `plan-vs-render`,
@@ -8456,7 +8456,7 @@ pattern is almost always an author writing film time. Heuristic, so a warn, neve
 
 ---
 
-## #317 — A missing typeface substitutes silently in a fresh worktree
+## 331. A missing typeface substitutes silently in a fresh worktree
 
 **What.** Every frame of the first four render passes was set in a high-contrast serif. The theme
 (`themes/vawe-dark.json`) declares `sans: "Anybody"` and its own note explains why. I judged
@@ -8498,8 +8498,8 @@ thing is gone on purpose. It never means a reference was not worth fixing: the n
 stale were corrected instead.
 
 
-<!-- doc-refs-allow: make schema-drift · #256 quotes the stale name it was chartered to correct -->
-## #318 — The two tools that FIT a seed have never once run
+<!-- doc-refs-allow: make schema-drift · #266 quotes the stale name it was chartered to correct -->
+## 332. The two tools that FIT a seed have never once run
 
 **What.** `scripts/author/lightfield-seeds.mjs` and `scripts/author/lightfield-fit.mjs` both import
 `./lightfield-model.mjs`. That file was never written and never committed: `git log --all` for the path
@@ -8536,7 +8536,7 @@ than absence of error.
 
 ---
 
-## #319 — A default that reproduces the old behaviour, except in float32
+## 333. A default that reproduces the old behaviour, except in float32
 
 **What.** `spectrum` needed per-stop ramp POSITIONS: eight evenly spaced stops cannot describe a
 feature narrower than a seventh of the ramp, however many you add, and the reference's trough is about
@@ -8573,7 +8573,7 @@ blank from correct is not a test; the hash now refuses to report unless the pict
 
 ---
 
-## #320 — The playground card drew a different picture from the generator it names
+## 334. The playground card drew a different picture from the generator it names
 
 **What.** `LookCard` in `site/app/playground/PlaygroundClient.tsx` draws a shader generator by calling
 the engine's ambient layer directly. It passed **two** of the six parameter vectors:
@@ -8595,7 +8595,7 @@ implementation of `core/surfaces/palette.js`, and it was already behind: a stop 
 position as `#rrggbb@0.42`, and this copy dropped it silently, so a card could not show a moved ramp
 at all. Now imports and calls the engine's own `palette()`.
 
-**Fix.** Pass all six vectors; use the engine's converter. Both are the same lesson as #275 and the
+**Fix.** Pass all six vectors; use the engine's converter. Both are the same lesson as #289 and the
 77-file `site/public` drift: the site must READ the engine, never re-state it.
 
 **Which gate would catch it.** None today, and that is the honest answer. A card is a picture in a
@@ -8605,7 +8605,7 @@ picture.
 
 ---
 
-## #321 — The catalogue that exists so nobody misses a capability was missing the biggest one
+## 335. The catalogue that exists so nobody misses a capability was missing the biggest one
 
 **What.** Asked whether we could use a globe from a component library, I went to npm. three.js was
 already a dependency, `core/three-fx.js` already had a scene-graph layer with four registered scenes,
@@ -8660,7 +8660,7 @@ fails. Restore: green.
 
 ---
 
-## #322 — Two films authored as improvements, both slower than the one they replaced
+## 336. Two films authored as improvements, both slower than the one they replaced
 
 **What.** `showcase-flight-globe` and `showcase-flight-computed` were written to fix `showcase-flight`.
 Measured as events per second (any moment a layer arrives or leaves, plus cuts and stings):
@@ -8704,7 +8704,7 @@ it also exposed two things worth having: the on-screen claim still said "600 fra
 <!-- doc-refs-allow: formats/scene/showcase-flight.json · superseded by showcase-flight-globe and deleted; entries that cite it are records of what it taught -->
 <!-- doc-refs-allow: formats/scene/showcase-flight-computed.json · the flat-chart iteration, superseded and deleted -->
 <!-- doc-refs-allow: formats/scene/_flight-chart.html · lived only in the deleted flat-chart film -->
-## #323 — A gate that names the exact drift, and is only a warning
+## 337. A gate that names the exact drift, and is only a warning
 
 **What.** `designspec-check` reported `#8fdcff is a chromatic colour NOT in the vawe-dark palette
 (nearest is 17% away)` on two consecutive films. I quoted it back in a progress report and shipped
@@ -8729,7 +8729,7 @@ broken.
 
 ---
 
-## #324 — The anti-slop detector cannot read SVG text, and invented 21 findings on the first fragment it was ever pointed at
+## 338. The anti-slop detector cannot read SVG text, and invented 21 findings on the first fragment it was ever pointed at
 
 **What.** `formats/scene/hero-site.json` was the first scene to move its hand-authored markup into a
 file, which is also the first time `make preview` could run the impeccable detector over it. The
@@ -8766,7 +8766,7 @@ believing a detector about markup it has never seen, point it at markup whose an
 
 ---
 
-## #325 — Moving markup into a file moved it out of the hash that proves somebody looked at it
+## 339. Moving markup into a file moved it out of the hash that proves somebody looked at it
 
 **What.** `scripts/lib/receipt.mjs` hashed the subject file's bytes and nothing else. The `html.src`
 feature lets a scene name its markup instead of containing it, so from the day it shipped, rewriting a
@@ -8797,7 +8797,7 @@ counting on it being there.
 
 ---
 
-## #326 — The anti-slop gate ran 41 rules over three CSS properties, and its silence read as a pass
+## 340. The anti-slop gate ran 41 rules over three CSS properties, and its silence read as a pass
 
 **What.** `make slop` rendered a scene, dumped the DOM and ran the vendored 41-rule detector over it.
 Measured on a real film's dump: **`box-shadow` appears zero times.** So every rule about a glow, an
@@ -8837,7 +8837,7 @@ into 41 silences that look like 41 passes.
 
 ---
 
-## #327 — A background parameter one level out of place: accepted, dropped, and a byte-identical render
+## 341. A background parameter one level out of place: accepted, dropped, and a byte-identical render
 
 **What.** The flight film's backdrop was a flat white field for all 13 seconds, so I gave it
 `gradientWash`. The stock pools were far too strong, so I wrote `"intensity": 0.3` on the bg window and
@@ -8848,7 +8848,7 @@ re-rendered. **Identical again.** Two parameter changes, two byte-identical shee
 `opts`; I had written them at the TOP LEVEL of the window, where `b.opts` is undefined and the whole
 override is a no-op. The render is exactly as if the keys were absent.
 
-**This is #157 one level up, and #157's own fix is why it hid.** That entry made an unknown key *inside*
+**This is #163 one level up, and #163's own fix is why it hid.** That entry made an unknown key *inside*
 `opts` throw, and `bgOverErrors` does that job well. Nothing looked one level out. So the shape that
 fails loudly is a typo in the right place, and the shape that fails silently is a correct key in the
 wrong place — which is the easier mistake to make and the harder one to see.
@@ -8875,7 +8875,7 @@ above is a place a correct key can be wrong.
 
 ---
 
-## #328 — Off-window was an absence, not a state: two clocks' worth of stale transform
+## 342. Off-window was an absence, not a state: two clocks' worth of stale transform
 
 **What.** `snap-scenes` quarantined `ab-control-shotcode` and `ab2-control-tenor` as NON-DETERMINISTIC.
 The symptom was geometric: two text nodes inside a pricing card reported `y 418.7` when the frames
@@ -8913,7 +8913,7 @@ work, ask what the skipped branch leaves behind, not just what it avoids doing.
 
 ---
 
-## #329 — Four colour parsers, four grammars, and one of them was unanchored
+## 343. Four colour parsers, four grammars, and one of them was unanchored
 
 **What.** `parseColor` existed four times with four different contracts: `core/filters.js:70` (array,
 anchored), `core/motion.js:336` (array, plus passthrough, **unanchored**), `core/lightfield/colour.js:8`
@@ -8942,7 +8942,7 @@ real nonetheless.
 
 ---
 
-## #330 — A git worktree silently removes the thing that proves a change is safe
+## 344. A git worktree silently removes the thing that proves a change is safe
 
 **What.** Three agents ran in isolated worktrees on disjoint files, each told to prove `make snap-all`
 reported zero changed scenes. The first came back with **42 identical, 57 changed** and, correctly,
@@ -8968,7 +8968,7 @@ three separate proofs of "nothing changed" do not compose into one. Here the mai
 sending work to a worktree, ask which gitignored directory the verification silently depends on.
 
 ---
-## #331 — Stripping tags eight times with three answers, and the two common answers were both wrong
+## 345. Stripping tags eight times with three answers, and the two common answers were both wrong
 
 **What.** "What does this string read as on screen" was implemented eight times: `plain` in
 `scripts/lib/text.mjs` (`/<[^>]*>/g` → empty), `onScreenText` in `core/validate.mjs` (style/script
@@ -8989,7 +8989,7 @@ functions, `onScreenText` (words, block-aware) and `glyphText` (characters, text
 **The live leak.** `designspec-check` ran `plain` over `l.html` AND over whole captured component
 files, so a fragment's stylesheet arrived as the film's copy and the jargon rules ran over CSS. A
 `<style>` comment reading `/* seamless, cutting-edge, world-class */` produced a `buzzword-phrase`
-finding against words no viewer can see. This is **#214 / #216 / #217 / #242 in a fifth consumer**, and
+finding against words no viewer can see. This is **#220 / #222 / #223 / #249 in a fifth consumer**, and
 it was still there because all four earlier fixes were applied at a call site rather than at the rule.
 
 **Fix.** One definition in `core/on-screen-text.js` — in `core/`, not `scripts/lib/`, because
@@ -9009,7 +9009,7 @@ no centre for it to be missing from. And when several copies of one rule disagre
 strictest and unify onto it: ask what the rule is actually a rule ABOUT. Two of the three answers here
 were wrong, and the correct one was in neither.
 
-## #332 — driveClips asked the DOM what to drive, on every frame
+## 346. driveClips asked the DOM what to drive, on every frame
 
 **What.** `core/clips.js` opened with `root.querySelectorAll('[data-start]')` INSIDE `driveClips`, which
 is the first thing `renderFrame` calls. An attribute-selector walk of the whole scene tree, 780 times a
@@ -9023,7 +9023,7 @@ same nodes 780 times.
 **Why it is a correctness finding and not only a cost.** A live query means `driveClips` operates on
 whatever is in the DOM at the instant it runs. Nothing does add a clip mid-render today, so no frame was
 ever wrong — but the file's own header claims `driveClips(clips, t)` is a pure function of t, and that
-line was the one thing in it that was not. It is the same shape as #328 directly above, found in the same
+line was the one thing in it that was not. It is the same shape as #342 directly above, found in the same
 file: a per-frame result that depends on something other than t, invisible until something moves.
 
 **Fix.** `collectClips(root)` takes the set ONCE, frozen, where the scene finishes building;
@@ -9040,7 +9040,7 @@ the frame loop its set; do not let it look.
 
 ---
 
-## #333 — Two answers to "is this background light", disagreeing on every saturated colour
+## 347. Two answers to "is this background light", disagreeing on every saturated colour
 
 **What.** Six places compute relative luminance. Four linearise the sRGB channels as WCAG requires and
 are used to GRADE contrast. Two — `core/boot.js` `luma` and `core/produce.js` `bgIsLight` — weighted the
@@ -9068,7 +9068,7 @@ differ textually — feed both the whole input space and measure where the ANSWE
 
 ---
 
-## #334 — A snapshot baseline was only valid within one font state, and nothing recorded which
+## 348. A snapshot baseline was only valid within one font state, and nothing recorded which
 
 **What.** `assets/fonts/` is gitignored and populated by `make fonts`. Every text width in the library
 moves with it, and `snap-all` compares text widths. So the determinism-and-regression net silently
@@ -9100,7 +9100,7 @@ result. A gate that cannot tell "the inputs moved" from "the code moved" is not 
 
 ---
 
-## #335 — Four workers meant four whole browsers, and one CDP call was the difference
+## 349. Four workers meant four whole browsers, and one CDP call was the difference
 
 **What.** `internal/scene/scene.go` `newTab` called `chromedp.NewExecAllocator` on every invocation.
 Its own comment said so — "spins up an independent browser + tab" — so `--workers 4` started four
@@ -9131,7 +9131,7 @@ seconds while the foreground tab ran 362. `--disable-background-timer-throttling
 three measured, all three leave the tab at zero. `Emulation.setFocusEmulationEnabled(true)` per tab
 puts all eight tabs at the full rate. This mattered more here than it would elsewhere: the readiness
 `Poll` runs in rAF mode and `shoot` awaits a double `__realRaf` before every screenshot, so without it
-every worker but one would have waited forever — #121, exactly.
+every worker but one would have waited forever — #124, exactly.
 
 **The spike was wrong twice before it was right, and both times the SHAPE of the numbers said so, not a
 failure.** It rooted a process walk at a pgrep guess that did not resolve, so root was 0 and it
@@ -9141,7 +9141,7 @@ sequentially. A spike that answers a decision needs the same scepticism as the c
 
 **Proof it is inert.** Frame hashes via `ffmpeg -f framemd5`, old binary against new: 1 worker
 `ab3b3a2a` both, 4 workers `a05d1bd0` both. Identical at each worker count. `w1 != w4` in BOTH
-binaries, which is the pre-existing residue of #258/#269 — untouched, neither fixed nor worsened.
+binaries, which is the pre-existing residue of #268/#281 — untouched, neither fixed nor worsened.
 
 **Lesson.** Before optimising a hot path, check the cheap structural question: are we creating one of
 something, or N. The comment had said "an independent browser" for as long as the function existed and
@@ -9149,7 +9149,7 @@ nobody read it as a cost.
 
 ---
 
-## #336 — Worker count changes about 80% of frames, and the cap should not move until that is understood
+## 350. Worker count changes about 80% of frames, and the cap should not move until that is understood
 
 > **CORRECTED by its own Phase 0, below. The headline number is right and its significance is not.**
 > 631 of 780 was measured on DECODED MP4 FRAMES. At the capture level the figure is **308 of 780** —
@@ -9157,17 +9157,17 @@ nobody read it as a cost.
 > far more of the frame than the raster does. And the magnitude, which this entry never measured, is
 > **max delta 70 of 255 on 0.14% of pixels, entirely on the anti-aliased outlines of text glyphs**,
 > measured at 2x supersample before the downsample averages four pixels into one. The globe, the route
-> and the backdrop are bit-identical. This is #258's characterised rasteriser jitter, not a new defect,
-> and the entry below made #258's exact mistake one layer up: it counted how many frames differ and
-> never asked by how much. #258 says "look at the pixels before theorising about them" and its own
+> and the backdrop are bit-identical. This is #268's characterised rasteriser jitter, not a new defect,
+> and the entry below made #268's exact mistake one layer up: it counted how many frames differ and
+> never asked by how much. #268 says "look at the pixels before theorising about them" and its own
 > correction says "look at the WORST case". Doing both took one ffmpeg pass and one image.
 >
 > **What follows for the 4-worker cap:** the correctness question that blocked it is answered on this
 > film. Six workers is 14% faster (42.1s against 48.7s) for 400 MB more. Confirm on two or three more
-> films — one with a captured `component`, since #267 is the failure that hid in exactly that place —
+> films — one with a captured `component`, since #279 is the failure that hid in exactly that place —
 > and then the default can move.
 
-**What.** Phase 2 of the one-browser-N-tabs work was to re-measure the 4-worker cap (#190), which was
+**What.** Phase 2 of the one-browser-N-tabs work was to re-measure the 4-worker cap (#196), which was
 tuned against four separate browser process trees and no longer describes the topology. Rendering
 `showcase-flight-globe` at 1, 4, 6 and 8 workers and hashing every DECODED frame:
 
@@ -9179,10 +9179,10 @@ tuned against four separate browser process trees and no longer describes the to
 | w6 vs w8 | 631 |
 
 The same worker count is perfectly reproducible — w4 old-binary against w4 new-binary is byte-identical
-(#335). Change the worker count and roughly four frames in five come out different.
+(#349). Change the worker count and roughly four frames in five come out different.
 
 **This predates the tabs change.** The 1-vs-4 figure was measured on the pre-change binary too. It is
-the residue #258/#269 records as open, and it is considerably larger than the count recorded there.
+the residue #268/#281 records as open, and it is considerably larger than the count recorded there.
 
 **Wall clock says the cap is worth revisiting, which is exactly why it must not move yet.** 4 workers
 48.7s / 2,012 MB · 6 workers **42.1s** / 2,413 MB · 8 workers 42.7s / 2,678 MB. Six is 14% faster and
@@ -9204,7 +9204,7 @@ the first version was not evidence for it.
 
 ---
 
-## #337 — `make preview` clipped every fragment at 1080px, because a portrait default outlived its page
+## 351. `make preview` clipped every fragment at 1080px, because a portrait default outlived its page
 
 The tool that exists so you can LOOK at a fragment before rendering it was showing you a cropped one.
 A `component` captured off linear.app (1344x546) previewed as a card with its right third missing: the
@@ -9248,7 +9248,7 @@ defaults, and both are fixed.
 
 ---
 
-## #338 — The one gate that blocks on structure read six of the eight channels its own source returns
+## 352. The one gate that blocks on structure read six of the eight channels its own source returns
 
 `no-continuous-object` is the only structural rule in this engine that fails a build. It asks that one
 object survive each cut and CHANGE there, and CLAUDE.md says plainly what that costs: *"it made one
@@ -9280,17 +9280,17 @@ after a capture did not validate. It now prints `src`/`w`/`x`/`y`, and `w` is st
 scales the capture to it and silently defaults to 1200. **A tool's printed snippet is documentation with
 a shorter path to the file than the docs have.**
 
-**What this film was for.** #267 (a captured DOM component racing the capture) had no live coverage —
+**What this film was for.** #279 (a captured DOM component racing the capture) had no live coverage —
 no scene in the library used a `component` layer. Now one does, and the measurements: two full renders
 byte-identical; 1 worker against 6 differs on 671 of 684 frames, worst frame PSNR 40.95 dB, max delta
 124 of 255, 0.116% of pixels over delta 32, longest contiguous run of big-delta pixels 24px. A 6x
 amplified diff of the worst frame is glyph outlines and avatar RIMS — every one of the six images is
-present in both renders, and a dropped image would be a solid block, not a ring. #267 does not
-reproduce, and the component layer adds no difference class beyond #258's characterised glyph jitter.
+present in both renders, and a dropped image would be a solid block, not a ring. #279 does not
+reproduce, and the component layer adds no difference class beyond #268's characterised glyph jitter.
 
 ---
 
-## #339 — The camera sugar accepted a typo, a missing target and the wrong frame, and said nothing to all three
+## 353. The camera sugar accepted a typo, a missing target and the wrong frame, and said nothing to all three
 
 Adding `travel` (the station-to-station journey) meant reading `core/camera-moves.js` closely, and the
 module had three silent failures sitting under the one it was asked for. None had ever fired, because
@@ -9332,7 +9332,7 @@ keyframes: `travel` closes the case inside one move, never across two.
 
 ---
 
-## #340 — Every static gate measured against the canvas origin, so a film whose transition is the camera was graded on a frame nobody was looking at
+## 354. Every static gate measured against the canvas origin, so a film whose transition is the camera was graded on a frame nobody was looking at
 
 A film can lay its beats out as STATIONS on a canvas far larger than the frame and travel between them
 with the camera, which is how `linear-journey` (5760x2160, 12 camera keys, **zero cuts**) and `playhead`
@@ -9387,7 +9387,7 @@ travelling camera.
 
 ---
 
-## #341 — Six camera generators would run their clock backward, and the reviewer that found it named two
+## 355. Six camera generators would run their clock backward, and the reviewer that found it named two
 
 `/ecc:review` over the six commits of this session returned one finding: `travel` and `truck` validate
 `dur` and `dwell` for FINITENESS and never for SIGN, so a negative value walks the keyframe times
@@ -9421,7 +9421,7 @@ Review before push, and treat a reviewer's finding as a sample of a class rather
 
 ---
 
-## #342 — Two profile rules read as enforced and had never once run
+## 356. Two profile rules read as enforced and had never once run
 
 Extracting the reference-profile table (it lived in `scripts/author/motion-director.mjs:40` and was
 consumed on line 50, so nothing else in the repo could ask what a profile means) meant checking that
@@ -9468,7 +9468,7 @@ leaks, and moving a sting into the looks table throws by name. `make effects` ou
 
 ---
 
-## #343 — The arsenal could not describe itself, and the one shared map made it lie
+## 357. The arsenal could not describe itself, and the one shared map made it lie
 
 `docs/EFFECTS.md` is generated from the registries and exists so an author can "see everything, then
 choose". Measured: **476 entries, 379 with no description at all — 20% covered.** The only source was a
@@ -9520,7 +9520,7 @@ self-evident, ransom faces are font names, and a drawn icon called `check` needs
 
 ---
 
-## #344 — The site study read every heading and then threw the words away
+## 358. The site study read every heading and then threw the words away
 
 Building the quiz's one site-grounded question — "which part of your product does the convincing?" — meant
 rendering its options from `sections.json`. They came out as `Move work forward across tea` and
@@ -9547,7 +9547,7 @@ being a handle rather than a quotation. Re-run `make sections` and the real word
 
 ---
 
-## #345 — The storyboard writer claimed to pass the gate and never had, at any duration
+## 359. The storyboard writer claimed to pass the gate and never had, at any duration
 
 `scripts/brand/storyboard-draft.mjs` turns a site study into a storyboard skeleton, and its header says
 plainly: *"Output passes storyboard-check structurally."* Running the two against each other for the first
@@ -9580,7 +9580,7 @@ in the day: a value produced, carried to a boundary, and dropped without a word.
 
 ---
 
-## #346 — A field enumerated by hand at a boundary, four times in one day
+## 360. A field enumerated by hand at a boundary, four times in one day
 
 Four separate files today collected a value, carried it to a boundary that lists its fields by hand, and
 dropped it. Nothing errored in any of them. Each was invisible until something downstream tried to USE
@@ -9608,7 +9608,7 @@ question is what you are dropping, and the answer has to be one you meant.**
 
 ---
 
-## #347 — `vawe_capabilities` shipped names and kept the meanings at home
+## 361. `vawe_capabilities` shipped names and kept the meanings at home
 
 An MCP client asking what this engine can do got `looks (31): neon dreamyHaze crt …` and
 `cuts (26): none fade slide …` — bare strings. One family in the same payload, `blocks`, carried a
@@ -9635,7 +9635,7 @@ which the validator requires) until this work happened to run it. `make mcp-smok
 
 ---
 
-## #348 — Describing the looks found four bugs in the looks
+## 362. Describing the looks found four bugs in the looks
 
 Writing one line per composite look meant reading all 31 recipes. Four defects fell out, and the first is
 the worst class this repo logs. **None is fixed — they are recorded here so the next pass has them.**
@@ -9652,7 +9652,7 @@ substitution: it should either apply or throw.
 `lightLeak` and `wash` all read `o.amt`, so one `lookOpts: { amt: 0.5 }` moves four passes at once, in
 different directions.
 
-> **AMENDED by #351 — this half is wrong, and the direction matters.** Measured across all 31 looks,
+> **AMENDED by #365 — this half is wrong, and the direction matters.** Measured across all 31 looks,
 > every `amt`-consuming pass in every look fixes its own key, so the fixed argument shadows the author's
 > and a user `amt` reached **nothing**. It was inert, not cross-talking. The namespace collision is real
 > but latent, and the fix is to REFUSE the knob, not to rename the passes. Recorded rather than silently
@@ -9660,7 +9660,7 @@ different directions.
 > years while being backwards.
 
 **3. `hStreak` blurs the ALPHA channel** — a `drop-shadow` pair, which is exactly the construct
-`docs/MISTAKES.md` #112 replaced for `bloomStack`. **That fix landed on `bloom` only.** On an opaque photo
+`docs/MISTAKES.md` #115 replaced for `bloomStack`. **That fix landed on `bloom` only.** On an opaque photo
 the alpha is the rectangle, so `vintageAnamorphic` streaks the frame's edge rather than its highlights.
 `chromaPair` has the same shape and at least admits it in a comment; `hStreak` carries no caveat. This is
 the "fix the rule, not the call site" pattern in CLAUDE.md, found still open two hundred entries later.
@@ -9679,7 +9679,7 @@ not separate from correctness work — it is a slow read of code nobody has read
 
 ---
 
-## #349 — The storyboard gate had never heard of the repo's own placeholder token
+## 363. The storyboard gate had never heard of the repo's own placeholder token
 
 `<fill: …>` is this repo's convention for "a decision a person still owes". `intent-from-storyboard.mjs`
 knows it and refuses to emit a `mustShow` for one. `storyboard-check` had **zero** occurrences of the
@@ -9700,14 +9700,14 @@ no rule. Of the 11 storyboards in the repo exactly one changed verdict, and it i
 skeleton.
 
 **The pattern this belongs to.** Three times this week a gate has been green about something it was not
-looking at: `storyboard-check` had only half a timeline rule (`#345`), `craft-coverage` could be satisfied
-by prose instead of its table (`#342`), and here a gate had no knowledge of a convention two other tools in
+looking at: `storyboard-check` had only half a timeline rule (`#359`), `craft-coverage` could be satisfied
+by prose instead of its table (`#356`), and here a gate had no knowledge of a convention two other tools in
 the same pipeline already enforce. **A green gate is a claim about what it measured, and the failure mode is
 always the same: the claim in the summary line is wider than the measurement behind it.**
 
 ---
 
-## #350 — A flat dark backdrop escaped the flat-backdrop warning
+## 364. A flat dark backdrop escaped the flat-backdrop warning
 
 `beat-check` warns `static-bg` on a film built entirely from flat presets, because CLAUDE.md's rule is that
 the backdrop is always a decision and a still field must be a deliberate one. Its `STATIC_PRESETS` set
@@ -9737,9 +9737,9 @@ missing from that prose entirely. Corrected to 22.
 
 ---
 
-## #351 — Five of the six documented look knobs did nothing, and the guard for exactly that was scoped to one family
+## 365. Five of the six documented look knobs did nothing, and the guard for exactly that was scoped to one family
 
-Fixing `#348`. Measuring it first made it much bigger than logged, and turned one of its four findings
+Fixing `#362`. Measuring it first made it much bigger than logged, and turned one of its four findings
 around completely.
 
 **What was claimed.** Three places — `core/looks.js:13`, `core/knobs.js:96`, `docs/PRIMITIVES.md:668` —
@@ -9778,14 +9778,14 @@ wording, of the unknown-modifier throw in `core/fx/index.js:55`). `warmth` and `
 neither had any destination. All 31 looks resolve byte-identically at every strength with no `lookOpts`, so
 no shipped pixel moved.
 
-**#348's bug 2 was backwards, and worth recording as such.** It said one `lookOpts:{amt:0.5}` "moves four
+**#362's bug 2 was backwards, and worth recording as such.** It said one `lookOpts:{amt:0.5}` "moves four
 passes at once, in different directions". Measured: every `amt`-consuming pass in every look fixes its own
 key, so a user `amt` reached *nothing*. It was inert, not cross-talking. The fix is therefore refusal, not
 renaming. A finding written from reading is a hypothesis; this one survived two years and one careful
 author and was still wrong about the direction of the effect.
 
-**The alpha blur, finally removed from the registry (`#348` bug 3, and `#112` before it).** `hStreak` was a
-`drop-shadow` pair — the construct `#112` replaced on `bloom` for blurring the ALPHA channel. On an opaque
+**The alpha blur, finally removed from the registry (`#362` bug 3, and `#115` before it).** `hStreak` was a
+`drop-shadow` pair — the construct `#115` replaced on `bloom` for blurring the ALPHA channel. On an opaque
 photo the alpha IS the rectangle: `vintageAnamorphic` drew a lavender halo round the whole card and put no
 streak on the picture at all, while its own blurb promised "horizontal blue streaks off the highlights".
 `chromaPair` was the same construct feeding 8 looks; it admitted in a comment that it was "a hint, not a
@@ -9807,7 +9807,7 @@ visible in any number:
   26px sigma smeared the headline into an unreadable bar. A streak is long, thin and FAINT: a large sigma
   with a low intensity spreads the energy so letter gaps stay open.
 
-**Other consumers, checked and cleared** (`#348` is itself the record of what happens when one call site is
+**Other consumers, checked and cleared** (`#362` is itself the record of what happens when one call site is
 fixed and the rule is not). `chromaGlow` and the `chroma` TEXT preset both follow the alpha deliberately —
 correct on glyphs, where the alpha IS the shape. `chromaGlow` is wrong on an opaque picture and nothing
 gates that; its blurb now says so. `core/fx/shadow.js` explains why it avoids `drop-shadow` entirely.
@@ -9850,10 +9850,10 @@ on render order. The code around it is careful and correct: it samples the track
 both pure, and its comment explains that the write must be authoritative so a cold render equals a warm
 one, citing `#41`. The purity it was protecting was defeated by the sentinel it chose for "empty".
 
-**The reusable part.** `#348` was found by describing code; this entry was found by *measuring* what that
+**The reusable part.** `#362` was found by describing code; this entry was found by *measuring* what that
 description claimed; and the motion-blur bug was found by *widening a signature* so a gate could see a
-property it had never recorded. All three beat the tests. The common thread across `#342`, `#345`, `#349`,
-`#350` and this one is now unmistakable: **a green gate is a claim about the subset it looked at.** Here
+property it had never recorded. All three beat the tests. The common thread across `#356`, `#359`, `#363`,
+`#364` and this one is now unmistakable: **a green gate is a claim about the subset it looked at.** Here
 the subset was one preset out of three that worked, one knob family out of six, and every visual property
 except the one being changed.
 
@@ -9864,7 +9864,7 @@ outside every signature in the repo.
 
 ---
 
-## #352 — The engine's defaults were another brand's colours, and nobody had ever chosen them
+## 366. The engine's defaults were another brand's colours, and nobody had ever chosen them
 
 Asked why a film I had just authored was dark-with-lime-green and scattered with dots that looked like
 dirt, the honest answer turned out to be: **I chose almost none of it.** I wrote `"theme": "default"` and
@@ -9909,7 +9909,7 @@ the code recoloured a glyph. It now bleeds outward at the moment of contact and 
 **5. `var(--muted)` is defined by nothing.** The theme sets `--text-2`; there is no `--muted`. CSS answers
 an undefined custom property by INHERITING, so a layer using it renders as whatever its parent was,
 silently. I put it on nine captions in a scene authored the same day I spent removing exactly this class of
-bug from `core/looks.js` (#351). `make designspec-check` names it `dead-token` and had been saying so.
+bug from `core/looks.js` (#365). `make designspec-check` names it `dead-token` and had been saying so.
 
 **The regression this nearly shipped.** Changing `default` restyled ten scenes, and `sample.json` — the
 authoring reference — went from **0 hard audit issues to 19**. `aurora` is a dark-FIELD preset, so it
@@ -9926,7 +9926,7 @@ found all five was not "what is broken" but **"who chose this?"** — and the an
 
 ---
 
-## #353 — `--p` was frozen at 0 for every backdrop that spans its film, and a sentinel is why
+## 367. `--p` was frozen at 0 for every backdrop that spans its film, and a sentinel is why
 
 Told that reaching for framework presets caps what you can build, the fix was to stop picking a
 background off a list and hand-author one. The first hand-authored backdrop written after that used
@@ -9961,7 +9961,7 @@ was. **When an effect does not appear, make it absurd before you conclude anythi
 reads in this same session mistook a downscaled comparison strip for a missing effect, and this one
 was real. The difference took one render to establish and no reasoning at all.
 
-**The context it belongs to.** This session had already logged #352, where the engine's default
+**The context it belongs to.** This session had already logged #366, where the engine's default
 background palette turned out to be another brand's colours. The measurement that prompted this entry:
 **164 background windows in this library use a preset; 14 are hand-authored.** The path away from
 inherited defaults was 92% untravelled, and the first person down it hit a variable that does not work.
@@ -9969,7 +9969,7 @@ A capability nobody uses is a capability nobody has tested.
 
 ---
 
-## #354 — `inkflash` was a colour wave wearing a name nobody had built
+## 368. `inkflash` was a colour wave wearing a name nobody had built
 
 Asked where `inkflash` came from, the answer was in the repo's own history. Commit `3a0a368`:
 
@@ -9982,7 +9982,7 @@ The name promised pigment hitting paper and the code was a hex lerp between two 
 
 **The defaults were the reference's palette.** `flash = '#ff742e'`, `to = '#1c1613'` — open
 `themes/brew.json` and they are its `accent` and its `ink`, verbatim. One film's brand colours frozen
-into a preset every theme may use, which is the same defect as `#352`'s `PAL_PLINTH` and has the same
+into a preset every theme may use, which is the same defect as `#366`'s `PAL_PLINTH` and has the same
 cause: someone reproduced a real film faithfully and never separated *that brand's colour* from *the
 mechanism*. Both now default to the theme through `color-mix`, which a hex-only mixer could not do
 because a theme colour is only known as a CSS variable at render time.
@@ -10012,7 +10012,7 @@ for every other theme — which is what "extract the mechanism, not the brand" m
 
 ---
 
-## #355 — Nine name→thing maps, each with its own silent fallback, and one film that never played as written
+## 369. Nine name→thing maps, each with its own silent fallback, and one film that never played as written
 
 F1 of the framework plan: stop writing gates for the silent-substitution class and remove the ability to
 express it. The engine had NINE named vocabularies and every one resolved by hand:
@@ -10021,15 +10021,15 @@ express it. The engine had NINE named vocabularies and every one resolved by han
 ANIM[name]        || fade                    // core/clips.js
 PRESENTATIONS[n]  || PRESENTATIONS.fade      // core/cuts.js — a CUT, the one moment the viewer is looking
 TIMINGS[timing]   || TIMINGS.smooth          // core/cuts.js, the next line
-PRESETS[preset]   || PRESETS.up              // core/type.js  (fixed in #354)
+PRESETS[preset]   || PRESETS.up              // core/type.js  (fixed in #368)
 PARTS[p.anim]     || PARTS.fadeUp            // formats/scene/scene.js, INSIDE the build path
 ICONS[name]       || ''                      // core/icons.js — renders an empty <svg>
 
-> **AMENDED by #360 — `core/icons.js` was listed here and NEVER TOUCHED.** `git show c49ea03 --stat`
+> **AMENDED by #374 — `core/icons.js` was listed here and NEVER TOUCHED.** `git show c49ea03 --stat`
 > contains no `core/icons.js`, and `ICONS[name] || ''` was still on line 22 when a review found it. The
 > entry claimed a fix that did not exist, in the entry about claiming things that are not so. Recorded
 > rather than quietly corrected, because a log that edits its own misses is worth less than one that
-> keeps them. Fixed for real in #360.
+> keeps them. Fixed for real in #374.
 ```
 
 **What it cost, measured.** Across all 146 scene files, **19 layers in two shipped scenes named an `anim`
@@ -10080,11 +10080,11 @@ its author wrote eighteen times and never once saw.
 
 ---
 
-## #356 — A colour default is a decision about the theme, or a deliberate constant, and nothing could tell them apart
+## 370. A colour default is a decision about the theme, or a deliberate constant, and nothing could tell them apart
 
 F3 of the framework plan. Twice this week a brand's colours turned out to be the engine's defaults:
-`PAL_PLINTH` painted every unthemed background in plinthai.xyz blue (#352), and `inkflash` flashed
-themes/brew.json's `#ff742e` onto its `#1c1613` in a preset every theme may use (#354). Both were fixed by
+`PAL_PLINTH` painted every unthemed background in plinthai.xyz blue (#366), and `inkflash` flashed
+themes/brew.json's `#ff742e` onto its `#1c1613` in a preset every theme may use (#368). Both were fixed by
 hand. The cause is structural and would have produced a third: an effect author writes the colour they are
 looking at, and **the source gives no way to say whether that hex is "the accent" or "this blue on purpose"**.
 
@@ -10102,7 +10102,7 @@ a forgotten tokenisation looks like. Resolution is late and context-aware: a CSS
 
 **What converting found.** `hStreak`'s `#a9c8ff` was DEAD — the only look with an `hBloom` fixes the
 colour, so nothing ever resolved it. A dead default is still a decision nobody made. And `lightLeak`'s
-`#ff9a3d` was the **unfinished half of #351**: routing made a user's `color` reach the leak, but the
+`#ff9a3d` was the **unfinished half of #365**: routing made a user's `color` reach the leak, but the
 DEFAULT still landed on one fixed orange, so `fadedPolaroid` declared `#ffd9a8` and `nostalgia` declared
 `#ffcf9a` and both leaked orange regardless. They now leak their own colour. `lomo` is unchanged, because
 its declared colour IS that orange.
@@ -10114,7 +10114,7 @@ white-hot heads of a spark and a meteor trail.
 **And a FOURTH signature hole, found the same way as the other three.** After changing two looks' leak
 colour, `make snap-all` reported **"identical: 104, changed: 0"**. A light leak is an overlay DIV's
 `background`, and the signature had no field for one — so the vignette, grain, scanlines and leak of every
-composite look were outside it, exactly as `filter` was this morning (#351), `clip-path` and the canvas
+composite look were outside it, exactly as `filter` was this morning (#365), `clip-path` and the canvas
 hash before that. `bgc` now records a layer's own background and its overlay children's. Proven by
 reverting `looks.js` with the field in place: `looks-reel` and `looks` surface immediately, 24 and 5
 changes, and nothing else moves.
@@ -10125,7 +10125,7 @@ to see. That is not four mistakes; it is one missing rule, applied four times to
 
 ---
 
-## #357 — One ease for every channel, so the second curve had to be hand-written in CSS
+## 371. One ease for every channel, so the second curve had to be hand-written in CSS
 
 F2 of the framework plan. `core/tracks/vars.js` animates CSS custom properties, which is how a block
 animates what it DOES rather than merely entering. It computed ONE ease for every channel:
@@ -10163,13 +10163,13 @@ precise than any named curve, and that is a real limit of a named-easing vocabul
 
 **What the library diff could NOT tell me.** `snap-all` reported 104 identical, and that is not evidence:
 the morphing div lives INSIDE a hand-authored `html` layer, and the signature captures only top-level
-layer elements. Unlike #351's `filter` and #356's `bgc`, this one is not a hole to close — an html layer's
+layer elements. Unlike #365's `filter` and #370's `bgc`, this one is not a hole to close — an html layer's
 inner DOM is arbitrary by definition. It is a stated limit, and the evidence for this change is the
 rendered comparison instead.
 
 ---
 
-## #358 — Every background boundary was written twice, and nothing kept the two equal
+## 372. Every background boundary was written twice, and nothing kept the two equal
 
 F4 of the framework plan. `brew-launch-act1` cuts its backdrop per beat — paper, dark, paper, accent,
 paper — and that is the film's main structural device. It was authored as six windows with hand-written
@@ -10186,7 +10186,7 @@ Move one and the register change silently detaches from the junction that was pu
 NAMED, never timed. The film already knows where it turns", and `audio.bridges[].at` takes `"cut@1"`.
 Backgrounds now accept the same reference — and rather than copy the grammar, it moved to
 `core/junctions.js` and audio-bridges imports it. Two hand-kept copies of one definition is MISTAKES
-#159 exactly, which is the entry about the snap signature drifting into blindness.
+#165 exactly, which is the entry about the snap signature drifting into blindness.
 
 `brew-launch-act1` renders **byte-identically** with eight of its numbers replaced by `cut@N`.
 
@@ -10205,7 +10205,7 @@ second by a validator throwing — which is the argument for both of them being 
 
 ---
 
-## #359 — F5, and what measuring "unused" actually showed
+## 373. F5, and what measuring "unused" actually showed
 
 The last item of the framework plan, and the one whose premise did not survive contact. The plan said:
 32 of 37 GSAP effects and 5 of 8 camera moves never appear in a shipped scene, the diagnosis is
@@ -10244,19 +10244,19 @@ about a third of that 32 duplicates something the engine already does well. The 
 
 ---
 
-## #360 — The review found the fix I had recorded but never made
+## 374. The review found the fix I had recorded but never made
 
 Two reviewers were run over the framework plan (`c49ea03..f70358d`). The general one approved: no
 purity violation, back-compat verified including `0` as a valid scalar in the new per-channel `vars`
 helper. The silent-failure hunter found six things, and the first is the one worth the entry.
 
-**`core/icons.js` was listed as fixed in #355 and was never opened.** `svgIcon()` still did
+**`core/icons.js` was listed as fixed in #369 and was never opened.** `svgIcon()` still did
 `${ICONS[name] || ''}`, which renders a complete but EMPTY `<svg>` — an icon-shaped hole, no error,
 nothing in the console. There are 15 icons; `svgIcon('rocket')` is a plausible thing to write and there
 is no rocket. `git show c49ea03 --stat` contains no `core/icons.js` at all.
 
 So the commit message and the log both asserted a fix that did not exist, **in the change whose entire
-subject was code that claims one thing and does another.** #355 is amended in place rather than edited
+subject was code that claims one thing and does another.** #369 is amended in place rather than edited
 silently: a log that quietly repairs its own misses is worth less than one that keeps them.
 
 The lesson is narrow and repeatable: **I enumerated the nine call sites by reading, then fixed eight and
@@ -10281,7 +10281,7 @@ command, and I never ran it. Every other claim in that entry was measured; this 
   decision now lives in the data as an explicit `none: null` rather than only in two duplicated guards.
 
 **Deliberately not fixed, with reasons:** `CORNERS[corner] || CORNERS.tr` in `core/looks.js` (a typo
-relocates a light leak; `lookOpts` has no per-key schema, so this needs the knob-routing work of #351
+relocates a light leak; `lookOpts` has no per-key schema, so this needs the knob-routing work of #365
 extended rather than a one-line throw), and `renderBg`'s `fx.type` chain having no final `else` (I could
 not establish whether `fx.type` is ever author-settable or always compiled from the validated preset
 enum, and a guess there is what this entry is about).
@@ -10292,9 +10292,9 @@ have re-read it with the same belief that put the line in the log.
 
 ---
 
-## #361 — Seven vocabularies still answered a wrong name with a plausible substitute
+## 375. Seven vocabularies still answered a wrong name with a plausible substitute
 
-The review that produced #360 prompted a full sweep: probe every named vocabulary in the engine with a
+The review that produced #374 prompted a full sweep: probe every named vocabulary in the engine with a
 nonsense name, then read what each CALLER does with the result.
 
 **The sweep corrected a claim I had just made.** I had said "13 vocabularies are not registries, so 13
@@ -10343,7 +10343,7 @@ alters nothing that works and refuses everything that never did.
 
 ---
 
-## #362 — A rule the framework cannot enforce, and the census that reads its own limits
+## 376. A rule the framework cannot enforce, and the census that reads its own limits
 
 P3, P4 and P5 of the plan, and the end of the silent-substitution work.
 
@@ -10359,7 +10359,7 @@ anim: "diveIn"    → `cameraMove: "diveIn"`
 ```
 
 Before, the engine could diagnose a wrong-slot name in 8 of 21 vocabularies. Now it does it in all of
-them, which matters because three of the five layers stranded in `#355` were real names in the wrong slot.
+them, which matters because three of the five layers stranded in `#369` were real names in the wrong slot.
 
 **P4 — the one thing the framework genuinely cannot do.** `core/registry.js` removes the ability to BUILD
 a registry with a fallback: `pick()` takes no such parameter. It cannot stop somebody writing a fresh
@@ -10373,7 +10373,7 @@ reasons was the useful part:
 - `PASS_READS[passName] || []`, `KNOB_ROUTES[knob] || []` — the key was validated one call earlier
 - `FX_DUR[spec.name] ?? 0.5` — the NAME is validated immediately above by `GSAP_EXIT_REGISTRY.pick`
 - **`CORNERS[corner] || CORNERS.tr`** — the one my own plan deferred as "needs the lookOpts schema work".
-  It needs nothing: `corner` is not a routed knob, so `assertKnobs` (#351) already refuses it from a
+  It needs nothing: `corner` is not a routed knob, so `assertKnobs` (#365) already refuses it from a
   scene, and only the in-repo recipes can set it. **I had planned work for a defect that a previous fix
   had already closed**, and only found that out by being made to write down why it was safe.
 
@@ -10393,7 +10393,7 @@ stated warning, and a check that watches for the tenth.
 
 ---
 
-## #363 — The gate written to catch blind spots had one, and its waiver list hid it
+## 377. The gate written to catch blind spots had one, and its waiver list hid it
 
 A reviewer over `25746ee..08d9c36` cleared the three things that could have gone badly: no new throw
 fires on an ABSENT value, none sits on a per-frame path (every one is scene-build-time), `validate.mjs`
@@ -10435,7 +10435,7 @@ that never do.
 
 ---
 
-## #364 — Eighty-nine words for one idea, and the answer to "should we remove every default?"
+## 378. Eighty-nine words for one idea, and the answer to "should we remove every default?"
 
 Three things, from one planning pass. The first is a question I was asked and answered with a measurement
 rather than an opinion.
@@ -10443,7 +10443,7 @@ rather than an opinion.
 **"Should we remove every default colour, so nothing default ever ships?" No — and the reason is a
 distinction, not a preference.** Every colour default found this week fell into one of two groups. Group
 one carried somebody's BRAND: `PAL_PLINTH` painted every unthemed background in one company's blue
-(#352), `inkflash` flashed another's orange (#354). Those are always bugs. Group two carries a PHYSICAL
+(#366), `inkflash` flashed another's orange (#368). Those are always bugs. Group two carries a PHYSICAL
 fact: a vignette is black because a lens falls off to black; a chromatic split fringes red and blue
 because that is what a lens does. **Removing group two would lower quality, not raise it** — sixteen more
 required fields nobody has an opinion about, and the predictable result is copying another scene's JSON,
@@ -10461,7 +10461,7 @@ terminal and the warm paper stock a pass simulates.
 `anim` 19, kinetic `preset` 27, `fx` 37, `parts[].anim` 6. **Eighty-nine names for one idea**, and FIVE
 spelled identically in two of them at once — `up`, `scale`, `swing`, `fadeUp`, `popIn`.
 
-That overlap is not cosmetic. **Three of the five layers stranded in #355 were real names written into
+That overlap is not cosmetic. **Three of the five layers stranded in #369 were real names written into
 the wrong slot.** An author who learns one vocabulary reasonably expects its words in the next field
 along, and the engine had five words that are genuinely in two.
 
@@ -10479,7 +10479,7 @@ notice names its REPLACEMENT, because "deprecated" without one is a scolding.
 it fails early" — then checked, and `core/boot.js:7` already imports `validateAll` and validates before
 building. Every registry already throws at layer build. **The make target is a convenience, not the
 correctness boundary**, and moving validation into it would have added a second copy of a rule the engine
-owns — the duplication behind #159 and #363.
+owns — the duplication behind #165 and #377.
 
 What replaced it is the opposite change: `core/validate.mjs` imported `GSAP_FX` and re-implemented a
 membership test. It now ASKS `GSAP_REGISTRY.has()`. Same behaviour, one copy, and a registry added later
@@ -10490,7 +10490,7 @@ test — just checking where a thing already happens before proposing to move it
 
 ---
 
-## #365 — `author-check` read as the safety net, and it is not one
+## 379. `author-check` read as the safety net, and it is not one
 
 B2, and the smallest change of the run with the clearest reason.
 
@@ -10530,12 +10530,12 @@ in the refusal group would have been a comfortable lie, and this entry exists be
 
 **The reusable part.** A tool that reports two different KINDS of thing in one list teaches the reader
 that they are one kind. That is the same defect as a fallback answering two different questions with one
-answer (#361) — the shape recurs at every scale, in code and in output.
+answer (#375) — the shape recurs at every scale, in code and in output.
 
 ---
 
-<!-- doc-refs-allow: make roadmap-drift · #256 quotes the stale name it was chartered to correct -->
-## #366 — Sixteen looks declared a colour that never rendered, and the test for it asked the wrong question
+<!-- doc-refs-allow: make roadmap-drift · #266 quotes the stale name it was chartered to correct -->
+## 380. Sixteen looks declared a colour that never rendered, and the test for it asked the wrong question
 
 Chasing the `make unused` census, which names itself a test backlog: three never-used effects had turned
 out to be BROKEN the moment anything exercised them, so the never-named vocabulary is really untested
@@ -10559,7 +10559,7 @@ const out = pass({ ...o, ...(fixed || {}), ...routed }, s);
 //                  ^^^ the look's own d      ^^^^^^ the author's knob, expanded
 ```
 
-The author's `lookOpts.color` is written AFTER the per-pass fixed bag, so it wins — that was the #351
+The author's `lookOpts.color` is written AFTER the per-pass fixed bag, so it wins — that was the #365
 fix and it is correct. The look's own `d.color` is merged BEFORE it, so any pass naming the same key
 shadows it silently. `letterpress` fixes `wash.color`, so its `d.color` never resolved against anything.
 
@@ -10583,7 +10583,7 @@ The repair went to the PASS and left the LOOK ENTRY sitting two dozen lines belo
 
 ### Why the existing guard was green
 
-`lib-test` already carried an assertion for this, added by #351, and its comment says a hand-written list
+`lib-test` already carried an assertion for this, added by #365, and its comment says a hand-written list
 "is what let `color` be dead on nineteen looks". It perturbs `resolveComposite(n, {k: probe})` — the
 author's knob. That is the ROUTED path, the one that wins. It could never see the unrouted one.
 
@@ -10607,9 +10607,9 @@ same shape as `ANIM[name] || fade` answering "absent" and "wrong" identically, o
 
 `node scripts/gates/lib-test.mjs` — "every DEFAULT a look declares reaches the frame".
 
-## #367 — A warning printed once, from one of eight workers, into a log nobody reads
+## 381. A warning printed once, from one of eight workers, into a log nobody reads
 
-Found while reporting #366, in `lib-test`'s own output: `ease: unknown easing "nope" — using
+Found while reporting #380, in `lib-test`'s own output: `ease: unknown easing "nope" — using
 easeOutCubic`. Two consumers of one vocabulary, giving opposite answers to the same wrong input.
 
 - `core/fx/progress.js:44` **throws** on an unknown easing.
@@ -10643,7 +10643,7 @@ vocabularies**, and the FIELD decides which is in force: `parts`, `morph`, `fx`,
 `motionPath` go straight to `gsap.fromTo` and take GSAP names; everything else runs on the engine's own
 interpolator and takes an `EASINGS` name. Both are right.
 
-Which makes a GSAP name in an engine-driven field the **#355 wrong-slot mistake** — a real name written
+Which makes a GSAP name in an engine-driven field the **#369 wrong-slot mistake** — a real name written
 into the neighbouring vocabulary, the most-repeated defect in this log. So the error says so instead of
 printing 41 names the author is not looking for:
 
@@ -10656,7 +10656,7 @@ printing 41 names the author is not looking for:
 - `resolveEasing`: ABSENT → `easeOutCubic` (documented, unchanged). WRONG NAME → throw, with the
   cross-registry hint. Different questions, different answers.
 - `progress.js`'s hand-rolled membership test deleted. It asks `resolveEasing` now. Two hand-kept copies
-  of one rule is #159, and this is the third time this run that removing a copy WAS the fix.
+  of one rule is #165, and this is the third time this run that removing a copy WAS the fix.
 - `core/validate.mjs` gained `easeErrors(cfg)`, so it fails in a second at author-check rather than
   mid-render on whichever frame first samples that key. The exclusion list is the whole rule and it can
   rot in silence, because getting it wrong reads as a stricter gate — so it is exported and asserted in
@@ -10671,7 +10671,7 @@ easing either. Both new `resolveEasing` assertions were run against `git show HE
 fail there.
 
 I also wrote, and then deleted, `ok('easeErrors: the whole shipped library is clean', true)` — an
-assertion whose condition is the literal `true`. Coverage-shaped and proving nothing, which is #363
+assertion whose condition is the literal `true`. Coverage-shaped and proving nothing, which is #377
 reproduced by hand inside the commit that cites it.
 
 ### The gate that now catches it
@@ -10679,7 +10679,7 @@ reproduced by hand inside the commit that cites it.
 `node core/validate.mjs <file>` (and `make author-check`) — before the render.
 `node scripts/gates/lib-test.mjs` — the exclusion list, asserted in both directions.
 
-## #368 — The gate for hand-authored fragments painted the brand colour black
+## 382. The gate for hand-authored fragments painted the brand colour black
 
 Building a GitHub-wrapped heatmap, I previewed the fragment and every cell came out grey. The SVG was
 right: 32 cells carried the top-quartile class. The FILL was not arriving.
@@ -10731,7 +10731,7 @@ A gate downstream of a broken gate inherits the blindness.
 The page now calls the ENGINE's own `applyTheme` (`core/boot.js`) in a module script, so the token names
 cannot drift from what a real render sets. That mattered immediately: the palette key is `surface2` and
 the token is `--surface-2`, and my own fragment had it wrong. A second copy of the mapping here is
-exactly how it would drift again (#159).
+exactly how it would drift again (#165).
 
 - `color:#f7f8f8` → `var(--text)`. The hard-coded colour was the concealment, so it goes.
 - A missing theme now exits 1 and lists the 35 that exist.
@@ -10748,7 +10748,7 @@ pass), and the bad-theme path exits 1.
 
 Itself. `make preview HTML=<frag> THEME=<name>` applies the real palette or fails loudly.
 
-## #369 — A bar chart rendered white, because `color` is the third name for a rect's fill
+## 383. A bar chart rendered white, because `color` is the third name for a rect's fill
 
 Authoring a GitHub-wrapped, I wrote the obvious thing:
 
@@ -10767,9 +10767,9 @@ The header of that exact file says:
 > is **type-agnostic**, so `fill` counted as known because svg uses it, and a rect written
 > `{fill:'#d33'}` silently rendered the default white.
 
-That is #213, and `color` reaches the same end by the same road: TEXT layers declare `color`, the
+That is #219, and `color` reaches the same end by the same road: TEXT layers declare `color`, the
 unknown-prop check does not know which type it is looking at, so `color` on a rect passes validation and
-is then dropped. The fix in #213 went to `fill` and stopped there. The failure mode is the worst
+is then dropped. The fix in #219 went to `fill` and stopped there. The failure mode is the worst
 available: the default is white, and **"it rendered white" is indistinguishable from "I asked for
 white"**.
 
@@ -10813,7 +10813,7 @@ byte-identical.
 None, and that is the honest answer. `color` works now; the type-agnostic prop check that let it through
 silently is unchanged.
 
-## #370 — The same frame paints differently depending on which worker tab drew it
+## 384. The same frame paints differently depending on which worker tab drew it
 
 The user said the contribution grid was blinking. It was, and it took three wrong hypotheses to find.
 
@@ -10878,7 +10878,7 @@ involved; all three were tested and cleared.
 Note the first attempt at the `color-mix` test was INVALID and looked like a fix: a CSS comment inside
 the injected `<style>` killed the whole rule block, the grid rendered at luminance 7.01 against an
 empty-band 6.2, and the spread went to 0.00 because there was nothing left to diverge. A gate reporting
-"no variance" on an empty region is the same defect as #363, reproduced by hand mid-investigation. The
+"no variance" on an empty region is the same defect as #377, reproduced by hand mid-investigation. The
 re-run put the comment in JS, outside the template literal, and confirmed 33.05 in a single render
 before trusting the 6-worker number.
 
@@ -10958,7 +10958,7 @@ seen any later frame, which is the only reading that is right by construction. P
 code before it was trusted: 5 of 25 frames on `gh-wrapped`, 4 of 25 on `showcase-lumen`, while the
 old self-comparison stayed green on both.
 
-## #371 — Two backdrop windows, and only the last one ever painted
+## 385. Two backdrop windows, and only the last one ever painted
 
 `bg` is a required field, so the backdrop is always the author's decision. The measured library says
 the decision is almost never made: **134 of 144 scenes paint ONE window for the whole runtime.** The
@@ -10967,14 +10967,14 @@ on four of its five cuts and spends its one accent window on the logo reveal; th
 rejected twice ran one window for 28 seconds under five blur cuts.
 
 That is not taste, it is cost. Writing a per-beat backdrop meant naming the same boundary twice, once
-in `bg` and once in `transitions`, with nothing keeping them equal. #358 fixed half of it by letting a
+in `bg` and once in `transitions`, with nothing keeping them equal. #372 fixed half of it by letting a
 window say `"from": "cut@1"` so the joint owns the number. The other half stayed expensive, and the
 expensive thing is the thing nobody writes.
 
 **And the cheap thing was silently broken.** A window with no `from`/`to` defaults to `0..1e9`. Write
 three windows and name no times and all three cover the whole film, `bgWinAt` keeps the last match,
 and the first two are accepted and then never drawn. Documented-looking input taken and discarded:
-#213 and #369 again, in the one field every scene is required to fill.
+#219 and #383 again, in the one field every scene is required to fill.
 
 **The fix.** `bindWindowsToJunctions` (`core/junctions.js`): when there are 2+ windows and not one of
 them names an edge, window i runs from junction i-1 to junction i and the last runs to the end. List
@@ -10993,7 +10993,7 @@ off it. That is right for the renderer, which lowers once at the top, and wrong 
 check that rewrites the object it is grading changes what every later check sees, and the author's
 own data with it. `bgErrors` clones first, and a test asserts the caller's `transitions` survive.
 
-## #372 — The renderer segfaulted instead of telling you why the scene would not load
+## 386. The renderer segfaulted instead of telling you why the scene would not load
 
 A six-second test scene with `"fx": "fade"` on a boundary killed the process:
 
@@ -11021,9 +11021,9 @@ to report why a scene would not load. Every author who ever hit a scene-load fai
 instead of the reason. The other `newTab` call, in the worker loop, already had the order right; this
 was one site, and it was the site that mattered.
 
-## #373 — Dark text on a dark backdrop, because the token name lied
+## 387. Dark text on a dark backdrop, because the token name lied
 
-The first film built on per-beat backdrops (#371) rendered three beats over paper, dark and accent.
+The first film built on per-beat backdrops (#385) rendered three beats over paper, dark and accent.
 The middle beat was blank. The text was there, at `#0f1620`, on a `#0f1620` field.
 
 **Cause one: a token name assumed a theme family.** `inkAt` returned `var(--ink)` over a light window
@@ -11039,7 +11039,7 @@ ink flipped, the THIRD beat went white-on-pale. `LIGHT_BGS` is a hand-kept list 
 and a saturated field in a dark one. One global answer is right for whichever family the list was
 written against and silently wrong for the other. Fixed by reading the colour the preset actually
 resolved to (`spec.base.color ?? spec.base.from`) and asking `isLightBg`, the same single definition
-`backgrounds.js` and `produce.js` ask (#159). The name list survives only as the fallback for a spec
+`backgrounds.js` and `produce.js` ask (#165). The name list survives only as the fallback for a spec
 that carries no base colour.
 
 **And there were two copies of the test.** `inkAt` and `bgAt` each derived `light` from `LIGHT_BGS`,
@@ -11069,9 +11069,9 @@ WCAG against it, which is the right measurement and it works.
 ever grades the scene the author has open. `motion-reel` and `motion-reel-v2` were dark-on-dark for
 their whole runtime and stayed that way, because after they shipped nothing ever asked them again.
 A check that is only ever run against the file you are editing cannot find a defect that is already in
-the library. Fixed by `make audit-all` (#374).
+the library. Fixed by `make audit-all` (#388).
 
-## #374 — A check that only grades the file you have open
+## 388. A check that only grades the file you have open
 
 `make audit` is a good check. It samples the bg canvas under a text element's own ink box, computes
 WCAG against it, and names the layer. It takes ONE scene.
@@ -11079,7 +11079,7 @@ WCAG against it, and names the layer. It takes ONE scene.
 That is a check against NEW defects. It is not a check against the library, and the library is where
 defects live once they ship: `motion-reel` and `motion-reel-v2` rendered dark text on a dark backdrop
 for their whole runtime and stayed that way, because after they shipped nothing ever asked them again
-(#373). The audit could have answered in one second at any point in those months. Nobody put the
+(#387). The audit could have answered in one second at any point in those months. Nobody put the
 question.
 
 `make audit-all` sweeps every shipped scene and exits 1 on any hard issue. First run:
@@ -11097,9 +11097,9 @@ Deliberately NOT wired into `make author-check`: it renders sampled frames for 1
 per-edit ladder that takes fifteen minutes is a ladder authors route around. On demand, and honest
 about what it found.
 
-## #375 — The colour wave settled to invisible, one level under #373
+## 389. The colour wave settled to invisible, one level under #373
 
-#373 fixed the ink a layer inherits from its bg window. A blueprint author then hit the same wall one
+#387 fixed the ink a layer inherits from its bg window. A blueprint author then hit the same wall one
 level down and wrote a workaround into the blueprint, which is how it surfaced: a `colorWave` label
 over a dark window vanished, and the fix in that file was to thread a resting colour through
 `presetOpts.to` on every call.
@@ -11108,7 +11108,7 @@ over a dark window vanished, and the fix in that file was to thread a resting co
 to a resting colour that defaulted to `var(--ink)`. The preset writes `color` on every unit span on
 every frame, so it OVERRIDES the per-window automatic ink that `core/layers/util.js` had just resolved.
 The same headline without the preset read fine; adding a kinetic reveal made it disappear. And `--ink`
-is the dark one in a white-first theme, which is #373's assumption verbatim.
+is the dark one in a white-first theme, which is #387's assumption verbatim.
 
 **The resting colour is not the preset's to choose.** It is the colour that layer would have had.
 `util.js` already computes `layerColor = L.color || auto || var(--text)` for the `--em` emphasis guard,
@@ -11118,9 +11118,9 @@ An explicit `to` still wins. The blueprint's workaround becomes optional rather 
 **Blast radius: none.** `snap-all` 104 identical, 0 changed. No shipped scene had a colour wave whose
 resting colour disagreed with its window, so this closes a trap rather than changing a film.
 
-## #376 — The contrast gate graded frames 0.067s into their entrance
+## 390. The contrast gate graded frames 0.067s into their entrance
 
-`make audit-all` (#374) reported 33 scenes with hard contrast failures. Before editing 33 films, I
+`make audit-all` (#388) reported 33 scenes with hard contrast failures. Before editing 33 films, I
 looked at one. `ab-skill-shotcode` was flagged for a "Get started" button at **1.0:1**. At the sampled
 frame the entire browser mockup was 0.067 seconds into its fade-in; two frames later the button is full
 orange with white type and completely legible.
@@ -11236,7 +11236,7 @@ the 7:1 house bar has now met sixteen films it never judged before. Nothing abov
 a number move; if one of those films is right and the bar is wrong, that is a separate argument, made
 with a frame in hand.
 
-## #377 — A worktree fan-out over films silently throws the work away
+## 391. A worktree fan-out over films silently throws the work away
 
 Four agents were sent to fix contrast findings across 32 scenes, one worktree each, split so no two
 shared a file. The split was right and the isolation was right. The delivery was not: **a worktree is
@@ -11266,7 +11266,7 @@ This is not an argument against worktrees here: three agents editing scenes in o
 blanket-git hook's warning becomes real damage. It is an argument for knowing which half of the repo is
 tracked before choosing how work comes back.
 
-## #378 — Two swatches in the ransom palette were never readable
+## 392. Two swatches in the ransom palette were never readable
 
 `ransomColorSwatches` is a HOUSE table: every ransom-note scene draws from it. Two of its nine pairs
 failed the large-text bar, measured in linear light with the same formula `core/motion.js` and
@@ -11291,7 +11291,7 @@ entry, a preset default, a blueprint, gets reported once per instance, so the bi
 is often the smallest fix. `plinth-ad` was the same shape: 18 findings, of which 12 were one `x: 60`
 against a safe box that starts at 65.
 
-## #379 — A gate threw away a declared width and invented an empty frame
+## 393. A gate threw away a declared width and invented an empty frame
 
 `camera-aimed-at-nothing` (scripts/gates/beat-check.mjs) asks, at 20Hz, whether the camera is pointed at
 anything alive. It answers with `inView` (scripts/gates/scene-timing.mjs), which takes the layer's box
@@ -11326,7 +11326,7 @@ here once the width was honoured, and it is a bigger change than this finding ju
 down so the next person who meets it knows it is known.
 
 
-## #380 — The documented way to declare a transition was invisible to every gate
+## 394. The documented way to declare a transition was invisible to every gate
 
 `transitions: [{at, fx, dur}]` is the UNIFIED boundary surface. `core/transitions-lower.js` lowers it to
 `cuts` / `seams` / `stings`, and the header of that file states the contract: "This is PURE SUGAR ... the
@@ -11360,7 +11360,7 @@ declare `transitions`. Nothing went from pass to fail.
 looks exactly like a finished feature until a second reader asks the raw question, and the failure is
 silent in the direction that matters least to the renderer and most to the gates.
 
-## #381 — A slot swap that cross-faded two words in the same box
+## 395. A slot swap that cross-faded two words in the same box
 
 `slotSwap` holds three fixed boxes while their contents turn over. It shipped with every pass but the
 last OVERHANGING its successor by one `exitDur`, on this reasoning, quoted from the source: a layer's
@@ -11393,7 +11393,7 @@ samples the middle of a beat and the collision lives at the joint. It was caught
 `make judge` sheet, which samples elsewhere again, and then by pulling the exact frame.
 
 
-## #382 — `critical: false` said "exclude from the layout audit" and excluded nothing from it
+## 396. `critical: false` said "exclude from the layout audit" and excluded nothing from it
 
 **What.** A film whose subject is a 366-cell contribution map placed it as one 1640x217 strip and
 pushed the camera in on it. `make audit` HARD-failed `safe`: under a 1.22x push the strip's ends left
@@ -11424,7 +11424,7 @@ layer that is genuinely illegible content and opts out is simply unjudged, which
 explicit per layer and never inferred from a shape.
 
 
-## #383 — The validator kept its own copy of "is this a real easing", and it was already one behind
+## 397. The validator kept its own copy of "is this a real easing", and it was already one behind
 
 **What.** `core/vocab.js` gave the engine a word layer: `ease: "snappy"`, `enterDur: "fast"`,
 `cameraMove: {move: "pull back"}`. `resolveEasing` resolved the feel words and every frame rendered.
@@ -11432,7 +11432,7 @@ explicit per layer and never inferred from a shape.
 
 **Root cause.** `easeNames` in `core/validate.mjs` tested membership with `EASINGS[nm]` written out by
 hand. That is a second copy of a rule that lives in `core/motion.js`, and a second copy only has to be
-right on the day it is written. #367 made `resolveEasing` throw for exactly this reason and left the
+right on the day it is written. #381 made `resolveEasing` throw for exactly this reason and left the
 copy standing. So the renderer and the gate disagreed about what the engine accepts, and the gate was
 the one saying no.
 
@@ -11454,7 +11454,7 @@ number.
 field, and every word is asserted to resolve to the same function its target name resolves to.
 `make vocab-check` fails if `docs/CRAFT/VOCABULARY.md` drifts from the registry.
 
-## #384 — A track compared the transform it wrote against the one the browser gives back
+## 398. A track compared the transform it wrote against the one the browser gives back
 
 **What.** The new idle track (`core/tracks/idle.js`) composes a small ambient transform on top of
 whatever the entrance and the motion track already put on a layer. Most entrances rewrite `transform`
@@ -11481,7 +11481,7 @@ base }` after the write. The two sides of the comparison are then in the same la
 with an idle failed 41 of 25 sampled frames, both as render-order dependence and as a forward-render
 mismatch. It named the defect before a frame was ever looked at. Nothing new was needed.
 
-## #385 — The doctrine told authors to render a false number
+## 399. The doctrine told authors to render a false number
 
 `docs/MOTION-CRAFT.md` recommended, twice, that "a value that should feel physical (number, bar, camera)"
 use `ease:"spring"`. `core/layers/count.js` runs the counter through whatever ease it is handed, so a
@@ -11511,13 +11511,13 @@ still in the temporal dead zone when the main called through. 45 scenes died wit
 instead of being validated. Caught because the library count jumped from 15 failures to 45 and the
 number was checked rather than assumed. The regex now lives inside the function.
 
-## #386 — A `SPECTACLE` field was added to the brief, read by the parser, and consumed by nothing
+## 400. A `SPECTACLE` field was added to the brief, read by the parser, and consumed by nothing
 
 **What.** `CLAUDE.md`'s brief gained a `SPECTACLE` line and `scripts/author/storyboard-parse.mjs` was
 taught to read it. No code downstream did anything with it. An author filled the field, the storyboard
 looked complete, and the film was byte-identical to one that had never named a loud moment.
 
-**Root cause.** The same shape as #213, #369 and #373: input accepted and then ignored. It is worse than
+**Root cause.** The same shape as #219, #383 and #387: input accepted and then ignored. It is worse than
 a missing field, because a missing field prompts a question and a dead one answers it wrongly. The
 authoring template already documents this failure by name in its `becomes:` slot, where "the author wrote
 the change down, did not build it, and every gate stayed green."
@@ -11547,7 +11547,7 @@ acceptance test: a scene with no `spectacle` returns on the resolver's first lin
 resolved per preset inside `presetSpec`, and copying that default into the attenuator would be a second
 copy of it in a second file, which is the duplicate-vocabulary shape this file keeps logging.
 
-## #386 — A documented `--json` flag whose output could not be parsed, and a test that pinned a repealed rule
+## 401. A documented `--json` flag whose output could not be parsed, and a test that pinned a repealed rule
 
 Two bugs found by an agent doing unrelated work. Both were in its way, both are the kind that stay
 hidden because the thing they break is the thing nobody looks at.
@@ -11562,21 +11562,21 @@ to stderr under `--json`; the sentence and the exit code both survive.
 class is contained and this was the only instance.
 
 **`scripts/gates/lint-test.mjs` could not pass in this tree.** Line 53 asserted `resolveEasing` FALLS
-BACK to `easeOutCubic` on an unknown name and "never throws (#83)". #367 deliberately reversed that: a
+BACK to `easeOutCubic` on an unknown name and "never throws (#138)". #381 deliberately reversed that: a
 curve quietly swapped for another renders a plausible frame that is not the one asked for, which is the
 silent-substitution class this file logs more than any other. The decision moved and the assertion did
 not.
 
 **A stale assertion is worse than a missing one.** It fails honest work, and it teaches the next author
 that the suite is unreliable and can be ignored. It now pins the CURRENT contract and names the entry
-that set it, so the next reversal has to argue with #367 rather than quietly break a test.
+that set it, so the next reversal has to argue with #381 rather than quietly break a test.
 
 **The shape worth remembering:** when a rule is reversed, the test that pinned the old rule is a second
-call site. #211's lesson ("fix the rule, not the call site, grep every consumer") applies to assertions
+call site. #217's lesson ("fix the rule, not the call site, grep every consumer") applies to assertions
 too, and an assertion is the consumer easiest to forget, because it lives in a file nobody edits while
 changing behaviour.
 
-## #387 — `make reveal` crashed on any single-beat film, and sampled every layer window a third too wide
+## 402. `make reveal` crashed on any single-beat film, and sampled every layer window a third too wide
 
 Two pre-existing bugs in `scripts/author/reveal.mjs`, found by an agent adding a ghost mode and verified
 against `git show HEAD:` before either was touched.
@@ -11592,7 +11592,7 @@ engine's `BASE_ENTER` has been 0.3 since the snap band moved, and it ignored the
 window the render does not use, and an author judging an entrance was judging the wrong span. Both now
 come from `enterDurOf` in `core/clips.js`, fed the dataset the renderer actually wrote.
 
-**The shape, again:** a second hand-written copy of a number the engine owns. Same as #159, same as the
+**The shape, again:** a second hand-written copy of a number the engine owns. Same as #165, same as the
 ramps before `clips.js` exported them. A constant duplicated into a tool drifts silently, because the
 tool keeps producing an image and nobody compares it to the render.
 
@@ -11609,7 +11609,7 @@ multi-key move bends or reverses, which is a judgement about spacing, not a key 
 `reveal.mjs` is also not byte-deterministic run to run. That is pre-existing, it means the default sheet
 cannot be proven unchanged by hash, and it is worth someone's attention.
 
-## #388 — The same statement discarded a tracking value for the second time
+## 403. The same statement discarded a tracking value for the second time
 
 `core/layers/text.js` `microType` re-writes `el.style.letterSpacing` from `kit.trackingFor(size)` one
 statement after `styleText` has already set it. That line carries a comment about **#28**, where it
@@ -11639,7 +11639,7 @@ from each of the ten, and should expect real width movement, which is the point.
 discarded two different upstream decisions. Anything that writes `letterSpacing` after `styleText` will
 be the third. That is an argument for the write happening once, not for a third comment.
 
-## #389 — Three checks that could not be reached, and a fourth still blind
+## 404. Three checks that could not be reached, and a fourth still blind
 
 **A check nothing runs is not a check.** Three reachability holes, closed, plus one reported.
 
@@ -11670,13 +11670,13 @@ had it, because that line says HARD in capitals.
 
 **Still blind, reported not smuggled:** `sceneTiming()` does not lower `transitions`, so
 `plan-vs-render` reads a film declaring its boundaries the documented way as a film with no boundaries.
-`brew-launch-act1` has four and an empty `d.cuts`. This is #380 again, in a gate #380 did not reach: the
+`brew-launch-act1` has four and an empty `d.cuts`. This is #394 again, in a gate #394 did not reach: the
 unified surface is invisible to yet another consumer. Fixing it changes existing findings across the
 library, so it wants its own before-and-after run rather than a ride-along.
 
-## #389 — Closing #388: the letter-spacing write happens once, and a second one fails a test
+## 405. Closing #388: the letter-spacing write happens once, and a second one fails a test
 
-#388 ended with an argument rather than a fix: "anything that writes `letterSpacing` after `styleText`
+#403 ended with an argument rather than a fix: "anything that writes `letterSpacing` after `styleText`
 will be the third [to discard something]. That is an argument for the write happening once." It is one
 write now.
 
@@ -11684,7 +11684,7 @@ write now.
 settled letter-spacing. It folds in everything that has an opinion: the author's `tracking`, the author's
 `ls`, the size ramp, the light-on-dark lift, `mono`, `raw`, and the theme's `type.optical` flag.
 `styleText` writes what it returns and nothing else writes the property. The statement in
-`core/layers/text.js` `microType` that had eaten a value twice (#28, then #388) is gone; the pass still
+`core/layers/text.js` `microType` that had eaten a value twice (#28, then #403) is gone; the pass still
 does its wrap, kerning and ligature work.
 
 **Parity was the hard part, and the rule as SHIPPED is not the rule either site described.** The two
@@ -11704,7 +11704,7 @@ behaviour assertions sit beside it, proving the one resolver really does honour 
 ramp, the polarity, `mono` and `raw`, so nobody ever needs a second write to get one of them applied.
 A comment asking for care was tried twice here and lost twice.
 
-## #390 — `onDark` asked the layer, and `ransom` paints every glyph on its own paper
+## 406. `onDark` asked the layer, and `ransom` paints every glyph on its own paper
 
 `onDark(L, midT)` answered polarity from the LAYER's resolved ink. `core/ransom.js` cuts each character
 onto its own light paper swatch with dark ink on it, so a ransom headline whose layer colour is light is
@@ -11725,9 +11725,9 @@ shoulder the way cut letters glued to a page do, and the line ends about 17px ea
 1105.6 → 1093.6 and 1445.1 → 1428.1. It is the only scene in 105 that moved, and it moved back toward
 its pre-lift widths, which is the point.
 
-## #391 — The ninth consumer of a defect that was declared closed
+## 407. The ninth consumer of a defect that was declared closed
 
-**#380 fixed eight readers of the unified `transitions` surface one at a time, and that is the bug.**
+**#394 fixed eight readers of the unified `transitions` surface one at a time, and that is the bug.**
 `beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director` and
 `verify/audit` each grew their own `lowerScene(d)` line at the top of their own file. Every one of them
 is right. The count is the problem: eight identical edits are eight chances to miss the ninth, and the
@@ -11778,10 +11778,10 @@ ledger fingerprint from `stings`, so two films can look more alike than they are
 `scripts/author/reimagine.mjs` rewrites `blinds` to `wipe` on stings and misses a unified one.
 `scripts/media/beatsync.mjs` needs no fix: it snaps `data.transitions[].at` as a first-class list.
 
-## #391b — SEVEN more consumers still do not lower `transitions`, and one is `make seam-check`
+## 408. SEVEN more consumers still do not lower `transitions`, and one is `make seam-check`
 
-#391 closed the ninth consumer. The grep it was required to run before closing found seven more, which
-is the point of that rule and the reason #380's "eight consumers, fixed" was wrong.
+#407 closed the ninth consumer. The grep it was required to run before closing found seven more, which
+is the point of that rule and the reason #394's "eight consumers, fixed" was wrong.
 
 **The sharp one: `scripts/gates/seam-snap.mjs`.** `make seam-check` collects boundaries from
 `data.cuts|seams|stings` only, so on a film declaring them the documented way it finds NONE and the
@@ -11798,7 +11798,7 @@ not to: it snaps `data.transitions[].at` as a first-class list.
 sidecar. So this fixed a gate that was blind on the repo's exemplar and changed nothing measurable,
 which is exactly the shape that lets a defect survive nine consumers and two closures.
 
-## #392 — Burnt-in captions rendered underneath the platform's own caption strip
+## 409. Burnt-in captions rendered underneath the platform's own caption strip
 
 `core/boot.js:325` writes `--safe-bottom` from `safeArea(w, h, destination)`. `formats/scene/scene.css`
 hardcoded `.hs-cap { bottom: 300px }` and never read it. On `destination:"tiktok"` the bottom chrome is
@@ -11822,9 +11822,9 @@ noticed in passing while comparing.
 headline landing on the caption band. They keep content in the top ~83% and export a caption band per
 skin. That is the real gap and it is a keep-out rule, not a typography one.
 
-## #393 — `letterSpacing` had two writers, and now it has one that cannot become two
+## 410. `letterSpacing` had two writers, and now it has one that cannot become two
 
-#388 recorded that one statement in `core/layers/text.js` had silently discarded two upstream decisions:
+#403 recorded that one statement in `core/layers/text.js` had silently discarded two upstream decisions:
 the author's own `tracking` (#28, in 12 shipped scenes) and the dark-ground polarity. Both were fixed by
 threading another argument through, which leaves the trap set for the next writer. Its closing argument
 was that the right shape is one write, not a third comment.
@@ -11852,9 +11852,9 @@ should sit.
 exactly rather than unifying it, because unifying it would re-track every serif layer and every
 non-optical theme in the library. That is a taste decision somebody should make deliberately.
 
-## #394 — The last readers of `transitions`, and the one that was policing the seams blind
+## 411. The last readers of `transitions`, and the one that was policing the seams blind
 
-#380 closed eight consumers of the unified `transitions` surface. #391 found the ninth and its required
+#394 closed eight consumers of the unified `transitions` surface. #407 found the ninth and its required
 grep found seven more. This closes five of those seven; the other two are named below and deliberately
 left, because fixing them moves a committed pixel baseline.
 
@@ -11867,7 +11867,7 @@ starts. Not one of the four cuts the author wrote was among them. The gate ran, 
 and wrote a contact sheet, and the cheapest catch this repo has for its worst class of bug had never
 looked at a single authored cut on the film it holds up as its best. Lowered, brew samples ELEVEN
 boundaries: the same seven plus 1.6s, 4.4s, 7.8s and 11.8s. The 7.8s tile is the orange ground the film
-punches to, which is the boundary #391 proved is real in the picture and this gate could not see.
+punches to, which is the boundary #407 proved is real in the picture and this gate could not see.
 
 **Nothing was flashing.** brew, `gh-wrapped` and `ab-skill-shotcode` are all clean at their real cuts.
 That is the correct outcome and not a reason to shrug: the gate was reporting a pass it had not earned,
@@ -11916,9 +11916,9 @@ only 3 of 149 scenes use the surface, so each miss costs almost nothing measurab
 blind still exits 0. The library diff for this pass is one line of a coverage report. The defect was a
 safety gate that could not fail.
 
-## #394 — The seam gate printed a pass it had never earned, and the ledger scan was dead
+## 412. The seam gate printed a pass it had never earned, and the ledger scan was dead
 
-Five more consumers of the unified `transitions` surface, found by the grep #391 was required to run.
+Five more consumers of the unified `transitions` surface, found by the grep #407 was required to run.
 
 **`make seam-check` on `brew-launch-act1` sampled SEVEN boundaries and not one was a cut.** All seven
 came from its layer-start fallback heuristic; the four authored cuts at 1.6 / 4.4 / 7.8 / 11.8s were
@@ -11952,9 +11952,9 @@ hiding a pixel diff inside a gate fix.
 `data.stings` and never `data.cuts`, so brew fingerprints with no boundary vocabulary at all. Widening
 it re-tunes every ledger score in the library.
 
-## #395 — Nothing stopped a headline landing on the caption
+## 413. Nothing stopped a headline landing on the caption
 
-#392 fixed WHERE a burnt-in caption sits: `.hs-cap` reads `--safe-bottom`, so it clears the platform's
+#409 fixed WHERE a burnt-in caption sits: `.hs-cap` reads `--safe-bottom`, so it clears the platform's
 own strip. It closed with a line naming what was still open, and this is that: the placement was right
 and the COLLISION was unguarded. A caption owns real estate at the bottom of the frame, and no rule
 compared any content against it. The safe box says where content may live; it says nothing about the
@@ -11997,7 +11997,7 @@ straight across the panel, over the playhead and two cut markers. Read, not infe
 overlap goes unreported, so the band is the floor of the keep-out and not the whole of it. It is a WARN,
 never a block, and it is one of the 19 finding kinds in `verify/audit.mjs`.
 
-## #396 — Half the authoring ladder was behind a flag, so half the authoring ladder did not exist
+## 414. Half the authoring ladder was behind a flag, so half the authoring ladder did not exist
 
 `make author-check` ran seven of its steps only when `TASTE=1` was set: `critique`, `direct`,
 `direction-floor`, `dissolve`, `designspec`, `copy`, `pace`. The flag was added in the 2026-08 cull with
@@ -12063,10 +12063,10 @@ prevented from typing `TASTE=1`. The finding is that for weeks nobody did, and a
 on someone remembering a flag is a mechanism with a usage rate, not a guarantee. Gate: the ladder itself,
 which now names all 15 steps before it runs and reports the tier of every one.
 
-## #397 — The audit that told us which gates were blind was itself wrong
+## 415. The audit that told us which gates were blind was itself wrong
 
-#380 fixed eight consumers of the unified `transitions` surface and declared itself closed. #391 found
-the ninth. #394 found five more. Each time, the fix was closed on the strength of a consumer audit.
+#394 fixed eight consumers of the unified `transitions` surface and declared itself closed. #407 found
+the ninth. #412 found five more. Each time, the fix was closed on the strength of a consumer audit.
 
 **That audit was wrong about four of them.** Measured, not argued:
 
@@ -12081,7 +12081,7 @@ gate, the ambition floor and the pace gate, all of them blind on `brew-launch-ac
 
 **A wrong entry in that audit is worse than the original defect.** The defect makes one gate quiet; the
 audit tells the next person not to look there. It is the reason this survived three closures, and the
-reason `#211`'s rule says GREP, not "check the list".
+reason `#217`'s rule says GREP, not "check the list".
 
 Fixed in all four. **Re-measured afterwards, gate by gate, because the first pass of this entry quoted a
 scene count nobody could reproduce.** The library holds 154 `.json` files in `formats/scene/` and **132
@@ -12100,7 +12100,7 @@ motion vocabulary and correctly stops warning `no-transition` on a film that dec
 That is exactly why a defect this wide could hide for this long. **A change that fixes a blind spot and
 moves no number is the hardest kind to believe and the easiest kind to skip.**
 
-## #398 — The ratchet: legacy is not a waiver
+## 416. The ratchet: legacy is not a waiver
 
 A new rule always fails old films. `no-storyboard` fires on 121 of 132 scenes. Two answers were
 rejected: backfill everything (a storyboard written to satisfy a gate is a fake storyboard, and the
@@ -12147,7 +12147,7 @@ default ladder, identical, and identical again under `TASTE=1`. A legacy film ex
 the day before the rule existed, which is the only version of grandfathering that is not just a
 disabled rule.
 
-## #399 — `gradient` + `split` painted nothing, and a comment said it could not happen
+## 417. `gradient` + `split` painted nothing, and a comment said it could not happen
 
 A `text` layer with `gradient` AND `split` rendered an INVISIBLE line. It was live in a shipped film:
 `formats/scene/example-product-promo.json` opens on `Ship faster.` at 210px with `split:"word"`, and the
@@ -12164,7 +12164,7 @@ as if the case had been considered.
 
 **Why no gate saw it.** A transparent glyph still measures as a full-size opaque box. Every DOM check in
 this repo asks about geometry, so the layout audit, the beat sheet's dead-air check and the snap
-signature all passed a blank headline. This is the same shape as #351 and `cp`/`cv`/`bgc`: a property
+signature all passed a blank headline. This is the same shape as #365 and `cp`/`cv`/`bgc`: a property
 that carries a whole class of visual change sitting outside what anything measures.
 
 **Fix: paint the fill per unit, offset back to the container.** `splitFillCss(css, box, offset)` resolves
@@ -12187,15 +12187,15 @@ imply one) appears exactly once, in `example-product-promo`. Its pixels change, 
 `snap-scenes` reports 103 of 103 identical and that is a REPORT OF ITS OWN BLINDNESS, not parity: the
 signature's selector is `[id], [data-layer="critical"], [data-start]` and a `.ku` unit span carries none
 of the three, so the units are outside the capture. The scene whose frames provably changed is one the
-gate cannot see. Left as found, since fixing it means widening `snap-signature.mjs`. **Closed by #400.**
+gate cannot see. Left as found, since fixing it means widening `snap-signature.mjs`. **Closed by #418.**
 
-## #400: The determinism net could not see a single kinetic type reveal
+## 418. The determinism net could not see a single kinetic type reveal
 
 `snap-signature.mjs` captured `[id], [data-layer="critical"], [data-start]`. A split unit is
 `<span class="ku">` (`core/type.js` `splitText`) and carries none of the three, so every kinetic split
 reveal in the library was outside the capture. Measured before touching anything, on
 `example-product-promo.expanded` at frame 30: **13 `.ku` spans in the DOM, 0 matching the selector, 0
-rows in the signature**. That is why #399 could fix `gradient` + `split`, change one scene's pixels, and
+rows in the signature**. That is why #417 could fix `gradient` + `split`, change one scene's pixels, and
 be told 103 of 103 identical.
 
 **Fix, in three parts, because the first one alone made the gate unusable.**
@@ -12232,7 +12232,7 @@ never recorded. The old baselines were incomplete, not wrong. New ones saved, an
 
 **What now catches it.** The quarantine still fires: with a counter-based jitter injected into the `.ku`
 rows of the capture, `snap-scenes linear-launch` quarantines the scene and names the moved unit rows;
-with the jitter removed, the same scene is clean. And the paint #399 fixed is now in the record:
+with the jitter removed, the same scene is clean. And the paint #417 fixed is now in the record:
 `example-product-promo.expanded` carries 247 unit rows, 27 of them with the gradient fill on them.
 
 **Still blind, named here so it is not re-discovered: `scripts/gates/motion-audit.mjs`.** Its series is
@@ -12240,7 +12240,7 @@ built from `[id], [data-layer="critical"]`, which is the OLD selector minus `[da
 contract is asserted over a set that contains no split unit and no timed non-text layer. Not fixed in
 this pass, to keep out of a file another agent held.
 
-## #401: Every font came from an unversioned URL, so the whole library measured differently by the day
+## 419. Every font came from an unversioned URL, so the whole library measured differently by the day
 
 `scripts/media/fonts.mjs` fetched 16 faces from `cdn.jsdelivr.net/npm/<pkg>/files/…` with no version in
 any URL. The bytes were whatever the CDN published that day, under filenames that never change. Every
@@ -12267,9 +12267,9 @@ and re-running restores byte-identical bytes from the pinned URL (`af61b969…`)
 to `Caveat.woff2` fails with the locked and measured hashes printed, exit 1.
 
 **The font stamp did not move.** `verify/snap/scenes/.font-state.json` reads 29 faces, `233cbd803052`,
-before and after the pinning, so the baselines saved in #400 are valid against the pinned set.
+before and after the pinning, so the baselines saved in #420 are valid against the pinned set.
 
-## #400: A caption style could be added to the registry and stay unreachable, and one shipped style had two states where it claims three
+## 420. A caption style could be added to the registry and stay unreachable, and one shipped style had two states where it claims three
 
 Three separate findings, all surfaced by adding four styles to `core/captions.js`. Each one is the same
 shape: a vocabulary with a second, unchecked copy of itself, or a doctrine nothing measures.
@@ -12343,7 +12343,7 @@ neighbours, so the slam is now transform-only, and the settled 4% is paid for by
 `.ku` in `formats/scene/scene.css`. The general rule, which is not caption-specific: **a per-frame style
 function may write paint, never layout.**
 
-## #402: Every count blueprint in the library is frozen at a non-zero start
+## 421. Every count blueprint in the library is frozen at a non-zero start
 
 `blueprints/kit.mjs:31` writes `countStart` as an ABSOLUTE time. It is a LOCAL one.
 
@@ -12380,11 +12380,11 @@ and reported instead of reaching):
 speaks.** An author is told no by the check and yes by the renderer, or the reverse, and in six of the
 eight nothing says anything at all.
 
-<!-- doc-refs-allow: make sfx · #256 quotes the stale name it was chartered to correct -->
-<!-- doc-refs-allow: make brandkit · #256 quotes a target removed with the templates -->
-<!-- doc-refs-allow: core/shaders.js · #256 quotes a path that moved two refactors ago -->
-<!-- doc-refs-allow: core/layers/shader.js · #256 quotes a path that moved into core/surfaces/ -->
-<!-- doc-refs-allow: core/layers/paint.js · #256 quotes a path that moved into core/surfaces/ -->
+<!-- doc-refs-allow: make sfx · #266 quotes the stale name it was chartered to correct -->
+<!-- doc-refs-allow: make brandkit · #266 quotes a target removed with the templates -->
+<!-- doc-refs-allow: core/shaders.js · #266 quotes a path that moved two refactors ago -->
+<!-- doc-refs-allow: core/layers/shader.js · #266 quotes a path that moved into core/surfaces/ -->
+<!-- doc-refs-allow: core/layers/paint.js · #266 quotes a path that moved into core/surfaces/ -->
 <!-- doc-refs-allow: scripts/gates/copy.mjs · quoted from a film pass; the copy gate runs inside author-check, not as its own file -->
 <!-- doc-refs-allow: make visuals · #NNN records a gate that was later culled -->
 <!-- doc-refs-allow: scripts/gates/visual-vocabulary.mjs · the entry records this gate's own deletion -->
@@ -12392,10 +12392,10 @@ eight nothing says anything at all.
 <!-- doc-refs-allow: scripts/dev/predict.mjs · cut in cc2dfc2 with five other engine-only tools -->
 <!-- doc-refs-allow: scripts/dev/rules-audit.mjs · cut in cc2dfc2 with five other engine-only tools -->
 <!-- doc-refs-allow: formats/scene/tokenjam-launch.json · the entry records this scene's deletion -->
-<!-- doc-refs-allow: make slop · retired in #326; the entries that cite it are records of what it did -->
-<!-- doc-refs-allow: scripts/gates/slop.mjs · the script #326 records the retirement of -->
+<!-- doc-refs-allow: make slop · retired in #340; the entries that cite it are records of what it did -->
+<!-- doc-refs-allow: scripts/gates/slop.mjs · the script #340 records the retirement of -->
 
-## #403: A caption accepted three fields, so where it sat was a CSS constant no JSON could reach
+## 422. A caption accepted three fields, so where it sat was a CSS constant no JSON could reach
 
 **What.** `formats/scene/schema.json` declared a caption as `{t0, t1, text}` and nothing else. Position
 came from `formats/scene/scene.css`, one hardcoded band, one `<div id="cap">` for the whole film. So an
@@ -12435,9 +12435,9 @@ for a `w` to centre against, and a pin naming a horizontal EDGE with no `w` is r
 instead of half-applied.
 
 **What did not change.** `snap-scenes` reports 34 identical and 71 changed both WITH and WITHOUT these
-edits: that spread is #401's unversioned fonts, not this. Measured both ways before believing it.
+edits: that spread is #419's unversioned fonts, not this. Measured both ways before believing it.
 
-## #404: The two most-used caption mechanisms in short-form video were unsayable, and the reason was in the contract
+## 423. The two most-used caption mechanisms in short-form video were unsayable, and the reason was in the contract
 
 **What.** A caption style is `(u, active) => styleObject`, applied to one word span. That expresses any
 TREATMENT and cannot express a different set of units or a different set of words on screen, because
@@ -12485,7 +12485,7 @@ test was asserting a bug that is not there. It now checks the property that matt
 write, so it is waived with a reason: the fact it carries is already in each shaped style's own
 `CAPTION_BLURBS` line, which is the row `make effects` prints.
 
-## #405: `out/*.png` never matched `out/flight/shot.png`, and fourteen render frames reached main
+## 424. `out/*.png` never matched `out/flight/shot.png`, and fourteen render frames reached main
 
 **What.** `.gitignore` carried `out/*.png`, `out/*.log`, `out/*.html` under a comment saying out/ is the
 scratch directory every author tool writes to and that shots and logs were "sitting untracked in
@@ -12509,7 +12509,7 @@ accident found a real gap, and that is luck, not a process.
 **The rule.** Stage by path, not by sweep. `git add <the files this commit is about>`. A commit whose
 diffstat is four times the size of the work it describes is telling you something before you push it.
 
-## #406: `<b>` around a caption word was accepted, rendered, and had no effect
+## 425. `<b>` around a caption word was accepted, rendered, and had no effect
 
 **What.** `formats/scene/scene.css:50` has painted `.hs-cap.styled b` with the accent since captions
 existed, and `splitText` preserves the `<b>` element and wraps the words inside it. So an author who
@@ -12544,7 +12544,7 @@ one word out of one word on screen carries no information anyway.
 **This is the mechanism every captioning tool calls "keyword emphasis" and sells as an ML feature.**
 Here it is the author pointing at the word, which is better: they know which one matters.
 
-## #407: Four caption mechanisms were reported reachable, and not one of them was callable
+## 426. Four caption mechanisms were reported reachable, and not one of them was callable
 
 **What.** A survey of `core/captions.js` concluded that `chroma`, `flip`, `wave` and `decode` from
 `core/type.js` were "reachable today, no new hook, because they are already pure `(u) => style`". They
@@ -12576,7 +12576,7 @@ that produced the better answer.
 
 **931 assertions pass, up from 915.** Fifteen caption styles, all fifteen previewable and shot.
 
-## #408: The pixel-regression gate had been blind for an unknown number of sessions
+## 427. The pixel-regression gate had been blind for an unknown number of sessions
 
 **What.** `snap-scenes` reported `identical: 34 · changed: 71` on every run, and 71 of 105 is not a
 finding, it is a gate that has stopped being evidence.
@@ -12592,7 +12592,7 @@ Quoting its absolute count across sessions, as an earlier report in this session
 **Why it did not hide.** It did not hide at all: the gate names its own condition on every run, in a
 warning block above the count, and says exactly what to do about it. It reported a font-state change
 from 30 faces `e724440085e2` to 33 faces `dd6cb2e15984`, and that every text width in the library moves
-with it, so "a changed scene below is NOT evidence about the code". The mechanism that #401 added was
+with it, so "a changed scene below is NOT evidence about the code". The mechanism that #419 added was
 working perfectly. **What failed is that nobody acted on it**, and a warning nobody acts on is
 indistinguishable from a warning nobody prints.
 
@@ -12618,7 +12618,7 @@ be used: save a baseline, make the change, run it, read the diff, in ONE session
 absolute count carries no meaning across sessions and none at all across machines. And a gate whose
 output does not move between runs that should have moved it is off, whatever it prints.
 
-## #409: The CSS-animation ban is not required for determinism, and the engine already proves it
+## 428. The CSS-animation ban is not required for determinism, and the engine already proves it
 
 **The claim under test.** `core/tokens.css:28` kills every CSS animation globally
 (`* { transition: none !important; animation: none !important }`) under the comment "determinism:
@@ -12673,7 +12673,7 @@ main document only. An animation inside a shadow root or an iframe is not reache
 `document.getAnimations()`, and `animation-delay` with a negative value, `fill-mode`, and
 compositor-accelerated animations were not tested.
 
-## #410: A part could arrive and never leave, and it was read as a limit of hand-written HTML
+## 429. A part could arrive and never leave, and it was read as a limit of hand-written HTML
 
 **Where it came from.** Two agents built the same terminal, one in layer primitives and one in
 hand-authored `html`, to compare the media. The layer version left the frame piece by piece. The html
@@ -12712,7 +12712,7 @@ entrance-only, and cannot be added retreating.
 
 **`fromTo` from the settled state, never a bare `to`.** A `to` records its start values when the tween
 first runs, which is a function of playback order and not of n, so a backward seek restores the wrong
-thing. This is the same failure shape as #370, in the same GSAP-driven code path.
+thing. This is the same failure shape as #384, in the same GSAP-driven code path.
 
 **Verified rather than assumed.** Exit frame rendered cold and again after seeking past it:
 byte-identical. `probe-purity` clean across 25 sampled frames. `snap-scenes` 105 identical, 0 changed,
@@ -12723,7 +12723,7 @@ missing feature as a property of a medium, because the medium's limits were the 
 the feature was undiscoverable. The schema label now leads with what `parts` is FOR, in the words an
 author would search for.
 
-## #411: A grandchild was scheduled to appear before the group it lives in
+## 430. A grandchild was scheduled to appear before the group it lives in
 
 **What.** `core/layers/util.js` threaded `rootL`, the OUTERMOST layer, unchanged through every level of
 `addGroupChild`. So a child's window was always `rootL.start + its own delay`, no matter how deep it
@@ -12764,7 +12764,7 @@ Baselines re-saved against the corrected behaviour.
 
 `probe-purity` clean. `lib-test` 937.
 
-## #412: 155 blocks, no shared spacing scale, so every one was made to look right on its own
+## 431. 155 blocks, no shared spacing scale, so every one was made to look right on its own
 
 **Measured before anything changed**, by calling every factory and walking its emitted output:
 
@@ -12805,7 +12805,7 @@ deliberate hierarchy. **A nearest-step rule cannot tell those apart**, so sweepi
 dressed as a system. Size keeps its scale and its 22% report, and gets fixed per block when that block
 is actually worked on. A mechanical sweep is only honest where the property is mechanical.
 
-## #413: A scaling idle on text is a shimmer, and it shipped in a film
+## 432. A scaling idle on text is a shimmer, and it shipped in a film
 
 **How it surfaced.** A user watching a rendered mp4 said two lines were "shimmering/glitching". Nothing
 in the JSON looked wrong and every gate was green.
@@ -12840,7 +12840,7 @@ without knowing why. Six `breathe` idles, three on text and three on images; onl
 flagged and moved to `drift`. The images keep theirs, correctly. One scene changed, justified, and
 re-baselined.
 
-## #414: Two thirds of a status vocabulary was theme-aware, and a brief demanded a check its worktree could not run
+## 433. Two thirds of a status vocabulary was theme-aware, and a brief demanded a check its worktree could not run
 
 **The token.** Every theme ships `up` and `down`, so `blocks/kit.mjs` TONES could paint ok and danger
 from the palette. `warn` was a hardcoded amber, `#F6A417`, that no brand could ever repaint. A status
@@ -12856,7 +12856,7 @@ it. A theme with an opinion declares one and wins; the other 37 get a working am
 ## And the brief defect, which is mine
 
 The literal-conversion agent was told its change "must stay 105 identical on `snap-scenes`, or justify
-each change one by one". **It could not run that check at all.** `verify/snap/` is gitignored (#408),
+each change one by one". **It could not run that check at all.** `verify/snap/` is gitignored (#427),
 so a fresh worktree has no baselines: the gate reported 103 no-baseline, 0 identical, 0 changed, and
 would have done so whatever the agent did.
 
@@ -12864,7 +12864,7 @@ It said so plainly rather than reporting a green it had not earned, and substitu
 `block-schema` and a light/dark visual pass. The main thread then ran the real diff: **105 identical**.
 
 The lesson is not about the agent. **A brief that demands a check the environment cannot perform
-teaches the agent to report something that looks like the check.** #408 established that these
+teaches the agent to report something that looks like the check.** #427 established that these
 baselines are local-only and I wrote the brief anyway, four hours later. Any future worktree brief
 must either say "the main thread runs snap-scenes on merge" or hand the agent a way to get baselines.
 
@@ -12875,7 +12875,7 @@ comment saying so. The rule added to `kit.mjs` the same hour ("a literal is legi
 colour IS the identity of something outside this theme") held up on first contact: the agent applied
 it and correctly refused most of the work.
 
-## #402 CLOSED: the frozen counter, fixed and shown
+## 434. CLOSED: the frozen counter, fixed and shown
 
 `blueprints/kit.mjs` `dollyNumber` wrote `countStart: start + 0.1`. `countStart` is seconds INTO the
 layer's own window, and the schema says so in as many words: "Count begins (s into window)". Adding the
@@ -12899,7 +12899,7 @@ another way of saying the counter had never actually worked anywhere it mattered
 
 Logged as the worst outstanding defect at the start of this session. It was two characters.
 
-## #415: /editor rendered a blank stage in production, and the engine had been saying why the whole time
+## 435. /editor rendered a blank stage in production, and the engine had been saying why the whole time
 
 **What a visitor saw.** The page loaded. The headline, the scene picker, the JSON, the scrubber: all
 correct. The render surface was empty and the time readout was a dash.
@@ -12931,7 +12931,7 @@ the iframe for `__engineError`.
   limit at the top of the gate so the next reader recognises it rather than argues with it.
 
 
-## #416: a layer is a wrapper over one DOM element, so give it a CSS passthrough, refuse the frame-owned half
+## 436. a layer is a wrapper over one DOM element, so give it a CSS passthrough, refuse the frame-owned half
 
 **The idea, and why the obvious version is a trap.** The layer vocabulary cannot express a box
 gradient (`gradient` is a TEXT fill via `background-clip`, not a box background), `mask-image`,
@@ -12945,7 +12945,7 @@ as `mask`/`filter`/`reflect` beside it).
 properties EVERY FRAME, not once at build time. `css` is written once. So a `css.opacity` would render
 correctly on frame 0 and then be silently overwritten by `core/clips.js:220`'s enter/exit envelope on
 frame 1: the exact "documented input accepted and then ignored" bug class this repo has logged the
-most (#213, #369, #373, #375).
+most (#219, #383, #387, #389).
 
 **The owned-property list, verified against the actual writes, not assumed:**
 
@@ -12990,7 +12990,7 @@ extra plumbing needed. `node scripts/gates/probe-purity.mjs scene` stayed green 
 identical regardless of render order): `css` is a static object read once, so it cannot break
 `renderFrame(n)`'s purity in `n`.
 
-## #417: the `paints-nothing` gate, and the sweep that was checking the wrong files
+## 437. the `paints-nothing` gate, and the sweep that was checking the wrong files
 
 **What it is for.** An `html` layer whose content was masked away rendered as a blank white card, and the
 agent that built it said the truest thing anyone said this week: "the mask bug that blanked the whole
@@ -13018,7 +13018,7 @@ census is the most dangerous shape a gate can take: 0 findings reads as 0 defect
 denominator was. Fixed by mirroring `snap-scenes:84-88`, which had already solved it, rather than
 inventing a second rule.
 
-## #418: `css` on a layer, and the eleven properties it refuses
+## 438. `css` on a layer, and the eleven properties it refuses
 
 The layer vocabulary is a wrapper over HTML, so a box gradient, a `mask-image`, a `clip-path` and an
 inset `box-shadow` were unreachable while the DOM underneath could do all four. `css: { … }` passes
@@ -13045,10 +13045,10 @@ author-facing alternative at all: the refusal explains itself but offers nothing
 less helpful than the other ten.
 
 `lib-test` 937 to 942. `probe-purity` clean. `snap-scenes` 105 identical, run on the main tree because
-a worktree has no baselines (#408, #414).
+a worktree has no baselines (#427, #433).
 
 
-## #419: `css` painted a box, and `radius` was silently dropped on it
+## 439. `css` painted a box, and `radius` was silently dropped on it
 
 **What.** A layer painting its own background through the new `css` passthrough and asking for
 `radius` rendered with square corners. Nothing said why. `make author-check` was clean, `validate`
@@ -13092,7 +13092,7 @@ for this fix is a rendered frame that was square before and rounded after, plus 
 behaviour has more than one moving part; this one has a single condition, and the honest record of
 "no coverage" is better than a test shaped to pass.
 
-## #420: the determinism gate exits green on a fresh clone, having compared nothing
+## 440. the determinism gate exits green on a fresh clone, having compared nothing
 
 **Found while auditing the repo for a public launch, which is exactly the lens that shows it.**
 `verify/snap/` is gitignored (`.gitignore:32`), on purpose: a baseline is a pixel record of one
@@ -13124,7 +13124,7 @@ A FEW no-baseline scenes stay soft, deliberately: that is a newly authored film 
 and failing on it would make writing a scene feel like breaking the build. **Zero comparisons is a
 different statement** and it is the one that has to be loud.
 
-**The rule, now hit twice in one day.** #417 was a census over the wrong files reporting clean; this is
+**The rule, now hit twice in one day.** #437 was a census over the wrong files reporting clean; this is
 a census over an empty set reporting clean. Any gate that summarises rather than accuses has the same
 failure mode: **a clean result over an empty denominator is not a pass, it is a gate that never ran.**
 When writing one, ask what it prints when it finds no subjects, and make that case fail.
@@ -13132,7 +13132,7 @@ When writing one, ask what it prints when it finds no subjects, and make that ca
 **Verified both ways.** Baselines moved aside → exit 1 with the message. Baselines restored → 105
 identical, exit 0. Proving the red half is the whole point: an untested guard is a guess.
 
-## #421: retiring 35 agent worktrees, and the five files that nearly went with them
+## 441. retiring 35 agent worktrees, and the five files that nearly went with them
 
 **What.** Agent worktrees had reached **35, at 9.1G**. The harness auto-removes an UNCHANGED worktree,
 which is the cheap half; the ones that changed something are the ones that accumulate, and they are
@@ -13144,7 +13144,7 @@ untracked in a worktree whose branch looked entirely superseded.
 
 *By the commit graph.* Five branches carried a commit whose subject was not in main, which reads as
 unmerged work. Every file in all five was already byte-identical in the main tree. Agent work in this
-repo is routinely **copied out rather than merged** (films are gitignored (#377)) so the graph
+repo is routinely **copied out rather than merged** (films are gitignored (#391)) so the graph
 systematically under-reports what landed, and trusting it would hoard worktrees forever.
 
 *By `git diff main..branch`.* This flags the whole repo. It also reports every file MAIN moved forward
@@ -13174,7 +13174,7 @@ broken recipe. Make said `warning: ignoring old commands for target 'review'` an
 target name is a substring of other target names**: anchor an insert on something unique, and read
 make's warnings: that one names the exact damage.
 
-## #422. A gate is not a fix: the CSS refusal that belonged in the code
+## 442. A gate is not a fix: the CSS refusal that belonged in the code
 
 **The correction, in the user's words: "dont add gates mf / you get to gates everytime / dont do things
 additively / do them properly in the code where you are writing logic".** They were right, and the
@@ -13213,11 +13213,11 @@ so it does not get re-broken.
 
 ---
 
-## #423: the layout audit graded a camera that was not there
+## 443. the layout audit graded a camera that was not there
 
 **Found by chasing a regression I thought I had caused, which turned out to be this.**
 
-`core/produce.js` injects a camera push into any un-choreographed scene, and #424 below made that push
+`core/produce.js` injects a camera push into any un-choreographed scene, and #444 below made that push
 real. Immediately, `make audit-all` went from 21 scenes with hard findings to 43. It looked like the
 push was shoving content out of the title-safe area. A plausible, physical explanation, and a camera
 scale above 1.0 really does move edge content outward.
@@ -13251,7 +13251,7 @@ is slightly BETTER, not a regression.
 clean / 21 hard" from hours before, when the library, the block count and the audit itself had all
 changed. The only valid before is one measured now, with one variable changed.
 
-## #424: the produced camera push had never once run
+## 444. the produced camera push had never once run
 
 `core/produce.js` gives any scene that declares no camera a gentle slow push, so the frame stays alive.
 It was written, it was commented, and **it had never executed in the history of the engine.**
@@ -13283,10 +13283,10 @@ bottom, so it never fights an authored film. **A default nobody can perceive is 
 is a dead one**: it costs the same to carry and delivers nothing.
 
 53 of 105 baselined scenes changed as a result, every one of them gaining the push the code always
-promised. See #423 for the audit bug this immediately exposed, and for why the apparent regression that
+promised. See #443 for the audit bug this immediately exposed, and for why the apparent regression that
 followed was not one.
 
-## #425: an array's ORDER was a shader API, and nothing could have caught it
+## 445. an array's ORDER was a shader API, and nothing could have caught it
 
 `core/stings.js:22` declared `SHADER_FX` as a flat list of names. `draw()` did `SHADER_FX.indexOf(effect)`
 and handed that integer to the GLSL uniform `u_fx`, where the fragment shader branched on `0..34` with
@@ -13311,11 +13311,11 @@ and `draw()` reading `SHADER_ID[effect]`. The index is explicit now and ordering
 rendered PNGs from `scripts/author/preview.mjs` and found they were not byte-reproducible run to run
 (sub-LSB jitter, PSNR 99.6 dB for the SAME code), so it argued from PSNR instead. That is a known trap:
 `preview.mjs` does not wait for GPU raster to settle and is for LOOKING, never for proving determinism
-(#102). The real proof was one command on main, where the baselines live: `snap-scenes` at **105
+(#105). The real proof was one command on main, where the baselines live: `snap-scenes` at **105
 identical**, over a library where **28 scenes exercise 21 of the 35 effects**, spanning ids 0 to 31.
 A refactor is pure when the renderer says so, not when a similarity metric is close enough.
 
-## #426: a documented `curl` that writes a zero-byte file on 404
+## 446. a documented `curl` that writes a zero-byte file on 404
 
 Three scenes stopped booting the moment `core/boot.js` began refusing an asset that never loaded. The
 paths all EXISTED on disk, so every path check passed and the first read was "the new refusal is a
@@ -13346,7 +13346,7 @@ command now 404s for real brands and leaves a zero-byte `.svg`.
 Fixed: the doc now points at `make assets` and shows `curl -fsS … || rm -f`, both empty files removed,
 and the tracked one untracked. `tryFetch` needed no change and is cited in the doc as the reason.
 
-## #427: an engine easing name on a GSAP-driven field renders a different curve, silently
+## 447. an engine easing name on a GSAP-driven field renders a different curve, silently
 
 **What.** `parts[].ease`, `parts[].exitEase`, `morph.ease`, `motionPath.ease` and `splitText.ease` go
 straight into `gsap.fromTo`. GSAP does not refuse a name it does not know: `parseEase` returns
@@ -13365,7 +13365,7 @@ curve they named rather than a look-alike, and there is no mapping table to drif
 **Gate.** None, and none wanted: the refusal is at the write site. No shipped scene uses either block,
 so `snap-scenes` stayed 106 identical.
 
-## #428: the html layer accepted six box props and ignored every one
+## 448. the html layer accepted six box props and ignored every one
 
 **What.** `bg`, `border`, `radius`, `shadow`, `elevation` and `pad` are shared layer props the schema
 advertises. `core/layers/html.js` never called `kit.chipBox`, which `group.js`, `rect.js` and `text.js`
@@ -13381,7 +13381,7 @@ computes its geometry from `w` BEFORE the wrapper, so border-box padding shrank 
 the content kept its width and the map overflowed onto the raw backdrop. Caught by reading the audit
 overlay, not by a number.
 
-## #429: a bare catalog name does not carry its catalog props, and the comment said it did
+## 449. a bare catalog name does not carry its catalog props, and the comment said it did
 
 **What.** `blocks/index.mjs` merged a catalog row's `props` only for a NAMESPACED name, with the comment
 "bare names use the raw factory (identical behaviour)". Measured: **82 of the 88 bare rows render
@@ -13395,7 +13395,7 @@ dark rounded bar with no text, no caret and no error, found by cropping a frame.
 substitution wearing the other coat. The families whose emptiness is meaningless refuse at the factory
 (`needContent`, blocks/codeanim.mjs). The false comment now carries the measured number.
 
-## #430: block-schema evaluated defaults in a hand-listed scope that had drifted from the kit
+## 450. block-schema evaluated defaults in a hand-listed scope that had drifted from the kit
 
 **What.** The gate's own header said "every module-level name a block default reaches for is a kit
 export". Its scope listed five of them and omitted `SPACE` and `TYPE`, the two `CLAUDE.md` tells authors
@@ -13405,20 +13405,20 @@ went unchecked.
 **Fix.** `const SCOPE = { ...KIT, ...REGISTRY, T: TOKENS }`, spread, never listed. Same reason
 `paramsOf` reads a generator's own signature instead of keeping a table.
 
-## #431: `make beats --vs` printed a tick and wrote nothing (MISTAKES #245, half-fixed)
+## 451. `make beats --vs` printed a tick and wrote nothing (MISTAKES #245, half-fixed)
 
 **What.** A source tile's label is `SITE: <section-label>`. ffmpeg parses `drawtext` text through the
 filter-graph parser, so the colon terminated the argument, the tile was never written, the row's
 `hstack` failed and the final `vstack` failed. Every `spawnSync` status was dropped, so the tool printed
 `✓ 12 beats … → /tmp/beats/creed-launch.png` and exited 0 with no file on disk.
 
-**Root cause.** #245 was fixed in `reveal.mjs` (`ffmpegOrDie`, `scratch`, a `drawtext` escape) and the
+**Root cause.** #254 was fixed in `reveal.mjs` (`ffmpegOrDie`, `scratch`, a `drawtext` escape) and the
 identical bug was left in `beats.mjs`: the "fix the rule, not the call site" failure CLAUDE.md names.
 
 **Fix.** Both tools now adopt `openScene`, `scratch()` and `ffmpegOrDie`, and share one exported
 `drawtext()` escape in the new `scripts/author/sheets.mjs`.
 
-## #432: producing a contact sheet is not looking at one
+## 452. producing a contact sheet is not looking at one
 
 **What.** `make dev` and `make ship` now emit both sheets automatically (`make sheets`). The receipt
 (`scripts/lib/receipt.mjs`) proves a human LOOKED, so automation would have made every receipt
@@ -13430,7 +13430,7 @@ has read, which is the "a wrong gate manufactures confidence" failure.
 on disk and current, open them". An explicit `make beats` still signs the look off, and a later
 automatic run does not downgrade it. All five states observed.
 
-## #433: a trim ate a status prefix, so the worktree pruner retired nothing
+## 453. a trim ate a status prefix, so the worktree pruner retired nothing
 
 **What.** `scripts/dev/worktree-prune.mjs` decides a worktree is safe to retire by comparing every file
 it touches against main. It read `git status --porcelain` through a helper that `.trim()`s its output.
@@ -13448,10 +13448,10 @@ Verified against six real worktrees: before, 6 of 6 were held with 3 mangled nam
 cleanly and the 4 genuinely-ahead ones were correctly held.
 
 **The general shape.** A convenience applied to every caller (trim, a default, a fallback) is wrong for
-the one caller whose data is positional. Same family as #430, where a hand-listed scope drifted from the
+the one caller whose data is positional. Same family as #450, where a hand-listed scope drifted from the
 vocabulary it claimed to cover.
 
-## #434: a look naming a pass that does not exist rendered without that effect, silently
+## 454. a look naming a pass that does not exist rendered without that effect, silently
 
 **What.** `resolveComposite` walked a look's pass list with `const pass = PASSES[passName]; if (!pass) continue;`
 A misspelled pass name in a `LOOKS` definition dropped that pass and rendered the look MISSING one of its
@@ -13475,7 +13475,7 @@ genuinely means the default shape; `FX_PARAMS[t] || []` is derived by `paramsOf`
 an unknown type surfaces as a refused option key rather than a dropped one. **Most of this class was
 already closed**: the surviving `||` matches in `core/` are comments describing the fix, not the bug.
 
-## #435: the npm package shipped one CPU architecture and claimed to be cross-platform
+## 455. the npm package shipped one CPU architecture and claimed to be cross-platform
 
 **What.** `bin/` is listed in `package.json` `files[]`, so the tarball carries whatever the PUBLISHING
 machine built. Published from an Apple Silicon Mac, `bin/vawe` is `Mach-O 64-bit executable arm64`, and
@@ -13494,7 +13494,7 @@ toolchain.
 **Open.** Five binaries is ~55MB against a 25MB pack ceiling, so shipping them all needs per-platform
 `optionalDependencies` (the esbuild/swc pattern). Not done, it is a publishing decision.
 
-## #436: every `npm install` downloaded 473MB of Chrome to read one path string
+## 456. every `npm install` downloaded 473MB of Chrome to read one path string
 
 **What.** `puppeteer` sat in `dependencies`. Its postinstall downloads a full Chrome UNCONDITIONALLY:
 **measured 473MB and 29s on a fast connection**, minutes on a normal one, against a 16.3MB package,
@@ -13512,7 +13512,7 @@ needs `libnss3`/`libatk`/`libgbm`, routinely absent on minimal, cloud and Docker
 would have OVERRIDDEN a working system browser and failed deep inside Go with a shared-library error.
 The binary is now asked `--version` and left unset if it does not answer. Exists is not runs.
 
-## #437: a typo'd `anchor` id, and a palette value that is not a colour
+## 457. a typo'd `anchor` id, and a palette value that is not a colour
 
 Two of the same shape, found by a read-only audit rather than by a render.
 
@@ -13532,7 +13532,7 @@ exists to remove. So `parseColor` is INJECTED: `themeErrors(theme, { parseColor 
 shape the layer builders already use. Without it the check is presence-only exactly as before, so no
 caller changed behaviour by accident; both real callers now pass it. **0 of 38 shipped themes newly
 fail**: the rule invents no findings.
-## #438: `anim` and `enterDur` accepted on a `split`/`cut` layer, then thrown away
+## 458. `anim` and `enterDur` accepted on a `split`/`cut` layer, then thrown away
 
 `formats/scene/scene.js` `setLayerTiming` writes `el.dataset.anim = (L.split || L.cut) ? 'none' : ...`
 and, for a split layer, `el.dataset.enter = '0'`. Both discards are CORRECT: a split layer enters per
@@ -13560,10 +13560,10 @@ sites, two different rules for the same prop name, and only the diff said so.
 the dataset never enters it. 71 of the 107 suspected layers were that case (`cuts-demo` alone had 50) and
 none was touched. Only `enterDur` under `split` is dead.
 
-## #439: a call site was updated and its import was not, and no gate took that branch
+## 459. a call site was updated and its import was not, and no gate took that branch
 
 **What.** `scripts/author/expand-blocks.mjs` was switched to `bakeCameraMove(d, frameOf(d))` when
-`core/produce.js` took ownership of that conversion (#424). Its imports were never updated, the file
+`core/produce.js` took ownership of that conversion (#444). Its imports were never updated, the file
 still imported `buildCameraMove` and `sceneDims`, the old API. So `make expand` threw
 `ReferenceError: bakeCameraMove is not defined` on **any scene carrying a top-level `cameraMove`**, and
 worked perfectly on every scene that did not.
@@ -13579,7 +13579,7 @@ files is not coverage of paths, and this repo counts the first and reasons as th
 **Fix.** The imports. And the probe that proves it: expanding a scene that declares `cameraMove` now
 bakes it (`cameraMove` removed, `camera` keys written) rather than throwing.
 
-## #440: the determinism net could not see a single block, and nobody noticed for the whole library
+## 460. the determinism net could not see a single block, and nobody noticed for the whole library
 
 **What.** `snap-scenes` byte-compares 106 rendered scenes and is the engine's safety net. It cannot see a
 block change AT ALL. Only 6 of 158 scenes still carry `{"type":"block"}` sugar, and those are snapshotted
@@ -13614,7 +13614,7 @@ library-wide sweep on every scene edit would fire on work the author never touch
 shape, run after touching `blocks/`, as `snap-all` is run after touching `core/`. Nor in `blocks-sync`:
 a gate that fails there would block the regeneration you run to fix it.
 
-## #441: `pad` on an unpainted layer was accepted and discarded
+## 461. `pad` on an unpainted layer was accepted and discarded
 
 **What.** `kit.chipBox` returns early on any layer with no `bg`, `border`, `shadow`, `elevation` or
 `glow`, and wrote `padding` AFTER that guard. So a layer declaring `pad` with no background got none.
@@ -13630,7 +13630,7 @@ was misleading: those are `group` layers, which go through `addGroupChild`, a di
 already applied padding. That is worth knowing on its own, **`pad` has two write sites with two
 different rules**, and only one of them dropped it.
 
-## #442: schema.json enums were hand-copied, and two had already drifted
+## 462. schema.json enums were hand-copied, and two had already drifted
 
 **What.** `formats/scene/schema.json` carried 48 enums, sixteen of them hand-copied from registries that
 live in code. `schema-drift.mjs` CHECKED they agreed and reported "in sync", a list policed, not a list
@@ -13639,7 +13639,7 @@ the enums alone without saying so.
 
 **Two had already drifted, and the check could not see either.** `layerProps.three` was missing `lines`
 (someone added a prop and skipped `--write`). `bg.item.preset` was missing `shapes`, the schema
-REJECTED a background preset the engine accepts, which is MISTAKES #82 again, and it survived because
+REJECTED a background preset the engine accepts, which is MISTAKES #137 again, and it survived because
 that path was never in the table.
 
 **Fix.** `--write` now regenerates the registry-owned enums in place, and the table grew from 16 to
@@ -13654,7 +13654,7 @@ Naming which is which is the point: an unlisted registry copy is exactly how `bg
 **Known limit, stated rather than hidden:** the check compares SORTED SETS, so a hand-reordered enum
 still reads as clean while `--write` would rewrite it. `lib-test` pins order for five enums only.
 
-## #443: a font axis the docs promised and the shipped subset does not have
+## 463. a font axis the docs promised and the shipped subset does not have
 
 **What.** `core/tokens.css:58` described Anybody as carrying `wdth+wght` axes. Upstream it does. **The
 subset we vendor carries `wght` only**, and fontkit reports the same for all 19 other variable faces we
@@ -13679,10 +13679,10 @@ node -e "const fk=require('fontkit');console.log(Object.keys(fk.openSync('assets
 ```
 
 **The class.** A capability documented from UPSTREAM rather than from the artifact we ship. The same
-shape as #426, where a documented `curl` wrote a zero-byte file that passed every path check: the claim
+shape as #446, where a documented `curl` wrote a zero-byte file that passed every path check: the claim
 was true of the source and false of the thing on disk.
 
-## #444: a scene past the browser's WebGL cap renders completely blank and exits 0
+## 464. a scene past the browser's WebGL cap renders completely blank and exits 0
 
 **What.** A scene carrying **18 `shader` layers renders a blank frame and succeeds.** Browsers cap live
 WebGL contexts at roughly 16. Past that `canvas.getContext('webgl')` returns null, the layer stored an
@@ -13708,13 +13708,13 @@ null back, and must then say so. A layer whose whole job is the paint never gets
 no error`, and the soft path still returns null.
 
 **The class.** Not a wrong value: an absent one, answered four separate times with a shrug. Same shape
-as #428 (`html` accepting six box props and reading none) and #441 (`pad` written after the guard that
+as #448 (`html` accepting six box props and reading none) and #461 (`pad` written after the guard that
 returns): the engine accepted the input and produced a plausible frame that was not the one asked for.
 
 **Also fixed here:** a lost context is counted rather than recovered from. Recovery would mean a frame
 that differs depending on when the driver dropped it, which `renderFrame(n)` purity forbids.
 
-## #445: one scene differs between main and every worktree, and four agents each rediscovered it
+## 465. one scene differs between main and every worktree, and four agents each rediscovered it
 
 **What.** `react-demo` renders consistently in every worktree and consistently differently on main. Not
 flaky: two independent worktrees produce byte-identical output (`opacity 0.222 → 0.281`, `w 235 →
@@ -13770,7 +13770,7 @@ nothing else touched. The general shape: a scene that reads a GITIGNORED asset i
 checkouts, and it degrades silently rather than refusing. The snapshot note added above is still the
 right warning; it was pointing at the wrong suspect.
 
-## #446: the camera's lens was keyable, reached nothing, and said nothing
+## 466. the camera's lens was keyable, reached nothing, and said nothing
 
 `cameraAt` has interpolated a `p` keyframe (the lens, `persp`) since the rig landed, and
 `drawCameraAndCut` writes it to `#root` every frame, but only under the RIG, and the rig turns on for a
@@ -13792,12 +13792,12 @@ author would still watch a still frame: now paying 3D rasterisation for it. The 
 the picture plane or it has no subject. So the repair is a REFUSAL, not a conversion: `formats/scene/scene.js`
 throws when the camera keys more than one distinct `p` and nothing in the frame stands off the plane, and
 it names the fix (`"modifiers": [{ "plane": -800 }]`). Same rule as `cameraMove` surviving to render
-(#424): sugar either resolves, or its absence fails loudly.
+(#444): sugar either resolves, or its absence fails loudly.
 
 No shipped scene changes. Two scenes key `p` (`search-demo` and its expanded twin) and both hold it at
 1900 with `rx`/`ry` already on, so the rig was on and the value constant.
 
-## #447: a gate's fix line named a command that cannot fix it
+## 467. a gate's fix line named a command that cannot fix it
 
 `schema-drift.mjs` checks 20 derived enums and then, in a separate block, checks that
 `layers.item.modifiers.item` names every modifier in `core/fx/index.js`. Both failures printed the same
@@ -13813,7 +13813,7 @@ Fixed where it is written: the modifier block prints its own fix (`add the key b
 layers.item.modifiers.item`), and the shared line now says `fix (the enums above)` so it only claims the
 half it can deliver. The check itself was right both times; only its instruction lied.
 
-## #448: the audit read text that is in the DOM on purpose and never on screen
+## 468. the audit read text that is in the DOM on purpose and never on screen
 
 `wordSlot` (core/fx/word-slot.js) puts a swapping word in a fixed box by stacking EVERY candidate in one
 CSS grid cell: the column is auto-sized by layout to the widest of them, so nothing after the slot ever
@@ -13846,7 +13846,7 @@ library sets and therefore cannot perturb anything.
 is it, the audit has been measuring some frames before the renderer finished writing them, which is a
 much larger finding than the one that surfaced it.
 
-## #449: a UI cue was mixed quieter than the music under it
+## 469. a UI cue was mixed quieter than the music under it
 
 **What.** `internal/audio/audio.go` ducked the music bed to -18dB under VO and under a sound bridge, and
 under a CUE it did nothing. A `tick` or `whoosh` took its table gain of 0.45 and played against a bed at
@@ -13891,7 +13891,7 @@ was in.
 **Still open.** `vawe-launch` asks for -14 LUFS and the mux delivers -16.6, before and after this change.
 Single-pass `loudnorm` undershooting its target is a separate finding and nobody has logged it.
 
-## #450: six gates stated a verdict they had not earned
+## 470. six gates stated a verdict they had not earned
 
 **What.** A sweep of the gate library found six checks whose PASS did not mean what it appeared to mean.
 Each is a different route to the same defect, so they are logged together.
@@ -13946,16 +13946,16 @@ candidate rule is that a beat whose `at` has no live layers passes today when `m
 defensible and it would create new failures across the library, which is a decision about the library
 rather than about the gate.
 
-**CLOSED by #452.** This entry also said `motion-audit`'s single inferred window may be a bad rule, and
+**CLOSED by #472.** This entry also said `motion-audit`'s single inferred window may be a bad rule, and
 guessed the repair was scenes declaring `segments` or `add()` deriving windows from `cuts`. Half right.
 Windows now come from the film's own cuts and seams, but that was the small half: 100 of the 127
 buildable scenes declare no cuts at all, so their windows did not move. `ii:monotonic` fired on a clean
 sample because it could not tell a layer's exit from a mid-scene dip, which no window would have fixed,
-and the gate was also scoring the CAMERA RIG as content. See #452.
+and the gate was also scoring the CAMERA RIG as content. See #472.
 
 
 
-## #451: eight resampling passes, and nothing we build ourselves could be fed to one
+## 471. eight resampling passes, and nothing we build ourselves could be fed to one
 
 `core/resample.js:41` threw on any layer that was not a raster:
 
@@ -13992,7 +13992,7 @@ arbitrary content, transform it", and we owned every pass and could point none o
 - `core/layers/index.js`: `attachResample` is called for EVERY type from `buildOne`, idempotently, so
   "which types can be resampled" is not a list anybody maintains.
 
-**The purity question, because a rasterisation cache is exactly where #370 lives.** There is no cache
+**The purity question, because a rasterisation cache is exactly where #384 lives.** There is no cache
 keyed on anything. The bake runs once, before frame 0, and produces a value; there is no per-frame
 memo and no accumulator. Verified rather than argued: `canvas-purity` on a scene of three baked layers
 is clean at 8 frames under scrambled render order, and a render of frame 200 followed by frame 20
@@ -14040,18 +14040,18 @@ ticks or a `type` that types is frozen at the state build left it in. Sampling a
 would need a rasterisation per frame, and `renderFrame(n)` is synchronous by contract while
 `<foreignObject>` decoding is not. That is a real ceiling, not a detail: the honest shape of this
 feature is "a still of composed content, transformed over time by the pass".
-## #452: the motion contract's windows came from a field nobody writes, and one of its clauses was measuring the camera
+## 472. the motion contract's windows came from a field nobody writes, and one of its clauses was measuring the camera
 
 `scripts/gates/motion-audit.mjs` scores five FAIL-tier clauses (i final-hold · ii monotonic · iii settle ·
 iv count-up · v typing) against a WINDOW. Windows came from `meta.segments`, `meta.segments` came from
 `scene.segments`, and **no scene has ever set it.** There is one format and `formats/scene/scene.js` never
 returns the key, so `core/boot.js:537` read `scene.segments || []` and got `[]` every time, for every film,
-since the gate was written. #423 fixed the gate's SILENCE about this. This fixes the cause.
+since the gate was written. #443 fixed the gate's SILENCE about this. This fixes the cause.
 
 **`segments` was never a missing declaration. It was a second way to say what `cuts` already says.** A film
 declares where it turns, in `cuts` and `seams`, and `core/junctions.js` already owns the reading of those
 joints for backgrounds and for audio bridges. Asking 135 scenes to write the same boundaries again under a
-different key is the drift #159 and #358 are both about, one field earlier. So `shotWindows(table, duration)`
+different key is the drift #165 and #372 are both about, one field earlier. So `shotWindows(table, duration)`
 joins `bindWindowsToJunctions` in `core/junctions.js`: the same joints, read the other way round. Stings are
 excluded deliberately, because a sting punctuates inside a shot at least as often as it ends one. `segments`
 is deleted from `meta`.
@@ -14099,10 +14099,10 @@ wall. It is not the default, because 53 of 127 films is two in five, and CLAUDE.
 road ends: a rule waived by reflex has been repealed with nobody writing it down.
 
 **Which gate catches it now.** Nothing catches "a field is written by nobody and read as meaning something".
-The shape to grep for is a `|| []` fallback on a key no producer sets, and #424 is the same sin with the
+The shape to grep for is a `|| []` fallback on a key no producer sets, and #444 is the same sin with the
 producer and the consumer swapped.
 
-## #453: the engine found the beat and no scene could ask it to use it
+## 473. the engine found the beat and no scene could ask it to use it
 
 **Found by reading `scripts/media/beatmap.mjs`'s own comment: "Authors then snap cut times to it."**
 
@@ -14113,7 +14113,7 @@ module: `core/spectrum.js`, `lib-test.mjs`, and `beatmap.mjs` itself. Nothing on
 Grepping `beatGrid` and `.beats.json` across `formats/scene/scene.js`, `core/boot.js` and
 `core/cuts.js` returned nothing at all.
 
-**Root cause.** The same shape as #424, one step earlier in the pipe. There, `cameraMove` was a field
+**Root cause.** The same shape as #444, one step earlier in the pipe. There, `cameraMove` was a field
 written and never read. Here, a whole analysis was computed and never consumed: the engine could name
 the pulse and had no way to be told to land on it. The workaround was a human copying numbers out of a
 JSON and typing them into cut times, which is a fix that has to be remembered by every future author,
@@ -14157,7 +14157,7 @@ declaration. It was left alone in this pass because four committed scenes carry 
 changing its tolerance would move them. The loop unroll for a short bed was taken FROM it, so at least
 that arithmetic now exists on the render path too.
 
-## #454: a camera nobody wrote switched a HARD rule off for most of the library
+## 474. a camera nobody wrote switched a HARD rule off for most of the library
 
 **What.** `verify/audit.mjs` dropped every `safe` and `caption-band` finding on any frame where the
 camera was moving, frame-wide, before the findings were counted:
@@ -14267,7 +14267,7 @@ reports it, which is right, but the two numbers are still one fact with two owne
 added to them, and a waiver would have been the wrong shape anyway, because the next `make catalog` run
 overwrites the file it was written into.
 
-## #455: the site kept its own copy of a scene, and served a bug that had been fixed for forty days
+## 475. the site kept its own copy of a scene, and served a bug that had been fixed for forty days
 
 **What.** A user reported that `argus-launch` fails to boot in the site's `/editor`. It does not fail:
 `./bin/vawe formats/scene/argus-launch.json --draft` renders it in 23.0s, 690 frames, exit 0, and
@@ -14303,9 +14303,9 @@ serving different bytes. It reads fifteen files.
 
 **The general shape, worth grepping for.** A directory that is (a) tracked, (b) a copy of something
 else in the repo, and (c) maintained by hand. `site/public/` holds other such copies. Each one is a
-`#455` waiting for someone to notice by hand.
+`#475` waiting for someone to notice by hand.
 
-## #456: six production deploys failed in a row and the only place that said so was a build log
+## 476. six production deploys failed in a row and the only place that said so was a build log
 
 **What.** `vawe.upsurge.cc` had not updated for two days. Coolify's config was correct throughout:
 `is_auto_deploy_enabled: true`, source `GithubApp`, branch `main`, webhook endpoint reachable and
@@ -14331,7 +14331,7 @@ where the repo is a fresh clone. The message said "absent from the repo" and tes
 disk", and the difference between those two sentences cost two days.
 
 **`.dockerignore` is the same trap one layer down, and it had already been logged.** Its own comment
-points at `docs/MISTAKES.md #275` for this exact failure and records the fix as a sentence: "Add a
+points at `docs/MISTAKES.md #289` for this exact failure and records the fix as a sentence: "Add a
 scene that names a new mark, add its line here." Nobody did. A rule enforced by asking the next author
 to remember is not enforced.
 
@@ -14351,7 +14351,7 @@ only where nobody looks is indistinguishable from a build that never ran.
 
 ---
 
-## #457: two owners of "which beat does this joint land on", and neither imported the other
+## 477. two owners of "which beat does this joint land on", and neither imported the other
 
 **What.** `core/beat-bind.js` snapped a film's joints at boot from an `audio.beatSync` declaration.
 `scripts/media/beatsync.mjs` snapped the same joints at author time and wrote `<scene>.beatsync.json`.
@@ -14413,12 +14413,12 @@ re-derives it, and the tell is a file that reasons about a subject and imports n
 
 ---
 
-## #458: the default push and the safe margin were one piece of geometry, written down twice
+## 478. the default push and the safe margin were one piece of geometry, written down twice
 
 **What.** `core/produce.js` gives any scene declaring no camera a `slowPush` from `1` to `1.06`
 spanning the whole runtime. `core/safe.js` sets `MARGIN` to `0.06`. Neither file mentioned the other,
 and both numbers describe the same thing: how much room a layer placed on the safe line has before the
-frame edge takes it. Left standing at the end of #454.
+frame edge takes it. Left standing at the end of #474.
 
 **The arithmetic, so nobody re-derives it a third time.** `#cam` scales about the centre of the
 viewport, so a point on the safe edge sits `dim * (0.5 - MARGIN)` from that centre and lands at
@@ -14426,11 +14426,11 @@ viewport, so a point on the safe edge sits `dim * (0.5 - MARGIN)` from that cent
 51px horizontally. It reaches the FRAME edge, `dim * 0.5`, at `s = 0.5 / (0.5 - MARGIN)`, which is
 1.1364.
 
-**What that measurement actually says, and it is not what #454 assumed.** The two numbers reading 0.06
+**What that measurement actually says, and it is not what #474 assumed.** The two numbers reading 0.06
 is a coincidence, not a relationship: ANY zoom above 1 carries a safe-edge layer out of the safe box,
 and the overshoot scales with the very margin it is eating, so widening `MARGIN` cannot fix it. The
 safe box is a PLACEMENT box, read at rest, and `verify/audit.mjs` already grades it in scene space and
-screen space and reports only when the two agree (#454). The line that genuinely cannot be crossed is
+screen space and reports only when the two agree (#474). The line that genuinely cannot be crossed is
 the frame edge, and 1.1364 is where it is.
 
 **Fix, and which of the two owns which half.** `core/safe.js` owns the geometry and exports
@@ -14461,7 +14461,7 @@ film is rendered.
 because the coincidence looks like the relationship. Do the arithmetic before deciding which one is
 wrong; here neither was.
 
-## #459: 558 effects and not one of them ever asked where the layer had been
+## 479. 558 effects and not one of them ever asked where the layer had been
 
 **What.** Every effect in this engine is a function of `t` evaluated once, at `t`. `spinBlur` and
 `zoomBlur` (`core/resample.js`) are the closest thing to a velocity effect we shipped and they resample
@@ -14469,7 +14469,7 @@ around a FIXED CENTRE, so they are blind to where the layer is actually going: a
 card sliding right get the identical smear. Nothing in 558 effects read a derivative of the clock.
 
 **Why nobody built it, and why the reason was wrong.** Sampling an earlier frame reads as an
-accumulator, and an accumulator is the bug in #370: GSAP's root timeline shipped `autoRemoveChildren`,
+accumulator, and an accumulator is the bug in #384: GSAP's root timeline shipped `autoRemoveChildren`,
 a tween was unlinked once the playhead passed it, and a frame became a function of `n` AND of the
 highest `n` that tab had drawn. But `renderFrame(n)` is pure, so the transform at `n-k` is exactly as
 computable as the one at `n`. The capability that costs a competing engine a warning in its rules file
@@ -14479,7 +14479,7 @@ is free here, and it sat unused.
 (`core/sequence.js`) is already a pure function of local time, so the past pose is COMPUTED, never
 remembered: `trail` draws k faded copies at the poses of the last six frames, `blur` samples the same
 poses inside a single frame so the copies read as a smear along the real direction of travel. Building
-them as two effects would have been two owners of one fact (#423).
+them as two effects would have been two owners of one fact (#443).
 
 **The decision the file turns on: the copies are CHILDREN of the layer.** A sibling would need the
 layer's full composed transform at `t-k` (cut, entrance, motion track, camera) recomposed outside the
@@ -14507,7 +14507,7 @@ every computed style, so it is rasterization noise from compositing, not engine 
 compares a DOM signature for exactly this reason and its header says so. Do not read a screenshot diff
 as a purity verdict without checking the computed styles first.
 
-## #460: the engine could not cut on a match, and the rule that wanted one cannot see it
+## 480. the engine could not cut on a match, and the rule that wanted one cannot see it
 
 **What went wrong.** `docs/CRAFT/FILM-STRUCTURE.md` lists the match cut first among spatial devices,
 and `no-continuous-object` is the most-waived rule in this library: 14 films, 11% of the 132
@@ -14521,8 +14521,8 @@ size and rotation onto the incoming layer's opening pose. What it never had was 
 landed wherever the two layers happened to meet, so the boundary was written three times: the cut's
 `t`, the outgoing layer's `duration`, the incoming layer's `start`. Nothing kept the three equal, and
 `core/validate.mjs` could only notice afterwards that they had drifted more than half a second apart.
-That is the two-copies-of-one-number failure `bindWindowsToJunctions` removed from `bg` (#358) and the
-snap signature before it (#159), still standing one field over.
+That is the two-copies-of-one-number failure `bindWindowsToJunctions` removed from `bg` (#372) and the
+snap signature before it (#165), still standing one field over.
 
 **Assert or produce.** A checker was the wrong answer twice over. This repo already has a gate that
 measures a prop surviving a junction, and that gate is the most-waived rule here; a second one would
@@ -14580,7 +14580,7 @@ Y'"*, which is literally what `becomes` and `matches` write into the JSON, and i
 does exactly that. The bench film `matchcut-demo` ships with the waiver and its reason. Reading a
 `becomes`/`matches` pair as ONE spanning form is a one-place change in that gate, and it was left
 undone deliberately: this pass did not own that file, and a gate change must be proven against the
-whole library before and after (a single scene going PASS to FAIL is a regression, #211).
+whole library before and after (a single scene going PASS to FAIL is a regression, #217).
 
 **Which gate catches the rest.** `core/validate.mjs` `matchErrors` runs the same binder on a clone, so
 every refusal above arrives from `make check` instead of sixty seconds and one ffmpeg pass later.
@@ -14592,7 +14592,7 @@ gives the joint it hangs on, and no new cut style was added because one that did
 be a second name for `none`. A match at a `none` cut is silent on purpose: that is the hard match cut,
 where the only event is the form changing.
 
-## #461: the catalogue taught the wrong key, and a whole subsystem went unused
+## 481. the catalogue taught the wrong key, and a whole subsystem went unused
 
 **What.** `core/fx/` ships **ten modifiers**, about 80KB of engine: `mixBlend`, `occlude`, `plane`,
 `progress`, `shadow`, `tilt`, `kick`, `wordSlot`, `alongPath`, `ghost`. They are reached by **3 of the
@@ -14621,20 +14621,20 @@ so an author who has already made the mistake can see why the error mentioned a 
 not correctness, and a gate that diffs prose against intent is not a thing. What would have caught it
 is the check nobody runs: **follow your own documentation once, literally, as an author would.**
 
-**The adoption lesson, which is not the same as the fix.** `parts` is the sibling case (#410): it was
+**The adoption lesson, which is not the same as the fix.** `parts` is the sibling case (#429): it was
 documented, and documentation moved it from 0 to 5 block files while scenes stayed at 2. So correcting
 this string will not by itself make modifiers used. What it removes is the guarantee of the opposite: an
 author who tried, failed, and concluded the feature was broken. The adoption work is putting modifiers
 into `blocks/`, where an author meets them without having to look them up.
 
-## #462: a deploy went green and served every stylesheet as a 404
+## 482. a deploy went green and served every stylesheet as a 404
 
 **What.** `vawe.upsurge.cc` returned 200 for every page and 404 for both `/_next/static/css/*.css`. The
 site rendered unstyled. Coolify reported the deployment `finished`.
 
 **Root cause, and it was my own fix one commit earlier.** `site/package.json` pins
 `NEXT_DIST_DIR=.next-build` so a running `next dev` and a `next build` do not fight over `.next`
-locally. The Dockerfile's runner COPYs name `.next`. #456 fixed that mismatch by renaming the
+locally. The Dockerfile's runner COPYs name `.next`. #476 fixed that mismatch by renaming the
 directory after the build: `rm -rf .next && mv .next-build .next`.
 
 **`next build --output standalone` BAKES the dist dir into its own server.** The build writes
@@ -14656,11 +14656,11 @@ general defect**, which is that nothing anywhere fetches an asset the rendered H
 returning 200 with a 404 stylesheet passes every check this repo and this deploy host own.
 
 **The pattern worth naming.** Two fixes in a row failed the same way: I reasoned about the build from
-the outside rather than reading what the build WROTE. #456's symptom looked like a poisoned cache and
+the outside rather than reading what the build WROTE. #476's symptom looked like a poisoned cache and
 was a path never written; this one looked like a working deploy and was a path renamed out from under
 its own server. Both were one `grep` into the build output away.
 
-## #463: a box said where the layer was heading, not where it was
+## 483. a box said where the layer was heading, not where it was
 
 `formats/scene/scene.js` `resolveBoxes(t)` composed every layer's box from its authored `x`/`y` plus
 `motionAt`, and from nothing else. An entrance is not in that sum. `driveClips` plays `anim`/`out` as a
@@ -14704,7 +14704,7 @@ but px translates and unitless scales, plus the three distances the fix depends 
 passing). `node scripts/gates/probe-purity.mjs scene` is clean: `clipStyleAt` is pure in `(dataset, t)`,
 so a box stays a pure function of `t`.
 
-## #464: the handover measured a word as zero wide, and put the card 401px away without saying so
+## 484. the handover measured a word as zero wide, and put the card 401px away without saying so
 
 **What.** `becomes: "<id>"` resolves the incoming layer's opening pose from the outgoing layer's final
 pose: centres matched, size matched by scale. `resolveBecomes` in `formats/scene/scene.js` read that
@@ -14724,7 +14724,7 @@ needed (1.302), with the card's left edge at x=0 (off the canvas) instead of ove
 frames are in the report; the word and the card share no pixels at all.
 
 **It reaches through `matches` too, and worse.** `bindMatchesToJunctions` (`core/junctions.js:165`,
-#460) is the authoring front door: it retimes the pair onto a junction and then writes `A.becomes`,
+#480) is the authoring front door: it retimes the pair onto a junction and then writes `A.becomes`,
 handing every question of geometry to this function. It never touches `w`/`h`. So the feature written
 so authors would not hand-align coordinates carried the same silent mis-alignment into the case it was
 written for.
@@ -14761,7 +14761,7 @@ measured one, a form measuring nothing is refused, and the `matches` path is mea
 validate reads data and cannot measure, so the only rule it could state is "declare `w`/`h`", which is
 the answer this entry rejects.
 
-## #465: one library, two sizes: 135 in one gate and 150 in the next, on the same afternoon
+## 485. one library, two sizes: 135 in one gate and 150 in the next, on the same afternoon
 
 **What happened.** `scripts/lib/census.mjs` owned HOW a sweep enumerates its population and left WHAT
 COUNTS to every caller. So each caller wrote the rule again, and they disagreed. `waiver-drift` dropped
@@ -14806,11 +14806,11 @@ already exactly the opt-in. designspec lost two findings, both on `onefile.anima
 generated sidecar, excludes `schema.json` and templates, every member declares `module: "scene"`, and
 the derivatives opt-in is a strict superset. Deleting the derivative clause fails the first assertion.
 
-## #466 · the render order was a comment, so two bugs in one week broke it and nothing said so
+## 486. the render order was a comment, so two bugs in one week broke it and nothing said so
 
-**What happened.** `#463` and `#464` landed within days of each other. Neither was arithmetic. `#464`
+**What happened.** `#483` and `#484` landed within days of each other. Neither was arithmetic. `#484`
 resolved the `becomes` handover before the build-time layout measurement, so an unsized text layer
-measured zero wide and a card landed 401.6px away at 0.77x scale. `#463` read a box that
+measured zero wide and a card landed 401.6px away at 0.77x scale. `#483` read a box that
 `resolveBoxes` composes from `x`/`y` plus the motion track alone, before any track runs, so `boxOf`
 reported the settled pose and a `follow` with an authored 24px gap rendered as a 24px overlap. Both
 were governed by the same fact: WHAT RUNS BEFORE WHAT.
@@ -14847,14 +14847,14 @@ from source text. It cannot prove that a track read a fresh value rather than a 
 property of one scene at one `t`, and `probe-purity`, `canvas-purity` and `snap-scenes` are what see
 it. All 107 scene snapshots are byte-identical.
 
-## #467 · the GSAP trigger list was a hand-kept second source of truth, and #148 was one of its failures
+## 487. the GSAP trigger list was a hand-kept second source of truth, and #148 was one of its failures
 
 **What.** `core/preload.js` decides whether the tween engine is fetched at all, from the props a scene
 names. Get that set wrong and the render is silent and STILL: no throw, no warning, a figure that simply
 does not move. Until now the set was a nine-name regex written out by hand, under a comment asking the
 next author to keep it in lockstep with `formats/scene/scene.js`, `core/parts.js` and
 `core/layers/composition.js`. Nothing checked the lockstep. It broke once already: the boot to preload
-extraction dropped `parts`, and a scene rendered completely unanimated (#148).
+extraction dropped `parts`, and a scene rendered completely unanimated (#154).
 
 Four of the nine names are named by zero or one scene in the whole library, so no render exercises them.
 A regex entry nobody renders is an entry nobody can notice is missing.
@@ -14868,7 +14868,7 @@ them was read at render time.
 `core/parts.js` and `core/layers/composition.js`. The remaining three (`morph`, `fx`, `fxOut`) are read
 inside `applyGsapHooks` in `formats/scene/scene.js`, which declares nothing importable, so they are still
 stated in `core/preload.js` and covered by the guard below. `gsap` was the ninth name and is deleted: the
-`gsap:{from,to}` field went in #208 and nothing has read it since, so it loaded a tween engine for a prop
+`gsap:{from,to}` field went in #214 and nothing has read it since, so it loaded a tween engine for a prop
 with no reader.
 
 **The guard is what makes stating the last three safe.** `scripts/gates/lib-test.mjs` re-derives the whole
@@ -14876,7 +14876,7 @@ set from the code that does the reading and fails when the two disagree, in thre
 
 * a SWEEP of every `.js` under `core/` and `formats/` for the one shape every GSAP hook is written in, a
   layer prop gating a branch that also tests `window.gsap`. It walks the tree rather than a named list of
-  files, because #229, #232 and #242 were each a gate whose file list was outrun by a directory move.
+  files, because #235, #238 and #249 were each a gate whose file list was outrun by a directory move.
 * the two `GSAP_TRIGGER` declarations, for the reads the sweep cannot see (`composition.js` tests
   `window.gsap` on a different line from its `L.comp` read).
 * the DECISION itself, run per prop against a stub `window`, so the four props no render exercises are
@@ -14888,7 +14888,7 @@ to `fx` alone names `SILENT: morph, fxOut, parts, comp, motionPath, physics, spl
 checks stay green, which is the synthetic half working on its own. End to end: a fixture scene using
 `splitText` + `physics` + `motionPath` renders one film with the set correct and a DIFFERENT, unanimated
 film with the plugin names dropped, and the guard names all three missing props on the same break. That is
-#148 reproduced and caught.
+#154 reproduced and caught.
 
 **Gates.** `lib-test` 1125 to 1130 passing (+5). `snap-scenes` 106 identical, 0 changed, so no shipped film
 moves. `probe-purity scene` clean. Preload runs once at boot and this changes nothing per frame.
@@ -14898,7 +14898,7 @@ one third of the set is a statement rather than a derivation. The one-line repai
 `export const GSAP_PROPS = ['morph', 'fx', 'fxOut'];` beside `applyGsapHooks`, imported by the guard in
 place of the sweep. It was not made here because another author owned that file this phase.
 
-## 465. `no-continuous-object` could not see a match cut, and a match cut is what it asked for
+## 488. `no-continuous-object` could not see a match cut, and a match cut is what it asked for
 
 **Symptom.** A short film held entirely by match cuts failed `no-continuous-object`, and the message it
 failed with read "every junction answers 'the X becomes the Y'". `becomes` is the field that writes
@@ -14951,7 +14951,7 @@ match cut "fails when the rhyme is forced, and the cut reads as a trick", and no
 that. Sixteen of the eighteen structural devices are still invisible: a motif, an escalation, a sound
 bridge, metric cutting. `make judge` and your eyes.
 
-## 466. `linear-motion` warned on a pan, and 41% of this library's eases are `linear` on purpose
+## 489. `linear-motion` warned on a pan, and 41% of this library's eases are `linear` on purpose
 
 **Symptom.** `linear-motion` fired on 18 of 135 films including `brew-launch-act1` and
 `higgsfield-recreation`, the two films this repo argues from. Its message said "a visible move must
@@ -14966,7 +14966,7 @@ A move with no rest inside the shot has nothing to ramp.
 The blueprints say so at the write site and the gate fired on them anyway. `recordedPan` eases only the
 settle before the scroll "so the scroll never has a standing start" and writes every interior key
 linear on purpose (`blueprints/beats-track.mjs:70`); `beats-punct.mjs:44` keys a slow constant drift;
-`build-cadence.mjs:27` hand-keys a mechanical page pan. Same class as #465: a proxy standing in for the
+`build-cadence.mjs:27` hand-keys a mechanical page pan. Same class as #488: a proxy standing in for the
 rule, and the proxy parting company with it at the house's own correct construction.
 
 **Fix.** Judge the RUN, not the key. A maximal chain of consecutive linear MOVING segments is flat only
@@ -15005,19 +15005,19 @@ in places the gate never looks, and it always did. And nothing here can tell a p
 constant from a pan that should ease: the exemptions prove a move HAS no rest to ramp, never that a
 constant rate is the right choice for that shot.
 
-## #468 and #469: withdrawn, they were duplicates of 465 and 466
+## 490. two entries withdrawn: they were duplicates of #488 and #489
 
 Both entries were byte-identical copies of the two above them, filed again under a second numbering
 scheme. Nothing outside this file cited either number, so the bodies are removed rather than kept in
-two places where they would drift apart. Read **465** (`no-continuous-object` could not see a match
-cut) and **466** (`linear-motion` warned on a pan) instead.
+two places where they would drift apart. Read **#488** (`no-continuous-object` could not see a match
+cut) and **#489** (`linear-motion` warned on a pan) instead.
 
 Found by a mechanical scan over the headings rather than by reading: two pairs scored an identical
 Jaccard of 1.0. That scan is worth re-running whenever this file grows, because appending to a
-500-entry log without grepping it first is exactly how these got here, and how #506 was later filed
-over the top of #268.
+500-entry log without grepping it first is exactly how these got here, and how #528 was later filed
+over the top of #280.
 
-## #470 · five blocks drew a shape the object does not have, and every one was a tidy constant
+## 491. five blocks drew a shape the object does not have, and every one was a tidy constant
 
 `phoneFrame` was reported: at the catalog's own `props: { w: 230, h: 440 }` it rendered a **capsule**, not
 a phone. Reading the rest of the 188-entry catalog by eye found four more of the same class. None of them
@@ -15093,14 +15093,14 @@ a card.
 touched here and neither shows up in `snap-blocks`, which reads the layer JSON and not the picture, so a
 poster for a time-sampled block can drift with nothing to say so. Both were reverted rather than fixed.
 
-## #471: a poster drifted on every run, and nothing anywhere looked at a poster
+## 492. a poster drifted on every run, and nothing anywhere looked at a poster
 
 **What.** `make blocks-scenes` rewrote `borderBeamCard.png` and `glassCard.png` on every run. `git status`
 was dirty after a no-op regenerate, so a real poster change and a re-run looked the same.
 
 **Nothing guards these files.** `snap-blocks` reads the layer JSON a factory returns, so a poster can
 drift, or go stale against a block that changed, in complete silence. One had: `toast.stack.png` was
-still showing the see-through avatar fill that `#470` replaced.
+still showing the see-through avatar fill that `#491` replaced.
 
 **Root cause.** `renderFrame(n)` is pure in the DOM and the crop rects are stable (`block-frames.json`
 is byte-identical across runs). A GPU-backed block does not rasterise byte-identically: measured on
@@ -15125,9 +15125,9 @@ decoder removed the browser, the server and the serialisation from the question 
 delta of 19** between runs, at a fixed frame, measured three times. That is not the rasteriser. Its
 poster is left drifting on purpose rather than absorbed by a wider threshold, because loosening a check
 until a number stops appearing is how a gate ends up measuring nothing. The block wants the same
-backward-seek treatment `#370` applied to the engine.
+backward-seek treatment `#384` applied to the engine.
 
-## #472: a gate printed "this film has sound" over a track measuring -91 dB
+## 493. a gate printed "this film has sound" over a track measuring -91 dB
 
 **What.** Two showcase films declared `"audio": { "auto": true }`, rendered a **-91 dB AAC track**, which
 is digital silence, and `make audio-check` printed **"✓ this film has sound"** for both.
@@ -15160,7 +15160,7 @@ needs the same question asked once: is there a path where the declaration is pre
 empty. `bed-missing` was the answer for one field; this is the answer for the next; the rest of
 `audio-check` still grades intent alone.
 
-## #473: the showcase page typed six film durations, and two were already wrong
+## 494. the showcase page typed six film durations, and two were already wrong
 
 **What.** `site/app/showcase/page.tsx` carried a hand-written `dur` string per film. `creed-launch` was
 recut from 53s to 35.6s and the page still read **`0:53`**. `plinth-ad` read `0:27` against a **0:28**
@@ -15168,7 +15168,7 @@ render, and nobody had touched that film.
 
 **Root cause, and it is the shape this repo logs most.** A duration is a fact about the mp4, and the
 page held a second copy of it, updated by whoever last remembered. `site-counts.mjs` exists because the
-same class produced eight stale figures across five files in one afternoon; `#471` exists because a
+same class produced eight stale figures across five files in one afternoon; `#492` exists because a
 poster went stale with nothing watching. This was the same thing one file over.
 
 **Fix.** `scripts/site/films-json.mjs` reads the duration from the encoded film with `ffprobe` and
@@ -15183,7 +15183,7 @@ has to come from the artifact that ships.
 regenerated rarely and re-encoding six of them to check a label is a poor trade on every push. It
 belongs beside `make site-assets`, which is what changes them.
 
-## #474: a sting counted as a joint, so declaring a spectacle moved every backdrop one beat late
+## 495. a sting counted as a joint, so declaring a spectacle moved every backdrop one beat late
 
 **What.** `bindWindowsToJunctions` (`core/junctions.js`) binds `bg` windows that declare no times to the
 film's joints, one per beat. It read **`table.junction`**, the merged list, which also holds stings.
@@ -15213,7 +15213,7 @@ joint past the duration. Both fail when the old line is restored, which is how I
 **The shape worth grepping for.** A merged convenience list read where a narrower one was meant. The
 inclusive list is always the easier import and is usually the wrong answer.
 
-## #475: beatSync moved the cuts and left the stings behind, so a sting drifted off the cut it punctuates
+## 496. beatSync moved the cuts and left the stings behind, so a sting drifted off the cut it punctuates
 
 **What.** `audio.beatSync` snaps a film's joints onto the track's pulse (`core/beat-bind.js`
 `snapJoints`). Cuts snapped their `t`, seams snapped the centre of their blend, and **stings did not
@@ -15242,7 +15242,7 @@ it (on-the-cut, offset-preserved, out-of-reach-untouched); the first two fail wh
 **The shape worth grepping for.** "Leave it alone" is not a null action when everything around it moves.
 A mark defined by its RELATION to another mark has to travel with it or the relation is what breaks.
 
-## #476: a sting tint was read as a hex, so a theme token silently painted it black
+## 497. a sting tint was read as a hex, so a theme token silently painted it black
 
 **What.** `stings[].color` and `stings[].colors[]` reach a WebGL uniform through
 `formats/scene/scene.js`, which converted them with `parseInt(String(h).replace('#',''), 16)`. That
@@ -15253,7 +15253,7 @@ to say why. `"rgb(255,0,0)"` and every CSS colour name did the same. A film rend
 **Root cause.** The author-facing key is called `color`, and the schema does not promise "hex". The
 engine already has an owner for exactly this question: `glowRGB` in `core/filters.js`, written because
 an SVG `feFlood` presentation attribute cannot resolve `var()` either. The sting path never called it
-and open-coded a hex parser instead, a second and worse resolver, which is the drift #159 and #358 are
+and open-coded a hex parser instead, a second and worse resolver, which is the drift #165 and #372 are
 both about.
 
 **Fix, in two halves with one owner each.** Resolution goes to `glowRGB`, so there is still exactly one
@@ -15270,7 +15270,7 @@ so the guard rejects any other token rather than letting one through.
 **Why no test caught it.** Nothing in the library had ever written a token as a sting colour, so the
 hex-only parser was never asked a question it could get wrong. Four assertions now pin the contract.
 
-## #477: beatSync reports what it moved, and the render log could not hear it
+## 498. beatSync reports what it moved, and the render log could not hear it
 
 **What.** `core/beat-bind.js` builds a one-line report of every joint the grid moved (`describeBind`),
 and `formats/scene/scene.js` logs it. It never reaches an author. Rendering a beat-synced scene prints
@@ -15282,7 +15282,7 @@ Nothing connects that console to the render process: `internal/scene/scene.go` r
 is `chromedp.Evaluate("window.__engine.meta", &meta)`, whose Go struct has a fixed field set, so an
 unknown JSON key is dropped by `encoding/json` without a word. `core/boot.js` builds that meta object
 from a fixed key list too. So the value is computed, handed to a dead channel, and discarded: the same
-"written and never read" shape as `cameraMove` (#424) and `segments` (#425).
+"written and never read" shape as `cameraMove` (#444) and `segments` (#510).
 
 **Fix.** The value now travels the channel that already exists rather than a new one.
 `formats/scene/scene.js` KEEPS the note instead of only logging it and returns it on the scene;
@@ -15294,15 +15294,15 @@ from a fixed key list too. So the value is computed, handed to a dead channel, a
 
 **The shape to remember.** Three files had to agree for one string to survive, and each of the three
 failed silently on its own: a console nothing listens to, a key nobody copies, a struct field that does
-not exist. This is the same "written and never read" family as `cameraMove` (#424) and `segments`
-(#425), and it is why a Go struct mirroring a JS object is a two-owner hazard every time.
+not exist. This is the same "written and never read" family as `cameraMove` (#444) and `segments`
+(#510), and it is why a Go struct mirroring a JS object is a two-owner hazard every time.
 
 **What still works, so the scope is clear.** The line IS visible in `make studio` and any devtools
 console, and `bindBeats` still THROWS (loudly, into `window.__engineError`, which the renderer does
 read) when a scene asks to be beat-matched and the grid will not load. Only the informational half is
 lost, and only in the batch render.
 
-## #478: the one block whose job is to host a brand painted Apple's window buttons over every theme
+## 499. the one block whose job is to host a brand painted Apple's window buttons over every theme
 
 **What.** `browserFrame` (`blocks/ui.mjs`) drew its three traffic dots from the macOS literals
 `#FF5F57`, `#FEBC2E`, `#28C840`. So the block that exists to frame a brand's own product UI answered to
@@ -15329,7 +15329,7 @@ object. A window button is the opposite case: it is chrome the host application 
 **The shape worth grepping for.** A literal that depicts a real product's UI. It reads as fidelity and
 it is a lock, and the block most likely to carry one is the block a brand is meant to sit inside.
 
-## #479: the same frame number drew two different pictures, and the difference was one card's type
+## 500. the same frame number drew two different pictures, and the difference was one card's type
 
 **What.** `parallaxZoom` (`blocks/vfx.mjs`) rendered frame 45 two different ways. Measured over 16
 separate browser launches, all rendering the SAME n with no seek history: **4 of 15 differed from the
@@ -15371,7 +15371,7 @@ backwards and is fixed by the same line.
 **The shape worth grepping for.** Text inside an element whose transform SCALES. A translate is safe; a
 scale changes the raster the glyphs need, and which raster arrives is the compositor's decision.
 
-## #480: the ghost trail painted OVER the layer, and a filled plate trailed nothing at all
+## 501. the ghost trail painted OVER the layer, and a filled plate trailed nothing at all
 
 **What.** `core/fx/ghost.js` builds k copies of a layer and poses each at where the layer WAS. Two
 defects, both visible in a shipped film (`showcase-ui`, the panel that slides out at 4.5s): the echoes
@@ -15410,7 +15410,7 @@ both are recorded rather than changed.
 trail that veils its own subject. It was found by rendering a repro and LOOKING, which is what
 `make judge` is for. `probe-purity` still passes: nothing here reads a previous frame.
 
-## #481: the wordSlot chip clipped its own descenders
+## 502. the wordSlot chip clipped its own descenders
 
 **What.** `{ "wordSlot": { "words": [...], "chip": true } }` draws the brand-coloured box CLAUDE.md's
 launch rule 5 asks for. Every `g`, `j`, `p`, `q` and `y` in it came out with a flat bottom: "puggy" and
@@ -15437,7 +15437,7 @@ the fix, not a side effect. `make audit` on that scene is clean before and after
 client size, and a descender sliced by half a pixel of overflow does not move either. It was found by
 rendering a word with a descender in a chip and looking at it.
 
-## #482: a gate kept its own list of which backdrops move, and called eight of them dead
+## 503. a gate kept its own list of which backdrops move, and called eight of them dead
 
 `scripts/gates/direction-floor.mjs` decided `no-bg-motion` from a hand-kept regex over preset NAMES:
 `/gradient|aurora|mesh|constellation|wave|flow|shader|orb|noise|plasma|dither|dotmatrix|metallic|softwash|liquid|spotlight/i`.
@@ -15449,18 +15449,18 @@ film sitting on it was told its background was static.
 **Root cause: two owners of one fact.** `bgPreset` in `core/backgrounds.js` returns the fx list that
 `renderBg(ctx, w, h, t, spec)` paints, and `BG_BLURBS` states the split in prose ("FLAT = `plain`
 `paper` `accentPlain` `dark` `deep`. Everything else animates"). The gate restated that in a regex over
-names, and the regex went stale the moment a preset was added or renamed. It is the same shape as #159:
+names, and the regex went stale the moment a preset was added or renamed. It is the same shape as #165:
 the second copy fails silently, because a missing name reads as "static", which is a legal answer.
 
 **Fix.** The gate asks the preset instead of matching its name: `movingPreset(name, value)` calls
 `bgPreset` and reports motion when any fx is not `grain` (film grain over a still base is exactly what
 the blurbs call FLAT). The derived answer agrees with `BG_BLURBS` on all 22 presets, and there is now
-nothing to keep in sync. An unknown name throws in `bgPreset` (#361) and is not this gate's finding.
+nothing to keep in sync. An unknown name throws in `bgPreset` (#375) and is not this gate's finding.
 
 **Blast radius, measured.** Over the 153 scenes in `formats/scene/`, 16 lost a spurious `no-bg-motion`
 warning and no scene gained a finding. Nothing else in `scripts/` carried a second copy of the list.
 
-## #483: a gate could only see a fragment written the shorter of its two documented ways
+## 504. a gate could only see a fragment written the shorter of its two documented ways
 
 An `html` layer and a `bg` window each take their markup two ways: `html` (inline in the scene JSON) or
 `src` (the same markup in a file). `core/sanitize-html.js` `htmlSource` is the one resolver the renderer
@@ -15483,7 +15483,7 @@ a finding.
 **The shape worth grepping for.** A feature with two spellings and a reader that knows one. The tell is
 that the failure looks like a defect in the film rather than in the reader.
 
-## #484: the clipped-text rule read every mask as a mistake
+## 505. the clipped-text rule read every mask as a mistake
 
 `verify/audit.mjs` hard-failed any film using the `tabBar.switch` block:
 `[clipped-text] DesignMotionExpo: mask is 329px too narrow for the glyphs`. Nothing was cut that was
@@ -15515,7 +15515,7 @@ edge is no longer reported here. The layer-level safe-zone and overflow checks s
 changed exit code, no finding added or removed in kind. Two scenes report the SAME finding one sample
 frame later, because the earliest frame was the one holding a mask at rest.
 
-## #485: the validator's lint was one 225-line body, so adding a rule was surgery
+## 506. the validator's lint was one 225-line body, so adding a rule was surgery
 
 `lintData` in `core/validate.mjs` scored cyclomatic complexity 84 across 225 lines, the highest in the
 repo. It is a LIST of eight independent authoring rules, and every one of them was inlined in one
@@ -15563,7 +15563,7 @@ the measurement, and a gate on a complexity number would fail dozens of honest f
 `splitParam` still scores 27 after the split, because it is a character scanner and cyclomatic
 complexity counts branches: a tokenizer branches. That is the score being a question, not a verdict.
 
-## #486: a comment inside devDependencies broke `npm install` for every fresh clone
+## 507. a comment inside devDependencies broke `npm install` for every fresh clone
 
 **What.** `npm install` failed outright at the repo root:
 `EINVALIDPACKAGENAME · Invalid package name "//puppeteer"`. Not a warning, not a partial install. No
@@ -15590,7 +15590,7 @@ comment moved, and nothing in the gate suite runs `npm install`. The one machine
 it is a fresh clone, and a fresh clone is exactly the case nobody tests. It is the same shape as the
 gitignored-films problem: the checkout everyone has is not the checkout a newcomer gets.
 
-## #487: two motion gates where one function held every rule
+## 508. two motion gates where one function held every rule
 
 `scripts/dev/complexity.mjs` put four functions from the motion pair in the repo's worst band:
 `motion-director.mjs` `analyse` at cx 108 over 372 lines, and in `motion-audit.mjs` the per-element
@@ -15629,7 +15629,7 @@ module evaluation.
 
 ---
 
-## #488: one static file server, copied 22 times, with 22 hand-rolled path guards
+## 509. one static file server, copied 22 times, with 22 hand-rolled path guards
 
 **What.** A structural-duplication scan found the same eight-line static file server in 22 scripts
 under `scripts/` and `verify/`: `scripts/author/preview.mjs`, `scripts/author/scene-page.mjs`,
@@ -15672,7 +15672,7 @@ whose capture needs sRGB and hinting off.
 copy served a real file as `application/octet-stream`. And studio's 404 body is now empty rather than
 `not found`.
 
-## #425: two `html` layers, one document, and the later stylesheet silently won
+## 510. two `html` layers, one document, and the later stylesheet silently won
 
 **The symptom.** Authoring `preface-launch`, the hero file pane was set to `.h { font-size: 40px }`
 and rendered at about 25px. Raising it to 60px changed nothing. Every gate was green, the JSON on
@@ -15685,7 +15685,7 @@ It sits later in paint order, so its rules won on every frame the big card was o
 layers, one global namespace, last one wins, nothing said a word.
 
 **What it is an instance of.** Documented input accepted and then silently discarded, which is the
-class this file logs most (#210, #213, #369, #373, #422). It is also the exact shape of #422: hand
+class this file logs most (#216, #219, #383, #387, #442). It is also the exact shape of #442: hand
 authored CSS that reads correctly and does nothing.
 
 **The workaround in the film, and why it is not the fix.** Every rule in both panes is now
@@ -15722,7 +15722,7 @@ scenes.**
 Pixels were compared separately, at 8 frames each on the 64 renderable scenes carrying an `html` layer
 or a hand-authored `html` bg. That comparison needs its own control and this is why: run the SAME code
 twice and 29 of the 64 scenes differ, some by a max channel delta of 173. Screenshot capture is not
-byte-reproducible for a GPU-backed backdrop (#102 again). Against that control, two scenes carry a
+byte-reproducible for a GPU-backed backdrop (#105 again). Against that control, two scenes carry a
 reproducible change and the other 62 do not:
 
 - **`glass`** (max delta 25, four frames of eight, control 0). This is the bug, in a shipped film. Its
@@ -15747,7 +15747,7 @@ after. `probe-purity scene` passes: 25 sampled frames, identical DOM regardless 
 that greps two `html` layers for a shared class name would notice this collision and leave the
 engine perfectly able to produce it again tomorrow (CLAUDE.md, "ARCHITECTURE: fix it at the root").
 
-## #489: the engine wrote 7,345 em dashes, and its own error message told you not to
+## 511. the engine wrote 7,345 em dashes, and its own error message told you not to
 
 The house rule is one line and it is global: never write an em dash, in code, comments, docs, commit
 messages or output. `core/validate.mjs` enforces it on the ONE surface it could see, on-screen copy in a
@@ -15786,7 +15786,7 @@ compares is not a comment: it changes with its assertion, in the same edit.
 **The gate that now catches it: `node scripts/dev/no-emdash.mjs`.** It reports every remaining em dash
 in scope with its file, line and surrounding text, and exits non-zero. Its exclusions are explicit and
 commented, not hidden: `site/` and `docs-site/` are another codebase with their own pass, vendored
-files are not ours, and `docs/MISTAKES.md` entries below #400 are the historical record. It also PRINTS
+files are not ours, and `docs/MISTAKES.md` entries below #420 are the historical record. It also PRINTS
 the count still owed by `cmd/` `internal/` `mcp/` `themes/` `presets/` `registry/`, which no pass has
 reached, so the remaining debt cannot go quiet.
 
@@ -15796,7 +15796,7 @@ so the property is only knowable across the whole repo, which is exactly the cas
 rule names as a gate's job. The validator stays where it is: it refuses the character in author data,
 at the entry point, and that half of the rule was never the broken half.
 
-## #490: the audit's one function did eleven jobs, because puppeteer only ships one
+## 512. the audit's one function did eleven jobs, because puppeteer only ships one
 
 `auditFrameFn` in `verify/audit.mjs` was 927 lines with a cyclomatic complexity of 166: the hardest
 function to change in this repo, and the gate that grades every film in the library. Inside it sat
@@ -15839,7 +15839,7 @@ Complexity, from `node scripts/dev/complexity.mjs verify`: the file's worst func
 `unholdable (50+)` bucket for the whole `verify` tree is now empty, and `hard to test (21-50)` holds
 one function instead of three.
 
-## #491: the validator passed a scene the engine refuses at boot, and studio hid the reason
+## 513. the validator passed a scene the engine refuses at boot, and studio hid the reason
 
 **What.** A scene declaring `spectacle` with an `of` naming no layer passed `make validate` clean, then
 died at boot. The whole report the author got was three stack frames in a browser panel:
@@ -15879,7 +15879,7 @@ server. Worth remembering wherever that hook is used again.
 refusal arrives with no file name attached. And an error a human cannot copy is an error a human
 retypes by hand, badly.
 
-## #492: RETRACTED, and the retraction is the lesson
+## 514. RETRACTED, and the retraction is the lesson
 
 **This entry claimed vawe's sound effects were 19 unlicensed Mixkit recordings. That is false.**
 
@@ -15903,9 +15903,9 @@ coordinator never opened it.
 
 **What survived.** The gap was real, just narrower than stated: the 15 existing cues are all
 INTERACTION sounds (press, toggle, success, error, the Cuelume vocabulary, designed for UI), and
-nothing derived sound from MOTION. That half is #493.
+nothing derived sound from MOTION. That half is #515.
 
-## #493: the engine knew every event in its own timeline and turned none of it into sound
+## 515. the engine knew every event in its own timeline and turned none of it into sound
 
 **What.** `buildSfx` scored a film from its cuts, its stings and its seams, and nothing else. Layer
 entrances, camera moves, counters and `parts` staggers were all silent, on every film, always. So a
@@ -15917,8 +15917,8 @@ description of what moves and when: `layers[].start`, `anim`, `w`/`h`, `data.cam
 `countDur`, `parts[].stagger`, `spectacle.at`. Every one of those is read by the picture and by
 nothing else. The sound path read a different, much smaller set (the junction list) and never asked
 the timeline what else it contained. One fact, two consumers, and the second consumer was never
-wired: the same shape as #423 (the audit read a camera the renderer had already baked differently)
-and #213 (a `SPECTACLE` field an author had to fill that no code read).
+wired: the same shape as #443 (the audit read a camera the renderer had already baked differently)
+and #219 (a `SPECTACLE` field an author had to fill that no code read).
 
 **Fix.** `core/audio-tactile.js` derives motion cues from the timeline the engine already holds, in
 the `{ t, name, gain }` shape `buildSfx` has always carried. A layer's SIZE and TRAVEL pick its cue
@@ -15944,7 +15944,7 @@ would have rewritten the sound of every film that already uses it. Silence stays
 the motion and that the density invariant holds; it cannot prove a thud belongs there. That is ears,
 and it is the same split this repo already draws between `make author-check` and `make judge`.
 
-## #494: author-check expanded two sugars of three, so a film built from blueprints failed step one
+## 516. author-check expanded two sugars of three, so a film built from blueprints failed step one
 
 **What.** `make author-check` expands `block` and `comp` sugar before it validates, and did not expand
 `beat`. So a film composed the way CLAUDE.md tells you to compose one, from `make blueprints`, failed
@@ -15963,7 +15963,7 @@ arms of one check disagreeing about what counts as a comment.
 **Found by** an agent upgrading `product-feature-tour` to use a `wordBlast` blueprint. It could not get
 past author-check on a film the docs told it to build that way.
 
-## #495: four defects in two films that every gate passed
+## 517. four defects in two films that every gate passed
 
 **What.** Two films were upgraded with cuts, camera moves and backdrops. Every blocking gate went green,
 `seam-check` read 16 boundaries clean, and the films were still wrong in four ways. All four were found
@@ -15984,7 +15984,7 @@ by reading `make judge` sheets and beats contact sheets, and none by a gate.
 frame that holds nothing, one loud thing on top of another, and timing against intent. The instruction
 to READ THE SHEETS is not ceremony, and a film can be green and wrong at the same time.
 
-## #496: `schema-drift --write` could never write the block it exists to write
+## 518. `schema-drift --write` could never write the block it exists to write
 
 **What.** `node scripts/gates/schema-drift.mjs --write` is the command CLAUDE.md names as the way to
 regenerate `formats/scene/schema.json`. It has been unable to do so. The splice anchor was
@@ -16003,7 +16003,7 @@ block into the generator's own one-line-per-key shape, which is what its header 
 and formatting cannot fool it. What was missing was any use of `--write` at all: adding three layer
 props is what surfaced it, three years of props having been added by hand.
 
-## #497: `iris` was registered as a bare `circleWipe`, so its second argument was the iris centre
+## 519. `iris` was registered as a bare `circleWipe`, so its second argument was the iris centre
 
 **What.** `core/clips.js` ANIM held `iris: circleWipe` and `defocus` and `clock` the same way. Every
 entry in that registry is called as `fn(enterT)`, so nothing had ever passed a second argument and the
@@ -16021,7 +16021,7 @@ takes an argument of its own is wrapped to arity 1 now.
 changes when a warp is handed to them. `iris` appearing in that set is what found this, and the same
 assertion refuses a future entrance that leaks a parameter into the slot.
 
-## #498: the recipes doc said motion blur was opt-in per layer, and the engine had made it automatic
+## 520. the recipes doc said motion blur was opt-in per layer, and the engine had made it automatic
 
 **What.** `docs/CRAFT/AFTER-EFFECTS-RECIPES.md` item 4 reads "`ghost` in blur mode does the right
 physics ... but it is opt-in per layer and driven off an authored motion track, so a layer entering
@@ -16029,7 +16029,7 @@ with `anim: "slide-left"` and no `motion` array gets nothing. After Effects make
 with a single angle; here it is a per-layer decision most authors never make."
 
 Half of that is out of date. `core/tracks/motion.js` has applied a velocity-derived blur to EVERY layer
-with a motion track above 480 px/s since docs/MISTAKES.md #204, using the same sampler, with
+with a motion track above 480 px/s since docs/MISTAKES.md #210, using the same sampler, with
 `motionBlur: false` as the opt-out. The paragraph describes the engine before that change.
 
 **Root cause.** A research document naming an engine file, written from the file it named
@@ -16046,7 +16046,7 @@ rasteriser noise, not this change.
 measurement. What is checked is the behaviour, in `make lib-test` (the shared velocity read is asserted
 to be arithmetically the read the motion track already made) and by the pixel diff above.
 
-## #499: three name collisions in one session, and the check that would have caught all three
+## 521. three name collisions in one session, and the check that would have caught all three
 
 **What.** Three separate times I introduced a name that already meant something else, and every time the
 engine accepted it and did the wrong thing silently.
@@ -16075,7 +16075,7 @@ first name collide.
 cannot quietly make a mode resolvable again. Nothing catches the general class, and nothing can: a name
 that already exists is a fact about the reader, not about the code.
 
-## #500: the motion instrument lied twice, and I was fooled by it within the hour
+## 522. the motion instrument lied twice, and I was fooled by it within the hour
 
 **What.** `./bin/vawe` prints a motion figure beside every render, added this session so authoring has a
 number instead of an opinion. It was wrong in two independent ways.
@@ -16101,7 +16101,7 @@ ground and one still headline it says "the GROUND is 95% of this film's measured
 `motion-split` reuses the Go renderer's own grid and sub-step, so the two agree (0.28 here, 0.27 there
 on the same film).
 
-## #501: a filter and a height, both authored, both silently dropped
+## 523. a filter and a height, both authored, both silently dropped
 
 **What.** Two props accepted and discarded on the same afternoon, found by building one title card.
 
@@ -16126,7 +16126,7 @@ was `"" → "blur(0.52px)"`: the old code was losing its own contribution too.
 asserts `adjust` honours an authored height. Neither is catchable by a gate in general, which is the
 argument for the rule the layer API should follow: **if `w` is handled centrally, `h` must be too.**
 
-## #502: green ticks read as passes, twice, in the gate for reading green ticks as passes
+## 524. green ticks read as passes, twice, in the gate for reading green ticks as passes
 
 **What.** Adding a drift check for a generated doc took three attempts. The first insert silently did not
 apply, and I read the resulting green run as a pass. Re-applied, it landed BELOW the clean-path exit
@@ -16144,7 +16144,7 @@ are now done for `grammar --check`.
 **Which gate catches it.** Nothing catches an edit that did not apply. The habit is the fix, and it is
 cheap: one grep after every scripted edit.
 
-## #503: a claim tested against the wrong population, and a test pinned to a count
+## 525. a claim tested against the wrong population, and a test pinned to a count
 
 **What.** Two smaller errors in the claims system, both of which produce a confident wrong answer.
 
@@ -16166,7 +16166,7 @@ SHAPE, that the vocabulary is a registry which refuses an unknown name.
 **Which gate catches it.** `make claims` prints the scope beside every verdict, so a mismatch is visible
 in the output rather than only in the file.
 
-## #504: a fork of a store that already existed, twenty lines from a doc that documented it
+## 526. a fork of a store that already existed, twenty lines from a doc that documented it
 
 **What.** I built `grammar/` to hold what we learn from reference films.
 `docs/CRAFT/REF-together-chat.md` is a 346-line hand study of exactly that, and it documents the same
@@ -16185,7 +16185,7 @@ which to believe. Both were right, and the disagreement is the finding.
 from the store it is generated from. Nothing catches a second store being created; `make grammar` and
 `make census` exist so the first one is easy to find.
 
-## #505: four blind attempts at an effect that has a name and a published recipe
+## 527. four blind attempts at an effect that has a name and a published recipe
 
 **What:** the user asked for the look in a reference frame: white text with an orange body and a blue
 rim. I built it four times by eye. Every attempt stacked coloured copies of the same text, offset and
@@ -16216,7 +16216,7 @@ resolved invalid and the browser dropped the entire `filter` declaration, both p
 and `feMerge` over an opaque plate covers rather than sums, which is why the wide tail that produces
 the blue rim is added with `feComposite operator="arithmetic"`.
 
-## #506: the motion figure was measuring worker boundaries, not the film
+## 528. the motion figure was measuring worker boundaries, not the film
 
 **What:** the render printed one motion number and `make motion-split` printed another for the same
 film, roughly five times apart. Four explanations were written into the code before anybody measured
@@ -16265,11 +16265,11 @@ That is not scattered per-tab noise, it is a systematic pattern: in the sharded 
 drawing the wrong instant. The mechanism is NOT established here and this entry should not be read as
 settling it.
 
-**THIS ENTRY WAS FILED WITHOUT CHECKING FOR DUPLICATES, and there are two.** #190 (eight render workers
-starved raster, and words blinked out) and especially #268 (the worker that drew a frame was decided by
-a race, so no two renders could be compared) are the same territory. #506 is kept because its
+**THIS ENTRY WAS FILED WITHOUT CHECKING FOR DUPLICATES, and there are two.** #196 (eight render workers
+starved raster, and words blinked out) and especially #280 (the worker that drew a frame was decided by
+a race, so no two renders could be compared) are the same territory. #528 is kept because its
 contribution is the MEASUREMENT and the reporting fix, not the discovery, but anybody working this
-should read #268 first. Checking this file before appending to it is one grep and it was skipped.
+should read #280 first. Checking this file before appending to it is one grep and it was skipped.
 
 **The lesson, and it is the expensive one:** four hypotheses were reasoned from reading the code and
 every one survived until a number killed it. The cheapest test, printing both delta arrays, was named

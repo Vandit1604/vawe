@@ -45,7 +45,7 @@ if (!fs.existsSync(path.join(CLIP_DIR, 'manifest.json'))) {
 const scenes = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'schema.json' && f !== '_coverage-reel.json')
   // Lowered, for the same reason `scripts/gates/coverage.mjs` lowers: a cut style or sting fx declared
   // through the unified `transitions` surface is exercised by a real scene, and counting it as a gap
-  // would put an already-covered effect back in the reel (docs/MISTAKES.md #391b).
+  // would put an already-covered effect back in the reel (docs/MISTAKES.md #408).
   .map((f) => { try { return lowerScene(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))); } catch { return null; } })
   .filter((j) => j && j.module === 'scene');
 const seen = { anim: new Set(), cut: new Set(), sting: new Set() };

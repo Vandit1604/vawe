@@ -7,7 +7,7 @@
 // Run it directly:  node scripts/site/type-specimens.mjs
 //
 // WHY IT IS GENERATED. A hand-kept list of kinetic presets goes stale the moment a preset is added,
-// and nothing says so (docs/MISTAKES.md #159). So the inventory here is read out of the code that
+// and nothing says so (docs/MISTAKES.md #165). So the inventory here is read out of the code that
 // renders it: PRESETS + PRESET_BLURBS in core/type.js, BEATS + REQUESTS in blueprints/index.mjs, and
 // the text-layer prop list the schema generates from the PROPS declarations. Add a preset and it
 // appears on the site with its own blurb and a working specimen, with no edit here.

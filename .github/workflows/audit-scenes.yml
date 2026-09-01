@@ -1,7 +1,7 @@
 name: layout audit (whole library, weekly)
 
 # `make audit` grades the one scene an author has open, so it only ever catches NEW defects. Two scenes
-# shipped dark-on-dark and stayed that way because nothing asked them again (docs/MISTAKES.md #373).
+# shipped dark-on-dark and stayed that way because nothing asked them again (docs/MISTAKES.md #387).
 # This is the sweep that asks them again. Weekly, not nightly: it is minutes rather than seconds, and a
 # contrast defect that has been on disk for a month is not urgent enough to pay for daily.
 #

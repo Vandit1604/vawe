@@ -23,7 +23,7 @@ export const CATALOG = [
       { text: '  "theme": "argus",', color: 'var(--up)' }, { text: '}', color: '#8898AA' }] } },
   { name: 'terminal', family: 'terminal', blurb: 'command prompt; command types in, output answers after it',
     props: { w: 540, command: 'make video', output: ['rendering 1950 frames...', 'done → out.mp4'] } },
-  // The two halves of the layers-vs-html head-to-head (docs/MISTAKES.md #410), kept as a matched pair
+  // The two halves of the layers-vs-html head-to-head (docs/MISTAKES.md #429), kept as a matched pair
   // on purpose: same subject, one built from layer primitives and one as a hand-authored surface.
   { name: 'terminalPro', family: 'terminalPro', blurb: 'a deploy terminal built from layer primitives: every line its own timed, measurable object',
     props: { w: 820, command: 'npm run deploy' } },

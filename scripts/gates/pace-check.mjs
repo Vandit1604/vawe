@@ -6,7 +6,7 @@
 // WHY THIS EXISTS. Two films were authored as a deliberate improvement on showcase-flight.json and both
 // came out SLOWER than the thing they replaced: 0.85 and 0.95 events per second against its 1.79, and
 // below the library's own median of 1.20. Nobody had to watch them to know, it is arithmetic on the
-// JSON, and nothing measured it (docs/MISTAKES.md #322).
+// JSON, and nothing measured it (docs/MISTAKES.md #336).
 //
 // The gate that knew already existed and was looking at the wrong artefact. `storyboard-check` warns
 // `held-state-too-long` at about 1.5 seconds, and it grades the PLAN. Both films were replanned until

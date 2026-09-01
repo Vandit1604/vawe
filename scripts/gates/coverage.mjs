@@ -30,7 +30,7 @@ const dir = path.join(repoRoot, SCENE_DIR);
 const scenes = population('coverage · corpus', { filter: LIBRARY_WITH_DERIVATIVES, quiet: true }).names
   // Two views of the same scene. `j` is LOWERED, because a boundary declared as `transitions` carries a
   // cut style and a sting fx that this report otherwise scores as unexercised, so the library looked
-  // like it used less of the engine than it does (docs/MISTAKES.md #391b). `raw` is the authored file,
+  // like it used less of the engine than it does (docs/MISTAKES.md #408). `raw` is the authored file,
   // because lowering CONSUMES the unified keys, and the prop census below asks which authored props no
   // scene sets, answering that off the lowered copy would report `transition` and `mech` as dead the
   // moment somebody used them.
