@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes claims study-verify recreate ref motion-split
+.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -415,6 +415,13 @@ measure:
 # make lib-test: fast pure-JS asserts for the core/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs
+
+# make mistakes-check: is a docs/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
+# A property only knowable across the whole library, so it is a gate, not a write-site fix (CLAUDE.md).
+# Two verbatim duplicates and a restatement shipped because nobody rereads a 540-entry file before
+# appending; this is the reread, automated. Exits non-zero on a hit.
+mistakes-check:
+	node scripts/gates/mistakes-dupes.mjs
 
 # make silent-check: is any named vocabulary still resolved with a silent default? A wrong name must
 # not become a plausible substitute; absence may keep its documented default. core/registry.js removes
