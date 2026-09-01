@@ -4778,6 +4778,88 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the base is recognised by comparing against its own output', /cur === prior\.out \? prior\.base : cur/.test(src));
 }
 
+// ---------- CAMERA MOTION BLUR: the velocity that smears is the one RELATIVE TO THE CAMERA ---------
+//
+// A layer blurred off its own track and stayed razor sharp under a whip pan, which is backwards: a
+// shutter exposes the SENSOR. These assert the two halves that make the feature right rather than
+// merely present: a still layer smears under a pan, and a layer travelling WITH the camera does not.
+{
+  const { cameraAt: camAtKf, cameraVelocityAt } = await import('../../core/sequence.js');
+  const { frame: motionFrame, resolveCameraBlur } = await import('../../core/tracks/motion.js');
+  // linear on purpose, for the reason the velocityAt block above states: an eased segment would make
+  // these assert the shape of easeInOutCubic instead of the shape of the read.
+  const pan = [{ t: 0, x: 0, ease: 'linear' }, { t: 1, x: -600, ease: 'linear' }];
+  ok('cameraVelocityAt reports the camera translation in px per SECOND',
+    Math.abs(cameraVelocityAt(pan, 0.5, 1 / 30).vx + 600) < 1);
+  ok('cameraVelocityAt tapers to zero on the film\'s first frame rather than extrapolating',
+    cameraVelocityAt(pan, 0, 1 / 30).speed === 0);
+  ok('cameraVelocityAt answers zero for a film with no camera at all',
+    cameraVelocityAt([], 0.5, 1 / 30).speed === 0 && cameraVelocityAt(null, 0.5, 1 / 30).speed === 0);
+  ok('cameraVelocityAt refuses a window that is not a positive number of seconds', (() => {
+    try { cameraVelocityAt(pan, 0.5, 0); return false; } catch (e) { return /positive lookback/.test(e.message); }
+  })());
+  // A ZOOM IS NOT MODELLED, and that is a decision rather than an oversight: its screen velocity is
+  // radial, so it cannot be answered without the layer's stage position, which a track does not have.
+  // Asserted so a later author cannot quietly start reading `s` here and produce a uniform, wrong smear.
+  ok('a pure camera PUSH contributes no velocity: the zoom is radial and deliberately unmodelled',
+    cameraVelocityAt([{ t: 0, s: 1, ease: 'linear' }, { t: 1, s: 3, ease: 'linear' }], 0.5, 1 / 30).speed === 0);
+
+  const camKit = { fps: 30, shutter: 0.5, cameraBlur: true };
+  const camOff = { ...camKit, cameraBlur: false };
+  const camView = (t) => ({ ...camAtKf(pan, t), vel: cameraVelocityAt(pan, t, 1 / 30) });
+  const blurOf = (L, k) => {
+    const el = { style: {} };
+    motionFrame(k, el, L, null, 0.5, 15, 0, 1, { camera: camView(0.5) });
+    const m = /blur\(([\d.]+)px\)/.exec(el.style.filter || '');
+    return m ? +m[1] : 0;
+  };
+  const still = { id: 'still', start: 0, duration: 1 };
+  // travels with the camera: the camera's x goes -600px/s, so +600px/s keeps it on the same pixels.
+  const locked = { id: 'locked', start: 0, duration: 1,
+    motion: [{ t: 0, x: 0, ease: 'linear' }, { t: 1, x: 600, ease: 'linear' }] };
+  // travels AGAINST it, so its velocity on the sensor is twice the camera's.
+  const against = { id: 'against', start: 0, duration: 1,
+    motion: [{ t: 0, x: 0, ease: 'linear' }, { t: 1, x: -600, ease: 'linear' }] };
+
+  ok('a layer with NO motion track smears under a pan: standing still on the stage is moving on the sensor',
+    blurOf(still, camKit) > 0.4);
+  ok('a layer travelling WITH the camera stays sharp, because the two velocities cancel',
+    blurOf(locked, camKit) === 0);
+  ok('a layer travelling AGAINST the camera smears more than one standing still',
+    blurOf(against, camKit) > blurOf(still, camKit));
+  // The measured numbers, so a later change to the shutter arithmetic cannot pass by moving both sides.
+  // 600px/s over a 1/30s frame is 20px; half-shutter at 0.5 is 5px, and the counter-runner doubles it.
+  ok('the camera smear is the same half-shutter arithmetic the layer path uses',
+    Math.abs(blurOf(still, camKit) - 5) < 0.1 && Math.abs(blurOf(against, camKit) - 10) < 0.1);
+
+  // DEFAULT OFF, and the whole library depends on it: with the dial down the camera contributes exactly
+  // nothing, so a still layer keeps the `filter` it always had and a moving one keeps only its own blur.
+  ok('with cameraBlur off a still layer is untouched by the camera',
+    blurOf(still, camOff) === 0);
+  ok('with cameraBlur off a layer\'s own track still blurs it, unchanged',
+    Math.abs(blurOf(locked, camOff) - 5) < 0.1 && Math.abs(blurOf(against, camOff) - 5) < 0.1);
+  ok('`motionBlur: false` opts a layer out of the camera\'s blur as well as its own',
+    blurOf({ ...still, motionBlur: false }, camKit) === 0);
+
+  // PURE IN THE FRAME: nothing is remembered between frames, so the same frame drawn on a cold element
+  // and on one that has already drawn a later frame must agree. This is the branch #507 was logged on.
+  ok('camera blur is a pure function of the frame, not of the frames drawn before it', (() => {
+    const el = { style: {} };
+    motionFrame(camKit, el, still, null, 0.9, 27, 0, 1, { camera: camView(0.9) });
+    motionFrame(camKit, el, still, null, 0.5, 15, 0, 1, { camera: camView(0.5) });
+    const warm = el.style.filter;
+    const e2 = { style: {} };
+    motionFrame(camKit, e2, still, null, 0.5, 15, 0, 1, { camera: camView(0.5) });
+    return warm === e2.style.filter;
+  })());
+
+  ok('`cameraBlur` is a boolean, and a number is refused by name rather than coerced', (() => {
+    try { resolveCameraBlur(0.5); return false; } catch (e) { return /BOOLEAN/.test(e.message) && /shutter/.test(e.message); }
+  })());
+  ok('`cameraBlur` absent or false is off, true is on',
+    resolveCameraBlur(undefined) === false && resolveCameraBlur(false) === false && resolveCameraBlur(true) === true);
+}
+
 // ---- the effects catalogue can still be built --------------------------------------------------
 // THIS ASSERT EXISTS BECAUSE THE CATALOGUE FAILED CORRECTLY AND FAR TOO LATE. `effects-json.mjs`
 // refuses a family that has no authoring form and no preview (or a stated reason for having none),

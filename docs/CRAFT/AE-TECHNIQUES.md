@@ -102,9 +102,15 @@ mechanism.
 
 **Pan, do not zoom, when the subject is centred.** Built first as `s: 1 -> 2`, the same seam scored 3x
 its neighbours instead of 0.9x, because a zoom's displacement is ZERO at the frame centre and that is
-where copy sits. A translation moves every pixel by the same amount. The remaining gap to After
-Effects is motion blur: `core/tracks/motion.js` blurs from a LAYER's own track and nothing reads the
-camera, so every frame here is sharp where AE's would smear.
+where copy sits. A translation moves every pixel by the same amount.
+
+**The pan now smears, and that is most of why the cut disappears.** This paragraph used to end by
+naming the remaining gap to After Effects: the motion track blurred from a LAYER's own track, nothing
+read the camera, so every frame of a whip pan rendered razor sharp. `"cameraBlur": true` closes it. The
+velocity that smears is the one RELATIVE TO THE CAMERA, so the pan streaks the frame and a layer
+travelling with the camera stays sharp; the film's `shutter` says how much. Off by default, because it
+puts a `filter` on layers that have never carried one. Turn it on for a velocity-hidden cut: at the
+peak the frame is already unresolvable, which is the condition the technique is built on.
 
 *The handoff.* **No mechanism, and that is the finding, not a gap.** The second shot's first key takes
 an `easeOut` whose `speed` is the incoming velocity, so the picture leaves the cut still travelling and

@@ -99,6 +99,11 @@ formats/scene/*.expanded.json
 # a generator with no consumer, which is the "not reproducible from the repo" case this section exists
 # to prevent. The RENDERED instance (formats/scene/_batch/) stays ignored, because that is content.
 !formats/scene/gh-wrapped.template.json
+# The camera-blur A/B. Not a film: it is the fixture `docs/MISTAKES.md` #552 and the effects
+# catalogue both cite, a whip pan across two depth planes plus one layer that counter-pans, so
+# the smear and the cancellation can be re-rendered rather than taken on trust. An untracked
+# fixture leaves both references naming a file a clean clone does not have.
+!formats/scene/_camera-blur-probe.json
 # ...but its DATA is one account's stats at one moment: regenerable from the API, stale the next day,
 # and somebody's record rather than the framework. Same policy as assets/gen.
 formats/scene/_data/

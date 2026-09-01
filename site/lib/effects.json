@@ -1,7 +1,7 @@
 {
-  "total": 622,
+  "total": 623,
   "previewed": 276,
-  "families": 45,
+  "families": 46,
   "tags": [
     [
       "asset",
@@ -21,7 +21,7 @@
     ],
     [
       "camera",
-      13
+      14
     ],
     [
       "canvas",
@@ -2613,6 +2613,26 @@
           "name": "workspaceZoomOut",
           "stem": "camera-moves--workspacezoomout",
           "desc": "pull · back · from · a · detail · to · reveal · the · whole",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "camera-dials",
+      "title": "Camera dials",
+      "tag": "camera",
+      "intro": "Top-level · scene · keys · that · change · what · the · camera · DOES · rather · than · where · it · goes. · `\"cameraBlur\" · true` · gives · the · film · a · real · shutter · every · layer · smears · by · its · velocity · RELATIVE · to · the · camera, · so · a · whip · pan · streaks · the · frame · and · a · layer · travelling · with · the · camera · stays · sharp. · How · much · is · the · film's · `shutter`, · in · degrees; · one · layer · opts · out · with · `motionBlur · false`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is formats/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.",
+      "count": 1,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "cameraBlur",
+          "stem": "camera-dials--camerablur",
+          "desc": "CAMERA · MOTION · BLUR · blur · the · frame · when · the · camera · whips. · Every · layer · smears · by · its · velocity · RELATIVE · TO · THE · CAMERA, · so · a · fast · pan · streaks · the · whole · frame · and · a · layer · travelling · with · the · camera · stays · sharp. · Off · by · default; · the · film's · `shutter` · (degrees) · says · how · much, · and · one · layer · opts · out · with · `motionBlur · false`. · A · zoom · and · a · roll · are · radial · and · are · not · modelled",
           "scene": null,
           "noPreview": null
         }

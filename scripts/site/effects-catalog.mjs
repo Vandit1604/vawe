@@ -39,6 +39,7 @@ import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
 import { GSAP_FX, EXIT_FX } from '../../core/gsap-effects.js';
 import { BEATS } from '../../blueprints/index.mjs';
+import { CAMERA_DIAL_REGISTRY } from '../../core/camera-moves.js';
 import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS } from '../../core/camera-moves.js';
 import { COMPOSITION_NAMES } from '../../core/compositions/index.js';
 // EVERYTHING BELOW THIS LINE WAS MISSING, and `scripts/gates/arsenal-check.mjs` now fails if the next
@@ -176,6 +177,7 @@ export const sections = [
   ['Vector layer (logos/icons)', '`{ "type":"svg", ... }`. A path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame'],
   ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint', { blurbs: BEAT_BLURBS }],
   ['Camera moves', '`"cameraMove": { "move":"<name>", ... }`. A calculated camera path → `data.camera` (smooth, velocity-continuous). `{ "move":"diveIn","tx":960,"ty":300,"to":1.6 }`', names(CAMERA_MOVE_NAMES), 'camera', { blurbs: CAMERA_MOVE_BLURBS }],
+  ['Camera dials', 'Top-level scene keys that change what the camera DOES rather than where it goes. `"cameraBlur": true` gives the film a real shutter: every layer smears by its velocity RELATIVE to the camera, so a whip pan streaks the frame and a layer travelling with the camera stays sharp. How much is the film\'s `shutter`, in degrees; one layer opts out with `motionBlur: false`.', names(CAMERA_DIAL_REGISTRY.names), 'camera', { blurbs: CAMERA_DIAL_REGISTRY.blurbs }],
   ['Compositions (bespoke per-beat timeline)', '`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).', names(COMPOSITION_NAMES), 'composition', { blurbs: COMPOSITION_BLURBS }],
   ['Layer types', 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.', names(LAYER_TYPES), 'layer', { blurbs: LAYER_BLURBS }],
   ['three.js scenes (real geometry)', '`{ "type":"three", "three":"<name>" }`. A scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.', names(THREE_FX), 'layer', { kind: 'three', blurbs: THREE_SCENES }],

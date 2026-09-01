@@ -502,6 +502,14 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
 | `workspaceZoomOut` | pull back from a detail to reveal the whole |
 
+## Camera dials  `[camera]`
+
+Top-level scene keys that change what the camera DOES rather than where it goes. `"cameraBlur": true` gives the film a real shutter: every layer smears by its velocity RELATIVE to the camera, so a whip pan streaks the frame and a layer travelling with the camera stays sharp. How much is the film's `shutter`, in degrees; one layer opts out with `motionBlur: false`.
+
+| name | what / when |
+|---|---|
+| `cameraBlur` | CAMERA MOTION BLUR: blur the frame when the camera whips. Every layer smears by its velocity RELATIVE TO THE CAMERA, so a fast pan streaks the whole frame and a layer travelling with the camera stays sharp. Off by default; the film's `shutter` (degrees) says how much, and one layer opts out with `motionBlur: false`. A zoom and a roll are radial and are not modelled |
+
 ## Compositions (bespoke per-beat timeline)  `[composition]`
 
 `{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).
@@ -965,4 +973,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_622 effects across 45 families. Regenerate: `make effects`._
+_623 effects across 46 families. Regenerate: `make effects`._

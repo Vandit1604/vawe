@@ -492,6 +492,11 @@
     "drift"
    ]
   },
+  "cameraBlur": {
+   "type": "boolean",
+   "label": "CAMERA MOTION BLUR. A shutter exposes the SENSOR, so with this on every layer smears by its velocity RELATIVE TO THE CAMERA: a whip pan streaks the whole frame, and a layer whose own `motion` travels with the camera stays sharp because the two velocities cancel. Off by default. HOW MUCH is the film's `shutter` (degrees), and one layer opts out with `motionBlur: false`. Only the camera's x/y translation smears: a zoom (`s`) and a roll are radial and are deliberately not modelled.",
+   "default": false
+  },
   "shutter": {
    "type": "number",
    "label": "MOTION BLUR for the whole film, as a camera states it: the SHUTTER ANGLE in degrees. 180 is the film standard (the frame exposed for half its duration), 360 is twice the smear, 90 halves it, and 0 turns the automatic blur off. Omitted, the engine keeps its own default of about 58 degrees. It is the default only: a layer overrides it with `motionBlur` (false opts out, a number sets its own shutter), and every blur is still velocity-derived off that layer's motion track.",
