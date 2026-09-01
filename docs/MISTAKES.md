@@ -17112,3 +17112,84 @@ which cannot answer reports nothing new rather than everything.
 is invisible from the inside: everything is registered, documented and searchable, and a search only
 finds what you already suspect is there. Zero users is the symptom, and age is the one cheap fact that
 tells an unwanted thing from an unseen one.
+
+## 552. the GPU was never off, and the raster it does at ss=2 is what made a render irreproducible
+
+**The premise this started from was wrong, and it was wrong in the way this file keeps warning about:
+it was reasoned, not measured.** `internal/scene/scene.go` names no `use-gl`, `enable-gpu`, `angle` or
+`swiftshader` flag, so the reading was "headless Chrome falls back to SwiftShader and rasterises 18
+ambient shaders on the CPU". Asked directly, through the SAME launcher the render uses, Chrome says:
+
+```
+go test ./internal/scene -run TestGLRenderer -v
+  ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)   vendor Google Inc. (Apple)
+  Canvas: Hardware accelerated · Compositing: Hardware accelerated · Rasterization: Hardware
+  accelerated · Skia Graphite: Enabled · OpenGL: Enabled
+```
+
+Every stage was already on the GPU. There is no flag to add and nothing to switch on. Two prices
+measured on the way to being sure, three runs each, median: `--disable-gpu` costs the type-heavy
+`plinth-ad` 51.2s -> 91.4s at 6 workers, and it does not slow a shader film down, it STOPS it:
+`core/webgl.js` refuses to boot an ambient field with no WebGL context, so `site-backdrop` renders
+nothing at all. So the GPU is not merely present, it is load-bearing, and it always was.
+
+**What was actually broken is the other half of the same subsystem.** #541 recorded that at `ss=2` the
+renderer does not reproduce against ITSELF and named the measurement it wanted. Run, on `plinth-ad`,
+one worker, twice, with `scripts/dev/framediff`:
+
+| device scale | byte-different frames |
+|---|---|
+| `-ss 1` | **0 of 900** |
+| `-ss 2` | **19 of 900** |
+
+Same film, same worker count, same code. `tabprobe` gained a `-ss` flag (it was hard-wired to 1, which
+is why the instrument could never see the defect) and isolates it to raster in one pair of commands:
+
+```
+tabprobe -root . -data /formats/scene/plinth-ad.json -tabs 2 -frame 45 -ss 1   identical sha
+tabprobe -root . -data /formats/scene/plinth-ad.json -tabs 2 -frame 45 -ss 2   different sha
+```
+
+Two COLD tabs, no paint history at all, and the 118-line DOM dump is line-for-line identical on both.
+Same display list, different pixels, only at device scale 2.
+
+**Root cause: GPU rasterisation.** Six flags were tried against that repro through `-flags`. Four
+change nothing (`num-raster-threads=1`, `disable-composited-antialiasing`, `disable-lcd-text`,
+`enable-gpu-rasterization`). Two converge the two tabs: `disable-skia-graphite` and
+`disable-gpu-rasterization`.
+
+**Fix: `--disable-gpu-rasterization` in `allocOpts`.** `plinth-ad` at `ss=2`, byte-different frames:
+
+| | GPU raster | with the flag |
+|---|---|---|
+| 1 worker against itself | 19 of 900 | **0** |
+| 6 workers against itself | 391 of 900 | **0** |
+| 1 worker against 6 | 405 of 900 | **3** |
+
+The 3 that remain are #531's residue, a different defect with its own reproduction and its own
+paragraph in `docs/BUGS/chrome-boxshadow-raster-history.md`; it survives this flag, which is the
+evidence that they are two bugs. `site-backdrop`, a shader film, was 0 of 840 at every worker count
+before and after: WebGL is untouched by a raster flag.
+
+**Price, because SPEED IS A PROPERTY YOU CAN LOSE WITHOUT NOTICING.** Three runs each, median:
+`plinth-ad` 51.2s -> 54.6s at 6 workers, +6.6%. `site-backdrop` 42.2s -> 36.8s, inside its own 8s
+run-to-run spread. Only the type-heavy case pays, and it pays 3.4 seconds for a render that reproduces.
+
+**`disable-skia-graphite` is the trap, not the alternative.** It converges the same repro and it takes
+WebGL away entirely, so every ambient shader, sting, raymarch surface and three.js scene refuses to
+boot. Measured, not assumed: `site-backdrop` fails with `this browser gave no WebGL context at all`. It
+also costs 51.2s -> 110.6s. A flag that fixes determinism by removing the engine's headline capability
+is not a fix.
+
+**Two instruments now exist so none of this has to be reasoned again.** `VAWE_CHROME_FLAGS` puts extra
+Chrome flags on the REAL capture path (`tabprobe -flags` only ever covered two tabs), and
+`TestGLRenderer` prints what Chrome is actually doing. Both were written for this and both are the
+reason the first paragraph could be disproved in one command.
+
+**And the worker cap stays at 6, now on evidence.** `cmd/render/main.go` said nothing about why. Priced
+at ss=2 on a 10-core M4, median wall clock with the run-to-run range: `site-backdrop` 106.9s at one
+worker, 42.2s (37.5-45.8) at six, 39.5s (36.9-44.1) at nine; `plinth-ad` 120.8s, 51.2s (49.5-52.2),
+50.1s (49.8-50.9). One to six is worth 2.4x. Six to nine is worth 2% and 7%, and both sit INSIDE the
+spread of the six-worker runs, for three more renderer processes and about 350 MB. Frame agreement is
+now equal at 1, 6 and 9 (0 of 900 against itself at each), so it is a pure speed question and the speed
+is not there. → **No gate:** the numbers live in the comment beside the default they justify.

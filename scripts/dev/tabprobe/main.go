@@ -58,6 +58,15 @@ func main() {
 	flush := flag.Bool("flush", false, "hide the stage and let it paint before every renderFrame")
 	purityN := flag.Int("purityN", 150, "frames for -purity")
 	pre := flag.String("pre", "", "on tab 0, paint+shoot this comma list of frames before the measured frame")
+	// -ss exists because #541 cannot be reproduced without it: the probe was hard-wired to device
+	// scale 1 while every SHIPPED film renders at 2, so the one setting that separates the reproducible
+	// path from the irreproducible one was the one setting the instrument could not vary.
+	ss := flag.Int("ss", 1, "device scale factor (the render ships at 2, --draft at 1)")
+	// -url points the whole instrument at any page that exposes the three things it drives:
+	// window.__engineReady, window.__realRaf and window.__engine.{renderFrame,frameSig}. That is what
+	// docs/BUGS/chrome-boxshadow-raster-history.html does, so a minimal reproduction gets the tab
+	// histories, the DOM dump and the hashes for free instead of a second driver.
+	pageURL := flag.String("url", "", "drive this URL instead of the scene (must shim window.__engine)")
 	plain := flag.String("plain", "", "sweep body: render|html|canvas|readback (default frameSig)")
 	flag.Parse()
 	srv, port, err := scene.Serve(*root)
@@ -66,6 +75,9 @@ func main() {
 	}
 	defer srv.Close()
 	u := fmt.Sprintf("http://127.0.0.1:%d/formats/scene/scene.html?data=%s&fps=30", port, url.QueryEscape(*data))
+	if *pageURL != "" {
+		u = *pageURL
+	}
 
 	opts := append([]chromedp.ExecAllocatorOption{},
 		chromedp.Headless,
@@ -76,7 +88,7 @@ func main() {
 		chromedp.Flag("disable-checker-imaging", true),
 		chromedp.Flag("run-all-compositor-stages-before-draw", true),
 		chromedp.Flag("disable-partial-raster", true),
-		chromedp.Flag("force-device-scale-factor", "1"),
+		chromedp.Flag("force-device-scale-factor", strconv.Itoa(*ss)),
 		chromedp.Flag("disable-renderer-backgrounding", true),
 		chromedp.Flag("disable-background-timer-throttling", true),
 		chromedp.Flag("disable-backgrounding-occluded-windows", true),
@@ -112,7 +124,7 @@ func main() {
 		}
 		defer cancel()
 		if err := chromedp.Run(ctx,
-			chromedp.EmulateViewport(int64(bootW), int64(bootH), chromedp.EmulateScale(1)),
+			chromedp.EmulateViewport(int64(bootW), int64(bootH), chromedp.EmulateScale(float64(*ss))),
 			emulation.SetFocusEmulationEnabled(true),
 			chromedp.Navigate(u),
 			chromedp.Poll("window.__engineReady === true || !!window.__engineError", nil, chromedp.WithPollingTimeout(45*time.Second)),
@@ -155,7 +167,7 @@ func main() {
 				return
 			}
 		}
-		if err := chromedp.Run(ctx, chromedp.EmulateViewport(1920, 1080, chromedp.EmulateScale(1))); err != nil {
+		if err := chromedp.Run(ctx, chromedp.EmulateViewport(1920, 1080, chromedp.EmulateScale(float64(*ss)))); err != nil {
 			fmt.Println("tab", i, "viewport:", err)
 			return
 		}
