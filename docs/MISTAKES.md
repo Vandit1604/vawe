@@ -16331,3 +16331,68 @@ the shader path, not someone who had tried the CSS. It stood for a year and cost
 a comment says a capability is impossible, check whether the sentence after it names an experiment that
 was actually run. → **No gate. The schema now names the modes, and `formats/scene/_glass-shapes.json`
 is the worked example.**
+
+## 531. the same film rendered at 1 worker and at 6 was a different film, and #506 named the symptom
+
+**What.** #506 measured it and said plainly that the mechanism was not established: even frames agreed
+between a one-worker and a six-worker render, odd frames differed by about 4.9, and the printed motion
+figure moved from 0.97 to 2.47 on a flag that changes nothing about the film. This is the mechanism.
+Measured on a 60-frame scene, one text layer travelling across the frame: **50 of 60 captured frames
+differed between `-workers 1` and `-workers 6`, and the ten that agreed were exactly the frames worker
+0 drew in both.** On `brew-launch`, 600 of 945.
+
+**Root cause. Four of them, and none is a race.** Two renders at six workers were byte-identical, so
+nothing here is timing. Every cause is the same shape: something on the page carries state from the
+frames a tab painted BEFORE this one, and the capture deals frames round-robin, so which frames a tab
+painted before this one is decided by the worker count.
+
+1. **`will-change` on every layer** (`formats/scene/scene.css`, `.hs-layer` and `#cam`). It promotes the
+   element to its own compositor layer, and a promoted layer is rasterized once and then TRANSFORMED,
+   so its glyphs keep the sub-pixel raster of the first frame that painted them. Proven with the DOM
+   held constant: identical `getBoundingClientRect` to six decimals, identical computed styles,
+   different pixels. Removing the two took 50 of 60 to 1 of 60. Same family as #272, where 400 promoted
+   elements in a lightfield made the picture never settle. **A promotion hint is a promise about
+   ANIMATION, and this renderer does not animate, it seeks.**
+2. **Chrome's partial raster** re-rasters only the invalidated part of a tile and keeps the rest, so a
+   tile's pixels depend on what was painted into it earlier. `--disable-partial-raster` took the
+   remaining 1 of 60 to 0.
+3. **A blur that was written and never cleared** (`core/tracks/motion.js`). The camera depth-of-field
+   write was guarded by `if (dof > 0.4)`, so a layer going off screen, or coming back into focus, kept
+   the `blur()` from an earlier frame: frame 83 carried `blur(1.49px)` from frame 77 on a tab that had
+   drawn 77 and `none` on a tab that had not. That is #41 again, on the branch #41 did not cover.
+4. **A typed line that was never put back** (`core/layers/text.js`). Outside its window the typewriter
+   returned early, leaving the element holding the last in-window frame's partial line: `renderFrame(72)`
+   produced "Mee▏" on a tab that had drawn 66 and the whole headline on a tab that had not.
+
+3 and 4 are the same defect as 1 and 2 stated in our own code: **a per-frame write that is skipped is
+not a write that does nothing, it is a write that leaves the previous frame's value.** Every per-frame
+write in this engine is authoritative; these two had an exit that was not.
+
+**Fix.** `will-change` removed from `.hs-layer`, `#cam` and the beat wrapper; `--disable-partial-raster`
+added beside the two determinism flags that were already there; both early returns made authoritative.
+A fifth finding is fixed and was not load-bearing on its own: `frameSig` decided a canvas's type with
+`cv.getContext('2d')`, which CREATES the context it claims to report, so the meta tab silently turned
+context-less canvases into 2D ones and composited every later frame differently. `core/canvas-kind.js`
+records the kind where a context is actually created, and nothing probes.
+
+**What this costs, stated plainly.** Removing `will-change` changes the pixels of EVERY film. Most of it
+is glyph antialiasing; a layer that scales changes more, because the frame is now rasterized at the
+scale it is drawn at instead of reusing an earlier raster stretched. Measured on `higgsfield-recreation`:
+141 of 150 frames move, median 0.29% of pixels. That is the correction, not the damage. The other three
+files change no pixels at all on that film (verified: byte-identical with only the CSS reverted).
+
+**Verification, which is the point.** `_shardtest` (60 frames): 50 differing before, **0 after, every
+frame byte-identical between `-workers 1` and `-workers 6`**. `higgsfield-recreation`: 37 to 10 of 150.
+`brew-launch`: 600 to 100 of 945. `probe-purity`, `canvas-purity` and `lib-test` (1306 assertions) stay
+green.
+
+**STILL OPEN, and this entry does not close it.** A residue remains: 10 of 150 and 100 of 945, max
+channel delta 14 on 0.03% of a frame's pixels. It is the same family (a tab's paint history), and it is
+what #269 recorded as unattributed. One measurement points at the cause and is not proof: shooting the
+same frame again after two more real rAFs returns a picture whose background gradient has ADVANCED,
+identically in every tab. That says a live 2D canvas repaints on rAF TICKS rather than as a function of
+`n`, so its phase depends on how many rAFs the tab has served. **The next measurement is to render one
+scene twice, once with its canvas-backed background and once with a flat one, and see whether the
+residue survives.** `scripts/dev/tabprobe` is the instrument: it opens N tabs the way `scene.Capture`
+does, gives tab 0 any paint history you name (`-pre 0,6,12,...`), and prints a hash and the full DOM of
+both, so "same DOM, different pixels" and "different DOM" are one command apart.
