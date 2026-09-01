@@ -45,6 +45,12 @@ const gradAngle = (dir) => (dir === 'right' ? '270deg' : dir === 'up' ? '0deg' :
 // deterministic jitter: fract(sin()) hash of the quantized progress step, pure in p
 const frac = (x) => { const s = Math.sin(x) * 43758.5453; return s - Math.floor(s); };
 
+// matchCut's two radii, as a percentage of the clip reference box. FULL is generous rather than 71
+// (the half-diagonal of a 16:9 frame) because an off-centre cx/cy needs more to still clear every
+// corner; anything past full coverage is invisible, so there is no cost to the margin. HELD is the
+// shape the eye carries across the join: big enough to read as a subject, small enough to be a shape.
+const MATCH_FULL = 150, MATCH_R = 16;
+
 // Each presentation: { enter(p, o) → style, exit(p, o) → style }. p is that phase's progress
 // (enter 0→1 = revealing, exit 0→1 = leaving); enter(1)/exit(0) must equal identity.
 export const PRESENTATIONS = {
@@ -161,6 +167,46 @@ export const PRESENTATIONS = {
   riseBlur: withBlurb('slow rise through heavy defocus, premium slow beats', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.2).toFixed(3), transform: `translateY(${((1 - p) * o.dist * 0.8).toFixed(2)}px)`, filter: `blur(${((1 - p) * 22).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translateY(${(-p * o.dist * 0.5).toFixed(2)}px)`, filter: `blur(${(p * 22).toFixed(2)}px)` }),
+  }),
+  // matchCut: the GRAPHIC MATCH, and the mechanism is a SHARED MASK carried across the junction.
+  //
+  // THE NAME AND THE RECIPE. An editor calls this a match cut (a graphic match, or an invisible cut
+  // when it is meant not to be noticed): two shots joined because a shape in the first lines up with a
+  // shape in the second, so the eye follows one continuous form and never registers the join. Every
+  // other presentation in this file dissolves, moves or wipes BETWEEN two frames. This one holds a
+  // shape STILL and swaps what is inside it.
+  //
+  // Three steps, and the third is the one that separates it from `iris`:
+  //   1. the outgoing frame closes down to the shape,
+  //   2. the content swaps at the closed state, a HARD cut inside a held shape,
+  //   3. the incoming frame opens back out of the SAME shape, in the same place, at the same size.
+  // `iris` and `softiris` do step 3 alone, against a plain fade-out, so the shape belongs to the
+  // arriving shot only and there is nothing for the eye to carry.
+  //
+  // THE SWAP IS AT THE MIDPOINT, not at the ends, which is why each half is opacity-gated: at p = 0.5
+  // the two frames are both clipped to the identical circle, the outgoing one stops painting and the
+  // incoming one starts. A crossfade there would show two subjects through each other and lose the
+  // match entirely.
+  //
+  // WHAT YOU STILL HAVE TO DO, because no engine can do it for you: put the two subjects in the same
+  // place at the same size. `cx`/`cy` aim the shape; the match is only a match if the thing inside it
+  // is the same shape in both shots. That is composition, and it is the whole craft of the device.
+  // Masks the frame, so a whole-frame cut needs sceneUnits.
+  matchCut: withBlurb('a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks, so a whole-frame cut needs sceneUnits', {
+    enter: (p, o) => {
+      const q = clamp01(p);
+      if (q >= 1) return style({});
+      if (q < 0.5) return style({ opacity: '0' });     // the outgoing beat owns the first half
+      const c = `circle(${lerp(MATCH_R, MATCH_FULL, (q - 0.5) * 2).toFixed(2)}% at ${o.cx}% ${o.cy}%)`;
+      return style({ clipPath: c, WebkitClipPath: c });
+    },
+    exit: (p, o) => {
+      const q = clamp01(p);
+      if (q <= 0) return style({});
+      if (q >= 0.5) return style({ opacity: '0' });    // swapped: the incoming beat owns the second half
+      const c = `circle(${lerp(MATCH_FULL, MATCH_R, q * 2).toFixed(2)}% at ${o.cx}% ${o.cy}%)`;
+      return style({ clipPath: c, WebkitClipPath: c });
+    },
   }),
   // glitch jitter: quantized deterministic shake that decays as the scene lands
   jitter: withBlurb('decaying deterministic shake, alarm and glitch beats only', {

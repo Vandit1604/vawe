@@ -1,6 +1,6 @@
 {
-  "total": 581,
-  "previewed": 256,
+  "total": 583,
+  "previewed": 257,
   "families": 39,
   "tags": [
     [
@@ -73,7 +73,7 @@
     ],
     [
       "static",
-      53
+      54
     ],
     [
       "text",
@@ -85,7 +85,7 @@
     ],
     [
       "transition",
-      75
+      76
     ]
   ],
   "list": [
@@ -869,7 +869,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 26,
+      "count": 27,
       "undescribed": 0,
       "entries": [
         {
@@ -954,6 +954,13 @@
           "stem": "scene-cuts--letterbox",
           "desc": "cinema · curtains · open · and · close · top · and · bottom, · cinematic · opener; · masks, · so · a · whole-frame · cut · needs · sceneUnits",
           "scene": "/assets/effects/scene-cuts--letterbox.json",
+          "noPreview": null
+        },
+        {
+          "name": "matchCut",
+          "stem": "scene-cuts--matchcut",
+          "desc": "a · GRAPHIC · MATCH · both · beats · are · clipped · to · the · same · circle · at · cx/cy, · the · content · swaps · inside · it · at · the · midpoint, · and · the · shape · opens · back · out. · The · eye · follows · one · form · across · the · join. · Unlike · `iris`, · the · shape · belongs · to · BOTH · shots, · which · is · what · makes · it · a · match · rather · than · a · reveal. · You · still · have · to · place · the · two · subjects · at · the · same · size · and · spot; · masks, · so · a · whole-frame · cut · needs · sceneUnits",
+          "scene": "/assets/effects/scene-cuts--matchcut.json",
           "noPreview": null
         },
         {
@@ -2525,7 +2532,7 @@
         {
           "name": "count",
           "stem": "layer-types--count",
-          "desc": "a · number · that · counts · from · -> · to · across · its · own · window, · formatted · (compacts · at · 1e6, · prefix/suffix/decimals). · The · text · build · plus · a · per-frame · value",
+          "desc": "a · number · that · counts · from · -> · to · across · its · own · window, · formatted · (compacts · at · 1e6, · prefix/suffix/decimals). · The · text · build · plus · a · per-frame · value. · `roll · true` · makes · it · an · ODOMETER · one · masked · wheel · per · digit, · each · sliding · to · its · next · value, · geared · so · a · wheel · only · turns · as · the · wheel · below · it · crosses · 9",
           "scene": null,
           "noPreview": null
         },
@@ -3357,7 +3364,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "most of these regrade a photographic source, and the index ships no photographs. The exception is `thermalBlur`, which is a type effect: its live card with a radius dial is in the playground.",
-      "count": 14,
+      "count": 15,
       "undescribed": 0,
       "entries": [
         {
@@ -3399,6 +3406,13 @@
           "name": "duotone",
           "stem": "filter-presets--duotone",
           "desc": "luminance · remapped · to · TWO · colours, · shadows · to · highlights. · The · poster/press · look; · defaults · to · --ink · and · --accent, · so · it · reskins · per · theme",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "goo",
+          "stem": "filter-presets--goo",
+          "desc": "the · GOOEY · / · METABALL · threshold, · and · the · one · primitive · that · can · morph · SEVERAL · elements · as · one · body · blur · the · group, · then · push · the · blurred · ALPHA · back · through · a · hard · ramp, · so · neighbouring · shapes · grow · a · liquid · bridge · as · they · approach · and · snap · apart · as · they · part. · Put · it · on · the · PARENT · (a · `group`, · or · an · `html` · layer · whose · children · move), · never · on · one · shape · one · shape · has · nothing · to · fuse · with. · `goo · 14` · sets · the · blur · radius · (how · far · shapes · reach · for · each · other), · `goo · 14,26` · also · sets · the · ramp · hardness. · Bigger · radius · = · longer · bridges; · softer · ramp · = · wetter · edge",
           "scene": null,
           "noPreview": null
         },

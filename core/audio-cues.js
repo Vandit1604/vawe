@@ -20,6 +20,8 @@ export const CUT_CUE = {
   flip: 'toggle', spin: 'toggle', cube: 'toggle', roll: 'toggle',
   clock: 'tick', blinds: 'tick', barn: 'tick',
   squeeze: 'press', collapse: 'press', letterbox: 'press',
+  // a match cut is meant to pass unnoticed, so the shape closing is the only event worth voicing
+  matchCut: 'bloom',
 };
 
 // Seam fx -> cue. Consumed for `data.seams` (the two-scene GPU blends core/seams.js SEAM_FX; the premium
