@@ -16555,3 +16555,25 @@ keeps the old default, because there is no single answer to give it.
 
 **Worked example:** `formats/scene/_kinetic-cut.json` and its one-number twin
 `_kinetic-cut-plain.json`.
+
+## 538. The refraction lens cannot bend a straight edge, because its map is separable
+
+**What.** `glass: "refract"` displaces the backdrop through a lens ramp built from an `feImage` whose
+red channel is a function of x alone and whose green channel is a function of y alone. `feDisplacementMap`
+then reads `dx = f(x)` and `dy = g(y)`. So a horizontal edge crossing the lens is OFFSET and fringed,
+and stays perfectly straight. Real glass bows it.
+
+**How it surfaced.** `formats/scene/vawe-glass-hero.json` puts a hard ink horizon under the lens at its
+loudest moment. Letterforms tear and split convincingly, because a glyph's edges run in every direction
+and the separable map catches them. The horizon does not curve, and once seen it cannot be unseen.
+
+**Why it is not a bug.** A separable ramp is cheap, stable and correct for the common case, which is a
+lens over detail rather than over one long straight edge. A true radial map (displacement toward or away
+from the lens centre, magnitude a function of RADIUS) would bend a straight edge properly and costs a
+different `feImage`, not a different architecture.
+
+**What to do until then.** Put detail under the lens, not a single long straight edge. If the shot needs
+a bending horizon, that is the radial map, and it is a real piece of work rather than a parameter.
+
+**No gate.** Nothing can measure "this edge should have curved". This is a note for the next author, and
+its right home is beside the effect: the same limitation is recorded in the film's storyboard.
