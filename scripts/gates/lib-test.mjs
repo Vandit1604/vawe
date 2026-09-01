@@ -36,6 +36,7 @@ import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilte
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
 import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
+import { collect as arsenalCollect, coverageIn, CONFIDENT, toks as arsenalToks } from '../author/arsenal.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/junctions.js';
@@ -4867,6 +4868,79 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('newness and usage are independent reads, so an old entry with users is neither',
      (() => { const fresh = newSince(['wipe', 'zzNotARealArsenalEntry']);
               return fresh.size === 1 && fresh.has('zzNotARealArsenalEntry'); })());
+}
+
+// ---- ARSENAL HONESTY (scripts/author/arsenal.mjs) ------------------------------------------------
+// The search an author is told to reach for before inventing anything returned its nearest match even
+// when it had none, twice in one day (docs/MISTAKES.md #551). Two things are asserted here and they are
+// different failures: RECALL, that it holds what it holds, and CONFIDENCE, that it can say it does not
+// know. Fixing only the second would leave it silently missing `beam`; fixing only the first would
+// leave it confidently answering questions with no answer.
+{
+  const corpus = await arsenalCollect();
+  const coverage = coverageIn(corpus);
+  const best = (q) => {
+    const qt = arsenalToks(q);
+    return corpus.map((e) => ({ name: e.name, c: coverage(e, qt) })).sort((a, b) => b.c - a.c)[0];
+  };
+  // Two vocabularies may legitimately share a word (the `globe` LAYER TYPE and the `globe` three.js
+  // scene), so this asks the best-covering entry of that name, never the first one collect() emitted.
+  const covers = (q, name) => { const qt = arsenalToks(q);
+    return Math.max(-1, ...corpus.filter((x) => x.name === name).map((x) => coverage(x, qt))); };
+
+  // RECALL. Layer types are not a `*_REGISTRY`, so the whole family was outside the corpus, and `beam`
+  // (blurb: "a light that travels the rounded-rect border") was unfindable by a query naming exactly
+  // that. The search offered cardCascade, lightLeak and highlight instead.
+  ok('the search holds the LAYER TYPES, the coarsest vocabulary in the engine',
+     ['beam', 'component', 'globe', 'adjust'].every((n) => corpus.some((e) => e.name === n && e.kind === 'layer type')));
+  ok('every layer type in the corpus carries its blurb, which is the only text a paraphrase can match',
+     corpus.filter((e) => e.kind === 'layer type').every((e) => e.blurb.length > 20));
+  ok('"a light that travels around the border of a card" FINDS beam, and confidently',
+     best('a light that travels around the border of a card').name === 'beam'
+     && covers('a light that travels around the border of a card', 'beam') >= CONFIDENT);
+
+  // CONFIDENCE. Two sets, and the threshold sits in the gap between them. Known-present queries must
+  // keep answering; known-absent queries must produce nothing above the bar. Loosening the matcher until
+  // the first set passes would break the second, which is the point of asserting both.
+  const PRESENT = [
+    ['a light that travels around the border of a card', 'beam'],
+    ['a page scrolling under a static tilt', 'scrollStory'],
+    ['count up to a big number', 'count'],
+    ['a dotted planet with tapered route arcs', 'globe'],
+    ['grade everything beneath this layer', 'adjust'],
+    ['thermal blur', 'thermalBlur'],
+    ['show the feature set as cards that pop in one after another', 'cardCascade'],
+    ['a sheen that sweeps across the box', 'beam'],
+    ['capture a real product surface', 'component'],
+    ['a full-frame generative webgl field', 'shader'],
+    ['a lit implicit surface from a distance field', 'raymarch'],
+  ];
+  for (const [q, want] of PRESENT) {
+    ok(`arsenal answers "${q}" with ${want}`, covers(q, want) >= CONFIDENT);
+  }
+
+  // The engine has none of these. `dollyZoom` was the top hit for the first two, twice, and an author
+  // nearly hand-rolled a conic gradient off the back of the third kind of answer.
+  const ABSENT = [
+    'keep a carried layer upright while its parent rotates',
+    'invert a layer against whatever is behind it',
+    'render the scene in stereoscopic 3d for a headset',
+    'transcribe the voiceover into subtitles automatically',
+    'make one layer chase another layer around the frame',
+    'attach a physics rigid body to a layer',
+  ];
+  for (const q of ABSENT) {
+    const b = best(q);
+    ok(`arsenal says it does not know "${q}" (nearest ${b.name} at ${b.c.toFixed(2)})`, b.c < CONFIDENT);
+  }
+
+  // A word in every blurb must not buy confidence, which is the reason the weighting is idf and not a
+  // plain count. Unweighted, "chase another layer around the frame" scored the same as a real query.
+  ok('a query of nothing but corpus-wide filler is never confident',
+     best('the layer in the frame').c < CONFIDENT);
+  ok('the threshold sits strictly between the two sets, so neither end is decoration',
+     CONFIDENT > Math.max(...ABSENT.map((q) => best(q).c))
+     && CONFIDENT <= Math.min(...PRESENT.map(([q, w]) => covers(q, w))));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
