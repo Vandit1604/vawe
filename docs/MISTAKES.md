@@ -16386,16 +16386,73 @@ frame byte-identical between `-workers 1` and `-workers 6`**. `higgsfield-recrea
 `brew-launch`: 600 to 100 of 945. `probe-purity`, `canvas-purity` and `lib-test` (1306 assertions) stay
 green.
 
-**STILL OPEN, and this entry does not close it.** A residue remains: 10 of 150 and 100 of 945, max
-channel delta 14 on 0.03% of a frame's pixels. It is the same family (a tab's paint history), and it is
-what #269 recorded as unattributed. One measurement points at the cause and is not proof: shooting the
-same frame again after two more real rAFs returns a picture whose background gradient has ADVANCED,
-identically in every tab. That says a live 2D canvas repaints on rAF TICKS rather than as a function of
-`n`, so its phase depends on how many rAFs the tab has served. **The next measurement is to render one
-scene twice, once with its canvas-backed background and once with a flat one, and see whether the
-residue survives.** `scripts/dev/tabprobe` is the instrument: it opens N tabs the way `scene.Capture`
-does, gives tab 0 any paint history you name (`-pre 0,6,12,...`), and prints a hash and the full DOM of
-both, so "same DOM, different pixels" and "different DOM" are one command apart.
+**STILL OPEN, and the residue is now attributed. It is a CSS `box-shadow`, and the canvas theory was
+wrong.** Everything below is `--draft` (ss=1), because that is what the residue figures in this entry
+were measured at, and the numbers reproduce exactly: `higgsfield-recreation` 0 of 150 between two
+one-worker renders and **10 of 150** between one worker and six; `brew-launch` 0 of 945 against itself
+and **103 of 945** at one against six. Zero against itself both times, so the residue is deterministic
+and the earlier reading, that it is decided by a tab's paint history, holds.
+
+**The measurement this entry asked for, run, and its answer.** Rendered `higgsfield-recreation` with
+its canvas-backed `liquid` background replaced by `{"kind":"solid"}` and nothing else changed:
+**9 of 150 at one worker against six, against 10 of 150 with the canvas.** The residue survives a flat
+background, so the 2D canvas is eliminated. The rAF observation that pointed at it was an artefact of
+the instrument: `tabprobe`'s "SECOND SHOT DIFFERS" line shoots again AFTER its GEO dump, and that dump
+calls `window.__engine.frameSig(4)`, which renders frame 4. The second shot was a different frame, not
+an advanced gradient.
+
+**What it actually is.** One blurred `box-shadow`. Removing `box-shadow:0 0 90px rgba(226,254,122,0.4)`
+from the `btn` layer's fragment, changing nothing else, takes the film from **10 of 150 to 3 of 150**.
+The single-frame repro is one command and it isolates the whole mechanism:
+
+```
+go run ./scripts/dev/tabprobe -root . -data /formats/scene/higgsfield-recreation.json \
+  -tabs 2 -frame 114 -pre 0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108 -pre1 0-113
+tab 0  sha=b76078e9...   (the six-worker tab's history)
+tab 1  sha=1b75eecb...   (the one-worker tab's history)
+```
+
+The two tabs' DOM is IDENTICAL, rects to six decimals, computed transform, filter and font included,
+and `filter` is `none` on both. The differing pixels are 695 of 2,073,600, max channel delta 10, in the
+box 876,450..1055,633, which is exactly the disc that fragment draws. So the display list is the same
+and the raster is not. Narrowed by history: `-pre1 113` and `-pre1 0` and `-pre1 114` all return the
+cold picture, `-pre1 111` and `-pre1 112` return the dirty one, and the element's size is constant from
+frame 101 onward, so what varies across those frames is the layer's transform scale (0.987201 at 112
+against 0.973541 at 114) and its sub-pixel offset. `_r_nograd` (solid fill instead of the radial
+gradient), `_r_norad` (no border-radius), `_r_fixedsize` (size pinned) all still differ; only removing
+the shadow converges them.
+
+**Eight Chrome flags were tried against that repro and NONE of them changes it**, so they need not be
+tried again: `num-raster-threads=1`, `disable-composited-antialiasing`, `disable-gpu`,
+`disable-gpu-rasterization`, `disable-low-res-tiling`, `default-tile-width/height=4096`,
+`skia-resource-cache-limit-mb=0`, `deterministic-mode`. `disable-threaded-compositing` hangs the
+capture (rAF never fires) and `force-gpu-mem-available-mb=1` makes both tabs agree only because it
+breaks the page: the shot is the background canvas with every DOM layer missing.
+
+**A fix was built, measured, and NOT shipped, which is the useful half.** If the picture depends on a
+tab's paint history, give every tab the SAME history: hide `#stage`, let that paint, then render the
+frame. It works in isolation. `tabprobe -flush` (kept, it is how this was measured) converges the two
+histories on frame 114 onto the cold picture exactly. In the real capture it makes things WORSE:
+**10 of 150 becomes 18 of 150**, and 20 of 150 with the paint barrier widened from two rAFs to four,
+so it is not a paint race. It fixes frames 114, 115, 119, 120, 121 and 125 and breaks 56 through 60,
+which are the frames carrying the heaviest `html` panel. Blanking with `display:none` rebuilds the
+layout tree every frame and that rebuild is itself history-dependent. Control: one worker against one
+worker stays 0 of 150 with the flush on, so the flush is deterministic, just not a flush.
+
+**Can `canvas-purity` be sharpened to catch this class? No, and the reason is worth recording.** It
+already covers the background canvas: its `nCanvas <= 1` skip never fires, measured over all 48 scene
+JSONs in the tree (37 pass, 11 fail to boot for missing themes and assets, none skip), because every
+scene carries at least two canvases and the gate hashes all of them. It is green here and it is right
+to be green. It hashes `<canvas>` pixels, and the carrier is a DOM element's `box-shadow`, which no
+canvas hash can reach. Seeing this needs a screenshot compared across render orders, and #532 already
+settled what that is: a deliberate render sweep, not a gate.
+
+**The single next measurement.** Take the repro above and bisect the fragment down to the smallest
+markup that still splits the two tabs (a bare `div` with one `box-shadow`, under a layer transform
+whose scale changes between the pre frame and the measured frame). Then file it upstream, because at
+that point it is a Chromium raster bug with a one-file reproduction, and this repo has no lever left:
+the DOM is identical, the flags do nothing, and the one flush that converges it in isolation costs
+more frames than it saves.
 
 ## 532. `snap-scenes` was read as a pixel gate for years, and it compares the DOM
 
@@ -16577,3 +16634,61 @@ a bending horizon, that is the radial map, and it is a real piece of work rather
 
 **No gate.** Nothing can measure "this edge should have curved". This is a note for the next author, and
 its right home is beside the effect: the same limitation is recorded in the film's storyboard.
+
+## 540. the render path that ships never awaited `__frameSettle`, only the profiled one did
+
+**What.** `core/frame-settle.js` exists so a layer can register asynchronous per-frame work and the
+capture drains it before it shoots. Its whole reason to exist is a `<video>` seek: setting
+`currentTime` starts a decode that fires `seeked` whenever it is ready, routinely longer than the two
+rAFs the capture waits, so a frame shot without draining holds whatever the decoder had lying around.
+That is #370 and #383.
+
+`internal/scene/scene.go` `shoot(f)` has two branches, and the drain was written into ONE of them. The
+profiled branch (`VAWE_PROFILE` set) evaluates `window.__frameSettle()`. The unprofiled branch, which
+is every real render anybody has ever run, evaluated `renderFrame(f)`, waited two rAFs and shot. So the
+barrier the defect was fixed with was live only when somebody was timing the render.
+
+**Root cause.** Two copies of one barrier. The branch existed to time three steps separately, and when
+the drain was added it was added to the branch being read at the time. Nothing compares the two, and
+the fast branch's own comment said it was "one round trip, not three", which is true and says nothing
+about which steps it runs.
+
+**Fix.** The two barriers are now named constants, `settleJS` and `paintJS`, next to `allocOpts` in
+`internal/scene/scene.go`, and both branches run both. One owner, so they cannot drift again.
+
+**Blast radius, measured:** none on a film without footage, which is the whole checked-in library.
+`higgsfield-recreation` at `--draft --workers 1` renders byte-identical before and after, 0 of 150
+frames different. `lib-test` is unchanged at 1408 assertions in this worktree, verified by restoring
+the two files to HEAD and re-running, so the change costs no assertion. Found while measuring #531.
+
+## 541. at the supersample it SHIPS with, the renderer is not reproducible against itself
+
+**What.** #531 measures its residue at `--draft`, where the capture runs at `ss=1`. A non-draft render
+runs at `ss=2` (`internal/render/render.go:92`) and is a different animal. Measured on
+`higgsfield-recreation`, 300 captured frames:
+
+| runs compared | frames byte-different |
+|---|---|
+| one worker against six | 100 of 300 |
+| **six workers against six workers** | **104 of 300** |
+| **one worker against one worker** | **58 of 300** |
+
+Worker count explains none of it. The render does not reproduce against ITSELF at the setting every
+shipped film is rendered with, and #531's whole method, comparing one worker against six, cannot see
+this because the control it never ran is the one that fails.
+
+**What it is not.** It is not #531's residue. That one is deterministic: at `--draft` the same film
+renders byte-identical to itself at one worker (0 of 150) and at six, on both test films
+(`brew-launch` 0 of 945). Only the supersampled path is irreproducible.
+
+**What is known and what is not.** The differences are small and they are on glyph edges: median
+0.00008% of a frame, max channel delta 3 to 8, and the worst frame's crop is the antialiasing of one
+headline. Nothing here identifies the cause. `--force-device-scale-factor=2` is the only render
+setting that separates the two paths, and it was not isolated.
+
+**The next measurement**, stated so it is not re-derived: run the `tabprobe` repro from #531 at
+device scale 2 rather than 1, twice from a cold browser with no paint history at all. If two cold tabs
+in two processes disagree at scale 2 and agree at scale 1, the fault is in the supersampled raster and
+not in anything the capture does with order. Logged rather than fixed because it is a different defect
+from the one this branch was opened for, and mixing them is how #531 came to argue from draft numbers
+without saying so.
