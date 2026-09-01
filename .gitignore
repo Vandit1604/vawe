@@ -103,6 +103,11 @@ formats/scene/*.expanded.json
 # and somebody's record rather than the framework. Same policy as assets/gen.
 formats/scene/_data/
 formats/scene/_batch/
+# auto-orient: the A/B pair for AE technique 12 (docs/CRAFT/AE-TECHNIQUES.md). Two files that differ
+# in one key, the `upright` modifier on each carried mark, so the verdict can be re-rendered rather
+# than taken on trust. A worked example the docs NAME and a clone does not have is not an example.
+!formats/scene/_auto-orient.json
+!formats/scene/_auto-orient-plain.json
 # motion-test: the before/after snap demo — a permanent engine demo AND a motion regression fixture.
 !formats/scene/motion-test.json
 # flagship examples + their registry — the showcase the repo ships (make gallery).

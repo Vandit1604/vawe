@@ -648,6 +648,7 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 | `shadow` | a drop shadow that knows where the light is, so every layer does not point the same way |
 | `squash` | SQUASH AND STRETCH read off the layer's own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash |
 | `tilt` | turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding |
+| `upright` | AUTO-ORIENT: hold this layer UPRIGHT while the layer carrying it rotates, so an arrangement can turn without its contents turning with it. Parenting gives you the rotation for free and it is almost always wrong: photographs carried round a circle go upside down at the bottom exactly when the motion peaks |
 | `wordSlot` | one word of the sentence swaps for the next while NOTHING after it reflows. The slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for |
 
 ## Part entrances  `[per-layer]`
@@ -964,4 +965,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_621 effects across 45 families. Regenerate: `make effects`._
+_622 effects across 45 families. Regenerate: `make effects`._

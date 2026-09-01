@@ -430,14 +430,32 @@ parenting rather than like a mistake.
 **NUMBERS** none stated. The demonstration also swings the parent on a second axis and the elements stay
 upright, which is the test that the flag is doing the work.
 
-**ENGINE MAPPING** The engine has `group` (a box and a clock) and `camera`, and a `follow` track
-(`core/tracks/follow.js`). Whether a followed or grouped layer inherits its carrier's rotation is decided
-in those files, and this is the entry most likely to be a genuine DEFAULT question rather than a feature.
+**ENGINE MAPPING** SHIPPED, as the `upright` modifier (`core/fx/upright.js`). A rotating `group` with
+children IS the null-and-parented-photos rig: the group carries a `motion` track and its children ride
+its transform, so left alone they turn with it. `"modifiers": [{ "upright": "wheel" }]` on a child names
+the rotating carrier and cancels its rotation, and nothing else: the carrier still swings the child
+around its centre, only the child's orientation is held.
 
-**DEFAULT OR OPTION** Candidate default, and the only one here worth arguing for. "Carried, but upright
-unless asked" is what an author means nearly every time. It is still a real piece of work: any change to
-inheritance must be proven byte-identical across the library by `scripts/gates/snap-scenes.mjs`, or the
-change is a regression wearing a fix's clothes.
+It reads the carrier's OWN keyframes through `motionAt`, exactly as `core/fx/lag.js` reads its leader,
+never the rendered transform, so the correction stays a pure function of the frame index and does not
+depend on which layer the loop reached first. It writes the `rotate` longhand, which is why it is
+refused alongside `tilt`, the other modifier that owns that property.
+
+**IT IS ROTATION ONLY.** Not scale, not skew. A carrier that scales is a rig moving toward the eye and
+its contents are meant to come with it, and `plane` already owns holding apparent size at a distance.
+
+**THE WORKED EXAMPLE** `formats/scene/_auto-orient.json`, with `_auto-orient-plain.json` as the twin
+that differs in exactly one key. Six brand marks on a 300px circle inside a group keyed
+`rot: 0 -> 360` over four seconds. Compared at frames 45 and 90: the marks sit at the SAME six
+positions in both films, and in the plain twin the Google wordmark stands vertical, Netflix leans and
+nvidia is on its side, while in the upright twin every mark reads level. The arrangement turns and its
+contents do not, which is the whole claim.
+
+**DEFAULT OR OPTION** OPTION, per layer, and the "candidate default" this entry argued for is now a
+decision against. A rig usually wants most children upright and one deliberately tumbling, and neither
+a changed inheritance default nor a group-level switch can say that: both are all children or none.
+Turning it on by default would also have had to be proven byte-identical across the library by
+`scripts/gates/snap-scenes.mjs`, and it cannot be, because the whole point is that it changes pixels.
 
 ---
 

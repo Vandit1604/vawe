@@ -29,8 +29,10 @@ import * as ghost from './ghost.js';
 import * as squash from './squash.js';
 import * as matte from './matte.js';
 import * as lag from './lag.js';
+import * as upright from './upright.js';
+import { defineRegistry } from '../registry.js';
 
-const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, shadow, squash, tilt, wordSlot };
+const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, shadow, squash, tilt, upright, wordSlot };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it, the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
@@ -56,9 +58,19 @@ export const FX_BLURBS = {
   plane: 'stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax',
   progress: 'hand the layer the FILM\'s progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with',
   shadow: 'a drop shadow that knows where the light is, so every layer does not point the same way',
+  upright: 'AUTO-ORIENT: hold this layer UPRIGHT while the layer carrying it rotates, so an arrangement can turn without its contents turning with it. Parenting gives you the rotation for free and it is almost always wrong: photographs carried round a circle go upside down at the bottom exactly when the motion peaks',
   tilt: 'turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding',
   wordSlot: 'one word of the sentence swaps for the next while NOTHING after it reflows. The slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for',
 };
+
+// SEARCHABLE, and it was not. `make arsenal` collects every `*_REGISTRY` export under core/, core/fx
+// and core/layers (scripts/author/arsenal.mjs), and this family exported FX_TYPES and FX_BLURBS and no
+// registry, so ALL FOURTEEN modifiers were invisible to the one tool an author uses to find the thing
+// they cannot name: `make arsenal Q="matte"` answered "nothing matched". Declared from the SAME two
+// objects the dispatch below reads, so the search cannot advertise a vocabulary the engine does not
+// have. `pick` keeps its own refusal rather than calling this one, because the message an author gets
+// for a misspelled modifier has to say what the `modifiers` ARRAY is, which no shared hint can know.
+export const FX_REGISTRY = defineRegistry('modifier', REGISTRY, { blurbs: FX_BLURBS, slot: 'modifiers[]' });
 
 // An unknown name is a HARD ERROR, never a skipped entry. A modifier that quietly does nothing is the
 // worst shape this repo has: `fx:[{"mixBlned":"screen"}]` would render a frame that looks plausible,

@@ -1,5 +1,5 @@
 {
-  "total": 621,
+  "total": 622,
   "previewed": 276,
   "families": 45,
   "tags": [
@@ -57,7 +57,7 @@
     ],
     [
       "per-layer",
-      78
+      79
     ],
     [
       "per-layer/scene",
@@ -3242,7 +3242,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.",
-      "count": 13,
+      "count": 14,
       "undescribed": 0,
       "entries": [
         {
@@ -3326,6 +3326,13 @@
           "name": "tilt",
           "stem": "per-layer-modifiers--tilt",
           "desc": "turn · the · layer · out · of · the · picture · plane · and · hold · it · there. · A · card · leaning · away, · a · phone · at · an · angle, · panels · receding",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "upright",
+          "stem": "per-layer-modifiers--upright",
+          "desc": "AUTO-ORIENT · hold · this · layer · UPRIGHT · while · the · layer · carrying · it · rotates, · so · an · arrangement · can · turn · without · its · contents · turning · with · it. · Parenting · gives · you · the · rotation · for · free · and · it · is · almost · always · wrong · photographs · carried · round · a · circle · go · upside · down · at · the · bottom · exactly · when · the · motion · peaks",
           "scene": null,
           "noPreview": null
         },
