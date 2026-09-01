@@ -23,7 +23,9 @@ not: "no fades, anywhere. No centred type. No pie chart, no legend, no donut, no
 This video tells developers who scroll past wrapped cards that a year of 1822 contributions was
 outweighed by 26 lines.
 
-Every number below comes from `formats/scene/_data/gh-wrapped.json` and nothing else.
+Every number below comes from the batch row `node scripts/media/gh-wrapped.mjs Vandit1604`
+writes, and nothing else. That row is pulled live from one account and never committed, so a
+clone regenerates it rather than finding it on disk.
 
 | fact | value |
 |---|---|

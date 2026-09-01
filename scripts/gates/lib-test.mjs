@@ -37,7 +37,7 @@ import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilte
 import fsMod from 'node:fs';
 import { defineRegistry, registries } from '../../core/registry.js';
 import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
-import { collect as arsenalCollect, coverageIn, CONFIDENT, toks as arsenalToks } from '../author/arsenal.mjs';
+import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks } from '../author/arsenal.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/junctions.js';
@@ -5064,6 +5064,63 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the threshold sits strictly between the two sets, so neither end is decoration',
      CONFIDENT > Math.max(...ABSENT.map((q) => best(q).c))
      && CONFIDENT <= Math.min(...PRESENT.map(([q, w]) => covers(q, w))));
+}
+
+// ---- ARSENAL SNIPPETS: the line an author PASTES ---------------------------------------------------
+// Every hit prints the JSON it goes in, and that line was built by one string replace over the slot. It
+// was wrong for both key-shaped families: `modifiers[]` printed `"modifiers[]": "upright" }]`, which is
+// not JSON at all, and every dotted slot printed a flat `"cameraMove.move": …`, which parses and is not
+// what the engine reads. Nobody noticed because the modifier family was unsearchable until the day
+// before. So the check is not "one family is fixed", it is that EVERY entry's snippet parses and puts
+// the name where its own slot says it goes. The walk below restates the slot grammar deliberately: a
+// test that called the renderer's own path builder would agree with it whatever it did.
+{
+  const corpus = await arsenalCollect();
+  const nameAt = (obj, slot, name) => {
+    const segs = slot.split('.');
+    let node = obj;
+    for (let i = 0; i < segs.length; i++) {
+      const seg = segs[i];
+      const marker = (seg.endsWith('[]') || seg.endsWith('{}')) ? seg.slice(-2) : '';
+      const key = marker ? seg.slice(0, -2) : seg;
+      if (!node || typeof node !== 'object') return false;
+      node = node[key];
+      if (marker === '[]') {
+        if (!Array.isArray(node) || !node.length) return false;
+        node = node[0];
+      }
+      if (i === segs.length - 1) {
+        if (marker) return !!node && typeof node === 'object' && Object.prototype.hasOwnProperty.call(node, name);
+        return node === name;
+      }
+    }
+    return false;
+  };
+
+  const pasteable = corpus.filter((e) => e.slot && !e.slot.includes('(') && e.kind !== 'blueprint beat');
+  const bad = [];
+  for (const e of pasteable) {
+    const snip = arsenalSnippet(e);
+    let obj = null;
+    try { obj = JSON.parse(`{${snip}}`); } catch { bad.push(`${e.kind} · ${e.name}: not JSON · ${snip}`); continue; }
+    if (!nameAt(obj, e.slot, e.name)) bad.push(`${e.kind} · ${e.name}: not at \`${e.slot}\` · ${snip}`);
+  }
+  if (bad.length) console.error('     ' + bad.slice(0, 5).join('\n     '));
+  ok(`every arsenal snippet parses as JSON and lands at its own slot (${pasteable.length} entries)`,
+     bad.length === 0);
+
+  // Per FAMILY, because the bug was one family being wrong while the other thirty-odd were right, and a
+  // total pass count hides that. A family with no pasteable snippet must be one whose slot is prose.
+  const families = [...new Set(corpus.map((e) => e.kind))];
+  const silent = families.filter((k) => corpus.filter((e) => e.kind === k)
+    .every((e) => e.kind === 'blueprint beat' ? false : !arsenalSnippet(e)));
+  ok('the only families that print no paste are the ones whose slot is prose, not a path',
+     silent.every((k) => corpus.filter((e) => e.kind === k).every((e) => e.slot && e.slot.includes('('))));
+  ok('both key-shaped families put the NAME in the key position, not the value',
+     (() => { const m = corpus.find((e) => e.kind === 'modifier');
+              const d = corpus.find((e) => e.kind === 'effector drive');
+              return arsenalSnippet(m) === `"modifiers": [{ "${m.name}": {} }]`
+                && arsenalSnippet(d) === `"effector": { "drives": { "${d.name}": 1 } }`; })());
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

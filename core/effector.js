@@ -67,7 +67,7 @@ export const DRIVES = {
   push: 'pixels ALONG the vector from the point to the clone. Positive shoves clones away, negative pulls them in. The only drive that reads the direction as well as the distance',
   opacity: 'added to 1. `opacity: -0.7` dims a fully affected clone to 0.3',
 };
-export const DRIVE_REGISTRY = defineRegistry('effector drive', DRIVES, { slot: 'effector.drives' });
+export const DRIVE_REGISTRY = defineRegistry('effector drive', DRIVES, { slot: 'effector.drives{}' });   // `{}`: the name is a KEY in that map, its value the amount
 export const DRIVE_NAMES = DRIVE_REGISTRY.names;
 
 /**

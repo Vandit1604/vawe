@@ -546,7 +546,10 @@ export function buildCameraMove(spec, canvas = null) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a camera move" when someone writes it somewhere else. core/registry.js.
-export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove', blurbs: CAMERA_MOVE_BLURBS });
+export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove.move', blurbs: CAMERA_MOVE_BLURBS });
+// The slot is `cameraMove.move` and not `cameraMove`: nothing reads a bare `"cameraMove": "slowPush"`,
+// bakeCameraMove (core/produce.js) reads `spec.move` off the object. The short form made `make arsenal`
+// print a paste that throws.
 
 // A CAMERA DIAL is a top-level scene key that changes what the camera DOES rather than where it goes,
 // and until now there was no way to find one. `make arsenal` searches registries, so a film-level dial
