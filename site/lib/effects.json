@@ -2013,7 +2013,7 @@
         {
           "name": "blobs",
           "stem": "backgrounds--blobs",
-          "desc": "the · airier · light · wash · smaller · separated · pools · with · a · technical · grid · reading · through · the · white · (moves)",
+          "desc": "the · airier · light · wash · smaller, · separated · pools · with · white · between · them · (moves). · No · grid · write · `grid · true` · on · a · softwash · fx · if · you · want · the · blueprint · rules",
           "scene": "/assets/effects/backgrounds--blobs.json",
           "noPreview": null
         },

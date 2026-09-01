@@ -379,7 +379,7 @@ On a `motion` key's `ease`, but NOT a curve. An easing is a function of one segm
 | `accent` | the brand accent as a radial with rippling dots and a slow spotlight (moves), the loud brand field |
 | `accentPlain` | the brand accent as a clean full-bleed field, grain only. FLAT, for plain sites whose hero is one colour |
 | `aurora` | drifting colour aurora (moves) |
-| `blobs` | the airier light wash: smaller separated pools with a technical grid reading through the white (moves) |
+| `blobs` | the airier light wash: smaller, separated pools with white between them (moves). No grid: write `grid: true` on a softwash fx if you want the blueprint rules |
 | `brandglow` | breathing accent glow |
 | `constellation` | drifting connected nodes (moves), telemetry/data feel |
 | `dark` | a plain dark radial, no dots. FLAT, the quiet backdrop for busy content |
