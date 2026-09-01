@@ -53,7 +53,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    font:12.5px/1.45 Anybody,system-ui,-apple-system,sans-serif;font-variation-settings:'wdth' 100}
  /* every digit that can change sits in the mono face with tabular figures, so a frame counter ticking
     from 9 to 10 does not shove the seconds beside it */
- .num,#read,#sel,input,#pickjson,#lanes{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+ .num,#read,#sel,input,#pickjson,#lanes,#zlab,#peekt,#candstat .el{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
  h2{margin:0;font:600 11px/1 Anybody,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
  #shell{display:flex;height:100vh;gap:var(--pad);padding:var(--pad)}
  /* ---- left rail: a column of panels. One today. A second one is another <section class=panel>. ---- */
@@ -67,6 +67,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    outline:1px solid var(--line);outline-offset:-1px;padding:var(--pad);display:flex;flex-direction:column;gap:var(--pad)}
  .panel .body{background:var(--panel-2);border-radius:var(--r-in);padding:10px;color:var(--ink-2);font-size:12px}
  .panel .body p{margin:0 0 8px} .panel .body p:last-child{margin:0}
+.muted{color:var(--muted)}
  .stub{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:11px}
  .stub i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
  #main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:var(--pad)}
@@ -92,6 +93,9 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  button{background:var(--panel-2);color:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:6px 11px;cursor:pointer;
    font:600 12px/1 Anybody,system-ui,sans-serif;white-space:nowrap}
  button:hover{background:var(--field);border-color:var(--muted)}
+ /* a control that is working is not a control you can press: say so, rather than looking pressable and
+    doing nothing (the chooser disables itself for the fifteen seconds it is rendering) */
+ button:disabled{opacity:.5;cursor:default} button:disabled:hover{background:var(--panel-2);border-color:var(--line-2)}
  button:active{transform:translateY(1px)}
  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
  button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
@@ -114,6 +118,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  #tl.off{height:36px} #tl.off #lanes,#tl.off #alerts{display:none} #tl.off+#split,body.tloff #split{visibility:hidden}
  #tlhead{display:flex;align-items:center;gap:10px;padding:9px 12px;color:var(--ink-2);font-size:11px;border-bottom:1px solid var(--line);flex:none}
  #tlhead b{font:700 12px/1 Anybody,system-ui,sans-serif;color:var(--ink)}
+ #tlkey{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
  #tlhead .sp{flex:1} #tlhead .k{display:inline-flex;align-items:center;gap:4px;margin-left:8px;color:var(--muted)}
  #tlhead .k i{width:9px;height:9px;border-radius:2px;display:inline-block}
  #alerts:empty{display:none}
@@ -123,7 +128,20 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  /* the rows scroll under a pinned ruler. #tlbody is the VISIBLE box, and the playhead lives there
     rather than in the scroller, so it spans what you can see instead of scrolling off the top. */
  #tlbody{position:relative;flex:1;min-height:0;display:flex}
- #lanes{position:relative;overflow-y:auto;overflow-x:hidden;padding:0 12px 12px;cursor:col-resize;flex:1;
+ /* ---- ZOOM ------------------------------------------------------------------------------------------
+    A 14 second film fits and a 60 second one does not, and until now there was no way to look closely at
+    one seam. Every position on this timeline is a PERCENTAGE of the ruler, so zoom is one number: the
+    scrolling contents get wider and every mark follows without a single coordinate being recomputed.
+    The playhead is the anchor, so zooming in keeps the frame you are on under the pointer's own place. */
+ #tlhead .zoom{display:inline-flex;align-items:center;gap:3px;margin-left:4px}
+ /* the mono face for the two glyph buttons: Anybody draws a plus so small it reads as a dot */
+ /* the mono face for the glyph buttons: Anybody draws a plus so small it reads as a dot. Sized to the
+    other buttons in this bar rather than smaller: three sizes of button in one row is the tell of a
+    control added late. */
+ #tlhead .zoom button{padding:5px 9px;font:600 12px/1 'JetBrains Mono',ui-monospace,monospace;border-radius:6px}
+ #tlhead .zoom s{text-decoration:none;color:var(--muted);margin-left:4px;font-family:'JetBrains Mono',ui-monospace,monospace}
+ #ruler,#film,#rows{width:calc(var(--z,1) * 100%)}
+ #lanes{position:relative;overflow-y:auto;overflow-x:auto;padding:0 12px 12px;cursor:col-resize;flex:1;
    overscroll-behavior:contain;scrollbar-width:thin}
  #lanes:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:var(--r-in)}
  #tlbody::after{content:'';position:absolute;left:0;right:0;bottom:0;height:20px;z-index:4;pointer-events:none;
@@ -136,7 +154,46 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  /* a transition is a moment, not a layer: it lives on the ruler, above every track */
  #ruler .m{position:absolute;top:14px;bottom:0;border-left:2px solid var(--ink-2);color:var(--ink-2);padding-left:3px;font-size:10px;font-weight:700;white-space:nowrap}
  #ruler .ms{position:absolute;top:14px;bottom:0;background:var(--ink-2);opacity:.12}
+ /* ---- THE FILMSTRIP: what the film LOOKS like, against the clock -----------------------------------
+    The bars say when a layer is open; they cannot say what is on screen. The strip is a band of real
+    frames pinned under the ruler, so the timeline is scannable by eye as well as readable by label.
+    It is never a replacement for the bars: two different questions, two registers, one clock.
+    Empty until the frames arrive, and it collapses to nothing rather than reserving a grey hole. */
+ #film{position:sticky;top:32px;z-index:3;height:56px;background:var(--field);border-bottom:1px solid var(--line)}
+ #film:empty{display:none}
+ #film .fr{position:absolute;top:0;bottom:0;background-size:cover;background-position:center;
+   box-shadow:inset -1px 0 0 var(--panel)}
  #rows{position:relative}
+ /* ---- TYPED LANES: a film has kinds of row, and they are not all layers -----------------------------
+    Differentiated by WEIGHT, HEIGHT and TEXTURE, never by hue. Fifteen colours in the surround is the
+    one thing this room is built to avoid, and a lane's kind is a structural fact, so structure says it:
+    layers are solid and 16px, captions are a dashed outline half that weight, sound is a deep trough.  */
+ .lane-h{position:relative;height:15px;color:var(--muted);font:600 9px/15px Anybody,system-ui,sans-serif;
+   letter-spacing:.09em;text-transform:uppercase;border-top:1px solid var(--line);margin-top:5px;padding-left:1px}
+ .lane-h em{font-style:normal;text-transform:none;letter-spacing:0;font-size:10px;font-weight:400;margin-left:8px;
+   font-family:'JetBrains Mono',ui-monospace,monospace}
+ /* a caption is an ANNOTATION over the picture, so it is drawn as one: no fill, a dashed edge, and it
+    sits low in its row the way a subtitle sits low in a frame */
+ .row.cap{height:16px}
+ .cap b{position:absolute;bottom:0;height:12px;border:1px dashed var(--line-2);border-radius:2px;
+   color:var(--ink-2);font:400 10px/10px 'JetBrains Mono',ui-monospace,monospace;padding:0 4px;overflow:hidden;white-space:nowrap}
+ /* sound is a TROUGH, deeper than any bar, because it runs under the whole film rather than beside it */
+ .row.aud{height:30px}
+ .aud .bed{position:absolute;top:2px;bottom:2px;left:0;right:0;background:var(--field);
+   box-shadow:inset 0 0 0 1px var(--line-2);border-radius:3px;overflow:hidden}
+ /* the beat grid, because a seam is supposed to LAND on it and that is judgeable by eye the moment the
+    grid is drawn under the cuts. Downbeats are full height, the rest are half. */
+ .aud .bt{position:absolute;bottom:0;height:40%;width:1px;background:var(--ink-2);opacity:.30}
+ .aud .bt.db{height:100%;opacity:.55}
+ .aud .fade{position:absolute;top:0;bottom:0;background:var(--panel);opacity:.55}
+ .aud .cue{position:absolute;top:1px;width:1px;bottom:1px;background:var(--ink)}
+ .aud .cue s{position:absolute;left:3px;top:-1px;text-decoration:none;color:var(--ink-2);font-size:9px;white-space:nowrap}
+ .aud .br{position:absolute;top:2px;bottom:2px;border:1px solid var(--ink-2);border-radius:3px;
+   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink-2) 22%,transparent) 0 2px,transparent 2px 6px)}
+ .aud .name{position:absolute;left:5px;top:50%;transform:translateY(-50%);color:var(--ink-2);
+   font:400 10px/1 'JetBrains Mono',ui-monospace,monospace;pointer-events:none}
+.lane-h span,.lane-note span{position:sticky;left:0;display:inline-block;background:var(--panel);padding-right:8px}
+ .lane-note{position:relative;height:16px;color:var(--muted);font-size:10px;line-height:16px;padding-left:1px}
  /* the ruler's ticks carried down through the stack, so the bars read against a clock */
  .grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);pointer-events:none}
  .row{position:relative;height:18px}
@@ -152,6 +209,9 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  .bar span{position:absolute;top:0;font-weight:600;pointer-events:none}
  .bar span em{font-style:normal;opacity:.75;font-weight:400}
  .bar.sel{outline:2px solid var(--accent);outline-offset:1px}
+ /* a layer that never changed across its own window: a dotted underline, the weight of a note */
+ .bar.still{box-shadow:inset 0 -2px 0 0 currentColor}
+ .bar.still span::after{content:' · still';opacity:.6;font-weight:400}
  .bar u{position:absolute;top:0;bottom:0;width:2px;background:currentColor;opacity:.85}
  /* dead air: the hole beat-check blocks on, drawn where it actually is. The label gets its own solid
     chip or the hatch runs straight through the letters. */
@@ -161,10 +221,102 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  .hz.beat{--hz:var(--hz-beat)} .hz.disputed{--hz:var(--hz-mute)}
  .hz b{position:absolute;top:2px;left:3px;color:var(--hz);font-size:10px;font-weight:700;white-space:nowrap;
    background:var(--panel);border:1px solid var(--hz);padding:0 4px;border-radius:3px}
+ /* ---- THE THUMBNAIL AT THE POINTER ----------------------------------------------------------------
+    Hover the timeline and see that instant WITHOUT moving the playhead: you keep your place, look
+    ahead, and come back having lost nothing. It is a second engine in a hidden iframe, not a captured
+    image, because seeking is free here and a live engine can show ANY instant rather than the fourteen
+    the strip happens to hold. The strip's nearest thumb paints behind it so the box is never empty
+    while the second engine seeks. Fixed, so it can sit above the timeline panel without being clipped. */
+ #peek{position:fixed;z-index:30;display:none;padding:3px;background:var(--panel);border-radius:8px;
+   box-shadow:var(--shadow);outline:1px solid var(--line-2);outline-offset:-1px;pointer-events:none}
+ #peek.on{display:block}
+ #peekbox{position:relative;overflow:hidden;border-radius:5px;background-size:cover;background-position:center;background-color:var(--stage)}
+ #peekbox iframe{position:absolute;top:0;left:0;border:0;transform-origin:0 0;background:transparent}
+ #peekt{position:absolute;left:5px;bottom:5px;color:#fff;background:rgba(0,0,0,.62);border-radius:4px;
+   padding:1px 5px;font:11px/1.5 'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
  #ph{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);z-index:5;pointer-events:none}
+ /* the hovered instant, marked on the ruler itself, so the box above and the time below agree */
+ #hov{position:absolute;top:0;bottom:0;width:1px;background:var(--ink-2);opacity:.5;z-index:5;pointer-events:none;display:none}
  /* the ruler is the one row that must never scroll away: a bar read against nothing is not a time */
  #ruler{box-shadow:0 1px 0 var(--line)}
  #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--accent)}
+ /* ---- THE FOUR STATES ----------------------------------------------------------------------------
+    Four questions in the order a person asks them: what am I making · what does this frame look like ·
+    does the whole thing work · can it go out. They share ONE playhead and one loaded scene, so moving
+    between them is not a context change, and nothing here reloads the iframe: the centre is HIDDEN,
+    never unmounted, so the engine that took a second to boot is still booted when you come back.
+    The switch is a segmented control 26px tall in a bar that already existed. A tab strip across the
+    top would have cost a whole row of the only screen the picture is judged on. */
+ #states{display:flex;gap:2px;background:var(--field);border-radius:8px;padding:2px;flex:none}
+ #states button{background:none;border:0;color:var(--muted);padding:4px 10px;border-radius:6px;font:600 11.5px/1 Anybody,system-ui,sans-serif;letter-spacing:.04em}
+ #states button:hover{color:var(--ink);background:none}
+ #states button[aria-current=page]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+ #centre,#split,#tl{display:none}
+ body[data-state=make] #centre{display:flex}
+ body[data-state=make] #split{display:flex}
+ body[data-state=make] #tl{display:flex}
+ /* the rail belongs to Make. Look wants the WIDTH: a strip is judged by putting two frames side by
+    side at a size the eye can use, and a rail of keys that do nothing in this state is not worth 300px
+    of it. */
+ body:not([data-state=make]) #rail{display:none}
+ [hidden]{display:none!important}
+ #pane{flex:1;min-height:0;display:none;flex-direction:column;background:var(--panel);border-radius:var(--r-out);
+   box-shadow:var(--shadow);outline:1px solid var(--line);outline-offset:-1px;padding:var(--pad);gap:var(--pad);overflow:hidden}
+ body:not([data-state=make]) #pane{display:flex}
+ #pane>section{display:none;flex:1;min-height:0;flex-direction:column;gap:var(--pad)}
+ body[data-state=plan] #planpane,body[data-state=look] #lookpane,body[data-state=ship] #shippane{display:flex}
+ .panehead{display:flex;align-items:center;gap:8px;flex:none;color:var(--ink-2);font-size:11px}
+ .panehead .sp{flex:1}
+ .paneview{flex:1;min-height:0;overflow:auto;background:var(--panel-2);border-radius:var(--r-in);padding:12px}
+ /* an honest empty state: what this is for, what it does not do yet, and the command that does */
+ .empty{max-width:56ch;color:var(--ink-2);font-size:12.5px;line-height:1.6;text-wrap:pretty}
+ .empty h3{margin:0 0 6px;font:700 14px/1.3 Anybody,system-ui,sans-serif;color:var(--ink)}
+ .empty code{white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;background:var(--field);
+   border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink)}
+ .empty ul{margin:8px 0 0;padding-left:18px} .empty li{margin:3px 0}
+ /* the strip. A sheet is one wide image and it must never be squeezed to fit: the point of Look is
+    that both sides of a seam are compared at a size the eye can use. So it scrolls, at natural size. */
+ #sheetwrap{flex:1;min-height:0;overflow:auto;background:var(--stage);border-radius:var(--r-in);
+   display:flex;align-items:flex-start;justify-content:center;padding:10px}
+ /* FIT THE WIDTH FIRST, natural size on click. A beats sheet of a 9:16 film is three columns of very
+    tall frames, and at natural size a 900px window shows one and a half rows: you are scrubbing again,
+    which is the thing Look exists not to be. Fitted, the whole shape of the film is one glance, and the
+    click gets you back to real pixels when a detail is in question. */
+ #sheet{display:block;max-width:100%;max-height:100%;cursor:zoom-in}
+ #sheet.full{max-width:none;max-height:none;cursor:zoom-out}
+ #sheetnote{margin:auto;max-width:60ch;color:var(--ink-2);font-size:12.5px;line-height:1.6;text-align:left;text-wrap:pretty}
+ #sheetnote b{color:var(--ink);display:block;margin-bottom:6px;font:700 13px/1.3 Anybody,system-ui,sans-serif}
+ /* the shared playhead, made visible: every marked moment in the film is one click from the strip */
+ #jump{flex:none;display:flex;flex-wrap:wrap;gap:5px}
+ #jump button{padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',ui-monospace,monospace}
+ .work{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-size:11px}
+ .work i{width:9px;height:9px;border-radius:50%;border:2px solid var(--accent);border-right-color:transparent;
+   display:inline-block;animation:sp .7s linear infinite}
+ @keyframes sp{to{transform:rotate(360deg)}}
+ /* the one moving thing on this page, and it stops for anyone who asked movement to stop */
+ @media (prefers-reduced-motion:reduce){.work i{animation:none;border-right-color:var(--accent);opacity:.5}}
+ /* ---- the chooser: six takes of this film, as CLIPS -----------------------------------------------
+    Never stills. A backdrop was once matched on one frame and was, in motion, twice too fast with
+    folds half the size (docs/MISTAKES.md #155), which is the whole reason this panel renders video. */
+ .chooser .body{padding:8px}
+ /* THE TILE IS THE FILM'S OWN SHAPE, never a 16:9 crop of it. Half this library is 9:16, and a thumb
+    that crops a portrait film to landscape is showing you a frame the film does not contain, which is
+    the same class of lie as judging motion off a still. --ar is set from the scene the page loaded. */
+ #cands{display:grid;grid-template-columns:1fr 1fr;gap:8px;--ar:16/9}
+ @media (max-width:1240px){#cands{grid-template-columns:1fr}}
+ .cand{display:flex;flex-direction:column;gap:0;padding:0;text-align:left;overflow:hidden;white-space:normal;
+   background:var(--panel);border:1px solid var(--line-2);border-radius:9px;cursor:pointer;font:inherit;color:var(--ink)}
+ .cand:hover{border-color:var(--accent)} .cand:active{transform:none}
+ .cand video,.cand .sk{width:100%;aspect-ratio:var(--ar);object-fit:contain;background:var(--stage);display:block}
+ .cand .sk{background:var(--field)}
+ .cand .t{display:flex;align-items:baseline;gap:5px;padding:6px 7px 0}
+ .cand .t b{font:700 11.5px/1.2 Anybody,system-ui,sans-serif}
+ .cand .t s{margin-left:auto;text-decoration:none;color:var(--muted);font-size:10px;font-family:'JetBrains Mono',ui-monospace,monospace}
+ .cand p{margin:2px 0 0;padding:0 7px 7px;color:var(--ink-2);font-size:10.5px;line-height:1.45;text-wrap:pretty}
+ /* a flagged candidate is SHOWN, flag and all. Dropping it silently is how a light-on-light backdrop
+    gets chosen from a thumbnail and discovered in a render. */
+ .cand p.warn{color:var(--bad);background:var(--bad-bg);border-top:1px solid var(--bad);padding:5px 7px;margin-top:4px}
+ #candstat{color:var(--muted);font-size:11px;line-height:1.5;text-wrap:pretty}
  /* ---- floating surfaces: the picker, the plan, the boot failure ---- */
  #pick{position:fixed;right:16px;top:16px;width:390px;max-height:74vh;display:none;flex-direction:column;
    background:var(--panel);color:var(--ink);outline:1px solid var(--line-2);outline-offset:-1px;border-radius:var(--r-out);z-index:40;
@@ -173,32 +325,43 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  #pickhead{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}
  #pickname{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  #pickjson{margin:0;padding:11px;overflow:auto;user-select:text;white-space:pre-wrap;color:var(--ink-2)}
- #planel{position:fixed;inset:36px;display:none;flex-direction:column;z-index:60;background:var(--panel);
-   outline:1px solid var(--line-2);outline-offset:-1px;border-radius:var(--r-out);box-shadow:var(--shadow);overflow:hidden}
- #planel.on{display:flex}
- #planhead{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink)}
- #planpath{flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
- #planbody{flex:1;overflow:auto;background:#fff;display:flex;align-items:flex-start;justify-content:center}
- #planimg{max-width:100%;display:block}
+ /* the storyboard is a WHITE sheet, so it keeps its own ground rather than inheriting the grey room */
+ #planpath{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
+ #planview{display:flex;align-items:flex-start;justify-content:center}
+ #planview.sheet{background:#fff;justify-content:center}
+ #planview:not(.sheet){justify-content:flex-start}
  /* the boot failure, said out loud: core/boot.js parks the reason on window.__engineError */
  #err{position:absolute;z-index:6;max-width:min(920px,86%);max-height:80%;overflow:auto;
    background:var(--bad-bg);border:1px solid var(--bad);border-radius:var(--r-out);box-shadow:var(--shadow);
    padding:16px 18px;color:var(--ink);white-space:pre-wrap;font-size:12.5px;line-height:1.55}
  #err b{display:block;margin-bottom:8px;color:var(--bad);font:700 15px/1.2 Anybody,system-ui,sans-serif}
+ /* ---- the selection, drawn ON THE PICTURE -----------------------------------------------------------
+    Selecting a layer used to change one line of text under the transport. The box says WHERE the thing
+    you selected is, which is the question you had. The handles do not resize anything yet and are drawn
+    anyway: they are what makes the box read as a selection rather than as a highlight. */
+ #selbox{position:absolute;z-index:5;display:none;pointer-events:none;outline:1px solid var(--accent);outline-offset:0}
+ #selbox.on{display:block}
+ #selbox i{position:absolute;width:6px;height:6px;background:var(--panel);border:1px solid var(--accent)}
+ #selbox i.tl{left:-3px;top:-3px} #selbox i.tr{right:-3px;top:-3px}
+ #selbox i.bl{left:-3px;bottom:-3px} #selbox i.br{right:-3px;bottom:-3px}
+ #selbox b{position:absolute;left:0;top:-17px;background:var(--accent);color:#fff;border-radius:3px;
+   padding:1px 5px;font:600 10px/1.4 'JetBrains Mono',ui-monospace,monospace;white-space:nowrap}
  #drag{position:absolute;inset:0;display:none;cursor:grab}
  #drag.on{display:block} #drag.on.dragging{cursor:grabbing;background:color-mix(in srgb,var(--accent) 12%,transparent)}
  kbd{font:11px/1 'JetBrains Mono',ui-monospace,monospace;border:1px solid var(--line-2);border-bottom-width:2px;
    border-radius:4px;padding:2px 4px;margin-right:2px;color:var(--ink-2);background:var(--panel);white-space:nowrap}
-</style></head><body>
- <div id=planel><div id=planhead><b>the plan, drawn from the storyboard</b><span id=planpath></span><button id=planclose>close</button></div><div id=planbody><img id=planimg alt="storyboard panels"></div></div>
+</style></head><body data-state=make>
  <div id=pick><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>close</button></div><pre id=pickjson></pre></div>
+ <div id=peek><div id=peekbox><span id=peekt></span></div></div>
  <div id=shell>
   <aside id=rail>
    <section class="panel chooser">
     <h2>chooser</h2>
     <div class=body>
-     <p>Picks between candidate takes of the same film, side by side.</p>
-     <p class=stub><i></i>not wired yet</p>
+     <p id=candstat aria-live=polite>Six backdrops for this film, at the playhead. Each one is the real scene with one
+      key changed, rendered as a clip: a still hides speed, scale and direction.</p>
+     <div id=cands></div>
+     <button id=candgo style="width:100%;margin-top:8px">six takes at the playhead</button>
     </div>
    </section>
    <section class="panel keys">
@@ -208,22 +371,25 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      <p><kbd>&larr;</kbd><kbd>&rarr;</kbd> a frame</p>
      <p><kbd>shift</kbd>+<kbd>&larr;</kbd><kbd>&rarr;</kbd> a second</p>
      <p><kbd>home</kbd><kbd>end</kbd> the ends</p>
-     <p><kbd>p</kbd> panels, <kbd>esc</kbd> closes</p>
+     <p><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> plan, make, look, ship</p>
     </div>
    </section>
   </aside>
   <div id=main>
    <div id=top>
+    <nav id=states aria-label="what you are doing">
+     <button data-state=plan>plan</button><button data-state=make>make</button
+     ><button data-state=look>look</button><button data-state=ship>ship</button>
+    </nav>
     <nav id=crumbs aria-label="composition stack"></nav>
     <span class=sp></span>
     <button id=key aria-pressed=false><svg viewBox="0 0 16 16"><path d="M8 2l6 6-6 6-6-6z"/></svg>key</button>
     <button id=undo><svg viewBox="0 0 16 16"><path d="M3 8h7a3 3 0 010 6H7"/><path d="M6 5L3 8l3 3"/></svg>undo</button>
-    <button id=plan><svg viewBox="0 0 16 16"><rect x=2 y=3 width=12 height=10 rx=1.5/><path d="M6 3v10M10 3v10"/></svg>panels</button>
     <button id=tgl aria-pressed=true><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>timeline</button>
     <button id=theme><svg viewBox="0 0 16 16"><circle cx=8 cy=8 r=5.5/><path d="M8 2.5v11" /></svg>theme: <span id=themetxt>light</span></button>
    </div>
    <div id=centre>
-    <div id=stage><iframe id=sc title="scene preview" src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=drag></div><div id=err hidden></div></div>
+    <div id=stage><iframe id=sc title="scene preview" src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=selbox><i class=tl></i><i class=tr></i><i class=bl></i><i class=br></i><b></b></div><div id=drag></div><div id=err hidden></div></div>
     <div id=bar>
      <button id=play aria-label="play or pause"><svg class=solid viewBox="0 0 16 16"><path d="M4 2.5l9 5.5-9 5.5z"/></svg>play</button>
      <input id=scrub type=range min=0 max=100 value=0 step=1 aria-label="frame">
@@ -231,11 +397,33 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
     </div>
     <div id=sel>click a layer in the picture, or a bar in the timeline, to select it</div>
    </div>
+   <div id=pane>
+    <section id=planpane>
+     <div class=panehead><b>the plan</b><span id=planpath>the storyboard this film was written from</span><span class=sp></span><button id=planredraw>redraw</button></div>
+     <div class=paneview id=planview><img id=planimg hidden alt="storyboard panels" style="max-width:100%;display:block"><div class=empty id=plannote hidden></div></div>
+    </section>
+    <section id=lookpane>
+     <div class=panehead>
+      <button data-sheet=beats aria-pressed=true>beats</button>
+      <button data-sheet=frames aria-pressed=false>key frames</button>
+      <button data-sheet=seams aria-pressed=false>seams</button>
+      <span id=lookwhat></span><span class=sp></span><span id=lookstat aria-live=polite></span><span class=muted>click the sheet for real pixels</span>
+     </div>
+     <div id=sheetwrap><img id=sheet hidden alt="contact sheet"><div id=sheetnote hidden></div></div>
+     <div id=jump></div>
+    </section>
+    <section id=shippane>
+     <div class=panehead><b>can it go out</b><span class=sp></span><span id=shipstat></span></div>
+     <div class=paneview><div class=empty id=shipbody></div></div>
+    </section>
+   </div>
    <div id=split role=separator aria-label="resize the timeline" tabindex=0></div>
    <div id=tl>
-    <div id=tlhead><b id=tlwhat>timeline</b><span class=sp></span><span id=tlkey></span></div>
+    <div id=tlhead><b id=tlwhat>timeline</b>
+     <span class=zoom><button id=zout aria-label="zoom out" title="zoom out">&minus;</button><button id=zfit aria-label="fit the whole film" title="fit the whole film">fit</button><button id=zin aria-label="zoom in" title="zoom in">+</button><s id=zlab>1.0x</s></span>
+     <span class=sp></span><span id=tlkey></span></div>
     <div id=alerts></div>
-    <div id=tlbody><div id=lanes tabindex=0><div id=ruler></div><div id=rows></div></div><div id=ph></div></div>
+    <div id=tlbody><div id=lanes tabindex=0><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
    </div>
   </div>
  </div>
@@ -303,20 +491,204 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  function setSel(i){ selIdx=i; const L=model&&model.layers.find(l=>l.i===i);
    selStart=L?L.start:0; selLabel=L?(L.type+' '+(L.label||'')):'';
    selReadout();
-   [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
- // ---- THE PLAN, one keypress away ----------------------------------------------------------------
- const planel=$('planel'), planImg=$('planimg'), planPath=$('planpath');
- function openPlan(){
-   planel.classList.add('on'); planPath.textContent='drawing...';
-   // cache-busted every open: the server redraws when the storyboard is newer than the sheet
-   fetch('/__panels?t='+Date.now()).then(r=>{
-     if(!r.ok) return r.text().then(t=>{ planPath.textContent=t.split(String.fromCharCode(10))[0]; planImg.removeAttribute('src'); });
-     planPath.textContent=r.headers.get('X-Storyboard')||'';
-     return r.blob().then(b=>{ planImg.src=URL.createObjectURL(b); }); })
-    .catch(e=>{ planPath.textContent='could not draw the panels: '+e.message; });
+   [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i));
+   drawSelBox(); }
+ // ---- THE FOUR STATES ----------------------------------------------------------------------------
+ // One scene, one playhead, four things you might be doing with them. Nothing here touches sc.src: the
+ // centre is hidden and shown, so the engine stays booted and the frame you left is the frame you
+ // return to. Entering a state does its work LAZILY, because two of them cost seconds of rendering.
+ let state='make';
+ function setState(s){
+   state=s; document.body.dataset.state=s;
+   [...document.querySelectorAll('#states button')].forEach(b=>
+     b.setAttribute('aria-current',b.dataset.state===s?'page':'false'));
+   if(s==='make') fit();
+   if(s==='plan') drawPlan();
+   if(s==='look') showSheet(sheetKind);
+   if(s==='ship') drawShip();
  }
- $('plan').addEventListener('click',openPlan);
- $('planclose').addEventListener('click',()=>planel.classList.remove('on'));
+ document.querySelectorAll('#states button').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
+
+ // ---- PLAN: the storyboard the beats were decided in ---------------------------------------------
+ // A STUB, and honest about it: preflight's nine decisions are not here. What IS here is the artefact
+ // that already existed and that nobody opened, because \`make panels\` wrote it to /tmp.
+ const planImg=$('planimg'), planPath=$('planpath'), planNote=$('plannote'), planView=$('planview');
+ let planDrawn=false;
+ // WHAT PLAN IS NOT, said in the state itself. An empty white pane with one line of error at the top
+ // is honest by accident; this says what belongs here, what is missing, and the command that makes it.
+ function planEmpty(why){
+   planImg.hidden=true; planImg.removeAttribute('src');
+   planNote.hidden=false; planView.classList.remove('sheet');
+   planNote.innerHTML='<h3>the plan is not here yet</h3>'
+     +'<p>'+esc(why)+'</p>'
+     +'<p>Two things belong in this state and neither is wired: the nine decisions that come BEFORE the '
+     +'JSON, and the lock sheet the beats were agreed in. Both run in the terminal today:</p>'
+     +'<ul><li><code>make preflight D='+esc((model&&model.file)||'')+'</code></li>'
+     +'<li>a <code>&lt;name&gt;.storyboard.md</code> beside the scene, or a top-level <code>"storyboard"</code> field</li></ul>'
+     +'<p>What studio can already show is the drawn sheet, the moment one of those exists.</p>';
+ }
+ function drawPlan(force){
+   if(planDrawn&&!force) return;
+   planDrawn=true; planPath.textContent='drawing the panels…';
+   // cache-busted: the server redraws when the storyboard is newer than the sheet
+   fetch('/__panels?t='+Date.now()).then(r=>{
+     if(!r.ok) return r.text().then(t=>{ planPath.textContent=''; planEmpty(t.split(String.fromCharCode(10))[0]); });
+     planPath.textContent=r.headers.get('X-Storyboard')||'';
+     return r.blob().then(b=>{ planNote.hidden=true; planImg.hidden=false; planView.classList.add('sheet');
+       planImg.src=URL.createObjectURL(b); }); })
+    .catch(e=>{ planPath.textContent=''; planEmpty('could not draw the panels: '+e.message); });
+ }
+ $('planredraw').addEventListener('click',()=>drawPlan(true));
+
+ // ---- LOOK: the film as a STRIP, which is a different question from a frame ----------------------
+ // Scrubbing tells you what a frame IS. A strip tells you whether the film WORKS, and the two sheets
+ // here are the ones this repo already makes and least often reads: every beat in · mid · out, and
+ // both sides of every transition pulled out of the rendered mp4. Neither needs new engine work.
+ const sheetImg=$('sheet'), sheetNote=$('sheetnote'), lookStat=$('lookstat'), lookWhat=$('lookwhat');
+ // The first two need NO RENDER: both seek renderFrame in a headless page, exactly as the scrubber does,
+ // so a scene that has never been rendered can still be judged as a strip. Only the seams need an mp4.
+ const SHEETWHAT={beats:'every beat: in · mid · out. No render needed',
+                  frames:'the key frames of the whole film. No render needed',
+                  seams:'both sides of every transition, out of the rendered mp4'};
+ let sheetKind='beats', sheetHave={};
+ let renderPoll=null;
+ function lookBusy(msg){ lookStat.innerHTML='<span class=work><i></i>'+esc(msg)+'</span>'; }
+ function note(title,body){ sheetImg.hidden=true; sheetNote.hidden=false;
+   sheetNote.innerHTML='<b>'+esc(title)+'</b>'+body; }
+ function showSheet(kind,force){
+   sheetKind=kind;
+   [...document.querySelectorAll('[data-sheet]')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sheet===kind)));
+   lookWhat.textContent=SHEETWHAT[kind]||'';
+   if(sheetHave[kind]&&!force){ sheetImg.src=sheetHave[kind]; sheetImg.hidden=false; sheetNote.hidden=true; lookStat.textContent=''; return; }
+   lookBusy(kind==='seams'?'decoding the seams out of the mp4, this takes a few seconds':'rendering every beat, this takes a few seconds');
+   sheetImg.hidden=true; sheetNote.hidden=true;
+   // EACH SHEET COSTS SECONDS, so two can be in flight and the slower one used to land last and
+   // overwrite the one you asked for second. A reply for a sheet nobody is looking at now is dropped.
+   const mine=()=>sheetKind===kind;
+   fetch('/__sheet?kind='+kind+'&t='+Date.now()).then(r=>{
+     if(!mine()) return;
+     if(r.status===409&&r.headers.get('X-Needs-Render')) return r.text().then(t=>{ lookStat.textContent='';
+       // SAY IT, never draw an empty grid. And offer the one thing that would fix it.
+       note('there are no seam frames to look at yet','<p>'+esc(t)+'</p><p>A render takes minutes and runs '
+         +'<code>make video</code> with the gates off.</p><p><button id=dorender>render it now</button></p>');
+       $('dorender').addEventListener('click',startRender); });
+     if(!r.ok) return r.text().then(t=>{ lookStat.textContent=''; note('that sheet could not be drawn','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(t)+'</pre>'); });
+     return r.blob().then(b=>{ const u=URL.createObjectURL(b); sheetHave[kind]=u;
+       sheetImg.src=u; sheetImg.hidden=false; sheetNote.hidden=true; lookStat.textContent=''; }); })
+   .catch(e=>{ lookStat.textContent=''; note('that sheet could not be drawn',esc(e.message)); });
+ }
+ document.querySelectorAll('[data-sheet]').forEach(b=>b.addEventListener('click',()=>showSheet(b.dataset.sheet)));
+ sheetImg.addEventListener('click',()=>sheetImg.classList.toggle('full'));
+ // THE RENDER, polled rather than awaited: a fetch held open for four minutes is a frozen panel with
+ // nothing to say for itself.
+ function startRender(){
+   fetch('/api/render',{method:'POST'}).then(r=>r.json()).then(pollRender);
+ }
+ function pollRender(st){
+   if(!st) return;
+   if(!st.done){ lookBusy('rendering · '+(st.secs||0)+'s · '+(st.line||''));
+     clearTimeout(renderPoll); renderPoll=setTimeout(()=>fetch('/api/render').then(r=>r.json()).then(pollRender),1500); return; }
+   lookStat.textContent='';
+   if(st.error){ note('the render failed','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(st.error)+'</pre>'); return; }
+   sheetHave.seams=null; showSheet('seams',true);
+ }
+ // THE PLAYHEAD IS SHARED, and this is where that pays: every marked moment in the film is one click
+ // from the strip, and the click lands you in Make at that frame.
+ function drawJump(){
+   const j=$('jump'); if(!model) return;
+   const ms=(model.marks||[]).map(k=>[k.t,k.kind]);
+   j.innerHTML=ms.length?ms.map(([t,k])=>'<button data-t="'+t+'">'+esc(k)+' '+(+t).toFixed(2)+'s</button>').join('')
+     :'<span class=stub><i></i>this film declares no cuts, seams or stings to jump to</span>';
+   j.querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{
+     setState('make'); go(Math.round(+b.dataset.t*fps)); }));
+ }
+
+ // ---- SHIP: a stub, and it says which gate it is showing you --------------------------------------
+ // The ladder is \`make ship\`, twenty steps that declare themselves as they run, and none of it is
+ // wired here. What IS real is beat-check, because the timeline already runs it, so this shows exactly
+ // that one gate's codes and refuses to imply it has seen the other nineteen.
+ function drawShip(){
+   const g=(model&&model.gate)||{codes:[]};
+   const codes=g.codes||[];
+   $('shipstat').textContent=codes.length?codes.length+' beat-check finding(s)':'beat-check is clean';
+   $('shipbody').innerHTML='<h3>not wired: this is one gate of twenty</h3>'
+     +'<p>The ladder that says a film is done is <code>make ship D='+esc((model&&model.file)||'')+'</code>. '
+     +'It declares every step before it runs, and nothing here runs any of them.</p>'
+     +'<p>What studio already knows is <b>beat-check</b>, because the timeline\\'s hazard bands come from it:</p>'
+     +(codes.length?'<ul>'+codes.map(c=>'<li><code>'+esc(c)+'</code></li>').join('')+'</ul>'
+       :'<ul><li>no findings on this scene</li></ul>')
+     +'<p>Waivers, legacy debt and what actually blocks are not shown, and a clean panel here is not a '
+     +'film cleared to go out.</p>';
+ }
+ // ---- THE CHOOSER: six takes of this film, at this frame ------------------------------------------
+ // IT NEVER ASKS FOR A WORD. There is no search box here and there will not be one: the person this
+ // panel is for can see what they want and cannot name it, which is exactly what \`make arsenal\` cannot
+ // help with. You point at a frame, it renders six real versions of that frame, and you pick one.
+ //
+ // Every card is a LOOPING CLIP, never a still. A still hides speed, scale and direction, and this repo
+ // has been burned by exactly that (docs/MISTAKES.md #155).
+ const cands=$('cands'), candStat=$('candstat'), candGo=$('candgo');
+ let candBusy=false, candTick=null;
+ function candWorking(){
+   const t0=Date.now();
+   candStat.innerHTML='<span class=work><i></i>rendering six takes at '+(n/fps).toFixed(2)+'s · <b class=el>0</b>s</span>';
+   // six clips of the real scene take roughly ten to fifteen seconds. SAY SO WHILE IT HAPPENS: a panel
+   // that sits still for fifteen seconds reads as broken, which is the one thing this cannot afford.
+   cands.style.setProperty('--ar',W+'/'+H);
+   cands.innerHTML=Array.from({length:6},()=>'<div class=cand><span class=sk></span></div>').join('');
+   clearInterval(candTick);
+   candTick=setInterval(()=>{ const el=candStat.querySelector('.el');
+     if(el) el.textContent=String(Math.round((Date.now()-t0)/1000)); },250);
+ }
+ function candDone(msg){ clearInterval(candTick); candStat.textContent=msg; }
+ function askCandidates(){
+   if(candBusy) return;
+   candBusy=true; candGo.disabled=true; candWorking();
+   fetch('/api/candidates',{method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({at:+(n/fps).toFixed(2),n:6})})
+    .then(r=>r.json()).then(d=>{
+      candBusy=false; candGo.disabled=false;
+      if(!d.ok){ cands.innerHTML='';
+        // The refusals are the useful half: a window painted with \`html\` has no preset to swap, and
+        // saying which window and why beats an empty strip.
+        candDone(''); candStat.innerHTML='<span style="color:var(--bad)">'+esc(d.error||'no candidates')+'</span>';
+        return; }
+      drawCands(d);
+    }).catch(e=>{ candBusy=false; candGo.disabled=false; candDone('could not ask for candidates: '+e.message); });
+ }
+ function drawCands(d){
+   const w=d.window||{}, cs=(d.candidates||[]).filter(c=>c.clip);
+   clearInterval(candTick);
+   candStat.innerHTML=esc('bg['+w.index+'], now \u201c'+w.current+'\u201d, at '+d.at+'s · '+cs.length+' takes in '+Math.round((d.ms||0)/1000)+'s')
+     +'<br>click one to apply it, <kbd>undo</kbd> above puts it back.';
+   // SIX AUTOPLAYING LOOPS IS EXACTLY THE MOTION SOMEBODY MAY HAVE ASKED TO BE SPARED, so under
+   // prefers-reduced-motion they load paused and the panel offers one control that starts them all.
+   // Not silently replaced by stills: a still hides speed, scale and direction, which is the whole
+   // reason these are clips, so the honest answer is "paused, and here is how to play them".
+   const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+   cands.innerHTML=cs.map((c,i)=>'<button class=cand data-i="'+i+'">'
+     +'<video src="/'+esc(c.clip)+'" loop muted playsinline preload=metadata'+(still?'':' autoplay')+'></video>'
+     +'<div class=t><b>'+esc(c.name)+'</b><s>'+(c.new?'new':(c.scenes+' film'+(c.scenes===1?'':'s')))+'</s></div>'
+     +'<p>'+esc(c.blurb||'')+'</p>'
+     +(c.warnings||[]).map(w2=>'<p class=warn>'+esc(w2)+'</p>').join('')
+     +'</button>').join('');
+   cands.querySelectorAll('.cand').forEach(b=>b.addEventListener('click',()=>applyCand(cs[+b.dataset.i])));
+   if(still){ candGo.insertAdjacentHTML('beforebegin',
+     '<button id=candplay style="width:100%;margin-top:8px">play the six clips</button>');
+     $('candplay').addEventListener('click',()=>cands.querySelectorAll('video').forEach(v=>v.play())); }
+ }
+ function applyCand(c){
+   candStat.innerHTML='<span class=work><i></i>applying '+esc(c.name)+'</span>';
+   fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ops:c.patch})})
+    .then(r=>r.json()).then(r=>{
+      if(!r.ok){ candStat.innerHTML='<span style="color:var(--bad)">'+esc(r.error)+'</span>'; return; }
+      candStat.textContent=r.changed?('applied "'+c.name+'" to the scene. undo is in the top bar.')
+        :('the scene already used "'+c.name+'", nothing changed.');
+      if(r.changed) reloadScene();
+    });
+ }
+ candGo.addEventListener('click',askCandidates);
+
  // ---- THE PICKER: click the picture, get the JSON that made it -----------------------------------
  const pick=$('pick'), pickName=$('pickname'), pickJson=$('pickjson');
  function bgAt(t){ if(!model) return null;
@@ -401,8 +773,30 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n;
    // measured off the RULER, which is the element the times are drawn on. A percentage of the lanes
    // box was 12px out at the end of the film and moved again when a scrollbar appeared.
-   ph.style.left=(12+ruler.clientWidth*Math.max(0,Math.min(1,n/fps/dur)))+'px';
-   if(selIdx>=0&&!dragging)selReadout(); }
+   ph.style.left=atX(n/fps)+'px';
+   if(selIdx>=0&&!dragging)selReadout();
+   drawSelBox(); }
+ // THE SELECTED LAYER, OUTLINED ON THE PICTURE. Redrawn every frame because the layer MOVES: a box
+ // measured once is wrong on the next frame, which is worse than no box. Measured in the iframe's own
+ // coordinates and mapped through the same scale fit() applied, so it lands on the pixels it names.
+ const selBox=$('selbox');
+ function drawSelBox(){
+   if(selIdx<0){ selBox.classList.remove('on'); return; }
+   try{
+     const doc=sc.contentDocument;
+     const el=doc&&doc.querySelector('.hs-layer[data-idx="'+selIdx+'"]');
+     if(!el){ selBox.classList.remove('on'); return; }
+     const r=el.getBoundingClientRect();
+     if(!r.width||!r.height){ selBox.classList.remove('on'); return; }
+     const f=sc.getBoundingClientRect(), st=$('stage').getBoundingClientRect();
+     selBox.style.left=(f.left-st.left+r.left*FITS)+'px';
+     selBox.style.top=(f.top-st.top+r.top*FITS)+'px';
+     selBox.style.width=(r.width*FITS)+'px';
+     selBox.style.height=(r.height*FITS)+'px';
+     selBox.querySelector('b').textContent=selLabel.trim()||('layer '+selIdx);
+     selBox.classList.add('on');
+   }catch(_){ selBox.classList.remove('on'); }   // a cross-origin document cannot be measured
+ }
  const errBox=$('err');
  // AN ERROR YOU CANNOT COPY IS AN ERROR YOU RETYPE BY HAND. The text is selectable, one button copies
  // it, and it is POSTed to the server so the terminal that started studio hears about it too.
@@ -448,19 +842,43 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  // ends, space plays. The range input handles its own arrows, so we stand back when it has focus rather
  // than stepping the frame twice.
  addEventListener('keydown',e=>{
-   if(e.key==='Escape'){ planel.classList.remove('on'); pick.classList.remove('on'); return; }
+   if(e.key==='Escape'){ pick.classList.remove('on'); return; }
    if(typing()||e.metaKey||e.ctrlKey||e.altKey) return;
+   // the states, in the order they are asked. Cheap to move between, so they are one keystroke apart.
+   const st={'1':'plan','2':'make','3':'look','4':'ship'}[e.key];
+   if(st){ e.preventDefault(); setState(st); return; }
    const step=e.shiftKey?fps:1;
    if(e.key==='ArrowRight'){ e.preventDefault(); go(n+step); }
    else if(e.key==='ArrowLeft'){ e.preventDefault(); go(n-step); }
    else if(e.key==='Home'){ e.preventDefault(); go(0); }
    else if(e.key==='End'){ e.preventDefault(); go(total); }
    else if(e.key===' '){ e.preventDefault(); setPlaying(!playing); }
-   else if(e.key==='p'||e.key==='P'){ planel.classList.contains('on')?planel.classList.remove('on'):openPlan(); }
  });
 
  // ---------- timeline ----------
  const pc=(t)=>(100*Math.max(0,Math.min(1,t/dur)))+'%';
+ // where a TIME sits on screen, once. The playhead and the hover mark both ask this and the second one
+ // would have got it wrong the moment zoom arrived, so there is one answer: the ruler's own width, the
+ // lane's left padding, and whatever the lane is scrolled by.
+ const atX=(t)=>12+ruler.clientWidth*Math.max(0,Math.min(1,t/dur))-lanes.scrollLeft;
+ let Z=1;
+ function setZoom(z){
+   Z=Math.max(1,Math.min(40,z));
+   lanes.style.setProperty('--z',Z);
+   $('zlab').textContent=Z.toFixed(1)+'x';
+   // ANCHOR ON THE PLAYHEAD: zooming is what you do to look closer at where you ARE, so the frame you
+   // are on stays put and the film grows around it.
+   requestAnimationFrame(()=>{
+     const frac=Math.max(0,Math.min(1,n/fps/dur));
+     lanes.scrollLeft=Math.max(0,ruler.clientWidth*frac-lanes.clientWidth/2);
+     if(model) paint(model);        // the label stride and the beat grid are MEASURED, so they re-space
+     draw();
+   });
+ }
+ $('zin').addEventListener('click',()=>setZoom(Z*1.6));
+ $('zout').addEventListener('click',()=>setZoom(Z/1.6));
+ $('zfit').addEventListener('click',()=>setZoom(1));
+ lanes.addEventListener('scroll',()=>{ ph.style.left=atX(n/fps)+'px'; });
  const esc=(s)=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
  // what a ruler label ACTUALLY measures, in the face and size it is drawn in. Rendered into the ruler
  // itself so it inherits every rule that applies to a real one, then removed.
@@ -505,8 +923,32 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
                 cls:(el.className.match(/hs-(img-wrap|rect|comp-wrap|group|text)/)||[])[1] }; });
  }
  const CLS={'img-wrap':'image','comp-wrap':'component','rect':'rect','group':'group','text':'text'};
+ // ---- the filmstrip ------------------------------------------------------------------------------
+ // NEVER BLOCKS THE FIRST PAINT. The timeline draws, then this asks for the strip and fills the band in
+ // when it arrives; the band is display:none until it has something, so nothing reserves a grey hole.
+ // Built once per scene on the server and cached there, so this is one request and then free.
+ let stripDone=false;
+ function filmstrip(){
+   if(stripDone) return; stripDone=true;
+   const band=$('film');
+   fetch('/api/strip').then(r=>r.json()).then(s=>{
+     if(!s||!s.frames||!s.frames.length){ stripDone=false;
+       if(s&&s.error) $('tlkey').textContent+='  ·  no strip: '+s.error; return; }
+     const w=100*s.stride/dur;
+     stripFrames=s.frames;
+     band.innerHTML=s.frames.map(f=>'<div class=fr style="left:'+pc(f.t-s.stride/2)+';width:'+w+'%;background-image:url('+f.src+')"></div>').join('');
+     // A LAYER THAT NEVER CHANGED at any instant we looked at. A NOTE, never a block: a held frame is
+     // sometimes the beat. Marked on the bar and counted once in the header.
+     const still=new Set(s.still||[]);
+     if(still.size){
+       [...rows.querySelectorAll('.bar')].forEach(b=>{ if(still.has(+b.dataset.i)){ b.classList.add('still');
+         b.title+='  ·  nothing about this layer changed at any of the '+s.frames.length+' instants sampled'; } });
+       $('tlkey').textContent+='  ·  '+still.size+' layer'+(still.size===1?'':'s')+' never change';
+     }
+   }).catch(()=>{ stripDone=false; });
+ }
  function timeline(){
-   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; drawCrumbs(); paint(m); })
+   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; drawCrumbs(); paint(m); drawJump(); })
      .catch(e=>{ $('tlwhat').textContent='timeline unavailable: '+e; });
  }
  function paint(m){
@@ -545,8 +987,45 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      r+='<div class=ms style="left:'+pc(k.t)+';width:'+(100*k.dur/dur)+'%"></div>'
        +'<div class=m style="left:'+pc(k.t)+'" title="'+esc(k.kind+' '+k.t+'s'+(k.name?' '+k.name:''))+'">'+k.kind.charAt(0).toUpperCase()+'</div>'; }
    ruler.innerHTML=r;
-   let h='';
+   let h='', H=bars.length*18;
    for(let t=step;t<=dur+1e-6;t+=step) h+='<div class=grid style="left:'+pc(t)+'"></div>';
+   // ---- THE OTHER KINDS OF ROW, and they come FIRST -------------------------------------------------
+   // Captions and sound are FEW and FIXED; the layer stack is unbounded. Drawn under it, a 76-layer film
+   // buries its whole soundtrack below the fold of a scrolling list, which is where it was on the first
+   // build of this. Above the layers they are always the first thing under the strip, and the stack that
+   // can be any length scrolls beneath them.
+   const caps=m.captions||[];
+   if(caps.length){
+     h+='<div class=lane-h><span>captions<em>'+caps.length+'</em></span></div>'; H+=21;
+     for(const c of caps){ const w=Math.max(0,c.t1-c.t0);
+       h+='<div class="row cap"><b style="left:'+pc(c.t0)+';width:'+(100*w/dur)+'%" title="'+esc(c.text)+'">'+esc(c.text)+'</b></div>'; H+=16; }
+   }
+   const A=m.audio||{};
+   if(!A.none){
+     h+='<div class=lane-h><span>sound'+(A.silent?'<em>silent</em>':(A.music?'<em>'+esc(A.music.split('/').pop())+(A.gain!=null?' · gain '+A.gain:'')+'</em>':'<em>no bed</em>'))+'</span></div>'; H+=21;
+     if(A.silent){
+       // A DECLARED SILENCE IS A DEVICE, and an undeclared one is a hole. The lane says which.
+       h+='<div class=lane-note><span>'+(A.why?esc('silent: '+A.why):'silent, and no reason given: audio._why is where the device gets declared')+'</span></div>'; H+=16;
+     } else {
+       let a='<div class=bed>';
+       const bts=(A.beats&&A.beats.beats)||[], dbs=new Set(((A.beats&&A.beats.downbeats)||[]).map(x=>+x.toFixed(3)));
+       // a grid denser than a tick every 3px is a grey wash, not a grid, so it is dropped and said so
+       const inRange=bts.filter(t=>t<=dur).length||1;
+       const dense=bts.length&&(ruler.clientWidth/inRange<3);
+       if(!dense) for(const t of bts){ if(t>dur) break;
+         a+='<i class="bt'+(dbs.has(+t.toFixed(3))?' db':'')+'" style="left:'+pc(t)+'"></i>'; }
+       if(A.fade&&A.fade.in) a+='<div class=fade style="left:0;width:'+(100*A.fade.in/dur)+'%"></div>';
+       if(A.fade&&A.fade.out) a+='<div class=fade style="right:0;width:'+(100*A.fade.out/dur)+'%"></div>';
+       for(const b of (A.bridges||[])) a+='<div class=br style="left:'+pc(b.start)+';width:'+(100*(b.end-b.start)/dur)+'%" title="'+esc((b.sound||'bridge')+' at '+b.at)+'"></div>';
+       // two cues a tenth of a second apart printed their names on top of each other, so the labels
+       // alternate high and low. The ticks stay where they are: it is the TIME that is being read.
+       (A.cues||[]).forEach((c,i)=>{ a+='<div class=cue style="left:'+pc(c.t)+'"><s style="top:'+(i%2?12:-1)+'px">'+esc(c.name)+'</s></div>'; });
+       a+='<span class=name>'+(A.beats?esc(Math.round(A.beats.bpm)+' bpm'+(dense?', grid too dense to draw':'')):(A.auto?'auto':''))+'</span></div>';
+       h+='<div class="row aud">'+a+'</div>'; H+=30;
+       if(A.bridgeError){ h+='<div class=lane-note><span>bridges did not resolve: '+esc(A.bridgeError)+'</span></div>'; H+=16; }
+     }
+     h+='<div class=lane-h><span>layers<em>'+bars.length+'</em></span></div>'; H+=21;
+   }
    for(const b of bars){ const sh=shade(b.type), wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
      const heldp=b.grew>0.005&&b.w?100*Math.min(b.grew,b.w)/b.w:0;
      h+='<div class=row><div class=bar data-i="'+(b.i??-1)+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%;background:'+sh[0]+';color:'+sh[1]+'" title="'+esc(b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s to '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'+(b.anim?' · '+b.anim:'')+(b.out?' then '+b.out:'')+(heldp?' · authored to '+(b.s+b.w-b.grew).toFixed(2)+'s, held '+b.grew.toFixed(2)+'s longer by beat wrapping':''))+'">'
@@ -562,7 +1041,8 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      const dis=grown.some(([x,y])=>x<b-1e-9&&y>a+1e-9);
      h+='<div class="hz '+(dis?'disputed':cls)+'" style="left:'+pc(a)+';width:'+(100*(b-a)/dur)+'%"><b>'+(dis?'disputed ':'')+lab+' '+(b-a).toFixed(2)+'s</b></div>'; }
    rows.innerHTML=h;
-   rows.style.height=(bars.length*18)+'px';
+   rows.style.height=H+'px';
+   filmstrip();
    $('tlwhat').textContent=m.file+' · '+bars.length+' layers · '+dur.toFixed(2)+'s / '+total+'f';
    // no colour key: the bars are a grey ramp, not a code, and each one prints its own type. What is
    // worth naming here is WHICH types the film is made of.
@@ -573,6 +1053,64 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
        +(dis?': the engine holds a window open here that the JSON does not declare, so beat-check may be reading a hole that does not render':'')+'</span>'; }).join('');
    if(selIdx>=0) setSel(selIdx);
  }
+ // ---- THE THUMBNAIL AT THE POINTER ---------------------------------------------------------------
+ // HOVER LOOKS, DRAG COMMITS. This never writes the playhead and never touches the main iframe: it owns a second
+ // engine of its own, so the picture in the centre is exactly where you left it while you read ahead.
+ //
+ // THROTTLED TO ONE SEEK PER ANIMATION FRAME, coalesced: the pointer writes a time into a variable and
+ // a single rAF drains it, so twenty mousemoves inside one frame cost ONE renderFrame and it is always
+ // the latest one. Measured on the 76-layer film: a peek seek is 4 to 9ms at this size, so the drain
+ // never overruns its frame, and scrubbing the main preview is unaffected because it is a different
+ // engine in a different document.
+ const peek=$('peek'), peekBox=$('peekbox'), peekT=$('peekt');
+ let peekFrame=null, peekReady=false, peekWant=null, peekPending=false, peekScale=1;
+ function peekBoot(){
+   if(peekFrame) return;
+   peekFrame=document.createElement('iframe');
+   peekFrame.title='frame preview'; peekFrame.setAttribute('aria-hidden','true');
+   // 120px tall whatever the canvas is, so a portrait film is not a sliver
+   peekScale=120/H;
+   peekFrame.style.width=W+'px'; peekFrame.style.height=H+'px';
+   peekFrame.style.transform='scale('+peekScale+')';
+   peekBox.style.width=Math.round(W*peekScale)+'px'; peekBox.style.height=Math.round(H*peekScale)+'px';
+   peekBox.insertBefore(peekFrame,peekT);
+   peekFrame.src=sc.src;
+   peekFrame.addEventListener('load',()=>{ const w=peekFrame.contentWindow;
+     const wait=()=>{ if(w.__engineReady&&w.__engine){ peekReady=true; peekDraw(); }
+                      else if(!w.__engineError) setTimeout(wait,80); };
+     wait(); });
+ }
+ function peekDraw(){
+   peekPending=false;
+   if(peekWant==null||!peekReady) return;
+   try{ peekFrame.contentWindow.__engine.renderFrame(Math.round(peekWant*fps)); }catch(_){ }
+ }
+ // the nearest thumbnail the strip already holds, painted behind the live frame so the box is never
+ // empty: instant first, exact a frame later.
+ let stripFrames=[];
+ function peekAt(t,clientX){
+   peekBoot();
+   peekWant=Math.max(0,Math.min(dur,t));
+   if(!peekPending){ peekPending=true; requestAnimationFrame(peekDraw); }
+   const near=stripFrames.length?stripFrames.reduce((a,b)=>Math.abs(b.t-peekWant)<Math.abs(a.t-peekWant)?b:a):null;
+   if(near) peekBox.style.backgroundImage='url('+near.src+')';
+   peekT.textContent=peekWant.toFixed(2)+'s · '+Math.round(peekWant*fps)+'f';
+   peek.classList.add('on');
+   const w=peek.offsetWidth, h=peek.offsetHeight, r=tl.getBoundingClientRect();
+   peek.style.left=Math.max(8,Math.min(innerWidth-w-8,clientX-w/2))+'px';
+   peek.style.top=Math.max(8,r.top-h-8)+'px';
+   $('hov').style.display='block';
+   $('hov').style.left=atX(peekWant)+'px';
+ }
+ function peekOff(){ peek.classList.remove('on'); $('hov').style.display='none'; peekWant=null; }
+ lanes.addEventListener('pointermove',e=>{
+   // a drag is a scrub and owns the pointer; hovering is the only thing that peeks
+   if(e.buttons&1){ peekOff(); return; }
+   const r=ruler.getBoundingClientRect();
+   peekAt((e.clientX-r.left)/r.width*dur, e.clientX);
+ });
+ lanes.addEventListener('pointerleave',peekOff);
+
  // drag anywhere in the lanes to seek; the playhead and the scrubber are the same value
  const seek=(e)=>{ const r=ruler.getBoundingClientRect(); n=Math.max(0,Math.min(total,Math.round((e.clientX-r.left)/r.width*dur*fps))); draw(); };
  lanes.addEventListener('pointerdown',e=>{
@@ -586,5 +1124,5 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  lanes.addEventListener('pointermove',e=>{ if(e.buttons&1) seek(e); });
  $('tgl').addEventListener('click',()=>{ const off=tl.classList.toggle('off');
    $('tgl').setAttribute('aria-pressed',String(!off)); document.body.classList.toggle('tloff',off); fit(); });
- drawCrumbs();
+ drawCrumbs(); setState('make');
 </script></body></html>`;

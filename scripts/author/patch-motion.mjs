@@ -216,3 +216,38 @@ export function upsertKey(keys, k, eps = 1e-4) {
   out.push(prev ? { ...prev, ...k } : k);          // a re-drag updates the key, it does not stack a new one
   return out.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
 }
+
+// applyOps(src, ops) → new source text, for the RFC 6902 patches scripts/dev/candidates.mjs emits.
+//
+// Same reason the rest of this file exists: a candidate accepted in studio changes ONE preset name, and
+// a parse/stringify round trip would reformat the whole hand-written scene around it. The ops that tool
+// emits are narrow by construction (a `replace` on a bg window's preset, and a `remove` of the `opts`
+// the new preset has no knob for), so this understands exactly that shape and refuses anything else
+// rather than growing into a general json-patch implementation nobody asked for.
+export function applyOps(src, ops) {
+  for (const op of ops || []) {
+    const m = /^\/(bg)\/(\d+)\/([A-Za-z0-9_]+)$/.exec(String(op && op.path));
+    if (!m) throw new Error(`this editor applies /bg/<i>/<prop> ops only, not ${JSON.stringify(op && op.path)}`);
+    const [, key, idxs, name] = m;
+    const arr = new RegExp(`"${key}"\\s*:\\s*\\[`).exec(src);
+    if (!arr) throw new Error(`this scene has no \`${key}\` array to patch`);
+    const el = elementSpans(src, arr.index + arr[0].length - 1)[+idxs];
+    if (!el) throw new Error(`${key}[${idxs}] does not exist in this scene`);
+    const cur = propSpan(src, el, name);
+    if (op.op === 'replace' || op.op === 'add') {
+      const text = JSON.stringify(op.value);
+      src = cur
+        ? src.slice(0, cur.valueStart) + text + src.slice(cur.valueEnd)
+        // no such property yet: first in the object, which is where the eye looks for a preset name
+        : src.slice(0, el.start + 1) + ` "${name}": ${text},` + src.slice(el.start + 1);
+    } else if (op.op === 'remove') {
+      if (!cur) continue;
+      let a = cur.keyStart, b = cur.valueEnd;
+      while (b < el.end && /[\s,]/.test(src[b]) && src[b] !== '\n') b++;
+      if (src[b] === '\n') b++;
+      if (src.slice(b, el.end - 1).trim() === '') { a = src.lastIndexOf(',', cur.keyStart); b = cur.valueEnd; }
+      src = src.slice(0, a) + src.slice(b);
+    } else throw new Error(`unsupported op "${op.op}"`);
+  }
+  return src;
+}
