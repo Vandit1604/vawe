@@ -30,16 +30,18 @@ export function dollyZ(s, lens) {
 // Keyframe times are SECONDS on the absolute timeline. Holds the last frame past the end.
 export function cameraAt(camKf, t) {
   if (!camKf || !camKf.length) return null;
-  let a = camKf[0], b = camKf[camKf.length - 1];
-  for (let i = 0; i < camKf.length - 1; i++) {
-    if (t >= camKf[i].t && t <= camKf[i + 1].t) { a = camKf[i]; b = camKf[i + 1]; break; }
-    if (t > camKf[i + 1].t) a = b = camKf[i + 1];
-  }
-  // per-keyframe `ease` drives the segment INTO b (mirrors motionAt). Default easeInOutCubic keeps every
-  // existing camera byte-identical; set `ease:"linear"` on interior keyframes for a velocity-CONTINUOUS
-  // multi-keyframe push. The old hardcoded ease-in-out zeroed velocity at every keyframe, so a chained
-  // push pulsed (accelerate→stop→accelerate). The "not smooth / shaking zoom" (docs/MISTAKES.md #125).
-  const p = a === b ? 1 : resolveEasing(b.ease || 'easeInOutCubic')(clamp01((t - a.t) / (b.t - a.t)));
+  // The index of the key the segment STARTS at, or the last key once t is past the end. `segmentAt`
+  // holds the last key for that index, so the "hold the final pose" branch is not written twice.
+  let i = 0;
+  while (i < camKf.length - 1 && t > camKf[i + 1].t) i++;
+  const a = camKf[i], b = camKf[i + 1] || a;
+  // per-keyframe `ease` drives the segment INTO b (segmentAt is the single owner, shared with motionAt).
+  // Default easeInOutCubic keeps every existing camera byte-identical; set `ease:"linear"` on interior
+  // keyframes for a velocity-CONTINUOUS multi-keyframe push. The old hardcoded ease-in-out zeroed
+  // velocity at every keyframe, so a chained push pulsed (accelerate/stop/accelerate). The "not smooth /
+  // shaking zoom" (docs/MISTAKES.md #125). WHICH default is picked stays here and not in segmentAt: the
+  // camera has no DENSE_KEY_SEC rule and that difference is deliberate (see motionAt).
+  const at = segmentAt(camKf, i, t, 'easeInOutCubic');
   // rx/ry/roll are the camera's ORIENTATION and they belong to the camera rather than to a layer for a
   // geometric reason: CSS `perspective()` takes its vanishing point from the element it is applied to,
   // so tilting sibling layers individually rotates each about its OWN centre and the composition comes
@@ -47,10 +49,10 @@ export function cameraAt(camKf, t) {
   // as a single plane in space, which is what "perspective on the frame" means (docs/MISTAKES.md #59).
   // `persp` is the LENS: the focal distance the projection is taken through, not the camera's position.
   // Position is `s` (see dollyZ); confusing the two is the dolly-zoom, and it is authored by keying both.
-  return { s: lerp(a.s ?? 1, b.s ?? 1, p), x: lerp(a.x ?? 0, b.x ?? 0, p), y: lerp(a.y ?? 0, b.y ?? 0, p),
-    rx: lerp(a.rx ?? 0, b.rx ?? 0, p), ry: lerp(a.ry ?? 0, b.ry ?? 0, p),
-    roll: lerp(a.roll ?? 0, b.roll ?? 0, p),
-    persp: lerp(a.p ?? 1600, b.p ?? 1600, p),
+  return { s: at('s', 1), x: at('x', 0), y: at('y', 0),
+    rx: at('rx', 0), ry: at('ry', 0),
+    roll: at('roll', 0),
+    persp: at('p', 1600),
     // FOCUS AND APERTURE, the camera's depth of field. `f` is the distance the lens is focused at, in
     // the same z as a layer's `depth`; `a` is how fast things go soft as they leave it, in blur pixels
     // per 100px of defocus. Keyed like everything else here, so a rack focus is two keyframes.
@@ -58,9 +60,10 @@ export function cameraAt(camKf, t) {
     // `focus: null` when NO keyframe names one, and that is the difference between "focused at the
     // picture plane" and "this film has no depth of field". Lerping a missing `f` to 0 would silently
     // give every film a lens focused on z 0, which is a working-looking default nobody asked for and
-    // would soften the whole library the moment it shipped.
-    focus: (a.f == null && b.f == null) ? null : lerp(a.f ?? b.f ?? 0, b.f ?? a.f ?? 0, p),
-    aperture: lerp(a.a ?? 0, b.a ?? 0, p) };
+    // would soften the whole library the moment it shipped. The default is the OTHER endpoint's `f`, so
+    // one keyed focus holds flat rather than racking from zero.
+    focus: (a.f == null && b.f == null) ? null : at('f', a.f ?? b.f ?? 0),
+    aperture: at('a', 0) };
 }
 
 // cameraView(camKf, t, CW, CH): the stage-space rectangle the camera is LOOKING AT, or null when there
@@ -181,6 +184,33 @@ function tangentAt(kfs, i, prop, dflt) {
   return ((kfs[i + 1][prop] ?? dflt) - (kfs[i - 1][prop] ?? dflt)) / span;
 }
 
+// ---------- ONE SEGMENT, ONE OWNER ----------
+//
+// segmentAt(kfs, i, t, dfltEase): the interpolator for the segment kfs[i] -> kfs[i+1] at time t,
+// returned as `(prop, dflt) => value` so a caller reads only the properties it owns. Past the last key
+// there is no segment and the last key holds.
+//
+// WHY IT IS ONE FUNCTION. cameraAt's own comment said it "mirrors motionAt", which is this codebase's
+// most-logged defect shape: one fact with two owners, drifting. They HAD drifted. `ease: "through"`
+// was dispatched inside motionAt, so it worked on a layer and threw `unknown easing "through"` on a
+// camera key, and nothing said the two vocabularies were different. Now the segment vocabulary is
+// shared and only the DEFAULT differs, which is the part that differs on purpose: motionAt has the
+// DENSE_KEY_SEC rule, the camera does not.
+export function segmentAt(kfs, i, t, dfltEase) {
+  const a = kfs[i], b = kfs[i + 1] || a;
+  const seg = b.t - a.t;
+  // `through` is not an easing and cannot be one: an easing is a function of one segment's own
+  // progress, and the whole point here is to read the keys either side. So it is dispatched before
+  // resolveEasing ever sees it, and `resolveEasing` still refuses every unknown name as before.
+  if (b.ease === 'through' && seg > 0) {
+    const u = clamp01((t - a.t) / seg);
+    return (prop, dflt) => hermite(a[prop] ?? dflt, b[prop] ?? dflt,
+      tangentAt(kfs, i, prop, dflt), tangentAt(kfs, i + 1, prop, dflt), seg, u);
+  }
+  const p = !(seg > 0) ? 1 : resolveEasing(b.ease || dfltEase)(clamp01((t - a.t) / seg));
+  return (prop, dflt) => lerp(a[prop] ?? dflt, b[prop] ?? dflt, p);
+}
+
 export function motionAt(kfs, lt) {
   const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1, blur: k.blur ?? 0, w: k.w ?? null, h: k.h ?? null, track: k.track ?? null });
   if (lt <= kfs[0].t) return norm(kfs[0]);
@@ -195,29 +225,13 @@ export function motionAt(kfs, lt) {
       // standing as the per-layer default. A hand-keyed cursor or drag lands keys every 2-4 frames and
       // its shape comes from WHERE the keys are, not from a curve fitted over each gap. Above the
       // threshold the old default stands, because a sparse key really is a span with a shape.
-      const seg = b.t - a.t;
-      // `smooth` is not an easing and cannot be one: an easing is a function of one segment's own
-      // progress, and the whole point here is to read the keys either side. So it is dispatched before
-      // resolveEasing ever sees it, and `resolveEasing` still refuses every unknown name as before.
-      if (b.ease === 'through' && seg > 0) {
-        const u = clamp01((lt - a.t) / seg);
-        const at = (prop, dflt) => hermite(a[prop] ?? dflt, b[prop] ?? dflt,
-          tangentAt(kfs, i, prop, dflt), tangentAt(kfs, i + 1, prop, dflt), seg, u);
-        // A layer-owned prop still animates only when BOTH endpoints state it, exactly as below: the
-        // rule is about whether the track owns the property, not about how it interpolates.
-        const ownS = (prop) => (a[prop] == null || b[prop] == null ? null : at(prop, 0));
-        return { dx: at('x', 0), dy: at('y', 0), scale: at('scale', 1), rot: at('rot', 0),
-          opacity: at('opacity', 1), blur: at('blur', 0),
-          w: ownS('w'), h: ownS('h'), track: ownS('track') };
-      }
-      const p = a.t === b.t ? 1
-        : resolveEasing(b.ease || (seg < DENSE_KEY_SEC ? 'linear' : 'easeInOutCubic'))(clamp01((lt - a.t) / seg));
+      const at = segmentAt(kfs, i, lt, (b.t - a.t) < DENSE_KEY_SEC ? 'linear' : 'easeInOutCubic');
       // Layer-owned props: one rule, no fallback. Both endpoints carry a number (resolveKeyedProps saw
       // to that) or the track does not animate that property and the caller leaves the element alone.
-      const own = (prop) => (a[prop] == null || b[prop] == null ? null : lerp(a[prop], b[prop], p));
-      return { dx: lerp(a.x ?? 0, b.x ?? 0, p), dy: lerp(a.y ?? 0, b.y ?? 0, p),
-        scale: lerp(a.scale ?? 1, b.scale ?? 1, p), rot: lerp(a.rot ?? 0, b.rot ?? 0, p),
-        opacity: lerp(a.opacity ?? 1, b.opacity ?? 1, p), blur: lerp(a.blur ?? 0, b.blur ?? 0, p),
+      const own = (prop) => (a[prop] == null || b[prop] == null ? null : at(prop, 0));
+      return { dx: at('x', 0), dy: at('y', 0),
+        scale: at('scale', 1), rot: at('rot', 0),
+        opacity: at('opacity', 1), blur: at('blur', 0),
         w: own('w'), h: own('h'), track: own('track') };
     }
   }

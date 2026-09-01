@@ -4207,6 +4207,20 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('resolveEasing REFUSES it: a mode is not a curve', threw != null);
   ok('`smooth` is still the feel word it always was',
     Math.abs(vel(0.6, 'smooth') - vel(0.6, undefined)) < 1);
+
+  // ONE INTERPOLATOR, NOT TWO. cameraAt's comment said it "mirrors motionAt" and they had already
+  // drifted: `through` was dispatched inside motionAt, so a camera key naming it threw
+  // `unknown easing "through"`. Both now go through segmentAt, and this asserts the camera gets the
+  // whole segment vocabulary rather than a copy of half of it.
+  const { cameraAt, segmentAt } = await import('../../core/sequence.js');
+  const cam = [{ t: 0, x: 0 }, { t: 0.6, x: 300, ease: 'through' }, { t: 1.2, x: 900, ease: 'through' }];
+  const camVel = (t) => { const h = 1 / 60; return (cameraAt(cam, t + h).x - cameraAt(cam, t - h).x) / (2 * h); };
+  ok('the camera speaks `through` too, because it shares the interpolator', camVel(0.6) > 400);
+  ok('the camera default is still plain easeInOutCubic, no density rule',
+    Math.abs(cameraAt([{ t: 0, x: 0 }, { t: 0.1, x: 100 }], 0.05).x - 50) < 0.01);
+  // segmentAt is the shared owner: past the last key there is no segment and the last key holds.
+  const at = segmentAt([{ t: 0, x: 0 }, { t: 1, x: 300 }], 1, 9);
+  ok('segmentAt holds the last key past the end', at('x', 0) === 300);
 }
 
 // ---------- an authored filter survives a motion track ----------
