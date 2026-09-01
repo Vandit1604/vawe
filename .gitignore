@@ -18,6 +18,12 @@ out/**/*.fonts.json
 # `**/`, not a bare `*`: `out/*.png` matches out/shot.png and NOT out/flight/shot.png, so a tool that
 # writes into a SUBDIRECTORY of out/ walked straight past this rule. Fourteen contact-sheet frames
 # from `out/flight/` reached main inside an unrelated commit exactly that way (docs/MISTAKES.md #424).
+out/**/*.mp4
+# `out/*.mp4` above misses a SUBDIRECTORY, which is the exact `**/` lesson the note above records.
+# scripts/dev/candidates.mjs writes out/candidates/<scene>-<axis>-<t>s/ full of proposal clips and
+# the patched scene copies they were rendered from. Every one is scratch: the panel applies a patch
+# to the real scene, and nothing downstream reads these.
+out/candidates/
 out/**/*.png
 out/**/*.log
 out/**/*.html

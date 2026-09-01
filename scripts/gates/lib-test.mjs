@@ -5181,5 +5181,67 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('sceneUnits: `acrossBeats` still opts a layer out of the wrapper entirely',
     held([L(0, 2, { acrossBeats: true }), L(2, 4)], 0) === null);
 }
+
+// ---------------------------------------------------------------------------------------------------
+// THE CHOOSER'S CANDIDATES (scripts/dev/candidates.mjs): what gets offered, and what a choice becomes.
+//
+// The panel that shows the strip depends on exactly two things: that the patch it is handed applies to
+// the key it names, and that the six options are visibly DIFFERENT from each other. Both are pure and
+// neither needs a browser, so both are asserted here rather than by looking at six clips.
+{
+  const { look: bgLook, patchOps, applyPatch, pickForVariety } = await import('../dev/candidates.mjs');
+
+  // ---- the patch ----
+  ok('candidates: the patch replaces the preset of the window it names, and nothing else',
+    JSON.stringify(patchOps(2, 'liquid')) === '[{"op":"replace","path":"/bg/2/preset","value":"liquid"}]');
+  ok('candidates: an `opts` block the new preset has no knob for is removed VISIBLY, as a second op',
+    (() => { const ops = patchOps(0, 'paperDots', true);
+      return ops.length === 2 && ops[1].op === 'remove' && ops[1].path === '/bg/0/opts'; })());
+  ok('candidates: applying a patch changes the preset and leaves the source object untouched',
+    (() => {
+      const scene = { module: 'scene', bg: [{ preset: 'paper' }, { preset: 'dark', opts: { intensity: 2 } }] };
+      const out = applyPatch(scene, patchOps(1, 'liquid', true));
+      return out.bg[1].preset === 'liquid' && out.bg[1].opts === undefined
+        && scene.bg[1].preset === 'dark' && scene.bg[1].opts.intensity === 2;
+    })());
+
+  // ---- what a preset LOOKS like, on this film's palette ----
+  ok('candidates: `plain` is flat and `liquid` moves, read off the preset the engine builds',
+    bgLook('plain').family === 'flat' && bgLook('plain').moves === false
+    && bgLook('liquid').moves === true && bgLook('liquid').family === 'liquid');
+  ok('candidates: lightness is MEASURED, so `paper` is light and `deep` is dark on the same palette',
+    bgLook('paper').tone === 'light' && bgLook('deep').tone === 'dark');
+  // The whole reason lightness is not read off the name: `value:"dark"` makes the same preset a dark
+  // window, exactly as formats/scene/scene.js decides it (docs/MISTAKES.md #159 is the drift this avoids).
+  ok('candidates: `value:"dark"` makes a light preset a dark window, the engine\'s own rule',
+    bgLook('plain').tone === 'light' && bgLook('plain', 'dark').tone === 'dark');
+
+  // ---- the picking ----
+  // Six settings of one look are ONE option, so the strip must not fill up with a family it already has
+  // even when that family holds the highest-scoring entries.
+  const pool = [
+    { name: 'a', relevance: 0.9, family: 'aurora', tone: 'dark' },
+    { name: 'b', relevance: 0.8, family: 'aurora', tone: 'dark' },
+    { name: 'c', relevance: 0.7, family: 'aurora', tone: 'dark' },
+    { name: 'd', relevance: 0.6, family: 'flat', tone: 'light' },
+    { name: 'e', relevance: 0.5, family: 'liquid', tone: 'dark' },
+  ];
+  ok('candidates: the strip takes an unseen family over a higher-scoring one it already has',
+    pickForVariety(pool, 3).map((c) => c.name).join('') === 'ade');
+  ok('candidates: relevance still orders the strip inside that rule, best first',
+    pickForVariety(pool, 5)[0].name === 'a');
+  ok('candidates: once every family is on the strip the rest fill in by relevance, nothing is lost',
+    pickForVariety(pool, 5).map((c) => c.name).join('') === 'adebc');
+  ok('candidates: `n` is a ceiling and a short pool is not padded',
+    pickForVariety(pool, 2).length === 2 && pickForVariety(pool.slice(0, 1), 6).length === 1);
+  // Deterministic, because the panel re-runs this and a strip that reshuffles is a strip nobody trusts.
+  ok('candidates: the same pool always yields the same strip, ties broken by name',
+    (() => {
+      const tied = pool.map((c) => ({ ...c, relevance: 0 }));
+      const one = pickForVariety(tied, 4).map((c) => c.name).join('');
+      return one === pickForVariety([...tied].reverse(), 4).map((c) => c.name).join('');
+    })());
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
