@@ -4950,15 +4950,20 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['capture a real product surface', 'component'],
     ['a full-frame generative webgl field', 'shader'],
     ['a lit implicit surface from a distance field', 'raymarch'],
+    // This was in the ABSENT set below, correctly, for about an hour. A sibling agent built `upright`
+    // in parallel while this calibration was being written, so the honest answer to it changed under
+    // the test. That is the set working: an absent query becomes a present one the day the capability
+    // lands, and the assertion has to move with it rather than be relaxed.
+    ['keep a carried layer upright while its parent rotates', 'upright'],
   ];
   for (const [q, want] of PRESENT) {
     ok(`arsenal answers "${q}" with ${want}`, covers(q, want) >= CONFIDENT);
   }
 
-  // The engine has none of these. `dollyZoom` was the top hit for the first two, twice, and an author
-  // nearly hand-rolled a conic gradient off the back of the third kind of answer.
+  // The engine has none of these. `dollyZoom` was the top hit for the first one, and for the
+  // upright query now in PRESENT above, and an author nearly hand-rolled a conic gradient off the
+  // back of the same kind of confident wrong answer.
   const ABSENT = [
-    'keep a carried layer upright while its parent rotates',
     'invert a layer against whatever is behind it',
     'render the scene in stereoscopic 3d for a headset',
     'transcribe the voiceover into subtitles automatically',
