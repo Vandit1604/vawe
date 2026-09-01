@@ -1,6 +1,6 @@
 ---
 when: proposing new engine work, or checking whether an effect already exists
-answers: "the effect surface: what ships, what is queued, and the one rule that governs all of it"
+answers: "the effect surface: which named effects ship, which are NOT BUILT, what is built and unused, and the one rule that governs all of it"
 group: engine
 ---
 
@@ -14,6 +14,16 @@ family**, because the second is nearly free once the machinery exists.
 browser can do, `renderFrame(n)` can capture deterministically. The only real question per item is
 *which substrate*, and that is what the tiers below encode.
 
+**How to read the status marks.** Every named effect below carries one of four, and nothing else:
+
+- **SHIPS** · exists, reachable from a scene, and something renders it. The `file:line` is the proof.
+- **NOT BUILT** · checked against the registry that would own it, and absent. Reach for something else.
+- **PART** · the family half exists. The line says which half.
+- **UNUSED** · reachable and tested, and zero scene files use it. See *Built and unused* below.
+
+A strikethrough is never a status mark here. Two items in the previous version were struck through
+and then contradicted by their own prose, and the strike read as done at a glance.
+
 ## The one rule that governs all of it
 
 Every effect must stay **pure in `n`**. No wall clock, no unseeded randomness, no state carried
@@ -25,111 +35,58 @@ gets a **closed-form or seeded-deterministic** implementation, or it does not sh
 This is not a purity fetish. It is what `make probe` checks, and it is the property the whole
 product is sold on.
 
-**Known violation (found 2026-07-17, unfixed):** the Go renderer's frame-dedup makes re-renders of an
-UNCHANGED scene pixel-different when the scene carries long-settling motion. Spring settles leave
-sub-pixel movement inside the DOM signature's rounding, so near-identical frames group together, and
-WHICH frame becomes the group's captured representative depends on worker order across the 8 parallel
-tabs. Catalog pages differ ~4% of pixels (max delta 88) between two back-to-back renders of the same
-JSON; scenes with fade-only motion (showcase-aspect) stay byte-identical. The fix belongs in the
-renderer (tighten the signature, or make representative selection deterministic, e.g. always the
-group's FIRST frame by index); until then `make catalog` avoids re-rendering unchanged pages so the
-site's clips do not churn, which contains the symptom, not the cause.
+**Known violation (found 2026-07-17, half fixed, narrowed).** Re-renders of an UNCHANGED scene can
+be pixel-different when the scene carries long-settling motion. The original diagnosis named two
+causes and only one of them survives.
+
+- **FIXED: representative selection.** Spring settles leave sub-pixel movement inside the DOM
+  signature's rounding, so near-identical frames group together, and WHICH frame the group captured
+  used to depend on worker order. The representative is now always the group's FIRST frame by index
+  (`internal/scene/scene.go:616-618`, `rep[f] = rep[f-1]`), and a long run gets a mid-run anchor
+  byte-compared inside the instance, which fails loudly rather than quietly.
+- **STILL OPEN: cross-tab rasterization.** Adjacent frames captured by *different* tabs differ in
+  pixels the film never changed. The renderer says so in its own source
+  (`internal/render/render.go:216-217`) and now refuses to print a motion figure measured across
+  workers (`:219-224`) rather than quoting a number it cannot make. Byte-identical re-renders hold
+  at `-workers 1`. This is gap 3 at the bottom of the page.
 
 ## Not an effect, and ahead of every effect: aspect ratios
 
-**Multi-aspect is not finished, and it is load-bearing for the whole list.** "One source renders
-16:9, 9:16, 1:1 and 4:5" is a headline claim on the site, the `showcase-aspect` scene exists to
-prove it, and the section of the homepage that pins now argues it. It does not yet hold up.
+**Multi-aspect is built and unadopted, and that distinction is the whole item now.** "One source
+renders 16:9, 9:16, 1:1 and 4:5" is a headline claim on the site. Every piece of machinery the claim
+needs ships. The library does not use it.
 
-The failure is not in the renderer, which sizes the canvas correctly per `--aspect` and does its job.
-It is that **the scene author has to solve the layout for each ratio by hand, and nothing stops them
-getting it wrong.** `showcase-aspect.json` itself shipped with `x: 60, w: 1800`, pixels tuned to a
-1920 canvas, so at 9:16 the box overflowed by 780px and cut "ratio." clean off the frame. The one
-beat advertising relative coordinates was hand-computing absolute ones, and it took a human eye to
-notice. That is the shape of the problem: a scene renders "fine" at every ratio and is wrong at all
-but one.
-
-**Update: the gate is built (`make audit ASPECT=16:9,9:16,1:1,4:5|all`), and the first thing it did
-was find two more bugs in that same six-second scene.** The fix for the overflow above had been
-`pin: "center"` with no `w`. But `pin` centres *a box*, and `resolveCoords` sizes a missing `w` as 0,
-so `center` resolved to `(W-0)/2` and put the layer's LEFT EDGE on the centre line. It rendered
-jammed into the right half **at every aspect, 16:9 included**, and passed the audit only because the
-ink happened to land inside the safe box there. Separately, the `dy: -190 / dy: 20` meant to separate
-its two lines were silently dropped (`dx`/`dy` are read only inside `scene.html`'s anchor pass), so
-both lines rendered at the same `y`, overlapping. A scene whose entire job is proving multi-aspect
-was wrong in three different ways, and rendering it at its own ratio revealed none of them.
+The failure was never in the renderer, which sizes the canvas correctly per `--aspect`. It is that
+**the scene author has to solve the layout for each ratio by hand.** `showcase-aspect.json` itself
+shipped with `x: 60, w: 1800`, pixels tuned to a 1920 canvas, so at 9:16 the box overflowed by 780px
+and cut "ratio." clean off the frame. The one beat advertising relative coordinates was
+hand-computing absolute ones. Then the gate found two more bugs in the same six-second scene: a
+`pin: "center"` with no `w` resolved to `(W-0)/2` and put the layer's LEFT EDGE on the centre line
+at every aspect, and its `dy` values were silently dropped. A scene whose entire job is proving
+multi-aspect was wrong in three ways, and rendering it at its own ratio revealed none of them.
 
 The lesson generalises past aspect ratios: **the checks were measuring the wrong thing.** Safe-zone
-measured the container border box, so a text layer given a `w` (which it needs) flagged its own empty
-slack as off-frame, which pushes an author to shrink `w` until the *box* fits, tuning a number, not
+measured the container border box, so a text layer given a `w` flagged its own empty slack as
+off-frame, which pushes an author to shrink `w` until the *box* fits, tuning a number rather than
 fixing a layout. It now measures the ink for layers that paint no box of their own. And a degenerate
-`pin` is a fact about the SOURCE, not about any rendered frame, so it is now checked by name rather
-than hoped to trip a measurement.
+`pin` is a fact about the SOURCE, not about any rendered frame, so it is now checked by name.
 
-### The measured state (`make audit ASPECT=16:9,9:16,1:1,4:5`)
+### The machinery, and what each piece is worth
 
-Not an estimate. Every scene, at the four ratios the site advertises; ✓ = zero hard issues:
+| piece | status | proof |
+|---|---|---|
+| Per-aspect gate, `make audit ASPECT=…` | **SHIPS** | `Makefile:302` passes `--aspect` through to `verify/audit.mjs`, mirroring `bin/vawe`. It also reports a scene that fails to boot instead of dying on an uncaught `TypeError`, which is how four unloadable scenes stayed invisible. |
+| One safe area, keyed on destination | **SHIPS** | `safeArea()` at `core/safe.js:121`, throwing on an unknown destination at `:123`. There used to be four disagreeing safe zones, because "safe" was three ideas at once: a margin, a platform's chrome, and an anchor. One function answers all of it, and placement and checking share it, so `pin:"bottom"` cannot fail. |
+| Per-aspect overrides, `aspects: { "9:16": {…} }` | **SHIPS** | Validated per declared ratio at `core/validate.mjs:207-213`; `aspects` is in the shared prop list at `formats/scene/schema.json:8`. An override cannot reintroduce the centring trap at one ratio only. |
+| A scene composed for all five ratios | **SHIPS** | `formats/scene/aspects-demo.json`, which passes `make audit ASPECT=all`. |
+| Layout that RESOLVES rather than gets computed | **PART** | The refusal half ships: a centring keyword with nothing to centre is a VALIDATE error (`core/validate.mjs` `layoutErrors`), on both axes, in one place, imported by `verify/audit.mjs`. The **measure** half, `center` sizing itself from the rendered layer, is **NOT BUILT**. It moves every centred layer, so it stays deliberate. |
+| The y-axis version of the same trap | **PART** | Checked, except on text and count, where `size*1.2` is the estimate and enough scenes have tuned around it that changing it would move shipped content. That carve-out is pinned in `make gate-test`. |
+| **Library-wide adoption** | **NOT BUILT** | Counted on this branch over the 170 JSON files in `formats/scene/`: `"aspects"` appears in **1** scene (`aspects-demo.json`), `"col"` in **0**, `"pin"` in **14**. The relative-coordinate system is one demo and fourteen pins. Everything else is hand-placed absolute pixels tuned to a 1920x1080 canvas. |
 
-```
-scene              16:9   9:16   1:1    4:5
-showcase-aspect      ✓      ✓      ✓      ✓
-stripe               ✓    ✗(11)  ✗(11)  ✗(11)
-linear-launch        ✓    ✗(18)  ✗(18)  ✗(18)
-creed-launch         ✓    ✗(19)  ✗(19)  ✗(19)
-argus-launch         ✓    ✗(14)  ✗(14)  ✗(14)
-vawe-intro           ✓    ✗(11)  ✗(11)  ✗(11)
-hero-site            ✓     ✗(4)   ✗(4)   ✗(4)
-showcase-cuts        ✓     ✗(3)   ✗(3)   ✗(3)
-showcase-ui          ✓     ✗(6)   ✗(6)   ✗(6)
-showcase-data        ✓     ✗(5)   ✗(5)   ✗(5)
-```
-
-**One six-second scene survives a change of ratio.** The counts are identical across 9:16/1:1/4:5
-because the failure is not per-ratio: it is "not 1920 wide". Across all 45 scenes, `col` is used
-**zero** times and `pin` **once**: the whole relative-coordinate system is one layer. Everything else
-is hand-placed absolute pixels tuned to a 1920x1080 canvas.
-
-Read that carefully, because it is not "nine broken scenes". Each of those scenes declares
-`aspect: "16:9"` and only ever ships 16:9, and at 16:9 every one of them is clean. Nothing is broken.
-**The claim is what is broad.** So the fix is a fork, and it is a product call, not an engineering one:
-either make the claim precise (the engine renders any aspect; a scene is composed for the ones it
-declares), or build per-aspect composition so a film can genuinely ship four.
-
-### What is missing, roughly in order
-
-- ~~**A gate.**~~ **Done.** `make audit ASPECT=…` mirrors `bin/vawe --aspect`, audits each canvas the
-  CLI would ship, and writes one overlay per ratio. It also reports a scene that fails to boot instead
-  of dying on an uncaught `TypeError`: previously one broken scene meant every *other* scene in the
-  sweep went unaudited, which is how four unloadable scenes (`plinth-ad`, `vawe-launch`,
-  `threadcite-*`, all missing or incomplete themes) stayed invisible.
-- ~~**A safe area worth the name.**~~ **Done**: `core/safe.js`. There were FOUR safe zones (boot's 6%
-  inset, tokens.css's per-orientation table, and a box each in audit.mjs and run.js) and they
-  disagreed: three of four engine edge pins placed content into the zone the audit rejected. They were
-  irreconcilable because "safe" was three ideas at once: a **margin** (a property of the canvas), a
-  platform's **chrome** (a property of the DESTINATION: 9:16 for a hero and 9:16 for TikTok are the
-  same canvas with different unusable regions), and an **anchor**. One function now answers all of it,
-  keyed on `destination`, and placement and checking share it, so `pin:"bottom"` cannot fail.
-- ~~**Layout that resolves rather than gets computed.**~~ **Refused, not yet measured.** A centring
-  keyword with nothing to centre is now a VALIDATE error (`core/validate.mjs` `layoutErrors`), so it
-  fails at `make validate` and in boot before a frame renders, on both axes. The rule lives in exactly
-  one place and `verify/audit.mjs` imports it. The *measure* half, making `center` size itself from
-  the rendered layer: is still open and still moves every centred layer, so it stays deliberate.
-- ~~**The y axis has the same trap, unchecked.**~~ **Checked**, except on text/count, where `size*1.2`
-  is a defensible estimate and enough scenes have tuned around the current behaviour that changing it
-  would move shipped content. That carve-out is pinned in `make gate-test`. Original note: A missing `h` makes `pin:"center"` resolve `y` to
-  `0.46*H`: top edge on the optical line, not the layer centred on it. (The far edges no longer have
-  this problem: `bottom` estimates a text layer's height as `size*1.2`, matching scene.html's anchor
-  fallback. No width equivalent is possible.) It skews by half a line rather than throwing content
-  off-frame, and enough scenes have tuned around it that flagging it today would be mostly noise. It
-  is still wrong, and it is the same root cause.
-- ~~**Per-aspect overrides.**~~ **Done**, `aspects: { "9:16": { …props… } }` on any layer or camera
-  keyframe, merged for that canvas only, applied before `resolveCoords`. The validator checks every
-  declared variant, so an override cannot reintroduce the centring trap at one ratio only.
-- ~~**4:5 is claimed but barely exercised.**~~ **Done**, `formats/scene/aspects-demo.json` composes
-  for all five ratios and passes `make audit ASPECT=all`.
-
-Until this is solid, "any aspect" is a promise the engine keeps only when the author does the work
-by hand. That is worth more than any new sting, because it is already being sold.
+Read the last row carefully, because it is not "the library is broken". Each of those scenes declares
+`aspect: "16:9"`, only ever ships 16:9, and is clean there. **The claim is what is broad.** So the
+fix is a fork, and it is a product call: either make the claim precise (the engine renders any
+aspect; a scene is composed for the ones it declares), or compose the films for four.
 
 ## Cost tiers
 
@@ -137,345 +94,245 @@ by hand. That is worth more than any new sting, because it is already being sold
 |---|---|---|---|
 | **1** | CSS / SVG filters | hours | `filter`, `mask`, `clip-path`, `mix-blend-mode`, `background-clip`, `@keyframes` evaluated at `t`. Already how `core/cuts.js` and `core/type.js` work. |
 | **2** | Canvas 2D | hours-days | Per-pixel work that does not need the GPU. Halftone, dither, ASCII, pixel-sort. |
-| **3** | GLSL fragment shader | days | Per-pixel, per-frame, keyed on `(progress, seed)` only. `core/stings.js` already has this path; most items are a new `SHADER_FX` entry. |
-| **4** | Three.js / WebGL scene | days-weeks | Real geometry, depth, raymarching. New layer type; heaviest lift, biggest payoff. |
-| **5** | Needs a determinism story first | unknown | Simulation, audio-reactivity, depth estimation. Blocked on design, not effort. |
+| **3** | GLSL fragment shader | days | Per-pixel, per-frame, keyed on `(progress, seed)` only. Most items are a new `SHADER_FX` entry. |
+| **4** | Three.js / WebGL scene | days-weeks | Real geometry, depth, raymarching. Its layer type now ships; see Tier 4. |
+| **5** | Needs a determinism story first | unknown | Simulation, depth estimation. Blocked on design, not effort. |
 
-## Tier 1: CSS / SVG (cheap, do these first)
+## Tier 1: CSS / SVG
 
-The whole **Lower Thirds** family (BILD, accent underline, bold block, clean bar, colour block,
-dark card, kicker name, mask reveal, side rule, soft pill, stack bars, news ticker) is one layout
-component plus a variant token. Ship the component, get twelve.
-
-Same shape for **Social Overlays** (X post card, Reddit card, Spotify now playing, YouTube lower
-third, macOS notification, Instagram/TikTok follow): these are `html` layers with real brand
-marks. **Licence caveat:** ship the *shape*, never a platform's logo lockup, unless the mark is
-used nominatively.
-
-Also here: **CSS Transitions** (3D, blur, cover, dissolve, grid, push, radial, scale, mechanical),
-**Effects** (grain overlay, vignette, shimmer sweep, parallax zoom/unzoom), most **Captions**
-(highlight, pill karaoke, gradient fill, neon accent/glow, weight shift, editorial emphasis, clip
-wipe, emoji pop), **Text Effects** (blend difference, texture mask), the **glow/light** family
-(bloom, halation, diffusion, rim light, spotlight cone), **duotone/tritone/gradient-map**,
-**posterize**, **sepia**, and **Code Snippets**: twenty-four terminal themes are a token set over
-the existing `codeBlock` block, not twenty-four features.
+| named effect | status | proof |
+|---|---|---|
+| Lower Thirds, all twelve variants | **SHIPS** | `lowerThird` at `blocks/core.mjs:230`; `BLOCKS` carries `lowerThird.cleanBar` · `.boldBlock` · `.bild` · `.darkCard` · `.sideRule` · `.kickerName` · `.accentUnderline` · `.maskReveal` · `.softPill` · `.colourBlock` · `.stackBars` · `.newsTicker`. |
+| Social Overlays: X post · Reddit · Spotify · YouTube · follow | **SHIPS** | `tweetCard` · `redditPost` · `nowPlaying` · `videoLowerThird` · `followCard`, all in `BLOCKS` (`blocks/index.mjs`). Licence caveat stands: ship the *shape*, never a platform's logo lockup, unless the mark is used nominatively. |
+| macOS notification | **PART** | No macOS-specific block. `notification` (plus `.warn` · `.error` · `.stack`) covers the shape without the platform chrome. |
+| CSS Transitions: 3D · blur · cover · push · radial · scale · mechanical | **SHIPS** | `PRESENTATIONS` in `core/cuts.js` holds 27 entries: `cube` (3D) · `blur` · `slide` (cover) · `wipe` · `iris` · `zoom` (scale) · `squeeze` · `blinds` · `barn` · `flip` · `roll` · `letterbox` · `skewWhip` · `matchCut` and more. |
+| CSS Transitions: dissolve · grid | **NOT BUILT** *as cuts* | Neither name is in `PRESENTATIONS`. The dissolve exists one level up as `SEAM_FX.dissolve` (`core/seams.js:32`) and as `RESAMPLE_FX.dissolve`; the grid one exists as `SHADER_FX.gridPixelateWipe` (`core/stings.js:33`). Both are reachable, neither is a cut. |
+| grain overlay · vignette · shimmer sweep · parallax zoom | **SHIPS** | `filmGrain` in `AMBIENT_FX`; `vignette` in `FILTER_PRESETS` (`core/filters.js`); `shimmerWave` in `core/type.js` presets; `ken` on an image layer (`formats/scene/schema.json:1327`). |
+| Captions: highlight · pill karaoke · neon accent · weight shift · clip wipe | **SHIPS** | `CAP_STYLES` holds 19 (`core/captions.js`): `highlight` · `pillKaraoke` · `neonEdge` · `weightShift` · `clipWipe`, plus `kineticSlam` · `underlineDraw` · `flipUp` · `ghostSplit` · `waveRide` · `scramble` · `wordFlash` · `wordSlide` · `typeOn` · `readerFocus` · `inkFill` · `focusPull` · `letterRise` · `weightWave`. |
+| Captions: gradient fill · editorial emphasis · emoji pop | **NOT BUILT** | None of the three is a `CAP_STYLES` key. |
+| Text Effects: blend difference · texture mask | **NOT BUILT** *as named presets* | No preset in `core/type.js`, `core/filters.js` or `core/looks.js` owns either name. Both are authorable by hand: `mix-blend-mode` is not on `core/sanitize-html.js`'s refused list, and `mask` is a layer prop (`formats/scene/schema.json:1291`). |
+| glow/light: bloom · halation | **SHIPS** | `bloom` in `FILTER_PRESETS`; `halationFilm` in `LOOKS` (`core/looks.js:197`, 31 entries). |
+| glow/light: diffusion · rim light | **NOT BUILT** | Neither name appears in `FILTER_PRESETS`, `LOOKS` or `AMBIENT_FX`. |
+| glow/light: spotlight cone | **PART** | `spotlight` exists as a BACKGROUND (`core/backgrounds.js:152`), a radial glow travelling across the frame. There is no per-layer cone. |
+| duotone · tritone · gradient-map · posterize · sepia | **SHIPS** | All five are `FILTER_PRESETS` keys (15 total, `core/filters.js`). |
+| Code snippet themes, twenty-four | **PART, and the rest is content** | Fourteen WCAG-checked `codeBlock.*` themes ship (`.light` · `.py` · `.midnight` · `.ember` · `.forest` · `.ocean` · `.neon` · `.paper` · `.ink` · `.dusk` · `.slate` · `.aurora` · `.linen` · `.frost`) with catalog rows. Going further is a token set, not a feature. |
 
 ## Tier 2: Canvas 2D
 
-**Shipped (`core/canvas-fx.js`, `canvasFx` on an image layer):** halftone · Bayer dither · mosaic ·
-stipple · ASCII · edgeDetect (Sobel) · crosshatch, plus stylized presets blueprint/comic/risograph/
-sketch/matrix/newsprint. Determinism story settled: **baked once at build** (boot's awaited preload →
-static PNG), so the pixels never change per frame. Probe/snap prove it. See `docs/DESIGN-NOTES/tier5.md`
-for the general carve-out taxonomy this used.
+**Shipped (`core/canvas-fx.js`, `canvasFx` on an image layer):** `CANVAS_FX` = 8, mosaic · dither ·
+halftone · stipple · ascii · edgeDetect · pixelSort · crosshatch, plus stylized presets
+blueprint/comic/risograph/sketch/matrix/newsprint. Determinism story settled: **baked once at build**
+(boot's awaited preload into a static PNG), so the pixels never change per frame. Probe and snap
+prove it. See `docs/DESIGN-NOTES/tier5.md` for the general carve-out taxonomy this used.
 
-**The generative half now exists.** `paint` is a layer type (`core/surfaces/paint.js` + `core/paint-fx.js`):
-a Canvas 2D surface redrawn every frame as a pure function of local time, mirroring how `shader` works.
-That is the piece **Matrix Decode** was waiting on, and it ships with `matrix` · `starfield` · `waves`.
-The contract each effect keeps: no accumulation, no Math.random/Date, and CLOSED-FORM motion (a
-particle's position is f(lt), never "last position + velocity"), which is exactly the line between
-this tier and the sims in Tier 5. Guarded by `make canvas-purity`, which hashes real pixels because
-`make probe` compares a DOM signature and structurally cannot see inside a canvas.
+**The generative half ships.** `paint` is a layer type (`core/surfaces/paint.js` + `core/paint-fx.js`):
+a Canvas 2D surface redrawn every frame as a pure function of local time, mirroring how `shader`
+works. That is the piece **Matrix Decode** was waiting on. `PAINT_FX` = 5 (`core/paint-fx.js:38`):
+`matrix` · `starfield` · `aurora` · `meteor` · `waves`. The contract each keeps: no accumulation, no
+`Math.random`/`Date`, and CLOSED-FORM motion (a particle's position is f(lt), never "last position
+plus velocity"), which is exactly the line between this tier and the sims in Tier 5. Guarded by
+`make canvas-purity`, which hashes real pixels because `make probe` compares a DOM signature and
+structurally cannot see inside a canvas. A new generative effect is now one `PAINT_FX` entry.
 
-**Remaining:** stained glass, low-poly triangulate, voxelize, **Code Typing** / **Code Diff** /
-**Code Highlight Sweep** / **Code Scroll To Line** (text metrics, not shaders). New generative effects
-are now content: one entry in `PAINT_FX`, no framework work.
-(`pixelSort` ships in `CANVAS_FX_NAMES` and `gridPixelateWipe` ships in `SHADER_FX`, both were listed
-here as remaining long after they landed.)
+| named effect | status | proof |
+|---|---|---|
+| Code Typing · Code Diff · Code Highlight Sweep · Code Scroll To Line | **SHIPS** | `codeTyping` · `codeDiff` · `codeHighlight` · `codeScroll`, all exported from `blocks/codeanim.mjs` and present in `BLOCKS`. Text metrics, not shaders. |
+| stained glass | **NOT BUILT** | No `stainedGlass` anywhere in `core/` or `blocks/`. |
+| low-poly triangulate | **NOT BUILT** | No `lowPoly` or `triangulate` anywhere in `core/` or `blocks/`. |
+| voxelize | **NOT BUILT** | No `voxel` anywhere in `core/` or `blocks/`. |
+| Data maps: US · US bubble · US flow · US hex · world | **SHIPS** | `usMap` · `usMapBubble` · `usMapFlow` · `usMapHex` · `worldMap` in `blocks/geo.mjs`. |
+| Data map: Spain | **NOT BUILT** | No `spain` in `blocks/`. The map is easy; sourcing accurate boundary data is the actual work, and an inaccurate map is worse than none. |
 
-**Excluded on purpose (break determinism: cannot ship as-is):** datamosh / P-frame freeze (codec +
-stateful), feedback/phosphor trails (frame feedback), low-fps stutter (per-frame state). These are the
-"Tier D" of the composite-looks plan; they would violate pure-in-n and are documented, not built.
+**Excluded on purpose, not queued** (they break determinism and cannot ship as-is): datamosh and
+P-frame freeze (codec plus stateful), feedback and phosphor trails (frame feedback), low-fps stutter
+(per-frame state). Documented, never built, and not a backlog item.
 
-**Data maps** (Spain, US, US bubble/flow/hex, world) live here too: real GeoJSON + a projection.
-The map is easy; sourcing accurate boundary data is the actual work, and inaccurate maps are worse
-than none.
+## Tier 3: GLSL
 
-## Tier 3: GLSL (one new SHADER_FX each)
+`SHADER_FX` holds 35 entries (`core/stings.js:35`) and `AMBIENT_FX` 18 (`core/shaders-ambient.js:49`);
+between them the families below are majority built. This section used to read as a wish-list and sent
+two consecutive planning passes at work that already existed.
 
-**MOSTLY SHIPPED: audited 2026-07-19.** `SHADER_FX` holds 35 entries and `AMBIENT_FX` 18; between
-them the families below are majority-built. This section used to read as a wish-list and sent two
-consecutive planning passes at work that already existed.
+| named effect | status | proof |
+|---|---|---|
+| Shader Transitions, all 14 | **SHIPS** | `SHADER_FX` = 35, including chromaticSplit · crossWarp · domainWarp · sdfIris · vortex · ridgedBurn · ripple · lens · thermal · leak · flash · whipPan · glitch · `cinematicZoom`, the GLSL sibling of the `PRESENTATIONS.zoom` cut. A generative overlay cannot smear the pixels under it, so it sells the dolly with the artefacts one leaves: radial streaks dying at the optical centre, a compressing rim, a centre bloom at peak speed. |
+| chromatic family, all 5 | **SHIPS** | `chromaSplit` and `chromaGlow` in `FILTER_PRESETS`; `dispersion` and `iridescence` in `SHADER_FX`; `chromaShift` in `RESAMPLE_FX`. |
+| analog/retro: vhs · crt · film grain · light leak · dot crawl · gate weave · nebula | **SHIPS** | `AMBIENT_FX` (`core/shaders-ambient.js`); `LOOKS` adds vhs · super8 · crt. `gateWeave` rides the gate border, the dust and the hair on one closed-form offset, so the picture floats without anything being sampled. |
+| CRT phosphor *trails* | **NOT BUILT, excluded** | Frame feedback. See the rule at the top. |
+| distortion: barrel · heat shimmer · ripple · vortex · kaleidoscope · displace/melt · fisheye · macroblock | **SHIPS** | `AMBIENT_FX` for the first five, `FILTER_PRESETS.displace` and `LOOKS.melt`, `fisheye` and `macroblock` in `RESAMPLE_FX`. The old "missing real block displacement" line is answered by `macroblock`. |
+| blur/motion: bokeh · zoom blur · spin blur · frosted glass | **SHIPS** | `zoomBlur` and `spinBlur` in `RESAMPLE_FX` (8 entries: zoomBlur · spinBlur · fisheye · bitCrush · macroblock · dissolve · refract · chromaShift). Frosted glass has two answers: the `glass` prop (`backdrop-filter`) for a blurred backdrop, `resample:"refract"` for real bending. |
+| **Portal** | **SHIPS** | `SEAM_FX` entry, `core/seams.js:32`, blurb at `:55`. This page listed it as "still absent". |
+| **Shatter** | **SHIPS** | `THREE_FX` key, `core/three-scenes.js:25`. One slab holds, then breaks into a seeded grid of shards. |
+| **Liquid Background** | **SHIPS** | `THREE_FX` key, `core/three-scenes.js:27`. |
+| **Code Shader Dissolve** | **SHIPS** | `codeDissolve` in `THREE_FX` (`core/three-scenes.js:29`); `lines` is declared as its source snippet at `core/three-fx.js:35`. It was listed as blocked on Seam C, and Seam C is built. |
+| **Glitch RGB captions** | **NOT BUILT** | None of the 19 `CAP_STYLES` is a glitch or RGB style. `LOOKS.glitchGlow` is a whole-frame look, not a caption style. |
 
-- **Shader Transitions: all 14 ship.** chromaticSplit · crossWarp · domainWarp · sdfIris · vortex ·
-  ridgedBurn · ripple · lens · thermal · leak · flash · whipPan · glitch, and **`cinematicZoom`
-  shipped 2026-07-19**: the GLSL sibling of the `PRESENTATIONS.zoom` cut. A generative overlay cannot
-  smear the pixels under it, so it sells the dolly with the artefacts one leaves: radial streaks that
-  die at the optical centre, a compressing rim, and a centre bloom at peak speed.
-- **chromatic: all 5 ship** (aberration/prism/RGB-offset via the `chromatic` filter primitive,
-  `dispersion` and `iridescence` as stings).
-- **analog/retro: majority ships**, `AMBIENT_FX` vhs · crt · filmGrain · lightLeak, `LOOKS` vhs ·
-  super8 · crt, plus `dotCrawl` in `AMBIENT_FX`, and **`gateWeave` shipped 2026-07-19** (film dust,
-  hairs, and the frame drifting in the projector gate. The gate border, dust and hair all ride one
-  closed-form offset, so the picture appears to float without anything being sampled). CRT phosphor
-  *trails* stay excluded (frame feedback).
-- **distortion: 7 of 8 ship**, barrel · heatShimmer · ripple · swirl/vortex · kaleidoscope ·
-  displace/melt, plus **`fisheye` via `resample`** (see below). Missing: real block displacement of a
-  layer beyond what `macroblock` does.
-- **blur/motion: bokeh ships, and `zoomBlur` + `spinBlur` now ship via `resample`** (see below). They
-  needed a texture to sample, not a new `SHADER_FX` entry. Frosted glass now has two answers: the
-  `glass` prop (`backdrop-filter`) for a blurred backdrop, `resample:"refract"` for real bending.
-- Still absent: **Glitch RGB captions, Liquid Background/Glass, Portal, Shatter, Code
-  Shader Dissolve.** Code Shader Dissolve needs a DOM subtree as a
-  texture (Seam C, not built); Portal and Shatter need real geometry. **`bit-crush` and `macroblocking`
-  now ship** as `resample` effects.
+**True multi-sample motion blur is not this tier.** It means rendering sub-frames and accumulating: a
+render-pipeline change, not a shader. Tier 5.
 
-Note: **true multi-sample motion blur** is not this tier. It means rendering sub-frames and
-accumulating: a render-pipeline change, not a shader. Tier 5.
+### Sampling: which seams exist
 
-### The capability that unblocked a whole cluster: shaders could not read the frame · SEAMS A + B NOW BUILT
+The old diagnosis stands. `core/stings.js` and `core/shaders-ambient.js` contain **zero**
+`sampler2D`/`texture2D`, and both are purely GENERATIVE overlays composited above the scene. Nothing
+in *that* path can sample what is behind it. What changed is that the sampling path no longer goes
+through it.
 
-Audited 2026-07-19, then **built**. The diagnosis stands: `core/stings.js` and `core/shaders-ambient.js`
-contain **zero** `sampler2D` / `texture2D`, and both are purely GENERATIVE overlays composited above the
-scene (stings sit at z-index 70). Nothing in *that* path can sample what is behind it. What changed is
-that the sampling path no longer has to go through it.
+| seam | status | proof |
+|---|---|---|
+| **A** · canvas sources (`paint`, `shader`) | **SHIPS** | `sourceOf()` at `core/resample.js:38` returns the element's stashed surface canvas. |
+| **B** · image sources (an `image` layer's `<img>`) | **SHIPS** | The same function, falling through to the `<img>` at `core/resample.js:40`. Spec `{ fx, amount, speed, seed }` on the layer, `amount` optionally `[from, to]` so the effect animates across the layer's own window. |
+| **C** · an arbitrary DOM subtree | **SHIPS** | **This page said "still NOT built, and deliberately so". It is built.** A built subtree is baked to a texture once at boot through `core/raster.js` (`buildInlinedCss`, `domToCanvas`), awaited by `core/boot.js`, and the design is stated at `core/resample.js:14-26`. The validator's refusal narrowed exactly as planned: `UNSAMPLABLE` is now only `['raymarch','three','globe','video']` (`core/validate.mjs:1313`), the four types whose pixels live in a canvas or a video bitmap outside the DOM. **The cost, said plainly:** the bake is ONE INSTANT taken from the built DOM before any frame draws, so a `count` that ticks is frozen at it. The motion comes from the pass, not the source. That is a hero device on a settled beat, not a wrapper around a moving one. |
+| **D** · two-scene shader transitions | **SHIPS** | `core/seams.js`, `SEAM_FX` = 14 (`:32`): fade · dissolve · slide · push · uncover · wipe · crossWarp · whipPan · sdfIris · dispersion · lens · flashWhite · cinematicZoom · portal. The stage either side of a boundary is rasterised once at build into `u_from`/`u_to`, and a two-sampler shader keyed on `u_progress` blends. No WebGL, or a blank raster, degrades to a plain cross-fade. Author API: top-level `seams: [{ t, fx, dur, dir?, seed?, intensity? }]`. This was "the one thing the two reference engines have that we do not". |
+| **Full-frame feedback** · sampling the COMPOSITED frame | **NOT BUILT, excluded** | The composite is one frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it. `resample` never samples its own previous output; guarded by `make probe` and `make canvas-purity`. |
 
-Both cheap paths shipped:
-1. **`backdrop-filter`**: the `glass` prop on any layer (`core/layers/util.js`). Reads what is behind
-   an element natively: frosted panels, the Tier-1 Liquid Glass approximation, blur-behind. It cannot
-   BEND the backdrop, only filter it, so it never covered the sampling family below.
-2. **Layer-as-texture, SHIPPED as `resample`** (`core/resample-fx.js` + `core/resample.js`). A layer
-   whose content is already a raster is bound as a GL texture and re-sampled through a fragment shader.
-   **Seam A (canvas sources: `paint`, `shader`) and Seam B (image sources: the `<img>` of an `image`
-   layer) are both done.** Spec: `{ fx, amount, speed, seed }` on the layer, `amount` optionally
-   `[from, to]` so the effect animates across the layer's own window. Docs: `docs/PRIMITIVES.md`.
-
-**Now done** (each was blocked purely on "must transform pixels it cannot see"):
-- ~~radial / zoom blur~~ → `zoomBlur`
-- ~~spin blur~~ → `spinBlur`
-- ~~fisheye, real lens distortion of a layer~~ → `fisheye` (barrel above 0.5, pincushion below)
-- ~~bit-crush~~ → `bitCrush` (depth-halving dial, not a linear level ramp)
-- ~~macroblocking~~ → `macroblock`
-- ~~real glass refraction~~ → `refract` (noise-gradient displacement + per-channel dispersion)
-- plus two that came free once sampling existed: `dissolve` (ember-lit erosion) and `chromaShift`.
-
-**Still NOT built, and deliberately so:**
-- **Seam C, sampling an arbitrary DOM subtree** (`text`, `group`, `component`, `codeBlock`). `resample`
-  needs a raster, and a DOM subtree is not one. Doing it means an offline `foreignObject` bake to a
-  texture in boot's awaited preload, mirroring how `canvasFx` bakes. That work has **not** been done, so
-  **Code Shader Dissolve** (wants a `codeBlock` as its texture) is still blocked, and the validator
-  rejects `resample` on any non-raster layer rather than silently ignoring it.
-
-  **The technique is now PROVEN, in about sixty lines: `node scripts/dev/seam-c-proto.mjs`.** DOM →
-  `foreignObject` → `<img>` → `texImage2D` → a fragment shader → pixels, with the frame number as the
-  only input. Five frames rendered forwards, backwards, shuffled and replayed are byte-identical to
-  their first render and all five differ from each other. So the plan above is sound and what remains
-  is the plumbing: the bake belongs in boot's awaited preload, and the validator's refusal can then be
-  narrowed instead of lifted.
-
-  **Why the proof was written: whether to adopt `vfx-js`.** It is MIT, zero-dependency, and does
-  exactly this. Two measured facts ruled it out as a runtime dependency, neither of them about
-  quality. Its released 1.1.0 has no way to set the clock, `render()` opens with `Date.now()`, and
-  asking for the same logical frame five times returned five different pictures on all three shaders
-  tried. And the half it would give us is `foreignObject` rasterisation, which this repo already
-  performs for the playground's PNG download. The seekable API (`setTime(t); render()`, documented as
-  exact) exists on its main branch and is unreleased; if it ships, this is worth revisiting for its
-  effect chain and its shader library rather than for the sampling.
-- **Full-frame feedback**: sampling the COMPOSITED frame. Out of scope on purpose: the composite is one
-  frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it.
-  That breaks pure-in-`n`, which is the product's central claim. `resample` never samples its own
-  previous output; guarded by `make probe` + `make canvas-purity`.
-- **Seam D: two-scene shader transitions (NOT built).** A cut today transforms ONE scene root
-  (`core/cuts.js`, a another engine-model timing/presentation split) and a sting is a GENERATIVE overlay above
-  it. Neither can blend the outgoing beat INTO the incoming one, because neither samples both as
-  textures. another engine does exactly this: rasterize the two beats either side of a cut to textures
-  `u_from`/`u_to` and run a fragment shader keyed on `u_progress`, which buys whip-pan motion-blur that
-  smears BOTH beats, an sdf-iris that reveals the next beat through a mask, dispersion/lens/warp that
-  bend across the seam, and flash-through-white with independent in/out windows. Ours cannot do any of
-  these; a `PRESENTATIONS` entry can only move/fade/clip one root, and a sting only paints on top.
-  **The determinism story is clean** (both textures are pure functions of `n`, no feedback), so this is
-  effort, not a blocked design. **The build:** a transition primitive that captures the two adjacent
-  beats to offscreen rasters (the `resample` layer-as-texture path already proves single-source capture;
-  this needs a second source and a window that spans the cut), then a small `TRANSITION_FX` GLSL registry
-  keyed on `(progress, seed)`: mirroring `SHADER_FX`. Port targets from the another engine study:
-  `whipPan` (10-tap directional blur on both), `sdfIris`, `flashThroughWhite` (dual smoothstep windows),
-  `crossWarp`, `gravitationalLens`. This is the one thing the two reference engines have that we do not.
-
-**Seam D (two-scene shader transitions) NOW BUILT (`core/seams.js`).** The capability neither a sting
-(overlay on one beat) nor a cut (transform one root) could offer: sample the OUTGOING beat AND the
-INCOMING beat as textures and blend one INTO the other. The whole stage either side of a boundary is
-rasterised ONCE at build (in-browser `foreignObject` over the live bg canvas, fonts + CSS + `:root`
-vars inlined) into `u_from` / `u_to`, and a two-sampler fragment shader keyed on `u_progress` runs the
-blend: `crossWarp` · `whipPan` · `sdfIris` · `dispersion` · `lens` · `flashWhite` · `cinematicZoom`, plus
-a `fade` fallback. Determinism holds because both textures are pure functions of `n` (two fixed frames,
-baked once); no WebGL or a blank raster degrades to a plain cross-fade. Author API: top-level
-`seams: [{ t, fx, dur, dir?, seed?, intensity? }]`. This is the DOM-as-texture `foreignObject` bake that
-**Seam C** wanted: Seam C (sampling one arbitrary subtree as a `resample` source) can now follow the
-same path. Note the bake surfaced a real framework bug: the virtual clock starved chromedp's rAF
-readiness Poll during the awaited bake; fixed by virtualising page timers lazily (see MISTAKES #121).
-
-~~**Genuinely cheap and still absent** (generative): nebula, iridescence, dot-crawl.~~ **All three
-shipped 2026-07-19**: `nebula` and `dotCrawl` in `AMBIENT_FX`, `iridescence` in `SHADER_FX`.
+**On `vfx-js`, kept because the measurement is still the answer.** It is MIT, zero-dependency, and
+does exactly Seam C. Two measured facts ruled it out as a runtime dependency, neither about quality:
+its released 1.1.0 has no way to set the clock, `render()` opens with `Date.now()`, and asking for
+the same logical frame five times returned five different pictures on all three shaders tried. The
+seekable API (`setTime(t); render()`) exists unreleased on main; if it ships, revisit it for its
+effect chain and its shader library, never for the sampling, which we now own.
 
 ## Tier 4: Three.js / WebGL
 
-Needs a new layer type (`three`?) with a deterministic clock, mirroring how `shader` works today.
+**The layer type ships.** This section was written as future work, and it was the "what I would build
+first" item 5. `core/surfaces/three.js` exists; `core/three-fx.js` declares the props at `:29-38`
+behind an 18-line determinism contract at `:5-18` (no `THREE.Clock`, no `performance.now`, no
+`Date`, no rAF driving anything); `three` has a full schema entry (`formats/scene/schema.json:705`)
+and four scenes use it: `three-showcase.json` · `motion-reel.json` · `motion-reel-v2.json` ·
+`showcase-globe.json`. The registry is split into `core/three-scenes.js` on purpose, so a Node-side
+gate can read the names without resolving the browser-absolute three.js import.
 
-**Code 3D Extrude**, **Code Morph**, **Code Snippet Flight**, **iPhone & MacBook 3D Showcase**,
-**3D UI Reveal**, extruded 3D text, raymarched SDF scenes, fractals (mandelbulb/julia), metaballs,
-holographic foil, chrome/refractive glass, water + caustics, cloth/flag wave, wireframe/point-cloud,
-depth-map 2.5D parallax, **Parallax Layers** captions, starfield/warp-speed/nebula/aurora.
-
-**HTML-in-Canvas / Liquid Glass** (iOS 26 home screen, context menu, media controls, notification,
-widgets, macOS Tahoe desktop) sits between 3 and 4: mostly `backdrop-filter` + layered highlights,
-but the convincing version needs real refraction. Start Tier 1, escalate only if it looks cheap.
-**Honest note:** Apple documents Liquid Glass for Apple platforms only. Any web version is an
-approximation and should be labelled one, never implied to be the real control.
+| named effect | status | proof |
+|---|---|---|
+| extruded 3D text | **SHIPS** | `extrudeText` in `THREE_FX` (`core/three-scenes.js:23`). |
+| wireframe / point cloud | **PART** | `pointCloud` ships (`core/three-scenes.js:22`). No wireframe scene: `THREE_FX` is the eleven scenes in `core/three-scenes.js` and none of them is one. |
+| metaballs · fractals (mandelbulb) · chrome glass · water caustics · holographic foil | **SHIPS** | `RAYMARCH_FX` = 5 (`core/raymarch-fx.js:28-35`): metaballs · mandelbulb · chromeGlass · caustics · holoFoil. |
+| Code 3D Extrude · Code Morph · Code Snippet Flight | **SHIPS** | `codeExtrude` in `THREE_FX`; `codeMorph` and `codeFlight` in `BLOCKS` (`blocks/codeanim.mjs`). |
+| iPhone and MacBook 3D Showcase · 3D UI Reveal | **SHIPS** | `deviceShowcase` and `uiParallax` in `THREE_FX`; `uiReveal3d` at `blocks/vfx.mjs:305`. |
+| HTML-in-Canvas / Liquid Glass | **SHIPS** | Six blocks in `blocks/glass.mjs`: `glassHome` · `glassMenu` · `glassControls` · `glassNotification` · `glassWidgets` · `glassDock`, with real refraction behind them (`glass:"refract"`). **Honest note:** Apple documents Liquid Glass for Apple platforms only. Any web version is an approximation and should be labelled one, never implied to be the real control. |
+| starfield · warp speed · nebula · aurora | **SHIPS**, at Tier 2 and 3 | `starfield` and `aurora` in `PAINT_FX`; `nebula` and `aurora` in `AMBIENT_FX`. They never needed Tier 4. |
+| cloth / flag wave | **NOT BUILT** | No `THREE_FX` entry, and no `cloth` or `flagWave` in `core/`. |
+| water surface as geometry, distinct from `caustics` | **NOT BUILT** | `RAYMARCH_FX.caustics` is a lit field, not a simulated surface. |
+| depth-map 2.5D parallax | **NOT BUILT** | No `depthMap` anywhere in `core/` or `scripts/`. Blocked behind depth estimation, Tier 5. |
+| **Parallax Layers** captions | **NOT BUILT** | Not a `CAP_STYLES` key. |
 
 ## Tier 5: blocked on a determinism story
 
-These are **not** "hard", they are **unsolved for this engine**, and shipping them naively breaks
-the product's central claim. (Audio-reactivity used to sit here and no longer does: `make spectrum`
-bakes per-frame band energy offline and the render reads row `n` of a table, so it never was a
-determinism problem once the analysis moved out of the frame. See `core/spectrum.js`.)
+These are **not** "hard", they are **unsolved for this engine**, and shipping them naively breaks the
+product's central claim. Audio-reactivity used to sit here and no longer does: `make spectrum` bakes
+per-frame band energy offline and the render reads row `n` of a table (`core/spectrum.js`), so it
+never was a determinism problem once the analysis moved out of the frame.
 
-- **Particle/fluid sims** (smoke, fog, fluid/ink diffusion, reaction-diffusion, boids, gravity
-  fields, disintegration, sand pour). Sims are iterative; `renderFrame(412)` cannot step 411 frames
-  first. Needs closed-form motion, or a precomputed baked buffer keyed by frame, or an explicit
-  "sim layers render in-order" carve-out that costs frame sharding.
-- **True motion blur.** Sub-frame accumulation in the render pipeline. NOTE: the cheap half already
-  ships, `L.motionBlur` derives a streak from the motion track's velocity, sampled at `t` and
-  `t - 1/fps` so it stays pure in `n` (`formats/scene/scene.html`). What remains is real multi-sample
-  accumulation, which is a quality upgrade rather than a zero-to-one.
-- **Depth estimation** for 2.5D parallax from a flat image. Needs a model in the pipeline.
-- ~~**Chroma key / luma key / difference matte.**~~ **Unblocked.** The question this was waiting on,
-  where source video enters a scene, is answered: the `clip` layer plays a preloaded PNG frame
-  sequence (`core/layers/clip.js`, exercised by `_coverage-reel.json`). Keying is now one per-pixel
-  entry over a `clip`, i.e. content, not a determinism problem.
+| item | status | proof |
+|---|---|---|
+| Particle and fluid sims: smoke · fog · ink diffusion · reaction-diffusion · boids · gravity fields · disintegration · sand pour | **SHIPS by the baked route** | The carve-out this tier named, "a precomputed baked buffer keyed by frame", is built and was unrecorded. `scripts/sim/run.mjs:1-11` runs the simulation offline, in order, once, and emits a PNG frame sequence; reproducibility is hashed by `scripts/sim/provenance.mjs`; the scene plays the frames back through the existing `clip` layer. `make sim`, `make sim-audit`. Non-determinism is confined to bake time. Writing a *live* sim is still refused, and should be. |
+| True multi-sample motion blur | **NOT BUILT** | The cheap half ships and is now AUTOMATIC above a speed the eye already reads as fast, not opt-in: `L.motionBlur` derives a streak from the motion track's velocity, sampled at `t` and `t - 1/fps` so it stays pure in `n` (`core/tracks/motion.js:99-104`; `motionBlur:false` opts out, a number overrides the shutter). What remains is real sub-frame accumulation in the render pipeline, and nothing in `internal/render/render.go` does any. |
+| Depth estimation for 2.5D parallax from a flat image | **NOT BUILT** | No `depthMap` or depth-estimation path in `core/` or `scripts/`. Needs a model in the pipeline. |
+| Chroma key · luma key · difference matte | **NOT BUILT, and unblocked** | The question it waited on, where source video enters a scene, is answered: the `clip` layer plays a preloaded PNG frame sequence (`core/layers/clip.js`, exercised by `_coverage-reel.json`). Keying is now one per-pixel entry over a `clip`. Zero hits for `chromaKey` or `lumaKey` anywhere in the repo. Unblocked is not built. |
 
-## Retro / expressive text (resourceboy.com/text-effects/retro), backlog
+Everything in Tier 5 gets a design note before a line of code. The determinism claim is the product;
+an effect that quietly breaks it costs more than it adds.
 
-A large family of retro text looks to mine for effects: https://resourceboy.com/text-effects/retro/
-(chrome, letterpress, sticker, foil, neon, halftone, marquee, etc.). Pull from it whenever the
-question is "what text effect should we build next." One is already shipped: the **ransom cutout**
-(`core/ransom.js`, paper + color palettes: see PRIMITIVES). The rest below are queued.
+## Retro / expressive text, backlog
 
-Three near-complete reference implementations were handed over (Study / resourceboy, self-contained
-WebGL1 + React). They are worth building, but note the **shared catch**: as given, each is an
-*interactive site component*: a `requestAnimationFrame` loop driven by `performance.now()`, pointer
-position, and `Math.random()`. That is the exact opposite of `renderFrame(n)` purity. So each has two
-possible homes, and the port differs:
+A large family of retro text looks to mine: https://resourceboy.com/text-effects/retro/ (chrome,
+letterpress, sticker, foil, neon, halftone, marquee). Pull from it whenever the question is "what
+text effect should we build next." Four already ship as `LOOKS`: `chrome` · `letterpress` · `neon` ·
+`emboss` (`core/looks.js:197`). The **ransom cutout** ships procedurally (`core/ransom.js`).
 
-- **As a live SITE block** (like the current blocks browser / editor): drop in almost as-is. The site
-  already runs interactive WebGL; cursor + rAF are fine there. Lowest effort, highest fidelity.
-- **As a VIDEO primitive** (a new fx/layer): must be rewritten **pure in n**, drive every phase from
-  the frame number, delete the cursor input and every `Math.random`/`performance.now`, and follow the
-  multi-pass-bloom-into-FBOs pattern already proven by `core/stings.js` / `core/raymarch-fx.js`. This
-  is the Tier 4 (WebGL) + Tier 5 (determinism) overlap; give it a design note first.
+Three near-complete reference implementations were handed over (self-contained WebGL1 and React).
+They are worth building, but note the **shared catch**: each is an *interactive site component*, a
+`requestAnimationFrame` loop driven by `performance.now()`, pointer position and `Math.random()`.
+That is the exact opposite of `renderFrame(n)` purity, so each has two possible homes:
 
-Queued from the handoff:
-- **Blur glow**. A crisp word in a gradient-mapped soft bloom on light paper: rasterize the word to a
-  height-locked white mask, build a real multi-pass Gaussian bloom (4 downsampled H/V blur FBOs) with
-  a depth-of-field focus, sum with falling weights, gamma, then gradient-map the luminance through a
-  5-stop ramp; ink-coloured sharp word on top; soft-light film grain. Ships several light-paper
-  palettes. (Study, WebGL1.)
-- **Chromatic glow**: the same multi-pass bloom, then split into a warm and a cool copy offset in
-  opposite directions with a spectral (multi-tap prism) rainbow rim; grain; palette worlds each with
-  their own wall colour, dark and light modes. The static `chroma` reveal preset and the `chromaGlow`
-  filter already gesture at this; this is the full live version. (Study, WebGL1.)
-- **Real-sprite ransom**. The asset-based cousin of `core/ransom.js`: real cut-out magazine letter
-  sprites (royalty-free WebP, e.g. resourceboy's pack) picked per character with seeded jitter, versus
-  our procedural CSS tiles. Higher fidelity, but needs a vetted royalty-free sprite set committed and
-  served, and for video it must bake to frames (no `Math.random` swap). Procedural ships today; sprites
-  are the upgrade when the asset licensing is settled.
+- **As a live SITE block**: drop it in almost as-is. The site already runs interactive WebGL.
+- **As a VIDEO primitive**: rewrite it **pure in n**, drive every phase from the frame number, delete
+  the cursor input and every `Math.random`/`performance.now`, and follow the multi-pass-bloom-into-FBOs
+  pattern already proven by `core/stings.js` and `core/raymarch-fx.js`. Give it a design note first.
 
-## What a showcase actually found (App Showcase, 2026-07-19)
+| named effect | status | proof |
+|---|---|---|
+| **Blur glow** | **NOT BUILT** | No `blurGlow` in `core/`. Wanted: rasterize the word to a height-locked white mask, a real multi-pass Gaussian bloom (4 downsampled H/V blur FBOs) with a depth-of-field focus, summed with falling weights, gamma, then gradient-mapped through a 5-stop luminance ramp; the ink-coloured sharp word on top; soft-light grain. |
+| **Chromatic glow** | **NOT BUILT** | No `chromaticGlow` in `core/`. The same multi-pass bloom, then a warm and a cool copy offset in opposite directions with a spectral prism rim. `FILTER_PRESETS.chromaGlow` and the `chroma` reveal preset are the static gesture, not this. |
+| **Real-sprite ransom** | **NOT BUILT** | `core/ransom.js` ships the procedural CSS-tile form. The sprite cousin needs a vetted royalty-free cut-out letter set committed and served, and for video it must bake to frames. Procedural ships today; sprites are the upgrade when the licensing is settled. |
 
-The instruction in the next section: build the showcases last and let them dictate the backlog, was
-tested by storyboarding an **App Showcase** against all 125 catalog blocks without writing the film.
-It surfaced 17 gaps. Three were defects and are FIXED; the other fourteen are the backlog, recorded
-here rather than left in a transcript.
+## Blocks: what a showcase found (App Showcase, 2026-07-19)
 
-**Fixed:** `phoneFrame`/`browserFrame` had no content slot (`children` now, plus a phone status row);
-`browserFrame` defaulted `url` to a real company's domain; `deploySuccess` baked in the invented
-statistic "Ready in 1.2s" (now `title`/`note`/`steps` props, `note` defaulting to nothing).
+The instruction below (build the showcases last, let them dictate the backlog) was tested by
+storyboarding an **App Showcase** against the catalog without writing the film. It surfaced 17 gaps.
+Sixteen are closed, and they are recorded here rather than left in a transcript.
 
-~~**The structural one, fix this before more effects.**~~ **DONE (2026-07-19).** `nowPlaying` used to
-be the ONLY app-content block, so a product-demo storyboard could only depict a *music app*. All six
-factories now ship in `blocks/app.mjs`: `feedRow` · `listRow` · `settingsRow` · `profileHeader` ·
-`onboardCard` · `emptyState`. This was correctly called ahead of any transition on this page.
+**Fixed defects:** `phoneFrame`/`browserFrame` had no content slot (`children` now, plus a phone
+status row); `browserFrame` defaulted `url` to a real company's domain; `deploySuccess` baked in the
+invented statistic "Ready in 1.2s".
 
-**Containers and composition: DONE (2026-07-19), both, in `blocks/index.mjs` (WAVE 6)**
-- ~~No **split-screen / picture-in-picture** primitive~~ → **`splitScreen`** (`splitScreen.pip`). A side
-  is a block descriptor `{ block, props }`, the same shape a scene already writes; the container
-  computes the pane box and injects `x`/`y`/`w`/`start`/`dur`. It injects `w` and NOT `h` on purpose:
-  most factories size themselves off content and accept no `h`, and a prop a factory does not
-  destructure is dropped in silence.
-- ~~`comparison.beforeAfter` takes two columns of STRINGS~~ → **`comparison.screens`**. `leftScreen` /
-  `rightScreen` turn the columns into panes and hand the geometry to `splitScreen`. The string form is
-  untouched and takes precedence by absence, so every existing caller renders what it rendered before.
+**Closed, all in `blocks/`:** app content beyond a music player (`feedRow` · `listRow` ·
+`settingsRow` · `profileHeader` · `onboardCard` · `emptyState`); split-screen and picture-in-picture
+(`splitScreen`, `splitScreen.pip`, whose sides are block descriptors and which injects `w` and NOT
+`h` on purpose, because most factories size off content and a prop a factory does not destructure is
+dropped in silence); `comparison.screens`; moving state (`tabBar.switch` · `tabBar.icons` ·
+`stepFlow.build` · `screenSwap`, which defaults to `wipe` because a wipe is a CLIP, so a swap inside
+a device frame does not slide across the bezel); interaction (`pointer` · `tapRipple` · `keyboard` ·
+`pressButton`); proof surfaces (`installCard`, whose stars FILL through a hard-edged mask so a 4.6
+lands mid-glyph, plus `socialProof` and `toast.stack`/`notification.stack` sharing one `stackWindows`
+helper).
 
-**State that cannot move: DONE (2026-07-19), all three**
-- ~~`tabBar` takes a static `active` index~~ → **`tabBar.switch`** / **`tabBar.icons`**. `activeFrom` +
-  `activeTo` slide the selection, and `tabs` now take `{ icon, label }`. One `html` layer: the pill
-  translates by `var(--p)` and the ACTIVE-styled copy of the label row lives inside the pill,
-  counter-translated by the same expression, so whichever tab the pill is over renders lit for free.
-  The two copies differ in COLOUR ONLY: a heavier active copy is a WIDER copy, and the alignment
-  depends on the two rows being metrically identical.
-- ~~`stepFlow` has the same frozen `active`~~ → **`stepFlow.build`**. `activeFrom` + `activeTo` sweep one
-  number; rings light and connectors fill as `pos` crosses them. Three states of a ring have to occupy
-  the same 44px, which a flow layout cannot express, so this is one `html` layer too.
-- ~~No **app-scroll or screen-transition** block at all~~ → **`screenSwap`** (`screenSwap.slide`). Every
-  screen shares one box and the windows hand over. It defaults to `wipe` because a wipe is a CLIP: the
-  outgoing screen never travels outside its own box, so a swap inside a device frame does not slide
-  across the bezel. `slide` pairs its directions (enter right, leave left) rather than retreating.
+| remaining gap | status | proof |
+|---|---|---|
+| `loadingBar`/`progressRing` assume card scale and do not read inside a device screen | **NOT BUILT** | `loadingBar` still defaults `w = 420` at `blocks/dev.mjs:110`. A sizing question, not a missing capability. |
+| A nested `layout:'free'` group did not position its own children | **SHIPS (fixed)** | Recorded here as an open framework bug that cost `installCard` a rating track. Fixed at `core/layers/util.js:522-527`, whose comment names the positioned-ancestor reasoning, and `:567`, which sets `position:absolute` plus `left`/`top` when `parentEl.dataset.free`. |
 
-**Interaction: DONE (2026-07-19), all three, in `blocks/interact.mjs`**
-- ~~no standalone cursor/tap block~~ → `pointer` (an arbitrary path) and `tapRipple`.
-- ~~no mobile keyboard~~ → `keyboard`, a phone-shaped rising key plane.
-- ~~`card`'s `cta` has no press state~~ → `pressButton`.
+## Built and unused: the other kind of debt
 
-**Proof surfaces: three of four DONE (2026-07-19)**
-- ~~No **app-store / install** block~~ → **`installCard`**, on `followCard`'s conventions. The stars
-  FILL: one row of five glyphs revealed by a hard-edged mask whose fraction is `rating / 5`, so a 4.6
-  lands mid-glyph. Every figure is a prop and every default is empty (`rating` 0 draws no stars), and
-  the count is FORMATTED from a number so the block cannot be handed a sentence.
-- ~~`avatarStack` … proves nothing without a hand-placed text layer~~ → **`socialProof`**, which owns
-  the stack and the caption and puts the caption where the stack actually ends. `caption`/`sub`
-  default to nothing; the `+N` still comes from the caller.
-- ~~`toast`/`notification` cannot stack or expire, and the icon prop exists on one and not the other~~ →
-  **`toast.stack`** / **`notification.stack`**. `items` stacks and expires via one shared
-  `stackWindows` helper in `blocks/kit.mjs`, and each block recurses into its own single-card form so
-  the stacked and single shapes cannot drift. `notification`'s `icon` was in the signature and
-  rendered NOWHERE; it now draws the same chip `toast` does.
-- `loadingBar`/`progressRing` assume card-scale width and do not read inside a device screen. **STILL
-  OPEN**. A sizing question, not a missing capability, and untouched by this pass.
+**This is the engine's real disease, and it is not "not built".** A capability lands, is reachable, is
+tested, and no film ever uses it. That reads green on every gate and buys nothing, and this page had
+no way to say it before this section existed. Counted over the 170 JSON files in `formats/scene/`:
 
-**Found while building the above (not fixed here: it belongs in `core/`):** a NESTED `layout:'free'`
-group does not position its own children. `layoutGroup` sets `display:block` and `addGroupChild` marks
-the children `position:absolute`, but nothing on the group is positioned, so an absolutely-placed
-child escapes to the LAYER root. Free layout works at top level (a layer root is positioned) and
-misplaces one node down, silently. It cost `installCard` a rating track that flew to the card's corner.
+| capability | reachable | proof | scenes using it |
+|---|---|---|---|
+| `effector`, a falloff from a travelling point, spent on a layer's own children | yes | `core/effector.js`, registered at `core/tracks/index.js:59`, schema at `formats/scene/schema.json:1255` | **0** |
+| `timeRemap` (whip · hold · freeze · rewind) | yes | shapes at `core/time.js:48`, baked once at boot by `bakeTimeRemap` at `:144`, schema at `formats/scene/schema.json:1814` | **0** |
+| `aspects`, per-aspect overrides | yes | `core/validate.mjs:207-213` | **1** (`aspects-demo.json`) |
+| `col`, the relative column coordinate | yes | shared prop list, `formats/scene/schema.json:8` | **0** |
+
+Neither `effector` nor `timeRemap` is unreachable, and neither is untested. They are unproven by a
+film, which is a different failure and needs a different fix: not engineering, but one scene that
+earns the capability. **When adding a capability, name the film that will use it, or expect this
+table to grow a row.**
 
 ## The Showcases
 
-**App Showcase**, **Apple Money Count**, **Blue Sweater Intro**, **North Korea Locked Down**,
-**NYC Paris Flight**, **VPN YouTube Spot** are not effects. They are *compositions* of the above.
-They belong in `formats/scene/`, as evidence the vocabulary composes. Build them **last**, and let
-them dictate which effects actually matter: a showcase that cannot be built is a better spec for
-the backlog than a wish-list is.
+**App Showcase** ships (`formats/scene/app-showcase.json`). **Apple Money Count**, **Blue Sweater
+Intro**, **North Korea Locked Down**, **NYC Paris Flight** and **VPN YouTube Spot** are **NOT BUILT**:
+none of them exists in `formats/scene/`. They are not effects, they are *compositions* of the above,
+and they belong in `formats/scene/` as evidence the vocabulary composes. Build them **last**, and let
+them dictate which effects actually matter: a showcase that cannot be built is a better spec for the
+backlog than a wish-list is. The App Showcase already proved that, seventeen times over.
 
-## What I would build first
+## The five gaps worth building, by what they unlock
 
-0. **Aspect ratios** (above). Not an effect, and ahead of all of them: it is a claim already on the
-   site that the engine only half keeps. ~~Ship the per-aspect gate first~~, **done**; it paid for
-   itself immediately by finding three bugs in the one scene that exists to prove the claim. What
-   remains is the `resolveCoords` trap behind them and a scene that exercises 4:5.
-~~1. **Lower thirds**~~ **Done**, all twelve variants ship (`lowerThird.cleanBar` … `.newsTicker`).
-~~2. **Shader transitions**~~ **Done**, 13 of 14; see Tier 3 above.
-~~3. **Code snippet themes**~~ **Done to 12**, `CODE_THEMES` has twelve WCAG-checked palettes and all
-   twelve now have catalog rows. Going to twenty-four is more content, not a different kind of work.
-~~4. **Analog/retro**~~ **Mostly done**, see Tier 3 above.
-5. **The `three` layer type** (Tier 4). Its own precondition ("once 1-4 prove the vocabulary") is now
-   met. Note the risk it was written with has since evaporated: headless WebGL already renders in the
-   Go pipeline (`site-backdrop.json` ships a `shader` layer), and the layer pattern has been proven
-   twice over by `core/surfaces/shader.js` and `core/surfaces/paint.js`.
+1. **Library-wide multi-aspect adoption.** The gate, the safe area, the overrides and a demo all
+   ship, and 1 scene in 170 uses them. This is the only gap that makes a claim already on the site
+   true.
+2. **`center` that measures the rendered layer.** Until it does, every author hand-computes the
+   number the layout system exists to compute. That is the root cause behind gap 1, not a sibling
+   of it.
+3. **Cross-tab raster determinism in the Go capture.** Byte-identical re-renders are the product's
+   central claim, and it currently holds only at `-workers 1`.
+4. **True multi-sample motion blur.** The one render-pipeline change on the list. Every fast move in
+   every film is sold by a derived streak rather than by accumulation.
+5. **Chroma / luma key.** Unblocked since the `clip` layer landed, and still unbuilt. It gates any
+   film that wants real footage composited rather than placed.
 
-**A standing warning, learned the hard way.** Items 1, 2 and 4 sat on this list as "build first" long
-after they were built, and two planning passes in a row were routed at them. Before building anything
-named here, check the registry that would own it, `SHADER_FX`, `AMBIENT_FX`, `CANVAS_FX_NAMES`,
-`PAINT_FX_NAMES`, `LOOK_NAMES`, `CAP_STYLES`, `PRESENTATIONS`, `blocks/catalog.mjs`. `make coverage`
-prints most of them. A roadmap is a claim about the past as much as the future, and this one decayed
-silently because nothing checked it.
-
-Everything in Tier 5 gets a design note before a line of code. The determinism claim is the
-product; an effect that quietly breaks it costs more than it adds.
+**A standing warning, learned the hard way, and it fired again.** Lower thirds, shader transitions
+and analog/retro sat on this page as "build first" long after they were built, and two planning
+passes in a row were routed at them. The 2026-09-01 audit found the same decay at a larger scale: the
+**`three` layer type**, **Seam C**, **Seam D**, **Portal**, **Shatter**, **Liquid Background**, **Code
+Shader Dissolve**, the **code-animation blocks** and the **offline sim baker** were all written here
+as future work while shipping. Before building anything named on this page, check the registry that
+would own it: `SHADER_FX`, `AMBIENT_FX`, `SEAM_FX`, `RESAMPLE_FX`, `CANVAS_FX_NAMES`,
+`PAINT_FX_NAMES`, `THREE_FX`, `RAYMARCH_FX`, `LOOK_NAMES`, `CAP_STYLES`, `FILTER_PRESETS`,
+`PRESENTATIONS`, `blocks/catalog.mjs`. `make arsenal Q="…"` searches all of them at once, and it
+returns its NEAREST match even when it has no answer, so confirm the name it hands you exists in the
+file it names. A roadmap is a claim about the past as much as the future, and this one decayed
+silently twice because nothing checked it.
