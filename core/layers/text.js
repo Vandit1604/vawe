@@ -204,7 +204,18 @@ export function frame(kit, el, L, t) {
   if (L.gradient) paintSplitUnits(el, L, t);
   if (!L.typing) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
-  if (!(t >= start && t < end)) return;
+  // THE BUILT LINE, STASHED ON THE FIRST FRAME THIS LAYER IS ASKED FOR, and put back the moment the
+  // layer is off its window. The early return used to leave the element holding whatever the LAST
+  // in-window frame typed, so `renderFrame(72)` produced "Mee▏" on a tab that had already drawn frame
+  // 66 and the whole line on a tab that had not. The capture shards round-robin, so which frames a tab
+  // drew before this one is decided by the worker count: one render at -workers 1 and the same render
+  // at -workers 6 disagreed (docs/MISTAKES.md #507). Every per-frame write in this engine is
+  // authoritative; this one had an exit that was not.
+  if (el.__hsTypeBase == null) el.__hsTypeBase = el.innerHTML;
+  if (!(t >= start && t < end)) {
+    if (el.innerHTML !== el.__hsTypeBase) el.innerHTML = el.__hsTypeBase;
+    return;
+  }
   const cps = L.typing === true ? 24 : L.typing;
   const full = L.text || '';
   const visLen = /[<&]/.test(full) ? stripLen(full) : full.length;

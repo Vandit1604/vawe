@@ -73,7 +73,18 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   // `filter` on a layer that has no motion track.
   const dof = live && cam && cam.focus != null && cam.aperture > 0 ? focusBlur(L, cam) : 0;
   if (!(L.motion && L.motion.length && live)) {
-    if (dof > 0.4) writeBlur(el, dof);
+    // THE WRITE IS AUTHORITATIVE ON THIS PATH TOO, and it was not. `if (dof > 0.4)` skipped the write
+    // whenever the layer went off screen or the lens came back into focus, so a blur written on an
+    // EARLIER frame stayed on the element: frame 83 carried `blur(1.49px)` from frame 77 on a tab that
+    // had drawn 77, and `none` on a tab that had not. That is #41 again on the branch #41 did not
+    // cover, and it is a purity bug before it is a visual one: a sharded render deals frames
+    // round-robin, so which frames a tab drew before this one is decided by the worker count
+    // (docs/MISTAKES.md #507).
+    //
+    // `el.__hsBlur` is the stash writeBlur leaves behind, so it is exactly the set of elements this
+    // writer has ever touched. Clearing only those keeps a layer that never had a filter free of a
+    // `filter: none` nobody asked for, which would move every snapshot signature in the library.
+    if (dof > 0.4 || el.__hsBlur) writeBlur(el, dof);
     return;
   }
   const fps = kit.fps;

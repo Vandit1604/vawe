@@ -377,7 +377,9 @@ boot((data, fps, theme, canvas) => {
       beatBounds.push({ start: edges[i], end });
       const w = document.createElement('div');
       w.className = 'hs-beat';
-      w.style.cssText = 'position:absolute;inset:0;transform-origin:50% 50%;will-change:transform,opacity';
+      // no `will-change` here either: it promotes the beat to a compositor layer whose raster is
+      // reused across seeks, so the frame depends on the frames painted before it (see scene.css).
+      w.style.cssText = 'position:absolute;inset:0;transform-origin:50% 50%';
       cam.appendChild(w);
       beatWrap.push(w);
     }

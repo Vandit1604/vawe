@@ -12,8 +12,18 @@
 /* a hand-authored living background (core/bg-html.js): full-bleed, behind the canvas and the camera.
    `overflow: hidden` so an oversized blob the author animates off-frame cannot grow the stage. */
 .hs-bghtml { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
-#cam { position: absolute; inset: 0; will-change: transform; transform-origin: 50% 50%; }
-.hs-layer { position: absolute; will-change: transform, opacity, filter; }
+/* NO `will-change` ON EITHER OF THESE, AND THAT IS THE POINT. Both carried
+   `will-change: transform, opacity, filter`, which promotes the element to its own compositor layer.
+   A promoted layer is rasterized once and then TRANSFORMED by the compositor, so the glyphs inside it
+   keep the sub-pixel raster they were given the first time the layer was painted, and the frame you
+   capture depends on which frames were painted before it. Geometry stayed identical to six decimals
+   and the pixels did not: a render at -workers 1 and the same render at -workers 6 disagreed on 50 of
+   60 frames, because each tab paints a different subset of the film. Removing these two took that to
+   1 of 60 (docs/MISTAKES.md #507). Same family as #272, where 400 promoted elements in a lightfield
+   made the picture never settle: a promotion hint is a promise about ANIMATION, and this renderer
+   does not animate, it seeks. */
+#cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.hs-layer { position: absolute; }
 .hs-text { color: var(--text); line-height: 1.04; }
 /* <b> is ACCENT EMPHASIS (recolour), not "bolder": inherit the layer weight so emphasis never
    jumps to UA bold 700 and sits heavier than its own line. Opt into a heavier emphasis explicitly. */

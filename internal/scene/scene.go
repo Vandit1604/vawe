@@ -134,6 +134,15 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// (docs/MISTAKES.pending-worker.md).
 		chromedp.Flag("disable-checker-imaging", true),
 		chromedp.Flag("run-all-compositor-stages-before-draw", true),
+		// PARTIAL RASTER IS INCREMENTAL, AND AN INCREMENTAL PICTURE IS NOT A FUNCTION OF n. Chrome
+		// re-rasters only the invalidated part of a tile and reuses what was already there, so a tile's
+		// pixels depend on which frames were painted into it earlier. Seeking straight to one frame and
+		// shooting it is a different history from seeking sixty, and a sharded capture gives every tab a
+		// different history by construction, so the same frame came out differently at -workers 1 and
+		// -workers 6. Measured on a 60-frame scene once the will-change promotions were gone (see
+		// formats/scene/scene.css): 1 of 60 frames still differed between the two, and 0 of 60 with this
+		// flag. Cost: none measurable on a 60-frame draft (docs/MISTAKES.md #507).
+		chromedp.Flag("disable-partial-raster", true),
 		// SUPERSAMPLE: capture at ss× device pixels so animated transforms (camera, kinetic type,
 		// stings) land text on a fine grid — the ss×ss box-resolve in downsample() averages the
 		// sub-pixel jitter out, killing the frame-to-frame shimmer at the root instead of by

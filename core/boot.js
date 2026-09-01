@@ -6,6 +6,7 @@ import { FPS, isLightBg } from './motion.js';
 import { bakeResamples } from './resample.js';
 import { glLive } from './webgl.js';
 import './frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
+import { canvasKind } from './canvas-kind.js'; // records each canvas's context kind at creation
 import { themeErrors, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from './theme-contract.js';
 import { parseColor, contrastRatio, ensureContrast } from './motion.js';
 import { validateAll } from './validate.mjs';
@@ -599,9 +600,15 @@ export async function boot(build) {
         let h = fnv(2166136261, document.body.innerHTML);
         for (const cv of document.querySelectorAll('canvas')) {
           if (!cv.width || cv.style.display === 'none') continue;
+          // ASK canvasKind, NEVER getContext. getContext('2d') CREATES the context it is meant to
+          // report, so probing here used to turn context-less canvases into 2D ones on the meta tab
+          // alone, and that tab then rasterized every later frame differently from every worker tab
+          // (docs/MISTAKES.md #507). A canvas with no kind holds no context and paints nothing.
+          const kind = canvasKind(cv);
+          if (!kind) continue;
           // visible 2D canvases repaint time-varying fx (grain/drift) BELOW probe resolution,
           // proven by an anchor-verification failure. Never dedup frames where one is live.
-          if (cv.getContext('2d')) { h = fnv(h, 'live2d:' + n); continue; }
+          if (kind === '2d') { h = fnv(h, 'live2d:' + n); continue; }
           try { // webgl overlays (shader stings) are keyed draws, sampling them is sound
             pctx.clearRect(0, 0, 24, 14); pctx.drawImage(cv, 0, 0, 24, 14);
             const d = pctx.getImageData(0, 0, 24, 14).data;
