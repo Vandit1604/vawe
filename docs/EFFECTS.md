@@ -29,6 +29,7 @@
 
 | name | what / when |
 |---|---|
+| `assemble` | each glyph flies in from its OWN scattered offset and rotation and settles into the word, arriving in a shuffled order · the AE "text animator + randomize-order range selector" reveal. Pair it with `split: "char"` |
 | `blur` | resolve out of blur: calm, premium |
 | `bounce` | springy bounce in: playful brands only |
 | `chroma` | R/G/B ghosts split apart and converge to a crisp glyph |
@@ -176,6 +177,7 @@
 | `iris` | circular reveal growing from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits |
 | `jitter` | decaying deterministic shake, alarm and glitch beats only |
 | `letterbox` | cinema curtains open and close top and bottom, cinematic opener; masks, so a whole-frame cut needs sceneUnits |
+| `matchCut` | a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks, so a whole-frame cut needs sceneUnits |
 | `none` | no transition at all, the beats simply replace each other. Masks nothing and moves nothing, so a whole-frame cut needs sceneUnits |
 | `punch` | scale burst, the leaving beat bursts past the camera, product focus |
 | `rise` | translate up + fade in |
@@ -379,7 +381,7 @@ On a `motion` key's `ease`, but NOT a curve. An easing is a function of one segm
 | `accent` | the brand accent as a radial with rippling dots and a slow spotlight (moves), the loud brand field |
 | `accentPlain` | the brand accent as a clean full-bleed field, grain only. FLAT, for plain sites whose hero is one colour |
 | `aurora` | drifting colour aurora (moves) |
-| `blobs` | the airier light wash: smaller separated pools with a technical grid reading through the white (moves) |
+| `blobs` | the airier light wash: smaller, separated pools with white between them (moves). No grid: write `grid: true` on a softwash fx if you want the blueprint rules |
 | `brandglow` | breathing accent glow |
 | `constellation` | drifting connected nodes (moves), telemetry/data feel |
 | `dark` | a plain dark radial, no dots. FLAT, the quiet backdrop for busy content |
@@ -482,7 +484,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
 | `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
 | `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express |
-| `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value |
+| `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
 | `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo |
 | `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
 | `globe` | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
@@ -682,6 +684,7 @@ What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, wh
 | `convolve` | a 3x3 kernel reading NEIGHBOURING pixels: emboss (a lit rubbing), edge (flat areas cancel to black, only boundaries survive), sharpen |
 | `displace` | static turbulence drives a displacement map. The pixels are pushed around by a fixed noise field. `freq` sets lump size (low = few big lumps), `scale` sets how far |
 | `duotone` | luminance remapped to TWO colours, shadows to highlights. The poster/press look; defaults to --ink and --accent, so it reskins per theme |
+| `goo` | the GOOEY / METABALL threshold, and the one primitive that can morph SEVERAL elements as one body: blur the group, then push the blurred ALPHA back through a hard ramp, so neighbouring shapes grow a liquid bridge as they approach and snap apart as they part. Put it on the PARENT (a `group`, or an `html` layer whose children move), never on one shape: one shape has nothing to fuse with. `goo:14` sets the blur radius (how far shapes reach for each other), `goo:14,26` also sets the ramp hardness. Bigger radius = longer bridges; softer ramp = wetter edge |
 | `gradientMap` | luminance remapped across any number of stops. The general case the two above are special cases of: a heat ramp, a risograph, a false-colour read |
 | `morph` | dilate or erode, swell the bright pixels into their neighbours, or eat them away. Type gains or loses weight |
 | `posterize` | each channel quantised to N discrete levels IN PLACE, hues kept. Banding as a decision, not an artefact |
@@ -907,4 +910,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_592 effects across 41 families. Regenerate: `make effects`._
+_595 effects across 41 families. Regenerate: `make effects`._

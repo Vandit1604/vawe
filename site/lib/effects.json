@@ -1,7 +1,7 @@
 {
-  "total": 583,
+  "total": 595,
   "previewed": 257,
-  "families": 39,
+  "families": 41,
   "tags": [
     [
       "asset",
@@ -41,7 +41,7 @@
     ],
     [
       "generator",
-      32
+      34
     ],
     [
       "layer",
@@ -57,7 +57,7 @@
     ],
     [
       "per-layer",
-      68
+      78
     ],
     [
       "per-layer/scene",
@@ -3225,6 +3225,102 @@
       ]
     },
     {
+      "id": "effector-falloffs",
+      "title": "Effector falloffs",
+      "tag": "per-layer",
+      "intro": "A · FALLOFF · FROM · A · TRAVELLING · POINT, · driving · the · layer's · own · children. · `effector · { · select, · path, · radius, · falloff, · drives, · sticky, · overshoot · }` · on · any · layer · with · children. · A · stagger · can · only · express · the · order · the · elements · sit · in; · this · expresses · DISTANCE, · in · two · dimensions, · from · a · point · that · moves, · so · one · rig · gives · a · wave, · a · ripple · out · of · a · centre · and · a · stroke · painted · across · a · grid, · and · only · the · point's · path · changes. · `path` · is · a · motion-key · list · ({t,x,y,ease}) · in · the · layer's · own · coordinates, · so · it · is · keyed · exactly · like · a · `motion` · track. · NO · KEYFRAME · LANDS · ON · ANY · CLONE. · `sticky` · (seconds) · is · what · makes · it · a · trail · rather · than · a · moving · highlight · a · clone · HOLDS · what · the · pass · did · to · it · and · releases · over · that · delay, · and · 1s · is · the · value · the · technique · is · built · on. · These · names · are · the · shape · of · the · falloff.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a falloff is the SHAPE of one point's reach, and it is invisible without the clones it acts on. Turn it on the playground's `effector` card, where the same grid is redrawn as you change it.",
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "linear",
+          "stem": "effector-falloffs--linear",
+          "desc": "influence · drops · straight · from · 1 · at · the · point · to · 0 · at · the · radius, · the · plain · ramp",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "smooth",
+          "stem": "effector-falloffs--smooth",
+          "desc": "a · smoothstep, · flat · at · both · ends, · so · a · clone · eases · into · the · field · and · out · of · it. · The · default",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "sphere",
+          "stem": "effector-falloffs--sphere",
+          "desc": "a · dome · full · influence · held · near · the · point, · then · a · cliff. · Reads · as · an · object · passing · beneath",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "step",
+          "stem": "effector-falloffs--step",
+          "desc": "no · falloff · at · all, · full · influence · inside · the · radius · and · none · outside. · A · hard-edged · pass",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "effector-drives",
+      "title": "Effector drives",
+      "tag": "per-layer",
+      "intro": "What · an · effector's · influence · is · SPENT · on · `drives · { · scale · 0.6, · push · 90 · }`, · where · the · number · is · the · amount · at · full · influence. · `push` · is · the · one · a · stagger · cannot · imitate, · because · it · reads · the · direction · from · the · point · to · the · clone · as · well · as · the · distance.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a drive is what the influence is spent on, so it shows nothing without a falloff and a field of clones. The playground's `effector` card carries all six on one grid.",
+      "count": 6,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "opacity",
+          "stem": "effector-drives--opacity",
+          "desc": "added · to · 1. · `opacity · -0.7` · dims · a · fully · affected · clone · to · 0.3",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "push",
+          "stem": "effector-drives--push",
+          "desc": "pixels · ALONG · the · vector · from · the · point · to · the · clone. · Positive · shoves · clones · away, · negative · pulls · them · in. · The · only · drive · that · reads · the · direction · as · well · as · the · distance",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "rotate",
+          "stem": "effector-drives--rotate",
+          "desc": "degrees. · `rotate · 25` · turns · a · fully · affected · clone · by · 25",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "scale",
+          "stem": "effector-drives--scale",
+          "desc": "added · to · 1. · `scale · 0.6` · swells · a · fully · affected · clone · to · 1.6",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "x",
+          "stem": "effector-drives--x",
+          "desc": "pixels, · a · sideways · offset · that · does · not · depend · on · where · the · point · is",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "y",
+          "stem": "effector-drives--y",
+          "desc": "pixels, · the · same · on · the · other · axis",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "blend-modes",
       "title": "Blend modes",
       "tag": "per-layer",
@@ -4435,7 +4531,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "generators have their own surface with every dial attached: /playground.",
-      "count": 5,
+      "count": 7,
       "undescribed": 0,
       "entries": [
         {
@@ -4456,6 +4552,20 @@
           "name": "crt",
           "stem": "generators-the-playground--crt",
           "desc": "A · cathode · ray · tube · the · picture · under · it · goes · soft · and · blooms, · then · scanlines · and · a · corner · falloff · go · over · the · top.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "effector",
+          "stem": "generators-the-playground--effector",
+          "desc": "One · travelling · point · drives · a · whole · grid · by · DISTANCE, · not · by · order · a · wave, · a · ripple · or, · with · a · sticky · delay, · a · trail · painted · across · the · clones. · No · keyframe · lands · on · any · clone.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "rangeSelector",
+          "stem": "generators-the-playground--rangeselector",
+          "desc": "The · AE · range · selector's · smoothness · dial · on · this · engine's · kinetic · presets · at · 1 · a · glyph · transitions, · at · 0 · it · swaps · outright, · which · is · the · value · a · font · morph · needs.",
           "scene": null,
           "noPreview": null
         },
