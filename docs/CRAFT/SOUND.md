@@ -545,28 +545,6 @@ essentially not written about this, which is part of why we drifted into shippin
 with an automated global enforcement system pointed at it. A wrong image gets a takedown if somebody
 notices. A wrong track gets a Content ID claim automatically, on upload, every time.
 
-### THE HOUSE BED, standing until somebody changes it
-
-**Marketing films use `bed`.** Mixkit track 292, chosen by the owner, recorded in
-`assets/music/credits.json` with its id, page and licence. Name it as `"music": "bed"`.
-
-The file is NOT in the repo, because this section's own rule forbids redistributing it. A fresh clone
-recovers it with one command:
-
-```bash
-node scripts/media/music.mjs --id 292 bed
-```
-
-**It has a pulse, and that is a requirement rather than a caveat.** A film carrying an audible beat
-whose cuts ignore it reads as two unrelated things playing at once, which is worse than silence. So a
-film using this bed derives a beat map (`make beatsync`, `audio.beatSync`) and puts its seams on the
-beat. If you are not going to cut to it, use a different bed.
-
-**This does not change the engine's default, and must not.** Silence stays what a film gets when it
-says nothing, because a bed that arrives unasked is the same silent substitution this repo refuses
-everywhere else. `bed` is the answer to "which track", not to "should there be one". The rule in
-section 5 still stands: give a film sound, or state the silence with a `_why`.
-
 ### What we use today, and it is fine
 
 Our beds come from **Mixkit's free tier**, which permits "commercial projects (YouTube videos, social
