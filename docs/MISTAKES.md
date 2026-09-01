@@ -17419,8 +17419,9 @@ itself, an unknown name, a missing `t`, keys running backwards, an empty list, a
 `validate` refuses an unknown name in a key the same way it already refuses a static one, because the
 ambient draw call RETURNS on a miss and would otherwise paint an empty canvas that passes every gate.
 `make arsenal Q="cycle a panel through different shader looks"` finds it through the `shader` layer
-type's blurb. Rendered and looked at: `formats/scene/_shader-keys-probe.json` frames 59/60 and 119/121,
-a clean hard swap on both keys with no dissolve. `make canvas-purity` passes on it, which is the gate
+type's blurb. Rendered and looked at on a throwaway probe (three looks keyed at 0s, 2s and 4s),
+frames 59/60 and 119/121: a clean hard swap on both keys with no dissolve. The probe is not kept,
+because a scratch film is gitignored and naming its path here would promise a file no reader has. `make canvas-purity` passes on it, which is the gate
 that can actually see inside a canvas.
 
 **A second thing found on the way.** `AMBIENT_REGISTRY` was built with no `blurbs`, so all 21 ambient
