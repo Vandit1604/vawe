@@ -4343,6 +4343,26 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     HANDLE_REGISTRY.names.every((n) => { const h = resolveHandle(n, 'easeOut');
       return Number.isFinite(h.influence) && Number.isFinite(h.speed) && h.influence >= 0 && h.influence <= 100; }));
 
+  // AND THE CLOCK. timeRemap keys are a key list with an `ease` per segment, exactly like a motion
+  // track, so they take the same handles from the same solver rather than growing a second dial.
+  // The units land better here than anywhere else: this segment's velocity IS a playback rate.
+  const { layerTime } = await import('../../core/time.js');
+  const clock = (remap) => (t) => layerTime({ timeRemap: remap }, t, 0, 2);
+  const evenly = clock([{ t: 0, at: 0 }, { t: 2, at: 2 }]);
+  ok('a handleless timeRemap is still the straight line it always was',
+    Math.abs(evenly(0.5) - 0.5) < 1e-9 && Math.abs(evenly(1.5) - 1.5) < 1e-9);
+  const stopped = clock([{ t: 0, at: 0 }, { t: 2, at: 2, easeIn: 'easyEase' }]);
+  // speed 0 on the arriving handle means the clock is at a DEAD STOP as it reaches the key, so the
+  // last stretch of source time is crossed slowly and the layer freezes into its final pose.
+  const rate = (f, t, h = 1 / 60) => (f(t + h) - f(t - h)) / (2 * h);
+  ok('a timeRemap handle with speed 0 stops the clock at that key', rate(stopped, 1.99) < 0.1);
+  ok('and the same clock is running FASTER than real time in the middle', rate(stopped, 1.0) > 1.2);
+  const fast = clock([{ t: 0, at: 0 }, { t: 2, at: 2, easeIn: { influence: 20, speed: 4 } }]);
+  ok('speed 4 on the arriving handle means 4x playback at that key',
+    Math.abs(rate(fast, 1.98) - 4) < 0.6);
+  ok('a timeRemap key with both a handle and a named ease is refused',
+    keyHandleErrors([{ t: 0, at: 0, easeOut: 'fling' }, { t: 2, at: 2, ease: 'easeOutQuint' }], 'r').length === 1);
+
   // And the CAMERA gets all of it, because it shares segmentAt.
   const { cameraAt } = await import('../../core/sequence.js');
   const cam = [{ t: 0, s: 1, easeOut: 'hang' }, { t: 1, s: 2, easeIn: 'hang' }];

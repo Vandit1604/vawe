@@ -30,7 +30,7 @@
 // remap of one number: no accumulator, no "where was I last frame", nothing that would make a seek
 // disagree with a forward render. A layer's window never moves either, only where inside it the layer
 // believes it is, so `start` and `duration` still mean what they say.
-import { resolveEasing } from './motion.js';
+import { resolveEasing, handleCurve } from './motion.js';
 import { defineRegistry, withBlurb, blurbsOf } from './registry.js';
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -82,7 +82,16 @@ function remapAt(keys, lt) {
     if (lt >= a.t && lt <= b.t) {
       const seg = b.t - a.t;
       if (!(seg > 0)) return b.at;
-      const p = resolveEasing(b.ease || 'linear')(clamp01((lt - a.t) / seg));
+      // HANDLES ON THE CLOCK, the same mechanism a motion key has, and the units land better here
+      // than anywhere else in the engine. `speed` is a multiple of the segment's average velocity,
+      // and this segment's velocity IS a playback rate, so `{"speed": 4}` on a timeRemap key means
+      // four times speed at that instant, which is what a speed graph has always meant. `speed: 0`
+      // stops the clock dead at the key, which is the freeze, reachable without a second key.
+      //
+      // IT IS THE SAME SOLVER, not a second one. The argument for handles on a position is that a
+      // named easing shapes a segment from outside it and cannot say what the value is doing AT the
+      // key; a clock has exactly that problem and had exactly one answer for it, `linear`.
+      const p = (handleCurve(a.easeOut, b.easeIn) || resolveEasing(b.ease || 'linear'))(clamp01((lt - a.t) / seg));
       return a.at + (b.at - a.at) * p;
     }
   }

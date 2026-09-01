@@ -1813,7 +1813,7 @@
     },
     "timeRemap": {
      "type": "string|array",
-     "label": "TIME REMAP: keyframes on this layer's own CLOCK, so everything it does (its motion, size, idle, typing, count) speeds and slows together. Either a shape name (\"whip\" ramps 20% · 530% · slow, \"hold\" drops to 30% across the middle half, \"freeze\" holds the last pose, \"rewind\" plays then runs backwards) or your own keys: [{\"t\":0,\"at\":0},{\"t\":1.4,\"at\":0.3},{\"t\":2,\"at\":2}], where `t` is the layer's elapsed second and `at` is the second it believes it is. A repeated `at` freezes, a falling `at` reverses, and `t` only ever goes forward. The general form of `timeWarp`; declaring both is refused."
+     "label": "TIME REMAP: keyframes on this layer's own CLOCK, so everything it does (its motion, size, idle, typing, count) speeds and slows together. Either a shape name (\"whip\" ramps 20% · 530% · slow, \"hold\" drops to 30% across the middle half, \"freeze\" holds the last pose, \"rewind\" plays then runs backwards) or your own keys: [{\"t\":0,\"at\":0},{\"t\":1.4,\"at\":0.3},{\"t\":2,\"at\":2}], where `t` is the layer's elapsed second and `at` is the second it believes it is. A repeated `at` freezes, a falling `at` reverses, and `t` only ever goes forward. The general form of `timeWarp`; declaring both is refused. A key also takes the graph-editor handles `easeOut` / `easeIn`, and their units land better here than anywhere: this segment's velocity IS a playback rate, so `speed: 4` on a handle means four times speed at that instant and `speed: 0` stops the clock dead at that key."
     },
     "timeWarp": {
      "type": "string",

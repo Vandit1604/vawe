@@ -785,6 +785,7 @@ export function handleErrors(data) {
   const walkLayers = (ls, path) => (ls || []).forEach((L, i) => {
     if (!isObj(L)) return;
     out.push(...keyHandleErrors(L.motion, `${path}[${i}] (${L.type || 'text'})`));
+    if (Array.isArray(L.timeRemap)) out.push(...keyHandleErrors(L.timeRemap, `${path}[${i}].timeRemap`));
     if (Array.isArray(L.children)) walkLayers(L.children, `${path}[${i}].children`);
   });
   walkLayers(data.layers, 'layers');

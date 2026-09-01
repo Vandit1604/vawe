@@ -497,6 +497,10 @@ export async function boot(build) {
     // walked by resolveKeyedProps, so without this line the handle system would be enforced on layers
     // and unenforced on the camera, which is the exact drift the interpolator was unified to end.
     assertKeyHandles(data.camera, 'camera');
+    // A `timeRemap` key list runs through the same handle system (core/time.js remapAt), so it gets
+    // the same refusal. A NAMED shape is a first-party literal and carries no handles.
+    for (const L of flatDepth(data.layers)) if (Array.isArray(L.timeRemap))
+      assertKeyHandles(L.timeRemap, `layer "${L.id || L.type || '?'}" timeRemap`);
     // Same refusal as the line above, for the same reason: a field written and then ignored is the one
     // outcome this path exists to make impossible. `make expand` is not an escape here, the bake is at
     // boot, so a scene that still carries one has hit a bug rather than skipped a step.
