@@ -11,7 +11,7 @@
 //
 // DEV TOOLING ONLY. It calls the engine's own renderFrame(n) from the parent frame, exactly as the Go
 // capture loop does per frame. It never touches the renderer or the determinism contract.
-export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><html data-theme=${theme}><head><meta charset=utf8><title>vawe studio · ${title}</title>
+export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><html data-theme=${theme}><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><meta id=tcol name=theme-color content="#F2F2F2"><title>vawe studio · ${title}</title>
 <style>
  @font-face{font-family:Anybody;src:url(/assets/fonts/Anybody.woff2) format('woff2');font-weight:100 900;font-display:swap}
  @font-face{font-family:'JetBrains Mono';src:url(/assets/fonts/JetBrainsMono.woff2) format('woff2');font-weight:100 800;font-display:swap}
@@ -30,11 +30,23 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  :root[data-theme=light]{color-scheme:light;
    --bg:#F2F2F2;--panel:#FFFFFF;--panel-2:#F7F7F7;--field:#EDEDED;--stage:#E8E8E8;
    --line:rgba(0,0,0,.10);--line-2:rgba(0,0,0,.20);
-   --ink:#1C1C1C;--ink-2:#4A4A4A;--muted:#8A8A8A;
+   --ink:#1C1C1C;--ink-2:#4A4A4A;
+   /* #8A8A8A was 3.4:1 on white and every dim label in this room is 10 to 11px. Measured, not
+      guessed: #6E6E6E is 5.1:1 on the panel and 4.8:1 on the panel's own body fill. Still a grey. */
+   --muted:#6E6E6E;
    --accent:#2563eb;--accent-soft:#EDF2FE;
    --bad:#a3282d;--bad-bg:#FBF4F4;--hz:#a3282d;--hz-beat:#8a5a00;--hz-mute:#8A8A8A;
    --wash:#1C1C1C;--wash-a:.34;
-   --shadow:0 1px 2px rgba(0,0,0,.05),0 18px 44px -18px rgba(0,0,0,.22)}
+   /* THREE ELEVATIONS, AND THEY ARE LOAD-BEARING. A coloured interface separates a panel from its
+      ground by tint; this room has no hue to spend, so depth is the only separator left. One heavy
+      pair of layers reads as fog on grey, so each step is a RAMP: many small offsets at low alpha,
+      each roughly doubling its blur, which is what makes a shadow read as distance rather than as
+      smudge. Neutral black only: the borrowed recipe tints its ring rgba(25,28,33), a blue-grey, and
+      a tinted shadow is a hue in the surround. Refused. */
+   --sh-1:0 1px 1px rgba(0,0,0,.04),0 2px 4px -2px rgba(0,0,0,.06);
+   --sh-2:0 1px 1px -.5px rgba(0,0,0,.04),0 3px 3px -1.5px rgba(0,0,0,.04),0 7px 7px -3.5px rgba(0,0,0,.045),0 16px 16px -8px rgba(0,0,0,.05);
+   --sh-3:0 2px 3px -1.5px rgba(0,0,0,.06),0 6px 9px -4px rgba(0,0,0,.08),0 16px 22px -10px rgba(0,0,0,.10),0 34px 46px -20px rgba(0,0,0,.13);
+   --shadow:var(--sh-2)}
  /* the grey room. The stage sits at #2E2E2E, the value the brief names, and everything around it is
     darker so the picture is the brightest thing in the frame. */
  :root[data-theme=dark]{color-scheme:dark;
@@ -45,7 +57,11 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    --accent:#3d7bf5;--accent-soft:#1a2740;
    --bad:#e0787f;--bad-bg:#2A1B1D;--hz:#e0505f;--hz-beat:#d69a30;--hz-mute:#8A8A8A;
    --wash:#000;--wash-a:.42;
-   --shadow:0 1px 2px rgba(0,0,0,.4),0 24px 60px -24px rgba(0,0,0,.7)}
+   /* the dark room has less lightness to spend on separation, so the same ramp runs deeper */
+   --sh-1:0 1px 1px rgba(0,0,0,.28),0 2px 4px -2px rgba(0,0,0,.34);
+   --sh-2:0 1px 1px -.5px rgba(0,0,0,.28),0 3px 3px -1.5px rgba(0,0,0,.28),0 7px 7px -3.5px rgba(0,0,0,.3),0 16px 16px -8px rgba(0,0,0,.34);
+   --sh-3:0 2px 3px -1.5px rgba(0,0,0,.4),0 6px 9px -4px rgba(0,0,0,.44),0 16px 22px -10px rgba(0,0,0,.5),0 34px 46px -20px rgba(0,0,0,.6);
+   --shadow:var(--sh-2)}
  /* narrow screens: the rail gives its width back to the picture, and the chrome keeps one line */
  @media (max-width:1240px){:root{--rail:212px}}
  *{box-sizing:border-box}
@@ -98,7 +114,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  button:disabled{opacity:.5;cursor:default} button:disabled:hover{background:var(--panel-2);border-color:var(--line-2)}
  button:active{transform:translateY(1px)}
  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
- button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+ button[aria-pressed=true],#tgl[aria-expanded=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
  /* the icons are drawn here, one set, stroked at 1.5 to sit beside 12px labels */
  button svg{width:13px;height:13px;vertical-align:-2px;margin-right:5px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
  button svg.solid{fill:currentColor;stroke:none}
@@ -108,7 +124,8 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  /* the selection readout is a status line under the transport, not a column that grows */
  #sel{flex:none;min-height:14px;color:var(--ink-2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  /* ---- the divider: the preview and the timeline compete for height, so the user arbitrates ---- */
- #split{flex:none;height:9px;cursor:row-resize;display:flex;align-items:center;justify-content:center;border-radius:5px}
+ #split{flex:none;height:9px;cursor:row-resize;display:flex;align-items:center;justify-content:center;border-radius:5px;
+   touch-action:none;user-select:none}
  #split:hover,#split.on{background:var(--panel-2)}
  #split::after{content:'';width:44px;height:3px;border-radius:2px;background:var(--line-2)}
  #split:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -133,16 +150,23 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
     one seam. Every position on this timeline is a PERCENTAGE of the ruler, so zoom is one number: the
     scrolling contents get wider and every mark follows without a single coordinate being recomputed.
     The playhead is the anchor, so zooming in keeps the frame you are on under the pointer's own place. */
- #tlhead .zoom{display:inline-flex;align-items:center;gap:3px;margin-left:4px}
+ #tlhead .zoom{display:inline-flex;align-items:center;gap:6px;margin-left:4px}
  /* the mono face for the two glyph buttons: Anybody draws a plus so small it reads as a dot */
  /* the mono face for the glyph buttons: Anybody draws a plus so small it reads as a dot. Sized to the
     other buttons in this bar rather than smaller: three sizes of button in one row is the tell of a
     control added late. */
- #tlhead .zoom button{padding:5px 9px;font:600 12px/1 'JetBrains Mono',ui-monospace,monospace;border-radius:6px}
+ #tlhead .zoom button{position:relative;min-width:34px;min-height:34px;padding:5px 9px;
+   font:600 12px/1 'JetBrains Mono',ui-monospace,monospace;border-radius:6px}
+ /* THE HIT AREA IS 40x44 AND THE BUTTON IS NOT. A pointer target this small is a real cost in a tool
+    somebody drives all day, and it does not have to be paid in pixels: the box below reaches into the
+    header's own padding for height and to the MIDDLE of the 6px gap for width, so no two targets ever
+    overlap (which is its own failure) and nothing on screen grew past 34px. 44 in full is unreachable
+    horizontally: three controls 40px apart cannot each own 44px without stealing from each other. */
+ #tlhead .zoom button::after{content:'';position:absolute;left:-3px;right:-3px;top:50%;height:44px;transform:translateY(-50%)}
  #tlhead .zoom s{text-decoration:none;color:var(--muted);margin-left:4px;font-family:'JetBrains Mono',ui-monospace,monospace}
  #ruler,#film,#rows{width:calc(var(--z,1) * 100%)}
  #lanes{position:relative;overflow-y:auto;overflow-x:auto;padding:0 12px 12px;cursor:col-resize;flex:1;
-   overscroll-behavior:contain;scrollbar-width:thin}
+   overscroll-behavior:contain;scrollbar-width:thin;user-select:none}
  #lanes:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:var(--r-in)}
  #tlbody::after{content:'';position:absolute;left:0;right:0;bottom:0;height:20px;z-index:4;pointer-events:none;
    background:linear-gradient(transparent,var(--panel))}
@@ -228,15 +252,18 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
     the strip happens to hold. The strip's nearest thumb paints behind it so the box is never empty
     while the second engine seeks. Fixed, so it can sit above the timeline panel without being clipped. */
  #peek{position:fixed;z-index:30;display:none;padding:3px;background:var(--panel);border-radius:8px;
-   box-shadow:var(--shadow);outline:1px solid var(--line-2);outline-offset:-1px;pointer-events:none}
+   box-shadow:var(--sh-3);outline:1px solid var(--line-2);outline-offset:-1px;pointer-events:none;
+   left:0;top:0;will-change:transform}
  #peek.on{display:block}
  #peekbox{position:relative;overflow:hidden;border-radius:5px;background-size:cover;background-position:center;background-color:var(--stage)}
  #peekbox iframe{position:absolute;top:0;left:0;border:0;transform-origin:0 0;background:transparent}
  #peekt{position:absolute;left:5px;bottom:5px;color:#fff;background:rgba(0,0,0,.62);border-radius:4px;
    padding:1px 5px;font:11px/1.5 'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
- #ph{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);z-index:5;pointer-events:none}
+ /* the playhead moves every frame of playback, so it moves on the compositor: left stays 0 and the
+    position is a transform. Writing 'left' re-ran layout on the whole lane stack thirty times a second. */
+ #ph{position:absolute;top:0;bottom:0;left:0;width:1px;background:var(--accent);z-index:5;pointer-events:none;will-change:transform}
  /* the hovered instant, marked on the ruler itself, so the box above and the time below agree */
- #hov{position:absolute;top:0;bottom:0;width:1px;background:var(--ink-2);opacity:.5;z-index:5;pointer-events:none;display:none}
+ #hov{position:absolute;top:0;bottom:0;left:0;width:1px;background:var(--ink-2);opacity:.5;z-index:5;pointer-events:none;display:none}
  /* the ruler is the one row that must never scroll away: a bar read against nothing is not a time */
  #ruler{box-shadow:0 1px 0 var(--line)}
  #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--accent)}
@@ -250,7 +277,10 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  #states{display:flex;gap:2px;background:var(--field);border-radius:8px;padding:2px;flex:none}
  #states button{background:none;border:0;color:var(--muted);padding:4px 10px;border-radius:6px;font:600 11.5px/1 Anybody,system-ui,sans-serif;letter-spacing:.04em}
  #states button:hover{color:var(--ink);background:none}
- #states button[aria-current=page]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+ /* the segmented control is a single-choice TOGGLE GROUP; it was marked aria-current=page inside a
+    nav landmark, and nothing here navigates. The accent belongs to the playhead and the focus ring, so
+    the raised state is drawn with elevation instead, which is what this room has. */
+ #states button[aria-pressed=true]{background:var(--panel);color:var(--ink);box-shadow:var(--sh-1)}
  #centre,#split,#tl{display:none}
  body[data-state=make] #centre{display:flex}
  body[data-state=make] #split{display:flex}
@@ -270,7 +300,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  .paneview{flex:1;min-height:0;overflow:auto;background:var(--panel-2);border-radius:var(--r-in);padding:12px}
  /* an honest empty state: what this is for, what it does not do yet, and the command that does */
  .empty{max-width:56ch;color:var(--ink-2);font-size:12.5px;line-height:1.6;text-wrap:pretty}
- .empty h3{margin:0 0 6px;font:700 14px/1.3 Anybody,system-ui,sans-serif;color:var(--ink)}
+ .empty h2{margin:0 0 6px;font:700 14px/1.3 Anybody,system-ui,sans-serif;color:var(--ink);letter-spacing:0;text-transform:none}
  .empty code{white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;background:var(--field);
    border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink)}
  .empty ul{margin:8px 0 0;padding-left:18px} .empty li{margin:3px 0}
@@ -282,8 +312,16 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
     tall frames, and at natural size a 900px window shows one and a half rows: you are scrubbing again,
     which is the thing Look exists not to be. Fitted, the whole shape of the film is one glance, and the
     click gets you back to real pixels when a detail is in question. */
- #sheet{display:block;max-width:100%;max-height:100%;cursor:zoom-in}
- #sheet.full{max-width:none;max-height:none;cursor:zoom-out}
+ /* the zoom is a real <button>: it was an <img> with a click handler, so it was invisible to the
+    keyboard and announced as an image. The button is the sheet's own box and carries no chrome. */
+ #sheetzoom{display:block;background:none;border:0;padding:0;border-radius:0;max-width:100%;max-height:100%;cursor:zoom-in}
+ #sheetzoom.full{max-width:none;max-height:none;cursor:zoom-out}
+ #sheetzoom:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+ #sheetzoom:hover{background:none}
+ /* width/height ATTRIBUTES carry the ratio and nothing else: both axes stay auto in CSS, so a mapped
+    height can never win over the fit the way it did on the effects thumbnails. */
+ #sheet{display:block;width:auto;height:auto;max-width:100%;max-height:100%}
+ #sheetzoom.full #sheet{max-width:none;max-height:none}
  #sheetnote{margin:auto;max-width:60ch;color:var(--ink-2);font-size:12.5px;line-height:1.6;text-align:left;text-wrap:pretty}
  #sheetnote b{color:var(--ink);display:block;margin-bottom:6px;font:700 13px/1.3 Anybody,system-ui,sans-serif}
  /* the shared playhead, made visible: every marked moment in the film is one click from the strip */
@@ -306,21 +344,23 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  @media (max-width:1240px){#cands{grid-template-columns:1fr}}
  .cand{display:flex;flex-direction:column;gap:0;padding:0;text-align:left;overflow:hidden;white-space:normal;
    background:var(--panel);border:1px solid var(--line-2);border-radius:9px;cursor:pointer;font:inherit;color:var(--ink)}
+ .cand{box-shadow:var(--sh-1)}
  .cand:hover{border-color:var(--accent)} .cand:active{transform:none}
+ .cand:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
  .cand video,.cand .sk{width:100%;aspect-ratio:var(--ar);object-fit:contain;background:var(--stage);display:block}
  .cand .sk{background:var(--field)}
  .cand .t{display:flex;align-items:baseline;gap:5px;padding:6px 7px 0}
  .cand .t b{font:700 11.5px/1.2 Anybody,system-ui,sans-serif}
  .cand .t s{margin-left:auto;text-decoration:none;color:var(--muted);font-size:10px;font-family:'JetBrains Mono',ui-monospace,monospace}
- .cand p{margin:2px 0 0;padding:0 7px 7px;color:var(--ink-2);font-size:10.5px;line-height:1.45;text-wrap:pretty}
+ .cand .t{width:100%} .cand .d{display:block;margin:2px 0 0;padding:0 7px 7px;color:var(--ink-2);font-size:10.5px;line-height:1.45;text-wrap:pretty}
  /* a flagged candidate is SHOWN, flag and all. Dropping it silently is how a light-on-light backdrop
     gets chosen from a thumbnail and discovered in a render. */
- .cand p.warn{color:var(--bad);background:var(--bad-bg);border-top:1px solid var(--bad);padding:5px 7px;margin-top:4px}
+ .cand .d.warn{color:var(--bad);background:var(--bad-bg);border-top:1px solid var(--bad);padding:5px 7px;margin-top:4px}
  #candstat{color:var(--muted);font-size:11px;line-height:1.5;text-wrap:pretty}
  /* ---- floating surfaces: the picker, the plan, the boot failure ---- */
  #pick{position:fixed;right:16px;top:16px;width:390px;max-height:74vh;display:none;flex-direction:column;
    background:var(--panel);color:var(--ink);outline:1px solid var(--line-2);outline-offset:-1px;border-radius:var(--r-out);z-index:40;
-   font:12px/1.5 'JetBrains Mono',ui-monospace,Menlo,monospace;box-shadow:var(--shadow)}
+   font:12px/1.5 'JetBrains Mono',ui-monospace,Menlo,monospace;box-shadow:var(--sh-3)}
  #pick.on{display:flex}
  #pickhead{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}
  #pickname{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -332,7 +372,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  #planview:not(.sheet){justify-content:flex-start}
  /* the boot failure, said out loud: core/boot.js parks the reason on window.__engineError */
  #err{position:absolute;z-index:6;max-width:min(920px,86%);max-height:80%;overflow:auto;
-   background:var(--bad-bg);border:1px solid var(--bad);border-radius:var(--r-out);box-shadow:var(--shadow);
+   background:var(--bad-bg);border:1px solid var(--bad);border-radius:var(--r-out);box-shadow:var(--sh-3);
    padding:16px 18px;color:var(--ink);white-space:pre-wrap;font-size:12.5px;line-height:1.55}
  #err b{display:block;margin-bottom:8px;color:var(--bad);font:700 15px/1.2 Anybody,system-ui,sans-serif}
  /* ---- the selection, drawn ON THE PICTURE -----------------------------------------------------------
@@ -348,17 +388,22 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    padding:1px 5px;font:600 10px/1.4 'JetBrains Mono',ui-monospace,monospace;white-space:nowrap}
  #drag{position:absolute;inset:0;display:none;cursor:grab}
  #drag.on{display:block} #drag.on.dragging{cursor:grabbing;background:color-mix(in srgb,var(--accent) 12%,transparent)}
+ /* said to a screen reader, never drawn: the one live region on the page, written at the moments
+    that matter rather than by whatever text happens to be ticking. */
+ .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
  kbd{font:11px/1 'JetBrains Mono',ui-monospace,monospace;border:1px solid var(--line-2);border-bottom-width:2px;
    border-radius:4px;padding:2px 4px;margin-right:2px;color:var(--ink-2);background:var(--panel);white-space:nowrap}
 </style></head><body data-state=make>
- <div id=pick><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>close</button></div><pre id=pickjson></pre></div>
- <div id=peek><div id=peekbox><span id=peekt></span></div></div>
+ <h1 class=vh>vawe studio</h1>
+ <p id=say class=vh role=status aria-live=polite></p>
+ <div id=pick role=region aria-label="the JSON behind what you clicked"><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>close</button></div><pre id=pickjson></pre></div>
+ <div id=peek aria-hidden=true><div id=peekbox><span id=peekt></span></div></div>
  <div id=shell>
   <aside id=rail>
    <section class="panel chooser">
     <h2>chooser</h2>
     <div class=body>
-     <p id=candstat aria-live=polite>Six backdrops for this film, at the playhead. Each one is the real scene with one
+     <p id=candstat>Six backdrops for this film, at the playhead. Each one is the real scene with one
       key changed, rendered as a clip: a still hides speed, scale and direction.</p>
      <div id=cands></div>
      <button id=candgo style="width:100%;margin-top:8px">six takes at the playhead</button>
@@ -377,19 +422,19 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
   </aside>
   <div id=main>
    <div id=top>
-    <nav id=states aria-label="what you are doing">
-     <button data-state=plan>plan</button><button data-state=make>make</button
-     ><button data-state=look>look</button><button data-state=ship>ship</button>
-    </nav>
+    <div id=states role=group aria-label="what you are doing">
+     <button data-state=plan aria-pressed=false>plan</button><button data-state=make aria-pressed=true>make</button
+     ><button data-state=look aria-pressed=false>look</button><button data-state=ship aria-pressed=false>ship</button>
+    </div>
     <nav id=crumbs aria-label="composition stack"></nav>
     <span class=sp></span>
-    <button id=key aria-pressed=false><svg viewBox="0 0 16 16"><path d="M8 2l6 6-6 6-6-6z"/></svg>key</button>
+    <button id=key aria-pressed=false title="drag the selected layer on the picture to write a motion key"><svg viewBox="0 0 16 16"><path d="M8 2l6 6-6 6-6-6z"/></svg>key</button>
     <button id=undo><svg viewBox="0 0 16 16"><path d="M3 8h7a3 3 0 010 6H7"/><path d="M6 5L3 8l3 3"/></svg>undo</button>
-    <button id=tgl aria-pressed=true><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>timeline</button>
-    <button id=theme><svg viewBox="0 0 16 16"><circle cx=8 cy=8 r=5.5/><path d="M8 2.5v11" /></svg>theme: <span id=themetxt>light</span></button>
+    <button id=tgl aria-expanded=true aria-controls=tl><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>timeline</button>
+    <button id=theme><svg viewBox="0 0 16 16"><circle cx=8 cy=8 r="5.5"/><path d="M8 2.5v11"/></svg>theme: <span id=themetxt>light</span></button>
    </div>
    <div id=centre>
-    <div id=stage><iframe id=sc title="scene preview" src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=selbox><i class=tl></i><i class=tr></i><i class=bl></i><i class=br></i><b></b></div><div id=drag></div><div id=err hidden></div></div>
+    <div id=stage><iframe id=sc title="scene preview" src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=selbox><i class=tl></i><i class=tr></i><i class=bl></i><i class=br></i><b></b></div><div id=drag></div><div id=err role=alert hidden></div></div>
     <div id=bar>
      <button id=play aria-label="play or pause"><svg class=solid viewBox="0 0 16 16"><path d="M4 2.5l9 5.5-9 5.5z"/></svg>play</button>
      <input id=scrub type=range min=0 max=100 value=0 step=1 aria-label="frame">
@@ -400,16 +445,16 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    <div id=pane>
     <section id=planpane>
      <div class=panehead><b>the plan</b><span id=planpath>the storyboard this film was written from</span><span class=sp></span><button id=planredraw>redraw</button></div>
-     <div class=paneview id=planview><img id=planimg hidden alt="storyboard panels" style="max-width:100%;display:block"><div class=empty id=plannote hidden></div></div>
+     <div class=paneview id=planview><img id=planimg hidden alt="storyboard panels" style="max-width:100%;width:auto;height:auto;display:block"><div class=empty id=plannote hidden></div></div>
     </section>
     <section id=lookpane>
      <div class=panehead>
       <button data-sheet=beats aria-pressed=true>beats</button>
       <button data-sheet=frames aria-pressed=false>key frames</button>
       <button data-sheet=seams aria-pressed=false>seams</button>
-      <span id=lookwhat></span><span class=sp></span><span id=lookstat aria-live=polite></span><span class=muted>click the sheet for real pixels</span>
+      <span id=lookwhat></span><span class=sp></span><span id=lookstat></span><span class=muted>click the sheet for real pixels</span>
      </div>
-     <div id=sheetwrap><img id=sheet hidden alt="contact sheet"><div id=sheetnote hidden></div></div>
+     <div id=sheetwrap><button id=sheetzoom hidden aria-label="show the sheet at real pixels" aria-pressed=false><img id=sheet alt="contact sheet"></button><div id=sheetnote hidden></div></div>
      <div id=jump></div>
     </section>
     <section id=shippane>
@@ -417,13 +462,14 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      <div class=paneview><div class=empty id=shipbody></div></div>
     </section>
    </div>
-   <div id=split role=separator aria-label="resize the timeline" tabindex=0></div>
+   <div id=split role=separator aria-orientation=horizontal aria-label="resize the timeline, arrow up and down"
+        tabindex=0 aria-valuemin=96 aria-valuenow=240></div>
    <div id=tl>
     <div id=tlhead><b id=tlwhat>timeline</b>
      <span class=zoom><button id=zout aria-label="zoom out" title="zoom out">&minus;</button><button id=zfit aria-label="fit the whole film" title="fit the whole film">fit</button><button id=zin aria-label="zoom in" title="zoom in">+</button><s id=zlab>1.0x</s></span>
      <span class=sp></span><span id=tlkey></span></div>
     <div id=alerts></div>
-    <div id=tlbody><div id=lanes tabindex=0><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
+    <div id=tlbody><div id=lanes tabindex=0 role=group aria-label="timeline: left and right seek, up and down select a layer"><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
    </div>
   </div>
  </div>
@@ -432,7 +478,30 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  const sc=$('sc'),scrub=$('scrub'),read=$('read'),play=$('play');
  const lanes=$('lanes'),ruler=$('ruler'),rows=$('rows'),ph=$('ph');
  let fps=30,total=0,n=0,playing=false,W=1920,H=1080,dur=1,model=null;
+ // ---- GEOMETRY IS MEASURED ONCE PER CHANGE, NEVER PER EVENT ---------------------------------------
+ // Every hover used to read the ruler's rect, the peek's own offsetWidth and the timeline panel's rect
+ // and then write three style properties, which is a forced synchronous layout inside a pointermove,
+ // thirty to a hundred times a second, on a page whose lane stack can be seventy rows. The playhead did
+ // the same every frame of playback. Nothing here changes without something else changing first (a
+ // resize, a zoom, the divider, a repaint), so the reads happen there and the hot paths read variables.
+ let rulerW=1, rulerL=0, laneScroll=0, stageBox=null, scBox=null, tlTop=0, peekW=0, peekH=0;
+ function measureBoxes(){
+   rulerW=ruler.clientWidth||1; rulerL=ruler.getBoundingClientRect().left;
+   laneScroll=lanes.scrollLeft;
+   stageBox=$('stage').getBoundingClientRect(); scBox=sc.getBoundingClientRect();
+   tlTop=$('tl').getBoundingClientRect().top;
+ }
  const typing=()=>/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+ // THE ONE LIVE REGION. The chooser's status line used to be aria-live and carried a seconds counter
+ // ticking four times a second, so a screen reader read the whole panel again every 250ms for fifteen
+ // seconds. The ticking figure is for the eye; this is for the ear, and it is written twice: once when
+ // the work starts and once when it finishes.
+ const say=(m)=>{ const el=$('say'); el.textContent=''; setTimeout(()=>{ el.textContent=m; },40); };
+ // FOCUS SURVIVES A STATE CHANGE. The rail, the centre and the timeline are display:none'd by state,
+ // and focus inside one of them was dropped to the body, which puts the next Tab back at the top of
+ // the page. Whatever was hidden, focus lands on the control that hid it.
+ const keepFocus=(fallback)=>{ const a=document.activeElement;
+   if(a&&a!==document.body&&a.checkVisibility&&!a.checkVisibility()) fallback.focus(); };
 
  // ---------- the divider ----------
  // The preview and the timeline compete for the same vertical space and only the person looking knows
@@ -442,8 +511,9 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  function setTlh(px){ const max=Math.max(120,innerHeight-240);
    const v=Math.max(96,Math.min(max,Math.round(px)));
    document.documentElement.style.setProperty('--tlh',v+'px');
+   split.setAttribute('aria-valuenow',String(v)); split.setAttribute('aria-valuemax',String(max));
    try{ localStorage.setItem(TLH_KEY,String(v)); }catch(_){}
-   fit(); }
+   fit(); measureBoxes(); }
  try{ const s=+localStorage.getItem(TLH_KEY); if(s) setTlh(s); }catch(_){}
  // GRAB OFFSET, not a snap. Dragging from the bottom of the 9px handle used to jerk the divider up to
    // put the pointer at its middle; the timeline now keeps the size it had when you took hold of it.
@@ -500,8 +570,9 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  let state='make';
  function setState(s){
    state=s; document.body.dataset.state=s;
+   keepFocus(document.querySelector('#states button[data-state="'+s+'"]'));
    [...document.querySelectorAll('#states button')].forEach(b=>
-     b.setAttribute('aria-current',b.dataset.state===s?'page':'false'));
+     b.setAttribute('aria-pressed',String(b.dataset.state===s)));
    if(s==='make') fit();
    if(s==='plan') drawPlan();
    if(s==='look') showSheet(sheetKind);
@@ -519,7 +590,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  function planEmpty(why){
    planImg.hidden=true; planImg.removeAttribute('src');
    planNote.hidden=false; planView.classList.remove('sheet');
-   planNote.innerHTML='<h3>the plan is not here yet</h3>'
+   planNote.innerHTML='<h2>the plan is not here yet</h2>'
      +'<p>'+esc(why)+'</p>'
      +'<p>Two things belong in this state and neither is wired: the nine decisions that come BEFORE the '
      +'JSON, and the lock sheet the beats were agreed in. Both run in the terminal today:</p>'
@@ -534,8 +605,10 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    fetch('/__panels?t='+Date.now()).then(r=>{
      if(!r.ok) return r.text().then(t=>{ planPath.textContent=''; planEmpty(t.split(String.fromCharCode(10))[0]); });
      planPath.textContent=r.headers.get('X-Storyboard')||'';
+     const d=dimOf(r.headers.get('X-Dim'));
      return r.blob().then(b=>{ planNote.hidden=true; planImg.hidden=false; planView.classList.add('sheet');
-       planImg.src=URL.createObjectURL(b); }); })
+       if(d){ planImg.width=d[0]; planImg.height=d[1]; }
+       planImg.src=URL.createObjectURL(b); say('the storyboard panels are drawn'); }); })
     .catch(e=>{ planPath.textContent=''; planEmpty('could not draw the panels: '+e.message); });
  }
  $('planredraw').addEventListener('click',()=>drawPlan(true));
@@ -544,7 +617,16 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  // Scrubbing tells you what a frame IS. A strip tells you whether the film WORKS, and the two sheets
  // here are the ones this repo already makes and least often reads: every beat in · mid · out, and
  // both sides of every transition pulled out of the rendered mp4. Neither needs new engine work.
- const sheetImg=$('sheet'), sheetNote=$('sheetnote'), lookStat=$('lookstat'), lookWhat=$('lookwhat');
+ const sheetImg=$('sheet'), sheetBtn=$('sheetzoom'), sheetNote=$('sheetnote'), lookStat=$('lookstat'), lookWhat=$('lookwhat');
+ // THE SHEET'S REAL SIZE, SENT WITH IT. The server reads the PNG's IHDR and answers X-Dim; the page
+ // writes it to the width/height ATTRIBUTES, so the box is the right shape before a byte is decoded.
+ // The CSS keeps both axes auto, which is the guard against the scar this repo already has: a mapped
+ // height attribute beating an aspect-ratio and squashing every thumbnail on the site.
+ const dimOf=(s)=>{ const p=String(s||'').split('x').map(Number);
+   return (p.length===2&&p[0]>0&&p[1]>0)?p:null; };
+ function setSheet(u,dim){ const d=dimOf(dim);
+   if(d){ sheetImg.width=d[0]; sheetImg.height=d[1]; } else { sheetImg.removeAttribute('width'); sheetImg.removeAttribute('height'); }
+   sheetImg.src=u; sheetBtn.hidden=false; sheetNote.hidden=true; }
  // The first two need NO RENDER: both seek renderFrame in a headless page, exactly as the scrubber does,
  // so a scene that has never been rendered can still be judged as a strip. Only the seams need an mp4.
  const SHEETWHAT={beats:'every beat: in · mid · out. No render needed',
@@ -553,32 +635,36 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  let sheetKind='beats', sheetHave={};
  let renderPoll=null;
  function lookBusy(msg){ lookStat.innerHTML='<span class=work><i></i>'+esc(msg)+'</span>'; }
- function note(title,body){ sheetImg.hidden=true; sheetNote.hidden=false;
+ function note(title,body){ sheetBtn.hidden=true; sheetNote.hidden=false;
    sheetNote.innerHTML='<b>'+esc(title)+'</b>'+body; }
  function showSheet(kind,force){
    sheetKind=kind;
    [...document.querySelectorAll('[data-sheet]')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sheet===kind)));
    lookWhat.textContent=SHEETWHAT[kind]||'';
-   if(sheetHave[kind]&&!force){ sheetImg.src=sheetHave[kind]; sheetImg.hidden=false; sheetNote.hidden=true; lookStat.textContent=''; return; }
-   lookBusy(kind==='seams'?'decoding the seams out of the mp4, this takes a few seconds':'rendering every beat, this takes a few seconds');
-   sheetImg.hidden=true; sheetNote.hidden=true;
+   if(sheetHave[kind]&&!force){ setSheet(sheetHave[kind].u,sheetHave[kind].dim); lookStat.textContent=''; return; }
+   const busy=kind==='seams'?'decoding the seams out of the mp4, this takes a few seconds':'rendering every beat, this takes a few seconds';
+   lookBusy(busy); say(busy);
+   sheetBtn.hidden=true; sheetNote.hidden=true;
    // EACH SHEET COSTS SECONDS, so two can be in flight and the slower one used to land last and
    // overwrite the one you asked for second. A reply for a sheet nobody is looking at now is dropped.
    const mine=()=>sheetKind===kind;
    fetch('/__sheet?kind='+kind+'&t='+Date.now()).then(r=>{
      if(!mine()) return;
-     if(r.status===409&&r.headers.get('X-Needs-Render')) return r.text().then(t=>{ lookStat.textContent='';
+     const dim=r.headers.get('X-Dim');
+     if(r.status===409&&r.headers.get('X-Needs-Render')) return r.text().then(t=>{ lookStat.textContent=''; say('there are no seam frames yet');
        // SAY IT, never draw an empty grid. And offer the one thing that would fix it.
        note('there are no seam frames to look at yet','<p>'+esc(t)+'</p><p>A render takes minutes and runs '
          +'<code>make video</code> with the gates off.</p><p><button id=dorender>render it now</button></p>');
        $('dorender').addEventListener('click',startRender); });
-     if(!r.ok) return r.text().then(t=>{ lookStat.textContent=''; note('that sheet could not be drawn','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(t)+'</pre>'); });
-     return r.blob().then(b=>{ const u=URL.createObjectURL(b); sheetHave[kind]=u;
-       sheetImg.src=u; sheetImg.hidden=false; sheetNote.hidden=true; lookStat.textContent=''; }); })
-   .catch(e=>{ lookStat.textContent=''; note('that sheet could not be drawn',esc(e.message)); });
+     if(!r.ok) return r.text().then(t=>{ lookStat.textContent=''; say('that sheet could not be drawn'); note('that sheet could not be drawn','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(t)+'</pre>'); });
+     return r.blob().then(b=>{ const u=URL.createObjectURL(b); sheetHave[kind]={u,dim};
+       setSheet(u,dim); lookStat.textContent=''; say('the '+kind+' sheet is ready'); }); })
+   .catch(e=>{ lookStat.textContent=''; say('that sheet could not be drawn'); note('that sheet could not be drawn',esc(e.message)); });
  }
  document.querySelectorAll('[data-sheet]').forEach(b=>b.addEventListener('click',()=>showSheet(b.dataset.sheet)));
- sheetImg.addEventListener('click',()=>sheetImg.classList.toggle('full'));
+ sheetBtn.addEventListener('click',()=>{ const full=sheetBtn.classList.toggle('full');
+   sheetBtn.setAttribute('aria-pressed',String(full));
+   sheetBtn.setAttribute('aria-label',full?'fit the sheet to the pane':'show the sheet at real pixels'); });
  // THE RENDER, polled rather than awaited: a fetch held open for four minutes is a frozen panel with
  // nothing to say for itself.
  function startRender(){
@@ -586,11 +672,11 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  }
  function pollRender(st){
    if(!st) return;
-   if(!st.done){ lookBusy('rendering · '+(st.secs||0)+'s · '+(st.line||''));
+   if(!st.done){ lookBusy('rendering · '+(st.secs||0)+'s · '+(st.line||''));   // the ticking figure is for the eye; say() spoke once at the start
      clearTimeout(renderPoll); renderPoll=setTimeout(()=>fetch('/api/render').then(r=>r.json()).then(pollRender),1500); return; }
    lookStat.textContent='';
    if(st.error){ note('the render failed','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(st.error)+'</pre>'); return; }
-   sheetHave.seams=null; showSheet('seams',true);
+   sheetHave.seams=null; say('the render finished'); showSheet('seams',true);
  }
  // THE PLAYHEAD IS SHARED, and this is where that pays: every marked moment in the film is one click
  // from the strip, and the click lands you in Make at that frame.
@@ -611,7 +697,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    const g=(model&&model.gate)||{codes:[]};
    const codes=g.codes||[];
    $('shipstat').textContent=codes.length?codes.length+' beat-check finding(s)':'beat-check is clean';
-   $('shipbody').innerHTML='<h3>not wired: this is one gate of twenty</h3>'
+   $('shipbody').innerHTML='<h2>not wired: this is one gate of twenty</h2>'
      +'<p>The ladder that says a film is done is <code>make ship D='+esc((model&&model.file)||'')+'</code>. '
      +'It declares every step before it runs, and nothing here runs any of them.</p>'
      +'<p>What studio already knows is <b>beat-check</b>, because the timeline\\'s hazard bands come from it:</p>'
@@ -644,6 +730,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  function askCandidates(){
    if(candBusy) return;
    candBusy=true; candGo.disabled=true; candWorking();
+   say('rendering six takes, this takes about fifteen seconds');
    fetch('/api/candidates',{method:'POST',headers:{'Content-Type':'application/json'},
      body:JSON.stringify({at:+(n/fps).toFixed(2),n:6})})
     .then(r=>r.json()).then(d=>{
@@ -652,9 +739,11 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
         // The refusals are the useful half: a window painted with \`html\` has no preset to swap, and
         // saying which window and why beats an empty strip.
         candDone(''); candStat.innerHTML='<span style="color:var(--bad)">'+esc(d.error||'no candidates')+'</span>';
+        say('no candidates: '+(d.error||''));
         return; }
       drawCands(d);
-    }).catch(e=>{ candBusy=false; candGo.disabled=false; candDone('could not ask for candidates: '+e.message); });
+    }).catch(e=>{ candBusy=false; candGo.disabled=false; candDone('could not ask for candidates: '+e.message);
+      say('the chooser failed: '+e.message); });
  }
  function drawCands(d){
    const w=d.window||{}, cs=(d.candidates||[]).filter(c=>c.clip);
@@ -666,24 +755,35 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    // Not silently replaced by stills: a still hides speed, scale and direction, which is the whole
    // reason these are clips, so the honest answer is "paused, and here is how to play them".
    const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+   // a <button> takes phrasing content, so the card is spans: a <p> inside a button is invalid markup
+   // and the parser closes the button around it, which is why the cards were one hit target on paper
+   // and several in the tree.
    cands.innerHTML=cs.map((c,i)=>'<button class=cand data-i="'+i+'">'
      +'<video src="/'+esc(c.clip)+'" loop muted playsinline preload=metadata'+(still?'':' autoplay')+'></video>'
-     +'<div class=t><b>'+esc(c.name)+'</b><s>'+(c.new?'new':(c.scenes+' film'+(c.scenes===1?'':'s')))+'</s></div>'
-     +'<p>'+esc(c.blurb||'')+'</p>'
-     +(c.warnings||[]).map(w2=>'<p class=warn>'+esc(w2)+'</p>').join('')
+     +'<span class=t><b>'+esc(c.name)+'</b><s>'+(c.new?'new':(c.scenes+' film'+(c.scenes===1?'':'s')))+'</s></span>'
+     +'<span class=d>'+esc(c.blurb||'')+'</span>'
+     +(c.warnings||[]).map(w2=>'<span class="d warn">'+esc(w2)+'</span>').join('')
      +'</button>').join('');
    cands.querySelectorAll('.cand').forEach(b=>b.addEventListener('click',()=>applyCand(cs[+b.dataset.i])));
-   if(still){ candGo.insertAdjacentHTML('beforebegin',
-     '<button id=candplay style="width:100%;margin-top:8px">play the six clips</button>');
-     $('candplay').addEventListener('click',()=>cands.querySelectorAll('video').forEach(v=>v.play())); }
+   // SIX LOOPS THAT NEVER STOP IS AN AUTOPLAY NOBODY CAN INTERRUPT. The control was only drawn under
+   // prefers-reduced-motion, which reads the setting as the only reason to want them still. It is one
+   // button either way, and it says which state it is about to move you to.
+   if(!$('candplay')) candGo.insertAdjacentHTML('beforebegin',
+     '<button id=candplay style="width:100%;margin-top:8px"></button>');
+   const cp=$('candplay'); let running=!still;
+   const label=()=>{ cp.textContent=running?'pause the six clips':'play the six clips'; };
+   label();
+   cp.onclick=()=>{ running=!running;
+     cands.querySelectorAll('video').forEach(v=>{ if(running) v.play(); else v.pause(); }); label(); };
  }
  function applyCand(c){
    candStat.innerHTML='<span class=work><i></i>applying '+esc(c.name)+'</span>';
    fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ops:c.patch})})
     .then(r=>r.json()).then(r=>{
       if(!r.ok){ candStat.innerHTML='<span style="color:var(--bad)">'+esc(r.error)+'</span>'; return; }
-      candStat.textContent=r.changed?('applied "'+c.name+'" to the scene. undo is in the top bar.')
-        :('the scene already used "'+c.name+'", nothing changed.');
+      candStat.textContent=r.changed?('applied \u201c'+c.name+'\u201d to the scene. undo is in the top bar.')
+        :('the scene already used \u201c'+c.name+'\u201d, nothing changed.');
+      say(candStat.textContent);
       if(r.changed) reloadScene();
     });
  }
@@ -707,7 +807,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  $('pickcopy').addEventListener('click',()=>{
    const b=$('pickcopy');
    navigator.clipboard.writeText(pickJson.textContent).then(()=>{
-     b.textContent='copied'; setTimeout(()=>b.textContent='copy JSON',1200); }); });
+     b.textContent='copied'; say('the JSON is on the clipboard'); setTimeout(()=>b.textContent='copy JSON',1200); }); });
  sc.addEventListener('load',()=>{ try{
    const doc=sc.contentDocument; if(!doc) return;
    doc.addEventListener('click',(ev)=>{
@@ -768,12 +868,15 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    const st=$('stage'),pad=32; const s=Math.min((st.clientWidth-pad)/W,(st.clientHeight-pad)/H);
    sc.style.width=W+'px';sc.style.height=H+'px';sc.style.transform='scale('+s+')';sc.style.transformOrigin='center';
    FITS=s;
+   measureBoxes();
  }
  function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n);
    read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n;
    // measured off the RULER, which is the element the times are drawn on. A percentage of the lanes
    // box was 12px out at the end of the film and moved again when a scrollbar appeared.
-   ph.style.left=atX(n/fps)+'px';
+   ph.style.transform='translateX('+atX(n/fps)+'px)';
+   // the range announces "0", not "frame 0 of 420": a bare number is not a position in a film
+   scrub.setAttribute('aria-valuetext','frame '+n+' of '+total+', '+(n/fps).toFixed(2)+' seconds');
    if(selIdx>=0&&!dragging)selReadout();
    drawSelBox(); }
  // THE SELECTED LAYER, OUTLINED ON THE PICTURE. Redrawn every frame because the layer MOVES: a box
@@ -788,7 +891,8 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      if(!el){ selBox.classList.remove('on'); return; }
      const r=el.getBoundingClientRect();
      if(!r.width||!r.height){ selBox.classList.remove('on'); return; }
-     const f=sc.getBoundingClientRect(), st=$('stage').getBoundingClientRect();
+     // the iframe's and the stage's boxes only move when fit() runs, so they are read there
+     const f=scBox||sc.getBoundingClientRect(), st=stageBox||$('stage').getBoundingClientRect();
      selBox.style.left=(f.left-st.left+r.left*FITS)+'px';
      selBox.style.top=(f.top-st.top+r.top*FITS)+'px';
      selBox.style.width=(r.width*FITS)+'px';
@@ -860,7 +964,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  // where a TIME sits on screen, once. The playhead and the hover mark both ask this and the second one
  // would have got it wrong the moment zoom arrived, so there is one answer: the ruler's own width, the
  // lane's left padding, and whatever the lane is scrolled by.
- const atX=(t)=>12+ruler.clientWidth*Math.max(0,Math.min(1,t/dur))-lanes.scrollLeft;
+ const atX=(t)=>12+rulerW*Math.max(0,Math.min(1,t/dur))-laneScroll;
  let Z=1;
  function setZoom(z){
    Z=Math.max(1,Math.min(40,z));
@@ -872,13 +976,14 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      const frac=Math.max(0,Math.min(1,n/fps/dur));
      lanes.scrollLeft=Math.max(0,ruler.clientWidth*frac-lanes.clientWidth/2);
      if(model) paint(model);        // the label stride and the beat grid are MEASURED, so they re-space
-     draw();
+     measureBoxes(); draw();
    });
  }
  $('zin').addEventListener('click',()=>setZoom(Z*1.6));
  $('zout').addEventListener('click',()=>setZoom(Z/1.6));
  $('zfit').addEventListener('click',()=>setZoom(1));
- lanes.addEventListener('scroll',()=>{ ph.style.left=atX(n/fps)+'px'; });
+ lanes.addEventListener('scroll',()=>{ laneScroll=lanes.scrollLeft; rulerL=ruler.getBoundingClientRect().left;
+   ph.style.transform='translateX('+atX(n/fps)+'px)'; });
  const esc=(s)=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
  // what a ruler label ACTUALLY measures, in the face and size it is drawn in. Rendered into the ruler
  // itself so it inherits every rule that applies to a real one, then removed.
@@ -903,6 +1008,8 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  const themeBtn=$('theme'), themeTxt=$('themetxt');
  function applyTheme(t){ document.documentElement.dataset.theme=t;
    ramp=RAMP[t]; themeTxt.textContent=t; try{ localStorage.setItem('vawe-studio-theme',t); }catch(_){}
+   // the browser paints its own chrome behind this page, so it is told which room it is standing in
+   $('tcol').setAttribute('content',getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#F2F2F2');
    if(model) paint(model); }
  themeBtn.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
  applyTheme((()=>{ try{ return localStorage.getItem('vawe-studio-theme')||document.documentElement.dataset.theme; }
@@ -1052,6 +1159,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      return '<span'+(dis?' class=dis':'')+'>'+(dis?'? ':'')+lab+' '+a.toFixed(2)+'s to '+b.toFixed(2)+'s'
        +(dis?': the engine holds a window open here that the JSON does not declare, so beat-check may be reading a hole that does not render':'')+'</span>'; }).join('');
    if(selIdx>=0) setSel(selIdx);
+   measureBoxes();
  }
  // ---- THE THUMBNAIL AT THE POINTER ---------------------------------------------------------------
  // HOVER LOOKS, DRAG COMMITS. This never writes the playhead and never touches the main iframe: it owns a second
@@ -1073,6 +1181,8 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    peekFrame.style.width=W+'px'; peekFrame.style.height=H+'px';
    peekFrame.style.transform='scale('+peekScale+')';
    peekBox.style.width=Math.round(W*peekScale)+'px'; peekBox.style.height=Math.round(H*peekScale)+'px';
+   // COMPUTED, not read back: the box is what we just wrote plus the 3px padding on each side
+   peekW=Math.round(W*peekScale)+6; peekH=Math.round(H*peekScale)+6;
    peekBox.insertBefore(peekFrame,peekT);
    peekFrame.src=sc.src;
    peekFrame.addEventListener('load',()=>{ const w=peekFrame.contentWindow;
@@ -1096,23 +1206,33 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    if(near) peekBox.style.backgroundImage='url('+near.src+')';
    peekT.textContent=peekWant.toFixed(2)+'s · '+Math.round(peekWant*fps)+'f';
    peek.classList.add('on');
-   const w=peek.offsetWidth, h=peek.offsetHeight, r=tl.getBoundingClientRect();
-   peek.style.left=Math.max(8,Math.min(innerWidth-w-8,clientX-w/2))+'px';
-   peek.style.top=Math.max(8,r.top-h-8)+'px';
+   peek.style.transform='translate3d('+Math.max(8,Math.min(innerWidth-peekW-8,clientX-peekW/2))+'px,'
+     +Math.max(8,tlTop-peekH-8)+'px,0)';
    $('hov').style.display='block';
-   $('hov').style.left=atX(peekWant)+'px';
+   $('hov').style.transform='translateX('+atX(peekWant)+'px)';
  }
  function peekOff(){ peek.classList.remove('on'); $('hov').style.display='none'; peekWant=null; }
  lanes.addEventListener('pointermove',e=>{
    // a drag is a scrub and owns the pointer; hovering is the only thing that peeks
    if(e.buttons&1){ peekOff(); return; }
-   const r=ruler.getBoundingClientRect();
-   peekAt((e.clientX-r.left)/r.width*dur, e.clientX);
+   peekAt((e.clientX-rulerL)/rulerW*dur, e.clientX);
  });
  lanes.addEventListener('pointerleave',peekOff);
+ // SELECTING A LAYER WAS POINTER-ONLY. Every bar is a div, and making seventy of them tab stops would
+ // bury the rest of the page, so the lane stack is one stop and the arrows walk it: the same shape a
+ // list box has. Left and right still seek, because the global handler owns those.
+ lanes.addEventListener('keydown',e=>{
+   if(e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
+   const bars=[...rows.querySelectorAll('.bar')].filter(b=>+b.dataset.i>=0);
+   if(!bars.length) return;
+   e.preventDefault(); e.stopPropagation();
+   const at=bars.findIndex(b=>+b.dataset.i===selIdx);
+   const to=bars[Math.max(0,Math.min(bars.length-1,at<0?0:at+(e.key==='ArrowDown'?1:-1)))];
+   setSel(+to.dataset.i); to.scrollIntoView({block:'nearest'});
+   say(selLabel.trim()||('layer '+selIdx)); });
 
  // drag anywhere in the lanes to seek; the playhead and the scrubber are the same value
- const seek=(e)=>{ const r=ruler.getBoundingClientRect(); n=Math.max(0,Math.min(total,Math.round((e.clientX-r.left)/r.width*dur*fps))); draw(); };
+ const seek=(e)=>{ n=Math.max(0,Math.min(total,Math.round((e.clientX-rulerL)/rulerW*dur*fps))); draw(); };
  lanes.addEventListener('pointerdown',e=>{
    // BEFORE the capture: setPointerCapture retargets everything that follows to the lanes element, so
    // a click handler on the bar never sees its own bar and selection silently did nothing.
@@ -1123,6 +1243,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    lanes.setPointerCapture(e.pointerId); seek(e); });
  lanes.addEventListener('pointermove',e=>{ if(e.buttons&1) seek(e); });
  $('tgl').addEventListener('click',()=>{ const off=tl.classList.toggle('off');
-   $('tgl').setAttribute('aria-pressed',String(!off)); document.body.classList.toggle('tloff',off); fit(); });
+   $('tgl').setAttribute('aria-expanded',String(!off)); document.body.classList.toggle('tloff',off);
+   keepFocus($('tgl')); fit(); measureBoxes(); });
  drawCrumbs(); setState('make');
 </script></body></html>`;

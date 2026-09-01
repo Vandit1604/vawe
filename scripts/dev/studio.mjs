@@ -278,6 +278,19 @@ const startRender = () => {
   p.on('error', (e) => { render.done = true; render.error = `could not start make: ${e.message}`; });
 };
 
+// THE INTRINSIC SIZE OF A SHEET, read out of the PNG's IHDR (bytes 16..24, fixed by the format).
+// Both sheets are drawn at a size that depends on the film, so the page cannot know the box to reserve
+// and the Look grid reflowed as each image decoded. Sent as X-Dim; the page turns it into the img's
+// width/height ATTRIBUTES, which supply a ratio and nothing else (the CSS keeps width/height auto, so
+// a mapped height can never beat the layout the way it did on the effects thumbnails).
+const pngDim = (f) => {
+  try {
+    const b = Buffer.alloc(24); const fd = fs.openSync(f, 'r');
+    fs.readSync(fd, b, 0, 24, 0); fs.closeSync(fd);
+    return b.readUInt32BE(16) + 'x' + b.readUInt32BE(20);
+  } catch { return ''; }
+};
+
 // Studio's own endpoints. Anything it does not answer falls through to the shared static handler.
 const studioRoutes = (req, res) => {
   const url = req.url.split('?')[0];
@@ -318,7 +331,7 @@ const studioRoutes = (req, res) => {
         return res.end('panels failed:\n' + String(r.stderr || r.stdout).slice(0, 900)), true; }
     }
     res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store',
-                         'X-Storyboard': path.relative(REPO_ROOT, sbPath) });
+                         'X-Dim': pngDim(png), 'X-Storyboard': path.relative(REPO_ROOT, sbPath) });
     fs.createReadStream(png).pipe(res);
     return true;
   }
@@ -424,7 +437,7 @@ const studioRoutes = (req, res) => {
     const png = S.file();
     const send = () => {
       if (!fs.existsSync(png)) return text(500, `${kind} reported success but wrote no sheet at ${png}`);
-      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store', 'X-Sheet': png });
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store', 'X-Dim': pngDim(png), 'X-Sheet': png });
       fs.createReadStream(png).pipe(res);
     };
     const stale = !fs.existsSync(png) || fs.statSync(dataArg).mtimeMs > fs.statSync(png).mtimeMs
