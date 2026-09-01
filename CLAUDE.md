@@ -660,6 +660,38 @@ suggestion is weighed against that first. Validate at the entry point rather tha
 Return the error; never log and continue. Prefer the boring, obvious construction: an abstraction with
 one caller is not decoupling, it is a second thing to read.
 
+## SPEED IS A PROPERTY YOU CAN LOSE WITHOUT NOTICING
+
+A correctness fix is allowed to cost speed. **Not knowing what it cost is the failure.** Nothing in
+this repo reports render time against a baseline, so a change that halves throughput lands green and
+silent, and the next author inherits a slower engine with no note saying when or why.
+
+**The worked example is one day's work, and it is not hypothetical.** Closing the sharded-render
+determinism bug added `--disable-partial-raster` and removed `will-change` from every layer. Both
+exist precisely to stop Chrome reusing a rasterised tile, which is the single largest thing making a
+render fast. That was the right trade, made deliberately, and **nobody measured the price**. It is
+still unpriced.
+
+**The rule.** If you touch the capture path (`internal/scene`, `internal/render`, a Chrome flag, the
+worker count, anything on `.hs-layer` or `#cam`), render one film before and after and state both
+wall-clock times in the commit body. Two numbers. That is the whole ask, and it is what turns "we
+chose correctness" from a hope into a record.
+
+**Two things already true that a reader should not have to rediscover:**
+
+- **The worker cap is `min(NumCPU - 1, 6)`** (`cmd/render/main.go:60`). On a 10-core machine that
+  leaves four cores idle, and memory is not the reason: an extra tab costs one renderer process and
+  about 118 MB, so nine tabs is roughly 1 GB. Whether the cap is a leftover or a deliberate ceiling
+  is not written down anywhere.
+- **Worker count and determinism are coupled**, so raising the cap is not purely a speed change.
+  `internal/scene/scene.go` records two renders of identical code differing on 373 of 1890 captures
+  at one worker and 1078 at four. Any speed experiment on the pool measures frame agreement too, or
+  it is trading correctness for time without saying so.
+
+**Do not optimise on a guess either.** The same rule that governs a rendering bug governs a slow one:
+measure, name the number, then change one thing. This file already carries four wrong explanations
+that were reasoned rather than measured, and a performance hunch is exactly as cheap to be wrong about.
+
 ## The framework harvest (do this EVERY render: the engine must compound)
 
 Authoring a video always surfaces friction. If that friction is only patched inside the JSON, the
