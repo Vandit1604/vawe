@@ -1,0 +1,159 @@
+{
+ "name": "_mine",
+ "source": "vawe-oneline.mp4",
+ "hash": "70f606fd22f66d6a",
+ "measured": {
+  "duration": 8.6,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "aspect": "1920:1080",
+  "hasAudio": false,
+  "shotDetection": "fixed-sampling",
+  "threshold": 0.3,
+  "peakSceneScore": 0.04,
+  "nearMisses": 0,
+  "shots": 5,
+  "medianShot": 1.72,
+  "cutsPerMinute": 34.9
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 1.72,
+   "ground": "dark",
+   "luma": 53.1,
+   "accent": "#4566b7",
+   "motion": 0.57,
+   "peak": 3.18,
+   "held": 0.74,
+   "frames": 50,
+   "joint": null,
+   "curve": [
+    0.3,
+    0.5,
+    0.6,
+    0.7,
+    3.2,
+    1,
+    0.2
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 2,
+   "t0": 1.72,
+   "len": 1.72,
+   "ground": "mid?",
+   "luma": 60.8,
+   "accent": "#2f4d9d",
+   "motion": 1.29,
+   "peak": 6.19,
+   "held": 0.42,
+   "frames": 50,
+   "joint": 0.2,
+   "curve": [
+    0.4,
+    2.5,
+    4.3,
+    0.8,
+    0.6,
+    0.8,
+    6.2
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 3,
+   "t0": 3.44,
+   "len": 1.72,
+   "ground": "dark",
+   "luma": 42.4,
+   "accent": "#274990",
+   "motion": 0.23,
+   "peak": 1.08,
+   "held": 0.92,
+   "frames": 49,
+   "joint": 2.8,
+   "curve": [
+    1.1,
+    0.4,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 4,
+   "t0": 5.16,
+   "len": 1.72,
+   "ground": "dark",
+   "luma": 38.6,
+   "accent": "#2d4f96",
+   "motion": 0.68,
+   "peak": 3.36,
+   "held": 0.62,
+   "frames": 50,
+   "joint": 0.1,
+   "curve": [
+    0.1,
+    0.2,
+    0.5,
+    1.2,
+    2.2,
+    3.4,
+    1.3
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 5,
+   "t0": 6.88,
+   "len": 1.72,
+   "ground": "dark",
+   "luma": 34.4,
+   "accent": "#1a356c",
+   "motion": 0.6,
+   "peak": 6.24,
+   "held": 0.88,
+   "frames": 49,
+   "joint": 0.2,
+   "curve": [
+    0.1,
+    0.2,
+    0.2,
+    0.1,
+    0.1,
+    0.3,
+    6.2
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  }
+ ],
+ "pace": {
+  "medianShot": 1.72,
+  "perMinute": 34.9
+ },
+ "groundPattern": "dark → mid? → dark → dark → dark",
+ "motionBand": {
+  "lo": 0.23,
+  "hi": 1.29
+ },
+ "threads": null,
+ "spectacle": null,
+ "takeaway": null
+}
