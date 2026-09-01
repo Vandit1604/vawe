@@ -18,7 +18,15 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  /* The greys, and nothing but. #1C1C1C #2E2E2E #4A4A4A #8A8A8A #E8E8E8 are the five the room is built
     from; the rest are steps between them. Lines are black/white at low alpha so a panel is separated by
     structure rather than by a heavy border. */
- :root{--tlh:300px;--rail:300px;--pad:8px;--r-out:12px;--r-in:calc(var(--r-out) - var(--pad))}
+ /* THE TIMELINE IS A VIEWPORT ONTO A LIST, NOT A LIST THAT DICTATES A HEIGHT. It used to open tall
+    enough to fit every bar, which on a 19-layer film took 439px of a 806px window and left the stage
+    212px, so a 16:9 film rendered 320px wide inside an 1100px stage: 29% of the width, all measured.
+    A fixed default and a scrolling row list gives that height to the picture, and a 40-layer film has
+    no default that would have fitted anyway. The divider still overrides this, and it sticks.
+    THE RAIL IS SIZED FOR WHAT IT WILL HOLD: six candidate takes read as a strip of 16:9 thumbs, two to
+    a row, which wants ~190px a thumb. It costs the picture nothing, because the film is fitted by
+    HEIGHT, so narrowing the stage takes away grey rather than picture. */
+ :root{--tlh:240px;--rail:clamp(300px,28vw,420px);--pad:8px;--r-out:12px;--r-in:calc(var(--r-out) - var(--pad))}
  :root[data-theme=light]{color-scheme:light;
    --bg:#F2F2F2;--panel:#FFFFFF;--panel-2:#F7F7F7;--field:#EDEDED;--stage:#E8E8E8;
    --line:rgba(0,0,0,.10);--line-2:rgba(0,0,0,.20);
@@ -51,6 +59,9 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  /* ---- left rail: a column of panels. One today. A second one is another <section class=panel>. ---- */
  #rail{width:var(--rail);flex:none;display:flex;flex-direction:column;gap:var(--pad);overflow:auto}
  /* the keys sit at the foot of the rail, so a column with one panel in it does not read as unfinished */
+ /* the panels size to what is in them and the keys sit at the foot of the column. Stretching the
+    chooser to fill the rail was tried and looked worse: an empty PANEL reads as broken, empty GROUND
+    reads as room. */
  .panel.keys{margin-top:auto} .panel.keys .body p{font-size:11px;line-height:2}
  .panel{background:var(--panel);border-radius:var(--r-out);box-shadow:var(--shadow);
    outline:1px solid var(--line);outline-offset:-1px;padding:var(--pad);display:flex;flex-direction:column;gap:var(--pad)}
@@ -109,7 +120,14 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  #alerts{padding:8px 12px 0;display:flex;flex-wrap:wrap;gap:6px;flex:none}
  #alerts span{background:var(--bad-bg);border:1px solid var(--bad);color:var(--bad);border-radius:6px;padding:3px 8px;font-size:11px}
  #alerts span.dis{background:var(--panel-2);border-color:var(--line-2);color:var(--ink-2)}
- #lanes{position:relative;overflow-y:auto;overflow-x:hidden;padding:0 12px 12px;cursor:col-resize;flex:1}
+ /* the rows scroll under a pinned ruler. #tlbody is the VISIBLE box, and the playhead lives there
+    rather than in the scroller, so it spans what you can see instead of scrolling off the top. */
+ #tlbody{position:relative;flex:1;min-height:0;display:flex}
+ #lanes{position:relative;overflow-y:auto;overflow-x:hidden;padding:0 12px 12px;cursor:col-resize;flex:1;
+   overscroll-behavior:contain;scrollbar-width:thin}
+ #lanes:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:var(--r-in)}
+ #tlbody::after{content:'';position:absolute;left:0;right:0;bottom:0;height:20px;z-index:4;pointer-events:none;
+   background:linear-gradient(transparent,var(--panel))}
  #ruler{position:sticky;top:0;z-index:4;height:32px;background:var(--panel);border-bottom:1px solid var(--line)}
  #ruler .t{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
  #ruler .t s{position:absolute;left:4px;top:2px;color:var(--ink-2);text-decoration:none;font-size:10px}
@@ -144,6 +162,8 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  .hz b{position:absolute;top:2px;left:3px;color:var(--hz);font-size:10px;font-weight:700;white-space:nowrap;
    background:var(--panel);border:1px solid var(--hz);padding:0 4px;border-radius:3px}
  #ph{position:absolute;top:0;bottom:0;width:1px;background:var(--accent);z-index:5;pointer-events:none}
+ /* the ruler is the one row that must never scroll away: a bar read against nothing is not a time */
+ #ruler{box-shadow:0 1px 0 var(--line)}
  #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--accent)}
  /* ---- floating surfaces: the picker, the plan, the boot failure ---- */
  #pick{position:fixed;right:16px;top:16px;width:390px;max-height:74vh;display:none;flex-direction:column;
@@ -174,7 +194,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  <div id=pick><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>close</button></div><pre id=pickjson></pre></div>
  <div id=shell>
   <aside id=rail>
-   <section class=panel>
+   <section class="panel chooser">
     <h2>chooser</h2>
     <div class=body>
      <p>Picks between candidate takes of the same film, side by side.</p>
@@ -215,7 +235,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    <div id=tl>
     <div id=tlhead><b id=tlwhat>timeline</b><span class=sp></span><span id=tlkey></span></div>
     <div id=alerts></div>
-    <div id=lanes><div id=ruler></div><div id=rows></div><div id=ph></div></div>
+    <div id=tlbody><div id=lanes tabindex=0><div id=ruler></div><div id=rows></div></div><div id=ph></div></div>
    </div>
   </div>
  </div>
@@ -236,12 +256,17 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    document.documentElement.style.setProperty('--tlh',v+'px');
    try{ localStorage.setItem(TLH_KEY,String(v)); }catch(_){}
    fit(); }
- let tlhChosen=false;
- try{ const s=+localStorage.getItem(TLH_KEY); if(s){ tlhChosen=true; setTlh(s); } }catch(_){}
- split.addEventListener('pointerdown',e=>{ split.setPointerCapture(e.pointerId); split.classList.add('on'); });
- split.addEventListener('pointermove',e=>{ if(!split.hasPointerCapture||!split.classList.contains('on'))return;
-   if(!(e.buttons&1))return; setTlh(innerHeight-e.clientY-14); });
- split.addEventListener('pointerup',()=>split.classList.remove('on'));
+ try{ const s=+localStorage.getItem(TLH_KEY); if(s) setTlh(s); }catch(_){}
+ // GRAB OFFSET, not a snap. Dragging from the bottom of the 9px handle used to jerk the divider up to
+   // put the pointer at its middle; the timeline now keeps the size it had when you took hold of it.
+ let splitGrab=0;
+ split.addEventListener('pointerdown',e=>{ split.setPointerCapture(e.pointerId); split.classList.add('on');
+   splitGrab=(innerHeight-e.clientY)-tl.getBoundingClientRect().height; });
+ split.addEventListener('pointermove',e=>{ if(!split.hasPointerCapture(e.pointerId))return;
+   setTlh(innerHeight-e.clientY-splitGrab); });
+ // a cancelled gesture ends the drag as surely as a clean release does
+ const splitDone=()=>split.classList.remove('on');
+ split.addEventListener('pointerup',splitDone); split.addEventListener('pointercancel',splitDone);
  split.addEventListener('keydown',e=>{ const h=tl.getBoundingClientRect().height;
    if(e.key==='ArrowUp'){ e.preventDefault(); setTlh(h+24); }
    if(e.key==='ArrowDown'){ e.preventDefault(); setTlh(h-24); } });
@@ -350,6 +375,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    if(!dragging) return;
    dragging.dx=(e.clientX-dragging.x0)/FITS; dragging.dy=(e.clientY-dragging.y0)/FITS;
    selOut.textContent='drag  '+Math.round(dragging.dx)+', '+Math.round(dragging.dy)+' px'; });
+ dragEl.addEventListener('pointercancel',()=>{ dragging=null; dragEl.classList.remove('dragging'); });
  dragEl.addEventListener('pointerup',async e=>{
    if(!dragging) return;
    const d=dragging; dragging=null; dragEl.classList.remove('dragging');
@@ -373,7 +399,10 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  }
  function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n);
    read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n;
-   ph.style.left='calc(12px + '+pc(n/fps)+')'; if(selIdx>=0&&!dragging)selReadout(); }
+   // measured off the RULER, which is the element the times are drawn on. A percentage of the lanes
+   // box was 12px out at the end of the film and moved again when a scrollbar appeared.
+   ph.style.left=(12+ruler.clientWidth*Math.max(0,Math.min(1,n/fps/dur)))+'px';
+   if(selIdx>=0&&!dragging)selReadout(); }
  const errBox=$('err');
  // AN ERROR YOU CANNOT COPY IS AN ERROR YOU RETYPE BY HAND. The text is selectable, one button copies
  // it, and it is POSTed to the server so the terminal that started studio hears about it too.
@@ -398,6 +427,12 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    errBox.hidden=true;
    const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; scrub.max=total; fit(); timeline(); n=0; draw(); }
  sc.addEventListener('load',()=>ready()); addEventListener('resize',fit);
+ // A LABEL MEASURED IN THE FALLBACK FACE IS THE WRONG WIDTH. The first paint can land before
+ // JetBrains Mono has loaded, and the ruler then chose a 1s stride the real face has no room for:
+ // the dark room and the light room disagreed about the same window, which is how it was caught.
+ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ if(model) paint(model); });
+ // the ruler is measured against its own width, so a resize has to re-measure it
+ addEventListener('resize',()=>{ if(model) paint(model); });
  // the stage resizes without the WINDOW resizing (the divider moves, a hazard band wraps), and a scale
  // computed against the old height overflows and clips the frame
  if(window.ResizeObserver) new ResizeObserver(()=>fit()).observe($('stage'));
@@ -427,6 +462,11 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  // ---------- timeline ----------
  const pc=(t)=>(100*Math.max(0,Math.min(1,t/dur)))+'%';
  const esc=(s)=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ // what a ruler label ACTUALLY measures, in the face and size it is drawn in. Rendered into the ruler
+ // itself so it inherits every rule that applies to a real one, then removed.
+ function measure(html){ const el=document.createElement('s');
+   el.style.cssText='position:absolute;left:0;top:0;visibility:hidden;white-space:nowrap';
+   el.innerHTML=html; ruler.appendChild(el); const w=el.offsetWidth; el.remove(); return w; }
  // THE BARS ARE CHROME, SO THEY ARE GREY. A hue per layer type would put fifteen colours in the surround
  // the eye is meant to judge the picture against, and the type is already written on every bar, so the
  // colour was redundant coding. What is left is a lightness ramp: enough to tell one row from the next,
@@ -487,12 +527,20 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    // ruler: a tick per beat of the clock, labelled in seconds AND frames
    const step=dur<=6?.5:dur<=16?1:dur<=45?2:5;
    let r='';
-   // the final tick is pinned to the right edge and its label reads leftward, so it lands on top of the
-   // one before it whenever a tick is narrower than the label. Below that width, the penultimate label
-   // is dropped and the tick line stays.
-   const tickPx=ruler.clientWidth*step/dur, last=Math.floor((dur+1e-6)/step)*step;
-   for(let t=0;t<=dur+1e-6;t+=step){ const end=t>dur-step*.6, hide=tickPx<96&&!end&&t>last-step-1e-6;
-     r+='<div class="t'+(end?' end':'')+'" style="left:'+pc(t)+'">'+(hide?'':'<s>'+(+t.toFixed(2))+'s<em>'+Math.round(t*fps)+'f</em></s>')+'</div>'; }
+   // LABELS ARE DROPPED BY MEASUREMENT. The old rule dropped the second-to-last label whenever a tick was
+   // narrower than a guessed 96px, which at 1440 threw away a label that fitted and at 1100 still let
+   // "13s 390f" collide with the pinned end label. So the widest label (the last one, biggest numbers) is
+   // rendered offscreen in the real face at the real size, and the stride is however many ticks it takes
+   // to clear that width. Nothing here knows what the window is.
+   const ticks=[]; for(let t=0;t<=dur+1e-6;t+=step) ticks.push(+t.toFixed(4));
+   const lab=(t)=>(+t.toFixed(2))+'s<em>'+Math.round(t*fps)+'f</em>';
+   const labW=measure(lab(ticks[ticks.length-1]))+14;   // +14: the gap a label needs before the next tick
+   const rw=ruler.clientWidth||1, stride=Math.max(1,Math.ceil(labW/(rw*step/dur)));
+   ticks.forEach((t,k)=>{ const end=k===ticks.length-1, x=rw*Math.min(1,t/dur);
+     // the last tick owns the right edge and its label reads leftward, so anything whose text would run
+     // into that label goes, whatever the stride says
+     const show=end||(k%stride===0&&x+labW<=rw-labW-6);
+     r+='<div class="t'+(end?' end':'')+'" style="left:'+pc(t)+'">'+(show?'<s>'+lab(t)+'</s>':'')+'</div>'; });
    for(const k of m.marks){
      r+='<div class=ms style="left:'+pc(k.t)+';width:'+(100*k.dur/dur)+'%"></div>'
        +'<div class=m style="left:'+pc(k.t)+'" title="'+esc(k.kind+' '+k.t+'s'+(k.name?' '+k.name:''))+'">'+k.kind.charAt(0).toUpperCase()+'</div>'; }
@@ -524,10 +572,6 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
      return '<span'+(dis?' class=dis':'')+'>'+(dis?'? ':'')+lab+' '+a.toFixed(2)+'s to '+b.toFixed(2)+'s'
        +(dis?': the engine holds a window open here that the JSON does not declare, so beat-check may be reading a hole that does not render':'')+'</span>'; }).join('');
    if(selIdx>=0) setSel(selIdx);
-   // fit the timeline to the film ONCE, so a 19-layer scene does not open with half its rows below the
-   // fold. The moment the divider is dragged the choice is the user's and this never fires again.
-   if(!tlhChosen){ tlhChosen=true;
-     setTlh(Math.min(innerHeight*0.55, bars.length*18+$('ruler').offsetHeight+$('tlhead').offsetHeight+30)); }
  }
  // drag anywhere in the lanes to seek; the playhead and the scrubber are the same value
  const seek=(e)=>{ const r=ruler.getBoundingClientRect(); n=Math.max(0,Math.min(total,Math.round((e.clientX-r.left)/r.width*dur*fps))); draw(); };
