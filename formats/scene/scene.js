@@ -410,6 +410,39 @@ boot((data, fps, theme, canvas) => {
     return beatBounds.length - 1;
   };
 
+  // THE BEAT'S CURRENT STATE, which is what a cut carries, versus the beat's HISTORY, which it must
+  // not. The wrapper owns the exit slide, so every layer it carries has its own exit suppressed and
+  // its life stretched to the cut; done to EVERY layer of the beat, a beat that is a whole act paints
+  // all four of its superseded type lines superimposed from the cut onward (docs/MISTAKES.md #555).
+  //
+  // A layer is still the beat's current state while either holds:
+  //   · it is on screen when the cut starts, so removing it would empty the frame mid-slide, or
+  //   · nothing in its beat began AT OR AFTER it ended, so nothing replaced it.
+  // The second clause is what keeps a deliberate hold (a line that lands a beat early and waits for
+  // the cut in silence) while dropping a line the next line took over from.
+  //
+  // ponytail: supersession is read from START times only, so a replacement that CROSSFADES (the
+  // incoming line starts before the outgoing one ends) is not detected and the outgoing line is still
+  // held. That errs toward the old behaviour, so it can under-fix and never newly break a film; the
+  // author's escape is to end the outgoing layer at the beat's end and let the wrapper carry it.
+  const EPS = 1e-6; // float noise only: `start + duration` lands on 20.099999999999998 for a cut at 20.1
+  // beat index → the latest start of any layer in it. Memoised on FIRST USE and not built here,
+  // because the resolvers below (relative starts, junction binding) still move a layer's start.
+  let lastStartInBeat = null;
+  const beatIsCurrent = (L, bi, beatEnd) => {
+    const end = (L.start ?? 0) + (L.duration ?? Infinity);
+    if (end >= beatEnd - EPS) return true;
+    if (!lastStartInBeat) {
+      lastStartInBeat = new Map();
+      for (const o of data.layers || []) {
+        const i = beatIndexOf(o);
+        if (i == null) continue;
+        lastStartInBeat.set(i, Math.max(lastStartInBeat.get(i) ?? -Infinity, o.start ?? 0));
+      }
+    }
+    return (lastStartInBeat.get(bi) ?? -Infinity) < end - EPS;
+  };
+
   // PROP AUDIT: every layer is watched from here, before the first read of any layer prop, so the
   // record covers the pre-passes below as well as the build itself.
   data.layers = (data.layers || []).map(watchProps);
@@ -624,10 +657,11 @@ boot((data, fps, theme, canvas) => {
     else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale * M.exitRatio).toFixed(3));
     // scene units: the beat WRAPPER owns the exit slide. Suppress this layer's own exit fade and keep it
     // alive through the wrapper's exit window, or it would vanish mid-slide. Non-last beats only (the
-    // last beat has no exit cut). The incoming ENTER stays per-layer, so contents still stagger in.
+    // last beat has no exit cut), and only the layers that are still the beat's CURRENT STATE
+    // (beatIsCurrent above). The incoming ENTER stays per-layer, so contents still stagger in.
     if (sceneUnits) {
       const bi = beatIndexOf(L);
-      if (bi != null && bi < beatBounds.length - 1) {
+      if (bi != null && bi < beatBounds.length - 1 && beatIsCurrent(L, bi, beatBounds[bi].end)) {
         const be = beatBounds[bi].end;                    // this beat's exit cut time
         const cut = sceneCuts.find((c) => +c.t === be);
         const dur = cut && cut.dur != null ? +cut.dur : 0.4;

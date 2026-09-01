@@ -17186,12 +17186,29 @@ ended earlier would vanish mid-slide), and that reasoning holds only for a layer
 screen when the cut starts. A layer that ended at 2.99s cannot vanish mid-slide at 11.07s: there is
 nothing left to hold. The rule was written for films whose beats are single shots, and silently
 mangles a film whose one beat is a whole act.
-**Fix:** NOT MADE, deliberately, and this is the note that says so. The one-line guard
-(`(L.start ?? 0) + (L.duration ?? Infinity) >= beatBounds[bi].end`) was written and measured: it
-changes the rendered output of **15 of the 111 snapshotted scenes**, and a film branch is the wrong
-place to land that. The film uses `acrossBeats: true`, the documented opt-out, on every layer that
-ends before the cut. Whoever picks this up: make the change on its own branch, run
-`make snap-all SAVE=1` and diff the 15.
+**Fix:** FIXED. `beatIsCurrent` in `formats/scene/scene.js`, mirrored in
+`scripts/gates/scene-timing.mjs`, which is the one model of this rule outside the renderer. The
+wrapper now carries only the layers that are still the beat's CURRENT STATE, and that is two clauses,
+not one: a layer is current if it is on screen when the cut starts, OR if nothing in its beat began at
+or after it ended, so nothing replaced it. The first clause is the strict guard this entry recorded
+last year. The second is what the guard was missing.
+
+The strict guard alone changes **15 of the 111 snapshotted scenes**, and looking at them is what named
+the missing clause. Those fifteen are showcase films whose lines end 0.05s to 0.5s before their own
+cut and are replaced by nothing: under the strict guard each one fades out and the wrapper then slides
+an EMPTY beat off the screen. That is a regression in every one of them. Held to "was it replaced",
+the same films are untouched and the bug still dies: **110 identical, 1 changed**, and the one is
+`tpot-launch`, which carried the identical defect in shipped work. Its second beat is a whole act of
+four sub-beats, so at 7.0s it painted "People." over "Recaps." and at 10.8s "People." over "Recaps."
+over "Moments.", three logos, three subtitles and three product cards superimposed. Frames at 6.0 ·
+7.0 · 8.5 · 10.0 · 10.8 · 11.0 were compared before and after; the beat now shows one sub-beat at a
+time and still slides out as one unit.
+
+The ceiling, stated so it is not rediscovered: supersession reads START times only, so a replacement
+that CROSSFADES is not detected and the outgoing layer is still held. That errs toward the old
+behaviour, so it can under-fix and can never newly break a film.
+→ **`lib-test` asserts the membership rule (7 cases), and `snap-all`'s `tpot-launch` baseline is what
+proves the renderer and the gate model still agree in the DOM.**
 
 ## 556. a scene-level `matchCut` cannot match three subjects, and the closed state proves it
 

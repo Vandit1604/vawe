@@ -5066,5 +5066,42 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
      && CONFIDENT <= Math.min(...PRESENT.map(([q, w]) => covers(q, w))));
 }
 
+// ---------------------------------------------------------------------------------------------------
+// SCENE UNITS: which layers the beat wrapper carries through the cut (docs/MISTAKES.md #555).
+//
+// The wrapper owns the exit slide, so a layer it carries loses its own exit and lives to the end of the
+// cut window. Applied to EVERY layer of the beat, a beat that is a whole act paints its entire history
+// at once. These assert the membership rule through scene-timing.mjs, which is the ONE model of it
+// outside the renderer; formats/scene/scene.js carries the same rule and snap-all's tpot-launch
+// baseline is what proves the two still agree in the DOM.
+{
+  const { sceneTiming } = await import('./scene-timing.mjs');
+  const scene = (layers) => ({ module: 'scene', duration: 12, sceneUnits: true,
+    cuts: [{ t: 6, style: 'slide', dur: 0.6 }], bg: [{ t: 0, preset: 'plain' }], layers });
+  const held = (layers, i) => { const T = sceneTiming(scene(layers)); return T.unitEnd(T.scene.layers[i]); };
+  const L = (start, duration, extra = {}) => ({ type: 'text', text: 'x', size: 80, start, duration, ...extra });
+
+  ok('sceneUnits: the beat\'s last state rides the wrapper out, so it lives to the end of the cut window',
+    held([L(0, 6)], 0) === 6.6);
+  ok('sceneUnits: a layer SUPERSEDED inside its beat keeps its authored window and is not resurrected',
+    held([L(0, 3), L(3, 3)], 0) === null && held([L(0, 3), L(3, 3)], 1) === 6.6);
+  ok('sceneUnits: three sequential lines in one beat leave only the third on screen at the cut',
+    (() => { const ls = [L(0, 2), L(2, 2), L(4, 2)];
+      return held(ls, 0) === null && held(ls, 1) === null && held(ls, 2) === 6.6; })());
+  // The reason the fix moves ONE scene and not fifteen. A line that lands a beat early and waits for the
+  // cut in silence was never replaced, so the wrapper still carries it: a strict on-screen-at-the-cut
+  // test would drop it and slide an empty beat out, which is a regression in every showcase scene.
+  ok('sceneUnits: a deliberate hold (nothing starts after it ends) still rides the wrapper out',
+    held([L(0, 5.5)], 0) === 6.6);
+  ok('sceneUnits: supersession is measured against when a layer ENDS, so an overlapping pair both ride out',
+    (() => { const ls = [L(0, 6), L(1, 5)]; return held(ls, 0) === 6.6 && held(ls, 1) === 6.6; })());
+  // float noise: 17.4 + 2.7 lands on 20.099999999999998, and a cut at 20.1 must not read that as gone.
+  ok('sceneUnits: a layer ending ON its cut is current, float noise included',
+    held([L(0, 2), L(2, 4.0000000000001)], 1) === 6.6);
+  ok('sceneUnits: `acrossBeats` still opts a layer out of the wrapper entirely',
+    held([L(0, 2, { acrossBeats: true }), L(2, 4)], 0) === null);
+}
+
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
