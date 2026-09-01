@@ -2,10 +2,11 @@
 //
 // A scene JSON does not say when its layers are visible. `start` + `duration` are what the AUTHOR wrote;
 // the renderer then rewrites them. core/produce.js turns `sceneUnits` on for any cut film that is not
-// already choreographed, and formats/scene/scene.js (setLayerTiming) then REPLACES every non-last-beat
-// layer's duration with the run to `beatEnd + cutDur`, so the beat wrapper can slide the whole beat out
-// as one unit. A gate that reads the raw fields sees holes the render does not have, and misses ones it
-// does. beat-check learned that the expensive way (docs/MISTAKES.md #172) by modelling it inline.
+// already choreographed, and formats/scene/scene.js (setLayerTiming) then REPLACES the duration of each
+// non-last-beat layer that is still the beat's CURRENT STATE with the run to `beatEnd + cutDur`, so the
+// beat wrapper can slide the whole beat out as one unit. A gate that reads the raw fields sees holes the
+// render does not have, and misses ones it does. beat-check learned that the expensive way
+// (docs/MISTAKES.md #172) by modelling it inline. Which layers count as current is #555.
 //
 // It lives here because a second gate now needs the same answer. Two copies of a model of someone else's
 // code drift, and the copy that drifts is the one that stops catching the bug. Import it; do not fork it.
@@ -259,6 +260,20 @@ export function sceneTiming(input) {
   // from unitEnd because the two answer different questions: unitEnd is when the layer is gone, this is
   // when the film moves on from it. A layer authored to leave long before its beat's cut is being HELD,
   // and telling the two apart needs the cut time, not the end of the cut window.
+  // Only the layers that are still the beat's CURRENT STATE ride the wrapper out; the ones the beat
+  // already replaced keep their authored window and leave when the author said (docs/MISTAKES.md #555).
+  // Mirrors `beatIsCurrent` in formats/scene/scene.js exactly, including the start-times-only ceiling.
+  const EPS = 1e-6;
+  const beatIsCurrent = (L, i) => {
+    const end = num(L.start, 0) + (L.duration == null ? Infinity : num(L.duration, Infinity));
+    if (end >= cutTimes[i] - EPS) return true;
+    for (const o of layers) {
+      if (o.acrossBeats === true) continue;
+      const s = num(o.start, 0);
+      if (s >= edges[i] && s < cutTimes[i] && s >= end - EPS) return false;
+    }
+    return true;
+  };
   const unitCut = (L) => {
     if (!sceneUnits || !cutTimes.length) return null;
     // `acrossBeats` opts a layer out of the wrapper (formats/scene/scene.js beatIndexOf), so the engine
@@ -267,10 +282,11 @@ export function sceneTiming(input) {
     if (L.acrossBeats === true) return null;
     const start = num(L.start, 0);
     for (let i = 0; i < edges.length - 1; i++) {            // non-last beats only
-      if (start >= edges[i] && start < cutTimes[i]) return cutTimes[i];
+      if (start >= edges[i] && start < cutTimes[i]) return beatIsCurrent(L, i) ? cutTimes[i] : null;
     }
     return null;                                            // last beat: no exit cut, no extension
   };
+
   const unitEnd = (L) => { const c = unitCut(L); return c == null ? null : c + cutDurAt(c); };
 
   // a blackout and a speck both keep a window open without putting anything in the frame.
