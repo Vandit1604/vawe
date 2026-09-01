@@ -17114,3 +17114,54 @@ its border. The three shader panels keep the default, because a picture may brea
 not hold. When a frame looks subtly wrong and nothing in the JSON explains it, measure a static feature
 across two frames rather than staring at one: the panel's left edge, in pixels, named the cause in
 about a minute after two hypotheses had already been wrong.
+
+## 552. a cut's `cx`/`cy` were per cent in the engine and 0-1 in the schema, so the only legal values were the wrong ones
+
+**What:** `cuts: [{ "style": "matchCut", "cx": 20.5 }]` was refused by `core/validate.mjs` with
+"cx must be <= 1". Writing `cx: 1` instead passed validation and rendered the shape at 1 per cent of
+the frame, hard against the left edge.
+**Root cause:** one fact with two owners. `cutStyle` (`core/cuts.js:286`) defaults `cx` to **50** and
+formats it as `` `${o.cx}%` ``, and the LAYER-level entry in `formats/scene/schema.json` says
+"Iris/soft-iris centre X (0-100%)". The SCENE-level `cuts[].cx` entry said "Origin x (0-1)" with
+`max: 1`. So the schema half was simply wrong, and it made every value the engine can use illegal
+while making one useless value the only legal one. No scene in the library sets `cuts[].cx`, which is
+why nothing had tripped it.
+**Fix:** the schema entry now says per cent, `max: 100`, and names `core/cuts.js` as the owner, so the
+two spellings agree. → **Gate: `make validate` / `core/validate.mjs`, which now permits what the
+engine actually reads.**
+
+## 553. `sceneUnits` held EVERY layer of a beat alive through the cut, so a long beat rendered its whole history at once
+
+**What:** turning on `sceneUnits` (which `matchCut` and every other masking cut requires) made
+`vawe-shader-terminal` paint all four of its on-screen lines, superimposed, from 7.7s onward:
+"Nbutwmatehat theNfombetiousnadesxtgnefrle."
+**Root cause:** `formats/scene/scene.js:629`. For every layer in a non-last beat it writes
+`el.dataset.duration = be + dur - start`, so the layer lives to the end of the cut window whatever the
+author asked for. The comment explains why (the beat WRAPPER owns the exit slide, and a layer that
+ended earlier would vanish mid-slide), and that reasoning holds only for a layer that is still on
+screen when the cut starts. A layer that ended at 2.99s cannot vanish mid-slide at 11.07s: there is
+nothing left to hold. The rule was written for films whose beats are single shots, and silently
+mangles a film whose one beat is a whole act.
+**Fix:** NOT MADE, deliberately, and this is the note that says so. The one-line guard
+(`(L.start ?? 0) + (L.duration ?? Infinity) >= beatBounds[bi].end`) was written and measured: it
+changes the rendered output of **15 of the 111 snapshotted scenes**, and a film branch is the wrong
+place to land that. The film uses `acrossBeats: true`, the documented opt-out, on every layer that
+ends before the cut. Whoever picks this up: make the change on its own branch, run
+`make snap-all SAVE=1` and diff the 15.
+
+## 554. a scene-level `matchCut` cannot match three subjects, and the closed state proves it
+
+**What:** the one cut in `vawe-shader-terminal` (three dark panels on white resolving to a wordmark)
+was authored as `style: "matchCut"` with the circle aimed at the left panel, which is where the
+wordmark sits. Rendered, the closed frame is the left panel with a crescent bitten out of the middle
+one and nothing where the third was.
+**Root cause:** the mask is ONE circle over the WHOLE FRAME, and the outgoing picture is three
+rectangles spread across 1710px. Closing that circle clips two of them into slivers long before the
+third has shrunk, so the held shape is a rectangle plus a crescent, not a form the eye can carry.
+`MATCH_FULL` is 150 per cent, so the visible part of each half is also compressed into its last two
+frames: at `dur: 0.673` the shape is still larger than the frame for 80 per cent of the closing.
+**Fix:** authoring, not engine. A graphic match needs ONE subject in the shape; a beat that ends on
+three equal panels has no single form to hand over. The film keeps `rise` and buys its seam back with
+velocity instead: the panels' exit now straddles the cut with `hang` on both keys, so the steepest
+frame of the move IS the cut (AE-TECHNIQUES #1) instead of the cut landing at 0 px/s.
+→ **Gate: `cut-velocity` in `scripts/author/motion-director.mjs`, which named the dead seam.**

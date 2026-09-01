@@ -25,8 +25,9 @@ duration: 14s
   Beat edges sit on the bed's own grid (assets/music/bed.wav, mixkit 292): 178.2 BPM, first bar 0.30s,
   so a beat is 0.3367s and a bar is 1.3468s. The command types 0.637 to 2.320, the output lines land
   one per beat from 2.657, the beam runs 5.014 to 6.361 (one bar, one lap), the interior turns on
-  6.361, the fold starts on 7.034, the fan launches on 7.708 and lands on 8.381, every panel changes
-  shader on 9.728, and the only cut is the downbeat at 11.074. `audio.beatSync` is NOT set:
+  6.361, the fold starts on 7.034, the fan launches on 7.708 and lands on 8.381, the panels swap shader
+  on 9.728, 9.812 and 9.896 (a three-frame ripple), and the only cut is the downbeat at 11.074, which the
+  panels' own exit straddles so the seam sits inside the move rather than on a still frame. `audio.beatSync` is NOT set:
   core/beat-bind.js refuses this bed at confidence 1.54 against a floor of 1.6, so the grid is applied
   by hand at author time rather than by the engine at boot.
 
@@ -135,7 +136,10 @@ duration: 14s
 - camera: hold
 - layout: unchanged, with one line of type under the right panel, right-aligned to its edge
 - picture: merging metaballs, a matrix rain, a starfield nebula: three looks nobody could mistake for each other
-- mechanism: one window per look, crossfading into the window under it, which is how the engine sequences anything
+- mechanism: a HARD swap on a scale punch. The plate under each panel draws 1 -> 1.07 -> 1 with `hang`
+  and `fling` handles, the outgoing shader ends on the apex and the incoming one is born on it, so the
+  content changes on the steepest frame of a move the eye is already following. Crossfading two windows
+  puts both states at half strength and neither reads (AE-TECHNIQUES #1)
 - style: unchanged, so the only new thing is the content of the panels
 - rest: every panel is a moving field
 - trigger: the three landed, so they can now be compared
