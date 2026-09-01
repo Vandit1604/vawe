@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>blurred box-shadow rasterises differently after a paint history</title>
+<!--
+  Minimal reproduction for docs/BUGS/chrome-boxshadow-raster-history.md.
+
+  ONE element, ONE blurred box-shadow, ONE transform scale. `renderFrame(n)` sets the scale for
+  frame n and nothing else. Two tabs of the same browser are driven to the SAME final frame through
+  DIFFERENT earlier frames; their DOM and computed style at the shot are identical, and their pixels
+  are not.
+
+  It shims window.__engine / __engineReady / __realRaf, so scripts/dev/tabprobe drives it unchanged:
+
+    go run ./scripts/dev/tabprobe -tabs 2 -frame 114 \
+      -url "file://$PWD/docs/BUGS/chrome-boxshadow-raster-history.html" \
+      -pre 0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108 -pre1 0-113
+-->
+<style>
+  html, body { margin: 0; background: #0b0c07; }
+  #wrap { position: absolute; left: 769.186035px; top: 431.936981px; width: 392px; height: 222px; display: flex; align-items: center; justify-content: center; transform-origin: 50% 50%; }
+  #disc {
+    width: 187px; height: 183px; border-radius: 91px;
+    background: radial-gradient(110% 85% at 50% 115%, #e8e015 0%, #e2f04a 40%, #e1f66c 75%);
+    box-shadow: 0 0 90px rgba(226, 254, 122, 0.4);
+  }
+</style>
+<canvas id="bg" width="1920" height="1080" style="position:absolute;left:0;top:0"></canvas>
+<div id="wrap"><div id="disc"></div></div>
+<script>
+  // What the real film's button was doing at the frame that splits: travelling to a sub-pixel left,
+  // under a sub-pixel uniform scale. The bisect says BOTH halves are load-bearing: take the motion
+  // track away and two tabs converge, take the box-shadow away and they converge.
+  const wrap = document.getElementById('wrap');
+  const left = n => 769.186035 + (114 - n) * 7.317;
+  const scale = n => 0.973541 + (114 - n) * 0.00683;
+  const g = document.getElementById('bg').getContext('2d');
+  g.fillStyle = '#0b0c07';
+  g.fillRect(0, 0, 1920, 1080);
+  window.__realRaf = requestAnimationFrame.bind(window);
+  window.__engine = {
+    renderFrame(n) {
+      wrap.style.left = left(n) + 'px';
+      wrap.style.transform = 'scale(' + scale(n) + ')';
+      return n;
+    },
+    frameSig(n) { return 'f' + n; },
+  };
+  window.__engine.renderFrame(0);
+  window.__engineReady = true;
+</script>

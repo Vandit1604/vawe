@@ -57,6 +57,18 @@ func main() {
 	// 6 is 14% faster than 4 (42.1s against 48.7s on showcase-flight-globe) for 400 MB more. 8 was
 	// measured too and buys nothing further (42.7s), so the cap goes to 6 and not higher — #190's
 	// corruption was found AT 8 and has not been re-tested there.
+	// 6 STANDS, AND NOW IT IS A MEASUREMENT RATHER THAN A LEFTOVER. Priced on a 10-core M4 at ss=2,
+	// three runs each, median wall clock and the run-to-run range beside it:
+	//
+	//	                        1 worker      6 workers          9 workers
+	//	site-backdrop (shader)   106.9s     42.2s (37.5-45.8)   39.5s (36.9-44.1)
+	//	plinth-ad (type)         120.8s     51.2s (49.5-52.2)   50.1s (49.8-50.9)
+	//
+	// 1 to 6 is worth 2.4x. 6 to 9 is worth 2% on the type film and 7% on the shader film, and both
+	// sit INSIDE the spread of the 6-worker runs, so nine tabs buy nothing this machine can measure
+	// for 3 more renderer processes and ~350 MB. Frame agreement is now equal at 1, 6 and 9 (0 of 900
+	// against itself at each, with the raster flag in internal/scene/scene.go), so this is a pure
+	// speed question and the speed is not there.
 	workers := flag.Int("workers", max(1, min(runtime.NumCPU()-1, 6)), "parallel capture tabs")
 	draft := flag.Bool("draft", false, "fast encode, no grain")
 	// SUPERSAMPLE override. ss=2 costs 4x the pixels of every expensive stage and exists to stop text

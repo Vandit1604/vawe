@@ -161,6 +161,38 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// formats/scene/scene.css): 1 of 60 frames still differed between the two, and 0 of 60 with this
 		// flag. Cost: none measurable on a 60-frame draft (docs/MISTAKES.md #507).
 		chromedp.Flag("disable-partial-raster", true),
+		// GPU RASTERISATION IS NOT A FUNCTION OF THE DISPLAY LIST AT ss=2, AND THAT IS #541.
+		//
+		// The GPU is already on and has always been on: the launcher above names no GL flag, and
+		// Chrome still reports ANGLE Metal on the real device, with canvas, compositing and
+		// rasterisation all hardware accelerated (TestGLRenderer in this package prints it). So there
+		// was never a SwiftShader fallback to escape. What there was is a GPU rasteriser that gives two
+		// COLD tabs of the SAME browser different pixels for an identical display list, but only at
+		// device scale 2:
+		//
+		//	tabprobe -root . -data /formats/scene/plinth-ad.json -tabs 2 -frame 45 -ss 1  identical sha
+		//	tabprobe -root . -data /formats/scene/plinth-ad.json -tabs 2 -frame 45 -ss 2  different sha,
+		//	  and its 118-line DOM dump (rects to six decimals, transform, filter, font) is line-for-line
+		//	  the same on both tabs. Same display list, different raster.
+		//
+		// Measured on plinth-ad, 900 frames at ss=2, byte-different frames (scripts/dev/framediff):
+		//
+		//	                 with GPU raster    with this flag
+		//	1 worker twice        19 of 900        0 of 900
+		//	6 workers twice      391 of 900        0 of 900
+		//	1 against 6          405 of 900        3 of 900
+		//
+		// The remaining 3 are #531's residue, a different defect with its own reproduction in
+		// docs/BUGS/. Everything else in that table is this flag.
+		//
+		// PRICE, measured, three runs each, median: plinth-ad 51.2s -> 54.6s at 6 workers (+6.6%);
+		// site-backdrop, a shader film, 42.2s -> 36.8s, inside its own 8s run-to-run spread. Raster is
+		// not what a shader film spends its time on, so only the type-heavy case pays.
+		//
+		// `--disable-skia-graphite` converges the same repro and is NOT the flag to use: it takes
+		// WebGL away entirely, and every ambient shader, sting and three.js scene then refuses to boot
+		// (core/webgl.js). VAWE_CHROME_FLAGS below is how both were tried on the real path.
+		chromedp.Flag("disable-gpu-rasterization", true),
 		// SUPERSAMPLE: capture at ss× device pixels so animated transforms (camera, kinetic type,
 		// stings) land text on a fine grid — the ss×ss box-resolve in downsample() averages the
 		// sub-pixel jitter out, killing the frame-to-frame shimmer at the root instead of by
@@ -190,6 +222,20 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 	)
 	if p := os.Getenv("CHROME_BIN"); p != "" {
 		opts = append(opts, chromedp.ExecPath(p))
+	}
+	// VAWE_CHROME_FLAGS: extra Chrome flags on the REAL capture path, comma separated, "k=v" or bare
+	// "k" for a boolean. It exists so a flag question is answered by a render instead of by reasoning.
+	// scripts/dev/tabprobe already had -flags for two tabs; this is the same lever for a whole film,
+	// and it is how the GPU question was settled (docs/MISTAKES.md #551).
+	for _, f := range strings.Split(os.Getenv("VAWE_CHROME_FLAGS"), ",") {
+		if f = strings.TrimSpace(f); f == "" {
+			continue
+		}
+		if k, v, ok := strings.Cut(f, "="); ok {
+			opts = append(opts, chromedp.Flag(k, v))
+		} else {
+			opts = append(opts, chromedp.Flag(f, true))
+		}
 	}
 	return opts
 }
