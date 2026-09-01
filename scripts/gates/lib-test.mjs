@@ -52,6 +52,7 @@ import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/parts.js';
 import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/effector.js';
+import { cutVelocityAdvice, layerSpeedAt } from '../../core/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
 import { parseColorRGB } from '../../core/motion.js';
@@ -1912,6 +1913,49 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('effector: a clone the point never reaches is left with no transform', () => true
     && effectorStyle(effectorAt(5000, 0, [{ t: 0, x: 0, y: 0 }, { t: 2, x: 100, y: 0 }], 1, { radius: 300 }), { scale: 1 }).transform === 'none');
   ok('effector: the track claims its own slot in the pipeline', TRACK_TYPES.includes('effector') && SLOTS.includes('effector'));
+
+  // ---- where the cut goes, read off the speed graph (docs/CRAFT/AE-TECHNIQUES.md #1) -------------
+  //
+  // A SCALE CHANGE IS MOTION. The technique's own demonstration is a null scaling 100 to 200 per cent
+  // across the seam and nothing translating at all, so a reader that measured translation alone would
+  // score that exact move at zero and advise the author to move the cut away from it.
+  ok('velocity-cut: a pure scale change reads as picture speed', (() => {
+    const L = { start: 0, duration: 2, motion: [{ t: 0, scale: 1 }, { t: 1, scale: 2, ease: 'linear' }] };
+    return layerSpeedAt(L, 0.5, 30) > 400;
+  })());
+  ok('velocity-cut: a layer that is off screen contributes nothing', (() => {
+    const L = { start: 1, duration: 1, motion: [{ t: 0, x: 0 }, { t: 1, x: 1000, ease: 'linear' }] };
+    return layerSpeedAt(L, 0.5, 30) === 0 && layerSpeedAt(L, 1.5, 30) > 0;
+  })());
+  // THE ADVICE ITSELF. The move runs 1.0s to 1.5s and the cut is written at 0.9s, in the stillness
+  // just before it. The peak the report names has to sit inside the move.
+  ok('velocity-cut: a cut in a trough is named, with the peak it should move to', (() => {
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 0 }, { t: 1.5, x: 900, ease: 'linear' }] }];
+    const [r] = cutVelocityAdvice([{ t: 0.9 }], layers, { duration: 3 });
+    return r.trough === true && r.peak.t > 1 && r.peak.t <= 1.5 && r.peak.speed > r.speed;
+  })());
+  // AND IT MUST STAY QUIET. A cut already sitting on the fastest frame near it needs no advice, and a
+  // report that fires on every cut is a report nobody reads. Measured over the library, 19 of 194 cuts
+  // in 47 films trip this.
+  ok('velocity-cut: a cut already at the peak is left alone', (() => {
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 0 }, { t: 1.5, x: 900, ease: 'linear' }] }];
+    return cutVelocityAdvice([{ t: 1.25 }], layers, { duration: 3 })[0].trough === false;
+  })());
+  // A FILM WITH NOTHING MOVING has no move for a cut to hide inside, so this has nothing to say. Two
+  // shipped films peak at 4 px/s beside a cut, which is a drift and not a move, and advising anybody
+  // to re-time a seam around it would be noise.
+  ok('velocity-cut: a still film is not a trough', (() => {
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 3, x: 2, ease: 'linear' }] }];
+    return cutVelocityAdvice([{ t: 1.5 }], layers, { duration: 3 })[0].trough === false;
+  })());
+  // ADVISORY, NEVER AUTOMATIC: it returns a reading and touches nothing. Asserted because the whole
+  // argument for this shape is that a scene which writes 4.2 still cuts at 4.2.
+  ok('velocity-cut: the advice moves no cut', (() => {
+    const cuts = [{ t: 0.9, fx: 'fade' }];
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 0 }, { t: 1.5, x: 900, ease: 'linear' }] }];
+    cutVelocityAdvice(cuts, layers, { duration: 3 });
+    return cuts[0].t === 0.9 && cuts[0].fx === 'fade';
+  })());
 
   // ---- the range selector's smoothness dial (docs/CRAFT/AE-TECHNIQUES.md #5) ---------------------
   //

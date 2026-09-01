@@ -30,6 +30,7 @@ import { LOOK_NAMES } from '../../core/looks.js';
 import { PROFILES } from './profiles.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
 import { DENSE_KEY_SEC } from '../../core/sequence.js';
+import { cutVelocityAdvice } from '../../core/velocity-cut.js';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 
@@ -208,6 +209,34 @@ function tellPacing(d, duration) {
   if (unreadable >= 2) return { metrics: {}, findings: [warn('pacing', `${unreadable} cuts less than 0.5s apart. Too fast to read unless a deliberate montage`)] };
   if (tiny / cutTimes.length > 0.5) return { metrics: {}, findings: [warn('pacing', `${tiny}/${cutTimes.length} cut-to-cut holds under 0.9s. Chaotic pacing unless intentional`)] };
   return nothing;
+}
+
+// WHERE THE CUT GOES, read off the picture's own speed rather than off the beat.
+//
+// Every other tell in this file asks whether a cut is the right KIND. This one asks whether it is in
+// the right PLACE, which is the half the arsenal had no word for: `make arsenal Q="hide the cut inside
+// the fastest part of a move"` returns matchCut and none, and both are shapes of cut. The eye cannot
+// resolve a join buried inside peak velocity, so a seam placed in a trough is the most visible one in
+// the film, and it is where a cut written on a round second nearly always lands
+// (docs/CRAFT/AE-TECHNIQUES.md #1).
+//
+// A SUGGESTION AND NOT A MOVE. The scene wrote 4.2 and the film cuts at 4.2; this says where the peak
+// was and leaves the number to the author. The measurement is core/velocity-cut.js, which sums
+// core/sequence.js `velocityAt` over the layers on screen rather than reading velocity a second time.
+function tellCutVelocity(d, allLayers, duration) {
+  const cuts = (d.cuts || []).filter((c) => c && typeof c.t === 'number');
+  if (!cuts.length) return nothing;
+  const rows = cutVelocityAdvice(cuts, allLayers, { duration: duration || Infinity });
+  const troughs = rows.filter((r) => r.trough);
+  const metrics = { cutsInTrough: troughs.length, cutsRead: rows.length };
+  if (!troughs.length) return { metrics, findings: [] };
+  const said = troughs.slice(0, 3).map((r) =>
+    `${r.t.toFixed(2)}s at ${Math.round(r.speed)} px/s, nearest peak ${r.peak.t.toFixed(2)}s at ${Math.round(r.peak.speed)}`);
+  return { metrics, findings: [warn('cut-velocity',
+    `${troughs.length}/${rows.length} cut(s) land where the picture is slow. ${said.join(' \u00b7 ')}`
+    + `${troughs.length > 3 ? ' \u00b7 \u2026' : ''}. A cut is invisible inside speed and obvious inside stillness, `
+    + 'so put the seam on the steepest frame of the move rather than on the beat. Move the cut to the peak, '
+    + 'or give the beat a move to hide in (AE-TECHNIQUES #1).')] };
 }
 
 // dead final frame: the payoff should hold to the end, never fade out (TASTE-RULES).
@@ -500,6 +529,7 @@ function analyse(d) {
     tellEffectSoup(d, layers, beats),
     tellContinuity(d, layers, beats),
     tellPacing(d, duration),
+    tellCutVelocity(d, allLayers, duration),
     tellDeadFinalFrame(layers, duration),
     tellLinearMotion(layers),
     speed,
