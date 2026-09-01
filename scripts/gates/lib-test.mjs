@@ -4,8 +4,8 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
   anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
-import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, STAGGER_FROM } from '../../core/type.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/time.js';
+import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites } from '../../core/cuts.js';
 import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts.js';
 import { killedBy, capabilitiesOf, checkCuts } from '../../core/ancestor-kills.js';
@@ -637,6 +637,29 @@ ok('gsapStagger translates only the two words GSAP spells differently',
   gsapStagger({ each: 0.05, from: 'first' }).from === 'start' && gsapStagger({ from: 'last' }).from === 'end'
   && gsapStagger({ from: 'center' }).from === 'center' && gsapStagger(0.07) === 0.07 && gsapStagger(undefined, 0.07) === 0.07);
 
+// TEXT SCRAMBLE: a RATE, a charset, and a reveal delay (docs/CRAFT/PARITY-AUDIT.md).
+const scramble = (u, opts) => { const el = { textContent: 'DETERMINISTIC' }; decodeText(el, u, 0, opts); return el.textContent; };
+ok('decode default is byte-identical to the baked 24 steps it replaced', (() => {
+  for (let u = 0; u < 1; u += 0.017) if (scramble(u) !== scramble(u, { rate: 48, each: 0.5 })) return false;
+  return true;
+})());
+ok('decode is pure in u: the same frame twice is the same string', scramble(0.37) === scramble(0.37));
+ok('decode resolves left to right and finishes', scramble(1) === 'DETERMINISTIC' && scramble(0.99).endsWith('C') === false || scramble(1) === 'DETERMINISTIC');
+// The bug the rate fixes: the scramble used to slow down purely because the reveal was longer.
+ok('rate is per SECOND, so a 2s window scrambles as often as a 0.5s one', (() => {
+  const steps = (each) => new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each }))).size;
+  return steps(2) >= steps(0.5) * 0.8;
+})());
+ok('a fixed COUNT is what it is no longer: doubling each doubles the refreshes',
+  new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each: 1 }))).size
+  > new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each: 0.25 }))).size);
+ok('chars takes a named set and uses ONLY that set',
+  [...scramble(0.05, { chars: 'numbers' })].every((c) => DECODE_CHARS.numbers.includes(c) || 'DETERMINISTIC'.includes(c)));
+ok('chars takes a raw string of your own glyphs',
+  [...scramble(0.05, { chars: 'xyz' })].every((c) => 'xyz'.includes(c) || 'DETERMINISTIC'.includes(c)));
+ok('revealDelay holds the word FULLY scrambled before it resolves',
+  scramble(0.2, { revealDelay: 0.5 })[0] !== 'D' || scramble(0.3, { revealDelay: 0.5 })[0] !== 'D');
+ok('revealDelay 0 is what shipped', scramble(0.4) === scramble(0.4, { revealDelay: 0 }));
 
 ok('preset up hidden at 0', PRESETS.up(0).opacity === 0 && PRESETS.up(0).transform.includes('translateY'));
 ok('preset up shown at 1', approx(PRESETS.up(1).opacity, 1) && PRESETS.up(1).transform.includes('translateY(0.00px)'));

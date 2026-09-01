@@ -20,7 +20,7 @@ less.
 |---|---|---|
 | stagger / offset reveal | **BEHIND, fixed** | the standard primitive ships three dials, we shipped one; `from` and `amount` now exist in both slots |
 | snappy overshoot | **BEHIND, fixed** | the `overshoot` handle peaked at exactly 1.000000 |
-| text scramble | BEHIND on dials, AHEAD on determinism | refresh is a fixed count per window, so a 0.5s reveal scrambles at 48/s and a 2s one at 12/s |
+| text scramble | **BEHIND on dials, fixed** · AHEAD on determinism | the refresh was a fixed count per window, so a 0.5s reveal scrambled at 48/s and a 2s one at 12/s; it is a RATE now |
 | 2.5D parallax | BEHIND | `depth` appears in 1 of 170 scenes; 44 of 47 camera films sit entirely at z = 0 |
 | device mockup | BEHIND | `metalness: 0.86` with no environment map anywhere in the file |
 | animated gradient | BEHIND on the default | 57 to 105 seconds per cycle against a practitioner band of 6 to 12 |
@@ -100,7 +100,7 @@ GSAP's own `start`/`end` spelling. `from` takes `first` (the default, so nothing
 pass-through an undocumented capability rather than a feature. `STAGGER_FROM_REGISTRY` puts it in
 `make arsenal`, and `formats/scene/_parity-type.json` renders all four orders on one frame.
 
-**It also refuses GSAP's `grid` and `axis`**, deliberately: they order a two-dimensional grid of
+**`amount` also refuses GSAP's `grid` and `axis`**, deliberately: they order a two-dimensional grid of
 targets, this vocabulary is one-dimensional, and forwarding a word the engine cannot honour is the thing
 being fixed here, not a feature to keep.
 
@@ -248,11 +248,28 @@ One trap worth knowing: with `split: "char"` each unit is one character, so `n =
 `settled = floor(u * 2)` is a hard swap at the halfway point. Decode is a word-split and line-split
 effect; on a char split the left-to-right resolve comes entirely from the stagger.
 
-### Verdict: BEHIND on the dials, AHEAD on determinism
+### Verdict: BEHIND on the dials, now fixed · AHEAD on determinism
 
-Ours is the only one of the four that survives a backward seek, and its refresh count is baked at 24
+Ours is the only one of the four that survives a backward seek, and its refresh count was baked at 24
 with a charset baked at 39 characters, while the two dials every reference exposes are `chars` and a
 refresh RATE.
+
+**CLOSED.** `decodeText` takes `{ chars, rate, revealDelay }` and `animateUnits` passes `popts` to it,
+so `presetOpts` on a decode layer is live rather than silently inert (`docs/MISTAKES.md` #543; decode
+was the only preset losing its options, the loop branch and `flap` both pass theirs). `rate` is
+refreshes per SECOND, default 48, which at the default `each` of 0.5s is the same `floor(u * 24)` the
+old code computed. `chars` takes a name from `DECODE_CHARS` (mixed, upperCase, lowerCase, numbers,
+symbols, blocks, binary) or any string of your own glyphs. `revealDelay` is the fraction of the window
+the unit holds fully scrambled, default 0.
+
+**Eight shipped films DO change, argued frame by frame in `docs/MISTAKES.md` #544**: all eight are
+decode layers whose `each` is not 0.5, and the change is which junk glyph a frame shows, never the
+layout, the timing or the resolve point.
+
+**`delimiter` and `rightToLeft` were skipped, with reasons.** `delimiter` is our `split` (`"word"` is
+GSAP's `delimiter: " "`), so adding it would be a second way to say one thing. `rightToLeft` reverses
+the resolve INSIDE one unit, and ordering already has an owner in `stagger.from`; on the char split
+these films actually use, the unit is one character and the dial would do nothing at all.
 
 ### The gap, concretely
 
@@ -275,7 +292,8 @@ carry it, and it is the one parameter whose absence you feel without being able 
 
 ## The single most valuable change
 
-**Fix the `overshoot` handle at `core/motion.js:230`.**
+**Fix the `overshoot` handle at `core/motion.js:230`.** (Done, and so are the two below it: the stagger
+dials and the scramble rate are closed, see each section's CLOSED note.)
 
 It wins on the repo's own ordering, not on size. The other two gaps are missing expressiveness: an
 author who wants a centre-out stagger or a numeral charset today writes something else and knows they

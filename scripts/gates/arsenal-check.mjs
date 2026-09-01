@@ -43,6 +43,8 @@ const WAIVED = new Map(Object.entries({
   FILTER_NAMES: 'that registry\'s own name list, the same names the catalogue already prints',
   STAGGER_FROM: 'the name list of STAGGER_FROM_REGISTRY, which IS catalogued as "Stagger order (`from`)". Exported because core/validate.mjs refuses an unknown order and must read the names from their owner',
   STAGGER_FROM_BLURBS: 'as LOOK_BLURBS, for the stagger orders',
+  DECODE_CHARS: 'the charsets behind DECODE_CHARS_REGISTRY, which IS catalogued as "Scramble charsets (`chars`)". A scene names a set, or writes its own glyphs',
+  DECODE_CHAR_BLURBS: 'as LOOK_BLURBS, for the scramble charsets',
   THERMAL_REGION: 'the filter region the thermal blur needs so its tail is not clipped. A geometry constant, not something a scene can name',
   KNOBS: 'playground control metadata, not an effect a scene can name',
   SPECTACLE_KEYS: 'the four keys of the `spectacle` block (at/of/device/why). The block is documented in docs/PRIMITIVES.md and its DEVICE vocabulary IS catalogued, as "Spectacle devices"; this is the shape of the object, not a vocabulary of effects',

@@ -265,7 +265,7 @@ export const PRESETS = {
     'focus pull, heavy blur and over-scale resolving to crisp, dreamy, premium'),
   // decode: deterministic scramble -> resolve (tech reveal; hero words only). Uses data-final
   // stashed by animateUnits on first call; character choice = hashSeed(unit index, step), pure.
-  decode: preset((u, { i = 0 } = {}) => {
+  decode: preset((u) => {
     const uu = clamp01(u);
     return { opacity: uu > 0 ? 1 : 0, __decode: uu, transform: 'none' }; // resolved in animateUnits (needs textContent)
   },
@@ -455,16 +455,58 @@ export const PRESET_BLURBS = blurbsOf('kinetic preset', PRESETS);
 
 // decode support: scrambles textContent deterministically until u resolves each char L->R.
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ023456789#$%&';
-export function decodeText(el, u, unitIndex) {
+
+// THE CHARSET IS A DIAL EVERY REFERENCE EXPOSES AND OURS BAKED (docs/CRAFT/PARITY-AUDIT.md). A brand
+// scramble in numerals, or in block shading, is a different effect and was unreachable. Write a NAME
+// from this table, or any string of your own glyphs.
+export const DECODE_CHARS = {
+  mixed: GLYPHS,
+  upperCase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  lowerCase: 'abcdefghijklmnopqrstuvwxyz',
+  numbers: '0123456789',
+  symbols: '!<>-_\\/[]{}=+*^?#$%&',
+  blocks: '\u2591\u2592\u2593\u2588',
+  binary: '01',
+};
+export const DECODE_CHAR_BLURBS = {
+  mixed: 'capitals, digits and four symbols, the house default and the busiest of the sets',
+  upperCase: 'capitals only, the calmest scramble and the one that keeps a headline reading as type',
+  lowerCase: 'lowercase only, quieter still, and the right set under a lowercase headline',
+  numbers: 'digits only, for a counter, a price, a code or anything the film is about to state as a number',
+  symbols: 'punctuation and operators, a terminal or a cipher rather than a word',
+  blocks: 'four shades of block, so the word dissolves into a bar of noise instead of into other letters',
+  binary: 'ones and zeros, the loudest cliche in the set, use it once and only where the subject IS binary',
+};
+
+// As STAGGER_FROM_REGISTRY: a registry so the arsenal search can find these, and no `pick`, because
+// any string of your own glyphs is a legal charset too.
+export const DECODE_CHARS_REGISTRY = defineRegistry('scramble charset', DECODE_CHARS,
+  { slot: 'presetOpts.chars', blurbs: DECODE_CHAR_BLURBS });
+
+// decodeText(el, u, unitIndex, opts): the scramble, PURE in u. The character choice is a hash of
+// (unit, column, step), never Math.random(), so a backward seek is exact. That is the one axis this is
+// ahead of every reference on, and it is why the dials below had to be added rather than borrowed.
+//
+// `rate` IS THE FIX THAT MATTERS. The step used to be `floor(u * 24)`: a fixed COUNT of refreshes
+// across the window, so a 0.5s reveal scrambled at 48 characters a second and a 2s one at 12. The rate
+// is the constant in every reference implementation and the duration is a separate decision. It is
+// stated in refreshes per second and defaults to 48, which at the default `each` of 0.5s is the same
+// 24 steps: no shipped frame moves.
+export function decodeText(el, u, unitIndex, { chars = 'mixed', rate = 48, revealDelay = 0, each = 0.5 } = {}) {
+  const set = DECODE_CHARS[chars] || (typeof chars === 'string' && chars.length ? chars : GLYPHS);
   if (el.__final == null) el.__final = el.textContent;
   const fin = el.__final, n = fin.length;
   if (u >= 1) { if (el.textContent !== fin) el.textContent = fin; return; }
-  const settled = Math.floor(clamp01(u) * (n + 1));
-  const step = Math.floor(clamp01(u) * 24); // scramble evolves with u (pure)
+  // revealDelay: the fraction of the window the unit holds FULLY scrambled before it starts resolving.
+  // Without it the first character resolves on the first frame, so nobody ever sees a scrambled word
+  // and the effect reads as noisy type. Default 0, which is exactly what shipped.
+  const rd = Math.min(0.95, Math.max(0, revealDelay));
+  const settled = Math.floor(clamp01((clamp01(u) - rd) / (1 - rd)) * (n + 1));
+  const step = Math.floor(clamp01(u) * Math.max(0, each) * Math.max(0, rate));
   let out = '';
   for (let c = 0; c < n; c++) {
     if (c < settled || fin[c] === ' ') out += fin[c];
-    else out += GLYPHS[hashSeed(`${unitIndex}:${c}:${step}`) % GLYPHS.length];
+    else out += set[hashSeed(`${unitIndex}:${c}:${step}`) % set.length];
   }
   if (el.textContent !== out) el.textContent = out;
 }
@@ -524,7 +566,12 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
       Object.assign(el.style, fn(t * speed + i * phaseStep, popts));
     } else {
       const u = unitProgress(t, i, units.length, { each, stagger, smoothness });
-      if (preset === 'decode') { decodeText(el, u, i); el.style.opacity = u > 0 ? '1' : '0'; return; }
+      // POPTS REACHED EVERY PRESET BUT THIS ONE. The early return handed decodeText three arguments and
+      // dropped `popts` on the floor, so `presetOpts` on a decode layer was accepted, forwarded nowhere
+      // and silently inert, and the preset's own declared parameter was dead code. Input accepted and
+      // then ignored is this repo's worst bug class (docs/MISTAKES.md #543). `each` rides along because
+      // the scramble RATE is per second and only the caller knows how long the window is.
+      if (preset === 'decode') { decodeText(el, u, i, { ...popts, each }); el.style.opacity = u > 0 ? '1' : '0'; return; }
       // `flap` mutates the character too, but unlike decode it also has a hinge to apply, so the
       // preset's own style still runs. Both live here for the same reason: a preset returns a style
       // and neither of these two effects is one.

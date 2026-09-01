@@ -16798,3 +16798,71 @@ with the shot spacing deliberately broken the writer emitted a DESCENDING keyfra
 writer now has two doors: a hold is dropped, a pose key REFUSES and names both times. The general
 version is that a de-duplicating guard which is right for one caller becomes a corruption engine for the
 next, and the cheap fix is to give the two callers two functions rather than one clever one.
+
+
+## 543. `presetOpts` on a `decode` layer was accepted and then read by nobody
+
+**What happened.** `animateUnits` (`core/type.js`) special-cased the scramble preset and returned early:
+`if (preset === 'decode') { decodeText(el, u, i); ...; return; }`. Every other preset got `popts` as its
+second argument; this one got three positional arguments and dropped the options on the floor.
+`decodeText` took no options object at all, so a `presetOpts` written on a decode layer validated,
+loaded, reached the frame loop and did nothing. The preset entry even declared a `{ i = 0 }` parameter
+it was never called with, which is the same bug written a second time.
+
+**Root cause.** An early return that predates the options plumbing. The knob manifest agreed with the
+code rather than with the author: `core/knobs.js` recorded `decode: []` with the comment "nothing
+author-facing", so the dead-knob validator had nothing to compare against and stayed quiet. Two files
+agreeing on the absence of a feature is not evidence the feature is absent by design.
+
+**Fix.** `decodeText(el, u, i, { ...popts, each })`, and `decodeText` now takes `{ chars, rate,
+revealDelay, each }`. `core/knobs.js` lists all three, so a typo in them is refused by `knobErrors` like
+any other dial. `each` rides along because the scramble RATE is per second and only the caller knows how
+long the window is.
+
+**Every other preset was checked, and decode was the only one.** The loop branch (`wave`,
+`shimmerWave`) passes `popts`, and `flap` reads `popts.steps` and then still runs its own style
+function. One early return, one loss.
+
+**What the gate now catches.** `scripts/gates/lib-test.mjs` asserts a charset and a reveal delay written
+as options actually reach the rendered string. Broken by restoring the three-argument call: the charset
+assertions fail.
+
+**The lesson.** An early return is a second, invisible signature. When a function grows an options
+object, the paths that return before it is used keep the old contract silently, and a validator built
+from the code rather than from the intent will agree with them.
+
+## 544. the text scramble refreshed a fixed COUNT per window, so its speed tracked its duration
+
+**What happened.** `decodeText` picked its junk character from `step = floor(u * 24)`: twenty-four
+refreshes spread across the unit's whole window, whatever that window was. A 0.5s reveal therefore
+scrambled at 48 characters a second and a 2s reveal at 12. Every reference implementation states the
+opposite contract: GSAP's ScrambleTextPlugin has a `speed` multiplier and baffle.js a millisecond
+interval, because the refresh is a RATE and the duration is a separate decision
+(`docs/CRAFT/PARITY-AUDIT.md`).
+
+**Root cause.** `u` was the only clock in the function, so the only expression available was a count.
+The window length was known to the caller and never passed.
+
+**Fix.** `rate`, in refreshes per second, default 48, with `each` passed in:
+`step = floor(u * each * rate)`. At the default `each` of 0.5s that is `floor(u * 24)` exactly, so the
+default is the old arithmetic and nothing about it is a new decision.
+
+**IT DOES MOVE SEVEN SHIPPED FILMS, and that is deliberate.** `snap-scenes` reports 8 changed and
+only seven are this: `ab3-nogate-tenor`, `ditherkit`, `showcase-intro` (and its expansion),
+`showcase-type-labour`, `type-demo`, `vawe-identity`. Every one is a decode layer whose `each` is not
+0.5, and every one changes in the same way. The eighth, `search-demo.expanded`, carries no decode, no
+stagger and no split, and changed before this work; its baseline was recorded in another checkout. Rendered `showcase-type-labour` frame 140
+before and after: layout, position, size and the resolve progress are pixel-identical, and the eight
+scrambled glyphs read `SKD7LLOQ` before and `S4B#M#9Z` after. What changed is WHICH junk letter a frame
+shows, and on that layer how often it changes (21.8/s to 48/s, because `each` is 1.1). The effect is the
+same effect. Keeping the old default would have meant keeping the defect as the shipped behaviour, which
+is the one outcome the harvest rule refuses. Re-save the baselines on a tree that holds the films.
+
+**What the gate now catches.** `lib-test` asserts the default is byte-identical to the 24 steps it
+replaced, and that doubling `each` now doubles the refreshes instead of stretching them. Broken by
+restoring `floor(u * 24)`: the second assertion fails and the first still passes, which is the pair
+saying "the default did not move, the dial did".
+
+**The lesson.** A count and a rate look interchangeable while one number is fixed. They diverge the
+moment somebody changes the other number, and the author who does has no way to tell that two decisions
+were wired to one dial.
