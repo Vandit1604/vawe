@@ -2040,6 +2040,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const L = { start: 0, duration: 2, motion: [{ t: 0, scale: 1 }, { t: 1, scale: 2, ease: 'linear' }] };
     return layerSpeedAt(L, 0.5, 30) > 400;
   })());
+  // A ROTATION MOVES PIXELS TOO, and this reader could not see one. The technique this file
+  // implements (docs/CRAFT/AE-TECHNIQUES.md #1) hands a fast ROTATION across the seam, so the
+  // advisory scored its own worked example at 0 px/s and called it a velocity trough.
+  ok('velocity-cut: a pure rotation reads as picture speed', (() => {
+    const L = { start: 0, duration: 2, motion: [{ t: 0, rot: 0 }, { t: 2, rot: 720 }] };
+    return layerSpeedAt(L, 1, 30) > 400;
+  })());
+  ok('velocity-cut: a rotating seam is no longer reported as a trough', (() => {
+    const layers = [{ start: 0, duration: 2, motion: [
+      { t: 0, rot: 0, easeOut: 'hang' }, { t: 1.2, rot: 300, easeIn: { influence: 22, speed: 3 } }] }];
+    return cutVelocityAdvice([{ t: 1.15 }], layers, { duration: 2 })[0].trough === false;
+  })());
+  ok('velocity-cut: and it reads an AUTHORED handle, because it derives from velocityAt', (() => {
+    const flat = [{ start: 0, duration: 2, motion: [{ t: 0, x: 0 }, { t: 1.2, x: 900 }] }];
+    const hung = [{ start: 0, duration: 2, motion: [
+      { t: 0, x: 0, easeOut: 'hang' }, { t: 1.2, x: 900, easeIn: { influence: 22, speed: 3 } }] }];
+    // The handle moves WHERE the speed is. The default curve is nearly stopped one frame before its
+    // last key; `hang` out plus a fast arrival is at its fastest there. A reader blind to handles
+    // would report the same number for both.
+    return layerSpeedAt(hung[0], 1.15, 30) > 6 * layerSpeedAt(flat[0], 1.15, 30);
+  })());
   ok('velocity-cut: a layer that is off screen contributes nothing', (() => {
     const L = { start: 1, duration: 1, motion: [{ t: 0, x: 0 }, { t: 1, x: 1000, ease: 'linear' }] };
     return layerSpeedAt(L, 0.5, 30) === 0 && layerSpeedAt(L, 1.5, 30) > 0;
@@ -4207,6 +4228,190 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('resolveEasing REFUSES it: a mode is not a curve', threw != null);
   ok('`smooth` is still the feel word it always was',
     Math.abs(vel(0.6, 'smooth') - vel(0.6, undefined)) < 1);
+
+  // ONE INTERPOLATOR, NOT TWO. cameraAt's comment said it "mirrors motionAt" and they had already
+  // drifted: `through` was dispatched inside motionAt, so a camera key naming it threw
+  // `unknown easing "through"`. Both now go through segmentAt, and this asserts the camera gets the
+  // whole segment vocabulary rather than a copy of half of it.
+  const { cameraAt, segmentAt } = await import('../../core/sequence.js');
+  const cam = [{ t: 0, x: 0 }, { t: 0.6, x: 300, ease: 'through' }, { t: 1.2, x: 900, ease: 'through' }];
+  const camVel = (t) => { const h = 1 / 60; return (cameraAt(cam, t + h).x - cameraAt(cam, t - h).x) / (2 * h); };
+  ok('the camera speaks `through` too, because it shares the interpolator', camVel(0.6) > 400);
+  ok('the camera default is still plain easeInOutCubic, no density rule',
+    Math.abs(cameraAt([{ t: 0, x: 0 }, { t: 0.1, x: 100 }], 0.05).x - 50) < 0.01);
+  // segmentAt is the shared owner: past the last key there is no segment and the last key holds.
+  const at = segmentAt([{ t: 0, x: 0 }, { t: 1, x: 300 }], 1, 9);
+  ok('segmentAt holds the last key past the end', at('x', 0) === 300);
+}
+
+// ---------- the graph editor's primitive: cubicBezier ----------
+// Asserted against PUBLISHED fixtures rather than against itself. AE's Easy Ease is influence 33.33
+// both sides with zero speed, which is cubic-bezier(0.333, 0, 0.667, 1); CSS `ease-in-out` is
+// cubic-bezier(0.42, 0, 0.58, 1). A solver that agreed only with its own arithmetic would pass a
+// round-trip test and still draw the wrong curve.
+{
+  const { cubicBezier, easeInOutCubic } = await import('../../core/motion.js');
+  // An independent high-iteration bisection solve of the same curve: different algorithm, same answer.
+  const ref = (x1, y1, x2, y2) => {
+    const at = (u, a1, a2) => 3 * (1 - u) * (1 - u) * u * a1 + 3 * (1 - u) * u * u * a2 + u * u * u;
+    return (t) => { let lo = 0, hi = 1;
+      for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (at(m, x1, x2) < t) lo = m; else hi = m; }
+      return at((lo + hi) / 2, y1, y2); };
+  };
+  let worst = 0;
+  for (const c of [[0.333, 0, 0.667, 1], [0.42, 0, 0.58, 1], [0.25, 0.1, 0.25, 1], [0.05, 1.6, 0.2, 1]]) {
+    const mine = cubicBezier(...c), theirs = ref(...c);
+    for (let i = 0; i <= 100; i++) worst = Math.max(worst, Math.abs(mine(i / 100) - theirs(i / 100)));
+  }
+  ok('cubicBezier agrees with an independent solve of the same curve', worst < 1e-5);
+
+  const easyEase = cubicBezier(0.333, 0, 0.667, 1);
+  ok('Easy Ease pins both ends exactly', easyEase(0) === 0 && easyEase(1) === 1);
+  ok('Easy Ease is symmetric about its midpoint', Math.abs(easyEase(0.5) - 0.5) < 1e-9
+    && Math.abs(easyEase(0.25) + easyEase(0.75) - 1) < 1e-6);
+  // The published value: cubic-bezier(0.42, 0, 0.58, 1) reads 0.1292 at t = 0.25. That is NOT
+  // easeInOutCubic (0.0625), which is the confusion this fixture exists to prevent: CSS `ease-in-out`
+  // and a cubic ease-in-out are different curves with nearly the same name.
+  const cssEIO = cubicBezier(0.42, 0, 0.58, 1);
+  ok('cubic-bezier(.42,0,.58,1) reads 0.1292 at t=0.25', Math.abs(cssEIO(0.25) - 0.129162) < 1e-4);
+  ok('and it is NOT easeInOutCubic', Math.abs(cssEIO(0.25) - easeInOutCubic(0.25)) > 0.05);
+  // The diagonal short-circuits to the identity, exactly, with no solve at all.
+  const lin = cubicBezier(0, 0, 1, 1);
+  ok('the diagonal is the identity, bit for bit', [0, 0.13, 0.5, 0.87, 1].every((t) => lin(t) === t));
+  // Monotone in t for any in-range control points: an easing that went backwards would rewind a move.
+  const steep = cubicBezier(0.02, 0, 0.98, 1);
+  let mono = true, prev = -1;
+  for (let i = 0; i <= 500; i++) { const v = steep(i / 500); if (v < prev - 1e-9) mono = false; prev = v; }
+  ok('a near-vertical curve is still monotone in t', mono);
+  // Overshoot is allowed: y outside [0,1] is a real shape (a back ease), so it must NOT be clamped.
+  ok('y is not clamped, so overshoot survives', cubicBezier(0.3, 0, 0.4, 1.7)(0.72) > 1);
+}
+
+// ---------- keyframe handles: influence AND speed, per key, per side ----------
+// The design decision under test is that SPEED is a multiple of the segment's own average velocity
+// rather than absolute units per second. In absolute units, y1 = (speed * influenceSeconds) / delta,
+// which carries the property's delta: one authored "200 units/sec" gives y1 = 0.125 for a 400px move
+// and y1 = 100 for a 0.5 scale change, and divides by zero on a property that does not move. As a
+// multiple, outSpeed = frac * (delta / dur), the delta and the duration cancel and y1 = frac * x1.
+// These asserts are that cancellation, measured through the shipped code.
+{
+  const { handleCurve, cubicBezier, HANDLE_REGISTRY, resolveHandle } = await import('../../core/motion.js');
+  const { motionAt, keyHandleErrors, velocityAt } = await import('../../core/sequence.js');
+
+  // ONE HANDLE PAIR, EVERY PROPERTY. x, scale and rot share no scale, and the same key drives all
+  // three to the SAME fractional progress. A speed term in absolute units could not do this.
+  const multi = [{ t: 0, x: 0, scale: 1, rot: 0, easeOut: { influence: 20, speed: 4 } },
+                 { t: 1, x: 400, scale: 2, rot: 90, easeIn: 'easyEase' }];
+  const frac = (v, a, b) => (v - a) / (b - a);
+  let sameProgress = true;
+  for (const t of [0.1, 0.3, 0.5, 0.9]) {
+    const m = motionAt(multi, t);
+    const fx = frac(m.dx, 0, 400), fs = frac(m.scale, 1, 2), fr = frac(m.rot, 0, 90);
+    if (Math.abs(fx - fs) > 1e-9 || Math.abs(fx - fr) > 1e-9) sameProgress = false;
+  }
+  ok('one handle pair drives x, scale and rot to identical progress', sameProgress);
+  // And it is the same curve whatever the segment lasts, which absolute units would not be either.
+  const short = [{ t: 0, x: 0, easeOut: { influence: 20, speed: 4 } }, { t: 0.5, x: 400 }];
+  const long = [{ t: 0, x: 0, easeOut: { influence: 20, speed: 4 } }, { t: 4, x: 400 }];
+  ok('the curve is the same shape at any segment duration',
+    Math.abs(motionAt(short, 0.25).dx - motionAt(long, 2).dx) < 1e-6);
+  // A property that does NOT change across the segment must still interpolate, not divide by zero.
+  const still = [{ t: 0, x: 100, easeOut: { influence: 20, speed: 4 } }, { t: 1, x: 100, easeIn: 'easyEase' }];
+  ok('a zero delta is not a special case', motionAt(still, 0.4).dx === 100);
+
+  // easyEase on both sides IS the published Easy Ease, cubic-bezier(1/3, 0, 2/3, 1).
+  const ee = handleCurve('easyEase', 'easyEase'), pub = cubicBezier(1 / 3, 0, 2 / 3, 1);
+  let w = 0; for (let i = 0; i <= 100; i++) w = Math.max(w, Math.abs(ee(i / 100) - pub(i / 100)));
+  ok('easyEase on both sides is AE Easy Ease exactly', w < 1e-9);
+  // The closed form: y1 = speed * influence/100, y2 = 1 - speed * influence/100.
+  const drawn = handleCurve({ influence: 25, speed: 2 }, null);
+  const closed = cubicBezier(0.25, 0.5, 2 / 3, 2 / 3);
+  let w2 = 0; for (let i = 0; i <= 100; i++) w2 = Math.max(w2, Math.abs(drawn(i / 100) - closed(i / 100)));
+  ok('handleCurve is y = speed * influence/100, with the delta cancelled out', w2 < 1e-9);
+  // An ABSENT side is the linear half, so a one-sided handle means what it says.
+  ok('handleCurve returns null when neither side authors one', handleCurve(null, null) === null);
+  ok('speed 1 both sides IS linear', (() => { const f = handleCurve('linear', 'linear');
+    return [0.2, 0.5, 0.8].every((t) => Math.abs(f(t) - t) < 1e-9); })());
+
+  // DEFAULTS ARE SACRED: a track with no handle takes the path it took before handles existed.
+  const plain = [{ t: 0, x: 0 }, { t: 1, x: 300 }, { t: 2, x: 900 }];
+  ok('a handleless track is byte-identical to the old default path',
+    motionAt(plain, 0.37).dx === 60.78359999999999);
+
+  // THE VELOCITY READ inherits handles for free, because it derives from motionAt.
+  const peak = (kfs) => Math.max(...[...Array(30)].map((_, i) => velocityAt(kfs, i / 30, 1 / 30).speed));
+  ok('velocityAt sees an authored handle without being told about it',
+    peak([{ t: 0, x: 0, easeOut: 'hang' }, { t: 1, x: 400, easeIn: 'hang' }]) > 1.25 * peak([{ t: 0, x: 0 }, { t: 1, x: 400 }]));
+
+  // THE REFUSALS. `through` COMPUTES the tangent, a handle AUTHORS it, a named ease is a third
+  // answer. All three refused by name rather than one silently winning.
+  ok('a key with both `through` and a handle is refused',
+    keyHandleErrors([{ t: 0 }, { t: 1, ease: 'through', easeIn: 'easyEase' }], 'L').length === 1);
+  ok('a named ease and a handle on one segment are refused',
+    keyHandleErrors([{ t: 0, easeOut: 'fling' }, { t: 1, ease: 'easeOutQuint' }], 'L').length === 1);
+  ok('a handle on its own is fine', keyHandleErrors([{ t: 0, easeOut: 'fling' }, { t: 1, easeIn: 'easyEase' }], 'L').length === 0);
+  ok('`ease` on a key shapes the PREVIOUS segment, so it does not clash with that key\'s `easeOut`',
+    keyHandleErrors([{ t: 0 }, { t: 1, ease: 'easeOutQuint', easeOut: 'fling' }, { t: 2 }], 'L').length === 0);
+  ok('an out-of-range influence is refused with the unit named',
+    /PER CENT of the segment/.test(keyHandleErrors([{ t: 0, easeOut: { influence: 400 } }, { t: 1 }], 'L')[0] || ''));
+  ok('an unknown handle name is refused, not substituted',
+    /unknown keyframe handle/.test(keyHandleErrors([{ t: 0, easeOut: 'easyEaseOut' }, { t: 1 }], 'L')[0] || ''));
+  // There is ONE name per SHAPE and the SLOT picks the side. easyEaseIn/easyEaseOut would be two
+  // spellings of one thing, which is the fork this repo logs most.
+  ok('there is no side-specific spelling of a handle name',
+    !HANDLE_REGISTRY.names.some((n) => /In$|Out$/.test(n)));
+  ok('every handle name resolves to a real { influence, speed }',
+    HANDLE_REGISTRY.names.every((n) => { const h = resolveHandle(n, 'easeOut');
+      return Number.isFinite(h.influence) && Number.isFinite(h.speed) && h.influence >= 0 && h.influence <= 100; }));
+
+  // AND THE CLOCK. timeRemap keys are a key list with an `ease` per segment, exactly like a motion
+  // track, so they take the same handles from the same solver rather than growing a second dial.
+  // The units land better here than anywhere else: this segment's velocity IS a playback rate.
+  const { layerTime } = await import('../../core/time.js');
+  const clock = (remap) => (t) => layerTime({ timeRemap: remap }, t, 0, 2);
+  const evenly = clock([{ t: 0, at: 0 }, { t: 2, at: 2 }]);
+  ok('a handleless timeRemap is still the straight line it always was',
+    Math.abs(evenly(0.5) - 0.5) < 1e-9 && Math.abs(evenly(1.5) - 1.5) < 1e-9);
+  const stopped = clock([{ t: 0, at: 0 }, { t: 2, at: 2, easeIn: 'easyEase' }]);
+  // speed 0 on the arriving handle means the clock is at a DEAD STOP as it reaches the key, so the
+  // last stretch of source time is crossed slowly and the layer freezes into its final pose.
+  const rate = (f, t, h = 1 / 60) => (f(t + h) - f(t - h)) / (2 * h);
+  ok('a timeRemap handle with speed 0 stops the clock at that key', rate(stopped, 1.99) < 0.1);
+  ok('and the same clock is running FASTER than real time in the middle', rate(stopped, 1.0) > 1.2);
+  const fast = clock([{ t: 0, at: 0 }, { t: 2, at: 2, easeIn: { influence: 20, speed: 4 } }]);
+  ok('speed 4 on the arriving handle means 4x playback at that key',
+    Math.abs(rate(fast, 1.98) - 4) < 0.6);
+  // BAKED ONCE, NOT PER FRAME. layerTime runs once per layer per frame and used to re-validate every
+  // key and, for a NAMED shape, allocate a fresh array on the way. bakeTimeRemap resolves it at boot.
+  const { bakeTimeRemap } = await import('../../core/time.js');
+  const baked = { timeRemap: 'whip', duration: 4 };
+  bakeTimeRemap(baked);
+  ok('bakeTimeRemap turns a named shape into seconds keys', Array.isArray(baked.timeRemap)
+    && baked.timeRemap[baked.timeRemap.length - 1].t === 4);
+  ok('and the mark is non-enumerable, so no walker sees a new key',
+    baked.timeRemap.baked === true && !Object.keys(baked.timeRemap).includes('baked'));
+  const again = baked.timeRemap;
+  bakeTimeRemap(baked);
+  ok('baking twice is a no-op, so a re-boot on the same data is safe', baked.timeRemap === again);
+  ok('a baked layer reads the same clock an unbaked one does', (() => {
+    const raw = { timeRemap: 'whip', duration: 4 };
+    for (const t of [0.3, 1.7, 2.9, 3.8])
+      if (Math.abs(layerTime(raw, t, 0, 4) - layerTime(baked, t, 0, 4)) > 1e-12) return false;
+    return true;
+  })());
+  let bootThrew = null;
+  try { bakeTimeRemap({ id: 'clocky', timeRemap: [{ t: 0, at: 0 }, { t: 1 }], duration: 2 }); }
+  catch (e) { bootThrew = e.message; }
+  ok('a bad key list fails at BAKE time, naming the layer',
+    bootThrew != null && /clocky/.test(bootThrew) && /numeric/.test(bootThrew));
+
+  ok('a timeRemap key with both a handle and a named ease is refused',
+    keyHandleErrors([{ t: 0, at: 0, easeOut: 'fling' }, { t: 2, at: 2, ease: 'easeOutQuint' }], 'r').length === 1);
+
+  // And the CAMERA gets all of it, because it shares segmentAt.
+  const { cameraAt } = await import('../../core/sequence.js');
+  const cam = [{ t: 0, s: 1, easeOut: 'hang' }, { t: 1, s: 2, easeIn: 'hang' }];
+  ok('a camera key takes handles too', cameraAt(cam, 0.5).s === 1.5 && cameraAt(cam, 0.15).s < 1.05);
 }
 
 // ---------- an authored filter survives a motion track ----------

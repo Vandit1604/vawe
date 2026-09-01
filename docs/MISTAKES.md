@@ -16464,3 +16464,63 @@ draw on purpose, and all three stay quiet.
 `dotmatrix` / `paperShapes` presets) draw circles of radius 1.3 to 5px at 52 to 64px spacing and never
 a line. A drifting dot field is a texture; a ruled grid is a canvas with a T-square on it. Only the
 second reads as a mock-up, so only the second is opt-in. → **Gate: `ruled-grid` in designspec-check.**
+
+## 534. `ease: "through"` worked on a layer key and threw on a camera key
+
+`cameraAt`'s own comment said it "mirrors motionAt", which is this repo's most-logged defect shape
+written down as a design note. They had already drifted. `through` is not an easing and `motionAt`
+dispatched it BEFORE `resolveEasing` was called; `cameraAt` had no such branch, so a camera key naming
+it reached `resolveEasing('through')` and threw `unknown easing "through"`. `core/validate.mjs`
+accepted it on both, because `isEasingName` is one predicate and the interpolators were two.
+
+Nobody found this by rendering. It surfaced while unifying the two functions for an unrelated feature,
+which is the point: a fact with two owners does not announce the day it drifts.
+
+**Root cause:** two hand-written interpolators over one keyframe vocabulary. **Fix:** `segmentAt`
+(`core/sequence.js`) is the single owner of how a segment is eased, and both call it. Only the
+DEFAULT stays with the caller, because that part differs on purpose: `motionAt` keeps its
+`DENSE_KEY_SEC` rule and the camera keeps plain `easeInOutCubic`. → **Gate: `lib-test` asserts a
+camera key speaks `through`, and that the camera default has no density rule.**
+
+**A second bug fell out of the same read.** Before the first camera key, the old loop left `b` as the
+LAST key rather than the neighbour, so a `focus` keyed only on key 1 read as `null` before key 0 and
+as its real value one frame later. A differential run over 36,000 random samples found `focus` as the
+only disagreement between old and new, and every instance was before the first key. No shipped scene
+exercises it (`snap-scenes` unchanged).
+
+## 535. the velocity-cut advisory could not see a rotation, and its own worked example is one
+
+`core/velocity-cut.js` finds the frame where the picture is fastest, so a cut can be hidden inside it.
+`layerSpeedAt` summed translation plus the edge travel implied by a SCALE change, and stopped there.
+The technique it implements (`docs/CRAFT/AE-TECHNIQUES.md` #1) hands a fast ROTATION from one element
+to another across the seam. So the advisory scored that seam at **0 px/s** and reported it as a
+velocity trough: it called the technique's own demonstration the mistake it exists to catch.
+
+The `SCALE_REACH` constant right above the bug is the tell. Somebody had already asked "what else
+moves pixels without moving the layer's origin", answered "scale", and stopped at one answer.
+
+**Root cause:** an enumeration treated as finished. **Fix:** `ROT_REACH` beside `SCALE_REACH`, a
+degree per second converted to px per second at an assumed radius, approximate on purpose exactly as
+the scale term is. The rotating seam now reads 3585 px/s where it read 0. → **Gate: `lib-test` asserts
+a pure rotation reads as picture speed, and that a rotating seam is not reported as a trough.**
+
+## 536. KNOWN LIMITATION, not fixed here: a motion track cannot carry velocity out of its own ends
+
+`tangentAt` (`core/sequence.js`) forces the FIRST and LAST tangents of an `ease: "through"` chain to
+zero, so a travel eases out of rest and back into it whatever its neighbours are doing. Inside the
+track that is right: the hitch `through` removes is the one between keys.
+
+At the BOUNDARY it is a real limit, and it is the reason the velocity-hidden cut's third part
+(`docs/CRAFT/AE-TECHNIQUES.md` #1, the handoff) has to be authored key by key rather than inherited. A
+layer whose last key is at full speed cannot say so; the next shot's first key has to re-declare it.
+
+**Deliberately NOT fixed with the keyframe handles.** A handle changes what a curve does INSIDE a
+segment; a non-zero end tangent changes what a TRACK MEANS at its boundary, which is a different
+promise and one every existing `through` chain in the library currently relies on. Handles do give the
+boundary an authored answer today (`easeOut` on the first key, `easeIn` on the last), so the limit is
+now "the tangent is not INFERRED from outside the track", not "the boundary cannot be shaped".
+
+Related and separate: `speed` is a multiple of each segment's OWN average velocity, so the same
+authored number on both sides of a cut hands the same SHAPE across and not the same units per second.
+Measured on a worked handoff: 762.8 deg/s arriving, 269.9 deg/s leaving, from the same `speed: 3`.
+Absolute continuity across two layers would need a cross-layer velocity binding and is not built.

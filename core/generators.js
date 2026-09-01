@@ -46,6 +46,7 @@ import { blurbsOf } from './registry.js';
 import { sanitizeHtml } from './sanitize-html.js';
 import { thermalPrimitives, THERMAL_REGION, THERMAL_RAMP } from './filters.js';
 import { FALLOFF_NAMES } from './effector.js';
+import { handleCurve } from './motion.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from './lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from './lightfield/presets.js';
 // The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
@@ -691,7 +692,96 @@ const SELECTOR = {
   }],
 };
 
-export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT, THERMAL, EFFECTOR, SELECTOR];
+// ── the keyframe-handle card: the graph editor, with the handles ON the dials ────────────────────
+//
+// A named easing has nothing worth a card: it is one fixed shape and a picture of it is a picture of
+// a constant. A HANDLE has four numbers and the whole point of a graph editor is that you cannot
+// predict the feel from them, so this is the one motion primitive in the engine where seeing the
+// curve while you drag is the difference between authoring it and guessing at it.
+//
+// TWO PANELS, and the second is the one that actually answers the question. The graph is the
+// familiar picture and it flatters everything: any curve from (0,0) to (1,1) looks reasonable. The
+// STRIP underneath samples the same curve at even intervals of TIME and marks where the value is,
+// so a handle that crushes the movement into the middle shows as a crowd of ticks at both ends and
+// a gap across the centre. That is what the eye reads on the rendered frame, and it is invisible in
+// the graph.
+//
+// The curve is NOT re-authored here. `handleCurve` in core/motion.js is the one owner and this card
+// samples it, so a card that looks right is evidence about the shipped interpolator rather than
+// about this file.
+const HANDLE_SCHEMA = {
+  outInfluence: { kind: 'num', min: 0, max: 100, def: 100 / 3, primary: true,
+                  note: 'how far along the segment the LEAVING handle reaches, as a per cent of its duration. AE\'s Easy Ease is a third. Large means the value hangs at this key and the movement is crushed into the far end.' },
+  outSpeed:     { kind: 'num', min: -2, max: 6, def: 0, primary: true,
+                  note: 'how fast the value is moving AS IT LEAVES the first key, as a MULTIPLE of the segment\'s own average velocity. 0 is a dead stop, 1 is a straight line, 4 rushes out. Negative winds back before setting off.' },
+  inInfluence:  { kind: 'num', min: 0, max: 100, def: 100 / 3, primary: true,
+                  note: 'the same reach for the ARRIVING handle, measured back from the second key.' },
+  inSpeed:      { kind: 'num', min: -2, max: 6, def: 0, primary: true,
+                  note: 'how fast the value is moving AS IT ARRIVES. 0 lands dead; above 1 it is still travelling when it gets there, which is what makes a swap read as one gesture rather than a dissolve.' },
+  ticks:        { kind: 'int', min: 6, max: 48, def: 24,
+                  note: 'how many even slices of TIME the strip samples. 24 is a second at 24fps, so each tick is a frame.' },
+  colour:       { kind: 'hex', def: '#e8ff59', note: 'the curve.' },
+};
+
+const HANDLE_CARD = {
+  name: 'keyframeHandle',
+  group: 'motion',
+  blurb: 'The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.',
+  docs: 'docs/EFFECTS.md',
+  reference: null,
+  schema: HANDLE_SCHEMA,
+  presets: {
+    easyEase: {},
+    snap: { outInfluence: 18, outSpeed: 4, inInfluence: 18, inSpeed: 4 },
+    hang: { outInfluence: 85, outSpeed: 0, inInfluence: 20, inSpeed: 1 },
+    overshoot: { outInfluence: 30, outSpeed: 0, inInfluence: 62, inSpeed: 1.8 },
+  },
+  produces: 'html',
+  ready: true,
+  render: (o) => {
+    const oi = pick(o, 'outInfluence', HANDLE_SCHEMA), os = pick(o, 'outSpeed', HANDLE_SCHEMA);
+    const ii = pick(o, 'inInfluence', HANDLE_SCHEMA), is = pick(o, 'inSpeed', HANDLE_SCHEMA);
+    const n = Math.round(pick(o, 'ticks', HANDLE_SCHEMA));
+    const col = o?.colour ?? HANDLE_SCHEMA.colour.def;
+    const f = handleCurve({ influence: oi, speed: os }, { influence: ii, speed: is });
+    // The four control-point coordinates, spelled out on the card because the numbers ARE the
+    // teaching: x is influence over 100, y is speed times that x.
+    const x1 = oi / 100, y1 = os * x1, x2 = 1 - ii / 100, y2 = 1 - is * (ii / 100);
+    const W = 100, H = 100, px = (x) => (x * W).toFixed(2), py = (y) => ((1 - y) * H).toFixed(2);
+    let d = `M 0 ${py(0)}`;
+    for (let i = 1; i <= 120; i++) { const t = i / 120; d += ` L ${px(t)} ${py(f(t))}`; }
+    const ticks = [...Array(n + 1)].map((_, i) => f(i / n));
+    const marks = ticks.map((v) => `<i style="position:absolute;left:${(v * 100).toFixed(3)}%;top:0;bottom:0;width:2px;margin-left:-1px;background:${col};opacity:.75"></i>`).join('');
+    const box = 'position:absolute;background:#0b0b0c;border:1px solid #ffffff1a;border-radius:8px';
+    return `<div style="position:absolute;inset:0;background:#000;container-type:size;font:500 clamp(8px,2.4cqw,15px)/1.4 var(--font-sans,system-ui),sans-serif;color:#fff">
+  <div style="${box};left:6%;top:8%;width:52%;aspect-ratio:1;overflow:hidden">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+      <path d="M 0 100 L 100 0" stroke="#ffffff26" stroke-width="0.6" fill="none" vector-effect="non-scaling-stroke"/>
+      <path d="M 0 ${py(0)} L ${px(x1)} ${py(y1)}" stroke="#ffffff59" stroke-width="0.6" fill="none" vector-effect="non-scaling-stroke"/>
+      <path d="M 100 ${py(1)} L ${px(x2)} ${py(y2)}" stroke="#ffffff59" stroke-width="0.6" fill="none" vector-effect="non-scaling-stroke"/>
+      <path d="${d}" stroke="${col}" stroke-width="1.6" fill="none" vector-effect="non-scaling-stroke"/>
+      <circle cx="${px(x1)}" cy="${py(y1)}" r="2.4" fill="${col}" vector-effect="non-scaling-stroke"/>
+      <circle cx="${px(x2)}" cy="${py(y2)}" r="2.4" fill="${col}" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </div>
+  <div style="position:absolute;left:62%;right:6%;top:8%;opacity:.82">
+    <div style="opacity:.55;letter-spacing:.08em;text-transform:uppercase">cubic-bezier</div>
+    <div style="color:${col};margin-top:.3em">${x1.toFixed(3)}, ${y1.toFixed(3)}, ${x2.toFixed(3)}, ${y2.toFixed(3)}</div>
+    <div style="opacity:.55;margin-top:1.2em;letter-spacing:.08em;text-transform:uppercase">out</div>
+    <div>influence ${oi.toFixed(0)}% &middot; speed ${os.toFixed(2)}x</div>
+    <div style="opacity:.55;margin-top:.9em;letter-spacing:.08em;text-transform:uppercase">in</div>
+    <div>influence ${ii.toFixed(0)}% &middot; speed ${is.toFixed(2)}x</div>
+  </div>
+  <div style="position:absolute;left:6%;right:6%;bottom:8%">
+    <div style="opacity:.55;margin-bottom:.5em;letter-spacing:.08em;text-transform:uppercase">even slices of time, marked where the value is</div>
+    <div style="${box};position:relative;height:3.2em;overflow:hidden">${marks}</div>
+  </div>
+</div>`;
+  },
+};
+
+
+export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT, THERMAL, EFFECTOR, HANDLE_CARD, SELECTOR];
 
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);

@@ -626,7 +626,13 @@
     },
     "ease": {
      "type": "string",
-     "label": "Easing INTO this keyframe (default easeInOutCubic). Use \"linear\" on interior keyframes for a velocity-continuous multi-keyframe push (a chained ease-in-out pulses/shakes because it zeroes velocity at each keyframe)."
+     "label": "Easing INTO this keyframe (default easeInOutCubic). Use \"linear\" on interior keyframes for a velocity-continuous multi-keyframe push (a chained ease-in-out pulses/shakes because it zeroes velocity at each keyframe). \"through\" carries velocity across the key from its neighbours."
+    },
+    "easeOut": {
+     "label": "THE HANDLE LEAVING THIS KEY, a graph-editor control point for the segment that STARTS here. A handle NAME from the keyframe-handle registry (see `make arsenal`), or { \"influence\": 0-100, \"speed\": a number }. `influence` is how far along the segment the handle reaches, as a PER CENT of its duration. `speed` is how fast the value is moving AT this key, as a MULTIPLE of the segment's own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out. A multiple and not px/sec, so ONE handle pair is correct for x, scale and rot at once and a property that does not change is not a division by zero. The far side of the segment is `easeIn` on the next key; a side that says nothing is the straight line. REFUSED beside `ease` on the same segment or `ease: \"through\"` on the same key: two answers to one question."
+    },
+    "easeIn": {
+     "label": "THE HANDLE ARRIVING AT THIS KEY, a graph-editor control point for the segment that ENDS here. Same shape as `easeOut`: a name, or { \"influence\": 0-100, \"speed\": a multiple of the segment's average velocity }. `easeIn: \"easyEase\"` is the AE dead-stop arrival; `easeIn: \"fling\"` arrives fast and is what makes a swap read as one gesture rather than a dissolve. Pairs with `easeOut` on the PREVIOUS key."
     },
     "x": {
      "type": "number",
@@ -1565,7 +1571,13 @@
       },
       "ease": {
        "type": "string",
-       "label": "Easing name (incl. spring, spring-bouncy, spring-stiff)"
+       "label": "Easing name (incl. spring, spring-bouncy, spring-stiff). ONE curve for the whole segment INTO this key. To draw the curve yourself, per side, use `easeOut` on the key before and `easeIn` here."
+      },
+      "easeOut": {
+       "label": "THE HANDLE LEAVING THIS KEY, a graph-editor control point for the segment that STARTS here. A handle NAME from the keyframe-handle registry (see `make arsenal`), or { \"influence\": 0-100, \"speed\": a number }. `influence` is how far along the segment the handle reaches, as a PER CENT of its duration. `speed` is how fast the value is moving AT this key, as a MULTIPLE of the segment's own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out. A multiple and not px/sec, so ONE handle pair is correct for x, scale and rot at once and a property that does not change is not a division by zero. The far side of the segment is `easeIn` on the next key; a side that says nothing is the straight line. REFUSED beside `ease` on the same segment or `ease: \"through\"` on the same key: two answers to one question."
+      },
+      "easeIn": {
+       "label": "THE HANDLE ARRIVING AT THIS KEY, a graph-editor control point for the segment that ENDS here. Same shape as `easeOut`: a name, or { \"influence\": 0-100, \"speed\": a multiple of the segment's average velocity }. `easeIn: \"easyEase\"` is the AE dead-stop arrival; `easeIn: \"fling\"` arrives fast and is what makes a swap read as one gesture rather than a dissolve. Pairs with `easeOut` on the PREVIOUS key."
       }
      }
     },
@@ -1801,7 +1813,7 @@
     },
     "timeRemap": {
      "type": "string|array",
-     "label": "TIME REMAP: keyframes on this layer's own CLOCK, so everything it does (its motion, size, idle, typing, count) speeds and slows together. Either a shape name (\"whip\" ramps 20% · 530% · slow, \"hold\" drops to 30% across the middle half, \"freeze\" holds the last pose, \"rewind\" plays then runs backwards) or your own keys: [{\"t\":0,\"at\":0},{\"t\":1.4,\"at\":0.3},{\"t\":2,\"at\":2}], where `t` is the layer's elapsed second and `at` is the second it believes it is. A repeated `at` freezes, a falling `at` reverses, and `t` only ever goes forward. The general form of `timeWarp`; declaring both is refused."
+     "label": "TIME REMAP: keyframes on this layer's own CLOCK, so everything it does (its motion, size, idle, typing, count) speeds and slows together. Either a shape name (\"whip\" ramps 20% · 530% · slow, \"hold\" drops to 30% across the middle half, \"freeze\" holds the last pose, \"rewind\" plays then runs backwards) or your own keys: [{\"t\":0,\"at\":0},{\"t\":1.4,\"at\":0.3},{\"t\":2,\"at\":2}], where `t` is the layer's elapsed second and `at` is the second it believes it is. A repeated `at` freezes, a falling `at` reverses, and `t` only ever goes forward. The general form of `timeWarp`; declaring both is refused. A key also takes the graph-editor handles `easeOut` / `easeIn`, and their units land better here than anywhere: this segment's velocity IS a playback rate, so `speed: 4` on a handle means four times speed at that instant and `speed: 0` stops the clock dead at that key."
     },
     "timeWarp": {
      "type": "string",

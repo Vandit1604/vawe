@@ -30,7 +30,7 @@
 // remap of one number: no accumulator, no "where was I last frame", nothing that would make a seek
 // disagree with a forward render. A layer's window never moves either, only where inside it the layer
 // believes it is, so `start` and `duration` still mean what they say.
-import { resolveEasing } from './motion.js';
+import { resolveEasing, handleCurve } from './motion.js';
 import { defineRegistry, withBlurb, blurbsOf } from './registry.js';
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -82,7 +82,16 @@ function remapAt(keys, lt) {
     if (lt >= a.t && lt <= b.t) {
       const seg = b.t - a.t;
       if (!(seg > 0)) return b.at;
-      const p = resolveEasing(b.ease || 'linear')(clamp01((lt - a.t) / seg));
+      // HANDLES ON THE CLOCK, the same mechanism a motion key has, and the units land better here
+      // than anywhere else in the engine. `speed` is a multiple of the segment's average velocity,
+      // and this segment's velocity IS a playback rate, so `{"speed": 4}` on a timeRemap key means
+      // four times speed at that instant, which is what a speed graph has always meant. `speed: 0`
+      // stops the clock dead at the key, which is the freeze, reachable without a second key.
+      //
+      // IT IS THE SAME SOLVER, not a second one. The argument for handles on a position is that a
+      // named easing shapes a segment from outside it and cannot say what the value is doing AT the
+      // key; a clock has exactly that problem and had exactly one answer for it, `linear`.
+      const p = (handleCurve(a.easeOut, b.easeIn) || resolveEasing(b.ease || 'linear'))(clamp01((lt - a.t) / seg));
       return a.at + (b.at - a.at) * p;
     }
   }
@@ -91,7 +100,14 @@ function remapAt(keys, lt) {
 
 // resolveRemap(spec, span, who): this layer's keys, in SECONDS. A name is scaled by the span here,
 // which is the one place a normalised shape and a real duration meet.
+//
+// A BAKED LIST IS RETURNED UNTOUCHED, and that is the whole reason `bakeTimeRemap` exists. This used
+// to run on EVERY frame, from inside `layerTime`, whose own docstring says it is called once per
+// layer per frame: so every frame re-validated every key, and a NAMED shape allocated a fresh array
+// through `.map()` on the way. The output was right and the work was wasted, and it grew with the
+// layer count. Handles make it worse, because a handled key carries more to check than a bare one.
 function resolveRemap(spec, span, who) {
+  if (spec && spec.baked) return spec;
   if (typeof spec === 'string')
     return TIME_REMAP_REGISTRY.pick(spec).map((k) => ({ t: k.t * span, at: k.at * span, ease: k.ease }));
   if (!Array.isArray(spec) || spec.length < 2)
@@ -109,6 +125,26 @@ function resolveRemap(spec, span, who) {
         + `backwards, which is how a rewind is written.`);
   }
   return spec;
+}
+
+/**
+ * bakeTimeRemap(L): resolve this layer's `timeRemap` ONCE, at boot, into seconds keys.
+ *
+ * Two things it buys. The per-frame path stops validating and stops allocating (see resolveRemap).
+ * And a bad key list now fails at BOOT with the layer named, rather than on whichever frame first
+ * samples it, which is the same trade `bakeCameraMove` and `bakeDepth` already make.
+ *
+ * The span it bakes against is `L.duration ?? 2`, which is exactly what `layerTime` computes from the
+ * `start`/`end` runTracks hands it, so the baked list is the list the read would have produced.
+ *
+ * The `baked` mark is NON-ENUMERABLE and sits on the ARRAY, not on the layer: a new layer property
+ * would be a schema-drift finding and a thing every prop walker has to learn about, and this is
+ * neither. Same construction as `withBlurb` in core/registry.js, for the same reason.
+ */
+export function bakeTimeRemap(L) {
+  if (!L || L.timeRemap == null || L.timeRemap.baked) return;
+  const keys = resolveRemap(L.timeRemap, L.duration ?? 2, L.id || L.type || 'a layer');
+  L.timeRemap = Object.defineProperty(keys.slice(), 'baked', { value: true });
 }
 
 /**

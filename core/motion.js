@@ -7,7 +7,7 @@
 // imports it and the browser must be able to resolve it. It is engine code, not tooling.
 
 import { FEEL, INTERP } from './vocab.js';
-import { nearMisses } from './registry.js';
+import { defineRegistry, withBlurb, blurbsOf, nearMisses } from './registry.js';
 
 export const FPS = 30;
 
@@ -106,6 +106,169 @@ export function speedRamp(t, { peak = 0.5, sharp = 2.4 } = {}) {
   if (peak <= 0) return decel(t, sharp);
   if (peak >= 1) return accel(t, sharp);
   return t < peak ? peak * Math.pow(t / peak, sharp) : 1 - (1 - peak) * Math.pow((1 - t) / (1 - peak), sharp);
+}
+
+// ---------- THE GRAPH EDITOR: a cubic bezier on the unit square ----------
+//
+// Every curve above is a fixed shape with a name. This one is the shape an author DRAWS, and it is the
+// primitive under After Effects' graph editor: two control points on the unit square, P0 (0,0) and
+// P3 (1,1) fixed, P1 = (x1,y1) and P2 = (x2,y2) authored. It is the same maths CSS `cubic-bezier()`
+// runs, so a curve copied off a CSS reference or out of AE reproduces here exactly.
+//
+// THE SOLVE, and why it is not a closed form. The curve is parametric in s, and BOTH axes are cubics
+// in s. What an easing needs is y as a function of x, so x(s) = t has to be inverted first.
+// Newton-Raphson converges in a handful of steps because x(s) is monotone for x1, x2 in [0,1], and a
+// bisection fallback covers the flat spots where the derivative goes to zero and Newton would stall or
+// shoot out of range. Deterministic and allocation-free: the returned closure holds four numbers and
+// creates nothing per call, which matters because it is sampled once per property per layer per frame.
+const bezA = (a1, a2) => 1 - 3 * a2 + 3 * a1;
+const bezB = (a1, a2) => 3 * a2 - 6 * a1;
+const bezC = (a1) => 3 * a1;
+const bezAt = (s, a1, a2) => ((bezA(a1, a2) * s + bezB(a1, a2)) * s + bezC(a1)) * s;
+const bezSlope = (s, a1, a2) => 3 * bezA(a1, a2) * s * s + 2 * bezB(a1, a2) * s + bezC(a1);
+
+/**
+ * cubicBezier(x1, y1, x2, y2) → (t) => y. `x1`/`x2` are clamped to [0,1] because they are TIME and a
+ * control point outside the segment makes x(s) non-monotone, which has no inverse. `y1`/`y2` are NOT
+ * clamped: a y outside [0,1] is an overshoot, which is a real and wanted shape.
+ */
+export function cubicBezier(x1, y1, x2, y2) {
+  const a1 = clamp01(x1), a2 = clamp01(x2);
+  if (a1 === y1 && a2 === y2) return (t) => t;   // the identity line, exactly, with no solve
+  return (t) => {
+    if (!(t > 0)) return 0;
+    if (t >= 1) return 1;
+    // Newton first, from t itself: for a curve near the diagonal that is already close.
+    let s = t;
+    for (let i = 0; i < 8; i++) {
+      const d = bezSlope(s, a1, a2);
+      if (!(Math.abs(d) > 1e-6)) break;
+      const e = bezAt(s, a1, a2) - t;
+      if (Math.abs(e) < 1e-9) return bezAt(s, y1, y2);
+      s -= e / d;
+      if (!(s >= 0) || !(s <= 1)) break;          // out of range, hand it to bisection
+    }
+    let lo = 0, hi = 1;
+    s = t;
+    for (let i = 0; i < 40; i++) {
+      const x = bezAt(s, a1, a2);
+      if (Math.abs(x - t) < 1e-9) break;
+      if (x < t) lo = s; else hi = s;
+      s = (lo + hi) / 2;
+    }
+    return bezAt(s, y1, y2);
+  };
+}
+
+// ---------- KEYFRAME HANDLES: influence AND speed, on the unit square ----------
+//
+// A named easing shapes a segment from OUTSIDE it: one curve for the whole gap, the same curve
+// whatever the keys either side are doing. A HANDLE belongs to a KEY and to one SIDE of it, which is
+// what a graph editor actually gives you and what the rest of this engine could not express.
+//
+//   easeOut on key a   shapes the segment LEAVING a
+//   easeIn  on key b   shapes the segment ARRIVING at b
+//   so the segment a -> b is drawn by a.easeOut and b.easeIn, one handle each.
+//
+// A handle carries TWO numbers, and the second one is the reason this is a feature rather than a
+// second spelling of `ease`:
+//
+//   influence   how far along the segment the handle reaches, 0 to 100 per cent of its DURATION.
+//               This is the x of the control point: x1 = outInfluence/100, x2 = 1 - inInfluence/100.
+//   speed       how fast the value is moving AT the key, as a MULTIPLE of the segment's own average
+//               velocity. 0 is a dead stop, 1 is "exactly the average" (a straight line), 4 rushes
+//               out, and a negative number leaves backwards before turning round.
+//
+// WHY SPEED IS A MULTIPLE AND NOT UNITS PER SECOND, which is the whole design decision here.
+// After Effects keys speed in real units (pixels/sec, degrees/sec, per cent/sec) and pays for it by
+// keying every property dimension SEPARATELY: x, scale and rot do not share a scale, so one handle
+// pair cannot serve all three with an absolute speed on it. Putting speed on the unit square needs
+//
+//     y1 = (outSpeed * influenceSeconds) / valueDelta
+//
+// and that expression carries the property's own delta, so it divides by zero on a property that does
+// not change across the segment and gives a different curve to x than to scale for the same authored
+// number. Written as a multiple of the average velocity, outSpeed = frac * (valueDelta / segDur), the
+// substitution cancels EXACTLY:
+//
+//     y1 = frac * (valueDelta / segDur) * ((influence/100) * segDur) / valueDelta = frac * influence/100
+//
+// No delta, no duration, no division. One handle pair is therefore correct for every property on the
+// key at once, a zero delta is not a special case because nothing is divided by it, and the authoring
+// surface stays flat: `{ "influence": 20, "speed": 4 }` and not a map keyed by property name. It is
+// also what an author reasons in ("leave at a quarter speed, arrive at twice"), which is the
+// secondary reason, not the deciding one. The deciding one is that the arithmetic is exact.
+//
+// The cost, stated plainly: a per-property speed in real units is not expressible. A move whose x
+// should leave at 400 px/s while its scale leaves at rest needs two layers or two tracks. That is the
+// trade for one handle pair that is always right instead of five that each need a delta.
+const HANDLE_DEFAULT_INFLUENCE = 100 / 3;   // AE's Easy Ease reaches a third of the way in
+
+// A side with NO handle contributes the LINEAR half of the curve, which is AE's own default temporal
+// interpolation: influence a third, speed equal to the average, so the control point sits on the
+// diagonal and that half of the segment is a straight line. It is what makes a one-sided handle mean
+// what it says: `easeOut: "easyEase"` alone gives (1/3, 0, 2/3, 2/3), eased out of the key and linear
+// into the next, exactly as applying Easy Ease Out to a single keyframe does.
+const LINEAR_SIDE = { influence: HANDLE_DEFAULT_INFLUENCE, speed: 1 };
+
+// THE SYMMETRIC FLAT-ENDS, STEEP-MIDDLE CURVE ALREADY EXISTS. `speedRamp` (below) owns it and is
+// exposed as `ease: "ramp"`, so a named handle preset that reproduced it on both sides would be a
+// second spelling of a shipped curve. Measured: a symmetric handle pair at influence 55, speed 0
+// reproduces `ramp` to within 0.0037 over the whole segment. `hang` is not that curve at a different
+// name, it is the SIDE of it, and the side is what a named easing cannot give you: the swap the
+// velocity-hidden cut describes is `hang` leaving one key and something else arriving at the next.
+//
+// The doses, measured as peak slope in multiples of the segment's average velocity, so the choice is
+// not by feel: easyEase 1.50x, `ramp` 2.40x, easeInOutCubic (the engine default) 3.00x, `hang` on
+// both sides 4.00x. Note the order: the DEFAULT is already steeper than `ramp`, so reaching for
+// `ramp` to make a move snappier makes it softer.
+const HANDLES = {
+  easyEase: withBlurb('AE\'s Easy Ease: reaches a third of the way in and arrives at a DEAD STOP. The default handle, and the one to use when you just want a key to stop being mechanical', { influence: HANDLE_DEFAULT_INFLUENCE, speed: 0 }),
+  linear: withBlurb('the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped', { ...LINEAR_SIDE }),
+  hang: withBlurb('influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state', { influence: 75, speed: 0 }),
+  fling: withBlurb('a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move', { influence: 18, speed: 4 }),
+  overshoot: withBlurb('arrives at 1.8x the average speed with a long handle, so the value sails past its key and comes back. The handle version of a back ease, and it needs the far side to stop it', { influence: 62, speed: 1.8 }),
+};
+
+export const HANDLE_REGISTRY = defineRegistry('keyframe handle', HANDLES, {
+  blurbs: blurbsOf('keyframe handle', HANDLES), slot: 'easeOut',
+});
+
+/**
+ * resolveHandle(h, side, who): a handle spec -> { influence, speed }. A NAME resolves through the
+ * registry (which refuses an unknown one rather than substituting); `null`/absent is the linear side.
+ */
+export function resolveHandle(h, side, who = '') {
+  if (h == null) return LINEAR_SIDE;
+  if (typeof h === 'string') return HANDLE_REGISTRY.pick(h);
+  if (typeof h !== 'object' || Array.isArray(h))
+    throw new Error(`${who ? `${who}: ` : ''}\`${side}\` takes a handle name (${HANDLE_REGISTRY.names.join(', ')}) `
+      + `or { "influence": 0-100, "speed": a multiple of the segment's average velocity }, got ${JSON.stringify(h)}.`);
+  const influence = h.influence == null ? HANDLE_DEFAULT_INFLUENCE : h.influence;
+  const speed = h.speed == null ? 0 : h.speed;
+  if (!Number.isFinite(influence) || influence < 0 || influence > 100)
+    throw new Error(`${who ? `${who}: ` : ''}\`${side}.influence\` is a PER CENT of the segment's duration, `
+      + `0 to 100. Got ${JSON.stringify(h.influence)}.`);
+  if (!Number.isFinite(speed))
+    throw new Error(`${who ? `${who}: ` : ''}\`${side}.speed\` is a MULTIPLE of the segment's average `
+      + `velocity (0 = a dead stop, 1 = a straight line, 4 = a rush). Got ${JSON.stringify(h.speed)}.`);
+  // A handle spec that names influence and nothing else means Easy Ease at that reach, not linear:
+  // an author writing `{influence: 60}` is asking for a slower key, and speed 1 would give them the
+  // straight line they already had. `speed` defaults to 0 for that reason, and the ABSENT-HANDLE
+  // default (LINEAR_SIDE) is a different question with a different answer.
+  return { influence, speed };
+}
+
+/**
+ * handleCurve(out, into, who): the two handles of ONE segment -> an easing function, or null when
+ * neither side authored one and the segment belongs to the named-easing path exactly as before.
+ */
+export function handleCurve(out, into, who = '') {
+  if (out == null && into == null) return null;
+  const o = resolveHandle(out, 'easeOut', who), i = resolveHandle(into, 'easeIn', who);
+  const x1 = o.influence / 100, x2i = i.influence / 100;
+  // y1 = speed * x1 and y2 = 1 - speed * (1 - x2): the cancellation derived above, written once.
+  return cubicBezier(x1, o.speed * x1, 1 - x2i, 1 - i.speed * x2i);
 }
 
 // easing registry: lets a theme name its easing as a string (motion.easing) that the scene

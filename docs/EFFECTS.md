@@ -321,6 +321,18 @@ On a `motion` key's `ease`, but NOT a curve. An easing is a function of one segm
 |---|---|
 | `through` | velocity carries THROUGH the key: a cubic Hermite with neighbour tangents, so a travel across several keys is one gesture rather than a stop at each |
 
+## Keyframe handles (the graph editor)  `[motion key]`
+
+On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles. A named easing is one stock curve for the whole gap; a handle is a control point you place. Each carries an `influence` (how far along the segment it reaches, 0-100 per cent of the DURATION) and a `speed` (how fast the value moves AT the key, as a MULTIPLE of the segment's own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out). A multiple and not px/sec, so one handle pair is correct for x, scale and rot at once. The names below are ONE SIDE each and the slot picks the side: `{ "t":0.6, "x":400, "easeOut":"fling", "easeIn":"easyEase" }`, or the long form `{ "influence": 18, "speed": 4 }`. Refused beside `ease` on the same segment.
+
+| name | what / when |
+|---|---|
+| `easyEase` | AE's Easy Ease: reaches a third of the way in and arrives at a DEAD STOP. The default handle, and the one to use when you just want a key to stop being mechanical |
+| `fling` | a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move |
+| `hang` | influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state |
+| `linear` | the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped |
+| `overshoot` | arrives at 1.8x the average speed with a long handle, so the value sails past its key and comes back. The handle version of a back ease, and it needs the far side to stop it |
+
 ## Depths (parallax planes)  `[per-layer]`
 
 `{ "depth": "back" }` on any layer. Stands it at a DISTANCE from the picture plane, so a camera move gives it parallax instead of turning the whole frame as one rigid pane. Each name is a fraction of the film's own lens, so it means the same distance under any camera, and it lowers to the `plane` modifier at boot. A raw number of px still works. Refused on a group CHILD, which sits in a flat parent: put it on the group.
@@ -882,6 +894,7 @@ Parametric field generators with declared option schemas, turnable at /playgroun
 | `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
 | `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
 | `effector` | One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone. |
+| `keyframeHandle` | The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens. |
 | `rangeSelector` | The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs. |
 | `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
 | `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
@@ -921,4 +934,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_599 effects across 42 families. Regenerate: `make effects`._
+_605 effects across 43 families. Regenerate: `make effects`._
