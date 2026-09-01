@@ -104,7 +104,7 @@ export function logoLockup({ markX = 690, markY = 300, markW = 150, wordX = 860,
 // (stroke, line-by-line) or MELTS into place from a blob (true shape-morph, optional spin), then the
 // wordmark cascades in word-by-word. This is the "rotate/draw and morph into the logo" beat. Pass a raw
 // SVG path in `mark` (the settled logo). For the melt, also pass `morphFrom` (the start shape); omit it to
-// get the stroke draw-on. Give the mark prominence (size 260+).
+// get the stroke draw-on, which now ends filled rather than as an outline. Give the mark prominence (size 260+).
 // COORDS: `mark`/`morphFrom` are in the `viewBox` space (default "0 0 100 100"), NOT stage pixels, a path
 // like "M50 10 L90 88 L10 88 Z" fills the box; the box is placed/sized by x/size. Path coords outside the
 // viewBox render off-box (invisible) with no error. Pass a matching `viewBox` if your path uses other units.
@@ -121,8 +121,12 @@ export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', ma
       morph: { to: mark, dur: 1.5, spin, points: 200 }, start: start + 0.3, duration: dur - 0.3,
       anim: 'fade', enterDur: 0.3, out: 'defocus', exitDur: 0.4 });
   } else if (mark) {
-    out.push({ type: 'svg', x: mx, y, w: size, h: size, viewBox, d: mark, stroke: color,
-      draw: { dur: 1.3, weight: 3 }, start: start + 0.3, duration: dur - 0.3, out: 'defocus', exitDur: 0.4 });
+    // The draw RESOLVES into the fill, so this branch ends as the mark exactly as the morph branch above
+    // does. It used to end as an outline, which is not a logo reveal: the standard recipe uses the drawn
+    // stroke as a matte for the real artwork. `ease` is the AE Easy Ease the write-on always wanted.
+    out.push({ type: 'svg', x: mx, y, w: size, h: size, viewBox, d: mark, stroke: color, fill: color,
+      draw: { dur: 1.3, weight: 3, ease: 'easeInOutCubic', fillDur: 0.4 },
+      start: start + 0.3, duration: dur - 0.3, out: 'defocus', exitDur: 0.4 });
   }
   if (wordmark) out.push(kineticHeadline({ text: wordmark, x: 160, y: y + size + 70, w: canvasW - 320, size: 92,
     weight: 800, preset: 'up', each: 0.42, stagger: 0.05, color: INK, start: start + 1.7, dur: dur - 1.7 }));

@@ -4643,5 +4643,89 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok(`the effects catalogue still builds: every family has a usage form and a preview or a reason${built ? '' : ' → ' + why}`, built);
 }
 
+// ---- svg `draw`: the write-on RESOLVES into the fill ----------------------------------------------
+// The standard logo-reveal recipe uses the drawn stroke as an alpha matte for the real artwork, so the
+// mark ends as itself. We shipped only the first half: `fill: none` was forced for a draw and frame()
+// never restored it, so a logo could write on and could never end filled. These assert the second half
+// arrives, that a mark WITHOUT a fill is untouched (the 7 draw layers in the library carry none), and
+// that the two alphas do not cross at half each, which reads as dimming rather than as resolving.
+{
+  const mkSvgEl = (tag) => ({
+    tag, style: {}, attrs: {}, childNodes: [], nodeType: 1, parentNode: null, dataset: {},
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    getAttribute(k) { return this.attrs[k]; },
+    appendChild(n) { n.parentNode = this; this.childNodes.push(n); return n; },
+    removeChild(n) { this.childNodes = this.childNodes.filter((c) => c !== n); return n; },
+  });
+  const DOC = { createElement: mkSvgEl, createElementNS: (_ns, tag) => mkSvgEl(tag) };
+  const svg = await import('../../core/layers/svg.js');
+
+  const mount = (L) => {
+    const prior = globalThis.document;
+    globalThis.document = DOC;
+    try { const el = mkSvgEl('div'); svg.build(null, el, L); return el; }
+    finally { globalThis.document = prior; }
+  };
+  const at = (el, L, t) => {
+    svg.frame(null, el, L, t);
+    const p = el.__svgPath;
+    return { fill: +(p.style.fillOpacity ?? 1), stroke: +(p.style.strokeOpacity ?? 1) };
+  };
+
+  const TRI = 'M50 5 L95 95 L5 95 Z';
+  const filled = { type: 'svg', d: TRI, fill: 'var(--accent)', start: 0, draw: { dur: 1.2, fillDur: 0.5 } };
+  const elF = mount(filled);
+  ok('svg draw: the fill COLOUR survives the build. It used to be discarded by a forced `fill: none`',
+    elF.__svgPath.getAttribute('fill') === 'var(--accent)' && elF.__drawFill === 'var(--accent)');
+  ok('svg draw: the fill is invisible while the stroke is still drawing',
+    at(elF, filled, 0.6).fill === 0 && at(elF, filled, 1.2).fill === 0);
+  ok('svg draw: the mark ENDS AS THE FILLED LOGO, stroke gone. The whole point of the effect',
+    (() => { const a = at(elF, filled, 1.7); return a.fill === 1 && a.stroke === 0; })());
+  ok('svg draw: the fill resolve is monotonic and clamped over its window',
+    (() => {
+      let prev = -1;
+      for (let t = 1.2; t <= 1.75; t += 0.025) {
+        const f = at(elF, filled, t).fill;
+        if (f < prev - 1e-9 || f < 0 || f > 1) return false;
+        prev = f;
+      }
+      return true;
+    })());
+  ok('svg draw: the two alphas never sit at half each, which would read as the mark DIMMING',
+    (() => {
+      for (let t = 1.2; t <= 1.7; t += 0.01) { const a = at(elF, filled, t); if (a.fill + a.stroke < 0.9) return false; }
+      return true;
+    })());
+  ok('svg draw: the frame stamp changes DURING the resolve, when `u` is pinned at 1 and the '
+    + 'static-frame dedup would otherwise reuse a neighbour and drop the whole second half',
+    (() => { at(elF, filled, 1.3); const a = elF.dataset.df; at(elF, filled, 1.55); return a !== elF.dataset.df; })());
+
+  const outline = { type: 'svg', d: TRI, stroke: 'var(--accent)', start: 0, draw: { dur: 1.2 } };
+  const elO = mount(outline);
+  ok('svg draw with NO fill is exactly what it always was: an outline, no resolve, no opacity written',
+    elO.__svgPath.getAttribute('fill') === 'none' && elO.__drawFill === null
+    && at(elO, outline, 2).fill === 1 && elO.__svgPath.style.fillOpacity === undefined);
+
+  ok('svg draw: `draw.fill: true` means the theme accent, the same spelling `fill: true` already had',
+    mount({ type: 'svg', d: TRI, draw: { dur: 1, fill: true } }).__drawFill === 'var(--accent)');
+  ok('svg draw: `draw.fill` OVERRIDES the layer fill, so a mark strokes in one colour and lands in another',
+    mount({ type: 'svg', d: TRI, fill: '#111', draw: { dur: 1, fill: '#e11d48' } }).__drawFill === '#e11d48');
+
+  // The ease was hardcoded easeOutCubic, so every write-on started at maximum speed. Absent still means
+  // easeOutCubic; a WRONG name throws rather than substituting, which is core/motion.js's contract.
+  const eased = { type: 'svg', d: TRI, stroke: 'v', start: 0, draw: { dur: 1.2, ease: 'easeInOutCubic' } };
+  const elE = mount(eased);
+  ok('svg draw: `draw.ease` reaches the pixels. easeInOutCubic is slower off the mark than the old hardcoded easeOutCubic',
+    (() => {
+      svg.frame(null, elE, eased, 0.3); const a = +elE.dataset.dw;
+      svg.frame(null, elO, outline, 0.3); return a < +elO.dataset.dw;
+    })());
+  ok('svg draw: an unknown `draw.ease` is REFUSED at build, never silently substituted',
+    (() => {
+      try { mount({ type: 'svg', d: TRI, draw: { ease: 'nope' } }); return false; }
+      catch (e) { return /unknown easing/.test(e.message); }
+    })());
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

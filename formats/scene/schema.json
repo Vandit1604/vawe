@@ -1658,7 +1658,7 @@
      "label": "svg layer: stroke thickness in viewBox units. Works on any stroked path, not just a draw-on one (`draw.weight` still wins when both are set)."
     },
     "draw": {
-     "label": "svg layer: stroke draws itself on. {dur, weight}"
+     "label": "svg layer: stroke draws itself on, then RESOLVES into the fill (stroke out, fill in) if one is given. {dur, weight, ease, fill, fillDur}. `fill` defaults to the layer's own `fill`; `true` means var(--accent); with neither, the mark stays an outline. `ease` defaults to easeOutCubic; easeInOutCubic is the AE Easy Ease standard."
     },
     "fade": {
      "type": "string",

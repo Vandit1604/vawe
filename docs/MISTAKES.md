@@ -16798,3 +16798,85 @@ with the shot spacing deliberately broken the writer emitted a DESCENDING keyfra
 writer now has two doors: a hold is dropped, a pose key REFUSES and names both times. The general
 version is that a de-duplicating guard which is right for one caller becomes a corruption engine for the
 next, and the cheap fix is to give the two callers two functions rather than one clever one.
+
+## 544. the premium animated gradient cycled in 57 to 105 seconds, so it shipped as a still image
+
+**What.** `flow` is the documented "premium default" of the `shader` layer and it is what an author gets
+by writing `{"type":"shader"}` with no name (`core/surfaces/shader.js:18`). Its three blobs drifted on
+coefficients of 0.06 to 0.11 radians per second, which is 57 to 105 seconds for one traverse. Rendered
+at 0s, 10s and 20s with the site's own four blues, the three frames are indistinguishable. A 20 second
+film got a fifth of one cycle, which is a gradient that does not move.
+
+**Root cause.** A bad DEFAULT sitting on good code, and the good code is what hid it. The machinery is
+ahead of the references it was measured against: OKLab mixing, positioned stops, aspect-relative radii,
+and a per-layer `speed`. So anyone who noticed had an escape hatch and used it, and the default was
+never re-argued. `formats/scene/site-backdrop.json`, the one film in the library that names `flow`, sets
+`speed: 0.22`, which proves both halves at once: the dial works, and reaching for it is what an author
+does INSTEAD of reporting the default.
+
+**Fix.** The six coefficients are multiplied by 5 (`core/shaders-ambient.js`, the `u_fx==0` branch),
+landing the periods at 11.4 to 20.9s. Practitioners pace this exact look at 6 to 12s per cycle
+(gradients.design), and the choice is deliberately just SLOWER than that band: a mesh gradient run
+inside 12s sloshes, and a backdrop that pulls the eye has stopped being a backdrop. Measured on a
+high-contrast probe, mean per-frame luma delta at t=6s went from **0.027 to 0.094** on a 0 to 255 scale,
+still far below the field this repo calls "living".
+
+**Blast radius, stated because a shader hides from the snapshot gate.** `scripts/gates/snap-scenes.mjs`
+compares the DOM, not pixels (#532), so it reports NOTHING for a change that repaints every frame. It
+was not cited as proof. One committed film names `flow`: `site-backdrop.json` at `speed: 0.22`, whose
+net rate becomes 1.1x its old one, so it is visually unchanged. Any film that reaches `shader` without
+naming one gets the new rate, which is the point.
+
+**A second finding from the same hour, and it cost twenty minutes.** The comment written above the fix
+contained a BACKTICK, quoting the `speed` prop. The whole fragment shader is a JS template literal, so
+the backtick closed it and `core/shaders-ambient.js` stopped parsing. What the render harness reported
+was `TimeoutError: Waiting failed: 30000ms exceeded`, with no module, no line and no mention of a syntax
+error, because `scene.html` never got far enough to park `window.__engineError`. The parse failure was
+one `node -e "import(...)"` away and the harness message pointed nowhere near it. The file now says so
+in the branch it bit. The general repair, for whoever owns the harness: a module-load failure should
+reach `__engineError` like every other boot failure, or the next author spends the same twenty minutes.
+
+**The lesson.** A dial that lets one author fix a bad default is how a bad default survives. `speed`
+made `flow` usable and therefore made it un-reported for as long as it has existed. When you find
+yourself correcting a shipped default at the call site, the correction IS the bug report.
+
+## 545. a logo reveal that could never end as the logo, because the fill was thrown away at build
+
+**What.** The `svg` layer's `draw` writes a mark on by animating `stroke-dashoffset` from 1 to 0. Build
+forced `fill: none` whenever `draw` was present (`core/layers/svg.js`), and `frame()` never restored it,
+so the mark drew its outline and stayed an outline for the rest of the film. Ten scenes use `draw` and
+none of them ends as a solid mark, because none of them could.
+
+**Root cause.** The standard recipe was half-read. After Effects animates Trim Paths and then uses the
+drawn stroke as an ALPHA MATTE for the real artwork, so the stroke reveals the FILLED logo and then
+disappears. We built the stroke and stopped, and the forced `fill: none` then made the second half
+unreachable rather than merely absent: an author who wrote `fill` beside `draw` had it silently
+discarded at build, which is the accepted-and-ignored shape this file logs more than any other. The
+census proves the silence rather than merely suggesting it: **0 of the 7 `svg` draw layers in the
+library carry a fill**, which is not taste, it is nobody bothering to pass a prop that did nothing.
+
+**Fix.** `core/layers/svg.js`. Build keeps the resolved colour on `el.__drawFill` and paints the path
+with it at `fill-opacity: 0`; `frame()` brings that opacity up over `draw.fillDur` (0.4s) once the
+stroke finishes, and takes the stroke's opacity down over the LAST 65% of the same window. Not the whole
+window, and that is the one non-obvious line: an even cross-fade parks both alphas at 0.5 in the middle,
+which reads as the mark dimming rather than as one thing becoming another. `draw.fill: true` means the
+theme accent, the spelling `fill: true` already had. `draw.ease` was added in the same pass, through
+`resolveEasing`, because the curve was hardcoded `easeOutCubic` and every write-on therefore started at
+maximum speed. `blueprints/beats.mjs` `logoReveal` passes both, so its draw branch now ends as the mark
+exactly as its morph branch always did.
+
+**What the gate now catches.** Eleven assertions in `scripts/gates/lib-test.mjs` over a fake-DOM mount:
+the fill colour survives the build, the fill is invisible while the stroke draws, the mark ends filled
+with the stroke gone, the resolve is monotonic and clamped, the two alphas never sum below 0.9, the
+`draw.ease` reaches the pixels, an unknown ease throws, and a mark with NO fill is exactly what it was.
+Proved by replacing the fill write with a constant `0`: two of them fail, and only those two.
+
+**A second failure worth the line, because it is why nothing shipped moved.** A layer with no fill is
+untouched, so this is a pure capability addition. That is a happy accident of the census, not a design:
+had one film written `fill` beside `draw` in hope, it would have changed under this commit without a
+word. The general rule is to run the census BEFORE calling a change safe, and to say the number.
+
+**The lesson.** When an effect is named after a thing (a logo reveal), ask whether the output IS that
+thing at the last frame. An outline that finished drawing looks finished, and looking finished is how
+half a recipe survives review. The question that finds it is not "does it animate" but "what is left
+on screen when it stops".
