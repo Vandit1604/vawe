@@ -17112,3 +17112,55 @@ which cannot answer reports nothing new rather than everything.
 is invisible from the inside: everything is registered, documented and searchable, and a search only
 finds what you already suspect is there. Zero users is the symptom, and age is the one cheap fact that
 tells an unwanted thing from an unseen one.
+
+
+## 552. the arsenal answered two questions it had no answer to, and missed the one it held
+
+**What happened.** `make arsenal Q="..."` is the search an author is told to reach for before inventing
+anything. In one day it was wrong twice, in the two different ways a search can be wrong.
+
+Asked for "a light that travels around the border of a card" it returned `cardCascade`, `lightLeak` and
+`highlight`. The right answer is the `beam` LAYER TYPE, whose own blurb reads "a light that travels the
+rounded-rect border", and whose file header says its purpose is proving the border-beam belongs in a
+deterministic engine. An author read the three wrong things and nearly hand-rolled a rotating conic
+gradient in CSS.
+
+Asked "keep a carried layer upright while its parent rotates" and "invert a layer against whatever is
+behind it", it returned `dollyZoom` top for both. The engine has neither capability.
+
+**Root cause, and there are two.**
+
+RECALL. `collect()` gathered every export ending in `_REGISTRY`. Layer types are not one: they are
+`LAYER_TYPES` + `LAYER_BLURBS` in `core/layers/index.js`, derived there from each module's own `blurb`
+export. So the coarsest vocabulary in the engine, 23 names including `beam`, `component`, `globe` and
+`raymarch`, was outside the corpus entirely. This is the same shape as the bug the file already carries a
+comment about: a search with a hand-shaped index answers for the index and not for the engine.
+
+CONFIDENCE. `score()` ranks and has no ceiling, so the best of 420 things came back whether it addressed
+the query or not. Nothing in the tool could return "I do not know".
+
+**The fix.** Layer types now come from their owner, so `beam` is found. Beside the ranking there is now
+`coverageIn()`: the share of the query an entry accounts for, each query word weighted by its rarity
+across the corpus. Anything under `CONFIDENT` is printed as a WEAK GUESS under a line saying nothing
+clearly matches, never in the position an answer occupies.
+
+**The step that could not be guessed.** Plain word-count coverage does not separate the two cases at all:
+"make one layer chase another layer around the frame", which the engine cannot do, scored 4 of 8 on
+`count`, exactly what "count up to a big number" scored. The words earning that were `layer` and `frame`,
+each in 37 of 420 entries, so they distinguish nothing. Weighting by rarity fixes it and adds the signal
+that matters most: a word in NO entry (`upright`, `invert`, `stereoscopic`) carries the most weight and
+can never be hit, so asking for something outside the vocabulary drives the score down rather than
+leaving it untouched. A word carried by more than 6% of the corpus now weighs nothing, so padding a query
+cannot buy confidence.
+
+**The threshold was measured, not chosen.** Eleven queries with a known-good answer here and seven the
+engine genuinely lacks. Worst known-good 0.513, best known-absent 0.432; `CONFIDENT` is 0.47, the
+midpoint. `lib-test` asserts both sets AND that the threshold still sits between them, so a later
+loosening of the matcher to improve recall cannot quietly switch the honesty off.
+
+**The lesson.** A search that always answers is not a search, it is a suggestion engine, and this repo has
+already deleted two gates for the same fault: `visual-vocabulary` squared a hairline into a tenth of the
+frame, `make slop` ran 41 rules over evidence for three and reported its silence as a pass. Both
+manufactured confidence. The arsenal was doing it to the one question an author asks before writing code.
+Recall and honesty are separate defects and fixing either alone leaves the tool wrong: silent about what
+it holds, or confident about what it does not.
