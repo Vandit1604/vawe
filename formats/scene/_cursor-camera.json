@@ -1,0 +1,37 @@
+{
+  "module": "scene", "orientation": "landscape", "theme": "argus", "duration": 11,
+  "audio": { "silent": true, "_why": "a probe for the followCursor camera, not a film: the only thing being judged is whether the frame reads as chasing the pointer" },
+  "bg": [{ "preset": "paper", "from": 0, "to": 11 }],
+  "cameraMove": { "move": "followCursor", "cursor": "ptr" },
+  "layers": [
+    { "type": "rect", "x": 260, "y": 180, "w": 1400, "h": 720, "radius": 20, "bg": "#ffffff", "border": "1px solid #e6e6e4", "shadow": true, "start": 0, "duration": 11, "anim": "fade", "exitDur": 0 },
+    { "type": "rect", "x": 260, "y": 180, "w": 300, "h": 720, "radius": 20, "bg": "#f3f3f0", "start": 0, "duration": 11, "anim": "fade", "exitDur": 0 },
+    { "type": "text", "text": "Workspace", "font": "sans", "size": 26, "weight": 600, "color": "#1f1f1a", "x": 300, "y": 226, "start": 0.1, "duration": 10.9, "anim": "fade", "exitDur": 0 },
+    { "type": "text", "text": "Drafts", "font": "sans", "size": 22, "weight": 400, "color": "#757572", "x": 300, "y": 300, "start": 0.1, "duration": 10.9, "anim": "fade", "exitDur": 0 },
+    { "type": "text", "text": "Published", "font": "sans", "size": 22, "weight": 400, "color": "#757572", "x": 300, "y": 348, "start": 0.1, "duration": 10.9, "anim": "fade", "exitDur": 0 },
+    { "type": "text", "text": "Archive", "font": "sans", "size": 22, "weight": 400, "color": "#757572", "x": 300, "y": 396, "start": 0.1, "duration": 10.9, "anim": "fade", "exitDur": 0 },
+
+    { "type": "rect", "x": 620, "y": 260, "w": 300, "h": 200, "radius": 14, "bg": "#ffffff", "border": "1px solid #e0e0dd", "start": 0.2, "duration": 10.8, "anim": "pop", "exitDur": 0 },
+    { "type": "text", "text": "Pricing page", "font": "sans", "size": 24, "weight": 500, "color": "#1f1f1a", "x": 650, "y": 400, "start": 0.4, "duration": 10.6, "anim": "fade", "exitDur": 0 },
+    { "type": "rect", "x": 960, "y": 260, "w": 300, "h": 200, "radius": 14, "bg": "#ffffff", "border": "1px solid #e0e0dd", "start": 0.3, "duration": 10.7, "anim": "pop", "exitDur": 0 },
+    { "type": "text", "text": "Changelog", "font": "sans", "size": 24, "weight": 500, "color": "#1f1f1a", "x": 990, "y": 400, "start": 0.5, "duration": 10.5, "anim": "fade", "exitDur": 0 },
+    { "type": "rect", "x": 1300, "y": 260, "w": 300, "h": 200, "radius": 14, "bg": "#ffffff", "border": "1px solid #e0e0dd", "start": 0.4, "duration": 10.6, "anim": "pop", "exitDur": 0 },
+    { "type": "text", "text": "Careers", "font": "sans", "size": 24, "weight": 500, "color": "#1f1f1a", "x": 1330, "y": 400, "start": 0.6, "duration": 10.4, "anim": "fade", "exitDur": 0 },
+
+    { "type": "rect", "x": 620, "y": 260, "w": 300, "h": 200, "radius": 14, "bg": "rgba(37,99,235,0.10)", "border": "2px solid #2563eb", "start": 2.1, "duration": 8.9, "anim": "pop", "exitDur": 0 },
+    { "type": "rect", "x": 960, "y": 260, "w": 300, "h": 200, "radius": 14, "bg": "rgba(37,99,235,0.10)", "border": "2px solid #2563eb", "start": 3.15, "duration": 7.85, "anim": "pop", "exitDur": 0 },
+
+    { "type": "text", "text": "Publish 2 pages", "font": "sans", "size": 28, "weight": 600, "color": "#ffffff", "bg": "#2563eb", "radius": 12, "pad": "18px 0", "x": 1330, "y": 760, "w": 270, "align": "center", "start": 3.4, "duration": 7.6, "anim": "pop", "exitDur": 0 },
+    { "type": "text", "text": "Live in 2 seconds", "font": "mono", "size": 26, "weight": 500, "color": "#1a9e57", "x": 660, "y": 780, "start": 6.6, "duration": 4.4, "anim": "rise", "exitDur": 0 },
+
+    { "type": "cursor", "id": "ptr", "size": 40, "start": 0.8, "duration": 10.2,
+      "clicks": [1.3, 2.35, 5.6],
+      "path": [
+        { "t": 0, "x": 1750, "y": 980 },
+        { "t": 1.2, "x": 770, "y": 360, "ease": "easeInOutCubic" },
+        { "t": 2.2, "x": 1110, "y": 360, "ease": "easeInOutCubic" },
+        { "t": 5.5, "x": 1465, "y": 800, "ease": "easeInOutCubic" },
+        { "t": 10.2, "x": 1465, "y": 800 }
+      ] }
+  ]
+}

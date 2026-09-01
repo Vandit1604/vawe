@@ -43,7 +43,7 @@ at row 6.
 | 1 | **Stagger / offset reveal** | 8 | one entrance run down a list with a per-item delay | 40 to 120ms between items (ripplix, superfiles); Framer Motion `staggerChildren` 0.1s, Motion examples 0.05s (motion.dev); never stagger more than 5 or 6, bring the rest in together (aninix) | **SHIPPED** | `parts` `{select, stagger, each}` (`core/parts.js:27`), `split` + stagger on text, falloff drives in `core/effector.js:37` |
 | 2 | **Snappy ease with overshoot** | 6 | scale up fast, pass the target, settle back | Easy Ease is influence 33.33 / speed 0; practitioners push the outgoing handle to 75 (`AFTER-EFFECTS-RECIPES.md`); UI motion under 300ms; `cubic-bezier(0.23, 1, 0.32, 1)` | **SHIPPED** | `overshoot: 0.12`, whole easing set in `core/motion.js`. Settled by recipes #1, #3 |
 | 3 | **Cursor + click micro-interaction** | 6 | a pointer travels a path and the click reads as a physical press | our own: the dip is scale 0.78 at the half-cycle over 0.11s, the ripple runs 0.45s (`core/layers/cursor.js:20-21`). No source publishes numbers | **PARTLY** | `cursor` layer with `path` and `clicks` (`core/layers/cursor.js:1`). The pointer reacts; the TARGET does not. A `pressTarget` would have to scale the clicked layer, not the pointer |
-| 4 | **Auto-zoom on the click** | 5 | the camera follows the pointer and magnifies the target before it is hit | no source states a duration or a scale; all four tools describe it only as "smooth easing" and "configurable" | **PARTLY** | `punchIn`, `diveIn`, `panFollow`, `workspaceZoomOut` all exist (`core/camera-moves.js:337-348`). Nothing binds a camera key to a `cursor` layer's `clicks` array, so the author hand-keys the same numbers twice |
+| 4 | **Auto-zoom on the click** | 5 | the camera follows the pointer and magnifies the target before it is hit | no source states a duration or a scale; all four tools describe it only as "smooth easing" and "configurable". Ours are chosen by rendering: it ARRIVES 0.18s before the press (about five frames, the shortest lead at which the frame has settled when the ripple fires), pushes for 0.9s to 1.35x, holds 0.6s and releases over 0.8s | **SHIPPED** | `"cameraMove": {"move":"followCursor","cursor":"<layer id>"}` reads that cursor layer's OWN `path` and `clicks` (`core/camera-moves.js` followCursor, bound at boot by `bindCursorCamera` in `core/produce.js`), so the pointer is the single owner of where the camera goes and nobody types the coordinates twice. Restraint is derived, not authored: presses closer together than `dwell + release + dur + lead` share one continuous flight and presses within 160px share one framing, so six clicks are never six crash zooms |
 | 5 | **Depth-map reveal transition** | 5 | a flat UI frame parts in depth as the camera pushes, near pixels moving before far ones | none published. Tutorials state only "keyframe the displacement intensity" | **MISSING** | Nearest is `displace` (`core/looks.js:109`, turbulence freq 0.012, scale 14), which is noise-driven, and `uiParallax` (`core/three-fx.js:225`), which needs the planes pre-split by hand |
 | 6 | **2.5D multi-plane parallax** | 5 | flat layers at depths, near ones travel further | `depth: back` is 0.73x (its own blurb) | **SHIPPED** | `plane` modifier + a camera move; `uiParallax` (`core/three-fx.js:225`) dollies a stack of captured planes. Recipes #12 agrees |
 | 7 | **Text scramble / random letters** | 5 | characters cycle through junk and resolve into the word | resolve left to right; our scramble advances in 24 steps across the window (`core/type.js:390`) | **SHIPPED** | `decode` (`core/type.js:202`), deterministic so a seek is exact |
@@ -67,10 +67,12 @@ at row 6.
 
 Ordered by demand over cost. Only the MISSING rows are here.
 
-**Cheaper than any of them:** row 4 and row 3 are each one binding away, and row 4 has the higher demand
-count of anything unbuilt. Deriving camera keys from a `cursor` layer's `path` and `clicks` costs one
-function and closes the single most-published SaaS demo technique of the last two years. Do it first, and
-do it before anything below.
+**Row 4 is BUILT, and it was the binding this section predicted.** `followCursor` derives the camera
+keys from a `cursor` layer's own `path` and `clicks` (`core/camera-moves.js`, bound at boot by
+`bindCursorCamera` in `core/produce.js`), which closed the most-published SaaS demo technique of the last
+two years for one generator and one resolver. **Row 3 is still one binding away and is now the cheapest
+thing here**: the pointer reacts to its own press, the TARGET does not, and a `pressTarget` naming a
+layer id would scale that layer instead of the arrow. It is the same shape as row 4 and the same size.
 
 ### 1. Depth-map reveal transition (5 sources)
 

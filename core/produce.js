@@ -16,6 +16,7 @@
 
 import { isLightBg as bgIsLight } from './motion.js';
 import { buildCameraMove } from './camera-moves.js';
+import { resolveCameraMove } from './vocab.js';
 import { sceneDims, MAX_ZOOM } from './safe.js';
 import { depthZ } from './fx/plane.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
@@ -90,6 +91,81 @@ export function produceBaseline(data, theme, frame) {
 // mis-centre of hundreds of pixels per axis, which is the exact failure core/camera-moves.js's
 // "it needs the frame it centres in" refusal exists to prevent. The frame is built at boot.js before
 // this is called; take it from there, and fall back only for callers that have no frame at all.
+// bindCursorCamera(spec, data): `{ move: "followCursor", cursor: "<layer id>" }` -> the same spec with
+// the named cursor layer's OWN path, clicks, base and start filled in.
+//
+// THE POINT OF THE WHOLE FEATURE IS HERE. A cursor layer already states where the pointer goes and when
+// it presses. Before this, an author who wanted the camera to go there too typed those coordinates a
+// second time into `diveIn` and kept the two copies in step by eye. Now the path is the single owner
+// and the camera is derived from it, so the two cannot disagree.
+//
+// IT RUNS INSIDE bakeCameraMove, on the ONE funnel every render goes through, for the reason that funnel
+// exists (docs/MISTAKES.md #424): a binding resolved anywhere else is a field an author can write and
+// nothing can read. core/boot.js already throws on a `cameraMove` that survives to render, so a scene
+// reaching a frame with this unresolved is impossible rather than silent.
+//
+// EVERY REFUSAL NAMES THE LAYER AND SAYS WHAT TO DO INSTEAD, because "invalid" is worse than the silence
+// it replaces. The one it does not raise itself is the scene that also declares its own `camera`:
+// bakeCameraMove refuses that for every move at once, three lines below.
+function bindCursorCamera(spec, data) {
+  if (!spec || typeof spec !== 'object') return spec;
+  const move = spec.move ? resolveCameraMove(spec.move) : null;
+  if (move !== 'followCursor') {
+    if (spec.cursor != null)
+      throw new Error(`cameraMove "${spec.move}" carries a "cursor" (${JSON.stringify(spec.cursor)}), and only`
+        + ' "followCursor" derives its keys from a pointer. Every other move would drop the field and fly'
+        + ' somewhere nobody authored. Use `"move": "followCursor"`, or take the cursor off this spec.');
+    return spec;
+  }
+  if (spec.cursor == null)
+    throw new Error('cameraMove "followCursor" needs `"cursor": "<layer id>"`, the id of the cursor layer'
+      + ' whose path the camera follows. The move exists so the pointer stays the ONLY place that path is'
+      + ' written, and without the id there is nothing to derive from.');
+  const cursors = [];
+  let hit = null;
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.type === 'cursor') cursors.push(L);
+    if (!hit && L.id === spec.cursor) hit = L;
+    walk(L.children); walk(L.layers);
+  } };
+  walk(data.layers);
+  const menu = cursors.length ? cursors.map((L) => JSON.stringify(L.id ?? '(no id)')).join(', ') : 'none';
+  if (!hit)
+    throw new Error(`cameraMove "followCursor" names a layer "${spec.cursor}" that this scene does not have.`
+      + ` Its cursor layers are: ${menu}. Give the pointer an \`id\` and name that one.`);
+  if (hit.type !== 'cursor')
+    throw new Error(`cameraMove "followCursor" names "${spec.cursor}", which is a ${hit.type || 'text'} layer.`
+      + ` Only a \`cursor\` layer carries the \`path\` and \`clicks\` this move reads (this scene's cursors:`
+      + ` ${menu}). To push toward a fixed point on any other layer, use \`diveIn\` with its tx/ty.`);
+  if (!Array.isArray(hit.path) || !hit.path.length)
+    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`path\`, so`
+      + ' there is nowhere to follow. Give the pointer `"path": [{t,x,y}, ...]`, or drop the sugar and'
+      + ' hand-key `diveIn` at the point you mean.');
+  if (!Array.isArray(hit.clicks) || !hit.clicks.length)
+    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`clicks\`.`
+      + ' The move IS the arrival at a press, so with none there is no moment to arrive at. Add'
+      + ' `"clicks": [t]`, or use `travel`/`panFollow` to ride the pointer without one.');
+  if (spec.start != null)
+    throw new Error(`cameraMove "followCursor" takes its "start" from cursor "${spec.cursor}" (${hit.start ?? 0}s),`
+      + ' because the click times are on that layer\'s own clock. A second start here would slide the'
+      + ' camera off the presses it was derived from. Move the cursor layer instead.');
+  // The base the path is measured from. core/layers/cursor.js anchors a pathed pointer at (0,0) when the
+  // author gives it no x/y, so this reads that same default rather than holding a second opinion about it.
+  // A RELATIVE COORDINATE IS REFUSED AND NOT GUESSED: this bake runs before resolveCoords (core/boot.js),
+  // so "center" or "40%" is still a string here and would aim the camera at NaN without a word.
+  const base = [hit.x ?? 0, hit.y ?? 0];
+  for (const [i, k] of [[0, 'x'], [1, 'y']]) {
+    if (!Number.isFinite(base[i]))
+      throw new Error(`cameraMove "followCursor" reads the base position of cursor "${spec.cursor}", and its`
+        + ` "${k}" is ${JSON.stringify(base[i])}. The camera bakes before relative coordinates resolve, so a`
+        + ' cursor it follows states its base in absolute stage px, or omits x/y entirely (which anchors the'
+        + ' path at 0,0, the same default the pointer itself uses).');
+  }
+  const { cursor: _named, ...rest } = spec;
+  return { ...rest, path: hit.path, clicks: hit.clicks, base, start: hit.start ?? 0 };
+}
+
 export function bakeCameraMove(data, frame) {
   if (!data || !data.cameraMove) return data;
   const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
@@ -99,7 +175,9 @@ export function bakeCameraMove(data, frame) {
   // sceneDims so a move that centres a point centres it in the REAL canvas (core/camera-moves.js can only
   // default to landscape). Same call expand-blocks.mjs makes; the math stays in camera-moves.js.
   const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
-  data.camera = specs.flatMap((s) => buildCameraMove(s, dims));
+  // A cursor binding resolves HERE, inside the one funnel, so `cursor` cannot be a field an author
+  // writes and nothing reads.
+  data.camera = specs.flatMap((s) => buildCameraMove(bindCursorCamera(s, data), dims));
   delete data.cameraMove;
   return data;
 }

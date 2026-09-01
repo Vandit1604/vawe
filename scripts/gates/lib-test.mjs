@@ -65,7 +65,8 @@ import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../..
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
 import { rollOffsets, displayNum } from '../../core/layers/count.js';
-import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
+import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, followCursor, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
+import { bakeCameraMove } from '../../core/produce.js';
 import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
@@ -3825,6 +3826,110 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('buildCameraMove resolves dollyZoom and refuses a param it does not read',
     JSON.stringify(buildCameraMove({ move: 'dollyZoom', dur: 1 })) === JSON.stringify(dollyZoom({ dur: 1 }))
     && (() => { try { buildCameraMove({ move: 'dollyZoom', lens: 900 }); return false; } catch { return true; } })());
+}
+
+// ---- followCursor: the camera DERIVED from the pointer -------------------------------------------
+// The whole value of this move is that the cursor's `path` stays the only place the target is written.
+// So the assertions are about the RELATIONSHIP: where the camera lands against where the pointer is,
+// that it is there BEFORE the press and still there ON it, and that many presses are not many zooms.
+{
+  const path = [{ t: 0, x: 0, y: 0 }, { t: 1, x: 400, y: 200 }, { t: 6, x: 400, y: 200 }];
+  const one = followCursor({ path, clicks: [2], base: [100, 100], start: 0 });
+
+  ok('followCursor centres the pointer, read off the cursor\'s own path', (() => {
+    const at = one.find((k) => k.s > 1);          // the arrival
+    // the pointer is at base + path = (500, 300) by t=1 and holds; centring it is 960-500, 540-300
+    return at && Math.abs(at.x - 460) < 1e-6 && Math.abs(at.y - 240) < 1e-6;
+  })());
+  ok('followCursor ARRIVES BEFORE THE PRESS and is still there on it', (() => {
+    const arrive = one.find((k) => k.s > 1), holdEnd = one.filter((k) => k.s > 1).pop();
+    return arrive.t < 2 && arrive.t === 2 - 0.18 && holdEnd.t >= 2;
+  })());
+  ok('followCursor opens wide and returns wide', one[0].s === 1 && one[one.length - 1].s === 1);
+  ok('followCursor keyframes ascend in t (a jumbled array deletes the whole move)',
+    one.every((k, i) => i === 0 || k.t > one[i - 1].t));
+  ok('followCursor is PURE: the same path and clicks give byte-identical keys',
+    JSON.stringify(followCursor({ path, clicks: [2], base: [100, 100] }))
+    === JSON.stringify(followCursor({ path, clicks: [2], base: [100, 100] })));
+
+  // RESTRAINT. Six presses inside one gesture are ONE push and ONE release, never six crash zooms.
+  const six = followCursor({ path: [{ t: 0, x: 0, y: 0 }, { t: 8, x: 1200, y: 0 }], base: [300, 540],
+    clicks: [2, 2.4, 2.8, 3.2, 3.6, 4] });
+  const pushes = six.filter((k, i) => k.s > 1 && (i === 0 || six[i - 1].s === 1)).length;
+  ok('followCursor: six clicks in one run are ONE push, not six', pushes === 1);
+  ok('followCursor: that run releases exactly once, at the end',
+    six.filter((k, i) => i > 0 && k.s === 1 && six[i - 1].s > 1).length === 1);
+  // ...and presses far enough apart in TIME do get their own shot.
+  const apart = followCursor({ path: [{ t: 0, x: 0, y: 0 }, { t: 20, x: 1200, y: 0 }], base: [300, 540],
+    clicks: [2, 9] });
+  ok('followCursor: presses further apart than the settle window get their own push',
+    apart.filter((k, i) => k.s > 1 && (i === 0 || apart[i - 1].s === 1)).length === 2);
+  // ...and two presses in the same PLACE never reframe, however far apart the camera could travel.
+  const same = followCursor({ path: [{ t: 0, x: 0, y: 0 }, { t: 8, x: 0, y: 0 }], base: [700, 400],
+    clicks: [2, 3] });
+  ok('followCursor: two presses inside `regroup` px share one framing',
+    new Set(same.filter((k) => k.s > 1).map((k) => `${k.x},${k.y}`)).size === 1);
+  // EVERY track, not just the simple one. The first cut of the writer silently emitted a DESCENDING
+  // array when the shot spacing was broken, and this assertion only looked at the one-click case, so
+  // it passed. cameraAt reads a jumbled array as "already at the end" and deletes the whole move.
+  ok('followCursor: every generated track ascends in t',
+    [one, six, apart, same].every((kf) => kf.every((k, i) => i === 0 || k.t > kf[i - 1].t)));
+  // A shot never leaves the framing it pushed for until the press it pushed for has happened. This is
+  // the SAME failure as arriving late, reached from the other side, and the demo probe hit it: the
+  // reframe toward the second card began 0.03s BEFORE the first click fired.
+  ok('followCursor holds through every press it framed', (() => {
+    const clicks = [2, 2.6], kf = followCursor({ base: [200, 540], clicks,
+      path: [{ t: 0, x: 0, y: 0 }, { t: 2, x: 0, y: 0 }, { t: 2.6, x: 700, y: 0 }, { t: 8, x: 700, y: 0 }] });
+    return clicks.every((c) => {
+      const before = kf.filter((k) => k.t <= c).pop(), after = kf.find((k) => k.t > c);
+      return before && after && before.x === after.x && before.y === after.y && before.s === after.s;
+    });
+  })());
+
+  ok('followCursor refuses a pointer it cannot follow, by name', [
+    () => followCursor({ clicks: [1] }),                              // no path
+    () => followCursor({ path, clicks: [] }),                         // no press to arrive at
+    () => followCursor({ path: [{ t: 0, x: 'center', y: 0 }], clicks: [1] }),  // unresolved coord
+    () => followCursor({ path, clicks: [1], to: 0.8 }),               // a zoom that zooms out
+    () => followCursor({ path, clicks: [0.05] }),                     // no room to lead the press
+    () => followCursor({ path, clicks: [1], dur: 0 }),                // a span that rewinds the clock
+  ].every((f) => { try { f(); return false; } catch { return true; } }));
+
+  ok('CAMERA_MOVE_NAMES picks up followCursor', CAMERA_MOVE_NAMES.includes('followCursor'));
+  // It centres a point that is never written in the spec, so it must ALWAYS be told the canvas or a
+  // portrait film would be mis-centred by 420px per axis in silence.
+  ok('buildCameraMove refuses followCursor with no canvas, and honours a portrait one', (() => {
+    let refused = false;
+    try { buildCameraMove({ move: 'followCursor', path, clicks: [2], base: [100, 100] }); } catch { refused = true; }
+    const kf = buildCameraMove({ move: 'followCursor', path, clicks: [2], base: [100, 100] }, [1080, 1920]);
+    return refused && kf.find((k) => k.s > 1).x === 1080 / 2 - 500;
+  })());
+
+  // THE BINDING. The scene names a cursor LAYER and the move reads that layer's own path: this is the
+  // one fact having one owner, which is the whole point of the feature.
+  const cursor = { type: 'cursor', id: 'ptr', x: 100, y: 100, start: 0.5, clicks: [2], path };
+  const scene = { module: 'scene', layers: [cursor], cameraMove: { move: 'followCursor', cursor: 'ptr' } };
+  bakeCameraMove(scene, { W: 1920, H: 1080 });
+  ok('bakeCameraMove binds the camera to the named cursor layer, on its own clock',
+    !scene.cameraMove && scene.camera.find((k) => k.s > 1).x === 460
+    && scene.camera.find((k) => k.s > 1).t === 0.5 + 2 - 0.18);
+  ok('the binding refuses every way of naming a pointer it cannot follow', [
+    { move: 'followCursor' },                                         // no cursor named
+    { move: 'followCursor', cursor: 'nope' },                         // no such layer
+    { move: 'followCursor', cursor: 'title' },                        // not a cursor layer
+    { move: 'followCursor', cursor: 'bare' },                         // a cursor with no path
+    { move: 'followCursor', cursor: 'ptr', start: 3 },                // a second owner for the clock
+    { move: 'diveIn', cursor: 'ptr', tx: 0, ty: 0 },                  // a cursor on a move that drops it
+  ].every((spec) => {
+    const d = { module: 'scene', cameraMove: spec, layers: [{ ...cursor }, { type: 'text', id: 'title' },
+      { type: 'cursor', id: 'bare' }] };
+    try { bakeCameraMove(d, { W: 1920, H: 1080 }); return false; } catch { return true; }
+  }));
+  ok('a relative cursor base is refused rather than aimed at NaN', (() => {
+    const d = { module: 'scene', cameraMove: { move: 'followCursor', cursor: 'ptr' },
+      layers: [{ ...cursor, x: 'center' }] };
+    try { bakeCameraMove(d, { W: 1920, H: 1080 }); return false; } catch { return true; }
+  })());
 }
 
 // ---- the `wght` axis reaches a HEADLINE, not only a caption --------------------------------------

@@ -16761,3 +16761,40 @@ bug itself as a refusal that names the layer, the conflict and a way out. Re-mea
 and nothing checks it: a group with `filter`, `glass`, a `mask` or an enter/exit `opacity` envelope
 takes a child's glass away. The check needs the group's own per-frame opacity, which is not known at
 build, so measure first whether an entrance envelope is even long enough to see before wiring it.
+## 543. a camera that arrives on time can still leave early, and the same shot fails both ways
+
+**What.** `followCursor` (`core/camera-moves.js`) derives the camera from a `cursor` layer's own `path`
+and `clicks`: it pushes toward the point the pointer is about to press, arrives 0.18s BEFORE the press,
+holds, then releases. The whole move exists because arriving after a click is worthless. On the first
+render of the demo probe it arrived on time and then LEFT 0.03s before that same click fired. The camera
+was already sliding toward the next card while the ripple went off.
+
+**Root cause.** A press inside a run of presses had two independent deadlines and only one of them was
+written down. The arrival was computed backwards from the click (`click - lead`), correctly. The
+DEPARTURE was computed backwards from the NEXT click (`nextArrive - dur`), which knows nothing about the
+press it is leaving. Two clicks 1.05s apart with a 0.9s push put the departure 0.03s before the first
+one. Nothing was out of range, no keyframe was jumbled, and every assertion passed: the failure was one
+number being derived from the wrong end.
+
+**Fix.** The hold now runs PAST the press it framed, by `dwell` where there is room and by half the gap
+where there is not, and the reframe takes what is left (`core/camera-moves.js`, followCursor's reframe
+leg). Half and never all: a reframe with no time is a whip.
+
+**What the gate now catches.** `scripts/gates/lib-test.mjs` asserts, for every press in a multi-press
+track, that the camera pose immediately before it equals the pose immediately after it. Broken
+deliberately by reverting the clamp: it fails, and it is the only assertion that does.
+
+**The lesson, and it generalises past this move.** A guarantee stated at one end of an interval is not a
+guarantee about the interval. "It arrives before the click" and "it is still there on the click" read as
+the same sentence and are two different constraints, and code that enforces the first passes every test
+written for the first. When a moment must be HELD rather than merely reached, assert the exit as well as
+the entry.
+
+**A second finding from the same hour, logged because it is the more dangerous half.** The keyframe
+writer originally dropped its predecessor whenever a new key was not later in time, on the reasoning
+that such a key is always a hold with nothing left to hold. It is not: a pose key can reach it too, and
+with the shot spacing deliberately broken the writer emitted a DESCENDING keyframe array, which
+`cameraAt` reads as "already at the end" and which deletes the entire move. It printed nothing. The
+writer now has two doors: a hold is dropped, a pose key REFUSES and names both times. The general
+version is that a de-duplicating guard which is right for one caller becomes a corruption engine for the
+next, and the cheap fix is to give the two callers two functions rather than one clever one.
