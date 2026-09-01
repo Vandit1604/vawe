@@ -45,6 +45,8 @@ const WAIVED = new Map(Object.entries({
   DEPRECATED_FX: 'the sixteen gsap entrances that duplicate an anim exactly, mapped to their replacement. Every one is ALREADY catalogued under "GSAP named effects"; this marks which to stop using (#364)',
   DEPRECATED_EXIT: 'as DEPRECATED_FX, for the exits',
 
+  TIME_REMAP_REGISTRY: 'the registry object wrapping the time-remap shapes, which ARE catalogued as "Time remaps (the layer\'s own clock)". A scene names a shape, never a registry',
+  TIME_REMAP_BLURBS: 'that registry\'s own blurb map, which the Time remaps section already prints',
   ICON_REGISTRY: 'the registry object wrapping ICONS, which IS catalogued as "Drawn icons"',
   ICON_NAMES: 'the same list the Drawn icons section already renders from ICONS',
   DIRS: 'the four travel directions (left/right/up/down). A scene names one, but as the `dir` field of a '

@@ -4,6 +4,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
   anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
+import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/time.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS } from '../../core/cuts.js';
 import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/clips.js';
@@ -414,6 +415,58 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
      JSON.stringify(clipStyleAt(stepped, 2 / 30)) !== JSON.stringify(clipStyleAt(stepped, 4 / 30)));
   ok('a stepped clock is pure: the same t answers the same after a seek away',
      (() => { const x = JSON.stringify(clipStyleAt(stepped, 0.17)); clipStyleAt(stepped, 2.4); return x === JSON.stringify(clipStyleAt(stepped, 0.17)); })());
+}
+
+// ---- THE LAYER'S CLOCK (core/time.js): TIME REMAPPING -------------------------------------------
+// AE recipe #25, the speed ramp. `timeWarp` was one easing over one span and therefore MONOTONE in
+// speed; a keyed remap is what expresses fast-HOLD-fast, and the freeze and the rewind fall out of the
+// same mechanism. Every assert below is a pure read of one number, which is the whole design.
+{
+  const at = (L, t, span = 2) => layerTime(L, t, 0, span);
+  ok('a layer with no time dial is handed the film\'s own second, untouched',
+     at({}, 0.7) === 0.7 && at({}, 0) === 0);
+  ok('timeWarp still lands exactly on the layer\'s end, as it did before core/time.js owned it',
+     Math.abs(at({ timeWarp: 'easeInQuint' }, 2) - 2) < 1e-9 && at({ timeWarp: 'easeInQuint' }, 0) === 0);
+  ok('timeWarp is monotone in SPEED, which is why a hold needs keys instead', (() => {
+    const L = { timeWarp: 'easeInOutCubic' }, d = (t) => at(L, t + 0.01) - at(L, t);
+    return d(0.2) < d(1.0) && d(1.8) < d(1.0);   // one hump: it cannot ramp, hold, then ramp again
+  })());
+  ok('the `whip` shape crawls, bolts, then lands: its middle is the fastest part by far', (() => {
+    const L = { timeRemap: 'whip' }, d = (t) => at(L, t + 0.02) - at(L, t);
+    return d(0.9) > 6 * d(0.2) && d(0.9) > 6 * d(1.8);
+  })());
+  ok('the `hold` shape sits near 30% speed across its middle half', (() => {
+    const L = { timeRemap: 'hold' }, mid = (at(L, 1.5) - at(L, 0.5)) / 1.0;
+    return mid > 0.2 && mid < 0.4;
+  })());
+  ok('`freeze` holds the last pose dead still to the end',
+     Math.abs(at({ timeRemap: 'freeze' }, 1.4) - at({ timeRemap: 'freeze' }, 2)) < 1e-9);
+  ok('`rewind` returns to where it started, so `at` may fall even though `t` never does',
+     Math.abs(at({ timeRemap: 'rewind' }, 2) - 0) < 1e-9 && at({ timeRemap: 'rewind' }, 1) > 1.9);
+  ok('a named shape scales to the layer\'s own span, so one name fits any duration',
+     Math.abs(at({ timeRemap: 'freeze' }, 6, 10) / 10 - at({ timeRemap: 'freeze' }, 1.2, 2) / 2) < 1e-9);
+  ok('hand-written keys are read in SECONDS, and a repeated `at` is a freeze', (() => {
+    const L = { timeRemap: [{ t: 0, at: 0 }, { t: 1, at: 0.5 }, { t: 2, at: 0.5 }] };
+    return Math.abs(at(L, 1) - 0.5) < 1e-9 && Math.abs(at(L, 1.8) - 0.5) < 1e-9;
+  })());
+  ok('the clock is PURE: a backwards seek answers exactly what the forward pass did', (() => {
+    const L = { timeRemap: 'whip' }, x = at(L, 0.83);
+    at(L, 1.9); at(L, 0.1);
+    return at(L, 0.83) === x;
+  })());
+  ok('an unknown remap name is refused with the menu, never resolved to a default', (() => {
+    try { at({ timeRemap: 'ramp' }, 1); return false; } catch (e) { return /unknown time remap/.test(e.message); }
+  })());
+  ok('a remap key that moves BACKWARDS in `t` is refused, naming which key', (() => {
+    try { at({ timeRemap: [{ t: 0, at: 0 }, { t: 1, at: 1 }, { t: 0.5, at: 2 }] }, 1); return false; }
+    catch (e) { return /only ever goes forward/.test(e.message); }
+  })());
+  ok('timeWarp and timeRemap on one layer are refused rather than one silently winning', (() => {
+    try { at({ timeWarp: 'easeInQuint', timeRemap: 'whip' }, 1); return false; }
+    catch (e) { return /two spellings of one/.test(e.message); }
+  })());
+  ok('every named shape carries a blurb, so `make arsenal` can find it',
+     TIME_REMAP_NAMES.length === 4 && TIME_REMAP_NAMES.every((n) => (TIME_REMAP_BLURBS[n] || '').length > 20));
 }
 
 // ---- THE VELOCITY READ (core/sequence.js), and the three modifiers built on it -------------------

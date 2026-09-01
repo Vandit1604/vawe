@@ -1,0 +1,55 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "rewind",
+      "x": 160,
+      "y": 380,
+      "w": 1600,
+      "size": 150,
+      "weight": 800,
+      "align": "center",
+      "start": 0.3,
+      "duration": 5.4,
+      "timeRemap": "rewind",
+      "motion": [
+        {
+          "t": 0,
+          "x": -520
+        },
+        {
+          "t": 5.4,
+          "x": 520,
+          "ease": "linear"
+        }
+      ]
+    },
+    {
+      "type": "count",
+      "to": 100,
+      "x": 160,
+      "y": 640,
+      "w": 1600,
+      "align": "center",
+      "size": 200,
+      "weight": 800,
+      "start": 0.3,
+      "duration": 5.4,
+      "timeRemap": "rewind"
+    }
+  ]
+}
