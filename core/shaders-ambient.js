@@ -656,4 +656,6 @@ export function createAmbientLayer(w = 1920, h = 1080) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a ambient shader" when someone writes it somewhere else. core/registry.js.
-export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader' });
+// The blurbs ride along, so `make arsenal` describes a field instead of only naming it: AMBIENT_SHADERS
+// is already the one owner of those sentences and the registry was passing none of them.
+export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader', blurbs: AMBIENT_SHADERS });

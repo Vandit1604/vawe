@@ -320,6 +320,7 @@
     "resample",
     "seed",
     "shader",
+    "shaderKeys",
     "speed",
     "w"
    ],
@@ -1158,6 +1159,20 @@
       "metaballs",
       "bands"
      ]
+    },
+    "shaderKeys": {
+     "type": "array",
+     "label": "shaderKeys: cycle ONE shader panel through several looks, on HARD CUTS. [{\"t\":2,\"shader\":\"voronoi\"},{\"t\":4,\"shader\":\"nebula\"}]. Before the first key the layer shows its own `shader`. Reach for this rather than stacking a layer per look: every canvas layer holds a WebGL context for the WHOLE film and browsers cap them near 16, and stacked windows crossfade, which dissolves two shaders into mud. `seed` \u00b7 `intensity` \u00b7 `colors` \u00b7 `params` stay the layer's and apply to every look",
+     "item": {
+      "t": {
+       "type": "number",
+       "label": "Seconds from the layer's start, the same clock as `start`. NOT scaled by `speed`, which dials the field's own loop. Keys must run forwards"
+      },
+      "shader": {
+       "type": "string",
+       "label": "The ambient field to show from `t` onwards. Same vocabulary as `shader` above"
+      }
+     }
     },
     "html": {
      "type": "string",
