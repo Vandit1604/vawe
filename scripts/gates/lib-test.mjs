@@ -51,6 +51,9 @@ import { CUT_REGISTRY } from '../../core/cuts.js';
 import { CUT_CUE } from '../../core/audio-cues.js';
 import { ANIM_REGISTRY } from '../../core/clips.js';
 import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/parts.js';
+import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/effector.js';
+import { cutVelocityAdvice, layerSpeedAt } from '../../core/velocity-cut.js';
+import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
 import { bgPaletteFrom } from '../../core/backgrounds.js';
 import { parseColorRGB } from '../../core/motion.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
@@ -1910,6 +1913,146 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       if (!vals.length || vals.some((v) => v !== 0)) return false;
     }
     return true;
+  })());
+
+  // ---- the effector: a falloff from a travelling point (docs/CRAFT/AE-TECHNIQUES.md #4) ----------
+  //
+  // The sticky assertion is the one that matters. Everything else here is a shape contract; sticky is
+  // the whole difference between a moving highlight and a painted trail, and it is the number the
+  // technique states out loud (1 second). Asserted as a COMPARISON against sticky 0 at the same
+  // instant, because "the value is non-zero" would pass on a rig that had simply not left yet.
+  ok(`effector: the falloff vocabulary is importable (${FALLOFF_NAMES.length} shapes)`, FALLOFF_NAMES.length === 4);
+  ok('effector: every falloff has a blurb', FALLOFF_NAMES.every((n) => FALLOFF_BLURBS[n]));
+  ok('effector: every drive has a blurb', DRIVE_NAMES.every((n) => typeof DRIVES[n] === 'string' && DRIVES[n].length));
+  // One contract, four shapes: full influence at the point, none at the radius. That is what lets
+  // `radius` mean the same thing whichever shape is named, so a film can swap one for another.
+  ok('effector: every falloff is 1 at the point and 0 at the radius', FALLOFF_NAMES.every((n) => {
+    const f = FALLOFFS[n];
+    return Math.abs(f(0) - 1) < 1e-9 && (n === 'step' ? true : Math.abs(f(1)) < 1e-9);
+  }));
+  ok('effector: an unknown falloff throws rather than falling back', (() => {
+    try { effectorAt(0, 0, [{ t: 0, x: 0, y: 0 }], 0, { falloff: 'smoot' }); return false; } catch (e) { return true; }
+  })());
+  ok('effector: a path is required, a point that never moves is not an effector', (() => {
+    try { effectorAt(0, 0, [], 0, {}); return false; } catch (e) { return true; }
+  })());
+  // THE STICKY DELAY. The point crosses this clone at t=0.3 and is twice the radius away by t=0.9.
+  // With sticky 0 the clone is already back at rest; with sticky 1 it is still displaced, and that
+  // held value IS the trail.
+  ok('effector: a sticky delay holds a clone after the point has passed (the trail)', (() => {
+    const path = [{ t: 0, x: 0, y: 0 }, { t: 2, x: 2000, y: 0, ease: 'linear' }];
+    const dry = effectorAt(300, 0, path, 0.9, { radius: 300, sticky: 0, step: 1 / 30 }).v;
+    const wet = effectorAt(300, 0, path, 0.9, { radius: 300, sticky: 1, step: 1 / 30 }).v;
+    return dry === 0 && wet > 0.2;
+  })());
+  ok('effector: the trail decays to nothing once the sticky window has passed', (() => {
+    // `linear`, so the assertion can name the frame the point crosses the clone. The default
+    // interpolation is easeInOutCubic over a sparse pair, and the point would be nowhere near x=300
+    // at t=0.3.
+    const path = [{ t: 0, x: 0, y: 0 }, { t: 2, x: 2000, y: 0, ease: 'linear' }];
+    const at = (t) => effectorAt(300, 0, path, t, { radius: 300, sticky: 1, step: 1 / 30 }).v;
+    return at(0.5) > at(0.9) && at(0.9) > at(1.2) && at(1.9) === 0;
+  })());
+  // PURE IN t, which is the whole reason the trail is recomputed backward along the path rather than
+  // accumulated. Sampling out of order must not change an answer.
+  ok('effector: the same time gives the same influence whatever order it is asked in', (() => {
+    const path = [{ t: 0, x: 0, y: 0 }, { t: 2, x: 2000, y: 0 }];
+    const o = { radius: 400, sticky: 1, step: 1 / 30 };
+    const fwd = [0.2, 0.6, 1.0, 1.4].map((t) => effectorAt(300, 0, path, t, o).v);
+    const back = [1.4, 1.0, 0.6, 0.2].map((t) => effectorAt(300, 0, path, t, o).v).reverse();
+    return fwd.every((v, i) => v === back[i]);
+  })());
+  // `push` is the drive a stagger cannot imitate: it reads the DIRECTION from the point to the clone.
+  // A clone to the right of the point is shoved right; a clone to the left is shoved left.
+  ok('effector: push shoves each clone along its own vector from the point', (() => {
+    const path = [{ t: 0, x: 500, y: 0 }, { t: 2, x: 500, y: 0 }];
+    const r = effectorStyle(effectorAt(600, 0, path, 0.5, { radius: 400 }), { push: 100 }).transform;
+    const l = effectorStyle(effectorAt(400, 0, path, 0.5, { radius: 400 }), { push: 100 }).transform;
+    return /translate\((\d|\.)/.test(r) && /translate\(-/.test(l);
+  })());
+  ok('effector: an unknown drive throws rather than doing nothing', (() => {
+    const inf = { v: 1, ux: 1, uy: 0 };
+    try { effectorStyle(inf, { scal: 1 }); return false; } catch (e) { return true; }
+  })());
+  ok('effector: a clone the point never reaches is left with no transform', () => true
+    && effectorStyle(effectorAt(5000, 0, [{ t: 0, x: 0, y: 0 }, { t: 2, x: 100, y: 0 }], 1, { radius: 300 }), { scale: 1 }).transform === 'none');
+  ok('effector: the track claims its own slot in the pipeline', TRACK_TYPES.includes('effector') && SLOTS.includes('effector'));
+
+  // ---- where the cut goes, read off the speed graph (docs/CRAFT/AE-TECHNIQUES.md #1) -------------
+  //
+  // A SCALE CHANGE IS MOTION. The technique's own demonstration is a null scaling 100 to 200 per cent
+  // across the seam and nothing translating at all, so a reader that measured translation alone would
+  // score that exact move at zero and advise the author to move the cut away from it.
+  ok('velocity-cut: a pure scale change reads as picture speed', (() => {
+    const L = { start: 0, duration: 2, motion: [{ t: 0, scale: 1 }, { t: 1, scale: 2, ease: 'linear' }] };
+    return layerSpeedAt(L, 0.5, 30) > 400;
+  })());
+  ok('velocity-cut: a layer that is off screen contributes nothing', (() => {
+    const L = { start: 1, duration: 1, motion: [{ t: 0, x: 0 }, { t: 1, x: 1000, ease: 'linear' }] };
+    return layerSpeedAt(L, 0.5, 30) === 0 && layerSpeedAt(L, 1.5, 30) > 0;
+  })());
+  // THE ADVICE ITSELF. The move runs 1.0s to 1.5s and the cut is written at 0.9s, in the stillness
+  // just before it. The peak the report names has to sit inside the move.
+  ok('velocity-cut: a cut in a trough is named, with the peak it should move to', (() => {
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 0 }, { t: 1.5, x: 900, ease: 'linear' }] }];
+    const [r] = cutVelocityAdvice([{ t: 0.9 }], layers, { duration: 3 });
+    return r.trough === true && r.peak.t > 1 && r.peak.t <= 1.5 && r.peak.speed > r.speed;
+  })());
+  // AND IT MUST STAY QUIET. A cut already sitting on the fastest frame near it needs no advice, and a
+  // report that fires on every cut is a report nobody reads. Measured over the library, 19 of 194 cuts
+  // in 47 films trip this.
+  ok('velocity-cut: a cut already at the peak is left alone', (() => {
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 0 }, { t: 1.5, x: 900, ease: 'linear' }] }];
+    return cutVelocityAdvice([{ t: 1.25 }], layers, { duration: 3 })[0].trough === false;
+  })());
+  // A FILM WITH NOTHING MOVING has no move for a cut to hide inside, so this has nothing to say. Two
+  // shipped films peak at 4 px/s beside a cut, which is a drift and not a move, and advising anybody
+  // to re-time a seam around it would be noise.
+  ok('velocity-cut: a still film is not a trough', (() => {
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 3, x: 2, ease: 'linear' }] }];
+    return cutVelocityAdvice([{ t: 1.5 }], layers, { duration: 3 })[0].trough === false;
+  })());
+  // ADVISORY, NEVER AUTOMATIC: it returns a reading and touches nothing. Asserted because the whole
+  // argument for this shape is that a scene which writes 4.2 still cuts at 4.2.
+  ok('velocity-cut: the advice moves no cut', (() => {
+    const cuts = [{ t: 0.9, fx: 'fade' }];
+    const layers = [{ start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 0 }, { t: 1.5, x: 900, ease: 'linear' }] }];
+    cutVelocityAdvice(cuts, layers, { duration: 3 });
+    return cuts[0].t === 0.9 && cuts[0].fx === 'fade';
+  })());
+
+  // ---- the range selector's smoothness dial (docs/CRAFT/AE-TECHNIQUES.md #5) ---------------------
+  //
+  // DEFAULT 1 IS THE IDENTITY, and that is why exposing this dial changed no rendered frame. Asserted
+  // rather than assumed: the remap is (u-0.5)/s+0.5, which is only the identity at exactly s=1, so a
+  // future default that drifted off 1 would silently move every kinetic preset in the library.
+  ok('type: smoothness 1 is the identity, so no shipped frame moves', (() => {
+    for (let i = 0; i <= 20; i++) {
+      const t = i * 0.05;
+      if (unitProgress(t, 0, 8, { each: 0.6 }) !== unitProgress(t, 0, 8, { each: 0.6, smoothness: 1 })) return false;
+    }
+    return true;
+  })());
+  // SMOOTHNESS 0 IS A SWAP, not a fast ease. The unit is unselected, then selected, and there is no
+  // value in between at any time. That is the property a font morph is built on: a glyph vanishes
+  // rather than scaling away.
+  ok('type: smoothness 0 swaps rather than interpolates', (() => {
+    for (let i = 0; i <= 60; i++) {
+      const v = unitProgress(i * 0.02, 0, 8, { each: 0.6, smoothness: 0 });
+      if (v !== 0 && v !== 1) return false;
+    }
+    return unitProgress(0.2, 0, 8, { each: 0.6, smoothness: 0 }) === 0
+      && unitProgress(0.4, 0, 8, { each: 0.6, smoothness: 0 }) === 1;
+  })());
+  // A partial smoothness narrows the BAND around the midpoint and keeps it centred there, so the
+  // moment a unit is half-way through is the same whatever the dial says. Without that the dial would
+  // also shift the timing, and the stagger would stop meaning what it says.
+  ok('type: a partial smoothness narrows the band without moving its centre', (() => {
+    const at = (t, s) => unitProgress(t, 0, 8, { each: 0.6, smoothness: s });
+    // The band is `smoothness` wide in u, centred on 0.5, so at 0.25 it spans u 0.375..0.625, which
+    // is t 0.225..0.375 for a 0.6s window.
+    return at(0.3, 0.25) === at(0.3, 1) && at(0.2, 0.25) === 0 && at(0.4, 0.25) === 1
+      && at(0.2, 1) > 0 && at(0.4, 1) < 1;
   })());
 }
 

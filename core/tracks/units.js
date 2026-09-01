@@ -17,10 +17,11 @@ const SPLIT = ['split', 'ransom'];
 export const PROPS = {
   preset: { when: SPLIT }, stagger: { when: SPLIT }, each: { when: SPLIT }, loop: { when: SPLIT },
   dist: { when: SPLIT }, speed: { when: SPLIT }, phaseStep: { when: SPLIT }, presetOpts: { when: SPLIT },
+  smoothness: { when: SPLIT },
   circle: {}, fx: {}, ransom: {},
 };
 
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(units && !L.circle && !L.fx && t >= start && t < end)) return;
-  animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : kit.M.stagger), each: L.each ?? 0.5, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
+  animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger: L.stagger ?? (L.ransom ? 0.08 : kit.M.stagger), each: L.each ?? 0.5, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
 }

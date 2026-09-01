@@ -5,10 +5,10 @@
  "layerProps": {
   "_generated": "node scripts/gates/schema-drift.mjs --write - do not hand-edit",
   "_source": "the PROPS declarations beside each read (core/props.js - core/layers/vocabulary.js)",
-  "shared": ["acrossBeats", "align", "align2", "anchor", "anim", "anticipate", "aspects", "at", "basis", "becomes", "becomesDur", "becomesEase", "bg", "border", "borderTrail", "children", "circle", "col", "colGap", "color", "cols", "colw", "critical", "crt", "css", "cut", "cutTiming", "cx", "cy", "decimals", "delay", "depth", "dir", "direction", "dist", "duration", "dx", "dy", "each", "elevation", "emColor", "enterDur", "exitDur", "fade", "filter", "follow", "font", "from", "fx", "fxOut", "gap", "glass", "glow", "gridCols", "grow", "gutter", "h", "id", "idle", "intensity", "italic", "items", "justify", "keyClicks", "keyCue", "keyGain", "layout", "logotype", "lookOpts", "loop", "ls", "mask", "modifiers", "morph", "motion", "motionBlur", "motionPath", "on", "opacity", "origin", "out", "overshoot", "pad", "panWith", "parts", "phaseStep", "physics", "pin", "prefix", "preset", "presetOpts", "progressiveBlur", "radius", "ransom", "ransomSeed", "react", "reflect", "resample", "rowGap", "seed", "shadow", "size", "speed", "split", "splitText", "stagger", "start", "step", "suffix", "text", "timeWarp", "track", "tracking", "transition", "type", "typing", "vars", "varsDelay", "varsDur", "varsEase", "w", "weight", "wrap", "x", "y"],
+  "shared": ["acrossBeats", "align", "align2", "anchor", "anim", "anticipate", "aspects", "at", "basis", "becomes", "becomesDur", "becomesEase", "bg", "border", "borderTrail", "children", "circle", "col", "colGap", "color", "cols", "colw", "critical", "crt", "css", "cut", "cutTiming", "cx", "cy", "decimals", "delay", "depth", "dir", "direction", "dist", "duration", "dx", "dy", "each", "effector", "elevation", "emColor", "enterDur", "exitDur", "fade", "filter", "follow", "font", "from", "fx", "fxOut", "gap", "glass", "glow", "gridCols", "grow", "gutter", "h", "id", "idle", "intensity", "italic", "items", "justify", "keyClicks", "keyCue", "keyGain", "layout", "logotype", "lookOpts", "loop", "ls", "mask", "modifiers", "morph", "motion", "motionBlur", "motionPath", "on", "opacity", "origin", "out", "overshoot", "pad", "panWith", "parts", "phaseStep", "physics", "pin", "prefix", "preset", "presetOpts", "progressiveBlur", "radius", "ransom", "ransomSeed", "react", "reflect", "resample", "rowGap", "seed", "shadow", "size", "smoothness", "speed", "split", "splitText", "stagger", "start", "step", "suffix", "text", "timeWarp", "track", "tracking", "transition", "type", "typing", "vars", "varsDelay", "varsDur", "varsEase", "w", "weight", "wrap", "x", "y"],
   "byType": {
    "text": ["caret", "caretHold", "fit", "fitH", "font", "gradient", "h", "ls", "maxLines", "raw", "size", "text", "tracking", "typing", "untype", "untypeRate", "w", "weight"],
-   "count": ["caret", "caretHold", "countDur", "countStart", "decimals", "ease", "fit", "fitH", "font", "from", "gradient", "h", "ls", "maxLines", "prefix", "raw", "roll", "size", "suffix", "text", "to", "tracking", "typing", "unit", "untype", "untypeRate", "w", "weight"],
+   "count": ["caret", "caretHold", "countDur", "countStart", "decimals", "ease", "fit", "fitH", "font", "from", "gradient", "h", "ls", "maxLines", "prefix", "raw", "size", "suffix", "text", "to", "tracking", "typing", "unit", "untype", "untypeRate", "w", "weight"],
    "image": ["canvasFx", "edgeFade", "edgeFadeColor", "h", "ken", "radius", "resample", "seed", "src", "w"],
    "video": ["fit", "h", "in", "out", "poster", "radius", "rate", "src", "w"],
    "group": ["children"],
@@ -251,7 +251,6 @@
       "spin",
       "collapse",
       "riseBlur",
-      "matchCut",
       "jitter"
      ]
     },
@@ -267,15 +266,15 @@
     },
     "cx": {
      "type": "number",
-     "label": "Origin x, per cent of the frame (0-100)",
+     "label": "Origin x (0-1)",
      "min": 0,
-     "max": 100
+     "max": 1
     },
     "cy": {
      "type": "number",
-     "label": "Origin y, per cent of the frame (0-100)",
+     "label": "Origin y (0-1)",
      "min": 0,
-     "max": 100
+     "max": 1
     },
     "dir": {
      "type": "string",
@@ -1064,7 +1063,6 @@
       "spin",
       "collapse",
       "riseBlur",
-      "matchCut",
       "jitter"
      ]
     },
@@ -1246,6 +1244,14 @@
      "type": "boolean|object",
      "label": "Lay the text CHARS on a rotating circular path (badge/seal). { radius: px, period: s/turn }. Set w = 2*radius so pin centres it."
     },
+    "effector": {
+     "type": "object",
+     "label": "A falloff from a TRAVELLING POINT, driving the layer's own children: { select, path, radius, falloff, drives, sticky, release, overshoot }. `path` is a motion-key list ({t,x,y,ease}) in the layer's own coordinates, (0,0) at its top-left. `drives` names what the influence is spent on (scale|rotate|x|y|push|opacity) and by how much at full influence. `sticky` (seconds) is what makes it a painted TRAIL instead of a moving highlight: a clone holds what the pass did to it and releases over that delay. No keyframe lands on any clone."
+    },
+    "smoothness": {
+     "type": "number",
+     "label": "Range-selector smoothness, 0..1, default 1. How WIDE each split unit's transition band is, not its curve. 1 = the unit crosses its whole window continuously (every preset's historic behaviour). 0 = the unit SWAPS between states with no interpolation, so a glyph vanishes instead of scaling away. Requires `split`."
+    },
     "phaseStep": {
      "type": "number",
      "label": "Per-unit phase offset for looping presets (wave/shimmerWave); ~0.12 = a crest travels the word"
@@ -1340,10 +1346,6 @@
     "prefix": {
      "type": "string",
      "label": "Count prefix (e.g. +, $)"
-    },
-    "roll": {
-     "type": "boolean",
-     "label": "count: odometer wheels, each digit slides to its next value"
     },
     "suffix": {
      "type": "string",
@@ -1786,7 +1788,7 @@
     },
     "glass": {
      "type": "boolean|number|string",
-     "label": "Glass: filter what is BEHIND this layer. true = a frosted default, a number = blur px, a string = a raw backdrop-filter. \"refract\" | \"refractThin\" = REAL glass, not frost: the backdrop is BENT along a lens map and split into three indices of refraction, which is what a blur cannot do. Pair it with `radius` for the shape (a glass layer paints nothing, so `radius` is honoured here and not by the box recipe) and write the Fresnel rim, specular and bevel as CSS on the layer's own content. Worked example: formats/scene/_glass-shapes.json"
+     "label": "Frosted glass: blur what is BEHIND this layer. true = default, a number = blur px, a string = raw backdrop-filter"
     },
     "depth": {
      "label": "three extrudeText: extrusion depth"
