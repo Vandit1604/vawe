@@ -1,6 +1,6 @@
 {
-  "total": 618,
-  "previewed": 273,
+  "total": 621,
+  "previewed": 276,
   "families": 45,
   "tags": [
     [
@@ -53,7 +53,7 @@
     ],
     [
       "per-frame",
-      35
+      38
     ],
     [
       "per-layer",
@@ -2792,7 +2792,7 @@
         {
           "name": "svg",
           "stem": "layer-types--svg",
-          "desc": "a · vector · mark · that · DRAWS · itself · on · (stroke · dashoffset) · or · MELTS · from · one · path · into · another · (true · point-lerp · morph, · optional · spin)",
+          "desc": "a · vector · mark · that · DRAWS · itself · on · (stroke · dashoffset) · and · then · RESOLVES · INTO · ITS · FILL, · the · stroke · leaving · as · the · solid · logo · arrives, · or · MELTS · from · one · path · into · another · (true · point-lerp · morph, · optional · spin)",
           "scene": null,
           "noPreview": null
         },
@@ -3034,7 +3034,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 18,
+      "count": 21,
       "undescribed": 0,
       "entries": [
         {
@@ -3063,6 +3063,13 @@
           "stem": "ambient-shader-fields--crt",
           "desc": "a · tube · 4px · RGB · phosphor · stripes, · scanlines, · a · corner · vignette · and · a · refresh · bar · rolling · down. · an · OVERLAY",
           "scene": "/assets/effects/ambient-shader-fields--crt.json",
+          "noPreview": null
+        },
+        {
+          "name": "domainWarp",
+          "stem": "ambient-shader-fields--domainwarp",
+          "desc": "marbled · ink · fBm · sampled · through · a · domain · that · is · itself · two · levels · of · fBm, · so · the · field · folds · back · over · itself. · the · classic · warp, · and · the · only · field · here · with · real · interior · structure",
+          "scene": "/assets/effects/ambient-shader-fields--domainwarp.json",
           "noPreview": null
         },
         {
@@ -3129,6 +3136,13 @@
           "noPreview": null
         },
         {
+          "name": "metaballs",
+          "stem": "ambient-shader-fields--metaballs",
+          "desc": "five · signed-distance · circles · merging · and · parting · on · a · polynomial · smooth · minimum, · so · they · fuse · into · one · body · instead · of · overlapping",
+          "scene": "/assets/effects/ambient-shader-fields--metaballs.json",
+          "noPreview": null
+        },
+        {
           "name": "mist",
           "stem": "ambient-shader-fields--mist",
           "desc": "near-still · layered · noise · haze. · The · quietest · field · here, · for · a · backdrop · that · must · move · without · being · noticed",
@@ -3161,6 +3175,13 @@
           "stem": "ambient-shader-fields--vhs",
           "desc": "tape · scanlines, · magenta/cyan · chroma · snow, · dropout · streaks · and · a · soft · tracking · band · creeping · up. · an · OVERLAY, · place · it · ABOVE · content",
           "scene": "/assets/effects/ambient-shader-fields--vhs.json",
+          "noPreview": null
+        },
+        {
+          "name": "voronoi",
+          "stem": "ambient-shader-fields--voronoi",
+          "desc": "cellular · (Worley) · noise · seeded · cells · drifting · on · their · own · loops, · each · one · flat-tinted, · with · a · lit · line · along · every · shared · border",
+          "scene": "/assets/effects/ambient-shader-fields--voronoi.json",
           "noPreview": null
         }
       ]

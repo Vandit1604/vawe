@@ -30,7 +30,16 @@ export function canvasLayer(name, blurb) {
       const [dw, dh] = S.size(kit);
       const w = Math.round(L.w ?? dw), h = Math.round(L.h ?? dh);
       const s = S.create(kit, L, w, h);
-      s.canvas.style.cssText = `display:block;width:${w}px;height:${h}px;border-radius:${L.radius ?? 0}px`;
+      // THE BOX IS THE ELEMENT'S, AND THE CANVAS FILLS IT. Sized in px here instead, the canvas kept
+      // its build-time size for the whole film, so a `motion` track keying `w`/`h` resized the LAYER
+      // and the canvas stayed put: with a radius (hence `overflow:hidden`) the surface became a window
+      // onto a larger field, and without one it overflowed its own panel. A shader folding from
+      // 1216x596 down to a 540x380 panel showed a CROP of the big field rather than the field fitted
+      // to the panel, and nothing reported it (docs/MISTAKES.md #550). Percentages make the box the one
+      // owner of the size, so anything that moves it moves the picture with it.
+      el.style.width = w + 'px';
+      el.style.height = h + 'px';
+      s.canvas.style.cssText = `display:block;width:100%;height:100%;border-radius:${L.radius ?? 0}px`;
       if (L.radius) el.style.overflow = 'hidden';
       el.appendChild(s.canvas);
       el.__surface = s;
