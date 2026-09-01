@@ -2,14 +2,14 @@
 message: the film is a text file, and the terminal that renders it becomes the pictures it made
 audience: developers and designers on X who have never seen a video written as JSON
 framework: BAB
-arc: hook (a command types itself) → build (the render reports its own states) → turn (the terminal's interior becomes a shader in place) → proof (two more panels rise from behind it and the three cycle through different looks) → payoff (from one text file)
+arc: hook (a command types itself) → build (the render reports its own states) → turn (the terminal's interior becomes a shader in place) → proof (two more panels rise from behind it and the three cycle through different looks) → payoff (two panels leave, the terminal itself becomes the wordmark)
 threads: a continuous object (the terminal's own body is on screen from frame one to the payoff and is never replaced, only changed) and an escalation of light (dim panel → a beam lapping its border → its interior IS the light → three of them)
 object: the terminal's body
 object_t0: a dark panel on a white ground with an empty prompt and a caret
-object_states: empty prompt → a real vawe command typed into it → the command's own render states listed under it → a light travelling its border → its interior IS the shader → it folds to one panel and two more rise from behind it → all three cycle through different shaders
-object_last: three equal panels on one baseline, dissolving as the wordmark arrives on the white it started on
+object_states: empty prompt → a real vawe command typed into it → the command's own render states listed under it → a light travelling its border → its interior is the shader seen through tinted glass, then the glass clears → it FOLDS to the centre panel and two more rise from behind it → all three cycle through different looks → the two wings leave and the terminal itself collapses into the wordmark
+object_last: the terminal, folded to a tile, collapsing onto the wordmark's own footprint on the white it started on
 pace: showreel, 2 seconds per idea
-spectacle: beat 5 · the two new shader panels · they rise from behind the folded one and fan out like a folder opening, landing aligned · the film stops showing one specimen and shows range
+spectacle: beat 5 · the two new panels · they rise from BEHIND the folding terminal and fan out like a folder opening over one full bar, all three landing aligned on 8.381 · the film stops showing one specimen and shows range
 not: no voiceover, no zoom or push into the shader, no dark film (the ground is white, vawe.dev's own register), no camera on the terminal, no breathing idle on anything that is meant to be a screen, no gradient hero, no centred type, no stock footage, no dots-in-a-title-bar terminal cliche
 format: 1920x1080
 theme: themes/vawe.json
@@ -25,9 +25,11 @@ duration: 14s
   Beat edges sit on the bed's own grid (assets/music/bed.wav, mixkit 292): 178.2 BPM, first bar 0.30s,
   so a beat is 0.3367s and a bar is 1.3468s. The command types 0.637 to 2.320, the output lines land
   one per beat from 2.657, the beam runs 5.014 to 6.361 (one bar, one lap), the interior turns on
-  6.361, the fold starts on 7.034, the fan launches on 7.708 and lands on 8.381, the panels swap shader
-  on 9.728, 9.812 and 9.896 (a three-frame ripple), and the only cut is the downbeat at 11.074, which the
-  panels' own exit straddles so the seam sits inside the move rather than on a still frame. `audio.beatSync` is NOT set:
+  6.361, the fold AND the fan both launch on 7.034 so they land together on 8.381, one full bar, the panels swap shader
+  on 9.728, 9.812 and 9.896 (a three-frame ripple), and the only cut is the downbeat at 11.074, which carries NO
+  presentation (`style: "none"`): the centre panel survives that seam and is the continuity across it,
+  so a `rise` would have carried the one thing holding the film together 70px along with everything else
+  (docs/CRAFT/TRANSITIONS.md step 1). `audio.beatSync` is NOT set:
   core/beat-bind.js refuses this bed at confidence 1.54 against a floor of 1.6, so the grid is applied
   by hand at author time rather than by the engine at boot.
 
@@ -99,8 +101,8 @@ duration: 14s
 - shot: medium (unchanged: nothing moves, nothing scales, the picture changes inside the same box)
 - camera: hold
 - layout: unchanged, which is the point of the beat
-- picture: a banded field, cobalt to white, FITTED to the terminal's body, with the chrome and the output still over it
-- mechanism: the body's `background` alpha is a `var(--t)` ramp across one beat; the shader layer is born at the body's exact box, one track under it
+- picture: a raymarched mandelbulb, cobalt on ink, FITTED to the terminal's body, with the chrome and the output still legible over it
+- mechanism: the body's `background` alpha falls in TWO squared steps, to 0.45 across one beat here and to nothing across the beat the fold takes; the raymarch layer is born at the body's exact box, one track under it. The middle step is what keeps the sigil and the ticks readable over a lit picture
 - style: the turn, and it is quiet: no push, no cut, no flash
 - rest: the type above holds while the picture under it changes
 - trigger: the beam completed its lap of the border
@@ -117,8 +119,8 @@ duration: 14s
 - shot: medium wide (three panels on one baseline, the frame's middle band)
 - camera: hold
 - layout: three equal panels, 540x380, on one baseline, filling the middle band of the frame
-- picture: the folded terminal in the centre, Worley cells on the left, a domain-warped marble on the right
-- mechanism: the centre's own `w`/`h` keys fold it; the other two carry a hand-keyed track from the centre's position at 0.86 scale and 7 degrees of rotation out to their slots at 1.0 and 0
+- picture: the folded terminal in the centre carrying a mandelbulb, Worley cells on the left, lit chrome on the right
+- mechanism: the terminal's OWN `w`/`h` keys fold it and it survives as the centre panel's frame, so nothing is swapped out; the other two carry a hand-keyed track from behind it at 0.86 scale and 7 degrees of rotation out to their slots at 1.0 and 0, over one bar, arriving on a `fling`
 - style: the loud beat, and the only one
 - rest: none
 - trigger: the interior turned in beat 4, so there is now something to have three of
@@ -135,7 +137,7 @@ duration: 14s
 - shot: medium wide (unchanged: the panels do not move again)
 - camera: hold
 - layout: unchanged, with one line of type under the right panel, right-aligned to its edge
-- picture: merging metaballs, a matrix rain, a starfield nebula: three looks nobody could mistake for each other
+- picture: a hot bar of light through fine slats, a bright caustic water, two dark merging blobs: three looks nobody could mistake for each other, and three different WEIGHTS (near-empty, full, sparse) rather than three patterns in one hue
 - mechanism: a HARD swap on a scale punch. The plate under each panel draws 1 -> 1.07 -> 1 with `hang`
   and `fling` handles, the outgoing shader ends on the apex and the incoming one is born on it, so the
   content changes on the steepest frame of a move the eye is already following. Crossfading two windows
@@ -152,12 +154,12 @@ duration: 14s
 
 ## Beat 7: From one text file (11.07s-14.0s)
 - type: cta
-- object: dissolving, leaving the black it started on
+- object: two panels leave and the terminal survives, collapsing onto the wordmark's own footprint
 - shot: medium (the wordmark in the left half, the right half deliberately empty)
 - camera: a 1.03 push over the last three seconds
 - layout: the payoff line, the wordmark and the url stacked in the left half
-- picture: a 200px wordmark in ink with the panels dissolving behind it
-- mechanism: a hand-keyed rise and settle on the wordmark, then a slow drift upward
+- picture: a 200px wordmark in ink, arriving on the beat the terminal vanishes into its own rectangle
+- mechanism: the terminal's geometry travels into the word's box over two beats while its opacity is gone after one, so the collapse triggers the word and never obstructs it; a hand-keyed rise and settle on the wordmark, then a slow drift upward
 - style: white, ink, one cobalt line
 - rest: the backdrop's faint cobalt pool opens slowly behind the wordmark
 - trigger: the cycle finished, so the film can name itself
@@ -166,4 +168,4 @@ duration: 14s
 - why: the payoff lands only after the viewer has watched the file turn into the pictures
 - emotion: settled
 - duration: 2.93s
-- transition_in: rise
+- transition_in: none (the terminal is the continuous object across this seam)

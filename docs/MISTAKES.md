@@ -17526,3 +17526,74 @@ worker, 42.2s (37.5-45.8) at six, 39.5s (36.9-44.1) at nine; `plinth-ad` 120.8s,
 spread of the six-worker runs, for three more renderer processes and about 350 MB. Frame agreement is
 now equal at 1, 6 and 9 (0 of 900 against itself at each), so it is a pure speed question and the speed
 is not there. → **No gate:** the numbers live in the comment beside the default they justify.
+
+## 563. a fold sprang back to full size, because a later keyframe mentioned only `scale`
+
+**What happened.** A terminal panel folds from 1240x620 down to a 564x404 tile over one bar, holds
+there, then takes a 1.07 scale punch when its contents swap. Written as five keys: the fold's two
+endpoints, which state `w` and `h`, and the punch's three, which state only `scale` because scale is
+the only thing the punch changes. The render showed the panel snapping back to nearly full width the
+moment the punch began, overlapping both its neighbours. Every gate was green: the film was valid, the
+track was valid, and nothing anywhere said a size had been reinterpreted.
+
+**Root cause, and it is deliberate.** `resolveKeyedProps` (`core/sequence.js:125`) fills an omitted
+`w`, `h` or `track` on EVERY key from the layer's own declaration, before `motionAt` ever sees the
+list. Its comment states the reasoning and the reasoning is right: `x`, `scale`, `rot` and `opacity`
+each have a constant identity (an omitted `x` means 0), and `w` does not. Identity for `w` is whatever
+the layer declared, which a pure evaluator cannot know, so the fill happens once with the layer in
+hand and `motionAt` keeps exactly one rule: both endpoints state the value or neither does.
+
+That is the correct design. The failure is what it looks like from the authoring side: a key that says
+nothing about size does not mean "hold the size", it means "go back to the declared size", and those
+two readings are indistinguishable until you render.
+
+**The fix, and it is at the write site.** State the box on every key after the fold. There is no
+shorthand and there should not be one, because a "hold" would be the second interpretation rule the
+comment above exists to refuse. Concretely:
+
+```json
+{ "t": 1.347, "w": 564, "h": 404 },
+{ "t": 2.694, "w": 564, "h": 404, "scale": 1.07 }
+```
+
+not
+
+```json
+{ "t": 1.347, "w": 564, "h": 404 },
+{ "t": 2.694, "scale": 1.07 }
+```
+
+**Why no gate.** A track whose keys disagree about `w` is a legitimate authoring shape: a layer that
+grows, shrinks and grows again writes exactly that. Nothing distinguishes "I meant to return to my
+declared size" from "I forgot to restate it", so any check would be a guess with a false-positive rate,
+and this repo has twice paid for a gate that measured the wrong thing. → **No gate:** the behaviour is
+documented where it is implemented, and now also as the failure it produces.
+
+## 564. `schema-drift --write` deleted the whole `shared` prop list, and its own re-run said everything was fine
+
+**What happened.** Adding one prop (`raymarchKeys` on the raymarch surface) made `schema-drift` report
+the generated `layerProps` block stale, and it names its own fix: `node scripts/gates/schema-drift.mjs
+--write`. Running it wrote the file, printed three green ticks, and left `formats/scene/schema.json`
+**444 lines shorter**. What it removed was the entire `layerProps.shared` array, every prop that is not
+owned by one layer type. Re-running the gate afterwards passed, because the gate compares the file
+against what it would generate now, and it had just generated it.
+
+**Root cause, not fully established, and said so rather than guessed.** The `shared` list is derived
+from more than the surface modules, and this tree is a worktree that does not carry every film or every
+expanded scene the full checkout has (`.gitignore:61`, a video instance is not the framework). The
+likely reading is that the generator computes `shared` from what it can see and silently writes a
+smaller answer when it can see less. I did not prove that, and it should be proved before anyone
+changes the generator.
+
+**What is certain, and is the useful half.** A `--write` that regenerates a whole file cannot be
+verified by re-running the gate that asked for it, because the two share the same computation. The
+check is `git diff --stat`. A one-prop addition that produces a 444-line deletion is not a formatting
+difference, and nothing except reading the diff would have caught it: the gate was green on both sides.
+
+**What I did instead.** Hand-added the two pieces, the name in `layerProps.raymarch` and the field
+definition beside `raymarch`, for a 17-line diff. The gate passes on that too.
+
+**The rule.** After any `--write`, `--fix` or `--save` that regenerates a generated file, read
+`git diff --stat` before staging, and treat a deletion count larger than the change you made as a
+failure until you can name every removed line. → **No gate:** a gate cannot check a gate's own output
+against itself, which is exactly the property this entry records.
