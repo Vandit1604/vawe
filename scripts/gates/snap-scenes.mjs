@@ -8,8 +8,14 @@
 //      is QUARANTINED: not baselined, listed in the report. (Date.now/Math.random are already banned by
 //      lib-test; this catches the order-dependence class, complementing probe-purity's per-frame proof.)
 //   2. REGRESSION BASELINE, for deterministic scenes, save/diff a DOM signature keyed by scene name,
-//      so any future refactor / version bump / new effect is provably byte-identical (or shows exactly
-//      what moved) across all 75 scenes, not just one.
+//      so any future refactor / version bump / new effect either leaves the DOM untouched or shows
+//      exactly what moved, across the whole library rather than one scene.
+//
+//      THIS IS NOT A PIXEL GATE, AND READING IT AS ONE HAS COST REAL TIME. The signature is the DOM
+//      and its computed styles at sampled frames. Two renders can pass it and still differ in pixels:
+//      rasterization is not in the DOM. Removing `will-change` from every layer moved the antialiasing
+//      of every film and this gate reported 109 identical, correctly, because no element moved. When
+//      the question is whether the PICTURE changed, diff rendered frames. See docs/MISTAKES.md.
 //
 //   node scripts/gates/snap-scenes.mjs --save   # write baselines → verify/snap/scenes/<name>.json
 //   node scripts/gates/snap-scenes.mjs          # diff current vs baselines

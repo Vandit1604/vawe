@@ -16396,3 +16396,26 @@ scene twice, once with its canvas-backed background and once with a flat one, an
 residue survives.** `scripts/dev/tabprobe` is the instrument: it opens N tabs the way `scene.Capture`
 does, gives tab 0 any paint history you name (`-pre 0,6,12,...`), and prints a hash and the full DOM of
 both, so "same DOM, different pixels" and "different DOM" are one command apart.
+
+## 532. `snap-scenes` was read as a pixel gate for years, and it compares the DOM
+
+**What.** Its own header said it saved a "DOM signature" and, in the same sentence, that a refactor was
+therefore "provably byte-identical". Those are different claims. The signature is the DOM and its
+computed styles at sampled frames. Rasterization is not in the DOM, so two renders can pass with
+identical signatures and still paint different pixels.
+
+**How it surfaced.** #531 removed `will-change` from every layer to stop a compositor layer reusing an
+earlier frame's raster. That moves the antialiasing of every film in the library. `snap-scenes`
+reported **109 identical, 0 changed**, and it was right: no element moved. The gate had nothing to say
+about the only thing that had changed.
+
+**The cost.** Every brief written in that session, and this file's own summary of the gate, cited it as
+proof that shipped films stay byte-identical. A change that repaints the whole library read as free.
+
+**Root cause.** One sentence asserting two facts, of which the gate establishes one. The word
+"byte-identical" was doing work the code never did.
+
+**Fix.** The header now says plainly that it is not a pixel gate, gives the worked example, and says to
+diff rendered frames when the question is whether the picture changed. **No new gate**: a pixel net
+over 109 films is a render sweep, not a check, and the honest answer is to run one deliberately when a
+change touches rasterization rather than to pretend a DOM diff covers it.
