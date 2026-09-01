@@ -16275,3 +16275,42 @@ should read #268 first. Checking this file before appending to it is one grep an
 every one survived until a number killed it. The cheapest test, printing both delta arrays, was named
 as "the next step" three times before it was run. Run the measurement that distinguishes the
 candidates FIRST, especially when it is the cheap one. → **Gate: the renderer refuses to report it.**
+
+
+## #507: `glass` was a frosted panel because nobody asked whether backdrop-filter takes a url()
+
+**What.** The engine's glass primitive (`applyGlass`, `core/layers/util.js`) accepted `true`, a px
+number, or a raw filter string, and its own comment said real glass was blocked on "a structural
+layer-as-texture change" because the shader path has no `sampler2D`. So every glass surface in this
+library is a blur, and a blur is the one thing glass does not do: blurring softens, glass BENDS.
+
+**Root cause.** `backdrop-filter` accepts a `<filter-value-list>`, and that list includes `url()`. The
+comment assumed it took only the filter FUNCTIONS. It does not: an SVG `feDisplacementMap` runs on the
+backdrop in this Chrome, verified by render. Nothing was structurally blocked; one capability was never
+tested.
+
+**Fix.** `glass: "refract"` and `glass: "refractThin"`, a named recipe built once in
+`core/layers/util.js`: a lens height map as a `data:` `feImage` (a red x-ramp plus a green y-ramp,
+screened, with the stops flat through the middle and steep at the rim), a NEGATIVE displacement scale
+so the rim pulls the surroundings inward, and THREE passes at three scales recombined per channel,
+which is dispersion and the step that separates glass from a chromatic-aberration filter. The AE names
+for the chain are in the comment beside it, per #505.
+
+**A second silent drop, found while wiring it.** `chipBox` writes `radius` only for a layer that also
+PAINTS (a bg, a border, a shadow, an elevation, a glow). A pane of glass paints nothing, so
+`{"glass": true, "radius": 24}` rounded nothing and there was no way to make a glass layer that was not
+a rectangle. Documented prop, accepted, dropped in silence: the `pad` bug in the same function, one
+guard down. `applyGlass` now writes it, because `backdrop-filter` is clipped by the element's own
+border-radius and a glass layer's shape IS its radius.
+
+**What is NOT reachable, recorded so nobody rebuilds it.** `mask` and `clip-path` do NOT clip a
+`backdrop-filter`: the filter runs over the whole border box while the mask removes only the element's
+own paint. So a masked annulus refracts its own hole and loses its rim doing it, and a glass torus is
+not buildable this way. Verified by rendering a masked circle beside a plain one: identical refraction.
+Any glass shape here has to be a shape `border-radius` can make.
+
+**Lesson.** The comment that said a feature was blocked was written by someone who had reasoned about
+the shader path, not someone who had tried the CSS. It stood for a year and cost the whole family. When
+a comment says a capability is impossible, check whether the sentence after it names an experiment that
+was actually run. → **No gate. The schema now names the modes, and `formats/scene/_glass-shapes.json`
+is the worked example.**
