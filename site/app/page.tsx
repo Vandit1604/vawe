@@ -97,9 +97,11 @@ export default function Home() {
                 smudges behind the headline. */}
             <Clip className="bookend-film" src="/assets/backdrop.mp4" poster="/assets/backdrop.jpg" />
             <div className="wrap hero-head on-accent" id="content" tabIndex={-1}>
+              {/* Names the audience. It used to read "for teams with no motion designer", which is
+                  the h1's own second line, so the first two things on the page said one thing twice. */}
               <span className="eyebrow">
                 <span className="dot" />
-                for teams with no motion designer
+                for product and marketing teams
               </span>
               {/* OUTCOME FIRST, MECHANISM SECOND, and it took two tries to get right. It read
                   "One JSON, one video.", which is how the thing WORKS. Then "Ship the film with the
@@ -111,7 +113,7 @@ export default function Home() {
                   "One JSON, one video" is now the first line of the sub, where it answers "how" for a
                   reader the headline has already convinced. */}
               <h1>
-                Motion graphics without
+                Motion graphics without{" "}
                 <br />
                 a motion designer.
               </h1>
@@ -155,7 +157,6 @@ export default function Home() {
             <p className="lead">
               Nothing here asks you to be careful. Anything that reads a real clock is refused before a
               pixel is drawn, so a film cannot drift between renders.
-              Two things fall out of that, and both matter more than the guarantee.
             </p>
             <div className="pf">
               <div>
@@ -187,7 +188,10 @@ export default function Home() {
             <div className="gal-head">
               <div>
                 <div className="kicker">what came out of it</div>
-                <h2 className="h2">Made without a timeline or a designer.</h2>
+                {/* The claim the three tiles below can be checked against: each carries the line
+                    count of the file that made it. It read "Made without a timeline or a designer.",
+                    which is a description of the process and a second copy of the h1's promise. */}
+                <h2 className="h2">Every film here fits in one file.</h2>
               </div>
               <Link href="/showcase">
                 See the full showcase <span className="arw">→</span>
@@ -218,16 +222,18 @@ export default function Home() {
           <div className="wrap">
             <div className="gal-head">
               <div>
-                <div className="kicker">why they do not look alike</div>
-                <h2 className="h2">Two films here never look alike.</h2>
+                {/* The kicker used to say the heading's sentence again, one line above it. It now
+                    names what the wall IS and the heading makes the claim. */}
+                <div className="kicker">what you compose from</div>
+                <h2 className="h2">Nothing here looks like a template.</h2>
               </div>
               <Link href="/arsenal">
                 Browse the arsenal <span className="arw">→</span>
               </Link>
             </div>
             <p className="lead">
-              Your film looks like yours. You compose it from primitives the way you would write
-              anything else, rather than pouring data into a layout someone else already composed. {EFFECTS.total} effects ship today,{" "}
+              You compose a film from primitives the way you would write anything else, rather than
+              pouring data into a layout someone else already composed. {EFFECTS.total} effects ship today,{" "}
               {EFFECTS.previewed} of them with a rendered preview. Below is one frame from each
               family that has one.
             </p>

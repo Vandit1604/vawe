@@ -22,8 +22,12 @@
    Centred, and that is the one place on this site where centring is right: the hero is a single
    claim with a single action under it, and the live editor below is the asymmetry. Top padding
    clears the absolutely-positioned pill nav. */
+/* padding-BLOCK, never the four-value shorthand. .hero-head is also a .wrap, and .wrap's own
+   `padding:0 26px` is what keeps prose off the screen edge. The shorthand here reset that to 0, so
+   at 390px the headline and the sub ran to 8px from the glass while every other section sat at 32.
+   Nothing on a desktop shows it: the hero text is narrow enough there to never reach the gutter. */
 .hero-head{position:relative;z-index:var(--z-raise);text-align:center;
-  padding:clamp(104px,11vw,132px) 0 clamp(90px,11vw,150px)}
+  padding-block:clamp(104px,11vw,132px) clamp(90px,11vw,150px)}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono),monospace;font-size:12px;
   letter-spacing:.02em;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
   padding:6px 13px;border-radius:999px;margin-bottom:26px}
@@ -48,6 +52,14 @@
    that nav block in globals; it stopped working the moment the hero moved to its own stylesheet,
    because a later file wins a specificity tie and this one loads last. */
 @media (max-width:700px){ .hero-head{padding-top:148px} }
+/* On a phone the authored line break stops helping and starts hurting: "Motion graphics" no longer
+   fits one line at the 2.35rem floor, so the forced break turned the headline into five ragged
+   lines. Drop the break and let text-wrap:balance choose, and let the type go a little smaller so
+   the first phrase holds together. Measured at 390px, where it lands on three even lines. */
+@media (max-width:560px){
+  .hero-head h1{font-size:clamp(1.95rem,8.4vw,2.35rem)}
+  .hero-head h1 br{display:none}
+}
 
 /* The editor overlaps UP into the V the band cuts, so the band reads as pouring into it. */
 .hero-stage{position:relative;z-index:var(--z-raise);width:80%;max-width:none;
@@ -127,8 +139,10 @@
 .hero-mobile{display:none;border-radius:14px;overflow:hidden;background:var(--bg-2);
   border:1px solid var(--line);box-shadow:var(--shadow-3)}
 .hero-mobile video{width:100%;display:block;aspect-ratio:16/9;object-fit:contain}
-.hero-mobile .hm-cta{display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:11px 14px;background:#fff;border-top:1px solid var(--line);
+/* flex-wrap, because the two halves do not fit one row at 390px: the caption was cut to
+   "ndered from one JSON" with its first word off the left edge. They stack instead. */
+.hero-mobile .hm-cta{display:flex;align-items:center;justify-content:space-between;gap:4px 10px;
+  flex-wrap:wrap;padding:11px 14px;background:#fff;border-top:1px solid var(--line);
   font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted)}
 .hero-mobile .hm-cta a{color:var(--accent);font-weight:600}
 /* An editable code pane is a desktop affordance: you are not typing JSON on a phone. Hide the
@@ -200,14 +214,20 @@
    the fifteen families that ship a preview, so no breakpoint strands a tile alone on a last row. */
 .fxwall{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:26px}
 .fx{min-width:0}
-.fx img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-2);
+/* height:auto is load-bearing. The <img> carries width/height attributes, which Chrome applies as
+   presentational hints, and the mapped `height:180px` beat the aspect-ratio here: every tile was
+   180px tall at every viewport, so a 640x360 frame was cropped to a portrait sliver. It is worst on
+   a phone (102x180) but it was never right on a desktop either (209x180). */
+.fx img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:var(--bg-2);
   border:1px solid var(--line);border-radius:8px}
 .fx figcaption{display:block;margin-top:7px;font-family:var(--font-mono),monospace;font-size:11px;
   color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fx .fxfam{display:block;color:var(--muted);font-size:10px;margin-top:1px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:900px){ .fxwall{grid-template-columns:repeat(3,minmax(0,1fr))} }
-@media (max-width:640px){ .fxwall{gap:10px} }
+/* Two, not three. At 390px three columns gave each tile 102px, which is a 57px-tall frame under a
+   family name truncated to "ambient shader f". A specimen you cannot read is not a specimen. */
+@media (max-width:560px){ .fxwall{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} }
 
 /* ===== MOBILE: TOUCH TARGETS AND THE SMALLEST TEXT ==========================================
  * Measured on the live site in a real browser rather than guessed at. Two findings, both real,
