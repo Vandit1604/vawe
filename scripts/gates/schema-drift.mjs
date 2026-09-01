@@ -6,7 +6,8 @@
 //   node scripts/gates/schema-drift.mjs            (make schema-check), exits 1 on drift
 //   node scripts/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part,
 //                                                  layerProps AND the registry-owned enums, then
-//                                                  re-run with no flag to verify
+//                                                  re-run with no flag to verify. A write that would
+//                                                  DROP a prop name is refused; --force overrides.
 //
 // THE PER-LAYER VOCABULARY IS GENERATED, NOT MAINTAINED. `schema.layerProps` is written by this file
 // from the PROPS declarations (core/props.js) and checked in; the gate fails when the committed block
@@ -72,7 +73,12 @@ const vocabulary = {
   byType: Object.fromEntries(LAYER_TYPES.map((t) => [t, Object.keys(LAYER_PROPS[t]).sort()])),
 };
 
-// One line per key, so a type gaining a prop is a one-line diff rather than a re-indent.
+// ONE NAME PER LINE, at the indentation the file already uses. This function used to emit each array
+// on a single line, which is not a formatting preference: schema.json is committed one-name-per-line,
+// so every `--write` reflowed a 451-line block into 6 and `git diff --stat` reported ~445 deletions for
+// a one-prop change. A reviewer read that as "the shared array was deleted" and it was not, the data
+// round-tripped identical (docs/MISTAKES.md #564). A generated block whose diff is unreadable cannot be
+// reviewed, and an unreviewable diff is how a real deletion would hide.
 //
 // THE INDENT IS READ OFF THE FILE, not assumed. It was hardcoded to two spaces here and in the splice
 // regex below, and formats/scene/schema.json is written with ONE, so the anchor never matched: `--write`
@@ -80,13 +86,15 @@ const vocabulary = {
 // layerProps block OR the registry-owned enums. The command CLAUDE.md names as the way to regenerate the
 // schema could not regenerate it, and the only symptom was an error message about a different anchor.
 function renderVocabulary(v, pad = '  ') {
-  const p2 = pad + pad, p3 = pad + pad + pad;
-  const arr = (a) => `[${a.map((x) => JSON.stringify(x)).join(', ')}]`;
-  const types = Object.entries(v.byType).map(([t, ps]) => `${p3}${JSON.stringify(t)}: ${arr(ps)}`);
+  const p2 = pad.repeat(2), p3 = pad.repeat(3);
+  const arr = (a, ind) => a.length
+    ? `[\n${a.map((x) => ind + pad + JSON.stringify(x)).join(',\n')}\n${ind}]`
+    : '[]';
+  const types = Object.entries(v.byType).map(([t, ps]) => `${p3}${JSON.stringify(t)}: ${arr(ps, p3)}`);
   return `${pad}"layerProps": {\n`
     + `${p2}"_generated": ${JSON.stringify(v._generated)},\n`
     + `${p2}"_source": ${JSON.stringify(v._source)},\n`
-    + `${p2}"shared": ${arr(v.shared)},\n`
+    + `${p2}"shared": ${arr(v.shared, p2)},\n`
     + `${p2}"byType": {\n` + types.join(',\n') + `\n${p2}}\n`
     + `${pad}},`;
 }
@@ -199,6 +207,35 @@ if (process.argv.includes('--write')) {
   const block = '\n' + renderVocabulary(vocabulary, pad);
   const spliced = found ? src.replace(BLOCK, block) : src.replace(FIELDS, `${block}\n${pad}"fields": {`);
   const { out: next, targets } = rewriteOwnedEnums(spliced);
+
+  // NO WRITE MAY LOSE VOCABULARY IN SILENCE. Everything above this line is the generator agreeing with
+  // itself: `--write` produces the block and the check then compares the file against the same
+  // computation, so re-running the gate can never tell "I verified this" from "I produced this"
+  // (docs/MISTAKES.md #564). The one thing a re-run cannot see is what the write TOOK AWAY, so that is
+  // measured here, against the file as it stood, and it is measured on NAMES rather than on lines: a
+  // reflow is not a loss and a lost prop is not a formatting difference.
+  //
+  // Adding a prop is additions only and writes with no ceremony. Removing one is rare and deliberate,
+  // so it is named and it needs `--force`: an author deleting a feature says so, and a generator that
+  // has gone blind (a module that stopped exporting PROPS merges as `{}` and takes its whole half of
+  // the vocabulary with it) cannot get past this without a human typing the flag.
+  const before = schema.layerProps || {};
+  const names = (v) => new Set([...(v.shared || []), ...Object.values(v.byType || {}).flat()]);
+  const had = names(before), now = names(vocabulary);
+  const gone = [...had].filter((k) => !now.has(k)).sort();
+  const added = [...now].filter((k) => !had.has(k)).sort();
+  if (added.length) console.log(`  + ${added.length} prop name(s): ${added.join(', ')}`);
+  if (gone.length) console.log(`  - ${gone.length} prop name(s): ${gone.join(', ')}`);
+  if (!added.length && !gone.length) console.log('  (no vocabulary change: formatting and enums only)');
+  if (gone.length && !process.argv.includes('--force')) {
+    console.error(`\u2717 refusing to write: this would drop ${gone.length} prop name(s) the committed schema carries.`);
+    console.error(`    ${gone.join(', ')}`);
+    console.error('    Nothing re-running this gate can catch that: it would compare the file against the');
+    console.error('    same computation that shrank it, and agree. Either a module stopped declaring what');
+    console.error('    it reads, or the removal is real.');
+    console.error('    fix: restore the declaration, or re-run with --force if the props are genuinely gone.');
+    process.exit(2);
+  }
   fs.writeFileSync(SCHEMA_PATH, next);
   console.log('✓ wrote formats/scene/schema.json layerProps (generated from the declarations)');
   console.log(`✓ wrote ${targets.length} registry-owned enum(s) at ${targets.reduce((a, t) => a + t.hits, 0)} site(s)`);

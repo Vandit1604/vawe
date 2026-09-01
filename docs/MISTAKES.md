@@ -17569,31 +17569,42 @@ declared size" from "I forgot to restate it", so any check would be a guess with
 and this repo has twice paid for a gate that measured the wrong thing. → **No gate:** the behaviour is
 documented where it is implemented, and now also as the failure it produces.
 
-## 564. `schema-drift --write` deleted the whole `shared` prop list, and its own re-run said everything was fine
+## 564. `schema-drift --write` looked like it deleted the whole `shared` prop list, and had not
 
 **What happened.** Adding one prop (`raymarchKeys` on the raymarch surface) made `schema-drift` report
 the generated `layerProps` block stale, and it names its own fix: `node scripts/gates/schema-drift.mjs
 --write`. Running it wrote the file, printed three green ticks, and left `formats/scene/schema.json`
-**444 lines shorter**. What it removed was the entire `layerProps.shared` array, every prop that is not
-owned by one layer type. Re-running the gate afterwards passed, because the gate compares the file
-against what it would generate now, and it had just generated it.
+**445 lines shorter**. Read as a `git diff --stat`, that is the whole `layerProps.shared` array leaving.
 
-**Root cause, not fully established, and said so rather than guessed.** The `shared` list is derived
-from more than the surface modules, and this tree is a worktree that does not carry every film or every
-expanded scene the full checkout has (`.gitignore:61`, a video instance is not the framework). The
-likely reading is that the generator computes `shared` from what it can see and silently writes a
-smaller answer when it can see less. I did not prove that, and it should be proved before anyone
-changes the generator.
+**Proven cause, and it is not what this entry first guessed.** Nothing was deleted. `renderVocabulary`
+emitted every array on ONE line, and schema.json is committed ONE NAME PER LINE, so each `--write`
+reflowed a 451-line block into 6. The data round-trips identical: parse both sides and
+`JSON.stringify(before.layerProps) === JSON.stringify(after.layerProps)`, 128 shared props before and
+128 after. The gate was green afterwards because nothing had been lost.
 
-**What is certain, and is the useful half.** A `--write` that regenerates a whole file cannot be
-verified by re-running the gate that asked for it, because the two share the same computation. The
-check is `git diff --stat`. A one-prop addition that produces a 444-line deletion is not a formatting
-difference, and nothing except reading the diff would have caught it: the gate was green on both sides.
+**The worktree theory in the first draft of this entry is disproven.** `shared` is not derived by
+walking films or scenes. It is `mergeProps` over seven STATIC ESM imports (`core/layers/vocabulary.js`),
+so a file this checkout does not carry is a module-resolution error, not a smaller answer. A partial
+checkout cannot shrink it.
 
-**What I did instead.** Hand-added the two pieces, the name in `layerProps.raymarch` and the field
-definition beside `raymarch`, for a 17-line diff. The gate passes on that too.
+**Fix.** `renderVocabulary` now emits one name per line at the indent it reads off the file, so a
+`--write` over a current file is byte-identical and a one-prop addition is a 3-line diff. That is the
+root fix: the alarm was a formatting reflow, and a generated block whose diff is unreadable is where a
+real deletion would hide.
 
-**The rule.** After any `--write`, `--fix` or `--save` that regenerates a generated file, read
-`git diff --stat` before staging, and treat a deletion count larger than the change you made as a
-failure until you can name every removed line. → **No gate:** a gate cannot check a gate's own output
-against itself, which is exactly the property this entry records.
+**Plus the guard for the deletion that this was mistaken for.** `--write` now compares the prop NAMES
+in the committed block against the ones it is about to write, prints `+`/`-` either way, and REFUSES,
+before writing, when any name would be dropped. `--force` is the way past, so a genuine removal is a
+deliberate act. The latent path it covers is real: `mergeProps` treats a missing declaration set as
+`{}`, so a module that stopped exporting `PROPS` would take its half of the vocabulary with it in
+silence.
+
+**Can the check be independent of the generator? Partly, and it already is.** The comparison of
+`layerProps` against the file is self-agreeing by construction and always will be. But the gate's second
+check reads the HAND-WRITTEN `layers.item` docs and demands the two name the same set, and that is a
+witness the generator does not author. Verified by breaking it: gutting `PROPS` in `core/pan-resolve.mjs`
+and forcing the write past the new guard still fails the gate with
+`layers.item documents 1 prop(s) no module declares: panWith`.
+
+→ **Gates:** `schema-drift --write` refuses a name-dropping regeneration; `lib-test` asserts the
+byte-identical round trip, the refusal, and `--force`.
