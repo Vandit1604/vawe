@@ -16798,3 +16798,85 @@ with the shot spacing deliberately broken the writer emitted a DESCENDING keyfra
 writer now has two doors: a hold is dropped, a pose key REFUSES and names both times. The general
 version is that a de-duplicating guard which is right for one caller becomes a corruption engine for the
 next, and the cheap fix is to give the two callers two functions rather than one clever one.
+
+## 544. the multiplane scale correction was written down, in an error message, and never applied
+
+**What.** `core/fx/plane.js` stands a layer at a depth under the camera rig, and the perspective divide
+magnifies it by `lens / (lens - z)`. Every After Effects multiplane rig corrects that: it scales each
+plane by `(zoom - z) / zoom` so the layer keeps the size it was laid out at and the depth shows up only
+as a different rate of travel. We refused to, on the argument that "depth without magnification is a
+translation, not a distance", and told the author to divide by hand in the header. The arithmetic was
+already computed one function away, inside `depthZ`'s refusal, purely to print it.
+
+**Root cause.** A good-sounding argument that had not been checked against a moving camera. The
+correction removes the size change; it does not remove the depth, because a depth is a DIFFERENT RATE
+OF TRAVEL, and the corrected layer still crosses the frame faster or slower than its neighbours, still
+converges on the vanishing point, still occludes by distance. The argument only holds for a camera that
+never moves, and `plane` refuses to render without a rig two functions down.
+
+**What it cost, measured.** `depth` appeared in 1 scene of 170 and `plane` in 4, while 44 of the 47
+films that move the camera sat entirely at z = 0. A capability that needs hand arithmetic to look right
+is a capability the library does not have.
+
+**Fix.** `hold` is a key on the plane spec and writes the `scale` longhand with `(lens - z) / lens`.
+`depth`, the named vocabulary whose whole job is parallax, sets it (`bakeDepth`, `core/produce.js`); raw
+`plane` does not, because a primitive that quietly rescales what it was handed is a primitive that lies,
+and two shipped films place 28 layers by the projected size they already get. It is written as CSS
+rather than baked, so a depth keyed through `--plane-z` corrects against the LIVE z with the same
+`min()` clamp the translate carries; a build-time constant would have held the size the layer has at the
+END of the travel and made the start wrong.
+
+**What the gate now catches.** `scripts/gates/lib-test.mjs` asserts `hold` is a plane key, that the
+correction is `(lens - z) / lens`, that the keyed form is a `calc()` carrying the translate's clamp, that
+an unheld plane never writes `scale`, and that `hold` beside `kick` or `squash` is refused by name
+(all three write the same longhand and modifiers resolve last-writer-wins, so one would silently win by
+array order). Removing `hold` from `PLANE_KEYS` fails three of them and nothing else.
+
+**Rendered before and after.** Five identical 340x200 rects on one grid, one per named depth, under a
+camera trucking 600px. Before: the far rect is drawn at 0.57x and hides behind its neighbour, the near
+one at 1.39x and covers the frame, and the layout is gone. After: all five are the size they were
+written at, and by the late frame they have separated by different amounts, far by about a third of what
+the picture plane moved and near by enough to leave the frame. The parallax is what survived.
+
+## 545. a device that ignored the two dials it declared, and a plane that assumed every capture was 1.6:1
+
+**What.** `deviceShowcase` (`core/three-fx.js`) wrote `roughness: 0.34, metalness: 0.86` as literals
+while `PROPS` declared `metalness` and `roughness` and five other scenes in the same file honoured them.
+`uiParallax` in the same file sized every plane with `const ar = 1.6`, so a 16:9 capture was squashed by
+11 per cent and a phone capture was unrecognisable.
+
+**Root cause.** Both are the same shape: a value that could only have come from the input was written as
+a constant instead. The aspect one is worse than a dropped prop, because nothing was even declared for
+the author to set: the texture knows its own shape and was never asked.
+
+**Fix.** `roughness: L.roughness ?? 0.34, metalness: L.metalness ?? 0.86`. The parallax planes are unit
+`PlaneGeometry` scaled in `pose()` from the image's own `naturalWidth`/`naturalHeight`, which is where it
+has to happen because geometry is built before the texture decodes. Still pure: `ensure()` has already
+thrown if the image is not decoded, so every worker reads the same two numbers.
+
+**Also, the pose.** It was `sin(t * 0.45) * 0.55` on a 14 second period, a turntable that never lands,
+so every use had to author a camera move around it to get the shot the effect is for. It now arrives at
+an off angle, pulls back by `travel` and eases to a held hero angle over `duration`; `settle: false`
+keeps the turntable.
+
+## 546. `PMREMGenerator.fromEquirectangular` on an 8-bit DataTexture returns a valid, black texture
+
+**What.** Adding a studio environment to `core/three-fx.js` (see #545: a metal body with nothing to
+reflect is black between its three highlights). The first version built a 32x16 sRGB `DataTexture` ramp
+and handed it to `pmrem.fromEquirectangular(src)`. Every call succeeded. `scene.environment.isTexture`
+was true and its image was the expected 336px cubeUV. The render did not change by one value out of 255.
+
+**Root cause, and why it took four probes.** Nothing failed, so every plausible suspect had to be ruled
+out by measurement instead: WebGL2 with half-float and float render targets both present; the material
+edit provably live (`metalness: 0` moved the body from (53,56,63) to (118,123,136)); `envMapIntensity`
+raised to 12 and then an explicit `material.envMap` assignment, both still (2,2,2) at metalness 1. That
+last one is the proof: the PMREM texture ITSELF was black, not the lighting path.
+
+**Fix.** `pmrem.fromScene(room, 0.04)` over four `BackSide` boxes, which is how three's own
+`RoomEnvironment` does it and which works here: the same body renders (69,72,80). The addon is not
+vendored, so the room is four lines of geometry rather than an import.
+
+**The lesson.** A graphics API that returns a well-formed object is not telling you the object has
+content. When a rendering change produces no pixel change, do not raise the intensity: prove the input
+is non-black by the shortest path available, which here was binding it directly to the material and
+watching it stay at 2.
