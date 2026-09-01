@@ -169,6 +169,12 @@ export function runTracks(kit, el, L, units, t, f, scene) {
 // the FILM, one line for the whole cast, and the per-layer override (`motionBlur`) is what says a
 // single layer disagrees. A default that every author has to remember to set on every layer is not a
 // default, it is a per-call-site opt-in (docs/CRAFT/AFTER-EFFECTS-RECIPES.md item 6).
-export function createTrackKit({ renderer, theme, M, fps, idle = null, shutter = DEFAULT_SHUTTER }) {
-  return Object.freeze({ renderer, theme, M, fps, idle, shutter });
+//
+// `cameraBlur` is the same kind of film-level dial and lives here for the same reason: a shutter that
+// exposes the SENSOR is a property of the camera, not of any one layer, so it is one line for the whole
+// cast. Default false, because switching it on puts a `filter` on layers that have never carried one
+// and a `filter` flattens a preserve-3d subtree, which is a change no film should get without asking.
+export function createTrackKit({ renderer, theme, M, fps, idle = null, shutter = DEFAULT_SHUTTER,
+  cameraBlur = false }) {
+  return Object.freeze({ renderer, theme, M, fps, idle, shutter, cameraBlur });
 }

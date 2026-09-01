@@ -17112,3 +17112,51 @@ which cannot answer reports nothing new rather than everything.
 is invisible from the inside: everything is registered, documented and searchable, and a search only
 finds what you already suspect is there. Zero users is the symptom, and age is the one cheap fact that
 tells an unwanted thing from an unseen one.
+
+## 552. the camera whipped and every frame came back razor sharp
+
+**What happened.** `core/tracks/motion.js` computed motion blur from a LAYER's own motion track and
+nothing in it read the camera. So a hand-keyed slide smeared correctly and a 1500px whip pan, the
+fastest thing a film can do, rendered every frame perfectly crisp. `docs/CRAFT/AE-TECHNIQUES.md` had
+already named it: the velocity-hidden cut works here by measurement, and the smear is a large part of
+why the same cut is invisible in After Effects.
+
+**Root cause.** A shutter exposes the SENSOR, and the track was measuring the stage. Those agree only
+for a locked-off camera, which is the case the code was written against. Nothing was wrong with the
+arithmetic; the wrong quantity was being measured.
+
+**The fix, and why it is one line rather than a correction term.** The camera's translate is written in
+the same pre-projection space a layer's `motion` dx/dy live in, in both rigs: flat is
+`scale(s) translate(x, y)` and 3D is `translate3d(x, y, dollyZ(s))`. So a layer's velocity on the sensor
+is (its own) + (the camera's), and `smear()` now takes a VECTOR sum instead of a magnitude. A layer whose
+track counter-pans lands on zero and stays sharp with no special case: the cancellation falls out of the
+addition. `cameraVelocityAt` (core/sequence.js) samples the camera exactly the way `velocityAt` samples a
+layer, through the same `cameraAt`/`segmentAt` evaluator, so the two cannot disagree about what fast
+means, and it is sampled ONCE PER FRAME in `formats/scene/scene.js` rather than once per layer.
+
+**Depth needed no code, and that is worth writing down.** A layer at a `plane` depth is projected by
+P/(P-z), so a pan moves it across the sensor by that factor more or less: parallax. But `filter` applies
+to the element in its OWN local space and the projection then scales the result, so the same factor
+magnifies the smear it magnifies the travel by. The ratio is depth-invariant, a local blur off a local
+velocity is correct at every depth, and a depth term would have DOUBLE-COUNTED it. Confirmed by render:
+in `formats/scene/_camera-blur-probe.json` the near plane's streak is visibly wider than the far one's
+with no depth code on the path.
+
+**What is deliberately NOT modelled**, stated rather than approximated: a zoom (`s`) and a roll. Their
+screen velocity is radial, proportional to a layer's distance from the frame centre, and a track has no
+access to a layer's stage position. A uniform number would have been plausible and wrong, which is the
+substitution this file logs more than any other defect, so they contribute nothing and `lib-test` asserts
+that a pure push scores zero so nobody quietly starts reading `s` there.
+
+**Default OFF**, and not out of caution about looks: switching it on writes a `filter` onto layers that
+have never carried one, and a `filter` flattens a `preserve-3d` subtree, so a rig film could lose its
+depth to a dial it never set. `snap-scenes` reports 110 identical with the dial down, and that is real
+evidence here rather than the usual weak kind (#532): the snapshot signature records `filter`, which is
+the exact property this change writes.
+
+**What catches it now.** 15 assertions in `scripts/gates/lib-test.mjs` (1516 to 1531), including the two
+that matter: a layer with no track SMEARS under a pan, and a layer travelling with the camera does not.
+`make arsenal Q="blur the frame when the camera whips"` finds it through `CAMERA_DIAL_REGISTRY`, which
+exists for the reason `FILTER_REGISTRY` does: a film-level dial was invisible to the one tool an author
+is told to reach for before inventing anything.
+

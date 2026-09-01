@@ -334,3 +334,29 @@ export function velocityAt(kfs, lt, dt) {
   const vx = (now.dx - prev.dx) / dt, vy = (now.dy - prev.dy) / dt;
   return { vx, vy, speed: Math.hypot(vx, vy), now, prev };
 }
+
+// cameraVelocityAt(camKf, t, dt): the camera's TRANSLATION over the window ending at t, in px per
+// SECOND, in the SAME SPACE a layer's own motion track speaks. Sampled the way velocityAt samples a
+// layer, through the same cameraAt/segmentAt evaluator, so the camera and a layer cannot disagree
+// about what "fast" means, and pure for the same reason: both poses are computed from the keyframes,
+// nothing is remembered between frames.
+//
+// WHY x/y AND NOTHING ELSE. The flat camera is `scale(s) translate(x, y)` and the rig is
+// `translate3d(x, y, dollyZ(s))`, so in both the translation is applied in the SAME pre-projection
+// space the layer's own dx/dy live in: a layer travelling at -(camera velocity) sits still on the
+// sensor, and the two numbers add. `s`, `roll`, `rx` and `ry` do not have that property. Their screen
+// velocity is RADIAL, proportional to a layer's distance from the frame centre, so it cannot be
+// answered without that layer's stage position, which is not available per layer inside a track. A
+// wrong-but-plausible number is the substitution this engine logs more than any other defect, so the
+// zoom and the roll contribute NOTHING here rather than something uniform and false.
+//
+// CLAMPED at t=0 like poseBack, and for the same reason: a film that opens on a moving camera opens
+// with zero velocity, because a camera that has not moved yet has not been anywhere else.
+export function cameraVelocityAt(camKf, t, dt) {
+  if (!(dt > 0)) throw new Error(`cameraVelocityAt: dt must be a positive lookback in seconds, got ${JSON.stringify(dt)}.`);
+  const now = cameraAt(camKf, t);
+  if (!now) return { vx: 0, vy: 0, speed: 0 };
+  const prev = cameraAt(camKf, Math.max(0, t - dt));
+  const vx = (now.x - prev.x) / dt, vy = (now.y - prev.y) / dt;
+  return { vx, vy, speed: Math.hypot(vx, vy) };
+}

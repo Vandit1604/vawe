@@ -37,6 +37,68 @@ export function resolveShutter(deg) {
   return deg / 360;
 }
 
+// ---- CAMERA MOTION BLUR: the frame moves, so everything standing still on the stage smears ----
+//
+// A layer blurred when its own track moved it and stayed razor sharp under a whip pan, which is the
+// opposite of what a shutter does: a camera exposes the SENSOR, so what smears is a layer's velocity
+// RELATIVE TO THE CAMERA, never the camera's own.
+//
+// THE SUM IS THE WHOLE MECHANISM, and it is a sum because of where the camera's translate is written.
+// The flat rig is `scale(s) translate(x, y)` on #cam and the 3D rig is `translate3d(x, y, dollyZ(s))`
+// (formats/scene/scene.js drawCameraAndCut). In both, the translation is applied in the same
+// pre-projection space a layer's own `motion` dx/dy live in, so a layer's velocity on the sensor is
+// (its own) + (the camera's), and a layer whose track exactly counter-pans lands on zero and stays
+// sharp. Nothing has to be converted, compared or corrected: the cancellation falls out of the
+// addition, which is why it is written as one.
+//
+// DEPTH IS ALREADY ACCOUNTED FOR, and by construction rather than by a correction term. A layer at a
+// `plane` depth z is projected by P/(P-z), so a camera pan moves it across the sensor by that factor
+// more or less than a layer on the picture plane: that is parallax. But `filter` is applied to the
+// element in its OWN local space and the projection then scales the result, so the same P/(P-z)
+// magnifies the smear it magnifies the travel by. The ratio is depth-invariant, so a blur written in
+// local pixels off a local velocity is correct at every depth, and a depth term here would double-count
+// it. Verified against the two-plane probe in formats/scene/_camera-blur-probe.json, whose far plane
+// smears visibly less than its near one with no depth code on this path.
+//
+// WHAT IS NOT MODELLED, said plainly rather than approximated: a camera ZOOM (`s`) and a ROLL/tilt
+// (`roll`/`rx`/`ry`). Their screen velocity is radial, proportional to a layer's distance from the
+// frame centre, and a track has no access to a layer's stage position, so they contribute nothing. A
+// pure push renders as sharp as it always did. See core/sequence.js cameraVelocityAt.
+//
+// DEFAULT OFF. `"cameraBlur": true` at the top level of a scene turns it on for the whole cast, and
+// the film's `shutter` sets how much, exactly as it does for a layer's own blur. Off by default for
+// two reasons and both are measured: it puts a `filter` on layers that have never carried one, and a
+// `filter` flattens a `preserve-3d` subtree, so a rig film could lose its depth to a dial it never set.
+
+// smear(kit, L, vx, vy): the motion-blur pixels a velocity in LAYER-LOCAL px/s earns, or 0 below the
+// floor. One owner for the shutter, the floor and the cap, because there are now two velocities
+// feeding it and the per-layer path is the precedent the camera path must not fork from.
+function smear(kit, L, vx, vy) {
+  const speed = Math.hypot(vx, vy);
+  // ~a quarter of the frame per second: below it nothing smears in life either, and a floor is
+  // what keeps this from softening every gentle drift in the library.
+  if (!(L.motionBlur || speed >= AUTO_BLUR_FLOOR_PER_SEC)) return 0;
+  // A GENTLER shutter when nobody asked. 0.5 is the right default for a layer whose author
+  // reached for blur deliberately; applied automatically it peaked at the 24px cap on five
+  // creed-launch rects and put 18px on a moving headline, which is dissolved, not smeared.
+  // AUTO_SHUTTER is the value the exemplar's own author chose by eye for its fastest layer.
+  const shutter = L.motionBlur == null ? kit.shutter : L.motionBlur === true ? 0.5 : +L.motionBlur;
+  return Math.min(24, shutter * (speed / kit.fps) * 0.5); // half-shutter, capped so text never dissolves
+}
+
+// resolveCameraBlur(v): the film's camera-blur dial, refused rather than coerced. A BOOLEAN and not a
+// second shutter: `shutter` already says how much smear this film wants and two numbers for one idea
+// is the drift this codebase logs more than any other defect. Absent or false = off, which is what
+// every scene in the library says today.
+export function resolveCameraBlur(v) {
+  if (v == null || v === false) return false;
+  if (v !== true) throw new Error(`\`cameraBlur\` is a BOOLEAN: true smears every layer by its velocity `
+    + `RELATIVE TO THE CAMERA, so a whip pan streaks the frame and a layer travelling with the camera `
+    + `stays sharp. Got ${JSON.stringify(v)}. HOW MUCH it smears is the film's \`shutter\` (in degrees), `
+    + `and a single layer opts out with \`motionBlur: false\`.`);
+  return true;
+}
+
 // planeZ(L): where this layer stands, in the camera's z. A layer with no depth is on the picture plane.
 // Read off the modifier the depth sugar bakes into (core/produce.js bakeDepth), because that is the one
 // place the distance is recorded once the film is produced.
@@ -72,6 +134,10 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   // on any camera keyframe this function returns exactly where it always did, and never touches
   // `filter` on a layer that has no motion track.
   const dof = live && cam && cam.focus != null && cam.aperture > 0 ? focusBlur(L, cam) : 0;
+  // The camera's own travel, in the units this layer's track speaks. Null unless the film asked for
+  // camera blur AND this layer kept the automatic blur, so with the dial off every scene in the
+  // library renders the exact bytes it rendered before: `cv` is null, both branches below add 0.
+  const cv = live && kit.cameraBlur && cam && cam.vel && L.motionBlur !== false ? cam.vel : null;
   if (!(L.motion && L.motion.length && live)) {
     // THE WRITE IS AUTHORITATIVE ON THIS PATH TOO, and it was not. `if (dof > 0.4)` skipped the write
     // whenever the layer went off screen or the lens came back into focus, so a blur written on an
@@ -84,7 +150,13 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
     // `el.__hsBlur` is the stash writeBlur leaves behind, so it is exactly the set of elements this
     // writer has ever touched. Clearing only those keeps a layer that never had a filter free of a
     // `filter: none` nobody asked for, which would move every snapshot signature in the library.
-    if (dof > 0.4 || el.__hsBlur) writeBlur(el, dof);
+    //
+    // A LAYER WITH NO TRACK STILL SMEARS UNDER A PAN, and that is the point: it is standing still on
+    // the stage while the sensor moves past it, so its velocity relative to the camera is the whole of
+    // the camera's. This is the branch most of a film's cast takes, which is why camera blur had to
+    // land before the early return rather than inside the motion-track path below.
+    const still = dof + (cv ? smear(kit, L, cv.vx, cv.vy) : 0);
+    if (still > 0.4 || el.__hsBlur) writeBlur(el, still);
     return;
   }
   const fps = kit.fps;
@@ -102,6 +174,7 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   //      crossing the frame in a few frames smears whether or not the author remembered. So it is
   //      now AUTOMATIC above a speed the eye already reads as fast, and still fully controllable,
   //      `motionBlur: false` opts out, a number overrides the shutter (KEYED-MOTION.md).
+  //  (c) the CAMERA's travel, added to (b) as a vector before either is measured (see `smear`).
   // THE AUTHOR'S OWN FOCUS WINS. A keyed `motion.blur` is a rack focus somebody wrote on purpose, and
   // adding the camera's depth of field on top would mean an author who asked for a sharp layer got a
   // soft one because of a lens setting somewhere else in the file. Stated here rather than resolved by
@@ -110,20 +183,11 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   let blurPx = m.blur > 0.01 ? m.blur : dof;
   if (L.motionBlur !== false) {
     // ONE OWNER for the velocity read (core/sequence.js), shared with the ghost trail and squash.
-    const speed = velocityAt(L.motion, t - start, 1 / fps).speed / fps; // px travelled in one frame
-    // ~a quarter of the frame per second: below it nothing smears in life either, and a floor is
-    // what keeps this from softening every gentle drift in the library. Converted to this frame's
-    // budget so the rule means the same thing at any frame rate.
-    const auto = speed >= AUTO_BLUR_FLOOR_PER_SEC / fps;
-    if (L.motionBlur || auto) {
-      // A GENTLER shutter when nobody asked. 0.5 is the right default for a layer whose author
-      // reached for blur deliberately; applied automatically it peaked at the 24px cap on five
-      // creed-launch rects and put 18px on a moving headline, which is dissolved, not smeared.
-      // AUTO_SHUTTER is the value the exemplar's own author chose by eye for its fastest layer.
-      const shutter = L.motionBlur == null ? kit.shutter
-        : L.motionBlur === true ? 0.5 : +L.motionBlur;
-      blurPx += Math.min(24, shutter * speed * 0.5);    // half-shutter, capped so text never dissolves
-    }
+    // Read as a VECTOR, not a magnitude, so the camera's travel can be added to it before anything is
+    // measured: two speeds cannot be summed, two velocities can, and a layer keeping pace with the
+    // camera has to come out at zero rather than at twice the number.
+    const v = velocityAt(L.motion, t - start, 1 / fps);
+    blurPx += smear(kit, L, v.vx + (cv ? cv.vx : 0), v.vy + (cv ? cv.vy : 0));
   }
   // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
   // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.

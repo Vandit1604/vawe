@@ -317,6 +317,7 @@
   "camera-moves--travel": "{\n  \"cameraMove\": {\n    \"move\": \"travel\"\n  }\n}",
   "camera-moves--truck": "{\n  \"cameraMove\": {\n    \"move\": \"truck\"\n  }\n}",
   "camera-moves--workspacezoomout": "{\n  \"cameraMove\": {\n    \"move\": \"workspaceZoomOut\"\n  }\n}",
+  "camera-dials--camerablur": "{\n  \"cameraBlur\": true\n}",
   "compositions-bespoke-per-beat-timeline--commasplit": "{\n  \"type\": \"composition\",\n  \"comp\": \"commaSplit\",\n  \"props\": {},\n  \"start\": 0.2,\n  \"dur\": 4.4\n}",
   "compositions-bespoke-per-beat-timeline--pipelineflow": "{\n  \"type\": \"composition\",\n  \"comp\": \"pipelineFlow\",\n  \"props\": {},\n  \"start\": 0.2,\n  \"dur\": 4.4\n}",
   "layer-types--adjust": "{\n  \"type\": \"adjust\"\n}",

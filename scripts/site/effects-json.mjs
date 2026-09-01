@@ -86,6 +86,7 @@ const USAGE = {
     ? j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', morph: { to: 'M60 8 L112 56 L60 104 L8 56 Z', spin: 6.28 }, x: 840, y: 420, w: 240 })
     : j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', stroke: '#fff', strokeWidth: 6, x: 840, y: 420, w: 240, start: 0, duration: 6 })),
   'beat-blueprints': (n) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
+  'camera-dials': () => j({ cameraBlur: true }),
   'camera-moves': (n) => j({ cameraMove: { move: n } }),
   'compositions-bespoke-per-beat-timeline': (n) => j({ type: 'composition', comp: n, props: {}, start: 0.2, dur: 4.4 }),
   'layer-types': (n) => j({ type: n }),
@@ -215,6 +216,7 @@ const NO_PREVIEW = {
   'adjustment-layers-grade-what-is-beneath': 'a grade has no subject of its own: it is whatever is already under it. The arsenal shows them through the scenes that use them.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
   'beat-blueprints': 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
+  'camera-dials': 'a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is formats/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.',
   'camera-moves': 'a camera move is only legible against a scene laid out for it, which is the film, not a swatch.',
   'compositions-bespoke-per-beat-timeline': 'a composition is a hand-authored timeline over data you pass. There is no neutral data for it.',
   'layer-types': 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',

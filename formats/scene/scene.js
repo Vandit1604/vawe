@@ -22,13 +22,13 @@ import { bindBeats, describeBind } from '/core/beat-bind.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio-cues.js';
 import { tactileCues } from '/core/audio-tactile.js';
 import { resolveBridges } from '/core/audio-bridges.js';
-import { cameraAt, dollyZ, motionAt, resolveKeyedProps } from '/core/sequence.js';
+import { cameraAt, cameraVelocityAt, dollyZ, motionAt, resolveKeyedProps } from '/core/sequence.js';
 import { specsOf } from '/core/fx/index.js';
 import { resolvePans } from '/core/pan-resolve.mjs';
 import { watchProps, auditLayer, watchedTree } from '/core/prop-audit.js';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';
-import { resolveShutter } from '/core/tracks/motion.js';
+import { resolveCameraBlur, resolveShutter } from '/core/tracks/motion.js';
 import { normalizeIdle } from '/core/idle.js';
 import { resolveSpectacle } from '/core/spectacle.js';
 const $ = (id) => document.getElementById(id);
@@ -1159,7 +1159,8 @@ boot((data, fps, theme, canvas) => {
   // `data.idle` is the film's scene-level idle: one line opts the whole cast into ambient hold motion
   // (core/idle.js). Normalized HERE so a misspelled name fails at boot with the registry's message,
   // rather than on whichever frame the first layer happens to reach its settled middle.
-  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(sceneIdle), shutter: resolveShutter(data.shutter) });
+  const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(sceneIdle),
+    shutter: resolveShutter(data.shutter), cameraBlur: resolveCameraBlur(data.cameraBlur) });
 
   function renderFrame(f) {
     const t = f / fps;
@@ -1177,6 +1178,11 @@ boot((data, fps, theme, canvas) => {
     const camNow = RIG
       ? { ...CAM_REST, ...keyed, rig: true, lens: rigLens ?? (keyed || CAM_REST).persp }
       : keyed;
+    // THE CAMERA'S VELOCITY, sampled ONCE PER FRAME and not once per layer. Every layer needs the same
+    // number, so re-deriving it per layer would evaluate the camera track fifty times for one answer,
+    // which is the fact-with-many-owners shape this repo logs most. Attached to the camera the view
+    // already carries, so the motion track reads the camera's speed off the camera.
+    if (camNow) camNow.vel = cameraVelocityAt(camKf, t, 1 / fps);
     // THE CLOCK. A layer was handed t and nothing to measure it against, so "how far through the film
     // am I" could only be answered by the author restating the runtime inside the layer, a second
     // copy of a number the scene already owns, which stops being true the moment the film is re-cut.

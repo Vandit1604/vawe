@@ -547,3 +547,19 @@ export function buildCameraMove(spec, canvas = null) {
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a camera move" when someone writes it somewhere else. core/registry.js.
 export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove', blurbs: CAMERA_MOVE_BLURBS });
+
+// A CAMERA DIAL is a top-level scene key that changes what the camera DOES rather than where it goes,
+// and until now there was no way to find one. `make arsenal` searches registries, so a film-level dial
+// was invisible to the one tool an author is told to reach for before inventing anything: you could
+// only meet `cameraBlur` by reading schema.json. Registered for exactly the reason FILTER_REGISTRY was,
+// so the search can answer for the engine and not for a hand-kept index (core/registry.js).
+export const CAMERA_DIAL_REGISTRY = defineRegistry('camera dial', { cameraBlur: 'cameraBlur' }, {
+  slot: 'cameraBlur (a top-level boolean)',
+  blurbs: {
+    cameraBlur: 'CAMERA MOTION BLUR: blur the frame when the camera whips. Every layer smears by its '
+      + 'velocity RELATIVE TO THE CAMERA, so a fast pan streaks the whole frame and a layer travelling '
+      + 'with the camera stays sharp. Off by default; the film\'s `shutter` (degrees) says how much, and '
+      + 'one layer opts out with `motionBlur: false`. A zoom and a roll are radial and are not modelled',
+  },
+});
+
