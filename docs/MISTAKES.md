@@ -16275,3 +16275,21 @@ should read #280 first. Checking this file before appending to it is one grep an
 every one survived until a number killed it. The cheapest test, printing both delta arrays, was named
 as "the next step" three times before it was run. Run the measurement that distinguishes the
 candidates FIRST, especially when it is the cheap one. → **Gate: the renderer refuses to report it.**
+
+## 529. `cuts[].cx`/`cy` were documented 0-1 and read as per cent
+
+**What.** `formats/scene/schema.json` declared the iris origin as `0-1` with `min: 0, max: 1`.
+`core/cuts.js:239` defaults them to `cx: 50, cy: 50` and feeds them straight into a
+`radial-gradient` as per cent. An author who followed the schema and wrote `cx: 0.5` would have
+put the iris in the top-left corner, and the editor's own slider would have capped at 1.
+
+**Why nobody hit it.** No scene sets either prop today, so the default carried every render. The
+drift was found by reading, not by a failure.
+
+**Root cause.** One fact with two owners, the shape this file logs most. The unit lived in the code
+AND in a hand-written schema label, and only one of them was ever exercised. Two other entries in
+the same file, `layers[].cx`/`cy`, already said `0-100%`, so the schema disagreed with itself.
+
+**Fix.** The schema now says per cent, with `max: 100`, matching both the code and its own sibling
+entries. `schema-drift` cannot catch this class: it proves every engine prop is DEFINED, never that
+the definition is true.
