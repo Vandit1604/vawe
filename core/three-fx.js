@@ -27,7 +27,7 @@ import { LONLAT } from './globe-dots.js';
 // taken). Declared here because this is where they are read; core/surfaces/three.js merges them.
 export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, bodyColor: {}, dolly: {},
   depth: {}, device: {}, screen: {}, font: {}, fov: {}, metalness: {}, roughness: {}, text: {},
-  morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {},
+  morphSpeed: {}, pitch: {}, yaw: {}, spin: {}, swing: {}, travel: {}, planes: {}, settle: {},
   // shatter · magnetic · liquidBackground · the code-* trio (which reuse breakAt/breakDur for their
   // own single event: an assembly, a build-in and a burn are all one span with one start).
   breakAt: {}, breakDur: {}, poles: {}, amp: {},
@@ -104,17 +104,62 @@ function textureFrom(src, what) {
   const tex = new (T().Texture)(img);
   tex.colorSpace = T().SRGBColorSpace;
   tex.anisotropy = 4;
-  return { tex, ensure() {
+  return { tex, img, ensure() {
     if (!img.complete || !img.naturalWidth) throw new Error(`three ${what}: image not decoded at render time (${src}), boot preloads every image-like string, so this means the path is wrong or unreachable`);
     tex.needsUpdate = true;
   } };
 }
 
-function studio(scene, colors) {
+// A STUDIO IS FOUR LIGHTS AND A ROOM, and this had only the four lights. `MeshStandardMaterial` is
+// physically based: at high metalness its diffuse term goes to almost nothing and the whole surface is
+// REFLECTION, so with punctual lights alone a metal body renders as near black with three specular
+// hits. That is what `deviceShowcase`'s 0.86 metalness was doing (docs/CRAFT/PARITY-AUDIT.md), and it
+// is a property of the MATERIAL, not of that one scene, so the room belongs here with the lights rather
+// than in the scene that happened to notice it missing.
+//
+// PROCEDURAL, not an HDRI file: three's own `RoomEnvironment` lives in the addons and only the core
+// bundle is vendored, and a downloaded .hdr is an asset every render would wait for. So this is the
+// same idea by hand, a box seen from inside with a bright ceiling panel and one tinted wall, blurred
+// into an irradiance map by `PMREMGenerator`.
+//
+// `fromScene`, NOT `fromEquirectangular`, AND THAT IS THE WHOLE BUG. The first version of this built a
+// 32x16 sRGB `DataTexture` ramp and handed it to `fromEquirectangular`. Every API call succeeded, the
+// texture came back valid (`isTexture` true, a 336px cubeUV image) and it was BLACK: a body at
+// metalness 1 and roughness 0.15 rendered (2,2,2) with `envMapIntensity` at 12. An 8-bit DataTexture
+// through that path produces nothing under this renderer, silently. `fromScene` renders real geometry
+// and works, which is how three's own RoomEnvironment does it. Measured both ways before choosing.
+//
+// DETERMINISTIC: the room is fixed geometry built once, and `renderFrame(n)` never touches it.
+function environment(renderer, scene, colors) {
+  const t = T();
+  const room = new (t.Scene)();
+  const box = new (t.BoxGeometry)();
+  const mats = [];
+  const panel = (c, pos, scl) => {
+    const m = new (t.MeshBasicMaterial)({ color: hex(c, '#ffffff'), side: t.BackSide });
+    mats.push(m);
+    const mesh = new (t.Mesh)(box, m);
+    mesh.position.set(pos[0], pos[1], pos[2]);
+    mesh.scale.set(scl[0], scl[1], scl[2]);
+    room.add(mesh);
+  };
+  panel('#6e727a', [0, 0, 0], [20, 20, 20]);                 // the room: mid grey, so nothing goes black
+  panel('#ffffff', [0, 9.4, 0], [13, 0.2, 13]);              // the softbox overhead, what metal mostly shows
+  panel(colors?.[1] || '#9fb6ff', [-8, 1, 3], [0.2, 9, 9]);  // one tinted wall, so the theme lands in the metal
+  panel('#2a2d33', [0, -9.4, 0], [16, 0.2, 16]);             // a dark floor: the dark half a reflection needs
+  const pmrem = new (t.PMREMGenerator)(renderer);
+  scene.environment = pmrem.fromScene(room, 0.04).texture;
+  pmrem.dispose();
+  box.dispose();
+  for (const m of mats) m.dispose();
+}
+
+function studio(renderer, scene, colors) {
   scene.add(new (T().AmbientLight)(0xffffff, 0.55));
   const key = new (T().DirectionalLight)(0xffffff, 2.4); key.position.set(4, 6, 5); scene.add(key);
   const fill = new (T().DirectionalLight)(hex(colors?.[1], '#9fb6ff'), 0.9); fill.position.set(-5, 2, 3); scene.add(fill);
   const rim = new (T().DirectionalLight)(0xffffff, 1.5); rim.position.set(-2, 3, -6); scene.add(rim);
+  environment(renderer, scene, colors);
 }
 
 // ---- the code board, shared by the three code-* scenes ------------------------------------------
@@ -196,7 +241,10 @@ const SCENES = {
     const w = isLaptop ? 3.0 : 1.35, h = isLaptop ? 2.0 : 2.75, d = 0.16;
     const bodyGeo = roundedSlab(w, h, d, isLaptop ? 0.10 : 0.20);
     const body = new (T().Mesh)(bodyGeo,
-      new (T().MeshStandardMaterial)({ color: hex(L.bodyColor, '#1b1e26'), roughness: 0.34, metalness: 0.86 }));
+      // `metalness` and `roughness` are declared in PROPS and were literals here: an input accepted and
+      // then ignored, which is the failure class this repo ranks first. Five other scenes read them.
+      new (T().MeshStandardMaterial)({ color: hex(L.bodyColor, '#1b1e26'),
+        roughness: L.roughness ?? 0.34, metalness: L.metalness ?? 0.86 }));
     grp.add(body);
     // ExtrudeGeometry adds bevelThickness to BOTH faces, so the slab is deeper than `depth` says.
     // Placing the screen at d/2 buried it inside the body and it rendered solid black. Measure.
@@ -211,11 +259,25 @@ const SCENES = {
       scr.position.z = frontZ + 0.004;
       grp.add(scr);
     }
+    // IT ARRIVES, IT LANDS, IT HOLDS. The pose was an unending sine on a 14s period, which is a
+    // TURNTABLE: it never settles, so every use had to author a camera move around it to get the shot
+    // the effect is actually for ("the frame pulls back and the UI turns out to be inside a laptop").
+    // The settle is the default because that is the effect; the turntable stays one word away.
+    const YAW0 = 0.62, PITCH0 = 0.24;                           // the off angle it arrives from
     return { obj: grp, pose(t, LL) {
       if (ensure) ensure();
       const spin = LL.spin ?? 1;
-      grp.rotation.y = Math.sin(t * 0.45 * spin) * 0.55 + (LL.yaw ?? 0);
-      grp.rotation.x = Math.sin(t * 0.31 * spin) * 0.14 + (LL.pitch ?? 0);
+      if (LL.settle === false) {
+        grp.rotation.y = Math.sin(t * 0.45 * spin) * 0.55 + (LL.yaw ?? 0);
+        grp.rotation.x = Math.sin(t * 0.31 * spin) * 0.14 + (LL.pitch ?? 0);
+      } else {
+        const p = ease(Math.min(1, t / Math.max(0.001, LL.duration ?? 1.6)));
+        grp.rotation.y = YAW0 + ((LL.yaw ?? -0.10) - YAW0) * p;
+        grp.rotation.x = PITCH0 + ((LL.pitch ?? 0.05) - PITCH0) * p;
+        // The pull back: it starts nearer the eye and recedes into its hero position. `travel` is the
+        // same dial `uiParallax` dollies with, so one word means one thing in both.
+        grp.position.z = (LL.travel ?? 0.9) * (1 - p);
+      }
       grp.position.y = Math.sin(t * 0.6) * 0.045;               // a slow float, so it never sits dead
     } };
   },
@@ -225,19 +287,25 @@ const SCENES = {
   uiParallax(L, colors) {
     const grp = new (T().Group)();
     const planes = (Array.isArray(L.planes) ? L.planes : []).slice(0, 6);
-    const ensures = [];
+    const ensures = [], sized = [];
     planes.forEach((p, i) => {
       const src = typeof p === 'string' ? p : p.src;
       const z = typeof p === 'object' && p.z != null ? p.z : -i * 0.9;
       const t = textureFrom(src, `uiParallax plane ${i}`); ensures.push(t.ensure);
-      const ar = 1.6;
-      const m = new (T().Mesh)(new (T().PlaneGeometry)(2.4, 2.4 / ar),
+      // A UNIT PLANE, SIZED FROM THE IMAGE. The aspect used to be `const ar = 1.6` for every plane, so
+      // a 16:9 capture (1.778) was squashed 11% and a phone capture was unrecognisable. The texture
+      // knows its own shape, but only once it has DECODED, and geometry is built before that, so the
+      // size is set in pose() from the image's own pixels. Absolute, never accumulated, and `ensure()`
+      // has already thrown if the image is not decoded, so the number is the same on every worker.
+      const m = new (T().Mesh)(new (T().PlaneGeometry)(1, 1),
         new (T().MeshBasicMaterial)({ map: t.tex, transparent: true }));
       m.position.set(typeof p === 'object' ? (p.x ?? 0) : 0, typeof p === 'object' ? (p.y ?? 0) : 0, z);
       grp.add(m);
+      sized.push({ m, img: t.img });
     });
     return { obj: grp, pose(t, LL) {
       for (const e of ensures) e();
+      for (const s of sized) s.m.scale.set(2.4, 2.4 * (s.img.naturalHeight / s.img.naturalWidth), 1);
       const p = ease(Math.min(1, t / Math.max(0.001, LL.duration ?? 4)));
       grp.position.z = p * (LL.travel ?? 2.2);                  // the dolly IS the reveal
       grp.rotation.y = (LL.swing ?? 0.18) * Math.sin(t * 0.5);
@@ -863,7 +931,7 @@ export function createThreeLayer(w, h, L, colors) {
   const scene = new (T().Scene)();
   const camera = new (T().PerspectiveCamera)(L.fov ?? 35, w / h, 0.1, 100);
   camera.position.set(0, 0, L.dolly ?? 5.2);
-  studio(scene, colors);
+  studio(renderer, scene, colors);
 
   const make = SCENES[L.three];
   if (!make) throw new Error(`unknown three scene "${L.three}", one of: ${THREE_FX.join(', ')}`);

@@ -21,8 +21,8 @@ less.
 | stagger / offset reveal | BEHIND | the standard primitive ships three dials, we ship one |
 | snappy overshoot | **BEHIND, fixed** | the `overshoot` handle peaked at exactly 1.000000 |
 | text scramble | BEHIND on dials, AHEAD on determinism | refresh is a fixed count per window, so a 0.5s reveal scrambles at 48/s and a 2s one at 12/s |
-| 2.5D parallax | BEHIND | `depth` appears in 1 of 170 scenes; 44 of 47 camera films sit entirely at z = 0 |
-| device mockup | BEHIND | `metalness: 0.86` with no environment map anywhere in the file |
+| 2.5D parallax | **BEHIND, fixed** | the scale correction every AE multiplane tool applies was printed in an error message instead of applied |
+| device mockup | **BEHIND, fixed** | `metalness: 0.86` with no environment map anywhere in the file, and the two dials it declared were literals |
 | animated gradient | **BEHIND on the default, fixed** | 57 to 105 seconds per cycle against a practitioner band of 6 to 12; now 11.4 to 20.9 |
 | logo reveal | **BEHIND, fixed** | `fill: none` was set for the draw and never restored, so a mark could not end filled |
 
@@ -331,21 +331,42 @@ Adoption: `"plane"` appears in 4 of 170 scenes, `"depth"` in 1, `uiParallax` in 
 records the same thing from its own census: 3 films of 134, while 44 of the 47 films that move the camera
 have every layer at z = 0.
 
-### Verdict: BEHIND
+### Verdict: BEHIND, both faults fixed
 
-The one arithmetic step every AE multiplane tool automates is the one step we hand back to the author,
-and the adoption number is what that costs: 1 scene of 170 uses a named depth.
+The one arithmetic step every AE multiplane tool automates was the one step we handed back to the
+author, and the adoption number was what that cost: 1 scene of 170 used a named depth.
 
-### The gap, concretely
+### The gap, closed
 
-1. Add an opt-out compensation on `depth`/`plane`, for example `depth: {name:"back", hold:true}`, that
-   multiplies the layer's own size by `(lens - z)/lens` at build so `back` renders at the size the author
-   laid out. The value is already computed for the error message (`core/fx/plane.js:190`), so this is
-   arithmetic that exists being applied instead of printed. `kick` owning scale is a real objection, but
-   `kick` is an animated scale and this is a static size correction at build; they do not collide.
-2. `uiParallax` hardcodes `const ar = 1.6` (`core/three-fx.js:233`) for every plane. A 16:9 capture
-   (1.778) is squashed by 11% and a phone capture is unrecognisable. The texture knows its own aspect;
-   read it.
+1. **The scale correction is applied, not printed.** `hold` is a key on the plane spec and writes the
+   `scale` longhand with `(lens - z) / lens`, the same number `depthZ`'s refusal quotes. `depth` sets it;
+   raw `plane` does not. That split is deliberate and it is still one mechanism: `hold` lives in
+   `core/fx/plane.js` and `bakeDepth` (`core/produce.js`) only chooses a default for it. The vocabulary
+   holds because its whole job is parallax; the primitive does not, because a primitive that quietly
+   rescales what it was handed is a primitive that lies, and two shipped films (`onefilm`, `playhead`)
+   place 28 layers by the projected size they already get. The escape from a held depth is the primitive:
+   `modifiers: [{ plane: { z } }]`.
+
+   The header's old argument, that "depth without magnification is a translation, not a distance", is
+   wrong and is now recorded as wrong. The correction removes the size change, not the depth: a depth is
+   a different RATE OF TRAVEL, and a corrected layer still crosses the frame faster or slower than its
+   neighbours, still converges on the vanishing point, still occludes by distance. The argument only
+   holds for a camera that never moves, and `plane` refuses to render without a rig.
+
+   `kick` owning `scale` was the real objection and it is real: `kick` and `squash` both write that
+   longhand, and modifiers resolve last-writer-wins, so `hold` beside either is refused by name at build
+   rather than losing silently to array order. The correction is CSS rather than a build-time constant so
+   that a depth keyed through `--plane-z` corrects against the LIVE z, carrying the translate's own
+   `min()` clamp.
+
+   Rendered before and after: five identical rects, one per named depth, under a trucking camera. Before,
+   the far one is drawn at 0.57x and hides behind its neighbour and the near one covers the frame. After,
+   all five are the size they were written at and separate by different amounts as the camera moves.
+   `docs/MISTAKES.md` #544.
+2. **`uiParallax` reads the texture's own aspect.** The planes are unit `PlaneGeometry` scaled in
+   `pose()` from `naturalWidth`/`naturalHeight`, which has to happen there because geometry is built
+   before the texture decodes; `ensure()` has already thrown if it has not, so every worker reads the
+   same two numbers. `docs/MISTAKES.md` #545.
 
 ### The step somebody would not guess
 
@@ -390,25 +411,34 @@ Body material is `roughness: 0.34, metalness: 0.86` written as literals (`core/t
 
 Adoption: `deviceShowcase` in 2 of 170 scenes.
 
-### Verdict: BEHIND
+### Verdict: BEHIND, three of four faults fixed
 
 Three faults, and the material one is measurable: metalness 0.86 with no environment map is a body with
 no diffuse and nothing to reflect.
 
-### The gap, concretely
+### The gap, closed
 
-1. **Silent no-op.** `L.metalness` and `L.roughness` are declared and ignored at
-   `core/three-fx.js:199`. This is the exact shape CLAUDE.md forbids: an input accepted and dropped.
-   One line, `roughness: L.roughness ?? 0.34, metalness: L.metalness ?? 0.86`.
-2. **No environment.** Either add a small procedural env (three's `RoomEnvironment` through a PMREM) or
-   drop the default metalness to about 0.2 so the punctual lights carry it. Today the default is a body
-   that is mostly black between the three highlights.
-3. **No reveal.** The pose is an unending sine that never lands, so this is a turntable, not the row-8
-   effect ("the shot pulls back and the UI turns out to be inside a laptop"). Add a settle: yaw and pitch
-   easing from an off angle to a held hero angle over `duration`, the same shape `uiParallax` already has
-   at `core/three-fx.js:240-242`. Without it every use needs a camera move authored around it.
-4. The `laptop` is a single slab. No base, no hinge, no keyboard. It reads as a tablet with a wide screen.
-   A second slab hinged at the bottom edge is cheap and is what makes the silhouette say laptop.
+1. **Silent no-op, fixed.** `roughness: L.roughness ?? 0.34, metalness: L.metalness ?? 0.86`.
+2. **The environment is in `studio()`, not in the scene that noticed it missing.** A metal body with
+   nothing to reflect is a property of the MATERIAL, and five other scenes in the file use
+   `MeshStandardMaterial`, so the room belongs where the lights are. It is procedural, because three's
+   `RoomEnvironment` is an addon and only the core bundle is vendored: four `BackSide` boxes (a mid-grey
+   room, an overhead softbox, one wall tinted with the theme's fill colour, a dark floor) through
+   `PMREMGenerator.fromScene`. The default metalness stays at 0.86 now that there is something to
+   reflect.
+
+   **`fromScene`, not `fromEquirectangular`, and that is worth the sentence.** The first attempt built a
+   32x16 sRGB `DataTexture` ramp and fed it to `fromEquirectangular`. Every call succeeded, the texture
+   came back valid, and it was black: the body still rendered (2,2,2) at metalness 1 with an explicit
+   `material.envMap` and `envMapIntensity: 12`. `fromScene` renders (69,72,80) from the same room.
+   `docs/MISTAKES.md` #546.
+3. **The settle is the default.** It arrives at an off angle, pulls back by `travel` and eases to a held
+   hero angle over `duration`, then holds. The turntable is `settle: false`, one word, so the two scenes
+   that had it can keep it. Chosen as the default rather than the alternative because the row-8 effect IS
+   the reveal: a pose that never lands makes every use author a camera move around it.
+4. **Still open: the `laptop` is a single slab.** No base, no hinge, no keyboard, so it reads as a tablet
+   with a wide screen. A second slab hinged at the bottom edge is cheap and is what makes the silhouette
+   say laptop.
 
 ### The step somebody would not guess
 

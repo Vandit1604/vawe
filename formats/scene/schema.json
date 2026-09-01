@@ -26,7 +26,7 @@
    "lottie": ["fit", "h", "loop", "speed", "src", "w"],
    "paint": ["amp", "angle", "bg", "color", "count", "h", "headColor", "hue", "hues", "length", "opacity", "paint", "radius", "rate", "resample", "seed", "size", "speed", "tail", "w", "weight"],
    "raymarch": ["colors", "h", "intensity", "radius", "raymarch", "resample", "seed", "speed", "spin", "w"],
-   "three": ["amp", "arcHeight", "bodyColor", "breakAt", "breakDur", "colors", "count", "dawnWidth", "depth", "dest", "device", "dolly", "drawDur", "drawStart", "font", "fov", "h", "lines", "metalness", "morphSpeed", "origin", "pitch", "planes", "pointSize", "poles", "radius", "resample", "roughness", "screen", "seed", "size", "speed", "spin", "spinDur", "spinFrom", "spinTo", "sunFrom", "sunLat", "sunTo", "swing", "text", "three", "travel", "w", "yaw"],
+   "three": ["amp", "arcHeight", "bodyColor", "breakAt", "breakDur", "colors", "count", "dawnWidth", "depth", "dest", "device", "dolly", "drawDur", "drawStart", "font", "fov", "h", "lines", "metalness", "morphSpeed", "origin", "pitch", "planes", "pointSize", "poles", "radius", "resample", "roughness", "screen", "seed", "settle", "size", "speed", "spin", "spinDur", "spinFrom", "spinTo", "sunFrom", "sunLat", "sunTo", "swing", "text", "three", "travel", "w", "yaw"],
    "globe": ["arcHeight", "arcWidth", "colors", "dark", "dest", "diffuse", "drawDur", "drawStart", "globe", "h", "mapBrightness", "mapSamples", "markerSize", "origin", "phi", "phiDur", "phiTo", "radius", "resample", "scale", "seed", "speed", "theta", "w"],
    "composition": ["comp", "props"],
    "adjust": ["amount", "filter", "kind"]
@@ -1213,7 +1213,7 @@
       },
       "plane": {
        "type": "number|object",
-       "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size, because a depth that does not is a scale: it is drawn at lens / (lens - z), so size it for the distance. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
+       "label": "Stand the layer at a DEPTH so the frame holds objects, not one sheet: -600 (px behind the picture plane) or { z: 240 } (in front of it, toward the eye). Sign is the CSS one. Two layers at different z move by different amounts when the camera trucks, which is parallax and is the whole point; every layer without it is at z = 0, where a camera move slides the entire composition rigidly. Turns the camera rig on by itself, exactly as `tilt` does. The layer changes apparent size (drawn at lens / (lens - z)) unless you set `hold: true`, which writes the scale correction every multiplane rig applies so the layer keeps the size you laid it out at and the depth shows up only as a different rate of travel. `hold` is OFF here and ON for the `depth` vocabulary. Refused alongside `kick` or `squash`, which write the same `scale` longhand. z at or past the lens (the camera's `p`, or `tilt.dist`, default 1600) is refused, and so is a group child, whose flat parent would project it through nothing. Put it on the GROUP."
       },
       "alongPath": {
        "type": "string|object",
@@ -1808,8 +1808,12 @@
      "type": "boolean|number|string",
      "label": "Frosted glass: blur what is BEHIND this layer. true = default, a number = blur px, a string = raw backdrop-filter"
     },
+    "settle": {
+     "type": "boolean",
+     "label": "three deviceShowcase: how the device is posed. Default (omitted, or true) is the REVEAL: it arrives at an off angle, pulls back by `travel` and eases to a held hero angle over `duration`, then holds. `false` gives the old TURNTABLE, an endless yaw/pitch sine that never lands, scaled by `spin`. `yaw`/`pitch` are the angle it settles ON when settling, and the sine's centre when not."
+    },
     "depth": {
-     "label": "three extrudeText: extrusion depth"
+     "label": "Stand this layer at a named DEPTH so a camera move gives it parallax instead of turning the whole frame as one rigid pane: \"far\" | \"back\" | \"front\" | \"near\", each a fraction of the film's own lens, or a raw distance in px. It lowers to the `plane` modifier at boot WITH the scale correction held on, so the layer keeps the size you laid it out at and the depth shows up as a different rate of travel: far 0.57x, back 0.73x, front 1.18x, near 1.39x the picture plane's rate. Want the raw projection instead? Write `modifiers: [{ plane: { z } }]`. Refused on a group child, whose flat parent would project it through nothing. (On a `three` extrudeText layer the same word is the extrusion depth.)"
     },
     "timeRemap": {
      "type": "string|array",

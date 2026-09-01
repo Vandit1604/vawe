@@ -232,7 +232,12 @@ export function bakeDepth(data) {
         const z = depthZ(L.depth, lens);
         if (z === 0) throw new Error(`\`depth\` resolved to z 0, which is the picture plane every layer is `
           + `already on. Drop the prop rather than declaring the distance you are already at.`);
-        (L.modifiers || (L.modifiers = [])).push({ plane: { z } });
+        // `hold: true` is what makes `depth` the multiplane vocabulary rather than a raw distance: the
+        // layer keeps the size it was laid out at and the depth shows up as a different RATE OF TRAVEL
+        // under the camera, which is the one arithmetic step every AE multiplane tool automates and the
+        // one we used to print in an error message. The raw primitive still does not hold: write
+        // `modifiers: [{ plane: { z } }]` for that.
+        (L.modifiers || (L.modifiers = [])).push({ plane: { z, hold: true } });
         delete L.depth;
       }
       walk(L.children, true);

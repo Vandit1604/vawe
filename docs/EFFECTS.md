@@ -339,10 +339,10 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 
 | name | what / when |
 |---|---|
-| `back` | behind the picture plane: the layer the camera passes, the one that gives the move its parallax. 0.73x |
-| `far` | the far plane: a backdrop, a wall, a field the subject stands in front of. Drawn at 0.57x |
-| `front` | just in front of the picture plane: a caption or a chip that rides ahead of the subject. 1.18x |
-| `near` | nearest the eye: the thing that crosses the frame fastest and leaves it first. 1.39x |
+| `back` | behind the picture plane: the layer the camera passes, the one that gives the move its parallax. Held, 0.73x the rate |
+| `far` | the far plane: a backdrop, a wall, a field the subject stands in front of. Held at its laid-out size, moved by the camera at 0.57x the picture plane's rate |
+| `front` | just in front of the picture plane: a caption or a chip that rides ahead of the subject. Held, 1.18x the rate |
+| `near` | nearest the eye: the thing that crosses the frame fastest and leaves it first. Held, 1.39x the rate |
 
 ## Adjustment layers (grade what is BENEATH)  `[per-layer]`
 
