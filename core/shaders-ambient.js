@@ -44,6 +44,9 @@ export const AMBIENT_SHADERS = {
   nebula: 'deep-field gas clouds from three octaves of noise with a hot core, dusted with twinkling stars off a hashed grid',
   dotCrawl: 'the NTSC artifact: a fine diagonal chroma lattice creeping one subcarrier phase per frame, concentrated where there is detail. an OVERLAY',
   gateWeave: 'a projector gate: the soft dark frame border, dust re-struck each projected frame and a hair that catches for a second or two, all riding ONE drifting offset so the picture appears to float',
+  domainWarp: 'marbled ink: fBm sampled through a domain that is itself two levels of fBm, so the field folds back over itself. the classic warp, and the only field here with real interior structure',
+  voronoi: 'cellular (Worley) noise: seeded cells drifting on their own loops, each one flat-tinted, with a lit line along every shared border',
+  metaballs: 'five signed-distance circles merging and parting on a polynomial smooth minimum, so they fuse into one body instead of overlapping',
   bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md',
 };
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
@@ -85,6 +88,20 @@ float rhash(vec2 p){ vec3 q = fract(vec3(p.xyx)*0.1031); q += dot(q, q.yzx+33.33
 float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
   float a=hash(i), b=hash(i+vec2(1,0)), c=hash(i+vec2(0,1)), d=hash(i+vec2(1,1));
   return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
+// fBm over the value noise above. FIVE octaves at lacunarity 2.0 and gain 0.5, which are the standard
+// fractional-Brownian-motion parameters every reference on the technique states (Musgrave's originals,
+// and the numbers Inigo Quilez's fBm and domain-warping articles use). Gain 0.5 with lacunarity 2.0 is
+// what makes it 1/f: halve the amplitude every time you double the frequency. Written here from those
+// numbers, not ported from anyone's shader.
+float fbm(vec2 p){ float a = 0.5, s = 0.0;
+  for(int i = 0; i < 5; i++){ s += a*noise(p); p *= 2.0; a *= 0.5; }
+  return s; }
+// The POLYNOMIAL smooth minimum, k = the blend radius in the field's own units. A plain min() gives
+// two circles a hard crease where they touch; the -k*h*(1-h) term is the whole effect and is the step
+// nobody guesses, because it is what removes the crease rather than merely rounding it.
+float smin(float a, float b, float k){
+  float h = clamp(0.5 + 0.5*(b - a)/k, 0.0, 1.0);
+  return mix(b, a, h) - k*h*(1.0 - h); }
 vec3 P(int i, vec3 df){                                   // palette stop, or a tasteful default
   if(i==0) return u_palN>0 ? u_pal[0] : df;
   if(i==1) return u_palN>1 ? u_pal[1] : df;
@@ -333,10 +350,69 @@ void main(){
     float hair = hon * smoothstep(0.0026, 0.0, abs(q.x - (hx + sway))) * step(1.0 - hlen, q.y);
     col = mix(vec3(1.0), vec3(0.02), max(dust*dirt, max(gate, hair)));
     alpha = gate*0.6 + dust*0.85 + hair*0.75;
+  } else if(u_fx==17){                                    // domainWarp, marbled ink
+    float wt = t*0.05;                                    // the clock, first line (see the bands note)
+    // DOMAIN WARPING, and the step that is not obvious: the warp is applied TWICE. f(p) = fbm(p + 4*r)
+    // where r = fbm(p + 4*q) and q = fbm(p). One level is a smear; two levels is what folds the field
+    // back over itself and produces the filaments. The amplitude 4.0 and the decorrelating offsets
+    // (5.2,1.3) (1.7,9.2) (8.3,2.8) (5.4,2.9) are the numbers the technique is always stated with.
+    // Each vector's two components MUST use different offsets, or q.x == q.y and the warp is a
+    // diagonal smear rather than a flow. Reimplemented from the recipe over our own value-noise fBm.
+    vec2 sp = p*2.6;
+    vec2 q = vec2(fbm(sp + wt), fbm(sp + vec2(5.2, 1.3) - wt));
+    vec2 r = vec2(fbm(sp + 4.0*q + vec2(1.7, 9.2) + wt*0.7),
+                  fbm(sp + 4.0*q + vec2(8.3, 2.8) - wt*0.7));
+    float f = fbm(sp + 4.0*r);
+    col = mix(c0, c1, clamp(f*f*2.4, 0.0, 1.0));
+    col = mix(col, c2, clamp(dot(q, q)*0.9, 0.0, 1.0));
+    col = mix(col, c3, clamp(r.x*r.x*1.4, 0.0, 1.0));
+  } else if(u_fx==18){                                    // voronoi, cellular (Worley) noise
+    float vt = t*0.35;                                    // the clock, first line (see the bands note)
+    // WORLEY NOISE, one feature point per grid cell, jitter 1.0, and each point orbits its own cell on
+    // a sine so the whole field is loopable and pure in t. F1 (the nearest point) gives the cells.
+    // The BORDER is the part with a recipe you would not guess: it is not F2 - F1, which bulges near
+    // corners. It is the distance to the perpendicular BISECTOR between the winning point and each
+    // neighbour, dot(0.5*(mr + d), normalize(d - mr)), which needs a SECOND pass over the neighbours
+    // carrying the first pass's winner. Written from that description.
+    vec2 g = p*5.0, ip = floor(g), fp = fract(g);
+    vec2 mr = vec2(0.0), mid = ip; float md = 8.0;
+    for(int j = -1; j <= 1; j++) for(int i = -1; i <= 1; i++){
+      vec2 o = vec2(float(i), float(j)), cc = ip + o;
+      vec2 pt = o + 0.5 + 0.42*sin(vt + 6.2831853*vec2(hash(cc), hash(cc + 37.0)));
+      vec2 d = pt - fp;
+      if(dot(d, d) < md){ md = dot(d, d); mr = d; mid = cc; }
+    }
+    float edge = 8.0;
+    for(int j = -2; j <= 2; j++) for(int i = -2; i <= 2; i++){
+      vec2 o = vec2(float(i), float(j)), cc = ip + o;
+      vec2 pt = o + 0.5 + 0.42*sin(vt + 6.2831853*vec2(hash(cc), hash(cc + 37.0)));
+      vec2 d = pt - fp;
+      if(dot(mr - d, mr - d) > 1e-5) edge = min(edge, dot(0.5*(mr + d), normalize(d - mr)));
+    }
+    float id = hash(mid + 11.0);
+    col = mix(mix(c0, c1, id), c3, 0.35*smoothstep(0.5, 0.0, sqrt(md)));
+    col = mix(col, c2, smoothstep(0.055, 0.0, edge));     // the lit border, one line per shared wall
+  } else if(u_fx==19){                                    // metaballs, SDF + polynomial smooth min
+    float mt = t*0.4;                                     // the clock, first line (see the bands note)
+    // FIVE circles as signed distance functions, merged with the polynomial smin above at k = 0.16.
+    // k is a LENGTH in the field's units, so it is the width of the neck two balls make as they meet:
+    // too small and they snap together, too large and the whole field is one puddle. The radii and the
+    // orbit rates are detuned per ball so the group never returns to the same arrangement on screen.
+    vec2 q = vec2(p.x - 0.5*ar, uv.y - 0.5);
+    float d = 8.0;
+    for(int i = 0; i < 5; i++){
+      float fi = float(i);
+      vec2 c = 0.26*vec2(sin(mt*(0.6 + 0.13*fi) + fi*2.1), cos(mt*(0.5 + 0.17*fi) + fi*1.3));
+      d = smin(d, length(q - c) - (0.105 + 0.028*sin(fi*3.0)), 0.16);
+    }
+    float body = smoothstep(0.012, -0.03, d);             // the surface, one soft pixel wide
+    float core = smoothstep(0.02, -0.12, d);              // the lit interior, so the body has volume
+    col = mix(c0, mix(c1, c2, core), body);
+    col = mix(col, c3, 0.55*smoothstep(0.06, 0.0, abs(d)));   // a rim on the boundary itself
   } else {                                                // bands, a ramp repeated over a scalar field
     float bt = t * 0.06;                                  // the clock, first line, see note below
     vec2  drift = vec2(0.05*sin(t*0.07), 0.03*cos(t*0.05));
-    // Index 17, the trailing else. The clock is on the FIRST line because lib-test reads the opening
+    // The trailing else (index 20 today). The clock is on the FIRST line because lib-test reads the opening
     // 600 characters of a branch looking for a use of t, and a long comment can push the only one out
     // of the window. That is the test being positional rather than this code being odd, and putting
     // the drift up top is better code anyway: it is the one thing every term below reads.

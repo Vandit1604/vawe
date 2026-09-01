@@ -70,7 +70,7 @@ import { bakeCameraMove } from '../../core/produce.js';
 import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
-import { AMBIENT_FX } from '../../core/shaders-ambient.js';
+import { AMBIENT_FX, AMBIENT_SHADERS } from '../../core/shaders-ambient.js';
 import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks.js';
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
@@ -1697,6 +1697,16 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
+  // THE THREE FIELDS WITH A NAMED TECHNIQUE BEHIND THEM, each asserted on the step of its recipe that
+  // is easy to lose and impossible to see in a still: reimplemented from the technique, never ported.
+  for (const n of ['domainWarp', 'voronoi', 'metaballs'])
+    ok(`ambient: ${n} is in the map with a blurb`, typeof AMBIENT_SHADERS[n] === 'string' && AMBIENT_SHADERS[n].length > 20);
+  ok('ambient: fBm is lacunarity 2 / gain 0.5 over five octaves', /float fbm\(vec2 p\)[\s\S]{0,220}i < 5;[\s\S]{0,120}p \*= 2\.0; a \*= 0\.5;/.test(frag));
+  ok('ambient: domainWarp warps TWICE (one level is a smear, not a fold)',
+    /4\.0\*q/.test(frag) && /4\.0\*r/.test(frag));
+  ok('ambient: voronoi finds its borders on the perpendicular bisector, not on F2-F1',
+    /normalize\(d - mr\)/.test(frag));
+  ok('ambient: metaballs merge on the polynomial smooth min', /float smin\(/.test(frag) && /d = smin\(d,/.test(frag));
   // EVERY ambient look must animate: one that ignores t is a frozen still on a layer whose entire
   // contract is "loops smoothly". Derived from AMBIENT_FX with a NAMED exemption set, because the
   // hand-typed wave list covered 8 of 17 and every appended effect landed outside it uncovered.

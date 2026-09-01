@@ -1,121 +1,165 @@
 ---
-message: the film is a text file, and the terminal that renders it turns into the picture it made
+message: the film is a text file, and the terminal that renders it becomes the pictures it made
 audience: developers and designers on X who have never seen a video written as JSON
 framework: BAB
-arc: hook (a command types itself) → build (the render reports its own states) → proof (the panel becomes the shader) → payoff (it came out of a text file)
-threads: a continuous object (the panel is on screen from frame one to the payoff and changes at every junction) and an escalation of light (dim panel → travelling border beam → the panel's own body becomes the light source)
-object: the terminal panel
-object_t0: a dark panel on true black with an empty prompt and a caret
-object_states: empty prompt → a real vawe command typed in → the command's own render states listed under it → a light travelling its border → its body IS the shader, and the box grows through the frame
-object_last: gone through the camera, leaving the wordmark on the black it started on
-pace: showreel, 2.8 seconds per idea
-spectacle: beat 4 · the shader layer, born at the panel's inner box · the panel's own fill dissolves into it over one beat and the box then travels through the camera · the terminal stops describing the render and becomes it
-not: no gradient hero, no stock footage, no centred type on the end card, no claim about hardware the code does not make, no dots-in-a-title-bar terminal cliche
+arc: hook (a command types itself) → build (the render reports its own states) → turn (the terminal's interior becomes a shader in place) → proof (two more panels rise from behind it and the three cycle through different looks) → payoff (from one text file)
+threads: a continuous object (the terminal's own body is on screen from frame one to the payoff and is never replaced, only changed) and an escalation of light (dim panel → a beam lapping its border → its interior IS the light → three of them)
+object: the terminal's body
+object_t0: a dark panel on a white ground with an empty prompt and a caret
+object_states: empty prompt → a real vawe command typed into it → the command's own render states listed under it → a light travelling its border → its interior IS the shader → it folds to one panel and two more rise from behind it → all three cycle through different shaders
+object_last: three equal panels on one baseline, dissolving as the wordmark arrives on the white it started on
+pace: showreel, 2 seconds per idea
+spectacle: beat 5 · the two new shader panels · they rise from behind the folded one and fan out like a folder opening, landing aligned · the film stops showing one specimen and shows range
+not: no voiceover, no zoom or push into the shader, no dark film (the ground is white, vawe.dev's own register), no camera on the terminal, no breathing idle on anything that is meant to be a screen, no gradient hero, no centred type, no stock footage, no dots-in-a-title-bar terminal cliche
 format: 1920x1080
 theme: themes/vawe.json
 duration: 14s
 ---
 
 <!--
-  Beat edges are the owner's, moved onto the music's own grid. The bed (assets/music/bed.wav, mixkit
-  292) measures 178.2 BPM with its first bar at 0.30s, so a beat is 0.3367s and a bar is 1.3468s. Every
-  joint here sits on a point of that grid: the command types from 0.637s to 2.320s, the output lines
-  land one per beat from 2.657s, the border beam runs 5.014s to 6.361s (exactly one bar, exactly one
-  lap), the panel becomes the shader on 6.361s, and the only hard cut is the downbeat at 11.074s.
-  `audio.beatSync` is NOT set: core/beat-bind.js refuses this bed at confidence 1.54 against a floor
-  of 1.6, so the grid is applied by hand at author time instead of by the engine at boot.
+  NO VOICEOVER. The four lines that were narration are on-screen type, one at a time, in the mono
+  face, in a fixed slot above the picture (the fourth moves under the right panel, into the space the
+  fan opens). The type is the only voice this film has, so each line arrives differently: word rise ·
+  per-character blur · one whole line · word unfold.
+
+  Beat edges sit on the bed's own grid (assets/music/bed.wav, mixkit 292): 178.2 BPM, first bar 0.30s,
+  so a beat is 0.3367s and a bar is 1.3468s. The command types 0.637 to 2.320, the output lines land
+  one per beat from 2.657, the beam runs 5.014 to 6.361 (one bar, one lap), the interior turns on
+  6.361, the fold starts on 7.034, the fan launches on 7.708 and lands on 8.381, every panel changes
+  shader on 9.728, and the only cut is the downbeat at 11.074. `audio.beatSync` is NOT set:
+  core/beat-bind.js refuses this bed at confidence 1.54 against a floor of 1.6, so the grid is applied
+  by hand at author time rather than by the engine at boot.
+
+  THE GROUND IS WHITE and the terminal is a dark panel on it, which is what vawe.dev is. The three
+  shader panels keep a dark plate for the same reason: they are pictures on paper, and a shader that
+  reads on black vanishes on white without one.
+
+  SOUND is the bed, the command's own key clicks (a `typing` layer, so the clicks are derived from the
+  formula that draws the characters), and `audio.tactile` at maxPerSec 2 for the arrivals.
 -->
 
-## Beat 1: The command (0s-2.5s)
+## Beat 1: The command (0s-2.99s)
 - type: hook
-- object: the panel sits alone on black, and a real vawe command types itself at its prompt
-- shot: medium (the panel fills the middle two thirds of the frame, the black around it deliberately empty)
-- camera: hold
-- layout: the panel fills the middle two thirds of the frame width, centred, on black
-- picture: a dark terminal panel, one hairline of white at 0.1 alpha, a title bar, a cobalt prompt sigil and a caret riding the end of the typed path
-- mechanism: the command's width is clipped on the scene clock in whole character cells, so it types rather than fades
-- style: true black, one mono face, one cobalt accent, nothing else on screen
+- object: the panel sits alone on white and a real vawe command types itself at its prompt
+- shot: medium (the panel fills the middle two thirds, the white around it deliberately empty)
+- camera: none. A camera move scales every layer under it, and a terminal whose text creeps is a fake terminal
+- layout: one line of type above the panel in ink, sharing its left edge; the panel in the middle band
+- picture: a dark terminal on white paper, one hairline at 0.10 alpha, a cobalt prompt sigil, a caret
+- mechanism: a `typing` text layer at 22 characters a second, which is also what makes the key clicks
+- style: white ground, one dark panel, one mono face, one cobalt accent
 - rest: the backdrop's dot field drifts five pixels a second
 - becomes: an empty prompt becomes a real command with a real scene path in it
-- onscreen: vawe formats/scene/shader-path.json
-- narration: You write the film as a text file.
-- why: the whole claim of the film is on screen in beat one, as a command rather than as a sentence
+- onscreen: You write the film as a text file. | vawe formats/scene/shader-path.json
+- why: the claim of the film is on screen in beat one, as a command rather than as a sentence
 - emotion: curiosity
-- duration: 2.5s
+- duration: 2.99s
 - transition_in: cut
 
-## Beat 2: It runs (2.5s-5.0s)
+## Beat 2: It runs (3.33s-5.01s)
 - type: proof
-- object: the same panel, now listing what the render did, line by line under the command
+- object: the same panel, listing what the render did, line by line under the command
 - shot: medium (unchanged: the panel has not moved)
-- camera: hold
-- layout: the same middle two thirds, the lower half of the panel filling with output
-- picture: five status lines and one progress track, each with a status mark, a dim key and a bright value
-- mechanism: engine-driven staggered entrances on each line (`parts`), and the progress track fills on the scene clock
-- style: unchanged from beat 1, so the only new thing in the frame is information
-- rest: the track fills for 1.35s under the render line
+- camera: none
+- layout: the same type slot above, the panel's lower half filling with output
+- picture: five status lines and a progress track, each with a mark, a dim key and a bright value
+- mechanism: `parts`, one line per beat of the bed; the track fills on the scene clock
+- style: unchanged, so the only new thing in the frame is information
+- rest: the track fills for two beats under the render line
 - trigger: the command in beat 1 was submitted
 - becomes: a command becomes its own output, with real counts in it
-- onscreen: parse · theme · shader · render · write
-- narration: No timeline. No motion designer.
+- onscreen: No timeline. No motion designer.
 - why: the states are the evidence that a text file is really the input, and they are true numbers
 - emotion: recognition
-- duration: 2.5s
+- duration: 1.68s
 - transition_in: none (the object never leaves)
 
 ## Beat 3: The border (5.01s-6.36s)
 - type: turn
 - object: the same panel, with a light travelling its border
 - shot: medium (unchanged)
-- camera: hold
-- layout: the same middle two thirds; the border is the only thing that changes
-- picture: a conic light ring masked to 2.5px of the panel's own border, with a soft cobalt bloom
-- mechanism: the `beam` layer, whose head angle is a closed-form function of local time
+- camera: none
+- layout: unchanged; the border is the only thing that moves
+- picture: a conic light masked to 2.5px of the panel's own border, with a cobalt bloom
+- mechanism: the `beam` layer, one lap in exactly one bar
 - style: the first light in the film that is not type
-- rest: the panel holds completely still and lets the light move
+- rest: the panel holds still and lets the light move
 - trigger: the render finished writing its file in beat 2
 - becomes: a panel that was reporting becomes a panel that is charged
 - onscreen: none
-- narration: none (the silence here is doing the work before the peak)
-- why: the border is the promise that the panel itself is about to do something
+- narration: none, and there is none anywhere: this film has no voice
+- why: the lap is the promise that the panel itself is about to do something
 - emotion: anticipation
 - duration: 1.35s
 - transition_in: none
 
-## Beat 4: The panel becomes the shader (6.36s-11.07s)
-- type: payoff
-- object: the panel's own body turns into the shader field, and the whole box grows through the frame
-- shot: medium becoming full bleed (the panel's inner box grows to fill the frame and past it)
-- camera: hold (the growth is the object's, not the camera's)
-- layout: the shader starts at the panel's inner box, the middle two thirds, and ends full bleed
-- picture: a banded shader field, cobalt to ice to white, exactly inside the terminal's body
-- mechanism: the shader layer and the panel carry the SAME hand-keyed scale ramp, so they grow as one object, and the panel's chrome dissolves over 1.9s while it travels
-- style: the loud beat, and the only one: everything before it is one mono face on black
-- rest: none
-- trigger: the beam in beat 3 completed its travel of the border
+## Beat 4: The interior turns (6.36s-7.71s)
+- type: reveal
+- object: the panel's own fill drops to nothing over one beat and the shader is what is underneath
+- shot: medium (unchanged: nothing moves, nothing scales, the picture changes inside the same box)
+- camera: hold
+- layout: unchanged, which is the point of the beat
+- picture: a banded field, cobalt to white, FITTED to the terminal's body, with the chrome and the output still over it
+- mechanism: the body's `background` alpha is a `var(--t)` ramp across one beat; the shader layer is born at the body's exact box, one track under it
+- style: the turn, and it is quiet: no push, no cut, no flash
+- rest: the type above holds while the picture under it changes
+- trigger: the beam completed its lap of the border
 - becomes: the thing describing the render becomes the render
-- onscreen: none
-- narration: This is what comes out. Same file, any shape.
-- why: the transformation is the argument, and any cut here would turn it into two shots of two things
+- onscreen: This is what comes out.
+- why: the transformation has to happen in place, or it is a cut to a second thing
 - emotion: surprise
-- duration: 4.71s
+- duration: 1.35s
 - transition_in: none
 
-## Beat 5: It came out of a text file (11.07s-14.0s)
-- type: cta
-- object: gone through the camera, leaving the black it started on
-- shot: medium (the wordmark against the left third, the right of the frame empty and holding the eye)
+## Beat 5: The fan (7.71s-9.73s)
+- type: payoff
+- object: the body folds down to one panel and two more rise from behind it
+- shot: medium wide (three panels on one baseline, the frame's middle band)
 - camera: hold
-- layout: the wordmark and url in the left half, on black, the right half deliberately empty
-- picture: the payoff line, a 200px wordmark, and the url in the mono face in cobalt
-- mechanism: a hand-keyed rise and settle on the wordmark, then a slow continued drift upward
-- style: black, white, one cobalt line
-- rest: the backdrop's cobalt pool opens slowly behind the wordmark
-- trigger: the shader travelled past the camera and left the frame empty
-- becomes: the picture becomes the name of the thing that made it
+- layout: three equal panels, 540x380, on one baseline, filling the middle band of the frame
+- picture: the folded terminal in the centre, Worley cells on the left, a domain-warped marble on the right
+- mechanism: the centre's own `w`/`h` keys fold it; the other two carry a hand-keyed track from the centre's position at 0.86 scale and 7 degrees of rotation out to their slots at 1.0 and 0
+- style: the loud beat, and the only one
+- rest: none
+- trigger: the interior turned in beat 4, so there is now something to have three of
+- becomes: one panel becomes three
+- onscreen: none
+- why: range is the argument, and range cannot be shown with one specimen
+- emotion: delight
+- duration: 2.02s
+- transition_in: none
+
+## Beat 6: The cycle (9.73s-11.07s)
+- type: feature_showcase
+- object: the three panels, each changing what it is showing
+- shot: medium wide (unchanged: the panels do not move again)
+- camera: hold
+- layout: unchanged, with one line of type under the right panel, right-aligned to its edge
+- picture: merging metaballs, a matrix rain, a starfield nebula: three looks nobody could mistake for each other
+- mechanism: one window per look, crossfading into the window under it, which is how the engine sequences anything
+- style: unchanged, so the only new thing is the content of the panels
+- rest: every panel is a moving field
+- trigger: the three landed, so they can now be compared
+- becomes: three panels become three different films
+- onscreen: Same file, any shape.
+- why: the swap is the proof of the claim the line makes
+- emotion: proof
+- duration: 1.34s
+- transition_in: none
+
+## Beat 7: From one text file (11.07s-14.0s)
+- type: cta
+- object: dissolving, leaving the black it started on
+- shot: medium (the wordmark in the left half, the right half deliberately empty)
+- camera: a 1.03 push over the last three seconds
+- layout: the payoff line, the wordmark and the url stacked in the left half
+- picture: a 200px wordmark in ink with the panels dissolving behind it
+- mechanism: a hand-keyed rise and settle on the wordmark, then a slow drift upward
+- style: white, ink, one cobalt line
+- rest: the backdrop's faint cobalt pool opens slowly behind the wordmark
+- trigger: the cycle finished, so the film can name itself
+- becomes: the pictures become the name of the thing that made them
 - onscreen: From one text file. | vawe | vawe.dev
-- narration: vawe dot dev.
-- why: the payoff is stated only after the viewer has watched the file turn into the picture
+- why: the payoff lands only after the viewer has watched the file turn into the pictures
 - emotion: settled
 - duration: 2.93s
 - transition_in: rise

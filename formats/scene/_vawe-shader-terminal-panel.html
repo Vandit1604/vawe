@@ -78,15 +78,12 @@
       </div>
 
       <div class="term">
-        <!-- The command types itself. `--typed` runs 0 to 1 between two points of the music's own beat
-             grid (0.637s to 2.320s, five beats at 178.2 BPM) and scales a 35ch clip, so the reveal is
-             exact in a monospace face and the caret rides its edge. -->
-        <div class="prompt"
-             style="--typed:clamp(0, calc((var(--t,0) - 0.637) / 1.683), 1)">
-          <span class="sigil">$</span><span class="typed"
-            style="width:calc(var(--typed) * 35ch)">vawe formats/scene/shader-path.json</span><span
-            class="caret"></span>
-        </div>
+        <!-- THE PROMPT ROW IS AN EMPTY SPACER, and the command is a real `text` layer sitting in
+             it (see the scene JSON). A CSS clip on `--t` drew the same picture and made no sound: key
+             clicks are derived from a `typing` layer's own reveal formula in formats/scene/scene.js,
+             so the engine has to be the one typing. The row keeps its line box so everything below it
+             stays where it was. -->
+        <div class="prompt"><span class="sigil">$</span>&nbsp;</div>
 
         <div class="lines">
           <div class="line"><span class="tick">OK</span><span class="key">parse</span><span class="val">shader-path.json · 6 layers · 14.0s</span></div>
