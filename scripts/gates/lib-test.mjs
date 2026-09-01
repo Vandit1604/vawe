@@ -4381,6 +4381,30 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const fast = clock([{ t: 0, at: 0 }, { t: 2, at: 2, easeIn: { influence: 20, speed: 4 } }]);
   ok('speed 4 on the arriving handle means 4x playback at that key',
     Math.abs(rate(fast, 1.98) - 4) < 0.6);
+  // BAKED ONCE, NOT PER FRAME. layerTime runs once per layer per frame and used to re-validate every
+  // key and, for a NAMED shape, allocate a fresh array on the way. bakeTimeRemap resolves it at boot.
+  const { bakeTimeRemap } = await import('../../core/time.js');
+  const baked = { timeRemap: 'whip', duration: 4 };
+  bakeTimeRemap(baked);
+  ok('bakeTimeRemap turns a named shape into seconds keys', Array.isArray(baked.timeRemap)
+    && baked.timeRemap[baked.timeRemap.length - 1].t === 4);
+  ok('and the mark is non-enumerable, so no walker sees a new key',
+    baked.timeRemap.baked === true && !Object.keys(baked.timeRemap).includes('baked'));
+  const again = baked.timeRemap;
+  bakeTimeRemap(baked);
+  ok('baking twice is a no-op, so a re-boot on the same data is safe', baked.timeRemap === again);
+  ok('a baked layer reads the same clock an unbaked one does', (() => {
+    const raw = { timeRemap: 'whip', duration: 4 };
+    for (const t of [0.3, 1.7, 2.9, 3.8])
+      if (Math.abs(layerTime(raw, t, 0, 4) - layerTime(baked, t, 0, 4)) > 1e-12) return false;
+    return true;
+  })());
+  let bootThrew = null;
+  try { bakeTimeRemap({ id: 'clocky', timeRemap: [{ t: 0, at: 0 }, { t: 1 }], duration: 2 }); }
+  catch (e) { bootThrew = e.message; }
+  ok('a bad key list fails at BAKE time, naming the layer',
+    bootThrew != null && /clocky/.test(bootThrew) && /numeric/.test(bootThrew));
+
   ok('a timeRemap key with both a handle and a named ease is refused',
     keyHandleErrors([{ t: 0, at: 0, easeOut: 'fling' }, { t: 2, at: 2, ease: 'easeOutQuint' }], 'r').length === 1);
 

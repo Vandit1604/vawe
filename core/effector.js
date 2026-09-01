@@ -118,6 +118,15 @@ export function effectorAt(cx, cy, kfs, t, { radius = 300, falloff = 'smooth', s
     ? springEase({ response: 0.5, dampingFraction: Math.max(0.2, 1 - clamp01(overshoot) * 0.75) })
     : resolveEasing(release);
   let best = now;
+  // HOW MANY BACKWARD SAMPLES, and why the cap is a number rather than the honest `sticky / step`.
+  // One sample per frame of the sticky window is what makes the trail land on the poses the pass
+  // actually visited: fewer and the trail beads, because a clone between two samples is never
+  // touched. 240 is eight seconds at 30fps and comfortably past any sticky an author would write
+  // (the playground card's own dial tops out at 2). Above it the trail does not break, it stops
+  // getting FINER: the window is still walked to `sticky` seconds back, in coarser steps, so a 20s
+  // sticky would sample every 83ms and a clone could sit in a gap. The cap exists because this runs
+  // per CLONE per frame: on the card's default 8x8 grid, n=240 would be 15,360 distance reads a
+  // frame, and the cap is what stops a mistyped `sticky` turning a render into a stall.
   const n = Math.min(240, Math.max(1, Math.ceil(sticky / Math.max(step, 1e-4))));
   for (let i = 1; i <= n; i++) {
     const s = t - (i * sticky) / n;
@@ -125,6 +134,10 @@ export function effectorAt(cx, cy, kfs, t, { radius = 300, falloff = 'smooth', s
     const r = rawInfluence(cx, cy, kfs, s, radius, shape);
     if (r.v <= 0) continue;
     const v = r.v * (1 - curve(i / n));
+    // MAGNITUDE, not value, and that is what makes the overshoot survive. With `overshoot > 0` the
+    // spring curve crosses above 1, so `1 - curve()` goes NEGATIVE: the clone is past rest on its way
+    // back. A plain `v > best.v` would discard exactly those samples and the overshoot would never
+    // reach the frame, leaving a dial that reads as doing nothing.
     if (Math.abs(v) > Math.abs(best.v)) best = { v, ux: r.ux, uy: r.uy };
   }
   return best;
