@@ -5266,5 +5266,44 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     })());
 }
 
+// ---- schema-drift --write: a regeneration must be READABLE and must never drop a name -------------
+// Both halves of docs/MISTAKES.md #564. The generator emitted each array on one line while
+// schema.json is committed one-name-per-line, so every `--write` reflowed a 451-line block into 6 and
+// `git diff --stat` reported ~445 deletions for a one-prop change. Nothing was lost, the data
+// round-tripped identical, but the diff was unreadable, and an unreadable diff is where a real
+// deletion hides. So: the render must reproduce the committed file byte for byte, and a write that
+// WOULD lose a prop name must refuse.
+//
+// The refusal is exercised end to end, against the real file, because the whole point is that it
+// happens before the write. A bogus name is spliced into the committed `layerProps.shared`, which no
+// module declares, so regenerating would drop it. The original text is restored either way, and the
+// test fails loudly if the guard let the write through.
+{
+  const { execFileSync } = await import('node:child_process');
+  const gate = new URL('./schema-drift.mjs', import.meta.url).pathname;
+  const file = path.join(repoRoot, 'formats', 'scene', 'schema.json');
+  const original = fs.readFileSync(file, 'utf8');
+  const run = (args) => {
+    try { return { code: 0, out: String(execFileSync(process.execPath, [gate, ...args], { stdio: 'pipe' })) }; }
+    catch (e) { return { code: e.status, out: String(e.stdout || '') + String(e.stderr || '') }; }
+  };
+  try {
+    ok('schema-drift: --write over a current file is byte-identical (no reflow, so the diff is the change)',
+      run(['--write']).code === 0 && fs.readFileSync(file, 'utf8') === original);
+
+    const marked = original.replace('"shared": [\n', '"shared": [\n   "zzTestPropNothingDeclares",\n');
+    ok('schema-drift: the refusal test could splice its subject in', marked !== original);
+    fs.writeFileSync(file, marked);
+    const refused = run(['--write']);
+    const kept = fs.readFileSync(file, 'utf8') === marked;
+    ok('schema-drift: --write REFUSES a regeneration that would drop a prop name, and writes nothing',
+      refused.code === 2 && /refusing to write/.test(refused.out) && /zzTestPropNothingDeclares/.test(refused.out) && kept);
+    ok('schema-drift: --force is the way past it, and the drop is named on the way',
+      run(['--write', '--force']).code === 0 && fs.readFileSync(file, 'utf8') === original);
+  } finally {
+    if (fs.readFileSync(file, 'utf8') !== original) fs.writeFileSync(file, original);
+  }
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
