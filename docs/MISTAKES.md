@@ -17000,3 +17000,49 @@ leaves the markup after it, a comment quoting `transition:` is not a transition,
 forbids, so any regex that reads authored markup will meet its own vocabulary in prose sooner or
 later. Strip the comments before you pattern-match, or the better a fragment is documented the more
 likely it is to break.
+
+## 550. a canvas layer kept its build-time size, so a folding shader showed a CROP of a bigger field
+
+**What.** A `shader` panel folding from the terminal's body (1216x596) down to a 540x380 tile showed a
+slice of the full-size field instead of the field fitted to the tile. It read as a window onto
+something larger, which is the opposite of what a panel is. Nothing reported it, and it is invisible on
+a still: you have to see the box change to know the picture did not.
+
+**Root cause.** `core/layers/canvas.js` sized the canvas in PIXELS at build time
+(`width:${w}px;height:${h}px`) while the LAYER element is what a `motion` track's `w`/`h` keys move. So
+the two disagreed the moment a box was keyed: with a `radius` (hence `overflow:hidden`) the canvas was
+cropped by its own shrinking layer, and without one it overflowed the panel it was supposed to be
+inside. Every canvas surface had it: shader, paint, raymarch, three, globe.
+
+**Fix.** The element owns the box (`el.style.width/height`) and the canvas fills it
+(`width:100%;height:100%`). One owner, so anything that moves the box moves the picture with it. The
+backing store stays at the built resolution and the browser scales it, which is what "fit" means here.
+
+**Blast radius.** None: `node scripts/gates/snap-scenes.mjs` reports the same 108 identical before and
+after, because no shipped scene keys `w`/`h` on a canvas layer. The bug was only reachable by the
+feature nobody had combined with it yet.
+
+**The lesson.** When two elements can each carry a size, one of them has to be told and the other has
+to ASK. A px value copied onto a child at build time is a second answer to a question the parent
+answers every frame.
+
+## 551. the engine's idle default breathes, and a breathing terminal reads as fake
+
+**What.** The terminal panel in the shader film crept: measured off the rendered frames, it was 1230px
+wide at 4.33s and 1267px at 6.33s, so every line of typed text drifted about seven pixels out and back
+over two seconds. Nobody wrote that motion. It is `DEFAULT_MOTION.idle = 'breathe'` in `core/motion.js`,
+the 1-2% ambient hold scale, which is ON for every layer unless something says otherwise.
+
+**Not a bug, and that is the point.** The default is deliberate and documented, and it is right for a
+card, a badge or a logo. It is wrong for anything that is meant to BE a screen: a terminal, a captured
+UI, a code slab, a chart. Real terminal text does not breathe, so the idle that makes a card feel alive
+makes a terminal feel like a mock-up of one, and the symptom is not "it moves", it is "this looks fake"
+with no obvious cause.
+
+**Fix, in the scene.** `"idle": "none"` on the panel, on the command layer and on the beam that traces
+its border. The three shader panels keep the default, because a picture may breathe.
+
+**The lesson.** A good default is still a decision that has to be re-made wherever its assumption does
+not hold. When a frame looks subtly wrong and nothing in the JSON explains it, measure a static feature
+across two frames rather than staring at one: the panel's left edge, in pixels, named the cause in
+about a minute after two hypotheses had already been wrong.

@@ -574,6 +574,7 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 | `bands` | a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md |
 | `barrel` | the LENS, not the picture: a corner vignette with a faint violet chromatic fringe riding the far edge only |
 | `crt` | a tube: 4px RGB phosphor stripes, scanlines, a corner vignette and a refresh bar rolling down. an OVERLAY |
+| `domainWarp` | marbled ink: fBm sampled through a domain that is itself two levels of fBm, so the field folds back over itself. the classic warp, and the only field here with real interior structure |
 | `dotCrawl` | the NTSC artifact: a fine diagonal chroma lattice creeping one subcarrier phase per frame, concentrated where there is detail. an OVERLAY |
 | `drift` | seven big soft bokeh discs rising up the frame and blending as they pass |
 | `filmGrain` | grain re-struck 24 times a second per ~2px cell, plus dust specks; bright or dark only, never mid-grey, so contrast survives. an OVERLAY |
@@ -583,11 +584,13 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 | `kaleidoscope` | a 6-fold mirrored mandala turning slowly and fading out toward the corners. A symmetric field of its own, never a mirror of your content |
 | `lightLeak` | three warm blobs drifting in from the edges on a loop, tinted from the palette. an OVERLAY |
 | `matrixDecode` | digital rain: near-white heads falling down 44 glyph columns at per-column speeds, each dragging a fading tail. palette stop 0 tints it |
+| `metaballs` | five signed-distance circles merging and parting on a polynomial smooth minimum, so they fuse into one body instead of overlapping |
 | `mist` | near-still layered noise haze. The quietest field here, for a backdrop that must move without being noticed |
 | `nebula` | deep-field gas clouds from three octaves of noise with a hot core, dusted with twinkling stars off a hashed grid |
 | `plasma` | two crossed sine waves interfering into a slow two-tone swell |
 | `ripple` | gentle water caustics: three rings of cool light expanding and overlapping |
 | `vhs` | tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY, place it ABOVE content |
+| `voronoi` | cellular (Worley) noise: seeded cells drifting on their own loops, each one flat-tinted, with a lit line along every shared border |
 
 ## Motion voices (tactile sound)  `[audio]`
 
@@ -935,4 +938,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_606 effects across 43 families. Regenerate: `make effects`._
+_609 effects across 43 families. Regenerate: `make effects`._
