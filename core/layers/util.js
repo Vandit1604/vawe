@@ -266,12 +266,20 @@ export function createKit(ctx) {
   //   glass: true            → a sensible frosted default
   //   glass: 18              → blur radius in px
   //   glass: 'blur(18px) saturate(1.4)'  → the raw filter, for full control
+  //   glass: 'refract' | 'refractThin'   → REAL GLASS: the backdrop is BENT, not blurred (below)
   function applyGlass(el, L) {
     if (L.glass == null || L.glass === false) return;
     const f = L.glass === true ? 'blur(14px) saturate(1.35)'
-      : typeof L.glass === 'number' ? `blur(${L.glass}px) saturate(1.3)` : String(L.glass);
+      : typeof L.glass === 'number' ? `blur(${L.glass}px) saturate(1.3)`
+      : REFRACT[L.glass] ? `url(#${ensureRefractDef(L.glass)})` : String(L.glass);
     el.style.backdropFilter = f;
     el.style.webkitBackdropFilter = f;
+    // A GLASS LAYER IS A SHAPE, and `backdrop-filter` is clipped by the element's own border-radius.
+    // chipBox writes `radius` only for a layer that also PAINTS (a bg, a border, a shadow), which a
+    // pane of glass by definition does not, so `{"glass": true, "radius": 24}` used to round nothing
+    // and there was no way to make a glass layer that was not a rectangle. Same class as `pad` above:
+    // a documented prop accepted and then dropped in silence.
+    if (L.radius != null) el.style.borderRadius = (typeof L.radius === 'number' ? L.radius + 'px' : L.radius);
   }
 
   // progressiveBlur: a DIRECTIONAL blur fog on the backdrop that ramps toward an edge (motion-primitives
@@ -583,4 +591,115 @@ export function createKit(ctx) {
   // canvas from here: `kit.frame.W`, `kit.frame.safe`, never an imported number or a hardcoded 1920.
   const api = { ...ctx, frame, hexA, onDark, trackingCss, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild, addGroupChild };
   return api;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// REAL GLASS: `glass: "refract"`.
+//
+// `glass: true` frosts the backdrop. Frosting is not glass, and everyone who has tried to fake glass
+// with it knows the tell: a blur softens, and glass BENDS. Bending needs the backdrop resampled along
+// a gradient, which is `feDisplacementMap`, and `backdrop-filter` accepts `url(#id)` in this Chrome,
+// not only the filter FUNCTIONS. That one fact is what makes this reachable at all.
+//
+// THE RECIPE, in the After Effects vocabulary it is borrowed from, because a look with a name has a
+// sequence and one step in it is always the one you would not guess:
+//
+//   1. HEIGHT MAP.  feDisplacementMap reads a MAP, never a shape: dx = (R - 0.5) * scale, dy from G.
+//      So the map is a red ramp across x plus a green ramp down y, summed with `screen` (their
+//      channels are disjoint, so screen is a plain add). It is stretched over the element's own box.
+//      THE STOPS ARE THE WHOLE LOOK: they sit near 128 through the middle and run away hard in the
+//      outer third, because a thick lens shows a near-true image at its centre and squeezes the world
+//      at its rim. A straight 0..255 ramp reads as a flat magnifier, which is a different object.
+//   2. REFRACTION, at a NEGATIVE scale. Negative pulls the surroundings inward at the rim; positive
+//      stretches them outward and reads as a smear. This is the step nobody guesses.
+//   3. DISPERSION. Glass bends red less than blue, so ONE displacement cannot make it. Run the map
+//      three times at rising scales, keep R from the shallowest, G from the middle, B from the
+//      steepest, and screen them back together. This is what separates real glass from a chromatic
+//      aberration filter bolted on afterwards.
+//   4. A hairline blur closes the seams the three passes leave between them.
+//
+// WHAT THIS DOES NOT DO, and it is CSS's limit, not this code's: `mask` and `clip-path` do NOT clip a
+// `backdrop-filter`. The filter runs over the whole border box and the mask removes only the element's
+// OWN paint, so a masked annulus refracts its hole as well and loses its rim doing it (verified by
+// rendering a masked circle beside a plain one: identical refraction). Any glass shape here has to be
+// a shape `border-radius` can make.
+//
+// The rest of the AE chain, Fresnel rim, specular, bevel, contact shadow, is PAINT ON the shape rather
+// than distortion of what is behind it, so it is box-shadows and gradients, and it belongs in the
+// caller's own CSS. Worked example: formats/scene/_glass-shapes.sphere.html.
+const REFRACT = {
+  // ior ≈ thick optical glass: the image inside is strongly compressed, the fringes stay a hairline
+  refract:     { scales: [-64, -78, -92], blur: 1.1 },
+  // a thinner shell: less compression, a wider spread between the three passes, so the colour splits
+  // loudly. The one to reach for when DISPERSION is the point of the shot.
+  refractThin: { scales: [-26, -40, -54], blur: 0.8 },
+};
+
+// the two ramps, as one data: URI. Static, so it is built once and every def shares the string.
+const LENS_RAMP = (() => {
+  const stops = [[0, 0], ['.30', 86], ['.42', 120], ['.50', 128], ['.58', 136], ['.70', 170], [1, 255]];
+  const grad = (id, vertical, ch) => `<linearGradient id='${id}' x1='0' y1='0' x2='${vertical ? 0 : 1}' y2='${vertical ? 1 : 0}'>`
+    + stops.map(([o, v]) => `<stop offset='${o}' stop-color='rgb(${ch === 0 ? v : 0},${ch === 1 ? v : 0},0)'/>`).join('')
+    + '</linearGradient>';
+  return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><defs>"
+    + grad('rx', false, 0) + grad('gy', true, 1) + "</defs>"
+    + "<rect width='256' height='256' fill='url(%23rx)'/>"
+    + "<rect width='256' height='256' fill='url(%23gy)' style='mix-blend-mode:screen'/></svg>";
+})();
+
+const REFRACT_NS = 'http://www.w3.org/2000/svg';
+
+// One <filter> per named preset, injected once into a shared host svg. Static in every parameter, so
+// renderFrame(n) stays a pure function of n: the def is identical whichever frame builds it first.
+function ensureRefractDef(name) {
+  const spec = REFRACT[name];
+  const id = `f-glass-${name}`;
+  if (typeof document === 'undefined') return id;
+  if (document.getElementById(id)) return id;
+
+  let host = document.getElementById('hs-glass-defs');
+  if (!host) {
+    host = document.createElementNS(REFRACT_NS, 'svg');
+    host.id = 'hs-glass-defs';
+    host.setAttribute('width', '0'); host.setAttribute('height', '0');
+    host.setAttribute('aria-hidden', 'true');
+    host.style.cssText = 'position:absolute;width:0;height:0';
+    host.appendChild(document.createElementNS(REFRACT_NS, 'defs'));
+    document.body.appendChild(host);
+  }
+  const el = (tag, attrs) => {
+    const n = document.createElementNS(REFRACT_NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+  const f = el('filter', {
+    id, x: '0%', y: '0%', width: '100%', height: '100%', 'color-interpolation-filters': 'sRGB',
+  });
+  // step 1: the height map, stretched over whatever box the caller gave the element.
+  // `xlink:href` and not `href`: core/sanitize-html.js strips any `href=` whose value opens on a
+  // protocol, and `data:` is one, so a fragment copying this pattern by hand must use the same
+  // spelling. Chrome honours the SVG 1.1 name here.
+  const img = el('feImage', { preserveAspectRatio: 'none', result: 'n' });
+  img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', LENS_RAMP);
+  f.appendChild(img);
+  // steps 2 + 3: one displacement per channel, three indices of refraction
+  const chans = ['r', 'g', 'b'];
+  spec.scales.forEach((scale, i) => {
+    f.appendChild(el('feDisplacementMap', {
+      in: 'SourceGraphic', in2: 'n', scale,
+      xChannelSelector: 'R', yChannelSelector: 'G', result: 'd' + chans[i],
+    }));
+    // keep ONE channel from this pass and zero the others, so the three sum cleanly under `screen`
+    const rows = [0, 1, 2].map((r) => [0, 1, 2].map((c) => (r === i && c === i ? 1 : 0)).join(' ') + ' 0 0');
+    f.appendChild(el('feColorMatrix', {
+      in: 'd' + chans[i], result: 'c' + chans[i],
+      values: rows.join('  ') + '  0 0 0 1 0',
+    }));
+  });
+  f.appendChild(el('feBlend', { in: 'cr', in2: 'cg', mode: 'screen', result: 'rg' }));
+  f.appendChild(el('feBlend', { in: 'rg', in2: 'cb', mode: 'screen', result: 'rgb' }));
+  // step 4: close the seams between the three passes
+  f.appendChild(el('feGaussianBlur', { in: 'rgb', stdDeviation: spec.blur }));
+  host.firstChild.appendChild(f);
+  return id;
 }

@@ -1786,7 +1786,7 @@
     },
     "glass": {
      "type": "boolean|number|string",
-     "label": "Frosted glass: blur what is BEHIND this layer. true = default, a number = blur px, a string = raw backdrop-filter"
+     "label": "Glass: filter what is BEHIND this layer. true = a frosted default, a number = blur px, a string = a raw backdrop-filter. \"refract\" | \"refractThin\" = REAL glass, not frost: the backdrop is BENT along a lens map and split into three indices of refraction, which is what a blur cannot do. Pair it with `radius` for the shape (a glass layer paints nothing, so `radius` is honoured here and not by the box recipe) and write the Fresnel rim, specular and bevel as CSS on the layer's own content. Worked example: formats/scene/_glass-shapes.json"
     },
     "depth": {
      "label": "three extrudeText: extrusion depth"
