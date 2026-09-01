@@ -168,6 +168,8 @@ const WAIVED = new Map(Object.entries({
   PROGRESS_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   SHADOW_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   TILT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  UPRIGHT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
+  FX_REGISTRY: 'the modifier family as a searchable registry, exported so `make arsenal` can index it (it collects `*_REGISTRY` exports and found no modifier at all before this). Its names and blurbs ARE catalogued, under FX_TYPES and FX_BLURBS, which is the same pair it is built from',
   CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in docs/CRAFT/SOUND.md and graded by make audio-check',
   SEAM_CUE: 'sound, as CUT_CUE',
   CUES: 'sound, as CUT_CUE',

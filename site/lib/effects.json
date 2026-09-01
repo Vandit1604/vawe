@@ -1,5 +1,5 @@
 {
-  "total": 618,
+  "total": 619,
   "previewed": 273,
   "families": 45,
   "tags": [
@@ -57,7 +57,7 @@
     ],
     [
       "per-layer",
-      78
+      79
     ],
     [
       "per-layer/scene",
@@ -2792,7 +2792,7 @@
         {
           "name": "svg",
           "stem": "layer-types--svg",
-          "desc": "a · vector · mark · that · DRAWS · itself · on · (stroke · dashoffset) · or · MELTS · from · one · path · into · another · (true · point-lerp · morph, · optional · spin)",
+          "desc": "a · vector · mark · that · DRAWS · itself · on · (stroke · dashoffset) · and · then · RESOLVES · INTO · ITS · FILL, · the · stroke · leaving · as · the · solid · logo · arrives, · or · MELTS · from · one · path · into · another · (true · point-lerp · morph, · optional · spin)",
           "scene": null,
           "noPreview": null
         },
@@ -3221,7 +3221,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.",
-      "count": 13,
+      "count": 14,
       "undescribed": 0,
       "entries": [
         {
@@ -3305,6 +3305,13 @@
           "name": "tilt",
           "stem": "per-layer-modifiers--tilt",
           "desc": "turn · the · layer · out · of · the · picture · plane · and · hold · it · there. · A · card · leaning · away, · a · phone · at · an · angle, · panels · receding",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "upright",
+          "stem": "per-layer-modifiers--upright",
+          "desc": "AUTO-ORIENT · hold · this · layer · UPRIGHT · while · the · layer · carrying · it · rotates, · so · an · arrangement · can · turn · without · its · contents · turning · with · it. · Parenting · gives · you · the · rotation · for · free · and · it · is · almost · always · wrong · photographs · carried · round · a · circle · go · upside · down · at · the · bottom · exactly · when · the · motion · peaks",
           "scene": null,
           "noPreview": null
         },

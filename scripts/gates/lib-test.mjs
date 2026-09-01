@@ -25,6 +25,7 @@ import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt } f
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
 import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
+import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
@@ -582,6 +583,41 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   ok('matte refuses to share `mask-image` with the layer\'s own `mask`', (() => {
     try { matteBuild(null, { style: {} }, { id: 'plate', mask: 'linear-gradient(#000,#fff)' }, 'sweep'); return false; }
     catch (e) { return /also sets `mask`/.test(e.message); }
+  })());
+
+  // UPRIGHT (auto-orient): the correction is the NEGATIVE of the carrier's own keyed rotation, read
+  // from its keyframes and not from anything the carrier's own frame pass wrote. So these run the
+  // modifier with no renderer and no DOM at all, which is the point: if the answer needed the rendered
+  // transform, this test could not exist and renderFrame(n) would depend on layer order.
+  const wheel = { id: 'wheel', type: 'group', start: 1, motion: [{ t: 0, rot: 0 }, { t: 2, rot: 180 }] };
+  const uview = { clock: scene.clock, ids: ['wheel', 'photo'], specOf: (id) => (id === 'wheel' ? wheel : null), boxOf: () => null };
+  const up = (t, spec = 'wheel', L = { id: 'photo' }) => { const el = { style: {} }; uprightFrame(null, el, L, t, uview, spec); return el.style.rotate; };
+  ok('upright cancels the carrier\'s rotation exactly, at the carrier\'s own start', up(1) === 'none');
+  ok('upright reads the carrier\'s LOCAL time, so its `start` offsets the angle', up(3) === '-180.000deg');
+  ok('upright is the negative of the carrier mid-move, sampled from the same track', up(2) === '-90.000deg');
+  ok('upright writes `none` rather than leaving a stale rotate when the carrier is square', up(1) === 'none' && up(3) !== 'none');
+  ok('upright takes the bare id and { of } to mean the same thing', up(2) === up(2, { of: 'wheel' }));
+  ok('upright refuses an unknown key by name', (() => {
+    try { up(2, { of: 'wheel', axis: 'z' }); return false; }
+    catch (e) { return /unknown key "axis"/.test(e.message); }
+  })());
+  ok('upright refuses `true`, because a layer cannot guess which ancestor turns', (() => {
+    try { up(2, true); return false; } catch (e) { return /There is no `true`/.test(e.message); }
+  })());
+  ok('upright refuses a carrier that never turns, rather than rendering as its own absence', (() => {
+    try { uprightFrame(null, { style: {} }, { id: 'photo' }, 1, { ...uview, specOf: () => ({ id: 'wheel', motion: [{ t: 0, x: 40 }] }) }, 'wheel'); return false; }
+    catch (e) { return /no `rot` key in a `motion` track/.test(e.message); }
+  })());
+  ok('upright refuses an unknown carrier id by name', (() => {
+    try { up(2, 'nowhere'); return false; } catch (e) { return /no layer with id "nowhere"/.test(e.message); }
+  })());
+  ok('upright refuses a layer holding itself upright', (() => {
+    try { uprightBuild(null, { style: {} }, { id: 'photo' }, 'photo'); return false; }
+    catch (e) { return /cannot hold itself upright/.test(e.message); }
+  })());
+  ok('upright refuses to share the `rotate` longhand with `tilt`', (() => {
+    try { uprightBuild(null, { style: {} }, { id: 'photo', modifiers: [{ tilt: { y: 20 } }, { upright: 'wheel' }] }, 'wheel'); return false; }
+    catch (e) { return /also carries `tilt`/.test(e.message); }
   })());
 }
 

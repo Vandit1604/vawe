@@ -17112,3 +17112,36 @@ which cannot answer reports nothing new rather than everything.
 is invisible from the inside: everything is registered, documented and searchable, and a search only
 finds what you already suspect is there. Zero users is the symptom, and age is the one cheap fact that
 tells an unwanted thing from an unseen one.
+
+## 552. every modifier was invisible to the search tool, because the family exported no registry
+
+**WHAT** `make arsenal Q="matte"` answered `nothing matched "matte"`. So did `plane`, `tilt`, `ghost`
+and every other name in `core/fx/`. All fourteen per-layer modifiers were unreachable from the one tool
+this repo tells an author to reach for before inventing anything, and the family has been shipping since
+`core/fx/index.js` was written.
+
+**ROOT CAUSE** `scripts/author/arsenal.mjs` builds its index by importing every module under `core/`,
+`core/fx/` and `core/layers/` and taking each export whose NAME ends in `_REGISTRY`. That discovery rule
+is deliberate and it is good: it replaced a hand-kept list that had already gone stale. But the modifier
+family predates `defineRegistry` and describes itself with two plain exports, `FX_TYPES` and
+`FX_BLURBS`, so it matched nothing and was skipped in silence. The index is built by a filter, and a
+family that does not fit the filter is not reported missing, it is simply absent.
+
+**WHY IT SURVIVED** Both sides looked complete from where they stood. `arsenal-check.mjs` passes,
+because it asks the opposite question, whether every exported vocabulary is NAMED in `docs/EFFECTS.md`,
+and `FX_BLURBS` is: the catalogue has had all fourteen rows the whole time. `unused.mjs` reports
+`modifier 14/14 (100%)`, because it derives from `FX_TYPES` directly. Documented, catalogued, counted,
+and unfindable. This is #551 one layer down: shipping a capability is not the same as making it
+reachable, and nothing measures reachability except trying to find the thing.
+
+**FIX** `core/fx/index.js` now also exports `FX_REGISTRY`, built by `defineRegistry` from the SAME two
+objects the dispatch reads, so the search cannot advertise a vocabulary the engine does not have. The
+local `pick` keeps its own refusal, because the message an author gets for a misspelled modifier has to
+explain what the `modifiers` ARRAY is, which no shared hint can know.
+
+**WHICH CHECK CATCHES IT NOW** None, and that is stated rather than papered over. A gate asserting
+"every family under core/fx is discoverable" would be one more thing to keep in step with a discovery
+rule that is already derived. The cheap habit is the one that found this: after adding a capability,
+SEARCH for it with the tool an author would use, in the words an author would type. The search was run
+here for `upright`, came back with `dollyZoom`, and that wrong answer is the only reason the other
+thirteen were found.
