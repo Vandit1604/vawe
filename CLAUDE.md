@@ -475,6 +475,29 @@ that rule every time. The catalogue: [`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT
 "the layer resizes", you are writing a gate's minimum rather than a film. Three consecutive films here
 were one rectangle changing size, and each passed everything.
 
+## A DEMO IS A TEN-SECOND FILM ABOUT ONE THING
+
+**27 of the 35 `formats/scene/_*.json` scratch scenes are contact-sheet shaped**: four or more sibling
+layers of one type stepping across x or y. None of the 35 paints a second `bg` window. They are the
+worst-looking work in the repo and they are the ones we end up showing people, because a demo's job is
+"prove the mechanism works", the fastest proof is nine specimens side by side, and no step of the taste
+ladder fires for a throwaway.
+
+A shared theme was never the missing piece: **all 35 already declare one**. The missing piece was the
+archetype, and a blank file has none.
+
+- **`make demo Q="…" [NAME=…] [FX=…] [SUBJECT=…]`** writes the archetype and runs the dev loop on it:
+  a PICTURE full bleed carrying the effect, a line of type captioning it, two grounds, one cut, one
+  camera move, a hand-keyed track.
+- **An effect acts on a SUBJECT, so the subject is pictorial.** A filter over a headline on a flat
+  field has nothing to act on and comes out a blob; the same filter over a real image reads exactly as
+  designed. A demo whose whole subject is a sentence in large type is a slide.
+- **A contact sheet is `make catalog`, and nothing else.** It is honestly a contact sheet.
+- **The ground is chosen because it is good, never because it reveals the effect, and it carries no
+  ruling.** A grid or a rod field reads as a design tool's canvas, which IS the harness look.
+
+The constants that make a row of demos read as a series: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
+
 ## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE
 
 `bg` is required, so the backdrop is always your decision. A static field is a choice you have to
