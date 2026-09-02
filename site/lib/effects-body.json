@@ -23,6 +23,7 @@
   "backgrounds--accent": "{\n  \"bg\": [\n    {\n      \"preset\": \"accent\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "backgrounds--accentplain": "{\n  \"bg\": [\n    {\n      \"preset\": \"accentPlain\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "backgrounds--aurora": "{\n  \"bg\": [\n    {\n      \"preset\": \"aurora\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
+  "backgrounds--black": "{\n  \"bg\": [\n    {\n      \"preset\": \"black\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "backgrounds--blobs": "{\n  \"bg\": [\n    {\n      \"preset\": \"blobs\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "backgrounds--brandglow": "{\n  \"bg\": [\n    {\n      \"preset\": \"brandglow\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "backgrounds--constellation": "{\n  \"bg\": [\n    {\n      \"preset\": \"constellation\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",

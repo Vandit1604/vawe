@@ -67,6 +67,7 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 | `accent` | the brand accent as a radial with rippling dots and a slow spotlight (moves), the loud brand field |
 | `accentPlain` | the brand accent as a clean full-bleed field, grain only. FLAT, for plain sites whose hero is one colour |
 | `aurora` | drifting colour aurora (moves) |
+| `black` | literally #000000, no tint, no wash, no grain. FLAT, when the only light in the film is the subject itself |
 | `blobs` | the airier light wash: smaller, separated pools with white between them (moves). No grid: write `grid: true` on a softwash fx if you want the blueprint rules |
 | `brandglow` | breathing accent glow |
 | `constellation` | drifting connected nodes (moves), telemetry/data feel |
@@ -1042,4 +1043,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 
 ---
-_641 effects across 53 families. Regenerate: `make effects`._
+_642 effects across 53 families. Regenerate: `make effects`._

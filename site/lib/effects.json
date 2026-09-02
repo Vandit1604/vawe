@@ -1,6 +1,6 @@
 {
-  "total": 641,
-  "previewed": 291,
+  "total": 642,
+  "previewed": 292,
   "families": 53,
   "tags": [
     [
@@ -13,7 +13,7 @@
     ],
     [
       "background",
-      21
+      22
     ],
     [
       "blueprint",
@@ -282,7 +282,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 21,
+      "count": 22,
       "undescribed": 0,
       "entries": [
         {
@@ -304,6 +304,13 @@
           "stem": "backgrounds--aurora",
           "desc": "drifting colour aurora (moves)",
           "scene": "/assets/effects/backgrounds--aurora.json",
+          "noPreview": null
+        },
+        {
+          "name": "black",
+          "stem": "backgrounds--black",
+          "desc": "literally #000000, no tint, no wash, no grain. FLAT, when the only light in the film is the subject itself",
+          "scene": "/assets/effects/backgrounds--black.json",
           "noPreview": null
         },
         {

@@ -34,6 +34,9 @@
 //   designspec. The LOOK lock: off-palette colours / non-role fonts vs the theme
 //   copy. The WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
 //   pace, is anything happening, and how often
+//   sound. The SILENCE gate: silent:true with no `_why`, an audio block that produces nothing, and
+//               where the bed came from. It ran for months and nothing read it, because it was not a
+//               step here and stated its findings in a shape finding-codes.mjs could not see.
 //   hero. The one LAYOUT finding that can run pre-render: `thin-hero`, via verify/audit.mjs --hero.
 //               Landscape only, and it costs a browser launch (1.4s measured), so it announces the cost
 //               before it pays it. Portrait films are told the rule has nothing to say about them.
@@ -504,6 +507,7 @@ const LADDER = [
   ['read', 'reports', 'whether a viewer can read each line in the seconds it is on screen'],
   ['pace', 'reports', 'whether anything happens, and how often'],
   ['eye', 'reports', 'where the eye is when a cut lands, and where the next shot sends it'],
+  ['sound', 'reports', 'whether this film\'s silence is a decision somebody wrote down'],
   ['assets', strict ? 'blocks' : 'reports', 'every referenced image, icon, capture and voice file exists'],
   ...(landscape ? [['hero', 'reports', 'whether the hero line is set at video scale (launches a browser)']] : []),
   ...(sbPath ? [['treatment', 'reports', 'whether the written rationale still describes this plan']] : []),
@@ -758,6 +762,27 @@ styleGate('pace', 'pace (is anything happening, and how often)', 'scripts/gates/
 // a layer can win by being alone. The first false positive found was a corner watermark scoring 43%
 // across an 0.8s hole, where the real defect is dead air and `beats` owns it.
 styleGate('eye', 'eye-trace (where the viewer is looking at each cut)', 'scripts/gates/eye-trace.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
+// SOUND. Is the silence a decision, or an omission?
+//
+// WHY IT WAS NOT HERE. It was written, it worked, and nothing ran it. `make audio-check` existed and
+// no step of this ladder called it, so the one gate that asks about a whole structural register was
+// reachable only by a person who already knew to ask. That is the same shape as a field written and
+// never read, which is the failure this repo logs more than any other.
+//
+// SEVERITY, ARGUED, AND THE ARGUMENT IS THE CENSUS. Of the 148 gate-visible scenes, 106 declare
+// `audio.silent:true` and 25 of those say why; 17 name no `audio` block at all and 1 has a block that
+// produces nothing. So blocking on day one fails 99 films, two in three, and CLAUDE.md already names
+// what happens next: everyone adds a waiver and the rule is repealed with nobody writing it down.
+// docs/MISTAKES.md #25 and #159 are that bill, paid twice.
+//
+// It is not ratcheted either, and that is the narrower call. A ratchet grandfathers the past and blocks
+// new work, which is right for `no-storyboard`, where the debt is a missing artefact. Here the rule
+// asks for a STATED DECISION rather than a particular answer, and the honest cheap answer to it,
+// `"silent": true, "_why": "…"`, is one line an author writes while reading the finding. A rule that
+// costs one line does not need a manifest of 99 rows to be adoptable; it needs to be printed where
+// somebody will see it, which is what this step is. Promote it when the census says fewer than a fifth
+// of gate-visible scenes are silent without a reason: `node scripts/gates/audio-check.mjs --all`.
+styleGate('sound', 'sound gate (is the silence a decision)', 'scripts/gates/audio-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4d. assets. The READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('assets', 'asset preflight (referenced files exist)', 'scripts/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
 
