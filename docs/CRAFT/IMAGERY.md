@@ -1,6 +1,6 @@
 ---
-when: choosing image vs gradient, treating a photo, icons
-answers: the visual ladder · treatment→intent · licensing · icon choice
+when: choosing image vs gradient, treating a photo, icons, or fetching a brand mark
+answers: the visual ladder · where a real asset comes from · treatment→intent · licensing · icon choice
 group: look
 ---
 
@@ -8,6 +8,27 @@ group: look
 
 The highest-taste image source is **captured real product UI** (`make capture`). Everything below is for when you
 need another visual. An untreated stock photo is worse than none.
+
+## 0. Always prefer a real image. Where one comes from, in order
+
+1. **Captured real UI**: `make capture` (a live component) is the highest-taste source.
+2. **Free/openly-licensed images**: brand logos, flags `flagcdn.com/<iso2>.svg` → `assets/flags/`;
+   CC0/CC-BY photos via `make photos` (attribution auto-recorded; CC-BY needs visible credit).
+3. **Drawn icons**: `svgIcon(name)`. 4. **Generated cards**: `make assets`. 5. **Emoji**: last resort.
+
+**Use `make assets` for logos, and if you curl one by hand, use `-f`.** This instruction used to read
+``curl https://cdn.simpleicons.org/<slug>/<hex>`` with no failure flag, and `curl -o` writes the
+response body whatever the status is. Simple Icons has been REMOVING marks on trademark request, so
+that command now 404s for real brands and leaves a **zero-byte .svg** on disk. The file then exists,
+passes every path check, and renders as an invisible hole. Two shipped assets were in exactly that
+state (`assets/icons/amazon.svg`, one of them tracked), breaking three scenes, and nothing said so
+until `core/boot.js` started refusing an asset that never loaded. `scripts/media/assets.mjs`
+`tryFetch` already gets this right: it requires 200, a minimum size AND a literal `<svg` before it
+writes, which is why `make assets` is the answer and a bare curl is not:
+
+```bash
+curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>
+```
 
 ## 1. Use the lightest visual that carries the meaning
 Ladder, lightest first. Go heavier only if it adds meaning, not decoration:
@@ -43,11 +64,12 @@ only when the image genuinely needs it. An over-graded image is as off as a raw 
 ## 3. Licensing, what's safe vs what triggers a claim
 - **Safe:** CC0 / public-domain photos (`make photos` records attribution; CC-BY needs a visible credit), your own
   assets, and **brand logos used nominatively** as trademarks (`cdn.simpleicons.org/<slug>/<hex>`).
-- **NEVER embed** (triggers Content-ID / copyright on a published video): movie/TV stills, album art, film posters,
-  news/press photos, paid stock without a license, copyrighted music. **Capture the real product UI instead.**
+- **Never embed copyrighted material** into a published video (it triggers Content ID claims): movie/TV
+  posters, album covers, film stills, news photos, paid stock without a license, copyrighted music.
+  **Capture the real product UI instead.**
 
 ## 4. Icons
-- **Brand marks → simple-icons** (`curl https://cdn.simpleicons.org/<slug>/<hex>` → `assets/icons/`).
+- **Brand marks → simple-icons**, fetched with `make assets` (or the `curl -f` form in §0) → `assets/icons/`.
   Whenever a company/product/tool is *named*, show its mark. Text-only lists of named things are a missed layer.
 - **UI / action icons → one line set** (Lucide/Feather, in `assets/icons/ui/`, MIT). Draw with `svgIcon(name)`.
 - **Never mix icon families**: one stroke set, one weight; match stroke weight to the text weight next to it.

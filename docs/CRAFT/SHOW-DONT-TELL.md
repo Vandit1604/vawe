@@ -10,8 +10,10 @@ codes: number-not-count
 A film can be well written, locked to the palette, cut in time and directed hard, and still show the
 viewer nothing. Every layer that carries information is a word. The viewer reads it, believes it or
 does not, and moves on. Measured across this library when the gate landed: **52 of 93 shipped scenes
-carried no large pictorial layer at all.** That was not a house style anyone chose. It is what you get
-when nobody is asked the question.
+carried no large pictorial layer at all.** Re-measured over the 148 gate-visible scenes: **64 carry
+zero pictorial layers of any size**, and the median film gives **5% of its layers to picture.** That
+was not a house style anyone chose. It is what you get when nobody is asked the question. It is debt,
+not a pattern to copy.
 
 **There is no gate for this. There used to be, and it was deleted in 2026-08 because it lied.**
 `visual-vocabulary` measured a layer's area to tell a mark from a picture, and its size helper squared
@@ -99,7 +101,8 @@ The deleted gate asked exactly three, and they are still the right three. Ask th
 3. **Which beats hold nothing but type?** Name them. Then ask each what it could show instead.
 
 **And the question none of it settles: does the picture EXPLAIN anything?** This is why the old gate
-was never sufficient even when it worked. A big decorative photograph satisfied all three above and
+was never sufficient even when it worked: even at its best it could prove a picture was large and never
+that it explained anything. A big decorative photograph satisfied all three above and
 deserved to fail a human. A bar chart of a number nobody cares about satisfied them too. That
 judgement is yours, and it is what `make judge` and the fidelity critic in
 [SUBAGENTS.md](SUBAGENTS.md) are for.
