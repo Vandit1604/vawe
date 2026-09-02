@@ -1,6 +1,6 @@
 ---
 when: you are writing an `html` layer by hand, or a fragment renders as a dead still and nothing says why
-answers: "what a layer actually wraps · the four ways a fragment moves · the three things the engine refuses and what to use instead · the traps that cost a render each"
+answers: "what a layer actually wraps · the four ways a fragment moves · the three things the engine refuses and what to use instead · the traps that cost a render each · the defaults that make hand-written markup read as AI slop, and which of the two gates sees what"
 group: look
 ---
 
@@ -52,8 +52,10 @@ This is the most flexible and the most hand-rolled. Use it for a shape whose geo
 ### 2. `parts`, for anything with children
 
 **The most useful feature almost nobody uses.** 8 of 164 scenes reach for it, against 62 that carry an
-`html` layer. Two agents building the same figure both concluded "an html layer leaves as one card" and
-reported it as a fact about the medium. It was a feature they had not found.
+`html` layer, and when the paired exit was added the count was 0 of 13 block files and 6 of 161 scenes.
+Two agents building the same figure both concluded "an html layer leaves as one card" and
+reported it as a fact about the medium. It was a feature they had not found (`core/parts.js`,
+[`../MISTAKES.md`](../MISTAKES.md) #410).
 
 `parts` is a CSS selector into your own markup. Every matched element gets an engine-driven, **seeked**
 entrance with a stagger, and `out: true` gives it the paired exit:
@@ -94,7 +96,7 @@ Each of these throws at boot, by name. None of them is arbitrary.
 
 | refused | why | instead |
 |---|---|---|
-| `animation` / `transition` in your CSS | they run on a clock the renderer does not own, so a seeked frame would be wrong | `--t` in a `calc()`, `parts`, or a motion track |
+| `animation` / `transition` in your CSS (`core/validate.mjs` refuses both by name, engine wide) | they run on a clock the renderer does not own, so a seeked frame would be wrong | `--t` in a `calc()`, `parts`, or a motion track |
 | `opacity` or `filter` in `css` | the engine writes both every frame (the enter/exit envelope, and the velocity blur) | the layer's own `opacity` and `filter` props |
 | a CSS value this Chrome drops | an invalid declaration is dropped silently, the rest of the rule survives, and the frame renders looking almost right | see the traps below |
 
@@ -123,6 +125,31 @@ ramp's bottom stops land where the alpha has already gone.
 `.chip` in one fragment cannot reach `.chip` in another. Name things for readability, not to avoid
 collisions that cannot happen.
 
+## Beat the AI slop
+
+Hand-authored HTML regresses to the mean: centered text, Inter, blue/purple gradient, equal card grid.
+Before writing any by hand, **load the relevant [`docs/CRAFT/`](README.md) guide** (how to choose
+a face / palette / layout / image), then the **`taste-skill`** (state the Design Read + set VARIANCE/MOTION/
+DENSITY dials, obey Anti-Default Discipline), then **`impeccable`** for craft. Skills are vendored in `.claude/skills/`.
+Defaults to reach past: **asymmetry over centered · scale contrast (one huge hero + tiny caption) · a
+committed non-generic face** (the real brand font when reflecting a brand; never Inter/Space Grotesk for
+anything generic). Then gate it two ways, and know which one sees what.
+**`make preview HTML=<frag>`** runs the vendored impeccable detector over the FRAGMENT, in a real browser
+with real computed styles. That is where it works, and it is the only place it is still wired.
+**`make designspec-check D=<file>`** runs OUR rule table (`scripts/lib/designspec-rules.mjs`) over the
+scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
+
+<!-- doc-refs-allow: make slop · this line records the target's retirement -->
+> `make slop` was RETIRED in 2026-08 (`docs/MISTAKES.md` #326). It ran the 41 borrowed rules over a DOM
+> dump that inlined three CSS properties (`font-family`, `color`, `background`) so every rule about a
+> border, a shadow, a glow or spacing had no evidence and returned nothing. Its silence read as a pass on
+> the whole library. The two counts in this paragraph are different things, and reading them as one is
+> why they look contradictory: the retired gate RAN **41** rules, and **38** were then examined
+> one by one for the fork (`docs/MISTAKES.md` #326). Of those 38, **6 were worth keeping**: most were
+> already measured better here, four had no subject in our artifacts at all, and five would have fired on
+> the engine's OWN features (the `glow` layer, the card recipe at `core/layers/doc.js:25`, the `eyebrow`
+> blueprint prop, the blinds-wipe mask in `core/cuts.js:130` that `lib-test` asserts).
+
 ## Preview before you render
 
 ```bash
@@ -137,8 +164,8 @@ right? Then render.
 
 - **`formats/scene/_vawe-teaser-word.html`**: an entire six-second film in one fragment: a plain state,
   a thermal ramp that fades in and out, and a goo morph between two words. Carries the four After
-  Effects steps of the effect in its own comments, which is the shape to copy: the recipe lives beside
-  the implementation, so the next author inherits the name rather than the guess.
+  Effects steps of the effect and their SVG equivalents in its own comments, which is the shape to copy:
+  the recipe lives beside the implementation, so the next author inherits the name rather than the guess.
 - **`core/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
   says in its comments why it does that rather than referencing one on the page.
 

@@ -8,12 +8,15 @@ description: "A reference image or clip shows a look you cannot immediately cons
 An effect a designer has made before has a name. The name leads to a recipe. The recipe has a step you
 would never have guessed, and that step is the reason your approximation failed.
 
-This skill exists because of a measured failure in this repo. A reference frame showed white text with
-an orange body and a blue rim. It was built four times by stacking coloured, offset, blurred copies of
-the same text, and rejected four times, because a stack of copies cannot make a continuous transition
-between three colours. One search returned the answer: the effect is a **thermal blur**, its recipe is
-white text, Fast Box Blur, **Colorama**, glow, and the colour comes from a **gradient map on
-luminance**, not from paint. Four renders bought nothing. The name bought everything.
+This skill exists because of a measured failure in this repo, `docs/MISTAKES.md` #505. A reference frame
+showed white text with an orange body and a blue rim. It was built four times by stacking coloured,
+offset, blurred copies of the same text, and rejected four times, because a stack of copies cannot make
+a continuous transition between three colours. One search returned the answer: the effect is a **thermal
+blur**, its recipe is white text, Fast Box Blur, **Colorama**, glow, and the colour comes from a
+**gradient map on luminance**, not from paint, so the blur's own grey falloff is remapped, bright to
+white, mid to orange, dim to blue. That one fact also explained every symptom the stack could not
+produce: the continuous transition, the organic edge, and the letters being eaten, all of which are the
+ramp acting on the glyph's own edge. Four renders bought nothing. The name bought everything.
 
 ## When this fires
 
