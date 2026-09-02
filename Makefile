@@ -778,6 +778,15 @@ capture:
 validate:
 	node core/validate.mjs $(D)
 
+# make schema AT='layers[].motion[]', what may I WRITE at this path. The sibling of `make arsenal`:
+# arsenal answers "what can the engine DO" from the registries, this answers "what may I write HERE"
+# from formats/scene/schema.json, which already carries a written label on every field and served it to
+# nobody. Built after an author guessed the two bezier handles on a keyframe were `in`/`out` (they are
+# `easeIn`/`easeOut`) and shipped a refusal that rejected three correct films. No AT prints the
+# top-level shape; a partial or wrong path names what IS legal there, the way a failed registry pick does.
+schema: ## what may I write at a path in a scene JSON (AT='layers[].motion[]'); no AT prints the top-level shape
+	@node scripts/author/schema-at.mjs $(if $(AT),'$(AT)')
+
 # make schema-check: assert every layer prop the engine (scene.html) reads is defined in schema.json
 # (catches drift like a new primitive that shipped without a schema entry). Exits 1 on drift.
 schema-check:

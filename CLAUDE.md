@@ -360,6 +360,13 @@ prints the snippet with the key it goes in (`make effects` regenerates the full 
 of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 148 gate-visible scenes**, and 12 of its
 19 beats have never been used once.
 
+**`make schema AT="layers[].motion[]"`** answers the other half: not what the engine can DO, but what you
+may WRITE at one path, with every field's type and its written label, read live from
+`formats/scene/schema.json`. Ask it instead of guessing a field name. It exists because a guess
+(`in`/`out` for a keyframe's two bezier handles, which are `easeIn`/`easeOut`) shipped a refusal that
+rejected three correct films, while the schema had the answer all along and served it to nobody. No
+`AT` prints the top-level shape; a partial path (`AT=motion`) is found rather than refused.
+
 **`make track SHAPE=pan|blast|drift|enter|exit`** emits a hand-keyed `motion` track from a shape
 measured off the two reference films. Use it instead of naming a preset. See the next section for why.
 
