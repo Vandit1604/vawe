@@ -46,28 +46,51 @@ export const FALLOFFS = {
   step: () => 1,
 };
 
+// EVERY BLURB SAYS WHAT THE FAMILY IS FOR, not just how its own curve bends, because a blurb is the
+// only text `make arsenal` searches (scripts/author/arsenal.mjs ranks name + kind + blurb, nothing
+// else). These four described a CURVE and never said "elements react to a moving point by distance",
+// so that exact question returned NOTHING HERE CLEARLY MATCHES over the family that answers it, and
+// offered a three.js point cloud instead. A capability nobody can find is a capability nobody has.
 export const FALLOFF_BLURBS = {
-  linear: 'influence drops straight from 1 at the point to 0 at the radius, the plain ramp',
-  smooth: 'a smoothstep, flat at both ends, so a clone eases into the field and out of it. The default',
-  sphere: 'a dome: full influence held near the point, then a cliff. Reads as an object passing beneath',
-  step: 'no falloff at all, full influence inside the radius and none outside. A hard-edged pass',
+  linear: 'proximity: each element reacts by its DISTANCE from the moving point, straight from full at the point to nothing at the radius. The plain ramp',
+  smooth: 'proximity by distance from a moving point, on a smoothstep: flat at both ends, so an element eases into the point\'s reach and out of it. The default',
+  sphere: 'proximity by distance, as a dome: elements near the moving point react fully, then a cliff. Reads as an object passing beneath them',
+  step: 'no falloff: an element reacts fully inside the moving point\'s radius and not at all outside. A hard-edged pass, hover-like',
 };
 
-export const FALLOFF_REGISTRY = defineRegistry('effector falloff', FALLOFFS, { slot: 'effector.falloff', blurbs: FALLOFF_BLURBS });
+export const FALLOFF_REGISTRY = defineRegistry('effector falloff', FALLOFFS, { slot: 'effector.falloff', blurbs: FALLOFF_BLURBS,
+  catalog: {
+    title: 'Effector falloffs',
+    tag: 'per-layer',
+    intro: 'A FALLOFF FROM A TRAVELLING POINT, driving the layer\'s own children. `effector: { select, path, radius, falloff, drives, sticky, overshoot }` on any layer with children. A stagger can only express the order the elements sit in; this expresses DISTANCE, in two dimensions, from a point that moves, so one rig gives a wave, a ripple out of a centre and a stroke painted across a grid, and only the point\'s path changes. `path` is a motion-key list ({t,x,y,ease}) in the layer\'s own coordinates, so it is keyed exactly like a `motion` track. NO KEYFRAME LANDS ON ANY CLONE. `sticky` (seconds) is what makes it a trail rather than a moving highlight: a clone HOLDS what the pass did to it and releases over that delay, and 1s is the value the technique is built on. These names are the shape of the falloff.',
+    usage: (n, { j }) => j({ type: 'html', html: '<div data-clone>…</div>×64', x: 160, y: 140, w: 1600, effector: { select: '[data-clone]', falloff: n, radius: 320, sticky: 1, drives: { scale: 0.75 }, path: [{ t: 0, x: -220, y: 300 }, { t: 2.2, x: 1820, y: 300 }] } }),
+    noPreview: "a falloff is the SHAPE of one point's reach, and it is invisible without the clones it acts on. Turn it on the playground's `effector` card, where the same grid is redrawn as you change it.",
+  },
+});
 export const FALLOFF_NAMES = FALLOFF_REGISTRY.names;
 
 // The properties an effector may drive, and what an amount of 1 means for each. Declared rather than
 // inferred so a misspelt drive is refused by name instead of silently doing nothing, which is the
 // failure shape this repo logs most.
 export const DRIVES = {
-  scale: 'added to 1. `scale: 0.6` swells a fully affected clone to 1.6',
-  rotate: 'degrees. `rotate: 25` turns a fully affected clone by 25',
+  scale: 'what an element\'s proximity to the moving point is SPENT on: added to 1, so `scale: 0.6` swells a fully affected clone to 1.6',
+  rotate: 'proximity spent on rotation, in degrees. `rotate: 25` turns a fully affected clone by 25',
   x: 'pixels, a sideways offset that does not depend on where the point is',
   y: 'pixels, the same on the other axis',
   push: 'pixels ALONG the vector from the point to the clone. Positive shoves clones away, negative pulls them in. The only drive that reads the direction as well as the distance',
   opacity: 'added to 1. `opacity: -0.7` dims a fully affected clone to 0.3',
 };
-export const DRIVE_REGISTRY = defineRegistry('effector drive', DRIVES, { slot: 'effector.drives{}' });   // `{}`: the name is a KEY in that map, its value the amount
+// `slot` carries `{}`: the name is a KEY in that map, its value the amount.
+// The entries ARE the descriptions, so they are the blurbs too: one map, one owner.
+export const DRIVE_REGISTRY = defineRegistry('effector drive', DRIVES, { slot: 'effector.drives{}', blurbs: DRIVES,
+  catalog: {
+    title: 'Effector drives',
+    tag: 'per-layer',
+    intro: 'What an effector\'s influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, where the number is the amount at full influence. `push` is the one a stagger cannot imitate, because it reads the direction from the point to the clone as well as the distance.',
+    usage: (n, { j }) => j({ type: 'html', html: '<div data-clone>…</div>×64', x: 160, y: 140, w: 1600, effector: { select: '[data-clone]', drives: { [n]: 0.6 }, radius: 320, sticky: 1, path: [{ t: 0, x: -220, y: 300 }, { t: 2.2, x: 1820, y: 300 }] } }),
+    noPreview: "a drive is what the influence is spent on, so it shows nothing without a falloff and a field of clones. The playground's `effector` card carries all six on one grid.",
+  },
+});
 export const DRIVE_NAMES = DRIVE_REGISTRY.names;
 
 /**

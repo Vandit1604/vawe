@@ -83,7 +83,18 @@ export const FILTER_BLURBS = {
 // one of them documented right above, answered "not found" to an author searching for the thing they
 // could not name. Declaring the registry is the whole fix: nothing here is restated, and a preset
 // added to the table above is searchable the moment it has a blurb.
-export const FILTER_REGISTRY = defineRegistry('filter', FILTER_PRESETS, { slot: 'filter', blurbs: FILTER_BLURBS });
+export const FILTER_REGISTRY = defineRegistry('filter', FILTER_PRESETS, { slot: 'filter', blurbs: FILTER_BLURBS,
+  catalog: {
+    title: 'Filter presets',
+    tag: 'static',
+    intro: '`filter:"<name>"`. A named colour grade. Composite LOOKS are the richer set above; these are the primitives.',
+    usage: (n, { j }) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: n }),
+    // MOSTLY TRUE AND NOT ENTIRELY, which is worth saying rather than leaving the blanket claim: most of
+    // this family regrades a picture, but `thermalBlur` is built for TYPE and needs no photograph at all.
+    // Its card is in the playground (`core/generators.js`), where its radius dial is on screen.
+    noPreview: 'most of these regrade a photographic source, and the index ships no photographs. The exception is `thermalBlur`, which is a type effect: its live card with a radius dial is in the playground.',
+  },
+});
 export const FILTER_NAMES = FILTER_REGISTRY.names;
 
 // chromaGlow: the reference "chromatic glow" is a soft neon BLOOM in the layer's own shape, a clean

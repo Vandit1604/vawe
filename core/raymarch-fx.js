@@ -287,4 +287,12 @@ export function createRaymarchLayer(w = 1080, h = 1080) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a raymarch" when someone writes it somewhere else. core/registry.js.
-export const RAYMARCH_REGISTRY = defineRegistry('raymarch', Object.fromEntries(RAYMARCH_FX.map((n) => [n, n])), { slot: 'raymarch' });
+export const RAYMARCH_REGISTRY = defineRegistry('raymarch', Object.fromEntries(RAYMARCH_FX.map((n) => [n, n])), { slot: 'raymarch', blurbs: RAYMARCH_SURFACES,
+  catalog: {
+    title: 'Raymarched surfaces',
+    tag: 'layer',
+    intro: '`{ "type":"raymarch", "raymarch":"<name>" }`. Implicit surfaces from a distance field. A subject you place, not a field behind everything.',
+    usage: (n, { full }) => full({ type: 'raymarch', raymarch: n }),
+    preview: (n, { base, OVER }) => base({ layers: [{ type: 'raymarch', raymarch: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
+  },
+});

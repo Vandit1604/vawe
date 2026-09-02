@@ -33,5 +33,14 @@ export function svgIcon(name, { size = 24, color = 'currentColor', stroke = 1.9,
 
 // Registered so an unknown icon is refused, and so a name that exists in ANOTHER vocabulary is
 // diagnosed rather than silently drawn as nothing.
-export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()' });
+export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()',
+  catalog: {
+    title: 'Drawn icons',
+    tag: 'asset',
+    intro: '`svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.',
+    skip: 'the name is the drawing',
+    usage: (n) => `svgIcon(${JSON.stringify(n)})`,
+    noPreview: 'the name is the drawing. Every one of them is on the page already, at /blocks.',
+  },
+});
 export const ICON_NAMES = ICON_REGISTRY.names;

@@ -658,4 +658,12 @@ export function createAmbientLayer(w = 1920, h = 1080) {
 // can say "that is a ambient shader" when someone writes it somewhere else. core/registry.js.
 // The blurbs ride along, so `make arsenal` describes a field instead of only naming it: AMBIENT_SHADERS
 // is already the one owner of those sentences and the registry was passing none of them.
-export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader', blurbs: AMBIENT_SHADERS });
+export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader', blurbs: AMBIENT_SHADERS,
+  catalog: {
+    title: 'Ambient shader fields',
+    tag: 'per-frame',
+    intro: '`{ "type":"shader", "shader":"<name>" }`. A full-frame generative field, pure in t, palette-tintable via `colors`. Sits behind content; no sampler, so it cannot read what is under it.',
+    usage: (n, { full }) => full({ type: 'shader', shader: n }),
+    preview: (n, { base, OVER }) => base({ layers: [{ type: 'shader', shader: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
+  },
+});

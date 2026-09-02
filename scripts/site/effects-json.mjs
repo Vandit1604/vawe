@@ -20,7 +20,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sections, d } from './effects-catalog.mjs';
+import { sections, d, USAGE_KIT } from './effects-catalog.mjs';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
 import { ASPECTS } from '../../core/safe.js';
 
@@ -35,82 +35,35 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g
 // has no business editing them, so the dash is normalised on the way out. The middle dot is the
 // sanctioned replacement and it is what the rest of the site already uses.
 const prose = (s) => String(s).replace(/\s*[: –]\s*/g, ' · ');
-const j = (o) => JSON.stringify(o, null, 2);
+const { j } = USAGE_KIT;
 
 // ── the JSON an author writes, per family ───────────────────────────────────────────────────────
 // Each returns the snippet shown in the drawer. The shape comes from that family's own intro in
 // effects-catalog.mjs (or, where the intro names no form, from formats/scene/schema.json).
-const text = (extra) => j({ type: 'text', text: 'Deterministic by design', x: 160, y: 420, w: 1600, size: 120, weight: 800, ...extra });
-const full = (extra) => j({ x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6, ...extra });
+//
+// THIS TABLE IS NOW THE MINORITY CASE. A registry carries its own `usage` at the definition site
+// (core/registry.js), and effects-catalog hands it the same three helpers this table uses. What is
+// left here is the 16 families with no registry behind them, so there is no definition site to write
+// on. A key here that matches no section id is DEAD: the id is a slug of the TITLE, so renaming a
+// section used to orphan its usage and its preview in silence, and the loop below now says so.
+const { text, full } = USAGE_KIT;
 
 const USAGE = {
-  // PRE-EXISTING GAP, closed while adding the family above: `make effects` was already red on this
-  // one, so the catalogue could not regenerate at all. A modifier is an array entry on a layer.
-  // A glow preset is a whole LAYER, not a prop on somebody else's, so its usage shows the layer.
-  'glow-presets': (n) => j({ type: 'glow', preset: n, x: 460, y: 240, w: 1000, h: 600, intensity: 0.4,
-    start: 0, duration: 6 }),
-  'per-layer-modifiers': (n) => text({ anim: 'rise', modifiers: [{ [n]: true }] }),
   // A motion voice is placed by the DERIVATION, not usually by hand, but it can be named directly and
   // an author reading the catalogue needs to see how.
   'motion-voices-tactile-sound': (n) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
-  'kinetic-text-presets': (n) => text({ split: 'word', preset: n, each: 0.5, stagger: 0.05 }),
-  'stagger-order-from': (n) => text({ split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.6, from: n } }),
-  'scramble-charsets-chars': (n) => text({ split: 'word', preset: 'decode', each: 0.9, presetOpts: { chars: n, rate: 48, revealDelay: 0.25 } }),
-  // THREE FAMILIES ADDED WITHOUT THEIR ROWS, and `make effects` was red for all three at once, so the
-  // catalogue could not regenerate at all. A family is not shipped until it can be looked up: this
-  // table is the only place that says how to WRITE one.
-  // An interpolation mode is not an easing and does not go in `ease`'s usual slot mentally, so the
-  // form matters: it is the key on a motion KEY, and it governs the segment arriving at that key.
-  'interpolation-modes-not-easings': (n) => text({ anim: 'none', motion: [{ t: 0, x: -300 }, { t: 0.8, x: 0, ease: n }, { t: 1.6, x: 300, ease: n }] }),
-  // A HANDLE is one SIDE of one key, and the slot says which side, so the form has to show both
-  // sides of a segment at once or the name reads as a whole-segment easing, which is the thing it
-  // is not. Written as a name here; the long form is { influence, speed }.
-  'keyframe-handles-the-graph-editor': (n) => text({ anim: 'none', motion: [{ t: 0, x: -300, easeOut: n }, { t: 0.9, x: 300, easeIn: n }] }),
-  // A depth is a NAMED PLANE, so it is one word on the layer and the camera does the rest.
-  'depths-parallax-planes': (n) => text({ depth: n }),
-  // An adjustment layer is a LAYER, not a prop, and `track` is the whole contract: everything with a
-  // lower track is graded, everything above it is untouched.
-  'adjustment-layers-grade-what-is-beneath': (n) => j({ layers: [{ type: 'adjust', kind: n, amount: 18, track: 6, start: 1.2, duration: 1.5 }] }),
-  'enter-exit-anims': (n) => text({ anim: n, enterDur: 0.6, out: 'defocus' }),
-  'idles-ambient-hold-motion': (n) => text({ idle: n }),
-  'gsap-named-effects': (n) => text({ anim: 'none', fx: n }),
-  'gsap-exits': (n) => text({ anim: 'rise', fxOut: n, exitDur: 0.6 }),
-  'scene-cuts': (n) => j({ cuts: [{ t: 2.4, style: n }] }),
-  // The timing rides ON a cut, so the usage shows both: a style with a speed curve chosen for it.
-  'cut-timings': (n) => j({ cuts: [{ t: 2.4, style: 'push', timing: n }] }),
-  'shader-stings': (n) => j({ stings: [{ t: 2.4, fx: n }] }),
-  'spectacle-devices': (n) => j({ spectacle: { at: 2.4, of: 'hero', device: n, why: 'the one loud moment, and every other dial drops to 55%' } }),
-  'seams-2-scene-blends': (n) => j({ seams: [{ t: 2.2, fx: n, dur: 0.8 }] }),
   'composite-looks-static': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: `${n}:0.9` }),
-  'canvas-image-passes-baked': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, canvasFx: n }),
-  'generative-paint-fx-per-frame': (n) => full({ type: 'paint', paint: n }),
-  backgrounds: (n) => j({ bg: [{ preset: n, from: 0, to: 6 }] }),
   // Two pseudo-names ("beam:border (border-beam)"), so the form is picked off the mode in the name.
   'per-frame-accent-layers': (n) => j({ type: 'beam', mode: n.includes('shine') ? 'shine' : 'border', x: 300, y: 430, w: 1320, h: 220, radius: 22, thickness: 3, speed: 0.5, start: 0, duration: 6 }),
   'vector-layer-logos-icons': (n) => (n.includes('morph')
     ? j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', morph: { to: 'M60 8 L112 56 L60 104 L8 56 Z', spin: 6.28 }, x: 840, y: 420, w: 240 })
     : j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', stroke: '#fff', strokeWidth: 6, x: 840, y: 420, w: 240, start: 0, duration: 6 })),
   'beat-blueprints': (n) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
-  'camera-dials': () => j({ cameraBlur: true }),
-  'camera-moves': (n) => j({ cameraMove: { move: n } }),
   'compositions-bespoke-per-beat-timeline': (n) => j({ type: 'composition', comp: n, props: {}, start: 0.2, dur: 4.4 }),
   'layer-types': (n) => j({ type: n }),
-  'three-js-scenes-real-geometry': (n) => full({ type: 'three', three: n }),
-  'raymarched-surfaces': (n) => full({ type: 'raymarch', raymarch: n }),
   'layer-as-texture-resample': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, resample: { fx: n, amount: [0, 1] } }),
-  'ambient-shader-fields': (n) => full({ type: 'shader', shader: n }),
-  // `modifiers`, NOT `fx`: core/fx/index.js says so in its own header, and `fx` is the GSAP slot.
-  'per-layer-fx': (n) => text({ modifiers: [{ type: n }] }),
-  'part-entrances': (n) => j({ type: 'html', html: '<svg>…</svg>', x: 160, y: 200, w: 1600, parts: [{ select: 'rect', anim: n, each: 0.4, stagger: 0.06 }] }),
-  'effector-falloffs': (n) => j({ type: 'html', html: '<div data-clone>…</div>×64', x: 160, y: 140, w: 1600, effector: { select: '[data-clone]', falloff: n, radius: 320, sticky: 1, drives: { scale: 0.75 }, path: [{ t: 0, x: -220, y: 300 }, { t: 2.2, x: 1820, y: 300 }] } }),
-  'effector-drives': (n) => j({ type: 'html', html: '<div data-clone>…</div>×64', x: 160, y: 140, w: 1600, effector: { select: '[data-clone]', drives: { [n]: 0.6 }, radius: 320, sticky: 1, path: [{ t: 0, x: -220, y: 300 }, { t: 2.2, x: 1820, y: 300 }] } }),
   'blend-modes': (n) => text({ mixBlend: n }),
-  'filter-presets': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: n }),
   easings: (n) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
-  // A remap is one word on the layer whose clock it warps, and the motion track is there to say what
-  // the clock is FOR: the same three keys read as a whip, a hold, a freeze or a rewind depending on
-  // this one field, which is the whole argument for it being a clock and not a fourth easing.
-  'time-remaps-the-layer-s-own-clock': (n) => j({ timeRemap: n, motion: [{ t: 0, x: -420 }, { t: 4, x: 420, ease: 'linear' }] }),
   // One slot each, and which slot depends on which registry the word came from.
   'plain-words-feel-duration-camera': (n) => (n in FEEL ? j({ ease: n })
     : n in DURATION ? j({ enterDur: n })
@@ -124,7 +77,6 @@ const USAGE = {
     captionStyle: n,
     captions: [{ t0: 0.3, t1: 4.6, text: 'Ship the payoff last', pin: 'center', size: 96 }],
   }),
-  'drawn-icons': (n) => `svgIcon(${JSON.stringify(n)})`,
   'ransom-faces': (n) => text({ split: 'char', ransom: { faces: [n] } }),
   'output-targets': (n) => (n in ASPECTS ? j({ aspect: n }) : j({ destination: n })),
   'generators-the-playground': (n) => `// turn the dials at /playground?gen=${n}, then paste the markup:\n${j({ bg: [{ html: '…', from: 0, to: 6 }] })}`,
@@ -144,29 +96,6 @@ const TWO = (t) => [
 const OVER = { ...HERO, text: '', size: 96, y: 860, start: 0.4, duration: 5.2, anim: 'fade' };
 
 const PREVIEW = {
-  // A glow is light, so it needs something to light and a ground dark enough to read against. The
-  // headline sits UNDER the glow in the layer order, which is what makes the preset visible as an
-  // effect on a subject rather than as a coloured rectangle on its own.
-  'glow-presets': (n) => base({ bg: [{ preset: 'ink', from: 0, to: 6 }],
-    layers: [{ ...HERO, y: 470 }, { type: 'glow', preset: n, x: 360, y: 240, w: 1200, h: 620, intensity: 0.45, start: 0, duration: 6 }] }),
-  'kinetic-text-presets': (n) => base({ layers: [{ ...HERO, split: 'word', preset: n, each: 0.6, stagger: 0.06 }] }),
-  'stagger-order-from': (n) => base({ layers: [{ ...HERO, split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.9, from: n } }] }),
-  'scramble-charsets-chars': (n) => base({ layers: [{ ...HERO, split: 'word', preset: 'decode', each: 1.2, stagger: 0.12, presetOpts: { chars: n, revealDelay: 0.25 } }] }),
-  'enter-exit-anims': (n) => base({ layers: [{ ...HERO, anim: n, enterDur: 0.8, out: n, exitDur: 0.8, start: 0.4, duration: 5 }] }),
-  'idles-ambient-hold-motion': (n) => base({ layers: [{ ...HERO, idle: n }] }),
-  'gsap-named-effects': (n) => base({ layers: [{ ...HERO, anim: 'none', fx: n }] }),
-  'gsap-exits': (n) => base({ layers: [{ ...HERO, anim: 'rise', fxOut: n, exitDur: 1, start: 0.4, duration: 4.2 }] }),
-  'scene-cuts': (n) => base({ layers: TWO(2.4), cuts: [{ t: 2.4, style: n }] }),
-  // One style throughout, so the only thing moving between these clips is the acceleration. `push`
-  // travels far enough that the curve is legible, which `fade` would not be.
-  'cut-timings': (n) => base({ layers: TWO(2.4), cuts: [{ t: 2.4, style: 'push', timing: n }] }),
-  'shader-stings': (n) => base({ layers: TWO(2.4), stings: [{ t: 2.4, fx: n }] }),
-  'seams-2-scene-blends': (n) => base({ layers: TWO(2.6), seams: [{ t: 2.2, fx: n, dur: 0.8 }] }),
-  backgrounds: (n) => base({ bg: [{ preset: n, from: 0, to: 6 }], layers: [{ ...HERO, text: n, size: 110 }] }),
-  'generative-paint-fx-per-frame': (n) => base({ layers: [{ type: 'paint', paint: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
-  'ambient-shader-fields': (n) => base({ layers: [{ type: 'shader', shader: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
-  'raymarched-surfaces': (n) => base({ layers: [{ type: 'raymarch', raymarch: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
-  'three-js-scenes-real-geometry': (n) => base({ layers: [{ type: 'three', three: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
   // CAPTIONS PLAY HERE, and the reason they did not is a claim the engine contradicts. This family
   // carried "captions need a voice track and cues, which the index does not carry", so eleven styles
   // sat on the page as names with no picture. core/captions.js opens by saying the opposite, in as
@@ -181,15 +110,6 @@ const PREVIEW = {
     captions: [{ t0: 0.3, t1: 5.4, text: 'Ship the payoff last', pin: 'center', size: 96 }],
     layers: [{ ...OVER, text: n, size: 44, y: 940, start: 0, duration: 6 }],
   }),
-  // The subject travels the frame at an even rate under a `linear` track, so everything the eye reads
-  // as speed here comes from the remap alone: `whip` crawls then bolts, `hold` sits in the middle,
-  // `freeze` stops dead, `rewind` comes back. The counter rides along to show the clock reaching a
-  // primitive, which is the part an easing on the motion track could never do.
-  'time-remaps-the-layer-s-own-clock': (n) => base({ layers: [
-    { ...HERO, text: n, y: 380, timeRemap: n, motion: [{ t: 0, x: -520 }, { t: 5.4, x: 520, ease: 'linear' }] },
-    { type: 'count', to: 100, x: 160, y: 640, w: 1600, align: 'center', size: 200, weight: 800,
-      start: 0.3, duration: 5.4, timeRemap: n },
-  ] }),
   'per-frame-accent-layers': (n) => base({ layers: [
     { type: 'text', text: 'border-beam', x: 460, y: 480, w: 1000, align: 'center', size: 72, weight: 700, font: 'mono', bg: 'rgba(255,255,255,0.04)', pad: '44px', radius: 22, start: 0.3, duration: 5.4 },
     { type: 'beam', mode: n.includes('shine') ? 'shine' : 'border', x: 460, y: 470, w: 1000, h: 170, radius: 22, thickness: 3, tail: 90, speed: 0.5, glow: 0.6, start: 0.5, duration: 5.2 },
@@ -210,37 +130,19 @@ const UNPLAYABLE = {
 
 // Why a family cannot be played here. Stated on the page, per family, in the author's own terms.
 const NO_PREVIEW = {
-  'per-layer-modifiers': 'each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.',
   // A SOUND has no still and no moving preview. The site could play it, but the arsenal's preview slot
   // renders a scene to frames, and frames cannot show a thud. Listed with its reason rather than left
   // as a gap, which is what this table is for.
   'motion-voices-tactile-sound': 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
-  'spectacle-devices': 'a spectacle is a whole film turning its other dials down. One clip cannot show the restraint that makes it work.',
   'composite-looks-static': 'a grade needs a photographic source, and the index ships no photographs. See it on the looks clip on /showcase.',
-  'canvas-image-passes-baked': 'a baked image pass needs a photographic source, and the index ships no photographs.',
   'layer-as-texture-resample': 'resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.',
-  // MOSTLY TRUE AND NOT ENTIRELY, which is worth saying rather than leaving the blanket claim: most of
-  // this family regrades a picture, but `thermalBlur` is built for TYPE and needs no photograph at all.
-  // Its card is in the playground (`core/generators.js`), where its radius dial is on screen.
-  'filter-presets': 'most of these regrade a photographic source, and the index ships no photographs. The exception is `thermalBlur`, which is a type effect: its live card with a radius dial is in the playground.',
-  'interpolation-modes-not-easings': 'a mode is the SHAPE of the segment between two keys. A still frame is a point on that curve and shows nothing about it; it is only itself in motion.',
-  'keyframe-handles-the-graph-editor': 'a handle is half the shape of a segment, so it has the same problem a mode has: a still frame is one point on the curve and says nothing about the curve. The playground card draws the curve itself with both handles on dials.',
-  'depths-parallax-planes': 'a plane only reads when the camera moves past it. One frame of a parallax is a frame with nothing parallaxing in it.',
-  'adjustment-layers-grade-what-is-beneath': 'a grade has no subject of its own: it is whatever is already under it. The arsenal shows them through the scenes that use them.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
   'beat-blueprints': 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
-  'camera-dials': 'a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is formats/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.',
-  'camera-moves': 'a camera move is only legible against a scene laid out for it, which is the film, not a swatch.',
   'compositions-bespoke-per-beat-timeline': 'a composition is a hand-authored timeline over data you pass. There is no neutral data for it.',
   'layer-types': 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
-  'per-layer-fx': 'a modifier acts on whatever layer is already there, so it has nothing to show on its own.',
-  'part-entrances': "a part entrance staggers across a figure's own children, so it needs your figure.",
-  'effector-falloffs': "a falloff is the SHAPE of one point's reach, and it is invisible without the clones it acts on. Turn it on the playground's `effector` card, where the same grid is redrawn as you change it.",
-  'effector-drives': "a drive is what the influence is spent on, so it shows nothing without a falloff and a field of clones. The playground's `effector` card carries all six on one grid.",
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
   easings: 'a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.',
   'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
-  'drawn-icons': 'the name is the drawing. Every one of them is on the page already, at /blocks.',
   'ransom-faces': 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
   'output-targets': 'an aspect or a platform safe area is a property of the canvas, not something that animates.',
   'generators-the-playground': 'generators have their own surface with every dial attached: /playground.',
@@ -248,13 +150,32 @@ const NO_PREVIEW = {
 };
 
 // ── build ───────────────────────────────────────────────────────────────────────────────────────
+// WHERE A FAMILY'S FORMS COME FROM, resolved once so the three passes below (the index, the snippet
+// bodies, the preview scenes) cannot answer the question differently. A registry answers it itself,
+// through the `catalog` block at its definition; the tables above answer for the rest. The scene kit
+// is passed in for the same reason the usage kit is: core/ ships to the browser and must not import a
+// documentation swatch.
+const SCENE_KIT = { base, HERO, TWO, OVER };
 const gaps = [];
+const forms = new Map();
+for (const [title, , , , meta] of sections) {
+  const id = slug(title);
+  const usage = meta && meta.usage ? (n) => meta.usage(n, USAGE_KIT) : USAGE[id];
+  const preview = meta && meta.preview ? (n) => meta.preview(n, SCENE_KIT) : PREVIEW[id];
+  const noPreview = (meta && meta.noPreview) || NO_PREVIEW[id] || null;
+  if (!usage) gaps.push(`${title} (id ${id}): no USAGE form`);
+  if (!preview && !noPreview) gaps.push(`${title} (id ${id}): neither a PREVIEW scene nor a reason it has none`);
+  forms.set(id, { usage: usage || (() => ''), preview: preview || null, noPreview });
+}
+// A table entry keyed by an id no section has is DEAD, and dead is how a renamed section loses its
+// usage without anything saying so: the survivor sits there looking maintained.
+for (const [table, name] of [[USAGE, 'USAGE'], [PREVIEW, 'PREVIEW'], [NO_PREVIEW, 'NO_PREVIEW']]) {
+  for (const id of Object.keys(table)) if (!forms.has(id)) gaps.push(`${name}["${id}"]: no section has that id, so nothing reads it`);
+}
+
 const families = sections.map(([title, intro, list, tag, meta]) => {
   const id = slug(title);
-  if (!USAGE[id]) gaps.push(`${title} (id ${id}): no USAGE form`);
-  if (!PREVIEW[id] && !NO_PREVIEW[id]) gaps.push(`${title} (id ${id}): neither a PREVIEW scene nor a reason it has none`);
-  const usage = USAGE[id] || (() => '');
-  const preview = PREVIEW[id] || null;
+  const { preview } = forms.get(id);
   return {
     id,
     title,
@@ -266,7 +187,7 @@ const families = sections.map(([title, intro, list, tag, meta]) => {
     // So the collapse is READ OFF the data rather than being a second judgement kept by hand.
     mode: meta && meta.skip ? 'chips' : 'table',
     note: (meta && meta.skip) ? prose(meta.skip) : null,
-    noPreview: preview ? null : NO_PREVIEW[id],
+    noPreview: preview ? null : forms.get(id).noPreview,
     count: list.length,
     undescribed: list.filter((n) => d(n, meta) === '\u2014').length,
     entries: list.map((name) => ({
@@ -289,7 +210,8 @@ const families = sections.map(([title, intro, list, tag, meta]) => {
 if (gaps.length) {
   console.error('✗ effects-json: a family is not described:');
   for (const g of gaps) console.error(`    ${g}`);
-  console.error('  Add its authoring form to USAGE, and either a PREVIEW scene or a NO_PREVIEW reason.');
+  console.error('  A registry writes its own: the `catalog` block on its defineRegistry call carries usage');
+  console.error('  and either preview or noPreview. Everything else adds a row to the tables in this file.');
   process.exit(1);
 }
 
@@ -326,7 +248,7 @@ const BODY = path.join(root, 'site/lib/effects-body.json');
 const bodies = Object.fromEntries(
   sections.flatMap(([title, , list]) => {
     const id = slug(title);
-    const usage = USAGE[id] || (() => '');
+    const { usage } = forms.get(id);
     return list.map((name) => [`${id}--${slug(name)}`, usage(name)]);
   }),
 );
@@ -335,10 +257,11 @@ const bodies = Object.fromEntries(
 const want = new Map();
 for (const [title, , list, , ] of sections) {
   const id = slug(title);
-  if (!PREVIEW[id]) continue;
+  const { preview } = forms.get(id);
+  if (!preview) continue;
   for (const name of list) {
     if (UNPLAYABLE[`${id}--${slug(name)}`]) continue;
-    want.set(`${id}--${slug(name)}.json`, j(PREVIEW[id](name)) + '\n');
+    want.set(`${id}--${slug(name)}.json`, j(preview(name)) + '\n');
   }
 }
 

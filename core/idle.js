@@ -67,7 +67,15 @@ export const IDLE_BLURBS = {
 // `defineRegistry` got `blurbs: null` and every reader that asks the registry what a name means
 // got nothing, while the blurbs three lines below were rendered into docs and enforced by
 // lib-test. Written and unread is the same as unwritten.
-export const IDLE_REGISTRY = defineRegistry('idle', IDLE, { slot: 'idle', blurbs: IDLE_BLURBS });
+export const IDLE_REGISTRY = defineRegistry('idle', IDLE, { slot: 'idle', blurbs: IDLE_BLURBS,
+  catalog: {
+    title: 'Idles (ambient hold motion)',
+    tag: 'per-layer/scene',
+    intro: '`idle` on a layer, or scene-level `idle` for the whole cast. Runs across the SETTLED MIDDLE only, between the enter ramp and the exit ramp, so it never fights an entrance. Off unless asked; `idle:"none"` on a layer opts one back out of a scene default. `{ "idle":"breathe" }` or `{ "idle":{"name":"drift","amp":14,"period":9} }`',
+    usage: (n, { text }) => text({ idle: n }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, idle: n }] }),
+  },
+});
 export const IDLE_NAMES = IDLE_REGISTRY.names;
 
 // normalizeIdle(spec): the three spellings an author may write, to one shape or null.

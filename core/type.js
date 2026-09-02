@@ -83,7 +83,15 @@ export const STAGGER_FROM_BLURBS = {
 // numeric index is legal too and refusing one would be wrong; core/validate.mjs owns that refusal and
 // reads its names from here.
 export const STAGGER_FROM_REGISTRY = defineRegistry('stagger order', STAGGER_FROM_BLURBS,
-  { slot: 'stagger.from', blurbs: STAGGER_FROM_BLURBS });
+  { slot: 'stagger.from', blurbs: STAGGER_FROM_BLURBS,
+  catalog: {
+    title: 'Stagger order (`from`)',
+    tag: 'text/parts',
+    intro: 'The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`. Works in BOTH slots that take a stagger, a split text layer and `parts[]`. `each` is the per-unit delay; `amount` is the TOTAL seconds the whole train may take and derives that delay from the unit count, so a 90-glyph headline and a 6-word one hold the same beat. A number index is legal too: the wave starts at that unit.',
+    usage: (n, { text }) => text({ split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.6, from: n } }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.9, from: n } }] }),
+  },
+});
 export const STAGGER_FROM = STAGGER_FROM_REGISTRY.names;
 
 // staggerOffset(i, n, from): unit i's rank in the wave, 0 = first to move.
@@ -481,7 +489,15 @@ export const DECODE_CHAR_BLURBS = {
 // As STAGGER_FROM_REGISTRY: a registry so the arsenal search can find these, and no `pick`, because
 // any string of your own glyphs is a legal charset too.
 export const DECODE_CHARS_REGISTRY = defineRegistry('scramble charset', DECODE_CHARS,
-  { slot: 'presetOpts.chars', blurbs: DECODE_CHAR_BLURBS });
+  { slot: 'presetOpts.chars', blurbs: DECODE_CHAR_BLURBS,
+  catalog: {
+    title: 'Scramble charsets (`chars`)',
+    tag: 'text',
+    intro: 'What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "presetOpts": { "chars":"numbers", "rate":48, "revealDelay":0.25 } }`. A named set, or any string of your own glyphs. `rate` is refreshes per SECOND (so a slower reveal is no longer also a slower scramble) and `revealDelay` is the fraction of the window the unit stays fully scrambled before it starts resolving, which is what makes the effect read as decoding rather than as noisy type.',
+    usage: (n, { text }) => text({ split: 'word', preset: 'decode', each: 0.9, presetOpts: { chars: n, rate: 48, revealDelay: 0.25 } }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, split: 'word', preset: 'decode', each: 1.2, stagger: 0.12, presetOpts: { chars: n, revealDelay: 0.25 } }] }),
+  },
+});
 
 // decodeText(el, u, unitIndex, opts): the scramble, PURE in u. The character choice is a hash of
 // (unit, column, step), never Math.random(), so a backward seek is exact. That is the one axis this is
@@ -597,4 +613,12 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
 
 // Defined after PRESETS so the map is complete. Gives the cross-registry hint: `preset:"popIn"`
 // is told that popIn is a gsap effect, which is the mistake three shipped layers actually made.
-export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS });
+export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS,
+  catalog: {
+    title: 'Kinetic text presets',
+    tag: 'text',
+    intro: '`split`+`preset` on a text layer. Words/chars reveal with motion. `{ "split":"word", "preset":"up", "each":0.4, "stagger":0.05 }`',
+    usage: (n, { text }) => text({ split: 'word', preset: n, each: 0.5, stagger: 0.05 }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, split: 'word', preset: n, each: 0.6, stagger: 0.06 }] }),
+  },
+});

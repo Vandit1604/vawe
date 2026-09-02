@@ -546,7 +546,15 @@ export function buildCameraMove(spec, canvas = null) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a camera move" when someone writes it somewhere else. core/registry.js.
-export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove.move', blurbs: CAMERA_MOVE_BLURBS });
+export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove.move', blurbs: CAMERA_MOVE_BLURBS,
+  catalog: {
+    title: 'Camera moves',
+    tag: 'camera',
+    intro: '`"cameraMove": { "move":"<name>", ... }`. A calculated camera path → `data.camera` (smooth, velocity-continuous). `{ "move":"diveIn","tx":960,"ty":300,"to":1.6 }`',
+    usage: (n, { j }) => j({ cameraMove: { move: n } }),
+    noPreview: 'a camera move is only legible against a scene laid out for it, which is the film, not a swatch.',
+  },
+});
 // The slot is `cameraMove.move` and not `cameraMove`: nothing reads a bare `"cameraMove": "slowPush"`,
 // bakeCameraMove (core/produce.js) reads `spec.move` off the object. The short form made `make arsenal`
 // print a paste that throws.
@@ -563,6 +571,13 @@ export const CAMERA_DIAL_REGISTRY = defineRegistry('camera dial', { cameraBlur: 
       + 'velocity RELATIVE TO THE CAMERA, so a fast pan streaks the whole frame and a layer travelling '
       + 'with the camera stays sharp. Off by default; the film\'s `shutter` (degrees) says how much, and '
       + 'one layer opts out with `motionBlur: false`. A zoom and a roll are radial and are not modelled',
+  },
+  catalog: {
+    title: 'Camera dials',
+    tag: 'camera',
+    intro: 'Top-level scene keys that change what the camera DOES rather than where it goes. `"cameraBlur": true` gives the film a real shutter: every layer smears by its velocity RELATIVE to the camera, so a whip pan streaks the frame and a layer travelling with the camera stays sharp. How much is the film\'s `shutter`, in degrees; one layer opts out with `motionBlur: false`.',
+    usage: (_, { j }) => j({ cameraBlur: true }),
+    noPreview: 'a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is formats/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.',
   },
 });
 

@@ -398,4 +398,13 @@ export function createShaderOverlay(parent, w = 1920, h = 1080) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a sting fx" when someone writes it somewhere else. core/registry.js.
-export const SHADER_REGISTRY = defineRegistry('sting fx', Object.fromEntries(SHADER_FX.map((n) => [n, n])), { slot: 'sting' });
+export const SHADER_REGISTRY = defineRegistry('sting fx', Object.fromEntries(SHADER_FX.map((n) => [n, n])), { slot: 'sting',
+  catalog: {
+    title: 'Shader stings',
+    tag: 'transition',
+    intro: '`stings:[{t,fx}]`. A full-frame shader accent on a reveal / background jump.',
+    register: 'sting',
+    usage: (n, { j }) => j({ stings: [{ t: 2.4, fx: n }] }),
+    preview: (n, { base, TWO }) => base({ layers: TWO(2.4), stings: [{ t: 2.4, fx: n }] }),
+  },
+});

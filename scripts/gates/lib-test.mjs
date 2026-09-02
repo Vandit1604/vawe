@@ -35,7 +35,7 @@ import { MARGIN, MAX_ZOOM } from '../../core/safe.js';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
-import { defineRegistry, registries } from '../../core/registry.js';
+import { defineRegistry, registries, catalogued } from '../../core/registry.js';
 import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
 import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks } from '../author/arsenal.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
@@ -2163,6 +2163,43 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     const kinds = registries().map((x) => x.kind);
     return ['anim', 'cut', 'kinetic preset', 'part entrance'].every((k) => kinds.includes(k));
   })());
+
+  // ---- the catalog block: a vocabulary publishes itself, or it does not exist ----------------------
+  // Adding one capability used to be four edits in three files (the registry, a section tuple in
+  // effects-catalog.mjs, a USAGE form and a PREVIEW scene in effects-json.mjs) held together by two
+  // gates. The four are one now. A HALF-WRITTEN block is refused at LOAD rather than by a gate, so the
+  // bad state is unrepresentable: these five assertions are the proof of that, not the mechanism.
+  const FULL = {
+    title: 'Widgets', tag: 'per-layer', intro: 'what a widget is for',
+    usage: (n) => `{"widget":"${n}"}`, noPreview: 'a widget has nothing to show',
+  };
+  ok('registry: a complete catalog block is carried on the registry', (() => {
+    const w = defineRegistry('catalog widget', { alpha: 1 }, { slot: 'widget', catalog: FULL });
+    return !!w.catalog && w.catalog.title === 'Widgets' && w.catalog.usage('alpha') === '{"widget":"alpha"}';
+  })());
+  const refuses = (bad) => {
+    try { defineRegistry('bad widget', { alpha: 1 }, { catalog: bad }); return false; }
+    catch (e) { return /catalog/.test(e.message); }
+  };
+  ok('registry: a catalog with no intro is refused at load', refuses({ ...FULL, intro: '' }));
+  ok('registry: a catalog with no usage form is refused at load', refuses({ ...FULL, usage: undefined }));
+  ok('registry: a catalog with NEITHER a preview nor a reason is refused',
+    refuses({ ...FULL, noPreview: undefined }));
+  ok('registry: a catalog with BOTH a preview and a reason is refused',
+    refuses({ ...FULL, preview: () => ({}) }));
+  // A registry with no catalog block is not catalogued, and the order is a property of the vocabulary
+  // (tag then title) rather than of module evaluation order, so deleting an import cannot reshuffle
+  // docs/EFFECTS.md.
+  ok('registry: catalogued() holds only the registries that publish themselves', (() => {
+    try {
+      const cats = catalogued();
+      return cats.length > 0 && cats.every((r) => r.catalog) && cats.length < registries().length;
+    } catch { return false; }   // a registry with no catalog reaching the sort throws, and that is a fail
+  })());
+  ok('registry: catalogued() is ordered by tag then title, not by definition order', (() => {
+    const k = (r) => `${r.catalog.tag} ${r.catalog.title}`;
+    return catalogued().every((r, i, a) => i === 0 || k(a[i - 1]) <= k(r));
+  })());
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 9);
   ok('parts: every part entrance has a blurb', PART_NAMES.every((n) => PART_BLURBS[n]));
@@ -3222,6 +3259,35 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     return asc.every(([lt, n]) => got.get(lt) === n);
   })());
 }
+// ---- the catalogue is READ from the registries, not restated beside them --------------------------
+// `scripts/site/effects-catalog.mjs` used to hand-list 32 sections whose name lists were, by
+// inspection, exactly the registries sitting one import away. It reads `catalogued()` now, so this
+// asserts the join actually happened: a registry that publishes itself has one section, carrying its
+// own title, slot label, prose and names. A regression here is silent otherwise, because a section
+// that vanishes takes its rows out of docs/EFFECTS.md and the doc still regenerates cleanly.
+{
+  const { sections } = await import('../site/effects-catalog.mjs');
+  // Minus this file's own fixture on both sides: the `catalog widget` built a few hundred lines up is
+  // a real registry in this process, so `catalogued()` publishes it and the catalogue then derives a
+  // section for it. That IS the mechanism working; it just is not one of the engine's vocabularies.
+  const fixture = ([title]) => title !== 'Widgets';
+  const derived = sections.filter(([, , , , meta]) => meta && meta.reg).filter(fixture);
+  const cats = catalogued().filter((r) => fixture([r.catalog.title]));
+  // `cats.length > 20` is the non-vacuity clause and it is load-bearing: with the catalog block lost,
+  // both sides go to zero and "every one has a section" passes over nothing at all.
+  ok(`catalogue: every self-publishing registry has a section (${derived.length} of ${cats.length})`,
+    cats.length > 20 && derived.length === cats.length && cats.every((r) => derived.some(([, , , , m]) => m.reg === r)));
+  ok('catalogue: a derived section carries the registry\'s own title, tag, intro and names',
+    derived.every(([title, intro, list, tag, meta]) => title === meta.reg.catalog.title
+      && tag === meta.reg.catalog.tag && intro === meta.reg.catalog.intro
+      && list.length === meta.reg.names.length && list.every((n) => meta.reg.has(n))));
+  // The hand-written half is the vocabularies with NO registry behind them, so there is no definition
+  // site to write a catalog block on. It shrinks only when one of them gains a registry.
+  ok(`catalogue: ${sections.length - derived.length} sections stay hand-written, none of them a registry`,
+    sections.filter(([, , , , meta]) => !meta || !meta.reg).every(([, , list]) =>
+      !registries().some((r) => r.names.length === list.length && list.every((n) => r.has(n)))));
+}
+
 // ---- registry blurbs (the description lives beside the thing it describes) ------------------------
 // docs/EFFECTS.md is generated from the registries and 379 of its 476 rows had no description, because
 // the only source was a FLAT 68-key map in the generator whose own comment called the notes "a bonus,

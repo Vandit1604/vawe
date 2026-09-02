@@ -261,4 +261,12 @@ export const CANVAS_FX_BLURBS = blurbsOf('canvas fx', CANVAS_FX);
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a canvas fx" when someone writes it somewhere else. core/registry.js.
-export const CANVAS_REGISTRY = defineRegistry('canvas fx', CANVAS_FX, { slot: 'canvasFx', blurbs: CANVAS_FX_BLURBS });
+export const CANVAS_REGISTRY = defineRegistry('canvas fx', CANVAS_FX, { slot: 'canvasFx', blurbs: CANVAS_FX_BLURBS,
+  catalog: {
+    title: 'Canvas image passes (baked)',
+    tag: 'static',
+    intro: '`canvasFx`: a one-time baked image pass (cannot move).',
+    usage: (n, { j }) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, canvasFx: n }),
+    noPreview: 'a baked image pass needs a photographic source, and the index ships no photographs.',
+  },
+});

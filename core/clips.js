@@ -92,7 +92,15 @@ export const ANIM_BLURBS = {
 // `defineRegistry` got `blurbs: null` and every reader that asks the registry what a name means
 // got nothing, while the blurbs three lines below were rendered into docs and enforced by
 // lib-test. Written and unread is the same as unwritten.
-export const ANIM_REGISTRY = defineRegistry('anim', ANIM, { slot: 'anim', blurbs: ANIM_BLURBS });
+export const ANIM_REGISTRY = defineRegistry('anim', ANIM, { slot: 'anim', blurbs: ANIM_BLURBS,
+  catalog: {
+    title: 'Enter / exit anims',
+    tag: 'per-layer',
+    intro: '`anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`',
+    usage: (n, { text }) => text({ anim: n, enterDur: 0.6, out: 'defocus' }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, anim: n, enterDur: 0.8, out: n, exitDur: 0.8, start: 0.4, duration: 5 }] }),
+  },
+});
 export const ANIM_NAMES = ANIM_REGISTRY.names;
 
 // The entrances that accept a WARP, and therefore the ones `anticipate` and `overshoot` are real on.

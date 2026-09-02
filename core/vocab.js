@@ -100,7 +100,20 @@ export const INTERP = {
   through: 'velocity carries THROUGH the key: a cubic Hermite with neighbour tangents, so a travel across several keys is one gesture rather than a stop at each',
 };
 
-export const INTERP_REGISTRY = defineRegistry('interpolation mode', INTERP, { slot: 'ease' });
+export const INTERP_REGISTRY = defineRegistry('interpolation mode', INTERP, { slot: 'ease', blurbs: INTERP,
+  catalog: {
+    title: 'Interpolation modes (not easings)',
+    tag: 'motion key',
+    intro: 'On a `motion` key\'s `ease`, but NOT a curve. An easing is a function of one segment\'s own progress, so it necessarily starts and ends that segment at zero velocity and an interior keyframe becomes a dead stop. A MODE decides how the value is computed at all and may read the keys either side. `{ "t":0.6, "x":400, "ease":"through" }`',
+    // THREE FAMILIES ADDED WITHOUT THEIR ROWS, and `make effects` was red for all three at once, so the
+    // catalogue could not regenerate at all. A family is not shipped until it can be looked up: this
+    // table is the only place that says how to WRITE one.
+    // An interpolation mode is not an easing and does not go in `ease`'s usual slot mentally, so the
+    // form matters: it is the key on a motion KEY, and it governs the segment arriving at that key.
+    usage: (n, { text }) => text({ anim: 'none', motion: [{ t: 0, x: -300 }, { t: 0.8, x: 0, ease: n }, { t: 1.6, x: 300, ease: n }] }),
+    noPreview: 'a mode is the SHAPE of the segment between two keys. A still frame is a point on that curve and shows nothing about it; it is only itself in motion.',
+  },
+});
 
 export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease' });
 export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur' });

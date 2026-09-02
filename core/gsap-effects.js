@@ -195,9 +195,25 @@ export const FX_DUR = Object.fromEntries(
 // this was found: `EXIT_FX` had zero users across 153 scenes and `GSAP_FX` 31 of 37 unused, which is
 // what an undescribed vocabulary looks like from the outside. Written and unread is the same as unwritten.
 export const GSAP_REGISTRY = defineRegistry('gsap effect',
-  Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx', blurbs: GSAP_BLURBS });
+  Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx', blurbs: GSAP_BLURBS,
+  catalog: {
+    title: 'GSAP named effects',
+    tag: 'per-layer/text',
+    intro: '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`',
+    usage: (n, { text }) => text({ anim: 'none', fx: n }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, anim: 'none', fx: n }] }),
+  },
+});
 export const GSAP_EXIT_REGISTRY = defineRegistry('gsap exit',
-  Object.fromEntries(EXIT_FX.map((n) => [n, n])), { slot: 'fxOut', blurbs: GSAP_EXIT_BLURBS });
+  Object.fromEntries(EXIT_FX.map((n) => [n, n])), { slot: 'fxOut', blurbs: GSAP_EXIT_BLURBS,
+  catalog: {
+    title: 'GSAP exits',
+    tag: 'exit',
+    intro: '`fxOut`: pair every entrance with a directional exit.',
+    usage: (n, { text }) => text({ anim: 'rise', fxOut: n, exitDur: 0.6 }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, anim: 'rise', fxOut: n, exitDur: 1, start: 0.4, duration: 4.2 }] }),
+  },
+});
 
 // ---- DEPRECATED: names that duplicate an `anim` exactly ------------------------------------------
 //
