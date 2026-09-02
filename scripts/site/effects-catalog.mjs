@@ -20,7 +20,6 @@ import { catalogued } from '../../core/registry.js';
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
-import { EASINGS } from '../../core/motion.js';
 import { RANSOM_FACES } from '../../core/ransom.js';
 import { ASPECTS } from '../../core/safe.js';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
@@ -168,7 +167,6 @@ export const sections = [
   // catalogue that names the wrong key guarantees the opposite.
   ['Motion voices (tactile sound)', 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.', names(MOTION_CUES), 'audio', { skip: null }],
   ['Blend modes', '`mixBlend`: how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it, MDN `mix-blend-mode`' }],
-  ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing', { skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md' }],
   ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
   ['Ransom faces', '`ransom` on a text layer: per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface, see it, do not read about it' }],
   ['Output targets', '`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.', names(Object.keys(ASPECTS)), 'canvas', { skip: 'a ratio is its own definition; the safe area it implies belongs to the destination, in the section below' }],

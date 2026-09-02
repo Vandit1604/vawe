@@ -766,6 +766,55 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `last` | starts at the last unit and runs backwards to the first, pair it with a right-to-left exit |
 | `random` | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
 
+## Easings  `[timing]`
+
+`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
+
+| name | what / when |
+|---|---|
+| `brake` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `hold` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `linear` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `ramp` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `rush` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `settle` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `snap` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring-bouncy` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring-stiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `springEase` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `springStiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+
 ## Time remaps (the layer's own clock)  `[timing]`
 
 `timeRemap` on a layer. After Effects' Time Remapping: the CLOCK accelerates, brakes, holds or reverses, so everything the layer does moves with it (its motion, its size, its idle, its typing, its count). An easing on a motion track cannot do this: it bends one property across one segment while the counter underneath still counts at an even rate. Name one of these shapes, or write your own keys `[{"t":0,"at":0},{"t":1.4,"at":0.3}]`, where `t` is the layer's elapsed second and `at` is the second it believes it is. The neighbouring dials: `timeWarp` is the one-easing form of the same idea, and `stepFps` posterizes the clock to a lower rate (15 in a 30fps film is the hand-drawn "on twos" look).
@@ -927,55 +976,6 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 | `saturation` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
 | `screen` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
 | `soft-light` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-
-## Easings  `[timing]`
-
-`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
-
-| name | what / when |
-|---|---|
-| `brake` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `hold` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `linear` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `ramp` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `rush` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `settle` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `snap` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring-bouncy` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring-stiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `springEase` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `springStiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 
 ## Plain words (feel · duration · camera)  `[timing]`
 

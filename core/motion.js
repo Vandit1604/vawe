@@ -307,6 +307,29 @@ export const EASINGS = {
   // whole segment so the FROM value holds, and 1 exactly at the end.
   hold: (t) => (t >= 1 ? 1 : 0),
 };
+
+// THE CATALOGUE AND THE SEARCH ONLY. NOTHING RESOLVES THROUGH THIS.
+//
+// `resolveEasing` below must keep its own refusal, and the reason is that the valid set of the `ease`
+// field is WIDER than this table: it is EASINGS + FEEL + INTERP, `isEasingName` is the one membership
+// test over that union, and resolveEasing accepts a feel word by design. A `pick()` here would refuse
+// `ease: "snappy"`, which is a shipped spelling. It also carries a cross-registry hint of its own for
+// GSAP ease names, which are real in this engine but only on GSAP-driven fields.
+//
+// What the registry is for: the section in docs/EFFECTS.md, which was hand-listed in
+// scripts/site/effects-catalog.mjs with its usage form and its no-preview reason a file further on.
+// `skip` stays, and it is a DECISION, not a gap: 41 curves named by mechanism are better served by the
+// feel table in docs/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
+export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
+  catalog: {
+    title: 'Easings',
+    tag: 'timing',
+    intro: '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.',
+    skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md',
+    usage: (n, { j }) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
+    noPreview: 'a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.',
+  },
+});
 // GSAP's easing vocabulary, which this engine also carries: `parts[].ease` and `morph.ease` go
 // straight to gsap.fromTo and never arrive here. Detected only to give a WRONG-SLOT name a useful
 // error instead of a list of 41 names it is not in. Same cross-registry hint as core/type.js.

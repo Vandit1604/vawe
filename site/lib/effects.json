@@ -3785,6 +3785,313 @@
       ]
     },
     {
+      "id": "easings",
+      "title": "Easings",
+      "tag": "timing",
+      "intro": "`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.",
+      "mode": "chips",
+      "note": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+      "noPreview": "a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.",
+      "count": 42,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "brake",
+          "stem": "easings--brake",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInBack",
+          "stem": "easings--easeinback",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInBounce",
+          "stem": "easings--easeinbounce",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInCirc",
+          "stem": "easings--easeincirc",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInCubic",
+          "stem": "easings--easeincubic",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInElastic",
+          "stem": "easings--easeinelastic",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInExpo",
+          "stem": "easings--easeinexpo",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutBack",
+          "stem": "easings--easeinoutback",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutBounce",
+          "stem": "easings--easeinoutbounce",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutCirc",
+          "stem": "easings--easeinoutcirc",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutCubic",
+          "stem": "easings--easeinoutcubic",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutElastic",
+          "stem": "easings--easeinoutelastic",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutExpo",
+          "stem": "easings--easeinoutexpo",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutQuad",
+          "stem": "easings--easeinoutquad",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutQuart",
+          "stem": "easings--easeinoutquart",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutQuint",
+          "stem": "easings--easeinoutquint",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInOutSine",
+          "stem": "easings--easeinoutsine",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInQuad",
+          "stem": "easings--easeinquad",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInQuart",
+          "stem": "easings--easeinquart",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInQuint",
+          "stem": "easings--easeinquint",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeInSine",
+          "stem": "easings--easeinsine",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutBack",
+          "stem": "easings--easeoutback",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutBounce",
+          "stem": "easings--easeoutbounce",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutCirc",
+          "stem": "easings--easeoutcirc",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutCubic",
+          "stem": "easings--easeoutcubic",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutElastic",
+          "stem": "easings--easeoutelastic",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutExpo",
+          "stem": "easings--easeoutexpo",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutQuad",
+          "stem": "easings--easeoutquad",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutQuart",
+          "stem": "easings--easeoutquart",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutQuint",
+          "stem": "easings--easeoutquint",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "easeOutSine",
+          "stem": "easings--easeoutsine",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "hold",
+          "stem": "easings--hold",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "linear",
+          "stem": "easings--linear",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "ramp",
+          "stem": "easings--ramp",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "rush",
+          "stem": "easings--rush",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "settle",
+          "stem": "easings--settle",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "snap",
+          "stem": "easings--snap",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "spring",
+          "stem": "easings--spring",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "spring-bouncy",
+          "stem": "easings--spring-bouncy",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "spring-stiff",
+          "stem": "easings--spring-stiff",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "springEase",
+          "stem": "easings--springease",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "springStiff",
+          "stem": "easings--springstiff",
+          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "time-remaps-the-layer-s-own-clock",
       "title": "Time remaps (the layer's own clock)",
       "tag": "timing",
@@ -4625,313 +4932,6 @@
           "name": "soft-light",
           "stem": "blend-modes--soft-light",
           "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "easings",
-      "title": "Easings",
-      "tag": "timing",
-      "intro": "`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.",
-      "mode": "chips",
-      "note": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-      "noPreview": "a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.",
-      "count": 42,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "brake",
-          "stem": "easings--brake",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInBack",
-          "stem": "easings--easeinback",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInBounce",
-          "stem": "easings--easeinbounce",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInCirc",
-          "stem": "easings--easeincirc",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInCubic",
-          "stem": "easings--easeincubic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInElastic",
-          "stem": "easings--easeinelastic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInExpo",
-          "stem": "easings--easeinexpo",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutBack",
-          "stem": "easings--easeinoutback",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutBounce",
-          "stem": "easings--easeinoutbounce",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutCirc",
-          "stem": "easings--easeinoutcirc",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutCubic",
-          "stem": "easings--easeinoutcubic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutElastic",
-          "stem": "easings--easeinoutelastic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutExpo",
-          "stem": "easings--easeinoutexpo",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutQuad",
-          "stem": "easings--easeinoutquad",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutQuart",
-          "stem": "easings--easeinoutquart",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutQuint",
-          "stem": "easings--easeinoutquint",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInOutSine",
-          "stem": "easings--easeinoutsine",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInQuad",
-          "stem": "easings--easeinquad",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInQuart",
-          "stem": "easings--easeinquart",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInQuint",
-          "stem": "easings--easeinquint",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeInSine",
-          "stem": "easings--easeinsine",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutBack",
-          "stem": "easings--easeoutback",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutBounce",
-          "stem": "easings--easeoutbounce",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutCirc",
-          "stem": "easings--easeoutcirc",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutCubic",
-          "stem": "easings--easeoutcubic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutElastic",
-          "stem": "easings--easeoutelastic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutExpo",
-          "stem": "easings--easeoutexpo",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutQuad",
-          "stem": "easings--easeoutquad",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutQuart",
-          "stem": "easings--easeoutquart",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutQuint",
-          "stem": "easings--easeoutquint",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "easeOutSine",
-          "stem": "easings--easeoutsine",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "hold",
-          "stem": "easings--hold",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "linear",
-          "stem": "easings--linear",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "ramp",
-          "stem": "easings--ramp",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "rush",
-          "stem": "easings--rush",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "settle",
-          "stem": "easings--settle",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "snap",
-          "stem": "easings--snap",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "spring",
-          "stem": "easings--spring",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "spring-bouncy",
-          "stem": "easings--spring-bouncy",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "spring-stiff",
-          "stem": "easings--spring-stiff",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "springEase",
-          "stem": "easings--springease",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "springStiff",
-          "stem": "easings--springstiff",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
           "scene": null,
           "noPreview": null
         }
