@@ -5162,6 +5162,38 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
               return fresh.size === 1 && fresh.has('zzNotARealArsenalEntry'); })());
 }
 
+// ---- ARSENAL SWEEP: the two shapes the gate used to be blind to --------------------------------
+//
+// `scripts/gates/arsenal-check.mjs` reports how many capabilities the engine exports, and that number
+// was a FLOOR rather than a census, in two ways that a green tick hid. It has no importable surface
+// (it runs and exits), so this drives its `--list` dump, which prints one `file::NAME` per export the
+// sweep sees.
+//
+// ONE: a vocabulary keyed by digits was not a vocabulary. The shape test required every key to start
+// with a letter, so `ASPECTS` (the five canvases, keyed `16:9`, `9:16`, ...) fell out, and the most
+// author-facing table in the engine was one the arsenal gate could not check.
+//
+// TWO: two files may export the same word. `found` and `exported` were keyed by NAME with
+// first-file-wins, so `core/type.js`'s kinetic `PRESETS` lost the key to `core/lightfield/presets.js`
+// and did not exist as far as the gate was concerned. That is worse than a miscount: the same
+// collision between a registry part and a bare vocabulary launders the bare one into the derived
+// bucket and stops checking it, and which of the two vanishes is decided by directory order.
+{
+  const { execFileSync } = await import('node:child_process');
+  let keys = [];
+  try {
+    keys = execFileSync('node', [path.join(repoRoot, 'scripts/gates/arsenal-check.mjs'), '--list'],
+      { encoding: 'utf8' }).split('\n').map((l) => l.replace(/^\w+\s+/, '').split('\t')[0]);
+  } catch { /* asserted as empty below */ }
+  ok('arsenal --list: the sweep dumps what it saw', keys.length > 100);
+  ok('arsenal sees a digit-keyed vocabulary (ASPECTS: 16:9, 9:16, 1:1, ...)',
+    keys.includes('core/safe.js::ASPECTS'));
+  ok('arsenal sees a vocabulary shaped as a table of records (RANSOM_FACES)',
+    keys.includes('core/ransom.js::RANSOM_FACES'));
+  ok('arsenal sees BOTH exports when two files share a name (PRESETS in lightfield and in type)',
+    keys.includes('core/lightfield/presets.js::PRESETS') && keys.includes('core/type.js::PRESETS'));
+}
+
 // ---- ARSENAL HONESTY (scripts/author/arsenal.mjs) ------------------------------------------------
 // The search an author is told to reach for before inventing anything returned its nearest match even
 // when it had none, twice in one day (docs/MISTAKES.md #551). Two things are asserted here and they are
