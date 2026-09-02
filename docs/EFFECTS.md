@@ -46,6 +46,18 @@
 | `shield` | the name is the drawing |
 | `spark` | the name is the drawing |
 
+## Motion voices (tactile sound)  `[audio]`
+
+The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine: `docs/CRAFT/SOUND.md`.
+
+| name | what / when |
+|---|---|
+| `pluck` | punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it |
+| `riser` | a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. What a declared `spectacle` gets |
+| `sweep` | a wipe: a noise band climbing the spectrum, wider and slower than a whoosh, so it reads as the whole frame changing rather than one object crossing it |
+| `thud` | something with WEIGHT arrives: a low sine dropping in pitch, because the ear reads a falling fundamental as mass. A frame-sized card landing |
+| `travel` | movement. Filtered noise whose band opens then closes, which is what separates a whoosh from a burst of static. One per camera gesture, not one per keyframe |
+
 ## Backgrounds  `[background]`
 
 `bg:[{preset,from,to}]`. The field behind everything; moving ones (aurora/constellation/mesh/…) animate.
@@ -940,18 +952,6 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 |---|---|
 | `svg:draw (stroke draws on)` | the logo/icon stroke draws itself on, line by line |
 | `svg:morph (shape melts into a logo)` | one path melts into another (blob into logo), optional spin |
-
-## Motion voices (tactile sound)  `[audio]`
-
-The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.
-
-| name | what / when |
-|---|---|
-| `pluck` | - |
-| `riser` | - |
-| `sweep` | - |
-| `thud` | - |
-| `travel` | - |
 
 ## Blend modes  `[per-layer]`
 

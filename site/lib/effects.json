@@ -227,6 +227,54 @@
       ]
     },
     {
+      "id": "motion-voices-tactile-sound",
+      "title": "Motion voices (tactile sound)",
+      "tag": "audio",
+      "intro": "The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote · a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine · `docs/CRAFT/SOUND.md`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.",
+      "count": 5,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "pluck",
+          "stem": "motion-voices-tactile-sound--pluck",
+          "desc": "punctuation, for a small element or a counter digit. Quiet on purpose · this is the one that becomes a machine gun, and the density rules exist because of it",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "riser",
+          "stem": "motion-voices-tactile-sound--riser",
+          "desc": "a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. What a declared `spectacle` gets",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "sweep",
+          "stem": "motion-voices-tactile-sound--sweep",
+          "desc": "a wipe · a noise band climbing the spectrum, wider and slower than a whoosh, so it reads as the whole frame changing rather than one object crossing it",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thud",
+          "stem": "motion-voices-tactile-sound--thud",
+          "desc": "something with WEIGHT arrives · a low sine dropping in pitch, because the ear reads a falling fundamental as mass. A frame-sized card landing",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "travel",
+          "stem": "motion-voices-tactile-sound--travel",
+          "desc": "movement. Filtered noise whose band opens then closes, which is what separates a whoosh from a burst of static. One per camera gesture, not one per keyframe",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "backgrounds",
       "title": "Backgrounds",
       "tag": "background",
@@ -4752,54 +4800,6 @@
           "name": "svg:morph (shape melts into a logo)",
           "stem": "vector-layer-logos-icons--svg-morph-shape-melts-into-a-logo",
           "desc": "one path melts into another (blob into logo), optional spin",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "motion-voices-tactile-sound",
-      "title": "Motion voices (tactile sound)",
-      "tag": "audio",
-      "intro": "The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote · a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.",
-      "count": 5,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "pluck",
-          "stem": "motion-voices-tactile-sound--pluck",
-          "desc": "-",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "riser",
-          "stem": "motion-voices-tactile-sound--riser",
-          "desc": "-",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "sweep",
-          "stem": "motion-voices-tactile-sound--sweep",
-          "desc": "-",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "thud",
-          "stem": "motion-voices-tactile-sound--thud",
-          "desc": "-",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "travel",
-          "stem": "motion-voices-tactile-sound--travel",
-          "desc": "-",
           "scene": null,
           "noPreview": null
         }

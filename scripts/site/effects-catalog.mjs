@@ -5,7 +5,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MOTION_CUES } from '../../core/audio-tactile.js';
 import { registersOf } from '../gates/craft-coverage.mjs';
 import { catalogued } from '../../core/registry.js';
 // The blurb maps of the families that have no registry, each still living beside the vocabulary it
@@ -165,7 +164,6 @@ export const sections = [
   // about 80KB of engine, reached by 3 of 135 scenes and by 0 of 30 block files. Documentation alone
   // does not fix adoption (`parts` went 0 to 5 block files and its scenes stayed at 2), but a
   // catalogue that names the wrong key guarantees the opposite.
-  ['Motion voices (tactile sound)', 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.', names(MOTION_CUES), 'audio', { skip: null }],
   ['Blend modes', '`mixBlend`: how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it, MDN `mix-blend-mode`' }],
   ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
   ['Ransom faces', '`ransom` on a text layer: per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface, see it, do not read about it' }],

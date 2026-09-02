@@ -60,9 +60,6 @@ const { j } = USAGE_KIT;
 const { text, full } = USAGE_KIT;
 
 const USAGE = {
-  // A motion voice is placed by the DERIVATION, not usually by hand, but it can be named directly and
-  // an author reading the catalogue needs to see how.
-  'motion-voices-tactile-sound': (n) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
   // Two pseudo-names ("beam:border (border-beam)"), so the form is picked off the mode in the name.
   'per-frame-accent-layers': (n) => j({ type: 'beam', mode: n.includes('shine') ? 'shine' : 'border', x: 300, y: 430, w: 1320, h: 220, radius: 22, thickness: 3, speed: 0.5, start: 0, duration: 6 }),
   'vector-layer-logos-icons': (n) => (n.includes('morph')
@@ -110,10 +107,6 @@ const UNPLAYABLE = {
 
 // Why a family cannot be played here. Stated on the page, per family, in the author's own terms.
 const NO_PREVIEW = {
-  // A SOUND has no still and no moving preview. The site could play it, but the arsenal's preview slot
-  // renders a scene to frames, and frames cannot show a thud. Listed with its reason rather than left
-  // as a gap, which is what this table is for.
-  'motion-voices-tactile-sound': 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
   'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
