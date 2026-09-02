@@ -126,7 +126,7 @@
   {
     "name": "statBig",
     "family": "statBig",
-    "blurb": "scale-contrast stat — huge count + tiny label",
+    "blurb": "scale-contrast stat, huge count + tiny label",
     "props": {
       "to": 1950,
       "label": "frames",
@@ -2086,7 +2086,7 @@
   {
     "name": "searchEngine.home",
     "family": "searchEngine",
-    "blurb": "search home — wordmark + pill, query types in (keys click)",
+    "blurb": "search home. Wordmark + pill, query types in (keys click)",
     "props": {
       "variant": "home",
       "w": 540,
@@ -2118,7 +2118,7 @@
   {
     "name": "searchEngine.results",
     "family": "searchEngine",
-    "blurb": "search results — ranked links, cursor clicks one",
+    "blurb": "search results, ranked links, cursor clicks one",
     "props": {
       "variant": "results",
       "w": 540,

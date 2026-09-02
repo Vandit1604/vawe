@@ -969,11 +969,11 @@ catalog: build ## render the block registry to paged sheets (browse the arsenal)
 	done
 	@echo "→ out/_catalog-*.mp4 (one page per file)"
 
-blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest
-	node scripts/site/blocks-docs.mjs
+blocks-docs: ## regenerate the docs/BLOCKS.md table from the manifest (CHECK=1 to verify only)
+	node scripts/site/blocks-docs.mjs $(if $(CHECK),--check,)
 
-blocks-json: ## regenerate site/lib/blocks.json (the site's grid) from the manifest
-	node scripts/site/blocks-json.mjs
+blocks-json: ## regenerate site/lib/blocks.json (the site's grid) from the manifest (CHECK=1 to verify only)
+	node scripts/site/blocks-json.mjs $(if $(CHECK),--check,)
 
 scenes-json: ## check site/public/scenes/ against formats/scene/ (WRITE=1 to rewrite)
 	node scripts/site/scenes-json.mjs $(if $(WRITE),--write,)
@@ -987,6 +987,12 @@ films-json: ## check site/lib/films.json against the rendered films (WRITE=1 to 
 # lost in a merge, one committed before its sound existed, one still 9:16 while its film was 16:9.
 # A gate nobody runs is not a gate.
 site-check: scenes-json films-json site-counts ## check every published artifact against its source
+	@# The three GENERATED artifacts that are committed: registry/ (outside agents fetch it),
+	@# docs/BLOCKS.md and site/lib/blocks.json. Each is written by a target somebody has to remember,
+	@# and registry/ had drifted from blocks/catalog.mjs for a week before anything ran this.
+	@node scripts/site/registry.mjs --check
+	@node scripts/site/blocks-docs.mjs --check
+	@node scripts/site/blocks-json.mjs --check
 
 # make code-quality: the codebase may get simpler, never more tangled.
 # A RATCHET, not a threshold: 334 findings exist today, and a threshold would fail every build on day
@@ -1034,7 +1040,7 @@ blocks-scenes: ## per-block scene JSON + poster still for the site (no render ne
 # PHONY because registry/ is a real directory, and make would otherwise call the target up to date.
 .PHONY: registry
 registry: ## regenerate registry/ from the block + beat manifests (CHECK=1 to verify only)
-	node scripts/site/registry.mjs
+	node scripts/site/registry.mjs $(if $(CHECK),--check,)
 
 house-style: ## scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)

@@ -40,6 +40,14 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 // Not families: the shared vocabulary, the manifest, the option checker, and this file.
 const NOT_A_FAMILY = new Set(['index.mjs', 'kit.mjs', 'catalog.mjs', 'schema.mjs']);
 
+// Exported functions that are NOT block factories: they return colours and geometry, other families
+// import them, and they have no catalog row because they are not blocks. A REASON each, because the
+// refusal below is only worth having if this list cannot become the place an orphaned block hides.
+export const NOT_A_BLOCK = {
+  palette: 'blocks/codeanim.mjs: returns a CODE_THEMES colour table for a theme name, never layers',
+  routeEdge: 'blocks/diagram.mjs: returns one orthogonal edge path (points + arrow head), never layers',
+};
+
 // Sorted, so import order is the alphabet and never the filesystem's opinion. Two runs on two
 // machines assemble the registry in the same order, which is what makes a duplicate name a
 // reproducible error rather than a race.
@@ -93,6 +101,24 @@ for (const file of FAMILY_FILES) {
 
   Object.assign(EXPORTS, mod);
   for (const t of tables) Object.assign(SCHEMAS, mod[t]);
+}
+
+// CONTRACT 4, and it is the one that loses authored work. A factory with no CATALOG row still renders
+// if you already know its name, and appears in NOTHING that lists the library: docs/BLOCKS.md, make
+// catalog, the site grid, make arsenal, registry/. It has happened: six of the twelve codeBlock themes
+// were authored and WCAG-checked together and six shipped without a row, invisible, one manifest line
+// away from being usable (see blocks/catalog.mjs, where they now have rows).
+// The opposite direction, a row naming a family no factory exports, has thrown since the day it bit
+// somebody (below). This is the same argument in the direction that costs more, and it belongs here
+// rather than in a gate for the reason the other two throws give: the write site can refuse, and a
+// gate that runs afterwards only promises to notice.
+const CATALOGUED = new Set(CATALOG.map((e) => e.family));
+const uncatalogued = Object.keys(ownerOf).filter((n) => !CATALOGUED.has(n) && !NOT_A_BLOCK[n]);
+if (uncatalogued.length) {
+  throw new Error(`blocks/catalog.mjs has no row for: ${uncatalogued.map((n) => `"${n}" (blocks/${ownerOf[n]})`).join(', ')}. `
+    + `A factory with no row is invisible: it is in no catalog, no doc, no registry item and no search. `
+    + `Add \`{ name: '${uncatalogued[0]}', family: '${uncatalogued[0]}', blurb: '<one line>', props: { … } }\` to blocks/catalog.mjs. `
+    + `If it is a shared helper and not a block, add it to NOT_A_BLOCK in blocks/index.mjs WITH A REASON.`);
 }
 
 Object.assign(BLOCKS, EXPORTS);

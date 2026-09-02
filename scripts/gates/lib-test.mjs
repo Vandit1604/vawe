@@ -71,7 +71,7 @@ import { rollOffsets, displayNum } from '../../core/layers/count.js';
 import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, followCursor, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
 import { bakeCameraMove } from '../../core/produce.js';
 import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
-import { BLOCKS } from '../../blocks/index.mjs';
+import { BLOCKS, CATEGORY_OF, NOT_A_BLOCK } from '../../blocks/index.mjs';
 import { SHADER_FX } from '../../core/stings.js';
 import { AMBIENT_FX, AMBIENT_SHADERS } from '../../core/shaders-ambient.js';
 import { shaderAt as ambientShaderAt, validate as ambientValidate } from '../../core/surfaces/shader.js';
@@ -1334,6 +1334,27 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     if (small.length) bad.push(`${e.name}: top-level text size ${small.join(',')} < the schema's 18px min`);
   }
   ok(`registry: all ${CATALOG.length} manifest rows resolve + build${bad.length ? ': ' + bad.slice(0, 3).join(' · ') : ''}`, bad.length === 0);
+
+  // ── A FACTORY WITH NO CATALOG ROW IS INVISIBLE, AND blocks/index.mjs NOW REFUSES ONE ─────────
+  // The direction that loses authored work: it renders if you know its name and appears in no
+  // catalog, no doc, no registry item and no search. Six codeBlock themes shipped that way. The
+  // refusal is at the write site (module load), so this asserts the two halves of it that a bad edit
+  // could quietly widen: every discovered factory is accounted for, and every exemption gives a
+  // reason. An exemption with an empty reason is how the list becomes the hiding place.
+  {
+    const families = new Set(CATALOG.map((e) => e.family));
+    const orphans = Object.keys(CATEGORY_OF).filter((n) => !families.has(n) && !NOT_A_BLOCK[n]);
+    ok(`registry: every factory has a catalog row or a named exemption${orphans.length ? ': ' + orphans.join(', ') : ''}`,
+      orphans.length === 0);
+    const unreasoned = Object.entries(NOT_A_BLOCK).filter(([, why]) => typeof why !== 'string' || why.length < 20);
+    ok(`registry: every NOT_A_BLOCK exemption carries a reason${unreasoned.length ? ': ' + unreasoned.map(([n]) => n).join(', ') : ''}`,
+      unreasoned.length === 0);
+    // The exemptions must stay EXEMPTIONS: a name here that later gets a catalog row is a block being
+    // hidden from every listing by a stale line nobody re-read.
+    const shadowed = Object.keys(NOT_A_BLOCK).filter((n) => families.has(n));
+    ok(`registry: no NOT_A_BLOCK name also has a catalog row${shadowed.length ? ': ' + shadowed.join(', ') : ''}`,
+      shadowed.length === 0);
+  }
 
   // determinism is the product; a block that reads a clock or Math.random breaks every render.
   const drift = CATALOG.filter((e) => BLOCKS[e.family]).filter((e) => {
@@ -5574,6 +5595,25 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   for (const [label, sheet] of [['craft', craft], ['blind', ab]]) {
     ok(`rubric: the ${label} sheet asks what the empty part is DOING, not how much there is`,
       /doing a job/.test(sheet) && !/crafted density/.test(sheet));
+  }
+}
+
+// ---- the committed GENERATED artifacts have a check, and a target that runs it ----
+// registry/, docs/BLOCKS.md and site/lib/blocks.json are generated, committed, and read by outsiders.
+// Each check EXISTED and none was reachable: the registry target documented `CHECK=1` in three places
+// and its recipe passed no flag, so `make registry CHECK=1` regenerated and exited 0, which looks
+// exactly like a passing check. registry/ and blocks.json were both stale for a week underneath it.
+// These asserts hold the wiring, not the freshness: site-check runs the real comparison, and this
+// fails the moment somebody drops the flag again, which is the bug that actually happened.
+{
+  const mk = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '../../Makefile'), 'utf8');
+  for (const gen of ['registry', 'blocks-docs', 'blocks-json']) {
+    ok(`generated: make ${gen} passes CHECK=1 through as --check`,
+      new RegExp(`node scripts/site/${gen}\\.mjs \\$\\(if \\$\\(CHECK\\),--check,\\)`).test(mk));
+    ok(`generated: site-check verifies ${gen}`,
+      new RegExp(`node scripts/site/${gen}\\.mjs --check`).test(mk));
+    ok(`generated: scripts/site/${gen}.mjs reads --check`,
+      /--check/.test(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), `../site/${gen}.mjs`), 'utf8')));
   }
 }
 

@@ -58,7 +58,10 @@ import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'registry');
-const CHECK = process.env.CHECK === '1';
+// `--check` (what the Makefile passes) or CHECK=1 in the environment. Both, because the target read
+// the environment while every sibling target passed a flag, and a check reachable only one way is a
+// check somebody runs the other way and believes.
+const CHECK = process.argv.includes('--check') || process.env.CHECK === '1';
 const SITE = 'https://vawe.dev';
 const SCHEMA = `${SITE}/schema`;
 
