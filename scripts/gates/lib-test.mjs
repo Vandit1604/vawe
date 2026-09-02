@@ -6448,6 +6448,29 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     (codes.get('silence-without-a-reason') || new Set()).has('scripts/gates/audio-check.mjs'));
 }
 
+// ---- `make sections` has to ANSWER the rule that cites it, not merely relate to it ------------
+//
+// CLAUDE.md's "Reflecting a real website" section is tagged `[ref: make sections]`, and rung.mjs can
+// only check that the Makefile defines the target. That is a floor, and the tag is worth nothing at the
+// floor: a [ref] counts only when running the command returns THE RULE'S OWN ANSWER. The rule says
+// storyboard one beat per section, in the site's order, and capture the real block. So the two things
+// the output must carry are asserted here rather than left to whoever next edits the printer.
+//
+// Verified by running it against a live site while the tag was written: 6 sections, each with a stable
+// selector and either a ready `make capture` line or the canvas fallback. What a test cannot re-run on
+// every machine is the network, so what is checked is the printer, which is the part that can rot.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'scripts/brand/sections.mjs'), 'utf8');
+  ok('sections: the inventory tells you to storyboard one beat per section, in the site order',
+    /storyboard = one beat per section, in this order/.test(src));
+  ok('sections: and hands you a runnable `make capture` per block, which is the capture-first half',
+    /make capture URL="\$\{url\}" SEL=/.test(src));
+  // A CRAWL THAT FINDS NOTHING HAS TOLD YOU NOTHING (docs/MISTAKES.md #207). An empty inventory that
+  // exits 0 is the tag's worst failure: the command ran, said nothing, and the rule reads as answered.
+  ok('sections: an empty inventory FAILS rather than printing a green tick over nothing',
+    /if \(!manifest\.length\)/.test(src) && /process\.exit\(1\)/.test(src));
+}
+
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter
 // how many assertions actually RAN, so a block that quietly stops running (an `await import` failing
 // inside a swallowing catch, a section deleted in a merge, an early return added while debugging) takes

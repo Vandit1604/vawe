@@ -223,7 +223,7 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 5. **A changing word belongs in a fixed box.** If one word swaps mid-sentence, put it in a fixed-width
    chip so nothing after it reflows, and the chip is the natural place for the brand colour.
 
-## Reflecting a real website (capture-first: the taste is already on the page)  `[eye]`
+## Reflecting a real website (capture-first: the taste is already on the page)  `[ref: make sections]`
 
 Never rewrite a site's sections by hand; you'll lose its taste and ignore half its assets. **Capture the
 real blocks instead**, and the ordered procedure lives in
