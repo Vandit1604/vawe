@@ -149,7 +149,7 @@ P-frame freeze (codec plus stateful), feedback and phosphor trails (frame feedba
 
 ## Tier 3: GLSL
 
-`SHADER_FX` holds 35 entries (`core/stings.js:35`) and `AMBIENT_FX` 18 (`core/shaders-ambient.js:49`);
+`SHADER_FX` holds 35 entries (`core/stings.js:35`) and `AMBIENT_FX` 21 (`core/shaders-ambient.js:49`);
 between them the families below are majority built. This section used to read as a wish-list and sent
 two consecutive planning passes at work that already existed.
 

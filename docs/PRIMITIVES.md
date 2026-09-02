@@ -159,7 +159,7 @@ fields at load, so it is pure sugar: determinism and every gate are unchanged.
 - **See any transition before authoring**: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
   renders a labelled A→B filmstrip. Decision theory: `docs/CRAFT/TRANSITIONS.md`.
 
-## Ambient shader looks (`core/shaders-ambient.js`): 18 continuous WebGL fields (the `shader` layer)
+## Ambient shader looks (`core/shaders-ambient.js`): 21 continuous WebGL fields (the `shader` layer)
 
 Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.
 Two roles:

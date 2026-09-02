@@ -114,8 +114,47 @@ if (fs.existsSync(BG_MDX)) {
   if (r.status !== 0) findings.push(String(r.stderr || r.stdout).replace(/✗/g, "").trim().split("\n").map((l) => l.trim()).filter(Boolean).join(" "));
 }
 
+// CLAUDE.md QUOTES NUMBERS TOO, AND IT IS THE FILE WITH THE WIDEST BLAST RADIUS. It is loaded into
+// every session, so a stale figure there is repeated by whoever reads it, and its own text says so:
+// "a number in this file gets quoted downstream faster than it gets checked". All three of its
+// checkable counts had decayed while this gate watched two other files (566/36 against a real 638/48,
+// 337 against 445, 134 against 148), which is this file's own lesson about the list underneath the rule,
+// arriving a third time.
+//
+// Each count is read from the thing that OWNS it, never recomputed here: a second way to count the
+// arsenal would be the drift this gate exists to catch, inside the gate that catches it.
+{
+  const claude = fs.readFileSync(path.join(repoRoot, 'CLAUDE.md'), 'utf8');
+  const ask = (script, args, re) => {
+    const r = spawnSync('node', [path.join(repoRoot, script), ...args], { cwd: repoRoot, encoding: 'utf8' });
+    const m = re.exec(String(r.stdout || '') + String(r.stderr || ''));
+    return m ? m.slice(1) : null;
+  };
+  const effects = /(\d+) effects across (\d+) families/.exec(
+    fs.readFileSync(path.join(repoRoot, 'docs/EFFECTS.md'), 'utf8'));
+  const census = ask('scripts/author/arsenal.mjs', ['--census'], /ARSENAL CENSUS · (\d+) named things/);
+  const scenes = ask('scripts/gates/waiver-drift.mjs', [], /WAIVER CENSUS · (\d+) scenes/);
+
+  const CLAIMS = [
+    { re: /(\d+) effects across (\d+) families/, want: effects && effects.slice(1),
+      src: 'docs/EFFECTS.md, which `make effects` generates' },
+    { re: /(\d+) named things/, want: census, src: 'scripts/author/arsenal.mjs --census' },
+    { re: /(\d+) gate-visible scenes/, want: scenes, src: 'scripts/gates/waiver-drift.mjs' },
+  ];
+  for (const { re, want, src } of CLAIMS) {
+    if (!want) { findings.push(`CLAUDE.md: could not reach ${src} to check its count, so it was NOT checked`); continue; }
+    const said = re.exec(claude);
+    if (!said) continue;   // the sentence was rewritten: nothing to check, not a failure
+    const have = said.slice(1);
+    if (have.join('/') !== want.join('/')) {
+      findings.push(`CLAUDE.md says "${said[0]}" and ${src} says ${want.join(' / ')}. `
+        + 'Fix the sentence: this file is read every session, so a stale number here is repeated downstream.');
+    }
+  }
+}
+
 if (!findings.length) {
-  console.log(`✓ docs in sync: no shipped effect listed as missing, every quoted registry count right (ROADMAP + PRIMITIVES + bg presets)`);
+  console.log(`✓ docs in sync: no shipped effect listed as missing, every quoted registry count right (ROADMAP + PRIMITIVES + CLAUDE.md + bg presets)`);
   process.exit(0);
 }
 console.log(`DOCS DRIFT (${findings.length})\n`);

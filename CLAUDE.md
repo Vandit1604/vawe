@@ -141,7 +141,14 @@ either way:
 |---|---|---|---|---|
 | pictorial LAYERS (see the warning below) | 46% (16/35) | 38% (3/8) | 3% (unverified) | **6%** |
 | layers with a hand-keyed `motion` track | 11% (4/35) | **75%** (6/8) | 10% (unverified) | **0%** |
-| `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | 1 in 84% of films |
+| `bg` windows | **6** in 19.6s, bound to `cut@0..cut@3` | 1 in 5s | 1 in 28s | 1 in 82% of films |
+
+**Every library figure below comes from `node scripts/dev/library-stats.mjs`, and none is typed by
+hand.** That script measures all of them in one run against one population, prints the definition it
+used for "pictorial", and is the thing to quote. It exists because these numbers were hand-measured
+once and then decayed in place: three had drifted by the time `docs-drift` learned to check them (566
+effects against a real 638, the arsenal census 337 against a real 445, the library 134 against 148). Re-run it before you
+cite anything here, and correct the sentence if it moved.
 
 **The population, named once so every figure here can be re-run.** "The library" means the **134
 gate-visible scenes** the gates themselves reason over: `formats/scene/*.json` with `module=="scene"`,
@@ -151,9 +158,9 @@ other populations exist (98 without scratch, 154 raw files in the directory) and
 file once cited 93, 130 and 144 as the size of the same library in three sentences. **"that film" is not
 named anywhere and I could not identify it, so its two cells are unverified and marked so.**
 
-**A FRESH CLONE SEES A THIRD OF 134, AND NOTHING IS BROKEN.** Films are gitignored on purpose
+**A FRESH CLONE SEES A THIRD OF 148, AND NOTHING IS BROKEN.** Films are gitignored on purpose
 (`.gitignore:61`: a video instance is not the framework), with an allowlist for the handful the site
-needs. So `waiver-drift.mjs` prints `WAIVER CENSUS · 134 scenes` on this machine and about a third of
+needs. So `waiver-drift.mjs` prints `WAIVER CENSUS · 148 scenes` on this machine and about a third of
 that on a clean checkout, and EVERY census in this file behaves the same way. If your count is smaller,
 the gates are fine and the number here is not stale: you are looking at a smaller library.
 
@@ -405,10 +412,10 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 337 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 445 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
-`docs/EFFECTS.md`, 566 effects across 36 families). Reach for it before you invent anything. The measured cost
-of not doing so: the `{type:"beat"}` blueprint mechanism is used by **2 of the 134 gate-visible scenes**, and 12 of its
+`docs/EFFECTS.md`, 638 effects across 48 families). Reach for it before you invent anything. The measured cost
+of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 148 gate-visible scenes**, and 12 of its
 19 beats have never been used once.
 
 **`make track SHAPE=pan|blast|drift|enter|exit`** emits a hand-keyed `motion` track from a shape
@@ -451,8 +458,8 @@ deleted. **You are the check now**, with `make judge` and your eyes. No green ti
 is only type. That was always true: even at its best the gate could prove a picture was large and never
 that it explained anything.
 
-Measured over the 134 gate-visible scenes: **56 carry zero pictorial layers of any size**, and the
-median film gives **6% of its layers to picture**. That was nobody's decision. It is debt, not a
+Measured over the 148 gate-visible scenes: **64 carry zero pictorial layers of any size**, and the
+median film gives **5% of its layers to picture**. That was nobody's decision. It is debt, not a
 pattern to copy. How to decide what to show: [`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
 
 ## A SLIDESHOW IS A FAILURE, AND A RESIZING BOX IS NOT THE ONLY WAY OUT
@@ -506,8 +513,8 @@ windows in the order the film turns, give none of them a `from`/`to`, and the en
 the joint after it (`core/junctions.js`), so the cuts you already wrote own the numbers.
 
 This is the strongest single lever in the file. brew inverts the tone of the world on four of its five
-cuts and spends its one accent window on the logo reveal, while **112 of the 134 gate-visible scenes,
-84%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
+cuts and spends its one accent window on the logo reveal, while **121 of the 148 gate-visible scenes,
+82%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
 
 Then **judge it across frames, never on one still**: pull 4+ timestamps and compare them as a strip. A
 still hides speed, scale and direction. A background was once "matched" on one frame and was, in
@@ -528,8 +535,8 @@ a `_why`. **Four films rule a grid by hand today, and none of them wrote it down
 
 ## SILENCE IS A DEVICE, NOT A DEFAULT
 
-**110 of the 134 gate-visible scenes ship mute, 82%**: 17 carry no `audio` key at all and 93 declare
-`silent: true`. Of those 93, **only 13 say why**. So the sentence to remember is not "nobody declares
+**123 of the 148 gate-visible scenes ship mute, 83%**: 17 carry no `audio` key at all and 106 declare
+`silent: true`. Of those 106, **only 26 say why**. So the sentence to remember is not "nobody declares
 the silence", it is "nearly everybody declares it and almost nobody justifies it". That closes the
 whole aural family of structural device: the sound bridge, music-led structure, the unfinished
 sentence. A sound bridge is also a continuous object the picture never has to carry.
