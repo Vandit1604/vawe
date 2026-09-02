@@ -135,6 +135,15 @@ const VALUES = {
   vars: { '--probe': [0, 1] },
   css: { letterSpacing: '0.01em' },
   clicks: [0.5],
+  // `preset` is ONE slot over two registries (31 kinetic names for split text, 7 glow names, no
+  // overlap), so the schema enum's first entry is a kinetic name and a glow layer must be told its own.
+  // Before core/layers/glow.js became a registry an unknown name here returned null and painted the
+  // plain gradient, so this probe passed by rendering the wrong thing.
+  // A field whose valid set is a UNION no enum can express (EASINGS + the feel words + the
+  // interpolation modes) still needs one real value to probe with. That is an input, not a contract.
+  ease: 'easeOutCubic',
+  varsEase: 'easeOutCubic',
+  'glow.preset': 'bloom',
   color: '#2563eb',
   anim: 'fade',
   out: 'fade',

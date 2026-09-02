@@ -17,6 +17,9 @@
 // have passed in silence. A name is not a fact about a layer; a name on a type is.
 import fs from 'node:fs';
 import { ANIM_NAMES } from '../../core/clips.js';
+import { EASINGS } from '../../core/motion.js';
+import { PRESET_REGISTRY } from '../../core/type.js';
+import { GLOW_REGISTRY } from '../../core/layers/glow.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
@@ -135,6 +138,20 @@ const OWNED = [
   // left lib-test comparing the two. Comparing is not owning: the gate said "they differ" and the
   // author still hand-edited schema.json. The registry owns it here, so --write derives it.
   { path: 'captionStyle',       want: CAP_STYLE_NAMES,                        src: 'core/captions.js CAP_STYLES' },
+  // `out` sat on this table for as long as it has existed and derived NOTHING, because the schema
+  // declared it a bare string and the loop below skipped a path with no enum without a word. The skip
+  // is loud now, and the enum is seeded, so the claim and the effect finally agree.
+  { path: 'layers.item.out',    want: [...ANIM_NAMES, 'none'],                 src: 'core/clips.js ANIM' },
+  // One `preset` slot, two vocabularies, and they do not overlap: 31 kinetic names for split text and
+  // 7 glow names. So a single enum still tells each name from a typo, and the per-TYPE question stays
+  // where it belongs, with the registry that throws at boot.
+  { path: 'layers.item.preset', want: [...PRESET_REGISTRY.names, ...GLOW_REGISTRY.names], src: 'core/type.js PRESETS + core/layers/glow.js GLOW_PRESETS' },
+  // `ease` and `varsEase` are deliberately NOT enumerated, and a first attempt to add them here was
+  // wrong in a way worth recording: the enum was Object.keys(EASINGS), and a shipped scene writing
+  // `ease: "sharp"` stopped booting, because the field also takes the FEEL words and the interpolation
+  // modes. core/motion.js `isEasingName` is the ONE membership test over that union, and its own
+  // comment says core/validate.mjs already held a second copy that was a registry behind. A schema
+  // enum would have been the third.
 ];
 
 // THE OWNED ENUMS ARE GENERATED TOO. Until now this table only COMPARED, so every registry that grew
@@ -161,11 +178,31 @@ function renderEnum(found, values) {
 // because the sentinels appended above (`none`) are already in some registries.
 const ownedEnum = (want) => [...new Set(want)];
 
+// A PATH ON THE OWNED TABLE CLAIMS AN OWNER, SO IT MUST HAVE SOMETHING TO OWN. Both loops below used
+// to `continue` past a path the schema declares without an `enum`, and `layers.item.out` therefore sat
+// on the table deriving nothing while the gate printed a tick: it was declared a bare string, so there
+// was no array to compare or rewrite and nothing said so. A declaration accepted and then ignored is
+// the exact failure this file exists to end, so the refusal lives here, once, and both callers use it.
+function ownedEnumNode(pth, src) {
+  const node = at(pth);
+  if (!node) {
+    console.error(`\u2717 ${pth} is on the owned table and does not exist in the schema`);
+    process.exit(2);
+  }
+  if (!Array.isArray(node.enum)) {
+    console.error(`\u2717 ${pth} names ${src} as the owner of its vocabulary, but the schema declares no`);
+    console.error('  "enum" there, so nothing is compared and nothing is derived. Seed it with an empty');
+    console.error('  "enum": [] at that path and re-run with --write.');
+    process.exit(2);
+  }
+  return node;
+}
+
+
 function rewriteOwnedEnums(src) {
   const targets = [];
   for (const { path: pth, want } of OWNED) {
-    const node = at(pth);
-    if (!node || !Array.isArray(node.enum)) continue;   // not declared as an enum: nothing to derive
+    const node = ownedEnumNode(pth, OWNED.find((o) => o.path === pth).src);
     const key = JSON.stringify(node.enum);
     const same = targets.find((t) => t.key === key);
     // Two paths whose arrays read alike cannot be told apart by value. Identical intent (seams.timing
@@ -329,8 +366,7 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
 {
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {
-    const node = at(pth);
-    if (!node || !Array.isArray(node.enum)) continue;   // not declared as an enum: nothing can drift
+    const node = ownedEnumNode(pth, src);
     checked++;
     const d = node.enum;
     const wantS = [...new Set(want)].sort().join(',');

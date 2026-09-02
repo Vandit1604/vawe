@@ -1448,6 +1448,7 @@
      ]
     },
     "out": {
+      "enum": ["fade", "up", "rise", "pop", "scale", "lift", "defocus", "slide-left", "slide-right", "slide-up", "slide-down", "wipe", "wipe-right", "wipe-left", "wipe-down", "wipe-up", "iris", "clock", "none"],
      "type": "string",
      "label": "driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONTINUES the travel is the oppositely named one: anim:\"slide-right\" + out:\"slide-left\", anim:\"wipe-right\" + out:\"wipe-left\"."
     },
@@ -1560,6 +1561,7 @@
      ]
     },
     "preset": {
+      "enum": ["weight", "up", "down", "type", "scale", "blur", "bounce", "slide", "wave", "shimmerWave", "flip", "fall", "elastic", "skew", "focus", "decode", "tilt", "stretch", "gradient", "highlight", "colorWave", "underline", "shadow", "riseClip", "draw", "chroma", "swing", "unfold", "strike", "flap", "assemble", "bloom", "halation", "diffusion", "rimLight", "spotlight", "chromatic", "chromaCycle"],
      "type": "string",
      "label": "Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/halation/diffusion/rimLight/spotlight/chromatic/chromaCycle on a glow layer)"
     },
