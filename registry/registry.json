@@ -1285,7 +1285,7 @@
     {
       "name": "searchEngine.home",
       "type": "vawe:block",
-      "description": "search home — wordmark + pill, query types in (keys click)",
+      "description": "search home. Wordmark + pill, query types in (keys click)",
       "tags": [
         "searchEngine"
       ]
@@ -1293,7 +1293,7 @@
     {
       "name": "searchEngine.results",
       "type": "vawe:block",
-      "description": "search results — ranked links, cursor clicks one",
+      "description": "search results, ranked links, cursor clicks one",
       "tags": [
         "searchEngine"
       ]
@@ -1389,7 +1389,7 @@
     {
       "name": "statBig",
       "type": "vawe:block",
-      "description": "scale-contrast stat — huge count + tiny label",
+      "description": "scale-contrast stat, huge count + tiny label",
       "tags": [
         "statBig"
       ]

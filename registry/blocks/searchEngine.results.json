@@ -3,7 +3,7 @@
   "name": "searchEngine.results",
   "type": "vawe:block",
   "title": "searchEngine.results",
-  "description": "search results — ranked links, cursor clicks one",
+  "description": "search results, ranked links, cursor clicks one",
   "tags": [
     "searchEngine"
   ],
