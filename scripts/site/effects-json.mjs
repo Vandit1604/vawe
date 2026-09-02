@@ -72,7 +72,6 @@ const USAGE = {
   'beat-blueprints': (n) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
   'compositions-bespoke-per-beat-timeline': (n) => j({ type: 'composition', comp: n, props: {}, start: 0.2, dur: 4.4 }),
   'layer-types': (n) => j({ type: n }),
-  'layer-as-texture-resample': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, resample: { fx: n, amount: [0, 1] } }),
   'blend-modes': (n) => text({ mixBlend: n }),
   easings: (n) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
   // One slot each, and which slot depends on which registry the word came from.
@@ -122,7 +121,6 @@ const NO_PREVIEW = {
   // renders a scene to frames, and frames cannot show a thud. Listed with its reason rather than left
   // as a gap, which is what this table is for.
   'motion-voices-tactile-sound': 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
-  'layer-as-texture-resample': 'resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
   'beat-blueprints': 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
   'compositions-bespoke-per-beat-timeline': 'a composition is a hand-authored timeline over data you pass. There is no neutral data for it.',

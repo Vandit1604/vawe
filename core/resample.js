@@ -24,7 +24,7 @@
 // `type` that types is frozen at the state build left it in. The MOTION comes from the pass, the
 // amount ramp, the noise clock, not from the source. That is a hero device on a settled beat, not a
 // wrapper you put around a moving one.
-import { createResampler, RESAMPLE_FX } from './resample-fx.js';
+import { createResampler, RESAMPLE_REGISTRY } from './resample-fx.js';
 import { buildInlinedCss, domToCanvas, rasterStats } from './raster.js';
 
 const SPECS = new WeakMap();   // el → { r, src, fx, amount, speed, seed, isStatic }
@@ -54,9 +54,7 @@ export function attachResample(kit, el, L) {
   // context) on the same element.
   if (SPECS.has(el) || PENDING.some((p) => p.el === el)) return;
   const spec = typeof L.resample === 'string' ? { fx: L.resample } : L.resample;
-  if (!RESAMPLE_FX.includes(spec.fx)) {
-    throw new Error(`unknown resample "${spec.fx}", one of: ${RESAMPLE_FX.join(', ')}`);
-  }
+  RESAMPLE_REGISTRY.pick(spec.fx);   // the one refusal, owned beside the vocabulary
   const src = sourceOf(el);
   if (!src) { PENDING.push({ el, L, spec }); return; }   // no raster of its own → bake the subtree
 

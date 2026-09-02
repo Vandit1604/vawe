@@ -1292,6 +1292,75 @@
       ]
     },
     {
+      "id": "layer-as-texture-resample",
+      "title": "Layer-as-texture (resample)",
+      "tag": "per-frame",
+      "intro": "`\"resample\":{ \"fx\":\"<name>\", \"amount\":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels · real lens distortion, radial and spin blur.\n\nIt works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot · the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name · their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.\n\nEach resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect · one or two per film, never decoration on fifty layers.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.",
+      "count": 8,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bitCrush",
+          "stem": "layer-as-texture-resample--bitcrush",
+          "desc": "quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "chromaShift",
+          "stem": "layer-as-texture-resample--chromashift",
+          "desc": "radial RGB separation, the channels pulling apart from the centre outwards",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "dissolve",
+          "stem": "layer-as-texture-resample--dissolve",
+          "desc": "noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "fisheye",
+          "stem": "layer-as-texture-resample--fisheye",
+          "desc": "real lens distortion · barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "macroblock",
+          "stem": "layer-as-texture-resample--macroblock",
+          "desc": "the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "refract",
+          "stem": "layer-as-texture-resample--refract",
+          "desc": "liquid glass · the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "spinBlur",
+          "stem": "layer-as-texture-resample--spinblur",
+          "desc": "smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "zoomBlur",
+          "stem": "layer-as-texture-resample--zoomblur",
+          "desc": "radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "adjustment-layers-grade-what-is-beneath",
       "title": "Adjustment layers (grade what is BENEATH)",
       "tag": "per-layer",
@@ -3984,75 +4053,6 @@
           "name": "video",
           "stem": "layer-types--video",
           "desc": "real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "layer-as-texture-resample",
-      "title": "Layer-as-texture (resample)",
-      "tag": "per-frame",
-      "intro": "`\"resample\":{ \"fx\":\"<name>\", \"amount\":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels · real lens distortion, radial and spin blur.\n\nIt works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot · the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name · their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.\n\nEach resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect · one or two per film, never decoration on fifty layers.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.",
-      "count": 8,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "bitCrush",
-          "stem": "layer-as-texture-resample--bitcrush",
-          "desc": "quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "chromaShift",
-          "stem": "layer-as-texture-resample--chromashift",
-          "desc": "radial RGB separation, the channels pulling apart from the centre outwards",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "dissolve",
-          "stem": "layer-as-texture-resample--dissolve",
-          "desc": "noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "fisheye",
-          "stem": "layer-as-texture-resample--fisheye",
-          "desc": "real lens distortion · barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "macroblock",
-          "stem": "layer-as-texture-resample--macroblock",
-          "desc": "the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "refract",
-          "stem": "layer-as-texture-resample--refract",
-          "desc": "liquid glass · the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "spinBlur",
-          "stem": "layer-as-texture-resample--spinblur",
-          "desc": "smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "zoomBlur",
-          "stem": "layer-as-texture-resample--zoomblur",
-          "desc": "radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp",
           "scene": null,
           "noPreview": null
         }

@@ -265,6 +265,25 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `starfield` | flying starfield (per-frame) |
 | `waves` | sine wave field (per-frame) |
 
+## Layer-as-texture (resample)  `[per-frame]`
+
+`"resample":{ "fx":"<name>", "amount":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.
+
+It works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot: the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name: their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.
+
+Each resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect: one or two per film, never decoration on fifty layers.
+
+| name | what / when |
+|---|---|
+| `bitCrush` | quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration |
+| `chromaShift` | radial RGB separation, the channels pulling apart from the centre outwards |
+| `dissolve` | noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away |
+| `fisheye` | real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge |
+| `macroblock` | the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration |
+| `refract` | liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do |
+| `spinBlur` | smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal |
+| `zoomBlur` | radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp |
+
 ## Adjustment layers (grade what is BENEATH)  `[per-layer]`
 
 `{ "type":"adjust", "kind":"<name>" }`. One grade over every layer with a LOWER `track`, so a whole beat can go soft or grey from a single layer instead of the same filter written onto fifteen. `amount` is the strength in that kind's own unit, and the CSS reads `var(--adjust)`, so the existing `vars` track keys it: `{ "type":"adjust","kind":"blur","amount":20,"vars":{"--adjust":[0,1]},"varsDur":0.8 }`. A raw `filter` string is the escape hatch and is static.
@@ -778,25 +797,6 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
 | `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
 | `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
-
-## Layer-as-texture (resample)  `[per-frame]`
-
-`"resample":{ "fx":"<name>", "amount":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.
-
-It works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot: the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name: their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.
-
-Each resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect: one or two per film, never decoration on fifty layers.
-
-| name | what / when |
-|---|---|
-| `bitCrush` | quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration |
-| `chromaShift` | radial RGB separation, the channels pulling apart from the centre outwards |
-| `dissolve` | noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away |
-| `fisheye` | real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge |
-| `macroblock` | the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration |
-| `refract` | liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do |
-| `spinBlur` | smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal |
-| `zoomBlur` | radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp |
 
 ## Motion voices (tactile sound)  `[audio]`
 

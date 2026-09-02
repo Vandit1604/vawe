@@ -20,7 +20,6 @@ import { catalogued } from '../../core/registry.js';
 // used to live in DESC had drifted: 3 of 12 beats were absent from it.
 import { BEAT_BLURBS } from './blueprints-catalog.mjs';
 import { LIGHTFIELD_BLURBS } from '../../core/lightfield/options.js';
-import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
 import { COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { COMPOSITION_NAMES } from '../../core/compositions/index.js';
@@ -29,7 +28,6 @@ import { COMPOSITION_NAMES } from '../../core/compositions/index.js';
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
 import { LAYER_TYPES, LAYER_BLURBS } from '../../core/layers/index.js';
-import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { EASINGS } from '../../core/motion.js';
 import { RANSOM_FACES } from '../../core/ransom.js';
@@ -159,7 +157,7 @@ const derived = catalogued().map((r) => {
 // must read the registries, never rewrite docs/EFFECTS.md.
 //
 // The hand-written half, and it stays hand-written for one reason each: none of these is a registry.
-// `BEATS`, `LAYER_TYPES`, `RESAMPLE_FX`, `GENERATORS` and the rest are
+// `BEATS`, `LAYER_TYPES`, `GENERATORS` and the rest are
 // plain exports with no `defineRegistry` behind them, so there is no definition site to hang a catalog
 // block on. Two are not even one vocabulary: "Per-frame accent layers" and "Vector layer" are
 // pseudo-names for a MODE of a layer type, and "Plain words" merges three registries (feel · duration ·
@@ -171,7 +169,6 @@ export const sections = [
   ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint', { blurbs: BEAT_BLURBS }],
   ['Compositions (bespoke per-beat timeline)', '`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).', names(COMPOSITION_NAMES), 'composition', { blurbs: COMPOSITION_BLURBS }],
   ['Layer types', 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.', names(LAYER_TYPES), 'layer', { blurbs: LAYER_BLURBS }],
-  ['Layer-as-texture (resample)', '`"resample":{ "fx":"<name>", "amount":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.\n\nIt works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot: the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name: their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.\n\nEach resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect: one or two per film, never decoration on fifty layers.', names(RESAMPLE_FX), 'per-frame', { blurbs: RESAMPLE_BLURBS }],
   // THE KEY IS `modifiers`, AND THIS LINE SAID `fx` FOR AS LONG AS THE FAMILY HAS EXISTED. `L.fx` is
   // the named-GSAP-effect slot and core/fx/index.js says so in capitals; an author who followed this
   // catalogue wrote `fx: [{ tilt: … }]` and got `layers[0].fx entry needs a name`. Ten modifiers,

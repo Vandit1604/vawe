@@ -20,6 +20,8 @@
 // premultipliedAlpha:true, so their texels already are. Blur is a weighted average, which is only
 // correct in premultiplied space anyway; alpha-modulating effects scale the whole vec4.
 
+import { defineRegistry } from './registry.js';
+
 export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift'];
 
 // RESAMPLE_BLURBS: one line per fx, next to the list the shader switches on (the `blurb` pattern of
@@ -43,6 +45,26 @@ export const RESAMPLE_BLURBS = {
   refract: 'liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do',
   chromaShift: 'radial RGB separation, the channels pulling apart from the centre outwards',
 };
+
+// The registry, and with it the catalogue section that used to be hand-listed in
+// scripts/site/effects-catalog.mjs beside this identical list, with its usage snippet and its
+// no-preview reason keyed by a slug of the heading in scripts/site/effects-json.mjs.
+//
+// It also gives the family ONE refusal. `createResampler().draw` below and `attachResample` in
+// core/resample.js were the same sentence written twice over the same eight names, so an unknown fx
+// was rejected in two voices depending on which path reached it first, and neither could say that the
+// name is really a paint fx or an ambient shader. RESAMPLE_FX stays the array it was: its ORDER is the
+// `u_fx` index the fragment shader switches on, so it is a wire format, not just a name list.
+export const RESAMPLE_REGISTRY = defineRegistry('resample fx', Object.fromEntries(RESAMPLE_FX.map((n) => [n, n])),
+  { slot: 'resample.fx', blurbs: RESAMPLE_BLURBS,
+    catalog: {
+      title: 'Layer-as-texture (resample)',
+      tag: 'per-frame',
+      intro: '`"resample":{ "fx":"<name>", "amount":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.\n\nIt works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot: the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name: their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.\n\nEach resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect: one or two per film, never decoration on fifty layers.',
+      usage: (n, { j }) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, resample: { fx: n, amount: [0, 1] } }),
+      noPreview: 'resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.',
+    },
+  });
 
 const VERT = 'attribute vec2 a; varying vec2 v; void main(){ v = a*0.5+0.5; gl_Position = vec4(a,0.0,1.0); }';
 
@@ -216,7 +238,7 @@ export function createResampler(w, h) {
     // A still image is the same texels on every frame and re-uploading it 900 times is pure waste.
     draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false) {
       const idx = RESAMPLE_FX.indexOf(fx);
-      if (idx < 0) throw new Error(`unknown resample "${fx}", one of: ${RESAMPLE_FX.join(', ')}`);
+      if (idx < 0) RESAMPLE_REGISTRY.pick(fx);   // throws, naming this vocabulary and any other the word lives in
       // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded.
       // A 404'd image reports width 1400 and naturalWidth 0. Uploading it leaves the texture
       // INCOMPLETE, and an incomplete texture samples as opaque black, so the layer renders as a
