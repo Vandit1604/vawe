@@ -38,6 +38,7 @@ import fsMod from 'node:fs';
 import { defineRegistry, registries, catalogued } from '../../core/registry.js';
 import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
 import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks } from '../author/arsenal.mjs';
+import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../author/schema-at.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/junctions.js';
@@ -5756,6 +5757,64 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // Every row still carries the part a signature CANNOT state. A row with no desc is a name in a list.
   const undescribed = Object.entries(KNOBS.kinetic).flatMap(([p, l]) => l.filter((r) => !r.desc).map((r) => `${p}.${r.name}`));
   ok(`knobs: every kinetic dial carries a desc${undescribed.length ? ': ' + undescribed.join(', ') : ''}`, undescribed.length === 0);
+}
+
+// ---- `make schema AT=` (scripts/author/schema-at.mjs) --------------------------------------------
+//
+// The tool that answers "what may I write HERE" from formats/scene/schema.json. Every assert below is
+// about the ANSWER being read out of the schema, never about a list this test or that tool keeps: the
+// failure it was built for was an author guessing a keyframe's bezier handles were `in`/`out`, so a
+// second copy of the field names anywhere in this chain would be the same bug with more steps.
+{
+  const schema = loadSchema();
+  const at = (p) => atResolve(schema, atSteps(p));
+
+  // THE INCIDENT, asserted directly. `easeIn`/`easeOut` are the real names and the guess was `in`/`out`.
+  const kf = at('layers[].motion[]');
+  // Through `childrenOf`, the same call the CLI prints from, so a tool that started filtering or
+  // substituting fields on the way to the page would fail here rather than in front of an author.
+  const kfFields = Object.keys(atChildren(kf.node) || {});
+  ok('schema AT: the keyframe path lists the real handle names, not the guess that broke three films',
+     !kf.error && kfFields.includes('easeIn') && kfFields.includes('easeOut')
+     && !kfFields.includes('in') && !kfFields.includes('out'));
+  ok('schema AT: the keyframe path carries the whole pose, `t` and `ox` included',
+     ['t', 'x', 'y', 'scale', 'ox', 'oy'].every((f) => kfFields.includes(f)));
+
+  // IT READS THE SCHEMA, NOT A SECOND LIST. Every field it printed above is a key of the schema node
+  // that scripts/gates/schema-drift.mjs holds against core/sequence.js KEYFRAME_PROPS. Compared to that
+  // same node here: if the tool ever grew a list of its own, these two sets would stop being equal.
+  const owner = schema.fields.layers.item.motion.item;
+  ok('schema AT: what it lists at a path IS the schema node at that path, with nothing added or hidden',
+     kfFields.slice().sort().join(',') === Object.keys(owner).sort().join(','));
+
+  // BOTH SPELLINGS OF ONE PATH. `[]` is what an author writes; `item` is the schema's own key, and the
+  // spelling scripts/gates/schema-drift.mjs addresses the same node by.
+  ok('schema AT: `layers.item.motion.item` and `layers[].motion[]` are one path',
+     atFmt(at('layers.item.motion.item').trail) === atFmt(kf.trail));
+
+  // A WRONG FIELD IS ANSWERED WITH THE LEGAL SET, never with a bare refusal. The map handed back is
+  // what the caller prints, so an empty one would be a rejection that teaches nothing.
+  const miss = at('layers[].zzNothing');
+  ok('schema AT: an unknown field is answered with what IS legal at that path',
+     miss.error === 'unknown' && miss.want === 'zzNothing'
+     && miss.map && Object.keys(miss.map).length > 100 && 'anim' in miss.map);
+
+  // A PARTIAL PATH IS FOUND, not refused: `AT=motion` fails at the root and the tree search is what
+  // turns that into an answer.
+  ok('schema AT: a partial path (`motion`) resolves to exactly one place in the tree',
+     at('motion').error === 'unknown'
+     && atPaths(schema).filter((x) => x.name === 'motion').map((x) => x.path).join() === 'layers[].motion');
+
+  // WHICH VOCABULARY AN ENUM IS, derived by value from the live registries rather than from a table.
+  // `layers.item.preset` is deliberately the union of two, and containment is what reports both.
+  const regs = registries();
+  ok('schema AT: an enum is traced back to the registry that owns it, by value',
+     kindsOfEnum(schema.fields.layers.item.anim.enum, regs).includes('anim')
+     && kindsOfEnum(schema.fields.cuts.item.style.enum, regs).includes('cut'));
+  ok('schema AT: a slot carrying two vocabularies names both',
+     ['kinetic preset', 'glow preset'].every((k) => kindsOfEnum(schema.fields.layers.item.preset.enum, regs).includes(k)));
+  ok('schema AT: an enum that is nobody\'s registry claims no owner',
+     kindsOfEnum(schema.fields.aspect.enum, regs).length === 0);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

@@ -590,7 +590,9 @@ Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color, `typing`) 
 `doc` · `html` · `clip` · `cursor` (pointer `path` + `clicks`) · `group` (layout box, see below). Per
 layer: window (`start/duration`), `track` z-order, `cut`+`dir`, `anim/out`, `motion[]` (keyframe track).
 Global `bg[]`, `stings[]`, `camera[]`, `captions[]`.
-Schema: `formats/scene/schema.json`.
+Schema: `formats/scene/schema.json`. **Ask it what is legal at a path rather than reading it:**
+`make schema AT='layers[].motion[]'` prints every field there with its type, its written label and,
+where the field takes a named vocabulary, which registry owns it. No `AT` prints the top-level shape.
 
 **Layout by containment: `group` is the DEFAULT for anything with a spatial relationship.** A group is
 a flex OR grid box; its children flow with `gap` so a label+value, a logo row, or a card grid can never
