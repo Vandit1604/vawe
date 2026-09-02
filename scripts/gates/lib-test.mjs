@@ -6087,6 +6087,34 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// ---- the search corpus and the catalogue are one population ------------------------------------
+//
+// The corpus read `*_REGISTRY` exports plus two hardcoded special cases (blueprints, layer types), each
+// added because its subject is not a registry. So a capability with no registry was invisible to the
+// search this repo tells you to run before inventing anything: docs/EFFECTS.md carried 639 effects and
+// the corpus carried 445. `easeOutExpo`, `tiktok`, `wordFlash`, `refract` and `commaSplit` all returned
+// NOTHING HERE CLEARLY MATCHES, over a sentence claiming 445 things had been searched. True about the
+// corpus, false about the engine, and the worse kind of wrong because it reads as an answer.
+{
+  const { collect } = await import('../author/arsenal.mjs');
+  const { sections } = await import('../site/effects-catalog.mjs');
+  const corpus = await collect();
+  const catalogued = new Set(sections.flatMap(([, , names]) => (names || [])
+    .map((e) => (typeof e === 'string' ? e : e && e.name)).filter(Boolean)));
+  const missing = [...catalogued].filter((n) => !corpus.some((e) => e.name === n));
+  ok(`arsenal: every name in the catalogue is searchable${missing.length ? ': ' + missing.slice(0, 6).join(', ') : ''}`,
+    missing.length === 0);
+  // The five that found nothing, named individually, because a population assertion passes the day
+  // somebody shrinks both sides.
+  for (const n of ['easeOutExpo', 'tiktok', 'wordFlash', 'refract', 'commaSplit']) {
+    ok(`arsenal: \`${n}\` is in the corpus`, corpus.some((e) => e.name === n));
+  }
+  // A REGISTRY ENTRY MUST WIN over a catalogue row where both know a name, because only the registry
+  // carries `slot` and `aka`. Losing that would quietly strip the paste target off half the answers.
+  const anim = corpus.find((e) => e.name === 'defocus');
+  ok('arsenal: a registry entry keeps its slot when the catalogue also lists it', !!anim && !!anim.slot);
+}
+
 // ---- the vocabulary hook: a NEW named vocabulary should be a registry ---------------------------
 //
 // The discovery problem was never that capabilities were hard to find. It was that publishing one was a

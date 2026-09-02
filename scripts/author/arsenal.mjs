@@ -103,6 +103,39 @@ export async function collect() {
       out.push({ name, kind: 'layer type', slot: 'layers[].type', blurb: blurbs[name] || '' });
     }
   } catch { /* layer types are optional to search */ }
+
+  // THE CATALOGUE KNOWS MORE THAN THE REGISTRIES DO, and the search was the last thing to hear about it.
+  //
+  // Everything above reads `*_REGISTRY` exports, plus the two hardcoded special cases sitting right
+  // there (blueprints, layer types), each added because its subject is not a registry. That is the
+  // whole shape of the bug: a capability the engine offers but has not been given a registry is
+  // invisible to the search this repo tells you to run before inventing anything.
+  //
+  // Measured: docs/EFFECTS.md carries 639 effects across 48 families and this corpus carried 445, so
+  // roughly 150 real names could not be found. `easeOutExpo`, `tiktok`, `wordFlash`, `refract` and
+  // `commaSplit` all returned NOTHING HERE CLEARLY MATCHES over a sentence claiming 445 things had been
+  // searched. The sentence was true about the corpus and false about the engine.
+  //
+  // So the corpus takes the catalogue as its second source. The catalogue is already the union of the
+  // registries that publish themselves and the 16 sections still hand-written, so this is one fact with
+  // one owner rather than a third list: anything a reader can find in docs/EFFECTS.md is now findable
+  // here, and anything added to either is added to both.
+  //
+  // A REGISTRY ENTRY WINS where both know a name, because it carries `slot` and `aka` and the section
+  // does not. The section only ever fills gaps.
+  try {
+    const { sections } = await import('../site/effects-catalog.mjs');
+    for (const [title, , names, slot, opts = {}] of sections) {
+      const kind = opts.kind || title.replace(/\s*\(.*\)\s*$/, '').replace(/s$/, '').toLowerCase();
+      for (const entry of names || []) {
+        const name = typeof entry === 'string' ? entry : entry && entry.name;
+        if (!name) continue;
+        if (out.some((e) => e.name === name)) continue;
+        out.push({ name, kind, slot: slot || null,
+          blurb: (opts.blurbs && opts.blurbs[name]) || '', aka: [] });
+      }
+    }
+  } catch { /* the catalogue is optional to search: a fresh clone can still find the registries */ }
   return out;
 }
 
