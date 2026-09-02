@@ -24,7 +24,14 @@ const DIMENSIONS = [
   '**Composition**: centered/aligned/on-thirds ON PURPOSE. Off-center-by-accident, mis-anchored\n   annotations (an underline not under its word), floating elements = FAIL. (This is the argus-pass class.)',
   '**Brand fidelity**, matches the house style: dominance, ONLY brand colours, the real face, the\n   SIGNATURE DETAILS present, the NEVERs absent.',
   '**Asset fidelity**: real captured assets (logos/mascots/UI), never a recreated-from-memory lookalike.',
-  '**Produced-not-generated**: crafted density; not a word-on-empty-space slide.',
+  // DIMENSION 6 USED TO READ "crafted density; not a word-on-empty-space slide", which instructs the
+  // judge to score density UP. That is length bias written into the rubric: a judge already leans that
+  // way by default, scoring the longer, busier answer higher whether or not it is better. And CLAUDE.md
+  // spends a whole section arguing the opposite case (active versus passive whitespace, "IS THE EMPTY
+  // PART OF THE FRAME DOING A JOB?"), noting that no gate sees it. The rubric saw it and scored against
+  // it. Asked as a question about whether the emptiness is WORKING, both a dense frame and a spare one
+  // can pass, and neither passes by being what it is.
+  '**Produced-not-generated**: every element in the frame is doing a job, and so is the empty part.\n   A dense frame where two elements repeat the same point FAILS. A spare frame whose emptiness\n   isolates the subject PASSES. Ask what the space is doing, never how much of it there is.',
   '**Value**: this frame teaches/proves/delights something no other frame does.',
 ];
 
@@ -47,6 +54,17 @@ ${numbered(DIMENSIONS)}
 - **Worst frame overall** + why.
 - **Verdict:** \`PASS\` only if every frame clears every dimension. Otherwise \`FIX\` + the prioritized list.
 Rule: if your eye catches it, it's a FIX. "Renders fine" is not PASS.
+
+## You may say you cannot tell, and you must when it is true
+A still cannot carry every dimension. Speed, direction, easing and whether a background is alive are
+properties of MOTION, and a sheet of key frames is not motion: a background was once judged "matched"
+on one still and was, running, 2.5x too fast with folds half the size. If a dimension asks something
+these frames cannot answer, write \`CANNOT TELL\` for it and name the evidence that would settle it
+(a 4-frame strip across the beat, the seam frames, the rendered mp4), instead of guessing.
+
+\`CANNOT TELL\` is a real answer and costs you nothing. A guess dressed as a finding costs the author a
+render, and it arrives in the same shape as a true one, so nobody downstream can tell them apart. If
+every dimension a frame CAN answer is clear and the rest are \`CANNOT TELL\`, the frame is not a FIX.
 `;
 }
 

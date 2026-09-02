@@ -5401,5 +5401,38 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     }
   }
 }
+// ---- the judge rubric: the two things a prompt template must not lose --------------------------
+//
+// A prompt is not code and nothing here asserted anything about it, which is how both of these came to
+// be true at once. They are asserted rather than merely fixed because the rubric is prose, and prose
+// regresses by being rewritten well.
+{
+  const { craftRubric, abRubric } = await import('./rubric.mjs');
+  const craft = craftRubric({ name: 'probe', frames: 6, landscape: true, dir: '/tmp/judge' });
+  const ab = abRubric({ rows: 4, landscape: true, dir: '/tmp/judge', judge: '1' });
+
+  // ABSTENTION. The craft verdict grammar had two values, PASS and FIX, so a judge asked about a
+  // dimension a STILL cannot carry had to guess, and the guess came back in the same shape as a real
+  // finding. docs/MISTAKES.md #155 is the archetype: a background "matched" on one frame that was 2.5x
+  // too fast in motion. scripts/author/arsenal.mjs solved the identical problem with CONFIDENT and a
+  // WEAK GUESS heading (#552) and it was never carried to the judge.
+  ok('rubric: the craft judge can decline a dimension a still cannot answer',
+    craft.includes('CANNOT TELL'));
+  ok('rubric: and is told what evidence would settle it instead of guessing',
+    /strip|seam frames|rendered mp4/.test(craft));
+  // The A/B sheet already had its own abstentions and must keep them: a forced choice with no TIE is
+  // an instruction to invent a difference.
+  ok('rubric: the blind comparison keeps TIE and NEITHER', ab.includes('TIE') && ab.includes('NEITHER'));
+
+  // LENGTH BIAS. Dimension 6 read "crafted density; not a word-on-empty-space slide", which tells the
+  // judge to score density UP, the direction an LLM judge already leans. CLAUDE.md argues the opposite
+  // case at length (active versus passive whitespace) and notes no gate sees it; the rubric saw it and
+  // scored against it. Asked as a question about whether the space is WORKING, a spare frame can win.
+  for (const [label, sheet] of [['craft', craft], ['blind', ab]]) {
+    ok(`rubric: the ${label} sheet asks what the empty part is DOING, not how much there is`,
+      /doing a job/.test(sheet) && !/crafted density/.test(sheet));
+  }
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
