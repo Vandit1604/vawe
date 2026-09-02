@@ -233,6 +233,21 @@ What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "
 | `wipe` | hard directional reveal, playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits |
 | `zoom` | push-through: the leaving beat shrinks away, the arriving one lands from too close, product focus |
 
+## Cut timings  `[cuts[]/per-layer]`
+
+The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[{ "t":3, "style":"push", "timing":"ramp" }]`, or `cutTiming` on a per-layer cut. The style says what the transition looks like; the timing says how it accelerates. `ramp` is the editor's slow-fast-slow speed ramp, for a whip or a camera throw; `rush` accelerates away and suits an exit; `brake` decelerates in and suits an arrival. A scene writes the word and the schema enum is derived from this registry, but the arsenal never listed it.
+
+| name | what / when |
+|---|---|
+| `brake` | decelerates in. The entrance curve: it arrives slower than it set off |
+| `linear` | no easing at all. A machine, a wipe with no personality, a ticker |
+| `out` | decelerates into place. The default feel for something appearing |
+| `pop` | overshoots past the mark and comes back. Playful, use once |
+| `ramp` | the editor's slow-fast-slow speed ramp. The one to reach for on a whip or a camera throw |
+| `rush` | accelerates away. The exit curve: it leaves faster than it left rest |
+| `smooth` | eases at both ends: reads as travel rather than as arrival |
+| `snappy` | decisive, no overshoot. The cut lands and stops |
+
 ## Shader stings  `[transition]`
 
 `stings:[{t,fx}]`. A full-frame shader accent on a reveal / background jump.
@@ -987,4 +1002,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_630 effects across 47 families. Regenerate: `make effects`._
+_638 effects across 48 families. Regenerate: `make effects`._

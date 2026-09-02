@@ -298,4 +298,17 @@ export function cutStyle(name, seqState, { timing = 'smooth', dir = 'left', dist
 
 // Built at the END so both maps are fully defined. `slot` is how an author writes it in a scene.
 export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut', blurbs: CUT_BLURBS });
-export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming' });
+// The curve a cut travels on, in the author's terms. Kept beside the registry, which is where every
+// other vocabulary in this engine keeps its descriptions, so `make arsenal` finds them with the names.
+export const TIMING_BLURBS = {
+  linear: 'no easing at all. A machine, a wipe with no personality, a ticker',
+  smooth: 'eases at both ends: reads as travel rather than as arrival',
+  out: 'decelerates into place. The default feel for something appearing',
+  snappy: 'decisive, no overshoot. The cut lands and stops',
+  pop: 'overshoots past the mark and comes back. Playful, use once',
+  rush: 'accelerates away. The exit curve: it leaves faster than it left rest',
+  brake: 'decelerates in. The entrance curve: it arrives slower than it set off',
+  ramp: "the editor's slow-fast-slow speed ramp. The one to reach for on a whip or a camera throw",
+};
+
+export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming', blurbs: TIMING_BLURBS });

@@ -76,6 +76,8 @@ const USAGE = {
   'gsap-named-effects': (n) => text({ anim: 'none', fx: n }),
   'gsap-exits': (n) => text({ anim: 'rise', fxOut: n, exitDur: 0.6 }),
   'scene-cuts': (n) => j({ cuts: [{ t: 2.4, style: n }] }),
+  // The timing rides ON a cut, so the usage shows both: a style with a speed curve chosen for it.
+  'cut-timings': (n) => j({ cuts: [{ t: 2.4, style: 'push', timing: n }] }),
   'shader-stings': (n) => j({ stings: [{ t: 2.4, fx: n }] }),
   'spectacle-devices': (n) => j({ spectacle: { at: 2.4, of: 'hero', device: n, why: 'the one loud moment, and every other dial drops to 55%' } }),
   'seams-2-scene-blends': (n) => j({ seams: [{ t: 2.2, fx: n, dur: 0.8 }] }),
@@ -155,6 +157,9 @@ const PREVIEW = {
   'gsap-named-effects': (n) => base({ layers: [{ ...HERO, anim: 'none', fx: n }] }),
   'gsap-exits': (n) => base({ layers: [{ ...HERO, anim: 'rise', fxOut: n, exitDur: 1, start: 0.4, duration: 4.2 }] }),
   'scene-cuts': (n) => base({ layers: TWO(2.4), cuts: [{ t: 2.4, style: n }] }),
+  // One style throughout, so the only thing moving between these clips is the acceleration. `push`
+  // travels far enough that the curve is legible, which `fade` would not be.
+  'cut-timings': (n) => base({ layers: TWO(2.4), cuts: [{ t: 2.4, style: 'push', timing: n }] }),
   'shader-stings': (n) => base({ layers: TWO(2.4), stings: [{ t: 2.4, fx: n }] }),
   'seams-2-scene-blends': (n) => base({ layers: TWO(2.6), seams: [{ t: 2.2, fx: n, dur: 0.8 }] }),
   backgrounds: (n) => base({ bg: [{ preset: n, from: 0, to: 6 }], layers: [{ ...HERO, text: n, size: 110 }] }),

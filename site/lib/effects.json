@@ -1,7 +1,7 @@
 {
-  "total": 630,
-  "previewed": 283,
-  "families": 47,
+  "total": 638,
+  "previewed": 291,
+  "families": 48,
   "tags": [
     [
       "asset",
@@ -34,6 +34,10 @@
     [
       "composition",
       2
+    ],
+    [
+      "cuts[]/per-layer",
+      8
     ],
     [
       "exit",
@@ -1239,6 +1243,75 @@
           "stem": "scene-cuts--zoom",
           "desc": "push-through · the · leaving · beat · shrinks · away, · the · arriving · one · lands · from · too · close, · product · focus",
           "scene": "/assets/effects/scene-cuts--zoom.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "cut-timings",
+      "title": "Cut timings",
+      "tag": "cuts[]/per-layer",
+      "intro": "The · SPEED · CURVE · a · cut · travels · on, · chosen · separately · from · the · cut · itself · `cuts · [{ · \"t\" · 3, · \"style\" · \"push\", · \"timing\" · \"ramp\" · }]`, · or · `cutTiming` · on · a · per-layer · cut. · The · style · says · what · the · transition · looks · like; · the · timing · says · how · it · accelerates. · `ramp` · is · the · editor's · slow-fast-slow · speed · ramp, · for · a · whip · or · a · camera · throw; · `rush` · accelerates · away · and · suits · an · exit; · `brake` · decelerates · in · and · suits · an · arrival. · A · scene · writes · the · word · and · the · schema · enum · is · derived · from · this · registry, · but · the · arsenal · never · listed · it.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 8,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "brake",
+          "stem": "cut-timings--brake",
+          "desc": "decelerates · in. · The · entrance · curve · it · arrives · slower · than · it · set · off",
+          "scene": "/assets/effects/cut-timings--brake.json",
+          "noPreview": null
+        },
+        {
+          "name": "linear",
+          "stem": "cut-timings--linear",
+          "desc": "no · easing · at · all. · A · machine, · a · wipe · with · no · personality, · a · ticker",
+          "scene": "/assets/effects/cut-timings--linear.json",
+          "noPreview": null
+        },
+        {
+          "name": "out",
+          "stem": "cut-timings--out",
+          "desc": "decelerates · into · place. · The · default · feel · for · something · appearing",
+          "scene": "/assets/effects/cut-timings--out.json",
+          "noPreview": null
+        },
+        {
+          "name": "pop",
+          "stem": "cut-timings--pop",
+          "desc": "overshoots · past · the · mark · and · comes · back. · Playful, · use · once",
+          "scene": "/assets/effects/cut-timings--pop.json",
+          "noPreview": null
+        },
+        {
+          "name": "ramp",
+          "stem": "cut-timings--ramp",
+          "desc": "the · editor's · slow-fast-slow · speed · ramp. · The · one · to · reach · for · on · a · whip · or · a · camera · throw",
+          "scene": "/assets/effects/cut-timings--ramp.json",
+          "noPreview": null
+        },
+        {
+          "name": "rush",
+          "stem": "cut-timings--rush",
+          "desc": "accelerates · away. · The · exit · curve · it · leaves · faster · than · it · left · rest",
+          "scene": "/assets/effects/cut-timings--rush.json",
+          "noPreview": null
+        },
+        {
+          "name": "smooth",
+          "stem": "cut-timings--smooth",
+          "desc": "eases · at · both · ends · reads · as · travel · rather · than · as · arrival",
+          "scene": "/assets/effects/cut-timings--smooth.json",
+          "noPreview": null
+        },
+        {
+          "name": "snappy",
+          "stem": "cut-timings--snappy",
+          "desc": "decisive, · no · overshoot. · The · cut · lands · and · stops",
+          "scene": "/assets/effects/cut-timings--snappy.json",
           "noPreview": null
         }
       ]

@@ -9,6 +9,7 @@ import { PRESETS, STAGGER_FROM_REGISTRY, DECODE_CHARS_REGISTRY } from '../../cor
 import { MOTION_CUES } from '../../core/audio-tactile.js';
 import { GLOW_REGISTRY, GLOW_BLURBS } from '../../core/layers/glow.js';
 import { ANIM_NAMES } from '../../core/clips.js';
+import { TIMING_REGISTRY, TIMING_BLURBS } from '../../core/cuts.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { SPECTACLE_DEVICES } from '../../core/knobs.js';
@@ -164,6 +165,7 @@ export const sections = [
   ['GSAP named effects', '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`', names(GSAP_FX), 'per-layer/text', { blurbs: GSAP_BLURBS }],
   ['GSAP exits', '`fxOut`: pair every entrance with a directional exit.', names(EXIT_FX), 'exit', { blurbs: GSAP_EXIT_BLURBS }],
   ['Scene cuts', '`cuts:[{t,style}]`. The beat-to-beat cut family. One family per film.', names(Object.keys(PRESENTATIONS)), 'transition', { blurbs: CUT_BLURBS }],
+  ['Cut timings', 'The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[{ "t":3, "style":"push", "timing":"ramp" }]`, or `cutTiming` on a per-layer cut. The style says what the transition looks like; the timing says how it accelerates. `ramp` is the editor\'s slow-fast-slow speed ramp, for a whip or a camera throw; `rush` accelerates away and suits an exit; `brake` decelerates in and suits an arrival. A scene writes the word and the schema enum is derived from this registry, but the arsenal never listed it.', names(TIMING_REGISTRY.names), 'cuts[]/per-layer', { blurbs: TIMING_BLURBS }],
   ['Shader stings', '`stings:[{t,fx}]`. A full-frame shader accent on a reveal / background jump.', names(SHADER_FX), 'transition', { kind: 'sting' }],
   ['Spectacle devices', '`"spectacle": { "at", "of", "device", "why" }`. The film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/spectacle.js`.', names(SPECTACLE_DEVICES.names), 'scene', { blurbs: SPECTACLE_DEVICES.blurbs }],
   ['Seams (2-scene blends)', '`seams:[{t,fx,dur}]`. One earned expressive transition, reserved for the payoff.', names(SEAM_FX), 'transition', { blurbs: SEAM_BLURBS }],

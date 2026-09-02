@@ -23,6 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { registries } from '../../core/registry.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CATALOG = 'scripts/site/effects-catalog.mjs';
@@ -39,53 +40,18 @@ const WAIVED = new Map(Object.entries({
   SURFACE_PROPS: 'as LAYER_PROPS, for surfaces',
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
   FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
-  FILTER_REGISTRY: 'the declaration BEHIND the filter-presets catalogue section, not a second vocabulary. It exists so `make arsenal` can find the fourteen filters, which it could not before it was written',
-  FILTER_NAMES: 'that registry\'s own name list, the same names the catalogue already prints',
-  STAGGER_FROM: 'the name list of STAGGER_FROM_REGISTRY, which IS catalogued as "Stagger order (`from`)". Exported because core/validate.mjs refuses an unknown order and must read the names from their owner',
-  STAGGER_FROM_BLURBS: 'as LOOK_BLURBS, for the stagger orders',
-  DECODE_CHARS: 'the charsets behind DECODE_CHARS_REGISTRY, which IS catalogued as "Scramble charsets (`chars`)". A scene names a set, or writes its own glyphs',
-  DECODE_CHAR_BLURBS: 'as LOOK_BLURBS, for the scramble charsets',
   THERMAL_REGION: 'the filter region the thermal blur needs so its tail is not clipped. A geometry constant, not something a scene can name',
   KNOBS: 'playground control metadata, not an effect a scene can name',
   SPECTACLE_KEYS: 'the four keys of the `spectacle` block (at/of/device/why). The block is documented in docs/PRIMITIVES.md and its DEVICE vocabulary IS catalogued, as "Spectacle devices"; this is the shape of the object, not a vocabulary of effects',
   DEPRECATED_FX: 'the sixteen gsap entrances that duplicate an anim exactly, mapped to their replacement. Every one is ALREADY catalogued under "GSAP named effects"; this marks which to stop using (#364)',
   DEPRECATED_EXIT: 'as DEPRECATED_FX, for the exits',
 
-  TIME_REMAP_REGISTRY: 'the registry object wrapping the time-remap shapes, which ARE catalogued as "Time remaps (the layer\'s own clock)". A scene names a shape, never a registry',
-  TIME_REMAP_BLURBS: 'that registry\'s own blurb map, which the Time remaps section already prints',
-  ICON_REGISTRY: 'the registry object wrapping ICONS, which IS catalogued as "Drawn icons"',
-  ICON_NAMES: 'the same list the Drawn icons section already renders from ICONS',
   DIRS: 'the four travel directions (left/right/up/down). A scene names one, but as the `dir` field of a '
     + 'cut or seam, and the schema carries it as an enum on both. This is the shared constant behind those, '
     + 'not a vocabulary of its own',
 
   JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name. Each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
-  FALLOFFS: 'the falloff FUNCTIONS behind FALLOFF_NAMES, which IS catalogued as "Effector falloffs". A scene names a falloff, never the function',
-  FALLOFF_REGISTRY: 'as ANIM_REGISTRY, for FALLOFF_NAMES ("Effector falloffs")',
-  DRIVE_REGISTRY: 'as ANIM_REGISTRY, for DRIVE_NAMES ("Effector drives")',
-  ANIM_REGISTRY: 'the registry OBJECT wrapping ANIM, which is catalogued as "Enter / exit anims". A scene names an anim, never a registry',
-  BG_REGISTRY: 'as ANIM_REGISTRY, for BG_NAMES ("Backgrounds")',
-  SEAM_REGISTRY: 'as ANIM_REGISTRY, for SEAM_FX ("Seams")',
-  SHADER_REGISTRY: 'as ANIM_REGISTRY, for SHADER_FX ("Shader stings")',
-  CANVAS_REGISTRY: 'as ANIM_REGISTRY, for CANVAS_FX_NAMES ("Canvas image passes")',
-  PAINT_REGISTRY: 'as ANIM_REGISTRY, for PAINT_FX_NAMES ("Generative paint FX")',
-  RAYMARCH_REGISTRY: 'as ANIM_REGISTRY, for RAYMARCH_FX ("Raymarched surfaces")',
-  AMBIENT_REGISTRY: 'as ANIM_REGISTRY, for AMBIENT_FX ("Ambient shader fields")',
-  THREE_REGISTRY: 'as ANIM_REGISTRY, for THREE_FX ("three.js scenes")',
-  CAMERA_REGISTRY: 'as ANIM_REGISTRY, for CAMERA_MOVE_NAMES ("Camera moves")',
-  FEEL_REGISTRY: 'as ANIM_REGISTRY, for FEEL. The words themselves ARE catalogued under "Plain words", and in full in docs/CRAFT/VOCABULARY.md',
-  DURATION_REGISTRY: 'as FEEL_REGISTRY, for DURATION',
-  CAMERA_WORD_REGISTRY: 'as FEEL_REGISTRY, for CAMERA_WORDS',
-  okDir: 'the direction guard seams shares with core/cuts.js DIRS; a scene names a direction, not a guard',
 
-  CUT_REGISTRY: 'as ANIM_REGISTRY, for PRESENTATIONS ("Scene cuts")',
-  TIMING_REGISTRY: 'as ANIM_REGISTRY, for TIMINGS. The cut timing curve, catalogued with the cuts',
-  GSAP_REGISTRY: 'as ANIM_REGISTRY, for GSAP_FX ("GSAP named effects")',
-  GSAP_EXIT_REGISTRY: 'as ANIM_REGISTRY, for EXIT_FX ("GSAP exits")',
-  PRESET_REGISTRY: 'as ANIM_REGISTRY, for PRESETS ("Kinetic text presets")',
-  PARTS: 'the raw [setup, from, to] tuples behind the part entrances, which ARE catalogued by name',
-  PART_BLURBS: 'the blurb map the Part entrances section renders',
-  PART_REGISTRY: 'the registry object; PART_NAMES is what the catalogue lists',
 
   KNOB_ROUTES: 'the map from a lookOpts knob to the private pass arguments it sets. The KNOBS themselves are '
     + 'catalogued in the Composite looks section and PRIMITIVES.md; this is the wiring under them, and a scene '
@@ -93,43 +59,23 @@ const WAIVED = new Map(Object.entries({
   LOOP_FX: 'the loop half of GSAP_FX, which IS catalogued. A subset named so a gate can tell an entrance from something that never settles',
   ONESHOT_FX: 'the other half of the same split',
   LOOK_BLURBS: 'the descriptions OF the looks, rendered in the catalogue beside each look. The words, not a vocabulary of their own',
-  PRESET_BLURBS: 'as LOOK_BLURBS, for kinetic presets',
-  ANIM_BLURBS: 'as LOOK_BLURBS, for enter/exit anims',
-  CUT_BLURBS: 'as LOOK_BLURBS, for scene cuts',
-  SEAM_BLURBS: 'as LOOK_BLURBS, for seams',
-  FX_BLURBS: 'as LOOK_BLURBS, for per-layer modifiers',
-  GSAP_BLURBS: 'as LOOK_BLURBS, for GSAP named effects',
-  GSAP_EXIT_BLURBS: 'as LOOK_BLURBS, for GSAP exits',
-  BEAT_BLURBS: 'as LOOK_BLURBS, scraped from the blueprint registry\'s own trailing comments',
   UNIFORM_FAMILIES: 'shader uniform grouping for the playground panel',
   KERNELS: 'convolution matrices behind the filter presets, which ARE catalogued',
-  TIMINGS: 'cut duration constants',
   MECHANISMS: 'internal classification of transitions, used by the direction gate',
   FAMILIES: 'internal classification of transitions, used by the direction gate',
-  HONOURS: 'which lightfield options each pattern reads, drives narrow(), not an author choice',
   BUILDERS: 'the lightfield pattern implementations behind PATTERNS, which IS catalogued',
   SLOTS: 'track slot names, internal to the track resolver',
-  FPS: 'the frame rate constant',
-  CANVAS_FX: 'the implementations behind CANVAS_FX_NAMES, which IS catalogued',
   CANVAS_FX_PRESETS: 'preset bundles over CANVAS_FX_NAMES',
-  ALL_GENERATORS: 'includes generators held back from the library; GENERATORS is the catalogued list',
   COMPOSITIONS: 'the implementations behind COMPOSITION_NAMES, which IS catalogued',
   CAP_STYLES: 'the implementations behind CAP_STYLE_NAMES, which IS catalogued',
   DESTINATIONS: 'the safe-area table behind DESTINATION_NAMES, which IS catalogued',
-  BANDS: 'a single generator definition, reached through GENERATORS',
-  THREE_FX_PROPS: 'prop declaration',
   CAMERA_MOVES: 'the move implementations behind CAMERA_MOVE_NAMES, which IS catalogued',
   LOOKS: 'the look implementations behind LOOK_NAMES, which IS catalogued',
-  PAINT_FX: 'the implementations behind PAINT_FX_NAMES, which IS catalogued',
-  ANIM: 'the anim implementations behind ANIM_NAMES, which IS catalogued',
-  IDLE: 'the idle generators behind IDLE_NAMES, which IS catalogued',
-  IDLE_REGISTRY: 'as IDLE. The registry object, not a name a scene can write',
   // A scene never names a caption SKIN: it sets `captionMode`/`captionStyle` and the skin follows from
   // that plus the destination. CAPTION_SKINS is the geometry table captionBand() measures against, so
   // there is nothing here for an author to choose. It reached main uncatalogued, which is why the gate
   // is right to have asked (docs/MISTAKES.md #409).
   CAPTION_SKINS: 'the caption geometry captionBand() measures against; a scene sets captionMode/captionStyle and the skin follows',
-  CAPTION_LINES: 'as CAPTION_SKINS, how many lines the band reserves, not a name a scene can write',
   // A scene names a caption STYLE and the shape follows it. CAP_STYLE_SHAPE is how the RENDERER
   // treats that style (one word on screen, or split per character); an author never writes it and
   // could not use it if they did. The fact it carries IS catalogued, in the place an author actually
@@ -145,12 +91,9 @@ const WAIVED = new Map(Object.entries({
   PAL: 'the colour tables the background presets draw from, and those ARE catalogued',
   PAL_PLINTH: 'as PAL, for one brand',
   SCHEMA: 'the lightfield option schema. It drives narrow() and the playground panel; its user-facing dials are PATTERNS/SHAPES/ANCHORS/DIRECTIONS/MOTIONS, which ARE catalogued',
-  RAMP: 'the lightfield bloom falloff constants',
   DEFAULT_MOTION: 'the fallback motion block',
   REQUIRED: 'the theme contract keys a theme file must define, checked by the theme gate, not chosen by a scene',
-  ORDER: 'track resolution order',
   LAYER_OWNED: 'which props a layer owns versus its sequence, internal to the sequencer',
-  DENSE_KEY_SEC: 'a density threshold constant',
   GHOST_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   LAG_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   MATTE_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
@@ -168,13 +111,10 @@ const WAIVED = new Map(Object.entries({
   PROGRESS_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   SHADOW_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   TILT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
-  UPRIGHT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
-  FX_REGISTRY: 'the modifier family as a searchable registry, exported so `make arsenal` can index it (it collects `*_REGISTRY` exports and found no modifier at all before this). Its names and blurbs ARE catalogued, under FX_TYPES and FX_BLURBS, which is the same pair it is built from',
   CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in docs/CRAFT/SOUND.md and graded by make audio-check',
   SEAM_CUE: 'sound, as CUT_CUE',
   CUES: 'sound, as CUT_CUE',
   PROFILE_BED: 'sound, as CUT_CUE',
-  TRANSITIONS: 'the transition implementations behind PRESENTATIONS, which IS catalogued',
   SURFACE_TYPES: 'the surfaces behind the layer types, which ARE catalogued via LAYER_TYPES',
   TRACK_TYPES: 'the track vocabulary, documented with the tracks in docs/PRIMITIVES.md rather than as an effect',
 }));
@@ -209,6 +149,7 @@ const isVocabulary = (v) => {
 };
 
 const found = new Map();
+const exported = new Map();   // every SCREAMING_CASE export, heuristic or not
 const unreadable = [];
 for (const f of files) {
   const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -217,18 +158,74 @@ for (const f of files) {
   let mod;
   try { mod = await import(path.join(ROOT, f)); } catch { unreadable.push(f); continue; }
   for (const n of names) if (isVocabulary(mod[n]) && !found.has(n)) found.set(n, f);
+  // Collected WITHOUT the shape heuristic, on purpose. A registry part is known by identity, and the
+  // heuristic is a guess made before identity was available: it drops an all-numeric map, so `DURATION`
+  // (a word to a number of seconds) never reached the collection and its registry then looked
+  // uncatalogued while the catalogue names it in full.
+  for (const n of names) if (!exported.has(n)) exported.set(n, [f, mod[n]]);
+}
+
+// ---- ONE VOCABULARY IS ONE CAPABILITY, EVEN WHEN IT IS FOUR EXPORTS --------------------------------
+//
+// This gate walks EXPORTS, and a vocabulary is normally exported four times: the entries map (`ANIM`),
+// its name list (`ANIM_NAMES`), its descriptions (`ANIM_BLURBS`) and the registry that binds them
+// (`ANIM_REGISTRY`). All four matched the shape heuristic above, so the gate reported four capabilities
+// where an author can name exactly one, and the extra three were each bought off with a hand-written
+// sentence. 55 of the 120 waivers were that, and every future registry would have added three more.
+//
+// The registry already KNOWS its own parts, so nothing here needs a naming convention: `entries` and
+// `blurbs` are matched by IDENTITY, the registry object by identity, and the derived name list by value
+// (`Object.keys` hands back a fresh array every time, so identity cannot reach it). A vocabulary that is
+// not a registry is still reported, which is the half of this gate worth keeping: it is how a capability
+// with no owner gets found.
+const REGS = registries();
+const sameNames = (v, names) => Array.isArray(v) && v.length === names.length
+  && [...v].sort().join('\u0000') === [...names].sort().join('\u0000');
+const partOfRegistry = (v) => REGS.find((r) => v === r || v === r.entries || (r.blurbs && v === r.blurbs)
+  || sameNames(v, r.names));
+
+const derived = new Map();
+for (const [name, [, value]] of exported) {
+  const r = partOfRegistry(value);
+  if (r) { derived.set(name, r); found.delete(name); }
 }
 
 const catalog = fs.readFileSync(path.join(ROOT, CATALOG), 'utf8');
+const named = (n) => new RegExp(`\\b${n}\\b`).test(catalog);
 const missing = [];
+
+// A REGISTRY IS CHECKED ONCE, THROUGH ANY OF ITS EXPORTS. The catalogue reaches a vocabulary by
+// whichever export reads best at the call site (`Object.keys(PRESETS)` here, `IDLE_REGISTRY.names`
+// there), and which one it picked is not a fact worth having an opinion about. A registry no export of
+// which is named is a capability with no way in, and NO WAIVER IS ACCEPTED for one: a registry exists
+// precisely so an author can name the thing, so "an author never picks from this" cannot be true of it.
+const byReg = new Map();
+for (const [name, r] of derived) (byReg.get(r) || byReg.set(r, []).get(r)).push(name);
+for (const [r, names] of byReg) {
+  if (names.some(named)) continue;
+  missing.push([`${r.kind} (${names.join(' / ')})`, `${names.length} export(s), no catalogue section`]);
+}
+
 for (const [name, file] of found) {
   if (WAIVED.has(name)) continue;
-  if (new RegExp(`\\b${name}\\b`).test(catalog)) continue;
+  if (named(name)) continue;
   missing.push([name, file]);
 }
 
-const covered = found.size - WAIVED.size - missing.length;
-console.log(`\n  arsenal · ${files.length} source file(s) walked · ${found.size} vocabular(ies) found · ${WAIVED.size} waived · ${covered} in the catalogue`);
+// A WAIVER FOR SOMETHING NO LONGER FOUND IS A LIE THE NEXT READER INHERITS. The list is the record of
+// what was deliberately left out, so an entry that no longer matches anything makes it a worse record
+// every time it is skipped in silence.
+const dead = [...WAIVED.keys()].filter((n) => !found.has(n));
+if (dead.length) {
+  console.log(`\n  ~ ${dead.length} waiver(s) no longer match any export the walk finds. Most will be`);
+  console.log('    registry parts, which are now recognised by identity and need no waiver:');
+  console.log(`      ${dead.join(', ')}`);
+}
+
+const covered = found.size - [...WAIVED.keys()].filter((n) => found.has(n)).length - missing.length;
+console.log(`\n  arsenal · ${files.length} source file(s) walked · ${found.size + derived.size} vocabular(ies) found`);
+console.log(`    ${derived.size} are the entries, names, blurbs or object of ${new Set(derived.values()).size} registr(ies), counted once each`);
+console.log(`    ${found.size} are not a registry: ${[...WAIVED.keys()].filter((n) => found.has(n)).length} waived · ${covered} in the catalogue`);
 // A SWEEP THAT SAW NOTHING MUST NOT PRINT A TICK. `walk('core')` is a bare readdir, so a moved or empty
 // core/ produced `0 vocabular(ies) found` and then `✓ every capability the engine exports is named`.
 if (!found.size) {
