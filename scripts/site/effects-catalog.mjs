@@ -6,7 +6,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MOTION_CUES } from '../../core/audio-tactile.js';
-import { LOOK_NAMES, LOOK_BLURBS } from '../../core/looks.js';
 import { registersOf } from '../gates/craft-coverage.mjs';
 import { catalogued } from '../../core/registry.js';
 // The blurb maps of the families that have no registry, each still living beside the vocabulary it
@@ -162,14 +161,13 @@ const derived = catalogued().map((r) => {
 // must read the registries, never rewrite docs/EFFECTS.md.
 //
 // The hand-written half, and it stays hand-written for one reason each: none of these is a registry.
-// `LOOK_NAMES`, `BEATS`, `LAYER_TYPES`, `RESAMPLE_FX`, `CAP_STYLE_NAMES`, `GENERATORS` and the rest are
+// `BEATS`, `LAYER_TYPES`, `RESAMPLE_FX`, `CAP_STYLE_NAMES`, `GENERATORS` and the rest are
 // plain exports with no `defineRegistry` behind them, so there is no definition site to hang a catalog
 // block on. Two are not even one vocabulary: "Per-frame accent layers" and "Vector layer" are
 // pseudo-names for a MODE of a layer type, and "Plain words" merges three registries (feel · duration ·
 // camera) into the one table an author reads. Give any of them a registry and it derives itself.
 export const sections = [
   ...derived,
-  ['Composite looks (static)', '`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.', names(LOOK_NAMES), 'static', { kind: 'look', blurbs: LOOK_BLURBS }],
   ['Per-frame accent layers', '`{ "type":"beam", ... }`. A light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`', ['beam:border (border-beam)', 'beam:shine (sheen sweep)'], 'per-frame'],
   ['Vector layer (logos/icons)', '`{ "type":"svg", ... }`. A path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame'],
   ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint', { blurbs: BEAT_BLURBS }],

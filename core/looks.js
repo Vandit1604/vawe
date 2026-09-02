@@ -24,7 +24,7 @@
 
 import { resolveFilter, bloomFilter, chromaSplitFilter, convolveFilter, morphFilter, reliefFilter } from './filters.js';
 import { lit } from './color.js';
-import { blurbsOf } from './registry.js';
+import { blurbsOf, defineRegistry } from './registry.js';
 
 // The theme's accent as a CSS value: every pass here writes CSS, so `var()` resolves for free.
 const CSS = { accent: 'var(--accent, #ffffff)' };
@@ -297,6 +297,25 @@ export const LOOKS = {
 // Read off the looks themselves; blurbsOf throws at load naming any look that forgot one.
 export const LOOK_BLURBS = blurbsOf('look', LOOKS);
 
+// The registry, and with it the catalogue section that used to be hand-listed in
+// scripts/site/effects-catalog.mjs beside the identical 31 names. The prose below is that section's,
+// moved rather than rewritten: one fact, one owner.
+//
+// THE SLOT IS `filter`, AND IT IS SHARED WITH core/filters.js. That sharing is the whole reason this
+// registry earns its keep: a look and a filter preset are written into the SAME JSON key, so an author
+// who reaches for `filter: "duotone"` (a filter) while thinking of a look, or the reverse, gets a
+// refusal that names which vocabulary the word does live in instead of a dead end.
+export const LOOK_REGISTRY = defineRegistry('look', LOOKS, { slot: 'filter', blurbs: LOOK_BLURBS,
+  catalog: {
+    title: 'Composite looks (static)',
+    tag: 'static',
+    register: 'look',
+    intro: '`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.',
+    usage: (n, { j }) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: `${n}:0.9` }),
+    noPreview: 'a grade needs a photographic source, and the index ships no photographs. See it on the looks clip on /showcase.',
+  },
+});
+
 // merge look defaults ← lookOpts ← positional strength; strength stays a clamped master dial.
 function mergeOpts(look, opts = {}, positional) {
   const merged = { ...look.d, ...opts };
@@ -366,7 +385,7 @@ export function resolveComposite(name, opts = {}, positional) {
   return { filter: fns.join(' '), overlays };
 }
 
-export const LOOK_NAMES = Object.keys(LOOKS);
+export const LOOK_NAMES = LOOK_REGISTRY.names;
 
 // The strength this look WOULD resolve to, given what resolveComposite would be given. Exported so a
 // caller that has to SCALE a look (core/spectacle.js, pulling every competing dial down) multiplies
@@ -377,7 +396,7 @@ export const baseStrength = (name, opts, positional) =>
 
 // base name of a filter spec ("neon:0.9" → "neon"); isLook tells util.js whether to route here.
 export const lookName = (spec) => String(spec || '').split(':')[0].trim();
-export const isLook = (spec) => Object.prototype.hasOwnProperty.call(LOOKS, lookName(spec));
+export const isLook = (spec) => LOOK_REGISTRY.has(lookName(spec));
 
 // Apply a composite look to a built layer element (browser only). Sets the CSS `filter` on the layer
 // and appends the look's overlay divs as inset children (ordered, pointer/layout-inert, radius-inherit).
@@ -391,7 +410,10 @@ export function applyComposite(el, spec, lookOpts) {
   // `if (!resolved) return;` until now: a mistyped look applied NO look and left the layer ungraded,
   // with nothing said. util.js only routes here when isLook() already matched, so reaching this with a
   // null means the two disagree, which is worth a loud error, not a shrug. #361.
-  if (!resolved) throw new Error(`unknown look "${name}", one of: ${LOOK_NAMES.join(', ')}`);
+  // `pick` rather than a hand-written list: reaching here means isLook() and resolveComposite disagree,
+  // and the registry's refusal also searches every OTHER vocabulary, so a name that is really a filter
+  // preset or a sting says so instead of printing 31 looks and leaving the author to spot the absence.
+  if (!resolved) LOOK_REGISTRY.pick(name);
   el.__lookApplied = name;
   // On an IMAGE layer the picture is the <img> inside the wrap, and the wrap already clips (it sets
   // overflow:hidden for `radius`/`ken`). Filtering the wrap put the glow passes OUTSIDE the picture:

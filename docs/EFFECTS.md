@@ -438,6 +438,44 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `pixelSort` | sorts each contiguous BRIGHT run of a scan line by luma. The signature glitch smear, and deterministic: the span is bounded by a threshold, nothing is random |
 | `stipple` | seeded ink dots on paper, denser where the source is dark, each jittered inside its own cell |
 
+## Composite looks (static)  `[static]`
+
+`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.
+
+| name | what / when |
+|---|---|
+| `angelic` | blown out, desaturated, the widest bloom in the library and an INVERTED vignette that whitens the corners. Heaven light, heavy-handed by design |
+| `chrome` | specular highlights ADDED on top, then remapped to a navy/steel/white tritone. Polished metal; two SVG filter passes, the most expensive look here |
+| `crt` | half the split of vhs plus a white bloom and the densest, darkest scanlines, corners pulled down. A lit phosphor tube: vhs glows and closes in |
+| `cyberpunk` | saturated hard, magenta/cyan split, magenta bloom over faint scanlines. A fixed neon-noir palette laid over your colours |
+| `dreamSequence` | the mildest warp plus defocus, cream bloom and a warm wash. DreamyHaze with the picture set drifting |
+| `dreamyHaze` | half-pixel defocus under a wide white bloom and a cream wash, soft-focus romance, no grain and no edges |
+| `droneCinematic` | every dial turned down (0.5 default strength, faint grain, shallow vignette). A grade rather than a look, safe under type and product UI |
+| `edgeGlow` | flat areas cancel to black and only boundaries survive, amplified 6x and bloomed. A neon wire drawing; six passes, and a smooth subject can come out empty |
+| `emboss` | the kernel turns the picture into a grey lit rubbing and half the colour is thrown away, carved surface, per-pixel and not cheap |
+| `fadedPolaroid` | eight passes: sepia, desaturated, contrast LOWERED, brown wash, corner leak, grain, vignette. A print left in the sun, the flattest look here |
+| `fatten` | dilation swells the bright pixels into their neighbours, type gains weight and a photo goes chunky and poster-like |
+| `filmNoir` | full grayscale, contrast crushed up, a small white bloom, grain and the deepest vignette, monochrome drama |
+| `glassWarp` | medium-frequency turbulence pushes the image around behind a faint white bloom, seen through thick glass, still readable |
+| `glitchGlow` | wide 3px red/blue split, source-coloured bloom, sparse scanlines. Hologram with the tint removed and the split doubled: a signal fault, not a projection |
+| `halationFilm` | warm amber bloom off the highlights plus grain, contrast barely touched. The restrained glow: no blur, no vignette, colours survive |
+| `heatWarp` | coarser, larger displacement under an orange wash and a lift, air over tarmac |
+| `hologram` | pink/cyan split, cyan flood-bloom and tight scanlines. A projected image, colour forced to teal |
+| `impact` | overexposed with the widest colour split here (4px) and a white bloom. The frame taking a punch, for one frozen hit only |
+| `letterpress` | diffuse light multiplies the image so it sinks into a warm paper wash, lifted 1.5x to stop it going black, ink pressed into stock |
+| `lomo` | the strongest saturation and the heaviest vignette in the library, plus a corner leak and grain. Plastic-camera punch: no glow, no split, just crush and corners |
+| `melt` | the lowest frequency and by far the largest displacement here, big slow lumps that destroy legibility, so never under type |
+| `neon` | the bright parts bloom in their OWN colours, nothing is tinted. Real sign-light, the one glow look that keeps the palette |
+| `nightVision` | grayscale then sepia then hue-rotated and saturated 4x to ONE green, green bloom, lines, grain, vignette. Image intensifier; the original colour is gone, not tinted |
+| `nostalgia` | fadedPolaroid without the wash, the flattening or the vignette, plus a warm bloom, same memory register, lighter and open at the edges |
+| `rippleGlass` | the highest frequency and a small offset, so the distortion reads as tight ripples not lumps, over a cool bloom, water on the lens |
+| `super8` | sepia, lifted, the heaviest grain here and a deep vignette. Warmth and dirt only, no split and no lines: film stock, not video |
+| `thermal` | luminance remapped to a six-stop black-purple-pink-orange-white ramp, softened. A heat camera; three passes, the cheapest sci-fi look and the most total recolour |
+| `timeFreeze` | drained of colour, washed cold blue with a matching bloom and a hairline split, the world stopped |
+| `vhs` | colour split 3px, slight defocus, scanlines and heavy grain. Tape: no vignette and no glow, so the frame stays flat and dirty |
+| `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
+| `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
+
 ## Filter presets  `[static]`
 
 `filter:"<name>"`. A named colour grade. Composite LOOKS are the richer set above; these are the primitives.
@@ -631,44 +669,6 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `warp` | energy, momentum |
 | `whipPan` | momentum swipe between beats |
 | `wipe` | playful "notice the cut" (shape wipes) |
-
-## Composite looks (static)  `[static]`
-
-`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.
-
-| name | what / when |
-|---|---|
-| `angelic` | blown out, desaturated, the widest bloom in the library and an INVERTED vignette that whitens the corners. Heaven light, heavy-handed by design |
-| `chrome` | specular highlights ADDED on top, then remapped to a navy/steel/white tritone. Polished metal; two SVG filter passes, the most expensive look here |
-| `crt` | half the split of vhs plus a white bloom and the densest, darkest scanlines, corners pulled down. A lit phosphor tube: vhs glows and closes in |
-| `cyberpunk` | saturated hard, magenta/cyan split, magenta bloom over faint scanlines. A fixed neon-noir palette laid over your colours |
-| `dreamSequence` | the mildest warp plus defocus, cream bloom and a warm wash. DreamyHaze with the picture set drifting |
-| `dreamyHaze` | half-pixel defocus under a wide white bloom and a cream wash, soft-focus romance, no grain and no edges |
-| `droneCinematic` | every dial turned down (0.5 default strength, faint grain, shallow vignette). A grade rather than a look, safe under type and product UI |
-| `edgeGlow` | flat areas cancel to black and only boundaries survive, amplified 6x and bloomed. A neon wire drawing; six passes, and a smooth subject can come out empty |
-| `emboss` | the kernel turns the picture into a grey lit rubbing and half the colour is thrown away, carved surface, per-pixel and not cheap |
-| `fadedPolaroid` | eight passes: sepia, desaturated, contrast LOWERED, brown wash, corner leak, grain, vignette. A print left in the sun, the flattest look here |
-| `fatten` | dilation swells the bright pixels into their neighbours, type gains weight and a photo goes chunky and poster-like |
-| `filmNoir` | full grayscale, contrast crushed up, a small white bloom, grain and the deepest vignette, monochrome drama |
-| `glassWarp` | medium-frequency turbulence pushes the image around behind a faint white bloom, seen through thick glass, still readable |
-| `glitchGlow` | wide 3px red/blue split, source-coloured bloom, sparse scanlines. Hologram with the tint removed and the split doubled: a signal fault, not a projection |
-| `halationFilm` | warm amber bloom off the highlights plus grain, contrast barely touched. The restrained glow: no blur, no vignette, colours survive |
-| `heatWarp` | coarser, larger displacement under an orange wash and a lift, air over tarmac |
-| `hologram` | pink/cyan split, cyan flood-bloom and tight scanlines. A projected image, colour forced to teal |
-| `impact` | overexposed with the widest colour split here (4px) and a white bloom. The frame taking a punch, for one frozen hit only |
-| `letterpress` | diffuse light multiplies the image so it sinks into a warm paper wash, lifted 1.5x to stop it going black, ink pressed into stock |
-| `lomo` | the strongest saturation and the heaviest vignette in the library, plus a corner leak and grain. Plastic-camera punch: no glow, no split, just crush and corners |
-| `melt` | the lowest frequency and by far the largest displacement here, big slow lumps that destroy legibility, so never under type |
-| `neon` | the bright parts bloom in their OWN colours, nothing is tinted. Real sign-light, the one glow look that keeps the palette |
-| `nightVision` | grayscale then sepia then hue-rotated and saturated 4x to ONE green, green bloom, lines, grain, vignette. Image intensifier; the original colour is gone, not tinted |
-| `nostalgia` | fadedPolaroid without the wash, the flattening or the vignette, plus a warm bloom, same memory register, lighter and open at the edges |
-| `rippleGlass` | the highest frequency and a small offset, so the distortion reads as tight ripples not lumps, over a cool bloom, water on the lens |
-| `super8` | sepia, lifted, the heaviest grain here and a deep vignette. Warmth and dirt only, no split and no lines: film stock, not video |
-| `thermal` | luminance remapped to a six-stop black-purple-pink-orange-white ramp, softened. A heat camera; three passes, the cheapest sci-fi look and the most total recolour |
-| `timeFreeze` | drained of colour, washed cold blue with a matching bloom and a hairline split, the world stopped |
-| `vhs` | colour split 3px, slight defocus, scanlines and heavy grain. Tape: no vignette and no glow, so the frame stays flat and dirty |
-| `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
-| `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
 
 ## Per-frame accent layers  `[per-frame]`
 
