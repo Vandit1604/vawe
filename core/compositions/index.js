@@ -18,6 +18,7 @@
 // SVG draw-on uses the pathLength=1 / dasharray "1 1" trick (as PARTS.drawOn) so it needs no getTotalLength
 // (the layer is not in the document yet at build() time, scene.js appends AFTER renderer.build).
 
+import { defineRegistry } from '../registry.js';
 const NS = 'http://www.w3.org/2000/svg';
 
 // small helpers kept local: a comp reaches for these, nothing global.
@@ -209,12 +210,27 @@ function commaSplit(ctx) {
 }
 
 export const COMPOSITIONS = { pipelineFlow, commaSplit };
-export const COMPOSITION_NAMES = Object.keys(COMPOSITIONS);
 
 // COMPOSITION_BLURBS: one line per comp, next to the registry (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
-// no comp, or a comp with no key, is a bug the effects catalog reports.
+// no comp, or a comp with no key, is a bug the registry below refuses at load.
 export const COMPOSITION_BLURBS = {
   pipelineFlow: 'staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline)',
   commaSplit: 'a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure',
 };
+
+// The registry, and with it the catalogue section that used to be hand-listed in
+// scripts/site/effects-catalog.mjs beside these same two names, its usage snippet and its no-preview
+// reason living in a third file keyed by a slug of the heading. It also owns the refusal in
+// core/layers/composition.js, which hand-typed the same list of names.
+export const COMPOSITION_REGISTRY = defineRegistry('composition', COMPOSITIONS, { slot: 'comp', blurbs: COMPOSITION_BLURBS,
+  catalog: {
+    title: 'Compositions (bespoke per-beat timeline)',
+    tag: 'composition',
+    intro: '`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).',
+    usage: (n, { j }) => j({ type: 'composition', comp: n, props: {}, start: 0.2, dur: 4.4 }),
+    noPreview: 'a composition is a hand-authored timeline over data you pass. There is no neutral data for it.',
+  },
+});
+
+export const COMPOSITION_NAMES = COMPOSITION_REGISTRY.names;
