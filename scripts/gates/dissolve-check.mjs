@@ -36,6 +36,7 @@
 //   node scripts/gates/dissolve-check.mjs <scene.json> [--strict]   ·   make dissolve D=<file>
 // FAIL: crossfade-mud.   Waive with {"authoring":{"allow":["crossfade-mud"]}}.
 import fs from 'node:fs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
@@ -190,15 +191,28 @@ console.log(`  ${layers.filter((L) => typeof L.html === 'string').length} html l
   + `${unreadable.length ? ` · ${unreadable.length} NOT measured (see below)` : ''}\n`);
 
 const mud = findings.filter(() => !allow.has('crossfade-mud'));
-for (const f of findings) {
-  console.log(`  ${allow.has('crossfade-mud') ? '○' : '✗'} [crossfade-mud] layer "${f.layer}": two elements at the same point (${f.key.replace(/\|/g, ' ')}) `
+// One fact, one owner: the record IS the finding and the five printed lines are rendered from it, so
+// author-check reads `code` off a structure rather than re-reading this paragraph. The class of bug
+// that costs is docs/MISTAKES.md #401.
+const F = gateFindings({ scene: file, indent: '  ', line: (r, g) => [
+  `  ${g} [${r.code}] ${r.summary}`,
+  `      "${r.oa}"  vs  "${r.ob}"`,
+  `      A crossfade between two TEXT states is a double exposure: the midpoint is two strings at half strength, not a transition.`,
+  `      ${r.fix}`,
+  `      Then every instant has fully legible before on one side and fully legible after on the other. For a few glyphs, a threshold swap works too.\n`,
+].join('\n') });
+for (const f of findings) F.finding({
+  code: 'crossfade-mud',
+  severity: 'error',
+  waived: allow.has('crossfade-mud'),
+  at: { layer: f.layer },
+  summary: `layer "${f.layer}": two elements at the same point (${f.key.replace(/\|/g, ' ')}) `
     + `cross-dissolve on ${f.v}, and BOTH stay above ${VISIBLE} opacity for ${s(f.share)} of its range`
-    + `${f.blur ? ', with a blur on top of it' : ''}.`);
-  console.log(`      "${f.oa}"  vs  "${f.ob}"`);
-  console.log(`      A crossfade between two TEXT states is a double exposure: the midpoint is two strings at half strength, not a transition.`);
-  console.log(`      Use a WIPE instead: one box, both strings, clip-path insets from opposite sides driven by ${f.v}, with a read head at the seam.`);
-  console.log(`      Then every instant has fully legible before on one side and fully legible after on the other. For a few glyphs, a threshold swap works too.\n`);
-}
+    + `${f.blur ? ', with a blur on top of it' : ''}.`,
+  fix: `Use a WIPE instead: one box, both strings, clip-path insets from opposite sides driven by ${f.v}, with a read head at the seam.`,
+  oa: f.oa, ob: f.ob,
+});
+F.emit();
 for (const u of unreadable) {
   console.log(`  ⚠ layer "${u.layer}": a same-point opacity pair this gate could NOT evaluate, so it is unjudged, not cleared.`);
   console.log(`      "${u.oa}"  vs  "${u.ob}"   (extend evalCss in ${'scripts/gates/dissolve-check.mjs'} if this shape should be measurable)\n`);

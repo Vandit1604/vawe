@@ -110,6 +110,7 @@ import { onScreenText } from '../lib/text.mjs';
 import { sceneTiming, num, spanOf } from './scene-timing.mjs';
 import { settleWindow } from '../../core/safe.js';
 import { BASE_ENTER, BASE_EXIT } from '../../core/clips.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 export const FPS = 30;
 export const HOLD_PER_WORD = 0.6;
@@ -302,7 +303,10 @@ if (process.argv[1] && process.argv[1].endsWith('read-check.mjs')) {
     process.exit(0);
   }
   console.log(`  ${findings.length} reading problem(s):`);
-  for (const x of findings) console.log(`    ~ [${x.code}] ${x.msg}`);
+  // The record is the finding; the line is rendered from it (docs/MISTAKES.md #401).
+  const F = gateFindings({ scene: file, indent: '    ' });
+  for (const x of findings) F.warn(x.code, x.msg);
+  F.emit();
   console.log(strict
     ? `\n  ✗ read gate (strict): the viewer cannot read what the film shows.\n`
     : `\n  a line nobody can read is a line nobody read. (Block with --strict / TASTE=1.)\n`);

@@ -33,6 +33,7 @@ import { DENSE_KEY_SEC } from '../../core/sequence.js';
 import { cutVelocityAdvice } from '../../core/velocity-cut.js';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
@@ -700,10 +701,12 @@ console.log(`\n  direction audit: ${fails.length} fail · ${warns.length} warn${
 if (findings.length && !lib.blind) console.log(`  Each finding carries where this film sits in the ${lib.films}-scene library. That is a position, not a\n`
   + `  target: the rule is what fired, and the median is only what has been made here.`);
 if (findings.length && lib.blind && lib.blind !== 'no findings') console.log(`  census BLIND (${lib.blind}), findings print without their library context.`);
-for (const f of findings) {
-  console.log(`    ${f.sev === 'FAIL' ? '✗' : '~'} [${f.code}] ${f.msg}`);
-  if (f.census) console.log(`        library: ${f.census}`);
-}
+// One fact, one owner: the record carries the finding, the renderer carries the layout, and
+// author-check reads `code` rather than re-reading the line (docs/MISTAKES.md #401).
+const F = gateFindings({ scene: file, indent: '    ',
+  line: (r, g) => `    ${g} [${r.code}] ${r.summary}` + (r.census ? `\n        library: ${r.census}` : '') });
+for (const f of findings) F.finding({ code: f.code, severity: f.sev === 'FAIL' ? 'error' : 'warn', summary: f.msg, ...(f.census ? { census: f.census } : {}) });
+F.emit();
 if (!findings.length) console.log('    ✓ direction reads clean');
 
 // The speed note. Not a finding and never counted as one: see the header for the three films that were

@@ -70,6 +70,7 @@ import { safeArea } from '../../core/safe.js';
 import { motionAt } from '../../core/sequence.js';
 import { bgPreset, bgPaletteFrom } from '../../core/backgrounds.js';
 import { parseColorRGB } from '../../core/motion.js';
+import { gateFindings, emitJson } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FPS = 30;
@@ -512,12 +513,12 @@ if (!file || !fs.existsSync(file)) {
 const r = report(file);
 if (!r) { console.error(`✗ ${file}: not a scene (module !== "scene")`); process.exit(2); }
 if (args.includes('--json')) {
-  console.log(JSON.stringify({ file, jumpFar: JUMP_FAR,
+  emitJson({ file, jumpFar: JUMP_FAR,
     junctions: r.t.junctions.map((j) => ({ t: j.t, kind: j.kind, dist: j.dist ?? null,
       from: j.before ? { id: j.before.win.L.id ?? j.before.win.L.type, x: j.before.win.cx | 0, y: j.before.win.cy | 0 } : null,
       to: j.after ? { id: j.after.win.L.id ?? j.after.win.L.type, x: j.after.win.cx | 0, y: j.after.win.cy | 0 } : null,
       unreadable: j.unreadable ?? null, live: j.live ?? null })),
-    debt: r.D, findings: r.findings }, null, 2));
+    debt: r.D, findings: r.findings });
   process.exit(0);
 }
 
@@ -546,7 +547,13 @@ if (!r.findings.length) {
     + `is followed by a below-median beat.\n`);
   process.exit(0);
 }
-for (const f of r.findings) console.log(`    ~ [eye-trace] ${f.code}: ${f.msg}`);
+// The bracketed code stays `eye-trace`, the family name this gate has always printed and the only
+// name anything downstream (doc routing, waivers) has ever been able to match. The per-junction code
+// is the head of the summary, exactly as it reads today. Splitting the two is a separate change with
+// its own waiver and doc consequences, and this one may not move the printed line.
+const F = gateFindings({ scene: file, indent: '    ' });
+for (const f of r.findings) F.warn('eye-trace', `${f.code}: ${f.msg}`);
+F.emit();
 console.log(strict
   ? '\n  ✗ eye-trace (strict)\n'
   : '\n  REPORT ONLY, Murch ranks eye-trace fourth of six at 7%, under emotion, story and rhythm, and says\n'

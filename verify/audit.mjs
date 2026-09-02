@@ -37,6 +37,7 @@ import { resolveCoords } from '../core/boot.js';
 // <style> body as glyphs (docs/MISTAKES.md #222/#217); this file went on doing exactly that when it
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
 import { snippet } from '../scripts/lib/text.mjs';
+import { gateFindings } from '../scripts/lib/findings.mjs';
 import { lowerScene } from '../core/transitions-lower.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -1669,7 +1670,17 @@ if (heroOnly) {
   if (!items.length && !rows.some((r) => r.note)) {
     console.log(`  ✓ hero fill: no landscape frame sampled sets its hero line at web scale.`);
   } else {
-    for (const i of items) console.log(`  ~ [thin-hero]${i.waived ? ' (waived)' : ''} ${i.m} f${i.f} ${i.a}${i.t ? ` "${i.t}"` : ''}, ${i.detail}`);
+    // Only the --hero branch speaks records so far, because it is the only part of this file
+    // author-check consumes before the render exists. The record is the finding and the line is
+    // rendered from it, so the aggregator reads `code` instead of re-reading the sentence
+    // (docs/MISTAKES.md #401). The rest of this file still prints `{kind}` rows post-render.
+    // The glyph is fixed rather than derived: a waived thin-hero has always printed `~ … (waived)`,
+    // never the `○` the shared renderer would reach for, and this change may not move the line.
+    const F = gateFindings({ indent: '  ',
+      line: (r) => `  ~ [${r.code}]${r.waived ? ' (waived)' : ''} ${r.summary}` });
+    for (const i of items) F.warn('thin-hero', `${i.m} f${i.f} ${i.a}${i.t ? ` "${i.t}"` : ''}, ${i.detail}`,
+      { at: { frame: i.f }, ...(i.waived ? { waived: true } : {}) });
+    F.emit();
   }
   console.log(`  (hero fill only: 1 of the 19 finding kinds in this file. Every contrast, overlap, clipping`);
   console.log(`   and safe-zone check still runs post-render, under \`make audit\`.)`);

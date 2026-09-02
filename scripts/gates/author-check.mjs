@@ -64,6 +64,7 @@ import { readReceipt } from '../lib/receipt.mjs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
 import { codesEmitted } from '../lib/finding-codes.mjs';
+import { readFindings } from '../lib/findings.mjs';
 import { sceneDims } from '../../core/safe.js';
 import { population, LIBRARY } from '../lib/census.mjs';
 
@@ -206,13 +207,40 @@ function gateForCode(code) {
   return cands.find((f) => f.startsWith('scripts/gates/')) || cands.find((f) => f.startsWith('scripts/author/')) || cands[0] || null;
 }
 
+// ---- HOW A GATE'S VERDICT REACHES THIS FILE ---------------------------------------------------------
+//
+// By a STRUCTURE, and never by re-reading the gate's prose. What used to be here was:
+//
+//     new RegExp(`[✗~]\\s*\\[${code}\\]`).test(out)
+//
+// and every one of the forty gates that can fail was one reformat away from becoming invisible to it.
+// Nothing would error. The step would print its findings in full, this file would read none of them,
+// and the film would pass. docs/MISTAKES.md #401 is the same class already paid for: motion-audit
+// printed its verdict line to stdout after its JSON, so the documented machine-readable output was not
+// machine-readable, and a sweep reported all 154 scenes as crashed.
+//
+// So a gate writes its records to the file named in VAWE_FINDINGS_OUT (scripts/lib/findings.mjs) while
+// printing exactly the prose it printed before. One run, both shapes: the person watching gets the
+// sentences and this file gets `code` and `severity`. A gate that does not speak records yet writes
+// nothing, and reads here as no findings, which is what the regex said about it too.
+const findingsTmp = path.join('/tmp/.author-check', String(process.pid));
+let findingsSeq = 0;
+/** Run a gate, return { r, records }. `records` is null when the gate wrote none. */
+function spawnGate(script, args, opts = {}) {
+  fs.mkdirSync(findingsTmp, { recursive: true });
+  const out = path.join(findingsTmp, `findings-${++findingsSeq}.json`);
+  try { fs.rmSync(out, { force: true }); } catch { /* first run */ }
+  const r = spawnSync('node', [path.join(repoRoot, script), ...args],
+    { encoding: 'utf8', cwd: repoRoot, ...opts, env: { ...process.env, VAWE_FINDINGS_OUT: out } });
+  return { r, records: readFindings(out) };
+}
+
 /** Does `code` fire on this scene? Runs the owning gate. ADOPT-TIME ONLY: never on the hot path. */
 function codeFiresOn(code, sceneFile) {
   const gate = gateForCode(code);
   if (!gate) return false;
-  const r = spawnSync('node', [path.join(repoRoot, gate), sceneFile], { encoding: 'utf8', cwd: repoRoot, timeout: 60000 });
-  const out = `${r.stdout || ''}${r.stderr || ''}`;
-  return new RegExp(`[✗~]\\s*\\[${code}\\]`).test(out);
+  const { records } = spawnGate(gate, [sceneFile], { timeout: 60000 });
+  return (records || []).some((f) => f.code === code && f.severity !== 'info');
 }
 
 // The identity of a scene for legacy purposes is its CONTENT, canonicalised, not its bytes. Sorting keys
@@ -524,21 +552,31 @@ const runGate = (name, label, script, args, opts = {}) => {
   // spawnSync, not execFileSync: a gate that PASSES can still print a warning, and it prints it to
   // stderr, which execFileSync throws away on success. That is how a step with a visible ⚠ above it
   // could summarise itself as "nothing found".
-  const r = spawnSync('node', [path.join(repoRoot, script), target, ...args], { encoding: 'utf8', cwd: repoRoot });
+  const { r, records } = spawnGate(script, [target, ...args]);
   const out = `${r.stdout || ''}${r.stderr || ''}`;
   const code = r.status ?? 1;
   process.stdout.write(out.endsWith('\n') ? out : out + '\n');
-  const blockCodes = [...out.matchAll(/✗\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1]);
+  // THE CODES COME OFF THE RECORDS. A waived finding is not a block, which is what the old regex meant
+  // by only matching ✗: the gates print `○` over a code the scene already excused.
+  const live = (records || []).filter((f) => !f.waived);
+  const blockCodes = live.filter((f) => f.severity === 'error').map((f) => f.code);
   // WHAT IS WRONG, AND WHERE THE ANSWER LIVES. A gate names a defect in a sentence it had to fit on one
   // line; the reasoning behind it is a page somebody already wrote and nobody opens. Measured before
   // this line existed: 10 of 64 gates cited a doc, and 12 of 33 CRAFT docs were reachable only by
   // browsing an index. Routing here rather than in each gate means all of them gain it at once, and it
   // reads the SAME `codes:` frontmatter `make doc-index` already validates, so there is one owner.
   // Warnings are included: `continuity` fired as a warning on the film that prompted all of this.
-  const warnCodes = [...out.matchAll(/~\s*\[([a-z0-9-]+)\]/gi)].map((m) => m[1]);
+  const warnCodes = live.filter((f) => f.severity === 'warn').map((f) => f.code);
   printDocs([...blockCodes, ...warnCodes]);
   // A STEP THAT FINDS NOTHING MUST SAY SO. Silence and a clean run look identical in a log, and a person
   // reading this cannot tell a gate that passed from a gate that fell over.
+  //
+  // THIS COUNT IS DELIBERATELY NOT THE RECORDS, and the two are different facts. `blockCodes` above is
+  // WHICH RULES FIRED, and it must be structural because a rule that stops being seen stops stopping
+  // anybody. This is HOW MANY MARKED LINES THE STEP PRINTED, a fact about the transcript the reader is
+  // looking at: it counts the ⚠ advisories from validate, critique and inspect, which are not coded
+  // findings and never were, so reading it off the records would make the tally disagree with the
+  // screen. Nothing is decided from it; it is a tally under output the reader can already see.
   const findings = (out.match(/^\s*[✗~⚠]/gm) || []).length;
   process.stdout.write(findings === 0 && code === 0
     ? `  → nothing found.\n`

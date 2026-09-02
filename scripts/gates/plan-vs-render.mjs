@@ -46,6 +46,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';
 import { parseStoryboard } from '../author/storyboard-parse.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
@@ -139,8 +140,12 @@ function nominationNote() {
 function printNomination() {
   const n = nominationNote();
   if (!n) return;
-  if (n.waived) { console.log(`  ○ [no-spectacle-nominated] waived via authoring.allow\n`); return; }
-  console.log(`  ~ [no-spectacle-nominated] ${n.msg}\n`);
+  const F = gateFindings({ scene: file, indent: '  ',
+    line: (r, g) => `  ${g} [${r.code}] ${r.waived ? 'waived via authoring.allow' : r.summary}\n` });
+  if (n.waived) F.finding({ code: 'no-spectacle-nominated', severity: 'warn', summary: n.msg, waived: true });
+  else F.warn('no-spectacle-nominated', n.msg);
+  F.emit();
+  if (n.waived) return;
   console.log(`    (advisory, and it stays advisory under --strict.)\n`);
 }
 
@@ -379,9 +384,14 @@ if (sb && sb.pace && spanned.length) {
 const fails = findings.filter((f) => f.sev === 'FAIL' && !allow.has(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !allow.has(f.code));
 const waived = findings.filter((f) => allow.has(f.code));
-for (const f of fails) console.log(`  ✗ [${f.code}] ${f.msg}\n`);
-for (const f of warns) console.log(`  ~ [${f.code}] ${f.msg}\n`);
-for (const f of waived) console.log(`  ○ [${f.code}] waived via authoring.allow`);
+// One fact, one owner: the record is the finding and the line is rendered from it, so author-check
+// reads `code` off a structure instead of re-reading this sentence (docs/MISTAKES.md #401).
+const F = gateFindings({ scene: file, indent: '  ',
+  line: (r, g) => r.waived ? `  ${g} [${r.code}] waived via authoring.allow` : `  ${g} [${r.code}] ${r.summary}\n` });
+for (const f of fails) F.fail(f.code, f.msg);
+for (const f of warns) F.warn(f.code, f.msg);
+for (const f of waived) F.finding({ code: f.code, severity: f.sev === 'FAIL' ? 'error' : 'warn', summary: f.msg, waived: true });
+F.emit();
 // The peak question runs on a planned film too. A sidecar carries beats and `becomes:` lines and never
 // a spectacle, so a film can be fully planned, fully checked here, and still nominate nothing.
 printNomination();
