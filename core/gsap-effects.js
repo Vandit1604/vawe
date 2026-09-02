@@ -194,8 +194,11 @@ export const FX_DUR = Object.fromEntries(
 // asks a registry what a name MEANS got nothing for the two largest effect families. Measured the day
 // this was found: `EXIT_FX` had zero users across 153 scenes and `GSAP_FX` 31 of 37 unused, which is
 // what an undescribed vocabulary looks like from the outside. Written and unread is the same as unwritten.
+// "letters get squeezed together kerning" found nothing, though `expandIn` is exactly that and its blurb
+// even says "tracking". Type vocabulary has three words for one thing and a blurb can only use one.
+const GSAP_AKA = { expandIn: ['kerning', 'letter-spacing', 'letterspacing', 'tracking out'] };
 export const GSAP_REGISTRY = defineRegistry('gsap effect',
-  Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx', blurbs: GSAP_BLURBS,
+  Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx', blurbs: GSAP_BLURBS, aka: GSAP_AKA,
   catalog: {
     title: 'GSAP named effects',
     tag: 'per-layer/text',

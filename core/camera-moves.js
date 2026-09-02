@@ -546,7 +546,11 @@ export function buildCameraMove(spec, canvas = null) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a camera move" when someone writes it somewhere else. core/registry.js.
-export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove.move', blurbs: CAMERA_MOVE_BLURBS,
+// "handheld camera feel" found nothing across all 445 named things, and `driftHold` IS that shot: a
+// held frame breathing on a sub-12px Lissajous. `handheld` is the only word a director would use for it
+// and no honest rewrite of that blurb puts it there, which is what `aka` is for.
+const CAMERA_AKA = { driftHold: ['handheld', 'breathing camera', 'operator float', 'not locked off'] };
+export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove.move', blurbs: CAMERA_MOVE_BLURBS, aka: CAMERA_AKA,
   catalog: {
     title: 'Camera moves',
     tag: 'camera',

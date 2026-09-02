@@ -83,7 +83,10 @@ export const FILTER_BLURBS = {
 // one of them documented right above, answered "not found" to an author searching for the thing they
 // could not name. Declaring the registry is the whole fix: nothing here is restated, and a preset
 // added to the table above is searchable the moment it has a blurb.
-export const FILTER_REGISTRY = defineRegistry('filter', FILTER_PRESETS, { slot: 'filter', blurbs: FILTER_BLURBS,
+// Same query as the `chroma` preset, same absence: the effect's textbook name is "chromatic aberration"
+// and the blurb calls it fringing, which is the right word for the sentence and the wrong one for a search.
+const FILTER_AKA = { chromaSplit: ['chromatic aberration', 'rgb split', 'colour fringing'] };
+export const FILTER_REGISTRY = defineRegistry('filter', FILTER_PRESETS, { slot: 'filter', blurbs: FILTER_BLURBS, aka: FILTER_AKA,
   catalog: {
     title: 'Filter presets',
     tag: 'static',

@@ -24,10 +24,13 @@
 const ALL = [];   // every registry built here, so a failed pick can ask the others
 
 /**
- * defineRegistry(kind, entries, opts) → { kind, entries, names, has, pick, blurbs }
+ * defineRegistry(kind, entries, opts) → { kind, entries, names, has, pick, blurbs, aka }
  *   kind: the author-facing noun, used verbatim in the error ("anim", "cut", "kinetic preset")
  *   entries: the name→value map itself
  *   opts.blurbs: the one-line-per-entry map, kept beside its registry (the blocks/catalog.mjs pattern)
+ *   opts.aka: name → the words a person would SEARCH with that the blurb honestly cannot carry
+ *     ("handheld" for `driftHold`, "kerning" for `expandIn`). Folded into the search corpus and never
+ *     printed, so a synonym cannot turn a description into keyword soup. See akaOf below.
  *   opts.slot: how an author writes it in JSON (`anim`, `fx`, `preset`), used to phrase the hint and
  *     to render the paste `make arsenal` prints. It is a PATH, and two markers say where the NAME goes:
  *     `bg[].preset` (the value of `preset` in an array of objects), `modifiers[]` (the KEY of an object
@@ -36,9 +39,14 @@ const ALL = [];   // every registry built here, so a failed pick can ask the oth
  *     vocabulary, written here so that adding one is a single edit. See checkCatalog below.
  * There is deliberately no `fallback` option.
  */
-export function defineRegistry(kind, entries, { blurbs, slot, catalog } = {}) {
+export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog } = {}) {
   if (!entries || typeof entries !== 'object') throw new Error(`defineRegistry("${kind}"): entries must be an object`);
   if (catalog) checkCatalog(kind, catalog);
+  if (aka) checkAka(kind, entries, aka);
+  // The blurb IS the retrieval index (scripts/author/arsenal.mjs ranks on name + kind + blurb + aka and
+  // nothing else), so the same refusal blurbsOf applies is applied to a blurbs map handed in directly.
+  // Most registries do not go through blurbsOf; without this the rule would cover a third of them.
+  if (blurbs) for (const [n, b] of Object.entries(blurbs)) checkBlurb(kind, n, b);
   const has = (name) => typeof name === 'string' && Object.prototype.hasOwnProperty.call(entries, name);
 
   const reg = {
@@ -46,6 +54,7 @@ export function defineRegistry(kind, entries, { blurbs, slot, catalog } = {}) {
     slot: slot || kind,
     entries,
     blurbs: blurbs || null,
+    aka: aka || null,
     catalog: catalog || null,
     get names() { return Object.keys(entries); },
     has,
@@ -90,6 +99,77 @@ function checkCatalog(kind, c) {
   if (!c.preview === !c.noPreview) bad('needs EITHER preview(name, kit) OR noPreview (a reason), never both and never neither');
   if (c.preview && typeof c.preview !== 'function') bad('preview must be a function of (name, kit)');
   if (c.noPreview && typeof c.noPreview !== 'string') bad('noPreview must be the reason, as a string');
+}
+
+/**
+ * checkAka(kind, entries, aka): the synonym map, refused at LOAD if it names something that is not here.
+ *
+ * WHY THE REFUSAL. An `aka` is invisible: it is never printed, it only changes what a search finds. So a
+ * typo'd key ("driftHeld") would index nothing, break nothing, and report nothing, which is the exact
+ * failure mode CLAUDE.md names as the one this repo pays for most: a field written and never read.
+ */
+function checkAka(kind, entries, aka) {
+  const bad = (why) => { throw new Error(`defineRegistry("${kind}"): aka ${why}`); };
+  if (typeof aka !== 'object') bad('must be a name → [synonym, …] object');
+  for (const [name, words] of Object.entries(aka)) {
+    if (!Object.prototype.hasOwnProperty.call(entries, name)) bad(`names "${name}", which is not an entry here`);
+    if (!Array.isArray(words) || !words.length) bad(`["${name}"] must be a non-empty array of words`);
+    for (const w of words) if (typeof w !== 'string' || !w.trim()) bad(`["${name}"] contains something that is not a word`);
+  }
+}
+
+// The stopwords and the tokenizer the SEARCH uses, owned here because the refusal below has to grade a
+// blurb by exactly the words the search will index it under, and two tokenizers would eventually
+// disagree about that. scripts/author/arsenal.mjs re-exports this as `toks` rather than keeping a copy.
+const STOP = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'and', 'or', 'is', 'it', 'that', 'with', 'for', 'as']);
+export const searchWords = (s) => String(s).toLowerCase().match(/[a-z][a-z0-9]+/g)?.filter((w) => !STOP.has(w)) || [];
+
+// `thermalBlur` → thermal, blur. What a reader already has from the NAME, and therefore what a blurb
+// adds nothing by repeating.
+const nameWords = (name) => new Set(String(name)
+  .replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().match(/[a-z0-9]+/g) || []);
+
+/**
+ * checkBlurb(kind, name, blurb): a blurb must exist AND say something the name does not already say.
+ *
+ * WHY THIS IS A REFUSAL AND NOT A GATE. An author searched `make arsenal` in plain English for
+ * "elements react to a moving point by distance". core/tracks/effector.js IS exactly that and the
+ * search answered NOTHING HERE CLEARLY MATCHES, because arsenal.mjs ranks on name + kind + blurb and
+ * that blurb never used the words a person types. So a blurb is not a caption, it is the RETRIEVAL
+ * INDEX, and "the fade cut fades" is an entry only findable by someone who already knows the word.
+ *
+ * THE RULE IS DELIBERATELY THE NARROWEST ONE THAT CATCHES THAT. Strip the stopwords, strip every word
+ * the name already carries, strip the kind every sibling shares, and refuse only when NOTHING is left. It says nothing about length, about
+ * style, or about whether the blurb is any good: a wrong refusal fires at module load and stops the
+ * engine, and this repo has deleted two gates for measuring the wrong thing (docs/TASTE.md, the
+ * `visual-vocabulary` story). Run over all 445 named things the day it was written, it fired ONCE, on
+ * `tilt: "3D tilt-in"`, whose only non-name word is `3D`, which the tokenizer cannot index at all.
+ *
+ * What it CANNOT do, so nobody reads a clean load as an endorsement: it measures distinctiveness, never
+ * accuracy. A confidently wrong blurb full of rare words passes this and always will. The distribution
+ * that shows how well the whole vocabulary retrieves itself is `scripts/dev/blurb-retrieval.mjs`.
+ */
+export function checkBlurb(kind, name, blurb) {
+  if (typeof blurb !== 'string' || !blurb.trim())
+    throw new Error(`${kind} "${name}" has no blurb, wrap it where it is written: `
+      + `${name}: withBlurb("what it does, in one line", …). Without one it is absent from `
+      + `\`make effects\`, docs/EFFECTS.md and the site, so nobody can choose it.`);
+  // What a reader already has before the blurb: the entry's own name, its morphological variants
+  // (`fade` → `fades`), and the KIND, which every sibling shares and which therefore separates nothing.
+  // Prefix matching in both directions is what makes "the fade cut fades" a restatement rather than
+  // three new words; it is also why this is refused only when NOTHING survives it.
+  const own = nameWords(name);
+  const lower = String(name).toLowerCase();
+  const kindWords = new Set(searchWords(kind));
+  const restates = (w) => lower.includes(w) || w.startsWith(lower)
+    || [...own].some((x) => w.startsWith(x) || x.startsWith(w)) || kindWords.has(w);
+  const said = searchWords(blurb).filter((w) => !restates(w));
+  if (!said.length)
+    throw new Error(`${kind} "${name}" has a blurb that only restates its own name (${JSON.stringify(blurb)}). `
+      + `The blurb is the search index: \`make arsenal\` ranks on name + kind + blurb, so an entry `
+      + `described in its own words can only be found by somebody who already knows the word. Say what `
+      + `it DOES, in the words a person would type. If the right words genuinely are the name, add them `
+      + `as \`aka\` on the registry instead.`);
 }
 
 // Where else does this name live? Returns the registries that DO know it.
@@ -149,10 +229,7 @@ export function withBlurb(blurb, value) {
 export function blurbsOf(kind, entries) {
   const out = {};
   for (const [name, value] of Object.entries(entries)) {
-    if (!value || typeof value.blurb !== 'string' || !value.blurb.trim())
-      throw new Error(`${kind} "${name}" has no blurb, wrap it where it is written: `
-        + `${name}: withBlurb("what it does, in one line", …). Without one it is absent from `
-        + `\`make effects\`, docs/EFFECTS.md and the site, so nobody can choose it.`);
+    checkBlurb(kind, name, value && value.blurb);
     out[name] = value.blurb;
   }
   return out;

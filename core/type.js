@@ -280,7 +280,7 @@ export const PRESETS = {
     'scramble→settle, techy'),
   // tilt: small rotate-in + rise (sporty/editorial)
   tilt: preset((u, { deg = 8, dist = 26 } = {}) => { const e = easeOutSettle(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateY(${((1 - e) * dist).toFixed(2)}px) rotate(${((1 - e) * -deg).toFixed(2)}deg)` }; },
-    '3D tilt-in'),
+    'each unit rises and swings upright from a small angle, sporty and editorial. A flat rotation, not a 3D hinge: `flip` is the one that turns'),
   // stretch: horizontal smear that snaps true (impact words)
   stretch: preset((u, { from = 1.6 } = {}) => { const e = easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 2), transform: `scaleX(${(from + (1 - from) * e).toFixed(3)})`, filter: `blur(${((1 - e) * 6).toFixed(2)}px)` }; },
     'horizontal smear that snaps true: impact words'),
@@ -322,7 +322,7 @@ export const PRESETS = {
     'the accent sweeps word by word along a line, each unit lighting then settling to the resting colour'),
   // underline: draws left -> right beneath the unit
   underline: preset((u, { color = 'currentColor', h = 3 } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% ${h}px`, backgroundPosition: '0 100%', transform: 'none' }; },
-    'underline draws on'),
+    'a rule grows left to right along the baseline as the word lands, the marker under a heading'),
   // shadow: poster lift, long shadow collapses as the word settles
   shadow: preset((u, { dist = 14 } = {}) => { const k = (1 - easeOutCubic(clamp01(u))); return { opacity: clamp01(u * 1.5), transform: `translateY(${(-k * 6).toFixed(2)}px)`, textShadow: `0 ${(k * dist).toFixed(1)}px ${(k * dist * 1.6).toFixed(1)}px rgba(0,0,0,0.55)` }; },
     'a long poster shadow collapses as the word settles, poster statements'),
@@ -332,7 +332,7 @@ export const PRESETS = {
   // half-visible at u=0, so the mask read as a smudge instead of an edge. A percentage is
   // self-scaling and needs no measurement, so the preset stays a pure function of u.
   riseClip: preset((u, { dist = 130 } = {}) => ({ opacity: 1, transform: `translateY(${((1 - easeOutSettle(clamp01(u))) * dist).toFixed(2)}%)` }),
-    'mask-rise reveal'),
+    'the word climbs out from behind a hard edge at its own baseline, hidden until it clears the line. The clean editorial reveal'),
   // draw: an SVG stroke draws itself on. Pairs with splitText(el,'path'), which stamps
   // pathLength="1" so dash units are normalised. The offset is then a pure function of u with no
   // measurement. `back:true` draws from the far end. Hidden at u=0, exact identity at u=1 (dash
@@ -613,7 +613,20 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
 
 // Defined after PRESETS so the map is complete. Gives the cross-registry hint: `preset:"popIn"`
 // is told that popIn is a gsap effect, which is the mistake three shipped layers actually made.
-export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS,
+// The words a person searches with that these blurbs cannot honestly carry. Each one is a query that
+// returned NOTHING HERE CLEARLY MATCHES the day it was added, for a capability sitting right here.
+// `aka` is never printed, so the blurb stays a sentence a reader can use and the index gets the synonym.
+const PRESET_AKA = {
+  // "typewriter typing text one letter at a time" found nothing. The blurb says typewriter and stops,
+  // so every other word an author reaches for (typing, letters, keystroke) missed.
+  type: ['typing', 'letters one at a time', 'keystroke', 'terminal caret'],
+  // "cross a word out with a line through it" is what the beat is FOR, and `strikethrough` is the word
+  // for it in every text tool. It appeared nowhere in the whole arsenal.
+  strike: ['strikethrough', 'crossed out', 'struck through'],
+  // "chromatic aberration colour fringing" found nothing. The effect's real name is not in our prose.
+  chroma: ['chromatic aberration', 'rgb split', 'colour fringing'],
+};
+export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS, aka: PRESET_AKA,
   catalog: {
     title: 'Kinetic text presets',
     tag: 'text',

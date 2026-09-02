@@ -30,6 +30,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { newSince, WINDOW_DAYS } from './recency.mjs';
+// The tokenizer lives in core/registry.js, where the load-time blurb refusal also needs it. Two
+// tokenizers would eventually disagree about which words an entry is indexed under, and the refusal has
+// to grade a blurb by exactly the words this search will find it by.
+import { searchWords } from '../../core/registry.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -67,7 +71,11 @@ export async function collect() {
         const key = `${reg.kind}\u0000${name}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        out.push({ name, kind: reg.kind, slot: reg.slot || null, blurb: (reg.blurbs && reg.blurbs[name]) || '' });
+        // `aka` is the searchable-but-unprinted half of a description: the words a person types that
+        // an honest blurb cannot carry ("handheld" for `driftHold`, "kerning" for `expandIn`). It joins
+        // the corpus below and never reaches the output, so a synonym cannot turn a blurb into keyword soup.
+        out.push({ name, kind: reg.kind, slot: reg.slot || null, blurb: (reg.blurbs && reg.blurbs[name]) || '',
+          aka: (reg.aka && reg.aka[name]) || [] });
       }
     }
   }
@@ -115,8 +123,10 @@ function usage() {
   return CACHE.counts;
 }
 
-const STOP = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'and', 'or', 'is', 'it', 'that', 'with', 'for', 'as']);
-export const toks = (s) => String(s).toLowerCase().match(/[a-z][a-z0-9]+/g)?.filter((w) => !STOP.has(w)) || [];
+export const toks = searchWords;
+
+/** Everything an entry is INDEXED by: what it is called, what it is, what it does, what it is also called. */
+export const corpusOf = (e) => `${e.name} ${e.kind} ${e.blurb} ${(e.aka || []).join(' ')}`;
 
 // ---- confidence: how much of the QUESTION this entry actually answers -----------------------------
 //
@@ -163,7 +173,7 @@ const MIN_MASS = 6.0;
 
 /** coverageIn(corpus) → (entry, queryTokens) → 0..1, the idf-weighted share of the query it answers. */
 export function coverageIn(all) {
-  const hay = new Map(all.map((e) => [e, new Set(toks(`${e.name} ${e.kind} ${e.blurb}`))]));
+  const hay = new Map(all.map((e) => [e, new Set(toks(corpusOf(e)))]));
   const floor = Math.log(1 / FILLER_SHARE);   // the idf a word must beat to count as content at all
   const df = new Map();
   const idf = (q) => {
@@ -176,7 +186,7 @@ export function coverageIn(all) {
   };
   return (entry, qt) => {
     const name = entry.name.toLowerCase();
-    const words = hay.get(entry) || new Set(toks(`${entry.name} ${entry.kind} ${entry.blurb}`));
+    const words = hay.get(entry) || new Set(toks(corpusOf(entry)));
     let hit = 0, total = 0;
     for (const q of qt) {
       const w = idf(q);
@@ -232,9 +242,10 @@ export function snippet(entry) {
   return Object.entries(obj).map(([k, v]) => `"${k}": ${jsonish(v)}`).join(', ');
 }
 
-function score(entry, qt) {
+/** The rank order itself. Exported so scripts/dev/blurb-retrieval.mjs measures THIS, not a copy of it. */
+export function score(entry, qt) {
   const name = entry.name.toLowerCase();
-  const hay = toks(`${entry.name} ${entry.kind} ${entry.blurb}`);
+  const hay = toks(corpusOf(entry));
   let s = 0;
   for (const q of qt) {
     if (name === q) s += 12;

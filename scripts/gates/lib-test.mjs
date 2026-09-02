@@ -35,9 +35,9 @@ import { MARGIN, MAX_ZOOM } from '../../core/safe.js';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/safe.js';
 import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/filters.js';
 import fsMod from 'node:fs';
-import { defineRegistry, registries, catalogued } from '../../core/registry.js';
+import { defineRegistry, registries, catalogued, checkBlurb, searchWords } from '../../core/registry.js';
 import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
-import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks } from '../author/arsenal.mjs';
+import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore } from '../author/arsenal.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/junctions.js';
@@ -5208,6 +5208,16 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // the test. That is the set working: an absent query becomes a present one the day the capability
     // lands, and the assertion has to move with it rather than be relaxed.
     ['keep a carried layer upright while its parent rotates', 'upright'],
+    // Six queries that all returned NOTHING HERE CLEARLY MATCHES for a capability the engine HAS. None
+    // of them is fixable by rewriting prose: `handheld`, `kerning`, `strikethrough` and `chromatic
+    // aberration` are the words a person types and not words those descriptions can honestly use. They
+    // are carried by `aka` on the registry, which is searched and never printed.
+    ['typewriter typing text one letter at a time', 'type'],
+    ['play the layer backwards', 'rewind'],
+    ['handheld camera feel', 'driftHold'],
+    ['letters get squeezed together kerning', 'expandIn'],
+    ['chromatic aberration colour fringing', 'chroma'],
+    ['strikethrough a word', 'strike'],
   ];
   for (const [q, want] of PRESENT) {
     ok(`arsenal answers "${q}" with ${want}`, covers(q, want) >= CONFIDENT);
@@ -5235,6 +5245,85 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the threshold sits strictly between the two sets, so neither end is decoration',
      CONFIDENT > Math.max(...ABSENT.map((q) => best(q).c))
      && CONFIDENT <= Math.min(...PRESENT.map(([q, w]) => covers(q, w))));
+}
+
+// ---- AKA: the searchable half of a description that is never printed -------------------------------
+// A blurb is prose a person reads in docs/EFFECTS.md AND the retrieval index `make arsenal` ranks on.
+// Those two jobs pull apart: "handheld" is the only word a director uses for `driftHold` and no honest
+// rewrite of "a held frame that is never dead, a sub-12px Lissajous micro-drift" contains it. `aka`
+// takes the search half so the prose half never has to become keyword soup.
+{
+  const corpus = await arsenalCollect();
+  const drift = corpus.find((e) => e.name === 'driftHold');
+  ok('aka reaches the search corpus', !!drift && drift.aka.includes('handheld'));
+  ok('aka NEVER reaches the printed description, which is the whole point',
+     !!drift && !/handheld/i.test(drift.blurb)
+     && corpus.filter((e) => e.kind === 'camera move').every((e) => !/handheld/i.test(e.blurb)));
+  // An aka is invisible: a typo'd key would index nothing, break nothing and report nothing, which is
+  // the "written and never read" failure this repo pays for most. So it is refused at LOAD.
+  ok('an aka naming something that is not an entry is refused at load', (() => {
+    try { defineRegistry('t', { a: 1 }, { aka: { b: ['x'] } }); return false; }
+    catch (e) { return /not an entry here/.test(e.message); }
+  })());
+  ok('an empty aka list is refused rather than silently indexing nothing', (() => {
+    try { defineRegistry('t', { a: 1 }, { aka: { a: [] } }); return false; }
+    catch (e) { return /non-empty array/.test(e.message); }
+  })());
+}
+
+// ---- AN UNSEARCHABLE BLURB CANNOT BE WRITTEN (core/registry.js checkBlurb) --------------------------
+// The incident: `make arsenal "elements react to a moving point by distance"` answered NOTHING HERE
+// CLEARLY MATCHES while core/tracks/effector.js was exactly that, because the blurb never used the
+// words a person types. One blurb was rewritten; this is the class. The rule is the NARROWEST one that
+// catches it, because a wrong refusal fires at module load and stops the engine, and this repo has
+// deleted two gates for measuring the wrong thing (docs/TASTE.md, `visual-vocabulary`).
+{
+  ok('a blurb that only restates the entry\'s own name is refused', (() => {
+    try { checkBlurb('cut', 'fade', 'the fade cut fades'); return false; }
+    catch (e) { return /only restates its own name/.test(e.message); }
+  })());
+  ok('a missing blurb is still refused, the older half of the same rule', (() => {
+    try { checkBlurb('cut', 'fade', ''); return false; } catch (e) { return /has no blurb/.test(e.message); }
+  })());
+  // The direction that matters more: it must not fire on a real one. If this ever goes off, the RULE is
+  // wrong, not the blurb.
+  ok('a blurb that says one thing the name does not is accepted',
+     checkBlurb('cut', 'fade', 'crossfade, the invisible cut') === undefined);
+  ok('the refusal is wired into defineRegistry, not only blurbsOf', (() => {
+    try { defineRegistry('t', { fade: 1 }, { blurbs: { fade: 'a fade that fades' } }); return false; }
+    catch (e) { return /only restates its own name/.test(e.message); }
+  })());
+}
+
+// ---- RETRIEVABILITY: does an entry's own description find that entry? ------------------------------
+// The objective form of "is this blurb any good": take the blurb as the query, strip every word the
+// NAME already carries (or the test grades itself), and ask where the entry lands in its own results.
+// This measures DISTINCTIVENESS, never accuracy: a confidently wrong blurb full of rare words passes.
+// Rank 1 is not the bar, because near-identical siblings legitimately cannot separate: `rise` and `up`
+// are ALIASES with one sentence between them, and `scale` beaten by `punch` is two names for one move.
+// TOP 3 is the bar. The report is scripts/dev/blurb-retrieval.mjs; 98.1% clear it today.
+{
+  const corpus = await arsenalCollect();
+  const own = (name) => new Set(String(name).replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().match(/[a-z0-9]+/g) || []);
+  const selfRank = (e) => {
+    const lower = e.name.toLowerCase(), parts = own(e.name);
+    const qt = searchWords(e.blurb).filter((q) => !lower.includes(q) && !parts.has(q));
+    if (!qt.length) return Infinity;
+    const ranked = corpus.map((x) => ({ x, s: arsenalScore(x, qt) })).filter((r) => r.s > 0)
+      .sort((a, b) => b.s - a.s || a.x.name.localeCompare(b.x.name));
+    const i = ranked.findIndex((r) => r.x.name === e.name && r.x.kind === e.kind);
+    return i < 0 ? Infinity : i + 1;
+  };
+  const blurbed = corpus.filter((e) => e.blurb && e.blurb.trim());
+  const top3 = blurbed.filter((e) => selfRank(e) <= 3).length;
+  // 97% is a RATCHET set just under where the vocabulary sits (352/359, 98.1%), not a round number:
+  // before the six terse blurbs below it were rewritten the figure was 346/359, 96.4%, and this failed.
+  ok(`at least 97% of blurbs retrieve their own entry in the top 3 (${top3}/${blurbed.length})`,
+     top3 / blurbed.length >= 0.97);
+  // Infinity means the blurb left NO word after the name was stripped, or the entry is absent from its
+  // own results. checkBlurb refuses the first case at load, so this is that refusal seen from outside.
+  ok('no blurb in the engine is invisible to its own description',
+     blurbed.every((e) => selfRank(e) !== Infinity));
 }
 
 // ---- ARSENAL SNIPPETS: the line an author PASTES ---------------------------------------------------

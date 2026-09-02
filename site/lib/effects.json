@@ -296,7 +296,7 @@
         {
           "name": "dotmatrix",
           "stem": "backgrounds--dotmatrix",
-          "desc": "dot · matrix · grid",
+          "desc": "a · light · field · ruled · by · evenly · spaced · dots · whose · size · waves · across · it, · the · printed · halftone · look · (moves)",
           "scene": "/assets/effects/backgrounds--dotmatrix.json",
           "noPreview": null
         },
@@ -380,7 +380,7 @@
         {
           "name": "spotlight",
           "stem": "backgrounds--spotlight",
-          "desc": "radial · spotlight · glow",
+          "desc": "a · deep · field · with · one · soft · pool · of · light · wandering · across · it · on · a · slow · cycle, · the · eye · follows · the · bright · patch · (moves)",
           "scene": "/assets/effects/backgrounds--spotlight.json",
           "noPreview": null
         }
@@ -1393,7 +1393,7 @@
         {
           "name": "pop",
           "stem": "enter-exit-anims--pop",
-          "desc": "scale · overshoot",
+          "desc": "springs · past · its · size · and · settles · back, · a · small · confident · arrival · for · a · chip, · a · badge · or · an · icon",
           "scene": "/assets/effects/enter-exit-anims--pop.json",
           "noPreview": null
         },
@@ -2379,7 +2379,7 @@
         {
           "name": "riseClip",
           "stem": "kinetic-text-presets--riseclip",
-          "desc": "mask-rise · reveal",
+          "desc": "the · word · climbs · out · from · behind · a · hard · edge · at · its · own · baseline, · hidden · until · it · clears · the · line. · The · clean · editorial · reveal",
           "scene": "/assets/effects/kinetic-text-presets--riseclip.json",
           "noPreview": null
         },
@@ -2442,7 +2442,7 @@
         {
           "name": "tilt",
           "stem": "kinetic-text-presets--tilt",
-          "desc": "3D · tilt-in",
+          "desc": "each · unit · rises · and · swings · upright · from · a · small · angle, · sporty · and · editorial. · A · flat · rotation, · not · a · 3D · hinge · `flip` · is · the · one · that · turns",
           "scene": "/assets/effects/kinetic-text-presets--tilt.json",
           "noPreview": null
         },
@@ -2456,7 +2456,7 @@
         {
           "name": "underline",
           "stem": "kinetic-text-presets--underline",
-          "desc": "underline · draws · on",
+          "desc": "a · rule · grows · left · to · right · along · the · baseline · as · the · word · lands, · the · marker · under · a · heading",
           "scene": "/assets/effects/kinetic-text-presets--underline.json",
           "noPreview": null
         },
