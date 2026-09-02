@@ -414,7 +414,7 @@ type/colour/layout/imagery → density → show-or-tell → what holds it across
 
 **`make arsenal Q="<what you mean, in plain english>"`** searches all 445 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
-`docs/EFFECTS.md`, 638 effects across 48 families). Reach for it before you invent anything. The measured cost
+`docs/EFFECTS.md`, 639 effects across 48 families). Reach for it before you invent anything. The measured cost
 of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 148 gate-visible scenes**, and 12 of its
 19 beats have never been used once.
 

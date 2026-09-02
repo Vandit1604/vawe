@@ -5401,6 +5401,22 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     }
   }
 }
+// ---- EASINGS.hold: the one interpolation that must NOT travel -----------------------------------
+//
+// Every other entry in the table is continuous and lands at 1. A hold is the opposite by design, so a
+// future tidy-up that "fixes" it to ease would silently turn every stepped swap into a 33ms slide. It
+// is asserted at the ends AND in the middle, because a curve that merely starts and finishes right is
+// exactly what a hold is not.
+{
+  const { EASINGS, resolveEasing } = await import('../../core/motion.js');
+  const h = EASINGS.hold;
+  ok('motion: hold does not travel anywhere inside its segment',
+    [0, 0.01, 0.25, 0.5, 0.75, 0.99, 0.999999].every((t) => h(t) === 0));
+  ok('motion: hold jumps to 1 exactly at the far key', h(1) === 1);
+  ok('motion: hold is reachable by name, like every other easing',
+    typeof resolveEasing('hold') === 'function' && resolveEasing('hold')(0.5) === 0);
+}
+
 // ---- arsenal --for: the trigger, not the search --------------------------------------------------
 //
 // The first cut ranked the arsenal against the film's own ON-SCREEN COPY, which states the subject

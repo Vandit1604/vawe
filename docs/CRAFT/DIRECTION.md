@@ -55,7 +55,16 @@ motion-graphics adaptation from **Austin Shaw, _Design for Motion_ (2020)** and 
 | **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
 | **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + `designspec` (slop was retired in 2026-08) |
 
-*(Squash-&-stretch, arcs, straight-ahead, solid drawing don't apply to flat type, omitted.)*
+*(Straight-ahead action and solid drawing are drawing techniques and have no form here.)*
+
+**Squash-and-stretch and arcs DO apply, and this line used to say they did not.**
+[AFTER-EFFECTS-RECIPES.md](AFTER-EFFECTS-RECIPES.md) has both, so two docs an author reads were
+answering the same question differently:
+
+| Principle | Here | How |
+|---|---|---|
+| **Squash and stretch** | **shipped** | the `squash` modifier, scaling non-uniformly off the layer's own velocity with the reciprocal kept, so it deforms rather than zooming. Wrong for anything with a rigid identity: a logo that squashes is a damaged logo |
+| **Arcs** | **partly** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66. It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath`, a different mechanism on a different clock that cannot combine with a keyed track |
 
 ## 2. Editing & pacing, rhythm is the direction
 

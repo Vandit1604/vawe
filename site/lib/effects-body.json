@@ -508,6 +508,7 @@
   "easings--easeoutquart": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"easeOutQuart\"\n    }\n  ]\n}",
   "easings--easeoutquint": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"easeOutQuint\"\n    }\n  ]\n}",
   "easings--easeoutsine": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"easeOutSine\"\n    }\n  ]\n}",
+  "easings--hold": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"hold\"\n    }\n  ]\n}",
   "easings--linear": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"linear\"\n    }\n  ]\n}",
   "easings--ramp": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"ramp\"\n    }\n  ]\n}",
   "easings--rush": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"rush\"\n    }\n  ]\n}",

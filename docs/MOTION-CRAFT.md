@@ -215,6 +215,7 @@ pure and land exactly at rest. Reach into this table by the FEELING you want, th
 | **Mechanical / geometric** | `easeOutCirc` · `easeInCirc` | stops or starts very HARD (near-vertical at one end) | wipes, bars, technical/UI reveals |
 | **Exit: launch away** | mirror of the entrance (automatic), or `rush` / `easeInCubic` | accelerates out; departures leave fast | any `out:` (the engine mirrors by default) |
 | **Speed ramp inside one move** | `ramp` (slow→fast→slow) · `rush` (accel) · `brake` (decel) | remaps progress so a camera/counter reads as intentional, not a lerp | camera moves, counters, velocity contrast |
+| **No travel at all: a stepped swap** | `hold` | holds the FROM value for the whole segment and jumps at the far key | a counter that ticks, a label that changes without sliding, anything cut rather than animated |
 | **Rebound (ball drop)** | `easeOutBounce` | rebounds inside [0,1]; never overshoots, bounces down to rest | rare; a literal drop, a playful accent |
 
 ### The two things a graph editor does that this table cannot say

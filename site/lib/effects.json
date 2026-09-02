@@ -1,5 +1,5 @@
 {
-  "total": 638,
+  "total": 639,
   "previewed": 291,
   "families": 48,
   "tags": [
@@ -93,7 +93,7 @@
     ],
     [
       "timing",
-      75
+      76
     ],
     [
       "transition",
@@ -3975,7 +3975,7 @@
       "mode": "chips",
       "note": "named · by · curve; · pick · by · FEELING · from · the · table · in · docs/MOTION-CRAFT.md",
       "noPreview": "a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.",
-      "count": 41,
+      "count": 42,
       "undescribed": 0,
       "entries": [
         {
@@ -4191,6 +4191,13 @@
         {
           "name": "easeOutSine",
           "stem": "easings--easeoutsine",
+          "desc": "named · by · curve; · pick · by · FEELING · from · the · table · in · docs/MOTION-CRAFT.md",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "hold",
+          "stem": "easings--hold",
           "desc": "named · by · curve; · pick · by · FEELING · from · the · table · in · docs/MOTION-CRAFT.md",
           "scene": null,
           "noPreview": null

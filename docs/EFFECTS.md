@@ -822,6 +822,7 @@ What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, wh
 | `easeOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 | `easeOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 | `easeOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `hold` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 | `linear` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 | `ramp` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 | `rush` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
@@ -1002,4 +1003,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_638 effects across 48 families. Regenerate: `make effects`._
+_639 effects across 48 families. Regenerate: `make effects`._

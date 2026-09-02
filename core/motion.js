@@ -290,6 +290,12 @@ export const EASINGS = {
   rush: (t) => accel(t), brake: (t) => decel(t), ramp: (t) => speedRamp(t),
   // spring physics (another engine-style): premium settle by default, springStiff = no overshoot
   spring: (t) => spring(t), springStiff: (t) => springStiff(t),
+  // A HOLD, the one interpolation in AE's set this table had no name for: the value does not travel,
+  // it JUMPS at the far key. A stepped swap is a real motion-graphics move (a counter that ticks, a
+  // label that changes without sliding, anything cut rather than animated) and it had to be written as
+  // two keys a frame apart, which reads as a 33ms move and is a different thing. Returns 0 through the
+  // whole segment so the FROM value holds, and 1 exactly at the end.
+  hold: (t) => (t >= 1 ? 1 : 0),
 };
 // GSAP's easing vocabulary, which this engine also carries: `parts[].ease` and `morph.ease` go
 // straight to gsap.fromTo and never arrive here. Detected only to give a WRONG-SLOT name a useful
