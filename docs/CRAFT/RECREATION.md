@@ -1,6 +1,6 @@
 ---
-when: "recreating a specific reference video end to end (\"make ours look like this\")"
-answers: "the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · the honest 1:1 ceiling"
+when: "recreating a specific reference video end to end (\"make ours look like this\"), or reflecting a real WEBSITE section by section"
+answers: "the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · one beat per section, in the site's order · the honest 1:1 ceiling"
 group: story
 ---
 
@@ -38,6 +38,21 @@ the [`../MISTAKES.md`](../MISTAKES.md) numbers in the margin are the receipts.
   happens to be. Dominance is never a field (MISTAKES: dominance-by-looking).
 
 ### 2. Get the real material (capture, never approximate)
+
+> **Reflecting a live SITE rather than a film? This step is the whole job.** Never rewrite a site's
+> sections by hand; you'll lose its taste and ignore half its assets. Instead:
+> 1. `make sections URL=… NAME=<brand>`: inventory every section (screenshot each + `sections.json`
+>    with a stable selector + a ready `make capture` command per block). **Look at the shots.**
+> 2. Storyboard **one beat per section, in the site's order.** `make capture` the real block → a crisp,
+>    live `component` (target the UI cluster, e.g. `SEL='section:nth-of-type(2) [class*=illustration]'`,
+>    so there's no duplicate headline over your kinetic one). Real logos, gradients, copy come free.
+>    Only a true `<canvas>`/WebGL section can't DOM-capture → then use the section screenshot as a clipped
+>    `image` layer with `ken`. Animate it OUR way (window / cut / camera / staggered parts); re-type copy
+>    with an overlaid `type` layer, never by editing captured glyphs (purity + font faithfulness).
+>    Preview any capture standalone first: `make preview HTML=<component>.json THEME=<brand>`.
+> 3. Hand-write HTML **only** for connective tissue: hook, CTA, counters. Preview every hand fragment
+>    before rendering: `make preview HTML=frag.html THEME=<brand>` → `/tmp/preview.png` (Read it, fix, repeat).
+
 - **Inventory the site.** `make sections URL=… NAME=<brand>`: a screenshot + a ready `make capture`
   command per section. **Look at the shots.**
 - **Capture live UI.** `make capture URL=… SEL='…' NAME=<brand> LABEL=<x>` lifts a real component into

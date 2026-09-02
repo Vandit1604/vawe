@@ -225,18 +225,11 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 
 ## Reflecting a real website (capture-first: the taste is already on the page)
 
-Never rewrite a site's sections by hand; you'll lose its taste and ignore half its assets. Instead:
-1. `make sections URL=… NAME=<brand>`: inventory every section (screenshot each + `sections.json`
-   with a stable selector + a ready `make capture` command per block). **Look at the shots.**
-2. Storyboard **one beat per section, in the site's order.** `make capture` the real block → a crisp,
-   live `component` (target the UI cluster, e.g. `SEL='section:nth-of-type(2) [class*=illustration]'`,
-   so there's no duplicate headline over your kinetic one). Real logos, gradients, copy come free.
-   Only a true `<canvas>`/WebGL section can't DOM-capture → then use the section screenshot as a clipped
-   `image` layer with `ken`. Animate it OUR way (window / cut / camera / staggered parts); re-type copy
-   with an overlaid `type` layer, never by editing captured glyphs (purity + font faithfulness).
-   Preview any capture standalone first: `make preview HTML=<component>.json THEME=<brand>`.
-3. Hand-write HTML **only** for connective tissue: hook, CTA, counters. Preview every hand fragment
-   before rendering: `make preview HTML=frag.html THEME=<brand>` → `/tmp/preview.png` (Read it, fix, repeat).
+Never rewrite a site's sections by hand; you'll lose its taste and ignore half its assets. **Capture the
+real blocks instead**, and the ordered procedure lives in
+[`docs/CRAFT/RECREATION.md`](docs/CRAFT/RECREATION.md) step 2: inventory every section and LOOK at the
+shots, storyboard one beat per section in the site's order, target the UI cluster rather than the whole
+block, when a screenshot is the only option, and the one job hand-written HTML still has.
 
 > **Reflecting a real FILM? `make study VIDEO=refs/ref.mp4 NAME=ref`.** `make sections` reads a website;
 > nothing here read a film, so every reference this repo argues from was studied by eye once and the study
@@ -284,83 +277,32 @@ because the engine cannot read lightness out of your CSS.
 
 When a reference shows a look you cannot immediately construct, **find out what it is called and read
 its recipe.** Do not approximate it by eye and iterate. An effect a designer has made before has a name,
-and the name leads to a sequence of steps, and one of those steps is always the thing you would never
-have guessed.
+the name leads to a sequence of steps, and one of those steps is always the thing you would never have
+guessed. That cost four rejected renders once: a stack of coloured, offset, blurred copies of a word
+cannot make what a **thermal blur** makes, because its colour is a gradient map on luminance and not
+paint (`docs/MISTAKES.md` #505).
 
-The worked example is `docs/MISTAKES.md` #505, and it is exact. A reference frame showed white text with
-an orange body and a blue rim. I built it four times by stacking coloured, offset, blurred copies of the
-same text, and it was rejected four times, because a stack of copies cannot make a continuous transition
-between three colours. The effect is called a **thermal blur**. Its recipe is white text, Fast Box Blur,
-**Colorama**, glow, and the third step is the whole answer: the colour is a **gradient map on luminance**,
-so the blur's own grey falloff is remapped, bright to white, mid to orange, dim to blue. One search
-returned that. It also explained every symptom the stack could not produce: the continuous transition,
-the organic edge, and the letters being eaten, all of which are the ramp acting on the glyph's own edge.
+**Why the pull toward guessing is real**, so you can watch for it: iterating looks like progress,
+because each attempt is a render you can show, and searching produces nothing to show.
 
-**Why the pull toward guessing is real.** Iterating looks like progress: each attempt is a render you can
-show. Searching produces nothing to show and feels like a detour. But an approximation converges on
-whatever the first guess was near, so four renders can leave you exactly where one did, and here they did.
-
-Three questions, in order, before you build an unfamiliar look:
-
-1. **What is it called?** Describe it in plain words and search. Motion work has a shared vocabulary,
-   most of it borrowed from After Effects: thermal blur, gradient map, displacement map, luma matte,
-   echo, chromatic aberration, goo morph, posterize time.
-2. **What are its steps?** A recipe is a chain of operations in an order. Write the chain down before you
-   write any markup, because the order is usually load-bearing.
-3. **Which step could you not have guessed?** There is nearly always one, and it is the reason your
-   approximation failed. In the thermal blur it is that the colour comes from a MAP and not from paint.
-
-Then build it once, **and then put it in the arsenal.** An effect built inside one film is an effect
-the next author rebuilds by guessing, so the second half is not optional: a filter chain over a layer's
-own pixels becomes a `FILTER_PRESETS` entry in `core/filters.js` with a blurb (`make arsenal` finds it
-the moment it has one), a stack of existing passes becomes a `LOOKS` entry in `core/looks.js`, and a
-`core/generators.js` entry gives it a card in the playground with its dial on screen. The thermal blur
-is `filter: "thermalBlur"` and a playground card today because of exactly that step.
-
-The full procedure, including the plain-words to AE-vocabulary table and the two rules that stop a
-second copy of the recipe existing, is the **`vawe-name-the-effect`** skill. Load it when a reference
-arrives and you cannot name what you are looking at.
-
-`formats/scene/_vawe-teaser-word.html` carries the four AE steps and their SVG equivalents in its own
-comments, which is the shape to copy: the recipe lives beside the implementation, so the next author
-inherits the name rather than the guess.
+**Load the `vawe-name-the-effect` skill** the moment a reference arrives and you cannot name what you
+are looking at. It carries the three questions in order, the plain-words to After-Effects vocabulary
+table, and where the effect goes afterwards so the next author inherits the name rather than the guess.
+That second half is not optional.
 
 ## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
 
-> **FIRST: `parts` IS HOW HAND-WRITTEN HTML GETS THE ENGINE'S CLOCK, and almost nobody uses it.**
-> A fragment animated with CSS renders as a DEAD STILL (transition and animation are disabled engine
-> wide, and `core/validate.mjs` refuses it at boot). The usual answer is to drive geometry from
-> `var(--t)` in a `calc()`, which works and is entirely hand-rolled. `parts` is the other answer and
-> it is better: a CSS SELECTOR into your own markup, and every matched element gets an engine-driven,
-> SEEKED entrance with a stagger, plus `out: true` for a paired exit
-> (`{ select, anim, each, stagger, delay, ease, out, exitDur }`, `core/parts.js`). So the markup keeps
-> the whole CSS surface and the CLOCK still owns each piece, which is the one thing a hand-rolled
-> `calc()` never gives back. Measured when the exit was added: **0 of 13 block files and 6 of 161
-> scenes used `parts`, against 61 scenes carrying an `html` layer.** Two agents building the same
-> figure in both media reached for neither, and both reported "an html layer leaves as one card" as a
-> fact about the medium. It was a missing feature (`docs/MISTAKES.md` #410).
-
 Hand-authored HTML regresses to the mean: centered text, Inter, blue/purple gradient, equal card grid.
-Before writing any by hand, **load the relevant [`docs/CRAFT/`](docs/CRAFT/README.md) guide** (how to choose
-a face / palette / layout / image), then the **`taste-skill`** (state the Design Read + set VARIANCE/MOTION/
-DENSITY dials, obey Anti-Default Discipline), then **`impeccable`** for craft. Skills are vendored in `.claude/skills/`.
-Defaults to reach past: **asymmetry over centered · scale contrast (one huge hero + tiny caption) · a
-committed non-generic face** (the real brand font when reflecting a brand; never Inter/Space Grotesk for
-anything generic). Then gate it two ways, and know which one sees what.
-**`make preview HTML=<frag>`** runs the vendored impeccable detector over the FRAGMENT, in a real browser
-with real computed styles. That is where it works, and it is the only place it is still wired.
-**`make designspec-check D=<file>`** runs OUR rule table (`scripts/lib/designspec-rules.mjs`) over the
-scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
-<!-- doc-refs-allow: make slop · this line records the target's retirement -->
-> `make slop` was RETIRED in 2026-08 (`docs/MISTAKES.md` #326). It ran the 41 borrowed rules over a DOM
-> dump that inlined three CSS properties (`font-family`, `color`, `background`) so every rule about a
-> border, a shadow, a glow or spacing had no evidence and returned nothing. Its silence read as a pass on
-> the whole library. The two counts in this paragraph are different things, and reading them as one is
-> why they look contradictory: the retired gate RAN **41** rules, and **38** were then examined
-> one by one for the fork (`docs/MISTAKES.md` #326). Of those 38, **6 were worth keeping**: most were
-> already measured better here, four had no subject in our artifacts at all, and five would have fired on
-> the engine's OWN features (the `glow` layer, the card recipe at `core/layers/doc.js:25`, the `eyebrow`
-> blueprint prop, the blinds-wipe mask in `core/cuts.js:130` that `lib-test` asserts).
+And a fragment animated with CSS renders as a **dead still**, because the engine refuses `animation` and
+`transition` at boot. `parts` is the answer almost nobody reaches for: a CSS selector into your own
+markup, and every matched element gets an engine-driven, SEEKED entrance with a stagger, plus a paired
+exit. 8 of 164 scenes use it, against 62 that carry an `html` layer.
+
+**Load [`docs/CRAFT/HTML-FRAGMENTS.md`](docs/CRAFT/HTML-FRAGMENTS.md) before you write one by hand.** It
+carries the four ways a fragment moves, the three refusals and what to use instead, the traps that each
+cost a render, the defaults to reach past, and which skills to load. **Then gate it two ways, and know
+which one sees what:** `make preview HTML=<frag>` reads the FRAGMENT in a real browser, `make
+designspec-check D=<file>` reads the SCENE. Both must be clean before you render.
 
 ## Icons & images (real assets first, emoji last)
 
@@ -484,26 +426,15 @@ were one rectangle changing size, and each passed everything.
 
 ## A DEMO IS A TEN-SECOND FILM ABOUT ONE THING
 
-**27 of the 35 `formats/scene/_*.json` scratch scenes are contact-sheet shaped**: four or more sibling
-layers of one type stepping across x or y. None of the 35 paints a second `bg` window. They are the
-worst-looking work in the repo and they are the ones we end up showing people, because a demo's job is
-"prove the mechanism works", the fastest proof is nine specimens side by side, and no step of the taste
-ladder fires for a throwaway.
+**27 of the 35 `formats/scene/_*.json` scratch scenes are contact-sheet shaped**, and none of the 35
+paints a second `bg` window. They are the worst-looking work in the repo and they are the ones we end up
+showing people, because a demo's job is "prove the mechanism works" and no step of the taste ladder
+fires for a throwaway. A shared theme was never the missing piece: all 35 already declare one. The
+missing piece was the archetype, and a blank file has none.
 
-A shared theme was never the missing piece: **all 35 already declare one**. The missing piece was the
-archetype, and a blank file has none.
-
-- **`make demo Q="…" [NAME=…] [FX=…] [SUBJECT=…]`** writes the archetype and runs the dev loop on it:
-  a PICTURE full bleed carrying the effect, a line of type captioning it, two grounds, one cut, one
-  camera move, a hand-keyed track.
-- **An effect acts on a SUBJECT, so the subject is pictorial.** A filter over a headline on a flat
-  field has nothing to act on and comes out a blob; the same filter over a real image reads exactly as
-  designed. A demo whose whole subject is a sentence in large type is a slide.
-- **A contact sheet is `make catalog`, and nothing else.** It is honestly a contact sheet.
-- **The ground is chosen because it is good, never because it reveals the effect, and it carries no
-  ruling.** A grid or a rod field reads as a design tool's canvas, which IS the harness look.
-
-The constants that make a row of demos read as a series: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
+**`make demo Q="…" [NAME=…] [FX=…] [SUBJECT=…]`** writes the archetype and runs the dev loop on it.
+Why the subject must be a PICTURE, why every one of its constants is fixed, and when the honest answer
+is `make catalog` instead: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
 
 ## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE
 
