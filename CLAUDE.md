@@ -241,29 +241,21 @@ block, when a screenshot is the only option, and the one job hand-written HTML s
 
 ## REACH FOR HTML FIRST. A LAYER IS FOR WHERE IT HELPS.
 
-The layer vocabulary is 20 types and ~197 props, and it is worth having: `text` measures and fits and
-carries the theme's ink, `count` counts, `component` captures a real product surface, `group` scopes a
-box AND a clock. Reach for one when it does something you would otherwise hand-roll.
+**If you are hunting for the prop that does the thing CSS already does, stop and write the CSS.** A
+gradient-filled word with a bloom behind it is four declarations, and it took three failed attempts
+through the layer vocabulary to not get it. Reach for a layer TYPE when it does something you would
+otherwise hand-roll: `text` measures and fits, `count` counts, `component` captures a real product
+surface, `group` scopes a box AND a clock.
 
-**For a LOOK, write the HTML.** A gradient-filled word with a bloom behind it is four CSS declarations
-and it took three failed attempts through the layer vocabulary to not get it: `filter` through `css`
-(refused, engine-owned), `filter` as a layer prop (silently destroyed by the motion track, a real bug
-now fixed), and a glow layer orbiting the word (the wrong idea entirely). Written as an `html` layer it
-was fifteen lines and correct first time. The signal is not subtle: **if you are hunting for the prop
-that does the thing CSS already does, stop and write the CSS.**
+**EVERY LAYER EFFECT WORKS ON AN `html` LAYER, and that is the architecture, not a coincidence.** So
+the choice is never "HTML or effects". It is HTML for what the frame LOOKS like, and the engine for
+what it DOES over time. Two refusals stand in the way and both are deliberate: no CSS `animation` or
+`transition` (they run on a clock the renderer does not own, so a seeked frame would be wrong), and no
+`opacity` or `filter` in `css` (the engine writes both every frame).
 
-**EVERY LAYER EFFECT WORKS ON AN `html` LAYER, and that is the architecture, not a coincidence.**
-Verified by render: `filter`, `modifiers` (tilt/plane/kick/matte/…), `depth`, `origin`, `timeWarp`,
-`motion`, `vars` and the camera all apply to an `html` layer exactly as they do to a `text` one, because
-they are written on the LAYER ELEMENT and the fragment is its content. So the choice is never
-"HTML or effects". It is HTML for what the frame LOOKS like, and the engine for what it DOES over time.
-
-Two things the fragment does not get, and both are deliberate:
-- **No CSS animation or transition.** `core/sanitize-html.js` refuses them at boot, because they run on
-  a clock the renderer does not own and a seeked frame would be wrong. Use `var(--t)` in a `calc()`, or
-  `parts` for an engine-driven per-element entrance, or put a `motion` track on the layer.
-- **No `opacity` or `filter` in `css`.** The engine writes both every frame (the enter/exit envelope and
-  the velocity blur). The validator refuses them by name and says what to use instead.
+Which effects were verified stacked on one fragment, what to use instead of each refusal, the four ways
+a fragment moves, and the traps that cost a render each:
+[`docs/CRAFT/HTML-FRAGMENTS.md`](docs/CRAFT/HTML-FRAGMENTS.md).
 
 ## BLACK MEANS `#000000`
 
@@ -306,21 +298,13 @@ designspec-check D=<file>` reads the SCENE. Both must be clean before you render
 
 ## Icons & images (real assets first, emoji last)
 
-**Always prefer a real image.** Order of preference:
-1. **Captured real UI**: `make capture` (a live component) is the highest-taste source.
-2. **Free/openly-licensed images**: brand logos, flags `flagcdn.com/<iso2>.svg` → `assets/flags/`;
-   CC0/CC-BY photos via `make photos` (attribution auto-recorded; CC-BY needs visible credit).
-   **Use `make assets` for logos, and if you curl one by hand, use `-f`.** This line used to read
-   ``curl https://cdn.simpleicons.org/<slug>/<hex>`` with no failure flag, and `curl -o` writes the
-   response body whatever the status is. Simple Icons has been REMOVING marks on trademark request, so
-   that command now 404s for real brands and leaves a **zero-byte .svg** on disk. The file then exists,
-   passes every path check, and renders as an invisible hole. Two shipped assets were in exactly that
-   state (`assets/icons/amazon.svg`, one of them tracked), breaking three scenes, and nothing said so
-   until `core/boot.js` started refusing an asset that never loaded. `scripts/media/assets.mjs`
-   `tryFetch` already gets this right: it requires 200, a minimum size AND a literal `<svg` before it
-   writes, which is why `make assets` is the answer and a bare curl is not:
-   `curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>`
-3. **Drawn icons**: `svgIcon(name)`. 4. **Generated cards**: `make assets`. 5. **Emoji**: last resort.
+**Always prefer a real image**, and captured real UI (`make capture`) is the highest-taste source. The
+rest of the ladder, and the treatment every image needs so it does not read as slop:
+[`docs/CRAFT/IMAGERY.md`](docs/CRAFT/IMAGERY.md).
+
+**Use `make assets` for logos. A bare `curl` writes a zero-byte file on a 404 and you get an invisible
+hole**, which is what two shipped assets were in until `core/boot.js` learned to refuse an asset that
+never loaded. IMAGERY.md §0 has the incident and the `curl -f` form if you must do it by hand.
 
 **Never embed copyrighted material** into a published video: movie/TV posters, album covers, film
 stills, news photos, paid stock. They trigger Content ID claims. Capture the real product UI instead.
@@ -393,23 +377,19 @@ undirected. `no-authored-motion` closes that hole and BLOCKS new work.
 
 ## SHOW, DO NOT ONLY TELL. NOTHING ENFORCES THIS.
 
-Every beat that makes a claim must be asked what it could SHOW instead of set in type: a bar whose
-length IS the number, a ring whose arc IS the share, a captured product surface, a diagram, a map, an
-svg that draws on. **DECORATION** dresses the frame and carries no information (a glow, a hairline, a
-scanline). **EXPLANATION** does work the words cannot. A film can drown in the first and have none of
-the second.
+Every beat that makes a claim must be asked what it could SHOW instead of set in type. **DECORATION**
+dresses the frame and carries no information. **EXPLANATION** does work the words cannot. A film can
+drown in the first and have none of the second.
 
 **There is no show floor, and you should know why.** `visual-vocabulary` measured a layer's area and
-its size helper squared any layer that declared one axis: a 590x18 underline scored as 590x590 and was
-credited with a tenth of the frame. So the one gate whose job was to tell a mark from a picture handed
-a pass to a hairline. Fixing the arithmetic would have failed dozens of shipped films, so it was
-deleted. **You are the check now**, with `make judge` and your eyes. No green tick will tell you a film
-is only type. That was always true: even at its best the gate could prove a picture was large and never
-that it explained anything.
+its size helper squared any layer that declared one axis, so the one gate whose job was to tell a mark
+from a picture handed a pass to a hairline. It was deleted. **You are the check now**, with `make
+judge` and your eyes. No green tick will tell you a film is only type.
 
-Measured over the 148 gate-visible scenes: **64 carry zero pictorial layers of any size**, and the
-median film gives **5% of its layers to picture**. That was nobody's decision. It is debt, not a
-pattern to copy. How to decide what to show: [`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
+Measured over the 148 gate-visible scenes: **64 carry zero pictorial layers of any size.** That was
+nobody's decision. It is debt, not a pattern to copy. What counts as explanation, the three questions
+the deleted gate asked and where to get the graphic:
+[`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
 
 ## A SLIDESHOW IS A FAILURE, AND A RESIZING BOX IS NOT THE ONLY WAY OUT
 
@@ -417,15 +397,12 @@ The failure is easy to feel: every beat is born and dies inside its own window, 
 between unrelated shots and the film is a stack of cards read aloud.
 
 The prescription used to be a CONTINUOUS OBJECT: one layer that survives a cut and changes across it.
-That is one device and it is the cheapest one. **Murch ranks it last**: a cut serves emotion 51% ·
-story 23% · rhythm 10% · eye-trace 7% · the screen plane 5% · three-dimensional space 4%, and you
-sacrifice up from the bottom. `no-continuous-object` measures spatial persistence plus a state change.
-It is the 4% item.
-
-The registers it cannot see: a match cut, a oner, camera travel, masking, cloning · an unfinished
-sentence, a sound bridge, a bookend · metric cutting, a track that IS the structure · a motif,
-escalation, a through-line. A film held by a motif and an escalation is properly structured and fails
-that rule every time. The catalogue: [`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md).
+That is one device and it is the cheapest one, and **Murch ranks it last** of the six things a cut must
+serve, so it is the first thing you sacrifice. `no-continuous-object` measures it and cannot see a
+match cut, a oner, a sound bridge, a metric cut rate, a motif or an escalation. A film held by a motif
+and an escalation is properly structured and fails that rule every time. The catalogue of what else can
+hold a film, Murch's ranking with its percentages, and a six-question decision aid:
+[`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md).
 
 **Name three ways this film could hold its subject, and reject the first one.** If the answer is always
 "the layer resizes", you are writing a gate's minimum rather than a film. Three consecutive films here

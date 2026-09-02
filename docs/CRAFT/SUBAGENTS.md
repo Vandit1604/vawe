@@ -1,6 +1,6 @@
 ---
 when: "judging your own render (a full pass, a recreation, anything you'll ship)"
-answers: "why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message"
+answers: "why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message · what to record so per-critic survival rate becomes computable"
 group: crosscutting
 ---
 
@@ -56,6 +56,52 @@ still looking at. Every other critic is handed a RENDER: a contact sheet, a fram
 frames, the source side by side. That is the difference between a second opinion and a second reading
 of your own file. Run `copy` when you want the writing re-read by something that is not you, and know
 that is what you are buying.
+
+## THE ROSTER IS UNMEASURED, AND HERE IS WHAT WOULD MEASURE IT
+
+**Everything above this line is an argument. No number in this repo supports it.** The observable that
+would is **per-critic survival rate**: of the findings a critic returns, what share does the main
+thread's own look confirm and act on. The prediction to test is that `copy` is lowest, because it is
+the one critic handed no artifact the author had not already seen.
+
+**That number cannot be computed today and nothing on disk gets close.** A critic returns its findings
+in an agent message. The main thread reads them, edits the scene, and the link between the finding and
+the edit is never written anywhere. `verify/judged/` records A/B judge verdicts, which is a different
+mechanism; `verify/beats-seen/` records that somebody looked, not what they found; `../MISTAKES.md`
+records fixes without saying which critic asked for them. Searched, all three: not one entry
+attributes a fix to a named critic. So the honest statement is a method, not a figure, and a figure
+from one panel run would be worse than none.
+
+**Record these fields, one row per finding, and the number becomes computable later.** Nothing here
+needs a tool: a JSON file beside the render will do, and `../../scripts/lib/receipt.mjs` already writes
+stage-keyed, hash-stamped records under `verify/approved/<stage>/` if you want one that goes stale when
+the scene moves on.
+
+| field | why this one |
+|---|---|
+| `scene` + its content hash | a finding against a scene that has since changed is not evidence about anything |
+| `critic` | the roster row, by name |
+| `input` | the artifact path it was handed. This is the admission test's answer, recorded rather than assumed |
+| `finding` | one line, naming the beat or seam it is about |
+| `disposition` | one of `fixed` · `confirmed-no-change` · `rejected` · `not-looked` |
+| `also_returned_by` | the other critics in the SAME run that returned this finding |
+
+**`disposition` has four values and not two, because the two obvious ones hide the interesting cases.**
+`fixed` means the scene changed because of it. `confirmed-no-change` means your eye agreed and no edit
+was warranted, which is a survival, not a miss. `rejected` means you looked and the flaw was not there.
+`not-looked` means nobody checked, and it measures the main thread rather than the critic, so it is
+reported separately and kept out of the denominator. Survival rate is
+`(fixed + confirmed-no-change) / (fixed + confirmed-no-change + rejected)`.
+
+**`also_returned_by` is the field a naive record would leave out, and it is the one that tests the
+claim.** Six instances of one model converge; if `copy` and `beat` return the same finding, that is
+common-cause convergence, not two pieces of evidence, and a survival rate blind to it will score a
+duplicated finding twice and read as agreement. It is also the cheapest way to catch a critic whose
+whole output is already covered by another.
+
+**Do not quote the number early.** One panel run is six samples and proves nothing about independence.
+Roughly fifty findings for a critic, across at least ten different films, before the rate is worth
+putting in a sentence. Until then this section is the method and the roster stands on its argument.
 
 Notes that matter per critic:
 

@@ -6,9 +6,11 @@ group: look
 
 # Writing HTML fragments, and making them move
 
-An `html` layer is not an escape hatch from the engine. It is the engine's **content**, and everything
-the engine does to a layer it does to your markup: filters, modifiers, depth, origin, the camera, the
-motion track. Verified in one render, with all of it stacked on a single fragment at once.
+An `html` layer is not an escape hatch from the engine. It is the engine's **content**, and **every
+layer effect works on it, which is the architecture and not a coincidence**: `filter`, `modifiers`
+(tilt/plane/kick/matte/…), `depth`, `origin`, `timeWarp`, `motion`, `vars` and the camera all apply to
+an `html` layer exactly as they do to a `text` one, because they are written on the LAYER ELEMENT and
+the fragment is its content. Verified in one render, with all of it stacked on a single fragment at once.
 
 So the choice is never "HTML or effects". It is **HTML for what the frame LOOKS like, and the engine
 for what it DOES over time.**
@@ -18,11 +20,14 @@ for what it DOES over time.**
 If you find yourself hunting for the prop that does what a CSS declaration already does, stop and write
 the CSS. A gradient-filled word with a bloom behind it is four declarations. It took three failed
 attempts through the layer vocabulary to not get it, and fifteen lines of markup to get it right first
-time.
+time. The three attempts, in the order they failed: `filter` through `css` (refused, engine-owned),
+`filter` as a layer prop (silently destroyed by the motion track, a real bug now fixed), and a `glow`
+layer orbiting the word (the wrong idea entirely). The signal is not subtle: **if you are hunting for
+the prop that does the thing CSS already does, stop and write the CSS.**
 
-Reach for a layer TYPE when it does something you would otherwise hand-roll: `text` measures and fits
-and carries the theme's ink, `count` counts, `component` captures a real product surface, `group`
-scopes a box and a clock.
+The layer vocabulary is 20 types and ~197 props, and it is worth having. Reach for a layer TYPE when it
+does something you would otherwise hand-roll: `text` measures and fits and carries the theme's ink,
+`count` counts, `component` captures a real product surface, `group` scopes a box AND a clock.
 
 ## A layer wraps TIME, not HTML
 
@@ -96,7 +101,7 @@ Each of these throws at boot, by name. None of them is arbitrary.
 
 | refused | why | instead |
 |---|---|---|
-| `animation` / `transition` in your CSS (`core/validate.mjs` refuses both by name, engine wide) | they run on a clock the renderer does not own, so a seeked frame would be wrong | `--t` in a `calc()`, `parts`, or a motion track |
+| `animation` / `transition` in your CSS (`core/sanitize-html.js` refuses them at boot, `core/validate.mjs` refuses both by name, engine wide) | they run on a clock the renderer does not own, so a seeked frame would be wrong | `--t` in a `calc()`, `parts`, or a motion track |
 | `opacity` or `filter` in `css` | the engine writes both every frame (the enter/exit envelope, and the velocity blur) | the layer's own `opacity` and `filter` props |
 | a CSS value this Chrome drops | an invalid declaration is dropped silently, the rest of the rule survives, and the frame renders looking almost right | see the traps below |
 
