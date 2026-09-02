@@ -338,9 +338,9 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 604 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 620 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
-`docs/EFFECTS.md`, 639 effects across 48 families). Reach for it before you invent anything. The measured cost
+`docs/EFFECTS.md`, 641 effects across 53 families). Reach for it before you invent anything. The measured cost
 of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 148 gate-visible scenes**, and 12 of its
 19 beats have never been used once.
 
