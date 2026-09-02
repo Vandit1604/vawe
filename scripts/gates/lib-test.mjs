@@ -44,7 +44,8 @@ import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJu
 import { applyComposite } from '../../core/looks.js';
 import { bakeCanvasFx } from '../../core/canvas-fx.js';
 import { DIRS } from '../../core/cuts.js';
-import { SPECTACLE_GAIN, attenuated, attenuatedKick } from '../../core/knobs.js';
+import { SPECTACLE_GAIN, attenuated, attenuatedKick, KNOBS, bindDials } from '../../core/knobs.js';
+import { dialsOf } from '../../core/props.js';
 import { resolveSpectacle } from '../../core/spectacle.js';
 import { okDir as seamDir } from '../../core/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
@@ -3926,12 +3927,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('knobs: a sibling preset\'s dial is still dead here',
     of({ type: 'text', preset: 'up', presetOpts: { bounce: 0.9 } }).length === 1);
 
-  // THE HALF THAT MUST STAY QUIET. core/knobs.js lists no entry for `colorWave`, `shimmerWave` or the
-  // `globe` three scene, yet all three read real per-preset opts in core/type.js / core/three-fx.js.
-  // Grading them against `_shared` alone would refuse four shipped films for a hole in the manifest.
+  // THE HALF THAT MUST STAY QUIET. A preset the manifest does not list is not graded against
+  // `_shared` alone, because that would refuse a shipped film for a HOLE in the manifest rather than
+  // for a mistake in the film. `colorWave` and `shimmerWave` were the kinetic examples here until
+  // `bindDials` (core/knobs.js) made an unlisted kinetic dial impossible; the `globe` three scene is
+  // still one, and the rule it proves has to keep a live subject.
   ok('knobs: a preset the manifest does not list is not graded at all',
-    of({ type: 'text', preset: 'colorWave', presetOpts: { flash: 1, to: '#fff', hold: 0.5 } }).length === 0
-    && of({ type: 'three', three: 'globe', pointSize: 3, spin: 1 }).length === 0);
+    of({ type: 'three', three: 'globe', pointSize: 3, spin: 1 }).length === 0);
+  // And the two that WERE that hole now have rows, so their real dials pass on the listed path.
+  ok('knobs: colorWave and shimmerWave are listed, and their own dials are legal',
+    of({ type: 'text', preset: 'colorWave', presetOpts: { flash: '#f00', to: '#fff', hold: 0.5 } }).length === 0
+    && of({ type: 'text', preset: 'shimmerWave', presetOpts: { amp: 2 } }).length === 0
+    && of({ type: 'text', preset: 'colorWave', presetOpts: { dist: 40 } }).length === 1);
 
   // A three scene's dials sit on the LAYER beside generic props, so only a real sibling dial can be
   // called misused, anything else is somebody's layout and must never be touched.
@@ -5575,6 +5582,75 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok(`rubric: the ${label} sheet asks what the empty part is DOING, not how much there is`,
       /doing a job/.test(sheet) && !/crafted density/.test(sheet));
   }
+}
+
+// ---- dialsOf + bindDials: one owner for a kinetic default (core/props.js, core/knobs.js) ---------
+//
+// A kinetic preset used to state its dials TWICE, in its own signature and again in core/knobs.js,
+// and TEN defaults had drifted apart before anybody read both columns side by side. `stretch`
+// destructures `from = 1.6` and the manifest advertised 0.4: a smear published as a shrink. The
+// manifest is what `vawe_capabilities` hands an outside model, so that model wrote 0.4 to KEEP the
+// default and got a frame the engine would never have produced, with no error anywhere.
+{
+  // 1. THE READER. It keeps the defaults, which is the whole difference from propsOf and paramsOf.
+  ok('dialsOf: reads a preset\'s dials AND their defaults off its own signature',
+    (() => { const d = dialsOf(PRESETS.up); return d && Object.keys(d).length === 1 && d.dist === 40; })());
+  ok('dialsOf: reads a string, a boolean and a zero without turning any of them into a number',
+    dialsOf(PRESETS.slide).dir === 'left' && dialsOf(PRESETS.draw).back === false
+    && dialsOf(PRESETS.type).at === 0 && dialsOf(PRESETS.assemble).seed === 'assemble');
+  ok('dialsOf: a colour default survives its own parentheses',
+    dialsOf(PRESETS.highlight).color === 'rgba(255,220,90,0.35)');
+  // A dial the signature NAMES but does not default (colorWave resolves both colours from the theme)
+  // is present with an undefined value: the name is known, the default is not.
+  ok('dialsOf: a dial with no stated default is named, not dropped', (() => {
+    const d = dialsOf(PRESETS.colorWave);
+    return 'flash' in d && d.flash === undefined && d.hold === 0.5;
+  })());
+  // 2. NULL IS "CANNOT SAY", NEVER "READS NONE" (core/props.js:66-68 writes the rule down). `decode`
+  // takes no options bag because animateUnits reads its dials for it, and an empty object here would
+  // have deleted its three rows instead of leaving them hand-written.
+  ok('dialsOf: a preset with no options bag returns null, not an empty set', dialsOf(PRESETS.decode) === null);
+  ok('dialsOf: and so decode keeps its hand-written rows, defaults included',
+    KNOBS.kinetic.decode.length === 3 && KNOBS.kinetic.decode[1].default === 48);
+
+  // 3. THE REFUSALS. All three fire at module load, so they are exercised on a fixture.
+  const threw = (family, presets) => { try { bindDials(family, presets); return ''; } catch (e) { return e.message; } };
+  const fake = (fn) => fn;
+  const contradiction = threw({ up: [{ name: 'dist', type: 'number', default: 60, desc: 'rise px' }] },
+    { up: fake((u, { dist = 40 } = {}) => u) });
+  ok('bindDials: a hand-written default that contradicts the signature throws', !!contradiction);
+  ok('bindDials: and the refusal names BOTH numbers, so nobody has to go and look',
+    /40/.test(contradiction) && /60/.test(contradiction) && /"dist"/.test(contradiction));
+  ok('bindDials: a dial the signature does not read is refused, and it lists what IS read',
+    /does not[\s\S]*read/.test(threw({ up: [{ name: 'dsit', type: 'number', desc: 'typo' }] },
+      { up: fake((u, { dist = 40 } = {}) => u) })));
+  // The half that lost `assemble`'s five dials for its whole life: a real dial with no row is
+  // invisible to vawe_capabilities, to `make knobs` and to the dead-knob validator.
+  ok('bindDials: a signature dial with no manifest row is refused, and named',
+    /"spin"/.test(threw({ up: [] }, { up: fake((u, { spin = 65 } = {}) => u) })));
+  ok('bindDials: a matching default is not a contradiction, and the row is bound',
+    (() => {
+      const fam = { up: [{ name: 'dist', type: 'number', default: 40, desc: 'rise px' }] };
+      bindDials(fam, { up: fake((u, { dist = 40 } = {}) => u) });
+      return fam.up[0].default === 40;
+    })());
+
+  // 4. THE LIVE MANIFEST. Every kinetic row's default now equals the signature's, by construction,
+  // and the six presets that had no rows at all have them.
+  const drift = [];
+  for (const [name, fn] of Object.entries(PRESETS)) {
+    const sig = dialsOf(fn); if (!sig) continue;
+    for (const row of KNOBS.kinetic[name] || [])
+      if (row.default !== (sig[row.name] === undefined ? null : sig[row.name])) drift.push(`${name}.${row.name}`);
+  }
+  ok(`knobs: every kinetic default is the signature's${drift.length ? ', drift: ' + drift.join(', ') : ''}`, drift.length === 0);
+  for (const p of ['weight', 'shimmerWave', 'colorWave', 'strike', 'flap', 'assemble'])
+    ok(`knobs: ${p} has manifest rows at all (it had none)`, (KNOBS.kinetic[p] || []).length > 0);
+  ok('knobs: assemble advertises all five of its dials, `shuffle` included',
+    ['dist', 'spin', 'shuffle', 'seed', 'blur'].every((d) => KNOBS.kinetic.assemble.some((r) => r.name === d)));
+  // Every row still carries the part a signature CANNOT state. A row with no desc is a name in a list.
+  const undescribed = Object.entries(KNOBS.kinetic).flatMap(([p, l]) => l.filter((r) => !r.desc).map((r) => `${p}.${r.name}`));
+  ok(`knobs: every kinetic dial carries a desc${undescribed.length ? ': ' + undescribed.join(', ') : ''}`, undescribed.length === 0);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

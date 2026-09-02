@@ -13,10 +13,20 @@
 
 import { defineRegistry } from './registry.js';
 import { SHADER_FX } from './stings.js';
+import { PRESETS } from './type.js';
+import { dialsOf } from './props.js';
 
 const n = (name, def, desc, range) => ({ name, type: 'number', default: def, desc, ...(range ? { range } : {}) });
 const col = (name, def, desc) => ({ name, type: 'color', default: def, desc });
 const en = (name, values, def, desc) => ({ name, type: 'enum', values, default: def, desc });
+
+// The kinetic three. Same shape, MINUS the default, because a kinetic preset already states its
+// defaults in its own signature and the block at the bottom of this file reads them back off it. A
+// row here writes only what a signature cannot: the desc, the range, the enum members.
+const kn = (name, desc, range) => ({ name, type: 'number', desc, ...(range ? { range } : {}) });
+const kcol = (name, desc) => ({ name, type: 'color', desc });
+const ken = (name, values, desc) => ({ name, type: 'enum', values, desc });
+const kstr = (name, desc, extra) => ({ name, type: 'string', desc, ...extra });
 
 export const KNOBS = {
   // ── kinetic presets (core/type.js): set on a split text layer via `preset` + `presetOpts` ──────
@@ -27,34 +37,50 @@ export const KNOBS = {
       n('stagger', 0.04, 'extra offset per unit (rhythm)'),
       n('speed', 1, 'overall speed multiplier'),
     ],
-    up: [n('dist', 60, 'rise distance px')],
-    down: [n('dist', 60, 'drop distance px')],
-    scale: [n('from', 0.4, 'start scale (0..1)')],
-    stretch: [n('from', 0.4, 'start scale')],
-    blur: [n('px', 16, 'start blur px')],
-    focus: [n('px', 16, 'start blur px')],
-    bounce: [n('bounce', 0.5, 'spring bounciness'), n('settle', 0.5, 'settle time'), n('dist', 60, 'travel px')],
-    elastic: [n('bounce', 0.62, 'wobble amount'), n('settle', 0.5, 'settle time')],
-    slide: [en('dir', ['left', 'right', 'up', 'down'], 'left', 'slide direction'), n('dist', 70, 'travel px')],
-    wave: [n('amp', 14, 'wave height px'), n('phase', 0, 'waves across the line')],
-    fall: [n('dist', 90, 'fall distance px')],
-    skew: [n('dist', 70, 'travel px')],
-    tilt: [n('deg', 8, 'tilt degrees'), n('dist', 26, 'travel px')],
-    gradient: [col('c1', '#ff5e7a', 'gradient start'), col('c2', '#7c5cff', 'gradient end')],
-    highlight: [col('color', '#ffe08a', 'marker colour')],
-    underline: [col('color', '#5e6ad2', 'underline colour'), n('h', 6, 'underline thickness px')],
-    shadow: [n('dist', 6, 'shadow offset px')],
-    riseClip: [n('dist', 60, 'clip rise px')],
-    draw: [{ name: 'ease', type: 'string', default: 'easeOutCubic', probe: 'linear', desc: 'easing name (core/ease.js)' }, { name: 'back', type: 'bool', default: false, desc: 'overshoot the stroke' }],
-    chroma: [n('dist', 16, 'split distance px'), n('rise', 10, 'rise px'), n('residual', 0, 'trailing fringe')],
-    swing: [n('deg', 24, 'swing angle'), n('bounce', 0.5, 'bounciness'), n('settle', 0.55, 'settle time')],
-    unfold: [n('deg', 90, 'fold angle')],
+    weight: [kn('from', 'starting weight on the font\'s own wght axis', [100, 900]), kn('to', 'weight it lands on', [100, 900]), kn('rise', 'px the line lifts through while the weight arrives')],
+    up: [kn('dist', 'rise distance px')],
+    down: [kn('dist', 'drop distance px')],
+    scale: [kn('from', 'start scale (0..1)')],
+    stretch: [kn('from', 'start scaleX: over 1 is the smear this preset is for, under 1 is a squeeze')],
+    blur: [kn('px', 'start blur px')],
+    focus: [kn('px', 'start blur px')],
+    bounce: [kn('bounce', 'spring bounciness'), kn('settle', 'settle time'), kn('dist', 'travel px')],
+    elastic: [kn('bounce', 'wobble amount'), kn('settle', 'settle time')],
+    slide: [ken('dir', ['left', 'right', 'up', 'down'], 'slide direction'), kn('dist', 'travel px')],
+    wave: [kn('amp', 'wave height px'), kn('phase', 'waves across the line')],
+    shimmerWave: [kn('amp', 'crest size: the lift, depth, rotation and scale all ride on it')],
+    fall: [kn('dist', 'fall distance px')],
+    skew: [kn('dist', 'travel px')],
+    tilt: [kn('deg', 'tilt degrees'), kn('dist', 'travel px')],
+    gradient: [kcol('c1', 'gradient start (also both ends of the ramp)'), kcol('c2', 'gradient midpoint, the bright band that sweeps through')],
+    highlight: [kcol('color', 'marker colour: keep it translucent, it sits BEHIND the glyphs')],
+    underline: [kcol('color', 'underline colour'), kn('h', 'underline thickness px')],
+    shadow: [kn('dist', 'shadow offset px at the start, collapsing to 0 as the word settles')],
+    riseClip: [kn('dist', 'clip rise as a PERCENTAGE of the unit\'s own height, so it scales with the type')],
+    draw: [kstr('ease', 'easing name (core/ease.js)', { probe: 'linear' }), { name: 'back', type: 'bool', desc: 'draw from the far end' }],
+    chroma: [kn('dist', 'split distance px'), kn('rise', 'rise px'), kn('residual', 'fringe left at rest: 0 is a crisp glyph')],
+    swing: [kn('deg', 'swing angle'), kn('bounce', 'bounciness'), kn('settle', 'settle time')],
+    unfold: [kn('deg', 'fold angle')],
     // the three that USED to be fixed, now knobbed
-    type: [n('at', 0, 'fraction of the entrance where it snaps on (0 = instant)', [0, 1])],
-    flip: [en('axis', ['x', 'y'], 'x', 'hinge axis: x = top-over, y = door-swing'), n('deg', 80, 'start angle')],
+    type: [kn('at', 'fraction of the entrance where it snaps on (0 = instant)', [0, 1])],
+    flip: [ken('axis', ['x', 'y'], 'hinge axis: x = top-over, y = door-swing'), kn('deg', 'start angle')],
+    // colorWave paints `color` every frame, so both ends default to a THEME variable rather than to a
+    // literal: the accent it lights in, the layer's own settled ink it lands on. Neither is a number a
+    // signature can state, so both rows come back with a null default and the desc carries the answer.
+    colorWave: [kcol('flash', 'the colour each unit lights in (unset = the theme accent)'), kcol('to', 'the colour it settles to (unset = that layer\'s own ink)'), kn('hold', 'fraction of the window the unit holds the flash before it starts settling', [0, 0.95])],
+    strike: [kcol('color', 'rule colour'), kn('h', 'rule thickness px'), kn('fade', 'how far the word dims once the line has crossed it (0 keeps it at full strength)', [0, 1]), kn('at', 'height of the rule as a percentage of the line box', [0, 100])],
+    flap: [kn('steps', 'how many flaps it runs before it lands, so also the speed: the whole run is fitted into `each`')],
+    // assemble's five worked and were catalogued NOWHERE, so the AE recipe the preset was built from
+    // (a range selector with randomize-order on) was unreachable from the outside. `shuffle` is the one
+    // that matters: it is the randomized ORDER, and at 0 the preset reads as a line being typed.
+    assemble: [kn('dist', 'how far out a glyph starts, px: each takes its own fraction of it'), kn('spin', 'largest start rotation in degrees, signed per glyph'), kn('shuffle', 'fraction of a unit\'s own window spent as a hashed delay, which is what scatters the arrival ORDER', [0, 1]), kstr('seed', 'seed for the scatter field: change it for a different arrangement, same on every render'), kn('blur', 'motion blur px on the travel, 0 turns it off')],
     // decode used to read NOTHING: animateUnits returned before it passed popts, so every dial written
     // here would have been accepted and ignored (docs/MISTAKES.md #542). These three are what the
     // reference implementations expose and what a brand actually changes.
+    //
+    // IT IS ALSO THE ONE PRESET WHOSE ROWS ARE STILL HAND-WRITTEN END TO END, defaults included. It
+    // takes no options bag at all, animateUnits reads these dials for it, so `dialsOf` returns null and
+    // the reconciliation at the bottom of this file skips it. That is "cannot say", never "reads none".
     decode: [
       { name: 'chars', type: 'string', default: 'mixed', desc: 'charset name (core/type.js DECODE_CHARS: mixed, upperCase, lowerCase, numbers, symbols, blocks, binary) or your own string of glyphs' },
       n('rate', 48, 'junk-character refreshes per SECOND (a rate, so a slower reveal is not also a slower scramble)'),
@@ -126,6 +152,62 @@ export const KNOBS = {
     ],
   },
 };
+
+// ── ONE OWNER PER DEFAULT ────────────────────────────────────────────────────────────────────────
+//
+// A kinetic dial's NAME and its DEFAULT live in the preset's own signature (core/type.js). This block
+// reads them back off it with `dialsOf` (core/props.js) and writes them onto the rows above, so the
+// rows state only what a signature cannot: the desc, the range, the enum members.
+//
+// IT REFUSES RATHER THAN RECONCILES, because the two sides had already drifted on TEN dials and
+// nothing anywhere said so. `stretch` destructures `from = 1.6`, a horizontal smear that snaps in from
+// over-wide, and this file advertised 0.4, a scale-up from small: the opposite gesture. `gradient` and
+// `highlight` advertised a different brand's colours entirely. That is worse than a stale doc, because
+// mcp/catalog.mjs hands these rows to `vawe_capabilities`: an outside model asked what `stretch` takes,
+// was told 0.4, wrote 0.4 to KEEP the default, and got a frame the engine would never have rendered on
+// its own. No error, no gate, just a wrong picture.
+//
+// A gate cannot close this and one was already trying: scripts/gates/knobs-audit.mjs proves an
+// advertised dial CHANGES the output, and it probes with `(Number(k.default) || 1) * 2 + 3`, so a dial
+// whose stated default is wrong still moves the frame and still passes. The refusal has to sit at the
+// write site, which is here.
+//
+// Exported so the refusals can be exercised on a fixture: they fire at module load, and a test cannot
+// break a manifest that has already loaded.
+export function bindDials(family, presets) {
+  for (const [name, fn] of Object.entries(presets)) {
+    const sig = dialsOf(fn);
+    // null is "cannot say", never "reads no dials". `decode` is the live case: it takes no options bag
+    // because animateUnits reads its dials for it, so nothing here can check its rows and it keeps them.
+    if (!sig) continue;
+    const rows = family[name] || [];
+    for (const row of rows) {
+      if (!(row.name in sig))
+        throw new Error(`kinetic preset "${name}" advertises a dial "${row.name}" its signature does not`
+          + ` read. It reads: ${Object.keys(sig).join(', ')}. Delete the row in core/knobs.js, or`
+          + ` destructure the dial in core/type.js. A dial nothing reads is ignored at render.`);
+      // A row may still carry a hand-written default, because nothing stops a future author typing one
+      // back in, and a SECOND opinion about a number is the state this block exists to end. Name both.
+      if ('default' in row && row.default !== sig[row.name])
+        throw new Error(`kinetic preset "${name}" states two defaults for "${row.name}": core/type.js`
+          + ` destructures ${JSON.stringify(sig[row.name])} and core/knobs.js advertises`
+          + ` ${JSON.stringify(row.default)}. The signature is what the engine runs. Delete the default`
+          + ` from the knobs row: it is read off the signature.`);
+      // undefined means the signature names the dial and states no default (colorWave's flash and to
+      // resolve to a theme variable at render). `null` is this manifest's word for "no stated default".
+      row.default = sig[row.name] === undefined ? null : sig[row.name];
+    }
+    const missing = Object.keys(sig).filter((d) => !rows.some((r) => r.name === d));
+    if (missing.length)
+      throw new Error(`kinetic preset "${name}" reads ${missing.map((d) => `"${d}"`).join(', ')} and`
+        + ` core/knobs.js does not list ${missing.length > 1 ? 'them' : 'it'}. A dial with no row is`
+        + ` invisible to vawe_capabilities, to make knobs and to the dead-knob validator, so nobody`
+        + ` outside this file can find it. Add the row: the desc is what a signature cannot state.`);
+  }
+  return family;
+}
+
+bindDials(KNOBS.kinetic, PRESETS);
 
 // The families whose whole preset list shares one dial set (no per-preset overrides).
 export const UNIFORM_FAMILIES = ['raymarch', 'ambient', 'sting', 'look'];
