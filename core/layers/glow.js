@@ -22,6 +22,7 @@
 // Back-compat: a glow with NO preset takes the exact original code path (same node, same background
 // string), existing scenes render byte-identical; the snap gate would catch any drift.
 import { mergeProps, propsOf } from '../props.js';
+import { defineRegistry } from '../registry.js';
 
 // ---- pure helpers (exported for lib tests) -------------------------------------------------------
 
@@ -30,87 +31,98 @@ export const alphaMix = (c, a) => `color-mix(in srgb, ${c} ${Math.round(a * 100)
 // whiten a colour toward light: liftWhite(c, 70) = 30% colour + 70% white (a hot core)
 export const liftWhite = (c, w) => `color-mix(in srgb, ${c} ${100 - w}%, white)`;
 
-// presetSpec(name, o) → { background, blend?, mask? } or null for unknown names.
+// The seven named looks. A REGISTRY, not an if-chain returning null: `presetSpec` used to answer an
+// unknown name with null and the builder read that as "no preset", so `preset: "blom"` painted the
+// plain gradient and said nothing. That is the one outcome indistinguishable from "I meant the plain
+// gradient", and core/registry.js exists to make it inexpressible: pick() takes no fallback and its
+// miss names every other registry that DOES know the word.
+const GLOW_PRESETS = {
+  bloom: (o, { c, at }) => {
+      // hot near-white core → accent falloff: light overflowing a bright source
+      const i = o.i ?? 0.4;
+      return { background:
+        `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite(c, 70), Math.min(1, i * 1.1))} 0%, ` +
+        `${alphaMix(c, i * 0.55)} 28%, ${alphaMix(c, i * 0.18)} 52%, transparent 74%)` };
+  },
+  halation: (o, { c, at }) => {
+      // tight warm core + a wide faint ring (film halation); intensity default is LOW on purpose
+      const i = o.i ?? 0.3;
+      const warm = `color-mix(in srgb, ${c} 55%, #ffe9c9)`;
+      return { background:
+        `radial-gradient(26% 26% ${at}, ${alphaMix(liftWhite(warm, 40), i * 0.8)} 0%, transparent 62%), ` +
+        `radial-gradient(50% 50% ${at}, transparent 50%, ${alphaMix(warm, i * 0.28)} 66%, transparent 84%)` };
+  },
+  diffusion: (o, { at }) => {
+      // broad low-alpha white veil, screen-blended: lifts blacks without recolouring content below
+      const i = o.i ?? 0.4;
+      return { blend: 'screen', background:
+        `radial-gradient(75% 75% ${at}, ${alphaMix('white', i * 0.4)} 0%, ` +
+        `${alphaMix('white', i * 0.16)} 55%, transparent 100%)` };
+  },
+  rimLight: (o, { c, at }) => {
+      // bright radial with an offset circle masked OUT of it → an off-centre crescent. The mask circle
+      // sits down-left of the centre, so the lit edge faces up-right: place the subject there.
+      const i = o.i ?? 0.4;
+      const mx = (Math.max(0, (o.cx ?? 0.5) - 0.14) * 100).toFixed(1);
+      const my = (Math.min(1, (o.cy ?? 0.5) + 0.07) * 100).toFixed(1);
+      return {
+        background:
+          `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite(c, 55), i * 0.9)} 0%, ` +
+          `${alphaMix(c, i * 0.35)} 40%, transparent 68%)`,
+        mask: `radial-gradient(55% 55% at ${mx}% ${my}%, transparent 58%, #000 74%)`,
+      };
+  },
+  spotlight: (o, { c }) => {
+      // soft-edged cone from an apex (default above-left), aimed by `angle` (CSS deg: 0 = up, cw);
+      // a radial mask from the apex fades the beam with distance so it never hard-clips the box edge.
+      const i = o.i ?? 0.4;
+      const ax = ((o.cx ?? 0.12) * 100).toFixed(1), ay = ((o.cy ?? 0) * 100).toFixed(1);
+      const ang = o.angle ?? 150, lc = liftWhite(c, 60);
+      return {
+        background:
+          `conic-gradient(from ${ang - 28}deg at ${ax}% ${ay}%, transparent 0deg, ` +
+          `${alphaMix(lc, i * 0.28)} 12deg, ${alphaMix(lc, i * 0.55)} 28deg, ` +
+          `${alphaMix(lc, i * 0.28)} 44deg, transparent 56deg)`,
+        mask: `radial-gradient(120% 120% at ${ax}% ${ay}%, #000 30%, transparent 88%)`,
+      };
+  },
+  chromatic: (o, { px, py }) => {
+      // RGB-split halo: red/green/blue radial copies offset left/centre/right, screen-blended so they
+      // add to white in the core and fringe to colour at the edges. Chromatic is a SPECTRUM by
+      // definition, so the channel hues are intentionally hard RGB, not theme tokens (the halo tints as
+      // a whole via hue-rotate on chromaCycle, or leave it as the classic aberration).
+      const i = o.i ?? 0.4;
+      const gg = (col, ox) => `radial-gradient(46% 46% at ${(+px + ox).toFixed(1)}% ${py}%, ${alphaMix(col, i * 0.7)} 0%, transparent 66%)`;
+      return { blend: 'screen', background: `${gg('#ff0033', -4.5)}, ${gg('#00ff5a', 0)}, ${gg('#0066ff', 4.5)}` };
+  },
+  chromaCycle: (o, { at }) => {
+      // a saturated neon bloom whose HUE sweeps the spectrum over time (driven in frame()); the static
+      // spec is the magenta starting state, screen-blended so it reads as emitted light.
+      const i = o.i ?? 0.45;
+      return { blend: 'screen', background:
+        `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite('#ff2fd0', 30), i)} 0%, ` +
+        `${alphaMix('#ff2fd0', i * 0.5)} 34%, transparent 72%)` };
+  },
+};
+
+export const GLOW_BLURBS = {
+  bloom: 'a hot near-white core falling off to the accent: light overflowing a bright source',
+  halation: 'a tight warm core plus a wide faint ring, the film halation. Low intensity on purpose',
+  diffusion: 'a broad low-alpha white veil, screen-blended: lifts blacks without recolouring below',
+  rimLight: 'an off-centre crescent, lit edge up-right. Place the subject there',
+  spotlight: 'a soft-edged cone from an apex, aimed by `angle`, faded with distance so it never clips',
+  chromatic: 'an RGB-split halo: three channel copies offset and screen-blended, white core, colour fringe',
+  chromaCycle: 'a saturated neon bloom whose hue sweeps the spectrum over `cycle` seconds',
+};
+
+export const GLOW_REGISTRY = defineRegistry('glow preset', GLOW_PRESETS, { slot: 'preset', blurbs: GLOW_BLURBS });
+
+// presetSpec(name, o) → { background, blend?, mask? }. THROWS on a name this vocabulary does not know.
 // o: { i intensity 0..1, cx/cy centre 0..1 within the layer box, angle deg (spotlight), color }
 export function presetSpec(name, o = {}) {
   const c = o.color || 'var(--accent)';
   const px = ((o.cx ?? 0.5) * 100).toFixed(1), py = ((o.cy ?? 0.5) * 100).toFixed(1);
-  const at = `at ${px}% ${py}%`;
-
-  if (name === 'bloom') {
-    // hot near-white core → accent falloff: light overflowing a bright source
-    const i = o.i ?? 0.4;
-    return { background:
-      `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite(c, 70), Math.min(1, i * 1.1))} 0%, ` +
-      `${alphaMix(c, i * 0.55)} 28%, ${alphaMix(c, i * 0.18)} 52%, transparent 74%)` };
-  }
-
-  if (name === 'halation') {
-    // tight warm core + a wide faint ring (film halation); intensity default is LOW on purpose
-    const i = o.i ?? 0.3;
-    const warm = `color-mix(in srgb, ${c} 55%, #ffe9c9)`;
-    return { background:
-      `radial-gradient(26% 26% ${at}, ${alphaMix(liftWhite(warm, 40), i * 0.8)} 0%, transparent 62%), ` +
-      `radial-gradient(50% 50% ${at}, transparent 50%, ${alphaMix(warm, i * 0.28)} 66%, transparent 84%)` };
-  }
-
-  if (name === 'diffusion') {
-    // broad low-alpha white veil, screen-blended: lifts blacks without recolouring content below
-    const i = o.i ?? 0.4;
-    return { blend: 'screen', background:
-      `radial-gradient(75% 75% ${at}, ${alphaMix('white', i * 0.4)} 0%, ` +
-      `${alphaMix('white', i * 0.16)} 55%, transparent 100%)` };
-  }
-
-  if (name === 'rimLight') {
-    // bright radial with an offset circle masked OUT of it → an off-centre crescent. The mask circle
-    // sits down-left of the centre, so the lit edge faces up-right: place the subject there.
-    const i = o.i ?? 0.4;
-    const mx = (Math.max(0, (o.cx ?? 0.5) - 0.14) * 100).toFixed(1);
-    const my = (Math.min(1, (o.cy ?? 0.5) + 0.07) * 100).toFixed(1);
-    return {
-      background:
-        `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite(c, 55), i * 0.9)} 0%, ` +
-        `${alphaMix(c, i * 0.35)} 40%, transparent 68%)`,
-      mask: `radial-gradient(55% 55% at ${mx}% ${my}%, transparent 58%, #000 74%)`,
-    };
-  }
-
-  if (name === 'spotlight') {
-    // soft-edged cone from an apex (default above-left), aimed by `angle` (CSS deg: 0 = up, cw);
-    // a radial mask from the apex fades the beam with distance so it never hard-clips the box edge.
-    const i = o.i ?? 0.4;
-    const ax = ((o.cx ?? 0.12) * 100).toFixed(1), ay = ((o.cy ?? 0) * 100).toFixed(1);
-    const ang = o.angle ?? 150, lc = liftWhite(c, 60);
-    return {
-      background:
-        `conic-gradient(from ${ang - 28}deg at ${ax}% ${ay}%, transparent 0deg, ` +
-        `${alphaMix(lc, i * 0.28)} 12deg, ${alphaMix(lc, i * 0.55)} 28deg, ` +
-        `${alphaMix(lc, i * 0.28)} 44deg, transparent 56deg)`,
-      mask: `radial-gradient(120% 120% at ${ax}% ${ay}%, #000 30%, transparent 88%)`,
-    };
-  }
-
-  if (name === 'chromatic') {
-    // RGB-split halo: red/green/blue radial copies offset left/centre/right, screen-blended so they
-    // add to white in the core and fringe to colour at the edges. Chromatic is a SPECTRUM by
-    // definition, so the channel hues are intentionally hard RGB, not theme tokens (the halo tints as
-    // a whole via hue-rotate on chromaCycle, or leave it as the classic aberration).
-    const i = o.i ?? 0.4;
-    const gg = (col, ox) => `radial-gradient(46% 46% at ${(+px + ox).toFixed(1)}% ${py}%, ${alphaMix(col, i * 0.7)} 0%, transparent 66%)`;
-    return { blend: 'screen', background: `${gg('#ff0033', -4.5)}, ${gg('#00ff5a', 0)}, ${gg('#0066ff', 4.5)}` };
-  }
-
-  if (name === 'chromaCycle') {
-    // a saturated neon bloom whose HUE sweeps the spectrum over time (driven in frame()); the static
-    // spec is the magenta starting state, screen-blended so it reads as emitted light.
-    const i = o.i ?? 0.45;
-    return { blend: 'screen', background:
-      `radial-gradient(50% 50% ${at}, ${alphaMix(liftWhite('#ff2fd0', 30), i)} 0%, ` +
-      `${alphaMix('#ff2fd0', i * 0.5)} 34%, transparent 72%)` };
-  }
-
-  return null;
+  return GLOW_REGISTRY.pick(name)(o, { c, px, py, at: `at ${px}% ${py}%` });
 }
 
 // pure hue at local time lt: full 0..360 sweep every `cycle` seconds (default 6s). Pure in lt.

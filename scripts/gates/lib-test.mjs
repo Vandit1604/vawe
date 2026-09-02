@@ -1475,7 +1475,16 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // glow presets (core/layers/glow.js)
   ok('glow: five presets yield backgrounds', ['bloom','halation','diffusion','rimLight','spotlight'].every((n) => typeof presetSpec(n, {}).background === 'string'));
-  ok('glow: unknown preset -> null (classic glow fallback)', presetSpec('nope') === null);
+  // A MISS THROWS, and this assertion used to demand the opposite. presetSpec answered an unknown name
+  // with null, the builder read null as "no preset asked for", and `preset: "blom"` painted the plain
+  // gradient in silence. The test encoded that as the contract, which is how a silent substitution
+  // survives a gate. core/registry.js owns the seven names now, so a miss names them and suggests the
+  // near one.
+  ok('glow: an unknown preset THROWS, and the message names the vocabulary and the near miss', (() => {
+    try { presetSpec('blom'); return false; } catch (e) {
+      return /glow preset/.test(e.message) && /bloom/.test(e.message);
+    }
+  })());
   ok('glow: theme-adaptive by default', presetSpec('bloom', {}).background.includes('var(--accent)'));
   ok('glow: explicit tint threads through', presetSpec('bloom', { color: '#123456' }).background.includes('#123456'));
   ok('glow: cx/cy move the light centre', presetSpec('bloom', { cx: 0.25, cy: 0.75 }).background.includes('at 25.0% 75.0%'));
