@@ -1,12 +1,20 @@
 // scripts/gates/site-counts.mjs: assert every capability count written on the SITE still matches the
 // registry it describes.  make site-counts
 //
-// KNOWN LIMIT, worth stating so the next false positive is recognised rather than argued with: the
-// word "families" belongs to TWO registries. Blocks have 70, effects have 35, and this gate compares
-// every "<n> families" it finds against the block count wherever the sentence sits. A true statement
-// about effect families therefore reads as a stale block count. The fix so far is to avoid writing a
-// bare family count inside the effects surfaces; scoping the comparison by file path would be better
-// and is not done.
+// AMBIGUOUS NOUNS ARE SCOPED BY SURFACE, and that is the fix this file's own KNOWN LIMIT used to ask
+// for and not do. "families" belongs to at least four registries (blocks, effects, cuts, fonts), and
+// this gate compared every "<n> families" against the block count wherever the sentence sat, so a true
+// statement about effect families read as a stale block count. Widening FILES into docs/ turned that
+// one known nuisance into twenty: "3 cut families", "48 effect families", "30 words across 3
+// families". So the bare noun is gone from TRUTH. What is checked instead is the QUALIFIED form
+// ("block families") plus the one sentence the product actually writes, "<n> blocks across <n>
+// families", which pins both numbers to the same registry by construction.
+//
+// The same reasoning scopes four more bare nouns to the site. In marketing copy "26 looks" and "27
+// cuts" are product claims; in engineering prose "8 looks" is a verb, "5 cuts" is the number of edits
+// in a film, and "12 blocks" is a DSP window. Those are not stale numbers and a gate that says they
+// are is one an author learns to skip, which is this file's lesson from the two guards further down.
+// So SITE_ONLY holds them and the docs surfaces get only the unambiguous multi-word subjects.
 //
 // WHY THIS EXISTS: the marketing copy said "96 components", "96 blocks across 44 families" and
 // "44 families" while the registry held 148 across 64; vawe-rules.md claimed 22 kinetic presets, 32
@@ -27,7 +35,9 @@ import { LOOK_NAMES } from '../../core/looks.js';
 import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
+import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
+import { LAYER_TYPES } from '../../core/layers/index.js';
 import { validateAll } from '../../core/validate.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -40,14 +50,21 @@ const grid = CATALOG.filter((e) => !e.overlay);
 const TRUTH = {
   blocks: grid.length,
   components: grid.length,
-  families: new Set(grid.map((e) => e.family)).size,
+  'block families': new Set(grid.map((e) => e.family)).size,
   looks: size(LOOK_NAMES),
   'composite looks': size(LOOK_NAMES),
   stings: size(SHADER_FX),
   'shader stings': size(SHADER_FX),
   'kinetic presets': size(PRESETS),
   cuts: size(PRESENTATIONS),
+  'cut presentations': size(PRESENTATIONS),
+  'ambient shader looks': size(AMBIENT_FX),
   'canvas fx': size(CANVAS_FX_NAMES),
+  // The layer vocabulary is the one count a reader USES rather than admires: a docs page that names
+  // fourteen types when the registry holds twenty-three does not merely misreport a size, it hides
+  // nine primitives, and nothing on the page says it is partial. Read from the registry itself, the
+  // same source `make coverage` was fixed to use after it reported 14/14 while a 15th type existed.
+  'layer types': size(LAYER_TYPES),
   // COUNT WHAT SHIPS, not what is on this disk. Three brand themes are deliberately untracked but
   // still present locally, so `readdirSync` says 38 here and a fresh clone has 35. A copy line reading
   // "38 themes" would therefore pass on the author's machine and fail for every contributor, the
@@ -64,11 +81,30 @@ const TRUTH = {
   })(),
 };
 
+// THE FILE LIST IS THE BLIND SPOT, NOT THE RULE. This gate's rule was always right and its FILES
+// stopped at `site/`, so docs-site/content/docs/layers.mdx said "fourteen types" against a registry of
+// twenty-three and then LISTED fourteen, putting nine primitives (video, beam, svg, composition,
+// adjust, paint, raymarch, three, globe) out of a reader's reach with nothing on the page admitting it
+// was partial. motion.mdx said 25 kinetic presets against 31; themes.mdx said fourteen themes. Same
+// shape as docs-drift.mjs:26, which records the identical lesson from the other side of the fence.
+// So every surface that states a count is DISCOVERED by walking, never listed: a hand-written list is
+// the exact artefact that goes stale, and a gate whose subject list is stale is a gate that is quiet.
+// docs/MISTAKES.md QUOTES WRONG NUMBERS ON PURPOSE. It is the incident log, and half its entries are
+// an account of a count that had decayed: "I found 96 components ... Real: 148 blocks, 63 families".
+// Every one of those is a true sentence containing a false number, so the gate found forty findings in
+// it and not one was actionable. An entry is a record of a past state and correcting it would destroy
+// the record. Excluded as a FILE because the property is a file's, not a line's: waiving forty lines
+// one at a time would be forty lies about having looked.
+const EXCLUDED = new Set(['docs/MISTAKES.md']);
+
 const FILES = [
   'site/lib/features.ts',
   'site/public/vawe-rules.md',
   ...walk('site/app').filter((f) => /\.tsx?$/.test(f)),
+  ...walk('docs-site/content/docs').filter((f) => f.endsWith('.mdx')),
+  ...walk('docs').filter((f) => f.endsWith('.md') && !EXCLUDED.has(f)),
 ];
+
 
 function walk(rel) {
   const dir = path.join(root, rel);
@@ -77,7 +113,21 @@ function walk(rel) {
     e.isDirectory() ? walk(path.join(rel, e.name)) : [path.join(rel, e.name)]);
 }
 
-const subjects = Object.keys(TRUTH).sort((a, b) => b.length - a.length).join('|');
+// `--files` prints the resolved surface list and stops. The list is now DISCOVERED, so the one thing
+// a test cannot assert against is the glob that produced it: a walk that silently returns nothing
+// looks exactly like a clean run, which is how this gate stayed quiet over docs-site/ in the first
+// place. lib-test asserts on what comes out of here.
+if (process.argv.includes('--files')) {
+  console.log(FILES.join('\n'));
+  process.exit(0);
+}
+
+// The bare nouns whose meaning is decided by the surface they sit on, not by the word. Checked in
+// site/ (product copy about the product) and never in docs/ (prose about films, frames and history).
+const SITE_ONLY = new Set(['blocks', 'components', 'looks', 'cuts']);
+const alt = (keys) => keys.sort((a, b) => b.length - a.length).join('|');
+const ALL_SUBJECTS = alt(Object.keys(TRUTH));
+const DOC_SUBJECTS = alt(Object.keys(TRUTH).filter((k) => !SITE_ONLY.has(k)));
 // Two shapes appear in the copy and both must be checked:
 //   "148 blocks", "a 148-block library"   → number first
 //   "## Kinetic presets (25)"             → heading with the count in parentheses
@@ -95,8 +145,28 @@ const subjects = Object.keys(TRUTH).sort((a, b) => b.length - a.length).join('|'
 //     So the run may not contain a digit either: the nearest NUMBER wins.
 // A gate change must never invent findings, and this one did until it was tested against real lines
 // rather than against the case it was written for.
-const NUM_FIRST = new RegExp(`\\b(\\d+)[ \\u00a0-](?:(?!${subjects})[a-z-]+,?[ \\u00a0]){0,4}(${subjects})\\b`, 'gi');
-const HEADING = new RegExp(`\\b(${subjects})\\s*\\((\\d+)\\)`, 'gi');
+// A COUNT SPELLED IN WORDS IS STILL A COUNT, and both of the bugs that prompted this widening were
+// spelled: "There are fourteen types" over a registry of 23, and "the repo ships fourteen" themes.
+// A digits-only matcher was not merely quiet about them, it could not see them at all. The fear was
+// that English numerals would drag in "the four canvas types" and "two guards" as claims about
+// registries; measured over all 117 surfaces it dragged in exactly ONE line, and that line is waived
+// where it sits. Twenty is the ceiling because prose stops spelling numbers there.
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+  'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen',
+  'nineteen', 'twenty'];
+const numFirst = (subjects) => new RegExp(`\\b(\\d+|${WORDS.join('|')})[ \\u00a0-](?:(?!${subjects})[a-z-]+,?[ \\u00a0]){0,4}(${subjects})\\b`, 'gi');
+const heading = (subjects) => new RegExp(`\\b(${subjects})\\s*\\((\\d+)\\)`, 'gi');
+const PATTERNS = {
+  site: [numFirst(ALL_SUBJECTS), heading(ALL_SUBJECTS)],
+  // The HEADING form keeps every subject on every surface. "## Cuts (26)" over a list of cut names is
+  // a registry claim wherever it sits, and no false positive in the widening came from that shape: it
+  // is prose that makes a bare noun ambiguous, never a heading that hands a count its own parentheses.
+  docs: [numFirst(DOC_SUBJECTS), heading(ALL_SUBJECTS)],
+};
+// "148 blocks across 70 families" is the one sentence the product writes about itself in which a bare
+// "families" is unambiguous: the noun it belongs to is standing right in front of it. Matched on every
+// surface, because that is the shape the marketing copy, the docs page and the block sheet all use.
+const ACROSS = /\b(\d+)[ \u00a0](?:blocks|components)[ \u00a0]across[ \u00a0](\d+)[ \u00a0]families\b/gi;
 
 const bad = [];
 for (const rel of FILES) {
@@ -116,15 +186,22 @@ for (const rel of FILES) {
     // On the line, or the line before it, since JSX and markdown both put a comment above the prose.
     // A marker with no reason after the colon does not count: it costs a sentence, so it is never the
     // cheap way out of a real stale number.
-    const waived = /site-counts-allow:\s*\S/.test(line) || /site-counts-allow:\s*\S/.test(prev);
+    // The lookahead is the markdown surface arriving: in `<!-- site-counts-allow: -->` the first
+    // non-space after the colon is the comment CLOSER, so a bare marker in a .md file bought silence
+    // for free and the "it costs a sentence" rule held only in JSX. Caught by lib-test, not by eye.
+    const REASON = /site-counts-allow:\s*(?!-->)(?!\*\/)\S/;
+    const waived = REASON.test(line) || REASON.test(prev);
     const check = (subject, stated) => {
       if (waived) return;
+      const n = isNaN(+stated) ? WORDS.indexOf(String(stated).toLowerCase()) : +stated;
       const real = TRUTH[subject.toLowerCase()];
-      if (real == null || +stated === real) return;
-      bad.push({ rel, line: i + 1, subject: subject.toLowerCase(), stated: +stated, real, text: line.trim().slice(0, 96) });
+      if (real == null || n === real) return;
+      bad.push({ rel, line: i + 1, subject: subject.toLowerCase(), stated: n, real, text: line.trim().slice(0, 96) });
     };
-    for (const m of line.matchAll(NUM_FIRST)) check(m[2], m[1]);
-    for (const m of line.matchAll(HEADING)) check(m[1], m[2]);
+    const [numeric, headed] = PATTERNS[rel.startsWith('site/') ? 'site' : 'docs'];
+    for (const m of line.matchAll(numeric)) check(m[2], m[1]);
+    for (const m of line.matchAll(headed)) check(m[1], m[2]);
+    for (const m of line.matchAll(ACROSS)) { check('blocks', m[1]); check('block families', m[2]); }
   });
 }
 

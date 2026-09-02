@@ -6087,5 +6087,53 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// ── site-counts SEES THE DOC SURFACES, AND STILL FAILS ON THEM ──────────────────────────────────
+// The gate's rule was never wrong; its FILES list was. It stopped at site/ while
+// docs-site/content/docs/layers.mdx said "fourteen types" against a registry of twenty-three and then
+// listed fourteen, hiding nine primitives from every reader who took the page as the vocabulary.
+// FILES is now walked rather than typed, so the thing to assert is the RESOLVED list: a walk that
+// silently returns nothing looks exactly like a clean run, which is how the blind spot survived.
+{
+  const gate = path.join(repoRoot, 'scripts/gates/site-counts.mjs');
+  const files = spawnSync('node', [gate, '--files'], { encoding: 'utf8', cwd: repoRoot })
+    .stdout.split('\n').filter(Boolean);
+  ok('site-counts: the resolved surface list reaches docs-site/content/docs',
+    files.includes('docs-site/content/docs/layers.mdx'));
+  ok('site-counts: and docs/', files.includes('docs/PRIMITIVES.md'));
+  ok('site-counts: while keeping the site surfaces it already had',
+    files.includes('site/lib/features.ts') && files.includes('site/public/vawe-rules.md'));
+  ok('site-counts: docs/MISTAKES.md stays out, it is a log of numbers that WERE wrong',
+    !files.includes('docs/MISTAKES.md'));
+
+  // Discovery is only half of it: a file can be in the list and still be read by nobody. Plant a
+  // stale count in each new surface and require the gate to name that file. Both were proved to fail
+  // by planting the number first and watching the gate stay green before the widening landed.
+  const planted = [
+    ['docs-site/content/docs/_lib-test-count.mdx', '# probe\n\nThere are 3 layer types.\n'],
+    ['docs/_LIB-TEST-COUNT.md', '# probe\n\nThe engine ships 3 kinetic presets.\n'],
+  ];
+  for (const [rel, body] of planted) {
+    const abs = path.join(repoRoot, rel);
+    try {
+      fs.writeFileSync(abs, body);
+      const r = spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot });
+      ok(`site-counts: a wrong count in ${rel.split('/')[0]}/ is caught`,
+        r.status === 1 && r.stderr.includes(rel));
+    } finally { fs.rmSync(abs, { force: true }); }
+  }
+
+  // The waiver has to cost a sentence. `doc-refs-allow` set the precedent and this one copies it:
+  // a bare marker is the cheap way out of a real stale number, so it does not count.
+  const abs = path.join(repoRoot, 'docs/_LIB-TEST-COUNT.md');
+  try {
+    fs.writeFileSync(abs, '<!-- site-counts-allow: the number below is a probe -->\nThere are 3 layer types.\n');
+    ok('site-counts: a waiver WITH a reason silences the line',
+      spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot }).status === 0);
+    fs.writeFileSync(abs, '<!-- site-counts-allow: -->\nThere are 3 layer types.\n');
+    ok('site-counts: a waiver with no reason does not',
+      spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot }).status === 1);
+  } finally { fs.rmSync(abs, { force: true }); }
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
