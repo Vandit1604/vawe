@@ -1,0 +1,289 @@
+{
+ "core/ancestor-kills.js": [
+  "CAPABILITIES"
+ ],
+ "core/audio-cues.js": [
+  "CUT_CUE",
+  "SEAM_CUE"
+ ],
+ "core/audio-kit.mjs": [
+  "CUES"
+ ],
+ "core/audio-select.js": [
+  "PROFILE_BED"
+ ],
+ "core/audio-tactile.js": [
+  "MOTION_CUES",
+  "DENSITY"
+ ],
+ "core/backgrounds.js": [
+  "PAL_PLINTH",
+  "BG_NAMES",
+  "BG_BLURBS"
+ ],
+ "core/boot.js": [
+  "PROPS"
+ ],
+ "core/camera-moves.js": [
+  "CAMERA_MOVES"
+ ],
+ "core/canvas-fx.js": [
+  "BAYER4",
+  "CANVAS_FX",
+  "CANVAS_FX_PRESETS"
+ ],
+ "core/captions.js": [
+  "CAP_STYLES",
+  "CAP_STYLE_SHAPE"
+ ],
+ "core/clips.js": [
+  "ANIM",
+  "ANIM_BLURBS"
+ ],
+ "core/compositions/index.js": [
+  "COMPOSITIONS",
+  "COMPOSITION_BLURBS"
+ ],
+ "core/cuts.js": [
+  "TIMINGS",
+  "IDENT",
+  "DIRS",
+  "PRESENTATIONS",
+  "TIMING_BLURBS"
+ ],
+ "core/effector.js": [
+  "FALLOFFS",
+  "FALLOFF_BLURBS",
+  "DRIVES"
+ ],
+ "core/filters.js": [
+  "FILTER_PRESETS",
+  "FILTER_BLURBS",
+  "THERMAL_REGION",
+  "KERNELS"
+ ],
+ "core/fx/ghost.js": [
+  "GHOST_KEYS"
+ ],
+ "core/fx/index.js": [
+  "FX_BLURBS",
+  "PROPS"
+ ],
+ "core/fx/kick.js": [
+  "KICK_KEYS",
+  "KICK_KINDS"
+ ],
+ "core/fx/lag.js": [
+  "LAG_KEYS"
+ ],
+ "core/fx/matte.js": [
+  "MATTE_KEYS"
+ ],
+ "core/fx/mix-blend.js": [
+  "BLEND_MODES"
+ ],
+ "core/fx/occlude.js": [
+  "OCCLUDE_KEYS"
+ ],
+ "core/fx/plane.js": [
+  "PLANE_KEYS"
+ ],
+ "core/fx/progress.js": [
+  "PROGRESS_KEYS"
+ ],
+ "core/fx/shadow.js": [
+  "SHADOW_KEYS"
+ ],
+ "core/fx/squash.js": [
+  "SQUASH_KEYS"
+ ],
+ "core/fx/tilt.js": [
+  "TILT_KEYS"
+ ],
+ "core/fx/upright.js": [
+  "UPRIGHT_KEYS"
+ ],
+ "core/generators.js": [
+  "ALL_GENERATORS"
+ ],
+ "core/gsap-effects.js": [
+  "GSAP_BLURBS",
+  "GSAP_EXIT_BLURBS",
+  "GSAP_FX",
+  "DEPRECATED_FX",
+  "DEPRECATED_EXIT"
+ ],
+ "core/icons.js": [
+  "ICONS"
+ ],
+ "core/idle.js": [
+  "IDLE",
+  "IDLE_BLURBS"
+ ],
+ "core/junctions.js": [
+  "JUNCTION_KINDS"
+ ],
+ "core/knobs.js": [
+  "KNOBS",
+  "UNIFORM_FAMILIES"
+ ],
+ "core/layers/adjust.js": [
+  "ADJUST_BLURBS"
+ ],
+ "core/layers/glow.js": [
+  "GLOW_BLURBS"
+ ],
+ "core/layers/util.js": [
+  "GLYPH_PAINTERS",
+  "PROPS"
+ ],
+ "core/lightfield/index.js": [
+  "RAMP"
+ ],
+ "core/lightfield/options.js": [
+  "PATTERNS",
+  "SHAPES",
+  "ANCHORS",
+  "DIRECTIONS",
+  "MOTIONS",
+  "LIGHTFIELD_BLURBS",
+  "SCHEMA",
+  "HONOURS"
+ ],
+ "core/lightfield/presets.js": [
+  "PRESETS"
+ ],
+ "core/looks.js": [
+  "KNOB_ROUTES",
+  "LOOKS"
+ ],
+ "core/motion.js": [
+  "EASINGS",
+  "DEFAULT_MOTION"
+ ],
+ "core/paint-fx.js": [
+  "PROPS",
+  "PAINT_FX"
+ ],
+ "core/pan-resolve.mjs": [
+  "PROPS"
+ ],
+ "core/parts.js": [
+  "PARTS",
+  "PART_BLURBS"
+ ],
+ "core/props.js": [
+  "PROPS"
+ ],
+ "core/ransom.js": [
+  "RANSOM_FACES"
+ ],
+ "core/raymarch-fx.js": [
+  "RAYMARCH_SURFACES"
+ ],
+ "core/resample-fx.js": [
+  "RESAMPLE_FX",
+  "RESAMPLE_BLURBS"
+ ],
+ "core/resample.js": [
+  "PROPS"
+ ],
+ "core/safe.js": [
+  "ASPECTS",
+  "DESTINATIONS",
+  "CAPTION_SKINS"
+ ],
+ "core/seams.js": [
+  "SEAM_FX",
+  "SEAM_BLURBS"
+ ],
+ "core/sequence.js": [
+  "LAYER_OWNED",
+  "POSE",
+  "KEYFRAME_PROPS"
+ ],
+ "core/shaders-ambient.js": [
+  "AMBIENT_SHADERS"
+ ],
+ "core/spectacle.js": [
+  "SPECTACLE_KEYS"
+ ],
+ "core/spectrum.js": [
+  "BANDS"
+ ],
+ "core/stings.js": [
+  "SHADER_ID"
+ ],
+ "core/surfaces/globe.js": [
+  "PROPS"
+ ],
+ "core/surfaces/raymarch.js": [
+  "PROPS"
+ ],
+ "core/surfaces/shader.js": [
+  "PROPS"
+ ],
+ "core/theme-contract.js": [
+  "REQUIRED",
+  "ON_INK"
+ ],
+ "core/three-fx.js": [
+  "PROPS"
+ ],
+ "core/three-scenes.js": [
+  "THREE_SCENES"
+ ],
+ "core/tracks/border-trail.js": [
+  "PROPS"
+ ],
+ "core/tracks/box.js": [
+  "PROPS"
+ ],
+ "core/tracks/cut.js": [
+  "PROPS"
+ ],
+ "core/tracks/effector.js": [
+  "PROPS"
+ ],
+ "core/tracks/follow.js": [
+  "PROPS"
+ ],
+ "core/tracks/idle.js": [
+  "PROPS"
+ ],
+ "core/tracks/motion.js": [
+  "PROPS"
+ ],
+ "core/tracks/ransom.js": [
+  "PROPS"
+ ],
+ "core/tracks/react.js": [
+  "PROPS"
+ ],
+ "core/tracks/units.js": [
+  "PROPS"
+ ],
+ "core/tracks/vars.js": [
+  "PROPS"
+ ],
+ "core/transitions-lower.js": [
+  "PROPS"
+ ],
+ "core/transitions.js": [
+  "TRANSITIONS",
+  "MECHANISMS",
+  "FAMILIES"
+ ],
+ "core/type.js": [
+  "STAGGER_FROM_BLURBS",
+  "PRESETS",
+  "DECODE_CHARS",
+  "DECODE_CHAR_BLURBS"
+ ],
+ "core/vocab.js": [
+  "FEEL",
+  "DURATION",
+  "CAMERA_WORDS",
+  "INTERP"
+ ]
+}

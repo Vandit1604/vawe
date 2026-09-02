@@ -6087,5 +6087,47 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// ---- the vocabulary hook: a NEW named vocabulary should be a registry ---------------------------
+//
+// The discovery problem was never that capabilities were hard to find. It was that publishing one was a
+// separate act from defining it, so the cheap thing to write was a bare export and 21 real capabilities
+// ended up hand-listed with nothing but memory holding them there. defineRegistry carries its own
+// catalogue entry now, so the correct thing costs one edit; this hook says so at the only moment the
+// choice is still cheap. Asserted because a hook that silently stops firing is indistinguishable from a
+// codebase that stopped making the mistake.
+{
+  const { execFileSync } = await import('node:child_process');
+  const hook = path.join(repoRoot, '.claude/hooks/vocabulary.mjs');
+  const run = (file) => {
+    try {
+      execFileSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: file } }), encoding: 'utf8' });
+      return { code: 0, err: '' };
+    } catch (e) { return { code: e.status, err: String(e.stderr || '') }; }
+  };
+
+  ok('vocab hook: silent on a file whose vocabularies are already known',
+    run(path.join(repoRoot, 'core/type.js')).code === 0);
+
+  const probe = path.join(repoRoot, 'core/tracks/idle.js');
+  const original = fs.readFileSync(probe, 'utf8');
+  try {
+    fs.writeFileSync(probe, `${original}\nexport const ZZ_PROBE_VOCAB = { a: 'one thing', b: 'another thing' };\n`);
+    const r = run(probe);
+    ok('vocab hook: fires on a NEW bare vocabulary', r.code === 2);
+    ok('vocab hook: names it and hands back the registry to write',
+      /ZZ_PROBE_VOCAB/.test(r.err) && /defineRegistry\(/.test(r.err));
+    // THE ESCAPE HATCH IS PART OF THE RULE. Most bare exports in core/ are correct (a props table, an
+    // interaction matrix), so the message must say how to record that rather than only how to comply.
+    ok('vocab hook: says what to do when it is NOT a vocabulary', /vocabulary-baseline\.json/.test(r.err));
+  } finally { fs.writeFileSync(probe, original); }
+
+  const wired = JSON.parse(fs.readFileSync(path.join(repoRoot, '.claude/settings.json'), 'utf8'));
+  ok('vocab hook: wired on Edit|Write',
+    JSON.stringify(wired.hooks.PostToolUse).includes('vocabulary.mjs'));
+  const base = JSON.parse(fs.readFileSync(path.join(repoRoot, 'verify/vocabulary-baseline.json'), 'utf8'));
+  ok('vocab hook: the baseline records what already exists, so the hook only judges what you add',
+    Object.keys(base).length > 40);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -20,6 +20,15 @@
             "command": "node .claude/hooks/code-quality.mjs"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/vocabulary.mjs"
+          }
+        ]
       }
     ]
   }
