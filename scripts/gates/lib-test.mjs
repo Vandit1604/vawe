@@ -21,13 +21,14 @@ import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { PROFILES } from '../author/profiles.mjs';
 import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs } from '../../core/layers/util.js';
-import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt } from '../../core/sequence.js';
+import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/sequence.js';
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
 import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../author/patch-motion.mjs';
+import { SHAPES as TRACK_SHAPES } from '../author/track.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -501,6 +502,32 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   ok('velocityAt refuses a window that is not a positive number of seconds', (() => {
     try { velocityAt(kf, 0.5, 0); return false; } catch (e) { return /positive lookback/.test(e.message); }
   })());
+
+  // ---- `make track SHAPE=exit` must not brake in the middle of a departure -----------------------
+  //
+  // A named easing is a function of ONE segment's own progress, so it ends that segment fast and
+  // starts the next one at rest: an interior key is a dead stop by construction (the SMOOTH section of
+  // core/sequence.js). `exit` is the one emitted shape whose interior key is a pure WAYPOINT, the
+  // travel never turns around, so the stop there is a defect and not the shape. Both segments were
+  // `easeInCubic` and the departure collapsed from 285 px/s to 31 at its own waypoint. Asserted as a
+  // velocity FLOOR rather than as the two key names, because the names are one way to get there and
+  // the floor is the thing a viewer sees.
+  const exitKeys = TRACK_SHAPES.exit({ dur: 0.55, to: -260, axis: 'y' });
+  // Sampled from the WAYPOINT to the end, never from t=0: the layer is meant to leave from rest, so the
+  // low velocity in its first frames is the shape. The defect is a brake once it is already moving.
+  const exitFloor = (keys) => {
+    let min = Infinity;
+    for (let i = 0; i <= 12; i++) min = Math.min(min, Math.abs(velocityAt(keys, 0.187 + ((0.55 - 0.187) * i) / 12, 1 / 30).vy));
+    return min;
+  };
+  ok('the emitted `exit` track never brakes below 250 px/s on its way out', exitFloor(exitKeys) > 250);
+  ok('the shape it replaced DID brake, so the floor above is measuring something', exitFloor([
+    { t: 0, y: 0, opacity: 1 }, { t: 0.187, y: -31.2, opacity: 1, ease: 'easeInCubic' },
+    { t: 0.55, y: -260, opacity: 0, ease: 'easeInCubic' }]) < 60);
+  ok('`exit` still LEAVES: it is faster at the frame edge than anywhere earlier',
+     Math.abs(velocityAt(exitKeys, 0.55, 1 / 30).vy) > exitFloor(exitKeys) * 2);
+  ok('every track `make track` emits is legal: no key carries two authored curves',
+     Object.keys(TRACK_SHAPES).every((n) => keyHandleErrors(TRACK_SHAPES[n]({}), n).length === 0));
 
   // SQUASH: the perpendicular axis is the RECIPROCAL, which is the difference between a squash and a zoom.
   const scene = { clock: { fps: 30, t: 0, frame: 0, duration: 3 } };
@@ -5253,6 +5280,12 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['letters get squeezed together kerning', 'expandIn'],
     ['chromatic aberration colour fringing', 'chroma'],
     ['strikethrough a word', 'strike'],
+    // The seventh, and the one with a measured cost. Counted over `formats/scene/*.json`: 166 films,
+    // 289 motion tracks, `ease: "through"` on ZERO of them and a bezier handle on 12. Asked in the words
+    // of the DEFECT it removes, the search answered NOTHING HERE CLEARLY MATCHES and offered a camera
+    // move, a flight path and a colour grade; asked in the engine's own words ("velocity through a
+    // keyframe") it answered instantly. The mechanism was reachable only by somebody who already knew.
+    ['the move stops dead in the middle of a travel', 'through'],
   ];
   for (const [q, want] of PRESENT) {
     ok(`arsenal answers "${q}" with ${want}`, covers(q, want) >= CONFIDENT);

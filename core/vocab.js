@@ -100,7 +100,21 @@ export const INTERP = {
   through: 'velocity carries THROUGH the key: a cubic Hermite with neighbour tangents, so a travel across several keys is one gesture rather than a stop at each',
 };
 
-export const INTERP_REGISTRY = defineRegistry('interpolation mode', INTERP, { slot: 'ease', blurbs: INTERP,
+// THE SYMPTOM IS NOT IN THE BLURB, AND THE SYMPTOM IS WHAT A PERSON TYPES. `make arsenal` was asked
+// "the move stops dead in the middle of a travel", which is the exact defect `through` was written to
+// remove, and it answered NOTHING HERE CLEARLY MATCHES and offered a camera move, a flight path and a
+// colour grade. The blurb is accurate and speaks the engine's own words (velocity, key, Hermite), so it
+// retrieves for somebody who already knows the mechanism and for nobody else. That is the retrieval
+// failure core/registry.js `aka` exists for: the words go in the SEARCH index without turning the
+// printed description into keyword soup. Counted over `formats/scene/*.json`: 289 motion tracks in
+// 166 films, and `through` appears on none of them.
+const INTERP_AKA = {
+  through: ['stall', 'stalls', 'stops dead', 'dead stop', 'stops in the middle', 'pause', 'pauses',
+    'hitch', 'hesitates', 'stutter', 'jerk', 'kink', 'waypoint', 'sparse keys', 'three keys',
+    'graph editor', 'continuous bezier', 'auto bezier', 'carries speed', 'one gesture', 'rounds a corner'],
+};
+
+export const INTERP_REGISTRY = defineRegistry('interpolation mode', INTERP, { slot: 'ease', blurbs: INTERP, aka: INTERP_AKA,
   catalog: {
     title: 'Interpolation modes (not easings)',
     tag: 'motion key',
