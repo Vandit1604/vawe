@@ -1,6 +1,6 @@
 // core/layers/count.js: a number that counts from→to over local time (stats, timers). Build is the
 // text build (styleText renders count content); this adds the per-frame value.
-import { mergeProps } from '../props.js';
+import { mergeProps, propsOf } from '../props.js';
 import { PROPS as TEXT_PROPS } from './text.js';
 export { build } from './text.js';
 
@@ -15,27 +15,30 @@ const TEXT_FRAME_ONLY = ['caret', 'caretHold', 'untype', 'untypeRate', 'maxLines
 const textShared = Object.fromEntries(
   Object.entries(TEXT_PROPS).filter(([k]) => !TEXT_FRAME_ONLY.includes(k)));
 
-// The count's own vocabulary, on top of the text build it reuses. The same shape as `export { build }`.
-export const PROPS = mergeProps(textShared, {
-  from: {}, to: {}, countStart: {}, countDur: {}, ease: {},
-  unit: {}, suffix: {}, prefix: {}, decimals: {}, roll: {},
-});
-
-export function frame(kit, el, L, t) {
+// The pattern sits in the SIXTH slot: core/layers/index.js calls frame(kit, el, L, t, scene) with
+// five arguments, so a pattern any earlier destructures `scene` and every prop reads undefined
+// (lib-test asserts the arity). `scene` itself is unused here. `start`/`duration` stay `L.x`: shared
+// vocabulary props, not this file's to declare. `decimals` stays hand-written below: it is read only
+// inside fmtCount/displayNum, never destructured on this signature, so propsOf cannot see it.
+export function frame(kit, el, L, t, scene, { countStart, countDur, from, to, ease, unit, suffix, prefix, roll } = L) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;
-  const cs = L.countStart ?? 0.2, cd = L.countDur ?? 1.6;
-  const v = kit.interpolate(t - start, [cs, cs + cd], [L.from ?? 0, L.to ?? 100], { easing: kit.resolveEasing(L.ease || 'easeOutCubic') });
+  const cs = countStart ?? 0.2, cd = countDur ?? 1.6;
+  const v = kit.interpolate(t - start, [cs, cs + cd], [from ?? 0, to ?? 100], { easing: kit.resolveEasing(ease || 'easeOutCubic') });
   // A leading currency symbol in `unit` is hoisted to the front: `unit:"$B"` reads "$880B", which is
   // what CLAUDE.md documents and what the catalog's own statBig.currency assumed. Appending it
   // verbatim produced "880$B". The doc, the manifest and the engine each said something different
   // (docs/MISTAKES.md #76). Plain units (%/k/ms) are untouched.
-  const rawUnit = L.unit || L.suffix || '';
+  const rawUnit = unit || suffix || '';
   const cur = /^([$€£¥])(.*)$/.exec(rawUnit);
-  const text = (L.prefix || '') + (cur ? cur[1] : '') + fmtCount(v, L) + (cur ? cur[2] : rawUnit);
-  if (L.roll) { rollInto(el, text, displayNum(v, L)); return; }
+  const text = (prefix || '') + (cur ? cur[1] : '') + fmtCount(v, L) + (cur ? cur[2] : rawUnit);
+  if (roll) { rollInto(el, text, displayNum(v, L)); return; }
   el.textContent = text;
 }
+
+// The count's own vocabulary, on top of the text build it reuses (the same shape as `export { build }`).
+// `decimals` is hand-written: it never appears on frame()'s own signature, only inside fmtCount/displayNum.
+export const PROPS = mergeProps(textShared, propsOf(frame), { decimals: {} });
 
 // fmtCount: number formatting that reads RIGHT. With a `unit` (%/k/$B) the author owns scale, so just apply
 // smart decimals (1 for a non-integer target < 100 → "0.4%", not "0"). Without a unit, auto-compact big raw

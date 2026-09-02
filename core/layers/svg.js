@@ -23,26 +23,61 @@
 // did nothing. docs/CRAFT/PARITY-AUDIT.md, docs/MISTAKES.md #545.
 import { interpolate, easeOutCubic, resolveEasing } from '../motion.js';
 import { resamplePath, bestRotation, rotatePoints, morphD } from '../path-morph.js';
+import { mergeProps, propsOf } from '../props.js';
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 
-// `draw.weight` still wins over `strokeWidth` where both are set, so neither is guarded on the other.
-export const PROPS = { w: {}, h: {}, viewBox: {}, d: {}, fill: {}, stroke: {}, strokeWidth: {},
-  draw: {}, morph: {} };
+// WHAT THE STROKE RESOLVES TO, split out of build() so the write-on's own branching does not count
+// against the layer's main shape decision. `draw.fill` wins over `fill` so a mark can stroke in one
+// colour and land in another; `true` means the theme's accent, the same spelling `fill: true` already
+// had at the top of build(). The fill is PRESENT from frame 0 and merely transparent: painting it in at
+// the end instead would change the path's own attributes mid-shot for no gain, and fill-opacity is the
+// one channel the engine does not already own on this element (`opacity` is the enter/exit envelope's).
+function applyDraw(el, p, draw, { fillIn, fill, stroke, strokeWidth }) {
+  const want = draw.fill ?? fillIn;
+  const fillTo = want == null || want === false ? null : (want === true ? 'var(--accent)' : want);
+  p.setAttribute('fill', fillTo ?? 'none');
+  if (fillTo) p.style.fillOpacity = '0';
+  p.setAttribute('stroke', stroke === 'none' ? (fill !== 'none' ? fill : 'var(--accent)') : stroke);
+  p.setAttribute('stroke-width', draw.weight ?? strokeWidth ?? 3);
+  p.setAttribute('pathLength', '1');       // normalise so the offset is a pure function of u, no measuring
+  p.style.strokeDasharray = '1 1';
+  p.style.strokeDashoffset = '1';          // hidden at t=0
+  el.__drawFill = fillTo;
+  // ABSENT → easeOutCubic, exactly as before. A WRONG NAME → throws naming the field. The curve used
+  // to be hardcoded, so the write-on always started at maximum speed; the standard is Easy Ease at
+  // both ends, which is `ease: "easeInOutCubic"` here.
+  el.__drawEase = resolveEasing(draw.ease);
+}
 
-export function build(kit, el, L) {
-  if (L.w != null) el.style.width = L.w + 'px';
-  if (L.h != null) el.style.height = L.h + 'px';
+// resample BOTH shapes to equal point counts ONCE (build-time DOM read), align by best rotation, and
+// stash the arrays. From here morphD(u) is pure, no per-frame getPointAtLength.
+function applyMorph(el, svg, p, morph) {
+  const n = morph.points ?? 180;
+  const tmp = document.createElementNS(SVGNS, 'path');
+  tmp.setAttribute('d', morph.to); tmp.setAttribute('fill', 'none'); tmp.style.visibility = 'hidden';
+  svg.appendChild(tmp);
+  const from = resamplePath(p, n);
+  const to = resamplePath(tmp, n);
+  svg.removeChild(tmp);
+  const k = bestRotation(from, to);
+  el.__morph = { from, to: rotatePoints(to, k), rawTo: morph.to };
+}
+
+// The props are read off this signature (propsOf, core/props.js). No second list to drift from it.
+export function build(kit, el, L, { w, h, viewBox, d, fill: fillIn, stroke: strokeIn, strokeWidth, draw, morph } = L) {
+  if (w != null) el.style.width = w + 'px';
+  if (h != null) el.style.height = h + 'px';
   el.style.pointerEvents = 'none';
   const svg = document.createElementNS(SVGNS, 'svg');
-  svg.setAttribute('viewBox', L.viewBox || '0 0 100 100');
+  svg.setAttribute('viewBox', viewBox || '0 0 100 100');
   svg.setAttribute('width', '100%'); svg.setAttribute('height', '100%');
   svg.style.overflow = 'visible';
-  const fill = L.fill && L.fill !== true ? L.fill : (L.draw ? 'none' : 'var(--accent)');
-  const stroke = L.stroke && L.stroke !== true ? L.stroke : (L.draw ? 'var(--accent)' : 'none');
+  const fill = fillIn && fillIn !== true ? fillIn : (draw ? 'none' : 'var(--accent)');
+  const stroke = strokeIn && strokeIn !== true ? strokeIn : (draw ? 'var(--accent)' : 'none');
 
   const p = document.createElementNS(SVGNS, 'path');
-  p.setAttribute('d', L.d || '');
+  p.setAttribute('d', d || '');
   p.setAttribute('fill', fill);
   p.setAttribute('stroke', stroke);
   p.setAttribute('stroke-linecap', 'round');
@@ -52,54 +87,24 @@ export function build(kit, el, L) {
   // static stroke was `draw:{weight:30}` for the side effect, a hack written to route around the
   // engine, which CLAUDE.md calls a bug report rather than an answer. `strokeWidth` is the honest
   // spelling; `draw.weight` still wins when present so no existing scene moves.
-  if (L.strokeWidth != null) p.setAttribute('stroke-width', L.strokeWidth);
-  if (L.draw) {
-    // WHAT THE STROKE RESOLVES TO, decided once here rather than recomputed per frame. `draw.fill`
-    // wins over `fill` so a mark can stroke in one colour and land in another; `true` means the
-    // theme's accent, the same spelling `fill: true` already had at the top of this function.
-    const want = L.draw.fill ?? L.fill;
-    const fillTo = want == null || want === false ? null : (want === true ? 'var(--accent)' : want);
-    // The fill is PRESENT from frame 0 and merely transparent. Painting it in at the end instead would
-    // change the path's own attributes mid-shot for no gain, and fill-opacity is the one channel the
-    // engine does not already own on this element (`opacity` is the enter/exit envelope's).
-    p.setAttribute('fill', fillTo ?? 'none');
-    if (fillTo) p.style.fillOpacity = '0';
-    p.setAttribute('stroke', stroke === 'none' ? (fill !== 'none' ? fill : 'var(--accent)') : stroke);
-    p.setAttribute('stroke-width', L.draw.weight ?? L.strokeWidth ?? 3);
-    p.setAttribute('pathLength', '1');       // normalise so the offset is a pure function of u, no measuring
-    p.style.strokeDasharray = '1 1';
-    p.style.strokeDashoffset = '1';          // hidden at t=0
-    el.__drawFill = fillTo;
-    // ABSENT → easeOutCubic, exactly as before. A WRONG NAME → throws naming the field. The curve used
-    // to be hardcoded, so the write-on always started at maximum speed; the standard is Easy Ease at
-    // both ends, which is `ease: "easeInOutCubic"` here.
-    el.__drawEase = resolveEasing(L.draw.ease);
-  }
+  if (strokeWidth != null) p.setAttribute('stroke-width', strokeWidth);
+  if (draw) applyDraw(el, p, draw, { fillIn, fill, stroke, strokeWidth });
   svg.appendChild(p);
   el.appendChild(svg);
   el.__svgPath = p;
 
-  if (L.morph && L.morph.to) {
-    // resample BOTH shapes to equal point counts ONCE (build-time DOM read), align by best rotation, and
-    // stash the arrays. From here morphD(u) is pure, no per-frame getPointAtLength.
-    const n = L.morph.points ?? 180;
-    const tmp = document.createElementNS(SVGNS, 'path');
-    tmp.setAttribute('d', L.morph.to); tmp.setAttribute('fill', 'none'); tmp.style.visibility = 'hidden';
-    svg.appendChild(tmp);
-    const from = resamplePath(p, n);
-    const to = resamplePath(tmp, n);
-    svg.removeChild(tmp);
-    const k = bestRotation(from, to);
-    el.__morph = { from, to: rotatePoints(to, k), rawTo: L.morph.to };
-  }
+  if (morph && morph.to) applyMorph(el, svg, p, morph);
 }
 
-export function frame(kit, el, L, t) {
+// The pattern sits in the SIXTH slot: core/layers/index.js calls frame(kit, el, L, t, scene) with
+// five arguments, so a pattern any earlier destructures `scene` and every prop reads undefined
+// (lib-test asserts the arity). `scene` itself is unused here, same as clip.js and lottie.js.
+export function frame(kit, el, L, t, scene, { draw, morph } = L) {
   const p = el.__svgPath; if (!p) return;
-  const start = L.start ?? 0;
-  if (L.draw) {
-    const dur = L.draw.dur ?? 1.2;
-    const u = interpolate(t - start, [0, dur], [0, 1], { easing: el.__drawEase || easeOutCubic, clamp: true });
+  const begin = L.start ?? 0;
+  if (draw) {
+    const dur = draw.dur ?? 1.2;
+    const u = interpolate(t - begin, [0, dur], [0, 1], { easing: el.__drawEase || easeOutCubic, clamp: true });
     if (u >= 1) { p.style.strokeDasharray = 'none'; p.style.strokeDashoffset = '0'; }
     else { p.style.strokeDasharray = '1 1'; p.style.strokeDashoffset = (1 - u).toFixed(4); }
     // THE RESOLVE. The fill comes up over `fillDur` once the stroke has finished, and the stroke leaves
@@ -107,8 +112,8 @@ export function frame(kit, el, L, t) {
     // half alpha in the middle, which reads as the mark dimming rather than as one becoming the other.
     let v = 0;
     if (el.__drawFill) {
-      const fd = L.draw.fillDur ?? 0.4;
-      v = interpolate(t - start - dur, [0, fd], [0, 1], { easing: easeOutCubic, clamp: true });
+      const fd = draw.fillDur ?? 0.4;
+      v = interpolate(t - begin - dur, [0, fd], [0, 1], { easing: easeOutCubic, clamp: true });
       p.style.fillOpacity = v.toFixed(4);
       p.style.strokeOpacity = (1 - Math.min(1, Math.max(0, (v - 0.35) / 0.65))).toFixed(4);
     }
@@ -117,14 +122,18 @@ export function frame(kit, el, L, t) {
     // free to reuse a neighbour and drop the whole second half.
     el.dataset.dw = u.toFixed(3); el.dataset.df = v.toFixed(3);
   } else if (el.__morph) {
-    const dur = L.morph.dur ?? 1.4, spin = L.morph.spin ?? 0, closed = L.morph.closed !== false;
-    const u = interpolate(t - start, [0, dur], [0, 1], { easing: easeOutCubic, clamp: true });
+    const dur = morph.dur ?? 1.4, spin = morph.spin ?? 0, closed = morph.closed !== false;
+    const u = interpolate(t - begin, [0, dur], [0, 1], { easing: easeOutCubic, clamp: true });
     // crisp endpoints: render the raw target `d` once settled (the polyline only exists during the melt)
     if (u >= 1) p.setAttribute('d', el.__morph.rawTo);
     else p.setAttribute('d', morphD(el.__morph.from, el.__morph.to, u, { spin, closed }));
     el.dataset.mp = u.toFixed(3);
   }
 }
+
+// Both signatures declare, because a prop read only on the frame path is just as real as one read at
+// build time. mergeProps unions them (core/props.js).
+export const PROPS = mergeProps(propsOf(build), propsOf(frame));
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin)";

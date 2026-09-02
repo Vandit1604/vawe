@@ -21,6 +21,7 @@
 //
 // Back-compat: a glow with NO preset takes the exact original code path (same node, same background
 // string), existing scenes render byte-identical; the snap gate would catch any drift.
+import { mergeProps, propsOf } from '../props.js';
 
 // ---- pure helpers (exported for lib tests) -------------------------------------------------------
 
@@ -139,12 +140,12 @@ export function flashEnvelope(lt, { attack = 0.35, decay = 0.9, peak = 0.4 } = {
 
 // Three shapes of glow in one file, and the guards say which prop belongs to which: the geometry knobs
 // only reach a named PRESET, `pulseAmp` only scales a `pulse`, `cycle` only times the chromaCycle preset.
-// `beam` and `intensity` are read on the preset-less path too, so they stay unconditional.
-export const PROPS = {
-  color: {}, color2: {}, intensity: {}, beam: {}, preset: {}, pulse: {}, flash: {},
-  cx: { when: 'preset' }, cy: { when: 'preset' }, angle: { when: 'preset' },
-  cycle: { when: 'preset' }, pulseAmp: { when: 'pulse' },
-  h: {},
+// A guard has no spelling in a signature, so these stay hand-written and union with the auto-derived
+// set below. `color2` stays hand-written too: it is read only inside the liveColor() helper, taking
+// `L` wholesale, never destructured directly in build() or frame().
+const GUARDED = {
+  cx: { when: 'preset' }, cy: { when: 'preset' }, angle: { when: 'preset' }, cycle: { when: 'preset' },
+  pulseAmp: { when: 'pulse' },
 };
 
 // A GLOW THAT CANNOT CHANGE IS HALF A GLOW, and it took a recreation to make that concrete. The
@@ -217,21 +218,30 @@ function liveColor(kit, L) {
 /** The radial stop, scaled by --glow-r only when this layer keys one. */
 const liveStop = (L, pct) => (drives(L, GLOW_VARS.r) ? `calc(var(${GLOW_VARS.r}, 1) * ${pct}%)` : `${pct}%`);
 
-export function build(kit, el, L) {
-  if (L.h != null) el.style.height = L.h + 'px';
+// classicBackground: the pre-preset gradient string, used both when the layer stays on the original
+// no-inner-node path and when a preset-less glow still needs pulse/flash on an inner node.
+function classicBackground(kit, L, beam) {
+  const c = liveColor(kit, L);
+  const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[beam];
+  return ang ? `linear-gradient(${ang}, transparent, ${c})`
+             : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent ${liveStop(L, 72)})`;
+}
+
+// The props are read off this signature (propsOf, core/props.js), for what build() reads DIRECTLY.
+// `cx`/`cy`/`angle` stay off it (guarded, see GUARDED above); `color2` stays hand-written (read only
+// inside the liveColor() helper).
+export function build(kit, el, L, { h, preset, intensity, color, pulse, flash, beam } = L) {
+  if (h != null) el.style.height = h + 'px';
   el.style.pointerEvents = 'none';
 
-  const spec = L.preset ? presetSpec(L.preset, {
-    i: L.intensity, cx: L.cx, cy: L.cy, angle: L.angle,
-    color: L.color && L.color !== true ? L.color : undefined,
+  const spec = preset ? presetSpec(preset, {
+    i: intensity, cx: L.cx, cy: L.cy, angle: L.angle,
+    color: color && color !== true ? color : undefined,
   }) : null;
 
-  if (!spec && !L.pulse && !L.flash) {
+  if (!spec && !pulse && !flash) {
     // ORIGINAL path, untouched: no preset, no pulse → identical output to the pre-preset builder
-    const c = liveColor(kit, L);
-    const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
-    el.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
-                              : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent ${liveStop(L, 72)})`;
+    el.style.background = classicBackground(kit, L, beam);
     return;
   }
 
@@ -245,10 +255,7 @@ export function build(kit, el, L) {
     if (spec.mask) { inner.style.maskImage = spec.mask; inner.style.webkitMaskImage = spec.mask; }
   } else {
     // pulse on a classic (preset-less) glow: same gradient as the original path, one node deeper
-    const c = liveColor(kit, L);
-    const ang = { right: '90deg', left: '270deg', up: '0deg', down: '180deg' }[L.beam];
-    inner.style.background = ang ? `linear-gradient(${ang}, transparent, ${c})`
-                                 : `radial-gradient(50% 50% at 50% 50%, ${c}, transparent ${liveStop(L, 72)})`;
+    inner.style.background = classicBackground(kit, L, beam);
   }
   // .hs-layer is already position:absolute (a containing block), never override it here
   el.appendChild(inner);
@@ -258,9 +265,14 @@ export function build(kit, el, L) {
 // breathe from LOCAL t (pure in t → deterministic, seek-safe). Stamp el.dataset.gp so a pulse-only
 // frame always changes the DOM signature, same rationale as shader.js: without it the render's
 // static-frame dedup could wrongly reuse a frame.
-export function frame(kit, el, L, t) {
-  const cycling = L.preset === 'chromaCycle';
-  if ((!L.pulse && !cycling && !L.flash) || !el.__glowInner) return;
+//
+// The pattern sits in the SIXTH slot: core/layers/index.js calls frame(kit, el, L, t, scene) with
+// five arguments, so a pattern any earlier destructures `scene` and every prop reads undefined
+// (lib-test asserts the arity). `scene` itself is unused here. `pulseAmp`/`cycle` stay off it
+// (guarded, see GUARDED above); `start`/`duration` stay `L.x` (shared vocabulary).
+export function frame(kit, el, L, t, scene, { preset, pulse, flash } = L) {
+  const cycling = preset === 'chromaCycle';
+  if ((!pulse && !cycling && !flash) || !el.__glowInner) return;
   // Set the inner DETERMINISTICALLY for EVERY t, never early-return and leave a STALE value. Outside the
   // layer's own window driveClips normally hides the layer, so a stale inner used to be invisible; but
   // sceneUnits can EXTEND the visible window past L.duration, and then the stale inner shows AND becomes
@@ -268,14 +280,14 @@ export function frame(kit, el, L, t) {
   // value outside the window instead of skipping.
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   const inWindow = t >= start && t < end;
-  if (L.flash) {
+  if (flash) {
     // a one-shot bloom that swells then settles (attack-decay); flash may be `true` or {attack,decay,peak}.
     // flashEnvelope is already 0 before/after the swell, so it rests at 0 outside the window too.
-    const o = inWindow ? flashEnvelope(t - start, L.flash === true ? {} : L.flash) : 0;
+    const o = inWindow ? flashEnvelope(t - start, flash === true ? {} : flash) : 0;
     el.__glowInner.style.opacity = o.toFixed(3);
     el.dataset.gf = o.toFixed(3);
-  } else if (L.pulse) {
-    const o = inWindow ? pulseOpacity(t - start, +L.pulse, L.pulseAmp) : 1; // rest at full opacity outside
+  } else if (pulse) {
+    const o = inWindow ? pulseOpacity(t - start, +pulse, L.pulseAmp) : 1; // rest at full opacity outside
     el.__glowInner.style.opacity = o.toFixed(3);
     el.dataset.gp = o.toFixed(3);
   }
@@ -287,6 +299,11 @@ export function frame(kit, el, L, t) {
     el.dataset.gh = h.toFixed(1);
   }
 }
+
+// Both signatures declare, because a prop read only on the frame path is just as real as one read at
+// build time. `GUARDED` is unioned in alongside them: a guard has no spelling in a signature (mergeProps,
+// core/props.js). `color2` unions in too: read only inside liveColor(), never destructured directly.
+export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, { color2: {} });
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight)";

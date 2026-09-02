@@ -1,14 +1,16 @@
 // core/layers/text.js. A text (or count) layer: theme-styled type + chip box + auto-fit safety.
 // Also drives the `typing` per-frame effect. `count` reuses this build (styleText handles its content).
 import { isPainting } from '../fonts.js';
+import { mergeProps, propsOf } from '../props.js';
 
 // The `fit` family is guarded because a fit with no width has nothing to fit INTO, and the typing
-// family because a caret with no `typing` has no reveal to trail. Everything the shared kit reads
-// (font · colour · the chip box) is declared in core/layers/util.js, which reads it.
-export const PROPS = {
-  text: {}, size: {}, weight: {}, font: {}, ls: {}, tracking: {}, raw: {}, gradient: {},
-  w: {}, h: {}, maxLines: {}, fit: {}, fitH: { when: 'fit' },
-  typing: {},
+// family because a caret with no `typing` has no reveal to trail. A guard has no spelling in a
+// signature, so these stay hand-written and union with the auto-derived set below. `font`/`ls`/
+// `tracking`/`raw` stay hand-written too: they flow through kit.styleText/microType via `L` passed
+// wholesale, never destructured directly in this file, so propsOf cannot see them. Everything else
+// the shared kit reads (colour, the chip box) is declared in core/layers/util.js, which reads it.
+const GUARDED = {
+  fitH: { when: 'fit' },
   caret: { when: 'typing' }, caretHold: { when: 'typing' },
   untype: { when: 'typing' }, untypeRate: { when: 'typing' },
 };
@@ -17,12 +19,15 @@ export const PROPS = {
 // about the ground under this layer, so they must ask it at the same instant or they disagree.
 const midT = (L) => (L.start ?? 0) + (L.duration ?? 2) / 2;
 
-export function build(kit, el, L) {
+// The props are read off this signature (propsOf, core/props.js), for what build() reads DIRECTLY.
+// `fitH` stays off it (guarded, see GUARDED above); `split`/`type` stay `L.x` (shared vocabulary,
+// declared centrally, not this file's to declare).
+export function build(kit, el, L, { fit, w, h, size, weight, text, maxLines } = L) {
   kit.styleText(el, L, midT(L));
   kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
   microType(kit, el, L); // pro-grade type refinements, on by default (opt out with raw:true)
   gradientFill(el, L); // static gradient text fill (dark→light vertical, etc.), the premium display look
-  if (L.fit && L.w) { // auto-size to the layer width; `fitH` → multi-line overflow-safe fit
+  if (fit && w) { // auto-size to the layer width; `fitH` → multi-line overflow-safe fit
     kit.cam.appendChild(el); // needs to be in-DOM to measure
     const fam = getComputedStyle(el).fontFamily.split(',')[0].replace(/['"]/g, '');
     // NOT document.fonts.check(): it is inverted for this question. Measured in headless Chrome it
@@ -30,16 +35,16 @@ export function build(kit, el, L) {
     // this warning fired on correct fonts and stayed silent on missing ones. isPainting() width-probes
     // the family against three generics instead (all-equal = it really resolved). See core/fonts.js.
     if (!isPainting(fam)) console.warn(`fit: font "${fam}" is NOT painting (falling back), fit measurement will be wrong. Run: make font-audit`);
-    if (L.fitH) kit.fitBox(el, { maxW: L.w, maxH: L.fitH, max: L.size ?? 96, min: 34 });
-    else el.style.fontSize = kit.fitText(el.textContent, L.w, { font: (px) => `${L.weight ?? 800} ${px}px ${fam}`, max: L.size ?? 96, min: 34 }) + 'px';
+    if (L.fitH) kit.fitBox(el, { maxW: w, maxH: L.fitH, max: size ?? 96, min: 34 });
+    else el.style.fontSize = kit.fitText(el.textContent, w, { font: (px) => `${weight ?? 800} ${px}px ${fam}`, max: size ?? 96, min: 34 }) + 'px';
     el.remove();
-  } else if (L.w && !L.split && (L.type === 'text' || !L.type) && L.text) {
+  } else if (w && !L.split && (L.type === 'text' || !L.type) && text) {
     // AUTO-FIT SAFETY: a headline that overflows its box gets shrunk so it never clips. Fires only on
     // real overflow (output changes only where already broken). Pure (measured once).
     kit.cam.appendChild(el);
-    const lh = parseFloat(getComputedStyle(el).lineHeight) || (L.size ?? 96) * 1.15;
-    const maxLines = L.maxLines ?? 5, maxH = L.h ?? maxLines * lh;
-    if (el.scrollHeight > maxH + 2 || el.scrollWidth > L.w + 1) kit.fitBox(el, { maxW: L.w, maxH, max: L.size ?? 96, min: 34 });
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || (size ?? 96) * 1.15;
+    const maxH = h ?? (maxLines ?? 5) * lh;
+    if (el.scrollHeight > maxH + 2 || el.scrollWidth > w + 1) kit.fitBox(el, { maxW: w, maxH, max: size ?? 96, min: 34 });
     el.remove();
   }
 }
@@ -188,21 +193,33 @@ export function typedLen(lt, { cps, visLen, untype, untypeRate }) {
   return Math.max(0, Math.min(visLen, n));
 }
 
-// typing: reveal char-by-char over local time (chars/sec) with a blinking caret. Pure fn of n.
-// HTML-SAFE: if the copy carries markup (an accent <span>, <b>…), the VISIBLE characters are revealed
-// while the tags are kept intact, so an accent word types IN its colour, exactly like the reference.
-// Plain text takes the cheap textContent path. Deterministic (output depends only on n = floor(t·cps)).
-export function frame(kit, el, L, t) {
-  // animated gradient fill (spin/flow): recompute the moving image from t. Pure in t; the clip + colour
-  // were established at build. Runs every frame the layer is on screen (opacity gates it when off).
-  if (L.gradient && L.gradient.animate) {
-    const css = gradientCss(L.gradient, t);
+// refreshGradient: the per-frame half of the gradient fill, split out of frame() so its own two
+// branches (animated recompute, split-unit repaint) do not count against the typing state machine
+// below. Pure in t; the clip + colour were established at build.
+function refreshGradient(el, L, gradient, t) {
+  // animated gradient fill (spin/flow): recompute the moving image from t.
+  // Runs every frame the layer is on screen (opacity gates it when off).
+  if (gradient.animate) {
+    const css = gradientCss(gradient, t);
     if (css) { el.style.backgroundImage = css.backgroundImage; el.style.backgroundPosition = css.backgroundPosition; }
   }
   // Static fills come through here too: for a split layer the container's paint reaches no glyph, so
   // this is not a refresh of an already-correct frame, it is the only thing that paints one.
-  if (L.gradient) paintSplitUnits(el, L, t);
-  if (!L.typing) return;
+  paintSplitUnits(el, L, t);
+}
+
+// typing: reveal char-by-char over local time (chars/sec) with a blinking caret. Pure fn of n.
+// HTML-SAFE: if the copy carries markup (an accent <span>, <b>…), the VISIBLE characters are revealed
+// while the tags are kept intact, so an accent word types IN its colour, exactly like the reference.
+// Plain text takes the cheap textContent path. Deterministic (output depends only on n = floor(t·cps)).
+// The pattern sits in the SIXTH slot: core/layers/index.js calls frame(kit, el, L, t, scene) with
+// five arguments, so a pattern any earlier destructures `scene` and every prop reads undefined
+// (lib-test asserts the arity). `scene` itself is unused here. `caret`/`caretHold`/`untype`/
+// `untypeRate` stay off the signature (guarded, see GUARDED above); `start`/`duration` stay `L.x`
+// (shared vocabulary).
+export function frame(kit, el, L, t, scene, { gradient, typing, text } = L) {
+  if (gradient) refreshGradient(el, L, gradient, t);
+  if (!typing) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   // THE BUILT LINE, STASHED ON THE FIRST FRAME THIS LAYER IS ASKED FOR, and put back the moment the
   // layer is off its window. The early return used to leave the element holding whatever the LAST
@@ -216,8 +233,8 @@ export function frame(kit, el, L, t) {
     if (el.innerHTML !== el.__hsTypeBase) el.innerHTML = el.__hsTypeBase;
     return;
   }
-  const cps = L.typing === true ? 24 : L.typing;
-  const full = L.text || '';
+  const cps = typing === true ? 24 : typing;
+  const full = text || '';
   const visLen = /[<&]/.test(full) ? stripLen(full) : full.length;
   const lt = t - start;
   const n = typedLen(lt, { cps, visLen, untype: L.untype, untypeRate: L.untypeRate });
@@ -246,6 +263,13 @@ function revealHtml(html, n) {
   walk(root);
   return root.innerHTML;
 }
+
+// Both signatures declare, because a prop read only on the frame path is just as real as one read at
+// build time. `GUARDED` is unioned in alongside them: a guard has no spelling in a signature (mergeProps,
+// core/props.js).
+export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, {
+  font: {}, ls: {}, tracking: {}, raw: {},
+});
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too";

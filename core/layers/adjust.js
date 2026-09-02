@@ -36,6 +36,7 @@
 // second-spelling fork this codebase logs as the source of most of its drift, and `vars` is already the
 // answer to "animate a number the layer's own CSS reads".
 import { defineRegistry } from '../registry.js';
+import { propsOf } from '../props.js';
 
 // Each kind is (unit) => the CSS filter, where `unit` is the string `calc(var(--adjust) * amount)` in
 // whatever unit that kind needs. `--adjust` runs 0..1 and `amount` carries the strength, so a keyed
@@ -75,9 +76,9 @@ export const ADJUST_BLURBS = {
 
 export const ADJUST_REGISTRY = defineRegistry('adjustment', KINDS, { blurbs: ADJUST_BLURBS, slot: 'kind' });
 
-export const PROPS = { kind: {}, amount: {}, filter: {} };
-
-export function build(kit, el, L) {
+// The props are read off this signature (propsOf, core/props.js). `w`/`h` stay `L.x`: they are the
+// shared box props every layer type accepts, not spelled out by this file's own declaration.
+export function build(kit, el, L, { kind, amount, filter } = L) {
   // NO GROUND OF ITS OWN, and this is not cosmetic. `backdrop-filter` composites what is painted behind
   // the element; give the element a background and it paints over the very pixels it is filtering, so
   // the grade lands on a solid colour and reads as nothing happening.
@@ -99,15 +100,15 @@ export function build(kit, el, L) {
   // rewriting somebody's CSS to thread a variable through it would be the engine editing author input.
   // `kind` is the keyable path and the message below says so rather than leaving it to be discovered.
   let css;
-  if (L.filter != null) {
-    css = String(L.filter);
-    if (L.amount != null) throw new Error(`an adjust layer sets both \`filter\` and \`amount\`. `
+  if (filter != null) {
+    css = String(filter);
+    if (amount != null) throw new Error(`an adjust layer sets both \`filter\` and \`amount\`. `
       + `\`amount\` is the strength of a named \`kind\`, and a raw \`filter\` states its own strengths, `
       + `so the amount would be discarded. Drop one.`);
   } else {
-    const name = L.kind ?? 'desaturate';
+    const name = kind ?? 'desaturate';
     const fn = ADJUST_REGISTRY.pick(name);   // an unknown kind is refused here, by name, at build
-    const amt = L.amount ?? AMOUNT[name];
+    const amt = amount ?? AMOUNT[name];
     if (typeof amt !== 'number' || !Number.isFinite(amt))
       throw new Error(`an adjust layer's \`amount\` is a number (the strength of "${name}"), got ${JSON.stringify(amt)}.`);
     el.style.setProperty('--adjust', '1');   // the seed `vars` overwrites; without it an un-keyed grade is nothing
@@ -118,8 +119,10 @@ export function build(kit, el, L) {
   // SCREEN, so the halo ADDS to the sharp picture instead of standing in front of it. Only for `bloom`:
   // every other kind is a grade and a grade that blended would be a different effect wearing the name.
   // An author can still set any blend on any kind through `css`, which is how this recipe was found.
-  if (L.filter == null && (L.kind ?? 'desaturate') === 'bloom') el.style.mixBlendMode = 'screen';
+  if (filter == null && (kind ?? 'desaturate') === 'bloom') el.style.mixBlendMode = 'screen';
 }
+
+export const PROPS = propsOf(build);
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust`";
