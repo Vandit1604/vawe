@@ -29,7 +29,6 @@
   "layers": [
     {
       "type": "globe",
-      "globe": true,
       "id": "globe",
       "acrossBeats": true,
       "colors": [

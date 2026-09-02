@@ -65,7 +65,7 @@ export const KNOBS = {
   // ── three.js scenes (core/three-fx.js), `three: "name"`, per-scene knobs ────────────────────────
   three: {
     _shared: [col('colors', '#8ab4ff', 'palette (array); colors[0] subject, colors[1] fill light'), n('speed', 1, 'motion speed')],
-    deviceShowcase: [en('device', ['phone', 'laptop', 'tablet'], 'phone', 'device shell'), col('bodyColor', '#1b1d22', 'shell colour'), n('spin', 1, 'auto-rotate'), n('yaw', 0, 'yaw deg'), n('pitch', 0, 'pitch deg'), { name: 'screen', type: 'string', default: '', desc: 'image put on the screen face' }],
+    deviceShowcase: [en('device', ['phone', 'laptop', 'tablet'], 'phone', 'device shell'), col('bodyColor', '#1b1d22', 'shell colour'), n('spin', 1, 'auto-rotate'), n('yaw', 0, 'yaw deg'), n('pitch', 0, 'pitch deg'), { name: 'screen', type: 'string', default: '', desc: 'image put on the screen face' }, n('roughness', 0.34, 'surface roughness'), n('metalness', 0.86, 'metalness')],
     uiParallax: [n('planes', 4, 'stacked planes'), n('travel', 1, 'parallax travel'), n('swing', 1, 'sway amount')],
     pointCloud: [n('count', 4000, 'particle count'), n('pointSize', 0.018, 'particle size'), n('morphSpeed', 1, 'morph rate'), n('spin', 1, 'auto-rotate'), n('seed', 1, 'shape seed')],
     extrudeText: [n('depth', 0.3, 'extrusion depth'), n('roughness', 0.28, 'surface roughness'), n('metalness', 0.72, 'metalness'), n('spin', 1, 'auto-rotate')],

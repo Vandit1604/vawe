@@ -5327,5 +5327,50 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   }
 }
 
+
+// ---- prop-probe: the exhaustive input to the prop audit (scripts/gates/prop-probe.mjs) ----
+//
+// The prober's TABLE is produced in a browser and cannot be asserted here. These two things can, and
+// they are the two that decide whether the table means anything: that a guarded prop is probed with its
+// guard SET, and that `three` is asked once per preset claiming a dial rather than once per prop.
+{
+  const { watchProps, deadProps, auditedProps } = await import('../../core/prop-audit.js');
+  const { probesOf, surfaceOf } = await import('./prop-probe.mjs');
+
+  // deadProps is the ONE copy of the decision: read a key, and only the unread one comes back.
+  const L = watchProps({ type: 'text', text: 'x', size: 40 });
+  void L.text;
+  ok('prop-audit: deadProps reports the prop that was never read',
+    deadProps(L, new Set(['text', 'size'])).join() === 'size');
+  ok('prop-audit: deadProps says nothing about a prop outside the set it was asked about',
+    deadProps(L, new Set(['text'])).length === 0);
+  ok('prop-audit: deadProps ignores the author\'s own `_` annotations',
+    deadProps(watchProps({ type: 'text', _why: 'a note' }), new Set(['_why'])).length === 0);
+  ok('prop-audit: auditedProps scopes a type out of its own declarations',
+    auditedProps('text').has('bg') && !auditedProps('text').has('size'));
+
+  // GUARD SATISFACTION. `fitH` is declared `{ when: 'fit' }` (core/layers/text.js:10) and text.js:25
+  // reads it only inside `if (L.fit && L.w)`. A probe that set `fitH` alone would report a live prop
+  // dead, which is the failure mode that would make this whole gate noise.
+  const fitH = probesOf('text').find((p) => p.prop === 'fitH');
+  ok('prop-probe: a `when`-guarded prop is probed with its guard set', !!fitH && fitH.layer.fit != null);
+  ok('prop-probe: and with the width that guard needs to do anything', !!fitH && fitH.layer.w != null);
+  const caretHold = probesOf('text').find((p) => p.prop === 'caretHold');
+  ok('prop-probe: the typing family is probed with `typing` set',
+    !!caretHold && caretHold.layer.typing != null && caretHold.layer.caretHold != null);
+
+  // PER-PRESET COVERAGE, and this is the acceptance test in assertion form. Five three scenes read
+  // `metalness`; the one that ignored it was deviceShowcase (docs/MISTAKES.md #529). Asking one preset
+  // per prop would have asked a scene that reads it and passed over the bug.
+  const metal = probesOf('three').filter((p) => p.prop === 'metalness');
+  ok('prop-probe: `three` asks every preset that claims a dial, not the first',
+    metal.length > 1 && metal.every((p) => p.layer.three === p.at));
+  ok('prop-probe: including deviceShowcase, the preset that ignored metalness',
+    metal.some((p) => p.at === 'deviceShowcase'));
+  ok('prop-probe: one probe layer carries exactly one target prop, on a minimal valid layer',
+    probesOf('rect').every((p) => p.layer.type === 'rect' && p.layer[p.prop] !== undefined));
+  ok('prop-probe: the surface covers what the type declares AND the kit props the audit scopes',
+    surfaceOf('three').includes('metalness') && surfaceOf('three').includes('bg'));
+}
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

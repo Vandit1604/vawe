@@ -17608,3 +17608,71 @@ and forcing the write past the new guard still fails the gate with
 
 → **Gates:** `schema-drift --write` refuses a name-dropping regeneration; `lib-test` asserts the
 byte-identical round trip, the refusal, and `--force`.
+
+## 565. the dead-prop audit could only judge props somebody had already written, so a declared dial waited for an author to find it
+
+**What.** `core/prop-audit.js` refuses a layer prop that is set and never read, per layer, on every
+render. It works, and for months it said nothing about `metalness` and `roughness` on the `three`
+layer, which were declared in `PROPS` (`core/three-fx.js:29`) and written as LITERALS inside
+`deviceShowcase` (#529). Nothing was broken in the checker. It can only judge a prop an author wrote,
+and no shipped scene wrote those two on that path, so it had nothing to fire on.
+
+**Root cause.** The mechanism was complete and the INPUT was not. A runtime audit is a function of the
+films that exist; a declaration is a promise the engine makes whether or not a film takes it up. The
+gap between the two is where a dial can sit dead for as long as nobody happens to use it.
+
+**Fix.** `scripts/gates/prop-probe.mjs`, blocking in `.githooks/pre-push` (`make prop-probe`). It
+supplies the missing input and reuses the whole existing mechanism: for every layer type, one probe
+layer per declared prop, minimal and valid, with the prop's `when` guards satisfied (`core/props.js`),
+built through the real pipeline in a browser, then judged by `deadProps`, which is now the ONE copy of
+the decision that `auditLayer` also calls. About 35 seconds, 23 types, roughly 110 probe scenes.
+
+Three things it had to get right, each learned by getting it wrong first:
+
+- **One prop per layer.** A layer carrying all 46 of its type's props throws for reasons that have
+  nothing to do with the question.
+- **Every preset that claims a dial, not the first one.** Five three scenes read `metalness`. Asking
+  one preset per prop asks `shatter`, sees a live read, and passes over the exact bug this was built
+  for. Verified by REPRODUCTION: restoring the literals at `core/three-fx.js:247` makes the prober
+  print `metalness@deviceShowcase, roughness@deviceShowcase`, and restoring the fix clears it.
+- **The context a `when` guard cannot express.** A guard is satisfied by PRESENCE, so it can say
+  "`fitH` needs `fit`" and cannot say "`angle` is read when `mode` is SHINE" or "`amp` belongs to the
+  `waves` paint". Those live in one map in the prober, each entry naming the file and line that reads
+  it. Without it, 26 findings; with it, 4 real ones.
+
+**What the first full run found, and what happened to each.**
+
+- **`globe` was a marker prop nothing read.** The layer's TYPE is `globe` and the surface is chosen
+  from that. Declaration deleted (`core/surfaces/globe.js`), the one scene carrying it edited, schema
+  regenerated. Its render is byte-identical.
+- **A `globe` layer with a start time crashed every frame before it began.** `core/layers/canvas.js:66`
+  calls `clear()` off-window on every surface, and globe was the only one of the five that never
+  defined it: `TypeError: s.clear is not a function`. No film hit it because the one globe scene starts
+  at 0. Added, mirroring `core/raymarch-fx.js:283`.
+- **`count` advertised five props its own frame() can never reach.** It exports its own `frame`, so
+  text.js's typing family (`caret`, `caretHold`, `untype`, `untypeRate`) never runs, and the auto-fit
+  branch that reads `maxLines` is restricted to `type === "text"` at `text.js:36`. They arrived by
+  merging the whole text vocabulary. Subtracted by name; no scene in the library set one.
+- **The `deviceShowcase` fix was half landed.** #529 made the code read `metalness`/`roughness`, and
+  the knob manifest (`core/knobs.js`) was never told, so `core/validate.mjs` still REFUSED both on that
+  preset: the dials were readable by the engine and unwritable by an author. Added to the manifest.
+
+**Two collisions it surfaced that are NOT deaths, recorded rather than fixed.** The schema is flat, so
+one name gets one type for every layer, and two props are read by a type that therefore cannot state
+them: `out` on `video` is a source out-point in seconds against an exit-animation NAME everywhere else,
+and `font` on a `three` `extrudeText` layer is a 3D typeface name against the `sans|serif|mono|num`
+enum. Both are unreachable from a scene today. Fixing either means type-scoped field validation, which
+is a larger change than this one, and guessing at it inside a dead-prop gate would be the wrong place.
+They sit in that gate's `SKIP` map with the reason written out.
+
+**Also inert, and left alone deliberately:** `intensity` on a `glow` with no `color` of its own.
+`liveColor` (`core/layers/glow.js:205`) returns the theme's accent glow before it reads the dial. It is
+reachable with a `color` or a `preset`, so it is not dead; making the default path honour it would
+change shipped films, and this pass had to change none.
+
+**Blast radius.** `snap-scenes`: 110 identical, and the one scene that differs
+(`vawe-shader-terminal`) differs with every change here reverted, so it is not from this.
+`lib-test` 1622 → 1633, `schema-drift` green.
+
+→ **Gates:** `make prop-probe`, blocking in pre-push. `lib-test` asserts guard satisfaction, the
+per-preset coverage, and `deadProps` itself; each was broken deliberately and watched to fail.

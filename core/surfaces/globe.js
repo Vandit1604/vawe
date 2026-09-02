@@ -25,8 +25,11 @@ export const size = () => [1080, 1080];   // a subject you place, like raymarch,
 export const stamp = 4;
 export const resamplable = false;
 
+// `globe: true` used to be declared here and was read by nothing: the layer's TYPE is `globe`, and the
+// surface is chosen from that (core/layers/canvas.js). One scene carried the marker, and it painted
+// exactly the same picture with it deleted. Found by scripts/gates/prop-probe.mjs.
 export const PROPS = {
-  globe: {}, colors: {}, phi: {}, phiTo: {}, phiDur: {}, theta: {},
+  colors: {}, phi: {}, phiTo: {}, phiDur: {}, theta: {},
   origin: {}, dest: {}, arcHeight: {}, arcWidth: {}, drawStart: {}, drawDur: {},
   mapSamples: {}, mapBrightness: {}, diffuse: {}, dark: {}, scale: {}, markerSize: {},
 };
@@ -128,6 +131,17 @@ export function create(kit, L, w, h) {
         markers: marks,
         arcs: q > 0.001 ? [{ from: ll(o), to: ll(tip) }] : [],
       });
+    },
+    // OFF-WINDOW MUST CLEAR, and this surface was the one that could not. core/layers/canvas.js calls
+    // `clear()` on every frame outside the layer's window, and globe was the only surface of the five
+    // that never defined it, so ANY globe layer with a start time threw `s.clear is not a function` on
+    // every frame before it began. Same shape as raymarch-fx.js:283: cobe owns the context, and asking
+    // the canvas for it again hands back that same one rather than a second.
+    clear() {
+      const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
+      if (!gl) return;
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
     },
     dispose() { globe.destroy(); },
   };

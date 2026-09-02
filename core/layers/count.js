@@ -4,8 +4,19 @@ import { mergeProps } from '../props.js';
 import { PROPS as TEXT_PROPS } from './text.js';
 export { build } from './text.js';
 
+// THE TEXT BUILD IS REUSED; THE TEXT FRAME IS NOT, and the vocabulary has to say so. This file exports
+// its own frame(), so nothing in text.js's frame ever runs on a count layer: the typing reveal and its
+// caret/untype family live there, and the auto-fit branch that reads `maxLines` is restricted to
+// `type === "text"` at text.js:36. Merging the whole text vocabulary advertised all five on a count
+// layer, where they were accepted and read by nothing (found by scripts/gates/prop-probe.mjs; no scene
+// in the library sets one). `typing` itself stays: the keyclick generator reads it for any layer
+// (formats/scene/scene.js:1529). `fit`/`fitH` stay too, they are read in the shared BUILD.
+const TEXT_FRAME_ONLY = ['caret', 'caretHold', 'untype', 'untypeRate', 'maxLines'];
+const textShared = Object.fromEntries(
+  Object.entries(TEXT_PROPS).filter(([k]) => !TEXT_FRAME_ONLY.includes(k)));
+
 // The count's own vocabulary, on top of the text build it reuses. The same shape as `export { build }`.
-export const PROPS = mergeProps(TEXT_PROPS, {
+export const PROPS = mergeProps(textShared, {
   from: {}, to: {}, countStart: {}, countDur: {}, ease: {},
   unit: {}, suffix: {}, prefix: {}, decimals: {}, roll: {},
 });
