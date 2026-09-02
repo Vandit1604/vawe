@@ -217,6 +217,40 @@ pure and land exactly at rest. Reach into this table by the FEELING you want, th
 | **Speed ramp inside one move** | `ramp` (slow→fast→slow) · `rush` (accel) · `brake` (decel) | remaps progress so a camera/counter reads as intentional, not a lerp | camera moves, counters, velocity contrast |
 | **Rebound (ball drop)** | `easeOutBounce` | rebounds inside [0,1]; never overshoots, bounces down to rest | rare; a literal drop, a playful accent |
 
+### The two things a graph editor does that this table cannot say
+
+Both are built, both are reachable from a scene, and neither appears above, which is why the library
+uses one of them twelve times in 288 motion tracks and the other **zero times in 166 films**. A
+capability an author cannot find is a capability the engine does not have.
+
+**1. A key in the MIDDLE of a move should not stop.** Every curve in the table is fitted inside one gap,
+so it lands at rest at both ends. Three keys therefore read as two moves with a full stop between them.
+`ease: "through"` computes the tangent at each key from its NEIGHBOURS, so the velocity entering a key
+equals the velocity leaving it and the whole track reads as one travel. Reach for it whenever a track
+has an interior key that is a waypoint rather than a destination: a camera passing a subject, a card
+crossing the frame and continuing, a counter that changes rate without pausing. It is not an easing (it
+is dispatched before `resolveEasing`, `core/sequence.js`), which is exactly why it was invisible here.
+
+**2. A key has TWO sides, and their shape is the speed graph.** A handle carries an influence (how far
+along the segment it reaches) and a speed (its slope), so `{ "t": 1.2, "x": 400, "out": "fling" }` shapes
+the departure independently of the arrival. Three shapes, and the meaning is in the shape, not the name:
+
+| Speed-graph shape | Handle | Reads as |
+|---|---|---|
+| **Spike, then decay** | `fling` (influence 18, speed 4) | a hit that settles. The subject is thrown and coasts |
+| **Flat plateau** | `linear` | sustained, mechanical, deliberate travel. A machine, a conveyor |
+| **Symmetrical hump** | `easyEase` (influence 33, speed 0) | soft and floaty, and generic BY DEFAULT: it is the same hump whatever the motion means |
+| **Flat-ended hold** | `hang` (influence 75, speed 0) | arrives and sits. What a snappy swap cuts on |
+| **Past the mark** | `overshoot` (influence 62, speed -0.8) | carries beyond rest and comes back |
+
+`easyEase` is the one to be suspicious of. It is AE's default on every keyframe, and applying it
+everywhere is the reason so much motion reads as competent and characterless. Choose the shape the
+motion means.
+
+**Do not force influence high on both sides of one key.** The engine accepts 0 to 100 on each handle,
+and near 100 on both collapses the hump into a near-vertical spike: the object visibly skips rather than
+snapping. Practitioners cap it around 90 for exactly that reason, and nothing here warns you.
+
 ### Reading the tells: good vs bad, at the easing level
 
 | Good | Bad (and why) |
