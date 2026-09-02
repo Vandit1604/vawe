@@ -5758,5 +5758,48 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok(`knobs: every kinetic dial carries a desc${undescribed.length ? ': ' + undescribed.join(', ') : ''}`, undescribed.length === 0);
 }
 
+// ---- the MCP tool descriptions carry the inventory --------------------------------------------
+//
+// A calling model reads a tool's DESCRIPTION before every call and its OUTPUT only when it decides to
+// call. So the size of the vocabulary belongs in the description, and this holds that wiring: the
+// failure it guards against is silent, because a description that lost its inventory still reads as a
+// perfectly good sentence.
+{
+  const { inventory } = await import('../../mcp/catalog.mjs');
+  const inv = inventory();
+  ok('mcp: the inventory reads the generated index and reports a real total',
+    inv && inv.total > 100 && inv.families > 10 && inv.top.length === 6);
+  const src = fs.readFileSync(path.join(repoRoot, 'mcp/server.mjs'), 'utf8');
+  ok('mcp: vawe_capabilities and vawe_guide both carry it',
+    (src.match(/\+ inventoryLine/g) || []).length >= 2);
+  // ABSENCE MUST DEGRADE, NEVER LIE. A fresh clone has no site/lib/effects.json until `make effects`
+  // has run, and a description inventing a count would be worse than one that omits it.
+  ok('mcp: a missing index yields null rather than a made-up number',
+    /catch \{ return null; \}/.test(fs.readFileSync(path.join(repoRoot, 'mcp/catalog.mjs'), 'utf8')));
+}
+
+// ---- effects-json `prose`: a colon or an en dash, and nothing else -----------------------------
+//
+// The class read `[: –]` with a literal SPACE inside it, so it matched every whitespace run and every
+// intro reached the site with each word separated by a bullet. The markdown renderer was unaffected,
+// which is exactly why it survived: two renderers read one intro and only one of them was ever looked at.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'scripts/site/effects-json.mjs'), 'utf8');
+  // The DECLARATION, not the file: the comment above this fix quotes the broken class, and a whole-file
+  // search would read the explanation as the bug.
+  ok('effects-json: `prose` splits on a colon or an en dash, not on whitespace',
+    /\[:–\]/.test(src) && !/\[: –\]/.test(src.replace(/^\s*\/\/.*$/gm, '')));
+  // COUNTING BULLETS IS THE WRONG SIGNAL and the first cut of this used it: an intro that genuinely
+  // uses several colons is correctly bulleted several times, and five real ones failed. The tell of the
+  // bug is a segment that is ONE WORD, because it split between words rather than at punctuation.
+  const site = JSON.parse(fs.readFileSync(path.join(repoRoot, 'site/lib/effects.json'), 'utf8'));
+  const shredded = site.list.filter((f) => {
+    const parts = (f.intro || '').split(' · ');
+    return parts.length > 4 && parts.filter((p) => p.trim().split(/\s+/).length === 1).length > parts.length / 2;
+  });
+  ok(`effects-json: no intro is split between its words${shredded.length ? ': ' + shredded.map((f) => f.id).join(', ') : ''}`,
+    shredded.length === 0);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

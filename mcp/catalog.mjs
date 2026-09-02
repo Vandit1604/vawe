@@ -28,6 +28,27 @@ export function example(name) {
   return fs.readFileSync(file, 'utf8');
 }
 
+// WHAT IS IN HERE, for the tool DESCRIPTION rather than the tool's reply.
+//
+// A calling model sees every tool's description before it calls anything, and sees a tool's OUTPUT only
+// if it decides to call it. So a description that says what a tool IS ("the full vocabulary") tells a
+// model nothing about whether it is worth opening, and a model that never opens it authors as though
+// the engine had none of this. That is the discovery failure this repo spent a day on, in the one place
+// where the reader is a model rather than a person.
+//
+// Read from site/lib/effects.json, which `make effects` generates from the registries and
+// `effects-json --check` verifies, so this cannot drift into a promise the engine does not keep. If the
+// file is missing (a fresh clone before `make effects`), return null and the description falls back to
+// its static sentence rather than inventing a number.
+export function inventory() {
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(repoRoot, 'site/lib/effects.json'), 'utf8'));
+    const top = [...d.list].sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 6)
+      .map((f) => `${f.count} ${f.title.toLowerCase()}`);
+    return { total: d.total, families: d.families, top };
+  } catch { return null; }
+}
+
 /** The full vocabulary, read live from the registries so a count can never lie. */
 export async function capabilities() {
   const [{ LOOK_NAMES }, { PRESETS, PRESET_BLURBS }, { PRESENTATIONS, CUT_BLURBS }, { registersOf }, { CATALOG },

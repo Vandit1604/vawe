@@ -34,7 +34,19 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g
 // user-facing surface here (CLAUDE.md, hard rules), and the blurbs live in core/ where this script
 // has no business editing them, so the dash is normalised on the way out. The middle dot is the
 // sanctioned replacement and it is what the rest of the site already uses.
-const prose = (s) => String(s).replace(/\s*[: –]\s*/g, ' · ');
+// A colon or an en dash becomes the site's separator, and NOTHING ELSE DOES. The class used to read
+// `[: –]` with a literal SPACE inside it, so it matched every whitespace run and the site received
+// every intro with each word separated: "a · first-party · vector, · when · no · real · logo". The
+// markdown was fine, which is why it survived: the two renderers read the same intro and only one of
+// them was looked at.
+// CODE SPANS ARE LEFT ALONE, which is the half the first fix missed. An intro carries the JSON an
+// author writes (`{ "move": "diveIn" }`), and rewriting the colon inside it published a snippet that
+// cannot be pasted: `{ "move" · "diveIn" }`. Split on backticks and transform only the odd, non-code
+// pieces, so punctuation between sentences becomes the separator and punctuation inside an example
+// stays punctuation.
+const prose = (s) => String(s).split('`')
+  .map((part, i) => (i % 2 ? part : part.replace(/\s*[:–]\s*/g, ' · ')))
+  .join('`');
 const { j } = USAGE_KIT;
 
 // ── the JSON an author writes, per family ───────────────────────────────────────────────────────

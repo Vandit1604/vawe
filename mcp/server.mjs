@@ -24,6 +24,17 @@ import * as uploads from './uploads.mjs';
 import * as pipe from './pipeline.mjs';
 import * as fetchers from './fetchers.mjs';
 import * as catalog from './catalog.mjs';
+
+// THE INVENTORY GOES IN THE DESCRIPTION, NOT THE REPLY. A calling model reads every tool's description
+// before it calls anything and reads a tool's output only if it chooses to call. So "the full block and
+// effect vocabulary" tells it nothing about whether opening this is worth a turn, and a model that
+// never opens it authors as though the engine had none of this. Naming the size and the six largest
+// families in the always-visible text is the cheapest possible fix and costs one line per call.
+// Falls back to the plain sentence when site/lib/effects.json is absent, rather than inventing a count.
+const INV = catalog.inventory();
+const inventoryLine = INV
+  ? ` It holds ${INV.total} named things across ${INV.families} families, including ${INV.top.join(' · ')}.`
+  : '';
 import { reflect } from './reflect.mjs';
 import { quote, isPaid, billingEnabled, checkoutUrl } from './pricing.mjs';
 
@@ -54,7 +65,8 @@ function getOwned(video_id) {
 server.registerTool('vawe_guide', {
   title: 'Vawe authoring guide',
   description: 'How to write a scene. Call with no arguments FIRST — that returns a short reference '
-    + 'that covers almost everything. Only pass detail:"full" if you need a prop it does not list.',
+    + 'that covers almost everything. Only pass detail:"full" if you need a prop it does not list.' + inventoryLine,
+
   inputSchema: {
     detail: z.enum(['quick', 'full']).optional()
       .describe('quick (default) = ~6KB reference. full = every schema prop + the complete vocabulary, ~46KB.'),
@@ -183,7 +195,7 @@ server.registerTool('vawe_capabilities', {
   title: 'The full block + effect vocabulary',
   description: 'Every composite look, kinetic preset, cut, and block the engine has, read live from '
     + 'the registries. Use it to discover a block (chart, terminal, pricing card, tweet) instead of '
-    + 'building one by hand.',
+    + 'building one by hand.' + inventoryLine,
   inputSchema: {},
 }, async () => {
   const c = await catalog.capabilities();
