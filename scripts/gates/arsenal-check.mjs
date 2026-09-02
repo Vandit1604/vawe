@@ -135,6 +135,13 @@ const WAIVED = new Map(Object.entries({
   SEAM_CUE: 'sound, as CUT_CUE',
   CUES: 'sound, as CUT_CUE',
   PROFILE_BED: 'sound, as CUT_CUE',
+  // FOUND BY THE ARRAY-OF-OBJECTS WIDENING (see isVocabulary). Each is a table of records, which is
+  // the shape RANSOM_FACES has, so the widening that found the faces found these four with it.
+  ALL_GENERATORS: 'every generator including the ones held back. `GENERATORS` is the ready subset and it IS catalogued; a scene can only name a generator that ships',
+  TRANSITIONS: 'the derived index over every transition mechanism (anim / cut / sting / seam), built from those registries at import time. Every member is catalogued in its own family; this is the join, as MECHANISMS and FAMILIES beside it',
+  HONOURS: 'which lightfield pattern honours which optional dial (core/lightfield/options.js). The refusal table behind narrow(), not a set of names: a scene writes the DIAL, and the dials ARE catalogued under "Lightfield dials"',
+  BANDS: 'sound. The three band splits the audio analyser measures energy in, as CUT_CUE',
+  ON_INK: 'the four status fills a block puts text on, and the palette key that overrides the ink for each. A theme contract the boot writes off and the theme gate grades off; a scene names neither side of it',
   SURFACE_TYPES: 'the surfaces behind the layer types, which ARE catalogued via LAYER_TYPES',
   TRACK_TYPES: 'the track vocabulary, documented with the tracks in docs/PRIMITIVES.md rather than as an effect',
 }));
@@ -158,17 +165,45 @@ if (fs.existsSync(path.join(ROOT, 'blueprints/index.mjs'))) files.push('blueprin
 // A vocabulary is a set of NAMES A SCENE CAN WRITE. In practice that is an array of two or more
 // strings, or an object keyed by those names. A number, a matrix of numbers, or a bag of numeric
 // constants is not something an author picks from.
+//
+// TWO SHAPES IT USED TO MISS, both widened deliberately and both measured over the whole repo first.
+// A KEY MAY START WITH A DIGIT. The test was `/^[a-zA-Z][\w-]*$/`, so `ASPECTS` (core/safe.js: the
+// five canvases, keyed `16:9`, `9:16`, `1:1`, ...) was not a vocabulary as far as this gate was
+// concerned. That is the single most author-facing table in the engine and the gate could not see it.
+// Widening the first character to include a digit, and the rest to include `:` and `.`, finds exactly
+// one new export across all of core/, and it is ASPECTS.
+// A VOCABULARY MAY BE A TABLE OF RECORDS. `RANSOM_FACES` (core/ransom.js) is a real set of names an
+// author picks from, shaped as an array of `{family, weight}` objects, and an array branch that only
+// accepted strings could not see it either. This one is the wider of the two: it finds seven exports,
+// three of which are real (RANSOM_FACES, GENERATORS, ALL_GENERATORS) and four of which are tables the
+// engine reads and a scene never writes, so those four are WAIVED above with their reason. Signal
+// still beats noise, which is the bar; a widening that lost that argument would have been reverted.
 const isVocabulary = (v) => {
-  if (Array.isArray(v)) return v.length >= 2 && v.every((x) => typeof x === 'string');
+  if (Array.isArray(v)) {
+    if (v.length < 2) return false;
+    return v.every((x) => typeof x === 'string')
+      || v.every((x) => x && typeof x === 'object' && !Array.isArray(x));
+  }
   if (v && typeof v === 'object') {
     const k = Object.keys(v);
-    return k.length >= 2 && k.every((x) => /^[a-zA-Z][\w-]*$/.test(x))
+    return k.length >= 2 && k.every((x) => /^[a-zA-Z0-9][\w:.-]*$/.test(x))
       && !Object.values(v).every((x) => typeof x === 'number');
   }
   return false;
 };
 
-const found = new Map();
+// KEYED BY FILE AND NAME, NEVER BY NAME ALONE. These two maps were keyed by the export NAME with
+// first-file-wins, and two files may export the same word: `PRESETS` is core/lightfield/presets.js
+// (fitted option bundles, waived below) AND core/type.js:188 (the kinetic preset entries map behind
+// PRESET_REGISTRY). Whichever `readdir` handed back first took the key and the other one did not exist
+// as far as this gate was concerned, so the same collision between a registry part and a bare
+// vocabulary would have LAUNDERED the bare one into the derived bucket and stopped checking it, with
+// which of the two was hidden decided by directory order. Keying by `file::name` costs the count its
+// tidiness (46 files export a `PROPS`, and all 46 are now counted and all 46 are waived by the one
+// PROPS entry) and buys back the guarantee that no export is invisible. The waiver list and the
+// catalogue test stay keyed by name on purpose: they answer "is this WORD in the document", which is
+// a question about the word and not about which file it came from.
+const found = new Map();      // `file::NAME` -> [file, NAME]
 const exported = new Map();   // every SCREAMING_CASE export, heuristic or not
 const unreadable = [];
 for (const f of files) {
@@ -177,12 +212,12 @@ for (const f of files) {
   if (!names.length) continue;
   let mod;
   try { mod = await import(path.join(ROOT, f)); } catch { unreadable.push(f); continue; }
-  for (const n of names) if (isVocabulary(mod[n]) && !found.has(n)) found.set(n, f);
+  for (const n of names) if (isVocabulary(mod[n])) found.set(`${f}::${n}`, [f, n]);
   // Collected WITHOUT the shape heuristic, on purpose. A registry part is known by identity, and the
   // heuristic is a guess made before identity was available: it drops an all-numeric map, so `DURATION`
   // (a word to a number of seconds) never reached the collection and its registry then looked
   // uncatalogued while the catalogue names it in full.
-  for (const n of names) if (!exported.has(n)) exported.set(n, [f, mod[n]]);
+  for (const n of names) exported.set(`${f}::${n}`, [n, mod[n]]);
 }
 
 // ---- ONE VOCABULARY IS ONE CAPABILITY, EVEN WHEN IT IS FOUR EXPORTS --------------------------------
@@ -204,10 +239,22 @@ const sameNames = (v, names) => Array.isArray(v) && v.length === names.length
 const partOfRegistry = (v) => REGS.find((r) => v === r || v === r.entries || (r.blurbs && v === r.blurbs)
   || sameNames(v, r.names));
 
-const derived = new Map();
-for (const [name, [, value]] of exported) {
+const derived = new Map();   // `file::NAME` -> registry
+for (const [key, [, value]] of exported) {
   const r = partOfRegistry(value);
-  if (r) { derived.set(name, r); found.delete(name); }
+  if (r) { derived.set(key, r); found.delete(key); }
+}
+
+// `--list` DUMPS THE SWEEP AND CHECKS NOTHING. Every fix to the shape heuristic here was made by
+// writing a throwaway script that re-walked core/ and printed what changed, because the gate itself
+// only ever printed a count. A count cannot tell you WHICH export a widening admitted, so the throwaway
+// got written again for the next widening. This is that script, kept: one key per line, `file::NAME`,
+// which is also the key lib-test asserts on to prove the two shapes this gate used to be blind to
+// (a digit-keyed table, and two files exporting the same word) are both seen.
+if (process.argv.includes('--list')) {
+  for (const [key] of found) console.log(`found   ${key}`);
+  for (const [key, r] of derived) console.log(`derived ${key}\t${r.kind}`);
+  process.exit(0);
 }
 
 const catalog = fs.readFileSync(path.join(ROOT, CATALOG), 'utf8');
@@ -221,7 +268,7 @@ const missing = [];
 // precisely so an author can name the thing, so "an author never picks from this" cannot be true of it.
 const IN_CATALOGUE = new Set(sections.map(([, , , , meta]) => meta && meta.reg).filter(Boolean));
 const byReg = new Map();
-for (const [name, r] of derived) (byReg.get(r) || byReg.set(r, []).get(r)).push(name);
+for (const [key, r] of derived) (byReg.get(r) || byReg.set(r, []).get(r)).push(key.split('::').pop());
 for (const [r, names] of byReg) {
   if (IN_CATALOGUE.has(r)) continue;   // it wrote its own section, from its own definition site
   if (names.some(named)) continue;     // an older vocabulary the catalogue still lists by export name
@@ -229,7 +276,7 @@ for (const [r, names] of byReg) {
     'a registry with no `catalog` block: add one to its defineRegistry call']);
 }
 
-for (const [name, file] of found) {
+for (const [, [file, name]] of found) {
   if (WAIVED.has(name)) continue;
   if (named(name)) continue;
   missing.push([name, file]);
@@ -238,17 +285,19 @@ for (const [name, file] of found) {
 // A WAIVER FOR SOMETHING NO LONGER FOUND IS A LIE THE NEXT READER INHERITS. The list is the record of
 // what was deliberately left out, so an entry that no longer matches anything makes it a worse record
 // every time it is skipped in silence.
-const dead = [...WAIVED.keys()].filter((n) => !found.has(n));
+const foundNames = new Set([...found.values()].map(([, n]) => n));
+const dead = [...WAIVED.keys()].filter((n) => !foundNames.has(n));
 if (dead.length) {
   console.log(`\n  ~ ${dead.length} waiver(s) no longer match any export the walk finds. Most will be`);
   console.log('    registry parts, which are now recognised by identity and need no waiver:');
   console.log(`      ${dead.join(', ')}`);
 }
 
-const covered = found.size - [...WAIVED.keys()].filter((n) => found.has(n)).length - missing.length;
+const waived = [...found.values()].filter(([, n]) => WAIVED.has(n)).length;
+const covered = found.size - waived - missing.length;
 console.log(`\n  arsenal · ${files.length} source file(s) walked · ${found.size + derived.size} vocabular(ies) found`);
 console.log(`    ${derived.size} are the entries, names, blurbs or object of ${new Set(derived.values()).size} registr(ies), counted once each`);
-console.log(`    ${found.size} are not a registry: ${[...WAIVED.keys()].filter((n) => found.has(n)).length} waived · ${covered} in the catalogue`);
+console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered} in the catalogue`);
 // A SWEEP THAT SAW NOTHING MUST NOT PRINT A TICK. `walk('core')` is a bare readdir, so a moved or empty
 // core/ produced `0 vocabular(ies) found` and then `✓ every capability the engine exports is named`.
 if (!found.size) {
