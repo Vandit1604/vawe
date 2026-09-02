@@ -278,6 +278,36 @@ Which way "away" is: the bearing the light falls off along. A keyword is a beari
 | `rimLight` | an off-centre crescent, lit edge up-right. Place the subject there |
 | `spotlight` | a soft-edged cone from an apex, aimed by `angle`, faded with distance so it never clips |
 
+## Layer types  `[layer]`
+
+The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.
+
+| name | what / when |
+|---|---|
+| `adjust` | one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust` |
+| `beam` | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
+| `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
+| `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
+| `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
+| `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express |
+| `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
+| `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo |
+| `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
+| `globe` | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
+| `glow` | soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) |
+| `group` | layout by containment: a flex/grid box whose children (any depth) flow with a gap, so a card + label + chip can never desync |
+| `html` | raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock |
+| `image` | an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot |
+| `lottie` | an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay |
+| `paint` | a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample |
+| `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
+| `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
+| `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
+| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
+| `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
+| `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
+| `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
+
 ## Raymarched surfaces  `[layer]`
 
 `{ "type":"raymarch", "raymarch":"<name>" }`. Implicit surfaces from a distance field. A subject you place, not a field behind everything.
@@ -861,36 +891,6 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
 | `verdictProof` | claim proven: typing command + note + tone verdict chip |
 | `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
-
-## Layer types  `[layer]`
-
-The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.
-
-| name | what / when |
-|---|---|
-| `adjust` | one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust` |
-| `beam` | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
-| `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
-| `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
-| `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
-| `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express |
-| `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
-| `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo |
-| `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
-| `globe` | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
-| `glow` | soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) |
-| `group` | layout by containment: a flex/grid box whose children (any depth) flow with a gap, so a card + label + chip can never desync |
-| `html` | raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock |
-| `image` | an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot |
-| `lottie` | an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay |
-| `paint` | a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample |
-| `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
-| `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
-| `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
-| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
-| `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
-| `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
-| `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
 
 ## Motion voices (tactile sound)  `[audio]`
 

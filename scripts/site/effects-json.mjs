@@ -69,7 +69,6 @@ const USAGE = {
     ? j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', morph: { to: 'M60 8 L112 56 L60 104 L8 56 Z', spin: 6.28 }, x: 840, y: 420, w: 240 })
     : j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', stroke: '#fff', strokeWidth: 6, x: 840, y: 420, w: 240, start: 0, duration: 6 })),
   'beat-blueprints': (n) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
-  'layer-types': (n) => j({ type: n }),
   'blend-modes': (n) => text({ mixBlend: n }),
   easings: (n) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
   // One slot each, and which slot depends on which registry the word came from.
@@ -119,7 +118,6 @@ const NO_PREVIEW = {
   'motion-voices-tactile-sound': 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
   'beat-blueprints': 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
-  'layer-types': 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
   easings: 'a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.',
   'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',

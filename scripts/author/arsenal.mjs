@@ -91,18 +91,9 @@ export async function collect() {
         blurb: (bp.REQUESTS && bp.REQUESTS[name]) || notes.get(name) || '' });
     }
   } catch { /* blueprints are optional to search */ }
-  // Layer TYPES: the coarsest vocabulary in the engine, and the one it could not search. They are not a
-  // `*_REGISTRY`; they are LAYER_TYPES + LAYER_BLURBS in core/layers/index.js, derived there from each
-  // module's own `blurb` export. So `beam`, whose blurb reads "a light that travels the rounded-rect
-  // border", was invisible to a query naming exactly that, and the search offered three wrong things
-  // instead (docs/MISTAKES.md #551). Read from that owner, never restated here.
-  try {
-    const L = await import('../../core/layers/index.js');
-    const blurbs = L.LAYER_BLURBS || {};
-    for (const name of L.LAYER_TYPES || []) {
-      out.push({ name, kind: 'layer type', slot: 'layers[].type', blurb: blurbs[name] || '' });
-    }
-  } catch { /* layer types are optional to search */ }
+  // Layer types used to need a special case here, because they were LAYER_TYPES + LAYER_BLURBS and not
+  // a registry, so `beam` was invisible to a query naming its own blurb (docs/MISTAKES.md #551). They
+  // are `LAYER_REGISTRY` now and the generic walk above finds them like everything else.
 
   // THE CATALOGUE KNOWS MORE THAN THE REGISTRIES DO, and the search was the last thing to hear about it.
   //

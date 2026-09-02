@@ -2,7 +2,7 @@
 // optionally frame(kit,el,L,t). `createRenderer(ctx)` binds the shared kit and dispatches by L.type, so
 // scene.html stays a thin orchestrator (bg/camera/stings/timing) and adding a primitive = adding a file.
 import { mergeProps } from '../props.js';
-import { blurbsOf } from '../registry.js';
+import { blurbsOf, defineRegistry } from '../registry.js';
 import { checkLayerTree } from './vocabulary.js';
 import { createKit } from './util.js';
 import { buildFx, frameFx } from '../fx/index.js';
@@ -48,6 +48,27 @@ export const LAYER_TYPES = Object.keys(REGISTRY);
 // vocabulary is the one thing every other effect in that document is a dial ON, and it was the one
 // family the catalogue could not describe.
 export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
+
+// THE REGISTRY IS FOR THE CATALOGUE, THE SEARCH AND has(). IT IS NOT THE DISPATCHER, and that is the
+// whole shape of this one. `pick(L)` below needs three behaviours defineRegistry's `pick` deliberately
+// does not have: a missing `type` means `text`, three sugar names get a message naming `make expand`,
+// and only then does anything else throw. Replacing it would move frames, so it is left exactly as it
+// was and this sits beside it.
+//
+// What it buys: the section below used to be hand-listed in scripts/site/effects-catalog.mjs with its
+// usage form and its no-preview reason in a third file, and `scripts/author/arsenal.mjs` carried a
+// hardcoded special case reading LAYER_TYPES + LAYER_BLURBS because layer types were not a registry
+// (docs/MISTAKES.md #551: `beam`, whose blurb says "a light that travels the rounded-rect border", was
+// invisible to a query naming exactly that). All of it is one declaration now.
+export const LAYER_REGISTRY = defineRegistry('layer type', REGISTRY, { slot: 'layers[].type', blurbs: LAYER_BLURBS,
+  catalog: {
+    title: 'Layer types',
+    tag: 'layer',
+    intro: 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.',
+    usage: (n, { j }) => j({ type: n }),
+    noPreview: 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
+  },
+});
 
 // The props each TYPE reads, taken off the modules that read them. Same contract as LAYER_TYPES, applied
 // to the vocabulary inside a layer rather than the vocabulary of layers: a gate answers "does anything
