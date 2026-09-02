@@ -36,6 +36,8 @@ const WAIVED = new Map(Object.entries({
   IDENT: 'the identity style set a cut resets to (core/cuts.js). A reset, not an effect: the CUT vocabulary it belongs to is catalogued in full',
   PROPS: 'per-module prop declarations. Covered by schema-drift and layer-props, which check them against schema.json',
   SHARED_PROPS: 'the props every layer type inherits, a prop list, not a vocabulary',
+  POSE: 'the table a motion keyframe is evaluated through (core/sequence.js): authored name to pose key to identity. An author writes `x` or `ox` on a KEY, which formats/scene/schema.json documents field by field and schema-drift checks against this table. A field list, not a vocabulary to pick a name from',
+  KEYFRAME_PROPS: 'what a keyframe may carry, generated from POSE and SIDES. Same argument: it is the list schema-drift compares the schema against, not a set of names an author chooses between',
   LAYER_PROPS: 'the generated prop table behind schema-drift',
   SURFACE_PROPS: 'as LAYER_PROPS, for surfaces',
   TRACK_PROPS: 'as LAYER_PROPS, for tracks',
