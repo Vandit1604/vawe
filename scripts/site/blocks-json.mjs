@@ -35,8 +35,19 @@ const OUT = path.join(root, 'site/lib/blocks.json');
 const grid = CATALOG.filter((e) => !e.overlay)
   .map(({ name, family, blurb, props }) => ({ name, family, blurb, props, category: CATEGORY_OF[family] || 'Core' }));
 
+const body = JSON.stringify(grid, null, 2) + '\n';
+// `--check` (make blocks-json CHECK=1) reports the drift this file was written to remove, rather than
+// silently repairing it on a run somebody happened to make. site/lib/blocks.json is committed and only
+// `make blocks-sync` rewrites it, so a new catalog row left the site's grid a row short until then.
+if (process.argv.includes('--check')) {
+  const have = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
+  if (have !== body) { console.error(`site/lib/blocks.json is STALE (it disagrees with blocks/catalog.mjs), run \`make blocks-json\``); process.exit(1); }
+  console.log(`site/lib/blocks.json: up to date (${grid.length} entries)`);
+  process.exit(0);
+}
+
 const prev = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT, 'utf8')) : [];
-fs.writeFileSync(OUT, JSON.stringify(grid, null, 2) + '\n');
+fs.writeFileSync(OUT, body);
 
 const added = grid.filter((b) => !prev.some((p) => p.name === b.name)).map((b) => b.name);
 const gone = prev.filter((p) => !grid.some((b) => b.name === p.name)).map((p) => p.name);
