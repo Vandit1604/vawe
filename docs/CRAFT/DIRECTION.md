@@ -86,6 +86,30 @@ Technique of Film Editing_.**
 - **Accelerate toward the climax**: tighten cutting through the build, then release on the payoff. →
   Shorten beats through the middle; the final held frame is the release. `[gated]` direct: `dead-final-frame`
 
+**Look at the shape, do not only feel it.** The rule above is a judgement and until now it had nothing
+to look at. `node scripts/gates/motion-split.mjs <scene.json>` now prints the film's energy over time as
+a sparkline of the LAYERS alone, with the cuts and seams ruled under the column they land in:
+
+```
+  THE FILM'S ENERGY OVER TIME · 54 samples of the layers, the ground removed
+
+    ▁▂▂▃▂▁▁▁▁▁▁▂▁▆▃▃▂▁▁▁▁▁▁▁▂▁▂▁█▅▂▁▁▂▁▂▁▁▆▂▂▂▁▂▁▂▁▁▂▁▂▁▁▂
+                  │             │         │
+    0s                                               10.8s   │ cut or seam · sting
+```
+
+The source is Bruce Block, *The Visual Story*: a film's visual intensity should establish the visual
+rules, escalate through the conflict, and resolve against what was established. So read the SHAPE, not
+the height. A film whose loudest frame sits in its middle ends twice, and the sample above is one:
+its peak is at 5.6s of 10.8s and everything after it is quieter than the beat before. The ground is
+removed on purpose, because a backdrop that churns for the whole runtime flatters the curve exactly as
+much as a moving subject does.
+
+**Nothing scores this and nothing will.** A film can be right and fall: a quiet ending is a choice, and
+a threshold on this curve would manufacture a finding on every film that made it. Two gates here have
+been deleted for measuring a proxy for a judgement ([`../TASTE.md`](../TASTE.md)), and the printer says
+so in its own comments so the next author does not add the teeth back.
+
 ## 3. Restraint, the single biggest amateur-vs-pro tell
 
 Source: **School of Motion; Shaw ("less, but better")**; enforced locally in [`TASTE-RULES.md`](TASTE-RULES.md).

@@ -17,6 +17,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
+import { marksOf } from '../../core/junctions.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -106,7 +107,9 @@ async function series(nobg) {
     deltas.push(shots);
   }
   await page.close();
-  return deltas;
+  // step and total travel with the pairs: sample j is frame j*step, which is the only way the
+  // sparkline below can put a cut under the column it actually happened in.
+  return { pairs: deltas, step, total };
 }
 
 const { decode } = await import('../lib/png-diff.mjs');
@@ -126,17 +129,22 @@ const cells = (buf) => {
   return out;
 };
 const score = (pairs) => {
-  const ds = pairs.map(([a, b]) => {
+  const series = pairs.map(([a, b]) => {
     const A = cells(a), B = cells(b);
     let s = 0; for (let i = 0; i < A.length; i++) s += Math.abs(A[i] - B[i]);
     if (process.env.SPLIT_DEBUG) console.error(`    cells=${A.length} delta=${(s / A.length).toFixed(3)}`);
     return s / A.length;
-  }).sort((x, y) => x - y);
-  return { median: ds[Math.floor(ds.length / 2)], still: ds.filter((d) => d < 0.5).length / ds.length };
+  });
+  // `series` stays in film order; the stats read a sorted COPY. Sorting in place is what kept the
+  // shape of the film out of this file's output for as long as it has existed.
+  const ds = [...series].sort((x, y) => x - y);
+  return { median: ds[Math.floor(ds.length / 2)], still: ds.filter((d) => d < 0.5).length / ds.length, series };
 };
 
-const full = score(await series(false));
-const bare = score(await series(true));
+const fullRun = await series(false);
+const bareRun = await series(true);
+const full = score(fullRun.pairs);
+const bare = score(bareRun.pairs);
 await browser.close(); server.close();
 
 const name = path.basename(abs, '.json');
@@ -148,4 +156,39 @@ console.log(`\n  the GROUND is ${Math.round(groundShare * 100)}% of this film's 
 console.log(`  the LAYERS deliver ${bare.median.toFixed(2)}, and that is the number to compare against a reference.`);
 if (groundShare > 0.6)
   console.log(`\n  ⚠ most of what this film measures is its backdrop. That is not wrong, and it is not the\n    content moving. \`make grammar\` has the band the references sit in.`);
+
+// THE SHAPE, NOT A SCORE. Both numbers above are BOUNDS: they say how much this film moves and whose
+// motion it is, and neither says WHEN. Bruce Block's argument (docs/RESEARCH/MOTION-CANON.md, ADOPT 3)
+// is that a film's visual intensity should follow its story: establish, escalate through the middle,
+// resolve on the payoff. DIRECTION.md section 2 asks the author to accelerate toward the climax and
+// then gives them nothing to look at. The per-sample series was already in hand here and was thrown
+// away by a sort. This prints it.
+//
+// IT IS NOT GATED AND MUST NOT BECOME ONE. A film can be right and fall: a quiet ending is a choice,
+// so any threshold on this curve manufactures a finding on every film that made that choice. This repo
+// has deleted two gates for measuring a proxy for a judgement, and `visual-vocabulary` is the one to
+// remember: it squared a 590x18 rule into 590x590 and credited a hairline with a tenth of the frame
+// (docs/TASTE.md). The eye reads the shape. This only draws it.
+const FPS = 30;                 // the URL above renders at 30, so a sample index converts back to seconds
+const BLOCKS = '▁▂▃▄▅▆▇█';
+const shape = bare.series;      // the LAYERS alone: the ground's own motion is not the film's energy
+const peak = Math.max(...shape);
+const bars = shape.map((d) => BLOCKS[peak > 0 ? Math.min(7, Math.round((d / peak) * 7)) : 0]).join('');
+const marks = marksOf(cfg);
+const rule = Array(shape.length).fill(' ');
+for (const m of marks) {
+  const col = Math.round((m.t * FPS) / bareRun.step);
+  if (col >= 0 && col < rule.length) rule[col] = m.kind === 'sting' ? '·' : '│';
+}
+const dur = bareRun.total / FPS;
+const end = `${dur.toFixed(1)}s`;
+console.log(`\n  THE FILM'S ENERGY OVER TIME · ${shape.length} samples of the layers, the ground removed\n`);
+console.log(`    ${bars}`);
+console.log(`    ${rule.join('')}`);
+console.log(`    0s${' '.repeat(Math.max(1, shape.length - 2 - end.length))}${end}`
+  + (marks.length ? '   │ cut or seam · sting' : '   one shot: no cuts, seams or stings to rule under it'));
+console.log(`\n  peak ${peak.toFixed(2)} at ${((shape.indexOf(peak) * bareRun.step) / FPS).toFixed(1)}s.`);
+console.log(`  Read the SHAPE, not the height: does it rise into the payoff, or is the loudest frame in
+  the middle? A film whose peak sits in its middle ends twice. Nothing scores this and nothing will:
+  docs/CRAFT/DIRECTION.md section 2, "accelerate toward the climax".`);
 console.log('');
