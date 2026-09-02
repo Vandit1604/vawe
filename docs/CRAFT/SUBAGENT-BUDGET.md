@@ -54,6 +54,15 @@ dominates the total. Cost rises faster than the number of tool calls.
 7. **Cap what comes back.** Tell the agent what to return and how much. Reconcile in the main thread.
 8. **Prefer one agent for sequential work.** Multi-agent orchestration helps when work is independent. For
    a chain of dependent steps, one agent with good context wins, and it costs less.
+   **The number behind this rule, which it used to state without one.** Anthropic's own multi-agent
+   research system consumes about 15x the tokens of a normal conversation, and token usage alone
+   explains roughly 80% of the performance difference it shows. Alongside that, a single agent has been
+   measured matching or beating five multi-agent architectures on multi-hop reasoning **at an equal
+   thinking-token budget**, unless context utilisation was degraded past a point. So a fan-out is
+   mostly buying you tokens, and you can buy those without it. Before launching one, state in a
+   sentence what a single agent with the same budget would plausibly have produced. If you cannot, the
+   fan-out is a guess about parallelism rather than a decision about it.
+
 9. **Match the pattern to the work.** Measure the shape of the task first. Choose the pattern second.
    Do not start with the orchestration and fit the work to it.
 

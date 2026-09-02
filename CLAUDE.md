@@ -719,6 +719,12 @@ Rules that make this real, not ceremonial:
   fail loudly. Silent substitution is how the wrong font and square avatars both shipped.
 - **Log it.** Append every framework-class finding to `docs/MISTAKES.md` (what · root cause · fix ·
   which gate now catches it). That file is the memory; an unlogged fix gets re-broken.
+- **ONE INCIDENT IS A HYPOTHESIS, NOT A RULE.** Logging a mistake and promoting it into standing
+  doctrine are different acts, and the second needs more evidence than the first. When a harvest turns
+  a finding into a rule in this file, cite the entries that support it and let the count do the
+  arguing: `#505` alone is one film's experience, `#214 + #216` is the same misreading surfacing twice
+  in two consumers, which is a pattern. A rule derived from a single run is a rule the next author
+  obeys as though it were measured, because nothing in the sentence says it was not. Say so instead.
 - **Check the blast radius** before changing shared behaviour: grep the other scenes for the pattern,
   and re-run `make probe` + `make snap`. Say plainly which existing videos change output and why.
 - **Report it.** Tell the user what was framework vs authoring. Never silently absorb engine bugs into

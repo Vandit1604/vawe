@@ -44,6 +44,19 @@ handed.
 | **ab** | which of two cuts is better, and does the graphic explain anything | *built, then cut.* `make ab` + `ab-record` + `AB-JUDGE.md` shipped in `05a5123` and were removed in `cc2dfc2` (2026-08-05) along with five other tools that only inspected the engine. Nothing runs today. Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. | n/a |
 <!-- doc-refs-allow: make ab · the row above exists to record that this critic was planned and never built -->
 
+**A critic's value is INDEPENDENT EVIDENCE, never a fresh pair of eyes.** Six instances of one model,
+handed similar context, do not vote independently: the measured version of that is 18 of 30 agents
+choosing the same branch name without conferring. So the admission test for any new critic is one
+question, and it is about the INPUT column above, not the job column: **what artifact does this critic
+see that the author did not?**
+
+By that test `copy` fails, and it is listed anyway so the failure is visible rather than quietly
+inherited. It is handed the strings from the scene JSON, which is the thing the author wrote and is
+still looking at. Every other critic is handed a RENDER: a contact sheet, a frame strip, the seam
+frames, the source side by side. That is the difference between a second opinion and a second reading
+of your own file. Run `copy` when you want the writing re-read by something that is not you, and know
+that is what you are buying.
+
 Notes that matter per critic:
 
 - **bg-motion exists because of a real failure.** A lime-on-black liquid field was "matched" against one
