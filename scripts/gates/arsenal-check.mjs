@@ -298,6 +298,49 @@ const covered = found.size - waived - missing.length;
 console.log(`\n  arsenal · ${files.length} source file(s) walked · ${found.size + derived.size} vocabular(ies) found`);
 console.log(`    ${derived.size} are the entries, names, blurbs or object of ${new Set(derived.values()).size} registr(ies), counted once each`);
 console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered} in the catalogue`);
+
+// ---- THE RATCHET: `covered` MAY FALL AND MAY NEVER RISE ------------------------------------------
+//
+// `covered` is the count of real capabilities that are catalogued BY HAND, because they are not
+// registries. Every one of them is a section somebody has to remember to write, keep, and keep keyed to
+// a slug of its own title, and that is the coupling `defineRegistry({ catalog })` was built to end: a
+// registry publishes its own section, so the correct thing costs one edit instead of four.
+//
+// This gate's own job has been shrinking all along and nothing said so. Most of what it used to check
+// is now structural and cannot be reached from here: a half-written catalog block throws at LOAD
+// (`checkCatalog`), a blurb that restates its own name is refused at LOAD (`checkBlurb`), and a dial
+// whose default contradicts its signature throws at LOAD (`bindDials`). What is LEFT is the one question
+// no derivation can answer, because it is a decision rather than a fact: **is this thing a capability,
+// and did you give it a registry?**
+//
+// So the number is ratcheted rather than gated at zero. Zero is not reachable today and pretending
+// otherwise would make this a rule people turn off: three registries deliberately have no catalog block
+// (feel, duration and camera words merge into one "Plain words" table), and several sections have no
+// registry behind them at all yet. A ratchet says the only allowed direction, which is the true rule.
+//
+// Lower it deliberately with --stamp, never to quiet a complaint. That is `make legacy STAMP=1`'s
+// argument, in the gate one directory over.
+{
+  const RATCHET = path.join(ROOT, 'verify/arsenal-ratchet.json');
+  const prior = (() => { try { return JSON.parse(fs.readFileSync(RATCHET, 'utf8')); } catch { return null; } })();
+  if (process.argv.includes('--stamp')) {
+    fs.mkdirSync(path.dirname(RATCHET), { recursive: true });
+    fs.writeFileSync(RATCHET, `${JSON.stringify({ handCatalogued: covered }, null, 1)}\n`);
+    console.log(`    ✓ ratchet stamped at ${covered} hand-catalogued capabilit(ies)`
+      + `${prior ? `, down from ${prior.handCatalogued}` : ''}`);
+  } else if (prior && covered > prior.handCatalogued) {
+    console.error(`\n  ✗ ${covered} capabilit(ies) are catalogued by hand, up from ${prior.handCatalogued}.`);
+    console.error('    A capability that is not a registry needs a section, a usage form and a preview written');
+    console.error('    for it, in three files, keyed by a slug of its own title. Give it a registry with a');
+    console.error('    `catalog` block instead and it publishes all three itself, from one edit.');
+    console.error('    If it genuinely cannot be a registry, lower the bar on purpose:');
+    console.error('      node scripts/gates/arsenal-check.mjs --stamp\n');
+    process.exit(1);
+  } else if (prior && covered < prior.handCatalogued) {
+    console.log(`    ~ ${prior.handCatalogued - covered} fewer hand-catalogued than the ratchet allows.`
+      + ' Lower it: node scripts/gates/arsenal-check.mjs --stamp');
+  }
+}
 // A SWEEP THAT SAW NOTHING MUST NOT PRINT A TICK. `walk('core')` is a bare readdir, so a moved or empty
 // core/ produced `0 vocabular(ies) found` and then `✓ every capability the engine exports is named`.
 if (!found.size) {

@@ -6237,5 +6237,39 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   } finally { fs.rmSync(abs, { force: true }); }
 }
 
+// ---- the arsenal ratchet: hand-catalogued capabilities may fall, never rise --------------------
+//
+// This gate's job has been shrinking and nothing said so. Most of what it used to check is structural
+// now and unreachable from here: a half-written catalog block throws at LOAD (checkCatalog), a blurb
+// that restates its own name throws at LOAD (checkBlurb), a dial contradicting its signature throws at
+// LOAD (bindDials). What is left is the one question no derivation can answer, because it is a decision
+// and not a fact: is this a capability, and did you give it a registry?
+//
+// Ratcheted rather than gated at zero, because zero is not reachable and a rule that demands the
+// impossible is a rule people turn off. Three registries deliberately carry no catalog block (feel,
+// duration and camera words merge into one table) and several sections have no registry behind them yet.
+{
+  const { execFileSync } = await import('node:child_process');
+  const gate = path.join(repoRoot, 'scripts/gates/arsenal-check.mjs');
+  const ratchet = path.join(repoRoot, 'verify/arsenal-ratchet.json');
+  const saved = fs.readFileSync(ratchet, 'utf8');
+  const run = () => { try { return { code: 0, out: execFileSync('node', [gate], { encoding: 'utf8', cwd: repoRoot }) }; }
+    catch (e) { return { code: e.status, out: `${e.stdout || ''}${e.stderr || ''}` }; } };
+  try {
+    ok('arsenal ratchet: the recorded number is the count of hand-catalogued capabilities',
+      Number.isInteger(JSON.parse(saved).handCatalogued));
+    fs.writeFileSync(ratchet, JSON.stringify({ handCatalogued: 0 }));
+    const worse = run();
+    ok('arsenal ratchet: a RISE is refused', worse.code === 1);
+    // The message must name the cheaper path, not merely the number. A gate that reports a count and no
+    // next action is one an author satisfies by editing the count.
+    ok('arsenal ratchet: and it names the one-edit alternative',
+      /catalog` block/.test(worse.out) && /--stamp/.test(worse.out));
+    fs.writeFileSync(ratchet, JSON.stringify({ handCatalogued: 9999 }));
+    ok('arsenal ratchet: a FALL is reported, not silently accepted',
+      /fewer hand-catalogued/.test(run().out));
+  } finally { fs.writeFileSync(ratchet, saved); }
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
