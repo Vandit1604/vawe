@@ -1,7 +1,7 @@
 {
   "total": 639,
   "previewed": 291,
-  "families": 48,
+  "families": 49,
   "tags": [
     [
       "asset",
@@ -505,6 +505,61 @@
           "name": "workspaceZoomOut",
           "stem": "camera-moves--workspacezoomout",
           "desc": "pull back from a detail to reveal the whole",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "destinations-platform-safe-area",
+      "title": "Destinations (platform safe area)",
+      "tag": "canvas",
+      "intro": "`\"destination\": \"<name>\"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect` · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition · `core/safe.js`.\n\nThe tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a safe area is a property of the canvas, not something that animates. `make audit M=<file> ASPECT=all` is how you see it, as a measurement against your own layers.",
+      "count": 6,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "broadcast",
+          "stem": "destinations-platform-safe-area--broadcast",
+          "desc": "the classic title-safe 90% box, 5% off every edge, for displays that overscan",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "feed",
+          "stem": "destinations-platform-safe-area--feed",
+          "desc": "Instagram and X in-feed, where the player furniture sits OUTSIDE the media, so nothing is painted over the picture and only the margin applies",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "reels",
+          "stem": "destinations-platform-safe-area--reels",
+          "desc": "Instagram Reels on 9 · 16 · a 14% right rail, 10% off the top, 22% off the bottom. Looser than tiktok, tighter than shorts",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "shorts",
+          "stem": "destinations-platform-safe-area--shorts",
+          "desc": "YouTube Shorts on 9 · 16, the most generous phone target · a 13% right rail, 8% off the top, 16% off the bottom",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "tiktok",
+          "stem": "destinations-platform-safe-area--tiktok",
+          "desc": "the tightest phone target · a rail down the RIGHT at 16.7% of the width for the action buttons, 12.5% off the top and 30.2% off the bottom for the caption and handle. Serves 9 · 16",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "web",
+          "stem": "destinations-platform-safe-area--web",
+          "desc": "no platform chrome at all · the whole frame is usable and only the 4% margin applies. A site hero, an X or LinkedIn post, a docs clip",
           "scene": null,
           "noPreview": null
         }
@@ -4841,87 +4896,45 @@
       "id": "output-targets",
       "title": "Output targets",
       "tag": "canvas",
-      "intro": "`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition · `core/safe.js`.",
+      "intro": "`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition · `core/safe.js`.",
       "mode": "chips",
-      "note": "an aspect or a platform; core/safe.js holds the safe area each implies",
-      "noPreview": "an aspect or a platform safe area is a property of the canvas, not something that animates.",
-      "count": 11,
+      "note": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
+      "noPreview": "an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.",
+      "count": 5,
       "undescribed": 0,
       "entries": [
         {
           "name": "16:9",
           "stem": "output-targets--16-9",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
+          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "1:1",
           "stem": "output-targets--1-1",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
+          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "4:3",
           "stem": "output-targets--4-3",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
+          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "4:5",
           "stem": "output-targets--4-5",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
+          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "9:16",
           "stem": "output-targets--9-16",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "broadcast",
-          "stem": "output-targets--broadcast",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "feed",
-          "stem": "output-targets--feed",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "reels",
-          "stem": "output-targets--reels",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "shorts",
-          "stem": "output-targets--shorts",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "tiktok",
-          "stem": "output-targets--tiktok",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "web",
-          "stem": "output-targets--web",
-          "desc": "an aspect or a platform; core/safe.js holds the safe area each implies",
+          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
           "scene": null,
           "noPreview": null
         }

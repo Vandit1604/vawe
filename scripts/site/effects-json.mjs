@@ -22,7 +22,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sections, d, USAGE_KIT } from './effects-catalog.mjs';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
-import { ASPECTS } from '../../core/safe.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');
@@ -79,7 +78,7 @@ const USAGE = {
     : n in DURATION ? j({ enterDur: n })
     : j({ cameraMove: { move: n } })),
   'ransom-faces': (n) => text({ split: 'char', ransom: { faces: [n] } }),
-  'output-targets': (n) => (n in ASPECTS ? j({ aspect: n }) : j({ destination: n })),
+  'output-targets': (n) => j({ module: 'scene', aspect: n }),
   'generators-the-playground': (n) => `// turn the dials at /playground?gen=${n}, then paste the markup:\n${j({ bg: [{ html: '…', from: 0, to: 6 }] })}`,
   'lightfield-dials': (n) => `// a lightfield option value, turned at /playground:\n${j({ pattern: n })}`,
 };
@@ -129,7 +128,7 @@ const NO_PREVIEW = {
   easings: 'a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.',
   'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
   'ransom-faces': 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
-  'output-targets': 'an aspect or a platform safe area is a property of the canvas, not something that animates.',
+  'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
   'generators-the-playground': 'generators have their own surface with every dial attached: /playground.',
   'lightfield-dials': 'a dial is a value, not an effect. Turn them together at /playground.',
 };

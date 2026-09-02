@@ -102,6 +102,21 @@ Top-level scene keys that change what the camera DOES rather than where it goes.
 | `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
 | `workspaceZoomOut` | pull back from a detail to reveal the whole |
 
+## Destinations (platform safe area)  `[canvas]`
+
+`"destination": "<name>"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect`: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition: `core/safe.js`.
+
+The tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.
+
+| name | what / when |
+|---|---|
+| `broadcast` | the classic title-safe 90% box, 5% off every edge, for displays that overscan |
+| `feed` | Instagram and X in-feed, where the player furniture sits OUTSIDE the media, so nothing is painted over the picture and only the margin applies |
+| `reels` | Instagram Reels on 9:16: a 14% right rail, 10% off the top, 22% off the bottom. Looser than tiktok, tighter than shorts |
+| `shorts` | YouTube Shorts on 9:16, the most generous phone target: a 13% right rail, 8% off the top, 16% off the bottom |
+| `tiktok` | the tightest phone target: a rail down the RIGHT at 16.7% of the width for the action buttons, 12.5% off the top and 30.2% off the bottom for the caption and handle. Serves 9:16 |
+| `web` | no platform chrome at all: the whole frame is usable and only the 4% margin applies. A site hero, an X or LinkedIn post, a docs clip |
+
 ## Caption styles  `[captions]`
 
 `captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
@@ -937,21 +952,15 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 
 ## Output targets  `[canvas]`
 
-`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.
+`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.
 
 | name | what / when |
 |---|---|
-| `16:9` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `1:1` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `4:3` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `4:5` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `9:16` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `broadcast` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `feed` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `reels` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `shorts` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `tiktok` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `web` | an aspect or a platform; core/safe.js holds the safe area each implies |
+| `16:9` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `1:1` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `4:3` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `4:5` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 
 ## Generators (the playground)  `[generator]`
 
@@ -1003,4 +1012,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_639 effects across 48 families. Regenerate: `make effects`._
+_639 effects across 49 families. Regenerate: `make effects`._
