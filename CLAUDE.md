@@ -448,7 +448,7 @@ no single write site, so `make designspec-check` warns on `ruled-grid`: two `rep
 rules crossing axes in one fragment. One axis is scanlines and stays quiet. Waive it in the scene with
 a `_why`. **Four films rule a grid by hand today, and none of them wrote it down.**
 
-## SILENCE IS A DEVICE, NOT A DEFAULT  `[eye]`
+## SILENCE IS A DEVICE, NOT A DEFAULT  `[gated: scripts/gates/audio-check.mjs#silence-without-a-reason]`
 
 **123 of the 148 gate-visible scenes ship mute, 83%**: 17 carry no `audio` key at all and 106 declare
 `silent: true`. Of those 106, **only 26 say why**. So the sentence to remember is not "nobody declares

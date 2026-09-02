@@ -6335,8 +6335,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok('rungs: and the refusal names the gate it could not find', /no-such-gate\.mjs/.test(ghost.out));
 
     // A GATE THAT EXISTS AND NEVER FIRES ON THIS RULE. One rung worse than a missing file, because the
-    // path resolves and a reader stops there. audio-check.mjs is the live example this pass found: it
-    // is a real gate, it has prose about silence, and it emits no finding code at all.
+    // path resolves and a reader stops there. audio-check.mjs WAS the live example: a real gate, with
+    // real prose about silence, emitting no finding code at all. It emits them now (see the sound-gate
+    // block below), which is what let the SILENCE section leave [eye].
     fs.writeFileSync(claude, savedClaude.replace(
       '`[gated: scripts/gates/author-check.mjs#no-authored-motion]`',
       '`[gated: scripts/gates/author-check.mjs#no-such-code]`'));
@@ -6369,6 +6370,65 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     fs.writeFileSync(ratchet, savedRatchet);
     fs.writeFileSync(claude, savedClaude);
   }
+}
+
+// ---- the sound gate: silence has to be a decision, and the decision has to be READABLE ---------
+//
+// This gate ran for months and nothing read it. It was not one of author-check's steps, and it stated
+// each finding as a tuple in a local array, so scripts/lib/finding-codes.mjs saw no code from it and
+// scripts/gates/rung.mjs would have called a tag naming it a FALSE TAG. Both halves are asserted here,
+// because both halves failed silently and either one alone leaves the rule unenforced again.
+{
+  const { execFileSync } = await import('node:child_process');
+  const gate = path.join(repoRoot, 'scripts/gates/audio-check.mjs');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sound-gate-'));
+  const outFile = path.join(tmp, 'findings.json');
+  const run = (audio) => {
+    const scene = path.join(tmp, 'scene.json');
+    fs.writeFileSync(scene, JSON.stringify({ module: 'scene', ...(audio === undefined ? {} : { audio }) }));
+    try { fs.rmSync(outFile, { force: true }); } catch { /* first run */ }
+    let out;
+    try { out = execFileSync('node', [gate, scene], { encoding: 'utf8', cwd: repoRoot, env: { ...process.env, VAWE_FINDINGS_OUT: outFile } }); }
+    catch (e) { out = `${e.stdout || ''}${e.stderr || ''}`; }
+    let recs = []; try { recs = JSON.parse(fs.readFileSync(outFile, 'utf8')); } catch { /* wrote none */ }
+    return { out, recs, codes: recs.map((r) => r.code) };
+  };
+  try {
+    const bare = run({ silent: true });
+    ok('sound gate: silent:true with no _why fires silence-without-a-reason',
+      bare.codes.includes('silence-without-a-reason'));
+    // THE RECORD, NOT THE LINE. The old shape printed the same sentence and told the aggregator
+    // nothing, which is how a working gate stayed unread (docs/MISTAKES.md #401).
+    ok('sound gate: and it says so as a RECORD, so author-check can read it without scraping prose',
+      bare.recs.some((r) => r.code === 'silence-without-a-reason' && r.severity === 'error' && r.fix));
+    ok('sound gate: and the printed line still carries the code, for the person watching',
+      /\[silence-without-a-reason\]/.test(bare.out));
+
+    ok('sound gate: a stated reason clears it',
+      !run({ silent: true, _why: 'autoplays muted in-feed; the type carries it alone' }).codes.includes('silence-without-a-reason'));
+    // A WORD IS NOT A REASON. 12 chars, the same floor author-check uses for `authoring._why`.
+    ok('sound gate: a one-word _why does not count as a decision',
+      run({ silent: true, _why: 'muted' }).codes.includes('silence-without-a-reason'));
+    ok('sound gate: no audio block at all is a different finding, because nobody decided anything',
+      run(undefined).codes.includes('silent-by-omission'));
+    ok('sound gate: an audio block that names nothing renders silent and says so',
+      run({ musicGain: 1 }).codes.includes('audio-block-produces-nothing'));
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+
+  // THE WIRING IS THE OTHER HALF. A gate nothing runs is a gate that does not exist, and this one was
+  // in that state while its prose read as enforcement.
+  const ladder = fs.readFileSync(path.join(repoRoot, 'scripts/gates/author-check.mjs'), 'utf8');
+  // The PATH, in the CALL. Matching the path anywhere in the file passes on the comment above the call,
+  // which is the whole failure again: prose reading as a mechanism.
+  ok('sound gate: author-check runs it as one of its steps',
+    /styleGate\('sound',[^\n]*'scripts\/gates\/audio-check\.mjs'/.test(ladder));
+  ok('sound gate: and declares it in the ladder it prints before it runs', /\['sound', 'reports'/.test(ladder));
+  // The tag in CLAUDE.md cites a code. rung.mjs checks the citation; this checks the citation is the
+  // one the gate actually fires on, which is the difference between a rung and a plausible neighbour.
+  const { codesEmitted } = await import('../lib/finding-codes.mjs');
+  const codes = codesEmitted();
+  ok('sound gate: finding-codes.mjs can SEE its codes, so the [gated] tag verifies against the derived map',
+    (codes.get('silence-without-a-reason') || new Set()).has('scripts/gates/audio-check.mjs'));
 }
 
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter

@@ -29,6 +29,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { population, LIBRARY } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -83,26 +84,42 @@ const reasonOf = (a) => {
   return typeof w === 'string' && w.trim().length >= 12 ? w.trim() : null;
 };
 
+// THE FINDINGS ARE RECORDS, NOT LINES, AND THAT IS WHAT WIRED THIS GATE INTO THE LADDER.
+//
+// This gate printed a real verdict for months and nothing anywhere read it: it was not one of
+// author-check's steps, and it stated each finding as a tuple in a local array, so
+// scripts/lib/finding-codes.mjs could not see a single code it emits either. A gate that emits no code
+// cannot be cited, ratcheted, waived or routed to a doc, and scripts/gates/rung.mjs calls a tag that
+// names one a FALSE TAG for exactly that reason. Two failures with one cause: the fact lived in a
+// shape only this file understood.
+//
+// So the codes are written as literals through the shared emitter (docs/MISTAKES.md #401). The printed
+// line is rendered FROM the record and keeps the wording it always had, so nothing a person reads moved.
+const F = gateFindings({
+  scene: file,
+  line: (r, g) => `    ${g} [${r.code}] ${r.summary}\n        \u2192 ${r.fix}`,
+});
+
 function findings(scene, sceneDir) {
-  const out = [];
+  const out = F.records;
   const a = (scene && typeof scene.audio === 'object' && scene.audio) || null;
   const state = classify(scene);
 
   if (state === OMITTED) {
-    out.push(['silent-by-omission', true,
+    F.fail('silent-by-omission',
       'this film names no `audio` block, so it renders with no sound and nobody decided that.',
-      'Give it a bed (`make audio-bed D=<file> WRITE=1`), or state the silence:\n' +
-      '        "audio": { "silent": true, "_why": "why this film is better with no sound" }']);
+      { fix: 'Give it a bed (`make audio-bed D=<file> WRITE=1`), or state the silence:\n' +
+      '        "audio": { "silent": true, "_why": "why this film is better with no sound" }' });
   } else if (state === SILENT && !reasonOf(a)) {
-    out.push(['silence-without-a-reason', true,
+    F.fail('silence-without-a-reason',
       '`audio.silent:true` with no `_why`. Silence is a legitimate choice and a strong one, but it is a',
-      'choice, so write the one line that says what the silence is doing:\n' +
-      '        "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries it alone" }']);
+      { fix: 'choice, so write the one line that says what the silence is doing:\n' +
+      '        "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries it alone" }' });
   } else if (state === HOLLOW) {
-    out.push(['audio-block-produces-nothing', true,
+    F.fail('audio-block-produces-nothing',
       'there is an `audio` block, but it names no music, no VO, no cues and no `auto`, the mixer\'s',
-      'emptiness guard writes no track at all, so this renders SILENT while reading as sounded.\n' +
-      '        Name a bed, or say `"silent": true` with a `_why` and mean it.']);
+      { fix: 'emptiness guard writes no track at all, so this renders SILENT while reading as sounded.\n' +
+      '        Name a bed, or say `"silent": true` with a `_why` and mean it.' });
   }
 
   if (!a) return { state, out };
@@ -122,50 +139,50 @@ function findings(scene, sceneDir) {
     // With `auto`, the cue set is derived from the film's own junctions, so the honest check is
     // whether the sfx pack exists at all rather than which entry a given cut will reach for.
     if (!have.size) {
-      out.push(['cues-have-no-sound', true,
+      F.fail('cues-have-no-sound',
         'this film declares cues (or `auto: true`) and assets/sfx/ holds no .wav at all, so every cue',
-        'resolves to nothing and the mixer writes a SILENT track while this gate reads it as sounded.\n' +
-        '        Bake them:  make sfx']);
+        { fix: 'resolves to nothing and the mixer writes a SILENT track while this gate reads it as sounded.\n' +
+        '        Bake them:  make sfx' });
     } else {
       const missing = [...named].filter((n) => !have.has(n));
-      if (missing.length) out.push(['cue-missing', true,
+      if (missing.length) F.fail('cue-missing',
         `audio.cues names ${missing.length} sound(s) with no file under assets/sfx/: ${missing.join(', ')}.`,
-        'Each one is dropped in silence. Run `make sfx`, or name a cue that exists.']);
+        { fix: 'Each one is dropped in silence. Run `make sfx`, or name a cue that exists.' });
     }
   }
 
   if (a.music === 'auto') {
-    out.push(['bed-unresolved', false,
+    F.warn('bed-unresolved',
       '`music:"auto"` is a sentinel resolved at AUTHORING time, not at render, the mixer does not run',
-      'core/audio-select.js, so an unresolved "auto" reaching it plays SILENCE.\n' +
-      `        Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1`]);
+      { fix: 'core/audio-select.js, so an unresolved "auto" reaching it plays SILENCE.\n' +
+      `        Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
   } else if (typeof a.music === 'string' && a.music) {
     const hit = resolveBed(a.music, sceneDir);
     if (!hit) {
-      out.push(['bed-missing', true,
+      F.fail('bed-missing',
         `audio.music "${a.music}" resolves to no file: the mixer falls back to SILENCE.`,
-        'Use a bed that exists under assets/music/ (`make music-pack`), or a real .wav path.']);
+        { fix: 'Use a bed that exists under assets/music/ (`make music-pack`), or a real .wav path.' });
     } else {
       const k = bedKey(a.music);
       const c = credits[k];
       if (!c) {
-        out.push(['bed-provenance-unknown', false,
+        F.warn('bed-provenance-unknown',
           `bed "${k}" has no entry in assets/music/credits.json: nobody recorded where it came from.`,
-          'An unattributed track under a commercial product film cannot be defended if it is claimed.\n' +
-          '        Record its source + licence in credits.json, or replace it with a bed that has one.']);
+          { fix: 'An unattributed track under a commercial product film cannot be defended if it is claimed.\n' +
+          '        Record its source + licence in credits.json, or replace it with a bed that has one.' });
       } else if (c.licenceVerified !== true) {
-        out.push(['bed-licence-unverified', false,
+        F.warn('bed-licence-unverified',
           `bed "${k}" is recorded as ${c.licence || 'an unread licence'} with licenceVerified:false.`,
-          `        ${c.note || 'Nobody has read the terms.'}\n` +
-          '        Read the licence, confirm commercial + no-attribution, then set licenceVerified:true.']);
+          { fix: `        ${c.note || 'Nobody has read the terms.'}\n` +
+          '        Read the licence, confirm commercial + no-attribution, then set licenceVerified:true.' });
       }
     }
   }
 
   if (typeof a.musicGain === 'number' && a.musicGain === 0 && !a.vo) {
-    out.push(['bed-muted', false,
+    F.warn('bed-muted',
       '`musicGain: 0` mutes the bed entirely. That is silence with extra steps.',
-      'Either give it a level, or drop the bed and declare the silence honestly.']);
+      { fix: 'Either give it a level, or drop the bed and declare the silence honestly.' });
   }
   return { state, out };
 }
@@ -206,7 +223,7 @@ if (!file || !fs.existsSync(file)) {
 }
 const scene = readJSON(file);
 const { state, out } = findings(scene, path.dirname(path.resolve(file)));
-const blocking = out.filter((f) => f[1]);
+const blocking = out.filter((f) => f.severity === 'error');
 
 console.log(`\n  sound gate · ${file}  (${state})`);
 if (!out.length) {
@@ -216,10 +233,7 @@ if (!out.length) {
     : `  ✓ this film has sound.\n`);
   process.exit(0);
 }
-for (const [code, blocks, headline, fix] of out) {
-  console.log(`    ${blocks ? '✗' : '~'} [${code}] ${headline}`);
-  console.log(`        → ${fix}`);
-}
+F.emit();
 console.log(strict && blocking.length
   ? `\n  ✗ sound gate (strict): ${blocking.length} finding(s) block.\n`
   : `\n  Sound is a structural device, not decoration. Docs/CRAFT/SOUND.md. Block these with --strict.\n`);
