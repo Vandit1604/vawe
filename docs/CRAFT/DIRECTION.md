@@ -49,13 +49,29 @@ motion-graphics adaptation from **Austin Shaw, _Design for Motion_ (2020)** and 
 | **Timing** | Frame count = weight and meaning. | A title (heavy) enters slower (0.5-0.7s) than a caption (0.25-0.4s). Never one global duration. | `[gated]` direct: `monotone-timing` |
 | **Spacing** | How distance spreads across frames is the ease's texture. | Prefer overshoot/settle (`snap`, `easeOutBack`, `spring`) over flat ramps for entrances. | `[eye]` |
 | **Anticipation** | A small opposite wind-up readies the eye. | Before a hero scale-up, dip ~2-4% (or nudge back ~8px) for ~4 frames. Hero moments only. | `[eye]` |
-| **Follow-through / overlap** | Parts don't stop at once; they trail and stagger. | Overshoot-and-settle on arrival (~5-10% past, ease back over 0.15-0.25s). Stagger a group's parts 60-120ms, never one frame. | `[eye]` (stagger partly in `motion-audit`) |
+| **Follow-through / overlap** | Parts don't stop at once; they trail and stagger. | THREE mechanisms, at three scopes, and this row named only the weakest. Between SIBLINGS: stagger 60-120ms, never one frame. Between LAYERS: `modifiers:[{lag:"card"}]`, which carries the leader's offset late and overruns its stop. Within ONE layer: `motionDelay:{scale:0.08,rot:0.12}`, so scale finishes after position, which is Williams' successive breaking of joints and the thing 138 of 283 motion tracks could not say. Overshoot-and-settle on arrival (~5-10% past) is arrival, not follow-through. | `[eye]` (stagger partly in `motion-audit`) |
 | **Staging** | One clear idea per shot; one focal point. | One headline-scale message per beat; everything else subordinate in size/opacity/motion. | `[eye]` + `[gated]` critique: `scattered-beat` |
 | **Secondary action** | A supporting motion that never competes. | At most one quiet secondary motion per beat (bg drift, glow, cursor), lower-contrast, offset in time. | `[eye]` |
 | **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
 | **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + `designspec` (slop was retired in 2026-08) |
 
-*(Straight-ahead action and solid drawing are drawing techniques and have no form here.)*
+**Straight-ahead action and solid drawing DO have a form here, and this line used to deny both.**
+
+*Straight-ahead*, as a PROCESS, genuinely cannot exist: `renderFrame(n)` is a pure function of the frame
+number, so nothing can be discovered by drawing in order, and that purity is the engine's founding rule.
+But the distinction the principle actually draws is between motion planned as POSES and motion that
+emerges from a RULE, and this engine has both, which is unusual enough to say out loud. Pose-to-pose is
+the `motion` track. Straight-ahead is everything computed per frame from local time with no keys at all:
+a `shader` or `raymarch` surface, the `effector` track (one travelling point, every child reacting to
+its distance), an `idle`, and any hand-written fragment driving geometry off `var(--t)`. Reach for the
+second when the motion is a behaviour rather than a path, and note that the two compose: `parts` can
+bring a grid in pose-to-pose and an effector can then wash across it.
+
+*Solid drawing* is weight, volume and consistent dimension, and the engine expresses all three: the
+`depth` registry and `modifiers` (`plane`, `tilt`, `kick`) put a layer in space rather than on a plane,
+`three` scenes carry real geometry with a light, and `track` keyed over time lets one thing pass BEHIND
+another mid-shot. What has no form here is the draughtsmanship half: nobody is drawing a figure, so
+"does the volume hold as it turns" is a question about a `three` scene, not about your linework.
 
 **Squash-and-stretch and arcs DO apply, and this line used to say they did not.**
 [AFTER-EFFECTS-RECIPES.md](AFTER-EFFECTS-RECIPES.md) has both, so two docs an author reads were
