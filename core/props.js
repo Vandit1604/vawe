@@ -53,3 +53,37 @@ export function mergeProps(...sets) {
   }
   return out;
 }
+
+// propsOf: a builder's declaration read off its OWN signature, the same trick `paramsOf`
+// (core/camera-moves.js:483) plays on a camera generator. A builder that destructures the layer in its
+// signature states each prop once, at the place it reads it, so there is no second list to drift:
+//
+//   export function build(kit, el, L, { h, bg } = L) { ... }
+//   export const PROPS = propsOf(build);
+//
+// It reads the LAST destructuring pattern in the parameter list, because a builder's layer comes last
+// (a camera generator's options come first, which is why paramsOf scans from the other end). A guard
+// (`when:`) has no spelling in a signature, so a builder with conditional reads keeps a hand-written set
+// and unions it in with mergeProps. Returns null for a non-destructuring signature: that is "cannot
+// say", never "reads nothing", and a caller must not turn it into an empty declaration.
+export function propsOf(fn) {
+  const src = String(fn);
+  const open = src.lastIndexOf('{', src.indexOf(')'));
+  if (open < 0) return null;
+  let depth = 0, close = -1;
+  for (let i = open; i < src.length; i++) {
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}' && --depth === 0) { close = i; break; }
+  }
+  if (close < 0) return null;
+  const names = [];
+  let d = 0, cur = '';
+  for (const ch of src.slice(open + 1, close)) {
+    if ('{[('.includes(ch)) d++;
+    else if ('}])'.includes(ch)) d--;
+    if (ch === ',' && d === 0) { names.push(cur); cur = ''; } else cur += ch;
+  }
+  names.push(cur);
+  const own = names.map((n) => n.split(/[=:]/)[0].trim()).filter(Boolean);
+  return Object.fromEntries(own.map((n) => [n, {}]));
+}

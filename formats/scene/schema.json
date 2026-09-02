@@ -213,7 +213,9 @@
     "children"
    ],
    "rect": [
+    "bg",
     "color",
+    "elevation",
     "fill",
     "h"
    ],
