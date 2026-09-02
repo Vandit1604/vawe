@@ -192,18 +192,34 @@ server.registerTool('vawe_capabilities', {
   // core/knobs.js writes a `desc` on 79 of its dials and this printed only `k.name`, so every one of
   // them was fetched across the wire and dropped on the floor — while the comment above claimed the
   // opposite. A caller learned that `stagger` exists and never that it is the rhythm offset per unit.
-  const dial = (k) => (k.desc ? `${k.name} (${k.desc})` : k.name);
+  // The DEFAULT goes over too, and it did not before. A caller that cannot see it either leaves the
+  // dial out (fine) or writes what it guesses the default is (not fine): that guess is how a wrong
+  // number in this manifest turns into a wrong frame, and it is why core/knobs.js now reads every
+  // kinetic default off the preset's own signature instead of keeping a second copy. `null` means the
+  // preset states no default and resolves the dial at render (colorWave's two colours), so it is left
+  // unsaid rather than printed as a value nobody can write.
+  const dial = (k) => {
+    const d = k.default == null ? '' : `default ${JSON.stringify(k.default)}`;
+    const note = [k.desc, d].filter(Boolean).join(', ');
+    return note ? `${k.name} (${note})` : k.name;
+  };
   const knobLine = (fam) => {
     const K = c.knobs[fam]; if (!K) return '';
     const shared = (K._shared || []).map(dial).join(' · ');
     const per = Object.entries(K).filter(([p]) => p !== '_shared' && K[p].length)
       .map(([p, list]) => `    ${p.padEnd(16)} ${list.map(dial).join(' · ')}`);
-    return `  shared dials: ${shared}\n${per.join('\n')}`;
+    // A family with no per-preset overrides (look) is ONE list and says so; the two that have both
+    // keep the split. Without this branch the uniform families printed a header and a blank line.
+    return per.length ? `  shared dials: ${shared}\n${per.join('\n')}` : `  dials: ${shared}`;
   };
   return text([
     `looks (${c.looks.length}) — the register each evokes; pick the group your story is in, then one member:`,
     ...c.looks.map((l) => `  ${l.name.padEnd(20)} ${l.blurb || ''}`.trimEnd()),
-    `  dials: strength (0..1, or "neon:0.8") · color · color2 · grain · vignette · warmth`,
+    // Typed by hand, this line drifted from the manifest in both directions at once: it still offered
+    // `warmth`, removed because no pass in any of the 31 looks ever read it (core/knobs.js,
+    // docs/MISTAKES.md #351), and it omitted `colors`, the gradient-map ramp that IS the thermal and
+    // chrome looks. So the tool advertised a dead dial and hid the one that matters. Read the manifest.
+    knobLine('look'),
     ``,
     `kinetic presets (${c.presets.length}) — how a line ARRIVES; set via preset + presetOpts:`,
     ...c.presets.map((x) => `  ${x.name.padEnd(14)} ${x.blurb || ''}`.trimEnd()),
