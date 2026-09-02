@@ -7,7 +7,7 @@ import { splitText, circleText, decodeText, gsapStagger } from '/core/type.js';
 import { buildMorph } from '/core/morph.js';
 import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/gsap-effects.js';
 import { ransomStyle } from '/core/ransom.js';
-import { capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '/core/captions.js';
+import { capUnitWins, capShape, wordU, lineU, CAP_STYLES, CAP_STYLE_REGISTRY } from '/core/captions.js';
 import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds.js';
 import { createBgHtml } from '/core/bg-html.js';
 import { htmlSource } from '/core/sanitize-html.js';
@@ -1038,8 +1038,10 @@ boot((data, fps, theme, canvas) => {
   // captionStyle: a word-timed treatment (core/captions.js) layered on the pop layout.
   // Unknown names fail LOUD at boot, matching the theme doctrine, never a silent fallback look.
   const capStyle = data.captionStyle || null;
-  if (capStyle && !CAP_STYLES[capStyle])
-    throw new Error(`unknown captionStyle "${capStyle}", known: ${Object.keys(CAP_STYLES).join(', ')}`);
+  // One refusal, owned by the registry: it also searches every other vocabulary, so a name borrowed
+  // from the kinetic presets or the looks is told where it really lives instead of being met with a
+  // bare list of eighteen caption styles.
+  if (capStyle) CAP_STYLE_REGISTRY.pick(capStyle);
   const camKf = data.camera || []; // cameraAt/motionAt now live in /core/sequence.js (pure, tested)
 
   // ---- THE CAMERA RIG: one model, two emissions ----

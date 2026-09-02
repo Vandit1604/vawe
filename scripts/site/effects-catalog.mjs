@@ -21,7 +21,6 @@ import { catalogued } from '../../core/registry.js';
 import { BEAT_BLURBS } from './blueprints-catalog.mjs';
 import { LIGHTFIELD_BLURBS } from '../../core/lightfield/options.js';
 import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
-import { CAPTION_BLURBS } from '../../core/captions.js';
 import { COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { COMPOSITION_NAMES } from '../../core/compositions/index.js';
@@ -33,7 +32,6 @@ import { LAYER_TYPES, LAYER_BLURBS } from '../../core/layers/index.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { EASINGS } from '../../core/motion.js';
-import { CAP_STYLE_NAMES } from '../../core/captions.js';
 import { RANSOM_FACES } from '../../core/ransom.js';
 import { ASPECTS, DESTINATION_NAMES } from '../../core/safe.js';
 import { GENERATORS, GENERATOR_BLURBS } from '../../core/generators.js';
@@ -161,7 +159,7 @@ const derived = catalogued().map((r) => {
 // must read the registries, never rewrite docs/EFFECTS.md.
 //
 // The hand-written half, and it stays hand-written for one reason each: none of these is a registry.
-// `BEATS`, `LAYER_TYPES`, `RESAMPLE_FX`, `CAP_STYLE_NAMES`, `GENERATORS` and the rest are
+// `BEATS`, `LAYER_TYPES`, `RESAMPLE_FX`, `GENERATORS` and the rest are
 // plain exports with no `defineRegistry` behind them, so there is no definition site to hang a catalog
 // block on. Two are not even one vocabulary: "Per-frame accent layers" and "Vector layer" are
 // pseudo-names for a MODE of a layer type, and "Plain words" merges three registries (feel · duration ·
@@ -184,7 +182,6 @@ export const sections = [
   ['Blend modes', '`mixBlend`: how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it, MDN `mix-blend-mode`' }],
   ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing', { skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md' }],
   ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
-  ['Caption styles', '`captions:{ style:"<name>" }`. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.', names(CAP_STYLE_NAMES), 'captions', { blurbs: CAPTION_BLURBS }],
   ['Ransom faces', '`ransom` on a text layer: per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface, see it, do not read about it' }],
   ['Output targets', '`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.', names([...Object.keys(ASPECTS), ...DESTINATION_NAMES]), 'canvas', { skip: 'an aspect or a platform; core/safe.js holds the safe area each implies' }],
   ['Generators (the playground)', 'Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.', names(GENERATORS.map((g) => g.name)), 'generator', { blurbs: GENERATOR_BLURBS }],

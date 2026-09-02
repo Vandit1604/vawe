@@ -79,15 +79,6 @@ const USAGE = {
   'plain-words-feel-duration-camera': (n) => (n in FEEL ? j({ ease: n })
     : n in DURATION ? j({ enterDur: n })
     : j({ cameraMove: { move: n } })),
-  // THE SHAPE THIS PRINTED WAS NOT A SHAPE THE ENGINE ACCEPTS. It emitted
-  // `captions: { style, cues: [...] }`, and the schema has `captionStyle` as a TOP-LEVEL string and
-  // `captions` as an ARRAY of {t0,t1,text}. So every one of these rows handed the author JSON that
-  // would fail `make validate` on the first line. Nothing checked it, because nothing renders a
-  // USAGE snippet; it is prose about code, and prose about code goes stale silently.
-  'caption-styles': (n) => j({
-    captionStyle: n,
-    captions: [{ t0: 0.3, t1: 4.6, text: 'Ship the payoff last', pin: 'center', size: 96 }],
-  }),
   'ransom-faces': (n) => text({ split: 'char', ransom: { faces: [n] } }),
   'output-targets': (n) => (n in ASPECTS ? j({ aspect: n }) : j({ destination: n })),
   'generators-the-playground': (n) => `// turn the dials at /playground?gen=${n}, then paste the markup:\n${j({ bg: [{ html: '…', from: 0, to: 6 }] })}`,
@@ -107,20 +98,6 @@ const TWO = (t) => [
 const OVER = { ...HERO, text: '', size: 96, y: 860, start: 0.4, duration: 5.2, anim: 'fade' };
 
 const PREVIEW = {
-  // CAPTIONS PLAY HERE, and the reason they did not is a claim the engine contradicts. This family
-  // carried "captions need a voice track and cues, which the index does not carry", so eleven styles
-  // sat on the page as names with no picture. core/captions.js opens by saying the opposite, in as
-  // many words: a line with NO `words` array gets deterministic per-word windows distributed by word
-  // length, "so every style still reads as intentional karaoke". Degradation is built in. The scene
-  // below carries no audio at all and every one of the eleven animates.
-  // It also places the caption at the CENTRE rather than in the bottom band, which is the only
-  // honest way to make a caption the subject of a 640x360 swatch, and is itself a demonstration of
-  // the placement grammar a caption gained in docs/MISTAKES.md #422.
-  'caption-styles': (n) => base({
-    captionStyle: n,
-    captions: [{ t0: 0.3, t1: 5.4, text: 'Ship the payoff last', pin: 'center', size: 96 }],
-    layers: [{ ...OVER, text: n, size: 44, y: 940, start: 0, duration: 6 }],
-  }),
   'per-frame-accent-layers': (n) => base({ layers: [
     { type: 'text', text: 'border-beam', x: 460, y: 480, w: 1000, align: 'center', size: 72, weight: 700, font: 'mono', bg: 'rgba(255,255,255,0.04)', pad: '44px', radius: 22, start: 0.3, duration: 5.4 },
     { type: 'beam', mode: n.includes('shine') ? 'shine' : 'border', x: 460, y: 470, w: 1000, h: 170, radius: 22, thickness: 3, tail: 90, speed: 0.5, glow: 0.6, start: 0.5, duration: 5.2 },

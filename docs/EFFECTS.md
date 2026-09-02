@@ -102,6 +102,32 @@ Top-level scene keys that change what the camera DOES rather than where it goes.
 | `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
 | `workspaceZoomOut` | pull back from a detail to reveal the whole |
 
+## Caption styles  `[captions]`
+
+`captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
+
+| name | what / when |
+|---|---|
+| `clipWipe` | LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time |
+| `flipUp` | the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all |
+| `focusPull` | a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size |
+| `ghostSplit` | two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme |
+| `highlight` | marker highlight sweep |
+| `inkFill` | the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself |
+| `kineticSlam` | the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still |
+| `letterRise` | the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing |
+| `neonEdge` | the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all |
+| `pillKaraoke` | a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant |
+| `readerFocus` | a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1 |
+| `scramble` | the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does |
+| `typeOn` | a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret |
+| `underlineDraw` | a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast |
+| `waveRide` | one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it |
+| `weightShift` | the spoken word RAMPS along the font's own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix |
+| `weightWave` | a crest of WEIGHT travels the line, each word riding the font's wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes |
+| `wordFlash` | ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint |
+| `wordSlide` | the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it |
+
 ## Cut timings  `[cuts[]/per-layer]`
 
 The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[{ "t":3, "style":"push", "timing":"ramp" }]`, or `cutTiming` on a per-layer cut. The style says what the transition looks like; the timing says how it accelerates. `ramp` is the editor's slow-fast-slow speed ramp, for a whip or a camera throw; `rush` accelerates away and suits an exit; `brake` decelerates in and suits an arrival. A scene writes the word and the schema enum is derived from this registry, but the arsenal never listed it.
@@ -893,32 +919,6 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `tour` | camera → `move: "travel"` |
 | `ui focus zoom` | camera → `move: "diveIn"` |
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
-
-## Caption styles  `[captions]`
-
-`captions:{ style:"<name>" }`. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
-
-| name | what / when |
-|---|---|
-| `clipWipe` | LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time |
-| `flipUp` | the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all |
-| `focusPull` | a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size |
-| `ghostSplit` | two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme |
-| `highlight` | marker highlight sweep |
-| `inkFill` | the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself |
-| `kineticSlam` | the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still |
-| `letterRise` | the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing |
-| `neonEdge` | the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all |
-| `pillKaraoke` | a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant |
-| `readerFocus` | a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1 |
-| `scramble` | the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does |
-| `typeOn` | a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret |
-| `underlineDraw` | a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast |
-| `waveRide` | one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it |
-| `weightShift` | the spoken word RAMPS along the font's own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix |
-| `weightWave` | a crest of WEIGHT travels the line, each word riding the font's wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes |
-| `wordFlash` | ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint |
-| `wordSlide` | the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it |
 
 ## Ransom faces  `[text]`
 
