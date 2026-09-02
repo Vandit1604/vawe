@@ -729,6 +729,7 @@ function LookCard({ gen, engine, active, onPick }:
 function ScenePreview({ url, title }: { url: string; title: string }) {
   // playing: FALSE. The page's contract is that nothing here moves and the panel says so in as many
   // words, but a generator that emits scene LAYERS came up through this hook with playback on, so the
+  // site-counts-allow: "two shader looks" counts the fields on this page, not the composite-look registry
   // two shader looks ran a 270-frame loop while every other look held still. A field is judged against
   // a still reference; a picture that changes while you look at it cannot be compared to one that does
   // not. One frame is drawn explicitly, because with no loop nobody else would draw it, and it is the

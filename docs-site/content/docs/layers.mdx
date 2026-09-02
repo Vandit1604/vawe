@@ -4,9 +4,9 @@ description: Every layer type in the scene vocabulary, the fields each one accep
 icon: Layers
 ---
 
-A layer is one element on the canvas. There are fourteen types, and you compose a video by stacking them. This page lists each type and its own fields; the fields shared by all layers are at the [bottom](#fields-every-layer-shares).
+A layer is one element on the canvas. There are 23 layer types, and you compose a video by stacking them. This page lists each type and its own fields; the fields shared by all layers are at the [bottom](#fields-every-layer-shares).
 
-The full list of types: `text`, `image`, `component`, `rect`, `count`, `group`, `glow`, `board`, `doc`, `html`, `clip`, `cursor`, `shader`, `lottie`.
+The full list of types: `text`, `count`, `image`, `video`, `group`, `rect`, `glow`, `beam`, `svg`, `cursor`, `clip`, `html`, `component`, `board`, `doc`, `shader`, `lottie`, `paint`, `raymarch`, `three`, `globe`, `composition`, `adjust`.
 
 ## text
 
@@ -28,7 +28,7 @@ The workhorse. Renders a headline or line of copy, optionally split and animated
 
 - `text` may contain `<b>` and `<em>`. Emphasis picks up `emColor` (the brand accent by default).
 - `size` ranges from 18 to a hard maximum of **260**. `weight` is 100 to 900. `font` is `sans`, `serif`, or `mono`.
-- `split` (`char`, `word`, or `line`) breaks the text into units, and `preset` animates each one. See the [25 kinetic presets](/docs/motion#kinetic-typography). `each` is the per-unit duration, `stagger` the delay between units.
+- `split` (`char`, `word`, or `line`) breaks the text into units, and `preset` animates each one. See the [31 kinetic presets](/docs/motion#kinetic-typography). `each` is the per-unit duration, `stagger` the delay between units.
 - `typing` renders a typewriter (a number is chars per second, `true` is 24), with an optional `caret`.
 - `fit` / `fitH` / `maxLines` auto-shrink a headline so it never overflows. `raw: true` opts out of the micro-typography pass.
 
@@ -43,6 +43,16 @@ A still image with a treatment. A bare image reads as flat, so give it one.
 - `ken` is a Ken Burns push (`true`, or `{from, to, fx, fy}`), capped at 8% travel and never reversing.
 - `edgeFade` dissolves the left and right edges into the background; set `edgeFadeColor` to your background on dark scenes (default `#ffffff`).
 - `radius` rounds the corners; `reflect` adds a floor reflection.
+
+## video
+
+Real footage. The engine seeks it to a computed source time every frame and never plays it, so the picture is as deterministic as a still.
+
+```json
+{ "type": "video", "src": "clip.mp4", "w": 900, "in": 2.5, "out": 8, "rate": 1, "fit": "cover" }
+```
+
+`in` and `out` cut the source range, `rate` retimes it, `poster` names a still for the first frame.
 
 ## component
 
@@ -102,6 +112,18 @@ A soft light source or directional beam.
 
 `glow` is a hex or `true` (theme accent), `intensity` 0.05 to 0.6, `beam` one of `right`, `left`, `up`, `down`.
 
+## svg, beam
+
+Two vector primitives. `svg` takes a path in `d` (with a `viewBox`) and draws itself on by stroke, then resolves into its fill, so a logo arrives as a line and lands as a solid; `morph` lerps one path into another. `beam` runs a light around a rounded-rect border, or sweeps a sheen across the box, closed-form in `t` rather than as a CSS keyframe.
+
+```json
+{ "type": "svg", "d": "M12 2 L22 20 H2 Z", "viewBox": "0 0 24 24", "draw": true, "stroke": "#fff", "fill": "#2563eb" }
+```
+
+```json
+{ "type": "beam", "w": 520, "h": 320, "mode": "border", "color": "#2563eb", "thickness": 2, "period": 3 }
+```
+
 ## board, doc
 
 Two structured cards. `board` is a mini Kanban (up to 4 columns of cards with labels). `doc` is a file or source card with a filename, an optional `diff`, and typed `blocks` (headings, mono body, code, bullets). Both are handy for product and developer stories.
@@ -121,6 +143,27 @@ An animated pointer that glides along a path and clicks. Pair it with a captured
 ## shader, html
 
 `shader` is an ambient WebGL field behind your content: `flow`, `aurora`, `plasma`, `drift`, or `mist`, tuned by `speed`, `intensity`, `colors`, and `seed`. (This is different from a [sting](/docs/motion#shader-stings), which is a brief cover over a cut.) `html` drops in hand-authored static HTML and CSS when you need something the primitives do not cover; `<script>` is stripped.
+
+## paint, raymarch, three, globe
+
+The rest of the canvas family. Each one paints its own pixels every frame from local time, so all four seek exactly like the primitives above.
+
+- `paint` is a generative Canvas 2D field, the same idea as `shader` written in JS rather than GLSL, and the one you can resample.
+- `raymarch` lights an implicit surface out of a distance field: a camera, a normal, a silhouette. The most expensive primitive in the engine, so give it one hero shot at the size it needs.
+- `three` is a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from `t`, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud.
+- `globe` is a dotted planet with tapered route arcs. Reach for `three: "globe"` instead only when you need a real sun vector.
+
+```json
+{ "type": "globe", "w": 720, "h": 720, "origin": [51.5, -0.1], "dest": [37.8, -122.4], "arcHeight": 0.4 }
+```
+
+## composition, adjust
+
+`composition` names a first-party hand-authored GSAP timeline in `core/compositions/` and passes it `props`, for choreography that `parts` and blueprints cannot express. `adjust` puts one grade over everything **beneath** it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust`.
+
+```json
+{ "type": "adjust", "kind": "blur", "amount": 0.6 }
+```
 
 ## Fields every layer shares
 

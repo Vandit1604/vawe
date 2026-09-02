@@ -25,7 +25,7 @@ time. The three attempts, in the order they failed: `filter` through `css` (refu
 layer orbiting the word (the wrong idea entirely). The signal is not subtle: **if you are hunting for
 the prop that does the thing CSS already does, stop and write the CSS.**
 
-The layer vocabulary is 20 types and ~197 props, and it is worth having. Reach for a layer TYPE when it
+The layer vocabulary is 23 layer types and ~197 props, and it is worth having. Reach for a layer TYPE when it
 does something you would otherwise hand-roll: `text` measures and fits and carries the theme's ink,
 `count` counts, `component` captures a real product surface, `group` scopes a box AND a clock.
 

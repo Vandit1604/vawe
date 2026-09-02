@@ -9,10 +9,12 @@ group: reference
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).
 Everything is pure in the frame number: same input, same bytes, any render order.
 
-**Vocabulary size: 26 cut presentations × 8 timings × 4 directions, 33 shader stings, 14 ambient
-shader looks, 26 composite looks, 8 canvas passes, 8 resample effects (layer-as-texture), 25 kinetic
-presets × 3 split modes, 14 easings + 3 velocity ramps, 14 background presets (recolored by every
-brand theme), 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
+**Vocabulary size: 27 cut presentations × 8 timings × 4 directions,
+35 shader stings, 21 ambient shader looks, 31 composite looks,
+8 canvas passes, 8 resample effects (layer-as-texture),
+31 kinetic presets × 3 split modes, 42 easings (the velocity ramps among them),
+21 background presets (recolored by every brand theme),
+16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.
 
 ## Responsive: one source → every aspect

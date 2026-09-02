@@ -17,6 +17,7 @@ import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
+import { LAYER_TYPES } from '../../core/layers/index.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
@@ -26,6 +27,13 @@ const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
 // only one file. A gate's blind spot is rarely the rule it states; it is the file list underneath it.
 const PRIM_PATH = path.join(repoRoot, 'docs', 'PRIMITIVES.md');
 const prim = fs.readFileSync(PRIM_PATH, 'utf8');
+// THIS TABLE SURVIVES site-counts.mjs WIDENING INTO docs/, and the reason is not the file list.
+// site-counts matches "<n> <noun>" and "<noun> (<n>)"; these headings put the number AFTER the noun
+// with a source path in between ("## Shader stings (`core/stings.js`), 35 WebGL cover-the-cut
+// effects"), and teaching that shape to a prose matcher would pair every trailing number with the
+// nearest preceding noun. It also checks something site-counts cannot: that the SENTENCE STILL
+// EXISTS. A regex that misses is reported below, so deleting the heading fails; a count nobody wrote
+// is a silent pass everywhere else.
 const HEADING_COUNTS = [
   { re: /## Shader stings \(`core\/stings\.js`\)[,:] (\d+)/,          reg: 'SHADER_FX' },
   { re: /## Ambient shader looks \(`core\/shaders-ambient\.js`\)[,:] (\d+)/, reg: 'AMBIENT_FX' },
@@ -98,6 +106,21 @@ if (fs.existsSync(BG_MDX)) {
   else if (+cm[1] !== BG_NAMES.length) findings.push(`docs-site backgrounds-and-images.mdx says ${cm[1]} bg presets, but core/backgrounds.js BG_NAMES holds ${BG_NAMES.length}`);
   const missing = BG_NAMES.filter((n) => !mdx.includes('`' + n + '`'));
   if (missing.length) findings.push(`docs-site backgrounds-and-images.mdx never lists bg preset(s): ${missing.join(', ')} (in core/backgrounds.js BG_NAMES)`);
+}
+
+// 4. THE LIST IS THE HARDER HALF OF THE COUNT, and it is the half that hides the damage.
+//    docs-site/content/docs/layers.mdx said "fourteen types" and then LISTED fourteen while the
+//    registry held 23, so nine primitives (video, beam, svg, composition, adjust, paint, raymarch,
+//    three, globe) were out of reach of anyone who took the page as the vocabulary, with nothing on
+//    it admitting it was partial. site-counts.mjs now holds the NUMBER. A corrected number over a
+//    list still missing nine names would be a green tick over the actual bug, so the names are
+//    checked here, the same way the bg presets above are and for the same reason: the list is
+//    copied, not derived.
+const LAYERS_MDX = path.join(repoRoot, 'docs-site', 'content', 'docs', 'layers.mdx');
+if (fs.existsSync(LAYERS_MDX)) {
+  const mdx = fs.readFileSync(LAYERS_MDX, 'utf8');
+  const missing = LAYER_TYPES.filter((n) => !mdx.includes('`' + n + '`'));
+  if (missing.length) findings.push(`docs-site layers.mdx never names layer type(s): ${missing.join(', ')} (in core/layers/index.js LAYER_TYPES)`);
 }
 
 // GRAMMAR.md IS GENERATED, so the only way it can be wrong is by being stale. Delegated to the

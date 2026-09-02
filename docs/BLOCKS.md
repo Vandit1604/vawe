@@ -44,6 +44,7 @@ layers.push(...B.stripeCard({ x: 1200, y: 260, start: 40 }));
 **Preview the whole library:** `make catalog` (auto-renders every entry to paged sheets).
 
 **Gate a scene for value:** `make critique D=formats/scene/<file>.json`, flags placeholder words,
+<!-- site-counts-allow: "22 shader stings" is a made-up on-screen claim in an example, not a count of the registry -->
 false claims (e.g. "22 shader stings" with no shader layer), static lists, illegible stings, lonely beats.
 
 ## Contract
@@ -57,7 +58,7 @@ false claims (e.g. "22 shader stings" with no shader layer), static lists, illeg
 
 ## The option contract (`blocks/schema.mjs`)
 
-Every one of the 70 families declares its options in a table, mirroring `core/lightfield/options.js`
+Every one of the 100 families declares its options in a table, mirroring `core/lightfield/options.js`
 key for key. A JS default is a value, not a contract: `w = 560` carries no floor, `color = SERIES[0]`
 carries no "this is a colour rather than a string", `tone = 'info'` carries no list of the spellings
 that paint. So no control panel could be built from a factory and no caller could be validated.
