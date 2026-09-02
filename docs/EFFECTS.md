@@ -200,6 +200,70 @@ Parametric field generators with declared option schemas, turnable at /playgroun
 | `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
 | `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
 
+## Lightfield envelope anchors  `[generator]`
+
+Which edge an element grows FROM. An envelope is a horizon, and a horizon has a side; the far end is the one that tapers. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `bottom` | the element grows UP from the bottom edge, so the free end, the one `taper` narrows, is at the top. The default |
+| `top` | the element hangs DOWN from the top edge, so the free end, the one `taper` narrows, is at the bottom |
+
+## Lightfield envelope shapes  `[generator]`
+
+How an element's extent varies with where it sits, as a curve across the row. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `arch` | a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome |
+| `circle` | the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse |
+| `crescent` | one circular arc with a second equal arc bitten out of it. A moon horn: empty on one side, a concave inner edge, a point at the tip |
+| `full` | the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does |
+| `hills` | three gaussians of unequal width and height summed, rolling ground: three summits with soft saddles between them |
+| `ramp` | a straight climb across the row, so the extents rise steadily from one side to the other |
+| `scallops` | the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall |
+| `valley` | the sine hump run upside down: a dip in the middle with both ends tall |
+| `wave` | a sinusoidal ripple across the row, so the extents rise and fall more than once between the two ends |
+
+## Lightfield motions  `[generator]`
+
+How the field lives against the frame clock. Driven off `var(--t)`, so it is seeked, never a CSS animation. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `breathe` | the whole field swells and settles on one slow cycle, the cells keeping their relation to each other |
+| `drift` | the field travels as one body, the cells holding station against each other |
+| `shimmer` | the cells slide against each other, so the seams open and close |
+| `still` | nothing moves: the output reads no clock at all |
+
+## Lightfield patterns  `[generator]`
+
+The STRUCTURE of a lightfield: what the elements are and which way the eye travels across them. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `rings` | concentric bands round a point, like light on water, the eye travels outwards |
+| `shards` | a fan of rays from a pivot below the frame, the eye travels up and out |
+| `slats` | a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across |
+
+## Lightfield shadow directions  `[generator]`
+
+Which way "away" is: the bearing the light falls off along. A keyword is a bearing and never a place, so `shadow.x`/`shadow.y` decide how far off centre the dark sits. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `bottom` | away is downward: the frame drains towards the bottom edge and stays lit at the top. The default bearing |
+| `bottom-left` | a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this |
+| `bottom-right` | a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this |
+| `center` | a radial: away in EVERY direction at once, so no edge can darken without the others darkening too |
+| `left` | a linear fall away to the left. A bearing and no centre, so only the move along it reaches the fall |
+| `left-and-right` | a lit vertical band with darkness at both sides and nothing taken off the top or bottom |
+| `right` | a linear fall away to the right |
+| `top` | away is upward: the frame drains towards the top edge and stays lit at the bottom |
+| `top-and-bottom` | a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes |
+| `top-left` | a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this |
+| `top-right` | a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this |
+
 ## Glow presets  `[glow layer]`
 
 `preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text. Each one is a named lighting behaviour rather than a gradient you tune by hand: `{ "type":"glow", "preset":"halation", "intensity":0.3 }`. `cx`/`cy` move the light centre, `angle` aims the spotlight cone, and `cycle` times the one preset that moves on its own. An unknown name THROWS and suggests the near word; it used to return null and paint the plain gradient in silence.
@@ -977,39 +1041,5 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `4:5` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 | `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 
-## Lightfield dials  `[generator]`
-
-The option vocabulary of the lightfield generators: the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth: `docs/LIGHTFIELD.md`.
-
-| name | what / when |
-|---|---|
-| `arch` | a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome |
-| `bottom` | as an anchor, the element grows up from the bottom edge and its free end is the top; as a direction, away is downward |
-| `bottom-left` | a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this |
-| `bottom-right` | a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this |
-| `breathe` | idle breathe |
-| `center` | a radial: away in EVERY direction at once, so no edge can darken without the others darkening too |
-| `circle` | the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse |
-| `crescent` | one circular arc with a second equal arc bitten out of it. A moon horn: empty on one side, a concave inner edge, a point at the tip |
-| `drift` | the field travels as one body, the cells holding station against each other |
-| `full` | the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does |
-| `hills` | three gaussians of unequal width and height summed, rolling ground: three summits with soft saddles between them |
-| `left` | a linear fall away to the left. A direction and no centre, so only the move along it reaches the fall |
-| `left-and-right` | a lit vertical band with darkness at both sides and nothing taken off the top or bottom |
-| `ramp` | a straight climb across the row, so the extents rise steadily from one side to the other |
-| `right` | a linear fall away to the right, the default bearing |
-| `rings` | concentric bands round a point, like light on water, the eye travels outwards |
-| `scallops` | the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall |
-| `shards` | a fan of rays from a pivot below the frame, the eye travels up and out |
-| `shimmer` | the cells slide against each other, so the seams open and close |
-| `slats` | a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across |
-| `still` | nothing moves: the output reads no clock at all |
-| `top` | as an anchor, the element hangs down from the top edge and its free end is the bottom; as a direction, away is upward |
-| `top-and-bottom` | a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes |
-| `top-left` | a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this |
-| `top-right` | a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this |
-| `valley` | the sine hump run upside down: a dip in the middle with both ends tall |
-| `wave` | sinusoidal wave across units |
-
 ---
-_639 effects across 49 families. Regenerate: `make effects`._
+_641 effects across 53 families. Regenerate: `make effects`._

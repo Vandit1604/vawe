@@ -1,7 +1,7 @@
 {
-  "total": 639,
+  "total": 641,
   "previewed": 291,
-  "families": 49,
+  "families": 53,
   "tags": [
     [
       "asset",
@@ -45,7 +45,7 @@
     ],
     [
       "generator",
-      35
+      37
     ],
     [
       "glow layer",
@@ -961,6 +961,274 @@
           "name": "thermalBlur",
           "stem": "generators-the-playground--thermalblur",
           "desc": "White type blurred, then remapped through a heat ramp · white cores, an orange body, a blue rim, and the thin strokes eaten away.",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "lightfield-envelope-anchors",
+      "title": "Lightfield envelope anchors",
+      "tag": "generator",
+      "intro": "Which edge an element grows FROM. An envelope is a horizon, and a horizon has a side; the far end is the one that tapers. Turn it with the rest at /playground; depth · `docs/LIGHTFIELD.md`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a dial is a value, not an effect. Turn them together at /playground.",
+      "count": 2,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bottom",
+          "stem": "lightfield-envelope-anchors--bottom",
+          "desc": "the element grows UP from the bottom edge, so the free end, the one `taper` narrows, is at the top. The default",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top",
+          "stem": "lightfield-envelope-anchors--top",
+          "desc": "the element hangs DOWN from the top edge, so the free end, the one `taper` narrows, is at the bottom",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "lightfield-envelope-shapes",
+      "title": "Lightfield envelope shapes",
+      "tag": "generator",
+      "intro": "How an element's extent varies with where it sits, as a curve across the row. Turn it with the rest at /playground; depth · `docs/LIGHTFIELD.md`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a dial is a value, not an effect. Turn them together at /playground.",
+      "count": 9,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "arch",
+          "stem": "lightfield-envelope-shapes--arch",
+          "desc": "a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "circle",
+          "stem": "lightfield-envelope-shapes--circle",
+          "desc": "the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "crescent",
+          "stem": "lightfield-envelope-shapes--crescent",
+          "desc": "one circular arc with a second equal arc bitten out of it. A moon horn · empty on one side, a concave inner edge, a point at the tip",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "full",
+          "stem": "lightfield-envelope-shapes--full",
+          "desc": "the no-op envelope, 1 everywhere · every element runs the whole frame, which is what a blind does",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "hills",
+          "stem": "lightfield-envelope-shapes--hills",
+          "desc": "three gaussians of unequal width and height summed, rolling ground · three summits with soft saddles between them",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "ramp",
+          "stem": "lightfield-envelope-shapes--ramp",
+          "desc": "a straight climb across the row, so the extents rise steadily from one side to the other",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "scallops",
+          "stem": "lightfield-envelope-shapes--scallops",
+          "desc": "the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "valley",
+          "stem": "lightfield-envelope-shapes--valley",
+          "desc": "the sine hump run upside down · a dip in the middle with both ends tall",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wave",
+          "stem": "lightfield-envelope-shapes--wave",
+          "desc": "a sinusoidal ripple across the row, so the extents rise and fall more than once between the two ends",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "lightfield-motions",
+      "title": "Lightfield motions",
+      "tag": "generator",
+      "intro": "How the field lives against the frame clock. Driven off `var(--t)`, so it is seeked, never a CSS animation. Turn it with the rest at /playground; depth · `docs/LIGHTFIELD.md`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a dial is a value, not an effect. Turn them together at /playground.",
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "breathe",
+          "stem": "lightfield-motions--breathe",
+          "desc": "the whole field swells and settles on one slow cycle, the cells keeping their relation to each other",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "drift",
+          "stem": "lightfield-motions--drift",
+          "desc": "the field travels as one body, the cells holding station against each other",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "shimmer",
+          "stem": "lightfield-motions--shimmer",
+          "desc": "the cells slide against each other, so the seams open and close",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "still",
+          "stem": "lightfield-motions--still",
+          "desc": "nothing moves · the output reads no clock at all",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "lightfield-patterns",
+      "title": "Lightfield patterns",
+      "tag": "generator",
+      "intro": "The STRUCTURE of a lightfield · what the elements are and which way the eye travels across them. Turn it with the rest at /playground; depth · `docs/LIGHTFIELD.md`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a dial is a value, not an effect. Turn them together at /playground.",
+      "count": 3,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "rings",
+          "stem": "lightfield-patterns--rings",
+          "desc": "concentric bands round a point, like light on water, the eye travels outwards",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "shards",
+          "stem": "lightfield-patterns--shards",
+          "desc": "a fan of rays from a pivot below the frame, the eye travels up and out",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "slats",
+          "stem": "lightfield-patterns--slats",
+          "desc": "a backlit blind · vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "lightfield-shadow-directions",
+      "title": "Lightfield shadow directions",
+      "tag": "generator",
+      "intro": "Which way \"away\" is · the bearing the light falls off along. A keyword is a bearing and never a place, so `shadow.x`/`shadow.y` decide how far off centre the dark sits. Turn it with the rest at /playground; depth · `docs/LIGHTFIELD.md`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a dial is a value, not an effect. Turn them together at /playground.",
+      "count": 11,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bottom",
+          "stem": "lightfield-shadow-directions--bottom",
+          "desc": "away is downward · the frame drains towards the bottom edge and stays lit at the top. The default bearing",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-left",
+          "stem": "lightfield-shadow-directions--bottom-left",
+          "desc": "a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-right",
+          "stem": "lightfield-shadow-directions--bottom-right",
+          "desc": "a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "center",
+          "stem": "lightfield-shadow-directions--center",
+          "desc": "a radial · away in EVERY direction at once, so no edge can darken without the others darkening too",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "left",
+          "stem": "lightfield-shadow-directions--left",
+          "desc": "a linear fall away to the left. A bearing and no centre, so only the move along it reaches the fall",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "left-and-right",
+          "stem": "lightfield-shadow-directions--left-and-right",
+          "desc": "a lit vertical band with darkness at both sides and nothing taken off the top or bottom",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "right",
+          "stem": "lightfield-shadow-directions--right",
+          "desc": "a linear fall away to the right",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top",
+          "stem": "lightfield-shadow-directions--top",
+          "desc": "away is upward · the frame drains towards the top edge and stays lit at the bottom",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-and-bottom",
+          "stem": "lightfield-shadow-directions--top-and-bottom",
+          "desc": "a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-left",
+          "stem": "lightfield-shadow-directions--top-left",
+          "desc": "a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-right",
+          "stem": "lightfield-shadow-directions--top-right",
+          "desc": "a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this",
           "scene": null,
           "noPreview": null
         }
@@ -5004,208 +5272,6 @@
           "name": "9:16",
           "stem": "output-targets--9-16",
           "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "lightfield-dials",
-      "title": "Lightfield dials",
-      "tag": "generator",
-      "intro": "The option vocabulary of the lightfield generators · the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth · `docs/LIGHTFIELD.md`.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "a dial is a value, not an effect. Turn them together at /playground.",
-      "count": 27,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "arch",
-          "stem": "lightfield-dials--arch",
-          "desc": "a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "bottom",
-          "stem": "lightfield-dials--bottom",
-          "desc": "as an anchor, the element grows up from the bottom edge and its free end is the top; as a direction, away is downward",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "bottom-left",
-          "stem": "lightfield-dials--bottom-left",
-          "desc": "a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "bottom-right",
-          "stem": "lightfield-dials--bottom-right",
-          "desc": "a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "breathe",
-          "stem": "lightfield-dials--breathe",
-          "desc": "idle breathe",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "center",
-          "stem": "lightfield-dials--center",
-          "desc": "a radial · away in EVERY direction at once, so no edge can darken without the others darkening too",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "circle",
-          "stem": "lightfield-dials--circle",
-          "desc": "the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "crescent",
-          "stem": "lightfield-dials--crescent",
-          "desc": "one circular arc with a second equal arc bitten out of it. A moon horn · empty on one side, a concave inner edge, a point at the tip",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "drift",
-          "stem": "lightfield-dials--drift",
-          "desc": "the field travels as one body, the cells holding station against each other",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "full",
-          "stem": "lightfield-dials--full",
-          "desc": "the no-op envelope, 1 everywhere · every element runs the whole frame, which is what a blind does",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "hills",
-          "stem": "lightfield-dials--hills",
-          "desc": "three gaussians of unequal width and height summed, rolling ground · three summits with soft saddles between them",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "left",
-          "stem": "lightfield-dials--left",
-          "desc": "a linear fall away to the left. A direction and no centre, so only the move along it reaches the fall",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "left-and-right",
-          "stem": "lightfield-dials--left-and-right",
-          "desc": "a lit vertical band with darkness at both sides and nothing taken off the top or bottom",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "ramp",
-          "stem": "lightfield-dials--ramp",
-          "desc": "a straight climb across the row, so the extents rise steadily from one side to the other",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "right",
-          "stem": "lightfield-dials--right",
-          "desc": "a linear fall away to the right, the default bearing",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "rings",
-          "stem": "lightfield-dials--rings",
-          "desc": "concentric bands round a point, like light on water, the eye travels outwards",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "scallops",
-          "stem": "lightfield-dials--scallops",
-          "desc": "the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "shards",
-          "stem": "lightfield-dials--shards",
-          "desc": "a fan of rays from a pivot below the frame, the eye travels up and out",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "shimmer",
-          "stem": "lightfield-dials--shimmer",
-          "desc": "the cells slide against each other, so the seams open and close",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "slats",
-          "stem": "lightfield-dials--slats",
-          "desc": "a backlit blind · vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "still",
-          "stem": "lightfield-dials--still",
-          "desc": "nothing moves · the output reads no clock at all",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "top",
-          "stem": "lightfield-dials--top",
-          "desc": "as an anchor, the element hangs down from the top edge and its free end is the bottom; as a direction, away is upward",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "top-and-bottom",
-          "stem": "lightfield-dials--top-and-bottom",
-          "desc": "a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "top-left",
-          "stem": "lightfield-dials--top-left",
-          "desc": "a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "top-right",
-          "stem": "lightfield-dials--top-right",
-          "desc": "a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "valley",
-          "stem": "lightfield-dials--valley",
-          "desc": "the sine hump run upside down · a dip in the middle with both ends tall",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "wave",
-          "stem": "lightfield-dials--wave",
-          "desc": "sinusoidal wave across units",
           "scene": null,
           "noPreview": null
         }

@@ -19,7 +19,6 @@ import { catalogued } from '../../core/registry.js';
 // the description, and blueprints-catalog.mjs already fails when one is missing. The hand-kept copy that
 // used to live in DESC had drifted: 3 of 12 beats were absent from it.
 import { BEAT_BLURBS } from './blueprints-catalog.mjs';
-import { LIGHTFIELD_BLURBS } from '../../core/lightfield/options.js';
 import { BEATS } from '../../blueprints/index.mjs';
 // `scripts/gates/arsenal-check.mjs` fails when a vocabulary the engine exports reaches none of these
 // sections. The catalogue is what CLAUDE.md sends an author to before they choose, and it once did not
@@ -30,7 +29,6 @@ import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { EASINGS } from '../../core/motion.js';
 import { RANSOM_FACES } from '../../core/ransom.js';
 import { ASPECTS } from '../../core/safe.js';
-import { PATTERNS, SHAPES, ANCHORS, DIRECTIONS, MOTIONS } from '../../core/lightfield/options.js';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -177,7 +175,6 @@ export const sections = [
   ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
   ['Ransom faces', '`ransom` on a text layer: per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface, see it, do not read about it' }],
   ['Output targets', '`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.', names(Object.keys(ASPECTS)), 'canvas', { skip: 'a ratio is its own definition; the safe area it implies belongs to the destination, in the section below' }],
-  ['Lightfield dials', 'The option vocabulary of the lightfield generators: the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth: `docs/LIGHTFIELD.md`.', names([...PATTERNS, ...SHAPES, ...ANCHORS, ...DIRECTIONS, ...MOTIONS]), 'generator', { blurbs: LIGHTFIELD_BLURBS }],
 ];
 
 // Imported (by scripts/site/effects-json.mjs) this module is a DATA source for `sections`, so the

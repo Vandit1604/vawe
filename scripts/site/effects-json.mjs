@@ -78,7 +78,6 @@ const USAGE = {
     : j({ cameraMove: { move: n } })),
   'ransom-faces': (n) => text({ split: 'char', ransom: { faces: [n] } }),
   'output-targets': (n) => j({ module: 'scene', aspect: n }),
-  'lightfield-dials': (n) => `// a lightfield option value, turned at /playground:\n${j({ pattern: n })}`,
 };
 
 // ── the scene a previewable effect plays ────────────────────────────────────────────────────────
@@ -126,7 +125,6 @@ const NO_PREVIEW = {
   'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
   'ransom-faces': 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
   'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
-  'lightfield-dials': 'a dial is a value, not an effect. Turn them together at /playground.',
 };
 
 // ── build ───────────────────────────────────────────────────────────────────────────────────────
