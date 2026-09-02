@@ -19,7 +19,7 @@ export const PROPS = { motion: {}, w: { when: 'motion' }, h: { when: 'motion' } 
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(L.motion && L.motion.length && (L.motion[0].w != null || L.motion[0].h != null || L.motion[0].track != null))) return;
   const inWin = t >= start && t < end;
-  const b = inWin ? motionAt(L.motion, t - start) : null;
+  const b = inWin ? motionAt(L.motion, t - start, L.motionDelay) : null;
   const bw = inWin && b.w != null ? b.w : L.w;
   const bh = inWin && b.h != null ? b.h : L.h;
   if (bw != null) el.style.width = bw.toFixed(2) + 'px';

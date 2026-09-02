@@ -83,6 +83,7 @@
    "morph",
    "motion",
    "motionBlur",
+   "motionDelay",
    "motionPath",
    "on",
    "opacity",
@@ -1978,6 +1979,8 @@
      "type": "array",
      "label": "Keyframe track, element choreography (pure in t). Offsets on the base position.",
      "item": {
+      "ox": { "type": "number", "label": "Anchor point X at this key, as a PERCENT of the layer's own box. The pivot a scale or rotation grows out of, keyed so it can TRAVEL: `origin` is the static version and cannot move. Both endpoints of a segment must state it, or neither does." },
+      "oy": { "type": "number", "label": "Anchor point Y at this key, as a PERCENT of the layer's own box. See `ox`." },
       "t": {
        "type": "number",
        "label": "Seconds from layer start"
@@ -2002,6 +2005,7 @@
        "type": "number",
        "label": "Opacity multiplier"
       },
+      "blur": { "type": "number", "label": "Gaussian blur (px) at this key. Keyable like every other pose property, and undocumented here until schema-drift learned to compare this block against the evaluator." },
       "w": {
        "type": "number",
        "label": "Width (px) at this key. The layer's BOX, not a scale: content re-fits instead of magnifying, which is how a sidebar collapses or a grid reflows. Needs a base `w` on the layer; state it on one key and every key inherits it."
@@ -2025,6 +2029,10 @@
        "label": "THE HANDLE ARRIVING AT THIS KEY, a graph-editor control point for the segment that ENDS here. Same shape as `easeOut`: a name, or { \"influence\": 0-100, \"speed\": a multiple of the segment's average velocity }. `easeIn: \"easyEase\"` is the AE dead-stop arrival; `easeIn: \"fling\"` arrives fast and is what makes a swap read as one gesture rather than a dissolve. Pairs with `easeOut` on the PREVIOUS key."
       }
      }
+    },
+    "motionDelay": {
+      "type": "number|object",
+      "label": "PER-PROPERTY timing on the motion track: seconds to delay ONE property's sampling, so scale can finish after position and rotation can settle after the travel (follow-through). A number delays every property; a map delays by name with \"*\" as its own default: { \"rot\": 0.1, \"scale\": 0.06 }. It shifts WHEN a property is read off the same track and changes no value and no keyframe."
     },
     "motionBlur": {
      "label": "Velocity motion blur on this layer's motion track (streak on fast moves; crisp when settled). true = half-shutter; a 0..1 number sets strength. Needs a motion track."

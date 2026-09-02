@@ -910,7 +910,7 @@ boot((data, fps, theme, canvas) => {
       const { L, el } = layers[i];
       const start = L.start ?? 0, end = start + (L.duration ?? 2);
       const visible = t >= start && t < end;
-      const m = visible && L.motion && L.motion.length ? motionAt(L.motion, t - start) : null;
+      const m = visible && L.motion && L.motion.length ? motionAt(L.motion, t - start, L.motionDelay) : null;
       const base = (L.id && baseSize.get(L.id)) || { w: 0, h: 0 };
       const w = m && m.w != null ? m.w : (L.w ?? base.w);
       const h = m && m.h != null ? m.h : (L.h ?? base.h);

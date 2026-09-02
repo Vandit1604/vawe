@@ -114,13 +114,36 @@ export const DENSE_KEY_SEC = 0.14;
 // "where it was authored". These three do not. Identity for `w` is the layer's own authored `w`;
 // identity for `track` is the layer's own z-order. A pure evaluator cannot know either, so an omitted
 // value inside motionAt could only ever mean "hold the neighbour", a second, different interpretation
-// rule, in the one file where a second rule already cost this repo a day (docs/MISTAKES.md #195, the
-// per-property motionAt that would have made a button invisible for a whole film).
+// rule, in the one file where a second rule already cost this repo a day (docs/MISTAKES.md #563: a
+// panel sprang back to its declared width because a later key mentioned only `scale`).
 //
 // So the fill happens HERE, once, with the layer in hand, and motionAt keeps exactly one rule: both
 // endpoints state the value, or neither does. A track that mentions none of them is untouched and
 // returns null for all three, which is how a layer opts out of paying for any of this.
 export const LAYER_OWNED = ['w', 'h', 'track'];
+
+// WHAT A KEYFRAME CARRIES, and the table the pose is BUILT from, so the two cannot disagree.
+//
+// The first cut of this hand-wrote the list and got the handle names wrong, guessing `in`/`out` where
+// the code says `easeIn`/`easeOut`, and three shipped films were refused for writing the correct thing.
+// A second list is the failure this whole file argues against and it was written INSIDE the check for
+// it. So: `POSE` maps the AUTHORED name to the pose key and its identity, `norm` is generated from it,
+// `SIDES` already owned the handle names and is spread in rather than retyped.
+//
+//   authored          pose key    identity when the key omits it
+export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['rot', 0],
+  opacity: ['opacity', 1], blur: ['blur', 0], w: ['w', null], h: ['h', null], track: ['track', null],
+  // THE ANCHOR POINT, KEYED. `origin` is a static CSS transform-origin written once at build
+  // (core/layers/util.js applyOrigin), so the pivot a scale or rotation grows out of could never move.
+  // AE keys the anchor point, and a travelling pivot is how a door swings from one hinge and then the
+  // other, or how a panel grows from its left edge and then from its centre. Nesting in a group buys a
+  // DIFFERENT FIXED pivot, never a moving one, so the workaround was never the same thing.
+  //
+  // Two numbers rather than the CSS string, because interpolating "0% 50%" would mean parsing a
+  // keyword-or-length-or-percentage grammar per frame to move a point. `ox`/`oy` are PERCENTAGES of the
+  // layer's own box, which is the form authors already write for the static prop, and identity is null
+  // so a track that never mentions them leaves `origin` exactly as the layer set it.
+  ox: ['ox', null], oy: ['oy', null] };
 
 export function resolveKeyedProps(layers) {
   (layers || []).forEach((L, idx) => {
@@ -128,6 +151,26 @@ export function resolveKeyedProps(layers) {
     // Two authored curves on one segment, refused with the layer in hand. This walk already exists and
     // already names the layer, so the check goes here instead of in a second pass over the same list.
     assertKeyHandles(L.motion, `layer "${L.id || L.type || '?'}"`);
+    // A KEY THAT CARRIES A PROPERTY NOTHING INTERPOLATES IS ACCEPTED-THEN-IGNORED, which is the failure
+    // this repo pays for most. `origin` is the one that found this: it reads as a keyable anchor point,
+    // an author writes a pivot that travels, and `origin` is a static CSS transform-origin written once
+    // at build (core/layers/util.js applyOrigin), so the pivot does not move and nothing says so. Every
+    // other unknown key was in the same position: `{"t":0,"rot":0,"zzNonsense":5}` validated clean.
+    //
+    // Refused here rather than in core/validate.mjs because this walk runs at BOOT, so a scene that
+    // reaches the renderer by any route is checked, and it already has the layer in hand to name it.
+    for (const k of L.motion) {
+      const stray = Object.keys(k || {}).filter((p) => !KEYFRAME_PROPS.includes(p) && !p.startsWith('_'));
+      if (stray.length) {
+        throw new Error(`layer "${L.id || L.type || '?'}" has a motion keyframe carrying ${stray.map((p) => `\`${p}\``).join(', ')}, `
+          + `which nothing interpolates, so it would be accepted and ignored. A keyframe carries: `
+          + `${KEYFRAME_PROPS.join(' · ')}.`
+          + (stray.includes('origin')
+            ? ` \`origin\` is the STATIC transform-origin and belongs on the layer. To make the pivot `
+              + `TRAVEL, key \`ox\`/\`oy\` instead: percentages of the layer's own box, on both endpoints.`
+            : ''));
+      }
+    }
     for (const prop of LAYER_OWNED) {
       if (!L.motion.some((k) => k && k[prop] != null)) continue;
       // `track` always has an identity: scene.js defaults a layer's z-order to its position in the
@@ -232,6 +275,10 @@ export function segmentAt(kfs, i, t, dfltEase) {
 // segment is a third. Picking one silently is how this repo gets its worst bugs, so all three are
 // refused by name.
 const SIDES = ['easeIn', 'easeOut'];
+
+// `t` is the time, `ease` drives the segment INTO this key, SIDES are its two bezier handles, and the
+// rest are the values that travel. Every name here is read; nothing here is a second copy of anything.
+export const KEYFRAME_PROPS = ['t', 'ease', ...SIDES, ...Object.keys(POSE)];
 export function keyHandleErrors(kfs, who = 'a track') {
   const out = [];
   if (!Array.isArray(kfs)) return out;
@@ -271,8 +318,43 @@ export function assertKeyHandles(kfs, who) {
   if (errs.length) throw new Error(errs[0]);
 }
 
-export function motionAt(kfs, lt) {
-  const norm = (k) => ({ dx: k.x ?? 0, dy: k.y ?? 0, scale: k.scale ?? 1, rot: k.rot ?? 0, opacity: k.opacity ?? 1, blur: k.blur ?? 0, w: k.w ?? null, h: k.h ?? null, track: k.track ?? null });
+// PER-PROPERTY TIMING. `motionDelay` shifts the time at which ONE property is sampled off the same
+// track, so scale can finish after position and rotation can settle a beat after the travel. That is
+// follow-through, Thomas and Johnston's fifth principle and Williams' successive breaking of joints,
+// and without it every property on a layer stops on the same frame, which is the difference between a
+// thing that moves and a thing that is moved. Measured before it was built: 138 of the 283 motion
+// tracks in the library key position AND scale/rot/opacity together, so the case is half the library
+// rather than a hypothetical.
+//
+// IT ADDS NO SECOND INTERPRETATION RULE, which is the thing this file refuses (docs/MISTAKES.md #563).
+// The track is read exactly as before; only the CLOCK differs per property, and a shifted pure function
+// is still pure. Both endpoints still state a value or neither does.
+//
+// SPELLED LIKE `varsDelay`, ON PURPOSE. core/tracks/vars.js already solved per-channel timing for CSS
+// variables after the identical argument (#357), taking a scalar or a map with `'*'` as its default. A
+// third spelling of "when does this channel start" is the drift this codebase pays for most, so this is
+// the second use of one shape rather than a new idea.
+//
+// NOT `lag`, which is taken and means something else: core/fx/lag.js makes one LAYER trail ANOTHER and
+// adds an overrun. This is within one layer and adds nothing. The two are the same principle at
+// different scopes and they should not be confused at the call site.
+const DELAYABLE = Object.entries(POSE).filter(([p]) => p !== 'track').map(([p, [out]]) => [out, p]);
+const delayOf = (d, prop) => (d && typeof d === 'object' && !Array.isArray(d) ? (d[prop] ?? d['*'] ?? 0) : (d ?? 0));
+
+export function motionAt(kfs, lt, motionDelay) {
+  const pose = poseAt(kfs, lt);
+  if (!motionDelay) return pose;
+  for (const [out, prop] of DELAYABLE) {
+    const d = delayOf(motionDelay, prop);
+    // A layer-owned prop the track never keys comes back null and must STAY null: sampling it earlier
+    // would hand the caller a number for a property the author never animated.
+    if (d && pose[out] !== null) pose[out] = poseAt(kfs, lt - d)[out];
+  }
+  return pose;
+}
+
+function poseAt(kfs, lt) {
+  const norm = (k) => Object.fromEntries(Object.entries(POSE).map(([p, [out, id]]) => [out, k[p] ?? id]));
   if (lt <= kfs[0].t) return norm(kfs[0]);
   const last = kfs[kfs.length - 1];
   if (lt >= last.t) return norm(last);
@@ -289,10 +371,12 @@ export function motionAt(kfs, lt) {
       // Layer-owned props: one rule, no fallback. Both endpoints carry a number (resolveKeyedProps saw
       // to that) or the track does not animate that property and the caller leaves the element alone.
       const own = (prop) => (a[prop] == null || b[prop] == null ? null : at(prop, 0));
-      return { dx: at('x', 0), dy: at('y', 0),
-        scale: at('scale', 1), rot: at('rot', 0),
-        opacity: at('opacity', 1), blur: at('blur', 0),
-        w: own('w'), h: own('h'), track: own('track') };
+      // GENERATED FROM `POSE`, like `norm` above, because these were two hand-written literals of one
+      // fact and they had already drifted: adding a property to the table moved the endpoints and left
+      // the interior returning undefined for it, which is a value that reads as "not keyed" everywhere.
+      // A null identity in the table means the property is LAYER-OWNED and needs both endpoints.
+      return Object.fromEntries(Object.entries(POSE).map(([p, [out, id]]) =>
+        [out, id === null ? own(p) : at(p, id)]));
     }
   }
   return norm(last);
@@ -313,6 +397,12 @@ export function motionAt(kfs, lt) {
 // poseBack(kfs, lt, dt): the pose `dt` seconds before local time `lt`, CLAMPED at the layer's own
 // first pose. A film that opens on a move therefore opens with zero velocity rather than an
 // extrapolated one, because a thing that has not moved yet has not been anywhere else.
+// It takes NO `motionDelay`, and that is a decision rather than an oversight. Velocity here feeds the
+// motion blur and the follow track, both of which want the layer's TRAVEL, and travel is position.
+// `motionDelay` on `x` or `y` shifts that travel and is therefore visible to velocity through the pose
+// itself; a delay on `scale` or `rot` is not, and a blur streak keyed to a rotation that has not
+// happened yet would be reading the future. If somebody later wants blur to follow a delayed rotation,
+// that is a real feature and it starts here, deliberately.
 export const poseBack = (kfs, lt, dt) => motionAt(kfs, Math.max(0, lt - dt));
 
 // velocityAt(kfs, lt, dt): the layer's travel over the window ENDING at lt, in px per SECOND.

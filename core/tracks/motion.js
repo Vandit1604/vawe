@@ -23,7 +23,9 @@ export const slot = 'transform';
 // `motionBlur` is derived from the DISTANCE between two samples of the motion track, so without a track
 // there is nothing to differentiate and the prop decides nothing, including `motionBlur: false`, which
 // opts out of an automatic blur that a still layer would never have had.
-export const PROPS = { motion: {}, motionBlur: { when: 'motion' } };
+export const PROPS = {
+  // Read here and by core/tracks/box.js and the scene's own pose pass, all three through motionAt.
+  motionDelay: { when: 'motion' }, motion: {}, motionBlur: { when: 'motion' } };
 
 // The scene's shutter, in the units a camera states it in, converted once. Exported so the one place
 // that builds the track kit reads the conversion rather than restating it (formats/scene/scene.js).
@@ -160,9 +162,14 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
     return;
   }
   const fps = kit.fps;
-  const m = motionAt(L.motion, t - start);
+  const m = motionAt(L.motion, t - start, L.motionDelay);
   const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
   el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
+  // A KEYED ANCHOR POINT. Written only when the track mentions it, so a layer's static `origin` is
+  // untouched by every film that does not: `ox`/`oy` come back null from the pose otherwise. It is set
+  // BEFORE the browser applies the transform above in the same frame, and both are plain style writes,
+  // so there is no ordering subtlety to get wrong.
+  if (m.ox != null || m.oy != null) el.style.transformOrigin = `${(m.ox ?? 50).toFixed(2)}% ${(m.oy ?? 50).toFixed(2)}%`;
   el.style.opacity = (baseOpacity(el) * m.opacity).toFixed(3);
   // TWO blur materials, summed into one blur():
   //  (a) focus-pull: the authored m.blur track (depth / rack-focus).
