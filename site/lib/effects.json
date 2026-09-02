@@ -898,6 +898,75 @@
       ]
     },
     {
+      "id": "generators-the-playground",
+      "title": "Generators (the playground)",
+      "tag": "generator",
+      "intro": "Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "generators have their own surface with every dial attached: /playground.",
+      "count": 8,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bands",
+          "stem": "generators-the-playground--bands",
+          "desc": "A ramp repeated over a field · panels, concentric arcs or nested rounds, with a light behind.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "colonnade",
+          "stem": "generators-the-playground--colonnade",
+          "desc": "Wide panels split by bright hairlines, soft masses under a glow.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "crt",
+          "stem": "generators-the-playground--crt",
+          "desc": "A cathode ray tube · the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "effector",
+          "stem": "generators-the-playground--effector",
+          "desc": "One travelling point drives a whole grid by DISTANCE, not by order · a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "keyframeHandle",
+          "stem": "generators-the-playground--keyframehandle",
+          "desc": "The graph editor for one keyframe pair · per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "rangeSelector",
+          "stem": "generators-the-playground--rangeselector",
+          "desc": "The AE range selector's smoothness dial on this engine's kinetic presets · at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "spectrum",
+          "stem": "generators-the-playground--spectrum",
+          "desc": "Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thermalBlur",
+          "stem": "generators-the-playground--thermalblur",
+          "desc": "White type blurred, then remapped through a heat ramp · white cores, an orange body, a blue rim, and the thin strokes eaten away.",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "glow-presets",
       "title": "Glow presets",
       "tag": "glow layer",
@@ -4935,75 +5004,6 @@
           "name": "9:16",
           "stem": "output-targets--9-16",
           "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "generators-the-playground",
-      "title": "Generators (the playground)",
-      "tag": "generator",
-      "intro": "Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "generators have their own surface with every dial attached: /playground.",
-      "count": 8,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "bands",
-          "stem": "generators-the-playground--bands",
-          "desc": "A ramp repeated over a field · panels, concentric arcs or nested rounds, with a light behind.",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "colonnade",
-          "stem": "generators-the-playground--colonnade",
-          "desc": "Wide panels split by bright hairlines, soft masses under a glow.",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "crt",
-          "stem": "generators-the-playground--crt",
-          "desc": "A cathode ray tube · the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top.",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "effector",
-          "stem": "generators-the-playground--effector",
-          "desc": "One travelling point drives a whole grid by DISTANCE, not by order · a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "keyframeHandle",
-          "stem": "generators-the-playground--keyframehandle",
-          "desc": "The graph editor for one keyframe pair · per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "rangeSelector",
-          "stem": "generators-the-playground--rangeselector",
-          "desc": "The AE range selector's smoothness dial on this engine's kinetic presets · at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs.",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "spectrum",
-          "stem": "generators-the-playground--spectrum",
-          "desc": "Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it.",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "thermalBlur",
-          "stem": "generators-the-playground--thermalblur",
-          "desc": "White type blurred, then remapped through a heat ramp · white cores, an orange body, a blue rim, and the thin strokes eaten away.",
           "scene": null,
           "noPreview": null
         }

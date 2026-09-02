@@ -185,6 +185,21 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 | `spinOut` | rotates a half turn while shrinking away, winding up before it goes, the mirror of spinIn |
 | `zoomOut` | swells past the camera as it fades, product focus, the leaving beat gets out of the way |
 
+## Generators (the playground)  `[generator]`
+
+Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.
+
+| name | what / when |
+|---|---|
+| `bands` | A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind. |
+| `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
+| `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
+| `effector` | One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone. |
+| `keyframeHandle` | The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens. |
+| `rangeSelector` | The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs. |
+| `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
+| `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
+
 ## Glow presets  `[glow layer]`
 
 `preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text. Each one is a named lighting behaviour rather than a gradient you tune by hand: `{ "type":"glow", "preset":"halation", "intensity":0.3 }`. `cx`/`cy` move the light centre, `angle` aims the spotlight cone, and `cycle` times the one preset that moves on its own. An unknown name THROWS and suggests the near word; it used to return null and paint the plain gradient in silence.
@@ -961,21 +976,6 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `4:3` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 | `4:5` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 | `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
-
-## Generators (the playground)  `[generator]`
-
-Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.
-
-| name | what / when |
-|---|---|
-| `bands` | A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind. |
-| `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
-| `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
-| `effector` | One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone. |
-| `keyframeHandle` | The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens. |
-| `rangeSelector` | The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs. |
-| `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
-| `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
 
 ## Lightfield dials  `[generator]`
 
