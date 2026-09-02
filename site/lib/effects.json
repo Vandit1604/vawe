@@ -1,7 +1,7 @@
 {
-  "total": 623,
-  "previewed": 276,
-  "families": 46,
+  "total": 630,
+  "previewed": 283,
+  "families": 47,
   "tags": [
     [
       "asset",
@@ -42,6 +42,10 @@
     [
       "generator",
       35
+    ],
+    [
+      "glow layer",
+      7
     ],
     [
       "layer",
@@ -429,6 +433,68 @@
           "stem": "scramble-charsets-chars--uppercase",
           "desc": "capitals · only, · the · calmest · scramble · and · the · one · that · keeps · a · headline · reading · as · type",
           "scene": "/assets/effects/scramble-charsets-chars--uppercase.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "glow-presets",
+      "title": "Glow presets",
+      "tag": "glow layer",
+      "intro": "`preset` · on · a · `glow` · layer, · the · same · slot · the · kinetic · presets · use · on · a · text · layer · and · a · different · vocabulary, · because · a · glow · carries · no · split · text. · Each · one · is · a · named · lighting · behaviour · rather · than · a · gradient · you · tune · by · hand · `{ · \"type\" · \"glow\", · \"preset\" · \"halation\", · \"intensity\" · 0.3 · }`. · `cx`/`cy` · move · the · light · centre, · `angle` · aims · the · spotlight · cone, · and · `cycle` · times · the · one · preset · that · moves · on · its · own. · An · unknown · name · THROWS · and · suggests · the · near · word; · it · used · to · return · null · and · paint · the · plain · gradient · in · silence.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 7,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bloom",
+          "stem": "glow-presets--bloom",
+          "desc": "a · hot · near-white · core · falling · off · to · the · accent · light · overflowing · a · bright · source",
+          "scene": "/assets/effects/glow-presets--bloom.json",
+          "noPreview": null
+        },
+        {
+          "name": "chromaCycle",
+          "stem": "glow-presets--chromacycle",
+          "desc": "a · saturated · neon · bloom · whose · hue · sweeps · the · spectrum · over · `cycle` · seconds",
+          "scene": "/assets/effects/glow-presets--chromacycle.json",
+          "noPreview": null
+        },
+        {
+          "name": "chromatic",
+          "stem": "glow-presets--chromatic",
+          "desc": "an · RGB-split · halo · three · channel · copies · offset · and · screen-blended, · white · core, · colour · fringe",
+          "scene": "/assets/effects/glow-presets--chromatic.json",
+          "noPreview": null
+        },
+        {
+          "name": "diffusion",
+          "stem": "glow-presets--diffusion",
+          "desc": "a · broad · low-alpha · white · veil, · screen-blended · lifts · blacks · without · recolouring · below",
+          "scene": "/assets/effects/glow-presets--diffusion.json",
+          "noPreview": null
+        },
+        {
+          "name": "halation",
+          "stem": "glow-presets--halation",
+          "desc": "a · tight · warm · core · plus · a · wide · faint · ring, · the · film · halation. · Low · intensity · on · purpose",
+          "scene": "/assets/effects/glow-presets--halation.json",
+          "noPreview": null
+        },
+        {
+          "name": "rimLight",
+          "stem": "glow-presets--rimlight",
+          "desc": "an · off-centre · crescent, · lit · edge · up-right. · Place · the · subject · there",
+          "scene": "/assets/effects/glow-presets--rimlight.json",
+          "noPreview": null
+        },
+        {
+          "name": "spotlight",
+          "stem": "glow-presets--spotlight",
+          "desc": "a · soft-edged · cone · from · an · apex, · aimed · by · `angle`, · faded · with · distance · so · it · never · clips",
+          "scene": "/assets/effects/glow-presets--spotlight.json",
           "noPreview": null
         }
       ]
@@ -2805,7 +2871,7 @@
         {
           "name": "shader",
           "stem": "layer-types--shader",
-          "desc": "a · full-frame · generative · WebGL · field · (see · the · ambient · shaders), · pure · in · t · and · palette-tintable; · it · carries · no · sampler, · so · it · cannot · read · what · is · beneath · it",
+          "desc": "a · full-frame · generative · WebGL · field · (see · the · ambient · shaders), · pure · in · t · and · palette-tintable; · it · carries · no · sampler, · so · it · cannot · read · what · is · beneath · it. · `shaderKeys` · cycles · ONE · panel · through · several · looks · on · hard · cuts, · in · one · context, · instead · of · stacking · a · layer · per · look",
           "scene": null,
           "noPreview": null
         },

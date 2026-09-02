@@ -46,6 +46,9 @@ const full = (extra) => j({ x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6,
 const USAGE = {
   // PRE-EXISTING GAP, closed while adding the family above: `make effects` was already red on this
   // one, so the catalogue could not regenerate at all. A modifier is an array entry on a layer.
+  // A glow preset is a whole LAYER, not a prop on somebody else's, so its usage shows the layer.
+  'glow-presets': (n) => j({ type: 'glow', preset: n, x: 460, y: 240, w: 1000, h: 600, intensity: 0.4,
+    start: 0, duration: 6 }),
   'per-layer-modifiers': (n) => text({ anim: 'rise', modifiers: [{ [n]: true }] }),
   // A motion voice is placed by the DERIVATION, not usually by hand, but it can be named directly and
   // an author reading the catalogue needs to see how.
@@ -139,6 +142,11 @@ const TWO = (t) => [
 const OVER = { ...HERO, text: '', size: 96, y: 860, start: 0.4, duration: 5.2, anim: 'fade' };
 
 const PREVIEW = {
+  // A glow is light, so it needs something to light and a ground dark enough to read against. The
+  // headline sits UNDER the glow in the layer order, which is what makes the preset visible as an
+  // effect on a subject rather than as a coloured rectangle on its own.
+  'glow-presets': (n) => base({ bg: [{ preset: 'ink', from: 0, to: 6 }],
+    layers: [{ ...HERO, y: 470 }, { type: 'glow', preset: n, x: 360, y: 240, w: 1200, h: 620, intensity: 0.45, start: 0, duration: 6 }] }),
   'kinetic-text-presets': (n) => base({ layers: [{ ...HERO, split: 'word', preset: n, each: 0.6, stagger: 0.06 }] }),
   'stagger-order-from': (n) => base({ layers: [{ ...HERO, split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.9, from: n } }] }),
   'scramble-charsets-chars': (n) => base({ layers: [{ ...HERO, split: 'word', preset: 'decode', each: 1.2, stagger: 0.12, presetOpts: { chars: n, revealDelay: 0.25 } }] }),

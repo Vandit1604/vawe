@@ -1,0 +1,41 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "ink",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "Deterministic",
+      "x": 160,
+      "y": 470,
+      "w": 1600,
+      "size": 150,
+      "weight": 800,
+      "align": "center",
+      "start": 0.3,
+      "duration": 5.4
+    },
+    {
+      "type": "glow",
+      "preset": "halation",
+      "x": 360,
+      "y": 240,
+      "w": 1200,
+      "h": 620,
+      "intensity": 0.45,
+      "start": 0,
+      "duration": 6
+    }
+  ]
+}

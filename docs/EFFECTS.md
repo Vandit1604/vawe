@@ -87,6 +87,20 @@ What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "
 | `symbols` | punctuation and operators, a terminal or a cipher rather than a word |
 | `upperCase` | capitals only, the calmest scramble and the one that keeps a headline reading as type |
 
+## Glow presets  `[glow layer]`
+
+`preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text. Each one is a named lighting behaviour rather than a gradient you tune by hand: `{ "type":"glow", "preset":"halation", "intensity":0.3 }`. `cx`/`cy` move the light centre, `angle` aims the spotlight cone, and `cycle` times the one preset that moves on its own. An unknown name THROWS and suggests the near word; it used to return null and paint the plain gradient in silence.
+
+| name | what / when |
+|---|---|
+| `bloom` | a hot near-white core falling off to the accent: light overflowing a bright source |
+| `chromaCycle` | a saturated neon bloom whose hue sweeps the spectrum over `cycle` seconds |
+| `chromatic` | an RGB-split halo: three channel copies offset and screen-blended, white core, colour fringe |
+| `diffusion` | a broad low-alpha white veil, screen-blended: lifts blacks without recolouring below |
+| `halation` | a tight warm core plus a wide faint ring, the film halation. Low intensity on purpose |
+| `rimLight` | an off-centre crescent, lit edge up-right. Place the subject there |
+| `spotlight` | a soft-edged cone from an apex, aimed by `angle`, faded with distance so it never clips |
+
 ## Enter / exit anims  `[per-layer]`
 
 `anim` (enter) + `out` (exit) on any layer. Entrances decelerate, exits accelerate. `{ "anim":"rise", "out":"defocus" }`
@@ -543,7 +557,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `paint` | a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample |
 | `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
 | `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
-| `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it |
+| `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
 | `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
 | `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
 | `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
@@ -973,4 +987,4 @@ The option vocabulary of the lightfield generators: the pattern, the envelope sh
 | `wave` | sinusoidal wave across units |
 
 ---
-_623 effects across 46 families. Regenerate: `make effects`._
+_630 effects across 47 families. Regenerate: `make effects`._
