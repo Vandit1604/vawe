@@ -15,11 +15,6 @@ import { catalogued } from '../../core/registry.js';
 // glyph units and not about a layer at all. A family-scoped map cannot make that mistake. The 32
 // registry-backed families no longer appear here at all: they carry their own blurbs and their own
 // section, and are read off `catalogued()` below.
-// Read off blueprints/index.mjs's own trailing comments: the registry line that declares each beat IS
-// the description, and blueprints-catalog.mjs already fails when one is missing. The hand-kept copy that
-// used to live in DESC had drifted: 3 of 12 beats were absent from it.
-import { BEAT_BLURBS } from './blueprints-catalog.mjs';
-import { BEATS } from '../../blueprints/index.mjs';
 // `scripts/gates/arsenal-check.mjs` fails when a vocabulary the engine exports reaches none of these
 // sections. The catalogue is what CLAUDE.md sends an author to before they choose, and it once did not
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
@@ -128,6 +123,11 @@ const walkCore = (d) => {
   }
 };
 walkCore('core');
+// blueprints/index.mjs is NOT under core/ and holds the beat registry. It used to reach this file
+// through an import line for BEATS and BEAT_BLURBS; the section derives itself now, so deleting that
+// import as "no longer needed" would have made the whole beat family vanish from docs/EFFECTS.md in
+// silence. Named here for the same reason scripts/gates/arsenal-check.mjs names it in its own walk.
+CORE.push('blueprints/index.mjs');
 for (const f of CORE) { try { await import(path.join(root, f)); } catch { /* browser-only; arsenal-check reports it */ } }
 
 // The catalogue's own furniture, handed to a registry's `usage`/`preview` rather than imported by it:
@@ -151,7 +151,7 @@ const derived = catalogued().map((r) => {
 // must read the registries, never rewrite docs/EFFECTS.md.
 //
 // The hand-written half, and it stays hand-written for one reason each: none of these is a registry.
-// `BEATS` and the rest are
+// The remaining families and the rest are
 // plain exports with no `defineRegistry` behind them, so there is no definition site to hang a catalog
 // block on. Two are not even one vocabulary: "Per-frame accent layers" and "Vector layer" are
 // pseudo-names for a MODE of a layer type, and "Plain words" merges three registries (feel · duration ·
@@ -160,7 +160,6 @@ export const sections = [
   ...derived,
   ['Per-frame accent layers', '`{ "type":"beam", ... }`. A light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`', ['beam:border (border-beam)', 'beam:shine (sheen sweep)'], 'per-frame'],
   ['Vector layer (logos/icons)', '`{ "type":"svg", ... }`. A path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame'],
-  ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint', { blurbs: BEAT_BLURBS }],
   // THE KEY IS `modifiers`, AND THIS LINE SAID `fx` FOR AS LONG AS THE FAMILY HAS EXISTED. `L.fx` is
   // the named-GSAP-effect slot and core/fx/index.js says so in capitals; an author who followed this
   // catalogue wrote `fx: [{ tilt: … }]` and got `layers[0].fx entry needs a name`. Ten modifiers,

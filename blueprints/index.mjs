@@ -4,6 +4,7 @@
 //
 // Placed in a scene as { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props } and expanded
 // by scripts/author/expand-blocks.mjs (make expand), the same path blocks use. Docs: docs/CRAFT/BLUEPRINTS.md.
+import { withBlurb, blurbsOf, defineRegistry } from '../core/registry.js';
 import * as Beats from './beats.mjs';
 // The PICTORIAL beats, kept in their own files because three agents authored them in parallel and two
 // agents on one file is how a merge eats somebody's work. Split by where the motion was harvested
@@ -21,26 +22,48 @@ export * from './kit.mjs';
 
 // name → factory. A beat factory is pure (props → array of scene-layer JSON) and takes at least {start, dur}.
 export const BEATS = {
-  kineticHook: Beats.kineticHook,       // hook / open loop: eyebrow + hero count-up|word + kinetic subline
-  statReveal: Beats.statReveal,         // payoff: hero count-up + kinetic label
-  cardCascade: Beats.cardCascade,       // feature grid: kinetic title + cards that pop in one after another
-  chipGrid: Beats.chipGrid,             // named things (sources/tools) as pills that pop staggered + footer
-  terminalReveal: Beats.terminalReveal, // a CLI beat: typing command + cursor + rising output + accent result
-  screenDive: Beats.screenDive,         // product surface: kinetic title + a real UI shot that KEN-pushes in
-  logoLockup: Beats.logoLockup,         // brand: mark pops + wordmark travels + kinetic headline + sub
-  logoReveal: Beats.logoReveal,         // brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade
-  verdictProof: Beats.verdictProof,     // claim proven: typing command + note + tone verdict chip
-  ctaEnd: Beats.ctaEnd,                 // held end card: mark + install chip + sub + url (exitDur 0)
-  typedHook: Beats.typedHook,           // hook that ERASES itself: types in, un-types ~2x faster, never fades
-  morphButton: Beats.morphButton,       // the object that BECOMES the next thing: button shrinks/rounds to a dot
-  propSentence: Collage.propSentence, // a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger
-  slotSwap: Collage.slotSwap,           // three fixed slots whose contents turn over N times; the right slot changes TYPE each pass
-  recordedPan: Track.recordedPan,       // a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded
-  echoRing: Track.echoRing,             // a stroked ring replaying another layer's path one beat late, fading as it grows
-  scrollStory: Track.scrollStory,       // a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop
-  focusRack: Track.focusRack,           // a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims
-  wordBlast: Punct.wordBlast,           // scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame
+  kineticHook: withBlurb('hook / open loop: eyebrow + hero count-up|word + kinetic subline', Beats.kineticHook),
+  statReveal: withBlurb('payoff: hero count-up + kinetic label', Beats.statReveal),
+  cardCascade: withBlurb('feature grid: kinetic title + cards that pop in one after another', Beats.cardCascade),
+  chipGrid: withBlurb('named things (sources/tools) as pills that pop staggered + footer', Beats.chipGrid),
+  terminalReveal: withBlurb('a CLI beat: typing command + cursor + rising output + accent result', Beats.terminalReveal),
+  screenDive: withBlurb('product surface: kinetic title + a real UI shot that KEN-pushes in', Beats.screenDive),
+  logoLockup: withBlurb('brand: mark pops + wordmark travels + kinetic headline + sub', Beats.logoLockup),
+  logoReveal: withBlurb('brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade', Beats.logoReveal),
+  verdictProof: withBlurb('claim proven: typing command + note + tone verdict chip', Beats.verdictProof),
+  ctaEnd: withBlurb('held end card: mark + install chip + sub + url (exitDur 0)', Beats.ctaEnd),
+  typedHook: withBlurb('hook that ERASES itself: types in, un-types ~2x faster, never fades', Beats.typedHook),
+  morphButton: withBlurb('the object that BECOMES the next thing: button shrinks/rounds to a dot', Beats.morphButton),
+  propSentence: withBlurb('a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger', Collage.propSentence),
+  slotSwap: withBlurb('three fixed slots whose contents turn over N times; the right slot changes TYPE each pass', Collage.slotSwap),
+  recordedPan: withBlurb('a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded', Track.recordedPan),
+  echoRing: withBlurb("a stroked ring replaying another layer's path one beat late, fading as it grows", Track.echoRing),
+  scrollStory: withBlurb('a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop', Track.scrollStory),
+  focusRack: withBlurb('a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims', Track.focusRack),
+  wordBlast: withBlurb('scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame', Punct.wordBlast),
 };
+
+// The descriptions used to be TRAILING `//` COMMENTS on the lines above, parsed back out of this file's
+// own source by a regex in scripts/site/blueprints-catalog.mjs and by a second one in
+// scripts/author/arsenal.mjs. Two parsers over one file, each of which silently found nothing for a beat
+// whose line was formatted differently: the catalogue's pattern named `Beats.` alone and reported the
+// beats declared from the three other modules as undocumented while they sat correctly commented two
+// lines below. A comment is not a data structure. `withBlurb` puts the same sentence where the code can
+// read it, and blurbsOf refuses at load for the beat that forgot one, which is what both regexes were
+// checking for after the fact.
+export const BEAT_BLURBS = blurbsOf('blueprint beat', BEATS);
+
+// The registry, and with it the catalogue section that was hand-listed in
+// scripts/site/effects-catalog.mjs with its usage form and its no-preview reason a file further on.
+export const BEAT_REGISTRY = defineRegistry('blueprint beat', BEATS, { slot: 'layers[].beat', blurbs: BEAT_BLURBS,
+  catalog: {
+    title: 'Beat blueprints',
+    tag: 'blueprint',
+    intro: '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.',
+    usage: (n, { j }) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
+    noPreview: 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
+  },
+});
 
 // HOW TO ASK FOR ONE, in prose. Their catalog entry ships as a SENTENCE you paste into a brief; ours
 // shipped as JSON you paste into a scene. The difference matters at the moment a film is being planned,

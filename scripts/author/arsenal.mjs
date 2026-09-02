@@ -79,16 +79,19 @@ export async function collect() {
       }
     }
   }
-  // Blueprints are not a registry (they are factories), but they are the highest-value thing to find
-  // and they carry the best description in the repo: a prose sentence saying how to ASK for the beat.
+  // Blueprints ARE a registry now (BEAT_REGISTRY), so the walk above would find them if it looked
+  // outside core/. It does not, and blueprints/index.mjs is the only vocabulary that lives elsewhere,
+  // so it is imported by name rather than by widening the readdir over a directory of factories.
+  //
+  // REQUESTS rides along as `aka`. It is a storyboard SENTENCE, not a description, so it is not a blurb
+  // and never printed; but it is the best prose in the repo for the words a person actually types when
+  // reaching for a beat, and `aka` is exactly the searchable-but-unprinted half.
   try {
     const bp = await import('../../blueprints/index.mjs');
-    const src = fs.readFileSync(path.join(repoRoot, 'blueprints/index.mjs'), 'utf8');
-    const notes = new Map();
-    for (const m of src.matchAll(/^\s*(\w+):\s*\w+\.\w+,\s*\/\/\s*(.+)$/gm)) notes.set(m[1], m[2].trim());
-    for (const name of Object.keys(bp.BEATS || {})) {
-      out.push({ name, kind: 'blueprint beat', slot: 'layers[].beat',
-        blurb: (bp.REQUESTS && bp.REQUESTS[name]) || notes.get(name) || '' });
+    const reg = bp.BEAT_REGISTRY;
+    for (const name of reg.names) {
+      out.push({ name, kind: reg.kind, slot: reg.slot, blurb: reg.blurbs[name] || '',
+        aka: [(bp.REQUESTS && bp.REQUESTS[name]) || ''].filter(Boolean) });
     }
   } catch { /* blueprints are optional to search */ }
   // Layer types used to need a special case here, because they were LAYER_TYPES + LAYER_BLURBS and not

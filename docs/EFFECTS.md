@@ -74,6 +74,32 @@
 | `soft` | gentle light radial with faint accent rings and discs drifting over it (moves) |
 | `spotlight` | a deep field with one soft pool of light wandering across it on a slow cycle, the eye follows the bright patch (moves) |
 
+## Beat blueprints  `[blueprint]`
+
+`{ "type":"beat", "beat":"<name>", ... }`. A whole beat's directed motion; `make expand`. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.
+
+| name | what / when |
+|---|---|
+| `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
+| `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
+| `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
+| `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
+| `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
+| `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
+| `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
+| `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
+| `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
+| `propSentence` | a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger |
+| `recordedPan` | a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded |
+| `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
+| `scrollStory` | a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop |
+| `slotSwap` | three fixed slots whose contents turn over N times; the right slot changes TYPE each pass |
+| `statReveal` | payoff: hero count-up + kinetic label |
+| `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
+| `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
+| `verdictProof` | claim proven: typing command + note + tone verdict chip |
+| `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
+
 ## Camera dials  `[camera]`
 
 Top-level scene keys that change what the camera DOES rather than where it goes. `"cameraBlur": true` gives the film a real shutter: every layer smears by its velocity RELATIVE to the camera, so a whip pan streaks the frame and a layer travelling with the camera stays sharp. How much is the film's `shutter`, in degrees; one layer opts out with `motionBlur: false`.
@@ -865,32 +891,6 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 |---|---|
 | `svg:draw (stroke draws on)` | the logo/icon stroke draws itself on, line by line |
 | `svg:morph (shape melts into a logo)` | one path melts into another (blob into logo), optional spin |
-
-## Beat blueprints  `[blueprint]`
-
-`{ "type":"beat", "beat":"<name>", ... }`. A whole beat's directed motion; `make expand`. See BLUEPRINTS.md.
-
-| name | what / when |
-|---|---|
-| `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
-| `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
-| `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
-| `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
-| `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
-| `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
-| `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
-| `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
-| `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
-| `propSentence` | a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger |
-| `recordedPan` | a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded |
-| `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
-| `scrollStory` | a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop |
-| `slotSwap` | three fixed slots whose contents turn over N times; the right slot changes TYPE each pass |
-| `statReveal` | payoff: hero count-up + kinetic label |
-| `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
-| `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
-| `verdictProof` | claim proven: typing command + note + tone verdict chip |
-| `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
 
 ## Motion voices (tactile sound)  `[audio]`
 

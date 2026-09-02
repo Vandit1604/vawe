@@ -3,24 +3,7 @@
 // Token-efficient by design: it's the "reach for a blueprint" priming step (docs/CRAFT/BLUEPRINTS.md).
 //   node scripts/site/blueprints-catalog.mjs   ·   make blueprints
 import { pathToFileURL } from 'node:url';
-import { readFileSync } from 'node:fs';
-import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
-
-const REGISTRY = new URL('../../blueprints/index.mjs', import.meta.url);
-
-// One description per beat, read off the registry's own trailing comments. A hand-kept copy here went
-// stale the moment a beat was added, so the source of truth is the line that declares the beat.
-function descriptions() {
-  const out = {};
-  for (const line of readFileSync(REGISTRY, 'utf8').split('\n')) {
-    // ANY namespace, not `Beats.` alone. The registry grew a second and third module the moment more
-    // than one author worked on beats at once, and a pattern that names one of them reports the others
-    // as undocumented while they sit two lines below, correctly commented.
-    const m = /^\s*(\w+):\s*\w+\.\w+,\s*\/\/\s*(.+?)\s*$/.exec(line);
-    if (m) out[m[1]] = m[2];
-  }
-  return out;
-}
+import { BEATS, BEAT_BLURBS, REQUESTS } from '../../blueprints/index.mjs';
 
 // The destructured parameter list, brace-matched rather than regex-matched: a default value can be an
 // array or an object, so both the end of the list and the commas inside it need a depth count. Splitting
@@ -43,19 +26,14 @@ function propsOf(fn) {
   return parts.map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean).join(', ');
 }
 
-// Exported so the effects catalog reads the registry's own trailing comments instead of keeping a second
-// hand-written copy. It had one, and it had drifted: 3 of the 12 beats were missing from it entirely.
-export const BEAT_BLURBS = descriptions();
+// The descriptions used to be scraped back out of blueprints/index.mjs by a regex here. They are
+// `withBlurb` on the factory now, and blurbsOf refuses at LOAD for a beat that forgot one, so the
+// completeness check this file used to run has nothing left to find.
 const DESC = BEAT_BLURBS;
-const missing = Object.keys(BEATS).filter((n) => !DESC[n]);
 // Same completeness rule as the descriptions, for the same reason: a hand-kept second list goes stale
 // the moment a beat is added, and the failure is silent.
 const noReq = Object.keys(BEATS).filter((n) => !REQUESTS[n]);
 if (noReq.length) { console.error(`! blueprints/index.mjs declares no REQUESTS entry for: ${noReq.join(', ')}`); process.exit(1); }
-if (missing.length) {
-  console.error(`! blueprints/index.mjs declares no description comment for: ${missing.join(', ')}`);
-  process.exit(1);
-}
 
 
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
