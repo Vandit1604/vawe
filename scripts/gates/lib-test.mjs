@@ -5401,6 +5401,31 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     }
   }
 }
+// ---- arsenal --for: the trigger, not the search --------------------------------------------------
+//
+// The first cut ranked the arsenal against the film's own ON-SCREEN COPY, which states the subject
+// ("part of Twitter") and nothing about the vocabulary, so it matched nothing and printed nothing at
+// all. Silence read exactly like "you have used everything". The signal has to come from the
+// registries, and this asserts that it does: a film naming one cut has decided cuts are in play, so
+// the other 26 are a real omission rather than a guess.
+{
+  const { registries } = await import('../../core/registry.js');
+  await import('../author/arsenal.mjs').catch(() => {});
+  const cut = registries().find((r) => r.kind === 'cut');
+  ok('arsenal --for: the cut vocabulary is reachable from the registry list', !!cut && cut.names.length > 20);
+  const { execFileSync } = await import('node:child_process');
+  let out = '', ranClean = true;
+  try {
+    out = execFileSync('node', [path.join(repoRoot, 'scripts/author/arsenal.mjs'), '--for',
+      path.join(repoRoot, 'formats/scene/sample.json')], { encoding: 'utf8' });
+  } catch { ranClean = false; }
+  // sample.json is the reference scene every author reads first, so it is the one file guaranteed to
+  // exist in a fresh clone. If it draws from no vocabulary at all the output is legitimately empty.
+  ok('arsenal --for: runs against the reference scene without throwing', ranClean);
+  ok('arsenal --for: says what a film has NOT reached for, or says nothing at all',
+    out === '' || /has not reached for/.test(out));
+}
+
 // ---- the judge rubric: the two things a prompt template must not lose --------------------------
 //
 // A prompt is not code and nothing here asserted anything about it, which is how both of these came to

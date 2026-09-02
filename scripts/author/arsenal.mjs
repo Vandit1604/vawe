@@ -253,6 +253,49 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const argv = process.argv.slice(2);
   const VALUE_FLAGS = new Set(['kind', 'n']);
   const flag = (n) => { const i = argv.indexOf('--' + n); return i < 0 ? null : argv[i + 1]; };
+  // ---- --for <scene.json>: the vocabularies this film is already using, and has barely touched ------
+  //
+  // DISCOVERY WORKS HERE. TRIGGERING IT IS WHAT FAILS, and the evidence is not subtle. In one day three
+  // capabilities turned out to be present, correct and unreachable in practice: cut timings were never
+  // in the catalogue at all, `ease:"through"` had zero uses across 166 films, and 12 of 288 motion tracks
+  // author a keyframe handle. None of those is a search problem. Nobody searched, because nothing in the
+  // loop they were already in suggested there was anything to search FOR.
+  //
+  // So this runs inside `make dev`, not `make preflight`. Preflight is a step you take deliberately, once,
+  // before the file exists; the twentieth render is where you want to be told that the thing you are
+  // hand-rolling has a name.
+  //
+  // THE SIGNAL IS THE REGISTRY, NOT A QUERY, and the first cut of this got that wrong. It ranked the
+  // arsenal against the film's own on-screen copy, which is a statement about the SUBJECT ("part of
+  // Twitter") and says nothing about the vocabulary, so it matched nothing and printed nothing. What a
+  // scene reliably states is which vocabularies it draws from: a film naming one cut has decided cuts
+  // are in play, and the other 26 are then a real omission rather than a guess. Fully derived from
+  // core/registry.js, so a new vocabulary joins this the day it is defined.
+  const forScene = argv.includes('--for') && argv[argv.indexOf('--for') + 1];
+  if (forScene) {
+    let raw; try { raw = fs.readFileSync(path.resolve(forScene), 'utf8'); } catch { process.exit(0); }
+    await collect();   // every registry module is imported as a side effect of building the corpus
+    const { registries } = await import('../../core/registry.js');
+    const used = (n) => raw.includes(`"${n}"`);
+    const inPlay = registries()
+      .map((r) => ({ r, has: r.names.filter(used), missing: r.names.filter((n) => !used(n)) }))
+      .filter((x) => x.has.length && x.missing.length)
+      .sort((a, b) => b.missing.length - a.missing.length)
+      .slice(0, 4);
+    const untouched = registries().filter((r) => r.names.length > 2 && !r.names.some(used)).length;
+    if (!inPlay.length && !untouched) process.exit(0);
+    console.log('\n  Vocabularies this film already uses, and what it has not reached for:\n');
+    for (const { r, has, missing } of inPlay) {
+      console.log(`    ${r.kind.padEnd(20)} uses ${String(has.length).padStart(2)}/${String(r.names.length).padEnd(3)} `
+        + `· ${missing.slice(0, 6).join(' ')}${missing.length > 6 ? ' …' : ''}`);
+    }
+    if (untouched) {
+      console.log(`\n    ${untouched} more vocabular(ies) this film names nothing from at all.`);
+    }
+    console.log(`  make arsenal Q="<what you mean>" searches all ${(await collect()).length}.\n`);
+    process.exit(0);
+  }
+
   const census = argv.includes('--census');
   const newOnly = argv.includes('--new');
   // Consume `--flag value` pairs by POSITION. Filtering on `argv.indexOf(a)` looked equivalent and is

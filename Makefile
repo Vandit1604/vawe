@@ -181,6 +181,7 @@ dev: build
 	./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node scripts/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
+	@node scripts/author/arsenal.mjs --for $(D) 2>/dev/null || true
 
 # make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]: scaffold a SPECIMEN scene
 # and run the dev loop on it. A demo written from a blank file comes out a contact sheet every time (27
@@ -197,6 +198,7 @@ demo: ## scaffold a SPECIMEN demo scene (one subject, one shot) and iterate on i
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
 check:
 	@MODE=iterate node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
+	@node scripts/author/arsenal.mjs --for $(D) 2>/dev/null || true
 
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
