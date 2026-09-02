@@ -18,7 +18,7 @@ renderer unless explicitly asked.
 > rules in **`docs/MOTION-CRAFT.md`**. **Use ONLY the site's colours** and respect dominance
 > (white-first vs dark).
 
-## The loop
+## The loop  `[ref: make list]`
 
 Three targets, and you will spend nearly all of your time in the first two. They are named nowhere else
 in this file, so read them here.
@@ -69,7 +69,7 @@ video (e.g. `linear-launch.json`) first as working references, then compose, nev
 > taste system (house-style · composition · motion · story-spine), the block registry (`make catalog`),
 > and the author→gate→render quality loop. Everything below is the doctrine it indexes.
 
-## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS, NOT A REQUEST TO START
+## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS, NOT A REQUEST TO START  `[eye]`
 
 **Load `vawe-video-planning` and follow it. Do not open a JSON file first.** The skill exists because
 authoring without a locked plan produces the same generic video for everyone, and it states the contract
@@ -92,7 +92,7 @@ colours and fonts, the layout archetype, the coordinate band, the treatment per 
 personality, the cuts, the CTA. Present it and WAIT. Then authoring is transcription, and a render is
 something you show once rather than something you iterate in front of somebody.
 
-## THE BRIEF: what the person asking is allowed to say, and what is YOUR job
+## THE BRIEF: what the person asking is allowed to say, and what is YOUR job  `[eye]`
 
 The person asking for a film should never have to name a colour, an easing, a layer type or a preset.
 If they find themselves reaching for one, that is your failure, not their prompt. Their whole request is
@@ -191,7 +191,7 @@ still a slide.
 > places many pictorial ELEMENTS", never as "brew's frame is half picture", and when you want the second
 > thing, measure area.
 
-## Content philosophy (what makes these good: follow it)
+## Content philosophy (what makes these good: follow it)  `[eye]`
 
 Every video is built on **hook → suspense → payoff**. The data must earn attention:
 
@@ -202,12 +202,12 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 - **Numbers:** use real, accurate figures. The `count` layer compacts ≥1e6 (`2500000000` → `2.5B`);
   use a unit suffix for small numbers (`unit: "$B"`, value `880` → `$880B`).
 
-## Hard rules
+## Hard rules  `[built: core/validate.mjs:764]`
 - **No em-dashes (U+2014) in any on-screen text**: the validator rejects them. Use a comma, period, or ·.
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - Text may contain `<b>…</b>` / `<em>…</em>` (rendered as HTML). Keep names short (they sit in cards).
 
-## Launch-video rules (standing, asked for directly: apply to every launch film)
+## Launch-video rules (standing, asked for directly: apply to every launch film)  `[eye]`
 
 1. **Check EVERY page, not the homepage.** `make sections` inventories one URL. Crawl the whole site
    (routes, view modes, empty states) before storyboarding. Tpot's real product turned out to be
@@ -223,7 +223,7 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 5. **A changing word belongs in a fixed box.** If one word swaps mid-sentence, put it in a fixed-width
    chip so nothing after it reflows, and the chip is the natural place for the brand colour.
 
-## Reflecting a real website (capture-first: the taste is already on the page)
+## Reflecting a real website (capture-first: the taste is already on the page)  `[eye]`
 
 Never rewrite a site's sections by hand; you'll lose its taste and ignore half its assets. **Capture the
 real blocks instead**, and the ordered procedure lives in
@@ -239,7 +239,7 @@ block, when a screenshot is the only option, and the one job hand-written HTML s
 > Hard cuts come back exact, dissolves score nothing and it says so instead of inventing a list. `refs/`
 > is gitignored on purpose: take the grammar, never the frames. **[`docs/CRAFT/REFERENCE-STUDY.md`](docs/CRAFT/REFERENCE-STUDY.md)**.
 
-## REACH FOR HTML FIRST. A LAYER IS FOR WHERE IT HELPS.
+## REACH FOR HTML FIRST. A LAYER IS FOR WHERE IT HELPS.  `[eye]`
 
 **If you are hunting for the prop that does the thing CSS already does, stop and write the CSS.** A
 gradient-filled word with a bloom behind it is four declarations, and it took three failed attempts
@@ -257,7 +257,7 @@ Which effects were verified stacked on one fragment, what to use instead of each
 a fragment moves, and the traps that cost a render each:
 [`docs/CRAFT/HTML-FRAGMENTS.md`](docs/CRAFT/HTML-FRAGMENTS.md).
 
-## BLACK MEANS `#000000`
+## BLACK MEANS `#000000`  `[eye]`
 
 When a brief says black, it means black. Every dark preset in `core/backgrounds.js` carries a tint or a
 wash: `dark`, `deep` and `ink` all sample well above zero at the corners, which is right for a film with
@@ -265,7 +265,7 @@ a lit world and wrong for one whose only light is the subject. A pitch-black gro
 hand-authored HTML (`background:#000`) with `tone: "dark"` on the window, and the tone is required
 because the engine cannot read lightness out of your CSS.
 
-## NAME THE EFFECT BEFORE YOU BUILD IT
+## NAME THE EFFECT BEFORE YOU BUILD IT  `[eye]`
 
 When a reference shows a look you cannot immediately construct, **find out what it is called and read
 its recipe.** Do not approximate it by eye and iterate. An effect a designer has made before has a name,
@@ -282,7 +282,7 @@ are looking at. It carries the three questions in order, the plain-words to Afte
 table, and where the effect goes afterwards so the next author inherits the name rather than the guess.
 That second half is not optional.
 
-## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)
+## Hand-writing HTML? Beat the AI slop (see `AGENTS.md`)  `[eye]`
 
 Hand-authored HTML regresses to the mean: centered text, Inter, blue/purple gradient, equal card grid.
 And a fragment animated with CSS renders as a **dead still**, because the engine refuses `animation` and
@@ -296,7 +296,7 @@ cost a render, the defaults to reach past, and which skills to load. **Then gate
 which one sees what:** `make preview HTML=<frag>` reads the FRAGMENT in a real browser, `make
 designspec-check D=<file>` reads the SCENE. Both must be clean before you render.
 
-## Icons & images (real assets first, emoji last)
+## Icons & images (real assets first, emoji last)  `[eye]`
 
 **Always prefer a real image**, and captured real UI (`make capture`) is the highest-taste source. The
 rest of the ladder, and the treatment every image needs so it does not read as slop:
@@ -309,7 +309,7 @@ never loaded. IMAGERY.md §0 has the incident and the `curl -f` form if you must
 **Never embed copyrighted material** into a published video: movie/TV posters, album covers, film
 stills, news photos, paid stock. They trigger Content ID claims. Capture the real product UI instead.
 
-## THE PROCESS HAS ONE OWNER, AND IT IS NOT THIS FILE
+## THE PROCESS HAS ONE OWNER, AND IT IS NOT THIS FILE  `[ref: make ship]`
 
 `make ship D=<file>` is the process. It **declares its own ladder before it runs**: every step, in
 order, what that step reads, and whether it can stop you. Twenty steps today, and the number moves
@@ -354,7 +354,7 @@ rejected three correct films, while the schema had the answer all along and serv
 **`make track SHAPE=pan|blast|drift|enter|exit`** emits a hand-keyed `motion` track from a shape
 measured off the two reference films. Use it instead of naming a preset. See the next section for why.
 
-## AUTHOR THE MOTION. DO NOT NAME IT.
+## AUTHOR THE MOTION. DO NOT NAME IT.  `[gated: scripts/gates/author-check.mjs#no-authored-motion]`
 
 The one measurement that separates the two films this file argues from and everything else:
 
@@ -375,7 +375,7 @@ Every time both are available the cheap one wins. The ambition floor cannot tell
 COUNTS techniques, and a preset is a technique, so the floor stays green while the film stays
 undirected. `no-authored-motion` closes that hole and BLOCKS new work.
 
-## SHOW, DO NOT ONLY TELL. NOTHING ENFORCES THIS.
+## SHOW, DO NOT ONLY TELL. NOTHING ENFORCES THIS.  `[eye]`
 
 Every beat that makes a claim must be asked what it could SHOW instead of set in type. **DECORATION**
 dresses the frame and carries no information. **EXPLANATION** does work the words cannot. A film can
@@ -391,7 +391,7 @@ nobody's decision. It is debt, not a pattern to copy. What counts as explanation
 the deleted gate asked and where to get the graphic:
 [`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
 
-## A SLIDESHOW IS A FAILURE, AND A RESIZING BOX IS NOT THE ONLY WAY OUT
+## A SLIDESHOW IS A FAILURE, AND A RESIZING BOX IS NOT THE ONLY WAY OUT  `[eye]`
 
 The failure is easy to feel: every beat is born and dies inside its own window, so each cut is a jump
 between unrelated shots and the film is a stack of cards read aloud.
@@ -408,7 +408,7 @@ hold a film, Murch's ranking with its percentages, and a six-question decision a
 "the layer resizes", you are writing a gate's minimum rather than a film. Three consecutive films here
 were one rectangle changing size, and each passed everything.
 
-## A DEMO IS A TEN-SECOND FILM ABOUT ONE THING
+## A DEMO IS A TEN-SECOND FILM ABOUT ONE THING  `[ref: make demo]`
 
 **27 of the 35 `formats/scene/_*.json` scratch scenes are contact-sheet shaped**, and none of the 35
 paints a second `bg` window. They are the worst-looking work in the repo and they are the ones we end up
@@ -420,7 +420,7 @@ missing piece was the archetype, and a blank file has none.
 Why the subject must be a PICTURE, why every one of its constants is fixed, and when the honest answer
 is `make catalog` instead: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
 
-## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE
+## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[eye]`
 
 `bg` is required, so the backdrop is always your decision. A static field is a choice you have to
 justify, never a default. **A backdrop that changes PER BEAT is the cheap thing to write**: list the
@@ -435,7 +435,7 @@ Then **judge it across frames, never on one still**: pull 4+ timestamps and comp
 still hides speed, scale and direction. A background was once "matched" on one frame and was, in
 motion, twice too fast with folds half the size (`docs/MISTAKES.md` #155).
 
-## NO RULED GRID UNLESS SOMEBODY ASKED FOR ONE
+## NO RULED GRID UNLESS SOMEBODY ASKED FOR ONE  `[gated: scripts/gates/designspec-check.mjs#ruled-grid]`
 
 A ruled line grid is a design tool's canvas. Put one behind a film and the film reads as a mock-up of
 itself, which is why it never arrives as a default any more. `blobs` used to bake `grid: true` into the
@@ -448,7 +448,7 @@ no single write site, so `make designspec-check` warns on `ruled-grid`: two `rep
 rules crossing axes in one fragment. One axis is scanlines and stays quiet. Waive it in the scene with
 a `_why`. **Four films rule a grid by hand today, and none of them wrote it down.**
 
-## SILENCE IS A DEVICE, NOT A DEFAULT
+## SILENCE IS A DEVICE, NOT A DEFAULT  `[eye]`
 
 **123 of the 148 gate-visible scenes ship mute, 83%**: 17 carry no `audio` key at all and 106 declare
 `silent: true`. Of those 106, **only 26 say why**. So the sentence to remember is not "nobody declares
@@ -459,7 +459,7 @@ sentence. A sound bridge is also a continuous object the picture never has to ca
 Give every film sound, or state the silence: `"audio": {"silent": true, "_why": "…"}`.
 [`docs/CRAFT/SOUND.md`](docs/CRAFT/SOUND.md).
 
-## IS THE EMPTY PART OF THE FRAME DOING A JOB?
+## IS THE EMPTY PART OF THE FRAME DOING A JOB?  `[eye]`
 
 Whitespace is ACTIVE (isolating the subject, directing the eye) or PASSIVE (what merely happened
 between two things placed independently). Passive space does not read as minimal, it reads as
@@ -471,7 +471,7 @@ working.
 because nobody decided anything. Same doc carries lead room, visual weight and three-plane depth:
 [`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md).
 
-## What the gates cannot do, so you must
+## What the gates cannot do, so you must  `[eye]`
 
 - **Read the sheets.** `make beats` (where each beat lands) and `make reveal` (how it arrives) are
   scored by nothing. `make beats` signs the look off with a receipt; skipping it is visible.
@@ -488,7 +488,7 @@ because nobody decided anything. Same doc carries lead room, visual weight and t
 - **Narrated?** Pace the picture to the voice: `make pace-from-vo VO=<file>.words.json`.
 - **`make ledger`** before shipping, `make ledger-add` after the user approves.
 
-## Waivers, legacy, and the difference
+## Waivers, legacy, and the difference  `[gated: scripts/gates/author-check.mjs]`
 
 A rule you deliberately break is waived IN THE SCENE, with a reason, and **a waiver with no `_why`
 blocks**:
@@ -505,7 +505,7 @@ yet: it is a debt, it warns on every run, and it disappears the moment the film 
 (`make legacy` for the board, `make legacy STAMP=1` to pay one off). Edit a legacy film without fixing
 it and it BLOCKS. Nothing is excused for life.
 
-## Changing the ENGINE, not a film? The doctrine is one file away
+## Changing the ENGINE, not a film? The doctrine is one file away  `[eye]`
 
 Five rules govern any change to `core/`, `internal/`, a gate or the capture path, and they live in
 **[`docs/CRAFT/ENGINE-CHANGES.md`](docs/CRAFT/ENGINE-CHANGES.md)** rather than here, because this file

@@ -121,6 +121,12 @@ dead-branch:
 doc-refs:
 	node scripts/gates/doc-refs.mjs
 
+# make rung: which rules in CLAUDE.md and docs/CRAFT are enforced by something, and which are only prose?
+# Every non-[eye] tag has to NAME its mechanism, and the named gate, hook, command or file:line has to
+# exist. LIST=1 prints the [eye] worklist instead; STAMP=1 records today's [eye] count as the ceiling.
+rung:
+	node scripts/gates/rung.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp)
+
 # make docs-drift: ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count. It decayed this way twice and
 # routed two planning passes at work that already existed; its own closing warning says nothing
 # checked it. Now something does.

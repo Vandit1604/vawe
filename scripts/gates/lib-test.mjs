@@ -6271,6 +6271,73 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   } finally { fs.writeFileSync(ratchet, saved); }
 }
 
+// ---- the rung tags: a claimed mechanism must exist, and the [eye] count may never rise ----------
+//
+// A rung tag is a DECLARATION THAT CLAIMS AN OWNER, which is the exact shape this repo logs more often
+// than any other failure: a field written and never read, a gate named in a doc and deleted a year ago,
+// a waiver keyword that only makes a gate stop talking. So the tags are worth nothing unless the claim
+// is checked, and the three things checked here are the three ways the mechanism rots: a gate that was
+// renamed, an [eye] count that creeps up while nobody watches, and a heading whose tag stops parsing.
+{
+  const { execFileSync } = await import('node:child_process');
+  const gate = path.join(repoRoot, 'scripts/gates/rung.mjs');
+  const ratchet = path.join(repoRoot, 'verify/rung-ratchet.json');
+  const claude = path.join(repoRoot, 'CLAUDE.md');
+  const savedRatchet = fs.readFileSync(ratchet, 'utf8');
+  const savedClaude = fs.readFileSync(claude, 'utf8');
+  const run = (...args) => { try { return { code: 0, out: execFileSync('node', [gate, ...args], { encoding: 'utf8', cwd: repoRoot }) }; }
+    catch (e) { return { code: e.status, out: `${e.stdout || ''}${e.stderr || ''}` }; } };
+  try {
+    const clean = run();
+    ok('rungs: every tag CLAUDE.md and docs/CRAFT carry today names something that exists', clean.code === 0);
+    ok('rungs: and the distribution is printed, so the shape of the debt is visible', /\[eye\]/.test(clean.out));
+
+    // A GATE THAT DOES NOT EXIST. The tag reads exactly as authoritative as a true one, which is why
+    // this has to be mechanical: nobody re-checks a path in a heading they have read fifty times.
+    fs.writeFileSync(claude, savedClaude.replace(
+      '`[gated: scripts/gates/author-check.mjs#no-authored-motion]`',
+      '`[gated: scripts/gates/no-such-gate.mjs]`'));
+    const ghost = run();
+    ok('rungs: a tag naming a gate that does not exist is REFUSED', ghost.code === 1);
+    ok('rungs: and the refusal names the gate it could not find', /no-such-gate\.mjs/.test(ghost.out));
+
+    // A GATE THAT EXISTS AND NEVER FIRES ON THIS RULE. One rung worse than a missing file, because the
+    // path resolves and a reader stops there. audio-check.mjs is the live example this pass found: it
+    // is a real gate, it has prose about silence, and it emits no finding code at all.
+    fs.writeFileSync(claude, savedClaude.replace(
+      '`[gated: scripts/gates/author-check.mjs#no-authored-motion]`',
+      '`[gated: scripts/gates/author-check.mjs#no-such-code]`'));
+    const wrongCode = run();
+    ok('rungs: a gate named for a code it never emits is REFUSED', wrongCode.code === 1);
+    ok('rungs: and the refusal says so in those words', /does not emit/.test(wrongCode.out));
+
+    // AN UNTAGGED SECTION. [eye] is the honest default and costs one word, so the only reason a section
+    // of CLAUDE.md carries no rung is that nobody asked the question.
+    fs.writeFileSync(claude, savedClaude.replace(
+      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[eye]`',
+      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE'));
+    const bare = run();
+    ok('rungs: an untagged section of CLAUDE.md is REFUSED', bare.code === 1);
+    ok('rungs: and it is named, so the fix is one word', /untagged: THE BACKGROUND MUST MOVE/.test(bare.out));
+
+    fs.writeFileSync(claude, savedClaude);
+    fs.writeFileSync(ratchet, JSON.stringify({ eye: 0 }));
+    const worse = run();
+    ok('rungs: a RISE in the [eye] count is refused', worse.code === 1);
+    // The message must name the cheaper path, not merely the number, or the number is what gets edited.
+    ok('rungs: and it names both the ablation that motivates it and --stamp',
+      /PROMPT-EVAL\.md/.test(worse.out) && /--stamp/.test(worse.out));
+
+    fs.writeFileSync(ratchet, JSON.stringify({ eye: 9999 }));
+    ok('rungs: a FALL is reported, not silently accepted', /fewer \[eye\]/.test(run().out));
+
+    ok('rungs: --list prints the worklist and nothing else', /the \[eye\] worklist/.test(run('--list').out));
+  } finally {
+    fs.writeFileSync(ratchet, savedRatchet);
+    fs.writeFileSync(claude, savedClaude);
+  }
+}
+
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter
 // how many assertions actually RAN, so a block that quietly stops running (an `await import` failing
 // inside a swallowing catch, a section deleted in a merge, an early return added while debugging) takes
