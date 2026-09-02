@@ -162,6 +162,7 @@ export default function Home() {
               <div>
                 <h3>Any render order.</h3>
                 <p>
+                  {/* site-counts-allow: "412 looks" is frame 412, not a count of looks */}
                   Frame 412 looks the same whether it renders first or last. That is what lets one film
                   split across parallel workers, and what lets you diff two renders of it.
                 </p>

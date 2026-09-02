@@ -102,8 +102,23 @@ const bad = [];
 for (const rel of FILES) {
   const file = path.join(root, rel);
   if (!fs.existsSync(file)) continue;
-  fs.readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+  const lines = fs.readFileSync(file, 'utf8').split('\n');
+  lines.forEach((line, i) => {
+    const prev = i > 0 ? lines[i - 1] : '';
+    // A NUMBER BESIDE A SUBJECT WORD IS NOT ALWAYS A COUNT OF IT. "Frame 412 looks the same whether it
+    // renders first or last" is a sentence about frame 412, and `looks` there is a verb. The matcher
+    // cannot tell a verb from a noun, and a gate arguing with correct prose is one an author learns to
+    // skip, which is this file's own lesson from the two guards above. So a line may waive itself with
+    // a reason it has to type, the same shape and the same enforcement as doc-refs-allow:
+    //
+    //   {/* site-counts-allow: "412 looks" is frame 412, not a count of looks */}
+    //
+    // On the line, or the line before it, since JSX and markdown both put a comment above the prose.
+    // A marker with no reason after the colon does not count: it costs a sentence, so it is never the
+    // cheap way out of a real stale number.
+    const waived = /site-counts-allow:\s*\S/.test(line) || /site-counts-allow:\s*\S/.test(prev);
     const check = (subject, stated) => {
+      if (waived) return;
       const real = TRUTH[subject.toLowerCase()];
       if (real == null || +stated === real) return;
       bad.push({ rel, line: i + 1, subject: subject.toLowerCase(), stated: +stated, real, text: line.trim().slice(0, 96) });

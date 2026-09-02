@@ -80,7 +80,7 @@ JSON *is* the video.
 | `bg` | string | Fill (rect) |
 | `border` | string|boolean | Border (rect) (true = a 1px hairline in var(--line)) |
 
-## Kinetic presets (30)
+## Kinetic presets (31)
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
@@ -97,7 +97,7 @@ Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `
 Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are sinusoidal
 (`easeInOutSine`). Never `linear` on a visible move.
 
-## Cuts (26)
+## Cuts (27)
 
 `"cuts": [{ "t": 3.2, "style": "punch" }]`, `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `jitter`
 
