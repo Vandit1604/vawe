@@ -11,6 +11,7 @@
 import fs from 'node:fs';
 import { onScreenText as stripTags } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -87,6 +88,9 @@ if (!findings.length) {
   process.exit(0);
 }
 console.log(`  ${findings.length} copy tell(s):`);
-for (const f of findings) console.log(`    ~ [${f.code}] ${f.msg}`);
+// The record is the finding; the line is rendered from it (docs/MISTAKES.md #401).
+const F = gateFindings({ scene: file, indent: '    ' });
+for (const f of findings) F.warn(f.code, f.msg);
+F.emit();
 console.log(strict ? `\n  ✗ copy gate (strict): tighten the writing before shipping.\n` : `\n  reach past these. The copy is the video's voice. (Block with --strict / STRICT=1.)\n`);
 process.exit(strict && findings.length ? 1 : 0);

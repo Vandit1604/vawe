@@ -26,6 +26,7 @@ import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
@@ -110,6 +111,10 @@ if (!problems.length) {
       + `    a backdrop or a determinism fixture is meant to be still and is never failed for it.\n`);
   process.exit(0);
 }
-for (const p of problems) console.log(`    ~ [pace] ${p}`);
+// Both problems are filed under the one code this gate has ever emitted, `pace`; the specific
+// diagnosis is the summary. The record is the finding (docs/MISTAKES.md #401).
+const F = gateFindings({ scene: file, indent: '    ' });
+for (const p of problems) F.warn('pace', p);
+F.emit();
 console.log(strict ? '\n  ✗ pace (strict)\n' : '\n  Waive a deliberately still film with {"authoring":{"allow":["slow-pace"]}}.\n');
 process.exit(strict ? 1 : 0);

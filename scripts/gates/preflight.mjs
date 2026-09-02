@@ -23,6 +23,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 import { readReceipt, writeReceipt, receiptPath } from '../lib/receipt.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -52,7 +53,9 @@ if (check) {
   const why = r.stale
     ? `the scene has CHANGED since the preflight was run. The decisions were made against an older cut of this film.`
     : `this scene has never been through the decision chain.`;
-  console.log(`  ✗ [no-preflight] ${why}`);
+  const F = gateFindings({ scene: file, indent: '  ' });
+  F.fail('no-preflight', why, { fix: `make preflight D=${file}`, doc: 'docs/CRAFT/README.md' });
+  F.emit();
   console.log(`      The chain is nine decisions that each constrain the next, and skipping it is how a film`);
   console.log(`      ends up composed of whatever the author happened to remember. It costs one command:`);
   console.log(`        make preflight D=${file}`);

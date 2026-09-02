@@ -60,6 +60,7 @@ import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timi
 import { readReceipt } from '../lib/receipt.mjs';
 import { snippet } from '../lib/text.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -299,9 +300,14 @@ const fails = findings.filter((f) => f.sev === 'FAIL' && !allow.has(f.code));
 const waived = findings.filter((f) => allow.has(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !allow.has(f.code));
 console.log(`\n  ${fails.length} fail · ${warns.length} warn${waived.length ? ` · ${waived.length} waived` : ''}`);
-for (const f of fails) console.log(`    ✗ [${f.code}] ${f.msg}`);
-for (const w of warns) console.log(`    ~ [${w.code}] ${w.msg}`);
-for (const w of waived) console.log(`    ○ [${w.code}] waived via authoring.allow`);
+// One fact, one owner: the RECORD is the finding and the line below is rendered from it, so
+// author-check reads `code` instead of re-reading this sentence (docs/MISTAKES.md #401).
+const F = gateFindings({ scene: file, indent: '    ',
+  line: (r, g) => `    ${g} [${r.code}] ${r.waived ? 'waived via authoring.allow' : r.summary}` });
+for (const f of fails) F.fail(f.code, f.msg);
+for (const w of warns) F.warn(w.code, w.msg);
+for (const w of waived) F.finding({ code: w.code, severity: w.sev === 'FAIL' ? 'error' : 'warn', summary: w.msg, waived: true });
+F.emit();
 if (!findings.length) console.log('    ✓ the timeline holds: content on screen throughout, every beat carries something');
 
 if (fails.length || (strict && warns.length)) {

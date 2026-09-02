@@ -23,6 +23,7 @@ import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 // They live in one gate under one name because an author should run one command, not two.
 import { RULES, runRules } from '../lib/designspec-rules.mjs';
 import { parseColorRGB } from '../../core/motion.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
@@ -319,6 +320,10 @@ if (!allowRGB.length) console.log(`  ⚠ theme "${themeName}" has no readable pa
 if (!findings.length) { console.log(`  ✓ on-spec: every colour is a token or a palette colour, every font a role.`
     + `${tokenLockRan ? '' : ' (dead-token lock did not run, see above.)'}\n`); process.exit(0); }
 console.log(`  ${findings.length} off-spec value(s):`);
-for (const f of findings) console.log(`    ~ [${f.sev}] ${f.msg}`);
+// `sev` here has always been the finding CODE, not a severity. It is recorded under its real name so
+// author-check can read the code off a structure instead of the printed line (docs/MISTAKES.md #401).
+const F = gateFindings({ scene: file, indent: '    ' });
+for (const f of findings) F.warn(f.sev, f.msg);
+F.emit();
 console.log(strict ? `\n  ✗ design-spec lock (strict): bring these onto the theme before shipping.\n` : `\n  reach onto the theme: these are the drift the eye reads as "off". (Block them with --strict / STRICT=1.)\n`);
 process.exit(strict ? 1 : 0);

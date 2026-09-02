@@ -29,7 +29,9 @@ import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upri
 import { mergePan } from '../../core/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../author/patch-motion.mjs';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { MARGIN, MAX_ZOOM } from '../../core/safe.js';
 import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/safe.js';
@@ -5988,6 +5990,100 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok(`gradeable: scripts/gates/${g} asks it before grading`,
       /gradeable\(/.test(fs.readFileSync(path.join(repoRoot, 'scripts/gates', g), 'utf8')));
   }
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+// ---- findings: a gate returns a RESULT, not a paragraph the caller re-reads --------------------
+//
+// author-check used to decide whether a rule had fired by matching `[✗~]\s*\[<code>\]` against the
+// gate's printed output. Forty gates can fail and every one of them was one reformat away from being
+// silently unheard: the step prints its findings, the aggregator reads none, the film passes. The same
+// class is already recorded as docs/MISTAKES.md #401, where a verdict line printed after a --json
+// payload made the documented machine-readable output unparseable and a sweep called all 154 scenes
+// crashed. These asserts hold the contract that replaced it.
+{
+  const findingsSrc = fs.readFileSync(path.join(repoRoot, 'scripts/lib/findings.mjs'), 'utf8');
+  const acSrc = fs.readFileSync(path.join(repoRoot, 'scripts/gates/author-check.mjs'), 'utf8');
+  // Comments quote the regex that was removed, on purpose: the incident is the reason the rule exists.
+  // Strip them, so this asserts about CODE and cannot be satisfied by deleting the history.
+  const acCode = acSrc.replace(/^\s*\/\/.*$/gm, '');
+  ok('findings: author-check no longer builds a RegExp out of a finding code',
+    !/new RegExp\([^)]*\$\{code\}/.test(acCode));
+  // A marker followed by a BRACKET is the scrape: it is reading a CODE out of a sentence. The bare
+  // marker count two lines below it in author-check is a different fact (how many lines the step
+  // printed) and is allowed to stay, which is why this pattern requires the bracket.
+  ok('findings: author-check no longer scrapes a [code] out of a ✗ / ~ line',
+    !/(matchAll|match|test)\(\s*\/[^/]*[✗~][^/]*\\\[/.test(acCode));
+  ok('findings: author-check reads the records instead', /readFindings\(/.test(acCode) && /VAWE_FINDINGS_OUT/.test(acCode));
+
+  // The emitter itself: one door, and stdout belongs to JSON under --json.
+  ok('findings: the module binds the real stdout before redirecting it',
+    /const realStdout = process\.stdout\.write\.bind/.test(findingsSrc)
+    && findingsSrc.indexOf('const realStdout') < findingsSrc.indexOf('if (jsonMode) process.stdout.write'));
+
+  // EVERY CONVERTED GATE, BY NAME. A gate that goes back to printing its findings by hand is the whole
+  // bug returning, and it would return quietly, so it is named here rather than counted.
+  const CONVERTED = ['scripts/gates/preflight.mjs', 'scripts/gates/beat-check.mjs',
+    'scripts/gates/direction-floor.mjs', 'scripts/gates/dissolve-check.mjs',
+    'scripts/gates/designspec-check.mjs', 'scripts/gates/copy-check.mjs', 'scripts/gates/read-check.mjs',
+    'scripts/gates/pace-check.mjs', 'scripts/gates/eye-trace.mjs', 'scripts/gates/plan-vs-render.mjs',
+    'scripts/author/motion-director.mjs', 'verify/audit.mjs'];
+  for (const g of CONVERTED) {
+    const src = fs.readFileSync(path.join(repoRoot, g), 'utf8');
+    ok(`findings: ${g} records its findings through the shared emitter`,
+      /gateFindings\(/.test(src) && /from '.*lib\/findings\.mjs'/.test(src));
+  }
+
+  // A FAILING SCENE, END TO END. The fixture crossfades two absolutely-positioned elements at the same
+  // point on one clock, which is exactly what dissolve-check exists to refuse; nothing in the library
+  // does it, so the gate could never be proven to speak on a scene it fails.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'findings-'));
+  const scene = path.join(dir, 'mud.json');
+  fs.writeFileSync(scene, JSON.stringify({ module: 'scene', name: 'mud', duration: 4,
+    bg: [{ preset: 'softwash' }], audio: { silent: true, _why: 'a fixture, not a film' },
+    layers: [{ type: 'html', id: 'mud', at: 0, dur: 4,
+      html: '<div style="position:absolute;left:10%;top:20%;opacity:var(--t)">AFTER</div>'
+          + '<div style="position:absolute;left:10%;top:20%;opacity:calc(1 - var(--t))">BEFORE</div>' }] }));
+  const gate = path.join(repoRoot, 'scripts/gates/dissolve-check.mjs');
+
+  const asJson = spawnSync('node', [gate, scene, '--json'], { encoding: 'utf8', cwd: repoRoot });
+  ok('findings: --json exits with the same code the prose run does', asJson.status === 1);
+  let parsed = null;
+  try { parsed = JSON.parse(asJson.stdout); } catch { parsed = null; }
+  ok('findings: --json stdout PARSES on a scene the gate fails', Array.isArray(parsed) && parsed.length === 1);
+  ok('findings: and it carries the code, the severity and the scene',
+    parsed && parsed[0].code === 'crossfade-mud' && parsed[0].severity === 'error' && parsed[0].scene === scene);
+  ok('findings: nothing but JSON reaches stdout under --json (#401: the human verdict goes to stderr)',
+    asJson.stdout.trim().startsWith('[') && asJson.stdout.trim().endsWith(']')
+    && /dissolve check/.test(asJson.stderr));
+
+  // The prose is the same prose, rendered from the record.
+  const prose = spawnSync('node', [gate, scene], { encoding: 'utf8', cwd: repoRoot });
+  ok('findings: the prose run still prints the finding line it always printed',
+    /^ {2}✗ \[crossfade-mud\] layer "mud":/m.test(prose.stdout));
+  ok('findings: and it says nothing on stderr', prose.stderr === '');
+
+  // The side channel: how author-check gets the structure without a second run.
+  const out = path.join(dir, 'recs.json');
+  const side = spawnSync('node', [gate, scene], { encoding: 'utf8', cwd: repoRoot,
+    env: { ...process.env, VAWE_FINDINGS_OUT: out } });
+  ok('findings: VAWE_FINDINGS_OUT gets the records while stdout keeps the prose',
+    JSON.parse(fs.readFileSync(out, 'utf8'))[0].code === 'crossfade-mud' && /crossfade-mud/.test(side.stdout));
+
+  // A CLEAN RUN IS STILL A RESULT. Every one of these gates exits early when it finds nothing, long
+  // before its report block, so the empty answer has to be flushed on the way out or the caller cannot
+  // tell "found nothing" from "does not speak records".
+  const clean = path.join(dir, 'clean.json');
+  fs.writeFileSync(clean, JSON.stringify({ module: 'scene', name: 'clean', duration: 4,
+    bg: [{ preset: 'softwash' }], layers: [{ type: 'text', text: 'hello', at: 0, dur: 4 }] }));
+  const cleanOut = path.join(dir, 'clean-recs.json');
+  // copy-check, not the dissolve gate: it returns at `process.exit(0)` the moment it has nothing to
+  // say, several blocks above its report, which is exactly the path the exit flush exists for.
+  spawnSync('node', [path.join(repoRoot, 'scripts/gates/copy-check.mjs'), clean], { encoding: 'utf8', cwd: repoRoot,
+    env: { ...process.env, VAWE_FINDINGS_OUT: cleanOut } });
+  ok('findings: a gate that finds nothing still writes an empty result',
+    (() => { try { return JSON.stringify(JSON.parse(fs.readFileSync(cleanOut, 'utf8'))) === '[]'; } catch { return false; } })());
+
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
