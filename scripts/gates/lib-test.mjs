@@ -5516,6 +5516,23 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     && bgLook('liquid').moves === true && bgLook('liquid').family === 'liquid');
   ok('candidates: lightness is MEASURED, so `paper` is light and `deep` is dark on the same palette',
     bgLook('paper').tone === 'light' && bgLook('deep').tone === 'dark');
+  // BLACK MEANS #000000, and the three assertions are the three ways it stops meaning that.
+  //
+  // CLAUDE.md carried a whole section saying a pitch-black ground had to be hand-written HTML with a
+  // `tone: "dark"` typed beside it, because no preset reached zero. Rendered at 1920x1080 on the vawe
+  // theme, `dark`, `deep` and `ink` all sample rgb(12,18,26) at the corner and `black` samples
+  // rgb(0,0,0). A tint of 12 is invisible next to a lit subject and obvious next to nothing.
+  ok('backgrounds: `black` is literally #000000, which is the only reason it exists',
+    bgPreset('black').base.kind === 'solid' && bgPreset('black').base.color === '#000000');
+  // NO GRAIN. Grain is noise painted OVER the base, so one grain fx lifts the corner off zero and the
+  // ground is very dark rather than black. Every other flat preset takes it; this one must not.
+  ok('backgrounds: and it carries no fx at all, because grain would lift the corner off zero',
+    bgPreset('black').fx.length === 0);
+  // The half that makes it [built] rather than a shorter way to type the same mistake: scene.js reads
+  // lightness off `base.color`, so the ink flips with nothing declared. A hand-authored fragment
+  // returns null there and needs the tone typed every time.
+  ok('backgrounds: the engine MEASURES it dark, so no `tone` has to be typed beside it',
+    bgLook('black').tone === 'dark' && bgLook('black').moves === false);
   // The whole reason lightness is not read off the name: `value:"dark"` makes the same preset a dark
   // window, exactly as formats/scene/scene.js decides it (docs/MISTAKES.md #159 is the drift this avoids).
   ok('candidates: `value:"dark"` makes a light preset a dark window, the engine\'s own rule',

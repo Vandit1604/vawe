@@ -257,13 +257,15 @@ Which effects were verified stacked on one fragment, what to use instead of each
 a fragment moves, and the traps that cost a render each:
 [`docs/CRAFT/HTML-FRAGMENTS.md`](docs/CRAFT/HTML-FRAGMENTS.md).
 
-## BLACK MEANS `#000000`  `[eye]`
+## BLACK MEANS `#000000`  `[built: core/backgrounds.js:429]`
 
-When a brief says black, it means black. Every dark preset in `core/backgrounds.js` carries a tint or a
-wash: `dark`, `deep` and `ink` all sample well above zero at the corners, which is right for a film with
-a lit world and wrong for one whose only light is the subject. A pitch-black ground is two lines of
-hand-authored HTML (`background:#000`) with `tone: "dark"` on the window, and the tone is required
-because the engine cannot read lightness out of your CSS.
+When a brief says black, it means black. Every OTHER dark preset in `core/backgrounds.js` carries a tint
+or a wash: rendered on the vawe theme, `dark`, `deep` and `ink` all sample `rgb(12,18,26)` at the corner,
+which is right for a film with a lit world and wrong for one whose only light is the subject. So write
+`{"preset": "black"}`. It is a solid `#000000` with no grain, it renders `rgb(0,0,0)` at every corner,
+and the engine reads its lightness off that colour, so you do not type a tone. This used to be two lines
+of hand-authored HTML plus a `tone: "dark"` you had to remember, because the engine cannot read lightness
+out of your CSS. A rule that existed to work around a missing preset is now the preset.
 
 ## NAME THE EFFECT BEFORE YOU BUILD IT  `[eye]`
 
@@ -338,9 +340,9 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 620 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 621 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
-`docs/EFFECTS.md`, 641 effects across 53 families). Reach for it before you invent anything. The measured cost
+`docs/EFFECTS.md`, 642 effects across 53 families). Reach for it before you invent anything. The measured cost
 of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 148 gate-visible scenes**, and 12 of its
 19 beats have never been used once.
 

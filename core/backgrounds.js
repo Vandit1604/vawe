@@ -355,7 +355,7 @@ export function bgPaletteFrom(palette) {
 // no way to enumerate a switch); the EFFECTS.md catalog + coverage derive the vocabulary from this so the
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
-  'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink',
+  'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink', 'black',
   'metallic', 'metallicSheen', 'gradientWash', 'blobs', 'liquid'];
 
 // BG_BLURBS: one line per preset, next to the switch that paints it (the `blurb` pattern of
@@ -381,6 +381,7 @@ export const BG_BLURBS = {
   dark: 'a plain dark radial, no dots. FLAT, the quiet backdrop for busy content',
   deep: 'the deepest plain radial, no dots. FLAT, when the content must own the whole frame',
   ink: 'dark radial with slow accent-tinted dots pulsing in place (moves), for a clean flat dark use `plain` + value:"dark"',
+  black: 'literally #000000, no tint, no wash, no grain. FLAT, when the only light in the film is the subject itself',
   metallic: 'vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser), dramatic dark bg, brand-coloured',
   metallicSheen: 'the quieter metallic: fewer, slower rods with a sweep crossing them (moves), a dark field type can sit on',
   gradientWash: 'one big saturated pool bleeding off a corner into white, a mesh gradient (moves), light and premium',
@@ -410,6 +411,22 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
       // trough for the pulse to be a modulation of something.
       { type: 'dots', mode: 'pulse', color: P.accent, baseAlpha: 0.11, peakAlpha: 0.22, spacing: 64, period: 5, driftX: 8, driftY: 5 }, grain ] };
     case 'plain': return { base: dark ? { kind: 'solid', color: P.inkBase[1] } : { kind: 'solid', color: P.paperBase[0] }, fx: [grain] };
+    // BLACK MEANS #000000, and it is a preset because it was a rule.
+    //
+    // CLAUDE.md carried a section telling authors to hand-write `background:#000` in an html window and
+    // remember `tone: "dark"` beside it, because every dark preset above carries a tint or a wash and
+    // none of them reaches zero: `dark` and `deep` are radials off the theme's own ramp, `ink` pulses
+    // accent-tinted dots, and `plain` + value:"dark" resolves to `P.inkBase[1]`, which is a theme colour
+    // and not black. A rule that exists to work around a missing preset should be the preset. The
+    // hand-written route also lost the ink: formats/scene/scene.js `windowIsLight` returns null for a
+    // fragment with no `tone`, so the tone had to be typed by hand every time or the frame came out
+    // dark-on-dark. Here the engine measures `base.color`, so #000000 reads as dark with nothing typed.
+    //
+    // NO GRAIN, and that is the whole point rather than an omission. Every other flat preset takes the
+    // `grain` fx; grain is noise painted over the base, so it lifts the corners off zero and the ground
+    // is then very dark rather than black. If you want the tooth, ask for it: `{ preset: 'black', fx: … }`
+    // is not a thing, so reach for `plain` + value:"dark" instead and accept the theme's colour.
+    case 'black': return { base: { kind: 'solid', color: '#000000' }, fx: [] };
     // accentPlain: the brand's accent colour as a clean full-bleed field (grain only, no dots/spotlight).
     // For PLAIN sites whose hero is a flat/gradient colour, not a textured one: match plain with plain.
     case 'accentPlain': return { base: { kind: 'radial', from: P.accentBase[0], to: P.accentBase[1], cx: 0.5, cy: 0.4 }, fx: [grain] };
