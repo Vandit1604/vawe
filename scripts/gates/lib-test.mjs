@@ -5949,5 +5949,47 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
      kindsOfEnum(schema.fields.aspect.enum, regs).length === 0);
 }
 
+// ---- gradeable: a render that exists is not a render that is CURRENT -----------------------------
+//
+// scripts/gates/tile.mjs already carried this bug's near twin in its own comment: a wrongly-resolved
+// name once made the judge grade a leftover mp4 and "report a clean run on a video the author never
+// made". The NAME was fixed and the FRESHNESS was not, so out/x.mp4 could still be the right name for
+// a film since rewritten, and every consumer checked only existsSync. An author edits a scene, runs
+// `make judge`, and is handed a verdict about a film that no longer exists. Nothing is wrong with the
+// file: it is simply the previous answer. This is the harness reflex "that file changed since you read
+// it", which the engine had nowhere.
+{
+  const { gradeable } = await import('./tile.mjs');
+  const dir = fs.mkdtempSync(path.join((await import('node:os')).tmpdir(), 'gradeable-'));
+  const scene = path.join(dir, 'probe.json');
+  const mp4 = path.join(dir, 'probe.mp4');
+
+  ok('gradeable: no render at all is refused, with the command that makes one',
+    (() => { fs.writeFileSync(scene, '{}'); const r = gradeable(scene, mp4);
+      return !r.ok && /no rendered video/.test(r.why) && /make video/.test(r.fix); })());
+
+  fs.writeFileSync(mp4, 'x');
+  fs.utimesSync(scene, new Date(1e9), new Date(1e9));   // scene older than the render
+  ok('gradeable: a render made after the scene is gradeable', gradeable(scene, mp4).ok);
+
+  fs.utimesSync(mp4, new Date(1e9), new Date(1e9));
+  fs.utimesSync(scene, new Date(2e9), new Date(2e9));   // scene edited after the render
+  const stale = gradeable(scene, mp4);
+  ok('gradeable: a render older than its scene is REFUSED', !stale.ok);
+  ok('gradeable: and the refusal says it is the previous answer, not a broken file',
+    /film you have since edited/.test(stale.why) && /make video/.test(stale.fix));
+  ok('gradeable: the age is stated in units a reader does not have to convert',
+    /(minute|hour|day)\(s\)/.test(stale.why));
+
+  // EVERY GRADER, NOT JUST THE ONE THAT BIT. The judge, the seam sheet and compare all read a render
+  // they did not make; a seam sheet cut from the previous render reports clean seams for a film whose
+  // cuts have moved, which is the one class that gate exists to catch.
+  for (const g of ['judge.mjs', 'seam-snap.mjs']) {
+    ok(`gradeable: scripts/gates/${g} asks it before grading`,
+      /gradeable\(/.test(fs.readFileSync(path.join(repoRoot, 'scripts/gates', g), 'utf8')));
+  }
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

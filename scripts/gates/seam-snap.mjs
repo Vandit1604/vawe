@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { flattenLayers } from '../lib/layers.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
 
+import { gradeable } from './tile.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/gates/seam-snap.mjs <scene.json>'); process.exit(2); }
@@ -30,7 +31,11 @@ if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/ga
 const data = lowerScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
-if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at out/${name}.mp4, render first (make video D=${dataArg})`); process.exit(2); }
+// EXISTS IS NOT FRESH. A seam sheet cut from the previous render reports clean seams for a film whose
+// cuts have moved, which is the one class this gate exists to catch. `gradeable` (scripts/gates/tile.mjs)
+// asks both halves and is the single owner of that question.
+const ready = gradeable(dataArg, mp4);
+if (!ready.ok) { console.error(`✗ ${ready.why}.\n  fix: ${ready.fix}`); process.exit(1); }
 
 // ffmpeg AND ffprobe ARE THE INSTRUMENT, and their absence is a fact about this machine, never about
 // the film. Every measurement below is a spawnSync whose failure mode was an ABSENCE of findings: with

@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import path from 'node:path';
 import { beatsOf, evenSamples } from './beats-of.mjs';
-import { frameTile, tileGrid, tileBox, baseOf, renderOf } from './tile.mjs';
+import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
 import { craftRubric } from './rubric.mjs';
 
 const inp = process.argv[2];
@@ -23,7 +23,10 @@ if (inp.endsWith('.json')) {
   scene = JSON.parse(fs.readFileSync(inp, 'utf8'));
   mp4 = renderOf(inp);
 }
-if (!fs.existsSync(mp4)) { console.error(`✗ no rendered video at ${mp4}, render first (\`make video D=${inp}\`), then judge.`); process.exit(1); }
+// A STALE RENDER IS THE ANSWER TO THE PREVIOUS QUESTION, and it grades clean. `gradeable` asks both
+// halves: is there a video, and was it made after the film was last edited.
+const ready = gradeable(inp, mp4);
+if (!ready.ok) { console.error(`✗ ${ready.why}.\n  fix: ${ready.fix}`); process.exit(1); }
 const brand = arg('--vs', scene?.theme && typeof scene.theme === 'string' ? scene.theme : '');
 
 const dur = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', mp4]).toString().trim());

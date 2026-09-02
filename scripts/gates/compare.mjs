@@ -9,7 +9,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { frameTile, tileGrid, renderOf } from './tile.mjs';
+import { frameTile, tileGrid, renderOf, gradeable } from './tile.mjs';
 
 const args = process.argv.slice(2);
 const at = (() => { const i = args.indexOf('--at'); return i >= 0 ? args[i + 1] : '3'; })();

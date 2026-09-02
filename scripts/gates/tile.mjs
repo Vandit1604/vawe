@@ -4,6 +4,7 @@
 // that were accidents rather than decisions. One implementation, so a sheet from one tool reads the same
 // as a sheet from the next, and so a fix to the ffmpeg graph lands everywhere at once.
 import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 
 const ff = (a) => execFileSync('ffmpeg', a, { stdio: ['ignore', 'ignore', 'ignore'] });
@@ -57,3 +58,37 @@ export const baseOf = (p) => path.basename(p).replace(/\.[^.]+$/, '');
 // the right rule all along; this is that rule, in one place, for every consumer.
 export const renderOf = (scenePath) =>
   path.join('out', `${path.basename(scenePath).replace(/\.(expanded\.)?json$/, '')}.mp4`);
+
+// EXISTS IS NOT FRESH, and the comment above stops one step short of its own lesson. Resolving the
+// right NAME was half the bug: the other half is that `out/x.mp4` can be the right name for a film the
+// author has since rewritten, and every consumer of this path checks only `existsSync`. So an author
+// edits a scene, runs `make judge`, and is handed a verdict about a video that no longer exists. There
+// is no error, because nothing is wrong with the file: it is simply the previous answer.
+//
+// Named `gradeable` rather than folded into `renderOf`, because `renderOf` is also the right function
+// for asking where a render WILL go, and a resolver that refuses a path it is about to create would be
+// wrong. A grader wants the other question, and it is the one that has bitten.
+//
+// mtime and not a content hash: the render is minutes of work and the scene is a text file, so the
+// question is only ever "was the film written after the frames were made". A hash would be exact,
+// slower, and would still need a place to keep the answer, which is a second fact to go stale.
+// "10228 minute(s)" is a number a reader has to convert before it means anything, and the whole point
+// of the line is that it should land immediately.
+const ago = (ms) => {
+  const m = Math.round(ms / 60000);
+  if (m < 90) return `${m} minute(s)`;
+  const h = Math.round(m / 60);
+  return h < 36 ? `${h} hour(s)` : `${Math.round(h / 24)} day(s)`;
+};
+
+export function gradeable(scenePath, mp4 = renderOf(scenePath)) {
+  if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix: `make video D=${scenePath}` };
+  if (!scenePath.endsWith('.json')) return { ok: true, mp4 };
+  const src = fs.statSync(scenePath).mtimeMs, out = fs.statSync(mp4).mtimeMs;
+  if (src > out) {
+    return { ok: false, mp4,
+      why: `${mp4} is ${ago(src - out)} older than ${scenePath}. It is a render of a film you have since edited`,
+      fix: `make video D=${scenePath}` };
+  }
+  return { ok: true, mp4 };
+}
