@@ -64,6 +64,24 @@ const SHAPES = {
 
 export const TIME_REMAP_REGISTRY = defineRegistry('time remap', SHAPES, {
   blurbs: blurbsOf('time remap', SHAPES), slot: 'timeRemap',
+  catalog: {
+    title: 'Time remaps (the layer\'s own clock)',
+    tag: 'timing',
+    intro: '`timeRemap` on a layer. After Effects\' Time Remapping: the CLOCK accelerates, brakes, holds or reverses, so everything the layer does moves with it (its motion, its size, its idle, its typing, its count). An easing on a motion track cannot do this: it bends one property across one segment while the counter underneath still counts at an even rate. Name one of these shapes, or write your own keys `[{"t":0,"at":0},{"t":1.4,"at":0.3}]`, where `t` is the layer\'s elapsed second and `at` is the second it believes it is. The neighbouring dials: `timeWarp` is the one-easing form of the same idea, and `stepFps` posterizes the clock to a lower rate (15 in a 30fps film is the hand-drawn "on twos" look).',
+    // A remap is one word on the layer whose clock it warps, and the motion track is there to say what
+    // the clock is FOR: the same three keys read as a whip, a hold, a freeze or a rewind depending on
+    // this one field, which is the whole argument for it being a clock and not a fourth easing.
+    usage: (n, { j }) => j({ timeRemap: n, motion: [{ t: 0, x: -420 }, { t: 4, x: 420, ease: 'linear' }] }),
+    // The subject travels the frame at an even rate under a `linear` track, so everything the eye reads
+    // as speed here comes from the remap alone: `whip` crawls then bolts, `hold` sits in the middle,
+    // `freeze` stops dead, `rewind` comes back. The counter rides along to show the clock reaching a
+    // primitive, which is the part an easing on the motion track could never do.
+    preview: (n, { base, HERO }) => base({ layers: [
+        { ...HERO, text: n, y: 380, timeRemap: n, motion: [{ t: 0, x: -520 }, { t: 5.4, x: 520, ease: 'linear' }] },
+        { type: 'count', to: 100, x: 160, y: 640, w: 1600, align: 'center', size: 200, weight: 800,
+          start: 0.3, duration: 5.4, timeRemap: n },
+      ] }),
+  },
 });
 export const TIME_REMAP_NAMES = Object.keys(SHAPES);
 export const TIME_REMAP_BLURBS = TIME_REMAP_REGISTRY.blurbs;

@@ -10,20 +10,30 @@
 // either, which is the one worth fixing: 0 of 4 THREE_FX scenes were named in it, along with 0 of 5
 // raymarch effects and 0 of 5 playground generators (docs/MISTAKES.md #335).
 //
-// The cause is that `scripts/site/effects-catalog.mjs` imports a HAND-WRITTEN list of registries. Add a
-// vocabulary to core/ and it appears in the catalogue only if someone remembers to add an import line.
+// The cause WAS that `scripts/site/effects-catalog.mjs` imported a HAND-WRITTEN list of registries. Add
+// a vocabulary to core/ and it appeared in the catalogue only if someone remembered an import line.
 // `make effects-check` cannot catch that: it proves the registries the catalogue knows about are not
 // stale, and has no way to know about the one it was never told about.
 //
-// WHY THIS IS A GATE AND NOT MORE AUTOMATION. Generating the catalogue mechanically from every export
-// would produce a worse document: its value is the one-line description beside each name, which is
-// judgement and not derivable. So the catalogue keeps its prose, and this makes an OMISSION LOUD
-// instead of silent. That is the same trade as `make beats`: the tool cannot look at the picture, so it
-// checks that somebody did.
+// THAT HALF IS NOW UNREPRESENTABLE, AND THIS GATE SHRANK ACCORDINGLY. A registry carries a `catalog`
+// block at its definition (core/registry.js) and the catalogue reads `catalogued()` over every module
+// under core/, so a registry that publishes itself needs no import line and no section tuple. What is
+// left for a gate is the half that cannot be derived: a vocabulary with NO registry behind it, which
+// has no definition site to hang prose on and therefore no way to announce itself.
+//
+// WHY NOT AUTOMATE THAT HALF TOO. Generating a section mechanically from any old export would produce a
+// worse document: its value is the one-line description beside each name, which is judgement. So the
+// remaining sections keep their prose, and this makes an OMISSION LOUD instead of silent. Same trade as
+// `make beats`: the tool cannot look at the picture, so it checks that somebody did.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registries } from '../../core/registry.js';
+// The catalogue's own family list, not its source text. A registry that publishes itself (a `catalog`
+// block on its defineRegistry call) is no longer NAMED in effects-catalog.mjs at all, so grepping that
+// file for its export would report every derived vocabulary as missing. Reading `sections` asks the
+// stronger question anyway: not "is the word in the file" but "is this vocabulary in the document".
+import { sections } from '../site/effects-catalog.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CATALOG = 'scripts/site/effects-catalog.mjs';
@@ -68,6 +78,14 @@ const WAIVED = new Map(Object.entries({
   BUILDERS: 'the lightfield pattern implementations behind PATTERNS, which IS catalogued',
   SLOTS: 'track slot names, internal to the track resolver',
   CANVAS_FX_PRESETS: 'preset bundles over CANVAS_FX_NAMES',
+  // FOUND BY A COLLISION, not by a new export. `named()` is a bare word match over the catalogue
+  // source, and the catalogue used to import `PRESETS` from core/type.js for the kinetic-preset
+  // section, so core/lightfield/PRESETS was silently credited with a different file's import line.
+  // The kinetic presets now write their own section and that import is gone, and the false pass went
+  // with it. The waiver itself: these are full option BUNDLES for the lightfield generator, the CLI
+  // and the playground starting point. A scene names the dials (PATTERNS/SHAPES/ANCHORS/…, which ARE
+  // catalogued) and pastes the markup the generator emits; it never writes `preset: "colonnade"`.
+  PRESETS: 'fitted option bundles for the lightfield generator (core/lightfield/presets.js), used by the CLI and as the playground start state. Its user-facing dials ARE catalogued under "Lightfield dials"',
   COMPOSITIONS: 'the implementations behind COMPOSITION_NAMES, which IS catalogued',
   CAP_STYLES: 'the implementations behind CAP_STYLE_NAMES, which IS catalogued',
   DESTINATIONS: 'the safe-area table behind DESTINATION_NAMES, which IS catalogued',
@@ -201,11 +219,14 @@ const missing = [];
 // there), and which one it picked is not a fact worth having an opinion about. A registry no export of
 // which is named is a capability with no way in, and NO WAIVER IS ACCEPTED for one: a registry exists
 // precisely so an author can name the thing, so "an author never picks from this" cannot be true of it.
+const IN_CATALOGUE = new Set(sections.map(([, , , , meta]) => meta && meta.reg).filter(Boolean));
 const byReg = new Map();
 for (const [name, r] of derived) (byReg.get(r) || byReg.set(r, []).get(r)).push(name);
 for (const [r, names] of byReg) {
-  if (names.some(named)) continue;
-  missing.push([`${r.kind} (${names.join(' / ')})`, `${names.length} export(s), no catalogue section`]);
+  if (IN_CATALOGUE.has(r)) continue;   // it wrote its own section, from its own definition site
+  if (names.some(named)) continue;     // an older vocabulary the catalogue still lists by export name
+  missing.push([`${r.kind} (${names.join(' / ')})`,
+    'a registry with no `catalog` block: add one to its defineRegistry call']);
 }
 
 for (const [name, file] of found) {
@@ -246,7 +267,9 @@ if (!missing.length) {
 }
 console.error(`\n  ✗ ${missing.length} capabilit(ies) the engine offers and the catalogue never mentions:\n`);
 for (const [name, file] of missing) console.error(`     ${name.padEnd(22)} ${file}`);
-console.error(`\n  An author told to "see the whole arsenal, then choose" cannot choose these. Either add a`);
-console.error(`  section for it to ${CATALOG} and run \`make effects\`, or waive it in`);
+console.error(`\n  An author told to "see the whole arsenal, then choose" cannot choose these.`);
+console.error(`  A REGISTRY writes its own section: give its defineRegistry call a \`catalog\` block`);
+console.error(`  (title / tag / intro / usage / preview or noPreview, core/registry.js) and run \`make effects\`.`);
+console.error(`  Anything else adds a section to ${CATALOG}, or is waived in`);
 console.error(`  this file WITH A REASON if it is not something a scene can name.\n`);
 process.exit(1);

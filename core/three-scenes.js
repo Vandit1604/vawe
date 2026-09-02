@@ -33,4 +33,13 @@ export const THREE_FX = Object.keys(THREE_SCENES);
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a three scene" when someone writes it somewhere else. core/registry.js.
-export const THREE_REGISTRY = defineRegistry('three scene', Object.fromEntries(THREE_FX.map((n) => [n, n])), { slot: 'three' });
+export const THREE_REGISTRY = defineRegistry('three scene', Object.fromEntries(THREE_FX.map((n) => [n, n])), { slot: 'three', blurbs: THREE_SCENES,
+  catalog: {
+    title: 'three.js scenes (real geometry)',
+    tag: 'layer',
+    intro: '`{ "type":"three", "three":"<name>" }`. A scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.',
+    register: 'three',
+    usage: (n, { full }) => full({ type: 'three', three: n }),
+    preview: (n, { base, OVER }) => base({ layers: [{ type: 'three', three: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
+  },
+});

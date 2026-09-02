@@ -70,7 +70,15 @@ export const FX_BLURBS = {
 // objects the dispatch below reads, so the search cannot advertise a vocabulary the engine does not
 // have. `pick` keeps its own refusal rather than calling this one, because the message an author gets
 // for a misspelled modifier has to say what the `modifiers` ARRAY is, which no shared hint can know.
-export const FX_REGISTRY = defineRegistry('modifier', REGISTRY, { blurbs: FX_BLURBS, slot: 'modifiers[]' });
+export const FX_REGISTRY = defineRegistry('modifier', REGISTRY, { blurbs: FX_BLURBS, slot: 'modifiers[]',
+  catalog: {
+    title: 'Per-layer modifiers',
+    tag: 'per-layer',
+    intro: '`"modifiers"` on a layer, applied in array order after every motion track. A physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow. NOT `"fx"`, which is the named-GSAP-effect slot and refuses an entry with no name.',
+    usage: (n, { text }) => text({ anim: 'rise', modifiers: [{ [n]: true }] }),
+    noPreview: 'each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.',
+  },
+});
 
 // An unknown name is a HARD ERROR, never a skipped entry. A modifier that quietly does nothing is the
 // worst shape this repo has: `fx:[{"mixBlned":"screen"}]` would render a frame that looks plausible,

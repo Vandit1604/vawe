@@ -227,7 +227,16 @@ export const DEPTH_BLURBS = Object.freeze({
 // `*_REGISTRY` the engine exports, which is the one place an author goes when they do not yet know the
 // name of the thing they want. A vocabulary that is not one is a vocabulary nobody can search for, and
 // being unfindable is the entire defect this file is fixing.
-export const DEPTH_REGISTRY = defineRegistry('depth', DEPTH_PLANES, { blurbs: DEPTH_BLURBS, slot: 'depth' });
+export const DEPTH_REGISTRY = defineRegistry('depth', DEPTH_PLANES, { blurbs: DEPTH_BLURBS, slot: 'depth',
+  catalog: {
+    title: 'Depths (parallax planes)',
+    tag: 'per-layer',
+    intro: '`{ "depth": "back" }` on any layer. Stands it at a DISTANCE from the picture plane, so a camera move gives it parallax instead of turning the whole frame as one rigid pane. Each name is a fraction of the film\'s own lens, so it means the same distance under any camera, and it lowers to the `plane` modifier at boot. A raw number of px still works. Refused on a group CHILD, which sits in a flat parent: put it on the group.',
+    // A depth is a NAMED PLANE, so it is one word on the layer and the camera does the rest.
+    usage: (n, { text }) => text({ depth: n }),
+    noPreview: 'a plane only reads when the camera moves past it. One frame of a parallax is a frame with nothing parallaxing in it.',
+  },
+});
 // NOT EXPORTED. The registry IS the vocabulary's public face, and a second exported spelling of the
 // same list is a second thing for a caller to reach for and for the catalogue to have to mention.
 // `arsenal-check` said so out loud, which is the gate doing its job.

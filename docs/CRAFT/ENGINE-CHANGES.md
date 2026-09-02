@@ -76,8 +76,13 @@ The engine should let you add an effect, a layer type, a block, a beat or a came
 handling everything again**. Where that is true today it is because of one of three primitives, and a
 new extension point should use one of them rather than invent a fourth:
 
-- **`defineRegistry(...)`** (`core/vocab.js`): a named vocabulary that refuses an unknown name and says
-  which slot it was reaching for.
+- **`defineRegistry(...)`** (`core/registry.js`): a named vocabulary that refuses an unknown name and
+  says which slot it was reaching for. Give it a **`catalog`** block (title, tag, intro, usage, and
+  either preview or noPreview) and it also writes its own section in `docs/EFFECTS.md` and its own page
+  on the site. That is the whole edit: adding one capability used to be four edits in three files, held
+  together by two gates, and the id those other three were keyed by was a slug of the section title, so
+  renaming a section orphaned its usage and its preview in silence. A half-written block is refused at
+  load rather than by a gate.
 - **`paramsOf`** (`core/camera-moves.js:216`), refuses an unknown parameter by reading the generator's
   OWN signature. Nobody maintains that list, so it cannot drift.
 - **`createKit(ctx)`** (`core/layers/util.js`): dependency injection for layer builders. A capability

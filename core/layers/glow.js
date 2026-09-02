@@ -115,7 +115,23 @@ export const GLOW_BLURBS = {
   chromaCycle: 'a saturated neon bloom whose hue sweeps the spectrum over `cycle` seconds',
 };
 
-export const GLOW_REGISTRY = defineRegistry('glow preset', GLOW_PRESETS, { slot: 'preset', blurbs: GLOW_BLURBS });
+export const GLOW_REGISTRY = defineRegistry('glow preset', GLOW_PRESETS, { slot: 'preset', blurbs: GLOW_BLURBS,
+  catalog: {
+    title: 'Glow presets',
+    tag: 'glow layer',
+    intro: '`preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text. Each one is a named lighting behaviour rather than a gradient you tune by hand: `{ "type":"glow", "preset":"halation", "intensity":0.3 }`. `cx`/`cy` move the light centre, `angle` aims the spotlight cone, and `cycle` times the one preset that moves on its own. An unknown name THROWS and suggests the near word; it used to return null and paint the plain gradient in silence.',
+    // PRE-EXISTING GAP, closed while adding the family above: `make effects` was already red on this
+    // one, so the catalogue could not regenerate at all. A modifier is an array entry on a layer.
+    // A glow preset is a whole LAYER, not a prop on somebody else's, so its usage shows the layer.
+    usage: (n, { j }) => j({ type: 'glow', preset: n, x: 460, y: 240, w: 1000, h: 600, intensity: 0.4,
+        start: 0, duration: 6 }),
+    // A glow is light, so it needs something to light and a ground dark enough to read against. The
+    // headline sits UNDER the glow in the layer order, which is what makes the preset visible as an
+    // effect on a subject rather than as a coloured rectangle on its own.
+    preview: (n, { base, HERO }) => base({ bg: [{ preset: 'ink', from: 0, to: 6 }],
+        layers: [{ ...HERO, y: 470 }, { type: 'glow', preset: n, x: 360, y: 240, w: 1200, h: 620, intensity: 0.45, start: 0, duration: 6 }] }),
+  },
+});
 
 // presetSpec(name, o) → { background, blend?, mask? }. THROWS on a name this vocabulary does not know.
 // o: { i intensity 0..1, cx/cy centre 0..1 within the layer box, angle deg (spotlight), color }

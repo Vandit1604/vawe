@@ -32,10 +32,13 @@ const ALL = [];   // every registry built here, so a failed pick can ask the oth
  *     to render the paste `make arsenal` prints. It is a PATH, and two markers say where the NAME goes:
  *     `bg[].preset` (the value of `preset` in an array of objects), `modifiers[]` (the KEY of an object
  *     inside the array), `effector.drives{}` (a KEY in an object map).
+ *   opts.catalog: everything docs/EFFECTS.md and the site's arsenal need in order to PUBLISH this
+ *     vocabulary, written here so that adding one is a single edit. See checkCatalog below.
  * There is deliberately no `fallback` option.
  */
-export function defineRegistry(kind, entries, { blurbs, slot } = {}) {
+export function defineRegistry(kind, entries, { blurbs, slot, catalog } = {}) {
   if (!entries || typeof entries !== 'object') throw new Error(`defineRegistry("${kind}"): entries must be an object`);
+  if (catalog) checkCatalog(kind, catalog);
   const has = (name) => typeof name === 'string' && Object.prototype.hasOwnProperty.call(entries, name);
 
   const reg = {
@@ -43,6 +46,7 @@ export function defineRegistry(kind, entries, { blurbs, slot } = {}) {
     slot: slot || kind,
     entries,
     blurbs: blurbs || null,
+    catalog: catalog || null,
     get names() { return Object.keys(entries); },
     has,
     /** The value, or a throw naming what this vocabulary knows, never a substitute. */
@@ -53,6 +57,39 @@ export function defineRegistry(kind, entries, { blurbs, slot } = {}) {
   };
   ALL.push(reg);
   return reg;
+}
+
+/**
+ * checkCatalog(kind, c): the publishing half of a vocabulary, refused at LOAD if it is incomplete.
+ *
+ * WHY IT LIVES ON THE REGISTRY. Adding one capability used to be four edits in three files: the
+ * registry here, a five-part section tuple in scripts/site/effects-catalog.mjs, a `USAGE[id]` form and
+ * a `PREVIEW[id]` scene (or a `NO_PREVIEW[id]` reason) in scripts/site/effects-json.mjs. The id those
+ * last three are keyed by is a slug of the section TITLE, so renaming a section silently orphaned its
+ * usage and its preview. Two gates then held the four halves together, and either one could stop a
+ * push. Every one of those facts is a fact about the vocabulary, so the vocabulary owns them.
+ *
+ *   title    the section heading, and the thing its id is slugged from
+ *   tag      the one-word slot label the catalogue prints beside the heading (`per-layer`, `camera`)
+ *   intro    the prose an author reads before choosing. Written for docs/EFFECTS.md
+ *   usage    (name, kit) → the JSON snippet an author writes. `kit` is the catalogue's own furniture
+ *            (`j`, `text`, `full`), passed in rather than imported so core/ keeps no site dependency
+ *   preview  (name, kit) → a whole scene object the site plays, `kit` being { base, HERO, TWO, OVER }
+ *   noPreview  why this family cannot honestly be played in one small clip. The alternative to
+ *            `preview`, never a companion to it, and never absent: a blank was how blanks got shipped
+ *   register optional, the key into SELECTION.md §4 when the register IS the description (looks, stings)
+ *   skip     optional, the DECISION that a family is self-describing, rendered instead of a blank row
+ *
+ * Refused here rather than checked by a gate, because a gate only promises to notice: a registry with
+ * half a catalogue entry cannot exist at all if the constructor will not build one.
+ */
+function checkCatalog(kind, c) {
+  const bad = (why) => { throw new Error(`defineRegistry("${kind}"): catalog ${why}`); };
+  for (const k of ['title', 'tag', 'intro']) if (typeof c[k] !== 'string' || !c[k].trim()) bad(`needs a non-empty ${k}`);
+  if (typeof c.usage !== 'function') bad('needs usage(name, kit), the JSON an author writes');
+  if (!c.preview === !c.noPreview) bad('needs EITHER preview(name, kit) OR noPreview (a reason), never both and never neither');
+  if (c.preview && typeof c.preview !== 'function') bad('preview must be a function of (name, kit)');
+  if (c.noPreview && typeof c.noPreview !== 'string') bad('noPreview must be the reason, as a string');
 }
 
 // Where else does this name live? Returns the registries that DO know it.
@@ -123,3 +160,13 @@ export function blurbsOf(kind, entries) {
 
 /** Every registry defined so far, for catalog/coverage surfaces that want the whole vocabulary. */
 export const registries = () => ALL.slice();
+
+/**
+ * catalogued(): the registries that publish themselves, in the order docs/EFFECTS.md prints them.
+ *
+ * Sorted by slot label and then by title, NOT by definition order. Definition order is module
+ * evaluation order, so deleting one unused import from the catalogue script would reshuffle the whole
+ * document; sorting on the registry's own fields makes the order a property of the vocabulary.
+ */
+export const catalogued = () => ALL.filter((r) => r.catalog)
+  .sort((a, z) => a.catalog.tag.localeCompare(z.catalog.tag) || a.catalog.title.localeCompare(z.catalog.title));

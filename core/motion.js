@@ -237,6 +237,16 @@ const HANDLES = {
 
 export const HANDLE_REGISTRY = defineRegistry('keyframe handle', HANDLES, {
   blurbs: blurbsOf('keyframe handle', HANDLES), slot: 'easeOut',
+  catalog: {
+    title: 'Keyframe handles (the graph editor)',
+    tag: 'motion key',
+    intro: 'On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles. A named easing is one stock curve for the whole gap; a handle is a control point you place. Each carries an `influence` (how far along the segment it reaches, 0-100 per cent of the DURATION) and a `speed` (how fast the value moves AT the key, as a MULTIPLE of the segment\'s own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out). A multiple and not px/sec, so one handle pair is correct for x, scale and rot at once. The names below are ONE SIDE each and the slot picks the side: `{ "t":0.6, "x":400, "easeOut":"fling", "easeIn":"easyEase" }`, or the long form `{ "influence": 18, "speed": 4 }`. Refused beside `ease` on the same segment.',
+    // A HANDLE is one SIDE of one key, and the slot says which side, so the form has to show both
+    // sides of a segment at once or the name reads as a whole-segment easing, which is the thing it
+    // is not. Written as a name here; the long form is { influence, speed }.
+    usage: (n, { text }) => text({ anim: 'none', motion: [{ t: 0, x: -300, easeOut: n }, { t: 0.9, x: 300, easeIn: n }] }),
+    noPreview: 'a handle is half the shape of a segment, so it has the same problem a mode has: a still frame is one point on the curve and says nothing about the curve. The playground card draws the curve itself with both handles on dials.',
+  },
 });
 
 /**

@@ -297,7 +297,15 @@ export function cutStyle(name, seqState, { timing = 'smooth', dir = 'left', dist
 }
 
 // Built at the END so both maps are fully defined. `slot` is how an author writes it in a scene.
-export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut', blurbs: CUT_BLURBS });
+export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut', blurbs: CUT_BLURBS,
+  catalog: {
+    title: 'Scene cuts',
+    tag: 'transition',
+    intro: '`cuts:[{t,style}]`. The beat-to-beat cut family. One family per film.',
+    usage: (n, { j }) => j({ cuts: [{ t: 2.4, style: n }] }),
+    preview: (n, { base, TWO }) => base({ layers: TWO(2.4), cuts: [{ t: 2.4, style: n }] }),
+  },
+});
 // The curve a cut travels on, in the author's terms. Kept beside the registry, which is where every
 // other vocabulary in this engine keeps its descriptions, so `make arsenal` finds them with the names.
 export const TIMING_BLURBS = {
@@ -311,4 +319,15 @@ export const TIMING_BLURBS = {
   ramp: "the editor's slow-fast-slow speed ramp. The one to reach for on a whip or a camera throw",
 };
 
-export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming', blurbs: TIMING_BLURBS });
+export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming', blurbs: TIMING_BLURBS,
+  catalog: {
+    title: 'Cut timings',
+    tag: 'cuts[]/per-layer',
+    intro: 'The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[{ "t":3, "style":"push", "timing":"ramp" }]`, or `cutTiming` on a per-layer cut. The style says what the transition looks like; the timing says how it accelerates. `ramp` is the editor\'s slow-fast-slow speed ramp, for a whip or a camera throw; `rush` accelerates away and suits an exit; `brake` decelerates in and suits an arrival. A scene writes the word and the schema enum is derived from this registry, but the arsenal never listed it.',
+    // The timing rides ON a cut, so the usage shows both: a style with a speed curve chosen for it.
+    usage: (n, { j }) => j({ cuts: [{ t: 2.4, style: 'push', timing: n }] }),
+    // One style throughout, so the only thing moving between these clips is the acceleration. `push`
+    // travels far enough that the curve is legible, which `fade` would not be.
+    preview: (n, { base, TWO }) => base({ layers: TWO(2.4), cuts: [{ t: 2.4, style: 'push', timing: n }] }),
+  },
+});

@@ -194,7 +194,15 @@ for (const d of Object.keys(DEVICE_BLURBS))
 
 export const SPECTACLE_DEVICES = defineRegistry('spectacle device',
   Object.fromEntries(Object.keys(DEVICE_BLURBS).map((k) => [k, k])),
-  { blurbs: DEVICE_BLURBS, slot: 'spectacle.device' });
+  { blurbs: DEVICE_BLURBS, slot: 'spectacle.device',
+  catalog: {
+    title: 'Spectacle devices',
+    tag: 'scene',
+    intro: '`"spectacle": { "at", "of", "device", "why" }`. The film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/spectacle.js`.',
+    usage: (n, { j }) => j({ spectacle: { at: 2.4, of: 'hero', device: n, why: 'the one loud moment, and every other dial drops to 55%' } }),
+    noPreview: 'a spectacle is a whole film turning its other dials down. One clip cannot show the restraint that makes it work.',
+  },
+});
 
 // THE TWO NUMBERS. `peak` is what the declared moment's own sting is set to, over the sting default
 // of 1; `rest` is what every competing amplitude dial elsewhere in the film is multiplied by.

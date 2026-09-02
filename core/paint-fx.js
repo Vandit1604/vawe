@@ -165,4 +165,12 @@ export const PAINT_FX_NAMES = Object.keys(PAINT_FX);
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a paint fx" when someone writes it somewhere else. core/registry.js.
-export const PAINT_REGISTRY = defineRegistry('paint fx', PAINT_FX, { slot: 'paint' });
+export const PAINT_REGISTRY = defineRegistry('paint fx', PAINT_FX, { slot: 'paint',
+  catalog: {
+    title: 'Generative paint FX (per-frame)',
+    tag: 'per-frame',
+    intro: '`{ "type":"paint", "paint":"<name>" }`. A full-canvas animated field, pure in t.',
+    usage: (n, { full }) => full({ type: 'paint', paint: n }),
+    preview: (n, { base, OVER }) => base({ layers: [{ type: 'paint', paint: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),
+  },
+});

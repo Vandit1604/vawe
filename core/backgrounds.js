@@ -563,4 +563,12 @@ export function renderBg(ctx, w, h, t, spec) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a background preset" when someone writes it somewhere else. core/registry.js.
-export const BG_REGISTRY = defineRegistry('background preset', Object.fromEntries(BG_NAMES.map((n) => [n, n])), { slot: 'bg[].preset', blurbs: BG_BLURBS });
+export const BG_REGISTRY = defineRegistry('background preset', Object.fromEntries(BG_NAMES.map((n) => [n, n])), { slot: 'bg[].preset', blurbs: BG_BLURBS,
+  catalog: {
+    title: 'Backgrounds',
+    tag: 'background',
+    intro: '`bg:[{preset,from,to}]`. The field behind everything; moving ones (aurora/constellation/mesh/…) animate.',
+    usage: (n, { j }) => j({ bg: [{ preset: n, from: 0, to: 6 }] }),
+    preview: (n, { base, HERO }) => base({ bg: [{ preset: n, from: 0, to: 6 }], layers: [{ ...HERO, text: n, size: 110 }] }),
+  },
+});

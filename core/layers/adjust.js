@@ -74,7 +74,17 @@ export const ADJUST_BLURBS = {
   contrast:   'harden the tones beneath, as a percentage',
 };
 
-export const ADJUST_REGISTRY = defineRegistry('adjustment', KINDS, { blurbs: ADJUST_BLURBS, slot: 'kind' });
+export const ADJUST_REGISTRY = defineRegistry('adjustment', KINDS, { blurbs: ADJUST_BLURBS, slot: 'kind',
+  catalog: {
+    title: 'Adjustment layers (grade what is BENEATH)',
+    tag: 'per-layer',
+    intro: '`{ "type":"adjust", "kind":"<name>" }`. One grade over every layer with a LOWER `track`, so a whole beat can go soft or grey from a single layer instead of the same filter written onto fifteen. `amount` is the strength in that kind\'s own unit, and the CSS reads `var(--adjust)`, so the existing `vars` track keys it: `{ "type":"adjust","kind":"blur","amount":20,"vars":{"--adjust":[0,1]},"varsDur":0.8 }`. A raw `filter` string is the escape hatch and is static.',
+    // An adjustment layer is a LAYER, not a prop, and `track` is the whole contract: everything with a
+    // lower track is graded, everything above it is untouched.
+    usage: (n, { j }) => j({ layers: [{ type: 'adjust', kind: n, amount: 18, track: 6, start: 1.2, duration: 1.5 }] }),
+    noPreview: 'a grade has no subject of its own: it is whatever is already under it. The arsenal shows them through the scenes that use them.',
+  },
+});
 
 // The props are read off this signature (propsOf, core/props.js). `w`/`h` stay `L.x`: they are the
 // shared box props every layer type accepts, not spelled out by this file's own declaration.
