@@ -20,7 +20,10 @@ export function build(kit, el, L, { src, w, h, fit } = L) {
   el.__lottieFrames = inst.totalFrames || (data.op - data.ip) || 1;
   el.__lottieFr = data.fr || 30; // author-time frame rate of the animation
 }
-export function frame(kit, el, L, t, { speed, loop } = L) {
+// The pattern sits AFTER every argument the dispatcher passes, and that position is load-bearing.
+// core/layers/index.js calls frame(kit, el, L, t, scene) with five arguments, so a pattern in the
+// fifth slot destructures `scene` and every prop reads undefined. lib-test asserts the arity.
+export function frame(kit, el, L, t, scene, { speed, loop } = L) {
   const inst = el.__lottie;
   if (!inst) return;
   const start = L.start ?? 0;

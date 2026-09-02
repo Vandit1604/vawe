@@ -9,7 +9,10 @@ export function build(kit, el, L, { src, w, radius, fit } = L) {
   el.style.borderRadius = (radius ?? 0) + 'px'; el.style.overflow = 'hidden';
   el.innerHTML = `<img class="hs-clip-img" style="width:100%;display:block;object-fit:${fit || 'cover'}" src="${man.frames[0] || ''}">`;
 }
-export function frame(kit, el, L, t, { src, speed, loop } = L) {
+// The pattern sits AFTER every argument the dispatcher passes, and that position is load-bearing.
+// core/layers/index.js calls frame(kit, el, L, t, scene) with five arguments, so a pattern in the
+// fifth slot destructures `scene` and every prop reads undefined. lib-test asserts the arity.
+export function frame(kit, el, L, t, scene, { src, speed, loop } = L) {
   const start = L.start ?? 0;
   const man = (kit.clips && kit.clips[src]) || { frames: [] };
   const N = man.frames.length;

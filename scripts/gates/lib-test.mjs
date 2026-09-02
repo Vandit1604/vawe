@@ -5371,6 +5371,26 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     probesOf('rect').every((p) => p.layer.type === 'rect' && p.layer[p.prop] !== undefined));
   ok('prop-probe: the surface covers what the type declares AND the kit props the audit scopes',
     surfaceOf('three').includes('metalness') && surfaceOf('three').includes('bg'));
+
+  // THE ARITY TRAP, and it bit on the first run of the prober. A builder reads its props off a
+  // destructured parameter (propsOf, core/props.js), and a defaulted parameter only takes its default
+  // when the caller passes nothing there. So the pattern must sit AFTER every argument the dispatcher
+  // passes: core/layers/index.js calls build(kit, el, L) with three and frame(kit, el, L, t, scene)
+  // with five. cursor, clip and lottie put the pattern in the fifth slot, destructured `scene`, and
+  // read path/clicks/speed/loop as undefined on every frame, with no error and no film to notice.
+  // `Function.length` counts the parameters before the first defaulted one, which IS the pattern's
+  // index, so one comparison settles it and nothing here can go stale as the engine moves.
+  const DISPATCHED = { build: 3, frame: 5 };
+  for (const file of fs.readdirSync(new URL('../../core/layers/', import.meta.url))) {
+    if (!file.endsWith('.js') || file === 'index.js' || file === 'util.js' || file === 'vocabulary.js') continue;
+    const mod = await import(`../../core/layers/${file}`);
+    for (const [name, min] of Object.entries(DISPATCHED)) {
+      const fn = mod[name];
+      if (typeof fn !== 'function' || !/=\s*L\s*\)\s*\{/.test(String(fn))) continue;
+      ok(`prop-probe: ${file} ${name}() puts its destructured pattern past all ${min} dispatched arguments`,
+        fn.length >= min);
+    }
+  }
 }
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

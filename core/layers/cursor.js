@@ -13,7 +13,10 @@ export function build(kit, el, L, { size, x, y, color, rippleColor } = L) {
   el.innerHTML = `<div class="hs-cur-ripple" style="position:absolute;left:6px;top:5px;width:64px;height:64px;margin:-32px;border-radius:50%;border:3px solid ${rippleColor || 'rgba(37,99,235,0.7)'};transform:scale(0);opacity:0"></div>`
     + `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" style="position:absolute;left:0;top:0;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.35))"><path d="M5 2.5 L5 19.5 L9.4 15.4 L12.3 21.3 L14.9 20.1 L12 14.3 L18.2 13.8 Z" fill="${color || '#141414'}" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
 }
-export function frame(kit, el, L, t, { path, clicks } = L) {
+// The pattern sits AFTER every argument the dispatcher passes, and that position is load-bearing.
+// core/layers/index.js calls frame(kit, el, L, t, scene) with five arguments, so a pattern in the
+// fifth slot destructures `scene` and every prop reads undefined. lib-test asserts the arity.
+export function frame(kit, el, L, t, scene, { path, clicks } = L) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;
   const lt = t - start, pm = (path && path.length) ? kit.motionAt(path, lt) : { dx: 0, dy: 0 };
