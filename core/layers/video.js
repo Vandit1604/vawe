@@ -8,36 +8,34 @@
 //
 // The seek is asynchronous, which the engine had no way to express until now. core/frame-settle.js is the
 // barrier the capture drains before it shoots; this layer is its first caller.
-import { mergeProps } from '../props.js';
+import { mergeProps, propsOf } from '../props.js';
 import { settleOn } from '../frame-settle.js';
 
 // `in`/`out` are points in the SOURCE, `rate` is how fast the source runs against the scene clock, and
 // they only mean anything together: out<=in is an empty cut and is refused rather than rendered as a
 // still. `fit` and `radius` follow the image layer's vocabulary so a footage layer and a still layer are
-// placed the same way.
-export const PROPS = mergeProps({
-  src: {}, w: {}, h: {}, radius: {}, fit: {}, poster: {},
-  in: {}, out: {}, rate: {},
-}, {});
+// placed the same way. The props are read off build()'s and sourceTime()'s own signatures (propsOf,
+// core/props.js), not typed a second time here.
 
 // The source time this layer shows at scene time `t`. Pure, exported, and unit-tested without a DOM for
 // the same reason core/layers/glow.js exports presetSpec: the arithmetic is the contract.
 // Clamped at both ends ON PURPOSE. Running past `out` holds the last frame rather than showing whatever
 // follows it in the file, because a layer whose window outlives its footage is an authoring mistake and
 // freezing is the readable failure. Silence would be showing unrelated footage.
-export function sourceTime(L, t) {
+// `start` is shared vocabulary (declared centrally, core/layers/vocabulary.js) so it stays `L.start`
+// rather than joining this pattern; `in`/`rate`/`out` are this layer's own and read here.
+export function sourceTime(L, t, { in: from, rate, out } = L) {
   const start = L.start ?? 0;
-  const from = L.in ?? 0;
-  const rate = L.rate ?? 1;
-  const to = L.out != null ? L.out : Infinity;
-  const raw = from + Math.max(0, t - start) * rate;
-  return Math.min(Math.max(raw, from), to);
+  const f = from ?? 0;
+  const to = out != null ? out : Infinity;
+  const raw = f + Math.max(0, t - start) * (rate ?? 1);
+  return Math.min(Math.max(raw, f), to);
 }
 
-export function build(kit, el, L) {
-  if (!L.src) throw new Error('video layer: `src` is required (a path under assets/, e.g. assets/video/clip.mp4)');
-  if (L.out != null && L.out <= (L.in ?? 0))
-    throw new Error(`video layer: out (${L.out}) must be greater than in (${L.in ?? 0}), an empty cut cannot be rendered`);
+export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint, out } = L) {
+  if (!src) throw new Error('video layer: `src` is required (a path under assets/, e.g. assets/video/clip.mp4)');
+  if (out != null && out <= (inPoint ?? 0))
+    throw new Error(`video layer: out (${out}) must be greater than in (${inPoint ?? 0}), an empty cut cannot be rendered`);
   const v = document.createElement('video');
   v.className = 'hs-video';
   // ROOT-RELATIVE, ALWAYS. The page is served from /formats/scene/, so a bare `assets/clip.mp4`
@@ -46,24 +44,26 @@ export function build(kit, el, L) {
   // like the layer was never written. Both spellings mean the same file and the assets preflight
   // already checks the repo-relative one, so the resolver belongs here rather than in the author's
   // JSON. Silence is the worst failure (docs/MISTAKES.md #383).
-  v.src = /^(https?:)?\/\//.test(L.src) || L.src.startsWith('/') ? L.src : '/' + L.src.replace(/^\.\//, '');
-  if (L.poster) v.poster = L.poster;
+  v.src = /^(https?:)?\/\//.test(src) || src.startsWith('/') ? src : '/' + src.replace(/^\.\//, '');
+  if (poster) v.poster = poster;
   // muted + playsInline + no autoplay + no controls: this element is a decoder we scrub, not a player.
   // The AUDIO of a clip is not taken from here; the mixer owns sound (core/audio*.js), because the film's
   // track has to survive an encode that this element is not part of.
   v.muted = true; v.defaultMuted = true; v.playsInline = true; v.controls = false; v.preload = 'auto';
   el.appendChild(v);
-  if (L.w) { el.style.width = L.w + 'px'; v.style.width = '100%'; }
-  if (L.h) { el.style.height = L.h + 'px'; v.style.height = '100%'; }
-  if (L.radius != null || L.w || L.h) {
+  if (w) { el.style.width = w + 'px'; v.style.width = '100%'; }
+  if (h) { el.style.height = h + 'px'; v.style.height = '100%'; }
+  if (radius != null || w || h) {
     el.style.overflow = 'hidden';
-    if (L.radius != null) el.style.borderRadius = L.radius + 'px';
+    if (radius != null) el.style.borderRadius = radius + 'px';
   }
   // cover only when there is a box to cover, the same guard image.js needs: with one axis declared,
   // `height:100%` has nothing to resolve against and the element collapses to zero.
-  if (L.w && L.h) v.style.objectFit = L.fit || 'cover';
+  if (w && h) v.style.objectFit = fit || 'cover';
   el.__video = v;
 }
+
+export const PROPS = mergeProps(propsOf(build), propsOf(sourceTime));
 
 export function frame(kit, el, L, t) {
   const v = el.__video || (el.__video = el.querySelector('video'));

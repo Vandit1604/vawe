@@ -9,6 +9,7 @@
 //     "speed":0.5, "color":"var(--accent)", "glow":0.6 }          // border-beam (default)
 //   { "type":"beam", "mode":"shine", "w":520,"h":150, "period":1.6, "angle":18, "color":"#fff" }  // sheen
 import { alphaMix } from './glow.js';
+import { mergeProps, propsOf } from '../props.js';
 
 // pure: the beam head angle (deg) at local time lt; `speed` = full loops per second.
 export const beamAngle = (lt, speed = 0.5) => (((lt * speed * 360) % 360) + 360) % 360;
@@ -18,9 +19,11 @@ export const beamAngle = (lt, speed = 0.5) => (((lt * speed * 360) % 360) + 360)
 // else is the one-fact-two-places drift that generates most of the defects logged here.
 export const SHINE_SCALE = 2.6;
 
-/** The sheen itself, as a CSS gradient. The ONE owner: frame() paints it, maskPaint() masks with it. */
-export const shineGradient = (L, c) =>
-  `linear-gradient(${L.angle ?? 18}deg, transparent 38%, ${alphaMix(c, L.intensity ?? 0.55)} 50%, transparent 62%)`;
+/** The sheen itself, as a CSS gradient. The ONE owner: frame() paints it, maskPaint() masks with it. Takes
+ * `angle`/`intensity` directly rather than the whole layer, so its two callers each declare the read on
+ * their own signature instead of both routing it through a shared `L`. */
+export const shineGradient = (angle, intensity, c) =>
+  `linear-gradient(${angle ?? 18}deg, transparent 38%, ${alphaMix(c, intensity ?? 0.55)} 50%, transparent 62%)`;
 
 export const shinePos = (lt, period = 1.6) => { const u = (((lt / Math.max(0.1, period)) % 1) + 1) % 1; return -20 + u * 140; };
 
@@ -29,55 +32,56 @@ export const beamConic = (a, c, tail) =>
   `conic-gradient(from ${a.toFixed(1)}deg, transparent 0deg, ${alphaMix(c, 0.0)} 1deg, ` +
   `${alphaMix(c, 0.85)} ${(tail * 0.5).toFixed(0)}deg, ${c} ${tail.toFixed(0)}deg, transparent ${(tail + 1).toFixed(0)}deg)`;
 
-// `mode:"shine"` and the default border-beam read disjoint halves of this list, but both halves are
+// The props are read off build()'s, frame()'s and maskPaint()'s own signatures (propsOf, core/props.js).
+// `mode:"shine"` and the default border-beam read disjoint halves of the union, but both halves are
 // authored on the same prop (`mode`), so guarding either on the other would say the wrong thing.
-export const PROPS = { w: {}, h: {}, radius: {}, color: {}, mode: {}, intensity: {},
-  angle: {}, thickness: {}, tail: {}, glow: {}, period: {}, speed: {} };
-
-export function build(kit, el, L) {
-  if (L.w != null) el.style.width = L.w + 'px';
-  if (L.h != null) el.style.height = L.h + 'px';
+export function build(kit, el, L, { w, h, color, mode, radius, thickness, tail, glow, angle, intensity } = L) {
+  if (w != null) el.style.width = w + 'px';
+  if (h != null) el.style.height = h + 'px';
   el.style.pointerEvents = 'none';
-  const c = L.color && L.color !== true ? L.color : 'var(--accent)';
+  const c = color && color !== true ? color : 'var(--accent)';
   const inner = document.createElement('div');
-  const r = (L.radius ?? 16) + 'px';
+  const r = (radius ?? 16) + 'px';
   inner.style.cssText = `position:absolute;inset:0;pointer-events:none;border-radius:${r}`;
 
-  if (L.mode === 'shine') {
-    inner.style.background = shineGradient(L, c);
+  if (mode === 'shine') {
+    inner.style.background = shineGradient(angle, intensity, c);
     inner.style.backgroundSize = `${SHINE_SCALE * 100}% 100%`;
     inner.style.backgroundPosition = '-20% 0';
     inner.style.mixBlendMode = 'screen';
   } else {
     // border-beam: a conic light ring, masked to the border thickness (the classic gradient-border mask:
     // two full-coverage masks, one clipped to content-box, XOR/exclude → only the padding ring paints).
-    const th = L.thickness ?? 2.5;
+    const th = thickness ?? 2.5;
     inner.style.padding = th + 'px';
-    inner.style.background = beamConic(0, c, L.tail ?? 90);
+    inner.style.background = beamConic(0, c, tail ?? 90);
     inner.style.webkitMask = 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)';
     inner.style.mask = 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)';
     inner.style.webkitMaskComposite = 'xor';
     inner.style.maskComposite = 'exclude';
-    if (L.glow) inner.style.filter = `drop-shadow(0 0 ${(6 * L.glow).toFixed(1)}px ${alphaMix(c, 0.7)})`;
+    if (glow) inner.style.filter = `drop-shadow(0 0 ${(6 * glow).toFixed(1)}px ${alphaMix(c, 0.7)})`;
   }
   el.appendChild(inner);
   el.__beamInner = inner;
-  el.__beamMode = L.mode || 'border';
+  el.__beamMode = mode || 'border';
 }
 
-export function frame(kit, el, L, t) {
+// The pattern sits AFTER every argument the dispatcher passes, and that position is load-bearing.
+// core/layers/index.js calls frame(kit, el, L, t, scene) with five arguments, so a pattern in the
+// fifth slot destructures `scene` and every prop reads undefined. lib-test asserts the arity.
+export function frame(kit, el, L, t, scene, { period, color, speed, tail } = L) {
   if (!el.__beamInner) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;
   const lt = t - start;
   if (el.__beamMode === 'shine') {
-    const p = shinePos(lt, L.period ?? 1.6);
+    const p = shinePos(lt, period ?? 1.6);
     el.__beamInner.style.backgroundPosition = `${p.toFixed(2)}% 0`;
     el.dataset.bp = p.toFixed(2);
   } else {
-    const c = L.color && L.color !== true ? L.color : 'var(--accent)';
-    const a = beamAngle(lt, L.speed ?? 0.5);
-    el.__beamInner.style.background = beamConic(a, c, L.tail ?? 90);
+    const c = color && color !== true ? color : 'var(--accent)';
+    const a = beamAngle(lt, speed ?? 0.5);
+    el.__beamInner.style.background = beamConic(a, c, tail ?? 90);
     el.dataset.ba = a.toFixed(1);
   }
 }
@@ -98,20 +102,25 @@ export function frame(kit, el, L, t) {
 // it would reveal a hairline outline of the layer beneath and nothing else. Returning it because it is
 // technically an image would be a working-looking answer to a question nobody meant to ask; null makes
 // the matte say what it says for any other unusable source, by name.
-export function maskPaint(L, lt, geom) {
-  if ((L.mode || 'border') !== 'shine') return null;
-  const c = L.color && L.color !== true ? L.color : 'var(--accent)';
+//
+// The pattern goes in the fourth slot: core/layers/index.js always calls `mod.maskPaint(spec, lt, geom)`
+// with three arguments, so a pattern there only ever fires on the default.
+export function maskPaint(L, lt, geom, { mode, color, period, angle, intensity } = L) {
+  if ((mode || 'border') !== 'shine') return null;
+  const c = color && color !== true ? color : 'var(--accent)';
   const w = geom.w * SHINE_SCALE;
   // CSS percentage positioning places the image so that p% of (container - image) is the offset. The
   // container here is the source's own box, which is what the live beam positions against, so the
   // travel is derived the same way rather than re-derived in pixels and drifting from it.
-  const travel = (shinePos(lt, L.period ?? 1.6) / 100) * (geom.w - w);
+  const travel = (shinePos(lt, period ?? 1.6) / 100) * (geom.w - w);
   return {
-    image: shineGradient(L, c),
+    image: shineGradient(angle, intensity, c),
     size: `${w.toFixed(2)}px ${geom.h.toFixed(2)}px`,
     position: `${(geom.x + travel).toFixed(2)}px ${geom.y.toFixed(2)}px`,
   };
 }
+
+export const PROPS = mergeProps(propsOf(build), propsOf(frame), propsOf(maskPaint));
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe";

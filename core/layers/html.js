@@ -3,6 +3,7 @@
 // pure. The sanitiser and the reasoning behind it live in core/sanitize-html.js, shared with the `html`
 // background so the layer and the backdrop cannot drift to different rules.
 import { sanitizeHtml, scopeStyles, htmlSource, droppedDecls } from '../sanitize-html.js';
+import { propsOf } from '../props.js';
 
 // `h` used to be accepted and then ignored: build() set width and not height, and the `.hs-html` wrapper
 // had no height of its own, so hand-authored CSS saying `height:100%` resolved against an auto-height
@@ -18,11 +19,10 @@ import { sanitizeHtml, scopeStyles, htmlSource, droppedDecls } from '../sanitize
 // `src` is the SAME markup, in a file instead of escaped into the JSON, the alternative to `html`, never
 // its replacement (the block generators build their fragments in memory and have no file to point at).
 // Exactly one of the two, enforced in core/validate.mjs; a `src` that never loaded throws in htmlSource.
-export const PROPS = { html: {}, src: {}, w: {}, h: {} };
-
-export function build(kit, el, L) {
-  if (L.w != null) el.style.width = L.w + 'px';
-  if (L.h != null) el.style.height = L.h + 'px';
+// The props are read off this signature (propsOf, core/props.js). No second list to drift from it.
+export function build(kit, el, L, { html, src, w, h } = L) {
+  if (w != null) el.style.width = w + 'px';
+  if (h != null) el.style.height = h + 'px';
   // THE FRAGMENT'S OWN BOX. `bg`, `border`, `radius`, `shadow`, `elevation` and `pad` are shared layer
   // props the schema advertises and this layer accepted and then ignored: nothing here called chipBox,
   // so an html panel asking for a frosted surface painted no surface, no edge and square corners while
@@ -33,15 +33,15 @@ export function build(kit, el, L) {
   // The layer states its box in `w`/`h`; padding must eat into it rather than grow it, or a panel
   // declaring 760px renders wider than the author asked for. Nothing sets box-sizing globally, so this
   // is scoped to the layers that DID declare a box.
-  if ((L.w != null || L.h != null) && L.pad != null) el.style.boxSizing = 'border-box';
+  if ((w != null || h != null) && L.pad != null) el.style.boxSizing = 'border-box';
   const where = `layer${L.id ? ` "${L.id}"` : ''} (html)`;
-  const src = htmlSource(L, kit.html, where);
+  const markup = htmlSource({ html, src }, kit.html, where);
   // REFUSE A DECLARATION THE BROWSER WOULD DROP, at the moment this fragment becomes DOM. The parser
   // rejects the one declaration, keeps the rest of the rule and renders on, so a hand-authored style
   // that is subtly malformed produces no error anywhere. The element just never does the thing. That
   // is the same failure the transition/animation refusal above exists for (CSS that reads correctly and
   // silently no-ops), so it is refused in the same breath rather than found later by looking at a frame.
-  const bad = droppedDecls(src);
+  const bad = droppedDecls(markup);
   if (bad.length)
     throw new Error(`${where}: the browser drops ${bad.length === 1 ? 'this style declaration' : 'these style declarations'} `
       + `: ${bad.join(' · ')}. It keeps the rest of the rule and renders on, so nothing fails and the `
@@ -49,8 +49,10 @@ export function build(kit, el, L) {
       + `\`calc(-1 * …)\`, not \`-calc(…)\`.`);
   // scopeStyles hoists the fragment's <style> blocks to the front and scopes each one to this wrapper,
   // so one layer's class names cannot reach another layer's DOM (docs/MISTAKES.md #425).
-  el.innerHTML = `<div class="hs-html" style="height:100%">${scopeStyles(sanitizeHtml(src))}</div>`;
+  el.innerHTML = `<div class="hs-html" style="height:100%">${scopeStyles(sanitizeHtml(markup))}</div>`;
 }
+
+export const PROPS = propsOf(build);
 
 // `--t` is the scene clock in seconds, the one thing hand-authored CSS can be a function of. It was
 // written only on the html BACKGROUND, so an html LAYER using `var(--t)` fell back to its default and
