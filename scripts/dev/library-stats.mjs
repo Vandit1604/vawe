@@ -32,6 +32,31 @@ const SCENES = path.join(ROOT, 'formats/scene');
 // the difference, because the one gate that ever measured area got it wrong and was deleted for it.
 const PICTORIAL = new Set(['image', 'html', 'component', 'svg', 'video', 'clip', 'lottie', 'board', 'doc']);
 
+// --files a.json b.json: measure the named scenes instead of the population, and print the per-file
+// counts a prompt ablation compares (scripts/dev/prompt-eval.sh). Same definitions, one owner.
+const fileArgs = process.argv.indexOf('--files');
+if (fileArgs !== -1) {
+  const files = process.argv.slice(fileArgs + 1).filter((a) => !a.startsWith('--'));
+  const rows = files.map((f) => {
+    const d = JSON.parse(fs.readFileSync(f, 'utf8'));
+    const layers = d.layers || [];
+    const mix = {};
+    for (const L of layers) mix[L.type] = (mix[L.type] || 0) + 1;
+    return {
+      file: path.basename(f),
+      seconds: d.seconds ?? d.duration ?? null,
+      bgWindows: Array.isArray(d.bg) ? d.bg.length : (d.bg ? 1 : 0),
+      cuts: Array.isArray(d.cuts) ? d.cuts.length : 0,
+      layers: layers.length,
+      motionTracks: layers.filter((L) => L.motion).length,
+      pictorial: layers.filter((L) => PICTORIAL.has(L.type)).length,
+      mix,
+    };
+  });
+  console.log(JSON.stringify(rows, null, 2));
+  process.exit(0);
+}
+
 const pop = population('library stats', { filter: LIBRARY, quiet: true });
 const s = { n: 0, oneBg: 0, mute: 0, noAudioKey: 0, silentDeclared: 0, silentWithWhy: 0,
   beatBlueprint: 0, zeroPictorial: 0 };
