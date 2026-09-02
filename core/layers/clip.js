@@ -1,16 +1,17 @@
 // core/layers/clip.js: a generated/any VIDEO played DETERMINISTICALLY as a preloaded PNG frame
 // sequence (scripts/gen-clip.mjs → manifest). No <video>: renderFrame(n) swaps the <img> src.
-export const PROPS = { src: {}, w: {}, radius: {}, fit: {}, speed: {}, loop: {} };
+import { mergeProps, propsOf } from '../props.js';
 
-export function build(kit, el, L) {
-  const man = (kit.clips && kit.clips[L.src]) || { frames: [], w: 640, h: 360, fps: 30 };
-  if (L.w != null) el.style.width = L.w + 'px';
-  el.style.borderRadius = (L.radius ?? 0) + 'px'; el.style.overflow = 'hidden';
-  el.innerHTML = `<img class="hs-clip-img" style="width:100%;display:block;object-fit:${L.fit || 'cover'}" src="${man.frames[0] || ''}">`;
+// The props are read off these signatures (propsOf, core/props.js). No second list to drift from them.
+export function build(kit, el, L, { src, w, radius, fit } = L) {
+  const man = (kit.clips && kit.clips[src]) || { frames: [], w: 640, h: 360, fps: 30 };
+  if (w != null) el.style.width = w + 'px';
+  el.style.borderRadius = (radius ?? 0) + 'px'; el.style.overflow = 'hidden';
+  el.innerHTML = `<img class="hs-clip-img" style="width:100%;display:block;object-fit:${fit || 'cover'}" src="${man.frames[0] || ''}">`;
 }
-export function frame(kit, el, L, t) {
+export function frame(kit, el, L, t, { src, speed, loop } = L) {
   const start = L.start ?? 0;
-  const man = (kit.clips && kit.clips[L.src]) || { frames: [] };
+  const man = (kit.clips && kit.clips[src]) || { frames: [] };
   const N = man.frames.length;
   if (!N) return;
   // The <img> is written once by build() above and only its `src` ever changes, so finding it again on
@@ -23,10 +24,14 @@ export function frame(kit, el, L, t) {
   // `undefined` = not looked yet, `null` = looked and there is none.
   if (el.__clipImg === undefined) el.__clipImg = el.querySelector('img');
   const img = el.__clipImg;
-  let fi = Math.floor((t - start) * (man.fps || 30) * (L.speed ?? 1));
-  fi = L.loop ? ((fi % N) + N) % N : Math.max(0, Math.min(N - 1, fi));
+  let fi = Math.floor((t - start) * (man.fps || 30) * (speed ?? 1));
+  fi = loop ? ((fi % N) + N) % N : Math.max(0, Math.min(N - 1, fi));
   if (img && img.getAttribute('src') !== man.frames[fi]) img.setAttribute('src', man.frames[fi]);
 }
+
+// Both signatures declare, because a prop read only on the frame path is just as real as one read at
+// build time. mergeProps unions them (core/props.js).
+export const PROPS = mergeProps(propsOf(build), propsOf(frame));
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders";

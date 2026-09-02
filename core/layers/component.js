@@ -1,11 +1,12 @@
 // core/layers/component.js: a REAL UI capture (capture-component.mjs), or one PART of a captured
 // animated scene (capture-scene.mjs), parts carry their own w/h and are re-animated here.
-export const PROPS = { src: {}, part: {}, w: {} };
+import { propsOf } from '../props.js';
 
-export function build(kit, el, L) {
-  let c = (kit.components && kit.components[L.src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
-  if (L.part && c.parts) c = c.parts.find((pp) => pp.name === L.part) || { html: `<div style="color:#888">part ${L.part} missing</div>`, w: 600, h: 300 };
-  const fit = (L.w || 1200) / Math.max(1, c.w);
+// The props are read off this signature (propsOf, core/props.js). No second list to drift from it.
+export function build(kit, el, L, { src, part, w } = L) {
+  let c = (kit.components && kit.components[src]) || { html: '<div style="color:#888">component not captured</div>', w: 900, h: 560 };
+  if (part && c.parts) c = c.parts.find((pp) => pp.name === part) || { html: `<div style="color:#888">part ${part} missing</div>`, w: 600, h: 300 };
+  const fit = (w || 1200) / Math.max(1, c.w);
   el.style.width = Math.round(c.w * fit) + 'px';
   el.style.height = Math.round(c.h * fit) + 'px';
   el.innerHTML = `<div class="hs-comp" style="width:${c.w}px;height:${c.h}px;transform:scale(${fit.toFixed(4)})">${c.html}</div>`;
@@ -16,6 +17,8 @@ export function build(kit, el, L) {
   const rootEl = el.firstElementChild?.firstElementChild;
   if (rootEl) rootEl.style.margin = '0';
 }
+
+export const PROPS = propsOf(build);
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w`";
