@@ -41,13 +41,13 @@ JSON *is* the video.
 
 ## Layer types
 
-`text` · `count` · `image` · `video` · `group` · `rect` · `glow` · `beam` · `svg` · `cursor` · `clip` · `html` · `component` · `board` · `doc` · `shader` · `lottie` · `paint` · `raymarch` · `three` · `globe` · `composition`
+`text` · `count` · `image` · `video` · `group` · `rect` · `glow` · `beam` · `svg` · `cursor` · `clip` · `html` · `component` · `board` · `doc` · `shader` · `lottie` · `paint` · `raymarch` · `three` · `globe` · `composition` · `adjust`
 
 ## The props you will actually use
 
 | prop | type | notes |
 |---|---|---|
-| `type` | string | Layer type. One of: `text` `count` `image` `video` `group` `rect` `glow` `beam` `svg` `cursor` `clip` `html` `component` `board` `doc` `shader` `lottie` `paint` `raymarch` `three` `globe` `composition` |
+| `type` | string | Layer type. One of: `text` `count` `image` `video` `group` `rect` `glow` `beam` `svg` `cursor` `clip` `html` `component` `board` `doc` `shader` `lottie` `paint` `raymarch` `three` `globe` `composition` `adjust` |
 | `text` | string | Text (may use <b>/<em>) |
 | `x` | number|string | Left: px number, or relative "50%" / "50%-40" / center / left / right (resolve |
 | `y` | number|string | Top: px number, or relative "50%" / center / top / bottom (resolved per aspect |
@@ -59,14 +59,14 @@ JSON *is* the video.
 | `align` | string | Text align. One of: `left` `center` `right` |
 | `font` | string | Face. One of: `sans` `serif` `mono` `num` |
 | `split` | string | Kinetic split ('path' = SVG strokes, for the `draw` preset). One of: `char` `word` `line` `path` |
-| `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h |
+| `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h. One of: `weight` `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` `shimmerWave` `flip` `fall` `elastic` `skew` `focus` `decode` `tilt` `stretch` `gradient` `highlight` `colorWave` `underline` `shadow` `riseClip` `draw` `chroma` `swing` `unfold` `strike` `flap` `assemble` `bloom` `halation` `diffusion` `rimLight` `spotlight` `chromatic` `chromaCycle` |
 | `presetOpts` | object | Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wav |
-| `stagger` | number | Per-unit delay (s) |
+| `stagger` | number|object | Per-unit delay (s), OR the three-dial object form { each, amount, from } that  |
 | `each` | number | Per-unit duration (s) |
 | `start` | ? | Window start: seconds, or relative "otherId+0.5" / "otherId.end-0.2" |
 | `duration` | number|string | Window length (s), or a duration word (core/vocab.js): instant / fast / medium |
 | `anim` | string | Enter anim. EXACT names (core/clips.js ANIM): fade / up / rise / pop / scale /. One of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
-| `out` | string | driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONT |
+| `out` | string | driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONT. One of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
 | `enterDur` | number|string | Enter window (s, cut layers), or a duration word (core/vocab.js): instant / fa |
 | `exitDur` | number|string | Exit window (s; 0 = hold to end), or a duration word (core/vocab.js): instant  |
 | `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds. One of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` |
@@ -84,22 +84,22 @@ JSON *is* the video.
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
-`weight` · `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold` · `strike` · `flap`
+`weight` · `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold` · `strike` · `flap` · `assemble`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
   lines). The SVG must be inline in `text`, an `<img>` has no reachable paths.
 - `presetOpts` passes per-preset knobs, e.g. `{"px":30}` for `blur`, `{"ease":"easeOutQuint"}` for `draw`.
 
-## Easings (41)
+## Easings (42)
 
-`linear` · `easeInCubic` · `easeOutCubic` · `easeInOutCubic` · `easeOutQuart` · `easeOutExpo` · `easeOutBack` · `easeOutElastic` · `easeInQuart` · `easeInExpo` · `easeInOutExpo` · `easeInSine` · `easeOutSine` · `easeInOutSine` · `easeOutQuint` · `easeInOutQuart` · `easeInQuad` · `easeOutQuad` · `easeInOutQuad` · `easeInQuint` · `easeInOutQuint` · `easeInCirc` · `easeOutCirc` · `easeInOutCirc` · `easeInBack` · `easeInOutBack` · `easeInElastic` · `easeInOutElastic` · `easeInBounce` · `easeOutBounce` · `easeInOutBounce` · `rush` · `brake` · `ramp` · `spring` · `springStiff` · `spring-bouncy` · `spring-stiff` · `springEase` · `settle` · `snap`
+`linear` · `easeInCubic` · `easeOutCubic` · `easeInOutCubic` · `easeOutQuart` · `easeOutExpo` · `easeOutBack` · `easeOutElastic` · `easeInQuart` · `easeInExpo` · `easeInOutExpo` · `easeInSine` · `easeOutSine` · `easeInOutSine` · `easeOutQuint` · `easeInOutQuart` · `easeInQuad` · `easeOutQuad` · `easeInOutQuad` · `easeInQuint` · `easeInOutQuint` · `easeInCirc` · `easeOutCirc` · `easeInOutCirc` · `easeInBack` · `easeInOutBack` · `easeInElastic` · `easeInOutElastic` · `easeInBounce` · `easeOutBounce` · `easeInOutBounce` · `rush` · `brake` · `ramp` · `spring` · `springStiff` · `hold` · `spring-bouncy` · `spring-stiff` · `springEase` · `settle` · `snap`
 
 Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are sinusoidal
 (`easeInOutSine`). Never `linear` on a visible move.
 
 ## Cuts (27)
 
-`"cuts": [{ "t": 3.2, "style": "punch" }]`, `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `jitter`
+`"cuts": [{ "t": 3.2, "style": "punch" }]`, `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `matchCut` · `jitter`
 
 ## Shader stings (35)
 
