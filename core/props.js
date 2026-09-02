@@ -22,7 +22,7 @@
 // it called those live and shouted about the 1482 that worked.
 
 // Both spellings of a guard: `when: 'split'` and `when: ['cut', 'split']` (any of them enables the read).
-const guardsOf = (d) => (d && d.when ? (Array.isArray(d.when) ? d.when : [d.when]) : []);
+export const guardsOf = (d) => (d && d.when ? (Array.isArray(d.when) ? d.when : [d.when]) : []);
 
 // A guard is satisfied by PRESENCE, not by truth of an arbitrary value, except `false`, which is how
 // every opt-out in this engine is spelled (`motionBlur: false`, `caret: false`). `motion: []` counts as

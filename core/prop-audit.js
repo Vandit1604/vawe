@@ -93,7 +93,7 @@ const auditedFor = new Map();
 // The props THIS type must consume during build: the kit's own vocabulary, minus anything a later
 // phase reads, minus anything the type declares for itself (a type that exports `frame` reads some of
 // its own props there, and a declaration cannot say which).
-function auditedProps(type) {
+export function auditedProps(type) {
   let s = auditedFor.get(type);
   if (!s) {
     const own = LAYER_PROPS[type] || {};
@@ -111,12 +111,25 @@ const labelOf = (L) => {
   return hint ? `layer (${JSON.stringify(hint.slice(0, 40))})` : 'layer';
 };
 
+// deadProps: the decision itself, and the only copy of it. `audited` is the set of names this caller
+// is asking about, so the prober (scripts/gates/prop-probe.mjs) can ask about a prop this audit's own
+// scope excludes without owning a second version of the rule.
+export function deadProps(p, audited) {
+  const reads = READS.get(p);
+  if (!reads) return [];
+  return Object.keys(p).filter((k) => AUDITED(k) && audited.has(k) && !reads.has(k));
+}
+
 export function auditLayer(p, label = labelOf(p)) {
   const reads = READS.get(p);
   if (!reads) return;
   const type = p.type == null || p.type === '' ? 'text' : p.type;
+  // THE PROBER'S SINK. A render never sets this. prop-probe.mjs does, before the scene boots, because
+  // it needs every death in one run rather than the first one, and it judges each layer AFTER a frame
+  // has been drawn (a type's own props are read in frame(), which is why this audit cannot see them).
+  if (globalThis.__PROP_PROBE) { globalThis.__PROP_PROBE.push({ layer: p, type, label }); return; }
   const audited = auditedProps(type);
-  const dead = Object.keys(p).filter((k) => AUDITED(k) && audited.has(k) && !reads.has(k));
+  const dead = deadProps(p, audited);
   if (!dead.length) return;
   throw new Error(`${label} (type "${type}"): ${dead.map((k) => `\`${k}\``).join(', ')} `
     + `${dead.length === 1 ? 'was' : 'were'} set and never read while this layer was built.\n`

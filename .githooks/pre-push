@@ -21,8 +21,13 @@
 # mistakes-check is here for the same reason as doc-refs: MISTAKES.md is edited on almost every commit
 # that touches this file's own doctrine, and a duplicate entry is only visible across the whole log, not
 # from the diff being pushed. It reads one file.
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + arsenal + scenes + mistakes) …"
-if ! make schema-check lib-test craft-coverage doc-refs arsenal-check scenes-json no-emdash mistakes-check; then
+# prop-probe is here because the thing it checks is a property of the ENGINE, not of any one film, and
+# nothing in an authoring ladder ever exercises a prop no film uses. That is the whole gap it closes:
+# `metalness` and `roughness` were declared on the three layer and overwritten by literals, and every
+# gate stayed green for months because no scene set them (docs/MISTAKES.md #565). It is the slow step
+# here, about 35 seconds, and it is the only one that needs a browser.
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + arsenal + scenes + mistakes + prop-probe) …"
+if ! make schema-check lib-test craft-coverage doc-refs arsenal-check scenes-json no-emdash mistakes-check prop-probe; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

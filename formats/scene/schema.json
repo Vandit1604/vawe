@@ -157,8 +157,6 @@
     "weight"
    ],
    "count": [
-    "caret",
-    "caretHold",
     "countDur",
     "countStart",
     "decimals",
@@ -170,7 +168,6 @@
     "gradient",
     "h",
     "ls",
-    "maxLines",
     "prefix",
     "raw",
     "roll",
@@ -181,8 +178,6 @@
     "tracking",
     "typing",
     "unit",
-    "untype",
-    "untypeRate",
     "w",
     "weight"
    ],
@@ -427,7 +422,6 @@
     "diffuse",
     "drawDur",
     "drawStart",
-    "globe",
     "h",
     "mapBrightness",
     "mapSamples",
@@ -2401,10 +2395,6 @@
     },
     "pointSize": {
      "label": "three pointCloud / globe / magnetic: point size in world units"
-    },
-    "globe": {
-     "type": "boolean",
-     "label": "globe: a dotted planet with a great-circle route drawn on it (cobe). Set the layer type to \"globe\"; this key is the marker. Route endpoints are `origin`/`dest` as [lon, lat]."
     },
     "phi": {
      "label": "globe: rotation in radians at t=0. 4.8 puts the North Atlantic facing the camera"

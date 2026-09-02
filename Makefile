@@ -3,7 +3,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split
+.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -786,6 +786,14 @@ schema-check:
 schema-write:
 	node scripts/gates/schema-drift.mjs --write
 
+# make prop-probe: set EVERY declared layer prop on a layer of EVERY type that declares it, build the
+# lot through the real pipeline, and report the ones nothing read. core/prop-audit.js already refuses a
+# dead prop at render time; its only gap was that an author had to write the prop first, which is how
+# `metalness` sat declared and ignored on the three layer for months. Takes ~35s (one browser, ~110
+# probe scenes). PROP=<type> narrows it to one layer type.
+prop-probe:
+	node scripts/gates/prop-probe.mjs $(PROP)
+
 # make lint-test: regression asserts for validate's lintData (missing-duration / typing+markup /
 # scene-collision). Each rule caught a real bug this session; this pins that it still fires.
 lint-test:
@@ -834,7 +842,7 @@ font-audit:
 # make install-hooks: activate the version-controlled git hooks (pre-push runs the framework gates)
 install-hooks:
 	git config core.hooksPath .githooks
-	@echo "✓ git hooks active (.githooks): pre-push runs schema-check + lib-test"
+	@echo "✓ git hooks active (.githooks): pre-push runs schema-check + lib-test + prop-probe"
 
 clean:
 	rm -rf bin out/*.mp4
