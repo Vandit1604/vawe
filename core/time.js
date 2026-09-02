@@ -64,6 +64,10 @@ const SHAPES = {
 
 export const TIME_REMAP_REGISTRY = defineRegistry('time remap', SHAPES, {
   blurbs: blurbsOf('time remap', SHAPES), slot: 'timeRemap',
+  // "play the layer backwards" found nothing. `rewind`'s blurb says BACKWARDS, but nobody types the
+  // one word a blurb happens to use, and `reverse` and `boomerang` are what this shape is called
+  // everywhere else. Never printed: the blurb already reads well.
+  aka: { rewind: ['reverse', 'backwards', 'boomerang', 'ping-pong', 'play in reverse'] },
   catalog: {
     title: 'Time remaps (the layer\'s own clock)',
     tag: 'timing',

@@ -894,6 +894,15 @@ else
 	node scripts/author/arsenal.mjs "$(Q)" $(if $(KIND),--kind "$(KIND)") $(if $(N),--n $(N))
 endif
 
+# make blurbs: does each entry's own description find that entry? A blurb is not a caption, it is the
+# RETRIEVAL INDEX `make arsenal` ranks on, so a description that cannot retrieve the thing it describes
+# is carrying no signal whatever it reads like. Take each blurb as the query, strip the words the NAME
+# already carries or the test grades itself, and report the rank. It measures DISTINCTIVENESS and never
+# accuracy: a confidently wrong blurb full of rare words passes. Reports, never blocks; the refusal that
+# blocks is checkBlurb in core/registry.js, at the point a blurb is written.
+blurbs: ## how well does each entry's own blurb retrieve it? (ALL=1 for every rank)
+	node scripts/dev/blurb-retrieval.mjs $(if $(ALL),--all)
+
 # make track SHAPE=pan TO=-600 DUR=1.25 [D=<scene.json> LAYER=<n>], a hand-keyed motion track from a
 # MEASURED shape rather than a preset name. studio's keyframe mode writes keys by DRAGGING on the stage,
 # which an agent cannot do, so the cheap path existed for a person and not for the author who writes

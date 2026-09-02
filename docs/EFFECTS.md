@@ -60,7 +60,7 @@
 | `constellation` | drifting connected nodes (moves), telemetry/data feel |
 | `dark` | a plain dark radial, no dots. FLAT, the quiet backdrop for busy content |
 | `deep` | the deepest plain radial, no dots. FLAT, when the content must own the whole frame |
-| `dotmatrix` | dot matrix grid |
+| `dotmatrix` | a light field ruled by evenly spaced dots whose size waves across it, the printed halftone look (moves) |
 | `gradientWash` | one big saturated pool bleeding off a corner into white, a mesh gradient (moves), light and premium |
 | `ink` | dark radial with slow accent-tinted dots pulsing in place (moves), for a clean flat dark use `plain` + value:"dark" |
 | `liquid` | folds of the brand hue against true black (moves). It OWNS the frame, so quiet type on it and nothing else |
@@ -72,7 +72,7 @@
 | `paperShapes` | faint drifting geometric shapes (light, subtle) |
 | `plain` | flat theme field |
 | `soft` | gentle light radial with faint accent rings and discs drifting over it (moves) |
-| `spotlight` | radial spotlight glow |
+| `spotlight` | a deep field with one soft pool of light wandering across it on a slow cycle, the eye follows the bright patch (moves) |
 
 ## Camera dials  `[camera]`
 
@@ -299,7 +299,7 @@ A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children. `effector: 
 | `iris` | circular iris opens from the centre of the layer |
 | `lift` | travels further than `pop` and settles alive, faces, avatars, a staggered row of cards |
 | `none` | no move and no fade. The layer just appears at its window edges |
-| `pop` | scale overshoot |
+| `pop` | springs past its size and settles back, a small confident arrival for a chip, a badge or an icon |
 | `rise` | translate up + fade in |
 | `scale` | punch in from small (overshoot) |
 | `slide-down` | enters from below; as an `out`, leaves downward |
@@ -481,7 +481,7 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `focus` | focus pull, heavy blur and over-scale resolving to crisp, dreamy, premium |
 | `gradient` | gradient sweeps through letterforms |
 | `highlight` | marker highlight sweep |
-| `riseClip` | mask-rise reveal |
+| `riseClip` | the word climbs out from behind a hard edge at its own baseline, hidden until it clears the line. The clean editorial reveal |
 | `scale` | punch in from small (overshoot) |
 | `shadow` | a long poster shadow collapses as the word settles, poster statements |
 | `shimmerWave` | looping light wave (per-unit): a 3D crest travelling across the word; never settles |
@@ -490,9 +490,9 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `stretch` | horizontal smear that snaps true: impact words |
 | `strike` | a rule draws THROUGH the word and it dims behind the line, still legible. The "not X, Y" beat, where the rejection is the content |
 | `swing` | each unit hinges from its top edge and swings upright, playful, short words |
-| `tilt` | 3D tilt-in |
+| `tilt` | each unit rises and swings upright from a small angle, sporty and editorial. A flat rotation, not a 3D hinge: `flip` is the one that turns |
 | `type` | typewriter hard on/off, no transform: terminals, timers, code |
-| `underline` | underline draws on |
+| `underline` | a rule grows left to right along the baseline as the word lands, the marker under a heading |
 | `unfold` | opens from edge-on about its left hinge, a panel turning to face you, premium |
 | `up` | words/chars rise into place: the default kinetic headline |
 | `wave` | sinusoidal wave across units: a LOOP that never settles; ambient only |

@@ -70,7 +70,7 @@ export const ANIM_BLURBS = {
   fade: 'opacity only',
   up: 'translate up + fade in, the alias of `rise`',
   rise: 'translate up + fade in',
-  pop: 'scale overshoot',
+  pop: 'springs past its size and settles back, a small confident arrival for a chip, a badge or an icon',
   scale: 'punch in from small (overshoot)',
   lift: 'travels further than `pop` and settles alive, faces, avatars, a staggered row of cards',
   defocus: 'leave through blur (dense/faces)',
