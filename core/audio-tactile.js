@@ -25,6 +25,7 @@
 // on that mix being what it is; folding motion into `auto` would rewrite the sound of every one of
 // them. Silence stays the engine default and a film asks for this.
 import { resolveEasing } from './motion.js';
+import { defineRegistry } from './registry.js';
 // The per-unit delay of a stagger spec has ONE reader (core/type.js), so the object form
 // `{ each, from, amount }` cannot mean one thing to the picture and another to the sound. Before this
 // import `+(p.stagger)` on an object was NaN, and a NaN step silently collapsed a whole train to one
@@ -32,8 +33,49 @@ import { resolveEasing } from './motion.js';
 import { staggerStep } from './type.js';
 
 // The cue names this module reaches for. `tick` and the rest of the interaction vocabulary already
-// bake; the five motion voices are being added to CUES in core/audio-kit.mjs alongside this work.
+// bake; the five motion voices live in CUES in core/audio-kit.mjs alongside them.
 export const MOTION_CUES = ['thud', 'travel', 'riser', 'sweep', 'pluck'];
+
+// THE FIVE ARE CATALOGUED AND THE OTHER FIFTEEN ARE NOT, and that looks like two decisions in
+// opposite directions until you see that CUES is TWO vocabularies in one map.
+//
+// `CUES` in core/audio-kit.mjs is waived out of the catalogue as "sound. The catalogue is picture",
+// the same waiver CUT_CUE, SEAM_CUE and PROFILE_BED carry. That judgement is right about fifteen of
+// its twenty entries: press, toggle, success, error, loading, ready are INTERACTION sounds, ported
+// from a UI library, and audio-kit.mjs says in its own comment that a film has nobody clicking. An
+// author composing a film does not pick from them.
+//
+// These five are the other thing. They are the film's own physics, derived from the timeline the
+// engine already holds, and any of them can also be placed by hand as `audio.cues[]`. That is a name
+// an author writes into scene JSON, which is exactly and only what the catalogue is for.
+//
+// So the contradiction was never "sound in or out". It is that one map holds a UI vocabulary and a
+// film vocabulary, and the waiver judged the whole map by its majority. What was actually broken is
+// smaller and is fixed here: the section passed `{ skip: null }`, so all five rows rendered as a
+// DASH, and a catalogue that renders a blank is how blanks get shipped. The blurbs below are the
+// voicing comments in core/audio-kit.mjs, moved rather than rewritten.
+//
+// NOT the whole field an author may name. `audio.cues[].name` also accepts four BAKED-ONLY aliases
+// (whoosh, reveal, click, pop) that are not CUES keys at all; core/validate.mjs:1288 records that and
+// treats the schema enum as a superset on purpose. Owning "every cue name a scene may write" in one
+// place is a real change and a separate one.
+export const MOTION_CUE_REGISTRY = defineRegistry('motion voice', Object.fromEntries(MOTION_CUES.map((n) => [n, n])), {
+  slot: 'audio.cues[].name',
+  blurbs: {
+    thud: 'something with WEIGHT arrives: a low sine dropping in pitch, because the ear reads a falling fundamental as mass. A frame-sized card landing',
+    travel: 'movement. Filtered noise whose band opens then closes, which is what separates a whoosh from a burst of static. One per camera gesture, not one per keyframe',
+    riser: 'a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. What a declared `spectacle` gets',
+    sweep: 'a wipe: a noise band climbing the spectrum, wider and slower than a whoosh, so it reads as the whole frame changing rather than one object crossing it',
+    pluck: 'punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it',
+  },
+  catalog: {
+    title: 'Motion voices (tactile sound)',
+    tag: 'audio',
+    intro: 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine: `docs/CRAFT/SOUND.md`.',
+    usage: (n, { j }) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
+    noPreview: 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
+  },
+});
 
 // DENSITY IS THE DESIGN PROBLEM, not the mapping. A 53s film with 103 layers offers ~150 events; every
 // one voiced is a hailstorm, and the hailstorm is what makes derived sound feel cheap. Three rules,

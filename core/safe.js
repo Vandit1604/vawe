@@ -33,6 +33,8 @@
 // engine's own default push is one (`core/produce.js`). See MAX_ZOOM below for the arithmetic, for
 // the line that genuinely cannot be crossed, and for who owns which half of it.
 
+import { defineRegistry } from './registry.js';
+
 // What a ratio MEANS in pixels. This lives here, with the safe area, because the two are the same
 // question asked twice ("how big is the frame" / "where inside it may content live") and answering
 // them from two tables is precisely how the engine and its gate drifted apart. boot.js and
@@ -113,14 +115,39 @@ export const DESTINATIONS = {
   broadcast: { native: '16:9', top: 0.05, bottom: 0.05, left: 0.05, right: 0.05 },
 };
 
-export const DESTINATION_NAMES = Object.keys(DESTINATIONS);
+// The blurbs are read off the table above and say the NUMBERS, because that is the whole question an
+// author has: which platform eats which edge. The catalogue used to fold the destinations in with the
+// aspect ratios under one `skip` line ("an aspect or a platform"), so nothing anywhere told a reader
+// that tiktok paints a rail down the right at 16.7% of the width and shorts does not. A single line
+// covering two vocabularies is how a real difference becomes invisible.
+const DESTINATION_BLURBS = {
+  web: 'no platform chrome at all: the whole frame is usable and only the 4% margin applies. A site hero, an X or LinkedIn post, a docs clip',
+  feed: 'Instagram and X in-feed, where the player furniture sits OUTSIDE the media, so nothing is painted over the picture and only the margin applies',
+  tiktok: 'the tightest phone target: a rail down the RIGHT at 16.7% of the width for the action buttons, 12.5% off the top and 30.2% off the bottom for the caption and handle. Serves 9:16',
+  reels: 'Instagram Reels on 9:16: a 14% right rail, 10% off the top, 22% off the bottom. Looser than tiktok, tighter than shorts',
+  shorts: 'YouTube Shorts on 9:16, the most generous phone target: a 13% right rail, 8% off the top, 16% off the bottom',
+  broadcast: 'the classic title-safe 90% box, 5% off every edge, for displays that overscan',
+};
+
+// A registry, so the section writes itself and safeArea below has one refusal rather than a hand-typed
+// list of names beside the table it already reads.
+export const DESTINATION_REGISTRY = defineRegistry('destination', DESTINATIONS, { slot: 'destination', blurbs: DESTINATION_BLURBS,
+  catalog: {
+    title: 'Destinations (platform safe area)',
+    tag: 'canvas',
+    intro: '`"destination": "<name>"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect`: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition: `core/safe.js`.\n\nThe tiktok figures are this repo\'s own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.',
+    usage: (n, { j }) => j({ module: 'scene', aspect: '9:16', destination: n }),
+    noPreview: 'a safe area is a property of the canvas, not something that animates. `make audit M=<file> ASPECT=all` is how you see it, as a measurement against your own layers.',
+  },
+});
+
+export const DESTINATION_NAMES = DESTINATION_REGISTRY.names;
 
 // safeArea(W, H, destination) → { x0, y0, x1, y1, margin, destination }
 // The box legible content must stay inside. Chrome and margin are combined with max(), never summed:
 // a platform's rail already includes the frame edge, so adding a margin on top would double-count it.
 export function safeArea(W, H, destination = 'web') {
-  const d = DESTINATIONS[destination];
-  if (!d) throw new Error(`unknown destination "${destination}", known: ${DESTINATION_NAMES.join(', ')}`);
+  const d = DESTINATION_REGISTRY.pick(destination);
   const margin = Math.round(Math.min(W, H) * MARGIN);
   const inset = (frac, dim) => Math.max(margin, Math.round(dim * frac));
   return {
@@ -219,8 +246,7 @@ export function captionBand(W, H, destination = 'web', skin = 'any', caps = []) 
 // `null` as a destination that legitimately has no fixed aspect (web/feed) - the one input validated
 // two different ways nine lines apart from safeArea, which throws. docs/MISTAKES.md #360.
 export const nativeAspect = (destination) => {
-  const d = DESTINATIONS[destination];
-  if (!d) throw new Error(`unknown destination "${destination}", known: ${DESTINATION_NAMES.join(', ')}`);
+  const d = DESTINATION_REGISTRY.pick(destination);
   return d.native ?? null;   // null still means "this destination serves any canvas"
 };
 

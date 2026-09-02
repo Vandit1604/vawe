@@ -5,8 +5,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MOTION_CUES } from '../../core/audio-tactile.js';
-import { LOOK_NAMES, LOOK_BLURBS } from '../../core/looks.js';
 import { registersOf } from '../gates/craft-coverage.mjs';
 import { catalogued } from '../../core/registry.js';
 // The blurb maps of the families that have no registry, each still living beside the vocabulary it
@@ -16,29 +14,13 @@ import { catalogued } from '../../core/registry.js';
 // glyph units and not about a layer at all. A family-scoped map cannot make that mistake. The 32
 // registry-backed families no longer appear here at all: they carry their own blurbs and their own
 // section, and are read off `catalogued()` below.
-// Read off blueprints/index.mjs's own trailing comments: the registry line that declares each beat IS
-// the description, and blueprints-catalog.mjs already fails when one is missing. The hand-kept copy that
-// used to live in DESC had drifted: 3 of 12 beats were absent from it.
-import { BEAT_BLURBS } from './blueprints-catalog.mjs';
-import { LIGHTFIELD_BLURBS } from '../../core/lightfield/options.js';
-import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
-import { CAPTION_BLURBS } from '../../core/captions.js';
-import { COMPOSITION_BLURBS } from '../../core/compositions/index.js';
-import { BEATS } from '../../blueprints/index.mjs';
-import { COMPOSITION_NAMES } from '../../core/compositions/index.js';
 // `scripts/gates/arsenal-check.mjs` fails when a vocabulary the engine exports reaches none of these
 // sections. The catalogue is what CLAUDE.md sends an author to before they choose, and it once did not
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
-import { LAYER_TYPES, LAYER_BLURBS } from '../../core/layers/index.js';
-import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
-import { EASINGS } from '../../core/motion.js';
-import { CAP_STYLE_NAMES } from '../../core/captions.js';
 import { RANSOM_FACES } from '../../core/ransom.js';
-import { ASPECTS, DESTINATION_NAMES } from '../../core/safe.js';
-import { GENERATORS, GENERATOR_BLURBS } from '../../core/generators.js';
-import { PATTERNS, SHAPES, ANCHORS, DIRECTIONS, MOTIONS } from '../../core/lightfield/options.js';
+import { ASPECTS } from '../../core/safe.js';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -139,6 +121,11 @@ const walkCore = (d) => {
   }
 };
 walkCore('core');
+// blueprints/index.mjs is NOT under core/ and holds the beat registry. It used to reach this file
+// through an import line for BEATS and BEAT_BLURBS; the section derives itself now, so deleting that
+// import as "no longer needed" would have made the whole beat family vanish from docs/EFFECTS.md in
+// silence. Named here for the same reason scripts/gates/arsenal-check.mjs names it in its own walk.
+CORE.push('blueprints/index.mjs');
 for (const f of CORE) { try { await import(path.join(root, f)); } catch { /* browser-only; arsenal-check reports it */ } }
 
 // The catalogue's own furniture, handed to a registry's `usage`/`preview` rather than imported by it:
@@ -162,35 +149,25 @@ const derived = catalogued().map((r) => {
 // must read the registries, never rewrite docs/EFFECTS.md.
 //
 // The hand-written half, and it stays hand-written for one reason each: none of these is a registry.
-// `LOOK_NAMES`, `BEATS`, `LAYER_TYPES`, `RESAMPLE_FX`, `CAP_STYLE_NAMES`, `GENERATORS` and the rest are
+// The remaining families and the rest are
 // plain exports with no `defineRegistry` behind them, so there is no definition site to hang a catalog
 // block on. Two are not even one vocabulary: "Per-frame accent layers" and "Vector layer" are
 // pseudo-names for a MODE of a layer type, and "Plain words" merges three registries (feel · duration ·
 // camera) into the one table an author reads. Give any of them a registry and it derives itself.
 export const sections = [
   ...derived,
-  ['Composite looks (static)', '`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.', names(LOOK_NAMES), 'static', { kind: 'look', blurbs: LOOK_BLURBS }],
   ['Per-frame accent layers', '`{ "type":"beam", ... }`. A light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`', ['beam:border (border-beam)', 'beam:shine (sheen sweep)'], 'per-frame'],
   ['Vector layer (logos/icons)', '`{ "type":"svg", ... }`. A path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame'],
-  ['Beat blueprints', '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md.', names(Object.keys(BEATS)), 'blueprint', { blurbs: BEAT_BLURBS }],
-  ['Compositions (bespoke per-beat timeline)', '`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).', names(COMPOSITION_NAMES), 'composition', { blurbs: COMPOSITION_BLURBS }],
-  ['Layer types', 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.', names(LAYER_TYPES), 'layer', { blurbs: LAYER_BLURBS }],
-  ['Layer-as-texture (resample)', '`"resample":{ "fx":"<name>", "amount":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.\n\nIt works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot: the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name: their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.\n\nEach resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect: one or two per film, never decoration on fifty layers.', names(RESAMPLE_FX), 'per-frame', { blurbs: RESAMPLE_BLURBS }],
   // THE KEY IS `modifiers`, AND THIS LINE SAID `fx` FOR AS LONG AS THE FAMILY HAS EXISTED. `L.fx` is
   // the named-GSAP-effect slot and core/fx/index.js says so in capitals; an author who followed this
   // catalogue wrote `fx: [{ tilt: … }]` and got `layers[0].fx entry needs a name`. Ten modifiers,
   // about 80KB of engine, reached by 3 of 135 scenes and by 0 of 30 block files. Documentation alone
   // does not fix adoption (`parts` went 0 to 5 block files and its scenes stayed at 2), but a
   // catalogue that names the wrong key guarantees the opposite.
-  ['Motion voices (tactile sound)', 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.', names(MOTION_CUES), 'audio', { skip: null }],
   ['Blend modes', '`mixBlend`: how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it, MDN `mix-blend-mode`' }],
-  ['Easings', '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.', names(Object.keys(EASINGS)), 'timing', { skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md' }],
   ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
-  ['Caption styles', '`captions:{ style:"<name>" }`. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.', names(CAP_STYLE_NAMES), 'captions', { blurbs: CAPTION_BLURBS }],
   ['Ransom faces', '`ransom` on a text layer: per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface, see it, do not read about it' }],
-  ['Output targets', '`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.', names([...Object.keys(ASPECTS), ...DESTINATION_NAMES]), 'canvas', { skip: 'an aspect or a platform; core/safe.js holds the safe area each implies' }],
-  ['Generators (the playground)', 'Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.', names(GENERATORS.map((g) => g.name)), 'generator', { blurbs: GENERATOR_BLURBS }],
-  ['Lightfield dials', 'The option vocabulary of the lightfield generators: the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth: `docs/LIGHTFIELD.md`.', names([...PATTERNS, ...SHAPES, ...ANCHORS, ...DIRECTIONS, ...MOTIONS]), 'generator', { blurbs: LIGHTFIELD_BLURBS }],
+  ['Output targets', '`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.', names(Object.keys(ASPECTS)), 'canvas', { skip: 'a ratio is its own definition; the safe area it implies belongs to the destination, in the section below' }],
 ];
 
 // Imported (by scripts/site/effects-json.mjs) this module is a DATA source for `sections`, so the

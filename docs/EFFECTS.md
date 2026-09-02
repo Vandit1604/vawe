@@ -46,6 +46,18 @@
 | `shield` | the name is the drawing |
 | `spark` | the name is the drawing |
 
+## Motion voices (tactile sound)  `[audio]`
+
+The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine: `docs/CRAFT/SOUND.md`.
+
+| name | what / when |
+|---|---|
+| `pluck` | punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it |
+| `riser` | a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. What a declared `spectacle` gets |
+| `sweep` | a wipe: a noise band climbing the spectrum, wider and slower than a whoosh, so it reads as the whole frame changing rather than one object crossing it |
+| `thud` | something with WEIGHT arrives: a low sine dropping in pitch, because the ear reads a falling fundamental as mass. A frame-sized card landing |
+| `travel` | movement. Filtered noise whose band opens then closes, which is what separates a whoosh from a burst of static. One per camera gesture, not one per keyframe |
+
 ## Backgrounds  `[background]`
 
 `bg:[{preset,from,to}]`. The field behind everything; moving ones (aurora/constellation/mesh/…) animate.
@@ -74,6 +86,32 @@
 | `soft` | gentle light radial with faint accent rings and discs drifting over it (moves) |
 | `spotlight` | a deep field with one soft pool of light wandering across it on a slow cycle, the eye follows the bright patch (moves) |
 
+## Beat blueprints  `[blueprint]`
+
+`{ "type":"beat", "beat":"<name>", ... }`. A whole beat's directed motion; `make expand`. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.
+
+| name | what / when |
+|---|---|
+| `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
+| `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
+| `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
+| `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
+| `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
+| `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
+| `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
+| `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
+| `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
+| `propSentence` | a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger |
+| `recordedPan` | a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded |
+| `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
+| `scrollStory` | a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop |
+| `slotSwap` | three fixed slots whose contents turn over N times; the right slot changes TYPE each pass |
+| `statReveal` | payoff: hero count-up + kinetic label |
+| `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
+| `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
+| `verdictProof` | claim proven: typing command + note + tone verdict chip |
+| `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
+
 ## Camera dials  `[camera]`
 
 Top-level scene keys that change what the camera DOES rather than where it goes. `"cameraBlur": true` gives the film a real shutter: every layer smears by its velocity RELATIVE to the camera, so a whip pan streaks the frame and a layer travelling with the camera stays sharp. How much is the film's `shutter`, in degrees; one layer opts out with `motionBlur: false`.
@@ -101,6 +139,56 @@ Top-level scene keys that change what the camera DOES rather than where it goes.
 | `travel` | station-to-station flight between points in STAGE coords. THE CAMERA AS THE TRANSITION (no cut) |
 | `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
 | `workspaceZoomOut` | pull back from a detail to reveal the whole |
+
+## Destinations (platform safe area)  `[canvas]`
+
+`"destination": "<name>"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect`: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition: `core/safe.js`.
+
+The tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.
+
+| name | what / when |
+|---|---|
+| `broadcast` | the classic title-safe 90% box, 5% off every edge, for displays that overscan |
+| `feed` | Instagram and X in-feed, where the player furniture sits OUTSIDE the media, so nothing is painted over the picture and only the margin applies |
+| `reels` | Instagram Reels on 9:16: a 14% right rail, 10% off the top, 22% off the bottom. Looser than tiktok, tighter than shorts |
+| `shorts` | YouTube Shorts on 9:16, the most generous phone target: a 13% right rail, 8% off the top, 16% off the bottom |
+| `tiktok` | the tightest phone target: a rail down the RIGHT at 16.7% of the width for the action buttons, 12.5% off the top and 30.2% off the bottom for the caption and handle. Serves 9:16 |
+| `web` | no platform chrome at all: the whole frame is usable and only the 4% margin applies. A site hero, an X or LinkedIn post, a docs clip |
+
+## Caption styles  `[captions]`
+
+`captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
+
+| name | what / when |
+|---|---|
+| `clipWipe` | LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time |
+| `flipUp` | the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all |
+| `focusPull` | a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size |
+| `ghostSplit` | two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme |
+| `highlight` | marker highlight sweep |
+| `inkFill` | the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself |
+| `kineticSlam` | the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still |
+| `letterRise` | the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing |
+| `neonEdge` | the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all |
+| `pillKaraoke` | a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant |
+| `readerFocus` | a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1 |
+| `scramble` | the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does |
+| `typeOn` | a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret |
+| `underlineDraw` | a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast |
+| `waveRide` | one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it |
+| `weightShift` | the spoken word RAMPS along the font's own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix |
+| `weightWave` | a crest of WEIGHT travels the line, each word riding the font's wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes |
+| `wordFlash` | ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint |
+| `wordSlide` | the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it |
+
+## Compositions (bespoke per-beat timeline)  `[composition]`
+
+`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).
+
+| name | what / when |
+|---|---|
+| `commaSplit` | a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure |
+| `pipelineFlow` | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
 
 ## Cut timings  `[cuts[]/per-layer]`
 
@@ -135,6 +223,85 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 | `spinOut` | rotates a half turn while shrinking away, winding up before it goes, the mirror of spinIn |
 | `zoomOut` | swells past the camera as it fades, product focus, the leaving beat gets out of the way |
 
+## Generators (the playground)  `[generator]`
+
+Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.
+
+| name | what / when |
+|---|---|
+| `bands` | A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind. |
+| `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
+| `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
+| `effector` | One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone. |
+| `keyframeHandle` | The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens. |
+| `rangeSelector` | The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs. |
+| `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
+| `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
+
+## Lightfield envelope anchors  `[generator]`
+
+Which edge an element grows FROM. An envelope is a horizon, and a horizon has a side; the far end is the one that tapers. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `bottom` | the element grows UP from the bottom edge, so the free end, the one `taper` narrows, is at the top. The default |
+| `top` | the element hangs DOWN from the top edge, so the free end, the one `taper` narrows, is at the bottom |
+
+## Lightfield envelope shapes  `[generator]`
+
+How an element's extent varies with where it sits, as a curve across the row. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `arch` | a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome |
+| `circle` | the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse |
+| `crescent` | one circular arc with a second equal arc bitten out of it. A moon horn: empty on one side, a concave inner edge, a point at the tip |
+| `full` | the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does |
+| `hills` | three gaussians of unequal width and height summed, rolling ground: three summits with soft saddles between them |
+| `ramp` | a straight climb across the row, so the extents rise steadily from one side to the other |
+| `scallops` | the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall |
+| `valley` | the sine hump run upside down: a dip in the middle with both ends tall |
+| `wave` | a sinusoidal ripple across the row, so the extents rise and fall more than once between the two ends |
+
+## Lightfield motions  `[generator]`
+
+How the field lives against the frame clock. Driven off `var(--t)`, so it is seeked, never a CSS animation. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `breathe` | the whole field swells and settles on one slow cycle, the cells keeping their relation to each other |
+| `drift` | the field travels as one body, the cells holding station against each other |
+| `shimmer` | the cells slide against each other, so the seams open and close |
+| `still` | nothing moves: the output reads no clock at all |
+
+## Lightfield patterns  `[generator]`
+
+The STRUCTURE of a lightfield: what the elements are and which way the eye travels across them. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `rings` | concentric bands round a point, like light on water, the eye travels outwards |
+| `shards` | a fan of rays from a pivot below the frame, the eye travels up and out |
+| `slats` | a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across |
+
+## Lightfield shadow directions  `[generator]`
+
+Which way "away" is: the bearing the light falls off along. A keyword is a bearing and never a place, so `shadow.x`/`shadow.y` decide how far off centre the dark sits. Turn it with the rest at /playground; depth: `docs/LIGHTFIELD.md`.
+
+| name | what / when |
+|---|---|
+| `bottom` | away is downward: the frame drains towards the bottom edge and stays lit at the top. The default bearing |
+| `bottom-left` | a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this |
+| `bottom-right` | a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this |
+| `center` | a radial: away in EVERY direction at once, so no edge can darken without the others darkening too |
+| `left` | a linear fall away to the left. A bearing and no centre, so only the move along it reaches the fall |
+| `left-and-right` | a lit vertical band with darkness at both sides and nothing taken off the top or bottom |
+| `right` | a linear fall away to the right |
+| `top` | away is upward: the frame drains towards the top edge and stays lit at the bottom |
+| `top-and-bottom` | a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes |
+| `top-left` | a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this |
+| `top-right` | a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this |
+
 ## Glow presets  `[glow layer]`
 
 `preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text. Each one is a named lighting behaviour rather than a gradient you tune by hand: `{ "type":"glow", "preset":"halation", "intensity":0.3 }`. `cx`/`cy` move the light centre, `angle` aims the spotlight cone, and `cycle` times the one preset that moves on its own. An unknown name THROWS and suggests the near word; it used to return null and paint the plain gradient in silence.
@@ -148,6 +315,36 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 | `halation` | a tight warm core plus a wide faint ring, the film halation. Low intensity on purpose |
 | `rimLight` | an off-centre crescent, lit edge up-right. Place the subject there |
 | `spotlight` | a soft-edged cone from an apex, aimed by `angle`, faded with distance so it never clips |
+
+## Layer types  `[layer]`
+
+The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.
+
+| name | what / when |
+|---|---|
+| `adjust` | one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust` |
+| `beam` | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
+| `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
+| `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
+| `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
+| `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express |
+| `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
+| `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo |
+| `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
+| `globe` | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
+| `glow` | soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) |
+| `group` | layout by containment: a flex/grid box whose children (any depth) flow with a gap, so a card + label + chip can never desync |
+| `html` | raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock |
+| `image` | an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot |
+| `lottie` | an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay |
+| `paint` | a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample |
+| `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
+| `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
+| `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
+| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
+| `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
+| `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
+| `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
 
 ## Raymarched surfaces  `[layer]`
 
@@ -238,6 +435,25 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `meteor` | ballistic streaks with echo trails (per-frame) |
 | `starfield` | flying starfield (per-frame) |
 | `waves` | sine wave field (per-frame) |
+
+## Layer-as-texture (resample)  `[per-frame]`
+
+`"resample":{ "fx":"<name>", "amount":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.
+
+It works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot: the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name: their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.
+
+Each resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect: one or two per film, never decoration on fifty layers.
+
+| name | what / when |
+|---|---|
+| `bitCrush` | quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration |
+| `chromaShift` | radial RGB separation, the channels pulling apart from the centre outwards |
+| `dissolve` | noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away |
+| `fisheye` | real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge |
+| `macroblock` | the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration |
+| `refract` | liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do |
+| `spinBlur` | smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal |
+| `zoomBlur` | radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp |
 
 ## Adjustment layers (grade what is BENEATH)  `[per-layer]`
 
@@ -438,6 +654,44 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `pixelSort` | sorts each contiguous BRIGHT run of a scan line by luma. The signature glitch smear, and deterministic: the span is bounded by a threshold, nothing is random |
 | `stipple` | seeded ink dots on paper, denser where the source is dark, each jittered inside its own cell |
 
+## Composite looks (static)  `[static]`
+
+`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.
+
+| name | what / when |
+|---|---|
+| `angelic` | blown out, desaturated, the widest bloom in the library and an INVERTED vignette that whitens the corners. Heaven light, heavy-handed by design |
+| `chrome` | specular highlights ADDED on top, then remapped to a navy/steel/white tritone. Polished metal; two SVG filter passes, the most expensive look here |
+| `crt` | half the split of vhs plus a white bloom and the densest, darkest scanlines, corners pulled down. A lit phosphor tube: vhs glows and closes in |
+| `cyberpunk` | saturated hard, magenta/cyan split, magenta bloom over faint scanlines. A fixed neon-noir palette laid over your colours |
+| `dreamSequence` | the mildest warp plus defocus, cream bloom and a warm wash. DreamyHaze with the picture set drifting |
+| `dreamyHaze` | half-pixel defocus under a wide white bloom and a cream wash, soft-focus romance, no grain and no edges |
+| `droneCinematic` | every dial turned down (0.5 default strength, faint grain, shallow vignette). A grade rather than a look, safe under type and product UI |
+| `edgeGlow` | flat areas cancel to black and only boundaries survive, amplified 6x and bloomed. A neon wire drawing; six passes, and a smooth subject can come out empty |
+| `emboss` | the kernel turns the picture into a grey lit rubbing and half the colour is thrown away, carved surface, per-pixel and not cheap |
+| `fadedPolaroid` | eight passes: sepia, desaturated, contrast LOWERED, brown wash, corner leak, grain, vignette. A print left in the sun, the flattest look here |
+| `fatten` | dilation swells the bright pixels into their neighbours, type gains weight and a photo goes chunky and poster-like |
+| `filmNoir` | full grayscale, contrast crushed up, a small white bloom, grain and the deepest vignette, monochrome drama |
+| `glassWarp` | medium-frequency turbulence pushes the image around behind a faint white bloom, seen through thick glass, still readable |
+| `glitchGlow` | wide 3px red/blue split, source-coloured bloom, sparse scanlines. Hologram with the tint removed and the split doubled: a signal fault, not a projection |
+| `halationFilm` | warm amber bloom off the highlights plus grain, contrast barely touched. The restrained glow: no blur, no vignette, colours survive |
+| `heatWarp` | coarser, larger displacement under an orange wash and a lift, air over tarmac |
+| `hologram` | pink/cyan split, cyan flood-bloom and tight scanlines. A projected image, colour forced to teal |
+| `impact` | overexposed with the widest colour split here (4px) and a white bloom. The frame taking a punch, for one frozen hit only |
+| `letterpress` | diffuse light multiplies the image so it sinks into a warm paper wash, lifted 1.5x to stop it going black, ink pressed into stock |
+| `lomo` | the strongest saturation and the heaviest vignette in the library, plus a corner leak and grain. Plastic-camera punch: no glow, no split, just crush and corners |
+| `melt` | the lowest frequency and by far the largest displacement here, big slow lumps that destroy legibility, so never under type |
+| `neon` | the bright parts bloom in their OWN colours, nothing is tinted. Real sign-light, the one glow look that keeps the palette |
+| `nightVision` | grayscale then sepia then hue-rotated and saturated 4x to ONE green, green bloom, lines, grain, vignette. Image intensifier; the original colour is gone, not tinted |
+| `nostalgia` | fadedPolaroid without the wash, the flattening or the vignette, plus a warm bloom, same memory register, lighter and open at the edges |
+| `rippleGlass` | the highest frequency and a small offset, so the distortion reads as tight ripples not lumps, over a cool bloom, water on the lens |
+| `super8` | sepia, lifted, the heaviest grain here and a deep vignette. Warmth and dirt only, no split and no lines: film stock, not video |
+| `thermal` | luminance remapped to a six-stop black-purple-pink-orange-white ramp, softened. A heat camera; three passes, the cheapest sci-fi look and the most total recolour |
+| `timeFreeze` | drained of colour, washed cold blue with a matching bloom and a hairline split, the world stopped |
+| `vhs` | colour split 3px, slight defocus, scanlines and heavy grain. Tape: no vignette and no glow, so the frame stays flat and dirty |
+| `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
+| `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
+
 ## Filter presets  `[static]`
 
 `filter:"<name>"`. A named colour grade. Composite LOOKS are the richer set above; these are the primitives.
@@ -523,6 +777,55 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `first` | the wave starts at the first unit and runs to the last, the default, and what a line of type being typed looks like |
 | `last` | starts at the last unit and runs backwards to the first, pair it with a right-to-left exit |
 | `random` | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
+
+## Easings  `[timing]`
+
+`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
+
+| name | what / when |
+|---|---|
+| `brake` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeInSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `easeOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `hold` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `linear` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `ramp` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `rush` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `settle` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `snap` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring-bouncy` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `spring-stiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `springEase` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `springStiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 
 ## Time remaps (the layer's own clock)  `[timing]`
 
@@ -632,44 +935,6 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `whipPan` | momentum swipe between beats |
 | `wipe` | playful "notice the cut" (shape wipes) |
 
-## Composite looks (static)  `[static]`
-
-`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.
-
-| name | what / when |
-|---|---|
-| `angelic` | blown out, desaturated, the widest bloom in the library and an INVERTED vignette that whitens the corners. Heaven light, heavy-handed by design |
-| `chrome` | specular highlights ADDED on top, then remapped to a navy/steel/white tritone. Polished metal; two SVG filter passes, the most expensive look here |
-| `crt` | half the split of vhs plus a white bloom and the densest, darkest scanlines, corners pulled down. A lit phosphor tube: vhs glows and closes in |
-| `cyberpunk` | saturated hard, magenta/cyan split, magenta bloom over faint scanlines. A fixed neon-noir palette laid over your colours |
-| `dreamSequence` | the mildest warp plus defocus, cream bloom and a warm wash. DreamyHaze with the picture set drifting |
-| `dreamyHaze` | half-pixel defocus under a wide white bloom and a cream wash, soft-focus romance, no grain and no edges |
-| `droneCinematic` | every dial turned down (0.5 default strength, faint grain, shallow vignette). A grade rather than a look, safe under type and product UI |
-| `edgeGlow` | flat areas cancel to black and only boundaries survive, amplified 6x and bloomed. A neon wire drawing; six passes, and a smooth subject can come out empty |
-| `emboss` | the kernel turns the picture into a grey lit rubbing and half the colour is thrown away, carved surface, per-pixel and not cheap |
-| `fadedPolaroid` | eight passes: sepia, desaturated, contrast LOWERED, brown wash, corner leak, grain, vignette. A print left in the sun, the flattest look here |
-| `fatten` | dilation swells the bright pixels into their neighbours, type gains weight and a photo goes chunky and poster-like |
-| `filmNoir` | full grayscale, contrast crushed up, a small white bloom, grain and the deepest vignette, monochrome drama |
-| `glassWarp` | medium-frequency turbulence pushes the image around behind a faint white bloom, seen through thick glass, still readable |
-| `glitchGlow` | wide 3px red/blue split, source-coloured bloom, sparse scanlines. Hologram with the tint removed and the split doubled: a signal fault, not a projection |
-| `halationFilm` | warm amber bloom off the highlights plus grain, contrast barely touched. The restrained glow: no blur, no vignette, colours survive |
-| `heatWarp` | coarser, larger displacement under an orange wash and a lift, air over tarmac |
-| `hologram` | pink/cyan split, cyan flood-bloom and tight scanlines. A projected image, colour forced to teal |
-| `impact` | overexposed with the widest colour split here (4px) and a white bloom. The frame taking a punch, for one frozen hit only |
-| `letterpress` | diffuse light multiplies the image so it sinks into a warm paper wash, lifted 1.5x to stop it going black, ink pressed into stock |
-| `lomo` | the strongest saturation and the heaviest vignette in the library, plus a corner leak and grain. Plastic-camera punch: no glow, no split, just crush and corners |
-| `melt` | the lowest frequency and by far the largest displacement here, big slow lumps that destroy legibility, so never under type |
-| `neon` | the bright parts bloom in their OWN colours, nothing is tinted. Real sign-light, the one glow look that keeps the palette |
-| `nightVision` | grayscale then sepia then hue-rotated and saturated 4x to ONE green, green bloom, lines, grain, vignette. Image intensifier; the original colour is gone, not tinted |
-| `nostalgia` | fadedPolaroid without the wash, the flattening or the vignette, plus a warm bloom, same memory register, lighter and open at the edges |
-| `rippleGlass` | the highest frequency and a small offset, so the distortion reads as tight ripples not lumps, over a cool bloom, water on the lens |
-| `super8` | sepia, lifted, the heaviest grain here and a deep vignette. Warmth and dirt only, no split and no lines: film stock, not video |
-| `thermal` | luminance remapped to a six-stop black-purple-pink-orange-white ramp, softened. A heat camera; three passes, the cheapest sci-fi look and the most total recolour |
-| `timeFreeze` | drained of colour, washed cold blue with a matching bloom and a hairline split, the world stopped |
-| `vhs` | colour split 3px, slight defocus, scanlines and heavy grain. Tape: no vignette and no glow, so the frame stays flat and dirty |
-| `vintageAnamorphic` | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
-| `watercolor` | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
-
 ## Per-frame accent layers  `[per-frame]`
 
 `{ "type":"beam", ... }`. A light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`
@@ -687,102 +952,6 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 |---|---|
 | `svg:draw (stroke draws on)` | the logo/icon stroke draws itself on, line by line |
 | `svg:morph (shape melts into a logo)` | one path melts into another (blob into logo), optional spin |
-
-## Beat blueprints  `[blueprint]`
-
-`{ "type":"beat", "beat":"<name>", ... }`. A whole beat's directed motion; `make expand`. See BLUEPRINTS.md.
-
-| name | what / when |
-|---|---|
-| `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
-| `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
-| `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
-| `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
-| `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
-| `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
-| `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
-| `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
-| `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
-| `propSentence` | a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger |
-| `recordedPan` | a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded |
-| `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
-| `scrollStory` | a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop |
-| `slotSwap` | three fixed slots whose contents turn over N times; the right slot changes TYPE each pass |
-| `statReveal` | payoff: hero count-up + kinetic label |
-| `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
-| `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
-| `verdictProof` | claim proven: typing command + note + tone verdict chip |
-| `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
-
-## Compositions (bespoke per-beat timeline)  `[composition]`
-
-`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).
-
-| name | what / when |
-|---|---|
-| `commaSplit` | a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure |
-| `pipelineFlow` | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
-
-## Layer types  `[layer]`
-
-The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.
-
-| name | what / when |
-|---|---|
-| `adjust` | one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust` |
-| `beam` | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
-| `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
-| `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
-| `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
-| `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express |
-| `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
-| `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo |
-| `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
-| `globe` | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
-| `glow` | soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) |
-| `group` | layout by containment: a flex/grid box whose children (any depth) flow with a gap, so a card + label + chip can never desync |
-| `html` | raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock |
-| `image` | an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot |
-| `lottie` | an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay |
-| `paint` | a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample |
-| `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
-| `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
-| `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
-| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
-| `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
-| `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
-| `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
-
-## Layer-as-texture (resample)  `[per-frame]`
-
-`"resample":{ "fx":"<name>", "amount":[from,to] }`. Bind a LAYER as a GL texture and re-sample it through a fragment shader. This is the family that needs to SEE pixels: real lens distortion, radial and spin blur.
-
-It works on ANY layer. One that already owns a raster (`image` · `paint` · `shader`) is sampled LIVE, every frame, so the source keeps moving under the pass. Every other type, `text`, `rect`, `group`, `svg`, `component`, `html`, a whole composed beat. Is BAKED once at boot: the built subtree is serialised into an offscreen raster and sampled as a still. The motion then comes from the pass (the `amount` ramp, the noise clock), not from the source, so a `count` that ticks or a `type` that types is frozen at the state the build left it in. `raymarch`, `three`, `globe` and `video` are refused by name: their pixels live in a canvas or a video bitmap, which is not part of the DOM, so neither path can read them.
-
-Each resampled layer takes its own WebGL context and browsers cap those at roughly 16. This is a hero-shot effect: one or two per film, never decoration on fifty layers.
-
-| name | what / when |
-|---|---|
-| `bitCrush` | quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration |
-| `chromaShift` | radial RGB separation, the channels pulling apart from the centre outwards |
-| `dissolve` | noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away |
-| `fisheye` | real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge |
-| `macroblock` | the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration |
-| `refract` | liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do |
-| `spinBlur` | smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal |
-| `zoomBlur` | radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp |
-
-## Motion voices (tactile sound)  `[audio]`
-
-The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js reads the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked. Any of them can also be placed by hand as `audio.cues[]`.
-
-| name | what / when |
-|---|---|
-| `pluck` | - |
-| `riser` | - |
-| `sweep` | - |
-| `thud` | - |
-| `travel` | - |
 
 ## Blend modes  `[per-layer]`
 
@@ -807,55 +976,6 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 | `saturation` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
 | `screen` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
 | `soft-light` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-
-## Easings  `[timing]`
-
-`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
-
-| name | what / when |
-|---|---|
-| `brake` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `hold` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `linear` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `ramp` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `rush` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `settle` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `snap` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring-bouncy` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring-stiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `springEase` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `springStiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
 
 ## Plain words (feel · duration · camera)  `[timing]`
 
@@ -894,32 +1014,6 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `ui focus zoom` | camera → `move: "diveIn"` |
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
-## Caption styles  `[captions]`
-
-`captions:{ style:"<name>" }`. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
-
-| name | what / when |
-|---|---|
-| `clipWipe` | LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time |
-| `flipUp` | the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all |
-| `focusPull` | a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size |
-| `ghostSplit` | two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme |
-| `highlight` | marker highlight sweep |
-| `inkFill` | the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself |
-| `kineticSlam` | the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still |
-| `letterRise` | the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing |
-| `neonEdge` | the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all |
-| `pillKaraoke` | a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant |
-| `readerFocus` | a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1 |
-| `scramble` | the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does |
-| `typeOn` | a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret |
-| `underlineDraw` | a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast |
-| `waveRide` | one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it |
-| `weightShift` | the spoken word RAMPS along the font's own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix |
-| `weightWave` | a crest of WEIGHT travels the line, each word riding the font's wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes |
-| `wordFlash` | ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint |
-| `wordSlide` | the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it |
-
 ## Ransom faces  `[text]`
 
 `ransom` on a text layer: per-glyph face mixing, from this fixed set.
@@ -937,70 +1031,15 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 
 ## Output targets  `[canvas]`
 
-`aspect` picks the canvas; `destination` picks the SAFE AREA inside it. They are different questions: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and TikTok paints a rail down the right and captions across the bottom. One definition: `core/safe.js`.
+`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.
 
 | name | what / when |
 |---|---|
-| `16:9` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `1:1` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `4:3` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `4:5` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `9:16` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `broadcast` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `feed` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `reels` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `shorts` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `tiktok` | an aspect or a platform; core/safe.js holds the safe area each implies |
-| `web` | an aspect or a platform; core/safe.js holds the safe area each implies |
-
-## Generators (the playground)  `[generator]`
-
-Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.
-
-| name | what / when |
-|---|---|
-| `bands` | A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind. |
-| `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
-| `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
-| `effector` | One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone. |
-| `keyframeHandle` | The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens. |
-| `rangeSelector` | The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs. |
-| `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
-| `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
-
-## Lightfield dials  `[generator]`
-
-The option vocabulary of the lightfield generators: the pattern, the envelope shape and its anchor, the shadow direction, and how the field lives against the clock. Depth: `docs/LIGHTFIELD.md`.
-
-| name | what / when |
-|---|---|
-| `arch` | a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome |
-| `bottom` | as an anchor, the element grows up from the bottom edge and its free end is the top; as a direction, away is downward |
-| `bottom-left` | a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this |
-| `bottom-right` | a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this |
-| `breathe` | idle breathe |
-| `center` | a radial: away in EVERY direction at once, so no edge can darken without the others darkening too |
-| `circle` | the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse |
-| `crescent` | one circular arc with a second equal arc bitten out of it. A moon horn: empty on one side, a concave inner edge, a point at the tip |
-| `drift` | the field travels as one body, the cells holding station against each other |
-| `full` | the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does |
-| `hills` | three gaussians of unequal width and height summed, rolling ground: three summits with soft saddles between them |
-| `left` | a linear fall away to the left. A direction and no centre, so only the move along it reaches the fall |
-| `left-and-right` | a lit vertical band with darkness at both sides and nothing taken off the top or bottom |
-| `ramp` | a straight climb across the row, so the extents rise steadily from one side to the other |
-| `right` | a linear fall away to the right, the default bearing |
-| `rings` | concentric bands round a point, like light on water, the eye travels outwards |
-| `scallops` | the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall |
-| `shards` | a fan of rays from a pivot below the frame, the eye travels up and out |
-| `shimmer` | the cells slide against each other, so the seams open and close |
-| `slats` | a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across |
-| `still` | nothing moves: the output reads no clock at all |
-| `top` | as an anchor, the element hangs down from the top edge and its free end is the bottom; as a direction, away is upward |
-| `top-and-bottom` | a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes |
-| `top-left` | a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this |
-| `top-right` | a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this |
-| `valley` | the sine hump run upside down: a dip in the middle with both ends tall |
-| `wave` | sinusoidal wave across units |
+| `16:9` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `1:1` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `4:3` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `4:5` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
+| `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 
 ---
-_639 effects across 48 families. Regenerate: `make effects`._
+_641 effects across 53 families. Regenerate: `make effects`._

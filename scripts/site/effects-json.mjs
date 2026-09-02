@@ -22,7 +22,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sections, d, USAGE_KIT } from './effects-catalog.mjs';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
-import { ASPECTS } from '../../core/safe.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');
@@ -61,38 +60,18 @@ const { j } = USAGE_KIT;
 const { text, full } = USAGE_KIT;
 
 const USAGE = {
-  // A motion voice is placed by the DERIVATION, not usually by hand, but it can be named directly and
-  // an author reading the catalogue needs to see how.
-  'motion-voices-tactile-sound': (n) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
-  'composite-looks-static': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: `${n}:0.9` }),
   // Two pseudo-names ("beam:border (border-beam)"), so the form is picked off the mode in the name.
   'per-frame-accent-layers': (n) => j({ type: 'beam', mode: n.includes('shine') ? 'shine' : 'border', x: 300, y: 430, w: 1320, h: 220, radius: 22, thickness: 3, speed: 0.5, start: 0, duration: 6 }),
   'vector-layer-logos-icons': (n) => (n.includes('morph')
     ? j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', morph: { to: 'M60 8 L112 56 L60 104 L8 56 Z', spin: 6.28 }, x: 840, y: 420, w: 240 })
     : j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', stroke: '#fff', strokeWidth: 6, x: 840, y: 420, w: 240, start: 0, duration: 6 })),
-  'beat-blueprints': (n) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
-  'compositions-bespoke-per-beat-timeline': (n) => j({ type: 'composition', comp: n, props: {}, start: 0.2, dur: 4.4 }),
-  'layer-types': (n) => j({ type: n }),
-  'layer-as-texture-resample': (n) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, resample: { fx: n, amount: [0, 1] } }),
   'blend-modes': (n) => text({ mixBlend: n }),
-  easings: (n) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
   // One slot each, and which slot depends on which registry the word came from.
   'plain-words-feel-duration-camera': (n) => (n in FEEL ? j({ ease: n })
     : n in DURATION ? j({ enterDur: n })
     : j({ cameraMove: { move: n } })),
-  // THE SHAPE THIS PRINTED WAS NOT A SHAPE THE ENGINE ACCEPTS. It emitted
-  // `captions: { style, cues: [...] }`, and the schema has `captionStyle` as a TOP-LEVEL string and
-  // `captions` as an ARRAY of {t0,t1,text}. So every one of these rows handed the author JSON that
-  // would fail `make validate` on the first line. Nothing checked it, because nothing renders a
-  // USAGE snippet; it is prose about code, and prose about code goes stale silently.
-  'caption-styles': (n) => j({
-    captionStyle: n,
-    captions: [{ t0: 0.3, t1: 4.6, text: 'Ship the payoff last', pin: 'center', size: 96 }],
-  }),
   'ransom-faces': (n) => text({ split: 'char', ransom: { faces: [n] } }),
-  'output-targets': (n) => (n in ASPECTS ? j({ aspect: n }) : j({ destination: n })),
-  'generators-the-playground': (n) => `// turn the dials at /playground?gen=${n}, then paste the markup:\n${j({ bg: [{ html: '…', from: 0, to: 6 }] })}`,
-  'lightfield-dials': (n) => `// a lightfield option value, turned at /playground:\n${j({ pattern: n })}`,
+  'output-targets': (n) => j({ module: 'scene', aspect: n }),
 };
 
 // ── the scene a previewable effect plays ────────────────────────────────────────────────────────
@@ -108,20 +87,6 @@ const TWO = (t) => [
 const OVER = { ...HERO, text: '', size: 96, y: 860, start: 0.4, duration: 5.2, anim: 'fade' };
 
 const PREVIEW = {
-  // CAPTIONS PLAY HERE, and the reason they did not is a claim the engine contradicts. This family
-  // carried "captions need a voice track and cues, which the index does not carry", so eleven styles
-  // sat on the page as names with no picture. core/captions.js opens by saying the opposite, in as
-  // many words: a line with NO `words` array gets deterministic per-word windows distributed by word
-  // length, "so every style still reads as intentional karaoke". Degradation is built in. The scene
-  // below carries no audio at all and every one of the eleven animates.
-  // It also places the caption at the CENTRE rather than in the bottom band, which is the only
-  // honest way to make a caption the subject of a 640x360 swatch, and is itself a demonstration of
-  // the placement grammar a caption gained in docs/MISTAKES.md #422.
-  'caption-styles': (n) => base({
-    captionStyle: n,
-    captions: [{ t0: 0.3, t1: 5.4, text: 'Ship the payoff last', pin: 'center', size: 96 }],
-    layers: [{ ...OVER, text: n, size: 44, y: 940, start: 0, duration: 6 }],
-  }),
   'per-frame-accent-layers': (n) => base({ layers: [
     { type: 'text', text: 'border-beam', x: 460, y: 480, w: 1000, align: 'center', size: 72, weight: 700, font: 'mono', bg: 'rgba(255,255,255,0.04)', pad: '44px', radius: 22, start: 0.3, duration: 5.4 },
     { type: 'beam', mode: n.includes('shine') ? 'shine' : 'border', x: 460, y: 470, w: 1000, h: 170, radius: 22, thickness: 3, tail: 90, speed: 0.5, glow: 0.6, start: 0.5, duration: 5.2 },
@@ -142,23 +107,11 @@ const UNPLAYABLE = {
 
 // Why a family cannot be played here. Stated on the page, per family, in the author's own terms.
 const NO_PREVIEW = {
-  // A SOUND has no still and no moving preview. The site could play it, but the arsenal's preview slot
-  // renders a scene to frames, and frames cannot show a thud. Listed with its reason rather than left
-  // as a gap, which is what this table is for.
-  'motion-voices-tactile-sound': 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
-  'composite-looks-static': 'a grade needs a photographic source, and the index ships no photographs. See it on the looks clip on /showcase.',
-  'layer-as-texture-resample': 'resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.',
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
-  'beat-blueprints': 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
-  'compositions-bespoke-per-beat-timeline': 'a composition is a hand-authored timeline over data you pass. There is no neutral data for it.',
-  'layer-types': 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
-  easings: 'a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.',
   'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
   'ransom-faces': 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
-  'output-targets': 'an aspect or a platform safe area is a property of the canvas, not something that animates.',
-  'generators-the-playground': 'generators have their own surface with every dial attached: /playground.',
-  'lightfield-dials': 'a dial is a value, not an effect. Turn them together at /playground.',
+  'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
 };
 
 // ── build ───────────────────────────────────────────────────────────────────────────────────────

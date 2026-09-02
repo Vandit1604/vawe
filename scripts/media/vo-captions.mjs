@@ -11,7 +11,7 @@
 //   default: PRINT the caption array (dry run). --write merges into <scene>.captioned.json (non-destructive).
 import fs from 'node:fs';
 import path from 'node:path';
-import { CAP_STYLES, CAP_STYLE_NAMES } from '../../core/captions.js';
+import { CAP_STYLE_REGISTRY } from '../../core/captions.js';
 
 const PAUSE_GAP = 0.6; // a gap > this between two words starts a new caption (a spoken pause)
 const TAIL = 0.3;      // the last word of the sidecar holds this long (no next word to bound it)
@@ -26,10 +26,9 @@ const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
 const style = argVal('--style') || 'weightShift';
 const group = Math.max(1, parseInt(argVal('--group') || String(DEFAULT_GROUP), 10) || DEFAULT_GROUP);
 
-if (!CAP_STYLES[style]) {
-  console.error(`unknown --style "${style}", known styles: ${CAP_STYLE_NAMES.join(', ')}`);
-  process.exit(2);
-}
+// The registry writes the refusal, including the cross-registry hint; this stays a clean CLI exit
+// rather than a stack trace, which is the only reason it is caught rather than thrown through.
+try { CAP_STYLE_REGISTRY.pick(style); } catch (e) { console.error(`--style: ${e.message}`); process.exit(2); }
 
 const scene = JSON.parse(fs.readFileSync(file, 'utf8'));
 const voRef = scene.audio && scene.audio.voWords;

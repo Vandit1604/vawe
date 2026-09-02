@@ -7,7 +7,7 @@
 import { clamp01 } from './motion.js';
 import { PRESETS, wght } from './type.js';
 import { onScreenText } from './on-screen-text.js';
-import { withBlurb, blurbsOf } from './registry.js';
+import { withBlurb, blurbsOf, defineRegistry } from './registry.js';
 
 // capWords(cap) → [{ w, t0, t1 }] with ABSOLUTE windows covering [cap.t0, cap.t1].
 // Author-supplied cap.words ([{t0,t1}], aligned to the markup-stripped word list) wins;
@@ -342,7 +342,6 @@ export const CAP_STYLES = {
   }),
 };
 
-export const CAP_STYLE_NAMES = Object.keys(CAP_STYLES);
 
 // ── STYLE SHAPE: the two things a style cannot say by returning a style object ────────────────────
 // Every style above is a function of (u, active) applied to one word span, and that contract can
@@ -392,3 +391,39 @@ export function capUnitWins(cap, unit = 'word') {
 // Each blurb carries the style's own contrast fact, because that is the half an author cannot see in a
 // still: every styled line sits on the 78% var(--bg) scrim plate and dims by colour mix, never opacity.
 export const CAPTION_BLURBS = blurbsOf('caption style', CAP_STYLES);
+
+// The registry, and with it the catalogue section that used to be hand-listed in
+// scripts/site/effects-catalog.mjs, with its usage snippet keyed by a slug of the section TITLE over in
+// scripts/site/effects-json.mjs. It also gives the two hand-rolled refusals below one owner: formats/
+// scene/scene.js and scripts/media/vo-captions.mjs each wrote out `unknown style, known: <join>` over
+// this same list, so a caption style could be rejected in two different sentences, and neither of them
+// could say that the name the author typed is really a kinetic preset or a look.
+//
+// THE INTRO SAID `captions:{ style:"<name>" }`, WHICH THE ENGINE HAS NEVER ACCEPTED. `captionStyle` is
+// a top-level string and `captions` is an array of {t0,t1,text}; schema-drift checks `captionStyle`
+// against these names. The usage snippet was corrected once already (docs/MISTAKES.md, the note in
+// effects-json.mjs) and the prose above it was left saying the wrong thing, because prose about code
+// goes stale in silence. Moving it to the definition site is what stops that happening twice.
+export const CAP_STYLE_REGISTRY = defineRegistry('caption style', CAP_STYLES, { slot: 'captionStyle', blurbs: CAPTION_BLURBS,
+  catalog: {
+    title: 'Caption styles',
+    tag: 'captions',
+    intro: '`captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.',
+    usage: (n, { j }) => j({
+      captionStyle: n,
+      captions: [{ t0: 0.3, t1: 4.6, text: 'Ship the payoff last', pin: 'center', size: 96 }],
+    }),
+    // CAPTIONS PLAY HERE, and the reason they once did not is a claim this file contradicts in its own
+    // opening: a line with NO `words` array gets deterministic per-word windows distributed by word
+    // length, so every style still reads as intentional karaoke with no audio at all. The caption sits
+    // at the CENTRE rather than in the bottom band, the only honest way to make it the subject of a
+    // 640x360 swatch, and itself a demonstration of the placement grammar of docs/MISTAKES.md #422.
+    preview: (n, { base, OVER }) => base({
+      captionStyle: n,
+      captions: [{ t0: 0.3, t1: 5.4, text: 'Ship the payoff last', pin: 'center', size: 96 }],
+      layers: [{ ...OVER, text: n, size: 44, y: 940, start: 0, duration: 6 }],
+    }),
+  },
+});
+
+export const CAP_STYLE_NAMES = CAP_STYLE_REGISTRY.names;

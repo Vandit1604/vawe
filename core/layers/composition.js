@@ -7,7 +7,7 @@
 // static DOM and authors PAUSED tweens on gsap.globalTimeline (delays offset by start); seekAll(t) drives
 // them per frame → pure in n, exactly like every other GSAP hook (formats/scene/scene.js applyGsapHooks).
 // No frame() hook: the timeline is global and seeked centrally.
-import { COMPOSITIONS } from '../compositions/index.js';
+import { COMPOSITION_REGISTRY } from '../compositions/index.js';
 import { propsOf } from '../props.js';
 
 // Which of those props needs the tween engine on disk before build. `props` is inert data; `comp` names a
@@ -19,10 +19,10 @@ export const GSAP_TRIGGER = 'comp';
 // local binding for the looked-up composition function already uses that name.
 export function build(kit, el, L, { comp: compName, props } = L) {
   el.style.pointerEvents = 'none';
-  const comp = COMPOSITIONS[compName];
   // was console.warn + return, so the beat's whole hand-authored timeline silently did not run. A
-  // warning in a headless render nobody reads is silence with extra steps. #361.
-  if (!comp) throw new Error(`unknown composition "${compName}". One of: ${Object.keys(COMPOSITIONS).join(', ')}`);
+  // warning in a headless render nobody reads is silence with extra steps. #361. pick() carries the
+  // same refusal and also names the vocabulary a mistaken word really belongs to.
+  const comp = COMPOSITION_REGISTRY.pick(compName);
   if (!window.gsap) { console.warn('composition: window.gsap missing, cannot author the timeline'); return; }
   // props is DATA the comp treats as textContent/attr, never innerHTML (same boundary as the html layer).
   comp({ el, gsap: window.gsap, start: L.start ?? 0, W: kit.W, H: kit.H, kit, ...(props && typeof props === 'object' ? props : {}) });

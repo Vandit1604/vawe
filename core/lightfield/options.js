@@ -6,6 +6,7 @@
 // ignores `patern:` hands you a field you did not ask for and no way to find out why.
 
 import { isHex } from './colour.js';
+import { defineRegistry } from '../registry.js';
 
 export const PATTERNS = ['slats', 'rings', 'shards'];
 // How an element's extent varies with where it sits. `full` is the no-op: every element runs the
@@ -33,46 +34,95 @@ export const DIRECTIONS = ['left', 'right', 'top', 'bottom', 'center',
   'top-left', 'top-right', 'bottom-left', 'bottom-right'];
 export const MOTIONS = ['still', 'drift', 'breathe', 'shimmer'];
 
-// LIGHTFIELD_BLURBS: one line per name in the five vocabularies above, next to the vocabularies
-// themselves (the `blurb` pattern of blocks/catalog.mjs). Consumed by the generated docs table and by
-// any catalog/MCP surface; a name with no blurb, or a blurb with no name, is a bug the catalog reports.
-// The text is the per-entry prose of docs/LIGHTFIELD.md and of the comments above, moved rather than
-// rewritten, so there is one wording of each fact.
-// `top` and `bottom` are BOTH an anchor and a direction, and one flat table has one row per name, so
-// those two blurbs say both meanings.
-export const LIGHTFIELD_BLURBS = {
-  // pattern: the structure of the field
-  slats: 'a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across',
-  rings: 'concentric bands round a point, like light on water, the eye travels outwards',
-  shards: 'a fan of rays from a pivot below the frame, the eye travels up and out',
-  // envelope shape: each element's extent as a curve in where it sits
-  full: 'the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does',
-  ramp: 'a straight climb across the row, so the extents rise steadily from one side to the other',
-  arch: 'a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome',
-  valley: 'the sine hump run upside down: a dip in the middle with both ends tall',
-  wave: 'sinusoidal wave across units',
-  circle: 'the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse',
-  crescent: 'one circular arc with a second equal arc bitten out of it. A moon horn: empty on one side, a concave inner edge, a point at the tip',
-  scallops: 'the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall',
-  hills: 'three gaussians of unequal width and height summed, rolling ground: three summits with soft saddles between them',
-  // anchor (which edge an element grows from) · direction (which way "away" is)
-  bottom: 'as an anchor, the element grows up from the bottom edge and its free end is the top; as a direction, away is downward',
-  top: 'as an anchor, the element hangs down from the top edge and its free end is the bottom; as a direction, away is upward',
-  left: 'a linear fall away to the left. A direction and no centre, so only the move along it reaches the fall',
-  right: 'a linear fall away to the right, the default bearing',
-  center: 'a radial: away in EVERY direction at once, so no edge can darken without the others darkening too',
-  'top-and-bottom': 'a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes',
-  'left-and-right': 'a lit vertical band with darkness at both sides and nothing taken off the top or bottom',
-  'top-left': 'a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this',
-  'top-right': 'a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this',
-  'bottom-left': 'a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this',
-  'bottom-right': 'a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this',
-  // motion: how the field lives against the frame clock
-  still: 'nothing moves: the output reads no clock at all',
-  drift: 'the field travels as one body, the cells holding station against each other',
-  breathe: 'idle breathe',
-  shimmer: 'the cells slide against each other, so the seams open and close',
-};
+// FIVE VOCABULARIES, FIVE REGISTRIES, and that is the correction. LIGHTFIELD_BLURBS was one flat
+// name-keyed map covering all five, which forced `top` and `bottom` to state BOTH of their meanings in
+// one sentence, because a flat table has one row per name and `top` is an anchor AND a direction. The
+// file said so out loud and carried on. Split, each name gets an honest line in the vocabulary it
+// belongs to, the catalogue prints five short tables instead of one 27-row table with two compound
+// rows, and an author who writes `anchor: "left"` is told that `left` is a shadow DIRECTION rather than
+// being handed the whole flat list to search.
+//
+// The text is still the per-entry prose of docs/LIGHTFIELD.md and of the comments above, moved rather
+// than rewritten. Two corrections were made in the move, both from this file's own SCHEMA: `right` was
+// described as "the default bearing" and the default is `bottom`, and `breathe` carried a two-word
+// placeholder that said nothing a reader could search for.
+const dials = (names) => Object.fromEntries(names.map((n) => [n, n]));
+const catalogFor = (title, slot, extra) => ({
+  title,
+  tag: 'generator',
+  intro: `${extra} Turn it with the rest at /playground; depth: \`docs/LIGHTFIELD.md\`.`,
+  usage: (n, { j }) => `// a lightfield option, turned at /playground and pasted as markup:\n${j(slot(n))}`,
+  noPreview: 'a dial is a value, not an effect. Turn them together at /playground.',
+});
+
+export const PATTERN_REGISTRY = defineRegistry('lightfield pattern', dials(PATTERNS), {
+  slot: 'pattern.kind',
+  blurbs: {
+    slats: 'a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across',
+    rings: 'concentric bands round a point, like light on water, the eye travels outwards',
+    shards: 'a fan of rays from a pivot below the frame, the eye travels up and out',
+  },
+  catalog: catalogFor('Lightfield patterns', (n) => ({ pattern: { kind: n } }),
+    'The STRUCTURE of a lightfield: what the elements are and which way the eye travels across them.'),
+});
+
+export const ENVELOPE_SHAPE_REGISTRY = defineRegistry('envelope shape', dials(SHAPES), {
+  slot: 'envelope.kind',
+  blurbs: {
+    full: 'the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does',
+    ramp: 'a straight climb across the row, so the extents rise steadily from one side to the other',
+    arch: 'a sine hump. It leaves the baseline at a finite slope and its shoulders sag, so it reads as a bump, not a dome',
+    valley: 'the sine hump run upside down: a dip in the middle with both ends tall',
+    wave: 'a sinusoidal ripple across the row, so the extents rise and fall more than once between the two ends',
+    circle: 'the unit semicircular arc, which leaves the baseline UPRIGHT. A symmetric dome, a planet limb, an eclipse',
+    crescent: 'one circular arc with a second equal arc bitten out of it. A moon horn: empty on one side, a concave inner edge, a point at the tip',
+    scallops: 'the same semicircle repeated five times. Odd, so one arc sits centred. A scalloped horizon when shallow, an arcade when tall',
+    hills: 'three gaussians of unequal width and height summed, rolling ground: three summits with soft saddles between them',
+  },
+  catalog: catalogFor('Lightfield envelope shapes', (n) => ({ envelope: { kind: n } }),
+    "How an element's extent varies with where it sits, as a curve across the row."),
+});
+
+export const ENVELOPE_ANCHOR_REGISTRY = defineRegistry('envelope anchor', dials(ANCHORS), {
+  slot: 'envelope.anchor',
+  blurbs: {
+    bottom: 'the element grows UP from the bottom edge, so the free end, the one `taper` narrows, is at the top. The default',
+    top: 'the element hangs DOWN from the top edge, so the free end, the one `taper` narrows, is at the bottom',
+  },
+  catalog: catalogFor('Lightfield envelope anchors', (n) => ({ envelope: { anchor: n } }),
+    'Which edge an element grows FROM. An envelope is a horizon, and a horizon has a side; the far end is the one that tapers.'),
+});
+
+export const SHADOW_DIRECTION_REGISTRY = defineRegistry('shadow direction', dials(DIRECTIONS), {
+  slot: 'shadow.direction',
+  blurbs: {
+    left: 'a linear fall away to the left. A bearing and no centre, so only the move along it reaches the fall',
+    right: 'a linear fall away to the right',
+    top: 'away is upward: the frame drains towards the top edge and stays lit at the bottom',
+    bottom: 'away is downward: the frame drains towards the bottom edge and stays lit at the top. The default bearing',
+    center: 'a radial: away in EVERY direction at once, so no edge can darken without the others darkening too',
+    'top-and-bottom': 'a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes',
+    'left-and-right': 'a lit vertical band with darkness at both sides and nothing taken off the top or bottom',
+    'top-left': 'a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this',
+    'top-right': 'a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this',
+    'bottom-left': 'a diagonal fall away to the bottom left, light rarely leaves along an axis, and no edge keyword says this',
+    'bottom-right': 'a diagonal fall away to the bottom right, light rarely leaves along an axis, and no edge keyword says this',
+  },
+  catalog: catalogFor('Lightfield shadow directions', (n) => ({ shadow: { direction: n } }),
+    'Which way "away" is: the bearing the light falls off along. A keyword is a bearing and never a place, so `shadow.x`/`shadow.y` decide how far off centre the dark sits.'),
+});
+
+export const FIELD_MOTION_REGISTRY = defineRegistry('field motion', dials(MOTIONS), {
+  slot: 'motion.kind',
+  blurbs: {
+    still: 'nothing moves: the output reads no clock at all',
+    drift: 'the field travels as one body, the cells holding station against each other',
+    breathe: 'the whole field swells and settles on one slow cycle, the cells keeping their relation to each other',
+    shimmer: 'the cells slide against each other, so the seams open and close',
+  },
+  catalog: catalogFor('Lightfield motions', (n) => ({ motion: { kind: n } }),
+    'How the field lives against the frame clock. Driven off `var(--t)`, so it is seeked, never a CSS animation.'),
+});
 
 // kind: int | unit (a 0..1 dial) | signed (a -1..1 dial) | num | hex | enum | group
 export const SCHEMA = {

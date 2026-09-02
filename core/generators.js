@@ -42,7 +42,7 @@
 // build a panel from, and inferring dials from example values guesses ranges and misses enums.
 import { lightfield } from './lightfield/index.js';
 import { crtSpec } from './layers/util.js';
-import { blurbsOf } from './registry.js';
+import { blurbsOf, defineRegistry } from './registry.js';
 import { sanitizeHtml } from './sanitize-html.js';
 import { thermalPrimitives, THERMAL_REGION, THERMAL_RAMP } from './filters.js';
 import { FALLOFF_NAMES } from './effector.js';
@@ -789,7 +789,25 @@ export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);
 // Every generator already wrote its own blurb; nothing READ them, so all four rendered as an em-dash in
 // docs/EFFECTS.md. Derived here rather than in the catalogue so a new generator without one is refused
 // at load instead of shipping a blank row.
-export const GENERATOR_BLURBS = blurbsOf('generator', Object.fromEntries(GENERATORS.map((g) => [g.name, g])));
+// The name-keyed map used to be built here, read once by blurbsOf and thrown away. It is kept and
+// handed to defineRegistry, which is what lets the catalogue section below live at the definition site
+// instead of being a fourth hand-written listing of the same names.
+const GENERATOR_ENTRIES = Object.fromEntries(GENERATORS.map((g) => [g.name, g]));
+export const GENERATOR_BLURBS = blurbsOf('generator', GENERATOR_ENTRIES);
+
+// THE REGISTRY HOLDS WHAT SHIPS, NOT ALL_GENERATORS. A generator with `ready:false` is built and held
+// back on purpose (HELD_BACK below counts them for the playground), and a catalogue advertising an
+// unbuilt thing is worse than one that is short. There is no `pick()` caller: a scene never names a
+// generator, it pastes the markup the playground emits, which is why this registry declares no slot.
+export const GENERATOR_REGISTRY = defineRegistry('generator', GENERATOR_ENTRIES, { blurbs: GENERATOR_BLURBS,
+  catalog: {
+    title: 'Generators (the playground)',
+    tag: 'generator',
+    intro: 'Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.',
+    usage: (n, { j }) => `// turn the dials at /playground?gen=${n}, then paste the markup:\n${j({ bg: [{ html: '…', from: 0, to: 6 }] })}`,
+    noPreview: 'generators have their own surface with every dial attached: /playground.',
+  },
+});
 
 // How many exist but are not shown. The page says this out loud: a one-card library with no
 // explanation reads as a broken page, and "two more are being worked on" is both true and the more
