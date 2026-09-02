@@ -590,168 +590,26 @@ yet: it is a debt, it warns on every run, and it disappears the moment the film 
 (`make legacy` for the board, `make legacy STAMP=1` to pay one off). Edit a legacy film without fixing
 it and it BLOCKS. Nothing is excused for life.
 
-## ARCHITECTURE: fix it at the root, or fail there. A gate is the last resort.
+## Changing the ENGINE, not a film? The doctrine is one file away
 
-**The rule, and it is not a preference.** A gate belongs ONLY where the problem cannot be avoided in
-the code at its root, or made to fail there. If it can be fixed at the write site *simply*, it is fixed
-at the write site and no gate is written. A gate is justified only when preventing the thing in code
-would genuinely complicate the code AND it cannot be solved at the root either. Then, and only then,
-build a gate.
+Five rules govern any change to `core/`, `internal/`, a gate or the capture path, and they live in
+**[`docs/CRAFT/ENGINE-CHANGES.md`](docs/CRAFT/ENGINE-CHANGES.md)** rather than here, because this file
+is addressed to somebody authoring a film. Their triggers stay, because a rule you do not know exists
+is a rule you cannot go and read:
 
-**The test, applied to any check you are about to write: where is this value WRITTEN?** If that place
-is reachable, the refusal goes there and the whole class of bug ends. A gate that runs afterwards
-leaves the engine perfectly able to produce the same bad value tomorrow; it only promises to notice.
+- **About to write a gate?** A gate is the LAST resort. If the bad value has a write site, the refusal
+  goes there and the whole class of bug ends. A gate that runs afterwards only promises to notice.
+- **Adding an authoring convenience?** Sugar either resolves at boot or its absence fails loudly.
+  Silence is never the third option: a field written and never read is the failure this repo pays for most.
+- **Adding an effect, a layer type, a block or a camera move?** Use one of the three existing extension
+  primitives rather than inventing a fourth, and check whether an owner for the fact already exists.
+- **Touched the capture path?** `internal/scene`, `internal/render`, a Chrome flag, the worker count,
+  anything on `.hs-layer` or `#cam`: render one film before and after and put both wall-clock times in
+  the commit body. A correctness fix may cost speed. Not knowing what it cost is the failure.
+- **After EVERY render**, list every problem you hit and classify each one: framework bug (fix the
+  engine now, delete the workaround), gate gap (sharpen the gate or its message), or authoring choice
+  (fix the JSON). A workaround is a bug report. Log every framework-class finding to `docs/MISTAKES.md`.
 
-What a gate IS for, stated so the rule is not read as "never":
-- a property only knowable **after a render** (a luminance flash across a cut, a frame that paints nothing)
-- a property only knowable **across the whole library** (a design repeating a shipped one, a count on the
-  site disagreeing with the registry that produced it)
-- a comparison against a **baseline** (byte-identical frames, purity across render order)
-- a **judgement**, which no code can make (`make judge`, and your eyes)
-
-**The worked example, because it is exactly the reflex to avoid.** A block emitted `left: -calc(...)`.
-Invalid CSS, so the browser dropped that one declaration, kept the rest of the rule, rendered on, and
-three of four focus brackets never moved with every check green. The first fix was a NEW GATE that
-swept every fragment in a browser. It worked, and it was the wrong shape. The right answer was three
-files away: `core/sanitize-html.js` already refuses `transition`/`animation` for the identical reason,
-hand-authored CSS that reads correctly and silently does nothing. The refusal now lives at the two
-places author CSS reaches the DOM (`core/layers/util.js`, `core/layers/html.js`) and throws naming the
-layer. The gate was deleted. Full write-up: `docs/MISTAKES.md` #422.
-
-**Every gate has a running cost, and this repo has paid it twice.** `visual-vocabulary` was deleted for
-measuring size wrongly: it squared a 590x18 rule into 590x590 and credited a hairline with a tenth of
-the frame. `make slop` ran 41 borrowed rules against a DOM dump carrying evidence for three of them and
-reported its silence as a pass. **A gate is another thing that can be quietly wrong, and a wrong gate is
-worse than no gate** because it manufactures confidence. Before adding one, read `docs/TASTE.md` on that
-cull.
-
-## SUGAR MUST NEVER SILENTLY NO-OP
-
-An authoring convenience that needs a build step to work is a trap: the author writes something real,
-skips a step they did not know about, and watches a still frame with nothing to tell them why.
-
-`make expand` resolves four sugars. Three of them (`block`, `beat`, `comp`) become layer TYPES, so a
-scene rendered without expanding is refused by name at boot. That is a build step failing LOUDLY, and it
-is acceptable: expansion imports all 217 block factories, which has no business in every render.
-
-The fourth, `cameraMove`, was written into `data.cameraMove` and read by nobody: `formats/scene/scene.js`
-reads `data.camera`. So an author who wrote a camera move and rendered without expanding got no camera
-and no error. It now bakes at boot (`bakeCameraMove` in `core/produce.js`), and `core/boot.js` THROWS if
-`cameraMove` survives to render, because the failure was a field written and never read, so the repair
-is not "convert it here", it is "make surviving unconverted impossible" (`docs/MISTAKES.md` #424).
-
-**The rule: sugar either resolves at boot, or its absence fails loudly. Silence is never the third option.**
-
-## LOOSE COUPLING: adding a thing must not mean touching everything
-
-The engine should let you add an effect, a layer type, a block, a beat or a camera move **without
-handling everything again**. Where that is true today it is because of one of three primitives, and a
-new extension point should use one of them rather than invent a fourth:
-
-- **`defineRegistry(...)`** (`core/vocab.js`): a named vocabulary that refuses an unknown name and says
-  which slot it was reaching for.
-- **`paramsOf`** (`core/camera-moves.js:216`), refuses an unknown parameter by reading the generator's
-  OWN signature. Nobody maintains that list, so it cannot drift.
-- **`createKit(ctx)`** (`core/layers/util.js`): dependency injection for layer builders. A capability
-  added to the ctx reaches every primitive at once, with no signature change at any call site. The frame
-  (`frameOf` in `core/safe.js`) arrived exactly this way.
-
-**One fact, one owner, everyone else receives it.** The recurring failure in this codebase is not
-complexity, it is the same fact known in two places and then drifting: the audit graded a camera read
-from the scene file while the renderer baked a different one at boot (#423), and light-versus-dark once
-had two implementations (#159). Before computing something a caller could have handed you, check whether
-an owner already exists. `nothing computes the frame twice` is the shape to copy.
-
-**Deterministic, simple, readable, fail early.** `renderFrame(n)` is a pure function of `n` and every
-suggestion is weighed against that first. Validate at the entry point rather than deep in the call chain.
-Return the error; never log and continue. Prefer the boring, obvious construction: an abstraction with
-one caller is not decoupling, it is a second thing to read.
-
-## SPEED IS A PROPERTY YOU CAN LOSE WITHOUT NOTICING
-
-A correctness fix is allowed to cost speed. **Not knowing what it cost is the failure.** Nothing in
-this repo reports render time against a baseline, so a change that halves throughput lands green and
-silent, and the next author inherits a slower engine with no note saying when or why.
-
-**The worked example is one day's work, and it is not hypothetical.** Closing the sharded-render
-determinism bug added `--disable-partial-raster` and removed `will-change` from every layer. Both
-exist precisely to stop Chrome reusing a rasterised tile, which is the single largest thing making a
-render fast. That was the right trade, made deliberately, and **nobody measured the price**. It is
-still unpriced.
-
-**The rule.** If you touch the capture path (`internal/scene`, `internal/render`, a Chrome flag, the
-worker count, anything on `.hs-layer` or `#cam`), render one film before and after and state both
-wall-clock times in the commit body. Two numbers. That is the whole ask, and it is what turns "we
-chose correctness" from a hope into a record.
-
-**Two things already true that a reader should not have to rediscover:**
-
-- **The worker cap is `min(NumCPU - 1, 6)`** (`cmd/render/main.go:60`). On a 10-core machine that
-  leaves four cores idle, and memory is not the reason: an extra tab costs one renderer process and
-  about 118 MB, so nine tabs is roughly 1 GB. Whether the cap is a leftover or a deliberate ceiling
-  is not written down anywhere.
-- **Worker count and determinism are coupled**, so raising the cap is not purely a speed change.
-  `internal/scene/scene.go` records two renders of identical code differing on 373 of 1890 captures
-  at one worker and 1078 at four. Any speed experiment on the pool measures frame agreement too, or
-  it is trading correctness for time without saying so.
-
-**Do not optimise on a guess either.** The same rule that governs a rendering bug governs a slow one:
-measure, name the number, then change one thing. This file already carries four wrong explanations
-that were reasoned rather than measured, and a performance hunch is exactly as cheap to be wrong about.
-
-## The framework harvest (do this EVERY render: the engine must compound)
-
-Authoring a video always surfaces friction. If that friction is only patched inside the JSON, the
-next author hits the identical wall and the engine never improves. So **after every render, before
-declaring done, list every problem hit this pass and classify each one**:
-
-| Class | Test | Action |
-|---|---|---|
-| **Framework bug** | Would ANY author hit this on a different brand? Did the engine do something silently wrong, or accept input it then ignored? | **Fix it in the engine/tooling now**, then delete the JSON-side workaround |
-| **Gate gap** | The render was wrong and no gate said anything, or the error message didn't name the real cause | **Extend the gate / sharpen the message** |
-| **Authoring choice** | Specific to this brand's taste, copy, or composition | Fix in the JSON only |
-
-Rules that make this real, not ceremonial:
-- **A workaround is a bug report.** If you wrote something odd to route around the engine
-  (`ken:{from:1,to:1}` purely to get a border-radius), that IS a framework bug. Fix the engine and
-  remove the hack, never leave the hack as the answer.
-- **Silence is the worst failure.** Any input the engine accepts and then ignores must either work or
-  fail loudly. Silent substitution is how the wrong font and square avatars both shipped.
-- **Log it.** Append every framework-class finding to `docs/MISTAKES.md` (what · root cause · fix ·
-  which gate now catches it). That file is the memory; an unlogged fix gets re-broken.
-- **ONE INCIDENT IS A HYPOTHESIS, NOT A RULE.** Logging a mistake and promoting it into standing
-  doctrine are different acts, and the second needs more evidence than the first. When a harvest turns
-  a finding into a rule in this file, cite the entries that support it and let the count do the
-  arguing: `#505` alone is one film's experience, `#214 + #216` is the same misreading surfacing twice
-  in two consumers, which is a pattern. A rule derived from a single run is a rule the next author
-  obeys as though it were measured, because nothing in the sentence says it was not. Say so instead.
-- **Check the blast radius** before changing shared behaviour: grep the other scenes for the pattern,
-  and re-run `make probe` + `make snap`. Say plainly which existing videos change output and why.
-- **Report it.** Tell the user what was framework vs authoring. Never silently absorb engine bugs into
-  a scene file.
-- **FIX THE RULE, NOT THE CALL SITE. Grep every consumer before you close it.** A measurement bug is
-  almost never in one place: the primitive that was read wrongly is read the same way somewhere else.
-  #214 taught the audit that `<style>` source is not glyphs, applied it to the overlap check alone, and
-  left the identical bug in the clipped-text check, where it surfaced as #216 the same day. Before
-  closing any finding of this shape, grep for the thing that was misread (`textContent`, `getBBox`,
-  `boxOf`, a default-substituting helper) and fix or explicitly clear EVERY consumer. A fix at one call
-  site looks exactly like a finished fix until something else trips the half you skipped.
-- **FINISH THE FIX. Reverting is not a resolution.** Having found an engine or gate bug, you fix it in
-  this pass. "I could not get it working so I put it back and logged it" is the one outcome that is
-  never acceptable: the next author inherits the same wall plus a note saying it is known. If a first
-  attempt does not fire, DEBUG IT: instrument the thing, print what the code actually sees, and find
-  out why. Every fix in this file that looked impossible was one measurement away (#211 took three
-  distinct root causes, and stopping after the first two would have shipped half a fix that changed
-  nothing). Abandon only when you can state what makes it genuinely infeasible, and then say so to the
-  user in plain words rather than quietly restoring the old behaviour.
-- **When satisfying a gate requires making the film worse, suspect the gate.** A gate that measures the
-  wrong thing does not merely miss defects, it manufactures them, and the author pays by deforming a
-  good design until the number moves. Before you shrink, recentre or delete something you know is right,
-  go and read what the gate actually measures (#211).
-- **A gate change must never invent findings.** Run the whole scene library before and after and diff the
-  counts. The only acceptable shapes are "no scene changes" and "these N changed, FAIL to PASS, here is
-  why each was a false positive". A single scene going PASS to FAIL is a regression, not a discovery,
-  until you have proven otherwise: an unclamped bound in #211 turned one clean scene into 7 failures.
 
 > **Editing `scene.html`?** Read the `vawe-scene-authoring` skill first (render-frame purity,
 > tokens, motion primitives, image/capture system, QA loop). System map: `docs/CODEMAPS/ARCHITECTURE.md`.

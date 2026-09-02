@@ -38,6 +38,12 @@ the downstream choices for you.
 | 6 | **The restraint pass**: cut what doesn't earn its place | [TASTE-RULES.md](TASTE-RULES.md) | a film with 2–3 earned effects, not fifteen |
 | 7 | **The sound**: sound by default, silence only with a stated reason | [SOUND.md](SOUND.md) | a film held together aurally, and a licence we can produce |
 
+**Not authoring a film at all?** The nine steps above are for somebody making one. If you are changing
+the ENGINE (a gate, a layer type, a registry, the capture path, anything under `core/` or `internal/`),
+the doctrine is [ENGINE-CHANGES.md](ENGINE-CHANGES.md): why a gate is the last resort, why sugar must
+fail loudly, the three extension primitives, how to price a change that touches the capture path, and
+the framework harvest.
+
 **Why the order matters:** STORY (1) decides a beat is a *proof* beat → its role tells SELECTION (2–3)
 to reach for a demonstration, a hard cut, `weightShift` emphasis → COLOR/LAYOUT (4) go flat and
 full-bleed so the number lands → DENSITY (5) adds the supporting stat + a mono readout → TASTE-RULES
