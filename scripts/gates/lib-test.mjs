@@ -6271,5 +6271,23 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   } finally { fs.writeFileSync(ratchet, saved); }
 }
 
+// A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter
+// how many assertions actually RAN, so a block that quietly stops running (an `await import` failing
+// inside a swallowing catch, a section deleted in a merge, an early return added while debugging) takes
+// its assertions with it and the run still prints a tick. That is absence read as a pass, in the file
+// this repo relies on to notice absence read as a pass.
+//
+// A FLOOR AND NOT AN EXACT COUNT, deliberately: this file gains assertions most days, so an exact match
+// would fail on every honest addition and be edited to fit within a week. The floor is raised when it is
+// comfortably passed, the same way verify/arsenal-ratchet.json is stamped, and it is a number in the
+// source rather than a file because a floor you can see while adding a test is a floor you remember.
+const FLOOR = 1800;
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
+if (!fail && pass < FLOOR) {
+  console.error(`\n✗ ${pass} assertions ran, below the floor of ${FLOOR}. Nothing FAILED, so something`);
+  console.error('  stopped RUNNING: a block that throws inside a swallowing catch, a section lost in a');
+  console.error('  merge, or a debugging return left behind. Find it rather than lowering the floor.');
+  console.error('  If the drop is deliberate, lower FLOOR at the end of this file and say why.\n');
+  process.exit(1);
+}
 process.exit(fail ? 1 : 0);
