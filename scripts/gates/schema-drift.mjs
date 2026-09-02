@@ -17,7 +17,7 @@
 // have passed in silence. A name is not a fact about a layer; a name on a type is.
 import fs from 'node:fs';
 import { ANIM_NAMES } from '../../core/clips.js';
-import { EASINGS } from '../../core/motion.js';
+import { KEYFRAME_PROPS } from '../../core/sequence.js';
 import { PRESET_REGISTRY } from '../../core/type.js';
 import { GLOW_REGISTRY } from '../../core/layers/glow.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
@@ -398,6 +398,26 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
       bad++;
     } else checked++;
   }
+  // A KEYFRAME'S FIELDS LIVED IN THREE PLACES: the evaluator (core/sequence.js `POSE`, which the pose
+  // is generated from), the refusal that names what a key may carry, and this schema's `motion.item`.
+  // The first two share one table now; this was the third, and it drifted the moment a property was
+  // added, so the schema described a keyframe the engine no longer had. COMPARED rather than written,
+  // for the reason the modifier block above gives: each field carries a hand-written label explaining
+  // what it means, and no generator can invent those.
+  {
+    const documented = Object.keys(at('layers.item.motion.item') || {});
+    const missing = KEYFRAME_PROPS.filter((p) => !documented.includes(p));
+    const extra = documented.filter((p) => !KEYFRAME_PROPS.includes(p));
+    if (missing.length || extra.length) {
+      console.error('\u2717 layers.item.motion.item DRIFT vs core/sequence.js KEYFRAME_PROPS');
+      if (missing.length) console.error(`    schema is MISSING: ${missing.join(', ')}  (a key may carry these; the schema does not say so)`);
+      if (extra.length) console.error(`    schema ADVERTISES: ${extra.join(', ')}  (a key carrying these is refused at boot)`);
+      console.error('    fix: add the field by hand to layers.item.motion.item in formats/scene/schema.json'
+        + ': each one carries a label no generator can invent.');
+      bad++;
+    }
+  }
+
   if (bad) { console.error('  fix (the enums above): node scripts/gates/schema-drift.mjs --write  (those are GENERATED)'); process.exit(1); }
   console.log(`\u2713 ${checked} schema enum(s) derived from the registries they copy, in sync`);
 }

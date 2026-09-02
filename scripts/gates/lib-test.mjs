@@ -5401,6 +5401,108 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     }
   }
 }
+// ---- a motion keyframe may not carry a property nothing interpolates -----------------------------
+//
+// Found by checking a claim rather than by a gate. The research pass said a keyable anchor point was
+// declined because "a group does it", and a group gives a DIFFERENT FIXED pivot by nesting, never a
+// travelling one. `origin` is a static CSS transform-origin written once at build, so a key carrying it
+// was accepted and read by nothing: the author writes a pivot that travels and gets one that does not.
+// Every unknown key was in that position, not just origin: {"t":0,"rot":0,"zzNonsense":5} validated clean.
+{
+  const { resolveKeyedProps, KEYFRAME_PROPS } = await import('../../core/sequence.js');
+  const track = (extra) => [{ id: 'probe', type: 'rect', motion: [{ t: 0, rot: 0, ...extra }, { t: 1, rot: 45 }] }];
+  const refuses = (extra) => { try { resolveKeyedProps(track(extra)); return null; } catch (e) { return e.message; } };
+
+  ok('keyframe: `origin` is refused, because the pivot cannot travel',
+    /origin/.test(refuses({ origin: '0% 50%' }) || ''));
+  ok('keyframe: and the message says what to do instead',
+    /key `ox`\/`oy`/.test(refuses({ origin: '0% 50%' }) || ''));
+  ok('keyframe: any property nothing interpolates is refused, not just the one that found this',
+    !!refuses({ zzNonsense: 5 }));
+  ok('keyframe: the message lists what a keyframe DOES carry',
+    /scale/.test(refuses({ zzNonsense: 5 }) || '') && /ease/.test(refuses({ zzNonsense: 5 }) || ''));
+  ok('keyframe: a legal track still passes', refuses({ ease: 'settle' }) === null);
+  // THE REGRESSION THIS CHECK ITSELF CAUSED, kept as a test rather than as a memory. The first cut of
+  // KEYFRAME_PROPS was hand-written and guessed `in`/`out` for the bezier handles where the code says
+  // `easeIn`/`easeOut` (core/sequence.js SIDES), so three shipped films were refused for writing the
+  // CORRECT thing. A second list, written inside the check for second lists. The list is generated from
+  // POSE and SIDES now, and these two assertions are what would have caught it.
+  ok('keyframe: the real handle names are accepted', refuses({ easeIn: 'easyEase', easeOut: 'hang' }) === null);
+  // A layer that declares w/h/track, because keying a BOX the layer never declared is a different and
+  // correct refusal (there is nothing to animate from, docs/MISTAKES.md #563).
+  const boxed = (extra) => { try {
+    resolveKeyedProps([{ id: 'probe', type: 'rect', w: 100, h: 50, track: 1,
+      motion: [{ t: 0, rot: 0, ...extra }, { t: 1, rot: 45 }] }]); return null;
+  } catch (e) { return e.message; } };
+  ok('keyframe: every name in KEYFRAME_PROPS is one a keyframe can actually carry',
+    KEYFRAME_PROPS.filter((p) => p !== 't')
+      .every((p) => boxed({ [p]: p.startsWith('ease') ? 'linear' : 1 }) === null));
+  // `dy` is the POSE's output name, not an authored one, so an author reading a pose and writing it
+  // back gets silence. 32 keys in one shipped film were exactly that.
+  ok('keyframe: a pose OUTPUT name is not an authored name', !!refuses({ dy: 90 }));
+  ok('keyframe: an author annotation is left alone', refuses({ _why: 'a note' }) === null);
+
+  // THE KEYABLE ANCHOR POINT. `origin` is static and always was; `ox`/`oy` are the travelling pivot,
+  // as percentages of the layer's own box. A layer that never keys them must be untouched, because
+  // every film in the library relies on that.
+  const { motionAt } = await import('../../core/sequence.js');
+  const pivot = motionAt([{ t: 0, rot: 0, ox: 0, oy: 50 }, { t: 1, rot: 45, ox: 100, oy: 50 }], 0.5);
+  ok('anchor: the pivot travels between the keys', pivot.ox === 50 && pivot.oy === 50);
+  const noPivot = motionAt([{ t: 0, rot: 0 }, { t: 1, rot: 45 }], 0.5);
+  ok('anchor: a track that never keys it returns null, so the layer keeps its own origin',
+    noPivot.ox === null && noPivot.oy === null);
+  // Same rule as w/h: both endpoints state it or neither does. One-sided cannot mean "hold", because
+  // that is the second interpretation rule docs/MISTAKES.md #563 exists to refuse.
+  ok('anchor: one endpoint alone is not enough',
+    motionAt([{ t: 0, ox: 0 }, { t: 1, rot: 45 }], 0.5).ox === null);
+  ok('anchor: the refusal for `origin` now names the thing that works',
+    /ox/.test(refuses({ origin: '0% 50%' }) || ''));
+  // ONE OWNER: the list the refusal reads is the list the evaluator interpolates.
+  ok('keyframe: every property the evaluator reads is in KEYFRAME_PROPS',
+    ['x', 'y', 'scale', 'rot', 'opacity', 'blur', 'w', 'h', 'track'].every((p) => KEYFRAME_PROPS.includes(p)));
+}
+
+// ---- motionDelay: follow-through on ONE layer -----------------------------------------------------
+//
+// Every property on a motion track used to stop on the same frame, which is the difference between a
+// thing that moves and a thing that is moved. Measured before it was built: 138 of the library's 283
+// motion tracks key position AND scale/rot/opacity together.
+{
+  const { motionAt } = await import('../../core/sequence.js');
+  const kfs = [{ t: 0, x: 0, scale: 1, rot: 0 }, { t: 1, x: 100, scale: 2, rot: 90 }];
+
+  // ABSENCE COSTS NOTHING AND CHANGES NOTHING. Every film in the library renders through this call,
+  // so the undelayed path must be identical, not merely close.
+  ok('motionDelay: a track without one is byte-identical to before',
+    JSON.stringify(motionAt(kfs, 0.5)) === JSON.stringify(motionAt(kfs, 0.5, undefined))
+    && JSON.stringify(motionAt(kfs, 0.5, 0)) === JSON.stringify(motionAt(kfs, 0.5)));
+
+  // THE POINT: one property lags, the others do not move with it.
+  const lagged = motionAt(kfs, 0.5, { scale: 0.3 });
+  const plain = motionAt(kfs, 0.5);
+  ok('motionDelay: the delayed property reads EARLIER on the same track', lagged.scale < plain.scale);
+  ok('motionDelay: and every other property is untouched',
+    lagged.dx === plain.dx && lagged.rot === plain.rot);
+
+  // A scalar delays everything, which is the original meaning varsDelay also carries.
+  const all = motionAt(kfs, 0.5, 0.3);
+  ok('motionDelay: a number delays every property', all.dx < plain.dx && all.scale < plain.scale);
+  // and `*` is the map's own default, so a map can delay everything EXCEPT one thing.
+  const star = motionAt(kfs, 0.5, { '*': 0.3, x: 0 });
+  ok('motionDelay: `*` is the map default and a named 0 opts one property back out',
+    star.dx === plain.dx && star.scale < plain.scale);
+
+  // PURITY. A shifted pure function is still pure, and renderFrame(n) depends on it.
+  ok('motionDelay: the same t returns the same pose',
+    JSON.stringify(motionAt(kfs, 0.42, { rot: 0.1 })) === JSON.stringify(motionAt(kfs, 0.42, { rot: 0.1 })));
+
+  // A LAYER-OWNED PROP THE TRACK NEVER KEYS MUST STAY null. Sampling it earlier would hand the caller
+  // a number for a property the author never animated, which is exactly the class docs/MISTAKES.md #563
+  // is about: a size reinterpreted without anything saying so.
+  ok('motionDelay: an unkeyed layer-owned property stays null rather than becoming a number',
+    motionAt(kfs, 0.5, { '*': 0.2 }).w === null);
+}
+
 // ---- EASINGS.hold: the one interpolation that must NOT travel -----------------------------------
 //
 // Every other entry in the table is continuous and lands at 1. A hold is the opposite by design, so a

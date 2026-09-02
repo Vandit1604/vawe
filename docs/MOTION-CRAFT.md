@@ -218,6 +218,47 @@ pure and land exactly at rest. Reach into this table by the FEELING you want, th
 | **No travel at all: a stepped swap** | `hold` | holds the FROM value for the whole segment and jumps at the far key | a counter that ticks, a label that changes without sliding, anything cut rather than animated |
 | **Rebound (ball drop)** | `easeOutBounce` | rebounds inside [0,1]; never overshoots, bounces down to rest | rare; a literal drop, a playful accent |
 
+### The pivot can travel
+
+`origin` is a static CSS transform-origin: it decides which point a scale or rotation grows out of, and
+it is written once when the layer is built. So the pivot could never move, and nesting in a group buys
+a DIFFERENT FIXED pivot rather than a moving one.
+
+`ox`/`oy` key it, as percentages of the layer's own box:
+
+```json
+{ "motion": [{ "t": 0, "rot": 0,  "ox": 0,   "oy": 50 },
+             { "t": 1, "rot": 45, "ox": 100, "oy": 50 }] }
+```
+
+A door that swings from one hinge and then the other; a panel that grows from its left edge and then
+from its centre. Same rule as `w`/`h`: both endpoints of a segment state it or neither does, because a
+one-sided value could only mean "hold", and that is a second reading of a track that has exactly one.
+A track that never mentions them leaves `origin` alone.
+
+### Follow-through: one property finishing after another, on the SAME layer
+
+The tell that separates "animated" from "moved". A card that slides in and whose rotation settles a
+beat after it lands reads as a physical object; the same card whose every property stops on the same
+frame reads as a slide changing. Thomas and Johnston call it overlapping action, Williams calls it
+successive breaking of joints, and until now the engine had no way to say it on one layer: a keyframe
+is a whole POSE, so one progress value drove every property in the segment.
+
+`motionDelay` shifts WHEN a property is read off the same track. It changes no value and no keyframe.
+
+```json
+{ "motion": [{ "t": 0, "x": -300, "scale": 0.9 }, { "t": 0.6, "x": 0, "scale": 1 }],
+  "motionDelay": { "scale": 0.08, "rot": 0.12 } }
+```
+
+A number delays everything; a map delays by name, and `"*"` is the map's own default, so
+`{ "*": 0.1, "x": 0 }` trails everything behind the travel. Keep the numbers small: 0.05 to 0.15
+seconds is the band where it reads as weight rather than as a second, later move.
+
+**Reach for the other one when the trailing thing is a separate layer.** `modifiers: [{ "lag": "card" }]`
+makes one layer follow another's motion late and overrun its stop. Same principle, different scope, and
+choosing the wrong one is how you end up hand-keying what the engine already does.
+
 ### The two things a graph editor does that this table cannot say
 
 Both are built, both are reachable from a scene, and neither appears above, which is why the library
