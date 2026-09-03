@@ -405,7 +405,7 @@ type/colour/layout/imagery → density → show-or-tell → what holds it across
 **`make arsenal Q="<what you mean, in plain english>"`** searches all 752 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
 `docs/EFFECTS.md`, 672 effects across 54 families). Reach for it before you invent anything. The measured cost
-of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 150 gate-visible scenes**, and 12 of its
+of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 149 gate-visible scenes**, and 12 of its
 19 beats have never been used once.
 
 **`make schema AT="layers[].motion[]"`** answers the other half: not what the engine can DO, but what you
@@ -495,7 +495,7 @@ windows in the order the film turns, give none of them a `from`/`to`, and the en
 the joint after it (`core/junctions.js`), so the cuts you already wrote own the numbers.
 
 This is the strongest single lever in the file. brew inverts the tone of the world on four of its five
-cuts and spends its one accent window on the logo reveal, while **121 of the 150 gate-visible scenes,
+cuts and spends its one accent window on the logo reveal, while **121 of the 149 gate-visible scenes,
 81%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
 
 **HALF OF THIS IS LIVE NOW, AND IT IS THE CHEAPER HALF.** `scripts/live/scene-live.mjs` fires on every
