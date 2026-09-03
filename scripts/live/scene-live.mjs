@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/scene-live.mjs — the four numbers CLAUDE.md argues from, measured on the film you just
+// scripts/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just
 // saved, at the moment the JSON is still open.
 //
 // WHY THIS EXISTS, AS A NUMBER. `node scripts/gates/rung.mjs` reports the enforcement ladder over this
