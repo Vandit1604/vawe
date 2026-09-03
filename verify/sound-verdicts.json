@@ -207,5 +207,6 @@
   "braam-5": "keep",
   "braam-0": "reject"
  },
- "_note": "Rounds are numbered by the generator that produced them. round5_cues judged the 13 shipped cues; round5_variants judged 104 generated variants, and out/sound-vary/specs-r5.json records what every one of them was. A round whose specs are not written down cannot be analysed once the generator changes, which is how round 3 became unmeasurable."
+ "_note": "Rounds are numbered by the generator that produced them. round5_cues judged the 13 shipped cues; round5_variants judged 104 generated variants, and out/sound-vary/specs-r5.json records what every one of them was. A round whose specs are not written down cannot be analysed once the generator changes, which is how round 3 became unmeasurable.",
+ "_settled": "chime, sparkle and success keep their hand-designed voicings. Round 5 gave each its own search space and each scored 0 composed keeps of 7 while the shipped one was kept, so this is measured rather than untried. The movement family scored 47 of 49 in the same round, so the loop works: a whoosh is a shape the space can express and a chime is a chord voiced by ear. More rounds will not move these."
 }
