@@ -422,7 +422,7 @@ missing piece was the archetype, and a blank file has none.
 Why the subject must be a PICTURE, why every one of its constants is fixed, and when the honest answer
 is `make catalog` instead: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
 
-## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[eye]`
+## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[live: .claude/hooks/scene-live.mjs]`
 
 `bg` is required, so the backdrop is always your decision. A static field is a choice you have to
 justify, never a default. **A backdrop that changes PER BEAT is the cheap thing to write**: list the
@@ -432,6 +432,12 @@ the joint after it (`core/junctions.js`), so the cuts you already wrote own the 
 This is the strongest single lever in the file. brew inverts the tone of the world on four of its five
 cuts and spends its one accent window on the logo reveal, while **121 of the 148 gate-visible scenes,
 82%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
+
+**HALF OF THIS IS LIVE NOW, AND IT IS THE CHEAPER HALF.** `.claude/hooks/scene-live.mjs` fires on every
+save of a scene JSON and says so when a film paints one `bg` window for its whole runtime, with the 82%
+beside it. What it CANNOT see is whether the window that is there actually moves, at what speed, or at
+what scale: it counts windows, and a window can hold a dead field. So the second paragraph is still
+yours.
 
 Then **judge it across frames, never on one still**: pull 4+ timestamps and compare them as a strip. A
 still hides speed, scale and direction. A background was once "matched" on one frame and was, in
