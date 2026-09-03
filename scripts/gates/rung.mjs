@@ -70,12 +70,13 @@ const RATCHET = path.join(ROOT, 'verify/rung-ratchet.json');
 
 export const RUNGS = ['built', 'gated', 'live', 'ref', 'eye'];
 
-// The files whose SECTIONS carry a rung. CLAUDE.md is the one file every session loads in full, so it
-// is the file where an unenforced rule costs the most and the only one whose sections MUST all be
-// tagged. The CRAFT guides are checked when they carry a tag and never required to, because a rung is a
-// property of an INSTRUCTION and half of CRAFT is reference: docs/EFFECTS.md and the codemaps describe
-// what exists rather than telling anyone to do anything, and tagging those would be tagging a table.
-const REQUIRED = 'CLAUDE.md';
+// The files whose SECTIONS carry a rung. AGENTS.md is the canonical doctrine every session loads in full
+// (CLAUDE.md is a shim that imports it), so it is the file where an unenforced rule costs the most and the
+// only one whose sections MUST all be tagged. The CRAFT guides are checked when they carry a tag and never
+// required to, because a rung is a property of an INSTRUCTION and half of CRAFT is reference: docs/EFFECTS.md
+// and the codemaps describe what exists rather than telling anyone to do anything, and tagging those would
+// be tagging a table.
+const REQUIRED = 'AGENTS.md';
 const SCANNED = () => [REQUIRED, ...fs.readdirSync(path.join(ROOT, 'docs/CRAFT'))
   .filter((f) => f.endsWith('.md')).sort().map((f) => `docs/CRAFT/${f}`)];
 

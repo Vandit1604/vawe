@@ -118,6 +118,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [QUICKSTART.md](../../../QUICKSTART.md) | you have never authored a video here and want the model and the loop in one page | the JSON and HTML split, the build-render-ship loop, and the hard rules for day one |
 | [docs/JUDGE.md](../../../docs/JUDGE.md) | the render is done and something must actually LOOK at it | the 7 scoring dimensions · the verdict contract · why the static gates cannot replace this |
 | [docs/LAUNCH-VIDEO-GUIDE.md](../../../docs/LAUNCH-VIDEO-GUIDE.md) | making a product-launch film for a real brand or website | the launch workflow end to end · what to crawl · the references it is built from |
 | [docs/MCP.md](../../../docs/MCP.md) | driving this engine from a fresh session over MCP rather than from the shell | one-time setup · registering the server · the tools it exposes |

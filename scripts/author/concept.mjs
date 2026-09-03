@@ -309,11 +309,11 @@ const TELLS = [
     anchor: 'Our films sit at 2.5 to 4 seconds a beat',
     says: 'this library already cuts at 2.5 to 4s, so that pace is the house habit',
     hit: (o) => o.dir.pace >= 2.5 && o.dir.pace <= 4 },
-  { id: 'the-free-device', doc: 'CLAUDE.md',
+  { id: 'the-free-device', doc: 'AGENTS.md',
     anchor: 'a keyed `w`/`h` on a rectangle passes and a motif does not',
     says: 'the transforming object is the device the tooling made free, so it is the one reached for first',
     hit: (o) => o.dir.thread === 'transforming object' },
-  { id: 'slideshow-shape', doc: 'CLAUDE.md',
+  { id: 'slideshow-shape', doc: 'AGENTS.md',
     anchor: 'plain-slideshow',
     says: 'few beats over a FULL runtime is the shape the ambition floor exists to catch',
     // The runtime clause is load-bearing. Four beats in six seconds is a fast film; four beats in
