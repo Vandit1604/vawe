@@ -3,7 +3,7 @@
   "name": "codeMorph",
   "type": "vawe:block",
   "title": "codeMorph",
-  "description": "a refactor as a transformation: shared tokens glide, the rest fade out and in",
+  "description": "a code refactor shown as a shape-shift: shared words glide into their new position while the rest fades out and in",
   "tags": [
     "codeMorph"
   ],

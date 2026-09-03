@@ -3,7 +3,7 @@
   "name": "card",
   "type": "vawe:block",
   "title": "card",
-  "description": "elevated card · tinted panel · pill tags · CTA arrow",
+  "description": "a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom",
   "tags": [
     "card"
   ],

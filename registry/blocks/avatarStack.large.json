@@ -3,7 +3,7 @@
   "name": "avatarStack.large",
   "type": "vawe:block",
   "title": "avatarStack.large",
-  "description": "larger avatar stack",
+  "description": "the same overlapping profile pictures at a bigger size, for a hero or a title card",
   "tags": [
     "avatarStack"
   ],

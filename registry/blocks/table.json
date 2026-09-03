@@ -3,7 +3,7 @@
   "name": "table",
   "type": "vawe:block",
   "title": "table",
-  "description": "data table (header + rows)",
+  "description": "a table of rows and columns: a header plus data rows divided by hairlines, rows fill in one after another.",
   "tags": [
     "table"
   ],

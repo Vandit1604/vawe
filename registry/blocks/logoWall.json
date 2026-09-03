@@ -3,7 +3,7 @@
   "name": "logoWall",
   "type": "vawe:block",
   "title": "logoWall",
-  "description": "grid of wordmarks / logos",
+  "description": "a grid of company wordmarks or logo images, for a social proof or partner strip.",
   "tags": [
     "logoWall"
   ],

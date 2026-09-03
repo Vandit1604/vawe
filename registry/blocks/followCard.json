@@ -3,7 +3,7 @@
   "name": "followCard",
   "type": "vawe:block",
   "title": "followCard",
-  "description": "name over handle, pill CTA",
+  "description": "a social profile follow card: name over @handle next to a follow button pill",
   "tags": [
     "followCard"
   ],

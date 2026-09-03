@@ -1,0 +1,130 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "bands",
+  "type": "vawe:generator",
+  "title": "bands",
+  "description": "A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind.",
+  "tags": [
+    "generator",
+    "shader",
+    "layers"
+  ],
+  "install": {
+    "kind": "scene-layers",
+    "target": "layers[]",
+    "requires": "nothing beyond the vawe engine: these are concrete layer primitives, no expand step",
+    "props": [
+      "shape",
+      "bands",
+      "bandAngle",
+      "bandOffset",
+      "mirrorBands",
+      "zoom",
+      "shapeOriginX",
+      "shapeOriginY",
+      "lightShape",
+      "lightWidth",
+      "lightHeight",
+      "lightAngle",
+      "lightOriginX",
+      "lightOriginY",
+      "lightEdge",
+      "lightRing",
+      "lightPoints",
+      "lightSpike",
+      "lightPolarity",
+      "seed",
+      "colour.farEdges",
+      "colour.midField",
+      "colour.lightCore",
+      "colour.deepShadow"
+    ],
+    "preset": "bands",
+    "options": {
+      "shape": "panels",
+      "bands": 48,
+      "bandAngle": 0,
+      "bandOffset": 0,
+      "mirrorBands": false,
+      "zoom": 1,
+      "shapeOriginX": 50,
+      "shapeOriginY": 50,
+      "lightShape": "round",
+      "lightWidth": 0.62,
+      "lightHeight": 0.62,
+      "lightAngle": 0,
+      "lightOriginX": 50,
+      "lightOriginY": 45,
+      "lightEdge": 1.6,
+      "lightRing": 0,
+      "lightPoints": 0,
+      "lightSpike": 0,
+      "lightPolarity": 1,
+      "seed": 7,
+      "colour": {
+        "farEdges": "#3a1f00",
+        "midField": "#ffb300",
+        "lightCore": "#ffe6a8",
+        "deepShadow": "#05060a"
+      }
+    },
+    "layers": [
+      {
+        "type": "shader",
+        "shader": "bands",
+        "intensity": 1,
+        "seed": 7,
+        "params": [
+          48,
+          0,
+          0.62,
+          1.6
+        ],
+        "params2": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "params3": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "params4": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "params5": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "params6": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "colors": [
+          "#3a1f00",
+          "#ffb300",
+          "#ffe6a8",
+          "#05060a"
+        ],
+        "x": 0,
+        "y": 0,
+        "start": 0,
+        "duration": 6
+      }
+    ]
+  },
+  "docs": "docs/LIGHTFIELD.md",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=bands"
+  }
+}

@@ -3,7 +3,7 @@
   "name": "barChart",
   "type": "vawe:block",
   "title": "barChart",
-  "description": "labeled bars scaled to max",
+  "description": "a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side",
   "tags": [
     "barChart"
   ],

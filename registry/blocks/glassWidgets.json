@@ -3,7 +3,7 @@
   "name": "glassWidgets",
   "type": "vawe:block",
   "title": "glassWidgets",
-  "description": "frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid)",
+  "description": "a cluster of frosted iOS-style widgets: one big showcase panel plus small stat tiles and chips",
   "tags": [
     "glassWidgets"
   ],

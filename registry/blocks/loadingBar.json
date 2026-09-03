@@ -3,7 +3,7 @@
   "name": "loadingBar",
   "type": "vawe:block",
   "title": "loadingBar",
-  "description": "determinate fill wipes L→R, lands ✓ done",
+  "description": "a progress bar: a track fills left to right to a set percent and finishes with a green done checkmark",
   "tags": [
     "loadingBar"
   ],

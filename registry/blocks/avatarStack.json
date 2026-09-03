@@ -3,7 +3,7 @@
   "name": "avatarStack",
   "type": "vawe:block",
   "title": "avatarStack",
-  "description": "overlapping avatars + overflow",
+  "description": "overlapping circular profile pictures in a row with a +N overflow count",
   "tags": [
     "avatarStack"
   ],

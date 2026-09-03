@@ -3,7 +3,7 @@
   "name": "textCursor",
   "type": "vawe:block",
   "title": "textCursor",
-  "description": "a caret that bleeds light: an accent glow on the cell, a red/cyan fringe on the type converging as the line settles",
+  "description": "a blinking text cursor typing a word, with a glowing red/cyan light-fringe on the letters as it lands",
   "tags": [
     "textCursor"
   ],

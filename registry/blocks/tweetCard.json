@@ -3,7 +3,7 @@
   "name": "tweetCard",
   "type": "vawe:block",
   "title": "tweetCard",
-  "description": "a post card + counts",
+  "description": "a tweet or X post card: avatar, handle, body text, like and reply counts",
   "tags": [
     "tweetCard"
   ],

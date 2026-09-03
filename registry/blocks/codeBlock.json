@@ -3,7 +3,7 @@
   "name": "codeBlock",
   "type": "vawe:block",
   "title": "codeBlock",
-  "description": "code card; syntax-coloured lines",
+  "description": "a code snippet card: lines of code write themselves in one by one, syntax-coloured, like a syntax-highlighted editor screenshot",
   "tags": [
     "codeBlock"
   ],

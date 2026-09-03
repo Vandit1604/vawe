@@ -3,7 +3,7 @@
   "name": "fileTree",
   "type": "vawe:block",
   "title": "fileTree",
-  "description": "indented file/folder tree",
+  "description": "a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar",
   "tags": [
     "fileTree"
   ],

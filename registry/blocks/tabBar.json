@@ -3,7 +3,7 @@
   "name": "tabBar",
   "type": "vawe:block",
   "title": "tabBar",
-  "description": "segmented control",
+  "description": "a row of tabs or a segmented control whose selected pill actually slides from one tab to another.",
   "tags": [
     "tabBar"
   ],

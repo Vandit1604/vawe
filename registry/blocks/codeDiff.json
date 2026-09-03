@@ -3,7 +3,7 @@
   "name": "codeDiff",
   "type": "vawe:block",
   "title": "codeDiff",
-  "description": "the edit PERFORMED: removals collapse red, additions expand green, in edit order",
+  "description": "a code edit replayed as it happened: the old line collapses away in red while the new line types in green",
   "tags": [
     "codeDiff"
   ],

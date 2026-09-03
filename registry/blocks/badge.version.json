@@ -3,7 +3,7 @@
   "name": "badge.version",
   "type": "vawe:block",
   "title": "badge.version",
-  "description": "version badge",
+  "description": "a small chip showing which release is running, like a v2.1.0 shield in a README",
   "tags": [
     "badge"
   ],

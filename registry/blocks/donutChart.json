@@ -3,7 +3,7 @@
   "name": "donutChart",
   "type": "vawe:block",
   "title": "donutChart",
-  "description": "ring segments + legend",
+  "description": "a pie chart drawn as a ring: coloured segments of a whole plus a legend of labels",
   "tags": [
     "donutChart"
   ],

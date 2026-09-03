@@ -3,7 +3,7 @@
   "name": "stripeCard",
   "type": "vawe:block",
   "title": "stripeCard",
-  "description": "recognizably-Stripe payments card",
+  "description": "a payments checkout card that copies Stripe's real look: amount, a small spend graph, a Pay button",
   "tags": [
     "stripeCard"
   ],

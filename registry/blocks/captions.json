@@ -3,7 +3,7 @@
   "name": "captions",
   "type": "vawe:block",
   "title": "captions",
-  "description": "timed subtitle chips (bottom overlay)",
+  "description": "subtitles at the bottom of the screen, timed to appear line by line like closed captions",
   "tags": [
     "captions",
     "overlay"

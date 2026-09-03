@@ -1,0 +1,37 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "thermalBlur",
+  "type": "vawe:generator",
+  "title": "thermalBlur",
+  "description": "White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away.",
+  "tags": [
+    "generator",
+    "treatment",
+    "html"
+  ],
+  "install": {
+    "kind": "generated-markup",
+    "target": "bg[].html (or an html layer)",
+    "requires": "markup only. Paste it as-is; the engine drives it with --t, and it needs no block library",
+    "props": [
+      "radius",
+      "heat",
+      "colour.ground",
+      "text"
+    ],
+    "preset": "heat",
+    "options": {
+      "radius": 6,
+      "heat": 1,
+      "colour": {
+        "ground": "#000000"
+      },
+      "text": "thermal blur"
+    },
+    "render": "import { byName } from 'core/generators.js'; byName('thermalBlur').render(options)"
+  },
+  "docs": "docs/EFFECTS.md",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=thermalBlur"
+  }
+}

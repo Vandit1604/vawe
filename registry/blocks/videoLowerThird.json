@@ -3,7 +3,7 @@
   "name": "videoLowerThird",
   "type": "vawe:block",
   "title": "videoLowerThird",
-  "description": "creator lower third · avatar, subs, red CTA",
+  "description": "a YouTube-style creator lower third: avatar, subscriber count, and a red subscribe CTA",
   "tags": [
     "videoLowerThird"
   ],

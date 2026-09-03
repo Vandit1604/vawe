@@ -3,7 +3,7 @@
   "name": "emptyState",
   "type": "vawe:block",
   "title": "emptyState",
-  "description": "zero state · icon tile, what is missing, the action that fills it",
+  "description": "a zero state panel with dashed border: an icon, a line saying what is missing, and a button that fills it.",
   "tags": [
     "emptyState"
   ],

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "effector",
+  "type": "vawe:generator",
+  "title": "effector",
+  "description": "One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.",
+  "tags": [
+    "generator",
+    "motion",
+    "layers"
+  ],
+  "install": {
+    "kind": "scene-layers",
+    "target": "layers[]",
+    "requires": "nothing beyond the vawe engine: these are concrete layer primitives, no expand step",
+    "props": [
+      "sticky",
+      "radius",
+      "falloff",
+      "scale",
+      "push",
+      "rotate",
+      "overshoot",
+      "cols",
+      "rows",
+      "colour"
+    ],
+    "preset": "trail",
+    "options": {
+      "sticky": 1,
+      "radius": 320,
+      "falloff": "smooth",
+      "scale": 0.75,
+      "push": 0,
+      "rotate": 0,
+      "overshoot": 0,
+      "cols": 8,
+      "rows": 8,
+      "colour": "#e8ff59"
+    },
+    "layers": [
+      {
+        "type": "html",
+        "x": 478,
+        "y": 58,
+        "w": 964,
+        "h": 964,
+        "start": 0,
+        "duration": 6,
+        "anim": "none",
+        "html": "<div style=\"display:grid;grid-template-columns:repeat(8,96px);gap:28px\"><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div><div data-clone style=\"width:96px;height:96px;border-radius:14px;background:#e8ff59\"></div></div>",
+        "effector": {
+          "select": "[data-clone]",
+          "path": [
+            {
+              "t": 0,
+              "x": -220,
+              "y": 269.92
+            },
+            {
+              "t": 2.2,
+              "x": 1184,
+              "y": 269.92,
+              "ease": "through"
+            },
+            {
+              "t": 4.4,
+              "x": -220,
+              "y": 694.0799999999999,
+              "ease": "through"
+            },
+            {
+              "t": 6,
+              "x": 482,
+              "y": 482
+            }
+          ],
+          "radius": 320,
+          "falloff": "smooth",
+          "sticky": 1,
+          "overshoot": 0,
+          "drives": {
+            "scale": 0.75
+          }
+        }
+      }
+    ]
+  },
+  "docs": "docs/EFFECTS.md",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=effector"
+  }
+}

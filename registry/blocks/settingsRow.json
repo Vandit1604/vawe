@@ -3,7 +3,7 @@
   "name": "settingsRow",
   "type": "vawe:block",
   "title": "settingsRow",
-  "description": "settings row · label + toggle, chevron or value",
+  "description": "a settings row: a label with a toggle switch, a chevron into a sub-screen, or a current value shown as text.",
   "tags": [
     "settingsRow"
   ],

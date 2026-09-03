@@ -3,7 +3,7 @@
   "name": "pointer",
   "type": "vawe:block",
   "title": "pointer",
-  "description": "mouse pointer · travels to a target and clicks it (ripple)",
+  "description": "a mouse cursor that travels across the screen to a target and clicks it, with a click ripple.",
   "tags": [
     "pointer"
   ],

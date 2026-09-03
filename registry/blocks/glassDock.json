@@ -3,7 +3,7 @@
   "name": "glassDock",
   "type": "vawe:block",
   "title": "glassDock",
-  "description": "floating frosted dock strip with one item magnified, its neighbours swelling toward it",
+  "description": "a floating frosted taskbar or dock strip where the icon under the cursor grows bigger, like the macOS dock",
   "tags": [
     "glassDock"
   ],

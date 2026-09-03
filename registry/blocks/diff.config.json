@@ -3,7 +3,7 @@
   "name": "diff.config",
   "type": "vawe:block",
   "title": "diff.config",
-  "description": "config diff",
+  "description": "a settings or yaml file changing: removed lines in red above the new ones in green",
   "tags": [
     "diff"
   ],

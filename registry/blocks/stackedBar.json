@@ -3,7 +3,7 @@
   "name": "stackedBar",
   "type": "vawe:block",
   "title": "stackedBar",
-  "description": "multi-series stacked bars",
+  "description": "a stacked bar chart: multiple series piled in one bar per category to show a total and its parts",
   "tags": [
     "stackedBar"
   ],

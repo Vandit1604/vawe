@@ -3,7 +3,7 @@
   "name": "parallaxZoom",
   "type": "vawe:block",
   "title": "parallaxZoom",
-  "description": "one card eats the frame: the centre cell scales to fill the board while its eight neighbours travel outward and dim",
+  "description": "a grid of cards where the centre card zooms to fill the whole frame while the rest slide outward and fade",
   "tags": [
     "parallaxZoom"
   ],

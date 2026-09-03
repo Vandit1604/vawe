@@ -3,7 +3,7 @@
   "name": "parallaxUnzoom",
   "type": "vawe:block",
   "title": "parallaxUnzoom",
-  "description": "the same board run backwards: the hero starts filling the frame and retreats into its cell as the ring arrives",
+  "description": "the reverse of a zoom-in: one card fills the frame first, then shrinks back into a grid of cards around it",
   "tags": [
     "parallaxUnzoom"
   ],

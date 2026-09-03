@@ -3,7 +3,7 @@
   "name": "flowchart",
   "type": "vawe:block",
   "title": "flowchart",
-  "description": "landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges",
+  "description": "a flowchart: boxes connected by lines that draw themselves on, with yes/no labels on the branches",
   "tags": [
     "flowchart"
   ],

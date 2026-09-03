@@ -3,7 +3,7 @@
   "name": "gauge",
   "type": "vawe:block",
   "title": "gauge",
-  "description": "semicircular meter",
+  "description": "a speedometer-style dial: a semicircular meter needle showing one value against a max",
   "tags": [
     "gauge"
   ],

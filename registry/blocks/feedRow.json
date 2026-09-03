@@ -3,7 +3,7 @@
   "name": "feedRow",
   "type": "vawe:block",
   "title": "feedRow",
-  "description": "feed item · avatar, name, timestamp, body",
+  "description": "one row of a social or activity feed: avatar, name, handle, timestamp, and a line of body text.",
   "tags": [
     "feedRow"
   ],

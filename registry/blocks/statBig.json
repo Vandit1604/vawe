@@ -3,7 +3,7 @@
   "name": "statBig",
   "type": "vawe:block",
   "title": "statBig",
-  "description": "scale-contrast stat, huge count + tiny label",
+  "description": "one huge number with a tiny label under it, for a single headline stat or KPI callout",
   "tags": [
     "statBig"
   ],

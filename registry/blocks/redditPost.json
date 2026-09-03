@@ -3,7 +3,7 @@
   "name": "redditPost",
   "type": "vawe:block",
   "title": "redditPost",
-  "description": "a link-aggregator post: the vote rail left of the title, subreddit line, body, comment count",
+  "description": "a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count",
   "tags": [
     "redditPost"
   ],

@@ -3,7 +3,7 @@
   "name": "logLines",
   "type": "vawe:block",
   "title": "logLines",
-  "description": "log stream (timestamp + level colour)",
+  "description": "a console log feed: timestamped lines stream in fast, colour-coded by info, warning and error level",
   "tags": [
     "logLines"
   ],

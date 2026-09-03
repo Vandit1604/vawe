@@ -3,7 +3,7 @@
   "name": "morphText",
   "type": "vawe:block",
   "title": "morphText",
-  "description": "a gooey word cycle: each word melts into the next through a metaball filter, no letter correspondence",
+  "description": "a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence",
   "tags": [
     "morphText"
   ],

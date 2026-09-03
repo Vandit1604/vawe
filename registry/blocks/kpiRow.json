@@ -3,7 +3,7 @@
   "name": "kpiRow",
   "type": "vawe:block",
   "title": "kpiRow",
-  "description": "row of stat cells (value + label)",
+  "description": "a row of numbers side by side, each with a small label under it, and the numbers count up",
   "tags": [
     "kpiRow"
   ],

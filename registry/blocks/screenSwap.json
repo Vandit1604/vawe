@@ -3,7 +3,7 @@
   "name": "screenSwap",
   "type": "vawe:block",
   "title": "screenSwap",
-  "description": "screen A becomes screen B in place (wipe, no travel)",
+  "description": "one app screen replaces another in the same spot, either a wipe or a slide, like swiping between phone screens",
   "tags": [
     "screenSwap"
   ],

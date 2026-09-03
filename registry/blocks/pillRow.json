@@ -3,7 +3,7 @@
   "name": "pillRow",
   "type": "vawe:block",
   "title": "pillRow",
-  "description": "horizontal row of chip tags",
+  "description": "a horizontal row of rounded chip tags, for labels, filters, or categories side by side.",
   "tags": [
     "pillRow"
   ],

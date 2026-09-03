@@ -3,7 +3,7 @@
   "name": "reactionBar",
   "type": "vawe:block",
   "title": "reactionBar",
-  "description": "reaction count pills",
+  "description": "emoji reaction pills with counts, like the reactions under a Slack or Discord message",
   "tags": [
     "reactionBar"
   ],

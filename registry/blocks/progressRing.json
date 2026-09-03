@@ -3,7 +3,7 @@
   "name": "progressRing",
   "type": "vawe:block",
   "title": "progressRing",
-  "description": "circular progress + % label",
+  "description": "a circular progress ring with the percent complete written in its centre",
   "tags": [
     "progressRing"
   ],

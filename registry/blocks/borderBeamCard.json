@@ -3,7 +3,7 @@
   "name": "borderBeamCard",
   "type": "vawe:block",
   "title": "borderBeamCard",
-  "description": "glass card with a light TRAVELLING its border (animated beam)",
+  "description": "a glass card with a bright line of light chasing around its border, like a loading ring on the edge",
   "tags": [
     "borderBeamCard"
   ],

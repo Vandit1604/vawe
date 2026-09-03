@@ -3,7 +3,7 @@
   "name": "terminal",
   "type": "vawe:block",
   "title": "terminal",
-  "description": "command prompt; command types in, output answers after it",
+  "description": "a terminal window: a shell command types itself in character by character, then its output prints below",
   "tags": [
     "terminal"
   ],

@@ -3,7 +3,7 @@
   "name": "checklist",
   "type": "vawe:block",
   "title": "checklist",
-  "description": "checked / unchecked items",
+  "description": "a checklist of items with checkboxes ticking off one by one, done rows dim to read as completed.",
   "tags": [
     "checklist"
   ],

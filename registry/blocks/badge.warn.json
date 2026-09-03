@@ -3,7 +3,7 @@
   "name": "badge.warn",
   "type": "vawe:block",
   "title": "badge.warn",
-  "description": "badge, warning",
+  "description": "an amber chip that flags something needing attention, a caution token",
   "tags": [
     "badge"
   ],

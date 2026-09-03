@@ -3,7 +3,7 @@
   "name": "glassCard",
   "type": "vawe:block",
   "title": "glassCard",
-  "description": "frosted glass panel (blurs the moving bg behind it) + sheen",
+  "description": "a frosted glass panel that blurs the moving content it sits over, like iOS or macOS translucency",
   "tags": [
     "glassCard"
   ],

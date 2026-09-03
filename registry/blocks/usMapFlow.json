@@ -3,7 +3,7 @@
   "name": "usMapFlow",
   "type": "vawe:block",
   "title": "usMapFlow",
-  "description": "origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out",
+  "description": "a map of the United States with arrows drawn between cities showing flow or movement from an origin to destinations",
   "tags": [
     "usMapFlow"
   ],

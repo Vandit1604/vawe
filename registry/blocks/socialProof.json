@@ -3,7 +3,7 @@
   "name": "socialProof",
   "type": "vawe:block",
   "title": "socialProof",
-  "description": "avatar stack + the line it proves (caption owned by the block)",
+  "description": "an avatar stack next to a trust line, like Trusted by 8,000 teams, for social proof",
   "tags": [
     "socialProof"
   ],

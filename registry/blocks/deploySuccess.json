@@ -3,7 +3,7 @@
   "name": "deploySuccess",
   "type": "vawe:block",
   "title": "deploySuccess",
-  "description": "CI cascade → green \"Deployed to production\" card",
+  "description": "a CI/CD pipeline status: build steps queue then run then check off, ending on a green deployed card with the live URL",
   "tags": [
     "deploySuccess"
   ],

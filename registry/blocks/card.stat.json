@@ -3,7 +3,7 @@
   "name": "card.stat",
   "type": "vawe:block",
   "title": "card.stat",
-  "description": "boxed KPI with delta chip",
+  "description": "a boxed metric: a label, a number counting up, a chip saying how much it went up",
   "tags": [
     "statCard"
   ],

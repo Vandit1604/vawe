@@ -3,7 +3,7 @@
   "name": "lineChart",
   "type": "vawe:block",
   "title": "lineChart",
-  "description": "trend line in a hairline card",
+  "description": "a line graph over time: a trend line in a hairline card, optionally filled to an area chart",
   "tags": [
     "lineChart"
   ],

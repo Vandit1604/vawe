@@ -3,7 +3,7 @@
   "name": "commitRow",
   "type": "vawe:block",
   "title": "commitRow",
-  "description": "git history list",
+  "description": "a git commit history list: hash, message, author and time per row, like a GitHub commits page",
   "tags": [
     "commitRow"
   ],

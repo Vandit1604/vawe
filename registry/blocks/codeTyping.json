@@ -3,7 +3,7 @@
   "name": "codeTyping",
   "type": "vawe:block",
   "title": "codeTyping",
-  "description": "live coding: one character frontier crosses the snippet, the caret riding it",
+  "description": "code being typed live in an editor: a text cursor runs across the snippet revealing one character at a time",
   "tags": [
     "codeTyping"
   ],

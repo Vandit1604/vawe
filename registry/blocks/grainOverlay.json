@@ -3,7 +3,7 @@
   "name": "grainOverlay",
   "type": "vawe:block",
   "title": "grainOverlay",
-  "description": "fine film-grain texture over the frame (feTurbulence)",
+  "description": "a layer of film grain or noise texture over the whole frame, so it looks shot on film instead of flat digital",
   "tags": [
     "grainOverlay",
     "overlay"
