@@ -9,12 +9,12 @@
   "cues": [
    {
     "t": 0.72,
-    "name": "loading",
+    "name": "swell",
     "gain": 0.4
    },
    {
     "t": 2.35,
-    "name": "tick",
+    "name": "pluck",
     "gain": 0.35
    },
    {
