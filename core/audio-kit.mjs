@@ -249,7 +249,11 @@ export const CUES = {
 
   chime: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1046.5, "attack":0.006, "decay":0.22, "peak":0.09}, {"kind":"tone","waveform":"sine","frequency":1568, "offset":0.09, "attack":0.006, "decay":0.26, "peak":0.08}], "shimmer":{"delay":0.12, "feedback":0.25, "wet":0.18, "lowpass":4000.0}},
   sparkle: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1760, "offset":0, "attack":0.003, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"sine","frequency":2217, "offset":0.045, "attack":0.003, "decay":0.09, "peak":0.04}, {"kind":"tone","waveform":"sine","frequency":2637, "offset":0.09, "attack":0.003, "decay":0.1, "peak":0.038}, {"kind":"tone","waveform":"sine","frequency":3520, "offset":0.135, "attack":0.003, "decay":0.12, "peak":0.032}], "shimmer":{"delay":0.07, "feedback":0.35, "wet":0.22, "lowpass":6000.0}},
-  droplet: {"masterGain":0.55, "layers":[{"kind":"tone","waveform":"sine","frequency":1200, "glideTo":550, "glideTime":0.14, "attack":0.004, "decay":0.2, "peak":0.075}], "shimmer":{"delay":0.09, "feedback":0.2, "wet":0.15, "lowpass":3000.0}},
+  // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
+  // (verify/sound-verdicts.json round 3). Numbers look arbitrary because they are a measured
+  // preference rather than a designed one: `compose('droplet', 3)` in scripts/dev/sound-vary.mjs
+  // reproduces them exactly.
+  droplet: {"masterGain": 0.55, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 1319.452355839312, "attack": 0.006, "decay": 0.26, "peak": 0.09374999999999999, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 1662.5099683575331, "attack": 0.0084, "decay": 0.2028, "peak": 0.05769230769230769, "offset": 0.008726843487471343}]},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
   // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
   // preference rather than a designed one: `vary('bloom', 3)` in scripts/dev/sound-vary.mjs
