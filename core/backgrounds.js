@@ -304,6 +304,22 @@ const MESH_LAYOUT = [
   { x: 0.55, y: 0.1, rf: 0.24, ax: 0.032, ay: 0.03, px: 18, py: 24, ph: 4, a: 0.42 },
   { x: 0.08, y: 0.86, rf: 0.2, ax: 0.03, ay: 0.028, px: 20, py: 18, ph: 5.3, a: 0.36 },
 ];
+// Mesh gradients hand numeric colours to softwash; parseColor returns null for a CSS name it cannot
+// read, which would crash the blob build, so refuse it by name here.
+function meshBlobs(colors) {
+  return colors.slice(0, 4).map((c, i) => {
+    const rgb = parseColor(c);
+    if (!rgb) throw new Error(`gradient: mesh colour ${JSON.stringify(c)} is not hex or rgb(). A mesh gradient needs numeric colours; a CSS name like "coral" works for kind linear/radial/conic but not mesh.`);
+    return { ...MESH_LAYOUT[i % MESH_LAYOUT.length], color: rgb.join(',') };
+  });
+}
+// The flat ramp for linear/radial/conic. Linear rotates the ramp about the frame centre by `angle`.
+function gradientRamp(ctx, w, h, { kind, cx, cy, angle }) {
+  if (kind === 'radial') return ctx.createRadialGradient(w * cx, h * cy, 0, w * cx, h * cy, Math.hypot(w, h) * 0.7);
+  if (kind === 'conic') return ctx.createConicGradient((angle * Math.PI) / 180, w * cx, h * cy);
+  const rad = (angle * Math.PI) / 180, len = Math.hypot(w, h) / 2, mx = w / 2, my = h / 2;
+  return ctx.createLinearGradient(mx - Math.cos(rad) * len, my - Math.sin(rad) * len, mx + Math.cos(rad) * len, my + Math.sin(rad) * len);
+}
 export function gradientFill(ctx, w, h, t, o = {}) {
   const rec = o.recipe ? GRADIENT_RECIPE_REGISTRY.pick(o.recipe) : {};
   const kind = o.kind ?? rec.kind ?? 'linear';
@@ -312,19 +328,17 @@ export function gradientFill(ctx, w, h, t, o = {}) {
   const stops = o.stops ?? rec.stops ?? null;
   const cx = o.cx ?? rec.cx ?? 0.5, cy = o.cy ?? rec.cy ?? 0.5;
   if (kind === 'mesh') {
-    const blobs = colors.slice(0, 4).map((c, i) => ({ ...MESH_LAYOUT[i % MESH_LAYOUT.length], color: parseColor(c).join(',') }));
-    softwash(ctx, w, h, t, { blobs, seed: o.seed ?? 0, motionScale: o.motionScale ?? 1, intensity: o.intensity ?? 1 });
+    softwash(ctx, w, h, t, { blobs: meshBlobs(colors), seed: o.seed ?? 0, motionScale: o.motionScale ?? 1, intensity: o.intensity ?? 1 });
     return;
   }
-  let g;
-  if (kind === 'radial') g = ctx.createRadialGradient(w * cx, h * cy, 0, w * cx, h * cy, Math.hypot(w, h) * 0.7);
-  else if (kind === 'conic') g = ctx.createConicGradient((angle * Math.PI) / 180, w * cx, h * cy);
-  else { // linear: angle rotates the ramp about the frame centre
-    const rad = (angle * Math.PI) / 180, len = Math.hypot(w, h) / 2, mx = w / 2, my = h / 2;
-    g = ctx.createLinearGradient(mx - Math.cos(rad) * len, my - Math.sin(rad) * len, mx + Math.cos(rad) * len, my + Math.sin(rad) * len);
-  }
+  const g = gradientRamp(ctx, w, h, { kind, cx, cy, angle });
   const n = colors.length;
-  colors.forEach((c, i) => g.addColorStop(stops ? stops[i] : (n === 1 ? 0 : i / (n - 1)), c));
+  // A partial or missing `stops` array falls back to even distribution for the entries it does not
+  // cover, rather than handing addColorStop an undefined offset (which throws a raw canvas error).
+  colors.forEach((c, i) => {
+    const at = stops && stops[i] != null ? stops[i] : (n === 1 ? 0 : i / (n - 1));
+    g.addColorStop(at, c);
+  });
   ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
 }
 

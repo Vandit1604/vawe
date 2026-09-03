@@ -15,7 +15,7 @@ import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTr
 import { SEAM_BLURBS } from '../../core/seams.js';
 import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
 import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/gsap-effects.js';
-import { BG_NAMES, BG_BLURBS } from '../../core/backgrounds.js';
+import { BG_NAMES, BG_BLURBS, gradientFill } from '../../core/backgrounds.js';
 import { GRADIENT_RECIPE_REGISTRY } from '../../core/gradient-recipes.js';
 import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
 import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/captions.js';
@@ -675,6 +675,8 @@ ok('gradient preset opts reach the fx (colors/angle/kind), and `kind` does not c
 ok('gradient preset resolves a named recipe at paint time (not opts)', (() => { const s = bgOver('gradient', { recipe: 'cool-mint' }); const fx = s && s.fx.find((f) => f.type === 'gradientFill'); return !!fx && fx.recipe === 'cool-mint'; })());
 ok('gradient preset carries a blurb', typeof BG_BLURBS.gradient === 'string' && BG_BLURBS.gradient.length > 0);
 ok('gradient recipes are a real registry (unknown recipe throws with a hint)', (() => { try { GRADIENT_RECIPE_REGISTRY.pick('zzz-not-real'); return false; } catch (e) { return /unknown/i.test(e.message); } })());
+ok('gradient mesh refuses a non-numeric colour by name, not a raw TypeError', (() => { const ctx = { createLinearGradient: () => ({ addColorStop() {} }), fillRect() {}, set fillStyle(v) {} }; try { gradientFill(ctx, 100, 100, 0, { kind: 'mesh', colors: ['coral'] }); return false; } catch (e) { return /is not hex or rgb/.test(e.message); } })());
+ok('gradient tolerates a stops array shorter than colors (even fallback, no crash)', (() => { const ctx = { createLinearGradient: () => ({ addColorStop(at) { if (typeof at !== 'number' || Number.isNaN(at)) throw new Error('bad offset'); } }), fillRect() {}, set fillStyle(v) {} }; try { gradientFill(ctx, 100, 100, 0, { kind: 'linear', colors: ['#111111', '#222222', '#333333'], stops: [0, 0.5] }); return true; } catch { return false; } })());
 
 // kinetic typography: unitProgress staggering + presets (pure)
 ok('unitProgress unit 0 starts at 0', approx(unitProgress(0, 0, 3, { each: 0.5, stagger: 0.06 }), 0));
