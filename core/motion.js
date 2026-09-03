@@ -321,19 +321,57 @@ export const EASINGS = {
 // `skip` stays, and it is a DECISION, not a gap: 41 curves named by mechanism are better served by the
 // feel table in docs/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
 export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
-  // THE ONE DECLARED OPT-OUT from the blurb rule that core/registry.js now refuses at load. It is a
-  // sentence rather than a flag on purpose: this is the only registry with an argument for carrying no
-  // blurbs, and a bare `true` would let the next author skip the work by typing four characters.
-  //
-  // The argument, and the thing that makes it hold: 41 curves named by mechanism would produce 41
-  // near-identical sentences about acceleration, which is worse for search than one good table, because
-  // every one of them would match every query about slowing down. What replaces them is the FEEL words
-  // in core/vocab.js, which now carry the plain English an author actually types ("slow down at the
-  // end" reaches `sharp`, "make it feel heavy" reaches `heavy`) and each names the exact easing it
-  // resolves to. If those blurbs are ever removed, this opt-out stops being justified.
-  noBlurbs: 'named by curve, and searched through the FEEL words in core/vocab.js, which carry the plain '
-    + 'English and name the easing each resolves to. 41 sentences about acceleration would match every '
-    + 'query about slowing down and therefore distinguish nothing.',
+  // EVERY CURVE CARRIES ITS OWN LINE NOW, and the opt-out that used to sit here is gone with the
+  // mechanism that allowed it. The argument for skipping them was that 41 near-identical sentences
+  // about acceleration would match every query about slowing down and therefore distinguish nothing.
+  // That is a real risk and it is a reason to write them WELL, not a reason to leave 42 capabilities
+  // reachable only by someone who already knows the name. So none of these says merely 'starts slow':
+  // each names its DEGREE against its siblings (quad is the mildest, expo the most violent) and what
+  // it is FOR, which is the thing an author is actually choosing between.
+  blurbs: {
+      "linear": "no acceleration at all, constant speed start to finish. Right for a loop or a marquee, wrong for anything a viewer watches arrive",
+      "easeInQuad": "leaves gently and keeps gathering pace, the mildest departure here. For an exit that should not feel yanked",
+      "easeOutQuad": "comes in quickly then rolls to a stop, the gentlest landing of the power curves. Small elements, short distances",
+      "easeInOutQuad": "soft at both ends with an even middle, the least dramatic way to carry something across the frame",
+      "easeInCubic": "gathers pace with real commitment, stronger than quad. A departure that should read as decided",
+      "easeOutCubic": "the everyday landing: quick off the mark, unhurried into place. Reach for it when nothing argues otherwise",
+      "easeInOutCubic": "the everyday travel curve, soft at both ends. A layer crossing from one place to another on screen",
+      "easeInQuart": "builds speed hard before it clears frame, a departure with weight behind it",
+      "easeOutQuart": "lands fast and settles crisply, snappier than cubic and it never passes its target. Good on an element arriving",
+      "easeInOutQuart": "unhurried at both ends, fast through the middle. A long journey that should read as deliberate",
+      "easeInQuint": "almost still, then gone. The most extreme departure short of exponential",
+      "easeOutQuint": "covers nearly all the distance at once then creeps the last of it, a very sharp arrival",
+      "easeInOutQuint": "lingers at both ends and hurries the middle, dramatic across a long journey",
+      "easeInExpo": "barely stirs, then clears frame all at once. The most violent departure available",
+      "easeOutExpo": "the most violent arrival: effectively there on the first frames, then a long quiet settle",
+      "easeInOutExpo": "held, flung, held. The most theatrical of the symmetric curves and the easiest to overuse",
+      "easeInSine": "the softest pick-up there is, barely perceptible as gathering pace",
+      "easeOutSine": "the softest landing there is, closer to speed fading away than to stopping",
+      "easeInOutSine": "the quietest way to shift anything. Ambient drift, backdrops, anything not asking to be watched",
+      "easeInCirc": "creeps, then whips away on a curve that turns hard at the last moment",
+      "easeOutCirc": "comes in at speed and flattens off almost immediately, a machined landing rather than a living one",
+      "easeInOutCirc": "flat, sudden, flat. Reads as machinery, not as anything with muscle",
+      "easeInBack": "pulls the opposite way first, a wind-up, before it goes",
+      "easeOutBack": "passes its target and returns, a small pop of emphasis on something landing",
+      "easeInOutBack": "winds up, crosses, passes the mark and comes back. Playful at both ends and loud",
+      "easeInElastic": "swings in place with growing wobble before it leaves. The loudest departure here",
+      "easeOutElastic": "passes its target repeatedly with a decaying wobble, the springiest landing available",
+      "easeInOutElastic": "wobbles at both ends. Almost always more than a film wants",
+      "easeInBounce": "bounces in place before it departs, like a ball gathering itself",
+      "easeOutBounce": "drops and bounces to rest, a ball meeting a floor",
+      "easeInOutBounce": "bounces at both ends. Cartoon physics, and it reads as exactly that",
+      "rush": "holds back for most of the span then covers the distance late. The exit curve: it leaves in a hurry",
+      "brake": "half the distance in the first quarter, then a long decline to a stop",
+      "ramp": "mild and symmetric: gathers pace, crosses the middle at full speed, tails off",
+      "spring": "passes the mark by a little and falls back, a physical landing with some give in it",
+      "springStiff": "tight and quick with no visible pass beyond the mark, for something that must not look playful",
+      "hold": "does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it",
+      "spring-bouncy": "visibly passes the mark and swings back, the playful one. One per film at most",
+      "spring-stiff": "most of the journey early, then a firm settle with no wobble at all",
+      "springEase": "spring shaped but damped flat: nearly arrived at once, then creeping the last fraction",
+      "settle": "most of the move happens immediately, then it eases the remainder and stops dead",
+      "snap": "covers the distance almost at once with a hair of overshoot, the fastest landing that still reads as movement"
+  },
   catalog: {
     title: 'Easings',
     tag: 'timing',

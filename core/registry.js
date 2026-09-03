@@ -54,16 +54,17 @@ const ALL = [];   // every registry built here, so a failed pick can ask the oth
  * bad value has a write site, the refusal goes there and the whole class ends. `defineRegistry` is that
  * write site, so adding an effect without a blurb now fails the moment the module loads.
  *
- * THE OPT-OUT IS A SENTENCE, NOT A FLAG. `noBlurbs` takes the reason, because the only registry that
- * legitimately has none (42 easings) has a real argument for it, and a bare `true` would let the next
- * author skip the work by typing four characters.
+ * THERE IS NO OPT-OUT, AND THERE WAS ONE FOR EXACTLY AS LONG AS IT TOOK TO WRITE THE MISSING LINES.
+ * `noBlurbs: '<reason>'` existed for the 42 easings, on the argument that 41 near-identical sentences
+ * about acceleration would match every query about slowing down and distinguish nothing. The argument
+ * was sound about BAD blurbs and was being used to excuse having none, which left 42 capabilities
+ * reachable only by an author who already knew their names. They are written now (core/motion.js), each
+ * naming its degree against its siblings, and the hatch is gone with them: a hatch that exists is a
+ * hatch the next author reaches for, and this rule has no legitimate exception left.
  */
-export function checkCovered(kind, entries, blurbs, noBlurbs) {
+export function checkCovered(kind, entries, blurbs) {
   const bare = Object.keys(entries).filter((n) => !(blurbs && blurbs[n]));
   if (!bare.length) return;
-  if (typeof noBlurbs === 'string' && noBlurbs.trim().length > 12) return;
-  if (noBlurbs) throw new Error(`defineRegistry("${kind}"): noBlurbs must be the REASON, in a sentence, `
-    + 'not a flag. Say why these entries are better served somewhere else.');
   throw new Error(`${kind}: ${bare.length} entr(ies) have no blurb (${bare.slice(0, 6).join(', ')}`
     + `${bare.length > 6 ? ', …' : ''}). Without one nothing can find them: \`make arsenal Q="…"\` ranks on `
     + 'name + kind + blurb, so an author who does not already know the name will be told the engine does '
@@ -72,7 +73,7 @@ export function checkCovered(kind, entries, blurbs, noBlurbs) {
     + '  If they genuinely belong somewhere else, say so in a sentence: noBlurbs: \'why\'.');
 }
 
-export function defineRegistry(kind, entries, { blurbs, noBlurbs, aka, slot, catalog } = {}) {
+export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog } = {}) {
   if (!entries || typeof entries !== 'object') throw new Error(`defineRegistry("${kind}"): entries must be an object`);
   if (catalog) checkCatalog(kind, catalog);
   if (aka) checkAka(kind, entries, aka);
@@ -80,7 +81,7 @@ export function defineRegistry(kind, entries, { blurbs, noBlurbs, aka, slot, cat
   // nothing else), so the same refusal blurbsOf applies is applied to a blurbs map handed in directly.
   // Most registries do not go through blurbsOf; without this the rule would cover a third of them.
   if (blurbs) for (const [n, b] of Object.entries(blurbs)) checkBlurb(kind, n, b);
-  checkCovered(kind, entries, blurbs, noBlurbs);
+  checkCovered(kind, entries, blurbs);
   const has = (name) => typeof name === 'string' && Object.prototype.hasOwnProperty.call(entries, name);
 
   const reg = {
@@ -88,7 +89,6 @@ export function defineRegistry(kind, entries, { blurbs, noBlurbs, aka, slot, cat
     slot: slot || kind,
     entries,
     blurbs: blurbs || null,
-    noBlurbs: noBlurbs || null,
     aka: aka || null,
     catalog: catalog || null,
     get names() { return Object.keys(entries); },

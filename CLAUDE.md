@@ -556,6 +556,11 @@ only by someone who already knew the name; and the block library was not in the 
 so `make arsenal Q="a terminal window"` answered "assume the engine does not have it" about 95
 families the engine has. Both are why `checkCovered` refuses at load now.
 
+**A blurb is not optional, and there is no exemption to ask for.** Every registry entry and every block
+row must carry one, refused at load by `checkCovered` and `checkBlurb` in `core/registry.js`. The one
+opt-out that existed, for the 42 easings, is gone along with the mechanism: it was a reason to write
+them well, not a licence to leave 42 capabilities reachable only by someone who already knew the name.
+
 **A threshold is a property of the corpus, not a constant.** `CONFIDENT` in `scripts/author/arsenal.mjs`
 is the midpoint between two measured query sets, and both sets are asserted in `lib-test`. Change what
 the engine contains and it must be re-measured, THROUGH that file's own `toks`: a pass that used a

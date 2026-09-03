@@ -530,7 +530,7 @@ A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children. `effector: 
 | `wipe-down` | clip reveal grows downward from the top edge |
 | `wipe-left` | clip reveal grows leftward from the right edge |
 | `wipe-right` | clip reveal grows rightward from the left edge |
-| `wipe-up` | clip reveal grows upward from the bottom edge, what a bar chart wants |
+| `wipe-up` | clip reveal grows upward from the bottom edge, so a column grows upward instead of appearing |
 
 ## Part entrances  `[per-layer]`
 
@@ -546,7 +546,7 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `riseIn` | a longer rise with a fade, for parts that should feel like they arrive |
 | `slide-left` | enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat |
 | `slide-right` | enters from its right and, with `out`, keeps going left · the mirror of slide-left |
-| `widen` | scales out from its left edge. A row, a rule, a progress track filling |
+| `widen` | scales out from its left edge. A row, a rule, anything that should fill rather than appear |
 
 ## Per-layer modifiers  `[per-layer]`
 
@@ -598,7 +598,7 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `driftIn` | floats a short diagonal out of soft blur, slowly. The quietest entrance here, for atmosphere |
 | `dropIn` | as bounceIn but falling from much further up, so it lands harder |
 | `elasticIn` | springs from tiny and wobbles several times before it stills, over a slow 1.1s, only ever playful, never for a serious brand |
-| `expandIn` | letters start crushed together and spread out of blur to their real tracking, a title-card open |
+| `expandIn` | letters start crushed together and spread out of blur to their real tracking, an opening line settling into place |
 | `fadeDown` | as fadeUp but settling downward from above, for anything hanging off a header |
 | `fadeIn` | plain opacity fade, nothing moves. The neutral default when motion would distract |
 | `fadeUp` | lifts 60px into place while fading. The workhorse entrance for body copy and cards |
@@ -787,48 +787,48 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 | name | what / when |
 |---|---|
-| `brake` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeInSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutBack` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutBounce` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutCirc` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutCubic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutElastic` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutExpo` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuad` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuart` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutQuint` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `easeOutSine` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `hold` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `linear` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `ramp` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `rush` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `settle` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `snap` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring-bouncy` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `spring-stiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `springEase` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
-| `springStiff` | named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md |
+| `brake` | half the distance in the first quarter, then a long decline to a stop |
+| `easeInBack` | pulls the opposite way first, a wind-up, before it goes |
+| `easeInBounce` | bounces in place before it departs, like a ball gathering itself |
+| `easeInCirc` | creeps, then whips away on a curve that turns hard at the last moment |
+| `easeInCubic` | gathers pace with real commitment, stronger than quad. A departure that should read as decided |
+| `easeInElastic` | swings in place with growing wobble before it leaves. The loudest departure here |
+| `easeInExpo` | barely stirs, then clears frame all at once. The most violent departure available |
+| `easeInOutBack` | winds up, crosses, passes the mark and comes back. Playful at both ends and loud |
+| `easeInOutBounce` | bounces at both ends. Cartoon physics, and it reads as exactly that |
+| `easeInOutCirc` | flat, sudden, flat. Reads as machinery, not as anything with muscle |
+| `easeInOutCubic` | the everyday travel curve, soft at both ends. A layer crossing from one place to another on screen |
+| `easeInOutElastic` | wobbles at both ends. Almost always more than a film wants |
+| `easeInOutExpo` | held, flung, held. The most theatrical of the symmetric curves and the easiest to overuse |
+| `easeInOutQuad` | soft at both ends with an even middle, the least dramatic way to carry something across the frame |
+| `easeInOutQuart` | unhurried at both ends, fast through the middle. A long journey that should read as deliberate |
+| `easeInOutQuint` | lingers at both ends and hurries the middle, dramatic across a long journey |
+| `easeInOutSine` | the quietest way to shift anything. Ambient drift, backdrops, anything not asking to be watched |
+| `easeInQuad` | leaves gently and keeps gathering pace, the mildest departure here. For an exit that should not feel yanked |
+| `easeInQuart` | builds speed hard before it clears frame, a departure with weight behind it |
+| `easeInQuint` | almost still, then gone. The most extreme departure short of exponential |
+| `easeInSine` | the softest pick-up there is, barely perceptible as gathering pace |
+| `easeOutBack` | passes its target and returns, a small pop of emphasis on something landing |
+| `easeOutBounce` | drops and bounces to rest, a ball meeting a floor |
+| `easeOutCirc` | comes in at speed and flattens off almost immediately, a machined landing rather than a living one |
+| `easeOutCubic` | the everyday landing: quick off the mark, unhurried into place. Reach for it when nothing argues otherwise |
+| `easeOutElastic` | passes its target repeatedly with a decaying wobble, the springiest landing available |
+| `easeOutExpo` | the most violent arrival: effectively there on the first frames, then a long quiet settle |
+| `easeOutQuad` | comes in quickly then rolls to a stop, the gentlest landing of the power curves. Small elements, short distances |
+| `easeOutQuart` | lands fast and settles crisply, snappier than cubic and it never passes its target. Good on an element arriving |
+| `easeOutQuint` | covers nearly all the distance at once then creeps the last of it, a very sharp arrival |
+| `easeOutSine` | the softest landing there is, closer to speed fading away than to stopping |
+| `hold` | does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it |
+| `linear` | no acceleration at all, constant speed start to finish. Right for a loop or a marquee, wrong for anything a viewer watches arrive |
+| `ramp` | mild and symmetric: gathers pace, crosses the middle at full speed, tails off |
+| `rush` | holds back for most of the span then covers the distance late. The exit curve: it leaves in a hurry |
+| `settle` | most of the move happens immediately, then it eases the remainder and stops dead |
+| `snap` | covers the distance almost at once with a hair of overshoot, the fastest landing that still reads as movement |
+| `spring` | passes the mark by a little and falls back, a physical landing with some give in it |
+| `spring-bouncy` | visibly passes the mark and swings back, the playful one. One per film at most |
+| `spring-stiff` | most of the journey early, then a firm settle with no wobble at all |
+| `springEase` | spring shaped but damped flat: nearly arrived at once, then creeping the last fraction |
+| `springStiff` | tight and quick with no visible pass beyond the mark, for something that must not look playful |
 
 ## Time remaps (the layer's own clock)  `[timing]`
 

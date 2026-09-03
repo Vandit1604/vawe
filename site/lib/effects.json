@@ -2500,7 +2500,7 @@
         {
           "name": "wipe-up",
           "stem": "enter-exit-anims--wipe-up",
-          "desc": "clip reveal grows upward from the bottom edge, what a bar chart wants",
+          "desc": "clip reveal grows upward from the bottom edge, so a column grows upward instead of appearing",
           "scene": "/assets/effects/enter-exit-anims--wipe-up.json",
           "noPreview": null
         }
@@ -2576,7 +2576,7 @@
         {
           "name": "widen",
           "stem": "part-entrances--widen",
-          "desc": "scales out from its left edge. A row, a rule, a progress track filling",
+          "desc": "scales out from its left edge. A row, a rule, anything that should fill rather than appear",
           "scene": null,
           "noPreview": null
         }
@@ -2832,7 +2832,7 @@
         {
           "name": "expandIn",
           "stem": "gsap-named-effects--expandin",
-          "desc": "letters start crushed together and spread out of blur to their real tracking, a title-card open",
+          "desc": "letters start crushed together and spread out of blur to their real tracking, an opening line settling into place",
           "scene": "/assets/effects/gsap-named-effects--expandin.json",
           "noPreview": null
         },
@@ -3867,294 +3867,294 @@
         {
           "name": "brake",
           "stem": "easings--brake",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "half the distance in the first quarter, then a long decline to a stop",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInBack",
           "stem": "easings--easeinback",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "pulls the opposite way first, a wind-up, before it goes",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInBounce",
           "stem": "easings--easeinbounce",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "bounces in place before it departs, like a ball gathering itself",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInCirc",
           "stem": "easings--easeincirc",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "creeps, then whips away on a curve that turns hard at the last moment",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInCubic",
           "stem": "easings--easeincubic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "gathers pace with real commitment, stronger than quad. A departure that should read as decided",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInElastic",
           "stem": "easings--easeinelastic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "swings in place with growing wobble before it leaves. The loudest departure here",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInExpo",
           "stem": "easings--easeinexpo",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "barely stirs, then clears frame all at once. The most violent departure available",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutBack",
           "stem": "easings--easeinoutback",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "winds up, crosses, passes the mark and comes back. Playful at both ends and loud",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutBounce",
           "stem": "easings--easeinoutbounce",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "bounces at both ends. Cartoon physics, and it reads as exactly that",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutCirc",
           "stem": "easings--easeinoutcirc",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "flat, sudden, flat. Reads as machinery, not as anything with muscle",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutCubic",
           "stem": "easings--easeinoutcubic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "the everyday travel curve, soft at both ends. A layer crossing from one place to another on screen",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutElastic",
           "stem": "easings--easeinoutelastic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "wobbles at both ends. Almost always more than a film wants",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutExpo",
           "stem": "easings--easeinoutexpo",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "held, flung, held. The most theatrical of the symmetric curves and the easiest to overuse",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutQuad",
           "stem": "easings--easeinoutquad",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "soft at both ends with an even middle, the least dramatic way to carry something across the frame",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutQuart",
           "stem": "easings--easeinoutquart",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "unhurried at both ends, fast through the middle. A long journey that should read as deliberate",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutQuint",
           "stem": "easings--easeinoutquint",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "lingers at both ends and hurries the middle, dramatic across a long journey",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInOutSine",
           "stem": "easings--easeinoutsine",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "the quietest way to shift anything. Ambient drift, backdrops, anything not asking to be watched",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInQuad",
           "stem": "easings--easeinquad",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "leaves gently and keeps gathering pace, the mildest departure here. For an exit that should not feel yanked",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInQuart",
           "stem": "easings--easeinquart",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "builds speed hard before it clears frame, a departure with weight behind it",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInQuint",
           "stem": "easings--easeinquint",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "almost still, then gone. The most extreme departure short of exponential",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeInSine",
           "stem": "easings--easeinsine",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "the softest pick-up there is, barely perceptible as gathering pace",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutBack",
           "stem": "easings--easeoutback",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "passes its target and returns, a small pop of emphasis on something landing",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutBounce",
           "stem": "easings--easeoutbounce",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "drops and bounces to rest, a ball meeting a floor",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutCirc",
           "stem": "easings--easeoutcirc",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "comes in at speed and flattens off almost immediately, a machined landing rather than a living one",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutCubic",
           "stem": "easings--easeoutcubic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "the everyday landing · quick off the mark, unhurried into place. Reach for it when nothing argues otherwise",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutElastic",
           "stem": "easings--easeoutelastic",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "passes its target repeatedly with a decaying wobble, the springiest landing available",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutExpo",
           "stem": "easings--easeoutexpo",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "the most violent arrival · effectively there on the first frames, then a long quiet settle",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutQuad",
           "stem": "easings--easeoutquad",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "comes in quickly then rolls to a stop, the gentlest landing of the power curves. Small elements, short distances",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutQuart",
           "stem": "easings--easeoutquart",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "lands fast and settles crisply, snappier than cubic and it never passes its target. Good on an element arriving",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutQuint",
           "stem": "easings--easeoutquint",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "covers nearly all the distance at once then creeps the last of it, a very sharp arrival",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "easeOutSine",
           "stem": "easings--easeoutsine",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "the softest landing there is, closer to speed fading away than to stopping",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "hold",
           "stem": "easings--hold",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "linear",
           "stem": "easings--linear",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "no acceleration at all, constant speed start to finish. Right for a loop or a marquee, wrong for anything a viewer watches arrive",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "ramp",
           "stem": "easings--ramp",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "mild and symmetric · gathers pace, crosses the middle at full speed, tails off",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "rush",
           "stem": "easings--rush",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "holds back for most of the span then covers the distance late. The exit curve · it leaves in a hurry",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "settle",
           "stem": "easings--settle",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "most of the move happens immediately, then it eases the remainder and stops dead",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "snap",
           "stem": "easings--snap",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "covers the distance almost at once with a hair of overshoot, the fastest landing that still reads as movement",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spring",
           "stem": "easings--spring",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "passes the mark by a little and falls back, a physical landing with some give in it",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spring-bouncy",
           "stem": "easings--spring-bouncy",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "visibly passes the mark and swings back, the playful one. One per film at most",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spring-stiff",
           "stem": "easings--spring-stiff",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "most of the journey early, then a firm settle with no wobble at all",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "springEase",
           "stem": "easings--springease",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "spring shaped but damped flat · nearly arrived at once, then creeping the last fraction",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "springStiff",
           "stem": "easings--springstiff",
-          "desc": "named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md",
+          "desc": "tight and quick with no visible pass beyond the mark, for something that must not look playful",
           "scene": null,
           "noPreview": null
         }
