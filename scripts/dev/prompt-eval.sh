@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# prompt-eval.sh: ablate ONE section of CLAUDE.md and measure what the JSON does differently.
+# prompt-eval.sh: ablate ONE section of AGENTS.md and measure what the JSON does differently.
 #
 # WHY. This repo runs ~70 gates over the engine and none over the 44KB file that drives every
-# authoring decision. Sections get moved out of CLAUDE.md and nobody can say what that cost. This is
+# authoring decision. Sections get moved out of AGENTS.md and nobody can say what that cost. This is
 # the smallest thing that can say. It is NOT an ablation harness: it runs ONE section, ONE arm each
 # way, and n=1 is n=1. Read docs/RESEARCH/PROMPT-EVAL.md before you quote any number it prints.
 #
 #   scripts/dev/prompt-eval.sh "## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE" out/prompt-eval
 #
 # Arg 1 is the EXACT `## ` heading line to remove for the ablated arm. Arg 2 is where the two scene
-# JSONs land. Run it from a WORKTREE: it edits CLAUDE.md in place and restores it, and a second agent
+# JSONs land. Run it from a WORKTREE: it edits AGENTS.md in place and restores it, and a second agent
 # reading that file while it is cut in half would be reading a lie.
 set -euo pipefail
 
@@ -20,8 +20,8 @@ SCENE="$ROOT/formats/scene/_demo-heatread.json"
 cd "$ROOT"
 mkdir -p "$OUT"
 
-grep -qxF "$HEADING" CLAUDE.md || { echo "no such heading in CLAUDE.md: $HEADING" >&2; exit 1; }
-restore() { git checkout -- CLAUDE.md 2>/dev/null || true; }
+grep -qxF "$HEADING" AGENTS.md || { echo "no such heading in AGENTS.md: $HEADING" >&2; exit 1; }
+restore() { git checkout -- AGENTS.md 2>/dev/null || true; }
 trap restore EXIT
 
 # The task, identical in both arms. It names the scaffold explicitly so the two runs start from the
@@ -42,11 +42,11 @@ TASKEOF
 for ARM in with without; do
   restore
   if [ "$ARM" = without ]; then
-    awk -v h="$HEADING" '$0==h{skip=1;next} skip && /^## /{skip=0} !skip' CLAUDE.md > "$OUT/CLAUDE.ablated.md"
-    cp "$OUT/CLAUDE.ablated.md" CLAUDE.md
+    awk -v h="$HEADING" '$0==h{skip=1;next} skip && /^## /{skip=0} !skip' AGENTS.md > "$OUT/CLAUDE.ablated.md"
+    cp "$OUT/CLAUDE.ablated.md" AGENTS.md
   fi
   rm -f "$SCENE"
-  echo "== arm: $ARM ($(wc -c < CLAUDE.md) bytes of CLAUDE.md)"
+  echo "== arm: $ARM ($(wc -c < AGENTS.md) bytes of AGENTS.md)"
   printf '%s\n' "$TASK" | claude -p --dangerously-skip-permissions > "$OUT/$ARM.log" 2>&1 || true
   cp "$SCENE" "$OUT/$ARM.json" 2>/dev/null || echo "arm $ARM wrote no scene" >&2
   rm -f "$SCENE"

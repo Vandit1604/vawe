@@ -6870,7 +6870,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const { execFileSync } = await import('node:child_process');
   const gate = path.join(repoRoot, 'scripts/gates/rung.mjs');
   const ratchet = path.join(repoRoot, 'verify/rung-ratchet.json');
-  const claude = path.join(repoRoot, 'CLAUDE.md');
+  const claude = path.join(repoRoot, 'AGENTS.md');
   const savedRatchet = fs.readFileSync(ratchet, 'utf8');
   const savedClaude = fs.readFileSync(claude, 'utf8');
   const run = (...args) => { try { return { code: 0, out: execFileSync('node', [gate, ...args], { encoding: 'utf8', cwd: repoRoot }) }; }

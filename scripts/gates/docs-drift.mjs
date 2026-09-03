@@ -147,7 +147,7 @@ if (fs.existsSync(LAYERS_MDX)) {
 // Each count is read from the thing that OWNS it, never recomputed here: a second way to count the
 // arsenal would be the drift this gate exists to catch, inside the gate that catches it.
 {
-  const claude = fs.readFileSync(path.join(repoRoot, 'CLAUDE.md'), 'utf8');
+  const claude = fs.readFileSync(path.join(repoRoot, 'AGENTS.md'), 'utf8');
   const ask = (script, args, re) => {
     const r = spawnSync('node', [path.join(repoRoot, script), ...args], { cwd: repoRoot, encoding: 'utf8' });
     const m = re.exec(String(r.stdout || '') + String(r.stderr || ''));
@@ -170,7 +170,7 @@ if (fs.existsSync(LAYERS_MDX)) {
     if (!said) continue;   // the sentence was rewritten: nothing to check, not a failure
     const have = said.slice(1);
     if (have.join('/') !== want.join('/')) {
-      findings.push(`CLAUDE.md says "${said[0]}" and ${src} says ${want.join(' / ')}. `
+      findings.push(`AGENTS.md says "${said[0]}" and ${src} says ${want.join(' / ')}. `
         + 'Fix the sentence: this file is read every session, so a stale number here is repeated downstream.');
     }
   }

@@ -239,3 +239,6 @@ themes/higgsfield.json
 
 # scratch probe renders, written by hand during debugging and never an input to anything
 assets/video/
+
+# machine-specific Claude Code settings (never share)
+.claude/settings.local.json

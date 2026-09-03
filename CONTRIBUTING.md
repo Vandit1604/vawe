@@ -6,8 +6,8 @@ group: project
 
 # Contributing to Vawe
 
-Thanks for looking. This file is short because the repo explains itself: `CLAUDE.md` is the authoring
-doctrine, `docs/INDEX.md` maps every other document, and `docs/MISTAKES.md` is the log of what has
+Thanks for looking. This file is short because the repo explains itself: `AGENTS.md` is the authoring
+doctrine (tool-neutral; `CLAUDE.md` is a shim that loads it), `docs/INDEX.md` maps every other document, and `docs/MISTAKES.md` is the log of what has
 already gone wrong and why the guard exists.
 
 ## Licence, first, so nobody wastes an afternoon
@@ -56,7 +56,7 @@ the author pays by deforming good work until a number moves.
 ## Things this repo will push back on
 
 - **A new gate.** Fix it at the write site if you can. A gate is for what is only knowable after a
-  render, across the whole library, or by a human. `CLAUDE.md` has the full test, and two gates have
+  render, across the whole library, or by a human. `AGENTS.md` has the full test, and two gates have
   been deleted here for measuring the wrong thing.
 - **A second way to say something the code can already say.** Two mechanisms for one fact is the drift
   that produces most of the bugs in `docs/MISTAKES.md`.

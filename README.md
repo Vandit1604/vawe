@@ -226,6 +226,9 @@ make site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+
 
 ## Docs
 
+New here and want to author? Start at **[`QUICKSTART.md`](QUICKSTART.md)** (blank file to rendered
+video in one page), then **[`AGENTS.md`](AGENTS.md)** for the full, tool-neutral authoring doctrine.
+
 Start at **[`docs/TASTE.md`](docs/TASTE.md)** (how to make something good), then
 [`docs/PRIMITIVES.md`](docs/PRIMITIVES.md) (the vocabulary), [`docs/BLOCKS.md`](docs/BLOCKS.md) (the
 registry), [`docs/MOTION-CRAFT.md`](docs/MOTION-CRAFT.md) (motion rules), and
