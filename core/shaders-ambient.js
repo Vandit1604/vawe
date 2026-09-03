@@ -48,7 +48,7 @@ export const AMBIENT_SHADERS = {
   voronoi: 'cellular (Worley) noise: seeded cells drifting on their own loops, each one flat-tinted, with a lit line along every shared border',
   metaballs: 'five signed-distance circles merging and parting on a polynomial smooth minimum, so they fuse into one body instead of overlapping',
   bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md',
-  godRays: 'shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point',
+  godRays: 'shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point. it is BRIGHT through the middle, so drop `intensity` toward 0.4 before putting white type over it',
   curlSmoke: 'a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern',
 };
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
