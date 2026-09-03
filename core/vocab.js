@@ -178,7 +178,14 @@ const CAMERA_BLURBS = {
   'drift hold': 'a very slow move on a held frame, so a static shot is never fully still.',
 };
 
-export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease', blurbs: FEEL_BLURBS });
+// A person asking for "snappy" often says "springy" too, meaning the same quick, decisive land, not
+// the bounce a spring gives on impact (that is `bouncy`, a few rows down). Without this word the query
+// tied with `hang`, a motion-key influence preset that also mentions "snappy" in its own blurb.
+const FEEL_AKA = {
+  snappy: ['springy', 'crisp', 'punchy'],
+};
+
+export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease', blurbs: FEEL_BLURBS, aka: FEEL_AKA });
 export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur', blurbs: DURATION_BLURBS });
 export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move', blurbs: CAMERA_BLURBS });
 

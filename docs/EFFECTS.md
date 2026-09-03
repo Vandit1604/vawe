@@ -998,7 +998,7 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 | name | what / when |
 |---|---|
-| `beam:border (border-beam)` | a light travels the rounded-rect border |
+| `beam:border (border-beam)` | a light travels the rounded-rect border of a card, redrawn each frame |
 | `beam:shine (sheen sweep)` | a sheen sweeps across the box |
 
 ## Vector layer (logos/icons)  `[per-frame]`
@@ -1007,7 +1007,7 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 | name | what / when |
 |---|---|
-| `svg:draw (stroke draws on)` | the logo/icon stroke draws itself on, line by line |
+| `svg:draw (stroke draws on)` | the logo or icon stroke draws its outline on, line by line, as if traced by a pen |
 | `svg:morph (shape melts into a logo)` | one path melts into another (blob into logo), optional spin |
 
 ## Plain words (feel · duration · camera)  `[timing]`
