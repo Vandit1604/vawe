@@ -245,3 +245,6 @@ assets/video/
 
 # Claude Code local config (agent-specific, not shipped): settings, plans, workflows
 .claude/
+
+# impeccable live-server local scratch
+.impeccable/
