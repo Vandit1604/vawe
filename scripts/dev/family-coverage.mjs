@@ -22,6 +22,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { collect } from '../author/arsenal.mjs';
 import { catalogued } from '../../core/registry.js';
+import { emitJson } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -79,6 +80,19 @@ export async function familyCoverage() {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { families, covered, exempt, uncovered, wantCount } = await familyCoverage();
+
+  if (process.argv.includes('--json')) {
+    emitJson({
+      families: families.length,
+      wantCount,
+      covered: [...covered].sort(),
+      exempt: [...exempt].filter((k) => families.includes(k)).sort(),
+      uncovered,
+      ok: uncovered.length === 0,
+    });
+    process.exit(uncovered.length ? 1 : 0);
+  }
+
   console.log(`\n  FAMILY COVERAGE · ${families.length} families · ${wantCount} labeled queries read from lib-test\n`);
   if (!wantCount) console.log('  ⚠ read ZERO queries from lib-test.mjs: the PRESENT/PLAIN parse has rotted.\n');
   console.log(`  covered by a golden query: ${covered.size}`);
