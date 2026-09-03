@@ -48,7 +48,7 @@ jobs:
       - run: npm ci
 
       - name: framework gates
-        run: make schema-check lib-test craft-coverage arsenal-check discovery generated-check
+        run: make schema-check lib-test craft-coverage arsenal-check discovery generated-check output-contract
 
       # Structured, readable failures. This step is the pass/fail authority's SIDECAR, not the authority:
       # it runs `if: always()`, writes to the job Summary and an artifact, and never sets the job status
@@ -58,7 +58,7 @@ jobs:
         run: |
           mkdir -p /tmp/findings
           # The findings-based gates emit a JSON array under --json (empty [] when clean).
-          for g in discovery arsenal-check generated-check craft-coverage; do
+          for g in discovery arsenal-check generated-check craft-coverage output-contract; do
             node "scripts/gates/$g.mjs" --json > "/tmp/findings/$g.json" 2>/dev/null || true
           done
           node -e '
