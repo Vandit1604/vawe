@@ -158,9 +158,9 @@ other populations exist (98 without scratch, 154 raw files in the directory) and
 file once cited 93, 130 and 144 as the size of the same library in three sentences. **"that film" is not
 named anywhere and I could not identify it, so its two cells are unverified and marked so.**
 
-**A FRESH CLONE SEES A THIRD OF 148, AND NOTHING IS BROKEN.** Films are gitignored on purpose
+**A FRESH CLONE SEES A THIRD OF 149, AND NOTHING IS BROKEN.** Films are gitignored on purpose
 (`.gitignore:61`: a video instance is not the framework), with an allowlist for the handful the site
-needs. So `waiver-drift.mjs` prints `WAIVER CENSUS · 148 scenes` on this machine and about a third of
+needs. So `waiver-drift.mjs` prints `WAIVER CENSUS · 149 scenes` on this machine and about a third of
 that on a clean checkout, and EVERY census in this file behaves the same way. If your count is smaller,
 the gates are fine and the number here is not stale: you are looking at a smaller library.
 
@@ -340,10 +340,10 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 624 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 722 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
-`docs/EFFECTS.md`, 645 effects across 53 families). Reach for it before you invent anything. The measured cost
-of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 148 gate-visible scenes**, and 12 of its
+`docs/EFFECTS.md`, 647 effects across 53 families). Reach for it before you invent anything. The measured cost
+of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 149 gate-visible scenes**, and 12 of its
 19 beats have never been used once.
 
 **`make schema AT="layers[].motion[]"`** answers the other half: not what the engine can DO, but what you
@@ -388,7 +388,7 @@ its size helper squared any layer that declared one axis, so the one gate whose 
 from a picture handed a pass to a hairline. It was deleted. **You are the check now**, with `make
 judge` and your eyes. No green tick will tell you a film is only type.
 
-Measured over the 148 gate-visible scenes: **64 carry zero pictorial layers of any size.** That was
+Measured over the 149 gate-visible scenes: **64 carry zero pictorial layers of any size.** That was
 nobody's decision. It is debt, not a pattern to copy. What counts as explanation, the three questions
 the deleted gate asked and where to get the graphic:
 [`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
@@ -430,8 +430,8 @@ windows in the order the film turns, give none of them a `from`/`to`, and the en
 the joint after it (`core/junctions.js`), so the cuts you already wrote own the numbers.
 
 This is the strongest single lever in the file. brew inverts the tone of the world on four of its five
-cuts and spends its one accent window on the logo reveal, while **121 of the 148 gate-visible scenes,
-82%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
+cuts and spends its one accent window on the logo reveal, while **121 of the 149 gate-visible scenes,
+81%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
 
 **HALF OF THIS IS LIVE NOW, AND IT IS THE CHEAPER HALF.** `.claude/hooks/scene-live.mjs` fires on every
 save of a scene JSON and says so when a film paints one `bg` window for its whole runtime, with the 82%
@@ -458,7 +458,7 @@ a `_why`. **Four films rule a grid by hand today, and none of them wrote it down
 
 ## SILENCE IS A DEVICE, NOT A DEFAULT  `[gated: scripts/gates/audio-check.mjs#silence-without-a-reason]`
 
-**123 of the 148 gate-visible scenes ship mute, 83%**: 17 carry no `audio` key at all and 106 declare
+**123 of the 149 gate-visible scenes ship mute, 83%**: 17 carry no `audio` key at all and 106 declare
 `silent: true`. Of those 106, **only 26 say why**. So the sentence to remember is not "nobody declares
 the silence", it is "nearly everybody declares it and almost nobody justifies it". That closes the
 whole aural family of structural device: the sound bridge, music-led structure, the unfinished
