@@ -972,6 +972,14 @@ paints-nothing: ## does each layer paint anything in its own box? pixel diff, no
 arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never mentions
 	node scripts/gates/arsenal-check.mjs
 
+# discovery: can an author still FIND what the engine can do? Registry blurbs are refused at load, so
+# this reads the SEARCH CORPUS instead, which is the only place that sees every source at once: the
+# catalogue reaches it without passing a write site, and 33 entries hid there while core/registry.js
+# correctly reported zero. It also compares the two indexes over one library, which disagreed by 185
+# entries for months with nothing noticing.
+discovery:
+	node scripts/gates/discovery.mjs
+
 effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
 
