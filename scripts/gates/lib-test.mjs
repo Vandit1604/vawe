@@ -6419,8 +6419,14 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
      && kindsOfEnum(schema.fields.cuts.item.style.enum, regs).includes('cut'));
   ok('schema AT: a slot carrying two vocabularies names both',
      ['kinetic preset', 'glow preset'].every((k) => kindsOfEnum(schema.fields.layers.item.preset.enum, regs).includes(k)));
+  // `aspect` USED TO BE THE OWNERLESS EXAMPLE, and it is not any more: core/safe.js's ASPECTS became a
+  // registry, so the enum now names one. That is the improvement arriving, not the test breaking, and
+  // the stronger assertion is the one the change makes available: that the enum finds its owner. The
+  // ownerless half moves to a field that genuinely has none, so both halves keep being tested.
+  ok('schema AT: an enum whose values ARE a registry names its owner',
+     kindsOfEnum(schema.fields.aspect.enum, regs).includes('output target'));
   ok('schema AT: an enum that is nobody\'s registry claims no owner',
-     kindsOfEnum(schema.fields.aspect.enum, regs).length === 0);
+     kindsOfEnum(schema.fields.fps.enum, regs).length === 0);
 }
 
 // ---- gradeable: a render that exists is not a render that is CURRENT -----------------------------
@@ -6745,7 +6751,12 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   try {
     ok('arsenal ratchet: the recorded number is the count of hand-catalogued capabilities',
       Number.isInteger(JSON.parse(saved).handCatalogued));
-    fs.writeFileSync(ratchet, JSON.stringify({ handCatalogued: 0 }));
+    // ONE BELOW THE TRUE COUNT, not a hardcoded 0. This wrote 0 to force a rise, which worked only while
+    // some capability was still hand-catalogued. The count reached 0 the day the last two got registries,
+    // and 0 stopped being a rise, so the test that proves the ratchet has teeth quietly lost its own.
+    // Reading the real value and subtracting one is a forced rise at every count including zero.
+    const trueCount = JSON.parse(saved).handCatalogued;
+    fs.writeFileSync(ratchet, JSON.stringify({ handCatalogued: trueCount - 1 }));
     const worse = run();
     ok('arsenal ratchet: a RISE is refused', worse.code === 1);
     // The message must name the cheaper path, not merely the number. A gate that reports a count and no
