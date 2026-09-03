@@ -1254,6 +1254,18 @@ if (isMain) {
       if (!fs.statSync(dir).isDirectory()) continue;
       for (const n of fs.readdirSync(dir)) {
         if (!n.endsWith('.json') || n === 'schema.json') continue;
+        // `.animatic.json` and `.template.json` are never a scene to validate on their own, the same
+        // family scripts/gates/audit-scenes.mjs already skips by name (its own `/\.(intent|animatic|
+        // template)\.json$/`). `.animatic.json` (scripts/author/animatic.mjs) is a disposable pacing
+        // clock that embeds scratch VO paths under /tmp, regenerated every run and never a
+        // deliverable. `.template.json` carries unsubstituted `{{placeholders}}` as raw JSON text,
+        // some of them outside a string (e.g. a bare `{{loudcount}}` as a number value), so it is not
+        // valid JSON until scripts/author/batch.mjs fills it in, by design, not a defect to repair.
+        // Other derivative suffixes (`.beatsync.`, `.captioned.`, `.directed.`) stay OUT of this list
+        // on purpose: those files still declare `module` and validate cleanly, so excluding them would
+        // just shrink coverage. `.expanded.json` also stays out: it is the renderable artifact and the
+        // whole reason the "un-expanded source" skip two lines down exists.
+        if (/\.(animatic|template)\.json$/.test(n)) continue;
         // only actual scenes: a formats/ dir also holds planning artifacts (*.intent.json carries
         // beats, not layers). "Declares a module" is the honest test for "the renderer would read it".
         const fp = path.join(dir, n);
