@@ -94,10 +94,32 @@
 .ar-ax:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* The kind row leads its own block, so it is the one thing in the rail set in the page's sans at
-   full ink. Everything under it is a narrowing of it. */
-.ar-ax-kind { color: var(--ink); font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+   full ink. Everything under it is a narrowing of it.
+ *
+ * AND THAT SENTENCE WAS TRUE OF THE INTENT AND FALSE OF THE CSS. The leader was set at 12px while the
+ * axes under it ran at 13.5px, so every category was SMALLER than the things it contained, and the two
+ * levels sat at the same indent with a pixel between them. Uppercase and full ink were carrying the
+ * hierarchy alone, which is why the rail read as one flat column of twenty rows rather than as two
+ * levels. Three changes, none of which adds a colour: the leader is no longer out-sized by its own
+ * children, the children indent so the tree is visible without reading, and a hairline opens each
+ * group. The hairline is this page's own device; the register uses rules and never shadows. */
+/* `.ar-rail a` AND NOT `.ar-ax-kind`, and that selector is the whole fix. `.rail a` in globals.css
+ * sets `color: var(--ink-2)` at specificity (0,1,1); a bare `.ar-ax-kind` is (0,1,0) and LOSES. So the
+ * leader has been rendering in exactly the same grey as its own children this whole time, while the
+ * comment above claimed full ink and the uppercase and weight applied normally because nothing else
+ * declared those. One property silently dropped out of a rule whose other properties worked, which is
+ * the hardest kind to see by reading. It is also the second time on this page: the banner records
+ * `var(--mono, …)` against a token defined nowhere, and the same class of miss. */
+.ar-rail a.ar-ax-kind {
+  color: var(--ink); font-weight: 600; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase;
+  padding-top: 9px; padding-bottom: 5px; }
 .ar-ax-kind em { text-transform: none; letter-spacing: 0; }
-.ar-group + .ar-group, .ar-ax-all + .ar-group { margin-top: 14px; }
+/* The axes are the narrowing, so they sit IN from the leader and one step quieter. */
+.ar-group .ar-ax:not(.ar-ax-kind) { padding-left: 21px; font-size: 12.5px; }
+/* A rule above each group, not a gap. Fourteen pixels of air between two lists that look alike is not
+   a boundary; a hairline is, and it costs no height on a rail that already scrolls. */
+.ar-group + .ar-group, .ar-ax-all + .ar-group {
+  margin-top: 10px; padding-top: 4px; border-top: 1px solid var(--line); }
 .ar-ax-out { margin-top: 14px; border-top: 1px solid var(--line); border-radius: 0; padding-top: 12px; }
 .ar-ax-out:hover { border-top-color: var(--line); }
 
@@ -239,7 +261,12 @@ span.ar-step { color: var(--muted); opacity: .45; }   /* the end of the run, sho
      turn a pill strip back into a stack. */
   .ar-group { display: contents; }
   .ar-ax { flex: 0 0 auto; padding: 5px 11px; white-space: nowrap; }
-  .ar-group + .ar-group, .ar-ax-all + .ar-group, .ar-ax-out { margin-top: 0; }
+  /* THE TWO-LEVEL RULES ABOVE ARE UNDONE HERE, ALL OF THEM. A pill strip has no tree to indent and no
+     group to rule off: the indent makes a lopsided pill and the border-top draws a line through the
+     middle of a wrapping row. Here the leader's uppercase carries the level on its own. */
+  .ar-group .ar-ax:not(.ar-ax-kind) { padding-left: 11px; font-size: 12.5px; }
+  .ar-ax-kind { padding-top: 5px; padding-bottom: 5px; }
+  .ar-group + .ar-group, .ar-ax-all + .ar-group, .ar-ax-out { margin-top: 0; padding-top: 5px; border-top: 0; }
   .ar-ax-out { border-top: 0; border-radius: 999px; padding-top: 5px; }
   .ar-how { display: none; }   /* the rail is a filter strip here; the note moves out of the way */
   .ar-find { flex: 1 1 100%; margin-left: 0; }

@@ -190,7 +190,7 @@ while you still know.
 
 | Surface | Register | Shaped by | Notes |
 |---|---|---|---|
-| `/arsenal` | product | **UNRECORDED** | Built before this convention existed. The craft bar of the site (hairlines for structure, one elevation step and only on hover, mono for anything literal), but the sources are lost. Re-derive from the code, do not guess. |
+| `/arsenal` | product | `ibelick/improve-ui` (ui-skills), rail pass only | Its PROOF GATE taken: a hierarchy finding needs rendered or user evidence, never a source read, so the rail was screenshotted before and after rather than argued about. That gate is what turned "the two levels look alike" into the actual cause: `.rail a` in globals.css is (0,1,1) and `.ar-ax-kind` was (0,1,0), so the leader's `--ink` never applied and it rendered in its children's grey. Its READ-ONLY boundary rejected, because a fix was asked for. The rest of the page predates this convention: hairlines for structure, one elevation step and only on hover, mono for anything literal, sources lost. Re-derive from the code, do not guess. |
 | `/editor` | product | **UNRECORDED** | Same. |
 | `/showcase`, `/`, `/playground`, `/features` | brand | **UNRECORDED** | Same. |
 | `site/og/card.html` | brand | `zeke/swiss-design` (ui-skills), local tokens win | Swiss principles taken (grid is real, whitespace is structure, opacity not hue for hierarchy, one accent, headings never bold). Its Tailwind and IBM Plex specifics REJECTED: this site owns its faces. |
