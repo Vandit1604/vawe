@@ -6456,11 +6456,44 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // AN UNTAGGED SECTION. [eye] is the honest default and costs one word, so the only reason a section
     // of CLAUDE.md carries no rung is that nobody asked the question.
     fs.writeFileSync(claude, savedClaude.replace(
-      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[eye]`',
+      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[live: .claude/hooks/scene-live.mjs]`',
       '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE'));
     const bare = run();
     ok('rungs: an untagged section of CLAUDE.md is REFUSED', bare.code === 1);
     ok('rungs: and it is named, so the fix is one word', /untagged: THE BACKGROUND MUST MOVE/.test(bare.out));
+
+    // THE [live] RUNG'S FIRST OCCUPANT, asserted here rather than only in the rung count. A hook that
+    // fires on everything gets turned off, so silence on a film doing fine is as much the contract as
+    // speech on a thin one, and both are checked.
+    {
+      const hook = path.join(repoRoot, '.claude/hooks/scene-live.mjs');
+      const fire = (scene) => {
+        const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: scene } }), encoding: 'utf8' });
+        return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
+      };
+      const tmp = path.join(repoRoot, 'formats/scene/_rung-live-probe.json');
+      fs.writeFileSync(tmp, JSON.stringify({ module: 'scene', bg: { preset: 'black' },
+        layers: [{ type: 'text', text: 'a' }, { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] }));
+      const thin = fire(tmp);
+      ok('scene-live: a film with one bg window and no picture is told so at the keystroke',
+        thin.code === 2 && /bg window for the whole runtime/.test(thin.out));
+      ok('scene-live: and it says it does not block, because it does not',
+        /Nothing here blocks/.test(thin.out));
+      fs.writeFileSync(tmp, JSON.stringify({ module: 'scene',
+        bg: [{ preset: 'black' }, { preset: 'plain' }],
+        layers: [{ type: 'image', src: 'a.png', motion: [{ t: 0, x: 0 }] }, { type: 'html', html: '<p>b</p>' },
+          { type: 'text', text: 'c' }] }));
+      const fine = fire(tmp);
+      ok('scene-live: a film doing fine gets silence, which is the reward', fine.code === 0 && !fine.out.trim());
+      fs.unlinkSync(tmp);
+      // A DERIVATIVE IS GENERATED. Telling an author their .expanded.json is thin names a file they did
+      // not write and cannot fix in place.
+      const der = path.join(repoRoot, 'formats/scene/_rung-live-probe.expanded.json');
+      fs.writeFileSync(der, JSON.stringify({ module: 'scene', bg: { preset: 'black' },
+        layers: [{ type: 'text' }, { type: 'text' }, { type: 'text' }] }));
+      ok('scene-live: a generated derivative is never spoken to', fire(der).code === 0);
+      fs.unlinkSync(der);
+    }
 
     fs.writeFileSync(claude, savedClaude);
     fs.writeFileSync(ratchet, JSON.stringify({ eye: 0 }));
