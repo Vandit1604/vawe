@@ -21,22 +21,25 @@ fs.mkdirSync(SFX, { recursive: true }); fs.mkdirSync(MUSIC, { recursive: true })
 // Engine role -> cue voicing. The Go mixer looks up assets/sfx/<name>.wav by cue name, so the
 // engine's own role names (whoosh/reveal/...) must exist as files even though the voicings are
 // Cuelume's. A role is an alias, not a copy: one spec, several names.
+// THIRTEEN OF THESE POINTED AT DELETED CUES, and the loop below exits 1 on the first one, so `make
+// audio` could not bake anything at all after the listening pass. A role is an alias, not a copy, and
+// the deleted names are KEPT as aliases here on purpose: a shipped scene may already write
+// `audio.cues[{name:"tick"}]`, and resolving that to the nearest surviving voicing is kinder than
+// refusing to bake. What a role must never be again is an alias onto a cue that is not there.
 const ROLES = {
   // auto sound-design roles the scene builder emits
-  whoosh: 'whisper',   // a cut, soft air, never a swoosh cliché
+  whoosh: 'whoosh',    // a real voicing now, not an alias onto a soft hiss
   reveal: 'chime',     // a sting, the thing that lands
-  // Cuelume's own 14, available to an author by name
-  chime: 'chime', sparkle: 'sparkle', droplet: 'droplet', bloom: 'bloom', whisper: 'whisper',
-  tick: 'tick', press: 'press', key: 'key', release: 'release', toggle: 'toggle',
-  success: 'success', error: 'error', page: 'page', loading: 'loading', ready: 'ready',
-  // MOTION roles, voiced in core/audio-kit.mjs. The fifteen above are INTERACTION sounds, for a UI
-  // where a person clicked. These are for a film, where a card lands and a camera travels, and
-  // core/audio-tactile.js derives them from the timeline rather than asking an author to place them.
-  thud: 'thud', travel: 'travel',
-  riser: 'riser', sweep: 'sweep', pluck: 'pluck',
-  // aliases onto the real cues, NOT new voicings. `click` and `pop` are names people reach for;
-  // both resolve to Cuelume cues rather than to something invented alongside them.
-  click: 'press', pop: 'droplet',
+  // the pitched cues that survived the listening pass, available to an author by name
+  chime: 'chime', sparkle: 'sparkle', droplet: 'droplet', bloom: 'bloom',
+  pluck: 'pluck', success: 'success', ready: 'ready',
+  // movement and weight, designed here for a film rather than ported from a UI library
+  riser: 'riser', drop: 'drop', impact: 'impact', swell: 'swell', braam: 'braam',
+  // aliases onto the real cues, NOT new voicings. `click` and `pop` are names people reach for; the
+  // rest are the deleted cues, redirected so an existing scene that names one still bakes.
+  click: 'pluck', pop: 'droplet', tick: 'pluck', key: 'pluck', press: 'impact',
+  release: 'pluck', toggle: 'pluck', page: 'whoosh', loading: 'swell', error: 'impact',
+  whisper: 'swell', thud: 'impact', travel: 'whoosh', sweep: 'whoosh',
 };
 
 // Cut/seam cue tables now live in core/audio-cues.js (pure data, shared by scene.html + lib-test) so

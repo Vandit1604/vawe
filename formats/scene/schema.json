@@ -2750,6 +2750,10 @@
         "thud",
         "travel",
         "riser",
+        "drop",
+        "impact",
+        "swell",
+        "braam",
         "sweep",
         "pluck"
        ]
@@ -2771,12 +2775,13 @@
         "sweep"
        ],
        "enum": [
-        "tick",
-        "thud",
-        "whoosh",
-        "riser",
         "pluck",
-        "sweep"
+        "droplet",
+        "chime",
+        "bloom",
+        "impact",
+        "whoosh",
+        "riser"
        ]
       },
       "params": {

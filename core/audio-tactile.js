@@ -48,7 +48,12 @@ import { staggerStep } from './type.js';
 // noise-layer count (keep 0.00, weak 1.00, reject 1.40). Attack and peak barely differ between the
 // groups, so "too sharp and loud" was a symptom: filtered white noise is what reads as cheap, whatever
 // its envelope. This list is now the pitched ones only.
-export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom'];
+// THE LIST WAS TRIMMED AND THE EMITTERS WERE NOT, which left the derivation naming three cues that
+// no longer existed: `thud` at a layer arrival, `travel` at a camera move, `riser` at the spectacle.
+// A trimmed list is not a fix if the code that WRITES the names is somewhere else, and it was.
+// `thud` is now `impact` and `travel` is now `whoosh`; `riser` is a name again, rebuilt without noise.
+// All three voicings are in core/audio-kit.mjs under `swarm`.
+export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom', 'impact', 'whoosh', 'riser'];
 
 // THE FIVE ARE CATALOGUED AND THE OTHER FIFTEEN ARE NOT, and that looks like two decisions in
 // opposite directions until you see that CUES is TWO vocabularies in one map.
@@ -76,10 +81,9 @@ export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom'];
 export const MOTION_CUE_REGISTRY = defineRegistry('motion voice', Object.fromEntries(MOTION_CUES.map((n) => [n, n])), {
   slot: 'audio.cues[].name',
   blurbs: {
-    thud: 'something with WEIGHT arrives: a low sine dropping in pitch, because the ear reads a falling fundamental as mass. A frame-sized card landing',
-    travel: 'movement. Filtered noise whose band opens then closes, which is what separates a whoosh from a burst of static. One per camera gesture, not one per keyframe',
-    riser: 'a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. What a declared `spectacle` gets',
-    sweep: 'a wipe: a noise band climbing the spectrum, wider and slower than a whoosh, so it reads as the whole frame changing rather than one object crossing it',
+    impact: 'something heavy ARRIVES and lands hard: a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home',
+    whoosh: 'air moving past. One camera gesture, one whoosh, never one per keyframe: the sound rises as the move starts and falls away as it passes',
+    riser: 'a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. Tension, suspense, a countdown to what a declared `spectacle` names',
     pluck: 'punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it',
   },
   catalog: {
@@ -166,7 +170,7 @@ function arrivalCues(layers, canvas, out) {
     const heavy = p >= 0.28;
     out.push({
       t: +(L.start ?? 0),
-      name: heavy ? 'thud' : 'pluck',
+      name: heavy ? 'impact' : 'pluck',
       gain: r3(((heavy ? 0.2 : 0.09) + (heavy ? 0.3 : 0.18) * p) * force),
       w: r3(0.25 + 0.5 * p),
     });
@@ -188,7 +192,7 @@ function cameraCues(camera, out) {
     const dur = +kf[j].t - +kf[i].t;
     // A longer move is a bigger gesture, so it is louder. It cannot be LONGER: the cue is a baked
     // wav of fixed length and nothing here can stretch it (see the report note on parameters).
-    if (dur >= 0.2) out.push({ t: +kf[i].t, name: 'travel', w: 0.7,
+    if (dur >= 0.2) out.push({ t: +kf[i].t, name: 'whoosh', w: 0.7,
       gain: r3(0.16 + 0.16 * Math.min(1, dur / 2)) });
     i = j;
   }

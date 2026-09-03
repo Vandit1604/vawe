@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { CUES, renderCue, normalize, writeWav } from '../../core/audio-kit.mjs';
+import { CUES, renderCue, normalize, writeWav, SR } from '../../core/audio-kit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(ROOT, 'out/sound-lab');
@@ -27,13 +27,18 @@ for (const n of names) writeWav(path.join(OUT, `${n}.wav`), normalize(renderCue(
 
 // A cue's own family, so the page groups sounds that should be judged against each other rather than
 // against the whole set: a `thud` and a `sparkle` are not competing for the same slot.
+// A CUE MISSING FROM THIS MAP DOES NOT RENDER ON THE PAGE, because the groups below are a fixed list
+// and an unfamilied cue falls to 'other', which no group prints. Silent omission from a judging tool
+// is the worst failure it can have: the sound is never heard and the absence looks like a decision.
 const FAMILY = {
-  thud: 'impact', travel: 'movement', riser: 'movement', sweep: 'movement',
+  whoosh: 'movement', riser: 'movement', swell: 'movement',
+  impact: 'weight', drop: 'weight', braam: 'weight',
   pluck: 'accent', chime: 'accent', sparkle: 'accent', droplet: 'accent', bloom: 'accent',
-  whisper: 'texture', tick: 'texture', key: 'texture',
-  press: 'interface', release: 'interface', toggle: 'interface', page: 'interface',
-  success: 'state', error: 'state', loading: 'state', ready: 'state',
+  success: 'state', ready: 'state',
 };
+const GROUPS = ['movement', 'weight', 'accent', 'state'];
+const orphans = names.filter((n) => !FAMILY[n]);
+if (orphans.length) { console.error(`\u2717 sound-lab: no family for ${orphans.join(', ')}, so they would not render. Add them to FAMILY.`); process.exit(1); }
 
 const rows = names.map((n) => `
   <div class="cue" data-cue="${n}">
@@ -78,7 +83,7 @@ h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7d8699;ma
 <p class="lede">Every cue the engine can synthesise, from <code>core/audio-kit.mjs</code>. Play each one and
 judge it. Space plays the focused row. Your verdicts are saved as you go; <b>Copy verdicts</b> puts them
 on the clipboard as JSON to paste back, and that file is what a tuning pass reads.</p>
-${['impact', 'movement', 'accent', 'texture', 'interface', 'state']
+${GROUPS
     .map((f) => `<h2>${f}</h2>` + names.filter((n) => (FAMILY[n] || 'other') === f)
       .map((n) => rows.split('\\n  <div class="cue"').find((r) => r.includes(`data-cue="${n}"`))
         ? `<div class="cue" data-cue="${n}">
@@ -134,3 +139,52 @@ console.log('  That file is the input a voicing pass needs and has never had: wi
 console.log('  "the sounds are bad" is one sentence covering twenty different sounds.\\n');
 
 if (process.argv.includes('--open')) execFileSync('open', [path.join(OUT, 'index.html')]);
+
+// ---------------------------------------------------------------- --measure
+// WHY A NUMBER AND NOT A VERDICT. Nobody can judge a sound from its parameters, and an agent tuning
+// these cues cannot hear at all. What it CAN do is check that a sound has the shape its name claims:
+// a whoosh whose brightness never moves is a static buzz, and a "tail" of 40ms is a click whatever the
+// comment above it says. So this prints, per cue, the two things a spec lies about most often:
+// the loudness envelope over time, and where the spectrum sits over time.
+//
+// THE CENTROID IS AN RMS FREQUENCY, NOT AN FFT BIN CENTROID, and the difference is worth knowing before
+// you quote it. For any signal, sqrt(∫f²|X(f)|² df / ∫|X(f)|² df) equals RMS(dx/dt) / (2π·RMS(x)), so
+// the quadratic spectral centroid falls straight out of the derivative with no transform at all
+// (Parseval; the identity is standard in the "spectral moments" literature). It weights the top octave
+// harder than a linear-mean centroid does, so treat it as a brightness INDEX that must MOVE, never as
+// a frequency you could tune a filter to.
+//
+//   node scripts/dev/sound-lab.mjs --measure          # every cue
+//   node scripts/dev/sound-lab.mjs --measure whoosh   # one
+function measure(x, slices = 8) {
+  const n = x.length, per = Math.floor(n / slices);
+  const rmsOf = (a, i0, i1) => { let s = 0; for (let i = i0; i < i1; i++) s += a[i] * a[i]; return Math.sqrt(s / Math.max(1, i1 - i0)); };
+  const d = new Float32Array(n); for (let i = 1; i < n; i++) d[i] = (x[i] - x[i - 1]) * SR;
+  const band = [];
+  for (let s = 0; s < slices; s++) {
+    const i0 = s * per, i1 = s === slices - 1 ? n : i0 + per;
+    const r = rmsOf(x, i0, i1);
+    band.push({ rms: r, centroid: r < 1e-5 ? 0 : rmsOf(d, i0, i1) / (2 * Math.PI * r) });
+  }
+  let peak = 0, peakAt = 0;
+  for (let i = 0; i < n; i++) { const a = Math.abs(x[i]); if (a > peak) { peak = a; peakAt = i; } }
+  // Tail = time from the peak until the signal stays under -40dB of it. Measured backwards so one
+  // late ring does not get averaged away by the silence around it.
+  let end = n - 1; while (end > peakAt && Math.abs(x[end]) < peak * 0.01) end--;
+  return { dur: n / SR, peak, peakAt: peakAt / SR, tail: (end - peakAt) / SR, band };
+}
+
+if (process.argv.includes('--measure')) {
+  const only = process.argv[process.argv.indexOf('--measure') + 1];
+  const pick = only && CUES[only] ? [only] : names;
+  console.log('\n  cue          dur   attack   tail    peak   | RMS envelope (8 slices)      | centroid Hz (8 slices)');
+  for (const n of pick) {
+    const m = measure(normalize(renderCue(CUES[n], 1)));
+    const env = m.band.map((b) => String(Math.round((b.rms / Math.max(1e-9, Math.max(...m.band.map((z) => z.rms)))) * 9))).join('');
+    const cen = m.band.map((b) => (b.centroid < 1 ? '   .' : String(Math.round(b.centroid)).padStart(5))).join('');
+    console.log(`  ${n.padEnd(12)}${m.dur.toFixed(2)}s ${m.peakAt.toFixed(3)}s ${m.tail.toFixed(3)}s ${m.peak.toFixed(2)}   | ${env.padEnd(28)} |${cen}`);
+  }
+  console.log('\n  RMS envelope: each digit is that slice as 0-9 of the loudest slice.');
+  console.log('  centroid: RMS frequency per slice. A row of identical numbers is a sound that never moves.\n');
+  process.exit(0);
+}

@@ -32,6 +32,11 @@ export function rng(seed = 0x9e3779b1) {
   return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return (s / 4294967296) * 2 - 1; };
 }
 
+// THE WAVEFORM NAME IS `tri`, NOT `triangle`, and several shipped specs say `triangle`. An unknown
+// name falls through to sine rather than throwing, so `waveform: "triangle"` has always rendered a SINE.
+// Not corrected here on purpose: `pluck` was judged by ear and kept in that state
+// (verify/sound-verdicts.json), so aliasing the name now would silently re-voice a cue a person
+// approved. Write `tri` when you mean a triangle, and know that the old specs do not.
 export function osc(type, f, t, phase = 0) {
   const ph = TAU * f * t + phase;
   if (type === 'tri') return (2 / Math.PI) * Math.asin(Math.sin(ph));
@@ -170,24 +175,58 @@ export function writeWav(file, samples, { stereo = false } = {}) {
 // The ten removed were the interface clicks and noise textures ported from a UI library, which a film
 // has no use for: nobody is clicking anything. What remains is the pitched set, which is what a film
 // actually scores with.
+// ---------------------------------------------------------------- swarm: a moving spectral band
+// WHAT A WHOOSH ACTUALLY IS, and the reason the engine could not make one. Every write-up of the
+// family agrees on the mechanism: a whoosh is a BAND OF ENERGY THAT MOVES THROUGH THE SPECTRUM while
+// its level swells and falls. The usual construction is white noise through a band-pass filter whose
+// centre frequency is automated across the sound, with a Doppler-style pitch fall at the pass point.
+//
+// `renderCue` cannot do that half of it. `biquad(type, f0, Q)` builds its coefficients ONCE, at layer
+// construction, so a noise layer's filter frequency is fixed for the layer's whole life. The two cues
+// that were deleted for sounding cheap, `travel` and `sweep`, were each two STATIC bands with an
+// offset between them, which is a two-step staircase and not a sweep. So round 1's finding ("every cue
+// kept had zero noise layers") is real about this engine's noise but is not a fact about noise: the
+// noise here never had the one thing that makes the family work.
+//
+// THE STEP THAT IS NOT OBVIOUS. A moving spectral band does not have to be a filter. Take twelve to
+// twenty partials, place them at IRREGULAR spacings across two octaves so no integer relationship
+// survives, and the ear stops hearing a chord and starts hearing a band: it is additive noise, the
+// same trick as a Risset glissando, and the density is what buys the fusion. Then glide every partial
+// to the same RATIO of its own frequency. Because renderCue's glide is linear in Hz, gliding each
+// f_k to f_k*R over one glideTime makes every partial share the multiplier (1 + (R-1)*t/T), so the
+// whole band translates rigidly in log-frequency and keeps its shape. That is a filter sweep, built
+// out of the one primitive the engine does own.
+//
+// Sources for the family and its numbers: Sound on Sound, "Synth Secrets" (additive/noise-band
+// synthesis); the standard trailer-whoosh recipe of band-passed noise with an automated centre
+// frequency plus Doppler pitch; Risset/Shepard glissando for the fused inharmonic stack.
+//
+//   f0        where the band starts, in Hz (its lowest partial)
+//   to        where that lowest partial ends. The ratio to/f0 is what the whole band travels.
+//   octaves   how wide the band is. Under ~1.5 it reads as a pitch, over ~2.5 it reads as air.
+//   n         partial count. Twelve is about the floor for fusion; below it you hear the parts.
+//   tilt      how much quieter each partial is than the one below it, so the band has a direction.
+//   stagger   how far apart in time the partials start. A few ms breaks the onset click; a few
+//             hundred ms turns the same stack into a swell, because the level accrues as they arrive.
+function swarm({ f0, to, octaves = 2, n = 14, attack, decay, peak, offset = 0, tilt = 0.55, wave = 'sine', stagger = 0.008 }) {
+  const R = to / f0;
+  return Array.from({ length: n }, (_, k) => {
+    // A low-discrepancy jitter (the golden-ratio sequence) rather than an even split. Evenly spaced
+    // partials in log frequency are a harmonic-ish comb and the ear finds a pitch in it; the irregular
+    // spacing is what keeps the stack reading as a band. Deterministic, so the cue is reproducible.
+    const u = (k + ((k * 0.6180339887) % 1)) / n;
+    const f = f0 * Math.pow(2, u * octaves);
+    return {
+      kind: 'tone', waveform: wave, frequency: f, glideTo: f * R, glideTime: decay * 0.9 + attack,
+      attack: attack * (1 + u * 0.5), decay: decay * (1 - u * 0.25),
+      peak: peak * Math.pow(1 - tilt, u * octaves) / Math.sqrt(n),
+      offset: offset + u * stagger,   // stagger, so the partials do not all start in phase
+    };
+  });
+}
+
 export const CUES = {
-  // ---- MOTION voices -----------------------------------------------------------------------------
-  // The fifteen cues below this block are INTERACTION sounds, ported from Cuelume: press, toggle,
-  // success, error. They are for a UI, where a person did something. A film has nobody clicking, and
-  // its events are physical: a card LANDS, a camera TRAVELS, a number COUNTS, a peak ARRIVES.
-  //
-  // These five are that vocabulary, and core/audio-tactile.js derives them from the timeline the
-  // engine already has. Voiced with the same primitives as the rest of this file so there is one
-  // synthesiser, not two: a Go copy was written and retired for exactly that reason (#492).
-
-
-  // Travel. Filtered noise whose band OPENS then closes: the movement is in the filter, not the level,
-  // which is what separates a whoosh from a burst of static.
-
-
-  // A wipe. A noise band travelling up through the spectrum, wider and slower than a whoosh so it
-  // reads as the frame changing rather than an object moving.
-
+  // ---- ACCENTS: something small lands ------------------------------------------------------------
   // Punctuation. A small element, a counter digit. Quiet on purpose: this is the one that becomes a
   // machine gun if it is loud, and the density rules exist because of it.
   pluck: { masterGain: 0.30, layers: [
@@ -197,26 +236,102 @@ export const CUES = {
 
   chime: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1046.5, "attack":0.006, "decay":0.22, "peak":0.09}, {"kind":"tone","waveform":"sine","frequency":1568, "offset":0.09, "attack":0.006, "decay":0.26, "peak":0.08}], "shimmer":{"delay":0.12, "feedback":0.25, "wet":0.18, "lowpass":4000.0}},
   sparkle: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1760, "offset":0, "attack":0.003, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"sine","frequency":2217, "offset":0.045, "attack":0.003, "decay":0.09, "peak":0.04}, {"kind":"tone","waveform":"sine","frequency":2637, "offset":0.09, "attack":0.003, "decay":0.1, "peak":0.038}, {"kind":"tone","waveform":"sine","frequency":3520, "offset":0.135, "attack":0.003, "decay":0.12, "peak":0.032}], "shimmer":{"delay":0.07, "feedback":0.35, "wet":0.22, "lowpass":6000.0}},
-  // PROMOTED FROM A VARIANT, round 3. The shipped voicing was rejected by ear and this one kept.
-  // `compose('droplet', 3)` in scripts/dev/sound-vary.mjs reproduces it exactly: the numbers are a
-  // measured preference rather than a designed one, which is why they do not look round.
-  droplet: {"masterGain": 0.55, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 1319.452355839312, "attack": 0.006, "decay": 0.26, "peak": 0.09374999999999999, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 1662.5099683575331, "attack": 0.0084, "decay": 0.2028, "peak": 0.05769230769230769, "offset": 0.008726843487471343}]},
+  droplet: {"masterGain":0.55, "layers":[{"kind":"tone","waveform":"sine","frequency":1200, "glideTo":550, "glideTime":0.14, "attack":0.004, "decay":0.2, "peak":0.075}], "shimmer":{"delay":0.09, "feedback":0.2, "wet":0.15, "lowpass":3000.0}},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
   // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
   // preference rather than a designed one: `vary('bloom', 3)` in scripts/dev/sound-vary.mjs
   // reproduces them exactly.
   bloom: {"masterGain": 0.5, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 597.135335543789, "attack": 0.06768921516090631, "decay": 0.14823116605728864, "peak": 0.07345559132331983}, {"kind": "tone", "waveform": "sine", "frequency": 426.59458829540756, "detune": 12, "attack": 0.14212638809904457, "decay": 0.48715202256059276, "peak": 0.05493165752501228}], "shimmer": {"delay": 0.15, "feedback": 0.2, "wet": 0.12, "lowpass": 2500}},
-  // `key` is the TYPING keystroke (distinct from `press`, which stays a sharp punch for cut/seam hits).
-  // A soft membrane tap: a low body that drops in pitch + a gentle low-passed click, highs rolled off so
-  // a fast train is unobtrusive under a headline/VO instead of a buzzy machine-gun. NOT a Cuelume voicing,
-  // designed here for this engine (the ported set had no keystroke that sounded good in a train).
   success: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":880, "attack":0.004, "decay":0.09, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1108.73, "offset":0.06, "attack":0.004, "decay":0.1, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1318.51, "offset":0.12, "attack":0.004, "decay":0.18, "peak":0.07}], "shimmer":{"delay":0.1, "feedback":0.22, "wet":0.16, "lowpass":4500}},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
   // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
   // preference rather than a designed one: `vary('ready', 7)` in scripts/dev/sound-vary.mjs
   // reproduces them exactly.
   ready: {"masterGain": 0.45, "layers": [{"kind": "noise", "filterType": "bandpass", "filterFrequency": 3200, "filterQ": 1.7, "attack": 0.001, "decay": 0.012098159216344356, "peak": 0.06180915778153576}, {"kind": "tone", "waveform": "sine", "frequency": 767.2653575001948, "offset": 0.025, "attack": 0.012457696743495762, "decay": 0.2870990530587733, "peak": 0.0528644083958352}, {"kind": "tone", "waveform": "sine", "frequency": 1330.0283611932584, "offset": 0.025, "attack": 0.023373052605427803, "decay": 0.4109534594230354, "peak": 0.045950954629282934}], "shimmer": {"delay": 0.13, "feedback": 0.2, "wet": 0.13, "lowpass": 3600}},
-};;
+  // ---- MOVEMENT and WEIGHT: built here, not ported ------------------------------------------------
+  // Everything below is designed for this engine rather than taken from Cuelume, which is a UI library
+  // and has no vocabulary for a cut. Each one is a moving spectral band or a moving fundamental, and
+  // none of them carries a noise layer, for the reason written above `swarm`.
+
+  // Whoosh. An object passes the camera, so the sound has to pass too: the band sweeps UP while the
+  // level swells, and then a second band sweeps DOWN as it leaves. The departure starts before the
+  // approach has finished, which is what stops the join reading as two sounds.
+  //
+  // The naive build is one band sweeping one way, and it is why a cheap whoosh sounds like a jet that
+  // never arrives: with no fall after the peak there is no pass point, only a rise. The Doppler drop
+  // IS the event.
+  whoosh: { masterGain: 0.55, layers: [
+    ...swarm({ f0: 220, to: 1500, octaves: 2.2, n: 16, attack: 0.26, decay: 0.055, peak: 0.55 }),
+    ...swarm({ f0: 1500, to: 380, octaves: 2.2, n: 16, attack: 0.03, decay: 0.13, peak: 0.46, offset: 0.28, tilt: 0.62 }),
+  ] },
+
+  // Riser. A build INTO a moment, so it must END where the moment is: place it by hand, led by the
+  // beat it feeds. One band, climbing, with the level still rising as the pitch arrives.
+  //
+  // Narrower than the whoosh (1.6 octaves against 2.2) on purpose. A riser is allowed to be nearly
+  // pitched, because the tension comes from knowing where it is going; a whoosh is not, because an
+  // object passing has no key.
+  riser: { masterGain: 0.5, layers: [
+    ...swarm({ f0: 165, to: 1320, octaves: 1.6, n: 13, attack: 0.72, decay: 0.10, peak: 0.5, tilt: 0.4 }),
+  ] },
+
+  // Sub drop. The downlifter that lands ON a cut rather than before it: a fundamental falling from
+  // just above the speech range to the bottom of the spectrum, with its own second harmonic so it is
+  // still audible on a phone, where nothing under about 150Hz plays at all.
+  //
+  // THE NUMBER THAT MATTERS IS THE END, not the start. Landing at 30Hz reads as a room-sized drop;
+  // stopping at 60Hz reads as a bass note, which is a different event. renderCue glides LINEARLY in
+  // Hz, and the recipes call for an exponential fall, so this lands lower earlier than a synth would.
+  // That is a real difference and it is the missing primitive: a glide curve.
+  drop: { masterGain: 0.6, layers: [
+    { kind: 'tone', waveform: 'sine', frequency: 96, glideTo: 30, glideTime: 0.5, attack: 0.006, decay: 0.30, peak: 0.62 },
+    { kind: 'tone', waveform: 'sine', frequency: 192, glideTo: 60, glideTime: 0.5, attack: 0.004, decay: 0.16, peak: 0.20 },
+  ] },
+
+  // Impact. Three parts, and every write-up of the family names the same three: a TRANSIENT that gives
+  // the hit its edge, a BODY that gives it mass, and a TAIL that gives it a room. The mistake is to
+  // build only the body, which lands like a thump behind a curtain, or only the transient, which is a
+  // click. The transient is milliseconds, the body is a tenth of a second, the tail is most of a second.
+  //
+  // The body falls in pitch because a falling fundamental is what the ear reads as mass. The tail is a
+  // swarm rather than a reverb because the engine has no reverb: a wide, quiet, slowly sinking band
+  // decays like a room without one.
+  impact: { masterGain: 0.55, layers: [
+    { kind: 'tone', waveform: 'sine', frequency: 2400, glideTo: 900, glideTime: 0.012, attack: 0.0008, decay: 0.010, peak: 0.34 },
+    { kind: 'tone', waveform: 'sine', frequency: 120, glideTo: 46, glideTime: 0.10, attack: 0.003, decay: 0.14, peak: 0.62 },
+    ...swarm({ f0: 200, to: 130, octaves: 2.6, n: 14, attack: 0.02, decay: 0.30, peak: 0.16, offset: 0.01, tilt: 0.5 }),
+  ] },
+
+  // Swell. The reverse-cymbal move: a sound that accelerates INTO a cut and stops dead on it, which is
+  // what makes an edit feel inevitable rather than sudden.
+  //
+  // THE STEP THAT IS NOT OBVIOUS, and it is a workaround for a missing primitive. A reverse swell needs
+  // an EXPONENTIAL-IN amplitude envelope, and `env` only offers a linear attack. So the curve is built
+  // from arrivals instead of from a shape: the partials are staggered across 340ms, so the level accrues
+  // as each one joins, and because the stack is tilted the late arrivals are the bright ones. The
+  // spectrum therefore opens as the level rises, which is the half of a reverse cymbal that people
+  // actually hear.
+  swell: { masterGain: 0.5, layers: [
+    ...swarm({ f0: 300, to: 900, octaves: 2.4, n: 18, attack: 0.05, decay: 0.075, peak: 0.42, tilt: -0.55, stagger: 0.52 }),
+  ] },
+
+  // Braam. The Inception horn: not one instrument but a stack of detuned saws an octave and a fifth
+  // apart, low enough to feel. The detune is the whole effect. Two saws a few cents apart beat against
+  // each other at the difference frequency, and a few of those at different rates is what makes one
+  // sustained note sound like a section rather than a synth.
+  //
+  // 14 cents at 55Hz beats at about 0.4Hz, which is slow enough to read as a swell inside the note.
+  // Tighter than about 5 cents and the stack sounds like one oscillator; wider than about 25 and it
+  // sounds out of tune rather than large. The small downward glide is the brass player running out of
+  // air, and it is what stops the note sounding held by a machine.
+  braam: { masterGain: 0.42, layers: [
+    { kind: 'tone', waveform: 'saw', frequency: 55, glideTo: 52, glideTime: 1.4, attack: 0.11, decay: 0.62, peak: 0.30 },
+    { kind: 'tone', waveform: 'saw', frequency: 55, detune: 14, attack: 0.14, decay: 0.66, peak: 0.28 },
+    { kind: 'tone', waveform: 'saw', frequency: 82.5, detune: -9, attack: 0.18, decay: 0.58, peak: 0.20 },
+    { kind: 'tone', waveform: 'saw', frequency: 110, detune: 7, attack: 0.22, decay: 0.50, peak: 0.14 },
+    { kind: 'tone', waveform: 'sine', frequency: 27.5, attack: 0.09, decay: 0.60, peak: 0.34 },
+  ] },
+};
 
 /**
  * Music bed: a seamless ambient loop built from a chord, a slow tremolo and an optional pulse.

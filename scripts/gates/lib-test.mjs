@@ -2749,15 +2749,41 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- audio kit (core/audio-kit.mjs): synthesized cues must be deterministic + audible ----
 {
-  const a = renderCue(CUES.tick, 5), b = renderCue(CUES.tick, 5);
+  const a = renderCue(CUES.ready, 5), b = renderCue(CUES.ready, 5);
   ok('audio: renderCue is deterministic for a seed', a.length === b.length && a.every((v, i) => v === b[i]));
-  ok('audio: a different seed changes the noise', (() => { const c = renderCue(CUES.tick, 6); return c.some((v, i) => v !== a[i]); })());
+  ok('audio: a different seed changes the noise', (() => { const c = renderCue(CUES.ready, 6); return c.some((v, i) => v !== a[i]); })());
   ok('audio: every cue produces non-silent signal', Object.keys(CUES).every((n) => { const s = renderCue(CUES[n], 3); return s.some((v) => Math.abs(v) > 1e-4); }));
   ok('audio: no cue clips the 16-bit ceiling', Object.keys(CUES).every((n) => renderCue(CUES[n], 3).every((v) => Math.abs(v) <= 1)));
   // normalize is the reason cues are audible under a bed: raw Cuelume peaks bake at -25..-40 dBFS
-  ok('audio: normalize lifts to the ceiling', (() => { const s = normalize(renderCue(CUES.whisper, 1), 0.8); let p = 0; for (const v of s) p = Math.max(p, Math.abs(v)); return Math.abs(p - 0.8) < 1e-3; })());
+  ok('audio: normalize lifts to the ceiling', (() => { const s = normalize(renderCue(CUES.pluck, 1), 0.8); let p = 0; for (const v of s) p = Math.max(p, Math.abs(v)); return Math.abs(p - 0.8) < 1e-3; })());
   ok('audio: normalize leaves silence alone (no /0)', (() => { const s = normalize(new Float32Array(64), 0.8); return s.every((v) => v === 0); })());
-  ok('audio: tick is shorter than bloom (envelope shape survives)', renderCue(CUES.tick, 1).length < renderCue(CUES.bloom, 1).length);
+  ok('audio: pluck is shorter than bloom (envelope shape survives)', renderCue(CUES.pluck, 1).length < renderCue(CUES.bloom, 1).length);
+  // THE MOVEMENT CUES ARE A MOVING SPECTRAL BAND, and nothing else about them matters. A whoosh whose
+  // brightness never moves is a burst of static, which is what the deleted `sweep` and `travel` were.
+  // Brightness here is the RMS frequency, RMS(dx/dt)/(2*pi*RMS(x)), the same measure printed by
+  // `node scripts/dev/sound-lab.mjs --measure`. These assert the SHAPE, not a tuning: a whoosh arches
+  // (it passes), a riser only climbs (it arrives), and neither may sit still.
+  const brightness = (x, s, e) => {
+    let sx = 0, sd = 0;
+    for (let i = s + 1; i < e; i++) { sx += x[i] * x[i]; const d = (x[i] - x[i - 1]) * SR; sd += d * d; }
+    return Math.sqrt(sd / Math.max(1, e - s - 1)) / (2 * Math.PI * Math.sqrt(sx / Math.max(1, e - s - 1)) || 1);
+  };
+  const bands = (name, k = 8) => { const x = normalize(renderCue(CUES[name], 1)); const w = Math.floor(x.length / k);
+    return Array.from({ length: k }, (_, i) => brightness(x, i * w, i === k - 1 ? x.length : (i + 1) * w)); };
+  ok('audio: no movement cue carries a noise layer (the round-1 finding, as a constraint)',
+    ['whoosh', 'riser', 'drop', 'impact', 'swell', 'braam'].every((n) => !CUES[n].layers.some((l) => l.kind === 'noise')));
+  ok('audio: whoosh brightness ARCHES, so it passes rather than only arrives', (() => {
+    const b = bands('whoosh'), top = b.indexOf(Math.max(...b));
+    return top > 0 && top < b.length - 1 && b[top] > b[0] * 1.5 && b[b.length - 1] < b[top] * 0.6; })());
+  ok('audio: riser brightness only CLIMBS, and by more than an octave', (() => {
+    const b = bands('riser').slice(0, 7);
+    return b.every((v, i) => i === 0 || v >= b[i - 1] * 0.98) && b[6] > b[0] * 2; })());
+  ok('audio: swell gets brighter as it builds, and peaks late', (() => {
+    const x = normalize(renderCue(CUES.swell, 1)), b = bands('swell');
+    let pk = 0, at = 0; for (let i = 0; i < x.length; i++) if (Math.abs(x[i]) > pk) { pk = Math.abs(x[i]); at = i; }
+    return b[6] > b[0] * 3 && at > x.length * 0.4; })());
+  ok('audio: drop ends below 45Hz, which is what makes it a drop and not a bass note', (() => {
+    const b = bands('drop'); return b[4] < 45 && b[0] > b[4] * 1.5; })());
   // a bed must loop seamlessly: first and last sample sit at the same point of every partial
   ok('audio: music bed is a whole number of seconds (seamless loop)', musicBed({ loop: 8 }).length === 8 * SR);
   ok('audio: music bed is deterministic', (() => { const x = musicBed({ loop: 2 }), y = musicBed({ loop: 2 }); return x.every((v, i) => v === y[i]); })());
@@ -3020,7 +3046,10 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // them is renamed this line is what says so.
   const unbaked = MOTION_CUES.filter((n) => !(n in CUES));
   if (unbaked.length) console.log(`  · tactile: motion cues not baked yet (pending core/audio-kit.mjs): ${unbaked.join(', ')}`);
-  ok('tactile: `tick` and the interaction vocabulary it borrows already bake', 'tick' in CUES);
+  // EVERY NAME THE DERIVATION EMITS MUST BE A CUE, which is the assertion that was missing when the
+  // listening pass trimmed MOTION_CUES and left the emitters writing `thud`, `travel` and `riser`.
+  // Naming one cue was never the check: the check is that the whole vocabulary resolves.
+  ok('tactile: every motion cue the derivation can emit has a voicing', MOTION_CUES.every((n) => n in CUES));
 
   ok('tactile: nothing sounds without a scene', tactileCues({}).length === 0);
 
@@ -3043,7 +3072,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const one = (L) => tactileCues({ duration: 4, layers: [L] }, { canvas })[0];
   const big = one({ type: 'rect', start: 1, w: 1600, h: 800, anim: 'rise' });
   const small = one({ type: 'rect', start: 1, w: 160, h: 60, anim: 'rise' });
-  ok('tactile: a big layer thuds, a chip plucks', big.name === 'thud' && small.name === 'pluck');
+  ok('tactile: a big layer lands as an impact, a chip plucks', big.name === 'impact' && small.name === 'pluck');
   ok('tactile: the bigger layer lands louder', big.gain > small.gain);
   // ...and same size, different travel. With no per-cue parameters, LEVEL is the only handle on how
   // hard a thing lands, so a slide has to be louder than a fade of the identical card.
@@ -3079,8 +3108,8 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const camCues = tactileCues({ duration: 30, camera: [
     { t: 0, s: 1, x: 0, y: 0 }, { t: 10, s: 1, x: 0, y: 0 },
     { t: 10.3, s: 1.13, x: 0, y: -10 }, { t: 12.3, s: 1, x: 0, y: 0 }, { t: 20, s: 1, x: 0, y: 0 }] }, { canvas });
-  ok('tactile: a punch-in and its release are ONE travel, not two',
-     camCues.length === 1 && camCues[0].name === 'travel' && camCues[0].t === 10);
+  ok('tactile: a punch-in and its release are ONE whoosh, not two',
+     camCues.length === 1 && camCues[0].name === 'whoosh' && camCues[0].t === 10);
   ok('tactile: a camera that only sits still says nothing',
      tactileCues({ duration: 20, camera: [{ t: 0, s: 1 }, { t: 19, s: 1 }] }, { canvas }).length === 0);
   ok('tactile: a longer move is a bigger gesture, so it is louder',
