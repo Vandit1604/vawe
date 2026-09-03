@@ -34,6 +34,7 @@ import { newSince, WINDOW_DAYS } from './recency.mjs';
 // tokenizers would eventually disagree about which words an entry is indexed under, and the refusal has
 // to grade a blurb by exactly the words this search will find it by.
 import { searchWords } from '../../core/registry.js';
+import { emitJson } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -348,6 +349,48 @@ export function score(entry, qt) {
   return s;
 }
 
+// ---- rankQuery: the CLI's own rank → split → reorder pipeline, as one flat, callable step -----------
+//
+// The CLI block below used to inline all of this. It is pulled out so an agent driving `--json` gets
+// the SAME ranking a human reads as prose, from ONE place, rather than a second reimplementation left
+// to drift from the first. `n` mirrors the CLI's `--n` (defaults the top-slice to 8); `guessN` mirrors
+// the CLI's fallback slice when nothing clears CONFIDENT (defaults to 3, the CLI's "a wall of guesses
+// is the noise this exists to remove" default).
+export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
+  const qt = toks(query);
+  const u = usage();
+  const coverage = coverageIn(all);
+  const top = all
+    .filter((e) => !kind || e.kind === kind)
+    .map((e) => ({ ...e, s: score(e, qt), c: coverage(e, qt) }))
+    .filter((e) => e.s > 0)
+    .sort((a, b) => b.s - a.s || b.c - a.c || a.name.localeCompare(b.name))
+    .slice(0, n);
+
+  const answersRaw = top.filter((e) => e.c >= CONFIDENT);
+  const guessesRaw = top.filter((e) => e.c < CONFIDENT);
+  let selected = answersRaw.length ? answersRaw : guessesRaw.slice(0, guessN);
+
+  // New entries first, same as the CLI: relevance already decided which names you see.
+  const fresh = newSince(selected.map((e) => e.name), { cwd: repoRoot });
+  selected = [...selected.filter((e) => fresh.has(e.name)), ...selected.filter((e) => !fresh.has(e.name))];
+
+  const shape = (e) => ({
+    name: e.name, kind: e.kind, slot: e.slot, blurb: e.blurb,
+    coverage: e.c, score: e.s, used: u.count(e.name), isNew: fresh.has(e.name),
+    snippet: e.kind === 'blueprint beat' ? null : snippet(e),
+  });
+
+  return {
+    query,
+    confident: answersRaw.length > 0,
+    all: all.length,
+    results: selected.map(shape),
+    answers: answersRaw.map(shape),
+    guesses: guessesRaw.map(shape),
+  };
+}
+
 // ---- the CLI ------------------------------------------------------------------------------------
 // Guarded, because the ranking above is a library now: lib-test imports `collect`, `coverageIn` and
 // `CONFIDENT` to calibrate the threshold against real queries, and an unguarded CLI would exit(2) the
@@ -479,40 +522,19 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   }
 
   const kind = flag('kind');
-  const n = Number(flag('n') || 8);
-  const qt = toks(query);
-  const u = usage();
-  const coverage = coverageIn(all);
-  let ranked = all
-    .filter((e) => !kind || e.kind === kind)
-    .map((e) => ({ ...e, s: score(e, qt), c: coverage(e, qt) }))
-    .filter((e) => e.s > 0)
-    // COVERAGE BREAKS THE TIE, and alphabetical order used to. `score` has a ceiling of one hit per
-    // query word, so "a monospace face for code" scores 9 for `JetBrains Mono` and 9 for each of the ten
-    // block families whose NAME starts with "code". Eleven equal scores, cut to eight, sorted by name:
-    // the one entry that answered all three words was the one that fell off the list, and the tool then
-    // reported NOTHING HERE CLEARLY MATCHES about a face it holds. Coverage is the calibrated measure of
-    // how much of the QUESTION an entry answers, so it is the honest second key; the name stays third so
-    // the order is still deterministic.
-    .sort((a, b) => b.s - a.s || b.c - a.c || a.name.localeCompare(b.name))
-    .slice(0, n);
+  const explicitN = flag('n');
+  const result = rankQuery(all, query, {
+    kind, n: Number(explicitN || 8), guessN: Number(explicitN) || 3,
+  });
 
-  // The split this whole file exists for. Anything under the bar is a GUESS, printed as one and never
-  // in the position an answer occupies. Ranking still decides the order inside each half.
-  const answers = ranked.filter((e) => e.c >= CONFIDENT);
-  const guesses = ranked.filter((e) => e.c < CONFIDENT);
-  // Three guesses by default, because a wall of things that do not answer the question is the noise
-  // this change exists to remove. An explicit --n is still honoured: `make preflight` ranks a whole
-  // storyboard paragraph rather than asking a question, and nothing will ever clear the bar for a
-  // paragraph, so its five stay five and are simply labelled for what they are.
-  ranked = answers.length ? answers : guesses.slice(0, Number(flag('n')) || 3);
+  // AGENT DOOR. Same ranking as the prose below, as a record instead of lines to grep. Nothing but this
+  // JSON may reach stdout under --json (docs/MISTAKES.md #401), so this must be the only exit past here.
+  if (argv.includes('--json')) {
+    emitJson(result);
+    process.exit(0);
+  }
 
-  // Age, asked for AFTER the ranking and only about the handful that survived it: 46ms for five names
-  // against 79ms for all 397, and nobody reads the other 392.
-  const fresh = newSince(ranked.map((e) => e.name), { cwd: repoRoot });
-  // New entries go first. Relevance already decided WHICH five you see; within five, the one you have
-  // never heard of is the one worth putting where the eye lands. Score order is preserved inside each half.
-  ranked = [...ranked.filter((e) => fresh.has(e.name)), ...ranked.filter((e) => !fresh.has(e.name))];
+  const ranked = result.results;
 
   if (!ranked.length) {
     console.log(`\n  nothing matched "${query}".`);
@@ -522,24 +544,24 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   // The tally is line 2 on purpose: `make preflight` prints its own header and keeps the rest, so this is
   // the line an author skimming a preflight actually reads.
-  const nUnused = ranked.filter((e) => u.count(e.name) === 0).length;
+  const nUnused = ranked.filter((e) => e.used === 0).length;
+  const nFresh = ranked.filter((e) => e.isNew).length;
   console.log(`\n  ARSENAL · "${query}"`);
-  if (!answers.length) {
+  if (!result.confident) {
     console.log(`  NOTHING HERE CLEARLY MATCHES. The ${all.length} named things were searched and none of them`);
     console.log(`  answers enough of that question to be called an answer. Assume the engine does not have it,`);
     console.log(`  and say so, rather than building on the ${ranked.length} below.\n`);
     console.log(`  Nearest by wording only, WEAK GUESSES, not answers:\n`);
   } else {
-    console.log(`  ${ranked.length} matched · ${fresh.size} newer than ${WINDOW_DAYS} days · ${nUnused} never used here.`
+    console.log(`  ${ranked.length} matched · ${nFresh} newer than ${WINDOW_DAYS} days · ${nUnused} never used here.`
       + `\n  New and unused is not a recommendation. It means you may not know it is there.\n`);
   }
   for (const e of ranked) {
-    const used = u.count(e.name);
-    console.log(`  ${e.name}${fresh.has(e.name) ? `   ← NEW, added in the last ${WINDOW_DAYS} days` : ''}`);
-    console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${used === 0 ? 'NEVER used in this library' : `${used} scene(s)`}`);
+    console.log(`  ${e.name}${e.isNew ? `   ← NEW, added in the last ${WINDOW_DAYS} days` : ''}`);
+    console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? 'NEVER used in this library' : `${e.used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   then: make expand D=<file>`);
-    else { const snip = snippet(e); if (snip) console.log(`      ${snip}`); }
+    else if (e.snippet) console.log(`      ${e.snippet}`);
     console.log('');
   }
 

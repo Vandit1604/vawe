@@ -37,12 +37,15 @@ import { fileURLToPath } from 'node:url';
 import { collect } from '../author/arsenal.mjs';
 import { registries } from '../../core/registry.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'verify/discovery-ratchet.json');
 const stamp = process.argv.includes('--stamp');
-let bad = 0;
-const fail = (...m) => { bad++; console.error(...m); };
+// The printed line is rendered FROM the record (docs/MISTAKES.md #401): each record's `summary`
+// already carries the full multi-line advice a human reads, so the custom renderer prints it verbatim,
+// and it is printed once, at f.emit(), rather than scattered across the five checks below.
+const f = gateFindings({ line: (r) => r.summary });
 
 const corpus = await collect();
 console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.map((e) => e.kind)).size} kinds`);
@@ -56,9 +59,10 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
     const b = reg.blurbs || {};
     for (const n of Object.keys(reg.entries || {})) if (!b[n]) bare.push(`${reg.kind}:${n}`);
   }
-  if (bare.length) fail(`\n  ✗ ${bare.length} REGISTRY entr(ies) have no blurb: ${bare.slice(0, 6).join(' ')}`,
-    '\n    core/registry.js refuses this at load, so it cannot happen by forgetting.',
-    '\n    Something has weakened checkCovered. Restore it rather than adding one here.');
+  if (bare.length) f.fail('registry-bare',
+    `\n  ✗ ${bare.length} REGISTRY entr(ies) have no blurb: ${bare.slice(0, 6).join(' ')} ` +
+    `\n    core/registry.js refuses this at load, so it cannot happen by forgetting. ` +
+    `\n    Something has weakened checkCovered. Restore it rather than adding one here.`);
   else console.log(`  ✓ every registry entry carries a blurb`);
 }
 
@@ -88,13 +92,14 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
   } else if (prior && bare.length > prior.unfindable) {
     const known = new Set(Object.keys(prior.kinds || {}));
     const fresh = [...new Set(bare.map((e) => e.kind))].filter((k) => !known.has(k));
-    fail(`\n  ✗ ${bare.length} entr(ies) in the search have no blurb, up from ${prior.unfindable}.`,
-      `\n    by kind: ${summary}`,
-      fresh.length ? `\n    NEW kind(s) with no blurb: ${fresh.join(' ')}` : '',
-      '\n    An entry with no blurb is findable only by someone who already knows its name, which is',
-      '\n    the definition of undiscoverable. Give it a blurb where it is written. If its vocabulary',
-      '\n    is not a registry yet, making it one is the real fix: it buys the load-time refusal too.',
-      '\n    Lower the bar deliberately only with: node scripts/gates/discovery.mjs --stamp\n');
+    f.fail('corpus-bare',
+      `\n  ✗ ${bare.length} entr(ies) in the search have no blurb, up from ${prior.unfindable}. ` +
+      `\n    by kind: ${summary} ` +
+      (fresh.length ? `\n    NEW kind(s) with no blurb: ${fresh.join(' ')} ` : '') +
+      `\n    An entry with no blurb is findable only by someone who already knows its name, which is` +
+      `\n    the definition of undiscoverable. Give it a blurb where it is written. If its vocabulary` +
+      `\n    is not a registry yet, making it one is the real fix: it buys the load-time refusal too.` +
+      `\n    Lower the bar deliberately only with: node scripts/gates/discovery.mjs --stamp\n`);
   } else if (prior && bare.length < prior.unfindable) {
     console.log(`  ~ ${prior.unfindable - bare.length} fewer unfindable than the ratchet allows. Lower it: --stamp`);
   } else console.log(`  ✓ ${bare.length} entr(ies) without a blurb, at the ratchet (${summary})`);
@@ -115,9 +120,10 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
   const familyOf = new Map(CATALOG.map((r) => [r.name, r.family]));
   const families = [...new Set(CATALOG.map((r) => r.family))];
   const represented = new Set([...found].map((n) => familyOf.get(n)).filter(Boolean));
-  const missing = families.filter((f) => !represented.has(f));
-  if (missing.length) fail(`\n  ✗ ${missing.length} block famil(ies) are not in the search: ${missing.slice(0, 8).join(' ')}`,
-    '\n    scripts/author/arsenal.mjs reads blocks/catalog.mjs. If a family is missing, that read broke.');
+  const missing = families.filter((fam) => !represented.has(fam));
+  if (missing.length) f.fail('block-unsearchable',
+    `\n  ✗ ${missing.length} block famil(ies) are not in the search: ${missing.slice(0, 8).join(' ')} ` +
+    `\n    scripts/author/arsenal.mjs reads blocks/catalog.mjs. If a family is missing, that read broke.`);
   else console.log(`  ✓ all ${families.length} block families are searchable`);
 }
 
@@ -139,10 +145,11 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
     const missing = items.map((i) => i.n || i.name).filter((n) => n && !cli.has(n));
     const variants = missing.filter((n) => n.includes('.'));
     const unexplained = missing.filter((n) => !n.includes('.'));
-    if (unexplained.length) fail(`\n  ✗ ${unexplained.length} thing(s) the WEBSITE lists that the CLI cannot find:`,
-      `\n    ${unexplained.slice(0, 8).join(' ')}`,
-      '\n    The site would show these and `make arsenal` would answer "assume the engine does not',
-      '\n    have it". Add them to the corpus in scripts/author/arsenal.mjs, beside the blocks.');
+    if (unexplained.length) f.fail('index-parity',
+      `\n  ✗ ${unexplained.length} thing(s) the WEBSITE lists that the CLI cannot find: ` +
+      `\n    ${unexplained.slice(0, 8).join(' ')} ` +
+      `\n    The site would show these and \`make arsenal\` would answer "assume the engine does not` +
+      `\n    have it". Add them to the corpus in scripts/author/arsenal.mjs, beside the blocks.`);
     else console.log(`  ✓ the two indexes agree, apart from ${variants.length} namespaced variants left out on purpose`);
   }
 }
@@ -158,15 +165,20 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
 {
   const { familyCoverage } = await import('../dev/family-coverage.mjs');
   const { uncovered, covered, wantCount } = await familyCoverage();
-  if (!wantCount) fail('\n  ✗ read ZERO queries from lib-test.mjs: the PRESENT/PLAIN parse in family-coverage.mjs has rotted.');
-  else if (uncovered.length) fail(`\n  ✗ ${uncovered.length} searchable famil(ies) have no author-phrased query in the eval:`,
-    `\n    ${uncovered.map((u) => u.family).slice(0, 8).join(', ')}`,
-    '\n    An author who cannot phrase a family in plain English cannot find it, whatever its blurbs say.',
-    '\n    Add one query per family to PRESENT/PLAIN in scripts/gates/lib-test.mjs that resolves to it,',
-    '\n    and close any miss with `aka` at the write site. Worklist: node scripts/dev/family-coverage.mjs',
-    '\n    If a family is genuinely reached only by mechanism, exempt it in scripts/dev/family-coverage.mjs.');
+  if (!wantCount) f.fail('family-uncovered',
+    '\n  ✗ read ZERO queries from lib-test.mjs: the PRESENT/PLAIN parse in family-coverage.mjs has rotted.');
+  else if (uncovered.length) f.fail('family-uncovered',
+    `\n  ✗ ${uncovered.length} searchable famil(ies) have no author-phrased query in the eval: ` +
+    `\n    ${uncovered.map((u) => u.family).slice(0, 8).join(', ')} ` +
+    `\n    An author who cannot phrase a family in plain English cannot find it, whatever its blurbs say.` +
+    `\n    Add one query per family to PRESENT/PLAIN in scripts/gates/lib-test.mjs that resolves to it,` +
+    `\n    and close any miss with \`aka\` at the write site. Worklist: node scripts/dev/family-coverage.mjs` +
+    `\n    If a family is genuinely reached only by mechanism, exempt it in scripts/dev/family-coverage.mjs.`);
   else console.log(`  ✓ all ${covered.size} searchable families are asked for by the eval`);
 }
 
+f.emit();
+const bad = f.records.filter((r) => r.severity === 'error').length;
 if (bad) { console.error(`\n  discovery: ${bad} finding(s)\n`); process.exit(1); }
 console.log('  ✓ discovery: an author can find what the engine can do\n');
+process.exit(0);
