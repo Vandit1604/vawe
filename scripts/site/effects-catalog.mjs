@@ -59,8 +59,18 @@ const DESC = {
   ctaEnd: 'held end card: mark + install chip + url', verdictProof: 'typing command + tone verdict chip',
   // beats (the camera moves that used to sit here now carry their own blurbs, core/camera-moves.js)
   logoLockup: 'mark pops + wordmark travels + kinetic headline', logoReveal: 'mark DRAWS on / MELTS from a blob + bloom + wordmark cascade',
-  // per-frame accent layers (pseudo-names)
-  'beam:border (border-beam)': 'a light travels the rounded-rect border', 'beam:shine (sheen sweep)': 'a sheen sweeps across the box',
+};
+
+// The two pseudo-name sections (a MODE of a layer type, not a registry) keep their blurbs scoped to
+// their own section, the way a family does, so `make arsenal` indexes them. They used to sit in the
+// flat DESC above, which `d()` reads for docs/EFFECTS.md but scripts/author/arsenal.mjs does not: the
+// search reads each section's own `blurbs` map. So four capabilities rendered a description in the docs
+// and were unfindable by the tool CLAUDE.md sends you to before inventing anything (discovery.mjs).
+const BEAM_BLURBS = {
+  'beam:border (border-beam)': 'a light travels the rounded-rect border',
+  'beam:shine (sheen sweep)': 'a sheen sweeps across the box',
+};
+const SVG_BLURBS = {
   'svg:draw (stroke draws on)': 'the logo/icon stroke draws itself on, line by line',
   'svg:morph (shape melts into a logo)': 'one path melts into another (blob into logo), optional spin',
 };
@@ -158,8 +168,8 @@ const derived = catalogued().map((r) => {
 // sections from their own definition sites.
 export const sections = [
   ...derived,
-  ['Per-frame accent layers', '`{ "type":"beam", ... }`. A light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`', ['beam:border (border-beam)', 'beam:shine (sheen sweep)'], 'per-frame'],
-  ['Vector layer (logos/icons)', '`{ "type":"svg", ... }`. A path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame'],
+  ['Per-frame accent layers', '`{ "type":"beam", ... }`. A light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`', ['beam:border (border-beam)', 'beam:shine (sheen sweep)'], 'per-frame', { blurbs: BEAM_BLURBS }],
+  ['Vector layer (logos/icons)', '`{ "type":"svg", ... }`. A path that DRAWS itself on (stroke) or MELTS from one shape into another (true shape-morph, optional spin). `{ "type":"svg","d":"…","morph":{"to":"…","spin":6.28} }`', ['svg:draw (stroke draws on)', 'svg:morph (shape melts into a logo)'], 'per-frame', { blurbs: SVG_BLURBS }],
   // THE KEY IS `modifiers`, AND THIS LINE SAID `fx` FOR AS LONG AS THE FAMILY HAS EXISTED. `L.fx` is
   // the named-GSAP-effect slot and core/fx/index.js says so in capitals; an author who followed this
   // catalogue wrote `fx: [{ tilt: … }]` and got `layers[0].fx entry needs a name`. Ten modifiers,

@@ -1,7 +1,4 @@
 {
- "unfindable": 4,
- "kinds": {
-  "per-frame accent layer": 2,
-  "vector layer": 2
- }
+ "unfindable": 0,
+ "kinds": {}
 }
