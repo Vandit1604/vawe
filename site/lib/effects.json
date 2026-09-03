@@ -781,6 +781,54 @@
       ]
     },
     {
+      "id": "output-targets",
+      "title": "Output targets",
+      "tag": "canvas",
+      "intro": "`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition · `core/safe.js`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.",
+      "count": 5,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "16:9",
+          "stem": "output-targets--16-9",
+          "desc": "wide landscape, the desktop shape · a website hero, a YouTube upload, a deck slide, anything watched on a laptop",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "1:1",
+          "stem": "output-targets--1-1",
+          "desc": "a square, equal on both sides · the feed post that crops the same everywhere it is shown",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "4:3",
+          "stem": "output-targets--4-3",
+          "desc": "boxy landscape, the old television and slide-projector shape · archive footage, a retro monitor",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "4:5",
+          "stem": "output-targets--4-5",
+          "desc": "the tall feed post · Instagram portrait, more height than a square without taking the whole phone",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "9:16",
+          "stem": "output-targets--9-16",
+          "desc": "tall and vertical, the whole phone screen edge to edge · TikTok, Reels, Shorts, a story",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "caption-styles",
       "title": "Caption styles",
       "tag": "captions",
@@ -1989,7 +2037,7 @@
         {
           "name": "godRays",
           "stem": "ambient-shader-fields--godrays",
-          "desc": "shafts of light · sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point",
+          "desc": "shafts of light · sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point. it is BRIGHT through the middle, so drop `intensity` toward 0.4 before putting white type over it",
           "scene": "/assets/effects/ambient-shader-fields--godrays.json",
           "noPreview": null
         },
@@ -2239,6 +2287,138 @@
           "name": "desaturate",
           "stem": "adjustment-layers-grade-what-is-beneath--desaturate",
           "desc": "drain the colour beneath. 1 is fully grey",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "blend-modes",
+      "title": "Blend modes",
+      "tag": "per-layer",
+      "intro": "`mixBlend` · how a layer composites with what is already painted beneath it. On a GROUP child it throws, because CSS blends against the nearest stacking context and every timed element carries a transform · put it on the group, whose backdrop is the frame.",
+      "mode": "chips",
+      "note": "the CSS compositing spec defines the maths; MDN `mix-blend-mode` is the reference",
+      "noPreview": "a blend is a relationship between two layers, so a still of the layer alone shows nothing about it.",
+      "count": 17,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "color",
+          "stem": "blend-modes--color",
+          "desc": "takes tint and richness from the layer and brightness from the backdrop. The way to recolour a photo",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "color-burn",
+          "stem": "blend-modes--color-burn",
+          "desc": "darkens the backdrop hard wherever the layer is deep, crushing the shadows",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "color-dodge",
+          "stem": "blend-modes--color-dodge",
+          "desc": "brightens the backdrop hard wherever the layer is pale, blowing the highlights out",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "darken",
+          "stem": "blend-modes--darken",
+          "desc": "keeps whichever is darker at every pixel, the layer or what is behind it",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "difference",
+          "stem": "blend-modes--difference",
+          "desc": "subtracts one picture from the other, so matching areas go black and opposites invert. The classic glitch look",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "exclusion",
+          "stem": "blend-modes--exclusion",
+          "desc": "the same subtraction with the contrast taken out, greying the midtones instead of driving them to black",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "hard-light",
+          "stem": "blend-modes--hard-light",
+          "desc": "as if a harsh lamp shone through the layer · strong, unsubtle contrast",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "hue",
+          "stem": "blend-modes--hue",
+          "desc": "takes only the colour angle from the layer and keeps the backdrop's brightness and richness",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "lighten",
+          "stem": "blend-modes--lighten",
+          "desc": "keeps whichever is lighter at every pixel, the layer or what is behind it",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "luminosity",
+          "stem": "blend-modes--luminosity",
+          "desc": "takes only brightness from the layer and keeps the backdrop's tint. The inverse of `color`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "multiply",
+          "stem": "blend-modes--multiply",
+          "desc": "darkens everything · white drops out and the rest deepens, the way ink sits on paper or two slides stack",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "normal",
+          "stem": "blend-modes--normal",
+          "desc": "no blending at all · the layer simply covers what is behind it. The default, and the way to turn a blend off",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "overlay",
+          "stem": "blend-modes--overlay",
+          "desc": "deepens the dark areas and brightens the light ones at once, so contrast rises against the backdrop",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "plus-lighter",
+          "stem": "blend-modes--plus-lighter",
+          "desc": "adds the two pictures together, so light over light runs to white. For glows and additive light",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "saturation",
+          "stem": "blend-modes--saturation",
+          "desc": "takes only the richness from the layer and keeps the backdrop's tint and brightness",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "screen",
+          "stem": "blend-modes--screen",
+          "desc": "lightens everything · black drops out and the rest brightens, the opposite of multiply, like two projectors on one wall",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "soft-light",
+          "stem": "blend-modes--soft-light",
+          "desc": "as if a diffuse lamp shone through the layer · a gentle wash rather than a hit",
           "scene": null,
           "noPreview": null
         }
@@ -3765,6 +3945,75 @@
       ]
     },
     {
+      "id": "ransom-faces",
+      "title": "Ransom faces",
+      "tag": "text",
+      "intro": "`ransom` on a text layer · per-glyph face mixing, from this fixed set. Each glyph is cut from a different one, so the eight are picked to CLASH (grotesque · contrast serif · marker hand · geometric · editorial serif · wide display · typewriter mono). Pick a subset with `ransom: { faces: [...] }` when you want a narrower clash.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a typeface is judged by looking. The ransom clip on /showcase sets all eight.",
+      "count": 8,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "Anybody",
+          "stem": "ransom-faces--anybody",
+          "desc": "an extremely wide display sans at its heaviest · poster shout, sci-fi proportions",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "Archivo",
+          "stem": "ransom-faces--archivo",
+          "desc": "a workhorse grotesque cut heavy and wide · the neutral, newspaper-headline shout of the set",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "Caveat",
+          "stem": "ransom-faces--caveat",
+          "desc": "handwriting, a felt-tip scrawl · the letter somebody wrote by hand and stuck down",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "Fraunces",
+          "stem": "ransom-faces--fraunces",
+          "desc": "a high-contrast display serif with a soft wobble, old seed-catalogue flavour, slanted here",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "Hanken Grotesk",
+          "stem": "ransom-faces--hanken-grotesk",
+          "desc": "a friendly rounded sans at maximum weight · soft, solid, no edge to it",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "Instrument Serif",
+          "stem": "ransom-faces--instrument-serif",
+          "desc": "a slanted editorial serif with thin stems · magazine headline, elegant against the noise",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "JetBrains Mono",
+          "stem": "ransom-faces--jetbrains-mono",
+          "desc": "a monospace typewriter for code and terminals, every letter the same width",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "Space Grotesk",
+          "stem": "ransom-faces--space-grotesk",
+          "desc": "a technical geometric sans, cool and even, the computer-lab voice in the note",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "scramble-charsets-chars",
       "title": "Scramble charsets (`chars`)",
       "tag": "text",
@@ -4848,138 +5097,6 @@
       ]
     },
     {
-      "id": "blend-modes",
-      "title": "Blend modes",
-      "tag": "per-layer",
-      "intro": "`mixBlend` · how a layer composites with what is beneath it.",
-      "mode": "chips",
-      "note": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-      "noPreview": "a blend mode is a relationship with what is underneath, and the index has no underneath.",
-      "count": 17,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "color",
-          "stem": "blend-modes--color",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "color-burn",
-          "stem": "blend-modes--color-burn",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "color-dodge",
-          "stem": "blend-modes--color-dodge",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "darken",
-          "stem": "blend-modes--darken",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "difference",
-          "stem": "blend-modes--difference",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "exclusion",
-          "stem": "blend-modes--exclusion",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "hard-light",
-          "stem": "blend-modes--hard-light",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "hue",
-          "stem": "blend-modes--hue",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "lighten",
-          "stem": "blend-modes--lighten",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "luminosity",
-          "stem": "blend-modes--luminosity",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "multiply",
-          "stem": "blend-modes--multiply",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "normal",
-          "stem": "blend-modes--normal",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "overlay",
-          "stem": "blend-modes--overlay",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "plus-lighter",
-          "stem": "blend-modes--plus-lighter",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "saturation",
-          "stem": "blend-modes--saturation",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "screen",
-          "stem": "blend-modes--screen",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "soft-light",
-          "stem": "blend-modes--soft-light",
-          "desc": "the CSS compositing spec defines it, MDN `mix-blend-mode`",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
       "id": "plain-words-feel-duration-camera",
       "title": "Plain words (feel · duration · camera)",
       "tag": "timing",
@@ -5197,123 +5314,6 @@
           "name": "zoom out",
           "stem": "plain-words-feel-duration-camera--zoom-out",
           "desc": "camera → `move: \"workspaceZoomOut\"`",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "ransom-faces",
-      "title": "Ransom faces",
-      "tag": "text",
-      "intro": "`ransom` on a text layer · per-glyph face mixing, from this fixed set.",
-      "mode": "chips",
-      "note": "a typeface, see it, do not read about it",
-      "noPreview": "a typeface is judged by looking. The ransom clip on /showcase sets all eight.",
-      "count": 8,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "Anybody",
-          "stem": "ransom-faces--anybody",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "Archivo",
-          "stem": "ransom-faces--archivo",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "Caveat",
-          "stem": "ransom-faces--caveat",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "Fraunces",
-          "stem": "ransom-faces--fraunces",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "Hanken Grotesk",
-          "stem": "ransom-faces--hanken-grotesk",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "Instrument Serif",
-          "stem": "ransom-faces--instrument-serif",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "JetBrains Mono",
-          "stem": "ransom-faces--jetbrains-mono",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "Space Grotesk",
-          "stem": "ransom-faces--space-grotesk",
-          "desc": "a typeface, see it, do not read about it",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "output-targets",
-      "title": "Output targets",
-      "tag": "canvas",
-      "intro": "`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition · `core/safe.js`.",
-      "mode": "chips",
-      "note": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
-      "noPreview": "an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.",
-      "count": 5,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "16:9",
-          "stem": "output-targets--16-9",
-          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "1:1",
-          "stem": "output-targets--1-1",
-          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "4:3",
-          "stem": "output-targets--4-3",
-          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "4:5",
-          "stem": "output-targets--4-5",
-          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "9:16",
-          "stem": "output-targets--9-16",
-          "desc": "a ratio is its own definition; the safe area it implies belongs to the destination, in the section below",
           "scene": null,
           "noPreview": null
         }

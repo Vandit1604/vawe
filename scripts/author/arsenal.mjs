@@ -474,7 +474,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     .filter((e) => !kind || e.kind === kind)
     .map((e) => ({ ...e, s: score(e, qt), c: coverage(e, qt) }))
     .filter((e) => e.s > 0)
-    .sort((a, b) => b.s - a.s || a.name.localeCompare(b.name))
+    // COVERAGE BREAKS THE TIE, and alphabetical order used to. `score` has a ceiling of one hit per
+    // query word, so "a monospace face for code" scores 9 for `JetBrains Mono` and 9 for each of the ten
+    // block families whose NAME starts with "code". Eleven equal scores, cut to eight, sorted by name:
+    // the one entry that answered all three words was the one that fell off the list, and the tool then
+    // reported NOTHING HERE CLEARLY MATCHES about a face it holds. Coverage is the calibrated measure of
+    // how much of the QUESTION an entry answers, so it is the honest second key; the name stays third so
+    // the order is still deterministic.
+    .sort((a, b) => b.s - a.s || b.c - a.c || a.name.localeCompare(b.name))
     .slice(0, n);
 
   // The split this whole file exists for. Anything under the bar is a GUESS, printed as one and never

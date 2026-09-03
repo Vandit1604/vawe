@@ -57,11 +57,12 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
 // ---- 2. THE WHOLE CORPUS: a ratchet, because one source has no write site to refuse at ------------
 // The catalogue (docs/EFFECTS.md) is the corpus's second source and nothing refuses on its behalf.
 // What is left, and why each is what it is, so the next reader does not re-derive it:
-//   ransom face (8)  real typeface names. A blurb would genuinely help ("a handwriting face" should
-//                    find Caveat), and they are worth a registry.
-//   output target(5) the aspect ratios. Same: "vertical for a phone" should find 9:16.
 //   svg / beam (4)   catalogue ROWS whose name already carries the description, e.g.
 //                    "svg:draw (stroke draws on)". Not a bare vocabulary; a different shape of entry.
+// The ransom faces (8) and the aspect ratios (5) were here and are not any more: both were worth a
+// registry, both got one (core/ransom.js, core/safe.js), and "a handwriting face" reaches Caveat and
+// "vertical for a phone" reaches 9:16. Thirteen of the seventeen went that way, which is the answer
+// for anything left in this list that is a real vocabulary rather than a row shape.
 // The number may fall and may never rise.
 {
   const bare = corpus.filter((e) => !e.blurb || !e.blurb.trim());

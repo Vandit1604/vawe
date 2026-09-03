@@ -37,9 +37,45 @@ import { defineRegistry } from './registry.js';
 
 // What a ratio MEANS in pixels. This lives here, with the safe area, because the two are the same
 // question asked twice ("how big is the frame" / "where inside it may content live") and answering
-// them from two tables is precisely how the engine and its gate drifted apart. boot.js and
+// them from two tables is precisely how the engine and its gate drifted apart.
+//
+// A REGISTRY, AND THE VALUE IT CARRIES IS THE PIXELS. Every other vocabulary here maps a name to an
+// implementation; this one maps a name to `[w, h]`, which is what boot.js and verify/audit.mjs read.
+// That is what a registry's `entries` map already is, so ASPECTS below IS the entries map: the object
+// keeps its shape, its keys and its values, and nothing that reads it changes.
+//
+// What it buys is the blurb. The five ratios reached `make arsenal` with none, so `Q="vertical for a
+// phone"` did not reach `9:16` and an author had to already know the notation to find the canvas. The
+// catalogue's line was "a ratio is its own definition", which is true of the arithmetic and false of
+// the question a person is actually asking, which is never about arithmetic: it is about where the
+// film is watched.
+export const ASPECT_REGISTRY = defineRegistry('output target', {
+  '16:9': [1920, 1080],
+  '9:16': [1080, 1920],
+  '1:1': [1080, 1080],
+  '4:5': [1080, 1350],
+  '4:3': [1440, 1080],
+}, {
+  slot: 'aspect',
+  blurbs: {
+    '16:9': 'wide landscape, the desktop shape: a website hero, a YouTube upload, a deck slide, anything watched on a laptop',
+    '9:16': 'tall and vertical, the whole phone screen edge to edge: TikTok, Reels, Shorts, a story',
+    '1:1': 'a square, equal on both sides: the feed post that crops the same everywhere it is shown',
+    '4:5': 'the tall feed post: Instagram portrait, more height than a square without taking the whole phone',
+    '4:3': 'boxy landscape, the old television and slide-projector shape: archive footage, a retro monitor',
+  },
+  catalog: {
+    title: 'Output targets',
+    tag: 'canvas',
+    intro: '`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.',
+    usage: (n, { j }) => j({ module: 'scene', aspect: n }),
+    noPreview: 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
+  },
+});
+
+// The name → pixels table itself, which is the registry's own entries map. boot.js and
 // verify/audit.mjs both import this; neither keeps a copy.
-export const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350], '4:3': [1440, 1080] };
+export const ASPECTS = ASPECT_REGISTRY.entries;
 
 /**
  * sceneDims(cfg, key?): the canvas a scene renders at, in pixels. An explicit key (an --aspect flag)
