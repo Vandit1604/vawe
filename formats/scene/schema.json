@@ -1156,7 +1156,9 @@
       "domainWarp",
       "voronoi",
       "metaballs",
-      "bands"
+      "bands",
+      "godRays",
+      "curlSmoke"
      ]
     },
     "shaderKeys": {
@@ -2322,7 +2324,8 @@
       "mandelbulb",
       "chromeGlass",
       "caustics",
-      "holoFoil"
+      "holoFoil",
+      "glassRefract"
      ]
     },
     "raymarchKeys": {

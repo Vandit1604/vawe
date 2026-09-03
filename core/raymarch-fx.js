@@ -31,6 +31,7 @@ export const RAYMARCH_SURFACES = {
   chromeGlass: 'a tumbling torus and a bobbing sphere in mirror chrome, reflecting a studio horizon with a hard specular glint',
   caustics: 'a water surface built from crossed low-frequency waves, lit so the caustic bands come from the same field that shapes it rather than sitting on top',
   holoFoil: 'a rippling disc of foil: thin-film interference over bright metal, the hue turning with viewing angle. the band is deliberately NARROW, so it reads as one colour sliding rather than a rainbow, and it is bounded to a disc so it keeps a silhouette',
+  glassRefract: 'a tumbling block of clear glass. the ray bends going in, crosses the body, and bends again coming out, and the exit is taken three times at three slightly different indices, so edges split into red and blue the way a prism does. thick parts drink the light and take the palette colour. transparent, dispersive, refractive: the crystal, the diamond, the ice cube',
 };
 export const RAYMARCH_FX = Object.keys(RAYMARCH_SURFACES);
 
@@ -54,6 +55,14 @@ mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
 float smin(float a, float b, float k){ float h = clamp(0.5 + 0.5*(b-a)/k, 0.0, 1.0); return mix(b, a, h) - k*h*(1.0-h); }
 float sdSphere(vec3 p, float r){ return length(p) - r; }
 float sdTorus(vec3 p, vec2 t){ vec2 q = vec2(length(p.xz)-t.x, p.y); return length(q)-t.y; }
+// The rounded box, from Inigo Quilez's distance-functions article (iquilezles.org/articles/distfunctions).
+// The max(q,0) length is the distance outside the box and the min(max(...),0) term is the interior
+// distance; adding both and subtracting r is what makes ONE expression exact both inside and out,
+// which a refracted ray marching from within the body needs and a naive outside-only box cannot give.
+float sdRoundBox(vec3 p, vec3 b, float r){
+  vec3 q = abs(p) - b;
+  return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0) - r;
+}
 float hash1(float n){ return fract(sin(n + u_seed) * 43758.5453123); }
 
 // palette lookup with a sane fallback, so a scene never depends on the author passing colours
@@ -116,12 +125,29 @@ float mapHoloFoil(vec3 p){
   return max(sheet, length(p.xz) - 0.95);
 }
 
+float mapGlassRefract(vec3 p){
+  // ONE convex-ish solid, deliberately. A refracted ray has to march the field from INSIDE, and a
+  // union of two bodies puts an interior wall in the middle of that march: the ray exits the first
+  // object into the second and the picture stops reading as one piece of glass. A rounded cube also
+  // gives the two things refraction needs to be legible: flat faces that carry a clean image of the
+  // environment, and fat corners where the bending is strong enough to split colour.
+  // The tumble is aimed at the CORNERS. A flat face of glass presented to the camera refracts a flat
+  // image and reads as a tinted panel; the corners are where the exit angle changes fastest and where
+  // both the caustic pinch and the colour split live. So the second axis is biased away from face-on
+  // and swings past it rather than resting there.
+  vec3 q = p;
+  q.xz *= rot(u_time * 0.26);
+  q.xy *= rot(0.62 + 0.42 * sin(u_time * 0.17));
+  return sdRoundBox(q, vec3(0.46), 0.18);
+}
+
 float map(vec3 p){
   if (u_fx == 0) return mapMetaballs(p);
   else if (u_fx == 1) return mapMandelbulb(p);
   else if (u_fx == 2) return mapChromeGlass(p);
   else if (u_fx == 3) return mapCaustics(p);
-  else return mapHoloFoil(p);
+  else if (u_fx == 4) return mapHoloFoil(p);
+  else return mapGlassRefract(p);
 }
 
 // tetrahedron normal: 4 taps instead of the naive 6, same accuracy
@@ -145,6 +171,26 @@ vec3 envColor(vec3 rd){
   float key  = pow(max(dot(rd, normalize(vec3(0.5, 0.7, -0.4))), 0.0), 32.0);
   float fill = pow(max(dot(rd, normalize(vec3(-0.6, 0.35, 0.5))), 0.0), 12.0);
   return col + vec3(1.0, 0.97, 0.92) * key * 3.2 + vec3(0.75, 0.82, 1.0) * fill * 0.55;
+}
+
+// THE ROOM A TRANSMITTED RAY LANDS IN. envColor above is a studio built for a MIRROR, and a mirror
+// mostly looks upward: its floor sits at 0.10 because almost nothing reflects off it. A refracted ray
+// does the opposite, it leaves the body pointing DOWN, so every transmitted ray in the first version
+// landed on the darkest surface in the room and a block of clear glass rendered as a black stone.
+// Glass needs something under it to carry an image, and it needs that something to have a GRADIENT in
+// it: refraction can only show what the room contains, and a flat white table refracts into an even
+// wash that reads as pale plastic. So the table recedes, and the two lamps are opposed in colour, to
+// give the dispersion at a corner something warm on one side and something cool on the other.
+vec3 transmitEnv(vec3 d){
+  vec3 e = envColor(d);
+  // The table sits HIGH and its edge is soft: a ray leaving a flat face of the block barely bends, so
+  // it exits only a little below horizontal, and a table that starts 30 degrees down leaves the whole
+  // face showing the dark studio floor.
+  vec3 table = mix(vec3(0.95, 0.97, 1.00), vec3(0.38, 0.46, 0.62), smoothstep(-0.06, -0.90, d.y));
+  e = mix(e, table, smoothstep(0.26, -0.26, d.y) * 0.86);
+  e += vec3(1.00, 0.72, 0.42) * pow(max(dot(d, normalize(vec3(-0.75, -0.10, 0.55))), 0.0), 8.0) * 0.70;
+  e += vec3(0.34, 0.56, 1.00) * pow(max(dot(d, normalize(vec3(0.80, 0.22, 0.42))), 0.0), 14.0) * 0.85;
+  return e;
 }
 
 void main(){
@@ -203,7 +249,7 @@ void main(){
       vec3 deep = pal(0, vec3(0.04, 0.22, 0.38)), lit = pal(1, vec3(0.55, 0.92, 0.98));
       col = mix(deep, lit, c * 0.85) * (0.35 + 0.65 * diff) + envColor(refl) * fres * 0.55;
 
-    } else {                                           // holoFoil, iridescent, angle-shifted hue
+    } else if (u_fx == 4) {                            // holoFoil, iridescent, angle-shifted hue
       // thin-film interference over metal. The hue band is NARROW (x2.6, not x7) and sits on a
       // bright silver base: a full-spectrum sweep reads as a pride gradient, not as foil.
       // Balance matters more than either term: the env is bright, so weighting metal above the film
@@ -216,6 +262,64 @@ void main(){
       col = mix(col, col * pal(0, vec3(1.0)), 0.20);
       col *= (0.55 + 0.45 * diff);
       col += vec3(1.0) * pow(max(dot(refl, ld), 0.0), 42.0) * 1.6;   // the glint that sells foil
+
+    } else {                                           // glassRefract, dispersive transparent glass
+      // WHAT MAKES GLASS LOOK LIKE GLASS, and it is three things in an order, none of which is
+      // "make it transparent". Read: Inigo Quilez on raymarching refraction, and Schlick's 1994
+      // approximation to the Fresnel term, which every real-time renderer uses.
+      //
+      // 1. FRESNEL decides how much of the pixel is reflection and how much is transmission, and it
+      //    depends on the viewing angle: face-on you see through, edge-on you see a mirror. Schlick:
+      //    F = F0 + (1-F0)(1-cos)^5, F0 = 0.04 for glass. A constant blend instead of this reads as
+      //    tinted plastic, which is the usual failure and the reason it is step one.
+      // 2. THE RAY CROSSES THE BODY. Refract in, march the field NEGATED (inside the solid the
+      //    distance is negative, so -map is the distance to the far wall), refract out at the exit
+      //    normal. Skipping the interior march and refracting straight into the environment gives a
+      //    lens with no thickness: no caustic pinch, no inverted image, no weight.
+      // 3. DISPERSION IS TAKEN AT THE EXIT ONLY. Red, green and blue have different indices, so a
+      //    prism splits them. Marching three times to get that would triple the cost of the most
+      //    expensive primitive in the engine; refracting the ONE interior ray out three times and
+      //    reading the environment for each costs three cheap lookups. The colour fringe appears at
+      //    the corners, where the exit angle changes fastest, which is where a real prism puts it.
+      float ior = 1.47;
+      vec3 rin = refract(rd, n, 1.0 / ior);
+      vec3 ip = p - n * 0.02;
+      float it = 0.0;
+      for (int i = 0; i < 40; i++) {
+        float dd = -map(ip + rin * it);
+        if (dd < SURF_EPS) break;
+        it += max(dd, 0.012);
+        if (it > 5.0) break;
+      }
+      vec3 xp = ip + rin * it;
+      vec3 xn = -normalAt(xp);                          // the far wall faces INWARD, hence the sign
+      // The three indices are spread WIDE, well past a real crown glass. A physical Abbe number puts
+      // the red and blue exits inside a degree of each other, which at 1080p is a fringe under two
+      // pixels: correct, and invisible. This is the same exaggeration a colourist makes; the effect
+      // has to survive a viewer who is not looking for it.
+      vec3 eR = refract(rin, xn, ior * 0.960);
+      vec3 eG = refract(rin, xn, ior);
+      vec3 eB = refract(rin, xn, ior * 1.040);
+      // refract() returns the zero vector on total internal reflection, and an env lookup along zero
+      // is a flat grey patch. TIR is not an error case here, it is the bright silvered edge a thick
+      // glass corner actually has, so fall back to the mirror ray rather than to a default colour.
+      vec3 mir = reflect(rin, xn);
+      if (dot(eR, eR) < 0.5) eR = mir;
+      if (dot(eG, eG) < 0.5) eG = mir;
+      if (dot(eB, eB) < 0.5) eB = mir;
+      // BEER-LAMBERT: the further the ray travelled through the body, the more of the palette's
+      // complement it lost. This is what makes thickness visible and is why the corners read darker
+      // and more saturated than the faces.
+      // The palette stop is pulled most of the way to white before it becomes an absorption
+      // coefficient. A saturated brand colour used raw makes (1 - tint) near 1 on two channels, and
+      // glass a centimetre thick then drinks nearly everything: the body goes black and the effect is
+      // gone. What an author means by "blue glass" is a faint cast over a bright body.
+      vec3 tint = mix(vec3(1.0), pal(0, vec3(0.55, 0.80, 0.95)), 0.55);
+      vec3 absorb = exp(-(vec3(1.0) - tint) * it * 0.85);
+      vec3 tr = vec3(transmitEnv(eR).r, transmitEnv(eG).g, transmitEnv(eB).b) * absorb;
+      float f = 0.04 + 0.96 * pow(1.0 - max(dot(n, -rd), 0.0), 5.0);   // Schlick
+      col = mix(tr, envColor(refl), clamp(f, 0.0, 1.0));
+      col += vec3(1.0) * pow(max(dot(refl, ld), 0.0), 110.0) * 3.4;    // the hard specular pin
     }
 
     // distance fog toward transparent, so the subject sits IN the composition rather than being

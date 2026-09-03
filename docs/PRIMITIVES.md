@@ -10,7 +10,7 @@ No templates. These are the words; you write the sentences. Counts are exact (fr
 Everything is pure in the frame number: same input, same bytes, any render order.
 
 **Vocabulary size: 27 cut presentations × 8 timings × 4 directions,
-35 shader stings, 21 ambient shader looks, 31 composite looks,
+35 shader stings, 23 ambient shader looks, 31 composite looks,
 8 canvas passes, 8 resample effects (layer-as-texture),
 31 kinetic presets × 3 split modes, 42 easings (the velocity ramps among them),
 21 background presets (recolored by every brand theme),
@@ -161,7 +161,7 @@ fields at load, so it is pure sugar: determinism and every gate are unchanged.
 - **See any transition before authoring**: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
   renders a labelled A→B filmstrip. Decision theory: `docs/CRAFT/TRANSITIONS.md`.
 
-## Ambient shader looks (`core/shaders-ambient.js`): 21 continuous WebGL fields (the `shader` layer)
+## Ambient shader looks (`core/shaders-ambient.js`): 23 continuous WebGL fields (the `shader` layer)
 
 Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.
 Two roles:
@@ -805,7 +805,7 @@ Not the same as its neighbours, and the difference is what to reach for:
   functions: it can blur and saturate that backdrop uniformly. It cannot **bend** it. `glass` for a
   frosted panel over a scene, `resample:"refract"` when the pixels should displace like real glass.
 
-## Raymarched 3D (`core/raymarch-fx.js`) · the `raymarch` layer type, 5 scenes
+## Raymarched 3D (`core/raymarch-fx.js`) · the `raymarch` layer type, 6 scenes
 
 Real 3D without a 3D engine. A fullscreen quad plus a signed distance field IS a renderer: march a ray
 per pixel, hit an implicit surface, shade it from its normal. No geometry, no scene graph, no

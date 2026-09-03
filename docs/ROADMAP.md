@@ -149,7 +149,7 @@ P-frame freeze (codec plus stateful), feedback and phosphor trails (frame feedba
 
 ## Tier 3: GLSL
 
-`SHADER_FX` holds 35 entries (`core/stings.js:35`) and `AMBIENT_FX` 21 (`core/shaders-ambient.js:49`);
+`SHADER_FX` holds 35 entries (`core/stings.js:35`) and `AMBIENT_FX` 23 (`core/shaders-ambient.js:49`);
 between them the families below are majority built. This section used to read as a wish-list and sent
 two consecutive planning passes at work that already existed.
 
@@ -206,7 +206,7 @@ gate can read the names without resolving the browser-absolute three.js import.
 |---|---|---|
 | extruded 3D text | **SHIPS** | `extrudeText` in `THREE_FX` (`core/three-scenes.js:23`). |
 | wireframe / point cloud | **PART** | `pointCloud` ships (`core/three-scenes.js:22`). No wireframe scene: `THREE_FX` is the eleven scenes in `core/three-scenes.js` and none of them is one. |
-| metaballs · fractals (mandelbulb) · chrome glass · water caustics · holographic foil | **SHIPS** | `RAYMARCH_FX` = 5 (`core/raymarch-fx.js:28-35`): metaballs · mandelbulb · chromeGlass · caustics · holoFoil. |
+| metaballs · fractals (mandelbulb) · chrome glass · water caustics · holographic foil | **SHIPS** | `RAYMARCH_FX` = 6 (`core/raymarch-fx.js:28-36`): metaballs · mandelbulb · chromeGlass · caustics · holoFoil · glassRefract. |
 | Code 3D Extrude · Code Morph · Code Snippet Flight | **SHIPS** | `codeExtrude` in `THREE_FX`; `codeMorph` and `codeFlight` in `BLOCKS` (`blocks/codeanim.mjs`). |
 | iPhone and MacBook 3D Showcase · 3D UI Reveal | **SHIPS** | `deviceShowcase` and `uiParallax` in `THREE_FX`; `uiReveal3d` at `blocks/vfx.mjs:305`. |
 | HTML-in-Canvas / Liquid Glass | **SHIPS** | Six blocks in `blocks/glass.mjs`: `glassHome` · `glassMenu` · `glassControls` · `glassNotification` · `glassWidgets` · `glassDock`, with real refraction behind them (`glass:"refract"`). **Honest note:** Apple documents Liquid Glass for Apple platforms only. Any web version is an approximation and should be labelled one, never implied to be the real control. |

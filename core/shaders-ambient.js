@@ -48,6 +48,8 @@ export const AMBIENT_SHADERS = {
   voronoi: 'cellular (Worley) noise: seeded cells drifting on their own loops, each one flat-tinted, with a lit line along every shared border',
   metaballs: 'five signed-distance circles merging and parting on a polynomial smooth minimum, so they fuse into one body instead of overlapping',
   bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md',
+  godRays: 'shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point',
+  curlSmoke: 'a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern',
 };
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
 
@@ -102,6 +104,24 @@ float fbm(vec2 p){ float a = 0.5, s = 0.0;
 float smin(float a, float b, float k){
   float h = clamp(0.5 + 0.5*(b - a)/k, 0.0, 1.0);
   return mix(b, a, h) - k*h*(1.0 - h); }
+// THE POTENTIAL a curl is taken of, and the curl itself. Bridson, Hourihan and Nordenstam,
+// "Curl-Noise for Procedural Fluid Flow" (SIGGRAPH 2007). In two dimensions the curl of a scalar
+// potential is (dPsi/dy, -dPsi/dx), and that vector field is divergence-free BY CONSTRUCTION: it can
+// roll and shear but it can never source or sink. That single property is the whole difference
+// between smoke and a smear. A field sampled straight out of noise has divergence everywhere, so it
+// piles material up in some places and empties others, and the result reads as a texture sliding
+// about. Take the curl of the same noise and it circulates instead.
+//
+// Two octaves, not five. The curl DIFFERENTIATES the potential, and differentiating amplifies the
+// high frequencies, so a third octave arrives as speckle in the flow rather than as structure.
+float psi(vec2 q){ return noise(q) + 0.42*noise(q*2.3 + 4.7); }
+// Forward differences, three taps rather than four. The half-cell bias a forward difference carries
+// is a fraction of a vortex wide and invisible in a flow field, and the tap it saves is paid ten
+// times over per pixel by the trace that calls this in a loop.
+vec2 curl(vec2 q){
+  float e = 0.055, c = psi(q);
+  return vec2(psi(q + vec2(0.0, e)) - c, -(psi(q + vec2(e, 0.0)) - c)) / e;
+}
 vec3 P(int i, vec3 df){                                   // palette stop, or a tasteful default
   if(i==0) return u_palN>0 ? u_pal[0] : df;
   if(i==1) return u_palN>1 ? u_pal[1] : df;
@@ -409,10 +429,10 @@ void main(){
     float core = smoothstep(0.02, -0.12, d);              // the lit interior, so the body has volume
     col = mix(c0, mix(c1, c2, core), body);
     col = mix(col, c3, 0.55*smoothstep(0.06, 0.0, abs(d)));   // a rim on the boundary itself
-  } else {                                                // bands, a ramp repeated over a scalar field
+  } else if(u_fx==20){                                    // bands, a ramp repeated over a scalar field
     float bt = t * 0.06;                                  // the clock, first line, see note below
     vec2  drift = vec2(0.05*sin(t*0.07), 0.03*cos(t*0.05));
-    // The trailing else (index 20 today). The clock is on the FIRST line because lib-test reads the opening
+    // The clock is on the FIRST line because lib-test reads the opening
     // 600 characters of a branch looking for a use of t, and a long comment can push the only one out
     // of the window. That is the test being positional rather than this code being odd, and putting
     // the drift up top is better code anyway: it is the one thing every term below reads.
@@ -569,6 +589,110 @@ void main(){
       col = clamp(ramp(0.5 + (gx - 0.5)*sc) - 0.30*slat*u_p5.z
                 + max(lit, 0.0)*0.35 - max(-lit, 0.0)*0.35, 0.0, 1.0);
     }
+    alpha = 1.0;
+  } else if(u_fx==21){                                    // godRays, volumetric light scattering
+    float gt = t*0.11;                                    // the clock, first line (see the bands note)
+    // TECHNIQUE: Kenny Mitchell, "Volumetric Light Scattering as a Post-Process", GPU Gems 3 ch.13.
+    // For each pixel, walk toward the light in screen space, sample an OCCLUDER at every step and sum
+    // the samples under an exponential decay. Radial shafts fall out of that sum without anything
+    // drawing a shaft: a pixel whose line to the light threads a gap collects light at every step,
+    // one whose line runs behind a leaf collects none, and the boundary between the two IS the beam.
+    //
+    // THE STEP NOBODY GUESSES is the decay. Sum the taps with equal weight and you get a blurred copy
+    // of the occluder smeared toward the light, which looks like a mistake. The geometric decay makes
+    // a tap's contribution fall with its distance from the pixel, so the shaft is bright where it
+    // starts and dissolves into the air, which is what scattering actually does.
+    //
+    // The occluder is GENERATED, not sampled from the picture: a WebGL layer here composites over its
+    // siblings without reading them, so there is nothing beneath to take a silhouette from. Two
+    // octaves of drifting noise, thresholded, is a canopy of leaves, and it is the honest version of
+    // the effect rather than a claim to be shadowing your content.
+    vec3 g0 = P(0, vec3(0.040, 0.055, 0.085));            // the unlit air
+    vec3 g1 = P(1, vec3(1.000, 0.870, 0.640));            // the light itself
+    vec3 g2 = P(2, vec3(0.290, 0.470, 0.620));            // the cool bounce the shafts sit against
+    vec2 lp = vec2((0.34 + 0.05*sin(gt*1.3))*ar, 1.06);   // the source, just off the top edge
+    vec2 dl = (lp - p) * (1.0/24.0) * 0.92;               // how far the 24 taps reach toward it
+    vec2 sp = p; float acc = 0.0, decay = 1.0;
+    for(int i=0;i<24;i++){
+      sp += dl;
+      // CANOPY FREQUENCY IS THE WHOLE PICTURE, and the first version had it four times too low. Big
+      // soft blobs give ONE fat smear of light, because the ray to the light either clears the blob
+      // or it does not; there is no second edge inside the frame to cut a second beam. The number of
+      // shafts is the number of gaps the occluder puts across the frame, so it is set here and
+      // nowhere else.
+      float c = noise(sp*6.6 + vec2(gt*1.1, -gt*0.6))*0.66 + noise(sp*14.5 - gt*0.75)*0.34;
+      acc += smoothstep(0.40, 0.76, c) * decay;
+      decay *= 0.952;
+    }
+    acc = clamp(acc*0.075, 0.0, 1.15);
+    float dl2 = dot(p - lp, p - lp);
+    // The bloom is TIGHT. Wide, it swallows the top third of the frame in white and takes the tops of
+    // the shafts with it, so the beams appear to start halfway down with no source.
+    float glow = exp(-dl2*3.4);                           // the source's own bloom
+    float haze = 0.35 + 0.65*exp(-dl2*0.30);              // air thickens toward the light
+    // DUST, three sizes of it, each mote circling its own cell so a still frame and a moving one
+    // disagree. It is multiplied by acc, so motes only light up where a beam already passes: dust
+    // visible in the dark half is what makes a god-ray shot read as a filter laid over the frame.
+    float dust = 0.0;
+    for(int i=0;i<3;i++){ float fi=float(i);
+      vec2 g = p*(11.0+6.0*fi) + vec2(t*0.020*(1.0+fi), -t*0.045);
+      vec2 gi = floor(g), gf = fract(g) - 0.5;
+      gf += 0.33*vec2(sin(t*0.45 + hash(gi)*6.2832), cos(t*0.37 + hash(gi+7.0)*6.2832));
+      dust += smoothstep(0.115, 0.0, length(gf)) * step(0.90, hash(gi + fi*13.0));
+    }
+    vec3 beam = mix(g2, g1, clamp(acc*0.9, 0.0, 1.0));
+    col = mix(g0, g2, 0.35*haze) + beam*(acc*haze + glow*0.55) + g1*dust*acc*0.55;
+    alpha = 1.0;
+  } else {                                                // curlSmoke, a rising plume
+    float st = t*0.30;                                    // the clock, first line (see the bands note)
+    // CURL NOISE for the flow (see psi/curl above), and a SEMI-LAGRANGIAN BACKTRACE for the smoke.
+    //
+    // PURITY IS WHY THIS IS WRITTEN THE WAY IT IS, and it is worth reading before the maths. Real
+    // smoke advects: frame n is frame n-1 pushed along the velocity field. renderFrame(n) here is
+    // SEEKED, frames render out of order across eight workers, and a shader that evolves from its own
+    // last frame renders one picture on a run and a different one on a scrub. So the walk runs
+    // BACKWARDS instead: from this pixel, step against the flow a fixed number of fixed-size steps,
+    // evaluating the field at the time each step belongs to, and ask at every landing whether the
+    // emitter was there. Density is the best answer over the whole path, faded by how long ago it
+    // was. Same picture a forward simulation gives, and a pure function of (p, t) with nothing
+    // remembered. Reaction-diffusion and a true pressure-projected fluid cannot be written this way
+    // and are therefore not in this file; this one can, because the flow is analytic.
+    //
+    // Taking the BEST landing rather than the sum is the correct reading and also the prettier one:
+    // a parcel of air either came from the emitter or it did not, and summing softens every filament
+    // the curl worked to make.
+    vec3 s0 = P(0, vec3(0.025, 0.030, 0.050));            // the room the plume hangs in
+    vec3 s1 = P(1, vec3(0.90, 0.30, 0.22));               // the hot near edge
+    vec3 s2 = P(2, vec3(0.99, 0.82, 0.52));               // the core
+    vec3 s3 = P(3, vec3(0.30, 0.36, 0.55));               // the cold tail, where it has thinned out
+    vec2 q = vec2(p.x - 0.5*ar, uv.y);
+    float dens = 0.0, age = 0.0, wsum = 0.0;
+    for(int i=0;i<14;i++){
+      float k = float(i);
+      float tk = st - k*0.065;                            // the field AT the time this step belongs to
+      vec2 v = curl(q*2.3 + vec2(0.0, -tk*0.55))*0.85 + vec2(0.0, 0.78);   // roll, plus the rise
+      q -= v*0.065;
+      // THE EMITTER IS PATCHY ON PURPOSE, and this is what separates a plume from a flame. A smooth
+      // source makes density fall off monotonically with height: every backtrace low in the frame
+      // spends its whole path inside the source, so the core saturates into a flat plateau and the
+      // curl only ever wrinkles its outline. Break the source into fine cells and neighbouring paths
+      // land in different ones, so the flow pulls them apart into filaments and detached wisps, which
+      // is the thing worth having and the reason for the frequency.
+      float src = exp(-q.x*q.x*13.0) * smoothstep(0.22, -0.06, q.y);
+      src *= smoothstep(0.30, 0.80, noise(q*15.0 + 21.0));
+      // A WEIGHTED MEAN, NOT THE BEST LANDING, and this is the one line that decides whether the
+      // result reads as smoke. Taking max over a fixed number of steps quantises the answer: each
+      // step contributes one distinct level, so the plume came out as ten stacked crescents with hard
+      // edges between them, the discretisation made visible. Averaging under the same dissipation
+      // weight blends adjacent steps into each other and the contours disappear, at no extra cost.
+      float w = exp(-k*0.135);                            // dissipation: older air is thinner
+      dens += src*w; age += k*w; wsum += w;
+    }
+    dens = clamp(dens/wsum * 2.6, 0.0, 1.0);
+    age = clamp(age/wsum/13.0 * 1.6, 0.0, 1.0);
+    vec3 ink = mix(s1, s2, smoothstep(0.45, 1.00, dens));
+    ink = mix(ink, s3, smoothstep(0.30, 0.95, age));      // colour by age, so the tail cools
+    col = mix(s0, ink, smoothstep(0.015, 0.42, dens));
     alpha = 1.0;
   } col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
