@@ -94,6 +94,47 @@ export async function collect() {
         aka: [(bp.REQUESTS && bp.REQUESTS[name]) || ''].filter(Boolean) });
     }
   } catch { /* blueprints are optional to search */ }
+  // BLOCKS, AND THEY WERE THE LARGEST HOLE IN THIS CORPUS. Measured before this landed: 97 of 97 block
+  // families were absent, so `make arsenal Q="a terminal window"` and even `Q="morphText"` answered
+  // NOTHING HERE CLEARLY MATCHES and told the author to assume the engine does not have it. The engine
+  // has 185 nameable blocks. The website's /arsenal has indexed them the whole time, so the two indexes
+  // over one library disagreed by 185 entries, and the one an author is told to run was the poorer.
+  //
+  // Why the two sources above could not see them. Blocks are not `*_REGISTRY` exports (the registry
+  // object lives in blocks/kit.mjs and is FILLED by blocks/index.mjs, so there is no `BLOCK_REGISTRY`
+  // to walk), and their catalogue is docs/BLOCKS.md, not docs/EFFECTS.md. Each source was correct about
+  // its own subject and neither had any reason to mention it.
+  //
+  // blocks/catalog.mjs is already the one owner of a block's name and its blurb: blocks/index.mjs
+  // THROWS at load for a factory with no row there. So this is the same fact read once more, not a
+  // third list.
+  //
+  // BARE FAMILY ROWS ONLY, and the 88 namespaced `family.variant` rows are left out on purpose. They
+  // are presets of a family, so their blurbs describe the same subject in fewer words ("toast, amber
+  // accent" beside notification's own line), and adding them measurably HURT the search: the blurb
+  // self-retrieval floor fell from 97% to 95% the moment they went in, because a variant and its
+  // family compete for their shared words and neither wins. A person searching for a notification
+  // wants the family; the variants are on its page. This is the one place where fewer names is a
+  // better index, which is the opposite of the rest of this file's argument and worth saying out loud.
+  try {
+    const [cat, idx] = await Promise.all([
+      import('../../blocks/catalog.mjs'),
+      import('../../blocks/index.mjs').catch(() => null),
+    ]);
+    const catOf = (idx && idx.CATEGORY_OF) || {};
+    for (const row of cat.CATALOG || []) {
+      if (!row || !row.name || row.name.includes('.')) continue;
+      const key = `block\u0000${row.name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      // `block`, because the printer renders a slot as `"<slot>": "<name>"` and that is exactly the
+      // line an author writes inside a block layer. A first attempt put the whole layer JSON in here
+      // and the snippet came out as nested quotes inside nested quotes, unreadable and uncopyable.
+      out.push({ name: row.name, kind: 'block', slot: 'block',
+        blurb: row.blurb || '', aka: [catOf[row.family] || ''].filter(Boolean) });
+    }
+  } catch { /* the block library is optional to search, the same way blueprints are */ }
+
   // Layer types used to need a special case here, because they were LAYER_TYPES + LAYER_BLURBS and not
   // a registry, so `beam` was invisible to a query naming its own blurb (docs/MISTAKES.md #551). They
   // are `LAYER_REGISTRY` now and the generic walk above finds them like everything else.

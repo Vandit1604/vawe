@@ -85,6 +85,7 @@ import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liv
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { FAMILY_MODULES, NOT_A_FAMILY } from '../../blocks/index.mjs';
+import { collect as collectArsenal } from '../author/arsenal.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, osc, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
 import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
@@ -2838,6 +2839,35 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       const b = strip(band({ filterFrequency: 6000, filterGlideTo: 400, filterGlideTime: 0.9 }));
       return b[0] > b[5] * 3; })());
   }
+}
+
+// ---- the search must know about the blocks ----
+// Measured before this landed: the CLI corpus held 623 entries across 54 kinds and `block` was not one
+// of them, so 97 of 97 block families were invisible to `make arsenal`. The website's /arsenal had
+// indexed them all along, so two indexes over one library disagreed by 185 entries and the poorer one
+// was the one CLAUDE.md tells an author to run before inventing anything. Worse than a gap: the tool
+// prints "The N named things were searched... Assume the engine does not have it", which it said about
+// `terminal`. A search that reports ABSENT about something present is the failure this repo has now
+// paid for twice, once for effects with no blurb and once here.
+{
+  const all = await collectArsenal();
+  const cat = (await import('../../blocks/catalog.mjs')).CATALOG;
+  const found = new Set(all.filter((e) => e.kind === 'block').map((e) => e.name));
+  const families = cat.map((r) => r.name).filter((n) => !n.includes('.'));
+  const missing = families.filter((n) => !found.has(n));
+  if (missing.length) console.log(`    blocks the search cannot find: ${missing.slice(0, 8).join(' ')}`);
+  ok('arsenal: every block FAMILY in the catalog is in the search corpus', missing.length === 0);
+  // And the variants are out on purpose, measured rather than assumed: with all 185 rows in, the blurb
+  // self-retrieval floor fell from 97% to 95%, because `notification.warn` ("toast, amber accent") and
+  // `notification` describe one subject and split its words between them.
+  ok('arsenal: a namespaced variant is NOT its own corpus entry',
+    !all.some((e) => e.kind === 'block' && e.name.includes('.')));
+  ok('arsenal: and a block names the key an author writes, not a prose label',
+    all.filter((e) => e.kind === 'block').every((e) => e.slot === 'block'));
+  // The specific query that started this: a real block, by its own exact name, answered absent.
+  ok('arsenal: `morphText` is findable by name', (() => {
+    const hit = all.find((e) => e.name === 'morphText');
+    return !!hit && hit.kind === 'block' && /gooey/.test(hit.blurb); })());
 }
 
 // ---- the block family map must match the directory it replaced ----
