@@ -99,7 +99,14 @@ ${GROUPS
 <div class="bar"><button id="copy">Copy verdicts</button><span id="tally"></span></div>
 <script>
 const KEY='vawe-sound-verdicts';
-const state=JSON.parse(localStorage.getItem(KEY)||'{}');
+const stored=JSON.parse(localStorage.getItem(KEY)||'{}');
+// PRUNE ON LOAD. A cue deleted between rounds leaves its verdict behind, and Copy verdicts then
+// emits a union of the live set and every ghost: one paste carried 25 verdicts for 13 cues, and
+// twelve of them judged sounds that no longer exist. The page knows which cues it just rendered,
+// so it is the only place that can tell a stale verdict from a real one.
+const live=new Set(Array.from(document.querySelectorAll('[data-cue]')).map(el=>el.dataset.cue));
+const state={}; for(const k of Object.keys(stored)) if(live.has(k)) state[k]=stored[k];
+localStorage.setItem(KEY,JSON.stringify(state));
 function paint(){
   document.querySelectorAll('.cue').forEach(c=>{
     const n=c.dataset.cue, s=state[n]||{};

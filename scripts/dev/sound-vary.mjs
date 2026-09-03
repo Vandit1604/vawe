@@ -26,7 +26,7 @@ const N = +(process.argv[process.argv.indexOf('--n') + 1] || 8);
 // those same ids, so every old verdict reattached itself to a sound nobody had heard. The page opened
 // with most of it already marked, which reads as "already selected" and is worse than blank: it is a
 // judgement that was never made, presented as one that was. Bump this whenever the generator changes.
-const ROUND = 3;
+const ROUND = 5;
 
 // The dials worth turning, and the range each may move within. Chosen so a variant is a DIFFERENT sound
 // of the same kind rather than a detuned copy or a different cue entirely. `frequency` is multiplicative
@@ -95,12 +95,18 @@ const rootOf = (name) => {
 
 export function compose(name, i) {
   const rand = prng(name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) * 7919 + i * 104729);
-  const root = rootOf(name) * (0.8 + rand() * 0.5);
-  const partials = rand() < 0.55 ? 1 : (rand() < 0.75 ? 2 : 3);   // 1 partial took 56% of keeps
-  const interval = INTERVALS[Math.floor(rand() * INTERVALS.length)];
+  const S = SPACES[name] || {};
+  const root = rootOf(name) * (0.8 + rand() * 0.5) * (S.high || 1);
+  const partials = S.partials ? S.partials[Math.floor(rand() * S.partials.length)]
+    : (rand() < 0.55 ? 1 : (rand() < 0.75 ? 2 : 3));
+  const ratios = S.ratios || INTERVALS;
+  const interval = ratios[Math.floor(rand() * ratios.length)];
   const wave = WAVES[Math.floor(rand() * WAVES.length)];
-  const shape = SHAPES[Math.floor(rand() * SHAPES.length)];
-  const glide = rand();
+  const shapes = S.shapes ? S.shapes.map((k) => SHAPES[k]) : SHAPES;
+  const shape = shapes[Math.floor(rand() * shapes.length)];
+  // `glide` is a THRESHOLD test below, so a space's 0 means never and 0.6 means often. Written as the
+  // probability it reads as, rather than as the raw comparison, because the comparison inverted once.
+  const glide = S.glide === undefined ? rand() : (rand() < S.glide ? 1 : 0);
   const layers = [];
   for (let p = 0; p < partials; p++) {
     const f = root * Math.pow(interval, p);
@@ -109,15 +115,118 @@ export function compose(name, i) {
       attack: shape.attack * (1 + p * 0.4),
       decay: shape.decay * (1 - p * 0.22),
       peak: shape.peak / (p + 1.6),
-      offset: p * 0.012 * rand(),                    // a stagger, so partials arrive as one event, not a chord
+      offset: p * (S.spread || 0.012) * rand(),      // a stagger, so partials arrive as one event, not a chord
     };
+    if (S.smooth) { layer.attack = Math.max(layer.attack, 0.02); }   // the note was "not smooth": no click
     // A GLIDE ON THE ROOT ONLY. Gliding every partial slides the whole harmonic stack and reads as a
     // tape warble rather than as a pitch move.
-    if (p === 0 && glide > 0.86) {   // glide was in 64% of keeps as `none`, and `up` was 45% of rejects
-      layer.glideTo = f * (glide > 0.8 ? 1.5 : 0.66);
+    if (p === 0 && glide > (S.glide === undefined ? 0.86 : 0.5)) {
+      layer.glideTo = f * (S.dir === 'down' ? 0.66 : 1.5);
       layer.glideTime = shape.decay * 0.5;
     }
     layers.push(layer);
+  }
+  return { masterGain: CUES[name].masterGain ?? 0.5, layers };
+}
+
+// ---------------------------------------------------------------- per-cue spaces (round 5)
+// ROUND 4 KILLED THE GLOBAL RULE. Round 3's preference (1 partial, no glide, sine, short decay) was
+// applied to every cue at once, and the result split hard: `pluck` went 3/9 to 8/9, and `chime` went
+// 4/9 to 0 of 9. Both are correct. A pluck IS one short partial; a chime is a BELL, and a bell is its
+// partials and its long decay, so the narrowing removed the two things that make it one. One space
+// cannot serve seven jobs, which is what "RL it category wise" meant and what I did not do.
+//
+// So the space is per cue now. Where a cue has a measured preference it is written here; where it does
+// not, the round-3 narrow default applies.
+const SPACES = {
+  pluck:   { partials: [1], shapes: [0, 1], glide: 0 },              // 8/9 in round 4: do not touch it
+  chime:   { partials: [2, 3], shapes: [3], glide: 0, ratios: [2.0, 2.4, 3.0] },  // inharmonic: a bell is not a chord
+  sparkle: { partials: [3, 4, 5], shapes: [0], glide: 0, spread: 0.05, high: 2.2 }, // 1/19 so far: a scatter of grains, not a note
+  droplet: { partials: [1, 2], shapes: [1, 2], glide: 0.6, dir: 'down' },          // a droplet is a pitch FALLING
+  bloom:   { partials: [2], shapes: [2, 3], glide: 0 },              // opens: slower and longer
+  success: { partials: [3], shapes: [1, 2], glide: 0, ratios: [1.25, 1.5] },       // an arpeggio that resolves upward
+  ready:   { partials: [2], shapes: [2, 3], glide: 0, smooth: true },              // note on the shipped one: "not smooth"
+};
+
+// ---------------------------------------------------------------- the movement family (round 5)
+// EVERY ONE OF THESE WAS REJECTED, and the reason is one sentence: they are stacks of pitched partials
+// with no noise in them. They were built that way because when they were built a noise layer's filter
+// could not move (core/audio-kit.mjs), so a band could sit but never sweep, and round 1 had rejected
+// every static band by ear. That verdict was read as "noise is bad" and written in as a constraint. It
+// was never about noise. It was about this engine, and the engine can sweep now.
+//
+// The notes say the same thing three times: whoosh "move more to low end", riser "more to the low end",
+// braam "sounds like bass". A tone stack has no air in it, so it reads as pitch where it should read as
+// movement. Each entry below is band-passed noise whose CUTOFF sweeps, plus a tone only where the cue
+// genuinely has a pitch (the riser's counter-sub, the drop's fundamental, the braam's stack).
+//
+// The spans are deliberately lower than the tone-stack versions they replace, because that is the note.
+const MOVEMENT = {
+  // an object PASSES: a band sweeping up, then a second sweeping down, overlapped so the join is one event
+  whoosh: { pass: true, lo: [140, 260], hi: [700, 1500], Q: [1.4, 3.2], up: [0.24, 0.38], down: [0.16, 0.30], sub: [55, 80] },
+  // a build INTO something: one band climbing, plus the sub that bends the other way so the low end stays
+  riser:  { lo: [120, 200], hi: [900, 1700], Q: [2.0, 4.5], up: [0.7, 1.2], sub: [70, 95], subTo: [36, 46] },
+  // arrives and STOPS. Top capped hard: the note on the last one was "ending too squeaky"
+  swell:  { lo: [180, 300], hi: [900, 1600], Q: [1.6, 3.0], up: [0.5, 0.8], cut: true },
+  // falls to the floor. The END is the number that matters: under 45Hz reads as a drop, 60Hz as a note
+  drop:   { tone: [150, 260], toneTo: [28, 42], lo: [600, 1100], hi: [70, 130], Q: [1.2, 2.4], up: [0.7, 1.2] },
+  // three bands, and the middle one is the step people leave out: without it an impact is a click on a thump
+  impact: { hit: true, click: [2200, 4200], body: [55, 90], mid: [900, 1800], Q: [0.8, 2.0] },
+  // WEIGHT, not a bass note. The note was "sounds like bass": it needs grit and beating, not more low
+  braam:  { brass: true, root: [48, 78], detune: [6, 30], parts: [4, 6], grit: [260, 900], Q: [0.8, 2.0],
+            bite: [0.10, 0.38], swell: [0.10, 0.45] },
+};
+
+const pick = (r, [a, b]) => a + r * (b - a);
+
+export function composeMovement(name, i) {
+  const M = MOVEMENT[name];
+  const rand = prng(name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) * 6151 + i * 92821);
+  const layers = [];
+  const noise = (f, to, Q, attack, decay, peak, offset = 0) => layers.push({
+    kind: 'noise', filterType: 'bandpass', filterFrequency: f, filterGlideTo: to,
+    filterGlideTime: attack + decay, filterQ: Q, attack, decay, peak, offset });
+
+  if (M.pass) {
+    const lo = pick(rand(), M.lo), hi = pick(rand(), M.hi), Q = pick(rand(), M.Q);
+    const up = pick(rand(), M.up), down = pick(rand(), M.down);
+    noise(lo, hi, Q, up, 0.05, 0.5);                       // approach: slow in, cut short at the pass
+    noise(hi, lo * 1.5, Q, 0.03, down, 0.44, up * 0.9);    // departure, starting BEFORE the approach ends
+    layers.push({ kind: 'tone', waveform: 'sine', frequency: pick(rand(), M.sub),
+      attack: up * 0.8, decay: 0.12, peak: 0.16 });        // the low end the note asked for
+  } else if (M.subTo) {
+    const up = pick(rand(), M.up);
+    noise(pick(rand(), M.lo), pick(rand(), M.hi), pick(rand(), M.Q), up, 0.10, 0.5);
+    layers.push({ kind: 'tone', waveform: 'sine', frequency: pick(rand(), M.sub),
+      glideTo: pick(rand(), M.subTo), glideTime: up, attack: up * 0.45, decay: 0.16, peak: 0.26 });
+  } else if (M.cut) {
+    const up = pick(rand(), M.up);
+    noise(pick(rand(), M.lo), pick(rand(), M.hi), pick(rand(), M.Q), up, 0.02, 0.5);  // 20ms: it STOPS
+  } else if (M.tone) {
+    const up = pick(rand(), M.up);
+    layers.push({ kind: 'tone', waveform: 'sine', frequency: pick(rand(), M.tone),
+      glideTo: pick(rand(), M.toneTo), glideTime: up, attack: 0.01, decay: up * 0.7, peak: 0.5 });
+    noise(pick(rand(), M.lo), pick(rand(), M.hi), pick(rand(), M.Q), 0.02, up * 0.7, 0.22);
+  } else if (M.hit) {
+    const Q = pick(rand(), M.Q);
+    noise(pick(rand(), M.click), pick(rand(), M.click) * 0.6, Q, 0.001, 0.012, 0.42);
+    layers.push({ kind: 'tone', waveform: 'sine', frequency: pick(rand(), M.body),
+      glideTo: pick(rand(), M.body) * 0.6, glideTime: 0.14, attack: 0.004, decay: 0.15, peak: 0.5 });
+    noise(pick(rand(), M.mid), pick(rand(), M.mid) * 0.35, Q, 0.006, 0.13, 0.2, 0.008);
+  } else if (M.brass) {
+    // A BRAAM IS NOT A BASS NOTE, which was the whole note on the last one. Three things separate them
+    // and the first variants had only the first: a low fundamental (yes), detuned partials BEATING
+    // against each other, and a band of grit that opens as the note swells. The beating is what the
+    // brightness index cannot see and the ear cannot miss, so the detune spread is wide on purpose:
+    // these eight variants are meant to disagree with each other, not to average.
+    const root = pick(rand(), M.root), cents = pick(rand(), M.detune), n = Math.round(pick(rand(), M.parts));
+    const swell = pick(rand(), M.swell);
+    for (let k = 0; k < n; k++) layers.push({                // stacked fifths and octaves, each detuned
+      kind: 'tone', waveform: k % 2 ? 'saw' : 'tri', frequency: root * [1, 1.5, 2, 3, 4, 6][k],
+      detune: (k % 2 ? cents : -cents) * (1 + k * 0.3),      // the top of the stack beats hardest
+      attack: swell + k * 0.03, decay: 0.9, peak: 0.30 / (k + 1.4) });
+    const g = pick(rand(), M.grit);
+    noise(g, g * 3.2, pick(rand(), M.Q), swell + 0.06, 0.7, pick(rand(), M.bite));
   }
   return { masterGain: CUES[name].masterGain ?? 0.5, layers };
 }
@@ -141,10 +250,18 @@ for (const n of names) {
   for (let i = 0; i < N; i++) {
     const id = `${n}-${i}`;
     // i === 0 is the shipped voicing, as the control. Everything above it is COMPOSED, not perturbed.
-    writeWav(path.join(OUT, `${id}.wav`), normalize(renderCue(i === 0 ? CUES[n] : compose(n, i), 1)));
-    made.push({ id, cue: n, i });
+    const spec = i === 0 ? CUES[n] : (MOVEMENT[n] ? composeMovement(n, i) : compose(n, i));
+    writeWav(path.join(OUT, `${id}.wav`), normalize(renderCue(spec, 1)));
+    made.push({ id, cue: n, i, spec });
   }
 }
+
+// EVERY VARIANT'S SPEC, WRITTEN DOWN. Round 3's verdicts became unmeasurable the moment the generator
+// changed: the ids still existed but nothing could say what `chime-4` had been, so the one question
+// worth asking (why did chime's four keeps work?) has no answer and never will. A round costs nothing
+// to record and cannot be reconstructed afterwards.
+fs.writeFileSync(path.join(OUT, `specs-r${ROUND}.json`),
+  JSON.stringify(Object.fromEntries(made.map((m) => [m.id, m.spec])), null, 1));
 
 // WHAT EACH CUE IS FOR, so a variant is judged against a job rather than in the abstract. "Is this a
 // good sound" has no answer; "is this a good sound for a card landing" does. Taken from the cue's own
