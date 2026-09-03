@@ -21,11 +21,47 @@
 
 // The CSS <blend-mode> keywords. Exported so schema-drift compares the schema's copy against this one
 // instead of the two drifting apart, the same contract every other vocabulary in the engine keeps.
-export const BLEND_MODES = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten',
-  'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion',
-  'hue', 'saturation', 'color', 'luminosity', 'plus-lighter'];
-
 import { killedBy } from '../ancestor-kills.js';
+import { defineRegistry } from '../registry.js';
+
+// A REGISTRY, WHICH THE THROW BELOW ALREADY CALLED IT. This was a bare array for as long as it existed,
+// and the guard in build() says "the whole failure this registry is built to refuse" about a thing that
+// was not one. The cost was exact and measured: `make arsenal` reads registries, so all seventeen modes
+// reached the search with NO blurb, findable only by someone who already typed the name. "burn one
+// layer into another" found `color-burn`; "make the dark parts darker and the light parts lighter"
+// found nothing. Every other named vocabulary in core/ carries its line; these did not because nobody
+// noticed they were outside the mechanism.
+//
+// The blurbs say what each mode DOES to the picture, in the words a person reaches for, because the
+// name is already indexed and repeating it buys nothing (core/registry.js refuses a blurb that only
+// says its own name back).
+export const BLEND_REGISTRY = defineRegistry('blend mode', Object.fromEntries(
+  ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn',
+    'hard-light', 'soft-light', 'difference', 'exclusion', 'hue', 'saturation', 'color',
+    'luminosity', 'plus-lighter'].map((n) => [n, n])), {
+  slot: 'mixBlend',
+  blurbs: {
+    normal: 'no blending at all: the layer simply covers what is behind it. The default, and the way to turn a blend off',
+    multiply: 'darkens everything: white drops out and the rest deepens, the way ink sits on paper or two slides stack',
+    screen: 'lightens everything: black drops out and the rest brightens, the opposite of multiply, like two projectors on one wall',
+    overlay: 'deepens the dark areas and brightens the light ones at once, so contrast rises against the backdrop',
+    darken: 'keeps whichever is darker at every pixel, the layer or what is behind it',
+    lighten: 'keeps whichever is lighter at every pixel, the layer or what is behind it',
+    'color-dodge': 'brightens the backdrop hard wherever the layer is pale, blowing the highlights out',
+    'color-burn': 'darkens the backdrop hard wherever the layer is deep, crushing the shadows',
+    'hard-light': 'as if a harsh lamp shone through the layer: strong, unsubtle contrast',
+    'soft-light': 'as if a diffuse lamp shone through the layer: a gentle wash rather than a hit',
+    difference: 'subtracts one picture from the other, so matching areas go black and opposites invert. The classic glitch look',
+    exclusion: 'the same subtraction with the contrast taken out, greying the midtones instead of driving them to black',
+    hue: 'takes only the colour angle from the layer and keeps the backdrop\'s brightness and richness',
+    saturation: 'takes only the richness from the layer and keeps the backdrop\'s tint and brightness',
+    color: 'takes tint and richness from the layer and brightness from the backdrop. The way to recolour a photo',
+    luminosity: 'takes only brightness from the layer and keeps the backdrop\'s tint. The inverse of `color`',
+    'plus-lighter': 'adds the two pictures together, so light over light runs to white. For glows and additive light',
+  },
+});
+
+export const BLEND_MODES = BLEND_REGISTRY.names;
 
 export function build(kit, el, L, spec) {
   const mode = typeof spec === 'string' ? spec : (spec && spec.mode);
