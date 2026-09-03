@@ -3,7 +3,7 @@
   "name": "effector",
   "type": "vawe:generator",
   "title": "effector",
-  "description": "One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.",
+  "description": "Move a hundred copies with one moving point, and keyframe none of them. Each copy reacts to how FAR the point is, not to its place in a list, so you get a wave, a ripple, or a trail that lags behind. Flip between trail, highlight and ripple to see it.",
   "tags": [
     "generator",
     "motion",

@@ -247,8 +247,8 @@ Parametric field generators with declared option schemas, turnable at /playgroun
 | `bands` | A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind. |
 | `colonnade` | Wide panels split by bright hairlines, soft masses under a glow. |
 | `crt` | A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top. |
-| `effector` | One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone. |
-| `keyframeHandle` | The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens. |
+| `effector` | Move a hundred copies with one moving point, and keyframe none of them. Each copy reacts to how FAR the point is, not to its place in a list, so you get a wave, a ripple, or a trail that lags behind. Flip between trail, highlight and ripple to see it. |
+| `keyframeHandle` | Why two easings that look alike FEEL different: one curve between two keyframes, drawn beside a strip of evenly spaced dots. The dots bunch where the thing is slow and spread where it is fast, which the curve alone hides. Flip between easyEase, snap, hang and overshoot to see it. |
 | `rangeSelector` | The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs. |
 | `spectrum` | Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it. |
 | `thermalBlur` | White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away. |
