@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/no-blanket-git.mjs"
+            "command": "node scripts/live/no-blanket-git.mjs"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/code-quality.mjs"
+            "command": "node scripts/live/code-quality.mjs"
           }
         ]
       },
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/vocabulary.mjs"
+            "command": "node scripts/live/vocabulary.mjs"
           }
         ]
       },
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/scene-live.mjs"
+            "command": "node scripts/live/scene-live.mjs"
           }
         ]
       },
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/craft-live.mjs"
+            "command": "node scripts/live/craft-live.mjs"
           }
         ]
       }

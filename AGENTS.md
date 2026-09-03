@@ -2,7 +2,7 @@
 
 This is the canonical, tool-neutral doctrine for the vawe video engine. It works the same way for
 Claude Code, Cursor, Codex, or a human with no agent at all. Where a rule leans on a Claude Code
-mechanism (a hook under `.claude/hooks/`, the Skill tool, a vendored skill), the rule itself still
+mechanism (a hook under `scripts/live/`, the Skill tool, a vendored skill), the rule itself still
 holds everywhere: read the neutral note beside it and follow the doc it points to by hand. `CLAUDE.md`
 is now a short pointer to this file, kept only so Claude Code auto-loads it.
 
@@ -26,7 +26,7 @@ renderer unless explicitly asked.
 
 ## Skill router  `[eye]`
 
-Skills below are vendored in `.claude/skills/` for Claude Code, loaded on demand with the Skill tool.
+Skills below live in `skills/` as plain docs any agent can read. Claude Code also loads them on demand with the Skill tool; on any other agent, open the doc in the last column and follow it as a checklist.
 **On any other agent, or with no agent, there is no Skill tool: open the doc in the last column
 yourself and follow it as a checklist.** That doc is the real content; the skill is a Claude Code
 shortcut to load it at the right moment.
@@ -262,7 +262,7 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - Text may contain `<b>…</b>` / `<em>…</em>` (rendered as HTML). Keep names short (they sit in cards).
 
-## Launch-video rules (standing, asked for directly: apply to every launch film)  `[live: .claude/hooks/craft-live.mjs]`
+## Launch-video rules (standing, asked for directly: apply to every launch film)  `[live: scripts/live/craft-live.mjs]`
 
 **This rung is a Claude Code hook that speaks at save-time. On any other agent there is no keystroke
 warning: treat this whole section as `[eye]` and check it yourself before every render.**
@@ -338,7 +338,7 @@ paint (`docs/MISTAKES.md` #505).
 because each attempt is a render you can show, and searching produces nothing to show.
 
 **Claude Code: load the `vawe-name-the-effect` skill the moment a reference arrives and you cannot name
-what you are looking at. Other agents: open the same skill's markdown under `.claude/skills/` (or read
+what you are looking at. Other agents: open the same skill's markdown under `skills/` (or read
 it as a plain doc) and work through it by hand.** It carries the three questions in order, the
 plain-words to After-Effects vocabulary table, and where the effect goes afterwards so the next author
 inherits the name rather than the guess. That second half is not optional.
@@ -358,7 +358,7 @@ else; see the Skill router above). **Then gate it two ways, and know
 which one sees what:** `make preview HTML=<frag>` reads the FRAGMENT in a real browser, `make
 designspec-check D=<file>` reads the SCENE. Both must be clean before you render.
 
-## Icons & images (real assets first, emoji last)  `[live: .claude/hooks/craft-live.mjs]`
+## Icons & images (real assets first, emoji last)  `[live: scripts/live/craft-live.mjs]`
 
 **This rung is a Claude Code hook. On any other agent, treat it as `[eye]`: check it by hand.**
 
@@ -484,7 +484,7 @@ missing piece was the archetype, and a blank file has none.
 Why the subject must be a PICTURE, why every one of its constants is fixed, and when the honest answer
 is `make catalog` instead: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
 
-## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[live: .claude/hooks/scene-live.mjs]`
+## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[live: scripts/live/scene-live.mjs]`
 
 **This rung is a Claude Code hook that fires on save. On any other agent, treat the whole section as
 `[eye]`: run the same check by hand, on every save.**
@@ -498,7 +498,7 @@ This is the strongest single lever in the file. brew inverts the tone of the wor
 cuts and spends its one accent window on the logo reveal, while **121 of the 149 gate-visible scenes,
 81%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
 
-**HALF OF THIS IS LIVE NOW, AND IT IS THE CHEAPER HALF.** `.claude/hooks/scene-live.mjs` fires on every
+**HALF OF THIS IS LIVE NOW, AND IT IS THE CHEAPER HALF.** `scripts/live/scene-live.mjs` fires on every
 save of a scene JSON and says so when a film paints one `bg` window for its whole runtime, with the 82%
 beside it. What it CANNOT see is whether the window that is there actually moves, at what speed, or at
 what scale: it counts windows, and a window can hold a dead field. So the second paragraph is still
@@ -604,7 +604,7 @@ here. Highest rung wins:
 
 | the harness does | this engine does | where |
 |---|---|---|
-| PostToolUse hooks that speak mid-task | the `[live]` rung: a hook reads what you just saved and answers | `.claude/hooks/*.mjs`, wired in `.claude/settings.json` (Claude Code only) |
+| PostToolUse hooks that speak mid-task | the `[live]` rung: a hook reads what you just saved and answers | `scripts/live/*.mjs`. Claude Code auto-runs them via a local `.claude/settings.json`; any other agent or CI runs `node scripts/live/<name>.mjs <file>` itself |
 | deferred tools, fetched by search rather than all loaded | `make arsenal Q="…"` over every named thing, and `make schema AT=…` for what is legal at one path | `scripts/author/arsenal.mjs`, `scripts/author/schema-at.mjs` |
 | skills: instructions loaded only when the task needs them | `docs/CRAFT/*.md`, and a finding NAMES the doc that settles it | `docs/TASTE.md` indexes them |
 | structured tool results instead of scraped prose | gate findings as data, not regex over a message | `scripts/lib/findings.mjs` |
@@ -635,7 +635,7 @@ is the midpoint between two measured query sets, and both sets are asserted in `
 the engine contains and it must be re-measured, THROUGH that file's own `toks`: a pass that used a
 hand-rolled tokenizer instead produced numbers that were all wrong in the same direction.
 
-## Changing the ENGINE, not a film? The doctrine is one file away  `[live: .claude/hooks/craft-live.mjs]`
+## Changing the ENGINE, not a film? The doctrine is one file away  `[live: scripts/live/craft-live.mjs]`
 
 **This rung is a Claude Code hook. On any other agent, treat the two path-decidable triggers below as
 `[eye]`: check them yourself on every save.**
@@ -644,7 +644,7 @@ Five rules govern any change to `core/`, `internal/`, a gate or the capture path
 **[`docs/CRAFT/ENGINE-CHANGES.md`](docs/CRAFT/ENGINE-CHANGES.md)** rather than here, because this file
 is addressed to somebody authoring a film. Their triggers stay, because a rule you do not know exists
 is a rule you cannot go and read. Two of the five are decidable from a path, so
-`.claude/hooks/craft-live.mjs` says them at the keystroke: a save under `internal/scene` or
+`scripts/live/craft-live.mjs` says them at the keystroke: a save under `internal/scene` or
 `internal/render`, and a new file under `scripts/gates/`. The other three are not decidable from a
 filename, and the hook says nothing about them rather than guessing:
 
@@ -663,5 +663,5 @@ filename, and the hook says nothing about them rather than guessing:
 
 > **Editing `scene.html`?** Claude Code: read the `vawe-scene-authoring` skill first (render-frame
 > purity, tokens, motion primitives, image/capture system, QA loop). Other agents: read the same content
-> under `.claude/skills/vawe-scene-authoring/` directly. System map: `docs/CODEMAPS/ARCHITECTURE.md`.
+> under `skills/vawe-scene-authoring/` directly. System map: `docs/CODEMAPS/ARCHITECTURE.md`.
 > Run `make probe` after scene-logic changes and `make review` for a fast health snapshot.

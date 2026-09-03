@@ -7,7 +7,7 @@
 // turns them into a storyboard. This file owns BOTH halves on purpose: the option table and the mapping
 // from answers to frontmatter are two ends of one contract, and split across files they drift silently.
 //
-// WHY THIS EXISTS. `.claude/skills/vawe-video-planning/SKILL.md` Step 1b already specifies a five-question
+// WHY THIS EXISTS. `skills/vawe-video-planning/SKILL.md` Step 1b already specifies a five-question
 // brief and Step 3c already specifies the lock sheet it produces. Neither was ever encoded, so the brief
 // ran differently every session and the one decision `storyboard-check` HARD-ERRORS on for a short film,
 // `threads:`, what holds the film across its cuts, was not among the five questions.

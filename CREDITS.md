@@ -14,13 +14,13 @@ Vawe's own.
 
 | What | Where | License | Notes |
 |---|---|---|---|
-| **impeccable** (design skill) | `.claude/skills/impeccable/` | Apache 2.0 | License text vendored alongside it (`.claude/skills/impeccable/LICENSE`). |
+| **impeccable** (design skill) | `skills/impeccable/` | Apache 2.0 | License text vendored alongside it (`skills/impeccable/LICENSE`). |
 | **lottie-web** (runtime) | `assets/vendor/` | MIT | Airbnb / lottie-web; see the vendor README. |
-| **taste-skill** (design skill) | `.claude/skills/taste-skill/` | *no declared license* | **Not redistributed.** Kept local-only and gitignored until its license is clarified. |
+| **taste-skill** (design skill) | `skills/taste-skill/` | *no declared license* | **Not redistributed.** Kept local-only and gitignored until its license is clarified. |
 
 ## First-party skills (Vawe)
 
-`.claude/skills/shortwave-scene-authoring/` and `.claude/skills/shortwave-video-planning/`
+`skills/shortwave-scene-authoring/` and `skills/shortwave-video-planning/`
 are authored for this project and covered by the Vawe Company License.
 
 ## Fonts

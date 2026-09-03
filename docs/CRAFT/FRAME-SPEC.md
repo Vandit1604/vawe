@@ -12,7 +12,7 @@ storyboard** (their `STORYBOARD.md`) where each beat names its blueprint, its me
 its emotion. Our engine already has the pieces (themes, blueprints, EFFECTS.md, the direction-floor); this
 doc is the contract that ties them into a front-door you fill before writing a single layer.
 
-> This complements [`vawe-video-planning`](../../.claude/skills/vawe-video-planning/SKILL.md) (the lock-sheet)
+> This complements [`vawe-video-planning`](../../skills/vawe-video-planning/SKILL.md) (the lock-sheet)
 > and [`DIRECTION.md`](DIRECTION.md) (pacing/restraint). Lock BOTH artifacts below and get sign-off before authoring.
 
 ## Part 1: The design-system spec (our `frame.md`)

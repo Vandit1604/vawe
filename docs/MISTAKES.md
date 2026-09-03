@@ -2147,7 +2147,7 @@ Both found while running the ladder on one film; neither is fixed in the gate th
 - **impeccable `flat-type-hierarchy`** flagged sizes 34/42/60 at "ratio 1.8:1" and advised aiming for
   "at least a 1.25 ratio between steps". 1.8 already exceeds 1.25. The code tests the *total span*
   (`max/min < 2.0`); the advice describes the *per-step* ratio. Contradictory on its face. Not patched
-  here: the detector is vendored under `.claude/skills/impeccable/`, and forking vendored rules to fix
+  here: the detector is vendored under `skills/impeccable/`, and forking vendored rules to fix
   prose costs more than it saves. Reported upstream-ward instead.
 
 **The running theme** (now ~13 instances): a gate's blind spot is never in the rule it states. It is in
@@ -3082,7 +3082,7 @@ and built our own version of all five adoptable pieces, offline / local-model on
 3. **Storyboard-as-proposal gate** (their Step 3) — `scripts/gates/storyboard-check.mjs` (`make
    storyboard-check`) + `docs/CRAFT/STORYBOARD-TEMPLATE.md`. Enforces a one-sentence message + per-beat
    type/onscreen/WHY before any JSON. Two-sided verified.
-4. **Gated orchestrator skill** — `.claude/skills/vawe-launch/SKILL.md`: the Step 0-6 flow adapted to our
+4. **Gated orchestrator skill** — `skills/vawe-launch/SKILL.md`: the Step 0-6 flow adapted to our
    tools (capture → theme-remix → storyboard-check → tts → blueprints → seam-check/judge), user-gated at 0/3/6.
 5. **Parallel per-beat authoring** (their Step 5) — `.claude/workflows/beats-parallel.mjs`: fan out one
    sub-agent per storyboard beat, each authors its layer fragment against the shared spec, merge into one
@@ -3724,7 +3724,7 @@ word boundaries. Times (`12:05`), semver (`v1.02.3`) and decimals had the same h
 dates or money tripped a rule about editorial scaffolding.
 
 **Fix.** `(?<![\w\-/:.])(0[1-9]|1[0-2])(?![\w\-/:.])` in
-`.claude/skills/impeccable/scripts/detector/engines/regex/detect-text.mjs`. Verified both directions on
+`skills/impeccable/scripts/detector/engines/regex/detect-text.mjs`. Verified both directions on
 the same input: a real `01 About / 02 Process / 03 Pricing / 04 Contact` scaffold still yields
 `01,02,03,04`; the CSV rows now yield nothing.
 
@@ -6511,7 +6511,7 @@ would run. A heredoc body, a quoted string and a grep pattern are all data, and 
 command position. This is the same measurement error as #220 (`<style>` source counted as glyphs), #222
 and #223 — a gate reading the representation rather than the thing.
 
-**Fix.** `commandsIn()` in `.claude/hooks/no-blanket-git.mjs` strips heredoc bodies and quoted literals,
+**Fix.** `commandsIn()` in `scripts/live/no-blanket-git.mjs` strips heredoc bodies and quoted literals,
 splits on command positions (`;`, newline, `&&`, `||`, `|`) and anchors every pattern with `^`, so a
 match can only land where the shell would actually run something.
 
@@ -6520,7 +6520,7 @@ bans. Every pattern is written with `\s+` between the words and every label is a
 the hook through a shell cannot trip the installed copy of itself. A guard whose own source is a
 tripwire is unmaintainable.
 
-**Which gate catches it.** `node .claude/hooks/test/no-blanket-git.test.mjs` — 17 cases, 8 real forms
+**Which gate catches it.** `node scripts/live/test/no-blanket-git.test.mjs` — 17 cases, 8 real forms
 that must block and 9 that must not, five of which are the exact prose forms that caused the self-blocks.
 The cases live in a JSON file rather than in the test source, for the same reason.
 
@@ -8738,7 +8738,7 @@ detector reported **21 `low-contrast` findings, every one of them false**: `1.1:
 (21 of them), `#2563eb` and `#0f1620`, all comfortably legible on white.
 
 **Root cause.** SVG paints text with `fill`. The detector reads CSS `color`
-(`.claude/skills/impeccable/scripts/detector/rules/checks.mjs`, and four more sites across the browser
+(`skills/impeccable/scripts/detector/rules/checks.mjs`, and four more sites across the browser
 source and its generated bundle), which for an inline `<svg><text>` is whatever the page happened to
 inherit and paints nothing at all. So it measured a property the SVG never uses, against the real
 background, and reported the arithmetic confidently. This engine's fragments are overwhelmingly inline
@@ -8756,7 +8756,7 @@ not have distinguished before. Regression-checked the way a gate change must be:
 (`docs/animation.html` 2, `docs/architecture.html` 26, `docs/design/animation-gist.html` 2) report
 identical counts before and after, and the eight `.html` fragments are unchanged on the static engine.
 
-**This is a patch to VENDORED third-party code** (`.claude/skills/impeccable`, Apache-2.0). Its build
+**This is a patch to VENDORED third-party code** (`skills/impeccable`, Apache-2.0). Its build
 script is not vendored, so both the source (`rules/checks.mjs`, `browser/injected/index.mjs`) and the
 generated bundle (`detect-antipatterns-browser.js`, which is the file `detectUrl` actually injects)
 carry the same edit. **Updating the skill will silently revert it.** Re-apply, or the 21 come back.

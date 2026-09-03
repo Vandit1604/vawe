@@ -6693,7 +6693,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // codebase that stopped making the mistake.
 {
   const { execFileSync } = await import('node:child_process');
-  const hook = path.join(repoRoot, '.claude/hooks/vocabulary.mjs');
+  const hook = path.join(repoRoot, 'scripts/live/vocabulary.mjs');
   const run = (file) => {
     try {
       execFileSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: file } }), encoding: 'utf8' });
@@ -6903,7 +6903,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // AN UNTAGGED SECTION. [eye] is the honest default and costs one word, so the only reason a section
     // of CLAUDE.md carries no rung is that nobody asked the question.
     fs.writeFileSync(claude, savedClaude.replace(
-      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[live: .claude/hooks/scene-live.mjs]`',
+      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[live: scripts/live/scene-live.mjs]`',
       '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE'));
     const bare = run();
     ok('rungs: an untagged section of CLAUDE.md is REFUSED', bare.code === 1);
@@ -6913,7 +6913,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // fires on everything gets turned off, so silence on a film doing fine is as much the contract as
     // speech on a thin one, and both are checked.
     {
-      const hook = path.join(repoRoot, '.claude/hooks/scene-live.mjs');
+      const hook = path.join(repoRoot, 'scripts/live/scene-live.mjs');
       const fire = (scene) => {
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: scene } }), encoding: 'utf8' });
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
@@ -6946,7 +6946,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // launch-video pair rules, the emoji-last ladder, and the two engine triggers a path can decide.
     // Both halves are asserted for each, because a hook that only ever speaks is a hook nobody keeps.
     {
-      const hook = path.join(repoRoot, '.claude/hooks/craft-live.mjs');
+      const hook = path.join(repoRoot, 'scripts/live/craft-live.mjs');
       const fire = (f) => {
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: f } }), encoding: 'utf8' });
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };

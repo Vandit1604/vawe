@@ -47,7 +47,7 @@ those leaves the ones that hurt:
 - `docs/LAUNCH-VIDEO-GUIDE.md`: unreachable, while CLAUDE.md carries a hand-written "Launch-video
   rules" section covering the same ground
 - `docs/MCP.md`, `docs/FRAMEWORK-AUDIT.md`: unreachable
-- `.claude/skills/vawe-animation`, `vawe-creative`, `vawe-scene-authoring`, named in prose in
+- `skills/vawe-animation`, `vawe-creative`, `vawe-scene-authoring`, named in prose in
   CLAUDE.md, but never as a path, so nothing follows them
 
 Two failures found while building, both of the same kind:
@@ -273,7 +273,7 @@ and never edited:
 | View | For | Cost when unused |
 |---|---|---|
 | `docs/INDEX.md` | humans, subagents, `make docs` | zero: a file on disk |
-| `.claude/skills/vawe-docs/SKILL.md` | Claude Code, which surfaces it automatically | ~100 tokens (its description) |
+| `skills/vawe-docs/SKILL.md` | Claude Code, which surfaces it automatically | ~100 tokens (its description) |
 | the table inside `docs/CRAFT/README.md` | the craft index that already existed | zero |
 
 `scripts/gates/doc-map.mjs` builds all three. `make doc-index` writes them; `make craft-coverage`

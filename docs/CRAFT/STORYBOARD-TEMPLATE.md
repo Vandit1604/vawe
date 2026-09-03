@@ -105,7 +105,7 @@ not: "the defaults this film refuses, in your own words"
   stays on screen across the cuts and every cut is a state change of it. Declare `object:` only if that
   is really the film, because then `object_t0` / `object_states` / `object_last` and an `object:` line
   on every beat are required too, and the scene-side mirror is direction-floor's `no-continuous-object`
-  (opt-in, `TASTE=1`). Doctrine for the object device: .claude/skills/vawe-continuous-action/SKILL.md.
+  (opt-in, `TASTE=1`). Doctrine for the object device: skills/vawe-continuous-action/SKILL.md.
 
   THE THIRD QUESTION, AND THE ONE NOTHING USED TO ASK. `trigger:` is WHAT MADE THIS BEAT HAPPEN.
   The act in the beat before that forced this one. "the cursor hits Send on the card in beat 1". It is

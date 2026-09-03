@@ -37,7 +37,7 @@ const EXCLUDED = [
   ['docs-site/', 'a separate Next app; its paths are its own and its own build checks them'],
   ['node_modules/', 'vendored'],
   ['out/', 'render output, not authored prose'],
-  ['.claude/skills/impeccable/', 'a vendored third-party skill. Its `src/App.tsx`, `public/`, `dist/` are examples of ANY project, never claims about this one, so checking them here would report 40 findings that are all correct prose'],
+  ['skills/impeccable/', 'a vendored third-party skill. Its `src/App.tsx`, `public/`, `dist/` are examples of ANY project, never claims about this one, so checking them here would report 40 findings that are all correct prose'],
   ['.claude/plans/', 'a dated record of what was planned, not an instruction. It describes a tree that was proposed and may never have been built'],
 ];
 
