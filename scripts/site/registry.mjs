@@ -11,6 +11,7 @@
 // SOURCES (one each. Nothing here is re-derived and nothing is hand-typed):
 //   blocks/catalog.mjs          name · family · blurb · props · overlay      (the block manifest)
 //   blueprints/index.mjs        BEATS + REQUESTS                              (the beat registry)
+//   core/generators.js          GENERATORS                                     (the playground registry)
 //   site/lib/block-frames.json  the measured ink rect of each block           (make blocks-scenes)
 //   site/public/assets/blocks/  a standalone scene + poster per block         (make blocks-scenes)
 //
@@ -47,6 +48,34 @@
 // for. Effects are NOT items: an effect is a prop value on a layer (anim, ease, a bg preset), not a
 // thing you place, so it has no install site and nothing to target. They stay in docs/EFFECTS.md.
 //
+// -- DECISION 3: a generator is a THIRD kind of item, and its install differs by `produces` --
+// A generator is not a block and not a beat. Nothing in a scene ever NAMES one: the engine has no
+// {"type":"generator"} layer, so there is no factory reference to paste and no `make expand` step.
+// What a generator gives you is its OUTPUT, and the output has two shapes, which the entry declares:
+//
+//   produces:'layers'  render(options) returns concrete scene layers (a shader layer, an html card).
+//                      They are engine-native primitives, so the item carries them under
+//                      install.layers, target "layers[]", and a consumer with no block library at all
+//                      can paste them and render. This is the closest thing to a block's install.layer
+//                      and it is the reason it is spelled differently: layers, plural, already expanded.
+//
+//   produces:'html'    render(options) returns a markup STRING, up to 31KB of it for colonnade. That
+//                      is a rendered artifact, not an install spec, and putting it in a JSON item would
+//                      commit a generated picture into the index while claiming to be a contract. So
+//                      the item carries the OPTIONS and the two ways to turn them into markup: the
+//                      playground URL a person uses, and the byName(...).render(...) call an agent
+//                      uses. Target is `bg[].html` or an html layer, which is where markup goes.
+//
+// install.options is the generator's FIRST PRESET over its schema defaults, not the raw defaults. The
+// registry's own argument, at the top of core/generators.js: a default is the neutral value a field
+// takes when nobody said otherwise, which is not the same as a good-looking result.
+// install.props is DERIVED, by walking the schema with the generator's own controlsOf(), so it is the
+// same dial list the playground builds its panel from and cannot drift from it.
+//
+// HELD BACK LOOKS GET NO ITEM, and nothing here filters for that: core/generators.js exports
+// GENERATORS already filtered to `ready`, with ALL_GENERATORS beside it for the tools that must score
+// what is held back. Importing the shipping list is the whole mechanism.
+//
 // Deterministic: entries sorted by (type, name), object keys written in a fixed order, no timestamps,
 // no counts recorded anywhere. Two runs over unchanged sources produce byte-identical output.
 import fs from 'node:fs';
@@ -55,6 +84,7 @@ import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
+import { GENERATORS, controlsOf, defaultsOf } from '../../core/generators.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'registry');
@@ -178,9 +208,45 @@ function beatItem(name) {
   };
 }
 
+function generatorItem(g) {
+  const preset = Object.keys(g.presets || {})[0] || null;
+  const base = { ...defaultsOf(g.schema), ...(preset ? g.presets[preset] : {}) };
+  const options = g.normalise ? g.normalise(base) : base;
+  const layers = g.produces === 'layers';
+  return {
+    $schema: `${SCHEMA}/registry-item.json`,
+    name: g.name,
+    type: 'vawe:generator',
+    title: g.name,
+    description: g.blurb,
+    tags: ['generator', g.group, g.produces],
+    install: {
+      kind: layers ? 'scene-layers' : 'generated-markup',
+      target: layers ? 'layers[]' : 'bg[].html (or an html layer)',
+      requires: layers
+        ? 'nothing beyond the vawe engine: these are concrete layer primitives, no expand step'
+        : 'markup only. Paste it as-is; the engine drives it with --t, and it needs no block library',
+      // The dials, as the playground's own walk of the schema reports them. Every one is legal in
+      // `options`; a nested one is dotted, matching what a permalink writes.
+      props: controlsOf(g.schema).map((c) => c.path),
+      preset,
+      options,
+      ...(layers
+        ? { layers: g.render(options) }
+        // NOT the markup itself. See DECISION 3: it is a rendered picture, sometimes 31KB of it.
+        : { render: `import { byName } from 'core/generators.js'; byName('${g.name}').render(options)` }),
+    },
+    docs: g.docs,
+    ...(g.reference ? { reference: g.reference } : {}),
+    preview: { url: `${SITE}/playground?gen=${g.name}` },
+  };
+}
+
 const items = [
   ...CATALOG.map(blockItem),
   ...Object.keys(BEATS).map(beatItem),
+  // GENERATORS, never ALL_GENERATORS: a look held back is not advertised. See DECISION 3.
+  ...GENERATORS.map(generatorItem),
 ].sort((a, b) => (a.type === b.type
   ? (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
   : (a.type < b.type ? -1 : 1)));
@@ -189,16 +255,19 @@ const index = {
   $schema: `${SCHEMA}/registry.json`,
   name: 'vawe',
   homepage: SITE,
-  usage: 'Each item installs as a LAYER OBJECT, not a file: append item.install.layer to the "layers" '
-    + 'array of a scene JSON ({"module":"scene",…}), set x/y/start/dur, then `make expand`. Items with '
-    + 'a files[] entry also ship a pre-expanded standalone scene that renders without the block library.',
+  usage: 'Blocks and beats install as a LAYER OBJECT, not a file: append item.install.layer to the '
+    + '"layers" array of a scene JSON ({"module":"scene",…}), set x/y/start/dur, then `make expand`. '
+    + 'Items with a files[] entry also ship a pre-expanded standalone scene that renders without the '
+    + 'block library. A generator installs its OUTPUT instead: item.install.layers is already-expanded '
+    + 'layers to append, and where install.kind is "generated-markup" you turn item.install.options into '
+    + 'markup (item.preview.url, or item.install.render) and paste that into a bg window.',
   items: items.map((it) => ({ name: it.name, type: it.type, description: it.description, tags: it.tags })),
 };
 
 // Every item file, plus the index, keyed by its path relative to registry/.
 const want = new Map([['registry.json', JSON.stringify(index, null, 2) + '\n']]);
 for (const it of items) {
-  const dir = it.type === 'vawe:beat' ? 'beats' : 'blocks';
+  const dir = { 'vawe:beat': 'beats', 'vawe:generator': 'generators' }[it.type] || 'blocks';
   want.set(`${dir}/${safeName(it.name)}.json`, JSON.stringify(it, null, 2) + '\n');
 }
 
@@ -234,6 +303,6 @@ for (const [rel, body] of want) {
 const stale = have.filter((rel) => !want.has(rel));
 for (const rel of stale) fs.rmSync(path.join(OUT, rel));
 
-const nBlocks = items.filter((i) => i.type === 'vawe:block').length;
-console.log(`registry: ${items.length} items (${nBlocks} blocks · ${items.length - nBlocks} beats) · ${wrote} file(s) written → registry/`
+const n = (t) => items.filter((i) => i.type === `vawe:${t}`).length;
+console.log(`registry: ${items.length} items (${n('block')} blocks · ${n('beat')} beats · ${n('generator')} generators) · ${wrote} file(s) written → registry/`
   + (stale.length ? `\n  removed ${stale.length} stale file(s)` : ''));
