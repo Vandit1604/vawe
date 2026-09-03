@@ -405,7 +405,7 @@ coverage:
 # is current. FAIL tier (exits 1) so the docs can't silently rot. Also runs in .githooks/pre-push,
 # because a doc-only commit never touches a render gate. Doc-map detail: scripts/gates/doc-map.mjs.
 craft-coverage:
-	node scripts/gates/craft-coverage.mjs
+	@node scripts/gates/craft-coverage.mjs $(if $(JSON),--json,)
 
 # make docs, PRINT THE DOC MAP: every written thing in this repo, one line each (reach for it when…,
 # it answers…). Read the line, open only the doc you need. Same map as the `vawe-docs` skill.
@@ -970,7 +970,7 @@ paints-nothing: ## does each layer paint anything in its own box? pixel diff, no
 	node scripts/gates/paints-nothing.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never mentions
-	node scripts/gates/arsenal-check.mjs
+	@node scripts/gates/arsenal-check.mjs $(if $(JSON),--json,)
 
 # discovery: can an author still FIND what the engine can do? Registry blurbs are refused at load, so
 # this reads the SEARCH CORPUS instead, which is the only place that sees every source at once: the
@@ -978,7 +978,13 @@ arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never 
 # correctly reported zero. It also compares the two indexes over one library, which disagreed by 185
 # entries for months with nothing noticing.
 discovery:
-	node scripts/gates/discovery.mjs
+	@node scripts/gates/discovery.mjs $(if $(JSON),--json,)
+
+# output-contract: every reporting gate renders through scripts/lib/findings.mjs (tight prose + --json).
+# Ratchets the count of gates that still print ad-hoc prose DOWN. docs/CRAFT/COMMAND-OUTPUT.md.
+# JSON=1 emits the whole migration worklist as findings; --stamp lowers the ratchet after a batch.
+output-contract:
+	@node scripts/gates/output-contract.mjs $(if $(JSON),--json,) $(if $(STAMP),--stamp,)
 
 # generated-check: run every generator, then ask git what moved. Three artefacts had no drift check at
 # all and one of them, site/lib/arsenal.json, went 67 items stale while still advertising a deleted
