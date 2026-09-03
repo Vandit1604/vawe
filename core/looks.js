@@ -305,7 +305,13 @@ export const LOOK_BLURBS = blurbsOf('look', LOOKS);
 // registry earns its keep: a look and a filter preset are written into the SAME JSON key, so an author
 // who reaches for `filter: "duotone"` (a filter) while thinking of a look, or the reverse, gets a
 // refusal that names which vocabulary the word does live in instead of a dead end.
-export const LOOK_REGISTRY = defineRegistry('look', LOOKS, { slot: 'filter', blurbs: LOOK_BLURBS,
+// The words a person types who is describing the look, not naming it: an author reaching for `vhs`
+// says "old videotape", never "vhs". Searched, never printed.
+const LOOK_AKA = {
+  vhs: ['videotape', 'retro tape', 'analog video', 'camcorder footage', 'old video'],
+};
+
+export const LOOK_REGISTRY = defineRegistry('look', LOOKS, { slot: 'filter', blurbs: LOOK_BLURBS, aka: LOOK_AKA,
   catalog: {
     title: 'Composite looks (static)',
     tag: 'static',

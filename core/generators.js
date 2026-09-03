@@ -795,11 +795,14 @@ export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);
 const GENERATOR_ENTRIES = Object.fromEntries(GENERATORS.map((g) => [g.name, g]));
 export const GENERATOR_BLURBS = blurbsOf('generator', GENERATOR_ENTRIES);
 
+// The words an author types who does not know the generator by name, never printed, only searched.
+const GENERATOR_AKA = { thermalBlur: ['heat vision', 'heat camera', 'infrared'] };
+
 // THE REGISTRY HOLDS WHAT SHIPS, NOT ALL_GENERATORS. A generator with `ready:false` is built and held
 // back on purpose (HELD_BACK below counts them for the playground), and a catalogue advertising an
 // unbuilt thing is worse than one that is short. There is no `pick()` caller: a scene never names a
 // generator, it pastes the markup the playground emits, which is why this registry declares no slot.
-export const GENERATOR_REGISTRY = defineRegistry('generator', GENERATOR_ENTRIES, { blurbs: GENERATOR_BLURBS,
+export const GENERATOR_REGISTRY = defineRegistry('generator', GENERATOR_ENTRIES, { blurbs: GENERATOR_BLURBS, aka: GENERATOR_AKA,
   catalog: {
     title: 'Generators (the playground)',
     tag: 'generator',

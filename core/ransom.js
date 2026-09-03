@@ -44,6 +44,8 @@ export const RANSOM_REGISTRY = defineRegistry('ransom face', FACES, {
   // and the paste grammar can only put a name at a path, so a path here would print
   // `"faces": "Caveat"`, which the engine reads as a record and renders nothing from.
   slot: 'ransom.faces (a list of {family, weight} records on a text layer)',
+  // The words an author types who does not know the face by name, never printed, only searched.
+  aka: { Caveat: ['handwriting font', 'handwritten font', 'cursive font', 'sticky note'] },
   blurbs: {
     Archivo: 'a workhorse grotesque cut heavy and wide: the neutral, newspaper-headline shout of the set',
     Fraunces: 'a high-contrast display serif with a soft wobble, old seed-catalogue flavour, slanted here',

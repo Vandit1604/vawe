@@ -5722,6 +5722,58 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       PLAIN.length - unsure.length >= floor);
   }
 
+  // ---- FAMILY: one author-phrased query per SEARCHABLE family, the coverage guarantee -------------
+  // PRESENT and PLAIN prove specific capabilities answer. They leave a silent gap: a whole FAMILY that
+  // nobody ever queried, so "a drifting background" reaching an `aurora` was never checked. This holds
+  // one plain-English query for every family an author DESCRIBES rather than names, and every one must
+  // resolve to its family confidently and in the top three. scripts/gates/discovery.mjs check 5 reads
+  // these (through scripts/dev/family-coverage.mjs) and FAILS when a searchable family has no query
+  // here, so a new vocabulary cannot land findable only by someone who already knows its name. Families
+  // reached by MECHANISM (an easing, a blend mode, a keyframe handle) are exempt and named in
+  // family-coverage.mjs; they stay covered per-entry by blurb self-retrieval. A miss is fixed with `aka`
+  // at the write site, never by bending the query toward the blurb's own words. The target of each is a
+  // name UNIQUE to its family: `bloom` names four different things, so a query wanting it proves nothing
+  // about which family answered.
+  const FAMILY = [
+    ['a bright white flash to hide a hard cut', 'flash'],                                                 // sting fx
+    ['an old worn videotape with scanlines and grain', 'vhs'],                                            // look
+    ['the product bursts forward past the camera as it leaves the frame', 'punch'],                       // cut
+    ['soft moving gradient blobs drifting slowly behind everything', 'flow'],                             // ambient shader
+    ['slow to fast then slow again speed ramp for a whip transition', 'ramp'],                            // cut timing
+    ['a held frame that stays subtly alive without actually moving anywhere, like breathing', 'breathe'], // idle
+    ['an animated pipeline diagram where cards pop in and a token travels along the connectors', 'pipelineFlow'], // composition
+    ['a light travels around the rounded rectangle border of a card', 'beam:border (border-beam)'],       // per-frame accent layer
+    ['have the logo icon outline draw itself stroke by stroke like a pen tracing it', 'svg:draw (stroke draws on)'], // vector layer
+    ['a saturated color pool bleeding off the corner into white', 'gradientWash'],                        // background preset
+    ['highlight the word as it is spoken like a marker', 'highlight'],                                    // caption style
+    ['a chip that pops and bounces into place', 'pop'],                                                   // anim
+    ['a lit crescent edge of light on one side of the subject', 'rimLight'],                              // glow preset
+    ['cross dissolve fade between two clips', 'fade'],                                                    // seam fx
+    ['camera pushes slowly closer to tighten focus', 'push in'],                                          // camera word
+    ['a 3d phone device turning with a real app screen on it', 'deviceShowcase'],                         // three scene
+    ['make this move feel snappy and springy', 'snappy'],                                                 // feel word
+    ['layer flies off to the left as it leaves', 'flyOutLeft'],                                           // gsap exit
+    ['a glassy transparent cube that bends and splits light like a prism', 'glassRefract'],               // raymarch
+    ['a heavy hit that lands hard', 'impact'],                                                            // motion voice
+    ['make it look like a newspaper print with dots', 'halftone'],                                        // canvas fx
+    ['text through a heat vision thermal camera', 'thermalBlur'],                                          // generator
+    ['travelling through space past the stars', 'starfield'],                                             // paint fx
+    ['make a chip pop in from nothing', 'popIn'],                                                          // part entrance
+    ['a handwritten note font', 'Caveat'],                                                                // ransom face
+    ['make this vertical for a phone screen', '9:16'],                                                    // output target
+    ['a video for tiktok', 'tiktok'],                                                                     // destination
+    ['a fast entrance duration', 'fast'],                                                                 // duration word
+    ['drain the colour to grey', 'desaturate'],                                                           // adjustment
+  ];
+  {
+    const inTop3 = (q, want) => { const qt = arsenalToks(q);
+      return corpus.map((e) => ({ n: e.name, c: coverage(e, qt) })).sort((a, b) => b.c - a.c)
+        .slice(0, 3).some((r) => r.n === want); };
+    const miss = FAMILY.filter(([q, w]) => !inTop3(q, w) || covers(q, w) < CONFIDENT);
+    if (miss.length) console.log(`    families whose query does not confidently resolve: ${miss.map(([q, w]) => `${w} <- "${q}"`).join('; ')}`);
+    ok('every searchable family has an author-phrased query that finds it confidently, in the top three', miss.length === 0);
+  }
+
   const ABSENT = [
     'invert a layer against whatever is behind it',
     'render the scene in stereoscopic 3d for a headset',

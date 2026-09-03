@@ -22,7 +22,15 @@
 // WHAT IT DOES NOT DO. It does not judge whether a blurb is GOOD. scripts/gates/lib-test.mjs owns
 // that: the blurb self-retrieval floor, the PRESENT/ABSENT confidence calibration, and the plain
 // English question set. Two owners for one question is how they drift apart. This gate owns
-// presence: is the thing in the index, and does it have words.
+// presence: is the thing in the index, does it have words, and is its family asked for (check 5).
+//
+// WHEN IS DISCOVERY "DONE". When four things hold and none can regress in silence: every entry has a
+// blurb (checkBlurb, at load), the corpus has no bare entry (check 2, ratchet at 0), every searchable
+// family is asked for by the eval (check 5), and the confidence threshold stays between the PRESENT and
+// ABSENT sets (lib-test). The paraphrase gap is closed with `aka` synonyms and the labeled eval, not
+// with semantic/vector retrieval: that was decided NO on purpose, because embeddings add a model, an
+// index to rebuild on every registry edit, drift, and softer abstention, to buy recall the deterministic
+// pieces already buy. Revisit only if the corpus stops fitting in memory or starts changing at query time.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -137,6 +145,27 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
       '\n    have it". Add them to the corpus in scripts/author/arsenal.mjs, beside the blocks.');
     else console.log(`  ✓ the two indexes agree, apart from ${variants.length} namespaced variants left out on purpose`);
   }
+}
+
+// ---- 5. EVERY SEARCHABLE FAMILY IS ASKED FOR, or discovery is only HALF measured ------------------
+// Checks 1-4 prove a thing is IN the index. They cannot prove the index answers the words a person
+// types: that is the labeled eval in lib-test.mjs (PRESENT + PLAIN), and its blind spot is a whole
+// FAMILY nobody wrote a query for. This closes it the way checkBlurb closes a bare entry: a searchable
+// family with no author-phrased golden query FAILS, so a new vocabulary cannot land undiscoverable-in-
+// -practice and pass in silence. Families reached by mechanism (an easing, a blend mode, a keyframe
+// handle) are exempt and named in scripts/dev/family-coverage.mjs; they are still covered per-entry by
+// blurb self-retrieval. This owns no list of its own: it reads that module, which reads the live eval.
+{
+  const { familyCoverage } = await import('../dev/family-coverage.mjs');
+  const { uncovered, covered, wantCount } = await familyCoverage();
+  if (!wantCount) fail('\n  ✗ read ZERO queries from lib-test.mjs: the PRESENT/PLAIN parse in family-coverage.mjs has rotted.');
+  else if (uncovered.length) fail(`\n  ✗ ${uncovered.length} searchable famil(ies) have no author-phrased query in the eval:`,
+    `\n    ${uncovered.map((u) => u.family).slice(0, 8).join(', ')}`,
+    '\n    An author who cannot phrase a family in plain English cannot find it, whatever its blurbs say.',
+    '\n    Add one query per family to PRESENT/PLAIN in scripts/gates/lib-test.mjs that resolves to it,',
+    '\n    and close any miss with `aka` at the write site. Worklist: node scripts/dev/family-coverage.mjs',
+    '\n    If a family is genuinely reached only by mechanism, exempt it in scripts/dev/family-coverage.mjs.');
+  else console.log(`  ✓ all ${covered.size} searchable families are asked for by the eval`);
 }
 
 if (bad) { console.error(`\n  discovery: ${bad} finding(s)\n`); process.exit(1); }

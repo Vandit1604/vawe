@@ -67,11 +67,11 @@ const DESC = {
 // search reads each section's own `blurbs` map. So four capabilities rendered a description in the docs
 // and were unfindable by the tool CLAUDE.md sends you to before inventing anything (discovery.mjs).
 const BEAM_BLURBS = {
-  'beam:border (border-beam)': 'a light travels the rounded-rect border',
+  'beam:border (border-beam)': 'a light travels the rounded-rect border of a card, redrawn each frame',
   'beam:shine (sheen sweep)': 'a sheen sweeps across the box',
 };
 const SVG_BLURBS = {
-  'svg:draw (stroke draws on)': 'the logo/icon stroke draws itself on, line by line',
+  'svg:draw (stroke draws on)': 'the logo or icon stroke draws its outline on, line by line, as if traced by a pen',
   'svg:morph (shape melts into a logo)': 'one path melts into another (blob into logo), optional spin',
 };
 

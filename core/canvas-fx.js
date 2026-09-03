@@ -259,9 +259,12 @@ export const CANVAS_FX_NAMES = Object.keys(CANVAS_FX);
 // when one is missing. All eight rendered as an em-dash in docs/EFFECTS.md until this existed.
 export const CANVAS_FX_BLURBS = blurbsOf('canvas fx', CANVAS_FX);
 
+// The words an author types who does not know the pass by name, never printed, only searched.
+const CANVAS_FX_AKA = { halftone: ['newspaper print', 'newspaper dots'] };
+
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a canvas fx" when someone writes it somewhere else. core/registry.js.
-export const CANVAS_REGISTRY = defineRegistry('canvas fx', CANVAS_FX, { slot: 'canvasFx', blurbs: CANVAS_FX_BLURBS,
+export const CANVAS_REGISTRY = defineRegistry('canvas fx', CANVAS_FX, { slot: 'canvasFx', blurbs: CANVAS_FX_BLURBS, aka: CANVAS_FX_AKA,
   catalog: {
     title: 'Canvas image passes (baked)',
     tag: 'static',
