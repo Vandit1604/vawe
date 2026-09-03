@@ -248,3 +248,7 @@ assets/video/
 
 # impeccable live-server local scratch
 .impeccable/
+
+# Uncredited capture assets, local-only (not shipped)
+assets/rec1/
+assets/rec3/
