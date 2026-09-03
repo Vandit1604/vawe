@@ -34,6 +34,11 @@ jobs:
       PUPPETEER_SKIP_DOWNLOAD: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: scripts/author/recency.mjs reads `git log --before=N.days` to compute registry
+          # newness. A shallow checkout has no history, so two newness lib-tests fail on CI while passing
+          # on a full local clone. scene-check.yml does this for the same reason.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -44,3 +49,52 @@ jobs:
 
       - name: framework gates
         run: make schema-check lib-test craft-coverage arsenal-check discovery generated-check
+
+      # Structured, readable failures. This step is the pass/fail authority's SIDECAR, not the authority:
+      # it runs `if: always()`, writes to the job Summary and an artifact, and never sets the job status
+      # (the `make` step above does). So it cannot mask a real exit code (docs/MISTAKES.md #401).
+      - name: findings summary (json)
+        if: always()
+        run: |
+          mkdir -p /tmp/findings
+          # The findings-based gates emit a JSON array under --json (empty [] when clean).
+          for g in discovery arsenal-check generated-check craft-coverage; do
+            node "scripts/gates/$g.mjs" --json > "/tmp/findings/$g.json" 2>/dev/null || true
+          done
+          node -e '
+            const fs = require("fs"), d = "/tmp/findings";
+            const out = {};
+            for (const f of fs.readdirSync(d)) {
+              const k = f.replace(/\.json$/, "");
+              try { out[k] = JSON.parse(fs.readFileSync(`${d}/${f}`, "utf8")); } catch { out[k] = []; }
+            }
+            fs.writeFileSync("findings.json", JSON.stringify(out, null, 2));
+            const total = Object.values(out).reduce((n, a) => n + (Array.isArray(a) ? a.length : 0), 0);
+            console.log(`findings.json written, ${total} finding(s) across ${Object.keys(out).length} gate(s)`);
+          '
+          # lib-test is a test runner (no --json): surface its REAL failures, minus the rung-fixture noise
+          # (the rung block deliberately injects bad tags to prove the gate catches them).
+          libfail=$(node scripts/gates/lib-test.mjs 2>&1 \
+            | grep -E "✗|[0-9]+ failed" \
+            | grep -viE "no-such-gate|no-such-code|untagged: THE BACKGROUND|up from|held up by prose|does not emit|decoration|claim an owner|catalogued by hand" \
+            || true)
+          {
+            echo "## Framework gate findings"
+            echo
+            echo "### Gate findings (JSON)"
+            echo '```json'
+            cat findings.json
+            echo '```'
+            echo "### lib-test"
+            echo '```'
+            echo "${libfail:-all assertions passed}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: upload findings.json
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-findings
+          path: findings.json
+          if-no-files-found: ignore
