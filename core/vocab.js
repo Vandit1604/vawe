@@ -129,9 +129,58 @@ export const INTERP_REGISTRY = defineRegistry('interpolation mode', INTERP, { sl
   },
 });
 
-export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease' });
-export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur' });
-export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move' });
+// THESE THIRTY BLURBS ARE THE PLAIN-ENGLISH DOOR, and their absence was a measured failure rather than
+// an untidiness. `make arsenal Q="slow down at the end"` and `Q="make the camera move closer"` both
+// answered NOTHING HERE CLEARLY MATCHES, and that message tells the author to assume the engine does
+// not have it. It has both: `smooth` is easeInOutCubic and `push in` is slowPush. A search that says
+// "absent" about something present is worse than one that says nothing, because it ends the looking.
+//
+// The 41 EASINGS deliberately carry no blurbs (see EASING_REGISTRY in core/motion.js: 41 near-identical
+// sentences about acceleration are worse than one feel table). That decision is kept, and it only works
+// if the feel words below carry the words a person would actually type. So they are written for SEARCH,
+// not for elegance: each one names the sensation, not the curve, because the curve already has a name.
+const FEEL_BLURBS = {
+  snappy: 'quick and decisive: moves off fast and slows down hard at the end. The default for a UI element landing.',
+  smooth: 'eases in and eases out, slow at both ends. The safe choice for anything travelling a long way across frame.',
+  soft: 'arrives and settles, with the overshoot damped out. Use where a hard stop would read as a collision.',
+  sharp: 'leaves instantly and decelerates steeply. The most aggressive slow-down-at-the-end available.',
+  gentle: 'slow at both ends, but shallower than smooth. Ambient drift, backgrounds, anything not asking for attention.',
+  heavy: 'slow at both ends and slow in the middle: reads as mass. Big panels and full-frame moves.',
+  pop: 'overshoots the target and comes back. A small piece of emphasis on something arriving.',
+  bouncy: 'a spring that visibly bounces before it settles. Playful, and loud: one per film at most.',
+  elastic: 'overshoots repeatedly with a decaying wobble. The loudest option here and rarely the right one.',
+  stiff: 'a spring with almost no give: fast, tight, barely any overshoot. Springs that must not look playful.',
+  mechanical: 'no acceleration at all, constant speed start to finish. Correct for a loop or a marquee, wrong for anything a person is meant to watch arrive.',
+};
+
+const DURATION_BLURBS = {
+  instant: 'about a twelfth of a second. Barely perceptible as motion: a state flip that must not feel animated.',
+  fast: 'under a fifth of a second. A payoff snapping into place, a value ticking over.',
+  medium: 'about a third of a second. The everyday entrance, and the one to reach for when nothing argues otherwise.',
+  slow: 'a little over half a second. A thesis line taking its time, a deliberate reveal.',
+  luxurious: 'over a second. The pace of a hero moment, and monotonous if more than one beat uses it.',
+};
+
+const CAMERA_BLURBS = {
+  'push in': 'the camera moves closer, slowly and continuously. Tightens attention without a cut.',
+  'slow push-in': 'the same slow move closer, spelled the way a storyboard usually spells it.',
+  'pull back': 'the camera retreats to reveal the wider context around what you have been looking at.',
+  'zoom out': 'the same widening move, spelled the way most people ask for it.',
+  dive: 'a fast move INTO the frame, ending close on one element. For entering a product surface.',
+  follow: 'the camera pans to keep a moving subject in frame.',
+  sweep: 'the camera trucks sideways across the scene, revealing what was beyond the edge.',
+  tour: 'a multi-leg move that visits several places in turn, one continuous shot rather than cuts.',
+  'pan stations': 'the same touring move, named for what it does: stopping at each station in order.',
+  circle: 'the camera orbits around the subject, so the subject stays put and the view changes.',
+  'ui focus zoom': 'a dive aimed at one control or panel, for showing exactly where a click lands.',
+  'punch in': 'an abrupt jump closer, not a glide. Punctuation: it hits on a beat.',
+  shake: 'a short handheld jolt. An impact, a hit, a moment of instability.',
+  'drift hold': 'a very slow move on a held frame, so a static shot is never fully still.',
+};
+
+export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease', blurbs: FEEL_BLURBS });
+export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur', blurbs: DURATION_BLURBS });
+export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move', blurbs: CAMERA_BLURBS });
 
 /**
  * resolveSeconds(v): a duration slot's value, whatever spelling it arrived in.

@@ -398,7 +398,53 @@ export function createShaderOverlay(parent, w = 1920, h = 1080) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a sting fx" when someone writes it somewhere else. core/registry.js.
-export const SHADER_REGISTRY = defineRegistry('sting fx', Object.fromEntries(SHADER_FX.map((n) => [n, n])), { slot: 'sting',
+// EVERY ONE OF THESE ALREADY EXISTED AS A COMMENT INSIDE THE FRAGMENT SHADER, describing exactly what
+// the branch draws, and not one of them reached anywhere an author could search. `make arsenal Q="a film
+// burn between two shots"` answered NOTHING HERE CLEARLY MATCHES while `burn` sat in this file with
+// `/* film burn */` written beside it. A description that only the implementer reads is not documentation.
+// AND ONE RULE LEARNED WHILE WRITING THESE. Keep generic transition wording OUT of a blurb. The first
+// draft said whipPan raced "between two shots", so `Q="a film burn between two shots"` returned whipPan
+// above `burn`: the search is honest token overlap with no notion of a common word, and three generic
+// tokens beat two specific ones. A blurb earns its entry by the words only that entry deserves.
+const STING_BLURBS = {
+  flash: 'a single hard white flash across the whole frame. The bluntest cut cover there is, and the one to use when the two shots have nothing in common.',
+  burn: 'a film burn: the frame chars through and blows out, the way heat eats a print. Warm, analogue, and loud.',
+  leak: 'a light leak, seed-generative and multi-hue. Colour bleeding in at the edges as if the camera back opened.',
+  grain: 'dense fine film grain rising over the frame. Texture rather than event: use it under something else.',
+  dissolve: 'the frame dissolves away to white. A clean act break when the next beat starts bright.',
+  ink: 'an ink bleed spreading to near-black. The dark twin of dissolve, for a beat that gets heavier.',
+  glitch: 'rgb channel split into displaced bars. Digital failure, interference, a system under strain.',
+  streak: 'sharp radial light rays from a hot core. Photographic rather than digital: a lens catching a source.',
+  pixel: 'a chunky mosaic that fills the frame and then clears. Reads as resolution being lost and regained.',
+  confetti: 'a burst of coloured pieces thrown across frame. Celebration, and hard to use without looking cheap.',
+  ripple: 'concentric rings expanding across the whole frame, like a struck water surface.',
+  scan: 'a CRT scanline band sweeping through, with a trailing glow. Terminal, monitor, surveillance.',
+  warp: 'a barrel-warped refraction shock ring expanding outward. An impact felt through the lens.',
+  bokeh: 'soft out-of-focus discs drifting across frame. Ambient and quiet: closer to a texture than a cut.',
+  wipe: 'a directional band sweeping across the frame. The plainest geometric transition, and it always reads.',
+  circle: 'a disc expanding from the centre. Focus opening outward from one point.',
+  blinds: 'venetian bars opening together. Mechanical and rhythmic.',
+  squares: 'grid cells filling in on a stagger. Modular, and it suits a layout that is already a grid.',
+  pinwheel: 'an angular sweep with three arms rotating around the centre.',
+  doors: 'panels closing in from both sides to meet in the middle.',
+  polka: 'a curtain of dots growing until they cover the frame.',
+  swirl: 'rotational light streaks thrown out from the centre.',
+  crossWarp: 'a noise-smeared directional veil dragging the frame sideways as it goes.',
+  domainWarp: 'a liquid marble wash, noise folded through noise. Organic, slow, and unlike anything geometric here.',
+  sdfIris: 'an iris wipe through a seeded shape, so the aperture is not simply a circle. Focus, with character.',
+  vortex: 'an ink spiral pulling inward to a dark eye. A beat being swallowed rather than ended.',
+  ridgedBurn: 'a filament ember front sweeping upward, like paper catching along a ragged edge.',
+  lens: 'a full anamorphic flare: hot core, ghosts down the axis, a horizontal streak. Cinematic and very loud.',
+  thermal: 'an iron-bow heat veil in coarse cells, colour mapped from luminance rather than painted on.',
+  whipPan: 'horizontal smear streaks racing across, as if the camera whipped sideways. Energy carried into a payoff.',
+  chromaticSplit: 'an rgb-fringed shock ring with colour fringing at the edges. An impact with a lens defect.',
+  dispersion: 'a spectral prism band sweeping the frame, splitting light into its colours as it passes.',
+  gridPixelateWipe: 'chunky pixel blocks sweeping a diagonal, each block a quantised tint. A wipe and a pixelate at once.',
+  iridescence: 'a thin-film interference sheen, the colour of oil on water shifting with angle.',
+  cinematicZoom: 'a dolly punch-in used as a cut cover: the camera lunges forward and the join hides inside the lunge.',
+};
+
+export const SHADER_REGISTRY = defineRegistry('sting fx', Object.fromEntries(SHADER_FX.map((n) => [n, n])), { slot: 'sting', blurbs: STING_BLURBS,
   catalog: {
     title: 'Shader stings',
     tag: 'transition',

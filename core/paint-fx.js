@@ -165,7 +165,15 @@ export const PAINT_FX_NAMES = Object.keys(PAINT_FX);
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a paint fx" when someone writes it somewhere else. core/registry.js.
-export const PAINT_REGISTRY = defineRegistry('paint fx', PAINT_FX, { slot: 'paint',
+const PAINT_BLURBS = {
+  matrix: 'columns of falling glyphs. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately.',
+  starfield: 'stars drifting past as if the camera were moving through them. Depth and travel on an otherwise flat frame.',
+  aurora: 'slow curtains of coloured light. Calm, ambient, and the least busy field here.',
+  meteor: 'streaks crossing the frame on a diagonal. Motion and event on a background that would otherwise be still.',
+  waves: 'rolling bands, a moving surface. Rhythm underneath content without competing for the eye.',
+};
+
+export const PAINT_REGISTRY = defineRegistry('paint fx', PAINT_FX, { slot: 'paint', blurbs: PAINT_BLURBS,
   catalog: {
     title: 'Generative paint FX (per-frame)',
     tag: 'per-frame',

@@ -83,6 +83,9 @@ export const MOTION_CUE_REGISTRY = defineRegistry('motion voice', Object.fromEnt
   blurbs: {
     impact: 'something heavy ARRIVES and lands hard: a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home',
     whoosh: 'air moving past. One camera gesture, one whoosh, never one per keyframe: the sound rises as the move starts and falls away as it passes',
+    droplet: 'something falls into place: a short pitched drop, placed automatically on a `drop` or `zoom` cut. The lightest of the arrival sounds',
+    chime: 'a small bright accent where a moment resolves. Noticed rather than announced, so it survives repetition better than a sting does',
+    bloom: 'something OPENS: placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut. Slower in than the others, because an opening is not an arrival',
     riser: 'a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. Tension, suspense, a countdown to what a declared `spectacle` names',
     pluck: 'punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it',
   },

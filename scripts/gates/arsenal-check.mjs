@@ -342,6 +342,57 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
       + ' Lower it: node scripts/gates/arsenal-check.mjs --stamp');
   }
 }
+// ---- THE SECOND RATCHET: `bare` MAY FALL AND MAY NEVER RISE --------------------------------------
+//
+// An entry with no blurb is findable only by its exact name, which means only by someone who already
+// knows it. That is the discovery problem in one line, and it was 131 entries across eight registries
+// until it was measured: `make arsenal Q="slow down at the end"`, `Q="a film burn between two shots"`
+// and `Q="make the camera move closer"` all answered NOTHING HERE CLEARLY MATCHES for capabilities the
+// engine has. `sharp`, `burn` and `push in` were all sitting there unblurbed. A search that reports
+// ABSENT about something present is worse than one that stays quiet, because it ends the looking.
+//
+// Ratcheted rather than gated at zero for one honest reason: the 42 EASINGS deliberately carry none.
+// That decision is written at EASING_REGISTRY in core/motion.js, 41 near-identical sentences about
+// acceleration being worse than one feel table, and it only holds because the FEEL words now carry the
+// plain English an author would actually type. Zero is therefore not the target; not-more is.
+{
+  const RATCHET = path.join(ROOT, 'verify/blurb-ratchet.json');
+  const bare = [];
+  for (const reg of Object.values(REGS)) {
+    const names = Object.keys(reg.entries || {});
+    const b = reg.blurbs || {};
+    for (const n of names) if (!b[n]) bare.push(`${reg.kind}:${n}`);
+  }
+  const prior = (() => { try { return JSON.parse(fs.readFileSync(RATCHET, 'utf8')); } catch { return null; } })();
+  if (process.argv.includes('--stamp')) {
+    fs.mkdirSync(path.dirname(RATCHET), { recursive: true });
+    // THE LIST, NOT ONLY THE COUNT. A count can say a rule was broken; only the list can say WHICH entry
+    // broke it. The first version stored the number, so removing `shield`'s blurb reported "43, up from
+    // 42" and then printed eight easings, none of which had changed. A gate that cannot name its own
+    // finding sends the reader to look through 591 entries by hand.
+    fs.writeFileSync(RATCHET, `${JSON.stringify({ unblurbed: bare.length, entries: bare.sort() }, null, 1)}\n`);
+    console.log(`    ✓ blurb ratchet stamped at ${bare.length} unblurbed entr(ies)`
+      + `${prior ? `, down from ${prior.unblurbed}` : ''}`);
+  } else if (prior && bare.length > prior.unblurbed) {
+    const known = new Set(prior.entries || []);
+    const fresh = bare.filter((n) => !known.has(n));
+    console.error(`\n  ✗ ${bare.length} registry entr(ies) have no blurb, up from ${prior.unblurbed}.`);
+    console.error(`    new since the ratchet: ${(fresh.length ? fresh : bare).slice(0, 8).join(' ')}`
+      + `${(fresh.length ? fresh : bare).length > 8 ? ' …' : ''}`);
+    console.error('    Without a blurb an entry is findable only by someone who already knows its name,');
+    console.error("    so `make arsenal Q=\"...\"` will report it ABSENT. Write one where the entry is:");
+    console.error('      blurbs: { <name>: "what it does, in one line" }  beside the defineRegistry call.');
+    console.error('    If it genuinely should carry none, lower the bar on purpose:');
+    console.error('      node scripts/gates/arsenal-check.mjs --stamp\n');
+    process.exit(1);
+  } else if (prior && bare.length < prior.unblurbed) {
+    console.log(`    ~ ${prior.unblurbed - bare.length} fewer unblurbed than the ratchet allows.`
+      + ' Lower it: node scripts/gates/arsenal-check.mjs --stamp');
+  } else if (!prior) {
+    console.log(`    ~ ${bare.length} unblurbed entr(ies), no ratchet yet. Stamp it: --stamp`);
+  }
+}
+
 // A SWEEP THAT SAW NOTHING MUST NOT PRINT A TICK. `walk('core')` is a bare readdir, so a moved or empty
 // core/ produced `0 vocabular(ies) found` and then `✓ every capability the engine exports is named`.
 if (!found.size) {

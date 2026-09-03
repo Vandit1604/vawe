@@ -33,7 +33,29 @@ export function svgIcon(name, { size = 24, color = 'currentColor', stroke = 1.9,
 
 // Registered so an unknown icon is refused, and so a name that exists in ANOTHER vocabulary is
 // diagnosed rather than silently drawn as nothing.
-export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()',
+// Written for SEARCH rather than for a caption: an author asking `make arsenal Q="a security icon"`
+// should reach `shield` without already knowing the word. So each line names what the mark MEANS in a
+// film, not what it looks like, because the shape is already in the name.
+const ICON_BLURBS = {
+  file: 'a document or a single record. Use where the subject is one item of content rather than a system.',
+  check: 'done, passed, verified. The mark for a gate going green or a step completing.',
+  shield: 'security, protection, trust. The one to reach for on a safety or privacy claim.',
+  bolt: 'speed or power. Fast execution, an instant action, energy.',
+  dollar: 'money, price, revenue, cost. Any figure the viewer reads as currency.',
+  link: 'a connection between two things, or a URL. Integration, reference, chaining.',
+  cube: 'a package, a build artifact, a module. A discrete unit of software.',
+  agent: 'an autonomous worker or assistant. The mark for something acting on its own.',
+  braces: 'code, JSON, a config file. The one to use when the subject is literally the syntax.',
+  globe: 'the world, the network, a public surface. Reach, deployment, anything international.',
+  arrowRight: 'forward, next, onward. Progression through a sequence, or a result following a cause.',
+  arrowLeft: 'back, previous, return. The pair to arrowRight, and it should point the way the film travels.',
+  spark: 'something new, generated, or AI-made. Novelty and creation rather than speed.',
+  plug: 'an integration or a connector. Where one system attaches to another.',
+  clock: 'time, duration, waiting, a deadline. Any beat whose subject is how long something takes.',
+  layers: 'a stack, composition, depth. The mark for things built out of other things.',
+};
+
+export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()', blurbs: ICON_BLURBS,
   catalog: {
     title: 'Drawn icons',
     tag: 'asset',

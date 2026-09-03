@@ -29,22 +29,22 @@
 
 | name | what / when |
 |---|---|
-| `agent` | the name is the drawing |
-| `arrowLeft` | the name is the drawing |
-| `arrowRight` | the name is the drawing |
-| `bolt` | the name is the drawing |
-| `braces` | the name is the drawing |
-| `check` | the name is the drawing |
-| `clock` | the name is the drawing |
-| `cube` | the name is the drawing |
-| `dollar` | the name is the drawing |
-| `file` | the name is the drawing |
-| `globe` | the name is the drawing |
-| `layers` | the name is the drawing |
-| `link` | the name is the drawing |
-| `plug` | the name is the drawing |
-| `shield` | the name is the drawing |
-| `spark` | the name is the drawing |
+| `agent` | an autonomous worker or assistant. The mark for something acting on its own. |
+| `arrowLeft` | back, previous, return. The pair to arrowRight, and it should point the way the film travels. |
+| `arrowRight` | forward, next, onward. Progression through a sequence, or a result following a cause. |
+| `bolt` | speed or power. Fast execution, an instant action, energy. |
+| `braces` | code, JSON, a config file. The one to use when the subject is literally the syntax. |
+| `check` | done, passed, verified. The mark for a gate going green or a step completing. |
+| `clock` | time, duration, waiting, a deadline. Any beat whose subject is how long something takes. |
+| `cube` | a package, a build artifact, a module. A discrete unit of software. |
+| `dollar` | money, price, revenue, cost. Any figure the viewer reads as currency. |
+| `file` | a document or a single record. Use where the subject is one item of content rather than a system. |
+| `globe` | the world, the network, a public surface. Reach, deployment, anything international. |
+| `layers` | a stack, composition, depth. The mark for things built out of other things. |
+| `link` | a connection between two things, or a URL. Integration, reference, chaining. |
+| `plug` | an integration or a connector. Where one system attaches to another. |
+| `shield` | security, protection, trust. The one to reach for on a safety or privacy claim. |
+| `spark` | something new, generated, or AI-made. Novelty and creation rather than speed. |
 
 ## Motion voices (tactile sound)  `[audio]`
 
@@ -52,11 +52,13 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 
 | name | what / when |
 |---|---|
+| `bloom` | something OPENS: placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut. Slower in than the others, because an opening is not an arrival |
+| `chime` | a small bright accent where a moment resolves. Noticed rather than announced, so it survives repetition better than a sting does |
+| `droplet` | something falls into place: a short pitched drop, placed automatically on a `drop` or `zoom` cut. The lightest of the arrival sounds |
+| `impact` | something heavy ARRIVES and lands hard: a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home |
 | `pluck` | punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it |
-| `riser` | a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. What a declared `spectacle` gets |
-| `sweep` | a wipe: a noise band climbing the spectrum, wider and slower than a whoosh, so it reads as the whole frame changing rather than one object crossing it |
-| `thud` | something with WEIGHT arrives: a low sine dropping in pitch, because the ear reads a falling fundamental as mass. A frame-sized card landing |
-| `travel` | movement. Filtered noise whose band opens then closes, which is what separates a whoosh from a burst of static. One per camera gesture, not one per keyframe |
+| `riser` | a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. Tension, suspense, a countdown to what a declared `spectacle` names |
+| `whoosh` | air moving past. One camera gesture, one whoosh, never one per keyframe: the sound rises as the move starts and falls away as it passes |
 
 ## Backgrounds  `[background]`
 
@@ -431,11 +433,11 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 
 | name | what / when |
 |---|---|
-| `aurora` | drifting colour aurora (moves) |
-| `matrix` | falling glyph rain (per-frame) |
-| `meteor` | ballistic streaks with echo trails (per-frame) |
-| `starfield` | flying starfield (per-frame) |
-| `waves` | sine wave field (per-frame) |
+| `aurora` | slow curtains of coloured light. Calm, ambient, and the least busy field here. |
+| `matrix` | columns of falling glyphs. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately. |
+| `meteor` | streaks crossing the frame on a diagonal. Motion and event on a background that would otherwise be still. |
+| `starfield` | stars drifting past as if the camera were moving through them. Depth and travel on an otherwise flat frame. |
+| `waves` | rolling bands, a moving surface. Rhythm underneath content without competing for the eye. |
 
 ## Layer-as-texture (resample)  `[per-frame]`
 
@@ -900,41 +902,41 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 | name | what / when |
 |---|---|
-| `blinds` | playful "notice the cut" (shape wipes) |
-| `bokeh` | time passing / reflection |
-| `burn` | a heavy story turn |
-| `chromaticSplit` | digital shock / rupture |
-| `cinematicZoom` | dive-in zoom into a screen |
-| `circle` | playful "notice the cut" (shape wipes) |
-| `confetti` | punctuation / a hit |
-| `crossWarp` | liquid / organic morph |
-| `dispersion` | digital shock / rupture |
-| `dissolve` | time/place change |
-| `domainWarp` | liquid / organic morph |
-| `doors` | playful "notice the cut" (shape wipes) |
-| `flash` | punctuation / a hit |
-| `glitch` | RGB-split glitch |
-| `grain` | punctuation / a hit |
-| `gridPixelateWipe` | digital shock / rupture |
-| `ink` | time passing / reflection |
-| `iridescence` | premium glamour / product |
-| `leak` | time passing / reflection |
-| `lens` | premium glamour / product |
-| `pinwheel` | playful "notice the cut" (shape wipes) |
-| `pixel` | digital shock / rupture |
-| `polka` | playful "notice the cut" (shape wipes) |
-| `ridgedBurn` | a heavy story turn |
-| `ripple` | liquid / organic morph |
-| `scan` | digital shock / rupture |
-| `sdfIris` | playful "notice the cut" (shape wipes) |
-| `squares` | playful "notice the cut" (shape wipes) |
-| `streak` | energy, momentum |
-| `swirl` | playful "notice the cut" (shape wipes) |
-| `thermal` | premium glamour / product |
-| `vortex` | a heavy story turn |
-| `warp` | energy, momentum |
-| `whipPan` | momentum swipe between beats |
-| `wipe` | playful "notice the cut" (shape wipes) |
+| `blinds` | venetian bars opening together. Mechanical and rhythmic. |
+| `bokeh` | soft out-of-focus discs drifting across frame. Ambient and quiet: closer to a texture than a cut. |
+| `burn` | a film burn: the frame chars through and blows out, the way heat eats a print. Warm, analogue, and loud. |
+| `chromaticSplit` | an rgb-fringed shock ring with colour fringing at the edges. An impact with a lens defect. |
+| `cinematicZoom` | a dolly punch-in used as a cut cover: the camera lunges forward and the join hides inside the lunge. |
+| `circle` | a disc expanding from the centre. Focus opening outward from one point. |
+| `confetti` | a burst of coloured pieces thrown across frame. Celebration, and hard to use without looking cheap. |
+| `crossWarp` | a noise-smeared directional veil dragging the frame sideways as it goes. |
+| `dispersion` | a spectral prism band sweeping the frame, splitting light into its colours as it passes. |
+| `dissolve` | the frame dissolves away to white. A clean act break when the next beat starts bright. |
+| `domainWarp` | a liquid marble wash, noise folded through noise. Organic, slow, and unlike anything geometric here. |
+| `doors` | panels closing in from both sides to meet in the middle. |
+| `flash` | a single hard white flash across the whole frame. The bluntest cut cover there is, and the one to use when the two shots have nothing in common. |
+| `glitch` | rgb channel split into displaced bars. Digital failure, interference, a system under strain. |
+| `grain` | dense fine film grain rising over the frame. Texture rather than event: use it under something else. |
+| `gridPixelateWipe` | chunky pixel blocks sweeping a diagonal, each block a quantised tint. A wipe and a pixelate at once. |
+| `ink` | an ink bleed spreading to near-black. The dark twin of dissolve, for a beat that gets heavier. |
+| `iridescence` | a thin-film interference sheen, the colour of oil on water shifting with angle. |
+| `leak` | a light leak, seed-generative and multi-hue. Colour bleeding in at the edges as if the camera back opened. |
+| `lens` | a full anamorphic flare: hot core, ghosts down the axis, a horizontal streak. Cinematic and very loud. |
+| `pinwheel` | an angular sweep with three arms rotating around the centre. |
+| `pixel` | a chunky mosaic that fills the frame and then clears. Reads as resolution being lost and regained. |
+| `polka` | a curtain of dots growing until they cover the frame. |
+| `ridgedBurn` | a filament ember front sweeping upward, like paper catching along a ragged edge. |
+| `ripple` | concentric rings expanding across the whole frame, like a struck water surface. |
+| `scan` | a CRT scanline band sweeping through, with a trailing glow. Terminal, monitor, surveillance. |
+| `sdfIris` | an iris wipe through a seeded shape, so the aperture is not simply a circle. Focus, with character. |
+| `squares` | grid cells filling in on a stagger. Modular, and it suits a layout that is already a grid. |
+| `streak` | sharp radial light rays from a hot core. Photographic rather than digital: a lens catching a source. |
+| `swirl` | rotational light streaks thrown out from the centre. |
+| `thermal` | an iron-bow heat veil in coarse cells, colour mapped from luminance rather than painted on. |
+| `vortex` | an ink spiral pulling inward to a dark eye. A beat being swallowed rather than ended. |
+| `warp` | a barrel-warped refraction shock ring expanding outward. An impact felt through the lens. |
+| `whipPan` | horizontal smear streaks racing across, as if the camera whipped sideways. Energy carried into a payoff. |
+| `wipe` | a directional band sweeping across the frame. The plainest geometric transition, and it always reads. |
 
 ## Per-frame accent layers  `[per-frame]`
 
@@ -1043,4 +1045,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 
 ---
-_642 effects across 53 families. Regenerate: `make effects`._
+_644 effects across 53 families. Regenerate: `make effects`._
