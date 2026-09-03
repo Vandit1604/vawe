@@ -6664,6 +6664,74 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       fs.unlinkSync(der);
     }
 
+    // THE [live] RUNG'S SECOND OCCUPANT. craft-live.mjs carries three rules that were [eye]: the
+    // launch-video pair rules, the emoji-last ladder, and the two engine triggers a path can decide.
+    // Both halves are asserted for each, because a hook that only ever speaks is a hook nobody keeps.
+    {
+      const hook = path.join(repoRoot, '.claude/hooks/craft-live.mjs');
+      const fire = (f) => {
+        const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: f } }), encoding: 'utf8' });
+        return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
+      };
+      const tmp = path.join(repoRoot, 'formats/scene/_craft-live-probe.json');
+      const write = (o) => fs.writeFileSync(tmp, JSON.stringify({ module: 'scene', bg: [{ preset: 'black' }], ...o }));
+
+      // core/clips.js:77 owns the direction: slide-left enters from the left edge and, as an `out`,
+      // leaves toward it. So the same word twice is enter-and-retreat, never one line of travel.
+      write({ layers: [{ type: 'text', text: 'a', anim: 'slide-right', out: 'slide-right' },
+        { type: 'image', src: 'a.png' }, { type: 'text', text: 'c' }] });
+      const retreat = fire(tmp);
+      ok('craft-live: a layer that enters and retreats down the same axis is named at the keystroke',
+        retreat.code === 2 && /enter and RETREAT/.test(retreat.out));
+      ok('craft-live: and it does not block, it advises', /Nothing here blocks/.test(retreat.out));
+
+      // The OPPOSITE word is the correct pair, and it must be silence or the rule teaches nothing.
+      write({ layers: [{ type: 'text', text: 'a', anim: 'slide-right', out: 'slide-left' },
+        { type: 'image', src: 'a.png' }, { type: 'text', text: 'c' }] });
+      ok('craft-live: the correctly paired opposite gets silence', fire(tmp).code === 0);
+
+      // Emoji is a finding only where it is standing in for the picture the film never got.
+      write({ layers: [{ type: 'text', text: 'ship it 🚀' }, { type: 'text', text: 'b' }, { type: 'rect', w: 10 }] });
+      const em = fire(tmp);
+      ok('craft-live: an emoji in a film with no picture at all is a finding',
+        em.code === 2 && /emoji in on-screen text and no image/.test(em.out));
+      write({ layers: [{ type: 'text', text: 'ship it 🚀' }, { type: 'image', src: 'a.png' }, { type: 'text', text: 'c' }] });
+      ok('craft-live: the same emoji beside a real image is not', fire(tmp).code === 0);
+
+      // A lone logo under 100px reads as punctuation. Three or more is an icon wall and is left alone.
+      write({ layers: [{ type: 'image', src: '/brand/logo.svg', w: 64, h: 64 },
+        { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] });
+      const logo = fire(tmp);
+      ok('craft-live: a logo sized like a bullet is named', logo.code === 2 && /the logo is 64px/.test(logo.out));
+      write({ layers: [{ type: 'image', src: '/brand/logo.svg', w: 240, h: 240 },
+        { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] });
+      ok('craft-live: a logo given prominence gets silence', fire(tmp).code === 0);
+      fs.unlinkSync(tmp);
+
+      // ONLY WHAT THE AUTHOR WROTE. A derivative is generated and cannot be fixed in place.
+      const der2 = path.join(repoRoot, 'formats/scene/_craft-live-probe.expanded.json');
+      fs.writeFileSync(der2, JSON.stringify({ module: 'scene', layers: [{ type: 'text', text: '🚀' },
+        { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] }));
+      ok('craft-live: a generated derivative is never spoken to', fire(der2).code === 0);
+      fs.unlinkSync(der2);
+
+      // The two engine triggers a PATH can decide, and the two neighbours that must stay quiet.
+      const cap = fire(path.join(repoRoot, 'internal/render/render.go'));
+      ok('craft-live: a save on the capture path asks for both wall-clock times',
+        cap.code === 2 && /CAPTURE PATH/.test(cap.out) && /wall-clock/.test(cap.out));
+      ok('craft-live: an edit to core/ is not the capture path and is silent',
+        fire(path.join(repoRoot, 'core/clips.js')).code === 0);
+      ok('craft-live: an EXISTING gate is not a new gate', fire(path.join(repoRoot, 'scripts/gates/rung.mjs')).code === 0);
+      // Assembled rather than written whole: a literal path here reads to doc-refs as a repo path the
+      // docs promise, and the file exists for four lines.
+      const fresh = path.join(repoRoot, 'scripts/gates', `_craft-live-probe-gate.${'mjs'}`);
+      fs.writeFileSync(fresh, 'export const probe = 1;\n');
+      const newGate = fire(fresh);
+      fs.unlinkSync(fresh);
+      ok('craft-live: a gate git has never seen is told a gate is the LAST resort',
+        newGate.code === 2 && /NEW GATE/.test(newGate.out) && /LAST resort/.test(newGate.out));
+    }
+
     fs.writeFileSync(claude, savedClaude);
     fs.writeFileSync(ratchet, JSON.stringify({ eye: 0 }));
     const worse = run();

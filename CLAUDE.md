@@ -207,7 +207,7 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - Text may contain `<b>…</b>` / `<em>…</em>` (rendered as HTML). Keep names short (they sit in cards).
 
-## Launch-video rules (standing, asked for directly: apply to every launch film)  `[eye]`
+## Launch-video rules (standing, asked for directly: apply to every launch film)  `[live: .claude/hooks/craft-live.mjs]`
 
 1. **Check EVERY page, not the homepage.** `make sections` inventories one URL. Crawl the whole site
    (routes, view modes, empty states) before storyboarding. Tpot's real product turned out to be
@@ -298,7 +298,7 @@ cost a render, the defaults to reach past, and which skills to load. **Then gate
 which one sees what:** `make preview HTML=<frag>` reads the FRAGMENT in a real browser, `make
 designspec-check D=<file>` reads the SCENE. Both must be clean before you render.
 
-## Icons & images (real assets first, emoji last)  `[eye]`
+## Icons & images (real assets first, emoji last)  `[live: .claude/hooks/craft-live.mjs]`
 
 **Always prefer a real image**, and captured real UI (`make capture`) is the highest-taste source. The
 rest of the ladder, and the treatment every image needs so it does not read as slop:
@@ -566,12 +566,15 @@ is the midpoint between two measured query sets, and both sets are asserted in `
 the engine contains and it must be re-measured, THROUGH that file's own `toks`: a pass that used a
 hand-rolled tokenizer instead produced numbers that were all wrong in the same direction.
 
-## Changing the ENGINE, not a film? The doctrine is one file away  `[eye]`
+## Changing the ENGINE, not a film? The doctrine is one file away  `[live: .claude/hooks/craft-live.mjs]`
 
 Five rules govern any change to `core/`, `internal/`, a gate or the capture path, and they live in
 **[`docs/CRAFT/ENGINE-CHANGES.md`](docs/CRAFT/ENGINE-CHANGES.md)** rather than here, because this file
 is addressed to somebody authoring a film. Their triggers stay, because a rule you do not know exists
-is a rule you cannot go and read:
+is a rule you cannot go and read. Two of the five are decidable from a path, so
+`.claude/hooks/craft-live.mjs` says them at the keystroke: a save under `internal/scene` or
+`internal/render`, and a new file under `scripts/gates/`. The other three are not decidable from a
+filename, and the hook says nothing about them rather than guessing:
 
 - **About to write a gate?** A gate is the LAST resort. If the bad value has a write site, the refusal
   goes there and the whole class of bug ends. A gate that runs afterwards only promises to notice.

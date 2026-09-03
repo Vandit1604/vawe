@@ -38,6 +38,15 @@
             "command": "node .claude/hooks/scene-live.mjs"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/craft-live.mjs"
+          }
+        ]
       }
     ]
   }
