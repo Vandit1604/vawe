@@ -69,7 +69,7 @@ function measure(file) {
   return { file: frames / rate, audible: (last + 1) / rate };
 }
 
-if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make sfx` / `make audio`). Nothing to check'); process.exit(0); }
+if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make audio`). Nothing to check'); process.exit(0); }
 // assets/sfx is entirely gitignored, so a checkout without it swept zero cues and said nothing was
 // wrong with them. population() states N and refuses a checkout that should hold more.
 const files = population('sfx audit', { dir: 'assets/sfx', ext: '.wav', quiet: true }).names;
@@ -90,5 +90,5 @@ for (const f of files) {
 console.log('');
 if (!bad.length) { console.log('✓ every sound effect is the shape its role claims'); process.exit(0); }
 for (const b of bad) console.log(`  ✗ ${b.name}: ${b.why}`);
-console.log('\nRe-fetch it (`make sfx --force`) or bake the synthesized voicing (`node scripts/media/audio-bake.mjs --force`).');
+console.log('\nRe-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node scripts/media/audio-bake.mjs --force`).');
 process.exit(1);

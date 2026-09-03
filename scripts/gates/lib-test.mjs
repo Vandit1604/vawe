@@ -2839,6 +2839,39 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   }
 }
 
+// ---- a gate's own FIX INSTRUCTION must be a command that runs ----
+// `scripts/gates/audio-check.mjs` told an author to run `make sfx` in two places and printed it inside
+// the finding, in the tone of the fix. There is no such target; the bake is `make audio`. So following
+// a gate's own advice failed with "No rule to make target `sfx`", which is worse than no advice: it
+// teaches the reader that the gates do not know their own repo, and the next real instruction gets
+// ignored too. `make doc-refs` already checks this for DOCS, and found 111 stale paths when it landed.
+// Nothing checked the strings the gates themselves print.
+{
+  const mk = fs.readFileSync(path.join(repoRoot, 'Makefile'), 'utf8');
+  const targets = new Set([...mk.matchAll(/^([a-zA-Z][\w-]*)\s*:/gm)].map((m) => m[1]));
+  const dir = path.join(repoRoot, 'scripts/gates');
+  const bad = [];
+  for (const f of fs.readdirSync(dir)) {
+    if (!f.endsWith('.mjs')) continue;
+    const src = fs.readFileSync(path.join(dir, f), 'utf8');
+    // BACKTICKED OR COMMAND-SHAPED ONLY. A bare /make (\w+)/ matches English: "make sure", "make it",
+    // "make a decision" all appear in gate prose and produced 45 false hits on the first run. A gate
+    // prints a command either inside backticks or after a colon and run of spaces, so those are the two
+    // forms checked, and ordinary sentences are left alone.
+    // COMMENTS ARE STRIPPED FIRST, and that is not tidiness. Gate files discuss this very class in
+    // prose: doc-refs.mjs:145 records reporting `make builds` and `make timed` as missing when they
+    // were quoted inside a comment, and snap-blocks.mjs names `make slop` as a past mistake. Reading
+    // a comment as an instruction makes the check argue with prose that is already correct, which is
+    // the failure doc-refs already wrote down and this would otherwise repeat.
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '')
+      .split('\n').filter((l) => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+    const forms = [...code.matchAll(/`make ([a-z][\w-]*)/g), ...code.matchAll(/:\s\s+make ([a-z][\w-]*)/g)];
+    for (const m of forms) if (!targets.has(m[1])) bad.push(`${f}: make ${m[1]}`);
+  }
+  if (bad.length) console.log('    gates naming a make target that does not exist:', [...new Set(bad)].join(' · '));
+  ok('gates: every `make <target>` a gate prints is a target the Makefile has', bad.length === 0);
+}
+
 // ---- beat detection (core/beats.js): the grid a beat-matched edit is built on ----
 {
   const SR = 44100;
