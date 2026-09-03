@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/no-blanket-git.mjs — refuse the four git commands that destroyed work in this repo.
+// scripts/live/no-blanket-git.mjs - refuse the four git commands that destroyed work in this repo.
 //
 // PreToolUse on Bash. Exit 2 blocks the call and returns stderr to the model.
 //
@@ -10,7 +10,7 @@
 // The rule is narrow. Staging by explicit path is untouched, and so is every read-only git command.
 // What is refused is the class that cannot tell YOUR work from someone else's.
 //
-// TWO THINGS THIS FILE LEARNED THE HARD WAY, both the misread this repo logs as #214/#216/#217 — a
+// TWO THINGS THIS FILE LEARNED THE HARD WAY, both the misread this repo logs as #214/#216/#217 - a
 // check reading source text instead of the thing the text produces:
 //
 //   1. MATCH A COMMAND, NEVER PROSE THAT MENTIONS ONE. Version one blocked its own commit, because the

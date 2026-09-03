@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/code-quality.mjs — tell the author about a tangled function while they are still in it.
+// scripts/live/code-quality.mjs - tell the author about a tangled function while they are still in it.
 //
 // PostToolUse on Edit|Write. Exit 2 returns stderr to the model, so the feedback arrives at the moment
 // the code was written rather than at push time. That timing is the whole point: a rule enforced at the

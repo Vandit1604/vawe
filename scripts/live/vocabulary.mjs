@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/vocabulary.mjs — a NEW named vocabulary should be a registry, and you should be told
+// scripts/live/vocabulary.mjs - a NEW named vocabulary should be a registry, and you should be told
 // while you are still in the file.
 //
 // WHY AT THE KEYSTROKE. This engine's discovery problem was never that capabilities were hard to find.

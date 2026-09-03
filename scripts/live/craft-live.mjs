@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/craft-live.mjs — three rules of CLAUDE.md that were held up by nothing but the
+// scripts/live/craft-live.mjs - three rules of CLAUDE.md that were held up by nothing but the
 // sentence, said at the moment the file is still open.
 //
 // WHY A SECOND LIVE HOOK. `node scripts/gates/rung.mjs` reports how each rule in CLAUDE.md is
