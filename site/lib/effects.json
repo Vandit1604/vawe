@@ -1,7 +1,7 @@
 {
-  "total": 647,
-  "previewed": 295,
-  "families": 53,
+  "total": 672,
+  "previewed": 320,
+  "families": 54,
   "tags": [
     [
       "asset",
@@ -13,7 +13,7 @@
     ],
     [
       "background",
-      22
+      47
     ],
     [
       "blueprint",
@@ -296,7 +296,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 22,
+      "count": 23,
       "undescribed": 0,
       "entries": [
         {
@@ -367,6 +367,13 @@
           "stem": "backgrounds--dotmatrix",
           "desc": "a light field ruled by evenly spaced dots whose size waves across it, the printed halftone look (moves)",
           "scene": "/assets/effects/backgrounds--dotmatrix.json",
+          "noPreview": null
+        },
+        {
+          "name": "gradient",
+          "stem": "backgrounds--gradient",
+          "desc": "an agent-controlled colour gradient backdrop, linear/radial/conic from your own hex colours, angle and stops, or a named recipe (`opts.recipe`). FLAT unless `opts.kind` is \"mesh\", which moves it",
+          "scene": "/assets/effects/backgrounds--gradient.json",
           "noPreview": null
         },
         {
@@ -451,6 +458,187 @@
           "stem": "backgrounds--spotlight",
           "desc": "a deep field with one soft pool of light wandering across it on a slow cycle, the eye follows the bright patch (moves)",
           "scene": "/assets/effects/backgrounds--spotlight.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "gradient-recipes",
+      "title": "Gradient recipes",
+      "tag": "background",
+      "intro": "named colour+kind(+angle) combos for the `gradient` background preset · `{\"preset\":\"gradient\",\"opts\":{\"recipe\":\"NAME\"}}`. Author colors/kind/angle in `opts` override a recipe field by field.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 24,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "arctic-blue",
+          "stem": "gradient-recipes--arctic-blue",
+          "desc": "pale ice blue radial, a cold spotlit pool",
+          "scene": "/assets/effects/gradient-recipes--arctic-blue.json",
+          "noPreview": null
+        },
+        {
+          "name": "berry-crush",
+          "stem": "gradient-recipes--berry-crush",
+          "desc": "crimson into tomato red, a hot fruit-punch ramp",
+          "scene": "/assets/effects/gradient-recipes--berry-crush.json",
+          "noPreview": null
+        },
+        {
+          "name": "citrus-pop",
+          "stem": "gradient-recipes--citrus-pop",
+          "desc": "orange into bright yellow, a loud fruit-stand ramp",
+          "scene": "/assets/effects/gradient-recipes--citrus-pop.json",
+          "noPreview": null
+        },
+        {
+          "name": "cool-mint",
+          "stem": "gradient-recipes--cool-mint",
+          "desc": "green into teal, a fresh spa ramp",
+          "scene": "/assets/effects/gradient-recipes--cool-mint.json",
+          "noPreview": null
+        },
+        {
+          "name": "coral-reef",
+          "stem": "gradient-recipes--coral-reef",
+          "desc": "salmon into pale pink, a beachy diagonal ramp",
+          "scene": "/assets/effects/gradient-recipes--coral-reef.json",
+          "noPreview": null
+        },
+        {
+          "name": "cosmic-drift",
+          "stem": "gradient-recipes--cosmic-drift",
+          "desc": "indigo, plum and hot pink drifting, a MOVING galaxy mesh",
+          "scene": "/assets/effects/gradient-recipes--cosmic-drift.json",
+          "noPreview": null
+        },
+        {
+          "name": "deep-ocean",
+          "stem": "gradient-recipes--deep-ocean",
+          "desc": "near-black into slate blue, a moody nautical field",
+          "scene": "/assets/effects/gradient-recipes--deep-ocean.json",
+          "noPreview": null
+        },
+        {
+          "name": "ember",
+          "stem": "gradient-recipes--ember",
+          "desc": "crimson, tomato and amber drifting, a MOVING fire mesh",
+          "scene": "/assets/effects/gradient-recipes--ember.json",
+          "noPreview": null
+        },
+        {
+          "name": "emerald-pool",
+          "stem": "gradient-recipes--emerald-pool",
+          "desc": "teal into jade radial, a jungle-pool glow",
+          "scene": "/assets/effects/gradient-recipes--emerald-pool.json",
+          "noPreview": null
+        },
+        {
+          "name": "forest-mist",
+          "stem": "gradient-recipes--forest-mist",
+          "desc": "teal, jade and pale sky drifting, a MOVING woodland mesh",
+          "scene": "/assets/effects/gradient-recipes--forest-mist.json",
+          "noPreview": null
+        },
+        {
+          "name": "glacier",
+          "stem": "gradient-recipes--glacier",
+          "desc": "sky blue into pale cyan radial, an icy pool",
+          "scene": "/assets/effects/gradient-recipes--glacier.json",
+          "noPreview": null
+        },
+        {
+          "name": "golden-hour",
+          "stem": "gradient-recipes--golden-hour",
+          "desc": "amber into warm yellow, a late-afternoon ramp",
+          "scene": "/assets/effects/gradient-recipes--golden-hour.json",
+          "noPreview": null
+        },
+        {
+          "name": "lavender-fog",
+          "stem": "gradient-recipes--lavender-fog",
+          "desc": "pale periwinkle into indigo, a dreamy purple wash",
+          "scene": "/assets/effects/gradient-recipes--lavender-fog.json",
+          "noPreview": null
+        },
+        {
+          "name": "midnight-violet",
+          "stem": "gradient-recipes--midnight-violet",
+          "desc": "three-stop indigo to plum, a night-sky ramp",
+          "scene": "/assets/effects/gradient-recipes--midnight-violet.json",
+          "noPreview": null
+        },
+        {
+          "name": "neon-dusk",
+          "stem": "gradient-recipes--neon-dusk",
+          "desc": "hot pink into electric violet, a synthwave ramp",
+          "scene": "/assets/effects/gradient-recipes--neon-dusk.json",
+          "noPreview": null
+        },
+        {
+          "name": "peach-cream",
+          "stem": "gradient-recipes--peach-cream",
+          "desc": "pale peach into blush, a soft dessert ramp",
+          "scene": "/assets/effects/gradient-recipes--peach-cream.json",
+          "noPreview": null
+        },
+        {
+          "name": "plum-wine",
+          "stem": "gradient-recipes--plum-wine",
+          "desc": "violet into dusty rose, a wine-toned diagonal ramp",
+          "scene": "/assets/effects/gradient-recipes--plum-wine.json",
+          "noPreview": null
+        },
+        {
+          "name": "rose-glow",
+          "stem": "gradient-recipes--rose-glow",
+          "desc": "blush pink radial, a warm skin-tone pool",
+          "scene": "/assets/effects/gradient-recipes--rose-glow.json",
+          "noPreview": null
+        },
+        {
+          "name": "slate-storm",
+          "stem": "gradient-recipes--slate-storm",
+          "desc": "charcoal into graphite, a neutral overcast ramp",
+          "scene": "/assets/effects/gradient-recipes--slate-storm.json",
+          "noPreview": null
+        },
+        {
+          "name": "solar-flare",
+          "stem": "gradient-recipes--solar-flare",
+          "desc": "red-orange-magenta conic ring, a sunburst wheel",
+          "scene": "/assets/effects/gradient-recipes--solar-flare.json",
+          "noPreview": null
+        },
+        {
+          "name": "spectrum-ring",
+          "stem": "gradient-recipes--spectrum-ring",
+          "desc": "cyan-violet-pink conic wheel, a full-hue rainbow ring",
+          "scene": "/assets/effects/gradient-recipes--spectrum-ring.json",
+          "noPreview": null
+        },
+        {
+          "name": "steel-blue",
+          "stem": "gradient-recipes--steel-blue",
+          "desc": "slate into charcoal-blue, a cool industrial ramp",
+          "scene": "/assets/effects/gradient-recipes--steel-blue.json",
+          "noPreview": null
+        },
+        {
+          "name": "sunset-strip",
+          "stem": "gradient-recipes--sunset-strip",
+          "desc": "red, magenta and amber drifting, a MOVING sunset mesh",
+          "scene": "/assets/effects/gradient-recipes--sunset-strip.json",
+          "noPreview": null
+        },
+        {
+          "name": "warm-dusk",
+          "stem": "gradient-recipes--warm-dusk",
+          "desc": "orange into coral, a sunset ramp on a 40deg diagonal",
+          "scene": "/assets/effects/gradient-recipes--warm-dusk.json",
           "noPreview": null
         }
       ]
@@ -1195,14 +1383,14 @@
         {
           "name": "effector",
           "stem": "generators-the-playground--effector",
-          "desc": "One travelling point drives a whole grid by DISTANCE, not by order · a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.",
+          "desc": "Move a hundred copies with one moving point, and keyframe none of them. Each copy reacts to how FAR the point is, not to its place in a list, so you get a wave, a ripple, or a trail that lags behind. Flip between trail, highlight and ripple to see it.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "keyframeHandle",
           "stem": "generators-the-playground--keyframehandle",
-          "desc": "The graph editor for one keyframe pair · per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.",
+          "desc": "Why two easings that look alike FEEL different · one curve between two keyframes, drawn beside a strip of evenly spaced dots. The dots bunch where the thing is slow and spread where it is fast, which the curve alone hides. Flip between easyEase, snap, hang and overshoot to see it.",
           "scene": null,
           "noPreview": null
         },
@@ -5056,7 +5244,7 @@
         {
           "name": "beam:border (border-beam)",
           "stem": "per-frame-accent-layers--beam-border-border-beam",
-          "desc": "a light travels the rounded-rect border",
+          "desc": "a light travels the rounded-rect border of a card, redrawn each frame",
           "scene": "/assets/effects/per-frame-accent-layers--beam-border-border-beam.json",
           "noPreview": null
         },
@@ -5083,7 +5271,7 @@
         {
           "name": "svg:draw (stroke draws on)",
           "stem": "vector-layer-logos-icons--svg-draw-stroke-draws-on",
-          "desc": "the logo/icon stroke draws itself on, line by line",
+          "desc": "the logo or icon stroke draws its outline on, line by line, as if traced by a pen",
           "scene": null,
           "noPreview": null
         },

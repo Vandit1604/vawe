@@ -16,6 +16,7 @@ import { SEAM_BLURBS } from '../../core/seams.js';
 import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
 import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/gsap-effects.js';
 import { BG_NAMES, BG_BLURBS } from '../../core/backgrounds.js';
+import { GRADIENT_RECIPE_REGISTRY } from '../../core/gradient-recipes.js';
 import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
 import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
@@ -666,6 +667,14 @@ const bgOver = (preset, over) => { try { return applyBgOver(bgPreset(preset), ov
 ok('bg opts reach the fx (liquid scale/speed/edge0)', (() => { const s = bgOver('liquid', { scale: 1.6, speed: 0.3, edge0: 0.4 }); const fx = s && s.fx.find((f) => f.type === 'liquid'); return !!fx && fx.scale === 1.6 && fx.speed === 0.3 && fx.edge0 === 0.4; })());
 ok('bg opts meta knobs still scale the baked numbers', (() => { const s = bgOver('paperDots', { dotAlpha: 0.5, grain: 0.2 }); const d = s && s.fx.find((f) => f.type === 'dots'), g = s && s.fx.find((f) => f.type === 'grain'); return !!d && d.peakAlpha === 0.5 && g.alpha === 0.2; })());
 ok('a bg opt no fx here reads is REFUSED, not dropped', bgOverErrors(bgPreset('liquid'), { dotAlpha: 0.2 }, 'bg[0]').length === 1 && bgOver('liquid', { dotAlpha: 0.2 }) === null);
+
+// ---- gradient preset: agent-controlled colours, runtime-generated (no baked raster pack shipped) ----
+ok('bg opts vocabulary is derived from the fx implementation (gradientFill)', ['kind', 'colors', 'angle', 'stops', 'cx', 'cy', 'recipe'].every((k) => FX_PARAMS.gradientFill.includes(k)));
+ok('gradient preset base shape: paper base + gradientFill + grain', (() => { const s = bgPreset('gradient'); return s.base.kind === 'linear' && s.fx.some((f) => f.type === 'gradientFill') && s.fx.some((f) => f.type === 'grain'); })());
+ok('gradient preset opts reach the fx (colors/angle/kind), and `kind` does not collide with the fx discriminator `type`', (() => { const s = bgOver('gradient', { kind: 'radial', colors: ['#111111', '#222222'], angle: 10 }); const fx = s && s.fx.find((f) => f.type === 'gradientFill'); return !!fx && fx.kind === 'radial' && fx.type === 'gradientFill' && fx.angle === 10 && Array.isArray(fx.colors) && fx.colors[0] === '#111111'; })());
+ok('gradient preset resolves a named recipe at paint time (not opts)', (() => { const s = bgOver('gradient', { recipe: 'cool-mint' }); const fx = s && s.fx.find((f) => f.type === 'gradientFill'); return !!fx && fx.recipe === 'cool-mint'; })());
+ok('gradient preset carries a blurb', typeof BG_BLURBS.gradient === 'string' && BG_BLURBS.gradient.length > 0);
+ok('gradient recipes are a real registry (unknown recipe throws with a hint)', (() => { try { GRADIENT_RECIPE_REGISTRY.pick('zzz-not-real'); return false; } catch (e) { return /unknown/i.test(e.message); } })());
 
 // kinetic typography: unitProgress staggering + presets (pure)
 ok('unitProgress unit 0 starts at 0', approx(unitProgress(0, 0, 3, { each: 0.5, stagger: 0.06 }), 0));
