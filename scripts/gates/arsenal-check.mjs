@@ -137,6 +137,7 @@ const WAIVED = new Map(Object.entries({
   PROFILE_BED: 'sound, as CUT_CUE',
   // FOUND BY THE ARRAY-OF-OBJECTS WIDENING (see isVocabulary). Each is a table of records, which is
   // the shape RANSOM_FACES has, so the widening that found the faces found these four with it.
+  RANSOM_FACES: 'the ARRAY view of the eight ransom faces. `RANSOM_REGISTRY` (core/ransom.js) is the same set as a map, carries the blurbs and writes the catalogue section, so this is one vocabulary in two shapes. The array cannot be recognised by identity: its members are `{family, weight}` records, not names, and ransomGlyph picks by index, so the order is what the array is for',
   GENERATORS: 'the ARRAY view of the ready generators. `GENERATOR_ENTRIES` is the same set as a map and IS the registry (core/generators.js), so this is one vocabulary in two shapes, not two. Identity cannot see that: the array is built by a filter and is a different object. The playground reads the array because it wants the order',
   ALL_GENERATORS: 'every generator including the ones held back. `GENERATORS` is the ready subset and it IS catalogued; a scene can only name a generator that ships',
   TRANSITIONS: 'the derived index over every transition mechanism (anim / cut / sting / seam), built from those registries at import time. Every member is catalogued in its own family; this is the join, as MECHANISMS and FAMILIES beside it',

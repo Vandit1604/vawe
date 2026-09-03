@@ -1,9 +1,7 @@
 {
- "unfindable": 17,
+ "unfindable": 4,
  "kinds": {
   "per-frame accent layer": 2,
-  "vector layer": 2,
-  "ransom face": 8,
-  "output target": 5
+  "vector layer": 2
  }
 }

@@ -10,22 +10,61 @@
 // for this effect (see docs/MISTAKES.md).
 import { hashSeed, random } from './motion.js';
 import { registeredFamilies } from './fonts.js';
+import { defineRegistry } from './registry.js';
 
 // Deliberately from DIFFERENT type classes (grotesque · contrast serif · marker hand · geometric ·
 // editorial serif · wide display · typewriter mono) so adjacent letters clash the way real cutouts do.
 // All are OFL and declared in core/tokens.css; ransomStyle throws if one is not registered rather than
 // letting a letter silently fall back to the body face (which would defeat the whole effect).
-export const RANSOM_FACES = [
-  { family: 'Archivo', weight: 800 },
-  { family: 'Fraunces', weight: 800, italic: true },
-  { family: 'Caveat', weight: 700 },
-  { family: 'Space Grotesk', weight: 700 },
-  { family: 'Instrument Serif', weight: 400, italic: true },
-  { family: 'Anybody', weight: 900 },
-  { family: 'JetBrains Mono', weight: 700 },
-  { family: 'Hanken Grotesk', weight: 900 },
-];
+//
+// A REGISTRY, BECAUSE A TYPEFACE IS A CHOICE AN AUTHOR MAKES. This was a bare array, so all eight faces
+// reached `make arsenal` with no blurb and were findable only by someone who already typed the name:
+// `Q="a handwriting face"` answered nothing while `Caveat` sat here. The catalogue called the family
+// self-describing ("a typeface, see it, do not read about it"), which is true of the LOOK and false of
+// the SEARCH: nobody looks at a face they cannot reach. The blurbs say what each one feels like and
+// what it is for, since the name is already indexed (core/registry.js refuses a blurb that only says
+// its own name back).
+//
+// ORDER IS LOAD-BEARING. ransomGlyph picks by `hash % faces.length`, so the sequence below IS the
+// per-glyph choice. Object keys keep insertion order, and RANSOM_FACES is still the same array in the
+// same order, so no rendered frame moves.
+const FACES = {
+  Archivo: { family: 'Archivo', weight: 800 },
+  Fraunces: { family: 'Fraunces', weight: 800, italic: true },
+  Caveat: { family: 'Caveat', weight: 700 },
+  'Space Grotesk': { family: 'Space Grotesk', weight: 700 },
+  'Instrument Serif': { family: 'Instrument Serif', weight: 400, italic: true },
+  Anybody: { family: 'Anybody', weight: 900 },
+  'JetBrains Mono': { family: 'JetBrains Mono', weight: 700 },
+  'Hanken Grotesk': { family: 'Hanken Grotesk', weight: 900 },
+};
 
+export const RANSOM_REGISTRY = defineRegistry('ransom face', FACES, {
+  // PROSE, DELIBERATELY, so no paste is printed. The slot takes a list of `{family, weight}` records
+  // and the paste grammar can only put a name at a path, so a path here would print
+  // `"faces": "Caveat"`, which the engine reads as a record and renders nothing from.
+  slot: 'ransom.faces (a list of {family, weight} records on a text layer)',
+  blurbs: {
+    Archivo: 'a workhorse grotesque cut heavy and wide: the neutral, newspaper-headline shout of the set',
+    Fraunces: 'a high-contrast display serif with a soft wobble, old seed-catalogue flavour, slanted here',
+    Caveat: 'handwriting, a felt-tip scrawl: the letter somebody wrote by hand and stuck down',
+    'Space Grotesk': 'a technical geometric sans, cool and even, the computer-lab voice in the note',
+    'Instrument Serif': 'a slanted editorial serif with thin stems: magazine headline, elegant against the noise',
+    Anybody: 'an extremely wide display sans at its heaviest: poster shout, sci-fi proportions',
+    'JetBrains Mono': 'a monospace typewriter for code and terminals, every letter the same width',
+    'Hanken Grotesk': 'a friendly rounded sans at maximum weight: soft, solid, no edge to it',
+  },
+  catalog: {
+    title: 'Ransom faces',
+    tag: 'text',
+    intro: '`ransom` on a text layer: per-glyph face mixing, from this fixed set. Each glyph is cut from a different one, so the eight are picked to CLASH (grotesque · contrast serif · marker hand · geometric · editorial serif · wide display · typewriter mono). Pick a subset with `ransom: { faces: [...] }` when you want a narrower clash.',
+    usage: (n, { text }) => text({ split: 'char', ransom: { faces: [FACES[n]] } }),
+    noPreview: 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
+  },
+});
+
+// The ARRAY view, in the order above, because every reader here wants the sequence and not the map.
+export const RANSOM_FACES = Object.values(FACES);
 // Two swatch palettes. `paper` is muted newsprint/kraft (a kidnapper note); `color` is the vivid
 // magazine-cutout look, saturated construction-paper grounds, wood-type, a neon tile, colored ink on
 // colored stock. `accent` seeds one tile from the theme so either palette still reskins per brand.

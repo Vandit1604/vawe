@@ -158,6 +158,18 @@ The tiktok figures are this repo's own portrait numbers carried over as fraction
 | `tiktok` | the tightest phone target: a rail down the RIGHT at 16.7% of the width for the action buttons, 12.5% off the top and 30.2% off the bottom for the caption and handle. Serves 9:16 |
 | `web` | no platform chrome at all: the whole frame is usable and only the 4% margin applies. A site hero, an X or LinkedIn post, a docs clip |
 
+## Output targets  `[canvas]`
+
+`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.
+
+| name | what / when |
+|---|---|
+| `16:9` | wide landscape, the desktop shape: a website hero, a YouTube upload, a deck slide, anything watched on a laptop |
+| `1:1` | a square, equal on both sides: the feed post that crops the same everywhere it is shown |
+| `4:3` | boxy landscape, the old television and slide-projector shape: archive footage, a retro monitor |
+| `4:5` | the tall feed post: Instagram portrait, more height than a square without taking the whole phone |
+| `9:16` | tall and vertical, the whole phone screen edge to edge: TikTok, Reels, Shorts, a story |
+
 ## Caption styles  `[captions]`
 
 `captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.
@@ -782,6 +794,21 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `wave` | sinusoidal wave across units: a LOOP that never settles; ambient only |
 | `weight` | the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still |
 
+## Ransom faces  `[text]`
+
+`ransom` on a text layer: per-glyph face mixing, from this fixed set. Each glyph is cut from a different one, so the eight are picked to CLASH (grotesque · contrast serif · marker hand · geometric · editorial serif · wide display · typewriter mono). Pick a subset with `ransom: { faces: [...] }` when you want a narrower clash.
+
+| name | what / when |
+|---|---|
+| `Anybody` | an extremely wide display sans at its heaviest: poster shout, sci-fi proportions |
+| `Archivo` | a workhorse grotesque cut heavy and wide: the neutral, newspaper-headline shout of the set |
+| `Caveat` | handwriting, a felt-tip scrawl: the letter somebody wrote by hand and stuck down |
+| `Fraunces` | a high-contrast display serif with a soft wobble, old seed-catalogue flavour, slanted here |
+| `Hanken Grotesk` | a friendly rounded sans at maximum weight: soft, solid, no edge to it |
+| `Instrument Serif` | a slanted editorial serif with thin stems: magazine headline, elegant against the noise |
+| `JetBrains Mono` | a monospace typewriter for code and terminals, every letter the same width |
+| `Space Grotesk` | a technical geometric sans, cool and even, the computer-lab voice in the note |
+
 ## Scramble charsets (`chars`)  `[text]`
 
 What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "presetOpts": { "chars":"numbers", "rate":48, "revealDelay":0.25 } }`. A named set, or any string of your own glyphs. `rate` is refreshes per SECOND (so a slower reveal is no longer also a slower scramble) and `revealDelay` is the fraction of the window the unit stays fully scrambled before it starts resolving, which is what makes the effect read as decoding rather than as noisy type.
@@ -1019,33 +1046,6 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `tour` | camera → `move: "travel"` |
 | `ui focus zoom` | camera → `move: "diveIn"` |
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
-
-## Ransom faces  `[text]`
-
-`ransom` on a text layer: per-glyph face mixing, from this fixed set.
-
-| name | what / when |
-|---|---|
-| `Anybody` | a typeface, see it, do not read about it |
-| `Archivo` | a typeface, see it, do not read about it |
-| `Caveat` | a typeface, see it, do not read about it |
-| `Fraunces` | a typeface, see it, do not read about it |
-| `Hanken Grotesk` | a typeface, see it, do not read about it |
-| `Instrument Serif` | a typeface, see it, do not read about it |
-| `JetBrains Mono` | a typeface, see it, do not read about it |
-| `Space Grotesk` | a typeface, see it, do not read about it |
-
-## Output targets  `[canvas]`
-
-`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.
-
-| name | what / when |
-|---|---|
-| `16:9` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
-| `1:1` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
-| `4:3` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
-| `4:5` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
-| `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 
 ---
 _647 effects across 53 families. Regenerate: `make effects`._
