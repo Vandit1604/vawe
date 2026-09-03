@@ -131,7 +131,7 @@ formatting survives.
 
 `docs/CRAFT/KEYED-MOTION.md` already names the gaps and they are the right ones: no curve editor, no
 motion path, no onion skin, no key deletion. Add to that list: no live reload, no way to add a layer,
-no search over the 566 effects or 217 blocks or 38 themes, no undo outside the key endpoint, and no way
+no search over the effects, the blocks or the themes, no undo outside the key endpoint, and no way
 for the agent driving the session to read what the person clicked.
 
 The plan and the film are still in two places. `make panels` renders the storyboard as a grey sheet and
