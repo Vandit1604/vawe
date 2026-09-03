@@ -5,8 +5,12 @@
   "duration": 10.6,
   "audio": { "silent": true, "_why": "a capability montage, no story to score" },
   "authoring": {
-    "allow": ["no-storyboard"],
-    "_why": { "no-storyboard": "a site capability montage of the `gradient` bg preset's recipes, not a film with a payoff or a pace budget to plan" }
+    "allow": ["no-storyboard", "plain-slideshow", "no-preflight"],
+    "_why": {
+      "no-storyboard": "a site capability montage of the `gradient` bg preset's recipes, not a film with a payoff or a pace budget to plan",
+      "plain-slideshow": "the moving gradient field IS the subject here; kinetic type or a camera move would fight the one thing this reel exists to show",
+      "no-preflight": "a capability montage regenerated from the preset's recipes; the nine-decision film chain does not apply to a background demo, and its preflight receipt is gitignored so it cannot reach CI"
+    }
   },
   "bg": [
     { "preset": "gradient", "from": 0, "to": 1.6, "opts": { "recipe": "warm-dusk" } },
