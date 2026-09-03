@@ -1,0 +1,23 @@
+{
+ "_why": "Judged by ear in the sound lab (node scripts/dev/sound-lab.mjs). Twenty cues, one listener, one sitting. This is the input a voicing pass needs: 'the sounds are bad' is one sentence covering twenty different sounds.",
+ "thud": { "verdict": "weak", "note": "didnt like it the timbre of it" },
+ "riser": { "verdict": "weak", "note": "start too loud" },
+ "sweep": { "verdict": "reject", "note": "bad" },
+ "travel": { "verdict": "reject" },
+ "bloom": { "verdict": "keep", "note": "more variations pls" },
+ "chime": { "verdict": "keep", "note": "more variations pls" },
+ "droplet": { "verdict": "keep", "note": "more variations pls" },
+ "pluck": { "verdict": "keep", "note": "more variations pls" },
+ "sparkle": { "verdict": "keep", "note": "more variations pls" },
+ "key": { "verdict": "reject", "note": "doesnt sound like key" },
+ "tick": { "verdict": "reject", "note": "too sharp and loud" },
+ "whisper": { "verdict": "reject", "note": "doesnt sound like whisper" },
+ "page": { "verdict": "reject", "note": "sharp loud bad" },
+ "press": { "verdict": "reject", "note": "too hard and loud" },
+ "release": { "verdict": "reject" },
+ "toggle": { "verdict": "reject" },
+ "error": { "verdict": "reject", "note": "start thud is bad" },
+ "loading": { "verdict": "weak", "note": "more variations" },
+ "ready": { "verdict": "weak", "note": "not smooth" },
+ "success": { "verdict": "keep" }
+}

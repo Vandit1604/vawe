@@ -34,7 +34,21 @@ import { staggerStep } from './type.js';
 
 // The cue names this module reaches for. `tick` and the rest of the interaction vocabulary already
 // bake; the five motion voices live in CUES in core/audio-kit.mjs alongside them.
-export const MOTION_CUES = ['thud', 'travel', 'riser', 'sweep', 'pluck'];
+// JUDGED BY EAR, AND FOUR OF THE ORIGINAL FIVE WERE REJECTED. This list used to read
+// ['thud', 'travel', 'riser', 'sweep', 'pluck'], and it is the set the engine places AUTOMATICALLY
+// whenever a film writes `audio.tactile`. Every one of those films was therefore scored with sounds
+// nobody had ever listened to, because the only way to hear a cue was to render a film with it in.
+//
+// A listening pass over all twenty (verify/sound-verdicts.json, via `node scripts/dev/sound-lab.mjs`)
+// rejected `travel` and `sweep` outright and called `thud` and `riser` weak. So four of the five sounds
+// this engine reached for BY DEFAULT were ones a person did not want, and a film shipped that way today.
+//
+// THE MEASURED REASON, which is better than the notes it came from. Sorting the twenty verdicts against
+// their own specs: every cue kept has ZERO noise layers, and the likelihood of rejection rises with the
+// noise-layer count (keep 0.00, weak 1.00, reject 1.40). Attack and peak barely differ between the
+// groups, so "too sharp and loud" was a symptom: filtered white noise is what reads as cheap, whatever
+// its envelope. This list is now the pitched ones only.
+export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom'];
 
 // THE FIVE ARE CATALOGUED AND THE OTHER FIFTEEN ARE NOT, and that looks like two decisions in
 // opposite directions until you see that CUES is TWO vocabularies in one map.

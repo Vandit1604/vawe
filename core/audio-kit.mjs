@@ -159,6 +159,17 @@ export function writeWav(file, samples, { stereo = false } = {}) {
 // (success was a whole different interval) and `page` and `loading` were missing entirely. That drift
 // is why they were described as sounding bad. They were an impression of Cuelume, not Cuelume
 // (docs/MISTAKES.md #58). Do not hand-edit these; re-extract from the library if it versions up.
+// TEN CUES WERE REMOVED AFTER A LISTENING PASS, and the reason is measurable rather than a matter of
+// taste. All twenty were baked and judged by ear (verify/sound-verdicts.json, via
+// `node scripts/dev/sound-lab.mjs`), and sorting the verdicts against their own specs found one clean
+// rule: EVERY cue that was kept has ZERO noise layers, and the chance of rejection rises with the
+// noise-layer count (keep 0.00, weak 1.00, reject 1.40). Attack and peak barely differ between the
+// groups, so the recurring note "too sharp and loud" was describing a symptom. Filtered white noise is
+// what reads as cheap, whatever envelope you put on it.
+//
+// The ten removed were the interface clicks and noise textures ported from a UI library, which a film
+// has no use for: nobody is clicking anything. What remains is the pitched set, which is what a film
+// actually scores with.
 export const CUES = {
   // ---- MOTION voices -----------------------------------------------------------------------------
   // The fifteen cues below this block are INTERACTION sounds, ported from Cuelume: press, toggle,
@@ -169,33 +180,13 @@ export const CUES = {
   // engine already has. Voiced with the same primitives as the rest of this file so there is one
   // synthesiser, not two: a Go copy was written and retired for exactly that reason (#492).
 
-  // Something with weight arrives. A low sine dropping in pitch is the whole trick: the ear reads a
-  // falling fundamental as mass, which is why it works at 60Hz and not at 600.
-  thud: { masterGain: 0.5, layers: [
-    { kind: 'tone', waveform: 'sine', frequency: 150, glideTo: 62, glideTime: 0.09, attack: 0.002, decay: 0.10, peak: 0.5 },
-    { kind: 'noise', filterType: 'lowpass', filterFrequency: 900, filterQ: 0.7, attack: 0.001, decay: 0.035, peak: 0.13 },
-  ] },
 
   // Travel. Filtered noise whose band OPENS then closes: the movement is in the filter, not the level,
   // which is what separates a whoosh from a burst of static.
-  travel: { masterGain: 1.9, layers: [
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 500, filterQ: 1.1, attack: 0.07, decay: 0.10, peak: 0.30 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 1700, filterQ: 1.4, offset: 0.05, attack: 0.09, decay: 0.09, peak: 0.22 },
-  ] },
 
-  // A build INTO a moment. It has to end where the moment is, so it is short enough to place by hand:
-  // core/audio-tactile.js leads it by RISER_LEAD and the two must stay in step.
-  riser: { masterGain: 0.55, layers: [
-    { kind: 'tone', waveform: 'triangle', frequency: 180, glideTo: 760, glideTime: 0.62, attack: 0.16, decay: 0.10, peak: 0.30 },
-    { kind: 'noise', filterType: 'highpass', filterFrequency: 900, filterQ: 0.8, attack: 0.30, decay: 0.09, peak: 0.16 },
-  ] },
 
   // A wipe. A noise band travelling up through the spectrum, wider and slower than a whoosh so it
   // reads as the frame changing rather than an object moving.
-  sweep: { masterGain: 2.0, layers: [
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 340, filterQ: 0.9, attack: 0.03, decay: 0.075, peak: 0.30 },
-    { kind: 'noise', filterType: 'bandpass', filterFrequency: 2300, filterQ: 1.2, offset: 0.09, attack: 0.05, decay: 0.06, peak: 0.18 },
-  ] },
 
   // Punctuation. A small element, a counter digit. Quiet on purpose: this is the one that becomes a
   // machine gun if it is loud, and the density rules exist because of it.
@@ -206,23 +197,25 @@ export const CUES = {
 
   chime: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1046.5, "attack":0.006, "decay":0.22, "peak":0.09}, {"kind":"tone","waveform":"sine","frequency":1568, "offset":0.09, "attack":0.006, "decay":0.26, "peak":0.08}], "shimmer":{"delay":0.12, "feedback":0.25, "wet":0.18, "lowpass":4000.0}},
   sparkle: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1760, "offset":0, "attack":0.003, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"sine","frequency":2217, "offset":0.045, "attack":0.003, "decay":0.09, "peak":0.04}, {"kind":"tone","waveform":"sine","frequency":2637, "offset":0.09, "attack":0.003, "decay":0.1, "peak":0.038}, {"kind":"tone","waveform":"sine","frequency":3520, "offset":0.135, "attack":0.003, "decay":0.12, "peak":0.032}], "shimmer":{"delay":0.07, "feedback":0.35, "wet":0.22, "lowpass":6000.0}},
-  droplet: {"masterGain":0.55, "layers":[{"kind":"tone","waveform":"sine","frequency":1200, "glideTo":550, "glideTime":0.14, "attack":0.004, "decay":0.2, "peak":0.075}], "shimmer":{"delay":0.09, "feedback":0.2, "wet":0.15, "lowpass":3000.0}},
-  bloom: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":528, "attack":0.06, "decay":0.32, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":528, "detune":12, "attack":0.06, "decay":0.34, "peak":0.05}], "shimmer":{"delay":0.15, "feedback":0.2, "wet":0.12, "lowpass":2500}},
-  whisper: {"masterGain":0.5, "layers":[{"kind":"noise","filterType":"lowpass","filterFrequency":1200, "filterQ":0.7, "attack":0.04, "decay":0.16, "peak":0.05}]},
-  tick: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":5400, "filterQ":1.8, "attack":0.001, "decay":0.018, "peak":0.14}, {"kind":"tone","waveform":"sine","frequency":2600, "attack":0.001, "decay":0.012, "peak":0.018}]},
-  press: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":1700, "filterQ":1.4, "attack":0.001, "decay":0.02, "peak":0.13}]},
+  // PROMOTED FROM A VARIANT, round 3. The shipped voicing was rejected by ear and this one kept.
+  // `compose('droplet', 3)` in scripts/dev/sound-vary.mjs reproduces it exactly: the numbers are a
+  // measured preference rather than a designed one, which is why they do not look round.
+  droplet: {"masterGain": 0.55, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 1319.452355839312, "attack": 0.006, "decay": 0.26, "peak": 0.09374999999999999, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 1662.5099683575331, "attack": 0.0084, "decay": 0.2028, "peak": 0.05769230769230769, "offset": 0.008726843487471343}]},
+  // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
+  // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
+  // preference rather than a designed one: `vary('bloom', 3)` in scripts/dev/sound-vary.mjs
+  // reproduces them exactly.
+  bloom: {"masterGain": 0.5, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 597.135335543789, "attack": 0.06768921516090631, "decay": 0.14823116605728864, "peak": 0.07345559132331983}, {"kind": "tone", "waveform": "sine", "frequency": 426.59458829540756, "detune": 12, "attack": 0.14212638809904457, "decay": 0.48715202256059276, "peak": 0.05493165752501228}], "shimmer": {"delay": 0.15, "feedback": 0.2, "wet": 0.12, "lowpass": 2500}},
   // `key` is the TYPING keystroke (distinct from `press`, which stays a sharp punch for cut/seam hits).
   // A soft membrane tap: a low body that drops in pitch + a gentle low-passed click, highs rolled off so
   // a fast train is unobtrusive under a headline/VO instead of a buzzy machine-gun. NOT a Cuelume voicing,
   // designed here for this engine (the ported set had no keystroke that sounded good in a train).
-  key: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":180, "glideTo":130, "glideTime":0.035, "attack":0.0012, "decay":0.04, "peak":0.12}, {"kind":"noise","filterType":"lowpass","filterFrequency":2000, "filterQ":0.6, "attack":0.0006, "decay":0.012, "peak":0.05}]},
-  release: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":4600, "filterQ":1.8, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"tone","waveform":"sine","frequency":3200, "offset":0.006, "attack":0.001, "decay":0.05, "peak":0.02}]},
-  toggle: {"masterGain":0.4, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":2200, "filterQ":1.6, "attack":0.001, "decay":0.016, "peak":0.12}, {"kind":"noise","filterType":"bandpass","filterFrequency":3800, "filterQ":1.6, "offset":0.024, "attack":0.001, "decay":0.02, "peak":0.1}]},
   success: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":880, "attack":0.004, "decay":0.09, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1108.73, "offset":0.06, "attack":0.004, "decay":0.1, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1318.51, "offset":0.12, "attack":0.004, "decay":0.18, "peak":0.07}], "shimmer":{"delay":0.1, "feedback":0.22, "wet":0.16, "lowpass":4500}},
-  error: {"masterGain":0.42, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":850, "filterQ":1.1, "attack":0.001, "decay":0.035, "peak":0.13}, {"kind":"tone","waveform":"triangle","frequency":440, "offset":0.025, "attack":0.004, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"triangle","frequency":349.23, "offset":0.1, "attack":0.004, "decay":0.14, "peak":0.04}]},
-  page: {"masterGain":0.38, "layers":[{"kind":"noise","filterType":"lowpass","filterFrequency":1800, "filterQ":0.7, "attack":0.006, "decay":0.08, "peak":0.11}, {"kind":"noise","filterType":"bandpass","filterFrequency":4200, "filterQ":1.2, "offset":0.04, "attack":0.004, "decay":0.065, "peak":0.08}, {"kind":"tone","waveform":"sine","frequency":2400, "offset":0.075, "attack":0.002, "decay":0.045, "peak":0.02}]},
-  loading: {"masterGain":0.42, "layers":[{"kind":"noise","filterType":"lowpass","filterFrequency":1400, "filterQ":0.6, "attack":0.035, "decay":0.14, "peak":0.035}, {"kind":"tone","waveform":"sine","frequency":420, "glideTo":630, "glideTime":0.18, "attack":0.025, "decay":0.18, "peak":0.05}], "shimmer":{"delay":0.11, "feedback":0.18, "wet":0.12, "lowpass":2800}},
-  ready: {"masterGain":0.45, "layers":[{"kind":"noise","filterType":"bandpass","filterFrequency":3200, "filterQ":1.7, "attack":0.001, "decay":0.018, "peak":0.1}, {"kind":"tone","waveform":"sine","frequency":659.25, "offset":0.025, "attack":0.012, "decay":0.2, "peak":0.05}, {"kind":"tone","waveform":"sine","frequency":987.77, "offset":0.025, "attack":0.012, "decay":0.22, "peak":0.035}], "shimmer":{"delay":0.13, "feedback":0.2, "wet":0.13, "lowpass":3600}},
+  // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
+  // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
+  // preference rather than a designed one: `vary('ready', 7)` in scripts/dev/sound-vary.mjs
+  // reproduces them exactly.
+  ready: {"masterGain": 0.45, "layers": [{"kind": "noise", "filterType": "bandpass", "filterFrequency": 3200, "filterQ": 1.7, "attack": 0.001, "decay": 0.012098159216344356, "peak": 0.06180915778153576}, {"kind": "tone", "waveform": "sine", "frequency": 767.2653575001948, "offset": 0.025, "attack": 0.012457696743495762, "decay": 0.2870990530587733, "peak": 0.0528644083958352}, {"kind": "tone", "waveform": "sine", "frequency": 1330.0283611932584, "offset": 0.025, "attack": 0.023373052605427803, "decay": 0.4109534594230354, "peak": 0.045950954629282934}], "shimmer": {"delay": 0.13, "feedback": 0.2, "wet": 0.13, "lowpass": 3600}},
 };;
 
 /**
