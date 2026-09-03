@@ -491,7 +491,7 @@ because nobody decided anything. Same doc carries lead room, visual weight and t
   shape (`core/safe.js`).
 - **`make judge`, and read the sheet.** The static gates cannot see composition or fidelity. If your
   eye catches a flaw, it is a FIX, never a rationalisation (`docs/JUDGE.md`).
-- **Eyeball real frames**: `make look M=scene` / `make frame M=scene N=<n>`. Never ship a film whose
+- **Eyeball real frames**: `make look D=<file>` / `make frame D=<file> N=<n>`. Never ship a film whose
   hook, reveal and end card you have not actually looked at.
 - **Narrated?** Pace the picture to the voice: `make pace-from-vo VO=<file>.words.json`.
 - **`make ledger`** before shipping, `make ledger-add` after the user approves.

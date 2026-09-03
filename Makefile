@@ -240,14 +240,22 @@ render: build
 all: build
 	./bin/vawe --all
 
-# make look M=scene [D=<file.json>]: storyboard (key frames) for visual review
-# D forwards to --data; without it both targets silently previewed sample.json while naming your scene.
+# make look D=<file.json>: storyboard (key frames) for visual review, of the film at D.
+# make frame D=<file.json> N=560: one exact frame of the film at D.
+# There is one module, scene, so these no longer take M=<module> the way `make render` does: that read
+# as "name your film here" by analogy with every D=-taking target, and `make look M=<film>` failed with
+# preview.mjs's raw usage blob, naming neither the mistake nor the fix. D omitted previews the module's
+# sample.json (a deliberate default, not an error); D pointing at a file that does not exist is loud;
+# M set here (the old, wrong habit) is now loud too instead of being silently ignored.
 look:
-	node scripts/author/preview.mjs $(M) "" $(if $(D),--data $(D))
+	@test -z "$(M)" || { echo "make look takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make look D=$(M)"; exit 1; }
+	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing formats/scene/sample.json"
+	node scripts/author/preview.mjs scene "" $(if $(D),--data $(D))
 
-# make frame M=scene N=560 [D=<file.json>]: one exact frame
 frame:
-	node scripts/author/preview.mjs $(M) $(N) $(if $(D),--data $(D))
+	@test -z "$(M)" || { echo "make frame takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make frame D=$(M) N=$(N)"; exit 1; }
+	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing formats/scene/sample.json"
+	node scripts/author/preview.mjs scene $(N) $(if $(D),--data $(D))
 
 # make grammar [N=<name>]: what we have learned about how good films are BUILT, from the committed
 # grammar/ store that `make study` writes. No argument prints every reference as one comparison table

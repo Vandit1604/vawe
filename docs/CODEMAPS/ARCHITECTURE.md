@@ -142,7 +142,7 @@ it are `make probe`, `make canvas-purity` and `make snap-all`.
 make list                 # formats + where schema/sample live
 make video D=…            # render one JSON → out/<name>.mp4
 make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
-make look M=… / frame M=… N=…   # storyboard / one frame
+make look D=… / frame D=… N=…   # storyboard / one frame
 make validate [D=…]       # data + theme against schema.json (boot runs it too)
 make census               # every named population in formats/scene, and the question each answers
 make lib-test             # motion-primitive + easing asserts (instant)
