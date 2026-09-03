@@ -1,6 +1,6 @@
 {
-  "total": 644,
-  "previewed": 292,
+  "total": 647,
+  "previewed": 295,
   "families": 53,
   "tags": [
     [
@@ -53,7 +53,7 @@
     ],
     [
       "layer",
-      39
+      40
     ],
     [
       "motion key",
@@ -61,7 +61,7 @@
     ],
     [
       "per-frame",
-      38
+      40
     ],
     [
       "per-layer",
@@ -1693,7 +1693,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 5,
+      "count": 6,
       "undescribed": 0,
       "entries": [
         {
@@ -1708,6 +1708,13 @@
           "stem": "raymarched-surfaces--chromeglass",
           "desc": "a tumbling torus and a bobbing sphere in mirror chrome, reflecting a studio horizon with a hard specular glint",
           "scene": "/assets/effects/raymarched-surfaces--chromeglass.json",
+          "noPreview": null
+        },
+        {
+          "name": "glassRefract",
+          "stem": "raymarched-surfaces--glassrefract",
+          "desc": "a tumbling block of clear glass. the ray bends going in, crosses the body, and bends again coming out, and the exit is taken three times at three slightly different indices, so edges split into red and blue the way a prism does. thick parts drink the light and take the palette colour. transparent, dispersive, refractive · the crystal, the diamond, the ice cube",
+          "scene": "/assets/effects/raymarched-surfaces--glassrefract.json",
           "noPreview": null
         },
         {
@@ -1899,7 +1906,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 21,
+      "count": 23,
       "undescribed": 0,
       "entries": [
         {
@@ -1928,6 +1935,13 @@
           "stem": "ambient-shader-fields--crt",
           "desc": "a tube · 4px RGB phosphor stripes, scanlines, a corner vignette and a refresh bar rolling down. an OVERLAY",
           "scene": "/assets/effects/ambient-shader-fields--crt.json",
+          "noPreview": null
+        },
+        {
+          "name": "curlSmoke",
+          "stem": "ambient-shader-fields--curlsmoke",
+          "desc": "a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern",
+          "scene": "/assets/effects/ambient-shader-fields--curlsmoke.json",
           "noPreview": null
         },
         {
@@ -1970,6 +1984,13 @@
           "stem": "ambient-shader-fields--gateweave",
           "desc": "a projector gate · the soft dark frame border, dust re-struck each projected frame and a hair that catches for a second or two, all riding ONE drifting offset so the picture appears to float",
           "scene": "/assets/effects/ambient-shader-fields--gateweave.json",
+          "noPreview": null
+        },
+        {
+          "name": "godRays",
+          "stem": "ambient-shader-fields--godrays",
+          "desc": "shafts of light · sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point",
+          "scene": "/assets/effects/ambient-shader-fields--godrays.json",
           "noPreview": null
         },
         {

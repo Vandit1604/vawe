@@ -357,6 +357,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 |---|---|
 | `caustics` | a water surface built from crossed low-frequency waves, lit so the caustic bands come from the same field that shapes it rather than sitting on top |
 | `chromeGlass` | a tumbling torus and a bobbing sphere in mirror chrome, reflecting a studio horizon with a hard specular glint |
+| `glassRefract` | a tumbling block of clear glass. the ray bends going in, crosses the body, and bends again coming out, and the exit is taken three times at three slightly different indices, so edges split into red and blue the way a prism does. thick parts drink the light and take the palette colour. transparent, dispersive, refractive: the crystal, the diamond, the ice cube |
 | `holoFoil` | a rippling disc of foil: thin-film interference over bright metal, the hue turning with viewing angle. the band is deliberately NARROW, so it reads as one colour sliding rather than a rainbow, and it is bounded to a disc so it keeps a silhouette |
 | `mandelbulb` | the mandelbulb fractal, depth-shaded near-to-far, its exponent breathing between 5.5 and 8.5 on a slow sine |
 | `metaballs` | five spheres orbiting and smooth-union-ing into one blob of soft glossy candy, two palette stops shading it top to bottom |
@@ -409,12 +410,14 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `bands` | a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md |
 | `barrel` | the LENS, not the picture: a corner vignette with a faint violet chromatic fringe riding the far edge only |
 | `crt` | a tube: 4px RGB phosphor stripes, scanlines, a corner vignette and a refresh bar rolling down. an OVERLAY |
+| `curlSmoke` | a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern |
 | `domainWarp` | marbled ink: fBm sampled through a domain that is itself two levels of fBm, so the field folds back over itself. the classic warp, and the only field here with real interior structure |
 | `dotCrawl` | the NTSC artifact: a fine diagonal chroma lattice creeping one subcarrier phase per frame, concentrated where there is detail. an OVERLAY |
 | `drift` | seven big soft bokeh discs rising up the frame and blending as they pass |
 | `filmGrain` | grain re-struck 24 times a second per ~2px cell, plus dust specks; bright or dark only, never mid-grey, so contrast survives. an OVERLAY |
 | `flow` | a soft mesh gradient: three big blobs drifting slowly over a vertical wash, the premium default |
 | `gateWeave` | a projector gate: the soft dark frame border, dust re-struck each projected frame and a hair that catches for a second or two, all riding ONE drifting offset so the picture appears to float |
+| `godRays` | shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point |
 | `heatShimmer` | rising warm haze in fine wavy bands, strongest low in the frame and thinning as it climbs. self-generated. It does not warp what is beneath it |
 | `kaleidoscope` | a 6-fold mirrored mandala turning slowly and fading out toward the corners. A symmetric field of its own, never a mirror of your content |
 | `lightLeak` | three warm blobs drifting in from the edges on a loop, tinted from the palette. an OVERLAY |
@@ -1045,4 +1048,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `9:16` | a ratio is its own definition; the safe area it implies belongs to the destination, in the section below |
 
 ---
-_644 effects across 53 families. Regenerate: `make effects`._
+_647 effects across 53 families. Regenerate: `make effects`._
