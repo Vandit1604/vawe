@@ -59,6 +59,11 @@ import * as terminalLayersFam from './terminal-layers.mjs';
 import * as uiFam from './ui.mjs';
 import * as vfxFam from './vfx.mjs';
 import { CATALOG } from './catalog.mjs';
+// The blurb rule is core/registry.js's, imported rather than restated: it refuses an empty line AND one
+// that only says the name back, and it grades a blurb by the exact words `make arsenal` will index it
+// under. Two copies of that rule would eventually disagree about which. The path resolves in the
+// browser too: core/ is vendored at /core and blocks at /blocklib, so `../core/` is right in both.
+import { checkBlurb } from '../core/registry.js';
 import { TOKENS, SERIES, onColor, R, cardChrome, toneColor, avatarEl, BLOCKS } from './kit.mjs';
 
 // The kit vocabulary, re-exported so a caller reaching for a token does not need a second import.
@@ -150,6 +155,18 @@ for (const file of FAMILY_FILES) {
 // somebody (below). This is the same argument in the direction that costs more, and it belongs here
 // rather than in a gate for the reason the other two throws give: the write site can refuse, and a
 // gate that runs afterwards only promises to notice.
+// CONTRACT 5: A ROW WITHOUT A REAL BLURB IS A BLOCK NOBODY CAN FIND. The row itself was already
+// required (contract 4 below), which is what makes a block appear in docs/BLOCKS.md and on the site.
+// It was not enough. A row with `blurb: ''` loaded silently and entered `make arsenal`'s corpus with
+// nothing to match on, so the block was reachable only by someone who already knew its exact name,
+// which is the definition of undiscoverable. Measured, and it was not hypothetical: 97 of 97 families
+// were missing from that corpus entirely, and separately 131 registry entries across the engine
+// carried no blurb. Both were found by looking, months late, not by anything refusing them.
+//
+// At LOAD rather than in a gate, for this file's own stated reason: the write site can refuse, and a
+// gate that runs afterwards only promises to notice.
+for (const e of CATALOG) checkBlurb('block', e.name, e.blurb);
+
 const CATALOGUED = new Set(CATALOG.map((e) => e.family));
 const uncatalogued = Object.keys(ownerOf).filter((n) => !CATALOGUED.has(n) && !NOT_A_BLOCK[n]);
 if (uncatalogued.length) {

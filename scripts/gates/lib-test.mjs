@@ -2841,6 +2841,22 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   }
 }
 
+// ---- a new block cannot ship undiscoverable ----
+// The hole this closes, probed rather than imagined: a catalog row with `blurb: ''` loaded silently and
+// entered the search corpus with nothing to match on, so the block was reachable only by someone who
+// already knew its exact name. Every discoverability failure this repo has paid for is that shape, and
+// the refusal is at the write site (blocks/index.mjs) rather than here, because a gate that runs
+// afterwards only promises to notice. These two assert it fires.
+{
+  const { checkBlurb } = await import('../../core/registry.js');
+  const throws = (blurb) => { try { checkBlurb('block', 'probeBlock', blurb); return false; } catch { return true; } };
+  ok('blocks: a row with no blurb is refused at load', throws(''));
+  ok('blocks: and one that only says its own name back is refused too', throws('a probe block'));
+  const { CATALOG } = await import('../../blocks/catalog.mjs');
+  ok('blocks: every catalog row already satisfies that rule',
+    CATALOG.every((e) => { try { checkBlurb('block', e.name, e.blurb); return true; } catch { return false; } }));
+}
+
 // ---- the search must know about the blocks ----
 // Measured before this landed: the CLI corpus held 623 entries across 54 kinds and `block` was not one
 // of them, so 97 of 97 block families were invisible to `make arsenal`. The website's /arsenal had
@@ -5433,9 +5449,20 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
      ['beam', 'component', 'globe', 'adjust'].every((n) => corpus.some((e) => e.name === n && e.kind === 'layer type')));
   ok('every layer type in the corpus carries its blurb, which is the only text a paraphrase can match',
      corpus.filter((e) => e.kind === 'layer type').every((e) => e.blurb.length > 20));
-  ok('"a light that travels around the border of a card" FINDS beam, and confidently',
-     best('a light that travels around the border of a card').name === 'beam'
-     && covers('a light that travels around the border of a card', 'beam') >= CONFIDENT);
+  // THE TOP ANSWER MOVED, AND THAT IS THE SEARCH GETTING BETTER, not a regression. This asserted that
+  // `beam` came FIRST, which was right when beam was the only thing in the engine that did this. The
+  // block library is in the corpus now, and `borderBeamCard` ("a glass card with a bright line of light
+  // chasing around its border") answers the query's own words more exactly: the query says "of a card"
+  // and beam is a bare layer type. So the assertion is what the original finding actually cared about,
+  // which is RECALL: beam was returned by nothing at all, and the search offered cardCascade, lightLeak
+  // and highlight in its place (docs/MISTAKES.md #551). Being findable and confident is the property;
+  // being first was a coincidence of a smaller library.
+  ok('"a light that travels around the border of a card" FINDS beam, and confidently', (() => {
+    const q = 'a light that travels around the border of a card';
+    const qt = arsenalToks(q);
+    const top3 = corpus.map((e) => ({ name: e.name, c: coverage(e, qt) }))
+      .sort((a, b) => b.c - a.c).slice(0, 3).map((r) => r.name);
+    return top3.includes('beam') && covers(q, 'beam') >= CONFIDENT; })());
 
   // CONFIDENCE. Two sets, and the threshold sits in the gap between them. Known-present queries must
   // keep answering; known-absent queries must produce nothing above the bar. Loosening the matcher until
@@ -5481,6 +5508,45 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // The engine has none of these. `dollyZoom` was the top hit for the first one, and for the
   // upright query now in PRESENT above, and an author nearly hand-rolled a conic gradient off the
   // back of the same kind of confident wrong answer.
+  // PLAIN ENGLISH ABOUT BLOCKS, and this set exists because the other one flattered the search. Every
+  // PRESENT query above is written in the engine's own vocabulary ("a lit implicit surface from a
+  // distance field"), which is how a person who already knows the library asks. These are how someone
+  // asks who does not. Measured before the block blurb pass: 10 of 18 had the right answer in the top
+  // three and 8 were answered confidently, while blurbs like `terminal`'s "command prompt; command
+  // types in, output answers after it" contained none of the words a person types. After: 17 and 14.
+  //
+  // Top THREE, not top one, on purpose. Several of these have honest siblings (`glassNotification` for
+  // a toast, `usMapHex` for a US map) and demanding a single winner would be asserting a preference
+  // rather than a capability.
+  const PLAIN = [
+    ['a terminal window', 'terminal'],
+    ['a fake browser window around a screenshot', 'browserFrame'],
+    ['a progress bar filling up', 'loadingBar'],
+    ['a phone shaped frame to put a screenshot in', 'phoneFrame'],
+    ['a toast notification popping up', 'notification'],
+    ['a kanban board with columns', 'kanban'],
+    ['a line graph over time', 'lineChart'],
+    ['a pie chart', 'donutChart'],
+    ['a table of rows and columns', 'table'],
+    ['a checklist with items ticking off', 'checklist'],
+    ['a map of the united states', 'usMap'],
+    ['a map of the world', 'worldMap'],
+    ['a timeline of events', 'timeline'],
+    ['a reddit post', 'redditPost'],
+  ];
+  {
+    const top3 = (q, want) => { const qt = arsenalToks(q);
+      return corpus.map((e) => ({ n: e.name, c: coverage(e, qt) })).sort((a, b) => b.c - a.c)
+        .slice(0, 3).some((r) => r.n === want); };
+    const missed = PLAIN.filter(([q, w]) => !top3(q, w));
+    if (missed.length) console.log(`    plain questions with no answer in the top 3: ${missed.map(([q]) => `"${q}"`).join(', ')}`);
+    ok('plain English about blocks finds the block, in the top three', missed.length === 0);
+    const unsure = PLAIN.filter(([q]) => best(q).c < CONFIDENT);
+    if (unsure.length) console.log(`    plain questions answered but not confidently: ${unsure.map(([q]) => `"${q}"`).join(', ')}`);
+    ok('and at least ten of them are answered confidently rather than refused',
+      PLAIN.length - unsure.length >= 10);
+  }
+
   const ABSENT = [
     'invert a layer against whatever is behind it',
     'render the scene in stereoscopic 3d for a headset',

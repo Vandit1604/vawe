@@ -513,6 +513,54 @@ yet: it is a debt, it warns on every run, and it disappears the moment the film 
 (`make legacy` for the board, `make legacy STAMP=1` to pay one off). Edit a legacy film without fixing
 it and it BLOCKS. Nothing is excused for life.
 
+## WHAT THIS ENGINE TOOK FROM THE AGENT HARNESS, AND WHERE IT LIVES  `[ref: make rung]`
+
+An agent works here through Claude Code, and several of that harness's mechanisms answer problems this
+repo also has. They were adopted one at a time, by different people, without anything writing down the
+correspondence, so the same idea kept being re-invented under a new name. This is the map. **When you
+adopt another one, add its row and give it a rung**, or the next author will build a third copy.
+
+**The organising idea is the RUNG LADDER**, and it is the harness's own lesson: a rule enforced by the
+system beats a rule an agent is asked to remember. `make rung` prints the current
+distribution and `node scripts/gates/rung.mjs --list` prints the worklist, so the numbers are one command away and are not repeated
+here. Highest rung wins:
+
+```
+[built]  the engine makes it true          a wrong value cannot be written
+[gated]  a gate refuses it                 the push stops
+[live]   something says it while you write a hook speaks at the keystroke
+[ref]    a command answers it on demand    you have to ask
+[eye]    nothing but the sentence          you have to remember
+```
+
+| the harness does | this engine does | where |
+|---|---|---|
+| PostToolUse hooks that speak mid-task | the `[live]` rung: a hook reads what you just saved and answers | `.claude/hooks/*.mjs`, wired in `.claude/settings.json` |
+| deferred tools, fetched by search rather than all loaded | `make arsenal Q="…"` over every named thing, and `make schema AT=…` for what is legal at one path | `scripts/author/arsenal.mjs`, `scripts/author/schema-at.mjs` |
+| skills: instructions loaded only when the task needs them | `docs/CRAFT/*.md`, and a finding NAMES the doc that settles it | `docs/TASTE.md` indexes them |
+| structured tool results instead of scraped prose | gate findings as data, not regex over a message | `scripts/lib/findings.mjs` |
+| a subagent's context stays out of the main thread | one critic, one job, one input path, a fixed verdict shape | `docs/CRAFT/SUBAGENTS.md`, budget in `docs/CRAFT/SUBAGENT-BUDGET.md` |
+| refusing an invalid call at the tool boundary | refusing at the WRITE SITE, so the bad state is unrepresentable | `core/registry.js`: `checkBlurb`, `checkCovered`, `checkCatalog` |
+
+**Three rules that keep this from drifting, and each one was paid for.**
+
+**A gate is the LAST resort, and a ratchet is what you write when zero is not reachable.** If the bad
+value has a write site, the refusal goes there and the class ends; a gate that runs afterwards only
+promises to notice. Where a clean state genuinely cannot be reached today, the number goes in
+`verify/*-ratchet.json` and may fall but never rise. Lower one deliberately with `--stamp`, never to
+quiet a complaint.
+
+**A search that says ABSENT about something present is worse than one that stays quiet**, because it
+ends the looking. Two of these shipped: 131 registry entries carried no blurb, so they were reachable
+only by someone who already knew the name; and the block library was not in the search corpus at all,
+so `make arsenal Q="a terminal window"` answered "assume the engine does not have it" about 95
+families the engine has. Both are why `checkCovered` refuses at load now.
+
+**A threshold is a property of the corpus, not a constant.** `CONFIDENT` in `scripts/author/arsenal.mjs`
+is the midpoint between two measured query sets, and both sets are asserted in `lib-test`. Change what
+the engine contains and it must be re-measured, THROUGH that file's own `toks`: a pass that used a
+hand-rolled tokenizer instead produced numbers that were all wrong in the same direction.
+
 ## Changing the ENGINE, not a film? The doctrine is one file away  `[eye]`
 
 Five rules govern any change to `core/`, `internal/`, a gate or the capture path, and they live in

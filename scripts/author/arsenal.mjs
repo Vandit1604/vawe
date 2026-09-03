@@ -218,11 +218,22 @@ export const corpusOf = (e) => `${e.name} ${e.kind} ${e.blurb} ${(e.aka || []).j
 // The weak prefix credit inside score() deliberately does not count as a hit, because `travel` lending
 // a point to `travelling` is a nudge for ranking and not evidence that the thing was found.
 
-// Calibrated, not picked. Two query sets live in scripts/gates/lib-test.mjs: eleven with a known-good
-// answer in this engine, and seven the engine genuinely has no answer to. Measured over the corpus the
-// worst known-good scores 0.513 and the best known-absent scores 0.432, so this is the midpoint of that
-// gap. lib-test asserts BOTH ends and that the threshold still sits between them, which is what stops a
-// later loosening of the matcher from quietly turning the honesty off.
+// Calibrated, not picked. Two query sets live in scripts/gates/lib-test.mjs: twelve with a known-good
+// answer in this engine, and five the engine genuinely has no answer to. This is the MIDPOINT of the
+// gap between them, and lib-test asserts both ends plus the fact that the threshold still sits between
+// them, which is what stops a later loosening of the matcher from quietly turning the honesty off.
+//
+// IT SURVIVED THE BLOCK LIBRARY, and that was worth checking rather than assuming. Coverage is
+// idf-weighted, so it is a property of the CORPUS: adding 95 block families changed every word's
+// rarity. Re-measured after, with `toks` from this file (see the warning below): worst known-good
+// 0.634, best known-absent 0.402. 0.47 still sits between them, and it answers MORE plain-English
+// questions than the recomputed midpoint of 0.518 would. So it stays.
+//
+// MEASURE WITH `toks`, NEVER WITH YOUR OWN SPLIT. A calibration pass here used a plain
+// /[a-z0-9]+/g tokenizer to "re-derive" this number and got 0.366, because that split does not do
+// what `toks` does. Every figure it produced was wrong in the same direction and the value it argued
+// for let a known-absent query through. The tokenizer is exported for this reason: the number is
+// meaningless unless it is measured through the same words the search actually indexes.
 export const CONFIDENT = 0.47;
 
 // Two things a bare ratio gets wrong, and both were measured rather than guessed.

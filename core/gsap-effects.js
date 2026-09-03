@@ -137,7 +137,7 @@ export const GSAP_BLURBS = {
   clipUp: 'a hard bottom-to-top wipe that uncovers the layer in place, opacity untouched, type reveals behind a mask',
   maskReveal: 'a hard left-to-right wipe, fast then a long settle. The premium editorial reveal for a headline',
   revealUp: 'clipUp plus a short lift and fade, so the layer rises as it is uncovered, the fuller version of clipUp',
-  expandIn: 'letters start crushed together and spread out of blur to their real tracking, a title-card open',
+  expandIn: 'letters start crushed together and spread out of blur to their real tracking, an opening line settling into place',
   tiltIn: 'swings open about its left edge, like a door facing the camera, needs 3D perspective',
   driftIn: 'floats a short diagonal out of soft blur, slowly. The quietest entrance here, for atmosphere',
   glitchIn: 'snaps in through five hard steps, sheared and offset. No smoothing at all, alarm and glitch beats only',

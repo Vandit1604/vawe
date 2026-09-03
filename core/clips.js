@@ -82,7 +82,7 @@ export const ANIM_BLURBS = {
   'wipe-right': 'clip reveal grows rightward from the left edge',
   'wipe-left': 'clip reveal grows leftward from the right edge',
   'wipe-down': 'clip reveal grows downward from the top edge',
-  'wipe-up': 'clip reveal grows upward from the bottom edge, what a bar chart wants',
+  'wipe-up': 'clip reveal grows upward from the bottom edge, so a column grows upward instead of appearing',
   iris: 'circular iris opens from the centre of the layer',
   clock: 'radial sweep from 12 o\'clock, clockwise',
   none: 'no move and no fade. The layer just appears at its window edges',

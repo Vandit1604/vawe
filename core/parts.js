@@ -53,7 +53,7 @@ export const PARTS = {
 
 export const PART_BLURBS = {
   growUp: 'scales up from its own bottom edge, a bar growing to its reading',
-  widen: 'scales out from its left edge. A row, a rule, a progress track filling',
+  widen: 'scales out from its left edge. A row, a rule, anything that should fill rather than appear',
   popIn: 'scales from nothing at its centre with a fade, dots, chips, markers',
   fadeUp: 'a short rise with a fade, the quiet default for any part',
   riseIn: 'a longer rise with a fade, for parts that should feel like they arrive',
