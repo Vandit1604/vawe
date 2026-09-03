@@ -4745,6 +4745,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('a nested style block is hoisted to the front of the fragment',
     scopeStyles('<div class="g"><style>.g{color:red}</style>x</div>')
       === '<style>@scope {.g{color:red}}</style><div class="g">x</div>');
+  // site-counts-allow: "two blocks" here is two <style> elements, not the block library
   ok('two blocks keep their order, so a fragment that overrides itself still cascades',
     scopeStyles('<style>a{}</style><b><style>c{}</style></b>')
       === '<style>@scope {a{}}</style><style>@scope {c{}}</style><b></b>');
@@ -5525,21 +5526,123 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // Top THREE, not top one, on purpose. Several of these have honest siblings (`glassNotification` for
   // a toast, `usMapHex` for a US map) and demanding a single winner would be asserting a preference
   // rather than a capability.
+  //
+  // WIDENED FROM 14 FAMILIES TO 88 OF 100, because 14 was a sample and the other 81 families were a
+  // promise nobody was keeping: the blurb pass rewrote 95 of them and a later edit could have made any
+  // of the untested ones unfindable again in silence. Nine families are deliberately NOT here, and
+  // each one is a finding about its BLURB rather than a question that was wrong:
+  //   card        "elevated info card: title, description, tag pills, and a call-to-action link at the
+  //               bottom" loses "a card with a heading, body text and a button at the bottom" to `doc`.
+  //               Wants the plain words: heading, body text, button.
+  //   pricingCard "plan · price · features · CTA" is a stub, not a sentence. Nothing to match.
+  //   statCard    "boxed KPI with delta chip" is a stub, and "delta chip" is jargon for "how much it
+  //               went up".
+  //   profileCard "avatar · name · role" is a stub. A person asks for "a photo with a name and a job
+  //               title".
+  //   lowerThird  "hairline plate · name over role · the quiet one" is a stub AND a private joke.
+  //   searchEngine "search home. Wordmark + pill, query types in (keys click)" carries neither
+  //               "search box" nor "search results".
+  //   colorCycle  "one word that changes colour over and over, cycling through a fixed hue sequence"
+  //               is every word of the question and still loses to `shader`: every token in it is
+  //               common across the corpus, so idf gives it nothing. Wants a rare word ("rainbow").
+  //   morphText   "each word melts into the next through a metaball filter" loses "one word melting
+  //               into the next word" to `wordFlash`, on melts/melting alone: the index does not stem.
+  //   terminalHtml is the one exclusion that is NOT a blurb bug. It and `terminal` are twins by design
+  //               and any honest question for one answers the other, so asking is asserting a
+  //               preference. The same reason the top-three rule exists.
+  // Those five stubs are the tail of the blurb pass, and they are the five that were never rewritten.
   const PLAIN = [
-    ['a terminal window', 'terminal'],
-    ['a fake browser window around a screenshot', 'browserFrame'],
-    ['a progress bar filling up', 'loadingBar'],
-    ['a phone shaped frame to put a screenshot in', 'phoneFrame'],
-    ['a toast notification popping up', 'notification'],
-    ['a kanban board with columns', 'kanban'],
-    ['a line graph over time', 'lineChart'],
-    ['a pie chart', 'donutChart'],
-    ['a table of rows and columns', 'table'],
-    ['a checklist with items ticking off', 'checklist'],
-    ['a map of the united states', 'usMap'],
-    ['a map of the world', 'worldMap'],
-    ['a timeline of events', 'timeline'],
-    ['a reddit post', 'redditPost'],
+    ["a terminal window", "terminal"],
+    ["a fake browser window around a screenshot", "browserFrame"],
+    ["a progress bar filling up", "loadingBar"],
+    ["a phone shaped frame to put a screenshot in", "phoneFrame"],
+    ["a toast notification popping up", "notification"],
+    ["a kanban board with columns", "kanban"],
+    ["a line graph over time", "lineChart"],
+    ["a pie chart", "donutChart"],
+    ["a table of rows and columns", "table"],
+    ["a checklist with items ticking off", "checklist"],
+    ["a map of the united states", "usMap"],
+    ["a map of the world", "worldMap"],
+    ["a timeline of events", "timeline"],
+    ["a reddit post", "redditPost"],
+    ["a deploy running in a console with a spinner", "terminalPro"],
+    ["a pipeline that builds and then says deployed", "deploySuccess"],
+    ["some small rounded labels in a row", "pillRow"],
+    ["letters flipping like an old airport board", "splitFlapBoard"],
+    ["a checkout screen with an amount and a pay button", "stripeCard"],
+    ["a bar chart comparing values", "barChart"],
+    ["red and green lines of a code change", "diff"],
+    ["a customer testimonial with a name under it", "quote"],
+    ["a few numbers side by side that count up", "kpiRow"],
+    ["a coloured warning strip with one line of text", "callout"],
+    ["us versus them in two columns", "comparison"],
+    ["subtitles at the bottom of the screen", "captions"],
+    ["several series stacked in one bar", "stackedBar"],
+    ["a folder and file sidebar like an editor", "fileTree"],
+    ["a list of git commits with authors", "commitRow"],
+    ["a chat conversation with messages left and right", "chatBubble"],
+    ["a tweet with likes and replies", "tweetCard"],
+    ["a row of overlapping profile pictures", "avatarStack"],
+    ["a little popup at the bottom saying something happened", "toast"],
+    ["emoji reactions with counts under a message", "reactionBar"],
+    ["a strip of customer company logos", "logoWall"],
+    ["a tiny status label like a build shield", "badge"],
+    ["a dial with a needle showing a value", "gauge"],
+    ["an announcement bar across the top of the page", "banner"],
+    ["a music player with album art and a scrubber", "nowPlaying"],
+    ["a subscribe button with a follower count", "videoLowerThird"],
+    ["a profile with a follow button", "followCard"],
+    ["a row of a social feed with a name and a timestamp", "feedRow"],
+    ["a list item with an icon, a title and a subtitle", "listRow"],
+    ["a settings screen row with a toggle switch", "settingsRow"],
+    ["the top of a profile page with follower stats", "profileHeader"],
+    ["a dashed box saying there is nothing here yet", "emptyState"],
+    ["a mouse cursor moving over and clicking something", "pointer"],
+    ["a finger tapping the screen on a phone", "tapRipple"],
+    ["a phone keyboard sliding up from the bottom", "keyboard"],
+    ["a button that presses down when you click it", "pressButton"],
+    ["two things side by side on half the screen each", "splitScreen"],
+    ["trusted by thousands of teams with faces", "socialProof"],
+    ["an app store row with stars and an install button", "installCard"],
+    ["a soft colourful blurry background", "meshPanel"],
+    ["a dark card with a glow coming from one corner", "spotlightCard"],
+    ["film grain over the whole picture", "grainOverlay"],
+    ["a grid of boxes of different sizes, one big one", "bento"],
+    ["a viewfinder overlay with a blinking rec dot", "camcorderHud"],
+    ["brackets that lock onto the subject like a camera focusing", "scanGate"],
+    ["boxes joined by arrows showing a process with yes and no", "flowchart"],
+    ["ios style widgets floating together", "glassWidgets"],
+    ["push notifications stacking on a lock screen", "glassNotification"],
+    ["a right click menu with icons", "glassMenu"],
+    ["a play bar with a scrubber and volume", "glassControls"],
+    ["a phone home screen full of app icons", "glassHome"],
+    ["a mac dock where icons grow as you hover", "glassDock"],
+    ["code typing itself out one character at a time", "codeTyping"],
+    ["scrolling down a file until it reaches the important line", "codeScroll"],
+    ["an old line of code being replaced by a new one", "codeDiff"],
+    ["a refactor where the words slide into new places", "codeMorph"],
+    ["two bits of code flying in and joining together", "codeFlight"],
+    ["every state as the same size hexagon", "usMapHex"],
+    ["circles on a map sized by how big the number is", "usMapBubble"],
+    ["arrows on a map going from one city to others", "usMapFlow"],
+    ["a blinking cursor typing a word with a coloured fringe", "textCursor"],
+    ["one card in a grid zooming out to fill the screen", "parallaxZoom"],
+    ["a full screen shot shrinking back into a grid of cards", "parallaxUnzoom"],
+    ["rows of interface standing up out of the floor in 3d", "uiReveal3d"],
+    ["a snippet of code as a syntax coloured card", "codeBlock"],
+    ["one huge number with a small label under it", "statBig"],
+    ["lines of logs streaming past fast", "logLines"],
+    ["a ring that fills up showing percent done", "progressRing"],
+    ["a small loading spinner going round", "spinner"],
+    ["the first run screens you swipe through when you open an app", "onboardCard"],
+    ["swiping from one app screen to the next", "screenSwap"],
+    ["a frosted glass panel over the background", "glassCard"],
+    ["a map of things connected to each other, not a tree", "nodeGraph"],
+    ["dim the code around the one line that matters", "codeHighlight"],
+    ["a row of tabs you can switch between", "tabBar"],
+    ["numbered steps across the screen filling in as you go", "stepFlow"],
+    ["a card with a light chasing around its edge", "borderBeamCard"],
   ];
   {
     const top3 = (q, want) => { const qt = arsenalToks(q);
@@ -5550,8 +5653,13 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok('plain English about blocks finds the block, in the top three', missed.length === 0);
     const unsure = PLAIN.filter(([q]) => best(q).c < CONFIDENT);
     if (unsure.length) console.log(`    plain questions answered but not confidently: ${unsure.map(([q]) => `"${q}"`).join(', ')}`);
-    ok('and at least ten of them are answered confidently rather than refused',
-      PLAIN.length - unsure.length >= 10);
+    // A PROPORTION, NOT A FIXED TEN. The floor said "at least ten" when the set held fourteen, which
+    // was two thirds of it. Widening the set to 91 and keeping the ten would have turned a real floor
+    // into decoration overnight: 81 of them could go unfindable and the number would still read green.
+    // Two thirds is what the set measures today at 70, so the bar keeps the meaning it had.
+    const floor = Math.ceil(PLAIN.length * 2 / 3);
+    ok(`and at least ${floor} of the ${PLAIN.length} are answered confidently rather than refused`,
+      PLAIN.length - unsure.length >= floor);
   }
 
   const ABSENT = [
@@ -6545,6 +6653,53 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok('site-counts: a waiver with no reason does not',
       spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot }).status === 1);
   } finally { fs.rmSync(abs, { force: true }); }
+
+  // ── AND IT READS THE TOOLS, WHICH IS WHERE A STALE COUNT COSTS MOST ───────────────────────────
+  // A wrong number in marketing copy oversells the product. A wrong number in a gate's own finding
+  // sends an author to a capability that is not there, or away from one that is: block-schema printed
+  // "154 of 155 blocks" over a registry of 185, doc-map advertised docs/EFFECTS.md as "15 families"
+  // over 53, and feature-audit answered a monotony warning with "21 presets available" over 31. Same
+  // class as `make sfx` in audio-check (the make-target test above), and nothing checked it either.
+  // `make arsenal` is the shape to copy: it prints `all.length`, so it cannot be wrong.
+  ok('site-counts: the resolved surface list reaches the author-facing tools',
+    files.includes('scripts/author/arsenal.mjs') && files.includes('scripts/gates/audio-check.mjs'));
+  {
+    // The extension is joined rather than written, because `make doc-refs` reads this file too and a
+    // literal `scripts/gates/*.mjs` in it is a script path the repo does not have. A probe that exists
+    // for a hundred milliseconds is not a promise to a reader, so it must not read as one.
+    const probe = path.join(repoRoot, 'scripts/gates', ['_lib-test-count', 'mjs'].join('.'));
+    try {
+      // A CLAIM IN CODE and the SAME CLAIM IN A COMMENT, in one file, because the second is what makes
+      // this check survivable. Every gate header in this repo discusses counts that were wrong once,
+      // site-counts.mjs quotes four of them in its own opening paragraph, and a matcher that reads
+      // comments reports the incident log. doc-refs.mjs:145 wrote that lesson down after reporting
+      // `make builds` as missing when it was quoted inside a comment.
+      fs.writeFileSync(probe, [
+        '// the engine ships 3 kinetic presets, and this line must stay invisible to the gate',
+        'console.log("the engine ships 3 kinetic presets");',
+        '',
+      ].join('\n'));
+      let r = spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot });
+      ok('site-counts: a wrong count printed by a script is caught, with its file and line',
+        r.status === 1 && /scripts\/gates\/_lib-test-count\.mjs:2\b/.test(r.stderr));
+      ok('site-counts: and the identical claim on line 1 is not, because it is a comment',
+        !/_lib-test-count\.mjs:1\b/.test(r.stderr));
+      // `cuts` is the one subject the code surface drops, and it is dropped on measurement rather than
+      // on taste: five of the seven bare-noun hits across both script directories say "cuts" and mean
+      // an edit, a film version or a scene count. "needs 2 cuts or seams" is a validator message,
+      // "Two cuts of the same film" is the judging rubric, "no cuts by design" is a waiver reason.
+      // `blocks` is NOT dropped, because block-schema.mjs printed "154 of 155 blocks" over a registry
+      // of 185 and that is the finding this whole surface exists for.
+      fs.writeFileSync(probe, 'console.log("this film has 2 cuts");\n');
+      r = spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot });
+      ok('site-counts: a bare `cuts` in a script is left alone, it is an edit and not the registry',
+        r.status === 0);
+      fs.writeFileSync(probe, 'console.log("154 of 155 blocks put their anchor top-left");\n');
+      r = spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot });
+      ok('site-counts: and a bare `blocks` is not, which is the claim block-schema actually printed',
+        r.status === 1 && /_lib-test-count\.mjs:1\b/.test(r.stderr));
+    } finally { fs.rmSync(probe, { force: true }); }
+  }
 }
 
 // ---- the arsenal ratchet: hand-catalogued capabilities may fall, never rise --------------------

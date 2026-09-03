@@ -268,7 +268,7 @@ for (const family of families) {
   if (corner && ANCHOR_EXEMPT[family]) {
     issues.push({ kind: 'stale-anchor-exemption', at: family, detail: `declared as an anchor exception and it places its top-left corner. Remove the entry from ANCHOR_EXEMPT in ${path.basename(fileURLToPath(import.meta.url))}.` });
   } else if (!corner && !ANCHOR_EXEMPT[family]) {
-    issues.push({ kind: 'not-top-left', at: family, detail: `x,y must be the block's TOP-LEFT corner (the site says so, and 154 of 155 blocks do it). This one put its first layer at ${Math.min(...xs)},${Math.min(...ys)} for a requested ${PROBE},${PROBE}. Fix the factory, or add it to ANCHOR_EXEMPT with the reason its anchor is not its corner.` });
+    issues.push({ kind: 'not-top-left', at: family, detail: `x,y must be the block's TOP-LEFT corner (the site says so, and every other block in the library does it). This one put its first layer at ${Math.min(...xs)},${Math.min(...ys)} for a requested ${PROBE},${PROBE}. Fix the factory, or add it to ANCHOR_EXEMPT with the reason its anchor is not its corner.` });
   }
 }
 

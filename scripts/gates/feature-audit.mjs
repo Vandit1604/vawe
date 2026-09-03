@@ -79,7 +79,7 @@ for (const v of ship) {
   if (total < 5) continue;
   const [top, n] = Object.entries(v.presets).sort((a, b) => b[1] - a[1])[0];
   const share = n / total;
-  if (share > 0.5) { console.log(`  ⚠ ${v.f}: "${top}" is ${Math.round(share * 100)}% of ${total} entrances, vary it (21 presets available).`); warned++; }
+  if (share > 0.5) { console.log(`  ⚠ ${v.f}: "${top}" is ${Math.round(share * 100)}% of ${total} entrances, vary it (`make arsenal` prints the rest).`); warned++; }
 }
 if (!warned) console.log('  ✓ no single preset dominates any shipped video');
 

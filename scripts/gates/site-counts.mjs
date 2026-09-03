@@ -103,6 +103,15 @@ const FILES = [
   ...walk('site/app').filter((f) => /\.tsx?$/.test(f)),
   ...walk('docs-site/content/docs').filter((f) => f.endsWith('.mdx')),
   ...walk('docs').filter((f) => f.endsWith('.md') && !EXCLUDED.has(f)),
+  // THE TOOLS THEMSELVES ARE A SURFACE, and they were the last one nobody read. `make arsenal` derives
+  // its own headline ("The ${all.length} named things were searched"), so it cannot go stale; every
+  // other author-facing script types its number by hand. Three had: block-schema printed "154 of 155
+  // blocks" over a registry of 185, doc-map advertised docs/EFFECTS.md as "15 families" over 53, and
+  // feature-audit told an author to vary an entrance because "21 presets" were available over 31. An
+  // author is told to trust these, and a wrong number here is worse than a wrong number in the copy:
+  // it is inside the fix instruction, which is the same failure `make sfx` was (lib-test:2929).
+  ...walk('scripts/author').filter((f) => f.endsWith('.mjs')),
+  ...walk('scripts/gates').filter((f) => f.endsWith('.mjs')),
 ];
 
 
@@ -128,6 +137,7 @@ const SITE_ONLY = new Set(['blocks', 'components', 'looks', 'cuts']);
 const alt = (keys) => keys.sort((a, b) => b.length - a.length).join('|');
 const ALL_SUBJECTS = alt(Object.keys(TRUTH));
 const DOC_SUBJECTS = alt(Object.keys(TRUTH).filter((k) => !SITE_ONLY.has(k)));
+const CODE_SUBJECTS = alt(Object.keys(TRUTH).filter((k) => k !== 'cuts'));
 // Two shapes appear in the copy and both must be checked:
 //   "148 blocks", "a 148-block library"   → number first
 //   "## Kinetic presets (25)"             → heading with the count in parentheses
@@ -158,6 +168,16 @@ const numFirst = (subjects) => new RegExp(`\\b(\\d+|${WORDS.join('|')})[ \\u00a0
 const heading = (subjects) => new RegExp(`\\b(${subjects})\\s*\\((\\d+)\\)`, 'gi');
 const PATTERNS = {
   site: [numFirst(ALL_SUBJECTS), heading(ALL_SUBJECTS)],
+  // Source files get every subject EXCEPT `cuts`, and that exception is measured rather than guessed.
+  // Over both script directories the bare nouns produced seven hits: five of them say "cuts" and mean
+  // something else every time ("needs 2 cuts or seams" is a validator message, "Two cuts of the same
+  // film" is the judging rubric, "no cuts by design" is a waiver reason, "26 cuts" is a string a
+  // rewriter searches a scene for). The word is a film edit, a scene count and a registry in one
+  // repo, so it is the one that has to go. `blocks` stays, because dropping it would have made this
+  // check blind to the finding that prompted it: block-schema.mjs printed "154 of 155 blocks" inside
+  // a fix instruction over a registry of 185. Its one honest collision ("two blocks keep their order",
+  // about `<style>` elements) waives itself on the line, which is what the waiver is for.
+  code: [numFirst(CODE_SUBJECTS), heading(ALL_SUBJECTS)],
   // The HEADING form keeps every subject on every surface. "## Cuts (26)" over a list of cut names is
   // a registry claim wherever it sits, and no false positive in the widening came from that shape: it
   // is prose that makes a bare noun ambiguous, never a heading that hands a count its own parentheses.
@@ -173,7 +193,21 @@ for (const rel of FILES) {
   const file = path.join(root, rel);
   if (!fs.existsSync(file)) continue;
   const lines = fs.readFileSync(file, 'utf8').split('\n');
-  lines.forEach((line, i) => {
+  // COMMENTS ARE PROSE, AND A GATE THAT READS THEM ARGUES WITH PROSE THAT IS ALREADY CORRECT. Gate
+  // files discuss stale counts at length in their own headers: this very file's comment block quotes
+  // "22 kinetic presets, 32 stings, 16 backgrounds and 16 themes" as the numbers that WERE wrong, and
+  // reporting them would be reporting the incident log. Same rule and same reason as the make-target
+  // test in lib-test, and as doc-refs.mjs:145, which recorded reporting `make builds` as missing when
+  // it was quoted inside a comment. Whole-line comments only, matching that precedent: a trailing
+  // stripper eats the `//` in a URL inside a string, which is a claim going quiet rather than a false
+  // one being reported. Line numbers are preserved so a finding still names the line a human opens.
+  const isCode = rel.startsWith('scripts/');
+  const text = !isCode ? lines
+    : fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+        .split('\n').map((l) => (/^\s*(\/\/|\*)/.test(l) ? '' : l));
+  text.forEach((line, i) => {
+    // The WAIVER is read off the raw line, never the stripped one: the marker lives in a comment, and
+    // stripping comments before looking for it would delete every waiver a source file can write.
     const prev = i > 0 ? lines[i - 1] : '';
     // A NUMBER BESIDE A SUBJECT WORD IS NOT ALWAYS A COUNT OF IT. "Frame 412 looks the same whether it
     // renders first or last" is a sentence about frame 412, and `looks` there is a verb. The matcher
@@ -190,15 +224,15 @@ for (const rel of FILES) {
     // non-space after the colon is the comment CLOSER, so a bare marker in a .md file bought silence
     // for free and the "it costs a sentence" rule held only in JSX. Caught by lib-test, not by eye.
     const REASON = /site-counts-allow:\s*(?!-->)(?!\*\/)\S/;
-    const waived = REASON.test(line) || REASON.test(prev);
+    const waived = REASON.test(lines[i]) || REASON.test(prev);
     const check = (subject, stated) => {
       if (waived) return;
       const n = isNaN(+stated) ? WORDS.indexOf(String(stated).toLowerCase()) : +stated;
       const real = TRUTH[subject.toLowerCase()];
       if (real == null || n === real) return;
-      bad.push({ rel, line: i + 1, subject: subject.toLowerCase(), stated: n, real, text: line.trim().slice(0, 96) });
+      bad.push({ rel, line: i + 1, subject: subject.toLowerCase(), stated: n, real, text: lines[i].trim().slice(0, 96) });
     };
-    const [numeric, headed] = PATTERNS[rel.startsWith('site/') ? 'site' : 'docs'];
+    const [numeric, headed] = PATTERNS[isCode ? 'code' : rel.startsWith('site/') ? 'site' : 'docs'];
     for (const m of line.matchAll(numeric)) check(m[2], m[1]);
     for (const m of line.matchAll(headed)) check(m[1], m[2]);
     for (const m of line.matchAll(ACROSS)) { check('blocks', m[1]); check('block families', m[2]); }
