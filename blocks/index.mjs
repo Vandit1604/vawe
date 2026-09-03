@@ -27,18 +27,58 @@
 // available and top-level await is fine: an ESM importer awaits it before its own body runs.
 //
 // See docs/BLOCKS.md for the catalog + screenshots.
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+// THE FAMILY LIST IS STATIC, AND THAT IS WHAT LETS A BLOCK RUN IN A BROWSER. This file used to
+// `fs.readdirSync` its own directory and `await import()` each family, which is a fine plugin loader
+// and is why blocks could never leave node: `scripts/site/site-engine.mjs` vendors core/ into the
+// site so /editor and /playground run the SAME renderFrame the encoder does, and blocks were the one
+// part of the engine it could not carry, because three `node:` imports sat at the top of this file.
+// So every block family, with a full typed option table (blocks/schema.mjs, written expressly so
+// "nothing could build a control panel for a block" would stop being true) could not reach the one
+// page built to turn their dials.
+//
+// Nothing else changes. Every refusal below still fires at load: a family with no CATEGORY, a family
+// with no option table, two families exporting one factory name, a factory with no catalog row. The
+// only thing lost is auto-discovery of a NEW file, and `scripts/gates/lib-test.mjs` asserts this map
+// against the real directory listing, so a family added and not imported here fails a test rather
+// than disappearing quietly.
+import * as appFam from './app.mjs';
+import * as boardFam from './board.mjs';
+import * as cameraChromeFam from './camera-chrome.mjs';
+import * as chartsFam from './charts.mjs';
+import * as codeanimFam from './codeanim.mjs';
+import * as coreFam from './core.mjs';
+import * as devFam from './dev.mjs';
+import * as diagramFam from './diagram.mjs';
+import * as geoFam from './geo.mjs';
+import * as glassFam from './glass.mjs';
+import * as interactFam from './interact.mjs';
+import * as sleekFam from './sleek.mjs';
+import * as socialFam from './social.mjs';
+import * as terminalHtmlFam from './terminal-html.mjs';
+import * as terminalLayersFam from './terminal-layers.mjs';
+import * as uiFam from './ui.mjs';
+import * as vfxFam from './vfx.mjs';
 import { CATALOG } from './catalog.mjs';
 import { TOKENS, SERIES, onColor, R, cardChrome, toneColor, avatarEl, BLOCKS } from './kit.mjs';
 
 // The kit vocabulary, re-exported so a caller reaching for a token does not need a second import.
 export { TOKENS, SERIES, onColor, R, cardChrome, toneColor, avatarEl };
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-// Not families: the shared vocabulary, the manifest, the option checker, and this file.
-const NOT_A_FAMILY = new Set(['index.mjs', 'kit.mjs', 'catalog.mjs', 'schema.mjs']);
+// Not families: the shared vocabulary, the manifest, the option checker, and this file. Exported so
+// the directory-drift test can subtract exactly what this file subtracts, rather than keeping a
+// second copy of the same four names.
+export const NOT_A_FAMILY = new Set(['index.mjs', 'kit.mjs', 'catalog.mjs', 'schema.mjs']);
+
+// file name → its module. Keyed by FILE because every error below names the file, which is what an
+// author needs to open. Sorted at the point of use, not here.
+export const FAMILY_MODULES = {
+  'app.mjs': appFam, 'board.mjs': boardFam, 'camera-chrome.mjs': cameraChromeFam,
+  'charts.mjs': chartsFam, 'codeanim.mjs': codeanimFam, 'core.mjs': coreFam,
+  'dev.mjs': devFam, 'diagram.mjs': diagramFam, 'geo.mjs': geoFam, 'glass.mjs': glassFam,
+  'interact.mjs': interactFam, 'sleek.mjs': sleekFam, 'social.mjs': socialFam,
+  'terminal-html.mjs': terminalHtmlFam, 'terminal-layers.mjs': terminalLayersFam,
+  'ui.mjs': uiFam, 'vfx.mjs': vfxFam,
+};
 
 // Exported functions that are NOT block factories: they return colours and geometry, other families
 // import them, and they have no catalog row because they are not blocks. A REASON each, because the
@@ -51,9 +91,7 @@ export const NOT_A_BLOCK = {
 // Sorted, so import order is the alphabet and never the filesystem's opinion. Two runs on two
 // machines assemble the registry in the same order, which is what makes a duplicate name a
 // reproducible error rather than a race.
-const FAMILY_FILES = fs.readdirSync(HERE)
-  .filter((f) => f.endsWith('.mjs') && !NOT_A_FAMILY.has(f))
-  .sort();
+const FAMILY_FILES = Object.keys(FAMILY_MODULES).sort();
 
 // Every named export of every family module, merged. Identifier-safe keys only (BLOCKS also holds
 // namespaced `family.variant` names, which are not identifiers), so this is the object to spread when
@@ -71,7 +109,7 @@ export { BLOCKS };
 const ownerOf = {};   // factory name → the file that exported it
 
 for (const file of FAMILY_FILES) {
-  const mod = await import(pathToFileURL(path.join(HERE, file)).href);
+  const mod = FAMILY_MODULES[file];
   const factories = Object.keys(mod).filter((k) => typeof mod[k] === 'function');
   if (!factories.length) continue;                 // a helper module ships no blocks; nothing to register
 
@@ -84,7 +122,7 @@ for (const file of FAMILY_FILES) {
   const tables = Object.keys(mod).filter((k) => k.endsWith('_SCHEMAS'));
   if (!tables.length) {
     throw new Error(`blocks/${file} exports ${factories.length} factor(y/ies) but declares no option `
-      + `table. Add \`export const ${path.basename(file, '.mjs').replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '').toUpperCase()}_SCHEMAS = { <family>: { … } }\` `
+      + `table. Add \`export const ${file.slice(0, -4).replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '').toUpperCase()}_SCHEMAS = { <family>: { … } }\` `
       + `(shape: blocks/schema.mjs). Without it every option this module takes is undeclared and `
       + `scripts/gates/block-schema.mjs fails with no-schema, long after the render that needed it.`);
   }

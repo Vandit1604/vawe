@@ -24,6 +24,27 @@ const PUB = path.join(root, 'site', 'public');
 // [from, to]: relative to repo root / site/public
 const COPY = [
   ['core', 'core'],                                   // the engine itself (216K, zero node imports)
+  // BLOCKS TRAVEL NOW, and until blocks/index.mjs stopped calling fs.readdirSync on itself they could
+  // not. They carry 100 typed option tables (blocks/schema.mjs) written expressly so a control panel
+  // could be built for a block, and the page built to turn dials could not reach a single one.
+  // NOT `blocks` → `blocks`. site/next.config.mjs 308s `/blocks/:name` to `/arsenal/:name`, because
+  // the old /blocks page moved there and outside links still point at it. A file vendored to
+  // /blocks/schema.mjs is therefore redirected to /arsenal/schema.mjs and 404s: the redirect cannot
+  // tell a page path from a static file. `blocklib` is a directory no route claims. Nothing in core/
+  // references /blocks/ (checked), and blocks import each other relatively, so the name is free.
+  ['blocks', 'blocklib'],
+  // d3, BECAUSE ONE BLOCK FAMILY IMPORTS IT BY BARE NAME. blocks/geo.mjs says `from 'd3-geo'`, which a
+  // browser cannot resolve: bare specifiers need an import map, and site/app/layout.tsx now carries
+  // one pointing at these three. Without them /blocklib/index.mjs throws at module scope and every
+  // block family disappears from the playground, not just the maps. `internmap` is d3-array's own
+  // dependency and is here for the same reason: the chain has to resolve to the end.
+  ['node_modules/d3-geo/src', 'vendor/d3-geo'],
+  ['node_modules/d3-array/src', 'vendor/d3-array'],
+  ['node_modules/internmap/src', 'vendor/internmap'],
+  // blocks/geo.mjs also imports `../assets/geo/*.js`. Vendored blocks live at /blocklib, so that
+  // resolves to /assets/geo, and without it the same module-scope throw takes every family down.
+  // 204K of coastline, and the alternative is a hundred playable families minus the two map ones.
+  ['assets/geo', 'assets/geo'],
   ['themes', 'themes'],                               // boot.js fetches /themes/<name>.json
   // these land inside the site's OWN public/assets/, which is why .gitignore names them
   ['assets/fonts', 'assets/fonts'],     // boot() blocks on document.fonts for every face

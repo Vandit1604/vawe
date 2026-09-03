@@ -49,6 +49,25 @@ export const viewport: Viewport = { themeColor: "#ffffff" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+      <head>
+        {/* THE ENGINE'S BLOCK LIBRARY RUNS IN THIS PAGE, and one of its 17 families says
+            `from 'd3-geo'`. A browser cannot resolve a bare specifier, so without this map
+            /blocklib/index.mjs throws at module scope and EVERY block family vanishes from
+            /playground, not only the maps. The three entries are the whole chain: d3-geo needs
+            d3-array, which needs internmap. scripts/site/site-engine.mjs vendors all three.
+
+            dangerouslySetInnerHTML because an import map must be literal script text; React would
+            otherwise escape it into something the parser ignores silently, which is the failure this
+            comment exists to stop the next person re-discovering. */}
+        <script
+          type="importmap"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({ imports: {
+            "d3-geo": "/vendor/d3-geo/index.js",
+            "d3-array": "/vendor/d3-array/index.js",
+            "internmap": "/vendor/internmap/index.js",
+          } }) }}
+        />
+      </head>
       <body>
         {/* WCAG 2.4.1. Lives here, not in Header, so it is the document's first focusable element
             without constraining where the nav sits in the tree. It targets #content, the first

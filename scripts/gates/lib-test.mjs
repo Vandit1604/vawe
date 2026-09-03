@@ -84,6 +84,7 @@ import { raymarchAt, validate as raymarchValidate } from '../../core/surfaces/ra
 import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks.js';
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
+import { FAMILY_MODULES, NOT_A_FAMILY } from '../../blocks/index.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, osc, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
 import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
@@ -2837,6 +2838,38 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       const b = strip(band({ filterFrequency: 6000, filterGlideTo: 400, filterGlideTime: 0.9 }));
       return b[0] > b[5] * 3; })());
   }
+}
+
+// ---- the block family map must match the directory it replaced ----
+// blocks/index.mjs used to `fs.readdirSync` its own folder, which meant a new family file was picked
+// up by existing. It imports statically now, so blocks can run in a browser (site-engine.mjs vendors
+// the engine into the site, and three `node:` imports were the only thing keeping blocks out of it).
+// The cost of that trade is exactly this: a family added and not imported would vanish in silence,
+// which is the failure this repo names most often. So the directory is still the source of truth,
+// and this is the thing that reads it.
+{
+  const dir = path.join(repoRoot, 'blocks');
+  const onDisk = fs.readdirSync(dir).filter((f) => f.endsWith('.mjs') && !NOT_A_FAMILY.has(f)).sort();
+  const imported = Object.keys(FAMILY_MODULES).sort();
+  const missing = onDisk.filter((f) => !imported.includes(f));
+  const ghost = imported.filter((f) => !onDisk.includes(f));
+  if (missing.length) console.log(`    family files on disk that nothing imports: ${missing.join(' ')}`);
+  if (ghost.length) console.log(`    imported names with no file: ${ghost.join(' ')}`);
+  ok('blocks: every family file in blocks/ is imported by blocks/index.mjs',
+    missing.length === 0 && ghost.length === 0);
+  ok('blocks: and each import is the module that file exports', imported.every((f) => {
+    const m = FAMILY_MODULES[f];
+    return m && typeof m === 'object' && typeof m.CATEGORY === 'string' && m.CATEGORY.length > 0; }));
+  // The whole point of the change: nothing under blocks/ may reach for node again, or the site loses
+  // the 100 option tables that blocks/schema.mjs exists to provide to a control panel.
+  ok('blocks: no family imports node:, so the browser can run one', (() => {
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith('.mjs')) continue;
+      const src = fs.readFileSync(path.join(dir, f), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((l) => !/^\s*(\/\/|\*)/.test(l)).join('\n');
+      if (/from ['"]node:/.test(src)) { console.log(`    blocks/${f} imports node:`); return false; }
+    }
+    return true; })());
 }
 
 // ---- a gate's own FIX INSTRUCTION must be a command that runs ----

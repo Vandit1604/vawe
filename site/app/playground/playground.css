@@ -114,3 +114,48 @@
    floor is the natural width of the longest label this button carries, so nothing looks different
    until the label shortens, and then nothing moves. */
 .pgcopy .btn { min-width: 7.75rem; }
+
+/* ── the library scroll ─────────────────────────────────────────────────────────────────────────
+   Replaces the two-up `.lgrid` wall. The wall existed to compare fields side by side, and that is
+   exactly the reason nothing on it was allowed to move (see the note on Poster in
+   PlaygroundClient.tsx). One poster at a time asks a different question, so they run. */
+.pgscroll { display: flex; flex-direction: column; gap: 34px; }
+
+.pgposter {
+  display: block; width: 100%; padding: 0; text-align: left; cursor: pointer;
+  background: none; border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  transition: border-color .18s var(--ease), transform .18s var(--ease); }
+.pgposter:hover { border-color: var(--accent-line); }
+/* ONE elevation step, and only on hover: the page's register, stated in arsenal.css and kept here so
+   the two catalog surfaces do not drift into two different ideas of depth. */
+.pgposter:hover .pgposter-shot { transform: scale(1.012); }
+.pgposter:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* 16:9, so a poster is the shape of the thing it is a poster for. A fixed height would letterbox
+   every generator differently as the column narrows. */
+.pgposter-shot {
+  display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--surface-2, #0b0d12);
+  overflow: hidden; transition: transform .18s var(--ease); }
+.pgposter-shot > * { width: 100%; height: 100%; display: block; }
+
+.pgposter-meta {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding: 13px 16px 15px; border-top: 1px solid var(--line); }
+.pgposter-name {
+  font: 600 15px/1.2 var(--font-mono), ui-monospace, monospace; color: var(--ink); }
+.pgposter-blurb { color: var(--ink-2); font-size: 13.5px; line-height: 1.5; flex: 1 1 20rem; }
+/* The affordance says what happens, not "learn more". It is the only thing on the poster that is not
+   the generator itself, so it earns its place by naming the action. */
+.pgposter-go {
+  font-size: 12.5px; color: var(--accent); white-space: nowrap; opacity: 0; transition: opacity .18s var(--ease); }
+.pgposter:hover .pgposter-go, .pgposter:focus-visible .pgposter-go { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pgposter, .pgposter-shot, .pgposter-go { transition: none; }
+  .pgposter:hover .pgposter-shot { transform: none; }
+}
+
+@media (max-width: 640px) {
+  .pgscroll { gap: 24px; }
+  .pgposter-meta { padding: 11px 13px 13px; }
+}
