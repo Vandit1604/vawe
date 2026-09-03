@@ -21,6 +21,24 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PUB = path.join(root, 'site', 'public');
 
+// TWO PLACES A DEPENDENCY CAN LIVE, and the Docker build only has the second. Locally d3 sits in the
+// repo-root node_modules, because it is a devDependency of the renderer. Inside the image nothing runs
+// `npm ci` at the root: the builder installs site/node_modules and nothing else. Resolving only the
+// root path therefore worked on every machine and failed in production, which is the exact shape this
+// file's own .dockerignore banner warns about. d3-geo is a dependency of site/package.json now, so the
+// second path is the one that exists in the image; the first is kept so a local run does not need the
+// site's node_modules to be installed.
+const d3 = (pkg) => {
+  for (const base of ['node_modules', 'site/node_modules']) {
+    const rel = `${base}/${pkg}/src`;
+    if (fs.existsSync(path.join(root, rel))) return rel;
+  }
+  // Named, not silent. Without it /blocklib/index.mjs throws at module scope in the browser and every
+  // block family disappears from /playground with a 404 nobody looks at.
+  throw new Error(`site-engine: cannot find ${pkg}. blocks/geo.mjs imports it by bare name and the `
+    + `browser needs it vendored. It is a dependency of site/package.json; run npm ci there.`);
+};
+
 // [from, to]: relative to repo root / site/public
 const COPY = [
   ['core', 'core'],                                   // the engine itself (216K, zero node imports)
@@ -38,9 +56,9 @@ const COPY = [
   // one pointing at these three. Without them /blocklib/index.mjs throws at module scope and every
   // block family disappears from the playground, not just the maps. `internmap` is d3-array's own
   // dependency and is here for the same reason: the chain has to resolve to the end.
-  ['node_modules/d3-geo/src', 'vendor/d3-geo'],
-  ['node_modules/d3-array/src', 'vendor/d3-array'],
-  ['node_modules/internmap/src', 'vendor/internmap'],
+  [d3('d3-geo'), 'vendor/d3-geo'],
+  [d3('d3-array'), 'vendor/d3-array'],
+  [d3('internmap'), 'vendor/internmap'],
   // blocks/geo.mjs also imports `../assets/geo/*.js`. Vendored blocks live at /blocklib, so that
   // resolves to /assets/geo, and without it the same module-scope throw takes every family down.
   // 204K of coastline, and the alternative is a hundred playable families minus the two map ones.

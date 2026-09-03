@@ -59,6 +59,9 @@ site/public/scripts
 # ── assets: the browser reaches for a handful of real files out of 59M ───────────────────────────
 !assets/icons
 !assets/vendor
+# blocks/geo.mjs imports these at module scope, so without them the whole block registry throws on
+# load and /playground shows generators only. 204K.
+!assets/geo
 # The marks the PUBLISHED scenes name. scripts/site/site-engine.mjs derives this list from the scenes
 # themselves and FAILS the build when one is absent — but it looks in the build CONTEXT, and this file
 # decides what is in it. So an asset can exist in the repo, pass every local run, and simply not be in

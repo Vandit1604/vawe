@@ -16,6 +16,13 @@ WORKDIR /src
 # re-keys the parent. `docker builder prune -af` on the host is the actual cure.
 COPY themes ./themes
 COPY core ./core
+# blocks/ AND assets/geo/, because scripts/site/site-engine.mjs vendors both into site/public and
+# REFUSES the build without them ("missing blocks"). This is the failure that took three days of live
+# 404s to notice: the site image copied core/ and not blocks/, so /blocklib/index.mjs was never there,
+# every block family vanished from /playground, and the page still answered 200. blocks/geo.mjs also
+# reads ../assets/geo at module scope, so the maps take the whole registry down without it.
+COPY blocks ./blocks
+COPY assets/geo ./assets/geo
 # The whole scene directory, not just the page: scene.html loads scene.js and scene.css, and shipping
 # only the page put a dead engine in production behind a 200.
 COPY formats/scene ./formats/scene
