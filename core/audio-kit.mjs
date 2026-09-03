@@ -197,9 +197,22 @@ export function writeWav(file, samples, { stereo = false } = {}) {
 // whole band translates rigidly in log-frequency and keeps its shape. That is a filter sweep, built
 // out of the one primitive the engine does own.
 //
-// Sources for the family and its numbers: Sound on Sound, "Synth Secrets" (additive/noise-band
-// synthesis); the standard trailer-whoosh recipe of band-passed noise with an automated centre
-// frequency plus Doppler pitch; Risset/Shepard glissando for the fused inharmonic stack.
+// THE SOURCE, and it settles the question rather than suggesting an answer. Selfridge, Moffat, Avital
+// and Reiss, "Creating Real-Time Aeroacoustic Sound Effects Using Physically Informed Models", JAES
+// 66(7/8) 594-607, 2018, models a swoosh as an AEOLIAN TONE: vortex shedding off a moving cylinder,
+// synthesised as five band-passed partials at ratios 1:2:3:4:5 (lift at 1, 3, 5 with gains 1.0, 0.6,
+// 0.1; drag at 2, 4 at about a tenth of lift), all sweeping together on f = 0.2*u/d. In their listening
+// test participants picked the SYNTHESISED sword over a recording of a real one more often than not.
+// So a swept resonant partial stack is not an approximation of a whoosh, it is the published model of
+// one, and the paper's own Q figures (about 90 for a thin fast object, about 10 for a thick slow one)
+// say the "tonal" and "noisy" halves were never two things: high-Q band-passed noise IS a jittery sine.
+//
+// WHERE THIS DIVERGES FROM THE PAPER, and why. The paper's five partials are HARMONIC, because it is
+// modelling one cylinder. A cut is not an object, so harmonic ratios here would read as a siren with a
+// pitch. The stack is spread irregularly instead, which trades the physics for the fusion: measured by
+// autocorrelation, `whoosh` scores 0.24 against 0.99 for `chime`, so the ear finds no note in it.
+// See also the Shepard/Risset glissando, which is the same construction with octave spacing and a
+// fixed bell of amplitudes in log-frequency (https://splice.com/blog/how-shepard-tone-works/).
 //
 //   f0        where the band starts, in Hz (its lowest partial)
 //   to        where that lowest partial ends. The ratio to/f0 is what the whole band travels.
@@ -258,8 +271,17 @@ export const CUES = {
   // approach has finished, which is what stops the join reading as two sounds.
   //
   // The naive build is one band sweeping one way, and it is why a cheap whoosh sounds like a jet that
-  // never arrives: with no fall after the peak there is no pass point, only a rise. The Doppler drop
-  // IS the event.
+  // never arrives: with no fall after the peak there is no pass point, only a rise. The INFLECTION at
+  // the loudest moment is the event, and it is the step that gets left out.
+  //
+  // TWO NUMBERS THAT ARE NOT WHAT THEY LOOK LIKE. The band travels a factor of 6.8, about 33 semitones,
+  // and that is the aeroacoustic tone tracking speed (f = 0.2*u/d, so a 3mm edge going 5 to 40 m/s
+  // sweeps 333Hz to 2667Hz), NOT Doppler. Real Doppler is small: (c+v)/(c-v) at 343 m/s gives 2.0
+  // semitones at 20 m/s and 3.0 at 30 m/s, so the 12 semitones the tutorials ask for is a stylised
+  // amount and the drama belongs in the filter and the level. And a real pass-by envelope is a
+  // Lorentzian, 1/(d^2 + v^2 t^2), whose half-power width is 2d/v: 0.33s for a 30 m/s pass at 5 metres,
+  // 0.13s at 2 metres. A near miss is a SPIKE on a long approach, not a symmetric swell, which is why
+  // the approach here is a slow attack and the departure is a fast one.
   whoosh: { masterGain: 0.55, layers: [
     ...swarm({ f0: 220, to: 1500, octaves: 2.2, n: 16, attack: 0.26, decay: 0.055, peak: 0.55 }),
     ...swarm({ f0: 1500, to: 380, octaves: 2.2, n: 16, attack: 0.03, decay: 0.13, peak: 0.46, offset: 0.28, tilt: 0.62 }),
@@ -271,8 +293,21 @@ export const CUES = {
   // Narrower than the whoosh (1.6 octaves against 2.2) on purpose. A riser is allowed to be nearly
   // pitched, because the tension comes from knowing where it is going; a whoosh is not, because an
   // object passing has no key.
+  //
+  // THE STEP THAT IS NOT OBVIOUS is the last layer: a sub that bends DOWN while everything else climbs.
+  // Every hybrid-riser recipe carries it and none explains it, so here is the reason. A riser leaves the
+  // bass register as it rises, and the low end goes with it, so the build gets thinner exactly where it
+  // should get heavier. The counter-moving sub is what stops that.
+  // (https://www.musicradar.com/tuition/tech/how-to-create-your-own-dramatic-hybrid-risers-641799,
+  // which also gives the shape: a 4-octave climb over 8 bars, exponential, so it ACCELERATES.)
+  //
+  // WHAT THIS ENGINE CANNOT DO, and it is the other half of every recipe: the -3 to -6dB CUT at the
+  // riser's own peak, immediately before the moment lands. The drop hits because of the hole in front
+  // of it, not because the riser got loud. That is a mixer decision, not a cue parameter, so place the
+  // riser to END on the beat and leave the frame before it quiet.
   riser: { masterGain: 0.5, layers: [
     ...swarm({ f0: 165, to: 1320, octaves: 1.6, n: 13, attack: 0.72, decay: 0.10, peak: 0.5, tilt: 0.4 }),
+    { kind: 'tone', waveform: 'sine', frequency: 70, glideTo: 38, glideTime: 0.8, attack: 0.34, decay: 0.16, peak: 0.22 },
   ] },
 
   // Sub drop. The downlifter that lands ON a cut rather than before it: a fundamental falling from
@@ -281,8 +316,12 @@ export const CUES = {
   //
   // THE NUMBER THAT MATTERS IS THE END, not the start. Landing at 30Hz reads as a room-sized drop;
   // stopping at 60Hz reads as a bass note, which is a different event. renderCue glides LINEARLY in
-  // Hz, and the recipes call for an exponential fall, so this lands lower earlier than a synth would.
+  // Hz, and every recipe calls for an exponential fall, so this lands lower earlier than a synth would.
   // That is a real difference and it is the missing primitive: a glide curve.
+  //
+  // This is the CINEMATIC sub-down, half a second long, not the 808 knock, which drops 24 semitones in
+  // 40 to 60ms and is a different event entirely (https://vadisound.com/cinematic-sound-design-series-
+  // how-to-create-sub-downs-low-booms-and-whooshes/). If you want the knock, shorten glideTime to 0.05.
   drop: { masterGain: 0.6, layers: [
     { kind: 'tone', waveform: 'sine', frequency: 96, glideTo: 30, glideTime: 0.5, attack: 0.006, decay: 0.30, peak: 0.62 },
     { kind: 'tone', waveform: 'sine', frequency: 192, glideTo: 60, glideTime: 0.5, attack: 0.004, decay: 0.16, peak: 0.20 },
@@ -296,8 +335,17 @@ export const CUES = {
   // The body falls in pitch because a falling fundamental is what the ear reads as mass. The tail is a
   // swarm rather than a reverb because the engine has no reverb: a wide, quiet, slowly sinking band
   // decays like a room without one.
+  //
+  // THE NUMBERS COME FROM 808 PRACTICE, which is the only place the family is written down with any:
+  // the transient is high-passed above 1kHz and trimmed under 40ms, the body's sine core sits at 45 to
+  // 55Hz, a third layer fills 1 to 3kHz, and every layer's LOUDEST PEAK is aligned to the same sample
+  // so three sounds read as one event (https://sfxengine.com/blog/impact-sound-effect,
+  // https://pixflow.net/blog/sound-effects-layering/). The body lands at 46Hz for that reason and the
+  // three offsets are within 10ms. The 1-3kHz layer is the one a naive build leaves out, and without it
+  // an impact is a click stapled to a thump with a hole between them.
   impact: { masterGain: 0.55, layers: [
     { kind: 'tone', waveform: 'sine', frequency: 2400, glideTo: 900, glideTime: 0.012, attack: 0.0008, decay: 0.010, peak: 0.34 },
+    { kind: 'tone', waveform: 'sine', frequency: 1600, glideTo: 1150, glideTime: 0.05, attack: 0.002, decay: 0.045, peak: 0.16 },
     { kind: 'tone', waveform: 'sine', frequency: 120, glideTo: 46, glideTime: 0.10, attack: 0.003, decay: 0.14, peak: 0.62 },
     ...swarm({ f0: 200, to: 130, octaves: 2.6, n: 14, attack: 0.02, decay: 0.30, peak: 0.16, offset: 0.01, tilt: 0.5 }),
   ] },
@@ -305,25 +353,40 @@ export const CUES = {
   // Swell. The reverse-cymbal move: a sound that accelerates INTO a cut and stops dead on it, which is
   // what makes an edit feel inevitable rather than sudden.
   //
-  // THE STEP THAT IS NOT OBVIOUS, and it is a workaround for a missing primitive. A reverse swell needs
-  // an EXPONENTIAL-IN amplitude envelope, and `env` only offers a linear attack. So the curve is built
-  // from arrivals instead of from a shape: the partials are staggered across 340ms, so the level accrues
-  // as each one joins, and because the stack is tilted the late arrivals are the bright ones. The
-  // spectrum therefore opens as the level rises, which is the half of a reverse cymbal that people
-  // actually hear.
+  // THE RECIPE, and it is two lines long. "Set the envelope attack shape to EXPONENTIAL, use a LONG
+  // attack, and set the decay to IMMEDIATE" (https://www.perfectcircuit.com/signal/filter-sweeps). The
+  // second half is the one that gets dropped, and it is the effect: the perceived hit is the
+  // DISCONTINUITY, so the swell and the thing it introduces overlap by zero samples. A fade of even
+  // 20ms reads as a fade-out rather than as an arrival.
+  //
+  // `env` offers a LINEAR attack and no immediate decay, so both halves are built rather than set. The
+  // curve comes from ARRIVALS: eighteen partials staggered across 600ms, so the level accrues as each
+  // one joins, and the tilt is inverted so the late arrivals are the loud bright ones and the spectrum
+  // opens as the level climbs. The cut comes from a decay of 22ms on every partial, which is short
+  // enough that the stack collapses within about 90ms of the last one landing. Measured: the level
+  // peaks at 70% of the cue's length and the brightness climbs 637Hz to 4.4kHz across it.
   swell: { masterGain: 0.5, layers: [
-    ...swarm({ f0: 300, to: 900, octaves: 2.4, n: 18, attack: 0.05, decay: 0.075, peak: 0.42, tilt: -0.55, stagger: 0.52 }),
+    ...swarm({ f0: 300, to: 900, octaves: 2.4, n: 18, attack: 0.05, decay: 0.022, peak: 0.42, tilt: -0.55, stagger: 0.60 }),
   ] },
 
-  // Braam. The Inception horn: not one instrument but a stack of detuned saws an octave and a fifth
-  // apart, low enough to feel. The detune is the whole effect. Two saws a few cents apart beat against
-  // each other at the difference frequency, and a few of those at different rates is what makes one
-  // sustained note sound like a section rather than a synth.
+  // Braam. The Inception horn: a stack of detuned saws an octave and a fifth apart, low enough to feel.
+  // The detune is what makes one sustained note sound like a section rather than a synth, because two
+  // saws a few cents apart beat at the difference frequency. THE BEAT RATE IS THE NUMBER TO SET, not
+  // the cents, and it is the one nobody computes: 14 cents is a ratio of 1.00811, so at 55Hz it beats
+  // at 0.45Hz, slow enough to read as a swell inside the note. The SAME 14 cents an octave up beats
+  // twice as fast, which is why one detune value cannot serve a whole stack. The small downward glide
+  // is the player running out of air, and it is what stops the note sounding held by a machine.
   //
-  // 14 cents at 55Hz beats at about 0.4Hz, which is slow enough to read as a swell inside the note.
-  // Tighter than about 5 cents and the stack sounds like one oscillator; wider than about 25 and it
-  // sounds out of tune rather than large. The small downward glide is the brass player running out of
-  // air, and it is what stops the note sounding held by a machine.
+  // WHAT THIS IS NOT, said plainly because it would otherwise read as a full recipe. No source I could
+  // reach gives a braam's detune in cents or its intervals, so the cents here are chosen to hit beat
+  // rates and are not quoted from anyone. And the two published methods both say the identity is
+  // RESONANCE AND DISTORTION rather than the note: about twenty detuned saws, one per brass player you
+  // are imagining, spread across the stereo field with real brass on top and heavy distortion
+  // (https://professionalcomposers.com/sound-design-how-to-make-trailer-braaam-fx/); or Zimmer's
+  // original, brass players playing INTO the resonance of an open piano in a church
+  // (https://richardpryn.com/braaams/). This engine has five voices, no distortion, no stereo and no
+  // resonator, so this is the shape of a braam at a fraction of its density. Treat it as the low
+  // sustained weight in the library, not as the trailer horn.
   braam: { masterGain: 0.42, layers: [
     { kind: 'tone', waveform: 'saw', frequency: 55, glideTo: 52, glideTime: 1.4, attack: 0.11, decay: 0.62, peak: 0.30 },
     { kind: 'tone', waveform: 'saw', frequency: 55, detune: 14, attack: 0.14, decay: 0.66, peak: 0.28 },
