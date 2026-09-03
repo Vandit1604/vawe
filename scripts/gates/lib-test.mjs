@@ -5775,6 +5775,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['a video for tiktok', 'tiktok'],                                                                     // destination
     ['a fast entrance duration', 'fast'],                                                                 // duration word
     ['drain the colour to grey', 'desaturate'],                                                           // adjustment
+    ['a moving crimson and amber fire mesh gradient that drifts', 'ember'],                               // gradient recipe
   ];
   {
     const inTop3 = (q, want) => { const qt = arsenalToks(q);
