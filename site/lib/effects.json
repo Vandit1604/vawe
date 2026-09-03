@@ -1,5 +1,5 @@
 {
-  "total": 642,
+  "total": 644,
   "previewed": 292,
   "families": 53,
   "tags": [
@@ -9,7 +9,7 @@
     ],
     [
       "audio",
-      5
+      7
     ],
     [
       "background",
@@ -115,112 +115,112 @@
         {
           "name": "agent",
           "stem": "drawn-icons--agent",
-          "desc": "the name is the drawing",
+          "desc": "an autonomous worker or assistant. The mark for something acting on its own.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "arrowLeft",
           "stem": "drawn-icons--arrowleft",
-          "desc": "the name is the drawing",
+          "desc": "back, previous, return. The pair to arrowRight, and it should point the way the film travels.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "arrowRight",
           "stem": "drawn-icons--arrowright",
-          "desc": "the name is the drawing",
+          "desc": "forward, next, onward. Progression through a sequence, or a result following a cause.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "bolt",
           "stem": "drawn-icons--bolt",
-          "desc": "the name is the drawing",
+          "desc": "speed or power. Fast execution, an instant action, energy.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "braces",
           "stem": "drawn-icons--braces",
-          "desc": "the name is the drawing",
+          "desc": "code, JSON, a config file. The one to use when the subject is literally the syntax.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "check",
           "stem": "drawn-icons--check",
-          "desc": "the name is the drawing",
+          "desc": "done, passed, verified. The mark for a gate going green or a step completing.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "clock",
           "stem": "drawn-icons--clock",
-          "desc": "the name is the drawing",
+          "desc": "time, duration, waiting, a deadline. Any beat whose subject is how long something takes.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "cube",
           "stem": "drawn-icons--cube",
-          "desc": "the name is the drawing",
+          "desc": "a package, a build artifact, a module. A discrete unit of software.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "dollar",
           "stem": "drawn-icons--dollar",
-          "desc": "the name is the drawing",
+          "desc": "money, price, revenue, cost. Any figure the viewer reads as currency.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "file",
           "stem": "drawn-icons--file",
-          "desc": "the name is the drawing",
+          "desc": "a document or a single record. Use where the subject is one item of content rather than a system.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "globe",
           "stem": "drawn-icons--globe",
-          "desc": "the name is the drawing",
+          "desc": "the world, the network, a public surface. Reach, deployment, anything international.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "layers",
           "stem": "drawn-icons--layers",
-          "desc": "the name is the drawing",
+          "desc": "a stack, composition, depth. The mark for things built out of other things.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "link",
           "stem": "drawn-icons--link",
-          "desc": "the name is the drawing",
+          "desc": "a connection between two things, or a URL. Integration, reference, chaining.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "plug",
           "stem": "drawn-icons--plug",
-          "desc": "the name is the drawing",
+          "desc": "an integration or a connector. Where one system attaches to another.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "shield",
           "stem": "drawn-icons--shield",
-          "desc": "the name is the drawing",
+          "desc": "security, protection, trust. The one to reach for on a safety or privacy claim.",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spark",
           "stem": "drawn-icons--spark",
-          "desc": "the name is the drawing",
+          "desc": "something new, generated, or AI-made. Novelty and creation rather than speed.",
           "scene": null,
           "noPreview": null
         }
@@ -234,9 +234,37 @@
       "mode": "table",
       "note": null,
       "noPreview": "a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.",
-      "count": 5,
+      "count": 7,
       "undescribed": 0,
       "entries": [
+        {
+          "name": "bloom",
+          "stem": "motion-voices-tactile-sound--bloom",
+          "desc": "something OPENS · placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut. Slower in than the others, because an opening is not an arrival",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "chime",
+          "stem": "motion-voices-tactile-sound--chime",
+          "desc": "a small bright accent where a moment resolves. Noticed rather than announced, so it survives repetition better than a sting does",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "droplet",
+          "stem": "motion-voices-tactile-sound--droplet",
+          "desc": "something falls into place · a short pitched drop, placed automatically on a `drop` or `zoom` cut. The lightest of the arrival sounds",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "impact",
+          "stem": "motion-voices-tactile-sound--impact",
+          "desc": "something heavy ARRIVES and lands hard · a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home",
+          "scene": null,
+          "noPreview": null
+        },
         {
           "name": "pluck",
           "stem": "motion-voices-tactile-sound--pluck",
@@ -247,28 +275,14 @@
         {
           "name": "riser",
           "stem": "motion-voices-tactile-sound--riser",
-          "desc": "a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. What a declared `spectacle` gets",
+          "desc": "a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. Tension, suspense, a countdown to what a declared `spectacle` names",
           "scene": null,
           "noPreview": null
         },
         {
-          "name": "sweep",
-          "stem": "motion-voices-tactile-sound--sweep",
-          "desc": "a wipe · a noise band climbing the spectrum, wider and slower than a whoosh, so it reads as the whole frame changing rather than one object crossing it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "thud",
-          "stem": "motion-voices-tactile-sound--thud",
-          "desc": "something with WEIGHT arrives · a low sine dropping in pitch, because the ear reads a falling fundamental as mass. A frame-sized card landing",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "travel",
-          "stem": "motion-voices-tactile-sound--travel",
-          "desc": "movement. Filtered noise whose band opens then closes, which is what separates a whoosh from a burst of static. One per camera gesture, not one per keyframe",
+          "name": "whoosh",
+          "stem": "motion-voices-tactile-sound--whoosh",
+          "desc": "air moving past. One camera gesture, one whoosh, never one per keyframe · the sound rises as the move starts and falls away as it passes",
           "scene": null,
           "noPreview": null
         }
@@ -2051,35 +2065,35 @@
         {
           "name": "aurora",
           "stem": "generative-paint-fx-per-frame--aurora",
-          "desc": "drifting colour aurora (moves)",
+          "desc": "slow curtains of coloured light. Calm, ambient, and the least busy field here.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--aurora.json",
           "noPreview": null
         },
         {
           "name": "matrix",
           "stem": "generative-paint-fx-per-frame--matrix",
-          "desc": "falling glyph rain (per-frame)",
+          "desc": "columns of falling glyphs. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--matrix.json",
           "noPreview": null
         },
         {
           "name": "meteor",
           "stem": "generative-paint-fx-per-frame--meteor",
-          "desc": "ballistic streaks with echo trails (per-frame)",
+          "desc": "streaks crossing the frame on a diagonal. Motion and event on a background that would otherwise be still.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--meteor.json",
           "noPreview": null
         },
         {
           "name": "starfield",
           "stem": "generative-paint-fx-per-frame--starfield",
-          "desc": "flying starfield (per-frame)",
+          "desc": "stars drifting past as if the camera were moving through them. Depth and travel on an otherwise flat frame.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--starfield.json",
           "noPreview": null
         },
         {
           "name": "waves",
           "stem": "generative-paint-fx-per-frame--waves",
-          "desc": "sine wave field (per-frame)",
+          "desc": "rolling bands, a moving surface. Rhythm underneath content without competing for the eye.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--waves.json",
           "noPreview": null
         }
@@ -4514,245 +4528,245 @@
         {
           "name": "blinds",
           "stem": "shader-stings--blinds",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "venetian bars opening together. Mechanical and rhythmic.",
           "scene": "/assets/effects/shader-stings--blinds.json",
           "noPreview": null
         },
         {
           "name": "bokeh",
           "stem": "shader-stings--bokeh",
-          "desc": "time passing / reflection",
+          "desc": "soft out-of-focus discs drifting across frame. Ambient and quiet · closer to a texture than a cut.",
           "scene": "/assets/effects/shader-stings--bokeh.json",
           "noPreview": null
         },
         {
           "name": "burn",
           "stem": "shader-stings--burn",
-          "desc": "a heavy story turn",
+          "desc": "a film burn · the frame chars through and blows out, the way heat eats a print. Warm, analogue, and loud.",
           "scene": "/assets/effects/shader-stings--burn.json",
           "noPreview": null
         },
         {
           "name": "chromaticSplit",
           "stem": "shader-stings--chromaticsplit",
-          "desc": "digital shock / rupture",
+          "desc": "an rgb-fringed shock ring with colour fringing at the edges. An impact with a lens defect.",
           "scene": "/assets/effects/shader-stings--chromaticsplit.json",
           "noPreview": null
         },
         {
           "name": "cinematicZoom",
           "stem": "shader-stings--cinematiczoom",
-          "desc": "dive-in zoom into a screen",
+          "desc": "a dolly punch-in used as a cut cover · the camera lunges forward and the join hides inside the lunge.",
           "scene": "/assets/effects/shader-stings--cinematiczoom.json",
           "noPreview": null
         },
         {
           "name": "circle",
           "stem": "shader-stings--circle",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "a disc expanding from the centre. Focus opening outward from one point.",
           "scene": "/assets/effects/shader-stings--circle.json",
           "noPreview": null
         },
         {
           "name": "confetti",
           "stem": "shader-stings--confetti",
-          "desc": "punctuation / a hit",
+          "desc": "a burst of coloured pieces thrown across frame. Celebration, and hard to use without looking cheap.",
           "scene": "/assets/effects/shader-stings--confetti.json",
           "noPreview": null
         },
         {
           "name": "crossWarp",
           "stem": "shader-stings--crosswarp",
-          "desc": "liquid / organic morph",
+          "desc": "a noise-smeared directional veil dragging the frame sideways as it goes.",
           "scene": "/assets/effects/shader-stings--crosswarp.json",
           "noPreview": null
         },
         {
           "name": "dispersion",
           "stem": "shader-stings--dispersion",
-          "desc": "digital shock / rupture",
+          "desc": "a spectral prism band sweeping the frame, splitting light into its colours as it passes.",
           "scene": "/assets/effects/shader-stings--dispersion.json",
           "noPreview": null
         },
         {
           "name": "dissolve",
           "stem": "shader-stings--dissolve",
-          "desc": "time/place change",
+          "desc": "the frame dissolves away to white. A clean act break when the next beat starts bright.",
           "scene": "/assets/effects/shader-stings--dissolve.json",
           "noPreview": null
         },
         {
           "name": "domainWarp",
           "stem": "shader-stings--domainwarp",
-          "desc": "liquid / organic morph",
+          "desc": "a liquid marble wash, noise folded through noise. Organic, slow, and unlike anything geometric here.",
           "scene": "/assets/effects/shader-stings--domainwarp.json",
           "noPreview": null
         },
         {
           "name": "doors",
           "stem": "shader-stings--doors",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "panels closing in from both sides to meet in the middle.",
           "scene": "/assets/effects/shader-stings--doors.json",
           "noPreview": null
         },
         {
           "name": "flash",
           "stem": "shader-stings--flash",
-          "desc": "punctuation / a hit",
+          "desc": "a single hard white flash across the whole frame. The bluntest cut cover there is, and the one to use when the two shots have nothing in common.",
           "scene": "/assets/effects/shader-stings--flash.json",
           "noPreview": null
         },
         {
           "name": "glitch",
           "stem": "shader-stings--glitch",
-          "desc": "RGB-split glitch",
+          "desc": "rgb channel split into displaced bars. Digital failure, interference, a system under strain.",
           "scene": "/assets/effects/shader-stings--glitch.json",
           "noPreview": null
         },
         {
           "name": "grain",
           "stem": "shader-stings--grain",
-          "desc": "punctuation / a hit",
+          "desc": "dense fine film grain rising over the frame. Texture rather than event · use it under something else.",
           "scene": "/assets/effects/shader-stings--grain.json",
           "noPreview": null
         },
         {
           "name": "gridPixelateWipe",
           "stem": "shader-stings--gridpixelatewipe",
-          "desc": "digital shock / rupture",
+          "desc": "chunky pixel blocks sweeping a diagonal, each block a quantised tint. A wipe and a pixelate at once.",
           "scene": "/assets/effects/shader-stings--gridpixelatewipe.json",
           "noPreview": null
         },
         {
           "name": "ink",
           "stem": "shader-stings--ink",
-          "desc": "time passing / reflection",
+          "desc": "an ink bleed spreading to near-black. The dark twin of dissolve, for a beat that gets heavier.",
           "scene": "/assets/effects/shader-stings--ink.json",
           "noPreview": null
         },
         {
           "name": "iridescence",
           "stem": "shader-stings--iridescence",
-          "desc": "premium glamour / product",
+          "desc": "a thin-film interference sheen, the colour of oil on water shifting with angle.",
           "scene": "/assets/effects/shader-stings--iridescence.json",
           "noPreview": null
         },
         {
           "name": "leak",
           "stem": "shader-stings--leak",
-          "desc": "time passing / reflection",
+          "desc": "a light leak, seed-generative and multi-hue. Colour bleeding in at the edges as if the camera back opened.",
           "scene": "/assets/effects/shader-stings--leak.json",
           "noPreview": null
         },
         {
           "name": "lens",
           "stem": "shader-stings--lens",
-          "desc": "premium glamour / product",
+          "desc": "a full anamorphic flare · hot core, ghosts down the axis, a horizontal streak. Cinematic and very loud.",
           "scene": "/assets/effects/shader-stings--lens.json",
           "noPreview": null
         },
         {
           "name": "pinwheel",
           "stem": "shader-stings--pinwheel",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "an angular sweep with three arms rotating around the centre.",
           "scene": "/assets/effects/shader-stings--pinwheel.json",
           "noPreview": null
         },
         {
           "name": "pixel",
           "stem": "shader-stings--pixel",
-          "desc": "digital shock / rupture",
+          "desc": "a chunky mosaic that fills the frame and then clears. Reads as resolution being lost and regained.",
           "scene": "/assets/effects/shader-stings--pixel.json",
           "noPreview": null
         },
         {
           "name": "polka",
           "stem": "shader-stings--polka",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "a curtain of dots growing until they cover the frame.",
           "scene": "/assets/effects/shader-stings--polka.json",
           "noPreview": null
         },
         {
           "name": "ridgedBurn",
           "stem": "shader-stings--ridgedburn",
-          "desc": "a heavy story turn",
+          "desc": "a filament ember front sweeping upward, like paper catching along a ragged edge.",
           "scene": "/assets/effects/shader-stings--ridgedburn.json",
           "noPreview": null
         },
         {
           "name": "ripple",
           "stem": "shader-stings--ripple",
-          "desc": "liquid / organic morph",
+          "desc": "concentric rings expanding across the whole frame, like a struck water surface.",
           "scene": "/assets/effects/shader-stings--ripple.json",
           "noPreview": null
         },
         {
           "name": "scan",
           "stem": "shader-stings--scan",
-          "desc": "digital shock / rupture",
+          "desc": "a CRT scanline band sweeping through, with a trailing glow. Terminal, monitor, surveillance.",
           "scene": "/assets/effects/shader-stings--scan.json",
           "noPreview": null
         },
         {
           "name": "sdfIris",
           "stem": "shader-stings--sdfiris",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "an iris wipe through a seeded shape, so the aperture is not simply a circle. Focus, with character.",
           "scene": "/assets/effects/shader-stings--sdfiris.json",
           "noPreview": null
         },
         {
           "name": "squares",
           "stem": "shader-stings--squares",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "grid cells filling in on a stagger. Modular, and it suits a layout that is already a grid.",
           "scene": "/assets/effects/shader-stings--squares.json",
           "noPreview": null
         },
         {
           "name": "streak",
           "stem": "shader-stings--streak",
-          "desc": "energy, momentum",
+          "desc": "sharp radial light rays from a hot core. Photographic rather than digital · a lens catching a source.",
           "scene": "/assets/effects/shader-stings--streak.json",
           "noPreview": null
         },
         {
           "name": "swirl",
           "stem": "shader-stings--swirl",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "rotational light streaks thrown out from the centre.",
           "scene": "/assets/effects/shader-stings--swirl.json",
           "noPreview": null
         },
         {
           "name": "thermal",
           "stem": "shader-stings--thermal",
-          "desc": "premium glamour / product",
+          "desc": "an iron-bow heat veil in coarse cells, colour mapped from luminance rather than painted on.",
           "scene": "/assets/effects/shader-stings--thermal.json",
           "noPreview": null
         },
         {
           "name": "vortex",
           "stem": "shader-stings--vortex",
-          "desc": "a heavy story turn",
+          "desc": "an ink spiral pulling inward to a dark eye. A beat being swallowed rather than ended.",
           "scene": "/assets/effects/shader-stings--vortex.json",
           "noPreview": null
         },
         {
           "name": "warp",
           "stem": "shader-stings--warp",
-          "desc": "energy, momentum",
+          "desc": "a barrel-warped refraction shock ring expanding outward. An impact felt through the lens.",
           "scene": "/assets/effects/shader-stings--warp.json",
           "noPreview": null
         },
         {
           "name": "whipPan",
           "stem": "shader-stings--whippan",
-          "desc": "momentum swipe between beats",
+          "desc": "horizontal smear streaks racing across, as if the camera whipped sideways. Energy carried into a payoff.",
           "scene": "/assets/effects/shader-stings--whippan.json",
           "noPreview": null
         },
         {
           "name": "wipe",
           "stem": "shader-stings--wipe",
-          "desc": "playful \"notice the cut\" (shape wipes)",
+          "desc": "a directional band sweeping across the frame. The plainest geometric transition, and it always reads.",
           "scene": "/assets/effects/shader-stings--wipe.json",
           "noPreview": null
         }
