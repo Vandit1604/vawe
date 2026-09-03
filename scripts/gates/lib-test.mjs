@@ -2770,8 +2770,6 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   };
   const bands = (name, k = 8) => { const x = normalize(renderCue(CUES[name], 1)); const w = Math.floor(x.length / k);
     return Array.from({ length: k }, (_, i) => brightness(x, i * w, i === k - 1 ? x.length : (i + 1) * w)); };
-  ok('audio: no movement cue carries a noise layer (the round-1 finding, as a constraint)',
-    ['whoosh', 'riser', 'drop', 'impact', 'swell', 'braam'].every((n) => !CUES[n].layers.some((l) => l.kind === 'noise')));
   ok('audio: whoosh brightness ARCHES, so it passes rather than only arrives', (() => {
     const b = bands('whoosh'), top = b.indexOf(Math.max(...b));
     return top > 0 && top < b.length - 1 && b[top] > b[0] * 1.5 && b[b.length - 1] < b[top] * 0.6; })());
@@ -2789,6 +2787,26 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('audio: music bed is deterministic', (() => { const x = musicBed({ loop: 2 }), y = musicBed({ loop: 2 }); return x.every((v, i) => v === y[i]); })());
   ok('audio: biquad bandpass rejects DC', (() => { const f = biquad('bandpass', 2000, 1.5); let last = 0; for (let i = 0; i < 500; i++) last = f(1); return Math.abs(last) < 0.05; })());
   ok('audio: biquad lowpass passes DC', (() => { const f = biquad('lowpass', 8000, 0.707); let last = 0; for (let i = 0; i < 500; i++) last = f(1); return last > 0.8; })());
+  // FILTER AUTOMATION. Until this existed a noise layer's cutoff was fixed for its whole life, so a
+  // band could sit but never sweep, and the deleted `travel` and `sweep` were two static bands with an
+  // offset: a staircase, not a sweep. That is why round 1 rejected every noise cue by ear, and the
+  // finding was about THIS ENGINE rather than about noise. These three assert the primitive itself,
+  // not any cue built on it, so they keep holding when the cues are revoiced.
+  {
+    const band = (extra) => normalize(renderCue({ masterGain: 0.5, layers: [{
+      kind: 'noise', filterType: 'bandpass', filterQ: 6, filterFrequency: 800,
+      attack: 0.05, decay: 0.3, peak: 0.2, ...extra }] }, 1));
+    const strip = (x, k = 6) => { const w = Math.floor(x.length / k);
+      return Array.from({ length: k }, (_, i) => brightness(x, i * w, i === k - 1 ? x.length : (i + 1) * w)); };
+    ok('audio: a noise band with no filter glide holds its brightness', (() => {
+      const b = strip(band({})); return Math.max(...b) < Math.min(...b) * 1.4; })());
+    ok('audio: filterGlideTo sweeps a noise band UP by more than two octaves', (() => {
+      const b = strip(band({ filterGlideTo: 6000, filterGlideTime: 0.9 }));
+      return b[5] > b[0] * 3 && b.every((v, i) => i === 0 || v > b[i - 1] * 0.95); })());
+    ok('audio: filterGlideTo sweeps a noise band DOWN, so a fall is not a separate mechanism', (() => {
+      const b = strip(band({ filterFrequency: 6000, filterGlideTo: 400, filterGlideTime: 0.9 }));
+      return b[0] > b[5] * 3; })());
+  }
 }
 
 // ---- beat detection (core/beats.js): the grid a beat-matched edit is built on ----

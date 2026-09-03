@@ -49,15 +49,23 @@ export function osc(type, f, t, phase = 0) {
 // Cuelume shapes its noise layers with BiquadFilterNode (lowpass/bandpass/highpass). A one-pole
 // filter is not close enough. The bandpass Q is what makes `tick` a click and not a thud.
 export function biquad(type, f0, Q) {
-  const w0 = TAU * clamp(f0, 20, SR / 2 - 100) / SR;
-  const c = Math.cos(w0), s = Math.sin(w0), alpha = s / (2 * Math.max(0.0001, Q));
-  let b0, b1, b2, a0, a1, a2;
-  if (type === 'lowpass') { b0 = (1 - c) / 2; b1 = 1 - c; b2 = b0; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; }
-  else if (type === 'highpass') { b0 = (1 + c) / 2; b1 = -(1 + c); b2 = b0; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; }
-  else { b0 = alpha; b1 = 0; b2 = -alpha; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; } // bandpass (0dB peak)
-  const B0 = b0 / a0, B1 = b1 / a0, B2 = b2 / a0, A1 = a1 / a0, A2 = a2 / a0;
+  let B0, B1, B2, A1, A2;
+  // `tune` is separate from construction so the cutoff can MOVE. Coefficients change; the delay
+  // state (x1..y2) does not, which is what keeps a swept filter continuous instead of clicking.
+  const tune = (f) => {
+    const w0 = TAU * clamp(f, 20, SR / 2 - 100) / SR;
+    const c = Math.cos(w0), s = Math.sin(w0), alpha = s / (2 * Math.max(0.0001, Q));
+    let b0, b1, b2, a0, a1, a2;
+    if (type === 'lowpass') { b0 = (1 - c) / 2; b1 = 1 - c; b2 = b0; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; }
+    else if (type === 'highpass') { b0 = (1 + c) / 2; b1 = -(1 + c); b2 = b0; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; }
+    else { b0 = alpha; b1 = 0; b2 = -alpha; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; } // bandpass (0dB peak)
+    B0 = b0 / a0; B1 = b1 / a0; B2 = b2 / a0; A1 = a1 / a0; A2 = a2 / a0;
+  };
+  tune(f0);
   let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-  return (x) => { const y = B0 * x + B1 * x1 + B2 * x2 - A1 * y1 - A2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = y; return y; };
+  const run = (x) => { const y = B0 * x + B1 * x1 + B2 * x2 - A1 * y1 - A2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = y; return y; };
+  run.tune = tune;
+  return run;
 }
 
 // ---------------------------------------------------------------- envelope
@@ -69,7 +77,12 @@ const env = (t, attack, decay, peak) => (t < attack ? (attack ? (t / attack) * p
  * Render one cue spec to mono samples.
  *   { masterGain, layers: [ {kind:'tone'|'noise', ...} ], shimmer?: {delay,feedback,wet,lowpass} }
  * tone  : waveform, frequency, glideTo, glideTime, detune (cents), offset, attack, decay, peak
- * noise : filterType, filterFrequency, filterQ, attack, decay, peak
+ * noise : filterType, filterFrequency, filterQ, filterGlideTo, filterGlideTime, attack, decay, peak
+ *
+ * The two filter-glide fields sweep the cutoff, and the sweep is EXPONENTIAL in frequency
+ * (a constant ratio per second), not linear in Hz like a tone's `glideTo`. That is the
+ * difference between a whoosh and a siren: the ear hears frequency ratios, so a linear Hz
+ * sweep crosses the low octaves too fast and the high ones too slowly.
  */
 export function renderCue(spec, seed = 1) {
   const layers = spec.layers || [];
@@ -80,14 +93,23 @@ export function renderCue(spec, seed = 1) {
   layers.forEach((L, li) => {
     const off = sec(L.offset || 0);
     const noiseGen = rng((seed * 2654435761 + li * 40503) >>> 0);
-    const filt = L.kind === 'noise' ? biquad(L.filterType || 'lowpass', L.filterFrequency || 1000, L.filterQ ?? 0.7) : null;
+    const f0Filt = L.filterFrequency || 1000;
+    const filt = L.kind === 'noise' ? biquad(L.filterType || 'lowpass', f0Filt, L.filterQ ?? 0.7) : null;
     const life = (L.attack || 0) + (L.decay || 0) * 5;
     const nn = Math.min(n - off, sec(life));
     let phase = 0;
     for (let i = 0; i < nn; i++) {
       const t = i / SR;
       let v;
-      if (L.kind === 'noise') v = filt(noiseGen());
+      if (L.kind === 'noise') {
+        // Re-tune in blocks of 32 samples (0.7ms at 44.1k). Per-sample costs 8 trig calls each and
+        // buys nothing: no sweep in any recipe here moves audibly inside a millisecond.
+        if (L.filterGlideTo != null && (i & 31) === 0) {
+          const g = clamp(t / Math.max(1e-4, L.filterGlideTime ?? 0.1), 0, 1);
+          filt.tune(f0Filt * Math.pow(L.filterGlideTo / f0Filt, g));
+        }
+        v = filt(noiseGen());
+      }
       else {
         // glide + detune are frequency-domain; integrate phase so a sweep stays continuous.
         let f = L.frequency || 440;
