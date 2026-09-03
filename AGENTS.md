@@ -16,6 +16,33 @@ for which task. **Skills are vendored in `.claude/skills/`. A fresh clone has th
 | **Hand-write any HTML** (a hook, CTA, card, hero) | **taste-skill** → then **impeccable** | design read + 3 dials, then production craft |
 | Judge / fix a design that "looks AI-generated" | **impeccable** (`critique`, `bolder`, `quieter`) | 41-rule detector + register craft |
 
+## JSON and HTML: the division of labour, and the default
+
+A vawe video is **JSON that composes a vocabulary**, plus **HTML where a bespoke picture is needed**.
+Give each the job it is good at:
+
+- **JSON owns** structure, timing, motion (keyframe tracks), cuts, camera, composition and audio. It is
+  what makes a scene composable, diffable, shareable and generatable. Author the film here.
+- **HTML owns** the *look* of one custom picture: a hero, a card, a CTA, gradients and type CSS can
+  express that a prop vocabulary cannot. Reach for it for the frame's appearance, never for its timing
+  (the engine drives motion; CSS `@keyframes`/`transition` are refused at boot).
+
+**An `html` layer's markup is a FILE by default (`src`), not an inline string.** The layer takes exactly
+one of `html` (inline) or `src` (a path to a `.html` file); the validator enforces one-and-only-one.
+**Prefer `src`.** Reasons, in order:
+
+1. **Agents write beautiful standalone `.html`; they write ugly escaped JSON strings.** Same skill, a
+   better container. A `.html` file has highlighting, formatting, and `make preview HTML=frag.html` to
+   see it in a real browser before it ever touches a scene. Inline HTML has none of that and pollutes
+   the JSON with escaped soup nobody wants to read or diff.
+2. **The JSON stays clean and composable** when the markup lives beside it, not inside it.
+3. Inline `html` is reserved for a genuinely trivial fragment (a line, a chip) where a file is overhead.
+
+So the authoring shape is: `hero.html` (the picture) + `launch.json` (the film, referencing it by
+`src`). **Share-time is the exception:** a bundling step may inline every `src` back INTO the JSON to
+produce one portable file (source vs. bundle, the same split a compiler makes). Author in files; inline
+only to ship a single artifact.
+
 ## The anti-slop rule (non-negotiable)
 
 Hand-authored HTML is where generic "AI slop" enters (centered text, Inter, blue/purple gradient, equal
