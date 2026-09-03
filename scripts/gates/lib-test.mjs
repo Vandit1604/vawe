@@ -6717,9 +6717,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok('vocab hook: says what to do when it is NOT a vocabulary', /vocabulary-baseline\.json/.test(r.err));
   } finally { fs.writeFileSync(probe, original); }
 
-  const wired = JSON.parse(fs.readFileSync(path.join(repoRoot, '.claude/settings.json'), 'utf8'));
-  ok('vocab hook: wired on Edit|Write',
-    JSON.stringify(wired.hooks.PostToolUse).includes('vocabulary.mjs'));
+  // The hook WIRING lives in .claude/settings.json, which is Claude-local and gitignored now, so it is
+  // not a tracked repo invariant. That the hook SCRIPT exists at scripts/live/ is covered by its [live]
+  // rung tag (rung.mjs). Here we only check the baseline the hook reads.
   const base = JSON.parse(fs.readFileSync(path.join(repoRoot, 'verify/vocabulary-baseline.json'), 'utf8'));
   ok('vocab hook: the baseline records what already exists, so the hook only judges what you add',
     Object.keys(base).length > 40);
