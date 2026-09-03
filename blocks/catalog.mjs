@@ -15,7 +15,7 @@
 // Hex literals (not TOKENS) on purpose: index.mjs imports THIS, so this must not import index.mjs.
 
 export const CATALOG = [
-  { name: 'card', family: 'card', blurb: "elevated info card: title, description, tag pills, and a call-to-action link at the bottom",
+  { name: 'card', family: 'card', blurb: "a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom",
     props: { w: 540, h: 300, title: 'Layers', desc: 'Text, image, count, cursor.', pills: ['Text', 'Image', 'Count'] } },
   { name: 'codeBlock', family: 'codeBlock', blurb: "a code snippet card: lines of code write themselves in one by one, syntax-coloured, like a syntax-highlighted editor screenshot",
     props: { w: 540, dark: true, label: 'scene.json', size: 19, lines: [
@@ -39,7 +39,7 @@ export const CATALOG = [
     props: { items: ['deterministic', 'pure(n)', 'no timeline'] } },
   { name: 'statBig', family: 'statBig', blurb: "one huge number with a tiny label under it, for a single headline stat or KPI callout",
     props: { to: 1950, label: 'frames', size: 120 } },
-  { name: 'colorCycle', family: 'colorCycle', blurb: "one word that changes colour over and over, cycling through a fixed hue sequence",
+  { name: 'colorCycle', family: 'colorCycle', blurb: "one word that changes colour again and again, repainted through a rainbow of hues in a fixed order",
     props: { word: 'colour', size: 64, each: 0.4 } },
   { name: 'splitFlapBoard', family: 'splitFlapBoard', blurb: "an airport or train station split-flap departure board where each letter flips through the alphabet to land on a word",
     props: { word: 'SHIPPED', label: 'status', size: 88 } },
@@ -100,11 +100,21 @@ export const CATALOG = [
   { name: 'stackedBar', family: 'stackedBar', blurb: "a stacked bar chart: multiple series piled in one bar per category to show a total and its parts",
     props: { w: 520, h: 260, series: [{}, {}], data: [
       { label: 'Mon', values: [24, 18] }, { label: 'Tue', values: [30, 22] }, { label: 'Wed', values: [20, 28] }, { label: 'Thu', values: [36, 24] }] } },
-  { name: 'card.pricing', family: 'pricingCard', blurb: 'plan · price · features · CTA',
+  // THESE THREE FAMILIES ARE UNSEARCHABLE AND A BLURB CANNOT FIX IT. `pricingCard`, `statCard` and
+  // `profileCard` have only `family.variant` rows, and scripts/author/arsenal.mjs indexes BARE rows
+  // only, on purpose: a variant's blurb describes the same subject in fewer words, and the two then
+  // split the words they share (the retrieval floor fell 97% → 95% the day all 185 rows went in). So
+  // the family is in NO search corpus, and `make arsenal Q="a pricing plan card"` answers ABSENT about
+  // something the engine has. The blurbs below are rewritten because they are also the catalog label
+  // and the docs/BLOCKS.md line, but the retrieval hole is upstream of them. Same for `lowerThird` and
+  // `searchEngine`. Closing it is a change to arsenal.mjs (index a family with no bare row), not five
+  // more rows here: a bare row also needs a poster, a scene and a frame rect, and moves the block
+  // count three doc surfaces state by hand.
+  { name: 'card.pricing', family: 'pricingCard', blurb: 'a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button',
     props: { w: 340, plan: 'Pro', price: '$29', features: ['Unlimited renders', 'Every format', '60fps export'], cta: 'Start free', highlight: true } },
-  { name: 'card.stat', family: 'statCard', blurb: 'boxed KPI with delta chip',
+  { name: 'card.stat', family: 'statCard', blurb: 'a boxed metric: a label, a number counting up, a chip saying how much it went up',
     props: { w: 340, to: 1950, label: 'frames rendered', delta: '+12%', deltaUp: true } },
-  { name: 'card.profile', family: 'profileCard', blurb: 'avatar · name · role',
+  { name: 'card.profile', family: 'profileCard', blurb: "a person's photo beside their name, with their job title under it",
     props: { w: 360, name: 'Ada Lovelace', role: 'Founding Engineer', initials: 'AL' } },
 
   // ── wave 2: dev blocks + device/UI chrome ──
@@ -272,7 +282,9 @@ export const CATALOG = [
   // Twelve entries, one factory: the layout (name over role) is fixed, the material around it is the
   // variant. Each row's copy suits its chrome, because a BILD block and a soft pill are not the same
   // register, and demoing both with "Jane Doe / Designer" would hide the only thing that differs.
-  { name: 'lowerThird.cleanBar', family: 'lowerThird', blurb: 'hairline plate · name over role · the quiet one',
+  // Unsearchable for the reason given beside `card.pricing` above: twelve namespaced rows, no bare
+  // one, so the whole family is outside `make arsenal`'s corpus whatever these lines say.
+  { name: 'lowerThird.cleanBar', family: 'lowerThird', blurb: "a name plate low in the frame: the speaker's name over their job title, on a hairline plate",
     props: { variant: 'cleanBar', name: 'Ana Roth', role: 'Principal engineer, Platform' } },
   { name: 'lowerThird.boldBlock', family: 'lowerThird', blurb: 'name reversed out of a solid accent block',
     props: { variant: 'boldBlock', name: 'Ana Roth', role: 'Principal engineer' } },
@@ -316,7 +328,8 @@ export const CATALOG = [
     props: {"w": 520, "channel": "Studio Vawe", "subscribers": "128K subscribers", "cta": "Subscribe"} },
   { name: 'followCard', family: 'followCard', blurb: "a social profile follow card: name over @handle next to a follow button pill",
     props: {"w": 360, "name": "Ana Roth", "handle": "anaroth", "cta": "Follow"} },
-  { name: 'searchEngine.home', family: 'searchEngine', blurb: 'search home. Wordmark + pill, query types in (keys click)',
+  // Unsearchable for the reason given beside `card.pricing` above: no bare row, so no corpus entry.
+  { name: 'searchEngine.home', family: 'searchEngine', blurb: 'a search engine home page: a wordmark over a rounded search box, the query typing itself in',
     props: { variant: 'home', w: 540, cps: 11, query: 'deterministic video from json',
       // THE LETTERS WERE GOOGLE'S. The word read "Search", but the six colours were Google's exact
       // brand hexes in Google's exact order (blue, red, yellow, blue, green, red) which is the
@@ -325,7 +338,7 @@ export const CATALOG = [
       // the repo. Same class as the brand recreations already removed from formats/scene.
       // The ramp also makes the demo honest: this is a search-engine block, not one company's.
       word: [{ c: 'S' }, { c: 'e' }, { c: 'a' }, { c: 'r' }, { c: 'c' }, { c: 'h' }] } },
-  { name: 'searchEngine.results', family: 'searchEngine', blurb: 'search results, ranked links, cursor clicks one',
+  { name: 'searchEngine.results', family: 'searchEngine', blurb: 'the search results page: a ranked list of links, with a cursor clicking one',
     props: { variant: 'results', w: 540, query: 'video from json', clickIndex: 0, results: [
       { url: 'vawe.dev › docs', title: 'One JSON. Any brand.', snippet: 'Same input, same frames, every time.' },
       { url: 'vawe.dev › blocks', title: 'The block registry', snippet: 'Vetted blocks you compose, not author.' }] } },
@@ -533,7 +546,7 @@ export const CATALOG = [
     props: { w: 1200, h: 760, title: 'and hands it back', caption: 'the same board, run backwards',
       tiles: [{ label: 'queue' }, { label: 'index' }, { label: 'cache' }, { label: 'edge' },
         { label: 'store' }, { label: 'logs' }, { label: 'auth' }, { label: 'jobs' }] } },
-  { name: 'morphText', family: 'morphText', blurb: "a gooey word cycle: each word melts into the next through a metaball filter, no letter correspondence",
+  { name: 'morphText', family: 'morphText', blurb: "a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence",
     props: { w: 900, words: ['ideas', 'drafts', 'inbox', 'shipped'], size: 120, hold: 0.8 } },
   { name: 'redditPost', family: 'redditPost', blurb: "a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count",
     props: { w: 620, sub: 'programming', author: 'deterministic', age: '4h',
