@@ -124,7 +124,7 @@ copyrighted media (posters/stills/album art) in a published video.
 |---|---|
 | `make probe M=<fmt>` | render-order **purity** (must pass, protects sharded rendering) |
 | `make audit [M=<fmt>]` | **overlap / overflow / safe-zone / tight-spacing** on `[data-layer=critical]`; overlays → `/tmp/audit/<fmt>.png` |
-| `make look M=<fmt>` / `make frame M=<fmt> N=<n>` | storyboard / one frame to eyeball |
+| `make look D=<file>` / `make frame D=<file> N=<n>` | storyboard / one frame to eyeball |
 | `make verify` | render integrity (dims/fps/codec/audio) + safe-zone + contact sheets |
 | `make review` | fast snapshot: lib-test + audit + a master overlay sheet (`/tmp/review.png`) |
 

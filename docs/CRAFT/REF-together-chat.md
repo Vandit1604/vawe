@@ -290,7 +290,7 @@ generated cards, then emoji.
 | # | asset | source | tier | note |
 |---|---|---|---|---|
 | 1 | the studio **timeline**: seconds ruler, one bar per layer, cut and seam marks, the shaded enter/exit ramps, the hazard band | **capture the real thing.** `make studio D=<a scene with a known hole>` then `make capture` on the timeline element | 1, captured real UI | the film's central surface. It must be the product, not a drawing of it. **Blocked right now**: `formats/scene/scene.js` is being rewritten, so the studio cannot be run this pass. |
-| 2 | the studio **frame preview** at four or five scrub positions | frames pulled from a scene we already ship, via `make frame M=<name> N=<n>` | 1, our own render output | these are the pictures riding above the timeline in beats 3 and 5 |
+| 2 | the studio **frame preview** at four or five scrub positions | frames pulled from a scene we already ship, via `make frame D=<file> N=<n>` | 1, our own render output | these are the pictures riding above the timeline in beats 3 and 5 |
 | 3 | the **render progress bar** of beat 5 | capture the real one if the studio exposes it; otherwise a `rect` with a keyed width | 1, then 3 | a `rect` here is honest, it is a progress bar |
 | 4 | the **playhead bar** itself | a `rect`, 8px wide, theme `ink` | 3, drawn | the spine object. No asset to fetch. |
 | 5 | the **dimension line** measuring 1.2s across the hazard band | `svg` layer, drawn on | 3, drawn | this is the beat-4 picture that stops it being type |

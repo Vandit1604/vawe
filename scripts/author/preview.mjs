@@ -33,6 +33,7 @@ if (flagIdx >= 0 && flagData === undefined) {
 if (dataArg && !fs.existsSync(path.resolve(dataArg))) {
   // Falling back to sample.json here is exactly how this bug hid: a missing scene must be loud.
   console.error(`preview.mjs: no such data file "${dataArg}"`);
+  console.error('usage: make look D=formats/scene/<film>.json  (or make frame D=… N=<n>)');
   process.exit(1);
 }
 if (!format || !fs.existsSync(path.join(repoRoot, 'formats', format, 'scene.html'))) {
