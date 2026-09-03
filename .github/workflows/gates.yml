@@ -1,6 +1,6 @@
 name: framework gates
 
-# The same five gates .githooks/pre-push runs, minus doc-refs. There is no CI-only list: the point is
+# The same gates .githooks/pre-push runs, minus doc-refs. There is no CI-only list: the point is
 # that a push blocked here is a push that would have been blocked on the developer's machine.
 #
 # doc-refs is DELIBERATELY ABSENT, and this is not a softened gate. formats/scene/*.json is gitignored
@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   fast-gates:
-    name: schema-check + lib-test + craft-coverage + arsenal-check
+    name: schema-check + lib-test + craft-coverage + arsenal-check + discovery + generated-check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -43,4 +43,4 @@ jobs:
       - run: npm ci
 
       - name: framework gates
-        run: make schema-check lib-test craft-coverage arsenal-check
+        run: make schema-check lib-test craft-coverage arsenal-check discovery generated-check

@@ -59,6 +59,18 @@ export const BLEND_REGISTRY = defineRegistry('blend mode', Object.fromEntries(
     luminosity: 'takes only brightness from the layer and keeps the backdrop\'s tint. The inverse of `color`',
     'plus-lighter': 'adds the two pictures together, so light over light runs to white. For glows and additive light',
   },
+  // The section publishes itself, so scripts/site/effects-catalog.mjs no longer hand-writes it. That
+  // hand-written row is what `lib-test` caught the moment this became a registry: a vocabulary with a
+  // definition site has somewhere to put its catalogue block, and a hand-written section for it is a
+  // second copy waiting to drift.
+  catalog: {
+    title: 'Blend modes',
+    tag: 'per-layer',
+    intro: '`mixBlend`: how a layer composites with what is already painted beneath it. On a GROUP child it throws, because CSS blends against the nearest stacking context and every timed element carries a transform: put it on the group, whose backdrop is the frame.',
+    skip: 'the CSS compositing spec defines the maths; MDN `mix-blend-mode` is the reference',
+    usage: (n, { j }) => j({ mixBlend: n }),
+    noPreview: 'a blend is a relationship between two layers, so a still of the layer alone shows nothing about it.',
+  },
 });
 
 export const BLEND_MODES = BLEND_REGISTRY.names;
