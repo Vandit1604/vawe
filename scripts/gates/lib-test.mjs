@@ -5549,30 +5549,43 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // a toast, `usMapHex` for a US map) and demanding a single winner would be asserting a preference
   // rather than a capability.
   //
-  // WIDENED FROM 14 FAMILIES TO 88 OF 100, because 14 was a sample and the other 81 families were a
+  // WIDENED FROM 14 FAMILIES TO 94 OF 100, because 14 was a sample and the other families were a
   // promise nobody was keeping: the blurb pass rewrote 95 of them and a later edit could have made any
-  // of the untested ones unfindable again in silence. Nine families are deliberately NOT here, and
-  // each one is a finding about its BLURB rather than a question that was wrong:
+  // of the untested ones unfindable again in silence.
+  //
+  // The last nine were investigated together and split three ways. THREE WERE BLURB BUGS, fixed in
+  // blocks/catalog.mjs and asserted at the end of the set below:
   //   card        "elevated info card: title, description, tag pills, and a call-to-action link at the
-  //               bottom" loses "a card with a heading, body text and a button at the bottom" to `doc`.
-  //               Wants the plain words: heading, body text, button.
-  //   pricingCard "plan · price · features · CTA" is a stub, not a sentence. Nothing to match.
-  //   statCard    "boxed KPI with delta chip" is a stub, and "delta chip" is jargon for "how much it
-  //               went up".
-  //   profileCard "avatar · name · role" is a stub. A person asks for "a photo with a name and a job
-  //               title".
-  //   lowerThird  "hairline plate · name over role · the quiet one" is a stub AND a private joke.
-  //   searchEngine "search home. Wordmark + pill, query types in (keys click)" carries neither
-  //               "search box" nor "search results".
+  //               bottom" lost "a card with a heading, body text and a button at the bottom" to `doc`
+  //               at 0.52. It says heading and body text now and wins that query at 0.81. It still
+  //               says LINK, not button, because the footer is a word and an arrow under a hairline
+  //               and calling it a button would be a blurb that reads well about the wrong thing.
   //   colorCycle  "one word that changes colour over and over, cycling through a fixed hue sequence"
-  //               is every word of the question and still loses to `shader`: every token in it is
-  //               common across the corpus, so idf gives it nothing. Wants a rare word ("rainbow").
-  //   morphText   "each word melts into the next through a metaball filter" loses "one word melting
-  //               into the next word" to `wordFlash`, on melts/melting alone: the index does not stem.
-  //   terminalHtml is the one exclusion that is NOT a blurb bug. It and `terminal` are twins by design
-  //               and any honest question for one answers the other, so asking is asserting a
-  //               preference. The same reason the top-three rule exists.
-  // Those five stubs are the tail of the blurb pass, and they are the five that were never rewritten.
+  //               was every word of the question and still lost to `shader`, because every token in it
+  //               is common across the corpus and idf gives a common word nothing. It carries
+  //               `rainbow` now, held by two entries rather than a hundred, and wins at 1.00.
+  //   morphText   "each word melts into the next" lost "one word melting into the next word" to
+  //               `wordFlash` on melts/melting alone. Written as "melting" it wins at 1.00, but the
+  //               BLURB IS NOT THE REAL FIX: the index does not stem, `cycles`/`cycling` and
+  //               `changes`/`changing` collide the same way, and rewriting one blurb per collision
+  //               pays for the same bug over and over. Stemming belongs in scripts/author/arsenal.mjs.
+  //
+  // FIVE ARE IN NO SEARCH CORPUS AT ALL, and no blurb can reach them. `pricingCard`, `statCard`,
+  // `profileCard`, `lowerThird` and `searchEngine` have only `family.variant` rows in the manifest,
+  // and scripts/author/arsenal.mjs indexes BARE rows only, deliberately (a variant and its family
+  // split their shared words; the retrieval floor fell 97% → 95% the day all 185 rows went in). So
+  // `make arsenal Q="a pricing plan card"` answers ABSENT about something the engine has, which is
+  // the failure this whole corpus exists to end. Their blurbs were stubs too and are rewritten, but
+  // that only fixes the catalog label and the docs/BLOCKS.md line. THE ASSERTION ABOVE, "every block
+  // FAMILY in the catalog is in the search corpus", reads the manifest's bare NAMES rather than its
+  // `family` field, so it passed over all five in silence. Two ways to close it, and the second is
+  // cheaper than it looks: index a family that has no bare row (arsenal.mjs), or give each a bare row
+  // here, which also needs a poster, a scene, a frame rect, and the block count edited by hand in
+  // site/app/arsenal/[name]/Stage.tsx and docs-site/content/docs/blocks.mdx.
+  //
+  //   terminalHtml is the one exclusion that is neither. It and `terminal` are twins by design and any
+  //               honest question for one answers the other, so asking is asserting a preference. The
+  //               same reason the top-three rule exists.
   const PLAIN = [
     ["a terminal window", "terminal"],
     ["a fake browser window around a screenshot", "browserFrame"],
@@ -5665,6 +5678,10 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ["a row of tabs you can switch between", "tabBar"],
     ["numbered steps across the screen filling in as you go", "stepFlow"],
     ["a card with a light chasing around its edge", "borderBeamCard"],
+    // The three of the nine a blurb could reach. The other six are in the comment above.
+    ["a card with a heading, body text and a button at the bottom", "card"],
+    ["a word that changes colour again and again", "colorCycle"],
+    ["one word melting into the next word", "morphText"],
   ];
   {
     const top3 = (q, want) => { const qt = arsenalToks(q);
