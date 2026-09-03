@@ -474,6 +474,30 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 | `darken` | dim everything beneath, as a percentage |
 | `desaturate` | drain the colour beneath. 1 is fully grey |
 
+## Blend modes  `[per-layer]`
+
+`mixBlend`: how a layer composites with what is already painted beneath it. On a GROUP child it throws, because CSS blends against the nearest stacking context and every timed element carries a transform: put it on the group, whose backdrop is the frame.
+
+| name | what / when |
+|---|---|
+| `color` | takes tint and richness from the layer and brightness from the backdrop. The way to recolour a photo |
+| `color-burn` | darkens the backdrop hard wherever the layer is deep, crushing the shadows |
+| `color-dodge` | brightens the backdrop hard wherever the layer is pale, blowing the highlights out |
+| `darken` | keeps whichever is darker at every pixel, the layer or what is behind it |
+| `difference` | subtracts one picture from the other, so matching areas go black and opposites invert. The classic glitch look |
+| `exclusion` | the same subtraction with the contrast taken out, greying the midtones instead of driving them to black |
+| `hard-light` | as if a harsh lamp shone through the layer: strong, unsubtle contrast |
+| `hue` | takes only the colour angle from the layer and keeps the backdrop's brightness and richness |
+| `lighten` | keeps whichever is lighter at every pixel, the layer or what is behind it |
+| `luminosity` | takes only brightness from the layer and keeps the backdrop's tint. The inverse of `color` |
+| `multiply` | darkens everything: white drops out and the rest deepens, the way ink sits on paper or two slides stack |
+| `normal` | no blending at all: the layer simply covers what is behind it. The default, and the way to turn a blend off |
+| `overlay` | deepens the dark areas and brightens the light ones at once, so contrast rises against the backdrop |
+| `plus-lighter` | adds the two pictures together, so light over light runs to white. For glows and additive light |
+| `saturation` | takes only the richness from the layer and keeps the backdrop's tint and brightness |
+| `screen` | lightens everything: black drops out and the rest brightens, the opposite of multiply, like two projectors on one wall |
+| `soft-light` | as if a diffuse lamp shone through the layer: a gentle wash rather than a hit |
+
 ## Depths (parallax planes)  `[per-layer]`
 
 `{ "depth": "back" }` on any layer. Stands it at a DISTANCE from the picture plane, so a camera move gives it parallax instead of turning the whole frame as one rigid pane. Each name is a fraction of the film's own lens, so it means the same distance under any camera, and it lowers to the `plane` modifier at boot. A raw number of px still works. Refused on a group CHILD, which sits in a flat parent: put it on the group.
@@ -958,30 +982,6 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 |---|---|
 | `svg:draw (stroke draws on)` | the logo/icon stroke draws itself on, line by line |
 | `svg:morph (shape melts into a logo)` | one path melts into another (blob into logo), optional spin |
-
-## Blend modes  `[per-layer]`
-
-`mixBlend`: how a layer composites with what is beneath it.
-
-| name | what / when |
-|---|---|
-| `color` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `color-burn` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `color-dodge` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `darken` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `difference` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `exclusion` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `hard-light` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `hue` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `lighten` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `luminosity` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `multiply` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `normal` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `overlay` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `plus-lighter` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `saturation` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `screen` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
-| `soft-light` | the CSS compositing spec defines it, MDN `mix-blend-mode` |
 
 ## Plain words (feel · duration · camera)  `[timing]`
 

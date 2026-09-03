@@ -980,6 +980,13 @@ arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never 
 discovery:
 	node scripts/gates/discovery.mjs
 
+# generated-check: run every generator, then ask git what moved. Three artefacts had no drift check at
+# all and one of them, site/lib/arsenal.json, went 67 items stale while still advertising a deleted
+# sound cue. WRITE=1 regenerates and exits 0; without it the run fails and leaves the files in place so
+# the fix is `git add`, not another command to remember.
+generated-check:
+	node scripts/gates/generated-check.mjs $(if $(WRITE),--write,)
+
 effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
 

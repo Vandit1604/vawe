@@ -18,7 +18,6 @@ import { catalogued } from '../../core/registry.js';
 // sections. The catalogue is what CLAUDE.md sends an author to before they choose, and it once did not
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
-import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { RANSOM_FACES } from '../../core/ransom.js';
 import { ASPECTS } from '../../core/safe.js';
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
@@ -164,7 +163,6 @@ export const sections = [
   // about 80KB of engine, reached by 3 of 135 scenes and by 0 of 30 block files. Documentation alone
   // does not fix adoption (`parts` went 0 to 5 block files and its scenes stayed at 2), but a
   // catalogue that names the wrong key guarantees the opposite.
-  ['Blend modes', '`mixBlend`: how a layer composites with what is beneath it.', names(BLEND_MODES), 'per-layer', { skip: 'the CSS compositing spec defines it, MDN `mix-blend-mode`' }],
   ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
   ['Ransom faces', '`ransom` on a text layer: per-glyph face mixing, from this fixed set.', names(RANSOM_FACES.map((f) => f.family)), 'text', { skip: 'a typeface, see it, do not read about it' }],
   ['Output targets', '`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/safe.js`.', names(Object.keys(ASPECTS)), 'canvas', { skip: 'a ratio is its own definition; the safe area it implies belongs to the destination, in the section below' }],
