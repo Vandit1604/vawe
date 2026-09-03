@@ -3,7 +3,7 @@
   "name": "keyframeHandle",
   "type": "vawe:generator",
   "title": "keyframeHandle",
-  "description": "The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.",
+  "description": "Why two easings that look alike FEEL different: one curve between two keyframes, drawn beside a strip of evenly spaced dots. The dots bunch where the thing is slow and spread where it is fast, which the curve alone hides. Flip between easyEase, snap, hang and overshoot to see it.",
   "tags": [
     "generator",
     "motion",

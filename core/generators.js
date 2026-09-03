@@ -619,7 +619,7 @@ const EFFECTOR_SCHEMA = {
 const EFFECTOR = {
   name: 'effector',
   group: 'motion',
-  blurb: 'One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.',
+  blurb: 'Move a hundred copies with one moving point, and keyframe none of them. Each copy reacts to how FAR the point is, not to its place in a list, so you get a wave, a ripple, or a trail that lags behind. Flip between trail, highlight and ripple to see it.',
   docs: 'docs/EFFECTS.md',
   reference: null,
   schema: EFFECTOR_SCHEMA,
@@ -726,7 +726,7 @@ const HANDLE_SCHEMA = {
 const HANDLE_CARD = {
   name: 'keyframeHandle',
   group: 'motion',
-  blurb: 'The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.',
+  blurb: 'Why two easings that look alike FEEL different: one curve between two keyframes, drawn beside a strip of evenly spaced dots. The dots bunch where the thing is slow and spread where it is fast, which the curve alone hides. Flip between easyEase, snap, hang and overshoot to see it.',
   docs: 'docs/EFFECTS.md',
   reference: null,
   schema: HANDLE_SCHEMA,
