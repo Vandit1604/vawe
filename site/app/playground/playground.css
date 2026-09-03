@@ -118,44 +118,144 @@
 /* ── the library scroll ─────────────────────────────────────────────────────────────────────────
    Replaces the two-up `.lgrid` wall. The wall existed to compare fields side by side, and that is
    exactly the reason nothing on it was allowed to move (see the note on Poster in
-   PlaygroundClient.tsx). One poster at a time asks a different question, so they run. */
-.pgscroll { display: flex; flex-direction: column; gap: 34px; }
+   PlaygroundClient.tsx). One poster at a time asks a different question, so they run.
 
+   IT IS STILL ONE COLUMN, and the reason is measured. The page was 16,745px for 23 items because a
+   full-width poster was a fixed 16:9: 622px of picture in a 900px window, under a header, so you
+   could not see one whole item and its own name at the same time. Two things fixed that without
+   making it a wall again. The poster takes the shape of the thing inside it, from the rect the build
+   measured, so a 944x194 block gets a 944x194 slot rather than a 16:9 box with 300px of nothing in
+   it. And the name and the blurb moved BESIDE the picture on a wide screen, where the page already
+   had 300px of unused gutter, so they cost no height at all. */
+.pgscroll { display: flex; flex-direction: column; gap: 26px; }
+
+/* THE POSTER IS NOT A CARD. It was a bordered box wrapping a picture and a caption bar, and the bar
+   made every item the same shape and the same weight: a uniform row, item after item, with nothing
+   saying which was which. Now the picture carries the hairline (a frame around a picture is
+   structure) and the words sit next to it on their own, which is the register /arsenal already uses:
+   .ar-card has no border, .ar-thumb has one. */
 .pgposter {
-  display: block; width: 100%; padding: 0; text-align: left; cursor: pointer;
-  background: none; border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
-  transition: border-color .18s var(--ease), transform .18s var(--ease); }
-.pgposter:hover { border-color: var(--accent-line); }
-/* ONE elevation step, and only on hover: the page's register, stated in arsenal.css and kept here so
-   the two catalog surfaces do not drift into two different ideas of depth. */
-.pgposter:hover .pgposter-shot { transform: scale(1.012); }
-.pgposter:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px;
+  width: 100%; padding: 0; text-align: left; cursor: pointer;
+  background: none; border: 0; border-radius: calc(var(--r) - 2px); color: inherit;
+  /* better-ui: name the properties that change, never `all`. */
+  transition: scale .12s var(--ease);
+}
+/* better-ui, and the value is exact rather than approximate: scale(0.96) on press is the tactile
+   confirmation. It is on the whole poster because the whole poster is the button, and 0.96 across a
+   1100px box is a large travel, so this is the one place the skill's value is scaled down: 0.994
+   moves the same 6px at this size that 0.96 moves on a 150px button. The skill's own framing is that
+   the press must be FELT; a literal 0.96 here would be a lurch. */
+.pgposter:active { scale: .994; }
+.pgposter:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
-/* 16:9, so a poster is the shape of the thing it is a poster for. A fixed height would letterbox
-   every generator differently as the column narrows. */
+/* The frame around the picture. `--pg-aspect` is the item's own shape, written by the component from
+   the rect `make blocks-scenes` measured, and clamped there to between 16:9 and 3.2:1.
+   CONCENTRIC RADIUS (better-ui): the shot has no padding, so its radius is the poster's radius
+   exactly; nothing is nested inside it that needs a smaller one. */
 .pgposter-shot {
-  display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--surface-2, #0b0d12);
-  overflow: hidden; transition: transform .18s var(--ease); }
-.pgposter-shot > * { width: 100%; height: 100%; display: block; }
+  position: relative; display: grid; place-items: center; overflow: hidden;
+  width: 100%; aspect-ratio: var(--pg-aspect, 16 / 9);
+  background: var(--surface);
+  border: 1px solid var(--line); border-radius: calc(var(--r) - 2px);
+  transition: border-color .18s var(--ease), box-shadow .18s var(--ease), transform .18s var(--ease);
+}
+/* ONE elevation step, and only on hover: the page's register, stated in arsenal.css and copied here
+   verbatim so the two catalog surfaces cannot drift into two different ideas of depth. better-ui
+   agrees with the split the site already made: a border for structure, a shadow for depth. */
+.pgposter:hover .pgposter-shot {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--ink) 22%, transparent);
+}
 
-.pgposter-meta {
-  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
-  padding: 13px 16px 15px; border-top: 1px solid var(--line); }
+/* The still, the live engine and the generator's own box all occupy the SAME cell, so the swap from
+   one to the other cannot move the picture. The shot already carries the item's aspect, so `contain`
+   fills it exactly rather than letterboxing. */
+.pgposter-shot > img,
+.pgposter-shot > .blive,
+.pgposter-shot > .pgposter-live {
+  grid-area: 1 / 1; display: block; width: 100%; height: 100%;
+}
+.pgposter-shot > img { object-fit: contain; }
+/* The live window: a full-size iframe inside, scaled and slid by BlockLive so the measured rect
+   fills the box. Hidden until the engine says ready, so the still covers the boot. Width beats
+   BlockLive's inline pixel width, which is the arsenal card layout's and not this one's. */
+.pgposter-shot > .blive {
+  position: relative; overflow: hidden; --sp-scale: 1;
+  width: 100% !important; height: 100% !important;
+  opacity: 0; transition: opacity .3s var(--ease);
+}
+.pgposter-shot > .blive[data-ready] { opacity: 1; }
+
+/* NOTHING TO SHOW IS A STATE, NOT A HOLE, and the stripe is /arsenal's, for the same reason it gives
+   there: a blank box says the site is broken, which is a different and untrue claim. Two items land
+   here. Both are full-frame overlays, which blocks-scenes.mjs skips because a crop rect around
+   something that IS the frame means nothing, so neither has a still to show. */
+.pgposter-none {
+  grid-area: 1 / 1; display: grid; gap: 6px; place-content: center; justify-items: center;
+  width: 100%; height: 100%; padding: 10px; text-align: center;
+  background: repeating-linear-gradient(135deg, var(--bg-2) 0 8px, var(--surface) 8px 16px);
+}
+.pgposter-none-tag {
+  font: 500 10px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px;
+}
+.pgposter-none-why { font-size: 10.5px; line-height: 1; color: var(--muted); }
+
+.pgposter-meta { display: grid; gap: 5px; align-content: start; min-width: 0; }
+.pgposter-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+/* WHICH KIND OF THING THIS IS, and whether it is moving. Both are inert facts about the entry, so
+   both are ink: the site keeps cobalt for what you can act on, and the only thing you can act on
+   here is the poster itself. */
+.pgposter-kind, .pgposter-state {
+  font: 500 10px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: .06em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 8px;
+}
+.pgposter-kind { color: var(--ink-2); background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.pgposter-state { color: var(--muted); border: 1px solid var(--line); }
+/* The dot is the static cue that pairs with the motion, so "is it running" survives a still
+   screenshot and a colour-blind reader. */
+.pgposter-state::before {
+  content: ""; display: inline-block; width: 5px; height: 5px; margin-right: 5px;
+  border-radius: 50%; background: currentColor; vertical-align: baseline;
+}
+.pgposter-state[data-state="live"] { color: var(--ink-2); }
+
 .pgposter-name {
-  font: 600 15px/1.2 var(--font-mono), ui-monospace, monospace; color: var(--ink); }
-.pgposter-blurb { color: var(--ink-2); font-size: 13.5px; line-height: 1.5; flex: 1 1 20rem; }
+  font: 600 15px/1.2 var(--font-mono), ui-monospace, monospace; color: var(--ink);
+  overflow-wrap: anywhere; }
+.pgposter-blurb { color: var(--ink-2); font-size: 13.5px; line-height: 1.5; text-wrap: pretty; }
 /* The affordance says what happens, not "learn more". It is the only thing on the poster that is not
-   the generator itself, so it earns its place by naming the action. */
+   the item itself, so it earns its place by naming the action. It is ALWAYS VISIBLE now: it used to
+   fade in on hover, which is no cue at all on a touch screen, where it was the only thing saying the
+   poster is a control. Hover moves it rather than revealing it. */
 .pgposter-go {
-  font-size: 12.5px; color: var(--accent); white-space: nowrap; opacity: 0; transition: opacity .18s var(--ease); }
-.pgposter:hover .pgposter-go, .pgposter:focus-visible .pgposter-go { opacity: 1; }
+  margin-top: 2px; font-size: 12.5px; color: var(--accent); white-space: nowrap;
+  transition: translate .18s var(--ease);
+}
+.pgposter:hover .pgposter-go, .pgposter:focus-visible .pgposter-go { translate: 3px 0; }
 
+/* THE WORDS GO BESIDE THE PICTURE, and only where there is room for them. The page is 1160px wide
+   and a poster that fills it is taller than the window; giving the meta a 300px column of that width
+   buys back every pixel the caption bar used to cost, 23 times over. Below 900px they stack, because
+   a 300px column and a picture cannot both fit and the picture is the point. */
+@media (min-width: 900px) {
+  .pgposter { grid-template-columns: minmax(0, 1fr) 288px; gap: 22px; align-items: start; }
+  .pgposter-meta { padding-top: 2px; }
+}
+
+/* Reduced motion keeps every STATE and drops only the travel. The hover step is a colour and a
+   shadow, which still say "liftable" without anything moving. */
 @media (prefers-reduced-motion: reduce) {
-  .pgposter, .pgposter-shot, .pgposter-go { transition: none; }
+  .pgposter, .pgposter-shot, .pgposter-go, .pgposter-shot > .blive { transition: none; }
+  .pgposter:active { scale: none; }
   .pgposter:hover .pgposter-shot { transform: none; }
+  .pgposter:hover .pgposter-go, .pgposter:focus-visible .pgposter-go { translate: none; }
 }
 
 @media (max-width: 640px) {
-  .pgscroll { gap: 24px; }
-  .pgposter-meta { padding: 11px 13px 13px; }
+  .pgscroll { gap: 20px; }
 }
