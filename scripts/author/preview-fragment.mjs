@@ -161,8 +161,8 @@ console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName},
 // least wants in an approval stop.
 async function detect(url, browser) {
   let detectUrl;
-  try { ({ detectUrl } = await import('../../.claude/skills/impeccable/scripts/detector/detect-antipatterns.mjs')); }
-  catch (e) { return { skipped: `the impeccable skill is not vendored at .claude/skills/impeccable (${e.code || e.message})` }; }
+  try { ({ detectUrl } = await import('../../skills/impeccable/scripts/detector/detect-antipatterns.mjs')); }
+  catch (e) { return { skipped: `the impeccable skill is not vendored at skills/impeccable (${e.code || e.message})` }; }
   try { return { findings: await detectUrl(url, { browser, waitUntil: 'load', settleMs: 100, viewport: { width: 1920, height: 1080 } }) }; }
   catch (e) { return { skipped: `the detector threw, ${e.message}` }; }
 }

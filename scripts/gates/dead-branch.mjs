@@ -45,7 +45,7 @@ const EXCLUDED_DIRS = [
   ['assets/vendor/', 'vendored third-party bundles, minified and not ours to edit'],
   ['docs-site/', 'a separate Next app with its own lint'],
   ['out/', 'render output'],
-  ['.claude/skills/impeccable/', 'a vendored third-party skill. Its 15 findings are real and none of them are ours to fix; carrying them would keep this gate permanently red on somebody else\'s code'],
+  ['skills/impeccable/', 'a vendored third-party skill. Its 15 findings are real and none of them are ours to fix; carrying them would keep this gate permanently red on somebody else\'s code'],
 ];
 
 const files = cp.execSync('git ls-files', { cwd: repoRoot }).toString().trim().split('\n')

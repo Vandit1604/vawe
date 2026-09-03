@@ -76,7 +76,7 @@ assets/brands/**
 assets/fonts/local/
 
 # vendored skill with no declared license — kept local, not redistributed (see CREDITS.md)
-.claude/skills/taste-skill/
+skills/taste-skill/
 
 # fetched sound effects — same policy as fonts (never committed; `make sfx` re-fetches).
 # credits.json IS tracked (attribution + pinned Mixkit ids for reproducible fetches).

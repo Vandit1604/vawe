@@ -888,7 +888,7 @@ beat-check: ## timeline gate: dead air, empty last frame, empty cut window, dead
 # (local, no network, token-efficient). the RENDERED-scene twin of this was retired (docs/MISTAKES.md #340);
 # this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.
 impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
-	node .claude/skills/impeccable/scripts/detect.mjs --json $(D)
+	node skills/impeccable/scripts/detect.mjs --json $(D)
 
 blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs)
 	node scripts/site/blueprints-catalog.mjs

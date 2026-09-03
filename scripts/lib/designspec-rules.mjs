@@ -1,7 +1,7 @@
 // scripts/lib/designspec-rules.mjs: OUR anti-slop rules. A table we own, not a list we borrow.
 //
 // WHY THIS EXISTS. `make slop` shells out to the vendored impeccable detector (41 rules, Apache-2.0,
-// `.claude/skills/impeccable/`). It is good work and it is not ours, in three ways that cost us:
+// `skills/impeccable/`). It is good work and it is not ours, in three ways that cost us:
 //
 //   1. WE CANNOT FIX IT. The browser path injects `detect-antipatterns-browser.js`, a 4,920-line
 //      GENERATED bundle whose build script is not vendored. It cannot be regenerated here. When the

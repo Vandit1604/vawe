@@ -26,8 +26,8 @@ story; we have all three: here's where each lives.
 | **Motion** | *How should it move?* | [`MOTION-CRAFT.md`](MOTION-CRAFT.md) (10 rules + effect-selection) · [`MOTION-RECIPES.md`](MOTION-RECIPES.md) (copy-paste recipe index) |
 | **Direction** | *Why does it read amateur when every layer renders fine?*, pacing, restraint, story placement | [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md). The spine that turns effects into a directed film; every rule sourced to its book + tagged by which gate enforces it |
 | **Film structure** | *What holds this film together across its cuts?* | [`CRAFT/FILM-STRUCTURE.md`](CRAFT/FILM-STRUCTURE.md). The catalogue: ~18 devices in four registers (spatial · verbal and aural · temporal · conceptual), what each one survives, when it fails, and a six-question decision aid. Read it before you pick. Carry two threads, not one. |
-| **Continuous action** | *Why does my plan read as three unrelated cards?* | [`vawe-continuous-action`](../.claude/skills/vawe-continuous-action/SKILL.md) · ONE of those devices, worked end to end: one object that transforms across every cut. Diegetic motion (the product doing its job), the measured 5-second budget, and the anti-slop checks you run before a frame renders. Worked from `higgsfield.mp4`. Right for a single-subject product film; wrong for a manifesto or an anthology. |
-| **Story-spine** | *Why these beats, in this order?* | [`CRAFT/STORY.md`](CRAFT/STORY.md). The spine, beat-role→persuasion→feeling, named spines + timing (hook → suspense → payoff; never spoil; build to a shocker). The [`vawe-video-planning`](../.claude/skills/vawe-video-planning/SKILL.md) skill applies it. |
+| **Continuous action** | *Why does my plan read as three unrelated cards?* | [`vawe-continuous-action`](../skills/vawe-continuous-action/SKILL.md) · ONE of those devices, worked end to end: one object that transforms across every cut. Diegetic motion (the product doing its job), the measured 5-second budget, and the anti-slop checks you run before a frame renders. Worked from `higgsfield.mp4`. Right for a single-subject product film; wrong for a manifesto or an anthology. |
+| **Story-spine** | *Why these beats, in this order?* | [`CRAFT/STORY.md`](CRAFT/STORY.md). The spine, beat-role→persuasion→feeling, named spines + timing (hook → suspense → payoff; never spoil; build to a shocker). The [`vawe-video-planning`](../skills/vawe-video-planning/SKILL.md) skill applies it. |
 
 > **Never authored one from scratch (no brand site)?** Follow [`CRAFT/AUTHORING-WALKTHROUGH.md`](CRAFT/AUTHORING-WALKTHROUGH.md):
 > the one narrative that carries a single video from a blank page to shipped, chaining the whole
@@ -250,7 +250,7 @@ satisfying a gate would make the film worse, go and read what the gate actually 
 
 ## Anti-slop discipline (the defaults to reach past)
 
-The enforcement lives in `.claude/skills/{taste-skill, impeccable}`, dials + a 41-rule detector.
+The enforcement lives in `skills/{taste-skill, impeccable}`, dials + a 41-rule detector.
 The doctrine, in one breath: **asymmetry over centered · scale contrast (one huge hero + tiny
 caption) · a committed non-generic face (the real brand font) · real assets over emoji · colour only
 from the brand · patterns as seasoning, never wallpaper · no em-dashes on screen.** CRAFT tells you

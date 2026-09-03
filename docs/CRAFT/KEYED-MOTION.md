@@ -9,7 +9,7 @@ codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-t
 
 `formats/scene/higgsfield-recreation.json` is cited across this repo as the exemplar, and everything
 written about it so far is about its **grammar**: one object, on screen from the first frame, and every
-cut is that object changing state ([`../../.claude/skills/vawe-continuous-action/SKILL.md`](../../.claude/skills/vawe-continuous-action/SKILL.md)).
+cut is that object changing state ([`../../skills/vawe-continuous-action/SKILL.md`](../../skills/vawe-continuous-action/SKILL.md)).
 That is the *what*. This file is the *how*. The motion mechanics that make it read as a product film
 rather than a competent slideshow, stated as numbers you can check in the JSON rather than as taste.
 
@@ -238,7 +238,7 @@ When a film has the right spine and still feels cheap, in order of how often it 
 
 ## See also
 
-- [`../../.claude/skills/vawe-continuous-action/SKILL.md`](../../.claude/skills/vawe-continuous-action/SKILL.md). The grammar: one object, every cut a state change
+- [`../../skills/vawe-continuous-action/SKILL.md`](../../skills/vawe-continuous-action/SKILL.md). The grammar: one object, every cut a state change
 - [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md), which curve, which cut, when
 - [`DIRECTION.md`](DIRECTION.md): pacing and restraint, and the gates that enforce them
 - [`../MISTAKES.md`](../MISTAKES.md) #164: this film trips the continuity gate at its sensitive threshold; the exemplar is not gate-clean, and that is a fact about the gate

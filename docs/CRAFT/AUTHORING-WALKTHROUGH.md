@@ -14,7 +14,7 @@ blue gradient). The fix is not inspiration; it is to run the same disciplined ch
 have given you, by hand.
 
 > Reflecting a real site instead? That path is easier and already canonical, follow the
-> [`vawe-video-planning`](../../.claude/skills/vawe-video-planning/SKILL.md) skill (study → lock →
+> [`vawe-video-planning`](../../skills/vawe-video-planning/SKILL.md) skill (study → lock →
 > execute) and skip Step 1 here. This walkthrough is the *from-scratch* companion to that skill.
 
 Worked example throughout: **"a 20s explainer: why most passwords are crackable in under an hour."**

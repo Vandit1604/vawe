@@ -67,5 +67,5 @@
   "optionalDependencies": {
     "ffmpeg-static": "^5.2.0"
   },
-  "//oxlint-note": "Code-quality enforcement: complexity, function length, nesting depth. Rust, so a whole-repo sweep runs in under a second and a single-file check is instant. That speed is what lets it run on every file WRITE (.claude/hooks/code-quality.mjs) rather than only at push, which is the difference between a rule that shapes code and a rule that scolds after the fact. A comment key must stay at the ROOT of this file: npm parses every key inside devDependencies as a package name, and a `//name` entry there breaks `npm install` outright."
+  "//oxlint-note": "Code-quality enforcement: complexity, function length, nesting depth. Rust, so a whole-repo sweep runs in under a second and a single-file check is instant. That speed is what lets it run on every file WRITE (scripts/live/code-quality.mjs) rather than only at push, which is the difference between a rule that shapes code and a rule that scolds after the fact. A comment key must stay at the ROOT of this file: npm parses every key inside devDependencies as a package name, and a `//name` entry there breaks `npm install` outright."
 }

@@ -74,7 +74,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [SUBAGENT-BUDGET.md](SUBAGENT-BUDGET.md) | "why did that fan-out cost so much" | the measured cost of a real run here, and the rules that follow: fewer and larger agents, file contents in the prompt, never two agents on one file |
 | [SUBAGENTS.md](SUBAGENTS.md) | judging your own render (a full pass, a recreation, anything you'll ship) | why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message · what to record so per-critic survival rate becomes computable |
 | [VOCABULARY.md](VOCABULARY.md) | you know the FEELING you want and not the engine name for it | the plain words the engine resolves in a real slot: feel to an easing, duration to seconds, a shot description to a camera move |
-| [`vawe-continuous-action`](../../.claude/skills/vawe-continuous-action/SKILL.md) (skill) | planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen | the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `formats/scene/higgsfield-recreation.json`. |
+| [`vawe-continuous-action`](../../skills/vawe-continuous-action/SKILL.md) (skill) | planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen | the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `formats/scene/higgsfield-recreation.json`. |
 
 **What & why (the story layer):**
 
@@ -132,7 +132,7 @@ including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._
 - [`../DESIGN-DATABASE.md`](../DESIGN-DATABASE.md) = *what techniques exist* (the catalog).
 - [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md) = *how it moves* (motion rules + gates).
 - [`../MISTAKES.md`](../MISTAKES.md) = *what went wrong before* (mistake → fix log).
-- `.claude/skills/{taste-skill,impeccable}` = *enforcement* (the anti-slop detector + dials). CRAFT tells
+- `skills/{taste-skill,impeccable}` = *enforcement* (the anti-slop detector + dials). CRAFT tells
   you what to do; impeccable checks you did it. Reach past what impeccable flags using these guides.
 - `make craft-coverage` = *doc integrity*: fails if a look/sting in the engine isn't classified in
   SELECTION, a doc names a removed effect, a CRAFT cross-link breaks, or a guide is orphaned from this index.
