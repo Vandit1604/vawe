@@ -93,10 +93,18 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
 // This is the one that was 95 of 95 missing. Hard zero: blocks/catalog.mjs is the single owner of a
 // block's name, and blocks/index.mjs throws at load for a factory with no row there, so there is no
 // legitimate reason for a family to exist and be unsearchable.
+// IT READ THE WRONG FIELD AND PASSED OVER ITS OWN SUBJECT. This built its family set from `r.name`
+// filtered to bare names, which is not the set of families: it is the set of families that HAPPEN to
+// have a bare row. Five did not (`pricingCard` exists only as `card.pricing`, `lowerThird` only as
+// `lowerThird.bild` and ten siblings), so the check ran over 95 of 100 and reported all clear about
+// exactly the rows it exists to catch. `make arsenal Q="a pricing plan card"` answered ABSENT the
+// whole time. The family lives in `r.family`; the name is what a scene writes.
 {
   const found = new Set(corpus.filter((e) => e.kind === 'block').map((e) => e.name));
-  const families = CATALOG.map((r) => r.name).filter((n) => !n.includes('.'));
-  const missing = families.filter((n) => !found.has(n));
+  const familyOf = new Map(CATALOG.map((r) => [r.name, r.family]));
+  const families = [...new Set(CATALOG.map((r) => r.family))];
+  const represented = new Set([...found].map((n) => familyOf.get(n)).filter(Boolean));
+  const missing = families.filter((f) => !represented.has(f));
   if (missing.length) fail(`\n  ✗ ${missing.length} block famil(ies) are not in the search: ${missing.slice(0, 8).join(' ')}`,
     '\n    scripts/author/arsenal.mjs reads blocks/catalog.mjs. If a family is missing, that read broke.');
   else console.log(`  ✓ all ${families.length} block families are searchable`);

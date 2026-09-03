@@ -122,8 +122,21 @@ export async function collect() {
       import('../../blocks/index.mjs').catch(() => null),
     ]);
     const catOf = (idx && idx.CATEGORY_OF) || {};
+    // A FAMILY WITH NO BARE ROW WOULD OTHERWISE BE ABSENT ENTIRELY, and five were: `pricingCard`,
+    // `statCard`, `profileCard`, `lowerThird` and `searchEngine` exist only as `card.pricing`,
+    // `lowerThird.bild` and so on. The dotted skip below is right about why it exists and wrong about
+    // where it applies: a variant is excluded because it SPLITS ITS FAMILY'S WORDS, and where there is
+    // no family entry there is nothing to split with. So the first variant of such a family is indexed,
+    // under the name a scene actually writes. `make arsenal Q="a pricing plan card"` reported ABSENT
+    // about a block the engine ships, which is the failure this whole corpus exists to prevent.
+    const bare = new Set((cat.CATALOG || []).filter((r) => r && r.name && !r.name.includes('.')).map((r) => r.name));
+    const orphanShown = new Set();
     for (const row of cat.CATALOG || []) {
-      if (!row || !row.name || row.name.includes('.')) continue;
+      if (!row || !row.name) continue;
+      if (row.name.includes('.')) {
+        if (bare.has(row.family) || orphanShown.has(row.family)) continue;
+        orphanShown.add(row.family);
+      }
       const key = `block\u0000${row.name}`;
       if (seen.has(key)) continue;
       seen.add(key);

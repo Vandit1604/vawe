@@ -2898,15 +2898,36 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const all = await collectArsenal();
   const cat = (await import('../../blocks/catalog.mjs')).CATALOG;
   const found = new Set(all.filter((e) => e.kind === 'block').map((e) => e.name));
-  const families = cat.map((r) => r.name).filter((n) => !n.includes('.'));
-  const missing = families.filter((n) => !found.has(n));
+  // `r.family`, NOT `r.name`. The old set was "families that happen to have a bare row", which is 95 of
+  // 100, so this passed over the five it existed to catch (`pricingCard` ships only as `card.pricing`).
+  const familyOf = new Map(cat.map((r) => [r.name, r.family]));
+  const families = [...new Set(cat.map((r) => r.family))];
+  const represented = new Set([...found].map((n) => familyOf.get(n)).filter(Boolean));
+  const missing = families.filter((f) => !represented.has(f));
   if (missing.length) console.log(`    blocks the search cannot find: ${missing.slice(0, 8).join(' ')}`);
   ok('arsenal: every block FAMILY in the catalog is in the search corpus', missing.length === 0);
-  // And the variants are out on purpose, measured rather than assumed: with all 185 rows in, the blurb
-  // self-retrieval floor fell from 97% to 95%, because `notification.warn` ("toast, amber accent") and
-  // `notification` describe one subject and split its words between them.
-  ok('arsenal: a namespaced variant is NOT its own corpus entry',
-    !all.some((e) => e.kind === 'block' && e.name.includes('.')));
+  // THE RULE IS NARROWER THAN "NO VARIANTS", and the first version of this assertion had it too wide.
+  // Variants are out because a variant and its family split their shared words: with all 185 rows in,
+  // the blurb self-retrieval floor fell from 97% to 95%, since `notification.warn` ("toast, amber
+  // accent") and `notification` describe one subject. That argument needs a family entry to split
+  // WITH. Five families have no bare row at all (`pricingCard` ships only as `card.pricing`), so the
+  // wide rule kept them out of the search entirely and `Q="a pricing plan card"` answered ABSENT about
+  // a block the engine has. So: at most one entry per family, and a variant only where its family has
+  // no bare row of its own.
+  ok('arsenal: one entry per block family, never a family and its variants both', (() => {
+    const familyOf = new Map(CATALOG.map((r) => [r.name, r.family]));
+    const seen = new Map();
+    for (const e of all.filter((x) => x.kind === 'block')) {
+      const f = familyOf.get(e.name);
+      if (!f) { console.log(`    corpus block "${e.name}" is in no catalog row`); return false; }
+      if (seen.has(f)) { console.log(`    family ${f} appears twice: ${seen.get(f)} and ${e.name}`); return false; }
+      seen.set(f, e.name);
+    }
+    return true; })());
+  ok('arsenal: a variant is indexed ONLY where its family has no bare row', (() => {
+    const bare = new Set(CATALOG.filter((r) => !r.name.includes('.')).map((r) => r.name));
+    return all.filter((e) => e.kind === 'block' && e.name.includes('.'))
+      .every((e) => !bare.has(CATALOG.find((r) => r.name === e.name).family)); })());
   ok('arsenal: and a block names the key an author writes, not a prose label',
     all.filter((e) => e.kind === 'block').every((e) => e.slot === 'block'));
   // The specific query that started this: a real block, by its own exact name, answered absent.
