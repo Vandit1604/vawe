@@ -129,6 +129,24 @@ export function compose(name, i) {
   return { masterGain: CUES[name].masterGain ?? 0.5, layers };
 }
 
+// ---------------------------------------------------------------- WHERE THIS LOOP STOPS
+// THREE CUES THE GENERATOR CANNOT REACH, and this is a result, not a to-do. `chime`, `sparkle` and
+// `success` kept their hand-designed voicings through every round, and round 5 is the one that settles
+// it: each was given its OWN search space, tuned to its job (chime got inharmonic bell ratios 2.0/2.4/
+// 3.0 and the longest envelope; sparkle got three to five short high grains instead of a note), and
+// each scored ZERO composed keeps out of seven while the shipped voicing was kept:
+//
+//     chime    shipped keep · composed 0 of 7
+//     sparkle  shipped keep · composed 0 of 7
+//     success  shipped keep · composed 0 of 7
+//
+// The movement family went the other way in the same round, 47 of 49 kept, so the loop works and it is
+// not the judging. What separates them is that a whoosh is a shape (a band that moves) and this
+// parameter space can express a shape, while a chime is a chord voiced by ear and the space can only
+// pick ratios from a list. Running more rounds on these three is spending judgement to re-derive an
+// answer already measured three times. If they are ever to improve it will be from a richer primitive
+// (per-partial envelopes, a real inharmonic series), not from more search.
+//
 // ---------------------------------------------------------------- per-cue spaces (round 5)
 // ROUND 4 KILLED THE GLOBAL RULE. Round 3's preference (1 partial, no glide, sine, short decay) was
 // applied to every cue at once, and the result split hard: `pluck` went 3/9 to 8/9, and `chime` went
