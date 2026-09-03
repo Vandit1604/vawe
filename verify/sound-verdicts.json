@@ -1,23 +1,211 @@
 {
  "_why": "Judged by ear in the sound lab (node scripts/dev/sound-lab.mjs). Twenty cues, one listener, one sitting. This is the input a voicing pass needs: 'the sounds are bad' is one sentence covering twenty different sounds.",
- "thud": { "verdict": "weak", "note": "didnt like it the timbre of it" },
- "riser": { "verdict": "weak", "note": "start too loud" },
- "sweep": { "verdict": "reject", "note": "bad" },
- "travel": { "verdict": "reject" },
- "bloom": { "verdict": "keep", "note": "more variations pls" },
- "chime": { "verdict": "keep", "note": "more variations pls" },
- "droplet": { "verdict": "keep", "note": "more variations pls" },
- "pluck": { "verdict": "keep", "note": "more variations pls" },
- "sparkle": { "verdict": "keep", "note": "more variations pls" },
- "key": { "verdict": "reject", "note": "doesnt sound like key" },
- "tick": { "verdict": "reject", "note": "too sharp and loud" },
- "whisper": { "verdict": "reject", "note": "doesnt sound like whisper" },
- "page": { "verdict": "reject", "note": "sharp loud bad" },
- "press": { "verdict": "reject", "note": "too hard and loud" },
- "release": { "verdict": "reject" },
- "toggle": { "verdict": "reject" },
- "error": { "verdict": "reject", "note": "start thud is bad" },
- "loading": { "verdict": "weak", "note": "more variations" },
- "ready": { "verdict": "weak", "note": "not smooth" },
- "success": { "verdict": "keep" }
+ "thud": {
+  "verdict": "weak",
+  "note": "didnt like it the timbre of it"
+ },
+ "riser": {
+  "verdict": "weak",
+  "note": "start too loud"
+ },
+ "sweep": {
+  "verdict": "reject",
+  "note": "bad"
+ },
+ "travel": {
+  "verdict": "reject"
+ },
+ "bloom": {
+  "verdict": "keep",
+  "note": "more variations pls"
+ },
+ "chime": {
+  "verdict": "keep",
+  "note": "more variations pls"
+ },
+ "droplet": {
+  "verdict": "keep",
+  "note": "more variations pls"
+ },
+ "pluck": {
+  "verdict": "keep",
+  "note": "more variations pls"
+ },
+ "sparkle": {
+  "verdict": "keep",
+  "note": "more variations pls"
+ },
+ "key": {
+  "verdict": "reject",
+  "note": "doesnt sound like key"
+ },
+ "tick": {
+  "verdict": "reject",
+  "note": "too sharp and loud"
+ },
+ "whisper": {
+  "verdict": "reject",
+  "note": "doesnt sound like whisper"
+ },
+ "page": {
+  "verdict": "reject",
+  "note": "sharp loud bad"
+ },
+ "press": {
+  "verdict": "reject",
+  "note": "too hard and loud"
+ },
+ "release": {
+  "verdict": "reject"
+ },
+ "toggle": {
+  "verdict": "reject"
+ },
+ "error": {
+  "verdict": "reject",
+  "note": "start thud is bad"
+ },
+ "loading": {
+  "verdict": "weak",
+  "note": "more variations"
+ },
+ "ready": {
+  "verdict": "weak",
+  "note": "not smooth"
+ },
+ "success": {
+  "verdict": "keep"
+ },
+ "round5_cues": {
+  "thud": "weak",
+  "riser": "reject",
+  "sweep": "reject",
+  "travel": "reject",
+  "bloom": "keep",
+  "chime": "keep",
+  "droplet": "keep",
+  "pluck": "keep",
+  "sparkle": "keep",
+  "key": "reject",
+  "tick": "reject",
+  "whisper": "reject",
+  "page": "reject",
+  "press": "reject",
+  "release": "reject",
+  "toggle": "reject",
+  "error": "reject",
+  "loading": "weak",
+  "ready": "reject",
+  "success": "keep",
+  "swell": "reject",
+  "whoosh": "reject",
+  "braam": "reject",
+  "drop": "reject",
+  "impact": "reject"
+ },
+ "round5_variants": {
+  "pluck-0": "reject",
+  "pluck-1": "keep",
+  "pluck-2": "keep",
+  "pluck-3": "keep",
+  "pluck-4": "keep",
+  "pluck-7": "keep",
+  "pluck-6": "reject",
+  "pluck-5": "keep",
+  "chime-0": "keep",
+  "chime-1": "reject",
+  "chime-2": "reject",
+  "chime-3": "reject",
+  "chime-4": "reject",
+  "chime-7": "reject",
+  "chime-6": "reject",
+  "chime-5": "reject",
+  "sparkle-0": "keep",
+  "sparkle-1": "reject",
+  "sparkle-2": "reject",
+  "sparkle-3": "reject",
+  "sparkle-4": "reject",
+  "sparkle-7": "reject",
+  "sparkle-6": "reject",
+  "sparkle-5": "reject",
+  "droplet-0": "keep",
+  "droplet-2": "keep",
+  "droplet-1": "reject",
+  "droplet-3": "reject",
+  "droplet-4": "keep",
+  "droplet-7": "reject",
+  "droplet-6": "keep",
+  "droplet-5": "reject",
+  "bloom-0": "keep",
+  "bloom-1": "keep",
+  "bloom-2": "keep",
+  "bloom-3": "keep",
+  "bloom-4": "keep",
+  "bloom-7": "keep",
+  "bloom-6": "keep",
+  "bloom-5": "reject",
+  "success-0": "keep",
+  "success-1": "reject",
+  "success-5": "reject",
+  "success-6": "reject",
+  "success-7": "reject",
+  "success-2": "reject",
+  "success-3": "reject",
+  "success-4": "reject",
+  "ready-2": "reject",
+  "ready-3": "keep",
+  "ready-4": "keep",
+  "ready-7": "keep",
+  "ready-6": "reject",
+  "ready-5": "keep",
+  "ready-0": "reject",
+  "ready-1": "reject",
+  "whoosh-1": "keep",
+  "whoosh-3": "keep",
+  "whoosh-2": "keep",
+  "whoosh-4": "keep",
+  "whoosh-7": "keep",
+  "whoosh-6": "keep",
+  "whoosh-5": "keep",
+  "riser-1": "keep",
+  "riser-2": "keep",
+  "riser-0": "reject",
+  "riser-5": "keep",
+  "riser-6": "keep",
+  "riser-7": "keep",
+  "riser-3": "keep",
+  "riser-4": "keep",
+  "drop-1": "keep",
+  "drop-2": "keep",
+  "drop-3": "keep",
+  "drop-4": "keep",
+  "drop-7": "keep",
+  "drop-6": "keep",
+  "drop-5": "keep",
+  "drop-0": "reject",
+  "impact-5": "keep",
+  "impact-1": "keep",
+  "impact-6": "keep",
+  "impact-7": "keep",
+  "impact-2": "keep",
+  "impact-3": "keep",
+  "impact-4": "keep",
+  "impact-0": "reject",
+  "swell-1": "keep",
+  "swell-2": "keep",
+  "swell-3": "keep",
+  "swell-4": "keep",
+  "swell-7": "keep",
+  "swell-6": "keep",
+  "swell-5": "keep",
+  "braam-1": "keep",
+  "braam-2": "reject",
+  "braam-3": "keep",
+  "braam-4": "keep",
+  "braam-7": "keep",
+  "braam-6": "keep",
+  "braam-5": "keep",
+  "braam-0": "reject"
+ },
+ "_note": "Rounds are numbered by the generator that produced them. round5_cues judged the 13 shipped cues; round5_variants judged 104 generated variants, and out/sound-vary/specs-r5.json records what every one of them was. A round whose specs are not written down cannot be analysed once the generator changes, which is how round 3 became unmeasurable."
 }

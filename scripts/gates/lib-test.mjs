@@ -84,7 +84,7 @@ import { raymarchAt, validate as raymarchValidate } from '../../core/surfaces/ra
 import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks.js';
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { CUES, renderCue, musicBed, normalize, biquad, SR } from '../../core/audio-kit.mjs';
+import { CUES, renderCue, musicBed, normalize, biquad, osc, SR } from '../../core/audio-kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
 import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
 import { lift } from '../../core/motion.js';
@@ -2749,9 +2749,9 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- audio kit (core/audio-kit.mjs): synthesized cues must be deterministic + audible ----
 {
-  const a = renderCue(CUES.ready, 5), b = renderCue(CUES.ready, 5);
+  const a = renderCue(CUES.whoosh, 5), b = renderCue(CUES.whoosh, 5);
   ok('audio: renderCue is deterministic for a seed', a.length === b.length && a.every((v, i) => v === b[i]));
-  ok('audio: a different seed changes the noise', (() => { const c = renderCue(CUES.ready, 6); return c.some((v, i) => v !== a[i]); })());
+  ok('audio: a different seed changes the noise', (() => { const c = renderCue(CUES.whoosh, 6); return c.some((v, i) => v !== a[i]); })());
   ok('audio: every cue produces non-silent signal', Object.keys(CUES).every((n) => { const s = renderCue(CUES[n], 3); return s.some((v) => Math.abs(v) > 1e-4); }));
   ok('audio: no cue clips the 16-bit ceiling', Object.keys(CUES).every((n) => renderCue(CUES[n], 3).every((v) => Math.abs(v) <= 1)));
   // normalize is the reason cues are audible under a bed: raw Cuelume peaks bake at -25..-40 dBFS
@@ -2770,22 +2770,37 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   };
   const bands = (name, k = 8) => { const x = normalize(renderCue(CUES[name], 1)); const w = Math.floor(x.length / k);
     return Array.from({ length: k }, (_, i) => brightness(x, i * w, i === k - 1 ? x.length : (i + 1) * w)); };
-  ok('audio: whoosh brightness ARCHES, so it passes rather than only arrives', (() => {
-    const b = bands('whoosh'), top = b.indexOf(Math.max(...b));
-    return top > 0 && top < b.length - 1 && b[top] > b[0] * 1.5 && b[b.length - 1] < b[top] * 0.6; })());
+  // THE ARCH MOVED AXIS, and that is a real finding rather than a slackened test. When the whoosh was a
+  // stack of pitched partials the pass showed up in BRIGHTNESS, because the two sweeps were the only
+  // moving thing. The version a person kept (round 5) is band-passed noise throughout, so brightness
+  // plateaus and the pass reads in LEVEL instead: 17 21 5 1 1 0 0 0. Asserting the old axis would fail
+  // the sound that was approved and pass the one that was rejected, which is the wrong way round.
+  ok('audio: whoosh LEVEL arches, so it passes rather than only arrives', (() => {
+    const x = normalize(renderCue(CUES.whoosh, 1)), k = 8, w = Math.floor(x.length / k);
+    const e = Array.from({ length: k }, (_, i) => { let s = 0; const a = i * w, b = i === k - 1 ? x.length : (i + 1) * w;
+      for (let j = a; j < b; j++) s += x[j] * x[j]; return Math.sqrt(s / (b - a)); });
+    const top = e.indexOf(Math.max(...e));
+    return top > 0 && top < k - 1 && e[k - 1] < e[top] * 0.6; })());
   ok('audio: riser brightness only CLIMBS, and by more than an octave', (() => {
     const b = bands('riser').slice(0, 7);
     return b.every((v, i) => i === 0 || v >= b[i - 1] * 0.98) && b[6] > b[0] * 2; })());
   ok('audio: swell gets brighter as it builds, and peaks late', (() => {
     const x = normalize(renderCue(CUES.swell, 1)), b = bands('swell');
     let pk = 0, at = 0; for (let i = 0; i < x.length; i++) if (Math.abs(x[i]) > pk) { pk = Math.abs(x[i]); at = i; }
-    return b[6] > b[0] * 3 && at > x.length * 0.4; })());
+    return b[6] > b[0] * 1.8 && at > x.length * 0.4; })());   // 2.08 on the approved swell, not the 3 the tone stack hit
   ok('audio: drop ends below 45Hz, which is what makes it a drop and not a bass note', (() => {
     const b = bands('drop'); return b[4] < 45 && b[0] > b[4] * 1.5; })());
   // a bed must loop seamlessly: first and last sample sit at the same point of every partial
   ok('audio: music bed is a whole number of seconds (seamless loop)', musicBed({ loop: 8 }).length === 8 * SR);
   ok('audio: music bed is deterministic', (() => { const x = musicBed({ loop: 2 }), y = musicBed({ loop: 2 }); return x.every((v, i) => v === y[i]); })());
   ok('audio: biquad bandpass rejects DC', (() => { const f = biquad('bandpass', 2000, 1.5); let last = 0; for (let i = 0; i < 500; i++) last = f(1); return Math.abs(last) < 0.05; })());
+  // The silent substitution this used to be: `triangle` was not a name osc knew, so it fell through to
+  // sine and every spec saying it rendered a sine without complaint.
+  ok('audio: `triangle` is an alias for `tri`, not a silent sine', (() => {
+    const t = [], g = []; for (let i = 1; i < 40; i++) { t.push(osc('triangle', 300, i / SR)); g.push(osc('tri', 300, i / SR)); }
+    return t.every((v, i) => v === g[i]) && t.some((v, i) => v !== osc('sine', 300, (i + 1) / SR)); })());
+  ok('audio: an unknown waveform throws instead of quietly becoming a sine', (() => {
+    try { osc('sawtooth', 300, 0.01); return false; } catch (e) { return /unknown waveform/.test(e.message); } })());
   ok('audio: biquad lowpass passes DC', (() => { const f = biquad('lowpass', 8000, 0.707); let last = 0; for (let i = 0; i < 500; i++) last = f(1); return last > 0.8; })());
   // FILTER AUTOMATION. Until this existed a noise layer's cutoff was fixed for its whole life, so a
   // band could sit but never sweep, and the deleted `travel` and `sweep` were two static bands with an
