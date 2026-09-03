@@ -157,7 +157,7 @@ site/public/assets/brands/
 
 
 # Raw cut-out letter SOURCES: 850MB of 1-3MB PNGs, re-extractable from the pack zip at any time.
-# The BAKED sprite set (assets/ransom, 21MB) is what the engine reads and IS tracked.
+# The BAKED sprite set (assets/ransom, 21MB) is local-only now (Resource Boy, no-redistribute): re-bake with `make ransom-sprites`.
 assets/ransom-src/*
 !assets/ransom-src/README.md
 
@@ -252,3 +252,10 @@ assets/video/
 # Uncredited capture assets, local-only (not shipped)
 assets/rec1/
 assets/rec3/
+
+# Resource Boy gradient pack: no-redistribute licence, replaced by the gradient preset. Local-only.
+assets/gradients/
+
+# Ransom feature is local-only (Resource Boy licence): its demo scene html and sprites are not shipped
+formats/scene/_ransom-intro-page.html
+assets/ransom/

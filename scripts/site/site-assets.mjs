@@ -48,7 +48,6 @@ const MANIFEST = [
   ['strip',  'showcase-stings',    'showcase-stings',        'stings.mp4',                 1120, 4.0, 16 / 9],
   ['strip',  'showcase-type',      'showcase-type',          'type.mp4',                   1120, 3.0, 16 / 9],
   ['strip',  'showcase-cuts',      'showcase-cuts',          'cuts.mp4',                   1120, 2.0, 16 / 9],
-  ['strip',  'ransom-intro',       'ransom-intro',           'ransom.mp4',                 1120, 4.0, 16 / 9],
 
   // showcase capability rows
   ['showcase', 'showcase-type',    'showcase-type',          'showcase/type.mp4',          1280, 3.0, 16 / 9],
@@ -57,9 +56,8 @@ const MANIFEST = [
   ['showcase', 'showcase-data',    'showcase-data',          'showcase/data.mp4',          1280, 5.0, 16 / 9],
   ['showcase', 'showcase-ui',      'showcase-ui',            'showcase/ui.mp4',            1280, 5.0, 16 / 9],
   // Poster seconds are chosen for the frame, not the midpoint: looks posters on `thermal` (t=13.2),
-  // the one beat that reads as colour at thumbnail size; ransom on a settled note rather than mid-swap.
+  // the one beat that reads as colour at thumbnail size.
   ['showcase', 'looks',            'looks',                  'showcase/looks.mp4',         1280, 13.2, 16 / 9],
-  ['showcase', 'ransom-intro',     'ransom-intro',           'showcase/ransom.mp4',        1280, 4.0, 16 / 9],
   ['showcase', 'gradient-showcase','gradient-showcase',      'showcase/gradients.mp4',     1280, 5.0, 16 / 9],
   // ditherkit opens on the dithered chart and spends its middle in a near-black transition, so a
   // midpoint poster would ship an almost empty still. 6.0 is the chart.
