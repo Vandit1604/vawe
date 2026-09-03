@@ -157,7 +157,30 @@ function checkAka(kind, entries, aka) {
 // blurb by exactly the words the search will index it under, and two tokenizers would eventually
 // disagree about that. scripts/author/arsenal.mjs re-exports this as `toks` rather than keeping a copy.
 const STOP = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'and', 'or', 'is', 'it', 'that', 'with', 'for', 'as']);
-export const searchWords = (s) => String(s).toLowerCase().match(/[a-z][a-z0-9]+/g)?.filter((w) => !STOP.has(w)) || [];
+// Collapse the common English inflections so the INDEX and the QUERY agree on a word's stem: a blurb
+// saying "melting" and a query typed as "melt" or "melts" all become `melt`. Without this the index
+// does not stem, so the same entry is findable under one spelling and not another, and rewriting a
+// blurb per collision pays for the bug over and over (lib-test.mjs, the morphText finding).
+//
+// Deliberately LIGHT: it strips a plural and a gerund/past ending, never below three letters, and
+// leaves `ss` alone. It does NOT strip a trailing silent `e` and does NOT reduce a verb to its bare
+// root. That line was tried and removed on measurement: reducing `chasing`/`chase` to one token (which
+// is what merging `cycle`/`cycling` also requires) let the ABSENT query "make one layer chase another
+// layer around the frame" match `borderBeamCard` ("a light chasing around its border") at 0.55, above
+// the worst real answer, so no confidence threshold could separate the two sets. Even Porter leaves
+// `cycle`/`cycling` as `cycle`/`cycl`, so a perfect verb merge is not on the table without that
+// collateral. Under-stemming keeps precision; the plural/gerund merge is where the real recall win is.
+const stem = (w) => {
+  if (w.length > 4 && w.endsWith('sses')) return w.slice(0, -2);        // classes → class (keep the ss)
+  if (w.length > 4 && w.endsWith('ies')) return `${w.slice(0, -3)}y`;   // flies → fly
+  if (w.length > 5 && w.endsWith('ing')) return w.slice(0, -3);         // melting → melt
+  if (w.length > 4 && w.endsWith('ed')) return w.slice(0, -2);          // melted → melt
+  if (w.length > 4 && /(?:s|x|z|ch|sh)es$/.test(w)) return w.slice(0, -2);  // boxes → box, matches → match
+  if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1);  // melts → melt, changes → change
+  return w;
+};
+export const searchWords = (s) => (String(s).toLowerCase().match(/[a-z][a-z0-9]+/g) || [])
+  .filter((w) => !STOP.has(w)).map(stem);
 
 // `thermalBlur` → thermal, blur. What a reader already has from the NAME, and therefore what a blurb
 // adds nothing by repeating.
