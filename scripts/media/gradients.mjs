@@ -1,5 +1,11 @@
-// scripts/media/gradients.mjs: bake a gradient-background pack into a render-ready library.
+// scripts/media/gradients.mjs: DEPRECATED. bake a gradient-background pack into a render-ready library.
 //   make gradients [SRC=~/Downloads/…zip] [W=1920] [N=0]
+//
+// DEPRECATED (Approach B, kept as a local-only fallback). The shippable path is the `gradient`
+// background preset (core/backgrounds.js, gradientFill + core/gradient-recipes.js): agent-controlled,
+// zero bytes shipped, no licence to track. Reach for THIS baker only if a still, ultra-soft
+// photographic gradient proves unreachable at frame time; the pack it writes is local-only and was
+// never meant to be committed (see LICENCE below), and nothing in this engine reads it any more.
 //
 // The packs ship 4K JPGs (3840x2160, ~290KB each). A 1080p render decodes every one of those pixels
 // and throws three quarters away, so this downscales once, offline, into assets/gradients/ and writes

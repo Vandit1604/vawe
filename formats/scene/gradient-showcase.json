@@ -3,156 +3,20 @@
   "theme": "vawe-inter",
   "aspect": "16:9",
   "duration": 10.6,
+  "audio": { "silent": true, "_why": "a capability montage, no story to score" },
+  "authoring": {
+    "allow": ["no-storyboard"],
+    "_why": { "no-storyboard": "a site capability montage of the `gradient` bg preset's recipes, not a film with a payoff or a pace budget to plan" }
+  },
+  "bg": [
+    { "preset": "gradient", "from": 0, "to": 1.6, "opts": { "recipe": "warm-dusk" } },
+    { "preset": "gradient", "from": 1.6, "to": 3.1, "opts": { "recipe": "citrus-pop" } },
+    { "preset": "gradient", "from": 3.1, "to": 4.6, "opts": { "recipe": "neon-dusk" } },
+    { "preset": "gradient", "from": 4.6, "to": 6.1, "opts": { "recipe": "arctic-blue" } },
+    { "preset": "gradient", "from": 6.1, "to": 7.6, "opts": { "recipe": "solar-flare" } },
+    { "preset": "gradient", "from": 7.6, "to": 10.6, "opts": { "recipe": "ember" } }
+  ],
   "layers": [
-    {
-      "type": "rect",
-      "x": 0,
-      "y": 0,
-      "w": 1920,
-      "h": 1080,
-      "bg": "#14161c",
-      "start": 0,
-      "duration": 11
-    },
-    {
-      "type": "rect",
-      "x": 290,
-      "y": 160,
-      "w": 1340,
-      "h": 762,
-      "bg": "#232733",
-      "radius": 26,
-      "anim": "rise",
-      "enterDur": 0.6,
-      "start": 0.15,
-      "duration": 10.6
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0055.jpg",
-      "x": 300,
-      "y": 170,
-      "w": 1320,
-      "h": 742,
-      "radius": 18,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "anim": "fade",
-      "enterDur": 0.35,
-      "exitDur": 0.35,
-      "start": 0.5,
-      "duration": 1.75
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0140.jpg",
-      "x": 300,
-      "y": 170,
-      "w": 1320,
-      "h": 742,
-      "radius": 18,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "anim": "fade",
-      "enterDur": 0.35,
-      "exitDur": 0.35,
-      "start": 1.9,
-      "duration": 1.75
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0355.jpg",
-      "x": 300,
-      "y": 170,
-      "w": 1320,
-      "h": 742,
-      "radius": 18,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "anim": "fade",
-      "enterDur": 0.35,
-      "exitDur": 0.35,
-      "start": 3.3,
-      "duration": 1.75
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0508.jpg",
-      "x": 300,
-      "y": 170,
-      "w": 1320,
-      "h": 742,
-      "radius": 18,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "anim": "fade",
-      "enterDur": 0.35,
-      "exitDur": 0.35,
-      "start": 4.7,
-      "duration": 1.75
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0741.jpg",
-      "x": 300,
-      "y": 170,
-      "w": 1320,
-      "h": 742,
-      "radius": 18,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "anim": "fade",
-      "enterDur": 0.35,
-      "exitDur": 0.35,
-      "start": 6.1,
-      "duration": 1.75
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0940.jpg",
-      "x": 300,
-      "y": 170,
-      "w": 1320,
-      "h": 742,
-      "radius": 18,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "anim": "fade",
-      "enterDur": 0.35,
-      "exitDur": 0.35,
-      "start": 7.5,
-      "duration": 1.75
-    },
-    {
-      "type": "image",
-      "src": "/assets/gradients/0299.jpg",
-      "x": 300,
-      "y": 170,
-      "w": 1320,
-      "h": 742,
-      "radius": 18,
-      "ken": {
-        "from": 1.0,
-        "to": 1.05
-      },
-      "anim": "fade",
-      "enterDur": 0.35,
-      "exitDur": 0.35,
-      "start": 8.9,
-      "duration": 1.75
-    },
     {
       "type": "text",
       "text": "Gradients",
@@ -163,13 +27,30 @@
       "size": 150,
       "font": "sans",
       "weight": 800,
-      "color": "#ffffff",
+      "color": "#1a1a1a",
       "tracking": "-4px",
       "anim": "fade",
-      "enterDur": 0.7,
-      "start": 0.9,
-      "duration": 9.4
+      "out": "fade",
+      "enterDur": 0.6,
+      "exitDur": 0.7,
+      "start": 0,
+      "duration": 7.6
+    },
+    {
+      "type": "text",
+      "text": "one recipe, <b>moving</b>.",
+      "x": 300,
+      "y": 470,
+      "w": 1320,
+      "align": "center",
+      "size": 96,
+      "font": "sans",
+      "weight": 800,
+      "color": "#1a1a1a",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 7.6,
+      "duration": 3.0
     }
-  ],
-  "bg": [{ "t": 0, "preset": "dotmatrix" }]
+  ]
 }

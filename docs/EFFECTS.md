@@ -76,6 +76,7 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 | `dark` | a plain dark radial, no dots. FLAT, the quiet backdrop for busy content |
 | `deep` | the deepest plain radial, no dots. FLAT, when the content must own the whole frame |
 | `dotmatrix` | a light field ruled by evenly spaced dots whose size waves across it, the printed halftone look (moves) |
+| `gradient` | an agent-controlled colour gradient backdrop, linear/radial/conic from your own hex colours, angle and stops, or a named recipe (`opts.recipe`). FLAT unless `opts.kind` is "mesh", which moves it |
 | `gradientWash` | one big saturated pool bleeding off a corner into white, a mesh gradient (moves), light and premium |
 | `ink` | dark radial with slow accent-tinted dots pulsing in place (moves), for a clean flat dark use `plain` + value:"dark" |
 | `liquid` | folds of the brand hue against true black (moves). It OWNS the frame, so quiet type on it and nothing else |
@@ -88,6 +89,37 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 | `plain` | flat theme field |
 | `soft` | gentle light radial with faint accent rings and discs drifting over it (moves) |
 | `spotlight` | a deep field with one soft pool of light wandering across it on a slow cycle, the eye follows the bright patch (moves) |
+
+## Gradient recipes  `[background]`
+
+named colour+kind(+angle) combos for the `gradient` background preset: `{"preset":"gradient","opts":{"recipe":"NAME"}}`. Author colors/kind/angle in `opts` override a recipe field by field.
+
+| name | what / when |
+|---|---|
+| `arctic-blue` | pale ice blue radial, a cold spotlit pool |
+| `berry-crush` | crimson into tomato red, a hot fruit-punch ramp |
+| `citrus-pop` | orange into bright yellow, a loud fruit-stand ramp |
+| `cool-mint` | green into teal, a fresh spa ramp |
+| `coral-reef` | salmon into pale pink, a beachy diagonal ramp |
+| `cosmic-drift` | indigo, plum and hot pink drifting, a MOVING galaxy mesh |
+| `deep-ocean` | near-black into slate blue, a moody nautical field |
+| `ember` | crimson, tomato and amber drifting, a MOVING fire mesh |
+| `emerald-pool` | teal into jade radial, a jungle-pool glow |
+| `forest-mist` | teal, jade and pale sky drifting, a MOVING woodland mesh |
+| `glacier` | sky blue into pale cyan radial, an icy pool |
+| `golden-hour` | amber into warm yellow, a late-afternoon ramp |
+| `lavender-fog` | pale periwinkle into indigo, a dreamy purple wash |
+| `midnight-violet` | three-stop indigo to plum, a night-sky ramp |
+| `neon-dusk` | hot pink into electric violet, a synthwave ramp |
+| `peach-cream` | pale peach into blush, a soft dessert ramp |
+| `plum-wine` | violet into dusty rose, a wine-toned diagonal ramp |
+| `rose-glow` | blush pink radial, a warm skin-tone pool |
+| `slate-storm` | charcoal into graphite, a neutral overcast ramp |
+| `solar-flare` | red-orange-magenta conic ring, a sunburst wheel |
+| `spectrum-ring` | cyan-violet-pink conic wheel, a full-hue rainbow ring |
+| `steel-blue` | slate into charcoal-blue, a cool industrial ramp |
+| `sunset-strip` | red, magenta and amber drifting, a MOVING sunset mesh |
+| `warm-dusk` | orange into coral, a sunset ramp on a 40deg diagonal |
 
 ## Beat blueprints  `[blueprint]`
 
@@ -1048,4 +1080,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_647 effects across 53 families. Regenerate: `make effects`._
+_672 effects across 54 families. Regenerate: `make effects`._

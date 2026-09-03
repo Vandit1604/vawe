@@ -599,7 +599,8 @@
       "metallicSheen",
       "gradientWash",
       "blobs",
-      "liquid"
+      "liquid",
+      "gradient"
      ]
     },
     "from": {

@@ -14,17 +14,18 @@ The backdrop is painted by the top-level `bg` array in windows of time. Each win
 
 `bg` is **required**. The engine used to pick one for you (a light brand got `dotmatrix`, a dark one `aurora`), which left the largest area of the frame as the single design decision no author ever made. Choose a preset, or say `[{ "preset": "plain" }]` for a deliberately flat field.
 
-There are 22 presets:
+There are 23 presets:
 
-`paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `shapes` · `deep` · `dark` · `black` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid`
+`paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `shapes` · `deep` · `dark` · `black` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid` · `gradient`
 
-The newest four all read the brand accent:
+The newest five all read the brand accent:
 
 - `metallic` — a dramatic dark backdrop: a curtain of vertical light rods with a **shimmer** sweeping across (brushed metal / a lit equaliser).
 - `metallicSheen` — the same rods, darker and grainier, with a **diagonal light sweep** raking across.
 - `gradientWash` — a **mesh gradient**: one saturated pool bleeding off a corner into white (light, premium).
 - `blobs` — smaller, well-separated gradient **blobs** over a technical grid (light, airy, open).
 - `liquid` — slow **folds of the accent against true black**, the "liquid light" backdrop. It owns the frame: put quiet type on it and nothing else. Renders a low-res warped field and scales it up, so the softness is an honest interpolation rather than a blur pass.
+- `gradient`: an **agent-controlled** gradient: your own hex `colors`, `angle` and `stops` (linear/radial/conic), or a named `opts.recipe` from `core/gradient-recipes.js`. FLAT by default; `opts.kind: "mesh"` routes the same colours through `blobs`'s moving wash instead. This is the runtime-generated replacement for the old baked JPG gradient pack: it renders from text, not from 1000 committed images.
 
 <Callout title="A pattern is a seasoning, not the wallpaper">
 The backdrop should exist on the real site. A plain, flat brand gets a plain field (`plain`, `paper`, `accentPlain`), never invented dots or shapes. Even when a site is textured, use a patterned preset on at most a beat or two, never throughout. Content beats stay plain so the content reads.

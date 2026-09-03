@@ -5,12 +5,15 @@
 // dot-matrix wave/ripple, particle field, constellation, aurora blobs, spotlight sweep, grain.
 import { random, clamp01, parseColor, isLightBg } from './motion.js';
 import { defineRegistry } from './registry.js';
+import { GRADIENT_RECIPE_REGISTRY } from './gradient-recipes.js';
 
-// ---- base fill: a tinted-neutral gradient (never pure #000/#fff). radial = spotlit, linear = flat.
-export function paintBase(ctx, w, h, { kind = 'radial', from = '#0b0e26', to = '#05061a', cx = 0.6, cy = 0.4, color } = {}) {
+// ---- base fill: a tinted-neutral gradient (never pure #000/#fff). radial = spotlit, linear = flat,
+// conic = a colour wheel swept from `angle` around (cx,cy).
+export function paintBase(ctx, w, h, { kind = 'radial', from = '#0b0e26', to = '#05061a', cx = 0.6, cy = 0.4, angle = 0, color } = {}) {
   if (kind === 'solid') { ctx.fillStyle = color || from; ctx.fillRect(0, 0, w, h); return; }
   let g;
   if (kind === 'linear') { g = ctx.createLinearGradient(0, 0, 0, h); }
+  else if (kind === 'conic') { g = ctx.createConicGradient((angle * Math.PI) / 180, w * cx, h * cy); }
   else { g = ctx.createRadialGradient(w * cx, h * cy, 0, w * cx, h * cy, Math.hypot(w, h) * 0.7); }
   g.addColorStop(0, from); g.addColorStop(1, to);
   ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
@@ -286,6 +289,45 @@ export function grain(ctx, w, h, t, o = {}) {
   }
 }
 
+// ---- gradientFill: an AUTHORED gradient, the one fx an agent parameterizes directly. colours/kind/
+// angle/stops/cx/cy come straight from opts (the bg opts vocabulary is derived from this source, see
+// FX_PARAMS below). `kind` names the shape rather than `type`, because `type` is the reserved field
+// every fx spec in a `bg.fx` array is dispatched on (renderBg reads `fx.type` to pick the painter);
+// an opts key called `type` would collide with it and get written over the fx's own discriminator.
+// `recipe` names a curated combo in gradient-recipes.js; author-supplied colors/kind/angle/stops
+// override it field by field. kind:"mesh" is not a raster gradient at all: it hands the same colours
+// to `softwash` so the field MOVES, because CSS gradients cannot animate here (no `animation`/
+// `transition` at boot) and a flat linear/radial/conic fill is otherwise static.
+const MESH_LAYOUT = [
+  { x: 0.18, y: 0.24, rf: 0.32, ax: 0.04, ay: 0.035, px: 22, py: 27, ph: 0, a: 0.62 },
+  { x: 0.85, y: 0.78, rf: 0.34, ax: 0.05, ay: 0.04, px: 26, py: 20, ph: 2, a: 0.54 },
+  { x: 0.55, y: 0.1, rf: 0.24, ax: 0.032, ay: 0.03, px: 18, py: 24, ph: 4, a: 0.42 },
+  { x: 0.08, y: 0.86, rf: 0.2, ax: 0.03, ay: 0.028, px: 20, py: 18, ph: 5.3, a: 0.36 },
+];
+export function gradientFill(ctx, w, h, t, o = {}) {
+  const rec = o.recipe ? GRADIENT_RECIPE_REGISTRY.pick(o.recipe) : {};
+  const kind = o.kind ?? rec.kind ?? 'linear';
+  const colors = o.colors ?? rec.colors ?? ['#ff9966', '#ff5e62'];
+  const angle = o.angle ?? rec.angle ?? 45;
+  const stops = o.stops ?? rec.stops ?? null;
+  const cx = o.cx ?? rec.cx ?? 0.5, cy = o.cy ?? rec.cy ?? 0.5;
+  if (kind === 'mesh') {
+    const blobs = colors.slice(0, 4).map((c, i) => ({ ...MESH_LAYOUT[i % MESH_LAYOUT.length], color: parseColor(c).join(',') }));
+    softwash(ctx, w, h, t, { blobs, seed: o.seed ?? 0, motionScale: o.motionScale ?? 1, intensity: o.intensity ?? 1 });
+    return;
+  }
+  let g;
+  if (kind === 'radial') g = ctx.createRadialGradient(w * cx, h * cy, 0, w * cx, h * cy, Math.hypot(w, h) * 0.7);
+  else if (kind === 'conic') g = ctx.createConicGradient((angle * Math.PI) / 180, w * cx, h * cy);
+  else { // linear: angle rotates the ramp about the frame centre
+    const rad = (angle * Math.PI) / 180, len = Math.hypot(w, h) / 2, mx = w / 2, my = h / 2;
+    g = ctx.createLinearGradient(mx - Math.cos(rad) * len, my - Math.sin(rad) * len, mx + Math.cos(rad) * len, my + Math.sin(rad) * len);
+  }
+  const n = colors.length;
+  colors.forEach((c, i) => g.addColorStop(stops ? stops[i] : (n === 1 ? 0 : i / (n - 1)), c));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+}
+
 // ---- named presets, now PALETTE-DRIVEN so one colors-pack reskins every background (the universal
 // brand rule: use ONLY the site's colours). A palette supplies rgb accents + base hex pairs; pass the
 // brand's palette and every preset (aurora/dots/shapes/plain/glow…) recolours. Dot/shape fields DRIFT.
@@ -356,7 +398,7 @@ export function bgPaletteFrom(palette) {
 // list lives in one place. Moving ones (aurora/constellation/mesh/spotlight/…) animate via renderBg(…,t).
 export const BG_NAMES = ['plain', 'paper', 'paperDots', 'paperShapes', 'soft', 'accent', 'accentPlain',
   'dotmatrix', 'aurora', 'mesh', 'constellation', 'brandglow', 'spotlight', 'dark', 'deep', 'ink', 'black',
-  'metallic', 'metallicSheen', 'gradientWash', 'blobs', 'liquid'];
+  'metallic', 'metallicSheen', 'gradientWash', 'blobs', 'liquid', 'gradient'];
 
 // BG_BLURBS: one line per preset, next to the switch that paints it (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key here
@@ -387,6 +429,7 @@ export const BG_BLURBS = {
   gradientWash: 'one big saturated pool bleeding off a corner into white, a mesh gradient (moves), light and premium',
   blobs: 'the airier light wash: smaller, separated pools with white between them (moves). No grid: write `grid: true` on a softwash fx if you want the blueprint rules',
   liquid: 'folds of the brand hue against true black (moves). It OWNS the frame, so quiet type on it and nothing else',
+  gradient: 'an agent-controlled colour gradient backdrop, linear/radial/conic from your own hex colours, angle and stops, or a named recipe (`opts.recipe`). FLAT unless `opts.kind` is "mesh", which moves it',
 };
 // `name` defaults to `paper` HERE rather than at each call site, where `b.preset || 'paper'` was
 // written three times. Absence has one documented answer; a WRONG name throws (#361).
@@ -472,6 +515,12 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
     // full-bleed by design: it OWNS the frame, so put quiet type on it, nothing else.
     case 'liquid': return { base: { kind: 'solid', color: '#000000' }, fx: [
       { type: 'liquid', color: P.accent }, { type: 'grain', alpha: 0.03 } ] };
+    // gradient: the agent-controlled gradient family (see gradientFill above). `opts.recipe` names a
+    // curated combo; `opts.colors`/`type`/`angle`/`stops`/`cx`/`cy` override it or replace it entirely.
+    // Paper base under it: a flat fill repaints the whole frame regardless, and a mesh wash reads as
+    // colour pooling into white, same as `blobs`/`gradientWash` above.
+    case 'gradient': return { base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
+      { type: 'gradientFill', recipe: 'warm-dusk' }, grain ] };
     // `case 'aurora': default:` until now, so ANY unknown name returned aurora, byte-identically.
     // The backdrop is the largest area of the frame, and the schema enum only catches a typo when the
     // author-check runs - under NOCHECK=1 the render is unsupervised. docs/MISTAKES.md #361.
@@ -489,7 +538,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
 // goes stale the moment an fx grows a parameter, and the stale half fails silently (docs/MISTAKES.md
 // #159). Each fx takes its options as its LAST parameter and reads them as `bag.<key>`, so the keys are
 // exactly the property reads on that parameter.
-const FX_IMPL = { dots: dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain };
+const FX_IMPL = { dots: dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain, gradientFill };
 function paramsOf(fn) {
   const src = String(fn);
   const sig = src.slice(src.indexOf('(') + 1, src.indexOf(')'));
@@ -575,6 +624,7 @@ export function renderBg(ctx, w, h, t, spec) {
     else if (fx.type === 'softwash') softwash(ctx, w, h, t, fx);
     else if (fx.type === 'liquid') liquid(ctx, w, h, t, fx);
     else if (fx.type === 'grain') grain(ctx, w, h, t, fx);
+    else if (fx.type === 'gradientFill') gradientFill(ctx, w, h, t, fx);
   }
 }
 
