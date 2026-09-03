@@ -100,6 +100,16 @@ const FEATURED = new Set([
   "parallaxZoom", "uiReveal3d", "screenSwap",
   // the camera pretending to be a camera
   "camcorderHud", "scanGate",
+  // A STATE TURNING INTO ANOTHER STATE, which is the family `codeMorph` belongs to and the reason it
+  // earns a place here: you cannot screenshot it. The first cut of this list dropped the whole Code
+  // category as "utility parts", which was the wrong axis. `table` and `redditPost` are utility;
+  // `codeMorph` is a transformation. The test is not what CATEGORY a block is filed under, it is
+  // whether it does something over time that a still cannot show.
+  "codeMorph", "codeFlight", "codeDiff",
+  // a process you watch complete, the other thing a screenshot cannot carry
+  "deploySuccess", "terminalPro",
+  // interaction, which is the hardest thing for a static portfolio to fake
+  "pointer",
 ]);
 
 
