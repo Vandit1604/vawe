@@ -19,12 +19,12 @@
     "cues": [
       {
         "t": 1.95,
-        "name": "click",
+        "name": "pluck",
         "gain": 0.5
       },
       {
         "t": 3.35,
-        "name": "page",
+        "name": "whoosh",
         "gain": 0.35
       },
       {
@@ -34,7 +34,7 @@
       },
       {
         "t": 6.78,
-        "name": "whisper",
+        "name": "swell",
         "gain": 0.4
       },
       {

@@ -37,7 +37,7 @@ const ROLES = {
   riser: 'riser', drop: 'drop', impact: 'impact', swell: 'swell', braam: 'braam',
   // aliases onto the real cues, NOT new voicings. `click` and `pop` are names people reach for; the
   // rest are the deleted cues, redirected so an existing scene that names one still bakes.
-  click: 'pluck', pop: 'droplet', tick: 'pluck', key: 'pluck', press: 'impact',
+  click: 'pluck', pop: 'droplet', tick: 'pluck', key: 'pluck', press: 'pluck',
   release: 'pluck', toggle: 'pluck', page: 'whoosh', loading: 'swell', error: 'impact',
   whisper: 'swell', thud: 'impact', travel: 'whoosh', sweep: 'whoosh',
 };

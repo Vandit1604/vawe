@@ -3065,6 +3065,20 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // reads wrong (a bloom-iris should not swoosh). This gate is why `data.seams` stopped rendering silent
   // (audio derived cuts+stings only). If a new SEAM_FX ships without a SEAM_CUE row, this fails loudly.
   ok('audio: SEAM_CUE covers every SEAM_FX (no silent seam)', SEAM_FX.every((fx) => typeof SEAM_CUE[fx] === 'string'));
+  // THE GATE THAT WAS MISSING, and its absence is why deleting ten cues broke six films silently. The
+  // alias table in scripts/media/audio-bake.mjs keeps an old name BAKING, which is kind, but a film
+  // that still says `tick` is a film nobody has re-listened to. This asserts the scenes themselves,
+  // not the alias layer, so the aliases stay a courtesy rather than becoming load-bearing.
+  ok('audio: every cue an author named in a scene is a cue that exists', (() => {
+    const dir = path.join(repoRoot, 'formats/scene');
+    const bad = [];
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith('.json')) continue;
+      let j; try { j = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { continue; }
+      for (const c of (j.audio && j.audio.cues) || []) if (c.name && !CUES[c.name]) bad.push(`${f}:${c.name}`);
+    }
+    if (bad.length) console.log('    scenes naming a cue that is gone:', bad.join(' '));
+    return bad.length === 0; })());
   ok('audio: every SEAM_CUE voicing resolves to a baked wav', Object.values(SEAM_CUE).every((c) => c === 'whoosh' || c === 'reveal' || c in CUES));
 }
 
