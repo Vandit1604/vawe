@@ -321,6 +321,19 @@ export const EASINGS = {
 // `skip` stays, and it is a DECISION, not a gap: 41 curves named by mechanism are better served by the
 // feel table in docs/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
 export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
+  // THE ONE DECLARED OPT-OUT from the blurb rule that core/registry.js now refuses at load. It is a
+  // sentence rather than a flag on purpose: this is the only registry with an argument for carrying no
+  // blurbs, and a bare `true` would let the next author skip the work by typing four characters.
+  //
+  // The argument, and the thing that makes it hold: 41 curves named by mechanism would produce 41
+  // near-identical sentences about acceleration, which is worse for search than one good table, because
+  // every one of them would match every query about slowing down. What replaces them is the FEEL words
+  // in core/vocab.js, which now carry the plain English an author actually types ("slow down at the
+  // end" reaches `sharp`, "make it feel heavy" reaches `heavy`) and each names the exact easing it
+  // resolves to. If those blurbs are ever removed, this opt-out stops being justified.
+  noBlurbs: 'named by curve, and searched through the FEEL words in core/vocab.js, which carry the plain '
+    + 'English and name the easing each resolves to. 41 sentences about acceleration would match every '
+    + 'query about slowing down and therefore distinguish nothing.',
   catalog: {
     title: 'Easings',
     tag: 'timing',

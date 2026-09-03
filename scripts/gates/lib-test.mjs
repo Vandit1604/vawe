@@ -2168,8 +2168,23 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // Every named vocabulary resolves through `pick()`, which takes no fallback parameter, so a silent
 // default is not expressible. docs/MISTAKES.md #369.
 {
-  const r = defineRegistry('widget', { alpha: 1, beta: 2 }, { slot: 'widget' });
+  const r = defineRegistry('widget', { alpha: 1, beta: 2 }, { slot: 'widget',
+    blurbs: { alpha: 'the first test widget, which exists only so this file has a vocabulary to pick from',
+      beta: 'the second test widget, its sibling, kept distinct so an error can list more than one name' } });
   ok('registry: a known name resolves', r.pick('alpha') === 1);
+  // THE BLURB IS THE RETRIEVAL INDEX, so an entry without one is a capability nobody can be told about.
+  // This used to be caught by a ratchet in arsenal-check, which is to say on a push, after the fact.
+  // The refusal is at the write site now, and these two assert both halves of it.
+  ok('registry: an entry with no blurb is refused at LOAD, not at a gate', (() => {
+    try { defineRegistry('gadget', { one: 1 }, { slot: 'gadget' }); return false; }
+    catch (e) { return /have no blurb/.test(e.message) && /one/.test(e.message); } })());
+  ok('registry: the blurb opt-out must be a REASON, never a bare flag', (() => {
+    try { defineRegistry('gadget', { one: 1 }, { slot: 'gadget', noBlurbs: true }); return false; }
+    catch (e) { return /must be the REASON/.test(e.message); } })());
+  ok('registry: an opt-out that gives a real reason is accepted', (() => {
+    try { defineRegistry('gadget', { one: 1 }, { slot: 'gadget',
+      noBlurbs: 'named by curve and searched through a neighbouring vocabulary that carries the words' });
+      return true; } catch { return false; } })());
   ok('registry: an unknown name THROWS rather than defaulting', (() => {
     try { r.pick('nope'); return false; } catch (e) { return /unknown widget/.test(e.message); }
   })());
@@ -2205,11 +2220,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     usage: (n) => `{"widget":"${n}"}`, noPreview: 'a widget has nothing to show',
   };
   ok('registry: a complete catalog block is carried on the registry', (() => {
-    const w = defineRegistry('catalog widget', { alpha: 1 }, { slot: 'widget', catalog: FULL });
+    const w = defineRegistry('catalog widget', { alpha: 1 }, { slot: 'widget', catalog: FULL, noBlurbs: 'a fixture in this test file, which exists to exercise one refusal and is never searched' });
     return !!w.catalog && w.catalog.title === 'Widgets' && w.catalog.usage('alpha') === '{"widget":"alpha"}';
   })());
   const refuses = (bad) => {
-    try { defineRegistry('bad widget', { alpha: 1 }, { catalog: bad }); return false; }
+    try { defineRegistry('bad widget', { alpha: 1 }, { catalog: bad, noBlurbs: 'a fixture in this test file, which exists to exercise one refusal and is never searched' }); return false; }
     catch (e) { return /catalog/.test(e.message); }
   };
   ok('registry: a catalog with no intro is refused at load', refuses({ ...FULL, intro: '' }));
@@ -5406,11 +5421,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // An aka is invisible: a typo'd key would index nothing, break nothing and report nothing, which is
   // the "written and never read" failure this repo pays for most. So it is refused at LOAD.
   ok('an aka naming something that is not an entry is refused at load', (() => {
-    try { defineRegistry('t', { a: 1 }, { aka: { b: ['x'] } }); return false; }
+    try { defineRegistry('t', { a: 1 }, { aka: { b: ['x'] }, noBlurbs: 'a fixture in this test file, which exists to exercise one refusal and is never searched' }); return false; }
     catch (e) { return /not an entry here/.test(e.message); }
   })());
   ok('an empty aka list is refused rather than silently indexing nothing', (() => {
-    try { defineRegistry('t', { a: 1 }, { aka: { a: [] } }); return false; }
+    try { defineRegistry('t', { a: 1 }, { aka: { a: [] }, noBlurbs: 'a fixture in this test file, which exists to exercise one refusal and is never searched' }); return false; }
     catch (e) { return /non-empty array/.test(e.message); }
   })());
 }

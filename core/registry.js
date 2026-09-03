@@ -39,7 +39,40 @@ const ALL = [];   // every registry built here, so a failed pick can ask the oth
  *     vocabulary, written here so that adding one is a single edit. See checkCatalog below.
  * There is deliberately no `fallback` option.
  */
-export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog } = {}) {
+/**
+ * checkCovered(kind, entries, blurbs, noBlurbs): every entry is findable, refused at LOAD.
+ *
+ * WHY THIS IS A LOAD REFUSAL AND NOT A GATE. An entry with no blurb is reachable only by someone who
+ * already knows its exact name, because the blurb IS the retrieval index. So a capability shipped
+ * without one is a capability nobody can be told about, and the failure is silent in the worst way:
+ * `make arsenal Q="a film burn"` answered NOTHING HERE CLEARLY MATCHES while `burn` sat in core/stings.js
+ * with `/* film burn *\/` written beside it. A search that reports ABSENT about something present is
+ * worse than one that stays quiet, because it ends the looking.
+ *
+ * 131 entries across eight registries were in that state, and a ratchet in scripts/gates/arsenal-check.mjs
+ * caught it only AFTER the fact, on a push. This repo's own rule says a gate is the last resort: if the
+ * bad value has a write site, the refusal goes there and the whole class ends. `defineRegistry` is that
+ * write site, so adding an effect without a blurb now fails the moment the module loads.
+ *
+ * THE OPT-OUT IS A SENTENCE, NOT A FLAG. `noBlurbs` takes the reason, because the only registry that
+ * legitimately has none (42 easings) has a real argument for it, and a bare `true` would let the next
+ * author skip the work by typing four characters.
+ */
+export function checkCovered(kind, entries, blurbs, noBlurbs) {
+  const bare = Object.keys(entries).filter((n) => !(blurbs && blurbs[n]));
+  if (!bare.length) return;
+  if (typeof noBlurbs === 'string' && noBlurbs.trim().length > 12) return;
+  if (noBlurbs) throw new Error(`defineRegistry("${kind}"): noBlurbs must be the REASON, in a sentence, `
+    + 'not a flag. Say why these entries are better served somewhere else.');
+  throw new Error(`${kind}: ${bare.length} entr(ies) have no blurb (${bare.slice(0, 6).join(', ')}`
+    + `${bare.length > 6 ? ', …' : ''}). Without one nothing can find them: \`make arsenal Q="…"\` ranks on `
+    + 'name + kind + blurb, so an author who does not already know the name will be told the engine does '
+    + 'not have it. Add them beside the defineRegistry call:\n'
+    + `    blurbs: { ${bare[0]}: 'what it does, in one line' }\n`
+    + '  If they genuinely belong somewhere else, say so in a sentence: noBlurbs: \'why\'.');
+}
+
+export function defineRegistry(kind, entries, { blurbs, noBlurbs, aka, slot, catalog } = {}) {
   if (!entries || typeof entries !== 'object') throw new Error(`defineRegistry("${kind}"): entries must be an object`);
   if (catalog) checkCatalog(kind, catalog);
   if (aka) checkAka(kind, entries, aka);
@@ -47,6 +80,7 @@ export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog } = {
   // nothing else), so the same refusal blurbsOf applies is applied to a blurbs map handed in directly.
   // Most registries do not go through blurbsOf; without this the rule would cover a third of them.
   if (blurbs) for (const [n, b] of Object.entries(blurbs)) checkBlurb(kind, n, b);
+  checkCovered(kind, entries, blurbs, noBlurbs);
   const has = (name) => typeof name === 'string' && Object.prototype.hasOwnProperty.call(entries, name);
 
   const reg = {
@@ -54,6 +88,7 @@ export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog } = {
     slot: slot || kind,
     entries,
     blurbs: blurbs || null,
+    noBlurbs: noBlurbs || null,
     aka: aka || null,
     catalog: catalog || null,
     get names() { return Object.keys(entries); },
