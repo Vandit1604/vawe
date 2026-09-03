@@ -53,6 +53,35 @@ const ENGINE_URL = "/core/generators.js";
 // because the old /blocks page moved there. A redirect cannot tell a page path from a static
 // file, so a module vendored to /blocks/index.mjs answers 404 at /arsenal/index.mjs.
 const BLOCKS_URL = "/blocklib/index.mjs";
+
+// ── THE PICK LIST ────────────────────────────────────────────────────────────────────────────────
+// THIS PAGE IS AN EDIT, NOT AN INDEX, and that distinction is the whole reason it is worth opening.
+// /arsenal is the exhaustive catalogue: every block, every effect, 800-odd things, complete by
+// construction and gated to stay that way. The playground is the handful somebody CHOSE, because a
+// designer who lands here should meet the engine at its best and leave wanting to try it.
+//
+// It was eight generators, hand-picked. Then the block library became loadable in a browser and all 95
+// families were poured in, on the reasoning that a hand-kept list is a second source of truth that
+// goes stale in silence. That reasoning is right about a CATALOGUE and exactly wrong here: the
+// curation IS the product. The page filled up with `redditPost`, `codeBlock`, `table` and `feedRow`,
+// which are honest working parts and belong in the catalogue, not in a shop window.
+//
+// So the list is deliberate and it is small. The bar: could a designer see this and want to build
+// with it. A part that answers "what would I use this for" rather than "how did they do that" is a
+// catalogue entry, and /arsenal already has it. Nothing here goes stale, because a name that stops
+// existing fails `lib-test`, which asserts every one of these resolves to a real family.
+const FEATURED = new Set([
+  // surfaces you feel before you read: glass, light, grain
+  "glassCard", "borderBeamCard", "spotlightCard", "meshPanel", "grainOverlay", "glassDock",
+  // type and text doing something a still cannot show
+  "morphText", "splitFlapBoard", "textCursor", "colorCycle",
+  // whole-frame moves
+  "parallaxZoom", "uiReveal3d", "screenSwap",
+  // the camera pretending to be a camera
+  "camcorderHud", "scanGate",
+]);
+
+
 const BLOCK_CATALOG_URL = "/blocklib/catalog.mjs";
 const AMBIENT_URL = "/core/shaders-ambient.js";
 const PALETTE_URL = "/core/surfaces/palette.js";
@@ -152,12 +181,13 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
             SCHEMAS: Record<string, Record<string, Spec>>; CATEGORY_OF: Record<string, string> };
           const rows = (c as unknown as { CATALOG: { name: string; family: string; blurb?: string;
             props?: Record<string, unknown> }[] }).CATALOG;
-          // A BARE FAMILY ROW ONLY. The catalog also carries namespaced `family.variant` presets, and
-          // those share their family's option table, so listing them would put the same dials on the
-          // page a dozen times under different names.
+          // A BARE FAMILY ROW, AND ONLY ONE THAT IS ON THE PICK LIST. The catalog also carries
+          // namespaced `family.variant` presets, which share their family's option table and would put
+          // the same dials on the page a dozen times under different names.
           const seen = new Set<string>();
           for (const row of rows) {
             if (row.name.includes(".") || seen.has(row.family)) continue;
+            if (!FEATURED.has(row.family)) continue;
             const schema = B.SCHEMAS[row.family];
             const factory = B.BLOCKS[row.family];
             // A family with no schema has no dials to turn, so it has no business on this page.

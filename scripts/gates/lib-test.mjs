@@ -2864,6 +2864,28 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     CATALOG.every((e) => { try { checkBlurb('block', e.name, e.blurb); return true; } catch { return false; } }));
 }
 
+// ---- the playground's pick list must name families that exist ----
+// /playground is an EDIT, not an index: a hand-chosen handful, because a designer landing there should
+// meet the engine at its best. /arsenal is the exhaustive catalogue and is gated to stay complete. The
+// risk a hand-kept list carries is the one this repo names most often, a name that quietly stops
+// existing, so the list is asserted here rather than trusted. This is the whole cost of curating, and
+// it is one test.
+{
+  const src = fs.readFileSync(path.join(repoRoot, 'site/app/playground/PlaygroundClient.tsx'), 'utf8');
+  const block = /const FEATURED = new Set\(\[([\s\S]*?)\]\)/.exec(src);
+  ok('playground: the pick list is where the test expects it', !!block);
+  if (block) {
+    const picked = [...block[1].matchAll(/"([A-Za-z][\w.]*)"/g)].map((m) => m[1]);
+    const families = new Set(CATALOG.map((r) => r.name).filter((n) => !n.includes('.')));
+    const gone = picked.filter((n) => !families.has(n));
+    if (gone.length) console.log(`    playground names families that do not exist: ${gone.join(' ')}`);
+    ok(`playground: all ${picked.length} featured blocks are real families`, gone.length === 0);
+    // Small on purpose. If this ever needs raising, raise it deliberately: a page that shows everything
+    // is the catalogue, and the catalogue already exists one route away.
+    ok('playground: the pick list stays an edit, not an index', picked.length > 0 && picked.length <= 30);
+  }
+}
+
 // ---- the search must know about the blocks ----
 // Measured before this landed: the CLI corpus held 623 entries across 54 kinds and `block` was not one
 // of them, so 97 of 97 block families were invisible to `make arsenal`. The website's /arsenal had
