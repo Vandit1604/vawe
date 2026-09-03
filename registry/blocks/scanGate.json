@@ -3,7 +3,7 @@
   "name": "scanGate",
   "type": "vawe:block",
   "title": "scanGate",
-  "description": "autofocus gate: a band travels the frame, the brackets contract onto the target and lock",
+  "description": "an autofocus targeting reticle: a scan line sweeps the frame and brackets snap shut and lock onto the subject",
   "tags": [
     "scanGate"
   ],

@@ -3,7 +3,7 @@
   "name": "card.profile",
   "type": "vawe:block",
   "title": "card.profile",
-  "description": "avatar · name · role",
+  "description": "a person's photo beside their name, with their job title under it",
   "tags": [
     "profileCard"
   ],

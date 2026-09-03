@@ -3,7 +3,7 @@
   "name": "kanban",
   "type": "vawe:block",
   "title": "kanban",
-  "description": "columns of cards",
+  "description": "a kanban board: columns of small cards dealt in reading order, for a task board or pipeline view.",
   "tags": [
     "kanban"
   ],

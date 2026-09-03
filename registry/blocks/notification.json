@@ -3,7 +3,7 @@
   "name": "notification",
   "type": "vawe:block",
   "title": "notification",
-  "description": "toast card (dot + title + body)",
+  "description": "a light system alert card that slides in from the edge, a status dot, a heading and a message, arrives and leaves like a phone banner.",
   "tags": [
     "notification"
   ],

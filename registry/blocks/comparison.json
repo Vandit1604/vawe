@@ -3,7 +3,7 @@
   "name": "comparison",
   "type": "vawe:block",
   "title": "comparison",
-  "description": "two columns (Before/After · Others/Us)",
+  "description": "before and after, or us versus them, shown as two columns of bullet points side by side",
   "tags": [
     "comparison"
   ],

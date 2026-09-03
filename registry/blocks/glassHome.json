@@ -3,7 +3,7 @@
   "name": "glassHome",
   "type": "vawe:block",
   "title": "glassHome",
-  "description": "frosted launcher grid led by one wide widget tile; tiles arrive on the diagonal",
+  "description": "a frosted phone home screen: a grid of app icon tiles plus one wide widget",
   "tags": [
     "glassHome"
   ],

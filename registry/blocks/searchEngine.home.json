@@ -3,7 +3,7 @@
   "name": "searchEngine.home",
   "type": "vawe:block",
   "title": "searchEngine.home",
-  "description": "search home. Wordmark + pill, query types in (keys click)",
+  "description": "a search engine home page: a wordmark over a rounded search box, the query typing itself in",
   "tags": [
     "searchEngine"
   ],

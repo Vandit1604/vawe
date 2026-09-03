@@ -3,7 +3,7 @@
   "name": "codeHighlight",
   "type": "vawe:block",
   "title": "codeHighlight",
-  "description": "a band sweeps down to one line while the context dims out of the way",
+  "description": "a code editor spotlight: the surrounding lines dim while a highlighted band sweeps down onto one target line",
   "tags": [
     "codeHighlight"
   ],

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "rangeSelector",
+  "type": "vawe:generator",
+  "title": "rangeSelector",
+  "description": "The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs.",
+  "tags": [
+    "generator",
+    "type",
+    "layers"
+  ],
+  "install": {
+    "kind": "scene-layers",
+    "target": "layers[]",
+    "requires": "nothing beyond the vawe engine: these are concrete layer primitives, no expand step",
+    "props": [
+      "smoothness",
+      "preset",
+      "stagger",
+      "each",
+      "text"
+    ],
+    "preset": "swap",
+    "options": {
+      "smoothness": 0,
+      "preset": "scale",
+      "stagger": 0.07,
+      "each": 0.6,
+      "text": "swap, do not scale"
+    },
+    "layers": [
+      {
+        "type": "text",
+        "x": 160,
+        "y": 460,
+        "w": 1600,
+        "align": "center",
+        "size": 130,
+        "weight": 700,
+        "color": "var(--text)",
+        "start": 0,
+        "duration": 5,
+        "anim": "none",
+        "text": "swap, do not scale",
+        "split": "char",
+        "preset": "scale",
+        "stagger": 0.07,
+        "each": 0.6,
+        "smoothness": 0
+      }
+    ]
+  },
+  "docs": "docs/EFFECTS.md",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=rangeSelector"
+  }
+}

@@ -3,7 +3,7 @@
   "name": "spotlightCard",
   "type": "vawe:block",
   "title": "spotlightCard",
-  "description": "dark card with a soft spotlight glow washing from a corner",
+  "description": "a dark card lit by a soft glow from one corner or edge, like a spotlight in a dark room",
   "tags": [
     "spotlightCard"
   ],

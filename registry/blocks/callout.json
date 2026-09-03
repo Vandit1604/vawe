@@ -3,7 +3,7 @@
   "name": "callout",
   "type": "vawe:block",
   "title": "callout",
-  "description": "info/success/warn strip",
+  "description": "a coloured info, success, or warning strip with a solid left bar and one line of text, for a note inline in a page.",
   "tags": [
     "callout"
   ],

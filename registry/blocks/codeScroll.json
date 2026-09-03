@@ -3,7 +3,7 @@
   "name": "codeScroll",
   "type": "vawe:block",
   "title": "codeScroll",
-  "description": "a viewport onto a long file: it scrolls until the target line centres, then lights it",
+  "description": "an editor auto-scrolling through a long file until the target line reaches the middle and lights up",
   "tags": [
     "codeScroll"
   ],

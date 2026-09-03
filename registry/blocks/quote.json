@@ -3,7 +3,7 @@
   "name": "quote",
   "type": "vawe:block",
   "title": "quote",
-  "description": "pull quote + attribution",
+  "description": "a big pull quote with the person's name credited underneath, for a testimonial or a line to remember",
   "tags": [
     "quote"
   ],

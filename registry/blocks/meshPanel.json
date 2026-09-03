@@ -3,7 +3,7 @@
   "name": "meshPanel",
   "type": "vawe:block",
   "title": "meshPanel",
-  "description": "soft mesh-gradient surface (stacked accent blobs)",
+  "description": "a soft blurry gradient background made of overlapping colour blobs, calm and branded",
   "tags": [
     "meshPanel"
   ],

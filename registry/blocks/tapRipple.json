@@ -3,7 +3,7 @@
   "name": "tapRipple",
   "type": "vawe:block",
   "title": "tapRipple",
-  "description": "touch tap · contact dot and an expanding ring, for phone demos",
+  "description": "a finger tap on a touchscreen: a contact dot and an expanding ring at the point touched, for phone demos.",
   "tags": [
     "tapRipple"
   ],

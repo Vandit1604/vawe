@@ -3,7 +3,7 @@
   "name": "bento",
   "type": "vawe:block",
   "title": "bento",
-  "description": "asymmetric bento grid: one hero cell + supporting cells (scale contrast)",
+  "description": "an asymmetric grid of boxes in different sizes, one big hero box and smaller ones around it, like a bento box or an Apple feature grid",
   "tags": [
     "bento"
   ],

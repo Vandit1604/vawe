@@ -3,7 +3,7 @@
   "name": "glassControls",
   "type": "vawe:block",
   "title": "glassControls",
-  "description": "frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter",
+  "description": "a frosted media player bar: scrubber, play and transport buttons, a volume or level meter",
   "tags": [
     "glassControls"
   ],

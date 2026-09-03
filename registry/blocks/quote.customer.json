@@ -3,7 +3,7 @@
   "name": "quote.customer",
   "type": "vawe:block",
   "title": "quote.customer",
-  "description": "customer quote",
+  "description": "a testimonial pulled big, with the person and their company credited underneath",
   "tags": [
     "quote"
   ],

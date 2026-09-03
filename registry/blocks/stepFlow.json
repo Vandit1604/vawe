@@ -3,7 +3,7 @@
   "name": "stepFlow",
   "type": "vawe:block",
   "title": "stepFlow",
-  "description": "horizontal numbered steps",
+  "description": "a horizontal row of numbered steps with connectors that fill in as progress moves from one step to the next.",
   "tags": [
     "stepFlow"
   ],

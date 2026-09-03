@@ -3,7 +3,7 @@
   "name": "usMapBubble",
   "type": "vawe:block",
   "title": "usMapBubble",
-  "description": "proportional circles at city coordinates (AREA is the value) with name + value callouts",
+  "description": "a map of the United States with circles sized by value at each city, a proportional bubble map",
   "tags": [
     "usMapBubble"
   ],

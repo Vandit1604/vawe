@@ -3,7 +3,7 @@
   "name": "spinner",
   "type": "vawe:block",
   "title": "spinner",
-  "description": "looping Lottie (deterministic)",
+  "description": "a small looping loading spinner animation for a busy or working state",
   "tags": [
     "spinner"
   ],

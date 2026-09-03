@@ -3,7 +3,7 @@
   "name": "profileHeader",
   "type": "vawe:block",
   "title": "profileHeader",
-  "description": "account header · avatar over name, handle, stat row",
+  "description": "the top of an account screen: avatar over a name and @handle, with a small row of stat counts below.",
   "tags": [
     "profileHeader"
   ],

@@ -3,7 +3,7 @@
   "name": "nowPlaying",
   "type": "vawe:block",
   "title": "nowPlaying",
-  "description": "music-player card · artwork, progress, transport",
+  "description": "a music player card: album artwork, a scrubbing progress bar, and play/skip transport controls",
   "tags": [
     "nowPlaying"
   ],

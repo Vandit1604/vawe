@@ -3,7 +3,7 @@
   "name": "terminalHtml",
   "type": "vawe:block",
   "title": "terminalHtml",
-  "description": "the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge",
+  "description": "the same deploy terminal as one hand-drawn console surface: gradient glass, per-word command colouring, a blinking text cursor",
   "tags": [
     "terminalHtml"
   ],

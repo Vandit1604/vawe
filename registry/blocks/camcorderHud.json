@@ -3,7 +3,7 @@
   "name": "camcorderHud",
   "type": "vawe:block",
   "title": "camcorderHud",
-  "description": "viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom",
+  "description": "a camcorder or viewfinder overlay: corner brackets, a blinking REC dot, a running timecode, battery and zoom readout",
   "tags": [
     "camcorderHud",
     "overlay"

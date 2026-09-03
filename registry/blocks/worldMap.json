@@ -3,7 +3,7 @@
   "name": "worldMap",
   "type": "vawe:block",
   "title": "worldMap",
-  "description": "world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map",
+  "description": "a world map coloured country by country, a global choropleth with a legend for the data shown",
   "tags": [
     "worldMap"
   ],

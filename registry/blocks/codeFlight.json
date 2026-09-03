@@ -3,7 +3,7 @@
   "name": "codeFlight",
   "type": "vawe:block",
   "title": "codeFlight",
-  "description": "discrete snippets fly in from alternating sides and assemble into one program",
+  "description": "separate code snippets fly in from opposite sides of the screen and snap together into one finished file",
   "tags": [
     "codeFlight"
   ],

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "colonnade",
+  "type": "vawe:generator",
+  "title": "colonnade",
+  "description": "Wide panels split by bright hairlines, soft masses under a glow.",
+  "tags": [
+    "generator",
+    "lightfield",
+    "html"
+  ],
+  "install": {
+    "kind": "generated-markup",
+    "target": "bg[].html (or an html layer)",
+    "requires": "markup only. Paste it as-is; the engine drives it with --t, and it needs no block library",
+    "props": [
+      "seed",
+      "colour.bloom",
+      "colour.mid",
+      "colour.deep",
+      "colour.ground",
+      "colour.shade",
+      "colour.through",
+      "colour.vivid",
+      "colour.spread",
+      "colour.originX",
+      "colour.originY",
+      "colour.lobes",
+      "colour.evenness",
+      "colour.extra",
+      "shadow.depth",
+      "shadow.softness",
+      "shadow.direction",
+      "shadow.originX",
+      "shadow.originY",
+      "shadow.light",
+      "shadow.seam",
+      "shadow.seamWidth",
+      "shadow.peak",
+      "shadow.sheen",
+      "envelope.kind",
+      "envelope.from",
+      "envelope.to",
+      "envelope.jitter",
+      "envelope.anchor",
+      "envelope.taper",
+      "envelope.mass",
+      "envelope.originX",
+      "envelope.originY",
+      "envelope.softness",
+      "pattern.kind",
+      "pattern.count",
+      "pattern.jitter",
+      "motion.kind",
+      "motion.speed",
+      "motion.amount"
+    ],
+    "preset": "colonnade",
+    "options": {
+      "seed": 7,
+      "colour": {
+        "bloom": "#ffd15c",
+        "mid": "#c97a0d",
+        "deep": "#5a3a12",
+        "ground": "#0c0d10",
+        "shade": "#020308",
+        "through": "#000000",
+        "vivid": 1.05,
+        "spread": 1,
+        "originX": 50,
+        "originY": 55,
+        "lobes": 3,
+        "evenness": 0,
+        "extra": []
+      },
+      "shadow": {
+        "depth": 0.7,
+        "softness": 0.5,
+        "direction": "top-and-bottom",
+        "originX": 50,
+        "originY": 50,
+        "light": "emitted",
+        "seam": -0.6,
+        "seamWidth": 0.025,
+        "peak": 34,
+        "sheen": 0
+      },
+      "envelope": {
+        "kind": "valley",
+        "from": 0.42,
+        "to": 0.72,
+        "jitter": 0.3,
+        "anchor": "bottom",
+        "taper": 0,
+        "mass": 0.93,
+        "originX": 50,
+        "originY": 50,
+        "softness": 0.35
+      },
+      "pattern": {
+        "kind": "slats",
+        "count": 12,
+        "jitter": 0.02
+      },
+      "motion": {
+        "kind": "drift",
+        "speed": 0.35,
+        "amount": 0.5
+      }
+    },
+    "render": "import { byName } from 'core/generators.js'; byName('colonnade').render(options)"
+  },
+  "docs": "docs/LIGHTFIELD.md",
+  "reference": "refs/ref-b.png",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=colonnade"
+  }
+}

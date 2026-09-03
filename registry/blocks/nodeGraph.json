@@ -3,7 +3,7 @@
   "name": "nodeGraph",
   "type": "vawe:block",
   "title": "nodeGraph",
-  "description": "non-hierarchical graph · author-placed nodes, routed edges, one node lit",
+  "description": "a network diagram of nodes and connecting edges, not a top-down tree, with one node highlighted",
   "tags": [
     "nodeGraph"
   ],

@@ -3,7 +3,7 @@
   "name": "installCard",
   "type": "vawe:block",
   "title": "installCard",
-  "description": "app-store row · stars sweep to the rating, then install",
+  "description": "an app store listing row: icon, star rating that sweeps in, and an Install button",
   "tags": [
     "installCard"
   ],

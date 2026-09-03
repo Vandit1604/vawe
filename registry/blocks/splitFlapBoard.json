@@ -3,7 +3,7 @@
   "name": "splitFlapBoard",
   "type": "vawe:block",
   "title": "splitFlapBoard",
-  "description": "a mechanical departure board · a drum per character steps through the alphabet and lands",
+  "description": "an airport or train station split-flap departure board where each letter flips through the alphabet to land on a word",
   "tags": [
     "splitFlapBoard"
   ],

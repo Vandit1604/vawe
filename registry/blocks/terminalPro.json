@@ -3,7 +3,7 @@
   "name": "terminalPro",
   "type": "vawe:block",
   "title": "terminalPro",
-  "description": "a deploy terminal built from layer primitives: every line its own timed, measurable object",
+  "description": "a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark",
   "tags": [
     "terminalPro"
   ],

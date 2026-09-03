@@ -3,7 +3,7 @@
   "name": "chatBubble",
   "type": "vawe:block",
   "title": "chatBubble",
-  "description": "a message thread",
+  "description": "a text message thread, chat bubbles left and right like iMessage or WhatsApp",
   "tags": [
     "chatBubble"
   ],

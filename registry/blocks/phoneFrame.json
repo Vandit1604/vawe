@@ -3,7 +3,7 @@
   "name": "phoneFrame",
   "type": "vawe:block",
   "title": "phoneFrame",
-  "description": "phone shell (draw content on top)",
+  "description": "a phone shaped shell: dark bezel, notch, status clock, screen area to draw your app content into for a mobile mockup.",
   "tags": [
     "phoneFrame"
   ],

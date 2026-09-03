@@ -3,7 +3,7 @@
   "name": "banner",
   "type": "vawe:block",
   "title": "banner",
-  "description": "accent announcement bar",
+  "description": "a full width coloured announcement bar with an icon, a message, and an optional CTA chip, spans the whole row edge to edge.",
   "tags": [
     "banner"
   ],

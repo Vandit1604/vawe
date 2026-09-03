@@ -3,7 +3,7 @@
   "name": "toast",
   "type": "vawe:block",
   "title": "toast",
-  "description": "dark snackbar + action",
+  "description": "a dark snackbar with a status dot, a message, and an optional action link, the popup that says something just happened.",
   "tags": [
     "toast"
   ],

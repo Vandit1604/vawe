@@ -3,7 +3,7 @@
   "name": "glassNotification",
   "type": "vawe:block",
   "title": "glassNotification",
-  "description": "frosted alerts fly in from the right and stack, each card narrower than the one above it",
+  "description": "frosted push notifications sliding in from the side and stacking up, like a phone lock screen",
   "tags": [
     "glassNotification"
   ],

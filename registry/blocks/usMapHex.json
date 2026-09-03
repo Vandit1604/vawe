@@ -3,7 +3,7 @@
   "name": "usMapHex",
   "type": "vawe:block",
   "title": "usMapHex",
-  "description": "US hex cartogram: every state the same size, so the reading is the value not the acreage",
+  "description": "a hex map of the United States: every state drawn as one same-size hexagon so colour reads value, not land area",
   "tags": [
     "usMapHex"
   ],

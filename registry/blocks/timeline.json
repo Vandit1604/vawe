@@ -3,7 +3,7 @@
   "name": "timeline",
   "type": "vawe:block",
   "title": "timeline",
-  "description": "vertical rail of events",
+  "description": "a vertical rail of dated events with dots and a connecting line, each entry lands beside its dot in sequence.",
   "tags": [
     "timeline"
   ],

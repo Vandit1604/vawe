@@ -3,7 +3,7 @@
   "name": "listRow",
   "type": "vawe:block",
   "title": "listRow",
-  "description": "generic list item · icon tile, title over sub, trailing detail",
+  "description": "a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row.",
   "tags": [
     "listRow"
   ],

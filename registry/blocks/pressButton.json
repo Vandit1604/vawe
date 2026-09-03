@@ -3,7 +3,7 @@
   "name": "pressButton",
   "type": "vawe:block",
   "title": "pressButton",
-  "description": "CTA that depresses and releases when it is clicked",
+  "description": "a CTA button that visibly depresses and springs back when clicked, the payoff for a pointer tap on a button.",
   "tags": [
     "pressButton"
   ],

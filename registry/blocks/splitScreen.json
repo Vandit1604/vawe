@@ -3,7 +3,7 @@
   "name": "splitScreen",
   "type": "vawe:block",
   "title": "splitScreen",
-  "description": "two panes, one geometry · second pane lands behind the first",
+  "description": "the screen divided into two side-by-side panes, or a small inset video in the corner like picture-in-picture",
   "tags": [
     "splitScreen"
   ],

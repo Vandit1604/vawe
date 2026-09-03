@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "crt",
+  "type": "vawe:generator",
+  "title": "crt",
+  "description": "A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top.",
+  "tags": [
+    "generator",
+    "treatment",
+    "html"
+  ],
+  "install": {
+    "kind": "generated-markup",
+    "target": "bg[].html (or an html layer)",
+    "requires": "markup only. Paste it as-is; the engine drives it with --t, and it needs no block library",
+    "props": [
+      "bloom",
+      "lines",
+      "gap",
+      "scan",
+      "vignette",
+      "tintAmount",
+      "colour.text",
+      "colour.ground",
+      "colour.tint",
+      "text",
+      "sub"
+    ],
+    "preset": "tube",
+    "options": {
+      "bloom": 1.6,
+      "lines": 0.42,
+      "gap": 4,
+      "scan": 1,
+      "vignette": 0.5,
+      "tintAmount": 0.25,
+      "colour": {
+        "text": "#5cff9d",
+        "ground": "#04140b",
+        "tint": "#19ff7a"
+      },
+      "text": "VHS",
+      "sub": "GREEN PHOSPHOR · SCANLINE · BLOOM"
+    },
+    "render": "import { byName } from 'core/generators.js'; byName('crt').render(options)"
+  },
+  "docs": "docs/EFFECTS.md",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=crt"
+  }
+}

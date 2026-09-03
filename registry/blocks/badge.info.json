@@ -3,7 +3,7 @@
   "name": "badge.info",
   "type": "vawe:block",
   "title": "badge.info",
-  "description": "badge, info",
+  "description": "a blue chip carrying a neutral fact, no alarm attached",
   "tags": [
     "badge"
   ],

@@ -2,7 +2,7 @@
   "$schema": "https://vawe.dev/schema/registry.json",
   "name": "vawe",
   "homepage": "https://vawe.dev",
-  "usage": "Each item installs as a LAYER OBJECT, not a file: append item.install.layer to the \"layers\" array of a scene JSON ({\"module\":\"scene\",…}), set x/y/start/dur, then `make expand`. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the block library.",
+  "usage": "Blocks and beats install as a LAYER OBJECT, not a file: append item.install.layer to the \"layers\" array of a scene JSON ({\"module\":\"scene\",…}), set x/y/start/dur, then `make expand`. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the block library. A generator installs its OUTPUT instead: item.install.layers is already-expanded layers to append, and where install.kind is \"generated-markup\" you turn item.install.options into markup (item.preview.url, or item.install.render) and paste that into a bg window.",
   "items": [
     {
       "name": "cardCascade",
@@ -178,7 +178,7 @@
     {
       "name": "avatarStack",
       "type": "vawe:block",
-      "description": "overlapping avatars + overflow",
+      "description": "overlapping circular profile pictures in a row with a +N overflow count",
       "tags": [
         "avatarStack"
       ]
@@ -186,7 +186,7 @@
     {
       "name": "avatarStack.large",
       "type": "vawe:block",
-      "description": "larger avatar stack",
+      "description": "the same overlapping profile pictures at a bigger size, for a hero or a title card",
       "tags": [
         "avatarStack"
       ]
@@ -194,7 +194,7 @@
     {
       "name": "badge",
       "type": "vawe:block",
-      "description": "CI-shield token (label · value)",
+      "description": "a small label plus coloured value chip, like a CI shield or a status token (e.g. version, warning, beta).",
       "tags": [
         "badge"
       ]
@@ -210,7 +210,7 @@
     {
       "name": "badge.info",
       "type": "vawe:block",
-      "description": "badge, info",
+      "description": "a blue chip carrying a neutral fact, no alarm attached",
       "tags": [
         "badge"
       ]
@@ -218,7 +218,7 @@
     {
       "name": "badge.version",
       "type": "vawe:block",
-      "description": "version badge",
+      "description": "a small chip showing which release is running, like a v2.1.0 shield in a README",
       "tags": [
         "badge"
       ]
@@ -226,7 +226,7 @@
     {
       "name": "badge.warn",
       "type": "vawe:block",
-      "description": "badge, warning",
+      "description": "an amber chip that flags something needing attention, a caution token",
       "tags": [
         "badge"
       ]
@@ -234,7 +234,7 @@
     {
       "name": "banner",
       "type": "vawe:block",
-      "description": "accent announcement bar",
+      "description": "a full width coloured announcement bar with an icon, a message, and an optional CTA chip, spans the whole row edge to edge.",
       "tags": [
         "banner"
       ]
@@ -258,7 +258,7 @@
     {
       "name": "barChart",
       "type": "vawe:block",
-      "description": "labeled bars scaled to max",
+      "description": "a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side",
       "tags": [
         "barChart"
       ]
@@ -274,7 +274,7 @@
     {
       "name": "bento",
       "type": "vawe:block",
-      "description": "asymmetric bento grid: one hero cell + supporting cells (scale contrast)",
+      "description": "an asymmetric grid of boxes in different sizes, one big hero box and smaller ones around it, like a bento box or an Apple feature grid",
       "tags": [
         "bento"
       ]
@@ -282,7 +282,7 @@
     {
       "name": "borderBeamCard",
       "type": "vawe:block",
-      "description": "glass card with a light TRAVELLING its border (animated beam)",
+      "description": "a glass card with a bright line of light chasing around its border, like a loading ring on the edge",
       "tags": [
         "borderBeamCard"
       ]
@@ -290,7 +290,7 @@
     {
       "name": "browserFrame",
       "type": "vawe:block",
-      "description": "window chrome (traffic dots + URL bar)",
+      "description": "a fake browser window: traffic-light dots and a URL bar framing a screenshot or any content drawn inside it.",
       "tags": [
         "browserFrame"
       ]
@@ -298,7 +298,7 @@
     {
       "name": "callout",
       "type": "vawe:block",
-      "description": "info/success/warn strip",
+      "description": "a coloured info, success, or warning strip with a solid left bar and one line of text, for a note inline in a page.",
       "tags": [
         "callout"
       ]
@@ -322,7 +322,7 @@
     {
       "name": "camcorderHud",
       "type": "vawe:block",
-      "description": "viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom",
+      "description": "a camcorder or viewfinder overlay: corner brackets, a blinking REC dot, a running timecode, battery and zoom readout",
       "tags": [
         "camcorderHud",
         "overlay"
@@ -331,7 +331,7 @@
     {
       "name": "captions",
       "type": "vawe:block",
-      "description": "timed subtitle chips (bottom overlay)",
+      "description": "subtitles at the bottom of the screen, timed to appear line by line like closed captions",
       "tags": [
         "captions",
         "overlay"
@@ -340,7 +340,7 @@
     {
       "name": "card",
       "type": "vawe:block",
-      "description": "elevated card · tinted panel · pill tags · CTA arrow",
+      "description": "a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom",
       "tags": [
         "card"
       ]
@@ -348,7 +348,7 @@
     {
       "name": "card.pricing",
       "type": "vawe:block",
-      "description": "plan · price · features · CTA",
+      "description": "a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button",
       "tags": [
         "pricingCard"
       ]
@@ -372,7 +372,7 @@
     {
       "name": "card.profile",
       "type": "vawe:block",
-      "description": "avatar · name · role",
+      "description": "a person's photo beside their name, with their job title under it",
       "tags": [
         "profileCard"
       ]
@@ -380,7 +380,7 @@
     {
       "name": "card.stat",
       "type": "vawe:block",
-      "description": "boxed KPI with delta chip",
+      "description": "a boxed metric: a label, a number counting up, a chip saying how much it went up",
       "tags": [
         "statCard"
       ]
@@ -404,7 +404,7 @@
     {
       "name": "chatBubble",
       "type": "vawe:block",
-      "description": "a message thread",
+      "description": "a text message thread, chat bubbles left and right like iMessage or WhatsApp",
       "tags": [
         "chatBubble"
       ]
@@ -420,7 +420,7 @@
     {
       "name": "checklist",
       "type": "vawe:block",
-      "description": "checked / unchecked items",
+      "description": "a checklist of items with checkboxes ticking off one by one, done rows dim to read as completed.",
       "tags": [
         "checklist"
       ]
@@ -444,7 +444,7 @@
     {
       "name": "codeBlock",
       "type": "vawe:block",
-      "description": "code card; syntax-coloured lines",
+      "description": "a code snippet card: lines of code write themselves in one by one, syntax-coloured, like a syntax-highlighted editor screenshot",
       "tags": [
         "codeBlock"
       ]
@@ -564,7 +564,7 @@
     {
       "name": "codeDiff",
       "type": "vawe:block",
-      "description": "the edit PERFORMED: removals collapse red, additions expand green, in edit order",
+      "description": "a code edit replayed as it happened: the old line collapses away in red while the new line types in green",
       "tags": [
         "codeDiff"
       ]
@@ -572,7 +572,7 @@
     {
       "name": "codeFlight",
       "type": "vawe:block",
-      "description": "discrete snippets fly in from alternating sides and assemble into one program",
+      "description": "separate code snippets fly in from opposite sides of the screen and snap together into one finished file",
       "tags": [
         "codeFlight"
       ]
@@ -580,7 +580,7 @@
     {
       "name": "codeHighlight",
       "type": "vawe:block",
-      "description": "a band sweeps down to one line while the context dims out of the way",
+      "description": "a code editor spotlight: the surrounding lines dim while a highlighted band sweeps down onto one target line",
       "tags": [
         "codeHighlight"
       ]
@@ -588,7 +588,7 @@
     {
       "name": "codeMorph",
       "type": "vawe:block",
-      "description": "a refactor as a transformation: shared tokens glide, the rest fade out and in",
+      "description": "a code refactor shown as a shape-shift: shared words glide into their new position while the rest fades out and in",
       "tags": [
         "codeMorph"
       ]
@@ -596,7 +596,7 @@
     {
       "name": "codeScroll",
       "type": "vawe:block",
-      "description": "a viewport onto a long file: it scrolls until the target line centres, then lights it",
+      "description": "an editor auto-scrolling through a long file until the target line reaches the middle and lights up",
       "tags": [
         "codeScroll"
       ]
@@ -604,7 +604,7 @@
     {
       "name": "codeTyping",
       "type": "vawe:block",
-      "description": "live coding: one character frontier crosses the snippet, the caret riding it",
+      "description": "code being typed live in an editor: a text cursor runs across the snippet revealing one character at a time",
       "tags": [
         "codeTyping"
       ]
@@ -612,7 +612,7 @@
     {
       "name": "colorCycle",
       "type": "vawe:block",
-      "description": "one word cycling through hues",
+      "description": "one word that changes colour again and again, repainted through a rainbow of hues in a fixed order",
       "tags": [
         "colorCycle"
       ]
@@ -620,7 +620,7 @@
     {
       "name": "commitRow",
       "type": "vawe:block",
-      "description": "git history list",
+      "description": "a git commit history list: hash, message, author and time per row, like a GitHub commits page",
       "tags": [
         "commitRow"
       ]
@@ -628,7 +628,7 @@
     {
       "name": "comparison",
       "type": "vawe:block",
-      "description": "two columns (Before/After · Others/Us)",
+      "description": "before and after, or us versus them, shown as two columns of bullet points side by side",
       "tags": [
         "comparison"
       ]
@@ -652,7 +652,7 @@
     {
       "name": "deploySuccess",
       "type": "vawe:block",
-      "description": "CI cascade → green \"Deployed to production\" card",
+      "description": "a CI/CD pipeline status: build steps queue then run then check off, ending on a green deployed card with the live URL",
       "tags": [
         "deploySuccess"
       ]
@@ -660,7 +660,7 @@
     {
       "name": "diff",
       "type": "vawe:block",
-      "description": "code diff card (+/- coloured)",
+      "description": "a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review",
       "tags": [
         "diff"
       ]
@@ -668,7 +668,7 @@
     {
       "name": "diff.config",
       "type": "vawe:block",
-      "description": "config diff",
+      "description": "a settings or yaml file changing: removed lines in red above the new ones in green",
       "tags": [
         "diff"
       ]
@@ -676,7 +676,7 @@
     {
       "name": "donutChart",
       "type": "vawe:block",
-      "description": "ring segments + legend",
+      "description": "a pie chart drawn as a ring: coloured segments of a whole plus a legend of labels",
       "tags": [
         "donutChart"
       ]
@@ -692,7 +692,7 @@
     {
       "name": "emptyState",
       "type": "vawe:block",
-      "description": "zero state · icon tile, what is missing, the action that fills it",
+      "description": "a zero state panel with dashed border: an icon, a line saying what is missing, and a button that fills it.",
       "tags": [
         "emptyState"
       ]
@@ -700,7 +700,7 @@
     {
       "name": "feedRow",
       "type": "vawe:block",
-      "description": "feed item · avatar, name, timestamp, body",
+      "description": "one row of a social or activity feed: avatar, name, handle, timestamp, and a line of body text.",
       "tags": [
         "feedRow"
       ]
@@ -708,7 +708,7 @@
     {
       "name": "fileTree",
       "type": "vawe:block",
-      "description": "indented file/folder tree",
+      "description": "a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar",
       "tags": [
         "fileTree"
       ]
@@ -716,7 +716,7 @@
     {
       "name": "flowchart",
       "type": "vawe:block",
-      "description": "landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges",
+      "description": "a flowchart: boxes connected by lines that draw themselves on, with yes/no labels on the branches",
       "tags": [
         "flowchart"
       ]
@@ -732,7 +732,7 @@
     {
       "name": "followCard",
       "type": "vawe:block",
-      "description": "name over handle, pill CTA",
+      "description": "a social profile follow card: name over @handle next to a follow button pill",
       "tags": [
         "followCard"
       ]
@@ -740,7 +740,7 @@
     {
       "name": "gauge",
       "type": "vawe:block",
-      "description": "semicircular meter",
+      "description": "a speedometer-style dial: a semicircular meter needle showing one value against a max",
       "tags": [
         "gauge"
       ]
@@ -764,7 +764,7 @@
     {
       "name": "glassCard",
       "type": "vawe:block",
-      "description": "frosted glass panel (blurs the moving bg behind it) + sheen",
+      "description": "a frosted glass panel that blurs the moving content it sits over, like iOS or macOS translucency",
       "tags": [
         "glassCard"
       ]
@@ -772,7 +772,7 @@
     {
       "name": "glassControls",
       "type": "vawe:block",
-      "description": "frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter",
+      "description": "a frosted media player bar: scrubber, play and transport buttons, a volume or level meter",
       "tags": [
         "glassControls"
       ]
@@ -780,7 +780,7 @@
     {
       "name": "glassDock",
       "type": "vawe:block",
-      "description": "floating frosted dock strip with one item magnified, its neighbours swelling toward it",
+      "description": "a floating frosted taskbar or dock strip where the icon under the cursor grows bigger, like the macOS dock",
       "tags": [
         "glassDock"
       ]
@@ -788,7 +788,7 @@
     {
       "name": "glassHome",
       "type": "vawe:block",
-      "description": "frosted launcher grid led by one wide widget tile; tiles arrive on the diagonal",
+      "description": "a frosted phone home screen: a grid of app icon tiles plus one wide widget",
       "tags": [
         "glassHome"
       ]
@@ -796,7 +796,7 @@
     {
       "name": "glassMenu",
       "type": "vawe:block",
-      "description": "frosted command panel: icon column, rows, separators, one row lit with the accent",
+      "description": "a frosted right-click or context menu: icon column, list of rows, one row highlighted",
       "tags": [
         "glassMenu"
       ]
@@ -804,7 +804,7 @@
     {
       "name": "glassNotification",
       "type": "vawe:block",
-      "description": "frosted alerts fly in from the right and stack, each card narrower than the one above it",
+      "description": "frosted push notifications sliding in from the side and stacking up, like a phone lock screen",
       "tags": [
         "glassNotification"
       ]
@@ -812,7 +812,7 @@
     {
       "name": "glassWidgets",
       "type": "vawe:block",
-      "description": "frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid)",
+      "description": "a cluster of frosted iOS-style widgets: one big showcase panel plus small stat tiles and chips",
       "tags": [
         "glassWidgets"
       ]
@@ -820,7 +820,7 @@
     {
       "name": "grainOverlay",
       "type": "vawe:block",
-      "description": "fine film-grain texture over the frame (feTurbulence)",
+      "description": "a layer of film grain or noise texture over the whole frame, so it looks shot on film instead of flat digital",
       "tags": [
         "grainOverlay",
         "overlay"
@@ -829,7 +829,7 @@
     {
       "name": "installCard",
       "type": "vawe:block",
-      "description": "app-store row · stars sweep to the rating, then install",
+      "description": "an app store listing row: icon, star rating that sweeps in, and an Install button",
       "tags": [
         "installCard"
       ]
@@ -837,7 +837,7 @@
     {
       "name": "kanban",
       "type": "vawe:block",
-      "description": "columns of cards",
+      "description": "a kanban board: columns of small cards dealt in reading order, for a task board or pipeline view.",
       "tags": [
         "kanban"
       ]
@@ -853,7 +853,7 @@
     {
       "name": "keyboard",
       "type": "vawe:block",
-      "description": "phone keyboard · qwerty keys, rises up into frame",
+      "description": "an on-screen phone keyboard, qwerty keys or a numeric keypad, that slides up from the bottom edge.",
       "tags": [
         "keyboard"
       ]
@@ -869,7 +869,7 @@
     {
       "name": "kpiRow",
       "type": "vawe:block",
-      "description": "row of stat cells (value + label)",
+      "description": "a row of numbers side by side, each with a small label under it, and the numbers count up",
       "tags": [
         "kpiRow"
       ]
@@ -893,7 +893,7 @@
     {
       "name": "lineChart",
       "type": "vawe:block",
-      "description": "trend line in a hairline card",
+      "description": "a line graph over time: a trend line in a hairline card, optionally filled to an area chart",
       "tags": [
         "lineChart"
       ]
@@ -917,7 +917,7 @@
     {
       "name": "listRow",
       "type": "vawe:block",
-      "description": "generic list item · icon tile, title over sub, trailing detail",
+      "description": "a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row.",
       "tags": [
         "listRow"
       ]
@@ -925,7 +925,7 @@
     {
       "name": "loadingBar",
       "type": "vawe:block",
-      "description": "determinate fill wipes L→R, lands ✓ done",
+      "description": "a progress bar: a track fills left to right to a set percent and finishes with a green done checkmark",
       "tags": [
         "loadingBar"
       ]
@@ -933,7 +933,7 @@
     {
       "name": "logLines",
       "type": "vawe:block",
-      "description": "log stream (timestamp + level colour)",
+      "description": "a console log feed: timestamped lines stream in fast, colour-coded by info, warning and error level",
       "tags": [
         "logLines"
       ]
@@ -957,7 +957,7 @@
     {
       "name": "logoWall",
       "type": "vawe:block",
-      "description": "grid of wordmarks / logos",
+      "description": "a grid of company wordmarks or logo images, for a social proof or partner strip.",
       "tags": [
         "logoWall"
       ]
@@ -997,7 +997,7 @@
     {
       "name": "lowerThird.cleanBar",
       "type": "vawe:block",
-      "description": "hairline plate · name over role · the quiet one",
+      "description": "a name plate low in the frame: the speaker's name over their job title, on a hairline plate",
       "tags": [
         "lowerThird"
       ]
@@ -1069,7 +1069,7 @@
     {
       "name": "meshPanel",
       "type": "vawe:block",
-      "description": "soft mesh-gradient surface (stacked accent blobs)",
+      "description": "a soft blurry gradient background made of overlapping colour blobs, calm and branded",
       "tags": [
         "meshPanel"
       ]
@@ -1077,7 +1077,7 @@
     {
       "name": "morphText",
       "type": "vawe:block",
-      "description": "a gooey word cycle: each word melts into the next through a metaball filter, no letter correspondence",
+      "description": "a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence",
       "tags": [
         "morphText"
       ]
@@ -1085,7 +1085,7 @@
     {
       "name": "nodeGraph",
       "type": "vawe:block",
-      "description": "non-hierarchical graph · author-placed nodes, routed edges, one node lit",
+      "description": "a network diagram of nodes and connecting edges, not a top-down tree, with one node highlighted",
       "tags": [
         "nodeGraph"
       ]
@@ -1093,7 +1093,7 @@
     {
       "name": "notification",
       "type": "vawe:block",
-      "description": "toast card (dot + title + body)",
+      "description": "a light system alert card that slides in from the edge, a status dot, a heading and a message, arrives and leaves like a phone banner.",
       "tags": [
         "notification"
       ]
@@ -1125,7 +1125,7 @@
     {
       "name": "nowPlaying",
       "type": "vawe:block",
-      "description": "music-player card · artwork, progress, transport",
+      "description": "a music player card: album artwork, a scrubbing progress bar, and play/skip transport controls",
       "tags": [
         "nowPlaying"
       ]
@@ -1133,7 +1133,7 @@
     {
       "name": "onboardCard",
       "type": "vawe:block",
-      "description": "onboarding pane · progress dots, title, body, CTA",
+      "description": "one pane of a first-run onboarding flow: progress dots, a title, body copy, and a CTA button.",
       "tags": [
         "onboardCard"
       ]
@@ -1141,7 +1141,7 @@
     {
       "name": "parallaxUnzoom",
       "type": "vawe:block",
-      "description": "the same board run backwards: the hero starts filling the frame and retreats into its cell as the ring arrives",
+      "description": "the reverse of a zoom-in: one card fills the frame first, then shrinks back into a grid of cards around it",
       "tags": [
         "parallaxUnzoom"
       ]
@@ -1149,7 +1149,7 @@
     {
       "name": "parallaxZoom",
       "type": "vawe:block",
-      "description": "one card eats the frame: the centre cell scales to fill the board while its eight neighbours travel outward and dim",
+      "description": "a grid of cards where the centre card zooms to fill the whole frame while the rest slide outward and fade",
       "tags": [
         "parallaxZoom"
       ]
@@ -1157,7 +1157,7 @@
     {
       "name": "phoneFrame",
       "type": "vawe:block",
-      "description": "phone shell (draw content on top)",
+      "description": "a phone shaped shell: dark bezel, notch, status clock, screen area to draw your app content into for a mobile mockup.",
       "tags": [
         "phoneFrame"
       ]
@@ -1165,7 +1165,7 @@
     {
       "name": "pillRow",
       "type": "vawe:block",
-      "description": "horizontal row of chip tags",
+      "description": "a horizontal row of rounded chip tags, for labels, filters, or categories side by side.",
       "tags": [
         "pillRow"
       ]
@@ -1173,7 +1173,7 @@
     {
       "name": "pointer",
       "type": "vawe:block",
-      "description": "mouse pointer · travels to a target and clicks it (ripple)",
+      "description": "a mouse cursor that travels across the screen to a target and clicks it, with a click ripple.",
       "tags": [
         "pointer"
       ]
@@ -1181,7 +1181,7 @@
     {
       "name": "pressButton",
       "type": "vawe:block",
-      "description": "CTA that depresses and releases when it is clicked",
+      "description": "a CTA button that visibly depresses and springs back when clicked, the payoff for a pointer tap on a button.",
       "tags": [
         "pressButton"
       ]
@@ -1189,7 +1189,7 @@
     {
       "name": "profileHeader",
       "type": "vawe:block",
-      "description": "account header · avatar over name, handle, stat row",
+      "description": "the top of an account screen: avatar over a name and @handle, with a small row of stat counts below.",
       "tags": [
         "profileHeader"
       ]
@@ -1197,7 +1197,7 @@
     {
       "name": "progressRing",
       "type": "vawe:block",
-      "description": "circular progress + % label",
+      "description": "a circular progress ring with the percent complete written in its centre",
       "tags": [
         "progressRing"
       ]
@@ -1221,7 +1221,7 @@
     {
       "name": "quote",
       "type": "vawe:block",
-      "description": "pull quote + attribution",
+      "description": "a big pull quote with the person's name credited underneath, for a testimonial or a line to remember",
       "tags": [
         "quote"
       ]
@@ -1229,7 +1229,7 @@
     {
       "name": "quote.customer",
       "type": "vawe:block",
-      "description": "customer quote",
+      "description": "a testimonial pulled big, with the person and their company credited underneath",
       "tags": [
         "quote"
       ]
@@ -1237,7 +1237,7 @@
     {
       "name": "reactionBar",
       "type": "vawe:block",
-      "description": "reaction count pills",
+      "description": "emoji reaction pills with counts, like the reactions under a Slack or Discord message",
       "tags": [
         "reactionBar"
       ]
@@ -1253,7 +1253,7 @@
     {
       "name": "redditPost",
       "type": "vawe:block",
-      "description": "a link-aggregator post: the vote rail left of the title, subreddit line, body, comment count",
+      "description": "a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count",
       "tags": [
         "redditPost"
       ]
@@ -1261,7 +1261,7 @@
     {
       "name": "scanGate",
       "type": "vawe:block",
-      "description": "autofocus gate: a band travels the frame, the brackets contract onto the target and lock",
+      "description": "an autofocus targeting reticle: a scan line sweeps the frame and brackets snap shut and lock onto the subject",
       "tags": [
         "scanGate"
       ]
@@ -1269,7 +1269,7 @@
     {
       "name": "screenSwap",
       "type": "vawe:block",
-      "description": "screen A becomes screen B in place (wipe, no travel)",
+      "description": "one app screen replaces another in the same spot, either a wipe or a slide, like swiping between phone screens",
       "tags": [
         "screenSwap"
       ]
@@ -1285,7 +1285,7 @@
     {
       "name": "searchEngine.home",
       "type": "vawe:block",
-      "description": "search home. Wordmark + pill, query types in (keys click)",
+      "description": "a search engine home page: a wordmark over a rounded search box, the query typing itself in",
       "tags": [
         "searchEngine"
       ]
@@ -1293,7 +1293,7 @@
     {
       "name": "searchEngine.results",
       "type": "vawe:block",
-      "description": "search results, ranked links, cursor clicks one",
+      "description": "the search results page: a ranked list of links, with a cursor clicking one",
       "tags": [
         "searchEngine"
       ]
@@ -1301,7 +1301,7 @@
     {
       "name": "settingsRow",
       "type": "vawe:block",
-      "description": "settings row · label + toggle, chevron or value",
+      "description": "a settings row: a label with a toggle switch, a chevron into a sub-screen, or a current value shown as text.",
       "tags": [
         "settingsRow"
       ]
@@ -1309,7 +1309,7 @@
     {
       "name": "socialProof",
       "type": "vawe:block",
-      "description": "avatar stack + the line it proves (caption owned by the block)",
+      "description": "an avatar stack next to a trust line, like Trusted by 8,000 teams, for social proof",
       "tags": [
         "socialProof"
       ]
@@ -1317,7 +1317,7 @@
     {
       "name": "spinner",
       "type": "vawe:block",
-      "description": "looping Lottie (deterministic)",
+      "description": "a small looping loading spinner animation for a busy or working state",
       "tags": [
         "spinner"
       ]
@@ -1333,7 +1333,7 @@
     {
       "name": "splitFlapBoard",
       "type": "vawe:block",
-      "description": "a mechanical departure board · a drum per character steps through the alphabet and lands",
+      "description": "an airport or train station split-flap departure board where each letter flips through the alphabet to land on a word",
       "tags": [
         "splitFlapBoard"
       ]
@@ -1349,7 +1349,7 @@
     {
       "name": "splitScreen",
       "type": "vawe:block",
-      "description": "two panes, one geometry · second pane lands behind the first",
+      "description": "the screen divided into two side-by-side panes, or a small inset video in the corner like picture-in-picture",
       "tags": [
         "splitScreen"
       ]
@@ -1365,7 +1365,7 @@
     {
       "name": "spotlightCard",
       "type": "vawe:block",
-      "description": "dark card with a soft spotlight glow washing from a corner",
+      "description": "a dark card lit by a soft glow from one corner or edge, like a spotlight in a dark room",
       "tags": [
         "spotlightCard"
       ]
@@ -1373,7 +1373,7 @@
     {
       "name": "stackedBar",
       "type": "vawe:block",
-      "description": "multi-series stacked bars",
+      "description": "a stacked bar chart: multiple series piled in one bar per category to show a total and its parts",
       "tags": [
         "stackedBar"
       ]
@@ -1389,7 +1389,7 @@
     {
       "name": "statBig",
       "type": "vawe:block",
-      "description": "scale-contrast stat, huge count + tiny label",
+      "description": "one huge number with a tiny label under it, for a single headline stat or KPI callout",
       "tags": [
         "statBig"
       ]
@@ -1413,7 +1413,7 @@
     {
       "name": "stepFlow",
       "type": "vawe:block",
-      "description": "horizontal numbered steps",
+      "description": "a horizontal row of numbered steps with connectors that fill in as progress moves from one step to the next.",
       "tags": [
         "stepFlow"
       ]
@@ -1445,7 +1445,7 @@
     {
       "name": "stripeCard",
       "type": "vawe:block",
-      "description": "recognizably-Stripe payments card",
+      "description": "a payments checkout card that copies Stripe's real look: amount, a small spend graph, a Pay button",
       "tags": [
         "stripeCard"
       ]
@@ -1453,7 +1453,7 @@
     {
       "name": "tabBar",
       "type": "vawe:block",
-      "description": "segmented control",
+      "description": "a row of tabs or a segmented control whose selected pill actually slides from one tab to another.",
       "tags": [
         "tabBar"
       ]
@@ -1485,7 +1485,7 @@
     {
       "name": "table",
       "type": "vawe:block",
-      "description": "data table (header + rows)",
+      "description": "a table of rows and columns: a header plus data rows divided by hairlines, rows fill in one after another.",
       "tags": [
         "table"
       ]
@@ -1501,7 +1501,7 @@
     {
       "name": "tapRipple",
       "type": "vawe:block",
-      "description": "touch tap · contact dot and an expanding ring, for phone demos",
+      "description": "a finger tap on a touchscreen: a contact dot and an expanding ring at the point touched, for phone demos.",
       "tags": [
         "tapRipple"
       ]
@@ -1509,7 +1509,7 @@
     {
       "name": "terminal",
       "type": "vawe:block",
-      "description": "command prompt; command types in, output answers after it",
+      "description": "a terminal window: a shell command types itself in character by character, then its output prints below",
       "tags": [
         "terminal"
       ]
@@ -1541,7 +1541,7 @@
     {
       "name": "terminalHtml",
       "type": "vawe:block",
-      "description": "the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge",
+      "description": "the same deploy terminal as one hand-drawn console surface: gradient glass, per-word command colouring, a blinking text cursor",
       "tags": [
         "terminalHtml"
       ]
@@ -1549,7 +1549,7 @@
     {
       "name": "terminalPro",
       "type": "vawe:block",
-      "description": "a deploy terminal built from layer primitives: every line its own timed, measurable object",
+      "description": "a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark",
       "tags": [
         "terminalPro"
       ]
@@ -1557,7 +1557,7 @@
     {
       "name": "textCursor",
       "type": "vawe:block",
-      "description": "a caret that bleeds light: an accent glow on the cell, a red/cyan fringe on the type converging as the line settles",
+      "description": "a blinking text cursor typing a word, with a glowing red/cyan light-fringe on the letters as it lands",
       "tags": [
         "textCursor"
       ]
@@ -1573,7 +1573,7 @@
     {
       "name": "timeline",
       "type": "vawe:block",
-      "description": "vertical rail of events",
+      "description": "a vertical rail of dated events with dots and a connecting line, each entry lands beside its dot in sequence.",
       "tags": [
         "timeline"
       ]
@@ -1581,7 +1581,7 @@
     {
       "name": "timeline.release",
       "type": "vawe:block",
-      "description": "release timeline",
+      "description": "dated shipping milestones down a rail, for a changelog or a roadmap",
       "tags": [
         "timeline"
       ]
@@ -1589,7 +1589,7 @@
     {
       "name": "toast",
       "type": "vawe:block",
-      "description": "dark snackbar + action",
+      "description": "a dark snackbar with a status dot, a message, and an optional action link, the popup that says something just happened.",
       "tags": [
         "toast"
       ]
@@ -1621,7 +1621,7 @@
     {
       "name": "tweetCard",
       "type": "vawe:block",
-      "description": "a post card + counts",
+      "description": "a tweet or X post card: avatar, handle, body text, like and reply counts",
       "tags": [
         "tweetCard"
       ]
@@ -1629,7 +1629,7 @@
     {
       "name": "uiReveal3d",
       "type": "vawe:block",
-      "description": "UI rows folding up out of depth: each hinges at its top edge in real perspective, one after another",
+      "description": "rows of a UI folding upright out of the floor in 3D perspective, one after another",
       "tags": [
         "uiReveal3d"
       ]
@@ -1637,7 +1637,7 @@
     {
       "name": "usMap",
       "type": "vawe:block",
-      "description": "US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend",
+      "description": "a map of the United States coloured state by state, a choropleth with a legend and value labels per state",
       "tags": [
         "usMap"
       ]
@@ -1645,7 +1645,7 @@
     {
       "name": "usMapBubble",
       "type": "vawe:block",
-      "description": "proportional circles at city coordinates (AREA is the value) with name + value callouts",
+      "description": "a map of the United States with circles sized by value at each city, a proportional bubble map",
       "tags": [
         "usMapBubble"
       ]
@@ -1653,7 +1653,7 @@
     {
       "name": "usMapFlow",
       "type": "vawe:block",
-      "description": "origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out",
+      "description": "a map of the United States with arrows drawn between cities showing flow or movement from an origin to destinations",
       "tags": [
         "usMapFlow"
       ]
@@ -1661,7 +1661,7 @@
     {
       "name": "usMapHex",
       "type": "vawe:block",
-      "description": "US hex cartogram: every state the same size, so the reading is the value not the acreage",
+      "description": "a hex map of the United States: every state drawn as one same-size hexagon so colour reads value, not land area",
       "tags": [
         "usMapHex"
       ]
@@ -1669,7 +1669,7 @@
     {
       "name": "videoLowerThird",
       "type": "vawe:block",
-      "description": "creator lower third · avatar, subs, red CTA",
+      "description": "a YouTube-style creator lower third: avatar, subscriber count, and a red subscribe CTA",
       "tags": [
         "videoLowerThird"
       ]
@@ -1677,9 +1677,89 @@
     {
       "name": "worldMap",
       "type": "vawe:block",
-      "description": "world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map",
+      "description": "a world map coloured country by country, a global choropleth with a legend for the data shown",
       "tags": [
         "worldMap"
+      ]
+    },
+    {
+      "name": "bands",
+      "type": "vawe:generator",
+      "description": "A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind.",
+      "tags": [
+        "generator",
+        "shader",
+        "layers"
+      ]
+    },
+    {
+      "name": "colonnade",
+      "type": "vawe:generator",
+      "description": "Wide panels split by bright hairlines, soft masses under a glow.",
+      "tags": [
+        "generator",
+        "lightfield",
+        "html"
+      ]
+    },
+    {
+      "name": "crt",
+      "type": "vawe:generator",
+      "description": "A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top.",
+      "tags": [
+        "generator",
+        "treatment",
+        "html"
+      ]
+    },
+    {
+      "name": "effector",
+      "type": "vawe:generator",
+      "description": "One travelling point drives a whole grid by DISTANCE, not by order: a wave, a ripple or, with a sticky delay, a trail painted across the clones. No keyframe lands on any clone.",
+      "tags": [
+        "generator",
+        "motion",
+        "layers"
+      ]
+    },
+    {
+      "name": "keyframeHandle",
+      "type": "vawe:generator",
+      "description": "The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.",
+      "tags": [
+        "generator",
+        "motion",
+        "html"
+      ]
+    },
+    {
+      "name": "rangeSelector",
+      "type": "vawe:generator",
+      "description": "The AE range selector's smoothness dial on this engine's kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs.",
+      "tags": [
+        "generator",
+        "type",
+        "layers"
+      ]
+    },
+    {
+      "name": "spectrum",
+      "type": "vawe:generator",
+      "description": "Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it.",
+      "tags": [
+        "generator",
+        "shader",
+        "layers"
+      ]
+    },
+    {
+      "name": "thermalBlur",
+      "type": "vawe:generator",
+      "description": "White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away.",
+      "tags": [
+        "generator",
+        "treatment",
+        "html"
       ]
     }
   ]

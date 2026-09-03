@@ -1,0 +1,161 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "spectrum",
+  "type": "vawe:generator",
+  "title": "spectrum",
+  "description": "Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it.",
+  "tags": [
+    "generator",
+    "shader",
+    "layers"
+  ],
+  "install": {
+    "kind": "scene-layers",
+    "target": "layers[]",
+    "requires": "nothing beyond the vawe engine: these are concrete layer primitives, no expand step",
+    "props": [
+      "bands",
+      "bandAngle",
+      "bandOffset",
+      "mirrorBands",
+      "zoom",
+      "gradientAngle",
+      "converge",
+      "bandLean",
+      "bandShading",
+      "lightShape",
+      "lightWidth",
+      "lightHeight",
+      "lightAngle",
+      "lightOriginX",
+      "lightOriginY",
+      "lightEdge",
+      "lightRing",
+      "lightPoints",
+      "lightSpike",
+      "lightPolarity",
+      "seed",
+      "colour.ramp1",
+      "colour.ramp1At",
+      "colour.ramp2",
+      "colour.ramp2At",
+      "colour.ramp3",
+      "colour.ramp3At",
+      "colour.ramp4",
+      "colour.ramp4At",
+      "colour.ramp5",
+      "colour.ramp5At",
+      "colour.ramp6",
+      "colour.ramp6At",
+      "colour.ramp7",
+      "colour.ramp7At",
+      "colour.ramp8",
+      "colour.ramp8At"
+    ],
+    "preset": "c6",
+    "options": {
+      "bands": 10.7,
+      "bandAngle": 0,
+      "bandOffset": 0.5,
+      "mirrorBands": true,
+      "zoom": 1,
+      "gradientAngle": 90,
+      "converge": 0.1,
+      "bandLean": 0.5,
+      "bandShading": -0.25,
+      "lightShape": "round",
+      "lightWidth": 0.62,
+      "lightHeight": 0.62,
+      "lightAngle": 0,
+      "lightOriginX": 50,
+      "lightOriginY": 45,
+      "lightEdge": 1.6,
+      "lightRing": 0,
+      "lightPoints": 0,
+      "lightSpike": 0,
+      "lightPolarity": 0,
+      "seed": 0,
+      "colour": {
+        "ramp1": "#effce6",
+        "ramp1At": 0,
+        "ramp2": "#def9de",
+        "ramp2At": 0.14285714285714285,
+        "ramp3": "#68b290",
+        "ramp3At": 0.2857142857142857,
+        "ramp4": "#c0e87a",
+        "ramp4At": 0.42857142857142855,
+        "ramp5": "#7ccdd8",
+        "ramp5At": 0.5714285714285714,
+        "ramp6": "#56a0dd",
+        "ramp6At": 0.7142857142857143,
+        "ramp7": "#dcf4fb",
+        "ramp7At": 0.8571428571428571,
+        "ramp8": "#eeffff",
+        "ramp8At": 1
+      }
+    },
+    "layers": [
+      {
+        "type": "shader",
+        "shader": "bands",
+        "intensity": 1,
+        "seed": 0,
+        "params": [
+          10.7,
+          0,
+          0.62,
+          1.6
+        ],
+        "params2": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "params3": [
+          1,
+          0.25,
+          0.1,
+          0.5
+        ],
+        "params4": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "params5": [
+          1,
+          0,
+          -0.25,
+          0.5
+        ],
+        "params6": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "colors": [
+          "#effce6",
+          "#def9de",
+          "#68b290",
+          "#c0e87a",
+          "#7ccdd8",
+          "#56a0dd",
+          "#dcf4fb",
+          "#eeffff"
+        ],
+        "x": 0,
+        "y": 0,
+        "start": 0,
+        "duration": 6
+      }
+    ]
+  },
+  "docs": "docs/LIGHTFIELD.md",
+  "reference": "refs/colonnade/c6.jpg",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=spectrum"
+  }
+}

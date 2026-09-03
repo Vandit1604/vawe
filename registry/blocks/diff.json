@@ -3,7 +3,7 @@
   "name": "diff",
   "type": "vawe:block",
   "title": "diff",
-  "description": "code diff card (+/- coloured)",
+  "description": "a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review",
   "tags": [
     "diff"
   ],

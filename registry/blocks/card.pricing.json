@@ -3,7 +3,7 @@
   "name": "card.pricing",
   "type": "vawe:block",
   "title": "card.pricing",
-  "description": "plan · price · features · CTA",
+  "description": "a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button",
   "tags": [
     "pricingCard"
   ],

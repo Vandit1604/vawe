@@ -3,7 +3,7 @@
   "name": "badge",
   "type": "vawe:block",
   "title": "badge",
-  "description": "CI-shield token (label · value)",
+  "description": "a small label plus coloured value chip, like a CI shield or a status token (e.g. version, warning, beta).",
   "tags": [
     "badge"
   ],

@@ -3,7 +3,7 @@
   "name": "usMap",
   "type": "vawe:block",
   "title": "usMap",
-  "description": "US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend",
+  "description": "a map of the United States coloured state by state, a choropleth with a legend and value labels per state",
   "tags": [
     "usMap"
   ],

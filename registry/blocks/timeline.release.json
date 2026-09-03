@@ -3,7 +3,7 @@
   "name": "timeline.release",
   "type": "vawe:block",
   "title": "timeline.release",
-  "description": "release timeline",
+  "description": "dated shipping milestones down a rail, for a changelog or a roadmap",
   "tags": [
     "timeline"
   ],

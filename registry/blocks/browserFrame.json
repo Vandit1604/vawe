@@ -3,7 +3,7 @@
   "name": "browserFrame",
   "type": "vawe:block",
   "title": "browserFrame",
-  "description": "window chrome (traffic dots + URL bar)",
+  "description": "a fake browser window: traffic-light dots and a URL bar framing a screenshot or any content drawn inside it.",
   "tags": [
     "browserFrame"
   ],

@@ -3,7 +3,7 @@
   "name": "glassMenu",
   "type": "vawe:block",
   "title": "glassMenu",
-  "description": "frosted command panel: icon column, rows, separators, one row lit with the accent",
+  "description": "a frosted right-click or context menu: icon column, list of rows, one row highlighted",
   "tags": [
     "glassMenu"
   ],

@@ -3,7 +3,7 @@
   "name": "keyboard",
   "type": "vawe:block",
   "title": "keyboard",
-  "description": "phone keyboard · qwerty keys, rises up into frame",
+  "description": "an on-screen phone keyboard, qwerty keys or a numeric keypad, that slides up from the bottom edge.",
   "tags": [
     "keyboard"
   ],

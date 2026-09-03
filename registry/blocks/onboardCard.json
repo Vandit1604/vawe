@@ -3,7 +3,7 @@
   "name": "onboardCard",
   "type": "vawe:block",
   "title": "onboardCard",
-  "description": "onboarding pane · progress dots, title, body, CTA",
+  "description": "one pane of a first-run onboarding flow: progress dots, a title, body copy, and a CTA button.",
   "tags": [
     "onboardCard"
   ],

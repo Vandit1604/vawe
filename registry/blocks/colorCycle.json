@@ -3,7 +3,7 @@
   "name": "colorCycle",
   "type": "vawe:block",
   "title": "colorCycle",
-  "description": "one word cycling through hues",
+  "description": "one word that changes colour again and again, repainted through a rainbow of hues in a fixed order",
   "tags": [
     "colorCycle"
   ],

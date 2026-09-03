@@ -1,0 +1,39 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "keyframeHandle",
+  "type": "vawe:generator",
+  "title": "keyframeHandle",
+  "description": "The graph editor for one keyframe pair: per-side influence and speed, drawn as the curve AND as the even-time strip that shows where the movement actually happens.",
+  "tags": [
+    "generator",
+    "motion",
+    "html"
+  ],
+  "install": {
+    "kind": "generated-markup",
+    "target": "bg[].html (or an html layer)",
+    "requires": "markup only. Paste it as-is; the engine drives it with --t, and it needs no block library",
+    "props": [
+      "outInfluence",
+      "outSpeed",
+      "inInfluence",
+      "inSpeed",
+      "ticks",
+      "colour"
+    ],
+    "preset": "easyEase",
+    "options": {
+      "outInfluence": 33.333333333333336,
+      "outSpeed": 0,
+      "inInfluence": 33.333333333333336,
+      "inSpeed": 0,
+      "ticks": 24,
+      "colour": "#e8ff59"
+    },
+    "render": "import { byName } from 'core/generators.js'; byName('keyframeHandle').render(options)"
+  },
+  "docs": "docs/EFFECTS.md",
+  "preview": {
+    "url": "https://vawe.dev/playground?gen=keyframeHandle"
+  }
+}
