@@ -7,6 +7,17 @@ codes: hook-emoji, hook-length, hook-weak-opener, jargon, no-spectacle-nominated
 
 # STORY: why these beats, in this order, doing what
 
+## AGENT SUMMARY
+
+- Never spoil the payoff: pose the question in the hook, close it with the best fact at 80-90% of
+  runtime. Every beat declares a persuasion move and a feeling arc, or it fails the value gate and gets
+  cut. Spine: Hook -> Build -> Proof -> Payoff -> CTA.
+- Enforced by the value gate in `vawe-video-planning` and the required per-beat fields in
+  `TASTE-RULES.md`; codes: `hook-emoji`, `hook-length`, `hook-weak-opener`, `jargon`,
+  `no-spectacle-nominated`, `restated-headline`, `spectacle-beat-unnamed`, `spectacle-in-wrong-beat`,
+  `spectacle-not-built`, `vague-quantifier`.
+- Checkable action: does every beat declare a persuasion and a feeling, and does the best fact land last?
+
 The four other spines answer how a frame looks, fills, moves, and sounds. This one answers the
 question that comes first: **what beats, in what order, and what each one is DOING to the viewer.**
 A video with perfect type and motion still fails if the beats are in the wrong order or none of them

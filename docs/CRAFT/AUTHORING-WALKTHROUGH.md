@@ -6,6 +6,16 @@ group: crosscutting
 
 # AUTHORING-WALKTHROUGH: one good video, from a blank page to shipped
 
+## AGENT SUMMARY
+
+- Follow the chain in order: spine -> manufacture the four things (taste anchor, real assets, story
+  spine, real copy) -> LOCK SHEET (value-test every beat) -> transcribe JSON -> `make author-check` ->
+  `beats`/`reveal` -> `make video` -> `make judge` (read the sheet) -> `ledger` -> harvest. Nothing
+  renders before the lock sheet is approved.
+- Enforced by `[ref]`: each step names the command that runs it; `make author-check` and `make judge`
+  are the two steps that block/see, everything else is sequence discipline.
+- Checkable action: is the lock sheet approved before any JSON is rendered?
+
 Every other doc is a *reference* you dip into. This is the one **narrative**: it walks a single video
 from a bare brief to a shipped file, calling each tool and doc in the order you actually use it. It
 exists because the hard case is authoring with **no brand site**, no colours, no real UI, no taste on
@@ -117,8 +127,7 @@ Under `TASTE=1` the ladder **blocks** on value (placeholder / unbacked / thin be
 on the **ambition floor** (`plain-slideshow`, too little motion; the inverse of effect-soup). **The four
 book tells do NOT block.** `linear-motion`, `monotone-timing`, `enter-and-retreat` and `effect-soup` are
 every one of them `warn()` in `scripts/author/motion-director.mjs`, which exits only on FAIL-tier codes
-and has no `--strict` path. This page said they blocked, and they never did. Directed lives between soup
-and slideshow. WARN-tier findings
+and has no `--strict` path. Directed lives between soup and slideshow. WARN-tier findings
 you read and reach past. A deliberate rule break you stand behind → waive it in the scene, **with its
 reason**, because a bare `allow` array blocks in the always-on half (`author-check.mjs:74-83` wants a
 `_why` of at least 12 characters per waived code):
@@ -176,3 +185,9 @@ rule in the project `CLAUDE.md`. An unlogged fix gets re-broken.
 spine → manufacture the four things → lock sheet (value-test every beat) → transcribe JSON in layering
 order → **`make author-check`** → `beats`/`reveal` → `make video` → **`make judge` (read the sheet)** →
 `ledger` → harvest. Miss the bolded two and you ship effects; run them and you ship a directed film.
+
+## Provenance
+
+**Do not re-add:** a claim that `linear-motion`, `monotone-timing`, `enter-and-retreat` or `effect-soup`
+block under `TASTE=1`. All four are `warn()`-tier in `scripts/author/motion-director.mjs` and have no
+`--strict` path; only value, direction, dissolve, designspec and the ambition floor block.

@@ -6,6 +6,17 @@ group: story
 
 # SELECTION: intent → the right effect, and why
 
+## AGENT SUMMARY
+
+- Pick transition, font, easing and look by the beat's INTENT, traced to a cited principle, never by
+  vibes. For a whole film, pick ONE of the 8 named reference profiles (Part 2) instead of inventing a
+  coordinated look beat by beat.
+- Enforced by `make direct`, which reads the chosen profile and flags contradictions (bounce on a
+  serious brand, mixed cut families, a loud sting on a restrained profile). `make concept` forces a
+  round of directions scored against the library median (Part 3).
+- Checkable action: name the profile you picked, then describe the content that would make a DIFFERENT
+  profile correct.
+
 `MOTION-CRAFT.md` is effect-first ("`whip` = momentum"). This file is **intent-first**: you know the
 feeling a beat wants, and it tells you which transition, font, look, easing and colour is correct,
 with the reason traced to a design principle. Use it so choices are predictable and explainable, not
