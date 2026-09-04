@@ -208,6 +208,14 @@ demo: ## scaffold a SPECIMEN demo scene (one subject, one shot) and iterate on i
 	@f=$$(node scripts/dev/demo.mjs --print-path --q "$(Q)" $(if $(NAME),--name "$(NAME)") $(if $(FX),--fx "$(FX)") $(if $(SUBJECT),--subject "$(SUBJECT)")) \
 	  && $(MAKE) --no-print-directory dev D=$$f
 
+# make scaffold OUT=formats/scene/<name>.json [DUR=13] [THEME=default] [BEATS=5]: THE DEFAULT START for
+# a real film, not a demo. Writes a scene composed entirely from {type:"beat"} blueprints (directed by
+# construction: it clears sparse-beats, plain-slideshow and no-transition/no-bg-motion on write) plus its
+# `.storyboard.md` sidecar (structurally clean against storyboard-check and craft-checklist). The
+# author's only job afterwards is to replace the `REPLACE:`/`<fill: ...>` markers. docs/CRAFT/BLUEPRINTS.md.
+scaffold: ## write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=)
+	node scripts/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS))
+
 # make check D=<file>: every gate, every finding, ZERO consequence. Same information `make ship`
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
 check:
