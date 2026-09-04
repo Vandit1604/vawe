@@ -119,13 +119,13 @@ dead-branch:
 # already resolves markdown links to .md files; nothing checked a command, a backticked source path,
 # or a target whose script had been deleted under it.
 doc-refs:
-	node scripts/gates/doc-refs.mjs
+	@node scripts/gates/doc-refs.mjs $(if $(JSON),--json,)
 
 # make rung: which rules in CLAUDE.md and docs/CRAFT are enforced by something, and which are only prose?
 # Every non-[eye] tag has to NAME its mechanism, and the named gate, hook, command or file:line has to
 # exist. LIST=1 prints the [eye] worklist instead; STAMP=1 records today's [eye] count as the ceiling.
 rung:
-	node scripts/gates/rung.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp)
+	@node scripts/gates/rung.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
 
 # make docs-drift: ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count. It decayed this way twice and
 # routed two planning passes at work that already existed; its own closing warning says nothing
@@ -356,7 +356,7 @@ snap-blocks:
 # settle before the exit, counters sane, typing completes). The check `make snap`/`make audit` can't do.
 # D forwards to --data; without it the target silently audited sample.json instead of your scene.
 motion:
-	node scripts/gates/motion-audit.mjs $(M) $(if $(D),--data $(D)) $(if $(STRIDE),--stride $(STRIDE))
+	@node scripts/gates/motion-audit.mjs $(M) $(if $(D),--data $(D)) $(if $(STRIDE),--stride $(STRIDE)) $(if $(JSON),--json,)
 
 # make conformance [enums|props|paths]: does the engine DO what it says it accepts? Applies every
 # declared enum value and every layer prop, and asserts the OUTPUT CHANGED. Catches the dominant bug
@@ -416,7 +416,7 @@ docs:
 # `vawe-docs` skill, and the table inside docs/CRAFT/README.md. Run it after editing a doc's `when:` or
 # `answers:`, or after adding a doc. The views are generated so they cannot drift from the docs.
 doc-index:
-	node scripts/gates/doc-map.mjs --write
+	@node scripts/gates/doc-map.mjs --write $(if $(JSON),--json,)
 
 # make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions.js): every transition
 # across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: docs/CRAFT/TRANSITIONS.md.
@@ -804,12 +804,12 @@ schema: ## what may I write at a path in a scene JSON (AT='layers[].motion[]'); 
 # make schema-check: assert every layer prop the engine (scene.html) reads is defined in schema.json
 # (catches drift like a new primitive that shipped without a schema entry). Exits 1 on drift.
 schema-check:
-	node scripts/gates/schema-drift.mjs
+	@node scripts/gates/schema-drift.mjs $(if $(JSON),--json,)
 
 # make schema-write: regenerate every DERIVED part of schema.json (the layerProps table + the enums
 # that copy a code registry) so a registry that grew needs no second, hand edit. schema-check verifies.
 schema-write:
-	node scripts/gates/schema-drift.mjs --write
+	@node scripts/gates/schema-drift.mjs --write $(if $(JSON),--json,)
 
 # make prop-probe: set EVERY declared layer prop on a layer of EVERY type that declares it, build the
 # lot through the real pipeline, and report the ones nothing read. core/prop-audit.js already refuses a
@@ -991,7 +991,7 @@ output-contract:
 # sound cue. WRITE=1 regenerates and exits 0; without it the run fails and leaves the files in place so
 # the fix is `git add`, not another command to remember.
 generated-check:
-	node scripts/gates/generated-check.mjs $(if $(WRITE),--write,)
+	@node scripts/gates/generated-check.mjs $(if $(WRITE),--write,) $(if $(JSON),--json,)
 
 effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
@@ -1102,7 +1102,7 @@ direct: ## direction gate + motion director, suggest cuts/stings (D=<file> [WRIT
 	node scripts/author/motion-director.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
 
 judge: ## vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
-	node scripts/gates/judge.mjs $(D) $(if $(VS),--vs $(VS))
+	@node scripts/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,)
 
 inspect: ## verify a scene against its .intent.json sidecar (D=<file>)
 	@node scripts/gates/inspect.mjs $(D) $(if $(JSON),--json,)
