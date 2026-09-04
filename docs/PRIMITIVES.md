@@ -8,7 +8,7 @@ group: reference
 
 ## AGENT SUMMARY
 
-- This doc lists every primitive and prop the engine composes videos from: the 18 layer types, every
+- This doc lists every primitive and prop the engine composes videos from: the 24 layer types, every
   effect/preset family (cuts, stings, seams, kinetic type, shaders, looks, modifiers), the responsive
   one-source-to-every-aspect model, and the motion-math exports.
 - It is the vocabulary reference. Check it before inventing a primitive or guessing a field name; then

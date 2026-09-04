@@ -6,6 +6,12 @@ group: look
 
 # Why some motion feels right
 
+## AGENT SUMMARY
+
+- Default entrances to `easeOutQuint` (not the weaker `easeOutCubic` this engine currently defaults to); never `ease-in` on an entrance. Turn on `exitRatio` per theme so exits move faster than their entrance.
+- `[eye]`: no gate enforces this page. `make claims` tracks the `linear`-easing split it names.
+- Checkable action: does this entrance ease out on a strong curve, and does its exit move faster than its arrival?
+
 Sources, all read 2026-08-29: [animations.dev](https://animations.dev) and
 [emilkowal.ski](https://emilkowal.ski/ui/great-animations) by Emil Kowalski, and his
 [review-animations STANDARDS](https://github.com/emilkowalski/skills/blob/main/skills/review-animations/STANDARDS.md),

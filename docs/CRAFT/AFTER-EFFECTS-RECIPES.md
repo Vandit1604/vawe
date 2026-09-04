@@ -6,6 +6,12 @@ group: reference
 
 # AFTER EFFECTS RECIPES: the named procedures, and what this engine already does
 
+## AGENT SUMMARY
+
+- 26 named After Effects recipes below, each with its real numbers and a HAVE / PARTLY / LACK verdict against this engine. The TABLE below is the current verdict; where a per-recipe section disagrees with the table, treat that as unresolved drift, not settled fact.
+- `[eye]`: a reference catalog, not a gate. Cross-check `make arsenal Q="…"` before building any of these by hand.
+- Checkable action: for the recipe you want, does its verdict say HAVE (use it), PARTLY (the shape exists, the dial does not), or LACK (build it, ranked in "The ten to build first")?
+
 This engine ships 559 effects. More atoms are worthless. What a motion designer actually carries in
 their head is not a list of effects, it is a list of **recipes**: ordered procedures with names, each
 combining several operations over time, each with numbers that practitioners argue about. `overshoot`
@@ -173,11 +179,10 @@ from there. Shutter Phase is normally **-90** so the blur straddles the frame ra
 makes it unreadable, which is why editorial work often drops to 90 or turns blur off for the text layer
 only while leaving it on for everything else.
 
-**Verdict: PARTLY.** `ghost` in blur mode does the right physics: it samples the layer's own motion track
-a few frames back and smears along the real direction of travel, not around a fixed centre. But it is
-**opt-in per layer and driven off an authored motion track**, so a layer entering with `anim: "slide-left"`
-and no `motion` array gets nothing. After Effects makes this a scene default with a single angle; here it
-is a per-layer decision most authors never make. Read `core/fx/ghost.js`.
+**Verdict: HAVE.** Motion blur applies automatically above 480 px/s of tracked velocity, with a default
+shutter of 0.16 of a frame (about 58 degrees), the same physics as this recipe. `motionBlur: false` opts
+a layer out; a number overrides the shutter (`core/tracks/motion.js`). `ghost` in blur mode is the
+older, still-available per-layer sampler for layers with an authored `motion` track.
 
 **Sources:** https://www.provideocoalition.com/tip_create_cinematic_motion_blur_in_after_effects_and_in_life/ ·
 https://www.wipster.io/blog/debunking-the-180-degree-shutter-rule
@@ -698,10 +703,8 @@ dropped frames rather than as style. It works on character-ish motion, on line w
 retro register. Mixing stepped elements with smooth ones in one frame is a decision, not an accident: the
 stepped thing must be the SUBJECT.
 
-**Verdict: HAVE, and this entry was wrong.** `step` quantises a layer's clock and has shipped for some
-time: `step: 15` is on twos in a 30fps film, `step: 10` is on threes. The schema even labels it "ANIMATE
-ON TWOS". The summary row above said HAVE while this section said LACK, which is what a hand-kept verdict
-does when nobody re-reads it.
+**Verdict: HAVE.** `step` quantises a layer's clock: `step: 15` is on twos in a 30fps film, `step: 10`
+is on threes. The schema labels it "ANIMATE ON TWOS".
 
 **Sources:** https://community.adobe.com/t5/after-effects-discussions/after-effects-why-set-posterize-time-to-12-fps-in-24fps-comp/m-p/14382555 ·
 https://www.unterfreiemhimmel.net/en/news/fbf-in-ae/
@@ -772,8 +775,8 @@ who writes it.
 > modifier, because a modifier runs LAST and a clock has to be quantised before anything reads it;
 > `squash` deforms along the DOMINANT axis, because an arbitrary axis needs a three-function transform
 > and the tracks own `transform`; `matte` takes the source layer's own image or gradient, because a
-> browser cannot read one live element's pixels as another's alpha; and item 4 was half wrong about the
-> engine, which had made the blur automatic already and only lacked the angle (docs/MISTAKES.md #520).
+> browser cannot read one live element's pixels as another's alpha; and motion blur (recipe #4) needed
+> only the shutter angle, since the blur itself was already automatic (docs/MISTAKES.md #520).
 > Items 8, 9 and 10 are not built.
 
 **A new easing or entrance dial. Cheapest shelf, changes every film.**
@@ -828,4 +831,15 @@ entries and should have more.**
 expensive: it touches the render-purity contract, and it should wait until something in a real film
 actually needs it. Arcs (#19) are a real gap and a small one, because most beats here travel short
 distances where the bow would be invisible.
+
+## Provenance
+
+Each recipe carries its own source links inline. Read alongside [`EFFECTS.md`](../EFFECTS.md) (the
+inventory), [`BLUEPRINTS.md`](BLUEPRINTS.md) (the beats), [`KEYED-MOTION.md`](KEYED-MOTION.md) and
+[`MOTION-CRAFT.md`](../MOTION-CRAFT.md) (the doctrine).
+
+**Do not re-add:** recipe #24 (Animate on twos) as LACK, or a note that its verdict disagreed with the
+summary table. Both now say HAVE (`step`). Recipe #4 (Motion blur) as PARTLY / opt-in / requiring an
+authored motion track: motion blur is automatic above 480 px/s with a default 0.16 shutter
+(`core/tracks/motion.js`; `docs/MISTAKES.md` #520).
 
