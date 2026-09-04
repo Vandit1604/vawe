@@ -7,8 +7,14 @@ codes: camera-aimed-at-nothing, eye-trace
 
 # Eye-trace: where the viewer is looking when you cut
 
-Murch ranks eye-trace fourth of six, at 7%, under emotion (51%), story (23%) and rhythm (10%). Three
-docs in this repo discussed it and nothing measured it. `scripts/gates/eye-trace.mjs` measures it.
+## AGENT SUMMARY
+
+- At each cut, put the incoming subject at or near the screen point the eye was on before the cut. Do not make the eye cross the frame at a junction.
+- `[ref: node scripts/gates/eye-trace.mjs <scene.json>]` (codes: `camera-aimed-at-nothing`, `eye-trace`). It REPORTS only and never blocks: Murch ranks eye-trace 4th of 6, at 7%, below emotion/story/rhythm, so a cut that serves the story is allowed to cost the eye a journey.
+- Checkable action: where is the eye at the start of this shot, where should it be at the end, and what moves it?
+
+Murch ranks eye-trace fourth of six, at 7%, under emotion (51%), story (23%) and rhythm (10%).
+`scripts/gates/eye-trace.mjs` measures it.
 
 Read the ranking before you read anything else here. Murch's instruction is to **sacrifice upward from
 the bottom**: a cut that serves the story is allowed to cost the eye a journey. So this is a REPORT.
@@ -62,11 +68,9 @@ It is not the whole of the craft, and the gap is not small. A ranking says where
 nothing about **moving the eye on purpose while the shot is running**, which is what a motion designer
 means by controlling a viewer. The instrument for that is almost always light: you make one thing the
 brightest thing in the frame, then you move which thing that is. The eye follows because it has no
-choice. Nothing in this document used to say so, and the reason was simple: none of it was authorable
-here.
+choice.
 
-**All four terms are now animatable, and that is new.** The ranking is `brighter > larger > in focus >
-moving`, and until recently three of the four were decided once, at build, for a layer's whole life.
+**All four ranked terms are animatable.** The ranking is `brighter > larger > in focus > moving`.
 
 | term | how you move it | where |
 |---|---|---|
@@ -75,10 +79,8 @@ moving`, and until recently three of the four were decided once, at build, for a
 | in focus | the camera's own focus, racked from one plane to another | camera `f` and `a` |
 | moving | a hand-keyed track, or a beam of light that sweeps and reveals what it touches | `motion` · `beam` + `matte` |
 
-**"In focus" was named here and did not exist.** This document listed it as one of the four things the
-eye ranks by, and for a long time the engine had no camera focus at all: softness was a per-layer blur
-an author keyed by hand on each layer, so "the frame focuses somewhere else now" was not a sentence you
-could write. A camera focus is one keyframe pair and the whole cast reacts by where it stands.
+**"In focus" is one keyframe pair.** A camera focus rack (camera `f` and `a`) moves what is sharp, and
+the whole cast reacts by where it stands, no per-layer blur keyed by hand.
 
 ### How to actually use it
 

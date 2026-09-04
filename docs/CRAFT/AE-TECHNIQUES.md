@@ -6,6 +6,12 @@ group: reference
 
 # AE-TECHNIQUES: twelve techniques, studied from a working motion designer
 
+## AGENT SUMMARY
+
+- 12 named After Effects techniques below, each with its recipe, the exact numbers the source states, and where it lands in this engine (HAVE / one dial away / new vocabulary needed).
+- `[eye]`: a reference catalog, not a gate. Cross-check `make arsenal Q="…"` before building any of these by hand; `hang` easing, the `weight` text preset, and the `upright` modifier already ship.
+- Checkable action: for the recipe you want, is its ENGINE MAPPING already HAVE, one dial away, or a genuinely new primitive?
+
 Source of the study: the **Stephan Zammit** YouTube channel, <https://www.youtube.com/@stephanzammit>.
 Forty videos listed; twelve watched for technique. Nothing below is quoted. Every recipe is rewritten
 from what the work shows, and every number is one the videos state out loud.
@@ -60,8 +66,7 @@ move and then cut on a beat, which puts the seam exactly where the motion is slo
 **NUMBERS** null scale 100 to 200 percent across the seam. Ease both keys, then pull the in and out
 handles flat so the interior is near vertical. Cut at the steepest frame.
 
-**ENGINE MAPPING** All three parts are reachable now, and two of the three arrived after this entry
-was first written.
+**ENGINE MAPPING** All three parts are reachable now.
 
 *The shape.* `speedRamp(t, {peak, sharp})` (`core/motion.js`) owns the symmetric flat-ends,
 steep-middle curve and is exposed as `ease: "ramp"` and as a cut timing. **Do not write a second one.**
@@ -104,10 +109,9 @@ mechanism.
 its neighbours instead of 0.9x, because a zoom's displacement is ZERO at the frame centre and that is
 where copy sits. A translation moves every pixel by the same amount.
 
-**The pan now smears, and that is most of why the cut disappears.** This paragraph used to end by
-naming the remaining gap to After Effects: the motion track blurred from a LAYER's own track, nothing
-read the camera, so every frame of a whip pan rendered razor sharp. `"cameraBlur": true` closes it. The
-velocity that smears is the one RELATIVE TO THE CAMERA, so the pan streaks the frame and a layer
+**The pan now smears, and that is most of why the cut disappears.** `"cameraBlur": true` reads camera
+velocity into the layer's own motion blur. The velocity that smears is the one RELATIVE TO THE CAMERA,
+so the pan streaks the frame and a layer
 travelling with the camera stays sharp; the film's `shutter` says how much. Off by default, because it
 puts a `filter` on layers that have never carried one. Turn it on for a velocity-hidden cut: at the
 peak the frame is already unresolvable, which is the condition the technique is built on.
@@ -482,3 +486,13 @@ a falloff amount (4), an inherited-rotation flag (12). None needs a new subsyste
 **One is a new vocabulary and it is the effector (4).** Everything else in this file either exists,
 is a look, or is a dial. The effector is the only entry that makes a class of film authorable that is not
 authorable now.
+
+## Provenance
+
+Source: the **Stephan Zammit** YouTube channel, <https://www.youtube.com/@stephanzammit> (forty videos
+listed, twelve watched for technique). Companion reference: `docs/CRAFT/AFTER-EFFECTS-RECIPES.md`.
+
+**Do not re-add:** framing entry 1's camera-blur fix or entry 1's velocity-cut mechanism as an open gap
+still to close, or entry 1's "two of the three arrived after this entry was first written" as live
+status. All three parts of the velocity-hidden cut (the ramp shape, `cameraBlur`, the placement advisory)
+ship today.

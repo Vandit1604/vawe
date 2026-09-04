@@ -7,6 +7,12 @@ codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-t
 
 # KEYED MOTION: how the exemplar actually moves
 
+## AGENT SUMMARY
+
+- Key mechanical motion (a cursor, a drag) DENSELY with `linear` between keys; key physical motion (a bloom, a settle) SPARSELY with a curve. Share one pan's deltas across layers on the same surface; use `--p` for a state change position cannot express; let exits leave diegetically, not by fading.
+- `[ref]`: this is a REGISTER, not a gate, nothing here blocks (opt in for a hero beat or a recreation). Related gate codes enforced elsewhere: `beat-holds-still`, `beats-held-open`, `beats-wrapped-as-units`, `held-through-the-change`, `junction-is-static`, `no-authored-motion`.
+- Checkable action: is every move two keys and a curve, or is a mechanical motion faking as a glide? Run the checklist below.
+
 `formats/scene/higgsfield-recreation.json` is cited across this repo as the exemplar, and everything
 written about it so far is about its **grammar**: one object, on screen from the first frame, and every
 cut is that object changing state ([`../../skills/vawe-continuous-action/SKILL.md`](../../skills/vawe-continuous-action/SKILL.md)).
@@ -219,8 +225,8 @@ natural match cut anyone writes, a word becoming a card, has nothing to declare;
 box the browser laid out, the same measurement `boxOf` answers from. It has to be measured rather than
 retyped, because the real width of a word depends on the theme's face: the same 180px `LATENCY` measures
 781px in `vawe`, 837px in `linear` and 796px in `higgsfield`, and no number an author types tracks all
-three. Until 2026-08 an unsized side scored 0x0 instead: the scale collapsed to 1 and the centre landed
-on the layer's top-left corner, so the handover was wrong and said nothing (`docs/MISTAKES.md` #461).
+three. Until 2026-08 an unsized side scored 0x0: the scale collapsed to 1 and the centre landed
+on the layer's top-left corner, silently misplacing the handover (`docs/MISTAKES.md` #461).
 A form that measures nothing on either axis is now refused by name.
 
 `validate` fails a `becomes` whose two layers do not meet at the boundary, naming the gap in seconds. A
