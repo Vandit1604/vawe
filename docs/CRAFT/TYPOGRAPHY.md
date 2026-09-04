@@ -9,6 +9,16 @@ confirm: "which face was chosen for its personality, and does the size scale hol
 
 # TYPOGRAPHY: choosing and setting type
 
+## AGENT SUMMARY
+
+- Run `make brandspec URL=…` (or `make fonts-discover` with no site) BEFORE picking a face or a
+  weight; never guess. Pick 1-3 faces with roles (primary/secondary/accent), pair for contrast not
+  conflict, and size hero type to fill 60-80% of frame width, not a web-sized box.
+- Enforced by `make audit` (`off-font`, `weak-headline`, `thin-hero`) and `make designspec-check`
+  (overused-face detection).
+- Checkable action: which face was chosen for its personality, and does the size scale hold across
+  beats?
+
 A good face does ~90% of the work; spend the effort *before* styling (Butterick). When reflecting a brand,
 the face is decided for you, use the site's real font. This guide is for choosing when it's open, and for
 sizing/spacing well either way. Maps to the theme's `type.{sans, serif, mono, num}` keys.
@@ -173,5 +183,9 @@ symptom is almost always an unloaded face, not a wrong choice. See [`../MISTAKES
 - **No em-dashes on screen** (validator-enforced): comma, period, or ·.
 - Numbers use `type.num` (mono, tabular) so counters don't jitter width. The `count`/`num` layers already do this.
 
+## Provenance
+
 **Sources:** Butterick *Practical Typography*; Refactoring UI (type system, font weight); Material 3 typography
-(optical size, roles); type-scale.com (modular ratios).
+(optical size, roles); type-scale.com (modular ratios); the reference system's
+`another engine-creative/references/typography.md` and `design-picker.md` (§0a guardrails, banned/overused
+face lists).

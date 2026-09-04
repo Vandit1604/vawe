@@ -9,6 +9,15 @@ confirm: "is each frame asymmetric with one hero, not centered with an equal gri
 
 # LAYOUT: composing a frame
 
+## AGENT SUMMARY
+
+- Compose asymmetric with one hero (scale contrast), never centered with an equal grid. Fill 60-80%
+  of frame width with hero text, anchor to edges/thirds, and keep essential content inside the
+  title-safe box and out of the caption band.
+- Enforced by `make audit` (codes: `buried`, `clipped-component`, `clipped-text`, `collapsed-image`,
+  `degenerate-pin`, `overflow`, `overlap`, `safe`, `thin-hero`).
+- Checkable action: is each frame asymmetric with one hero, not centered with an equal grid?
+
 Layout is where hand-authored work most often regresses to slop (centered everything, equal card grid). This is
 how to place layers and compose an `html` layer with intent.
 
@@ -227,6 +236,8 @@ Every one of them is decided when you choose the shot, and none of them can be r
 a layer twenty pixels. `storyboard-check` asks for `shot:`, `camera:`, `picture:` and `placement:` for
 exactly this reason: the composition is a plan, and the JSON transcribes it.
 
+
+## Provenance
 
 **Sources:** Refactoring UI (hierarchy, spacing, layout); Müller-Brockmann *Grid Systems in Graphic Design*;
 Gestalt principles (proximity, similarity, common region); Butterick (measure); broadcast title-safe standards;

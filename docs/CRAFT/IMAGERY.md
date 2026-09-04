@@ -8,6 +8,15 @@ confirm: "where did each image come from, and what treatment earned it its place
 
 # IMAGERY & ICONS: choosing and treating visuals
 
+## AGENT SUMMARY
+
+- Prefer the lightest real visual: captured real UI (`make capture`) first, a raw stock photo last.
+  Treat every image (edge-fade, `ken`, clip-to-shape, scrim, grade) so it feels intentional, and
+  fetch logos through `make assets` (or `curl -f`), never a bare `curl -o`.
+- Enforced by the beats fidelity gate (untreated/off-brand images fail it) and `make audit`
+  (flags tiny logos below ~5% of frame height).
+- Checkable action: where did each image come from, and what treatment earned it its place?
+
 The highest-taste image source is **captured real product UI** (`make capture`). Everything below is for when you
 need another visual. An untreated stock photo is worse than none.
 
@@ -18,15 +27,12 @@ need another visual. An untreated stock photo is worse than none.
    CC0/CC-BY photos via `make photos` (attribution auto-recorded; CC-BY needs visible credit).
 3. **Drawn icons**: `svgIcon(name)`. 4. **Generated cards**: `make assets`. 5. **Emoji**: last resort.
 
-**Use `make assets` for logos, and if you curl one by hand, use `-f`.** This instruction used to read
-``curl https://cdn.simpleicons.org/<slug>/<hex>`` with no failure flag, and `curl -o` writes the
-response body whatever the status is. Simple Icons has been REMOVING marks on trademark request, so
-that command now 404s for real brands and leaves a **zero-byte .svg** on disk. The file then exists,
-passes every path check, and renders as an invisible hole. Two shipped assets were in exactly that
-state (`assets/icons/amazon.svg`, one of them tracked), breaking three scenes, and nothing said so
-until `core/boot.js` started refusing an asset that never loaded. `scripts/media/assets.mjs`
-`tryFetch` already gets this right: it requires 200, a minimum size AND a literal `<svg` before it
-writes, which is why `make assets` is the answer and a bare curl is not:
+**Use `make assets` for logos, and if you curl one by hand, use `-f`.** `curl -o` writes the response
+body whatever the status is, and Simple Icons removes marks on trademark request, so a bare curl can
+404 and leave a **zero-byte .svg** on disk. The file then exists, passes every path check, and renders
+as an invisible hole. `scripts/media/assets.mjs`'s `tryFetch` gets this right: it requires 200, a
+minimum size AND a literal `<svg` before it writes, which is why `make assets` is the answer and a
+bare curl is not:
 
 ```bash
 curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>
@@ -84,5 +90,12 @@ only when the image genuinely needs it. An over-graded image is as off as a raw 
 `make gen-image Q="…" NAME=<name>` → a normal `image` layer; `make gen-video`/`gen-clip` → a deterministic `clip`
 layer. Still treat generated stills (grade/edge-fade/ken) and match them to the palette, generated ≠ exempt from taste.
 
+## Provenance
+
+**Do not re-add:** a bare `curl -o` for fetching a logo. It zero-byted two shipped assets
+(`assets/icons/amazon.svg` among them), breaking three scenes silently, before `core/boot.js` learned
+to refuse an asset that never loaded. Use `make assets` or `curl -f`.
+
 **Sources:** Refactoring UI (working with images, scrims/overlap); Creative Commons licensing; simple-icons /
-Lucide system guidance; this repo's [../MISTAKES.md](../MISTAKES.md) (untasteful-image, logo-value).
+Lucide system guidance; this repo's [../MISTAKES.md](../MISTAKES.md) (untasteful-image, logo-value); the
+reference system's `another engine-creative/references/motion-principles.md` (§2 mandatory image treatment).

@@ -9,6 +9,16 @@ confirm: "does each cut serve the relationship between its two beats, chosen by 
 
 # TRANSITIONS: choosing the seam by theory, not habit
 
+## AGENT SUMMARY
+
+- Choose each seam by the relationship and feeling between its two beats (Murch's Rule of Six:
+  emotion 51%), never by habit. Default to a hard cut; earn ONE primary transition for ~60-70% of
+  cuts plus 1-2 bolder accents reserved for the payoff.
+- Enforced by `make direct` (`cut-families`: 3+ families fails) and `make critique`
+  (`crossfade-mud`, `cut-velocity`, `dead-final-frame`, `no-transition`, `flat-seams`).
+- Checkable action: does each cut serve the relationship between its two beats, chosen by theory
+  not habit?
+
 A transition is the **seam between two beats**. Every school of editing agrees on one thing: the seam
 is *grammar*, not decoration: it means something, and the meaning must be **chosen**, not defaulted.
 The failure this doc exists to kill is picking one effect (a blur, a dissolve) and spraying it on every
@@ -365,6 +375,8 @@ Doctrine carries the taste; the gates backstop the source-decidable subset:
   `typing-cutoff`, MISTAKES #119).
 - **restraint**: a primary used on ~all cuts (monotone) or accents with no earned reason are judgment
   calls the planning skill and `make judge` review; the vision judge scores whether each seam reads.
+
+## Provenance
 
 **Sources:** StudioBinder (transition types · Murch's Rule of Six · match cuts · Soviet montage);
 Adobe / MasterClass (J/L cuts · continuity editing); Eisenstein / Kuleshov (montage); Murch, *In the
