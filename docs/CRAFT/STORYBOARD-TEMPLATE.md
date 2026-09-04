@@ -16,6 +16,21 @@ spectacle: "beat N · which layer · which device · what the moment is for, the
 not: "the defaults this film refuses, in your own words"
 ---
 
+## AGENT SUMMARY
+
+- Copy this file, fill every field, then run `make storyboard-check SB=<file>` and get sign-off
+  BEFORE writing any scene JSON.
+- Two lines are required and gate-checked for PRESENCE only, never for quality: `spectacle:` (the one
+  loud moment, named: beat, layer, device, why) and `not:` (the defaults this film refuses).
+- Fill `pace:` (showreel 1.5-4s/idea, explainer 3-8s, held 6s+), `threads:`/`object:` (what holds the
+  film across its cuts), and per-beat `shot:`/`layout:`/`becomes:`/`trigger:`/`picture:`, then watch
+  `make animatic SB=<file>` before writing any JSON.
+- Enforced by `[gated: scripts/gates/storyboard-check.mjs]` (presence of `spectacle:`/`not:`, plus
+  `pace-not-chosen` and `timeline-hole`) and `[gated: scripts/gates/plan-vs-render.mjs]` once a scene
+  exists; `[ref: make panels]` / `[ref: make animatic]` draw what each field means but check nothing.
+- Confirm: are `spectacle:` and `not:` both filled, and have you watched `make animatic` before
+  writing any scene JSON?
+
 <!--
   This is the STORYBOARD contract (another engine Step 3, adapted). Copy it, fill it, then run
   `make storyboard-check SB=<file>` and present it for sign-off BEFORE writing any scene JSON:

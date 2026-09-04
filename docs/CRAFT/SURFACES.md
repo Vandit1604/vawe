@@ -7,6 +7,21 @@ codes: no-bg-motion, off-radius, off-shadow, ruled-grid, static-bg
 
 # SURFACES: sleek components, the build-first loop, and the design spec
 
+## AGENT SUMMARY
+
+- Load this AFTER type/colour/layout is locked ([TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) ·
+  [LAYOUT](LAYOUT.md)). Pick ONE of the 8 visual styles as the register, do not mix.
+- Build a reusable surface as HTML FIRST: author the fragment (prefer a `blocks/sleek.mjs` factory),
+  preview it standalone (`make preview HTML=<file> THEME=<brand>`), gate it clean
+  (`make designspec-check D=<file>`), only then drop it into the scene.
+- Lock the one-page design spec (colours, typography, rounded, borders, shadows, spacing, motion,
+  components) before authoring a bespoke surface; every block/fragment obeys it.
+- Enforced by `[gated: scripts/gates/designspec-check.mjs]` (codes: `no-bg-motion`, `off-radius`,
+  `off-shadow`, `ruled-grid`, `static-bg`), which automates colours and typography of the post-build
+  check; corners, spacing, depth and the negative list are `[eye]`.
+- Confirm: did you build and gate the fragment BEFORE dropping it into the scene, and does every
+  colour/font in it trace back to the spec table?
+
 The finishing layer: the actual *surfaces* copy sits on (glass, mesh, spotlight, bento), how to build a
 bespoke one before you drop it in, and a one-page design spec to lock a look. Load this after the frame's
 type/colour/layout is decided ([TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) · [LAYOUT](LAYOUT.md)).

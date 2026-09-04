@@ -6,6 +6,22 @@ group: look
 
 # FRAME-SPEC: the per-video contract (design system + storyboard) authored BEFORE the JSON
 
+## AGENT SUMMARY
+
+- Lock TWO artifacts before writing any layer: the design-system spec (Part 1: colour ROLES not
+  hexes, type by role, a negative list) and the beat-by-beat storyboard (Part 2, fill
+  [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md)).
+- Weight each on-screen cue into the back ~50% of its beat (build 0-30% / breathe 30-70% / resolve
+  70-100%); never dump everything in the first 30% (slideshow) or fake life with independent drift
+  during a hold (screensaver).
+- After rendering, QA the SEAMS not the centres: `make seam-check D=<file>` pulls the frames
+  straddling every transition and flags a luminance flash or a bad morph.
+- Enforced by `[gated: scripts/gates/author-check.mjs#front-loaded]` (+ `motion-monotony`, same gate)
+  for the reveal-model floor; `[ref: make seam-check]` for the seam QA; the two locked artifacts
+  themselves are `[eye]`, checked by sign-off before authoring.
+- Confirm: is every on-screen cue weighted into the back half of its beat, and did you run
+  `make seam-check` after rendering?
+
 The another engine lesson: a great video is not authored frame-first. Two artifacts are locked first and every
 frame then *obeys them line by line*: a **design-system spec** (their `frame.md`) and a **scene-by-scene
 storyboard** (their `STORYBOARD.md`) where each beat names its blueprint, its mechanism, its persuasion, and

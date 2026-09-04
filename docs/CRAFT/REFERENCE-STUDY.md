@@ -6,6 +6,19 @@ group: story
 
 # REFERENCE STUDY: learn from great videos, then copy the feel (not just the frames)
 
+## AGENT SUMMARY
+
+- Run `make study VIDEO=refs/ref.mp4 NAME=ref` first, then the 5-step pipeline (map beats, measure
+  motion, catalog motifs, map to primitives, author + verify) before copying any look.
+- Never sample only a beat's middle frame: also sample the entrance (fps=12, first ~0.5s), the exit
+  (fps=12, last ~0.5s) and a hard-zoomed crop of the text, or you miss the dolly, gradient fill or
+  colour-wave.
+- `refs/` is gitignored: extract the grammar (shot length, cut rate, what carries a junction), never
+  keep the reference's frames, UI, copy or colours in a published film.
+- Enforced by `[ref: make study]` / `[ref: make measure]`; no gate. A motif with no mapped primitive is
+  a framework finding, log it to `docs/MISTAKES.md`, don't fake it.
+- Confirm: did you sample the entrance, the exit and a zoomed crop, not just the beat's middle frame?
+
 When a real motion-graphics piece looks better than ours, the difference is almost never one effect, it
 is a handful of **habits** we skipped. This doc names those habits, and gives the repeatable pipeline for
 extracting them from ANY reference and mapping them to our primitives. Study a reference the way an editor

@@ -6,6 +6,22 @@ group: reference
 
 # SAAS MOTION DEMAND: what product films actually use, ranked
 
+## AGENT SUMMARY
+
+- Before building a new effect, check the ranked table below: 20 techniques ranked by how many
+  independent sources name them, each marked SHIPPED / PARTLY / MISSING against this engine, with the
+  file:line that already does it.
+- The build queue has three MISSING rows in demand order: depth-map reveal transition (5 sources), 3D
+  carousel (3 sources), proximity hover (1 source), each with the one step nobody guesses.
+- The engine refuses five techniques by construction (`renderFrame(n)` purity: no prior-frame feedback,
+  no CSS `animation`/`transition` in a fragment, no `opacity`/`filter` in a layer's `css`, no
+  real-sampling backdrop blur, no design-file importer), so don't propose them.
+- Enforced by `[ref: make arsenal Q="…"]` before inventing anything; no gate. This is a survey of what
+  is published, not a measurement of shipped videos, treat the ranking as direction and re-derive any
+  figure you intend to quote.
+- Confirm: does `make arsenal Q="…"` already have this, and if not, is it in the build queue below
+  before you build it from scratch?
+
 ## Method, and its honest limit
 
 Eight web searches (SaaS explainer breakdowns, UI animation for product demos, stagger and offset
