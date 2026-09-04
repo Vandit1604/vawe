@@ -78,6 +78,8 @@ const WAIVED = new Map(Object.entries({
   LOOP_FX: 'the loop half of GSAP_FX, which IS catalogued. A subset named so a gate can tell an entrance from something that never settles',
   ONESHOT_FX: 'the other half of the same split',
   LOOK_BLURBS: 'the descriptions OF the looks, rendered in the catalogue beside each look. The words, not a vocabulary of their own',
+  PASSES: 'the pass library behind the composite looks (core/looks/presets.js): the GLSL/canvas passes a LOOK is built from. An author names a LOOK (catalogued as Composite looks), never a raw pass. Backing data, not a vocabulary',
+  PASS_READS: 'the map of which pass reads which knob (core/looks/presets.js), the wiring under the looks. A scene names a knob or a look, never this table',
   UNIFORM_FAMILIES: 'shader uniform grouping for the playground panel',
   KERNELS: 'convolution matrices behind the filter presets, which ARE catalogued',
   MECHANISMS: 'internal classification of transitions, used by the direction gate',
