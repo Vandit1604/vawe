@@ -47,6 +47,8 @@ const f = gateFindings({ line: (r) => r.summary });
 // place to hide the next real one.
 const WAIVED = new Map(Object.entries({
   UNITS: 'the transition LIBRARY behind the seam runner (core/transitions/units.js): one GLSL unit per seam fx. A scene names a seam by its fx name (fade/wipe/whipPan…), and SEAM_REGISTRY in core/seams.js catalogues every one of those with its blurb. UNITS is the backing data the registry derives from, not a fifth thing to choose',
+  CORE_UNITS: 'the 14 original seam units, concatenated into UNITS (core/transitions/units.js). Backing data, catalogued through SEAM_REGISTRY like the rest',
+  HOUSE_UNITS: 'the hand-written vawe house-set seam units (core/transitions/units-house.js), concatenated into UNITS and catalogued through SEAM_REGISTRY. Backing data, not a separate vocabulary',
   CAPABILITIES: 'the measured table of which ANCESTOR style silently disables which DESCENDANT capability (core/ancestor-kills.js). A scene names a capability by writing `glass`/`mixBlend`/`plane`, all of which ARE catalogued; this is the interaction table behind the refusal, not a fifth thing to choose',
   IDENT: 'the identity style set a cut resets to (core/cuts.js). A reset, not an effect: the CUT vocabulary it belongs to is catalogued in full',
   PROPS: 'per-module prop declarations. Covered by schema-drift and layer-props, which check them against schema.json',

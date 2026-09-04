@@ -61,6 +61,7 @@ const EXCLUDE_SUFFIX = [
   ['.storyboard.md', 'a per-video artifact, not guidance'],
   ['.treatment.md', 'a per-video artifact, not guidance'],
   ['.lock.md', 'a per-video artifact, not guidance: the frozen spec one film was authored from'],
+  ['LICENSES.md', 'a provenance/attribution table (author + license per vendored asset), not guidance'],
 ];
 
 // Generated docs. Frontmatter here would be destroyed by the next regenerate, so the one line lives

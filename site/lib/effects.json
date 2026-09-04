@@ -1,6 +1,6 @@
 {
-  "total": 672,
-  "previewed": 320,
+  "total": 684,
+  "previewed": 332,
   "families": 54,
   "tags": [
     [
@@ -97,7 +97,7 @@
     ],
     [
       "transition",
-      76
+      88
     ]
   ],
   "list": [
@@ -4869,14 +4869,42 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 14,
+      "count": 26,
       "undescribed": 0,
       "entries": [
+        {
+          "name": "barnDoor",
+          "stem": "seams-2-scene-blends--barndoor",
+          "desc": "two doors split from the centre outward along dir, opening onto the next beat. A confident, symmetric reveal",
+          "scene": "/assets/effects/seams-2-scene-blends--barndoor.json",
+          "noPreview": null
+        },
+        {
+          "name": "blindsWipe",
+          "stem": "seams-2-scene-blends--blindswipe",
+          "desc": "slatted blinds sweep across the frame along dir, revealing the next beat. A crisp graphic wipe",
+          "scene": "/assets/effects/seams-2-scene-blends--blindswipe.json",
+          "noPreview": null
+        },
+        {
+          "name": "burnThrough",
+          "stem": "seams-2-scene-blends--burnthrough",
+          "desc": "the frame burns away along a noisy front with a hot ember edge, revealing the next beat through the fire. A dramatic organic pivot",
+          "scene": "/assets/effects/seams-2-scene-blends--burnthrough.json",
+          "noPreview": null
+        },
         {
           "name": "cinematicZoom",
           "stem": "seams-2-scene-blends--cinematiczoom",
           "desc": "dive-in zoom into a screen",
           "scene": "/assets/effects/seams-2-scene-blends--cinematiczoom.json",
+          "noPreview": null
+        },
+        {
+          "name": "clockWipe",
+          "stem": "seams-2-scene-blends--clockwipe",
+          "desc": "a hand sweeps around the frame like a clock, wiping the next beat in behind it with a soft glowing edge. A timed, mechanical reveal",
+          "scene": "/assets/effects/seams-2-scene-blends--clockwipe.json",
           "noPreview": null
         },
         {
@@ -4915,10 +4943,31 @@
           "noPreview": null
         },
         {
+          "name": "irisRound",
+          "stem": "seams-2-scene-blends--irisround",
+          "desc": "a soft circle opens from the centre with a bright rim, irising the next beat into view. A classic spotlight reveal",
+          "scene": "/assets/effects/seams-2-scene-blends--irisround.json",
+          "noPreview": null
+        },
+        {
           "name": "lens",
           "stem": "seams-2-scene-blends--lens",
           "desc": "one moving optical centre bends BOTH beats through a single lens, with a warm flare. Premium product glamour, dark scenes",
           "scene": "/assets/effects/seams-2-scene-blends--lens.json",
+          "noPreview": null
+        },
+        {
+          "name": "lumaWipe",
+          "stem": "seams-2-scene-blends--lumawipe",
+          "desc": "the next beat bleeds through the darkest parts of the current one first, along a soft noisy threshold. A cinematic dissolve with grain",
+          "scene": "/assets/effects/seams-2-scene-blends--lumawipe.json",
+          "noPreview": null
+        },
+        {
+          "name": "pixelDissolve",
+          "stem": "seams-2-scene-blends--pixeldissolve",
+          "desc": "the frame coarsens into big pixels at the midpoint then sharpens into the next beat. A retro digital dissolve",
+          "scene": "/assets/effects/seams-2-scene-blends--pixeldissolve.json",
           "noPreview": null
         },
         {
@@ -4936,6 +4985,13 @@
           "noPreview": null
         },
         {
+          "name": "rippleWave",
+          "stem": "seams-2-scene-blends--ripplewave",
+          "desc": "concentric waves ripple out from the centre as the frame dissolves, like a drop hitting water. Soft, calming links",
+          "scene": "/assets/effects/seams-2-scene-blends--ripplewave.json",
+          "noPreview": null
+        },
+        {
           "name": "sdfIris",
           "stem": "seams-2-scene-blends--sdfiris",
           "desc": "the arriving beat revealed through an expanding seeded polygon iris (star, hex, diamond or triangle) with a bright rim. Playful reveal, the shape is the personality",
@@ -4943,10 +4999,31 @@
           "noPreview": null
         },
         {
+          "name": "shatterGlitch",
+          "stem": "seams-2-scene-blends--shatterglitch",
+          "desc": "the frame breaks into blocks whose RGB channels tear apart and flicker, then snap back clean. A hard digital pivot",
+          "scene": "/assets/effects/seams-2-scene-blends--shatterglitch.json",
+          "noPreview": null
+        },
+        {
           "name": "slide",
           "stem": "seams-2-scene-blends--slide",
           "desc": "the arriving beat slides in over a held outgoing one (cover), dir-aware, the basic every tool has",
           "scene": "/assets/effects/seams-2-scene-blends--slide.json",
+          "noPreview": null
+        },
+        {
+          "name": "spinZoom",
+          "stem": "seams-2-scene-blends--spinzoom",
+          "desc": "the outgoing beat spins and scales out while the incoming beat spins in. A kinetic whip between shots",
+          "scene": "/assets/effects/seams-2-scene-blends--spinzoom.json",
+          "noPreview": null
+        },
+        {
+          "name": "swirlWarp",
+          "stem": "seams-2-scene-blends--swirlwarp",
+          "desc": "a vortex twists the centre of the frame and unwinds into the next beat, strongest mid-cut. Organic, dreamy pivots",
+          "scene": "/assets/effects/seams-2-scene-blends--swirlwarp.json",
           "noPreview": null
         },
         {
@@ -4968,6 +5045,13 @@
           "stem": "seams-2-scene-blends--wipe",
           "desc": "a soft-edged line sweeps toward dir, the arriving beat revealed behind it, playful, \"notice the cut\"",
           "scene": "/assets/effects/seams-2-scene-blends--wipe.json",
+          "noPreview": null
+        },
+        {
+          "name": "zoomBlur",
+          "stem": "seams-2-scene-blends--zoomblur",
+          "desc": "both beats streak toward the centre in a radial blur and cross-dissolve. A punchy push between shots",
+          "scene": "/assets/effects/seams-2-scene-blends--zoomblur.json",
           "noPreview": null
         }
       ]

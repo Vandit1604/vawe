@@ -68,8 +68,13 @@ void main(){ gl_FragColor = vec4(transition(v_uv).rgb, 1.0); }
 // compile ONE program per unit: PREAMBLE (the shared contract) + the unit's own transition() + MAIN.
 // Each unit is its own program, so a helper or uniform in one can never collide with another, which is
 // what lets the library grow to many vendored gl-transitions shaders without one giant shader.
+// The exact fragment source a unit compiles to: preamble + its transition() + main. Exported so an
+// offline compile-check (scripts/dev/seam-compile-check.mjs) tests the SAME source the runner builds.
+export const seamFrag = (unit) => PREAMBLE + '\n' + unit.glsl + '\n' + MAIN;
+export const SEAM_VERT = VERT;
+
 function buildProgram(gl, unit) {
-  const frag = PREAMBLE + '\n' + unit.glsl + '\n' + MAIN;
+  const frag = seamFrag(unit);
   const sh = (type, src) => {
     const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(`seam shader "${unit.name}": ` + gl.getShaderInfoLog(s));
@@ -105,13 +110,19 @@ export function createSeamCompositor(parent, w = 1920, h = 1080) {
   // ---- 2D fallback: plain opacity cross-fade (no GL, or a program failed to compile) ----
   if (!gl) return make2dFallback(canvas, w, h);
 
-  let programs;
-  try {
-    programs = UNITS.map((u) => buildProgram(gl, u));
-  } catch (e) {
-    // a driver that reports webgl but won't compile → degrade to the 2D cross-fade rather than crash
-    return make2dFallback(canvas, w, h, gl);
-  }
+  // ONE PROGRAM PER UNIT, compiled independently so a single bad unit degrades to `fade` for THAT fx
+  // only, never dropping every seam to the 2D fallback. (The library grows by adding units; a typo in
+  // one vendored shader must not blank the rest.) Only `fade` itself failing to compile, a real driver
+  // problem, falls the whole compositor back to 2D.
+  let programs, fadeProg = null;
+  const fadeUnit = UNITS.find((u) => u.name === 'fade') || UNITS[0];
+  try { fadeProg = buildProgram(gl, fadeUnit); }
+  catch (e) { return make2dFallback(canvas, w, h, gl); }
+  programs = UNITS.map((u) => {
+    if (u === fadeUnit) return fadeProg;
+    try { return buildProgram(gl, u); }
+    catch (e) { try { console.warn(`seam "${u.name}" failed to compile, using fade: ${e.message}`); } catch (_) {} return fadeProg; }
+  });
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
