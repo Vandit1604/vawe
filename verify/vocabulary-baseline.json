@@ -274,6 +274,9 @@
   "MECHANISMS",
   "FAMILIES"
  ],
+ "core/transitions/units.js": [
+  "UNITS"
+ ],
  "core/type.js": [
   "STAGGER_FROM_BLURBS",
   "PRESETS",
