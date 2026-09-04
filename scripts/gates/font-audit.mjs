@@ -14,7 +14,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
+const f = gateFindings();
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const format = process.argv[2] || 'scene';
 const dataArg = process.argv[3];
@@ -53,13 +55,13 @@ const ICON = { OK: '✓', FALLBACK: '✗', 'SYSTEM-LUCK': '⚠', BROKEN: '✗' }
 for (const r of report) console.log(`  ${ICON[r.verdict]} ${r.family.padEnd(22)} ${r.verdict.padEnd(12)} registered=${r.registered} loaded=${r.loaded}`);
 console.log(`  → ${path.relative(repoRoot, sidecar)}`);
 
-if (bad.length) {
-  console.error(`\n✗ font audit FAILED: ${bad.length} family(ies) are not rendering as intended:`);
-  for (const r of bad) {
-    if (r.verdict === 'FALLBACK') console.error(`  ✗ ${r.family}: no @font-face. The browser silently substituted a generic. Vendor it to assets/fonts/ and add an @font-face to core/tokens.css.`);
-    if (r.verdict === 'SYSTEM-LUCK') console.error(`  ⚠ ${r.family}: painting from a SYSTEM install with no @font-face. It looks right on this machine and will fall back everywhere else. Vendor it.`);
-    if (r.verdict === 'BROKEN') console.error(`  ✗ ${r.family}: @font-face exists but the file failed to load (bad path or 404). Check the src url in core/tokens.css.`);
-  }
-  process.exit(1);
-}
-console.log(`\n✓ font audit OK: ${report.length} family(ies), all vendored, loaded and painting (${name})`);
+const FIX = {
+  FALLBACK: 'no @font-face. The browser silently substituted a generic. Vendor it to assets/fonts/ and add an @font-face to core/tokens.css.',
+  'SYSTEM-LUCK': 'painting from a SYSTEM install with no @font-face. It looks right on this machine and will fall back everywhere else. Vendor it.',
+  BROKEN: '@font-face exists but the file failed to load (bad path or 404). Check the src url in core/tokens.css.',
+};
+for (const r of bad) f.fail(`font-${r.verdict.toLowerCase()}`, `${r.family}: ${FIX[r.verdict]}`, { at: r.family });
+
+if (!bad.length) console.log(`\n✓ font audit OK: ${report.length} family(ies), all vendored, loaded and painting (${name})`);
+f.emit();
+process.exit(bad.length ? 1 : 0);

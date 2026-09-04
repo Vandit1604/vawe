@@ -15,7 +15,9 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
+const f = gateFindings();
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const format = process.argv[2] || 'scene';
 const dataArg = process.argv[3];
@@ -63,11 +65,14 @@ for (const n of frames) {
     // here. Printing only the frame threw that away and left the reader hunting across every canvas.
     const a = clean.split('|'), b = dirty.split('|');
     const which = a.map((h, i) => [i, h, b[i]]).filter(([, h, o]) => h !== o);
-    console.log(`   ✗ frame ${n}: ${which.length} of ${a.length} canvas(es) differ by render order`);
-    for (const [i, h, o] of which) console.log(`       canvas[${i}]  clean ${h}  →  after scrambled order ${o}`);
+    f.fail('canvas-order-dependent',
+      `frame ${n}: ${which.length} of ${a.length} canvas(es) differ by render order`,
+      { at: `frame ${n}`,
+        fix: which.map(([i, h, o]) => `canvas[${i}]  clean ${h}  →  after scrambled order ${o}`).join('; ') });
   }
 }
 await browser.close(); server.close();
-if (bad) { console.log(`\n✗ CANVAS PURITY FAILED: ${bad}/${frames.length} frames depend on render order.`);
-  console.log('A shader/paint layer that does not clear when off-window holds the last frame it drew.'); process.exit(1); }
-console.log(`✓ canvas purity OK: ${frames.length} frames, ${nCanvas} canvases, pixels identical regardless of render order`);
+if (bad) console.log('A shader/paint layer that does not clear when off-window holds the last frame it drew.');
+else console.log(`✓ canvas purity OK: ${frames.length} frames, ${nCanvas} canvases, pixels identical regardless of render order`);
+f.emit();
+process.exit(bad ? 1 : 0);

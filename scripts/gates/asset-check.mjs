@@ -21,10 +21,15 @@ import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
+// A missing asset / typeface is a WARN by default and only becomes BLOCKING under --strict, which is a
+// caller flag rather than a fixed severity, so the finding's severity is computed from it directly.
+const sev = () => (strict ? 'error' : 'warn');
+const f = gateFindings();
 if (!file || !fs.existsSync(file)) { console.error('usage: node scripts/gates/asset-check.mjs <scene.json> [--strict]'); process.exit(2); }
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 const sceneDir = path.dirname(path.resolve(file));
@@ -130,31 +135,24 @@ for (const [where, v] of videoRefs) {
     if (dur > 0 && keys / dur < 1) sparse.push([where, v, keys, dur]);
   } catch (e) { unprobed.push([v, /ENOENT/.test(String(e && e.message)) ? 'ffprobe is not installed here' : 'ffprobe could not read it']); }
 }
-if (sparse.length) {
-  console.log(`  ${sparse.length} clip(s) with SPARSE KEYFRAMES. A seek lands early and the wrong frame renders, silently:`);
-  for (const [w, v, k, d] of sparse)
-    console.log(`    ✗ ${v}  [${w}]  ${k} keyframe(s) in ${d.toFixed(1)}s\n`
-      + `        → ffmpeg -i ${v} -c:v libx264 -pix_fmt yuv420p -g 1 -crf 18 <out>.mp4   (all-intra; bigger file, exact seeks)`);
-}
+for (const [w, v, k, d] of sparse) f.warn('sparse-keyframes',
+  `${v}  [${w}]  ${k} keyframe(s) in ${d.toFixed(1)}s, a seek lands early and the wrong frame renders, silently`,
+  { at: w, fix: `ffmpeg -i ${v} -c:v libx264 -pix_fmt yuv420p -g 1 -crf 18 <out>.mp4   (all-intra; bigger file, exact seeks)` });
 
 console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${remotes.length} remote · ${fonts.size} typeface(s)`
   + `${videoRefs.length ? ` · ${videoRefs.length - unprobed.length}/${videoRefs.length} clip(s) keyframe-probed` : ''})`);
-if (unprobed.length) {
-  console.log(`  ${unprobed.length} clip(s) NOT checked for sparse keyframes. This is about this machine, not the film:`);
-  for (const [v, why] of unprobed) console.log(`    ○ ${v}  (${why})`);
-}
-if (missingFonts.length) {
-  console.log(`  ${missingFonts.length} MISSING typeface(s). Every frame will render in a fallback face and NOTHING else will say so:`);
-  for (const [u, fam] of missingFonts) console.log(`    ✗ ${u}  (${[...fam].join(', ')})`);
-  console.log(`        → make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)`);
-}
-if (remotes.length) for (const [w, v] of remotes) console.log(`    · remote (not checked): ${v}  [${w}]`);
-if (!missing.length && !missingFonts.length) { console.log(`  ✓ every local asset reference and every declared typeface resolves to a file on disk.\n`); process.exit(0); }
-if (!missing.length) {
-  console.log(`  ✓ every local asset reference resolves to a file on disk.\n`);
-  process.exit(strict ? 1 : 0);
-}
-console.log(`  ${missing.length} MISSING asset(s): the render will show a broken image / silent gap:`);
-for (const [w, v] of missing) console.log(`    ✗ ${v}  [${w}]\n        → ${howto(v)}`);
-console.log(strict ? `\n  ✗ asset preflight (strict): fetch these before rendering.\n` : `\n  fetch these before you author around them (make assets D=${file} fills most). Block with --strict.\n`);
-process.exit(strict && (missing.length || missingFonts.length) ? 1 : 0);
+
+for (const [v, why] of unprobed) f.note('unprobed-video', `${v} not checked for sparse keyframes: ${why}`, { at: v });
+for (const [u, fam] of missingFonts) f.finding({ severity: sev(), code: 'missing-font',
+  summary: `${u} (${[...fam].join(', ')}) has no vendored file, every frame renders in a fallback face and nothing else will say so`,
+  at: u, fix: 'make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)' });
+for (const [w, v] of remotes) f.note('remote-asset', `${v}  [${w}]  not checked (remote)`, { at: w });
+for (const [w, v] of missing) f.finding({ severity: sev(), code: 'missing-asset',
+  summary: `${v}  [${w}]  the render will show a broken image / silent gap`, at: w, fix: howto(v) });
+
+if (!missing.length && !missingFonts.length) console.log(`  ✓ every local asset reference and every declared typeface resolves to a file on disk.\n`);
+else if (!missing.length) console.log(`  ✓ every local asset reference resolves to a file on disk.\n`);
+else console.log(strict ? `\n  ✗ asset preflight (strict): fetch these before rendering.\n` : `\n  fetch these before you author around them (make assets D=${file} fills most). Block with --strict.\n`);
+
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
