@@ -12,6 +12,9 @@ import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
+import { gateFindings } from '../lib/findings.mjs';
+
+const f = gateFindings();
 
 const DIR = SCENE_DIR;
 const SKIP = new Set(['sample.json', 'schema.json']);
@@ -69,7 +72,7 @@ for (const v of ship) console.log('  ' + v.f.replace('.json', '').padEnd(20) + c
 const totals = cols.map((c) => ship.filter((v) => has(v, c)).length);
 console.log('  ' + `TOTAL /${ship.length}`.padEnd(20) + totals.map((t) => String(t).padEnd(7)).join(''));
 const never = cols.filter((c, i) => totals[i] === 0);
-if (never.length) console.log(`\n  ⚠ NEVER adopted by any shipped video: ${never.join(', ')}. The newest/best primitives are going unused.`);
+if (never.length) f.warn('never-adopted', `NEVER adopted by any shipped video: ${never.join(', ')}. The newest/best primitives are going unused.`);
 
 // ---- 3. preset-monotony warnings (shipped videos) ----
 console.log('\n=== ENTRANCE VARIETY (shipped videos) ===');
@@ -79,8 +82,14 @@ for (const v of ship) {
   if (total < 5) continue;
   const [top, n] = Object.entries(v.presets).sort((a, b) => b[1] - a[1])[0];
   const share = n / total;
-  if (share > 0.5) { console.log(`  ⚠ ${v.f}: "${top}" is ${Math.round(share * 100)}% of ${total} entrances, vary it (`make arsenal` prints the rest).`); warned++; }
+  if (share > 0.5) {
+    f.warn('preset-monotony', `${v.f}: "${top}" is ${Math.round(share * 100)}% of ${total} entrances, vary it`,
+      { at: v.f, fix: '`make arsenal` prints the rest' });
+    warned++;
+  }
 }
 if (!warned) console.log('  ✓ no single preset dominates any shipped video');
 
 console.log('\nfeature-audit: report only (WARN tier). Prefer group/spring/fitH per docs/PRIMITIVES.md.');
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

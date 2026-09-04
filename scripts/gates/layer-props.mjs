@@ -27,8 +27,10 @@ import { SHARED_PROPS as SHARED } from '../../core/layers/vocabulary.js';
 import { firesOn } from '../../core/props.js';
 import { population, isTemplate } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
+const f = gateFindings();
 
 // The shared half of the vocabulary - what every layer reads whatever its type - comes from
 // core/layers/vocabulary.js, the same module the RENDERER refuses unknown props with. This gate used
@@ -41,8 +43,9 @@ const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '
 // the scenes being wrong, and the gate must say that instead of blaming the library.
 for (const k of ['start', 'duration', 'motion', 'anim', 'out']) {
   if (!SHARED[k] || SHARED[k].when) {
-    console.error(`✗ layer-props is blind: nothing declares \`${k}\` as an unconditional shared read. `
+    f.fail('blind-check', `layer-props is blind: nothing declares \`${k}\` as an unconditional shared read. `
       + `The declarations in formats/scene/props.js and core/tracks/ have drifted from the engine.`);
+    f.emit();
     process.exit(2);
   }
 }
@@ -88,11 +91,14 @@ for (const rel of targets) {
         const at = `${path.basename(rel)} ${where}[${i}] (${t})`;
         if (v.kind === 'dropped') {
           dropped++;
-          console.log(`   ✗ ${at}: \`${k}\` is set and nothing reads it.`);
-          console.log(`       ${t} reads: ${Object.keys(LAYER_PROPS[t]).sort().slice(0, 14).join(', ')}${Object.keys(LAYER_PROPS[t]).length > 14 ? ', …' : ''}`);
+          const reads = Object.keys(LAYER_PROPS[t]).sort();
+          f.fail('prop-dropped', `${at}: \`${k}\` is set and nothing reads it.`, {
+            at, fix: `${t} reads: ${reads.slice(0, 14).join(', ')}${reads.length > 14 ? ', …' : ''}`,
+          });
         } else {
           inert++;
-          console.log(`   ✗ ${at}: \`${k}\` is read only when the layer sets ${v.guards.map((g) => `\`${g}\``).join(' or ')}. It does not, so \`${k}\` does nothing.`);
+          f.fail('prop-inert', `${at}: \`${k}\` is read only when the layer sets `
+            + `${v.guards.map((g) => `\`${g}\``).join(' or ')}. It does not, so \`${k}\` does nothing.`, { at });
         }
       }
       if (L.children) walk(L.children, `${where}[${i}].children`);
@@ -101,6 +107,7 @@ for (const rel of targets) {
   walk(cfg.layers, 'layers');
 }
 console.log(`\n── layer props · ${checked} layer(s) across ${targets.length} file(s)`);
+f.emit();
 if (!dropped && !inert) { console.log('✓ every prop a layer sets is read by its type or the shared path'); process.exit(0); }
 console.log(`✗ ${dropped + inert} prop(s) accepted and dropped (${dropped} nothing reads, ${inert} behind an`);
 console.log('  enabler the layer never sets). A prop the engine ignores is the most expensive bug class');

@@ -25,6 +25,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readReceipt, writeReceipt } from '../lib/receipt.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -84,20 +85,32 @@ const bar = checks.filter((c) => c.bar <= +STAGE);
 const failed = bar.filter((c) => !c.ok);
 const carried = [...new Set(bar.flatMap((c) => c.codes))].sort();  // sorted: the receipt is diffed between drafts
 
-console.log(`\n  DRAFT ${STAGE}% · ${NAME}\n`);
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 // THE BARE WORD `failed` WAS THE WHOLE MESSAGE. Every sub-gate here is run with stdio:'pipe' and then
 // reduced to a `[bracket-code]` regex, so a child that fails without emitting a code, a missing browser,
 // a parse error, a real defect worded differently. Printed the same four letters and every number it
 // measured was discarded. A gate that captured its evidence and threw it away is worse than one that
 // never looked: it reports a verdict it can no longer justify.
 const tail = (out, n = 4) => out.split('\n').map((l) => l.replace(/\s+$/, '')).filter(Boolean).slice(-n);
+const f = gateFindings({
+  line: (r) => {
+    const lines = [`      ${r.summary}`];
+    if (r.tail) for (const l of r.tail) lines.push(`      │ ${l}`);
+    if (r.fix) lines.push(`      run it yourself: ${r.fix}`);
+    return lines.join('\n');
+  },
+});
+
+console.log(`\n  DRAFT ${STAGE}% · ${NAME}\n`);
 for (const c of bar) {
   console.log(`  ${c.ok ? '✓' : '✗'} ${c.label.padEnd(16)} ${c.ok ? '' : c.codes.join(', ') || '(no finding code, see its own words below)'}`);
   if (c.ok) continue;
-  console.log(`      ${c.hint}`);
-  if (!c.codes.length && c.out) for (const l of tail(c.out)) console.log(`      │ ${l}`);
-  if (c.cmd) console.log(`      run it yourself: ${c.cmd}`);
+  f.fail(c.codes[0] || slug(c.label), c.hint, {
+    at: c.label, fix: c.cmd, codes: c.codes,
+    tail: (!c.codes.length && c.out) ? tail(c.out) : undefined,
+  });
 }
+f.emit();
 
 if (failed.length) {
   console.log(`\n  ✗ not a ${STAGE}% draft yet: ${failed.map((c) => c.label).join(', ')}.`);
