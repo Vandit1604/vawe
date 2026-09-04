@@ -22,6 +22,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { run as runDocMap } from './doc-map.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CRAFT = path.join(ROOT, 'docs', 'CRAFT');
@@ -152,20 +153,21 @@ const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
   const docmap = runDocMap();
   const groups = [
-    ['registry coverage', coverageErrors()],
-    ['phantom references', phantomErrors()],
-    ['cross-links', linkErrors()],
-    ['README index', indexErrors()],
-    ['doc map', docmap.fails],
+    ['registry coverage', 'craft-coverage-registry', coverageErrors()],
+    ['phantom references', 'craft-coverage-phantom', phantomErrors()],
+    ['cross-links', 'craft-coverage-link', linkErrors()],
+    ['README index', 'craft-coverage-orphan', indexErrors()],
+    ['doc map', 'doc-map', docmap.fails],
   ];
+  const f = gateFindings();
   // Named on every run, never silently absent: an incomplete index must announce itself.
-  for (const msg of docmap.pending) console.warn(`  ⚠ doc map: ${msg}`);
-  const failed = groups.filter(([, e]) => e.length);
+  for (const msg of docmap.pending) { console.warn(`  ⚠ doc map: ${msg}`); f.note('doc-map-pending', msg); }
+  const failed = groups.filter(([, , e]) => e.length);
   if (failed.length) {
     console.error('✗ craft-coverage: the docs are out of sync\n');
-    for (const [name, e] of failed) {
+    for (const [name, code, e] of failed) {
       console.error(`  ${name}:`);
-      for (const msg of e) console.error(`    - ${msg}`);
+      for (const msg of e) { console.error(`    - ${msg}`); f.fail(code, msg); }
     }
     console.error('\n  Fix: classify new looks/stings in docs/CRAFT/SELECTION.md §4, repair the link, add the doc to README,');
     console.error('  or give the doc `when:`/`answers:`/`group:` frontmatter and run `make doc-index`.');
