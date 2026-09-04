@@ -939,6 +939,17 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `rewind` | plays to the end at double speed, then runs itself BACKWARDS to where it started. One layer, one window, and the return is the same motion reversed |
 | `whip` | SPEED RAMP: crawls at 20% speed, whips through the middle at about 530%, lands slow. The AE three-key ramp, for a dull passage you want crossed fast |
 
+## Film energy  `[top-level]`
+
+One word at the top of the scene sets the default speed curve for every cut and seam that names no `timing`. `energy:"brand"` gives the whole film the house speed ramp; `calm`, `hype` and `tense` shift the whole film's velocity at once. An explicit `timing` on a cut always wins.
+
+| name | what / when |
+|---|---|
+| `brand` | the house slow-fast-slow speed ramp on every cut. Directed and confident, the default to reach for |
+| `calm` | unhurried: every cut decelerates into place. Premium, editorial, a film with room to breathe |
+| `hype` | decisive: cuts land and stop with no drift. Launch-reel energy, product drops, announcements |
+| `tense` | restless: cuts accelerate away. Urgency, countdowns, a film that will not sit still |
+
 ## Scene cuts  `[transition]`
 
 `cuts:[{t,style}]`. The beat-to-beat cut family. One family per film.
@@ -1104,4 +1115,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_689 effects across 55 families. Regenerate: `make effects`._
+_693 effects across 56 families. Regenerate: `make effects`._
