@@ -14,6 +14,7 @@
 import { TRANSITIONS } from './transitions.js';
 import { resolveSeconds } from './vocab.js';
 import { parseColor } from './motion.js';
+import { ENERGY, okEnergy } from './energy.js';
 
 // The layer prop THIS file reads, declared beside the read (core/props.js). lowerScene() consumes it
 // and deletes it before any builder sees the layer, so no registry declares it and the schema was
@@ -102,6 +103,13 @@ const durs = (o, keys) => { for (const k of keys) if (o && o[k] != null) o[k] = 
 export function lowerScene(data) {
   if (!data || typeof data !== 'object') return data;
 
+  // ENERGY is the film-wide default speed curve (core/energy.js). It fills the `timing` of any cut or
+  // seam that names none, sugar or hand-authored, and an explicit `timing` always wins. It is only ever
+  // a value when the film declares `energy`, so a legacy scene (no energy) writes nothing and re-lowers
+  // byte-identical. When set, it OUTRANKS the per-fx `defaultTiming` ramp: the film's chosen velocity is
+  // more specific than a blanket motion default.
+  const bandTiming = okEnergy(data.energy) ? ENERGY[data.energy] : undefined;
+
   const boundary = Array.isArray(data.transitions) ? data.transitions : [];
   if (boundary.length) {
     const cuts = data.cuts ? [...data.cuts] : [];
@@ -111,7 +119,7 @@ export function lowerScene(data) {
       if (!T || typeof T !== 'object') continue;
       const at = T.at ?? T.t;
       const m = boundaryMechanism(T.fx, T.mech);
-      const timing = T.timing ?? defaultTiming(T.fx);   // a motion fx with no timing gets the speed ramp
+      const timing = T.timing ?? bandTiming ?? defaultTiming(T.fx);   // energy, else the motion-fx speed ramp
       if (m === 'seam') seams.push(clean({ t: at, fx: T.fx, dur: T.dur, dir: T.dir, seed: T.seed, intensity: T.intensity, feather: T.feather, timing }));
       else if (m === 'cut') cuts.push(clean({ t: at, style: T.fx, dur: T.dur, dir: T.dir, timing, cx: T.cx, cy: T.cy, dist: T.dist }));
       else stings.push(clean({ t: at, fx: T.fx, dur: T.dur, seed: T.seed, intensity: T.intensity, color: T.color }));
@@ -120,6 +128,14 @@ export function lowerScene(data) {
     if (stings.length) data.stings = stings;
     if (seams.length) data.seams = seams;
     delete data.transitions;
+  }
+
+  // ENERGY reaches HAND-AUTHORED cuts/seams too, so the film-wide velocity is not limited to the
+  // `transitions` sugar. Only fires when `energy` is set (bandTiming defined), and only fills a `timing`
+  // that is absent, so re-lowering is a no-op and a legacy film is untouched.
+  if (bandTiming) {
+    for (const c of data.cuts || []) if (c && typeof c === 'object' && c.timing == null) c.timing = bandTiming;
+    for (const s of data.seams || []) if (s && typeof s === 'object' && s.timing == null) s.timing = bandTiming;
   }
 
   // Every sting's tint, hand-written or lowered from `transitions`, checked at the one place they all

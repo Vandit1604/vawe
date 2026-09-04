@@ -97,6 +97,7 @@ import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../..
 import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
 import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
 import { boundaryMechanism, lowerScene, checkStingColor } from '../../core/transitions-lower.js';
+import { ENERGY, okEnergy } from '../../core/energy.js';
 import { SEAM_FX } from '../../core/seams.js';
 import { SEAM_CUE } from '../../core/audio-cues.js';
 import { resolveBridges } from '../../core/audio-bridges.js';
@@ -281,6 +282,28 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
   ok('vocab: lowerScene carries a numeric dir (angle) from transitions into seams', (() => {
     const d = lowerScene({ transitions: [{ at: 2, fx: 'wipe', mech: 'seam', dir: 35 }] });
     return d.seams[0].dir === 35;
+  })());
+  // energy: the film-wide default speed curve (core/energy.js), applied by lowerScene.
+  ok('energy: every ENERGY value is a real TIMINGS curve', Object.values(ENERGY).every((t) => t in TIMINGS));
+  ok('energy: okEnergy passes a known word and null, throws on an unknown', (() => {
+    if (okEnergy('brand') !== 'brand' || okEnergy(null) !== null) return false;
+    try { okEnergy('loud'); return false; } catch { return true; }
+  })());
+  ok('energy: lowerScene fills the timing of a hand-authored cut that names none', (() => {
+    const d = lowerScene({ energy: 'hype', cuts: [{ t: 2, style: 'push' }] });
+    return d.cuts[0].timing === ENERGY.hype; // 'snappy'
+  })());
+  ok('energy: an explicit timing on a cut beats the energy band', (() => {
+    const d = lowerScene({ energy: 'hype', cuts: [{ t: 2, style: 'push', timing: 'ramp' }] });
+    return d.cuts[0].timing === 'ramp';
+  })());
+  ok('energy: a film with no energy re-lowers byte-identical (no timing written)', (() => {
+    const d = lowerScene({ cuts: [{ t: 2, style: 'push' }] });
+    return d.cuts[0].timing === undefined;
+  })());
+  ok('energy: the band reaches a seam pushed through the transitions sugar', (() => {
+    const d = lowerScene({ energy: 'calm', transitions: [{ at: 2, fx: 'wipe', mech: 'seam' }] });
+    return d.seams[0].timing === ENERGY.calm; // 'out'
   })());
   ok('vocab: seam dirVec resolves a numeric angle to a unit vector', (() => {
     const [x, y] = seamDirVec(90); // 90deg = up = [0,1] on this shader's y-up uv
@@ -5782,6 +5805,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['the product bursts forward past the camera as it leaves the frame', 'punch'],                       // cut
     ['soft moving gradient blobs drifting slowly behind everything', 'flow'],                             // ambient shader
     ['slow to fast then slow again speed ramp for a whip transition', 'ramp'],                            // cut timing
+    ['make the whole film feel calm and unhurried', 'calm'],                                              // energy (film-wide speed curve)
     ['a held frame that stays subtly alive without actually moving anywhere, like breathing', 'breathe'], // idle
     ['an animated pipeline diagram where cards pop in and a token travels along the connectors', 'pipelineFlow'], // composition
     ['a light travels around the rounded rectangle border of a card', 'beam:border (border-beam)'],       // per-frame accent layer
