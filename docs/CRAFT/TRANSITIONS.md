@@ -109,6 +109,22 @@ speed dial (every curve is a named member of `TIMINGS`, `core/cuts.js`):
 `make direct` warns (`flat-seams`) when a film has two or more boundaries and every one rides a gentle
 curve with no speed ramp anywhere. It never blocks; it is the nudge to spend one ramp.
 
+### Two more seam knobs: `feather` and an angled `dir`
+
+Beyond `timing`, a `mech:"seam"` takes two shape knobs (both optional, both static, so determinism is
+unchanged):
+
+- **`feather`** (0..0.2): the softness of the edge on the edge-based seams (`wipe`, `irisRound`,
+  `clockWipe`, `barnDoor`, `blindsWipe`, `burnThrough`, `lumaWipe`). A hard edge reads as a slide deck;
+  a soft one reads graded, this is the single biggest cheap-vs-premium tell. Omit it for each unit's
+  own baked default; set `feather: 0.12` for a soft band, `feather: 0` for a crisp line.
+- **`dir` as an angle**: `dir` still takes `left|right|up|down`, but a **number of degrees** (0=right,
+  90=up) sweeps a `wipe`/`barnDoor`/`blindsWipe` at any angle, not just the four cardinals.
+
+```json
+{ "at": 5, "fx": "wipe", "mech": "seam", "dir": 35, "feather": 0.12, "timing": "ramp" }
+```
+
 > **Studied and deliberately not built (yet).** another engine models a transition as an orthogonal
 > *presentation* (`{draw, props}`) times a *timing* (`{getProgress, getDurationInFrames}`), and carries a
 > physics **spring** whose duration is *measured* from its damping/stiffness, not specified. Its overlap

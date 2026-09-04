@@ -1129,7 +1129,9 @@ boot((data, fps, theme, canvas) => {
   }
 
   // ---- SEAMS: two-scene shader transitions (core/seams.js) ----
-  // [{t, fx, dur, dir?, seed?, intensity?}]. The two beats either side of the boundary are
+  // [{t, fx, dur, dir?, seed?, intensity?, feather?}]. `dir` is a cardinal name or a number of
+  // degrees; `feather` (0..0.2) is an edge-softness override, per-fx default when absent. The two
+  // beats either side of the boundary are
   // rasterised ONCE (bakeSeams, at build) into u_from/u_to; renderFrame only SAMPLES them, so
   // the whole thing stays pure in n. The compositor is created ONLY when a scene declares seams,
   // so a scene without them adds no DOM and renders byte-identical to before.
@@ -1148,7 +1150,8 @@ boot((data, fps, theme, canvas) => {
       if (s.fx != null && !SEAM_FX.includes(s.fx))
         throw new Error(`unknown seam fx "${s.fx}" at t=${s.t}, one of: ${SEAM_FX.join(', ')}`);
       return { t: +s.t, fx: s.fx ?? 'fade', dur: +(s.dur ?? 0.5),
-        dir: s.dir, seed: s.seed ?? 0, intensity: s.intensity ?? 1, timing: s.timing || 'smooth',
+        dir: s.dir, seed: s.seed ?? 0, intensity: s.intensity ?? 1, feather: s.feather,
+        timing: s.timing || 'smooth',
         _from: null, _to: null, _fallback: false };
     })
     .filter((s) => s.dur > 0 && isFinite(s.t))
@@ -1429,7 +1432,7 @@ boot((data, fps, theme, canvas) => {
       const p = CUT_TIMINGS[s.timing]((t - s.t) / s.dur); // ease the transition progress
       if (s._from && s._to) {
         const fx = s._fallback ? 'fade' : s.fx; // blank raster → plain cross-fade
-        seamCompositor.draw(fx, p, s._from, s._to, { dir: s.dir, seed: s.seed, intensity: s.intensity });
+        seamCompositor.draw(fx, p, s._from, s._to, { dir: s.dir, seed: s.seed, intensity: s.intensity, feather: s.feather });
       } else {
         seamCompositor.clear(); // never baked (e.g. bake threw) → show the live stage, no dip
       }

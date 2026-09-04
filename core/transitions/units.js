@@ -67,10 +67,11 @@ const CORE_UNITS = [
 
   { name: 'wipe', family: 'reveal', author: 'vawe', license: 'internal', source: 'vawe',
     blurb: 'a soft-edged line sweeps toward dir, the arriving beat revealed behind it, playful, "notice the cut"',
-    glsl: vawe(`  float edge = sg < 0.0 ? (1.0 - p) : p;
-  float soft = 0.015;
-  float m = sg < 0.0 ? smoothstep(edge - soft, edge + soft, ax)
-                     : (1.0 - smoothstep(edge - soft, edge + soft, ax));
+    // Signed projection onto u_dir (any angle, not just the 4 cardinals): reduces to the old sg/ax
+    // cardinal-snap formula exactly at those 4 vectors (algebraically identical, verified by hand).
+    glsl: vawe(`  float coord = dot(uv - 0.5, u_dir) + 0.5;
+  float soft = u_feather;
+  float m = 1.0 - smoothstep(p - soft, p + soft, coord);
   col = mix(getFrom(uv), getTo(uv), m);`) },
 
   { name: 'crossWarp', family: 'warp', author: 'Eke Péter', license: 'MIT', source: 'gl-transitions/crosswarp',
@@ -82,10 +83,13 @@ const CORE_UNITS = [
     blurb: 'momentum swipe between beats',
     glsl: vawe(`  vec2 d = normalize(u_dir + 1e-4) / aspect;
   float amt = 0.9 * u_intensity;
+  // The smear spread is a CLAMPED read of intensity, so a subtle whip (low intensity, for travel
+  // alone) doesn't also lose its smear down to nothing; amt above still tracks intensity directly.
+  float smearK = clamp(u_intensity, 0.4, 2.0);
   vec3 acc = vec3(0.0); float wsum = 0.0;
   for (int i = 0; i < 6; i++) {
     float k = float(i)/5.0;
-    float sm = (k - 0.5) * 0.06 * u_intensity;
+    float sm = (k - 0.5) * 0.06 * smearK;
     vec2 fuv = uv + d * (p*amt + sm);
     vec2 tuv = uv + d * ((p - 1.0)*amt + sm);
     vec3 mixed = mix(getFrom(fuv).rgb, getTo(tuv).rgb, smoothstep(0.35, 0.65, p));

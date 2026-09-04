@@ -112,7 +112,7 @@ export function lowerScene(data) {
       const at = T.at ?? T.t;
       const m = boundaryMechanism(T.fx, T.mech);
       const timing = T.timing ?? defaultTiming(T.fx);   // a motion fx with no timing gets the speed ramp
-      if (m === 'seam') seams.push(clean({ t: at, fx: T.fx, dur: T.dur, dir: T.dir, seed: T.seed, intensity: T.intensity, timing }));
+      if (m === 'seam') seams.push(clean({ t: at, fx: T.fx, dur: T.dur, dir: T.dir, seed: T.seed, intensity: T.intensity, feather: T.feather, timing }));
       else if (m === 'cut') cuts.push(clean({ t: at, style: T.fx, dur: T.dur, dir: T.dir, timing, cx: T.cx, cy: T.cy, dist: T.dist }));
       else stings.push(clean({ t: at, fx: T.fx, dur: T.dur, seed: T.seed, intensity: T.intensity, color: T.color }));
     }

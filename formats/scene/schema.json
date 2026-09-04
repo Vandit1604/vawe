@@ -894,14 +894,14 @@
      "max": 3
     },
     "dir": {
-     "type": "string",
-     "label": "Travel direction for whipPan (left|right|up|down)",
-     "enum": [
-      "left",
-      "right",
-      "up",
-      "down"
-     ]
+     "type": "string|number",
+     "label": "Travel direction: left|right|up|down, or a number of degrees (0=right, 90=up) for any angle. A bad string is refused at render (core/seams.js okDir), not by this schema, because a union type carries no enum check."
+    },
+    "feather": {
+     "type": "number",
+     "label": "Edge softness override for the edge-based units (wipe, irisRound, clockWipe, barnDoor, blindsWipe, burnThrough, lumaWipe). Omit for that unit's own baked default.",
+     "min": 0,
+     "max": 0.2
     },
     "seed": {
      "type": "number",
@@ -968,14 +968,14 @@
      "max": 3
     },
     "dir": {
-     "type": "string",
-     "label": "Travel direction (left|right|up|down)",
-     "enum": [
-      "left",
-      "right",
-      "up",
-      "down"
-     ]
+     "type": "string|number",
+     "label": "Travel direction: left|right|up|down, or a number of degrees (0=right, 90=up). A numeric dir only means anything for mech:\"seam\"; mech:\"cut\" still only knows the 4 names and throws on a number."
+    },
+    "feather": {
+     "type": "number",
+     "label": "Edge softness override, seam only (see seams[].feather). Omit for that unit's own baked default.",
+     "min": 0,
+     "max": 0.2
     },
     "timing": {
      "type": "string",
