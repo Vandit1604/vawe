@@ -380,8 +380,9 @@ value of the entry is the RECIPE for authoring a brand-specific one: an html lay
 radial gradients plus a filter chain is reachable today, since `filter` applies to an `html` layer like
 any other. Worth adding as a background preset only if a film needs the colours keyed to its own brand.
 
-**DEFAULT OR OPTION** Option. Note that **112 of 134 gate-visible scenes paint one background window for
-the whole runtime**, so the real lever is binding windows to cuts, not a richer single window.
+**DEFAULT OR OPTION** Option. Note that most gate-visible scenes paint one background window for the
+whole runtime (112 of 134, last measured; run `node scripts/gates/waiver-drift.mjs` for the current
+count), so the real lever is binding windows to cuts, not a richer single window.
 
 ---
 

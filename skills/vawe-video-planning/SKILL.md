@@ -244,9 +244,9 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
 ## Step 3b.1: Every frame FIGHTS for its value (the value gate)
 
 The single most common failure: beats that occupy time without earning it. Before locking any beat,
-apply the **value test**: "if I cut this frame, what does the viewer lose?" If the answer is "nothing"
-or "a restatement of the headline," the beat is not done. Reimagine it until it teaches, proves, or
-delights something no other frame does. Concretely:
+apply **the value test** ([`docs/TASTE.md`](../../docs/TASTE.md), the one law). If the answer is
+"nothing" or "a restatement of the headline," the beat is not done. Reimagine it until it teaches,
+proves, or delights something no other frame does. Concretely:
 
 - **SHOW the real artifact, never a placeholder label.** The word "scene" / "rendered" / "output" in
   a box proves nothing, it's a stand-in for work not done. Render an ACTUAL mini-scene (real layers
@@ -295,7 +295,8 @@ each image, and every cut's reason.
 | **Continuity plan** | which 1–2 elements TRAVEL across beats; the one cut family used | **the brief** (thread) + quiz-look |
 | Per beat (one row each) | `t-range · role · exact copy · image/treatment · cut-in (relationship + transition + WHY, per TRANSITIONS.md) · motion · feeling` | you |
 | Assets | which real logos / photos / uploads (NOT bare rects), and their treatment | you |
-| Sound | `audio.auto` on? captions? | you |
+| Sound | bed + cues, or a written `_why` for silence: [`SOUND.md`](../../docs/CRAFT/SOUND.md) §0 has the four-command path | you |
+| Captions | timing source, `destination` if this ships to a phone feed, `captionMode`/`captionStyle` if not plain: [`CAPTIONS.md`](../../docs/CRAFT/CAPTIONS.md) | you |
 | CTA | the exact end action + url | the brief, when the study found one |
 
 For a no-site video, the first four rows ARE the four manufactured things from Step 0.5. If any is
@@ -327,6 +328,11 @@ Three failures that ship "renders-fine but wrong" videos (see `docs/MISTAKES.md`
   your eye is that gate until the vision-judge exists.
 
 ## Step 4: Author → verify (non-negotiable ladder)
+
+This step runs the `check` → `ship` → `judge` → `ledger` phases of the one spine in
+[`AGENTS.md`](../../AGENTS.md#the-process-has-one-owner-and-it-is-not-this-file) ("THE PROCESS HAS ONE
+OWNER"). `author-check`, `video`, `beats`, `reveal` and `ledger` below are the STEPS those phases run,
+not a separate ladder.
 
 `make validate` → `make video` → `make motion --data <file>` → `make audit M=<fmt>` (text AND
 image contrast) → **`make beats D=<file> VS=<brand>`** (FIDELITY GATE, stacks each beat beside its

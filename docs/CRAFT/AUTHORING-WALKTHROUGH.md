@@ -61,9 +61,9 @@ Beat table in your reply first (not the JSON): per beat name the **archetype** (
 frame** (§value test below), and the **motion**. Then freeze it as the planning skill's LOCK SHEET and
 get sign-off. **Nothing renders before the lock sheet is approved.**
 
-The **value test** on every beat ([`../TASTE.md`](../TASTE.md), the one law): *if I cut this frame,
-what does the viewer lose?* If the answer is "a restatement of the headline," the beat isn't done,
-give it a real artifact (a live meter filling, a counter, a real UI), not a word in a box.
+Apply **the value test** on every beat ([`../TASTE.md`](../TASTE.md), the one law). If the answer is
+"a restatement of the headline," the beat isn't done, give it a real artifact (a live meter filling, a
+counter, a real UI), not a word in a box.
 
 ## Step 3: Author the JSON (transcribe the lock sheet, don't explore)
 
@@ -92,18 +92,25 @@ a scene JSON, not raw HTML; pointing it at a fragment measures nothing.
 
 ## Step 4: The mandatory ladder (this is what stops effect-soup)
 
+This is the `make check` phase of the one spine in
+[`AGENTS.md`](../../AGENTS.md#the-process-has-one-owner-and-it-is-not-this-file): every gate runs,
+nothing blocks yet.
+
 ```bash
 make author-check D=formats/scene/passwords.json           # validate · beats · assets · inspect · plan-vs-render
 TASTE=1 make author-check D=formats/scene/passwords.json  # ...+ critique · direct · floor · dissolve
                                                           #     designspec · copy · pace
 ```
 
-**The style gates are OPT-IN.** A bare `make author-check` runs only the always-on half, which catches a
-film that is BROKEN: schema and em-dash (`validate`), timeline holes (`beats`), missing referenced files
-(`assets`, advisory unless `STRICT=1`), the value contract (`inspect` + `plan-vs-render`), plus two
-advisory notes (`treatment`, `waiver-drift`). It says nothing at all about whether the film is any good,
-and the run prints which gates it skipped. `TASTE=1` adds the seven style gates. `slop` is not one of
-them: it was retired in 2026-08 and its script deleted.
+**The style gates always run; `TASTE=1` only promotes them to blocking.** A bare `make author-check`
+runs the always-on half, which catches a film that is BROKEN: schema and em-dash (`validate`), timeline
+holes (`beats`), missing referenced files (`assets`, advisory unless `STRICT=1`), the value contract
+(`inspect` + `plan-vs-render`), plus two advisory notes (`treatment`, `waiver-drift`). It ALSO runs the
+seven style gates, critique · direct · floor · dissolve · designspec · copy · pace, but their findings
+only print, they cannot stop the run. `slop` is not one of them: it was retired in 2026-08 and its
+script deleted. See [`TASTE.md`](../TASTE.md) "One process, two severities" for why: promoting them by
+default would fail four films in five, which is the exact "a rule fired on most of the library gets
+waived by reflex" failure `CLAUDE.md`/`AGENTS.md` warns about.
 
 Under `TASTE=1` the ladder **blocks** on value (placeholder / unbacked / thin beats), on direction
 (≥3 cut families, profile contradictions), on crossfade mud, on the designspec colour and font lock, and
@@ -133,6 +140,9 @@ make reveal D=<file>        # the ENTER arc + settled + EXIT arc → catches how
 
 ## Step 5: Render, then the gate that SEES
 
+This is the `make ship` + `make judge` phases of the same spine (`make video` here is the lighter,
+sheet-less render; `make ship` also runs `seam-check` and the contact sheets).
+
 ```bash
 make video D=formats/scene/passwords.json             # → out/passwords.mp4  (+ author-check + audit)
 make judge D=formats/scene/passwords.json             # preps /tmp/judge/sheet.png + rubric
@@ -145,6 +155,8 @@ make judge D=formats/scene/passwords.json             # preps /tmp/judge/sheet.p
 ([`../JUDGE.md`](../JUDGE.md), [`../MISTAKES.md`](../MISTAKES.md) #15). Fix the JSON, re-render.
 
 ## Step 6: Prove it isn't a repeat, then log it
+
+This is the `make ledger` / `make ledger-add` phase of the same spine.
 
 ```bash
 make ledger     D=<file>          # fails if this repeats a shipped design (change ≥2 of cut/beat/layout)

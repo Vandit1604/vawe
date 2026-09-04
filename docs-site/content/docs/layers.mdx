@@ -6,7 +6,7 @@ icon: Layers
 
 A layer is one element on the canvas. There are 24 layer types, and you compose a video by stacking them. This page lists each type and its own fields; the fields shared by all layers are at the [bottom](#fields-every-layer-shares).
 
-The full list of types: `text`, `count`, `image`, `video`, `group`, `rect`, `glow`, `beam`, `svg`, `cursor`, `clip`, `html`, `component`, `board`, `doc`, `shader`, `lottie`, `paint`, `raymarch`, `three`, `globe`, `composition`, `adjust`.
+The full list of types: `text`, `count`, `image`, `video`, `group`, `rect`, `glow`, `beam`, `svg`, `cursor`, `clip`, `html`, `component`, `board`, `doc`, `shader`, `lottie`, `paint`, `raymarch`, `three`, `globe`, `particles`, `composition`, `adjust`.
 
 ## text
 
@@ -144,14 +144,15 @@ An animated pointer that glides along a path and clicks. Pair it with a captured
 
 `shader` is an ambient WebGL field behind your content: `flow`, `aurora`, `plasma`, `drift`, or `mist`, tuned by `speed`, `intensity`, `colors`, and `seed`. (This is different from a [sting](/docs/motion#shader-stings), which is a brief cover over a cut.) `html` drops in hand-authored static HTML and CSS when you need something the primitives do not cover; `<script>` is stripped.
 
-## paint, raymarch, three, globe
+## paint, raymarch, three, globe, particles
 
-The rest of the canvas family. Each one paints its own pixels every frame from local time, so all four seek exactly like the primitives above.
+The rest of the canvas family. Each one paints its own pixels every frame from local time, so all seek exactly like the primitives above.
 
 - `paint` is a generative Canvas 2D field, the same idea as `shader` written in JS rather than GLSL, and the one you can resample.
 - `raymarch` lights an implicit surface out of a distance field: a camera, a normal, a silhouette. The most expensive primitive in the engine, so give it one hero shot at the size it needs.
 - `three` is a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from `t`, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud.
 - `globe` is a dotted planet with tapered route arcs. Reach for `three: "globe"` instead only when you need a real sun vector.
+- `particles` is a seeded particle field (`confetti`, `sparks`, `dust`) driven by `gravity` and `spread`, deterministic from the seed so it seeks like everything else. One burst for a payoff, never ambient filler.
 
 ```json
 { "type": "globe", "w": 720, "h": 720, "origin": [51.5, -0.1], "dest": [37.8, -122.4], "arcHeight": 0.4 }

@@ -26,6 +26,38 @@ vocabulary, and it closed it silently, by habit, with no decision anywhere.
 
 ---
 
+## 0. The 90% case: give the film sound, in four commands
+
+Most films need none of the theory below. They need a bed under the type and cues on the beats that
+earn one. Do this, in order, before reading further:
+
+```bash
+make audio                       # bake every cue + music bed, no network, deterministic (core/audio-kit.mjs)
+make audio-bed D=<file> WRITE=1  # resolve "audio.music":"auto" in the scene to a concrete bed
+make audio-check D=<file>        # is the result a decision or an omission? read what it prints
+make video D=<file>               # renders with the mux; listen to out/<file>.mp4
+```
+
+Write `"audio": { "music": "auto" }` in the scene (or name a bed directly, `"music": "lofi"`) before the
+first command. `make audio-bed` picks the bed from the scene's `profile`, and it MUST run before
+render: the render binary has no JS pre-pass, so an unresolved `"auto"` reaching the mixer is read as a
+filename and plays silence (`§6` below has the full trap). Five profiles (`apple`, `linear`, `vercel`,
+`a24`, `bloomberg`) still resolve `"auto"` to nothing, so on those, name a bed by hand or fetch a real
+track: `make music GENRE=ambient NAME=<film>` (Mixkit free stock, the one step here that touches the
+network; confirm its licence before commercial release, `§7`).
+
+**When silence is genuinely right,** it is because the destination autoplays muted in-feed and every
+beat reads without sound, not because nobody got to it. Say so in the scene:
+
+```json
+"audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries the whole beat" }
+```
+
+`audio-check` blocks (`STRICT=1`) on `silent:true` with no `_why`. A missing `_why` is the tell that
+the silence was never decided, only defaulted to.
+
+---
+
 ## 1. The prime rule, replacing the old one
 
 An earlier version of this file opened with *"Silence is the default. A video must WORK silent, then a
