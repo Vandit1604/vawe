@@ -35,8 +35,9 @@ const paint = canvasLayer('paint', 'a generative Canvas 2D field drawn per frame
 const raymarch = canvasLayer('raymarch', 'a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs');
 const three = canvasLayer('three', 'a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud');
 const globe = canvasLayer('globe', 'a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector');
+const particles = canvasLayer('particles', 'a deterministic particle emitter: `preset` picks confetti (a gravity-fed burst), sparks (a fast radial flash) or dust (a slow ambient drift). Closed-form per particle, seeded by `seed`, never a running sim');
 
-const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, composition, adjust };
+const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, particles, composition, adjust };
 
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed, the same failure as the

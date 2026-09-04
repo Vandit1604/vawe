@@ -1,7 +1,7 @@
 {
-  "total": 685,
-  "previewed": 333,
-  "families": 54,
+  "total": 689,
+  "previewed": 336,
+  "families": 55,
   "tags": [
     [
       "asset",
@@ -53,11 +53,15 @@
     ],
     [
       "layer",
-      40
+      41
     ],
     [
       "motion key",
       6
+    ],
+    [
+      "particles layer",
+      3
     ],
     [
       "per-frame",
@@ -1762,7 +1766,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a layer type is the noun, not the effect. Every preview on this page is already one of them.",
-      "count": 23,
+      "count": 24,
       "undescribed": 0,
       "entries": [
         {
@@ -1874,6 +1878,13 @@
           "name": "paint",
           "stem": "layer-types--paint",
           "desc": "a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "particles",
+          "stem": "layer-types--particles",
+          "desc": "a deterministic particle emitter · `preset` picks confetti (a gravity-fed burst), sparks (a fast radial flash) or dust (a slow ambient drift). Closed-form per particle, seeded by `seed`, never a running sim",
           "scene": null,
           "noPreview": null
         },
@@ -2137,6 +2148,40 @@
           "stem": "keyframe-handles-the-graph-editor--overshoot",
           "desc": "arrives from BEYOND its key and settles back · the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it",
           "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "particles-presets",
+      "title": "Particles presets",
+      "tag": "particles layer",
+      "intro": "`preset` on a `particles` layer picks the emitter · `{ \"type\":\"particles\", \"preset\":\"confetti\" }`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 3,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "confetti",
+          "stem": "particles-presets--confetti",
+          "desc": "a gravity-fed burst launched near the bottom of the box, tumbling rects as it falls · celebratory",
+          "scene": "/assets/effects/particles-presets--confetti.json",
+          "noPreview": null
+        },
+        {
+          "name": "dust",
+          "stem": "particles-presets--dust",
+          "desc": "a slow ambient drift that loops forever, low-alpha specks with a gentle twinkle · atmosphere behind a subject",
+          "scene": "/assets/effects/particles-presets--dust.json",
+          "noPreview": null
+        },
+        {
+          "name": "sparks",
+          "stem": "particles-presets--sparks",
+          "desc": "a fast radial flash from the box centre, additive-blended, gone in under a second · an impact or a reveal",
+          "scene": "/assets/effects/particles-presets--sparks.json",
           "noPreview": null
         }
       ]
@@ -3565,7 +3610,7 @@
       "id": "composite-looks-static",
       "title": "Composite looks (static)",
       "tag": "static",
-      "intro": "`filter:\"<look>\"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`\"neon:0.9\"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.",
+      "intro": "`filter:\"<look>\"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`\"neon:0.9\"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks/index.js` is the list.",
       "mode": "table",
       "note": null,
       "noPreview": "a grade needs a photographic source, and the index ships no photographs. See it on the looks clip on /showcase.",
