@@ -40,6 +40,7 @@ shortcut to load it at the right moment.
 | Decide what holds a short film across its cuts | read [`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md) | ~18 devices in four registers, sourced; carry two threads. A continuous object is one of them, and the one Murch ranks last |
 | **Hand-write any HTML** (a hook, CTA, card, hero) | **taste-skill** → then **impeccable** | design read + 3 dials, then production craft |
 | Judge / fix a design that "looks AI-generated" | **impeccable** (`critique`, `bolder`, `quieter`) | 41-rule detector + register craft |
+| Add captions, or ship to a phone feed (`tiktok`/`reels`/`shorts`) | read [`docs/CRAFT/CAPTIONS.md`](docs/CRAFT/CAPTIONS.md) | timing, the safe strip per destination, `captionMode`/`captionStyle` |
 
 ### The anti-slop rule (non-negotiable)
 
@@ -64,8 +65,9 @@ card grid). **Before writing HTML by hand:**
 ### Gates
 Authoring quality, one command: **`make author-check D=<file>`** (always on: validate · beats · assets ·
 inspect · plan-vs-render; `make video` runs it unless `NOCHECK=1`). The style gates, critique · direct ·
-floor · dissolve · slop · designspec · copy, are OPT-IN: `TASTE=1 make author-check D=<file>`
-([`docs/TASTE.md`](docs/TASTE.md)). Then the eye rungs:
+floor · dissolve · designspec · copy · pace, ALWAYS RUN too, but only report: `TASTE=1 make author-check
+D=<file>` promotes their findings to blocking ([`docs/TASTE.md`](docs/TASTE.md)). `slop` is not among
+them: retired in 2026-08. Then the eye rungs:
 `make probe` → `make audit` → `make beats` → `make ledger` → **`make judge`** (the gate that SEES,
 required post-render; [`docs/JUDGE.md`](docs/JUDGE.md)).
 
@@ -379,13 +381,18 @@ stills, news photos, paid stock. They trigger Content ID claims. Capture the rea
 order, what that step reads, and whether it can stop you. Twenty steps today, and the number moves
 without this paragraph having to be edited, which is the entire reason it is stated there and not here.
 
-```bash
-make preflight D=<file>   # BEFORE the JSON: the nine decisions, and the arsenal aimed at this film
-make dev  D=<file>        # the iteration loop: build, draft-render, open. No gates, no audit
-make check D=<file>       # every gate, every finding, ZERO consequence. Nothing blocks
-make ship D=<file>        # the ladder with its teeth in, then the seams
-make judge D=<file>       # MANDATORY, post-render, and the only step that SEES
-```
+**This is the ONE spine. Every other doc names these same phases in these same words**, and shows
+`author-check` / `video` / `beats` / `reveal` / `ledger` only as the STEP a phase runs, never as a
+rival finish line.
+
+| phase | what it is | steps it runs |
+|---|---|---|
+| `make preflight D=<file>` | the 9 decisions before any JSON | the decision chain (`docs/CRAFT/README.md`) |
+| `make dev D=<file>` / `make studio D=<file>` | the iteration loop | `./bin/vawe --draft`, no gates, no audit |
+| `make check D=<file>` | every gate, every finding, ZERO consequence | `author-check` in report mode |
+| `make ship D=<file>` | the ladder with its teeth in, in order | `author-check` → `./bin/vawe` (render) → `audit` → `seam-check` |
+| `make judge D=<file>` | the eye, MANDATORY post-render, the only step that SEES | read with `make beats` / `make reveal` / `make look` |
+| `make ledger D=<file>` / `make ledger-add D=<file>` | prove it is not a repeat, then log it | run before shipping, logged after the user approves |
 
 This file used to carry its own copy of that ladder: twenty-two numbered steps whose numbering did not
 sort, in which `0` and `0a` (compose from blueprints · see the whole arsenal) were printed **eleventh
@@ -402,11 +409,12 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 752 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 772 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
-`docs/EFFECTS.md`, 672 effects across 54 families). Reach for it before you invent anything. The measured cost
-of not doing so: the `{type:"beat"}` blueprint mechanism is used by **3 of the 149 gate-visible scenes**, and 12 of its
-19 beats have never been used once.
+`docs/EFFECTS.md`, 693 effects across 56 families). Reach for it before you invent anything. The measured cost
+of not doing so: the `{type:"beat"}` blueprint mechanism is used by a handful of gate-visible scenes (3
+of 149 when last measured; run `node scripts/gates/waiver-drift.mjs` for the current count), and 12 of
+its 19 beats have never been used once.
 
 **`make schema AT="layers[].motion[]"`** answers the other half: not what the engine can DO, but what you
 may WRITE at one path, with every field's type and its written label, read live from
@@ -450,8 +458,9 @@ its size helper squared any layer that declared one axis, so the one gate whose 
 from a picture handed a pass to a hairline. It was deleted. **You are the check now**, with `make
 judge` and your eyes. No green tick will tell you a film is only type.
 
-Measured over the 149 gate-visible scenes: **64 carry zero pictorial layers of any size.** That was
-nobody's decision. It is debt, not a pattern to copy. What counts as explanation, the three questions
+Measured over the gate-visible scenes: **64 of 149 carried zero pictorial layers of any size, last
+measured** (run `node scripts/gates/waiver-drift.mjs` for the current count). That was nobody's
+decision. It is debt, not a pattern to copy. What counts as explanation, the three questions
 the deleted gate asked and where to get the graphic:
 [`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
 
@@ -462,10 +471,14 @@ between unrelated shots and the film is a stack of cards read aloud.
 
 The prescription used to be a CONTINUOUS OBJECT: one layer that survives a cut and changes across it.
 That is one device and it is the cheapest one, and **Murch ranks it last** of the six things a cut must
-serve, so it is the first thing you sacrifice. `no-continuous-object` measures it and cannot see a
-match cut, a oner, a sound bridge, a metric cut rate, a motif or an escalation. A film held by a motif
-and an escalation is properly structured and fails that rule every time. The catalogue of what else can
-hold a film, Murch's ranking with its percentages, and a six-question decision aid:
+serve, so it is the first thing you sacrifice. `no-continuous-object` credits the two devices the engine
+PRODUCES and can verify, a continuous object and a match cut (`matches`/`becomes`). It cannot verify a
+oner, a sound bridge, a metric cut rate, a motif or an escalation, because those are conceptual and no
+static gate can confirm one. So a film held by one of THOSE is not a failure and does not fake a
+continuous object to pass: it declares the real device in a reasoned waiver,
+`{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how>"}}}`,
+which is a structural decision someone wrote down, not an admission. The catalogue of what else can hold
+a film, Murch's ranking with its percentages, and a six-question decision aid:
 [`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md).
 
 **Name three ways this film could hold its subject, and reject the first one.** If the answer is always
@@ -495,8 +508,9 @@ windows in the order the film turns, give none of them a `from`/`to`, and the en
 the joint after it (`core/junctions.js`), so the cuts you already wrote own the numbers.
 
 This is the strongest single lever in the file. brew inverts the tone of the world on four of its five
-cuts and spends its one accent window on the logo reveal, while **121 of the 149 gate-visible scenes,
-81%, paint ONE window for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
+cuts and spends its one accent window on the logo reveal, while **81% of gate-visible scenes (121 of
+149, last measured; run `node scripts/gates/waiver-drift.mjs` for the current count) paint ONE window
+for the whole runtime**. A pictorial beat on a dead backdrop is still a slide.
 
 **HALF OF THIS IS LIVE NOW, AND IT IS THE CHEAPER HALF.** `scripts/live/scene-live.mjs` fires on every
 save of a scene JSON and says so when a film paints one `bg` window for its whole runtime, with the 82%
@@ -523,7 +537,8 @@ a `_why`. **Four films rule a grid by hand today, and none of them wrote it down
 
 ## SILENCE IS A DEVICE, NOT A DEFAULT  `[gated: scripts/gates/audio-check.mjs#silence-without-a-reason]`
 
-**123 of the 149 gate-visible scenes ship mute, 83%**: 17 carry no `audio` key at all and 106 declare
+**83% of gate-visible scenes ship mute** (123 of 149, last measured; run
+`node scripts/gates/waiver-drift.mjs` for the current count): 17 carry no `audio` key at all and 106 declare
 `silent: true`. Of those 106, **only 26 say why**. So the sentence to remember is not "nobody declares
 the silence", it is "nearly everybody declares it and almost nobody justifies it". That closes the
 whole aural family of structural device: the sound bridge, music-led structure, the unfinished

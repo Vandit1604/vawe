@@ -129,8 +129,9 @@ none and it reports `no-storyboard`.
 
 ### The ratchet: grandfather the past, block new work now
 
-`no-storyboard` fires on **121 of the 132 scenes** in `formats/scene/`. Two answers were considered and
-both rejected. **Backfill** writes 121 storyboards to satisfy a gate, and for a judgement rule that is
+`no-storyboard` fires on most scenes in `formats/scene/` (121 of 132, last measured; run
+`node scripts/gates/waiver-drift.mjs` for the current count). Two answers were considered and
+both rejected. **Backfill** writes a storyboard for each one to satisfy a gate, and for a judgement rule that is
 worse than the red: the number goes green and nobody learns anything. **Wait for a threshold** ("promote
 it when under a quarter are missing") leaves the rule toothless for months and depends on a cleanup
 nobody is scheduled to do.
@@ -178,7 +179,11 @@ census runs it across the whole library on every author-check run, so a probe th
 would cost 132 browsers. A finding that only exists after a child gate has run cannot be ratcheted this
 way, and should not be, because its census would go stale between runs.
 
-Then the eyeball + memory rungs (not chained: you must look):
+These are the `make judge` / `make ledger` phases of the one spine in
+[`AGENTS.md`](../AGENTS.md#the-process-has-one-owner-and-it-is-not-this-file) ("THE PROCESS HAS ONE
+OWNER"): `preflight` → `dev`/`studio` → `check` → `ship` (which runs `author-check` → render → `audit`
+→ `seam-check`) → `judge` → `ledger`. The eyeball + memory rungs below are read UNDER `judge`, not a
+separate ladder (not chained: you must look):
 
 ```bash
 make studio   D=<file>              # LIVE scrubbable preview + TIMELINE (bars, ramps, cuts, dead-air bands)
