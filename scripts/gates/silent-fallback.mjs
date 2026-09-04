@@ -18,9 +18,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCAN = ['core', 'formats/scene'];
+const f = gateFindings();
 
 // A lookup indexed by something that looks like a NAME, with a fallback. `[0]`/`[i]`/`[idx]` are
 // positional and excluded: an index out of range is not a misspelling.
@@ -86,23 +88,15 @@ for (const d of SCAN) walk(d);
 // gate never saw the line at all. Three of these existed here, written for `o?.[k]`, which the first
 // pattern could not match, and they are what made a real blind spot look considered. #363.
 const stale = [...WAIVED.keys()].filter((k) => !hit.has(k));
-if (stale.length) {
-  console.error(`✗ silent-fallback: ${stale.length} waiver(s) matched nothing, they describe code this gate`);
-  console.error('  never saw, so they claim an inspection that did not happen:\n');
-  for (const k of stale) console.error(`    ${k}`);
-  console.error('\n  Either the code moved (update the key) or the pattern cannot see it (widen the pattern).');
-  process.exit(1);
-}
+for (const k of stale) f.fail('stale-waiver',
+  `${k}: waiver matches nothing, it describes code this gate never saw, so it claims an inspection that did not happen`,
+  { fix: 'either the code moved (update the key) or the pattern cannot see it (widen the pattern)' });
 
-if (!findings.length) {
-  console.log(`✓ silent-fallback: no unexplained name-keyed fallback in ${SCAN.join(' / ')}`);
-  console.log(`  ${WAIVED.size} waived, each with a reason. A vocabulary resolves through core/registry.js,`);
-  console.log('  which refuses a wrong name and keeps the default for an absent one.');
-  process.exit(0);
-}
-console.error(`✗ silent-fallback: ${findings.length} name-keyed lookup(s) with a fallback and no stated reason:\n`);
-for (const f of findings) console.error(`    ${f.rel}:${f.line}\n      ${f.code}`);
-console.error(`\n  A wrong name must not resolve to a default. Either route it through defineRegistry`);
-console.error(`  (core/registry.js) so it throws, or waive it in this file WITH A REASON if the key is`);
-console.error('  positional, a cache, or a membership test rather than a vocabulary.');
-process.exit(1);
+for (const hit_ of findings) f.fail('silent-fallback',
+  `${hit_.rel}:${hit_.line}  ${hit_.code}`,
+  { at: `${hit_.rel}:${hit_.line}`,
+    fix: 'route it through defineRegistry (core/registry.js) so a wrong name throws, or waive it here WITH A REASON if the key is positional, a cache, or a membership test rather than a vocabulary' });
+
+if (!f.count) console.log(`✓ silent-fallback: no unexplained name-keyed fallback in ${SCAN.join(' / ')}`);
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

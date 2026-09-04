@@ -142,7 +142,7 @@ sfx-check:
 # make canvas-purity [M=scene] [D=<file>]: do the shader/paint PIXELS depend only on n? `make probe`
 # compares a DOM signature and structurally cannot see inside a canvas (docs/MISTAKES.md #64).
 canvas-purity:
-	node scripts/gates/canvas-purity.mjs $(if $(M),$(M),scene) $(D)
+	@node scripts/gates/canvas-purity.mjs $(if $(M),$(M),scene) $(D) $(if $(JSON),--json,)
 
 build: fonts
 	go build -o bin/vawe ./cmd/render
@@ -454,7 +454,7 @@ mistakes-check:
 # not become a plausible substitute; absence may keep its documented default. core/registry.js removes
 # the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #376.
 silent-check:
-	node scripts/gates/silent-fallback.mjs
+	@node scripts/gates/silent-fallback.mjs $(if $(JSON),--json,)
 
 # make unused, which registered effects has no shipped scene ever named? A REPORT, not a rule: it
 # always exits 0. Read a zero as "nobody can find it", "it does not work", or "something else does it
@@ -700,7 +700,7 @@ copy-check:
 # icon / captured component / VO file exists on disk before you render (a missing one = a broken image or
 # silent gap). Prints how to fetch each. Advisory in author-check; STRICT=1 blocks.
 asset-check:
-	node scripts/gates/asset-check.mjs $(D) $(if $(STRICT),--strict,)
+	@node scripts/gates/asset-check.mjs $(D) $(if $(STRICT),--strict,) $(if $(JSON),--json,)
 
 # make pace-from-vo VO=<file>.words.json [BEATS=n], SCRIPT-FIRST PACING: propose beat start/durations
 # timed to the narration (from a voWords sidecar) so the reveals land on the voice. Proposes; never mutates.
@@ -862,7 +862,7 @@ probe:
 # Anybody and Manrope in the wrong typeface. Writes out/<name>.fonts.json. Exits 1 on any non-OK.
 # (Distinct from `make fonts`, which DOWNLOADS the faces.)
 font-audit:
-	node scripts/gates/font-audit.mjs $(if $(M),$(M),scene) $(D)
+	@node scripts/gates/font-audit.mjs $(if $(M),$(M),scene) $(D) $(if $(JSON),--json,)
 
 # make install-hooks: activate the version-controlled git hooks (pre-push runs the framework gates)
 install-hooks:
@@ -967,7 +967,7 @@ pace-check:
 # it never blocks without STRICT=1, because the library has never been held to this rule before today.
 .PHONY: paints-nothing
 paints-nothing: ## does each layer paint anything in its own box? pixel diff, not DOM (D=<file> [STRICT=1])
-	node scripts/gates/paints-nothing.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+	@node scripts/gates/paints-nothing.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(JSON),--json,)
 
 arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never mentions
 	@node scripts/gates/arsenal-check.mjs $(if $(JSON),--json,)

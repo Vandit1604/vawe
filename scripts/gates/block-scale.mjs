@@ -21,10 +21,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SPACE_STEPS, TYPE_STEPS, R_STEPS } from '../../blocks/kit.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const STRICT = process.argv.includes('--strict');
 const SITES = process.argv.includes('--sites');
+const f = gateFindings();
 
 // The four props a scale governs, and the steps each one answers to.
 const SCALES = {
@@ -82,9 +84,18 @@ if (SITES) {
 }
 
 console.log(`\n  ${totalOff} off-scale value(s) across ${new Set(offSites.map((s) => s.block)).size} block(s).`);
-if (!STRICT) {
-  console.log('  Reporting only. `--strict` exits non-zero; `--sites` names every one.');
-  process.exit(0);
+
+// One finding per scale that carries off-values. WARN by default (this gate REPORTS on purpose, see the
+// header comment); `--strict` is a caller flag, not a fixed severity, so it decides error vs warn here.
+for (const [k, t] of Object.entries(tally)) {
+  if (!t.off) continue;
+  f.finding({ severity: STRICT ? 'error' : 'warn', code: `block-scale-${k}`,
+    summary: `${t.off} off-scale ${k} value(s), ${pct(t.on, t.off)}% on scale`,
+    fix: '--sites names every one; see blocks/kit.mjs for the shared scale' });
 }
-console.log(`\nblock-scale: FAIL under --strict. See ${path.relative(repoRoot, fileURLToPath(import.meta.url))}`);
-process.exit(totalOff ? 1 : 0);
+
+if (!STRICT) console.log('  Reporting only. `--strict` exits non-zero; `--sites` names every one.');
+else if (totalOff) console.log(`\nblock-scale: FAIL under --strict. See ${path.relative(repoRoot, fileURLToPath(import.meta.url))}`);
+
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

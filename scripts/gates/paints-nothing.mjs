@@ -47,11 +47,13 @@ import puppeteer from 'puppeteer';
 import { sceneTiming, spanOf } from './scene-timing.mjs';
 import { population, SCENE_DIR } from '../lib/census.mjs';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
 const file = argv.find((a) => !a.startsWith('--'));
 const strict = argv.includes('--strict');
+const f = gateFindings();
 
 const FPS = 30;
 const OPACITY_FLOOR = 0.01; // below this a layer is DECLARED invisible right now, not a paint failure
@@ -160,24 +162,25 @@ const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', 
 async function reportOne(absFile) {
   const r = await checkScene(browser, port, absFile);
   console.log(`\n  paints-nothing · ${r.file}`);
-  if (r.skip) { console.log(`  · ${r.skip}\n`); return { fail: false }; }
-  if (r.error) { console.log(`  ✗ ${r.error}\n`); return { fail: false }; }
-  if (!r.findings.length) { console.log(`  ✓ ${r.layerCount} layer(s) checked, all paint something\n`); return { fail: false }; }
-  for (const f of r.findings) console.log(`    ~ [paints-nothing] ${f.layer} at t=${f.t}s (frame ${f.frame}) is pixel-identical to itself hidden, it paints nothing in its own box.`);
-  const blockable = !r.waived;
+  if (r.skip) { console.log(`  · ${r.skip}\n`); return; }
+  if (r.error) { console.log(`  ✗ ${r.error}\n`); return; }
+  if (!r.findings.length) { console.log(`  ✓ ${r.layerCount} layer(s) checked, all paint something\n`); return; }
+  // Blocking depends on --strict AND the waiver, both caller-side, not a fixed severity.
+  const sev = strict && !r.waived ? 'error' : 'warn';
+  for (const p of r.findings) f.finding({ severity: sev, code: 'paints-nothing',
+    summary: `${p.layer} at t=${p.t}s (frame ${p.frame}) is pixel-identical to itself hidden, it paints nothing in its own box`,
+    at: `${r.file}: ${p.layer}`, scene: r.file, waived: r.waived });
   console.log(r.waived
     ? '\n  (waived: authoring.allow has "paints-nothing" with a stated reason)\n'
     : strict
       ? '\n  ✗ paints-nothing (strict)\n'
       : '\n  Waive a deliberately blank layer with {"authoring":{"allow":["paints-nothing"],"_why":{"paints-nothing":"…"}}}.\n');
-  return { fail: strict && blockable };
 }
 
-let exitCode = 0;
 if (file) {
   const abs = path.resolve(file);
-  if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); exitCode = 2; }
-  else { const { fail } = await reportOne(abs); if (fail) exitCode = 1; }
+  if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); await browser.close(); server.close(); process.exit(2); }
+  await reportOne(abs);
 } else {
   // PREFER THE EXPANDED SIBLING, and skip the source that has sugar in it. This filter originally
   // EXCLUDED `.expanded.json`, which is backwards: an unexpanded source carrying `block`/`beat`/`comp`
@@ -204,15 +207,17 @@ if (file) {
   });
   for (const s of skipped) console.log(`  · un-expanded source: ${s}`);
   let scenesWithFindings = 0;
-  for (const f of files) {
-    const r = await checkScene(browser, port, path.join(repoRoot, f));
+  for (const sceneFile of files) {
+    const r = await checkScene(browser, port, path.join(repoRoot, sceneFile));
     if (r.skip || r.error) { if (r.error) console.log(`  ✗ ${r.file}: ${r.error}`); continue; }
     if (r.findings.length) {
       scenesWithFindings++;
       const unwaived = r.waived ? ' (waived)' : '';
       console.log(`  ${r.file}: ${r.findings.length} blank layer(s)${unwaived}`);
-      for (const f2 of r.findings) console.log(`    ~ ${f2.layer} at t=${f2.t}s`);
-      if (strict && !r.waived) exitCode = 1;
+      const sev = strict && !r.waived ? 'error' : 'warn';
+      for (const p of r.findings) f.finding({ severity: sev, code: 'paints-nothing',
+        summary: `${r.file}: ${p.layer} at t=${p.t}s (frame ${p.frame}) is pixel-identical to itself hidden, it paints nothing in its own box`,
+        at: `${r.file}: ${p.layer}`, scene: r.file, waived: r.waived });
     }
   }
   console.log(`\n  paints-nothing census · ${files.length} scenes checked · ${scenesWithFindings} with findings\n`);
@@ -220,4 +225,5 @@ if (file) {
 
 await browser.close();
 server.close();
-process.exit(exitCode);
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
