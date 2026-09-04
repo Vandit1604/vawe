@@ -5540,6 +5540,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['a page scrolling under a static tilt', 'scrollStory'],
     ['count up to a big number', 'count'],
     ['a dotted planet with tapered route arcs', 'globe'],
+    ['a fast radial flash of sparks', 'sparks'],
     ['grade everything beneath this layer', 'adjust'],
     ['thermal blur', 'thermalBlur'],
     ['show the feature set as cards that pop in one after another', 'cardCascade'],

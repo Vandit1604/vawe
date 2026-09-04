@@ -99,6 +99,7 @@ const BASE = {
   raymarch: { raymarch: 'metaballs', w: 600, h: 400 },
   three: { three: 'uiParallax', w: 600, h: 500 },
   globe: { w: 600, h: 600 },
+  particles: { preset: 'confetti', w: 600, h: 400 },
   composition: { comp: 'pipelineFlow', w: 600 },
   adjust: { kind: 'blur' },
 };
@@ -145,6 +146,7 @@ const VALUES = {
   ease: 'easeOutCubic',
   varsEase: 'easeOutCubic',
   'glow.preset': 'bloom',
+  'particles.preset': 'confetti',   // `preset` also names the particles emitter's mode (confetti/sparks/dust)
   color: '#2563eb',
   anim: 'fade',
   out: 'fade',

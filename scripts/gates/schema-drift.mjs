@@ -20,6 +20,7 @@ import { ANIM_NAMES } from '../../core/clips.js';
 import { KEYFRAME_PROPS } from '../../core/sequence.js';
 import { PRESET_REGISTRY } from '../../core/type.js';
 import { GLOW_REGISTRY } from '../../core/layers/glow.js';
+import { PARTICLES_REGISTRY } from '../../core/surfaces/particles.js';
 import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
 import { RESAMPLE_FX } from '../../core/resample-fx.js';
@@ -152,7 +153,7 @@ const OWNED = [
   // One `preset` slot, two vocabularies, and they do not overlap: 31 kinetic names for split text and
   // 7 glow names. So a single enum still tells each name from a typo, and the per-TYPE question stays
   // where it belongs, with the registry that throws at boot.
-  { path: 'layers.item.preset', want: [...PRESET_REGISTRY.names, ...GLOW_REGISTRY.names], src: 'core/type.js PRESETS + core/layers/glow.js GLOW_PRESETS' },
+  { path: 'layers.item.preset', want: [...PRESET_REGISTRY.names, ...GLOW_REGISTRY.names, ...PARTICLES_REGISTRY.names], src: 'core/type.js PRESETS + core/layers/glow.js GLOW_PRESETS + core/surfaces/particles.js PARTICLES_REGISTRY' },
   // `ease` and `varsEase` are deliberately NOT enumerated, and a first attempt to add them here was
   // wrong in a way worth recording: the enum was Object.keys(EASINGS), and a shipped scene writing
   // `ease: "sharp"` stopped booting, because the field also takes the FEEL words and the interpolation

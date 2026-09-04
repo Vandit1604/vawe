@@ -386,6 +386,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `image` | an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot |
 | `lottie` | an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay |
 | `paint` | a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample |
+| `particles` | a deterministic particle emitter: `preset` picks confetti (a gravity-fed burst), sparks (a fast radial flash) or dust (a slow ambient drift). Closed-form per particle, seeded by `seed`, never a running sim |
 | `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
 | `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
 | `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
@@ -444,6 +445,16 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `hang` | influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state |
 | `linear` | the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped |
 | `overshoot` | arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it |
+
+## Particles presets  `[particles layer]`
+
+`preset` on a `particles` layer picks the emitter: `{ "type":"particles", "preset":"confetti" }`.
+
+| name | what / when |
+|---|---|
+| `confetti` | a gravity-fed burst launched near the bottom of the box, tumbling rects as it falls: celebratory |
+| `dust` | a slow ambient drift that loops forever, low-alpha specks with a gentle twinkle: atmosphere behind a subject |
+| `sparks` | a fast radial flash from the box centre, additive-blended, gone in under a second: an impact or a reveal |
 
 ## Ambient shader fields  `[per-frame]`
 
@@ -731,7 +742,7 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 
 ## Composite looks (static)  `[static]`
 
-`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks.js` is the list.
+`filter:"<look>"`. A colour-grade / treatment on a layer (STATIC). One positional arg is always strength (`"neon:0.9"`); the rest ride in `lookOpts`. **`strength` is the only knob every look takes**, `color` (recolours glow, streak, leak, wash and light), `color2` (the other side of a colour split), `colors` (gradient-map stops), `grain` and `vignette` each need the matching pass, so they apply to some looks and not others. A knob a look cannot apply THROWS and names what that look does take, rather than being silently dropped; `liveKnobs(name)` in `core/looks/index.js` is the list.
 
 | name | what / when |
 |---|---|
@@ -1093,4 +1104,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_685 effects across 54 families. Regenerate: `make effects`._
+_689 effects across 55 families. Regenerate: `make effects`._

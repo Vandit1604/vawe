@@ -439,6 +439,22 @@
     "theta",
     "w"
    ],
+   "particles": [
+    "color",
+    "colors",
+    "count",
+    "gravity",
+    "h",
+    "hues",
+    "preset",
+    "radius",
+    "resample",
+    "seed",
+    "size",
+    "speed",
+    "spread",
+    "w"
+   ],
    "composition": [
     "comp",
     "props"
@@ -1143,6 +1159,7 @@
       "raymarch",
       "three",
       "globe",
+      "particles",
       "composition",
       "adjust"
      ]
@@ -1581,7 +1598,7 @@
      ]
     },
     "preset": {
-      "enum": ["weight", "up", "down", "type", "scale", "blur", "bounce", "slide", "wave", "shimmerWave", "flip", "fall", "elastic", "skew", "focus", "decode", "tilt", "stretch", "gradient", "highlight", "colorWave", "underline", "shadow", "riseClip", "draw", "chroma", "swing", "unfold", "strike", "flap", "assemble", "bloom", "halation", "diffusion", "rimLight", "spotlight", "chromatic", "chromaCycle"],
+      "enum": ["weight", "up", "down", "type", "scale", "blur", "bounce", "slide", "wave", "shimmerWave", "flip", "fall", "elastic", "skew", "focus", "decode", "tilt", "stretch", "gradient", "highlight", "colorWave", "underline", "shadow", "riseClip", "draw", "chroma", "swing", "unfold", "strike", "flap", "assemble", "bloom", "halation", "diffusion", "rimLight", "spotlight", "chromatic", "chromaCycle", "confetti", "sparks", "dust"],
      "type": "string",
      "label": "Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/halation/diffusion/rimLight/spotlight/chromatic/chromaCycle on a glow layer)"
     },
@@ -1920,6 +1937,7 @@
         "raymarch",
         "three",
         "globe",
+        "particles",
         "composition",
         "adjust"
        ]
@@ -2233,6 +2251,14 @@
     "count": {
      "type": "number",
      "label": "Particle/line count (paint)"
+    },
+    "gravity": {
+     "type": "number",
+     "label": "Particle downward acceleration, px/s^2 (particles confetti)"
+    },
+    "spread": {
+     "type": "number",
+     "label": "Particle launch spread in degrees (particles)"
     },
     "amp": {
      "type": "number",
