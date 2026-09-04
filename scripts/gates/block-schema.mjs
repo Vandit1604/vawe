@@ -21,6 +21,7 @@
 //   6. every `def` passes its own rule, and every example row in the catalog passes the whole table
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { EXPORTS } from '../../blocks/index.mjs';
@@ -279,13 +280,18 @@ for (const e of CATALOG) {
   catch (err) { issues.push({ kind: 'catalog-fails-schema', at: e.name, detail: err.message }); }
 }
 
+// One finding per issue, `kind` as the code (block-schema names its own violation classes). The group
+// header is folded into the FIRST finding of each kind's `line`, so the grouped-by-kind report a human
+// reads is still one console.log per finding, rendered by findings.mjs and never printed twice.
 const byKind = issues.reduce((m, i) => { (m[i.kind] ||= []).push(i); return m; }, {});
+const f = gateFindings({ line: (r) => `${r.header ? `\n  ${r.header}\n` : ''}    ${r.at}: ${r.summary}` });
+for (const [kind, list] of Object.entries(byKind)) {
+  list.forEach((i, idx) => f.fail(kind, i.detail, { at: i.at, header: idx === 0 ? `${kind} (${list.length})` : undefined }));
+}
+
 console.log(`block-schema: ${families.length} families, ${Object.keys(SCHEMA).length} tables, ` +
   `${Object.values(SCHEMA).reduce((n, t) => n + Object.keys(t).length, 0)} declared keys.`);
-if (!issues.length) { console.log('block-schema: PASS'); process.exit(0); }
-for (const [kind, list] of Object.entries(byKind)) {
-  console.log(`\n  ${kind} (${list.length})`);
-  for (const i of list) console.log(`    ${i.at}: ${i.detail}`);
-}
-console.log(`\nblock-schema: FAIL (${issues.length} issue${issues.length === 1 ? '' : 's'}). See ${path.relative(repoRoot, fileURLToPath(import.meta.url))}`);
-process.exit(1);
+if (!issues.length) console.log('block-schema: PASS');
+f.emit();
+if (issues.length) console.log(`\nblock-schema: FAIL (${issues.length} issue${issues.length === 1 ? '' : 's'}). See ${path.relative(repoRoot, fileURLToPath(import.meta.url))}`);
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

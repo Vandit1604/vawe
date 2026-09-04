@@ -30,6 +30,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -183,11 +184,16 @@ for (const fp of files) {
 }
 
 console.log(`── dead branch · ${files.length} source file(s)\n`);
+
+const f = gateFindings({ line: (r) => `   ${r.at}  ${r.code === 'identical-arms' ? `both arms are \`${r.arm}\`` : `\`${r.name}\`, ${r.why}`}\n       ${r.summary}` });
 if (!hits.length) console.log('✓ no ternary has identical arms');
-for (const h of hits) console.log(`   ✗ ${h.file}:${h.line}  both arms are \`${h.arm}\`\n       ${h.text}`);
+for (const h of hits) f.fail('identical-arms', h.text, { at: `${h.file}:${h.line}`, arm: h.arm });
 if (!dataflow.length) console.log('✓ no value is computed and then discarded, and no condition is decided at author time');
-for (const d of dataflow) console.log(`   ✗ ${d.file}:${d.line}  \`${d.name}\`, ${d.why}\n       ${d.text}`);
-if (!hits.length && !dataflow.length) process.exit(0);
-console.log(`\n✗ ${hits.length + dataflow.length} place(s) where the code decides nothing. A render gate cannot see this:`);
-console.log('  the output is valid, deterministic, and wrong by omission.');
-process.exit(1);
+for (const d of dataflow) f.fail('dead-branch', d.text, { at: `${d.file}:${d.line}`, name: d.name, why: d.why });
+
+f.emit();
+if (hits.length || dataflow.length) {
+  console.log(`\n✗ ${hits.length + dataflow.length} place(s) where the code decides nothing. A render gate cannot see this:`);
+  console.log('  the output is valid, deterministic, and wrong by omission.');
+}
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

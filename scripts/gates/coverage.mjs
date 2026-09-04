@@ -24,6 +24,7 @@ import { SHADER_FX } from '../../core/stings.js';
 import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dir = path.join(repoRoot, SCENE_DIR);
@@ -104,8 +105,12 @@ for (const [label, all, seen] of GROUPS) {
 const unusedProps = [...schemaProps].filter((p) => !used.prop.has(p)).sort();
 
 console.log('\n── unexercised vocabulary (nothing renders these, so nothing would notice a regression)\n');
-for (const [label, unused] of gaps) console.log(`   ${label}: ${unused.length}\n      ${unused.join(', ')}\n`);
-if (unusedProps.length) console.log(`   schema props no scene sets: ${unusedProps.length}\n      ${unusedProps.join(', ')}\n`);
+
+// WARN tier by design (always exits 0): unused vocabulary is a fact to act on, not a build failure.
+const f = gateFindings({ line: (r) => `   ${r.summary}` });
+for (const [label, unused] of gaps) f.warn('unexercised', `${label}: ${unused.length}\n      ${unused.join(', ')}\n`, { at: label });
+if (unusedProps.length) f.warn('unexercised-prop', `schema props no scene sets: ${unusedProps.length}\n      ${unusedProps.join(', ')}\n`);
+f.emit();
 
 console.log('Conformance proves these WORK; coverage says nothing USES them. The audio path had zero of');
 console.log('both, which is why the cuts array produced no sound for as long as it existed (#23).');

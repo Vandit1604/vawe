@@ -19,6 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { population } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const argv = process.argv.slice(2);
 const aspectAt = argv.indexOf('--aspect');
@@ -95,12 +96,18 @@ process.stdout.write('\n\n');
 
 const bad = rows.filter((r) => r.hard > 0);
 const errored = rows.filter((r) => r.errored);
+
+// The whole per-scene report (header line + every finding, never a head, a truncated list reads as
+// "that was all of them") is the finding's own text: findings.mjs renders it verbatim, so the report
+// prints exactly once whether or not --json is asked for.
+const f = gateFindings({ line: (r) => r.summary });
 for (const r of bad) {
-  console.log(`✗ ${r.f}  (${r.hard} hard · ${r.warn} warn)`);
-  // every finding, never a head: a truncated list reads as "that was all of them"
-  for (const line of r.findings) console.log(`    ${line}`);
+  f.fail('audit-hard', [`✗ ${r.f}  (${r.hard} hard · ${r.warn} warn)`, ...r.findings.map((line) => `    ${line}`)].join('\n'), { at: r.f });
 }
-for (const r of errored) console.log(`! ${r.f}, audit could not run:\n${r.out.split('\n').slice(-4).join('\n')}`);
+for (const r of errored) {
+  f.fail('audit-errored', `! ${r.f}, audit could not run:\n${r.out.split('\n').slice(-4).join('\n')}`, { at: r.f });
+}
+f.emit();
 
 const clean = rows.length - bad.length - errored.length;
 console.log(`\n==== AUDIT-ALL · ${rows.length} scenes ====`);

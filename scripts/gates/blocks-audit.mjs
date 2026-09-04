@@ -16,6 +16,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import * as B from '../../blocks/index.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // BOTH files, because the shared primitives moved to blocks/kit.mjs and a rule that stops at a file
@@ -175,7 +176,11 @@ for (const [name, body] of Object.entries(FACTORIES)) {
 const ORDER = ['contrast', 'unauditable', 'baked-claim', 'claim-default', 'baked-superlative', 'brand-default', 'baked-brand', 'dead-prop', 'prop-divergence'];
 issues.sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind));
 console.log(`── block audit · ${Object.keys(FACTORIES).length} factories, ${CATALOG.length} catalog entries\n`);
-if (!issues.length) { console.log('✓ no factory ships a claim, a brand, a dead prop or a divergent vocabulary'); process.exit(0); }
-for (const i of issues) console.log(`   ✗ ${i.kind.padEnd(18)} ${i.name}\n       ${i.detail}`);
-console.log(`\n✗ ${issues.length} issue(s). A block ships to EVERY caller, so the copy rules that apply to a scene apply here.`);
-process.exit(1);
+
+const f = gateFindings({ line: (r) => `   ${r.code.padEnd(18)} ${r.at}\n       ${r.summary}` });
+for (const i of issues) f.fail(i.kind, i.detail, { at: i.name });
+
+if (!issues.length) console.log('✓ no factory ships a claim, a brand, a dead prop or a divergent vocabulary');
+f.emit();
+if (issues.length) console.log(`\n✗ ${issues.length} issue(s). A block ships to EVERY caller, so the copy rules that apply to a scene apply here.`);
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
