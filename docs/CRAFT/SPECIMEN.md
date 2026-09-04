@@ -6,6 +6,21 @@ group: look
 
 # THE SPECIMEN: a demo is a ten-second film about ONE thing
 
+## AGENT SUMMARY
+
+- A demo proves ONE mechanism: `make demo Q="…" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]` writes the
+  fixed archetype (`formats/scene/_demo-<slug>.json`) and runs the dev loop. Never hand-author a demo
+  from a blank file, a blank file plus "prove it works" produces a debug-harness grid every time.
+- The subject MUST be a real picture (full-bleed, bled off three edges with the fourth feathered),
+  never a headline: most effects need real tonal detail to act on, and a line of type gives them none.
+- The archetype's constants (one ground: aurora then mesh, no ruled grid, one label treatment, one
+  type scale, one motion personality read off the theme, one 9s runtime with one cut at 4.4s) are
+  fixed in `scripts/dev/demo.mjs` and never overridden per-demo, so a row of demos reads as a series.
+- Enforced by `[ref: make demo]`; no gate. Every scaffolded demo carries four waivers as properties
+  of the archetype: `no-storyboard`, `no-preflight`, `slow-pace`, `text-overstays`.
+- Confirm: is the subject a real picture, not a line of type, and did you change the CONSTANT, not
+  the demo, if something needs to differ?
+
 A demo is written to prove a mechanism works. That purpose leaks straight into the composition,
 because the fastest proof is nine specimens side by side, and nine specimens side by side is a debug
 harness. A harness is legible and it is never beautiful, and it is the thing we end up showing people.

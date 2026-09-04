@@ -7,6 +7,21 @@ codes: line-length
 
 # Reading: can a viewer take the words in, in the seconds they are there?
 
+## AGENT SUMMARY
+
+- A hold must give a viewer time to read it: `words x 0.6s` (read-twice at 200wpm), floor 0.833s,
+  ceiling 5s (BBC, not Netflix's 7s). Past 8 words the two published rules contradict each other, so
+  cut the line, never argue with the clock.
+- Only PROSE is graded: a `text` layer, 4+ words, `size` >= 28. A `count`, a 1-3 word chip, small type
+  (< 28) and `html` text are excluded, they are looked at, not read.
+- `node scripts/gates/read-check.mjs <scene.json>` reports only, it never blocks; 61% of the library
+  fails `unreadable-hold` at a median of 0.58x the read-twice ask, so treat the finding as real even
+  though nothing stops the render.
+- Enforced by `[ref: node scripts/gates/read-check.mjs <scene.json>]` (frontmatter code: `line-length`,
+  which stays enforced in `copy-check`, not here).
+- Confirm: does every prose line (4+ words, size >= 28) hold for `words x 0.6s` after it settles,
+  measured from when it stops moving, not from when it starts?
+
 Every other check on on-screen copy grades the WORDS. `copy-check` grades the writing and flags a
 headline over 14 words as too long "to read in a beat", but it never looks at the beat. So a nine-word
 headline alive for 0.6s walks the whole ladder clean, and only an eye ever notices.
