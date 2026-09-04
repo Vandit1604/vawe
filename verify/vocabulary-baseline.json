@@ -165,9 +165,12 @@
  "core/lightfield/presets.js": [
   "PRESETS"
  ],
- "core/looks.js": [
+ "core/looks/presets.js": [
+  "PASSES",
   "KNOB_ROUTES",
-  "LOOKS"
+  "PASS_READS",
+  "LOOKS",
+  "LOOK_AKA"
  ],
  "core/motion.js": [
   "EASINGS",
