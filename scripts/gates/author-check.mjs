@@ -193,6 +193,7 @@ const RATCHET_CODES = {
   'enter-and-retreat': 'a layer leaves the way it came, in one direction of travel',
   'no-transition': 'a multi-beat film earns at least one real seam or cut, not flat jumps',
   'sparse-beats': 'the film has enough beats for its length, not two or three cards held too long',
+  'feature-poverty': 'the film reaches into the engine\'s expressive families, not just the top of the box',
   'craft-unvisited': 'every CRAFT doc that applies to this film is answered in the plan',
   'no-plan-for-craft': 'the film has a storyboard the craft checklist can be answered in',
   // NOT RATCHETED, and the measurement is the reason. `off-colour` fires on BOTH exemplars, because a

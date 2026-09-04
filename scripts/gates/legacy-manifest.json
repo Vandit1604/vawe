@@ -2235,6 +2235,317 @@
         }
       },
       "viaGate": "scripts/gates/craft-checklist.mjs"
+    },
+    "feature-poverty": {
+      "adopted": "2026-09-04",
+      "what": "the film reaches into the engine's expressive families, not just the top of the box",
+      "legacy": {
+        "_animate-skill": {
+          "since": "2026-09-04",
+          "hash": "e8728d239725ba0a"
+        },
+        "_arcfall-test": {
+          "since": "2026-09-04",
+          "hash": "561bf2debe140306"
+        },
+        "_catalog-1": {
+          "since": "2026-09-04",
+          "hash": "4721c98d7c40f854"
+        },
+        "_catalog-10": {
+          "since": "2026-09-04",
+          "hash": "bb06572bd5b9d0dc"
+        },
+        "_catalog-11": {
+          "since": "2026-09-04",
+          "hash": "3d50dae2854f5173"
+        },
+        "_catalog-12": {
+          "since": "2026-09-04",
+          "hash": "e8bedd775b62d471"
+        },
+        "_catalog-13": {
+          "since": "2026-09-04",
+          "hash": "bc7b5e07847cbcb0"
+        },
+        "_catalog-14": {
+          "since": "2026-09-04",
+          "hash": "71ce196da9a03b47"
+        },
+        "_catalog-15": {
+          "since": "2026-09-04",
+          "hash": "9623529960d516f2"
+        },
+        "_catalog-16": {
+          "since": "2026-09-04",
+          "hash": "e04a0ccf417fb087"
+        },
+        "_catalog-17": {
+          "since": "2026-09-04",
+          "hash": "85d807728f160987"
+        },
+        "_catalog-18": {
+          "since": "2026-09-04",
+          "hash": "6b66fffd4743f34d"
+        },
+        "_catalog-19": {
+          "since": "2026-09-04",
+          "hash": "99decac61680cf64"
+        },
+        "_catalog-2": {
+          "since": "2026-09-04",
+          "hash": "b90041375c0f242f"
+        },
+        "_catalog-20": {
+          "since": "2026-09-04",
+          "hash": "38285c1485697e7f"
+        },
+        "_catalog-21": {
+          "since": "2026-09-04",
+          "hash": "2d5e20eb4a8b3976"
+        },
+        "_catalog-22": {
+          "since": "2026-09-04",
+          "hash": "039d99448f55834c"
+        },
+        "_catalog-23": {
+          "since": "2026-09-04",
+          "hash": "64ec98749bff3c84"
+        },
+        "_catalog-24": {
+          "since": "2026-09-04",
+          "hash": "148d77d6465ba339"
+        },
+        "_catalog-25": {
+          "since": "2026-09-04",
+          "hash": "c10d5a512d765084"
+        },
+        "_catalog-26": {
+          "since": "2026-09-04",
+          "hash": "5f2366e3e90b7802"
+        },
+        "_catalog-3": {
+          "since": "2026-09-04",
+          "hash": "f7019762466a8e6c"
+        },
+        "_catalog-4": {
+          "since": "2026-09-04",
+          "hash": "36d799324e820f43"
+        },
+        "_catalog-5": {
+          "since": "2026-09-04",
+          "hash": "b1f6b218046c98f0"
+        },
+        "_catalog-6": {
+          "since": "2026-09-04",
+          "hash": "39ec4b6d2cc6bd4b"
+        },
+        "_catalog-7": {
+          "since": "2026-09-04",
+          "hash": "e81411ae7d51fb29"
+        },
+        "_catalog-8": {
+          "since": "2026-09-04",
+          "hash": "d207766c30196fac"
+        },
+        "_catalog-9": {
+          "since": "2026-09-04",
+          "hash": "d177e0e220fd910d"
+        },
+        "_cursor-camera": {
+          "since": "2026-09-04",
+          "hash": "a080575f8e9ed11c"
+        },
+        "_glass-shapes": {
+          "since": "2026-09-04",
+          "hash": "f98ae295a9e05951"
+        },
+        "_lightfall-test": {
+          "since": "2026-09-04",
+          "hash": "399144602188a6af"
+        },
+        "_playhead-subject": {
+          "since": "2026-09-04",
+          "hash": "0040be511013aa71"
+        },
+        "_t-house": {
+          "since": "2026-09-04",
+          "hash": "2e8d8d93fedf936e"
+        },
+        "_t-knobs": {
+          "since": "2026-09-04",
+          "hash": "89cf0feeb5e400a8"
+        },
+        "app-showcase": {
+          "since": "2026-09-04",
+          "hash": "3d2aa3c3a58b688f"
+        },
+        "canvasfx-reel": {
+          "since": "2026-09-04",
+          "hash": "2ffa8929ee00c323"
+        },
+        "chromatic": {
+          "since": "2026-09-04",
+          "hash": "73c714a261d0acbc"
+        },
+        "cuts-demo": {
+          "since": "2026-09-04",
+          "hash": "affc95cc3be4fc5c"
+        },
+        "ditherkit": {
+          "since": "2026-09-04",
+          "hash": "2d9d5669ec8efa91"
+        },
+        "glass": {
+          "since": "2026-09-04",
+          "hash": "a872366d85e9a4bf"
+        },
+        "gradient-showcase": {
+          "since": "2026-09-04",
+          "hash": "f1a77aa64de493a3"
+        },
+        "linear-journey": {
+          "since": "2026-09-04",
+          "hash": "74f0191ba44090b3"
+        },
+        "linear-launch": {
+          "since": "2026-09-04",
+          "hash": "60963f20eceb5523"
+        },
+        "looks-reel": {
+          "since": "2026-09-04",
+          "hash": "e9d5df2acd31e421"
+        },
+        "looks": {
+          "since": "2026-09-04",
+          "hash": "ebb9564eba0b7bf0"
+        },
+        "motion-reel-v2": {
+          "since": "2026-09-04",
+          "hash": "c7c64958c8476dbb"
+        },
+        "motion-reel": {
+          "since": "2026-09-04",
+          "hash": "4d3e29ad09513b30"
+        },
+        "northwind": {
+          "since": "2026-09-04",
+          "hash": "96492d548ceb4589"
+        },
+        "onefile": {
+          "since": "2026-09-04",
+          "hash": "96ae5ade453d68d4"
+        },
+        "onefilm": {
+          "since": "2026-09-04",
+          "hash": "abcfc814f825db32"
+        },
+        "paint-demo": {
+          "since": "2026-09-04",
+          "hash": "6e455e46c0621fb8"
+        },
+        "ransom-internal": {
+          "since": "2026-09-04",
+          "hash": "4e786301d14e612f"
+        },
+        "ransom-intro": {
+          "since": "2026-09-04",
+          "hash": "16591ac629d13366"
+        },
+        "react-demo": {
+          "since": "2026-09-04",
+          "hash": "2907bc8816d86b19"
+        },
+        "rec1-nogate": {
+          "since": "2026-09-04",
+          "hash": "a82939c6f6136f25"
+        },
+        "refstudy": {
+          "since": "2026-09-04",
+          "hash": "cd91a88ce87cfb55"
+        },
+        "seam-demo": {
+          "since": "2026-09-04",
+          "hash": "01f01ee149643bc2"
+        },
+        "search-demo": {
+          "since": "2026-09-04",
+          "hash": "7331611c0bc0c561"
+        },
+        "showcase-count": {
+          "since": "2026-09-04",
+          "hash": "23b67b094635e189"
+        },
+        "showcase-globe": {
+          "since": "2026-09-04",
+          "hash": "f48114281a606a3f"
+        },
+        "showcase-intro": {
+          "since": "2026-09-04",
+          "hash": "b5c3cda482de8858"
+        },
+        "showcase-scenecut": {
+          "since": "2026-09-04",
+          "hash": "61e161521f7cff67"
+        },
+        "showcase-spot": {
+          "since": "2026-09-04",
+          "hash": "8108e54fb33a593c"
+        },
+        "showcase-type-labour": {
+          "since": "2026-09-04",
+          "hash": "268f4b77928812d5"
+        },
+        "showcase-vocabulary": {
+          "since": "2026-09-04",
+          "hash": "b0de579b7dd5f988"
+        },
+        "site-backdrop": {
+          "since": "2026-09-04",
+          "hash": "3a66f6a6d7dfeb1d"
+        },
+        "stings-demo": {
+          "since": "2026-09-04",
+          "hash": "1dec506e421c1183"
+        },
+        "stripe": {
+          "since": "2026-09-04",
+          "hash": "989588c577a8dc8f"
+        },
+        "threadcite-3s": {
+          "since": "2026-09-04",
+          "hash": "bfc3ac4212b59df7"
+        },
+        "threadcite-open": {
+          "since": "2026-09-04",
+          "hash": "24093bc9a2bfc8b4"
+        },
+        "three-showcase": {
+          "since": "2026-09-04",
+          "hash": "ff5a6cc4939a212a"
+        },
+        "tierc-reel": {
+          "since": "2026-09-04",
+          "hash": "bcde952bdc39b06e"
+        },
+        "tpot-launch": {
+          "since": "2026-09-04",
+          "hash": "ea9d3e6784a6d249"
+        },
+        "type-demo": {
+          "since": "2026-09-04",
+          "hash": "5471aa9990ba45b1"
+        },
+        "vawe-identity": {
+          "since": "2026-09-04",
+          "hash": "02bc3e9fca87e0ac"
+        },
+        "vawe-rebuilt": {
+          "since": "2026-09-04",
+          "hash": "7738750af780e4d7"
+        }
+      },
+      "viaGate": "scripts/gates/direction-floor.mjs"
     }
   },
   "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",

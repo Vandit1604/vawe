@@ -204,6 +204,21 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
     fail('sparse-beats', `${beats} beat(s) across ${Math.round(dur * 10) / 10}s, a film this long needs about ${needed} (a boundary roughly every 3.5s). Two or three cards held for twelve seconds is a slideshow by length, not a film. Compose more beats from blueprints (make blueprints), or shorten the film. docs/CRAFT/DIRECTION.md.`);
 }
 
+// FEATURE POVERTY (fix 8). The engine has ~15 expressive families; a film that reaches for only a
+// couple, whatever its length, is using the toy box near the top. This is the enforcement half of
+// "make the author reach deeper": it counts the DISTINCT families in use (the same `vocab` the ambition
+// floor already reads) and fails a film that draws from too few for its length. Ratcheted in
+// author-check, so new work must reach further while the legacy library is frozen. The message NAMES the
+// high-value families most films skip, so the fix is "add one of these", not "go read the manual".
+{
+  const need = dur >= 8 ? Math.min(6, 3 + Math.floor(dur / 8)) : 0;
+  if (need && vocab.length < need) {
+    const HIGH_VALUE = [['camera', 'a camera move (cameraMove: slowPush / diveIn)'], ['motionTrack', 'a hand-keyed motion track (make track)'], ['countup', 'a count-up (a count layer)'], ['cursor', 'a cursor demo'], ['ken', 'a ken push on an image'], ['fx', 'a per-layer effect'], ['svgMotion', 'an svg that draws itself on'], ['beam', 'a border-beam accent'], ['composition', 'a bespoke composition beat']];
+    const reach = HIGH_VALUE.filter(([k]) => !sig[k]).map(([, v]) => v).slice(0, 5);
+    fail('feature-poverty', `this film uses ${vocab.length} expressive famil(y/ies) (${vocab.join(', ') || 'none'}); a ${Math.round(dur * 10) / 10}s film should reach for about ${need}. The engine has ~15 families and this draws from the top of the box. Reach for one of: ${reach.join(' · ')}. Rank them for THIS film with \`make preflight\`, or search: \`make arsenal Q="<the feeling>"\`.`);
+  }
+}
+
 // ── NO CONTINUOUS OBJECT ─────────────────────────────────────────────────────────────────────────
 // A SLIDESHOW is a film where every beat is an ISLAND: no content object survives a cut, so each
 // seam is a jump between unrelated shots rather than a state change of one thing. The opposite (the
