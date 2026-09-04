@@ -7,6 +7,18 @@ codes: effect-soup
 
 # TASTE RULES: what not to do, and how each choice makes the viewer feel
 
+## AGENT SUMMARY
+
+- Prime directive: rather no motion than bad motion, rather one clean idea than five effects. Every
+  rule below is a corollary; when two rules collide, this one wins.
+- Vary ease, duration, entrance direction and stagger per beat. Never repeat one default (one ease,
+  one 0.4-0.5s duration, one entrance direction) across a whole film.
+- Enforced by: `codes: effect-soup`, plus the backstop table at the end (`make validate`/`critique`,
+  `designspec-check`, `make audit`, `make knobs-audit`, `make motion`, `make ledger`, judgment via
+  `make direct`, `make judge`).
+- Checkable action: name the beat's motion in one clause. Does it need "and" to join two unrelated
+  verbs (a second effect on the same beat)?
+
 `MOTION-CRAFT.md` says HOW to move a thing (the 10 rules, the speed dials). This file says WHAT it
 feels like when you do, and WHAT NOT TO DO. It is the cause→feeling layer: you reach for it when the
 video "renders fine but feels cheap." Modelled on the another engine taste system (doctrine in prose,

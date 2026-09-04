@@ -8,6 +8,15 @@ confirm: "does each html fragment move by the engine's mechanisms, not CSS anima
 
 # Writing HTML fragments, and making them move
 
+## AGENT SUMMARY
+
+- An `html` layer is content, not an escape hatch: every layer effect (`filter`, `modifiers`, `depth`,
+  `origin`, `timeWarp`, `motion`, `vars`, camera) applies to it exactly as it does to a `text` layer.
+- Move a fragment with `--t` in `calc()`, `parts`, a `motion` track, or `vars`. Never CSS `animation`
+  or `transition`: the engine refuses both at boot, because they run on a clock it does not own.
+- Checkable action: does each html fragment move by the engine's mechanisms, not CSS animation or
+  transition?
+
 An `html` layer is not an escape hatch from the engine. It is the engine's **content**, and **every
 layer effect works on it, which is the architecture and not a coincidence**: `filter`, `modifiers`
 (tilt/plane/kick/matte/…), `depth`, `origin`, `timeWarp`, `motion`, `vars` and the camera all apply to

@@ -6,6 +6,17 @@ group: crosscutting
 
 # SUBAGENTS: one critic, one job, one verdict
 
+## AGENT SUMMARY
+
+- Run the six dedicated critics (beat, bg-motion, reveal, fidelity, copy, seam) in one parallel
+  message, each with a fixed verdict shape. Never grade your own render: the thread that wrote the
+  scene grades it kindly.
+- Give each critic ONE artifact the author has not already seen (a render, a frame strip, a seam
+  crop), not the scene JSON restated in prose.
+- Enforced by `[eye]`: no gate runs the panel for you; it is judgment, backstopped only by the
+  admission test (does this critic see something the author did not) and the recorded dispositions.
+- Checkable action: what artifact does this critic see that the author did not?
+
 Authoring a video well takes several **different** kinds of judgement: does this beat read, does the
 background move at the right speed, does the copy earn the hook, does a seam flash. One agent doing
 all of them in one context does all of them worse. So: **run dedicated critics, one job each, in
@@ -49,7 +60,7 @@ of the roster.
 | **fidelity** | recreations only: how close each beat is to its source | render frames + the source frames, side by side | per beat: `{beat, score 0-10, gaps: [...]}` |
 | **copy** | on-screen writing only | the strings from the scene JSON, in beat order | per line: `{beat, line, tell, rewrite}` |
 | **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
-| **ab** | which of two cuts is better, and does the graphic explain anything | *built, then cut.* `make ab` + `ab-record` + `AB-JUDGE.md` shipped in `05a5123` and were removed in `cc2dfc2` (2026-08-05) along with five other tools that only inspected the engine. Nothing runs today. Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. | n/a |
+| **ab** | which of two cuts is better, and does the graphic explain anything | *not built.* `make ab`, `ab-record` and `AB-JUDGE.md` were removed (`cc2dfc2`, 2026-08-05). Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. | n/a |
 <!-- doc-refs-allow: make ab · the row above exists to record that this critic was planned and never built -->
 
 **A critic's value is INDEPENDENT EVIDENCE, never a fresh pair of eyes.** Six instances of one model,
@@ -158,3 +169,8 @@ Convening six agents for a two-token change is theatre.
 **Run the panel for:** a full authoring pass, any recreation, and any render you intend to ship. Those
 three, always. Between them, use judgement, and remember that the cost of the panel is one message and
 the cost of skipping it is a shipped video with a background running twice too fast.
+
+## Provenance
+
+**Do not re-add:** the claim that an `ab` critic runs today. It shipped (`05a5123`) and was removed
+(`cc2dfc2`, 2026-08-05) with five other tools. Use `make compare` and judge by eye instead.

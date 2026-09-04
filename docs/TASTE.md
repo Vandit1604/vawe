@@ -6,6 +6,18 @@ group: crosscutting
 
 # TASTE: how to make something good in this engine
 
+## AGENT SUMMARY
+
+- The one law: every frame must fight for its value. Show something true (a real artifact, a live
+  demo, a proof); cut a beat if the viewer loses nothing when it's gone.
+- Route through the three spines (house-style, composition, motion, direction, film structure,
+  story-spine) before authoring from your own priors.
+- Enforced by `make author-check D=<file>` every time (BLOCKS: validate, beats, inspect,
+  plan-vs-render; REPORTS: critique, direct, floor, dissolve, designspec, copy, pace, hero,
+  treatment, waiver-drift, promoted to blocking by `TASTE=1`), then post-render `make judge`.
+- Checkable action: does every design decision trace to the brand's real site or the locked plan, not
+  to a default?
+
 The front door. Read this before authoring anything; it routes you to the specific guides and names
 the loop that catches slop. It exists because the taste knowledge is (correctly) split across many
 files, and without an index an agent authors from its own priors, which regress to the mean.
@@ -116,9 +128,8 @@ waived by reflex, and a rule waived by reflex has already been repealed with nob
 So the step became mandatory and the severity did not move. Making a step optional protected the rule
 from ever being read; it never protected the author from a rule fitted to the wrong library.
 
-**The storyboard step, and its promotion condition.** `plan-vs-render` used to print "write the
-storyboard" at a film that had none, and nothing anywhere asked whether one existed. Now step 2 looks
-for it, every time, and says what it found. A scene declares its plan explicitly:
+**The storyboard step, and its promotion condition.** Step 2 of `plan-vs-render` looks for a
+storyboard every run and says what it found. A scene declares its plan explicitly:
 
 ```json
 { "storyboard": "formats/scene/my-film.storyboard.md" }
