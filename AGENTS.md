@@ -323,9 +323,8 @@ When a brief says black, it means black. Every OTHER dark preset in `core/backgr
 or a wash: rendered on the vawe theme, `dark`, `deep` and `ink` all sample `rgb(12,18,26)` at the corner,
 which is right for a film with a lit world and wrong for one whose only light is the subject. So write
 `{"preset": "black"}`. It is a solid `#000000` with no grain, it renders `rgb(0,0,0)` at every corner,
-and the engine reads its lightness off that colour, so you do not type a tone. This used to be two lines
-of hand-authored HTML plus a `tone: "dark"` you had to remember, because the engine cannot read lightness
-out of your CSS. A rule that existed to work around a missing preset is now the preset.
+and the engine reads its lightness off that colour, so you do not type a tone. The preset does the work
+the engine cannot do from your CSS: it cannot read lightness out of hand-authored HTML, so `black` carries it.
 
 ## NAME THE EFFECT BEFORE YOU BUILD IT  `[eye]`
 
@@ -397,12 +396,8 @@ rival finish line.
 Reaching `make judge` is not the stop: load `vawe-review-loop` (`skills/vawe-review-loop/SKILL.md` for
 an agent with no Skill tool) for the written rule on when to stop iterating, fix, and look again.
 
-This file used to carry its own copy of that ladder: twenty-two numbered steps whose numbering did not
-sort, in which `0` and `0a` (compose from blueprints · see the whole arsenal) were printed **eleventh
-and twelfth**, inside a section titled "After writing a JSON", when both must happen before one exists.
-Three descriptions of one process, and the two that were prose went stale. The gates now say what they
-check, and a finding **names the doc that settles it**, so what is left here is the part no gate can
-hold: why, and what to do when the gate is quiet.
+The gates now say what they check, and a finding **names the doc that settles it**, so what is left here
+is the part no gate can hold: why, and what to do when the gate is quiet.
 
 ### Where to start, every time
 
@@ -472,8 +467,8 @@ the deleted gate asked and where to get the graphic:
 The failure is easy to feel: every beat is born and dies inside its own window, so each cut is a jump
 between unrelated shots and the film is a stack of cards read aloud.
 
-The prescription used to be a CONTINUOUS OBJECT: one layer that survives a cut and changes across it.
-That is one device and it is the cheapest one, and **Murch ranks it last** of the six things a cut must
+The cheapest device is a CONTINUOUS OBJECT: one layer that survives a cut and changes across it. It is
+one device of many, and **Murch ranks it last** of the six things a cut must
 serve, so it is the first thing you sacrifice. `no-continuous-object` credits the two devices the engine
 PRODUCES and can verify, a continuous object and a match cut (`matches`/`becomes`). It cannot verify a
 oner, a sound bridge, a metric cut rate, a motif or an escalation, because those are conceptual and no

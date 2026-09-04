@@ -5,6 +5,10 @@ description: "Turn a one-line brief into a SHOOTABLE plan for a short product fi
 
 # vawe-continuous-action - plan the film as one action
 
+**The contract:** name one object, write its state at every beat, and treat every cut as that
+object changing state, never a jump. Follow Steps 1 to 7 in order, in the storyboard, before you
+write any JSON.
+
 The engine can build anything. What it cannot do is plan something great from a blank brief.
 Handed "make a 5s launch film for an AI image tool", an agent writes a competent slideshow:
 hook card, feature card, logo card. Every gate passes. Nobody watches it twice.
