@@ -111,11 +111,11 @@ export const MARGIN = 0.06;
 /**
  * MAX_ZOOM: the largest uniform zoom the margin can absorb before edge-pinned content is CROPPED.
  *
- * WHY THIS IS HERE. `core/produce.js` gives every scene that declares no camera a `slowPush` to 1.06,
- * and this file sets `MARGIN` to 0.06. The two numbers were written independently and both describe
- * the same geometry: how much room a layer placed on the safe line has before the frame edge eats it.
- * Nobody owned the relationship, so either could be edited alone and the first sign would be cropped
- * pixels in a delivered film (docs/MISTAKES.md #454, #458).
+ * WHY THIS IS HERE. `MARGIN` is 0.06, and any authored zoom carries a safe-edge layer toward the frame
+ * edge; this constant is the point past which the frame edge eats it. The engine used to inject a
+ * `slowPush` to 1.06 into every camera-less scene, which made the relationship between these two 0.06s
+ * load-bearing on every film; that injection is gone (a still subject should not zoom), but the ceiling
+ * still bounds any push an AUTHOR writes, so cropped pixels never ship (docs/MISTAKES.md #454, #458).
  *
  * The arithmetic, once, so it is not re-derived: `#cam` scales about the centre of the viewport, so a
  * point at the safe edge sits `dim * (0.5 - MARGIN)` from that centre and lands at `dim * (0.5 -

@@ -53,6 +53,8 @@ director rotates within a family; it does not mix families.
 > **Deep dive:** this table is the summary. [`TRANSITIONS.md`](TRANSITIONS.md) is the full theory,
 > the complete transition taxonomy, Murch's Rule of Six (emotion 51%), continuity-vs-montage, J/L cuts,
 > shared-element morph, and the ordered per-seam decision procedure. Read it when you can't say *why*.
+> **Want the copy-paste menu instead of the theory?** [`TRANSITIONS.md`](TRANSITIONS.md) opens with
+> *The easy palette*: six seams with a snippet each, the 30fps duration table, and station-to-station.
 
 ## 2. Fonts, the register of the voice
 

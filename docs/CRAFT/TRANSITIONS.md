@@ -62,6 +62,71 @@ used as a boundary (`pop`), is rejected at validate with the catalog, never sile
 
 ---
 
+## The easy palette: six seams that stay varied without thinking
+
+The theory below is the *why*. This is the *menu*: six transitions that cover almost every launch film,
+ordered cheapest-first, each with the one thing it says and a copy-paste snippet. **Vary the seam by
+MEANING, not by reaching for a new effect** (that is the amateur tell). A whole film is usually one
+primary from this list on ~60-70% of cuts, plus ONE bolder accent reserved for the payoff. Pick the
+primary by the film's personality; pick each accent by what that one seam has to say.
+
+| # | Seam | Say it when | Snippet (30fps) |
+|---|---|---|---|
+| 1 | **Hard cut** | the two beats are one thought (the default, most cuts) | *(no `transitions` entry: place beats back-to-back, overlap ~2-4f so the stage never empties)* |
+| 2 | **Directional slide / push** | a NEW place, same energy: carry the eye one way | `{ "at": 5, "fx": "push", "mech": "seam", "dir": "left", "dur": 0.5, "timing": "smooth" }` |
+| 3 | **Cross-dissolve** | time passing, or a gentle link between two images | `{ "at": 5, "fx": "dissolve", "mech": "seam", "dur": 0.45, "timing": "smooth" }` |
+| 4 | **Whip pan** | frantic "meanwhile"; hide the cut inside motion blur | `{ "at": 5, "fx": "whipPan", "dir": "left", "dur": 0.35, "timing": "snappy" }` |
+| 5 | **Cinematic zoom** | push into a detail, or a calm reveal at the hero beat | `{ "at": 5, "fx": "cinematicZoom", "dur": 0.6, "timing": "smooth" }` |
+| 6 | **Shared-element morph** | the SAME object takes its next role (highest craft) | *(no seam: a persistent layer with a `motion` track that repositions/resizes across the cut, see* The motion-design layer *below)* |
+
+Direction is a real lever for #2 and #4: a beat that entered from the right should leave to the left
+(one continuous travel per seam, never enter-and-retreat). Rotate through 1-2-3 for the body and spend
+4 or 5 ONCE, and a six-beat film already feels edited, not sprayed.
+
+> **Align the beats to the seam, or a `mech:"seam"` transition dissolves nothing.** A seam blends the
+> frame just BEFORE `at` against the frame just AFTER. If both beats are still on screen across `at`
+> (the outgoing text never left, the incoming text already arrived), the seam crossfades two nearly
+> identical stages and the copy MUSHES into an unreadable double. So the outgoing beat must END at `at`
+> (let the seam be its exit: `"out": "none", "exitDur": 0`) and the incoming beat must START at `at`.
+> No gate catches this (both layers are legitimately present, and a persistent morph element SHOULD
+> span the cut); it is an authoring discipline the eye and `make judge` verify.
+
+### Concrete durations at 30fps
+
+Frames, because "0.5s" hides that it is 15 frames. Round to the frame; a seam is felt, not measured.
+
+| Transition | Frames @30fps | Seconds | Note |
+|---|---|---|---|
+| Match-on-action overlap | 2-5f | 0.06-0.16s | the shared movement carries the eye; the blend is almost nothing |
+| Whip pan | 8-12f | 0.27-0.40s | fast AND blurred, or it reads as a slow slide |
+| Quick dissolve | 12-15f | 0.40-0.50s | the workhorse soft cut |
+| Standard seam (slide/push/dissolve) | 15-30f | 0.50-1.00s | the body-of-the-film default |
+| Cinematic zoom | 15-25f | 0.50-0.85s | slower settles calmer |
+| Fade to black (act break) | 20-40f | 0.66-1.33s | a real pause; earn it |
+| UI hand-off (element to element) | ≤9f | ≤300ms | ease-out; keep interface motion snappy (Emil Kowalski) |
+
+### Station-to-station: the launch-film transition with no cut
+
+The Apple move: instead of cutting between product shots, the camera FLIES through one continuous space,
+dwelling on each feature in turn. There is no seam because there is no cut, the flight IS the transition,
+and the whole film reads as one world rather than a stack of slides. Reach for it when the beats are
+PLACES with a spatial logic (a dashboard, then a panel inside it, then a detail), not unrelated claims.
+
+```json
+"cameraMove": { "move": "travel", "stations": [
+  { "tx": 960, "ty": 540, "s": 1 },                      // station 0: where the flight begins (wide)
+  { "tx": 620, "ty": 400, "s": 1.6, "dur": 1.2, "dwell": 1.0 },   // fly in, hold on feature A
+  { "tx": 1300, "ty": 720, "s": 1.8, "dur": 1.0, "dwell": 1.0 }   // glide to feature B, settle
+] }
+```
+
+`tx`/`ty` are the STAGE point to centre; `s` the zoom; `dur` the flight INTO a station; `dwell` the hold
+once there. Station 0 is the start, so it has no `dur`. Interiors run linear on purpose (an eased curve
+at each stop would zero velocity and break one flight into N hops, MISTAKES #125). This is a
+`choreographed`-adjacent scene: it carries no per-beat `cuts`, so it never triggers scene-unit swaps.
+
+---
+
 ## The prime rule
 
 > **A transition must serve the RELATIONSHIP between the two beats AND the FEELING across the seam.
