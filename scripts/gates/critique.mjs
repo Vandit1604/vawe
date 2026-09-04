@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
 import { onScreenText, glyphText, snippet } from '../lib/text.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -211,13 +212,18 @@ if (contentIv.length > 1) {
 
 // ---- report ----
 findings.sort((a, b) => a.t - b.t);
-const errs = findings.filter((f) => f.sev === 'error');
+const errs = findings.filter((r) => r.sev === 'error');
 console.log(`\n  critique · ${file} · ${beats.length} beats · ${findings.length} findings (${errs.length} errors)\n`);
-for (const f of findings) {
-  const tag = f.sev === 'error' ? '✗' : '⚠';
-  console.log(`  ${tag} [${f.rule}] @${f.t.toFixed(1)}s`);
-  console.log(`      ${f.msg}`);
+
+const gf = gateFindings({ line: (r) => `  ${r.severity === 'error' ? '✗' : '⚠'} [${r.code}] @${r.at}\n      ${r.summary}` });
+for (const r of findings) {
+  // critique's own tiers (error/warn) map straight onto the house ones; `at` carries the beat time
+  // the original tag printed, formatted the same way (one decimal, trailing "s").
+  (r.sev === 'error' ? gf.fail : gf.warn)(r.rule, r.msg, { at: `${r.t.toFixed(1)}s` });
 }
 if (!findings.length) console.log('  ✓ no value-gate violations, every beat carries an artifact.\n');
-else console.log('');
+gf.emit();
+if (findings.length) console.log('');
+// --strict escalates a warn-only run to blocking, same as before: the value gate has no hard/soft
+// split of its own, `--strict` is what turns "noted" into "refused".
 process.exit((errs.length || (strict && findings.length)) ? 1 : 0);

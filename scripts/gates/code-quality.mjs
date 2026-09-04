@@ -22,6 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = path.join(ROOT, 'verify/code-quality-baseline.json');
@@ -109,14 +110,15 @@ if (!worse.length) {
   process.exit(0);
 }
 
+const f = gateFindings({ line: (r) => r.summary });
 console.error(`✗ code-quality: ${worse.length} file/rule pair(s) got WORSE than the baseline.\n`);
 for (const [k, had, n] of worse) {
   const [file, rule] = k.split('::');
-  console.error(`  ${file}  ${rule}: ${had} -> ${n}`);
-  for (const r of rows.filter((x) => x.file === file && x.rule === rule)) {
-    console.error(`      :${r.line}  ${r.message}`);
-  }
+  const lines = rows.filter((x) => x.file === file && x.rule === rule)
+    .map((r) => `      :${r.line}  ${r.message}`).join('\n');
+  f.fail('code-quality-worse', `  ${file}  ${rule}: ${had} -> ${n}\n${lines}`, { at: `${file}::${rule}` });
 }
+f.emit();
 console.error(`\n  Split the function so it does one job. The rules and their limits are in .oxlintrc.json.`);
 console.error(`  If the new shape is genuinely right and the rule is wrong, say so and run: make code-quality WRITE=1`);
-process.exit(1);
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

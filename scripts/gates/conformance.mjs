@@ -33,9 +33,13 @@ import { PRESETS } from '../../core/type.js';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const only = process.argv[2] || 'all';
+// A flag (only `--json` today) is not the phase selector: `process.argv[2]` used to be that unconditionally,
+// so `conformance.mjs --json` silently ran phase "--json" instead of "all" (the same class of bug
+// audit-scenes.mjs paid for once already: a flag swallowed as the positional argument).
+const only = process.argv.slice(2).find((a) => !a.startsWith('--')) || 'all';
 
 
 // Scenes are served from MEMORY, never written to formats/. A sweep that litters the repo with
@@ -316,9 +320,14 @@ if (only === 'all' || only === 'paths') await sweepPaths();
 await browser.close(); server.close();
 
 console.log('\n' + '='.repeat(72));
-if (!findings.length) { console.log('✓ conformance clean: every declared value and prop changes the output'); process.exit(0); }
-console.log(`CONFORMANCE FINDINGS (${findings.length})\n`);
-for (const f of findings) console.log(`  [${f.area}] ${f.subject}\n      ${f.detail}\n`);
-console.log('Each finding is one of: unimplemented vocabulary, a prop accepted and discarded, or a');
-console.log('constructor that forgot a prop. Triage against docs/MISTAKES.md #19-27 before fixing.');
-process.exit(1);
+const gf = gateFindings({ line: (r) => `  [${r.area}] ${r.at}\n      ${r.summary}\n` });
+for (const r of findings) gf.fail('conformance', r.detail, { at: r.subject, area: r.area });
+
+if (!findings.length) console.log('✓ conformance clean: every declared value and prop changes the output');
+else console.log(`CONFORMANCE FINDINGS (${findings.length})\n`);
+gf.emit();
+if (findings.length) {
+  console.log('Each finding is one of: unimplemented vocabulary, a prop accepted and discarded, or a');
+  console.log('constructor that forgot a prop. Triage against docs/MISTAKES.md #19-27 before fixing.');
+}
+process.exit(findings.length ? 1 : 0);
