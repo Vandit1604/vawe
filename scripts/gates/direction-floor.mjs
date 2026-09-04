@@ -152,6 +152,16 @@ if (!directedByBeats) {
   if (sig.transition === 0) warn('no-transition', 'no seams or cuts between beats. Beats just cut flat. Earn 1-3 transitions (a dissolve, a cinematicZoom into a screen).');
 }
 if (!sig.bgMotion) warn('no-bg-motion', 'the background is static. A good video moves the viewer with a living backdrop (a moving gradient / mesh / aurora / shader), used brand-appropriately, not a flat field. See core/backgrounds.js.');
+
+// SPEED IS THE ANTI-REPETITION LEVER (docs/CRAFT/TRANSITIONS.md). A film whose boundaries all ride a
+// gentle curve reads flat and same-y, however many effects it uses. Nudge (never block) toward a speed
+// ramp on the dynamic seam: `ramp` (slow-fast-slow), `rush` (exit), `brake` (entrance).
+{
+  const gentle = new Set([undefined, null, 'smooth', 'linear', 'out']);
+  const boundaries = [...(d.seams || []), ...(d.cuts || [])].filter((b) => b && typeof b === 'object');
+  if (boundaries.length >= 2 && boundaries.every((b) => gentle.has(b.timing)))
+    warn('flat-seams', `all ${boundaries.length} boundaries share one gentle speed (${boundaries.map((b) => b.timing || 'smooth').join(', ')}). Vary the VELOCITY, not just the effect: reach for a speed ramp on the dynamic seam (timing:"ramp" slow-fast-slow, "rush" on an exit, "brake" on an entrance). TRANSITIONS.md, the speed dial.`);
+}
 if (!directedByBeats && vocab.length < 3) warn('low-vocab', `only ${vocab.length} motion technique(s) in play (${vocab.join(', ') || 'none'}). Reach for more of the range: count-ups, ken push, a cursor demo, a custom motion track.`);
 
 // ANTI-FRONT-LOAD (another engine reveal model): a directed video weights its cues ACROSS its length; the

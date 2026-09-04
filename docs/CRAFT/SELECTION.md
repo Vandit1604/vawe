@@ -54,7 +54,9 @@ director rotates within a family; it does not mix families.
 > the complete transition taxonomy, Murch's Rule of Six (emotion 51%), continuity-vs-montage, J/L cuts,
 > shared-element morph, and the ordered per-seam decision procedure. Read it when you can't say *why*.
 > **Want the copy-paste menu instead of the theory?** [`TRANSITIONS.md`](TRANSITIONS.md) opens with
-> *The easy palette*: six seams with a snippet each, the 30fps duration table, and station-to-station.
+> *The easy palette*: seven transitions with a snippet each, the 30fps duration table, station-to-station,
+> and the **speed dial** (ramp/rush/brake). Speed is the anti-repetition lever: a motion seam carries
+> `timing:"ramp"` (slow-fast-slow), never a flat curve, or the film reads same-y however many effects it has.
 
 ## 2. Fonts, the register of the voice
 

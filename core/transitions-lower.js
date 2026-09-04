@@ -34,6 +34,15 @@ for (const t of TRANSITIONS) {
 // sting-only (glitch/chromaticSplit) to sting.
 const BOUNDARY_ORDER = ['cut', 'seam', 'sting'];
 
+// SPEED BY DEFAULT for MOTION transitions. A spatial fx (a whip, a zoom, a slide, a squeeze) with no
+// `timing` reads FLAT, and a film whose seams are all flat feels repetitive (docs/CRAFT/TRANSITIONS.md,
+// "speed is the anti-repetition lever"). So when the agent authors a motion fx through the `transitions`
+// sugar and names no timing, it gets the slow-fast-slow speed ramp for free. A pure blend (fade/dissolve)
+// stays on the gentle default. An explicit `timing` always wins, and raw hand-authored `seams`/`cuts`
+// are untouched (this only fills the sugar's default, so no legacy film re-times silently).
+const RAMP_BY_DEFAULT = new Set(['whipPan', 'whip', 'cinematicZoom', 'zoom', 'squeeze', 'slide', 'push', 'uncover']);
+const defaultTiming = (fx) => (RAMP_BY_DEFAULT.has(fx) ? 'ramp' : undefined);
+
 export function boundaryMechanism(fx, mech) {
   const have = MECHS_OF.get(fx);
   if (!have) throw new Error(`unknown transition fx "${fx}", see \`make transitions\` for the catalog`);
@@ -102,8 +111,9 @@ export function lowerScene(data) {
       if (!T || typeof T !== 'object') continue;
       const at = T.at ?? T.t;
       const m = boundaryMechanism(T.fx, T.mech);
-      if (m === 'seam') seams.push(clean({ t: at, fx: T.fx, dur: T.dur, dir: T.dir, seed: T.seed, intensity: T.intensity, timing: T.timing }));
-      else if (m === 'cut') cuts.push(clean({ t: at, style: T.fx, dur: T.dur, dir: T.dir, timing: T.timing, cx: T.cx, cy: T.cy, dist: T.dist }));
+      const timing = T.timing ?? defaultTiming(T.fx);   // a motion fx with no timing gets the speed ramp
+      if (m === 'seam') seams.push(clean({ t: at, fx: T.fx, dur: T.dur, dir: T.dir, seed: T.seed, intensity: T.intensity, timing }));
+      else if (m === 'cut') cuts.push(clean({ t: at, style: T.fx, dur: T.dur, dir: T.dir, timing, cx: T.cx, cy: T.cy, dist: T.dist }));
       else stings.push(clean({ t: at, fx: T.fx, dur: T.dur, seed: T.seed, intensity: T.intensity, color: T.color }));
     }
     if (cuts.length) data.cuts = cuts;

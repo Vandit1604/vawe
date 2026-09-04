@@ -2,7 +2,7 @@
 when: "choosing the CUT between two beats (you can't say why a transition is there)"
 answers: "the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure"
 group: story
-codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition
+codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition, flat-seams
 ---
 
 # TRANSITIONS: choosing the seam by theory, not habit
@@ -62,9 +62,9 @@ used as a boundary (`pop`), is rejected at validate with the catalog, never sile
 
 ---
 
-## The easy palette: six seams that stay varied without thinking
+## The easy palette: seven transitions that stay varied without thinking
 
-The theory below is the *why*. This is the *menu*: six transitions that cover almost every launch film,
+The theory below is the *why*. This is the *menu*: seven transitions that cover almost every launch film,
 ordered cheapest-first, each with the one thing it says and a copy-paste snippet. **Vary the seam by
 MEANING, not by reaching for a new effect** (that is the amateur tell). A whole film is usually one
 primary from this list on ~60-70% of cuts, plus ONE bolder accent reserved for the payoff. Pick the
@@ -73,15 +73,49 @@ primary by the film's personality; pick each accent by what that one seam has to
 | # | Seam | Say it when | Snippet (30fps) |
 |---|---|---|---|
 | 1 | **Hard cut** | the two beats are one thought (the default, most cuts) | *(no `transitions` entry: place beats back-to-back, overlap ~2-4f so the stage never empties)* |
-| 2 | **Directional slide / push** | a NEW place, same energy: carry the eye one way | `{ "at": 5, "fx": "push", "mech": "seam", "dir": "left", "dur": 0.5, "timing": "smooth" }` |
-| 3 | **Cross-dissolve** | time passing, or a gentle link between two images | `{ "at": 5, "fx": "dissolve", "mech": "seam", "dur": 0.45, "timing": "smooth" }` |
-| 4 | **Whip pan** | frantic "meanwhile"; hide the cut inside motion blur | `{ "at": 5, "fx": "whipPan", "dir": "left", "dur": 0.35, "timing": "snappy" }` |
-| 5 | **Cinematic zoom** | push into a detail, or a calm reveal at the hero beat | `{ "at": 5, "fx": "cinematicZoom", "dur": 0.6, "timing": "smooth" }` |
-| 6 | **Shared-element morph** | the SAME object takes its next role (highest craft) | *(no seam: a persistent layer with a `motion` track that repositions/resizes across the cut, see* The motion-design layer *below)* |
+| 2 | **Directional slide / push** | a NEW place, same energy: carry the eye one way | `{ "at": 5, "fx": "push", "mech": "seam", "dir": "left", "dur": 0.5, "timing": "ramp" }` |
+| 3 | **Cross-dissolve** | time passing, or a gentle link between two images | `{ "at": 5, "fx": "fade", "mech": "seam", "dur": 0.5, "timing": "smooth" }` |
+| 4 | **Whip pan** | frantic "meanwhile"; hide the cut inside motion blur | `{ "at": 5, "fx": "whipPan", "dir": "left", "dur": 0.45, "timing": "ramp" }` |
+| 5 | **Cinematic zoom** | push into a detail, or a calm reveal at the hero beat | `{ "at": 5, "fx": "cinematicZoom", "dur": 0.55, "timing": "ramp" }` |
+| 6 | **Squeeze** (a speed ramp you can SEE) | a fast, kinetic pivot: the frame smear-stretches through the cut | `{ "at": 5, "fx": "squeeze", "dir": "left", "dur": 0.4, "timing": "ramp" }` |
+| 7 | **Shared-element morph** | the SAME object takes its next role (highest craft) | *(no seam: a persistent layer with a `motion` track that repositions/resizes across the cut, see* The motion-design layer *below)* |
 
-Direction is a real lever for #2 and #4: a beat that entered from the right should leave to the left
+Direction is a real lever for #2, #4 and #6: a beat that entered from the right should leave to the left
 (one continuous travel per seam, never enter-and-retreat). Rotate through 1-2-3 for the body and spend
-4 or 5 ONCE, and a six-beat film already feels edited, not sprayed.
+a bolder one ONCE, and a film already feels edited, not sprayed.
+
+### Speed is the anti-repetition lever
+
+**The transition is the verb, the timing is the adverb.** The `fx` says *what* crosses the cut; the
+`timing` says *how fast, and with what weight*. A transition with no speed profile reads FLAT, and a film
+whose seams all ride the same gentle curve feels repetitive however many effects it uses. So **the motion
+seams above carry `timing:"ramp"`, not `"smooth"`** (and a bare motion fx through the `transitions` sugar
+now defaults to `ramp`, `core/transitions-lower.js`). `ramp` is the editor's slow-fast-slow speed ramp
+(`core/motion.js` `speedRamp`): it eases in, races through the middle, and settles, which is what makes a
+whip or a zoom feel *thrown* rather than slid. Vary the VELOCITY across a film, not only the effect. The
+speed dial (every curve is a named member of `TIMINGS`, `core/cuts.js`):
+
+| timing | curve | reach for it on |
+|---|---|---|
+| **ramp** | slow-fast-slow | whips, zooms, squeezes, any thrown/kinetic seam (the default for motion fx) |
+| **rush** | accelerate away | an EXIT: the beat leaves faster than it left rest |
+| **brake** | decelerate in | an ENTRANCE: the beat arrives slower than it set off |
+| **pop** | overshoot then settle | a spring-y arrival with life: a chip, a badge, a UI element landing |
+| **snappy** | decisive, no overshoot | a punchy cut that lands and stops |
+| **smooth** | gentle ease-in-out | a calm blend (a cross-dissolve, a fade), where a ramp would fight the mood |
+| **linear** | flat, constant speed | a deliberately mechanical sweep; rarely what you want |
+
+`make direct` warns (`flat-seams`) when a film has two or more boundaries and every one rides a gentle
+curve with no speed ramp anywhere. It never blocks; it is the nudge to spend one ramp.
+
+> **Studied and deliberately not built (yet).** another engine models a transition as an orthogonal
+> *presentation* (`{draw, props}`) times a *timing* (`{getProgress, getDurationInFrames}`), and carries a
+> physics **spring** whose duration is *measured* from its damping/stiffness, not specified. Its overlap
+> model mounts and blends two LIVE scenes; vawe (like another engine' shader-transitions, the same seam
+> architecture) blends two BAKED stills. Our named-curve dial above is a nicer author surface than a raw
+> ease string, and `pop` already gives a spring-like overshoot, so the one genuine gap is a *parameterized*
+> spring. It is a real feature, not a bug, and it stays out until a film needs a physical arrival the dial
+> cannot fake. Recorded here so the next author inherits the decision, not the re-investigation.
 
 > **Align the beats to the seam, or a `mech:"seam"` transition dissolves nothing.** A seam blends the
 > frame just BEFORE `at` against the frame just AFTER. If both beats are still on screen across `at`
