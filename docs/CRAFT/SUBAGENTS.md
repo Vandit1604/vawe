@@ -31,6 +31,14 @@ look at everything.
 one sheet and one question and it commits. Every standing critic below is defined by the file it is
 handed.
 
+**`make critics D=<file>`** emits this roster as ready-to-launch prompts, concrete for that film (the
+real `/tmp/beats/<name>.png`, `/tmp/reveal/<name>.png`, `/tmp/seams/<name>.png` paths, and the on-screen
+strings for `copy`). Copy the six prompts into six parallel `Agent` calls. Once they report,
+`make critics D=<file> RECORD=<panels.json>` writes the panel's findings to
+`verify/approved/panels/<name>.json`, hashed to this version of the scene, so the doc below and the tool
+point at each other: `scripts/author/critics.mjs` is the source of the prompts, this table is the source
+of the roster.
+
 ## The roster
 
 | Critic | Job | Input it is handed | Verdict shape |

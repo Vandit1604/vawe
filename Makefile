@@ -866,6 +866,13 @@ worktrees:
 review:
 	node verify/review.mjs
 
+# make critics D=<scene.json> [VS=brand] [RECORD=<panels.json>]: THE CRITIC PANEL (docs/CRAFT/SUBAGENTS.md),
+# as an invokable, recorded step. No RECORD: prints the six critics' prompts, concrete for this film, to
+# launch as parallel Agent calls. RECORD=<file>: given the six verdicts collected into one JSON file,
+# writes the receipt to verify/approved/panels/<name>.json (goes stale when the scene changes).
+critics:
+	node scripts/author/critics.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(RECORD),--record $(RECORD))
+
 # make probe [M=scene]: assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.
 probe:

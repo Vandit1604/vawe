@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fingerprint, similarity, verdict } from './similarity.mjs';
 import { gateFindings } from '../lib/findings.mjs';
+import { readReceipt } from '../lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const LEDGER = path.join(ROOT, 'dna', 'ledger.json');
@@ -56,6 +57,21 @@ if (cmd === 'check') {
 }
 
 if (cmd === 'add') {
+  // DONE MEANS THE EYE PASSED (taste loop, phase 1+4). The ledger is the design memory of FINISHED
+  // work, so a cut is not logged until it has been judged and the verdict is PASS. The judge receipt is
+  // hashed to the scene, so a PASS on an older cut reads as stale and does not count: the loop is not
+  // done until the eye stops finding fixes against THIS render.
+  const jr = readReceipt('judge', file);
+  const v = jr.exists ? (jr.receipt && jr.receipt.verdict) : null;
+  if (!jr.exists || jr.stale || v !== 'PASS') {
+    const why = !jr.exists ? 'this cut has no judge verdict'
+      : jr.stale ? 'the judge verdict is for an older cut of this film'
+      : `the last judge verdict was ${v || 'not PASS'}`;
+    console.error(`✗ ledger-add refused: ${why}. A film is done when the EYE passes, not when it renders.`);
+    console.error(`    make judge D=${file}                 # render the key frames, score every one against the rubric`);
+    console.error(`    make judge D=${file} --verdict PASS  # once the eye is satisfied (or --verdict FIX, then fix and re-judge)`);
+    process.exit(1);
+  }
   const next = entries.filter((e) => e.file !== rel);
   next.push({ file: rel, theme: fp.theme, module: data.module, added: new Date().toISOString().slice(0, 10), fp });
   fs.mkdirSync(path.dirname(LEDGER), { recursive: true });
