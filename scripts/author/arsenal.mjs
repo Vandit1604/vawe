@@ -60,6 +60,16 @@ const MODULE_PATHS = ['core', 'core/fx', 'core/layers'].flatMap(dirsOf);
 /** Read one entry's value out of an optional registry map (blurbs, aka, pitfalls), or a default. */
 const at = (map, name, dflt = '') => (map && map[name] != null ? map[name] : dflt);
 
+// Sound cues were the last hole in this corpus: `make arsenal Q="a whoosh"` answered ABSENT while 13
+// synthesized cues sat in core/audio-kit.mjs. sfx-catalog.mjs owns their metadata and exposes it as
+// rows; imported as a function so its own gate does not read that map as a second vocabulary.
+async function cueSource() {
+  try {
+    const { cueCorpus } = await import('./sfx-catalog.mjs');
+    return cueCorpus();
+  } catch { return []; }
+}
+
 /** Every entry the engine can name: {name, kind, slot, blurb, pitfall}. */
 export async function collect() {
   const out = [];
@@ -188,6 +198,9 @@ export async function collect() {
       }
     }
   } catch { /* the catalogue is optional to search: a fresh clone can still find the registries */ }
+  // Only the cues no registry already owns: MOTION_CUE_REGISTRY (core/audio-tactile.js) covers seven,
+  // and a cue findable twice under two kinds is the drift this tool exists to remove. This fills the rest.
+  out.push(...(await cueSource()).filter((c) => !out.some((e) => e.name === c.name && e.slot === c.slot)));
   return out;
 }
 

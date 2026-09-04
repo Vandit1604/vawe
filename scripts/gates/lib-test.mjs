@@ -5595,6 +5595,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['capture a real product surface', 'component'],
     ['a full-frame generative webgl field', 'shader'],
     ['a lit implicit surface from a distance field', 'raymarch'],
+    ['a low sustained dramatic weight sound', 'braam'],
     // This was in the ABSENT set below, correctly, for about an hour. A sibling agent built `upright`
     // in parallel while this calibration was being written, so the honest answer to it changed under
     // the test. That is the set working: an absent query becomes a present one the day the capability
