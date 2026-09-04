@@ -9,6 +9,12 @@ confirm: "does each claim beat SHOW an artifact, not just set type?"
 
 # SHOW, DON'T ONLY TELL: what to show, and how
 
+## AGENT SUMMARY
+
+- Every claim beat must SHOW an artifact, not just set type: decoration (glow, mark, hairline) carries no information; explanation (a bar, a ring, a diagram, a captured surface) does work the words cannot.
+- No gate enforces this (`visual-vocabulary` was deleted in 2026-08 for lying about area). Code `number-not-count` is the nearest gate signal; the rest is `make judge` and your eyes.
+- Checkable action: does each claim beat SHOW an artifact, not just set type?
+
 A film can be well written, locked to the palette, cut in time and directed hard, and still show the
 viewer nothing. Every layer that carries information is a word. The viewer reads it, believes it or
 does not, and moves on. Measured across this library when the gate landed: **52 of 93 shipped scenes
@@ -17,12 +23,6 @@ zero pictorial layers of any size, last measured** (run `node scripts/gates/waiv
 current count), and the median film gives **5% of its layers to picture.** That
 was not a house style anyone chose. It is what you get when nobody is asked the question. It is debt,
 not a pattern to copy.
-
-**There is no gate for this. There used to be, and it was deleted in 2026-08 because it lied.**
-`visual-vocabulary` measured a layer's area to tell a mark from a picture, and its size helper squared
-any layer that declared one axis and had no readable intrinsic aspect. A 590x18 decorative underline
-was scored as 590x590 and credited with a tenth of the frame, so the gate handed a pass to a hairline.
-It was also waived by 30 of 130 films. See `docs/TASTE.md` for the cull and what would bring it back.
 
 Read the rest of this document as craft, not as a checklist a tool will run for you. The thing it asks
 you to do has not changed; only the pretence that it was being checked has. What checks it now is
@@ -131,9 +131,15 @@ Density is the neighbouring rule, not the same one: [DENSITY.md](DENSITY.md) ask
 full enough to look produced. This one asks whether anything in it is doing the explaining. A frame can
 pass density on three text elements and still show nothing.
 
----
+## Provenance
 
-## The backlog (triaged 2026-07-29)
+**Why there is no gate.** There used to be one. `visual-vocabulary` measured a layer's area to tell a
+mark from a picture, and its size helper squared any layer that declared one axis and had no readable
+intrinsic aspect. A 590x18 decorative underline was scored as 590x590 and credited with a tenth of the
+frame, so the gate handed a pass to a hairline. It was deleted in 2026-08 because it lied. It was also
+waived by 30 of 130 films. See `docs/TASTE.md` for the cull and what would bring it back.
+
+### The backlog (triaged 2026-07-29)
 
 The gate landed on a library that was already built, and 48 scenes failed it. That number is not 48
 mistakes. It was triaged once, and the buckets are recorded here so nobody re-derives them.
