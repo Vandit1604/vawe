@@ -124,7 +124,7 @@ video (e.g. `linear-launch.json`) first as working references, then compose, nev
 > taste system (house-style · composition · motion · story-spine), the block registry (`make catalog`),
 > and the author→gate→render quality loop. Everything below is the doctrine it indexes.
 
-## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS, NOT A REQUEST TO START  `[eye]`
+## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS, NOT A REQUEST TO START  `[gated: scripts/gates/author-check.mjs#no-storyboard]`
 
 **Claude Code: load `vawe-video-planning` and follow it. Other agents: read
 [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](docs/CRAFT/AUTHORING-WALKTHROUGH.md) and the planning contract
@@ -345,7 +345,7 @@ it as a plain doc) and work through it by hand.** It carries the three questions
 plain-words to After-Effects vocabulary table, and where the effect goes afterwards so the next author
 inherits the name rather than the guess. That second half is not optional.
 
-## Hand-writing HTML? Beat the AI slop (see the anti-slop rules above)  `[eye]`
+## Hand-writing HTML? Beat the AI slop (see the anti-slop rules above)  `[gated: scripts/gates/designspec-check.mjs#off-colour]`
 
 Hand-authored HTML regresses to the mean: centered text, Inter, blue/purple gradient, equal card grid.
 And a fragment animated with CSS renders as a **dead still**, because the engine refuses `animation` and
@@ -467,7 +467,7 @@ decision. It is debt, not a pattern to copy. What counts as explanation, the thr
 the deleted gate asked and where to get the graphic:
 [`docs/CRAFT/SHOW-DONT-TELL.md`](docs/CRAFT/SHOW-DONT-TELL.md).
 
-## A SLIDESHOW IS A FAILURE, AND A RESIZING BOX IS NOT THE ONLY WAY OUT  `[eye]`
+## A SLIDESHOW IS A FAILURE, AND A RESIZING BOX IS NOT THE ONLY WAY OUT  `[gated: scripts/gates/direction-floor.mjs#no-continuous-object]`
 
 The failure is easy to feel: every beat is born and dies inside its own window, so each cut is a jump
 between unrelated shots and the film is a stack of cards read aloud.
