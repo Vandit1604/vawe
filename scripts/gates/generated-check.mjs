@@ -22,9 +22,13 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const write = process.argv.includes('--write');
+// The printed line is rendered FROM the record (docs/MISTAKES.md #401): each `stale` record's summary
+// already carries the file/cmd detail a human reads, so the custom renderer prints it verbatim.
+const f = gateFindings({ line: (r) => r.summary });
 
 // [label, argv, the paths it owns]. A generator that writes outside its declared paths is a finding in
 // itself: the diff below would report it and name a path this table does not list.
@@ -72,8 +76,12 @@ if (write) {
   console.log(`\n  ✓ regenerated ${stale.reduce((n, s) => n + s[2].length, 0)} file(s). Commit them.\n`);
   process.exit(0);
 }
+for (const [label, cmd, moved] of stale) f.fail('generated-stale', `${label}: ${moved.join(' ')}   (${cmd})`, {
+  fix: 'the files have been REGENERATED in place; review and commit them',
+  doc: 'docs/CRAFT/COMMAND-OUTPUT.md',
+});
 console.error(`\n  ✗ ${stale.length} generator(s) produce output that differs from what is committed.`);
-for (const [label, cmd, moved] of stale) console.error(`      ${label}: ${moved.join(' ')}   (${cmd})`);
+f.emit();
 console.error('\n    A stale generated file is a claim the engine no longer backs. site/lib/arsenal.json');
 console.error('    went 67 items behind this way and kept advertising a sound cue that had been deleted.');
 console.error('    The files have been REGENERATED in place, so the fix is to review and commit them.\n');

@@ -34,9 +34,13 @@ import { registries } from '../../core/registry.js';
 // file for its export would report every derived vocabulary as missing. Reading `sections` asks the
 // stronger question anyway: not "is the word in the file" but "is this vocabulary in the document".
 import { sections } from '../site/effects-catalog.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CATALOG = 'scripts/site/effects-catalog.mjs';
+// The printed line is rendered FROM the record (docs/MISTAKES.md #401): each record's `summary` already
+// carries the full multi-line advice a human reads, so the custom renderer prints it verbatim.
+const f = gateFindings({ line: (r) => r.summary });
 
 // NOT A VOCABULARY. Each of these is a SCREAMING_CASE export that an author never picks from, so the
 // catalogue is the wrong home for it. Named with a reason, because an unexplained waiver list becomes a
@@ -331,12 +335,14 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
     console.log(`    ✓ ratchet stamped at ${covered} hand-catalogued capabilit(ies)`
       + `${prior ? `, down from ${prior.handCatalogued}` : ''}`);
   } else if (prior && covered > prior.handCatalogued) {
-    console.error(`\n  ✗ ${covered} capabilit(ies) are catalogued by hand, up from ${prior.handCatalogued}.`);
-    console.error('    A capability that is not a registry needs a section, a usage form and a preview written');
-    console.error('    for it, in three files, keyed by a slug of its own title. Give it a registry with a');
-    console.error('    `catalog` block instead and it publishes all three itself, from one edit.');
-    console.error('    If it genuinely cannot be a registry, lower the bar on purpose:');
-    console.error('      node scripts/gates/arsenal-check.mjs --stamp\n');
+    f.fail('arsenal-ratchet',
+      `${covered} capabilit(ies) are catalogued by hand, up from ${prior.handCatalogued}. ` +
+      'A capability that is not a registry needs a section, a usage form and a preview written ' +
+      'for it, in three files, keyed by a slug of its own title. Give it a registry with a ' +
+      '`catalog` block instead and it publishes all three itself, from one edit. ' +
+      'If it genuinely cannot be a registry, lower the bar on purpose: ' +
+      'node scripts/gates/arsenal-check.mjs --stamp');
+    f.emit();
     process.exit(1);
   } else if (prior && covered < prior.handCatalogued) {
     console.log(`    ~ ${prior.handCatalogued - covered} fewer hand-catalogued than the ratchet allows.`
@@ -377,14 +383,16 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
   } else if (prior && bare.length > prior.unblurbed) {
     const known = new Set(prior.entries || []);
     const fresh = bare.filter((n) => !known.has(n));
-    console.error(`\n  ✗ ${bare.length} registry entr(ies) have no blurb, up from ${prior.unblurbed}.`);
-    console.error(`    new since the ratchet: ${(fresh.length ? fresh : bare).slice(0, 8).join(' ')}`
-      + `${(fresh.length ? fresh : bare).length > 8 ? ' …' : ''}`);
-    console.error('    Without a blurb an entry is findable only by someone who already knows its name,');
-    console.error("    so `make arsenal Q=\"...\"` will report it ABSENT. Write one where the entry is:");
-    console.error('      blurbs: { <name>: "what it does, in one line" }  beside the defineRegistry call.');
-    console.error('    If it genuinely should carry none, lower the bar on purpose:');
-    console.error('      node scripts/gates/arsenal-check.mjs --stamp\n');
+    f.fail('blurb-ratchet',
+      `${bare.length} registry entr(ies) have no blurb, up from ${prior.unblurbed}. ` +
+      `new since the ratchet: ${(fresh.length ? fresh : bare).slice(0, 8).join(' ')}` +
+      `${(fresh.length ? fresh : bare).length > 8 ? ' …' : ''} ` +
+      'Without a blurb an entry is findable only by someone who already knows its name, ' +
+      'so `make arsenal Q="..."` will report it ABSENT. Write one where the entry is: ' +
+      'blurbs: { <name>: "what it does, in one line" }  beside the defineRegistry call. ' +
+      'If it genuinely should carry none, lower the bar on purpose: ' +
+      'node scripts/gates/arsenal-check.mjs --stamp');
+    f.emit();
     process.exit(1);
   } else if (prior && bare.length < prior.unblurbed) {
     console.log(`    ~ ${prior.unblurbed - bare.length} fewer unblurbed than the ratchet allows.`
@@ -408,13 +416,17 @@ if (unreadable.length) console.log(`  ~ ${unreadable.length} module(s) could not
 
 if (!missing.length) {
   console.log(`  ✓ every capability the engine exports is named in docs/EFFECTS.md\n`);
+  f.emit();
   process.exit(0);
 }
+for (const [name, file] of missing) f.fail('arsenal-missing', `${name.padEnd(22)} ${file}`, {
+  fix: 'a REGISTRY writes its own section: give its defineRegistry call a `catalog` block '
+    + '(title / tag / intro / usage / preview or noPreview, core/registry.js) and run `make effects`. '
+    + `Anything else adds a section to ${CATALOG}, or is waived in this file WITH A REASON if it is `
+    + 'not something a scene can name',
+  doc: 'docs/EFFECTS.md',
+});
 console.error(`\n  ✗ ${missing.length} capabilit(ies) the engine offers and the catalogue never mentions:\n`);
-for (const [name, file] of missing) console.error(`     ${name.padEnd(22)} ${file}`);
-console.error(`\n  An author told to "see the whole arsenal, then choose" cannot choose these.`);
-console.error(`  A REGISTRY writes its own section: give its defineRegistry call a \`catalog\` block`);
-console.error(`  (title / tag / intro / usage / preview or noPreview, core/registry.js) and run \`make effects\`.`);
-console.error(`  Anything else adds a section to ${CATALOG}, or is waived in`);
-console.error(`  this file WITH A REASON if it is not something a scene can name.\n`);
+f.emit();
+console.error(`\n  An author told to "see the whole arsenal, then choose" cannot choose these.\n`);
 process.exit(1);

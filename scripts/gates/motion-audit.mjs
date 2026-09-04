@@ -35,6 +35,12 @@ import { sceneDims } from '../../core/safe.js';
 import { junctionTable, marksOf, shotWindows } from '../../core/junctions.js';
 import { lowerScene } from '../../core/transitions-lower.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+// This gate already owns a rich --json payload (a whole report object, not a flat finding list), the
+// exact docs/MISTAKES.md #401 case findings.mjs was built to name. `emitJson` is the one door that lets
+// it keep that payload verbatim while still routing through the shared module (scripts/lib/findings.mjs,
+// docs/CRAFT/COMMAND-OUTPUT.md): it writes to the real stdout captured before any --json redirect, so it
+// cannot become a second writer on the same stream.
+import { emitJson } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -484,7 +490,7 @@ for (const f of formats) for (const d of DATA_LIST) {
 }
 await browser.close(); server.close();
 
-if (JSON_OUT) { console.log(JSON.stringify(results, null, 2)); }
+if (JSON_OUT) { emitJson(results); }
 else {
   console.log('==================== MOTION AUDIT ====================');
   for (const r of results) {

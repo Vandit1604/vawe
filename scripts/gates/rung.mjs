@@ -64,6 +64,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { codesEmitted } from '../lib/finding-codes.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'verify/rung-ratchet.json');
@@ -205,6 +206,9 @@ export function run() {
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const r = run();
   const list = process.argv.includes('--list');
+  // The printed line is rendered FROM the record (docs/MISTAKES.md #401): each record's `summary`
+  // already carries the multi-line advice a human reads, so the custom renderer prints it verbatim.
+  const f = gateFindings({ line: (rec) => rec.summary });
 
   if (list) {
     console.log(`── the [eye] worklist · ${r.eye} rule(s) held up by nothing but the sentence\n`);
@@ -227,15 +231,20 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   console.log(`\n   the [eye] list: node scripts/gates/rung.mjs --list`);
 
   for (const s of r.bad) {
-    console.error(`\n  ✗ ${s.file}:${s.line}  \`[${s.rung}${s.names ? `: ${s.names}` : ''}]\`  ${s.title}`);
-    console.error(`      ${s.why}`);
+    f.fail('bad-rung-tag',
+      `${s.file}:${s.line}  \`[${s.rung}${s.names ? `: ${s.names}` : ''}]\`  ${s.title}\n      ${s.why}`,
+      { at: `${s.file}:${s.line}` });
   }
   for (const s of r.untagged) {
-    console.error(`\n  ✗ ${s.file}:${s.line}  untagged: ${s.title}`);
-    console.error('      Every section of CLAUDE.md carries a rung. If nothing enforces it, that is `[eye]`,');
-    console.error('      and saying so is the point.');
+    f.fail('untagged-section',
+      `${s.file}:${s.line}  untagged: ${s.title}\n` +
+      '      Every section of CLAUDE.md carries a rung. If nothing enforces it, that is `[eye]`, ' +
+      'and saying so is the point.',
+      { at: `${s.file}:${s.line}` });
   }
   if (r.bad.length || r.untagged.length) {
+    console.error();
+    f.emit();
     console.error(`\n  ${r.bad.length + r.untagged.length} tag(s) claim an owner and do not have one.`);
     console.error('  A tag nobody can verify is decoration, and decoration retires a problem on paper.\n');
     process.exit(1);
@@ -247,14 +256,17 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     fs.mkdirSync(path.dirname(RATCHET), { recursive: true });
     fs.writeFileSync(RATCHET, `${JSON.stringify({ eye: r.eye }, null, 1)}\n`);
     console.log(`  ✓ ratchet stamped at ${r.eye} [eye] rule(s)${prior ? `, ${r.eye <= prior.eye ? 'down' : 'UP'} from ${prior.eye}` : ''}\n`);
+    f.emit();
   } else if (prior && r.eye > prior.eye) {
-    console.error(`\n  ✗ ${r.eye} rule(s) are held up by prose alone, up from ${prior.eye}.`);
-    console.error('    A new rule with no mechanism is a new rule nobody will follow, and the ablation in');
-    console.error('    docs/RESEARCH/PROMPT-EVAL.md is what that costs: deleting the loudest prose rule in');
-    console.error('    this repo changed the behaviour it governs by zero.');
-    console.error('    Give it a default, a gate, a hook or a command. If it genuinely cannot have one,');
-    console.error('    raise the bar on purpose:');
-    console.error('      node scripts/gates/rung.mjs --stamp\n');
+    f.fail('rung-ratchet',
+      `${r.eye} rule(s) are held up by prose alone, up from ${prior.eye}. ` +
+      'A new rule with no mechanism is a new rule nobody will follow, and the ablation in ' +
+      'docs/RESEARCH/PROMPT-EVAL.md is what that costs: deleting the loudest prose rule in ' +
+      'this repo changed the behaviour it governs by zero. ' +
+      'Give it a default, a gate, a hook or a command. If it genuinely cannot have one, ' +
+      'raise the bar on purpose: node scripts/gates/rung.mjs --stamp');
+    console.error();
+    f.emit();
     process.exit(1);
   } else if (prior && r.eye < prior.eye) {
     console.log(`  ~ ${prior.eye - r.eye} fewer [eye] rule(s) than the ratchet allows. Lower it:`
