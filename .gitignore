@@ -124,6 +124,9 @@ formats/scene/_batch/
 # flagship examples + their registry — the showcase the repo ships (make gallery).
 !formats/scene/example-*.json
 !formats/scene/examples.json
+# ...but NOT their expansions, same bug as the showcase-* glob above: this allow is a glob too, so it
+# was quietly re-including example-*.expanded.json, the compiled twin nobody should learn from.
+formats/scene/example-*.expanded.json
 # TEMPLATES. These are the framework's answer to "how is a launch film shaped": the composition,
 # timing, camera and beat structure of a real film with every borrowed identity removed. The product
 # is fictional, every colour is a theme token, the marks are inline svg. They ship on purpose. Their

@@ -53,5 +53,20 @@
       "tags": ["metallic", "shimmer", "dark", "background", "brand-coloured"],
       "poster": 3.0
     }
-  ]
+  ],
+  "goldSet": {
+    "note": "Read a SHORT specimen to learn one mechanism; read a FULL film to learn structure and pacing. Do not copy .expanded.json (machine output).",
+    "shortSpecimens": [
+      { "file": "example-metallic-bg.json", "teaches": "backgrounds" },
+      { "file": "example-html-bg.json", "teaches": "html layer" },
+      { "file": "showcase-composition.json", "teaches": "layout" },
+      { "file": "motion-test.json", "teaches": "motion primitives" },
+      { "file": "example-kinetic-type.json", "teaches": "kinetic type" }
+    ],
+    "fullFilms": [
+      { "file": "saas-hero-launch.json", "teaches": "whole directed structure" },
+      { "file": "product-feature-tour.json", "teaches": "whole directed structure" },
+      { "file": "process.json", "teaches": "whole directed structure" }
+    ]
+  }
 }
