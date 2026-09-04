@@ -22,7 +22,7 @@
  "core/shaders-ambient.js::max-params": 1,
  "core/fx/along-path.js::complexity": 1,
  "scripts/gates/layer-props.mjs::no-unused-vars": 1,
- "core/produce.js::no-unused-vars": 1,
+ "core/produce.js::complexity": 1,
  "core/motion.js::unicorn(no-useless-spread)": 1,
  "core/fx/word-slot.js::no-unused-vars": 1,
  "core/fx/word-slot.js::complexity": 1,
