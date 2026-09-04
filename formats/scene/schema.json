@@ -542,6 +542,16 @@
     "pop"
    ]
   },
+  "energy": {
+   "type": "string",
+   "label": "Film energy: the default speed curve for every cut and seam that names no timing. calm decelerates into place; brand is the house slow-fast-slow speed ramp; hype lands snappy and stops; tense accelerates away. An explicit timing on a cut always wins.",
+   "enum": [
+    "calm",
+    "brand",
+    "hype",
+    "tense"
+   ]
+  },
   "captionStyle": {
    "type": "string",
    "label": "Word-timed caption treatment on the pop layout (core/captions.js). Optional per-line words:[{t0,t1}].",

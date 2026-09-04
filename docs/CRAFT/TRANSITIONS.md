@@ -109,6 +109,28 @@ speed dial (every curve is a named member of `TIMINGS`, `core/cuts.js`):
 `make direct` warns (`flat-seams`) when a film has two or more boundaries and every one rides a gentle
 curve with no speed ramp anywhere. It never blocks; it is the nudge to spend one ramp.
 
+### One word for the whole film: `energy`
+
+Naming a `timing` on every cut is how you set velocity per beat. Setting it ONCE for the whole film is
+`energy`, a single top-level word. AE motion design gives a piece one velocity personality: a calm brand
+film and a hype launch reel do not accelerate the same way. `energy` is that personality, and it fills
+the `timing` of every cut and seam that names none.
+
+```json
+{ "module": "scene", "energy": "brand", "cuts": [ ... ], "seams": [ ... ] }
+```
+
+| energy | the film's default curve | reach for it on |
+|---|---|---|
+| **calm** | `out` (decelerate in) | premium, editorial, a film with room to breathe |
+| **brand** | `ramp` (the house speed ramp) | the default to reach for: directed and confident |
+| **hype** | `snappy` (lands and stops) | product drops, announcements, launch-reel energy |
+| **tense** | `rush` (accelerate away) | urgency, countdowns, a film that will not sit still |
+
+It is a DEFAULT, never an override: an explicit `timing` on any cut or seam still wins, and it reaches
+hand-authored `cuts`/`seams`, not only the `transitions` sugar. A film that names no `energy` is
+untouched, so nothing re-times silently. `core/energy.js`.
+
 ### Two more seam knobs: `feather` and an angled `dir`
 
 Beyond `timing`, a `mech:"seam"` takes two shape knobs (both optional, both static, so determinism is

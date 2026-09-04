@@ -32,6 +32,9 @@
  "core/camera-moves/index.js": [
   "CAMERA_MOVES"
  ],
+ "core/energy.js": [
+  "ENERGY_BLURBS"
+ ],
  "core/canvas-fx.js": [
   "BAYER4",
   "CANVAS_FX",
