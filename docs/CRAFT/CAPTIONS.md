@@ -8,6 +8,15 @@ confirm: "are captions timed to the words, and do they sit in the safe strip for
 
 # CAPTIONS: timing, safe placement, and the style options
 
+## AGENT SUMMARY
+
+- Time captions to real words (`words:[{t0,t1}]`, via `make vo-captions` or `make captions`), and
+  set `"destination"` (`tiktok`/`reels`/`shorts`) so the caption band sits in that platform's safe
+  strip, not the default web margin.
+- Enforced by `make audit M=<file> ASPECT=all` (overlap / clipped text / safe-zone / WCAG contrast).
+- Checkable action: are captions timed to the words, and do they sit in the safe strip for the
+  destination?
+
 Captions are a lock-sheet checkbox today and phone-feed vertical is first-class, so the two need to
 meet. This is the short version; the fields themselves live in `formats/scene/schema.json`.
 

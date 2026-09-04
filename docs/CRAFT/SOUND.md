@@ -9,6 +9,16 @@ confirm: "does this film carry sound, or is the silence a stated decision?"
 
 # SOUND: the structural register we have not been using
 
+## AGENT SUMMARY
+
+- Sound is the default, not silence. Give every film sound (`make audio` + `make audio-bed
+  D=<file> WRITE=1`); ship mute only with a stated reason (`"audio":{"silent":true,"_why":"…"}`).
+  A film must still read with the sound off.
+- Enforced by `make audio-check` (codes: `silent-by-omission`, `silence-without-a-reason`,
+  `audio-block-produces-nothing`, `cues-have-no-sound`, `cue-missing`, `bed-unresolved`,
+  `bed-missing`, `bed-provenance-unknown`, `bed-licence-unverified`, `bed-muted`).
+- Checkable action: does this film carry sound, or is the silence a stated decision?
+
 Measured across `formats/scene/`: **25 films carry a real track, 90 declare `audio.silent:true`, 20 name
 no `audio` block at all, and 1 has a block that produces nothing.** Not one of the 90 says why. Run
 `make audio-check` to see the census fresh; it is the first thing this document is for.
@@ -60,22 +70,14 @@ the silence was never decided, only defaulted to.
 
 ---
 
-## 1. The prime rule, replacing the old one
+## 1. The prime rule
 
-An earlier version of this file opened with *"Silence is the default. A video must WORK silent, then a
-bed may make it better."* Half of that survives and half of it was doing damage.
+A film must read with the sound off: feed autoplay is muted, so type that only makes sense over a
+voice fails for most of its audience. That is binding.
 
-**What survives:** a film must read with the sound off. Feed autoplay is muted, so type that only
-makes sense over a voice has failed for most of its audience. That is still true and still binding.
-
-**What was wrong:** "therefore ship it mute" does not follow. A film that works silent AND has sound is
-strictly better than the same film mute, and the argument for the default was never made, it was
-inherited from a real engine bug. The mixer used to auto-discover any `assets/music.wav` and put it
-under everything, which produced the buzzing-under-everything failure, and the fix was to make music
-opt-in (`internal/audio/audio.go`). That was the right fix for that bug. It then hardened into
-doctrine, and the doctrine outlived the bug by a year.
-
-So:
+It does not follow that the film should ship mute. A film that works silent AND has sound is
+strictly better than the same film mute. Sound is the default; silence is a device with a reason
+you write down.
 
 **You will ship it mute and never notice you decided anything.** Five films in six here did exactly that,
 and not one of the 90 says why. Silence closes a whole quarter of the structural vocabulary, including the
@@ -480,8 +482,7 @@ mixer is read as a filename, matches nothing, and plays **silence**. Always
 
 **A second trap, currently live.** `core/audio-select.js` maps five of its eight profiles (`apple`,
 `linear`, `vercel`, `a24`, `bloomberg`) to `bed: null`, and an absent or unknown profile also yields
-silence. So `music:"auto"` on most films still resolves to *nothing*. That map was written under the
-old doctrine and now contradicts this document. It is listed as open work in §9.
+silence. So `music:"auto"` on most films still resolves to *nothing* (open work, §9).
 
 ---
 
@@ -742,14 +743,23 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
 
 ## 9. Open work
 
-1. **`core/audio-select.js` still encodes the old doctrine.** Five of eight profiles map to `bed: null`,
-   and an unknown profile yields silence, so `music:"auto"` mostly resolves to nothing. It should map
-   every profile to *something* (a bed, or an explicit held tone) before "sound by default" is real.
+1. **`core/audio-select.js` still maps most profiles to nothing.** Five of eight profiles map to
+   `bed: null`, and an unknown profile yields silence, so `music:"auto"` mostly resolves to nothing. It
+   should map every profile to *something* (a bed, or an explicit held tone) before "sound by default"
+   is real.
 2. **`audio.auto:true` is on in 22 of 25 sounded films.** By §4 that is a cue on every junction, which
    is mickey-mousing. Those films want hand-placed cues on two or three beats instead.
-3. ~~**Nothing in the engine can author a J-cut or an L-cut.**~~ **Done**, `audio.bridges`, §2. The
-   remaining gap is that `direction-floor` still cannot see a bridge, so a film held together by sound
-   alone trips `no-continuous-object` and needs a waiver. Teaching the gate to read `audio.bridges` as a
-   continuous object is the next piece: it would have to reason about junctions rather than layers.
+3. **`direction-floor` still cannot see a bridge as a continuous object.** `audio.bridges` (§2) authors
+   J-cuts and L-cuts, but a film held together by sound alone still trips `no-continuous-object` and
+   needs a waiver. Teaching the gate to read `audio.bridges` is the next piece: it would have to reason
+   about junctions rather than layers.
 4. **`assets/music/` is gitignored and untracked.** A fresh clone has no beds, so every film naming one
    renders silent with only a warning. Sound cannot be a true default until the default asset exists.
+
+## Provenance
+
+**Do not re-add:** "silence is the default" as house doctrine. It traced to a real engine bug, the
+mixer once auto-discovered any `assets/music.wav` and put it under everything; making music opt-in
+(`internal/audio/audio.go`) was the right fix for that bug, but the silence-by-default rule that grew
+from it outlived the bug and is wrong. §1 states the corrected rule: sound is the default, silence is
+a stated device.

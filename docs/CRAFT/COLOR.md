@@ -9,6 +9,15 @@ confirm: "is the palette eyedropped from one dominant source, not invented?"
 
 # COLOR: building a palette
 
+## AGENT SUMMARY
+
+- Eyedrop the palette from the real brand (`make palette`), never invent. Decide light-first vs
+  dark-first by LOOKING at the hero, build from one accent held to 10% (60-30-10), and hit ~7:1
+  contrast on headline type.
+- Enforced by `make audit` (contrast fails hard) and `make designspec-check` (`off-colour`,
+  `dead-token`, `contrast-unmeasurable`).
+- Checkable action: is the palette eyedropped from one dominant source, not invented?
+
 Colours come **only from the brand**: eyedrop the real pixels (`make palette`), never invent. This guide is
 how to turn those pixels into a full `theme.palette` and use it well. Maps to the theme contract keys:
 `bg, bg2, surface, surface2, line, lineStrong, text, text2, dim, ink, accent, accentDim, accentGlow, up, down`
@@ -117,5 +126,8 @@ One accent across the whole piece · vary **hue only within the brand's family**
 drama (a value flip is itself a transition) · patterns are seasoning, not wallpaper. Backgrounds pull from this
 same palette (`core/backgrounds.js` is palette-driven), so one pack reskins every bg.
 
+## Provenance
+
 **Sources:** Refactoring UI (accessible colour systems, defining greys first); Material 3 (tonal palettes, error/
-semantic roles); WCAG 2.x (1.4.3 / 1.4.11); 60-30-10 (interior-design rule).
+semantic roles); WCAG 2.x (1.4.3 / 1.4.11); 60-30-10 (interior-design rule); the reference system's
+`another engine-creative/references/house-style.md` (§0 lazy-default list).
