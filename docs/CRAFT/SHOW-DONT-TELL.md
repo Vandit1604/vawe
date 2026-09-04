@@ -12,8 +12,9 @@ confirm: "does each claim beat SHOW an artifact, not just set type?"
 A film can be well written, locked to the palette, cut in time and directed hard, and still show the
 viewer nothing. Every layer that carries information is a word. The viewer reads it, believes it or
 does not, and moves on. Measured across this library when the gate landed: **52 of 93 shipped scenes
-carried no large pictorial layer at all.** Re-measured over the 148 gate-visible scenes: **64 carry
-zero pictorial layers of any size**, and the median film gives **5% of its layers to picture.** That
+carried no large pictorial layer at all.** Re-measured over the gate-visible scenes: **64 of 148 carry
+zero pictorial layers of any size, last measured** (run `node scripts/gates/waiver-drift.mjs` for the
+current count), and the median film gives **5% of its layers to picture.** That
 was not a house style anyone chose. It is what you get when nobody is asked the question. It is debt,
 not a pattern to copy.
 

@@ -394,6 +394,9 @@ rival finish line.
 | `make judge D=<file>` | the eye, MANDATORY post-render, the only step that SEES | read with `make beats` / `make reveal` / `make look` |
 | `make ledger D=<file>` / `make ledger-add D=<file>` | prove it is not a repeat, then log it | run before shipping, logged after the user approves |
 
+Reaching `make judge` is not the stop: load `vawe-review-loop` (`skills/vawe-review-loop/SKILL.md` for
+an agent with no Skill tool) for the written rule on when to stop iterating, fix, and look again.
+
 This file used to carry its own copy of that ladder: twenty-two numbered steps whose numbering did not
 sort, in which `0` and `0a` (compose from blueprints · see the whole arsenal) were printed **eleventh
 and twelfth**, inside a section titled "After writing a JSON", when both must happen before one exists.

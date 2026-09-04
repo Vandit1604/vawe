@@ -29,7 +29,8 @@ the cull and the three things that must be true to switch any of them back on.
 The original reasoning, kept because it is still the argument:
 
 **Why.** Those rules were fitted to ~100 films we have since established are debt: 52 of 93 carried no
-large picture, 18 waive continuity, and the show floor is waived by 32% of the library AND passable by a
+large picture (a snapshot from when the gate landed; see `docs/CRAFT/SHOW-DONT-TELL.md` for the current
+count), 18 waive continuity, and the show floor is waived by 32% of the library AND passable by a
 590x18 underline. New work is being measured against a library nobody likes, using thresholds derived
 from it, which can only pull toward the mean. The library already voted: 31 films waived the show floor.
 Formalising that is more honest than carrying 31 waivers and calling the rule live.
