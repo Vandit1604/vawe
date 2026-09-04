@@ -177,6 +177,17 @@ the script, then run \`node scripts/author/sfx-catalog.mjs\` to regenerate.
 `;
 }
 
+// The cues as `make arsenal` corpus rows, so a query like "a whoosh on a cut" finds them. META stays the
+// one owner of the metadata; this is a FUNCTION, not an exported map, so arsenal-check does not read it as
+// a second, uncatalogued vocabulary of the same cues.
+export function cueCorpus() {
+  assertCoverage();
+  return Object.entries(META).map(([name, m]) => ({
+    name, kind: 'sfx cue', slot: 'audio.cues[].name',
+    blurb: m.purpose, aka: [m.family, m.energy, 'sound', 'sfx', 'audio'], pitfall: m.pitfall,
+  }));
+}
+
 function main() {
   assertCoverage();
   const md = build();
