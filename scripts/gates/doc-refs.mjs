@@ -28,6 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -279,23 +280,34 @@ export function run() {
 
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const r = run();
+  const f = gateFindings();
   console.log(`── doc refs · ${r.scanned} markdown file(s) · ${r.targets} make target(s) · ${r.recipes} recipe script(s)\n`);
   if (!r.badRecipes.length) console.log('✓ every Makefile recipe runs a script that exists');
   for (const b of r.badRecipes) {
     console.log(`   ✗ Makefile:${b.line}  \`make ${b.target}\` runs ${b.script}, which does not exist`);
     console.log('       the target answers, the script does not. An author reads node\'s error as their own mistake.');
+    f.fail('doc-refs-recipe', `Makefile:${b.line}  \`make ${b.target}\` runs ${b.script}, which does not exist`,
+      { at: `Makefile:${b.line}` });
   }
   if (!r.badTargets.length) console.log('✓ every `make <target>` the docs name exists in the Makefile');
   for (const b of r.badTargets) {
     console.log(`   ✗ ${b.rel}:${b.line}  \`make ${b.target}\`: no such Makefile target`);
     console.log(`       ${b.text}`);
+    f.fail('doc-refs-target', `${b.rel}:${b.line}  \`make ${b.target}\`: no such Makefile target`,
+      { at: `${b.rel}:${b.line}` });
   }
   if (!r.badSelfRefs.length) console.log('✓ every `node <script>` a source file prints or documents exists');
-  for (const b of r.badSelfRefs) console.log(`   ✗ ${b.rel}:${b.line}  prints \`node ${b.ref}\`, which does not exist`);
+  for (const b of r.badSelfRefs) {
+    console.log(`   ✗ ${b.rel}:${b.line}  prints \`node ${b.ref}\`, which does not exist`);
+    f.fail('doc-refs-self-ref', `${b.rel}:${b.line}  prints \`node ${b.ref}\`, which does not exist`,
+      { at: `${b.rel}:${b.line}` });
+  }
   if (!r.badPaths.length) console.log('✓ every repo path the docs cite exists on disk');
   for (const b of r.badPaths) {
     console.log(`   ✗ ${b.rel}:${b.line}  ${b.ref}: no such file or directory`);
     console.log(`       ${b.text}`);
+    f.fail('doc-refs-path', `${b.rel}:${b.line}  ${b.ref}: no such file or directory`,
+      { at: `${b.rel}:${b.line}` });
   }
   const n = r.badTargets.length + r.badPaths.length + r.badRecipes.length + r.badSelfRefs.length;
   if (!n) process.exit(0);

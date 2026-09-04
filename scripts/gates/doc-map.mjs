@@ -29,6 +29,7 @@ import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { codesEmitted } from '../lib/finding-codes.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -416,10 +417,11 @@ const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
   const write = process.argv.includes('--write');
   const r = run({ write });
-  for (const msg of r.pending) console.warn(`  ⚠ ${msg}`);
+  const f = gateFindings();
+  for (const msg of r.pending) { console.warn(`  ⚠ ${msg}`); f.note('doc-map-pending', msg); }
   if (!r.ok) {
     console.error('\n✗ doc-map:');
-    for (const msg of r.fails) console.error(`    - ${msg}`);
+    for (const msg of r.fails) { console.error(`    - ${msg}`); f.fail('doc-map', msg); }
     process.exit(1);
   }
   if (write) console.log(r.wrote.length ? `✓ doc-index: wrote ${r.wrote.join(', ')}` : '✓ doc-index: already current');

@@ -37,6 +37,13 @@ import { SPECTACLE_DEVICES } from '../../core/knobs.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
 import { CAP_STYLE_NAMES } from '../../core/captions.js';
 import path from 'node:path';
+import { gateFindings } from '../lib/findings.mjs';
+
+// One record per drift check, rendered verbatim (each summary already carries the full multi-line
+// report a human reads, same shape discovery.mjs uses). `--write` is a generator, not a report, and
+// stays untouched below; only the four checks that can fail with `bad code left in schema.json` route
+// through here, so `--json` finally gets a real payload instead of silently doing nothing.
+const f = gateFindings({ line: (r) => r.summary });
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 // THE ENGINE IS EVERY FILE THAT READS A LAYER PROP, and that list is derived rather than remembered.
@@ -282,17 +289,18 @@ if (process.argv.includes('--write')) {
   const have = JSON.stringify(schema.layerProps ?? null);
   const want = JSON.stringify(vocabulary);
   if (have !== want) {
-    console.error('✗ formats/scene/schema.json `layerProps` is stale - it is GENERATED from the PROPS');
-    console.error('  declarations and a module has changed what it reads since it was last written.');
+    const lines = ['✗ formats/scene/schema.json `layerProps` is stale - it is GENERATED from the PROPS',
+      '  declarations and a module has changed what it reads since it was last written.'];
     const hv = schema.layerProps || {};
     const cmp = (label, a = [], b = []) => {
       const add = b.filter((x) => !a.includes(x)), rm = a.filter((x) => !b.includes(x));
-      if (add.length) console.error(`    ${label}: now declared, not in the file - ${add.join(', ')}`);
-      if (rm.length) console.error(`    ${label}: in the file, no longer declared - ${rm.join(', ')}`);
+      if (add.length) lines.push(`    ${label}: now declared, not in the file - ${add.join(', ')}`);
+      if (rm.length) lines.push(`    ${label}: in the file, no longer declared - ${rm.join(', ')}`);
     };
     cmp('shared', hv.shared, vocabulary.shared);
     for (const t of new Set([...Object.keys(hv.byType || {}), ...LAYER_TYPES])) cmp(t, (hv.byType || {})[t], vocabulary.byType[t]);
-    console.error('  fix: node scripts/gates/schema-drift.mjs --write');
+    lines.push('  fix: node scripts/gates/schema-drift.mjs --write');
+    f.fail('schema-layerprops-stale', lines.join('\n'));
     process.exit(1);
   }
   const n = Object.values(vocabulary.byType).reduce((a, ps) => a + ps.length, 0);
@@ -314,15 +322,17 @@ if (process.argv.includes('--write')) {
   const undocumented = [...declared].filter((k) => !documented.has(k)).sort();
   const unread = [...documented].filter((k) => !declared.has(k)).sort();
   if (undocumented.length || unread.length) {
+    const lines = [];
     if (undocumented.length) {
-      console.error(`✗ the engine declares ${undocumented.length} layer prop(s) that layers.item does not document:`);
-      for (const k of undocumented) console.error(`    • ${k}  (validate rejects it today; the engine reads it)`);
+      lines.push(`✗ the engine declares ${undocumented.length} layer prop(s) that layers.item does not document:`);
+      for (const k of undocumented) lines.push(`    • ${k}  (validate rejects it today; the engine reads it)`);
     }
     if (unread.length) {
-      console.error(`✗ layers.item documents ${unread.length} prop(s) no module declares:`);
-      for (const k of unread) console.error(`    • ${k}  (an author can write it and nothing will read it)`);
-      console.error('    either declare it beside the code that reads it, or delete it from the schema.');
+      lines.push(`✗ layers.item documents ${unread.length} prop(s) no module declares:`);
+      for (const k of unread) lines.push(`    • ${k}  (an author can write it and nothing will read it)`);
+      lines.push('    either declare it beside the code that reads it, or delete it from the schema.');
     }
+    f.fail('schema-doc-mismatch', lines.join('\n'));
     process.exit(1);
   }
   console.log(`✓ layers.item documents exactly the ${declared.size} prop(s) the engine declares`);
@@ -351,9 +361,10 @@ const INTERNAL = new Set(['type', 'children', 'part', 'use']);
 
 const missing = [...engineProps].filter((p) => !defined.has(p) && !INTERNAL.has(p)).sort();
 if (missing.length) {
-  console.error(`✗ schema drift: engine reads ${missing.length} prop(s) not in schema.json:`);
-  for (const p of missing) console.error(`    • L.${p}`);
-  console.error('  add them to formats/scene/schema.json (or to INTERNAL in this script if truly computed).');
+  const lines = [`✗ schema drift: engine reads ${missing.length} prop(s) not in schema.json:`];
+  for (const p of missing) lines.push(`    • L.${p}`);
+  lines.push('  add them to formats/scene/schema.json (or to INTERNAL in this script if truly computed).');
+  f.fail('schema-engine-prop-missing', lines.join('\n'));
   process.exit(1);
 }
 console.log(`✓ schema in sync: all ${engineProps.size} engine props are defined in schema.json`);
@@ -373,9 +384,11 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
     if ([...new Set(d)].sort().join(',') === wantS) continue;
     const missing = want.filter((x) => !d.includes(x));
     const extra = d.filter((x) => !want.includes(x));
-    console.error(`\u2717 ${pth} DRIFT vs ${src}`);
-    if (missing.length) console.error(`    schema is MISSING: ${missing.join(', ')}  (the engine accepts these; the schema rejects them)`);
-    if (extra.length) console.error(`    schema ADVERTISES: ${extra.join(', ')}  (nothing implements these)`);
+    const lines = [`\u2717 ${pth} DRIFT vs ${src}`];
+    if (missing.length) lines.push(`    schema is MISSING: ${missing.join(', ')}  (the engine accepts these; the schema rejects them)`);
+    if (extra.length) lines.push(`    schema ADVERTISES: ${extra.join(', ')}  (nothing implements these)`);
+    for (const l of lines) console.error(l);
+    f.fail('schema-enum-drift', lines.join('\n'), { at: pth });
     bad++;
   }
   // The modifier vocabulary is a set of KEYS, not an enum, so the loop above cannot see it: a second
@@ -387,14 +400,16 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
     if (have !== [...FX_TYPES].sort().join(',')) {
       const missing = FX_TYPES.filter((x) => !(x in node));
       const extra = Object.keys(node).filter((x) => !FX_TYPES.includes(x));
-      console.error('\u2717 layers.item.modifiers.item DRIFT vs core/fx/index.js REGISTRY');
-      if (missing.length) console.error(`    schema is MISSING: ${missing.join(', ')}  (the engine accepts these; the schema rejects them)`);
-      if (extra.length) console.error(`    schema ADVERTISES: ${extra.join(', ')}  (nothing implements these)`);
+      const lines = ['\u2717 layers.item.modifiers.item DRIFT vs core/fx/index.js REGISTRY'];
+      if (missing.length) lines.push(`    schema is MISSING: ${missing.join(', ')}  (the engine accepts these; the schema rejects them)`);
+      if (extra.length) lines.push(`    schema ADVERTISES: ${extra.join(', ')}  (nothing implements these)`);
       // NOT `--write`: each key here carries that modifier's own hand-written prop schema, which no
       // generator can invent. The shared fix line below said --write and it does nothing for this
       // block, so an author ran it, saw the same failure, and had no next move.
-      console.error('    fix: add the key by hand to layers.item.modifiers.item in formats/scene/schema.json'
+      lines.push('    fix: add the key by hand to layers.item.modifiers.item in formats/scene/schema.json'
         + ': this block is a hand-written prop schema per modifier, NOT a generated enum.');
+      for (const l of lines) console.error(l);
+      f.fail('schema-modifier-drift', lines.join('\n'), { at: 'layers.item.modifiers.item' });
       bad++;
     } else checked++;
   }
@@ -409,11 +424,13 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
     const missing = KEYFRAME_PROPS.filter((p) => !documented.includes(p));
     const extra = documented.filter((p) => !KEYFRAME_PROPS.includes(p));
     if (missing.length || extra.length) {
-      console.error('\u2717 layers.item.motion.item DRIFT vs core/sequence.js KEYFRAME_PROPS');
-      if (missing.length) console.error(`    schema is MISSING: ${missing.join(', ')}  (a key may carry these; the schema does not say so)`);
-      if (extra.length) console.error(`    schema ADVERTISES: ${extra.join(', ')}  (a key carrying these is refused at boot)`);
-      console.error('    fix: add the field by hand to layers.item.motion.item in formats/scene/schema.json'
+      const lines = ['\u2717 layers.item.motion.item DRIFT vs core/sequence.js KEYFRAME_PROPS'];
+      if (missing.length) lines.push(`    schema is MISSING: ${missing.join(', ')}  (a key may carry these; the schema does not say so)`);
+      if (extra.length) lines.push(`    schema ADVERTISES: ${extra.join(', ')}  (a key carrying these is refused at boot)`);
+      lines.push('    fix: add the field by hand to layers.item.motion.item in formats/scene/schema.json'
         + ': each one carries a label no generator can invent.');
+      for (const l of lines) console.error(l);
+      f.fail('schema-motion-drift', lines.join('\n'), { at: 'layers.item.motion.item' });
       bad++;
     }
   }
