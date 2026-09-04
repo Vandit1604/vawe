@@ -18,9 +18,11 @@ import { RESAMPLE_FX } from '../../core/resample-fx.js';
 import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
 import { BG_NAMES } from '../../core/backgrounds.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
+const f = gateFindings();
 
 // PRIMITIVES.md states a count in its section HEADINGS (", 35 WebGL cover-the-cut effects"). Those
 // decayed exactly like the roadmap's did (33 and 14 against a real 35 and 17) while this gate watched
@@ -49,8 +51,6 @@ const REGISTRIES = {
 };
 const every = Object.entries(REGISTRIES).flatMap(([reg, { names, src }]) => names.map((n) => ({ n, reg, src })));
 
-const findings = [];
-
 // ---- 1. "still absent" / "missing" lines that name something already shipped ----------------------
 // Strikethrough (~~...~~) is how this doc retires a claim, so a struck line is history, not a claim.
 const ABSENT = /(still absent|^\s*-?\s*missing:|genuinely cheap and still absent|not built|cannot be built)/i;
@@ -65,7 +65,9 @@ doc.split('\n').forEach((line, i) => {
     // and uses plain prose for feature names, so the backtick IS the disambiguator. A gate that
     // cries wolf on prose gets skimmed, and takes its real findings down with it.
     if (!tail.includes('`' + n + '`')) continue;
-    findings.push(`docs/ROADMAP.md:${i + 1} calls "${n}" absent, but it ships in ${reg} (${src})\n      ${line.trim().slice(0, 150)}`);
+    f.fail('absent-but-shipped', `docs/ROADMAP.md:${i + 1} calls "${n}" absent, but it ships in ${reg} (${src})`, {
+      at: `docs/ROADMAP.md:${i + 1}`, fix: line.trim().slice(0, 150),
+    });
   }
 });
 
@@ -80,18 +82,20 @@ for (const [reg, { names, src }] of Object.entries(REGISTRIES)) {
     if (claimed > 500) continue;
     if (claimed === names.length) continue;
     const line = doc.slice(0, m.index).split('\n').length;
-    findings.push(`docs/ROADMAP.md:${line} says ${reg} holds ${claimed}, but it holds ${names.length} (${src})`);
+    f.fail('count-mismatch', `docs/ROADMAP.md:${line} says ${reg} holds ${claimed}, but it holds ${names.length} (${src})`,
+      { at: `docs/ROADMAP.md:${line}` });
   }
 }
 
 for (const { re, reg } of HEADING_COUNTS) {
   const m = prim.match(re);
-  if (!m) { findings.push(`docs/PRIMITIVES.md has no ${reg} heading matching ${re}. The count check silently stopped running`); continue; }
+  if (!m) { f.fail('heading-gone', `docs/PRIMITIVES.md has no ${reg} heading matching ${re}. The count check silently stopped running`); continue; }
   const claimed = Number(m[1]);
   const real = REGISTRIES[reg].names.length;
   if (claimed !== real) {
     const line = prim.slice(0, m.index).split('\n').length;
-    findings.push(`docs/PRIMITIVES.md:${line} heading says ${claimed} ${reg}, but it holds ${real} (${REGISTRIES[reg].src})`);
+    f.fail('heading-count-mismatch', `docs/PRIMITIVES.md:${line} heading says ${claimed} ${reg}, but it holds ${real} (${REGISTRIES[reg].src})`,
+      { at: `docs/PRIMITIVES.md:${line}` });
   }
 }
 
@@ -102,10 +106,10 @@ const BG_MDX = path.join(repoRoot, 'docs-site', 'content', 'docs', 'backgrounds-
 if (fs.existsSync(BG_MDX)) {
   const mdx = fs.readFileSync(BG_MDX, 'utf8');
   const cm = /There are (\d+) presets:/.exec(mdx);
-  if (!cm) findings.push(`docs-site backgrounds-and-images.mdx has no "There are N presets:" line. The bg count check silently stopped running`);
-  else if (+cm[1] !== BG_NAMES.length) findings.push(`docs-site backgrounds-and-images.mdx says ${cm[1]} bg presets, but core/backgrounds.js BG_NAMES holds ${BG_NAMES.length}`);
+  if (!cm) f.fail('bg-heading-gone', 'docs-site backgrounds-and-images.mdx has no "There are N presets:" line. The bg count check silently stopped running');
+  else if (+cm[1] !== BG_NAMES.length) f.fail('bg-count-mismatch', `docs-site backgrounds-and-images.mdx says ${cm[1]} bg presets, but core/backgrounds.js BG_NAMES holds ${BG_NAMES.length}`);
   const missing = BG_NAMES.filter((n) => !mdx.includes('`' + n + '`'));
-  if (missing.length) findings.push(`docs-site backgrounds-and-images.mdx never lists bg preset(s): ${missing.join(', ')} (in core/backgrounds.js BG_NAMES)`);
+  if (missing.length) f.fail('bg-missing-name', `docs-site backgrounds-and-images.mdx never lists bg preset(s): ${missing.join(', ')} (in core/backgrounds.js BG_NAMES)`);
 }
 
 // 4. THE LIST IS THE HARDER HALF OF THE COUNT, and it is the half that hides the damage.
@@ -120,7 +124,7 @@ const LAYERS_MDX = path.join(repoRoot, 'docs-site', 'content', 'docs', 'layers.m
 if (fs.existsSync(LAYERS_MDX)) {
   const mdx = fs.readFileSync(LAYERS_MDX, 'utf8');
   const missing = LAYER_TYPES.filter((n) => !mdx.includes('`' + n + '`'));
-  if (missing.length) findings.push(`docs-site layers.mdx never names layer type(s): ${missing.join(', ')} (in core/layers/index.js LAYER_TYPES)`);
+  if (missing.length) f.fail('layer-missing-name', `docs-site layers.mdx never names layer type(s): ${missing.join(', ')} (in core/layers/index.js LAYER_TYPES)`);
 }
 
 // GRAMMAR.md IS GENERATED, so the only way it can be wrong is by being stale. Delegated to the
@@ -134,7 +138,7 @@ if (fs.existsSync(LAYERS_MDX)) {
 {
   const r = spawnSync('node', [path.join(repoRoot, 'scripts/author/grammar.mjs'), '--check'],
     { cwd: repoRoot, encoding: 'utf8' });
-  if (r.status !== 0) findings.push(String(r.stderr || r.stdout).replace(/✗/g, "").trim().split("\n").map((l) => l.trim()).filter(Boolean).join(" "));
+  if (r.status !== 0) f.fail('grammar-stale', String(r.stderr || r.stdout).replace(/✗/g, "").trim().split("\n").map((l) => l.trim()).filter(Boolean).join(" "));
 }
 
 // CLAUDE.md QUOTES NUMBERS TOO, AND IT IS THE FILE WITH THE WIDEST BLAST RADIUS. It is loaded into
@@ -165,23 +169,24 @@ if (fs.existsSync(LAYERS_MDX)) {
     { re: /(\d+) gate-visible scenes/, want: scenes, src: 'scripts/gates/waiver-drift.mjs' },
   ];
   for (const { re, want, src } of CLAIMS) {
-    if (!want) { findings.push(`CLAUDE.md: could not reach ${src} to check its count, so it was NOT checked`); continue; }
+    if (!want) { f.fail('claim-unreachable', `CLAUDE.md: could not reach ${src} to check its count, so it was NOT checked`); continue; }
     const said = re.exec(claude);
     if (!said) continue;   // the sentence was rewritten: nothing to check, not a failure
     const have = said.slice(1);
     if (have.join('/') !== want.join('/')) {
-      findings.push(`AGENTS.md says "${said[0]}" and ${src} says ${want.join(' / ')}. `
+      f.fail('claim-mismatch', `AGENTS.md says "${said[0]}" and ${src} says ${want.join(' / ')}. `
         + 'Fix the sentence: this file is read every session, so a stale number here is repeated downstream.');
     }
   }
 }
 
-if (!findings.length) {
+if (!f.count) {
   console.log(`✓ docs in sync: no shipped effect listed as missing, every quoted registry count right (ROADMAP + PRIMITIVES + CLAUDE.md + bg presets)`);
+  f.emit();
   process.exit(0);
 }
-console.log(`DOCS DRIFT (${findings.length})\n`);
-for (const f of findings) console.log(`  ✗ ${f}\n`);
+console.log(`DOCS DRIFT (${f.count})\n`);
+f.emit();
 console.log('A roadmap that lists shipped work as missing routes the next planning pass at phantom work.');
 console.log('This has happened twice (see the standing warning at the end of ROADMAP.md).');
 process.exit(1);

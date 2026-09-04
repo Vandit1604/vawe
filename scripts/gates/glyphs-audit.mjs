@@ -18,15 +18,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DIR = path.join(repoRoot, 'assets/fonts/3d');
+const f_ = gateFindings();
 
-if (!fs.existsSync(DIR)) { console.log('  · no assets/fonts/3d yet, nothing to audit'); process.exit(0); }
+if (!fs.existsSync(DIR)) { console.log('  · no assets/fonts/3d yet, nothing to audit'); f_.emit(); process.exit(0); }
 const files = fs.readdirSync(DIR).filter((f) => f.endsWith('.typeface.json')).sort();
-if (!files.length) { console.log('  · no typeface JSON in assets/fonts/3d, nothing to audit'); process.exit(0); }
+if (!files.length) { console.log('  · no typeface JSON in assets/fonts/3d, nothing to audit'); f_.emit(); process.exit(0); }
 
-const problems = [];
 const hex = (cp) => `U+${cp.toString(16).toUpperCase().padStart(4, '0')}`;
 
 for (const f of files) {
@@ -35,26 +36,28 @@ for (const f of files) {
   try {
     data = JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8'));
   } catch (e) {
-    problems.push({ rel, kind: 'UNREADABLE', msg: `not valid JSON: ${e.message}` });
+    f_.fail('unreadable', `${rel}: not valid JSON: ${e.message}`, { at: rel });
     continue;
   }
 
   const m = data.vawe;
   if (!m?.source || !m?.sourceSha256) {
     // Without provenance the artifact is unauditable forever after, so absence is itself the failure.
-    problems.push({ rel, kind: 'NO-PROVENANCE', msg: 'no vawe.source/sourceSha256 block. Rebuild it: node scripts/fonts/glyphs.mjs <Name>' });
+    f_.fail('no-provenance', `${rel}: no vawe.source/sourceSha256 block`, { at: rel, fix: 'node scripts/fonts/glyphs.mjs <Name>' });
     continue;
   }
 
   const srcPath = path.join(repoRoot, m.source);
   if (!fs.existsSync(srcPath)) {
-    problems.push({ rel, kind: 'SOURCE-GONE', msg: `its source ${m.source} no longer exists` });
+    f_.fail('source-gone', `${rel}: its source ${m.source} no longer exists`, { at: rel });
     continue;
   }
   const actual = crypto.createHash('sha256').update(fs.readFileSync(srcPath)).digest('hex');
   if (actual !== m.sourceSha256) {
-    problems.push({ rel, kind: 'STALE', msg:
-      `${m.source} has changed since this was baked\n      baked from sha256:${m.sourceSha256.slice(0, 16)}\n      file is now  sha256:${actual.slice(0, 16)}\n      Rebuild: node scripts/fonts/glyphs.mjs ${path.basename(m.source, '.woff2')}${m.weight ? ` --weight ${m.weight}` : ''}` });
+    f_.fail('stale', `${rel}: ${m.source} has changed since this was baked`
+      + ` (baked from sha256:${m.sourceSha256.slice(0, 16)}, file is now sha256:${actual.slice(0, 16)})`, {
+      at: rel, fix: `node scripts/fonts/glyphs.mjs ${path.basename(m.source, '.woff2')}${m.weight ? ` --weight ${m.weight}` : ''}`,
+    });
     continue;
   }
 
@@ -72,20 +75,22 @@ for (const f of files) {
       if (cp !== 0x20 && !g.o) empty.push(cp);
     }
   }
-  if (missing.length) problems.push({ rel, kind: 'GAPS', msg:
-    `claims charset "${m.charset}" but is missing ${missing.length} glyph(s): ${missing.slice(0, 12).map(hex).join(' ')}${missing.length > 12 ? ' …' : ''}` });
-  if (empty.length) problems.push({ rel, kind: 'GAPS', msg:
-    `${empty.length} glyph(s) have an EMPTY outline and would render as blanks: ${empty.slice(0, 12).map(hex).join(' ')}${empty.length > 12 ? ' …' : ''}` });
+  if (missing.length) f_.fail('gaps', `${rel}: claims charset "${m.charset}" but is missing ${missing.length} `
+    + `glyph(s): ${missing.slice(0, 12).map(hex).join(' ')}${missing.length > 12 ? ' …' : ''}`, { at: rel });
+  if (empty.length) f_.fail('gaps', `${rel}: ${empty.length} glyph(s) have an EMPTY outline and would render as `
+    + `blanks: ${empty.slice(0, 12).map(hex).join(' ')}${empty.length > 12 ? ' …' : ''}`, { at: rel });
 
   if (!missing.length && !empty.length) {
     console.log(`  ✓ ${f.padEnd(28)} ${String(Object.keys(glyphs).length).padStart(3)} glyphs  charset=${m.charset}  weight=${m.weight ?? 'static'}  ← ${m.source}`);
   }
 }
 
-if (problems.length) {
-  console.error(`\n✗ glyphs audit FAILED: ${problems.length} problem(s) in assets/fonts/3d:\n`);
-  for (const p of problems) console.error(`  ✗ ${p.rel}  [${p.kind}]\n      ${p.msg}\n`);
+if (f_.count) {
+  console.error(`\n✗ glyphs audit FAILED: ${f_.count} problem(s) in assets/fonts/3d:\n`);
+  f_.emit();
   console.error('A stale typeface JSON renders flawlessly in the WRONG font. Nothing else will tell you.');
   process.exit(1);
 }
 console.log(`\n✓ glyphs audit OK: ${files.length} typeface artifact(s), each matching its source woff2 and covering the charset it claims`);
+f_.emit();
+process.exit(0);

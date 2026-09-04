@@ -12,6 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fingerprint, similarity, verdict } from './similarity.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const LEDGER = path.join(ROOT, 'dna', 'ledger.json');
@@ -36,20 +37,22 @@ const fp = fingerprint(data);
 const entries = load();
 
 if (cmd === 'check') {
-  let hard = 0, warn = 0;
+  const f = gateFindings();
   for (const e of entries) {
     if (e.file === rel) continue; // re-checking a shipped file against itself is meaningless
     const sameBrand = e.theme === fp.theme;
     const s = similarity(fp, e.fp);
     const v = verdict(s, sameBrand);
     if (v === 'ok' || v === 'distinct') continue;
-    if (v === 'SAME') hard++; else warn++;
-    console.log(`${v === 'SAME' ? '✗ SAME' : '~ ' + v}  vs ${e.file}${sameBrand ? ' (same brand)' : ''}, score ${(s.score * 100).toFixed(0)}% · vocab ${(s.vocab * 100).toFixed(0)}% · structure ${(s.struct * 100).toFixed(0)}%`);
-    if (v === 'SAME-SKELETON') console.log('    same brand retelling the same beat skeleton, vary the structure');
-    if (v === 'SAME') console.log('    differentiate: change ≥2 of {cut family, beat structure, layout archetype}');
+    const scoreStr = `score ${(s.score * 100).toFixed(0)}% · vocab ${(s.vocab * 100).toFixed(0)}% · structure ${(s.struct * 100).toFixed(0)}%`;
+    const fix = v === 'SAME-SKELETON' ? 'same brand retelling the same beat skeleton, vary the structure'
+      : v === 'SAME' ? 'differentiate: change ≥2 of {cut family, beat structure, layout archetype}' : undefined;
+    const add = v === 'SAME' ? f.fail : f.warn;
+    add.call(f, v.toLowerCase(), `vs ${e.file}${sameBrand ? ' (same brand)' : ''}, ${scoreStr}`, { at: e.file, fix });
   }
-  if (!hard && !warn) console.log(`✓ distinct from all ${entries.length} logged design(s)`);
-  process.exit(hard ? 1 : 0);
+  if (!f.count) console.log(`✓ distinct from all ${entries.length} logged design(s)`);
+  f.emit();
+  process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
 }
 
 if (cmd === 'add') {

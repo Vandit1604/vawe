@@ -17,8 +17,10 @@
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const f = gateFindings();
 
 // Generous enough that ordinary growth does not trip it, tight enough that a whole asset directory
 // slipping in does. The context was 15.8M when this was written and 49M when it moved to an allowlist.
@@ -38,17 +40,19 @@ if (r.error?.code === 'ENOENT' || /Cannot connect to the Docker daemon/i.test(ou
   // daemon is a fact about this machine; the size of the context is a fact about the repo, and the
   // first has never been evidence for the second. Exit 2 (could not measure), which no caller can
   // mistake for a pass and which is not the same claim as exit 1 (over budget).
-  console.error('✗ docker is not available here, so the build context was NOT measured.');
-  console.error('  This says nothing about whether the context fits its budget. Start the daemon, or');
-  console.error('  run this where docker is available, and ask again.');
+  f.warn('docker-unavailable', 'docker is not available here, so the build context was NOT measured. '
+    + 'This says nothing about whether the context fits its budget.',
+    { fix: 'start the daemon, or run this where docker is available, and ask again' });
+  f.emit();
   process.exit(2);
 }
 
 const lines = out.split('\n').map((l) => l.replace(/^#\d+\s+[\d.]+\s+/, '').trim()).filter(Boolean);
 const totalKb = Number(lines.find((l) => /^\d+$/.test(l)));
 if (!Number.isFinite(totalKb)) {
-  console.error('✗ could not read the context size out of the docker build. Raw output:');
+  f.fail('unreadable-output', 'could not read the context size out of the docker build');
   console.error(out.split('\n').slice(-30).join('\n'));
+  f.emit();
   process.exit(1);
 }
 // `du -sk` counts 1024-BYTE BLOCKS. Dividing by 1000 gave a figure that was neither MB nor MiB and
@@ -60,10 +64,13 @@ for (const l of lines.filter((l) => /^\d+\s+\/ctx\/./.test(l)))
   console.log(`   ${(Number(l.split(/\s+/)[0]) / 1024).toFixed(1).padStart(7)}MiB  ${l.split(/\s+/)[1].replace('/ctx/', '')}`);
 
 if (mib > BUDGET_MB) {
-  console.error(`\n✗ build context is ${mib.toFixed(1)}MiB, over the ${BUDGET_MB}MiB budget.`);
-  console.error('  .dockerignore is an ALLOWLIST: something listed there has grown. Find it above, and');
-  console.error('  either narrow its `!` line to the files a COPY actually needs, or raise the budget');
-  console.error('  deliberately in this file.');
+  f.fail('over-budget', `build context is ${mib.toFixed(1)}MiB, over the ${BUDGET_MB}MiB budget`, {
+    fix: '.dockerignore is an ALLOWLIST: something listed there has grown. Find it above, and either '
+      + 'narrow its `!` line to the files a COPY actually needs, or raise the budget deliberately in this file',
+  });
+  f.emit();
   process.exit(1);
 }
 console.log('✓ within budget');
+f.emit();
+process.exit(0);

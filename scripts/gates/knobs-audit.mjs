@@ -16,6 +16,7 @@ import { pathToFileURL } from 'node:url';
 import { KNOBS } from '../../core/knobs.js';
 import { PRESETS } from '../../core/type.js';
 import { resolveComposite, LOOK_NAMES } from '../../core/looks.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 // COVERAGE, stated so nobody reads a pass as more than it is. core/knobs.js has SIX families and this
 // guard can only prove the ones whose resolution is a pure function: `kinetic` (u, opts → keyframes)
@@ -71,10 +72,12 @@ function lookDrift() {
 // ---- CLI ----
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
+  const f = gateFindings();
   const drift = driftGuard();
-  if (drift.length) {
+  for (const d of drift) f.fail('dead-knob', d);
+  if (f.count) {
     console.error('✗ manifest drift: core/knobs.js advertises dials the code ignores:');
-    for (const d of drift) console.error(`    ${d}`);
+    f.emit();
     process.exit(1);
   }
   console.log('✓ every advertised kinetic and look knob changes the output'
@@ -83,4 +86,6 @@ if (isMain) {
   // A scene path used to select the dead-knob check. That check is core/validate.mjs's now, so say so
   // rather than accept an argument and do nothing with it.
   if (process.argv[2]) console.log(`\n(the per-scene dead-knob check moved to core/validate.mjs, \`make validate D=${process.argv[2]}\`)`);
+  f.emit();
+  process.exit(0);
 }

@@ -26,12 +26,14 @@
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import { flattenLayer } from '../lib/layers.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
 const intentPath = (() => { const i = process.argv.indexOf('--intent'); return i >= 0 ? process.argv[i + 1] : file.replace(/\.json$/, '.intent.json'); })();
+const f = gateFindings();
 if (!file) { console.error('usage: node scripts/gates/inspect.mjs <scene.json> [--intent p] [--strict]'); process.exit(2); }
-if (!fs.existsSync(intentPath)) { console.log(`  (no intent sidecar at ${intentPath}. Nothing to verify)`); process.exit(0); }
+if (!fs.existsSync(intentPath)) { console.log(`  (no intent sidecar at ${intentPath}. Nothing to verify)`); f.emit(); process.exit(0); }
 
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const intent = JSON.parse(fs.readFileSync(intentPath, 'utf8'));
@@ -66,13 +68,14 @@ for (const b of intent.beats || []) {
   // REPORTING, not a check: the transformation this beat owes. Printed so the run reads as a director's
   // checklist. Nothing above or below tests it, see the honesty note at the top of this file.
   if (b.becomes) console.log(`      · becomes: ${b.becomes}`);
-  if (missing.length) console.log(`      missing artifact: ${missing.map((m) => JSON.stringify(m)).join(', ')}, expected: ${b.artifact || '?'}`);
-  if (b.mustAnimate && !hasMotion) console.log(`      declared mustAnimate but no animated layer is live at ${at}s`);
+  if (ok) continue;
+  const bits = [];
+  if (missing.length) bits.push(`missing artifact: ${missing.map((m) => JSON.stringify(m)).join(', ')}, expected: ${b.artifact || '?'}`);
+  if (b.mustAnimate && !hasMotion) bits.push(`declared mustAnimate but no animated layer is live at ${at}s`);
   // a failure should say what was supposed to be happening here, not just which string went missing.
-  if (!ok && (b.becomes || b.object)) {
-    if (b.object) console.log(`      at this moment the object should be: ${b.object}`);
-    if (b.becomes) console.log(`      and the junction should deliver: ${b.becomes}`);
-  }
+  if (b.object) bits.push(`at this moment the object should be: ${b.object}`);
+  if (b.becomes) bits.push(`and the junction should deliver: ${b.becomes}`);
+  f.fail('unmet-beat', bits.join('; '), { at: `@${at}s${window} ${b.name || ''}`.trim() });
 }
 console.log(`\n  ${pass} pass · ${fail} fail\n`);
 // THIS READ `fail && (strict || true) ? (fail ? 1 : 0) : 0`, and `strict || true` is true. So the flag
@@ -83,4 +86,5 @@ console.log(`\n  ${pass} pass · ${fail} fail\n`);
 // nothing HERE, and it says so rather than being a silent no-op. What a strict tier ought to promote
 // in this gate is an open design question, not something to invent from inside a bug fix.
 if (strict) console.log('  (--strict changes nothing in inspect: an unmet beat already fails it.)\n');
+f.emit();
 process.exit(fail ? 1 : 0);
