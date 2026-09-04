@@ -6,6 +6,15 @@ group: crosscutting
 
 # Reference study: Together.ai Chat (`refs/together-chat.mp4`)
 
+## AGENT SUMMARY
+
+- A frame-by-frame study of one film, `refs/together-chat.mp4`: shot timings, palette dominance by
+  pixel count, type sizing, and what holds it together (no cuts, one continuous camera space).
+- Use it as a reference when authoring: steal the cadence, the palette discipline, the word-level
+  reveal, the shape match, the asymmetry (§9); never the content, the typo, or the static background
+  as a default (§9 "Do not take").
+- `[eye]`: this is a study feeding judgement, not a mechanical check; nothing here is gated or built.
+
 A Together.ai **Chat** product demo. 19.78s, landscape, white-first. It is the strongest argument in
 `refs/` for a film built out of **camera travel over real product surfaces** instead of out of cuts.
 

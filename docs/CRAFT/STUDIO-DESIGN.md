@@ -6,6 +6,16 @@ group: reference
 
 # STUDIO DESIGN: what to take from another engine and another engine, and what to refuse
 
+## AGENT SUMMARY
+
+- Read this before adding a feature to `make studio` (`scripts/dev/studio.mjs`): it holds the COPY/REJECT
+  verdict (§4) and the ranked build list with costs (§5) for every candidate feature, each with a reason.
+- `scripts/dev/studio.mjs` is ONE file: no build step, no dependency, no framework, light theme by
+  default. A feature that needs a bundler, a component tree, or a second way to say what the JSON
+  already says is a bad borrow no matter how good it is in another engine or another engine.
+- Checkable action: before building, find your feature's row in §4; if it says REJECT, read the reason
+  before reopening the question. `[ref: scripts/dev/studio.mjs]`
+
 Two other systems ship a developer-facing video editor. Both are far ahead of ours on features, and
 both are built on a format ours does not have. This file reads them, then says which of their
 decisions belong here.

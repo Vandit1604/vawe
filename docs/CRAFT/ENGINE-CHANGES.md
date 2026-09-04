@@ -6,6 +6,18 @@ group: crosscutting
 
 # Changing the engine
 
+## AGENT SUMMARY
+
+- Five rules for touching `core/`, `internal/`, a gate, or the capture path: a gate is the LAST resort
+  (fix at the write site first); sugar must resolve at boot or fail loudly, never silently no-op; use
+  one of three loose-coupling primitives (`defineRegistry`, `paramsOf`, `createKit`) instead of a fourth;
+  price a capture-path change with a before/after wall-clock render time in the commit body; after every
+  render, classify each friction point as framework bug / gate gap / authoring choice and log framework
+  bugs to `docs/MISTAKES.md`.
+- Two of the five (a save under `internal/scene`/`internal/render`, a new file under `scripts/gates/`)
+  are spoken at the keystroke by the Claude Code hook `scripts/live/craft-live.mjs`; the rest are `[eye]`,
+  check them yourself before committing an engine change.
+
 <!-- doc-refs-allow: make slop · retired in `docs/MISTAKES.md` #326; the paragraph below is the record of why -->
 
 CLAUDE.md is addressed to somebody AUTHORING A FILM, and it says so in its first paragraph: you do not

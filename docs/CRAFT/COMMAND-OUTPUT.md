@@ -7,6 +7,12 @@ codes: ad-hoc-output
 
 # Command output: one contract, two renderings
 
+## AGENT SUMMARY
+
+- Any reporting command (gate, check, audit) must build a finding as a record `{code, severity, summary, at?, fix?, doc?}` first, then render prose from it, never print ad-hoc text.
+- `--json` emits ONLY the records on stdout, everything else (header, verdict, advice) goes to stderr, same exit code both modes.
+- `[gated: ad-hoc-output]` `scripts/gates/output-contract.mjs` ratchets non-compliant reporting gates down; a new one that prints ad-hoc prose is refused.
+
 A reporting command (a gate, a check, an audit) must not invent its own print style. It follows the
 house contract in `scripts/lib/findings.mjs`, which `docs/MISTAKES.md #401` paid for.
 
