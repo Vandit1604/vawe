@@ -2,9 +2,6 @@
 when: a film is about to ship mute, or you need a real sound for a beat instead of silence
 answers: "which of the 13 synthesized cues to reach for, its family, energy, how it attaches to a scene, and its known failure mode"
 group: crosscutting
-codes: silence-without-a-reason
-applies-when: always
-confirm: "did you reach for a real cue here, or default to silence?"
 ---
 
 # SFX CATALOG: the 13 synthesized cues, and when to reach for each
