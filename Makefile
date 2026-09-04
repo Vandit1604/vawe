@@ -47,6 +47,14 @@ audio-bed:
 audio-check:
 	node scripts/gates/audio-check.mjs $(if $(D),$(D),--all) $(if $(filter 1,$(STRICT)),--strict)
 
+# make craft-check D=<file>. Did this film VISIT the CRAFT doctrine relevant to it? Computes a fixed
+# feature set from the scene (short/long, hasImages, hasHtml, hasBoundaries, ...), finds every CRAFT doc
+# whose `applies-when:` feature is true, and checks the storyboard sidecar's `craft:` map for a one-line
+# answer to that doc's `confirm:` question. No plan-> `no-plan-for-craft`. A relevant doc with no answer
+# -> `craft-unvisited`. Not wired into author-check yet.
+craft-check:
+	node scripts/gates/craft-checklist.mjs $(D)
+
 # make vo-captions D=<file> [STYLE=weightShift] [WRITE=1]: turn a VO word-timing sidecar (audio.voWords)
 # into timed karaoke captions. No TTS; reads the transcript only. Prints by default; WRITE → <file>.captioned.json.
 # (Distinct from `make captions`, which times captions from a plain SCRIPT string, scripts/author/captions.mjs.)

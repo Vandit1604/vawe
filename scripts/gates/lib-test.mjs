@@ -7177,6 +7177,91 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     /if \(!manifest\.length\)/.test(src) && /process\.exit\(1\)/.test(src));
 }
 
+// ---- craft-checklist: features, and the answered/missing split ------------------------------------
+// The gate's whole contract is "a relevant doc with no storyboard answer blocks". Asserted here rather
+// than left to the two sample renders in the repo, which can both go stale or be deleted.
+{
+  const { computeFeatures, craftMapFrom, storyboardPathFor } = await import('./craft-checklist.mjs');
+
+  // A tiny synthetic scene exercising every feature at once: short, with an image, a text layer with
+  // split+preset (kinetic), an html layer, one cut, and real (non-silent) audio.
+  const scene = {
+    duration: 6,
+    layers: [
+      { type: 'image', src: 'x.png' },
+      { type: 'text', text: 'hello', split: 'word', preset: 'up' },
+      { type: 'html', html: '<div>x</div>' },
+      { type: 'group', children: [{ type: 'text', text: '' }] }, // empty text: does not count as a text beat
+    ],
+    cuts: [{ t: 3, style: 'hard' }],
+    audio: { music: 'warm.wav' },
+  };
+  const f = computeFeatures(scene);
+  ok('craft-checklist: always is always true', f.always === true);
+  ok('craft-checklist: 6s scene is short, not long', f.short === true && f.long === false);
+  ok('craft-checklist: an image layer sets hasImages', f.hasImages === true);
+  ok('craft-checklist: a text layer with split+preset sets hasKinetic', f.hasKinetic === true);
+  ok('craft-checklist: an html layer sets hasHtml', f.hasHtml === true);
+  ok('craft-checklist: a real text layer sets hasTextBeats', f.hasTextBeats === true);
+  ok('craft-checklist: one cut sets hasBoundaries', f.hasBoundaries === true);
+  ok('craft-checklist: a named music bed sets hasAudio and clears silent',
+    f.hasAudio === true && f.silent === false);
+
+  const onlyEmptyText = computeFeatures({ duration: 5, layers: [{ type: 'text', text: '  ' }] });
+  ok('craft-checklist: a blank-text layer alone does not count as a text beat', onlyEmptyText.hasTextBeats === false);
+
+  const longSilent = computeFeatures({ duration: 20, layers: [], audio: { silent: true } });
+  ok('craft-checklist: a 20s scene is long, not short', longSilent.long === true && longSilent.short === false);
+  ok('craft-checklist: silent:true is silent and carries no audio',
+    longSilent.silent === true && longSilent.hasAudio === false);
+
+  const noBoundaries = computeFeatures({ duration: 5, layers: [] });
+  ok('craft-checklist: no cuts/seams/stings/transitions means no boundaries', noBoundaries.hasBoundaries === false);
+
+  // storyboardPathFor: same basename, .storyboard.md sibling.
+  ok('craft-checklist: storyboardPathFor swaps .json for .storyboard.md beside the scene',
+    storyboardPathFor('formats/scene/foo.json') === 'formats/scene/foo.storyboard.md');
+
+  // craftMapFrom: reads the nested `craft:` map out of a storyboard's frontmatter, case-insensitive key,
+  // and stops at the first dedented (or blank) line so it never bleeds into the prose below.
+  const sbAnswered = '---\nmessage: "x"\ncraft:\n  layout: "off-center hero, cream ground"\n  sound: "VO carries it"\n---\n\nbody text\n';
+  const mapAnswered = craftMapFrom(sbAnswered);
+  ok('craft-checklist: craftMapFrom reads a two-entry craft: map', mapAnswered.layout === 'off-center hero, cream ground' && mapAnswered.sound === 'VO carries it');
+  ok('craft-checklist: craftMapFrom on a storyboard with no craft: key returns empty',
+    Object.keys(craftMapFrom('---\nmessage: "x"\n---\n')).length === 0);
+
+  // The gate itself, end to end, via temp files: a relevant doc with no answer BLOCKS; the same scene
+  // with every relevant doc answered PASSES. Mirrors how audio-check's own asserts spawn the real CLI.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'craft-checklist-'));
+  const sceneFile = path.join(tmp, 'demo.json');
+  fs.writeFileSync(sceneFile, JSON.stringify({ module: 'scene', duration: 6, layers: scene.layers, cuts: scene.cuts, audio: scene.audio }));
+
+  const runGate = () => spawnSync(process.execPath, [path.join(repoRoot, 'scripts/gates/craft-checklist.mjs'), sceneFile], { encoding: 'utf8' });
+
+  // no storyboard sidecar at all: no-plan-for-craft, blocks.
+  const noPlan = runGate();
+  ok('craft-checklist: a scene with no storyboard sidecar blocks with no-plan-for-craft',
+    noPlan.status !== 0 && /no-plan-for-craft/.test(noPlan.stdout));
+
+  // a storyboard that answers nothing: every relevant doc is craft-unvisited, blocks.
+  fs.writeFileSync(path.join(tmp, 'demo.storyboard.md'), '---\nmessage: "x"\n---\n');
+  const unanswered = runGate();
+  ok('craft-checklist: a storyboard with no craft: map blocks with craft-unvisited',
+    unanswered.status !== 0 && /craft-unvisited/.test(unanswered.stdout));
+
+  // the same scene, every relevant doc answered: passes clean.
+  const { docRegistry } = await import('./craft-checklist.mjs');
+  const features = computeFeatures(scene);
+  const relevant = docRegistry().filter((d) => features[d.appliesWhen] === true);
+  const craftLines = relevant.map((d) => `  ${d.slug}: "answered"`).join('\n');
+  fs.writeFileSync(path.join(tmp, 'demo.storyboard.md'), `---\nmessage: "x"\ncraft:\n${craftLines}\n---\n`);
+  const answered = runGate();
+  ok('craft-checklist: a storyboard answering every relevant doc passes clean',
+    answered.status === 0 && !/craft-unvisited/.test(answered.stdout));
+
+  fs.rmSync(tmp, { recursive: true, force: true });
+}
+
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter
 // how many assertions actually RAN, so a block that quietly stops running (an `await import` failing
 // inside a swallowing catch, a section deleted in a merge, an early return added while debugging) takes

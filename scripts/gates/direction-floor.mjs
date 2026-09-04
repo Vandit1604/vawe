@@ -98,7 +98,7 @@ const movingPreset = (name, value) => {
 const animatedWin = (b) => b && (movingPreset(b.preset, b.value)
   || b.mode != null || b.period != null || b.driftX != null || b.driftY != null
   || /var\(\s*--[tp]\b/.test(htmlOf(b)));
-const hasBgMotion = (d.bg || []).some(animatedWin)
+const hasBgMotion = (Array.isArray(d.bg) ? d.bg : (d.bg ? [d.bg] : [])).some(animatedWin)
   || flat.some((l) => l.shader || l.canvasFx || l.three || l.raymarch || l.type === 'paint');
 
 // camera actually MOVES (s/x/y changes across keyframes), not a static [{s:1},{s:1}].
@@ -175,6 +175,19 @@ if (!directedByBeats && vocab.length < 3) warn('low-vocab', `only ${vocab.length
 // slideshow even when each line is kinetic. Beat-composed scenes spread starts across the film, so they
 // clear this; a hand-authored front-load trips it.
 const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.duration ?? 0)), 0) || 1;
+
+// BEAT DENSITY. A film long enough to need chapters but cut into only two or three beats reads as a
+// few cards held too long, whatever motion each card carries. `d` is lowered, so `transitions` is
+// already folded into cuts/seams; beats = declared boundaries + 1. The floor is a boundary roughly
+// every 3.5s past 8s, so a 12s film needs 4 beats and a 2-beat 12s film fails. Ratcheted in
+// author-check (RATCHET_CODES) so it blocks NEW work and the legacy library is frozen, not broken.
+{
+  const beatBounds = (d.cuts || []).length + (d.seams || []).length;
+  const beats = beatBounds + 1;
+  const needed = dur >= 8 ? Math.ceil(dur / 3.5) : 0;
+  if (needed && beats < needed)
+    fail('sparse-beats', `${beats} beat(s) across ${Math.round(dur * 10) / 10}s, a film this long needs about ${needed} (a boundary roughly every 3.5s). Two or three cards held for twelve seconds is a slideshow by length, not a film. Compose more beats from blueprints (make blueprints), or shorten the film. docs/CRAFT/DIRECTION.md.`);
+}
 
 // ── NO CONTINUOUS OBJECT ─────────────────────────────────────────────────────────────────────────
 // A SLIDESHOW is a film where every beat is an ISLAND: no content object survives a cut, so each

@@ -3,6 +3,8 @@ when: "picking `type.sans/serif/mono`, sizing headlines"
 answers: which face signals which personality · pairing · the size scale · weight/tracking/leading
 group: look
 codes: off-font, weak-headline
+applies-when: hasTextBeats
+confirm: "which face was chosen for its personality, and does the size scale hold across beats?"
 ---
 
 # TYPOGRAPHY: choosing and setting type
