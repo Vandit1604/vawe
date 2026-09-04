@@ -19,21 +19,27 @@ import fs from 'node:fs';
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE } from '../author/storyboard-parse.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
-const f = process.argv[2];
+const f = process.argv.slice(2).find((a) => !a.startsWith('--'));
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: docs/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
 const src = fs.readFileSync(f, 'utf8');
 
+const gf = gateFindings();
+// errs/warns drive the console prose below, unchanged; err()/warn() mirror each one into gf so --json
+// (and the VAWE_FINDINGS_OUT side channel) carry the same facts as records.
 const errs = [], warns = [];
+const err = (code, msg, extra) => { errs.push(msg); gf.fail(code, msg, extra); };
+const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra); };
 // ── frontmatter: the video's spine ──────────────────────────────────────────────────────────────
 const fm = /^---\n([\s\S]*?)\n---/.exec(src);
 const head = fm ? fm[1] : '';
 const field = (k) => { const m = new RegExp(`^${k}\\s*:\\s*(.+)$`, 'mi').exec(head); return m ? m[1].trim().replace(/^["']|["']$/g, '') : null; };
-if (!fm) errs.push('no frontmatter block: the spine (message · audience · arc · format · duration) goes in a leading --- … --- block');
+if (!fm) err('no-frontmatter', 'no frontmatter block: the spine (message · audience · arc · format · duration) goes in a leading --- … --- block');
 const message = field('message');
-if (!message) errs.push('missing `message:`. The ONE sentence this video communicates. Without it the video has no spine.');
-else if (message.split(/\s+/).length > 20) warns.push(`message is ${message.split(/\s+/).length} words. A proposal message should be ONE tight sentence (≤ ~18 words).`);
-for (const k of ['audience', 'arc', 'format', 'duration']) if (!field(k)) warns.push(`missing \`${k}:\` in frontmatter`);
+if (!message) err('missing-message', 'missing `message:`. The ONE sentence this video communicates. Without it the video has no spine.');
+else if (message.split(/\s+/).length > 20) warn('message-too-long', `message is ${message.split(/\s+/).length} words. A proposal message should be ONE tight sentence (≤ ~18 words).`);
+for (const k of ['audience', 'arc', 'format', 'duration']) if (!field(k)) warn('missing-frontmatter-field', `missing \`${k}:\` in frontmatter`);
 
 // ── WHAT HOLDS THE FILM: required on short films ──────────────────────────────────────────────────
 // A film under ~15s has no room for chapters, so something has to carry the viewer across the cuts, and
@@ -52,13 +58,13 @@ const shortFilm = durSec != null && durSec < SPINE_MAX_S;
 const hasObject = !!field('object');
 const hasThreads = !!field('threads');
 if (shortFilm && !hasObject && !hasThreads) {
-  errs.push(`this is a ${durRaw} film and the frontmatter names neither \`threads:\` nor \`object:\`, NAME WHAT HOLDS THIS FILM. Under ${SPINE_MAX_S}s there is no room for chapters, so a film whose beats are islands is a slideshow. Write \`threads:\` naming two devices from docs/CRAFT/FILM-STRUCTURE.md (a match cut · a camera travel · a motif · a bookend · a metric cut rate · an unfinished sentence · an open question · a transforming object). If one of them is a continuous object, name it as \`object:\` too and the scene-side gate can check it.`);
+  err('no-holding-device', `this is a ${durRaw} film and the frontmatter names neither \`threads:\` nor \`object:\`, NAME WHAT HOLDS THIS FILM. Under ${SPINE_MAX_S}s there is no room for chapters, so a film whose beats are islands is a slideshow. Write \`threads:\` naming two devices from docs/CRAFT/FILM-STRUCTURE.md (a match cut · a camera travel · a motif · a bookend · a metric cut rate · an unfinished sentence · an open question · a transforming object). If one of them is a continuous object, name it as \`object:\` too and the scene-side gate can check it.`);
 }
 if (shortFilm && !hasThreads && hasObject) {
-  warns.push('one thread only: `object:` names a continuous object and nothing else. A single thread has to be literal and obvious to work, which is how a film ends up as a resizing box. Add `threads:` with a second device (docs/CRAFT/FILM-STRUCTURE.md).');
+  warn('single-thread', 'one thread only: `object:` names a continuous object and nothing else. A single thread has to be literal and obvious to work, which is how a film ends up as a resizing box. Add `threads:` with a second device (docs/CRAFT/FILM-STRUCTURE.md).');
 }
 if (shortFilm && hasObject) for (const k of ['object_t0', 'object_states', 'object_last']) {
-  if (!field(k)) warns.push(`missing \`${k}:\`. A declared object spine needs the object's state at t=0, at each cut, and at the last frame (the payoff, or the moment before it).`);
+  if (!field(k)) warn('missing-object-field', `missing \`${k}:\`. A declared object spine needs the object's state at t=0, at each cut, and at the last frame (the payoff, or the moment before it).`);
 }
 
 // ── the two decisions that are made ONCE, for the whole film ──────────────────────────────────────
@@ -75,13 +81,13 @@ if (shortFilm && hasObject) for (const k of ['object_t0', 'object_states', 'obje
 // Writing the peak down is not building it, exactly as with `becomes:`.
 const spectacle = field('spectacle');
 const not = field('not');
-if (!spectacle) errs.push('missing `spectacle:`. NAME THE ONE EXAGGERATED MOMENT: which beat, which layer, which device, and what it is for. It is two-sided, and that is the point: naming the peak is a promise that every other beat stays restrained. A film that names none has not chosen restraint, it has chosen one flat volume for the whole runtime. Then build it in the scene as `"spectacle": { "at", "of", "device", "why" }` (core/spectacle.js), which `make plan-check` checks against this line.');
-if (!not) errs.push('missing `not:`. NAME WHAT THIS FILM IS NOT. Most generic output is not a wrong decision, it is an un-excluded default: the centred type, the even grid, the fade on everything. Write the defaults you are refusing here, in your own words, so the beats below have something to be measured against. Nothing grades the prose; the line exists so the decision gets made.');
+if (!spectacle) err('missing-spectacle', 'missing `spectacle:`. NAME THE ONE EXAGGERATED MOMENT: which beat, which layer, which device, and what it is for. It is two-sided, and that is the point: naming the peak is a promise that every other beat stays restrained. A film that names none has not chosen restraint, it has chosen one flat volume for the whole runtime. Then build it in the scene as `"spectacle": { "at", "of", "device", "why" }` (core/spectacle.js), which `make plan-check` checks against this line.');
+if (!not) err('missing-not', 'missing `not:`. NAME WHAT THIS FILM IS NOT. Most generic output is not a wrong decision, it is an un-excluded default: the centred type, the even grid, the fade on everything. Write the defaults you are refusing here, in your own words, so the beats below have something to be measured against. Nothing grades the prose; the line exists so the decision gets made.');
 
 // ── beats: each must state its job ────────────────────────────────────────────────────────────────
 const beats = [...src.matchAll(/^##\s+(?:Beat\s+)?(\d+|[A-Za-z].*?)\s*[, :-].*$/gmi)];
 const blocks = blocksOf(src);
-if (blocks.length < 2) errs.push('fewer than 2 beats: a video is a sequence of beats; storyboard each one as `## Beat N, title`.');
+if (blocks.length < 2) err('too-few-beats', 'fewer than 2 beats: a video is a sequence of beats; storyboard each one as `## Beat N, title`.');
 const REQ = ['type', 'onscreen', 'why'];
 
 // ── the vocabulary that separates a MECHANISM from a TRANSFORMATION ──────────────────────────────
@@ -129,10 +135,10 @@ for (const b of blocks) {
   // A DECLARED object spine must be located in every beat. Only when the film declared one: a plan held
   // by a motif or a metric cut rate has no object to place, and asking for one anyway is what turned a
   // catalogue of devices into a single mandatory device.
-  if (shortFilm && hasObject && !has('object')) errs.push(`beat "${title}" is missing \`object:\`. This film declares \`object: "${field('object')}"\`, so say what it has become in this beat (or where it is, if it is not born yet). Every cut must read "the X becomes the Y". If the object is not really what holds this film, drop it and name the real devices in \`threads:\`.`);
+  if (shortFilm && hasObject && !has('object')) err('beat-missing-object', `beat "${title}" is missing \`object:\`. This film declares \`object: "${field('object')}"\`, so say what it has become in this beat (or where it is, if it is not born yet). Every cut must read "the X becomes the Y". If the object is not really what holds this film, drop it and name the real devices in \`threads:\`.`);
   const missing = REQ.filter((k) => !has(k));
-  if (missing.length) errs.push(`beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
-  if (!/(^|\n)\s*[-*]?\s*(blueprint|mechanism)\s*:/i.test(b)) warns.push(`beat "${title}": no \`blueprint:\` or \`mechanism:\`, name the shot shape / motion so the JSON transcribes it (make blueprints · docs/EFFECTS.md).`);
+  if (missing.length) err('beat-missing-fields', `beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
+  if (!/(^|\n)\s*[-*]?\s*(blueprint|mechanism)\s*:/i.test(b)) warn('beat-missing-blueprint', `beat "${title}": no \`blueprint:\` or \`mechanism:\`, name the shot shape / motion so the JSON transcribes it (make blueprints · docs/EFFECTS.md).`);
 
   // The transformation, as a field of its own. `object:` says where the thing IS; `becomes:` says what
   // it TURNED INTO here. Measured against the reference film, our recreations landed state-changes at
@@ -143,13 +149,13 @@ for (const b of blocks) {
   else {
     const changes = becomes.match(CHANGE_VERB) || [];
     if (!changes.length && ANIM_VOCAB.test(becomes)) {
-      warns.push(`beat "${title}": becomes-is-a-preset, "${becomes}". That is the mechanism, not the transformation: \`mechanism:\` already answers how it moves; \`becomes:\` answers what it turned into.`);
+      warn('becomes-is-preset', `beat "${title}": becomes-is-a-preset, "${becomes}". That is the mechanism, not the transformation: \`mechanism:\` already answers how it moves; \`becomes:\` answers what it turned into.`);
     }
     // A beat is a hold for as long as nothing in it changes. The reference film never sat on one state
     // for more than ~1.5s; a 3s beat carrying a single change is two seconds of watching it not happen.
     const span = spans[n - 1];
     if (span.start != null && span.end - span.start >= 3.0 && changes.length <= 1) {
-      warns.push(`beat "${title}": held-state-too-long, ${(span.end - span.start).toFixed(2)}s spent on one change. The reference film never holds a single state longer than about 1.5 seconds, so a 3s+ beat with one change is a 3s hold. Either name the second change or split the beat.`);
+      warn('held-state-too-long', `beat "${title}": held-state-too-long, ${(span.end - span.start).toFixed(2)}s spent on one change. The reference film never holds a single state longer than about 1.5 seconds, so a 3s+ beat with one change is a 3s hold. Either name the second change or split the beat.`);
     }
     // ends-on-a-claim. The last beat puts a sentence on screen and nothing changes under it, so the
     // film's final act is a line of copy appearing. Three of our recreations closed exactly this way:
@@ -169,17 +175,17 @@ for (const b of blocks) {
   spans[n - 1].trigger = filled ? trigger : null;
   spans[n - 1].caused = filled && !TRIGGER_SEQUENCE.test(trigger);
   if (filled && TRIGGER_SEQUENCE.test(trigger)) {
-    warns.push(`beat "${title}": trigger-is-a-sequence, "${trigger}". That says WHEN this beat happens, not what made it happen, and every slideshow already has an order. Name the act on screen that forces it: the cursor clicking Send, a number crossing the line, the hand letting go of the card.`);
+    warn('trigger-is-sequence', `beat "${title}": trigger-is-a-sequence, "${trigger}". That says WHEN this beat happens, not what made it happen, and every slideshow already has an order. Name the act on screen that forces it: the cursor clicking Send, a number crossing the line, the hand letting go of the card.`);
   } else if (filled && trigger.split(/\s+/).length <= 6 && ANIM_VOCAB.test(trigger)) {
     // ponytail: word-count guard, because a long trigger that happens to contain "slides" is usually
     // describing a real event. Widen it only if short real causes start tripping.
-    warns.push(`beat "${title}": trigger-is-a-mechanism, "${trigger}". A cut or a fade is how the film arrives here, not why it had to. \`mechanism:\` already answers that. \`trigger:\` names the thing in the PREVIOUS beat that made this one necessary.`);
+    warn('trigger-is-mechanism', `beat "${title}": trigger-is-a-mechanism, "${trigger}". A cut or a fade is how the film arrives here, not why it had to. \`mechanism:\` already answers that. \`trigger:\` names the thing in the PREVIOUS beat that made this one necessary.`);
   }
 
   // A why that says "hook" restates the beat's category. The category is already in `type:`.
   const why = fieldIn(b, 'why');
   if (why && (why.split(/\s+/).length < 5 || /^(the\s+)?(hook|payoff|cta|because|setup|intro|outro)\b[\s.·, -]*$/i.test(why))) {
-    warns.push(`beat "${title}": stub-why, "${why}". A why states what the viewer learns or feels HERE and why it belongs at this point in the film, not the beat's category.`);
+    warn('stub-why', `beat "${title}": stub-why, "${why}". A why states what the viewer learns or feels HERE and why it belongs at this point in the film, not the beat's category.`);
   }
 }
 
@@ -199,7 +205,7 @@ const chainLines = spans.map((s, i) => {
   return `${arrow}\n${head}`;
 });
 if (links.length && causedLinks && causedLinks < links.length) {
-  warns.push(`chain-breaks: ${causedLinks} of ${links.length} junctions name what caused them and ${links.length - causedLinks} do not, so this film's causal spine is ${fragments} fragments, not one. The beats you did write a \`trigger:\` for prove the film can carry a cause; the gaps are where it stops and starts again. Fill the missing ones, or move the beat somewhere its cause exists.`);
+  warn('chain-breaks', `chain-breaks: ${causedLinks} of ${links.length} junctions name what caused them and ${links.length - causedLinks} do not, so this film's causal spine is ${fragments} fragments, not one. The beats you did write a \`trigger:\` for prove the film can carry a cause; the gaps are where it stops and starts again. Fill the missing ones, or move the beat somewhere its cause exists.`);
 }
 
 // ── the clock: the storyboard already carries times, so read them ─────────────────────────────────
@@ -208,17 +214,17 @@ if (links.length && causedLinks && causedLinks < links.length) {
 // where the payoff lands; a plan that runs out early ships a film that ends on an unmade claim.
 const timed = spans.filter((s) => s.start != null);
 if (timed.length && timed.length < spans.length) {
-  warns.push(`partial-timeline: ${timed.length}/${spans.length} beats carry a (start s-end s) range. Without one on every beat the plan cannot be checked against the clock. Missing: ${spans.filter((s) => s.start == null).map((s) => `"${s.title}"`).join(', ')}.`);
+  warn('partial-timeline', `partial-timeline: ${timed.length}/${spans.length} beats carry a (start s-end s) range. Without one on every beat the plan cannot be checked against the clock. Missing: ${spans.filter((s) => s.start == null).map((s) => `"${s.title}"`).join(', ')}.`);
 } else if (timed.length === spans.length && spans.length) {
   for (let i = 1; i < spans.length; i++) {
     const prev = spans[i - 1], cur = spans[i];
     const d = cur.start - prev.end;
-    if (d >= 0.5) errs.push(`timeline-hole: "${prev.title}" ends at ${prev.end}s and "${cur.title}" starts at ${cur.start}s: ${d.toFixed(2)}s of the film is unplanned. Nothing is storyboarded to be on screen there.`);
-    else if (-d >= 0.5) errs.push(`timeline-hole: "${prev.title}" runs to ${prev.end}s while "${cur.title}" starts at ${cur.start}s: they overlap by ${(-d).toFixed(2)}s. Two beats claiming the same seconds means one of them is not planned.`);
+    if (d >= 0.5) err('timeline-hole', `timeline-hole: "${prev.title}" ends at ${prev.end}s and "${cur.title}" starts at ${cur.start}s: ${d.toFixed(2)}s of the film is unplanned. Nothing is storyboarded to be on screen there.`);
+    else if (-d >= 0.5) err('timeline-hole', `timeline-hole: "${prev.title}" runs to ${prev.end}s while "${cur.title}" starts at ${cur.start}s: they overlap by ${(-d).toFixed(2)}s. Two beats claiming the same seconds means one of them is not planned.`);
   }
   const last = spans[spans.length - 1];
   if (durSec != null && durSec - last.end > 0.5) {
-    errs.push(`timeline-hole, your beats stop at ${last.end}s of a ${durSec}s film: ${(durSec - last.end).toFixed(2)}s of the film is unplanned. The last seconds are where the payoff lands; a storyboard that runs out early ships a film that ends on a claim it never demonstrated.`);
+    err('timeline-underrun', `timeline-hole, your beats stop at ${last.end}s of a ${durSec}s film: ${(durSec - last.end).toFixed(2)}s of the film is unplanned. The last seconds are where the payoff lands; a storyboard that runs out early ships a film that ends on a claim it never demonstrated.`);
   }
   // …and the MIRROR, which was missing: beats that run PAST the declared duration. Only the short side
   // was checked, so a plan could declare 12s and storyboard 16s of beats and be called complete. The
@@ -227,7 +233,7 @@ if (timed.length && timed.length < spans.length) {
   // story should end. `plan-vs-render` fails `plan-overruns-render` for the same reason one stage later;
   // this is that check at the stage where it is still free to fix.
   if (durSec != null && last.end - durSec > 0.5) {
-    errs.push(`timeline-overrun, your beats run to ${last.end}s of a ${durSec}s film: ${(last.end - durSec).toFixed(2)}s more is storyboarded than the film has. Either raise \`duration:\` to ${Math.ceil(last.end)}s, or cut beats until they fit. Whichever you do, decide it here rather than letting the JSON run out mid-beat.`);
+    err('timeline-overrun', `timeline-overrun, your beats run to ${last.end}s of a ${durSec}s film: ${(last.end - durSec).toFixed(2)}s more is storyboarded than the film has. Either raise \`duration:\` to ${Math.ceil(last.end)}s, or cut beats until they fit. Whichever you do, decide it here rather than letting the JSON run out mid-beat.`);
   }
 }
 
@@ -238,8 +244,8 @@ if (timed.length && timed.length < spans.length) {
 // waive it. But "the storyboard changed since anyone last looked at the pictures" is precisely what the
 // receipt exists to say out loud.
 const seen = readReceipt('panels', f);
-if (!seen.exists) warns.push(`no panels have been drawn for this storyboard, run \`make panels SB=${f}\` and READ the sheet. This gate grades the plan against itself and cannot see composition; the panels are the only artefact at this stage that can.`);
-else if (seen.stale) warns.push(`the panels are stale: they were drawn from an older version of this file (${seen.receipt.at}). Re-run \`make panels SB=${f}\` and look again; the beat you changed is the one nobody has seen.`);
+if (!seen.exists) warn('no-panels', `no panels have been drawn for this storyboard, run \`make panels SB=${f}\` and READ the sheet. This gate grades the plan against itself and cannot see composition; the panels are the only artefact at this stage that can.`);
+else if (seen.stale) warn('stale-panels', `the panels are stale: they were drawn from an older version of this file (${seen.receipt.at}). Re-run \`make panels SB=${f}\` and look again; the beat you changed is the one nobody has seen.`);
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
 console.log(`  storyboard-check · ${f} · ${blocks.length} beat(s)`);

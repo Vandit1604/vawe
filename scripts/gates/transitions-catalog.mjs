@@ -4,6 +4,10 @@
 // The catalog is DERIVED from the four source registries, so this is always in sync, its only failure
 // mode is a name the family classifier didn't recognise (family "other"), which it reports at the end.
 import { TRANSITIONS, MECHANISMS, basics, unclassified } from '../../core/transitions.js';
+import { gateFindings } from '../lib/findings.mjs';
+
+// A report, never a rule: it never blocks, so every finding here is a WARN and the exit code stays 0.
+const f = gateFindings();
 
 const MECH_DESC = {
   anim: 'per-LAYER entrance/exit (anim / out on a layer)',
@@ -36,4 +40,6 @@ const orphan = unclassified();
 if (orphan.length) {
   console.log(`  ~ ${orphan.length} unclassified (family "other"), extend FAMILY_OF in core/transitions.js:`);
   console.log(`    ${orphan.map((t) => `${t.mechanism}:${t.name}`).join(', ')}\n`);
+  f.warn('unclassified-transition', `${orphan.length} transition(s) fall into family "other": ${orphan.map((t) => `${t.mechanism}:${t.name}`).join(', ')}`,
+    { fix: 'extend FAMILY_OF in core/transitions.js' });
 }

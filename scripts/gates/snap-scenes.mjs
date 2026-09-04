@@ -33,11 +33,13 @@ import { flattenLayers } from '../lib/layers.mjs';
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap', 'scenes');
 fs.mkdirSync(SNAP, { recursive: true });
 const args = process.argv.slice(2);
+const f = gateFindings();
 const SAVE = args.includes('--save');
 
 // A BASELINE IS ONLY VALID WITHIN ONE FONT STATE, and nothing used to record which one.
@@ -214,6 +216,16 @@ for (const scene of scenes) {
 await browser.close(); server.close();
 
 // ---- report ----
+// Mirror every console line into a record, so --json carries the same facts. Severity follows whether
+// the item contributes to a failing exit below: quarantine, an error and (outside SAVE) a diff are
+// blocking; a bare no-baseline scene is a note, unless NOTHING was compared, which is its own failure.
+for (const q of quarantined) f.fail('quarantined', `${q.name}: non-deterministic (order-dependent), quarantined: ${q.sample.join(' · ')}`, { at: q.name });
+for (const e of errored) f.fail('render-error', e);
+if (!SAVE) {
+  for (const c of changed) f.fail('scene-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 12).join(' · ')}${c.diffs.length > 12 ? ` … +${c.diffs.length - 12} more` : ''}`, { at: c.name });
+  for (const n of nobaseline) f.note('no-baseline', `${n}: determinism-checked, but no baseline to diff against, run \`make snap-all SAVE=1\``, { at: n });
+  if (!identical.length && !changed.length && nobaseline.length) f.fail('nothing-compared', `all ${nobaseline.length} scene(s) lack a baseline, this gate checked NOTHING`);
+}
 console.log(`\n==== SNAP-ALL · ${scenes.length} scenes ====`);
 if (!SAVE) {
   const now = fontState();

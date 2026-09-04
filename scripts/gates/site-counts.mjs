@@ -39,6 +39,7 @@ import { AMBIENT_FX } from '../../core/shaders-ambient.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { LAYER_TYPES } from '../../core/layers/index.js';
 import { validateAll } from '../../core/validate.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const size = (o) => (Array.isArray(o) ? o.length : Object.keys(o).length);
@@ -189,6 +190,7 @@ const PATTERNS = {
 const ACROSS = /\b(\d+)[ \u00a0](?:blocks|components)[ \u00a0]across[ \u00a0](\d+)[ \u00a0]families\b/gi;
 
 const bad = [];
+const f = gateFindings();
 for (const rel of FILES) {
   const file = path.join(root, rel);
   if (!fs.existsSync(file)) continue;
@@ -264,6 +266,12 @@ for (const rel of FILES) {
       for (const err of validateAll(schema, scene)) fail(err);
     }
   }
+}
+
+for (const b of bad) {
+  const at = b.line === '-' ? b.rel : `${b.rel}:${b.line}`;
+  if (b.subject === 'boots') f.fail('starter-refused', `${b.rel}: ${b.text}`, { at, fix: 'fix the STARTER scene so it passes the same validator the engine runs at boot' });
+  else f.fail('stale-count', `${at}  says ${b.stated} ${b.subject}, registry has ${b.real}\n    ${b.text}`, { at });
 }
 
 if (!bad.length) {

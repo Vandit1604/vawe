@@ -29,11 +29,13 @@ import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { population } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap', 'blocks');
 fs.mkdirSync(SNAP, { recursive: true });
 const args = process.argv.slice(2);
+const f = gateFindings();
 const SAVE = args.includes('--save');
 const ONLY = args.find((a) => !a.startsWith('--'));
 
@@ -119,6 +121,16 @@ for (const entry of entries) {
 }
 
 // ---- report ----
+// Mirror every console line into a record, so --json carries the same facts. Severity follows whether
+// the item contributes to a failing exit below: non-determinism, an error and (outside SAVE) a diff are
+// blocking; a bare no-baseline entry is a note, unless NOTHING was compared, which is its own failure.
+for (const q of nondeterministic) f.fail('non-deterministic', `${q.name}: non-deterministic, same props answered differently on two calls: ${q.sample.join(' · ')}`, { at: q.name });
+for (const e of errored) f.fail('block-error', e);
+if (!SAVE) {
+  for (const c of changed) f.fail('block-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 10).join(' · ')}${c.diffs.length > 10 ? ` … +${c.diffs.length - 10} more` : ''}`, { at: c.name });
+  for (const n of nobaseline) f.note('no-baseline', `${n}: no baseline to diff against, run \`make snap-blocks SAVE=1\``, { at: n });
+  if (!identical.length && !changed.length && nobaseline.length) f.fail('nothing-compared', `all ${nobaseline.length} block(s) lack a baseline, this gate checked NOTHING`);
+}
 console.log(`\n==== SNAP-BLOCKS · ${entries.length} catalog entr${entries.length === 1 ? 'y' : 'ies'} from ${mods.n} block module(s) ====`);
 if (SAVE) {
   console.log(`✓ ${saved.length} baseline(s) saved → verify/snap/blocks/`);
