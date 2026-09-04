@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { lowerScene } from '../../core/transitions-lower.js';
 import { population, SCENE_DIR } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -74,22 +75,24 @@ export const verdict = (s, sameBrand) => sameBrand
 
 // ---------- CLI ----------
 if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
-  let files = process.argv.slice(2);
+  const rawArgs = process.argv.slice(2).filter((a) => a !== '--json');
+  const explicit = rawArgs.length > 0;
+  let files = rawArgs;
   if (!files.length) {
     // authored data only: skip schemas, bundled samples, and the transitions showcase
     files = population('similarity', { filter: (f) => !/^(schema|sample|cuts-demo)\.json$|^sample/.test(f) })
       .names.map((f) => path.join(SCENE_DIR, f));
   }
+  const f = gateFindings();
   // A `.template.json` holds mustache placeholders, so it is not JSON and never was a video. One of
   // them threw out of the scan and killed the WHOLE library audit, which is why `make similar` with no
   // arguments reported nothing at all. Name the skip; an explicitly listed file still throws.
-  const explicit = process.argv.length > 2;
   const fps = [];
-  for (const f of files) {
+  for (const ff of files) {
     let data;
-    try { data = JSON.parse(fs.readFileSync(path.resolve(ROOT, f), 'utf8')); }
-    catch (e) { if (explicit) throw e; console.log(`   · skipped ${path.basename(f)} (not parseable JSON)`); continue; }
-    fps.push({ f, fp: fingerprint(data) });
+    try { data = JSON.parse(fs.readFileSync(path.resolve(ROOT, ff), 'utf8')); }
+    catch (e) { if (explicit) throw e; console.log(`   · skipped ${path.basename(ff)} (not parseable JSON)`); continue; }
+    fps.push({ f: ff, fp: fingerprint(data) });
   }
   let hard = 0, warn = 0;
   console.log('==================== SIMILARITY AUDIT ====================');
@@ -102,6 +105,8 @@ if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
     if (v === 'SAME') hard++; else warn++;
     console.log(`${v === 'SAME' ? '✗ SAME ' : '~ ' + v.toLowerCase()}  ${path.basename(A.f)} ↔ ${path.basename(B.f)}${sameBrand ? ' (same brand)' : ''}`);
     console.log(`    score ${(s.score * 100).toFixed(0)}% · vocab ${(s.vocab * 100).toFixed(0)}% · structure ${(s.struct * 100).toFixed(0)}%${s.layout != null ? ` · layout ${(s.layout * 100).toFixed(0)}%` : ''}`);
+    const summary = `${path.basename(A.f)} ↔ ${path.basename(B.f)}${sameBrand ? ' (same brand)' : ''}: score ${(s.score * 100).toFixed(0)}% · vocab ${(s.vocab * 100).toFixed(0)}% · structure ${(s.struct * 100).toFixed(0)}%${s.layout != null ? ` · layout ${(s.layout * 100).toFixed(0)}%` : ''}`;
+    if (v === 'SAME') f.fail('similarity-same', summary); else f.warn('similarity-close', summary);
   }
   if (!hard && !warn) console.log(`✓ ${fps.length} video(s), all pairs distinct`);
   else console.log(`${hard ? '✗ ' + hard + ' SAME pair(s), differentiate before shipping' : '~ ' + warn + ' close pair(s)'}`);

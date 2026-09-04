@@ -24,10 +24,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { population, LIBRARY } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'formats', 'scene');
-const file = process.argv[2];
+const file = process.argv.slice(2).find((a) => !a.startsWith('--'));
+// "It never blocks. A gate that blocked on this would itself be waived" (see header): every finding
+// here is a WARN or a NOTE, never an error, so the exit code stays 0.
+const f = gateFindings();
 
 // LEGACY IS NOT A WAIVER, and this census is the one place they could be confused. A ratcheted rule
 // (scripts/gates/legacy-manifest.json) grandfathers the films that predate it, and a reader who sees
@@ -89,6 +93,7 @@ if (file) {
     if (RETIRED.has(c)) {
       console.log(`  ✗ ${c}, DEAD WAIVER: no gate emits this code any more (${RETIRED.get(c)}).`);
       console.log(`      Delete it from "authoring.allow" (and its \`_why\`). It excuses nothing.`);
+      f.warn('dead-waiver', `${c}: no gate emits this code any more (${RETIRED.get(c)}), delete it from "authoring.allow"`, { at: c });
       continue;
     }
     const others = (tally.get(c) || []).filter((n) => n !== name);
@@ -100,8 +105,10 @@ if (file) {
       console.log(`  ~ ${line}`);
       console.log(`      At this share the rule is effectively repealed and nothing recorded that decision.`);
       console.log(`      Either fix the films, or change the gate honestly, but stop paying the toll.`);
+      f.warn('waiver-drift', `${line}. At this share the rule is effectively repealed.`, { at: c });
     } else {
       console.log(`  · ${line}`);
+      f.note('waiver-shared', line, { at: c });
     }
     if (!why) console.log(`      and it carries no \`_why\`, so the argument for breaking it does not exist.`);
   }
@@ -109,6 +116,7 @@ if (file) {
     if (!legacyHolder(code, name)) continue;
     console.log(`  ▪ ${code} · this film holds LEGACY status (grandfathered ${ratchet.rules[code].legacy[name].since}).`);
     console.log(`      Not a waiver: nobody has looked at this film against that rule, and no reason is recorded.`);
+    f.note('legacy-status', `${code}: this film holds LEGACY status (grandfathered ${ratchet.rules[code].legacy[name].since})`, { at: code });
   }
   console.log('');
   process.exit(0);
@@ -132,7 +140,10 @@ if (ratcheted.length) {
 }
 if (dead.length) {
   console.log(`  ✗ DEAD WAIVERS: no gate emits these codes any more, so they excuse nothing:\n`);
-  for (const [c, films] of dead) console.log(`      ${c.padEnd(28)} ${films.length} film(s): ${films.slice(0, 6).join(', ')}${films.length > 6 ? ', …' : ''}`);
+  for (const [c, films] of dead) {
+    console.log(`      ${c.padEnd(28)} ${films.length} film(s): ${films.slice(0, 6).join(', ')}${films.length > 6 ? ', …' : ''}`);
+    f.warn('dead-waiver', `${c}: ${films.length} film(s) still carry this dead waiver (${RETIRED.get(c)}): ${films.slice(0, 6).join(', ')}${films.length > 6 ? ', …' : ''}`, { at: c });
+  }
   console.log(`      (${[...new Set(dead.map(([c]) => RETIRED.get(c)))].join('; ')})\n`);
 }
 if (!rows.length) { console.log('  no live waivers anywhere.\n'); process.exit(0); }
@@ -149,3 +160,7 @@ console.log(drifted.length
     + `\n\n  This is the number, not an opinion. A rule this often excused is either wrong and should be\n`
     + `  changed, or right and is being ignored. Both are worth an hour; neither is worth another waiver.\n`
   : `\n  ✓ no rule is being waived habitually.\n`);
+for (const [c, films] of drifted) {
+  const pct = Math.round((films.length / total) * 100);
+  f.warn('waiver-drift', `${c} is waived by ${films.length} film(s), ${pct}% of the library, and has stopped being a rule`, { at: c });
+}

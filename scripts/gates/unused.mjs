@@ -25,8 +25,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { population } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// A report, never a rule (see header): always exits 0, so every finding here is INFO.
+const f = gateFindings();
 
 const { PRESETS } = await import('../../core/type.js');
 const { ANIM_NAMES } = await import('../../core/clips.js');
@@ -75,6 +78,8 @@ for (const [family, used, all, missing] of rows) {
   const pct = all ? Math.round((used / all) * 100) : 100;
   const bar = missing.length ? `  never named: ${missing.join(' ')}` : '';
   console.log(`  ${family.padEnd(w)}  ${String(used).padStart(3)}/${String(all).padEnd(3)} (${String(pct).padStart(3)}%)${bar}`);
+  if (missing.length) f.note('unused-vocabulary', `${family}: ${missing.length}/${all.length} never named in a shipped scene: ${missing.join(' ')}`,
+    { doc: 'docs/MISTAKES.md' });
 }
 console.log(`\n  ${total - dead}/${total} of the registered vocabulary appears in a shipped scene · ${dead} never named.`);
 console.log('  Read each zero as: nobody can find it, it does not work, or something else does it better.');

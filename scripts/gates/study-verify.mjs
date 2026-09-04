@@ -25,10 +25,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv.find((a) => a.endsWith('.json'));
 const RENDER = !process.argv.includes('--no-render');
+const f = gateFindings();
 if (!file) { console.error('usage: node scripts/gates/study-verify.mjs <scene.json> [--no-render]'); process.exit(2); }
 const abs = path.resolve(ROOT, file);
 if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
@@ -64,13 +66,17 @@ const findings = [];
 const ok = [];
 
 const near = (a, b) => Math.abs(a - b) <= TOL;
-if (Math.abs(g.measured.duration - (scene.duration || 0)) > 0.15)
+if (Math.abs(g.measured.duration - (scene.duration || 0)) > 0.15) {
   findings.push(['duration', `scene declares ${scene.duration}s, the film measures ${g.measured.duration}s`]);
-else ok.push(`duration ${g.measured.duration}s matches the declared ${scene.duration}s`);
+  f.fail('duration', `scene declares ${scene.duration}s, the film measures ${g.measured.duration}s`);
+} else ok.push(`duration ${g.measured.duration}s matches the declared ${scene.duration}s`);
 
 const missed = declaredCuts.filter((t) => !measuredCuts.some((m) => near(m, t)));
 const extra = measuredCuts.filter((m) => !declaredCuts.some((t) => near(m, t)));
-if (missed.length) findings.push(['cut-missed', `the scene declares a boundary at ${missed.map((t) => t + 's').join(', ')} and the study found none within ${TOL}s`]);
+if (missed.length) {
+  findings.push(['cut-missed', `the scene declares a boundary at ${missed.map((t) => t + 's').join(', ')} and the study found none within ${TOL}s`]);
+  f.fail('cut-missed', `the scene declares a boundary at ${missed.map((t) => t + 's').join(', ')} and the study found none within ${TOL}s`);
+}
 if (declaredCuts.length && !missed.length)
   ok.push(`all ${declaredCuts.length} declared boundary(ies) found, within ${TOL}s: ${declaredCuts.map((t, i) => `${t}→${measuredCuts.find((m) => near(m, t))}`).join(', ')}`);
 if (!declaredCuts.length) ok.push('the scene declares no boundary');
@@ -97,8 +103,10 @@ ok.push(groundNote);
 // only checks that the marking survived. A bucket that lost its doubt on the way here is a real defect.
 for (const sh of g.shots || []) {
   const nearEdge = [60, 128].some((e) => Math.abs(sh.luma - e) < 4);
-  if (nearEdge && !String(sh.ground).endsWith('?'))
+  if (nearEdge && !String(sh.ground).endsWith('?')) {
     findings.push(['ground-false-confidence', `shot ${sh.i} measured luma ${sh.luma}, within 4 of a bucket edge, and was named "${sh.ground}" with no doubt marker.`]);
+    f.fail('ground-false-confidence', `shot ${sh.i} measured luma ${sh.luma}, within 4 of a bucket edge, and was named "${sh.ground}" with no doubt marker.`);
+  }
   if (nearEdge) ok.push(`shot ${sh.i} luma ${sh.luma} sits on a bucket edge and says so: "${sh.ground}"`);
 }
 
@@ -110,6 +118,7 @@ if (extra.length) {
   console.log(`    Not a failure. \`cuts\` is the ENGINE's cut mechanism; a scene score measures what a`);
   console.log(`    VIEWER sees. Layers ending together, or one travelling fast, changes the frame hard`);
   console.log(`    without any cut being declared. Check the sheet: refs/${studyName}/sheet.png`);
+  f.note('undeclared-boundary', `${extra.length} undeclared boundary(ies) at ${extra.map((t) => t + 's').join(', ')}, not a failure: check refs/${studyName}/sheet.png`);
 }
 console.log('');
-process.exit(findings.length ? 1 : 0);
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
