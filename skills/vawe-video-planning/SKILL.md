@@ -185,6 +185,12 @@ different output: this breaks the author's own habits.
 
 ## Step 3: Storyboard on paper before JSON
 
+**First, run `make scaffold OUT=formats/scene/<name>.json DUR=<n> THEME=<name>`.** It writes a scene
+composed entirely from directed `{type:"beat"}` blueprints, already tiled with transitions, a moving
+backdrop and sound, plus its `.storyboard.md` sidecar with the frontmatter and per-beat fields
+storyboard-check and craft-checklist ask for. Every field the plan below still has to decide is marked
+`REPLACE:`/`<fill: ...>`; fill those in place of hand-writing JSON from blank, the #1 authoring failure.
+
 > **Film under ~15 seconds? Load [`vawe-continuous-action`](../vawe-continuous-action/SKILL.md)
 > instead of the beat table below.** A short film is ONE continuous action, not a sequence of
 > beats: one object is on screen from the first frame and every cut is that object changing state
