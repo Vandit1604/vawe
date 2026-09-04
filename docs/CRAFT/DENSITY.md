@@ -9,13 +9,21 @@ confirm: "does each beat carry the hero + support + metadata triad, not one flat
 
 # Density: "produced, not generated"
 
+## AGENT SUMMARY
+
+- A beat held longer than 3s needs the hero + support + metadata triad, at least 3 sizable elements, not
+  one flat headline on empty space. The metadata layer (registration marks, monospace readouts, section
+  labels, dimension brackets) is what reads as "a person crafted this."
+- Enforced by `make critique`, which flags a beat below the triad as `thin-beat`; codes: `dead-air`,
+  `empty-beat`, `ends-on-nothing`.
+- Checkable action: does each beat carry the hero + support + metadata triad, not one flat line?
+
 The single biggest reason a beat looks *generated* (flat, web-page-like, AI) instead of *produced*
 (a real motion-graphic) is **too few elements carrying too little information.** A headline + a caption
 on empty space reads as a slide. A produced frame has **8–10 meaningful elements** working together:
 the hero, its supporting data, and the *metadata layer* that says "a person crafted this."
 
-This is another engine' `video-composition` doctrine, restored for Vawe (we had it in the blueprint
-version and stripped it: that's why later cuts felt sparse).
+This is another engine' `video-composition` doctrine, restored for Vawe.
 
 ## The metadata layer (the "produced" tell)
 Add a thin, quiet layer of production detail that frames the content without competing with it:
@@ -65,3 +73,8 @@ Borrowed close to verbatim from the reference system's `video-composition.md`, `
 ## Blocks that add produced density fast
 `kpiRow` · `barChart` · `diff` · `callout` · `pillRow` · `notification`, drop one in as the *support*,
 and a dim mono readout as the *metadata*. See [`docs/BLOCKS.md`](../BLOCKS.md).
+
+## Provenance
+
+**Do not re-add:** the doctrine was in the blueprint version of this engine, got stripped, and later
+cuts read sparse as a result. Keep the triad rule live instead of re-telling that history.

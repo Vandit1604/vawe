@@ -7,6 +7,16 @@ codes: all-median, beats-unseen, close-pace, no-preflight, options-collapse, sta
 
 # Approval stops: show the work before it is finished
 
+## AGENT SUMMARY
+
+- Stop and show one screen at each of four points (concept, storyboard panels, hand-written fragment,
+  style frames) plus the 85% draft, and wait for approve/deny/change before starting the next phase.
+  Three genuinely different options, or it is not a choice.
+- Not a gate: nothing here is automated, nothing passes or fails. `make approve STAGE=<stage> D=<file>`
+  records the answer as a hash receipt; editing the file withdraws its own approval.
+- Checkable action: did the reviewer see this stop before the next phase began, and was it three real
+  options, not one option with a question mark?
+
 Points in the pipeline where the author **stops**, shows one screen, and does not start the next
 phase until the person who asked for the film answers: approve, deny, or change it.
 
@@ -23,7 +33,7 @@ earlier and far cheaper:
 | "wtf concept was that": a glass film that was four frosted rectangles drifting | **concept** | one line of text |
 | Instrument Serif, a saturated AI-default face | **style frames** | one token |
 | an explainer whose first slide carried nothing | **style frames** | one element |
-| a scroll-driven deck whose motion was the point and was wrong | **concept** | a sentence |
+| a scroll-driven deck whose motion was the point, and it missed | **concept** | a sentence |
 | a film whose first two seconds held one character | **storyboard panels** | one line of markdown |
 
 Five rejections, five rebuilds, none of which needed to happen. The pattern is always the same:

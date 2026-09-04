@@ -6,6 +6,15 @@ group: crosscutting
 
 # Continuity without an object
 
+## AGENT SUMMARY
+
+- A film does not need one object to survive a cut. Carry continuity in TWO OR MORE registers at once
+  (unfinished sentence, match cut, camera travel, rhythm, counter, question); a transforming prop is the
+  cheapest register and the one Murch ranks last (4%).
+- `no-continuous-object` (opt-in, `TASTE=1 make author-check` or `make direction-floor`) sees only the
+  prop register. A film held by the other registers needs a waiver with a `_why` naming the thread.
+- Checkable action: how many threads carry this film across its cuts, and in which registers?
+
 `no-continuous-object` asks a film to STAY WITH a subject across its cuts. This library has answered that
 question the same way eighteen times: keep one rectangle alive and key its `w` and `h`. That satisfies the
 gate. It is also the cheapest answer available, and three consecutive films built on it passed every gate
@@ -14,11 +23,11 @@ while being visually inert.
 This page exists because a reference film in `refs/` holds together across ten cuts in eighteen seconds
 without keeping one prop alive through them, and is plainly better than what we build.
 
-MEASURE IT BEFORE YOU COPY IT, and I did not, the first time. My first read of that film was "nothing
-survives a cut", and it was wrong. Pulling frames across the light section shows a large grey band curving
-through shot after shot: it is there at 5.7s, 6.3s, 9.0s, 9.7s and 10.4s, drops out for a black interlude,
-and comes back. Props sit along it and it shifts between shots, so it reads as a camera travelling one
-continuous curved surface. The film is MORE continuous than a first look suggests, not less.
+MEASURE IT BEFORE YOU COPY IT. A contact sheet undercounts continuity: pulling frames across the light
+section of the reference shows a large grey band curving through shot after shot, at 5.7s, 6.3s, 9.0s,
+9.7s and 10.4s, dropping out for a black interlude and coming back. Props sit along it and it shifts
+between shots, so it reads as a camera travelling one continuous curved surface. The film is MORE
+continuous than a contact sheet suggests.
 
 What it actually runs is TWO THREADS AT ONCE:
   - a grammatical one, one clause per shot, none of them finishing;
@@ -110,8 +119,7 @@ of it. Add a second thread the gate CAN see, keep it subtle, and you will not ne
 
 ## Measure the reference, do not remember it
 
-The first read of this film recorded here was "nothing survives a cut", written from a contact sheet, and
-it was wrong: a grey path runs through half the film and a frame-by-frame pull found it in a minute. A
-contact sheet samples; it does not measure. Before drawing a rule from a reference, pull the cut list
-(`ffmpeg select='gt(scene,0.25)'`), get the shot-length distribution, and sample INSIDE the shots that
-look empty. The conclusion changed completely, and it changed toward more rigour, not less.
+A contact sheet samples; it does not measure. A grey path running through half of the reference film only
+turned up on a frame-by-frame pull, not on the contact sheet. Before drawing a rule from a reference, pull
+the cut list (`ffmpeg select='gt(scene,0.25)'`), get the shot-length distribution, and sample INSIDE the
+shots that look empty.

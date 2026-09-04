@@ -7,6 +7,14 @@ codes: no-kinetic-type, plain-slideshow
 
 # BLUEPRINTS: compose a video from directed beats, don't re-derive motion
 
+## AGENT SUMMARY
+
+- Run `make blueprints` FIRST and start every beat from a directed `{type:"beat"}` blueprint. Do not
+  open a blank JSON and hand-write `anim:"rise"`/`anim:"fade"` on every layer.
+- Enforced by `make direction-floor` (opt-in `TASTE=1 make author-check`), the ambition floor that fails
+  a plain slideshow; codes: `no-kinetic-type`, `plain-slideshow`.
+- Checkable action: did you run `make blueprints` before writing `anim:` on a blank layer?
+
 **You will open a blank JSON and write `anim: "rise"` and `anim: "fade"`, and it will pass every gate.
 Don't. Run `make blueprints` FIRST and start from a directed beat.** This is not a suggestion about
 efficiency. It is the #1 authoring failure in this repo, named as such in `CLAUDE.md`, proven twice on the
