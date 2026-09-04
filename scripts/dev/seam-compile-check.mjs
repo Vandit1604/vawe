@@ -44,5 +44,5 @@ await browser.close();
 
 const fails = results.filter((r) => !r.ok);
 for (const r of results) console.log(`${r.ok ? 'ok  ' : 'FAIL'}  ${r.name.padEnd(20)} ${r.ok ? '' : r.log}`);
-console.log(`\n${results.length - fails.length}/${results.length} compiled` + (fails.length ? `; FAILURES: ${fails.map((f) => f.name).join(', ')}` : ' — all clean'));
+console.log(`\n${results.length - fails.length}/${results.length} compiled` + (fails.length ? `; FAILURES: ${fails.map((f) => f.name).join(', ')}` : ', all clean'));
 process.exit(fails.length ? 1 : 0);
