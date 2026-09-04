@@ -8,7 +8,7 @@
 //
 // cutStyle ALWAYS returns the full style set (identity values in the steady state) so a property
 // written during the cut can never stick, byte-identical DOM for any render order.
-import { clamp01, lerp, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, wipe, circleWipe, clockWipe, accel, decel, speedRamp } from './motion.js';
+import { clamp01, lerp, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, wipe, circleWipe, clockWipe, accel, decel, speedRamp, easeOutSpring } from './motion.js';
 import { defineRegistry, withBlurb, blurbsOf } from './registry.js';
 
 export const TIMINGS = {
@@ -22,6 +22,9 @@ export const TIMINGS = {
   rush: (p) => accel(clamp01(p)),
   brake: (p) => decel(clamp01(p)),
   ramp: (p) => speedRamp(clamp01(p)),
+  // damped-spring: overshoots past 1 around p~0.69 then settles, the one shape a plain ease cannot
+  // give a landing. Reach for it on a badge/chip/number arriving with physical life.
+  spring: (p) => easeOutSpring(clamp01(p)),
 };
 
 export const IDENT = { opacity: '1', transform: 'none', filter: 'none', clipPath: 'none', WebkitClipPath: 'none', maskImage: 'none', WebkitMaskImage: 'none', maskSize: 'auto', maskPosition: '0% 0%', WebkitMaskPosition: '0% 0%' };
@@ -317,6 +320,7 @@ export const TIMING_BLURBS = {
   rush: 'accelerates away. The exit curve: it leaves faster than it left rest',
   brake: 'decelerates in. The entrance curve: it arrives slower than it set off',
   ramp: "the editor's slow-fast-slow speed ramp. The one to reach for on a whip or a camera throw",
+  spring: 'a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number',
 };
 
 export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming', blurbs: TIMING_BLURBS,

@@ -1,6 +1,6 @@
 {
-  "total": 684,
-  "previewed": 332,
+  "total": 685,
+  "previewed": 333,
   "families": 54,
   "tags": [
     [
@@ -37,7 +37,7 @@
     ],
     [
       "cuts[]/per-layer",
-      8
+      9
     ],
     [
       "exit",
@@ -1197,7 +1197,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 8,
+      "count": 9,
       "undescribed": 0,
       "entries": [
         {
@@ -1254,6 +1254,13 @@
           "stem": "cut-timings--snappy",
           "desc": "decisive, no overshoot. The cut lands and stops",
           "scene": "/assets/effects/cut-timings--snappy.json",
+          "noPreview": null
+        },
+        {
+          "name": "spring",
+          "stem": "cut-timings--spring",
+          "desc": "a damped-spring overshoot that settles, physical life for something landing · a badge, a chip, a number",
+          "scene": "/assets/effects/cut-timings--spring.json",
           "noPreview": null
         }
       ]

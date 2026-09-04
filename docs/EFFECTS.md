@@ -251,6 +251,7 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 | `rush` | accelerates away. The exit curve: it leaves faster than it left rest |
 | `smooth` | eases at both ends: reads as travel rather than as arrival |
 | `snappy` | decisive, no overshoot. The cut lands and stops |
+| `spring` | a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number |
 
 ## GSAP exits  `[exit]`
 
@@ -1092,4 +1093,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_684 effects across 54 families. Regenerate: `make effects`._
+_685 effects across 54 families. Regenerate: `make effects`._

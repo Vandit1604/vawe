@@ -6,7 +6,7 @@ import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, po
   anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/time.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type.js';
-import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites } from '../../core/cuts.js';
+import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS } from '../../core/cuts.js';
 import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts.js';
 import { killedBy, capabilitiesOf, checkCuts } from '../../core/ancestor-kills.js';
 import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/clips.js';
@@ -870,6 +870,11 @@ ok('speedRamp slow at both ends', speedRamp(0.1) < 0.1 && speedRamp(0.9) > 0.9);
 ok('speedRamp monotone', (() => { let prev = 0; for (let t = 0; t <= 1.001; t += 0.01) { const v = speedRamp(t); if (v < prev - 1e-9) return false; prev = v; } return true; })());
 ok('speedRamp peak shifts', speedRamp(0.3, { peak: 0.2 }) > speedRamp(0.3, { peak: 0.8 }));
 ok('EASINGS has ramps', typeof EASINGS.ramp === 'function' && typeof EASINGS.rush === 'function' && typeof EASINGS.brake === 'function');
+
+// TIMINGS.spring: damped-spring cut timing, endpoints exact and it overshoots past 1 once mid-curve
+ok('TIMINGS.spring starts at 0', TIMINGS.spring(0) === 0);
+ok('TIMINGS.spring ends at 1', Math.abs(TIMINGS.spring(1) - 1) < 1e-6);
+ok('TIMINGS.spring overshoots past 1', (() => { for (let t = 0.01; t < 1; t += 0.01) if (TIMINGS.spring(t) > 1) return true; return false; })());
 
 // optical tracking: em string, monotone tighter as size grows
 ok('trackingFor em string', trackingFor(16).endsWith('em'));
