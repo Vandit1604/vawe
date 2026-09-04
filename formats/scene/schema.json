@@ -856,7 +856,19 @@
       "lens",
       "flashWhite",
       "cinematicZoom",
-      "portal"
+      "portal",
+      "barnDoor",
+      "clockWipe",
+      "irisRound",
+      "shatterGlitch",
+      "zoomBlur",
+      "swirlWarp",
+      "rippleWave",
+      "pixelDissolve",
+      "blindsWipe",
+      "burnThrough",
+      "spinZoom",
+      "lumaWipe"
      ]
     },
     "dur": {

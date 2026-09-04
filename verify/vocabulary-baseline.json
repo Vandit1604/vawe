@@ -274,6 +274,9 @@
   "MECHANISMS",
   "FAMILIES"
  ],
+ "core/transitions/units-house.js": [
+  "HOUSE_UNITS"
+ ],
  "core/transitions/units.js": [
   "UNITS"
  ],

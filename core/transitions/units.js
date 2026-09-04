@@ -33,7 +33,9 @@ ${body}
   return vec4(col.rgb, 1.0);
 }`;
 
-export const UNITS = [
+import { HOUSE_UNITS } from './units-house.js';
+
+const CORE_UNITS = [
   { name: 'fade', family: 'blend', author: 'vawe', license: 'internal', source: 'vawe',
     blurb: 'flat cross-dissolve of both beats. The universal fallback every seam degrades to with no WebGL or a blank raster',
     glsl: vawe(`  col = mix(getFrom(uv), getTo(uv), p);`) },
@@ -173,5 +175,7 @@ export const UNITS = [
   col.rgb += glow * rim * (0.5 + 0.9 * sin(PI * p)) * u_intensity;`) },
 ];
 
+// The 14 originals first (their fx indices never shift), then the hand-written house set.
+export const UNITS = [...CORE_UNITS, ...HOUSE_UNITS];
 export const SEAM_FX = UNITS.map((u) => u.name);
 export const SEAM_BLURBS = Object.fromEntries(UNITS.map((u) => [u.name, u.blurb]));

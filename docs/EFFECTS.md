@@ -967,20 +967,32 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 | name | what / when |
 |---|---|
+| `barnDoor` | two doors split from the centre outward along dir, opening onto the next beat. A confident, symmetric reveal |
+| `blindsWipe` | slatted blinds sweep across the frame along dir, revealing the next beat. A crisp graphic wipe |
+| `burnThrough` | the frame burns away along a noisy front with a hot ember edge, revealing the next beat through the fire. A dramatic organic pivot |
 | `cinematicZoom` | dive-in zoom into a screen |
+| `clockWipe` | a hand sweeps around the frame like a clock, wiping the next beat in behind it with a soft glowing edge. A timed, mechanical reveal |
 | `crossWarp` | both beats drag toward the centre and swap through a soft noise front. A wipe with grit, for organic brands and dark scenes |
 | `dispersion` | prism channel-split across the seam along a seeded axis, peaking mid-way, optical, techy pivots |
 | `dissolve` | grainy film dissolve, each pixel flipping as a noise front passes it, time/place change |
 | `fade` | flat cross-dissolve of both beats. The universal fallback every seam degrades to with no WebGL or a blank raster |
 | `flashWhite` | white flash on an energy pivot |
+| `irisRound` | a soft circle opens from the centre with a bright rim, irising the next beat into view. A classic spotlight reveal |
 | `lens` | one moving optical centre bends BOTH beats through a single lens, with a warm flare. Premium product glamour, dark scenes |
+| `lumaWipe` | the next beat bleeds through the darkest parts of the current one first, along a soft noisy threshold. A cinematic dissolve with grain |
+| `pixelDissolve` | the frame coarsens into big pixels at the midpoint then sharpens into the next beat. A retro digital dissolve |
 | `portal` | glowing portal reveal (once) |
 | `push` | both beats shove together toward dir, the arriving one following the leaving one off screen, dir-aware basic |
+| `rippleWave` | concentric waves ripple out from the centre as the frame dissolves, like a drop hitting water. Soft, calming links |
 | `sdfIris` | the arriving beat revealed through an expanding seeded polygon iris (star, hex, diamond or triangle) with a bright rim. Playful reveal, the shape is the personality |
+| `shatterGlitch` | the frame breaks into blocks whose RGB channels tear apart and flicker, then snap back clean. A hard digital pivot |
 | `slide` | the arriving beat slides in over a held outgoing one (cover), dir-aware, the basic every tool has |
+| `spinZoom` | the outgoing beat spins and scales out while the incoming beat spins in. A kinetic whip between shots |
+| `swirlWarp` | a vortex twists the centre of the frame and unwinds into the next beat, strongest mid-cut. Organic, dreamy pivots |
 | `uncover` | the leaving beat slides off toward dir and reveals a held arriving beat under it, dir-aware basic |
 | `whipPan` | momentum swipe between beats |
 | `wipe` | a soft-edged line sweeps toward dir, the arriving beat revealed behind it, playful, "notice the cut" |
+| `zoomBlur` | both beats streak toward the centre in a radial blur and cross-dissolve. A punchy push between shots |
 
 ## Shader stings  `[transition]`
 
@@ -1080,4 +1092,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_672 effects across 54 families. Regenerate: `make effects`._
+_684 effects across 54 families. Regenerate: `make effects`._

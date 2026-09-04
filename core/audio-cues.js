@@ -38,4 +38,8 @@ export const SEAM_CUE = {
   fade: 'bloom', dissolve: 'bloom', slide: 'whoosh', uncover: 'whoosh', wipe: 'whoosh',
   crossWarp: 'whoosh', push: 'impact', whipPan: 'whoosh', sdfIris: 'bloom', dispersion: 'sparkle',
   lens: 'droplet', flashWhite: 'impact', cinematicZoom: 'drop', portal: 'bloom',
+  // the hand-written house set (core/transitions/units-house.js), a cue per fx by character.
+  barnDoor: 'whoosh', clockWipe: 'whoosh', irisRound: 'bloom', shatterGlitch: 'sparkle',
+  zoomBlur: 'whoosh', swirlWarp: 'whoosh', rippleWave: 'droplet', pixelDissolve: 'sparkle',
+  blindsWipe: 'whoosh', burnThrough: 'impact', spinZoom: 'whoosh', lumaWipe: 'bloom',
 };
