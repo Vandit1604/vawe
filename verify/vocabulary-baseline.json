@@ -49,11 +49,13 @@
   "COMPOSITIONS",
   "COMPOSITION_BLURBS"
  ],
- "core/cuts.js": [
-  "TIMINGS",
+ "core/cuts/presentations.js": [
   "IDENT",
   "DIRS",
-  "PRESENTATIONS",
+  "PRESENTATIONS"
+ ],
+ "core/cuts/timings.js": [
+  "TIMINGS",
   "TIMING_BLURBS"
  ],
  "core/effector.js": [
