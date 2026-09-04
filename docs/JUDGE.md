@@ -6,6 +6,16 @@ group: process
 
 # The vision judge: the gate that SEES
 
+## AGENT SUMMARY
+
+- `make judge` is the only gate that SEES: static gates read the DOM/JSON, this reads the rendered
+  key frames against the brand's house-style and a 7-dimension craft rubric.
+- Score each frame 1-5 on all 7 dimensions; `PASS` only if every frame clears every dimension,
+  otherwise `FIX` + a prioritized list.
+- Enforced by `[eye]`: nothing but the agent's own look, opt-in, run on the near-final cut after the
+  static ladder is green.
+- Checkable action: if your eye catches a flaw, it's a FIX. Never rationalize a flaw you notice.
+
 `validate`/`critique`/`slop`/`audit` are **static**: they read the DOM/JSON. None can see whether the
 mascot is faithful, the headline is centered, or an underline hits its word. That needs an eye. `make judge`
 is that gate: it preps the key frames + the brand's house-style + a craft rubric, and the **agent-in-the-loop
@@ -43,12 +53,9 @@ Then the agent **reads the sheet against the rubric** and returns a structured v
 
 It sees one film, and the agent running it knows which version it just authored. Both limits are fatal to
 the question "is this better than what I had". For that you need a blind A/B judge: two cuts, paired
-beat by beat, arms hidden, three judges. **It was built, and then it was cut.** `make ab`, `make ab-record`
-and `CRAFT/AB-JUDGE.md` shipped on 2026-07-29 (`05a5123`) and were removed on 2026-08-05 (`cc2dfc2`), in a
-commit that cut six tools on the ground that none of them had ever been the reason a video looked better.
-This file and [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md) then spent four days saying the judge had never
-been written, which is a harder thing to notice than a dangling link and a worse thing to believe: it
-turns a decision into an oversight. Until one is built again, tile the two renders with `make compare`
+beat by beat, arms hidden, three judges. **No such judge exists today.** `make ab`, `make ab-record` and
+`CRAFT/AB-JUDGE.md` were removed on 2026-08-05 (`cc2dfc2`), along with five other tools that had never
+been the reason a video looked better. Until one is built again, tile the two renders with `make compare`
 and judge them by eye, knowing you know which arm is which.
 
 <!-- doc-refs-allow: CRAFT/AB-JUDGE.md · named here only to record that this file was built and then cut -->
@@ -67,3 +74,10 @@ claimed. That was right, and it stays right.
 Opt-in, but the **final taste check before shipping**, run it on the near-final cut, after the static
 ladder is green. It catches what the others structurally can't; on the argus film it flagged a stat with a
 dropped unit and a scattered beat that `critique` (0 findings) and `slop` (clean) both missed.
+
+## Provenance
+
+**Do not re-add:** the claim that a blind A/B judge was never built. It shipped (`05a5123`,
+2026-07-29) and was removed (`cc2dfc2`, 2026-08-05); this file and
+[`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md) once described the removal as if it had never existed,
+which turns a decision into an oversight.

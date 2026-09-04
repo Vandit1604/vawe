@@ -9,6 +9,16 @@ confirm: "is the motion hand-keyed with real physics, not a named preset firing 
 
 # MOTION-CRAFT: the stored rules of great motion animation
 
+## AGENT SUMMARY
+
+- Vary timing per beat by intent (ambient 0.8-1.2s, thesis 0.5s, payoff 0.25-0.35s); ease out on
+  entrances, ease in on exits; stagger 60-120ms in hierarchy order; settle and hold before the exit;
+  one hero motion per beat.
+- Enforced by codes: `enter-and-retreat`, `front-loaded`, `linear-motion`, `monotone-timing`,
+  `motion-monotony`, `profile`, `shared-start`, `stagger-total`, `tempo-flat`, `uneven-cascade`, via
+  `make direct` / `motion-audit`. All warn; none block.
+- Checkable action: is the motion hand-keyed with real physics, not a named preset firing once?
+
 > **How should it FEEL, and what not to do?** See [`CRAFT/TASTE-RULES.md`](CRAFT/TASTE-RULES.md). The cause→feeling layer and the failure-modes catalog. This file is the mechanics; that one is the taste.
 > **Which effect for which FEELING (intent-first), grounded in design theory?** See [`CRAFT/SELECTION.md`](CRAFT/SELECTION.md). This file is the effect→use index; that one is the intent→effect picker + the named reference profiles (linear/apple/nike/a24/…).
 > **Just want the copy-paste JSON?** See [`MOTION-RECIPES.md`](MOTION-RECIPES.md). The atomic recipe index (one line per motion pattern: slug · exact JSON · tags). This file is the rules; that one applies them.
@@ -183,9 +193,9 @@ This is not a new capability (the engine ships it) it just has to be USED.
   thing with weight passes its target and settles back. A number has no mass, and a count that springs
   flies PAST its true figure and falls back to it, so for a few frames the film shows a number that is
   not true. A film that says 1,822 contributions and paints 1,900 on the way has broken the one content
-  rule this repo does not bend ("use real, accurate figures"). This line used to say the opposite, and
-  said it twice; `core/layers/count.js` obeys whatever ease it is given, so the doc was the whole bug.
-  Reach for `easeOutExpo` or `easeOutQuart` on a count: the deceleration IS the weight.
+  rule this repo does not bend ("use real, accurate figures"): `core/layers/count.js` runs the value
+  through whatever ease it is handed, so overshoot is never absorbed. Reach for `easeOutExpo` or
+  `easeOutQuart` on a count: the deceleration IS the weight.
 - **The theme owns the personality, and it now applies.** `theme.motion`
   `{easing,bounce,settle,enter,durationScale,stagger}` scales every default at render time (a punchy brand
   tightens `durationScale`/`stagger`; a calm one stretches them). It was defined-but-unwired before; it is
@@ -437,3 +447,10 @@ Caption styles (`captionStyle:`, core/captions.js; word-timed, degrade to length
 - **pillKaraoke**: the loudest, most social; fast hype cuts over busy footage, never over dense UI.
 - **weightShift**: the quietest; product demos and calm brand films; needs a multi-weight face.
 - **clipWipe**: lyric-video energy for one hero line; only on themes whose accent clears 4.5:1.
+
+## Provenance
+
+**Do not re-add:** overshoot/spring easing as a recommendation for a `count` layer. This doc endorsed
+it twice; `core/layers/count.js` obeys whatever ease it is given, so an overshoot ease paints a number
+that is not true for several frames ([`MISTAKES.md`](MISTAKES.md) #385). Use `easeOutExpo` /
+`easeOutQuart` on a count instead, never `spring` / `easeOutBack` / `easeOutElastic`.

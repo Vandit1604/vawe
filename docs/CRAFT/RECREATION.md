@@ -6,6 +6,15 @@ group: story
 
 # RECREATION: recreate a reference video, end to end
 
+## AGENT SUMMARY
+
+- Recreating a reference (or reflecting a live site) is an ordered loop: measure, capture, build,
+  score, beat-sync, verify. Never guess from a memory of the reference.
+- Capture real UI (`make capture` / `make sections`); hand-write HTML only for connective tissue
+  (hook, CTA, counters). Sample each beat's entrance and exit, never its settled middle frame.
+- Checkable action: did you sample the reference's entrance and exit frames, not its settled middle
+  frame, before authoring the beat?
+
 You are handed a video ("make ours look like this") and there is no HTML to copy, a reference is
 pixels, not a scene. This is the ordered loop that turns those pixels into a scene of ours that reads
 like the same film. It ties together the measurement tools, the motion director, the capture pipeline,
