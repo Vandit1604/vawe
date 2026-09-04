@@ -7,7 +7,7 @@
 // Usage: node scripts/gates/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
-import { writeReceipt } from '../lib/receipt.mjs';
+import { writeReceipt, readReceipt } from '../lib/receipt.mjs';
 import path from 'node:path';
 import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
@@ -53,8 +53,20 @@ const verdictArg = arg('--verdict', null);
 if (verdictArg) {
   const v = String(verdictArg).toUpperCase();
   if (v !== 'PASS' && v !== 'FIX') { console.error('--verdict must be PASS or FIX'); process.exit(2); }
+  // A verdict may only be recorded against a sheet THIS tool actually produced for THIS cut. Without
+  // this, `--verdict PASS` could be called first, with no sheet ever rendered and nothing ever looked
+  // at, and ledger-add would accept it. So require a prior, non-stale prep receipt whose sheet exists on
+  // disk (the prep branch below runs ffprobe + renders the frames, so a garbage mp4 cannot have produced
+  // one). This cannot prove the agent LOOKED, a script never can, but it forces the real render of the
+  // frames the agent is meant to score, and the critic panel cross-checks the eye.
+  const prep = readReceipt('judge', inp);
+  const sheet = prep.exists && prep.receipt && prep.receipt.sheet;
+  if (!prep.exists || prep.stale || !sheet || !fs.existsSync(sheet)) {
+    console.error(`✗ no sheet to judge${prep.exists && prep.stale ? ' for this cut (the prep is for an older edit)' : ''}. Run \`make judge D=${inp}\` first to render the key frames, LOOK at them against the rubric, then record the verdict.`);
+    process.exit(1);
+  }
   const fixes = arg('--fixes', '');
-  writeReceipt('judge', inp, { verdict: v, fixes, at: new Date().toISOString().slice(0, 10) });
+  writeReceipt('judge', inp, { verdict: v, fixes, sheet, at: new Date().toISOString().slice(0, 10) });
   console.log(v === 'PASS'
     ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make ledger-add D=${inp}).`
     : `  ✓ judge verdict recorded: FIX${fixes ? ` (${fixes})` : ''}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
