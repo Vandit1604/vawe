@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 import { population } from '../lib/census.mjs';
+import { gateFindings } from '../lib/findings.mjs';
+const f = gateFindings();
 const SFX = path.join(repoRoot, 'assets/sfx');
 
 // role prefix → the longest it may be, in seconds, and why that number.
@@ -69,7 +71,7 @@ function measure(file) {
   return { file: frames / rate, audible: (last + 1) / rate };
 }
 
-if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make audio`). Nothing to check'); process.exit(0); }
+if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make audio`). Nothing to check'); f.emit(); process.exit(0); }
 // assets/sfx is entirely gitignored, so a checkout without it swept zero cues and said nothing was
 // wrong with them. population() states N and refuses a checkout that should hold more.
 const files = population('sfx audit', { dir: 'assets/sfx', ext: '.wav', quiet: true }).names;
@@ -88,7 +90,12 @@ for (const f of files) {
   if (!ok) bad.push({ name, why: `${m.audible.toFixed(2)}s of audible signal exceeds the ${cap}s cap, ${why}` });
 }
 console.log('');
-if (!bad.length) { console.log('✓ every sound effect is the shape its role claims'); process.exit(0); }
-for (const b of bad) console.log(`  ✗ ${b.name}: ${b.why}`);
+if (!bad.length) { console.log('✓ every sound effect is the shape its role claims'); f.emit(); process.exit(0); }
+for (const b of bad) {
+  console.log(`  ✗ ${b.name}: ${b.why}`);
+  f.fail('sfx-shape', `${b.name}: ${b.why}`, { at: `assets/sfx/${b.name}.wav`,
+    fix: 're-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node scripts/media/audio-bake.mjs --force`)' });
+}
 console.log('\nRe-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node scripts/media/audio-bake.mjs --force`).');
-process.exit(1);
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

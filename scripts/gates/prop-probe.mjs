@@ -34,6 +34,7 @@ import { SHARED_PROPS } from '../../core/layers/vocabulary.js';
 import { auditedProps } from '../../core/prop-audit.js';
 import { KNOBS } from '../../core/knobs.js';
 import { guardsOf } from '../../core/props.js';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -380,17 +381,27 @@ const all = [...ownDead, ...kitDead];
 const live = all.filter((f) => !waiverOf(f));
 const waived = all.filter((f) => waiverOf(f));
 
+const findingsOut = gateFindings();
 console.log(`PROP PROBE · ${types.length} types · ${all.length} dead · ${waived.length} waived`);
 const byType = new Map();
 for (const f of live) byType.set(f.type, [...(byType.get(f.type) || []), label(f)]);
 for (const [t, ps] of [...byType].sort()) console.log(`  ${t.padEnd(13)} ${ps.join(', ')}`);
+for (const f of live) findingsOut.fail('dead-prop', `${f.type}: ${label(f)} set and never read`, {
+  at: `${f.type}.${f.prop}${f.at ? `@${f.at}` : ''}`,
+  fix: 'fix the reader, delete the declaration, or waive it with a reason in WAIVERS (scripts/gates/prop-probe.mjs)',
+});
 for (const e of errors) console.log(`  ! ${e.type}: ${e.error}`);
+for (const e of errors) findingsOut.fail('probe-boot-error', `${e.type}: ${e.error}`, {
+  at: e.type,
+  fix: 'the probe scene did not boot for this type: fix the base layer or the probe value, this type was NOT checked',
+});
 if (errors.length) console.log('\nA type whose probe scene did not boot was NOT checked. Fix the base layer or the value.');
 if (live.length) {
   console.log(`\n${live.length} prop${live.length === 1 ? '' : 's'} set and never read. Each one is a value the`
     + ` engine accepts and ignores: fix the reader, delete the declaration, or waive it with a reason`
     + ` in WAIVERS (scripts/gates/prop-probe.mjs).`);
 }
-process.exit(live.length || errors.length ? 1 : 0);
+findingsOut.emit();
+process.exit(findingsOut.records.some((r) => r.severity === 'error') ? 1 : 0);
 
 }   // isMain
