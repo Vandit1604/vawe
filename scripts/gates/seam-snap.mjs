@@ -21,6 +21,8 @@ import { flattenLayers } from '../lib/layers.mjs';
 import { lowerScene } from '../../core/transitions-lower.js';
 
 import { gradeable } from './tile.mjs';
+import { gateFindings } from '../lib/findings.mjs';
+const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/gates/seam-snap.mjs <scene.json>'); process.exit(2); }
@@ -112,7 +114,7 @@ const starts = [...new Set(flat.filter((l) => l.track !== 0).map((l) => l.start 
 let last = -9; for (const t of starts) { if (t - last > 1.2 && t > 0.3) bounds.add(t); last = t; }
 const seams = [...bounds].map((t) => Math.round(t * fps)).filter((n) => n > 2 && n < total - 2).sort((a, b) => a - b);
 
-if (!seams.length) { console.log('✓ seam-snap: no transition boundaries to sample (single-beat scene)'); process.exit(0); }
+if (!seams.length) { console.log('✓ seam-snap: no transition boundaries to sample (single-beat scene)'); f.emit(); process.exit(0); }
 
 // ── for each boundary, compare the seam window to the frames just outside it ──────────────────────
 // A flash is a luminance dip PRESENT at the seam and ABSENT 6 frames to either side. Comparing to the
@@ -162,13 +164,26 @@ if (tiles.length) {
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
 console.log(`  seam-snap · ${seams.length - unread.length} of ${seams.length} transition boundary(ies) read · sheet → ${SHEET}`);
-for (const nt of unread) console.error(`  ? boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked.`);
-if (!findings.length && !unread.length) { console.log(`✓ seam-snap clean. No luminance flash at any transition (read ${SHEET} to confirm the eye agrees)`); process.exit(0); }
+for (const nt of unread) {
+  console.error(`  ? boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked.`);
+  f.warn('seam-unread', `boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked`, { at: `frame ${nt}` });
+}
+if (!findings.length && !unread.length) {
+  console.log(`✓ seam-snap clean. No luminance flash at any transition (read ${SHEET} to confirm the eye agrees)`);
+  f.emit();
+  process.exit(0);
+}
 if (!findings.length) {
   console.error(`\n✗ seam-snap: ${unread.length} of ${seams.length} boundary(ies) could not be read out of out/${name}.mp4.`);
   console.error('  No flash was found at the ones that decoded, and that is not a verdict on the ones that did not.');
+  f.emit();
   process.exit(2);
 }
-for (const f of findings) console.error(`  ✗ flash at ${f.t}s (frame ${f.frame}): luma dips to ${f.dip} vs ${f.outside} just outside. A black/dark flash in the transition overlap (docs/MISTAKES.md #144).`);
+for (const seam of findings) {
+  console.error(`  ✗ flash at ${seam.t}s (frame ${seam.frame}): luma dips to ${seam.dip} vs ${seam.outside} just outside. A black/dark flash in the transition overlap (docs/MISTAKES.md #144).`);
+  f.fail('seam-flash', `flash at ${seam.t}s (frame ${seam.frame}): luma dips to ${seam.dip} vs ${seam.outside} just outside`,
+    { at: `frame ${seam.frame}`, doc: 'docs/MISTAKES.md#144' });
+}
 console.error(`\n✗ seam-snap: ${findings.length} transition flash(es). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
+f.emit();
 process.exit(1);

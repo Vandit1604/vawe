@@ -16,6 +16,7 @@ import { sceneDims } from '../../core/safe.js';
 // other, and how a gate goes blind without saying so (MISTAKES #159).
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'verify', 'snap');
@@ -88,8 +89,9 @@ if (SAVE) { fs.writeFileSync(file, JSON.stringify(sig)); console.log(`✓ baseli
 if (!fs.existsSync(file)) { console.error(`no baseline for ${m}, run with --save first`); process.exit(2); }
 const base = JSON.parse(fs.readFileSync(file, 'utf8'));
 const diffs = diffSig(base, sig);
+const f = gateFindings();
 console.log(`\n==== SNAP DIFF · ${m} (${frames.length} frames vs baseline) ====`);
-if (!diffs.length) { console.log('✓ IDENTICAL: no DOM/layout change across sampled frames'); process.exit(0); }
+if (!diffs.length) { console.log('✓ IDENTICAL: no DOM/layout change across sampled frames'); f.emit(); process.exit(0); }
 for (const d of diffs.slice(0, 60)) console.log('  ' + d);
 if (diffs.length > 60) console.log(`  … +${diffs.length - 60} more`);
 // EXIT 1. A baseline diff is the gate's only finding, and printing it under a zero exit made every
@@ -100,4 +102,6 @@ if (diffs.length > 60) console.log(`  … +${diffs.length - 60} more`);
 console.error(`\n△ ${diffs.length} change(s): the sampled frames no longer match verify/snap/${m}.json.`);
 console.error('  If every change is intended, re-baseline it deliberately: '
   + `node scripts/gates/scene-snap.mjs ${m} --save`);
-process.exit(1);
+for (const d of diffs) f.fail('scene-snap-diff', d, { at: m, fix: `intended? re-baseline: node scripts/gates/scene-snap.mjs ${m} --save` });
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

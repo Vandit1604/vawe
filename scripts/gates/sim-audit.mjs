@@ -23,6 +23,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { sourceHash } from '../sim/provenance.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SIMS = path.join(repoRoot, 'sims');
@@ -137,16 +138,22 @@ console.log(`   bakes: ${bakes.length}${bakes.length ? '  ' + bakes.join(', ') :
 if (!entrySims.length) console.log('\n   (no sims: nothing to check)');
 console.log('');
 
+const f = gateFindings();
 if (!problems.length) {
   console.log('='.repeat(72));
   // The old line claimed three things unconditionally. `assets/baked/` is gitignored, so a checkout with
   // none printed "every bake matches its source" having compared no bakes at all.
   console.log(`✓ sim audit OK, ${entrySims.length ? `all ${entrySims.length} sim(s) seeded` : 'no sims to seed-check'}`
     + `, ${bakes.length ? `all ${bakes.length} bake(s) match their source and their sequences are intact` : 'NO bakes present (assets/baked is gitignored) so nothing was compared against a source'}`);
+  f.emit();
   process.exit(0);
 }
 console.log('='.repeat(72));
 console.log(`SIM AUDIT FAILED (${problems.length})\n`);
-for (const p of problems) console.log(`  ✗ [${p.kind}] ${p.where}\n      ${p.msg}\n`);
+for (const p of problems) {
+  console.log(`  ✗ [${p.kind}] ${p.where}\n      ${p.msg}\n`);
+  f.fail(`sim-${p.kind}`, p.msg, { at: p.where, doc: 'sims/README.md' });
+}
 console.log('Determinism moved to bake time; it did not disappear (sims/README.md).');
-process.exit(1);
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

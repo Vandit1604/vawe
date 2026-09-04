@@ -19,6 +19,7 @@ import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { marksOf } from '../../core/junctions.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv.find((a) => a.endsWith('.json'));
@@ -147,15 +148,26 @@ const full = score(fullRun.pairs);
 const bare = score(bareRun.pairs);
 await browser.close(); server.close();
 
+// This gate is an INSTRUMENT, never a check: it has no pass/fail threshold and must not gain one (see
+// the comment at the bottom of this file). So every fact it reports is `info`, never `fail`/`warn`, and
+// the exit code stays 0 no matter what it measures.
+const f = gateFindings();
 const name = path.basename(abs, '.json');
 console.log(`\n  MOTION SPLIT · ${name}\n`);
 console.log(`  with the authored ground   motion ${full.median.toFixed(2)}   ${Math.round(full.still * 100)}% still`);
 console.log(`  with the ground removed    motion ${bare.median.toFixed(2)}   ${Math.round(bare.still * 100)}% still`);
+f.note('motion-split', `with the authored ground: motion ${full.median.toFixed(2)}, ${Math.round(full.still * 100)}% still; with the ground removed: motion ${bare.median.toFixed(2)}, ${Math.round(bare.still * 100)}% still`,
+  { fullMedian: full.median, fullStill: full.still, bareMedian: bare.median, bareStill: bare.still });
 const groundShare = full.median > 0 ? Math.max(0, 1 - bare.median / full.median) : 0;
 console.log(`\n  the GROUND is ${Math.round(groundShare * 100)}% of this film's measured motion.`);
 console.log(`  the LAYERS deliver ${bare.median.toFixed(2)}, and that is the number to compare against a reference.`);
-if (groundShare > 0.6)
+f.note('ground-share', `the ground is ${Math.round(groundShare * 100)}% of this film's measured motion; the layers deliver ${bare.median.toFixed(2)}`,
+  { groundShare });
+if (groundShare > 0.6) {
   console.log(`\n  ⚠ most of what this film measures is its backdrop. That is not wrong, and it is not the\n    content moving. \`make grammar\` has the band the references sit in.`);
+  f.note('ground-dominant', 'most of what this film measures is its backdrop, not the content moving',
+    { fix: '`make grammar` has the band the references sit in' });
+}
 
 // THE SHAPE, NOT A SCORE. Both numbers above are BOUNDS: they say how much this film moves and whose
 // motion it is, and neither says WHEN. Bruce Block's argument (docs/RESEARCH/MOTION-CANON.md, ADOPT 3)
@@ -192,3 +204,6 @@ console.log(`  Read the SHAPE, not the height: does it rise into the payoff, or 
   the middle? A film whose peak sits in its middle ends twice. Nothing scores this and nothing will:
   docs/CRAFT/DIRECTION.md section 2, "accelerate toward the climax".`);
 console.log('');
+f.note('energy-shape', `peak ${peak.toFixed(2)} at ${((shape.indexOf(peak) * bareRun.step) / FPS).toFixed(1)}s over ${shape.length} samples, ${dur.toFixed(1)}s runtime`,
+  { peak, peakAt: (shape.indexOf(peak) * bareRun.step) / FPS, samples: shape.length });
+f.emit();

@@ -16,7 +16,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { gateFindings } from '../lib/findings.mjs';
 
+const f = gateFindings();
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const format = process.argv[2];
 const dataArg = process.argv[3];
@@ -99,7 +101,9 @@ for (const n of samples) {
     const dir = '/tmp/purity_fail'; fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, `f${n}_forward.html`), truth);
     fs.writeFileSync(path.join(dir, `f${n}_seeked.html`), a);
-    console.error(`✗ frame ${n} (${(n / meta.fps).toFixed(1)}s) differs from the FORWARD-ONLY render. A later frame left state behind; diff: ${dir}/f${n}_{forward,seeked}.html`);
+    const msg = `frame ${n} (${(n / meta.fps).toFixed(1)}s) differs from the FORWARD-ONLY render. A later frame left state behind; diff: ${dir}/f${n}_{forward,seeked}.html`;
+    console.error(`✗ ${msg}`);
+    f.fail('purity-forward-mismatch', msg, { at: `frame ${n}` });
   }
   // Dirty the state with frames that actually RUN something, not just far-away ones. The old
   // scrambler used frame 0 or the last frame; at both, a layer mid-timeline is off-window and
@@ -113,10 +117,14 @@ for (const n of samples) {
     const dir = '/tmp/purity_fail'; fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, `f${n}_a.html`), a);
     fs.writeFileSync(path.join(dir, `f${n}_b.html`), b);
-    console.error(`✗ frame ${n} (${(n / meta.fps).toFixed(1)}s) NOT pure, render-order-dependent DOM; diff: ${dir}/f${n}_{a,b}.html`);
+    const msg = `frame ${n} (${(n / meta.fps).toFixed(1)}s) NOT pure, render-order-dependent DOM; diff: ${dir}/f${n}_{a,b}.html`;
+    console.error(`✗ ${msg}`);
+    f.fail('purity-render-order', msg, { at: `frame ${n}` });
   }
 }
 await browser.close(); server.close();
 
-if (fails) { console.error(`\n✗ purity FAILED: ${fails}/${samples.length} frames depend on render order`); process.exit(1); }
-console.log(`✓ purity OK: ${samples.length} sampled frames produce identical DOM regardless of render order (${format}, ${meta.duration.toFixed(1)}s)`);
+if (fails) console.error(`\n✗ purity FAILED: ${fails}/${samples.length} frames depend on render order`);
+else console.log(`✓ purity OK: ${samples.length} sampled frames produce identical DOM regardless of render order (${format}, ${meta.duration.toFixed(1)}s)`);
+f.emit();
+process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

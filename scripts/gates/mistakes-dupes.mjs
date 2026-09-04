@@ -13,6 +13,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { gateFindings } from '../lib/findings.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MISTAKES_PATH = path.join(__dirname, '..', '..', 'docs', 'MISTAKES.md');
@@ -75,6 +76,7 @@ function jaccard(a, b) {
 const THRESHOLD = 0.75;
 
 function main() {
+  const f = gateFindings();
   const text = readFileSync(MISTAKES_PATH, 'utf8');
   const entries = parseEntries(text);
   const tokens = entries.map((e) => tokenize(e.title));
@@ -93,16 +95,19 @@ function main() {
 
   if (hits.length === 0) {
     console.log(`mistakes-dupes: OK, no heading pairs >= ${THRESHOLD} Jaccard over ${entries.length} entries.`);
+    f.emit();
     return;
   }
 
   hits.sort((x, y) => y.score - x.score);
   console.log(`mistakes-dupes: ${hits.length} suspect pair(s) at >= ${THRESHOLD} Jaccard:\n`);
   for (const { a, b, score } of hits) {
-    console.log(`  ${score.toFixed(2)}  #${a.num} ${a.title}  (line ${a.line})`);
-    console.log(`         #${b.num} ${b.title}  (line ${b.line})`);
+    f.fail('mistakes-dupe',
+      `${score.toFixed(2)}  #${a.num} ${a.title} (line ${a.line})  ~  #${b.num} ${b.title} (line ${b.line})`,
+      { at: `docs/MISTAKES.md:${a.line}`,
+        fix: 'if a deliberate cross-reference, not a duplicate, add the pair to ALLOWLIST in this file with a reason' });
   }
-  console.log('\nIf a pair is a deliberate cross-reference, not a duplicate, add it to ALLOWLIST in this file with a reason.');
+  f.emit();
   process.exit(1);
 }
 
