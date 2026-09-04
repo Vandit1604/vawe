@@ -1694,27 +1694,29 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // The overlay itself is GL, so JS asserts the contract around it: one name list, one shader branch
 // per name, and the schema exposing exactly that vocabulary, the three surfaces that can drift.
 {
-  const src = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
+  // core/stings.js is now a thin re-export; the shader lives in core/stings/ (one file per fx under
+  // units/, core/stings/index.js the runner that stitches them into one FRAG, same shape as
+  // core/seams.js). One name list, one unit per name, and the schema exposing exactly that vocabulary.
   ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length > 0 && new Set(SHADER_FX).size === SHADER_FX.length);
-  const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('const VERT'));
-  const noBranch = SHADER_FX.map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
-  ok(`stings: FRAG has a branch for every effect${noBranch.length ? ', missing ' + noBranch.map((i) => SHADER_FX[i]).join(', ') : ''}`, noBranch.length === 0);
-  ok('stings: no shader branch past the end of the list', !frag.includes(`u_fx == ${SHADER_FX.length}`));
+  const unitsDir = path.join(repoRoot, 'core', 'stings', 'units');
+  const missingUnit = SHADER_FX.filter((n) => !fs.existsSync(path.join(unitsDir, `${n}.js`)));
+  ok(`stings: every effect has a unit file${missingUnit.length ? ', missing ' + missingUnit.join(', ') : ''}`, missingUnit.length === 0);
+  const extraUnit = fs.readdirSync(unitsDir).map((f) => f.replace(/\.js$/, '')).filter((n) => !SHADER_FX.includes(n));
+  ok(`stings: no unit file past the end of the list${extraUnit.length ? ', extra ' + extraUnit.join(', ') : ''}`, extraUnit.length === 0);
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
   const en = schema.fields.stings.item.fx.enum;
   ok('stings: schema fx enum is exactly SHADER_FX, in order', JSON.stringify(en) === JSON.stringify(SHADER_FX));
-  // EVERY branch keys off pp/bell (progress): a sting that ignores progress freezes mid-cut, which
-  // defeats the only thing a sting is for. Derived from SHADER_FX, not a hand-typed wave list: the
-  // list version covered 10 of 34 effects, so appending an effect added ZERO coverage and a frozen
-  // new sting would have passed. Same failure as the hardcoded counts in MISTAKES #83.
+  // EVERY unit keys off pp/bell (progress): a sting that ignores progress freezes mid-cut, which
+  // defeats the only thing a sting is for. Read each unit's own `glsl` export.
   const STING_EXEMPT = new Set();   // none: a sting that does not move is not a sting
-  const frozen = SHADER_FX.filter((name, i) => {
-    if (STING_EXEMPT.has(name)) return false;
-    const next = SHADER_FX[i + 1] ? frag.indexOf(`u_fx == ${i + 1}`) : frag.length;
-    const body = frag.slice(frag.indexOf(`u_fx == ${i}`), next > 0 ? next : frag.length);
+  const frozen = SHADER_FX.filter((name) => {
+    if (STING_EXEMPT.has(name) || missingUnit.includes(name)) return false;
+    const unitSrc = fs.readFileSync(path.join(unitsDir, `${name}.js`), 'utf8');
+    const glslMatch = unitSrc.match(/export const glsl = `([\s\S]*?)`;/);
+    const body = glslMatch ? glslMatch[1] : '';
     return !(body.includes('pp') || body.includes('bell'));
   });
-  ok(`stings: all ${SHADER_FX.length} branches depend on progress${frozen.length ? ', frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
+  ok(`stings: all ${SHADER_FX.length} units depend on progress${frozen.length ? ', frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
 }
 
 // ---- three (real geometry) ----
@@ -4271,10 +4273,12 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('sting ids: 0..n-1, no gaps, no duplicates',
     new Set(ids).size === ids.length && Math.min(...ids) === 0 && Math.max(...ids) === ids.length - 1);
 
-  const fragSrc = fs.readFileSync(path.join(repoRoot, 'core', 'stings.js'), 'utf8');
-  const missing = ids.filter((i) => !fragSrc.includes(`u_fx == ${i}`));
+  // core/stings.js is now a thin re-export; FRAG/draw() live in core/stings/index.js, one branch per
+  // unit under core/stings/units/*.js (see the "shader stings" block above for the unit-level checks).
+  const fragSrc = fs.readFileSync(path.join(repoRoot, 'core', 'stings', 'index.js'), 'utf8');
+  const missing = ids.filter((i) => !FX[i] || !fs.existsSync(path.join(repoRoot, 'core', 'stings', 'units', `${FX[i]}.js`)));
   ok(`sting ids: FRAG branches every id${missing.length ? ', missing ' + missing.join(', ') : ''}`, missing.length === 0);
-  ok('sting ids: no FRAG branch past the last id', !fragSrc.includes(`u_fx == ${ids.length}`));
+  ok('sting ids: no FRAG branch past the last id', !FX[ids.length]);
 
   // An unknown name used to be a silent no-op (draw() returned clear()). A real draw() needs WebGL,
   // so assert on the source: the lookup must throw and name the known effects, never fall back.
