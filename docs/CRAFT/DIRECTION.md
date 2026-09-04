@@ -59,18 +59,17 @@ Every rule is tagged:
 | **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
 | **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + `designspec` (slop was retired in 2026-08) |
 
-**Correction of a correction: straight-ahead action and solid drawing DO have a form here, and this
-line used to deny both.**
+### Straight-ahead, solid drawing, squash and arcs in this engine
 
-*Straight-ahead*, as a PROCESS, genuinely cannot exist: `renderFrame(n)` is a pure function of the frame
+*Straight-ahead*, as a PROCESS, cannot exist here: `renderFrame(n)` is a pure function of the frame
 number, so nothing can be discovered by drawing in order, and that purity is the engine's founding rule.
 But the distinction the principle actually draws is between motion planned as POSES and motion that
-emerges from a RULE, and this engine has both, which is unusual enough to say out loud. Pose-to-pose is
-the `motion` track. Straight-ahead is everything computed per frame from local time with no keys at all:
-a `shader` or `raymarch` surface, the `effector` track (one travelling point, every child reacting to
-its distance), an `idle`, and any hand-written fragment driving geometry off `var(--t)`. Reach for the
-second when the motion is a behaviour rather than a path, and note that the two compose: `parts` can
-bring a grid in pose-to-pose and an effector can then wash across it.
+emerges from a RULE, and this engine has both. Pose-to-pose is the `motion` track. Straight-ahead is
+everything computed per frame from local time with no keys at all: a `shader` or `raymarch` surface, the
+`effector` track (one travelling point, every child reacting to its distance), an `idle`, and any
+hand-written fragment driving geometry off `var(--t)`. Reach for the second when the motion is a
+behaviour rather than a path, and note that the two compose: `parts` can bring a grid in pose-to-pose and
+an effector can then wash across it.
 
 *Solid drawing* is weight, volume and consistent dimension, and the engine expresses all three: the
 `depth` registry and `modifiers` (`plane`, `tilt`, `kick`) put a layer in space rather than on a plane,
@@ -78,9 +77,7 @@ bring a grid in pose-to-pose and an effector can then wash across it.
 another mid-shot. What has no form here is the draughtsmanship half: nobody is drawing a figure, so
 "does the volume hold as it turns" is a question about a `three` scene, not about your linework.
 
-**Correction of a correction: squash-and-stretch and arcs DO apply, and this line used to say they did
-not.** [AFTER-EFFECTS-RECIPES.md](AFTER-EFFECTS-RECIPES.md) has both, so two docs an author reads were
-answering the same question differently:
+*Squash-and-stretch and arcs* both apply here, per [AFTER-EFFECTS-RECIPES.md](AFTER-EFFECTS-RECIPES.md):
 
 | Principle | Here | How |
 |---|---|---|
@@ -292,6 +289,11 @@ answers as above: write `duration` to say what you meant, or mark the layer `"ac
 the authored window (it then fades out on its own instead of sliding with the beat). It **warns**.
 
 ## Provenance
+
+**Do not re-add:** a claim that straight-ahead action, solid drawing, squash-and-stretch or arcs have no
+form in this engine. §1 states the live mechanism for each (the `squash` modifier, `ease:"through"`,
+`motionPath`, the `effector`/`shader`/`raymarch`/`idle` tracks, the `depth`/`modifiers`/`three`/`track`
+family).
 
 **Per-section sourcing**, moved here from the top of each numbered section above:
 
