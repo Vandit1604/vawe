@@ -2,6 +2,8 @@
 when: you are writing an `html` layer by hand, or a fragment renders as a dead still and nothing says why
 answers: "what a layer actually wraps · the four ways a fragment moves · the three things the engine refuses and what to use instead · the traps that cost a render each · the defaults that make hand-written markup read as AI slop, and which of the two gates sees what"
 group: look
+applies-when: hasHtml
+confirm: "does each html fragment move by the engine's mechanisms, not CSS animation or transition?"
 ---
 
 # Writing HTML fragments, and making them move

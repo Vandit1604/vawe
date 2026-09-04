@@ -191,6 +191,10 @@ const RATCHET_CODES = {
   'linear-motion': 'motion carries easing, not a constant rate',
   'monotone-timing': 'the film varies its timing rather than moving everything alike',
   'enter-and-retreat': 'a layer leaves the way it came, in one direction of travel',
+  'no-transition': 'a multi-beat film earns at least one real seam or cut, not flat jumps',
+  'sparse-beats': 'the film has enough beats for its length, not two or three cards held too long',
+  'craft-unvisited': 'every CRAFT doc that applies to this film is answered in the plan',
+  'no-plan-for-craft': 'the film has a storyboard the craft checklist can be answered in',
   // NOT RATCHETED, and the measurement is the reason. `off-colour` fires on BOTH exemplars, because a
   // recreation carries the captured brand's colours and those are not in our theme palette. A rule that
   // fails the two films this repo argues from is a wrong rule for a whole class of film, not a
@@ -503,6 +507,7 @@ const LADDER = [
   ['motion', moRatchet.state === 'new' ? 'blocks' : 'reports', 'whether anything in this film is choreographed rather than named'],
   ['dissolve', 'reports', 'transitions: two text states cross-dissolved into mud'],
   ['designspec', 'reports', 'the look lock: colours off the theme palette, fonts outside its roles'],
+  ['craft', 'reports', 'the craft checklist: every CRAFT doc relevant to this film is answered in the plan'],
   ['copy', 'reports', 'the words: weak hook, jargon, a restated headline, a number set flat'],
   ['read', 'reports', 'whether a viewer can read each line in the seconds it is on screen'],
   ['pace', 'reports', 'whether anything happens, and how often'],
@@ -736,6 +741,11 @@ styleGate('dissolve', 'dissolve check (crossfade mud)', 'scripts/gates/dissolve-
 // decoration. Every scene in the library passes it: the seven that are legitimately off the brand say
 // so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #337).
 styleGate('designspec', 'design-spec lock (theme colours + fonts)', 'scripts/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
+// 4b2. craft. THE CHECKLIST: every CRAFT doc whose `applies-when:` matches this film must be answered in
+// the storyboard's `craft:` map, so an author cannot ship without going through the docs that apply. This
+// is the fix for the failure that a huge doc system existed and a film used none of it: it turns the
+// relevant docs from something you may read into a checklist the plan carries. scripts/gates/craft-checklist.mjs.
+styleGate('craft', 'craft checklist (every relevant CRAFT doc answered)', 'scripts/gates/craft-checklist.mjs', [], { waivable: true, exitMeansFail: true });
 // 4c. copy. The WORDS lock: hook length / weak opener, marketing jargon, restated headlines, flat numbers.
 styleGate('copy', 'copy gate (on-screen writing)', 'scripts/gates/copy-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4d. read. The CLOCK lock, and it is the half `copy` cannot see. `copy` grades the LINE: its length,

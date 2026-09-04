@@ -2,6 +2,8 @@
 when: adding burnt-in captions, or shipping to a phone feed (tiktok / reels / shorts)
 answers: "caption timing (words, vo-captions), the safe strip per destination, captionMode vs captionStyle"
 group: crosscutting
+applies-when: hasAudio
+confirm: "are captions timed to the words, and do they sit in the safe strip for the destination?"
 ---
 
 # CAPTIONS: timing, safe placement, and the style options

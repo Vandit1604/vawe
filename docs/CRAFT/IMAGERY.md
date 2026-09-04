@@ -2,6 +2,8 @@
 when: choosing image vs gradient, treating a photo, icons, or fetching a brand mark
 answers: the visual ladder · where a real asset comes from · treatment→intent · licensing · icon choice
 group: look
+applies-when: hasImages
+confirm: "where did each image come from, and what treatment earned it its place?"
 ---
 
 # IMAGERY & ICONS: choosing and treating visuals

@@ -3,6 +3,8 @@ when: placing layers, composing a beat
 answers: grid · one hero · asymmetry vs centered · archetype→intent · safe zones · active vs passive whitespace
 group: look
 codes: buried, clipped-component, clipped-text, collapsed-image, degenerate-pin, overflow, overlap, safe, thin-hero
+applies-when: always
+confirm: "is each frame asymmetric with one hero, not centered with an equal grid?"
 ---
 
 # LAYOUT: composing a frame

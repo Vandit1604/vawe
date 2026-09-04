@@ -3,6 +3,8 @@ when: the film is all type in boxes
 answers: "decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes"
 group: density
 codes: number-not-count
+applies-when: hasTextBeats
+confirm: "does each claim beat SHOW an artifact, not just set type?"
 ---
 
 # SHOW, DON'T ONLY TELL: what to show, and how

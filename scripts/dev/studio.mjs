@@ -130,6 +130,17 @@ const timelineModel = (file) => {
   };
 };
 
+// The ambition floor (plain-slideshow, no-continuous-object, no-camera, no-transition, no-bg-motion...)
+// is a SCRIPT, same shape as beat-check above, so it is run the same way: once, and its findings read
+// back from stdout+stderr rather than re-implemented here. Console only, never blocking: `make studio`
+// is the iteration loop, and the loop is not where a gate gets teeth.
+const directionFloorFindings = (file) => {
+  let out = '';
+  try { out = execFileSync(process.execPath, [path.join(repoRoot, 'scripts/gates/direction-floor.mjs'), file], { encoding: 'utf8' }); }
+  catch (e) { out = String(e.stdout || '') + String(e.stderr || ''); } // the gate exits 1 on a FAIL
+  return out.split('\n').map((l) => l.trim()).filter((l) => /^[^[]*\[[a-z-]+\]/.test(l));
+};
+
 // LIGHT IS STILL THE DEFAULT, and the dark room is the better of the two. Vawe is a white-first product,
 // so the instrument you photograph beside the site stays light; the grey room behind the toggle is where
 // frames get judged, because an achromatic surround is the only one that does not skew the picture.
@@ -491,3 +502,13 @@ console.log(`    timeline below: drag it to seek · hazard bands are dead air (b
 console.log(`    drag the divider to trade preview height for timeline height (it sticks)`);
 console.log(`    theme: light · the toggle switches to the grey room and it sticks · start dark with THEME=dark`);
 console.log(`    Ctrl-C to stop.\n`);
+
+// Never fatal: a gate crash here must not take the server down with it.
+try {
+  const floor = directionFloorFindings(dataArg);
+  if (floor.length) {
+    console.log(`  direction floor (\`make direction-floor D=${path.relative(repoRoot, dataArg)}\` for the full report):`);
+    for (const l of floor) console.log(`    ${l}`);
+    console.log('');
+  }
+} catch { /* the studio loop never blocks on a gate */ }
