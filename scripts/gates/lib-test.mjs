@@ -8,6 +8,7 @@ import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/time.
 import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS } from '../../core/cuts.js';
 import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts.js';
+import { dirVec as seamDirVec, featherFor as seamFeatherFor } from '../../core/seams.js';
 import { killedBy, capabilitiesOf, checkCuts } from '../../core/ancestor-kills.js';
 import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/clips.js';
 import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
@@ -272,6 +273,29 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
     const d = lowerScene({ layers: [{ text: 'A', transition: { in: 'rise', out: 'fade', dur: 'fast' } }] });
     return d.layers[0].enterDur === DURATION.fast && d.layers[0].exitDur === DURATION.fast;
   })());
+  // feather/angle: the two seam knobs, carried by lowerScene's `transitions` -> `seams` push.
+  ok('vocab: lowerScene carries feather from transitions into seams', (() => {
+    const d = lowerScene({ transitions: [{ at: 2, fx: 'wipe', mech: 'seam', feather: 0.12 }] });
+    return d.seams[0].feather === 0.12;
+  })());
+  ok('vocab: lowerScene carries a numeric dir (angle) from transitions into seams', (() => {
+    const d = lowerScene({ transitions: [{ at: 2, fx: 'wipe', mech: 'seam', dir: 35 }] });
+    return d.seams[0].dir === 35;
+  })());
+  ok('vocab: seam dirVec resolves a numeric angle to a unit vector', (() => {
+    const [x, y] = seamDirVec(90); // 90deg = up = [0,1] on this shader's y-up uv
+    return Math.abs(x) < 1e-9 && Math.abs(y - 1) < 1e-9;
+  })());
+  ok('vocab: seam dirVec still resolves the 4 cardinal names, unchanged', (() => {
+    const [x, y] = seamDirVec('right');
+    return x === 1 && y === 0;
+  })());
+  ok('vocab: seam featherFor uses the per-fx default when opts.feather is absent',
+    seamFeatherFor('wipe', 1, {}) === 0.015 && seamFeatherFor('blindsWipe', 1, {}) === 0.06);
+  ok('vocab: seam featherFor honours an explicit opts.feather over the default',
+    seamFeatherFor('wipe', 1, { feather: 0.12 }) === 0.12);
+  ok('vocab: seam featherFor irisRound default tracks intensity, byte-identical to its old inline formula',
+    seamFeatherFor('irisRound', 2, {}) === 0.02 + 0.04 * 2);
   ok('vocab: lowering is idempotent (a resolved number stays itself)', (() => {
     const d = lowerScene({ layers: [{ text: 'A', enterDur: 'fast' }] });
     return lowerScene(d).layers[0].enterDur === DURATION.fast;

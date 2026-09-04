@@ -46,6 +46,7 @@ uniform float u_p;
 uniform float u_seed;
 uniform vec2  u_dir;
 uniform float u_intensity;
+uniform float u_feather;
 uniform vec2  u_res;
 const float PI = 3.14159265;
 vec4 getFrom(vec2 uv){ return texture2D(u_from, vec2(uv.x, 1.0 - uv.y)); }
@@ -95,6 +96,30 @@ const DIR_VEC = { left: [-1, 0], right: [1, 0], up: [0, 1], down: [0, -1] };
 // same four names and the same silent fall back to left.
 export const okDir = (d) => { if (d == null) return 'left'; if (DIRS.includes(d)) return d;
   throw new Error(`unknown seam direction "${d}", one of: ${DIRS.join(', ')}`); };
+
+// ANGLE: `dir` also accepts a number, in degrees, resolved to a unit vector (0deg = right, 90deg = up,
+// matching DIR_VEC's own axes). A name still goes through okDir (validated, defaults to left); a number
+// is trusted as-is, mod nothing, so 370 and 10 land at the same vector (harmless, never worth refusing).
+export const dirVec = (d) => (typeof d === 'number' ? [Math.cos(d * Math.PI / 180), Math.sin(d * Math.PI / 180)] : DIR_VEC[okDir(d)]);
+
+// FEATHER: every edge-based unit used to bake its own edge softness as a GLSL literal. This is that
+// literal, moved out to a per-fx JS default so `opts.feather` can override it. irisRound's default was
+// never a constant, it grew with `u_intensity`, so its entry stays a function of the resolved intensity
+// to keep an unset-feather render byte-identical to before this knob existed.
+const DEFAULT_FEATHER = {
+  wipe: 0.015,
+  irisRound: (intensity) => 0.02 + 0.04 * intensity,
+  clockWipe: 0.02,
+  barnDoor: 0.03,
+  blindsWipe: 0.06,
+  burnThrough: 0.05,
+  lumaWipe: 0.04,
+};
+export const featherFor = (fx, intensity, opts) => {
+  if (opts.feather != null) return +opts.feather;
+  const d = DEFAULT_FEATHER[fx];
+  return typeof d === 'function' ? d(intensity) : (d ?? 0);
+};
 
 // createSeamCompositor(parent, w, h): a full-frame canvas above the stings overlay (z 85, below the
 // caption bar at z 90) that either runs the two-scene shader or, without GL, cross-fades in 2D.
@@ -155,8 +180,10 @@ export function createSeamCompositor(parent, w = 1920, h = 1080) {
       if (!fromTex || !toTex) return this.clear(); // nothing baked → show live stage (safer than black)
       const seed = +opts.seed || 0, intensity = opts.intensity != null ? +opts.intensity : 1;
       // The third copy of `[dir] || left`. core/cuts.js owns the vocabulary; this asks it. #361.
-      const dir = DIR_VEC[okDir(opts.dir)];
-      const key = idx + ':' + progress.toFixed(4) + ':' + seed + ':' + intensity + ':' + dir.join(',') + ':' + (from.__seamId || '') + ':' + (to.__seamId || '');
+      // `opts.dir` is either one of the 4 cardinal names or a number of degrees (dirVec above).
+      const dir = dirVec(opts.dir);
+      const feather = featherFor(fx, intensity, opts);
+      const key = idx + ':' + progress.toFixed(4) + ':' + seed + ':' + intensity + ':' + feather + ':' + dir.join(',') + ':' + (from.__seamId || '') + ':' + (to.__seamId || '');
       if (canvas.style.display !== 'block') canvas.style.display = 'block';
       if (key === last) return; last = key;
       const prog = programs[idx];
@@ -167,6 +194,7 @@ export function createSeamCompositor(parent, w = 1920, h = 1080) {
       gl.uniform1f(gl.getUniformLocation(prog, 'u_p'), progress);
       gl.uniform1f(gl.getUniformLocation(prog, 'u_seed'), seed);
       gl.uniform1f(gl.getUniformLocation(prog, 'u_intensity'), intensity);
+      gl.uniform1f(gl.getUniformLocation(prog, 'u_feather'), feather);
       gl.uniform2f(gl.getUniformLocation(prog, 'u_dir'), dir[0], dir[1]);
       gl.uniform2f(gl.getUniformLocation(prog, 'u_res'), w, h);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, fromTex);

@@ -15,9 +15,12 @@ export const HOUSE_UNITS = [
     blurb: 'two doors split from the centre outward along dir, opening onto the next beat. A confident, symmetric reveal',
     glsl: `vec4 transition(vec2 uv){
   float p = clamp(u_p, 0.0, 1.0);
-  float ax = abs(u_dir.x) > 0.5 ? uv.x : uv.y;
-  float d = abs(ax - 0.5) * 2.0;                 // 0 at centre line, 1 at the edges
-  float soft = 0.03;
+  // Sign-invariant axis coord: |u_dir.x|,|u_dir.y| are exactly 1/0 for a cardinal dir, so this is
+  // byte-identical to the old "abs(u_dir.x)>0.5 ? uv.x : uv.y" pick at those 4 vectors, and blends
+  // continuously between the two axes for any angle in between.
+  float coord = uv.x * abs(u_dir.x) + uv.y * abs(u_dir.y);
+  float d = abs(coord - 0.5) * 2.0;              // 0 at centre line, 1 at the edges
+  float soft = u_feather;
   float m = smoothstep(p + soft, p - soft, d);   // opens from the centre out
   return vec4(mix(getFrom(uv), getTo(uv), m).rgb, 1.0);
 }` },
@@ -30,7 +33,7 @@ export const HOUSE_UNITS = [
   vec2 d = (uv - 0.5) * aspect;
   float a = atan(d.x, -d.y);                      // 0 at top, sweeps clockwise
   float norm = (a + PI) / (2.0 * PI);             // 0..1 around the dial
-  float m = 1.0 - smoothstep(p - 0.02, p + 0.02, norm);
+  float m = 1.0 - smoothstep(p - u_feather, p + u_feather, norm);
   vec4 col = mix(getFrom(uv), getTo(uv), m);
   float rim = smoothstep(0.02, 0.0, abs(norm - p));
   col.rgb += rim * 0.25 * u_intensity;
@@ -45,7 +48,7 @@ export const HOUSE_UNITS = [
   float r = length((uv - 0.5) * aspect);
   float maxR = length(0.5 * aspect) + 0.05;
   float front = p * maxR;
-  float soft = 0.02 + 0.04 * u_intensity;
+  float soft = u_feather;
   float m = smoothstep(front + soft, front - soft, r);   // inside the circle -> the next beat
   vec4 col = mix(getFrom(uv), getTo(uv), m);
   float rim = smoothstep(soft * 2.0, 0.0, abs(r - front));
@@ -77,10 +80,13 @@ export const HOUSE_UNITS = [
   float bell = sin(PI * p);
   vec2 c0 = vec2(0.5);
   vec2 dir = uv - c0;
+  // Clamped so a low intensity still leaves a readable streak (there is no separate travel to
+  // preserve here, unlike whipPan, but the same one-line fix keeps a subtle call from going flat).
+  float blurK = clamp(u_intensity, 0.4, 2.0);
   vec3 acc = vec3(0.0);
   for (int i = 0; i < 8; i++) {
     float t = float(i) / 7.0;
-    float sc = 1.0 - t * 0.15 * bell * u_intensity;
+    float sc = 1.0 - t * 0.15 * bell * blurK;
     vec2 suv = c0 + dir * sc;
     acc += mix(getFrom(suv), getTo(suv), p).rgb;
   }
@@ -129,10 +135,11 @@ export const HOUSE_UNITS = [
     blurb: 'slatted blinds sweep across the frame along dir, revealing the next beat. A crisp graphic wipe',
     glsl: `vec4 transition(vec2 uv){
   float p = clamp(u_p, 0.0, 1.0);
-  float ax = abs(u_dir.x) > 0.5 ? uv.x : uv.y;
+  float coord = uv.x * abs(u_dir.x) + uv.y * abs(u_dir.y);
   float slats = 12.0;
-  float local = fract(ax * slats);
-  float m = 1.0 - smoothstep(p - 0.06, p + 0.06, local);   // each slat opens on the same clock
+  float local = fract(coord * slats);
+  float soft = u_feather;
+  float m = 1.0 - smoothstep(p - soft, p + soft, local);   // each slat opens on the same clock
   return vec4(mix(getFrom(uv), getTo(uv), m).rgb, 1.0);
 }` },
 
@@ -142,7 +149,7 @@ export const HOUSE_UNITS = [
   float p = clamp(u_p, 0.0, 1.0);
   float n = fbm(uv * 5.0 + u_seed);
   float front = p * 1.2 - 0.1;
-  float m = smoothstep(front + 0.05, front - 0.05, n);   // burned -> the next beat
+  float m = smoothstep(front + u_feather, front - u_feather, n);   // burned -> the next beat
   float rim = smoothstep(0.08, 0.0, abs(n - front));
   vec4 col = mix(getFrom(uv), getTo(uv), m);
   vec3 hot = vec3(1.0, 0.5, 0.15);
@@ -173,7 +180,7 @@ export const HOUSE_UNITS = [
   float lum = dot(fromc.rgb, vec3(0.299, 0.587, 0.114));
   float n = (fbm(uv * 3.0 + u_seed) - 0.5) * 0.3;
   float thr = p * 1.3 - 0.15 + n;
-  float m = 1.0 - smoothstep(thr - 0.04, thr + 0.04, lum);   // dark areas reveal first
+  float m = 1.0 - smoothstep(thr - u_feather, thr + u_feather, lum);   // dark areas reveal first
   return vec4(mix(getFrom(uv), getTo(uv), m).rgb, 1.0);
 }` },
 ];
