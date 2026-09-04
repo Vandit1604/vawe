@@ -109,7 +109,8 @@ checked and what it found. What is not uniform is what a finding **costs**:
 film that is not grandfathered, in every mode. See "The ratchet" below.
 
 **Why the second row is not a lowered bar.** Measured on this library the day the split was written:
-give the REPORTS tier teeth and **116 of 141 scenes fail**. Four films in five. `CLAUDE.md` already
+give the REPORTS tier teeth and **116 of 141 scenes fail** (last measured; run
+`node scripts/gates/waiver-drift.mjs` for the current count). Four films in five. `CLAUDE.md` already
 names what happens next, and it has happened here twice: a rule that fires on most of the library gets
 waived by reflex, and a rule waived by reflex has already been repealed with nobody writing it down.
 So the step became mandatory and the severity did not move. Making a step optional protected the rule
@@ -140,7 +141,8 @@ So the rule is **ratcheted**. A film that predates it is recorded as **LEGACY** 
 `scripts/gates/legacy-manifest.json`, with the rule and the date. Anything not in that manifest must
 comply immediately, and `no-storyboard` BLOCKS on it whether or not `TASTE=1` is set. Legacy films keep
 exactly the severity they had before the ratchet existed: reported by default, promoted by `TASTE=1`.
-Measured across all 132 scenes, the day it was built: **0 exit codes moved**, in either mode.
+Measured across all 132 scenes (last measured; run `node scripts/gates/waiver-drift.mjs` for the
+current count), the day it was built: **0 exit codes moved**, in either mode.
 
 **Legacy is not a waiver, and if the two ever read the same the rule has been repealed.** A waiver lives
 in the scene, in `authoring.allow` with a `_why`, and it says a person looked at this film and decided
@@ -224,13 +226,15 @@ figures are HISTORICAL and neither can be re-run: the gate is gone and the scene
 again. What did not come back is their teeth: their findings report, and `TASTE=1` promotes them. The
 cull's reasoning was about severity and it had been applied to existence, which is a different and
 worse thing: a step nobody runs is a step nobody reads, and the seven had been silent for weeks. See
-"One process, two severities" above for the measured cost of promoting them (116 of 141 scenes fail).
+"One process, two severities" above for the measured cost of promoting them (116 of 141 scenes fail,
+last measured; run `node scripts/gates/waiver-drift.mjs` for the current count).
 <!-- doc-refs-allow: scripts/gates/slop.mjs · this line records that the script is gone -->
 `slop` is not among them: it was RETIRED, not switched off, its script `scripts/gates/slop.mjs` was
 deleted, and this list named it as a live opt-in step for months.
 Nothing about them is dishonest. They are *fitted*, to a library this
 repo's own doctrine calls debt, and a fitted rule left switched on stops raising the floor and starts
-teaching the waiver keyword. `direction-floor` blocked 38 of 130 shipped scenes.
+teaching the waiver keyword. `direction-floor` blocked 38 of 130 shipped scenes (last measured; run
+`node scripts/gates/waiver-drift.mjs` for the current count).
 
 **Nothing that catches BROKEN was touched:** `validate`, `beat-check`, `asset-check`, `probe` /
 `scene-snap` / `canvas-purity`, `seam-check`, `audit`, `schema-drift`, `gate-mutation`, plan-vs-render.
