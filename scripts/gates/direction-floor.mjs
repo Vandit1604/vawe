@@ -21,6 +21,11 @@
 // FAIL (blocks): `plain-slideshow` · `no-continuous-object`. WARN (coaching): no-continuous-object-inferred ·
 // no-kinetic-type · no-camera · no-transition · no-bg-motion · low-vocab. Waive a deliberate minimal
 // film with {"authoring":{"allow":["plain-slideshow"]}}.
+// A film held by a NON-OBJECT device (a motif, an escalation, a metric cut rate, a sound bridge:
+// docs/CRAFT/FILM-STRUCTURE.md) is legitimate structure this gate cannot verify, so it routes through
+// the reasoned waiver too: {"authoring":{"allow":["no-continuous-object"],"_why":{...}}}. The gate
+// credits only the two devices the engine PRODUCES (a continuous object, a match cut); the rest are a
+// declaration someone wrote down, not something a static gate can confirm. See FIX_MSG below.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -330,7 +335,7 @@ const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text)}"` : ''
 const carriedMsg = (spanning) => (spanning.length
   ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there. A fixed logo or watermark riding the cut is furniture, not a spine.`
   : `not one content layer is visible on both sides of any boundary. Every beat is born and dies inside itself.`);
-const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give both forms an `id` and declare `"matches": [{"at": "cut@0", "from": "<the X>", "to": "<the Y>"}]`. The joint retimes them onto itself and the engine carries the centre, size and rotation across (core/junctions.js). See skills/vawe-continuous-action/SKILL.md.';
+const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give both forms an `id` and declare `"matches": [{"at": "cut@0", "from": "<the X>", "to": "<the Y>"}]`. The joint retimes them onto itself and the engine carries the centre, size and rotation across (core/junctions.js). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: docs/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
 
 // `acrossBeats: true` attaches a layer to the camera instead of its beat wrapper, keeping its authored
 // window, so a spine is expressible whatever the cut style. It replaced the advice that used to live
