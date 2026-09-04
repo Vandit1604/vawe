@@ -55,6 +55,21 @@ if (!file) { console.error('usage: node scripts/gates/direction-floor.mjs <scene
 const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
+// FIX 6: the two SLIDESHOW waivers must be BACKED BY A PLAN. `no-continuous-object` and `plain-slideshow`
+// are the rules a reflex `allow` silences, so honour their waiver only when the storyboard beside this
+// scene names `threads:` (what holds the film, docs/CRAFT/FILM-STRUCTURE.md). A waiver with a `_why` but
+// no named device is the "make the gate stop talking" move; here it is simply not honoured, the finding
+// stands, and the ratchet in author-check decides severity (new work blocks, the legacy library is frozen).
+// So this tightens NEW films without breaking the many legacy scenes that waive these by habit.
+const PLAN_BACKED_WAIVERS = new Set(['no-continuous-object', 'plain-slideshow']);
+let planThreads = '';
+try {
+  const fm = fs.readFileSync(file.replace(/\.json$/, '.storyboard.md'), 'utf8').match(/^---\n([\s\S]*?)\n---/);
+  const m = fm && fm[1].match(/^threads:\s*(\S.*)$/m);
+  planThreads = m ? m[1].trim() : '';
+} catch { planThreads = ''; }
+const canWaive = (code) => !(PLAN_BACKED_WAIVERS.has(code) && !planThreads);
+
 // flatten every layer, including group children and beat descriptors.
 const flat = flattenLayers(d.layers);
 
@@ -463,7 +478,8 @@ console.log(dur < CONTINUITY_MAX_DUR
 // third alias and is no longer emitted here: it is a fact about the render, not a verdict on the film,
 // and it now warns from the always-on beat-check where every author sees it.
 const CONTINUITY_ALIASES = new Set(['no-continuous-object-inferred']);
-const waivedBy = (code) => allow.has(code) || (CONTINUITY_ALIASES.has(code) && allow.has('no-continuous-object'));
+const waivedBy = (code) => (allow.has(code) && canWaive(code))
+  || (CONTINUITY_ALIASES.has(code) && allow.has('no-continuous-object') && canWaive('no-continuous-object'));
 const fails = findings.filter((f) => f.sev === 'FAIL' && !waivedBy(f.code));
 const waived = findings.filter((f) => f.sev === 'FAIL' && waivedBy(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !waivedBy(f.code));

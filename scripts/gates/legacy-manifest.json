@@ -2132,6 +2132,109 @@
         }
       },
       "viaGate": "scripts/gates/direction-floor.mjs"
+    },
+    "craft-unvisited": {
+      "adopted": "2026-09-04",
+      "what": "every CRAFT doc that applies to this film is answered in the plan",
+      "legacy": {
+        "_glass-shapes": {
+          "since": "2026-09-04",
+          "hash": "f98ae295a9e05951"
+        },
+        "ab-skill-shotcode": {
+          "since": "2026-09-04",
+          "hash": "1ed86b90e40e06b9"
+        },
+        "ab2-skill-tenor": {
+          "since": "2026-09-04",
+          "hash": "8b65847ee38fb12e"
+        },
+        "ab4-a-ledgerline": {
+          "since": "2026-09-04",
+          "hash": "ec1baeb35cacd263"
+        },
+        "ab4-b-ledgerline": {
+          "since": "2026-09-04",
+          "hash": "16a6cef2711b6926"
+        },
+        "onefile": {
+          "since": "2026-09-04",
+          "hash": "96ae5ade453d68d4"
+        },
+        "onefilm": {
+          "since": "2026-09-04",
+          "hash": "abcfc814f825db32"
+        },
+        "playhead": {
+          "since": "2026-09-04",
+          "hash": "dfdfb039289f3c13"
+        },
+        "preface-launch": {
+          "since": "2026-09-04",
+          "hash": "8f82841de41666b6"
+        },
+        "process": {
+          "since": "2026-09-04",
+          "hash": "0055952b1a31dbf1"
+        },
+        "product-feature-tour": {
+          "since": "2026-09-04",
+          "hash": "c993fa7b3c2ba75e"
+        },
+        "rec3-skill": {
+          "since": "2026-09-04",
+          "hash": "b65009bc0e6f3382"
+        },
+        "saas-hero-launch": {
+          "since": "2026-09-04",
+          "hash": "f7f3cc46910170de"
+        },
+        "showcase-cuts": {
+          "since": "2026-09-04",
+          "hash": "4e39173ca2793def"
+        },
+        "showcase-data": {
+          "since": "2026-09-04",
+          "hash": "a08ce1e24f35f9ab"
+        },
+        "showcase-stings": {
+          "since": "2026-09-04",
+          "hash": "a23380448b3ddff5"
+        },
+        "showcase-type-labour": {
+          "since": "2026-09-04",
+          "hash": "268f4b77928812d5"
+        },
+        "showcase-type": {
+          "since": "2026-09-04",
+          "hash": "d0f0b8c0441cc635"
+        },
+        "showcase-ui": {
+          "since": "2026-09-04",
+          "hash": "f527586f4ae0baaf"
+        },
+        "thread": {
+          "since": "2026-09-04",
+          "hash": "5302bf14396e08e0"
+        },
+        "vawe-glass-hero": {
+          "since": "2026-09-04",
+          "hash": "dc5ab9ff463d7642"
+        },
+        "vawe-launch": {
+          "since": "2026-09-04",
+          "hash": "ce089f3af9b3d31b"
+        },
+        "vawe-shader-terminal": {
+          "since": "2026-09-04",
+          "hash": "bf0a98b7258db44e"
+        },
+        "vawe-teaser": {
+          "since": "2026-09-04",
+          "hash": "0011c8c81193c4ed"
+        }
+      },
+      "viaGate": "scripts/gates/craft-checklist.mjs"
     }
   },
   "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",
