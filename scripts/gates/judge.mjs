@@ -42,6 +42,25 @@ if (!ready.ok) {
 }
 const brand = arg('--vs', scene?.theme && typeof scene.theme === 'string' ? scene.theme : '');
 
+// RECORD THE VERDICT (taste loop, phase 1+4). The prep run below produces the sheet and writes a
+// "looked at this content" receipt. But looking is not judging: the receipt that gates `ledger-add`
+// must carry the agent's actual verdict. So `--verdict PASS|FIX` records it against THIS render (the
+// `gradeable` check above already refused a stale one), and PASS is the film's definition of done: the
+// eye scored every frame and had nothing left to fix. FIX records that the loop is not converged, so
+// the receipt does not read as done. This is the honest limit stated in the plan: the score is the
+// agent's, written down, not something a script can verify, and the critic panel cross-checks it.
+const verdictArg = arg('--verdict', null);
+if (verdictArg) {
+  const v = String(verdictArg).toUpperCase();
+  if (v !== 'PASS' && v !== 'FIX') { console.error('--verdict must be PASS or FIX'); process.exit(2); }
+  const fixes = arg('--fixes', '');
+  writeReceipt('judge', inp, { verdict: v, fixes, at: new Date().toISOString().slice(0, 10) });
+  console.log(v === 'PASS'
+    ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make ledger-add D=${inp}).`
+    : `  ✓ judge verdict recorded: FIX${fixes ? ` (${fixes})` : ''}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
+  process.exit(0);
+}
+
 const dur = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', mp4]).toString().trim());
 const dims = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', mp4]).toString().trim().split(',').map(Number);
 const landscape = dims[0] >= dims[1];

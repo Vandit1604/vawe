@@ -64,9 +64,9 @@
       { "file": "example-kinetic-type.json", "teaches": "kinetic type" }
     ],
     "fullFilms": [
-      { "file": "saas-hero-launch.json", "teaches": "whole directed structure" },
-      { "file": "product-feature-tour.json", "teaches": "whole directed structure" },
-      { "file": "process.json", "teaches": "whole directed structure" }
+      { "file": "saas-hero-launch.json", "teaches": "whole directed structure", "register": "a white-first SaaS launch, hook to CTA" },
+      { "file": "product-feature-tour.json", "teaches": "whole directed structure", "register": "a dark, chaptered product tour" },
+      { "file": "process.json", "teaches": "whole directed structure", "register": "an idea proven by one measured instance" }
     ]
   }
 }
