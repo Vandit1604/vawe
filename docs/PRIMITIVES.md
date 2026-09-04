@@ -6,6 +6,15 @@ group: reference
 
 # The primitive library: everything you compose videos from
 
+## AGENT SUMMARY
+
+- This doc lists every primitive and prop the engine composes videos from: the 18 layer types, every
+  effect/preset family (cuts, stings, seams, kinetic type, shaders, looks, modifiers), the responsive
+  one-source-to-every-aspect model, and the motion-math exports.
+- It is the vocabulary reference. Check it before inventing a primitive or guessing a field name; then
+  confirm live with `make schema AT='<path>'` (what is legal at a JSON path) or `make arsenal Q="…"`
+  (search all named things by plain-English meaning).
+
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).
 Everything is pure in the frame number: same input, same bytes, any render order.
 

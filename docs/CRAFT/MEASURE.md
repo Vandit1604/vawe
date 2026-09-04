@@ -6,6 +6,15 @@ group: story
 
 # MEASURE, read a transition's real motion, in our own vocabulary
 
+## AGENT SUMMARY  `[ref: make measure]`
+
+- Run `make measure VIDEO=<file> FROM=<t> TO=<t>` to get a transition's real duration and nearest engine
+  preset (with residual), instead of guessing "a slide with some easing."
+- Also self-verifies your own renders: `make measure VIDEO=out/<name>.mp4 FROM=<t> TO=<t> EXPECT=<preset>`
+  checks whether what rendered matches what you authored.
+- Checkable action: residual < 0.07, trust and author the named preset; residual > 0.07, the motion is
+  not one eased tween, re-author by intent (see "What it CANNOT see" below).
+
 **You will watch the reference, write "a slide with some easing", and then name a duration and a curve
 that you did not measure. That is confabulation, and it is indistinguishable from knowing.** Run `make
 measure`. `duration: 0.43s, ease: easeOutSine` is **measured, not seen**, and the tool reports the answer

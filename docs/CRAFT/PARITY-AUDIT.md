@@ -6,6 +6,14 @@ group: look
 
 # Parity audit: are the effects we ship actually good?
 
+## AGENT SUMMARY
+
+- Read this before reaching for `stagger`, an `overshoot`/graph-editor handle, `decode` text scramble,
+  `plane`/`depth` parallax, `deviceShowcase`, an animated gradient bg, or `svg` `draw`/`morph` logo reveal:
+  each has a measured verdict, a fixed/open gap, and the file:line to check against the standard recipe.
+- All seven were BEHIND the published recipe on at least one axis; most are now CLOSED/fixed. Read the
+  per-effect "Verdict" and "The gap" before assuming the shipped default is already correct.
+
 `docs/CRAFT/SAAS-MOTION-DEMAND.md` found that nine of the ten most-demanded SaaS motion effects
 already ship here. This audit asks the harder question about seven of them: **shipping is not the same
 as doing it well.** Each was checked against the recipe practitioners publish, with numbers, then

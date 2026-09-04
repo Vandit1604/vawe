@@ -6,6 +6,16 @@ group: crosscutting
 
 # Planning subagent work: what it costs, and how to spend less
 
+## AGENT SUMMARY
+
+- Read this BEFORE any fan-out. One real run here cost 87 agents, 5.66M subagent tokens, about 65,000
+  tokens per agent, for 61 findings, while the main context grew by only about 3,000 tokens.
+- The rules that follow from it: fewer, larger agents (batches of 5 to 10, not one per item), put file
+  contents in the prompt, never send two agents to the same files, always cap the return with a
+  structured schema. One agent with a good prompt beats a fan-out for sequential, dependent work.
+- Checkable action: before launching a fan-out, state in one sentence what a single agent with the same
+  token budget would plausibly have produced. If you cannot, the fan-out is a guess, not a decision.
+
 Read this before you launch a fan-out. The rules below come from two sources. One is a measured run in
 this repo. The other is published guidance on multi-agent orchestration, listed at the end.
 
@@ -54,7 +64,7 @@ dominates the total. Cost rises faster than the number of tool calls.
 7. **Cap what comes back.** Tell the agent what to return and how much. Reconcile in the main thread.
 8. **Prefer one agent for sequential work.** Multi-agent orchestration helps when work is independent. For
    a chain of dependent steps, one agent with good context wins, and it costs less.
-   **The number behind this rule, which it used to state without one.** Anthropic's own multi-agent
+   **The number behind this rule.** Anthropic's own multi-agent
    research system consumes about 15x the tokens of a normal conversation, and token usage alone
    explains roughly 80% of the performance difference it shows. Alongside that, a single agent has been
    measured matching or beating five multi-agent architectures on multi-hop reasoning **at an equal
