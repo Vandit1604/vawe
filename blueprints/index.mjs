@@ -55,7 +55,20 @@ export const BEAT_BLURBS = blurbsOf('blueprint beat', BEATS);
 
 // The registry, and with it the catalogue section that was hand-listed in
 // scripts/site/effects-catalog.mjs with its usage form and its no-preview reason a file further on.
+// The known failure mode of a beat, printed by `make arsenal` under its blurb. Optional and seeded on
+// the highest-traffic beats only: each line is a trap the doctrine already names, kept where an author
+// reaching for the beat will see it. A key that is not a beat is refused at load (core/registry.js).
+export const BEAT_PITFALLS = {
+  kineticHook: 'a hook over ~12 words, or with more than one emoji, reads weak and the validator rejects it. Front-load the strong word.',
+  statReveal: 'a number the frame never SHOWS is worse than none. Back the stat with the real UI it comes from, do not only set it in type.',
+  cardCascade: 'a uniform stagger on every card reads as a spec sheet, not a film. Vary the rhythm and let the most important card move last.',
+  terminalReveal: 'a typed command with no visible consequence is a dead beat. Show what the command DID, not just that it ran.',
+  screenDive: 'a KEN push onto a low-res or placeholder screen amplifies the flaw. Use a real captured surface at full resolution.',
+  ctaEnd: 'a mark sized like a bullet beside the headline reads as punctuation. Give the logo real prominence on the end card (150px+).',
+};
+
 export const BEAT_REGISTRY = defineRegistry('blueprint beat', BEATS, { slot: 'layers[].beat', blurbs: BEAT_BLURBS,
+  pitfalls: BEAT_PITFALLS,
   catalog: {
     title: 'Beat blueprints',
     tag: 'blueprint',

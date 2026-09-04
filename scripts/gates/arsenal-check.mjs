@@ -248,7 +248,7 @@ const REGS = registries();
 const sameNames = (v, names) => Array.isArray(v) && v.length === names.length
   && [...v].sort().join('\u0000') === [...names].sort().join('\u0000');
 const partOfRegistry = (v) => REGS.find((r) => v === r || v === r.entries || (r.blurbs && v === r.blurbs)
-  || sameNames(v, r.names));
+  || (r.pitfalls && v === r.pitfalls) || sameNames(v, r.names));
 
 const derived = new Map();   // `file::NAME` -> registry
 for (const [key, [, value]] of exported) {
