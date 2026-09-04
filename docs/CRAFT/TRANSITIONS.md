@@ -101,6 +101,7 @@ speed dial (every curve is a named member of `TIMINGS`, `core/cuts.js`):
 | **rush** | accelerate away | an EXIT: the beat leaves faster than it left rest |
 | **brake** | decelerate in | an ENTRANCE: the beat arrives slower than it set off |
 | **pop** | overshoot then settle | a spring-y arrival with life: a chip, a badge, a UI element landing |
+| **spring** | overshoot-and-settle spring | a badge/chip/number LANDING with physical life, a bouncy product reveal |
 | **snappy** | decisive, no overshoot | a punchy cut that lands and stops |
 | **smooth** | gentle ease-in-out | a calm blend (a cross-dissolve, a fade), where a ramp would fight the mood |
 | **linear** | flat, constant speed | a deliberately mechanical sweep; rarely what you want |
@@ -113,9 +114,12 @@ curve with no speed ramp anywhere. It never blocks; it is the nudge to spend one
 > physics **spring** whose duration is *measured* from its damping/stiffness, not specified. Its overlap
 > model mounts and blends two LIVE scenes; vawe (like another engine' shader-transitions, the same seam
 > architecture) blends two BAKED stills. Our named-curve dial above is a nicer author surface than a raw
-> ease string, and `pop` already gives a spring-like overshoot, so the one genuine gap is a *parameterized*
-> spring. It is a real feature, not a bug, and it stays out until a film needs a physical arrival the dial
-> cannot fake. Recorded here so the next author inherits the decision, not the re-investigation.
+> ease string, and `pop` already gives a spring-like overshoot. **`spring`** closes the shape gap: it is
+> the house damped-harmonic-oscillator easing (`core/motion.js` `easeOutSpring`, the same math behind
+> `easeOutSettle`/`easeOutSnap`) fixed at one tasteful bounce/settle rather than exposed as another engine's
+> per-call `{damping, stiffness}` API. A genuinely *parameterized* spring, where an author dials the
+> bounce and duration per transition, stays out until a film needs an arrival this fixed curve cannot
+> fake. Recorded here so the next author inherits the decision, not the re-investigation.
 
 > **Align the beats to the seam, or a `mech:"seam"` transition dissolves nothing.** A seam blends the
 > frame just BEFORE `at` against the frame just AFTER. If both beats are still on screen across `at`

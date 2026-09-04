@@ -907,7 +907,8 @@
       "pop",
       "rush",
       "brake",
-      "ramp"
+      "ramp",
+      "spring"
      ]
     }
    }
@@ -971,7 +972,8 @@
       "pop",
       "rush",
       "brake",
-      "ramp"
+      "ramp",
+      "spring"
      ]
     },
     "seed": {
@@ -1556,7 +1558,8 @@
       "pop",
       "rush",
       "brake",
-      "ramp"
+      "ramp",
+      "spring"
      ]
     },
     "cx": {

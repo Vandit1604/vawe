@@ -502,8 +502,13 @@ export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
 // [0,1] (distinct from the exported springEase({response,dampingFraction}) factory above, which is the
 // iOS-parameterised spring). Renamed off `springEase` to free that name for the public API.
 const springWindow = (o) => { const T = springSettle(o); return (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(clamp01(t) * T, o)); };
+// easeOutSpring: the house overshoot-and-settle curve as a plain t->eased function (mirrors
+// easeOutBack / speedRamp's shape: one argument, pure). Overshoots to ~1.07 near t~0.69, lands
+// exactly at 1 by t=1. Exported by name so a cut/seam TIMING (core/cuts.js) can reach it directly
+// instead of a second spring curve getting hand-rolled there; EASINGS.spring below is this same value.
+export const easeOutSpring = springWindow({ bounce: 0.35, settle: 0.92 });
 Object.assign(EASINGS, {
-  spring: springWindow({ bounce: 0.35, settle: 0.92 }),
+  spring: easeOutSpring,
   'spring-bouncy': springWindow({ bounce: 0.55, settle: 0.94 }),
   'spring-stiff': springWindow({ bounce: 0.12, settle: 0.72 }),
   // iOS-parameterised spring, house default (ζ=1, no overshoot). Usable by name in any `ease:` slot.
