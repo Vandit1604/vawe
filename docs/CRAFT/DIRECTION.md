@@ -9,6 +9,12 @@ confirm: "where is the restraint, and what does the spectacle beat earn against 
 
 # DIRECTION: the spine that turns effects into a directed film
 
+## AGENT SUMMARY
+
+- Direct every beat with the spine below: ease every start/stop with intent, vary timing and rhythm, keep restraint (one motion idea per beat, effects as seasoning), and place beats hook -> build -> payoff.
+- Enforced by `[gated]` direct checks (codes: `pace`, `pace-not-chosen`, `pace-not-kept`, `pacing`, plus `effect-soup`, `monotone-timing`, `dead-final-frame`, `enter-and-retreat`, `linear-motion`, `cut-families`, `continuity`) and by `[eye]` + `make judge` where no static gate can see the call.
+- Checkable action: where is the restraint, and what does the spectacle beat earn against it?
+
 The engine can do almost anything. That is the problem: with every primitive available, an author
 reaches for *more* and ships "lots of effects" instead of a directed piece. This file is the missing
 spine (**pacing, restraint, and story placement**) stated as principles from the craft's real
@@ -41,10 +47,6 @@ Every rule is tagged:
 
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
 
-Source: **Thomas & Johnston, _The Illusion of Life: Disney Animation_ (1981)**, the 12 principles;
-motion-graphics adaptation from **Austin Shaw, _Design for Motion_ (2020)** and **School of Motion,
-"12 Principles for Motion Design."**
-
 | Principle | One line | JSON translation | Tag |
 |---|---|---|---|
 | **Slow in / slow out** | Nothing STARTS or STOPS instantly. | A move from rest to rest eases: entrances decelerate (ease-out), exits accelerate (ease-in). A constant rate is right where there is no rest to ease, so `ease:"linear"` is CORRECT for a pan, a scroll, a marquee, a progress ring, a spinner and an ambient drift. | `[gated]` direct: `linear-motion` (warns, never blocks) |
@@ -57,7 +59,8 @@ motion-graphics adaptation from **Austin Shaw, _Design for Motion_ (2020)** and 
 | **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
 | **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + `designspec` (slop was retired in 2026-08) |
 
-**Straight-ahead action and solid drawing DO have a form here, and this line used to deny both.**
+**Correction of a correction: straight-ahead action and solid drawing DO have a form here, and this
+line used to deny both.**
 
 *Straight-ahead*, as a PROCESS, genuinely cannot exist: `renderFrame(n)` is a pure function of the frame
 number, so nothing can be discovered by drawing in order, and that purity is the engine's founding rule.
@@ -75,8 +78,8 @@ bring a grid in pose-to-pose and an effector can then wash across it.
 another mid-shot. What has no form here is the draughtsmanship half: nobody is drawing a figure, so
 "does the volume hold as it turns" is a question about a `three` scene, not about your linework.
 
-**Squash-and-stretch and arcs DO apply, and this line used to say they did not.**
-[AFTER-EFFECTS-RECIPES.md](AFTER-EFFECTS-RECIPES.md) has both, so two docs an author reads were
+**Correction of a correction: squash-and-stretch and arcs DO apply, and this line used to say they did
+not.** [AFTER-EFFECTS-RECIPES.md](AFTER-EFFECTS-RECIPES.md) has both, so two docs an author reads were
 answering the same question differently:
 
 | Principle | Here | How |
@@ -85,9 +88,6 @@ answering the same question differently:
 | **Arcs** | **partly** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66. It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath`, a different mechanism on a different clock that cannot combine with a keyed track |
 
 ## 2. Editing & pacing, rhythm is the direction
-
-Source: **Walter Murch, _In the Blink of an Eye_ (2001)**; edit-rhythm from **Reisz & Millar, _The
-Technique of Film Editing_.**
 
 - **The Rule of Six**. A cut serves, in priority: **emotion (51%) · story (23%) · rhythm (10%) ·
   eye-trace (7%) · screen plane (5%) · spatial continuity (4%)**. Emotion dominates; spatial logic is
@@ -130,8 +130,6 @@ so in its own comments so the next author does not add the teeth back.
 
 ## 3. Restraint, the single biggest amateur-vs-pro tell
 
-Source: **School of Motion; Shaw ("less, but better")**; enforced locally in [`TASTE-RULES.md`](TASTE-RULES.md).
-
 - **One motion idea per beat.** A dolly, OR a colour-wave, OR a stagger, not all three. Stacking them
   is maximalism that reads as a demo reel, not a film. `[gated]` direct: `effect-soup`
 - **Two properties on one layer must make ONE claim.** This is the finer cut of the rule above, and it
@@ -161,10 +159,7 @@ Source: **School of Motion; Shaw ("less, but better")**; enforced locally in [`T
 
 ## 4. Story placement, the beats, in the right order
 
-Source: **McKee, _Story_ (1997)** (setup/turn/payoff, rising action, tension/release); **Snyder,
-_Save the Cat!_** (hook-first, escalation); **Loewenstein, "The Psychology of Curiosity" (1994)** (the
-open loop); **Ogilvy, _Ogilvy on Advertising_** (front-load, honesty). The applied spine lives in
-[`STORY.md`](STORY.md); these are its sources and laws.
+The applied spine lives in [`STORY.md`](STORY.md); §"Provenance" below carries its sources and laws.
 
 - **Hook → build → payoff.** Every film is setup, escalation, release. Beat 1 poses; the middle
   escalates; the last beat pays off. `[eye]`
@@ -246,19 +241,6 @@ its median: the aim is to catch a film that is asleep, not to make every film mo
 fires, and the p10, median and p90 of the measure behind it. Use it to argue about a rule. It reaches no
 verdict and exits 0.
 
-## Sources
-
-- Thomas & Johnston (_The Illusion of Life: Disney Animation_ (1981)) the 12 principles.
-- Walter Murch (_In the Blink of an Eye_ (2001)) the Rule of Six, cut-on-motion, emotion-first.
-- Austin Shaw (_Design for Motion_ (2020)) the motion-graphics adaptation, type-in-motion.
-- Jon Krasner (_Motion Graphic Design: Applied History and Aesthetics_) negative space, holds.
-- School of Motion ("12 Principles for Motion Design") the practitioner translation.
-- Google Material Design (Motion guidelines) asymmetric easing, duration-by-distance.
-- Robert McKee (_Story_ (1997)) setup/turn/payoff, rising action, tension & release.
-- Blake Snyder (_Save the Cat!_) hook-first, escalation.
-- George Loewenstein ("The Psychology of Curiosity" (1994)) the open loop / curiosity gap.
-- David Ogilvy (_Ogilvy on Advertising_) front-loading the strong element, honesty.
-
 ## no-continuous-object (and its inferred twin)
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
@@ -309,3 +291,31 @@ against the same 0.4s this gate calls the line where a held frame stops reading 
 answers as above: write `duration` to say what you meant, or mark the layer `"acrossBeats": true` to keep
 the authored window (it then fades out on its own instead of sliding with the beat). It **warns**.
 
+## Provenance
+
+**Per-section sourcing**, moved here from the top of each numbered section above:
+
+- §1 First principles of motion. Source: **Thomas & Johnston, _The Illusion of Life: Disney Animation_
+  (1981)**, the 12 principles; motion-graphics adaptation from **Austin Shaw, _Design for Motion_
+  (2020)** and **School of Motion, "12 Principles for Motion Design."**
+- §2 Editing & pacing. Source: **Walter Murch, _In the Blink of an Eye_ (2001)**; edit-rhythm from
+  **Reisz & Millar, _The Technique of Film Editing_.**
+- §3 Restraint. Source: **School of Motion; Shaw ("less, but better")**; enforced locally in
+  [`TASTE-RULES.md`](TASTE-RULES.md).
+- §4 Story placement. Source: **McKee, _Story_ (1997)** (setup/turn/payoff, rising action,
+  tension/release); **Snyder, _Save the Cat!_** (hook-first, escalation); **Loewenstein, "The
+  Psychology of Curiosity" (1994)** (the open loop); **Ogilvy, _Ogilvy on Advertising_** (front-load,
+  honesty).
+
+**Full bibliography**, gathered from every "Source:" line above:
+
+- Thomas & Johnston (_The Illusion of Life: Disney Animation_ (1981)) the 12 principles.
+- Walter Murch (_In the Blink of an Eye_ (2001)) the Rule of Six, cut-on-motion, emotion-first.
+- Austin Shaw (_Design for Motion_ (2020)) the motion-graphics adaptation, type-in-motion.
+- Jon Krasner (_Motion Graphic Design: Applied History and Aesthetics_) negative space, holds.
+- School of Motion ("12 Principles for Motion Design") the practitioner translation.
+- Google Material Design (Motion guidelines) asymmetric easing, duration-by-distance.
+- Robert McKee (_Story_ (1997)) setup/turn/payoff, rising action, tension & release.
+- Blake Snyder (_Save the Cat!_) hook-first, escalation.
+- George Loewenstein ("The Psychology of Curiosity" (1994)) the open loop / curiosity gap.
+- David Ogilvy (_Ogilvy on Advertising_) front-loading the strong element, honesty.

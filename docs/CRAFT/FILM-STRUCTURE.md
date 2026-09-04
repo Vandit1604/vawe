@@ -9,6 +9,12 @@ confirm: "what holds this film across its cuts?"
 
 # Film structure: what holds a short film together
 
+## AGENT SUMMARY
+
+- Name what holds the film across each cut: a spatial device (transforming object, match cut via `matches`, camera travel), a verbal/aural one (unfinished sentence, sound bridge, bookend), a temporal one (metric/rhythmic cutting, music-led), or a conceptual one (motif, escalation, intellectual montage). Pick from Part 1, land on at least two threads (Part 4, Q6).
+- Enforced by `[gated]` codes `continuity`, `no-continuous-object`, `no-continuous-object-inferred` (opt-in via `TASTE=1` or `make direction-floor`; the gate sees only the transforming-object device, so waive with a named `_why` when another device carries the film).
+- Checkable action: what holds this film across its cuts?
+
 This library has one answer to that question. One object survives every cut and changes there.
 `direction-floor` blocks on `no-continuous-object` when it cannot find that object, and
 [`CONTINUITY-WITHOUT-AN-OBJECT.md`](CONTINUITY-WITHOUT-AN-OBJECT.md) already records that eighteen of our
@@ -57,14 +63,6 @@ register the answer lives in. A film can and should run several registers at onc
 | **Cloning** | a new object visibly born from the old one | a one-to-many or many-to-one relation | used as a generic entrance |
 | **Dolly and zoom** | your position in one space | navigating between places in a system | there is no system, only slides |
 
-A match cut is "a match cut based on the visual shape or composition of elements across the cut", and it
-comes in shape, motion, colour, subject and thematic forms
-([Wikipedia](https://en.wikipedia.org/wiki/Match_cut)). School of Motion splits the motion-design use into
-two: match cuts with movement, which continue momentum, and match cuts with framing, which keep the
-composition and let the content change. Its timing note is exact and usable: "if you have a twelve frame
-move and decide to cut on frame six, pick-up the next shot on frame seven"
-([School of Motion](https://schoolofmotion.com/blog/match-cuts)).
-
 ### The engine builds one for you: `matches`
 
 The match cut is the one spatial device this engine PRODUCES rather than asks you to align. Name the
@@ -91,21 +89,9 @@ Know the limit, and it is a limit of the gate rather than of the device: **a fil
 fails `no-continuous-object`.** That rule looks for one layer id alive on both sides of a boundary, and
 a match cut is two ids by construction. See the match-cut entry in `docs/MISTAKES.md`.
 
-Masking, cloning, dolly-and-zoom and transformation are four of Issara Willenskomer's twelve principles of
-UX in Motion, and he defines each by the continuity it creates: transformation "creates a continuous state
-of narrative flow when object utility changes"; masking "creates continuity in an interface object or
-object group when utility is determined by which part of the object or group is revealed or concealed";
-cloning "creates continuity, relationship and narrative, when new objects originate and depart"; dolly and
-zoom "preserves continuity and spatial narrative when navigating interface objects and spaces"
-([UX in Motion Manifesto](https://medium.com/ux-in-motion/creating-usability-with-motion-the-ux-in-motion-manifesto-a87a4584ddc)).
-Our continuous-object rule is his *transformation* principle, promoted to a law. His other eleven are
-still available and we use almost none of them structurally.
-
-The single sweeping camera move is a standing title-sequence device, not a novelty. Art of the Title names
-*Hellboy II* and *I, Robot* as sequences built on "a fluid, single-shot camera move" that carries wildly
-varied imagery ([Art of the Title](https://www.artofthetitle.com/feature/the-inner-workings/)). In live
-action the same idea is the long take or oner, and a pseudo-oner hides its cuts in a whip pan or a dark
-passage ([Wikipedia](https://en.wikipedia.org/wiki/Long_take)).
+The single sweeping camera move is a standing title-sequence device, not a novelty. In live action the
+same idea is the long take or oner, and a pseudo-oner hides its cuts in a whip pan or a dark passage.
+See Provenance below for the sourced statements behind both claims.
 
 ### Verbal and aural: something you hear survives
 
@@ -116,20 +102,12 @@ passage ([Wikipedia](https://en.wikipedia.org/wiki/Long_take)).
 | **Bookend** | an opening image the ending answers | the film has a change to show | the two ends merely repeat |
 | **Open question** | an unanswered loop | the payoff really answers it | the question was rhetorical |
 
-A sound bridge is audio from one scene bleeding into the next; the J-cut runs the next scene's audio early,
-the L-cut runs this scene's audio late
-([StudioBinder](https://www.studiobinder.com/blog/what-is-a-sound-bridge-definition/)). It is the cheapest
-continuity device in live action and we cannot use it, because our films ship silent by default. That is a
-real constraint on us and worth naming: **we have voluntarily given up one of the two easiest registers.**
-
-Bookends are "a pair of scenes that occur at the beginning and end of a film" that "act as a framing device
-for the main story", used to give "a clear entry point and a satisfying exit point"
-([Filmmakers Academy](https://www.filmmakersacademy.com/glossary/bookends/)). The requirement is that
-something crucial has changed between the two.
-
-The **unfinished sentence** is our own name, from
+A sound bridge is the cheapest continuity device in live action and we cannot use it, because our films
+ship silent by default. That is a real constraint on us and worth naming: **we have voluntarily given up
+one of the two easiest registers.** The **unfinished sentence** is our own name, from
 [`CONTINUITY-WITHOUT-AN-OBJECT.md`](CONTINUITY-WITHOUT-AN-OBJECT.md), for one clause per shot with no full
-stop until the end. I found no source that names it. Treat it as a house term, not received vocabulary.
+stop until the end; treat it as a house term, not received vocabulary. See Provenance for the sourced
+definitions of a sound bridge and a bookend.
 
 ### Temporal: the clock survives
 
@@ -139,18 +117,9 @@ stop until the end. I found no source that names it. Treat it as a house term, n
 | **Rhythmic cutting** | a pulse that bends with what is in frame | there is real variety to pace | it drifts into no pattern at all |
 | **Music-led structure** | the track's own sections | there is a track chosen before the boards | the track arrives last, as decoration |
 
-Eisenstein's five methods run metric, rhythmic, tonal, overtonal and intellectual; in metric montage "the
-pieces are joined together according to their lengths, in a formula-scheme corresponding to a measure of
-music" ([Media Studies](https://media-studies.com/eisenstein-montage/),
-[StudioBinder](https://www.studiobinder.com/blog/soviet-montage-theory/)). Metric cutting is a structure by
-itself. Nothing in the picture has to persist if the clock does.
-
-Music-led is the strongest directly-sourced statement I found from a practitioner about structure. On the
-*Lolo* titles, Laura Nicolas says: "We really used the music as the main structure for the titles, it
-really leads the whole sequence by its rhythmic changes," and then, generally, "Music is a key element for
-my creations, I always use it as the structure for my films and not the other way around"
-([Art of the Title](https://www.artofthetitle.com/title/lolo/)). Art of the Title's own survey agrees that
-music is essential glue in title work ([The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)).
+Metric cutting is a structure by itself: nothing in the picture has to persist if the clock does.
+Music-led is the strongest directly-sourced statement found about structure, from the *Lolo* titles: see
+Provenance for the quote and the citation.
 
 ### Conceptual: the idea survives, and nothing else has to
 
@@ -161,27 +130,15 @@ music is essential glue in title work ([The Inner Workings](https://www.artofthe
 | **Escalation** | each beat outbidding the last | you have a real ranked order | the beats are peers |
 | **Conceptual through-line** | one idea restated in many pictures | the idea is specific | the idea is "innovation" |
 
-A motif is a repeated visual, verbal, musical or behavioural element that points to a deeper meaning
-([FilmDaft](https://filmdaft.com/motif-in-film-explained/)). Intellectual montage "involves the
-juxtaposition of seemingly unrelated images to create a new, higher level of meaning"
-([Media Studies](https://media-studies.com/eisenstein-montage/)); the Kuleshov effect is the same
-mechanism proved on one face. Art of the Title's example of a conceptual through-line is *Fight Club*,
-where "this immediate relationship between cause and effect" holds a sequence of abstract imagery together
-([The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)).
-
 **These are the devices our gate cannot see at all.** A film held by a motif and an escalation is properly
 structured and will fail `no-continuous-object` every time.
 
 ### Whole-film shapes, as distinct from devices
 
 A device joins two shots. A shape decides what the whole film is. The named advertising shapes are
-problem/solution, product demo, vignette anthology, and manifesto or anthem. Manifesto films "capture the
-brand's essence in a video without a storyline or plot", with the product taking a back seat
-([shots](https://shots.net/news/view/manifesto-ads-has-corporate-poetry-outstayed-its-welcome)). A vignette
-demo shows a series of scenarios rather than one
-([Storylane](https://www.storylane.io/blog/vignette-demo)). This layer of the literature is mostly
-marketing content and I did not find a credible practitioner source that ranks these shapes against each
-other. Take the names, not the advice.
+problem/solution, product demo, vignette anthology, and manifesto or anthem. This layer of the literature
+is mostly marketing content and no credible practitioner source was found that ranks these shapes against
+each other; take the names, not the advice (sourced definitions in Provenance).
 
 Note what the shapes imply. A manifesto and a vignette anthology are **deliberately discontinuous in the
 picture.** They are held by the voice and the pulse. Our gate blocks both.
@@ -192,52 +149,42 @@ picture.** They are held by the voice and the pulse. Our gate blocks both.
 
 This half is much thinner than Part 1, and that is the honest finding. Named studios publish process
 pages and give podcast interviews, and they talk about collaboration, trust, timelines and sound. They do
-not, in anything I could find, say "we chose a match-cut spine here because the brief had three subjects".
+not, in anything found, say "we chose a match-cut spine here because the brief had three subjects".
 The device choice appears to be tacit knowledge that nobody writes down.
 
-What I did find, ranked by how directly it answers the question.
+What was found, ranked by how directly it answers the question. Sourced quotes and citations for each
+numbered claim below are collected in Provenance.
 
 **1. Murch ranks what a cut must serve, and puts spatial continuity last.** Emotion 51%, story 23%, rhythm
-10%, eye-trace 7%, the two-dimensional plane of the screen 5%, three-dimensional space 4%. "If you find
-you have to sacrifice certain of those six things to make a cut, sacrifice your way up, item by item, from
-the bottom" ([StudioBinder](https://www.studiobinder.com/blog/walter-murch-rule-of-six/); Murch, *In the
-Blink of an Eye*, 2001). This is a decision rule and it is the most load-bearing source on the page. It
-governs one cut rather than a whole structure, but the ordering generalises: **whatever holds the film
-together should be chosen for the feeling first, and spatial persistence is the thing you give up first,
-not the thing you must have.**
+10%, eye-trace 7%, the two-dimensional plane of the screen 5%, three-dimensional space 4%. This is a
+decision rule and it is the most load-bearing source on the page. It governs one cut rather than a whole
+structure, but the ordering generalises: **whatever holds the film together should be chosen for the
+feeling first, and spatial persistence is the thing you give up first, not the thing you must have.**
 
 **2. The message decides, and it decides before any picture exists.** Ordinary Folk's published process
-runs Message, Design, Animation, Audio. Stage one is "we shut up and listen. We may ask a question or two
-hundred," and produces a script ([Ordinary Folk](https://www.ordinaryfolk.co/process)). School of Motion's
-Explainer Camp puts storyboard and animatic in week three, before After Effects, and calls the animatic
-the guide that communicates "the timing of the piece, as well as what will happen, where and when"
-([School of Motion](https://www.schoolofmotion.com/blog/inside-explainer-camp-course-art-visual-essays)).
-The criterion here is not which device, it is which comes first. Structure is settled in the cheapest
-medium available, and the picture obeys it.
+runs Message, Design, Animation, Audio. School of Motion's Explainer Camp puts storyboard and animatic
+in week three, before After Effects. The criterion here is not which device, it is which comes first.
+Structure is settled in the cheapest medium available, and the picture obeys it.
 
-**3. If there is a track, the track may be the structure.** Laura Nicolas, quoted above: music leads, "not
-the other way around" ([Art of the Title](https://www.artofthetitle.com/title/lolo/)). The inverse holds
-for narrated work: when there is a voice, the music serves the words and the words set the pace.
+**3. If there is a track, the track may be the structure.** Laura Nicolas, quoted in Provenance: music
+leads, "not the other way around." The inverse holds for narrated work: when there is a voice, the music
+serves the words and the words set the pace.
 
 **4. The platform sets the front of the structure, not the middle.** Short-form guidance is consistent and
 low-quality as writing: hook in the first three seconds, then escalation, then payoff, then a CTA or loop,
-with the subject filling a 9:16 frame from the first frame rather than opening wide
-([SocialKit](https://socialk.it/en/blog/video-hooks-first-three-seconds)). This constrains the opening and
-the runtime. It says nothing about which device carries the middle.
+with the subject filling a 9:16 frame from the first frame rather than opening wide. This constrains the
+opening and the runtime. It says nothing about which device carries the middle.
 
 **5. Kinetic typography carries its own test.** The practical question is whether the motion supports
-comprehension: "If a viewer cannot read the word at the moment it matters, the animation is working
-against the message"
-([We Design Motion](https://wedesignmotion.com/blog/design/kinetic-typography-when-and-why-it-works/)).
+comprehension: if a viewer cannot read the word at the moment it matters, the animation is working
+against the message.
 
-**What I could not find:** any studio, in a process page, podcast transcript or Art of the Title interview,
+**What could not be found:** any studio, in a process page, podcast transcript or interview,
 stating a rule for choosing between a continuous object, a match-cut chain, a motif, and a metric cut rate.
-Emil Kowalski's animations.dev and the UI-motion literature generally were a dead end for this question:
-they are rigorous about how a *single* transition should feel (duration, easing, transform over layout) and
-say nothing about how a *film* is held together ([animations.dev](https://animations.dev/),
-[emilkowal.ski](https://emilkowal.ski/ui/great-animations)). Most searches for studio structural process
-returned SEO listicles ranking motion studios. Treat any confident decision framework on this topic,
-including mine below, as inference.
+The UI-motion literature generally was a dead end for this question: it is rigorous about how a *single*
+transition should feel (duration, easing, transform over layout) and says nothing about how a *film* is
+held together. Most searches for studio structural process returned SEO listicles ranking motion studios.
+Treat any confident decision framework on this topic, including Part 4 below, as inference.
 
 ---
 
@@ -344,11 +291,10 @@ Every device in Part 1 answers the question "what survives the cut". None of the
 cut happen". Those are different questions, and a film can pass the first and fail the second: four beats
 can share a prop, a colour and a cut rate, and still be four things that merely follow each other.
 
-The distinction is old and it is not ours. Post hoc is not propter hoc: after is not because. Art of the
-Title's read of the *Fight Club* titles names the thing that holds a run of abstract images as "this
-immediate relationship between cause and effect"
-([The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)), and nothing in that
-sequence persists in the picture at all.
+The distinction is old and it is not ours. Post hoc is not propter hoc: after is not because. See
+Provenance for the sourced reading of the *Fight Club* titles, whose run of abstract images does not
+persist in the picture at all and is held together by "this immediate relationship between cause and
+effect".
 
 The published method this came from decomposes a reference film into five columns: time, what is on
 screen, what moves, **what triggers the next screen**, and what sound sits there. Its worked grammar for a
@@ -406,6 +352,99 @@ storyboard can state a perfect chain and the film can drop every causing act. Th
 and your eyes.
 
 ---
+
+## Provenance
+
+**Sourced statements for Part 1.**
+
+A match cut is "a match cut based on the visual shape or composition of elements across the cut", and it
+comes in shape, motion, colour, subject and thematic forms
+([Wikipedia](https://en.wikipedia.org/wiki/Match_cut)). School of Motion splits the motion-design use into
+two: match cuts with movement, which continue momentum, and match cuts with framing, which keep the
+composition and let the content change. Its timing note is exact and usable: "if you have a twelve frame
+move and decide to cut on frame six, pick-up the next shot on frame seven"
+([School of Motion](https://schoolofmotion.com/blog/match-cuts)).
+
+Masking, cloning, dolly-and-zoom and transformation are four of Issara Willenskomer's twelve principles of
+UX in Motion, and he defines each by the continuity it creates: transformation "creates a continuous state
+of narrative flow when object utility changes"; masking "creates continuity in an interface object or
+object group when utility is determined by which part of the object or group is revealed or concealed";
+cloning "creates continuity, relationship and narrative, when new objects originate and depart"; dolly and
+zoom "preserves continuity and spatial narrative when navigating interface objects and spaces"
+([UX in Motion Manifesto](https://medium.com/ux-in-motion/creating-usability-with-motion-the-ux-in-motion-manifesto-a87a4584ddc)).
+Our continuous-object rule is his *transformation* principle, promoted to a law. His other eleven are
+still available and we use almost none of them structurally.
+
+The single sweeping camera move is a standing title-sequence device, not a novelty. Art of the Title names
+*Hellboy II* and *I, Robot* as sequences built on "a fluid, single-shot camera move" that carries wildly
+varied imagery ([Art of the Title](https://www.artofthetitle.com/feature/the-inner-workings/)). In live
+action the same idea is the long take or oner, and a pseudo-oner hides its cuts in a whip pan or a dark
+passage ([Wikipedia](https://en.wikipedia.org/wiki/Long_take)).
+
+A sound bridge is audio from one scene bleeding into the next; the J-cut runs the next scene's audio early,
+the L-cut runs this scene's audio late
+([StudioBinder](https://www.studiobinder.com/blog/what-is-a-sound-bridge-definition/)).
+
+Bookends are "a pair of scenes that occur at the beginning and end of a film" that "act as a framing device
+for the main story", used to give "a clear entry point and a satisfying exit point"
+([Filmmakers Academy](https://www.filmmakersacademy.com/glossary/bookends/)). The requirement is that
+something crucial has changed between the two.
+
+Eisenstein's five methods run metric, rhythmic, tonal, overtonal and intellectual; in metric montage "the
+pieces are joined together according to their lengths, in a formula-scheme corresponding to a measure of
+music" ([Media Studies](https://media-studies.com/eisenstein-montage/),
+[StudioBinder](https://www.studiobinder.com/blog/soviet-montage-theory/)).
+
+Music-led is the strongest directly-sourced statement found from a practitioner about structure. On the
+*Lolo* titles, Laura Nicolas says: "We really used the music as the main structure for the titles, it
+really leads the whole sequence by its rhythmic changes," and then, generally, "Music is a key element for
+my creations, I always use it as the structure for my films and not the other way around"
+([Art of the Title](https://www.artofthetitle.com/title/lolo/)). Art of the Title's own survey agrees that
+music is essential glue in title work ([The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)).
+
+A motif is a repeated visual, verbal, musical or behavioural element that points to a deeper meaning
+([FilmDaft](https://filmdaft.com/motif-in-film-explained/)). Intellectual montage "involves the
+juxtaposition of seemingly unrelated images to create a new, higher level of meaning"
+([Media Studies](https://media-studies.com/eisenstein-montage/)); the Kuleshov effect is the same
+mechanism proved on one face. Art of the Title's example of a conceptual through-line is *Fight Club*,
+where "this immediate relationship between cause and effect" holds a sequence of abstract imagery together
+([The Inner Workings](https://www.artofthetitle.com/feature/the-inner-workings/)).
+
+Manifesto films "capture the brand's essence in a video without a storyline or plot", with the product
+taking a back seat
+([shots](https://shots.net/news/view/manifesto-ads-has-corporate-poetry-outstayed-its-welcome)). A vignette
+demo shows a series of scenarios rather than one
+([Storylane](https://www.storylane.io/blog/vignette-demo)). This layer of the literature is mostly
+marketing content and I did not find a credible practitioner source that ranks these shapes against each
+other. Take the names, not the advice.
+
+**Sourced statements for Part 2.**
+
+**1.** Murch, *In the Blink of an Eye* (2001): "If you find you have to sacrifice certain of those six
+things to make a cut, sacrifice your way up, item by item, from the bottom"
+([StudioBinder](https://www.studiobinder.com/blog/walter-murch-rule-of-six/)).
+
+**2.** Ordinary Folk's published process runs Message, Design, Animation, Audio. Stage one is "we shut up
+and listen. We may ask a question or two hundred," and produces a script
+([Ordinary Folk](https://www.ordinaryfolk.co/process)). School of Motion's Explainer Camp puts storyboard
+and animatic in week three, before After Effects, and calls the animatic the guide that communicates "the
+timing of the piece, as well as what will happen, where and when"
+([School of Motion](https://www.schoolofmotion.com/blog/inside-explainer-camp-course-art-visual-essays)).
+
+**3.** Laura Nicolas, quoted above under Part 1 ([Art of the Title](https://www.artofthetitle.com/title/lolo/)).
+
+**4.** Short-form guidance: hook in the first three seconds, then escalation, then payoff, then a CTA or
+loop, with the subject filling a 9:16 frame from the first frame rather than opening wide
+([SocialKit](https://socialk.it/en/blog/video-hooks-first-three-seconds)).
+
+**5.** "If a viewer cannot read the word at the moment it matters, the animation is working against the
+message" ([We Design Motion](https://wedesignmotion.com/blog/design/kinetic-typography-when-and-why-it-works/)).
+
+**What was checked and found not to answer the question:** Emil Kowalski's animations.dev and the
+UI-motion literature generally were a dead end for this question: they are rigorous about how a *single*
+transition should feel (duration, easing, transform over layout) and say nothing about how a *film* is
+held together ([animations.dev](https://animations.dev/),
+[emilkowal.ski](https://emilkowal.ski/ui/great-animations)).
 
 ## Sources
 
