@@ -91,8 +91,8 @@ grounded in the site's content, the better the result.
 
 ## Step 1b: The brief itself (`make quiz`, not prose)
 
-This step used to be five bullets, and five bullets in a skill run differently every session. It is a
-script now, and the script is the one that knows what the gates require:
+The brief comes from a script, not from prose, because the script is the one that knows what the
+gates require:
 
 ```bash
 make quiz NAME=<brand> URL=<url>          # → the AskUserQuestion payload, as JSON
