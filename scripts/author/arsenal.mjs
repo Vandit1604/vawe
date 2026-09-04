@@ -57,7 +57,10 @@ const dirsOf = (rel) => {
 };
 const MODULE_PATHS = ['core', 'core/fx', 'core/layers'].flatMap(dirsOf);
 
-/** Every entry the engine can name: {name, kind, slot, blurb}. */
+/** Read one entry's value out of an optional registry map (blurbs, aka, pitfalls), or a default. */
+const at = (map, name, dflt = '') => (map && map[name] != null ? map[name] : dflt);
+
+/** Every entry the engine can name: {name, kind, slot, blurb, pitfall}. */
 export async function collect() {
   const out = [];
   const seen = new Set();
@@ -75,8 +78,8 @@ export async function collect() {
         // `aka` is the searchable-but-unprinted half of a description: the words a person types that
         // an honest blurb cannot carry ("handheld" for `driftHold`, "kerning" for `expandIn`). It joins
         // the corpus below and never reaches the output, so a synonym cannot turn a blurb into keyword soup.
-        out.push({ name, kind: reg.kind, slot: reg.slot || null, blurb: (reg.blurbs && reg.blurbs[name]) || '',
-          aka: (reg.aka && reg.aka[name]) || [] });
+        out.push({ name, kind: reg.kind, slot: reg.slot || null, blurb: at(reg.blurbs, name),
+          aka: at(reg.aka, name, []), pitfall: at(reg.pitfalls, name) });
       }
     }
   }
@@ -92,7 +95,7 @@ export async function collect() {
     const reg = bp.BEAT_REGISTRY;
     for (const name of reg.names) {
       out.push({ name, kind: reg.kind, slot: reg.slot, blurb: reg.blurbs[name] || '',
-        aka: [(bp.REQUESTS && bp.REQUESTS[name]) || ''].filter(Boolean) });
+        aka: [(bp.REQUESTS && bp.REQUESTS[name]) || ''].filter(Boolean), pitfall: at(reg.pitfalls, name) });
     }
   } catch { /* blueprints are optional to search */ }
   // BLOCKS, AND THEY WERE THE LARGEST HOLE IN THIS CORPUS. Measured before this landed: 97 of 97 block
@@ -145,7 +148,7 @@ export async function collect() {
       // line an author writes inside a block layer. A first attempt put the whole layer JSON in here
       // and the snippet came out as nested quotes inside nested quotes, unreadable and uncopyable.
       out.push({ name: row.name, kind: 'block', slot: 'block',
-        blurb: row.blurb || '', aka: [catOf[row.family] || ''].filter(Boolean) });
+        blurb: row.blurb || '', aka: [catOf[row.family] || ''].filter(Boolean), pitfall: row.pitfall || '' });
     }
   } catch { /* the block library is optional to search, the same way blueprints are */ }
 
@@ -181,7 +184,7 @@ export async function collect() {
         if (!name) continue;
         if (out.some((e) => e.name === name)) continue;
         out.push({ name, kind, slot: slot || null,
-          blurb: (opts.blurbs && opts.blurbs[name]) || '', aka: [] });
+          blurb: (opts.blurbs && opts.blurbs[name]) || '', aka: [], pitfall: at(opts.pitfalls, name) });
       }
     }
   } catch { /* the catalogue is optional to search: a fresh clone can still find the registries */ }
@@ -192,7 +195,6 @@ export async function collect() {
 const CACHE = { counts: null };
 function usage() {
   if (CACHE.counts) return CACHE.counts;
-  const counts = new Map();
   const dir = path.join(repoRoot, 'formats/scene');
   const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'schema.json') : [];
   const texts = [];
@@ -376,7 +378,7 @@ export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
   selected = [...selected.filter((e) => fresh.has(e.name)), ...selected.filter((e) => !fresh.has(e.name))];
 
   const shape = (e) => ({
-    name: e.name, kind: e.kind, slot: e.slot, blurb: e.blurb,
+    name: e.name, kind: e.kind, slot: e.slot, blurb: e.blurb, pitfall: e.pitfall || null,
     coverage: e.c, score: e.s, used: u.count(e.name), isNew: fresh.has(e.name),
     snippet: e.kind === 'blueprint beat' ? null : snippet(e),
   });
@@ -560,6 +562,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`  ${e.name}${e.isNew ? `   ← NEW, added in the last ${WINDOW_DAYS} days` : ''}`);
     console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? 'NEVER used in this library' : `${e.used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
+    if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
     if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   then: make expand D=<file>`);
     else if (e.snippet) console.log(`      ${e.snippet}`);
     console.log('');

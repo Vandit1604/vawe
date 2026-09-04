@@ -723,6 +723,19 @@ asset-check:
 pace-from-vo:
 	node scripts/media/pace-from-vo.mjs
 
+# make export-edl D=formats/scene/<file>.json [OUT=<dir>], HAND THE FILM TO AN EDITOR: read the RESOLVED
+# timeline (cuts/seams/stings, per-shot windows, layer in/out + on-screen text, the audio track) and write
+# two sidecars beside the source: <name>.shots.json (self-describing) and <name>.edl (CMX3600, importable
+# by Premiere/Resolve/FCP7). Read-only, the render path is untouched, deterministic. A vawe mp4 stops being terminal.
+export-edl:
+	@node scripts/media/export-edl.mjs $(D) $(if $(OUT),--out $(OUT),)
+
+# make sfx-catalog, REGENERATE docs/CRAFT/SFX-CATALOG.md from core/audio-kit.mjs CUES: the "reach for this
+# sound" table (family/energy/purpose/placement/pitfall per cue). Fails loudly if a cue has no catalog line,
+# so a new cue cannot ship undocumented. Run after adding or renaming a cue.
+sfx-catalog:
+	@node scripts/author/sfx-catalog.mjs
+
 # make studio D=formats/scene/<file>.json [PORT=8799]: LIVE scrubbable preview (no mp4 render). Serves
 # the scene in a browser with a frame slider + play; scrub/step to iterate, edit the JSON + reload. Under
 # it, a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, enter/exit

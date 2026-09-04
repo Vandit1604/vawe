@@ -73,10 +73,11 @@ export function checkCovered(kind, entries, blurbs) {
     + '  If they genuinely belong somewhere else, say so in a sentence: noBlurbs: \'why\'.');
 }
 
-export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog } = {}) {
+export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog, pitfalls } = {}) {
   if (!entries || typeof entries !== 'object') throw new Error(`defineRegistry("${kind}"): entries must be an object`);
   if (catalog) checkCatalog(kind, catalog);
   if (aka) checkAka(kind, entries, aka);
+  if (pitfalls) checkPitfalls(kind, entries, pitfalls);
   // The blurb IS the retrieval index (scripts/author/arsenal.mjs ranks on name + kind + blurb + aka and
   // nothing else), so the same refusal blurbsOf applies is applied to a blurbs map handed in directly.
   // Most registries do not go through blurbsOf; without this the rule would cover a third of them.
@@ -90,6 +91,7 @@ export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog } = {
     entries,
     blurbs: blurbs || null,
     aka: aka || null,
+    pitfalls: pitfalls || null,
     catalog: catalog || null,
     get names() { return Object.keys(entries); },
     has,
@@ -150,6 +152,22 @@ function checkAka(kind, entries, aka) {
     if (!Object.prototype.hasOwnProperty.call(entries, name)) bad(`names "${name}", which is not an entry here`);
     if (!Array.isArray(words) || !words.length) bad(`["${name}"] must be a non-empty array of words`);
     for (const w of words) if (typeof w !== 'string' || !w.trim()) bad(`["${name}"] contains something that is not a word`);
+  }
+}
+
+/**
+ * checkPitfalls(kind, entries, pitfalls): the OPTIONAL known-failure map, refused at LOAD if it names
+ * something that is not here. `pitfall` is not mandatory (a capability with no famous trap needs none),
+ * but a pitfall keyed to a typo'd name is the "field written and never read" failure again: it would
+ * describe nothing, break nothing, and warn nobody. So the map itself is optional; every key in it is
+ * checked. `make arsenal` prints a matched entry's pitfall under its blurb.
+ */
+function checkPitfalls(kind, entries, pitfalls) {
+  const bad = (why) => { throw new Error(`defineRegistry("${kind}"): pitfalls ${why}`); };
+  if (typeof pitfalls !== 'object') bad('must be a name → "the trap, in one line" object');
+  for (const [name, line] of Object.entries(pitfalls)) {
+    if (!Object.prototype.hasOwnProperty.call(entries, name)) bad(`names "${name}", which is not an entry here`);
+    if (typeof line !== 'string' || !line.trim()) bad(`["${name}"] must be a non-empty one-line pitfall`);
   }
 }
 

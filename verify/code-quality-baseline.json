@@ -174,5 +174,7 @@
  "scripts/author/expand-blocks.mjs::no-unused-vars": 4,
  "scripts/author/expand-blocks.mjs::complexity": 1,
  "scripts/author/concept.mjs::no-unused-vars": 1,
- "scripts/author/concept.mjs::no-unused-expressions": 1
+ "scripts/author/concept.mjs::no-unused-expressions": 1,
+ "scripts/author/arsenal.mjs::complexity": 1,
+ "scripts/author/arsenal.mjs::max-depth": 1
 }
