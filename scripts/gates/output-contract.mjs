@@ -16,7 +16,9 @@ const RATCHET = path.join(ROOT, 'verify/output-contract-ratchet.json');
 
 // Named, not silently skipped: a test runner tallies pass/fail (not finding-shaped), and this gate
 // measures the others so it does not measure itself.
-const EXEMPT = new Set(['lib-test.mjs', 'output-contract.mjs']);
+// compare.mjs streams live render progress (not pass/fail findings): routing it through findings.mjs
+// would defer all output to one flush at the end and kill the progress feedback it exists to give.
+const EXEMPT = new Set(['lib-test.mjs', 'output-contract.mjs', 'compare.mjs']);
 
 /** A gate CONFORMS when it renders through findings.mjs. It is a MIGRATION TARGET when it prints its own
  * prose without that contract. A gate that prints nothing reports nothing, so it is neither. */
