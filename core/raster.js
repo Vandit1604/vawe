@@ -25,7 +25,7 @@
 // have returned. The declaration below existed for months and nothing read it, so a comment claimed
 // "inlined once per document" while the work ran on every seam (docs/MISTAKES.md #257).
 const _fontCache = new Map();   // absolute url → data: URI
-let _tokensCss = null;          // core/tokens.css text, fetched once
+const _linkedCss = new Map();   // same-origin stylesheet href → CSS text, fetched once each
 
 async function fetchAsDataUri(url, mime) {
   const res = await fetch(url);
@@ -84,14 +84,24 @@ function usedFamilies(el) {
 
 export async function buildInlinedCss(el) {
   const families = usedFamilies(el);
-  // base sheet: the scene's own <style> blocks + tokens.css, minus their @font-face (url()s that
-  // would not resolve in the isolated raster, the data: versions below replace them).
+  // base sheet: the scene's own <style> blocks AND every linked stylesheet, minus their @font-face
+  // (url()s that would not resolve in the isolated raster, the data: versions below replace them).
   let base = '';
   for (const st of document.querySelectorAll('style')) base += '\n' + st.textContent;
-  if (_tokensCss === null) {
-    try { _tokensCss = await (await fetch('/core/tokens.css')).text(); } catch (e) { _tokensCss = ''; }
+  // Linked stylesheets are INVISIBLE to the <style> query above, so fetch each once and inline it.
+  // This closes the bug where the seam bake lost `.hs-layer{position:absolute}` (it lives in the
+  // LINKED scene.css, not an inline <style>): without it every baked layer fell back to `position:
+  // static`, collapsed to top-of-frame block flow, and seam content jumped upward until the window
+  // ended (docs/MISTAKES.md). tokens.css was the one link hand-fetched here; this generalises it so
+  // no future linked sheet goes missing from a raster.
+  for (const link of document.querySelectorAll('link[rel="stylesheet"]')) {
+    const href = link.href;
+    if (!href || new URL(href, location.href).origin !== location.origin) continue;  // skip cross-origin (fonts): inlineFonts handles those
+    if (!_linkedCss.has(href)) {
+      try { _linkedCss.set(href, await (await fetch(href)).text()); } catch (e) { _linkedCss.set(href, ''); }
+    }
+    base += '\n' + _linkedCss.get(href);
   }
-  base += '\n' + _tokensCss;
   base = base.replace(/@font-face\s*\{[^}]*\}/g, '');
   const fonts = await inlineFonts(families);
   // :root custom properties (applyTheme wrote --bg/--accent/--font-* onto the documentElement inline

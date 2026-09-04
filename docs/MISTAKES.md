@@ -17676,3 +17676,42 @@ change shipped films, and this pass had to change none.
 
 → **Gates:** `make prop-probe`, blocking in pre-push. `lib-test` asserts guard satisfaction, the
 per-preset coverage, and `deadProps` itself; each was broken deliberately and watched to fail.
+
+## 566. every seam shifted its text to the top of the frame, because the bake dropped a linked stylesheet
+
+**What.** In every two-scene seam (a `mech:"seam"` transition: wipe, dissolve, whipPan, cinematicZoom),
+the on-screen copy jumped up toward the top-left the instant the seam started, held there through the
+window, and settled back to its authored `y` when the window ended. A plain hard cut, and the morph
+(a `motion` track), were rock-steady: the copy never moved. So four of six palette transitions looked
+broken and two looked correct, which is the shape of a bug in the shared seam path, not the layers.
+
+**Root cause.** The seam bake rasterises the stage to a texture through an SVG `<foreignObject>`
+(`core/raster.js` `domToCanvas`), and the CSS it feeds that raster came from `buildInlinedCss`, which
+collected every inline `<style>` block plus ONE hand-fetched stylesheet, `/core/tokens.css`. But the
+layer geometry does not live in an inline `<style>` or in tokens.css. It lives in `formats/scene/scene.css`,
+loaded as a `<link rel="stylesheet">`, and `scene.css:26` is where `.hs-layer { position: absolute }`
+is declared. `document.querySelectorAll('style')` never matches a `<link>`, so that rule was absent
+from the isolated raster. Every layer built as a `<div class="hs-layer">` with only inline `left`/`top`
+then rasterised as `position: static`, `top`/`left` became no-ops, and the layers stacked in normal
+block flow from the top of `#cam`. That is the exact symptom: text at the top of the baked still. The
+compositor was innocent: it faithfully blended two stills that were already mis-laid-out. A hard cut
+never calls the bake (`bakeSeams` runs only `if (seams.length)`), so it only ever showed the live,
+correctly-styled DOM.
+
+**Root fix.** `core/raster.js` `buildInlinedCss` now inlines EVERY same-origin `<link rel="stylesheet">`,
+not just tokens.css: it loops `document.querySelectorAll('link[rel="stylesheet"]')`, skips cross-origin
+hrefs (fonts, handled separately by `inlineFonts`), and caches each sheet's text by href in `_linkedCss`
+the same way tokens was cached once. This closes the whole CLASS: any future linked sheet is inlined too,
+so no raster can silently lose a rule again. The one hand-fetched exception that hid the gap is gone.
+
+**Diagnosis note (for the next author).** The tell was that the copy settled back the moment the seam
+window ended, and that the incoming beat was still wrong one frame PAST the window: both are baked frames
+(`renderAt(round((t+dur)*fps)+1)`), so both carried the missing CSS. Reading the whole seam path top to
+bottom (shader, compositor geometry, camera) found nothing; the defect was one step upstream of all of
+them, in what the bake was handed. The layer type did not matter: an `html` layer would have shifted the
+same way, because the missing rule is on `.hs-layer`, which wraps every layer type.
+
+→ **Gates:** none new. This is a capture-path correctness fix with no source-decidable signature (a gate
+cannot see "a linked stylesheet was omitted from a raster" without rendering). Verified by REPRODUCTION:
+the four seam demos shifted before the fix and hold their `y` after; the hard cut was unchanged. `make
+seam-check` (frames straddling a transition) is the standing catch for seam regressions.
