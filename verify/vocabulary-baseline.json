@@ -16,10 +16,15 @@
   "MOTION_CUES",
   "DENSITY"
  ],
- "core/backgrounds.js": [
-  "PAL_PLINTH",
+ "core/backgrounds/index.js": [
   "BG_NAMES",
   "BG_BLURBS"
+ ],
+ "core/backgrounds/palette.js": [
+  "PAL_PLINTH"
+ ],
+ "core/backgrounds/presets.js": [
+  "PRESETS"
  ],
  "core/boot.js": [
   "PROPS"

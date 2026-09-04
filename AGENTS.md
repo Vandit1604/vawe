@@ -315,7 +315,7 @@ Which effects were verified stacked on one fragment, what to use instead of each
 a fragment moves, and the traps that cost a render each:
 [`docs/CRAFT/HTML-FRAGMENTS.md`](docs/CRAFT/HTML-FRAGMENTS.md).
 
-## BLACK MEANS `#000000`  `[built: core/backgrounds.js:429]`
+## BLACK MEANS `#000000`  `[built: core/backgrounds/presets.js:117]`
 
 When a brief says black, it means black. Every OTHER dark preset in `core/backgrounds.js` carries a tint
 or a wash: rendered on the vawe theme, `dark`, `deep` and `ink` all sample `rgb(12,18,26)` at the corner,
