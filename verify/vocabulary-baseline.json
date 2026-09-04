@@ -123,6 +123,11 @@
  "core/junctions.js": [
   "JUNCTION_KINDS"
  ],
+ "core/kinetic/presets.js": [
+  "PRESETS",
+  "DECODE_CHARS",
+  "DECODE_CHAR_BLURBS"
+ ],
  "core/knobs.js": [
   "KNOBS",
   "UNIFORM_FAMILIES"
@@ -281,10 +286,7 @@
   "UNITS"
  ],
  "core/type.js": [
-  "STAGGER_FROM_BLURBS",
-  "PRESETS",
-  "DECODE_CHARS",
-  "DECODE_CHAR_BLURBS"
+  "STAGGER_FROM_BLURBS"
  ],
  "core/vocab.js": [
   "FEEL",

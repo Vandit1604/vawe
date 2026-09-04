@@ -5479,8 +5479,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     keys.includes('core/safe.js::ASPECTS'));
   ok('arsenal sees a vocabulary shaped as a table of records (RANSOM_FACES)',
     keys.includes('core/ransom.js::RANSOM_FACES'));
-  ok('arsenal sees BOTH exports when two files share a name (PRESETS in lightfield and in type)',
-    keys.includes('core/lightfield/presets.js::PRESETS') && keys.includes('core/type.js::PRESETS'));
+  ok('arsenal sees BOTH exports when two files share a name (PRESETS in lightfield and in kinetic)',
+    keys.includes('core/lightfield/presets.js::PRESETS') && keys.includes('core/kinetic/presets.js::PRESETS'));
 }
 
 // ---- ARSENAL HONESTY (scripts/author/arsenal.mjs) ------------------------------------------------
