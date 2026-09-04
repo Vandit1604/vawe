@@ -29,7 +29,7 @@
  "core/boot.js": [
   "PROPS"
  ],
- "core/camera-moves.js": [
+ "core/camera-moves/index.js": [
   "CAMERA_MOVES"
  ],
  "core/canvas-fx.js": [
