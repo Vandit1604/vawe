@@ -17735,7 +17735,12 @@ opposite of what its own comment claimed. The render looked fine (it did render)
 gone for beats 1..N. Fix: the rect now sets `acrossBeats:true`. Verified by REPRODUCTION: the accent underline
 appears in one beat before the fix and in all four after, traveling on its keyed track.
 
-→ **Gates:** none new, but a KNOWN GAP is recorded. `no-continuous-object` (`scripts/author/motion-director.mjs`)
-credits any layer with a `motion` array; it does not know that under `sceneUnits` a layer without
-`acrossBeats` is truncated to one beat, so it passes a film whose continuous object visually disappears.
-Sharpening it to require `acrossBeats` on the crediting layer when `sceneUnits` is set is the follow-up.
+→ **Gates:** the BLOCKING floor was already right. `direction-floor.mjs` `no-continuous-object` excludes
+any layer the engine confines to its beat (`sceneTiming.unitEnd` non-null under `sceneUnits`), so a
+truncated rect is not a spine candidate and the film fails with the exact `acrossBeats` fix in the message
+(this is MISTAKES #183). The GAP was in the coaching twin: `motion-director.mjs` `tellContinuity` credited a
+`motion` track or a spanning window without asking whether `sceneUnits` truncates it, and blanket-passed any
+`sceneUnits` film, so it stayed silent on a spine the renderer had cut. Fixed by reusing the same
+`sceneTiming.unitEnd` oracle: it now credits only survivors and WARNs when an authored spine is truncated,
+naming `acrossBeats`. The lesson: a coaching check and the floor it coaches toward must read timing the
+same way, or the coaching contradicts the block.
