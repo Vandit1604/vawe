@@ -117,6 +117,26 @@ const layers = spans.map((s, i) => ({
   ...propsFor(s.name, s, i === payoffIdx),
 }));
 
+// THE CONTINUOUS OBJECT, emitted by default. One accent element that spans EVERY cut, so the film reads
+// as one piece and not a stack of independent beats. This is the single thing that most separates a
+// directed film from a slideshow, and it is the one the old scaffold waived instead of writing. Replace
+// it with your own motif (a mark that travels, a UI object that persists and changes, a rule under the
+// operative word), but do NOT delete it: a film with nothing continuous is a slideshow, and
+// `no-continuous-object` will say so. It travels on a hand-keyed track, so it also seeds authored motion.
+layers.push({
+  type: 'rect',
+  w: 140, h: 6, radius: 3,
+  x: 160, y: 900,
+  fill: 'var(--accent)',
+  start: 0,
+  duration: dur,
+  motion: [
+    { t: 0, x: 160 },
+    { t: +(dur / 2).toFixed(2), x: 900, ease: 'easeInOutSine' },
+    { t: dur, x: 160, ease: 'easeInOutSine' },
+  ],
+});
+
 // ---- transitions: one per boundary, mostly fade, one accent into the payoff --------------------------
 const transitions = [];
 for (let i = 1; i < spans.length; i++) {
@@ -139,16 +159,6 @@ const scene = {
   theme,
   duration: dur,
   energy: 'brand',
-  authoring: {
-    allow: ['no-continuous-object'],
-    _why: {
-      'no-continuous-object': 'held by a rotation of independent beats, a MOTIF (the accent field + '
-        + 'kinetic reveal register recurring every beat) plus a BOOKEND (the hook\'s open loop answered '
-        + 'by the payoff beat), both non-object devices per docs/CRAFT/FILM-STRUCTURE.md, not a single '
-        + 'object crossing one cut. REPLACE: once the film has a real product surface, swap a middle '
-        + 'beat for screenDive/logoLockup with a real object riding across a cut and drop this waiver.',
-    },
-  },
   audio: { auto: true },
   bg,
   transitions,
@@ -198,7 +208,7 @@ arc: "hook -> build -> proof -> payoff -> CTA"
 format: 1920x1080
 theme: "themes/${theme}.json"
 duration: ${dur}s
-threads: "a recurring motif (the accent register every beat shares) + a bookend (the hook's open loop, answered by the payoff)"
+threads: "a CONTINUOUS OBJECT (the accent element the scaffold emits, spanning every cut on a hand-keyed track, REPLACE it with your real motif but keep something continuous) + a bookend (the hook's open loop, answered by the payoff)"
 spectacle: "beat ${specIdx + 1} (${names[specIdx]}) · the hero count-up · the number carries the film's one loud moment"
 not: "<fill: the defaults this film refuses, e.g. no centered slide deck, no gradient hero, no Inter>"
 craft:
