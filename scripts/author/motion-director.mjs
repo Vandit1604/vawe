@@ -33,6 +33,7 @@ import { DENSE_KEY_SEC } from '../../core/sequence.js';
 import { cutVelocityAdvice } from '../../core/velocity-cut.js';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
+import { sceneTiming } from '../gates/scene-timing.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -189,11 +190,22 @@ function tellEffectSoup(d, layers, beats) {
 // continuity: a shared element that travels (a motion track, or a layer spanning a beat boundary).
 function tellContinuity(d, layers, beats) {
   const spansABeat = (l) => { const a = l.start ?? 0, b = a + (l.dur ?? l.enterDur ?? 0); return beats.some((t) => t > a + 0.05 && t < b - 0.05); };
-  const travelers = layers.filter((l) => l.track !== 0 && (Array.isArray(l.motion) && l.motion.length > 1 || spansABeat(l)));
-  // sceneUnits carries continuity BY CONSTRUCTION: every boundary moves the whole outgoing beat out and the
-  // incoming beat in as units, so the scene itself travels across each cut (the strongest continuity there is).
+  const wouldTravel = (l) => l.track !== 0 && (Array.isArray(l.motion) && l.motion.length > 1 || spansABeat(l));
   if (beats.length < 4) return nothing;
+  // A layer only travels if the engine actually carries it across the cut. Under sceneUnits every
+  // non-acrossBeats layer is truncated to its own beat (scene-timing `unitEnd` is non-null then), so a
+  // motion track or a spanning window is a spine ON PAPER that vanishes after the first cut. Credit only
+  // the survivors, matching direction-floor's no-continuous-object, which BLOCKS this same case.
+  const T = sceneTiming(d);
+  const survives = (l) => T.unitEnd(l) == null;
+  const travelers = layers.filter((l) => wouldTravel(l) && survives(l));
+  const truncated = layers.filter((l) => wouldTravel(l) && !survives(l));
   const metrics = { continuity: travelers.length };
+  // sceneUnits carries continuity BY CONSTRUCTION: every boundary moves the whole outgoing beat out and the
+  // incoming beat in as units, so the scene itself travels across each cut. A film with no authored spine is
+  // still not a slideshow. But an AUTHORED spine that sceneUnits cut is the misleading pass this used to give.
+  if (travelers.length === 0 && truncated.length && !layers.some((l) => l.acrossBeats === true))
+    return { metrics, findings: [warn('continuity', `${truncated.length} layer(s) travel on paper but sceneUnits truncates each to its own beat, so none survives a cut. Mark the spine "acrossBeats":true (direction-floor blocks this as no-continuous-object).`)] };
   if (travelers.length === 0 && d.sceneUnits !== true)
     return { metrics, findings: [warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat). Reads as a slideshow (TASTE-RULES: continuity). Or set "sceneUnits":true so each beat slides in/out as one unit.`)] };
   return { metrics, findings: [] };
