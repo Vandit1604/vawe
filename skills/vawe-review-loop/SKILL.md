@@ -45,6 +45,14 @@ verdict shape. Overkill for a one-line tweak; required for anything you intend t
 
 **Critics report. You fix. A critic is evidence, never a ruling.**
 
+**The PASS is not yours to self-record.** You authored the film, so your own read of `make judge` is
+the one read that cannot be trusted to fail it: a judge scoring its own lineage inflates the score, and
+that is not a character flaw, it is a measured bias. It is why hinge-v1, a slideshow, was recorded PASS
+by the agent that wrote it. So before `make judge --verdict PASS`, hand `/tmp/judge/<name>/sheet.png` and
+the rubric to a SEPARATE critic (a fresh subagent that did not author the film: the fidelity and beat
+critics in `docs/CRAFT/SUBAGENTS.md`), and record PASS only when that independent eye agrees. A FIX from
+either eye keeps the loop open.
+
 ## The stopping rule
 
 This is the part that did not exist. Apply it in order; the first line that matches ends the loop.
