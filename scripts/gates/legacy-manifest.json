@@ -2825,6 +2825,17 @@
         }
       },
       "viaGate": "scripts/gates/beat-check.mjs"
+    },
+    "sweep-static": {
+      "adopted": "2026-09-05",
+      "what": "the rendered pixels move, the whole film is not one frozen frame held for its runtime",
+      "legacy": {
+        "_t-dissolve": {
+          "since": "2026-09-05",
+          "hash": "267740d419012471"
+        }
+      },
+      "viaGate": "scripts/gates/sweep-static.mjs"
     }
   },
   "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",
