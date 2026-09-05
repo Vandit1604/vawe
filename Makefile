@@ -774,6 +774,13 @@ studio:
 seam-check:
 	@node scripts/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
 
+# make sweep-static D=formats/x/video.json, THE PIXELS-MOVED CHECK: sample 10 frames from the RENDERED mp4
+# and fail if geometry never changes across the whole film (max consecutive change < 0.5%). Complements
+# static-bg (which checks declared bg WINDOWS): this checks whether anything actually moved on screen. A
+# held beat among real motion cannot trip it (it fails only when EVERY sampled pair is frozen). Render first.
+sweep-static:
+	@node scripts/gates/sweep-static.mjs $(D) $(if $(JSON),--json,)
+
 # make similar [D="a.json b.json"], sameness audit: score authored videos pairwise (motion vocab
 # + beat structure + layout). Cross-brand SAME (>0.75) fails; the anti-template gate.
 similar:
