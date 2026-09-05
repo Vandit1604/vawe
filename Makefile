@@ -223,6 +223,18 @@ scaffold: ## write a directed, gate-passing scene + storyboard skeleton to start
 pitch: ## diverge to 5 concepts under the anti-median gate before authoring (NAME=, CHOSE=, LEFT=)
 	node scripts/author/pitch.mjs $(NAME) $(if $(CHOSE),--chose "$(CHOSE)") $(if $(LEFT),--left "$(LEFT)")
 
+# make route Q="<what the user asked>": map a request to ONE vawe deliverable (launch-video / explainer /
+# motion-graphic / recreation / demo) and print that route's intake questions + which blueprints and CRAFT
+# docs to load. Read one small route file, not all of AGENTS.md. docs/CRAFT/ROUTING.md.
+route: ## map a request to a vawe deliverable + its intake (Q="...")
+	node scripts/author/route.mjs "$(Q)"
+
+# make llms-txt: regenerate formats/llms.txt, the portable, drift-proof vocabulary primer (one rule + a
+# when-to-use per layer type + the effect families + the hard rules + the loop), generated from the live
+# registries so an agent can author a compliant scene from the full palette without loading the whole repo.
+llms-txt: ## regenerate formats/llms.txt, the portable vocabulary primer
+	node scripts/author/llms-txt.mjs
+
 # make check D=<file>: every gate, every finding, ZERO consequence. Same information `make ship`
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
 check:

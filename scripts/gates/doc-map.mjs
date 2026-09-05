@@ -332,7 +332,12 @@ export function renderCraftBlock(entries) {
   const inCraft = (e) => e.file.startsWith('docs/CRAFT/');
   for (const key of CRAFT_GROUPS) {
     const rows = [
-      ...entries.filter((e) => e.group === key && inCraft(e)).map((e) => ({ label: `[${path.basename(e.file)}](${path.basename(e.file)})`, ...e })),
+      // relative to docs/CRAFT/, not basename: a doc under a subdirectory (docs/CRAFT/routes/*) needs
+      // its subpath in the link, or the generated table points at a file that does not exist there.
+      ...entries.filter((e) => e.group === key && inCraft(e)).map((e) => {
+        const rel = path.relative('docs/CRAFT', e.file);
+        return { label: `[${rel}](${rel})`, ...e };
+      }),
       ...CRAFT_ALSO.filter((e) => e.group === key),
     ];
     if (!rows.length) continue;

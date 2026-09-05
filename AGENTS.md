@@ -9,9 +9,10 @@ is now a short pointer to this file, kept only so Claude Code auto-loads it.
 This repo turns **one self-describing JSON → one rendered video** (30fps mp4, at any of **five**
 canvases: `16:9` 1920×1080 · `9:16` 1080×1920 · `1:1` 1080×1080 · `4:5` 1080×1350 · `4:3` 1440×1080,
 the table at `core/safe.js:35`; a ratio it does not name is still honoured, sized to fit the long edge
-at 1920). There is exactly **one module: `scene`**, an open canvas of **18 composable layer types**
-(`ls core/layers/`: beam · board · canvas · clip · component · composition · count · cursor · doc ·
-glow · group · html · image · lottie · rect · svg · text · video) plus camera · cuts · stings ·
+at 1920). There is exactly **one module: `scene`**, an open canvas of **24 composable layer types**
+(`ls core/layers/`: adjust · beam · board · clip · component · composition · count · cursor · doc ·
+globe · glow · group · html · image · lottie · paint · particles · raymarch · rect · shader · svg ·
+text · three · video) plus camera · cuts · stings ·
 captions. `html` counts as a picture, and that matters: it is what makes brew's 46% further down.
 **No templates.** You do not pour data into a canned layout; you compose each video from the vocabulary in
 `docs/PRIMITIVES.md`. Your job when asked to "make a video about X" is to **write a scene JSON**
@@ -407,7 +408,7 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 772 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 778 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
 `docs/EFFECTS.md`, 693 effects across 56 families). Reach for it before you invent anything. The measured cost
 of not doing so: the `{type:"beat"}` blueprint mechanism is used by a handful of gate-visible scenes (3
