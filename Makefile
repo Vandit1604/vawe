@@ -216,6 +216,13 @@ demo: ## scaffold a SPECIMEN demo scene (one subject, one shot) and iterate on i
 scaffold: ## write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=)
 	node scripts/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS))
 
+# make pitch NAME=<name>: DIVERGE before the storyboard. Prints the pitch protocol (4 questions, 5 concepts
+# on 5 forced axes, the anti-median 0.10 gate, the silhouette check) so the chosen angle is not the median a
+# model would default to. Record the outcome: make pitch NAME=<name> CHOSE="<angle>" LEFT="<median left behind>"
+# writes a receipt (verify/approved/pitch/<name>.json) and prints the storyboard `angle:` line. docs/CRAFT/PITCH.md.
+pitch: ## diverge to 5 concepts under the anti-median gate before authoring (NAME=, CHOSE=, LEFT=)
+	node scripts/author/pitch.mjs $(NAME) $(if $(CHOSE),--chose "$(CHOSE)") $(if $(LEFT),--left "$(LEFT)")
+
 # make check D=<file>: every gate, every finding, ZERO consequence. Same information `make ship`
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
 check:
