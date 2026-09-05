@@ -52,7 +52,16 @@ Then the agent **reads the sheet against the rubric** and returns a structured v
 ## What this judge cannot do: tell you whether an edit HELPED
 
 It sees one film, and the agent running it knows which version it just authored. Both limits are fatal to
-the question "is this better than what I had". For that you need a blind A/B judge: two cuts, paired
+the question "is this better than what I had".
+
+**So the PASS is not the author's to self-record.** A judge scoring a film it wrote inflates the score,
+a measured bias, not a lapse, and it is why hinge-v1 (a slideshow) was recorded PASS by the agent that
+made it. The `--verdict PASS` that gates `ledger-add` must be corroborated by a SEPARATE critic: hand
+`/tmp/judge/<name>/sheet.png` and the rubric to a fresh subagent that did not author the film (the
+fidelity and beat critics in [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md)) and record PASS only when that
+independent eye agrees. This costs nothing but one dispatch and it removes the one bias no rubric can.
+
+For the harder question, whether an edit HELPED, you need a blind A/B judge: two cuts, paired
 beat by beat, arms hidden, three judges. **No such judge exists today.** `make ab`, `make ab-record` and
 `CRAFT/AB-JUDGE.md` were removed on 2026-08-05 (`cc2dfc2`), along with five other tools that had never
 been the reason a video looked better. Until one is built again, tile the two renders with `make compare`
