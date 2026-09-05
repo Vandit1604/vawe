@@ -17768,3 +17768,30 @@ SOURCE's planning decisions, not the renderable expansion.
 `make author-check` (exit 0). The class: a gate about the SOURCE (a receipt, a plan) must read the file the
 author edits; only a gate about the RENDERABLE scene wants the expansion. Reproduced by running the ladder on
 a scaffolded film before (crash, then permanent `no-preflight`) and after (clean).
+
+## 569. a film rendered portrait and every "bug" for an hour was the canvas, plus a 404 that blamed the wrong thing
+
+Authoring a 16:9 social explainer surfaced two engine paper-cuts, each of which cost real renders.
+
+**A scene that states no canvas renders 9:16, silently.** `core/boot.js` resolves the aspect as `?aspect= >
+data.aspect > (orientation === 'landscape' ? '16:9' : '9:16')`, so a scene with neither `aspect` nor
+`orientation` is portrait. The lock sheet said 16:9, the storyboard said `format: 1920x1080`, and nothing
+read either. Every symptom that followed was the 1080px width: a keyed `x` offset of 920 pushed the spine
+off the right edge (read for an hour as "the panel vanishes when its track starts"), two text boxes
+"clipped", the payoff picture "sat at the right edge". Nine isolation probes later, `ffprobe` said 1080x1920.
+Fix for the film: `"aspect": "16:9"`. The class: a default that changes composition must not be silent.
+`validate` should say "no aspect stated, defaulting to 9:16" on any scene without one, and `plan-vs-render`
+should compare the storyboard's `format:` to the render's dims; neither exists yet.
+
+**A relative asset path 404s with a message that names the wrong cause.** `core/boot.js` sets `im.src`
+verbatim, so `"src": "assets/brands/x.jpg"` resolves against the PAGE URL (`/formats/scene/…`) and 404s,
+while shipped scenes all write `"/assets/…"` with a leading slash. The error says "does not exist, or its
+path is outside the roots the render server allows", both false: the file existed and `assets/` is a served
+root. Fix for the film: the leading slash. The class: either boot prefixes `/` when a src is not absolute
+(the write-site fix), or the message says "a src must start with `/`".
+
+**Lesson, for the next author.** When a layer "vanishes", `ffprobe` the render's dimensions BEFORE probing the
+layer. Two facts settle most position bugs in one command: the canvas size, and that motion `x`/`y` are
+OFFSETS on the base position (`make schema AT="layers[].motion[]"`), not absolute coordinates.
+
+→ **Gates:** none new yet; both classes are named above with their write-site fix.
