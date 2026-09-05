@@ -31,7 +31,7 @@ const ROUTES = [
   {
     name: 'launch-video',
     file: 'docs/CRAFT/routes/launch-video.md',
-    keywords: ['launch video', 'launch film', 'promo', 'market our', 'market this', 'showcase our', 'product video', 'site tour', 'from hinge.co', '.com', '.xyz', '.dev', '.io', 'our site', 'our product'],
+    keywords: ['launch video', 'launch film', 'promo', 'market our', 'market this', 'showcase our', 'product video', 'site tour', '.com', '.co', '.ai', '.app', '.xyz', '.dev', '.io', 'our site', 'our product'],
     intake: [
       'Which URL, and every page? Crawl routes, view modes and empty states, not just the homepage.',
       'Style anchor: which pages to feature, if the site is large.',
