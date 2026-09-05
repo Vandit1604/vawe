@@ -196,6 +196,12 @@ const RATCHET_CODES = {
   'feature-poverty': 'the film reaches into the engine\'s expressive families, not just the top of the box',
   'craft-unvisited': 'every CRAFT doc that applies to this film is answered in the plan',
   'no-plan-for-craft': 'the film has a storyboard the craft checklist can be answered in',
+  // The backdrop is the largest area of the frame, and 81% of the library paints one flat field for the
+  // whole runtime. beat-check has warned on it for a while and the warn was scrolled past. The flat-film
+  // tier is ratcheted now: a NEW film has to move the backdrop on at least one beat (a moving preset, or
+  // bg windows with `t` that turn), or state the still ground as a decision. The dead-markup tier of the
+  // same code stays a hard beat-check fail, so this does not loosen it.
+  'static-bg': 'the backdrop moves, at least one beat is not a flat field asleep for the whole film',
   // NOT RATCHETED, and the measurement is the reason. `off-colour` fires on BOTH exemplars, because a
   // recreation carries the captured brand's colours and those are not in our theme palette. A rule that
   // fails the two films this repo argues from is a wrong rule for a whole class of film, not a

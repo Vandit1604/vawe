@@ -2546,6 +2546,285 @@
         }
       },
       "viaGate": "scripts/gates/direction-floor.mjs"
+    },
+    "static-bg": {
+      "adopted": "2026-09-05",
+      "what": "the backdrop moves, at least one beat is not a flat field asleep for the whole film",
+      "legacy": {
+        "_auto-orient-plain": {
+          "since": "2026-09-05",
+          "hash": "05f4511c0be8cf28"
+        },
+        "_auto-orient": {
+          "since": "2026-09-05",
+          "hash": "31f56a0cac3e01dd"
+        },
+        "_campush": {
+          "since": "2026-09-05",
+          "hash": "a94ace0ccd6eeb45"
+        },
+        "_catalog-1": {
+          "since": "2026-09-05",
+          "hash": "4721c98d7c40f854"
+        },
+        "_catalog-10": {
+          "since": "2026-09-05",
+          "hash": "bb06572bd5b9d0dc"
+        },
+        "_catalog-11": {
+          "since": "2026-09-05",
+          "hash": "3d50dae2854f5173"
+        },
+        "_catalog-12": {
+          "since": "2026-09-05",
+          "hash": "e8bedd775b62d471"
+        },
+        "_catalog-13": {
+          "since": "2026-09-05",
+          "hash": "bc7b5e07847cbcb0"
+        },
+        "_catalog-14": {
+          "since": "2026-09-05",
+          "hash": "71ce196da9a03b47"
+        },
+        "_catalog-15": {
+          "since": "2026-09-05",
+          "hash": "9623529960d516f2"
+        },
+        "_catalog-16": {
+          "since": "2026-09-05",
+          "hash": "e04a0ccf417fb087"
+        },
+        "_catalog-17": {
+          "since": "2026-09-05",
+          "hash": "85d807728f160987"
+        },
+        "_catalog-18": {
+          "since": "2026-09-05",
+          "hash": "6b66fffd4743f34d"
+        },
+        "_catalog-19": {
+          "since": "2026-09-05",
+          "hash": "99decac61680cf64"
+        },
+        "_catalog-2": {
+          "since": "2026-09-05",
+          "hash": "b90041375c0f242f"
+        },
+        "_catalog-20": {
+          "since": "2026-09-05",
+          "hash": "38285c1485697e7f"
+        },
+        "_catalog-21": {
+          "since": "2026-09-05",
+          "hash": "2d5e20eb4a8b3976"
+        },
+        "_catalog-22": {
+          "since": "2026-09-05",
+          "hash": "039d99448f55834c"
+        },
+        "_catalog-23": {
+          "since": "2026-09-05",
+          "hash": "64ec98749bff3c84"
+        },
+        "_catalog-24": {
+          "since": "2026-09-05",
+          "hash": "148d77d6465ba339"
+        },
+        "_catalog-25": {
+          "since": "2026-09-05",
+          "hash": "c10d5a512d765084"
+        },
+        "_catalog-26": {
+          "since": "2026-09-05",
+          "hash": "5f2366e3e90b7802"
+        },
+        "_catalog-3": {
+          "since": "2026-09-05",
+          "hash": "f7019762466a8e6c"
+        },
+        "_catalog-4": {
+          "since": "2026-09-05",
+          "hash": "36d799324e820f43"
+        },
+        "_catalog-5": {
+          "since": "2026-09-05",
+          "hash": "b1f6b218046c98f0"
+        },
+        "_catalog-6": {
+          "since": "2026-09-05",
+          "hash": "39ec4b6d2cc6bd4b"
+        },
+        "_catalog-7": {
+          "since": "2026-09-05",
+          "hash": "e81411ae7d51fb29"
+        },
+        "_catalog-8": {
+          "since": "2026-09-05",
+          "hash": "d207766c30196fac"
+        },
+        "_catalog-9": {
+          "since": "2026-09-05",
+          "hash": "d177e0e220fd910d"
+        },
+        "_cursor-camera": {
+          "since": "2026-09-05",
+          "hash": "a080575f8e9ed11c"
+        },
+        "_glowA": {
+          "since": "2026-09-05",
+          "hash": "55417171b2dc7fe4"
+        },
+        "_glowB": {
+          "since": "2026-09-05",
+          "hash": "816d74ba01273ec7"
+        },
+        "_handle-probe": {
+          "since": "2026-09-05",
+          "hash": "89799f15f849f8cc"
+        },
+        "_kinetic-cut-plain": {
+          "since": "2026-09-05",
+          "hash": "694f953955d3f3c1"
+        },
+        "_kinetic-cut": {
+          "since": "2026-09-05",
+          "hash": "862c9ff7ff8667e4"
+        },
+        "_particles": {
+          "since": "2026-09-05",
+          "hash": "3a8822414bf2f833"
+        },
+        "_playhead-subject": {
+          "since": "2026-09-05",
+          "hash": "0040be511013aa71"
+        },
+        "_t-dissolve": {
+          "since": "2026-09-05",
+          "hash": "267740d419012471"
+        },
+        "_t-hardcut": {
+          "since": "2026-09-05",
+          "hash": "da5c1c08d3cce42a"
+        },
+        "_t-house": {
+          "since": "2026-09-05",
+          "hash": "2e8d8d93fedf936e"
+        },
+        "_t-knobs": {
+          "since": "2026-09-05",
+          "hash": "89cf0feeb5e400a8"
+        },
+        "_t-morph": {
+          "since": "2026-09-05",
+          "hash": "f86263698091c055"
+        },
+        "_t-squeeze": {
+          "since": "2026-09-05",
+          "hash": "3c92713edde0ce8a"
+        },
+        "_t-text-still": {
+          "since": "2026-09-05",
+          "hash": "3ad926970f7d32b8"
+        },
+        "_t-whip": {
+          "since": "2026-09-05",
+          "hash": "5e0bb42927bef479"
+        },
+        "_t-wipe": {
+          "since": "2026-09-05",
+          "hash": "64c4d66e72474ca1"
+        },
+        "_t-zoom": {
+          "since": "2026-09-05",
+          "hash": "03f38555362931c5"
+        },
+        "app-showcase": {
+          "since": "2026-09-05",
+          "hash": "3d2aa3c3a58b688f"
+        },
+        "aspects-demo": {
+          "since": "2026-09-05",
+          "hash": "6006621435a9eea1"
+        },
+        "cadence": {
+          "since": "2026-09-05",
+          "hash": "f89fc09dd015e1ff"
+        },
+        "chromatic": {
+          "since": "2026-09-05",
+          "hash": "73c714a261d0acbc"
+        },
+        "cuts-demo": {
+          "since": "2026-09-05",
+          "hash": "affc95cc3be4fc5c"
+        },
+        "demo-interactions": {
+          "since": "2026-09-05",
+          "hash": "d791b6c61b742a6f"
+        },
+        "glass": {
+          "since": "2026-09-05",
+          "hash": "a872366d85e9a4bf"
+        },
+        "looks-reel": {
+          "since": "2026-09-05",
+          "hash": "e9d5df2acd31e421"
+        },
+        "onefilm": {
+          "since": "2026-09-05",
+          "hash": "abcfc814f825db32"
+        },
+        "orbit-proof": {
+          "since": "2026-09-05",
+          "hash": "178f4f8b8c216254"
+        },
+        "search-demo": {
+          "since": "2026-09-05",
+          "hash": "7331611c0bc0c561"
+        },
+        "showcase-intro": {
+          "since": "2026-09-05",
+          "hash": "b5c3cda482de8858"
+        },
+        "showcase-scenecut": {
+          "since": "2026-09-05",
+          "hash": "61e161521f7cff67"
+        },
+        "showcase-spot": {
+          "since": "2026-09-05",
+          "hash": "8108e54fb33a593c"
+        },
+        "showcase-type-labour": {
+          "since": "2026-09-05",
+          "hash": "268f4b77928812d5"
+        },
+        "showcase-vocabulary": {
+          "since": "2026-09-05",
+          "hash": "b0de579b7dd5f988"
+        },
+        "stings-demo": {
+          "since": "2026-09-05",
+          "hash": "1dec506e421c1183"
+        },
+        "tpot-launch": {
+          "since": "2026-09-05",
+          "hash": "ea9d3e6784a6d249"
+        },
+        "type-demo": {
+          "since": "2026-09-05",
+          "hash": "5471aa9990ba45b1"
+        },
+        "vawe-identity": {
+          "since": "2026-09-05",
+          "hash": "02bc3e9fca87e0ac"
+        },
+        "vawe-rebuilt": {
+          "since": "2026-09-05",
+          "hash": "7738750af780e4d7"
+        }
+      },
+      "viaGate": "scripts/gates/beat-check.mjs"
     }
   },
   "_generated": "GENERATED FILE. Do not hand-edit: a hand-kept list goes stale the day it is written.",
