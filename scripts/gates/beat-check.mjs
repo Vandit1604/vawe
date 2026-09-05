@@ -52,7 +52,9 @@
 //   node scripts/gates/beat-check.mjs <scene.json> [--strict]   ·   make beat-check D=<file>
 // FAIL (blocks): dead-air · ends-on-nothing · empty-beat · static-bg (the dead-markup tier).
 // WARN: static-bg (the flat-film tier) · beats-wrapped-as-units · beats-held-open · beats-unseen.
-// All block under --strict.
+// The flat-film tier of static-bg is RATCHETED by author-check (RATCHET_CODES, adopted 2026-09-05): it
+// stays a warn here, but a NEW or edited film that trips it blocks in the ladder. The 68 films flat on
+// the day it was promoted are legacy. All block under --strict.
 // Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
