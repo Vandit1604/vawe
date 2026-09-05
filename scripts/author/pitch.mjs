@@ -24,6 +24,12 @@ function arg(name) {
   return i >= 0 && process.argv[i + 1] != null ? process.argv[i + 1] : null;
 }
 
+// Guarded so importing this module never parses argv, writes a receipt, or exits, matching the guarded
+// main() in llms-txt/route/sweep-static. The CLI body runs only when this file is the entry point.
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) main();
+
+function main() {
 const name = process.argv[2];
 if (!name || name.startsWith('--')) {
   console.error('usage: node scripts/author/pitch.mjs <name-or-scene.json> [--chose "<angle>"] [--left "<median>"]');
@@ -117,3 +123,4 @@ console.log(`
 
   read: docs/CRAFT/PITCH.md
 `);
+}
