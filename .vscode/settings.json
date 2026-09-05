@@ -1,0 +1,8 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["formats/scene/!(schema).json"],
+      "url": "./formats/scene/schema.json"
+    }
+  ]
+}
