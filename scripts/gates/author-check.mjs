@@ -573,7 +573,12 @@ const runGate = (name, label, script, args, opts = {}) => {
   // spawnSync, not execFileSync: a gate that PASSES can still print a warning, and it prints it to
   // stderr, which execFileSync throws away on success. That is how a step with a visible ⚠ above it
   // could summarise itself as "nothing found".
-  const { r, records } = spawnGate(script, [target, ...args]);
+  // Most gates read the RENDERABLE scene, so they get `target` (the expanded copy when the film uses
+  // block/beat/comp sugar). A gate about the SOURCE's planning decisions must get the original `file`
+  // instead: its receipt is hashed against the bytes the author edits, and the expanded copy has
+  // different bytes, so checking preflight against `target` marked every sugar film's receipt stale and
+  // told the author to `make preflight D=/tmp/...` an ephemeral path. `opts.subject` opts a step out.
+  const { r, records } = spawnGate(script, [opts.subject || target, ...args]);
   const out = `${r.stdout || ''}${r.stderr || ''}`;
   const code = r.status ?? 1;
   process.stdout.write(out.endsWith('\n') ? out : out + '\n');
@@ -639,7 +644,7 @@ const styleGate = (name, label, script, args, opts) =>
 //    decisions in docs/CRAFT/README.md were put in front of somebody for THIS version. It cannot grade
 //    the answers and does not pretend to, the same way `make beats` proves a sheet was looked at and
 //    not that the beats are good. Ratcheted like the rest, so the library warns and new work complies.
-record('preflight', runGate('preflight', 'preflight (the decisions before the JSON)', 'scripts/gates/preflight.mjs', []), { waivable: true, tier: 'reports' });
+record('preflight', runGate('preflight', 'preflight (the decisions before the JSON)', 'scripts/gates/preflight.mjs', [], { subject: file }), { waivable: true, tier: 'reports' });
 record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
 
 // 1a. storyboard, DOES THIS FILM HAVE A PLAN, AND DOES THE PLAN HOLD TOGETHER?
