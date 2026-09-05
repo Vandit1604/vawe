@@ -72,7 +72,7 @@ if (!file) {
   const files = population('pace census', { filter: LIBRARY })
     .names.map((f) => `${SCENE_DIR}/${f}`);
   const rows = [];
-  for (const f of files) { const m = measure(path.join(ROOT, f)); if (m) rows.push([f.split('/').pop().replace('.json', ''), m]); }
+  for (const f of files) { const m = measure(path.resolve(ROOT, f)); if (m) rows.push([f.split('/').pop().replace('.json', ''), m]); }
   rows.sort((a, b) => a[1].eps - b[1].eps);
   console.log('\n  pace census · events per second · a film with copy should clear ' + FLOOR.toFixed(1) + '\n');
   for (const [n, m] of rows) {
@@ -83,7 +83,11 @@ if (!file) {
   process.exit(0);
 }
 
-const m = measure(path.join(ROOT, file));
+// path.resolve, not path.join: author-check runs this on the EXPANDED scene, whose path is absolute
+// (/tmp/.author-check/<pid>/x.json). path.join(ROOT, "/tmp/...") absorbs the leading slash and yields
+// ROOT/tmp/..., a file that does not exist, so pace-check crashed on every beat/block/comp film.
+// path.resolve returns an absolute arg unchanged and still joins a repo-relative one. MISTAKES #568.
+const m = measure(path.resolve(ROOT, file));
 if (!m) { console.error(`✗ ${file}: no layers or no duration`); process.exit(2); }
 const problems = [];
 if (m.copy && m.eps < FLOOR && !m.allow.includes('slow-pace')) {

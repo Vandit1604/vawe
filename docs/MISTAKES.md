@@ -17744,3 +17744,27 @@ truncated rect is not a spine candidate and the film fails with the exact `acros
 `sceneTiming.unitEnd` oracle: it now credits only survivors and WARNs when an authored spine is truncated,
 naming `acrossBeats`. The lesson: a coaching check and the floor it coaches toward must read timing the
 same way, or the coaching contradicts the block.
+
+## 568. a fresh scaffold could never pass author-check, because two gates mishandled the expanded path
+
+Running `make author-check` on a fresh `make scaffold` (a beat film) end to end surfaced two coupled path
+bugs, both in how the ladder hands the EXPANDED scene to a gate. A film using `block`/`beat`/`comp` sugar is
+expanded to `/tmp/.author-check/<pid>/<name>.json` and every gate is run on that absolute path.
+
+**Bug one: pace-check crashed on every sugar film.** `pace-check.mjs` did `path.join(ROOT, file)`. `path.join`
+does not honour an absolute second arg, so `path.join(ROOT, "/tmp/.author-check/…")` yielded
+`ROOT/tmp/.author-check/…`, a file that does not exist, and step 15 threw `ENOENT`. Fix: `path.resolve`, which
+returns an absolute arg unchanged and still joins a repo-relative one.
+
+**Bug two: preflight was unsatisfiable for every sugar film.** author-check ran the preflight step on the
+expanded copy too. But preflight's receipt is hashed against the SUBJECT's bytes, and the expanded copy's
+bytes differ from the original the author edits, so the receipt the author recorded (`make preflight
+D=<original>`) always read STALE, and `no-preflight` (a ratchet) blocked forever. The step even told the author
+to `make preflight D=/tmp/.author-check/<pid>/…`, an ephemeral path gone by the next run. Fix: `runGate` gained
+an `opts.subject` override and the preflight step passes the original `file`, because preflight is about the
+SOURCE's planning decisions, not the renderable expansion.
+
+→ **Gates:** the fix is verified end to end: a fresh scaffold, after `make preflight D=<file>`, now passes
+`make author-check` (exit 0). The class: a gate about the SOURCE (a receipt, a plan) must read the file the
+author edits; only a gate about the RENDERABLE scene wants the expansion. Reproduced by running the ladder on
+a scaffolded film before (crash, then permanent `no-preflight`) and after (clean).
