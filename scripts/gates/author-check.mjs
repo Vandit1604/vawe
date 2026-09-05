@@ -202,6 +202,10 @@ const RATCHET_CODES = {
   // bg windows with `t` that turn), or state the still ground as a decision. The dead-markup tier of the
   // same code stays a hard beat-check fail, so this does not loosen it.
   'static-bg': 'the backdrop moves, at least one beat is not a flat field asleep for the whole film',
+  // static-bg checks whether a film DECLARES a backdrop that can move; sweep-static checks the RENDERED
+  // pixels for whether anything actually did. It needs the mp4, so it no-ops (and passes) until the film is
+  // rendered, then a NEW film whose whole timeline is frozen blocks. A film can pass one and fail the other.
+  'sweep-static': 'the rendered pixels move, the whole film is not one frozen frame held for its runtime',
   // NOT RATCHETED, and the measurement is the reason. `off-colour` fires on BOTH exemplars, because a
   // recreation carries the captured brand's colours and those are not in our theme palette. A rule that
   // fails the two films this repo argues from is a wrong rule for a whole class of film, not a
@@ -508,6 +512,7 @@ const LADDER = [
   ['validate', 'blocks', 'the schema, the vocabulary, and em-dashes in on-screen text'],
   ['storyboard', sbRatchet.state === 'new' ? 'blocks' : 'reports', 'whether this film has a written plan, and whether the plan holds together'],
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
+  ['sweep-static', 'reports', 'the RENDERED pixels: did anything move, or is the whole film frozen (needs a render; ratcheted)'],
   ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
   ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
@@ -695,6 +700,12 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
 //     a backdrop that structurally cannot move. Every other gate reads the scene as a bag of layers; this
 //     one walks the clock. Blocking, waivable by code.
 record('beats', runGate('beats', 'beat check (timeline holes)', 'scripts/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
+
+// sweep-static. The pixels-moved check, the post-render twin of beats' declared-backdrop check. It reads
+// the RENDERED mp4, so before a render it reports "render first" and finds nothing; once rendered, a film
+// whose whole timeline is frozen emits [sweep-static], which is ratcheted (RATCHET_CODES) so a NEW frozen
+// film blocks while the library is grandfathered. Reports here; the escalation pass below gives it teeth.
+record('sweep-static', runGate('sweep-static', 'sweep-static (rendered pixels moved)', 'scripts/gates/sweep-static.mjs', []), { waivable: true, tier: 'reports' });
 // 2. critique, value gate; errors report, waivable by rule code.
 styleGate('critique', 'critique (value gate)', 'scripts/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 3. direct, direction gate; FAILs report, waivable by code.
