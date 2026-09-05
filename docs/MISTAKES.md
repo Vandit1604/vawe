@@ -17715,3 +17715,27 @@ same way, because the missing rule is on `.hs-layer`, which wraps every layer ty
 cannot see "a linked stylesheet was omitted from a raster" without rendering). Verified by REPRODUCTION:
 the four seam demos shifted before the fix and hold their `y` after; the hard cut was unchanged. `make
 seam-check` (frames straddling a transition) is the standing catch for seam regressions.
+
+## 567. the scaffold's default draft did not render, and the fix silently broke its continuous object
+
+Two coupled traps, one on top of the other, in `make scaffold` (the anti-blank-file default), both found
+while wiring exemplar-conditioned backdrops.
+
+**Trap one: the default draft did not render.** The scaffold writes `transitions:[{fx:"fade"}]`. A `fade`
+is a mask-only cut, and `formats/scene/scene.js` throws on one when there is nothing underneath to reveal
+("the frame would go empty"). `core/produce.js` auto-sets `sceneUnits:true` for `cuts[]` films, which makes
+the two beats cross-fade as UNITS, but not for the `transitions[]` the scaffold writes, so every scaffolded
+film failed at render. Fix: the scaffold emits `sceneUnits:true` itself.
+
+**Trap two: `sceneUnits` then truncated the continuous object.** Under `sceneUnits`, every top-level layer
+is bound to the ONE beat its `start` falls in and exits with that beat's wrapper (`scene.js` `beatIndexOf`),
+UNLESS it sets `acrossBeats:true`. The scaffold's continuous rect (`start:0`) had no such flag, so the
+"accent element that spans EVERY cut" was attached to beat 0 only and vanished after the first cut, the exact
+opposite of what its own comment claimed. The render looked fine (it did render), and the motif was simply
+gone for beats 1..N. Fix: the rect now sets `acrossBeats:true`. Verified by REPRODUCTION: the accent underline
+appears in one beat before the fix and in all four after, traveling on its keyed track.
+
+→ **Gates:** none new, but a KNOWN GAP is recorded. `no-continuous-object` (`scripts/author/motion-director.mjs`)
+credits any layer with a `motion` array; it does not know that under `sceneUnits` a layer without
+`acrossBeats` is truncated to one beat, so it passes a film whose continuous object visually disappears.
+Sharpening it to require `acrossBeats` on the crediting layer when `sceneUnits` is set is the follow-up.
