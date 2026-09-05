@@ -25,6 +25,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { gateFindings } from '../lib/findings.mjs';
 import { readReceipt, writeReceipt, receiptPath } from '../lib/receipt.mjs';
+import { nearestExemplars } from '../lib/exemplars.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const STAGE = 'preflight';
@@ -146,32 +147,12 @@ if (missed.length) {
 // ---- EXEMPLARS TO STUDY -------------------------------------------------------------------------
 // The arsenal (below) ranks what the engine CAN do against this film. That answers "what is
 // available", never "what does excellent look like". `examples.json`'s goldSet holds the films this
-// repo is proudest of; this reads it and picks the 2-3 whose register is closest to what THIS film
-// says it is, so an agent studying it has something to imitate, not only rules to avoid.
-function exemplars(feelText) {
-  const p = path.join(repoRoot, 'formats/scene/examples.json');
-  if (!fs.existsSync(p)) return [];
-  let ex;
-  try { ex = JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return []; }
-  const films = ex && ex.goldSet && ex.goldSet.fullFilms;
-  if (!Array.isArray(films) || !films.length) return [];
-  const stop = new Set(['the', 'a', 'an', 'and', 'or', 'of', 'to', 'for', 'with', 'on', 'in', 'is', 'this', 'that', 'it', 'its', 'film', 'video', 'one']);
-  const words = (s) => ((s || '').toLowerCase().match(/[a-z]{3,}/g) || []).filter((w) => !stop.has(w));
-  const feelWords = new Set(words(feelText));
-  const scored = films.map((f) => {
-    const sbPath = path.join(repoRoot, 'formats/scene', f.file.replace(/\.json$/, '.storyboard.md'));
-    let own = [f.teaches, f.register].filter(Boolean).join(' ');
-    if (fs.existsSync(sbPath)) own += ' ' + fs.readFileSync(sbPath, 'utf8').slice(0, 1200);
-    const score = feelWords.size ? words(own).filter((w) => feelWords.has(w)).length : 0;
-    return { ...f, score };
-  });
-  scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, 3);
-}
-
+// repo is proudest of; `nearestExemplars` picks the 2-3 whose register is closest to what THIS film
+// says it is, so an agent studying it has something to imitate, not only rules to avoid. Retrieval
+// lives in scripts/lib/exemplars.mjs so `make scaffold` composes from the SAME ranking (one owner).
 const feelForExemplars = [scene.note, scene.spectacle && scene.spectacle.of, sb && fs.readFileSync(sb, 'utf8')]
   .filter(Boolean).join(' ');
-const gold = exemplars(feelForExemplars);
+const gold = nearestExemplars(feelForExemplars, 3);
 if (gold.length) {
   console.log(`\n  EXEMPLARS TO STUDY. These are the films to reach toward, not rules to avoid:\n`);
   for (const g of gold) {
