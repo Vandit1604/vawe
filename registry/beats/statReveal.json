@@ -36,7 +36,8 @@
       "x",
       "y",
       "w",
-      "unit"
+      "unit",
+      "heroSize"
     ]
   }
 }

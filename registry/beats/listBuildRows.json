@@ -1,0 +1,39 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "listBuildRows",
+  "type": "vawe:beat",
+  "title": "listBuildRows",
+  "description": "Grow a vertical list one row at a time under a fixed rule, never resetting what already landed.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "layer": {
+      "type": "beat",
+      "beat": "listBuildRows",
+      "start": 0,
+      "dur": 4
+    },
+    "requiredProps": [],
+    "props": [
+      "items",
+      "x",
+      "y",
+      "w",
+      "rowH",
+      "gap",
+      "size",
+      "weight",
+      "dotColor",
+      "stagger"
+    ]
+  }
+}

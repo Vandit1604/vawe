@@ -39,7 +39,8 @@
       "y",
       "w",
       "unit",
-      "wordSize"
+      "wordSize",
+      "heroSize"
     ]
   }
 }
