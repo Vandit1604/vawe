@@ -23,12 +23,14 @@
       "dur": 4,
       "title": null,
       "image": null,
-      "caption": null
+      "caption": null,
+      "captionSize": null
     },
     "requiredProps": [
       "title",
       "image",
-      "caption"
+      "caption",
+      "captionSize"
     ],
     "props": [
       "x",

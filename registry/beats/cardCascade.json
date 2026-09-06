@@ -21,10 +21,12 @@
       "beat": "cardCascade",
       "start": 0,
       "dur": 4,
-      "title": null
+      "title": null,
+      "heroSize": null
     },
     "requiredProps": [
-      "title"
+      "title",
+      "heroSize"
     ],
     "props": [
       "x",

@@ -22,11 +22,15 @@
       "start": 0,
       "dur": 4,
       "title": null,
-      "footer": null
+      "footer": null,
+      "bodySize": null,
+      "captionSize": null
     },
     "requiredProps": [
       "title",
-      "footer"
+      "footer",
+      "bodySize",
+      "captionSize"
     ],
     "props": [
       "x",

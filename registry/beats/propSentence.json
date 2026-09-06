@@ -20,9 +20,12 @@
       "type": "beat",
       "beat": "propSentence",
       "start": 0,
-      "dur": 4
+      "dur": 4,
+      "// exitDur 0": null
     },
-    "requiredProps": [],
+    "requiredProps": [
+      "// exitDur 0"
+    ],
     "props": [
       "items",
       "x",
@@ -36,7 +39,7 @@
       "propW",
       "radius",
       "stagger",
-      "justify",
+      "so a dissolve out of this\n  // beat crosses real content rather than an already-faded field.\n  justify",
       "enterDur",
       "exitDur"
     ]
