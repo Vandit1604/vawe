@@ -378,6 +378,55 @@ Doctrine carries the taste; the gates backstop the source-decidable subset:
 - **restraint**: a primary used on ~all cuts (monotone) or accents with no earned reason are judgment
   calls the planning skill and `make judge` review; the vision judge scores whether each seam reads.
 
+## Seam forensics: three defects the flash check can't see
+
+`scripts/gates/seam-snap.mjs` reads the rendered mp4 for a whole-frame luminance flash at every
+boundary. Three real defects on `verify/evals/briefs/demo.json` survived it because none of them touch
+the frame's overall brightness: a redraw local to one corner, a fade that keeps going past its own
+window, and a background that steps instead of blending while the layers on top of it dissolve.
+`node scripts/gates/seam-forensics.mjs <scene.json>` reads the same rendered pixels, but inside the
+authored BOX of one layer, or the strip outside every layer's box, rather than the frame as a whole.
+
+### Seam forensics ghost
+
+An outgoing layer still visible, fading, several frames past the transition's own declared `dur`. The
+box is the outgoing layer's authored `{x,y,w,h}`; the signature is a mean colour DIFFERENCE (against a
+fully-settled reference frame) that is still elevated one frame after `dur` ends and has mostly decayed
+ten frames later. A layer that is simply dark or busy there reads flat at both samples and never trips
+it; only a DECAYING reading does. Blind spot: a layer whose own content legitimately keeps changing in
+that box past `dur` (a counter still ticking, a loop still playing) reads the same as a ghost.
+
+### Seam forensics resurrection
+
+A layer redrawn after its own authored end. The baseline is the frame just before the layer first
+draws (never `end+1f`: on the defect this gate exists for, the redraw starts at `end+1f`, so that frame
+is already wrong as a "clean" reference). The probe is one frame before every boundary that falls
+outside the layer's own crossfade window. A `cursor` layer places by an absolute `path`, not `x/y`, so
+it carries no authored box; it is always checked against the canvas ORIGIN corner instead, because that
+is where this exact defect drew (docs/MISTAKES.md candidate, not yet logged: a stale render state
+falling back to `(0,0)` instead of staying unmounted). Blind spot: a later beat legitimately reusing the
+same screen region reads identically to a resurrection; the gate excludes a probe when another layer's
+own box (or an active `group`, for a beat-blueprint child whose box the engine lays out at render time
+rather than in the authored JSON) plausibly covers the same area, but a beat that reuses the space
+without any group wrapper is not caught by that exclusion.
+
+### Seam forensics split seam
+
+The field, a strip of pixels outside every authored layer box (the bottom margin), should move in small,
+roughly even steps across a transition's own window. One step several times the size of the rest is a
+hard background swap disguised inside a soft layer dissolve. Blind spot: a scene with real content
+placed in that margin reads its own motion here instead of the field's.
+
+### Seam forensics tuning
+
+Thresholds are read off real pixel measurements on `out/demo.mp4` (today's engine, before the three
+defects above were fixed), not guessed: a ghost's decay floor and ratio, a resurrection's edge-reading
+delta, and a split seam's step floor. `scripts/gates/seam-forensics.mjs`'s own header constants
+(`GHOST_FLOOR`, `GHOST_RATIO`, `RES_FLOOR`, `SPLIT_FLOOR`) are the one place they are written; re-measure
+them the same way (crop the box, `blend=difference` or `edgedetect=mode=colormix`, `scale=1:1`) before
+moving them, on a scene with and without the defect in question, the same way this file's numbers were
+found.
+
 ## Provenance
 
 **Sources:** StudioBinder (transition types · Murch's Rule of Six · match cuts · Soviet montage);
