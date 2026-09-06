@@ -37,6 +37,12 @@ const slack = lintData({ module: 'scene', layers: [
 ] });
 ok(!slack.some((w) => /colliding/.test(w)), `rule 3: declared boxes that overlap only in empty slack are silent (got ${slack.filter((w) => /colliding/.test(w)).join('; ') || 'none'})`, 'collision-slack-silent');
 
+// --- noAspectWarns: a scene with no canvas stated renders 9:16 in silence, and must say so (#569) ---
+const noAspect = lintData({ module: 'scene', duration: 5, layers: [{ type: 'text', text: 'Hi', start: 0, duration: 5 }] });
+ok(noAspect.some((w) => /no "aspect" stated/.test(w)), 'rule: a scene with no aspect warns that it defaults to 9:16', 'no-aspect-rule');
+const hasAspect = lintData({ module: 'scene', aspect: '16:9', duration: 5, layers: [{ type: 'text', text: 'Hi', start: 0, duration: 5 }] });
+ok(!hasAspect.some((w) => /no "aspect" stated/.test(w)), 'rule: a scene that states its aspect is silent', 'no-aspect-silent');
+
 // --- childWindowWarns: a group child's own start/duration is discarded, and must say so ---
 // `addGroupChild` reads the window off the GROUP, so these two props have never done anything on a
 // child. 49 children across 13 films write one today. The rule is pinned in BOTH directions, because a

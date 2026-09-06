@@ -1145,7 +1145,18 @@ export function lintData(data) {
     //     now pins that typed markup is SILENT so this cannot be reintroduced by reflex.
     ...countWindowWarns(data),
     ...sceneCollisionWarns(data),
+    ...noAspectWarns(data),
   ];
+}
+
+// A scene that states neither `aspect` nor `orientation` renders 9:16. core/boot.js resolves the canvas
+// as ?aspect= > data.aspect > orientation, and the orientation fallback is portrait; nothing said so. A
+// 16:9 film authored that way spent an hour being debugged as "the panel vanishes when its track starts"
+// before ffprobe showed a 1080px-wide canvas (docs/MISTAKES.md #569). A default that changes the whole
+// composition must not be silent. A warning, not an error: 10 library scenes rely on the default today.
+function noAspectWarns(data) {
+  if (!isObj(data) || data.aspect || data.orientation || data.orient) return [];
+  return ['no "aspect" stated, so this renders 9:16 (portrait) by default. State the canvas: "aspect": "16:9" | "9:16" | "1:1" | "4:5" | "4:3".'];
 }
 
 function walk(fields, obj, path, errors) {

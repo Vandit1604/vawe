@@ -10,6 +10,7 @@
 // barrier the capture drains before it shoots; this layer is its first caller.
 import { mergeProps, propsOf } from '../props.js';
 import { settleOn } from '../frame-settle.js';
+import { srcUrl } from '../src-url.js';
 
 // `in`/`out` are points in the SOURCE, `rate` is how fast the source runs against the scene clock, and
 // they only mean anything together: out<=in is an empty cut and is refused rather than rendered as a
@@ -44,7 +45,7 @@ export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint,
   // like the layer was never written. Both spellings mean the same file and the assets preflight
   // already checks the repo-relative one, so the resolver belongs here rather than in the author's
   // JSON. Silence is the worst failure (docs/MISTAKES.md #383).
-  v.src = /^(https?:)?\/\//.test(src) || src.startsWith('/') ? src : '/' + src.replace(/^\.\//, '');
+  v.src = srcUrl(src);
   if (poster) v.poster = poster;
   // muted + playsInline + no autoplay + no controls: this element is a decoder we scrub, not a player.
   // The AUDIO of a clip is not taken from here; the mixer owns sound (core/audio*.js), because the film's

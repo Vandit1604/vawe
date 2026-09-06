@@ -23,6 +23,7 @@ import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from './ransom.js';
+import { srcUrl } from './src-url.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 
@@ -215,7 +216,7 @@ export async function preloadImages(data) {
     const im = new Image();
     im.onload = () => (im.decode ? im.decode().then(res, res) : res());
     im.onerror = () => { if (isRepoPath(src)) missing.push(src); res(); };
-    im.src = src;
+    im.src = srcUrl(src);
   })));
   if (missing.length)
     throw new Error(`${missing.length === 1 ? 'this image was' : 'these images were'} never loaded: `
@@ -245,7 +246,7 @@ async function preloadVideos(data) {
     // Resolve on error too. A missing clip is caught by the assets preflight with a path in the message;
     // hanging the boot here would report it as a dead scene instead.
     v.onloadeddata = res; v.onerror = res;
-    v.src = src;
+    v.src = srcUrl(src);
   })));
 }
 

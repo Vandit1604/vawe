@@ -180,6 +180,9 @@ if (sig && sig.bgPresets.length) {
 const scene = {
   module: 'scene',
   theme,
+  // Stated, never defaulted: a scene with no `aspect` renders 9:16 in silence (core/boot.js), and the
+  // storyboard this scaffold writes says 1920x1080. The two must agree (MISTAKES #569).
+  aspect: '16:9',
   duration: dur,
   energy: 'brand',
   // Each beat is a whole-frame composition, so the `fade` boundaries below must cross-fade the beats
