@@ -26,6 +26,10 @@ export const TYPE_SPINES = {
     bgPresets: ['paper', 'soft', 'dotmatrix'],
     cutFamily: { default: 'dissolve', accent: 'punch' },
     cues: ['tick', 'chime'],
+    // The pace band is the type's own decision, and it sits just past the floor's 3.5s boundary rule
+    // (sparse-beats). Written here once, so every explainer scaffold carries the reasoned waiver instead
+    // of each author rediscovering the block after a render (the acceptance run did, 2026-09-06).
+    waive: { 'sparse-beats': 'explainer pace band, 2.5-4.0s per beat (skills/vawe-type-explainer): one idea must land before the next starts, so a boundary every ~3.7s is the type\'s own rhythm, not a slideshow' },
   },
   'talking-head': {
     // the face-safe slot is the placeholder rect the worked example fills; captions carry the beat
