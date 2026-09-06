@@ -676,6 +676,13 @@ filename, and the hook says nothing about them rather than guessing:
   engine now, delete the workaround), gate gap (sharpen the gate or its message), or authoring choice
   (fix the JSON). A workaround is a bug report. Log every framework-class finding to `docs/MISTAKES.md`.
 
+**Touched motion, transitions, backgrounds, type or layout? Ship a before/after.** `make evals` renders
+a fixed set of small brief scenes and checks only that each one is alive (right duration, right
+dimensions); no gate can score whether a change made films look better, so the compare is what proves
+it moved something. `make evals-compare BEFORE=verify/evals/baseline` renders your working tree fresh
+and opens the two side by side. Link the resulting `compare.html` in the commit or PR body.
+[`docs/EVALS.md`](docs/EVALS.md).
+
 > **Editing `scene.html`?** Claude Code: read the `vawe-scene-authoring` skill first (render-frame
 > purity, tokens, motion primitives, image/capture system, QA loop). Other agents: read the same content
 > under `skills/vawe-scene-authoring/` directly. System map: `docs/CODEMAPS/ARCHITECTURE.md`.
