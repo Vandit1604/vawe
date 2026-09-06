@@ -526,6 +526,12 @@ sections:
 study:
 	node scripts/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH))
 
+# make mine: cluster every studied grammar/*.json shot by device into named shapes, each with the
+# grammar + shot index that backs it, → grammar/_mined-shapes.json. The receipt beats-mined.mjs's
+# `sources:` lines are read from. docs/CRAFT/BLUEPRINTS.md "Mined blueprints".
+mine:
+	node scripts/author/mine.mjs $(if $(JSON),--json,)
+
 # make preview HTML=path/frag.html [THEME=linear] [BG=#hex] [W=1400] [SERVE=1], render a single
 # hand-written fragment (or a captured component JSON) STANDALONE on the theme bg → /tmp/preview.png.
 # SERVE=1 keeps it LIVE in your browser instead (real fonts/assets). "is this HTML doing what I want?".

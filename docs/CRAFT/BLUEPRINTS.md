@@ -174,3 +174,41 @@ Add a pure `props → layers` factory to `blueprints/beats.mjs` (compose the idi
 `kineticHeadline`, `dollyNumber`, `caption`, `chip`, `panel`, `verdictChip`), register it in
 `blueprints/index.mjs`, and describe it in `scripts/site/blueprints-catalog.mjs`. Keep it brand-agnostic
 (semantic theme vars, no hardcoded palette) and deterministic (no Date/random).
+
+## Mined blueprints
+
+19 beats were invented once and 12 sat unused: an author reaching for a shape the invented set did not
+have fell back to raw layers, which is the failure this whole doc exists to stop. `make mine` closes it
+the way another engine closed it (22 shot templates mined from 178 real ads): it reads every studied
+reference under `grammar/*.json` (`make study`, [`REFERENCE-STUDY.md`](REFERENCE-STUDY.md)) and clusters
+shots by device into named shapes, writing the receipt to `grammar/_mined-shapes.json`, which grammar
+file and shot index backs each one.
+
+**The rule: a new blueprint comes from a studied reference, not from invention.** `make mine` will not
+print a shape with zero matched shots, and a factory in `blueprints/beats-mined.mjs` with no source line
+is a claim nobody can check. If you want a shape the corpus does not have, study a film that has it
+(`make study VIDEO=<mp4> NAME=<name>`) before you write the factory.
+
+The ten mined today, each in `blueprints/beats-mined.mjs`, its blurb in `blueprints/index.mjs`:
+
+| Beat | Role | Signature move | Sources |
+|---|---|---|---|
+| `blurResolveHook` | Hook | type arrives smeared with motion blur, snaps into focus, never slides or fades | pin-1119918632363453012#1, pin-415034921941332045, pin-333759022406760643 |
+| `dialogueAccumulate` | Hook | sans/serif word pairs accumulate on a held frame, a dot as the joint, a bloomed payoff line | rebuilt#1 |
+| `containerFill` | Key_Feature | a fixed frame holds while chips fill it one at a time | pin-1119918632363453012#2, pin-583145851797705243, arc-space-swiping, pin-333759022406800725 |
+| `cardFan` | Key_Feature | cards arrive from one side and fan open in perspective around a fixed anchor | pinref#3, #5, #6, #7 |
+| `listBuildRows` | Key_Feature | a vertical list grows one row at a time under a fixed rule | pinref#11-#15 |
+| `chipConverge` | Proof | chips scatter in from every side, then converge onto one point | pinref#16, #17 |
+| `cellMosaic` | Build | a grid of mixed cells slides as one surface while each cell keeps its own content | rebuilt#3 |
+| `wordWipe` | Key_Feature | an oversized word crosses the whole frame motion-blurred; its passage is the transition | rebuilt#4 |
+| `wordmarkAssemble` | CTA/Brand_Outro | the mark's letters settle from scattered positions while tiles drift behind at a different depth | rebuilt#5 |
+| `viewportTrio` | Payoff | the same subject shown at three sizes at once, the "it is really finished" shot | framer-hero#2 |
+
+**How to pick one.** Run `make mine` to see the current shape clusters and their sources, run `make
+blueprints` for the props each mined beat takes, then place `{"type":"beat","beat":"<name>", ...}` and
+`make expand` it, the same as any other beat.
+
+`make mine` is a CLUSTERING tool, not a code generator: it scores every studied shot's `onScreen` /
+`moves` / `trigger` text against a fixed keyword dictionary and prints which grammar + shot backs each
+shape (`scripts/author/mine.mjs`). The factories themselves are hand-authored, like every other
+`beats-*.mjs` file, because choreography is a judgement call no keyword match should make silently.
