@@ -47,29 +47,6 @@
    "dur": 0.42
   }
  ],
- "cameraMove": [
-  {
-   "move": "slowPush",
-   "start": 0,
-   "dur": 3.1,
-   "from": 1,
-   "to": 1.06
-  },
-  {
-   "move": "punchIn",
-   "start": 10.8,
-   "dur": 0.34,
-   "from": 0.86,
-   "to": 1
-  },
-  {
-   "move": "slowPush",
-   "start": 13,
-   "dur": 2,
-   "from": 1,
-   "to": 1.05
-  }
- ],
  "spectacle": {
   "at": 10.8,
   "of": "statA",
@@ -281,6 +258,61 @@
    "start": 13.75,
    "duration": 1.25,
    "track": 5
+  }
+ ],
+ "camera": [
+  {
+   "t": 0,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 3.1,
+   "s": 1.06,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 10.8,
+   "s": 0.86,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 11.14,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeInExpo"
+  },
+  {
+   "t": 11.22,
+   "s": 0.96,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutQuad"
+  },
+  {
+   "t": 11.72,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutElastic"
+  },
+  {
+   "t": 13,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 15,
+   "s": 1.05,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
   }
  ]
 }

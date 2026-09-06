@@ -7,17 +7,17 @@
 import fs from 'node:fs';
 import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
 import { onScreenText, glyphText, snippet } from '../lib/text.mjs';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
 if (!file) { console.error('usage: node scripts/gates/critique.mjs <scene.json> [--strict]'); process.exit(2); }
 // The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
-// renders anything (core/transitions-lower.js), and until this line the gates did not, so a scene
+// renders anything (core/transitions/lower.js), and until this line the gates did not, so a scene
 // that declared its boundaries the documented way was read as a film with no boundaries at all.
 // Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
-const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
+const d = loadScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const layers = d.layers || [];
 const findings = [];
 const F = (sev, rule, msg, t) => findings.push({ sev, rule, msg, t });

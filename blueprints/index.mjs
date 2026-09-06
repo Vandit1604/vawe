@@ -3,7 +3,7 @@
 // default, so the agent never regresses to plain fades (the failure the direction floor gates).
 //
 // Placed in a scene as { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props } and expanded
-// by scripts/author/expand-blocks.mjs (make expand), the same path blocks use. Docs: docs/CRAFT/BLUEPRINTS.md.
+// at LOAD time by core/engine/expand.js, the same path blocks use; no separate step. Docs: docs/CRAFT/BLUEPRINTS.md.
 import { withBlurb, blurbsOf, defineRegistry } from '../core/registry/registry.js';
 import * as Beats from './beats.mjs';
 // The PICTORIAL beats, kept in their own files because three agents authored them in parallel and two
@@ -72,7 +72,7 @@ export const BEAT_BLURBS = blurbsOf('blueprint beat', BEATS);
 // scripts/site/effects-catalog.mjs with its usage form and its no-preview reason a file further on.
 // The known failure mode of a beat, printed by `make arsenal` under its blurb. Optional and seeded on
 // the highest-traffic beats only: each line is a trap the doctrine already names, kept where an author
-// reaching for the beat will see it. A key that is not a beat is refused at load (core/registry.js).
+// reaching for the beat will see it. A key that is not a beat is refused at load (core/registry/registry.js).
 export const BEAT_PITFALLS = {
   kineticHook: 'a hook over ~12 words, or with more than one emoji, reads weak and the validator rejects it. Front-load the strong word.',
   statReveal: 'a number the frame never SHOWS is worse than none. Back the stat with the real UI it comes from, do not only set it in type.',
@@ -87,9 +87,9 @@ export const BEAT_REGISTRY = defineRegistry('blueprint beat', BEATS, { slot: 'la
   catalog: {
     title: 'Beat blueprints',
     tag: 'blueprint',
-    intro: '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.',
+    intro: '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion, expanded at load. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.',
     usage: (n, { j }) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
-    noPreview: 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
+    noPreview: 'a beat writes a whole cast of layers from content you supply. Run `make expand D=<file>` to see what it writes.',
   },
 });
 

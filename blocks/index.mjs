@@ -23,8 +23,9 @@
 // It used to need both, plus two Object.assign calls, and nine identical registration lines sat here
 // differing only in a name, carrying no information the module did not already have.
 //
-// This module is NODE-ONLY (nothing in core/ or formats/ imports it), so reading the directory is
-// available and top-level await is fine: an ESM importer awaits it before its own body runs.
+// `core/engine/expand.js` imports this module now (block/beat/comp sugar expands at LOAD time, in the
+// browser and in Node), which is exactly what the static family list below exists to make safe: no
+// `fs.readdirSync` and no dynamic `import()`, so nothing here needs a filesystem to run.
 //
 // See docs/BLOCKS.md for the catalog + screenshots.
 // THE FAMILY LIST IS STATIC, AND THAT IS WHAT LETS A BLOCK RUN IN A BROWSER. This file used to
@@ -59,7 +60,7 @@ import * as terminalLayersFam from './terminal-layers.mjs';
 import * as uiFam from './ui.mjs';
 import * as vfxFam from './vfx.mjs';
 import { CATALOG } from './catalog.mjs';
-// The blurb rule is core/registry.js's, imported rather than restated: it refuses an empty line AND one
+// The blurb rule is core/registry/registry.js's, imported rather than restated: it refuses an empty line AND one
 // that only says the name back, and it grades a blurb by the exact words `make arsenal` will index it
 // under. Two copies of that rule would eventually disagree about which. The path resolves in the
 // browser too: core/ is vendored at /core and blocks at /blocklib, so `../core/` is right in both.

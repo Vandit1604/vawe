@@ -23,7 +23,7 @@ import { PRESENTATIONS } from '../../core/cuts/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
 import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -36,7 +36,7 @@ const scenes = population('coverage · corpus', { filter: LIBRARY_WITH_DERIVATIV
   // scene sets, answering that off the lowered copy would report `transition` and `mech` as dead the
   // moment somebody used them.
   .map((f) => { try { const raw = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-    return { f, raw, j: lowerScene(structuredClone(raw)) }; } catch { return null; } })
+    return { f, raw, j: loadScene(structuredClone(raw)) }; } catch { return null; } })
   .filter((x) => x && x.j.module === 'scene');
 
 // walk every layer, including group children: a primitive used only inside a group is still used
@@ -59,7 +59,7 @@ for (const { j, raw } of scenes) {
   for (const b of j.bg || []) if (b?.preset) used.bg.add(b.preset);
   for (const l of layersOf(j)) {
     if (l.type) used.type.add(l.type);
-    // `anim` and `out` draw from the SAME registry (core/clips.js ANIM), so counting only `anim`
+    // `anim` and `out` draw from the SAME registry (core/timeline/clips.js ANIM), so counting only `anim`
     // reported `defocus` as unexercised while tpot-launch used it on five layers as an exit. A
     // coverage gate that undercounts sends you to build something that already ships.
     if (l.anim) used.anim.add(l.anim);

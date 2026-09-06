@@ -64,7 +64,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { readReceipt } from '../lib/receipt.mjs';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
 import { codesEmitted } from '../lib/finding-codes.mjs';
 import { readFindings } from '../lib/findings.mjs';
@@ -456,28 +456,13 @@ const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) 
 }
 const vs = vsArg || (typeof scene.theme === 'string' ? scene.theme : null);
 
-// Blocks, beats and comps are BUILD-TIME sugar: `validate` rejects an un-expanded one outright, and every
-// gate that walks layers sees `{type:"block"}` as one opaque thing rather than the chart it becomes. So a
-// scene written with the repo's own vocabulary could not pass its own mandatory ladder: the source failed
-// validate, and the `.expanded.json` is a derivative some gates skip by name. Neither file could be
-// green. Expand to a temp that keeps the BASENAME (receipts and theme resolution key off it) and is not
-// named `.expanded` (so nothing skips it), then gate that.
-//
-// `beat` was missing from this list, and it is the same sugar with the same refusal at boot. A film that
-// composed one beat from `make blueprints`, which CLAUDE.md step 0 asks every author to do, therefore
-// failed step 1 of its own mandatory ladder while step 6 read the blueprint happily off the same file.
-// The three names are one vocabulary (scripts/author/expand-blocks.mjs resolves them together), so they
-// are listed together here rather than two of three.
-let target = file;
-const SUGAR_TYPES = ['block', 'beat', 'comp'];
-const hasSugar = (L) => Array.isArray(L) && L.some((l) => l && (SUGAR_TYPES.includes(l.type) || hasSugar(l.children)));
-if (hasSugar(scene.layers)) {
-  const dir = path.join('/tmp/.author-check', String(process.pid));
-  fs.mkdirSync(dir, { recursive: true });
-  target = path.join(dir, path.basename(file));
-  execFileSync('node', [path.join(repoRoot, 'scripts/author/expand-blocks.mjs'), file, target], { cwd: repoRoot, stdio: 'ignore' });
-  console.log(`  (block/comp sugar expanded for the gates → ${target}; findings refer to ${path.basename(file)})`);
-}
+// Blocks, beats and comps are BUILD-TIME sugar, and used to need a separate `make expand` pass before
+// any gate could read them: `validate` rejected an un-expanded scene outright, and every gate that
+// walked layers saw `{type:"block"}` as one opaque thing rather than the chart it becomes, so a scene
+// written with the repo's own vocabulary could not pass its own mandatory ladder. core/engine/expand.js now
+// resolves the sugar at LOAD time (`loadScene`, which every gate below already calls to read a scene
+// off disk), so the ladder gates the source file directly.
+const target = file;
 
 // ---- WHERE THE STORYBOARD COMES FROM ----------------------------------------------------------------
 // A scene declares its plan one of two ways, and the explicit one wins:
@@ -573,11 +558,9 @@ const runGate = (name, label, script, args, opts = {}) => {
   // spawnSync, not execFileSync: a gate that PASSES can still print a warning, and it prints it to
   // stderr, which execFileSync throws away on success. That is how a step with a visible ⚠ above it
   // could summarise itself as "nothing found".
-  // Most gates read the RENDERABLE scene, so they get `target` (the expanded copy when the film uses
-  // block/beat/comp sugar). A gate about the SOURCE's planning decisions must get the original `file`
-  // instead: its receipt is hashed against the bytes the author edits, and the expanded copy has
-  // different bytes, so checking preflight against `target` marked every sugar film's receipt stale and
-  // told the author to `make preflight D=/tmp/...` an ephemeral path. `opts.subject` opts a step out.
+  // `target` is the source `file`; sugar expands at load inside each gate now, not to a second file on
+  // disk, so every gate reads the same bytes the author edits and a receipt hashed against them stays
+  // valid. `opts.subject` still opts a step out, kept for a gate that names a different file entirely.
   const { r, records } = spawnGate(script, [opts.subject || target, ...args]);
   const out = `${r.stdout || ''}${r.stderr || ''}`;
   const code = r.status ?? 1;
@@ -912,7 +895,7 @@ const failed = results.filter((r) => r.failed);
 const waivers = results.filter((r) => r.waived);
 console.log(`\n════════ author-check · ${path.basename(file)} ════════`);
 // TWO KINDS OF FINDING, and reading them as one list is why NOCHECK=1 looks like it skips safety.
-// `validate` runs the SAME validator the engine runs at boot (core/boot.js imports validateAll), and
+// `validate` runs the SAME validator the engine runs at boot (core/engine/boot.js imports validateAll), and
 // every vocabulary registry throws during layer build. Those cannot be skipped by anything: a scene
 // that fails them will not render, with or without this target. Everything else here is this target's
 // own judgement about craft, and the engine will happily render a film that fails all of it.

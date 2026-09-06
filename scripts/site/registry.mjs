@@ -11,7 +11,7 @@
 // SOURCES (one each. Nothing here is re-derived and nothing is hand-typed):
 //   blocks/catalog.mjs          name · family · blurb · props · overlay      (the block manifest)
 //   blueprints/index.mjs        BEATS + REQUESTS                              (the beat registry)
-//   core/generators.js          GENERATORS                                     (the playground registry)
+//   core/layout/generators.js          GENERATORS                                     (the playground registry)
 //   site/lib/block-frames.json  the measured ink rect of each block           (make blocks-scenes)
 //   site/public/assets/blocks/  a standalone scene + poster per block         (make blocks-scenes)
 //
@@ -67,12 +67,12 @@
 //                      uses. Target is `bg[].html` or an html layer, which is where markup goes.
 //
 // install.options is the generator's FIRST PRESET over its schema defaults, not the raw defaults. The
-// registry's own argument, at the top of core/generators.js: a default is the neutral value a field
+// registry's own argument, at the top of core/layout/generators.js: a default is the neutral value a field
 // takes when nobody said otherwise, which is not the same as a good-looking result.
 // install.props is DERIVED, by walking the schema with the generator's own controlsOf(), so it is the
 // same dial list the playground builds its panel from and cannot drift from it.
 //
-// HELD BACK LOOKS GET NO ITEM, and nothing here filters for that: core/generators.js exports
+// HELD BACK LOOKS GET NO ITEM, and nothing here filters for that: core/layout/generators.js exports
 // GENERATORS already filtered to `ready`, with ALL_GENERATORS beside it for the tools that must score
 // what is held back. Importing the shipping list is the whole mechanism.
 //
@@ -161,7 +161,7 @@ function blockItem(entry) {
     install: {
       kind: 'scene-layer',
       target: 'layers[]',
-      requires: 'vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`',
+      requires: 'vawe engine (blocks/index.mjs); expands automatically at load, no separate step',
       layer,
       // No requiredProps for a block: the example layer is COMPLETE. Every one of these is rendered
       // and screenshotted by make blocks-scenes, so the fragment is proven, not merely plausible.
@@ -200,7 +200,7 @@ function beatItem(name) {
     install: {
       kind: 'scene-layer',
       target: 'layers[]',
-      requires: 'vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`',
+      requires: 'vawe engine (blueprints/index.mjs); expands automatically at load, no separate step',
       layer,
       requiredProps: spec.required.filter(timing),
       props: spec.optional.filter(timing),
@@ -256,8 +256,8 @@ const index = {
   name: 'vawe',
   homepage: SITE,
   usage: 'Blocks and beats install as a LAYER OBJECT, not a file: append item.install.layer to the '
-    + '"layers" array of a scene JSON ({"module":"scene",…}), set x/y/start/dur, then `make expand`. '
-    + 'Items with a files[] entry also ship a pre-expanded standalone scene that renders without the '
+    + '"layers" array of a scene JSON ({"module":"scene",…}), set x/y/start/dur; it expands automatically '
+    + 'at load. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the '
     + 'block library. A generator installs its OUTPUT instead: item.install.layers is already-expanded '
     + 'layers to append, and where install.kind is "generated-markup" you turn item.install.options into '
     + 'markup (item.preview.url, or item.install.render) and paste that into a bg window.',

@@ -4,7 +4,7 @@
 //   • overflow: text clipped (scrollW/H > clientW/H)    (HARD fail)
 //   • safe-zone: element outside the SAFE box            (HARD fail)
 //   • caption-band: content inside the strip a burnt-in caption will be painted into, on a film that
-//                 declares captions (core/safe.js captionBand)     (warn)
+//                 declares captions (core/layout/safe.js captionBand)     (warn)
 //   • contrast: text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
 //                 (blue-on-blue); widened to any ≥60px headline text  (HARD on critical, else warn)
 //   • buried: >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
@@ -38,7 +38,8 @@ import { resolveCoords } from '../core/engine/boot.js';
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
 import { snippet } from '../scripts/lib/text.mjs';
 import { gateFindings } from '../scripts/lib/findings.mjs';
-import { lowerScene } from '../core/transitions/lower.js';
+import { loadScene } from '../core/engine/expand.js';
+import { bootPathFor } from '../scripts/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -77,11 +78,11 @@ if (badAspect) { console.error(`unknown aspect "${badAspect}", known: ${Object.k
 const modules = argv.length ? argv
   : fs.readdirSync(formatsDir).filter((d) => fs.existsSync(path.join(formatsDir, d, 'scene.html')));
 
-// The canvas this audit runs at comes from core/safe.js, alongside the safe box it feeds, same
+// The canvas this audit runs at comes from core/layout/safe.js, alongside the safe box it feeds, same
 // reason the safe box lives there. An explicit --aspect wins; else the scene's own `aspect`.
 const dimsFor = (key, cfg) => sceneDims(cfg, key);
 
-// The safe box comes from core/safe.js: the SAME function boot.js places against and writes to
+// The safe box comes from core/layout/safe.js: the SAME function boot.js places against and writes to
 // --safe-* for the debug overlay. This file used to carry its own tables (a portrait box, a landscape
 // box, and a proportional fallback for everything else), which is how the checker ended up rejecting
 // content the engine's own `pin:"bottom"` had just placed. A gate that disagrees with the thing it
@@ -483,7 +484,7 @@ function frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // Do not re-derive it from the JSON. The scene file cannot be mapped onto the DOM here: `sceneUnits`
   // reparents top-level layers into per-beat wrappers, so document order is not authoring order, and no
   // layer element carries its authored id. ASK THE RENDER instead, renderFrame(n) is pure in n
-  // (core/boot.js), so stepping to the next frame, measuring, and stepping back leaves the page exactly
+  // (core/engine/boot.js), so stepping to the next frame, measuring, and stepping back leaves the page exactly
   // where it was. One definition of "moving", covering `motion`, motionPath, gsap and ken alike: the box
   // is not where it is 0.1s either side of here.
   //
@@ -510,8 +511,8 @@ function frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     window.__engine.renderFrame(n);
     return (e) => moved.has(e);
   })();
-  // A STING and a SEAM paint a full-frame generative overlay ON TOP of everything (core/stings.js,
-  // core/seams.js). Nothing under one can be graded, and the frame list SAMPLES sting times on
+  // A STING and a SEAM paint a full-frame generative overlay ON TOP of everything (core/stings/index.js,
+  // core/timeline/seams.js). Nothing under one can be graded, and the frame list SAMPLES sting times on
   // purpose, so the composited pixel under a headline mid-burn is the burn. cuts-demo's "sting:
   // burn" measured 1.1:1 against #080301 and the frame is a wall of fire: true about the pixel,
   // false about the film. The same shape as #376's opening finding, a verdict passed on a frame
@@ -668,7 +669,7 @@ function safeFinding(sb, ctx, id, li, t) {
 // CAPTION BAND. The safe box says where content may live; it says nothing about the strip a
 // burnt-in caption is about to be painted into, so a headline could land squarely on the caption
 // and every rule above stayed green. Same subject and same measurement as the safe walk, settled
-// content, ink box, an image or real text, over a band core/safe.js derives from the same
+// content, ink box, an image or real text, over a band core/layout/safe.js derives from the same
 // destination numbers the caption itself is placed against.
 function captionBandFinding(sb, CAPBAND, id, li, t) {
   if (!CAPBAND) return null;
@@ -1264,10 +1265,10 @@ function overlayFn(n, SAFE) {
 // Some layout bugs live in the SOURCE and are invisible to any single rendered frame, so they must be
 // caught by name rather than hoped to trip a measurement.
 //
-// `pin`/`x` centring keywords resolve against the LAYER'S OWN SIZE (core/boot.js resolveCoords: `center`
+// `pin`/`x` centring keywords resolve against the LAYER'S OWN SIZE (core/engine/boot.js resolveCoords: `center`
 // → (W - size)/2). A layer with no `w` has size 0, so `center` means (W-0)/2, the layer's LEFT EDGE
 // lands on the centre line and the content runs off to the right. It renders wrong at every aspect, but
-// Layout placement (a centring keyword with nothing to centre) is defined ONCE, in core/validate.mjs,
+// Layout placement (a centring keyword with nothing to centre) is defined ONCE, in core/validate/validate.mjs,
 // and imported here. It used to live in this file with its own NEEDS_W/PIN_X tables, a second copy of
 // a rule the engine also needs, which is the exact shape of the bug that gave the repo four safe boxes
 // and eight canvas-size derivations (docs/MISTAKES.md #46). The validator is the owner; the audit
@@ -1367,7 +1368,7 @@ function sampleBg(img, box, sx, sy) {
 }
 
 // WCAG arithmetic, unchanged from the in-page version it replaces, same relative-luminance curve
-// core/motion.js uses. It moved here because the pixels are here.
+// core/motion/motion.js uses. It moved here because the pixels are here.
 const relLum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const cratio = (a, b) => { const [hi, lo] = relLum(a) > relLum(b) ? [relLum(a), relLum(b)] : [relLum(b), relLum(a)]; return (hi + 0.05) / (lo + 0.05); };
 const nearColour = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 60; // ≈ same colour = invisible
@@ -1491,6 +1492,7 @@ const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const rows = [];
+const bootScratch = []; // expanded-sugar scratch files this run wrote, cleaned up at the end
 
 for (const spec of modules) {
   // a .json arg audits THAT data file (module read from it); a bare name audits the format's sample
@@ -1504,12 +1506,21 @@ for (const spec of modules) {
   const absPath = path.join(repoRoot, sample);
   if (sample.startsWith('..') || !fs.existsSync(absPath)) { rows.push({ m: spec, hard: 1, warn: 0, crit: 0, note: 'file not found' }); continue; }
   // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
-  // renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
+  // renders (core/transitions/lower.js). Without this, a film that declares its boundaries the
   // documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
-  const cfg = (() => { try { return lowerScene(JSON.parse(fs.readFileSync(absPath, 'utf8'))); } catch { return {}; } })();
+  const cfg = (() => { try { return loadScene(JSON.parse(fs.readFileSync(absPath, 'utf8'))); } catch { return {}; } })();
   const m = isData ? (cfg.module || spec) : spec;
   // the scene's own waiver list, read the same way every other gate reads it.
   const allow = new Set(Array.isArray(cfg.authoring?.allow) ? cfg.authoring.allow : []);
+
+  // THE PAGE BOOTS OFF `sample` AS A FILE, not off `cfg`: it fetches `?data=/<path>` and parses it
+  // itself, so a scene carrying `block`/`beat`/`comp` sugar (already resolved in `cfg` above, via
+  // `loadScene`) would 404 the browser's own `formats/scene/scene.js` at the raw layer type: that page
+  // deliberately never imports core/engine/expand.js (its own banner says why). `bootPathFor` writes the
+  // already-expanded `cfg` to a scratch file and boots from THAT instead; a scene with no sugar is
+  // returned unchanged, so this is a no-op for the overwhelming majority of scenes.
+  const bootSample = bootPathFor(repoRoot, fs.readFileSync(absPath, 'utf8'), cfg, sample);
+  if (bootSample !== sample) bootScratch.push(path.join(repoRoot, bootSample));
 
   // source checks are aspect-independent (they're about the JSON, not a canvas), report them once
   const si = heroOnly ? [] : sourceIssues(cfg);
@@ -1537,7 +1548,7 @@ for (const aspectKey of askedAspects) {
   // ?aspect= is the same knob internal/scene/scene.go passes when rendering, so the audit measures the
   // canvas the CLI would actually ship rather than a re-implementation of it.
   const q = aspectKey ? `&aspect=${encodeURIComponent(aspectKey)}` : '';
-  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30${q}`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${bootSample}&fps=30${q}`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   // A scene that refuses to boot is the loudest possible failure, so report it as one. Reading
   // __engine.meta unconditionally threw an uncaught TypeError here, which killed the whole run: one
@@ -1659,6 +1670,7 @@ for (const aspectKey of askedAspects) {
 }
 }
 await browser.close(); server.close();
+for (const f of bootScratch) { try { fs.unlinkSync(f); } catch { } }
 
 // --hero prints its own short report and exits 0. It is ONE warning out of this file's 18 kinds, so
 // printing the full LAYOUT AUDIT banner under it would claim a sweep that did not happen.

@@ -12,7 +12,7 @@
 // reachable. An author who cannot find the thing re-derives a worse version of it, which is exactly
 // how sixteen layers ended up saying `preset: "up"`.
 //
-// THIS OWNS NO LIST, and that is the whole design. `defineRegistry` (core/registry.js) already carries
+// THIS OWNS NO LIST, and that is the whole design. `defineRegistry` (core/registry/registry.js) already carries
 // `kind`, `slot`, `names` and `blurbs` for every vocabulary, and `blueprints/index.mjs` already carries
 // a description and a prose REQUEST per beat. A fourth copy of those names would drift from the three
 // that exist, which is the failure this repo logs more than any other. Everything below is read at
@@ -30,7 +30,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { newSince, WINDOW_DAYS } from './recency.mjs';
-// The tokenizer lives in core/registry.js, where the load-time blurb refusal also needs it. Two
+// The tokenizer lives in core/registry/registry.js, where the load-time blurb refusal also needs it. Two
 // tokenizers would eventually disagree about which words an entry is indexed under, and the refusal has
 // to grade a blurb by exactly the words this search will find it by.
 import { searchWords } from '../../core/registry/registry.js';
@@ -68,7 +68,7 @@ const MODULE_PATHS = corePackages.flatMap(dirsOf);
 const at = (map, name, dflt = '') => (map && map[name] != null ? map[name] : dflt);
 
 // Sound cues were the last hole in this corpus: `make arsenal Q="a whoosh"` answered ABSENT while 13
-// synthesized cues sat in core/audio-kit.mjs. sfx-catalog.mjs owns their metadata and exposes it as
+// synthesized cues sat in core/audio/kit.mjs. sfx-catalog.mjs owns their metadata and exposes it as
 // rows; imported as a function so its own gate does not read that map as a second vocabulary.
 async function cueSource() {
   try {
@@ -438,7 +438,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   // Twitter") and says nothing about the vocabulary, so it matched nothing and printed nothing. What a
   // scene reliably states is which vocabularies it draws from: a film naming one cut has decided cuts
   // are in play, and the other 26 are then a real omission rather than a guess. Fully derived from
-  // core/registry.js, so a new vocabulary joins this the day it is defined.
+  // core/registry/registry.js, so a new vocabulary joins this the day it is defined.
   const forScene = argv.includes('--for') && argv[argv.indexOf('--for') + 1];
   if (forScene) {
     let raw; try { raw = fs.readFileSync(path.resolve(forScene), 'utf8'); } catch { process.exit(0); }
@@ -583,7 +583,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? 'NEVER used in this library' : `${e.used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
-    if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   then: make expand D=<file>`);
+    if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   (expands at load; \`make expand D=<file>\` to eyeball it)`);
     else if (e.snippet) console.log(`      ${e.snippet}`);
     console.log('');
   }

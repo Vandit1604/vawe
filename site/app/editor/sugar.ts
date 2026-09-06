@@ -1,18 +1,20 @@
-/* THE `make expand` CLIFF.
+/* THE `make expand` CLIFF, for HAND-TYPED sugar only.
  *
  * The engine ships four authoring sugars. Three of them — `block`, `beat`, `comp` — are BUILD-TIME:
- * `make expand` turns them into real layers, and the renderer refuses them by name at boot
- * (core/layers/index.js:88). The fourth, `cameraMove`, bakes at boot (core/produce.js) and is
- * therefore fine in a browser; it is deliberately not listed here.
+ * `core/expand.js` `expandScene` turns them into real layers, at load. The picker's own scenes never
+ * hit this any more: scripts/site/scenes-json.mjs expands them at PUBLISH time, before they ever reach
+ * `site/public/scenes/`. What is left, and what this file still exists for, is a scene a visitor TYPES
+ * by hand into the editor, with no publish step to run it through.
  *
- * A browser author has no shell, so `make expand` is not a step they can take. The engine's refusal
- * is correct and it names a fix they cannot reach. So the editor catches the three FIRST, while they
- * are typing, and says the true thing: this needs the CLI, here is the layer, here is the line.
- *
- * Why not expand here. `blocks/index.mjs` discovers its ~156 factories with `fs.readdirSync` plus a
- * dynamic `import(pathToFileURL(...))`. No bundler can follow that, so neither a client bundle nor a
- * traced `output: "standalone"` server route would carry the modules — it would work in dev and ship
- * broken, which is the silent-substitution failure this repo refuses.
+ * Why the render page (and this editor's live stage, the same iframe) cannot expand it live. It is not
+ * a bundler limitation: `blocks/index.mjs` is static-import based precisely so it CAN be bundled
+ * (see its own file banner). It is a deliberate SERVER boundary instead: `formats/scene/scene.js` never
+ * imports `core/expand.js`, because the render page's file server default-denies the ~186 block/beat
+ * factories by design (`internal/scene/scene.go` `served`, a security wall for MCP/stranger scenes),
+ * and one factory (`blocks/geo.mjs`) imports `d3-geo` by bare specifier, resolvable only through an
+ * import map that page does not carry. So the editor catches the three FIRST, while a visitor is
+ * typing, and says the true thing: this needs a publish step it cannot run here, here is the layer,
+ * here is the line.
  */
 
 export type Sugar = { type: string; name: string; line: number };
@@ -59,12 +61,14 @@ export function sugarMessage(found: Sugar[]): string {
   const one = found.length === 1;
   const list = found.map((f) => `  line ${f.line || "?"} · "type": "${f.type}" → ${f.name}`).join("\n");
   return (
-    `${found.length} build-time sugar layer${one ? "" : "s"}. The renderer refuses ${one ? "it" : "them"}:\n`
+    `${found.length} build-time sugar layer${one ? "" : "s"} typed by hand. This stage cannot expand `
+    + `${one ? "it" : "them"} live:\n`
     + `block, beat and comp are expanded before a render, not during one.\n\n`
     + `${list}\n\n`
-    + `The browser cannot expand ${one ? "it" : "them"}: the block factories are discovered from the `
-    + `filesystem, so they do not exist here. Run \`make expand D=<scene.json>\` and paste the `
-    + `.expanded.json, or replace the layer with the primitives it emits.`
+    + `A scene picked from the list above is already expanded (scripts/site/scenes-json.mjs does that `
+    + `at publish time); typing a NEW block/beat layer by hand has no publish step to run it through. `
+    + `Run \`make expand D=<scene.json>\` and paste the printed JSON, or replace the layer with the `
+    + `primitives it emits.`
   );
 }
 

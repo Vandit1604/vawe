@@ -15,7 +15,7 @@
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
-    "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
+    "requires": "vawe engine (blueprints/index.mjs); expands automatically at load, no separate step",
     "layer": {
       "type": "beat",
       "beat": "typedHook",

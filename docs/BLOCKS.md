@@ -20,14 +20,14 @@ override. See [`TASTE.md`](TASTE.md) for where blocks sit in the quality loop.
 
 **Two ways to use them:**
 
-**1. First-class in `scene.json`** (recommended), author a `block` layer, then expand before render:
+**1. First-class in `scene.json`** (recommended), author a `block` layer directly, it expands into real
+layers at LOAD time (`core/engine/expand.js`), no separate step:
 
 ```json
 { "type": "block", "block": "stripeCard", "x": 1260, "y": 400, "w": 420, "start": 40, "dur": 3 }
 ```
 ```bash
-make expand D=formats/scene/my.json     # → my.expanded.json with real layers
-make video  D=formats/scene/my.expanded.json
+make video D=formats/scene/my.json
 ```
 
 **2. From an authoring/transform script:**
@@ -97,8 +97,8 @@ _188 entries across 100 families._
 
 | Block | For |
 |---|---|
-| `card` | elevated card · tinted panel · pill tags · CTA arrow |
-| `codeBlock` | code card; syntax-coloured lines |
+| `card` | a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom |
+| `codeBlock` | a code snippet card: lines of code write themselves in one by one, syntax-coloured, like a syntax-highlighted editor screenshot |
 | `codeBlock.light` | code card, light surface |
 | `codeBlock.py` | code card, python |
 | `codeBlock.midnight` | code theme · cool dark, blue-first cycling |
@@ -113,110 +113,110 @@ _188 entries across 100 families._
 | `codeBlock.aurora` | code theme · teal dark, mint and violet |
 | `codeBlock.linen` | code theme · warm light, earthen syntax |
 | `codeBlock.frost` | code theme · cool light, ice-blue syntax |
-| `terminal` | command prompt; command types in, output answers after it |
+| `terminal` | a terminal window: a shell command types itself in character by character, then its output prints below |
 | `terminal.git` | git command |
 | `terminal.install` | install command |
 | `terminal.build` | build output |
-| `terminalPro` | a deploy terminal built from layer primitives: every line its own timed, measurable object |
-| `terminalHtml` | the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge |
-| `loadingBar` | determinate fill wipes L→R, lands ✓ done |
-| `deploySuccess` | CI cascade → green "Deployed to production" card |
-| `browserFrame` | window chrome (traffic dots + URL bar) |
-| `pillRow` | horizontal row of chip tags |
-| `statBig` | scale-contrast stat, huge count + tiny label |
+| `terminalPro` | a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark |
+| `terminalHtml` | the same deploy terminal as one hand-drawn console surface: gradient glass, per-word command colouring, a blinking text cursor |
+| `loadingBar` | a progress bar: a track fills left to right to a set percent and finishes with a green done checkmark |
+| `deploySuccess` | a CI/CD pipeline status: build steps queue then run then check off, ending on a green deployed card with the live URL |
+| `browserFrame` | a fake browser window: traffic-light dots and a URL bar framing a screenshot or any content drawn inside it. |
+| `pillRow` | a horizontal row of rounded chip tags, for labels, filters, or categories side by side. |
+| `statBig` | one huge number with a tiny label under it, for a single headline stat or KPI callout |
 | `statBig.currency` | stat with a $ unit |
 | `statBig.time` | stat, ms unit |
-| `colorCycle` | one word cycling through hues |
-| `splitFlapBoard` | a mechanical departure board · a drum per character steps through the alphabet and lands |
+| `colorCycle` | one word that changes colour again and again, repainted through a rainbow of hues in a fixed order |
+| `splitFlapBoard` | an airport or train station split-flap departure board where each letter flips through the alphabet to land on a word |
 | `splitFlapBoard.small` | the board at caption size, no header rail |
-| `stripeCard` | recognizably-Stripe payments card |
-| `barChart` | labeled bars scaled to max |
+| `stripeCard` | a payments checkout card that copies Stripe's real look: amount, a small spend graph, a Pay button |
+| `barChart` | a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side |
 | `barChart.green` | bars in success green |
-| `diff` | code diff card (+/- coloured) |
-| `diff.config` | config diff |
-| `quote` | pull quote + attribution |
-| `quote.customer` | customer quote |
-| `notification` | toast card (dot + title + body) |
+| `diff` | a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review |
+| `diff.config` | a settings or yaml file changing: removed lines in red above the new ones in green |
+| `quote` | a big pull quote with the person's name credited underneath, for a testimonial or a line to remember |
+| `quote.customer` | a testimonial pulled big, with the person and their company credited underneath |
+| `notification` | a light system alert card that slides in from the edge, a status dot, a heading and a message, arrives and leaves like a phone banner. |
 | `notification.warn` | toast, amber accent |
 | `notification.error` | toast, error |
 | `notification.stack` | alerts that stack and expire, not one that sits |
-| `kpiRow` | row of stat cells (value + label) |
+| `kpiRow` | a row of numbers side by side, each with a small label under it, and the numbers count up |
 | `kpiRow.money` | KPI row, currency |
 | `kpiRow.time` | latency percentiles |
-| `callout` | info/success/warn strip |
+| `callout` | a coloured info, success, or warning strip with a solid left bar and one line of text, for a note inline in a page. |
 | `callout.info` | info strip (blurple) |
 | `callout.warn` | warning strip (terracotta) |
-| `comparison` | two columns (Before/After · Others/Us) |
+| `comparison` | before and after, or us versus them, shown as two columns of bullet points side by side |
 | `comparison.beforeAfter` | Before / After columns |
 | `comparison.screens` | before / after as two SCREENS, not two lists |
-| `captions` | timed subtitle chips (bottom overlay) |
-| `lineChart` | trend line in a hairline card |
+| `captions` | subtitles at the bottom of the screen, timed to appear line by line like closed captions |
+| `lineChart` | a line graph over time: a trend line in a hairline card, optionally filled to an area chart |
 | `lineChart.area` | trend line with area fill |
 | `lineChart.down` | declining trend (red) |
-| `donutChart` | ring segments + legend |
+| `donutChart` | a pie chart drawn as a ring: coloured segments of a whole plus a legend of labels |
 | `donutChart.two` | two-segment ring |
-| `stackedBar` | multi-series stacked bars |
+| `stackedBar` | a stacked bar chart: multiple series piled in one bar per category to show a total and its parts |
 | `stackedBar.three` | three-series stack |
-| `card.pricing` | plan · price · features · CTA |
+| `card.pricing` | a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button |
 | `card.pricing.free` | pricing, free tier |
 | `card.pricing.team` | pricing, team tier |
-| `card.stat` | boxed KPI with delta chip |
+| `card.stat` | a boxed metric: a label, a number counting up, a chip saying how much it went up |
 | `card.stat.down` | KPI card, negative delta |
 | `card.stat.plain` | KPI card, no delta |
-| `card.profile` | avatar · name · role |
-| `fileTree` | indented file/folder tree |
-| `logLines` | log stream (timestamp + level colour) |
+| `card.profile` | a person's photo beside their name, with their job title under it |
+| `fileTree` | a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar |
+| `logLines` | a console log feed: timestamped lines stream in fast, colour-coded by info, warning and error level |
 | `logLines.light` | log stream on a light surface |
 | `logLines.errors` | log stream with errors |
-| `commitRow` | git history list |
-| `phoneFrame` | phone shell (draw content on top) |
-| `tabBar` | segmented control |
+| `commitRow` | a git commit history list: hash, message, author and time per row, like a GitHub commits page |
+| `phoneFrame` | a phone shaped shell: dark bezel, notch, status clock, screen area to draw your app content into for a mobile mockup. |
+| `tabBar` | a row of tabs or a segmented control whose selected pill actually slides from one tab to another. |
 | `tabBar.four` | four-tab control |
 | `tabBar.switch` | the selection SLIDES from one tab to another |
 | `tabBar.icons` | app tab bar · icon over label, selection slides |
-| `checklist` | checked / unchecked items |
+| `checklist` | a checklist of items with checkboxes ticking off one by one, done rows dim to read as completed. |
 | `checklist.todo` | checklist, all open |
 | `checklist.done` | checklist, all complete |
-| `table` | data table (header + rows) |
+| `table` | a table of rows and columns: a header plus data rows divided by hairlines, rows fill in one after another. |
 | `table.pricing` | table, pricing rows |
-| `timeline` | vertical rail of events |
-| `timeline.release` | release timeline |
-| `stepFlow` | horizontal numbered steps |
+| `timeline` | a vertical rail of dated events with dots and a connecting line, each entry lands beside its dot in sequence. |
+| `timeline.release` | dated shipping milestones down a rail, for a changelog or a roadmap |
+| `stepFlow` | a horizontal row of numbered steps with connectors that fill in as progress moves from one step to the next. |
 | `stepFlow.start` | steps, at start |
 | `stepFlow.done` | steps, all complete |
 | `stepFlow.build` | the track TRAVELS · rings light and connectors fill in sequence |
-| `kanban` | columns of cards |
+| `kanban` | a kanban board: columns of small cards dealt in reading order, for a task board or pipeline view. |
 | `kanban.two` | two-column board |
-| `chatBubble` | a message thread |
+| `chatBubble` | a text message thread, chat bubbles left and right like iMessage or WhatsApp |
 | `chatBubble.support` | support thread |
-| `tweetCard` | a post card + counts |
-| `avatarStack` | overlapping avatars + overflow |
-| `avatarStack.large` | larger avatar stack |
-| `toast` | dark snackbar + action |
+| `tweetCard` | a tweet or X post card: avatar, handle, body text, like and reply counts |
+| `avatarStack` | overlapping circular profile pictures in a row with a +N overflow count |
+| `avatarStack.large` | the same overlapping profile pictures at a bigger size, for a hero or a title card |
+| `toast` | a dark snackbar with a status dot, a message, and an optional action link, the popup that says something just happened. |
 | `toast.error` | snackbar, error + retry |
 | `toast.info` | snackbar, info |
 | `toast.stack` | snackbars that stack and expire |
-| `reactionBar` | reaction count pills |
+| `reactionBar` | emoji reaction pills with counts, like the reactions under a Slack or Discord message |
 | `reactionBar.love` | reactions (love set) |
-| `logoWall` | grid of wordmarks / logos |
+| `logoWall` | a grid of company wordmarks or logo images, for a social proof or partner strip. |
 | `logoWall.four` | four logos, 2 cols |
-| `badge` | CI-shield token (label · value) |
-| `badge.version` | version badge |
-| `badge.warn` | badge, warning |
-| `badge.info` | badge, info |
+| `badge` | a small label plus coloured value chip, like a CI shield or a status token (e.g. version, warning, beta). |
+| `badge.version` | a small chip showing which release is running, like a v2.1.0 shield in a README |
+| `badge.warn` | an amber chip that flags something needing attention, a caution token |
+| `badge.info` | a blue chip carrying a neutral fact, no alarm attached |
 | `badge.beta` | beta status badge |
-| `gauge` | semicircular meter |
+| `gauge` | a speedometer-style dial: a semicircular meter needle showing one value against a max |
 | `gauge.warn` | gauge, low (amber) |
 | `gauge.full` | gauge, complete (green) |
-| `progressRing` | circular progress + % label |
+| `progressRing` | a circular progress ring with the percent complete written in its centre |
 | `progressRing.done` | ring, 100% (green) |
 | `progressRing.low` | ring, low (amber) |
-| `banner` | accent announcement bar |
+| `banner` | a full width coloured announcement bar with an icon, a message, and an optional CTA chip, spans the whole row edge to edge. |
 | `banner.info` | banner, info (blurple) |
 | `banner.warn` | banner, warning (amber) |
-| `spinner` | looping Lottie (deterministic) |
+| `spinner` | a small looping loading spinner animation for a busy or working state |
 | `spinner.small` | small looping Lottie |
-| `lowerThird.cleanBar` | hairline plate · name over role · the quiet one |
+| `lowerThird.cleanBar` | a name plate low in the frame: the speaker's name over their job title, on a hairline plate |
 | `lowerThird.boldBlock` | name reversed out of a solid accent block |
 | `lowerThird.bild` | tabloid front page · caps, reversed, loud |
 | `lowerThird.darkCard` | dark card · the one that survives bright photography |
@@ -228,63 +228,63 @@ _188 entries across 100 families._
 | `lowerThird.colourBlock` | two offset blocks, ink then accent |
 | `lowerThird.stackBars` | plate over a short accent bar · reads as a mark |
 | `lowerThird.newsTicker` | accent chip + line · role IS the chip (LIVE/BREAKING) |
-| `nowPlaying` | music-player card · artwork, progress, transport |
-| `videoLowerThird` | creator lower third · avatar, subs, red CTA |
-| `followCard` | name over handle, pill CTA |
-| `searchEngine.home` | search home. Wordmark + pill, query types in (keys click) |
-| `searchEngine.results` | search results, ranked links, cursor clicks one |
-| `feedRow` | feed item · avatar, name, timestamp, body |
-| `listRow` | generic list item · icon tile, title over sub, trailing detail |
-| `settingsRow` | settings row · label + toggle, chevron or value |
-| `profileHeader` | account header · avatar over name, handle, stat row |
-| `onboardCard` | onboarding pane · progress dots, title, body, CTA |
-| `emptyState` | zero state · icon tile, what is missing, the action that fills it |
-| `pointer` | mouse pointer · travels to a target and clicks it (ripple) |
-| `tapRipple` | touch tap · contact dot and an expanding ring, for phone demos |
-| `keyboard` | phone keyboard · qwerty keys, rises up into frame |
+| `nowPlaying` | a music player card: album artwork, a scrubbing progress bar, and play/skip transport controls |
+| `videoLowerThird` | a YouTube-style creator lower third: avatar, subscriber count, and a red subscribe CTA |
+| `followCard` | a social profile follow card: name over @handle next to a follow button pill |
+| `searchEngine.home` | a search engine home page: a wordmark over a rounded search box, the query typing itself in |
+| `searchEngine.results` | the search results page: a ranked list of links, with a cursor clicking one |
+| `feedRow` | one row of a social or activity feed: avatar, name, handle, timestamp, and a line of body text. |
+| `listRow` | a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row. |
+| `settingsRow` | a settings row: a label with a toggle switch, a chevron into a sub-screen, or a current value shown as text. |
+| `profileHeader` | the top of an account screen: avatar over a name and @handle, with a small row of stat counts below. |
+| `onboardCard` | one pane of a first-run onboarding flow: progress dots, a title, body copy, and a CTA button. |
+| `emptyState` | a zero state panel with dashed border: an icon, a line saying what is missing, and a button that fills it. |
+| `pointer` | a mouse cursor that travels across the screen to a target and clicks it, with a click ripple. |
+| `tapRipple` | a finger tap on a touchscreen: a contact dot and an expanding ring at the point touched, for phone demos. |
+| `keyboard` | an on-screen phone keyboard, qwerty keys or a numeric keypad, that slides up from the bottom edge. |
 | `keyboard.numeric` | phone keypad · numeric grid, rises up into frame |
-| `pressButton` | CTA that depresses and releases when it is clicked |
-| `splitScreen` | two panes, one geometry · second pane lands behind the first |
+| `pressButton` | a CTA button that visibly depresses and springs back when clicked, the payoff for a pointer tap on a button. |
+| `splitScreen` | the screen divided into two side-by-side panes, or a small inset video in the corner like picture-in-picture |
 | `splitScreen.pip` | picture-in-picture · an aside inset over the subject |
-| `screenSwap` | screen A becomes screen B in place (wipe, no travel) |
+| `screenSwap` | one app screen replaces another in the same spot, either a wipe or a slide, like swiping between phone screens |
 | `screenSwap.slide` | screen change that reads as travel · enters right, leaves left |
-| `socialProof` | avatar stack + the line it proves (caption owned by the block) |
-| `installCard` | app-store row · stars sweep to the rating, then install |
-| `glassCard` | frosted glass panel (blurs the moving bg behind it) + sheen |
-| `meshPanel` | soft mesh-gradient surface (stacked accent blobs) |
-| `spotlightCard` | dark card with a soft spotlight glow washing from a corner |
-| `borderBeamCard` | glass card with a light TRAVELLING its border (animated beam) |
-| `grainOverlay` | fine film-grain texture over the frame (feTurbulence) |
-| `bento` | asymmetric bento grid: one hero cell + supporting cells (scale contrast) |
-| `camcorderHud` | viewfinder OSD: corner brackets, a blinking REC lamp, a running timecode, battery + zoom |
-| `scanGate` | autofocus gate: a band travels the frame, the brackets contract onto the target and lock |
-| `flowchart` | landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges |
+| `socialProof` | an avatar stack next to a trust line, like Trusted by 8,000 teams, for social proof |
+| `installCard` | an app store listing row: icon, star rating that sweeps in, and an Install button |
+| `glassCard` | a frosted glass panel that blurs the moving content it sits over, like iOS or macOS translucency |
+| `meshPanel` | a soft blurry gradient background made of overlapping colour blobs, calm and branded |
+| `spotlightCard` | a dark card lit by a soft glow from one corner or edge, like a spotlight in a dark room |
+| `borderBeamCard` | a glass card with a bright line of light chasing around its border, like a loading ring on the edge |
+| `grainOverlay` | a layer of film grain or noise texture over the whole frame, so it looks shot on film instead of flat digital |
+| `bento` | an asymmetric grid of boxes in different sizes, one big hero box and smaller ones around it, like a bento box or an Apple feature grid |
+| `camcorderHud` | a camcorder or viewfinder overlay: corner brackets, a blinking REC dot, a running timecode, battery and zoom readout |
+| `scanGate` | an autofocus targeting reticle: a scan line sweeps the frame and brackets snap shut and lock onto the subject |
+| `flowchart` | a flowchart: boxes connected by lines that draw themselves on, with yes/no labels on the branches |
 | `flowchart.vertical` | the same flow turned 90 degrees for a phone feed · cols run down, lanes across, type raised to the portrait floor |
-| `nodeGraph` | non-hierarchical graph · author-placed nodes, routed edges, one node lit |
-| `glassWidgets` | frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid) |
-| `glassNotification` | frosted alerts fly in from the right and stack, each card narrower than the one above it |
-| `glassMenu` | frosted command panel: icon column, rows, separators, one row lit with the accent |
-| `glassControls` | frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter |
-| `glassHome` | frosted launcher grid led by one wide widget tile; tiles arrive on the diagonal |
-| `glassDock` | floating frosted dock strip with one item magnified, its neighbours swelling toward it |
-| `codeTyping` | live coding: one character frontier crosses the snippet, the caret riding it |
-| `codeHighlight` | a band sweeps down to one line while the context dims out of the way |
-| `codeScroll` | a viewport onto a long file: it scrolls until the target line centres, then lights it |
-| `codeDiff` | the edit PERFORMED: removals collapse red, additions expand green, in edit order |
-| `codeMorph` | a refactor as a transformation: shared tokens glide, the rest fade out and in |
-| `codeFlight` | discrete snippets fly in from alternating sides and assemble into one program |
-| `usMapHex` | US hex cartogram: every state the same size, so the reading is the value not the acreage |
-| `usMap` | US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend |
-| `worldMap` | world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map |
-| `usMapBubble` | proportional circles at city coordinates (AREA is the value) with name + value callouts |
-| `usMapFlow` | origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out |
-| `textCursor` | a caret that bleeds light: an accent glow on the cell, a red/cyan fringe on the type converging as the line settles |
+| `nodeGraph` | a network diagram of nodes and connecting edges, not a top-down tree, with one node highlighted |
+| `glassWidgets` | a cluster of frosted iOS-style widgets: one big showcase panel plus small stat tiles and chips |
+| `glassNotification` | frosted push notifications sliding in from the side and stacking up, like a phone lock screen |
+| `glassMenu` | a frosted right-click or context menu: icon column, list of rows, one row highlighted |
+| `glassControls` | a frosted media player bar: scrubber, play and transport buttons, a volume or level meter |
+| `glassHome` | a frosted phone home screen: a grid of app icon tiles plus one wide widget |
+| `glassDock` | a floating frosted taskbar or dock strip where the icon under the cursor grows bigger, like the macOS dock |
+| `codeTyping` | code being typed live in an editor: a text cursor runs across the snippet revealing one character at a time |
+| `codeHighlight` | a code editor spotlight: the surrounding lines dim while a highlighted band sweeps down onto one target line |
+| `codeScroll` | an editor auto-scrolling through a long file until the target line reaches the middle and lights up |
+| `codeDiff` | a code edit replayed as it happened: the old line collapses away in red while the new line types in green |
+| `codeMorph` | a code refactor shown as a shape-shift: shared words glide into their new position while the rest fades out and in |
+| `codeFlight` | separate code snippets fly in from opposite sides of the screen and snap together into one finished file |
+| `usMapHex` | a hex map of the United States: every state drawn as one same-size hexagon so colour reads value, not land area |
+| `usMap` | a map of the United States coloured state by state, a choropleth with a legend and value labels per state |
+| `worldMap` | a world map coloured country by country, a global choropleth with a legend for the data shown |
+| `usMapBubble` | a map of the United States with circles sized by value at each city, a proportional bubble map |
+| `usMapFlow` | a map of the United States with arrows drawn between cities showing flow or movement from an origin to destinations |
+| `textCursor` | a blinking text cursor typing a word, with a glowing red/cyan light-fringe on the letters as it lands |
 | `textCursor.bar` | the same treatment with a thin vertical rule instead of a filled cell |
-| `parallaxZoom` | one card eats the frame: the centre cell scales to fill the board while its eight neighbours travel outward and dim |
-| `parallaxUnzoom` | the same board run backwards: the hero starts filling the frame and retreats into its cell as the ring arrives |
-| `morphText` | a gooey word cycle: each word melts into the next through a metaball filter, no letter correspondence |
-| `redditPost` | a link-aggregator post: the vote rail left of the title, subreddit line, body, comment count |
-| `uiReveal3d` | UI rows folding up out of depth: each hinges at its top edge in real perspective, one after another |
+| `parallaxZoom` | a grid of cards where the centre card zooms to fill the whole frame while the rest slide outward and fade |
+| `parallaxUnzoom` | the reverse of a zoom-in: one card fills the frame first, then shrinks back into a grid of cards around it |
+| `morphText` | a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence |
+| `redditPost` | a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count |
+| `uiReveal3d` | rows of a UI folding upright out of the floor in 3D perspective, one after another |
 <!-- BLOCKS:END -->
 
 ## Comps: reusable sub-compositions (instance a cluster many times/places)
@@ -308,8 +308,9 @@ A **block** is a library factory (shared across films). A **comp** is a cluster 
 
 The instance's `x/y/start` **offset** every layer in the comp (group children flow, so they're
 untouched). Comps may contain blocks and other comps, expansion is recursive and cycle-guarded.
-Like blocks, comps are **build-time sugar**: run `make expand D=<file>` → `<file>.expanded.json`,
-then validate/render that. `make validate` errors on any un-expanded `block`/`comp` layer.
+Like blocks, comps are **build-time sugar**, expanded at LOAD time (`core/engine/expand.js`); validate and
+render the source file directly, no separate step. `make expand D=<file>` still exists to print the
+expanded JSON to stdout when you want to see what a comp becomes.
 
 ## Tokens
 `TOKENS` exports the Creed palette + research-grounded brand hexes: `accent` terracotta `#C96442`,

@@ -175,7 +175,7 @@ function resolveAnchors(data) {
     // NO ANCHOR and a WRONG ANCHOR are different questions, and `if (!T) continue` answered both with
     // silence. A typo'd id left the layer at whatever x/y it happened to carry, usually 0,0 or on top
     // of something else, with no error, no warning and no gate, because `anchor` is a bare string in
-    // schema.json and nothing checked it resolves. Same shape as ANIM[name] || fade (core/registry.js).
+    // schema.json and nothing checked it resolves. Same shape as ANIM[name] || fade (core/registry/registry.js).
     if (L.anchor && !byId[L.anchor]) {
       const near = Object.keys(byId).filter((id) => id.toLowerCase().includes(String(L.anchor).toLowerCase().slice(0, 4)));
       throw new Error(`layer${L.id ? ` "${L.id}"` : ''} anchors to "${L.anchor}", which is not the id of any layer in this scene.`
@@ -202,6 +202,10 @@ boot((data, fps, theme, canvas) => {
   // lower the unified `transitions`/`layers[].transition` surface into the raw cuts/stings/seams/
   // anim fields BEFORE any parse below reads them. Pure + idempotent; a scene without the unified
   // keys is untouched. Kept here (top of the callback) so every parser sees the lowered form.
+  //
+  // block/beat/comp sugar is NOT expanded here: this file never imports core/engine/expand.js, on purpose
+  // (core/engine/expand.js's own banner says why, and internal/render/expand.go is where that expansion
+  // actually happens for this render path, server-side, before the page ever fetches this JSON).
   data = lowerScene(data);
   // Snap the film's joints to the track's pulse, if the scene named a grid. AFTER lowering (a cut
   // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time, the bg
@@ -213,7 +217,7 @@ boot((data, fps, theme, canvas) => {
   let beatSyncNote = '';
   { const r = bindBeats(data, canvas && canvas.beats); if (r) { beatSyncNote = describeBind(r); console.log(beatSyncNote); } }
   // The film's nominated loud moment: write the device as a sting at `at` and pull every competing
-  // amplitude dial in the film down around it (core/spectacle.js). BEFORE the sting/seam/layer parses
+  // amplitude dial in the film down around it (core/timeline/spectacle.js). BEFORE the sting/seam/layer parses
   // below, because those are its subject; a no-op when the scene declares no `spectacle`.
   resolveSpectacle(data);
   // canvas W,H come from boot (aspect-resolved). Fallback keeps standalone use working.
@@ -236,7 +240,7 @@ boot((data, fps, theme, canvas) => {
   // A bg window may bind its edges to a JOINT instead of a time: `"from": "cut@1"`. brew-launch-act1
   // cuts its backdrop per beat - paper, dark, paper, accent - and wrote every boundary twice, once here
   // and once in `transitions`, with nothing keeping the two equal. Now the cut owns the number.
-  // core/junctions.js, docs/MISTAKES.md #358.
+  // core/timeline/junctions.js, docs/MISTAKES.md #358.
   const BG_JUNCTIONS = junctionTable(marksOf(data));
   const atTime = (v, where) => (isJunctionRef(v) ? resolveJunction(v, BG_JUNCTIONS, where) : v);
   // Windows that declare NO times at all bind to the film's own joints, in order, see
@@ -247,7 +251,7 @@ boot((data, fps, theme, canvas) => {
     // (the "customize, don't default" rule; fails loud if the theme never authored one).
     if (b0.use === 'theme' && !(theme && theme.bgDefault)) throw new Error(`bg use:"theme" but theme "${(theme && theme.name) || '?'}" defines no bgDefault`);
     const b = b0.use === 'theme' ? { ...theme.bgDefault, from: b0.from, to: b0.to } : b0;
-    // a HAND-AUTHORED window (core/bg-html.js) paints in the DOM, not on the canvas: no preset spec,
+    // a HAND-AUTHORED window (core/layout/bg-html.js) paints in the DOM, not on the canvas: no preset spec,
     // and the canvas is hidden while it is on screen.
     // `src` is resolved to markup HERE, once, so every downstream reader of a window (bg-html, the ink
     // picker, bgAt) keeps asking the one question it already asks: does this window have `html`?
@@ -265,7 +269,7 @@ boot((data, fps, theme, canvas) => {
   // Suppressing it here is what makes the alpha channel real: core/tokens.css clears CSS backgrounds
   // and cannot touch canvas pixels, and `bg` is a required field, so every scene painted an opaque
   // canvas over the whole frame and every exported alpha channel came back 255 (MISTAKES #224).
-  // Read off the class core/boot.js already set, so the flag is parsed in exactly one place.
+  // Read off the class core/engine/boot.js already set, so the flag is parsed in exactly one place.
   const ALPHA = document.documentElement.classList.contains('alpha');
   if (!bgWins.length || ALPHA) cv.style.display = 'none'; // fallback: the .hs-stage theme gradient
   // hand-authored backdrops: built once here, shown/hidden per frame by drawBg (null if none declared,
@@ -290,7 +294,7 @@ boot((data, fps, theme, canvas) => {
   // warned. The same invisible-output class as #213 and #369, and Phase-4 per-beat backdrops make it
   // the common case rather than the rare one. So ask the palette instead of trusting the token name:
   // use `--text` when it really is light, and otherwise the theme's own light ground.
-  // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light, the same
+  // isLightBg is core/motion/motion.js's single definition of light-versus-dark, in linear light, the same
   // one backgrounds.js and produce.js ask. A second hand-kept copy of that question is MISTAKES #159.
   const P = (theme && theme.palette) || {};
   const ON_DARK = isLightBg(P.text) ? 'var(--text)'
@@ -324,8 +328,8 @@ boot((data, fps, theme, canvas) => {
   // ---- shader stings: [{t, fx, dur, seed, color?, intensity?}]. Boundary effects on a WebGL overlay ----
   // A sting tint is a COLOUR: a hex, an rgb(), a CSS name, or a theme token. This read `parseInt(hex,
   // 16)` and nothing else, so every other form became NaN and then [0,0,0] -- "var(--accent)" tinted
-  // the sting BLACK with no error (docs/MISTAKES.md #476). core/filters.js `glowRGB` is the engine's
-  // one owner of token -> literal rgb (feFlood cannot resolve var() either); core/transitions-lower.js
+  // the sting BLACK with no error (docs/MISTAKES.md #476). core/looks/filters.js `glowRGB` is the engine's
+  // one owner of token -> literal rgb (feFlood cannot resolve var() either); core/transitions/lower.js
   // owns the refusal, at the write site, so an unresolvable tint is named before a browser starts.
   const tint01 = (c, where) => glowRGB(checkStingColor(c, where)).map((v) => v / 255);
   // `.filter(s => SHADER_FX.includes(s.fx))` until now: a sting with an unknown fx was DROPPED and
@@ -455,7 +459,7 @@ boot((data, fps, theme, canvas) => {
   // becomes:"<id>" is NOT resolved here. It needs the measured box of a layer that states no w/h, and
   // nothing is measured until the DOM exists, so it runs beside `baseSize` below (see resolveBecomes).
   resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
-  resolveKeyedProps(data.layers);   // a key that states w/h → every key on that track states it (see core/sequence.js)
+  resolveKeyedProps(data.layers);   // a key that states w/h → every key on that track states it (see core/timeline/sequence.js)
   const extra = []; // group children (any depth), animated on their root group's window
 
   // applyGsapHooks: the GSAP-driven layer entrances/exits/paths, all built as PAUSED tweens on
@@ -471,12 +475,12 @@ boot((data, fps, theme, canvas) => {
     // Removed rather than repaired: `motion` does everything it claimed and more (a real keyframe
     // track, holds, reversals, per-key easing), deterministically. Rejected loudly at validate so an
     // author who reaches for it is redirected instead of shipping a flickering layer. (MISTAKES #208.)
-    // TextMorph: letters migrate A->B (core/morph.js), tweened by GSAP. Rebuilds the layer's chars.
+    // TextMorph: letters migrate A->B (core/motion/morph.js), tweened by GSAP. Rebuilds the layer's chars.
     // Guard on type: an svg layer's `morph` is a SHAPE morph it drives itself in svg.js frame(), without
     // this, buildMorph would rebuild the svg as text glyphs and render the target path `d` string as words
     // (docs/MISTAKES.md #140: the engine silently doing the wrong thing on an accepted input).
     if (L.morph && L.type !== 'svg' && window.gsap) buildMorph(el, L, window.gsap);
-    // NAMED GSAP effects (core/gsap-effects.js): `fx:"popIn"` | `fx:{name,dur,ease}` | `fx:["blurIn","float"]`.
+    // NAMED GSAP effects (core/engine/gsap-effects.js): `fx:"popIn"` | `fx:{name,dur,ease}` | `fx:["blurIn","float"]`.
     if (L.fx && window.gsap) {
       const targets = (units && units.length) ? units : el; // split → per unit (staggered), else the layer
       for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
@@ -537,7 +541,7 @@ boot((data, fps, theme, canvas) => {
     // (html inline-SVG, group, svg). `parts: { select, anim, each, stagger, delay, ease }`.
     if (L.parts && window.gsap) {
       // The PARTS vocabulary used to be declared right here, inside the build path, which is why it was
-      // the one registry with no name, no catalogue entry and no gate: core/parts.js now owns it.
+      // the one registry with no name, no catalogue entry and no gate: core/motion/parts.js now owns it.
       // one spec or an ARRAY of specs: a figure can grow its bars, THEN draw its line, THEN pop its dots.
       for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) {
         const sel = p.select || 'rect, circle, path, polyline, line, [data-part]';
@@ -559,7 +563,7 @@ boot((data, fps, theme, canvas) => {
         // A PART CAN NOW LEAVE. Every entry used to be a one-way tween, so a hand-authored html figure
         // could only ever fade out as ONE card while a native layer stack left piece by piece. That
         // read as a limit of hand-written HTML in a head-to-head build and it was this line missing.
-        // Opt in with `out: true` (the entrance's own paired exit, core/parts.js slot 4) so an
+        // Opt in with `out: true` (the entrance's own paired exit, core/motion/parts.js slot 4) so an
         // existing scene cannot grow an exit it never asked for.
         // `fromTo` from the SETTLED state, never a bare `to`: a `to` records its start values when the
         // tween first runs, which is a function of playback order rather than of n, and a backward seek
@@ -588,7 +592,7 @@ boot((data, fps, theme, canvas) => {
   }
 
   // the layer registry (core/layers/*): one primitive per file; scene.html just dispatches.
-  // `frame` is boot's one frame object (core/safe.js frameOf), forwarded whole so createKit hands every
+  // `frame` is boot's one frame object (core/layout/safe.js frameOf), forwarded whole so createKit hands every
   // primitive the canvas instead of each one re-deriving or hardcoding it. Nothing recomputes it here.
   const renderer = createRenderer({ theme, W, H, frame: canvas?.frame, cam, inkAt, bgWinAt, ACCENT_BGS, trackingFor,
     splitText, icon, motionAt, kenBurns, interpolate, resolveEasing, clamp01, fitText, fitBox,
@@ -627,7 +631,7 @@ boot((data, fps, theme, canvas) => {
     // `idle: "breath"` would first throw on whichever frame that layer reaches its settled middle,
     // which is a dead render one third of the way in with a stack trace instead of an authoring error.
     normalizeIdle(L.idle !== undefined ? L.idle : sceneIdle);
-    // THE TWO ENTRANCE DIALS (core/motion.js: anticipation and the overshoot amount). Written here,
+    // THE TWO ENTRANCE DIALS (core/motion/motion.js: anticipation and the overshoot amount). Written here,
     // refused here for the same layers that already lose their `anim`: a split or cut layer's entrance
     // is owned by something else, so a dial on it would be an input accepted and dropped.
     for (const [prop, lo, hi] of [['anticipate', 0.01, 0.6], ['overshoot', 0.01, 0.6]]) {
@@ -644,7 +648,7 @@ boot((data, fps, theme, canvas) => {
     // `overshoot` would fail one third of the way into a render instead of at authoring time.
     entranceWarp(el, BASE_ENTER);
     // `step` quantises this layer's clock (animate on twos = 15 in a 30fps film). On the element as
-    // well as on the layer because the entrance is composed by core/clips.js, which sees only the DOM.
+    // well as on the layer because the entrance is composed by core/timeline/clips.js, which sees only the DOM.
     if (L.step != null) {
       if (typeof L.step !== 'number' || !(L.step > 0) || L.step > fps)
         throw new Error(`layer ${idx} (${L.type}) sets step: ${JSON.stringify(L.step)}. It is UPDATES PER SECOND, above 0 and no faster than the film's own ${fps}fps: 15 is "on twos", 10 is "on threes". A step at or above the frame rate changes nothing.`);
@@ -767,7 +771,7 @@ boot((data, fps, theme, canvas) => {
   // by addGroupChild during the map above. Both writers of `data-start` have run, and nothing after
   // this line adds one. Collected once instead of re-queried inside driveClips, which walked the tree
   // 780 times a render for a set that is fixed after build, and, worse, made what frame N renders a
-  // function of what was in the DOM at that instant. core/clips.js carries the reasoning and the rule
+  // function of what was in the DOM at that instant. core/timeline/clips.js carries the reasoning and the rule
   // for the day something legitimately needs to add a clip later.
   const CLIPS = collectClips(cam);
 
@@ -782,7 +786,7 @@ boot((data, fps, theme, canvas) => {
   // never read a neighbour's box left behind by the previous frame. A measured box would be exactly
   // that stale value for every layer the loop has not reached yet, silently and only sometimes.
   const CANVAS = Object.freeze({ w: W, h: H });
-  const SAFE = canvas?.safe ? Object.freeze({ ...canvas.safe }) : null; // computed once in core/boot.js
+  const SAFE = canvas?.safe ? Object.freeze({ ...canvas.safe }) : null; // computed once in core/engine/boot.js
   // THE SCENE'S LIGHT: one point in canvas space that every shadow aims away from (core/fx/shadow.js).
   // Resolved here rather than inside the modifier so the scene owns it and a second consumer (a shade,
   // a specular edge, a gradient that follows the key) reads the same value. Checked here too, and
@@ -823,7 +827,7 @@ boot((data, fps, theme, canvas) => {
   // The handover, now that both forms have a real box. Still ONCE, at build, still pure geometry on the
   // JSON: it writes `motion` keys, which every reader samples per frame. resolveKeyedProps runs again
   // because the keys it injects are new, and a target whose own track states w/h needs them stated on
-  // every key (core/sequence.js keeps exactly one rule: both endpoints, or neither).
+  // every key (core/timeline/sequence.js keeps exactly one rule: both endpoints, or neither).
   resolveBecomes(data, (L) => measured.get(L));
   resolveKeyedProps(data.layers);
   // A GROUP CHILD'S BOX, which used to be null on the argument that flex and grid put it where only
@@ -978,7 +982,7 @@ boot((data, fps, theme, canvas) => {
   // rewrites `start`, resolveKeyedProps expands tracks), so handing out the real one would let a
   // modifier rewrite the input of a layer that has not rendered yet and make renderFrame(n) depend on
   // render order. Copied and frozen ONCE at build, so the per-frame cost is a Map lookup.
-  // A PLAIN recursive copy, not structuredClone: a layer spec is a watched Proxy (core/prop-audit.js)
+  // A PLAIN recursive copy, not structuredClone: a layer spec is a watched Proxy (core/registry/prop-audit.js)
   // and the structured-clone algorithm refuses an exotic object outright. Same output for the JSON
   // shapes a layer is made of, and it costs one pass that deepFreeze was making anyway.
   const deepCopy = (o) => (Array.isArray(o) ? o.map(deepCopy)
@@ -1036,18 +1040,18 @@ boot((data, fps, theme, canvas) => {
   const duration = data.duration || +(lastEnd + 0.4).toFixed(2);
   const caps = data.captions || [];
   const capMode = data.captionMode || 'sentence';
-  // captionStyle: a word-timed treatment (core/captions.js) layered on the pop layout.
+  // captionStyle: a word-timed treatment (core/type/captions.js) layered on the pop layout.
   // Unknown names fail LOUD at boot, matching the theme doctrine, never a silent fallback look.
   const capStyle = data.captionStyle || null;
   // One refusal, owned by the registry: it also searches every other vocabulary, so a name borrowed
   // from the kinetic presets or the looks is told where it really lives instead of being met with a
   // bare list of eighteen caption styles.
   if (capStyle) CAP_STYLE_REGISTRY.pick(capStyle);
-  const camKf = data.camera || []; // cameraAt/motionAt now live in /core/sequence.js (pure, tested)
+  const camKf = data.camera || []; // cameraAt/motionAt now live in /core/timeline/sequence.js (pure, tested)
 
   // ---- THE CAMERA RIG: one model, two emissions ----
   //
-  // The camera is a position in space (core/sequence.js). Where NOTHING in the frame leaves the canvas
+  // The camera is a position in space (core/timeline/sequence.js). Where NOTHING in the frame leaves the canvas
   // plane, every point sits at z=0 and the perspective projection of the whole frame collapses exactly
   // to the affine `scale(s) translate(x,y)` this engine has always written, same picture, to the pixel,
   // proved in scripts/dev/spike-dolly.mjs. So that string is still what gets emitted, for the reason
@@ -1129,7 +1133,7 @@ boot((data, fps, theme, canvas) => {
     for (const w of beatWrap) w.style.transformStyle = 'preserve-3d';
   }
 
-  // ---- SEAMS: two-scene shader transitions (core/seams.js) ----
+  // ---- SEAMS: two-scene shader transitions (core/timeline/seams.js) ----
   // [{t, fx, dur, dir?, seed?, intensity?, feather?}]. `dir` is a cardinal name or a number of
   // degrees; `feather` (0..0.2) is an edge-softness override, per-fx default when absent. The two
   // beats either side of the boundary are
@@ -1197,7 +1201,7 @@ boot((data, fps, theme, canvas) => {
   // cross-cutting per-frame behaviour meant editing the right paragraph of a 940-line file and the
   // order lived only in the reader's memory of having scrolled past it.
   // `data.idle` is the film's scene-level idle: one line opts the whole cast into ambient hold motion
-  // (core/idle.js). Normalized HERE so a misspelled name fails at boot with the registry's message,
+  // (core/engine/idle.js). Normalized HERE so a misspelled name fails at boot with the registry's message,
   // rather than on whichever frame the first layer happens to reach its settled middle.
   const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(sceneIdle),
     shutter: resolveShutter(data.shutter), cameraBlur: resolveCameraBlur(data.cameraBlur) });
@@ -1235,7 +1239,7 @@ boot((data, fps, theme, canvas) => {
       canvas: CANVAS, safe: SAFE, clock, theme: THEME, bg: bgAt(t), marks: MARKS });
     // A layer carrying `step` runs its whole track pipeline on a QUANTISED clock: same seconds, held
     // for the whole step, so the layer updates 15 times a second inside a 30fps film. Pure, because the
-    // quantised time is a function of t alone (core/motion.js stepClock), and the entrance half of the
+    // quantised time is a function of t alone (core/motion/motion.js stepClock), and the entrance half of the
     // same layer is stepped identically inside clipStyleAt.
     for (const { L, el, units } of layers) {
       const lt = L.step != null ? stepClock(t, L.step, L.start ?? 0) : t;
@@ -1287,7 +1291,7 @@ boot((data, fps, theme, canvas) => {
           capEl.__units = [s];
         } else if (capStyle) {
           capEl.innerHTML = cap.text;
-          capEl.__units = splitText(capEl, shape.unit || 'word'); // the kinetic splitter (core/type.js)
+          capEl.__units = splitText(capEl, shape.unit || 'word'); // the kinetic splitter (core/type/type.js)
           // EMPHASIS, MARKED ONCE AT BUILD. `<b>`/`<em>` around a word is the author saying "this is
           // the one that matters", scene.css has painted it with the accent since captions existed,
           // and eight of the eleven styles silently ate it: splitText preserves the <b> element and
@@ -1300,7 +1304,7 @@ boot((data, fps, theme, canvas) => {
         } else { capEl.innerHTML = cap.text; capEl.__units = null; }
       }
       capEl.__wins = one && wins ? [wins[activeIdx < 0 ? 0 : activeIdx]] : wins;
-      // PLACEMENT, WRITTEN EVERY FRAME. core/boot.js has already resolved this caption's pin / edge
+      // PLACEMENT, WRITTEN EVERY FRAME. core/engine/boot.js has already resolved this caption's pin / edge
       // keywords / "50%" strings to px against the safe box, so all that is left is to emit them.
       // Every one of the six is assigned on every frame even when the caption places nothing, because
       // the alternative is a caption inheriting the position of whichever caption the tab happened to
@@ -1572,7 +1576,7 @@ boot((data, fps, theme, canvas) => {
   }
   // Sound bridges resolve HERE because this is where the junctions are: `at:"cut@2"` is only
   // answerable next to MARKS. The result is spans of seconds, so the mixer never has to know what a
-  // cut is (core/audio-bridges.js).
+  // cut is (core/audio/bridges.js).
   return { fps, duration, stings: stings.map((s) => s.t), sfx: buildSfx(), beatSync: beatSyncNote,
     bridges: resolveBridges(data.audio, MARKS, duration), renderFrame, bakeSeams };
 });

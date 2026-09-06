@@ -37,7 +37,7 @@ import { sceneDims } from '../../core/layout/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
 
@@ -45,14 +45,14 @@ const file = process.argv[2];
 const strict = process.argv.includes('--strict');
 if (!file) { console.error('usage: node scripts/gates/direction-floor.mjs <scene.json> [--strict]'); process.exit(2); }
 // The floor coaches on the RAW AUTHORED scene (what you wrote), NOT the produced one, the engine injects
-// the baseline at render (core/produce.js), so these WARNs read as "author this deliberately instead of
+// the baseline at render (core/engine/produce.js), so these WARNs read as "author this deliberately instead of
 // leaning on the injected default." Judging the produced scene would mask the very conditions this gate
 // exists to surface (and defeat gate-mutation's ability to prove the gate can fire).
 // The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
-// renders anything (core/transitions-lower.js), and until this line the gates did not, so a scene
+// renders anything (core/transitions/lower.js), and until this line the gates did not, so a scene
 // that declared its boundaries the documented way was read as a film with no boundaries at all.
 // Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
-const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
+const d = loadScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // FIX 6: the two SLIDESHOW waivers must be BACKED BY A PLAN. `no-continuous-object` and `plain-slideshow`
@@ -83,12 +83,12 @@ const plainHeadlines = headlines.filter((l) => !isExpressiveText(l));
 // list of a fact somebody else owns is the drift this codebase logs most: it called EIGHT of the 22
 // presets flat while they animate (paperDots, paperShapes, soft, accent, shapes, brandglow, ink, blobs),
 // so a film on the loud brand field was told its backdrop was dead. The owner of "does this move" is
-// `bgPreset` in core/backgrounds.js: it returns the fx list that renderBg(…, t) paints, and `grain` is
+// `bgPreset` in core/backgrounds/index.js: it returns the fx list that renderBg(…, t) paints, and `grain` is
 // the only fx that is not motion (film grain over a still base). That is the same split BG_BLURBS
 // states in prose (FLAT = plain · paper · accentPlain · dark · deep) now read off the code instead of
 // restated here. An unknown name throws there (#361) and is not this gate's finding to report.
 // THE MARKUP OF A HAND-AUTHORED FRAGMENT, from either place it can live. `html` is the markup inline in
-// the scene JSON and `src` is the SAME markup in a file (core/sanitize-html.js `htmlSource` is the one
+// the scene JSON and `src` is the SAME markup in a file (core/type/sanitize-html.js `htmlSource` is the one
 // resolver the renderer uses, and it takes both). Every reader here used to look at `html` only, so a
 // fragment written to a file. The documented alternative, and the only sane one past a few lines, was
 // read as empty markup: its `var(--t)` backdrop counted as a dead field, and an `html` layer holding the
@@ -99,14 +99,14 @@ const htmlOf = (o) => {
   if (!o || typeof o !== 'object') return '';
   if (typeof o.html === 'string') return o.html;
   if (typeof o.src !== 'string') return '';
-  // `src` is repo-root relative (core/preload.js roots it at '/'), so it resolves the same from any cwd.
+  // `src` is repo-root relative (core/engine/preload.js roots it at '/'), so it resolves the same from any cwd.
   try { return fs.readFileSync(path.join(repoRoot, o.src), 'utf8'); } catch { return ''; }
 };
 const movingPreset = (name, value) => {
   try { return (bgPreset(name ?? undefined, value).fx || []).some((f) => f && f.type !== 'grain'); }
   catch { return false; }
 };
-// ...and a HAND-AUTHORED backdrop (core/bg-html.js) animates by being a function of `var(--t)`, the one
+// ...and a HAND-AUTHORED backdrop (core/layout/bg-html.js) animates by being a function of `var(--t)`, the one
 // thing it is allowed to move by, CSS animation is disabled engine-wide and the sanitiser rejects it.
 // Without this the escape hatch for a backdrop the preset vocabulary cannot express was told it was a
 // flat field, which pushes the author back onto the presets: the opposite of what it exists for.
@@ -119,18 +119,22 @@ const hasBgMotion = (Array.isArray(d.bg) ? d.bg : (d.bg ? [d.bg] : [])).some(ani
 // camera actually MOVES (s/x/y changes across keyframes), not a static [{s:1},{s:1}].
 const cam = d.camera || [];
 const camKf = cam.length > 1 && cam.some((k) => (k.s ?? 1) !== (cam[0].s ?? 1) || (k.x ?? 0) !== (cam[0].x ?? 0) || (k.y ?? 0) !== (cam[0].y ?? 0));
-// the `cameraMove` sugar (core/camera-moves.js) IS a camera move, it just expands to d.camera at
-// `make expand`, and the floor runs PRE-expand, so without this it nags "no-camera" on a scene that
-// already has a push/dive. Credit a cameraMove that names a move or actually changes scale/position.
-// ...and the sugar is documented as an OBJECT (`"cameraMove": { "move":"diveIn" }`, core/camera-moves.js),
-// which scripts/author/expand-blocks.mjs accepts alongside an array. Only crediting the array meant a
-// film using the documented form was told its camera never moves while the camera was moving.
+// the `cameraMove` sugar (core/camera-moves/index.js) IS a camera move, and `loadScene` above already bakes
+// it to `d.camera` (core/engine/expand.js), so `cam`/`camKf` normally see it there. `camSpecs` below stays as
+// a defensive fallback for a scene handed to this gate before baking (a raw JSON in a test fixture),
+// so a film using the documented `cameraMove` form is never told its camera never moves.
+// The sugar is documented as an OBJECT (`"cameraMove": { "move":"diveIn" }`, core/camera-moves/index.js),
+// which core/engine/expand.js accepts alongside an array. Only crediting the array meant a film using the
+// documented form was told its camera never moves while the camera was moving.
 const camSpecs = Array.isArray(d.cameraMove) ? d.cameraMove : (d.cameraMove ? [d.cameraMove] : []);
 const camSugar = camSpecs.some((m) => m && (m.move || (m.from != null && m.to != null && m.from !== m.to) || (m.tx != null) || (m.ty != null)));
 const camMoves = camKf || camSugar;
 
 const sig = {
-  beats: flat.filter((l) => l.type === 'beat').length,
+  // `l._beat` (core/engine/expand.js): the beat a layer came from. `l.type === 'beat'` never survives to
+  // this gate any more, sugar expands at LOAD time now, so the raw type is gone by the time a scene
+  // reaches here; the annotation is what is left to recognise "composed from a blueprint" by.
+  beats: flat.filter((l) => l._beat || l.type === 'beat').length,
   kineticText: texts.filter(isExpressiveText).length,
   countup: flat.filter((l) => l.type === 'count').length,
   camera: camMoves ? 1 : 0,
@@ -171,7 +175,7 @@ if (!directedByBeats) {
   if (!camMoves) warn('no-camera', 'the camera never moves. One slow push (or a dive-in on a product shot) adds life without moving content. MOTION-RECIPES slow-push / dive-in.');
   if (sig.transition === 0) warn('no-transition', 'no seams or cuts between beats. Beats just cut flat. Earn 1-3 transitions (a dissolve, a cinematicZoom into a screen).');
 }
-if (!sig.bgMotion) warn('no-bg-motion', 'the background is static. A good video moves the viewer with a living backdrop (a moving gradient / mesh / aurora / shader), used brand-appropriately, not a flat field. See core/backgrounds.js.');
+if (!sig.bgMotion) warn('no-bg-motion', 'the background is static. A good video moves the viewer with a living backdrop (a moving gradient / mesh / aurora / shader), used brand-appropriately, not a flat field. See core/backgrounds/index.js.');
 
 // SPEED IS THE ANTI-REPETITION LEVER (docs/CRAFT/TRANSITIONS.md). A film whose boundaries all ride a
 // gentle curve reads flat and same-y, however many effects it uses. Nudge (never block) toward a speed
@@ -244,7 +248,7 @@ const bounds = [...new Set(boundaries)].filter((t) => t > EPS && t < dur - EPS).
 
 const T = sceneTiming(d);
 // A layer the engine confines to its own beat CANNOT be a spine, whatever its authored window says.
-// Under `sceneUnits` (core/produce.js turns it on for any cut film with no choreographed `motion`
+// Under `sceneUnits` (core/engine/produce.js turns it on for any cut film with no choreographed `motion`
 // track) formats/scene/scene.js rewrites every non-last-beat layer to end with its beat, so a layer
 // authored across the cut is truncated at it. `unitEnd` is exactly that rewrite: non-null means the
 // engine ends this layer with its own beat. Reading the raw `start`/`duration` here passed a film
@@ -267,7 +271,7 @@ const visible = (l) => { const s = l.start ?? 0; return [s, l.duration != null ?
 // Machinery whose internal clock this gate cannot read (a blueprint beat, a bespoke composition, a
 // parts build, a morph, a motion path, a playing video). Assume it transforms, a gate must not
 // invent a failure out of something it cannot see (MISTAKES #25).
-const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l.type === 'clip'
+const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l._beat || l.type === 'clip'
   || l.parts || l.morph || l.motionPath || l.gsap || l.physics
   || (l.type === 'group' && l.each)          // per-child build. On a TEXT layer `each` is the split
   || (l.type === 'cursor' && l.path)         // reveal's per-char duration, an entrance, not a transform.
@@ -319,8 +323,8 @@ const poseAt = (l, t) => {
 //
 // `becomes` is not a claim the author makes and the gate has to trust. The engine PRODUCES the match:
 // resolveBecomes (formats/scene/scene.js) carries the outgoing form's centre, size and rotation onto
-// the incoming layer's opening pose, and core/validate.mjs refuses a handover whose two halves do not
-// meet. `matches` is the same handover hung on a named joint, and core/junctions.js retimes both
+// the incoming layer's opening pose, and core/validate/validate.mjs refuses a handover whose two halves do not
+// meet. `matches` is the same handover hung on a named joint, and core/timeline/junctions.js retimes both
 // layers onto it so the joint owns the only copy of the number.
 //
 // A handover therefore SPANS a boundary and CHANGES there, both by construction: the form persists
@@ -378,7 +382,7 @@ const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text)}"` : ''
 const carriedMsg = (spanning) => (spanning.length
   ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there. A fixed logo or watermark riding the cut is furniture, not a spine.`
   : `not one content layer is visible on both sides of any boundary. Every beat is born and dies inside itself.`);
-const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give both forms an `id` and declare `"matches": [{"at": "cut@0", "from": "<the X>", "to": "<the Y>"}]`. The joint retimes them onto itself and the engine carries the centre, size and rotation across (core/junctions.js). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: docs/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
+const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give both forms an `id` and declare `"matches": [{"at": "cut@0", "from": "<the X>", "to": "<the Y>"}]`. The joint retimes them onto itself and the engine carries the centre, size and rotation across (core/timeline/junctions.js). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: docs/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
 
 // `acrossBeats: true` attaches a layer to the camera instead of its beat wrapper, keeping its authored
 // window, so a spine is expressible whatever the cut style. It replaced the advice that used to live
@@ -445,7 +449,7 @@ if (dur < CONTINUITY_MAX_DUR) {
     }
   }
 }
-const reveals = flat.filter((l) => l.track !== 0 && (l.text || l.type === 'count' || l.type === 'beat' || l.type === 'image' || l.type === 'svg' || isExpressiveText(l))).map((l) => l.start ?? 0);
+const reveals = flat.filter((l) => l.track !== 0 && (l.text || l.type === 'count' || l.type === 'beat' || l._beat || l.type === 'image' || l.type === 'svg' || isExpressiveText(l))).map((l) => l.start ?? 0);
 if (reveals.length >= 4) {
   const early = reveals.filter((t) => t < dur * 0.3).length / reveals.length;
   const lateHalf = reveals.filter((t) => t > dur * 0.5).length;

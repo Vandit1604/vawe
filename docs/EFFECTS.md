@@ -123,7 +123,7 @@ named colour+kind(+angle) combos for the `gradient` background preset: `{"preset
 
 ## Beat blueprints  `[blueprint]`
 
-`{ "type":"beat", "beat":"<name>", ... }`. A whole beat's directed motion; `make expand`. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.
+`{ "type":"beat", "beat":"<name>", ... }`. A whole beat's directed motion, expanded at load. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.
 
 | name | what / when |
 |---|---|

@@ -15,7 +15,8 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 1. **Compose from BLUEPRINTS, don't hand-roll motion.** `make blueprints` lists directed beats
    (`{type:"beat"}`, docs/CRAFT/BLUEPRINTS.md): kineticHook, statReveal, cardCascade, chipGrid,
    terminalReveal, screenDive, verdictProof, logoLockup, ctaEnd. Drop one per storyboard beat, fill brand
-   content, `make expand`. Good motion becomes the default instead of re-derived and under-reached.
+   content; it expands into real layers at load, no separate step. Good motion becomes the default
+   instead of re-derived and under-reached.
 
 2. **Kinetic typography, always.** Key lines reveal word-by-word or char-by-char (`split`+`preset`), never
    a flat fade. Numbers COUNT up. `make direction-floor` FAILS `plain-slideshow` if you skip this.
@@ -54,7 +55,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 ```
 make blueprints                 # browse directed beats → pick one per storyboard beat
 … author formats/scene/<x>.json (beats + brand content + a living bg + camera + seams) …
-make expand   D=<x>.json        # beats → real layers
+                                 # beats/blocks/comps expand into real layers at LOAD, no separate step
 make author-check D=<x>.json    # validate · critique · direct(effect-soup ceiling) · FLOOR(slideshow) · slop
 make video    D=<x>.json        # render (author-check runs first; NOCHECK=1 to skip during iteration)
 make reveal   D=<x>.json        # SEE the entrance motion (mid-frames hide it), is it kinetic, not fading?

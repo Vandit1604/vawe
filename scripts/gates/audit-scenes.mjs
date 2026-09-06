@@ -30,8 +30,7 @@ const aspect = aspectAt >= 0 ? argv[aspectAt + 1] : null;
 const filter = argv.find((a, i) => !a.startsWith('--') && !(aspectAt >= 0 && i === aspectAt + 1)) || '';
 
 const DIR = 'formats/scene';
-// The same exclusions the other library sweeps use: a sidecar is not a film, and an un-expanded source
-// is audited through its .expanded.json sibling rather than twice.
+// The same exclusion every library sweep uses: a sidecar is not a film.
 const skip = (f) => !f.endsWith('.json') || f === 'schema.json' || f.startsWith('_')
   || /\.(intent|animatic|template)\.json$/.test(f);
 
@@ -39,14 +38,12 @@ const pop = population('audit-scenes', { filter: (f) => !skip(f) });
 const scenes = pop.names
   .filter((f) => {
     if (filter && !f.includes(filter)) return false;
-    // an un-expanded source cannot be audited; its expanded sibling is in the list already
+    // `block`/`beat`/`comp` sugar expands at LOAD time (core/engine/expand.js), so a source carrying it is
+    // renderable directly; only a genuinely malformed file (no `layers` array) is excluded.
     const src = path.join(DIR, f);
     try {
       const d = JSON.parse(fs.readFileSync(src, 'utf8'));
       if (!Array.isArray(d.layers)) return false;
-      if (f.endsWith('.expanded.json')) return true;
-      const hasBlock = (L) => L && (L.type === 'block' || L.type === 'beat');
-      if (d.layers.some(hasBlock) && fs.existsSync(src.replace(/\.json$/, '.expanded.json'))) return false;
     } catch { return false; }
     return true;
   });

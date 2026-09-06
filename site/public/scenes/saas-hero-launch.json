@@ -9,28 +9,41 @@
   "silent": true,
   "_why": "Template ships mute so a fork can drop its own bed in without fighting a mix it did not choose. Replace with a real audio block before shipping."
  },
- "camera": [
+ "_camera": "The camera is written as MOVES, not keys: the generators in core/camera-moves/index.js own the arithmetic, so retiming a beat is one number. The dive is the only large one, and it lands on the release panel because that is the beat the film is about. A dive is bounded by the copy it must not push off the frame. At scale s centred on tx the left edge of the visible stage is tx - 960/s, and both films set their text column at x=150, so tx must stay at or under 150 + 960/s. The first pass dove to 1.2 on the panel centre and cropped the whole left column for five seconds with every gate green; `make judge` was the only thing that saw it.",
+ "_cuts": "One family, soft: this is a white editorial film and a punchy edit would fight it. `blur` and `riseBlur` are the two soft styles that work without beat wrapping (core/cuts.js refuses a masking cut on a whole-frame root, because there is nothing underneath to reveal). Each cut sits in the gap between two beats, and the backdrop windows below carry no times because they bind to these joints (core/timeline/junctions.js).",
+ "cuts": [
   {
-   "t": 0,
-   "s": 1
+   "t": 7.6,
+   "style": "blur",
+   "dur": 0.34
   },
   {
-   "t": 13.6,
-   "s": 1
+   "t": 12.95,
+   "style": "riseBlur",
+   "dur": 0.36
   },
   {
-   "t": 24.2,
-   "s": 1.06
+   "t": 24.4,
+   "style": "riseBlur",
+   "dur": 0.32
   },
   {
-   "t": 24.6,
-   "s": 1
+   "t": 31.2,
+   "style": "blur",
+   "dur": 0.34
   },
   {
-   "t": 45,
-   "s": 1
+   "t": 38.8,
+   "style": "blur",
+   "dur": 0.36
   }
  ],
+ "spectacle": {
+  "at": 26.5,
+  "of": "shippedTotal",
+  "device": "cinematicZoom",
+  "why": "The film has spent 24 seconds showing ONE release go out. The peak lands where the counter stops, not where the beat opens: a 0.9s sting written at the cut buried the number's whole entrance, so it is written where 4.8M settles instead. The device is monochrome on purpose. `chromaticSplit` was tried and painted a rainbow ring over the chart, which is off-palette on a film whose whole look is one blue. It is the only beat allowed to raise its voice."
+ },
  "layers": [
   {
    "type": "text",
@@ -210,7 +223,7 @@
    "x": 150,
    "y": 250,
    "start": 0.3,
-   "duration": 6.9,
+   "duration": 7.65,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.4,
@@ -255,7 +268,7 @@
    "stagger": 0.035,
    "each": 0.32,
    "start": 0.5,
-   "duration": 6.7,
+   "duration": 7.45,
    "exitDur": 0.4,
    "critical": true
   },
@@ -270,7 +283,7 @@
    "x": 152,
    "y": 736,
    "start": 1.3,
-   "duration": 5.9,
+   "duration": 6.65,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.4
@@ -288,7 +301,7 @@
    "x": 152,
    "y": 800,
    "start": 1.9,
-   "duration": 5.3,
+   "duration": 6.05,
    "anim": "rise",
    "enterDur": 0.35,
    "exitDur": 0.4,
@@ -305,12 +318,12 @@
    "x": 150,
    "y": 330,
    "split": "word",
-   "preset": "up",
+   "preset": "scale",
    "dist": 18,
    "stagger": 0.03,
    "each": 0.26,
    "start": 8,
-   "duration": 4.6,
+   "duration": 5.15,
    "exitDur": 0.4,
    "critical": true
   },
@@ -323,7 +336,7 @@
    "items": "stretch",
    "gap": 12,
    "start": 8.5,
-   "duration": 4.1,
+   "duration": 4.65,
    "anim": "rise",
    "enterDur": 0.5,
    "exitDur": 0.35,
@@ -483,12 +496,12 @@
    "x": 150,
    "y": 330,
    "split": "word",
-   "preset": "up",
+   "preset": "riseClip",
    "dist": 20,
    "stagger": 0.03,
    "each": 0.28,
    "start": 13.2,
-   "duration": 11,
+   "duration": 11.35,
    "exitDur": 0.4,
    "critical": true
   },
@@ -506,7 +519,7 @@
    "radius": 14,
    "elevation": 2,
    "start": 13.6,
-   "duration": 10.6,
+   "duration": 10.95,
    "anim": "rise",
    "enterDur": 0.5,
    "exitDur": 0.35,
@@ -523,21 +536,21 @@
        "radius": 100,
        "w": 12,
        "h": 12,
-       "bg": "#FF5F57"
+       "bg": "var(--down)"
       },
       {
        "type": "group",
        "radius": 100,
        "w": 12,
        "h": 12,
-       "bg": "#FEBC2E"
+       "bg": "var(--warn)"
       },
       {
        "type": "group",
        "radius": 100,
        "w": 12,
        "h": 12,
-       "bg": "#28C840"
+       "bg": "var(--up)"
       },
       {
        "type": "group",
@@ -763,7 +776,7 @@
    "x": 152,
    "y": 660,
    "start": 14.6,
-   "duration": 9.6,
+   "duration": 9.95,
    "anim": "fade",
    "enterDur": 0.45,
    "exitDur": 0.4
@@ -780,7 +793,7 @@
    "x": 152,
    "y": 300,
    "start": 24.6,
-   "duration": 6.4,
+   "duration": 6.75,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.4
@@ -788,6 +801,7 @@
   {
    "type": "count",
    "track": 20,
+   "id": "shippedTotal",
    "from": 0,
    "to": 4.8,
    "decimals": 1,
@@ -795,16 +809,48 @@
    "size": 176,
    "weight": 700,
    "color": "var(--text)",
+   "w": 720,
+   "h": 200,
    "x": 150,
    "y": 352,
-   "countStart": 0.2,
+   "countStart": 0.45,
    "countDur": 1.4,
    "start": 24.7,
-   "duration": 6.3,
-   "anim": "rise",
-   "enterDur": 0.4,
+   "duration": 6.65,
+   "anim": "fade",
+   "enterDur": 0.25,
    "exitDur": 0.4,
-   "critical": true
+   "critical": true,
+   "_ghost": "The number ARRIVES rather than fades up: a fast keyed slide, and `ghost` reads the same motion track a few frames back and draws the poses it just left. This is the layer the spectacle names, so it is the one the engine exempts from the attenuation.",
+   "motion": [
+    {
+     "t": 0.28,
+     "x": 220,
+     "y": 0
+    },
+    {
+     "t": 0.62,
+     "x": 0,
+     "y": 0,
+     "ease": "easeOutQuart"
+    },
+    {
+     "t": 6.3,
+     "x": 0,
+     "y": 0,
+     "ease": "linear"
+    }
+   ],
+   "modifiers": [
+    {
+     "ghost": {
+      "mode": "trail",
+      "k": 5,
+      "alpha": 0.42,
+      "fade": 0.62
+     }
+    }
+   ]
   },
   {
    "type": "text",
@@ -817,7 +863,7 @@
    "x": 152,
    "y": 590,
    "start": 25.1,
-   "duration": 5.9,
+   "duration": 6.25,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.4
@@ -829,7 +875,7 @@
    "w": 840,
    "html": "<div style=\"background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-sizing:border-box;width:840px;box-shadow:0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05)\"><div style=\"display:flex;align-items:flex-end;justify-content:space-between;gap:14px;height:476px\"><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">2.1</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(186px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2021</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">2.8</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(249px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2022</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">3.5</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(311px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2023</div></div><div style=\"display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%\"><div style=\"font:700 17px var(--font-num);color:var(--text);letter-spacing:-0.01em;font-variant-numeric:tabular-nums\">4.8</div><div style=\"position:relative;width:180.5px;height:426px;border-radius:6px;background:color-mix(in srgb, var(--accent) 8%, transparent)\"><div style=\"position:absolute;left:0;right:0;bottom:0;height:calc(426px * var(--p, 1));border-radius:6px;background:var(--accent)\"></div></div><div style=\"font:500 17px var(--font-sans);color:var(--text-2)\">2024</div></div></div></div>",
    "start": 25.2,
-   "duration": 5.8,
+   "duration": 6.15,
    "anim": "fade",
    "enterDur": 0.25,
    "exitDur": 0.3,
@@ -855,156 +901,46 @@
    "x": 150,
    "y": 250,
    "split": "word",
-   "preset": "up",
+   "preset": "blur",
    "dist": 16,
    "stagger": 0.028,
    "each": 0.24,
    "start": 31.4,
-   "duration": 7,
+   "duration": 7.4,
    "exitDur": 0.4,
    "critical": true
   },
   {
-   "type": "group",
+   "type": "html",
    "track": 20,
-   "layout": "grid",
-   "gridCols": 4,
-   "gap": 26,
+   "id": "capGrid",
+   "becomes": "endLine",
+   "becomesDur": 0.52,
+   "becomesEase": "easeOutQuart",
+   "_becomes": "The four cards do not fade out and a headline does not fade in: the grid HANDS OVER to the closing line, which opens in the grid's own pose and shrinks into its own. `becomes` resolves the pose from the measured boxes, so retiming or resizing either side cannot drift the match (formats/scene/scene.js resolveBecomes).",
+   "_parts": "Four cards used to be one `group` that faded in as a block and left as a block. As markup they keep the whole CSS surface, and `parts` hands the ENGINE the clock: one selector, an engine-driven seeked entrance per card on a stagger, and `out: true` so they leave one at a time in the direction they arrived (core/motion/parts.js).",
    "x": 150,
    "y": 440,
    "w": 1620,
+   "h": 280,
    "start": 31.9,
-   "duration": 6.5,
+   "duration": 6.9,
    "anim": "fade",
-   "enterDur": 0.4,
-   "exitDur": 0.4,
-   "children": [
+   "enterDur": 0.3,
+   "exitDur": 0.5,
+   "parts": [
     {
-     "type": "group",
-     "layout": "column",
-     "align2": "flex-start",
-     "gap": 14,
-     "pad": "34px",
-     "h": 280,
-     "bg": "var(--surface)",
-     "radius": 16,
-     "elevation": 1,
-     "children": [
-      {
-       "type": "text",
-       "text": "Deploy",
-       "size": 40,
-       "weight": 700,
-       "color": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "text": "Every environment, one pipeline.",
-       "size": 22,
-       "weight": 400,
-       "color": "var(--text-2)",
-       "w": 270
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "align2": "flex-start",
-     "gap": 14,
-     "pad": "34px",
-     "h": 280,
-     "bg": "var(--surface)",
-     "radius": 16,
-     "elevation": 1,
-     "children": [
-      {
-       "type": "text",
-       "text": "Observe",
-       "size": 40,
-       "weight": 700,
-       "color": "var(--text)"
-      },
-      {
-       "type": "text",
-       "text": "Traces and logs on the same clock.",
-       "size": 22,
-       "weight": 400,
-       "color": "var(--text-2)",
-       "w": 270
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "align2": "flex-start",
-     "gap": 14,
-     "pad": "34px",
-     "h": 280,
-     "bg": "var(--surface)",
-     "radius": 16,
-     "elevation": 1,
-     "children": [
-      {
-       "type": "text",
-       "text": "Review",
-       "size": 40,
-       "weight": 700,
-       "color": "var(--up)"
-      },
-      {
-       "type": "text",
-       "text": "Approvals that travel with the change.",
-       "size": 22,
-       "weight": 400,
-       "color": "var(--text-2)",
-       "w": 270
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "align2": "flex-start",
-     "gap": 14,
-     "pad": "34px",
-     "h": 280,
-     "bg": "var(--surface)",
-     "radius": 16,
-     "elevation": 1,
-     "children": [
-      {
-       "type": "text",
-       "text": "Guard",
-       "size": 40,
-       "weight": 700,
-       "color": "var(--down)"
-      },
-      {
-       "type": "text",
-       "text": "Rollback in a single keystroke.",
-       "size": 22,
-       "weight": 400,
-       "color": "var(--text-2)",
-       "w": 270
-      }
-     ]
+     "select": ".cap",
+     "anim": "riseIn",
+     "each": 0.5,
+     "stagger": 0.11,
+     "delay": 0.1,
+     "ease": "power3.out",
+     "out": true,
+     "exitDur": 0.42
     }
    ],
-   "motion": [
-    {
-     "t": 0,
-     "y": 40,
-     "opacity": 0
-    },
-    {
-     "t": 0.6,
-     "y": 0,
-     "opacity": 1,
-     "ease": "easeOutExpo"
-    }
-   ]
+   "html": "<div class=\"caps\"><div class=\"cap\"><div class=\"capname\" style=\"color:var(--accent)\">Deploy</div><div class=\"capsub\">Every environment, one pipeline.</div></div><div class=\"cap\"><div class=\"capname\" style=\"color:var(--text)\">Observe</div><div class=\"capsub\">Traces and logs on the same clock.</div></div><div class=\"cap\"><div class=\"capname\" style=\"color:var(--up)\">Review</div><div class=\"capsub\">Approvals that travel with the change.</div></div><div class=\"cap\"><div class=\"capname\" style=\"color:var(--down)\">Guard</div><div class=\"capsub\">Rollback in a single keystroke.</div></div></div><style>.caps{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;width:1620px}.cap{height:280px;padding:34px;box-sizing:border-box;background:var(--surface);border-radius:16px;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:14px;align-items:flex-start}.capname{font-size:40px;font-weight:700;line-height:1.05}.capsub{font-size:22px;font-weight:400;color:var(--text-2);max-width:280px;line-height:1.35}</style>"
   },
   {
    "type": "svg",
@@ -1047,6 +983,7 @@
   {
    "type": "text",
    "track": 20,
+   "id": "endLine",
    "text": "Start with <b>Meridian.</b>",
    "size": 100,
    "weight": 600,
@@ -1060,8 +997,8 @@
    "dist": 20,
    "stagger": 0.03,
    "each": 0.3,
-   "start": 39.4,
-   "duration": 5.6,
+   "start": 38.9,
+   "duration": 6.1,
    "exitDur": 0,
    "critical": true
   },
@@ -1103,10 +1040,145 @@
    "exitDur": 0
   }
  ],
+ "_bg": "Six windows, one per beat, and not one of them names a time: the engine binds window i to the joint after it, so the cuts own the numbers and retiming a beat moves the backdrop with it. Every preset is a QUIET light field on purpose. The loud light ones (blobs, gradientWash) were tried and read as big saturated pools over a white film that already carries four blurred accent discs of its own; the backdrop turning per beat has to be felt, not looked at.",
  "bg": [
   {
-   "t": 0,
    "preset": "dotmatrix"
+  },
+  {
+   "preset": "paperDots"
+  },
+  {
+   "preset": "paperShapes"
+  },
+  {
+   "preset": "soft"
+  },
+  {
+   "preset": "paper"
+  },
+  {
+   "preset": "dotmatrix"
+  }
+ ],
+ "camera": [
+  {
+   "t": 0,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 7.4,
+   "s": 1.04,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 7.9,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 12.7,
+   "s": 1.03,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 13.9,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 16.5,
+   "s": 1.1,
+   "x": -20,
+   "y": 40,
+   "ease": "easeOutQuart"
+  },
+  {
+   "t": 21.8,
+   "s": 1.1,
+   "x": -20,
+   "y": 40
+  },
+  {
+   "t": 24.2,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 24.5,
+   "s": 0.95,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 24.86,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeInExpo"
+  },
+  {
+   "t": 24.939999999999998,
+   "s": 0.96,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutQuad"
+  },
+  {
+   "t": 25.439999999999998,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutElastic"
+  },
+  {
+   "t": 25.6,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 30.900000000000002,
+   "s": 1.04,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 31.5,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 38.4,
+   "s": 1.05,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 39.2,
+   "s": 1.03,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 45,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
   }
  ]
 }

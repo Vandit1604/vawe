@@ -11,14 +11,14 @@
 //   node scripts/gates/seam-snap.mjs formats/scene/<file>.json     ·     make seam-check D=<file>
 //
 // It reads the real rendered pixels (not renderFrame) because a seam is composited during the render
-// (core/seams.js), so it only exists in the mp4, which is the whole reason a DOM-signature gate can't
+// (core/timeline/seams.js), so it only exists in the mp4, which is the whole reason a DOM-signature gate can't
 // see it. Requires out/<name>.mp4 (render first). Writes /tmp/seams/<name>.png so the eye gets the seams too.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { flattenLayers } from '../lib/layers.mjs';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 
 import { gradeable } from './tile.mjs';
 import { gateFindings } from '../lib/findings.mjs';
@@ -29,8 +29,8 @@ if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/ga
 // LOWERED, because `transitions: [{at, fx}]` is the documented way to declare a boundary and it lowers
 // to cuts/seams/stings only at render time. Reading the raw file found NO boundaries on the three films
 // that declare them that way, so this gate ran and reported nothing on the exemplar it exists to protect
-// (docs/MISTAKES.md #394 · #407 · #408). Cloned: lowerScene mutates and deletes what it is handed.
-const data = lowerScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));
+// (docs/MISTAKES.md #394 · #407 · #408). Cloned: loadScene mutates and deletes what it is handed.
+const data = loadScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
 // EXISTS IS NOT FRESH. A seam sheet cut from the previous render reports clean seams for a film whose

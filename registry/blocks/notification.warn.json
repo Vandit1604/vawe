@@ -14,7 +14,7 @@
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
-    "requires": "vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
     "layer": {
       "type": "block",
       "block": "notification.warn",

@@ -2,7 +2,7 @@
 //
 //   node scripts/gates/layer-props.mjs [scene.json ...]   ·   make layer-props
 //
-// `make expand` warns when a BLOCK is handed a prop its factory does not accept (MISTAKES #60).
+// core/engine/expand.js warns when a BLOCK/BEAT is handed a prop its factory does not accept (MISTAKES #60).
 // Nothing did the equivalent for a raw layer, so `{"type":"glow","r":620,"opacity":0.5}` was accepted
 // and silently dropped, `core/layers/glow.js` sizes from w/h and takes color+intensity, and neither
 // `r` nor that `opacity` is a prop it reads. That is the single most expensive bug class in this repo.
@@ -14,7 +14,7 @@
 // every registry directory and 2 in a file it did scan but under a variable named `A`. Three earlier
 // widenings of the same scan were each overtaken by the next move (#229 · #232 · #242). Every module
 // that reads a layer prop now says so beside the read; this is a set difference against those statements.
-// The declaration contract is core/props.js.
+// The declaration contract is core/registry/props.js.
 //
 // AND THE GUARD IS HALF THE ANSWER. Six props fire only behind another, `preset` needs a split, `dist`
 // needs a `cut` or a split, `motionBlur` needs a `motion` track. A layer that sets one without its
@@ -79,7 +79,7 @@ for (const rel of targets) {
   const walk = (layers, where) => {
     for (const [i, L] of (layers || []).entries()) {
       if (!L || typeof L !== 'object') continue;
-      if (L.type === 'block' || L.type === 'comp') continue;   // `make expand` owns those
+      if (L.type === 'block' || L.type === 'beat' || L.type === 'comp') continue;   // core/engine/expand.js owns those props
       const t = L.type || 'text';
       if (!LAYER_PROPS[t]) continue;
       checked++;

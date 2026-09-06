@@ -4,7 +4,7 @@
 //   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav WRITE=1    # → x.beatsync.json
 //   [GRID=beat|downbeat]  [SNAP=0.12]  [LAYERS=1]
 //
-// THE SNAP ITSELF IS NOT HERE ANY MORE. `core/beat-bind.js` owns which joints move and how far; this
+// THE SNAP ITSELF IS NOT HERE ANY MORE. `core/beats/index.js` owns which joints move and how far; this
 // reads the grid, calls `snapJoints`, and reports. It used to answer the same question separately:
 // its own nearest-beat search (so it never appeared as an importer of `snapToBeat` and nothing linked
 // the two), its own tolerance (half a beat capped at 0.18s, against beat-bind's 0.12s), and its own
@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { snapToBeat } from '../../core/beats/detect.js';
 import { unrollGrid, snapJoints, DEFAULT_MAX_SHIFT } from '../../core/beats/index.js';
 
@@ -49,10 +49,10 @@ const bm = JSON.parse(fs.readFileSync(beatsFile, 'utf8'));
 const pulse = (GRID === 'downbeat' ? bm.downbeats : bm.beats) || [];
 if (!pulse.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad has no beat). Nothing to snap to`); process.exit(1); }
 
-// LOWER FIRST, for the same reason core/boot.js binds after the lowering pass: a junction written as
+// LOWER FIRST, for the same reason core/engine/boot.js binds after the lowering pass: a junction written as
 // `transitions` is not a cut or a seam until then, so snapping its `at` would snap a seam by its start
 // where the engine snaps it by its centre. This is why the CLI no longer knows the word `transitions`.
-const data = lowerScene(JSON.parse(fs.readFileSync(D, 'utf8')));
+const data = loadScene(JSON.parse(fs.readFileSync(D, 'utf8')));
 let sceneDur = data.duration || 0;
 if (!sceneDur) for (const L of data.layers || []) sceneDur = Math.max(sceneDur, (L.start ?? 0) + (L.duration ?? 2));
 const grid = unrollGrid(pulse, bm.seconds || 0, sceneDur);

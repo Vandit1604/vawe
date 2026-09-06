@@ -1,7 +1,7 @@
 // scripts/media/export-edl.mjs: A RENDERED SCENE IS CURRENTLY A DEAD END. An editor can only get at
 // the cuts, the on-screen text, and the audio events by re-reading the JSON, and most editors do not
-// read JSON. This reads the same LOWERED timeline the engine itself renders from (lowerScene +
-// core/junctions.js, no second copy of the cut math) and writes two sidecars beside the scene: a
+// read JSON. This reads the same LOWERED timeline the engine itself renders from (loadScene +
+// core/timeline/junctions.js, no second copy of the cut math) and writes two sidecars beside the scene: a
 // self-describing `.shots.json` for a human or another script, and a minimal CMX3600 `.edl` an NLE
 // (Premiere, Resolve, FCP7) can import as a straight assembly.
 //
@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { marksOf, junctionTable, shotWindows } from '../../core/timeline/junctions.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -27,9 +27,9 @@ if (!dataArg || dataArg.startsWith('--') || !fs.existsSync(dataArg)) {
 const OUT_DIR = outIdx >= 0 && argv[outIdx + 1] ? argv[outIdx + 1] : path.dirname(path.resolve(dataArg));
 
 const raw = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
-// clone before lowering: lowerScene mutates and deletes what it is handed, and this must never touch
+// clone before lowering: loadScene mutates and deletes what it is handed, and this must never touch
 // the caller's file on disk.
-const data = lowerScene(structuredClone(raw));
+const data = loadScene(structuredClone(raw));
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const duration = Number(data.duration) || 0;
 
@@ -65,7 +65,7 @@ const shotList = shots.map((s, i) => {
 });
 
 const cuts = boundaryMarks.map((m) => ({ t: +m.t.toFixed(2), kind: m.kind, style: styleOf(m) }));
-// stings punctuate but are not shot boundaries (core/junctions.js), still worth listing as events.
+// stings punctuate but are not shot boundaries (core/timeline/junctions.js), still worth listing as events.
 for (const s of data.stings || []) if (Number.isFinite(+s.t)) cuts.push({ t: +(+s.t).toFixed(2), kind: 'sting', style: s.fx ?? null });
 cuts.sort((a, b) => a.t - b.t);
 

@@ -18,7 +18,7 @@
 //
 // Exemptions are declarative: elements (or ancestors) with data-motion="loop" (carets, spinners,
 // pulsing chrome) are skipped by (ii)/(iii). SHOT WINDOWS come from the film's own cuts and seams via
-// core/junctions.js `shotWindows`. A film that cuts nowhere is one shot, which is a true answer and not
+// core/timeline/junctions.js `shotWindows`. A film that cuts nowhere is one shot, which is a true answer and not
 // a fallback. They used to come from `meta.segments`, a field no scene has ever set, which disabled the
 // whole FAIL tier for the life of the gate (docs/MISTAKES.md #472).
 //
@@ -33,7 +33,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/layout/safe.js';
 import { junctionTable, marksOf, shotWindows } from '../../core/timeline/junctions.js';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 // This gate already owns a rich --json payload (a whole report object, not a flat finding list), the
 // exact docs/MISTAKES.md #401 case findings.mjs was built to name. `emitJson` is the one door that lets
@@ -84,7 +84,7 @@ const captureSeries = (page, total, stride) => page.evaluate(async (total, strid
   const keys = els.map((el, i) => el.id || ((typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName) + '#' + i));
   const chains = els.map((el) => { const c = [el]; let p = el.parentElement; while (p && p !== document.body) { c.push(p); p = p.parentElement; } return c; });
   const loop = els.map((el) => !!el.closest('[data-motion]')); // any data-motion (loop/swap/…) opts out of motion checks
-  // Markup that is not meant to paint: the SVG filter-definition host (core/filters.js stamps it
+  // Markup that is not meant to paint: the SVG filter-definition host (core/looks/filters.js stamps it
   // aria-hidden, 0x0), anything inside <defs>, and script/style/template. It is boxless by design, so
   // asking whether it ever had a box is asking the wrong question of it.
   const nonVisual = els.map((el) => el.getAttribute('aria-hidden') === 'true'
@@ -155,15 +155,15 @@ const captureSeries = (page, total, stride) => page.evaluate(async (total, strid
 }, total, stride);
 
 // ---- windows: the film's OWN JOINTS ----
-// This used to read `meta.segments`, and NO SCENE HAS EVER SET IT: core/boot.js read
+// This used to read `meta.segments`, and NO SCENE HAS EVER SET IT: core/engine/boot.js read
 // `scene.segments || []`, formats/scene never returns the key, and there is exactly one format. So
 // every segment-scoped FAIL was rewritten to WARN before a reader saw it and the run printed a tick.
 // `segments` was never a missing declaration: it was a SECOND way to say what `cuts` already says,
-// and the film's cuts and seams are the joints, so core/junctions.js owns the reading of them
+// and the film's cuts and seams are the joints, so core/timeline/junctions.js owns the reading of them
 // (docs/MISTAKES.md #165, #372: one fact, one owner). A film with no cuts is genuinely one shot.
 // Lowered first: a scene written with the unified `transitions` surface has no `cuts` key yet.
 function shotWindowsOf(data, total) {
-  const lowered = lowerScene(structuredClone(data));
+  const lowered = loadScene(structuredClone(data));
   const table = junctionTable(marksOf(lowered));
   // The transition duration belongs to the joint that ENDS a shot: `visEnd` is where the exit begins,
   // so a 0.8s cut and a 0.2s cut do not end their shot at the same frame.
@@ -172,7 +172,7 @@ function shotWindowsOf(data, total) {
     if (Number.isFinite(+m?.t)) jointDur.set(+(+m.t).toFixed(3), +m.dur > 0 ? +m.dur : 0.4);
   const shots = shotWindows(table, total / FPS);
   const windowSource = shots.length > 1
-    ? `${shots.length} shots from the film's own cuts/seams (core/junctions.js)`
+    ? `${shots.length} shots from the film's own cuts/seams (core/timeline/junctions.js)`
     : 'one shot, this film declares no cuts or seams';
   const windows = shots.map((s, i) => {
     const isLast = i === shots.length - 1;

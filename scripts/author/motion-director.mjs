@@ -28,7 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LOOK_NAMES } from '../../core/looks/index.js';
 import { PROFILES } from './profiles.mjs';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { DENSE_KEY_SEC } from '../../core/timeline/sequence.js';
 import { cutVelocityAdvice } from '../../core/timeline/velocity-cut.js';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
@@ -234,8 +234,8 @@ function tellPacing(d, duration) {
 // (docs/CRAFT/AE-TECHNIQUES.md #1).
 //
 // A SUGGESTION AND NOT A MOVE. The scene wrote 4.2 and the film cuts at 4.2; this says where the peak
-// was and leaves the number to the author. The measurement is core/velocity-cut.js, which sums
-// core/sequence.js `velocityAt` over the layers on screen rather than reading velocity a second time.
+// was and leaves the number to the author. The measurement is core/timeline/velocity-cut.js, which sums
+// core/timeline/sequence.js `velocityAt` over the layers on screen rather than reading velocity a second time.
 function tellCutVelocity(d, allLayers, duration) {
   const cuts = (d.cuts || []).filter((c) => c && typeof c.t === 'number');
   if (!cuts.length) return nothing;
@@ -295,7 +295,7 @@ function tellLinearMotion(layers) {
   // to ease a hold would put a drift into a frame that is supposed to be locked.
   const KEYED = ['x', 'y', 'scale', 'rot', 'opacity', 'blur', 'w', 'h'];
   const moved = (a, b) => !!a && !!b && KEYED.some((p) => (b[p] ?? null) !== (a[p] ?? null));
-  // The engine's own per-key defaults (core/sequence.js motionAt), so the ground a run covers is the
+  // The engine's own per-key defaults (core/timeline/sequence.js motionAt), so the ground a run covers is the
   // ground it covers on screen and not an artefact of which props a key happens to spell out.
   const span = (a, b) => ({
     px: Math.hypot((b.x ?? 0) - (a.x ?? 0), (b.y ?? 0) - (a.y ?? 0)),
@@ -364,7 +364,7 @@ function tellLinearMotion(layers) {
 // whatever the author typed. This measures every keyed move so the report can place the fastest one.
 //
 // Only sparse segments count. The engine itself draws the line: below DENSE_KEY_SEC a segment "is not
-// a span with a shape, it is one step of a traced path" (core/sequence.js), and it interpolates those
+// a span with a shape, it is one step of a traced path" (core/timeline/sequence.js), and it interpolates those
 // linearly for that reason. A hand-keyed cursor lands keys every two or three frames, and reading each
 // hop as a move would report a click as a 2500 px/s whip. Borrowing the engine's own constant keeps
 // one owner for that judgement instead of a second number here that could drift from it.
@@ -429,7 +429,7 @@ function tellSharedStart(layers) {
 // high, 8 items at 0.10s take 0.8s to leave the gate and stop reading as ONE arrival. The dial table in
 // MOTION-CRAFT gives the per-item band and no total, which is exactly the hole this closes. The measure
 // is the STAGGER SEQUENCE, first unit start to last unit start: (n-1) x stagger.
-// A RATE is not a stagger. `type` is a typewriter and `wave` is a looping phase (core/type.js), so for
+// A RATE is not a stagger. `type` is a typewriter and `wave` is a looping phase (core/type/type.js), so for
 // both the step IS the effect's speed and its total is the shot length by design.
 const RATE_PRESET = new Set(['type', 'wave']);
 function tellStaggerTotal(allLayers) {
@@ -594,7 +594,7 @@ function library() {
   const trips = new Map(), values = new Map();
   let films = 0;
   for (const f of pop.names) {
-    let d; try { d = lowerScene(JSON.parse(fs.readFileSync(path.join(ROOT, SCENE_DIR, f), 'utf8'))); } catch { continue; }
+    let d; try { d = loadScene(JSON.parse(fs.readFileSync(path.join(ROOT, SCENE_DIR, f), 'utf8'))); } catch { continue; }
     if (d.module !== 'scene') continue;
     films++;
     let a; try { a = analyse(d); } catch { continue; }
@@ -656,9 +656,9 @@ if (!file) {
 
 // ---- one film --------------------------------------------------------------------------------------
 // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
-// renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
+// renders (core/transitions/lower.js). Without this, a film that declares its boundaries the
 // documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
-const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
+const d = loadScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const { layers, beats, duration, findings, metrics, fastest, personality, settle, bounce, FAMILY, profile } = analyse(d);
 
 const picks = [];

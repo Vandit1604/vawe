@@ -51,7 +51,7 @@ if (noReq.length) { console.error(`! blueprints/index.mjs declares no REQUESTS e
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
   console.log(`\n  BEAT BLUEPRINTS · ${Object.keys(BEATS).length} directed beats  (compose a video as a sequence of these)\n`);
-  console.log(`  Place one as:  { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props }   → make expand\n`);
+  console.log(`  Place one as:  { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props }   (expands at load)\n`);
   for (const [name, fn] of Object.entries(BEATS)) {
     console.log(`  • ${name}`);
     console.log(`      ${DESC[name]}`);
