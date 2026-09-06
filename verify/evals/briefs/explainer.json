@@ -1,0 +1,89 @@
+{
+  "module": "scene",
+  "authoringNote": "EVAL FIXTURE (W6, docs/CRAFT/EVALS.md). Kinetic type hook, a count-up stat grid, a payoff line. Numbers are real facts about this engine (24 layer types, 5 canvases, 1 module), so the fixture stays honest without borrowing a brand's claims.",
+  "theme": "default",
+  "aspect": "9:16",
+  "duration": 9,
+  "audio": { "silent": true, "_why": "fixture; no scene calls for sound" },
+  "bg": [
+    { "from": 0, "to": 5.9, "preset": "soft" },
+    { "from": 5.9, "to": 9, "preset": "plain" }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "One engine. <b>Every</b> shape.",
+      "x": 90,
+      "y": 420,
+      "w": 900,
+      "size": 78,
+      "weight": 800,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "stretch",
+      "stagger": 0.07,
+      "each": 0.48,
+      "start": 0.2,
+      "duration": 2.0
+    },
+    {
+      "type": "group",
+      "x": 90,
+      "y": 780,
+      "w": 900,
+      "layout": "row",
+      "items": "flex-start",
+      "gap": 60,
+      "start": 2.3,
+      "duration": 3.4,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "children": [
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 8,
+          "children": [
+            { "type": "count", "from": 0, "to": 24, "size": 88, "weight": 800, "color": "var(--accent)", "countStart": 0.3, "countDur": 1.1 },
+            { "type": "text", "text": "layer types", "size": 26, "font": "mono", "color": "var(--dim)" }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 8,
+          "children": [
+            { "type": "count", "from": 0, "to": 5, "size": 88, "weight": 800, "color": "var(--accent)", "countStart": 0.5, "countDur": 1.1 },
+            { "type": "text", "text": "canvases", "size": 26, "font": "mono", "color": "var(--dim)" }
+          ]
+        },
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "flex-start",
+          "gap": 8,
+          "children": [
+            { "type": "count", "from": 0, "to": 1, "size": 88, "weight": 800, "color": "var(--accent)", "countStart": 0.7, "countDur": 0.6 },
+            { "type": "text", "text": "module", "size": 26, "font": "mono", "color": "var(--dim)" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Same JSON. Any shape you need.",
+      "x": 90,
+      "y": 1400,
+      "w": 900,
+      "size": 54,
+      "weight": 700,
+      "color": "var(--text)",
+      "anim": "rise",
+      "enterDur": 0.4,
+      "start": 6.1,
+      "duration": 2.7
+    }
+  ]
+}

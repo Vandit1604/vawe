@@ -45,6 +45,12 @@ verify/snap/*
 verify/beats-seen/
 verify/approved/
 
+# make evals: every timestamped run + compare dir is scratch, mp4s included. verify/evals/baseline/ is
+# the one committed run, and only its sheets + manifest.json, never its mp4s (they are gigabytes across
+# a library; see docs/CRAFT/EVALS.md and scripts/dev/evals.mjs saveBaseline()).
+verify/evals/runs/
+verify/evals/baseline/*.mp4
+
 # kie.ai secret + generated assets
 .kie.key
 assets/gen

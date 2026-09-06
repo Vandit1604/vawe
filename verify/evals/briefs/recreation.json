@@ -1,0 +1,85 @@
+{
+  "module": "scene",
+  "authoringNote": "EVAL FIXTURE (W6, docs/CRAFT/EVALS.md). sceneUnits with a continuous object: the wordmark carries acrossBeats and a kick modifier so it survives both cuts and visibly reacts to each, instead of resetting per beat.",
+  "theme": "vawe",
+  "aspect": "16:9",
+  "duration": 9,
+  "sceneUnits": true,
+  "cuts": [
+    { "t": 3, "style": "whip", "dir": "left", "dur": 0.4 },
+    { "t": 6, "style": "riseBlur", "dur": 0.4 }
+  ],
+  "audio": { "silent": true, "_why": "fixture; the cuts carry the beat, not a track" },
+  "bg": [
+    { "t": 0, "preset": "soft" },
+    { "t": 3, "preset": "paperDots" },
+    { "t": 6, "preset": "plain" }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "id": "wordmark",
+      "text": "vawe",
+      "x": 90,
+      "y": 76,
+      "w": 300,
+      "size": 30,
+      "weight": 700,
+      "font": "mono",
+      "color": "var(--accent)",
+      "start": 0,
+      "duration": 9,
+      "track": 1,
+      "acrossBeats": true,
+      "modifiers": [{ "kick": true }]
+    },
+    {
+      "type": "text",
+      "text": "One shot.",
+      "x": 140,
+      "y": 460,
+      "w": 1400,
+      "size": 110,
+      "weight": 800,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.45,
+      "start": 0.3,
+      "duration": 2.4
+    },
+    {
+      "type": "text",
+      "text": "Cut to the next beat.",
+      "x": 140,
+      "y": 460,
+      "w": 1400,
+      "size": 110,
+      "weight": 800,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.45,
+      "start": 3.3,
+      "duration": 2.4
+    },
+    {
+      "type": "text",
+      "text": "The mark never resets.",
+      "x": 140,
+      "y": 460,
+      "w": 1400,
+      "size": 110,
+      "weight": 800,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "stagger": 0.07,
+      "each": 0.45,
+      "start": 6.3,
+      "duration": 2.4
+    }
+  ]
+}
