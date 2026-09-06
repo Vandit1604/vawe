@@ -2690,7 +2690,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       const d = bound();
       ok('match: the outgoing form ends ON the joint', L(d, 'dot').duration === 2.5);
       ok('match: the incoming form opens ON the joint', L(d, 'card').start === 3);
-      ok('match: the handover is handed to `becomes`', L(d, 'dot').becomes === 'card' && L(d, 'dot').becomesDur === 0.42);
+      ok('match: the handover is handed to `becomes`', L(d, 'dot').becomes === 'card' && L(d, 'dot').becomesDur === 0.9);
       ok('match: neither form ramps across the joint',
         L(d, 'dot').out === 'none' && L(d, 'dot').exitDur === 0 && L(d, 'card').anim === 'none' && L(d, 'card').enterDur === 0);
       const again = JSON.stringify(d);

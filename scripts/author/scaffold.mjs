@@ -126,6 +126,16 @@ const layers = spans.map((s, i) => ({
   ...propsFor(s.name, s, i === payoffIdx),
 }));
 
+// Nothing arrives on frame one. A layer whose entrance starts at t=0 is already fully on screen at the
+// first rendered frame, so there is no arrival to see, it reads as a jump-cut rather than an entrance.
+// Push the hook beat's start by 0.2s and shrink it by the same amount so it still ends exactly where the
+// next beat begins (the tiling above has no gaps or overlaps, and this must not reopen one).
+const FIRST_ARRIVAL_OFFSET = 0.2;
+if (layers[0] && layers[0].dur > FIRST_ARRIVAL_OFFSET) {
+  layers[0].start = +(layers[0].start + FIRST_ARRIVAL_OFFSET).toFixed(2);
+  layers[0].dur = +(layers[0].dur - FIRST_ARRIVAL_OFFSET).toFixed(2);
+}
+
 // THE CONTINUOUS OBJECT, emitted by default. One accent element that spans EVERY cut, so the film reads
 // as one piece and not a stack of independent beats. This is the single thing that most separates a
 // directed film from a slideshow, and it is the one the old scaffold waived instead of writing. Replace

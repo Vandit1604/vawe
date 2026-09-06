@@ -119,6 +119,24 @@ const hookLayers = BEATS.kineticHook({ eyebrow: 'e', to: 94, unit: '%', sub: 'a 
 ok(Array.isArray(hookLayers) && hookLayers.some((l) => l.split && l.preset), 'blueprints: kineticHook emits a kinetic (split+preset) reveal', 'blueprint-kinetic-reveal');
 ok(hookLayers.some((l) => l.type === 'count'), 'blueprints: kineticHook emits a count-up hero number', 'blueprint-count-hero');
 
+// --- staggerTotalWarns: an authored split stagger over the 0.5s total-arrival budget must say so ---
+const wideChar = lintData({ module: 'scene', duration: 5, layers: [
+  { type: 'text', text: 'A twenty character line', split: 'char', stagger: 0.05, start: 0, duration: 5 },
+] });
+ok(wideChar.some((w) => /over the 0\.5s cap/.test(w)), 'rule: an authored char stagger over budget warns and names the number', 'stagger-total-rule');
+const tightWord = lintData({ module: 'scene', duration: 5, layers: [
+  { type: 'text', text: 'Short headline here', split: 'word', stagger: 0.05, start: 0, duration: 5 },
+] });
+ok(!tightWord.some((w) => /over the 0\.5s cap/.test(w)), 'rule: a stagger that stays under budget is silent', 'stagger-total-silent');
+const wideAmount = lintData({ module: 'scene', duration: 5, layers: [
+  { type: 'text', text: 'A twenty character line', split: 'char', stagger: { amount: 0.9 }, start: 0, duration: 5 },
+] });
+ok(wideAmount.some((w) => /over the 0\.5s cap/.test(w)), 'rule: an authored stagger.amount over budget warns too', 'stagger-total-amount-rule');
+const unauthored = lintData({ module: 'scene', duration: 5, layers: [
+  { type: 'text', text: 'A twenty character line here easily', split: 'char', start: 0, duration: 5 },
+] });
+ok(!unauthored.some((w) => /over the 0\.5s cap/.test(w)), 'rule: no stagger authored at all is silent (the engine default already scales)', 'stagger-total-unauthored-silent');
+
 f.emit();
 console.log(fail ? `\nlint-test: ${fail} failed` : '\nlint-test: all pass');
 process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

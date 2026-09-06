@@ -152,11 +152,12 @@ function resolveBecomes(data, sizeOf) {
     // match the LARGER axis ratio so the incoming form covers the outgoing one rather than sitting inside it
     const s0 = Math.max((a.w * aS) / b.w, (a.h * aS) / b.h);
     const rot = num(lastA.rot, 0);
-    const dur = Math.max(0.05, num(A.becomesDur, 0.42));
+    // 0.9s / easeInOutCubic reads as a visible morph; the old 0.42s / easeOutCubic read as a cut.
+    const dur = Math.max(0.05, num(A.becomesDur, 0.9));
     const own = Array.isArray(B.motion) ? B.motion : [];
     const r3 = (v) => +(+v).toFixed(3);
     const open = { t: 0, x: r3(acx - bcx), y: r3(acy - bcy), scale: r3(s0) };
-    const settle = { t: r3(dur), x: 0, y: 0, scale: 1, ease: A.becomesEase || 'easeOutCubic' };
+    const settle = { t: r3(dur), x: 0, y: 0, scale: 1, ease: A.becomesEase || 'easeInOutCubic' };
     if (rot) { open.rot = r3(rot); settle.rot = 0; }
     // the incoming layer's own keys resume once the handover is done; anything it declared inside the
     // handover window is dropped, because during it the layer is not itself yet.
