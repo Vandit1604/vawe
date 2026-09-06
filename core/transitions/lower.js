@@ -28,6 +28,11 @@ for (const t of TRANSITIONS) {
   if (!MECHS_OF.has(t.name)) MECHS_OF.set(t.name, new Set());
   MECHS_OF.get(t.name).add(t.mechanism);
 }
+// `none` is deliberately absent from the catalog's cut row (core/transitions/catalog.js: it is the
+// absence of an effect, not one to browse in `make transitions`), but it IS a real PRESENTATIONS entry
+// and a boundary transition must be able to say "hard cut, no visual transition", the same thing a raw
+// `cuts[].style:"none"` always meant.
+MECHS_OF.get('none')?.add('cut');
 
 // A BOUNDARY transition is scene-level: cut · seam · sting (anim is layer-level, never a boundary).
 // Precedence when a name exists in several mechanisms: CUT first, so the ambiguous basics
@@ -42,7 +47,11 @@ const BOUNDARY_ORDER = ['cut', 'seam', 'sting'];
 // sugar and names no timing, it gets the slow-fast-slow speed ramp for free. A pure blend (fade/dissolve)
 // stays on the gentle default. An explicit `timing` always wins, and raw hand-authored `seams`/`cuts`
 // are untouched (this only fills the sugar's default, so no legacy film re-times silently).
-const RAMP_BY_DEFAULT = new Set(['whipPan', 'whip', 'cinematicZoom', 'zoom', 'squeeze', 'slide', 'push', 'uncover']);
+// Exported so scripts/author/migrate-junctions.mjs can PIN the render-time default (`smooth`, see
+// core/cuts/index.js and formats/scene/scene.js) explicitly on a raw cut/seam it is converting, rather
+// than let it fall through to this ramp: a legacy scene earns identical rendered output, never a
+// silent re-time, from moving into `transitions[]`.
+export const RAMP_BY_DEFAULT = new Set(['whipPan', 'whip', 'cinematicZoom', 'zoom', 'squeeze', 'slide', 'push', 'uncover']);
 const defaultTiming = (fx) => (RAMP_BY_DEFAULT.has(fx) ? 'ramp' : undefined);
 
 export function boundaryMechanism(fx, mech) {
@@ -116,14 +125,19 @@ export function lowerScene(data) {
     const cuts = data.cuts ? [...data.cuts] : [];
     const stings = data.stings ? [...data.stings] : [];
     const seams = data.seams ? [...data.seams] : [];
+    // AUTHOR NOTES (`_why`, `note`, any `_`-prefixed key, the convention core/engine/expand.js
+    // `isNote` names) ride along untouched: they carry no engine meaning, so dropping them at THIS
+    // pass is not an authoring correction, it is data loss, indistinguishable from `migrate-junctions.mjs`
+    // silently erasing an author's comment on the one boundary that survived to disk.
+    const notesOf = (T) => { const n = {}; for (const k of Object.keys(T)) if (k === 'note' || k.startsWith('_')) n[k] = T[k]; return n; };
     for (const T of boundary) {
       if (!T || typeof T !== 'object') continue;
       const at = T.at ?? T.t;
       const m = boundaryMechanism(T.fx, T.mech);
       const timing = T.timing ?? bandTiming ?? defaultTiming(T.fx);   // energy, else the motion-fx speed ramp
-      if (m === 'seam') seams.push(clean({ t: at, fx: T.fx, dur: T.dur, dir: T.dir, seed: T.seed, intensity: T.intensity, feather: T.feather, timing }));
-      else if (m === 'cut') cuts.push(clean({ t: at, style: T.fx, dur: T.dur, dir: T.dir, timing, cx: T.cx, cy: T.cy, dist: T.dist }));
-      else stings.push(clean({ t: at, fx: T.fx, dur: T.dur, seed: T.seed, intensity: T.intensity, color: T.color }));
+      if (m === 'seam') seams.push(clean({ t: at, snap: T.snap, fx: T.fx, dur: T.dur, dir: T.dir, seed: T.seed, intensity: T.intensity, feather: T.feather, timing, ...notesOf(T) }));
+      else if (m === 'cut') cuts.push(clean({ t: at, snap: T.snap, style: T.fx, dur: T.dur, dir: T.dir, timing, cx: T.cx, cy: T.cy, dist: T.dist, ...notesOf(T) }));
+      else stings.push(clean({ t: at, fx: T.fx, dur: T.dur, seed: T.seed, intensity: T.intensity, color: T.color, colors: T.colors, ...notesOf(T) }));
     }
     if (cuts.length) data.cuts = cuts;
     if (stings.length) data.stings = stings;
