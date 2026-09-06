@@ -1,0 +1,47 @@
+{
+  "module": "scene",
+  "authoringNote": "EVAL FIXTURE (W6, docs/CRAFT/EVALS.md). 4s logo sting: the canonical wave (assets/icons/vawe-wave.svg, inlined) draws itself, then the wordmark types in.",
+  "theme": "vawe",
+  "aspect": "16:9",
+  "duration": 4,
+  "audio": { "silent": true, "_why": "fixture; a sting normally carries a hit, but this one only proves the draw+type mechanism" },
+  "bg": [
+    { "from": 0, "to": 4, "preset": "plain" }
+  ],
+  "layers": [
+    {
+      "type": "svg",
+      "x": 810,
+      "y": 380,
+      "w": 300,
+      "h": 156,
+      "viewBox": "0 0 46 24",
+      "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4",
+      "stroke": "var(--accent)",
+      "strokeWidth": 2.6,
+      "draw": { "dur": 0.9, "weight": 10 },
+      "start": 0.1,
+      "duration": 2.4,
+      "anim": "none"
+    },
+    {
+      "type": "text",
+      "text": "vawe",
+      "x": "center",
+      "y": 580,
+      "w": 600,
+      "align": "center",
+      "size": 72,
+      "weight": 700,
+      "color": "var(--text)",
+      "split": "char",
+      "preset": "type",
+      "each": 0.5,
+      "stagger": 0.05,
+      "start": 1.05,
+      "duration": 2.6,
+      "anim": "none",
+      "exitDur": 0
+    }
+  ]
+}
