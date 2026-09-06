@@ -987,6 +987,11 @@ previews: ## render one preview clip + sheet per beat blueprint (ONLY=<id>[,<id>
 preset-sheets: ## render one showcase clip + sheet per reference profile (ONLY=<name>[,<name>...])
 	node scripts/dev/preset-sheets.mjs $(if $(ONLY),--only=$(ONLY))
 
+# make theme-sheet THEME=<name>: one rendered contact sheet for ONE theme's `look` (W8), so a brand's
+# look is a picture, not a JSON. Reuses preset-sheets' own tile machinery. docs/CRAFT/THEME-LOOK.md.
+theme-sheet: ## render one contact sheet for a theme's `look` block (THEME=<name>)
+	node scripts/dev/theme-sheet.mjs --theme=$(THEME)
+
 # make arsenal Q="a page scrolling under a tilt", ONE ranked search across every vocabulary the engine
 # names: beats, effects, camera moves, cuts, seams, looks, anims. It owns no list; `defineRegistry`
 # already carries each name's kind, slot and blurb, and blueprints/index.mjs already carries a prose
