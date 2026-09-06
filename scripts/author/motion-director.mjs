@@ -35,6 +35,9 @@ import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 import { sceneTiming } from '../gates/scene-timing.mjs';
 import { gateFindings } from '../lib/findings.mjs';
+// Generators write authored scenes, and an authored scene carries transitions[] only (the validator
+// refuses cuts/stings/seams); the same converter the migration uses runs at the write site.
+import { migrateOne } from './migrate-junctions.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
@@ -753,7 +756,7 @@ if (WRITE) {
   for (const p of picks) if (p.seam && !seamsOut.some((s) => Math.abs((s.t ?? 0) - p.t) < 0.2)) seamsOut.push({ t: r2(p.t), fx: p.seam, dur: 0.6, timing: p.seamTiming });
   if (seamsOut.length) d.seams = seamsOut.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
   const out = file.replace(/\.json$/, '.directed.json');
-  fs.writeFileSync(out, JSON.stringify(d, null, 2));
+  fs.writeFileSync(out, JSON.stringify(migrateOne(d).next, null, 2));
   console.log(`\n  ✓ applied → ${out}  (${picks.length} cuts, ${picks.filter((p) => p.sting).length} stings, ${picks.filter((p) => p.seam).length} seam)\n`);
 } else {
   console.log(`\n  suggest-only. Re-run with WRITE=1 (or --write) to apply → <file>.directed.json`);

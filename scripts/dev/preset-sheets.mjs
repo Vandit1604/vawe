@@ -16,6 +16,9 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { PROFILES, PROFILE_NAMES } from '../author/profiles.mjs';
 import { frameTile, tileGrid, tileBox, renderOf } from '../gates/tile.mjs';
+// Generators write authored scenes, and an authored scene carries transitions[] only (the validator
+// refuses cuts/stings/seams); the same converter the migration uses runs at the write site.
+import { migrateOne } from '../author/migrate-junctions.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCRATCH = path.join(ROOT, 'formats/scene/_batch/preset-sheets');
@@ -99,7 +102,7 @@ for (const name of names) {
   const scenePath = path.join(SCRATCH, `${name}.json`);
   const destDir = path.join(OUT_DIR, name);
   try {
-    fs.writeFileSync(scenePath, JSON.stringify(sceneFor(name), null, 1));
+    fs.writeFileSync(scenePath, JSON.stringify(migrateOne(sceneFor(name)).next, null, 1));
     execFileSync('node', ['core/validate/validate.mjs', scenePath], { cwd: ROOT, stdio: 'pipe' });
     execFileSync('./bin/vawe', [scenePath, '--draft', '--workers', '2'], { cwd: ROOT, stdio: 'pipe' });
 
