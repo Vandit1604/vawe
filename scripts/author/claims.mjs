@@ -62,7 +62,7 @@ const OURS_METRICS = {
   // How many DISTINCT preset names a film reaches for. A preset is a name the engine expands; the
   // alternative is a keyed track the author typed. The two films this repo argues from use TWO each.
   presetNames: ({ scene }) => {
-    const KEYS = ['anim', 'out', 'preset', 'fx', 'fxOut', 'cut', 'morph', 'physics', 'motionPath', 'splitText', 'ransom', 'react'];
+    const KEYS = ['anim', 'out', 'preset', 'fx', 'cut', 'morph', 'physics', 'motionPath', 'splitText', 'ransom', 'react'];
     const walk = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object' ? [L, ...walk(L.children), ...walk(L.layers)] : []));
     const layers = walk(scene.layers);
     if (!layers.length) return null;

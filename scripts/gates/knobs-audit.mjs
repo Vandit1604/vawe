@@ -15,6 +15,7 @@
 import { pathToFileURL } from 'node:url';
 import { KNOBS } from '../../core/registry/knobs.js';
 import { PRESETS } from '../../core/type/type.js';
+import { decodeText } from '../../core/kinetic/presets.js';
 import { resolveComposite, LOOK_NAMES } from '../../core/looks/index.js';
 import { gateFindings } from '../lib/findings.mjs';
 
@@ -33,6 +34,12 @@ function driftGuard() {
   const dead = [];
   for (const [preset, knobs] of Object.entries(KNOBS.kinetic)) {
     if (preset === '_shared') continue;
+    // `decode` is special-cased in animateUnits (core/type/type.js): its scramble comes from
+    // decodeText(el, u, i, opts), a side-effecting DOM write, NOT from PRESETS.decode(u, opts), which
+    // only ever returns the settle opacity/transform and ignores every decode-only knob by design (see
+    // the "POPTS REACHED EVERY PRESET BUT THIS ONE" comment there). Probing PRESETS.decode reported
+    // `rate`/`revealDelay` as dead when the real render path honours both; probe decodeText instead.
+    if (preset === 'decode') { dead.push(...decodeDrift(knobs)); continue; }
     const fn = PRESETS[preset];
     if (!fn) { dead.push(`${preset}: no such preset in core/type.js`); continue; }
     const base = sig(fn, {});
@@ -50,6 +57,28 @@ function driftGuard() {
     }
   }
   return dead.concat(lookDrift());
+}
+
+// decodeText mutates `el.textContent` rather than returning a style object, so it needs its own probe
+// harness: a fake element, a few `u` samples, the resulting text strings joined as the signature.
+function decodeDrift(knobs) {
+  const dead = [];
+  const us = [0.15, 0.35, 0.55, 0.75];
+  const sig = (opts) => {
+    const el = { textContent: 'DECODE TEXT', __final: undefined };
+    return us.map((u) => { decodeText(el, u, 3, opts); return el.textContent; }).join('|');
+  };
+  const base = sig({});
+  for (const k of knobs) {
+    if (k.type === 'string' && k.probe == null) continue; // same rule as driftGuard: no known-valid alternative to try
+    const probe = k.probe != null ? k.probe
+      : k.type === 'enum' ? k.values[k.values.length - 1]
+        : k.type === 'bool' ? true
+          : k.type === 'color' ? '#123456'
+            : (Number(k.default) || 1) * 2 + 3;
+    if (sig({ [k.name]: probe }) === base) dead.push(`decode.${k.name} does not change the output`);
+  }
+  return dead;
 }
 
 // `look` is a UNIFORM family: one dial set advertised for all 31 looks, and no look uses every dial

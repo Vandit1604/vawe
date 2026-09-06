@@ -62,8 +62,6 @@ const WAIVED = new Map(Object.entries({
   THERMAL_REGION: 'the filter region the thermal blur needs so its tail is not clipped. A geometry constant, not something a scene can name',
   KNOBS: 'playground control metadata, not an effect a scene can name',
   SPECTACLE_KEYS: 'the four keys of the `spectacle` block (at/of/device/why). The block is documented in docs/PRIMITIVES.md and its DEVICE vocabulary IS catalogued, as "Spectacle devices"; this is the shape of the object, not a vocabulary of effects',
-  DEPRECATED_FX: 'the sixteen gsap entrances that duplicate an anim exactly, mapped to their replacement. Every one is ALREADY catalogued under "GSAP named effects"; this marks which to stop using (#364)',
-  DEPRECATED_EXIT: 'as DEPRECATED_FX, for the exits',
 
   DIRS: 'the four travel directions (left/right/up/down). A scene names one, but as the `dir` field of a '
     + 'cut or seam, and the schema carries it as an enum on both. This is the shared constant behind those, '

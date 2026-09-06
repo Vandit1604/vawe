@@ -56,7 +56,6 @@ const WAIVED = new Map(Object.entries({
   // report it. `leakGrad` now throws (docs/MISTAKES.md #454). Judge a fallback by whether a WRONG
   // value can reach it, never by whether an AUTHOR can send one.
   'core/looks.js:KNOB_ROUTES[knob]': 'the knob was validated by assertKnobs one call earlier',
-  'formats/scene/scene.js:FX_DUR[spec.name]': 'a duration default for an effect that declares none; the NAME is validated by GSAP_EXIT_REGISTRY.pick immediately above',
   'formats/scene/scene.js:SEAM_CUE[s.fx]': 'the seam fx is validated where seams are parsed (#361), and lib-test asserts SEAM_CUE covers every SEAM_FX',
 }));
 

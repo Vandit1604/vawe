@@ -69,8 +69,9 @@ export const SHAPES = {
     { t: r3(dur * 0.71), [axis]: r3(-amp * 0.55), ease: 'easeInOutSine' },
     { t: r3(dur), [axis]: r3(amp * 0.22), ease: 'easeInOutSine' },
   ]),
-  // A KEYED DEPARTURE. `EXIT_FX` ships eleven named exits and 153 scenes use none of them, while the
-  // engine's default exit is a fade in place, so almost every layer in this library leaves the same way.
+  // A KEYED DEPARTURE. The gsap `fxOut` family once shipped eleven named exits and no scene ever used
+  // one (deleted, docs/MISTAKES.md #364), while the engine's default exit is a fade in place, so almost
+  // every layer in this library leaves the same way.
   // The exemplars do not: brew's punctuation leaves by growing THROUGH the frame, and higgsfield's
   // leave diegetically, carried off by the pan they arrived on. This is the cheap middle: accelerate
   // out of the frame on one axis, opacity trailing the move rather than leading it, so the layer is

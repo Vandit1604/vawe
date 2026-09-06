@@ -27,10 +27,10 @@ import { nearMisses } from '../registry/registry.js';
 import { parseColor, contrastRatio } from '../motion/motion.js';
 import { ASPECTS } from '../layout/safe.js';
 import { boundaryMechanism, lowerScene } from '../transitions/lower.js';
-import { junctionTable, marksOf, bindWindowsToJunctions, bindMatchesToJunctions } from '../timeline/junctions.js';
+import { junctionTable, marksOf, bindWindowsToJunctions } from '../timeline/junctions.js';
 import { resolveSpectacle } from '../timeline/spectacle.js';
 import { beatGridPath } from '../beats/index.js';
-import { GSAP_FX, EXIT_FX, GSAP_REGISTRY, GSAP_EXIT_REGISTRY, DEPRECATED_FX, DEPRECATED_EXIT } from '../engine/gsap-effects.js';
+import { GSAP_FX, GSAP_REGISTRY } from '../engine/gsap-effects.js';
 import { timeCssUsed } from '../type/sanitize-html.js';
 import { EASINGS, isEasingName } from '../motion/motion.js';
 import { resolveSeconds, FEEL } from '../registry/vocab.js';
@@ -251,12 +251,11 @@ export function validateData(schema, data) {
   errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
   errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
   errors.push(...transitionErrors(data || {})); // unified transitions must route to a real mechanism
-  errors.push(...fxErrors(data || {}));     // named GSAP fx/fxOut must be real effects; no fxOut+out clash
+  errors.push(...fxErrors(data || {}));     // named GSAP fx must be a real effect
   errors.push(...knobErrors(data || {}));   // a dial set on a preset that does not read it is dead config
   errors.push(...staggerErrors(data || {})); // a stagger object names three dials, in both slots that take one
   errors.push(...countEaseErrors(data || {})); // a counter must never overshoot its own value
   errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
-  errors.push(...matchErrors(data || {})); // a match cut names two real layers and fits inside its shot
   errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
   errors.push(...cssErrors(data || {}));    // css passthrough must not name a prop the engine rewrites every frame
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
@@ -463,17 +462,6 @@ export function externalHtmlErrors(cfg, read) {
   return out;
 }
 
-// MATCH CUTS. bindMatchesToJunctions refuses a match it cannot produce, and it does so at boot, which
-// is sixty seconds and one ffmpeg pass after the author could have known. Run the same binder here, on
-// a CLONE for the reason bgErrors gives just below: a validator that rewrites the object it is grading
-// changes what every later check sees.
-export function matchErrors(cfg) {
-  if (!Array.isArray(cfg?.matches) || !cfg.matches.length) return [];
-  const clone = lowerScene(structuredClone(cfg));
-  try { bindMatchesToJunctions(clone, junctionTable(marksOf(clone))); } catch (e) { return [e.message]; }
-  return [];
-}
-
 // The keys a bg WINDOW owns. Everything else that matches a preset parameter belongs under `opts`.
 // Listed rather than derived: a window's own vocabulary is small and stable, and deriving it from the
 // schema would make this check silently weaker the moment the schema grew a key.
@@ -571,10 +559,9 @@ export function bgErrors(cfg) {
   return out;
 }
 
-// NAMED GSAP EFFECTS: `fx` (entrance/loop/text) and `fxOut` (exit) reference stored effects by name.
-// scene.html only console.warns on a typo (a warn the render swallows), so an unknown name shipped an
-// unanimated layer silently. Catch it here, loudly, with a "did you mean" pointer. Also: `fxOut` and a
-// motion `out` both drive the exit transform. A layer may declare only one, else they fight.
+// NAMED GSAP EFFECTS: `fx` (entrance/loop/text) references a stored effect by name. scene.html only
+// console.warns on a typo (a warn the render swallows), so an unknown name shipped an unanimated layer
+// silently. Catch it here, loudly, with a "did you mean" pointer.
 export function fxErrors(cfg) {
   const out = [];
   const layers = Array.isArray(cfg.layers) ? cfg.layers : [];
@@ -591,12 +578,6 @@ export function fxErrors(cfg) {
         if (nm == null) { out.push(`layers[${i}].fx entry needs a name (string or {name})`); continue; }
         if (!GSAP_REGISTRY.has(nm)) out.push(`layers[${i}].fx "${nm}" is not a known effect.${nearest(nm, GSAP_FX)}`);
       }
-    }
-    if (L.fxOut != null) {
-      const nm = nameOf(L.fxOut);
-      if (nm == null) out.push(`layers[${i}].fxOut needs a name (string or {name})`);
-      else if (!GSAP_EXIT_REGISTRY.has(nm)) out.push(`layers[${i}].fxOut "${nm}" is not a known exit.${nearest(nm, EXIT_FX)}`);
-      if (L.out != null) out.push(`layers[${i}] declares both "out" and "fxOut", they both own the exit. Keep one.`);
     }
     // splitText (GSAP line reveal) re-wraps the layer AFTER the engine's own `split` already did, the two
     // splitters fight. splitText is line-level only; char/word stay with `split`.
@@ -734,9 +715,6 @@ export function durationWordErrors(cfg) {
       if (typeof L[k] !== 'string') continue;
       try { resolveSeconds(L[k]); } catch (e) { out.push(`${at}.${k}: ${e.message}`); }
     }
-    if (isObj(L.transition) && typeof L.transition.dur === 'string') {
-      try { resolveSeconds(L.transition.dur); } catch (e) { out.push(`${at}.transition.dur: ${e.message}`); }
-    }
     (L.children || []).forEach((c, i) => visit(c, `${at}.children[${i}]`));
   };
   (cfg.layers || []).forEach((L, i) => visit(L, `layers[${i}]`));
@@ -777,7 +755,7 @@ function noEmdash(v, path, errors) {
 }
 
 // THIS ENGINE HAS TWO EASING VOCABULARIES and the field decides which one is in force. `parts[].ease`,
-// `morph.ease`, `fx:{ease}`, `fxOut:{ease}`, `splitText.ease` and `motionPath.ease` are handed straight
+// `morph.ease`, `fx:{ease}`, `splitText.ease` and `motionPath.ease` are handed straight
 // to gsap.fromTo, so they take GSAP names (`power2.inOut`). Everything else is driven by the engine's
 // own interpolator and takes an EASINGS name. Both are correct, and a name from one in a field of the
 // other is the #355 wrong-slot mistake, which is the single most-repeated defect in this log.
@@ -786,7 +764,7 @@ function noEmdash(v, path, errors) {
 // about catching it in a second at author-check instead of mid-render on whichever frame first samples
 // that key. The exclusion list below is the whole rule: get it wrong in the other direction and this
 // invents findings on `showcase-lumen` and `showcase-type-labour`, which name GSAP eases correctly.
-const GSAP_OWNED_EASE = new Set(['parts', 'morph', 'fx', 'fxOut', 'splitText', 'motionPath', 'physics']);
+const GSAP_OWNED_EASE = new Set(['parts', 'morph', 'fx', 'splitText', 'motionPath', 'physics']);
 const EASE_KEYS = new Set(['ease', 'easing', 'settleEase']);
 function easeNames(v, path, errors, underGsap = false) {
   if (Array.isArray(v)) return v.forEach((x, i) => easeNames(x, `${path}[${i}]`, errors, underGsap));
@@ -841,22 +819,6 @@ export function easeErrors(cfg) { const out = []; easeNames(cfg, '', out); retur
 // The label the window, count and collision rules report a layer with. Three of the rules below share
 // it, so it is declared once here rather than inside each.
 const layerName = (L, i) => `layer[${i}] (${L.type || 'text'}${typeof L.text === 'string' ? ` "${onScreenText(L.text).slice(0, 24)}"` : ''})`;
-
-function deprecatedEntranceWarns(data) {
-  const warns = [];
-  // A DEPRECATED entrance still renders, so it is a warning, not an error. It names its replacement,
-  // because "deprecated" without one is just a scolding. The engine carries four vocabularies for an
-  // entrance and these sixteen duplicate `anim` exactly. docs/MISTAKES.md #364.
-  for (const [i, L] of (data.layers || []).entries()) {
-    const names = L.fx == null ? [] : (Array.isArray(L.fx) ? L.fx : [L.fx]).map((x) => (typeof x === 'string' ? x : x && x.name));
-    for (const nm of names) if (nm && DEPRECATED_FX[nm])
-      warns.push(`layers[${i}].fx "${nm}" is deprecated, use ${DEPRECATED_FX[nm]}. It does the same thing, works on any layer type, and there are four vocabularies for an entrance already (#364).`);
-    const outNm = L.fxOut == null ? null : (typeof L.fxOut === 'string' ? L.fxOut : L.fxOut.name);
-    if (outNm && DEPRECATED_EXIT[outNm])
-      warns.push(`layers[${i}].fxOut "${outNm}" is deprecated, use ${DEPRECATED_EXIT[outNm]} (#364).`);
-  }
-  return warns;
-}
 
 function becomesHandoverWarns(data) {
   const warns = [];
@@ -1025,13 +987,9 @@ function missingWindowWarns(data) {
   const layers = Array.isArray(data?.layers) ? data.layers : [];
   // (1) MISSING WINDOW: a layer with no `duration` renders for the ENTIRE video (engine default). Almost
   //     always a slip (the "+" gutter that leaked for 53s). Full-bleed backdrops opt out with track:0.
-  // A layer named as a match cut's OUTGOING form is retimed to end on the joint at boot
-  // (core/timeline/junctions.js bindMatchesToJunctions), so writing a `duration` here would be the second copy
-  // of the number the joint already owns. It does not render for the whole video and must not be told to.
-  const matchFrom = new Set((Array.isArray(data?.matches) ? data.matches : []).map((m) => m && m.from).filter(Boolean));
   layers.forEach((L, i) => {
     if (!isObj(L)) return;
-    if (L.duration == null && L.track !== 0 && !matchFrom.has(L.id)) warns.push(`${layerName(L, i)} has no "duration". Renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
+    if (L.duration == null && L.track !== 0) warns.push(`${layerName(L, i)} has no "duration". Renders for the whole video. Add start+duration (or track:0 for an intentional backdrop).`);
   });
   return warns;
 }
@@ -1128,7 +1086,6 @@ function sceneCollisionWarns(data) {
 
 export function lintData(data) {
   return [
-    ...deprecatedEntranceWarns(data),
     ...becomesHandoverWarns(data),
     ...omittedKeyResetWarns(data),
     ...inertPropWarns(data),
