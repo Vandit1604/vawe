@@ -56,7 +56,6 @@
    "font",
    "from",
    "fx",
-   "fxOut",
    "gap",
    "glass",
    "glow",
@@ -123,7 +122,6 @@
    "timeWarp",
    "track",
    "tracking",
-   "transition",
    "type",
    "typing",
    "vars",
@@ -741,37 +739,6 @@
     "dist": {
      "type": "number",
      "label": "Travel distance in px for a directional cut"
-    }
-   }
-  },
-  "matches": {
-   "type": "array",
-   "label": "Match cuts: two forms that coincide on a joint (core/timeline/junctions.js bindMatchesToJunctions)",
-   "item": {
-    "at": {
-     "type": "string",
-     "label": "The joint the match lands on: \"cut@1\" / \"seam@0\" / \"sting@2\" / \"junction@3\", or a time in seconds",
-     "required": true
-    },
-    "from": {
-     "type": "string",
-     "label": "id of the OUTGOING layer, the form that ends on the joint",
-     "required": true
-    },
-    "to": {
-     "type": "string",
-     "label": "id of the INCOMING layer, which opens on the outgoing form's last pose and settles into its own",
-     "required": true
-    },
-    "dur": {
-     "type": "number",
-     "label": "Handover span (s, default 0.9). Refused above a third of the shot it lands in.",
-     "min": 0.05,
-     "max": 2
-    },
-    "ease": {
-     "type": "string",
-     "label": "Easing of the settle (default easeInOutCubic)"
     }
    }
   },
@@ -1440,34 +1407,6 @@
      "type": "number",
      "label": "z-order track"
     },
-    "transition": {
-     "type": "object",
-     "label": "UNIFIED layer transition (sugar over anim/out): { in, out, dir, dur }. Lowered to anim/out/dir/enterDur/exitDur at load. `in`/`out` are anim names (core/timeline/clips.js); a raw anim/out you also set wins.",
-     "fields": {
-      "in": {
-       "type": "string",
-       "label": "Enter anim (same names as `anim`)"
-      },
-      "out": {
-       "type": "string",
-       "label": "Exit anim (same names as `out`)"
-      },
-      "dir": {
-       "type": "string",
-       "label": "Travel direction where the anim reads one",
-       "enum": [
-        "left",
-        "right",
-        "up",
-        "down"
-       ]
-      },
-      "dur": {
-       "type": "number|string",
-       "label": "Enter/exit duration (s), or a duration word (core/registry/vocab.js): instant | fast | medium | slow | luxurious"
-      }
-     }
-    },
     "anim": {
      "type": "string",
      "label": "Enter anim. EXACT names (core/timeline/clips.js ANIM): fade | up | rise | pop | scale | lift | defocus | slide-left | slide-right | slide-up | slide-down | wipe | wipe-left | wipe-right | wipe-up | wipe-down | iris | clock | none. Unknown names fall back to fade silently. There is no 'slide', and direction is part of the name, not a separate prop. A slide is named for the edge it comes FROM; a wipe is named for the edge its reveal TRAVELS TOWARD (wipe-up grows upward from the bottom; plain `wipe` = `wipe-right`).",
@@ -1630,11 +1569,7 @@
     },
     "fx": {
      "type": "string|object|array",
-     "label": "Named GSAP effect(s) from core/engine/gsap-effects.js: popIn | {name,dur,ease} | [blurIn,float]. Entrances (popIn/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none."
-    },
-    "fxOut": {
-     "type": "string|object",
-     "label": "Named GSAP EXIT from core/engine/gsap-effects.js, anchored to the layer's end: fadeOut | fadeOutUp | flyOutLeft | popOut | zoomOut | blurOut | dropOut | collapseOut | spinOut | {name,dur,ease}. Mutually exclusive with `out`."
+     "label": "Named GSAP effect(s) from core/engine/gsap-effects.js: zoomBlur | {name,dur,ease} | [blurIn,float]. Entrances (zoomBlur/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none. There is no `fxOut`: the named GSAP exit family measured zero users and was deleted whole (docs/MISTAKES.md #364); use `out` for an exit."
     },
     "modifiers": {
      "type": "array",
