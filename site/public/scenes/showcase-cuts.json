@@ -252,20 +252,6 @@
    "exitDur": 0
   }
  ],
- "cuts": [
-  {
-   "t": 2.8,
-   "style": "punch"
-  },
-  {
-   "t": 5.6,
-   "style": "none"
-  },
-  {
-   "t": 7.6,
-   "style": "zoom"
-  }
- ],
  "bg": [
   {
    "preset": "plain"
@@ -278,6 +264,24 @@
   },
   {
    "preset": "paper"
+  }
+ ],
+ "transitions": [
+  {
+   "at": 2.8,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 5.6,
+   "mech": "cut",
+   "fx": "none"
+  },
+  {
+   "at": 7.6,
+   "mech": "cut",
+   "fx": "zoom",
+   "timing": "smooth"
   }
  ]
 }

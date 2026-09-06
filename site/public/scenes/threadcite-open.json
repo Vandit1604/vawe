@@ -27,33 +27,6 @@
    "value": "dark"
   }
  ],
- "cuts": [
-  {
-   "t": 4.2,
-   "style": "blur",
-   "dur": 0.4
-  },
-  {
-   "t": 8.5,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 14.6,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 20.3,
-   "style": "blur",
-   "dur": 0.4
-  },
-  {
-   "t": 25.4,
-   "style": "riseBlur",
-   "dur": 0.42
-  }
- ],
  "spectacle": {
   "at": 25.4,
   "of": "endmark",
@@ -444,6 +417,38 @@
    "anim": "rise",
    "exitDur": 0,
    "critical": true
+  }
+ ],
+ "transitions": [
+  {
+   "at": 4.2,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  },
+  {
+   "at": 8.5,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 14.6,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 20.3,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  },
+  {
+   "at": 25.4,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
   }
  ]
 }

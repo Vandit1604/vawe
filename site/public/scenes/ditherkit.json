@@ -13,32 +13,6 @@
    "to": 29
   }
  ],
- "stings": [
-  {
-   "t": 4.2,
-   "fx": "pixel",
-   "dur": 0.5,
-   "seed": 3
-  },
-  {
-   "t": 8,
-   "fx": "pixel",
-   "dur": 0.4,
-   "seed": 7
-  },
-  {
-   "t": 11.3,
-   "fx": "pixel",
-   "dur": 0.4,
-   "seed": 11
-  },
-  {
-   "t": 22,
-   "fx": "scan",
-   "dur": 0.7,
-   "seed": 5
-  }
- ],
  "camera": [
   {
    "t": 0,
@@ -448,6 +422,36 @@
    "duration": 1.8,
    "anim": "rise",
    "exitDur": 0
+  }
+ ],
+ "transitions": [
+  {
+   "at": 4.2,
+   "mech": "sting",
+   "fx": "pixel",
+   "dur": 0.5,
+   "seed": 3
+  },
+  {
+   "at": 8,
+   "mech": "sting",
+   "fx": "pixel",
+   "dur": 0.4,
+   "seed": 7
+  },
+  {
+   "at": 11.3,
+   "mech": "sting",
+   "fx": "pixel",
+   "dur": 0.4,
+   "seed": 11
+  },
+  {
+   "at": 22,
+   "mech": "sting",
+   "fx": "scan",
+   "dur": 0.7,
+   "seed": 5
   }
  ]
 }

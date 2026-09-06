@@ -25,28 +25,6 @@
    "value": "dark"
   }
  ],
- "cuts": [
-  {
-   "t": 3.15,
-   "style": "blur",
-   "dur": 0.4
-  },
-  {
-   "t": 5.3,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 10.8,
-   "style": "punch",
-   "dur": 0.36
-  },
-  {
-   "t": 13,
-   "style": "riseBlur",
-   "dur": 0.42
-  }
- ],
  "spectacle": {
   "at": 10.8,
   "of": "statA",
@@ -258,6 +236,32 @@
    "start": 13.75,
    "duration": 1.25,
    "track": 5
+  }
+ ],
+ "transitions": [
+  {
+   "at": 3.15,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  },
+  {
+   "at": 5.3,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 10.8,
+   "mech": "cut",
+   "fx": "punch",
+   "dur": 0.36
+  },
+  {
+   "at": 13,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
   }
  ],
  "camera": [

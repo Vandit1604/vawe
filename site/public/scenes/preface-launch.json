@@ -2273,58 +2273,6 @@
    "exitDur": 0
   }
  ],
- "cuts": [
-  {
-   "t": 5.2,
-   "style": "blur",
-   "dur": 0.4
-  },
-  {
-   "t": 11,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 19.6,
-   "style": "blur",
-   "dur": 0.4
-  },
-  {
-   "t": 23.5,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 27,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 32.2,
-   "style": "blur",
-   "dur": 0.4
-  },
-  {
-   "t": 38.8,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 42.3,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 47.4,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 50,
-   "style": "blur",
-   "dur": 0.4
-  }
- ],
  "_template": "A launch film for PREFACE, a FICTIONAL product: a markdown file an AI coding agent reads before it answers. Nothing here is anyone's brand. Every colour is a themes/preface.json token, the mark is an inline SVG, the domain is a reserved .example name, and the only real marks on screen are the agent logos in the compatibility ring, which name the tools the file works with. To reskin, change `theme`; to refill, replace the copy strings and the six file sections.",
  "spectacle": {
   "at": 24.4,
@@ -2332,5 +2280,67 @@
   "device": "ripple",
   "why": "the one moment the film is allowed to shout: ten spokes leave the file at once and the ring of agents lights up. Every other beat holds one idea at one volume."
  },
- "storyboard": "formats/scene/preface-launch.storyboard.md"
+ "storyboard": "formats/scene/preface-launch.storyboard.md",
+ "transitions": [
+  {
+   "at": 5.2,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  },
+  {
+   "at": 11,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 19.6,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  },
+  {
+   "at": 23.5,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 27,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 32.2,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  },
+  {
+   "at": 38.8,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 42.3,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 47.4,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 50,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  }
+ ]
 }
