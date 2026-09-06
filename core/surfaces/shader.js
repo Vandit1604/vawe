@@ -1,7 +1,7 @@
 // core/surfaces/shader.js: a smooth ambient WebGL field (flow/aurora/plasma/drift/mist/…). The
 // `shader` layer type's pixels. Colourful by default, palette-tintable via L.colors. Not the
 // cut-cover stings, those live in core/stings.js.
-import { createAmbientLayer, AMBIENT_FX, AMBIENT_REGISTRY } from '../shaders-ambient.js';
+import { createAmbientLayer, AMBIENT_FX, AMBIENT_REGISTRY } from './shaders-ambient.js';
 import { palette } from './palette.js';
 import { keyAt, validateKeys, atOf } from './surface-keys.js';
 

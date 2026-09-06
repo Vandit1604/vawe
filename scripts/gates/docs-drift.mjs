@@ -44,10 +44,10 @@ const HEADING_COUNTS = [
 
 const REGISTRIES = {
   SHADER_FX: { names: SHADER_FX, src: 'core/stings.js' },
-  AMBIENT_FX: { names: AMBIENT_FX, src: 'core/shaders-ambient.js' },
-  PAINT_FX: { names: PAINT_FX_NAMES, src: 'core/paint-fx.js' },
-  RESAMPLE_FX: { names: RESAMPLE_FX, src: 'core/resample-fx.js' },
-  RAYMARCH_FX: { names: RAYMARCH_FX, src: 'core/raymarch-fx.js' },
+  AMBIENT_FX: { names: AMBIENT_FX, src: 'core/surfaces/shaders-ambient.js' },
+  PAINT_FX: { names: PAINT_FX_NAMES, src: 'core/surfaces/paint-fx.js' },
+  RESAMPLE_FX: { names: RESAMPLE_FX, src: 'core/resample/effects.js' },
+  RAYMARCH_FX: { names: RAYMARCH_FX, src: 'core/surfaces/raymarch-fx.js' },
 };
 const every = Object.entries(REGISTRIES).flatMap(([reg, { names, src }]) => names.map((n) => ({ n, reg, src })));
 

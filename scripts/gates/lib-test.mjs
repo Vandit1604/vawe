@@ -1777,7 +1777,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // reaching for THREE.Clock or Math.random six months from now and quietly breaking pure-in-n, which
 // probe/canvas-purity would then catch only if the sampled frames happened to disagree.
 {
-  const src = fs.readFileSync(path.join(repoRoot, 'core', 'three-fx.js'), 'utf8');
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'surfaces', 'three-fx.js'), 'utf8');
   const code = src.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n');
   ok(`three: ${THREE_FX.length} scenes, all unique`, THREE_FX.length > 0 && new Set(THREE_FX).size === THREE_FX.length);
   // ONE list: three-scenes.js names them, three-fx.js implements them, and these must agree. The
@@ -1807,7 +1807,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // material. An effect present in one and missing from the other renders as an untextured silhouette
 // or as nothing, so both are checked.
 {
-  const src = fs.readFileSync(path.join(repoRoot, 'core', 'raymarch-fx.js'), 'utf8');
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'surfaces', 'raymarch-fx.js'), 'utf8');
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   ok(`raymarch: ${RAYMARCH_FX.length} scenes, all unique`, RAYMARCH_FX.length > 0 && new Set(RAYMARCH_FX).size === RAYMARCH_FX.length);
   const mapFn = frag.slice(frag.indexOf('float map(vec3 p)'), frag.indexOf('vec3 normalAt'));
@@ -1854,7 +1854,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // source texture. An effect that never calls texture2D is not a resample, it is a veil painted over
 // the layer, and it would silently discard the pixels the author asked to transform.
 {
-  const src = fs.readFileSync(path.join(repoRoot, 'core', 'resample-fx.js'), 'utf8');
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'resample', 'effects.js'), 'utf8');
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   ok(`resample: ${RESAMPLE_FX.length} effects, all unique`, RESAMPLE_FX.length > 0 && new Set(RESAMPLE_FX).size === RESAMPLE_FX.length);
   const noBranch = RESAMPLE_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
@@ -1879,7 +1879,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // Same three surfaces as stings, one difference: the last effect is the dispatch's trailing `else`
 // (it has no `u_fx==N` literal), so branches are checked for indices 0..N-2 plus a final else.
 {
-  const src = fs.readFileSync(path.join(repoRoot, 'core', 'shaders-ambient.js'), 'utf8');
+  const src = fs.readFileSync(path.join(repoRoot, 'core', 'surfaces', 'shaders-ambient.js'), 'utf8');
   ok(`ambient: ${AMBIENT_FX.length} effects, all unique`, AMBIENT_FX.length > 0 && new Set(AMBIENT_FX).size === AMBIENT_FX.length);
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   const noBranch = AMBIENT_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx==${i}`));
