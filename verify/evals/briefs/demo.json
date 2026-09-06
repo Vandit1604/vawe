@@ -1,0 +1,48 @@
+{
+ "module": "scene",
+ "note": "DEMO worked example (docs/EVALS.md, skills/vawe-type-demo/SKILL.md). Proves the `cursor` layer: a pointer follows a real [{t,x,y}] path, clicks a real button, and the click has a visible CONSEQUENCE (the chip that only appears after the click, not on a timer of its own). No captured site here, a plain panel stands in for one. Theme vawe.",
+ "theme": "vawe",
+ "aspect": "16:9",
+ "duration": 10,
+ "energy": "brand",
+ "audio": { "silent": true, "_why": "worked example: proving the cursor+click mechanism, not a mix" },
+ "bg": [
+  { "from": 0, "to": 2.4, "preset": "soft" },
+  { "from": 2.4, "to": 7.2, "preset": "paper" },
+  { "from": 7.2, "to": 10, "preset": "dotmatrix" }
+ ],
+ "transitions": [
+  { "at": 2.4, "fx": "fade", "dur": 0.5 },
+  { "at": 7.2, "fx": "punch", "dur": 0.45 }
+ ],
+ "sceneUnits": true,
+ "layers": [
+  { "type": "text", "text": "Watch the click <b>land.</b>", "size": 96, "weight": 650, "w": 1400, "x": 160, "y": 380, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0.2, "duration": 2.0, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "rect", "x": 440, "y": 260, "w": 1040, "h": 480, "radius": 20, "fill": "var(--surface)", "border": "1.5px solid var(--line)", "start": 2.5, "duration": 4.5, "anim": "scale", "enterDur": 0.4, "out": "fade", "exitDur": 0.35 },
+  { "type": "text", "text": "Weekly report", "size": 44, "weight": 650, "color": "var(--ink)", "x": 500, "y": 320, "start": 2.7, "duration": 4.1, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "18 rows ready.", "size": 30, "weight": 500, "color": "var(--dim)", "x": 500, "y": 390, "start": 2.9, "duration": 3.7, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "rect", "x": 820, "y": 600, "w": 220, "h": 64, "radius": 12, "fill": "var(--accent)", "start": 3.0, "duration": 3.5, "anim": "pop", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Export", "size": 28, "weight": 650, "color": "#ffffff", "align": "center", "x": 820, "y": 620, "w": 220, "start": 3.15, "duration": 3.35, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "text", "text": "Exported.", "size": 30, "weight": 650, "color": "var(--up)", "x": 820, "y": 500, "w": 220, "align": "center", "start": 5.7, "duration": 1.4, "anim": "pop", "enterDur": 0.3, "out": "fade", "exitDur": 0.2 },
+
+  { "type": "cursor", "path": [
+      { "t": 0, "x": 300, "y": 240 },
+      { "t": 1.0, "x": 800, "y": 560, "ease": "easeInOutSine" },
+      { "t": 1.7, "x": 928, "y": 630, "ease": "easeOutCubic" }
+    ], "clicks": [1.7], "start": 3.7, "duration": 2.4, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "text", "text": "The click. The response. The proof.", "size": 64, "weight": 640, "w": 1500, "x": 160, "y": 420, "start": 7.4, "duration": 2.4, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "vawe.dev", "size": 40, "weight": 600, "color": "var(--accent)", "font": "mono", "x": 160, "y": 540, "start": 8.0, "duration": 1.8, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
+
+  { "type": "rect", "w": 10, "h": 10, "radius": 5, "x": 60, "y": 60, "fill": "var(--accent)", "start": 0, "duration": 10, "acrossBeats": true,
+    "motion": [
+      { "t": 0, "x": 0, "y": 0 },
+      { "t": 3.7, "x": 0, "y": 40, "ease": "easeInOutSine" },
+      { "t": 6.1, "x": 0, "y": -20, "ease": "easeInOutSine" },
+      { "t": 10, "x": 0, "y": 0, "ease": "easeInOutSine" }
+    ]
+  }
+ ]
+}
