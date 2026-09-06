@@ -2340,6 +2340,14 @@ holds: core/prop-audit.js (refuses a prop set and never read); blueprints/beats.
 A `var(--surface2)` resolves to an undefined custom property and the box renders transparent with no render-time warning; the hyphenated `--surface-2` (and `--text-2`) is what boot sets from the palette key. The designspec lock catches it before render as `dead-token`, with a did-you-mean; the film was authored without running it.
 holds: scripts/gates/designspec-check.mjs (dead-token, inside author-check)
 
+## 572. a group's children fell back to the 0.26s default exit, so every dissolve over a group-built beat crossed an empty field
+`addGroupChild` in core/layers/util.js computed a child's clock from the parent but never passed the parent's `exitDur` down, so a child with none of its own faded out over the last quarter second of its window, exactly at the beat boundary; a hard cut hid it, a dissolve found nothing to cross. A child now inherits the group's `exitDur` when it states none, and blueprint layers hold to the beat end.
+holds: core/layers/util.js (childExitDur), blueprints/kit.mjs (exitDur 0 by default), make seam-check
+
+## 573. a migration script read the file the same change deleted, so it could run exactly once
+legacy-fold.mjs folded the legacy manifest into scene waivers and the manifest was deleted in the same commit; on any machine whose gitignored library was not folded yet the script crashed on ENOENT. A one-shot script that owns its input reads it from the last commit that carried it (`git show <sha>:<path>`) when the file is gone.
+holds: scripts/gates/legacy-fold.mjs (MANIFEST_LAST_COMMIT)
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
