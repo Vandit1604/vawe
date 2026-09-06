@@ -34,6 +34,7 @@ shortcut to load it at the right moment.
 
 | You are about to… | Claude Code: load this skill | Everyone: read this instead / after |
 |---|---|---|
+| **Write any layer** (the first move, every time) | **vawe-scene-authoring** (it loads the rules) | [`docs/RULES/INDEX.md`](docs/RULES/INDEX.md): the contract every scene obeys, then the one-page numeric rule for the thing you are writing (offsets not absolutes, ease direction, handover glide, stagger total, speed bands, video scale, text on flat). The essays below say why; the rules say the number |
 | Author / edit a scene JSON or `scene.html` | **vawe-scene-authoring** | purity, tokens, motion primitives, capture + QA loop |
 | Plan a new video (brief → storyboard) | **vawe-video-planning** | site-derived design language, storyboard, ledger |
 | Author a video **from scratch** (no brand site) | **vawe-video-planning** + read [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](docs/CRAFT/AUTHORING-WALKTHROUGH.md) | manufacture the four things a site gives; run the chain end-to-end |
