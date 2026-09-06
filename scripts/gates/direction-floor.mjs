@@ -37,7 +37,7 @@ import { sceneDims } from '../../core/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/junctions.js';
 
@@ -52,7 +52,7 @@ if (!file) { console.error('usage: node scripts/gates/direction-floor.mjs <scene
 // renders anything (core/transitions-lower.js), and until this line the gates did not, so a scene
 // that declared its boundaries the documented way was read as a film with no boundaries at all.
 // Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
-const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
+const d = loadScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // FIX 6: the two SLIDESHOW waivers must be BACKED BY A PLAN. `no-continuous-object` and `plain-slideshow`
@@ -119,18 +119,22 @@ const hasBgMotion = (Array.isArray(d.bg) ? d.bg : (d.bg ? [d.bg] : [])).some(ani
 // camera actually MOVES (s/x/y changes across keyframes), not a static [{s:1},{s:1}].
 const cam = d.camera || [];
 const camKf = cam.length > 1 && cam.some((k) => (k.s ?? 1) !== (cam[0].s ?? 1) || (k.x ?? 0) !== (cam[0].x ?? 0) || (k.y ?? 0) !== (cam[0].y ?? 0));
-// the `cameraMove` sugar (core/camera-moves.js) IS a camera move, it just expands to d.camera at
-// `make expand`, and the floor runs PRE-expand, so without this it nags "no-camera" on a scene that
-// already has a push/dive. Credit a cameraMove that names a move or actually changes scale/position.
-// ...and the sugar is documented as an OBJECT (`"cameraMove": { "move":"diveIn" }`, core/camera-moves.js),
-// which scripts/author/expand-blocks.mjs accepts alongside an array. Only crediting the array meant a
-// film using the documented form was told its camera never moves while the camera was moving.
+// the `cameraMove` sugar (core/camera-moves.js) IS a camera move, and `loadScene` above already bakes
+// it to `d.camera` (core/expand.js), so `cam`/`camKf` normally see it there. `camSpecs` below stays as
+// a defensive fallback for a scene handed to this gate before baking (a raw JSON in a test fixture),
+// so a film using the documented `cameraMove` form is never told its camera never moves.
+// The sugar is documented as an OBJECT (`"cameraMove": { "move":"diveIn" }`, core/camera-moves.js),
+// which core/expand.js accepts alongside an array. Only crediting the array meant a film using the
+// documented form was told its camera never moves while the camera was moving.
 const camSpecs = Array.isArray(d.cameraMove) ? d.cameraMove : (d.cameraMove ? [d.cameraMove] : []);
 const camSugar = camSpecs.some((m) => m && (m.move || (m.from != null && m.to != null && m.from !== m.to) || (m.tx != null) || (m.ty != null)));
 const camMoves = camKf || camSugar;
 
 const sig = {
-  beats: flat.filter((l) => l.type === 'beat').length,
+  // `l._beat` (core/expand.js): the beat a layer came from. `l.type === 'beat'` never survives to
+  // this gate any more, sugar expands at LOAD time now, so the raw type is gone by the time a scene
+  // reaches here; the annotation is what is left to recognise "composed from a blueprint" by.
+  beats: flat.filter((l) => l._beat || l.type === 'beat').length,
   kineticText: texts.filter(isExpressiveText).length,
   countup: flat.filter((l) => l.type === 'count').length,
   camera: camMoves ? 1 : 0,
@@ -267,7 +271,7 @@ const visible = (l) => { const s = l.start ?? 0; return [s, l.duration != null ?
 // Machinery whose internal clock this gate cannot read (a blueprint beat, a bespoke composition, a
 // parts build, a morph, a motion path, a playing video). Assume it transforms, a gate must not
 // invent a failure out of something it cannot see (MISTAKES #25).
-const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l.type === 'clip'
+const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l._beat || l.type === 'clip'
   || l.parts || l.morph || l.motionPath || l.gsap || l.physics
   || (l.type === 'group' && l.each)          // per-child build. On a TEXT layer `each` is the split
   || (l.type === 'cursor' && l.path)         // reveal's per-char duration, an entrance, not a transform.
@@ -445,7 +449,7 @@ if (dur < CONTINUITY_MAX_DUR) {
     }
   }
 }
-const reveals = flat.filter((l) => l.track !== 0 && (l.text || l.type === 'count' || l.type === 'beat' || l.type === 'image' || l.type === 'svg' || isExpressiveText(l))).map((l) => l.start ?? 0);
+const reveals = flat.filter((l) => l.track !== 0 && (l.text || l.type === 'count' || l.type === 'beat' || l._beat || l.type === 'image' || l.type === 'svg' || isExpressiveText(l))).map((l) => l.start ?? 0);
 if (reveals.length >= 4) {
   const early = reveals.filter((t) => t < dur * 0.3).length / reveals.length;
   const lateHalf = reveals.filter((t) => t > dur * 0.5).length;

@@ -12,7 +12,7 @@
 // with itself; it shouldn't retell the same skeleton).
 import fs from 'node:fs';
 import path from 'node:path';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 import { population, SCENE_DIR } from '../lib/census.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 
@@ -23,9 +23,9 @@ export function fingerprint(input) {
   // Lowered HERE rather than at each caller, so `make ledger` (scripts/gates/ledger.mjs imports this)
   // inherits it. A film that declares its boundaries as `transitions` fingerprinted with no stings at
   // all, so two films could share a sting vocabulary and the ledger would score them as further apart
-  // than they are (docs/MISTAKES.md #408). Cloned: lowerScene mutates and deletes what it is handed,
+  // than they are (docs/MISTAKES.md #408). Cloned: loadScene mutates and deletes what it is handed,
   // and a fingerprint must never rewrite the scene its caller goes on to grade.
-  const data = lowerScene(structuredClone(input));
+  const data = loadScene(structuredClone(input));
   const vocab = new Set(), structure = [], layout = [], colors = new Set();
   const word = (v) => { if (typeof v === 'string' && v) vocab.add(v); };
   if (Array.isArray(data.scenes)) {

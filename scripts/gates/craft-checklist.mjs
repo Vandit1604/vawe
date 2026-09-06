@@ -28,7 +28,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -145,7 +145,7 @@ export function storyboardPathFor(sceneFile) {
 // ---- CLI -----------------------------------------------------------------------------------------
 function run(file) {
   const scene = JSON.parse(fs.readFileSync(file, 'utf8'));
-  lowerScene(scene);
+  loadScene(scene);
   const features = computeFeatures(scene);
   const docs = docRegistry();
   const relevant = docs.filter((d) => features[d.appliesWhen] === true);

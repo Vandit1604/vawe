@@ -38,7 +38,8 @@ import { resolveCoords } from '../core/boot.js';
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
 import { snippet } from '../scripts/lib/text.mjs';
 import { gateFindings } from '../scripts/lib/findings.mjs';
-import { lowerScene } from '../core/transitions-lower.js';
+import { loadScene } from '../core/expand.js';
+import { bootPathFor } from '../scripts/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -1491,6 +1492,7 @@ const server = await startServer();
 const port = server.address().port;
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const rows = [];
+const bootScratch = []; // expanded-sugar scratch files this run wrote, cleaned up at the end
 
 for (const spec of modules) {
   // a .json arg audits THAT data file (module read from it); a bare name audits the format's sample
@@ -1506,10 +1508,19 @@ for (const spec of modules) {
   // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
   // renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
   // documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
-  const cfg = (() => { try { return lowerScene(JSON.parse(fs.readFileSync(absPath, 'utf8'))); } catch { return {}; } })();
+  const cfg = (() => { try { return loadScene(JSON.parse(fs.readFileSync(absPath, 'utf8'))); } catch { return {}; } })();
   const m = isData ? (cfg.module || spec) : spec;
   // the scene's own waiver list, read the same way every other gate reads it.
   const allow = new Set(Array.isArray(cfg.authoring?.allow) ? cfg.authoring.allow : []);
+
+  // THE PAGE BOOTS OFF `sample` AS A FILE, not off `cfg`: it fetches `?data=/<path>` and parses it
+  // itself, so a scene carrying `block`/`beat`/`comp` sugar (already resolved in `cfg` above, via
+  // `loadScene`) would 404 the browser's own `formats/scene/scene.js` at the raw layer type: that page
+  // deliberately never imports core/expand.js (its own banner says why). `bootPathFor` writes the
+  // already-expanded `cfg` to a scratch file and boots from THAT instead; a scene with no sugar is
+  // returned unchanged, so this is a no-op for the overwhelming majority of scenes.
+  const bootSample = bootPathFor(repoRoot, fs.readFileSync(absPath, 'utf8'), cfg, sample);
+  if (bootSample !== sample) bootScratch.push(path.join(repoRoot, bootSample));
 
   // source checks are aspect-independent (they're about the JSON, not a canvas), report them once
   const si = heroOnly ? [] : sourceIssues(cfg);
@@ -1537,7 +1548,7 @@ for (const aspectKey of askedAspects) {
   // ?aspect= is the same knob internal/scene/scene.go passes when rendering, so the audit measures the
   // canvas the CLI would actually ship rather than a re-implementation of it.
   const q = aspectKey ? `&aspect=${encodeURIComponent(aspectKey)}` : '';
-  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30${q}`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${bootSample}&fps=30${q}`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   // A scene that refuses to boot is the loudest possible failure, so report it as one. Reading
   // __engine.meta unconditionally threw an uncaught TypeError here, which killed the whole run: one
@@ -1659,6 +1670,7 @@ for (const aspectKey of askedAspects) {
 }
 }
 await browser.close(); server.close();
+for (const f of bootScratch) { try { fs.unlinkSync(f); } catch { } }
 
 // --hero prints its own short report and exits 0. It is ONE warning out of this file's 18 kinds, so
 // printing the full LAYOUT AUDIT banner under it would claim a sweep that did not happen.

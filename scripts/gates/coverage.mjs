@@ -23,7 +23,7 @@ import { PRESENTATIONS } from '../../core/cuts.js';
 import { SHADER_FX } from '../../core/stings.js';
 import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -36,7 +36,7 @@ const scenes = population('coverage · corpus', { filter: LIBRARY_WITH_DERIVATIV
   // scene sets, answering that off the lowered copy would report `transition` and `mech` as dead the
   // moment somebody used them.
   .map((f) => { try { const raw = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-    return { f, raw, j: lowerScene(structuredClone(raw)) }; } catch { return null; } })
+    return { f, raw, j: loadScene(structuredClone(raw)) }; } catch { return null; } })
   .filter((x) => x && x.j.module === 'scene');
 
 // walk every layer, including group children: a primitive used only inside a group is still used

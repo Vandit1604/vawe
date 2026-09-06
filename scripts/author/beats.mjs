@@ -20,7 +20,7 @@ import { openScene } from './scene-page.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
 import { drawtext } from './sheets.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -54,7 +54,7 @@ export async function beatSheet(s, { dataArg, vs = null, auto = false } = {}) {
   // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
   // renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
   // documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
-  const data = lowerScene(JSON.parse(fs.readFileSync(dataArg, 'utf8')));
+  const data = loadScene(JSON.parse(fs.readFileSync(dataArg, 'utf8')));
   const { duration } = s.meta;
   const beats = beatWindows(data, duration);
 
