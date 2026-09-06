@@ -576,7 +576,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? 'NEVER used in this library' : `${e.used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
-    if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   then: make expand D=<file>`);
+    if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   (expands at load; \`make expand D=<file>\` to eyeball it)`);
     else if (e.snippet) console.log(`      ${e.snippet}`);
     console.log('');
   }

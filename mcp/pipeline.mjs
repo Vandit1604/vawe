@@ -72,13 +72,11 @@ export async function validate(scenePath) {
   return { ok: r.ok, report: r.out };
 }
 
-/** expand + the advisory gates. Slow (browser), so callers run this in the background. */
+/** the advisory gates. Slow (browser), so callers run this in the background. */
 export async function gates(scenePath) {
-  // expand-blocks turns {"block":"kpiRow"} into real layers using the PRIVATE factories. It has to
-  // run before anything measures the scene, or the gates audit a scene that is mostly placeholders.
-  const expanded = scenePath.replace(/\.json$/, '.expanded.json');
-  const expand = await step('node', ['scripts/author/expand-blocks.mjs', scenePath], 120_000);
-  const target = fs.existsSync(expanded) ? expanded : scenePath;
+  // {"type":"block"/"beat"/"comp"} sugar expands at LOAD time now (core/expand.js), so every gate
+  // reads `scenePath` directly; there is no more `.expanded.json` derivative to write or point at.
+  const target = scenePath;
 
   // `slop` (the vendored 41-rule detector over a DOM dump) was retired: it inlined three CSS
   // properties, so most of its rules had no evidence and its silence read as a pass
@@ -89,7 +87,6 @@ export async function gates(scenePath) {
   return {
     target,
     report: {
-      expand: expand.ok ? 'ok' : expand.out,
       // designspec and ledger are ADVISORY. They are taste opinions, and refusing to render someone's
       // video because a detector dislikes their font is the wrong side of a paid product.
       designspec: designspec.out,

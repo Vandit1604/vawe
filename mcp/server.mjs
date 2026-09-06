@@ -316,7 +316,7 @@ server.registerTool('vawe_draft', {
 
   (async () => {
     try {
-      const g = await pipe.gates(scenePath);          // expand + slop + ledger (browser, slow)
+      const g = await pipe.gates(scenePath);          // designspec + ledger + knobs (browser, slow)
       await pipe.render(g.target, out, { watermark: true, aspect: aspect || undefined });
       const seconds = pipe.durationOf(out);
       const auditOut = await pipe.audit(g.target);
@@ -373,8 +373,9 @@ server.registerTool('vawe_export', {
   // from the one that was approved, which is the one thing an export must never do.
   const scenePath = path.join(store.paths.scenes(),
     `${rec.id}${rec.revisions ? `.r${rec.revisions}` : ''}.json`);
-  const expanded = scenePath.replace(/\.json$/, '.expanded.json');
-  const src = fs.existsSync(expanded) ? expanded : scenePath;
+  // {"type":"block"/"beat"/"comp"} sugar expands at LOAD time now (core/expand.js), so the renderer
+  // reads the source scene directly; there is no more `.expanded.json` derivative to prefer.
+  const src = scenePath;
 
   // One render per requested ratio, each to its own file. The scene's own aspect is expressed as
   // undefined (no --aspect), so a default export matches the draft exactly.
