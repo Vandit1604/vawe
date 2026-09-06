@@ -12,7 +12,7 @@ import { flattenLayers } from './layers.mjs';
 /**
  * layerBoxes(data) → [{ type, start, end, box }] for every layer, `data` already through `loadScene`.
  * `box` is `{x,y,w,h}` in canvas px, or null when the layer declares no usable extent (no `x`/`y`, or a
- * text layer with neither `w` nor `size` to estimate one) — a real blind spot, not a guess papered over:
+ * text layer with neither `w` nor `size` to estimate one): a real blind spot, not a guess papered over:
  * a layer this can't box is a layer neither seam-forensics check can look inside, only pass over quietly.
  * `start`/`end` are null the same way when `start`/`duration` aren't plain numbers (a relative or
  * word-valued window; the checks that need a number skip the layer rather than mis-time it).
