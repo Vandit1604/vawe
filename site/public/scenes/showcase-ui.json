@@ -76,21 +76,21 @@
        "radius": 100,
        "w": 12,
        "h": 12,
-       "bg": "#FF5F57"
+       "bg": "var(--down)"
       },
       {
        "type": "group",
        "radius": 100,
        "w": 12,
        "h": 12,
-       "bg": "#FEBC2E"
+       "bg": "var(--warn)"
       },
       {
        "type": "group",
        "radius": 100,
        "w": 12,
        "h": 12,
-       "bg": "#28C840"
+       "bg": "var(--up)"
       },
       {
        "type": "group",

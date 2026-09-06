@@ -208,12 +208,19 @@
    "preset": "ink"
   }
  ],
- "cameraMove": {
-  "move": "slowPush",
-  "start": 0,
-  "dur": 13,
-  "from": 1,
-  "to": 1.05,
-  "ease": "easeInOutCubic"
- }
+ "camera": [
+  {
+   "t": 0,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 13,
+   "s": 1.05,
+   "x": 0,
+   "y": 0,
+   "ease": "easeInOutCubic"
+  }
+ ]
 }

@@ -778,7 +778,8 @@
      "ease": "easeInCubic"
     }
    ],
-   "motionBlur": true
+   "motionBlur": true,
+   "_beat": "wordBlast"
   },
   {
    "type": "svg",

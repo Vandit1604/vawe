@@ -69,12 +69,12 @@ const MANIFEST = [
   ['aspect', 'showcase-aspect',    'showcase-aspect.1x1',    'showcase/aspect-11.mp4',      520, 2.0, 1],
 
   // launch films. Two rows here used to be pixel recreations of other companies' marketing pages and
-  // were converted into fillable TEMPLATES (docs: CREDITS.md · "Third-party brands"). The template
-  // rows name the `.expanded.json`, because a template is authored with `{type:"block"}` sugar and the
-  // engine refuses an un-expanded block at boot: run `make expand D=formats/scene/<name>.json` first.
+  // were converted into fillable TEMPLATES (docs: CREDITS.md · "Third-party brands"). saas-hero-launch
+  // is authored with `{type:"block"}` sugar, which now expands at LOAD time (core/expand.js) rather
+  // than a separate `make expand` step, so it renders straight off the source file.
   // Posters are chosen for the frame, not the midpoint: 28s is the saas film's number-and-chart beat,
   // 9s is the tour's issue board. A 3s poster on either is a headline on an empty field.
-  ['films',  'saas-hero-launch.expanded', 'saas-hero-launch', 'films/saas-hero-launch.mp4', 1280, 28.0, 16 / 9],
+  ['films',  'saas-hero-launch', 'saas-hero-launch', 'films/saas-hero-launch.mp4', 1280, 28.0, 16 / 9],
   ['films',  'product-feature-tour', 'product-feature-tour', 'films/product-feature-tour.mp4', 1280, 9.0, 16 / 9],
   ['films',  'argus-launch',       'argus-launch',           'films/argus-launch.mp4',     1280, 3.0, 16 / 9],
   ['films',  'preface-launch',     'preface-launch',         'films/preface-launch.mp4',   1280, 25.6, 16 / 9],
