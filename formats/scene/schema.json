@@ -765,13 +765,13 @@
     },
     "dur": {
      "type": "number",
-     "label": "Handover span (s, default 0.42). Refused above a third of the shot it lands in.",
+     "label": "Handover span (s, default 0.9). Refused above a third of the shot it lands in.",
      "min": 0.05,
      "max": 2
     },
     "ease": {
      "type": "string",
-     "label": "Easing of the settle (default easeOutCubic)"
+     "label": "Easing of the settle (default easeInOutCubic)"
     }
    }
   },
@@ -1794,15 +1794,15 @@
     },
     "becomes": {
      "type": "string",
-     "label": "Declare that this layer CONTINUES as another (by its `id`) across a boundary. A cut transforms one root and a seam blends two frozen stills; neither joins the CONTENT, so the only thing that truly connects two scenes is a form that persists. The named layer opens on THIS layer's final pose (centres matched, size matched by scale, rotation carried) and then animates away into its own geometry, so the handover is exact by construction instead of hand-aligned and hoped for. `becomesDur` (default 0.42) and `becomesEase` shape the handover. validate fails if the two do not meet at the boundary. See docs/CRAFT/KEYED-MOTION.md."
+     "label": "Declare that this layer CONTINUES as another (by its `id`) across a boundary. A cut transforms one root and a seam blends two frozen stills; neither joins the CONTENT, so the only thing that truly connects two scenes is a form that persists. The named layer opens on THIS layer's final pose (centres matched, size matched by scale, rotation carried) and then animates away into its own geometry, so the handover is exact by construction instead of hand-aligned and hoped for. `becomesDur` (default 0.9) and `becomesEase` shape the handover. validate fails if the two do not meet at the boundary. See docs/CRAFT/KEYED-MOTION.md."
     },
     "becomesDur": {
      "type": "number",
-     "label": "Seconds the incoming layer takes to settle from the handed-over pose into its own (default 0.42)."
+     "label": "Seconds the incoming layer takes to settle from the handed-over pose into its own (default 0.9)."
     },
     "becomesEase": {
      "type": "string",
-     "label": "Easing for the handover settle (default easeOutCubic)."
+     "label": "Easing for the handover settle (default easeInOutCubic)."
     },
     "panWith": {
      "type": "string",
