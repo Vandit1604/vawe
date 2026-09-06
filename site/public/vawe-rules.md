@@ -99,11 +99,11 @@ Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are 
 
 ## Cuts (27)
 
-`"cuts": [{ "t": 3.2, "style": "punch" }]`, `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `matchCut` · `jitter`
+`"transitions": [{ "at": 3.2, "fx": "punch" }]`, `none` · `fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur` · `matchCut` · `jitter`
 
 ## Shader stings (35)
 
-`"stings": [{ "t": 3.2, "fx": "flash", "colors": ["#2563eb"], "intensity": 0.5 }]`
+`"transitions": [{ "at": 3.2, "fx": "flash", "colors": ["#2563eb"], "intensity": 0.5 }]`
 
 `flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh` · `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl` · `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion` · `gridPixelateWipe` · `iridescence` · `cinematicZoom`
 

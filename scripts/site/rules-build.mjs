@@ -118,11 +118,11 @@ Entrances decelerate (\`easeOut*\`), exits accelerate (\`rush\`), ambient loops 
 
 ## Cuts (${CUTS.length})
 
-\`"cuts": [{ "t": 3.2, "style": "punch" }]\`, \`${CUTS.join('` · `')}\`
+\`"transitions": [{ "at": 3.2, "fx": "punch" }]\`, \`${CUTS.join('` · `')}\`
 
 ## Shader stings (${STINGS.length})
 
-\`"stings": [{ "t": 3.2, "fx": "flash", "colors": ["#2563eb"], "intensity": 0.5 }]\`
+\`"transitions": [{ "at": 3.2, "fx": "flash", "colors": ["#2563eb"], "intensity": 0.5 }]\`
 
 \`${STINGS.join('` · `')}\`
 
