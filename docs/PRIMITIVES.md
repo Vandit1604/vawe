@@ -156,19 +156,21 @@ them and stays order-independent: `make probe` + `make canvas-purity` pass on a 
 
 ## Unified transitions (`core/transitions/lower.js`): one field, routed to the right mechanism
 
-The four mechanisms above (`anim` · `cut` · `sting` · `seam`) are the machinery; author through **one
-surface** and the engine routes by name (the catalog in `core/transitions/catalog.js`). Lowered to the raw
-fields at load, so it is pure sugar: determinism and every gate are unchanged.
-- **Boundary** `transitions: [{ at, fx, dur?, dir?, timing?, mech? }]`, a transition between two beats.
-  `fx` selects the mechanism: seam-only (`whipPan`/`crossWarp`/`cinematicZoom`) → **seam**; `whip`/
-  `punch`/`zoom` → **cut**; `glitch`/`chromaticSplit` → **sting**. The ambiguous basics (`fade`/`slide`/
-  `wipe`/`dissolve`/`push`/`uncover`) default to a cheap root **cut**; `mech: "seam"` upgrades to the
-  two-scene blend.
-- **Layer** `{ …, transition: { in, out, dir?, dur? } }`. Sugar over `anim`/`out` on a single layer.
-- A raw `cuts`/`stings`/`seams`/`anim` value set on the same beat/layer wins; an unroutable `fx` (a
-  typo, or a layer-only anim like `pop` used as a boundary) is rejected at validate, never coerced.
+The four mechanisms above (`anim` · `cut` · `sting` · `seam`) are the machinery; author a **boundary**
+transition (between two beats) through **one surface** and the engine routes it by name (the catalog in
+`core/transitions/catalog.js`). Lowered to the raw fields at load, so it is pure sugar: determinism and
+every gate are unchanged.
+- `transitions: [{ at, fx, dur?, dir?, timing?, mech? }]`. `fx` selects the mechanism: seam-only
+  (`whipPan`/`crossWarp`/`cinematicZoom`) → **seam**; `whip`/`punch`/`zoom` → **cut**;
+  `glitch`/`chromaticSplit` → **sting**. The ambiguous basics (`fade`/`slide`/`wipe`/`dissolve`/`push`/
+  `uncover`) default to a cheap root **cut**; `mech: "seam"` upgrades to the two-scene blend.
+- A raw `cuts`/`stings`/`seams` value set on the same beat wins; an unroutable `fx` (a typo, or a
+  layer-only anim like `pop` used as a boundary) is rejected at validate, never coerced.
 - **See any transition before authoring**: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
   renders a labelled A→B filmstrip. Decision theory: `docs/CRAFT/TRANSITIONS.md`.
+- A layer's own entrance/exit is `anim`/`out` directly, not a second sugar over the same fields: a
+  `{ transition: { in, out, dir?, dur? } }` shorthand used to live here too and was removed for
+  measuring zero users across the library while duplicating `anim`/`out` exactly.
 
 ## Ambient shader looks (`core/surfaces/shaders-ambient.js`): 23 continuous WebGL fields (the `shader` layer)
 
@@ -813,6 +815,20 @@ Not the same as its neighbours, and the difference is what to reach for:
 - **vs `glass`**: `backdrop-filter` reads what is *behind* a layer, but only through the CSS filter
   functions: it can blur and saturate that backdrop uniformly. It cannot **bend** it. `glass` for a
   frosted panel over a scene, `resample:"refract"` when the pixels should displace like real glass.
+
+## Two shared kit props nobody had found (`core/layers/util.js`): `progressiveBlur`, `borderTrail`
+
+Both are on every layer, alongside `glass`, and both were fully built with no doc line and no arsenal
+entry, so they measured zero users across the library for being unfindable rather than unwanted.
+
+- **`progressiveBlur: true | { dir, max, start }`**: a directional blur fog on the backdrop that ramps
+  toward one edge (motion-primitives' ProgressiveBlur). Fades a dense grid, list or feed into an edge
+  far more cleanly than one flat blur or a vignette. `dir` (top/bottom/left/right) is the edge the blur
+  intensifies toward, `max` the blur px at that edge, `start` the 0..1 fraction of the span that stays
+  sharp before the ramp begins.
+- **`borderTrail: true | { color, width, period, arc }`**: a glowing arc that orbits the layer's border
+  (motion-primitives' BorderTrail), a ring mask over a spinning conic wedge. `width` in px, `period` in
+  seconds per orbit, `arc` in degrees. Emphasis for a CTA or an end card.
 
 ## Raymarched 3D (`core/surfaces/raymarch-fx.js`) · the `raymarch` layer type, 6 scenes
 

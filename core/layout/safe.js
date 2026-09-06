@@ -324,7 +324,7 @@ export function settleWindow(L = {}) {
   const st = Number(L.start ?? 0) || 0;
   const en = L.split ? 0 : (L.enterDur != null ? Number(L.enterDur) : DEFAULT_ENTER);
   const du = L.duration != null ? Number(L.duration) : Infinity;
-  const exD = L.fxOut ? 0 : (L.exitDur != null ? Number(L.exitDur) : DEFAULT_EXIT_DUR);
+  const exD = L.exitDur != null ? Number(L.exitDur) : DEFAULT_EXIT_DUR;
   const t0 = st + en + ARRIVED_PAD;
   const t1 = du === Infinity ? Infinity : (L.out ? st + du - exD - ARRIVED_PAD : st + du);
   return t1 > t0 ? { t0, t1 } : null;

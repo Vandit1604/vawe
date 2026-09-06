@@ -38,7 +38,7 @@ const { SEAM_FX } = await import('../../core/timeline/seams.js');
 const { SHADER_FX } = await import('../../core/stings/index.js');
 const { LOOK_NAMES } = await import('../../core/looks/index.js');
 const { BG_NAMES } = await import('../../core/backgrounds/index.js');
-const { GSAP_FX, EXIT_FX } = await import('../../core/engine/gsap-effects.js');
+const { GSAP_FX } = await import('../../core/engine/gsap-effects.js');
 const { AMBIENT_FX } = await import('../../core/surfaces/shaders-ambient.js');
 const { RAYMARCH_FX } = await import('../../core/surfaces/raymarch-fx.js');
 const { THREE_FX } = await import('../../core/surfaces/three-scenes.js');
@@ -50,7 +50,7 @@ const { PAINT_FX_NAMES } = await import('../../core/surfaces/paint-fx.js');
 const FAMILIES = [
   ['kinetic preset', Object.keys(PRESETS)], ['anim', ANIM_NAMES], ['cut', Object.keys(PRESENTATIONS)],
   ['seam', SEAM_FX], ['sting', SHADER_FX], ['look', LOOK_NAMES], ['background', BG_NAMES],
-  ['gsap fx', GSAP_FX], ['gsap exit', EXIT_FX], ['ambient shader', AMBIENT_FX],
+  ['gsap fx', GSAP_FX], ['ambient shader', AMBIENT_FX],
   ['raymarch', RAYMARCH_FX], ['three scene', THREE_FX], ['camera move', CAMERA_MOVE_NAMES],
   ['modifier', FX_TYPES], ['part entrance', PART_NAMES], ['paint fx', PAINT_FX_NAMES],
 ];

@@ -1,25 +1,26 @@
-// core/transitions-lower.js: the UNIFIED transition surface, lowered to the four raw mechanisms.
+// core/transitions-lower.js: the UNIFIED transition surface, lowered to the raw mechanisms.
 //
-// An author has ONE way to declare a transition; the engine routes it to the correct mechanism:
-//   • boundary (between two beats)  →  data.transitions: [{ at, fx, dur, dir, timing, mech? }]
-//   • layer entrance/exit           →  layers[].transition: { in, out, dir, dur }
+// An author declares a BOUNDARY transition (between two beats) in one place, and the engine routes it
+// to the correct mechanism: data.transitions: [{ at, fx, dur, dir, timing, mech? }].
 //
 // This is PURE SUGAR: lowerScene() expands the unified surface into the raw fields the engine already
-// renders (data.cuts / data.stings / data.seams / layer.anim|out), then the existing parsers take over
-// untouched. So the render path, the seam bake, cutStyle and every gate are unchanged, the unified API
-// adds a normalisation pass, it does not rewrite anything. Determinism is preserved (a pure data→data
+// renders (data.cuts / data.stings / data.seams), then the existing parsers take over untouched. So
+// the render path, the seam bake, cutStyle and every gate are unchanged, the unified API adds a
+// normalisation pass, it does not rewrite anything. Determinism is preserved (a pure data→data
 // transform in array order), and a scene that uses no unified key lowers to a byte-identical no-op.
 //
 // Routing is a LOOKUP, not a heuristic: core/transitions.js already maps every fx to its mechanism(s).
+//
+// A per-layer `transition: { in, out, dir, dur }` sugar used to live here too, expanding to
+// anim/out/dir/enterDur/exitDur on lowerScene. It duplicated those five fields exactly, with no
+// motion it could express that writing them directly could not, and it measured zero users across
+// every scene in the library. Removed rather than kept as a second way to say `anim`/`out` (#gsap-audit).
 import { TRANSITIONS } from './catalog.js';
 import { resolveSeconds } from '../registry/vocab.js';
 import { parseColor } from '../motion/motion.js';
 import { ENERGY, okEnergy } from './energy.js';
 
-// The layer prop THIS file reads, declared beside the read (core/props.js). lowerScene() consumes it
-// and deletes it before any builder sees the layer, so no registry declares it and the schema was
-// advertising a prop the declared vocabulary could not account for.
-export const PROPS = { transition: {} };
+export const PROPS = {};
 
 // fx name → the set of mechanisms that implement it (derived from the catalog, so it can't drift).
 const MECHS_OF = new Map();
@@ -155,19 +156,6 @@ export function lowerScene(data) {
     for (const c of L.children || []) timings(c);
   };
 
-  for (const L of data.layers || []) {
-    timings(L);
-    const tr = L && L.transition;
-    if (!tr || typeof tr !== 'object') continue;
-    durs(tr, ['dur']);
-    if (tr.in != null && L.anim == null) L.anim = tr.in;      // layer entrance
-    if (tr.out != null && L.out == null) L.out = tr.out;      // layer exit
-    if (tr.dir != null && L.dir == null) L.dir = tr.dir;
-    if (tr.dur != null) {
-      if (tr.in != null && L.enterDur == null) L.enterDur = tr.dur;
-      if (tr.out != null && L.exitDur == null) L.exitDur = tr.dur;
-    }
-    delete L.transition;
-  }
+  for (const L of data.layers || []) timings(L);
   return data;
 }

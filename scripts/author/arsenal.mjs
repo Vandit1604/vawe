@@ -1,13 +1,15 @@
 // arsenal.mjs: ask the arsenal for the thing you mean, in plain English.
 //
 //   node scripts/author/arsenal.mjs "a page scrolling under a static tilt"
-//   node scripts/author/arsenal.mjs "leave the frame" --kind "gsap exit"
+//   node scripts/author/arsenal.mjs "leave the frame" --kind "gsap fx"
 //   node scripts/author/arsenal.mjs --census            # what is built and never used
 //
 // WHY. The census that prompted this is not close: the `{type:"beat"}` blueprint mechanism, which
 // CLAUDE.md names as the #1 defence against a plain slideshow, is used by 2 of 153 scenes, and 11 of
-// its 19 beats have zero users. `EXIT_FX`, eleven named exits, is used by NONE, while every film still
-// needs its layers to leave. That instruction has been given for months and obeyed twice, so the
+// its 19 beats have zero users. `EXIT_FX`, eleven named exits, was used by NONE and was deleted whole
+// rather than left uncatalogued (docs/MISTAKES.md #364): every film still needs its layers to leave,
+// and `out` already reaches every motion that family named. That instruction has been given for
+// months and obeyed twice, so the
 // problem is not persuasion: 566 effects reachable only by reading an 849-line generated file are not
 // reachable. An author who cannot find the thing re-derives a worse version of it, which is exactly
 // how sixteen layers ended up saying `preset: "up"`.

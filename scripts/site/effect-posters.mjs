@@ -72,18 +72,8 @@ const FAMILY_POSTER = {
   'shader-stings': (scene) => scene.stings[0].t + 0.25,
   'seams-2-scene-blends': (scene) => scene.seams[0].t + scene.seams[0].dur / 2,
 
-  // The effect on show here is the EXIT (`fxOut`), not the plain `rise` entrance ahead of it. The
-  // scene's own `exitDur` prop (1s here) is NOT the ramp fxOut actually plays: every EXITS entry in
-  // core/gsap-effects.js carries its own short tween (0.45-0.6s, `.in`-eased so most of the visible
-  // motion crams into its last third) anchored to the layer's own end, independent of `exitDur`.
-  // Confirmed by rendering candidate frames across five exits (blurOut/dropOut/spinOut/collapseOut/
-  // fadeOut): the layer is still fully settled half a second before its end and fully gone a
-  // hundredth of a second before it; 0.05s before the end reliably lands mid-flight (faded, moved
-  // or rotated, still legible) for all five.
-  'gsap-exits': (scene) => {
-    const l = scene.layers[0];
-    return l.start + l.duration - 0.05;
-  },
+  // `gsap-exits` (the named `fxOut` family) used to have its own poster timing here. Deleted with the
+  // family itself: all 11 names measured zero users across the library (docs/MISTAKES.md #364).
 };
 
 // Default: 45% into the layer's own entrance. `enterDur` names it directly; `each` is the
