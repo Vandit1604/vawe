@@ -82,7 +82,7 @@ publishes the equation. Both send you to a generator tool
 https://m1.material.io/motion/duration-easing.html). So this curve comes from our own films.
 
 Every keyed move in the 135 gate-visible scenes, taking only the segments the engine treats as a span
-rather than as one step of a traced path (`DENSE_KEY_SEC`, `core/sequence.js`): **345 moves.** Sorted
+rather than as one step of a traced path (`DENSE_KEY_SEC`, `core/timeline/sequence.js`): **345 moves.** Sorted
 into distance buckets, the median speed barely moves.
 
 | Distance | Moves | Median speed |
@@ -136,7 +136,7 @@ They read the authored JSON, so they cost about a second and change no pixel.
 | `tempo-flat` | slowest `enterDur` ÷ fastest, over 4 or more | **under 1.5x** | the speed dials span 0.25s to 1.2s, about 3x; 1.5x is the floor, 3x is the target |
 
 **What each one does NOT see.** `stagger-total` skips a RATE: `preset:"type"` is a typewriter and
-`preset:"wave"` is a looping phase (`core/type.js`), so for both the step is the effect's speed and its
+`preset:"wave"` is a looping phase (`core/type/type.js`), so for both the step is the effect's speed and its
 total is the shot length by design. It also cannot count `parts`, which selects its children at render
 time. `tempo-flat` reads only an explicit `enterDur`; a scene that leans on the engine default has one
 tempo and says nothing about it, and stays silent here. `shared-start` counts top-level layers only,
@@ -283,7 +283,7 @@ so it lands at rest at both ends. Three keys therefore read as two moves with a 
 equals the velocity leaving it and the whole track reads as one travel. Reach for it whenever a track
 has an interior key that is a waypoint rather than a destination: a camera passing a subject, a card
 crossing the frame and continuing, a counter that changes rate without pausing. It is not an easing (it
-is dispatched before `resolveEasing`, `core/sequence.js`), which is exactly why it was invisible here.
+is dispatched before `resolveEasing`, `core/timeline/sequence.js`), which is exactly why it was invisible here.
 
 **2. A key has TWO sides, and their shape is the speed graph.** A handle carries an influence (how far
 along the segment it reaches) and a speed (its slope), so `{ "t": 1.2, "x": 400, "out": "fling" }` shapes
@@ -427,7 +427,7 @@ which is why it's written down.
 
 ## Wave-1 effect selection (colour grades · glow · captions)
 
-Colour-grade filter presets (any layer, `filter:`, core/filters.js):
+Colour-grade filter presets (any layer, `filter:`, core/looks/filters.js):
 - **duotone**: collapse a busy photo into two brand colours so it reads as graphic, not photographic; the bare default (ink to accent) makes any image on-brand instantly.
 - **tritone**: duotone with a mid-tone, for photos that lose too much in two colours (faces, product shots).
 - **gradientMap**: a full stylised grade for hero imagery that should feel art-directed, not filtered.
@@ -442,7 +442,7 @@ Glow presets (`type:"glow"`, `preset:`, core/layers/glow.js):
 - **rimLight**: edge-light a subject placed to the crescent's upper-right; gives a cutout dimension.
 - **spotlight**, stage a reveal: aim the cone (angle, default from above-left) at what enters next.
 
-Caption styles (`captionStyle:`, core/captions.js; word-timed, degrade to length-proportional pacing):
+Caption styles (`captionStyle:`, core/type/captions.js; word-timed, degrade to length-proportional pacing):
 - **highlight**: marker-pen emphasis with a read trail; the default when the caption IS the content.
 - **pillKaraoke**: the loudest, most social; fast hype cuts over busy footage, never over dense UI.
 - **weightShift**: the quietest; product demos and calm brand films; needs a multi-weight face.

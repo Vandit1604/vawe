@@ -76,10 +76,10 @@ fixing a layout. It now measures the ink for layers that paint no box of their o
 | piece | status | proof |
 |---|---|---|
 | Per-aspect gate, `make audit ASPECT=…` | **SHIPS** | `Makefile:302` passes `--aspect` through to `verify/audit.mjs`, mirroring `bin/vawe`. It also reports a scene that fails to boot instead of dying on an uncaught `TypeError`, which is how four unloadable scenes stayed invisible. |
-| One safe area, keyed on destination | **SHIPS** | `safeArea()` at `core/safe.js:121`, throwing on an unknown destination at `:123`. There used to be four disagreeing safe zones, because "safe" was three ideas at once: a margin, a platform's chrome, and an anchor. One function answers all of it, and placement and checking share it, so `pin:"bottom"` cannot fail. |
-| Per-aspect overrides, `aspects: { "9:16": {…} }` | **SHIPS** | Validated per declared ratio at `core/validate.mjs:207-213`; `aspects` is in the shared prop list at `formats/scene/schema.json:8`. An override cannot reintroduce the centring trap at one ratio only. |
+| One safe area, keyed on destination | **SHIPS** | `safeArea()` at `core/layout/safe.js:121`, throwing on an unknown destination at `:123`. There used to be four disagreeing safe zones, because "safe" was three ideas at once: a margin, a platform's chrome, and an anchor. One function answers all of it, and placement and checking share it, so `pin:"bottom"` cannot fail. |
+| Per-aspect overrides, `aspects: { "9:16": {…} }` | **SHIPS** | Validated per declared ratio at `core/validate/validate.mjs:207-213`; `aspects` is in the shared prop list at `formats/scene/schema.json:8`. An override cannot reintroduce the centring trap at one ratio only. |
 | A scene composed for all five ratios | **SHIPS** | `formats/scene/aspects-demo.json`, which passes `make audit ASPECT=all`. |
-| Layout that RESOLVES rather than gets computed | **PART** | The refusal half ships: a centring keyword with nothing to centre is a VALIDATE error (`core/validate.mjs` `layoutErrors`), on both axes, in one place, imported by `verify/audit.mjs`. The **measure** half, `center` sizing itself from the rendered layer, is **NOT BUILT**. It moves every centred layer, so it stays deliberate. |
+| Layout that RESOLVES rather than gets computed | **PART** | The refusal half ships: a centring keyword with nothing to centre is a VALIDATE error (`core/validate/validate.mjs` `layoutErrors`), on both axes, in one place, imported by `verify/audit.mjs`. The **measure** half, `center` sizing itself from the rendered layer, is **NOT BUILT**. It moves every centred layer, so it stays deliberate. |
 | The y-axis version of the same trap | **PART** | Checked, except on text and count, where `size*1.2` is the estimate and enough scenes have tuned around it that changing it would move shipped content. That carve-out is pinned in `make gate-test`. |
 | **Library-wide adoption** | **NOT BUILT** | Counted on this branch over the 170 JSON files in `formats/scene/`: `"aspects"` appears in **1** scene (`aspects-demo.json`), `"col"` in **0**, `"pin"` in **14**. The relative-coordinate system is one demo and fourteen pins. Everything else is hand-placed absolute pixels tuned to a 1920x1080 canvas. |
 
@@ -92,7 +92,7 @@ aspect; a scene is composed for the ones it declares), or compose the films for 
 
 | Tier | Substrate | Cost | Why |
 |---|---|---|---|
-| **1** | CSS / SVG filters | hours | `filter`, `mask`, `clip-path`, `mix-blend-mode`, `background-clip`, `@keyframes` evaluated at `t`. Already how `core/cuts.js` and `core/type.js` work. |
+| **1** | CSS / SVG filters | hours | `filter`, `mask`, `clip-path`, `mix-blend-mode`, `background-clip`, `@keyframes` evaluated at `t`. Already how `core/cuts/index.js` and `core/type/type.js` work. |
 | **2** | Canvas 2D | hours-days | Per-pixel work that does not need the GPU. Halftone, dither, ASCII, pixel-sort. |
 | **3** | GLSL fragment shader | days | Per-pixel, per-frame, keyed on `(progress, seed)` only. Most items are a new `SHADER_FX` entry. |
 | **4** | Three.js / WebGL scene | days-weeks | Real geometry, depth, raymarching. Its layer type now ships; see Tier 4. |
@@ -105,29 +105,29 @@ aspect; a scene is composed for the ones it declares), or compose the films for 
 | Lower Thirds, all twelve variants | **SHIPS** | `lowerThird` at `blocks/core.mjs:230`; `BLOCKS` carries `lowerThird.cleanBar` · `.boldBlock` · `.bild` · `.darkCard` · `.sideRule` · `.kickerName` · `.accentUnderline` · `.maskReveal` · `.softPill` · `.colourBlock` · `.stackBars` · `.newsTicker`. |
 | Social Overlays: X post · Reddit · Spotify · YouTube · follow | **SHIPS** | `tweetCard` · `redditPost` · `nowPlaying` · `videoLowerThird` · `followCard`, all in `BLOCKS` (`blocks/index.mjs`). Licence caveat stands: ship the *shape*, never a platform's logo lockup, unless the mark is used nominatively. |
 | macOS notification | **PART** | No macOS-specific block. `notification` (plus `.warn` · `.error` · `.stack`) covers the shape without the platform chrome. |
-| CSS Transitions: 3D · blur · cover · push · radial · scale · mechanical | **SHIPS** | `PRESENTATIONS` in `core/cuts.js` holds 27 entries: `cube` (3D) · `blur` · `slide` (cover) · `wipe` · `iris` · `zoom` (scale) · `squeeze` · `blinds` · `barn` · `flip` · `roll` · `letterbox` · `skewWhip` · `matchCut` and more. |
-| CSS Transitions: dissolve · grid | **NOT BUILT** *as cuts* | Neither name is in `PRESENTATIONS`. The dissolve exists one level up as `SEAM_FX.dissolve` (`core/seams.js:32`) and as `RESAMPLE_FX.dissolve`; the grid one exists as `SHADER_FX.gridPixelateWipe` (`core/stings.js:33`). Both are reachable, neither is a cut. |
-| grain overlay · vignette · shimmer sweep · parallax zoom | **SHIPS** | `filmGrain` in `AMBIENT_FX`; `vignette` in `FILTER_PRESETS` (`core/filters.js`); `shimmerWave` in `core/type.js` presets; `ken` on an image layer (`formats/scene/schema.json:1327`). |
-| Captions: highlight · pill karaoke · neon accent · weight shift · clip wipe | **SHIPS** | `CAP_STYLES` holds 19 (`core/captions.js`): `highlight` · `pillKaraoke` · `neonEdge` · `weightShift` · `clipWipe`, plus `kineticSlam` · `underlineDraw` · `flipUp` · `ghostSplit` · `waveRide` · `scramble` · `wordFlash` · `wordSlide` · `typeOn` · `readerFocus` · `inkFill` · `focusPull` · `letterRise` · `weightWave`. |
+| CSS Transitions: 3D · blur · cover · push · radial · scale · mechanical | **SHIPS** | `PRESENTATIONS` in `core/cuts/index.js` holds 27 entries: `cube` (3D) · `blur` · `slide` (cover) · `wipe` · `iris` · `zoom` (scale) · `squeeze` · `blinds` · `barn` · `flip` · `roll` · `letterbox` · `skewWhip` · `matchCut` and more. |
+| CSS Transitions: dissolve · grid | **NOT BUILT** *as cuts* | Neither name is in `PRESENTATIONS`. The dissolve exists one level up as `SEAM_FX.dissolve` (`core/timeline/seams.js:32`) and as `RESAMPLE_FX.dissolve`; the grid one exists as `SHADER_FX.gridPixelateWipe` (`core/stings/index.js:33`). Both are reachable, neither is a cut. |
+| grain overlay · vignette · shimmer sweep · parallax zoom | **SHIPS** | `filmGrain` in `AMBIENT_FX`; `vignette` in `FILTER_PRESETS` (`core/looks/filters.js`); `shimmerWave` in `core/type/type.js` presets; `ken` on an image layer (`formats/scene/schema.json:1327`). |
+| Captions: highlight · pill karaoke · neon accent · weight shift · clip wipe | **SHIPS** | `CAP_STYLES` holds 19 (`core/type/captions.js`): `highlight` · `pillKaraoke` · `neonEdge` · `weightShift` · `clipWipe`, plus `kineticSlam` · `underlineDraw` · `flipUp` · `ghostSplit` · `waveRide` · `scramble` · `wordFlash` · `wordSlide` · `typeOn` · `readerFocus` · `inkFill` · `focusPull` · `letterRise` · `weightWave`. |
 | Captions: gradient fill · editorial emphasis · emoji pop | **NOT BUILT** | None of the three is a `CAP_STYLES` key. |
-| Text Effects: blend difference · texture mask | **NOT BUILT** *as named presets* | No preset in `core/type.js`, `core/filters.js` or `core/looks.js` owns either name. Both are authorable by hand: `mix-blend-mode` is not on `core/sanitize-html.js`'s refused list, and `mask` is a layer prop (`formats/scene/schema.json:1291`). |
-| glow/light: bloom · halation | **SHIPS** | `bloom` in `FILTER_PRESETS`; `halationFilm` in `LOOKS` (`core/looks.js:197`, 31 entries). |
+| Text Effects: blend difference · texture mask | **NOT BUILT** *as named presets* | No preset in `core/type/type.js`, `core/looks/filters.js` or `core/looks/index.js` owns either name. Both are authorable by hand: `mix-blend-mode` is not on `core/type/sanitize-html.js`'s refused list, and `mask` is a layer prop (`formats/scene/schema.json:1291`). |
+| glow/light: bloom · halation | **SHIPS** | `bloom` in `FILTER_PRESETS`; `halationFilm` in `LOOKS` (`core/looks/index.js:197`, 31 entries). |
 | glow/light: diffusion · rim light | **NOT BUILT** | Neither name appears in `FILTER_PRESETS`, `LOOKS` or `AMBIENT_FX`. |
-| glow/light: spotlight cone | **PART** | `spotlight` exists as a BACKGROUND (`core/backgrounds.js:152`), a radial glow travelling across the frame. There is no per-layer cone. |
-| duotone · tritone · gradient-map · posterize · sepia | **SHIPS** | All five are `FILTER_PRESETS` keys (15 total, `core/filters.js`). |
+| glow/light: spotlight cone | **PART** | `spotlight` exists as a BACKGROUND (`core/backgrounds/index.js:152`), a radial glow travelling across the frame. There is no per-layer cone. |
+| duotone · tritone · gradient-map · posterize · sepia | **SHIPS** | All five are `FILTER_PRESETS` keys (15 total, `core/looks/filters.js`). |
 | Code snippet themes, twenty-four | **PART, and the rest is content** | Fourteen WCAG-checked `codeBlock.*` themes ship (`.light` · `.py` · `.midnight` · `.ember` · `.forest` · `.ocean` · `.neon` · `.paper` · `.ink` · `.dusk` · `.slate` · `.aurora` · `.linen` · `.frost`) with catalog rows. Going further is a token set, not a feature. |
 
 ## Tier 2: Canvas 2D
 
-**Shipped (`core/canvas-fx.js`, `canvasFx` on an image layer):** `CANVAS_FX` = 8, mosaic · dither ·
+**Shipped (`core/canvas/effects.js`, `canvasFx` on an image layer):** `CANVAS_FX` = 8, mosaic · dither ·
 halftone · stipple · ascii · edgeDetect · pixelSort · crosshatch, plus stylized presets
 blueprint/comic/risograph/sketch/matrix/newsprint. Determinism story settled: **baked once at build**
 (boot's awaited preload into a static PNG), so the pixels never change per frame. Probe and snap
 prove it. See `docs/DESIGN-NOTES/tier5.md` for the general carve-out taxonomy this used.
 
-**The generative half ships.** `paint` is a layer type (`core/surfaces/paint.js` + `core/paint-fx.js`):
+**The generative half ships.** `paint` is a layer type (`core/surfaces/paint.js` + `core/surfaces/paint-fx.js`):
 a Canvas 2D surface redrawn every frame as a pure function of local time, mirroring how `shader`
-works. That is the piece **Matrix Decode** was waiting on. `PAINT_FX` = 5 (`core/paint-fx.js:38`):
+works. That is the piece **Matrix Decode** was waiting on. `PAINT_FX` = 5 (`core/surfaces/paint-fx.js:38`):
 `matrix` · `starfield` · `aurora` · `meteor` · `waves`. The contract each keeps: no accumulation, no
 `Math.random`/`Date`, and CLOSED-FORM motion (a particle's position is f(lt), never "last position
 plus velocity"), which is exactly the line between this tier and the sims in Tier 5. Guarded by
@@ -149,7 +149,7 @@ P-frame freeze (codec plus stateful), feedback and phosphor trails (frame feedba
 
 ## Tier 3: GLSL
 
-`SHADER_FX` holds 35 entries (`core/stings.js:35`) and `AMBIENT_FX` 23 (`core/shaders-ambient.js:49`);
+`SHADER_FX` holds 35 entries (`core/stings/index.js:35`) and `AMBIENT_FX` 23 (`core/surfaces/shaders-ambient.js:49`);
 between them the families below are majority built. This section used to read as a wish-list and sent
 two consecutive planning passes at work that already existed.
 
@@ -157,14 +157,14 @@ two consecutive planning passes at work that already existed.
 |---|---|---|
 | Shader Transitions, all 14 | **SHIPS** | `SHADER_FX` = 35, including chromaticSplit · crossWarp · domainWarp · sdfIris · vortex · ridgedBurn · ripple · lens · thermal · leak · flash · whipPan · glitch · `cinematicZoom`, the GLSL sibling of the `PRESENTATIONS.zoom` cut. A generative overlay cannot smear the pixels under it, so it sells the dolly with the artefacts one leaves: radial streaks dying at the optical centre, a compressing rim, a centre bloom at peak speed. |
 | chromatic family, all 5 | **SHIPS** | `chromaSplit` and `chromaGlow` in `FILTER_PRESETS`; `dispersion` and `iridescence` in `SHADER_FX`; `chromaShift` in `RESAMPLE_FX`. |
-| analog/retro: vhs · crt · film grain · light leak · dot crawl · gate weave · nebula | **SHIPS** | `AMBIENT_FX` (`core/shaders-ambient.js`); `LOOKS` adds vhs · super8 · crt. `gateWeave` rides the gate border, the dust and the hair on one closed-form offset, so the picture floats without anything being sampled. |
+| analog/retro: vhs · crt · film grain · light leak · dot crawl · gate weave · nebula | **SHIPS** | `AMBIENT_FX` (`core/surfaces/shaders-ambient.js`); `LOOKS` adds vhs · super8 · crt. `gateWeave` rides the gate border, the dust and the hair on one closed-form offset, so the picture floats without anything being sampled. |
 | CRT phosphor *trails* | **NOT BUILT, excluded** | Frame feedback. See the rule at the top. |
 | distortion: barrel · heat shimmer · ripple · vortex · kaleidoscope · displace/melt · fisheye · macroblock | **SHIPS** | `AMBIENT_FX` for the first five, `FILTER_PRESETS.displace` and `LOOKS.melt`, `fisheye` and `macroblock` in `RESAMPLE_FX`. The old "missing real block displacement" line is answered by `macroblock`. |
 | blur/motion: bokeh · zoom blur · spin blur · frosted glass | **SHIPS** | `zoomBlur` and `spinBlur` in `RESAMPLE_FX` (8 entries: zoomBlur · spinBlur · fisheye · bitCrush · macroblock · dissolve · refract · chromaShift). Frosted glass has two answers: the `glass` prop (`backdrop-filter`) for a blurred backdrop, `resample:"refract"` for real bending. |
-| **Portal** | **SHIPS** | `SEAM_FX` entry, `core/seams.js:32`, blurb at `:55`. This page listed it as "still absent". |
-| **Shatter** | **SHIPS** | `THREE_FX` key, `core/three-scenes.js:25`. One slab holds, then breaks into a seeded grid of shards. |
-| **Liquid Background** | **SHIPS** | `THREE_FX` key, `core/three-scenes.js:27`. |
-| **Code Shader Dissolve** | **SHIPS** | `codeDissolve` in `THREE_FX` (`core/three-scenes.js:29`); `lines` is declared as its source snippet at `core/three-fx.js:35`. It was listed as blocked on Seam C, and Seam C is built. |
+| **Portal** | **SHIPS** | `SEAM_FX` entry, `core/timeline/seams.js:32`, blurb at `:55`. This page listed it as "still absent". |
+| **Shatter** | **SHIPS** | `THREE_FX` key, `core/surfaces/three-scenes.js:25`. One slab holds, then breaks into a seeded grid of shards. |
+| **Liquid Background** | **SHIPS** | `THREE_FX` key, `core/surfaces/three-scenes.js:27`. |
+| **Code Shader Dissolve** | **SHIPS** | `codeDissolve` in `THREE_FX` (`core/surfaces/three-scenes.js:29`); `lines` is declared as its source snippet at `core/surfaces/three-fx.js:35`. It was listed as blocked on Seam C, and Seam C is built. |
 | **Glitch RGB captions** | **NOT BUILT** | None of the 19 `CAP_STYLES` is a glitch or RGB style. `LOOKS.glitchGlow` is a whole-frame look, not a caption style. |
 
 **True multi-sample motion blur is not this tier.** It means rendering sub-frames and accumulating: a
@@ -172,17 +172,17 @@ render-pipeline change, not a shader. Tier 5.
 
 ### Sampling: which seams exist
 
-The old diagnosis stands. `core/stings.js` and `core/shaders-ambient.js` contain **zero**
+The old diagnosis stands. `core/stings/index.js` and `core/surfaces/shaders-ambient.js` contain **zero**
 `sampler2D`/`texture2D`, and both are purely GENERATIVE overlays composited above the scene. Nothing
 in *that* path can sample what is behind it. What changed is that the sampling path no longer goes
 through it.
 
 | seam | status | proof |
 |---|---|---|
-| **A** · canvas sources (`paint`, `shader`) | **SHIPS** | `sourceOf()` at `core/resample.js:38` returns the element's stashed surface canvas. |
-| **B** · image sources (an `image` layer's `<img>`) | **SHIPS** | The same function, falling through to the `<img>` at `core/resample.js:40`. Spec `{ fx, amount, speed, seed }` on the layer, `amount` optionally `[from, to]` so the effect animates across the layer's own window. |
-| **C** · an arbitrary DOM subtree | **SHIPS** | **This page said "still NOT built, and deliberately so". It is built.** A built subtree is baked to a texture once at boot through `core/raster.js` (`buildInlinedCss`, `domToCanvas`), awaited by `core/boot.js`, and the design is stated at `core/resample.js:14-26`. The validator's refusal narrowed exactly as planned: `UNSAMPLABLE` is now only `['raymarch','three','globe','video']` (`core/validate.mjs:1313`), the four types whose pixels live in a canvas or a video bitmap outside the DOM. **The cost, said plainly:** the bake is ONE INSTANT taken from the built DOM before any frame draws, so a `count` that ticks is frozen at it. The motion comes from the pass, not the source. That is a hero device on a settled beat, not a wrapper around a moving one. |
-| **D** · two-scene shader transitions | **SHIPS** | `core/seams.js`, `SEAM_FX` = 14 (`:32`): fade · dissolve · slide · push · uncover · wipe · crossWarp · whipPan · sdfIris · dispersion · lens · flashWhite · cinematicZoom · portal. The stage either side of a boundary is rasterised once at build into `u_from`/`u_to`, and a two-sampler shader keyed on `u_progress` blends. No WebGL, or a blank raster, degrades to a plain cross-fade. Author API: top-level `seams: [{ t, fx, dur, dir?, seed?, intensity? }]`. This was "the one thing the two reference engines have that we do not". |
+| **A** · canvas sources (`paint`, `shader`) | **SHIPS** | `sourceOf()` at `core/resample/index.js:38` returns the element's stashed surface canvas. |
+| **B** · image sources (an `image` layer's `<img>`) | **SHIPS** | The same function, falling through to the `<img>` at `core/resample/index.js:40`. Spec `{ fx, amount, speed, seed }` on the layer, `amount` optionally `[from, to]` so the effect animates across the layer's own window. |
+| **C** · an arbitrary DOM subtree | **SHIPS** | **This page said "still NOT built, and deliberately so". It is built.** A built subtree is baked to a texture once at boot through `core/resample/raster.js` (`buildInlinedCss`, `domToCanvas`), awaited by `core/engine/boot.js`, and the design is stated at `core/resample/index.js:14-26`. The validator's refusal narrowed exactly as planned: `UNSAMPLABLE` is now only `['raymarch','three','globe','video']` (`core/validate/validate.mjs:1313`), the four types whose pixels live in a canvas or a video bitmap outside the DOM. **The cost, said plainly:** the bake is ONE INSTANT taken from the built DOM before any frame draws, so a `count` that ticks is frozen at it. The motion comes from the pass, not the source. That is a hero device on a settled beat, not a wrapper around a moving one. |
+| **D** · two-scene shader transitions | **SHIPS** | `core/timeline/seams.js`, `SEAM_FX` = 14 (`:32`): fade · dissolve · slide · push · uncover · wipe · crossWarp · whipPan · sdfIris · dispersion · lens · flashWhite · cinematicZoom · portal. The stage either side of a boundary is rasterised once at build into `u_from`/`u_to`, and a two-sampler shader keyed on `u_progress` blends. No WebGL, or a blank raster, degrades to a plain cross-fade. Author API: top-level `seams: [{ t, fx, dur, dir?, seed?, intensity? }]`. This was "the one thing the two reference engines have that we do not". |
 | **Full-frame feedback** · sampling the COMPOSITED frame | **NOT BUILT, excluded** | The composite is one frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it. `resample` never samples its own previous output; guarded by `make probe` and `make canvas-purity`. |
 
 **On `vfx-js`, kept because the measurement is still the answer.** It is MIT, zero-dependency, and
@@ -195,18 +195,18 @@ effect chain and its shader library, never for the sampling, which we now own.
 ## Tier 4: Three.js / WebGL
 
 **The layer type ships.** This section was written as future work, and it was the "what I would build
-first" item 5. `core/surfaces/three.js` exists; `core/three-fx.js` declares the props at `:29-38`
+first" item 5. `core/surfaces/three.js` exists; `core/surfaces/three-fx.js` declares the props at `:29-38`
 behind an 18-line determinism contract at `:5-18` (no `THREE.Clock`, no `performance.now`, no
 `Date`, no rAF driving anything); `three` has a full schema entry (`formats/scene/schema.json:705`)
 and four scenes use it: `three-showcase.json` · `motion-reel.json` · `motion-reel-v2.json` ·
-`showcase-globe.json`. The registry is split into `core/three-scenes.js` on purpose, so a Node-side
+`showcase-globe.json`. The registry is split into `core/surfaces/three-scenes.js` on purpose, so a Node-side
 gate can read the names without resolving the browser-absolute three.js import.
 
 | named effect | status | proof |
 |---|---|---|
-| extruded 3D text | **SHIPS** | `extrudeText` in `THREE_FX` (`core/three-scenes.js:23`). |
-| wireframe / point cloud | **PART** | `pointCloud` ships (`core/three-scenes.js:22`). No wireframe scene: `THREE_FX` is the eleven scenes in `core/three-scenes.js` and none of them is one. |
-| metaballs · fractals (mandelbulb) · chrome glass · water caustics · holographic foil | **SHIPS** | `RAYMARCH_FX` = 6 (`core/raymarch-fx.js:28-36`): metaballs · mandelbulb · chromeGlass · caustics · holoFoil · glassRefract. |
+| extruded 3D text | **SHIPS** | `extrudeText` in `THREE_FX` (`core/surfaces/three-scenes.js:23`). |
+| wireframe / point cloud | **PART** | `pointCloud` ships (`core/surfaces/three-scenes.js:22`). No wireframe scene: `THREE_FX` is the eleven scenes in `core/surfaces/three-scenes.js` and none of them is one. |
+| metaballs · fractals (mandelbulb) · chrome glass · water caustics · holographic foil | **SHIPS** | `RAYMARCH_FX` = 6 (`core/surfaces/raymarch-fx.js:28-36`): metaballs · mandelbulb · chromeGlass · caustics · holoFoil · glassRefract. |
 | Code 3D Extrude · Code Morph · Code Snippet Flight | **SHIPS** | `codeExtrude` in `THREE_FX`; `codeMorph` and `codeFlight` in `BLOCKS` (`blocks/codeanim.mjs`). |
 | iPhone and MacBook 3D Showcase · 3D UI Reveal | **SHIPS** | `deviceShowcase` and `uiParallax` in `THREE_FX`; `uiReveal3d` at `blocks/vfx.mjs:305`. |
 | HTML-in-Canvas / Liquid Glass | **SHIPS** | Six blocks in `blocks/glass.mjs`: `glassHome` · `glassMenu` · `glassControls` · `glassNotification` · `glassWidgets` · `glassDock`, with real refraction behind them (`glass:"refract"`). **Honest note:** Apple documents Liquid Glass for Apple platforms only. Any web version is an approximation and should be labelled one, never implied to be the real control. |
@@ -220,7 +220,7 @@ gate can read the names without resolving the browser-absolute three.js import.
 
 These are **not** "hard", they are **unsolved for this engine**, and shipping them naively breaks the
 product's central claim. Audio-reactivity used to sit here and no longer does: `make spectrum` bakes
-per-frame band energy offline and the render reads row `n` of a table (`core/spectrum.js`), so it
+per-frame band energy offline and the render reads row `n` of a table (`core/tracks/spectrum.js`), so it
 never was a determinism problem once the analysis moved out of the frame.
 
 | item | status | proof |
@@ -238,7 +238,7 @@ an effect that quietly breaks it costs more than it adds.
 A large family of retro text looks to mine: https://resourceboy.com/text-effects/retro/ (chrome,
 letterpress, sticker, foil, neon, halftone, marquee). Pull from it whenever the question is "what
 text effect should we build next." Four already ship as `LOOKS`: `chrome` · `letterpress` · `neon` ·
-`emboss` (`core/looks.js:197`). The **ransom cutout** ships procedurally (`core/ransom.js`).
+`emboss` (`core/looks/index.js:197`). The **ransom cutout** ships procedurally (`core/type/ransom.js`).
 
 Three near-complete reference implementations were handed over (self-contained WebGL1 and React).
 They are worth building, but note the **shared catch**: each is an *interactive site component*, a
@@ -248,13 +248,13 @@ That is the exact opposite of `renderFrame(n)` purity, so each has two possible 
 - **As a live SITE block**: drop it in almost as-is. The site already runs interactive WebGL.
 - **As a VIDEO primitive**: rewrite it **pure in n**, drive every phase from the frame number, delete
   the cursor input and every `Math.random`/`performance.now`, and follow the multi-pass-bloom-into-FBOs
-  pattern already proven by `core/stings.js` and `core/raymarch-fx.js`. Give it a design note first.
+  pattern already proven by `core/stings/index.js` and `core/surfaces/raymarch-fx.js`. Give it a design note first.
 
 | named effect | status | proof |
 |---|---|---|
 | **Blur glow** | **NOT BUILT** | No `blurGlow` in `core/`. Wanted: rasterize the word to a height-locked white mask, a real multi-pass Gaussian bloom (4 downsampled H/V blur FBOs) with a depth-of-field focus, summed with falling weights, gamma, then gradient-mapped through a 5-stop luminance ramp; the ink-coloured sharp word on top; soft-light grain. |
 | **Chromatic glow** | **NOT BUILT** | No `chromaticGlow` in `core/`. The same multi-pass bloom, then a warm and a cool copy offset in opposite directions with a spectral prism rim. `FILTER_PRESETS.chromaGlow` and the `chroma` reveal preset are the static gesture, not this. |
-| **Real-sprite ransom** | **NOT BUILT** | `core/ransom.js` ships the procedural CSS-tile form. The sprite cousin needs a vetted royalty-free cut-out letter set committed and served, and for video it must bake to frames. Procedural ships today; sprites are the upgrade when the licensing is settled. |
+| **Real-sprite ransom** | **NOT BUILT** | `core/type/ransom.js` ships the procedural CSS-tile form. The sprite cousin needs a vetted royalty-free cut-out letter set committed and served, and for video it must bake to frames. Procedural ships today; sprites are the upgrade when the licensing is settled. |
 
 ## Blocks: what a showcase found (App Showcase, 2026-07-19)
 
@@ -290,9 +290,9 @@ no way to say it before this section existed. Counted over the 170 JSON files in
 
 | capability | reachable | proof | scenes using it |
 |---|---|---|---|
-| `effector`, a falloff from a travelling point, spent on a layer's own children | yes | `core/effector.js`, registered at `core/tracks/index.js:59`, schema at `formats/scene/schema.json:1255` | **0** |
-| `timeRemap` (whip · hold · freeze · rewind) | yes | shapes at `core/time.js:48`, baked once at boot by `bakeTimeRemap` at `:144`, schema at `formats/scene/schema.json:1814` | **0** |
-| `aspects`, per-aspect overrides | yes | `core/validate.mjs:207-213` | **1** (`aspects-demo.json`) |
+| `effector`, a falloff from a travelling point, spent on a layer's own children | yes | `core/motion/effector.js`, registered at `core/tracks/index.js:59`, schema at `formats/scene/schema.json:1255` | **0** |
+| `timeRemap` (whip · hold · freeze · rewind) | yes | shapes at `core/timeline/time.js:48`, baked once at boot by `bakeTimeRemap` at `:144`, schema at `formats/scene/schema.json:1814` | **0** |
+| `aspects`, per-aspect overrides | yes | `core/validate/validate.mjs:207-213` | **1** (`aspects-demo.json`) |
 | `col`, the relative column coordinate | yes | shared prop list, `formats/scene/schema.json:8` | **0** |
 
 Neither `effector` nor `timeRemap` is unreachable, and neither is untested. They are unproven by a

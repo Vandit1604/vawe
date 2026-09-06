@@ -9,7 +9,7 @@ group: reference
 A working "design brain" for the video engine: given a **concept/beat**, look up which
 background, layout, motion, transition, colour and value to use. Grounded in UI/UX + motion-design
 research (Gestalt, 60-30-10, WCAG, Material-3 easing, 12 principles). Backgrounds map to real
-`core/backgrounds.js` presets; the rest is the broader technique palette to reach for when a concept
+`core/backgrounds/index.js` presets; the rest is the broader technique palette to reach for when a concept
 needs it. This file is the **technique catalog**; the narrative side (beat order, timing, what each
 beat does) lives in [`CRAFT/STORY.md`](CRAFT/STORY.md).
 

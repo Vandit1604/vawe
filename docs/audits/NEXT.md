@@ -68,7 +68,7 @@ and effects are what visual range is made of.
 
 **What shipped, where the plan was wrong.** The slot is **`modifiers`**, not `fx`. The argument for the
 slot above is unchanged and still worth reading; only the NAME was wrong, and it was wrong because `fx`
-was already taken. `L.fx` has been the named-GSAP-effect slot since `core/gsap-effects.js` shipped, with
+was already taken. `L.fx` has been the named-GSAP-effect slot since `core/engine/gsap-effects.js` shipped, with
 `L.fxOut` as its exit half; it is in the schema with that meaning, `formats/scene/scene.js:576` gates
 kinetic-unit animation on `!L.fx`, and `applyGsapHooks` warns on any entry the effect registry does not
 know. Two dispatch tables in one prop, told apart by whether an object carries a `name` key, would have

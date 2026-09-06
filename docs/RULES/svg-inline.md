@@ -11,13 +11,13 @@ The `svg` layer type has no `src` field. Its legal props are `d`, `viewBox`, `fi
 `strokeWidth`, `draw`, `morph`, `w`, `h`: the path data and its box, written directly into the JSON, so
 `draw` can animate the stroke and `morph` can melt one path into another. A `src` belongs on `image`,
 `video`, `html` and `component`, and any repo-relative path there (`assets/logo.png`, `./x.png`) is
-resolved by `core/src-url.js` to a root-relative URL; it is never resolved against the page the scene
+resolved by `core/engine/src-url.js` to a root-relative URL; it is never resolved against the page the scene
 loads from.
 
 | layer | src field | path form |
 |---|---|---|
 | `svg` | none: `d` + `viewBox` inline | n/a |
-| `image` / `video` / `html` / `component` | `src` | repo-relative or root-relative, resolved by `core/src-url.js` |
+| `image` / `video` / `html` / `component` | `src` | repo-relative or root-relative, resolved by `core/engine/src-url.js` |
 
 Right:
 ```json

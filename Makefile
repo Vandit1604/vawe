@@ -35,10 +35,10 @@ audio:
 	node scripts/media/audio-bake.mjs
 
 # make audio-bed D=<file> [WRITE=1]: resolve `audio.music:"auto"` to a concrete bed from the scene's
-# profile (docs/CRAFT/SOUND.md via core/audio-select.js). Prints by default; WRITE bakes it in place,
+# profile (docs/CRAFT/SOUND.md via core/audio/select.js). Prints by default; WRITE bakes it in place,
 # because the render binary has no JS pre-pass and would read "auto" as a filename → silence.
 audio-bed:
-	node core/audio-select.js $(D) $(if $(filter 1,$(WRITE)),--write)
+	node core/audio/select.js $(D) $(if $(filter 1,$(WRITE)),--write)
 
 # make audio-check D=<file> [STRICT=1]. THE SOUND GATE: is this film's silence a decision or an
 # omission? Blocks (STRICT=1) on a scene with no `audio` block, on `silent:true` with no `_why`, on an
@@ -852,7 +852,7 @@ capture:
 # make validate [D=formats/x/topic.json]: check data + inline theme against the format schema.
 # No D = validate every formats/*/sample.json. Same validator boot() runs before rendering.
 validate:
-	node core/validate.mjs $(D)
+	node core/validate/validate.mjs $(D)
 
 # make schema AT='layers[].motion[]', what may I WRITE at this path. The sibling of `make arsenal`:
 # arsenal answers "what can the engine DO" from the registries, this answers "what may I write HERE"

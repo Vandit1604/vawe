@@ -8,7 +8,7 @@ is now a short pointer to this file, kept only so Claude Code auto-loads it.
 
 This repo turns **one self-describing JSON → one rendered video** (30fps mp4, at any of **five**
 canvases: `16:9` 1920×1080 · `9:16` 1080×1920 · `1:1` 1080×1080 · `4:5` 1080×1350 · `4:3` 1440×1080,
-the table at `core/safe.js:35`; a ratio it does not name is still honoured, sized to fit the long edge
+the table at `core/layout/safe.js:35`; a ratio it does not name is still honoured, sized to fit the long edge
 at 1920). There is exactly **one module: `scene`**, an open canvas of **24 composable layer types**
 (`ls core/layers/`: adjust · beam · board · clip · component · composition · count · cursor · doc ·
 globe · glow · group · html · image · lottie · paint · particles · raymarch · rect · shader · svg ·
@@ -261,7 +261,7 @@ Every video is built on **hook → suspense → payoff**. The data must earn att
 - **Numbers:** use real, accurate figures. The `count` layer compacts ≥1e6 (`2500000000` → `2.5B`);
   use a unit suffix for small numbers (`unit: "$B"`, value `880` → `$880B`).
 
-## Hard rules  `[built: core/validate.mjs:764]`
+## Hard rules  `[built: core/validate/validate.mjs:764]`
 - **No em-dashes (U+2014) in any on-screen text**: the validator rejects them. Use a comma, period, or ·.
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - Text may contain `<b>…</b>` / `<em>…</em>` (rendered as HTML). Keep names short (they sit in cards).
@@ -321,7 +321,7 @@ a fragment moves, and the traps that cost a render each:
 
 ## BLACK MEANS `#000000`  `[built: core/backgrounds/presets.js:117]`
 
-When a brief says black, it means black. Every OTHER dark preset in `core/backgrounds.js` carries a tint
+When a brief says black, it means black. Every OTHER dark preset in `core/backgrounds/index.js` carries a tint
 or a wash: rendered on the vawe theme, `dark`, `deep` and `ink` all sample `rgb(12,18,26)` at the corner,
 which is right for a film with a lit world and wrong for one whose only light is the subject. So write
 `{"preset": "black"}`. It is a solid `#000000` with no grain, it renders `rgb(0,0,0)` at every corner,
@@ -370,7 +370,7 @@ rest of the ladder, and the treatment every image needs so it does not read as s
 [`docs/CRAFT/IMAGERY.md`](docs/CRAFT/IMAGERY.md).
 
 **Use `make assets` for logos. A bare `curl` writes a zero-byte file on a 404 and you get an invisible
-hole**, which is what two shipped assets were in until `core/boot.js` learned to refuse an asset that
+hole**, which is what two shipped assets were in until `core/engine/boot.js` learned to refuse an asset that
 never loaded. IMAGERY.md §0 has the incident and the `curl -f` form if you must do it by hand.
 
 **Never embed copyrighted material** into a published video: movie/TV posters, album covers, film
@@ -409,7 +409,7 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 788 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 797 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
 `docs/EFFECTS.md`, 703 effects across 56 families). Reach for it before you invent anything. The measured cost
 of not doing so: the `{type:"beat"}` blueprint mechanism is used by 3 films in the whole library, and
@@ -516,7 +516,7 @@ is `make catalog` instead: [`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md).
 `bg` is required, so the backdrop is always your decision. A static field is a choice you have to
 justify, never a default. **A backdrop that changes PER BEAT is the cheap thing to write**: list the
 windows in the order the film turns, give none of them a `from`/`to`, and the engine binds window i to
-the joint after it (`core/junctions.js`), so the cuts you already wrote own the numbers.
+the joint after it (`core/timeline/junctions.js`), so the cuts you already wrote own the numbers.
 
 This is the strongest single lever in the file. brew inverts the tone of the world on four of its five
 cuts and spends its one accent window on the logo reveal, while **81% of gate-visible scenes (121 of
@@ -579,7 +579,7 @@ because nobody decided anything. Same doc carries lead room, visual weight and t
 - **Audit every canvas you ship.** `make audit M=<file> ASPECT=all`. A scene passes at its own aspect
   and is wrong at every other: `pin` centres a *box*, so a text layer needs `w` (+ `align`). Going to a
   phone feed? Set `"destination": "tiktok"|"reels"|"shorts"`: the safe area is not a property of the
-  shape (`core/safe.js`).
+  shape (`core/layout/safe.js`).
 - **`make judge`, and read the sheet.** The static gates cannot see composition or fidelity. If your
   eye catches a flaw, it is a FIX, never a rationalisation (`docs/JUDGE.md`).
 - **Eyeball real frames**: `make look D=<file>` / `make frame D=<file> N=<n>`. Never ship a film whose
@@ -635,7 +635,7 @@ here. Highest rung wins:
 | skills: instructions loaded only when the task needs them | `docs/CRAFT/*.md`, and a finding NAMES the doc that settles it | `docs/TASTE.md` indexes them |
 | structured tool results instead of scraped prose | gate findings as data, not regex over a message | `scripts/lib/findings.mjs` |
 | a subagent's context stays out of the main thread | one critic, one job, one input path, a fixed verdict shape | `docs/CRAFT/SUBAGENTS.md`, budget in `docs/CRAFT/SUBAGENT-BUDGET.md` |
-| refusing an invalid call at the tool boundary | refusing at the WRITE SITE, so the bad state is unrepresentable | `core/registry.js`: `checkBlurb`, `checkCovered`, `checkCatalog` |
+| refusing an invalid call at the tool boundary | refusing at the WRITE SITE, so the bad state is unrepresentable | `core/registry/registry.js`: `checkBlurb`, `checkCovered`, `checkCatalog` |
 
 **Three rules that keep this from drifting, and each one was paid for.**
 
@@ -652,7 +652,7 @@ so `make arsenal Q="a terminal window"` answered "assume the engine does not hav
 families the engine has. Both are why `checkCovered` refuses at load now.
 
 **A blurb is not optional, and there is no exemption to ask for.** Every registry entry and every block
-row must carry one, refused at load by `checkCovered` and `checkBlurb` in `core/registry.js`. The one
+row must carry one, refused at load by `checkCovered` and `checkBlurb` in `core/registry/registry.js`. The one
 opt-out that existed, for the 42 easings, is gone along with the mechanism: it was a reason to write
 them well, not a licence to leave 42 capabilities reachable only by someone who already knew the name.
 

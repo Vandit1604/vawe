@@ -14,9 +14,9 @@
 - Source: the npm `three` package's `build/` directory. It is a **devDependency**, present only to
   produce these two files; nothing imports `three` from `node_modules` at runtime.
 - License: **MIT** (© three.js authors), see `three.LICENSE`.
-- Loaded by `core/boot.js` as `window.THREE`, a GLOBAL, via `await import(...)` in the awaited
+- Loaded by `core/engine/boot.js` as `window.THREE`, a GLOBAL, via `await import(...)` in the awaited
   readiness phase, and ONLY when the scene declares a `three` layer. Two reasons, both load-bearing:
-  a static import would make `core/three-fx.js` unloadable in Node, which takes the whole layer
+  a static import would make `core/surfaces/three-fx.js` unloadable in Node, which takes the whole layer
   registry down with it (`make schema-check` crashed exactly that way); and awaiting it means a
   `three` layer can build synchronously without racing the module load, which would otherwise render
   empty on whichever workers got there first. That is a purity break, not a glitch.
@@ -36,8 +36,8 @@
   https://gsap.com/standard-license. Free for this use (rendering our own videos); the header in each
   file states the terms. NOT MIT, do not re-license or redistribute the plugins as a standalone lib.
 - The engine strips `<script>` from scene HTML by design, so GSAP is an INTERNAL tween engine, never
-  an author-JS hatch. Loaded on demand by `core/preload.js` (`preloadGsap`) ONLY when a scene uses a
+  an author-JS hatch. Loaded on demand by `core/engine/preload.js` (`preloadGsap`) ONLY when a scene uses a
   `gsap`/`morph`/`fx`/`fxOut`/`motionPath`/`physics`/`splitText` field. Made DETERMINISTIC by stopping
   the ticker (`gsap.ticker.sleep()`) and pausing + seeking the global timeline per frame in
   `seekAll(t)`: every tween is a pure function of `t`, proven by the dedup pass + `make probe`.
-- Named effects live in `core/gsap-effects.js` (referenced from JSON by name via `fx`/`fxOut`).
+- Named effects live in `core/engine/gsap-effects.js` (referenced from JSON by name via `fx`/`fxOut`).

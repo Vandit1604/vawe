@@ -39,7 +39,7 @@ Anything that breaks that is a bug even if it looks right. `make probe` and
 
 ```bash
 node scripts/gates/lib-test.mjs        # the unit suite
-node core/validate.mjs                 # every scene still validates
+node core/validate/validate.mjs                 # every scene still validates
 node scripts/gates/code-quality.mjs    # nothing got more tangled
 ```
 
