@@ -202,6 +202,10 @@ boot((data, fps, theme, canvas) => {
   // lower the unified `transitions`/`layers[].transition` surface into the raw cuts/stings/seams/
   // anim fields BEFORE any parse below reads them. Pure + idempotent; a scene without the unified
   // keys is untouched. Kept here (top of the callback) so every parser sees the lowered form.
+  //
+  // block/beat/comp sugar is NOT expanded here: this file never imports core/expand.js, on purpose
+  // (core/expand.js's own banner says why, and internal/render/expand.go is where that expansion
+  // actually happens for this render path, server-side, before the page ever fetches this JSON).
   data = lowerScene(data);
   // Snap the film's joints to the track's pulse, if the scene named a grid. AFTER lowering (a cut
   // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time, the bg

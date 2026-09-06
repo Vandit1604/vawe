@@ -1209,6 +1209,12 @@ function walk(fields, obj, path, errors) {
   }
 }
 
+// `block`/`beat`/`comp` are build-time sugar (core/expand.js), not layer types the base schema
+// describes: a layer naming one carries the factory's own props, checked by `make blocks-audit`
+// instead. Pulled out to its own function rather than three `||`s inline at each of checkField's two
+// call sites, which is what pushed that switch over the complexity ceiling for one extra layer type.
+const isSugarType = (t) => t === 'block' || t === 'beat' || t === 'comp';
+
 function checkField(spec, val, at, errors) {
   switch (spec.type) {
     case 'number':
@@ -1219,9 +1225,10 @@ function checkField(spec, val, at, errors) {
     case 'string':
       if (spec.minLength != null && val.length < spec.minLength) errors.push(`${at} must be ≥ ${spec.minLength} chars`);
       if (spec.enum && !spec.enum.includes(val)) {
-      // `block`/`comp` are BUILD-TIME sugar, not layer types. Reporting them as an unknown enum buries
-      // the dedicated "run make expand" message under a list of 15 types that are all wrong answers.
-      if (!(at.endsWith('.type') && (val === 'block' || val === 'comp')))
+      // `block`/`beat`/`comp` are BUILD-TIME sugar, not layer types: core/expand.js resolves them at
+      // load, before any real primitive is checked against this enum, so a scene that names one is
+      // correct as authored, never an unknown-enum finding.
+      if (!(at.endsWith('.type') && isSugarType(val)))
         errors.push(`${at} "${val}" is not valid.${nearest(val, spec.enum)} One of: ${spec.enum.join(', ')}`);
     }
       if (spec.pattern && !new RegExp(spec.pattern).test(val)) errors.push(`${at} must match /${spec.pattern}/ (got "${val}")`);
@@ -1229,13 +1236,13 @@ function checkField(spec, val, at, errors) {
     case 'array':
       if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} needs ≥ ${spec.minItems} item(s) (got ${val.length})${spec.hint ? `, ${spec.hint}` : ''}`);
       if (spec.maxItems != null && val.length > spec.maxItems) errors.push(`${at} allows ≤ ${spec.maxItems} item(s) (got ${val.length})`);
-      // A block/comp layer carries the BLOCK's props (a pointer's `to:{x,y}`, a kpiRow's `items:[…]`),
-      // NOT the base layer schema, blocks-audit owns those. The unknown-prop pass already exempts
-      // block/comp; this TYPE pass must too, or a valid block prop (`to` object vs the layer's `to`
+      // A block/beat/comp layer carries the BLOCK's/BEAT's props (a pointer's `to:{x,y}`, a kpiRow's
+      // `items:[…]`), NOT the base layer schema, blocks-audit owns those. The unknown-prop pass already
+      // exempts them; this TYPE pass must too, or a valid block prop (`to` object vs the layer's `to`
       // number) fails and the scene cannot boot (this silently broke showcase-spot/flight). Same intent
       // as the note at the layers checkLayer pass below.
       if (isObj(spec.item)) val.forEach((el, i) => {
-        if (isObj(el) && (el.type === 'block' || el.type === 'comp')) return;
+        if (isObj(el) && isSugarType(el.type)) return;
         walk(spec.item, el, `${at}[${i}].`, errors);
       });
       break;
@@ -1306,17 +1313,12 @@ if (isMain) {
         // valid JSON until scripts/author/batch.mjs fills it in, by design, not a defect to repair.
         // Other derivative suffixes (`.beatsync.`, `.captioned.`, `.directed.`) stay OUT of this list
         // on purpose: those files still declare `module` and validate cleanly, so excluding them would
-        // just shrink coverage. `.expanded.json` also stays out: it is the renderable artifact and the
-        // whole reason the "un-expanded source" skip two lines down exists.
+        // just shrink coverage.
         if (/\.(animatic|template)\.json$/.test(n)) continue;
         // only actual scenes: a formats/ dir also holds planning artifacts (*.intent.json carries
         // beats, not layers). "Declares a module" is the honest test for "the renderer would read it".
         const fp = path.join(dir, n);
         try { if (!JSON.parse(fs.readFileSync(fp, 'utf8')).module) continue; } catch { }
-        // A scene authored with block/comp sugar is a SOURCE; `make expand` writes the renderable
-        // <name>.expanded.json beside it, and that is what gets validated and rendered. Checking the
-        // source too would report "un-expanded block" forever on a file that is correct as authored.
-        if (!n.endsWith('.expanded.json') && fs.existsSync(fp.replace(/\.json$/, '.expanded.json'))) continue;
         targets.push(fp);
       }
     }
@@ -1353,8 +1355,9 @@ if (isMain) {
     const schemaPath = mod && path.join(root, 'formats', mod, 'schema.json');
     try { schema = schemaPath && fs.existsSync(schemaPath) ? readJSON(schemaPath) : null; } catch (e) { schema = null; }
     const errors = validateAll(schema, data);
-    // build-time sugar must be expanded before render: the engine's layer registry has no
-    // `block`/`comp` type, so a leftover one renders as NOTHING. Fail loud → run `make expand`.
+    // `block`/`beat`/`comp` sugar expands at LOAD time (core/expand.js), so a scene naming one is
+    // correct as authored and validates clean; `checkField` above exempts the three from the layer
+    // type enum for exactly that reason.
     // UNKNOWN PROPS. The engine reads the props it knows and ignores the rest in silence, so
     // `fill` instead of `bg`, or `colour` instead of `color`, renders a layer that is quietly wrong
     // and gives the author nothing to search for. Two shipped scenes set `opacity` on a layer for
@@ -1376,10 +1379,11 @@ if (isMain) {
         // checked it here: a `rect` child validated clean and then hard-failed the render with
         // "not valid. Did you mean 'text'?". Green validate followed by a boot crash is a worse
         // experience than either outcome alone, because the author trusts the first one.
-        if (isChild && L.type != null && CHILD_TYPES.length && !CHILD_TYPES.includes(L.type)) {
+        if (isChild && L.type != null && CHILD_TYPES.length && !CHILD_TYPES.includes(L.type)
+          && L.type !== 'block' && L.type !== 'beat' && L.type !== 'comp') {
           errors.push(`${where} type "${L.type}" is not valid as a group child, one of: ${CHILD_TYPES.join(', ')}.`);
         }
-        if (L.type !== 'block' && L.type !== 'comp') {
+        if (L.type !== 'block' && L.type !== 'beat' && L.type !== 'comp') {
           const known = isChild ? [...CI, ...LI] : LI;
           for (const k of Object.keys(L)) {
             if (k.startsWith('_') || known.includes(k)) continue;
@@ -1412,10 +1416,6 @@ if (isMain) {
       // never touches. Rendering both would silently drop the ken. Refuse instead.
       if (L.type === 'image' && L.ken)
         errors.push(`layer[${i}] combines \`ken\` with \`resample\`, ken is a CSS transform and does not reach the sampled pixels, so it would be silently ignored. Pick one.`);
-    });
-    (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
-      if (isObj(L) && (L.type === 'block' || L.type === 'comp'))
-        errors.push(`layer[${i}] is an un-expanded ${L.type} ("${L.block || L.ref}"), run \`make expand D=${path.relative(root, file)}\` and render the .expanded.json.`);
     });
     // named themes: the CLI can read the file, so completeness-check it here (boot re-checks).
     if (typeof data.theme === 'string') {

@@ -3,7 +3,7 @@
 // default, so the agent never regresses to plain fades (the failure the direction floor gates).
 //
 // Placed in a scene as { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props } and expanded
-// by scripts/author/expand-blocks.mjs (make expand), the same path blocks use. Docs: docs/CRAFT/BLUEPRINTS.md.
+// at LOAD time by core/expand.js, the same path blocks use; no separate step. Docs: docs/CRAFT/BLUEPRINTS.md.
 import { withBlurb, blurbsOf, defineRegistry } from '../core/registry.js';
 import * as Beats from './beats.mjs';
 // The PICTORIAL beats, kept in their own files because three agents authored them in parallel and two
@@ -87,9 +87,9 @@ export const BEAT_REGISTRY = defineRegistry('blueprint beat', BEATS, { slot: 'la
   catalog: {
     title: 'Beat blueprints',
     tag: 'blueprint',
-    intro: '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion; `make expand`. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.',
+    intro: '`{ "type":"beat", "beat":"<name>", ... }`. A whole beat\'s directed motion, expanded at load. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.',
     usage: (n, { j }) => j({ type: 'beat', beat: n, start: 0.2, dur: 4.4, x: 160, y: 320, w: 1200 }),
-    noPreview: 'a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.',
+    noPreview: 'a beat writes a whole cast of layers from content you supply. Run `make expand D=<file>` to see what it writes.',
   },
 });
 

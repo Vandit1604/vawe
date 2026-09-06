@@ -96,8 +96,9 @@ export function checkLayer(L, typeProps, where) {
 // one entry point means there is no second path to forget.
 //
 // `block` / `comp` / `beat` layers are build-time sugar carrying THEIR factory's props, not a
-// primitive's. They are left alone here; core/layers/index.js refuses them by type with the message
-// that names `make expand`.
+// primitive's. core/expand.js resolves every one of them at load, before checkLayerTree ever runs, so
+// this guard should never fire; it is kept as a defensive no-op rather than a refusal, because a props
+// check has no business judging a vocabulary that is not its own.
 const SUGAR_TYPES = new Set(['block', 'comp', 'beat']);
 
 // The orchestrator builds one layer at a time and does not hand over its index, so name the layer by

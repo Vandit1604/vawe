@@ -51,10 +51,9 @@ export const LAYER_TYPES = Object.keys(REGISTRY);
 export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 
 // THE REGISTRY IS FOR THE CATALOGUE, THE SEARCH AND has(). IT IS NOT THE DISPATCHER, and that is the
-// whole shape of this one. `pick(L)` below needs three behaviours defineRegistry's `pick` deliberately
-// does not have: a missing `type` means `text`, three sugar names get a message naming `make expand`,
-// and only then does anything else throw. Replacing it would move frames, so it is left exactly as it
-// was and this sits beside it.
+// whole shape of this one. `pick(L)` below needs one behaviour defineRegistry's `pick` deliberately
+// does not have: a missing `type` means `text`, and only then does anything else throw. Replacing it
+// would move frames, so it is left exactly as it was and this sits beside it.
 //
 // What it buys: the section below used to be hand-listed in scripts/site/effects-catalog.mjs with its
 // usage form and its no-preview reason in a third file, and `scripts/author/arsenal.mjs` carried a
@@ -98,20 +97,14 @@ export const LAYER_PROPS = Object.freeze(Object.fromEntries(
 // was the wrong one. An author reading that mp4 concludes the gate is pedantic; the frame is empty.
 //
 // A missing `type` still means text (documented default). A type that is present and unknown is a bug.
-// `block`, `comp` and `beat` are BUILD-TIME sugar, expanded by `make expand` (scripts/author/expand-blocks.mjs),
-// so they get the message that names the actual next step rather than the generic one.
+// `block`, `comp` and `beat` USED to be build-time sugar a separate `make expand` step had to resolve
+// first; core/expand.js `expandScene` now runs at LOAD (core/transitions/lower.js `loadScene`, called
+// by formats/scene/scene.js before any layer is built), so none of the three ever reach this dispatch
+// any more. A scene that somehow still carries one is an unknown type, same as any other typo.
 const pick = (L) => {
   const t = L.type;
   if (t == null || t === '' || t === 'text') return text;
   if (REGISTRY[t]) return REGISTRY[t];
-  if (t === 'block' || t === 'comp' || t === 'beat') {
-    // Deliberately does not name WHICH block/beat/comp this was. schema-drift guards the set of layer
-    // props the ENGINE reads, and those three are author-facing build-time sugar the schema omits on
-    // purpose, so reading one here would widen what the renderer claims to consume for a nicer string.
-    throw new Error(`layer type "${t}" is build-time sugar, not a renderable primitive, `
-      + `run \`make expand D=<scene.json>\` and render the .expanded.json. Rendering it directly would `
-      + `silently draw nothing.`);
-  }
   throw new Error(`unknown layer type "${t}", known: ${LAYER_TYPES.join(', ')}. `
     + `An unknown type used to fall back to the text builder, which paints nothing.`);
 };

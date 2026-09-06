@@ -5,7 +5,8 @@
 // vars so every brand reskins them; the theme owns the palette and `make audit` owns contrast.
 //
 // Each factory is PURE (props → array of scene-layer JSON), the same contract as blocks/ui.mjs. Compose in
-// an authoring script or via `{ "type":"block", "block":"glassCard", ... }` + `make expand`.
+// an authoring script or via `{ "type":"block", "block":"glassCard", ... }`, which expands at load
+// (core/expand.js), no separate step.
 import { TOKENS as T, text } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that

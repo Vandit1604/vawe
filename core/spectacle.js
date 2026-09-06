@@ -19,7 +19,7 @@
 // the attenuation exempts. The named layer keeps its full amplitude while the film quietens around it,
 // which is the difference between a peak and a raised floor.
 //
-// WHERE THIS RUNS. First thing in the scene callback, straight after `lowerScene`, because stings and
+// WHERE THIS RUNS. First thing in the scene callback, straight after `loadScene`, because stings and
 // seams are parsed further down and layers further down still. It mutates the JSON and nothing else.
 // The same shape as resolveBecomes and resolveAnchors, so renderFrame(n) is untouched and stays a
 // pure function of n.
