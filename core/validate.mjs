@@ -1146,7 +1146,39 @@ export function lintData(data) {
     ...countWindowWarns(data),
     ...sceneCollisionWarns(data),
     ...noAspectWarns(data),
+    ...staggerTotalWarns(data),
   ];
+}
+
+// A kinetic split group's whole arrival must read as ONE beat: docs/RULES caps the last unit's delay
+// at 0.5s, past that it reads as a typewriter, not a reveal. core/tracks/units.js scales the default for
+// an UNAUTHORED stagger, but a number or object the author actually wrote is a decision, so this warns
+// instead of overriding it. Unit count is estimated the same way splitText (core/type.js) counts them:
+// words by default, chars for 'char'/ransom/circle, lines for 'line'.
+function staggerTotalWarns(data) {
+  const warns = [];
+  const layers = Array.isArray(data?.layers) ? data.layers : [];
+  const STAGGER_BUDGET = 0.5;
+  layers.forEach((L, i) => {
+    if (!isObj(L) || (!L.split && !L.ransom && !L.circle) || L.circle || L.fx || typeof L.text !== 'string') return;
+    const mode = L.split || ((L.ransom || L.circle) ? 'char' : 'word');
+    const n = mode === 'char'
+      ? glyphText(L.text).replace(/\s+/g, '').length
+      : mode === 'line'
+        ? glyphText(L.text).split('\n').length
+        : onScreenText(L.text).split(/\s+/).filter(Boolean).length;
+    if (n < 2) return;
+    let step = null, label = null;
+    if (typeof L.stagger === 'number') { step = L.stagger; label = `stagger ${step}`; }
+    else if (isObj(L.stagger) && typeof L.stagger.amount === 'number') {
+      if (L.stagger.amount > STAGGER_BUDGET) warns.push(`${layerName(L, i)} split into ${n} units with stagger.amount ${L.stagger.amount}s, over the ${STAGGER_BUDGET}s cap for one arrival. Past that the group reads as a typewriter, not a beat. Lower amount, or split fewer units (word instead of char).`);
+      return;
+    } else if (isObj(L.stagger) && typeof L.stagger.each === 'number') { step = L.stagger.each; label = `stagger.each ${step}`; }
+    if (step == null) return;
+    const total = step * (n - 1);
+    if (total > STAGGER_BUDGET) warns.push(`${layerName(L, i)} split into ${n} units at ${label}, so the last unit arrives ${total.toFixed(2)}s after the first, over the ${STAGGER_BUDGET}s cap for one arrival. Past that the group reads as a typewriter, not a beat. Lower the stagger, or use "stagger": { "amount": ${STAGGER_BUDGET} } to cap the total directly.`);
+  });
+  return warns;
 }
 
 // A scene that states neither `aspect` nor `orientation` renders 9:16. core/boot.js resolves the canvas

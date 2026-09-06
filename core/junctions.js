@@ -213,7 +213,8 @@ export function bindMatchesToJunctions(data, table) {
     if (t <= aStart) throw new Error(`${where}: the joint is at ${t}s and "${M.from}" starts at ${aStart}s, `
       + `so the outgoing form is never on screen before the match. Move the joint, or start "${M.from}" earlier.`);
 
-    const dur = Math.max(0.05, Number.isFinite(+M.dur) ? +M.dur : (Number.isFinite(+A.becomesDur) ? +A.becomesDur : 0.42));
+    // same default as resolveBecomes (formats/scene/scene.js): 0.9s reads as a morph, 0.42s read as a cut.
+    const dur = Math.max(0.05, Number.isFinite(+M.dur) ? +M.dur : (Number.isFinite(+A.becomesDur) ? +A.becomesDur : 0.9));
     const next = table.junction.find((j) => j > t + 1e-6);
     const shot = (next != null ? next : (+data.duration || t + dur)) - t;
     if (shot > 0 && dur > shot * MATCH_HANDOVER_SHARE)

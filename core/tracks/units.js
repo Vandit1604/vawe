@@ -21,6 +21,17 @@ export const PROPS = {
   circle: {}, fx: {}, ransom: {},
 };
 
+// A split group's whole arrival must read as ONE beat, not a typewriter: docs/RULES caps the total
+// stagger (last unit's delay) at 0.5s. A flat per-unit theme delay was authored for short headlines and
+// silently blew past that on a long one (a 20-char headline at the theme's 0.05s/unit already runs 0.95s
+// of pure delay before its last glyph even starts moving). Only the UNAUTHORED case is scaled: an author
+// who writes a number or object has said what they mean, and validate.mjs warns them instead of the
+// engine second-guessing a decision on their behalf.
+const STAGGER_BUDGET = 0.5;
+function defaultStaggerStep(rawDefault, n) {
+  return n > 1 ? Math.min(rawDefault, STAGGER_BUDGET / (n - 1)) : rawDefault;
+}
+
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(units && !L.circle && !L.fx && t >= start && t < end)) return;
   // `stagger` may be a NUMBER (the per-unit delay, as always) or the object form { each, from, amount }.
@@ -28,6 +39,6 @@ export function frame(kit, el, L, units, t, f, start, end) {
   // "the theme's delay, ordered from the centre", so it is spread OVER the default rather than past it.
   const stagger = L.stagger && typeof L.stagger === 'object'
     ? { each: kit.M.stagger, ...L.stagger }
-    : (L.stagger ?? (L.ransom ? 0.08 : kit.M.stagger));
+    : (L.stagger ?? defaultStaggerStep(L.ransom ? 0.08 : kit.M.stagger, units.length));
   animateUnits(units, t - start, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger, each: L.each ?? 0.5, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
 }
