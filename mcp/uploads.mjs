@@ -1,4 +1,4 @@
-// mcp/uploads.mjs — a caller's own images and fonts, so a launch video can carry their logo.
+// mcp/uploads.mjs. A caller's own images and fonts, so a launch video can carry their logo.
 //
 // This was the real ceiling on the product. Every effect in the engine was reachable, but a person
 // making a video for THEIR product could not put THEIR mark in it, which is most of what a launch
@@ -12,7 +12,7 @@
 //      is a path traversal waiting to happen, and hashing also means uploading the same logo twice
 //      costs nothing.
 //   3. It lands INSIDE the repo, under the owner. The renderer serves scenes from a file server
-//      rooted at the repo, so anything outside it is a 404 to the browser — the exact bug that made
+//      rooted at the repo, so anything outside it is a 404 to the browser: the exact bug that made
 //      every real session fail before.
 import fs from 'node:fs';
 import path from 'node:path';

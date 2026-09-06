@@ -1,4 +1,4 @@
-// mcp/fetchers.mjs — bring a real brand mark or an openly-licensed photo into a caller's uploads.
+// mcp/fetchers.mjs. Bring a real brand mark or an openly-licensed photo into a caller's uploads.
 // Both go through safeFetch (SSRF-guarded) and land under the caller via uploads.save, which sniffs
 // the bytes and refuses hostile SVG. So a logo or photo is exactly as safe as an upload, because it
 // becomes one.

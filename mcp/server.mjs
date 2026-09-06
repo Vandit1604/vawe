@@ -1,4 +1,4 @@
-// mcp/server.mjs — Vawe as an MCP server. Your users' own Claude writes the scene; this renders it.
+// mcp/server.mjs. Vawe as an MCP server. Your users' own Claude writes the scene; this renders it.
 //
 //   npx @modelcontextprotocol/inspector node mcp/server.mjs      # try it
 //   claude mcp add vawe -- node /abs/path/to/mcp/server.mjs      # wire it into Claude Code
@@ -64,7 +64,7 @@ function getOwned(video_id) {
 // ── vawe_guide ───────────────────────────────────────────────────────────────────────────────────
 server.registerTool('vawe_guide', {
   title: 'Vawe authoring guide',
-  description: 'How to write a scene. Call with no arguments FIRST — that returns a short reference '
+  description: 'How to write a scene. Call with no arguments FIRST: that returns a short reference '
     + 'that covers almost everything. Only pass detail:"full" if you need a prop it does not list.' + inventoryLine,
 
   inputSchema: {
@@ -74,7 +74,7 @@ server.registerTool('vawe_guide', {
 }, async ({ detail }) => {
   // Default SMALL on purpose. The full guide is 46KB, and a model that spends its context reading
   // the schema has less left for the thing it was asked to make. The short page covers the shape,
-  // the traps that render wrong without erroring, and which effects actually read on screen — which
+  // the traps that render wrong without erroring, and which effects actually read on screen, which
   // is what the first draft needs. `full` is there for the second question, not the first.
   if (detail !== 'full') {
     const quick = path.join(pipe.repoRoot, 'docs/SCENE-QUICK.md');
@@ -202,7 +202,7 @@ server.registerTool('vawe_capabilities', {
   // Render each preset with its dials, so a caller does not just learn a name exists but how to tune
   // it. A dial set on a preset that ignores it is reported by the draft gates (dead-knob check).
   // core/registry/knobs.js writes a `desc` on 79 of its dials and this printed only `k.name`, so every one of
-  // them was fetched across the wire and dropped on the floor — while the comment above claimed the
+  // them was fetched across the wire and dropped on the floor, while the comment above claimed the
   // opposite. A caller learned that `stagger` exists and never that it is the rhythm offset per unit.
   // The DEFAULT goes over too, and it did not before. A caller that cannot see it either leaves the
   // dial out (fine) or writes what it guesses the default is (not fine): that guess is how a wrong
@@ -225,7 +225,7 @@ server.registerTool('vawe_capabilities', {
     return per.length ? `  shared dials: ${shared}\n${per.join('\n')}` : `  dials: ${shared}`;
   };
   return text([
-    `looks (${c.looks.length}) — the register each evokes; pick the group your story is in, then one member:`,
+    `looks (${c.looks.length}): the register each evokes; pick the group your story is in, then one member:`,
     ...c.looks.map((l) => `  ${l.name.padEnd(20)} ${l.blurb || ''}`.trimEnd()),
     // Typed by hand, this line drifted from the manifest in both directions at once: it still offered
     // `warmth`, removed because no pass in any of the 31 looks ever read it (core/registry/knobs.js,
@@ -233,31 +233,31 @@ server.registerTool('vawe_capabilities', {
     // chrome looks. So the tool advertised a dead dial and hid the one that matters. Read the manifest.
     knobLine('look'),
     ``,
-    `kinetic presets (${c.presets.length}) — how a line ARRIVES; set via preset + presetOpts:`,
+    `kinetic presets (${c.presets.length}): how a line ARRIVES; set via preset + presetOpts:`,
     ...c.presets.map((x) => `  ${x.name.padEnd(14)} ${x.blurb || ''}`.trimEnd()),
     knobLine('kinetic'),
     ``,
-    `three scenes — set via three:"name":`,
+    `three scenes: set via three:"name":`,
     knobLine('three'),
     ``,
-    `raymarch / ambient / sting — uniform dials:`,
+    `raymarch / ambient / sting: uniform dials:`,
     `  raymarch: ${(c.knobs.raymarch._shared).map((k) => k.name).join(' ')}`,
     `  ambient:  ${(c.knobs.ambient._shared).map((k) => k.name).join(' ')}`,
     `  sting:    ${(c.knobs.sting._shared).map((k) => k.name).join(' ')}`,
     ``,
-    `cuts (${c.cuts.length}) — one family per film; the ten that only MASK need sceneUnits:`,
+    `cuts (${c.cuts.length}): one family per film; the ten that only MASK need sceneUnits:`,
     ...c.cuts.map((x) => `  ${x.name.padEnd(12)} ${x.blurb || ''}`.trimEnd()),
     // The rest of the vocabulary a caller has to choose from. Listed with meanings for the same reason as
     // the three above: a name on its own is not a choice.
-    `seams (${c.seams.length}) — the only mechanism that samples BOTH beats; one earned blend at the payoff:`,
+    `seams (${c.seams.length}): the only mechanism that samples BOTH beats; one earned blend at the payoff:`,
     ...c.seams.map((x) => `  ${x.name.padEnd(14)} ${x.blurb || ''}`.trimEnd()),
-    `stings (${c.stings.length}) — a shader AT the cut; the register each says:`,
+    `stings (${c.stings.length}): a shader AT the cut; the register each says:`,
     ...c.stings.map((x) => `  ${x.name.padEnd(18)} ${x.blurb || ''}`.trimEnd()),
-    `layer entrances/exits (${c.anims.length}) — anim / out:`,
+    `layer entrances/exits (${c.anims.length}): anim / out:`,
     ...c.anims.map((x) => `  ${x.name.padEnd(14)} ${x.blurb || ''}`.trimEnd()),
-    `gsap effects (${c.gsap.length}) — fx on a layer; the LOOPS never settle, so never use one as an entrance:`,
+    `gsap effects (${c.gsap.length}): fx on a layer; the LOOPS never settle, so never use one as an entrance:`,
     ...c.gsap.map((x) => `  ${x.name.padEnd(18)} ${x.blurb || ''}`.trimEnd()),
-    `gsap exits (${c.gsapExits.length}) — fxOut:`,
+    `gsap exits (${c.gsapExits.length}): fxOut:`,
     ...c.gsapExits.map((x) => `  ${x.name.padEnd(16)} ${x.blurb || ''}`.trimEnd()),
     ``,
     `blocks (${c.blocks.length} across ${c.blockFamilies.length} families):`,
@@ -269,7 +269,7 @@ server.registerTool('vawe_capabilities', {
 server.registerTool('vawe_draft', {
   title: 'Render a free watermarked draft',
   description: 'Submit a scene JSON. Validates immediately, then renders in the BACKGROUND and '
-    + 'returns a video_id right away. Poll vawe_status(video_id) until status is "drafted" — a '
+    + 'returns a video_id right away. Poll vawe_status(video_id) until status is "drafted": a '
     + '10s video takes a couple of minutes. Free and unlimited; the watermark is the ONLY difference '
     + 'from the paid export, so what you judge here is what you get.',
   inputSchema: {
@@ -360,7 +360,7 @@ server.registerTool('vawe_export', {
 }, async ({ video_id, aspects }) => {
   const rec = getOwned(video_id);
   if (!rec) return text(`no such video: ${video_id}`);
-  if (!rec.draft) return text('draft this video first — export renders the revision you last drafted.');
+  if (!rec.draft) return text('draft this video first: export renders the revision you last drafted.');
 
   const seconds = rec.draft.seconds || 0;
   const q = quote(seconds);
@@ -414,7 +414,7 @@ server.registerTool('vawe_status', {
 }, async ({ video_id }) => {
   if (!video_id) {
     const all = store.list(OWNER);
-    if (!all.length) return text('no videos yet — start with vawe_guide, then vawe_draft.');
+    if (!all.length) return text('no videos yet: start with vawe_guide, then vawe_draft.');
     return text(all.map((r) => `${r.id}  ${r.status.padEnd(10)} rev ${r.revisions}`).join('\n'));
   }
   const rec = getOwned(video_id);
@@ -424,7 +424,7 @@ server.registerTool('vawe_status', {
   // answer "is it done", "is it any good" and "what do I do next" in one read, or the model polls
   // blind and then guesses.
   if (rec.status === 'rendering' || rec.status === 'exporting') {
-    return text(`▶ ${rec.status} — not finished yet. Wait a bit and call vawe_status("${rec.id}") again.`);
+    return text(`▶ ${rec.status}: not finished yet. Wait a bit and call vawe_status("${rec.id}") again.`);
   }
   if (rec.status === 'failed' || rec.status === 'export-failed') {
     return text(`✗ ${rec.status}\n\n${rec.error || 'no detail recorded'}`);
@@ -448,7 +448,7 @@ server.registerTool('vawe_status', {
       (g.knobs && g.knobs.includes('dead knob')) ? `knobs:  ${g.knobs.split('\n').filter((l) => l.includes('does nothing')).join('\n        ')}` : '',
       ``,
       `Fix anything above and call vawe_draft again with video_id "${rec.id}". Drafts are free.`,
-      `When it is genuinely good: vawe_export("${rec.id}") — ${q.label}, $${q.usd}.`,
+      `When it is genuinely good: vawe_export("${rec.id}"), ${q.label}, $${q.usd}.`,
     ].join('\n'));
   }
   return text(JSON.stringify({ ...rec, billing: billingEnabled() ? 'on' : 'off' }, null, 2));
