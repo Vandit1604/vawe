@@ -161,7 +161,7 @@ function blockItem(entry) {
     install: {
       kind: 'scene-layer',
       target: 'layers[]',
-      requires: 'vawe engine (blocks/index.mjs); expand with `make expand D=<scene.json>`',
+      requires: 'vawe engine (blocks/index.mjs); expands automatically at load, no separate step',
       layer,
       // No requiredProps for a block: the example layer is COMPLETE. Every one of these is rendered
       // and screenshotted by make blocks-scenes, so the fragment is proven, not merely plausible.
@@ -200,7 +200,7 @@ function beatItem(name) {
     install: {
       kind: 'scene-layer',
       target: 'layers[]',
-      requires: 'vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`',
+      requires: 'vawe engine (blueprints/index.mjs); expands automatically at load, no separate step',
       layer,
       requiredProps: spec.required.filter(timing),
       props: spec.optional.filter(timing),
@@ -256,8 +256,8 @@ const index = {
   name: 'vawe',
   homepage: SITE,
   usage: 'Blocks and beats install as a LAYER OBJECT, not a file: append item.install.layer to the '
-    + '"layers" array of a scene JSON ({"module":"scene",…}), set x/y/start/dur, then `make expand`. '
-    + 'Items with a files[] entry also ship a pre-expanded standalone scene that renders without the '
+    + '"layers" array of a scene JSON ({"module":"scene",…}), set x/y/start/dur; it expands automatically '
+    + 'at load. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the '
     + 'block library. A generator installs its OUTPUT instead: item.install.layers is already-expanded '
     + 'layers to append, and where install.kind is "generated-markup" you turn item.install.options into '
     + 'markup (item.preview.url, or item.install.render) and paste that into a bg window.',
