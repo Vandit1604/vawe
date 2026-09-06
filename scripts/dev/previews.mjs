@@ -76,6 +76,13 @@ const CONTENT = {
   focusRack: { sharp: { type: 'text', text: 'In focus', x: 560, y: 420, w: 800, size: 64, weight: 700, color: 'var(--ink)' },
     soft: { type: 'text', text: 'Out of focus', x: 560, y: 620, w: 800, size: 64, weight: 700, color: 'var(--ink)' } },
   wordBlast: { text: 'Faster.' },
+  // The five HTML-FIRST beats (blueprints/beats-html.mjs): a fragment author's own markup, `parts`
+  // reveals it. `data-part` marks each child so the default selector finds something to stagger.
+  htmlCard: { title: 'Uptime', body: '<div data-part style="font:700 96px var(--font-sans);color:var(--text)">99.99%</div><div data-part style="font:500 26px var(--font-mono);color:var(--dim)">last 90 days</div>', dur: 3.4 },
+  htmlPanel: { body: '<div data-part style="padding:40px;font:500 30px var(--font-mono);color:var(--text)">$ deploy --prod</div>', dur: 3 },
+  htmlBrowser: { url: 'app.example.com/dashboard', body: '<div data-part style="padding:40px;font:600 34px var(--font-sans);color:var(--text)">Your dashboard, live</div>', dur: 4 },
+  htmlTable: { headers: ['Service', 'Status', 'Latency'], rows: [['api', 'ok', '42ms'], ['worker', 'ok', '18ms'], ['db', 'ok', '6ms']], dur: 3.6 },
+  htmlChat: { messages: [{ from: 'a', text: 'Deploy is live' }, { from: 'b', text: 'Nice, checking now', me: true }, { from: 'a', text: 'p99 42ms' }], dur: 3.6 },
 };
 
 const missing = Object.keys(BEATS).filter((n) => !CONTENT[n]);

@@ -104,6 +104,51 @@
       ]
     },
     {
+      "name": "htmlBrowser",
+      "type": "vawe:beat",
+      "description": "Frame your own page content in a real browser chrome, traffic dots and a url bar, and reveal it part by part.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "htmlCard",
+      "type": "vawe:beat",
+      "description": "Draw a card from your own markup and reveal its pieces one at a time, not as one flat card.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "htmlChat",
+      "type": "vawe:beat",
+      "description": "Play a chat log whose bubbles land one after another, the way a conversation actually arrives.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "htmlPanel",
+      "type": "vawe:beat",
+      "description": "Give your own content a plain surface to sit on, a terminal, a dialog, anything you draw yourself.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "htmlTable",
+      "type": "vawe:beat",
+      "description": "Show a real table that fills in row by row, never the whole grid at once.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
       "name": "kineticHook",
       "type": "vawe:beat",
       "description": "Open on a kinetic hook: eyebrow, one hero number or word that counts up, a subline that arrives word by word.",

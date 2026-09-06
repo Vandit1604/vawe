@@ -1,0 +1,44 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "htmlBrowser",
+  "type": "vawe:beat",
+  "title": "htmlBrowser",
+  "description": "Frame your own page content in a real browser chrome, traffic dots and a url bar, and reveal it part by part.",
+  "tags": [
+    "beat",
+    "motion"
+  ],
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blueprints/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "beat",
+      "beat": "htmlBrowser",
+      "start": 0,
+      "dur": 4,
+      "select": null,
+      "anim": null,
+      "each": null,
+      "stagger": null
+    },
+    "requiredProps": [
+      "select",
+      "anim",
+      "each",
+      "stagger"
+    ],
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "url",
+      "body"
+    ]
+  }
+}
