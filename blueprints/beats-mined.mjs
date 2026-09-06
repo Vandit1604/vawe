@@ -154,11 +154,13 @@ export function cellMosaic({ cells = [], cols = 4, cellW = 260, cellH = 170, gap
 // IS the transition: what it reveals lands the instant it clears. Measured off `rebuilt` shot 4, whose
 // scale contrast (one word ~8x the frame's own type) is the loudest frame in that film.
 // sources: rebuilt#4.
-export function wordWipe({ word, color = INK, size = 900, weight = 800, wipeAt = 0.4,
+export function wordWipe({ word, color = INK, size = 560, scale = 1.6, weight = 800, wipeAt = 0.4,
   revealText, subText, x = 0, w = 1920, y = 340, start = 0, dur = 1.8 } = {}) {
+  // The schema caps `size` at 560; the frame-fill look (a word ~8x the frame's own type) comes from
+  // the track's `scale`, so the word is set at the cap and scaled up, not written past it.
   const out = [{ type: 'text', text: word, x, y, w, align: 'center', size, weight, color,
     start, duration: Math.max(0.5, wipeAt + 0.3), anim: 'none', exitDur: 0, motionBlur: true,
-    motion: [{ t: 0, x: -w }, { t: wipeAt, x: w, ease: 'easeInCubic' }] }];
+    motion: [{ t: 0, x: -w, scale }, { t: wipeAt, x: w, scale, ease: 'easeInCubic' }] }];
   if (revealText) out.push(caption({ text: revealText, x: 160, y: y + 40, w: 1600, size: 40,
     weight: 600, color: ACCENT, start: start + wipeAt, dur: Math.max(0.4, dur - wipeAt) }));
   if (subText) out.push(caption({ text: subText, x: 160, y: y + 100, w: 1600, size: 30,

@@ -391,6 +391,34 @@
     "poster": "beats/viewportTrio/poster.png",
     "sheet": "beats/viewportTrio/sheet.png"
    }
+  },
+  {
+   "id": "slotSwap",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "three fixed slots whose contents turn over N times; the right slot changes TYPE each pass",
+   "files": {
+    "preview": "beats/slotSwap/preview.mp4",
+    "poster": "beats/slotSwap/poster.png",
+    "sheet": "beats/slotSwap/sheet.png"
+   }
+  },
+  {
+   "id": "wordWipe",
+   "duration": 2.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "an oversized word crosses the whole frame motion-blurred, and its passage is the transition",
+   "files": {
+    "preview": "beats/wordWipe/preview.mp4",
+    "poster": "beats/wordWipe/poster.png",
+    "sheet": "beats/wordWipe/sheet.png"
+   }
   }
  ]
 }
