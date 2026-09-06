@@ -1,0 +1,32 @@
+---
+name: ease-direction
+when: choosing an ease for an entrance, an exit, or a move between two positions
+holds: eye (MOTION-CRAFT.md Rule 2; judgment, not gated)
+answers: "which easing family belongs on an entrance, an exit, and a handover, and why easeOutExpo on a handover is wrong"
+group: look
+---
+# Entrances ease out, exits ease in, a handover eases in-out
+
+An entrance is a landing: it decelerates, so use `easeOutCubic`/`easeOutExpo`/`easeOutBack`. An exit is
+a launch: it accelerates, so use `easeInCubic`/`easeInExpo`. A move BETWEEN two positions the viewer
+already sees, including a `becomes` handover, is neither arriving nor departing: it travels, so it
+eases both ends with `easeInOutCubic`. `easeOutExpo` on a handover decelerates through the whole
+travel, so the object seems to teleport in fast and crawl the rest of the way, which reads as two
+separate objects, not one that moved.
+
+| move | ease family | example |
+|---|---|---|
+| entrance | ease OUT | `easeOutCubic`, `easeOutExpo`, `easeOutBack` |
+| exit | ease IN | `easeInCubic`, `easeInExpo` |
+| handover / travel between two seen positions | ease IN-OUT | `easeInOutCubic` |
+| never on a handover | `easeOutExpo` | reads as a cut, not a move |
+
+Right:
+```json
+{ "id": "card", "becomes": "dot", "becomesDur": 0.9, "becomesEase": "easeInOutCubic" }
+```
+
+Wrong:
+```json
+{ "id": "card", "becomes": "dot", "becomesDur": 0.9, "becomesEase": "easeOutExpo" }
+```
