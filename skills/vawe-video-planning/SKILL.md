@@ -179,6 +179,13 @@ in, generic video out.
 move differently per brand (punchy: short settle/tight stagger; calm: long settle/no bounce).
 Leaving motion at defaults is shared DNA across brands; don't.
 
+**Write `look` into the theme too** (`docs/CRAFT/THEME-LOOK.md`): the bg preset rotation, the
+type scale, the layout anchor/margin, the mark's two sizes, the cut family, the audio cues. This
+is the same study, spent a second time: a theme with `motion` but no `look` still forces every
+FILM for that brand to re-decide its own backdrop and cut family from scratch. `make scaffold
+TYPE=<type> THEME=<name>` reads `look` and uses it; `make theme-sheet THEME=<name>` renders it
+as a picture so you can check it before authoring the film.
+
 **Name 2–3 references** that fit THIS brand ("Vercel keynote restraint", "Sandwich Video
 warmth") and state what the design borrows and what it refuses. Different reference triangle,
 different output: this breaks the author's own habits.

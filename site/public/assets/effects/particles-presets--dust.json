@@ -1,0 +1,30 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "black",
+      "from": 0,
+      "to": 3
+    }
+  ],
+  "layers": [
+    {
+      "type": "particles",
+      "preset": "dust",
+      "count": 80,
+      "seed": 1,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "start": 0,
+      "duration": 3
+    }
+  ]
+}

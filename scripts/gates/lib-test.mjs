@@ -1,4 +1,4 @@
-// scripts/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion.js.
+// scripts/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js.
 // No browser needed (the primitives are pure). Run: node scripts/gates/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
@@ -127,7 +127,7 @@ if (process.argv.includes('--colours')) {
     ['foo rgb(1,2,3)', 'was motion-only: the missing anchor, now null'],
     [[1, 2, 3], 'was motion-only (array passthrough)'],
   ];
-  console.log('\n  the one colour parser · core/motion.js\n');
+  console.log('\n  the one colour parser · core/motion/motion.js\n');
   for (const [v, why] of rows) {
     const t = parseColor(v), o = parseColorRGB(v);
     let lf; try { lf = JSON.stringify(lightfieldToRgb(v)); } catch { lf = 'refused'; }
@@ -206,7 +206,7 @@ ok('resolveEasing names the wrong slot for a GSAP ease', (() => {
 ok('resolveEasing accepts every name the library uses', ['linear', 'easeOutCubic', 'easeInOutCubic', 'ramp', 'spring', 'springEase', 'settle', 'snap', 'brake', 'rush'].every((n) => typeof resolveEasing(n) === 'function'));
 ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
 
-// ---- core/vocab.js: the plain words, accepted where the concrete value is ----
+// ---- core/registry/vocab.js: the plain words, accepted where the concrete value is ----
 // The words are ALIASES. Three things have to hold or the whole idea is a second vocabulary that lies:
 // every word resolves, every word resolves to the SAME thing its target does, and a concrete value is
 // untouched by their existence. The fourth is that a typo is refused with its near misses.
@@ -218,7 +218,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
   ok('vocab: every CAMERA word names a move that exists',
     Object.values(CAMERA_WORDS).every((t) => CAMERA_MOVE_NAMES.includes(t)));
   // The far side of every alias, asked of the real registries. A rename over there is caught here,
-  // because core/vocab.js is a leaf (core/motion.js imports it) and cannot check itself at import.
+  // because core/registry/vocab.js is a leaf (core/motion/motion.js imports it) and cannot check itself at import.
   ok('vocab: verifyVocab finds no dangling target',
     verifyVocab({ easings: Object.keys(EASINGS), cameraMoves: CAMERA_MOVE_NAMES }).length === 0);
   // A word that shadows a curve would be unreachable: resolveEasing finds EASINGS first, so the word
@@ -229,8 +229,8 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
     const all = [...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)];
     return new Set(all).size === all.length;
   })());
-  // `medium` is BASE_ENTER. Asserted rather than imported: core/clips.js imports core/motion.js, which
-  // imports core/vocab.js, and the cycle is not worth one constant.
+  // `medium` is BASE_ENTER. Asserted rather than imported: core/timeline/clips.js imports core/motion/motion.js, which
+  // imports core/registry/vocab.js, and the cycle is not worth one constant.
   ok('vocab: `medium` is the engine\'s own default entrance (BASE_ENTER)', DURATION.medium === BASE_ENTER);
 
   // PASSTHROUGH: the non-negotiable. A scene naming a number or a real name is untouched.
@@ -253,7 +253,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
     try { resolveSeconds('quick'); return false; } catch { return true; }
   })());
   // A feel word written into a slot that takes a different vocabulary is DIAGNOSED, not just rejected.
-  // The cross-registry hint core/registry.js exists for.
+  // The cross-registry hint core/registry/registry.js exists for.
   ok('vocab: a feel word in the `anim` slot is named as a feel word', (() => {
     try { ANIM_REGISTRY.pick('snappy'); return false; }
     catch (e) { return /feel word/.test(e.message) && /ease: "snappy"/.test(e.message); }
@@ -283,7 +283,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
     const d = lowerScene({ transitions: [{ at: 2, fx: 'wipe', mech: 'seam', dir: 35 }] });
     return d.seams[0].dir === 35;
   })());
-  // energy: the film-wide default speed curve (core/energy.js), applied by lowerScene.
+  // energy: the film-wide default speed curve (core/transitions/energy.js), applied by lowerScene.
   ok('energy: every ENERGY value is a real TIMINGS curve', Object.values(ENERGY).every((t) => t in TIMINGS));
   ok('energy: okEnergy passes a known word and null, throws on an unknown', (() => {
     if (okEnergy('brand') !== 'brand' || okEnergy(null) !== null) return false;
@@ -389,7 +389,7 @@ ok('clockWipe is polygon', clockWipe(0.5).clipPath.startsWith('polygon('));
 ok('clockWipe full at 1 has all corners', (() => { const p = clockWipe(1).clipPath; return p.includes('100.0% 0.0%') && p.includes('100.0% 100.0%') && p.includes('0.0% 100.0%'); })());
 ok('clockWipe deterministic', clockWipe(0.33).clipPath === clockWipe(0.33).clipPath);
 
-// The DIRECTION of every named wipe in the layer registry (core/clips.js ANIM). Counting names cannot
+// The DIRECTION of every named wipe in the layer registry (core/timeline/clips.js ANIM). Counting names cannot
 // see this: `wipe-right` was registered as wipe(t,'right') and therefore revealed right-to-left, against
 // its own name and the comment beside it, and no gate could tell. A wipe is named for the edge its
 // reveal TRAVELS TOWARD; motion.js `wipe(dir)` names the edge it grows FROM, so each pair is crossed.
@@ -484,7 +484,7 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
      (() => { const x = JSON.stringify(clipStyleAt(stepped, 0.17)); clipStyleAt(stepped, 2.4); return x === JSON.stringify(clipStyleAt(stepped, 0.17)); })());
 }
 
-// ---- THE LAYER'S CLOCK (core/time.js): TIME REMAPPING -------------------------------------------
+// ---- THE LAYER'S CLOCK (core/timeline/time.js): TIME REMAPPING -------------------------------------------
 // AE recipe #25, the speed ramp. `timeWarp` was one easing over one span and therefore MONOTONE in
 // speed; a keyed remap is what expresses fast-HOLD-fast, and the freeze and the rewind fall out of the
 // same mechanism. Every assert below is a pure read of one number, which is the whole design.
@@ -492,7 +492,7 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   const at = (L, t, span = 2) => layerTime(L, t, 0, span);
   ok('a layer with no time dial is handed the film\'s own second, untouched',
      at({}, 0.7) === 0.7 && at({}, 0) === 0);
-  ok('timeWarp still lands exactly on the layer\'s end, as it did before core/time.js owned it',
+  ok('timeWarp still lands exactly on the layer\'s end, as it did before core/timeline/time.js owned it',
      Math.abs(at({ timeWarp: 'easeInQuint' }, 2) - 2) < 1e-9 && at({ timeWarp: 'easeInQuint' }, 0) === 0);
   ok('timeWarp is monotone in SPEED, which is why a hold needs keys instead', (() => {
     const L = { timeWarp: 'easeInOutCubic' }, d = (t) => at(L, t + 0.01) - at(L, t);
@@ -536,7 +536,7 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
      TIME_REMAP_NAMES.length === 4 && TIME_REMAP_NAMES.every((n) => (TIME_REMAP_BLURBS[n] || '').length > 20));
 }
 
-// ---- THE VELOCITY READ (core/sequence.js), and the three modifiers built on it -------------------
+// ---- THE VELOCITY READ (core/timeline/sequence.js), and the three modifiers built on it -------------------
 {
   // LINEAR on purpose: motionAt eases a sparse segment, so a track written without `ease` has an
   // instantaneous velocity at its midpoint nearly three times its average, and every number below
@@ -557,7 +557,7 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   //
   // A named easing is a function of ONE segment's own progress, so it ends that segment fast and
   // starts the next one at rest: an interior key is a dead stop by construction (the SMOOTH section of
-  // core/sequence.js). `exit` is the one emitted shape whose interior key is a pure WAYPOINT, the
+  // core/timeline/sequence.js). `exit` is the one emitted shape whose interior key is a pure WAYPOINT, the
   // travel never turns around, so the stop there is a defect and not the shape. Both segments were
   // `easeInCubic` and the departure collapsed from 285 px/s to 31 at its own waypoint. Asserted as a
   // velocity FLOOR rather than as the two key names, because the names are one way to get there and
@@ -985,7 +985,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     }
   };
   walkCore(path.join(repoRoot, 'core'));
-  // Assignment forms only. A tween that ANIMATES letter-spacing (core/gsap-effects.js `expandIn`) is a
+  // Assignment forms only. A tween that ANIMATES letter-spacing (core/engine/gsap-effects.js `expandIn`) is a
   // motion over the settled value, not a second opinion about what the settled value is.
   const WRITE = /\.style\.letterSpacing\s*=|setProperty\(\s*['"]letter-spacing['"]/;
   // The allowlist is a list of REASONS, not of files. A file may only be here if it writes a value it
@@ -1149,7 +1149,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('ancestor-kills reaches group children', cmsg.includes('"pane"'));
 }
 
-// timeline evaluators (core/sequence.js): pure math lifted out of scene.html
+// timeline evaluators (core/timeline/sequence.js): pure math lifted out of scene.html
 {
   // cameraAt: empty → null; endpoints clamp; midpoint eases between two keyframes
   ok('cameraAt empty null', cameraAt([], 1) === null);
@@ -1282,7 +1282,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 }
 
 // ---- the safe area ----
-// The point of core/safe.js is that ONE function answers "where may content live", so the asserts that
+// The point of core/layout/safe.js is that ONE function answers "where may content live", so the asserts that
 // matter are the relationships the four old tables got wrong, not the arithmetic.
 {
   const A = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350] };
@@ -1544,7 +1544,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // Each family's pure surface, held to the contract its consumers rely on. The DOM halves (SVG def
 // injection, the caption runtime) are covered by make probe + the rendered reel, not here.
 {
-  // colour-grade presets (core/filters.js)
+  // colour-grade presets (core/looks/filters.js)
   ok('filter: raw CSS passes through', resolveFilter('blur(4px) saturate(1.2)').filter === 'blur(4px) saturate(1.2)');
   ok('filter: sepia param', resolveFilter('sepia:0.6').filter === 'sepia(0.6)');
   ok('filter: vignette is an overlay, never a filter', resolveFilter('vignette:0.6').filter === '' && /radial-gradient/.test(resolveFilter('vignette:0.6').overlay));
@@ -1557,7 +1557,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('filter: parseColor hex3 + rgb + junk', JSON.stringify(parseColor('#7cf')) === '[119,204,255]' && JSON.stringify(parseColor('rgb(1, 2, 3)')) === '[1,2,3]' && parseColor('nope') === null);
   ok('filter: all six presets exist', ['duotone','tritone','gradientMap','posterize','sepia','vignette'].every((k) => FILTER_PRESETS[k]));
 
-  // THE ONE COLOUR PARSER (core/motion.js). Four copies with four grammars became one, and this is
+  // THE ONE COLOUR PARSER (core/motion/motion.js). Four copies with four grammars became one, and this is
   // the falsifiable half of that claim: for each old copy, a colour it REJECTED and a colour it
   // ACCEPTED, run through the shared parser now. If the union ever narrows, or the anchor is
   // dropped again, one of these flips. `node scripts/gates/lib-test.mjs --colours` prints the table.
@@ -1595,7 +1595,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // A MISS THROWS, and this assertion used to demand the opposite. presetSpec answered an unknown name
   // with null, the builder read null as "no preset asked for", and `preset: "blom"` painted the plain
   // gradient in silence. The test encoded that as the contract, which is how a silent substitution
-  // survives a gate. core/registry.js owns the seven names now, so a miss names them and suggests the
+  // survives a gate. core/registry/registry.js owns the seven names now, so a miss names them and suggests the
   // near one.
   ok('glow: an unknown preset THROWS, and the message names the vocabulary and the near miss', (() => {
     try { presetSpec('blom'); return false; } catch (e) {
@@ -1615,7 +1615,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('glow: chromaCycle yields a screen-blended neon base', (() => { const s = presetSpec('chromaCycle', {}); return s.blend === 'screen' && typeof s.background === 'string'; })());
   ok('glow: cycleHue sweeps 0->360, pure + looping', cycleHue(0) === 0 && cycleHue(3, 6) === 180 && approx(cycleHue(6, 6), 0) && cycleHue(1.7, 5) === cycleHue(1.7, 5));
 
-  // caption styles (core/captions.js)
+  // caption styles (core/type/captions.js)
   const cap = { t0: 1, t1: 3, text: 'Ship the <b>payoff</b> last' };
   const wins = capWords(cap);
   ok('captions: markup-stripped to 4 word windows, contiguous from t0', wins.length === 4 && approx(wins[0].t0, 1)
@@ -1643,7 +1643,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('captions: the one-word styles declare mode:one, typeOn declares unit:char',
     capShape('wordFlash').mode === 'one' && capShape('wordSlide').mode === 'one'
     && capShape('typeOn').unit === 'char' && capShape('typeOn').mode !== 'one');
-  // The char windows must align INDEX FOR INDEX with core/type.js splitText('char'), which emits one
+  // The char windows must align INDEX FOR INDEX with core/type/type.js splitText('char'), which emits one
   // unit per non-space character, word by word. There is no DOM here, so the count is the check.
   const chw = capUnitWins(cap, 'char');
   ok('captions: char windows are one per non-space character',
@@ -1685,7 +1685,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // THE THREE STATES, once per style. A caption style whose upcoming and already-spoken words look
   // identical is a progress bar with no memory: the viewer cannot tell what has been read from what
   // is coming. Every style must therefore emit three DISTINCT declarations, and none of the three may
-  // reach for opacity (the contrast doctrine at the top of core/captions.js).
+  // reach for opacity (the contrast doctrine at the top of core/type/captions.js).
   // clipWipe is exempt and cannot be tested this way: it is LINE-level, one argument, no word states.
   const st = (name, u, active) => JSON.stringify(CAP_STYLES[name](u, active));
   for (const name of CAP_STYLE_NAMES.filter((n) => n !== 'clipWipe')) {
@@ -1746,9 +1746,9 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // The overlay itself is GL, so JS asserts the contract around it: one name list, one shader branch
 // per name, and the schema exposing exactly that vocabulary, the three surfaces that can drift.
 {
-  // core/stings.js is now a thin re-export; the shader lives in core/stings/ (one file per fx under
+  // core/stings/index.js is now a thin re-export; the shader lives in core/stings/ (one file per fx under
   // units/, core/stings/index.js the runner that stitches them into one FRAG, same shape as
-  // core/seams.js). One name list, one unit per name, and the schema exposing exactly that vocabulary.
+  // core/timeline/seams.js). One name list, one unit per name, and the schema exposing exactly that vocabulary.
   ok(`stings: ${SHADER_FX.length} effects, all unique`, SHADER_FX.length > 0 && new Set(SHADER_FX).size === SHADER_FX.length);
   const unitsDir = path.join(repoRoot, 'core', 'stings', 'units');
   const missingUnit = SHADER_FX.filter((n) => !fs.existsSync(path.join(unitsDir, `${n}.js`)));
@@ -1773,7 +1773,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- three (real geometry) ----
 // three.js is only deterministic if you keep it that way, and nothing about the library enforces it.
-// These are the teeth behind core/three-fx.js's contract: the banned-API list is what stops someone
+// These are the teeth behind core/surfaces/three-fx.js's contract: the banned-API list is what stops someone
 // reaching for THREE.Clock or Math.random six months from now and quietly breaking pure-in-n, which
 // probe/canvas-purity would then catch only if the sampled frames happened to disagree.
 {
@@ -2231,7 +2231,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`themes: every theme resolves a background palette (authored or derived)${noPal.length ? ': ' + noPal.join(', ') : ''}`, noPal.length === 0);
 }
 
-// ---- the registry primitive (core/registry.js) ----
+// ---- the registry primitive (core/registry/registry.js) ----
 // Every named vocabulary resolves through `pick()`, which takes no fallback parameter, so a silent
 // default is not expressible. docs/MISTAKES.md #369.
 {
@@ -2611,7 +2611,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     !lintData({ layers: [{ type: 'text', fx: 'charFold' }] }).some((m) => /deprecated/.test(m)));
 }
 
-// ---- junctions: name a moment by its JOINT, never by its time (core/junctions.js) ----
+// ---- junctions: name a moment by its JOINT, never by its time (core/timeline/junctions.js) ----
 {
   const marks = [{ t: 1.6, kind: 'cut' }, { t: 4.4, kind: 'cut' }, { t: 7.8, kind: 'sting' }];
   const table = junctionTable(marks);
@@ -2742,7 +2742,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 }
 
 // ---- css passthrough: `cssErrors` refuses every prop the engine rewrites every frame or kills
-// globally, and stays silent on anything else (core/validate.mjs, core/layers/util.js applyCss) ----
+// globally, and stays silent on anything else (core/validate/validate.mjs, core/layers/util.js applyCss) ----
 {
   ok('css: opacity is refused, and names the alternative', (() => {
     const errs = cssErrors({ layers: [{ type: 'rect', css: { opacity: 0.5 } }] });
@@ -2797,7 +2797,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   })());
 }
 
-// ---- colour defaults: a token or a stated constant, never an unexplained hex (core/color.js) ----
+// ---- colour defaults: a token or a stated constant, never an unexplained hex (core/color/color.js) ----
 {
   ok('color: a token resolves to var() in a CSS context', resolveColor(token('--accent'), 'css') === 'var(--accent, #ffffff)');
   ok('color: a token resolves to components where var() cannot go (SVG attrs, canvas)',
@@ -2836,7 +2836,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('canvasfx: every preset targets a real pass', Object.values(CANVAS_FX_PRESETS).every((p) => CANVAS_FX_NAMES.includes(p.fx)));
 }
 
-// ---- audio kit (core/audio-kit.mjs): synthesized cues must be deterministic + audible ----
+// ---- audio kit (core/audio/kit.mjs): synthesized cues must be deterministic + audible ----
 {
   const a = renderCue(CUES.whoosh, 5), b = renderCue(CUES.whoosh, 5);
   ok('audio: renderCue is deterministic for a seed', a.length === b.length && a.every((v, i) => v === b[i]));
@@ -3093,7 +3093,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beats: snapToBeat REFUSES to drag a far cut', snapToBeat(1.28, bts, 0.12) === 1.28);
   ok('beats: snapToBeat is a no-op with no grid', snapToBeat(3.3, [], 0.12) === 3.3);
   ok('beats: downbeats take every 4th beat', downbeats([0, 1, 2, 3, 4, 5, 6, 7, 8], 4).join() === '0,4,8');
-  // ---- beat BINDING (core/beat-bind.js): the grid reaches the film's joints, or the render stops ----
+  // ---- beat BINDING (core/beats/index.js): the grid reaches the film's joints, or the render stops ----
   const throws = (fn, re) => { try { fn(); return false; } catch (e) { return re.test(e.message); } };
   const G = { bpm: 120, confidence: 8, beats: [0, 0.5, 1, 1.5, 2, 2.5, 3], downbeats: [0, 2] };
   const sc = () => ({ audio: { music: 'beat', beatSync: true }, cuts: [{ t: 0.54, style: 'punch' }, { t: 1.28, style: 'punch' }], seams: [{ t: 1.75, dur: 0.5, fx: 'fade' }] });
@@ -3152,7 +3152,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('motion: lift settles to identity', lift(1).transform.includes('scale(1.0000)'));
 }
 
-// ---- opacity envelope (core/clips.js): eased, and safe to cross-dissolve with ----
+// ---- opacity envelope (core/timeline/clips.js): eased, and safe to cross-dissolve with ----
 {
   ok('envelope: not linear (an entrance decelerates)', opacityEnvelope(0.25, 0) > 0.4);
   ok('envelope: 0 at the start, 1 when settled', opacityEnvelope(0, 0) === 0 && opacityEnvelope(1, 0) === 1);
@@ -3167,7 +3167,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     } return true; })());
 }
 
-// ---- clipStyleAt (core/clips.js): the composition asked for, not performed ----
+// ---- clipStyleAt (core/timeline/clips.js): the composition asked for, not performed ----
 // A fake element is enough because the function reads only `el.dataset` and writes nothing. That is
 // the whole point of the lift: the pose at t is a VALUE, so it can be asked for out of order, twice,
 // or for a t nobody is rendering.
@@ -3206,7 +3206,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
      clipStyleAt(Object.freeze({ dataset: Object.freeze({ start: '0', duration: '2', anim: 'rise' }) }), 1).opacity === '1.000');
 }
 
-// ---- sceneDims (core/safe.js): how big is the frame, asked once ----
+// ---- sceneDims (core/layout/safe.js): how big is the frame, asked once ----
 {
   ok('dims: aspect wins', sceneDims({ aspect: '16:9' }).join() === '1920,1080');
   ok('dims: portrait aspect', sceneDims({ aspect: '9:16' }).join() === '1080,1920');
@@ -3220,7 +3220,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 }
 
 // ---- ONE definition of the canvas: no tool may re-derive dimensions from `orientation` ----
-// core/safe.js exists because four copies of the safe box disagreed; the same then happened to the
+// core/layout/safe.js exists because four copies of the safe box disagreed; the same then happened to the
 // frame size across eight call sites. This asserts the copies stay gone rather than trusting a memo.
 {
   const scan = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -3273,7 +3273,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('ransom: accent tile carries the passed accent', ransomSwatches('#0af').some((s) => s.bg === '#0af'));
 }
 
-// ---- unified transitions router + lowering (core/transitions-lower.js) ----
+// ---- unified transitions router + lowering (core/transitions/lower.js) ----
 {
   const throws = (fn) => { try { fn(); return false; } catch { return true; } };
   ok('transitions: seam-only name routes to seam', boundaryMechanism('whipPan') === 'seam');
@@ -3330,11 +3330,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     await import('../../core/audio/tactile.js');
   const canvas = { w: 1920, h: 1080 };
 
-  // The five motion voices are being added to CUES in core/audio-kit.mjs alongside this module, so
+  // The five motion voices are being added to CUES in core/audio/kit.mjs alongside this module, so
   // this reports rather than fails: a name that has not baked yet renders silent, and the day one of
   // them is renamed this line is what says so.
   const unbaked = MOTION_CUES.filter((n) => !(n in CUES));
-  if (unbaked.length) console.log(`  · tactile: motion cues not baked yet (pending core/audio-kit.mjs): ${unbaked.join(', ')}`);
+  if (unbaked.length) console.log(`  · tactile: motion cues not baked yet (pending core/audio/kit.mjs): ${unbaked.join(', ')}`);
   // EVERY NAME THE DERIVATION EMITS MUST BE A CUE, which is the assertion that was missing when the
   // listening pass trimmed MOTION_CUES and left the emitters writing `thud`, `travel` and `riser`.
   // Naming one cue was never the check: the check is that the whole vocabulary resolves.
@@ -4122,7 +4122,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   throws({ bridge: 'j', at: 'cut@0', lead: 0.5, span: 0.2, fade: 1, sound: 'a' }, /does not fit/, 'a fade that does not fit the span is refused');
 }
 
-// ---- idle (core/idle.js) --------------------------------------------------------------------------
+// ---- idle (core/engine/idle.js) --------------------------------------------------------------------------
 // An idle runs on EVERY frame of a layer's hold, so the two things that can go wrong are the two things
 // that are expensive: it is not pure in the frame, or it does something when nobody asked. Both are
 // asserted here rather than left to the render, because both are invisible in a still.
@@ -4160,7 +4160,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   }
 
   // The AMPLITUDE the reference asks for by name: a 1-2% breathing scale. A breathe that reached 8%
-  // would be a pulse animation, and one that reached 0.2% would be the sub-pixel shimmer core/motion.js
+  // would be a pulse animation, and one that reached 0.2% would be the sub-pixel shimmer core/motion/motion.js
   // snaps its easing endpoints to avoid.
   {
     let lo = Infinity, hi = -Infinity;
@@ -4210,7 +4210,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   }
 }
 
-// ---- the spectacle dial (core/knobs.js arithmetic + core/spectacle.js walk) -----------------------
+// ---- the spectacle dial (core/registry/knobs.js arithmetic + core/timeline/spectacle.js walk) -----------------------
 //
 // The half that can be proved without a DOM: what the attenuation DOES to a number, and that a scene
 // with no `spectacle` comes back untouched. Whether the film reads better is a question for eyes.
@@ -4325,7 +4325,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('sting ids: 0..n-1, no gaps, no duplicates',
     new Set(ids).size === ids.length && Math.min(...ids) === 0 && Math.max(...ids) === ids.length - 1);
 
-  // core/stings.js is now a thin re-export; FRAG/draw() live in core/stings/index.js, one branch per
+  // core/stings/index.js is now a thin re-export; FRAG/draw() live in core/stings/index.js, one branch per
   // unit under core/stings/units/*.js (see the "shader stings" block above for the unit-level checks).
   const fragSrc = fs.readFileSync(path.join(repoRoot, 'core', 'stings', 'index.js'), 'utf8');
   const missing = ids.filter((i) => !FX[i] || !fs.existsSync(path.join(repoRoot, 'core', 'stings', 'units', `${FX[i]}.js`)));
@@ -4364,7 +4364,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // THE HALF THAT MUST STAY QUIET. A preset the manifest does not list is not graded against
   // `_shared` alone, because that would refuse a shipped film for a HOLE in the manifest rather than
   // for a mistake in the film. `colorWave` and `shimmerWave` were the kinetic examples here until
-  // `bindDials` (core/knobs.js) made an unlisted kinetic dial impossible; the `globe` three scene is
+  // `bindDials` (core/registry/knobs.js) made an unlisted kinetic dial impossible; the `globe` three scene is
   // still one, and the rule it proves has to keep a live subject.
   ok('knobs: a preset the manifest does not list is not graded at all',
     of({ type: 'three', three: 'globe', pointSize: 3, spin: 1 }).length === 0);
@@ -4761,7 +4761,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---- THE GSAP TRIGGER LOCKSTEP (docs/MISTAKES.md #154, #487) ----
-// core/preload.js decides whether the tween engine is fetched at all, from the props a scene names. Get
+// core/engine/preload.js decides whether the tween engine is fetched at all, from the props a scene names. Get
 // that set wrong and the render is silent and STILL: no throw, no warning, a figure that simply does not
 // move. It shipped that way once, because the set was a hand-typed list beside a comment asking the next
 // author to keep it in lockstep with three other files.
@@ -4828,7 +4828,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 {
   const { insideRoot, MIME, REPO_ROOT } = await import('../lib/render-harness.mjs');
   const root = '/repo';
-  ok('a file under the root is served', insideRoot(root, '/repo/core/boot.js'));
+  ok('a file under the root is served', insideRoot(root, '/repo/core/engine/boot.js'));
   ok('the root itself is inside itself', insideRoot(root, '/repo'));
   ok('a parent is refused', insideRoot(root, '/etc/passwd') === false);
   ok('a climb out is refused', insideRoot(root, path.join(root, '../secrets')) === false);
@@ -4940,7 +4940,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   let m = null; try { depthZ('mid', 1600); } catch (e) { m = e.message; }
   ok('an unknown depth is refused with the menu and its magnifications',
     m != null && /far/.test(m) && /0\.57x/.test(m) && /1\.39x/.test(m));
-  // THE SUGAR BECOMES THE MODIFIER, or core/boot.js throws. A field written and read by nothing is the
+  // THE SUGAR BECOMES THE MODIFIER, or core/engine/boot.js throws. A field written and read by nothing is the
   // failure the whole bake path exists to make impossible (docs/MISTAKES.md #444).
   const d = { layers: [{ type: 'rect', depth: 'back' }] };
   bakeDepth(d);
@@ -5468,7 +5468,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     mount({ type: 'svg', d: TRI, fill: '#111', draw: { dur: 1, fill: '#e11d48' } }).__drawFill === '#e11d48');
 
   // The ease was hardcoded easeOutCubic, so every write-on started at maximum speed. Absent still means
-  // easeOutCubic; a WRONG name throws rather than substituting, which is core/motion.js's contract.
+  // easeOutCubic; a WRONG name throws rather than substituting, which is core/motion/motion.js's contract.
   const eased = { type: 'svg', d: TRI, stroke: 'v', start: 0, draw: { dur: 1.2, ease: 'easeInOutCubic' } };
   const elE = mount(eased);
   ok('svg draw: `draw.ease` reaches the pixels. easeInOutCubic is slower off the mark than the old hardcoded easeOutCubic',
@@ -5519,7 +5519,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // author-facing table in the engine was one the arsenal gate could not check.
 //
 // TWO: two files may export the same word. `found` and `exported` were keyed by NAME with
-// first-file-wins, so `core/type.js`'s kinetic `PRESETS` lost the key to `core/lightfield/presets.js`
+// first-file-wins, so `core/type/type.js`'s kinetic `PRESETS` lost the key to `core/lightfield/presets.js`
 // and did not exist as far as the gate was concerned. That is worse than a miscount: the same
 // collision between a registry part and a bare vocabulary launders the bare one into the derived
 // bucket and stops checking it, and which of the two vanishes is decided by directory order.
@@ -5887,7 +5887,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   })());
 }
 
-// ---- AN UNSEARCHABLE BLURB CANNOT BE WRITTEN (core/registry.js checkBlurb) --------------------------
+// ---- AN UNSEARCHABLE BLURB CANNOT BE WRITTEN (core/registry/registry.js checkBlurb) --------------------------
 // The incident: `make arsenal "elements react to a moving point by distance"` answered NOTHING HERE
 // CLEARLY MATCHES while core/tracks/effector.js was exactly that, because the blurb never used the
 // words a person types. One blurb was rewritten; this is the class. The rule is the NARROWEST one that
@@ -6198,7 +6198,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     surfaceOf('three').includes('metalness') && surfaceOf('three').includes('bg'));
 
   // THE ARITY TRAP, and it bit on the first run of the prober. A builder reads its props off a
-  // destructured parameter (propsOf, core/props.js), and a defaulted parameter only takes its default
+  // destructured parameter (propsOf, core/registry/props.js), and a defaulted parameter only takes its default
   // when the caller passes nothing there. So the pattern must sit AFTER every argument the dispatcher
   // passes: core/layers/index.js calls build(kit, el, L) with three and frame(kit, el, L, t, scene)
   // with five. cursor, clip and lottie put the pattern in the fifth slot, destructured `scene`, and
@@ -6240,7 +6240,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('keyframe: a legal track still passes', refuses({ ease: 'settle' }) === null);
   // THE REGRESSION THIS CHECK ITSELF CAUSED, kept as a test rather than as a memory. The first cut of
   // KEYFRAME_PROPS was hand-written and guessed `in`/`out` for the bezier handles where the code says
-  // `easeIn`/`easeOut` (core/sequence.js SIDES), so three shipped films were refused for writing the
+  // `easeIn`/`easeOut` (core/timeline/sequence.js SIDES), so three shipped films were refused for writing the
   // CORRECT thing. A second list, written inside the check for second lists. The list is generated from
   // POSE and SIDES now, and these two assertions are what would have caught it.
   ok('keyframe: the real handle names are accepted', refuses({ easeIn: 'easyEase', easeOut: 'hang' }) === null);
@@ -6411,9 +6411,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       /--check/.test(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), `../site/${gen}.mjs`), 'utf8')));
   }
 }
-// ---- dialsOf + bindDials: one owner for a kinetic default (core/props.js, core/knobs.js) ---------
+// ---- dialsOf + bindDials: one owner for a kinetic default (core/registry/props.js, core/registry/knobs.js) ---------
 //
-// A kinetic preset used to state its dials TWICE, in its own signature and again in core/knobs.js,
+// A kinetic preset used to state its dials TWICE, in its own signature and again in core/registry/knobs.js,
 // and TEN defaults had drifted apart before anybody read both columns side by side. `stretch`
 // destructures `from = 1.6` and the manifest advertised 0.4: a smear published as a shrink. The
 // manifest is what `vawe_capabilities` hands an outside model, so that model wrote 0.4 to KEEP the
@@ -6433,7 +6433,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     const d = dialsOf(PRESETS.colorWave);
     return 'flash' in d && d.flash === undefined && d.hold === 0.5;
   })());
-  // 2. NULL IS "CANNOT SAY", NEVER "READS NONE" (core/props.js:66-68 writes the rule down). `decode`
+  // 2. NULL IS "CANNOT SAY", NEVER "READS NONE" (core/registry/props.js:66-68 writes the rule down). `decode`
   // takes no options bag because animateUnits reads its dials for it, and an empty object here would
   // have deleted its three rows instead of leaving them hand-written.
   ok('dialsOf: a preset with no options bag returns null, not an empty set', dialsOf(PRESETS.decode) === null);
@@ -6545,7 +6545,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
      ['t', 'x', 'y', 'scale', 'ox', 'oy'].every((f) => kfFields.includes(f)));
 
   // IT READS THE SCHEMA, NOT A SECOND LIST. Every field it printed above is a key of the schema node
-  // that scripts/gates/schema-drift.mjs holds against core/sequence.js KEYFRAME_PROPS. Compared to that
+  // that scripts/gates/schema-drift.mjs holds against core/timeline/sequence.js KEYFRAME_PROPS. Compared to that
   // same node here: if the tool ever grew a list of its own, these two sets would stop being equal.
   const owner = schema.fields.layers.item.motion.item;
   ok('schema AT: what it lists at a path IS the schema node at that path, with nothing added or hidden',
@@ -6577,7 +6577,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
      && kindsOfEnum(schema.fields.cuts.item.style.enum, regs).includes('cut'));
   ok('schema AT: a slot carrying two vocabularies names both',
      ['kinetic preset', 'glow preset'].every((k) => kindsOfEnum(schema.fields.layers.item.preset.enum, regs).includes(k)));
-  // `aspect` USED TO BE THE OWNERLESS EXAMPLE, and it is not any more: core/safe.js's ASPECTS became a
+  // `aspect` USED TO BE THE OWNERLESS EXAMPLE, and it is not any more: core/layout/safe.js's ASPECTS became a
   // registry, so the enum now names one. That is the improvement arriving, not the test breaking, and
   // the stronger assertion is the one the change makes available: that the enum finds its owner. The
   // ownerless half moves to a field that genuinely has none, so both halves keep being tested.
@@ -6791,6 +6791,66 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const base = JSON.parse(fs.readFileSync(path.join(repoRoot, 'verify/vocabulary-baseline.json'), 'utf8'));
   ok('vocab hook: the baseline records what already exists, so the hook only judges what you add',
     Object.keys(base).length > 40);
+}
+
+// ── theme.look (W8, core/registry/theme-contract.js): refused at load with the near word, same discipline
+// every other named vocabulary gets (core/registry/registry.js). A theme with no `look` is untouched by any of
+// this: `look == null` short-circuits to a clean pass, asserted first so the optional-block contract
+// itself is covered.
+{
+  const { lookErrors, LOOK_KEYS } = await import('../../core/registry/theme-contract.js');
+  const { nearMisses } = await import('../../core/registry/registry.js');
+  const bgNames = ['soft', 'paper', 'ink'];
+  const transitionNames = ['fade', 'cinematicZoom', 'dissolve'];
+  const cueNames = ['chime', 'whoosh', 'success'];
+
+  ok('theme.look: absent is clean (no look block is not an error)', lookErrors(null).length === 0);
+  ok('theme.look: a complete, valid look is clean', lookErrors({
+    backdrop: ['soft', 'paper'], scale: { hook: 90, headline: 60 }, layout: { anchor: 'left', margin: 160 },
+    marks: { logo: 'x.svg', endCardSize: 140, headlineSize: 100 }, cuts: { default: 'fade', accent: 'dissolve' },
+    cues: ['chime'], field: { grain: 0, vignette: 0.1 },
+  }, { bgNames, transitionNames, cueNames, nearMisses }).length === 0);
+
+  ok('theme.look: an unknown top-level key refuses with the near word', lookErrors({ backdorp: ['soft'] }, { bgNames, nearMisses })
+    .some((m) => /look\.backdorp/.test(m) && /did you mean "backdrop"/.test(m)));
+  ok('theme.look: LOOK_KEYS is the registry\'s own name list (one owner, not a second copy)',
+    LOOK_KEYS.length === 7 && LOOK_KEYS.includes('backdrop') && LOOK_KEYS.includes('cues'));
+
+  ok('theme.look: a bad bg preset name refuses with the near word', lookErrors({ backdrop: ['sof'] }, { bgNames, nearMisses })
+    .some((m) => /look\.backdrop names "sof"/.test(m) && /did you mean "soft"/.test(m)));
+  ok('theme.look: a real bg preset passes even with bgNames handed in', lookErrors({ backdrop: ['soft'] }, { bgNames, nearMisses }).length === 0);
+  ok('theme.look: backdrop names are unchecked (never assumed fine) when bgNames is not handed in, e.g. the browser boot path skipping cueNames',
+    lookErrors({ backdrop: ['not-a-real-preset'] }, {}).length === 0);
+
+  ok('theme.look: a bad cut name refuses with the near word', lookErrors({ cuts: { default: 'fad' } }, { transitionNames, nearMisses })
+    .some((m) => /look\.cuts\.default names "fad"/.test(m) && /did you mean "fade"/.test(m)));
+
+  ok('theme.look: a bad cue name refuses with the near word', lookErrors({ cues: ['chim'] }, { cueNames, nearMisses })
+    .some((m) => /look\.cues names "chim"/.test(m) && /did you mean "chime"/.test(m)));
+
+  ok('theme.look: layout.anchor must be one of the three named directions', lookErrors({ layout: { anchor: 'up' } })
+    .some((m) => /look\.layout\.anchor/.test(m)));
+  ok('theme.look: scale values must be numbers', lookErrors({ scale: { hook: '90px' } })
+    .some((m) => /look\.scale\.hook must be a number/.test(m)));
+
+  // every theme pack this repo ships must itself be clean: the same live registries `make validate`
+  // uses, so this is the real contract, not a mocked one.
+  const { BG_NAMES: liveBg } = await import('../../core/backgrounds/index.js');
+  const { TRANSITIONS: liveTransitions } = await import('../../core/transitions/catalog.js');
+  const { CUES: liveCues } = await import('../../core/audio/kit.mjs');
+  const liveTransitionNames = liveTransitions.map((t) => t.name);
+  const liveCueNames = Object.keys(liveCues);
+  const themeDir = path.join(repoRoot, 'themes');
+  const themeFiles = fs.readdirSync(themeDir).filter((n) => n.endsWith('.json'))
+    .concat(fs.readdirSync(path.join(themeDir, 'presets')).filter((n) => n.endsWith('.json')).map((n) => `presets/${n}`));
+  let themeLookErrs = 0;
+  for (const tf of themeFiles) {
+    const t = JSON.parse(fs.readFileSync(path.join(themeDir, tf), 'utf8'));
+    if (!t.look) continue;
+    const errs = lookErrors(t.look, { bgNames: liveBg, transitionNames: liveTransitionNames, cueNames: liveCueNames, nearMisses });
+    if (errs.length) { themeLookErrs++; console.error(`  theme ${tf}: ${errs.join('; ')}`); }
+  }
+  ok('theme.look: every shipped theme with a `look` block validates clean against the live registries', themeLookErrs === 0);
 }
 
 // ── site-counts SEES THE DOC SURFACES, AND STILL FAILS ON THEM ──────────────────────────────────
@@ -7022,7 +7082,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       const tmp = path.join(repoRoot, 'formats/scene/_craft-live-probe.json');
       const write = (o) => fs.writeFileSync(tmp, JSON.stringify({ module: 'scene', bg: [{ preset: 'black' }], ...o }));
 
-      // core/clips.js:77 owns the direction: slide-left enters from the left edge and, as an `out`,
+      // core/timeline/clips.js:77 owns the direction: slide-left enters from the left edge and, as an `out`,
       // leaves toward it. So the same word twice is enter-and-retreat, never one line of travel.
       write({ layers: [{ type: 'text', text: 'a', anim: 'slide-right', out: 'slide-right' },
         { type: 'image', src: 'a.png' }, { type: 'text', text: 'c' }] });

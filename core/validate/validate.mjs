@@ -1,9 +1,9 @@
-// core/validate.mjs, ENGINE CODE, not tooling: core/boot.js imports it, so the browser must be
+// core/validate/validate.mjs, ENGINE CODE, not tooling: core/engine/boot.js imports it, so the browser must be
 // able to resolve it (it ships to the site with the rest of core/). The node:fs use below is a lazy
 // dynamic import in the CLI branch and is never reached in a browser.
 //
 // (was) data + theme validation against a format's schema.json.
-// Runs in TWO places: (1) core/boot.js boot() imports validateData/validateTheme and aborts the
+// Runs in TWO places: (1) core/engine/boot.js boot() imports validateData/validateTheme and aborts the
 // render pre-first-frame on bad data (clear message, no wasted frames); (2) `make validate` (the
 // CLI main below) checks data files from the shell. Pure + browser-safe: no top-level node imports.
 //
@@ -19,7 +19,9 @@
 import { onScreenText, glyphText } from '../type/on-screen-text.js';
 import { IDLE } from '../engine/idle.js';
 import { STAGGER_FROM } from '../type/type.js';
-import { themeErrors } from '../registry/theme-contract.js';
+import { themeErrors, lookErrors } from '../registry/theme-contract.js';
+import { TRANSITIONS } from '../transitions/catalog.js';
+import { nearMisses } from '../registry/registry.js';
 // parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
 // absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
 import { parseColor, contrastRatio } from '../motion/motion.js';
@@ -273,7 +275,7 @@ export function validateData(schema, data) {
 //
 // TRANSLATION IS NOT REFUSED, and the difference is mechanical rather than a matter of degree. A
 // drift moves the whole run two to five pixels: the text travels, which is what ambient motion is
-// FOR and the reason core/idle.js exists. A scale re-rasterises. Only the second one is the bug.
+// FOR and the reason core/engine/idle.js exists. A scale re-rasterises. Only the second one is the bug.
 const idleName = (v) => (typeof v === 'string' ? v : v && typeof v === 'object' ? v.name : null);
 // Which idles change `scale` is read off the registry by CALLING it, not from a hand-kept list: a new
 // idle that scales must be caught the day it lands, not the day someone remembers to update a name.
@@ -328,8 +330,8 @@ export function idleErrors(cfg, IDLES = IDLE) {
 //
 // Placement is NOT checked here beyond its shape. Whether a pinned caption collides with a headline
 // is a question about a rendered frame, so it belongs to `make audit`, which reserves the band
-// (core/safe.js captionBand) and can see where the other layers actually landed.
-// The pins whose x-keyword is a real edge rather than 'center' (core/boot.js PIN).
+// (core/layout/safe.js captionBand) and can see where the other layers actually landed.
+// The pins whose x-keyword is a real edge rather than 'center' (core/engine/boot.js PIN).
 const H_PINS = ['left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right',
   'thirds-tl', 'thirds-tr', 'thirds-bl', 'thirds-br', 'thirds-l', 'thirds-r'];
 export function captionErrors(cfg) {
@@ -346,7 +348,7 @@ export function captionErrors(cfg) {
     // A horizontal pin needs a box to pin. `top`, `bottom` and `center` only ask for a vertical
     // position and the stylesheet's box still applies, so those are complete on their own. `left`,
     // `right` and the corners are asking to move an edge, and a caption has no width until one is
-    // declared, so the request cannot be honoured. core/boot.js therefore leaves it alone, and this
+    // declared, so the request cannot be honoured. core/engine/boot.js therefore leaves it alone, and this
     // says so out loud rather than letting the caption render where it always did.
     if (H_PINS.includes(c.pin) && c.w == null)
       out.push(`captions[${i}] pin "${c.pin}" moves a horizontal edge but the caption declares no w, `
@@ -399,8 +401,8 @@ export function htmlLayerErrors(cfg) {
 // ignores (docs/MISTAKES.md #213, #369, #373, #375). Every refusal names the vocabulary that already
 // owns the job, never just "no".
 const OWNED_CSS = {
-  opacity: 'written every frame from the enter/exit envelope (core/clips.js:220), use `anim` / `motion`',
-  transform: 'written every frame by motion tracks and named entrances (core/clips.js, GSAP), use `motion`',
+  opacity: 'written every frame from the enter/exit envelope (core/timeline/clips.js:220), use `anim` / `motion`',
+  transform: 'written every frame by motion tracks and named entrances (core/timeline/clips.js, GSAP), use `motion`',
   animation: 'killed engine-wide (core/tokens.css:28, `* { animation: none !important }`) because a frame is seeked, not played, use `parts` for a seeked entrance into your own markup, or drive a value from `vars`',
   transition: 'killed engine-wide (core/tokens.css:28, `* { transition: none !important }`) for the same reason as `animation`, use `parts` or `vars`',
   position: 'the coordinate system the engine lays the layer out with (formats/scene/scene.js), use `x` / `y` / `w`',
@@ -408,8 +410,8 @@ const OWNED_CSS = {
   top: "written from the layer's `y` on every build (formats/scene/scene.js), set `y` instead",
   width: "written from the layer's `w`, and again by the type-specific builder, set `w` instead",
   height: "written from the layer's `h` by the type-specific builder (core/layers/*.js), set `h` instead",
-  zIndex: "written every frame from the layer's stacking order (core/clips.js:150, driven by `track`), set `track` instead",
-  pointerEvents: 'written every frame from the layer\'s on/off-window state (core/clips.js), there is no authoring override for it',
+  zIndex: "written every frame from the layer's stacking order (core/timeline/clips.js:150, driven by `track`), set `track` instead",
+  pointerEvents: 'written every frame from the layer\'s on/off-window state (core/timeline/clips.js), there is no authoring override for it',
 };
 
 export function cssErrors(cfg) {
@@ -482,7 +484,7 @@ const BG_WINDOW_KEYS = new Set(['preset', 'use', 'value', 'html', 'src', 'from',
 export function bgErrors(cfg) {
   const out = [];
   // Windows that name no times at all are bound to the film's own joints, one each, in order
-  // (core/junctions.js bindWindowsToJunctions). That needs one junction fewer than there are windows.
+  // (core/timeline/junctions.js bindWindowsToJunctions). That needs one junction fewer than there are windows.
   // Checked HERE as well as at render because the render throw arrives 60 seconds and one ffmpeg pass
   // later, and the answer is the same either way. Lowered first: a scene written with the unified
   // `transitions` surface has no `cuts` key yet, and counting the raw form would refuse a film whose
@@ -609,13 +611,13 @@ export function fxErrors(cfg) {
 // boot, the knob was a warning from `scripts/gates/knobs-audit.mjs` that only appeared if you ran it.
 // So it moved here, beside every other refusal, and the gate kept only its manifest half.
 //
-// `knobsFor(family, preset)` (core/knobs.js) already answers which dials a preset reads; this is the
+// `knobsFor(family, preset)` (core/registry/knobs.js) already answers which dials a preset reads; this is the
 // wiring, not a second copy of that knowledge.
 //
-// WHERE IT REFUSES, AND WHERE IT DELIBERATELY STAYS QUIET. Only a preset core/knobs.js LISTS is
+// WHERE IT REFUSES, AND WHERE IT DELIBERATELY STAYS QUIET. Only a preset core/registry/knobs.js LISTS is
 // graded. A preset with no manifest entry (`colorWave`, `shimmerWave`, `globe` today) is one the
 // manifest has nothing to say about, and refusing a dial on the strength of a list that does not
-// cover it is guessing, not checking. All three read real per-preset opts in core/type.js and
+// cover it is guessing, not checking. All three read real per-preset opts in core/type/type.js and
 // core/surfaces/three-fx.js, and grading them against `_shared` alone would refuse four shipped films for a
 // hole in the manifest. Fill the manifest and they start being checked, with no change here.
 const KNOB_SLOTS = [
@@ -719,7 +721,7 @@ export function seamErrors(cfg) {
 // UNIFIED TRANSITIONS: the fx must route to a real boundary mechanism (cut/seam/sting). The schema
 // checks shape (at/dur/timing); only the router knows whether a name is a boundary transition at all,
 // so a typo or a layer-only name (e.g. `pop`) used as a boundary is caught here, loudly, not silently.
-// A duration slot may name a WORD instead of a number (core/vocab.js), and core/transitions-lower.js
+// A duration slot may name a WORD instead of a number (core/registry/vocab.js), and core/transitions/lower.js
 // resolves it. That resolve THROWS on an unknown word, which is right at render and wrong as the first
 // thing an author hears: the throw arrives from inside a lowering pass, out of one of eight workers.
 // Caught here so the same refusal is a validation line, at the entry point, in a second.
@@ -753,7 +755,7 @@ export function transitionErrors(cfg) {
   return out;
 }
 
-// ON-SCREEN TEXT, out of a string that may be MARKUP. The rule moved to core/on-screen-text.js and is
+// ON-SCREEN TEXT, out of a string that may be MARKUP. The rule moved to core/type/on-screen-text.js and is
 // re-exported here so the existing importers keep working: it was the strictest of eight copies, and
 // making it the only one is what closes docs/MISTAKES.md #214/#216/#217 in the consumers that still
 // used the naive `/<[^>]+>/g` form. Every em-dash in ordinary copy is still caught, including inside
@@ -811,7 +813,7 @@ function easeNames(v, path, errors, underGsap = false) {
 }
 /**
  * handleErrors(data) → messages[]: per-key `easeIn`/`easeOut` handles that contradict something else
- * on the same segment. It CALLS core/sequence.js keyHandleErrors rather than restating the rule,
+ * on the same segment. It CALLS core/timeline/sequence.js keyHandleErrors rather than restating the rule,
  * because the renderer already refuses these at boot and a second copy here would be free to drift
  * into saying something different from the thing that actually throws.
  */
@@ -878,7 +880,7 @@ function becomesHandoverWarns(data) {
 function omittedKeyResetWarns(data) {
   const warns = [];
   // A key states what changes and says nothing about the rest, and `motionAt`/`cameraAt` read that
-  // silence as IDENTITY, not as "unchanged" (core/sequence.js). That contract is deliberate and scenes
+  // silence as IDENTITY, not as "unchanged" (core/timeline/sequence.js). That contract is deliberate and scenes
   // depend on it. A layer whose only `opacity` key sits at the end fades over the last segment precisely
   // because the keys before it read as opacity 1. But it means a track that declares a property, moves it
   // somewhere, and then stops mentioning it SNAPS it home, and nothing about the JSON looks wrong.
@@ -1024,7 +1026,7 @@ function missingWindowWarns(data) {
   // (1) MISSING WINDOW: a layer with no `duration` renders for the ENTIRE video (engine default). Almost
   //     always a slip (the "+" gutter that leaked for 53s). Full-bleed backdrops opt out with track:0.
   // A layer named as a match cut's OUTGOING form is retimed to end on the joint at boot
-  // (core/junctions.js bindMatchesToJunctions), so writing a `duration` here would be the second copy
+  // (core/timeline/junctions.js bindMatchesToJunctions), so writing a `duration` here would be the second copy
   // of the number the joint already owns. It does not render for the whole video and must not be told to.
   const matchFrom = new Set((Array.isArray(data?.matches) ? data.matches : []).map((m) => m && m.from).filter(Boolean));
   layers.forEach((L, i) => {
@@ -1153,7 +1155,7 @@ export function lintData(data) {
 // A kinetic split group's whole arrival must read as ONE beat: docs/RULES caps the last unit's delay
 // at 0.5s, past that it reads as a typewriter, not a reveal. core/tracks/units.js scales the default for
 // an UNAUTHORED stagger, but a number or object the author actually wrote is a decision, so this warns
-// instead of overriding it. Unit count is estimated the same way splitText (core/type.js) counts them:
+// instead of overriding it. Unit count is estimated the same way splitText (core/type/type.js) counts them:
 // words by default, chars for 'char'/ransom/circle, lines for 'line'.
 function staggerTotalWarns(data) {
   const warns = [];
@@ -1181,7 +1183,7 @@ function staggerTotalWarns(data) {
   return warns;
 }
 
-// A scene that states neither `aspect` nor `orientation` renders 9:16. core/boot.js resolves the canvas
+// A scene that states neither `aspect` nor `orientation` renders 9:16. core/engine/boot.js resolves the canvas
 // as ?aspect= > data.aspect > orientation, and the orientation fallback is portrait; nothing said so. A
 // 16:9 film authored that way spent an hour being debugged as "the panel vanishes when its track starts"
 // before ffprobe showed a 1080px-wide canvas (docs/MISTAKES.md #569). A default that changes the whole
@@ -1246,7 +1248,7 @@ function checkField(spec, val, at, errors) {
 }
 
 // validateTheme(theme): shape-check a theme spec. A data JSON MUST declare its theme (name or
-// inline object). There is no default look (core/theme-contract.js). Inline objects are
+// inline object). There is no default look (core/registry/theme-contract.js). Inline objects are
 // completeness-checked here; named themes are completeness-checked by the CLI below (it can read
 // the file) and again at boot by applyTheme.
 export function validateTheme(spec) {
@@ -1265,6 +1267,10 @@ export function validateTheme(spec) {
       if (k in spec.motion && typeof spec.motion[k] !== 'number') errors.push(`theme.motion.${k} must be a number`);
     }
   }
+  // cueNames omitted here on purpose: its source (core/audio/kit.mjs) imports node:fs and must stay
+  // out of the bundle the browser loads (this function also runs from core/engine/boot.js). The CLI branch
+  // below re-checks every theme PACK with the full list, cueNames included.
+  if ('look' in spec) errors.push(...lookErrors(spec.look, { bgNames: BG_NAMES, transitionNames: TRANSITIONS.map((t) => t.name), nearMisses }));
   return errors;
 }
 
@@ -1328,7 +1334,7 @@ if (isMain) {
   let failed = 0;
 
   // AUDIO registries, loaded live so the checks below cannot rot against the synth engine.
-  // CUES is the ONLY valid cue-name set (core/audio-kit.mjs). Beds are the .wav files the mixer
+  // CUES is the ONLY valid cue-name set (core/audio/kit.mjs). Beds are the .wav files the mixer
   // resolves a `music` bed-name against (assets/music/). audio-kit imports node:fs, so this dynamic
   // import stays in the CLI branch and never reaches the browser.
   const { CUES } = await import('../audio/kit.mjs');
@@ -1521,9 +1527,16 @@ if (isMain) {
   // Themes are checked directly, not only via a scene that happens to name one. A pack sitting in
   // themes/ half-written is a landmine for whoever authors the next video against that brand.
   let themeFailed = 0;
+  const transitionNames = TRANSITIONS.map((t) => t.name);
   for (const tf of themeTargets) {
     let errs;
-    try { errs = themeErrors(readJSON(tf), { parseColor, contrastRatio }); } catch (e) { errs = [`unreadable: ${e.message}`]; }
+    try {
+      const t = readJSON(tf);
+      errs = [
+        ...themeErrors(t, { parseColor, contrastRatio }),
+        ...lookErrors(t.look, { bgNames: BG_NAMES, transitionNames, cueNames: CUE_NAMES, nearMisses }),
+      ];
+    } catch (e) { errs = [`unreadable: ${e.message}`]; }
     if (errs.length) { themeFailed++; console.error(`✗ ${path.relative(root, tf)}`); for (const e of errs) console.error(`    • ${e}`); }
   }
   if (themeTargets.length) console.log(`themes: ${themeTargets.length - themeFailed} ok, ${themeFailed} incomplete`);

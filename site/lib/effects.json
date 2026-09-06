@@ -1,7 +1,7 @@
 {
-  "total": 689,
-  "previewed": 336,
-  "families": 55,
+  "total": 710,
+  "previewed": 340,
+  "families": 57,
   "tags": [
     [
       "asset",
@@ -17,7 +17,7 @@
     ],
     [
       "blueprint",
-      19
+      29
     ],
     [
       "camera",
@@ -96,8 +96,16 @@
       5
     ],
     [
+      "theme",
+      7
+    ],
+    [
       "timing",
       76
+    ],
+    [
+      "top-level",
+      4
     ],
     [
       "transition",
@@ -655,13 +663,41 @@
       "mode": "table",
       "note": null,
       "noPreview": "a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.",
-      "count": 19,
+      "count": 29,
       "undescribed": 0,
       "entries": [
+        {
+          "name": "blurResolveHook",
+          "stem": "beat-blueprints--blurresolvehook",
+          "desc": "a hook whose type arrives smeared with motion blur and snaps into focus, never sliding or fading",
+          "scene": null,
+          "noPreview": null
+        },
         {
           "name": "cardCascade",
           "stem": "beat-blueprints--cardcascade",
           "desc": "feature grid · kinetic title + cards that pop in one after another",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cardFan",
+          "stem": "beat-blueprints--cardfan",
+          "desc": "cards arrive from one side and fan open in perspective around a fixed anchor",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cellMosaic",
+          "stem": "beat-blueprints--cellmosaic",
+          "desc": "a grid of mixed cells that slides as one surface while each cell keeps its own content",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "chipConverge",
+          "stem": "beat-blueprints--chipconverge",
+          "desc": "chips scatter in from every side and then converge onto one point",
           "scene": null,
           "noPreview": null
         },
@@ -673,9 +709,23 @@
           "noPreview": null
         },
         {
+          "name": "containerFill",
+          "stem": "beat-blueprints--containerfill",
+          "desc": "a fixed frame that never moves while chips fill it in one at a time",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "ctaEnd",
           "stem": "beat-blueprints--ctaend",
           "desc": "held end card · mark + install chip + sub + url (exitDur 0)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "dialogueAccumulate",
+          "stem": "beat-blueprints--dialogueaccumulate",
+          "desc": "sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom",
           "scene": null,
           "noPreview": null
         },
@@ -697,6 +747,13 @@
           "name": "kineticHook",
           "stem": "beat-blueprints--kinetichook",
           "desc": "hook / open loop · eyebrow + hero count-up|word + kinetic subline",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "listBuildRows",
+          "stem": "beat-blueprints--listbuildrows",
+          "desc": "a vertical list that grows one row at a time under a fixed left rule",
           "scene": null,
           "noPreview": null
         },
@@ -785,9 +842,30 @@
           "noPreview": null
         },
         {
+          "name": "viewportTrio",
+          "stem": "beat-blueprints--viewporttrio",
+          "desc": "the same subject shown at three sizes at once, the \"it is really finished\" payoff shot",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "wordBlast",
           "stem": "beat-blueprints--wordblast",
           "desc": "scale punctuation · arrives oversized, settles, drifts, leaves by growing THROUGH the frame",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wordWipe",
+          "stem": "beat-blueprints--wordwipe",
+          "desc": "an oversized word crosses the whole frame motion-blurred, and its passage is the transition",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wordmarkAssemble",
+          "stem": "beat-blueprints--wordmarkassemble",
+          "desc": "the brand mark settles from scattered letters while small tiles drift at a different depth behind it",
           "scene": null,
           "noPreview": null
         }
@@ -921,7 +999,7 @@
       "id": "destinations-platform-safe-area",
       "title": "Destinations (platform safe area)",
       "tag": "canvas",
-      "intro": "`\"destination\": \"<name>\"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect` · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition · `core/safe.js`.\n\nThe tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.",
+      "intro": "`\"destination\": \"<name>\"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect` · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition · `core/layout/safe.js`.\n\nThe tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.",
       "mode": "table",
       "note": null,
       "noPreview": "a safe area is a property of the canvas, not something that animates. `make audit M=<file> ASPECT=all` is how you see it, as a measurement against your own layers.",
@@ -976,7 +1054,7 @@
       "id": "output-targets",
       "title": "Output targets",
       "tag": "canvas",
-      "intro": "`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition · `core/safe.js`.",
+      "intro": "`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition · `core/layout/safe.js`.",
       "mode": "table",
       "note": null,
       "noPreview": "an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.",
@@ -1998,7 +2076,7 @@
       "id": "three-js-scenes-real-geometry",
       "title": "three.js scenes (real geometry)",
       "tag": "layer",
-      "intro": "`{ \"type\":\"three\", \"three\":\"<name>\" }`. A scene graph · meshes, materials, lights, a camera. For what a distance field structurally cannot express · a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.",
+      "intro": "`{ \"type\":\"three\", \"three\":\"<name>\" }`. A scene graph · meshes, materials, lights, a camera. For what a distance field structurally cannot express · a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/surfaces/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.",
       "mode": "table",
       "note": null,
       "noPreview": null,
@@ -3444,7 +3522,7 @@
       "id": "spectacle-devices",
       "title": "Spectacle devices",
       "tag": "scene",
-      "intro": "`\"spectacle\": { \"at\", \"of\", \"device\", \"why\" }`. The film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/spectacle.js`.",
+      "intro": "`\"spectacle\": { \"at\", \"of\", \"device\", \"why\" }`. The film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/timeline/spectacle.js`.",
       "mode": "table",
       "note": null,
       "noPreview": "a spectacle is a whole film turning its other dials down. One clip cannot show the restraint that makes it work.",
@@ -4364,6 +4442,68 @@
       ]
     },
     {
+      "id": "theme-look-keys",
+      "title": "Theme look keys",
+      "tag": "theme",
+      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the seven keys it accepts.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme's whole look",
+      "count": 7,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "backdrop",
+          "stem": "theme-look-keys--backdrop",
+          "desc": "ordered bg preset names the brand turns through, one window per beat",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cues",
+          "stem": "theme-look-keys--cues",
+          "desc": "the audio cue names the brand reaches for",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cuts",
+          "stem": "theme-look-keys--cuts",
+          "desc": "the default and accent cut/transition names the brand favours",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "field",
+          "stem": "theme-look-keys--field",
+          "desc": "grain and vignette defaults for the backdrop",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "layout",
+          "stem": "theme-look-keys--layout",
+          "desc": "the anchor band (left/center/right) and margin every beat composes against",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "marks",
+          "stem": "theme-look-keys--marks",
+          "desc": "the logo path plus its end-card and headline-adjacent sizes",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "scale",
+          "stem": "theme-look-keys--scale",
+          "desc": "type sizes at 16 · 9 for hook / headline / body / caption",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "easings",
       "title": "Easings",
       "tag": "timing",
@@ -4707,6 +4847,47 @@
           "stem": "time-remaps-the-layer-s-own-clock--whip",
           "desc": "SPEED RAMP · crawls at 20% speed, whips through the middle at about 530%, lands slow. The AE three-key ramp, for a dull passage you want crossed fast",
           "scene": "/assets/effects/time-remaps-the-layer-s-own-clock--whip.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "film-energy",
+      "title": "Film energy",
+      "tag": "top-level",
+      "intro": "One word at the top of the scene sets the default speed curve for every cut and seam that names no `timing`. `energy:\"brand\"` gives the whole film the house speed ramp; `calm`, `hype` and `tense` shift the whole film's velocity at once. An explicit `timing` on a cut always wins.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "brand",
+          "stem": "film-energy--brand",
+          "desc": "the house slow-fast-slow speed ramp on every cut. Directed and confident, the default to reach for",
+          "scene": "/assets/effects/film-energy--brand.json",
+          "noPreview": null
+        },
+        {
+          "name": "calm",
+          "stem": "film-energy--calm",
+          "desc": "unhurried · every cut decelerates into place. Premium, editorial, a film with room to breathe",
+          "scene": "/assets/effects/film-energy--calm.json",
+          "noPreview": null
+        },
+        {
+          "name": "hype",
+          "stem": "film-energy--hype",
+          "desc": "decisive · cuts land and stop with no drift. Launch-reel energy, product drops, announcements",
+          "scene": "/assets/effects/film-energy--hype.json",
+          "noPreview": null
+        },
+        {
+          "name": "tense",
+          "stem": "film-energy--tense",
+          "desc": "restless · cuts accelerate away. Urgency, countdowns, a film that will not sit still",
+          "scene": "/assets/effects/film-energy--tense.json",
           "noPreview": null
         }
       ]
