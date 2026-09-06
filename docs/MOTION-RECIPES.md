@@ -128,18 +128,18 @@ must state a relationship (time/place/this-becomes-that).
 
 - **`hard-cut`**: no transition; fast pace, on the beat, raw impact. Just place adjacent beats; run
   `make beatsync` to land it on the beat. · _transition, default, sound_
-- **`punch-cut`**. A scene-level punch-in on a product focus. `{ "cuts": [{ "t": 6.0, "style": "punch", "dur": 0.28 }] }` · _transition_
+- **`punch-cut`**. A scene-level punch-in on a product focus. `{ "transitions": [{ "at": 6.0, "fx": "punch", "dur": 0.28 }] }` · _transition_
 - **`layer-cut`**: a per-layer cut presentation with snappy timing.
   `{ "cut": "whip", "cutTiming": "snappy", "dir": "left" }` · _transition, momentum_
-- **`dissolve`**, passage of time / location change / montage. `{ "seams": [{ "t": 5.0, "fx": "dissolve", "dur": 0.5 }] }` · _transition, time_
-- **`whip-pan`**, momentum cut when the layout also moves sideways. `{ "seams": [{ "t": 5.0, "fx": "whipPan", "dur": 0.5 }] }` · _transition, momentum_
-- **`dive-in`**, dynamic zoom into a sub-framed element/screen. `{ "seams": [{ "t": 5.0, "fx": "cinematicZoom", "dur": 0.55 }] }` · _transition, camera_
+- **`dissolve`**, passage of time / location change / montage. `{ "transitions": [{ "at": 5.0, "fx": "dissolve", "mech": "seam", "dur": 0.5 }] }` · _transition, time_
+- **`whip-pan`**, momentum cut when the layout also moves sideways. `{ "transitions": [{ "at": 5.0, "fx": "whipPan", "dur": 0.5 }] }` · _transition, momentum_
+- **`dive-in`**, dynamic zoom into a sub-framed element/screen. `{ "transitions": [{ "at": 5.0, "fx": "cinematicZoom", "dur": 0.55 }] }` · _transition, camera_
 - **`portal-reveal`**: a glowing portal opens from centre with a torn chromatic edge and swallows the
-  frame into the next beat; a sci-fi / big-reveal moment (use once). `{ "seams": [{ "t": 5.0, "fx": "portal", "dur": 0.9, "intensity": 1.0, "seed": 3 }] }` · _transition, reveal, energy_
+  frame into the next beat; a sci-fi / big-reveal moment (use once). `{ "transitions": [{ "at": 5.0, "fx": "portal", "mech": "seam", "dur": 0.9, "intensity": 1.0, "seed": 3 }] }` · _transition, reveal, energy_
 - **`flash-cut`**: a white flash on an energy pivot; use at an act break, sparingly.
-  `{ "seams": [{ "t": 5.0, "fx": "flashWhite", "dur": 0.4 }] }` · _transition, energy_
+  `{ "transitions": [{ "at": 5.0, "fx": "flashWhite", "mech": "seam", "dur": 0.4 }] }` · _transition, energy_
 - **`sting-accent`**. A full-frame shader accent on a reveal (warm brands: `leak`/`burn`; tech: `glitch`).
-  `{ "stings": [{ "t": 5.0, "fx": "leak", "colors": ["#ff742e"], "intensity": 0.6 }] }` · _transition, accent_
+  `{ "transitions": [{ "at": 5.0, "fx": "leak", "colors": ["#ff742e"], "intensity": 0.6 }] }` · _transition, accent_
 
 ## Camera & dolly: `camera[]` + a hero `motion` track
 
