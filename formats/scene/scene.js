@@ -416,37 +416,23 @@ boot((data, fps, theme, canvas) => {
   };
 
   // THE BEAT'S CURRENT STATE, which is what a cut carries, versus the beat's HISTORY, which it must
-  // not. The wrapper owns the exit slide, so every layer it carries has its own exit suppressed and
-  // its life stretched to the cut; done to EVERY layer of the beat, a beat that is a whole act paints
-  // all four of its superseded type lines superimposed from the cut onward (docs/MISTAKES.md #555).
+  // not. The wrapper owns the exit slide, so a layer still on screen when the cut starts has its own
+  // exit suppressed and its VISIBILITY stretched to the cut (setLayerTiming below); doing that to
+  // every layer of the beat, including ones the beat had already moved on from, painted a whole act's
+  // superseded type lines superimposed from the cut onward (docs/MISTAKES.md #555).
   //
-  // A layer is still the beat's current state while either holds:
-  //   · it is on screen when the cut starts, so removing it would empty the frame mid-slide, or
-  //   · nothing in its beat began AT OR AFTER it ended, so nothing replaced it.
-  // The second clause is what keeps a deliberate hold (a line that lands a beat early and waits for
-  // the cut in silence) while dropping a line the next line took over from.
-  //
-  // ponytail: supersession is read from START times only, so a replacement that CROSSFADES (the
-  // incoming line starts before the outgoing one ends) is not detected and the outgoing line is still
-  // held. That errs toward the old behaviour, so it can under-fix and never newly break a film; the
-  // author's escape is to end the outgoing layer at the beat's end and let the wrapper carry it.
+  // A layer is the beat's current state ONLY while it is on screen when the cut starts: its own end
+  // reaches the beat's end. A layer that ended earlier is gone at the cut on its own clock, same as
+  // any layer outside a scene-units film; nothing here revives it. This used to also credit a layer
+  // nothing else in the beat started after (a "deliberate hold"), which read the wrapper's stretched
+  // `data-duration` back into every per-layer clock downstream (frame(), the tracks pipeline), and a
+  // primitive that stops at its OWN authored end when handed a `t` past it (`cursor.js`'s early
+  // return, the guard every "if (!(t>=start&&t<end)) return" primitive shares) rendered its resting
+  // pose, at the origin, instead of holding: the cursor drawn top-left at 6.9s, the caption solid past
+  // its own end at 7.2s (docs/MISTAKES.md, this fix). An author who wants a line to persist to the
+  // cut authors its `duration` to reach the beat's end; the wrapper no longer guesses it for them.
   const EPS = 1e-6; // float noise only: `start + duration` lands on 20.099999999999998 for a cut at 20.1
-  // beat index → the latest start of any layer in it. Memoised on FIRST USE and not built here,
-  // because the resolvers below (relative starts, junction binding) still move a layer's start.
-  let lastStartInBeat = null;
-  const beatIsCurrent = (L, bi, beatEnd) => {
-    const end = (L.start ?? 0) + (L.duration ?? Infinity);
-    if (end >= beatEnd - EPS) return true;
-    if (!lastStartInBeat) {
-      lastStartInBeat = new Map();
-      for (const o of data.layers || []) {
-        const i = beatIndexOf(o);
-        if (i == null) continue;
-        lastStartInBeat.set(i, Math.max(lastStartInBeat.get(i) ?? -Infinity, o.start ?? 0));
-      }
-    }
-    return (lastStartInBeat.get(bi) ?? -Infinity) < end - EPS;
-  };
+  const beatIsCurrent = (L, bi, beatEnd) => (L.start ?? 0) + (L.duration ?? Infinity) >= beatEnd - EPS;
 
   // PROP AUDIT: every layer is watched from here, before the first read of any layer prop, so the
   // record covers the pre-passes below as well as the build itself.
@@ -638,8 +624,15 @@ boot((data, fps, theme, canvas) => {
     if (L.split) el.dataset.enter = '0';
     else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
     if (L.out) el.dataset.out = L.out;
+    // NO DEFAULT FADE-OUT. BASE_EXIT used to apply to every layer that named no `out`, so a layer
+    // authored to simply END held nothing: it faded for its last ~0.26s whether or not anyone asked
+    // for that fade, one more hand quietly writing this layer's life. An exit is now authored (`out`,
+    // with or without `exitDur`) or it comes from the beat's transition (sceneUnits, below, or a
+    // cut/seam/sting at the joint); a layer that states neither holds to its own end and simply stops
+    // being drawn there. `exitDur` alone (no `out`) still opts into the OLD calm in-place fade
+    // (clipStyleAt's default when `out` is absent), so that spelling keeps working unchanged.
     if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
-    else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale * M.exitRatio).toFixed(3));
+    else if (!L.cut && L.out) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale * M.exitRatio).toFixed(3));
     // scene units: the beat WRAPPER owns the exit slide. Suppress this layer's own exit fade and keep it
     // alive through the wrapper's exit window, or it would vanish mid-slide. Non-last beats only (the
     // last beat has no exit cut), and only the layers that are still the beat's CURRENT STATE
@@ -657,6 +650,11 @@ boot((data, fps, theme, canvas) => {
         // alone. data-duration stays what the renderer needs (driveClips must hold the layer through
         // the wrapper's slide, or it vanishes mid-move); data-authored-duration is what the author
         // asked for, so every tool that REPORTS timing can show both and name the substitution.
+        // KEPT (not deleted): scripts/dev/studio-page.mjs reads it to show both numbers in the studio
+        // inspector. Its OWN pose is no longer at risk from this stretch: renderFrame's per-layer loop
+        // clamps every primitive's clock to `L.start + L.duration` (the authored number, read straight
+        // off this object, not off the dataset this stretches), so the substitution below only ever
+        // widens the window driveClips uses for VISIBILITY, never the window a primitive drives from.
         if (L.duration != null) el.dataset.authoredDuration = String(L.duration);
         el.dataset.duration = String(+(be + dur - (L.start ?? 0)).toFixed(3)); // live through the slide-out
       }
@@ -1157,11 +1155,41 @@ boot((data, fps, theme, canvas) => {
     ...stings.map((s) => ({ t: +s.t, kind: 'sting' })),
   ].filter((m) => Number.isFinite(m.t)).sort((a, b) => a.t - b.t).map(Object.freeze));
 
-  // drawBg: the theme bg on canvas (last matching window wins) + a continuous slow breathe.
-  // A hand-authored (`html`) window paints in the DOM instead, so the canvas is hidden for its span.
+  // THE FIELD RIDES THE CUT. A real transition at a joint (any entry in `sceneCuts`; style:"none" is
+  // filtered out above) is the one moment the viewer is guaranteed to be looking, and a bg window that
+  // switches HARD there while the content dissolves is a world that snaps while the foreground glides.
+  // `bgCutAt(t)` names the cut straddling t, if any; drawBg below cross-dissolves the window either
+  // side of it on that SAME curve and duration, so both readings of "a joint" (an explicit `from`/`to`
+  // that happens to land on a cut time, and a window bound to the joint by bindWindowsToJunctions with
+  // no from/to of its own) behave alike: both are just two windows meeting at the cut's `t`.
+  // The window itself differs by mode, and this mirrors that rather than inventing a third: sceneUnits
+  // swaps the two beat wrappers over [ct, ct+dur) (driveSceneUnits below, default 0.4); the plain
+  // camera-level cut is CENTRED on ct, [ct-dur/2, ct+dur/2) (drawCameraAndCut below, default 0.36). A
+  // bg blend on the wrong window would drift out of sync with the transition the viewer is watching.
+  const bgCutAt = (t) => {
+    for (const cu of sceneCuts) {
+      const ct = +cu.t;
+      const from = sceneUnits ? ct : ct - (cu.dur ?? 0.36) / 2;
+      const dur = sceneUnits ? (cu.dur ?? 0.4) : (cu.dur ?? 0.36);
+      if (t >= from && t < from + dur) return { ct: from, dur, timing: cu.timing || 'smooth' };
+    }
+    return null;
+  };
+  // Off-screen scratch for the INCOMING side of a bg cross-dissolve, built lazily (most scenes never
+  // blend a bg) and sized once: `renderBg` clears-then-paints its target, so painting both sides onto
+  // the same canvas would erase the outgoing side the instant the incoming side starts drawing.
+  let bgBlendCv = null;
+  // drawBg: the theme bg on canvas (last matching window wins outside a transition) + a continuous
+  // slow breathe. A hand-authored (`html`) window paints in the DOM instead, so the canvas is hidden
+  // for its span; a hand-authored window on either side of a cut cannot be blended here (the canvas
+  // cannot read lightness or pixels out of somebody's CSS), so that case keeps the hard switch.
   function drawBg(t) {
     if (!bgWins.length || ALPHA) return; // alpha export: no backdrop, so unpainted pixels stay transparent
-    const w = bgWinAt(t);
+    const cut = bgCutAt(t);
+    const before = cut ? bgWinAt(cut.ct - 1e-4) : null;
+    const after = cut ? bgWinAt(cut.ct + cut.dur + 1e-4) : null;
+    const blending = !!(before && after && before !== after && before.spec && after.spec);
+    const w = blending ? after : bgWinAt(t);
     const authored = bgHtml ? bgHtml.frame(t, w, duration) : false;
     cv.style.display = authored ? 'none' : '';
     // CLEAR IT, do not just hide it. Returning early left the canvas holding the last frame it painted,
@@ -1171,7 +1199,15 @@ boot((data, fps, theme, canvas) => {
     // and therefore left that scene with no regression baseline at all. And latent: the day anything
     // cross-fades a preset window into an html one, those stale pixels become visible.
     if (authored) { ctx.clearRect(0, 0, W, H); return; }
-    renderBg(ctx, W, H, t, w.spec);
+    if (blending) {
+      const p = CUT_TIMINGS[cut.timing](clamp01((t - cut.ct) / cut.dur));
+      renderBg(ctx, W, H, t, before.spec);       // the outgoing field, opaque, on the real canvas
+      if (!bgBlendCv) { bgBlendCv = document.createElement('canvas'); bgBlendCv.width = W; bgBlendCv.height = H; }
+      renderBg(bgBlendCv.getContext('2d'), W, H, t, after.spec); // the incoming field, off-screen
+      ctx.save(); ctx.globalAlpha = p; ctx.drawImage(bgBlendCv, 0, 0); ctx.restore();
+    } else {
+      renderBg(ctx, W, H, t, w.spec);
+    }
     cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
   }
 
@@ -1222,7 +1258,19 @@ boot((data, fps, theme, canvas) => {
     // quantised time is a function of t alone (core/motion/motion.js stepClock), and the entrance half of the
     // same layer is stepped identically inside clipStyleAt.
     for (const { L, el, units } of layers) {
-      const lt = L.step != null ? stepClock(t, L.step, L.start ?? 0) : t;
+      const rawT = L.step != null ? stepClock(t, L.step, L.start ?? 0) : t;
+      // FREEZE THE PRIMITIVE'S OWN CLOCK AT ITS AUTHORED LIFE. The beat wrapper can stretch a current
+      // layer's VISIBILITY past its own end (setLayerTiming's data-duration rewrite, so it survives to
+      // the cut instead of fading early), but a primitive's frame() was never told about that stretch;
+      // it still measures against `L.start`/`L.duration`, the authored numbers. Handed a `t` past its
+      // own end, a primitive that stops driving there (the shared "if (!(t>=start&&t<end)) return"
+      // guard, e.g. `cursor.js`) leaves whatever the LAST thing to touch the element wrote, which is
+      // `driveClips`'s resting transform, i.e. the origin: the cursor at (0,0), not held in place. So
+      // clock ownership is the layer's own, always: never hand a primitive a `t` beyond what it was
+      // authored for, and it holds its last real pose by construction instead of by each primitive
+      // remembering to (MISTAKES: the demo film's cursor at 6.9-7.2s).
+      const ownEnd = L.duration != null ? (L.start ?? 0) + L.duration : Infinity;
+      const lt = Number.isFinite(ownEnd) ? Math.min(rawT, ownEnd - EPS) : rawT;
       runTracks(trackKit, el, L, units, lt, L.step != null ? Math.round(lt * fps) : f, view);
     }
     drawCaptions(t);

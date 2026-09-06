@@ -148,7 +148,14 @@ export const BASE_ENTER = 0.3, BASE_EXIT = 0.26;
 // Two functions rather than one returning a pair: this runs for every clip on every frame, and an
 // object literal here is an allocation the render pays ~50,000 times a minute of video.
 export const enterDurOf = (el) => (el.dataset.enter != null ? parseFloat(el.dataset.enter) : BASE_ENTER);
-export const exitDurOf = (el) => (el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : BASE_EXIT);
+// NO DEFAULT FADE-OUT (docs/MISTAKES.md, "four hands on one layer's life"). formats/scene/scene.js
+// (setLayerTiming) only writes `data-exitDur` for a layer that named an `out`, or one that named
+// `exitDur` itself; a layer with neither holds to its own end. If this function still handed back
+// BASE_EXIT whenever the attribute was absent, that silence would have been undone right here: the
+// one write site would have stopped authoring the fade and the one read site would have kept
+// inventing it anyway. `out` is the signal, read directly rather than trusting the attribute alone,
+// so a caller that builds a clip by hand (no scene.js in the loop) gets the same rule for free.
+export const exitDurOf = (el) => (el.dataset.exitDur != null ? parseFloat(el.dataset.exitDur) : el.dataset.out ? BASE_EXIT : 0);
 
 /**
  * The opacity envelope every layer fades through. Eased, and MIRRORED: the exit curve is the
