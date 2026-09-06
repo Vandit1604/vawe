@@ -1,5 +1,5 @@
-import { glContext } from '../webgl.js';
-import { defineRegistry } from '../registry.js';
+import { glContext } from '../engine/webgl.js';
+import { defineRegistry } from '../registry/registry.js';
 // core/raymarch-fx.js: REAL 3D, without a 3D engine. A fullscreen quad plus a distance field is a
 // renderer: march a ray per pixel, hit an implicit surface, shade it. No geometry, no scene graph, no
 // three.js, and no new determinism story, because a raymarched frame is already a pure function of

@@ -1,4 +1,4 @@
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 // core/three-scenes.js: the `three` scene NAME registry, and nothing else.
 //
 // It is split out for one concrete reason: core/three-fx.js imports the vendored three.js by its

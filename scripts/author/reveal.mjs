@@ -31,11 +31,11 @@ import { openScene } from './scene-page.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
 import { drawtext } from './sheets.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 // The ramp lengths have ONE definition and this is it. Re-deriving the default here is how the two
 // copies drift: the `--layers` window below carried a hand-written `?? 0.4` while the engine's default
 // has been 0.3 since the snap band landed, so every per-layer window was sampled ~33% too wide.
-import { enterDurOf } from '../../core/clips.js';
+import { enterDurOf } from '../../core/timeline/clips.js';
 
 const NEXIT = 5;                      // frames across the exit arc
 const GHOST_W = 340;                  // wider than the strip tiles: the trail is the subject now

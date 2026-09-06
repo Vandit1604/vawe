@@ -5,8 +5,8 @@
 // Runs AFTER `transform` (the motion track) and before `post` (the modifiers): the idle is a small
 // thing added to whatever choreography the layer already has, never a replacement for it. A layer with
 // a keyed motion track and an idle gets both, with the idle riding outside.
-import { enterDurOf, exitDurOf } from '../clips.js';
-import { idleAt, idlePhase, idleTransform, normalizeIdle, settledGain } from '../idle.js';
+import { enterDurOf, exitDurOf } from '../timeline/clips.js';
+import { idleAt, idlePhase, idleTransform, normalizeIdle, settledGain } from '../engine/idle.js';
 
 export const slot = 'idle';
 

@@ -68,7 +68,7 @@ export function illegalRefs(scene) {
  * outlast an MCP client's 60s cancel, so it belongs behind the async boundary with the render.
  */
 export async function validate(scenePath) {
-  const r = await step('node', ['core/validate.mjs', scenePath], 60_000);
+  const r = await step('node', ['core/validate/validate.mjs', scenePath], 60_000);
   return { ok: r.ok, report: r.out };
 }
 

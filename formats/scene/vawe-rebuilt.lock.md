@@ -31,7 +31,7 @@ film is entirely brand. The subject is **vawe**, so this one ships; `brew-launch
 - **Type** `Anybody` for the sans. The theme's `serif` is also Anybody, which cannot carry the
   serif-italic half of the device, so this film declares `InstrumentSerif-Italic` inline. That is a
   theme gap and it gets logged.
-- **Grounds** five windows, no `from`/`to`, bound to the four cuts by `core/junctions.js`:
+- **Grounds** five windows, no `from`/`to`, bound to the four cuts by `core/timeline/junctions.js`:
   `plain(dark) → plain(light) → plain(dark) → plain(light) → aurora(dark)`.
 
 ## What carries across every cut

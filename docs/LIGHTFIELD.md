@@ -515,15 +515,15 @@ three colour stops.
 
 Copy the options straight into a scene, copy the HTML, or copy a link that carries only what you
 changed. To add another generator to that page, export a `SCHEMA` and a render function and add a
-row to `core/generators.js`. The page reads the registry; there is no list to keep on the site.
+row to `core/layout/generators.js`. The page reads the registry; there is no list to keep on the site.
 
 ## The `bands` shader, and the `spectrum` look built on it
 
-`bands` is not a lightfield. It is one branch of `core/shaders-ambient.js`, reached from a scene as
+`bands` is not a lightfield. It is one branch of `core/surfaces/shaders-ambient.js`, reached from a scene as
 `{"type":"shader","shader":"bands"}`, and it shares this page because it answers the same question
 with different machinery: a repeating ramp over a scalar field, tinted, with a light behind it.
 
-Two cards in `core/generators.js` sit on that one branch. `bands` is the original look, dark and lit
+Two cards in `core/layout/generators.js` sit on that one branch. `bands` is the original look, dark and lit
 from behind. `spectrum` is the same shader with the colour running at a right angle to the bands.
 
 ### The dials, and why they were renamed
@@ -532,7 +532,7 @@ The first set read `count` / `angle` / `glow` / `softness` / `edge` / `warm` / `
 every one failed the only test a control has to pass: a person who has not read the shader cannot
 tell what it changes. `angle` was in TURNS, so a right angle was `0.25`. `glow` was a radius named
 like a switch. They are now in degrees and in percent, and the shader's uniform layout did not move:
-`core/generators.js` does the mapping, which is the job that file exists for.
+`core/layout/generators.js` does the mapping, which is the job that file exists for.
 
 Where a number means a PLACE it uses the spelling this document already settled on for the
 lightfield's three origins: percent of the frame, `50`/`50` unmoved, off-frame values legal.

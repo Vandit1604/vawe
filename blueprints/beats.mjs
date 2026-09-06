@@ -7,7 +7,7 @@
 //   { "type": "beat", "beat": "kineticHook", "start": 0.3, "dur": 5.5, "eyebrow": "...", "to": 94, ... }
 // and expanded by `make expand`. See docs/CRAFT/BLUEPRINTS.md.
 import { INK, DIM, ACCENT, kineticHeadline, dollyNumber, caption, chip, panel, verdictChip, rowGroup, colGroup } from './kit.mjs';
-import { glyphText } from '../core/on-screen-text.js';
+import { glyphText } from '../core/type/on-screen-text.js';
 
 // kineticHook: the OPEN LOOP. An eyebrow question, a hero number (count-up + pop) OR a big kinetic word,
 // then a word-by-word subline. Front-loads the strong element (DIRECTION.md §4).

@@ -30,7 +30,7 @@
       "ticks": 24,
       "colour": "#e8ff59"
     },
-    "render": "import { byName } from 'core/generators.js'; byName('keyframeHandle').render(options)"
+    "render": "import { byName } from 'core/layout/generators.js'; byName('keyframeHandle').render(options)"
   },
   "docs": "docs/EFFECTS.md",
   "preview": {

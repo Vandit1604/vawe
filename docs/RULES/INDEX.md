@@ -37,7 +37,7 @@ below.
 | [`speed-bands`](speed-bands.md) | choosing a duration | warns: `make direct` |
 | [`video-scale`](video-scale.md) | sizing a hero graphic or type | warns: `make audit` |
 | [`text-on-flat`](text-on-flat.md) | placing a headline over a background fx | gated: `make audit` |
-| [`state-the-canvas`](state-the-canvas.md) | starting any scene | warns: `core/validate.mjs` |
+| [`state-the-canvas`](state-the-canvas.md) | starting any scene | warns: `core/validate/validate.mjs` |
 | [`svg-inline`](svg-inline.md) | writing an svg layer or a src path | eye |
 | [`no-css-clock`](no-css-clock.md) | hand-writing an html layer | built: `core/layers/html.js` |
 | [`one-cut-family`](one-cut-family.md) | choosing the cut between two beats | warns: `make direct` |

@@ -36,7 +36,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PRESETS, PRESET_BLURBS } from '../../core/type.js';
+import { PRESETS, PRESET_BLURBS } from '../../core/type/type.js';
 import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
 import { BEAT_BLURBS } from './blueprints-catalog.mjs';
 import { serveRepo, launchPage, waitForEngine } from '../lib/render-harness.mjs';

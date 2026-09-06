@@ -28,7 +28,7 @@
       },
       "text": "thermal blur"
     },
-    "render": "import { byName } from 'core/generators.js'; byName('thermalBlur').render(options)"
+    "render": "import { byName } from 'core/layout/generators.js'; byName('thermalBlur').render(options)"
   },
   "docs": "docs/EFFECTS.md",
   "preview": {

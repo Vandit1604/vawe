@@ -123,7 +123,7 @@ for (const id of ids) {
     // validate.mjs does not know the {type:"beat"} sugar (that is expand-blocks' job), so it is run on
     // the EXPANDED scene, the same order `make video` uses.
     execFileSync('node', ['scripts/author/expand-blocks.mjs', scenePath, expandedPath], { cwd: ROOT, stdio: 'pipe' });
-    execFileSync('node', ['core/validate.mjs', expandedPath], { cwd: ROOT, stdio: 'pipe' });
+    execFileSync('node', ['core/validate/validate.mjs', expandedPath], { cwd: ROOT, stdio: 'pipe' });
     execFileSync('./bin/vawe', [expandedPath, '--draft', '--workers', '2'], { cwd: ROOT, stdio: 'pipe' });
 
     const mp4 = path.join(ROOT, renderOf(expandedPath)); // out/<id>.mp4 -> renderOf strips .expanded

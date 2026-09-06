@@ -15,10 +15,10 @@
 // CLOSED-FORM motion: a particle's position at local time `lt` is f(lt), never "last position +
 // velocity". That is what makes renderFrame(n) pure and seek-safe, and it is why this is NOT a Tier 5
 // particle sim (docs/ROADMAP.md): a sim steps from the previous frame, this does not.
-import { random } from '../motion.js';
-import { glowRGB } from '../filters.js';
-import { mergeProps } from '../props.js';
-import { defineRegistry } from '../registry.js';
+import { random } from '../motion/motion.js';
+import { glowRGB } from '../looks/filters.js';
+import { mergeProps } from '../registry/props.js';
+import { defineRegistry } from '../registry/registry.js';
 
 export const size = (kit) => [kit.W, kit.H];
 export const stamp = 3;

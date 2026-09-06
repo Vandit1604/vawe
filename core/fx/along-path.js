@@ -22,7 +22,7 @@
 // PURITY. build() restructures once; frame() writes one attribute on the element this file created,
 // never on the layer, so the composition-order contract in core/fx/index.js holds.
 
-import { clamp01, resolveEasing } from '../motion.js';
+import { clamp01, resolveEasing } from '../motion/motion.js';
 
 const KEYS = ['curve', 'd', 'w', 'h', 'from', 'to', 'dur', 'delay', 'ease', 'anchor'];
 const MARK = 'data-along-path';

@@ -57,7 +57,7 @@ Legend for tags: `entrance · exit · overshoot · rhythm · transition · camer
 
 ## Named GSAP effects: `fx` (reference a stored effect by name)
 
-A library of GSAP effects (`core/gsap-effects.js`, registered via `gsap.registerEffect`) you call by name
+A library of GSAP effects (`core/engine/gsap-effects.js`, registered via `gsap.registerEffect`) you call by name
 from JSON. Pair with `anim:"none"` so GSAP owns the transform. On a `split` layer the effect runs PER
 UNIT with a stagger. Deterministic (seeked per frame). Add a row to the library → instantly referenceable.
 

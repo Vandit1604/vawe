@@ -108,8 +108,8 @@
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import { sceneTiming, num, spanOf } from './scene-timing.mjs';
-import { settleWindow } from '../../core/safe.js';
-import { BASE_ENTER, BASE_EXIT } from '../../core/clips.js';
+import { settleWindow } from '../../core/layout/safe.js';
+import { BASE_ENTER, BASE_EXIT } from '../../core/timeline/clips.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 export const FPS = 30;

@@ -1,12 +1,12 @@
 // core/layers/index.js: the layer registry. Each primitive is a file exporting build(kit,el,L) and
 // optionally frame(kit,el,L,t). `createRenderer(ctx)` binds the shared kit and dispatches by L.type, so
 // scene.html stays a thin orchestrator (bg/camera/stings/timing) and adding a primitive = adding a file.
-import { mergeProps } from '../props.js';
-import { blurbsOf, defineRegistry } from '../registry.js';
+import { mergeProps } from '../registry/props.js';
+import { blurbsOf, defineRegistry } from '../registry/registry.js';
 import { checkLayerTree } from './vocabulary.js';
 import { createKit } from './util.js';
 import { buildFx, frameFx } from '../fx/index.js';
-import { attachResample } from '../resample.js';
+import { attachResample } from '../resample/index.js';
 import * as text from './text.js';
 import * as count from './count.js';
 import * as image from './image.js';

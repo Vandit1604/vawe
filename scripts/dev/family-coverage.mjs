@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { collect } from '../author/arsenal.mjs';
-import { catalogued } from '../../core/registry.js';
+import { catalogued } from '../../core/registry/registry.js';
 import { emitJson } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -34,8 +34,14 @@ export const MECHANISM_NAMED = new Set([
   'easing', 'blend mode', 'icon',                 // also carry catalog `skip`; listed for one source of truth
   'camera dial', 'depth', 'interpolation mode', 'time remap', 'keyframe handle', 'stagger order',
   'effector drive', 'effector falloff', 'scramble charset', 'resample fx',
-  'lightfield envelope anchor', 'lightfield envelope shape', 'lightfield motion',
-  'lightfield pattern', 'lightfield shadow direction',
+  // The registries themselves are named 'envelope anchor' / 'shadow direction' (core/lightfield/
+  // options.js, defineRegistry's first arg), not 'lightfield envelope anchor' / 'lightfield shadow
+  // direction': this set is matched against that exact kind string. The two entries carried the
+  // longer, wrong spelling since they were written, invisible until W9's arsenal.mjs fix (core/
+  // moved from three hardcoded directories to a real per-package walk) discovered
+  // core/lightfield/options.js's registries for the first time and the mismatch finally mattered.
+  'envelope anchor', 'envelope shape', 'field motion',
+  'lightfield pattern', 'shadow direction',
 ]);
 
 /** The two labeled arrays in lib-test.mjs, read from source: the (query, want) pairs the eval asserts. */

@@ -2,15 +2,15 @@
 // them to the scene's services (theme, inkAt, cam, splitText, …) so every primitive builder is a small
 // pure-ish file that takes the kit. Ported verbatim from scene.html's inline helpers (byte-identical).
 
-import { applyLayerFilter } from '../filters.js';
-import { droppedProps } from '../sanitize-html.js';
-import { isLook, applyComposite } from '../looks.js';
+import { applyLayerFilter } from '../looks/filters.js';
+import { droppedProps } from '../type/sanitize-html.js';
+import { isLook, applyComposite } from '../looks/index.js';
 // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light. Every part of
 // this engine that has to tell a light ground from a dark one asks THAT function; a second hand-kept
 // copy of the question is docs/MISTAKES.md #159.
-import { isLightBg, parseColor } from '../motion.js';
+import { isLightBg, parseColor } from '../motion/motion.js';
 // The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
-import { frameOf } from '../safe.js';
+import { frameOf } from '../layout/safe.js';
 
 // hexA('#5e6ad2', .25) → rgba string (glow/beam colours come as brand hex)
 export function hexA(hex, a) {
@@ -434,7 +434,7 @@ export function createKit(ctx) {
   // as it would any other declaration), and per-child engine timing survives.
   //
   // Written ONCE here, at build time, same as every other decorate() call, never per frame. That is
-  // why `core/validate.mjs`'s `cssErrors` REFUSES any key the engine itself rewrites every frame
+  // why `core/validate/validate.mjs`'s `cssErrors` REFUSES any key the engine itself rewrites every frame
   // (opacity, transform, left/top/width/height, zIndex, pointerEvents) or that core/tokens.css kills
   // globally (animation, transition): a build-time write to one of those is silently erased the moment
   // the render advances past frame 0, which is the exact "accepted input the engine then ignores" bug

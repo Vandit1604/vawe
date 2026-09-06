@@ -40,7 +40,7 @@
 // POSITION IS UNTOUCHED, which is the whole technique: the carrier still swings this layer around its
 // centre, and only the layer's ORIENTATION is held. The arrangement rotates, its contents stay readable.
 
-import { motionAt } from '../sequence.js';
+import { motionAt } from '../timeline/sequence.js';
 
 export const UPRIGHT_KEYS = ['of'];
 

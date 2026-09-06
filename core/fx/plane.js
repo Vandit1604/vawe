@@ -68,7 +68,7 @@
 // projected by nothing. Put the plane on the GROUP: the whole composed card then stands at that depth
 // and its children ride it, which is what a card at a distance is.
 
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 
 export const PLANE_KEYS = ['z', 'hold'];
 

@@ -19,7 +19,7 @@
 // CSS, an inline `calc()`, or an SVG attribute reads it and the modifier never touches layout. Written
 // in full every frame and never read back, so a cold render and a warm one agree.
 
-import { resolveEasing } from '../motion.js';
+import { resolveEasing } from '../motion/motion.js';
 
 export const PROGRESS_KEYS = ['var', 'ease'];
 

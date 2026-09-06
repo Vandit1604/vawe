@@ -14,11 +14,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ANIM_NAMES } from '../../core/clips.js';
-import { PRESENTATIONS } from '../../core/cuts.js';
-import { SHADER_FX } from '../../core/stings.js';
+import { ANIM_NAMES } from '../../core/timeline/clips.js';
+import { PRESENTATIONS } from '../../core/cuts/index.js';
+import { SHADER_FX } from '../../core/stings/index.js';
 import { execFileSync } from 'node:child_process';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dir = path.join(repoRoot, 'formats/scene');

@@ -68,7 +68,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
 import { codesEmitted } from '../lib/finding-codes.mjs';
 import { readFindings } from '../lib/findings.mjs';
-import { sceneDims } from '../../core/safe.js';
+import { sceneDims } from '../../core/layout/safe.js';
 import { population, LIBRARY } from '../lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -645,7 +645,7 @@ const styleGate = (name, label, script, args, opts) =>
 //    the answers and does not pretend to, the same way `make beats` proves a sheet was looked at and
 //    not that the beats are good. Ratcheted like the rest, so the library warns and new work complies.
 record('preflight', runGate('preflight', 'preflight (the decisions before the JSON)', 'scripts/gates/preflight.mjs', [], { subject: file }), { waivable: true, tier: 'reports' });
-record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/validate.mjs', []), { waivable: false });
+record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/validate/validate.mjs', []), { waivable: false });
 
 // 1a. storyboard, DOES THIS FILM HAVE A PLAN, AND DOES THE PLAN HOLD TOGETHER?
 //

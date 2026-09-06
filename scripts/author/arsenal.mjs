@@ -33,7 +33,7 @@ import { newSince, WINDOW_DAYS } from './recency.mjs';
 // The tokenizer lives in core/registry.js, where the load-time blurb refusal also needs it. Two
 // tokenizers would eventually disagree about which words an entry is indexed under, and the refusal has
 // to grade a blurb by exactly the words this search will find it by.
-import { searchWords } from '../../core/registry.js';
+import { searchWords } from '../../core/registry/registry.js';
 import { emitJson } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -51,11 +51,18 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const dirsOf = (rel) => {
   try {
     return fs.readdirSync(path.join(repoRoot, rel))
-      .filter((f) => f.endsWith('.js'))
+      .filter((f) => f.endsWith('.js') || f.endsWith('.mjs'))
       .map((f) => `${rel}/${f}`);
   } catch { return []; }
 };
-const MODULE_PATHS = ['core', 'core/fx', 'core/layers'].flatMap(dirsOf);
+// core/ itself holds ONLY package directories now (W9: no root file may go orphaned), so a fixed
+// list of three subdirectories is exactly the "hand-kept index" this file's own header warns against:
+// a vocabulary moved into a fourth package would be unsearchable again. Discover every package under
+// core/ instead, the same way the header already discovers files within one.
+const corePackages = fs.readdirSync(path.join(repoRoot, 'core'), { withFileTypes: true })
+  .filter((e) => e.isDirectory())
+  .map((e) => `core/${e.name}`);
+const MODULE_PATHS = corePackages.flatMap(dirsOf);
 
 /** Read one entry's value out of an optional registry map (blurbs, aka, pitfalls), or a default. */
 const at = (map, name, dflt = '') => (map && map[name] != null ? map[name] : dflt);
@@ -436,7 +443,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (forScene) {
     let raw; try { raw = fs.readFileSync(path.resolve(forScene), 'utf8'); } catch { process.exit(0); }
     await collect();   // every registry module is imported as a side effect of building the corpus
-    const { registries } = await import('../../core/registry.js');
+    const { registries } = await import('../../core/registry/registry.js');
     const used = (n) => raw.includes(`"${n}"`);
     const inPlay = registries()
       .map((r) => ({ r, has: r.names.filter(used), missing: r.names.filter((n) => !used(n)) }))

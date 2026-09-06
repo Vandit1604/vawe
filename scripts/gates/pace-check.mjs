@@ -36,7 +36,7 @@ const strict = process.argv.includes('--strict');
 // backdrop sits nearer 0.15 and is meant to.
 const FLOOR = 1.0;          // below this a film is asleep
 const HOLD = 4.0;           // seconds with nothing arriving or leaving
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 
 function measure(p) {
 // The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it

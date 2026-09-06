@@ -1,5 +1,5 @@
-import { glContext } from '../webgl.js';
-import { defineRegistry } from '../registry.js';
+import { glContext } from '../engine/webgl.js';
+import { defineRegistry } from '../registry/registry.js';
 // core/shaders-ambient.js: smooth LOOPING ambient shaders for the `shader` layer primitive. Where
 // core/stings.js is transient cut-covers, these are continuous, slow, low-contrast colour fields you
 // place behind content. Pure in (time, seed) so renderFrame(n) stays deterministic.

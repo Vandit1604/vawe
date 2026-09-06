@@ -3,7 +3,7 @@
 //   make transitions BASIC=1    → just the basics (the fundamentals every tool has)
 // The catalog is DERIVED from the four source registries, so this is always in sync, its only failure
 // mode is a name the family classifier didn't recognise (family "other"), which it reports at the end.
-import { TRANSITIONS, MECHANISMS, basics, unclassified } from '../../core/transitions.js';
+import { TRANSITIONS, MECHANISMS, basics, unclassified } from '../../core/transitions/catalog.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 // A report, never a rule: it never blocks, so every finding here is a WARN and the exit code stays 0.

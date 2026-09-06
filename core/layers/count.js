@@ -1,6 +1,6 @@
 // core/layers/count.js: a number that counts from→to over local time (stats, timers). Build is the
 // text build (styleText renders count content); this adds the per-frame value.
-import { mergeProps, propsOf } from '../props.js';
+import { mergeProps, propsOf } from '../registry/props.js';
 import { PROPS as TEXT_PROPS } from './text.js';
 export { build } from './text.js';
 

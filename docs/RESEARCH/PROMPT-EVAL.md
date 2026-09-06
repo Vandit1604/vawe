@@ -41,7 +41,7 @@ everything the agent ADDS on top of it is the measurement.
 
 `THE BACKGROUND MUST MOVE` is the only section in the file whose instruction lands as a countable
 property of the JSON. It asks for more than one `bg` window and it asks for those windows to carry no
-`from`/`to`, so the cuts own the timing (`core/junctions.js`). Both are one `jq` away. The population
+`from`/`to`, so the cuts own the timing (`core/timeline/junctions.js`). Both are one `jq` away. The population
 baseline already exists and has an owner: `node scripts/dev/library-stats.mjs` reports how many
 gate-visible scenes paint a single window, so the arms can be read against the library rather than
 against an impression. No other section is that cheap to falsify.

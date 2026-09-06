@@ -100,7 +100,7 @@ for (const name of names) {
   const destDir = path.join(OUT_DIR, name);
   try {
     fs.writeFileSync(scenePath, JSON.stringify(sceneFor(name), null, 1));
-    execFileSync('node', ['core/validate.mjs', scenePath], { cwd: ROOT, stdio: 'pipe' });
+    execFileSync('node', ['core/validate/validate.mjs', scenePath], { cwd: ROOT, stdio: 'pipe' });
     execFileSync('./bin/vawe', [scenePath, '--draft', '--workers', '2'], { cwd: ROOT, stdio: 'pipe' });
 
     const mp4 = path.join(ROOT, renderOf(scenePath));

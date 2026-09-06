@@ -5,7 +5,7 @@
 // Yields to two other owners of the same glyphs, and the conditions are the declaration: `circle` lays
 // the units out on a ring and rotates the ring instead, and a named GSAP effect (`L.fx`) drives them
 // from its own timeline. Two writers on one span is a fight nothing would report.
-import { animateUnits } from '../type.js';
+import { animateUnits } from '../type/type.js';
 
 export const slot = 'split';
 

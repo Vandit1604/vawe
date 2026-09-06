@@ -22,7 +22,7 @@
 // exists, core/layers/canvas.js does all of that once, for all four. A surface that needed its own
 // build order would not belong here; it would be a layer type, like `glow` and `beam`, which paint
 // with CSS gradients and own no canvas at all.
-import { mergeProps } from '../props.js';
+import { mergeProps } from '../registry/props.js';
 import * as paint from './paint.js';
 import * as shader from './shader.js';
 import * as globe from './globe.js';

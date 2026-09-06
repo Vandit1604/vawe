@@ -11,12 +11,18 @@
 // No per-frame work and no frame feedback here: resolveComposite is pure, so renderFrame(n) stays
 // deterministic and `make probe` holds.
 
-import { defineRegistry, blurbsOf } from '../registry.js';
+import { defineRegistry, blurbsOf } from '../registry/registry.js';
 import { PASSES, LOOKS, LOOK_AKA, KNOB_ROUTES, PASS_READS, clamp } from './presets.js';
 
 // LOOKS and KNOB_ROUTES were the two public exports of core/looks.js's data half; PASSES, PASS_READS
 // and LOOK_AKA stay module-private here exactly as they were before the split.
 export { LOOKS, KNOB_ROUTES };
+
+// filters.js (root, W9): named colour-grade FILTERS (duotone/tritone/gradientMap/…), a sibling
+// vocabulary to LOOKS rather than the same one; a `look` composites PASSES, a `filter` resolves one
+// CSS/SVG grade. Grouped here because it shared no other package and this is where its one look-side
+// consumer (LOOK_REGISTRY's `filter` slot, above) already lived.
+export * from './filters.js';
 
 // Read off the looks themselves; blurbsOf throws at load naming any look that forgot one.
 export const LOOK_BLURBS = blurbsOf('look', LOOKS);

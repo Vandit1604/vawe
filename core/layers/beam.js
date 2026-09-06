@@ -9,7 +9,7 @@
 //     "speed":0.5, "color":"var(--accent)", "glow":0.6 }          // border-beam (default)
 //   { "type":"beam", "mode":"shine", "w":520,"h":150, "period":1.6, "angle":18, "color":"#fff" }  // sheen
 import { alphaMix } from './glow.js';
-import { mergeProps, propsOf } from '../props.js';
+import { mergeProps, propsOf } from '../registry/props.js';
 
 // pure: the beam head angle (deg) at local time lt; `speed` = full loops per second.
 export const beamAngle = (lt, speed = 0.5) => (((lt * speed * 360) % 360) + 360) % 360;

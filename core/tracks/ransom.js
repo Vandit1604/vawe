@@ -3,7 +3,7 @@
 //
 // After `split` and not before it: both write the same unit spans, and the reveal is the pose while
 // the cycle is the surface. Reversing them would have the reveal overwrite each freshly rolled cutout.
-import { ransomTick } from '../ransom.js';
+import { ransomTick } from '../type/ransom.js';
 
 export const slot = 'glyphs';
 

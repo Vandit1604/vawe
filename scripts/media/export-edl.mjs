@@ -11,8 +11,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lowerScene } from '../../core/transitions-lower.js';
-import { marksOf, junctionTable, shotWindows } from '../../core/junctions.js';
+import { lowerScene } from '../../core/transitions/lower.js';
+import { marksOf, junctionTable, shotWindows } from '../../core/timeline/junctions.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FPS = 30;

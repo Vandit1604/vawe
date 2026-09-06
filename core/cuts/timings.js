@@ -2,8 +2,8 @@
 // PRESENTATION (./presentations.js) says what a cut looks like; a TIMING says how it accelerates
 // through it, chosen separately (`cuts:[{t,style,timing}]`). Same package split as core/stings/ and
 // core/backgrounds/: core/cuts.js is now a thin re-export of ./index.js.
-import { clamp01, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, accel, decel, speedRamp, easeOutSpring } from '../motion.js';
-import { defineRegistry } from '../registry.js';
+import { clamp01, easeInOutCubic, easeOutCubic, easeOutQuart, easeOutBack, accel, decel, speedRamp, easeOutSpring } from '../motion/motion.js';
+import { defineRegistry } from '../registry/registry.js';
 
 export const TIMINGS = {
   linear: (p) => clamp01(p),

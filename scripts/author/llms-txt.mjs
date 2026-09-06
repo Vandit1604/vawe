@@ -21,7 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { catalogued } from '../../core/registry.js';
+import { catalogued } from '../../core/registry/registry.js';
 import { LAYER_REGISTRY } from '../../core/layers/index.js';
 import { collect } from './arsenal.mjs';
 

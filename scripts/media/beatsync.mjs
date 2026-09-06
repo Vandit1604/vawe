@@ -21,9 +21,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { lowerScene } from '../../core/transitions-lower.js';
-import { snapToBeat } from '../../core/beats.js';
-import { unrollGrid, snapJoints, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
+import { lowerScene } from '../../core/transitions/lower.js';
+import { snapToBeat } from '../../core/beats/detect.js';
+import { unrollGrid, snapJoints, DEFAULT_MAX_SHIFT } from '../../core/beats/index.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);

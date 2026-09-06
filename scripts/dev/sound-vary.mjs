@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { CUES, renderCue, normalize, writeWav } from '../../core/audio-kit.mjs';
+import { CUES, renderCue, normalize, writeWav } from '../../core/audio/kit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(ROOT, 'out/sound-vary');
