@@ -269,7 +269,7 @@ if (!allowed.has('ruled-grid')) {
     if (gridSeen.has(where)) return; gridSeen.add(where);
     findings.push({ sev: 'ruled-grid', msg: `${where} · ${how}. A ruled line grid is a design tool's canvas: `
       + `it makes the film read as a mock-up of itself. Nothing in the engine draws one unless asked, so either `
-      + `delete it or waive it with a \`_why\` saying what the grid is doing.` });
+      + `delete it or waive it with a \`_why\` saying what the grid is doing. See docs/CRAFT/SURFACES.md.` });
   };
   for (const l of scanTargets) {
     const kv = []; strings(l, '', kv);
