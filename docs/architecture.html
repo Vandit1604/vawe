@@ -220,13 +220,13 @@
       <table>
         <thead><tr><th>Module</th><th>Responsibility</th></tr></thead>
         <tbody>
-          <tr><td><code>core/motion.js</code></td><td>Boot, the motion primitives (interpolate, spring, rise, fade, slide, wipe), easings, <b>seeded</b> randomness, text measurement, the theme system. All pure in <code>n</code>.</td></tr>
-          <tr><td><code>core/sequence.js</code></td><td>Timeline evaluators. <code>motionAt()</code> turns a layer's keyframe track into <code>{dx, dy, scale, rot, opacity, blur, w, h, track}</code>; <code>cameraAt()</code> does the same for the camera, including its 3D tilt.</td></tr>
-          <tr><td><code>core/clips.js</code></td><td>Reads <code>data-start/-duration/-track/-anim/-out</code> off the DOM and drives timed multi-layer clips with enter/exit and z-order. Also the seek interface that drives paused WAAPI and GSAP.</td></tr>
+          <tr><td><code>core/motion/motion.js</code></td><td>Boot, the motion primitives (interpolate, spring, rise, fade, slide, wipe), easings, <b>seeded</b> randomness, text measurement, the theme system. All pure in <code>n</code>.</td></tr>
+          <tr><td><code>core/timeline/sequence.js</code></td><td>Timeline evaluators. <code>motionAt()</code> turns a layer's keyframe track into <code>{dx, dy, scale, rot, opacity, blur, w, h, track}</code>; <code>cameraAt()</code> does the same for the camera, including its 3D tilt.</td></tr>
+          <tr><td><code>core/timeline/clips.js</code></td><td>Reads <code>data-start/-duration/-track/-anim/-out</code> off the DOM and drives timed multi-layer clips with enter/exit and z-order. Also the seek interface that drives paused WAAPI and GSAP.</td></tr>
           <tr><td><code>core/layers/*</code></td><td>One file per layer type. Each exports <code>build()</code> (once) and optionally <code>frame()</code> (per frame).</td></tr>
           <tr><td><code>core/preload.js</code></td><td>The one async phase, before the virtual clock starts. Images, fonts, components, GSAP, shaders. After it, every lookup is a static table, so purity holds.</td></tr>
-          <tr><td><code>core/safe.js</code></td><td>Canvas dimensions and the safe box. Crucially, the safe box depends on <code>destination</code>. A 9:16 web hero and a 9:16 reel are the same shape with different chrome.</td></tr>
-          <tr><td><code>core/validate.mjs</code></td><td>Schema + theme validation. Runs in <code>boot()</code> before the first frame, so a bad scene fails fast rather than rendering wrong.</td></tr>
+          <tr><td><code>core/layout/safe.js</code></td><td>Canvas dimensions and the safe box. Crucially, the safe box depends on <code>destination</code>. A 9:16 web hero and a 9:16 reel are the same shape with different chrome.</td></tr>
+          <tr><td><code>core/validate/validate.mjs</code></td><td>Schema + theme validation. Runs in <code>boot()</code> before the first frame, so a bad scene fails fast rather than rendering wrong.</td></tr>
         </tbody>
       </table>
       </div>

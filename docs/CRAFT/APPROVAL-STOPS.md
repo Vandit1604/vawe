@@ -114,7 +114,7 @@ hierarchy and the cobalt glow in `docs/animation.html`.
 - **A relative path inside the fragment resolves against the PAGE, not against the fragment's folder.**
   Moving markup into `formats/scene/` does not make `./logo.svg` mean the file beside it. Write asset
   paths from the repo root.
-- **`sanitizeHtml` strips any absolute `src`/`href`** (`core/sanitize-html.js`), so an `<img src="/…">`
+- **`sanitizeHtml` strips any absolute `src`/`href`** (`core/type/sanitize-html.js`), so an `<img src="/…">`
   that renders in your browser renders empty in the film. The preview shows the fragment BEFORE the
   sanitiser, so a picture that is right here can still be wrong in the render. Check the beats sheet.
 

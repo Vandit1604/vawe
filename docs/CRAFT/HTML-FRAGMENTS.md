@@ -70,7 +70,7 @@ This is the most flexible and the most hand-rolled. Use it for a shape whose geo
 **The most useful feature almost nobody uses.** 8 of 164 scenes reach for it, against 62 that carry an
 `html` layer, and when the paired exit was added the count was 0 of 13 block files and 6 of 161 scenes.
 Two agents building the same figure both concluded "an html layer leaves as one card" and
-reported it as a fact about the medium. It was a feature they had not found (`core/parts.js`,
+reported it as a fact about the medium. It was a feature they had not found (`core/motion/parts.js`,
 [`../MISTAKES.md`](../MISTAKES.md) #410).
 
 `parts` is a CSS selector into your own markup. Every matched element gets an engine-driven, **seeked**
@@ -112,7 +112,7 @@ Each of these throws at boot, by name. None of them is arbitrary.
 
 | refused | why | instead |
 |---|---|---|
-| `animation` / `transition` in your CSS (`core/sanitize-html.js` refuses them at boot, `core/validate.mjs` refuses both by name, engine wide) | they run on a clock the renderer does not own, so a seeked frame would be wrong | `--t` in a `calc()`, `parts`, or a motion track |
+| `animation` / `transition` in your CSS (`core/type/sanitize-html.js` refuses them at boot, `core/validate/validate.mjs` refuses both by name, engine wide) | they run on a clock the renderer does not own, so a seeked frame would be wrong | `--t` in a `calc()`, `parts`, or a motion track |
 | `opacity` or `filter` in `css` | the engine writes both every frame (the enter/exit envelope, and the velocity blur) | the layer's own `opacity` and `filter` props |
 | a CSS value this Chrome drops | an invalid declaration is dropped silently, the rest of the rule survives, and the frame renders looking almost right | see the traps below |
 
@@ -164,7 +164,7 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 > one by one for the fork (`docs/MISTAKES.md` #326). Of those 38, **6 were worth keeping**: most were
 > already measured better here, four had no subject in our artifacts at all, and five would have fired on
 > the engine's OWN features (the `glow` layer, the card recipe at `core/layers/doc.js:25`, the `eyebrow`
-> blueprint prop, the blinds-wipe mask in `core/cuts.js:130` that `lib-test` asserts).
+> blueprint prop, the blinds-wipe mask in `core/cuts/index.js:130` that `lib-test` asserts).
 
 ## Preview before you render
 
@@ -182,7 +182,7 @@ right? Then render.
   a thermal ramp that fades in and out, and a goo morph between two words. Carries the four After
   Effects steps of the effect and their SVG equivalents in its own comments, which is the shape to copy:
   the recipe lives beside the implementation, so the next author inherits the name rather than the guess.
-- **`core/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
+- **`core/layout/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
   says in its comments why it does that rather than referencing one on the page.
 
 ## The one thing to remember

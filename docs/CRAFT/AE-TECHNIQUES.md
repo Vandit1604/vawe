@@ -68,11 +68,11 @@ handles flat so the interior is near vertical. Cut at the steepest frame.
 
 **ENGINE MAPPING** All three parts are reachable now.
 
-*The shape.* `speedRamp(t, {peak, sharp})` (`core/motion.js`) owns the symmetric flat-ends,
+*The shape.* `speedRamp(t, {peak, sharp})` (`core/motion/motion.js`) owns the symmetric flat-ends,
 steep-middle curve and is exposed as `ease: "ramp"` and as a cut timing. **Do not write a second one.**
 Measured: a symmetric keyframe-handle pair at influence 55, speed 0 reproduces `ramp` to within 0.0037
 over the whole segment. What `ramp` cannot do is be ASYMMETRIC, and that is the half this technique
-needs. Per-key, per-side handles (`easeOut` / `easeIn`, `core/motion.js handleCurve`) give it: `hang`
+needs. Per-key, per-side handles (`easeOut` / `easeIn`, `core/motion/motion.js handleCurve`) give it: `hang`
 leaving a key is the flat, held half, and something faster arriving at the next is the other. The doses,
 as peak slope in multiples of the segment's average velocity, so nobody has to pick by feel:
 
@@ -86,7 +86,7 @@ as peak slope in multiples of the segment's average velocity, so nobody has to p
 Read the third row before reaching for the second: the DEFAULT is steeper than `ramp`, so naming
 `ramp` to make a move snappier makes it softer.
 
-*The placement.* `core/velocity-cut.js` reads `velocityAt` at each junction and reports a cut sitting
+*The placement.* `core/timeline/velocity-cut.js` reads `velocityAt` at each junction and reports a cut sitting
 in a velocity trough; `scripts/author/motion-director.mjs` prints it. It reads authored handles for
 free, because it derives from the one velocity owner rather than re-implementing it. It reads the
 CAMERA too, and it used to not: a seam whose whole move lived on the null scored 0 px/s, so the
@@ -146,9 +146,9 @@ cycle; changing the rate keeps the cycle and kills the screensaver feeling.
 **NUMBERS** `amount` 1. `timing` keyed 0 at the start to 5 at 7 seconds. One interior auto-bezier key
 pulled below the straight line. Seven duplicates of the shape, then staggered.
 
-**ENGINE MAPPING** `core/idle.js` has exactly three idles: `none`, `breathe`, `drift`. All three are
+**ENGINE MAPPING** `core/engine/idle.js` has exactly three idles: `none`, `breathe`, `drift`. All three are
 uniform in time, which is the boredom this technique names. The engine already owns the fix in another
-vocabulary: `ease: "through"` (`core/vocab.js:99`, `core/sequence.js:202`) reads a key's neighbours so a
+vocabulary: `ease: "through"` (`core/registry/vocab.js:99`, `core/timeline/sequence.js:202`) reads a key's neighbours so a
 travel across several keys is one gesture. A `timeWarp` for an idle would be the same idea applied to a
 loop's phase. Nothing in `make arsenal Q="loop that speeds up and slows down"` matches.
 
@@ -171,8 +171,8 @@ the animation you already made becomes legible for the first time.
 **NUMBERS** seven duplicates. A constant per-copy offset (dragged, not typed, in the source).
 
 **ENGINE MAPPING** Present under another name. `motionDefaults.stagger` defaults to **0.045s**
-(`core/motion.js:718`), which is 1.35 frames at 30fps, and `parts` carries a per-element `stagger` into
-hand-authored HTML (`core/parts.js`). The gap is that stagger is a scalar here, and the technique wants
+(`core/motion/motion.js:718`), which is 1.35 frames at 30fps, and `parts` carries a per-element `stagger` into
+hand-authored HTML (`core/motion/parts.js`). The gap is that stagger is a scalar here, and the technique wants
 it applied to a set of layers that are copies of one thing. See entry 4.
 
 **DEFAULT OR OPTION** Already a default. Worth knowing 0.045s is fast: at seven elements the whole wave
@@ -202,9 +202,9 @@ to 50; linked size 80 at rest.
 **ENGINE MAPPING** Absent. `make arsenal Q="stagger a grid of clones with a falloff from a point"`
 returns `chipGrid`, `gridPixelateWipe` and `iris`: a blueprint, a sting, and a cut. None of them is a
 falloff. This is the one entry in this file that is a genuinely new vocabulary, and it should be built
-with `defineRegistry` (`core/vocab.js`) plus the `createKit(ctx)` injection point in
+with `defineRegistry` (`core/registry/vocab.js`) plus the `createKit(ctx)` injection point in
 `core/layers/util.js`, so the falloff reaches every layer builder with no signature change. The dynamics
-half is already solvable: `springEase({response, dampingFraction})` in `core/motion.js` is the overshoot,
+half is already solvable: `springEase({response, dampingFraction})` in `core/motion/motion.js` is the overshoot,
 and `sticky` is a per-element hold on the same eased value.
 
 **DEFAULT OR OPTION** Option, and a large one. But it is the highest-value item here, because it makes
@@ -233,10 +233,10 @@ because it is not an easing: it is whether the selector interpolates between sel
 `shape: ramp up` for a fall. Amount 50 percent on the duplicated animator, random seed 50. Melt example:
 position 140 down, rotation 45 on the first animator and -75 on the duplicate, tracking +50.
 
-**ENGINE MAPPING** Partly present. `core/type.js` PRESETS carries 31 kinetic presets, and `assemble` is
+**ENGINE MAPPING** Partly present. `core/type/type.js` PRESETS carries 31 kinetic presets, and `assemble` is
 described in the arsenal as the AE text-animator-plus-randomize-order reveal. What is missing is that
 `shape`, `smoothness` and `amount` are DIALS on the selector, and here they are baked into whichever
-preset you name. `splitText` and `unitProgress` in `core/type.js` are where the selection is computed,
+preset you name. `splitText` and `unitProgress` in `core/type/type.js` are where the selection is computed,
 so that is where a falloff shape and an amount would live.
 
 **DEFAULT OR OPTION** Option. Exposing the three dials would widen every existing preset without changing
@@ -258,8 +258,8 @@ register a static face cannot fake.
 **NUMBERS** weight animated to 700 from the face's light default. Offset 0 to 100. Smoothness reduced,
 order randomized.
 
-**ENGINE MAPPING** HAVE. `preset: "weight"` in `core/type.js`, and `make arsenal` reports it in **144
-scenes**, the most used kinetic preset in the library. `wght` is exported from `core/type.js` directly.
+**ENGINE MAPPING** HAVE. `preset: "weight"` in `core/type/type.js`, and `make arsenal` reports it in **144
+scenes**, the most used kinetic preset in the library. `wght` is exported from `core/type/type.js` directly.
 Nothing to build.
 
 **DEFAULT OR OPTION** Already effectively a default. Listed so nobody rebuilds it.
@@ -285,9 +285,9 @@ the shift inside a motion the viewer reads as intentional.
 **NUMBERS** tracking 0 to 30 and back to 0. Smoothness 0 percent. Per-face tracking correction stated as
 18 for one face against the reference. Three faces chained.
 
-**ENGINE MAPPING** Absent as such. `filter: "morph"` (`core/filters.js`) is dilate and erode on pixels,
-not a font swap, and `morphButton` is a blueprint beat. This is a new `core/type.js` preset, `fontMorph`,
-and it needs one thing the engine has: `trackingFor` is already exported from `core/motion.js` (it is
+**ENGINE MAPPING** Absent as such. `filter: "morph"` (`core/looks/filters.js`) is dilate and erode on pixels,
+not a font swap, and `morphButton` is a blueprint beat. This is a new `core/type/type.js` preset, `fontMorph`,
+and it needs one thing the engine has: `trackingFor` is already exported from `core/motion/motion.js` (it is
 asserted in `scripts/gates/lib-test.mjs`).
 
 **DEFAULT OR OPTION** Option. It is a spectacle device, and a film should have one of those, not four.
@@ -314,7 +314,7 @@ tool, and the same class this repo logs as its worst failure mode.
 20 echoes at -0.001, decay 0.95. Roughen border 3, edge sharpness 10, scale 10, complexity 1; melt build
 uses border 5, sharpness 10, scale 30. Evolution driven as time times 50.
 
-**ENGINE MAPPING** `FILTER_PRESETS` in `core/filters.js` holds sepia, duotone, tritone, gradientMap,
+**ENGINE MAPPING** `FILTER_PRESETS` in `core/looks/filters.js` holds sepia, duotone, tritone, gradientMap,
 thermalBlur, posterize, chromaGlow, displace, bloom, chromaSplit, convolve, morph, goo, relief, vignette.
 There is no echo. `make arsenal Q="echo trail motion blur repeated copies"` returns blur cuts, blur
 presets and `echoRing`, a blueprint beat that replays a path one beat late: adjacent, not this. Note the
@@ -347,7 +347,7 @@ evolution as time times 20. The particle variant: rectangles at 2 and 4 px, repe
 rotation 45 degrees, wiggle at 15 per second with amplitude 25 wrapped in a posterize-time, then the
 whole repeater duplicated.
 
-**ENGINE MAPPING** `core/backgrounds.js:276` has `grain(ctx, w, h, t, o)`, seeded per frame and index,
+**ENGINE MAPPING** `core/backgrounds/index.js:276` has `grain(ctx, w, h, t, o)`, seeded per frame and index,
 holding each pattern for **2 frames by default** because per-frame grain crawls on static type. That is
 FRAME grain. This technique is LAYER grain, shaped by one layer's alpha, coloured per band, and parented
 to the subject. `make arsenal Q="grain noise texture over the whole frame"` returns the `grain` sting
@@ -378,8 +378,8 @@ blur just gives you four soft ellipses; the direction is what smears them into e
 the linear build. Twirl radius 30. Null rotation 0 to 180 over about 5 seconds. Turbulent displace in the
 linear build: amount 600, size 350, complexity 3, evolution as time times 50.
 
-**ENGINE MAPPING** Adjacent things exist and none is this construction. `core/backgrounds.js` ships
-`blobs` (5 scenes), `gradientWash` (12 scenes) and `mesh`; `core/filters.js` ships `gradientMap`. The
+**ENGINE MAPPING** Adjacent things exist and none is this construction. `core/backgrounds/index.js` ships
+`blobs` (5 scenes), `gradientWash` (12 scenes) and `mesh`; `core/looks/filters.js` ships `gradientMap`. The
 value of the entry is the RECIPE for authoring a brand-specific one: an html layer with four positioned
 radial gradients plus a filter chain is reachable today, since `filter` applies to an `html` layer like
 any other. Worth adding as a background preset only if a film needs the colours keyed to its own brand.
@@ -414,7 +414,7 @@ threshold raised slightly, intensity 0.8. Final seating glow: radius 100, intens
 centres zeroed, then expression-added to the null position. Opacity keyed 100, 0, 100 across the switch.
 
 **ENGINE MAPPING** The pieces are here and the RIG is not. There is a `glow` layer type, `LOOKS` carries
-`edgeGlow` and `halationFilm`, `core/filters.js` has `bloom` and `chromaGlow`, and `modifiers` carries a
+`edgeGlow` and `halationFilm`, `core/looks/filters.js` has `bloom` and `chromaGlow`, and `modifiers` carries a
 `matte`. `make arsenal Q="light sweep reveals text through a mask"` returns `maskReveal`, `highlight` and
 the `lightLeak` shader, all of which are sweeps, not sources. Step 5 is the part this repo would insist
 on regardless: one fact, one owner. A light whose position is written in two effect centres is exactly the
@@ -474,7 +474,7 @@ Turning it on by default would also have had to be proven byte-identical across 
 
 Three findings, in the order they matter.
 
-**The engine's easing vocabulary is finished and its PLACEMENT vocabulary is not.** `core/motion.js` has
+**The engine's easing vocabulary is finished and its PLACEMENT vocabulary is not.** `core/motion/motion.js` has
 every Penner family in In, Out and InOut, a closed-form spring, a speed ramp and a Hermite mode that
 carries velocity through a key. Not one of the twelve techniques wanted a curve the engine lacks. Three
 of them wanted to know WHERE to put something: the cut (1), the interior rate key (2), the effector's

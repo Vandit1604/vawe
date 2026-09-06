@@ -53,7 +53,7 @@ What a gate IS for, stated so the rule is not read as "never":
 Invalid CSS, so the browser dropped that one declaration, kept the rest of the rule, rendered on, and
 three of four focus brackets never moved with every check green. The first fix was a NEW GATE that
 swept every fragment in a browser. It worked, and it was the wrong shape. The right answer was three
-files away: `core/sanitize-html.js` already refuses `transition`/`animation` for the identical reason,
+files away: `core/type/sanitize-html.js` already refuses `transition`/`animation` for the identical reason,
 hand-authored CSS that reads correctly and silently does nothing. The refusal now lives at the two
 places author CSS reaches the DOM (`core/layers/util.js`, `core/layers/html.js`) and throws naming the
 layer. The gate was deleted. Full write-up: `docs/MISTAKES.md` #422.
@@ -76,7 +76,7 @@ is acceptable: expansion imports all 217 block factories, which has no business 
 
 The fourth, `cameraMove`, was written into `data.cameraMove` and read by nobody: `formats/scene/scene.js`
 reads `data.camera`. So an author who wrote a camera move and rendered without expanding got no camera
-and no error. It now bakes at boot (`bakeCameraMove` in `core/produce.js`), and `core/boot.js` THROWS if
+and no error. It now bakes at boot (`bakeCameraMove` in `core/engine/produce.js`), and `core/engine/boot.js` THROWS if
 `cameraMove` survives to render, because the failure was a field written and never read, so the repair
 is not "convert it here", it is "make surviving unconverted impossible" (`docs/MISTAKES.md` #424).
 
@@ -88,18 +88,18 @@ The engine should let you add an effect, a layer type, a block, a beat or a came
 handling everything again**. Where that is true today it is because of one of three primitives, and a
 new extension point should use one of them rather than invent a fourth:
 
-- **`defineRegistry(...)`** (`core/registry.js`): a named vocabulary that refuses an unknown name and
+- **`defineRegistry(...)`** (`core/registry/registry.js`): a named vocabulary that refuses an unknown name and
   says which slot it was reaching for. Give it a **`catalog`** block (title, tag, intro, usage, and
   either preview or noPreview) and it also writes its own section in `docs/EFFECTS.md` and its own page
   on the site. That is the whole edit: adding one capability used to be four edits in three files, held
   together by two gates, and the id those other three were keyed by was a slug of the section title, so
   renaming a section orphaned its usage and its preview in silence. A half-written block is refused at
   load rather than by a gate.
-- **`paramsOf`** (`core/camera-moves.js:216`), refuses an unknown parameter by reading the generator's
+- **`paramsOf`** (`core/camera-moves/index.js:216`), refuses an unknown parameter by reading the generator's
   OWN signature. Nobody maintains that list, so it cannot drift.
 - **`createKit(ctx)`** (`core/layers/util.js`): dependency injection for layer builders. A capability
   added to the ctx reaches every primitive at once, with no signature change at any call site. The frame
-  (`frameOf` in `core/safe.js`) arrived exactly this way.
+  (`frameOf` in `core/layout/safe.js`) arrived exactly this way.
 
 **One fact, one owner, everyone else receives it.** The recurring failure in this codebase is not
 complexity, it is the same fact known in two places and then drifting: the audit graded a camera read

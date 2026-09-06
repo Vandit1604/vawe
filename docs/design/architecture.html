@@ -104,7 +104,7 @@ before it. Break that and the film is wrong in a way no single frame reveals.</p
 
 <h2><span class="n">Stage one</span>The pipeline</h2>
 <pre><b>data.json</b>
-   │  core/validate.mjs   refuses a bad scene before the first frame
+   │  core/validate/validate.mjs   refuses a bad scene before the first frame
    ▼
 <b>cmd/render</b> (Go) ──► chromedp: N headless tabs, each seeking renderFrame(n)
    │                        <span class="c">purity is what makes the sharding legal</span>
@@ -201,7 +201,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   resting keys and the composed style, so any animation that does write a transform still wins.</p>
   <div class="ev"><b>evidence</b> · turning the idle default on quarantined <span class="m">linear-agents</span>
   at scale 0.9897 forwards, 0.9694 backwards. The bug predated the idle; the idle gave it a second voice.
-  <br><b>fix</b> · <span class="m">core/clips.js</span>, one frozen constant, two spread sites.</div>
+  <br><b>fix</b> · <span class="m">core/timeline/clips.js</span>, one frozen constant, two spread sites.</div>
 </div>
 
 <div class="find done">
@@ -221,7 +221,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   group and the child's discarded, which 49 children across 13 films do today: warned in the validator,
   not refused, because honouring an absolute start would let a child outlive the group containing it.</p>
   <div class="ev"><b>fix</b> · <span class="m">formats/scene/scene.js</span>,
-  <span class="m">core/validate.mjs</span>, pinned in <span class="m">lint-test</span> in both
+  <span class="m">core/validate/validate.mjs</span>, pinned in <span class="m">lint-test</span> in both
   directions, with the asserts watched failing.</div>
 </div>
 
@@ -277,7 +277,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   <h3>The linear easings were a measurement question <span class="tag">p3 · answered</span></h3>
   <p>"41% of easings are linear" was one number doing two jobs. Split by segment length it is three:
   <strong>15%</strong> sit on a segment shorter than <code>DENSE_KEY_SEC</code> (0.14s), where
-  <code>core/sequence.js</code> interpolates linearly anyway and naming it is documentation;
+  <code>core/timeline/sequence.js</code> interpolates linearly anyway and naming it is documentation;
   <strong>28%</strong> sit on a longer span across 22 films, which is the real question; and
   <strong>58%</strong> carry a named curve.</p>
   <p>No code change, deliberately. <code>linear-motion</code> is already a ratcheted code, so the
@@ -298,12 +298,12 @@ resort: if the bad value has a write site, the refusal goes there and the class 
 <h2><span class="n">Today</span>What changed while this was written</h2>
 <div class="scroll"><table>
 <tr><th>change</th><th>where</th><th>effect</th></tr>
-<tr><td>The layer lifecycle gained its third phase</td><td class="m">core/motion.js · formats/scene/scene.js</td><td><code>clipStyleAt</code> computes an entrance ramp and an exit ramp and has no branch for the middle, so stillness was never a decision, it was the shape of the data model. <span class="m">motionDefaults</span> now carries <span class="m">idle</span>, resolved layer → scene → theme → engine default.</td></tr>
-<tr><td>The transform accumulator is emptied every frame</td><td class="m">core/clips.js</td><td>Fixes an order-dependence older than the idle. See the board.</td></tr>
-<tr><td>The aurora family got the motion knob it never had</td><td class="m">core/backgrounds.js</td><td>aurora 0.14 → 1.31, mesh 0.12 → 1.02. Amplitude and period move together, or the field sloshes.</td></tr>
+<tr><td>The layer lifecycle gained its third phase</td><td class="m">core/motion/motion.js · formats/scene/scene.js</td><td><code>clipStyleAt</code> computes an entrance ramp and an exit ramp and has no branch for the middle, so stillness was never a decision, it was the shape of the data model. <span class="m">motionDefaults</span> now carries <span class="m">idle</span>, resolved layer → scene → theme → engine default.</td></tr>
+<tr><td>The transform accumulator is emptied every frame</td><td class="m">core/timeline/clips.js</td><td>Fixes an order-dependence older than the idle. See the board.</td></tr>
+<tr><td>The aurora family got the motion knob it never had</td><td class="m">core/backgrounds/index.js</td><td>aurora 0.14 → 1.31, mesh 0.12 → 1.02. Amplitude and period move together, or the field sloshes.</td></tr>
 <tr><td>Every render reports how much of it moves</td><td class="m">internal/scene · internal/render</td><td><span class="m">78% still, motion 0.30</span> beside the duration. It refuses nothing.</td></tr>
 <tr><td>A new layer type: <span class="m">adjust</span></td><td class="m">core/layers/adjust.js</td><td>One grade over everything with a lower <code>track</code>. Five kinds plus a raw filter, keyed through the existing <code>vars</code> track.</td></tr>
-<tr><td>Relative time, three holes closed</td><td class="m">formats/scene/scene.js · core/validate.mjs</td><td>The resolver walks the whole tree, two invented defaults became refusals, and a group child's discarded window is warned.</td></tr>
+<tr><td>Relative time, three holes closed</td><td class="m">formats/scene/scene.js · core/validate/validate.mjs</td><td>The resolver walks the whole tree, two invented defaults became refusals, and a group child's discarded window is warned.</td></tr>
 <tr><td>A tracked snapshot digest</td><td class="m">verify/snap/digest.json</td><td>4.2KB of sha256, so CI can answer whether a scene moved.</td></tr>
 <tr><td><span class="m">make census</span> · preflight's NOT REACHED FOR</td><td class="m">scripts/lib/census.mjs · scripts/gates/preflight.mjs</td><td>Populations by name; capabilities this film declines, with the library's share beside each.</td></tr>
 </table></div>

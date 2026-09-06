@@ -44,7 +44,7 @@ Most films need none of the theory below. They need a bed under the type and cue
 earn one. Do this, in order, before reading further:
 
 ```bash
-make audio                       # bake every cue + music bed, no network, deterministic (core/audio-kit.mjs)
+make audio                       # bake every cue + music bed, no network, deterministic (core/audio/kit.mjs)
 make audio-bed D=<file> WRITE=1  # resolve "audio.music":"auto" in the scene to a concrete bed
 make audio-check D=<file>        # is the result a decision or an omission? read what it prints
 make video D=<file>               # renders with the mux; listen to out/<file>.mp4
@@ -177,7 +177,7 @@ A `lead` that reaches back past the previous junction is refused rather than cli
 leaning over two shots is not the device. A `sound` that is not on disk fails the render, a film whose
 continuity is carried by a texture that never plays is not a quieter film, it is a different one.
 
-Resolved by `core/audio-bridges.js` (in the browser, where the junctions live) into spans of seconds;
+Resolved by `core/audio/bridges.js` (in the browser, where the junctions live) into spans of seconds;
 mixed by `internal/audio/audio.go`, which never has to know what a cut is.
 
 ---
@@ -219,7 +219,7 @@ make spectrum MUSIC=… FPS=30                    # per-frame band energy → a 
 `beatmap` reports low confidence on an ambient pad and says so, which is the correct answer rather than
 a fabricated grid. `beatsync` is the picture-follows-track direction and it is deterministic and
 idempotent; four scenes in the library carry a `.beatsync.json` and it is the most under-used tool we
-own. It no longer decides anything itself: since #457 it reads the grid and calls `core/beat-bind.js`,
+own. It no longer decides anything itself: since #457 it reads the grid and calls `core/beats/index.js`,
 so the preview and the render answer "which beat does this joint land on" the same way.
 
 ### The scene can now NAME its grid, and the engine snaps the joints itself
@@ -256,9 +256,9 @@ unmatched is the bug this replaces, not a softer version of it.
 
 A short bed loops to fill the film, so the grid is unrolled across the runtime (`warm` is 8 seconds;
 its beats recur every 8 seconds). Everything happens once, before the first frame, so `renderFrame(n)`
-never sees a grid. `core/beat-bind.js`.
+never sees a grid. `core/beats/index.js`.
 
-> **One thing decides which beat a joint lands on, and it is `core/beat-bind.js`.** The CLI calls the
+> **One thing decides which beat a joint lands on, and it is `core/beats/index.js`.** The CLI calls the
 > same `snapJoints`, so both use the same 0.12s tolerance, both snap cuts by their time and seams by
 > their centre, and neither touches a sting. The CLI held a second opinion until #457: half a beat
 > capped at 0.18s, which above 60 BPM is wider than the gap between beats, so nothing was ever left
@@ -388,7 +388,7 @@ memory before ffmpeg muxes it.
 }
 ```
 
-**The cues** (`core/audio-kit.mjs`, baked by `make audio`): `chime · sparkle · droplet · bloom ·
+**The cues** (`core/audio/kit.mjs`, baked by `make audio`): `chime · sparkle · droplet · bloom ·
 whisper · tick · press · key · release · toggle · success · error · page · loading · ready`, plus the
 baked aliases `whoosh · reveal · click · pop`. They are **synthesized from parameters**, noise, a
 biquad, an envelope, seeded and deterministic, so they carry no licence at all and same params always
@@ -429,7 +429,7 @@ is a workaround rather than the dial.
 | `make music-pack` / `make music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
 | `make audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
 | `make beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
-| `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beat-bind.js) |
+| `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beats/index.js) |
 | `make beatsync D=… MUSIC=… WRITE=1` | the author-time twin: same policy, writes `<scene>.beatsync.json` |
 | `make spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
 | `make sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
@@ -439,7 +439,7 @@ is a workaround rather than the dial.
 ### Caption styles: eight, and what each one uses to say "here"
 
 `"captionStyle": "<name>"` layers a word-timed treatment on the pop caption layout. The words come
-from `capWords()` (`core/captions.js`): the author's own `words:[{t0,t1}]` when a line carries them,
+from `capWords()` (`core/type/captions.js`): the author's own `words:[{t0,t1}]` when a line carries them,
 otherwise windows distributed by word length, which reads as speech and needs no timing file. Every
 style is a pure function of one word's progress, so a cold seek and a warm one paint the same frame.
 
@@ -469,18 +469,18 @@ the dimmest state at 4.8:1, which clears AA with room to spare.
 contrast**. `lib-test` proves each style keeps three distinct states and never reaches for opacity;
 the ratio itself is arithmetic over the theme palette. Neither is a picture. Read a frame.
 
-**The band.** `captionBand()` (`core/safe.js`) describes the strip a caption paints, and the audit
+**The band.** `captionBand()` (`core/layout/safe.js`) describes the strip a caption paints, and the audit
 warns when other content lands there. No style may make that strip taller than the skin it declares,
 so every value that could grow the line is bounded to the `styled` plate's own 14px padding: the
 `neonEdge` halo stops at 14px and the `kineticSlam` overshoot stops at 1.22, which at 64px adds 7px
 a side. A style that wants more has to move the band first, and moving the band moves every scene.
 
 **The trap, in bold, because it has bitten twice.** `music:"auto"` is resolved at **authoring** time by
-`core/audio-select.js`. The render binary has no JS pre-pass, so an unresolved `"auto"` reaching the
+`core/audio/select.js`. The render binary has no JS pre-pass, so an unresolved `"auto"` reaching the
 mixer is read as a filename, matches nothing, and plays **silence**. Always
 `make audio-bed D=<file> WRITE=1`. `make validate` and `make audio-check` both warn; heed them.
 
-**A second trap, currently live.** `core/audio-select.js` maps five of its eight profiles (`apple`,
+**A second trap, currently live.** `core/audio/select.js` maps five of its eight profiles (`apple`,
 `linear`, `vercel`, `a24`, `bloomberg`) to `bed: null`, and an absent or unknown profile also yields
 silence. So `music:"auto"` on most films still resolves to *nothing* (open work, §9).
 
@@ -743,7 +743,7 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
 
 ## 9. Open work
 
-1. **`core/audio-select.js` still maps most profiles to nothing.** Five of eight profiles map to
+1. **`core/audio/select.js` still maps most profiles to nothing.** Five of eight profiles map to
    `bed: null`, and an unknown profile yields silence, so `music:"auto"` mostly resolves to nothing. It
    should map every profile to *something* (a bed, or an explicit held tone) before "sound by default"
    is real.

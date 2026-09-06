@@ -26,7 +26,7 @@ it is generated from the engine registries, so every effect that exists is liste
 
 ## The three per-frame mechanisms (know which one moves)
 
-- **`paint` fields** (`core/paint-fx.js`): generative full-canvas, closed-form in t, **can move** (aurora
+- **`paint` fields** (`core/surfaces/paint-fx.js`): generative full-canvas, closed-form in t, **can move** (aurora
   drifts, meteor streaks, matrix rains). Author `{"type":"paint","paint":"<name>", ...opts}`.
 - **`beam` / `glow` / `svg` layers**: DOM effects driven per frame by their `frame()` hook (border-beam
   angle, sheen position, glow flash envelope, svg draw/morph). Pure in t, dataset-stamped.

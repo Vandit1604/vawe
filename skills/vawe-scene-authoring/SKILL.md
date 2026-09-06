@@ -31,8 +31,8 @@ parallel Chrome tabs. So:
 - Guard it: `make probe M=<format>` asserts purity. Run it after any scene-logic change.
 
 ```js
-import { boot } from '/core/boot.js';
-import { interpolate, easeOutCubic } from '/core/motion.js';
+import { boot } from '/core/engine/boot.js';
+import { interpolate, easeOutCubic } from '/core/motion/motion.js';
 boot((data, fps) => {
   const duration = /* seconds */, total = Math.round(duration * fps);
   function renderFrame(n) {
@@ -61,7 +61,7 @@ visibility via `stage.className = 'stage phase-' + phase`) → `.safe` (the safe
 determinism reset, `.stage`/`.num`/`.icon-img`/debug overlay. It contains zero colors, font choices,
 scales or shadows. Every look var (`--font-*`, `--bg`, `--text/-2`, `--dim`, `--ink`, `--surface/-2`,
 `--line/-strong`, `--accent/-dim/-glow`, `--up`/`--down`, `--g0..2`) is written by `applyTheme()` from
-the video's theme, and `core/theme-contract.js` requires the theme to be COMPLETE, a missing key
+the video's theme, and `core/registry/theme-contract.js` requires the theme to be COMPLETE, a missing key
 fails at `make validate` and again at boot. Never write `var(--x, fallback)` with a constant in a
 scene: if the var is a look value it comes from the theme (guaranteed), and a hardcoded fallback is
 exactly the "wrong-look video renders anyway" bug the contract exists to prevent. Data JSONs must
@@ -92,7 +92,7 @@ Non-negotiable moves:
 - **Gate it:** `make designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
   clear its flags before you render. Full routing: `AGENTS.md`.
 
-## Animation: pure primitives in `core/motion.js` (no GSAP)
+## Animation: pure primitives in `core/motion/motion.js` (no GSAP)
 
 GSAP gives no render-speed benefit here (we seek-and-screenshot, not real-time playback), and risks
 the purity contract. Use these closed-form, pure-in-`n` helpers instead:

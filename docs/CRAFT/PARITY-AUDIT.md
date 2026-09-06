@@ -76,13 +76,13 @@ the counts here are an upper bound.
 
 Two implementations, and they do not share a dial.
 
-- Split text: `unitProgress` (`core/type.js:79`) is `u = clamp01((t - i * stagger) / each)`. Order is
+- Split text: `unitProgress` (`core/type/type.js:79`) is `u = clamp01((t - i * stagger) / each)`. Order is
   the DOM index `i`, always. Defaults resolved at `core/tracks/units.js:26`: `stagger` falls through to
-  `kit.M.stagger`, which is `DEFAULT_MOTION.stagger = 0.045` (`core/motion.js:881`), and `each`
+  `kit.M.stagger`, which is `DEFAULT_MOTION.stagger = 0.045` (`core/motion/motion.js:881`), and `each`
   defaults to 0.5s.
 - `parts`: `formats/scene/scene.js:517` hands the spec to `gsap.fromTo` with
   `duration: p.each ?? 0.5, stagger: p.stagger ?? 0.07, ease: power3.out, delay: layer.start + (p.delay ?? 0.1)`.
-- `core/effector.js:107` is a different primitive (falloff from a moving point, `radius` 300,
+- `core/motion/effector.js:107` is a different primitive (falloff from a moving point, `radius` 300,
   `falloff: "smooth"`), correctly described in its own header as the thing a stagger cannot express.
 
 Measured over the library: 365 split-text layers. Median stagger train
@@ -100,10 +100,10 @@ total-time cap (`amount`), did not exist in either implementation.
 
 **CLOSED.** `stagger` takes a number, as always, or the object form `{ each, amount, from }`, and the
 same three words work on a split text layer and in `parts[]`. `staggerOffset` / `staggerStep`
-(`core/type.js`) are the single reader, so the picture, the parts timeline and the tactile mixer cannot
+(`core/type/type.js`) are the single reader, so the picture, the parts timeline and the tactile mixer cannot
 disagree about what `{ amount: 0.6 }` means; `gsapStagger` translates at the one seam where a spec meets
 GSAP's own `start`/`end` spelling. `from` takes `first` (the default, so nothing shipped moves), `center`,
-`last`, `edges`, `random` (hashed, never `Math.random`) or a unit index. `core/validate.mjs`
+`last`, `edges`, `random` (hashed, never `Math.random`) or a unit index. `core/validate/validate.mjs`
 `staggerErrors` refuses a fourth key and an unknown order in BOTH slots, which is what made the `parts`
 pass-through an undocumented capability rather than a feature. `STAGGER_FROM_REGISTRY` puts it in
 `make arsenal`. The four orders were judged on one frame from a throwaway probe scene, since a
@@ -115,7 +115,7 @@ being fixed here, not a feature to keep.
 
 ### The gap, concretely
 
-Add both to `unitProgress` (`core/type.js:79`), which is the one owner both a split layer and any
+Add both to `unitProgress` (`core/type/type.js:79`), which is the one owner both a split layer and any
 future consumer read:
 
 - `from`: remap `i` before the multiply. `"first"` (today's behaviour, the default), `"center"`,
@@ -132,7 +132,7 @@ shape this repo logs. `formats/scene/schema.json` carries `stagger` as a bare na
 
 `from: "center"` is not a cosmetic reorder. On a headline it changes what the eye reads as the subject:
 a left-to-right train reads as typing, a centre-out train reads as the word arriving as one object.
-`assemble` (`core/type.js:363`) already knew this, and because the engine had no ordering dial it had
+`assemble` (`core/type/type.js:363`) already knew this, and because the engine had no ordering dial it had
 to spend part of its OWN window on a hashed delay to fake a shuffled arrival. That workaround is the
 bug report.
 
@@ -164,26 +164,26 @@ Measured, not read, by sampling each curve at 20,001 points:
 
 | curve | file | peak | at t |
 |---|---|---|---|
-| `easeOutBack` | `core/motion.js` EASINGS | 1.1000 | 0.58 |
-| `snap` / `easeOutSnap` (default LAYER entrance) | `core/motion.js:428` | 1.0152 | 0.48 |
-| `settle` / `easeOutSettle` (default per-unit) | `core/motion.js:421` | 1.0006 | 0.90 |
-| `spring` | `core/motion.js:411` | 1.0681 | 0.69 |
-| `spring-bouncy` | `core/motion.js:412` | 1.2053 | 0.41 |
-| `overshootEase(0.12)` | `core/motion.js:498` | 1.1200 | 0.54 |
-| `overshootEase(0.30)` | `core/motion.js:498` | 1.2999 | 0.31 |
-| **handle `overshoot`, either side or both** | `core/motion.js:230` | **1.0000** | 1.00 |
+| `easeOutBack` | `core/motion/motion.js` EASINGS | 1.1000 | 0.58 |
+| `snap` / `easeOutSnap` (default LAYER entrance) | `core/motion/motion.js:428` | 1.0152 | 0.48 |
+| `settle` / `easeOutSettle` (default per-unit) | `core/motion/motion.js:421` | 1.0006 | 0.90 |
+| `spring` | `core/motion/motion.js:411` | 1.0681 | 0.69 |
+| `spring-bouncy` | `core/motion/motion.js:412` | 1.2053 | 0.41 |
+| `overshootEase(0.12)` | `core/motion/motion.js:498` | 1.1200 | 0.54 |
+| `overshootEase(0.30)` | `core/motion/motion.js:498` | 1.2999 | 0.31 |
+| **handle `overshoot`, either side or both** | `core/motion/motion.js:230` | **1.0000** | 1.00 |
 
 `overshootEase` is the strongest thing in this file. It inverts the second-order step response
 `Mp = exp(-pi*zeta / sqrt(1 - zeta^2))` for zeta, so an author states the overshoot percentage they can
 see and gets it: asked 12%, measured 1.1200; asked 30%, measured 1.2999. AE gives you a handle and you
 find the percentage by eye.
 
-`springEase({response, dampingFraction})` (`core/motion.js:83`) defaults `dampingFraction` to 1, so
+`springEase({response, dampingFraction})` (`core/motion/motion.js:83`) defaults `dampingFraction` to 1, so
 `ease: "springEase"` overshoots by exactly zero. That is a defensible house default and it is two clicks
 softer than both platform defaults it is modelled on (iOS 0.825, Framer 0.5).
 
-The `overshoot` HANDLE is wrong. Its blurb (`core/motion.js:230`) says the value "sails past its key and
-comes back". Its numbers are influence 62, speed 1.8. `handleCurve` (`core/motion.js:266`) builds
+The `overshoot` HANDLE is wrong. Its blurb (`core/motion/motion.js:230`) says the value "sails past its key and
+comes back". Its numbers are influence 62, speed 1.8. `handleCurve` (`core/motion/motion.js:266`) builds
 `cubicBezier(x1, speed*x1, 1-x2, 1-speed*x2)`, so on the arriving side y2 = 1 - 1.8*0.62 = -0.116, which
 pulls the curve DOWN before the key and produces a plain ease-in. Peak 1.000000. A sail-past on the
 arriving side needs a NEGATIVE speed: `{influence: 40, speed: -1}` measures 1.0885, and
@@ -200,7 +200,7 @@ sail-past.
 
 ### The gap, concretely
 
-Change the `overshoot` entry at `core/motion.js:230` to a negative arriving speed. `{influence: 40,
+Change the `overshoot` entry at `core/motion/motion.js:230` to a negative arriving speed. `{influence: 40,
 speed: -1}` gives 8.8%, sitting between `easeOutBack` (10%) and `snap` (1.5%), and matches what the
 blurb already claims. One scene uses it, so the blast radius is one file. Then add the assertion
 `lib-test` does not have: every named handle whose blurb claims an overshoot must sample above 1.
@@ -232,9 +232,9 @@ and the reveal delay are the two things a brand actually changes.
 
 ### What we do
 
-`decodeText` (`core/type.js:385`) with the `decode` preset entry at `core/type.js:202`.
+`decodeText` (`core/type/type.js:385`) with the `decode` preset entry at `core/type/type.js:202`.
 
-- Charset: `GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ023456789#$%&'` (`core/type.js:384`), 39 characters,
+- Charset: `GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ023456789#$%&'` (`core/type/type.js:384`), 39 characters,
   hardcoded. Note it contains no `1`.
 - Refresh: `step = Math.floor(clamp01(u) * 24)`, a fixed COUNT of 24 refreshes across the unit's whole
   window, not a rate. At the default `each` of 0.5s that is 48 refreshes per second, aliased down to 30
@@ -245,10 +245,10 @@ and the reveal delay are the two things a brand actually changes.
 - Determinism: `hashSeed(`${unitIndex}:${c}:${step}`)`, pure in u. This is genuinely better than the
   references, all of which use `Math.random()` and cannot be seeked.
 
-**Nothing is exposed.** `animateUnits` (`core/type.js:443`) special-cases decode at line 454:
+**Nothing is exposed.** `animateUnits` (`core/type/type.js:443`) special-cases decode at line 454:
 `if (preset === 'decode') { decodeText(el, u, i); ...; return; }`. `popts` is never passed, and
 `decodeText` takes no options object at all, so `presetOpts` on a decode layer is silently inert. The
-preset function at `core/type.js:202` declares a `{ i = 0 }` parameter that is never called.
+preset function at `core/type/type.js:202` declares a `{ i = 0 }` parameter that is never called.
 
 Adoption is healthy: 12 of 161 scenes use `decode`, and `make arsenal Q="text scramble characters
 resolve"` returns it.
@@ -282,7 +282,7 @@ these films actually use, the unit is one character and the dial would do nothin
 
 ### The gap, concretely
 
-Give `decodeText` an options object and pass `popts` through at `core/type.js:454`:
+Give `decodeText` an options object and pass `popts` through at `core/type/type.js:454`:
 
 - `chars`: a string, or one of the named sets. A brand scramble in numerals, or in `░▒▓█`, is a
   different effect and is currently unreachable.
@@ -301,7 +301,7 @@ carry it, and it is the one parameter whose absence you feel without being able 
 
 ## The single most valuable change
 
-**Fix the `overshoot` handle at `core/motion.js:230`.** (Done, and so are the two below it: the stagger
+**Fix the `overshoot` handle at `core/motion/motion.js:230`.** (Done, and so are the two below it: the stagger
 dials and the scramble rate are closed, see each section's CLOSED note.)
 
 It wins on the repo's own ordering, not on size. The other two gaps are missing expressiveness: an
@@ -366,10 +366,10 @@ The compensation is explicitly refused. `core/fx/plane.js:147` says the fourth b
 author's", and the header at `core/fx/plane.js:36-40` tells the author to divide by `(lens - z) / lens`
 themselves.
 
-**The three.js one.** `uiParallax` (`core/three-fx.js:225`) takes up to 6 planes, spaces them at
+**The three.js one.** `uiParallax` (`core/surfaces/three-fx.js:225`) takes up to 6 planes, spaces them at
 `z = -i * 0.9` world units, sizes every plane 2.4 wide, dollies the group by `travel ?? 2.2` over
 `duration ?? 4`, and swings `swing ?? 0.18` rad on a 12.6s sine. Camera is `fov ?? 35` at
-`dolly ?? 5.2` (`core/three-fx.js:864-865`). At those defaults the near plane is 5.2 units out and a
+`dolly ?? 5.2` (`core/surfaces/three-fx.js:864-865`). At those defaults the near plane is 5.2 units out and a
 sixth plane is 9.7, a depth ratio of 1.87, so the strongest parallax available at defaults is
 near travelling 1.87x the far.
 
@@ -387,7 +387,7 @@ author, and the adoption number was what that cost: 1 scene of 170 used a named 
 1. **The scale correction is applied, not printed.** `hold` is a key on the plane spec and writes the
    `scale` longhand with `(lens - z) / lens`, the same number `depthZ`'s refusal quotes. `depth` sets it;
    raw `plane` does not. That split is deliberate and it is still one mechanism: `hold` lives in
-   `core/fx/plane.js` and `bakeDepth` (`core/produce.js`) only chooses a default for it. The vocabulary
+   `core/fx/plane.js` and `bakeDepth` (`core/engine/produce.js`) only chooses a default for it. The vocabulary
    holds because its whole job is parallax; the primitive does not, because a primitive that quietly
    rescales what it was handed is a primitive that lies, and two shipped films (`onefilm`, `playhead`)
    place 28 layers by the projected size they already get. The escape from a held depth is the primitive:
@@ -438,21 +438,21 @@ lights it renders near black plus three specular hits
 
 ### What we do
 
-`deviceShowcase` (`core/three-fx.js:193`). A rounded slab, 3.0 x 2.0 x 0.16 for `laptop` and
+`deviceShowcase` (`core/surfaces/three-fx.js:193`). A rounded slab, 3.0 x 2.0 x 0.16 for `laptop` and
 1.35 x 2.75 x 0.16 otherwise, plus a `PlaneGeometry` screen inset 0.13 (laptop) or 0.09, given
-`MeshBasicMaterial` so the screen emits rather than lights (`core/three-fx.js:206`). Correct, and the
-comment at `core/three-fx.js:203` records the bevel-depth bug it cost to get there.
+`MeshBasicMaterial` so the screen emits rather than lights (`core/surfaces/three-fx.js:206`). Correct, and the
+comment at `core/surfaces/three-fx.js:203` records the bevel-depth bug it cost to get there.
 
-Pose (`core/three-fx.js:210-216`): `rotation.y = sin(t * 0.45 * spin) * 0.55`, so yaw sweeps plus and
+Pose (`core/surfaces/three-fx.js:210-216`): `rotation.y = sin(t * 0.45 * spin) * 0.55`, so yaw sweeps plus and
 minus 31.5 degrees on a 14.0s period; `rotation.x = sin(t * 0.31 * spin) * 0.14`, plus and minus 8.0
 degrees on 20.3s; plus a 0.045 unit float on a 10.5s period.
 
-Lighting (`core/three-fx.js:114-117`): ambient 0.55, key 2.4, fill 0.9, rim 1.5. No environment map, no
+Lighting (`core/surfaces/three-fx.js:114-117`): ambient 0.55, key 2.4, fill 0.9, rim 1.5. No environment map, no
 tone mapping, no shadows anywhere in the file (I grepped `envMap|Environment|PMREM|toneMapping`: zero
 hits).
 
-Body material is `roughness: 0.34, metalness: 0.86` written as literals (`core/three-fx.js:199`), while
-`PROPS` declares `metalness` and `roughness` (`core/three-fx.js:29`) and five other scenes honour them
+Body material is `roughness: 0.34, metalness: 0.86` written as literals (`core/surfaces/three-fx.js:199`), while
+`PROPS` declares `metalness` and `roughness` (`core/surfaces/three-fx.js:29`) and five other scenes honour them
 (`:434`, `:576`, `:642`, `:661`, `:795`).
 
 Adoption: `deviceShowcase` in 2 of 170 scenes.
@@ -511,18 +511,18 @@ The blob-and-blur shortcut is a documented alternative: radial-gradient divs ins
 
 Two families again.
 
-**Shader.** `flow` is the documented premium default (`core/shaders-ambient.js:30`): a vertical base wash
-plus three gaussian blobs mixed by `exp` falloff (`core/shaders-ambient.js:175-179`). The drift
+**Shader.** `flow` is the documented premium default (`core/surfaces/shaders-ambient.js:30`): a vertical base wash
+plus three gaussian blobs mixed by `exp` falloff (`core/surfaces/shaders-ambient.js:175-179`). The drift
 coefficients WERE 0.06 to 0.11 rad/s, so the blob paths had periods of **57 to 105 seconds**. Palette is
-up to 8 stops with optional positions, mixed in **OKLab** (`core/shaders-ambient.js:104-131`). The layer
+up to 8 stops with optional positions, mixed in **OKLab** (`core/surfaces/shaders-ambient.js:104-131`). The layer
 takes `speed` (`core/layers/canvas.js:16`, applied at `:58`), default 1.
 
-**Canvas backgrounds.** `aurora` (`core/backgrounds.js:77`) draws 2 to 4 radial blobs with
+**Canvas backgrounds.** `aurora` (`core/backgrounds/index.js:77`) draws 2 to 4 radial blobs with
 `globalCompositeOperation = 'lighter'`; default periods `px` 13 to 19s and `py` 14 to 22s, radii 480 to
-620px, divided by `motionScale` (default 1). `softwash` (`core/backgrounds.js:113`) is the same idea
+620px, divided by `motionScale` (default 1). `softwash` (`core/backgrounds/index.js:113`) is the same idea
 source-over, radii as fractions of the frame diagonal (0.21 to 0.34), with a deliberate core stop at
 `WASH_CORE = 0.34` so each pool has a readable centre. The `mesh` preset passes `motionScale: 3.2`
-(`core/backgrounds.js:428`), giving periods of 3.8 to 6.9s.
+(`core/backgrounds/index.js:428`), giving periods of 3.8 to 6.9s.
 
 ### Verdict: BEHIND on the default, PARITY on the machinery. FIXED.
 
@@ -530,12 +530,12 @@ The machinery is arguably ahead: OKLab mixing, positioned stops, aspect-relative
 `motionScale` knob that shortens the period as it widens the drift are all things the blob shortcut does
 not have. The default was the problem. `flow`, the one the file calls "the premium default", cycled in 57
 to 105 seconds against the 6 to 12 second band, so in a 20 second film it traversed about a fifth of one
-cycle. The repo already measured this class of defect: `core/backgrounds.js:87-90` records four
+cycle. The repo already measured this class of defect: `core/backgrounds/index.js:87-90` records four
 "living" presets at 0.02 to 0.14 median per-frame luma delta against `liquid`'s 0.96.
 
 ### What was done
 
-The six coefficients are multiplied by 5 (`core/shaders-ambient.js`, the `u_fx==0` branch), so the
+The six coefficients are multiplied by 5 (`core/surfaces/shaders-ambient.js`, the `u_fx==0` branch), so the
 periods are **11.4 to 20.9s**. That is deliberately just SLOWER than the 6 to 12 second reference band:
 a mesh gradient run inside 12s sloshes, and a backdrop that pulls the eye has stopped being a backdrop.
 Judged on a strip at 1.0 / 3.5 / 6.0 / 8.5s, not one still, with high-contrast stops so the blobs are
@@ -559,7 +559,7 @@ them would be wrong.
 
 ### The step somebody would not guess
 
-Mixing in OKLab rather than sRGB. We already do it and `core/shaders-ambient.js:104-116` is honest that
+Mixing in OKLab rather than sRGB. We already do it and `core/surfaces/shaders-ambient.js:104-116` is honest that
 it cannot rescue near-complementary pairs.
 
 ---
@@ -590,8 +590,8 @@ mark ends as itself. A write-on that ends as an outline has not revealed the log
 starting at +0.6s, then either a 1.5s morph or a 1.3s draw at weight 3 starting at +0.3s, then a wordmark
 cascade at +1.7s with `each: 0.42, stagger: 0.05`.
 
-Note the task's framing is off in one place: `core/morph.js` is **TextMorph**, letters migrating between
-two words (`core/morph.js:1`). The shape morph is `core/path-morph.js`, reached from the `svg` layer.
+Note the task's framing is off in one place: `core/motion/morph.js` is **TextMorph**, letters migrating between
+two words (`core/motion/morph.js:1`). The shape morph is `core/layers/path-morph.js`, reached from the `svg` layer.
 
 Adoption: `logoReveal` in 1 of 170 scenes, `logoLockup` in 0, `"draw"` in 10, `"morph"` in 3.
 
@@ -612,7 +612,7 @@ missing entirely, and it is why `draw` was an outline effect here rather than a 
    Looked at, not assumed: frames at 0.6 / 1.2 / 1.5 / 2.0s are a partial outline, a closed outline, a
    filling mark with the stroke still ghosting, and the solid mark.
 3. **`draw.ease`.** `easeOutCubic` was hardcoded, so every write-on started at maximum speed. The field
-   goes through `resolveEasing` (`core/motion.js`), so absent still means `easeOutCubic` and a wrong
+   goes through `resolveEasing` (`core/motion/motion.js`), so absent still means `easeOutCubic` and a wrong
    name throws instead of substituting. `easeInOutCubic` is the AE Easy Ease the recipe asks for.
 
 `logoReveal` (`blueprints/beats.mjs`) now passes both, so its draw branch ends as the mark exactly as
@@ -627,8 +627,8 @@ write and watching two of them fail.
    turned this from an outline effect into a logo reveal. `draw: {from, to}` is still the right shape.
 4. **One path only.** `L.d` is a single `d`, so a multi-element mark is flattened into one compound path
    and gets no per-element stagger. The shape is `parts`-style sequencing over several `<path>`
-   children, and `core/parts.js` already owns staggered entrances; that is a bigger change than this
-   file's cheapest-real-win framing, and `core/parts.js` was another agent's this pass.
+   children, and `core/motion/parts.js` already owns staggered entrances; that is a bigger change than this
+   file's cheapest-real-win framing, and `core/motion/parts.js` was another agent's this pass.
 5. `logoReveal`'s 1.3s draw still sits below the 2 to 5 second band, and is still defensible in a
    20 second film. Unchanged on purpose: it was the item to change last.
 
