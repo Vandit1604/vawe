@@ -1,18 +1,18 @@
 {
- "core/ancestor-kills.js": [
+ "core/fx/ancestor-kills.js": [
   "CAPABILITIES"
  ],
- "core/audio-cues.js": [
+ "core/audio/cues.js": [
   "CUT_CUE",
   "SEAM_CUE"
  ],
- "core/audio-kit.mjs": [
+ "core/audio/kit.mjs": [
   "CUES"
  ],
- "core/audio-select.js": [
+ "core/audio/select.js": [
   "PROFILE_BED"
  ],
- "core/audio-tactile.js": [
+ "core/audio/tactile.js": [
   "MOTION_CUES",
   "DENSITY"
  ],
@@ -32,10 +32,10 @@
  "core/camera-moves/index.js": [
   "CAMERA_MOVES"
  ],
- "core/energy.js": [
+ "core/transitions/energy.js": [
   "ENERGY_BLURBS"
  ],
- "core/canvas-fx.js": [
+ "core/canvas/effects.js": [
   "BAYER4",
   "CANVAS_FX",
   "CANVAS_FX_PRESETS"
@@ -179,7 +179,7 @@
   "EASINGS",
   "DEFAULT_MOTION"
  ],
- "core/paint-fx.js": [
+ "core/surfaces/paint-fx.js": [
   "PROPS",
   "PAINT_FX"
  ],
@@ -196,14 +196,14 @@
  "core/ransom.js": [
   "RANSOM_FACES"
  ],
- "core/raymarch-fx.js": [
+ "core/surfaces/raymarch-fx.js": [
   "RAYMARCH_SURFACES"
  ],
- "core/resample-fx.js": [
+ "core/resample/effects.js": [
   "RESAMPLE_FX",
   "RESAMPLE_BLURBS"
  ],
- "core/resample.js": [
+ "core/resample/index.js": [
   "PROPS"
  ],
  "core/safe.js": [
@@ -220,13 +220,13 @@
   "POSE",
   "KEYFRAME_PROPS"
  ],
- "core/shaders-ambient.js": [
+ "core/surfaces/shaders-ambient.js": [
   "AMBIENT_SHADERS"
  ],
  "core/spectacle.js": [
   "SPECTACLE_KEYS"
  ],
- "core/spectrum.js": [
+ "core/tracks/spectrum.js": [
   "BANDS"
  ],
  "core/stings.js": [
@@ -245,10 +245,10 @@
   "REQUIRED",
   "ON_INK"
  ],
- "core/three-fx.js": [
+ "core/surfaces/three-fx.js": [
   "PROPS"
  ],
- "core/three-scenes.js": [
+ "core/surfaces/three-scenes.js": [
   "THREE_SCENES"
  ],
  "core/tracks/border-trail.js": [
@@ -284,10 +284,10 @@
  "core/tracks/vars.js": [
   "PROPS"
  ],
- "core/transitions-lower.js": [
+ "core/transitions/lower.js": [
   "PROPS"
  ],
- "core/transitions.js": [
+ "core/transitions/catalog.js": [
   "TRANSITIONS",
   "MECHANISMS",
   "FAMILIES"
