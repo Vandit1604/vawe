@@ -20,7 +20,7 @@ next starts, not to keep pace with a product tour.
 
 - **Counts with REAL figures.** The `count` layer compacts >=1e6 automatically; use a real number,
   never a round placeholder. This type's own worked example (`docs/EVALS.md`) uses this engine's own
-  facts (24 layer types, 693 effects, 29 blueprints) precisely because they are checkable.
+  facts (24 layer types, 703 effects, 29 blueprints) precisely because they are checkable.
 - **Payoff last, always.** Order beats so the most counterintuitive fact lands at the very end; never
   spoil it in the hook. `docs/RULES/payoff-last.md`.
 - **No product needed.** Resist the urge to bolt on a CTA or a brand lockup; an explainer that ends on
@@ -69,6 +69,6 @@ carrying real information, or is the whole film type on a field (`docs/CRAFT/SHO
 ## The worked example
 
 `verify/evals/briefs/explainer.json` (12s, 16:9). Shows: four real facts about this engine (24 layer
-types, 693 effects across 56 families, 29 beat blueprints), a live `count` layer animating to 693, and
+types, 703 effects across 56 families, 29 beat blueprints), a live `count` layer animating to 693, and
 the payoff ("no templates: every beat is composed") landing last. A thin accent rule tracks the active
 line as the continuous object.

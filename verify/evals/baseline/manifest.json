@@ -1,6 +1,6 @@
 {
- "when": "2026-09-06T11:17:11.079Z",
- "commit": "27c2ee53",
+ "when": "2026-09-06T11:39:03.669Z",
+ "commit": "e94cfeb4",
  "briefsDir": "verify/evals/briefs",
  "runDir": "verify/evals/baseline",
  "sheet": "verify/evals/baseline/sheet.png",

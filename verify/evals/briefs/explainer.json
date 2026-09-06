@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "note": "EXPLAINER worked example (docs/EVALS.md, skills/vawe-type-explainer/SKILL.md). No product, no site: teaches four real facts about THIS engine (24 layer types, 693 effects across 56 families, 29 beat blueprints, 5 canvases) and holds the payoff (no templates, every beat composed) for last. A thin accent rule underlines the active word and survives every cut: the continuous object. Theme vawe, white-first cobalt.",
+ "note": "EXPLAINER worked example (docs/EVALS.md, skills/vawe-type-explainer/SKILL.md). No product, no site: teaches four real facts about THIS engine (24 layer types, 703 effects across 56 families, 29 beat blueprints, 5 canvases) and holds the payoff (no templates, every beat composed) for last. A thin accent rule underlines the active word and survives every cut: the continuous object. Theme vawe, white-first cobalt.",
  "theme": "vawe",
  "aspect": "16:9",
  "duration": 12,
@@ -35,7 +35,7 @@
   ] },
 
   { "type": "text", "text": "and every one composes into an effect", "size": 56, "weight": 600, "w": 1400, "x": 160, "y": 200, "start": 6.6, "duration": 2.8, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
-  { "type": "count", "to": 693, "unit": "", "x": 160, "y": 340, "w": 900, "size": 220, "weight": 700, "color": "var(--ink)", "countStart": 0.2, "countDur": 1.6, "start": 6.9, "duration": 2.4, "anim": "none", "out": "fade", "exitDur": 0.3 },
+  { "type": "count", "to": 703, "unit": "", "x": 160, "y": 340, "w": 900, "size": 220, "weight": 700, "color": "var(--ink)", "countStart": 0.2, "countDur": 1.6, "start": 6.9, "duration": 2.4, "anim": "none", "out": "fade", "exitDur": 0.3 },
   { "type": "text", "text": "effects, across 56 families", "size": 44, "weight": 500, "color": "var(--dim)", "w": 900, "x": 160, "y": 610, "start": 8.1, "duration": 1.2, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
 
   { "type": "count", "to": 29, "unit": "", "x": 160, "y": 260, "w": 700, "size": 260, "weight": 700, "color": "var(--accent)", "countStart": 0.2, "countDur": 1.0, "start": 9.6, "duration": 2.4, "anim": "none", "out": "fade", "exitDur": 0 },
