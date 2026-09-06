@@ -16,8 +16,10 @@ import { INK, DIM, ACCENT, LINE, SURF2, caption, chip, panel, kineticHeadline } 
 export function blurResolveHook({ text, x = 160, y = 400, w = 1600, size = 130, weight = 800,
   color = INK, align = 'center', font, blurFrom = 24, resolveAt = 0.4, sub, start = 0, dur = 2.4 } = {}) {
   const motion = [{ t: 0, blur: blurFrom }, { t: resolveAt, blur: 0, ease: 'easeOutCubic' }];
+  // exitDur 0: held to the beat's own end (docs/RULES/first-arrival.md), so a dissolve into the next
+  // beat crosses real content rather than an already-faded field.
   const out = [{ type: 'text', text, x, y, w, align, size, weight, color, ...(font ? { font } : {}),
-    start, duration: dur, anim: 'none', motion, out: 'fade', exitDur: 0.4 }];
+    start, duration: dur, anim: 'none', motion, out: 'fade', exitDur: 0 }];
   // The sub sits UNDER the headline's line box, not inside it: 0.9 x size landed it on the descenders
   // and validate flagged the two lines colliding at every size (found by the acceptance run, 2026-09-06).
   if (sub) out.push(caption({ text: sub, x, y: y + Math.round(size * 1.35), w,
@@ -38,9 +40,10 @@ export function dialogueAccumulate({ pairs = [], bloomLine, x = 160, y = 260, w 
   ].filter(Boolean) }));
   const bloomStart = start + 0.3 + pairs.length * stagger + 0.4;
   const bloomY = y + pairs.length * (size + rowGap);
+  // exitDur 0: held to the beat's own end, see blurResolveHook above.
   const out = [{ type: 'group', x, y, w, layout: 'column', gap: rowGap, start: start + 0.3,
     duration: Math.max(0.5, dur - 0.3), anim: 'pop', enterDur: 0.5, each: stagger, out: 'fade',
-    exitDur: 0.4, children: rows }];
+    exitDur: 0, children: rows }];
   if (bloomLine) {
     out.push({ type: 'glow', x: x - 60, y: bloomY - 40, w: w + 120, h: Math.round(size * 2.4),
       preset: 'bloom', intensity: 0.45, color: dotColor,
@@ -60,11 +63,14 @@ export function dialogueAccumulate({ pairs = [], bloomLine, x = 160, y = 260, w 
 export function containerFill({ items = [], x = 460, y = 400, w = 1000, h = 220, gap = 28,
   itemSize = 42, glow = 0.28, stagger = 0.35, start = 0, dur = 4.5 } = {}) {
   const chips = items.map((t) => chip({ text: t, size: itemSize }));
+  // First arrival: 0.2s hold (docs/RULES/first-arrival.md), not the 0.3-0.4s this beat used to give the
+  // chips before anything readable appeared. exitDur 0: held to the beat's own end (see blurResolveHook
+  // above), so the outgoing side of a dissolve into/out of this beat still shows real content.
   return [
     panel({ x, y, w, h, start, dur, glow }),
     { type: 'group', x: x + 40, y: y + Math.round((h - itemSize - 36) / 2), w: w - 80,
-      layout: 'row', wrap: true, gap, start: start + 0.3, duration: Math.max(0.5, dur - 0.3),
-      anim: 'pop', enterDur: 0.4, each: stagger, out: 'fade', exitDur: 0.3, children: chips },
+      layout: 'row', wrap: true, gap, start: start + 0.2, duration: Math.max(0.5, dur - 0.2),
+      anim: 'pop', enterDur: 0.35, each: stagger, out: 'fade', exitDur: 0, children: chips },
   ];
 }
 
@@ -84,7 +90,8 @@ export function cardFan({ cards = [], anchorX = 1350, anchorY = 540, cardW = 360
       type: 'group', x: anchorX - Math.round(cardW / 2), y: anchorY - Math.round(cardH / 2),
       w: cardW, pad: 24, bg: 'var(--surface)', radius, border: `1.5px solid var(--line)`,
       layout: 'column', gap: 10,
-      start: start + t0, duration: Math.max(0.4, dur - t0), anim: 'none', out: 'defocus', exitDur: 0.3,
+      // exitDur 0: held to the beat's own end, see blurResolveHook above.
+      start: start + t0, duration: Math.max(0.4, dur - t0), anim: 'none', out: 'defocus', exitDur: 0,
       motion: [
         { t: 0, x: arriveFrom, rot: rot * 2, opacity: 0 },
         { t: settleAt, x: dx, y: dy, rot, opacity: 1, ease: 'easeOutCubic' },
@@ -103,9 +110,10 @@ export function cardFan({ cards = [], anchorX = 1350, anchorY = 540, cardW = 360
 export function listBuildRows({ items = [], x = 240, y = 260, w = 900, rowH = 86, gap = 18,
   size = 40, weight = 600, dotColor = ACCENT, stagger = 0.5, start = 0, dur = 5 } = {}) {
   return items.map((label, i) => ({
+    // exitDur 0: held to the beat's own end, see blurResolveHook above.
     type: 'group', x, y: y + i * (rowH + gap), w, layout: 'row', items: 'center', gap: 20,
     start: start + i * stagger, duration: Math.max(0.4, dur - i * stagger),
-    anim: 'slide-up', enterDur: 0.35, out: 'fade', exitDur: 0.3,
+    anim: 'slide-up', enterDur: 0.35, out: 'fade', exitDur: 0,
     children: [
       { type: 'rect', w: 12, h: 12, radius: 6, bg: dotColor },
       { type: 'text', text: label, size, weight, color: INK, font: 'mono' },
@@ -146,7 +154,8 @@ export function cellMosaic({ cells = [], cols = 4, cellW = 260, cellH = 170, gap
     : { type: 'text', text: c.text, w: cellW, size: 30, weight: 700, color: INK }));
   return [{
     type: 'group', x, y, w: cols * (cellW + gap), layout: 'row', wrap: true, gap,
-    start, duration: dur, anim: 'none', out: 'fade', exitDur: 0.3,
+    // exitDur 0: held to the beat's own end, see blurResolveHook above.
+    start, duration: dur, anim: 'none', out: 'fade', exitDur: 0,
     motion: [{ t: 0, x: 0 }, { t: dur, x: travel, ease: 'linear' }],
     children,
   }];
@@ -182,8 +191,9 @@ export function wordmarkAssemble({ wordmark, tiles = [], x, y = 460, size = 92, 
     const ang = (i / n) * Math.PI * 2;
     const dx = Math.round(Math.cos(ang) * (scatterR + 120));
     const dy = Math.round(Math.sin(ang) * (scatterR + 120) * 0.5);
+    // exitDur 0: held to the beat's own end, see blurResolveHook above.
     return { type: 'image', src: t, x: wx - 60 + i * 10, y: y - 220, w: 96,
-      start, duration: dur, anim: 'none', out: 'fade', exitDur: 0.3,
+      start, duration: dur, anim: 'none', out: 'fade', exitDur: 0,
       motion: [
         { t: 0, x: dx, y: dy, opacity: 0 },
         { t: 0.4, x: dx, y: dy, opacity: 0.7, ease: 'easeOutCubic' },
@@ -207,9 +217,11 @@ export function viewportTrio({ image, caption: cap, sizes = [280, 460, 760], gap
     const h = Math.round(w * 0.62);
     // No `border` on an image: core/layers/image.js never reads it and the expander refuses a prop
     // that is set and never read (the same defect that kept screenDive from rendering).
+    // exitDur 0: held to the beat's own end (docs/RULES/first-arrival.md), so a dissolve out of this
+    // beat crosses real content rather than an already-faded field.
     const layer = { type: 'image', src: image, x: cx, y: y + Math.round((tallest - h) / 2), w, h,
       radius: 12, start: start + i * 0.08,
-      duration: Math.max(0.6, dur - i * 0.08), anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0.4 };
+      duration: Math.max(0.6, dur - i * 0.08), anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0 };
     cx += w + gap;
     return layer;
   });
