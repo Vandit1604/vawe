@@ -34,6 +34,15 @@ export function hexA(hex, a) {
 export const GLYPH_PAINTERS = ['ransom'];
 export const paintsOwnGlyphs = (L) => !!L && GLYPH_PAINTERS.some((k) => L[k]);
 
+// childExitDur(C, rootL) -> the exitDur a group child's DOM element should carry, or undefined (the
+// caller's own BASE_EXIT default then applies). A child that states its own `exitDur` always wins; one
+// that states none HOLDS ITS PARENT'S, because a group's `exitDur:0` ("held to the beat's own end", see
+// the beat blueprints) said nothing about its children, who fell straight through to driveClips' 0.26s
+// default. That default was invisible behind a hard cut (the last quarter-second is erased anyway) and
+// a blank field behind a dissolve, which crosses exactly the window the fade had already emptied. Pure,
+// so the inheritance rule is testable without a DOM (addGroupChild needs one for everything else it does).
+export const childExitDur = (C, rootL) => C.exitDur ?? rootL.exitDur;
+
 // The props the SHARED KIT reads, for every layer type that calls it, the type styling, the chip box,
 // the decoration pass, the group layout, and a group child's own timing. A prop honoured here is honoured
 // everywhere, which is why it is one flat set and not a per-type one.
@@ -516,6 +525,7 @@ export function createKit(ctx) {
     // be a second spelling of one idea.
     const d = Math.max(0, +C.delay || 0);
     const cStart = (rootL.start ?? 0) + d, cDur = Math.max(0, (rootL.duration ?? 0) - d);
+    const exitDur = childExitDur(C, rootL); // see childExitDur above
     if (isGroup) {
       c.className = 'hs-group';
       layoutGroup(c, C); chipBox(c, C); sizeChild(c, C, false);
@@ -546,7 +556,7 @@ export function createKit(ctx) {
       // delay, scheduled that child at 2s. It appeared a full second BEFORE the group it lives in.
       // That is not a stagger model, it is an absent one, and the comment below has described the
       // intended behaviour ("within its group's window") the whole time.
-      for (const gc of C.children || []) addGroupChild(c, gc, { start: cStart, duration: cDur });
+      for (const gc of C.children || []) addGroupChild(c, gc, { start: cStart, duration: cDur, exitDur });
     }
     if (!isGroup) c.className = C.type === 'image' ? 'hs-img-wrap' : 'hs-text';
     // DELEGATE to the primitive. This file used to re-implement a SUBSET of each type's build inline,
@@ -581,7 +591,7 @@ export function createKit(ctx) {
     if (C.anim) c.dataset.anim = C.anim;
     if (C.out) c.dataset.out = C.out;
     if (C.enterDur != null) c.dataset.enter = String(C.enterDur);
-    if (C.exitDur != null) c.dataset.exitDur = String(C.exitDur);
+    if (exitDur != null) c.dataset.exitDur = String(exitDur);
     extra.push({ L: { ...C, start: cStart, duration: cDur }, el: c, units: C.split ? splitText(c, C.split) : null });
   }
 

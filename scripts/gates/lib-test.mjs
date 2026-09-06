@@ -22,7 +22,7 @@ import { RESAMPLE_BLURBS } from '../../core/resample/effects.js';
 import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/type/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { PROFILES } from '../author/profiles.mjs';
-import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs } from '../../core/layers/util.js';
+import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs, childExitDur } from '../../core/layers/util.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/timeline/sequence.js';
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
 import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
@@ -1049,6 +1049,14 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('onDark itself is the thing that declines',
     kitFor({ palette: {} }, DARK_GROUND).onDark({ ransom: true }, 1) === false
     && kitFor({ palette: {} }, DARK_GROUND).onDark({ text: 'A' }, 1) === true);
+
+  // 4. childExitDur: a group child that names no exitDur of its own used to fall straight through to
+  // driveClips' BASE_EXIT default regardless of what the group declared, so a row blueprint's
+  // `exitDur:0` ("held to the beat's own end") never reached the text/rect inside the row, and a
+  // dissolve into/out of that beat crossed a field its own children had already faded to nothing.
+  ok('a child with its own exitDur keeps it', childExitDur({ exitDur: 0.5 }, { exitDur: 0 }) === 0.5);
+  ok('a child with none inherits the group\'s', childExitDur({}, { exitDur: 0 }) === 0);
+  ok('neither set: undefined, so BASE_EXIT still applies', childExitDur({}, {}) === undefined);
 }
 
 // transitions kit: every presentation lands at full visibility (enter(1)); fade-out family exits hidden
