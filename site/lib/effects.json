@@ -1,7 +1,7 @@
 {
-  "total": 710,
-  "previewed": 340,
-  "families": 57,
+  "total": 692,
+  "previewed": 322,
+  "families": 56,
   "tags": [
     [
       "asset",
@@ -40,10 +40,6 @@
       9
     ],
     [
-      "exit",
-      11
-    ],
-    [
       "generator",
       37
     ],
@@ -77,7 +73,7 @@
     ],
     [
       "per-layer/text",
-      37
+      30
     ],
     [
       "scene",
@@ -1343,96 +1339,6 @@
           "stem": "cut-timings--spring",
           "desc": "a damped-spring overshoot that settles, physical life for something landing · a badge, a chip, a number",
           "scene": "/assets/effects/cut-timings--spring.json",
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "gsap-exits",
-      "title": "GSAP exits",
-      "tag": "exit",
-      "intro": "`fxOut` · pair every entrance with a directional exit.",
-      "mode": "table",
-      "note": null,
-      "noPreview": null,
-      "count": 11,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "blurOut",
-          "stem": "gsap-exits--blurout",
-          "desc": "defocuses away without moving, correct for faces, cards and dense grids, where sliding reads as chaos",
-          "scene": "/assets/effects/gsap-exits--blurout.json",
-          "noPreview": null
-        },
-        {
-          "name": "collapseOut",
-          "stem": "gsap-exits--collapseout",
-          "desc": "folds down flat to a line from its top edge, terminal output, rows, receipts",
-          "scene": "/assets/effects/gsap-exits--collapseout.json",
-          "noPreview": null
-        },
-        {
-          "name": "dropOut",
-          "stem": "gsap-exits--dropout",
-          "desc": "falls out of the bottom of the frame under gravity, a thing discarded",
-          "scene": "/assets/effects/gsap-exits--dropout.json",
-          "noPreview": null
-        },
-        {
-          "name": "fadeOut",
-          "stem": "gsap-exits--fadeout",
-          "desc": "plain opacity fade to nothing, the neutral exit, safe under any cut",
-          "scene": "/assets/effects/gsap-exits--fadeout.json",
-          "noPreview": null
-        },
-        {
-          "name": "fadeOutDown",
-          "stem": "gsap-exits--fadeoutdown",
-          "desc": "accelerates downward as it fades, the exit that pairs with fadeUp",
-          "scene": "/assets/effects/gsap-exits--fadeoutdown.json",
-          "noPreview": null
-        },
-        {
-          "name": "fadeOutUp",
-          "stem": "gsap-exits--fadeoutup",
-          "desc": "accelerates upward off its mark as it fades, the exit that pairs with fadeDown",
-          "scene": "/assets/effects/gsap-exits--fadeoutup.json",
-          "noPreview": null
-        },
-        {
-          "name": "flyOutLeft",
-          "stem": "gsap-exits--flyoutleft",
-          "desc": "throws off the left edge, gathering speed. The exit that pairs with flyRight",
-          "scene": "/assets/effects/gsap-exits--flyoutleft.json",
-          "noPreview": null
-        },
-        {
-          "name": "flyOutRight",
-          "stem": "gsap-exits--flyoutright",
-          "desc": "throws off the right edge, gathering speed, the exit that pairs with flyLeft",
-          "scene": "/assets/effects/gsap-exits--flyoutright.json",
-          "noPreview": null
-        },
-        {
-          "name": "popOut",
-          "stem": "gsap-exits--popout",
-          "desc": "shrinks away with a small anticipation swell first, the mirror of popIn, playful",
-          "scene": "/assets/effects/gsap-exits--popout.json",
-          "noPreview": null
-        },
-        {
-          "name": "spinOut",
-          "stem": "gsap-exits--spinout",
-          "desc": "rotates a half turn while shrinking away, winding up before it goes, the mirror of spinIn",
-          "scene": "/assets/effects/gsap-exits--spinout.json",
-          "noPreview": null
-        },
-        {
-          "name": "zoomOut",
-          "stem": "gsap-exits--zoomout",
-          "desc": "swells past the camera as it fades, product focus, the leaving beat gets out of the way",
-          "scene": "/assets/effects/gsap-exits--zoomout.json",
           "noPreview": null
         }
       ]
@@ -3250,11 +3156,11 @@
       "id": "gsap-named-effects",
       "title": "GSAP named effects",
       "tag": "per-layer/text",
-      "intro": "`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ \"anim\":\"none\", \"fx\":\"charOvershoot\" }`",
+      "intro": "`fx` on a layer, pair with `anim:\"none\"` so GSAP owns the transform; per-letter on a `split` layer. `{ \"anim\":\"none\", \"fx\":\"charOvershoot\" }`",
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 37,
+      "count": 30,
       "undescribed": 0,
       "entries": [
         {
@@ -3356,27 +3262,6 @@
           "noPreview": null
         },
         {
-          "name": "fadeDown",
-          "stem": "gsap-named-effects--fadedown",
-          "desc": "as fadeUp but settling downward from above, for anything hanging off a header",
-          "scene": "/assets/effects/gsap-named-effects--fadedown.json",
-          "noPreview": null
-        },
-        {
-          "name": "fadeIn",
-          "stem": "gsap-named-effects--fadein",
-          "desc": "plain opacity fade, nothing moves. The neutral default when motion would distract",
-          "scene": "/assets/effects/gsap-named-effects--fadein.json",
-          "noPreview": null
-        },
-        {
-          "name": "fadeUp",
-          "stem": "gsap-named-effects--fadeup",
-          "desc": "lifts 60px into place while fading. The workhorse entrance for body copy and cards",
-          "scene": "/assets/effects/gsap-named-effects--fadeup.json",
-          "noPreview": null
-        },
-        {
           "name": "flipInX",
           "stem": "gsap-named-effects--flipinx",
           "desc": "hinges up into the frame about its horizontal axis, cards and panels, needs 3D perspective",
@@ -3395,20 +3280,6 @@
           "stem": "gsap-named-effects--float",
           "desc": "LOOP, never settles · rises and sinks 18px forever, idle life for a hero object",
           "scene": "/assets/effects/gsap-named-effects--float.json",
-          "noPreview": null
-        },
-        {
-          "name": "flyLeft",
-          "stem": "gsap-named-effects--flyleft",
-          "desc": "travels in from off the left edge and decelerates hard, pair with a leftward exit",
-          "scene": "/assets/effects/gsap-named-effects--flyleft.json",
-          "noPreview": null
-        },
-        {
-          "name": "flyRight",
-          "stem": "gsap-named-effects--flyright",
-          "desc": "travels in from off the right edge and decelerates hard, pair with a rightward exit",
-          "scene": "/assets/effects/gsap-named-effects--flyright.json",
           "noPreview": null
         },
         {
@@ -3437,13 +3308,6 @@
           "stem": "gsap-named-effects--maskreveal",
           "desc": "a hard left-to-right wipe, fast then a long settle. The premium editorial reveal for a headline",
           "scene": "/assets/effects/gsap-named-effects--maskreveal.json",
-          "noPreview": null
-        },
-        {
-          "name": "popIn",
-          "stem": "gsap-named-effects--popin",
-          "desc": "springs up from 60% and overshoots slightly past full size before settling, playful, for badges and chips",
-          "scene": "/assets/effects/gsap-named-effects--popin.json",
           "noPreview": null
         },
         {
@@ -3507,13 +3371,6 @@
           "stem": "gsap-named-effects--zoomblur",
           "desc": "rushes back from too close while the defocus resolves. A camera pulling focus, premium hero beat",
           "scene": "/assets/effects/gsap-named-effects--zoomblur.json",
-          "noPreview": null
-        },
-        {
-          "name": "zoomIn",
-          "stem": "gsap-named-effects--zoomin",
-          "desc": "grows from a fifth of its size on a plain decelerate, no overshoot. Bigger travel than popIn, calmer landing",
-          "scene": "/assets/effects/gsap-named-effects--zoomin.json",
           "noPreview": null
         }
       ]
