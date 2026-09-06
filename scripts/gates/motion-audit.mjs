@@ -33,7 +33,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { junctionTable, marksOf, shotWindows } from '../../core/junctions.js';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 // This gate already owns a rich --json payload (a whole report object, not a flat finding list), the
 // exact docs/MISTAKES.md #401 case findings.mjs was built to name. `emitJson` is the one door that lets
@@ -163,7 +163,7 @@ const captureSeries = (page, total, stride) => page.evaluate(async (total, strid
 // (docs/MISTAKES.md #165, #372: one fact, one owner). A film with no cuts is genuinely one shot.
 // Lowered first: a scene written with the unified `transitions` surface has no `cuts` key yet.
 function shotWindowsOf(data, total) {
-  const lowered = lowerScene(structuredClone(data));
+  const lowered = loadScene(structuredClone(data));
   const table = junctionTable(marksOf(lowered));
   // The transition duration belongs to the joint that ENDS a shot: `visEnd` is where the exit begins,
   // so a 0.8s cut and a 0.2s cut do not end their shot at the same frame.

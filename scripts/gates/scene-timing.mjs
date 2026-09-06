@@ -31,7 +31,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneDims } from '../../core/safe.js';
 import { cameraView } from '../../core/sequence.js';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 
 export const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
 
@@ -233,12 +233,12 @@ export function inView(L, view, root = ROOT) {
 // and every gate built on this model inherits that. #380 fixed eight consumers one at a time and missed
 // the ninth; lowering HERE is what makes the tenth impossible. docs/MISTAKES.md #394, #407.
 //
-// CLONED, because lowerScene mutates and `delete`s `transitions` off what it is given. That is right for
+// CLONED, because loadScene mutates and `delete`s `transitions` off what it is given. That is right for
 // the renderer, which lowers once at the top, and wrong for a gate: a check that rewrites the object it
 // is grading changes what every later check sees. core/validate.mjs clones for the same reason.
 // Lowering is idempotent, so a caller that already lowered pays a copy and nothing else.
 export function sceneTiming(input) {
-  const d = lowerScene(structuredClone(input));
+  const d = loadScene(structuredClone(input));
   const layers = (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object');
 
   const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])

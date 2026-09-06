@@ -28,7 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LOOK_NAMES } from '../../core/looks.js';
 import { PROFILES } from './profiles.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 import { DENSE_KEY_SEC } from '../../core/sequence.js';
 import { cutVelocityAdvice } from '../../core/velocity-cut.js';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
@@ -594,7 +594,7 @@ function library() {
   const trips = new Map(), values = new Map();
   let films = 0;
   for (const f of pop.names) {
-    let d; try { d = lowerScene(JSON.parse(fs.readFileSync(path.join(ROOT, SCENE_DIR, f), 'utf8'))); } catch { continue; }
+    let d; try { d = loadScene(JSON.parse(fs.readFileSync(path.join(ROOT, SCENE_DIR, f), 'utf8'))); } catch { continue; }
     if (d.module !== 'scene') continue;
     films++;
     let a; try { a = analyse(d); } catch { continue; }
@@ -658,7 +658,7 @@ if (!file) {
 // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
 // renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
 // documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
-const d = lowerScene(JSON.parse(fs.readFileSync(file, 'utf8')));
+const d = loadScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const { layers, beats, duration, findings, metrics, fastest, personality, settle, bounce, FAMILY, profile } = analyse(d);
 
 const picks = [];

@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { loadScene } from '../../core/expand.js';
 import { snapToBeat } from '../../core/beats.js';
 import { unrollGrid, snapJoints, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
 
@@ -52,7 +52,7 @@ if (!pulse.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad 
 // LOWER FIRST, for the same reason core/boot.js binds after the lowering pass: a junction written as
 // `transitions` is not a cut or a seam until then, so snapping its `at` would snap a seam by its start
 // where the engine snaps it by its centre. This is why the CLI no longer knows the word `transitions`.
-const data = lowerScene(JSON.parse(fs.readFileSync(D, 'utf8')));
+const data = loadScene(JSON.parse(fs.readFileSync(D, 'utf8')));
 let sceneDur = data.duration || 0;
 if (!sceneDur) for (const L of data.layers || []) sceneDur = Math.max(sceneDur, (L.start ?? 0) + (L.duration ?? 2));
 const grid = unrollGrid(pulse, bm.seconds || 0, sceneDur);
