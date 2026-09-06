@@ -2,11 +2,15 @@
  "authoring": {
   "allow": [
    "safe",
-   "no-storyboard"
+   "no-storyboard",
+   "no-authored-motion",
+   "no-preflight"
   ],
   "_why": {
    "safe": "the beat IS a dimension diagram of the 160px margin, so its leader line and its '160' label are drawn from the frame edge inward. Moving them inside the safe box would measure a distance the film is not about.",
-   "no-storyboard": "this film predates the storyboard rule and was grandfathered by the legacy manifest. Recording the safe waiver above changed the file, which forfeits that row by design. No plan was ever written for this film and inventing one now would be the fake plan the ratchet exists to prevent."
+   "no-storyboard": "this film predates the storyboard rule and was grandfathered by the legacy manifest. Recording the safe waiver above changed the file, which forfeits that row by design. No plan was ever written for this film and inventing one now would be the fake plan the ratchet exists to prevent.",
+   "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
+   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
   }
  },
  "module": "scene",
@@ -20,7 +24,7 @@
  "camera": [
   {
    "t": 0,
-   "s": 1.0
+   "s": 1
   },
   {
    "t": 15.5,
@@ -42,7 +46,7 @@
    "dir": "left"
   },
   {
-   "t": 11.0,
+   "t": 11,
    "fx": "dissolve",
    "dur": 0.5
   }
@@ -70,7 +74,7 @@
    "type": "text",
    "text": "Order,",
    "start": 0.6,
-   "duration": 3.0,
+   "duration": 3,
    "x": 160,
    "y": 360,
    "w": 1600,
@@ -89,7 +93,7 @@
   {
    "type": "text",
    "text": "from chaos.",
-   "start": 1.0,
+   "start": 1,
    "duration": 2.6,
    "x": 160,
    "y": 620,
@@ -320,7 +324,7 @@
    "type": "text",
    "text": "message.",
    "start": 11.5,
-   "duration": 4.0,
+   "duration": 4,
    "x": 160,
    "y": 540,
    "w": 1600,

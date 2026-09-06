@@ -5,20 +5,57 @@
   "sceneUnits": true,
   "theme": "mercury",
   "duration": 12.4,
-  "audio": { "silent": true },
+  "audio": {
+    "silent": true
+  },
   "bg": [
-    { "preset": "plain", "value": "dark", "from": 0, "to": 12.4 }
+    {
+      "preset": "plain",
+      "value": "dark",
+      "from": 0,
+      "to": 12.4
+    }
   ],
   "cuts": [
-    { "t": 2.2, "style": "punch", "dur": 0.34 },
-    { "t": 4.0, "style": "whip", "dur": 0.34 },
-    { "t": 5.9, "style": "riseBlur", "dur": 0.4 },
-    { "t": 7.8, "style": "softiris", "dur": 0.44 },
-    { "t": 10.1, "style": "rise", "dur": 0.4 }
+    {
+      "t": 2.2,
+      "style": "punch",
+      "dur": 0.34
+    },
+    {
+      "t": 4,
+      "style": "whip",
+      "dur": 0.34
+    },
+    {
+      "t": 5.9,
+      "style": "riseBlur",
+      "dur": 0.4
+    },
+    {
+      "t": 7.8,
+      "style": "softiris",
+      "dur": 0.44
+    },
+    {
+      "t": 10.1,
+      "style": "rise",
+      "dur": 0.4
+    }
   ],
   "stings": [
-    { "t": 3.82, "fx": "chromaticSplit", "dur": 0.5, "seed": 3 },
-    { "t": 7.76, "fx": "dispersion", "dur": 0.6, "seed": 7 }
+    {
+      "t": 3.82,
+      "fx": "chromaticSplit",
+      "dur": 0.5,
+      "seed": 3
+    },
+    {
+      "t": 7.76,
+      "fx": "dispersion",
+      "dur": 0.6,
+      "seed": 7
+    }
   ],
   "layers": [
     {
@@ -157,10 +194,12 @@
       "color": "var(--text)",
       "split": "word",
       "preset": "blur",
-      "presetOpts": { "px": 26 },
+      "presetOpts": {
+        "px": 26
+      },
       "stagger": 0.09,
       "each": 0.5,
-      "start": 6.0,
+      "start": 6,
       "duration": 1.75,
       "anim": "none",
       "exitDur": 0.24
@@ -177,7 +216,9 @@
       "color": "var(--text)",
       "split": "word",
       "preset": "blur",
-      "presetOpts": { "px": 26 },
+      "presetOpts": {
+        "px": 26
+      },
       "stagger": 0.09,
       "each": 0.5,
       "start": 6.32,
@@ -278,5 +319,21 @@
       "enterDur": 0.5,
       "exitDur": 0.3
     }
-  ]
+  ],
+  "authoring": {
+    "allow": [
+      "no-storyboard",
+      "restated-headline",
+      "no-preflight",
+      "feature-poverty",
+      "static-bg"
+    ],
+    "_why": {
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "restated-headline": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (a beat does not repeat the line above it)",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)",
+      "static-bg": "legacy: grandfathered 2026-09-05, adopted 2026-09-05 (the backdrop moves, at least one beat is not a flat field asleep for the whole film)"
+    }
+  }
 }

@@ -228,7 +228,7 @@
             {
               "type": "text",
               "weight": 500,
-              "text": "\u25b2",
+              "text": "▲",
               "size": 15,
               "color": "var(--up)"
             },
@@ -304,7 +304,7 @@
             {
               "type": "text",
               "weight": 700,
-              "text": "\u2713",
+              "text": "✓",
               "size": 14,
               "color": "#fff"
             }
@@ -577,8 +577,16 @@
   ],
   "authoring": {
     "allow": [
-      "off-colour"
+      "off-colour",
+      "no-storyboard",
+      "no-authored-motion",
+      "no-preflight"
     ],
-    "_allow_why": "off-colour: the frame depicts a macOS window, and #FF5F57 / #FEBC2E / #28C840 are the real traffic-light colours. A brand token there would be a lie about the UI being shown."
+    "_allow_why": "off-colour: the frame depicts a macOS window, and #FF5F57 / #FEBC2E / #28C840 are the real traffic-light colours. A brand token there would be a lie about the UI being shown.",
+    "_why": {
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
+    }
   }
 }

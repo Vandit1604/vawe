@@ -38,7 +38,7 @@
    "style": "punch"
   },
   {
-   "t": 12.0,
+   "t": 12,
    "style": "punch"
   },
   {
@@ -69,11 +69,17 @@
  "authoring": {
   "allow": [
    "numbered-section-markers",
-   "static-bg"
+   "static-bg",
+   "no-preflight",
+   "craft-unvisited",
+   "feature-poverty"
   ],
   "_why": {
    "numbered-section-markers": "the numbers ARE the content: the reel is ordered by ascending After Effects labour, so 01..09 is the argument itself, not scaffolding above unrelated sections. This is the exemption the rule names.",
-   "static-bg": "see bg[0]._why. A motion reference must hold its ground still or the reader cannot tell the effect from the backdrop. The film does turn its backdrop once, at the payoff, where nothing is being compared any more."
+   "static-bg": "see bg[0]._why. A motion reference must hold its ground still or the reader cannot tell the effect from the backdrop. The film does turn its backdrop once, at the payoff, where nothing is being compared any more.",
+   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+   "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)",
+   "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
   }
  },
  "layers": [
@@ -90,7 +96,7 @@
    "preset": "up",
    "each": 0.55,
    "stagger": 0.07,
-   "start": 0.0,
+   "start": 0,
    "duration": 3.7,
    "exitDur": 0.3,
    "critical": true
@@ -158,12 +164,12 @@
    "acrossBeats": true,
    "motion": [
     {
-     "t": 0.0,
-     "w": 0.0
+     "t": 0,
+     "w": 0
     },
     {
-     "t": 0.0,
-     "w": 0.0
+     "t": 0,
+     "w": 0
     },
     {
      "t": 0.35,
@@ -239,7 +245,7 @@
     },
     {
      "t": 21.95,
-     "w": 1400.0,
+     "w": 1400,
      "ease": "brake"
     }
    ]
@@ -323,7 +329,7 @@
     "dist": 26,
     "rise": 14
    },
-   "each": 1.0,
+   "each": 1,
    "stagger": 0.04,
    "start": 6.8,
    "duration": 2.5,
@@ -409,7 +415,7 @@
    "weight": 600,
    "color": "var(--accent)",
    "anim": "fade",
-   "start": 12.0,
+   "start": 12,
    "duration": 2.7,
    "enterDur": 0.25,
    "exitDur": 0.25
@@ -533,7 +539,7 @@
    "presetOpts": {
     "deg": 90
    },
-   "each": 1.0,
+   "each": 1,
    "stagger": 0.07,
    "start": 17.6,
    "duration": 2.5,
@@ -630,7 +636,7 @@
    "ransom": true,
    "ransomSeed": 7,
    "anim": "rise",
-   "start": 23.0,
+   "start": 23,
    "duration": 2.5,
    "enterDur": 0.5,
    "exitDur": 0.35,

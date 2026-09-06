@@ -2,7 +2,7 @@
   "module": "scene",
   "aspect": "16:9",
   "theme": "vawe",
-  "duration": 8.0,
+  "duration": 8,
   "sceneUnits": false,
   "storyboard": "formats/scene/showcase-stings.storyboard.md",
   "audio": {
@@ -46,7 +46,7 @@
           "scale": 1
         },
         {
-          "t": 3.0,
+          "t": 3,
           "y": -18,
           "scale": 1.014,
           "ease": "easeOutCubic"
@@ -77,7 +77,7 @@
       "weight": 400,
       "color": "var(--dim)",
       "start": 0.5,
-      "duration": 1.0,
+      "duration": 1,
       "anim": "fade",
       "enterDur": 0.3,
       "exitDur": 0.2
@@ -168,7 +168,7 @@
       "weight": 700,
       "color": "var(--text)",
       "start": 3.35,
-      "duration": 2.0,
+      "duration": 2,
       "anim": "fade",
       "enterDur": 0.3,
       "exitDur": 0.15
@@ -244,5 +244,15 @@
     {
       "preset": "gradientWash"
     }
-  ]
+  ],
+  "authoring": {
+    "allow": [
+      "no-preflight",
+      "craft-unvisited"
+    ],
+    "_why": {
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
+    }
+  }
 }

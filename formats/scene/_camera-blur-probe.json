@@ -4,48 +4,195 @@
   "aspect": "16:9",
   "produced": false,
   "authoring": {
-    "allow": ["no-preflight", "linear-motion", "no-storyboard"],
+    "allow": [
+      "no-preflight",
+      "linear-motion",
+      "no-storyboard",
+      "no-transition"
+    ],
     "_why": {
       "no-preflight": "not a film. It is the A/B fixture for `cameraBlur` (docs/MISTAKES.md #552): render it with the dial up and down and compare frame 31. There is nothing for the nine decisions to decide.",
       "linear-motion": "the linearity IS the measurement. An eased pan would make the smear a function of easeInOutCubic's midpoint rather than of a velocity anyone can compute by hand, and the `locked` layer could not cancel the camera exactly.",
-      "no-storyboard": "a fixture has no beats to board. What it shows is stated in its own layer copy: one still station, one counter-panning layer, two depth planes."
+      "no-storyboard": "a fixture has no beats to board. What it shows is stated in its own layer copy: one still station, one counter-panning layer, two depth planes.",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
     }
   },
   "duration": 2.4,
   "shutter": 180,
   "cameraBlur": true,
-  "audio": { "silent": true, "_why": "a probe for one filter, not a film" },
-  "bg": [{ "t": 0, "preset": "aurora" }],
+  "audio": {
+    "silent": true,
+    "_why": "a probe for one filter, not a film"
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "aurora"
+    }
+  ],
   "camera": [
-    { "t": 0, "x": 0 },
-    { "t": 0.9, "x": 0, "ease": "linear" },
-    { "t": 1.2, "x": -1500, "ease": "linear" },
-    { "t": 2.4, "x": -1500, "ease": "linear" }
+    {
+      "t": 0,
+      "x": 0
+    },
+    {
+      "t": 0.9,
+      "x": 0,
+      "ease": "linear"
+    },
+    {
+      "t": 1.2,
+      "x": -1500,
+      "ease": "linear"
+    },
+    {
+      "t": 2.4,
+      "x": -1500,
+      "ease": "linear"
+    }
   ],
   "layers": [
-    { "id": "a", "type": "text", "text": "SHARP OR SMEARED", "x": 120, "y": 300, "w": 900,
-      "size": 74, "weight": 800, "anim": "none", "start": 0, "duration": 2.4 },
-    { "id": "b", "type": "text", "text": "fine strokes read the shutter", "x": 120, "y": 470, "w": 900,
-      "size": 40, "weight": 400, "anim": "none", "start": 0, "duration": 2.4 },
-    { "id": "grid", "type": "rect", "x": 120, "y": 600, "w": 1700, "h": 4, "fill": "#fff",
-      "anim": "none", "start": 0, "duration": 2.4 },
-    { "id": "c", "type": "text", "text": "1500px in 0.3s", "x": 1500, "y": 300, "w": 900,
-      "size": 74, "weight": 800, "anim": "none", "start": 0, "duration": 2.4 },
-    { "id": "d", "type": "text", "text": "the second station", "x": 1500, "y": 470, "w": 900,
-      "size": 40, "weight": 400, "anim": "none", "start": 0, "duration": 2.4 },
-    { "id": "near", "type": "rect", "x": 1250, "y": 700, "w": 260, "h": 160, "fill": "#39f",
-      "anim": "none", "start": 0, "duration": 2.4,
-      "modifiers": [{ "tilt": { "y": 14 } }, { "plane": 400 }] },
-    { "id": "far", "type": "rect", "x": 900, "y": 700, "w": 260, "h": 160, "fill": "#3f9",
-      "anim": "none", "start": 0, "duration": 2.4,
-      "modifiers": [{ "tilt": { "y": 14 } }, { "plane": -900 }] },
-    { "id": "locked", "type": "text", "text": "LOCKED TO THE CAMERA", "x": 120, "y": 940, "w": 1100,
-      "size": 46, "weight": 800, "anim": "none", "start": 0, "duration": 2.4,
+    {
+      "id": "a",
+      "type": "text",
+      "text": "SHARP OR SMEARED",
+      "x": 120,
+      "y": 300,
+      "w": 900,
+      "size": 74,
+      "weight": 800,
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4
+    },
+    {
+      "id": "b",
+      "type": "text",
+      "text": "fine strokes read the shutter",
+      "x": 120,
+      "y": 470,
+      "w": 900,
+      "size": 40,
+      "weight": 400,
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4
+    },
+    {
+      "id": "grid",
+      "type": "rect",
+      "x": 120,
+      "y": 600,
+      "w": 1700,
+      "h": 4,
+      "fill": "#fff",
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4
+    },
+    {
+      "id": "c",
+      "type": "text",
+      "text": "1500px in 0.3s",
+      "x": 1500,
+      "y": 300,
+      "w": 900,
+      "size": 74,
+      "weight": 800,
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4
+    },
+    {
+      "id": "d",
+      "type": "text",
+      "text": "the second station",
+      "x": 1500,
+      "y": 470,
+      "w": 900,
+      "size": 40,
+      "weight": 400,
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4
+    },
+    {
+      "id": "near",
+      "type": "rect",
+      "x": 1250,
+      "y": 700,
+      "w": 260,
+      "h": 160,
+      "fill": "#39f",
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4,
+      "modifiers": [
+        {
+          "tilt": {
+            "y": 14
+          }
+        },
+        {
+          "plane": 400
+        }
+      ]
+    },
+    {
+      "id": "far",
+      "type": "rect",
+      "x": 900,
+      "y": 700,
+      "w": 260,
+      "h": 160,
+      "fill": "#3f9",
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4,
+      "modifiers": [
+        {
+          "tilt": {
+            "y": 14
+          }
+        },
+        {
+          "plane": -900
+        }
+      ]
+    },
+    {
+      "id": "locked",
+      "type": "text",
+      "text": "LOCKED TO THE CAMERA",
+      "x": 120,
+      "y": 940,
+      "w": 1100,
+      "size": 46,
+      "weight": 800,
+      "anim": "none",
+      "start": 0,
+      "duration": 2.4,
       "motion": [
-        { "t": 0, "x": 0 },
-        { "t": 0.9, "x": 0, "ease": "linear" },
-        { "t": 1.2, "x": 1500, "ease": "linear" },
-        { "t": 2.4, "x": 1500, "ease": "linear" }
-      ] }
+        {
+          "t": 0,
+          "x": 0
+        },
+        {
+          "t": 0.9,
+          "x": 0,
+          "ease": "linear"
+        },
+        {
+          "t": 1.2,
+          "x": 1500,
+          "ease": "linear"
+        },
+        {
+          "t": 2.4,
+          "x": 1500,
+          "ease": "linear"
+        }
+      ]
+    }
   ]
 }

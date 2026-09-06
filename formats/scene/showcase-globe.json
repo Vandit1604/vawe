@@ -43,5 +43,21 @@
       "exitDur": 0,
       "dolly": 3.5
     }
-  ]
+  ],
+  "authoring": {
+    "allow": [
+      "no-storyboard",
+      "plain-slideshow",
+      "no-preflight",
+      "no-transition",
+      "feature-poverty"
+    ],
+    "_why": {
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "plain-slideshow": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film reaches past a slideshow: kinetic type, a camera move, or real transitions)",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)",
+      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
+    }
+  }
 }

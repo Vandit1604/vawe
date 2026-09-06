@@ -17,9 +17,42 @@
       "to": 13,
       "opts": {
         "blobs": [
-        { "color": "231,234,240", "x": 0.14, "y": 0.22, "rf": 0.44, "ax": 0.07, "ay": 0.05, "px": 11, "py": 13, "ph": 0, "a": 0.85 },
-        { "color": "37,99,235", "x": 0.86, "y": 0.8, "rf": 0.3, "ax": 0.06, "ay": 0.055, "px": 9, "py": 12, "ph": 2, "a": 0.09 },
-          { "color": "231,234,240", "x": 0.62, "y": 0.92, "rf": 0.26, "ax": 0.05, "ay": 0.045, "px": 13, "py": 10, "ph": 4, "a": 0.6 }
+          {
+            "color": "231,234,240",
+            "x": 0.14,
+            "y": 0.22,
+            "rf": 0.44,
+            "ax": 0.07,
+            "ay": 0.05,
+            "px": 11,
+            "py": 13,
+            "ph": 0,
+            "a": 0.85
+          },
+          {
+            "color": "37,99,235",
+            "x": 0.86,
+            "y": 0.8,
+            "rf": 0.3,
+            "ax": 0.06,
+            "ay": 0.055,
+            "px": 9,
+            "py": 12,
+            "ph": 2,
+            "a": 0.09
+          },
+          {
+            "color": "231,234,240",
+            "x": 0.62,
+            "y": 0.92,
+            "rf": 0.26,
+            "ax": 0.05,
+            "ay": 0.045,
+            "px": 13,
+            "py": 10,
+            "ph": 4,
+            "a": 0.6
+          }
         ]
       }
     }
@@ -37,10 +70,10 @@
         "#e7eaf0",
         "#2563eb"
       ],
-      "_colors_why": "light mode, from themes/vawe.json: sea #f6f8fb (bg2, so the planet sits ON the page) \u00b7 marker+route #2563eb (accent, on white the accent is the strongest value the theme owns, and the route is the subject) \u00b7 glow #e7eaf0 (line, a hairline halo rather than a bloom). dark:0 because a shaded night side on a white page reads as dirt.",
+      "_colors_why": "light mode, from themes/vawe.json: sea #f6f8fb (bg2, so the planet sits ON the page) · marker+route #2563eb (accent, on white the accent is the strongest value the theme owns, and the route is the subject) · glow #e7eaf0 (line, a hairline halo rather than a bloom). dark:0 because a shaded night side on a white page reads as dirt.",
       "phi": 4.42,
       "phiTo": 4.86,
-      "phiDur": 7.0,
+      "phiDur": 7,
       "theta": 0.24,
       "origin": [
         -73.78,
@@ -51,7 +84,7 @@
         49.01
       ],
       "arcHeight": 0.035,
-      "arcWidth": 3.0,
+      "arcWidth": 3,
       "markerSize": 0.045,
       "mapSamples": 22000,
       "mapBrightness": 1.35,
@@ -67,8 +100,8 @@
       "anim": "fade",
       "enterDur": 0.7,
       "exitDur": 0,
-      "drawStart": 2.0,
-      "drawDur": 6.0
+      "drawStart": 2,
+      "drawDur": 6
     },
     {
       "type": "text",
@@ -101,7 +134,7 @@
       "x": 660,
       "y": 118,
       "w": 600,
-      "start": 2.0,
+      "start": 2,
       "duration": 2.6,
       "anim": "rise",
       "out": "defocus",
@@ -112,7 +145,7 @@
     },
     {
       "type": "text",
-      "text": "JFK \u00b7 22:40",
+      "text": "JFK · 22:40",
       "size": 24,
       "font": "mono",
       "color": "#697182",
@@ -141,9 +174,9 @@
       "y": 214,
       "w": 600,
       "countStart": 0,
-      "countDur": 6.0,
+      "countDur": 6,
       "ease": "easeInOutCubic",
-      "start": 2.0,
+      "start": 2,
       "duration": 6.6,
       "anim": "fade",
       "out": "defocus",
@@ -202,7 +235,7 @@
       "y": 118,
       "w": 600,
       "start": 8.3,
-      "duration": 2.0,
+      "duration": 2,
       "anim": "rise",
       "out": "defocus",
       "enterDur": 0.4,
@@ -211,7 +244,7 @@
     },
     {
       "type": "text",
-      "text": "CDG \u00b7 11:55",
+      "text": "CDG · 11:55",
       "size": 24,
       "font": "mono",
       "align": "center",
@@ -248,7 +281,7 @@
     },
     {
       "type": "text",
-      "text": "one JSON \u00b7 780 frames \u00b7 identical every run",
+      "text": "one JSON · 780 frames · identical every run",
       "size": 20,
       "font": "mono",
       "w": 1000,
@@ -264,7 +297,7 @@
     },
     {
       "type": "text",
-      "text": "sample route \u00b7 figures are illustrative",
+      "text": "sample route · figures are illustrative",
       "size": 18,
       "font": "mono",
       "align": "right",
@@ -281,9 +314,17 @@
     }
   ],
   "authoring": {
-    "allow": ["aphoristic-cadence"],
+    "allow": [
+      "aphoristic-cadence",
+      "no-storyboard",
+      "no-preflight",
+      "no-transition"
+    ],
     "_why": {
-      "aphoristic-cadence": "The rule would have me cut \"Every vertex computed. Not one drawn.\" as manufactured contrast, and it is right about the shape. Here the contrast is the fact: the globe is 22,000 points sampled from Natural Earth and a great-circle route solved per frame, and there is no drawn artwork anywhere in the film. The rule exists to make the author decide rather than comply. This is the decision."
+      "aphoristic-cadence": "The rule would have me cut \"Every vertex computed. Not one drawn.\" as manufactured contrast, and it is right about the shape. Here the contrast is the fact: the globe is 22,000 points sampled from Natural Earth and a great-circle route solved per frame, and there is no drawn artwork anywhere in the film. The rule exists to make the author decide rather than comply. This is the decision.",
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
     }
   },
   "cameraMove": [

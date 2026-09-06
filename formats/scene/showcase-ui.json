@@ -4,11 +4,15 @@
   "authoring": {
     "allow": [
       "off-colour",
-      "clipped-text"
+      "clipped-text",
+      "no-preflight",
+      "craft-unvisited"
     ],
     "_why": {
       "off-colour": "the browserFrame block paints the real macOS traffic-light dots, and window chrome that is not those three colours does not read as window chrome",
-      "clipped-text": "tabBar.switch reveals the selected label through a moving mask, so the pill's clientWidth (347px) is meant to be narrower than the label row inside it (1052px). Nothing is cut on screen: the audit reads a deliberate mask as a clipped glyph run."
+      "clipped-text": "tabBar.switch reveals the selected label through a moving mask, so the pill's clientWidth (347px) is meant to be narrower than the label row inside it (1052px). Nothing is cut on screen: the audit reads a deliberate mask as a clipped glyph run.",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
     }
   },
   "aspect": "16:9",
@@ -209,7 +213,7 @@
           "ease": "easeInOutCubic"
         },
         {
-          "t": 3.0,
+          "t": 3,
           "x": -840,
           "y": 0
         },
@@ -294,7 +298,7 @@
       "font": "mono",
       "color": "var(--paper)",
       "start": 3.62,
-      "duration": 3.0,
+      "duration": 3,
       "anim": "fade",
       "enterDur": 0.4,
       "exitDur": 0.3
@@ -381,7 +385,7 @@
         },
         {
           "type": "text",
-          "text": "frame rate  \u00b7  frames  \u00b7  timelines",
+          "text": "frame rate  ·  frames  ·  timelines",
           "font": "mono",
           "size": 19,
           "color": "var(--line)",
@@ -447,7 +451,7 @@
         },
         {
           "type": "text",
-          "text": "frame rate  \u00b7  frames  \u00b7  timelines",
+          "text": "frame rate  ·  frames  ·  timelines",
           "font": "mono",
           "size": 19,
           "color": "var(--line)"

@@ -198,8 +198,10 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
 // BEAT DENSITY. A film long enough to need chapters but cut into only two or three beats reads as a
 // few cards held too long, whatever motion each card carries. `d` is lowered, so `transitions` is
 // already folded into cuts/seams; beats = declared boundaries + 1. The floor is a boundary roughly
-// every 3.5s past 8s, so a 12s film needs 4 beats and a 2-beat 12s film fails. Ratcheted in
-// author-check (RATCHET_CODES) so it blocks NEW work and the legacy library is frozen, not broken.
+// every 3.5s past 8s, so a 12s film needs 4 beats and a 2-beat 12s film fails. RETIRED from
+// author-check's hard-code list (measured 2026-09-07): it fired on 58% of the library and every single
+// occurrence was already legacy or waived, so it had zero live enforcement anywhere. It still reports
+// here, plainly, as a report-tier finding.
 {
   const beatBounds = (d.cuts || []).length + (d.seams || []).length;
   const beats = beatBounds + 1;

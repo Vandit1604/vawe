@@ -4,21 +4,163 @@
   "theme": "lumen",
   "duration": 10,
   "cameraMove": [
-    { "move": "slowPush", "start": 0, "dur": 6, "from": 1, "to": 1.05 },
-    { "move": "slowPush", "start": 6, "dur": 4, "from": 1.05, "to": 1.12 }
+    {
+      "move": "slowPush",
+      "start": 0,
+      "dur": 6,
+      "from": 1,
+      "to": 1.05
+    },
+    {
+      "move": "slowPush",
+      "start": 6,
+      "dur": 4,
+      "from": 1.05,
+      "to": 1.12
+    }
   ],
-  "bg": [{ "t": 0, "preset": "spotlight" }],
+  "bg": [
+    {
+      "t": 0,
+      "preset": "spotlight"
+    }
+  ],
   "layers": [
-    { "type": "paint", "paint": "aurora", "x": 0, "y": 0, "w": 1920, "h": 1080, "start": 0, "duration": 6.4, "speed": 0.8, "opacity": 0.35, "out": "fade", "exitDur": 0.5 },
-
-    { "type": "text", "text": "ONE TIMELINE PER BEAT", "x": 160, "y": 200, "w": 1000, "size": 30, "weight": 600, "font": "mono", "color": "var(--accent)", "ls": "0.1em", "anim": "fade", "enterDur": 0.5, "start": 0.2, "duration": 2.2, "out": "fade", "exitDur": 0.4 },
-    { "type": "text", "text": "Hand-authored motion.", "x": 160, "y": 300, "w": 1300, "size": 120, "weight": 800, "color": "var(--text)", "split": "word", "preset": "up", "each": 0.4, "stagger": 0.05, "start": 0.6, "duration": 1.9, "out": "fade", "exitDur": 0.4 },
-
-    { "type": "text", "text": "A composition is a bespoke timeline.", "x": 160, "y": 300, "w": 1600, "align": "center", "size": 44, "weight": 500, "font": "mono", "color": "var(--text-2)", "anim": "fade", "enterDur": 0.5, "start": 2.7, "duration": 4.9, "out": "fade", "exitDur": 0.4 },
-    { "type": "composition", "comp": "pipelineFlow", "x": 360, "y": 440, "w": 1200, "start": 3.0, "duration": 4.6, "out": "defocus", "exitDur": 0.4,
-      "props": { "stages": ["Capture", "Compose", "Render"] } },
-
-    { "type": "text", "text": "Motion `parts` can't reach.", "x": 160, "y": 430, "w": 1600, "align": "center", "size": 88, "weight": 800, "color": "var(--text)", "split": "word", "preset": "scale", "each": 0.34, "stagger": 0.04, "start": 7.9, "duration": 2.1, "exitDur": 0 },
-    { "type": "text", "text": "compositions/index.js", "x": 160, "y": 580, "w": 1600, "align": "center", "size": 48, "weight": 700, "font": "mono", "color": "var(--accent)", "bg": "rgba(94,224,200,0.10)", "pad": "18px 40px", "radius": 100, "anim": "pop", "enterDur": 0.5, "start": 8.4, "duration": 1.6, "exitDur": 0 }
-  ]
+    {
+      "type": "paint",
+      "paint": "aurora",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "start": 0,
+      "duration": 6.4,
+      "speed": 0.8,
+      "opacity": 0.35,
+      "out": "fade",
+      "exitDur": 0.5
+    },
+    {
+      "type": "text",
+      "text": "ONE TIMELINE PER BEAT",
+      "x": 160,
+      "y": 200,
+      "w": 1000,
+      "size": 30,
+      "weight": 600,
+      "font": "mono",
+      "color": "var(--accent)",
+      "ls": "0.1em",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 0.2,
+      "duration": 2.2,
+      "out": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "Hand-authored motion.",
+      "x": 160,
+      "y": 300,
+      "w": 1300,
+      "size": 120,
+      "weight": 800,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "up",
+      "each": 0.4,
+      "stagger": 0.05,
+      "start": 0.6,
+      "duration": 1.9,
+      "out": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "A composition is a bespoke timeline.",
+      "x": 160,
+      "y": 300,
+      "w": 1600,
+      "align": "center",
+      "size": 44,
+      "weight": 500,
+      "font": "mono",
+      "color": "var(--text-2)",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 2.7,
+      "duration": 4.9,
+      "out": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "type": "composition",
+      "comp": "pipelineFlow",
+      "x": 360,
+      "y": 440,
+      "w": 1200,
+      "start": 3,
+      "duration": 4.6,
+      "out": "defocus",
+      "exitDur": 0.4,
+      "props": {
+        "stages": [
+          "Capture",
+          "Compose",
+          "Render"
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "text": "Motion `parts` can't reach.",
+      "x": 160,
+      "y": 430,
+      "w": 1600,
+      "align": "center",
+      "size": 88,
+      "weight": 800,
+      "color": "var(--text)",
+      "split": "word",
+      "preset": "scale",
+      "each": 0.34,
+      "stagger": 0.04,
+      "start": 7.9,
+      "duration": 2.1,
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "compositions/index.js",
+      "x": 160,
+      "y": 580,
+      "w": 1600,
+      "align": "center",
+      "size": 48,
+      "weight": 700,
+      "font": "mono",
+      "color": "var(--accent)",
+      "bg": "rgba(94,224,200,0.10)",
+      "pad": "18px 40px",
+      "radius": 100,
+      "anim": "pop",
+      "enterDur": 0.5,
+      "start": 8.4,
+      "duration": 1.6,
+      "exitDur": 0
+    }
+  ],
+  "authoring": {
+    "allow": [
+      "no-storyboard",
+      "no-preflight",
+      "no-transition"
+    ],
+    "_why": {
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
+    }
+  }
 }

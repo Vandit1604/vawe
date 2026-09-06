@@ -76,8 +76,18 @@
   ],
   "authoring": {
     "allow": [
-      "off-colour"
+      "off-colour",
+      "no-storyboard",
+      "plain-slideshow",
+      "no-preflight",
+      "no-transition"
     ],
-    "_allow_why": "off-colour: the palette is FITTED to refs/colonnade/c6.jpg and scores against it. It is a measurement of a photograph, not a brand choice."
+    "_allow_why": "off-colour: the palette is FITTED to refs/colonnade/c6.jpg and scores against it. It is a measurement of a photograph, not a brand choice.",
+    "_why": {
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "plain-slideshow": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film reaches past a slideshow: kinetic type, a camera move, or real transitions)",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
+    }
   }
 }

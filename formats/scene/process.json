@@ -83,7 +83,7 @@
     "gain": 0.55
    },
    {
-    "t": 10.0,
+    "t": 10,
     "name": "impact",
     "gain": 0.4
    },
@@ -169,11 +169,11 @@
    "duration": 8.7,
    "anim": "fade",
    "enterDur": 1.2,
-   "exitDur": 1.0
+   "exitDur": 1
   },
   {
    "type": "text",
-   "text": "verify/audit.mjs  \u00b7  safe-zone check",
+   "text": "verify/audit.mjs  ·  safe-zone check",
    "font": "mono",
    "track": 2,
    "size": 26,
@@ -192,7 +192,7 @@
   },
   {
    "type": "text",
-   "text": "verify/audit.mjs  \u00b7  safe-zone check",
+   "text": "verify/audit.mjs  ·  safe-zone check",
    "font": "mono",
    "track": 2,
    "size": 26,
@@ -325,11 +325,11 @@
    "acrossBeats": true,
    "motion": [
     {
-     "t": 0.0,
+     "t": 0,
      "scale": 1
     },
     {
-     "t": 0.0,
+     "t": 0,
      "scale": 1
     },
     {
@@ -347,7 +347,7 @@
      "ease": "easeOutCubic"
     },
     {
-     "t": 5.0,
+     "t": 5,
      "scale": 0.848
     },
     {
@@ -373,7 +373,7 @@
     },
     {
      "t": 11.4,
-     "scale": 1.0,
+     "scale": 1,
      "ease": "easeOutCubic"
     }
    ]
@@ -392,7 +392,7 @@
    "w": 340,
    "align": "right",
    "start": 1.2,
-   "duration": 2.0,
+   "duration": 2,
    "anim": "fade",
    "enterDur": 0.4,
    "exitDur": 0.3
@@ -417,11 +417,11 @@
    "acrossBeats": true,
    "motion": [
     {
-     "t": 0.0,
+     "t": 0,
      "rot": 0
     },
     {
-     "t": 3.0,
+     "t": 3,
      "rot": 96,
      "ease": "easeInOutCubic"
     },
@@ -695,7 +695,7 @@
   },
   {
    "type": "text",
-   "text": "showcase-cuts    0 \u2192 7 hard failures",
+   "text": "showcase-cuts    0 → 7 hard failures",
    "font": "mono",
    "track": 7,
    "size": 30,
@@ -721,7 +721,7 @@
    "radius": 8,
    "bg": "rgba(255,77,109,0.22)",
    "border": "2px solid #ff4d6d",
-   "start": 10.0,
+   "start": 10,
    "duration": 1.9,
    "anim": "pop",
    "enterDur": 0.22,
@@ -802,7 +802,7 @@
    "bg": "rgba(255,77,109,0.22)",
    "border": "2px solid #ff4d6d",
    "start": 10.9,
-   "duration": 1.0,
+   "duration": 1,
    "anim": "pop",
    "enterDur": 0.22,
    "exitDur": 0.3
@@ -924,8 +924,8 @@
    "x": 90,
    "y": 1650,
    "w": 860,
-   "start": 13.0,
-   "duration": 2.0,
+   "start": 13,
+   "duration": 2,
    "anim": "fade",
    "enterDur": 0.5,
    "exitDur": 0
@@ -948,5 +948,15 @@
    "enterDur": 0.5,
    "exitDur": 0
   }
- ]
+ ],
+ "authoring": {
+  "allow": [
+   "no-preflight",
+   "craft-unvisited"
+  ],
+  "_why": {
+   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+   "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
+  }
+ }
 }

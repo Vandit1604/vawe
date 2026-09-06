@@ -556,22 +556,17 @@ cutout:
 waivers:
 	@node scripts/gates/waiver-drift.mjs $(D) $(if $(JSON),--json,)
 
-# make legacy [ADOPT=<rule>] [STAMP=1]: THE RATCHET. A new rule fails the whole library on its first
-# run, and both usual answers are worse than the red: backfilling a judgement rule produces fake work,
-# and waiting for a threshold leaves the rule toothless. So the films that predate a rule are recorded
-# as LEGACY in a generated manifest, and everything new must comply at once. Legacy is NOT a waiver: a
-# waiver is a decision with a reason in the scene, legacy means nobody has looked yet.
-# ADOPT freezes a rule's legacy set once, on the day it is promoted, and refuses to run twice. STAMP can
-# only remove rows (fixed, deleted, or EDITED since). Nothing can add one, so the ratchet only tightens.
 # make preflight D=<scene.json>, the nine decisions from docs/CRAFT/README.md put in front of you for
 # THIS film, plus the arsenal ranked against what the film says it is, then a receipt. It records only
-# with --record: the ratchet runs gates bare to see which films fail them, and a checker that certifies
-# on that invocation would excuse the whole library (it did, once, for all 134).
+# with --record: a bare run would otherwise certify the whole library by accident (it did, once, for
+# all 134).
 preflight: ## the decisions that belong BEFORE the JSON, recorded for this version of the scene
 	node scripts/gates/preflight.mjs $(D) --record
 
-legacy:
-	node scripts/gates/author-check.mjs --legacy $(if $(ADOPT),--adopt $(ADOPT)) $(if $(filter 1,$(STAMP)),--stamp)
+# `make legacy` (the ratchet census/adopt/stamp) is RETIRED. scripts/gates/legacy-manifest.json and the
+# author-check.mjs ratchet engine that read it are gone: scripts/gates/legacy-fold.mjs folded every row
+# into an explicit per-scene `authoring.allow` + `_why`, so `authoring.allow` is the one excuse mechanism
+# left. See docs/TASTE.md "Waivers, not legacy" and AGENTS.md "Waivers, legacy, and the difference".
 
 # make draft D=<scene.json> STAGE=85|95: hand over a draft at a DECLARED level of finish.
 # Without one, review is a guess: a reviewer who thinks they are seeing a ship candidate flags the

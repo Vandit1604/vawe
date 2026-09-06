@@ -122,8 +122,10 @@ checked and what it found. What is not uniform is what a finding **costs**:
 | **BLOCKS** | validate · beats · inspect · plan (+ assets under `STRICT=1`) | the film is broken; the run stops |
 | **REPORTS** | storyboard · critique · direct · floor · dissolve · designspec · copy · pace · hero · treatment · waiver-drift | printed in full, never a wall; `TASTE=1` promotes them |
 
-`storyboard` is the exception in that second row, and the exception has a mechanism: it BLOCKS on any
-film that is not grandfathered, in every mode. See "The ratchet" below.
+`storyboard` is one of several exceptions in that second row with their own mechanism: `HARD_CODES` in
+`scripts/gates/author-check.mjs` names a set of codes that BLOCK whenever they fire and the scene has
+not waived them, in every mode, whatever tier their own step sits in. See "Hard codes, and waivers, not
+legacy" below.
 
 **Why the second row is not a lowered bar.** Measured on this library the day the split was written:
 give the REPORTS tier teeth and **116 of 141 scenes fail** (last measured; run
@@ -144,58 +146,87 @@ Without that field the step falls back to the naming convention: `<base>.storybo
 scene, then `_concepts/<base>.storyboard.md`. Find one and it runs `storyboard-check` over it. Find
 none and it reports `no-storyboard`.
 
-### The ratchet: grandfather the past, block new work now
+### Hard codes, and waivers, not legacy
+<!-- doc-refs-allow: scripts/gates/legacy-manifest.json · this section records that the file is gone -->
 
-`no-storyboard` fires on most scenes in `formats/scene/` (121 of 132, last measured; run
-`node scripts/gates/waiver-drift.mjs` for the current count). Two answers were considered and
-both rejected. **Backfill** writes a storyboard for each one to satisfy a gate, and for a judgement rule that is
-worse than the red: the number goes green and nobody learns anything. **Wait for a threshold** ("promote
-it when under a quarter are missing") leaves the rule toothless for months and depends on a cleanup
-nobody is scheduled to do.
+There used to be a RATCHET here: a rule that fires on most of the library on day one was recorded as
+**LEGACY** in a generated manifest (`scripts/gates/legacy-manifest.json`), with the rule and the date, so
+new work had to comply while the past was excused "by the calendar". That was a THIRD excuse mechanism
+sitting beside `authoring.allow` + `_why` (a person decided, and wrote why) and the ratchet engine that
+read the manifest (`RATCHET_CODES` / `RATCHET_RULES` / `gateForCode` / `codeFiresOn`, ~340 lines in
+`scripts/gates/author-check.mjs`). Two systems saying "this rule does not apply here" is exactly the
+drift the rest of this repo's doctrine warns against, and an audit measured what it cost:
 
-So the rule is **ratcheted**. A film that predates it is recorded as **LEGACY** in a generated manifest,
-`scripts/gates/legacy-manifest.json`, with the rule and the date. Anything not in that manifest must
-comply immediately, and `no-storyboard` BLOCKS on it whether or not `TASTE=1` is set. Legacy films keep
-exactly the severity they had before the ratchet existed: reported by default, promoted by `TASTE=1`.
-Measured across all 132 scenes (last measured; run `node scripts/gates/waiver-drift.mjs` for the
-current count), the day it was built: **0 exit codes moved**, in either mode.
+**Measured, before any cut (164 gate-visible scenes, 2026-09-07; `node scripts/gates/waiver-drift.mjs`
+for the current count).** `fires` is legacy-or-new together (the rule's true trip rate); `unwaived-new`
+is what was actually, live, blocking a real render on that day:
 
-**Legacy is not a waiver, and if the two ever read the same the rule has been repealed.** A waiver lives
-in the scene, in `authoring.allow` with a `_why`, and it says a person looked at this film and decided
-the rule is wrong for it. Legacy lives in a central generated file, carries no reason, and says nobody
-has looked yet. They print differently on purpose:
+| code | fires | share | legacy | unwaived-new |
+|---|---|---|---|---|
+| no-preflight | 164 | 100% | 125 | 36 |
+| no-storyboard | 137 | 84% | 94 | 32 |
+| sparse-beats | 95 | 58% | 93 | **0** |
+| no-transition | 89 | 54% | 88 | 1 |
+| feature-poverty | 76 | 46% | 76 | 0 |
+| static-bg | 68 | 41% | 68 | 0 |
+| plain-slideshow | 53 | 32% | 42 | 3 |
+| craft-unvisited | 24 | 15% | 24 | 0 |
+| no-continuous-object | 17 | 10% | 0 | 7 |
+| no-authored-motion | 16 | 10% | 13 | 3 |
+| effect-soup | 5 | 3% | 5 | 0 |
+| enter-and-retreat | 5 | 3% | 4 | 1 |
+| restated-headline | 5 | 3% | 4 | 1 |
+| linear-motion | 3 | 2% | 2 | 0 |
+| monotone-timing | 2 | 1% | 2 | 0 |
+| crossfade-mud / off-font / jargon | 0 | 0% | 0 | 0 |
+
+Separately, `no-plan-for-craft` (never adopted into the ratchet at all) fired on **136 of 164 (83%)
+with ZERO waivers anywhere**, because it duplicated `no-storyboard` under a looser, inconsistent check
+(a sibling `<base>.storyboard.md` only, not a scene's declared `storyboard` field) and exited before the
+craft checklist could even run.
+
+**Two codes were retired rather than folded**, because folding would have been ceremony over a rule that
+had already stopped meaning anything:
+- **`sparse-beats`**: fires on 58% of the library and every single occurrence was already legacy or
+  waived (0 unwaived-new). A rule with zero live enforcement anywhere is not excused, it is decoration.
+  Removed from `HARD_CODES`; `direction-floor.mjs` still emits the finding as a plain report.
+- **`no-plan-for-craft`**: folded into `craft-unvisited` instead, in `scripts/gates/craft-checklist.mjs`.
+  No storyboard now just means every relevant CRAFT doc reads as unanswered, which `craft-unvisited`
+  already measured correctly; the duplicate exit path is gone.
+
+**Every other row folded.** `scripts/gates/legacy-fold.mjs` walked every row the manifest held and, for
+each scene that still fires the rule, wrote it into that scene's own `authoring.allow` + `_why`:
+
+```json
+"_why": { "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))" }
+```
+
+563 waivers were written across 157 scenes this way (9 rows dropped because the scene now complies or
+was deleted; 12 already covered by a real waiver). The manifest and the ratchet engine that read it were
+then deleted from `author-check.mjs`, and `scripts/gates/legacy-manifest.json` itself was deleted.
+
+**One excuse mechanism now.** `HARD_CODES` names the same codes the ratchet used to (minus the two
+retired above): a code fires, the scene has not waived it, the run stops. No manifest, no census, no
+legacy state, because those questions were about the library over time and the library is already
+folded. `authoring.allow` + `_why` is the only door out, for old debt and a deliberate new exception
+alike:
 
 ```
   ○ storyboard  waived (no-storyboard) · somebody decided, and said why
-  ▪ storyboard  LEGACY (no-storyboard, grandfathered 2026-08-21) · nobody has looked yet
 ```
 
-**Two numbers, not one.** Every run prints `121 legacy · 11 current · 0 NEW failures`. "0 new failures"
-is a thing you can act on. "121 failures" is noise people learn to scroll past, and that habit is the
-disease this exists to treat.
+Only one glyph now. `▪ LEGACY` (nobody has looked yet) is retired along with the mechanism it named.
 
-**Editing a legacy film costs it the status.** The manifest stores a hash of each film's canonicalised
-content, so a reformat is free and a change to what the film IS is not. Touching a film is when you owe
-it a plan: the moment the file is open and decisions are being made about it is the cheapest one there
-will ever be to write down what it is for. A one-line colour fix does not force a fake storyboard, it
-forces one sentence in a waiver, which is a decision the next reader can argue with.
+**Any rule can join `HARD_CODES`.** No probe needs to be cheap and pure any more, because nothing
+re-evaluates the whole library at check time: a code's severity is a Set lookup against the codes the
+ladder's own steps already produced for THIS scene. `scripts/lib/finding-codes.mjs` still derives which
+gate owns a code, so a hand-kept map cannot rot the first time a rule moves file.
 
-**It only tightens.** `--adopt` freezes a rule's legacy set once and refuses to run twice; `--stamp`
-can only remove rows (the film complied, was deleted, or was edited). Nothing adds a row after adoption,
-so nobody can grandfather today's film by re-running the command. A hand-kept list would have gone stale
-the day it was written, which is `#159`.
-
-```bash
-make legacy                       # the census, writes nothing
-make legacy ADOPT=<rule>          # freeze today's failures as legacy, once, on promotion day
-make legacy STAMP=1               # prune rows that no longer qualify
-```
-
-**Any rule can join.** A rule opts in by name in `RATCHET_RULES` (`scripts/gates/author-check.mjs`) with
-a probe that says whether one scene fails it. The probe must be cheap and pure, fs and JSON only: the
-census runs it across the whole library on every author-check run, so a probe that launched a browser
-would cost 132 browsers. A finding that only exists after a child gate has run cannot be ratcheted this
-way, and should not be, because its census would go stale between runs.
+**Re-running the fold.** Scenes are gitignored, so a fresh clone has never run
+`scripts/gates/legacy-fold.mjs` and does not need to: there is no manifest left to fold FROM. The script
+stays in the repo as the record of how the migration was done, and because a future rule that goes
+straight to `HARD_CODES` after a maintenance sweep can use the same shape by hand: write the waiver into
+the scene, with a `_why` a person could have written.
 
 These are the `make judge` / `make ledger` phases of the one spine in
 [`AGENTS.md`](../AGENTS.md#the-process-has-one-owner-and-it-is-not-this-file) ("THE PROCESS HAS ONE

@@ -7301,10 +7301,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   const runGate = () => spawnSync(process.execPath, [path.join(repoRoot, 'scripts/gates/craft-checklist.mjs'), sceneFile], { encoding: 'utf8' });
 
-  // no storyboard sidecar at all: no-plan-for-craft, blocks.
+  // no storyboard sidecar at all: no separate code any more (folded into no-storyboard, which the main
+  // ladder already owns); the craft map is just empty, so every relevant doc reads as craft-unvisited.
   const noPlan = runGate();
-  ok('craft-checklist: a scene with no storyboard sidecar blocks with no-plan-for-craft',
-    noPlan.status !== 0 && /no-plan-for-craft/.test(noPlan.stdout));
+  ok('craft-checklist: a scene with no storyboard sidecar blocks with craft-unvisited, not a second code',
+    noPlan.status !== 0 && /craft-unvisited/.test(noPlan.stdout) && !/no-plan-for-craft/.test(noPlan.stdout));
 
   // a storyboard that answers nothing: every relevant doc is craft-unvisited, blocks.
   fs.writeFileSync(path.join(tmp, 'demo.storyboard.md'), '---\nmessage: "x"\n---\n');
