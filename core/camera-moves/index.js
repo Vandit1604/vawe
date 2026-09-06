@@ -16,8 +16,9 @@ import { resolveCameraMove } from '../vocab.js';
 // entry to CAMERA_MOVES with a blurb. CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS and CAMERA_REGISTRY are all
 // DERIVED from that one map, so nothing else has to be told a move now exists.
 //
-// Author sugar: `"cameraMove": { "move":"diveIn", ... }` at the scene root expands (make expand) to
-// `data.camera`. Compose legs by hand for anything these don't cover.
+// Author sugar: `"cameraMove": { "move":"diveIn", ... }` at the scene root bakes to `data.camera` at
+// load (`bakeCameraMove`, core/produce.js, called from core/boot.js and core/expand.js). Compose legs
+// by hand for anything these don't cover.
 
 import { slowPush } from './slow-push.js';
 import { diveIn } from './dive-in.js';
