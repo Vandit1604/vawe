@@ -244,8 +244,8 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   dots/shapes. Only use a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/
   `paperShapes`) if the site itself has that texture. And even then a pattern is a SEASONING, not the
   wallpaper: at most one or two beats (a hook or one accent moment), never throughout. Content/proof
-  beats stay plain so the content reads. Recurring mistakes + fixes live in `docs/MISTAKES.md`, read
-  it before authoring.
+  beats stay plain so the content reads. Recurring mistakes + fixes live in `docs/MISTAKES.md`; ask it
+  with `make mistakes Q="…"` before authoring rather than reading it end to end.
 
 ## Step 3b.1: Every frame FIGHTS for its value (the value gate)
 
