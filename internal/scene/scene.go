@@ -35,12 +35,12 @@ type Meta struct {
 	FPS         float64     `json:"fps"`
 	Duration    float64     `json:"duration"`
 	TotalFrames int         `json:"totalFrames"`
-	Width       int         `json:"width"`  // capture size — 0 falls back to the portrait default
+	Width       int         `json:"width"`  // capture size. 0 falls back to the portrait default
 	Height      int         `json:"height"` // (set by core/boot.js boot from data.orientation)
 	Stings      []float64   `json:"stings"`
 	SFX         []audio.Cue `json:"sfx"`
 	// Bridges are J/L-cuts already resolved from junction names to spans of seconds by
-	// core/audio-bridges.js — the browser is the only place that knows where the film's cuts are.
+	// core/audio-bridges.js: the browser is the only place that knows where the film's cuts are.
 	Bridges []audio.Bridge `json:"bridges"`
 	// BeatSync is core/beat-bind.js's one-line report of every joint the track's grid moved. It is
 	// informational, and it only reaches an author because it is DECLARED here: encoding/json drops
@@ -145,7 +145,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// captured component's screenshots vanish from a frame or two and reappear.
 		//
 		// That is a race against wall time, so it lands on different frames in every render, and each
-		// worker browser loses it independently — which is why four workers damage roughly four times
+		// worker browser loses it independently, which is why four workers damage roughly four times
 		// as many frames as one. Measured on brew-launch: 925 of 1890 frames differed between two
 		// 4-worker renders, up to 17% of the pixels of a frame, with whole product screenshots missing.
 		// Waiting longer only shifts the odds; these two flags remove the race
@@ -200,7 +200,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// (core/webgl.js). VAWE_CHROME_FLAGS below is how both were tried on the real path.
 		chromedp.Flag("disable-gpu-rasterization", true),
 		// SUPERSAMPLE: capture at ss× device pixels so animated transforms (camera, kinetic type,
-		// stings) land text on a fine grid — the ss×ss box-resolve in downsample() averages the
+		// stings) land text on a fine grid: the ss×ss box-resolve in downsample() averages the
 		// sub-pixel jitter out, killing the frame-to-frame shimmer at the root instead of by
 		// stripping effects. Draft renders at ss=1 for speed.
 		chromedp.Flag("force-device-scale-factor", fmt.Sprintf("%d", ss)),
@@ -218,7 +218,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		//
 		// THEY CHANGE NO PIXEL. Each one only stops Chrome de-prioritising a hidden tab; none touches
 		// raster, layout or colour. Verified by A/B: the same scene built with and without these three
-		// renders a byte-identical mp4 (2892399 bytes both ways). That is one scene, not the library —
+		// renders a byte-identical mp4 (2892399 bytes both ways). That is one scene, not the library,
 		// stated precisely because the earlier draft of this comment claimed the library and had not
 		// checked it.
 		chromedp.Flag("disable-renderer-backgrounding", true),
@@ -250,7 +250,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 // device scale. Pass an allocator context for the first tab (which starts the browser) and that first
 // tab's context for every later one.
 //
-// IT USED TO SPIN UP A WHOLE BROWSER PER CALL — `chromedp.NewExecAllocator` was inside here, and its
+// IT USED TO SPIN UP A WHOLE BROWSER PER CALL: `chromedp.NewExecAllocator` was inside here, and its
 // own comment said "an independent browser + tab". Four workers meant four complete Chrome
 // installations: measured at 51 processes and 5,604 MB peak against another engine's 12 / 1,738 and
 // another engine' 9 / 1,347 for the same job. One browser with four tabs measures 13 processes and
@@ -260,13 +260,13 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 // setFocusEmulationEnabled IS LOAD-BEARING, and it is not the flag anyone would reach for first. A
 // background tab in headless Chrome is not throttled, it is FROZEN: measured zero rAF callbacks in
 // three seconds while the foreground tab ran 362. `--disable-background-timer-throttling`,
-// `--disable-backgrounding-occluded-windows` and `--disable-renderer-backgrounding` change NOTHING —
+// `--disable-backgrounding-occluded-windows` and `--disable-renderer-backgrounding` change NOTHING:
 // all three were measured and all three leave the tab at zero. This one call makes every tab report
 // itself focused and visible, and all eight tabs then tick at the full rate.
 //
 // That matters here more than it would elsewhere, because the readiness Poll below runs in rAF mode
 // and `shoot` awaits a double `__realRaf` before every screenshot. Without this, every worker except
-// one would wait forever — which is docs/MISTAKES.md #121 exactly.
+// one would wait forever, which is docs/MISTAKES.md #121 exactly.
 func newTab(parent context.Context, url string, ss int) (context.Context, context.CancelFunc, error) {
 	ctx, cancel := chromedp.NewContext(parent)
 	err := chromedp.Run(ctx,
@@ -326,7 +326,7 @@ func absd(a, b uint32) uint32 {
 	return b - a
 }
 
-// profile — per-phase wall time across every capture worker, behind VAWE_PROFILE=1.
+// profile: per-phase wall time across every capture worker, behind VAWE_PROFILE=1.
 //
 // It exists because the render's cost had never been attributed. A 14.6s film costs 2.13s of CPU per
 // frame; a synthetic browser benchmark explained about a quarter of that, and the remainder was
@@ -455,7 +455,7 @@ func capture(format string, buf *[]byte) chromedp.Action {
 // resolve turns a captured frame into the bytes written to disk.
 //
 // For JPEG it does NOTHING, deliberately. The ss×ss box resolve is now ffmpeg's `scale=flags=area`,
-// which IS a box filter — the same operation, in SIMD C instead of a Go loop over image.At(). Measured:
+// which IS a box filter: the same operation, in SIMD C instead of a Go loop over image.At(). Measured:
 // 838 ms/frame in Go against 12.6 ms/frame in ffmpeg for decode + scale + h264 together. Re-encoding
 // here would also mean a second lossy generation for no reason.
 //
@@ -472,7 +472,7 @@ func resolve(buf []byte, ss int, format string) ([]byte, error) {
 // attempt at the fast path silently never ran and the identical output was mistaken for proof.
 var downsampleFast, downsampleSlow int64
 
-// downsample resolves an ss×-supersampled PNG to native size by averaging each ss×ss block — the
+// downsample resolves an ss×-supersampled PNG to native size by averaging each ss×ss block: the
 // exact SSAA resolve. Sub-pixel jitter from animated transforms averages out, so text stays crisp
 // instead of shimmering frame-to-frame. Averages alpha-premultiplied channels (correct over the
 // transparent/alpha export too). ss<=1 returns the bytes untouched. Deterministic (fixed kernel).
@@ -489,11 +489,11 @@ func downsample(buf []byte, ss int) ([]byte, error) {
 	dst := image.NewRGBA(image.Rect(0, 0, ow, oh))
 	n := uint32(ss * ss)
 
-	// FAST PATH — index Pix instead of calling At().
+	// FAST PATH: index Pix instead of calling At().
 	//
 	// `src.At(x, y).RGBA()` is an interface call returning a boxed color.Color, run once per SUBPIXEL:
 	// at ss=2 into 1920x1080 that is 8.3M interface calls and 8.3M allocations per frame. Profiling
-	// (VAWE_PROFILE=1) put this loop at 979 ms/frame, 46.6% of a final render — second only to the
+	// (VAWE_PROFILE=1) put this loop at 979 ms/frame, 46.6% of a final render, second only to the
 	// screenshot itself.
 	//
 	// EXACT, not approximate. Chrome's screenshots decode to *image.RGBA, whose Pix is already
@@ -502,7 +502,7 @@ func downsample(buf []byte, ss int) ([]byte, error) {
 	// including translucent ones. Any other concrete type falls through to the original loop.
 	//
 	// A previous attempt at this guarded on *image.NRGBA, which Chrome never produces. It fell through
-	// to the slow loop, produced a byte-identical mp4, and saved nothing — and the byte-identical hash
+	// to the slow loop, produced a byte-identical mp4, and saved nothing, and the byte-identical hash
 	// was read as proof of correctness when it was proof of nothing. Hence downsampleFast: the profile
 	// prints how many frames took which path, so "never ran" cannot masquerade as "correct".
 	if rgba, ok := src.(*image.RGBA); ok {
@@ -565,7 +565,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	if ss < 1 {
 		ss = 1
 	}
-	// CAPTURE FORMAT. PNG costs 526 ms/frame at 3840x2160 and JPEG q95 costs 80 ms — 6.6x — because a
+	// CAPTURE FORMAT. PNG costs 526 ms/frame at 3840x2160 and JPEG q95 costs 80 ms (6.6x), because a
 	// lossless compressor is being asked to encode 8.3 megapixels that end up in a lossy h264 anyway.
 	// NOT byte-stable across repeats, and the claim that it was is now deleted. Measured on brew-launch:
 	// two renders of identical code differed on 373 of 1890 captures with ONE worker and 1078 with four.
@@ -585,7 +585,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// re-measure this (docs/MISTAKES.md #258).
 	//
 	// ALPHA STAYS PNG. JPEG has no alpha channel, and the transparent export is the one path whose
-	// whole point is the alpha channel — exactly the kind of silent substitution this repo keeps
+	// whole point is the alpha channel: exactly the kind of silent substitution this repo keeps
 	// logging. VAWE_CAPTURE=png forces the old path for everything.
 	capExt := CaptureExt(transparent)
 	capFmt := "jpeg"
@@ -621,14 +621,14 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	allocCtx, cancelAlloc := chromedp.NewExecAllocator(context.Background(), allocOpts(ss)...)
 	defer cancelAlloc()
 
-	// one tab for meta — and it is the tab that owns the browser, so it is cancelled here, not by the
+	// one tab for meta, and it is the tab that owns the browser, so it is cancelled here, not by the
 	// worker that borrows it.
 	ctx0, cancel0, err := newTab(allocCtx, url, ss)
 	// THE ERROR CHECK COMES FIRST. newTab returns (nil, nil, err) on every failure path, so deferring
 	// cancel0 before checking err scheduled a call to a nil func: the return ran, the deferred nil call
 	// panicked, and the process died with a SIGSEGV attributed to this function's closing brace. That
-	// crash REPLACED the message newTab had already built — "scene error: <what the engine actually
-	// said>" — with a stack trace naming a line that has nothing to do with the fault, on the one path
+	// crash REPLACED the message newTab had already built ("scene error: <what the engine actually
+	// said>") with a stack trace naming a line that has nothing to do with the fault, on the one path
 	// whose whole job is to report why a scene would not load (docs/MISTAKES.md #372).
 	if err != nil {
 		return meta, err
@@ -654,7 +654,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// ---- static-frame dedup: capture each RUN of identical frames once ----
 	// frameSig(n) hashes every per-frame DOM write + downsampled canvas pixels. Runs of equal
 	// signatures capture only their first frame; the rest are hardlinked afterwards. Mid-run
-	// ANCHOR frames are captured anyway and byte-compared — a mismatch means the signature
+	// ANCHOR frames are captured anyway and byte-compared: a mismatch means the signature
 	// missed real motion, and we fail LOUDLY (purity culture: no silent wrong frames).
 	// VAWE_NO_DEDUP=1 disables.
 	rep := make([]int, total)
@@ -745,7 +745,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			// The three steps are run SEPARATELY under VAWE_PROFILE so each can be timed. Batched into
 			// one chromedp.Run they are one number, and one number is what let a 2.13s-per-frame cost
 			// go unexplained: a synthetic bench accounted for ~500ms of it and the rest was guessed at
-			// twice, wrongly. Unprofiled, the batched call is kept — it is one round trip, not three.
+			// twice, wrongly. Unprofiled, the batched call is kept: it is one round trip, not three.
 			if prof == nil {
 				err := chromedp.Run(ctx,
 					chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
@@ -803,7 +803,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 					if derr != nil || ratio > 0.0005 {
 						os.WriteFile("/tmp/dedup_rep"+capExt, buf, 0644)
 						os.WriteFile("/tmp/dedup_anchor"+capExt, abuf, 0644)
-						return fmt.Errorf("dedup verification FAILED: frames %d and %d share a signature but differ %.4f%% in one instance — a per-frame effect escapes frameSig; render with VAWE_NO_DEDUP=1 and report (pair in /tmp/dedup_*)", j.frame, j.anchor, ratio*100)
+						return fmt.Errorf("dedup verification FAILED: frames %d and %d share a signature but differ %.4f%% in one instance: a per-frame effect escapes frameSig; render with VAWE_NO_DEDUP=1 and report (pair in /tmp/dedup_*)", j.frame, j.anchor, ratio*100)
 					}
 				}
 			}

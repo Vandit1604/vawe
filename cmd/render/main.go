@@ -1,6 +1,6 @@
-// Vawe Company License 1.0 — see LICENSE at the repository root.
+// Vawe Company License 1.0. See LICENSE at the repository root.
 //
-// Command vawe — Go render service CLI (mirrors engine/render.js).
+// Command vawe: Go render service CLI (mirrors engine/render.js).
 //
 //	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out out/q.mp4
 //	go run ./cmd/render --all
@@ -23,9 +23,9 @@ import (
 )
 
 func main() {
-	module := flag.String("module", "", "format name (optional — taken from the JSON's \"module\" field)")
+	module := flag.String("module", "", "format name (optional, taken from the JSON's \"module\" field)")
 	data := flag.String("data", "", "data JSON file (also accepted as a positional arg)")
-	out := flag.String("out", "", "output mp4 (optional — defaults to out/<json-name>.mp4)")
+	out := flag.String("out", "", "output mp4 (optional, defaults to out/<json-name>.mp4)")
 	list := flag.Bool("list", false, "list available formats + their schema/sample, then exit")
 	fps := flag.Int("fps", 0, "frames per second (0 = the scene's fps, else 60 final / 30 --draft)")
 	// CAP AT 4, NOT 8. Each worker is a full browser capturing at ss× supersample, and past about four
@@ -55,7 +55,7 @@ func main() {
 	// the max-delta figure is there to detect: a half-painted region reads far above 47.
 	//
 	// 6 is 14% faster than 4 (42.1s against 48.7s on showcase-flight-globe) for 400 MB more. 8 was
-	// measured too and buys nothing further (42.7s), so the cap goes to 6 and not higher — #190's
+	// measured too and buys nothing further (42.7s), so the cap goes to 6 and not higher: #190's
 	// corruption was found AT 8 and has not been re-tested there.
 	// 6 STANDS, AND NOW IT IS A MEASUREMENT RATHER THAN A LEFTOVER. Priced on a 10-core M4 at ss=2,
 	// three runs each, median wall clock and the run-to-run range beside it:
@@ -142,7 +142,7 @@ func main() {
 	}
 	// READ THE FILE BEFORE SAYING ANYTHING ABOUT ITS CONTENTS. Every reader below (videoGrain,
 	// moduleOf) used to swallow its read error and hand back a zero value, so a path that does not
-	// exist arrived at the "no module field" message — a complaint about the contents of a file
+	// exist arrived at the "no module field" message, a complaint about the contents of a file
 	// nothing had opened (docs/MISTAKES.md #229).
 	if _, err := os.Stat(dataPath); err != nil {
 		if os.IsNotExist(err) {
@@ -168,7 +168,7 @@ func main() {
 		mod = m
 	}
 	if mod == "" {
-		fmt.Fprintf(os.Stderr, "✗ %s has no \"module\" field — add one (e.g. \"module\": \"higherlower\") or pass --module\n", dataPath)
+		fmt.Fprintf(os.Stderr, "✗ %s has no \"module\" field: add one (e.g. \"module\": \"higherlower\") or pass --module\n", dataPath)
 		os.Exit(1)
 	}
 
@@ -195,7 +195,7 @@ func main() {
 	name := strings.TrimSuffix(filepath.Base(dataPath), filepath.Ext(dataPath))
 	// `.expanded` is a BUILD artifact (scripts/author/expand-blocks.mjs writes <name>.expanded.json
 	// from <name>.json), not part of what the video is called. Without this every block-authored
-	// scene ships as "search-demo.expanded.mp4" — the pipeline's internals leaking into the
+	// scene ships as "search-demo.expanded.mp4": the pipeline's internals leaking into the
 	// deliverable's filename, which is the one string a human actually reads (docs/MISTAKES.md #54).
 	name = strings.TrimSuffix(name, ".expanded")
 	for _, asp := range aspects {
@@ -205,7 +205,7 @@ func main() {
 		if outPath == "" || len(aspects) > 1 {
 			// TAG ON ANY EXPLICIT --aspect, not only when several were asked for. The tag used to be
 			// gated on `len(aspects) > 1`, so rendering a 16:9 scene with `--aspect 9:16` wrote
-			// out/<name>.mp4 — silently REPLACING the scene's own-aspect render with a
+			// out/<name>.mp4, silently REPLACING the scene's own-aspect render with a
 			// differently-shaped film under the identical filename. Nothing said anything, and the
 			// only way to notice was to open the file (docs/MISTAKES.md #221).
 			// An explicit --out still wins: naming the file is the author's call.
@@ -228,7 +228,7 @@ func main() {
 }
 
 // videoGrain reports whether a video OPTS IN to film grain via `"grain": true`. Default (absent) is
-// false — grain is a deliberate filmic choice, not something every video pays the shimmer cost for.
+// false: grain is a deliberate filmic choice, not something every video pays the shimmer cost for.
 func videoGrain(path string) bool {
 	b, err := os.ReadFile(path)
 	if err != nil {

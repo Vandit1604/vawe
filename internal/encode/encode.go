@@ -50,13 +50,13 @@ func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext str
 		args = append(args, "-i", watermark)
 	}
 	args = append(args, "-an")
-	// grain is OPT-IN (`"grain": true`) — only genuinely filmic brands reach here. Low-strength luma
+	// grain is OPT-IN (`"grain": true`): only genuinely filmic brands reach here. Low-strength luma
 	// temporal grain: heavy/temporal noise is incompressible and crawls over sharp text as shimmer.
 	grainFx := ""
 	if !draft && grain {
 		grainFx = "noise=c0s=3:c0f=t"
 	}
-	// The supersample resolve. `area` is a box filter — the exact ss×ss average the Go resolve did — so
+	// The supersample resolve. `area` is a box filter: the exact ss×ss average the Go resolve did, so
 	// this is the same operation, not an approximation of it. Placed first in the chain so grain and the
 	// watermark apply at final size, exactly as they did when Go resolved before encoding.
 	scaleFx := ""
@@ -97,7 +97,7 @@ func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext str
 }
 
 // VideoAlpha encodes the transparent PNG sequence to a VP9 WebM with a real alpha channel
-// (yuva420p) — a motion-graphics overlay layer to composite over other footage. Video-only.
+// (yuva420p): a motion-graphics overlay layer to composite over other footage. Video-only.
 // A watermark is overlaid the same way it is on the opaque path: the export a customer can drop
 // straight onto their own footage used to be the one that came out clean (MISTAKES #225).
 // These frames were already resolved to final size in Go, so no scale precedes the sheet.
@@ -130,7 +130,7 @@ func Composite(bgVideo, overlayWebm string, w, h, fps int, watermark, out string
 		"[0:v]scale=%d:%d:force_original_aspect_ratio=increase,crop=%d:%d,fps=%s,setsar=1[bg];",
 		w, h, w, h, r)
 	// The overlay MUST be decoded by libvpx-vp9. ffmpeg's own faster vp9 decoder cannot read the alpha
-	// side data WebM stores the plane in, and hands back yuv420p with no complaint — so the overlay
+	// side data WebM stores the plane in, and hands back yuv420p with no complaint, so the overlay
 	// arrived fully opaque and every transparent pixel composited as black, which looks like a
 	// background that failed to load rather than a decoder that dropped a channel (MISTAKES #224).
 	args := []string{"-y", "-stream_loop", "-1", "-i", bgVideo, "-c:v", "libvpx-vp9", "-i", overlayWebm}
