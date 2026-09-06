@@ -51,7 +51,7 @@ func flat(amp float64, n int) []float64 {
 	return s
 }
 
-// (a) Same config in, byte-identical PCM out — determinism is the contract.
+// (a) Same config in, byte-identical PCM out: determinism is the contract.
 func TestRenderDeterministic(t *testing.T) {
 	dir := t.TempDir()
 	cfg := Config{Music: constMusic(t, dir, 0.4, 3)}
@@ -179,7 +179,7 @@ func TestLCutTrailsThePicture(t *testing.T) {
 	}
 }
 
-// (f) A bridge with `duck` pulls the music bed down under itself — the cross in "cross it under".
+// (f) A bridge with `duck` pulls the music bed down under itself: the cross in "cross it under".
 func TestBridgeDucksTheBed(t *testing.T) {
 	dir := t.TempDir()
 	bridgeSource(t, dir, "texture", 0.5)
@@ -233,7 +233,7 @@ func cueSource(t *testing.T, dir, name string, amp, secs float64) {
 	writeMonoWav(t, filepath.Join(dir, "assets", "sfx", name+".wav"), flat(amp, int(secs*sr)))
 }
 
-// rmsDiff is the level of what the SECOND file added to the first — the cue on its own, lifted out of
+// rmsDiff is the level of what the SECOND file added to the first: the cue on its own, lifted out of
 // a mix it is summed into. Measuring the mix would only prove the window got louder.
 func rmsDiff(a, b *wav, from, to float64) float64 {
 	i, j := int(from*float64(a.rate)), int(to*float64(a.rate))
@@ -248,7 +248,7 @@ func rmsDiff(a, b *wav, from, to float64) float64 {
 	return math.Sqrt(acc / float64(j-i))
 }
 
-// (i) A cue must be HEARD over the bed under it. A cue is causal — it says the thing happened — and a
+// (i) A cue must be HEARD over the bed under it. A cue is causal, it says the thing happened, and a
 // bed is atmosphere; a `tick` at its table gain of 0.45 against a bed at 0.6 sat UNDER the atmosphere.
 func TestCueClearsTheBed(t *testing.T) {
 	dir := t.TempDir()

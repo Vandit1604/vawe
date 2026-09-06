@@ -21,7 +21,7 @@ const (
 	// THE CUE-VERSUS-BED RULE, and this is the only place it is stated. A cue is CAUSAL: it says the
 	// button was pressed, the row landed, the thing arrived. A bed is atmosphere. When atmosphere
 	// covers causality the film stops explaining itself, so a cue's table gain is a FLOOR, not a
-	// level — it is raised until the cue clears the bed under it, and it is never lowered.
+	// level: it is raised until the cue clears the bed under it, and it is never lowered.
 	cueHeadroom = 2.0  // ~+6dB: how far over the bed a cue has to sit to read as a separate event
 	cueWindow   = 0.05 // a transient is judged on its loudest 50ms, not on its decaying tail
 	cueMaxLift  = 4.0  // +12dB. Past this the bed is too loud for the cue, not the cue too quiet.
@@ -66,7 +66,7 @@ type Config struct {
 	// stings. Without it a scene could only trim the cues it placed by hand: the derived ones fell back
 	// to the table above and drowned quiet authored cues (keystrokes at 0.055 under cuts at 0.6).
 	SfxGain *float64 `json:"sfxGain,omitempty"`
-	// Silent renders the video with no audio track at all — skips the default
+	// Silent renders the video with no audio track at all: skips the default
 	// music.wav/sting.wav auto-discovery. Use for motion-graphics overlays.
 	Silent bool `json:"silent,omitempty"`
 	// MusicFade fades the MUSIC bed in from t=0 and out to `duration`, in seconds. Zero/absent legs
@@ -89,7 +89,7 @@ type wav struct {
 }
 
 // Render writes the mixed stereo WAV to outWav. Returns false if there was nothing to mix, and an
-// error only for a mix that would come out WRONG rather than absent — today that is a sound bridge
+// error only for a mix that would come out WRONG rather than absent: today that is a sound bridge
 // whose source file is missing, because a film whose beats are held together by a texture that never
 // plays is not a quieter film, it is a different one.
 func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges []Bridge, formatDir, assetsBase, outWav string) (bool, error) {
@@ -105,14 +105,14 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	}
 
 	// Silence is the DEFAULT. This used to fall back to a discovered "music.wav", so ANY scene that
-	// simply omitted an `audio` key shipped with a bed under it — sound you never asked for, on every
+	// simply omitted an `audio` key shipped with a bed under it: sound you never asked for, on every
 	// video authored without thinking about audio. A music track is now opt-in: name it, or get silence.
 	musicFile := ""
 	if cfg.Music != "" {
-		// A bare bed NAME (no path separator, no extension — e.g. "tense") resolves to
+		// A bare bed NAME (no path separator, no extension, e.g. "tense") resolves to
 		// assets/music/<name>.wav, the same place `make audio`/`make music-pack` write and the same
 		// rule core/validate.mjs checks. Without this, a named bed matched nothing and dropped to
-		// silence with no error — a silent substitution the validator wrongly reported as fine
+		// silence with no error: a silent substitution the validator wrongly reported as fine
 		// (docs/MISTAKES.md #132). A real path ("assets/music/lofi.wav") resolves directly and never
 		// hits the fallback.
 		fallback := ""
@@ -121,16 +121,16 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 		}
 		musicFile = resolve(bases, cfg.Music, fallback)
 		if musicFile == "" {
-			// Not fatal — assets/music/ is gitignored, so a fresh clone legitimately has no beds and
+			// Not fatal: assets/music/ is gitignored, so a fresh clone legitimately has no beds and
 			// every sounded film would otherwise refuse to render. But it must never pass unremarked:
 			// this exact silence shipped in argus-launch for months while the scene claimed a bed.
-			fmt.Fprintf(os.Stderr, "⚠ audio.music %q resolved to no file — the film renders with NO BED. Run `make music-pack`, or fix the name.\n", cfg.Music)
+			fmt.Fprintf(os.Stderr, "⚠ audio.music %q resolved to no file: the film renders with NO BED. Run `make music-pack`, or fix the name.\n", cfg.Music)
 		}
 	}
 	voFile := resolve(bases, cfg.VO, "")
 	// Bridge sources resolve BEFORE anything is mixed, so a missing one fails the render instead of
 	// half-mixing a film that has lost its continuity. Order: an explicit path, then a bed name, then
-	// a synthesized cue name — the three things `sound` is allowed to be.
+	// a synthesized cue name: the three things `sound` is allowed to be.
 	bridgeFiles := make([]string, len(bridges))
 	for i, b := range bridges {
 		f := ""
@@ -143,12 +143,12 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 			}
 		}
 		if f == "" {
-			return false, fmt.Errorf("audio bridge (%s-cut at t=%.2f) names sound %q, which is not on disk — looked for it as a path, as assets/music/%s.wav and as assets/sfx/%s.wav. Run `make audio` for a cue or `make music-pack` for a bed",
+			return false, fmt.Errorf("audio bridge (%s-cut at t=%.2f) names sound %q, which is not on disk. Looked for it as a path, as assets/music/%s.wav and as assets/sfx/%s.wav. Run `make audio` for a cue or `make music-pack` for a bed",
 				b.Kind, b.At, b.Sound, b.Sound, b.Sound)
 		}
 		bridgeFiles[i] = f
 	}
-	// `Sting` was resolved here and then used ONLY in the emptiness guard below — its samples never
+	// `Sting` was resolved here and then used ONLY in the emptiness guard below: its samples never
 	// reached the mix, so the field did nothing except let an auto-discovered assets/sting.wav force a
 	// silent audio track onto a scene that asked for none. No scene sets it, and what a "sting file"
 	// should mean is ambiguous now that scene.html emits per-sting `reveal` cues into the sfx list.
@@ -196,7 +196,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	}
 
 	// SOUND BRIDGES. Each is laid down as its own looped texture with an equal-power ramp at both
-	// ends, and may pull the music bed down under itself by the same curve — that mirrored pair IS the
+	// ends, and may pull the music bed down under itself by the same curve: that mirrored pair IS the
 	// cross in "cross it under", and it is what makes the join a bridge rather than a second file
 	// switching on. Every value is a function of the sample index, so the mix is reproducible.
 	var bridgeMix []float64
@@ -245,7 +245,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	fadeOutN := int(math.Round(cfg.MusicFade.Out * sr))
 	// The ATMOSPHERE, kept as its own signal: music plus bridge texture, after every gain that acts on
 	// them. It is what a cue has to be heard over, and holding it rather than re-deriving it is why the
-	// cue rule below can be one function instead of a copy of this loop. VO is deliberately not in it —
+	// cue rule below can be one function instead of a copy of this loop. VO is deliberately not in it,
 	// the bed already ducks under a voice, and a cue is not competing with the narration.
 	bed := make([]float64, total)
 	for i := 0; i < total; i++ {
@@ -332,11 +332,11 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 
 // overTheBed is the ONE place the cue-versus-bed relationship is decided (see cueHeadroom). It returns
 // the gain this cue must play at to be heard over the atmosphere under it, which is `g` itself
-// wherever the bed is already quiet enough — so a film with no music, or a cue landing in a duck,
+// wherever the bed is already quiet enough, so a film with no music, or a cue landing in a duck,
 // mixes exactly as it did before this rule existed. It only ever raises: pulling a loud cue DOWN to a
 // margin would be the mixer overruling a voicing nobody asked it to touch.
 //
-// Both sides are measured the same way, over the SAME window — the cue's loudest cueWindow seconds.
+// Both sides are measured the same way, over the SAME window: the cue's loudest cueWindow seconds.
 // Masking is short-time, so what hides a click is the bed's energy under the click, not the bed's
 // average over the bar. Scoring the cue on its loudest moment and the bed on a long average would
 // flatter every cue and this rule would never fire.
@@ -354,7 +354,7 @@ func overTheBed(clip, bed []float64, start int, g float64, name string, t float6
 	// A cue is a TRANSIENT: the loudest 50ms of a click carries a peak many times its own RMS, so
 	// matching RMS to a loud bed sends that peak through the roof. The limiter would then squash the
 	// whole mix for the length of the cue, which is a worse defect than the one being fixed. So the
-	// lift is capped by the cue's own peak as well as by cueMaxLift, and never below 1 — this rule
+	// lift is capped by the cue's own peak as well as by cueMaxLift, and never below 1: this rule
 	// raises cues, it does not trim a voicing that is already hot.
 	maxLift := cueMaxLift
 	if pk := peakOf(clip) * g; pk > 0 && cueCeiling/pk < maxLift {
@@ -366,7 +366,7 @@ func overTheBed(clip, bed []float64, start int, g float64, name string, t float6
 	if lift > maxLift {
 		// Loud, because the clamp means the cue does NOT clear the bed and the film still has the
 		// defect. Silently settling for whatever fits would hide the thing this rule exists to catch.
-		fmt.Fprintf(os.Stderr, "⚠ audio: cue %q at t=%.2f cannot clear the bed — it needs +%.1fdB and only +%.1fdB fits before it clips. The bed is too loud for this cue, not the cue too quiet: lower audio.musicGain, or place a cue with more body.\n",
+		fmt.Fprintf(os.Stderr, "⚠ audio: cue %q at t=%.2f cannot clear the bed. It needs +%.1fdB and only +%.1fdB fits before it clips. The bed is too loud for this cue, not the cue too quiet: lower audio.musicGain, or place a cue with more body.\n",
 			name, t, 20*math.Log10(lift), 20*math.Log10(maxLift))
 		lift = maxLift
 	}
