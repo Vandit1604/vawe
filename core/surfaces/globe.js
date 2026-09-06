@@ -3,7 +3,7 @@
 // This is cobe (MIT, 12.9 KB, zero dependencies), vendored at /assets/vendor/cobe.module.js and
 // loaded lazily by preloadCobe the way three.js is.
 //
-// WHY A LIBRARY HERE, WHEN core/three-fx.js HAS ITS OWN GLOBE. The three one is honest and it is a
+// WHY A LIBRARY HERE, WHEN core/surfaces/three-fx.js HAS ITS OWN GLOBE. The three one is honest and it is a
 // hundred and fifty lines that draw a worse picture: flat dots, a hard limb, a line for a route. cobe
 // is purpose-built and gives an atmospheric glow, a diffuse terminator and a thick tapered arc for a
 // tenth of the code. Both stay: the three globe computes a real terminator hemisphere from a sun

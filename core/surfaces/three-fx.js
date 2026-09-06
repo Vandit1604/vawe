@@ -1,4 +1,4 @@
-// core/three-fx.js: REAL GEOMETRY. Where `raymarch` renders implicit surfaces from a distance field,
+// core/surfaces/three-fx.js: REAL GEOMETRY. Where `raymarch` renders implicit surfaces from a distance field,
 // this is a scene graph: meshes, materials, lights, a camera. It exists for the things an SDF
 // structurally cannot express. A font outline, a device body, a captured UI plane, a point cloud.
 //
