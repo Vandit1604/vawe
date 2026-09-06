@@ -11,7 +11,6 @@
 // EN DASHES AND HYPHENS ARE FINE. An en dash in a number range is explicitly allowed and a hyphen is
 // not a dash at all. Only U+2014 is matched here.
 import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 
 const EM = String.fromCharCode(0x2014);   // never write the literal here: this file is in scope
 const QUIET = process.argv.includes('--quiet');
@@ -32,41 +31,24 @@ const EXCLUDE = [
   (f) => f.startsWith('node_modules/') || f.includes('/vendor/'),
 ];
 
-// docs/MISTAKES.md is a LOG. Entries below #418 are history: rewriting them would edit the record of
-// what was written at the time. Only entries from #418 on are held to the rule.
-// (418, not 400: the file's three numbering schemes were reconciled to one sequential scheme, and 418
-// is where that same historical boundary now falls. Recomputed once by lining up every heading's OLD
-// history status against its NEW number; the split was exact, no entry landed on the wrong side.)
+// docs/MISTAKES.md USED TO carry the full prose of each entry, and an entry below #418 was exempted
+// as history: rewriting it would have edited the record of what was written at the time. That record
+// now lives in git, not in the working file: the migration to a three-line index
+// (scripts/author/mistakes-compact.mjs) rewrote every entry's lesson line fresh, so nothing in the
+// current file is verbatim historical text any more. The exemption is gone; the whole file is held to
+// the rule, same as everything else in SCOPE.
 const MISTAKES = 'docs/MISTAKES.md';
-const HISTORY_BEFORE = 418;
-
-function historyLines(text) {
-  const out = new Set();
-  let inHistory = false;
-  text.split('\n').forEach((line, i) => {
-    const m = /^##\s+#?(\d+)\b/.exec(line);          // both "## #487:" and the older "## 83."
-    if (m) inHistory = Number(m[1]) < HISTORY_BEFORE;
-    if (inHistory) out.add(i + 1);
-  });
-  return out;
-}
 
 const raw = execSync(`git grep -nI '${EM}' -- ${SCOPE.map((s) => `'${s}'`).join(' ')} || true`,
   { encoding: 'utf8', maxBuffer: 64 << 20 });
 
 const hits = [];
-let skippedHistory = 0;
-let history = null;
 for (const line of raw.split('\n')) {
   if (!line) continue;
   const m = /^([^:]+):(\d+):(.*)$/s.exec(line);
   if (!m) continue;
   const [, file, no, text] = m;
   if (EXCLUDE.some((f) => f(file))) continue;
-  if (file === MISTAKES) {
-    history ??= historyLines(readFileSync(MISTAKES, 'utf8'));
-    if (history.has(Number(no))) { skippedHistory++; continue; }
-  }
   hits.push({ file, no, text: text.trim() });
 }
 
@@ -83,7 +65,6 @@ if (hits.length) {
 }
 const pending = execSync(`git grep -cI '${EM}' -- ${PENDING.map((s2) => `'${s2}'`).join(' ')} || true`,
   { encoding: 'utf8', maxBuffer: 8 << 20 }).trim().split('\n').filter(Boolean).length;
-console.log(`no-emdash: clean (${skippedHistory} left in ${MISTAKES} entries below #${HISTORY_BEFORE}, `
-  + 'which are the historical record and out of scope)');
+console.log(`no-emdash: clean (${MISTAKES} included, no historical exemption any more)`);
 if (pending) console.log(`no-emdash: ${pending} file(s) still carry it in ${PENDING.join(', ')}, `
   + 'which no pass has reached yet. Not a failure, a debt.');
