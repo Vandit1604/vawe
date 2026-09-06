@@ -47,7 +47,9 @@ const wave = (rest) => ({ color: rest, split: 'word', preset: 'colorWave',
 // beat is sized for; move it up for three rows, down for one, and look at the frame either way.
 export function propSentence({ items = [], x = 120, y = 250, w = 1680, gap = 44, size = 170,
   weight = 600, wordColor = INK, wordOut = 'fade', propW = 380, radius = 22, stagger = 0.08,
-  justify = 'flex-start', start = 0, dur = 1.6, enterDur = 0.32, exitDur = 0.2 } = {}) {
+  // exitDur 0: held to the beat's own end (docs/RULES/first-arrival.md), so a dissolve out of this
+  // beat crosses real content rather than an already-faded field.
+  justify = 'flex-start', start = 0, dur = 1.6, enterDur = 0.32, exitDur = 0 } = {}) {
   // one prop's shared timing: it arrives late by its place in the sentence and leaves with everything else
   const timing = (i, it) => ({ delay: +(it.at != null ? it.at : i * stagger).toFixed(3), enterDur, exitDur });
 
