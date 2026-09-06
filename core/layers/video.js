@@ -9,7 +9,7 @@
 // The seek is asynchronous, which the engine had no way to express until now. core/frame-settle.js is the
 // barrier the capture drains before it shoots; this layer is its first caller.
 import { mergeProps, propsOf } from '../props.js';
-import { settleOn } from '../frame-settle.js';
+import { settleOn } from './frame-settle.js';
 import { srcUrl } from '../src-url.js';
 
 // `in`/`out` are points in the SOURCE, `rate` is how fast the source runs against the scene clock, and

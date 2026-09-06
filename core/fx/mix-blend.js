@@ -21,7 +21,7 @@
 
 // The CSS <blend-mode> keywords. Exported so schema-drift compares the schema's copy against this one
 // instead of the two drifting apart, the same contract every other vocabulary in the engine keeps.
-import { killedBy } from '../ancestor-kills.js';
+import { killedBy } from './ancestor-kills.js';
 import { defineRegistry } from '../registry.js';
 
 // A REGISTRY, WHICH THE THROW BELOW ALREADY CALLED IT. This was a bare array for as long as it existed,

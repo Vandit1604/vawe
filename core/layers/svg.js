@@ -22,7 +22,7 @@
 // shipped film moved: 0 of the 7 `svg` draw layers in the library carried a fill, because carrying one
 // did nothing. docs/CRAFT/PARITY-AUDIT.md, docs/MISTAKES.md #545.
 import { interpolate, easeOutCubic, resolveEasing } from '../motion.js';
-import { resamplePath, bestRotation, rotatePoints, morphD } from '../path-morph.js';
+import { resamplePath, bestRotation, rotatePoints, morphD } from './path-morph.js';
 import { mergeProps, propsOf } from '../props.js';
 
 const SVGNS = 'http://www.w3.org/2000/svg';

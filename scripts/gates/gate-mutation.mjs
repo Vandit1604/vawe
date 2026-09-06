@@ -890,10 +890,10 @@ const srcCases = [
     // svg-layer prop (docs/MISTAKES.md #149), pick a prop that can never be legitimised.
     mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "notARealProp": "#000" },'),
     cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
-  { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/three-fx.js',
+  { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/surfaces/three-fx.js',
     mutate: (s) => s.replace('const ease = (p)', 'const jitter = Math.random();\nconst ease = (p)'),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /no wall-clock or unseeded randomness/ },
-  { name: 'raymarch · a scene whose distance field ignores time', file: 'core/raymarch-fx.js',
+  { name: 'raymarch · a scene whose distance field ignores time', file: 'core/surfaces/raymarch-fx.js',
     mutate: (s) => s.replace('float w = sin(p.x * 2.2 + u_time * 0.9) * 0.13 + sin(p.z * 1.7 - u_time * 0.7) * 0.11;',
                              'float w = sin(p.x * 2.2) * 0.13 + sin(p.z * 1.7) * 0.11;'),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /distance field that depends on time/ },
