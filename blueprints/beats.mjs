@@ -13,33 +13,39 @@ import { glyphText } from '../core/type/on-screen-text.js';
 // then a word-by-word subline. Front-loads the strong element (DIRECTION.md §4).
 // `heroSize` overrides the count's own size (360 unchanged if omitted); a theme's `look.scale.hook`
 // (core/registry/theme-contract.js W8) is the one caller that passes it, so a brand's hook scale is real
-// without every existing kineticHook call needing to change.
+// without every existing kineticHook call needing to change. `captionSize` overrides the subline (74
+// unchanged if omitted), from `look.scale.caption`, same optional-kwarg shape.
 export function kineticHook({ x = 160, y = 160, w = 1600, eyebrow, to, unit = '', decimals, word, wordSize = 300,
-  heroSize = 360, sub, start = 0, dur = 5.5 } = {}) {
+  heroSize = 360, sub, captionSize, start = 0, dur = 5.5 } = {}) {
   const out = [];
   if (eyebrow) out.push(caption({ text: eyebrow, x, y: y + 90, w, size: 56, start, dur }));
   if (to != null) out.push(dollyNumber({ to, unit, decimals, x, y: y + 190, w, size: heroSize, start: start + 0.4, dur: dur - 0.4 }));
   else if (word) out.push(kineticHeadline({ text: word, x, y: y + 190, w, size: wordSize, weight: 800, preset: 'scale', each: 0.34, start: start + 0.4, dur: dur - 0.4 }));
-  if (sub) out.push(kineticHeadline({ text: sub, x, y: y + 620, w, size: 74, weight: 700, start: start + 1.9, dur: dur - 1.9 }));
+  if (sub) out.push(kineticHeadline({ text: sub, x, y: y + 620, w, size: captionSize || 74, weight: 700, start: start + 1.9, dur: dur - 1.9 }));
   return out;
 }
 
 // statReveal: the PAYOFF. A hero count-up + a kinetic label. Held long (the release the build earned).
 // `heroSize` overrides the count's own size (320 unchanged if omitted): a theme's `look.scale.headline`.
-export function statReveal({ x = 160, y = 330, w = 1600, to, unit = '', decimals, prefix, label, heroSize = 320, start = 0, dur = 3.6 } = {}) {
+// `captionSize` overrides the label under it (48 unchanged if omitted), from `look.scale.caption`.
+export function statReveal({ x = 160, y = 330, w = 1600, to, unit = '', decimals, prefix, label,
+  heroSize = 320, captionSize, start = 0, dur = 3.6 } = {}) {
   return [
     dollyNumber({ to, unit, decimals, prefix, x, y, w, size: heroSize, start, dur }),
-    label && kineticHeadline({ text: label, x, y: y + 380, w, size: 48, weight: 600, each: 0.3, stagger: 0.03, start: start + 0.9, dur: dur - 0.9 }),
+    label && kineticHeadline({ text: label, x, y: y + 380, w, size: captionSize || 48, weight: 600, each: 0.3, stagger: 0.03, start: start + 0.9, dur: dur - 0.9 }),
   ].filter(Boolean);
 }
 
 // cardCascade. A FEATURE GRID that proves density: a kinetic title + N cards that pop in one after
 // another (follow-through/staging). Each card = name (accent) + desc (body) + a mono command/detail.
+// `heroSize` overrides each card's desc/body text (26 unchanged if omitted): a theme's `look.scale.body`
+// (core/registry/theme-contract.js W8) is the one caller that passes it, the same optional-kwarg,
+// unchanged-default shape as `kineticHook`'s `heroSize` (blueprints/kit.mjs doc, docs/CRAFT/THEME-LOOK.md).
 export function cardCascade({ x = 197, y = 300, w = 1526, title, cards = [], cols = 3, cardW = 490,
-  start = 0, dur = 8 } = {}) {
+  heroSize, start = 0, dur = 8 } = {}) {
   const card = (c) => colGroup([
     { type: 'text', text: c.name, size: 36, weight: 700, color: ACCENT },
-    c.desc && { type: 'text', text: c.desc, font: 'serif', w: cardW - 56, size: 26, weight: 500, color: 'var(--text-2)' },
+    c.desc && { type: 'text', text: c.desc, font: 'serif', w: cardW - 56, size: heroSize || 26, weight: 500, color: 'var(--text-2)' },
     c.detail && { type: 'text', text: c.detail, w: cardW - 56, font: 'mono', size: 22, weight: 500, color: DIM },
   ].filter(Boolean), 12);
   const rows = [];
@@ -48,19 +54,27 @@ export function cardCascade({ x = 197, y = 300, w = 1526, title, cards = [], col
   }
   return [
     title && kineticHeadline({ text: title, x: 160, y: y - 150, w: 1600, size: 62, weight: 700, each: 0.36, stagger: 0.04, start, dur }),
-    { type: 'group', x, y, w, layout: 'column', gap: 26, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.46, each: 0.06, out: 'defocus', exitDur: 0.45, children: rows },
+    // exitDur 0: held to the beat's own end (docs/RULES/first-arrival.md), so a dissolve into the next
+    // beat crosses real content rather than an already-faded field.
+    { type: 'group', x, y, w, layout: 'column', gap: 26, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.46, each: 0.06, out: 'defocus', exitDur: 0, children: rows },
   ].filter(Boolean);
 }
 
 // chipGrid: NAMED things (sources, integrations, tools) as mono pills that pop in staggered, with an
 // accent footer line. Backs a "reads every X" / "works with Y" claim by SHOWING the set.
-export function chipGrid({ x = 300, y = 380, w = 1320, title, chips = [], cols = 4, footer, start = 0, dur = 6.5 } = {}) {
+// `bodySize` overrides each chip's own text (34 unchanged if omitted, `chip()` in kit.mjs), from
+// `look.scale.body`; `captionSize` overrides the footer line (40 unchanged if omitted), from
+// `look.scale.caption`. Same optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize`
+// (docs/CRAFT/THEME-LOOK.md "Left undone" note names this beat as the next slice of that work).
+export function chipGrid({ x = 300, y = 380, w = 1320, title, chips = [], cols = 4, footer,
+  bodySize, captionSize, start = 0, dur = 6.5 } = {}) {
   const rows = [];
-  for (let i = 0; i < chips.length; i += cols) rows.push(rowGroup(chips.slice(i, i + cols).map((c) => chip({ text: c })), 26));
+  for (let i = 0; i < chips.length; i += cols) rows.push(rowGroup(chips.slice(i, i + cols).map((c) => chip({ text: c, ...(bodySize ? { size: bodySize } : {}) })), 26));
   return [
     title && kineticHeadline({ text: title, x: 160, y: y - 180, w: 1600, size: 62, weight: 700, preset: 'scale', each: 0.34, stagger: 0.035, start, dur }),
-    { type: 'group', x, y, w, layout: 'column', gap: 26, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.5, each: 0.05, out: 'defocus', exitDur: 0.4, children: rows },
-    footer && caption({ text: footer, x: 160, y: y + 380, w: 1600, size: 40, weight: 600, color: ACCENT, anim: 'pop', start: start + 1.5, dur: dur - 1.5 }),
+    // exitDur 0: held to the beat's own end, see cardCascade above.
+    { type: 'group', x, y, w, layout: 'column', gap: 26, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.5, each: 0.05, out: 'defocus', exitDur: 0, children: rows },
+    footer && caption({ text: footer, x: 160, y: y + 380, w: 1600, size: captionSize || 40, weight: 600, color: ACCENT, anim: 'pop', start: start + 1.5, dur: dur - 1.5 }),
   ].filter(Boolean);
 }
 
@@ -84,14 +98,18 @@ export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, pro
 // screenDive. The payoff PRODUCT surface: a kinetic title, then the real UI capture/screenshot that
 // KEN-PUSHES in (zoom into the dashboard, not a static card), plus a mono caption. Pair with a
 // `cinematicZoom` seam at `start` for the dive-in (docs/MOTION-RECIPES.md dive-in).
-export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: cap, zoom = [1.0, 1.28], start = 0, dur = 7 } = {}) {
+// `captionSize` overrides the mono caption under the shot (36 unchanged if omitted), from
+// `look.scale.caption`. Same optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize`.
+export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: cap, zoom = [1.0, 1.28],
+  captionSize, start = 0, dur = 7 } = {}) {
   return [
     title && kineticHeadline({ text: title, x: 160, y: 108, w: 1600, size: 58, weight: 700, preset: 'scale', each: 0.3, stagger: 0.03, start, dur }),
     // No `border` here: core/layers/image.js never reads it, and the expander refuses a prop that is
     // set and never read, which is why this beat's preview failed to render. The hairline lives on
     // the surface behind a capture, not on the image itself.
-    { type: 'image', src: image, x, y, w, radius: 14, start: start + 0.3, duration: dur - 0.6, anim: 'scale', enterDur: 0.55, out: 'defocus', exitDur: 0.4, ken: { from: zoom[0], to: zoom[1] } },
-    cap && caption({ text: cap, x: 160, y: 918, w: 1600, size: 36, start: start + 0.6, dur: dur - 0.6 }),
+    // exitDur 0: held to the beat's own end, see cardCascade above.
+    { type: 'image', src: image, x, y, w, radius: 14, start: start + 0.3, duration: dur - 0.6, anim: 'scale', enterDur: 0.55, out: 'defocus', exitDur: 0, ken: { from: zoom[0], to: zoom[1] } },
+    cap && caption({ text: cap, x: 160, y: 918, w: 1600, size: captionSize || 36, start: start + 0.6, dur: dur - 0.6 }),
   ].filter(Boolean);
 }
 
@@ -100,8 +118,9 @@ export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: c
 export function logoLockup({ markX = 690, markY = 300, markW = 150, wordX = 860, wordY = 322, wordW = 470,
   mark, wordmark, headline, sub, start = 0, dur = 5.5 } = {}) {
   return [
-    mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.6, out: 'defocus', exitDur: 0.4, ken: { from: 1.0, to: 1.05 } },
-    wordmark && { type: 'image', src: wordmark, x: wordX, y: wordY, w: wordW, start: start + 0.7, duration: dur - 0.7, anim: 'slide-left', enterDur: 0.6, out: 'defocus', exitDur: 0.4 },
+    // exitDur 0 on both: held to the beat's own end, see cardCascade above.
+    mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.6, out: 'defocus', exitDur: 0, ken: { from: 1.0, to: 1.05 } },
+    wordmark && { type: 'image', src: wordmark, x: wordX, y: wordY, w: wordW, start: start + 0.7, duration: dur - 0.7, anim: 'slide-left', enterDur: 0.6, out: 'defocus', exitDur: 0 },
     headline && kineticHeadline({ text: headline, x: 160, y: markY + 260, w: 1600, size: 78, weight: 700, each: 0.44, stagger: 0.05, start: start + 1.3, dur: dur - 1.3 }),
     sub && caption({ text: sub, x: 160, y: markY + 400, w: 1600, size: 38, start: start + 2.0, dur: dur - 2.0 }),
   ].filter(Boolean);
@@ -126,14 +145,16 @@ export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', ma
   if (mark && morphFrom) {
     out.push({ type: 'svg', x: mx, y, w: size, h: size, viewBox, d: morphFrom, fill: color,
       morph: { to: mark, dur: 1.5, spin, points: 200 }, start: start + 0.3, duration: dur - 0.3,
-      anim: 'fade', enterDur: 0.3, out: 'defocus', exitDur: 0.4 });
+      // exitDur 0: held to the beat's own end, see cardCascade above.
+      anim: 'fade', enterDur: 0.3, out: 'defocus', exitDur: 0 });
   } else if (mark) {
     // The draw RESOLVES into the fill, so this branch ends as the mark exactly as the morph branch above
     // does. It used to end as an outline, which is not a logo reveal: the standard recipe uses the drawn
     // stroke as a matte for the real artwork. `ease` is the AE Easy Ease the write-on always wanted.
     out.push({ type: 'svg', x: mx, y, w: size, h: size, viewBox, d: mark, stroke: color, fill: color,
       draw: { dur: 1.3, weight: 3, ease: 'easeInOutCubic', fillDur: 0.4 },
-      start: start + 0.3, duration: dur - 0.3, out: 'defocus', exitDur: 0.4 });
+      // exitDur 0: held to the beat's own end, see cardCascade above.
+      start: start + 0.3, duration: dur - 0.3, out: 'defocus', exitDur: 0 });
   }
   if (wordmark) out.push(kineticHeadline({ text: wordmark, x: 160, y: y + size + 70, w: canvasW - 320, size: 92,
     weight: 800, preset: 'up', each: 0.42, stagger: 0.05, color: INK, start: start + 1.7, dur: dur - 1.7 }));

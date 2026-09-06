@@ -26,9 +26,13 @@ import { INK } from './kit.mjs';
 // brew measures the same softening), because a wordmark is wide and 1.9x throws it off both edges. That is
 // how the logo reads as the next WORD of the sentence instead of as a badge, and it is the launch rule
 // about giving a mark prominence, written as motion instead of as a size.
-export function wordBlast({ text, src, x = 160, y = 380, w, h, size = 380, weight = 600, color = INK,
+// `bodySize` overrides the word's own size (380 unchanged if omitted), from `look.scale.body`: same
+// optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize` (docs/CRAFT/THEME-LOOK.md
+// "Left undone" note names this beat as the next slice of that work).
+export function wordBlast({ text, src, x = 160, y = 380, w, h, size, bodySize, weight = 600, color = INK,
   align = 'center', font, arrive, exit, settle = 1, drift, settleAt = 0.42, driftFor = 0.3,
   motionBlur = true, start = 0, dur = 1.5 } = {}) {
+  size = size ?? bodySize ?? 380;
   const isMark = src != null;
   if (!isMark && text == null) throw new Error('wordBlast: pass `text` (a word) or `src` (a mark). It punctuates one of the two.');
   // a wide mark cannot take the word's amplitude; keep the two sets of numbers named, not branched inline
@@ -46,6 +50,12 @@ export function wordBlast({ text, src, x = 160, y = 380, w, h, size = 380, weigh
   ];
   const base = { x, y, start, duration: dur, anim: 'none', exitDur: 0, motion, motionBlur };
   if (isMark) return [{ type: 'image', src, ...(w != null ? { w } : {}), ...(h != null ? { h } : {}), ...base }];
-  return [{ type: 'text', text, w: w != null ? w : 1600, align, size, weight, color,
+  // `fit: true` measures the same way a plain `text` layer's `fit` does (core/layers/text.js
+  // `kit.fitText`): one line, shrunk to the box width, capped at `size`. Without it, a two-word
+  // headline at this beat's DEFAULT size (380, w 1600) wraps to two lines instead of shrinking to
+  // fit one, because the generic auto-fit-safety path only guards against CLIPPING (up to 5 lines by
+  // default) and never fires on a wrap that still has room to grow downward. A single punctuation
+  // word is meant to read as one line; `fit` is the mechanism that already exists for exactly this.
+  return [{ type: 'text', text, w: w != null ? w : 1600, align, size, weight, color, fit: true,
     ...(font ? { font } : {}), ...base }];
 }

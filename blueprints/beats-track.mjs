@@ -52,9 +52,12 @@ const lerpAt = (rows, at, col) => {                   // piecewise-linear read o
 //
 // The surface is an image path, a captured component, or hand HTML. It must overflow the frame in the
 // direction of travel; panning a surface that fits shows the void behind it.
+//
+// `exitDur` defaults to 0: held to the beat's own end (docs/RULES/first-arrival.md), so a dissolve out
+// of this beat crosses real content rather than an already-faded field.
 export function recordedPan({ id = 'recpan', image, capture, html, x = 0, y = 0, w = 1920, h,
   travel = -600, lead = 30, leadDur = 0.45, hold = 0, panDur = 0.8, rhythm = SCROLL_RHYTHM,
-  riders = [], anim = 'fade', enterDur = 0.3, out = 'fade', exitDur = 0.1, start = 0, dur = 3 } = {}) {
+  riders = [], anim = 'fade', enterDur = 0.3, out = 'fade', exitDur = 0, start = 0, dur = 3 } = {}) {
   const panAt = leadDur + hold;
   if (panAt + panDur > dur + 1e-6) {
     throw new Error(`recordedPan: the pan runs to ${round(panAt + panDur)}s of a ${dur}s beat. Give the beat `
@@ -175,10 +178,13 @@ function surfaceLayer({ image, capture, html, w, h }, who) {
 //
 // The spotlight, when asked for, is a radial-gradient overlay ABOVE the content and fixed to the FRAME,
 // not welded to the surface, and it fades in only once the last scroll has landed.
+//
+// `exitDur` defaults to 0: held to the beat's own end (docs/RULES/first-arrival.md), so a dissolve out
+// of this beat crosses real content rather than an already-faded field.
 export function scrollStory({ id = 'scrollstory', image, capture, html, x = 0, y = 0, w = 1920, h,
   sections = [], stops, stepDur = 1.2, dwell = 0.5, lead = 0.35, leadY = 26, ease = 'power3.out',
   tilt, shadowBlur = 70, spotlight = false, spotlightDur = 0.6, riders = [],
-  anim = 'fade', enterDur = 0.4, out = 'fade', exitDur = 0.25, start = 0, dur = 5 } = {}) {
+  anim = 'fade', enterDur = 0.4, out = 'fade', exitDur = 0, start = 0, dur = 5 } = {}) {
   // Cumulative section heights → the absolute offset of each section's top. n sections make n-1 scrolls.
   const offs = Array.isArray(stops) && stops.length
     ? stops.slice()

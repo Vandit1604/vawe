@@ -55,6 +55,7 @@ import { dialsOf } from '../../core/registry/props.js';
 import { resolveSpectacle } from '../../core/timeline/spectacle.js';
 import { okDir as seamDir } from '../../core/timeline/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
+import { ACCENT } from '../../blueprints/kit.mjs';
 import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/engine/gsap-effects.js';
 import { produceBaseline } from '../../core/engine/produce.js';
 import { lintData, easeErrors, bgErrors, matchErrors, durationWordErrors, cssErrors } from '../../core/validate/validate.mjs';
@@ -7324,6 +7325,84 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     answered.status === 0 && !/craft-unvisited/.test(answered.stdout));
 
   fs.rmSync(tmp, { recursive: true, force: true });
+}
+
+// ---- beat-seams acceptance run (2026-09): five fixes to blueprints/*.mjs, one assert each -----------
+// formats/scene/vawe-explainer-v2.json's seam-check showed a blank field at every `dissolve` boundary
+// (3.67s/7.33s/11.0s): a blueprint's own exitDur faded its content to nothing before the beat's own
+// `start+dur`, and the arriving beat's first content began well after `start`, so a dissolve crossed
+// two already-empty frames. docs/RULES/first-arrival.md.
+{
+  // 1. SEAM OVERLAP: a beat's terminal content holds to its own end (exitDur 0) rather than fading
+  // itself out before the dissolve gets there. Checked on one beat from each of the four files this
+  // pass touched: beats-mined.mjs (the beat actually on the broken seam), beats.mjs, beats-collage.mjs
+  // and beats-track.mjs (both via their factory defaults, since neither is on the acceptance film).
+  const hook = BEATS.blurResolveHook({ text: 'x', dur: 2 });
+  ok('seam overlap: blurResolveHook (beats-mined.mjs) holds its headline to the beat end (exitDur 0)',
+    hook[0].exitDur === 0);
+  const fill = BEATS.containerFill({ items: ['a', 'b'], dur: 2 });
+  const chipGroup = fill.find((l) => l.type === 'group');
+  ok('seam overlap: containerFill (beats-mined.mjs, the beat on the broken 3.67s/7.33s seams) holds '
+    + 'its chip group to the beat end (exitDur 0)', chipGroup.exitDur === 0);
+  const rows = BEATS.listBuildRows({ items: ['a', 'b'], dur: 2 });
+  ok('seam overlap: listBuildRows (beats-mined.mjs, the beat on the broken 11.0s seam) holds every row '
+    + 'to the beat end (exitDur 0)', rows.every((r) => r.exitDur === 0));
+  const cascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a' }], dur: 2 });
+  ok('seam overlap: cardCascade (beats.mjs) holds its card group to the beat end (exitDur 0)',
+    cascade.find((l) => l.type === 'group').exitDur === 0);
+  const sentence = BEATS.propSentence({ items: [{ word: 'x' }] });
+  ok('seam overlap: propSentence (beats-collage.mjs) defaults exitDur to 0 on its items',
+    sentence[0].children[0].exitDur === 0);
+  const pan = BEATS.recordedPan({ image: 'x.png' });
+  ok('seam overlap: recordedPan (beats-track.mjs) defaults exitDur to 0', pan[0].exitDur === 0);
+
+  // 2. NO WRAP: wordBlast fits its text to `w` the same way a plain `text` layer does (`fit: true`,
+  // core/layers/text.js), instead of the generic auto-fit-safety path (which only guards clipping up
+  // to 5 lines and never fires on a two-line wrap that still has vertical room).
+  const blast = BEATS.wordBlast({ text: 'One JSON.' });
+  ok('no wrap: wordBlast sets `fit: true` on its text layer, so a headline that would wrap shrinks '
+    + 'to one line instead (core/layers/text.js kit.fitText)', blast[0].fit === true);
+  ok('no wrap: wordBlast still accepts an explicit `size` unchanged (the acceptance film passes 250)',
+    BEATS.wordBlast({ text: 'x', size: 250 })[0].size === 250);
+
+  // 3. STROKE: logoReveal's mark-only default (no `morphFrom`) draws the path with a stroke (`draw`)
+  // rather than a flat fill, settling into the fill once drawn (docs' "ends filled rather than as an
+  // outline" note on the branch itself).
+  const reveal = BEATS.logoReveal({ mark: 'M0 0 L1 1', wordmark: 'x' });
+  const markLayer = reveal.find((l) => l.type === 'svg');
+  ok('stroke: logoReveal draws the mark-only default with a stroke (`draw`), not a flat fill',
+    !!markLayer.draw && markLayer.stroke === ACCENT);
+  ok('stroke: logoReveal still fills for the morph (blob-melt) path, which has no stroke draw-on',
+    !BEATS.logoReveal({ mark: 'M0 0 L1 1', morphFrom: 'M0 0 L2 2' }).find((l) => l.type === 'svg').draw);
+
+  // 4. RULE POSITION: the scaffold's continuous-object rect sits in the lower safe margin (below the
+  // text band every beat factory defaults into), not at y:900 where it read as an underline.
+  const scaffoldSrc = fs.readFileSync(path.join(repoRoot, 'scripts/author/scaffold.mjs'), 'utf8');
+  ok('rule position: the scaffold continuous object no longer sits at y:900 (the old text-band clash)',
+    !/y: 900,\s*\n\s*fill: 'var\(--accent\)'/.test(scaffoldSrc));
+  ok('rule position: it sits at y:1010, in the lower safe margin (MARGIN 0.06 of 1080 leaves 1015)',
+    /y: 1010,\s*\n\s*fill: 'var\(--accent\)'/.test(scaffoldSrc));
+
+  // 5. SCALE KWARG: look.scale.body/.caption reach the remaining beat factories the same optional-kwarg,
+  // unchanged-default way heroSize already reaches kineticHook/statReveal.
+  const plainCascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a', desc: 'd' }], dur: 2 });
+  const plainDesc = plainCascade[1].children[0].children[0].children[1];
+  ok('scale kwarg: cardCascade keeps its default body size (26) when heroSize is absent',
+    plainDesc.size === 26);
+  const scaledCascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a', desc: 'd' }], heroSize: 30, dur: 2 });
+  ok('scale kwarg: cardCascade honours heroSize (look.scale.body) for the card body text when given',
+    scaledCascade[1].children[0].children[0].children[1].size === 30);
+  const grid = BEATS.chipGrid({ title: 'x', chips: ['a'], footer: 'f', bodySize: 20, captionSize: 22, dur: 2 });
+  ok('scale kwarg: chipGrid honours bodySize (look.scale.body) for its chip text',
+    grid[1].children[0].children[0].size === 20);
+  ok('scale kwarg: chipGrid honours captionSize (look.scale.caption) for its footer',
+    grid.find((l) => l !== undefined && l.color === ACCENT && l.text === 'f').size === 22);
+  ok('scale kwarg: kineticHook keeps its default sub size (74) when captionSize is absent',
+    BEATS.kineticHook({ sub: 'x', dur: 2 })[0].size === 74);
+  ok('scale kwarg: kineticHook honours captionSize (look.scale.caption) for its subline',
+    BEATS.kineticHook({ sub: 'x', captionSize: 30, dur: 2 })[0].size === 30);
+  ok('scale kwarg: wordBlast honours bodySize (look.scale.body) when no explicit size is given',
+    BEATS.wordBlast({ text: 'x', bodySize: 200 })[0].size === 200);
 }
 
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter
