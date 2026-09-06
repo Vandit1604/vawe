@@ -18,8 +18,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { EASINGS } from '../../core/motion.js';
-import { TIMINGS } from '../../core/cuts.js';
+import { EASINGS } from '../../core/motion/motion.js';
+import { TIMINGS } from '../../core/cuts/index.js';
 
 const argv = process.argv.slice(2);
 const VIDEO = process.env.VIDEO || argv[0];

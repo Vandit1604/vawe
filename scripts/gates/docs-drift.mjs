@@ -11,12 +11,12 @@ import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { SHADER_FX } from '../../core/stings.js';
-import { AMBIENT_FX } from '../../core/shaders-ambient.js';
-import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
-import { RESAMPLE_FX } from '../../core/resample-fx.js';
-import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
-import { BG_NAMES } from '../../core/backgrounds.js';
+import { SHADER_FX } from '../../core/stings/index.js';
+import { AMBIENT_FX } from '../../core/surfaces/shaders-ambient.js';
+import { PAINT_FX_NAMES } from '../../core/surfaces/paint-fx.js';
+import { RESAMPLE_FX } from '../../core/resample/effects.js';
+import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
+import { BG_NAMES } from '../../core/backgrounds/index.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
 import { gateFindings } from '../lib/findings.mjs';
 
@@ -31,14 +31,14 @@ const PRIM_PATH = path.join(repoRoot, 'docs', 'PRIMITIVES.md');
 const prim = fs.readFileSync(PRIM_PATH, 'utf8');
 // THIS TABLE SURVIVES site-counts.mjs WIDENING INTO docs/, and the reason is not the file list.
 // site-counts matches "<n> <noun>" and "<noun> (<n>)"; these headings put the number AFTER the noun
-// with a source path in between ("## Shader stings (`core/stings.js`), 35 WebGL cover-the-cut
+// with a source path in between ("## Shader stings (`core/stings/index.js`), 35 WebGL cover-the-cut
 // effects"), and teaching that shape to a prose matcher would pair every trailing number with the
 // nearest preceding noun. It also checks something site-counts cannot: that the SENTENCE STILL
 // EXISTS. A regex that misses is reported below, so deleting the heading fails; a count nobody wrote
 // is a silent pass everywhere else.
 const HEADING_COUNTS = [
-  { re: /## Shader stings \(`core\/stings\.js`\)[,:] (\d+)/,          reg: 'SHADER_FX' },
-  { re: /## Ambient shader looks \(`core\/shaders-ambient\.js`\)[,:] (\d+)/, reg: 'AMBIENT_FX' },
+  { re: /## Shader stings \(`core\/stings\/index\.js`\)[,:] (\d+)/,          reg: 'SHADER_FX' },
+  { re: /## Ambient shader looks \(`core\/surfaces\/shaders-ambient\.js`\)[,:] (\d+)/, reg: 'AMBIENT_FX' },
   { re: /the `raymarch` layer type, (\d+)/,                         reg: 'RAYMARCH_FX' },
 ];
 

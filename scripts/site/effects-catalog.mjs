@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registersOf } from '../gates/craft-coverage.mjs';
-import { catalogued } from '../../core/registry.js';
+import { catalogued } from '../../core/registry/registry.js';
 // The blurb maps of the families that have no registry, each still living beside the vocabulary it
 // describes (the pattern blocks/catalog.mjs proves at 70/70). They take PRECEDENCE over DESC below, and
 // that ordering is the point: DESC is a FLAT name-keyed map shared across families, so `up` the anim was
@@ -18,7 +18,7 @@ import { catalogued } from '../../core/registry.js';
 // sections. The catalogue is what CLAUDE.md sends an author to before they choose, and it once did not
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
-import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
+import { FEEL, DURATION, CAMERA_WORDS } from '../../core/registry/vocab.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');

@@ -20,7 +20,7 @@ import { openScene } from './scene-page.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
 import { drawtext } from './sheets.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 

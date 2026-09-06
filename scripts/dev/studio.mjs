@@ -24,8 +24,8 @@ import { execFile, execFileSync, spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { patchMotion, upsertKey, applyOps } from '../author/patch-motion.mjs';
 import { serveRepo, REPO_ROOT, launchPage, waitForEngine } from '../lib/render-harness.mjs';
-import { sceneDims } from '../../core/safe.js';
-import { resolveBridges } from '../../core/audio-bridges.js';
+import { sceneDims } from '../../core/layout/safe.js';
+import { resolveBridges } from '../../core/audio/bridges.js';
 import { scratch } from '../lib/scratch.mjs';
 import { studioPage } from './studio-page.mjs';
 

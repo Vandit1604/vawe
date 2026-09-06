@@ -84,7 +84,7 @@ import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
-import { GENERATORS, controlsOf, defaultsOf } from '../../core/generators.js';
+import { GENERATORS, controlsOf, defaultsOf } from '../../core/layout/generators.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'registry');
@@ -234,7 +234,7 @@ function generatorItem(g) {
       ...(layers
         ? { layers: g.render(options) }
         // NOT the markup itself. See DECISION 3: it is a rendered picture, sometimes 31KB of it.
-        : { render: `import { byName } from 'core/generators.js'; byName('${g.name}').render(options)` }),
+        : { render: `import { byName } from 'core/layout/generators.js'; byName('${g.name}').render(options)` }),
     },
     docs: g.docs,
     ...(g.reference ? { reference: g.reference } : {}),

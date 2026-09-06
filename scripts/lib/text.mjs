@@ -20,8 +20,8 @@
 // there was nothing central to be missing from. It is also how the same `<style>`-is-not-glyphs bug
 // (#214/#216/#217) reached a fifth consumer, `designspec-check` was reading a captured component's
 // CSS as the film's copy and running the jargon rules over it.
-export { onScreenText, glyphText } from '../../core/on-screen-text.js';
-import { onScreenText } from '../../core/on-screen-text.js';
+export { onScreenText, glyphText } from '../../core/type/on-screen-text.js';
+import { onScreenText } from '../../core/type/on-screen-text.js';
 
 // A layer's on-screen words. `count` layers carry `text` too, and a null type is a text layer.
 export const layerText = (l) => (l && (l.type === 'text' || l.type === 'count' || l.type == null) ? onScreenText(l.text) : '');

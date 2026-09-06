@@ -26,11 +26,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LOOK_NAMES } from '../../core/looks.js';
+import { LOOK_NAMES } from '../../core/looks/index.js';
 import { PROFILES } from './profiles.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
-import { DENSE_KEY_SEC } from '../../core/sequence.js';
-import { cutVelocityAdvice } from '../../core/velocity-cut.js';
+import { lowerScene } from '../../core/transitions/lower.js';
+import { DENSE_KEY_SEC } from '../../core/timeline/sequence.js';
+import { cutVelocityAdvice } from '../../core/timeline/velocity-cut.js';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 import { sceneTiming } from '../gates/scene-timing.mjs';

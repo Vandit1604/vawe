@@ -18,7 +18,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { flattenLayers } from '../lib/layers.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 
 import { gradeable } from './tile.mjs';
 import { gateFindings } from '../lib/findings.mjs';

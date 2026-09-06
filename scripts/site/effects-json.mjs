@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sections, d, USAGE_KIT } from './effects-catalog.mjs';
-import { FEEL, DURATION, CAMERA_WORDS } from '../../core/vocab.js';
+import { FEEL, DURATION, CAMERA_WORDS } from '../../core/registry/vocab.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');

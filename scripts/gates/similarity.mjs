@@ -12,7 +12,7 @@
 // with itself; it shouldn't retell the same skeleton).
 import fs from 'node:fs';
 import path from 'node:path';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 import { population, SCENE_DIR } from '../lib/census.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 

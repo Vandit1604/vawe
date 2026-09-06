@@ -8,7 +8,7 @@
 //
 // Colours are semantic theme vars; coordinates are the 1920x1080 stage. Pure: props in, layers out.
 import { INK } from './kit.mjs';
-import { motionAt } from '../core/sequence.js';
+import { motionAt } from '../core/timeline/sequence.js';
 
 // The scroll rhythm measured off `higgsfield-recreation` beat 2, normalised: [fraction of the pan's
 // duration, fraction of its travel]. Nothing about it is regular, and that is the whole point. The gaps

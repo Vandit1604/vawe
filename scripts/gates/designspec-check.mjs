@@ -22,7 +22,7 @@ import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
 // They live in one gate under one name because an author should run one command, not two.
 import { RULES, runRules } from '../lib/designspec-rules.mjs';
-import { parseColorRGB } from '../../core/motion.js';
+import { parseColorRGB } from '../../core/motion/motion.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
@@ -168,7 +168,7 @@ const label = (l, i) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text, 22)}
 const KNOWN_VARS = (() => {
   const set = new Set();
   try {                                                   // whatever core/boot.js writes onto :root
-    const boot = fs.readFileSync(path.join(ROOT, 'core/boot.js'), 'utf8');
+    const boot = fs.readFileSync(path.join(ROOT, 'core/engine/boot.js'), 'utf8');
     for (const m of boot.matchAll(/set\(\s*'(--[a-z0-9-]+)'/gi)) set.add(m[1]);
     if (/--g\$\{i\}|`--g\$\{i\}`/.test(boot)) for (let i = 0; i < 10; i++) set.add(`--g${i}`);
   } catch { /* unreadable: fall through, the css pass below still contributes */ }

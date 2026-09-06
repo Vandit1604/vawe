@@ -2,7 +2,7 @@
 // that nothing reads is found on the day it is declared rather than on the day an author happens to
 // write it into a film.
 //
-// WHY THIS EXISTS AND WHAT IT IS NOT. `core/prop-audit.js` already refuses a prop that was set and
+// WHY THIS EXISTS AND WHAT IT IS NOT. `core/registry/prop-audit.js` already refuses a prop that was set and
 // never read, at runtime, per layer, with no false positives from computed keys. It is live on every
 // render (formats/scene/scene.js:448 wraps every layer, :726 audits each one as its build finishes).
 // Its only gap is COVERAGE: it can judge a prop only when an author wrote it. `metalness` and
@@ -31,9 +31,9 @@ import { fileURLToPath } from 'node:url';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS } from '../../core/layers/vocabulary.js';
-import { auditedProps } from '../../core/prop-audit.js';
-import { KNOBS } from '../../core/knobs.js';
-import { guardsOf } from '../../core/props.js';
+import { auditedProps } from '../../core/registry/prop-audit.js';
+import { KNOBS } from '../../core/registry/knobs.js';
+import { guardsOf } from '../../core/registry/props.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -325,7 +325,7 @@ for (const type of types) {
     // Five ascending frames in one tab, not three: a caret BLINKS, so `caretHold` is only reached on the
     // frames where the blink is on, and three samples all landed in the off phase.
     for (const n of [0, 15, 25, 35, 50, 70, 90]) engine.renderFrame(n);
-    const { deadProps } = await import('/core/prop-audit.js');
+    const { deadProps } = await import('/core/registry/prop-audit.js');
     const out = [];
     const sink = window.__PROP_PROBE;
     for (let i = 0; i < names.length; i++) {

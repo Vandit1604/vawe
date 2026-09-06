@@ -92,7 +92,7 @@ html,body{margin:0;background:${bg};color:var(--text);width:auto;height:auto;ove
 <script type="module">
   // ONE definition of what a theme means. Importing the engine's own applyTheme is the point: a second
   // copy of the palette-to-token mapping here is how it drifted the first time (#159, #368).
-  import { applyTheme } from '/core/boot.js';
+  import { applyTheme } from '/core/engine/boot.js';
   try { applyTheme(${JSON.stringify(theme)}); window.__themed = true; }
   catch (e) { window.__themed = 'error: ' + e.message; }
 </script></body></html>`;

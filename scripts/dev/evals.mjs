@@ -21,7 +21,7 @@ import { execFileSync, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { frameTile, tileGrid } from '../gates/tile.mjs';
-import { sceneDims } from '../../core/safe.js';
+import { sceneDims } from '../../core/layout/safe.js';
 
 const BRIEFS_DIR = 'verify/evals/briefs';
 const RUNS_DIR = 'verify/evals/runs';

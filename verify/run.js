@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { ffprobe } from './extract.js';
-import { safeArea, ASPECTS, sceneDims } from '../core/safe.js';
+import { safeArea, ASPECTS, sceneDims } from '../core/layout/safe.js';
 import { population } from '../scripts/lib/census.mjs';
 import { serveRepo, waitForEngine } from '../scripts/lib/render-harness.mjs';
 

@@ -3,32 +3,32 @@
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
-  anticipateEase, overshootEase, stepClock } from '../../core/motion.js';
-import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/time.js';
-import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type.js';
-import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS } from '../../core/cuts.js';
-import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts.js';
-import { dirVec as seamDirVec, featherFor as seamFeatherFor } from '../../core/seams.js';
-import { killedBy, capabilitiesOf, checkCuts } from '../../core/ancestor-kills.js';
-import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/clips.js';
+  anticipateEase, overshootEase, stepClock } from '../../core/motion/motion.js';
+import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/timeline/time.js';
+import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type/type.js';
+import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS } from '../../core/cuts/index.js';
+import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts/index.js';
+import { dirVec as seamDirVec, featherFor as seamFeatherFor } from '../../core/timeline/seams.js';
+import { killedBy, capabilitiesOf, checkCuts } from '../../core/fx/ancestor-kills.js';
+import { ANIM_NAMES, ANIM_BLURBS, clipStyleAt, WARPABLE, entranceWarp } from '../../core/timeline/clips.js';
 import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTransform,
-  normalizeIdle, settledGain } from '../../core/idle.js';
-import { SEAM_BLURBS } from '../../core/seams.js';
+  normalizeIdle, settledGain } from '../../core/engine/idle.js';
+import { SEAM_BLURBS } from '../../core/timeline/seams.js';
 import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
-import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/gsap-effects.js';
-import { BG_NAMES, BG_BLURBS, gradientFill } from '../../core/backgrounds.js';
-import { GRADIENT_RECIPE_REGISTRY } from '../../core/gradient-recipes.js';
-import { RESAMPLE_BLURBS } from '../../core/resample-fx.js';
-import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/captions.js';
+import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/engine/gsap-effects.js';
+import { BG_NAMES, BG_BLURBS, gradientFill } from '../../core/backgrounds/index.js';
+import { GRADIENT_RECIPE_REGISTRY } from '../../core/backgrounds/gradient-recipes.js';
+import { RESAMPLE_BLURBS } from '../../core/resample/effects.js';
+import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/type/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
 import { PROFILES } from '../author/profiles.mjs';
 import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs } from '../../core/layers/util.js';
-import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/sequence.js';
+import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/timeline/sequence.js';
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
 import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
-import { mergePan } from '../../core/pan-resolve.mjs';
+import { mergePan } from '../../core/layout/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../author/patch-motion.mjs';
 import { SHAPES as TRACK_SHAPES } from '../author/track.mjs';
 import fs from 'node:fs';
@@ -36,74 +36,74 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { MARGIN, MAX_ZOOM } from '../../core/safe.js';
-import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/safe.js';
-import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/filters.js';
+import { MARGIN, MAX_ZOOM } from '../../core/layout/safe.js';
+import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, frameOf, outOfFrame, settleWindow, reportBounds, boundsCheckOn } from '../../core/layout/safe.js';
+import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/looks/filters.js';
 import fsMod from 'node:fs';
-import { defineRegistry, registries, catalogued, checkBlurb, searchWords } from '../../core/registry.js';
+import { defineRegistry, registries, catalogued, checkBlurb, searchWords } from '../../core/registry/registry.js';
 import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
 import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore } from '../author/arsenal.mjs';
 import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../author/schema-at.mjs';
-import { token, literal, lit, resolveColor } from '../../core/color.js';
+import { token, literal, lit, resolveColor } from '../../core/color/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
-import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/junctions.js';
-import { applyComposite } from '../../core/looks.js';
-import { bakeCanvasFx } from '../../core/canvas-fx.js';
-import { DIRS } from '../../core/cuts.js';
-import { SPECTACLE_GAIN, attenuated, attenuatedKick, KNOBS, bindDials } from '../../core/knobs.js';
-import { dialsOf } from '../../core/props.js';
-import { resolveSpectacle } from '../../core/spectacle.js';
-import { okDir as seamDir } from '../../core/seams.js';
+import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/timeline/junctions.js';
+import { applyComposite } from '../../core/looks/index.js';
+import { bakeCanvasFx } from '../../core/canvas/effects.js';
+import { DIRS } from '../../core/cuts/index.js';
+import { SPECTACLE_GAIN, attenuated, attenuatedKick, KNOBS, bindDials } from '../../core/registry/knobs.js';
+import { dialsOf } from '../../core/registry/props.js';
+import { resolveSpectacle } from '../../core/timeline/spectacle.js';
+import { okDir as seamDir } from '../../core/timeline/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
-import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/gsap-effects.js';
-import { produceBaseline } from '../../core/produce.js';
-import { lintData, easeErrors, bgErrors, matchErrors, durationWordErrors, cssErrors } from '../../core/validate.mjs';
-import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/vocab.js';
-import { BASE_ENTER } from '../../core/clips.js';
-import { CUT_REGISTRY } from '../../core/cuts.js';
-import { CUT_CUE } from '../../core/audio-cues.js';
-import { ANIM_REGISTRY } from '../../core/clips.js';
-import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/parts.js';
-import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/effector.js';
-import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/velocity-cut.js';
+import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/engine/gsap-effects.js';
+import { produceBaseline } from '../../core/engine/produce.js';
+import { lintData, easeErrors, bgErrors, matchErrors, durationWordErrors, cssErrors } from '../../core/validate/validate.mjs';
+import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/registry/vocab.js';
+import { BASE_ENTER } from '../../core/timeline/clips.js';
+import { CUT_REGISTRY } from '../../core/cuts/index.js';
+import { CUT_CUE } from '../../core/audio/cues.js';
+import { ANIM_REGISTRY } from '../../core/timeline/clips.js';
+import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/motion/parts.js';
+import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/motion/effector.js';
+import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/timeline/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
-import { bgPaletteFrom } from '../../core/backgrounds.js';
-import { parseColorRGB } from '../../core/motion.js';
+import { bgPaletteFrom } from '../../core/backgrounds/index.js';
+import { parseColorRGB } from '../../core/motion/motion.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
-import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/path-morph.js';
+import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/layers/path-morph.js';
 import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
 import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
 import { rollOffsets, displayNum } from '../../core/layers/count.js';
-import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, followCursor, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves.js';
-import { bakeCameraMove } from '../../core/produce.js';
-import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/captions.js';
+import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, followCursor, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves/index.js';
+import { bakeCameraMove } from '../../core/engine/produce.js';
+import { capWords, capUnitWins, capShape, wordU, lineU, CAP_STYLES } from '../../core/type/captions.js';
 import { BLOCKS, CATEGORY_OF, NOT_A_BLOCK } from '../../blocks/index.mjs';
-import { SHADER_FX } from '../../core/stings.js';
-import { AMBIENT_FX, AMBIENT_SHADERS } from '../../core/shaders-ambient.js';
+import { SHADER_FX } from '../../core/stings/index.js';
+import { AMBIENT_FX, AMBIENT_SHADERS } from '../../core/surfaces/shaders-ambient.js';
 import { shaderAt as ambientShaderAt, validate as ambientValidate } from '../../core/surfaces/shader.js';
 import { raymarchAt, validate as raymarchValidate } from '../../core/surfaces/raymarch.js';
-import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks.js';
-import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas-fx.js';
+import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liveKnobs } from '../../core/looks/index.js';
+import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas/effects.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { FAMILY_MODULES, NOT_A_FAMILY } from '../../blocks/index.mjs';
 import { collect as collectArsenal } from '../author/arsenal.mjs';
-import { CUES, renderCue, musicBed, normalize, biquad, osc, SR } from '../../core/audio-kit.mjs';
-import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats.js';
-import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beat-bind.js';
-import { lift } from '../../core/motion.js';
-import { opacityEnvelope, ANIM } from '../../core/clips.js';
-import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../../core/backgrounds.js';
-import { bandEnergies, sampleAt, BANDS } from '../../core/spectrum.js';
-import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/ransom.js';
-import { boundaryMechanism, lowerScene, checkStingColor } from '../../core/transitions-lower.js';
-import { ENERGY, okEnergy } from '../../core/energy.js';
-import { SEAM_FX } from '../../core/seams.js';
-import { SEAM_CUE } from '../../core/audio-cues.js';
-import { resolveBridges } from '../../core/audio-bridges.js';
-import { RESAMPLE_FX } from '../../core/resample-fx.js';
-import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
-import { THREE_FX } from '../../core/three-scenes.js';
+import { CUES, renderCue, musicBed, normalize, biquad, osc, SR } from '../../core/audio/kit.mjs';
+import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats/detect.js';
+import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beats/index.js';
+import { lift } from '../../core/motion/motion.js';
+import { opacityEnvelope, ANIM } from '../../core/timeline/clips.js';
+import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../../core/backgrounds/index.js';
+import { bandEnergies, sampleAt, BANDS } from '../../core/tracks/spectrum.js';
+import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/type/ransom.js';
+import { boundaryMechanism, lowerScene, checkStingColor } from '../../core/transitions/lower.js';
+import { ENERGY, okEnergy } from '../../core/transitions/energy.js';
+import { SEAM_FX } from '../../core/timeline/seams.js';
+import { SEAM_CUE } from '../../core/audio/cues.js';
+import { resolveBridges } from '../../core/audio/bridges.js';
+import { RESAMPLE_FX } from '../../core/resample/effects.js';
+import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
+import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -992,7 +992,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // did not decide.
   const ALLOWED = {
     'core/layers/util.js': 'the resolver: trackingCss decides, styleText writes, once',
-    'core/morph.js': 'copies the ALREADY-RESOLVED computed value onto a wrapper (getComputedStyle → wrap), so the glyphs keep their spacing through the morph. It forms no opinion.',
+    'core/motion/morph.js': 'copies the ALREADY-RESOLVED computed value onto a wrapper (getComputedStyle → wrap), so the glyphs keep their spacing through the morph. It forms no opinion.',
   };
   const writers = coreFiles
     .filter((p) => WRITE.test(fs.readFileSync(p, 'utf8')))
@@ -1259,7 +1259,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // Every named easing must be a real 0->1 curve. Asserted across the WHOLE registry, not just the
 // new ones: a curve that does not land on 1 silently leaves elements short of their final position.
 {
-  const { EASINGS } = await import('../../core/motion.js');
+  const { EASINGS } = await import('../../core/motion/motion.js');
   // These curves leave [0,1] BY DESIGN: `back` dips below 0 to anticipate, `elastic`/`spring` ring
   // past 1 before settling. The f(0)=0 / f(1)=1 checks below still apply to them, overshooting is
   // character, not arriving is a bug (see the spring-bouncy f(1)=0.96 fix).
@@ -2052,7 +2052,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     // The EVEN case must reach the shader as no positions at all. The two shader paths are the same
     // formula in real arithmetic and different pictures in float32, so a generator that helpfully
     // filled in `@0.142857…` would shift every field that never asked for positions.
-    const { ALL_GENERATORS, defaultsOf } = await import('../../core/generators.js');
+    const { ALL_GENERATORS, defaultsOf } = await import('../../core/layout/generators.js');
     const spectrum = ALL_GENERATORS.find((g) => g.name === 'spectrum');
     const flat = spectrum.render(defaultsOf(spectrum.schema))[0].colors;
     ok('spectrum: untouched ramp stops carry NO position (bit-identical to before positions existed)',
@@ -2920,7 +2920,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // the refusal is at the write site (blocks/index.mjs) rather than here, because a gate that runs
 // afterwards only promises to notice. These two assert it fires.
 {
-  const { checkBlurb } = await import('../../core/registry.js');
+  const { checkBlurb } = await import('../../core/registry/registry.js');
   const throws = (blurb) => { try { checkBlurb('block', 'probeBlock', blurb); return false; } catch { return true; } };
   ok('blocks: a row with no blurb is refused at load', throws(''));
   ok('blocks: and one that only says its own name back is refused too', throws('a probe block'));
@@ -3327,7 +3327,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // ---- TACTILE sound design: the film's own motion, voiced (core/audio-tactile.js) -----------------
 {
   const { tactileCues, capDensity, derive, travelOf, prominenceOf, MOTION_CUES, DENSITY, RISER_LEAD } =
-    await import('../../core/audio-tactile.js');
+    await import('../../core/audio/tactile.js');
   const canvas = { w: 1920, h: 1080 };
 
   // The five motion voices are being added to CUES in core/audio-kit.mjs alongside this module, so
@@ -4309,7 +4309,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- shader sting ids: the branch number is written down, not inferred from array order ----
 {
-  const { SHADER_ID: ID, SHADER_FX: FX } = await import('../../core/stings.js');
+  const { SHADER_ID: ID, SHADER_FX: FX } = await import('../../core/stings/index.js');
   // The shipped order, transcribed by hand. If a future edit renumbers an effect, every scene using
   // shader stings renders a DIFFERENT shader with no crash and no visual error, this catches that.
   const SHIPPED = ['flash', 'burn', 'leak', 'grain', 'dissolve', 'ink', 'glitch', 'streak', 'pixel', 'confetti',
@@ -4345,7 +4345,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // It was a warning printed by `scripts/gates/knobs-audit.mjs` if you remembered to run it, while an
 // unknown layer PROP of the same shape has thrown at boot for a long time. These say the two agree now.
 {
-  const { knobErrors } = await import('../../core/validate.mjs');
+  const { knobErrors } = await import('../../core/validate/validate.mjs');
   const of = (L) => knobErrors({ layers: [L] });
 
   ok('knobs: a legal dial on a listed preset is accepted',
@@ -4406,7 +4406,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   globalThis.document = globalThis.document || { createElement: () => ({ style: {} }), querySelector: () => null };
   // Every src fails, which is the interesting direction: what matters is WHICH failures are refused.
   globalThis.Image = class { set src(v) { queueMicrotask(() => this.onerror && this.onerror()); } };
-  const { preloadImages } = await import('../../core/boot.js');
+  const { preloadImages } = await import('../../core/engine/boot.js');
   const threw = async (scene) => { try { await preloadImages(scene); return ''; } catch (e) { return e.message; } };
 
   const local = await threw({ layers: [{ type: 'image', src: '/assets/brands/nope/logo.svg' }] });
@@ -4770,8 +4770,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // engine rather than a named list of files, because #148's sibling failures (#229 · #232 · #242) were all
 // a gate whose file list was outrun by a directory move.
 {
-  const { GSAP_PROPS } = await import('../../core/preload.js');
-  const { GSAP_TRIGGER: PARTS_TRIGGER } = await import('../../core/parts.js');
+  const { GSAP_PROPS } = await import('../../core/engine/preload.js');
+  const { GSAP_TRIGGER: PARTS_TRIGGER } = await import('../../core/motion/parts.js');
   const { GSAP_TRIGGER: COMP_TRIGGER } = await import('../../core/layers/composition.js');
   const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -4809,7 +4809,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // And the decision itself, exercised per prop. Four of these are used by zero or one scene in the
   // library, so no render proves them: a synthetic layer is the only thing that does.
-  const { preloadGsap } = await import('../../core/preload.js');
+  const { preloadGsap } = await import('../../core/engine/preload.js');
   const priorWin = globalThis.window;
   let touched = false;
   const fakeGsap = { ticker: { sleep() { touched = true; } }, globalTimeline: {}, registerPlugin() {},
@@ -4836,12 +4836,12 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('a sibling with the root as a name prefix is refused', insideRoot(root, '/repo-evil/config') === false);
   ok('the mime table covers every type the copies served',
     ['.html', '.mjs', '.json', '.woff2', '.otf', '.mp4', '.webm', '.jpeg'].every((e) => MIME[e]));
-  ok('the harness resolves the repo root', fs.existsSync(path.join(REPO_ROOT, 'core/motion.js')));
+  ok('the harness resolves the repo root', fs.existsSync(path.join(REPO_ROOT, 'core/motion/motion.js')));
 }
 
 // ---- a fragment's stylesheet stops at its own layer (docs/MISTAKES.md #510) ----
 {
-  const { scopeStyles } = await import('../../core/sanitize-html.js');
+  const { scopeStyles } = await import('../../core/type/sanitize-html.js');
   ok('markup with no stylesheet is handed back unchanged',
     scopeStyles('<div class="g">hi</div>') === '<div class="g">hi</div>');
   ok('a style block is wrapped in a bare @scope',
@@ -4861,7 +4861,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // word `<style>` in an author's note made STYLE_BLOCK span from the NOTE to the first real
   // `</style>`, so the fragment's whole stylesheet and the opening tag of its root element were
   // swallowed into one `@scope {…}` block. The panel rendered as unstyled text and nothing said a word.
-  const { sanitizeHtml, timeCssUsed, stripComments } = await import('../../core/sanitize-html.js');
+  const { sanitizeHtml, timeCssUsed, stripComments } = await import('../../core/type/sanitize-html.js');
   const noted = '<!-- write a <style> block, never a transition: it renders as a dead still -->'
     + '<style>.g{color:red}</style><div class="g">x</div>';
   ok('a comment naming <style> does not swallow the real stylesheet',
@@ -4922,7 +4922,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 {
   const { DEPTH_PLANES, DEPTH_REGISTRY, DEPTH_BLURBS, depthZ, PLANE_KEYS } = await import('../../core/fx/plane.js');
   const DEPTH_NAMES = DEPTH_REGISTRY.names;
-  const { bakeDepth } = await import('../../core/produce.js');
+  const { bakeDepth } = await import('../../core/engine/produce.js');
   ok('every named depth carries a blurb', DEPTH_NAMES.every((n) => typeof DEPTH_BLURBS[n] === 'string'));
   // A FRACTION OF THE LENS, NEVER A PIXEL COUNT. A film that keys `p` changes what 600px behind the
   // picture plane means; it must not change what "back" means.
@@ -5052,9 +5052,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // `linear` reads 500 · 750 · 1000 (no stop, but a discontinuity), and `through` reads 749 · 770 · 845.
 // That difference IS the feature, so it is what gets asserted rather than the implementation.
 {
-  const { motionAt } = await import('../../core/sequence.js');
-  const { INTERP } = await import('../../core/vocab.js');
-  const { isEasingName } = await import('../../core/motion.js');
+  const { motionAt } = await import('../../core/timeline/sequence.js');
+  const { INTERP } = await import('../../core/registry/vocab.js');
+  const { isEasingName } = await import('../../core/motion/motion.js');
   const track = (ease) => [{ t: 0, x: 0 }, { t: 0.6, x: 300, ease }, { t: 1.2, x: 900, ease }];
   const vel = (t, ease) => { const k = track(ease), h = 1 / 60;
     return (motionAt(k, t + h).dx - motionAt(k, t - h).dx) / (2 * h); };
@@ -5079,7 +5079,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('`through` is a declared interpolation mode', Object.prototype.hasOwnProperty.call(INTERP, 'through'));
   ok('`through` is a legal `ease` value', isEasingName('through'));
   let threw = null;
-  try { (await import('../../core/motion.js')).resolveEasing('through'); } catch (e) { threw = e.message; }
+  try { (await import('../../core/motion/motion.js')).resolveEasing('through'); } catch (e) { threw = e.message; }
   ok('resolveEasing REFUSES it: a mode is not a curve', threw != null);
   ok('`smooth` is still the feel word it always was',
     Math.abs(vel(0.6, 'smooth') - vel(0.6, undefined)) < 1);
@@ -5088,7 +5088,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // drifted: `through` was dispatched inside motionAt, so a camera key naming it threw
   // `unknown easing "through"`. Both now go through segmentAt, and this asserts the camera gets the
   // whole segment vocabulary rather than a copy of half of it.
-  const { cameraAt, segmentAt } = await import('../../core/sequence.js');
+  const { cameraAt, segmentAt } = await import('../../core/timeline/sequence.js');
   const cam = [{ t: 0, x: 0 }, { t: 0.6, x: 300, ease: 'through' }, { t: 1.2, x: 900, ease: 'through' }];
   const camVel = (t) => { const h = 1 / 60; return (cameraAt(cam, t + h).x - cameraAt(cam, t - h).x) / (2 * h); };
   ok('the camera speaks `through` too, because it shares the interpolator', camVel(0.6) > 400);
@@ -5105,7 +5105,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // cubic-bezier(0.42, 0, 0.58, 1). A solver that agreed only with its own arithmetic would pass a
 // round-trip test and still draw the wrong curve.
 {
-  const { cubicBezier, easeInOutCubic } = await import('../../core/motion.js');
+  const { cubicBezier, easeInOutCubic } = await import('../../core/motion/motion.js');
   // An independent high-iteration bisection solve of the same curve: different algorithm, same answer.
   const ref = (x1, y1, x2, y2) => {
     const at = (u, a1, a2) => 3 * (1 - u) * (1 - u) * u * a1 + 3 * (1 - u) * u * u * a2 + u * u * u;
@@ -5150,8 +5150,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // multiple, outSpeed = frac * (delta / dur), the delta and the duration cancel and y1 = frac * x1.
 // These asserts are that cancellation, measured through the shipped code.
 {
-  const { handleCurve, cubicBezier, HANDLE_REGISTRY, resolveHandle } = await import('../../core/motion.js');
-  const { motionAt, keyHandleErrors, velocityAt } = await import('../../core/sequence.js');
+  const { handleCurve, cubicBezier, HANDLE_REGISTRY, resolveHandle } = await import('../../core/motion/motion.js');
+  const { motionAt, keyHandleErrors, velocityAt } = await import('../../core/timeline/sequence.js');
 
   // ONE HANDLE PAIR, EVERY PROPERTY. x, scale and rot share no scale, and the same key drives all
   // three to the SAME fractional progress. A speed term in absolute units could not do this.
@@ -5233,7 +5233,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // AND THE CLOCK. timeRemap keys are a key list with an `ease` per segment, exactly like a motion
   // track, so they take the same handles from the same solver rather than growing a second dial.
   // The units land better here than anywhere else: this segment's velocity IS a playback rate.
-  const { layerTime } = await import('../../core/time.js');
+  const { layerTime } = await import('../../core/timeline/time.js');
   const clock = (remap) => (t) => layerTime({ timeRemap: remap }, t, 0, 2);
   const evenly = clock([{ t: 0, at: 0 }, { t: 2, at: 2 }]);
   ok('a handleless timeRemap is still the straight line it always was',
@@ -5249,7 +5249,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     Math.abs(rate(fast, 1.98) - 4) < 0.6);
   // BAKED ONCE, NOT PER FRAME. layerTime runs once per layer per frame and used to re-validate every
   // key and, for a NAMED shape, allocate a fresh array on the way. bakeTimeRemap resolves it at boot.
-  const { bakeTimeRemap } = await import('../../core/time.js');
+  const { bakeTimeRemap } = await import('../../core/timeline/time.js');
   const baked = { timeRemap: 'whip', duration: 4 };
   bakeTimeRemap(baked);
   ok('bakeTimeRemap turns a named shape into seconds keys', Array.isArray(baked.timeRemap)
@@ -5275,7 +5275,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     keyHandleErrors([{ t: 0, at: 0, easeOut: 'fling' }, { t: 2, at: 2, ease: 'easeOutQuint' }], 'r').length === 1);
 
   // And the CAMERA gets all of it, because it shares segmentAt.
-  const { cameraAt } = await import('../../core/sequence.js');
+  const { cameraAt } = await import('../../core/timeline/sequence.js');
   const cam = [{ t: 0, s: 1, easeOut: 'hang' }, { t: 1, s: 2, easeIn: 'hang' }];
   ok('a camera key takes handles too', cameraAt(cam, 0.5).s === 1.5 && cameraAt(cam, 0.15).s < 1.05);
 }
@@ -5303,7 +5303,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // shutter exposes the SENSOR. These assert the two halves that make the feature right rather than
 // merely present: a still layer smears under a pan, and a layer travelling WITH the camera does not.
 {
-  const { cameraAt: camAtKf, cameraVelocityAt } = await import('../../core/sequence.js');
+  const { cameraAt: camAtKf, cameraVelocityAt } = await import('../../core/timeline/sequence.js');
   const { frame: motionFrame, resolveCameraBlur } = await import('../../core/tracks/motion.js');
   // linear on purpose, for the reason the velocityAt block above states: an eased segment would make
   // these assert the shape of easeInOutCubic instead of the shape of the read.
@@ -5532,9 +5532,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   } catch { /* asserted as empty below */ }
   ok('arsenal --list: the sweep dumps what it saw', keys.length > 100);
   ok('arsenal sees a digit-keyed vocabulary (ASPECTS: 16:9, 9:16, 1:1, ...)',
-    keys.includes('core/safe.js::ASPECTS'));
+    keys.includes('core/layout/safe.js::ASPECTS'));
   ok('arsenal sees a vocabulary shaped as a table of records (RANSOM_FACES)',
-    keys.includes('core/ransom.js::RANSOM_FACES'));
+    keys.includes('core/type/ransom.js::RANSOM_FACES'));
   ok('arsenal sees BOTH exports when two files share a name (PRESETS in lightfield and in kinetic)',
     keys.includes('core/lightfield/presets.js::PRESETS') && keys.includes('core/kinetic/presets.js::PRESETS'));
 }
@@ -6159,7 +6159,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // they are the two that decide whether the table means anything: that a guarded prop is probed with its
 // guard SET, and that `three` is asked once per preset claiming a dial rather than once per prop.
 {
-  const { watchProps, deadProps, auditedProps } = await import('../../core/prop-audit.js');
+  const { watchProps, deadProps, auditedProps } = await import('../../core/registry/prop-audit.js');
   const { probesOf, surfaceOf } = await import('./prop-probe.mjs');
 
   // deadProps is the ONE copy of the decision: read a key, and only the unread one comes back.
@@ -6225,7 +6225,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // was accepted and read by nothing: the author writes a pivot that travels and gets one that does not.
 // Every unknown key was in that position, not just origin: {"t":0,"rot":0,"zzNonsense":5} validated clean.
 {
-  const { resolveKeyedProps, KEYFRAME_PROPS } = await import('../../core/sequence.js');
+  const { resolveKeyedProps, KEYFRAME_PROPS } = await import('../../core/timeline/sequence.js');
   const track = (extra) => [{ id: 'probe', type: 'rect', motion: [{ t: 0, rot: 0, ...extra }, { t: 1, rot: 45 }] }];
   const refuses = (extra) => { try { resolveKeyedProps(track(extra)); return null; } catch (e) { return e.message; } };
 
@@ -6261,7 +6261,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // THE KEYABLE ANCHOR POINT. `origin` is static and always was; `ox`/`oy` are the travelling pivot,
   // as percentages of the layer's own box. A layer that never keys them must be untouched, because
   // every film in the library relies on that.
-  const { motionAt } = await import('../../core/sequence.js');
+  const { motionAt } = await import('../../core/timeline/sequence.js');
   const pivot = motionAt([{ t: 0, rot: 0, ox: 0, oy: 50 }, { t: 1, rot: 45, ox: 100, oy: 50 }], 0.5);
   ok('anchor: the pivot travels between the keys', pivot.ox === 50 && pivot.oy === 50);
   const noPivot = motionAt([{ t: 0, rot: 0 }, { t: 1, rot: 45 }], 0.5);
@@ -6284,7 +6284,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // thing that moves and a thing that is moved. Measured before it was built: 138 of the library's 283
 // motion tracks key position AND scale/rot/opacity together.
 {
-  const { motionAt } = await import('../../core/sequence.js');
+  const { motionAt } = await import('../../core/timeline/sequence.js');
   const kfs = [{ t: 0, x: 0, scale: 1, rot: 0 }, { t: 1, x: 100, scale: 2, rot: 90 }];
 
   // ABSENCE COSTS NOTHING AND CHANGES NOTHING. Every film in the library renders through this call,
@@ -6326,7 +6326,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // is asserted at the ends AND in the middle, because a curve that merely starts and finishes right is
 // exactly what a hold is not.
 {
-  const { EASINGS, resolveEasing } = await import('../../core/motion.js');
+  const { EASINGS, resolveEasing } = await import('../../core/motion/motion.js');
   const h = EASINGS.hold;
   ok('motion: hold does not travel anywhere inside its segment',
     [0, 0.01, 0.25, 0.5, 0.75, 0.99, 0.999999].every((t) => h(t) === 0));
@@ -6343,7 +6343,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // registries, and this asserts that it does: a film naming one cut has decided cuts are in play, so
 // the other 26 are a real omission rather than a guess.
 {
-  const { registries } = await import('../../core/registry.js');
+  const { registries } = await import('../../core/registry/registry.js');
   await import('../author/arsenal.mjs').catch(() => {});
   const cut = registries().find((r) => r.kind === 'cut');
   ok('arsenal --for: the cut vocabulary is reachable from the registry list', !!cut && cut.names.length > 20);
@@ -6770,7 +6770,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   };
 
   ok('vocab hook: silent on a file whose vocabularies are already known',
-    run(path.join(repoRoot, 'core/type.js')).code === 0);
+    run(path.join(repoRoot, 'core/type/type.js')).code === 0);
 
   const probe = path.join(repoRoot, 'core/tracks/idle.js');
   const original = fs.readFileSync(probe, 'utf8');
@@ -7066,7 +7066,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       ok('craft-live: a save on the capture path asks for both wall-clock times',
         cap.code === 2 && /CAPTURE PATH/.test(cap.out) && /wall-clock/.test(cap.out));
       ok('craft-live: an edit to core/ is not the capture path and is silent',
-        fire(path.join(repoRoot, 'core/clips.js')).code === 0);
+        fire(path.join(repoRoot, 'core/timeline/clips.js')).code === 0);
       ok('craft-live: an EXISTING gate is not a new gate', fire(path.join(repoRoot, 'scripts/gates/rung.mjs')).code === 0);
       // Assembled rather than written whole: a literal path here reads to doc-refs as a repo path the
       // docs promise, and the file exists for four lines.

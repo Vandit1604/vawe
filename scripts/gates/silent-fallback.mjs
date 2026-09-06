@@ -2,7 +2,7 @@
 //
 //   node scripts/gates/silent-fallback.mjs        ·        make silent-check
 //
-// WHY THIS IS A CHECK AND NOT FRAMEWORK. `core/registry.js` removes the ability to BUILD a registry with
+// WHY THIS IS A CHECK AND NOT FRAMEWORK. `core/registry/registry.js` removes the ability to BUILD a registry with
 // a fallback: `pick()` takes no such parameter. What it cannot do is stop somebody writing a fresh plain
 // object and indexing it by hand. That part needs a reader.
 //
@@ -67,7 +67,7 @@ const walk = (dir) => {
     const rel = `${dir}/${e.name}`;
     if (e.isDirectory()) { walk(rel); continue; }
     if (!/\.(js|mjs)$/.test(e.name)) continue;
-    if (rel.endsWith('core/registry.js')) continue;              // the primitive itself
+    if (rel.endsWith('core/registry/registry.js')) continue;     // the primitive itself
     const lines = fs.readFileSync(path.join(ROOT, rel), 'utf8').split('\n');
     lines.forEach((line, i) => {
       const t = line.trim();

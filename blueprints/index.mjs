@@ -4,7 +4,7 @@
 //
 // Placed in a scene as { "type": "beat", "beat": "<name>", "start": s, "dur": s, ...props } and expanded
 // by scripts/author/expand-blocks.mjs (make expand), the same path blocks use. Docs: docs/CRAFT/BLUEPRINTS.md.
-import { withBlurb, blurbsOf, defineRegistry } from '../core/registry.js';
+import { withBlurb, blurbsOf, defineRegistry } from '../core/registry/registry.js';
 import * as Beats from './beats.mjs';
 // The PICTORIAL beats, kept in their own files because three agents authored them in parallel and two
 // agents on one file is how a merge eats somebody's work. Split by where the motion was harvested

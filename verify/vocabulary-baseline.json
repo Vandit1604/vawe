@@ -26,7 +26,7 @@
  "core/backgrounds/presets.js": [
   "PRESETS"
  ],
- "core/boot.js": [
+ "core/engine/boot.js": [
   "PROPS"
  ],
  "core/camera-moves/index.js": [
@@ -40,11 +40,11 @@
   "CANVAS_FX",
   "CANVAS_FX_PRESETS"
  ],
- "core/captions.js": [
+ "core/type/captions.js": [
   "CAP_STYLES",
   "CAP_STYLE_SHAPE"
  ],
- "core/clips.js": [
+ "core/timeline/clips.js": [
   "ANIM",
   "ANIM_BLURBS"
  ],
@@ -61,12 +61,12 @@
   "TIMINGS",
   "TIMING_BLURBS"
  ],
- "core/effector.js": [
+ "core/motion/effector.js": [
   "FALLOFFS",
   "FALLOFF_BLURBS",
   "DRIVES"
  ],
- "core/filters.js": [
+ "core/looks/filters.js": [
   "FILTER_PRESETS",
   "FILTER_BLURBS",
   "THERMAL_REGION",
@@ -113,24 +113,24 @@
  "core/fx/upright.js": [
   "UPRIGHT_KEYS"
  ],
- "core/generators.js": [
+ "core/layout/generators.js": [
   "ALL_GENERATORS"
  ],
- "core/gsap-effects.js": [
+ "core/engine/gsap-effects.js": [
   "GSAP_BLURBS",
   "GSAP_EXIT_BLURBS",
   "GSAP_FX",
   "DEPRECATED_FX",
   "DEPRECATED_EXIT"
  ],
- "core/icons.js": [
+ "core/layout/icons.js": [
   "ICONS"
  ],
- "core/idle.js": [
+ "core/engine/idle.js": [
   "IDLE",
   "IDLE_BLURBS"
  ],
- "core/junctions.js": [
+ "core/timeline/junctions.js": [
   "JUNCTION_KINDS"
  ],
  "core/kinetic/presets.js": [
@@ -138,7 +138,7 @@
   "DECODE_CHARS",
   "DECODE_CHAR_BLURBS"
  ],
- "core/knobs.js": [
+ "core/registry/knobs.js": [
   "KNOBS",
   "UNIFORM_FAMILIES"
  ],
@@ -175,7 +175,7 @@
   "LOOKS",
   "LOOK_AKA"
  ],
- "core/motion.js": [
+ "core/motion/motion.js": [
   "EASINGS",
   "DEFAULT_MOTION"
  ],
@@ -183,17 +183,17 @@
   "PROPS",
   "PAINT_FX"
  ],
- "core/pan-resolve.mjs": [
+ "core/layout/pan-resolve.mjs": [
   "PROPS"
  ],
- "core/parts.js": [
+ "core/motion/parts.js": [
   "PARTS",
   "PART_BLURBS"
  ],
- "core/props.js": [
+ "core/registry/props.js": [
   "PROPS"
  ],
- "core/ransom.js": [
+ "core/type/ransom.js": [
   "RANSOM_FACES"
  ],
  "core/surfaces/raymarch-fx.js": [
@@ -206,16 +206,16 @@
  "core/resample/index.js": [
   "PROPS"
  ],
- "core/safe.js": [
+ "core/layout/safe.js": [
   "ASPECTS",
   "DESTINATIONS",
   "CAPTION_SKINS"
  ],
- "core/seams.js": [
+ "core/timeline/seams.js": [
   "SEAM_FX",
   "SEAM_BLURBS"
  ],
- "core/sequence.js": [
+ "core/timeline/sequence.js": [
   "LAYER_OWNED",
   "POSE",
   "KEYFRAME_PROPS"
@@ -223,13 +223,13 @@
  "core/surfaces/shaders-ambient.js": [
   "AMBIENT_SHADERS"
  ],
- "core/spectacle.js": [
+ "core/timeline/spectacle.js": [
   "SPECTACLE_KEYS"
  ],
  "core/tracks/spectrum.js": [
   "BANDS"
  ],
- "core/stings.js": [
+ "core/stings/index.js": [
   "SHADER_ID"
  ],
  "core/surfaces/globe.js": [
@@ -241,7 +241,7 @@
  "core/surfaces/shader.js": [
   "PROPS"
  ],
- "core/theme-contract.js": [
+ "core/registry/theme-contract.js": [
   "REQUIRED",
   "ON_INK"
  ],
@@ -298,10 +298,10 @@
  "core/transitions/units.js": [
   "UNITS"
  ],
- "core/type.js": [
+ "core/type/type.js": [
   "STAGGER_FROM_BLURBS"
  ],
- "core/vocab.js": [
+ "core/registry/vocab.js": [
   "FEEL",
   "DURATION",
   "CAMERA_WORDS",

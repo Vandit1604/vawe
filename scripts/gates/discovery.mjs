@@ -35,7 +35,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { collect } from '../author/arsenal.mjs';
-import { registries } from '../../core/registry.js';
+import { registries } from '../../core/registry/registry.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 

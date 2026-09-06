@@ -17,7 +17,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { ALL_GENERATORS, defaultsOf } from '../../core/generators.js';
+import { ALL_GENERATORS, defaultsOf } from '../../core/layout/generators.js';
 import { shoot } from './lightfield-shot.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

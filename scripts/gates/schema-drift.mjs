@@ -10,33 +10,33 @@
 //                                                  DROP a prop name is refused; --force overrides.
 //
 // THE PER-LAYER VOCABULARY IS GENERATED, NOT MAINTAINED. `schema.layerProps` is written by this file
-// from the PROPS declarations (core/props.js) and checked in; the gate fails when the committed block
+// from the PROPS declarations (core/registry/props.js) and checked in; the gate fails when the committed block
 // differs from what the declarations produce. It is TYPE-SCOPED, and that is the whole point: this
 // gate used to answer "is this prop in the schema?" by NAME over the flat `layers.item` map, so `src`
 // on an `html` layer was indistinguishable from `src` on an `image` layer and a third meaning would
 // have passed in silence. A name is not a fact about a layer; a name on a type is.
 import fs from 'node:fs';
-import { ANIM_NAMES } from '../../core/clips.js';
-import { KEYFRAME_PROPS } from '../../core/sequence.js';
-import { PRESET_REGISTRY } from '../../core/type.js';
+import { ANIM_NAMES } from '../../core/timeline/clips.js';
+import { KEYFRAME_PROPS } from '../../core/timeline/sequence.js';
+import { PRESET_REGISTRY } from '../../core/type/type.js';
 import { GLOW_REGISTRY } from '../../core/layers/glow.js';
 import { PARTICLES_REGISTRY } from '../../core/surfaces/particles.js';
-import { AMBIENT_FX } from '../../core/shaders-ambient.js';
-import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
-import { RESAMPLE_FX } from '../../core/resample-fx.js';
-import { RAYMARCH_FX } from '../../core/raymarch-fx.js';
-import { THREE_FX } from '../../core/three-scenes.js';
+import { AMBIENT_FX } from '../../core/surfaces/shaders-ambient.js';
+import { PAINT_FX_NAMES } from '../../core/surfaces/paint-fx.js';
+import { RESAMPLE_FX } from '../../core/resample/effects.js';
+import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
+import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS } from '../../core/layers/vocabulary.js';
 import { FX_TYPES } from '../../core/fx/index.js';
 import { BLEND_MODES } from '../../core/fx/mix-blend.js';
 import { ADJUST_REGISTRY } from '../../core/layers/adjust.js';
-import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
-import { SHADER_FX } from '../../core/stings.js';
-import { SEAM_FX } from '../../core/seams.js';
-import { SPECTACLE_DEVICES } from '../../core/knobs.js';
-import { BG_NAMES } from '../../core/backgrounds.js';
-import { CAP_STYLE_NAMES } from '../../core/captions.js';
+import { PRESENTATIONS, TIMINGS } from '../../core/cuts/index.js';
+import { SHADER_FX } from '../../core/stings/index.js';
+import { SEAM_FX } from '../../core/timeline/seams.js';
+import { SPECTACLE_DEVICES } from '../../core/registry/knobs.js';
+import { BG_NAMES } from '../../core/backgrounds/index.js';
+import { CAP_STYLE_NAMES } from '../../core/type/captions.js';
 import path from 'node:path';
 import { gateFindings } from '../lib/findings.mjs';
 
@@ -79,7 +79,7 @@ const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));
 // a guard is a question about one layer's other props and a static vocabulary cannot answer it.
 const vocabulary = {
   _generated: 'node scripts/gates/schema-drift.mjs --write - do not hand-edit',
-  _source: 'the PROPS declarations beside each read (core/props.js - core/layers/vocabulary.js)',
+  _source: 'the PROPS declarations beside each read (core/registry/props.js - core/layers/vocabulary.js)',
   shared: Object.keys(SHARED_PROPS).sort(),
   byType: Object.fromEntries(LAYER_TYPES.map((t) => [t, Object.keys(LAYER_PROPS[t]).sort()])),
 };

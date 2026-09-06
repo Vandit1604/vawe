@@ -28,10 +28,10 @@ import puppeteer from 'puppeteer';
 // Vocabulary is DERIVED from the registries, never restated here. A hand-typed list in a gate drifts
 // from the code the same way the schema label did (MISTAKES #21), and then the gate certifies the
 // drift. Importing means new vocabulary is swept the day it lands.
-import { ANIM_NAMES } from '../../core/clips.js';
-import { PRESETS } from '../../core/type.js';
-import { LOOK_NAMES } from '../../core/looks.js';
-import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
+import { ANIM_NAMES } from '../../core/timeline/clips.js';
+import { PRESETS } from '../../core/type/type.js';
+import { LOOK_NAMES } from '../../core/looks/index.js';
+import { CANVAS_FX_NAMES } from '../../core/canvas/effects.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 

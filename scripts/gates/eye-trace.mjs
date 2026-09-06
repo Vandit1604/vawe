@@ -65,11 +65,11 @@ import { fileURLToPath } from 'node:url';
 import { sceneTiming, boxOf, sceneView, num } from './scene-timing.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
-import { resolveCoords } from '../../core/boot.js';
-import { safeArea } from '../../core/safe.js';
-import { motionAt } from '../../core/sequence.js';
-import { bgPreset, bgPaletteFrom } from '../../core/backgrounds.js';
-import { parseColorRGB } from '../../core/motion.js';
+import { resolveCoords } from '../../core/engine/boot.js';
+import { safeArea } from '../../core/layout/safe.js';
+import { motionAt } from '../../core/timeline/sequence.js';
+import { bgPreset, bgPaletteFrom } from '../../core/backgrounds/index.js';
+import { parseColorRGB } from '../../core/motion/motion.js';
 import { gateFindings, emitJson } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
