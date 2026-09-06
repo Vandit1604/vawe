@@ -1,0 +1,74 @@
+---
+name: vawe-type-demo
+description: "Playbook for a product-mechanism demo in this engine: a cursor path, a real click, a visible consequence, a zoom. Load when the route table (docs/CRAFT/ROUTING.md) matches demo, or the request is to prove one mechanism, effect, or blueprint works, not to ship a full film."
+---
+
+# vawe-type-demo: the cursor-and-proof playbook
+
+A demo is not a launch film cut short: it proves ONE mechanism works, and its honesty depends on the
+click having a real, visible consequence. A cursor that clicks nothing, or a UI that changes on its own
+timer regardless of the click, is decoration wearing a demo's clothes.
+
+## The spine
+
+Hook naming the mechanism (2-3s) -> the demo itself: cursor arrives, clicks, consequence (3-5s) ->
+payoff naming what was proven (2-3s) -> close. Pace band: **2.5-4.5s per beat**. The demo beat itself
+can run longer than its neighbours: give the click room to read before the consequence lands.
+
+## What this type needs that others do not
+
+- **A real cursor path.** The `cursor` layer follows `path:[{t,x,y}]` (times LOCAL to the layer's own
+  `start`, coordinates absolute screen px when the layer carries no `x`/`y` of its own) and fires a
+  ripple at each time in `clicks:[t...]`.
+- **A click with a CONSEQUENCE.** Whatever changes after the click (a chip appears, a state flips) must
+  start at or just after the click time, never on its own independent schedule: the causality is the
+  whole point of a demo, and a coincidental timing reads as fake the moment anyone looks twice.
+- **A zoom, when the detail is small.** `ken` on the underlying `image`/`component`, or a `cameraMove`,
+  pushes into the part of the UI the click actually touches.
+- **The subject is a picture, not a blank rectangle.** `docs/CRAFT/SPECIMEN.md`'s own rule: a demo
+  proving nothing visual is not a demo, it is a slide with a caption.
+
+## The blueprints to reach for
+
+By role (`make blueprints` for the full 29):
+- **hook**: `kineticHook`, `typedHook`
+- **the mechanism itself**: no dedicated blueprint owns cursor+click; compose it from a real UI
+  (`component`/`image`/`html`) plus a `cursor` layer, or reach for `recordedPan`/`scrollStory` when the
+  proof is a captured surface wider or taller than the frame
+- **proof**: `verdictProof` (type a command, note the result, pop a verdict chip), `terminalReveal`
+- **close**: `ctaEnd`
+
+## The rules that matter most
+
+`docs/RULES/first-arrival.md` · `docs/RULES/motion-offsets.md` (the cursor's own `path` keyframes) ·
+`docs/RULES/text-on-flat.md` · `docs/CRAFT/SPECIMEN.md` (what makes a demo honest) ·
+`docs/CRAFT/SHOW-DONT-TELL.md`.
+
+## Assets and how to get them
+
+Prefer a real captured UI (`make capture`) over a hand-drawn panel; the worked example below uses a
+plain panel only because no real product was in scope, and says so in its `note`. A cursor demo never
+needs a video recording of a real click, since the engine draws and animates the pointer itself.
+
+## `make scaffold TYPE=demo`
+
+```bash
+make scaffold OUT=formats/scene/<name>.json TYPE=demo DUR=10
+```
+
+Composes `kineticHook -> recordedPan -> verdictProof -> ctaEnd` (`scripts/author/type-spines.mjs`) on
+`soft/ink` bg presets. `recordedPan` needs a real `image`/`capture`/`html` surface: the scaffold marks
+it `REPLACE:` since it cannot invent one for you; swap in a plain UI panel + `cursor` layer instead if
+the proof is a click rather than a pan.
+
+## What the judge weighs for this type
+
+Does the cursor actually land where it claims to click? Does something change ONLY after the click, not
+before or independently? Is the mechanism being proven nameable in one sentence? Is there a zoom or a
+push where the detail is small enough to need one?
+
+## The worked example
+
+`verify/evals/briefs/demo.json` (10s, 16:9). Shows: a `cursor` layer following a real path onto a
+button, a click ripple, and an "Exported." chip that appears only after the click, not on its own timer.
+No captured site here, a plain panel stands in for one (named in the scene `note`).
