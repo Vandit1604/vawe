@@ -140,8 +140,13 @@
       "bg": "var(--accent)",
       "radius": 10,
       "start": 2.95,
+      "duration": 2.65,
       "anim": "fade",
-      "enterDur": 0.3
+      "enterDur": 0.3,
+      "out": "none",
+      "exitDur": 0,
+      "becomes": "card",
+      "becomesDur": 0.9
     },
     {
       "type": "text",
@@ -171,7 +176,10 @@
       "h": 200,
       "bg": "var(--accent)",
       "radius": 16,
+      "start": 5.6,
       "duration": 2.05,
+      "anim": "none",
+      "enterDur": 0,
       "exitDur": 0.01
     },
     {
@@ -256,13 +264,6 @@
     {
       "t": 7.6,
       "style": "zoom"
-    }
-  ],
-  "matches": [
-    {
-      "at": "cut@1",
-      "from": "token",
-      "to": "card"
     }
   ],
   "bg": [

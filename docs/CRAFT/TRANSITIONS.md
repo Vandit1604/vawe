@@ -51,26 +51,27 @@ given transition is there.
 
 ## One surface to author them: the unified `transitions`
 
-The four mechanisms are the *machinery*; you rarely pick one by hand. Author a transition through **one
-field** and let the engine route it (core/transitions/lower.js), driven by the same catalog:
+The four mechanisms are the *machinery*; you rarely pick one by hand. Author a **boundary** transition
+(between two beats) through one top-level array and let the engine route it
+(core/transitions/lower.js), driven by the same catalog:
 
-- **Boundary** (between two beats): a top-level array:
-  ```json
-  "transitions": [{ "at": 9.7, "fx": "whipPan", "dur": 0.6, "dir": "left", "timing": "snappy" }]
-  ```
-  `fx` picks the mechanism: seam-only names (`whipPan`/`crossWarp`/`cinematicZoom`) → a two-scene
-  **seam**; `whip`/`punch`/`zoom` → a root **cut**; `glitch`/`chromaticSplit` → a **sting** overlay.
-  The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) resolve to a cheap root
-  **cut** by default; add `"mech": "seam"` to upgrade to the real GPU blend of both beats.
-- **Layer** entrance/exit: sugar over `anim`/`out`:
-  ```json
-  { "type": "text", "transition": { "in": "rise", "out": "slide-left", "dir": "left", "dur": 0.4 } }
-  ```
+```json
+"transitions": [{ "at": 9.7, "fx": "whipPan", "dur": 0.6, "dir": "left", "timing": "snappy" }]
+```
 
-This lowers to the raw `cuts`/`stings`/`seams`/`anim` fields at load, so everything above (easing,
-direction, the decision procedure) applies unchanged. The raw fields remain the low-level escape hatch;
-a raw value you also set on the same layer/beat wins. An `fx` that names nothing, or a layer-only anim
-used as a boundary (`pop`), is rejected at validate with the catalog, never silently coerced.
+`fx` picks the mechanism: seam-only names (`whipPan`/`crossWarp`/`cinematicZoom`) → a two-scene
+**seam**; `whip`/`punch`/`zoom` → a root **cut**; `glitch`/`chromaticSplit` → a **sting** overlay.
+The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) resolve to a cheap root
+**cut** by default; add `"mech": "seam"` to upgrade to the real GPU blend of both beats.
+
+This lowers to the raw `cuts`/`stings`/`seams` fields at load, so everything above (easing, direction,
+the decision procedure) applies unchanged. The raw fields remain the low-level escape hatch; a raw
+value you also set on the same beat wins. An `fx` that names nothing, or a layer-only anim used as a
+boundary (`pop`), is rejected at validate with the catalog, never silently coerced.
+
+A layer's own entrance/exit is `anim`/`out` directly (`docs/PRIMITIVES.md`), not a second sugar over
+the same two fields: a `transition: { in, out, dir, dur }` shorthand used to live here too and was
+removed for measuring zero users across the library while duplicating `anim`/`out` exactly.
 
 ---
 

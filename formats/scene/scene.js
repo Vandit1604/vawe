@@ -1,11 +1,11 @@
 import { boot } from '/core/engine/boot.js';
-import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions, bindMatchesToJunctions } from '/core/timeline/junctions.js';
+import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions } from '/core/timeline/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/motion/parts.js';
 import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg, stepClock } from '/core/motion/motion.js';
 import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, entranceWarp, BASE_ENTER, BASE_EXIT } from '/core/timeline/clips.js';
 import { splitText, circleText, decodeText, gsapStagger } from '/core/type/type.js';
 import { buildMorph } from '/core/motion/morph.js';
-import { FX_DUR, GSAP_REGISTRY, GSAP_EXIT_REGISTRY } from '/core/engine/gsap-effects.js';
+import { GSAP_REGISTRY } from '/core/engine/gsap-effects.js';
 import { ransomStyle } from '/core/type/ransom.js';
 import { capUnitWins, capShape, wordU, lineU, CAP_STYLES, CAP_STYLE_REGISTRY } from '/core/type/captions.js';
 import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds/index.js';
@@ -199,9 +199,9 @@ function resolveAnchors(data) {
 }
 
 boot((data, fps, theme, canvas) => {
-  // lower the unified `transitions`/`layers[].transition` surface into the raw cuts/stings/seams/
-  // anim fields BEFORE any parse below reads them. Pure + idempotent; a scene without the unified
-  // keys is untouched. Kept here (top of the callback) so every parser sees the lowered form.
+  // lower the unified `transitions` surface into the raw cuts/stings/seams fields BEFORE any parse
+  // below reads them. Pure + idempotent; a scene without the unified key is untouched. Kept here (top
+  // of the callback) so every parser sees the lowered form.
   //
   // block/beat/comp sugar is NOT expanded here: this file never imports core/engine/expand.js, on purpose
   // (core/engine/expand.js's own banner says why, and internal/render/expand.go is where that expansion
@@ -452,9 +452,6 @@ boot((data, fps, theme, canvas) => {
   // record covers the pre-passes below as well as the build itself.
   data.layers = (data.layers || []).map(watchProps);
   resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
-  // matches:[{at:"cut@1", from, to}] → the two named layers are retimed ONTO that joint and the
-  // handover is handed to `becomes` below. AFTER relative starts, so both layers carry a number.
-  bindMatchesToJunctions(data, BG_JUNCTIONS);
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
   // becomes:"<id>" is NOT resolved here. It needs the measured box of a layer that states no w/h, and
   // nothing is measured until the DOM exists, so it runs beside `baseSize` below (see resolveBecomes).
@@ -496,22 +493,6 @@ boot((data, fps, theme, canvas) => {
         const { name, dur, ease, delay, stagger, ...rest } = spec;
         fn(targets, { delay: (L.start ?? 0) + (delay || 0), stagger: stagger ?? (targets === units ? 0.04 : 0),
           ...(dur != null ? { duration: dur } : {}), ...(ease ? { ease } : {}), ...rest });
-      }
-    }
-    // NAMED GSAP EXIT (`fxOut`): anchored so the exit ENDS exactly at the layer's end (delay = end - dur).
-    // immediateRender:false (set at registration) holds the layer until then. Exclusive with `out` (validate).
-    if (L.fxOut && window.gsap) {
-      const spec = typeof L.fxOut === 'string' ? { name: L.fxOut } : (L.fxOut || {});
-      GSAP_EXIT_REGISTRY.pick(spec.name);   // was console.warn-and-skip; see `fx` above
-      const fn = window.gsap.effects[spec.name];
-      if (!fn) throw new Error(`fxOut "${spec.name}" is registered but GSAP has no such effect.`);
-      {
-        const { name, dur, ease, stagger, ...rest } = spec;
-        const d = dur ?? FX_DUR[spec.name] ?? 0.5;
-        const end = (L.start ?? 0) + (L.duration ?? 2);
-        const targets = (units && units.length) ? units : el;
-        fn(targets, { delay: Math.max(0, end - d), duration: d, stagger: stagger ?? 0,
-          ...(ease ? { ease } : {}), ...rest });
       }
     }
     // MOTION PATH (MotionPathPlugin): fly the layer along an SVG path. Closed-form position → pure in n.
@@ -600,7 +581,7 @@ boot((data, fps, theme, canvas) => {
     html: window.__html });
   // setLayerTiming: write the data-* attributes driveClips reads (start/duration/track/anim/enter/exit).
   // Enter/exit default to the base snap durations scaled by the theme's durationScale; a split layer
-  // enters instantly (units reveal themselves), and fxOut zeroes the fade so GSAP owns the exit alone.
+  // enters instantly, units reveal themselves.
   function setLayerTiming(el, L, idx) {
     // THE LAYER'S INDEX IN THE AUTHORED ARRAY. Nothing in the render reads it. It exists so a tool can
     // map a painted pixel back to the JSON that produced it: studio's picker hit-tests the frame and
@@ -657,8 +638,7 @@ boot((data, fps, theme, canvas) => {
     if (L.split) el.dataset.enter = '0';
     else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
     if (L.out) el.dataset.out = L.out;
-    if (L.fxOut) el.dataset.exitDur = '0';
-    else if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
+    if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
     else if (!L.cut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale * M.exitRatio).toFixed(3));
     // scene units: the beat WRAPPER owns the exit slide. Suppress this layer's own exit fade and keep it
     // alive through the wrapper's exit window, or it would vanish mid-slide. Non-last beats only (the
@@ -723,7 +703,7 @@ boot((data, fps, theme, canvas) => {
     // half, with no error. Group children (core/layers/util.js:187) always built-then-decorated,
     // which is why the same look was correct inside a group and broken outside one.
     renderer.kit.decorate(el, L);   // mask + filter/look + fade + reflect + logotype. ONE definition, shared with group children
-    applyGsapHooks(el, L, units);   // gsap / morph / fx / fxOut / motionPath / physics / splitText (all pure, seeked per frame)
+    applyGsapHooks(el, L, units);   // gsap / morph / fx / motionPath / physics / splitText (all pure, seeked per frame)
     // The read record is snapshotted HERE, the instant this layer's build finishes, and never later:
     // everything after this point (the frozen scene-view copies at specs, the per-frame pipeline)
     // reads layers in an order no worker agrees on, and a check that moved with it would not be a

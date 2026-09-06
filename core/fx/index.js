@@ -11,10 +11,10 @@
 // place and becomes a thing you do.
 //
 // AUTHOR-FACING NAME: `modifiers`, NOT `fx`. `L.fx` has been the named-GSAP-effect slot since
-// core/gsap-effects.js shipped (`fx:"popIn"` | `{name,dur,ease}` | `["blurIn","float"]`) and
-// `L.fxOut` is its exit half. Putting modifiers in the same array would have meant two dispatch
-// tables in one prop, told apart by whether an object carries a `name` key, and would have silently
-// changed two live behaviours: scene.js gates kinetic units on `!L.fx`, and applyGsapHooks warns
+// core/gsap-effects.js shipped (`fx:"zoomBlur"` | `{name,dur,ease}` | `["blurIn","float"]`). Putting
+// modifiers in the same array would have meant two dispatch tables in one prop, told apart by whether
+// an object carries a `name` key, and would have silently changed two live behaviours: scene.js gates
+// kinetic units on `!L.fx`, and applyGsapHooks warns
 // "unknown GSAP effect" for any item the effect registry does not know.
 import * as mixBlend from './mix-blend.js';
 import * as occlude from './occlude.js';

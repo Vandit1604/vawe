@@ -15,7 +15,7 @@ import { IDLE, IDLE_NAMES, IDLE_BLURBS, IDLE_IDENTITY, idleAt, idlePhase, idleTr
   normalizeIdle, settledGain } from '../../core/engine/idle.js';
 import { SEAM_BLURBS } from '../../core/timeline/seams.js';
 import { FX_TYPES, FX_BLURBS } from '../../core/fx/index.js';
-import { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS, LOOP_FX, ONESHOT_FX } from '../../core/engine/gsap-effects.js';
+import { GSAP_FX, GSAP_BLURBS, GSAP_REGISTRY, LOOP_FX, ONESHOT_FX } from '../../core/engine/gsap-effects.js';
 import { BG_NAMES, BG_BLURBS, gradientFill } from '../../core/backgrounds/index.js';
 import { GRADIENT_RECIPE_REGISTRY } from '../../core/backgrounds/gradient-recipes.js';
 import { RESAMPLE_BLURBS } from '../../core/resample/effects.js';
@@ -46,7 +46,7 @@ import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSni
 import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../author/schema-at.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
-import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions, bindMatchesToJunctions, MATCH_HANDOVER_SHARE } from '../../core/timeline/junctions.js';
+import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions } from '../../core/timeline/junctions.js';
 import { applyComposite } from '../../core/looks/index.js';
 import { bakeCanvasFx } from '../../core/canvas/effects.js';
 import { DIRS } from '../../core/cuts/index.js';
@@ -55,9 +55,8 @@ import { dialsOf } from '../../core/registry/props.js';
 import { resolveSpectacle } from '../../core/timeline/spectacle.js';
 import { okDir as seamDir } from '../../core/timeline/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
-import { DEPRECATED_FX, DEPRECATED_EXIT } from '../../core/engine/gsap-effects.js';
 import { produceBaseline } from '../../core/engine/produce.js';
-import { lintData, easeErrors, bgErrors, matchErrors, durationWordErrors, cssErrors } from '../../core/validate/validate.mjs';
+import { easeErrors, bgErrors, durationWordErrors, cssErrors } from '../../core/validate/validate.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/registry/vocab.js';
 import { BASE_ENTER } from '../../core/timeline/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts/index.js';
@@ -97,6 +96,7 @@ import { FX_PARAMS, bgOptKeys, bgOverErrors, bgPreset, applyBgOver } from '../..
 import { bandEnergies, sampleAt, BANDS } from '../../core/tracks/spectrum.js';
 import { ransomGlyph, ransomSwatches, RANSOM_FACES } from '../../core/type/ransom.js';
 import { boundaryMechanism, lowerScene, checkStingColor } from '../../core/transitions/lower.js';
+import { checkLayer } from '../../core/layers/vocabulary.js';
 import { ENERGY, okEnergy } from '../../core/transitions/energy.js';
 import { SEAM_FX } from '../../core/timeline/seams.js';
 import { SEAM_CUE } from '../../core/audio/cues.js';
@@ -270,9 +270,12 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
     const d = lowerScene({ layers: [{ type: 'group', children: [{ text: 'A', enterDur: 'medium' }] }] });
     return d.layers[0].children[0].enterDur === DURATION.medium;
   })());
-  ok('vocab: lowerScene carries a word through transition.dur', (() => {
-    const d = lowerScene({ layers: [{ text: 'A', transition: { in: 'rise', out: 'fade', dur: 'fast' } }] });
-    return d.layers[0].enterDur === DURATION.fast && d.layers[0].exitDur === DURATION.fast;
+  // `layers[].transition` (sugar over anim/out/dir/enterDur/exitDur) measured zero users and was
+  // removed (#gsap-audit). It must REFUSE now, not silently accept and ignore: an unknown prop, not a
+  // dead one that renders nothing.
+  ok('vocab: a layer carrying the removed `transition` sugar is refused, not ignored', (() => {
+    try { checkLayer({ type: 'text', transition: { in: 'rise' } }, {}, 'layers[0]'); return false; }
+    catch (e) { return /unknown prop `transition`/.test(e.message); }
   })());
   // feather/angle: the two seam knobs, carried by lowerScene's `transitions` -> `seams` push.
   ok('vocab: lowerScene carries feather from transitions into seams', (() => {
@@ -325,7 +328,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
   })());
   // The validator must accept what the renderer accepts and refuse what it refuses, at the entry point.
   ok('vocab: validate accepts a known duration word',
-    durationWordErrors({ layers: [{ enterDur: 'fast', transition: { dur: 'slow' } }] }).length === 0);
+    durationWordErrors({ layers: [{ enterDur: 'fast' }] }).length === 0);
   ok('vocab: validate refuses an unknown one, naming the slot', (() => {
     const e = durationWordErrors({ layers: [{ enterDur: 'quick' }] });
     return e.length === 1 && /layers\[0\]\.enterDur/.test(e[0]) && /unknown duration word/.test(e[0]);
@@ -2268,8 +2271,8 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // The part that the evidence demanded: three of the five stranded names were real names in a
   // NEIGHBOURING registry, so a failed pick says where the name actually lives.
   ok('registry: a name from another registry is diagnosed, not just rejected', (() => {
-    try { ANIM_REGISTRY.pick('popIn'); return false; }
-    catch (e) { return /gsap effect/.test(e.message) && /fx: "popIn"/.test(e.message); }
+    try { ANIM_REGISTRY.pick('bounceIn'); return false; }
+    catch (e) { return /gsap effect/.test(e.message) && /fx: "bounceIn"/.test(e.message); }
   })());
   ok('registry: `preset` names are diagnosed when written into `anim`', (() => {
     try { ANIM_REGISTRY.pick('down'); return false; }
@@ -2591,24 +2594,30 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('vocab: the direction vocabulary has ONE definition', DIRS.length === 4 && DIRS.join() === 'left,right,up,down');
 }
 
-// ---- deprecation: 16 gsap names that duplicate an `anim` exactly (#364) ----
+// ---- removal: 7 gsap entrances + the whole gsap exit family, all zero-user duplicates (#364) ----
 {
-  ok('deprecated: every deprecated name STILL resolves, a notice, not a removal',
-    Object.keys(DEPRECATED_FX).every((n) => GSAP_FX.includes(n))
-    && Object.keys(DEPRECATED_EXIT).every((n) => EXIT_FX.includes(n)));
-  ok('deprecated: each one names a REPLACEMENT, because "deprecated" alone is a scolding',
-    Object.values({ ...DEPRECATED_FX, ...DEPRECATED_EXIT }).every((v) => /^(anim|out):"/.test(v)));
+  // Deleted rather than kept as a "deprecated" notice: the 7 (fadeIn/fadeUp/fadeDown/flyLeft/flyRight/
+  // popIn/zoomIn) and the exit family (all 11) measured zero users across the library, and each of the
+  // 7 duplicated an `anim`/`out` preset exactly. An author who names one now gets REFUSED with the real
+  // word, not a warning that still renders the redundant vocabulary. `expandIn` was mapped as an
+  // eighth duplicate once; it is not one (animates `letterSpacing`, which no `anim` entry touches) and
+  // stays, tested in the survivors list below.
+  const gone = ['fadeIn', 'fadeUp', 'fadeDown', 'flyLeft', 'flyRight', 'popIn', 'zoomIn'];
+  ok('removed: none of the 7 deleted gsap entrances resolve any more',
+    gone.every((n) => !GSAP_FX.includes(n)) && gone.every((n) => !GSAP_REGISTRY.has(n)));
+  ok('removed: naming one throws, naming the family it belongs to', (() => {
+    try { GSAP_REGISTRY.pick('popIn'); return false; }
+    catch (e) { return /gsap effect/.test(e.message) && /popIn/.test(e.message); }
+  })());
+  ok('removed: fxOut is an unknown prop now, not a silently-ignored one', (() => {
+    try { checkLayer({ type: 'text', fxOut: 'fadeOut' }, {}, 'layers[0]'); return false; }
+    catch (e) { return /unknown prop `fxOut`/.test(e.message); }
+  })());
   // The ones that survive do something no `anim` can. A kinetic preset only works on a TEXT layer with
   // `split`, so bounceIn is NOT a duplicate of preset:"bounce" on an image, it is the only way.
-  ok('deprecated: the per-character effects and idle loops are KEPT',
-    ['charFold', 'charTilt', 'charBlurCascade', 'charOvershoot', 'float', 'breathe', 'wobble', 'heartbeat']
-      .every((n) => !DEPRECATED_FX[n]));
-  ok('deprecated: using one is a WARNING, not an error, it still renders', (() => {
-    const w = lintData({ layers: [{ type: 'text', fx: 'popIn' }] });
-    return w.some((m) => /deprecated/.test(m) && /anim:"pop"/.test(m));
-  })());
-  ok('deprecated: a kept effect produces no notice',
-    !lintData({ layers: [{ type: 'text', fx: 'charFold' }] }).some((m) => /deprecated/.test(m)));
+  ok('removed: the per-character effects, idle loops, zoomBlur and expandIn are KEPT',
+    ['zoomBlur', 'expandIn', 'charFold', 'charTilt', 'charBlurCascade', 'charOvershoot', 'float', 'breathe', 'wobble', 'heartbeat']
+      .every((n) => GSAP_FX.includes(n)));
 }
 
 // ---- junctions: name a moment by its JOINT, never by its time (core/timeline/junctions.js) ----
@@ -2677,61 +2686,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
       return errs.length === 0 && Array.isArray(cfg.transitions) && cfg.transitions.length === 1;
     })());
   }
-  // ---- the MATCH CUT: the joint owns the handover, and the engine produces the alignment ----
-  {
-    const film = () => ({
-      duration: 8, cuts: [{ t: 3, style: 'punch' }],
-      matches: [{ at: 'cut@0', from: 'dot', to: 'card' }],
-      layers: [{ id: 'dot', type: 'rect', start: 0.5, duration: 9 }, { id: 'card', type: 'rect', start: 6, duration: 2 }],
-    });
-    const bound = (d = film()) => { bindMatchesToJunctions(d, junctionTable(marksOf(d))); return d; };
-    const L = (d, id) => d.layers.find((x) => x.id === id);
-    {
-      const d = bound();
-      ok('match: the outgoing form ends ON the joint', L(d, 'dot').duration === 2.5);
-      ok('match: the incoming form opens ON the joint', L(d, 'card').start === 3);
-      ok('match: the handover is handed to `becomes`', L(d, 'dot').becomes === 'card' && L(d, 'dot').becomesDur === 0.9);
-      ok('match: neither form ramps across the joint',
-        L(d, 'dot').out === 'none' && L(d, 'dot').exitDur === 0 && L(d, 'card').anim === 'none' && L(d, 'card').enterDur === 0);
-      const again = JSON.stringify(d);
-      bindMatchesToJunctions(d, junctionTable(marksOf(d)));
-      ok('match: binding twice is a no-op', JSON.stringify(d) === again);
-    }
-    ok('match: an id that is not a layer throws and lists the ids', (() => {
-      const d = film(); d.matches[0].to = 'crd';
-      try { bound(d); return false; } catch (e) { return /to "crd" is not the id/.test(e.message) && /dot, card/.test(e.message); }
-    })());
-    ok('match: a joint the film does not have throws', (() => {
-      const d = film(); d.matches[0].at = 'cut@4';
-      try { bound(d); return false; } catch (e) { return /"cut@4" does not exist/.test(e.message); }
-    })());
-    ok('match: an entrance or exit on either form is refused, not overwritten', (() => {
-      const d = film(); d.layers[1].anim = 'rise';
-      try { bound(d); return false; } catch (e) { return /a match cut has no entrance and no exit/.test(e.message) && /anim:"rise"/.test(e.message); }
-    })());
-    ok('match: a handover that eats its own shot is refused', (() => {
-      const d = film(); d.duration = 3.6; d.matches[0].dur = 0.5;   // 0.5s of a 0.6s shot
-      try { bound(d); return false; } catch (e) { return /the eye reads a move, not a match/.test(e.message); }
-    })());
-    ok(`match: the handover ceiling is a third of the shot, and it is OURS`, MATCH_HANDOVER_SHARE === 0.33);
-    ok('match: beat-wrapped units that would tear the two forms apart are refused', (() => {
-      const d = film(); d.sceneUnits = true;
-      try { bound(d); return false; } catch (e) { return /carried apart at the very frame/.test(e.message) && /"sceneUnits": false/.test(e.message); }
-    })());
-    ok('match: a form that is not on screen before the joint is refused', (() => {
-      const d = film(); d.layers[0].start = 4;
-      try { bound(d); return false; } catch (e) { return /never on screen before the match/.test(e.message); }
-    })());
-    ok('match: a film that declares none is untouched', (() => {
-      const d = { layers: [{ id: 'a' }] }, before = JSON.stringify(d);
-      bindMatchesToJunctions(d, junctionTable([]));
-      return JSON.stringify(d) === before;
-    })());
-    ok('match: the validator catches it without a render', (() => {
-      const d = film(); d.matches[0].from = 'nope';
-      return matchErrors(d).some((m) => /from "nope" is not the id/.test(m));
-    })());
-  }
+  // `matches` (a top-level array binding two layers onto a junction, via bindMatchesToJunctions) used
+  // to have its own test block here. Deleted with the mechanism: it measured ONE use across the whole
+  // library and its only value over writing `becomes`/`duration`/`start` by hand was retiming onto a
+  // named joint, on that one scene (docs/MISTAKES.md #364-adjacent). `becomes` itself is still tested
+  // by lib-test's produce.js coverage below.
 
   // The grammar has ONE definition now. audio-bridges established it and backgrounds reuse it; two
   // hand-kept copies of a definition is MISTAKES #159 exactly.
@@ -3285,11 +3244,11 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('transitions: layer-only anim rejected as a boundary', throws(() => boundaryMechanism('pop')));
   ok('transitions: unknown fx rejected', throws(() => boundaryMechanism('definitely-not-a-fx')));
   ok('transitions: mech mismatch rejected', throws(() => boundaryMechanism('whipPan', 'cut')));
-  // lowering expands + consumes the unified keys, in place, idempotently
-  const d = lowerScene({ layers: [{ text: 'A', transition: { in: 'rise', dur: 0.4 } }], transitions: [{ at: 2, fx: 'whipPan', dur: 0.6, timing: 'snappy' }] });
+  // lowering expands + consumes the unified boundary key, in place, idempotently. The per-layer
+  // `transition` sugar it used to lower too is gone (zero users, exact anim/out duplicate, #gsap-audit).
+  const d = lowerScene({ layers: [{ text: 'A' }], transitions: [{ at: 2, fx: 'whipPan', dur: 0.6, timing: 'snappy' }] });
   ok('transitions: boundary lowers to a seam', Array.isArray(d.seams) && d.seams[0].t === 2 && d.seams[0].fx === 'whipPan' && d.seams[0].timing === 'snappy');
-  ok('transitions: unified keys are consumed', !('transitions' in d) && !('transition' in d.layers[0]));
-  ok('transitions: layer transition lowers to anim/enterDur', d.layers[0].anim === 'rise' && d.layers[0].enterDur === 0.4);
+  ok('transitions: unified boundary key is consumed', !('transitions' in d));
   ok('transitions: ambiguous basic lowers to a cut', (() => { const x = lowerScene({ transitions: [{ at: 1, fx: 'slide', dir: 'left' }] }); return Array.isArray(x.cuts) && x.cuts[0].style === 'slide'; })());
   ok('transitions: lowering is idempotent (no-op second pass)', (() => { const x = lowerScene(lowerScene({ transitions: [{ at: 1, fx: 'fade' }] })); return x.cuts.length === 1; })());
   ok('transitions: a scene with no unified keys is untouched', (() => { const src = { layers: [{ text: 'x' }], cuts: [{ t: 1, style: 'fade' }] }; const x = lowerScene(src); return x.cuts.length === 1 && !('transitions' in x); })());
@@ -3652,7 +3611,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['SEAM_FX', SEAM_FX, SEAM_BLURBS],
     ['FX_TYPES', FX_TYPES, FX_BLURBS],
     ['GSAP_FX', GSAP_FX, GSAP_BLURBS],
-    ['EXIT_FX', EXIT_FX, GSAP_EXIT_BLURBS],
     ['BG_NAMES', BG_NAMES, BG_BLURBS],
     ['RESAMPLE_FX', RESAMPLE_FX, RESAMPLE_BLURBS],
     ['CAP_STYLE_NAMES', CAP_STYLE_NAMES, CAPTION_BLURBS],
@@ -4071,17 +4029,14 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   } catch (e) { threw = e.message; }
   ok('becomes refuses a form with no box rather than guessing one', /no box to match against/.test(threw) && /ghost/.test(threw));
 
-  // matches:[{at,from,to}] is the authoring front door and it hands the geometry to resolveBecomes, so
-  // the same measurement has to reach through it. It never touches w/h itself.
+  // A hand-authored `becomes` (the front door for a match cut, now that `matches` is gone) hands the
+  // same geometry to resolveBecomes: it never touches w/h itself.
   {
-    const from = { id: 'word', type: 'text', x: 300, y: 420, start: 0, duration: 5 };
-    const to = { id: 'card', type: 'rect', x: 660, y: 340, w: 600, h: 400, start: 4, duration: 4 };
-    const scene = { duration: 8, sceneUnits: false, cuts: [{ t: 3, style: 'none' }], layers: [from, to],
-      matches: [{ at: 'cut@0', from: 'word', to: 'card' }] };
-    bindMatchesToJunctions(scene, junctionTable(marksOf(scene)));
-    ok('matches hands the pair to becomes', from.becomes === 'card' && to.start === 3);
+    const from = { id: 'word', type: 'text', x: 300, y: 420, start: 0, duration: 3, becomes: 'card' };
+    const to = { id: 'card', type: 'rect', x: 660, y: 340, w: 600, h: 400, start: 3, duration: 4 };
+    const scene = { duration: 8, sceneUnits: false, cuts: [{ t: 3, style: 'none' }], layers: [from, to] };
     resolveBecomes(scene, (L) => (L === from ? { w: 780, h: 187 } : null));
-    ok('a matched handover is measured too', to.motion[0].scale === +Math.max(780 / 600, 187 / 400).toFixed(3));
+    ok('a hand-authored becomes handover is measured too', to.motion[0].scale === +Math.max(780 / 600, 187 / 400).toFixed(3));
   }
 }
 
@@ -4801,7 +4756,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const derived = new Set([...swept, PARTS_TRIGGER, COMP_TRIGGER]);
   const missing = [...derived].filter((k) => !GSAP_PROPS.includes(k));
   const stale = GSAP_PROPS.filter((k) => !derived.has(k));
-  ok(`the sweep finds the GSAP hooks at all (found ${swept.size})`, swept.size >= 7);
+  // 7 -> 6 when `fxOut` (the named GSAP exit family) was deleted for zero users: its
+  // `if (L.fxOut && window.gsap)` hook went with it (docs/MISTAKES.md #364).
+  ok(`the sweep finds the GSAP hooks at all (found ${swept.size})`, swept.size >= 6);
   ok(`every prop read behind window.gsap triggers the preload${missing.length ? ': MISSING ' + missing.join(', ') : ''}`,
     missing.length === 0);
   ok(`every preload trigger has a reader${stale.length ? ': STALE ' + stale.join(', ') : ''}`,
@@ -5821,7 +5778,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['camera pushes slowly closer to tighten focus', 'push in'],                                          // camera word
     ['a 3d phone device turning with a real app screen on it', 'deviceShowcase'],                         // three scene
     ['make this move feel snappy and springy', 'snappy'],                                                 // feel word
-    ['layer flies off to the left as it leaves', 'flyOutLeft'],                                           // gsap exit
     ['a glassy transparent cube that bends and splits light like a prism', 'glassRefract'],               // raymarch
     ['a heavy hit that lands hard', 'impact'],                                                            // motion voice
     ['make it look like a newspaper print with dots', 'halftone'],                                        // canvas fx
