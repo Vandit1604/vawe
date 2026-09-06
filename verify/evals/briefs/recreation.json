@@ -1,0 +1,48 @@
+{
+ "module": "scene",
+ "note": "RECREATION worked example (docs/EVALS.md, skills/vawe-type-recreation/SKILL.md). Takes the GRAMMAR studied off grammar/framer-hero.json (make study), never its frames or brand: a prompt types, the generated artefact builds in beside it with no hard cut, and the SAME artefact is later shown from a different angle (the reference's own 'it is really finished' payoff, three viewports at once). Content here is generic (a made-up pricing page, no captured UI, no real brand), only the device is recreated. Dark ground throughout, matching the reference's own dark-to-dark. Theme vawe.",
+ "theme": "vawe",
+ "aspect": "16:9",
+ "duration": 11,
+ "energy": "calm",
+ "sceneUnits": true,
+ "audio": { "silent": true, "_why": "worked example: proving the recreated device, not a mix" },
+ "bg": [ { "preset": "ink" } ],
+ "transitions": [
+  { "at": 3.4, "fx": "dissolve", "dur": 0.6 },
+  { "at": 6.4, "fx": "dissolve", "dur": 0.6 },
+  { "at": 9.0, "fx": "dissolve", "dur": 0.5 }
+ ],
+ "layers": [
+  { "type": "text", "text": "PROMPT", "font": "mono", "size": 24, "weight": 600, "color": "var(--dim)", "tracking": "0.2em", "x": 160, "y": 160, "start": 0.2, "duration": 2.4, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "rect", "x": 160, "y": 210, "w": 760, "h": 90, "radius": 14, "fill": "var(--surface-2)", "start": 0.2, "duration": 2.4, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "design a pricing page", "size": 34, "weight": 600, "color": "var(--ink)", "x": 194, "y": 236, "w": 700, "start": 0.4, "duration": 2.1, "typing": 16, "anim": "none", "out": "fade", "exitDur": 0.3 },
+
+  { "type": "rect", "x": 160, "y": 340, "w": 1040, "h": 620, "radius": 18, "fill": "var(--surface-2)", "start": 2.6, "duration": 6.0, "anim": "slide-right", "enterDur": 0.55, "out": "fade", "exitDur": 0.35, "acrossBeats": true },
+  { "type": "text", "text": "Pricing", "size": 40, "weight": 650, "color": "var(--ink)", "x": 200, "y": 380, "start": 3.0, "duration": 3.2, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3, "acrossBeats": true },
+  { "type": "group", "x": 200, "y": 460, "w": 960, "layout": "row", "gap": 24, "start": 3.2, "duration": 3.0, "anim": "pop", "enterDur": 0.35, "each": 0.12, "out": "fade", "exitDur": 0.3, "acrossBeats": true, "children": [
+    { "type": "rect", "w": 280, "h": 320, "radius": 12, "fill": "var(--line)" },
+    { "type": "rect", "w": 280, "h": 320, "radius": 12, "fill": "var(--accent-dim)" },
+    { "type": "rect", "w": 280, "h": 320, "radius": 12, "fill": "var(--line)" }
+  ] },
+
+  { "type": "text", "text": "the SAME page, from a different angle", "size": 46, "weight": 620, "w": 1500, "x": 160, "y": 200, "start": 6.6, "duration": 2.2, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "group", "x": 160, "y": 320, "w": 1600, "layout": "row", "items": "center", "gap": 56, "start": 9.1, "duration": 1.7, "anim": "pop", "enterDur": 0.4, "each": 0.15, "out": "fade", "exitDur": 0, "children": [
+    { "type": "rect", "w": 260, "h": 156, "radius": 10, "fill": "var(--surface-2)" },
+    { "type": "rect", "w": 420, "h": 252, "radius": 14, "fill": "var(--surface-2)" },
+    { "type": "rect", "w": 620, "h": 372, "radius": 18, "fill": "var(--surface-2)" }
+  ] },
+  { "type": "text", "text": "it is really finished.", "size": 44, "weight": 620, "color": "var(--dim)", "x": 160, "y": 780, "start": 9.6, "duration": 1.2, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0 },
+
+  { "type": "rect", "w": 90, "h": 5, "radius": 3, "x": 160, "y": 148, "fill": "var(--accent)", "start": 0, "duration": 11, "acrossBeats": true,
+    "motion": [
+      { "t": 0, "x": 0 },
+      { "t": 3.4, "x": 30, "ease": "easeInOutSine" },
+      { "t": 6.4, "x": -20, "ease": "easeInOutSine" },
+      { "t": 9.0, "x": 40, "ease": "easeInOutSine" },
+      { "t": 11, "x": 0, "ease": "easeInOutSine" }
+    ]
+  }
+ ]
+}

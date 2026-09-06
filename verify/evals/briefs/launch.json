@@ -1,0 +1,50 @@
+{
+ "module": "scene",
+ "note": "LAUNCH worked example (docs/EVALS.md, skills/vawe-type-launch/SKILL.md). Captured UI (assets/brands/vawe/stills/glass-hero.png, a real product shot, not invented) carries the build beat; the payoff shows a real engine fact (5 real canvases) instead of a slogan; the wave mark gets its own beat, never a bullet next to a headline. The wordmark travels bottom-left across every cut: the continuous object. Theme vawe, white-first cobalt.",
+ "theme": "vawe",
+ "aspect": "16:9",
+ "duration": 13,
+ "energy": "brand",
+ "sceneUnits": true,
+ "audio": { "silent": true, "_why": "worked example: proving the type spine and captured-UI show-not-tell, not a mix" },
+ "bg": [
+  { "from": 0, "to": 2.6, "preset": "paper" },
+  { "from": 2.6, "to": 6.5, "preset": "soft" },
+  { "from": 6.5, "to": 9.5, "preset": "dotmatrix" },
+  { "from": 9.5, "to": 13, "preset": "paperShapes" }
+ ],
+ "transitions": [
+  { "at": 2.6, "fx": "fade", "dur": 0.5 },
+  { "at": 6.5, "fx": "cinematicZoom", "dur": 0.6 },
+  { "at": 9.5, "fx": "fade", "dur": 0.5 }
+ ],
+ "layers": [
+  { "type": "text", "text": "VAWE", "font": "mono", "size": 30, "weight": 600, "color": "var(--dim)", "tracking": "0.24em", "x": 150, "y": 180, "start": 0.1, "duration": 2.3, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "One JSON becomes <b>any canvas.</b>", "size": 92, "weight": 640, "tracking": "-0.02em", "w": 1500, "x": 150, "y": 280, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0.3, "duration": 2.1, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "text", "text": "the real product surface, captured", "size": 44, "weight": 600, "color": "var(--text-2)", "w": 1000, "x": 150, "y": 150, "start": 2.7, "duration": 3.6, "anim": "slide-up", "enterDur": 0.45, "out": "fade", "exitDur": 0.3 },
+  { "type": "image", "src": "/assets/brands/vawe/stills/glass-hero.png", "x": 340, "y": 300, "w": 1240, "h": 698, "radius": 16, "start": 2.9, "duration": 3.3, "anim": "scale", "enterDur": 0.55, "out": "defocus", "exitDur": 0.4, "ken": { "from": 1.0, "to": 1.12 } },
+
+  { "type": "text", "text": "five real canvases, one JSON", "size": 56, "weight": 600, "w": 1400, "x": 150, "y": 190, "start": 6.6, "duration": 2.7, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+  { "type": "group", "x": 150, "y": 340, "w": 1600, "layout": "row", "gap": 24, "start": 6.9, "duration": 2.3, "anim": "pop", "enterDur": 0.4, "each": 0.09, "out": "fade", "exitDur": 0.3, "children": [
+    { "type": "text", "text": "16:9", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
+    { "type": "text", "text": "9:16", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
+    { "type": "text", "text": "1:1", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
+    { "type": "text", "text": "4:5", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
+    { "type": "text", "text": "4:3", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" }
+  ] },
+
+  { "type": "svg", "x": 150, "y": 250, "w": 130, "h": 68, "viewBox": "0 0 46 24", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "draw": { "dur": 0.9, "weight": 4, "ease": "easeInOutCubic" }, "start": 9.7, "duration": 3.1, "anim": "none", "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "vawe.dev", "size": 84, "weight": 650, "color": "var(--ink)", "x": 150, "y": 420, "start": 10.3, "duration": 2.5, "anim": "slide-up", "enterDur": 0.45, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "24 layers. 693 effects. one render.", "size": 36, "weight": 500, "color": "var(--dim)", "x": 150, "y": 540, "start": 10.7, "duration": 2.1, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
+
+  { "type": "svg", "x": 150, "y": 940, "w": 92, "h": 48, "viewBox": "0 0 46 24", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "start": 0, "duration": 13,
+    "motion": [
+      { "t": 0, "x": 0 },
+      { "t": 4.3, "x": 260, "ease": "easeInOutSine" },
+      { "t": 8.6, "x": 520, "ease": "easeInOutSine" },
+      { "t": 13, "x": 780, "ease": "easeInOutSine" }
+    ]
+  }
+ ]
+}

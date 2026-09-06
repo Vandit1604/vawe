@@ -1,0 +1,20 @@
+{
+ "module": "scene",
+ "note": "STING worked example (docs/EVALS.md, skills/vawe-type-sting/SKILL.md). One move, the mark, six seconds: the wave draws itself on stroke by stroke, resolves to a fill, and the wordmark settles in behind it. No cuts, no second beat: `BLACK MEANS #000000` (AGENTS.md) since the brief calls for a true black bumper. Theme vawe.",
+ "theme": "vawe",
+ "aspect": "16:9",
+ "duration": 6,
+ "energy": "brand",
+ "audio": { "silent": true, "_why": "worked example: one silent move, no music decision to make yet" },
+ "bg": [ { "preset": "black" } ],
+ "layers": [
+  { "type": "svg", "x": 810, "y": 380, "w": 300, "h": 156, "viewBox": "0 0 46 24",
+    "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "fill": "var(--accent)",
+    "draw": { "dur": 1.3, "weight": 5, "fillDur": 0.5, "ease": "easeInOutCubic" },
+    "start": 0.2, "duration": 5.6, "anim": "none", "out": "fade", "exitDur": 0.4,
+    "motion": [ { "t": 0, "scale": 0.7 }, { "t": 1.8, "scale": 1.0, "ease": "easeOutCubic" }, { "t": 5.6, "scale": 1.04, "ease": "easeInOutSine" } ]
+  },
+  { "type": "text", "text": "vawe", "size": 104, "weight": 650, "color": "#ffffff", "align": "center", "x": 660, "y": 590, "w": 600, "start": 1.6, "duration": 4.2, "anim": "fade", "enterDur": 0.6, "out": "fade", "exitDur": 0.4 },
+  { "type": "text", "text": "one JSON. any canvas.", "size": 32, "weight": 500, "color": "rgba(255,255,255,0.55)", "align": "center", "x": 660, "y": 706, "w": 600, "font": "mono", "start": 2.4, "duration": 3.4, "anim": "fade", "enterDur": 0.5, "out": "fade", "exitDur": 0.4 }
+ ]
+}
