@@ -1,4 +1,4 @@
-// mcp/pipeline.mjs — scene JSON in, rendered file out, with the private half of the engine applied.
+// mcp/pipeline.mjs. Scene JSON in, rendered file out, with the private half of the engine applied.
 //
 // THE SPLIT THIS FILE EXISTS TO ENFORCE. The authoring vocabulary (schema, look/sting/cut names) is
 // already public in site/public/vawe-rules.md, so a caller's own model can write a scene from it and
@@ -63,7 +63,7 @@ export function illegalRefs(scene) {
 }
 
 /**
- * validate ONLY. Pure JSON, no browser, back in well under a second — which is why it is the only
+ * validate ONLY. Pure JSON, no browser, back in well under a second, which is why it is the only
  * thing a tool call may wait for. Everything else (expand, designspec, ledger, audit) opens Chrome and can
  * outlast an MCP client's 60s cancel, so it belongs behind the async boundary with the render.
  */
@@ -107,7 +107,7 @@ export async function render(scenePath, outFile, { watermark = true, aspect } = 
   const args = [scenePath, '--out', outFile];
   if (aspect) args.push('--aspect', aspect);
   if (watermark) {
-    if (!fs.existsSync(WATERMARK)) throw new Error('watermark sheet missing — run `make watermark`');
+    if (!fs.existsSync(WATERMARK)) throw new Error('watermark sheet missing: run `make watermark`');
     args.push('--watermark', WATERMARK);
   }
   const r = await step(path.join(repoRoot, 'bin/vawe'), args);

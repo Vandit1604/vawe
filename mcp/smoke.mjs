@@ -1,4 +1,4 @@
-// mcp/smoke.mjs — end-to-end check that the MCP server actually works: `node mcp/smoke.mjs`.
+// mcp/smoke.mjs. End-to-end check that the MCP server actually works: `node mcp/smoke.mjs`.
 //
 // Speaks the real protocol over stdio rather than importing the handlers, because the failures worth
 // catching here are wiring failures (a tool that never registered, a schema the client rejects), and
@@ -18,7 +18,7 @@ const SCENE = {
   module: 'scene', theme: 'vawe', aspect: '16:9', duration: 2, audio: { silent: true },
   // `bg` is REQUIRED, and this scene declared none: it painted a full-canvas rect instead, which the
   // validator does not accept as a backdrop (a scrim is a layer wearing a backdrop's clothes). So the one
-  // thing that exercises the MCP path has been failing at `draft not accepted` — and it is wired to no
+  // thing that exercises the MCP path has been failing at `draft not accepted`, and it is wired to no
   // make target, so nothing said so. Verified identical at HEAD before this line was added.
   bg: [{ t: 0, preset: 'plain', value: 'dark' }],
   layers: [
@@ -42,7 +42,7 @@ for (const want of ['vawe_draft', 'vawe_export', 'vawe_guide', 'vawe_status']) {
 const guide = await client.callTool({ name: 'vawe_guide', arguments: {} });
 const guideLen = guide.content[0].text.length;
 console.log(`✓ vawe_guide → ${(guideLen / 1024).toFixed(0)}KB of vocabulary + schema`);
-if (guideLen < 2000) { console.error('✗ guide looks empty — is site/public/vawe-rules.md present?'); process.exit(1); }
+if (guideLen < 2000) { console.error('✗ guide looks empty: is site/public/vawe-rules.md present?'); process.exit(1); }
 
 // ── adversarial: the leak vectors must be refused, always. This is the regression that keeps the
 // wall shut; if any of these ever renders instead of refusing, a stranger can read the repo. ────────

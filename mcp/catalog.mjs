@@ -1,4 +1,4 @@
-// mcp/catalog.mjs — read-only introspection: worked examples to learn from, and the full block +
+// mcp/catalog.mjs. Read-only introspection: worked examples to learn from, and the full block +
 // effect vocabulary. Nothing here fetches or writes; it reads the engine's own registries so the
 // numbers can never drift from what actually ships.
 import fs from 'node:fs';
@@ -64,13 +64,13 @@ export async function capabilities() {
     import(path.join(repoRoot, 'core/timeline/clips.js')),
     import(path.join(repoRoot, 'core/engine/gsap-effects.js')),
   ]);
-  // A look's meaning is its REGISTER — the era it evokes — which is what an author picks between, and it
+  // A look's meaning is its REGISTER (the era it evokes), which is what an author picks between, and it
   // is already complete and gated in docs/CRAFT/SELECTION.md §4.
   const REGISTERS = registersOf(fs.readFileSync(path.join(repoRoot, 'docs/CRAFT/SELECTION.md'), 'utf8'));
   const blocks = CATALOG.filter((e) => !e.overlay);
   const families = [...new Set(blocks.map((e) => e.family))];
   // Names WITH their meanings. These three crossed the wire as bare strings while `blocks` right below
-  // them carried a `blurb` — so a client learned what a block was and never what a look, a preset or a cut
+  // them carried a `blurb`, so a client learned what a block was and never what a look, a preset or a cut
   // is. The descriptions exist now (each beside its own registry), so shipping the name alone is a choice
   // to withhold them.
   return {
@@ -79,7 +79,7 @@ export async function capabilities() {
     cuts: Object.keys(PRESENTATIONS).map((n) => ({ name: n, blurb: CUT_BLURBS[n] || null })),
     // The rest of the transition and entrance vocabulary, which was still going over as nothing at all.
     // A caller choosing between `whipPan` and `crossWarp`, or between `rise` and `defocus`, had the names
-    // and no way to tell them apart — so it picked by the sound of the word.
+    // and no way to tell them apart, so it picked by the sound of the word.
     stings: SHADER_FX.map((n) => ({ name: n, blurb: REGISTERS.sting[n] || null })),
     seams: SEAM_FX.map((n) => ({ name: n, blurb: SEAM_BLURBS[n] || null })),
     anims: ANIM_NAMES.map((n) => ({ name: n, blurb: ANIM_BLURBS[n] || null })),

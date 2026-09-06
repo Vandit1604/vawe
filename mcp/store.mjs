@@ -1,4 +1,4 @@
-// mcp/store.mjs — the video record. One JSON file per video under VAWE_DATA (default .vawe-data/).
+// mcp/store.mjs. The video record. One JSON file per video under VAWE_DATA (default .vawe-data/).
 //
 // Deliberately a flat file store, not a database. A video's whole life is: a scene was submitted, a
 // draft was rendered, maybe it was paid for, maybe a clean file exists. That is four fields and no
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 // Default INSIDE the repo, not process.cwd(). The renderer serves the scene to headless Chrome from
 // a static file server rooted at the repo, so a scene written anywhere else is fetched as a Go 404
-// page and the browser reports `Unexpected non-whitespace character after JSON at position 4` —
+// page and the browser reports `Unexpected non-whitespace character after JSON at position 4`,
 // which is JSON.parse("404 page not found"). Using cwd worked only when the server happened to be
 // started from the repo, i.e. in every test and no real session.
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

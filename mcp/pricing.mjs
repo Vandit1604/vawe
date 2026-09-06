@@ -1,10 +1,10 @@
-// mcp/pricing.mjs — what a finished video costs, and whether this one is paid for.
+// mcp/pricing.mjs. What a finished video costs, and whether this one is paid for.
 //
 // PRICED BY DURATION, NOT PER VIDEO. A 12-second launch clip and a 60-second brand film are not the
 // same product: the film costs several times the render and is worth several times more. A flat fee
 // overcharges the clip, undercharges the film, and pushes everyone toward the long one.
 //
-// DRAFTS ARE FREE ON PURPOSE. Authoring a good video takes many renders — the reference film in this
+// DRAFTS ARE FREE ON PURPOSE. Authoring a good video takes many renders: the reference film in this
 // repo took about ten, and each pass fixed something real. Charging per render taxes the loop that
 // makes videos good, and people ship their third attempt instead of their tenth. So: iterate free
 // with a watermark, pay once at the moment of value, which is the clean file.

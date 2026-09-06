@@ -1,4 +1,4 @@
-// mcp/net.mjs — the one guarded way this server fetches a URL a caller influenced.
+// mcp/net.mjs. The one guarded way this server fetches a URL a caller influenced.
 //
 // The tools that reach the network (logo, photo, reflect) are how a stranger points this server at a
 // URL. Unguarded, that is a server-side request forgery: a caller asks for a "logo" at

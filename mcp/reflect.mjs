@@ -1,8 +1,8 @@
-// mcp/reflect.mjs — read a real site's palette and faces so a video can be authored in the brand's
+// mcp/reflect.mjs. Read a real site's palette and faces so a video can be authored in the brand's
 // own colours instead of invented ones.
 //
 // DELIBERATELY NO BROWSER. The repo can screenshot a site with puppeteer, but a headless browser
-// pointed at a caller's URL fetches whatever that page tells it to, straight past the SSRF guard —
+// pointed at a caller's URL fetches whatever that page tells it to, straight past the SSRF guard:
 // the metadata endpoint, an internal service, anything. So this reads the HTML (and its stylesheets)
 // through safeFetch and extracts the signal from the source. It returns the colours and font names,
 // not a screenshot. Less than the full `make sections` pipeline, and safe to expose to strangers.
@@ -34,7 +34,7 @@ export async function reflect(rawUrl) {
   const url = /^https?:\/\//i.test(rawUrl) ? rawUrl : 'https://' + rawUrl;
   const html = (await safeFetch(url)).toString('utf8');
 
-  // Pull in linked stylesheets too (guarded, capped) — most brand colour lives in the CSS, not the
+  // Pull in linked stylesheets too (guarded, capped): most brand colour lives in the CSS, not the
   // inline HTML. Only same-origin-ish absolute/relative hrefs; a handful, not the whole tree.
   let css = html;
   const hrefs = [...html.matchAll(/<link[^>]+rel=["']?stylesheet["']?[^>]*href=["']([^"']+)["']/gi)]
@@ -43,7 +43,7 @@ export async function reflect(rawUrl) {
     try { css += '\n' + (await safeFetch(new URL(href, url).toString())).toString('utf8'); } catch { /* skip */ }
   }
 
-  // Prefer colours declared as brand/accent CSS VARIABLES — those are the tokens the site chose to
+  // Prefer colours declared as brand/accent CSS VARIABLES: those are the tokens the site chose to
   // name, so they are the palette, not the 117 incidental hexes a full stylesheet contains. Fall back
   // to frequency only when a site names no variables. Cap hard: a brand has a handful of colours, and
   // handing back a hundred is the same as handing back none.
