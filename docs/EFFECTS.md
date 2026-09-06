@@ -889,6 +889,20 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `last` | starts at the last unit and runs backwards to the first, pair it with a right-to-left exit |
 | `random` | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
 
+## Theme look keys  `[theme]`
+
+A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the seven keys it accepts.
+
+| name | what / when |
+|---|---|
+| `backdrop` | ordered bg preset names the brand turns through, one window per beat |
+| `cues` | the audio cue names the brand reaches for |
+| `cuts` | the default and accent cut/transition names the brand favours |
+| `field` | grain and vignette defaults for the backdrop |
+| `layout` | the anchor band (left/center/right) and margin every beat composes against |
+| `marks` | the logo path plus its end-card and headline-adjacent sizes |
+| `scale` | type sizes at 16:9 for hook / headline / body / caption |
+
 ## Easings  `[timing]`
 
 `ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
@@ -1125,4 +1139,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_703 effects across 56 families. Regenerate: `make effects`._
+_710 effects across 57 families. Regenerate: `make effects`._

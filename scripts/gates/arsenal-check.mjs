@@ -4,7 +4,7 @@
 //   node scripts/gates/arsenal-check.mjs
 //
 // WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make effects →
-// docs/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/three-fx.js` sat in
+// docs/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/surfaces/three-fx.js` sat in
 // the repo with a full three.js scene-graph layer, a written determinism contract and four registered
 // scenes. The author had not read the arsenal doc, which is one failure. The doc did not contain three
 // either, which is the one worth fixing: 0 of 4 THREE_FX scenes were named in it, along with 0 of 5
@@ -16,7 +16,7 @@
 // stale, and has no way to know about the one it was never told about.
 //
 // THAT HALF IS NOW UNREPRESENTABLE, AND THIS GATE SHRANK ACCORDINGLY. A registry carries a `catalog`
-// block at its definition (core/registry.js) and the catalogue reads `catalogued()` over every module
+// block at its definition (core/registry/registry.js) and the catalogue reads `catalogued()` over every module
 // under core/, so a registry that publishes itself needs no import line and no section tuple. What is
 // left for a gate is the half that cannot be derived: a vocabulary with NO registry behind it, which
 // has no definition site to hang prose on and therefore no way to announce itself.
@@ -46,14 +46,14 @@ const f = gateFindings({ line: (r) => r.summary });
 // catalogue is the wrong home for it. Named with a reason, because an unexplained waiver list becomes a
 // place to hide the next real one.
 const WAIVED = new Map(Object.entries({
-  UNITS: 'the transition LIBRARY behind the seam runner (core/transitions/units.js): one GLSL unit per seam fx. A scene names a seam by its fx name (fade/wipe/whipPan…), and SEAM_REGISTRY in core/seams.js catalogues every one of those with its blurb. UNITS is the backing data the registry derives from, not a fifth thing to choose',
+  UNITS: 'the transition LIBRARY behind the seam runner (core/transitions/units.js): one GLSL unit per seam fx. A scene names a seam by its fx name (fade/wipe/whipPan…), and SEAM_REGISTRY in core/timeline/seams.js catalogues every one of those with its blurb. UNITS is the backing data the registry derives from, not a fifth thing to choose',
   CORE_UNITS: 'the 14 original seam units, concatenated into UNITS (core/transitions/units.js). Backing data, catalogued through SEAM_REGISTRY like the rest',
   HOUSE_UNITS: 'the hand-written vawe house-set seam units (core/transitions/units-house.js), concatenated into UNITS and catalogued through SEAM_REGISTRY. Backing data, not a separate vocabulary',
   CAPABILITIES: 'the measured table of which ANCESTOR style silently disables which DESCENDANT capability (core/ancestor-kills.js). A scene names a capability by writing `glass`/`mixBlend`/`plane`, all of which ARE catalogued; this is the interaction table behind the refusal, not a fifth thing to choose',
   IDENT: 'the identity style set a cut resets to (core/cuts.js). A reset, not an effect: the CUT vocabulary it belongs to is catalogued in full',
   PROPS: 'per-module prop declarations. Covered by schema-drift and layer-props, which check them against schema.json',
   SHARED_PROPS: 'the props every layer type inherits, a prop list, not a vocabulary',
-  POSE: 'the table a motion keyframe is evaluated through (core/sequence.js): authored name to pose key to identity. An author writes `x` or `ox` on a KEY, which formats/scene/schema.json documents field by field and schema-drift checks against this table. A field list, not a vocabulary to pick a name from',
+  POSE: 'the table a motion keyframe is evaluated through (core/timeline/sequence.js): authored name to pose key to identity. An author writes `x` or `ox` on a KEY, which formats/scene/schema.json documents field by field and schema-drift checks against this table. A field list, not a vocabulary to pick a name from',
   KEYFRAME_PROPS: 'what a keyframe may carry, generated from POSE and SIDES. Same argument: it is the list schema-drift compares the schema against, not a set of names an author chooses between',
   LAYER_PROPS: 'the generated prop table behind schema-drift',
   SURFACE_PROPS: 'as LAYER_PROPS, for surfaces',
@@ -87,8 +87,13 @@ const WAIVED = new Map(Object.entries({
   BUILDERS: 'the lightfield pattern implementations behind PATTERNS, which IS catalogued',
   SLOTS: 'track slot names, internal to the track resolver',
   CANVAS_FX_PRESETS: 'preset bundles over CANVAS_FX_NAMES',
+  LOOK_SCALE_KEYS: 'the fixed shape of `theme.look.scale` (hook/headline/body/caption). LOOK_KEYS itself IS catalogued, as "Theme look keys"; this is the four fields inside one of those keys, not a fifth vocabulary',
+  LOOK_LAYOUT_ANCHORS: 'the fixed enum of `theme.look.layout.anchor` (left/center/right). Same argument as LOOK_SCALE_KEYS',
+  LOOK_MARK_KEYS: 'the fixed shape of `theme.look.marks`. Same argument as LOOK_SCALE_KEYS',
+  LOOK_CUT_SLOTS: 'the fixed shape of `theme.look.cuts` (default/accent). Same argument as LOOK_SCALE_KEYS',
+  LOOK_FIELD_KEYS: 'the fixed shape of `theme.look.field` (grain/vignette). Same argument as LOOK_SCALE_KEYS',
   // FOUND BY A COLLISION, not by a new export. `named()` is a bare word match over the catalogue
-  // source, and the catalogue used to import `PRESETS` from core/type.js for the kinetic-preset
+  // source, and the catalogue used to import `PRESETS` from core/type/type.js for the kinetic-preset
   // section, so core/lightfield/PRESETS was silently credited with a different file's import line.
   // The kinetic presets now write their own section and that import is gone, and the false pass went
   // with it. The waiver itself: these are full option BUNDLES for the lightfield generator, the CLI
@@ -146,8 +151,8 @@ const WAIVED = new Map(Object.entries({
   PROFILE_BED: 'sound, as CUT_CUE',
   // FOUND BY THE ARRAY-OF-OBJECTS WIDENING (see isVocabulary). Each is a table of records, which is
   // the shape RANSOM_FACES has, so the widening that found the faces found these four with it.
-  RANSOM_FACES: 'the ARRAY view of the eight ransom faces. `RANSOM_REGISTRY` (core/ransom.js) is the same set as a map, carries the blurbs and writes the catalogue section, so this is one vocabulary in two shapes. The array cannot be recognised by identity: its members are `{family, weight}` records, not names, and ransomGlyph picks by index, so the order is what the array is for',
-  GENERATORS: 'the ARRAY view of the ready generators. `GENERATOR_ENTRIES` is the same set as a map and IS the registry (core/generators.js), so this is one vocabulary in two shapes, not two. Identity cannot see that: the array is built by a filter and is a different object. The playground reads the array because it wants the order',
+  RANSOM_FACES: 'the ARRAY view of the eight ransom faces. `RANSOM_REGISTRY` (core/type/ransom.js) is the same set as a map, carries the blurbs and writes the catalogue section, so this is one vocabulary in two shapes. The array cannot be recognised by identity: its members are `{family, weight}` records, not names, and ransomGlyph picks by index, so the order is what the array is for',
+  GENERATORS: 'the ARRAY view of the ready generators. `GENERATOR_ENTRIES` is the same set as a map and IS the registry (core/layout/generators.js), so this is one vocabulary in two shapes, not two. Identity cannot see that: the array is built by a filter and is a different object. The playground reads the array because it wants the order',
   ALL_GENERATORS: 'every generator including the ones held back. `GENERATORS` is the ready subset and it IS catalogued; a scene can only name a generator that ships',
   TRANSITIONS: 'the derived index over every transition mechanism (anim / cut / sting / seam), built from those registries at import time. Every member is catalogued in its own family; this is the join, as MECHANISMS and FAMILIES beside it',
   HONOURS: 'which lightfield pattern honours which optional dial (core/lightfield/options.js). The refusal table behind narrow(), not a set of names: a scene writes the DIAL, and the dials ARE catalogued under "Lightfield dials"',
@@ -178,12 +183,12 @@ if (fs.existsSync(path.join(ROOT, 'blueprints/index.mjs'))) files.push('blueprin
 // constants is not something an author picks from.
 //
 // TWO SHAPES IT USED TO MISS, both widened deliberately and both measured over the whole repo first.
-// A KEY MAY START WITH A DIGIT. The test was `/^[a-zA-Z][\w-]*$/`, so `ASPECTS` (core/safe.js: the
+// A KEY MAY START WITH A DIGIT. The test was `/^[a-zA-Z][\w-]*$/`, so `ASPECTS` (core/layout/safe.js: the
 // five canvases, keyed `16:9`, `9:16`, `1:1`, ...) was not a vocabulary as far as this gate was
 // concerned. That is the single most author-facing table in the engine and the gate could not see it.
 // Widening the first character to include a digit, and the rest to include `:` and `.`, finds exactly
 // one new export across all of core/, and it is ASPECTS.
-// A VOCABULARY MAY BE A TABLE OF RECORDS. `RANSOM_FACES` (core/ransom.js) is a real set of names an
+// A VOCABULARY MAY BE A TABLE OF RECORDS. `RANSOM_FACES` (core/type/ransom.js) is a real set of names an
 // author picks from, shaped as an array of `{family, weight}` objects, and an array branch that only
 // accepted strings could not see it either. This one is the wider of the two: it finds seven exports,
 // three of which are real (RANSOM_FACES, GENERATORS, ALL_GENERATORS) and four of which are tables the
@@ -205,7 +210,7 @@ const isVocabulary = (v) => {
 
 // KEYED BY FILE AND NAME, NEVER BY NAME ALONE. These two maps were keyed by the export NAME with
 // first-file-wins, and two files may export the same word: `PRESETS` is core/lightfield/presets.js
-// (fitted option bundles, waived below) AND core/type.js:188 (the kinetic preset entries map behind
+// (fitted option bundles, waived below) AND core/type/type.js:188 (the kinetic preset entries map behind
 // PRESET_REGISTRY). Whichever `readdir` handed back first took the key and the other one did not exist
 // as far as this gate was concerned, so the same collision between a registry part and a bare
 // vocabulary would have LAUNDERED the bare one into the derived bucket and stopped checking it, with
@@ -364,7 +369,7 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
 // ABSENT about something present is worse than one that stays quiet, because it ends the looking.
 //
 // Ratcheted rather than gated at zero for one honest reason: the 42 EASINGS deliberately carry none.
-// That decision is written at EASING_REGISTRY in core/motion.js, 41 near-identical sentences about
+// That decision is written at EASING_REGISTRY in core/motion/motion.js, 41 near-identical sentences about
 // acceleration being worse than one feel table, and it only holds because the FEEL words now carry the
 // plain English an author would actually type. Zero is therefore not the target; not-more is.
 {
@@ -426,7 +431,7 @@ if (!missing.length) {
 }
 for (const [name, file] of missing) f.fail('arsenal-missing', `${name.padEnd(22)} ${file}`, {
   fix: 'a REGISTRY writes its own section: give its defineRegistry call a `catalog` block '
-    + '(title / tag / intro / usage / preview or noPreview, core/registry.js) and run `make effects`. '
+    + '(title / tag / intro / usage / preview or noPreview, core/registry/registry.js) and run `make effects`. '
     + `Anything else adds a section to ${CATALOG}, or is waived in this file WITH A REASON if it is `
     + 'not something a scene can name',
   doc: 'docs/EFFECTS.md',

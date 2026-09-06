@@ -29,7 +29,7 @@ fonts-discover:
 invent-look:
 	node scripts/author/invent-look.mjs $(SB) $(if $(SEED),--seed $(SEED)) $(if $(COUNT),--count $(COUNT)) $(if $(PICK),--pick $(PICK)) $(if $(NAME),--name $(NAME)) $(if $(FORCE),--force) $(if $(filter 1,$(JSON)),--json)
 
-# make audio: bake every cue + music bed from PARAMETERS (core/audio-kit.mjs). No network, no
+# make audio: bake every cue + music bed from PARAMETERS (core/audio/kit.mjs). No network, no
 # licence, deterministic: same params -> same bytes. Replaces downloading a sample library.
 audio:
 	node scripts/media/audio-bake.mjs
@@ -69,7 +69,7 @@ music:
 	node scripts/media/music.mjs $(if $(ID),--id $(ID)) $(GENRE) $(N) $(NAME)
 
 # make music-pack: fetch the curated real-loop pack (lofi/chill/beat) the engine ships as its
-# default sound, replacing the synthesized drone beds. core/audio-select.js maps profiles onto these.
+# default sound, replacing the synthesized drone beds. core/audio/select.js maps profiles onto these.
 music-pack:
 	node scripts/media/music.mjs --pack
 
@@ -90,14 +90,14 @@ beatmap:
 
 # make beatsync D=formats/x/video.json MUSIC=assets/music/warm.wav [GRID=beat|downbeat] [SNAP=0.12]
 # [LAYERS=1] [WRITE=1]: snap the scene's cuts and seams onto the track's beat grid so the edit lands
-# ON the beat. The policy is core/beat-bind.js's, not a second copy of it: same tolerance, same joints,
+# ON the beat. The policy is core/beats/index.js's, not a second copy of it: same tolerance, same joints,
 # stings never. Reports drift; WRITE writes <scene>.beatsync.json. Deterministic + idempotent.
 # A film that wants this on EVERY render declares `"audio":{"beatSync":true}` and needs no derivative.
 beatsync:
 	node scripts/media/beatsync.mjs $(D) --music $(MUSIC) $(if $(GRID),--grid $(GRID)) $(if $(SNAP),--snap $(SNAP)) $(if $(filter 1,$(LAYERS)),--layers) $(if $(filter 1,$(WRITE)),--write)
 
 # The sound library is SYNTHESIZED, not downloaded: `make audio` bakes every cue from the Cuelume
-# voicings in core/audio-kit.mjs (noise + biquad + envelope, seeded, deterministic, no licence).
+# voicings in core/audio/kit.mjs (noise + biquad + envelope, seeded, deterministic, no licence).
 # scripts/media/sfx.mjs (the old Mixkit fetcher) is kept for reference but is NOT wired to a target:
 # a downloaded file named `click` turned out to be 19.6 seconds long and nothing noticed (MISTAKES #51).
 
@@ -424,7 +424,7 @@ watermark:
 site-counts:
 	@node scripts/gates/site-counts.mjs $(if $(JSON),--json,)
 
-# make knobs-audit [D=<file>], DRIFT GUARD: every dial core/knobs.js advertises must actually change
+# make knobs-audit [D=<file>], DRIFT GUARD: every dial core/registry/knobs.js advertises must actually change
 # the render (a manifest that lies is worse than none). With D, also reports knobs set on a preset that
 # ignores them (pointSize on extrudeText), turning a silent no-op into a message.
 knobs-audit:
@@ -454,7 +454,7 @@ docs:
 doc-index:
 	@node scripts/gates/doc-map.mjs --write $(if $(JSON),--json,)
 
-# make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions.js): every transition
+# make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition
 # across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: docs/CRAFT/TRANSITIONS.md.
 transitions:
 	@node scripts/gates/transitions-catalog.mjs $(if $(JSON),--json,)
@@ -469,13 +469,13 @@ transition-preview:
 
 # make measure VIDEO=<file> FROM=<s> TO=<s> [EXPECT=<preset>], MEASURE a transition's real motion and
 # name it in OUR vocabulary: per-frame tracks the moving element and fits the progress curve against the
-# engine's own easings (core/motion.js + core/cuts.js), reporting the nearest preset + residual. Point it
+# engine's own easings (core/motion/motion.js + core/cuts.js), reporting the nearest preset + residual. Point it
 # at a reference video ("what transition is this?") or at our own render + EXPECT=<preset> ("did my cut
 # render as the curve I authored?"). Dependency-free (ffmpeg + Node). Notes/limits: docs/CRAFT/MEASURE.md.
 measure:
 	node scripts/author/measure-motion.mjs $(VIDEO) $(FROM) $(TO) $(EXPECT)
 
-# make lib-test: fast pure-JS asserts for the core/motion.js motion primitives (no browser)
+# make lib-test: fast pure-JS asserts for the core/motion/motion.js motion primitives (no browser)
 lib-test:
 	node scripts/gates/lib-test.mjs
 
@@ -487,7 +487,7 @@ mistakes-check:
 	@node scripts/gates/mistakes-dupes.mjs $(if $(JSON),--json,)
 
 # make silent-check: is any named vocabulary still resolved with a silent default? A wrong name must
-# not become a plausible substitute; absence may keep its documented default. core/registry.js removes
+# not become a plausible substitute; absence may keep its documented default. core/registry/registry.js removes
 # the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #376.
 silent-check:
 	@node scripts/gates/silent-fallback.mjs $(if $(JSON),--json,)
@@ -756,7 +756,7 @@ pace-from-vo:
 export-edl:
 	@node scripts/media/export-edl.mjs $(D) $(if $(OUT),--out $(OUT),)
 
-# make sfx-catalog, REGENERATE docs/CRAFT/SFX-CATALOG.md from core/audio-kit.mjs CUES: the "reach for this
+# make sfx-catalog, REGENERATE docs/CRAFT/SFX-CATALOG.md from core/audio/kit.mjs CUES: the "reach for this
 # sound" table (family/energy/purpose/placement/pitfall per cue). Fails loudly if a cue has no catalog line,
 # so a new cue cannot ship undocumented. Run after adding or renaming a cue.
 sfx-catalog:
@@ -874,7 +874,7 @@ schema-write:
 	@node scripts/gates/schema-drift.mjs --write $(if $(JSON),--json,)
 
 # make prop-probe: set EVERY declared layer prop on a layer of EVERY type that declares it, build the
-# lot through the real pipeline, and report the ones nothing read. core/prop-audit.js already refuses a
+# lot through the real pipeline, and report the ones nothing read. core/registry/prop-audit.js already refuses a
 # dead prop at render time; its only gap was that an author had to write the prop first, which is how
 # `metalness` sat declared and ignored on the three layer for months. Takes ~35s (one browser, ~110
 # probe scenes). PROP=<type> narrows it to one layer type.
@@ -987,6 +987,11 @@ previews: ## render one preview clip + sheet per beat blueprint (ONLY=<id>[,<id>
 preset-sheets: ## render one showcase clip + sheet per reference profile (ONLY=<name>[,<name>...])
 	node scripts/dev/preset-sheets.mjs $(if $(ONLY),--only=$(ONLY))
 
+# make theme-sheet THEME=<name>: one rendered contact sheet for ONE theme's `look` (W8), so a brand's
+# look is a picture, not a JSON. Reuses preset-sheets' own tile machinery. docs/CRAFT/THEME-LOOK.md.
+theme-sheet: ## render one contact sheet for a theme's `look` block (THEME=<name>)
+	node scripts/dev/theme-sheet.mjs --theme=$(THEME)
+
 # make arsenal Q="a page scrolling under a tilt", ONE ranked search across every vocabulary the engine
 # names: beats, effects, camera moves, cuts, seams, looks, anims. It owns no list; `defineRegistry`
 # already carries each name's kind, slot and blurb, and blueprints/index.mjs already carries a prose
@@ -1007,7 +1012,7 @@ endif
 # is carrying no signal whatever it reads like. Take each blurb as the query, strip the words the NAME
 # already carries or the test grades itself, and report the rank. It measures DISTINCTIVENESS and never
 # accuracy: a confidently wrong blurb full of rare words passes. Reports, never blocks; the refusal that
-# blocks is checkBlurb in core/registry.js, at the point a blurb is written.
+# blocks is checkBlurb in core/registry/registry.js, at the point a blurb is written.
 blurbs: ## how well does each entry's own blurb retrieve it? (ALL=1 for every rank)
 	node scripts/dev/blurb-retrieval.mjs $(if $(ALL),--all)
 
@@ -1068,7 +1073,7 @@ arsenal-check: ## fail if the engine exports a capability docs/EFFECTS.md never 
 
 # discovery: can an author still FIND what the engine can do? Registry blurbs are refused at load, so
 # this reads the SEARCH CORPUS instead, which is the only place that sees every source at once: the
-# catalogue reaches it without passing a write site, and 33 entries hid there while core/registry.js
+# catalogue reaches it without passing a write site, and 33 entries hid there while core/registry/registry.js
 # correctly reported zero. It also compares the two indexes over one library, which disagreed by 185
 # entries for months with nothing noticing.
 discovery:
@@ -1090,10 +1095,10 @@ generated-check:
 effects-check: ## fail if docs/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
 
-vocab: ## regenerate docs/CRAFT/VOCABULARY.md. The plain words (feel/duration/camera) from core/vocab.js
+vocab: ## regenerate docs/CRAFT/VOCABULARY.md. The plain words (feel/duration/camera) from core/registry/vocab.js
 	node scripts/site/vocab-catalog.mjs
 
-vocab-check: ## fail if docs/CRAFT/VOCABULARY.md is stale vs core/vocab.js
+vocab-check: ## fail if docs/CRAFT/VOCABULARY.md is stale vs core/registry/vocab.js
 	node scripts/site/vocab-catalog.mjs --check
 
 critique: ## value-gate, flag hollow/low-value beats (D=<file>)

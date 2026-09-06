@@ -11,20 +11,24 @@ import { glyphText } from '../core/type/on-screen-text.js';
 
 // kineticHook: the OPEN LOOP. An eyebrow question, a hero number (count-up + pop) OR a big kinetic word,
 // then a word-by-word subline. Front-loads the strong element (DIRECTION.md §4).
-export function kineticHook({ x = 160, y = 160, w = 1600, eyebrow, to, unit = '', decimals, word, wordSize = 300, sub,
-  start = 0, dur = 5.5 } = {}) {
+// `heroSize` overrides the count's own size (360 unchanged if omitted); a theme's `look.scale.hook`
+// (core/registry/theme-contract.js W8) is the one caller that passes it, so a brand's hook scale is real
+// without every existing kineticHook call needing to change.
+export function kineticHook({ x = 160, y = 160, w = 1600, eyebrow, to, unit = '', decimals, word, wordSize = 300,
+  heroSize = 360, sub, start = 0, dur = 5.5 } = {}) {
   const out = [];
   if (eyebrow) out.push(caption({ text: eyebrow, x, y: y + 90, w, size: 56, start, dur }));
-  if (to != null) out.push(dollyNumber({ to, unit, decimals, x, y: y + 190, w, size: 360, start: start + 0.4, dur: dur - 0.4 }));
+  if (to != null) out.push(dollyNumber({ to, unit, decimals, x, y: y + 190, w, size: heroSize, start: start + 0.4, dur: dur - 0.4 }));
   else if (word) out.push(kineticHeadline({ text: word, x, y: y + 190, w, size: wordSize, weight: 800, preset: 'scale', each: 0.34, start: start + 0.4, dur: dur - 0.4 }));
   if (sub) out.push(kineticHeadline({ text: sub, x, y: y + 620, w, size: 74, weight: 700, start: start + 1.9, dur: dur - 1.9 }));
   return out;
 }
 
 // statReveal: the PAYOFF. A hero count-up + a kinetic label. Held long (the release the build earned).
-export function statReveal({ x = 160, y = 330, w = 1600, to, unit = '', decimals, prefix, label, start = 0, dur = 3.6 } = {}) {
+// `heroSize` overrides the count's own size (320 unchanged if omitted): a theme's `look.scale.headline`.
+export function statReveal({ x = 160, y = 330, w = 1600, to, unit = '', decimals, prefix, label, heroSize = 320, start = 0, dur = 3.6 } = {}) {
   return [
-    dollyNumber({ to, unit, decimals, prefix, x, y, w, size: 320, start, dur }),
+    dollyNumber({ to, unit, decimals, prefix, x, y, w, size: heroSize, start, dur }),
     label && kineticHeadline({ text: label, x, y: y + 380, w, size: 48, weight: 600, each: 0.3, stagger: 0.03, start: start + 0.9, dur: dur - 0.9 }),
   ].filter(Boolean);
 }

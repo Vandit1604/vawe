@@ -58,6 +58,16 @@ if (typeArg && !TYPE_SPINES[typeArg]) {
 }
 const spine = typeArg ? TYPE_SPINES[typeArg] : null;
 
+// THEME LOOK (W8, core/registry/theme-contract.js): the brand's own fixed backdrop/cuts/scale/layout, read
+// straight off the theme file so a scaffold for THIS brand doesn't re-decide them the way the type
+// spine decides them for a whole TYPE. Optional: a theme with no `look` changes nothing below, same as
+// before this existed. `theme` here is always a name (scaffold never takes an inline theme object).
+let look = null;
+try {
+  const themePath = path.resolve(ROOT, 'themes', `${theme}.json`);
+  if (fs.existsSync(themePath)) look = JSON.parse(fs.readFileSync(themePath, 'utf8')).look || null;
+} catch { /* an unreadable theme file is core/validate/validate.mjs's job to report, not scaffold's */ }
+
 // COMPOSE FROM THE NEAREST PROVEN FILM, not a generic default. A blank draft regresses to the mean;
 // so does a scaffold whose backdrop is one fixed pair of windows. `--like "<brief>"` (or, absent that,
 // the output name itself) ranks the goldSet and the winner drives the backdrop rhythm below. The
@@ -120,9 +130,15 @@ const CHIPS = ['REPLACE: source A', 'REPLACE: source B', 'REPLACE: source C', 'R
 function propsFor(name, span, isPayoff) {
   switch (name) {
     case 'kineticHook':
-      return { eyebrow: 'REPLACE: the open-loop question', to: 94, unit: '%', sub: 'REPLACE: the second cue, revealed later' };
+      // look.scale.hook -> kineticHook's own heroSize (blueprints/beats.mjs), so the theme's hook
+      // scale is real without every existing kineticHook call needing to change.
+      return { eyebrow: 'REPLACE: the open-loop question', to: 94, unit: '%', sub: 'REPLACE: the second cue, revealed later',
+        ...(look?.scale?.hook ? { heroSize: look.scale.hook } : {}) };
     case 'statReveal':
-      return { to: 3, prefix: '', unit: 'x', label: isPayoff ? 'REPLACE: the shocker payoff line' : 'REPLACE: a mid-film stat' };
+      // look.scale.headline -> statReveal's heroSize: the payoff's hero count reads as the film's
+      // headline moment, so it takes the headline step of the scale, not the hook step.
+      return { to: 3, prefix: '', unit: 'x', label: isPayoff ? 'REPLACE: the shocker payoff line' : 'REPLACE: a mid-film stat',
+        ...(look?.scale?.headline ? { heroSize: look.scale.headline } : {}) };
     case 'cardCascade':
       return { title: 'REPLACE: feature grid title', cards: CARDS };
     case 'wordBlast':
@@ -155,11 +171,24 @@ function propsFor(name, span, isPayoff) {
   }
 }
 
+// look.layout -> x/w on every beat whose blueprint accepts a generic x/w (all of them except the three
+// that name their own mark*/word* slots instead: logoLockup, ctaEnd, logoReveal). `margin` is the
+// shared left/right inset at the scaffold's fixed 1920px 16:9 width; `anchor` is published on the
+// theme for a hand-authored fragment or a future consumer to read, not yet turned into an `align` here.
+const LAYOUT_OPT_OUT = new Set(['logoLockup', 'ctaEnd', 'logoReveal']);
+const CANVAS_W = 1920;
+function layoutFor(name) {
+  if (!look?.layout || LAYOUT_OPT_OUT.has(name)) return {};
+  const margin = look.layout.margin ?? 160;
+  return { x: margin, w: CANVAS_W - margin * 2 };
+}
+
 const layers = spans.map((s, i) => ({
   type: 'beat',
   beat: s.name,
   start: s.start,
   dur: s.dur,
+  ...layoutFor(s.name),
   ...propsFor(s.name, s, i === payoffIdx),
 }));
 
@@ -198,9 +227,9 @@ layers.push({
 });
 
 // ---- transitions: one per boundary, mostly fade, one accent into the payoff --------------------------
-// A named type spine picks its own cut family (a launch film's fade-then-zoom reads differently from
-// an explainer's dissolve-then-punch); with no `--type`, fall back to the generic fade/cinematicZoom pair.
-const cutFamily = spine ? spine.cutFamily : { default: 'fade', accent: 'cinematicZoom' };
+// theme.look.cuts wins over the TYPE spine, which wins over the generic default: the brand's own cut
+// family is a fixed fact about the brand, the type spine only a fact about the kind of film.
+const cutFamily = look?.cuts ? look.cuts : spine ? spine.cutFamily : { default: 'fade', accent: 'cinematicZoom' };
 const transitions = [];
 for (let i = 1; i < spans.length; i++) {
   const at = spans[i].start;
@@ -208,15 +237,19 @@ for (let i = 1; i < spans.length; i++) {
   transitions.push({ at, fx: accent ? cutFamily.accent : cutFamily.default, dur: accent ? 0.6 : 0.5 });
 }
 
-// ---- bg: the backdrop turns, and the exemplar (or the type spine) sets HOW MUCH --------------------
+// ---- bg: the backdrop turns, and the theme (or the exemplar, or the type spine) sets HOW MUCH -------
 // CLAUDE.md's strongest single lever: 82% of the library paints one window for the whole runtime;
-// brew inverts the world on four of its five cuts. When an exemplar is in hand, mirror its backdrop
-// RHYTHM: one junction-bound window per beat (no from/to, so the cuts already written own the numbers,
-// core/junctions.js), cycling the exemplar's own presets so each cut turns the world the way that film
+// brew inverts the world on four of its five cuts. theme.look.backdrop wins first: it is the brand's
+// own fixed rotation (W8), a fact about THIS theme rather than a guess at what one exemplar or one
+// type generally does. Falling short of that, an exemplar in hand mirrors its backdrop RHYTHM: one
+// junction-bound window per beat (no from/to, so the cuts already written own the numbers,
+// core/timeline/junctions.js), cycling the exemplar's own presets so each cut turns the world the way that film
 // does. A named `--type` cycles its own preset list the same way, since the type IS the taste anchor
-// when no exemplar was asked for. With neither, fall back to the two-window default.
+// when no exemplar was asked for. With none of the three, fall back to the two-window default.
 let bg;
-if (sig && sig.bgPresets.length) {
+if (look?.backdrop && look.backdrop.length) {
+  bg = spans.map((_, i) => ({ preset: look.backdrop[i % look.backdrop.length] }));
+} else if (sig && sig.bgPresets.length) {
   bg = spans.map((_, i) => ({ preset: sig.bgPresets[i % sig.bgPresets.length] }));
 } else if (spine) {
   bg = spans.map((_, i) => ({ preset: spine.bgPresets[i % spine.bgPresets.length] }));
@@ -231,7 +264,7 @@ if (sig && sig.bgPresets.length) {
 const scene = {
   module: 'scene',
   theme,
-  // Stated, never defaulted: a scene with no `aspect` renders 9:16 in silence (core/boot.js), and the
+  // Stated, never defaulted: a scene with no `aspect` renders 9:16 in silence (core/engine/boot.js), and the
   // storyboard this scaffold writes says 1920x1080. The two must agree (MISTAKES #569).
   aspect: '16:9',
   duration: dur,
@@ -315,6 +348,7 @@ fs.writeFileSync(path.resolve(ROOT, sbPath), storyboard);
 // The path goes to stdout ALONE (matching scripts/dev/demo.mjs), so `make scaffold` can hand it
 // straight to `make dev`/`make ship`; everything else is a note and goes to stderr.
 console.error(`✓ scaffold: ${names.length} beats (${names.join(' -> ')}) across ${dur}s -> ${out}`);
+if (look) console.error(`  theme "${theme}" carries a look: bg/cuts/scale/layout above are the brand's own, not guessed.${look.cues ? ` Its cues: ${look.cues.join(', ')} (audio.auto derives from the cuts actually used; reach for these by hand where auto isn't enough).` : ''}`);
 if (typeArg) console.error(`  TYPE=${typeArg} spine: skills/vawe-type-${typeArg}/SKILL.md carries this type's rules and worked example.`);
 if (sig) console.error(`  composed to the shape of ${exemplar.file} (${exemplar.register || exemplar.teaches}): ${bg.length} bg windows turn the world. STUDY formats/scene/${exemplar.file}.`);
 else if (!spine) console.error(`  no exemplar matched "${likeText.trim()}"; used the two-window default. Pass --like "<brief>" to compose from the nearest proven film.`);
