@@ -176,7 +176,7 @@ export function slotSwap({ passes = [], x = 240, y = 330, badge = 150, badgeRadi
       // smallest thing in the row
       L.push({ type: 'text', text: q.word, x: px, y: Math.round(cy - (q.size || 110) * 0.62), w,
         align: 'center', size: q.size || 110, weight: q.weight || 700,
-        ...wave(q.color || labelColor), ...tm });
+        ...wave(q.color || labelColor), ...atSplit(off.payload) });
     } else if (q.chip != null) {
       L.push({ type: 'text', text: q.chip, font: 'mono', x: px, y: Math.round(cy - 34), w,
         align: 'center', size: q.size || 30, weight: 600, color: q.color || INK, bg: q.bg || SURF2,
