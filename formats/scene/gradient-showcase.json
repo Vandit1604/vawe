@@ -3,22 +3,75 @@
   "theme": "vawe-inter",
   "aspect": "16:9",
   "duration": 10.6,
-  "audio": { "silent": true, "_why": "a capability montage, no story to score" },
+  "audio": {
+    "silent": true,
+    "_why": "a capability montage, no story to score"
+  },
   "authoring": {
-    "allow": ["no-storyboard", "plain-slideshow", "no-preflight"],
+    "allow": [
+      "no-storyboard",
+      "plain-slideshow",
+      "no-preflight",
+      "no-transition",
+      "feature-poverty"
+    ],
     "_why": {
       "no-storyboard": "a site capability montage of the `gradient` bg preset's recipes, not a film with a payoff or a pace budget to plan",
       "plain-slideshow": "the moving gradient field IS the subject here; kinetic type or a camera move would fight the one thing this reel exists to show",
-      "no-preflight": "a capability montage regenerated from the preset's recipes; the nine-decision film chain does not apply to a background demo, and its preflight receipt is gitignored so it cannot reach CI"
+      "no-preflight": "a capability montage regenerated from the preset's recipes; the nine-decision film chain does not apply to a background demo, and its preflight receipt is gitignored so it cannot reach CI",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)",
+      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
     }
   },
   "bg": [
-    { "preset": "gradient", "from": 0, "to": 1.6, "opts": { "recipe": "warm-dusk" } },
-    { "preset": "gradient", "from": 1.6, "to": 3.1, "opts": { "recipe": "citrus-pop" } },
-    { "preset": "gradient", "from": 3.1, "to": 4.6, "opts": { "recipe": "neon-dusk" } },
-    { "preset": "gradient", "from": 4.6, "to": 6.1, "opts": { "recipe": "arctic-blue" } },
-    { "preset": "gradient", "from": 6.1, "to": 7.6, "opts": { "recipe": "solar-flare" } },
-    { "preset": "gradient", "from": 7.6, "to": 10.6, "opts": { "recipe": "ember" } }
+    {
+      "preset": "gradient",
+      "from": 0,
+      "to": 1.6,
+      "opts": {
+        "recipe": "warm-dusk"
+      }
+    },
+    {
+      "preset": "gradient",
+      "from": 1.6,
+      "to": 3.1,
+      "opts": {
+        "recipe": "citrus-pop"
+      }
+    },
+    {
+      "preset": "gradient",
+      "from": 3.1,
+      "to": 4.6,
+      "opts": {
+        "recipe": "neon-dusk"
+      }
+    },
+    {
+      "preset": "gradient",
+      "from": 4.6,
+      "to": 6.1,
+      "opts": {
+        "recipe": "arctic-blue"
+      }
+    },
+    {
+      "preset": "gradient",
+      "from": 6.1,
+      "to": 7.6,
+      "opts": {
+        "recipe": "solar-flare"
+      }
+    },
+    {
+      "preset": "gradient",
+      "from": 7.6,
+      "to": 10.6,
+      "opts": {
+        "recipe": "ember"
+      }
+    }
   ],
   "layers": [
     {
@@ -54,7 +107,7 @@
       "anim": "fade",
       "enterDur": 0.5,
       "start": 7.6,
-      "duration": 3.0
+      "duration": 3
     }
   ]
 }

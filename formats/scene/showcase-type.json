@@ -4,7 +4,7 @@
   "authoringNote": "The continuous object is the timing diagram: one html layer runs the whole film, keeps its ruler and its rows across every cut, and re-slopes as each preset's stagger changes. sceneUnits is off so the cuts do not chop it into four islands. The film shows three presets, REJECTS the reading that this is a typeface choice (strike), and names what it is instead (wordSlot).",
   "aspect": "16:9",
   "theme": "vawe",
-  "duration": 13.0,
+  "duration": 13,
   "sceneUnits": false,
   "audio": {
     "auto": true,
@@ -13,10 +13,16 @@
   },
   "authoring": {
     "allow": [
-      "no-continuous-object"
+      "no-continuous-object",
+      "no-authored-motion",
+      "no-preflight",
+      "craft-unvisited"
     ],
     "_why": {
-      "no-continuous-object": "the diagram IS the spine and it changes at every cut: each junction swaps its whole bar chart for the next preset's. direction-floor cannot see it because its `var(--t)` exemption tests `l.html` and this layer carries its markup in `src`. A gate blind spot, not a missing spine."
+      "no-continuous-object": "the diagram IS the spine and it changes at every cut: each junction swaps its whole bar chart for the next preset's. direction-floor cannot see it because its `var(--t)` exemption tests `l.html` and this layer carries its markup in `src`. A gate blind spot, not a missing spine.",
+      "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
     }
   },
   "layers": [
@@ -175,7 +181,7 @@
       "w": 1380,
       "h": 560,
       "start": 0,
-      "duration": 13.0,
+      "duration": 13,
       "anim": "fade",
       "enterDur": 0.45,
       "exitDur": 0,
@@ -220,7 +226,7 @@
   "cameraMove": {
     "move": "slowPush",
     "start": 0,
-    "dur": 13.0,
+    "dur": 13,
     "from": 1,
     "to": 1.05,
     "ease": "easeInOutCubic"

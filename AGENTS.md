@@ -589,7 +589,7 @@ because nobody decided anything. Same doc carries lead room, visual weight and t
 - **Narrated?** Pace the picture to the voice: `make pace-from-vo VO=<file>.words.json`.
 - **`make ledger`** before shipping, `make ledger-add` after the user approves.
 
-## Waivers, legacy, and the difference  `[gated: scripts/gates/author-check.mjs]`
+## Waivers, and only waivers  `[gated: scripts/gates/author-check.mjs]`
 
 A rule you deliberately break is waived IN THE SCENE, with a reason, and **a waiver with no `_why`
 blocks**:
@@ -601,10 +601,16 @@ blocks**:
 }
 ```
 
-**LEGACY IS NOT A WAIVER.** A waiver says somebody looked and decided. Legacy says nobody has looked
-yet: it is a debt, it warns on every run, and it disappears the moment the film complies
-(`make legacy` for the board, `make legacy STAMP=1` to pay one off). Edit a legacy film without fixing
-it and it BLOCKS. Nothing is excused for life.
+<!-- doc-refs-allow: scripts/gates/legacy-manifest.json · this section records that the file is gone -->
+**There used to be a second mechanism, LEGACY, and it is retired.** A ratchet engine in
+author-check.mjs read `scripts/gates/legacy-manifest.json` and silently excused any scene that predated
+a rule "by the calendar", carrying no reason because none had been written. Two systems saying "this
+rule does not apply here" is exactly the drift this file warns against elsewhere, so
+`scripts/gates/legacy-fold.mjs` walked every row the manifest held and, for each scene that still fires
+the rule, wrote it into that scene's own `authoring.allow` + `_why` (`"legacy: grandfathered <date>,
+adopted <date> (<what the rule checks>)"`). The manifest and the ratchet machinery that read it are
+deleted. **`authoring.allow` + `_why` is now the one excuse mechanism.** A rule fires or it does not,
+and the only door out, for old debt and a deliberate new exception alike, is a reason in the scene.
 
 ## WHAT THIS ENGINE TOOK FROM THE AGENT HARNESS, AND WHERE IT LIVES  `[ref: make rung]`
 

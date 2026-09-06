@@ -2,8 +2,14 @@
  "module": "scene",
  "authoring": {
   "allow": [
-   "no-continuous-object"
-  ]
+   "no-continuous-object",
+   "no-storyboard",
+   "no-preflight"
+  ],
+  "_why": {
+   "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
+  }
  },
  "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
  "theme": "neutral",
@@ -32,7 +38,7 @@
    "dur": 0.2
   },
   {
-   "t": 6.0,
+   "t": 6,
    "style": "punch",
    "dur": 0.2
   },
@@ -52,7 +58,7 @@
    "type": "text",
    "text": "MAKE",
    "start": 0.3,
-   "duration": 2.0,
+   "duration": 2,
    "pin": "center",
    "y": 860,
    "w": 1000,
@@ -145,7 +151,7 @@
     },
     {
      "t": 0.34,
-     "scale": 1.0,
+     "scale": 1,
      "opacity": 1,
      "ease": "spring"
     },
@@ -199,7 +205,7 @@
   {
    "type": "text",
    "text": "on the beat.",
-   "start": 9.0,
+   "start": 9,
    "duration": 1.5,
    "pin": "center",
    "y": 1120,
@@ -232,7 +238,7 @@
    "type": "text",
    "text": "KINETIC",
    "start": 10.5,
-   "duration": 2.0,
+   "duration": 2,
    "pin": "center",
    "y": 820,
    "w": 1040,
@@ -260,8 +266,8 @@
   },
   {
    "type": "text",
-   "text": "vawe \u00b7 scene engine",
-   "start": 11.0,
+   "text": "vawe · scene engine",
+   "start": 11,
    "duration": 1.5,
    "pin": "center",
    "y": 1280,

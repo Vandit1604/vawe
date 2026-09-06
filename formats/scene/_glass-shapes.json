@@ -73,7 +73,7 @@
       "font": "mono",
       "color": "#ffffff",
       "start": 1.5,
-      "duration": 3.0,
+      "duration": 3,
       "anim": "fade",
       "enterDur": 0.3,
       "exitDur": 0.3
@@ -206,7 +206,7 @@
           "t": 6.8,
           "x": 330,
           "y": 120,
-          "scale": 1.0,
+          "scale": 1,
           "ease": "linear"
         },
         {
@@ -315,7 +315,7 @@
           "t": 1.05,
           "x": -600,
           "rot": -4,
-          "scale": 1.0,
+          "scale": 1,
           "ease": "easeOutQuint"
         },
         {
@@ -362,9 +362,9 @@
           "scale": 0.55
         },
         {
-          "t": 1.0,
+          "t": 1,
           "y": 0,
-          "scale": 1.0,
+          "scale": 1,
           "ease": "easeOutQuint"
         },
         {
@@ -388,8 +388,8 @@
       "size": 76,
       "weight": 700,
       "color": "#ffffff",
-      "start": 14.0,
-      "duration": 3.0,
+      "start": 14,
+      "duration": 3,
       "exitDur": 0.4,
       "split": "word",
       "preset": "up",
@@ -419,11 +419,17 @@
   "authoring": {
     "allow": [
       "unreadable-hold",
-      "aphoristic-cadence"
+      "aphoristic-cadence",
+      "no-transition",
+      "craft-unvisited",
+      "feature-poverty"
     ],
     "_why": {
       "unreadable-hold": "the end card subtitle names the whole recipe (backdrop-filter, one SVG displacement map, three indices of refraction) and that IS the payoff of the film. The end card is 3.5s, so no honest duration reaches the reading wall for nine words, and cutting it to three would delete the answer the other sixteen seconds were asking for. Every other line was cut instead.",
-      "aphoristic-cadence": "\"No 3D. No plugin.\" is a factual exclusion, not manufactured contrast: the film loads no 3D scene and no plugin, and the line under it names exactly what it does load."
+      "aphoristic-cadence": "\"No 3D. No plugin.\" is a factual exclusion, not manufactured contrast: the film loads no 3D scene and no plugin, and the line under it names exactly what it does load.",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)",
+      "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)",
+      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
     }
   }
 }

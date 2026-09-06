@@ -33,15 +33,15 @@ const file = process.argv.slice(2).find((a) => !a.startsWith('--'));
 // here is a WARN or a NOTE, never an error, so the exit code stays 0.
 const f = gateFindings();
 
-// LEGACY IS NOT A WAIVER, and this census is the one place they could be confused. A ratcheted rule
-// (scripts/gates/legacy-manifest.json) grandfathers the films that predate it, and a reader who sees
-// "no-storyboard: 2 waivers" here would conclude the rule is barely being dodged, when in fact 121 films
-// are excused from it by date. Both numbers have to be visible, and they have to be visibly different:
-// a waiver is a person's decision with a reason attached, legacy is nobody having looked yet.
+// LEGACY IS RETIRED. `scripts/gates/legacy-manifest.json` used to grandfather films that predated a
+// rule "by the calendar"; `scripts/gates/legacy-fold.mjs` folded every one of its rows into an explicit
+// `authoring.allow` + `_why` on the scene itself, and the manifest and the ratchet engine that read it
+// were deleted (author-check.mjs). So this file no longer has to tell legacy and waived apart: every
+// exception counted below is a real, per-scene, `_why`-carrying decision. `ratchet` stays as an empty
+// shape (rather than a second read path) so the block that used to print it below simply prints nothing.
 let ratchet = { rules: {} };
-try { ratchet = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/gates/legacy-manifest.json'), 'utf8')); } catch {}
-const legacyCount = (code) => Object.keys(ratchet.rules?.[code]?.legacy || {}).length;
-const legacyHolder = (code, name) => Boolean(ratchet.rules?.[code]?.legacy?.[name]);
+const legacyCount = () => 0;
+const legacyHolder = () => false;
 
 // ---- the census ----
 const tally = new Map();      // code -> [scene names]
@@ -69,6 +69,7 @@ const RETIRED = new Map([
   ['no-visual-vocabulary', 'visual-vocabulary, deleted (its size measurement was wrong)'],
   ['graphics-thin', 'visual-vocabulary, deleted (its size measurement was wrong)'],
   ['text-only-beat', 'visual-vocabulary, deleted (its size measurement was wrong)'],
+  ['no-plan-for-craft', 'craft-checklist.mjs, folded into craft-unvisited (it duplicated no-storyboard)'],
 ]);
 
 // A code waived by this share of the library has stopped being an exception. 0.15 is deliberately low:

@@ -88,7 +88,7 @@
           "type": "block",
           "block": "emptyState",
           "w": 640,
-          "icon": "\u2630",
+          "icon": "☰",
           "title": "Weekly update",
           "body": "Nothing written yet. Due in four hours.",
           "cta": "Start writing",
@@ -143,7 +143,7 @@
       "title": "Update due today",
       "body": "Saltmarsh workspace, 4:00pm",
       "accent": "var(--accent)",
-      "start": 5.0,
+      "start": 5,
       "dur": 1.5
     },
     {
@@ -182,7 +182,7 @@
             }
           ],
           "start": 7.15,
-          "dur": 3.0
+          "dur": 3
         },
         {
           "type": "block",
@@ -294,7 +294,7 @@
       "weight": 700,
       "color": "var(--text)",
       "start": 13.8,
-      "duration": 3.0,
+      "duration": 3,
       "anim": "rise",
       "enterDur": 0.5,
       "exitDur": 0.3
@@ -333,7 +333,7 @@
       "y": 420,
       "w": 640,
       "h": 300,
-      "label": "demo workspace \u00b7 updates sent",
+      "label": "demo workspace · updates sent",
       "data": [
         {
           "label": "M",
@@ -370,7 +370,7 @@
       "font": "mono",
       "color": "var(--text-2)",
       "start": 14.8,
-      "duration": 2.0,
+      "duration": 2,
       "anim": "fade",
       "enterDur": 0.4,
       "exitDur": 0.3
@@ -442,7 +442,7 @@
       "stagger": 0.04,
       "each": 0.42,
       "start": 20.3,
-      "duration": 3.0,
+      "duration": 3,
       "anim": "none",
       "exitDur": 0.2
     },
@@ -514,8 +514,20 @@
   ],
   "authoring": {
     "allow": [
-      "off-colour"
+      "off-colour",
+      "no-storyboard",
+      "no-authored-motion",
+      "no-preflight",
+      "feature-poverty",
+      "static-bg"
     ],
-    "_allow_why": "off-colour: a lighting demo whose whole subject is coloured light, sampled from the reference it recreates."
+    "_allow_why": "off-colour: a lighting demo whose whole subject is coloured light, sampled from the reference it recreates.",
+    "_why": {
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)",
+      "static-bg": "legacy: grandfathered 2026-09-05, adopted 2026-09-05 (the backdrop moves, at least one beat is not a flat field asleep for the whole film)"
+    }
   }
 }

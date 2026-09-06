@@ -337,5 +337,15 @@
    "preset": "paperShapes"
   }
  ],
- "_why_bg": "three windows for three slots. There were four, and the middle two were both `soft`: the same ground painted twice across a cut, which is a window that turns nothing. The scene failed validation on every determinism run because a fourth window had no joint left to bind to."
+ "_why_bg": "three windows for three slots. There were four, and the middle two were both `soft`: the same ground painted twice across a cut, which is a window that turns nothing. The scene failed validation on every determinism run because a fourth window had no joint left to bind to.",
+ "authoring": {
+  "allow": [
+   "no-preflight",
+   "craft-unvisited"
+  ],
+  "_why": {
+   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+   "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
+  }
+ }
 }

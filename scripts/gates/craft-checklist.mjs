@@ -157,18 +157,15 @@ function run(file) {
 
   console.log(`\n  craft checklist · ${file}`);
 
+  // NO SEPARATE "no plan" CODE. This used to fail its own `no-plan-for-craft` here, checking only the
+  // sibling-file naming convention (not a scene's declared `storyboard` field, so it could fire on a
+  // scene the main ladder's own `no-storyboard` step already considered planned) and exiting before a
+  // single relevant doc was even listed. Measured: it fired on 83% of the library with zero waivers
+  // anywhere, because nobody had a lever to pull, the ladder's `no-storyboard` step already owns "does
+  // this film have a plan" and blocks on it. With no storyboard the craft map is simply empty, so every
+  // relevant doc reads as unanswered below, which `craft-unvisited` already measures correctly.
   const sbPath = storyboardPathFor(file);
-  if (!fs.existsSync(sbPath)) {
-    F.fail('no-plan-for-craft',
-      `no storyboard sidecar at ${path.relative(ROOT, sbPath)}, so no craft: answers can exist yet.`,
-      { fix: 'Write the plan (docs/CRAFT/STORYBOARD-TEMPLATE.md) before the JSON, then answer each\n' +
-        '        relevant doc\'s confirm question under its `craft:` map.' });
-    F.emit();
-    console.log('\n  ✗ craft checklist: no plan, nothing to check.\n');
-    process.exit(1);
-  }
-
-  const craft = craftMapFrom(fs.readFileSync(sbPath, 'utf8'));
+  const craft = fs.existsSync(sbPath) ? craftMapFrom(fs.readFileSync(sbPath, 'utf8')) : {};
   let missing = 0;
   for (const d of relevant) {
     const answer = craft[d.slug];

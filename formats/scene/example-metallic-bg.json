@@ -3,10 +3,71 @@
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 6,
-  "bg": [{ "t": 0, "preset": "metallic" }],
+  "bg": [
+    {
+      "t": 0,
+      "preset": "metallic"
+    }
+  ],
   "layers": [
-    { "type": "text", "text": "BACKGROUND · METALLIC", "x": 160, "y": 300, "w": 1200, "size": 30, "weight": 600, "font": "mono", "color": "rgba(255,255,255,0.7)", "ls": "0.24em", "anim": "fade", "enterDur": 0.5, "start": 0.3, "duration": 5.4 },
-    { "type": "text", "text": "Shimmer.", "x": 160, "y": 380, "w": 1500, "size": 220, "weight": 800, "color": "#ffffff", "split": "char", "preset": "up", "each": 0.34, "stagger": 0.05, "start": 0.6, "duration": 5.1 },
-    { "type": "text", "text": "vertical light rods, coloured by the brand, sweeping in time.", "x": 160, "y": 660, "w": 1500, "size": 40, "weight": 500, "font": "mono", "color": "rgba(255,255,255,0.6)", "anim": "fade", "enterDur": 0.6, "start": 1.6, "duration": 4.4 }
-  ]
+    {
+      "type": "text",
+      "text": "BACKGROUND · METALLIC",
+      "x": 160,
+      "y": 300,
+      "w": 1200,
+      "size": 30,
+      "weight": 600,
+      "font": "mono",
+      "color": "rgba(255,255,255,0.7)",
+      "ls": "0.24em",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "start": 0.3,
+      "duration": 5.4
+    },
+    {
+      "type": "text",
+      "text": "Shimmer.",
+      "x": 160,
+      "y": 380,
+      "w": 1500,
+      "size": 220,
+      "weight": 800,
+      "color": "#ffffff",
+      "split": "char",
+      "preset": "up",
+      "each": 0.34,
+      "stagger": 0.05,
+      "start": 0.6,
+      "duration": 5.1
+    },
+    {
+      "type": "text",
+      "text": "vertical light rods, coloured by the brand, sweeping in time.",
+      "x": 160,
+      "y": 660,
+      "w": 1500,
+      "size": 40,
+      "weight": 500,
+      "font": "mono",
+      "color": "rgba(255,255,255,0.6)",
+      "anim": "fade",
+      "enterDur": 0.6,
+      "start": 1.6,
+      "duration": 4.4
+    }
+  ],
+  "authoring": {
+    "allow": [
+      "no-storyboard",
+      "no-preflight",
+      "no-transition"
+    ],
+    "_why": {
+      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
+      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
+      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
+    }
+  }
 }
