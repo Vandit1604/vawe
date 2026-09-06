@@ -88,7 +88,7 @@ export const KNOBS = {
     ],
   },
 
-  // ── three.js scenes (core/three-fx.js), `three: "name"`, per-scene knobs ────────────────────────
+  // ── three.js scenes (core/surfaces/three-fx.js), `three: "name"`, per-scene knobs ────────────────────────
   three: {
     _shared: [col('colors', '#8ab4ff', 'palette (array); colors[0] subject, colors[1] fill light'), n('speed', 1, 'motion speed')],
     deviceShowcase: [en('device', ['phone', 'laptop', 'tablet'], 'phone', 'device shell'), col('bodyColor', '#1b1d22', 'shell colour'), n('spin', 1, 'auto-rotate'), n('yaw', 0, 'yaw deg'), n('pitch', 0, 'pitch deg'), { name: 'screen', type: 'string', default: '', desc: 'image put on the screen face' }, n('roughness', 0.34, 'surface roughness'), n('metalness', 0.86, 'metalness')],
@@ -97,7 +97,7 @@ export const KNOBS = {
     extrudeText: [n('depth', 0.3, 'extrusion depth'), n('roughness', 0.28, 'surface roughness'), n('metalness', 0.72, 'metalness'), n('spin', 1, 'auto-rotate')],
     shatter: [n('count', 144, 'shards (rounded to a square grid)'), n('seed', 7, 'break pattern seed'), n('breakAt', 0.6, 'seconds before the surface breaks'), n('breakDur', 2.4, 'seconds the break takes'), n('travel', 2.6, 'how far the shards fly'), n('depth', 1.6, 'how far they fly toward camera'), n('spin', 1, 'tumble rate'), n('roughness', 0.32, 'surface roughness'), n('metalness', 0.55, 'metalness'), n('yaw', 0, 'yaw'), n('pitch', 0, 'pitch'), { name: 'screen', type: 'string', default: '', desc: 'image mapped across the surface before it breaks' }],
     magnetic: [n('poles', 2, '2 = dipole, 1 = a single source', [1, 2]), n('count', 18, 'field lines'), n('seed', 3, 'launch-angle seed'), n('pointSize', 0.05, 'travelling charge size'), n('spin', 1, 'orbit rate'), n('yaw', 0, 'yaw'), n('pitch', 0.18, 'pitch')],
-    // The code-* trio share ONE layout builder (`codeBoard` in core/three-fx.js), so they share their
+    // The code-* trio share ONE layout builder (`codeBoard` in core/surfaces/three-fx.js), so they share their
     // dials too: `lines` is the snippet the board is derived from, and breakAt/breakDur are that
     // scene's single event, a build-in, a burn, an assembly.
     codeExtrude: [{ name: 'lines', type: 'string', default: '', desc: 'the snippet, one string per line (array)' }, n('breakAt', 0.3, 'seconds before the first row rises'), n('breakDur', 1.1, 'seconds one row takes to land'), n('travel', 1, 'row-to-row delay multiplier'), n('depth', 1.8, 'how far back a row starts'), n('seed', 5, 'per-token constants seed'), n('spin', 1, 'drift rate'), n('roughness', 0.34, 'surface roughness'), n('metalness', 0.5, 'metalness'), n('yaw', -0.34, 'yaw'), n('pitch', 0.16, 'pitch')],

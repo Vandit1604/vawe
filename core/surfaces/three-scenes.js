@@ -1,7 +1,7 @@
 import { defineRegistry } from '../registry/registry.js';
 // core/three-scenes.js: the `three` scene NAME registry, and nothing else.
 //
-// It is split out for one concrete reason: core/three-fx.js imports the vendored three.js by its
+// It is split out for one concrete reason: core/surfaces/three-fx.js imports the vendored three.js by its
 // BROWSER-absolute path (/assets/vendor/three.module.js), which Node cannot resolve. Every gate that
 // needs the list of scenes runs in Node, so importing the implementation to read its registry made
 // `make schema-drift` crash outright.
@@ -9,7 +9,7 @@ import { defineRegistry } from '../registry/registry.js';
 // The obvious alternative, hand-copying the names into each gate, is the exact failure this repo has
 // now logged three times in one day (#83 counts, #90 doc claims, #94 coverage lists): a hand-kept
 // list of things that exist elsewhere decays the moment someone ships. So there is still exactly ONE
-// list, here, with no imports; core/three-fx.js imports it, and lib-test asserts that the SCENES it
+// list, here, with no imports; core/surfaces/three-fx.js imports it, and lib-test asserts that the SCENES it
 // actually implements match it name for name. Splitting the file does not get to mean splitting the
 // source of truth.
 // EACH SCENE DESCRIBES ITSELF. This was a bare array of names, so all eleven rendered their blurb as
@@ -37,7 +37,7 @@ export const THREE_REGISTRY = defineRegistry('three scene', Object.fromEntries(T
   catalog: {
     title: 'three.js scenes (real geometry)',
     tag: 'layer',
-    intro: '`{ "type":"three", "three":"<name>" }`. A scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.',
+    intro: '`{ "type":"three", "three":"<name>" }`. A scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/surfaces/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.',
     register: 'three',
     usage: (n, { full }) => full({ type: 'three', three: n }),
     preview: (n, { base, OVER }) => base({ layers: [{ type: 'three', three: n, x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 6 }, { ...OVER, text: n }] }),

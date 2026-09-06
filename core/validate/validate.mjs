@@ -616,7 +616,7 @@ export function fxErrors(cfg) {
 // graded. A preset with no manifest entry (`colorWave`, `shimmerWave`, `globe` today) is one the
 // manifest has nothing to say about, and refusing a dial on the strength of a list that does not
 // cover it is guessing, not checking. All three read real per-preset opts in core/type.js and
-// core/three-fx.js, and grading them against `_shared` alone would refuse four shipped films for a
+// core/surfaces/three-fx.js, and grading them against `_shared` alone would refuse four shipped films for a
 // hole in the manifest. Fill the manifest and they start being checked, with no change here.
 const KNOB_SLOTS = [
   // `presetOpts` holds ONLY dials, so any key that is not one is dead, typos included.
