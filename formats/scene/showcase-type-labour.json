@@ -24,48 +24,6 @@
   "sfxGain": 0.55,
   "_why": "no bed and no voice: the reel is read frame by frame, and a track would set a pace the viewer is meant to ignore while comparing nine entrances. The engine's own cut cues punctuate the ten joints, so the metric rhythm is audible without a loop."
  },
- "cuts": [
-  {
-   "t": 3.9,
-   "style": "punch"
-  },
-  {
-   "t": 6.6,
-   "style": "punch"
-  },
-  {
-   "t": 9.3,
-   "style": "punch"
-  },
-  {
-   "t": 12,
-   "style": "punch"
-  },
-  {
-   "t": 14.7,
-   "style": "punch"
-  },
-  {
-   "t": 17.4,
-   "style": "punch"
-  },
-  {
-   "t": 20.1,
-   "style": "punch"
-  },
-  {
-   "t": 22.8,
-   "style": "punch"
-  },
-  {
-   "t": 25.5,
-   "style": "punch"
-  },
-  {
-   "t": 28.2,
-   "style": "riseBlur"
-  }
- ],
  "authoring": {
   "allow": [
    "numbered-section-markers",
@@ -746,5 +704,57 @@
    "exitDur": 0
   }
  ],
- "sceneUnits": true
+ "sceneUnits": true,
+ "transitions": [
+  {
+   "at": 3.9,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 6.6,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 9.3,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 12,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 14.7,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 17.4,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 20.1,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 22.8,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 25.5,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 28.2,
+   "mech": "cut",
+   "fx": "riseBlur"
+  }
+ ]
 }

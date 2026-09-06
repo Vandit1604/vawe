@@ -26,33 +26,6 @@
   },
   "sfxGain": 0.8
  },
- "cuts": [
-  {
-   "t": 2.2,
-   "style": "punch",
-   "dur": 0.2
-  },
-  {
-   "t": 4.1,
-   "style": "punch",
-   "dur": 0.2
-  },
-  {
-   "t": 6,
-   "style": "punch",
-   "dur": 0.2
-  },
-  {
-   "t": 8.6,
-   "style": "punch",
-   "dur": 0.2
-  },
-  {
-   "t": 10.4,
-   "style": "punch",
-   "dur": 0.2
-  }
- ],
  "layers": [
   {
    "type": "text",
@@ -285,6 +258,38 @@
   {
    "t": 0,
    "preset": "aurora"
+  }
+ ],
+ "transitions": [
+  {
+   "at": 2.2,
+   "mech": "cut",
+   "fx": "punch",
+   "dur": 0.2
+  },
+  {
+   "at": 4.1,
+   "mech": "cut",
+   "fx": "punch",
+   "dur": 0.2
+  },
+  {
+   "at": 6,
+   "mech": "cut",
+   "fx": "punch",
+   "dur": 0.2
+  },
+  {
+   "at": 8.6,
+   "mech": "cut",
+   "fx": "punch",
+   "dur": 0.2
+  },
+  {
+   "at": 10.4,
+   "mech": "cut",
+   "fx": "punch",
+   "dur": 0.2
   }
  ]
 }

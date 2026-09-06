@@ -6,47 +6,6 @@
   "audio": {
     "silent": true
   },
-  "cuts": [
-    {
-      "t": 4.85,
-      "style": "punch"
-    },
-    {
-      "t": 6.55,
-      "style": "whip"
-    },
-    {
-      "t": 8.35,
-      "style": "punch"
-    },
-    {
-      "t": 10.15,
-      "style": "whip"
-    },
-    {
-      "t": 11.55,
-      "style": "riseBlur"
-    }
-  ],
-  "stings": [
-    {
-      "t": 8.95,
-      "fx": "flash",
-      "colors": [
-        "#2563eb"
-      ],
-      "intensity": 0.45
-    },
-    {
-      "t": 11.55,
-      "fx": "leak",
-      "colors": [
-        "#2563eb",
-        "#8fc0ff"
-      ],
-      "intensity": 0.3
-    }
-  ],
   "layers": [
     {
       "id": "wave",
@@ -588,5 +547,53 @@
       "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
       "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 4.85,
+      "mech": "cut",
+      "fx": "punch"
+    },
+    {
+      "at": 6.55,
+      "mech": "cut",
+      "fx": "whip",
+      "timing": "smooth"
+    },
+    {
+      "at": 8.35,
+      "mech": "cut",
+      "fx": "punch"
+    },
+    {
+      "at": 10.15,
+      "mech": "cut",
+      "fx": "whip",
+      "timing": "smooth"
+    },
+    {
+      "at": 11.55,
+      "mech": "cut",
+      "fx": "riseBlur"
+    },
+    {
+      "at": 8.95,
+      "mech": "sting",
+      "fx": "flash",
+      "intensity": 0.45,
+      "colors": [
+        "#2563eb"
+      ]
+    },
+    {
+      "at": 11.55,
+      "mech": "sting",
+      "fx": "leak",
+      "intensity": 0.3,
+      "colors": [
+        "#2563eb",
+        "#8fc0ff"
+      ]
+    }
+  ]
 }

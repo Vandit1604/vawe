@@ -13,46 +13,6 @@
       "to": 23.5
     }
   ],
-  "cuts": [
-    {
-      "t": 3.45,
-      "style": "softwipe",
-      "dur": 0.4
-    },
-    {
-      "t": 6.65,
-      "style": "slide",
-      "dur": 0.4
-    },
-    {
-      "t": 10.25,
-      "style": "rise",
-      "dur": 0.4
-    },
-    {
-      "t": 13.65,
-      "style": "whip",
-      "dur": 0.36
-    },
-    {
-      "t": 16.95,
-      "style": "softiris",
-      "dur": 0.42
-    },
-    {
-      "t": 20.15,
-      "style": "riseBlur",
-      "dur": 0.42
-    }
-  ],
-  "stings": [
-    {
-      "t": 9.95,
-      "fx": "flash",
-      "dur": 0.4,
-      "seed": 2
-    }
-  ],
   "layers": [
     {
       "type": "text",
@@ -529,5 +489,52 @@
       "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)",
       "static-bg": "legacy: grandfathered 2026-09-05, adopted 2026-09-05 (the backdrop moves, at least one beat is not a flat field asleep for the whole film)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 3.45,
+      "mech": "cut",
+      "fx": "softwipe",
+      "dur": 0.4
+    },
+    {
+      "at": 6.65,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.4,
+      "timing": "smooth"
+    },
+    {
+      "at": 10.25,
+      "mech": "cut",
+      "fx": "rise",
+      "dur": 0.4
+    },
+    {
+      "at": 13.65,
+      "mech": "cut",
+      "fx": "whip",
+      "dur": 0.36,
+      "timing": "smooth"
+    },
+    {
+      "at": 16.95,
+      "mech": "cut",
+      "fx": "softiris",
+      "dur": 0.42
+    },
+    {
+      "at": 20.15,
+      "mech": "cut",
+      "fx": "riseBlur",
+      "dur": 0.42
+    },
+    {
+      "at": 9.95,
+      "mech": "sting",
+      "fx": "flash",
+      "dur": 0.4,
+      "seed": 2
+    }
+  ]
 }

@@ -4,57 +4,6 @@
   "theme": "vawe",
   "duration": 15,
   "sceneUnits": true,
-  "cuts": [
-    {
-      "t": 1.6,
-      "style": "slide",
-      "dir": "left",
-      "dur": 0.42,
-      "timing": "snappy"
-    },
-    {
-      "t": 3.2,
-      "style": "slide",
-      "dir": "left",
-      "dur": 0.42,
-      "timing": "snappy"
-    },
-    {
-      "t": 5,
-      "style": "slide",
-      "dir": "left",
-      "dur": 0.42,
-      "timing": "snappy"
-    },
-    {
-      "t": 6.8,
-      "style": "slide",
-      "dir": "up",
-      "dur": 0.46,
-      "timing": "snappy"
-    },
-    {
-      "t": 8.8,
-      "style": "slide",
-      "dir": "left",
-      "dur": 0.42,
-      "timing": "snappy"
-    },
-    {
-      "t": 10.6,
-      "style": "slide",
-      "dir": "left",
-      "dur": 0.42,
-      "timing": "snappy"
-    },
-    {
-      "t": 12.4,
-      "style": "slide",
-      "dir": "up",
-      "dur": 0.5,
-      "timing": "snappy"
-    }
-  ],
   "cameraMove": [
     {
       "move": "slowPush",
@@ -407,5 +356,63 @@
       "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
       "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 1.6,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.42,
+      "dir": "left",
+      "timing": "snappy"
+    },
+    {
+      "at": 3.2,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.42,
+      "dir": "left",
+      "timing": "snappy"
+    },
+    {
+      "at": 5,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.42,
+      "dir": "left",
+      "timing": "snappy"
+    },
+    {
+      "at": 6.8,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.46,
+      "dir": "up",
+      "timing": "snappy"
+    },
+    {
+      "at": 8.8,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.42,
+      "dir": "left",
+      "timing": "snappy"
+    },
+    {
+      "at": 10.6,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.42,
+      "dir": "left",
+      "timing": "snappy"
+    },
+    {
+      "at": 12.4,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.5,
+      "dir": "up",
+      "timing": "snappy"
+    }
+  ]
 }

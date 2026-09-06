@@ -25,28 +25,6 @@
       "ease": "linear"
     }
   ],
-  "seams": [
-    {
-      "t": 3.3,
-      "fx": "whipPan",
-      "dur": 0.5
-    },
-    {
-      "t": 7,
-      "fx": "cinematicZoom",
-      "dur": 0.55
-    },
-    {
-      "t": 11,
-      "fx": "whipPan",
-      "dur": 0.5
-    },
-    {
-      "t": 14.2,
-      "fx": "flashWhite",
-      "dur": 0.4
-    }
-  ],
   "layers": [
     {
       "type": "text",
@@ -457,5 +435,34 @@
       "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
       "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 3.3,
+      "mech": "seam",
+      "fx": "whipPan",
+      "dur": 0.5,
+      "timing": "smooth"
+    },
+    {
+      "at": 7,
+      "mech": "seam",
+      "fx": "cinematicZoom",
+      "dur": 0.55,
+      "timing": "smooth"
+    },
+    {
+      "at": 11,
+      "mech": "seam",
+      "fx": "whipPan",
+      "dur": 0.5,
+      "timing": "smooth"
+    },
+    {
+      "at": 14.2,
+      "mech": "seam",
+      "fx": "flashWhite",
+      "dur": 0.4
+    }
+  ]
 }

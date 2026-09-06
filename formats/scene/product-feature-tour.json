@@ -72,41 +72,6 @@
     }
   ],
   "_cuts": "The MOTION family, which is what the motion director picks for this theme's punchy personality, rotated across its members. A matte cut (wipe, iris, blinds) would have matched the three roadmap bars, but core/cuts.js refuses one on a whole-frame root and the only way to earn it is beat wrapping, which this film opts out of one field up. So the film carries two cut families: shape inside the beat, motion between them. Each cut sits on a chapter boundary, and the backdrop windows at the foot of the file carry no times because they bind to these joints (core/junctions.js).",
-  "cuts": [
-    {
-      "t": 5.6,
-      "style": "whip",
-      "dur": 0.32,
-      "dir": "left"
-    },
-    {
-      "t": 13.7,
-      "style": "zoom",
-      "dur": 0.36
-    },
-    {
-      "t": 22.15,
-      "style": "whip",
-      "dur": 0.32,
-      "dir": "right"
-    },
-    {
-      "t": 31.7,
-      "style": "punch",
-      "dur": 0.3
-    },
-    {
-      "t": 38.2,
-      "style": "zoom",
-      "dur": 0.36
-    },
-    {
-      "t": 44,
-      "style": "slide",
-      "dur": 0.34,
-      "dir": "left"
-    }
-  ],
   "spectacle": {
     "at": 34.4,
     "of": "adoptionCount",
@@ -919,5 +884,51 @@
       "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
       "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 5.6,
+      "mech": "cut",
+      "fx": "whip",
+      "dur": 0.32,
+      "dir": "left",
+      "timing": "smooth"
+    },
+    {
+      "at": 13.7,
+      "mech": "cut",
+      "fx": "zoom",
+      "dur": 0.36,
+      "timing": "smooth"
+    },
+    {
+      "at": 22.15,
+      "mech": "cut",
+      "fx": "whip",
+      "dur": 0.32,
+      "dir": "right",
+      "timing": "smooth"
+    },
+    {
+      "at": 31.7,
+      "mech": "cut",
+      "fx": "punch",
+      "dur": 0.3
+    },
+    {
+      "at": 38.2,
+      "mech": "cut",
+      "fx": "zoom",
+      "dur": 0.36,
+      "timing": "smooth"
+    },
+    {
+      "at": 44,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.34,
+      "dir": "left",
+      "timing": "smooth"
+    }
+  ]
 }

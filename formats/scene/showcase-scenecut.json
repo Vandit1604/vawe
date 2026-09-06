@@ -22,22 +22,6 @@
   "theme": "vawe",
   "duration": 9,
   "sceneUnits": true,
-  "cuts": [
-    {
-      "t": 3,
-      "style": "slide",
-      "dir": "left",
-      "dur": 0.6,
-      "timing": "smooth"
-    },
-    {
-      "t": 6,
-      "style": "riseBlur",
-      "dir": "left",
-      "dur": 0.6,
-      "timing": "smooth"
-    }
-  ],
   "cameraMove": [
     {
       "move": "slowPush",
@@ -169,6 +153,24 @@
       "enterDur": 0.5,
       "start": 6.9,
       "duration": 2.1
+    }
+  ],
+  "transitions": [
+    {
+      "at": 3,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.6,
+      "dir": "left",
+      "timing": "smooth"
+    },
+    {
+      "at": 6,
+      "mech": "cut",
+      "fx": "riseBlur",
+      "dur": 0.6,
+      "dir": "left",
+      "timing": "smooth"
     }
   ]
 }

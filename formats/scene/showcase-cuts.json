@@ -252,20 +252,6 @@
       "exitDur": 0
     }
   ],
-  "cuts": [
-    {
-      "t": 2.8,
-      "style": "punch"
-    },
-    {
-      "t": 5.6,
-      "style": "none"
-    },
-    {
-      "t": 7.6,
-      "style": "zoom"
-    }
-  ],
   "bg": [
     {
       "preset": "plain"
@@ -289,5 +275,23 @@
       "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
       "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 2.8,
+      "mech": "cut",
+      "fx": "punch"
+    },
+    {
+      "at": 5.6,
+      "mech": "cut",
+      "fx": "none"
+    },
+    {
+      "at": 7.6,
+      "mech": "cut",
+      "fx": "zoom",
+      "timing": "smooth"
+    }
+  ]
 }

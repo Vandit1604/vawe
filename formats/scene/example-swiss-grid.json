@@ -32,25 +32,6 @@
    "ease": "linear"
   }
  ],
- "seams": [
-  {
-   "t": 3.6,
-   "fx": "wipe",
-   "dur": 0.5,
-   "dir": "left"
-  },
-  {
-   "t": 7.2,
-   "fx": "wipe",
-   "dur": 0.5,
-   "dir": "left"
-  },
-  {
-   "t": 11,
-   "fx": "dissolve",
-   "dur": 0.5
-  }
- ],
  "layers": [
   {
    "type": "text",
@@ -359,6 +340,28 @@
   {
    "t": 0,
    "preset": "dotmatrix"
+  }
+ ],
+ "transitions": [
+  {
+   "at": 3.6,
+   "mech": "seam",
+   "fx": "wipe",
+   "dur": 0.5,
+   "dir": "left"
+  },
+  {
+   "at": 7.2,
+   "mech": "seam",
+   "fx": "wipe",
+   "dur": 0.5,
+   "dir": "left"
+  },
+  {
+   "at": 11,
+   "mech": "seam",
+   "fx": "dissolve",
+   "dur": 0.5
   }
  ]
 }

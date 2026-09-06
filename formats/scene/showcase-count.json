@@ -28,43 +28,6 @@
       "to": 19.6
     }
   ],
-  "cuts": [
-    {
-      "t": 3.05,
-      "style": "softwipe",
-      "dur": 0.4
-    },
-    {
-      "t": 6.45,
-      "style": "slide",
-      "dur": 0.4
-    },
-    {
-      "t": 10.05,
-      "style": "rise",
-      "dur": 0.4
-    },
-    {
-      "t": 13.45,
-      "style": "punch",
-      "dur": 0.36
-    },
-    {
-      "t": 17.25,
-      "style": "riseBlur",
-      "dur": 0.42
-    }
-  ],
-  "stings": [
-    {
-      "t": 13.6,
-      "fx": "flash",
-      "colors": [
-        "#2563eb"
-      ],
-      "intensity": 0.35
-    }
-  ],
   "layers": [
     {
       "type": "rect",
@@ -394,5 +357,47 @@
       "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
       "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 3.05,
+      "mech": "cut",
+      "fx": "softwipe",
+      "dur": 0.4
+    },
+    {
+      "at": 6.45,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.4,
+      "timing": "smooth"
+    },
+    {
+      "at": 10.05,
+      "mech": "cut",
+      "fx": "rise",
+      "dur": 0.4
+    },
+    {
+      "at": 13.45,
+      "mech": "cut",
+      "fx": "punch",
+      "dur": 0.36
+    },
+    {
+      "at": 17.25,
+      "mech": "cut",
+      "fx": "riseBlur",
+      "dur": 0.42
+    },
+    {
+      "at": 13.6,
+      "mech": "sting",
+      "fx": "flash",
+      "intensity": 0.35,
+      "colors": [
+        "#2563eb"
+      ]
+    }
+  ]
 }
