@@ -13,11 +13,15 @@ import * as Beats from './beats.mjs';
 import * as Collage from './beats-collage.mjs';
 import * as Track from './beats-track.mjs';
 import * as Punct from './beats-punct.mjs';
+// The MINED beats: harvested by `make mine` from grammar/*.json (studied real films), never invented.
+// See docs/CRAFT/BLUEPRINTS.md "Mined blueprints" and grammar/_mined-shapes.json for the source shots.
+import * as Mined from './beats-mined.mjs';
 
 export * from './beats.mjs';
 export * from './beats-collage.mjs';
 export * from './beats-track.mjs';
 export * from './beats-punct.mjs';
+export * from './beats-mined.mjs';
 export * from './kit.mjs';
 
 // name → factory. A beat factory is pure (props → array of scene-layer JSON) and takes at least {start, dur}.
@@ -41,6 +45,17 @@ export const BEATS = {
   scrollStory: withBlurb('a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop', Track.scrollStory),
   focusRack: withBlurb('a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims', Track.focusRack),
   wordBlast: withBlurb('scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame', Punct.wordBlast),
+  // ---- MINED (from grammar/*.json via `make mine`, see docs/CRAFT/BLUEPRINTS.md) -------------------
+  blurResolveHook: withBlurb('a hook whose type arrives smeared with motion blur and snaps into focus, never sliding or fading', Mined.blurResolveHook),
+  dialogueAccumulate: withBlurb('sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom', Mined.dialogueAccumulate),
+  containerFill: withBlurb('a fixed frame that never moves while chips fill it in one at a time', Mined.containerFill),
+  cardFan: withBlurb('cards arrive from one side and fan open in perspective around a fixed anchor', Mined.cardFan),
+  listBuildRows: withBlurb('a vertical list that grows one row at a time under a fixed left rule', Mined.listBuildRows),
+  chipConverge: withBlurb('chips scatter in from every side and then converge onto one point', Mined.chipConverge),
+  cellMosaic: withBlurb('a grid of mixed cells that slides as one surface while each cell keeps its own content', Mined.cellMosaic),
+  wordWipe: withBlurb('an oversized word crosses the whole frame motion-blurred, and its passage is the transition', Mined.wordWipe),
+  wordmarkAssemble: withBlurb('the brand mark settles from scattered letters while small tiles drift at a different depth behind it', Mined.wordmarkAssemble),
+  viewportTrio: withBlurb('the same subject shown at three sizes at once, the "it is really finished" payoff shot', Mined.viewportTrio),
 };
 
 // The descriptions used to be TRAILING `//` COMMENTS on the lines above, parsed back out of this file's
@@ -104,4 +119,14 @@ export const REQUESTS = {
   scrollStory: 'Scroll a page taller than the frame the way a person scrolls it: hold the frame still, lean the surface on a static tilt, and stop at each real section in turn on one ease.',
   focusRack: 'Rack the focus between two planes: the near one pulls sharp while the far one blurs AND dims, one exchange, then settle sharp before the cut.',
   wordBlast: 'Punctuate with one word (or the mark) that arrives oversized, settles, creeps, then grows THROUGH the frame. It does not fade.',
+  blurResolveHook: 'Open on a line that arrives smeared with motion blur and snaps into focus. It never slides, fades or scales.',
+  dialogueAccumulate: 'Build the hook as sans/serif word pairs that accumulate on a held frame, a small dot joining each pair, then a bloomed payoff line.',
+  containerFill: 'Hold a fixed frame on screen and fill it with chips one at a time. The frame is the constant; the count is the variable.',
+  cardFan: 'Fan a stack of cards open from one side around a fixed anchor, each a touch later and a touch more rotated than the last.',
+  listBuildRows: 'Grow a vertical list one row at a time under a fixed rule, never resetting what already landed.',
+  chipConverge: 'Scatter a ring of chips in from every side, then converge them onto one point.',
+  cellMosaic: 'Slide a grid of mixed cells as one surface while every cell keeps its own content, so words and pictures cross cell boundaries together.',
+  wordWipe: 'Wipe the frame with one word roughly eight times the normal type size, motion-blurred, and land the reveal the instant it clears.',
+  wordmarkAssemble: 'Assemble the brand mark from scattered letters while small tiles drift slowly at a different depth behind it.',
+  viewportTrio: 'Show the same real surface at three sizes at once, the "it is really finished" payoff shot.',
 };
