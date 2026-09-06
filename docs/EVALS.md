@@ -36,7 +36,7 @@ change that only affects one family still shows up somewhere:
 - **`sting.json`**: a 4s logo sting, the wave draws on, the wordmark types in.
 - **`recreation.json`**: `sceneUnits` with a continuous object (`acrossBeats` + `kick`) crossing two cuts.
 
-They are fixtures, not showcase films: small, honest, and kept passing `node core/validate.mjs`. Adding
+They are fixtures, not showcase films: small, honest, and kept passing `node core/validate/validate.mjs`. Adding
 a fifth deliberately widens what the harness watches; do not grow them into full productions.
 
 ## Running it

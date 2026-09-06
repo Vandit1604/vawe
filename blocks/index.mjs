@@ -63,7 +63,7 @@ import { CATALOG } from './catalog.mjs';
 // that only says the name back, and it grades a blurb by the exact words `make arsenal` will index it
 // under. Two copies of that rule would eventually disagree about which. The path resolves in the
 // browser too: core/ is vendored at /core and blocks at /blocklib, so `../core/` is right in both.
-import { checkBlurb } from '../core/registry.js';
+import { checkBlurb } from '../core/registry/registry.js';
 import { TOKENS, SERIES, onColor, R, cardChrome, toneColor, avatarEl, BLOCKS } from './kit.mjs';
 
 // The kit vocabulary, re-exported so a caller reaching for a token does not need a second import.

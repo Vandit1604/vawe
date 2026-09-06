@@ -16,11 +16,11 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { SEAM_FX } from '../../core/seams.js';
+import { SEAM_FX } from '../../core/timeline/seams.js';
 import { scratch, scratchBase, ffmpegOrDie } from '../lib/scratch.mjs';
-import { PRESENTATIONS, TIMINGS } from '../../core/cuts.js';
-import { SHADER_FX } from '../../core/stings.js';
-import { ANIM_NAMES } from '../../core/clips.js';
+import { PRESENTATIONS, TIMINGS } from '../../core/cuts/index.js';
+import { SHADER_FX } from '../../core/stings/index.js';
+import { ANIM_NAMES } from '../../core/timeline/clips.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

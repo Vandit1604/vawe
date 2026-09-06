@@ -108,7 +108,7 @@
         "amount": 0.5
       }
     },
-    "render": "import { byName } from 'core/generators.js'; byName('colonnade').render(options)"
+    "render": "import { byName } from 'core/layout/generators.js'; byName('colonnade').render(options)"
   },
   "docs": "docs/LIGHTFIELD.md",
   "reference": "refs/ref-b.png",

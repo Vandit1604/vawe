@@ -6,7 +6,7 @@
 // at render time (renderBg), and publishes the registry. Adding a preset means adding one entry to
 // presets.js; nothing here changes. core/backgrounds.js re-exports this whole surface so every
 // existing importer keeps its `from './backgrounds.js'` path.
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 import { paintBase, dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain, gradientFill } from './fx.js';
 import { PAL_PLINTH, PAL, bgPaletteFrom } from './palette.js';
 import { PRESETS } from './presets.js';

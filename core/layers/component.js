@@ -1,6 +1,6 @@
 // core/layers/component.js: a REAL UI capture (capture-component.mjs), or one PART of a captured
 // animated scene (capture-scene.mjs), parts carry their own w/h and are re-animated here.
-import { propsOf } from '../props.js';
+import { propsOf } from '../registry/props.js';
 
 // The props are read off this signature (propsOf, core/props.js). No second list to drift from it.
 export function build(kit, el, L, { src, part, w } = L) {

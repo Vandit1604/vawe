@@ -1,7 +1,7 @@
 // core/layers/text.js. A text (or count) layer: theme-styled type + chip box + auto-fit safety.
 // Also drives the `typing` per-frame effect. `count` reuses this build (styleText handles its content).
-import { isPainting } from '../fonts.js';
-import { mergeProps, propsOf } from '../props.js';
+import { isPainting } from '../engine/fonts.js';
+import { mergeProps, propsOf } from '../registry/props.js';
 
 // The `fit` family is guarded because a fit with no width has nothing to fit INTO, and the typing
 // family because a caret with no `typing` has no reveal to trail. A guard has no spelling in a

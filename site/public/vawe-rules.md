@@ -64,11 +64,11 @@ JSON *is* the video.
 | `stagger` | number|object | Per-unit delay (s), OR the three-dial object form { each, amount, from } that  |
 | `each` | number | Per-unit duration (s) |
 | `start` | ? | Window start: seconds, or relative "otherId+0.5" / "otherId.end-0.2" |
-| `duration` | number|string | Window length (s), or a duration word (core/vocab.js): instant / fast / medium |
-| `anim` | string | Enter anim. EXACT names (core/clips.js ANIM): fade / up / rise / pop / scale /. One of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
+| `duration` | number|string | Window length (s), or a duration word (core/registry/vocab.js): instant / fast |
+| `anim` | string | Enter anim. EXACT names (core/timeline/clips.js ANIM): fade / up / rise / pop . One of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
 | `out` | string | driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONT. One of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
-| `enterDur` | number|string | Enter window (s, cut layers), or a duration word (core/vocab.js): instant / fa |
-| `exitDur` | number|string | Exit window (s; 0 = hold to end), or a duration word (core/vocab.js): instant  |
+| `enterDur` | number|string | Enter window (s, cut layers), or a duration word (core/registry/vocab.js): ins |
+| `exitDur` | number|string | Exit window (s; 0 = hold to end), or a duration word (core/registry/vocab.js): |
 | `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds. One of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` |
 | `critical` | boolean | Force include/exclude from layout audit |
 | `track` | number | z-order track |

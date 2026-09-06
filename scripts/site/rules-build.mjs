@@ -11,8 +11,8 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PRESETS } from '../../core/type.js';
-import { EASINGS } from '../../core/motion.js';
+import { PRESETS } from '../../core/type/type.js';
+import { EASINGS } from '../../core/motion/motion.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');

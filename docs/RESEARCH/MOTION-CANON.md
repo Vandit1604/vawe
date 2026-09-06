@@ -73,11 +73,11 @@ own version is **successive breaking of joints**, animating primary action first
 the loose trailing parts, rather than solving every joint at once). Bartlett states the motion-graphics
 form directly: SPACING is the graph editor's distribution of keys, and it is a per-property decision.
 
-**What the engine expresses today.** `core/sequence.js:274` `motionAt` interpolates a segment with ONE
+**What the engine expresses today.** `core/timeline/sequence.js:274` `motionAt` interpolates a segment with ONE
 progress value `p` and applies it to every property: `lerp(a[prop] ?? dflt, b[prop] ?? dflt, p)`
-(`segmentAt`, `core/sequence.js:203`). A keyframe is therefore a **complete pose**, not a property key.
+(`segmentAt`, `core/timeline/sequence.js:203`). A keyframe is therefore a **complete pose**, not a property key.
 Worse for this purpose, an omitted property falls back to its IDENTITY, not to the neighbour's value
-(`core/sequence.js:275`, `norm`), so you cannot key `rot` at 0.30s without restating `x` there too. That
+(`core/timeline/sequence.js:275`, `norm`), so you cannot key `rot` at 0.30s without restating `x` there too. That
 rule is deliberate and is defended in the file: one interpretation rule, both endpoints or neither. It
 also means the thing Williams describes is not expressible on one layer. Scale cannot finish three
 frames after position; rotation cannot trail the travel.
@@ -120,7 +120,7 @@ number: **influence is a percentage of the segment, and forcing it high on BOTH 
 Practitioners cap it near 90 for that reason.
 
 **What the engine expresses today.** All three shapes are already reachable, and the registry at
-`core/motion.js:226` even names them: `fling` (influence 18, speed 4) IS the spike, `linear` IS the
+`core/motion/motion.js:226` even names them: `fling` (influence 18, speed 4) IS the spike, `linear` IS the
 plateau, `easyEase` (influence 33, speed 0) IS the hump, and `hang` (influence 75, speed 0) is the
 flat-ended graph a snappy swap is cut on. What is missing is that the easing table in MOTION-CRAFT.md,
 which is where an author actually looks, is indexed by FEELING and contains none of them: it stops at
@@ -130,7 +130,7 @@ ceiling; `resolveHandle` accepts 0 to 100 and 100 is legal on both sides.
 **The concrete change.** Two rows and one sentence, both in `docs/MOTION-CRAFT.md`: a small table
 mapping the three speed-graph shapes to the handle names that produce them, and a line saying influence
 above about 90 on both sides of one key reads as a skip rather than as a snap. If somebody later wants
-the refusal in code it belongs in `resolveHandle` (`core/motion.js:243`), which is the one place a
+the refusal in code it belongs in `resolveHandle` (`core/motion/motion.js:243`), which is the one place a
 handle is read, but a doc line is the honest first move: no film in the library has hit it yet.
 
 **What a viewer would see.** The difference between a film whose every move is the same soft hump and
@@ -187,19 +187,19 @@ needs a change; all of it needs a citation the next author can check.
   even the Wikipedia paraphrase: the presentation of an idea so that it is "completely and unmistakably
   clear".
 - **Dense keys with linear between them** (`KEYED-MOTION.md` §1, and the `DENSE_KEY_SEC` default at
-  `core/sequence.js:109`) is Williams' ONES AND TWOS argument arriving from the other end. Williams:
+  `core/timeline/sequence.js:109`) is Williams' ONES AND TWOS argument arriving from the other end. Williams:
   animate on ones (every frame) for fast, high-impact action; the shape comes from where the drawings
   ARE. Our rule: below 0.14s a segment is not a span with a shape, it is one step of a traced path, so
   the curve is wrong and the key placement is the whole answer. Same claim, different medium.
 - **"Bad inbetweens will kill the finest animation"** (Williams, quoting Natwick) is the sharpest one-line
-  statement of the finding at `core/sequence.js:145`: every per-segment easing zeroes velocity at both
+  statement of the finding at `core/timeline/sequence.js:145`: every per-segment easing zeroes velocity at both
   ends of its own segment, so an interior keyframe is a full stop by construction, and the measured
   velocity series (1418 · 168 · 8 · 2 · 16 · 336 · 2836 px/s) is a dead stop in the middle of a travel.
   `ease: "through"` was written to fix exactly that. The literature had the complaint eighty years early.
 - **`ease: "through"` is AE's Continuous Bezier, arrived at independently.** Adobe's interpolation list
   (snippet-read) has five types, and Continuous Bezier is the one whose handles stay tangent across the
   key so the velocity does not kink, with Auto Bezier computing that tangent from the neighbours. That is
-  the cubic Hermite with finite-difference tangents at `core/sequence.js:220`, described in the same
+  the cubic Hermite with finite-difference tangents at `core/timeline/sequence.js:220`, described in the same
   words by the comment above it. Two of AE's five are ours by default (linear below `DENSE_KEY_SEC`,
   bezier via handles), one is `through`, one (Auto Bezier) is the same code path, and only HOLD is
   missing.
@@ -219,11 +219,11 @@ across them.
 
 | the operation | engine today | verdict |
 |---|---|---|
-| shape one segment's acceleration by dragging two handles (influence + speed) | `easeIn`/`easeOut` per key, per side, `{influence, speed}` or a named handle (`core/motion.js:163`, `handleCurve`) | **FULL PARITY**, and unused (below) |
-| make velocity survive an interior key, so a three-key travel reads as one gesture | `ease: "through"`, cubic Hermite with neighbour tangents (`core/sequence.js:220`) | **FULL PARITY**, and used ZERO times |
+| shape one segment's acceleration by dragging two handles (influence + speed) | `easeIn`/`easeOut` per key, per side, `{influence, speed}` or a named handle (`core/motion/motion.js:163`, `handleCurve`) | **FULL PARITY**, and unused (below) |
+| make velocity survive an interior key, so a three-key travel reads as one gesture | `ease: "through"`, cubic Hermite with neighbour tangents (`core/timeline/sequence.js:220`) | **FULL PARITY**, and used ZERO times |
 | offset one property's keys from another's on the same layer | not expressible: one `p` per segment, every key a full pose | **NO PARITY** (ADOPT 1) |
 | bend the PATH between two position keys (spatial interpolation) | not on the track. `motionPath` (GSAP, with `autoRotate`) flies a layer along an SVG path, and `alongPath` sets type on a curve | **PARALLEL MECHANISM, NOT PARITY** |
-| jump a value with no interpolation (AE's HOLD interpolation type) | nothing: 41 easings and none is a step (`core/motion.js` `EASINGS`) | **NO PARITY**, and trivially closable |
+| jump a value with no interpolation (AE's HOLD interpolation type) | nothing: 41 easings and none is a step (`core/motion/motion.js` `EASINGS`) | **NO PARITY**, and trivially closable |
 | give each axis its own curve (AE's Separate Dimensions) | `x` and `y` are already separate scalars on the key, but ONE `p` shapes both | **HALF**: we pay the cost and do not get the benefit (below) |
 | retime a whole move without reshaping it (roving keyframes) | nothing | **NO PARITY**, and correct: roving is spatial-only |
 
@@ -252,12 +252,12 @@ is what `through` is for and nobody has typed it.
 Two things follow, and neither is engine code:
 
 1. **`through` is undiscoverable.** It is not an easing (it is dispatched before `resolveEasing` ever
-   sees it, `core/sequence.js:209`), so it does not appear in the easing table in MOTION-CRAFT.md, which
+   sees it, `core/timeline/sequence.js:209`), so it does not appear in the easing table in MOTION-CRAFT.md, which
    is where an author looks. It appears in `KEYED-MOTION.md` and in the arcs row of the recipes table.
    One row in the MOTION-CRAFT easing table ("the value keeps its speed through an interior key") would
    cost a line and is the highest-value edit in this document.
 2. **The handle vocabulary is named but not demonstrated.** `hang`, `fling`, `overshoot`, `easyEase` and
-   `linear` all carry good blurbs in `core/motion.js:226`. No shipped film shows what one looks like.
+   `linear` all carry good blurbs in `core/motion/motion.js:226`. No shipped film shows what one looks like.
    A `make catalog` card per handle, or one demo scene, would do more than any new feature here.
 
 **The Separate Dimensions finding, which is the sharpest thing this pass turned up.** In After Effects,
@@ -266,7 +266,7 @@ curves right-clicks it and separates the dimensions, which deletes the motion pa
 disappear from the composition viewer and each axis becomes a scalar with its own temporal
 interpolation. That is a TRADE, made knowingly, and it is made often. **This engine is permanently on
 the far side of that trade and gets nothing for it.** `x` and `y` are already separate scalars on a
-motion key (`core/sequence.js:275`), so there is no motion path to bow, which is why arcs are hard here.
+motion key (`core/timeline/sequence.js:275`), so there is no motion path to bow, which is why arcs are hard here.
 But one `p` still shapes both, so there is no independent curve per axis either. Whichever way you look
 at it, the engine took the cost of separation and kept the coupling of the joined form. Closing it is
 the same one-line change as ADOPT 1, since a per-property sampling offset generalises to a per-property
@@ -274,7 +274,7 @@ CURVE, and `core/tracks/vars.js:21` already shows the shape the API should take.
 
 **One deliberate divergence worth recording so nobody "fixes" it.** Adobe's Keyframe Velocity dialog
 states SPEED in the property's own units (px/sec on Position), which means a handle copied between
-properties is meaningless. `core/motion.js:191` writes speed as a MULTIPLE of the segment's average
+properties is meaningless. `core/motion/motion.js:191` writes speed as a MULTIPLE of the segment's average
 velocity instead, and the algebra cancels the delta and the duration, so one handle pair is correct for
 `x`, `scale` and `rot` at once. That is better than AE for a JSON authoring surface, and it is the
 reason the handle spec is flat rather than a map keyed by property. It also means an AE number lifted
@@ -283,7 +283,7 @@ from a tutorial does not transfer: the influence does, the speed does not.
 **Three smaller gaps, each stated so it can be dismissed cheaply:**
 
 - **No HOLD keyframe.** The easing registry has 41 names and none of them is a step
-  (`core/motion.js` `EASINGS`). A value that jumps rather than travels has to be written as two keys a
+  (`core/motion/motion.js` `EASINGS`). A value that jumps rather than travels has to be written as two keys a
   frame apart. AE has one; a stepped swap is a real motion-graphics move. Small, and obviously right if
   anybody wants it: the change is one entry that returns 0 until `t >= 1`.
 - **The anchor point is not keyable.** `origin` is a static CSS `transform-origin`
@@ -301,7 +301,7 @@ doc: a three-key apex turns 22 degrees where `linear` turns 66), so a polyline o
 It cannot bow a TWO-key segment, which is what AE's spatial bezier does and what the 10 to 20%
 perpendicular bow in the recipes doc describes. The honest verdict for a two-key move is the body's
 PARTLY, and the route is `motionPath`, which is a different mechanism with a different clock (GSAP,
-`core/preload.js:234`) and cannot be combined with a keyed track. Nobody should build spatial handles for
+`core/engine/preload.js:234`) and cannot be combined with a keyed track. Nobody should build spatial handles for
 this: one file in the library uses `motionPath` at all, so the demand is not there.
 
 ---
@@ -321,7 +321,7 @@ this: one file in the library uses `motionPath` at all, so the demand is not the
 - **`prefers-reduced-motion` and the hover/pointer gates.** Correct for the web, meaningless for an mp4.
 - **Interruptibility, and springs chosen because they carry velocity through an interruption.** There is
   no interruption in a rendered film. Our springs are analytic and pure in `t` by design
-  (`core/motion.js:392`), which is the right trade here and would be the wrong one in a UI.
+  (`core/motion/motion.js:392`), which is the right trade here and would be the wrong one in a UI.
 - **Roving keyframes.** Adobe's own constraint settles this: roving applies ONLY to spatial properties
   (Position, Anchor Point, effect points) with three or more keys, never to the first or last, and it
   works by moving a key's TIME so the speed through it stays constant. The engine has no spatial path,

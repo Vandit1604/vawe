@@ -1,7 +1,7 @@
 // core/layers/doc.js. A markdown / source FILE card from pure data: optional filename + diff-chip
 // header, then blocks (heading with accent bar · mono body · code · bullets). Theme-styled, auto-height.
 // `blocks` carries the document body; its keys (h · code · bullets · body) are the block's vocabulary.
-import { propsOf } from '../props.js';
+import { propsOf } from '../registry/props.js';
 
 // The props are read off this signature (propsOf, core/props.js). No second list to drift from it.
 export function build(kit, el, L,

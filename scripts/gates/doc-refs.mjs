@@ -7,7 +7,7 @@
 // whole file. CLAUDE.md alone names ~40 make targets and ~60 repo paths, all hand-typed, all
 // describing a Makefile and a tree that move under them. `craft-coverage`/`doc-map` already resolve
 // markdown links to `.md` files. Nothing checked a single `make …` command, a backticked source path
-// (`core/safe.js`), a skill directory, or a link to a non-markdown file. This does.
+// (`core/layout/safe.js`), a skill directory, or a link to a non-markdown file. This does.
 //
 // SCAN SURFACE IS DISCOVERED, NEVER LISTED. `git ls-files '*.md'` minus a few directories excluded
 // BY REASON below. A gate whose surface is a hardcoded array is a map of where the docs lived the day

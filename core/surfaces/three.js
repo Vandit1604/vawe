@@ -3,7 +3,7 @@
 // The determinism contract lives in core/three-fx.js, read its header before adding a scene. The
 // short version: pose everything absolutely from t, never accumulate, never touch a clock.
 import { createThreeLayer, THREE_FX, PROPS as FX_PROPS } from './three-fx.js';
-import { mergeProps } from '../props.js';
+import { mergeProps } from '../registry/props.js';
 
 export const size = () => [720, 720];   // a subject, not a field, like raymarch
 export const stamp = 3;

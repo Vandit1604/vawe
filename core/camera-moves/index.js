@@ -1,5 +1,5 @@
-import { defineRegistry, withBlurb, blurbsOf } from '../registry.js';
-import { resolveCameraMove } from '../vocab.js';
+import { defineRegistry, withBlurb, blurbsOf } from '../registry/registry.js';
+import { resolveCameraMove } from '../registry/vocab.js';
 // core/camera-moves/index.js: CAMERA CHOREOGRAPHY, the runner. Every move is its own file, pure
 // (params) → camera-keyframe array, the same shape core/sequence.js `cameraAt` interpolates
 // ([{t,s,x,y,rx,ry,ease}], t in absolute seconds). A move is smooth and CALCULATED instead of

@@ -13,9 +13,9 @@
 // The half that stays cannot move: it proves a claim about the CODE, not about one scene, by probing
 // every advertised dial for an output change. There is no write site for "the manifest is honest".
 import { pathToFileURL } from 'node:url';
-import { KNOBS } from '../../core/knobs.js';
-import { PRESETS } from '../../core/type.js';
-import { resolveComposite, LOOK_NAMES } from '../../core/looks.js';
+import { KNOBS } from '../../core/registry/knobs.js';
+import { PRESETS } from '../../core/type/type.js';
+import { resolveComposite, LOOK_NAMES } from '../../core/looks/index.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 // COVERAGE, stated so nobody reads a pass as more than it is. core/knobs.js has SIX families and this

@@ -23,7 +23,7 @@
 // pair, once with the capability declared and once without, and reports how much the declaration
 // actually changed. Re-run it before trusting a row; a browser update is allowed to move one.
 
-import { PRESENTATIONS, SOLO_BLIND, cutWrites } from '../cuts.js';
+import { PRESENTATIONS, SOLO_BLIND, cutWrites } from '../cuts/index.js';
 
 // ---- what a descendant can be reaching for ----
 // `killedBy` lists the ANCESTOR properties measured to take the capability away. A property absent from

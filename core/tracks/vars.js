@@ -9,7 +9,7 @@
 // Custom properties are its own namespace, so no other track can collide with it. It runs before
 // `react` and `transform` only because a value the layer's CSS reads should be settled before anything
 // modulates what that CSS produced.
-import { clamp01, resolveEasing } from '../motion.js';
+import { clamp01, resolveEasing } from '../motion/motion.js';
 
 export const slot = 'vars';
 

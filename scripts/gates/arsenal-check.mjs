@@ -28,7 +28,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { registries } from '../../core/registry.js';
+import { registries } from '../../core/registry/registry.js';
 // The catalogue's own family list, not its source text. A registry that publishes itself (a `catalog`
 // block on its defineRegistry call) is no longer NAMED in effects-catalog.mjs at all, so grepping that
 // file for its export would report every derived vocabulary as missing. Reading `sections` asks the

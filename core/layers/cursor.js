@@ -1,6 +1,6 @@
 // core/layers/cursor.js: a pointer that follows a `path` ([{t,x,y}] keyframes) and clicks at
 // `clicks:[t…]`. The core of a product demo. macOS arrow + a ripple ring that fires on click.
-import { mergeProps, propsOf } from '../props.js';
+import { mergeProps, propsOf } from '../registry/props.js';
 
 // The props are read off these signatures (propsOf, core/props.js). No second list to drift from them.
 export function build(kit, el, L, { size, x, y, color, rippleColor } = L) {

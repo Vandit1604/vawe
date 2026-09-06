@@ -42,7 +42,7 @@
       "text": "VHS",
       "sub": "GREEN PHOSPHOR · SCANLINE · BLOOM"
     },
-    "render": "import { byName } from 'core/generators.js'; byName('crt').render(options)"
+    "render": "import { byName } from 'core/layout/generators.js'; byName('crt').render(options)"
   },
   "docs": "docs/EFFECTS.md",
   "preview": {

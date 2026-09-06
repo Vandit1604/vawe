@@ -49,7 +49,7 @@ keep both variants in `assets/icons/` ,  light (`#f3f3f0`) for dark bgs, `-dark`
 holds: none
 
 ## 8. A non-existent bg preset failed loud with no hint
-added `deep`/`dark`/`accentPlain` as real presets, plus a Levenshtein "Did you mean 'x'?" suggestion in `core/validate.mjs` for enum typos.
+added `deep`/`dark`/`accentPlain` as real presets, plus a Levenshtein "Did you mean 'x'?" suggestion in `core/validate/validate.mjs` for enum typos.
 holds: none
 
 ## 9. `<b>` emphasis invisible on an accent-coloured background (blue-on-blue)
@@ -108,7 +108,7 @@ the schema now carries the exact enum from the registry and states that unknown 
 holds: scripts/gates/conformance.mjs, scripts/gates/schema-drift.mjs
 
 ## 22. Fonts substituted silently ,  twice ,  because the load list was hand-maintained
-(1) the load set is now DERIVED from the `@font-face` rules in the CSS (`core/fonts.js`), so vendoring is the only step; (2) `make font-audit` fails the build on any family that is not vendored +...
+(1) the load set is now DERIVED from the `@font-face` rules in the CSS (`core/engine/fonts.js`), so vendoring is the only step; (2) `make font-audit` fails the build on any family that is not vendored +...
 holds: none
 
 ## 23. Auto sound-design ignored the `cuts` array (so a scored film was silent at every cut)
@@ -128,7 +128,7 @@ holds: scripts/gates/author-check.mjs, scripts/gates/blocks-audit.mjs, scripts/g
 holds: scripts/gates/gate-mutation.mjs
 
 ## 27. Sound was a downloaded sample library, not part of the framework
-`core/audio-kit.mjs` ,  the engine now SYNTHESIZES its own audio: oscillators, seeded noise, RBJ biquads, envelopes, a feedback-delay shimmer, a WAV writer, and a parameterized music-bed generator.
+`core/audio/kit.mjs` ,  the engine now SYNTHESIZES its own audio: oscillators, seeded noise, RBJ biquads, envelopes, a feedback-delay shimmer, a WAV writer, and a parameterized music-bed generator.
 holds: none
 
 ## 28. `tracking` was applied and then overwritten one statement later
@@ -140,14 +140,14 @@ scene cuts now render. A cut treats the beat LEAVING as an exit and the beat ARR
 holds: none
 
 ## Method note ,  how conformance findings must be triaged
-The first conformance run reported 13 inert props; 10 were the harness's fault, not the engine's: `opacity`/`scale`/`rotate` are CAMERA-KEYFRAME props (schema:858-871, `core/sequence.js:26`),...
+The first conformance run reported 13 inert props; 10 were the harness's fault, not the engine's: `opacity`/`scale`/`rotate` are CAMERA-KEYFRAME props (schema:858-871, `core/timeline/sequence.js:26`),...
 
 ## 30. Synthesized cues sounded like buzzing; music now comes from real recordings
 deleted the generated cues, restored the recorded Mixkit sfx library, and added `make music` to fetch a real soundtrack.
 holds: none
 
 ## 31. A hand-typed enum in the schema rejected a valid new value within minutes
-`make schema-check` now asserts the schema's anim enum EQUALS `ANIM_NAMES` from `core/clips.js`, and fails loudly with both sets printed when they diverge. Rule: if a gate or a schema restates a...
+`make schema-check` now asserts the schema's anim enum EQUALS `ANIM_NAMES` from `core/timeline/clips.js`, and fails loudly with both sets printed when they diverge. Rule: if a gate or a schema restates a...
 holds: none
 
 ## 32. Beat matching: build the edit ON the music, do not drag cuts onto it
@@ -175,7 +175,7 @@ Conformance proves a value changes the frame; coverage says nothing USES it.
 holds: none
 
 ## 38. Every fade in the engine was linear (and the obvious fix broke cross-dissolves)
-What: entrances and exits felt slightly wrong in a way that is hard to point at. Root cause: `core/clips.js` composed opacity as `clamp01(enterT) * exitMul` ,  two linear ramps ,  while the...
+What: entrances and exits felt slightly wrong in a way that is hard to point at. Root cause: `core/timeline/clips.js` composed opacity as `clamp01(enterT) * exitMul` ,  two linear ramps ,  while the...
 holds: scripts/gates/scene-snap.mjs
 
 ## 39. `make snap` reported IDENTICAL after every fade curve in the engine changed
@@ -207,7 +207,7 @@ sampling is content-aware ,  the resting midpoint of every layer is sampled, not
 holds: scripts/gates/sim-audit.mjs
 
 ## 46. Five tools rendered every landscape scene into a portrait viewport
-`sceneDims(cfg, key?)` in `core/safe.js` ,  dimensions and the safe area are the same question asked twice, so they live together.
+`sceneDims(cfg, key?)` in `core/layout/safe.js` ,  dimensions and the safe area are the same question asked twice, so they live together.
 holds: scripts/gates/lib-test.mjs
 
 ## 47. `make motion D=...` audited a different file and said nothing
@@ -227,7 +227,7 @@ the mark centres via the group's own `justify` (or a text layer's `align` over i
 holds: none
 
 ## 51. A sound effect named `click` was 19.6 seconds long
-keystrokes are now GENERATED, not downloaded ,  `key1/key2/key3/keyspace/keyenter` in core/audio-kit.mjs are ~15-35ms bandpassed noise transients, which is physically what a key click is.
+keystrokes are now GENERATED, not downloaded ,  `key1/key2/key3/keyspace/keyenter` in core/audio/kit.mjs are ~15-35ms bandpassed noise transients, which is physically what a key click is.
 holds: scripts/gates/sfx-audit.mjs
 
 ## 52. The demo was silently scored
@@ -483,7 +483,7 @@ holds: none
 holds: none
 
 ## 115. Every "glow" in the engine was a drop-shadow, which glows the wrong channel
-a real `bloom` SVG filter in `core/filters.js` (feColorMatrix → feComponentTransfer → feFlood/feComposite → two feGaussianBlur → additive feComposite), and `bloomStack` in `core/looks.js` now...
+a real `bloom` SVG filter in `core/looks/filters.js` (feColorMatrix → feComponentTransfer → feFlood/feComposite → two feGaussianBlur → additive feComposite), and `bloomStack` in `core/looks/index.js` now...
 holds: none
 
 ## 116. A kernel's `amount` knob has to respect what the kernel sums to
@@ -599,7 +599,7 @@ Two-part forcing function: (1) `blueprints/` ,  directed-motion BEAT factories (
 holds: none
 
 ## 144. seams flashed BLACK on every white-first scene without an explicit bg window
-`core/seams.js stageToCanvas` ,  in the no-canvas-bg branch, fill the theme base bg (read `--bg` off `.hs-stage`, fall back to computed background-color, then `#fff`) BEFORE drawing the DOM, so...
+`core/timeline/seams.js stageToCanvas` ,  in the no-canvas-bg branch, fill the theme base bg (read `--bg` off `.hs-stage`, fall back to computed background-color, then `#fff`) BEFORE drawing the DOM, so...
 holds: scripts/gates/seam-snap.mjs
 
 ## 145. the killer per-frame effects were missing (border-beam, aurora, meteor, flash-bloom)
@@ -659,11 +659,11 @@ glow.frame() now sets the inner DETERMINISTICALLY for every t ,  no early return
 holds: none
 
 ## 159. the engine PICKED the background, so nobody ever designed one
-`bg` is now required in `formats/scene/schema.json` (`required` + `minItems: 1`), and the injection is gone from `core/produce.js`.
+`bg` is now required in `formats/scene/schema.json` (`required` + `minItems: 1`), and the injection is gone from `core/engine/produce.js`.
 holds: scripts/gates/author-check.mjs, scripts/gates/gate-mutation.mjs, scripts/gates/lib-test.mjs, scripts/gates/scene-snap.mjs, scripts/gates/snap-signature.mjs
 
 ## 160. hand-authored CSS animation renders a DEAD STILL, and said nothing
-`timeCssUsed()` in the new shared `core/sanitize-html.js` detects `animation` / `@keyframes` / `transition`; validate rejects them by name in BOTH a bg window and an `html` layer, and the message...
+`timeCssUsed()` in the new shared `core/type/sanitize-html.js` detects `animation` / `@keyframes` / `transition`; validate rejects them by name in BOTH a bg window and an `html` layer, and the message...
 holds: none
 
 ## 161. judged a moving background on ONE still, and got the motion twice too fast
@@ -711,7 +711,7 @@ holds: none
 holds: scripts/gates/author-check.mjs, scripts/gates/dissolve-check.mjs
 
 ## 172. a global `cut` blanked the whole frame, and the timeline gate called the hole a transition
-`core/cuts.js` gains `soloCutStyle` for the single-root path: same closed-form styles, every VISIBILITY channel (opacity, clip, mask) pinned at identity, so the transition rides on transform and...
+`core/cuts/index.js` gains `soloCutStyle` for the single-root path: same closed-form styles, every VISIBILITY channel (opacity, clip, mask) pinned at identity, so the transition rides on transform and...
 holds: scripts/gates/scene-timing.mjs
 
 ## 173. the storyboard promised a change, the film never built one, and every gate stayed green
@@ -874,7 +874,7 @@ The policy. A final render is 60fps, an iteration render is 30.
 holds: scripts/gates/seam-snap.mjs
 
 ## 212. the engine could move a box and scale a box, but never resize one
-`w`/`h` are keyable. `core/sequence.js` gains `resolveBoxes()` and `motionAt` returns `w`/`h`.
+`w`/`h` are keyable. `core/timeline/sequence.js` gains `resolveBoxes()` and `motionAt` returns `w`/`h`.
 holds: none
 
 ## 213. depth was a number, not a track, so nothing could pass behind anything
@@ -946,7 +946,7 @@ What. Two error messages, both naming the wrong cause, both current until this p
 holds: none
 
 ## 230. `--alpha` exported a fully opaque overlay, and every downstream flag on that path was wrong too
-`formats/scene/scene.js` reads the `alpha` class `core/boot.js` already sets and suppresses both backdrops, the canvas and the hand-authored `bgHtml`.
+`formats/scene/scene.js` reads the `alpha` class `core/engine/boot.js` already sets and suppresses both backdrops, the canvas and the hand-authored `bgHtml`.
 holds: none
 
 ## 231. the watermark was drawn at twice the frame size and clipped, on every render that was not a draft
@@ -1002,7 +1002,7 @@ Doctrine reversed. `audio._why` added, matching `authoring._why` including its 1
 holds: none
 
 ## 244. the only continuity the engine could express was visual, so every film had to carry a prop
-`audio.bridges` ,  a span of sound hung off a NAMED junction, `core/audio-bridges.js` resolving it in the browser (the only place that knows where the film's cuts are) into seconds, and...
+`audio.bridges` ,  a span of sound hung off a NAMED junction, `core/audio/bridges.js` resolving it in the browser (the only place that knows where the film's cuts are) into seconds, and...
 holds: none
 
 ## 245. The design-spec lock knew three type roles; the engine has four
@@ -1074,11 +1074,11 @@ holds: none
 holds: none
 
 ## 262. `hue` was live in the engine and missing from the schema, because the scan only matched `L.`
-The comparison is now against the DECLARATIONS, which `core/paint-fx.js` has always carried (`export const PROPS = { …, hue: {}, hues: {}, … }`).
+The comparison is now against the DECLARATIONS, which `core/surfaces/paint-fx.js` has always carried (`export const PROPS = { …, hue: {}, hues: {}, … }`).
 holds: none
 
 ## 263. `transition` was documented, read, and declared by nothing
-`core/transitions-lower.js` exports `PROPS = { transition: {} }` beside the read, and `core/layers/vocabulary.js` merges it into the shared half. Which gate catches it. `make schema-check` ,...
+`core/transitions/lower.js` exports `PROPS = { transition: {} }` beside the read, and `core/layers/vocabulary.js` merges it into the shared half. Which gate catches it. `make schema-check` ,...
 holds: none
 
 ## 264. an unknown prop on a layer was accepted and then ignored, at render time
@@ -1102,7 +1102,7 @@ The comment is replaced with the measurement.
 holds: none
 
 ## 269. a captured component's images were never preloaded, and they are somebody else's CDN
-What. `preloadImages` in `core/boot.js` walks the SCENE DATA for image paths, and its own comment says why it exists: "without this the Go renderer can screenshot a frame mid-download, so the...
+What. `preloadImages` in `core/engine/boot.js` walks the SCENE DATA for image paths, and its own comment says why it exists: "without this the Go renderer can screenshot a frame mid-download, so the...
 holds: none
 
 ## 270. `_lightfall.html` moves at frame rates against a clock measured in seconds
@@ -1130,11 +1130,11 @@ The message now names the pair that actually collided: `src` IS `html` in a file
 holds: none
 
 ## 276. update ,  the two hand-authored backdrops moved at frame rates against a clock in seconds
-Fixed in the same pass. Every `var(--t) * K` coefficient in `_lightfall.html` (86 terms) and `_arcfall.html` (40 terms) was authored as if `--t` counted frames; `core/bg-html.js` writes SECONDS.
+Fixed in the same pass. Every `var(--t) * K` coefficient in `_lightfall.html` (86 terms) and `_arcfall.html` (40 terms) was authored as if `--t` counted frames; `core/layout/bg-html.js` writes SECONDS.
 holds: none
 
 ## 277. closed in part, and one half of it is still open
-Two real defects in `make preview`, both fixed. One: the preview never set `--t`. The frame clock is written by `core/bg-html.js` every frame, in seconds.
+Two real defects in `make preview`, both fixed. One: the preview never set `--t`. The frame clock is written by `core/layout/bg-html.js` every frame, in seconds.
 holds: none
 
 ## 278. a capture localizer that only recognised an asset by its file extension
@@ -1279,7 +1279,7 @@ The user rolled the dice and got a green bloom, a blue blob and a yellow wash in
 holds: none
 
 ## 308. a backtick inside a GLSL comment silently ended the shader
-Adding a `blinds` effect to `core/shaders-ambient.js`, the render stopped failing with a named GLSL error and started TIMING OUT with nothing in the log.
+Adding a `blinds` effect to `core/surfaces/shaders-ambient.js`, the render stopped failing with a named GLSL error and started TIMING OUT with nothing in the log.
 holds: none
 
 ## 309. the blinds generator is ours, and the licence is why
@@ -1414,7 +1414,7 @@ What. `make slop` rendered a scene, dumped the DOM and ran the vendored 41-rule 
 holds: scripts/gates/author-check.mjs
 
 ## 341. A background parameter one level out of place: accepted, dropped, and a byte-identical render
-`bgErrors` in `core/validate.mjs` now flags any key at the top level of a bg window that is a real parameter of that window's preset (`bgOptKeys`) and not one of the window's own keys, and prints...
+`bgErrors` in `core/validate/validate.mjs` now flags any key at the top level of a bg window that is a real parameter of that window's preset (`bgOptKeys`) and not one of the window's own keys, and prints...
 holds: none
 
 ## 342. Off-window was an absence, not a state: two clocks' worth of stale transform
@@ -1422,7 +1422,7 @@ The off-window branch writes the resting style set before zeroing opacity ,  the
 holds: none
 
 ## 343. Four colour parsers, four grammars, and one of them was unanchored
-One parser in `core/motion.js`, accepting the union and anchored at both ends, with a `{r,g,b}` adapter for the two object-shaped consumers.
+One parser in `core/motion/motion.js`, accepting the union and anchored at both ends, with a `{r,g,b}` adapter for the two object-shaped consumers.
 holds: none
 
 ## 344. A git worktree silently removes the thing that proves a change is safe
@@ -1430,7 +1430,7 @@ Any worktree agent whose brief includes verification must first run `make fonts`
 holds: none
 
 ## 345. Stripping tags eight times with three answers, and the two common answers were both wrong
-One definition in `core/on-screen-text.js` ,  in `core/`, not `scripts/lib/`, because `core/validate.mjs` and `core/captions.js` need it and both ship to the browser, so a definition parked in...
+One definition in `core/type/on-screen-text.js` ,  in `core/`, not `scripts/lib/`, because `core/validate/validate.mjs` and `core/type/captions.js` need it and both ship to the browser, so a definition parked in...
 holds: none
 
 ## 346. driveClips asked the DOM what to drive, on every frame
@@ -1438,7 +1438,7 @@ holds: none
 holds: none
 
 ## 347. Two answers to "is this background light", disagreeing on every saturated colour
-One `isLightBg` in `core/motion.js`, in linear light, beside the `relLum` the contrast maths already uses.
+One `isLightBg` in `core/motion/motion.js`, in linear light, beside the `relLum` the contrast maths already uses.
 holds: none
 
 ## 348. A snapshot baseline was only valid within one font state, and nothing recorded which
@@ -1462,7 +1462,7 @@ holds: scripts/gates/snap-signature.mjs
 holds: scripts/gates/direction-floor.mjs
 
 ## 353. The camera sugar accepted a typo, a missing target and the wrong frame, and said nothing to all three
-Adding `travel` (the station-to-station journey) meant reading `core/camera-moves.js` closely, and the module had three silent failures sitting under the one it was asked for.
+Adding `travel` (the station-to-station journey) meant reading `core/camera-moves/index.js` closely, and the module had three silent failures sitting under the one it was asked for.
 holds: scripts/gates/unused.mjs
 
 ## 354. Every static gate measured against the canvas origin, so a film whose transition is the camera was graded on a frame nobody was looking at
@@ -1638,7 +1638,7 @@ holds: none
 holds: none
 
 ## 397. The validator kept its own copy of "is this a real easing", and it was already one behind
-`core/motion.js` exports `isEasingName(n)` ,  the one membership test ,  and the validator asks it.
+`core/motion/motion.js` exports `isEasingName(n)` ,  the one membership test ,  and the validator asks it.
 holds: none
 
 ## 398. A track compared the transform it wrote against the one the browser gives back
@@ -1650,7 +1650,7 @@ holds: none
 holds: scripts/gates/snap-signature.mjs
 
 ## 400. A `SPECTACLE` field was added to the brief, read by the parser, and consumed by nothing
-A scene-level block, `"spectacle": { at, of, device, why }`, resolved by `core/spectacle.js` before any DOM exists.
+A scene-level block, `"spectacle": { at, of, device, why }`, resolved by `core/timeline/spectacle.js` before any DOM exists.
 holds: scripts/gates/lib-test.mjs, scripts/gates/plan-vs-render.mjs, scripts/gates/schema-drift.mjs, scripts/gates/snap-signature.mjs
 
 ## 401. A documented `--json` flag whose output could not be parsed, and a test that pinned a repealed rule
@@ -1686,7 +1686,7 @@ holds: scripts/gates/plan-vs-render.mjs, scripts/gates/scene-timing.mjs, scripts
 holds: scripts/gates/coverage.mjs, scripts/gates/seam-snap.mjs, scripts/gates/similarity.mjs
 
 ## 409. Burnt-in captions rendered underneath the platform's own caption strip
-`core/boot.js:325` writes `--safe-bottom` from `safeArea(w, h, destination)`.
+`core/engine/boot.js:325` writes `--safe-bottom` from `safeArea(w, h, destination)`.
 holds: scripts/gates/arsenal-check.mjs, scripts/gates/lib-test.mjs
 
 ## 410. `letterSpacing` had two writers, and now it has one that cannot become two
@@ -1730,7 +1730,7 @@ holds: none
 holds: none
 
 ## 420. A caption style could be added to the registry and stay unreachable, and one shipped style had two states where it claims three
-Three separate findings, all surfaced by adding four styles to `core/captions.js`.
+Three separate findings, all surfaced by adding four styles to `core/type/captions.js`.
 holds: none
 
 ## 421. Every count blueprint in the library is frozen at a non-zero start
@@ -1738,11 +1738,11 @@ holds: none
 holds: none
 
 ## 422. A caption accepted three fields, so where it sat was a CSS constant no JSON could reach
-A caption resolves through `resolveCoords` (`core/boot.js`), the SAME function that places a layer: `pin`, `x`, `y`, `w`, the `"50%"` and `"center"` and edge keywords, all against the same safe box.
+A caption resolves through `resolveCoords` (`core/engine/boot.js`), the SAME function that places a layer: `pin`, `x`, `y`, `w`, the `"50%"` and `"center"` and edge keywords, all against the same safe box.
 holds: none
 
 ## 423. The two most-used caption mechanisms in short-form video were unsayable, and the reason was in the contract
-`CAP_STYLE_SHAPE` in `core/captions.js` declares `mode:'one'` and `unit:'char'` per style, and `capUnitWins(cap, unit)` subdivides each WORD window across that word's characters, so speech pacing...
+`CAP_STYLE_SHAPE` in `core/type/captions.js` declares `mode:'one'` and `unit:'char'` per style, and `capUnitWins(cap, unit)` subdivides each WORD window across that word's characters, so speech pacing...
 holds: none
 
 ## 424. `out/*.png` never matched `out/flight/shot.png`, and fourteen render frames reached main
@@ -1778,7 +1778,7 @@ Measured before anything changed, by calling every factory and walking its emitt
 holds: none
 
 ## 432. A scaling idle on text is a shimmer, and it shipped in a film
-`idleErrors` in `core/validate.mjs` refuses a scaling idle on a layer whose subtree is text, and names `drift` as the alternative in the message.
+`idleErrors` in `core/validate/validate.mjs` refuses a scaling idle on a layer whose subtree is text, and names `drift` as the alternative in the message.
 holds: none
 
 ## 433. Two thirds of a status vocabulary was theme-aware, and a brief demanded a check its worktree could not run
@@ -1825,23 +1825,23 @@ The correction, in the user's words: "dont add gates mf / you get to gates every
 holds: none
 
 ## 443. the layout audit graded a camera that was not there
-Found by chasing a regression I thought I had caused, which turned out to be this. `core/produce.js` injects a camera push into any un-choreographed scene, and #444 below made that push real.
+Found by chasing a regression I thought I had caused, which turned out to be this. `core/engine/produce.js` injects a camera push into any un-choreographed scene, and #444 below made that push real.
 holds: scripts/gates/site-counts.mjs
 
 ## 444. the produced camera push had never once run
-`core/produce.js` gives any scene that declares no camera a gentle slow push, so the frame stays alive.
+`core/engine/produce.js` gives any scene that declares no camera a gentle slow push, so the frame stays alive.
 holds: scripts/gates/lib-test.mjs
 
 ## 445. an array's ORDER was a shader API, and nothing could have caught it
-`core/stings.js:22` declared `SHADER_FX` as a flat list of names.
+`core/stings/index.js:22` declared `SHADER_FX` as a flat list of names.
 holds: none
 
 ## 446. a documented `curl` that writes a zero-byte file on 404
-Three scenes stopped booting the moment `core/boot.js` began refusing an asset that never loaded.
+Three scenes stopped booting the moment `core/engine/boot.js` began refusing an asset that never loaded.
 holds: none
 
 ## 447. an engine easing name on a GSAP-driven field renders a different curve, silently
-`gsapEase(e, fallback, where)` in `core/motion.js`, at all five call sites.
+`gsapEase(e, fallback, where)` in `core/motion/motion.js`, at all five call sites.
 holds: none
 
 ## 448. the html layer accepted six box props and ignored every one
@@ -1909,7 +1909,7 @@ The comment now states what the file actually holds and says to re-subset before
 holds: scripts/gates/lib-test.mjs
 
 ## 464. a scene past the browser's WebGL cap renders completely blank and exits 0
-`core/webgl.js` is the one owner. It counts live contexts, so the error can say how many, which is the fact that makes it actionable and which no call site could know.
+`core/engine/webgl.js` is the one owner. It counts live contexts, so the error can say how many, which is the fact that makes it actionable and which no call site could know.
 holds: scripts/gates/lib-test.mjs
 
 ## 465. one scene differs between main and every worktree, and four agents each rediscovered it
@@ -1937,7 +1937,7 @@ Each gate now separates cannot-check from checked-and-clean.
 holds: none
 
 ## 471. eight resampling passes, and nothing we build ourselves could be fed to one
-- `core/raster.js`: the serialiser moved out of `seams.js` with `buildInlinedCss`, `domToCanvas`, `isBlankRaster` and a new `rasterStats`.
+- `core/resample/raster.js`: the serialiser moved out of `seams.js` with `buildInlinedCss`, `domToCanvas`, `isBlankRaster` and a new `rasterStats`.
 holds: none
 
 ## 472. the motion contract's windows came from a field nobody writes, and one of its clauses was measuring the camera
@@ -1945,7 +1945,7 @@ holds: none
 holds: scripts/gates/motion-audit.mjs
 
 ## 473. the engine found the beat and no scene could ask it to use it
-`core/beat-bind.js`, and a scene declares its grid: "audio": { "music": "beat", "beatSync": true } `true` derives the sidecar from the bed the way the mixer derives the bed itself...
+`core/beats/index.js`, and a scene declares its grid: "audio": { "music": "beat", "beatSync": true } `true` derives the sidecar from the bed the way the mixer derives the bed itself...
 holds: none
 
 ## 474. a camera nobody wrote switched a HARD rule off for most of the library
@@ -1961,11 +1961,11 @@ The check now asks git rather than the filesystem (`git check-ignore --stdin`, o
 holds: none
 
 ## 477. two owners of "which beat does this joint land on", and neither imported the other
-`core/beat-bind.js` owns the policy and exports it: `snapJoints(data, grid, maxShift)` and `unrollGrid(pulse, period, dur)`, with `DEFAULT_MAX_SHIFT` beside them.
+`core/beats/index.js` owns the policy and exports it: `snapJoints(data, grid, maxShift)` and `unrollGrid(pulse, period, dur)`, with `DEFAULT_MAX_SHIFT` beside them.
 holds: scripts/gates/lib-test.mjs
 
 ## 478. the default push and the safe margin were one piece of geometry, written down twice
-What. `core/produce.js` gives any scene declaring no camera a `slowPush` from `1` to `1.06` spanning the whole runtime.
+What. `core/engine/produce.js` gives any scene declaring no camera a `slowPush` from `1` to `1.06` spanning the whole runtime.
 holds: none
 
 ## 479. 558 effects and not one of them ever asked where the layer had been
@@ -2001,7 +2001,7 @@ What happened. `#483` and `#484` landed within days of each other.
 holds: none
 
 ## 487. the GSAP trigger list was a hand-kept second source of truth, and #148 was one of its failures
-What. `core/preload.js` decides whether the tween engine is fetched at all, from the props a scene names.
+What. `core/engine/preload.js` decides whether the tween engine is fetched at all, from the props a scene names.
 holds: scripts/gates/lib-test.mjs
 
 ## 488. `no-continuous-object` could not see a match cut, and a match cut is what it asked for
@@ -2069,7 +2069,7 @@ The gate asks the preset instead of matching its name: `movingPreset(name, value
 holds: none
 
 ## 504. a gate could only see a fragment written the shorter of its two documented ways
-One `htmlOf(o)` reader in the gate returns `o.html`, or the file `o.src` names (repo-root relative, as `core/preload.js` resolves it).
+One `htmlOf(o)` reader in the gate returns `o.html`, or the file `o.src` names (repo-root relative, as `core/engine/preload.js` resolves it).
 holds: none
 
 ## 505. the clipped-text rule read every mask as a mistake
@@ -2077,7 +2077,7 @@ holds: none
 holds: none
 
 ## 506. the validator's lint was one 225-line body, so adding a rule was surgery
-`lintData` in `core/validate.mjs` scored cyclomatic complexity 84 across 225 lines, the highest in the repo.
+`lintData` in `core/validate/validate.mjs` scored cyclomatic complexity 84 across 225 lines, the highest in the repo.
 holds: none
 
 ## 507. a comment inside devDependencies broke `npm install` for every fresh clone
@@ -2113,7 +2113,7 @@ This entry claimed vawe's sound effects were 19 unlicensed Mixkit recordings.
 holds: none
 
 ## 515. the engine knew every event in its own timeline and turned none of it into sound
-`core/audio-tactile.js` derives motion cues from the timeline the engine already holds, in the `{ t, name, gain }` shape `buildSfx` has always carried.
+`core/audio/tactile.js` derives motion cues from the timeline the engine already holds, in the `{ t, name, gain }` shape `buildSfx` has always carried.
 holds: none
 
 ## 516. author-check expanded two sugars of three, so a film built from blueprints failed step one
@@ -2189,7 +2189,7 @@ What: an author writing `"preset": "blobs"` on a bg window got a ruled technical
 holds: none
 
 ## 534. `ease: "through"` worked on a layer key and threw on a camera key
-`segmentAt` (`core/sequence.js`) is the single owner of how a segment is eased, and both call it.
+`segmentAt` (`core/timeline/sequence.js`) is the single owner of how a segment is eased, and both call it.
 holds: none
 
 ## 535. the velocity-cut advisory could not see a rotation, and its own worked example is one
@@ -2197,11 +2197,11 @@ holds: none
 holds: none
 
 ## 536. KNOWN LIMITATION, not fixed here: a motion track cannot carry velocity out of its own ends
-`tangentAt` (`core/sequence.js`) forces the FIRST and LAST tangents of an `ease: "through"` chain to zero, so a travel eases out of rest and back into it whatever its neighbours are doing.
+`tangentAt` (`core/timeline/sequence.js`) forces the FIRST and LAST tangents of an `ease: "through"` chain to zero, so a travel eases out of rest and back into it whatever its neighbours are doing.
 holds: none
 
 ## 537. The cut-velocity advisory was blind to the camera, so it scored its own recipe at zero
-`cameraSpeedAt` in `core/velocity-cut.js`, differenced off `cameraAt` exactly as the layer term is differenced off `velocityAt`, so an authored handle on a camera key is read for free and no curve...
+`cameraSpeedAt` in `core/timeline/velocity-cut.js`, differenced off `cameraAt` exactly as the layer term is differenced off `velocityAt`, so an authored handle on a camera key is read for free and no curve...
 holds: none
 
 ## 538. The refraction lens cannot bend a straight edge, because its map is separable
@@ -2221,11 +2221,11 @@ What. `formats/scene/vawe-glass-hero.json` is a film about one thing: a refracti
 holds: scripts/gates/lib-test.mjs
 
 ## 543. a camera that arrives on time can still leave early, and the same shot fails both ways
-The hold now runs PAST the press it framed, by `dwell` where there is room and by half the gap where there is not, and the reframe takes what is left (`core/camera-moves.js`, followCursor's...
+The hold now runs PAST the press it framed, by `dwell` where there is room and by half the gap where there is not, and the reframe takes what is left (`core/camera-moves/index.js`, followCursor's...
 holds: none
 
 ## 544. the premium animated gradient cycled in 57 to 105 seconds, so it shipped as a still image
-The six coefficients are multiplied by 5 (`core/shaders-ambient.js`, the `u_fx==0` branch), landing the periods at 11.4 to 20.9s.
+The six coefficients are multiplied by 5 (`core/surfaces/shaders-ambient.js`, the `u_fx==0` branch), landing the periods at 11.4 to 20.9s.
 holds: none
 
 ## 545. a logo reveal that could never end as the logo, because the fill was thrown away at build
@@ -2253,7 +2253,7 @@ holds: scripts/gates/lib-test.mjs
 holds: none
 
 ## 550. a fragment's own comment ate its stylesheet, because every regex read prose as markup
-`stripComments` in `core/sanitize-html.js`, one owner, called first by `sanitizeHtml`, `timeCssUsed` and `droppedDecls`.
+`stripComments` in `core/type/sanitize-html.js`, one owner, called first by `sanitizeHtml`, `timeCssUsed` and `droppedDecls`.
 holds: none
 
 ## 551. five capabilities shipped in one day, and none was reachable at the moment it mattered
@@ -2269,7 +2269,7 @@ What. The terminal panel in the shader film crept: measured off the rendered fra
 holds: none
 
 ## 554. a cut's `cx`/`cy` were per cent in the engine and 0-1 in the schema, so the only legal values were the wrong ones
-the schema entry now says per cent, `max: 100`, and names `core/cuts.js` as the owner, so the two spellings agree. → Gate: `make validate` / `core/validate.mjs`, which now permits what the engine...
+the schema entry now says per cent, `max: 100`, and names `core/cuts/index.js` as the owner, so the two spellings agree. → Gate: `make validate` / `core/validate/validate.mjs`, which now permits what the engine...
 holds: none
 
 ## 555. `sceneUnits` held EVERY layer of a beat alive through the cut, so a long beat rendered its whole history at once
@@ -2293,7 +2293,7 @@ What happened. `core/tracks/motion.js` computed motion blur from a LAYER's own m
 holds: none
 
 ## 560. the arsenal printed a snippet nobody could paste, and two registries named a slot the engine does not read
-`slot` is now a documented PATH with two markers, stated once in `core/registry.js` beside the option: `bg[].preset` puts the name in the VALUE of `preset`; `modifiers[]` ends at the array, so the...
+`slot` is now a documented PATH with two markers, stated once in `core/registry/registry.js` beside the option: `bg[].preset` puts the name in the VALUE of `preset`; `modifiers[]` ends at the array, so the...
 holds: none
 
 ## 561. a shader panel could not change its look, and the workaround cost a WebGL context per look
@@ -2317,7 +2317,7 @@ holds: scripts/gates/lib-test.mjs, scripts/gates/schema-drift.mjs
 holds: scripts/gates/prop-probe.mjs
 
 ## 566. every seam shifted its text to the top of the frame, because the bake dropped a linked stylesheet
-`core/raster.js` `buildInlinedCss` now inlines EVERY same-origin `<link rel="stylesheet">`, not just tokens.css: it loops `document.querySelectorAll('link[rel="stylesheet"]')`, skips cross-origin...
+`core/resample/raster.js` `buildInlinedCss` now inlines EVERY same-origin `<link rel="stylesheet">`, not just tokens.css: it loops `document.querySelectorAll('link[rel="stylesheet"]')`, skips cross-origin...
 holds: none
 
 ## 567. the scaffold's default draft did not render, and the fix silently broke its continuous object

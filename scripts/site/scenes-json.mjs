@@ -56,7 +56,7 @@ if (!files.length) { console.error(`✗ no scenes under ${path.relative(ROOT, OU
 //
 // Publish the expanded scene instead (`make expand D=<scene.json>` writes `<name>.expanded.json`), or
 // take it out of `site/public/scenes/`. `cameraMove` is deliberately absent from this list: it bakes at
-// boot in `core/produce.js`, so it works in a browser.
+// boot in `core/engine/produce.js`, so it works in a browser.
 const SUGAR = ['block', 'beat', 'comp'];
 const sugarIn = (scene) => {
   const hits = [];

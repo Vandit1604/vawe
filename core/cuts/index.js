@@ -14,7 +14,7 @@
 //
 // cutStyle ALWAYS returns the full style set (identity values in the steady state) so a property
 // written during the cut can never stick, byte-identical DOM for any render order.
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 import { PRESENTATIONS, CUT_BLURBS, IDENT, DIRS, SOLO_BLIND, cutWrites, HIDE_CHANNELS } from './presentations.js';
 import { TIMINGS, TIMING_BLURBS, TIMING_REGISTRY } from './timings.js';
 

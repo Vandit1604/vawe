@@ -13,17 +13,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ANIM_NAMES } from '../../core/clips.js';
+import { ANIM_NAMES } from '../../core/timeline/clips.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
-import { PAINT_FX_NAMES } from '../../core/paint-fx.js';
-import { PRESETS } from '../../core/type.js';
-import { LOOK_NAMES } from '../../core/looks.js';
-import { CANVAS_FX_NAMES } from '../../core/canvas-fx.js';
-import { PRESENTATIONS } from '../../core/cuts.js';
-import { SHADER_FX } from '../../core/stings.js';
+import { PAINT_FX_NAMES } from '../../core/surfaces/paint-fx.js';
+import { PRESETS } from '../../core/type/type.js';
+import { LOOK_NAMES } from '../../core/looks/index.js';
+import { CANVAS_FX_NAMES } from '../../core/canvas/effects.js';
+import { PRESENTATIONS } from '../../core/cuts/index.js';
+import { SHADER_FX } from '../../core/stings/index.js';
 import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

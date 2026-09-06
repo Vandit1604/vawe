@@ -31,21 +31,21 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // A report, never a rule (see header): always exits 0, so every finding here is INFO.
 const f = gateFindings();
 
-const { PRESETS } = await import('../../core/type.js');
-const { ANIM_NAMES } = await import('../../core/clips.js');
-const { PRESENTATIONS } = await import('../../core/cuts.js');
-const { SEAM_FX } = await import('../../core/seams.js');
-const { SHADER_FX } = await import('../../core/stings.js');
-const { LOOK_NAMES } = await import('../../core/looks.js');
-const { BG_NAMES } = await import('../../core/backgrounds.js');
-const { GSAP_FX, EXIT_FX } = await import('../../core/gsap-effects.js');
-const { AMBIENT_FX } = await import('../../core/shaders-ambient.js');
-const { RAYMARCH_FX } = await import('../../core/raymarch-fx.js');
-const { THREE_FX } = await import('../../core/three-scenes.js');
-const { CAMERA_MOVE_NAMES } = await import('../../core/camera-moves.js');
+const { PRESETS } = await import('../../core/type/type.js');
+const { ANIM_NAMES } = await import('../../core/timeline/clips.js');
+const { PRESENTATIONS } = await import('../../core/cuts/index.js');
+const { SEAM_FX } = await import('../../core/timeline/seams.js');
+const { SHADER_FX } = await import('../../core/stings/index.js');
+const { LOOK_NAMES } = await import('../../core/looks/index.js');
+const { BG_NAMES } = await import('../../core/backgrounds/index.js');
+const { GSAP_FX, EXIT_FX } = await import('../../core/engine/gsap-effects.js');
+const { AMBIENT_FX } = await import('../../core/surfaces/shaders-ambient.js');
+const { RAYMARCH_FX } = await import('../../core/surfaces/raymarch-fx.js');
+const { THREE_FX } = await import('../../core/surfaces/three-scenes.js');
+const { CAMERA_MOVE_NAMES } = await import('../../core/camera-moves/index.js');
 const { FX_TYPES } = await import('../../core/fx/index.js');
-const { PART_NAMES } = await import('../../core/parts.js');
-const { PAINT_FX_NAMES } = await import('../../core/paint-fx.js');
+const { PART_NAMES } = await import('../../core/motion/parts.js');
+const { PAINT_FX_NAMES } = await import('../../core/surfaces/paint-fx.js');
 
 const FAMILIES = [
   ['kinetic preset', Object.keys(PRESETS)], ['anim', ANIM_NAMES], ['cut', Object.keys(PRESENTATIONS)],

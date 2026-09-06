@@ -24,8 +24,8 @@ import { BEATS } from '../../blueprints/index.mjs';
 // any scene carrying a top-level `cameraMove`, and nothing caught it, because no snapshotted scene
 // has one. A call site updated without its import is invisible to every gate that never takes that
 // branch, which is why the check below renders one.
-import { bakeCameraMove } from '../../core/produce.js';
-import { frameOf } from '../../core/safe.js';
+import { bakeCameraMove } from '../../core/engine/produce.js';
+import { frameOf } from '../../core/layout/safe.js';
 
 const inp = process.argv[2];
 if (!inp) { console.error('usage: node scripts/author/expand-blocks.mjs <scene.json> [out.json]'); process.exit(2); }

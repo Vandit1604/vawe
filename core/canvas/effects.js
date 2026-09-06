@@ -1,6 +1,6 @@
-import { defineRegistry, withBlurb, blurbsOf } from '../registry.js';
-import { glowRGB } from '../filters.js';
-import { lit } from '../color.js';
+import { defineRegistry, withBlurb, blurbsOf } from '../registry/registry.js';
+import { glowRGB } from '../looks/filters.js';
+import { lit } from '../color/color.js';
 
 // A canvas cannot read a CSS custom property, so a theme token has to be resolved to components.
 // glowRGB does that against the live theme and caches it (core/filters.js), so the theme is read once

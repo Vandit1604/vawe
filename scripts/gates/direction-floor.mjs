@@ -29,17 +29,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { motionAt } from '../../core/sequence.js';
-import { bgPreset } from '../../core/backgrounds.js';
+import { motionAt } from '../../core/timeline/sequence.js';
+import { bgPreset } from '../../core/backgrounds/index.js';
 import { typedLen } from '../../core/layers/text.js';
-import { clamp01 } from '../../core/motion.js';
-import { sceneDims } from '../../core/safe.js';
+import { clamp01 } from '../../core/motion/motion.js';
+import { sceneDims } from '../../core/layout/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 import { gateFindings } from '../lib/findings.mjs';
-import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/junctions.js';
+import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');

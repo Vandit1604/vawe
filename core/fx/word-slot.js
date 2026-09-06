@@ -25,8 +25,8 @@
 // holds (transform/opacity/filter on the LAYER belong to the cross-cutting tracks). Every value is a
 // function of `t` alone, so a cold render and a warm one agree.
 
-import { clamp01, easeOutCubic } from '../motion.js';
-import { INK_PAD_EM } from '../type.js';
+import { clamp01, easeOutCubic } from '../motion/motion.js';
+import { INK_PAD_EM } from '../type/type.js';
 
 // NOT EXPORTED. It is this modifier's own key list, used twice in the two throws below, and nothing
 // outside this file reads it. Exported, it read as a NAMED VOCABULARY and scripts/gates/arsenal-check

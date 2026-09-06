@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readWav } from './wav-read.mjs';
-import { bandEnergies, BANDS } from '../../core/spectrum.js';
+import { bandEnergies, BANDS } from '../../core/tracks/spectrum.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];

@@ -31,9 +31,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { sceneDims } from '../../core/safe.js';
-import { junctionTable, marksOf, shotWindows } from '../../core/junctions.js';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { sceneDims } from '../../core/layout/safe.js';
+import { junctionTable, marksOf, shotWindows } from '../../core/timeline/junctions.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 // This gate already owns a rich --json payload (a whole report object, not a flat finding list), the
 // exact docs/MISTAKES.md #401 case findings.mjs was built to name. `emitJson` is the one door that lets

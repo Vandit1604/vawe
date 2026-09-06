@@ -5,7 +5,7 @@
 import puppeteer from 'puppeteer';
 import fs from 'node:fs';
 import { UNITS } from '../../core/transitions/units.js';
-import { seamFrag, SEAM_VERT } from '../../core/seams.js';
+import { seamFrag, SEAM_VERT } from '../../core/timeline/seams.js';
 
 const frags = UNITS.map((u) => ({ name: u.name, source: u.source, vert: SEAM_VERT, frag: seamFrag(u) }));
 

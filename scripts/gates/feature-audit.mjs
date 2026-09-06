@@ -7,9 +7,9 @@
 // Run: node scripts/gates/feature-audit.mjs   (make feature-audit)
 import fs from 'fs';
 import path from 'path';
-import { PRESETS } from '../../core/type.js';
-import { PRESENTATIONS } from '../../core/cuts.js';
-import { SHADER_FX } from '../../core/stings.js';
+import { PRESETS } from '../../core/type/type.js';
+import { PRESENTATIONS } from '../../core/cuts/index.js';
+import { SHADER_FX } from '../../core/stings/index.js';
 import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { gateFindings } from '../lib/findings.mjs';

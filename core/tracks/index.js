@@ -36,7 +36,7 @@
 // is one line, in the one file that documents the pipeline.
 // Bound under `t<Name>` so the registry's keys stay the track names while `units` and `motion` remain
 // free as the argument and kit-field names they have carried since updateLayer.
-import { mergeProps } from '../props.js';
+import { mergeProps } from '../registry/props.js';
 import * as tCut from './cut.js';
 import * as tUnits from './units.js';
 import * as tRansom from './ransom.js';
@@ -51,7 +51,7 @@ import * as tBox from './box.js';
 import * as tFollow from './follow.js';
 import * as tMotion from './motion.js';
 import { DEFAULT_SHUTTER } from './motion.js';
-import { layerTime } from '../time.js';
+import { layerTime } from '../timeline/time.js';
 import * as tIdle from './idle.js';
 import * as tModifiers from './modifiers.js';
 

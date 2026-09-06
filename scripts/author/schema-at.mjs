@@ -137,7 +137,7 @@ async function registriesLive() {
   try {
     const { collect } = await import('./arsenal.mjs');
     await collect();                                   // imports every module that defines a vocabulary
-    const { registries } = await import('../../core/registry.js');
+    const { registries } = await import('../../core/registry/registry.js');
     return registries();
   } catch { return []; }                               // the kind line is a courtesy, never the answer
 }
@@ -286,7 +286,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const where = fmtPath(r.trail) || 'the top level';
   const legal = r.map ? Object.keys(r.map).sort() : [];
   let near = [];
-  try { ({ nearMisses: near } = await import('../../core/registry.js')); near = near(r.want, legal); } catch { near = []; }
+  try { ({ nearMisses: near } = await import('../../core/registry/registry.js')); near = near(r.want, legal); } catch { near = []; }
   console.log(`\n  no field "${r.want}" at \`${where}\`.${near.length ? ` Did you mean ${near.map((n) => `\`${n}\``).join(', ')}?` : ''}`);
   console.log(`\n  What IS legal at \`${where}\` (${legal.length}):\n`);
   console.log(wrap(legal.join(' · '), '    '));

@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, downbeats } from '../../core/beats.js';
+import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, downbeats } from '../../core/beats/detect.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];

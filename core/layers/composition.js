@@ -8,7 +8,7 @@
 // them per frame → pure in n, exactly like every other GSAP hook (formats/scene/scene.js applyGsapHooks).
 // No frame() hook: the timeline is global and seeked centrally.
 import { COMPOSITION_REGISTRY } from '../compositions/index.js';
-import { propsOf } from '../props.js';
+import { propsOf } from '../registry/props.js';
 
 // Which of those props needs the tween engine on disk before build. `props` is inert data; `comp` names a
 // timeline, and a comp built with no GSAP is a still frame with no error (docs/MISTAKES.md #148).

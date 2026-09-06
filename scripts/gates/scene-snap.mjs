@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { sceneDims } from '../../core/safe.js';
+import { sceneDims } from '../../core/layout/safe.js';
 // ONE shared signature definition (capture + diff), also used by snap-scenes.mjs. Both gates used to
 // keep their own hand-copied version; that duplication is how a field gets added to one and not the
 // other, and how a gate goes blind without saying so (MISTAKES #159).

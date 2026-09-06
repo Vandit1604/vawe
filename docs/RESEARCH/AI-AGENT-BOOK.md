@@ -280,7 +280,7 @@ this is the lowest-ranked ADOPT here.
 
 Captured third-party HTML is untrusted content flowing into both a scene file and the agent's context.
 `make capture` DOM-captures a live site and `mcp/server.mjs` `vawe_reflect` fetches an arbitrary URL.
-`core/sanitize-html.js` refuses `transition` and `animation`, but for DETERMINISM, and nothing in its
+`core/type/sanitize-html.js` refuses `transition` and `animation`, but for DETERMINISM, and nothing in its
 header says which trust boundary it is or is not. Ch4's tool description poisoning, ch3's
 "retrieved documents are the most typical vector for indirect prompt injection", and ch9's "LLM
 summarization is a transformation for readability and processing, not a sanitization step that makes
@@ -322,10 +322,10 @@ already right.
 systematic discrepancy between the world the model perceives and the world the tool operates on", with
 the Cursor case where the edit tool silently normalized curly quotes and the model could not diagnose
 its own failure. Ch5 gives the principle in one line: "**Constraints over guidance**, the former means
-'cannot be done,' the latter is merely 'advised against'." `core/registry.js` is that principle
+'cannot be done,' the latter is merely 'advised against'." `core/registry/registry.js` is that principle
 enforced structurally rather than by policy: `pick()` takes no fallback parameter, "so a silent
 default is not expressible through this helper at all, and the fifth registry cannot be written
-wrong." `CLAUDE.md`'s "SUGAR MUST NEVER SILENTLY NO-OP" and `core/boot.js` throwing on a surviving
+wrong." `CLAUDE.md`'s "SUGAR MUST NEVER SILENTLY NO-OP" and `core/engine/boot.js` throwing on a surviving
 `cameraMove` (#424) are the same rule at two more sites.
 
 **"Produced an answer" is not "completed the task".** Ch1, on a missing context component: "the
@@ -350,7 +350,7 @@ enough to justify how blunt the rule is.
 candidates score below threshold "the system should return an explicit 'not found', prompting the
 Agent to rephrase and retry". `scripts/author/arsenal.mjs` has `CONFIDENT = 0.47` and prints
 everything below it as a WEAK GUESS, added because `dollyZoom` was offered twice in one day for
-capabilities the engine does not have (#552). `core/registry.js` goes past the book: a failed pick
+capabilities the engine does not have (#552). `core/registry/registry.js` goes past the book: a failed pick
 searches every OTHER registry and says where the name does live ("`popIn` is a gsap effect, not an
 anim. Did you mean `fx: \"popIn\"`?"). Ch4 describes nothing like that cross-vocabulary hint.
 
@@ -543,7 +543,7 @@ Measured against that, our stack is already at the top tier and in two respects 
 - It can say it does not know (`CONFIDENT = 0.47`, WEAK GUESS), which is ch4's explicit-not-found
   fallback.
 - `--kind` is ch4's two-level hierarchical match (its server-then-tool becomes our kind-then-name).
-- `core/registry.js` adds the cross-vocabulary hint, which ch4 does not describe anywhere.
+- `core/registry/registry.js` adds the cross-vocabulary hint, which ch4 does not describe anywhere.
 - `scripts/gates/arsenal-check.mjs` has no counterpart in the book at all. Ch4 assumes the catalogue
   and the capability set stay in sync; nothing in it addresses a capability the catalogue never
   mentions. On its 120 waivers against 173 exports: those are 120 documented answers to "is this

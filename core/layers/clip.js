@@ -1,6 +1,6 @@
 // core/layers/clip.js: a generated/any VIDEO played DETERMINISTICALLY as a preloaded PNG frame
 // sequence (scripts/gen-clip.mjs → manifest). No <video>: renderFrame(n) swaps the <img> src.
-import { mergeProps, propsOf } from '../props.js';
+import { mergeProps, propsOf } from '../registry/props.js';
 
 // The props are read off these signatures (propsOf, core/props.js). No second list to drift from them.
 export function build(kit, el, L, { src, w, radius, fit } = L) {

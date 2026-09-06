@@ -29,16 +29,16 @@ import http from 'node:http';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { safeArea, captionBand, captionSkin, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/safe.js';
-import { layoutErrors } from '../core/validate.mjs';
+import { safeArea, captionBand, captionSkin, nativeAspect, DESTINATION_NAMES, ASPECTS, sceneDims } from '../core/layout/safe.js';
+import { layoutErrors } from '../core/validate/validate.mjs';
 // The renderer's own placement resolver, called rather than re-implemented. See capBandFor below.
-import { resolveCoords } from '../core/boot.js';
+import { resolveCoords } from '../core/engine/boot.js';
 // The SOURCE-side twin of the in-page `inkText()` below. That helper already refuses to read a
 // <style> body as glyphs (docs/MISTAKES.md #222/#217); this file went on doing exactly that when it
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
 import { snippet } from '../scripts/lib/text.mjs';
 import { gateFindings } from '../scripts/lib/findings.mjs';
-import { lowerScene } from '../core/transitions-lower.js';
+import { lowerScene } from '../core/transitions/lower.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -452,11 +452,11 @@ function frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
     // m12 m21 (roll) · m13 m31 (yaw) · m23 m32 (pitch), in column-major CSS order
     return [v[1], v[4], v[2], v[8], v[6], v[9]].some((k) => Math.abs(k) > 0.001);
   })();
-  // UN-CAMERA. The SAFE box is a margin in SCENE coordinates: `core/safe.js` states the invariant that
+  // UN-CAMERA. The SAFE box is a margin in SCENE coordinates: `core/layout/safe.js` states the invariant that
   // placement and checking read the same function, so `pin:"top"` resolves to the safe box's own edge and
   // an edge pin can never fail. getBoundingClientRect reads a box AFTER the camera transform, so a zoom
   // carries edge-pinned content out of the safe box with nothing wrong in the film. That is not a corner
-  // case here: `core/produce.js` injects a 1 -> 1.06 slowPush into every scene that declares no camera,
+  // case here: `core/engine/produce.js` injects a 1 -> 1.06 slowPush into every scene that declares no camera,
   // 1.06 consumes exactly the 0.06 MARGIN, and 90 of 147 scenes take the injection. Measured on the
   // library: of 14 scenes that gained a safe finding, 10 lost it again the moment the injected push was
   // replaced by a static camera. Those ten were correct authoring reported as a defect.
@@ -1191,7 +1191,7 @@ function hideProbeSubjects(hideList) {
       set('-webkit-text-fill-color', 'transparent');
       set('-webkit-text-stroke-color', 'transparent');
       // A text-shadow is the TEXT's paint, not the backdrop's, and here it is often the ink colour
-      // itself: `core/ransom.js` sets `0 0 4px <ink>, 0 0 9px <ink>` as a neon glow. Left standing,
+      // itself: `core/type/ransom.js` sets `0 0 4px <ink>, 0 0 9px <ink>` as a neon glow. Left standing,
       // a transparent glyph still smears its own colour across the box the backdrop is read from,
       // and the ratio collapses toward 1:1, the old bug's shape, in a new place. Chromium paints a
       // text-shadow even for transparent text, so it has to come off explicitly.
@@ -1618,7 +1618,7 @@ for (const aspectKey of askedAspects) {
     if (hard > worst.n) worst = { f, n: hard };
     // NO FRAME-WIDE CAMERA EXEMPTION. A filter used to sit at this line: it read the camera keyframes and
     // dropped every `safe` and `caption-band` finding on any frame between two keys that differ.
-    // `core/produce.js` gives a scene that declares no camera a `slowPush` spanning the WHOLE runtime, so
+    // `core/engine/produce.js` gives a scene that declares no camera a `slowPush` spanning the WHOLE runtime, so
     // it answered "moving" on every frame of 90 of the 147 scenes here, and a rule this file calls a HARD
     // fail was switched off for most of the library. It was also the second owner of a fact the page
     // already holds. The page decides per LAYER, from the render: `travelling` for a box mid-journey,

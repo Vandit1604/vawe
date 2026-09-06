@@ -6,8 +6,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { lintData, fxErrors, validateData } from '../../core/validate.mjs';
-import { resolveEasing, easeOutCubic } from '../../core/motion.js';
+import { lintData, fxErrors, validateData } from '../../core/validate/validate.mjs';
+import { resolveEasing, easeOutCubic } from '../../core/motion/motion.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

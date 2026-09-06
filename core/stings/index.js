@@ -1,5 +1,5 @@
-import { glContext } from '../webgl.js';
-import { defineRegistry } from '../registry.js';
+import { glContext } from '../engine/webgl.js';
+import { defineRegistry } from '../registry/registry.js';
 import * as flash from './units/flash.js';
 import * as burn from './units/burn.js';
 import * as leak from './units/leak.js';

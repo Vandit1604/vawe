@@ -61,7 +61,7 @@ import path from 'node:path';
 import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timing.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 import { snippet } from '../lib/text.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
@@ -224,7 +224,7 @@ if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion)
 }
 
 // ---------- 5. beats-wrapped-as-units ----------
-// The authored `duration` is not always the rendered one. `core/produce.js` turns `sceneUnits` on for
+// The authored `duration` is not always the rendered one. `core/engine/produce.js` turns `sceneUnits` on for
 // any cut film with no choreographed `motion` track, and `formats/scene/scene.js` then rewrites every
 // non-last-beat layer to end with its own beat so the wrapper can slide the beat out as one block. A
 // layer authored across a cut is truncated at it, silently, and the JSON keeps saying otherwise.

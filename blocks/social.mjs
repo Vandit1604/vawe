@@ -47,7 +47,7 @@ export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } 
   return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.xs, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
     children: messages.map((m, i) => ({ type: 'group', layout: 'row', justify: m.me ? 'flex-end' : 'flex-start', children: [
       // The "me" bubble sits on T.accent, so its ink is `onColor`, which now resolves to the
-      // `--on-accent` token `core/boot.js` computes per theme, rather than assuming white clears a
+      // `--on-accent` token `core/engine/boot.js` computes per theme, rather than assuming white clears a
       // lime. HAIRLINE, NO SHADOW on the other side: a bubble already has a boundary, and a drop
       // shadow on every message turns a thread into a stack of loose cards.
       text({ text: m.text, size: TYPE.base, weight: 500, color: m.me ? onColor(T.accent) : T.ink,

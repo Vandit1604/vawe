@@ -39,7 +39,7 @@ to any platform ratio:
 
 Resolved once at boot (pure in W,H → still deterministic). Absolute-coord scenes are unaffected.
 
-## Motion math (`core/motion.js`, 56 exports)
+## Motion math (`core/motion/motion.js`, 56 exports)
 
 | Primitive | Signature | Use for |
 |---|---|---|
@@ -57,7 +57,7 @@ Resolved once at boot (pure in W,H → still deterministic). Absolute-coord scen
 | `wipe` / `circleWipe` / `clockWipe` | `(t, ...)` → clip-path | raw reveal shapes |
 | `installVirtualClock` | auto in `boot()` | Date/rAF/timers/Math.random frozen to the frame |
 
-## Cuts (`core/cuts.js`): 26 presentations × 8 timings
+## Cuts (`core/cuts/index.js`): 26 presentations × 8 timings
 
 `cutStyle(name, seqState, {timing, dir, dist, cx, cy})` → full style set (never leaves properties stuck).
 
@@ -70,7 +70,7 @@ Resolved once at boot (pure in W,H → still deterministic). Absolute-coord scen
 - Taste: whip/slide between same-background scenes only; dark↔light cuts want a shader sting over them.
 - **JSON knobs on a layer**: `cut` · `dir` · `dist` · `cutTiming` (the 8 above, default `smooth`) · `cx`/`cy` (iris/soft-iris centre %, default 50/50).
 
-## Shader stings (`core/stings.js`): 35 WebGL cover-the-cut effects
+## Shader stings (`core/stings/index.js`): 35 WebGL cover-the-cut effects
 
 `fxo.draw(fx, progress, seed)`, pure in its args: `flash` `burn` (ember front) `leak` (**seed-generative
 multi-hue light leak: every `seed` is a different leak, many multicolour; tint with `color` to force one hue**)
@@ -97,7 +97,7 @@ Peak them AT the cut; see MOTION-CRAFT for the when-to-use guide.
   `leak` also takes **`colors: ["#..", ...]`** (up to 4). The leak is built from exactly those hues and
   the `seed` only arranges them (deterministic + art-directable). Omit both → seed-generated multi-hue.
 
-## The spectacle (`core/spectacle.js`): nominate ONE loud moment, and the engine quietens the rest
+## The spectacle (`core/timeline/spectacle.js`): nominate ONE loud moment, and the engine quietens the rest
 
 ```json
 "spectacle": { "at": 6.6, "of": "logo", "device": "flash", "why": "the mark lands" }
@@ -131,7 +131,7 @@ all 104 snapshotted scenes prove it.
 that default lives per preset inside `presetSpec` and copying it here would put a second copy of it in a
 second file. Anything unset keeps the preset's own resting value.
 
-## Seams (`core/seams.js`): two-scene shader transitions (blend BOTH beats)
+## Seams (`core/timeline/seams.js`): two-scene shader transitions (blend BOTH beats)
 
 A sting paints a generative overlay ON TOP of one beat; a cut transforms ONE root. A **seam** is the
 only transition that samples the OUTGOING and INCOMING beats as textures and blends one INTO the other.
@@ -154,10 +154,10 @@ them and stays order-independent: `make probe` + `make canvas-purity` pass on a 
   inside the isolated SVG render). **Limitation**: cross-origin `<img>` and captured components may
   render blank in the baked texture; a blank raster (or no WebGL) falls back to a plain cross-fade.
 
-## Unified transitions (`core/transitions-lower.js`): one field, routed to the right mechanism
+## Unified transitions (`core/transitions/lower.js`): one field, routed to the right mechanism
 
 The four mechanisms above (`anim` · `cut` · `sting` · `seam`) are the machinery; author through **one
-surface** and the engine routes by name (the catalog in `core/transitions.js`). Lowered to the raw
+surface** and the engine routes by name (the catalog in `core/transitions/catalog.js`). Lowered to the raw
 fields at load, so it is pure sugar: determinism and every gate are unchanged.
 - **Boundary** `transitions: [{ at, fx, dur?, dir?, timing?, mech? }]`, a transition between two beats.
   `fx` selects the mechanism: seam-only (`whipPan`/`crossWarp`/`cinematicZoom`) → **seam**; `whip`/
@@ -170,7 +170,7 @@ fields at load, so it is pure sugar: determinism and every gate are unchanged.
 - **See any transition before authoring**: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
   renders a labelled A→B filmstrip. Decision theory: `docs/CRAFT/TRANSITIONS.md`.
 
-## Ambient shader looks (`core/shaders-ambient.js`): 23 continuous WebGL fields (the `shader` layer)
+## Ambient shader looks (`core/surfaces/shaders-ambient.js`): 23 continuous WebGL fields (the `shader` layer)
 
 Where stings cover a cut, these are LOOPING looks placed as a `shader` layer, pure in local `t`.
 Two roles:
@@ -188,7 +188,7 @@ Two roles:
   the DOM under it), honest, and still perfectly composable. Knobs: `speed` · `intensity` · `colors`
   · `seed`. Reel: _wave3-reel demonstrates all eight overlay looks over live copy.
 
-## Kinetic type (`core/type.js`): 27 presets × char/word/line splits
+## Kinetic type (`core/type/type.js`): 27 presets × char/word/line splits
 
 `splitText(el, mode)` (preserves `<b>/<em>`) + `animateUnits(units, t, {preset, stagger, each})`:
 `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` (looping) `flip` `fall` `elastic` `skew` `focus`
@@ -205,7 +205,7 @@ from edge-on). Reels: cuts-demo.mp4 + type-demo.mp4 + chromatic.mp4.
   (per-preset overrides, e.g. `gradient` `{c1,c2}` · `highlight`/`underline` `{color}` · `blur`/`focus`
   `{px}` · `tilt` `{deg}` · `wave` `{amp,phase}` · `bounce`/`elastic` `{bounce,settle}` · `scale`/`stretch` `{from}`).
 
-## Ransom cutout (`core/ransom.js`): comic/kidnapper-note treatment
+## Ransom cutout (`core/type/ransom.js`): comic/kidnapper-note treatment
 
 `"ransom": true` on a `text` layer cuts every glyph from a different source: its own typeface (from a
 pool of 8 distinct OFL classes: grotesque · contrast serif · marker · geometric · editorial serif ·
@@ -233,7 +233,7 @@ byte-identical across render order. Mixed case is preserved from the input.
   fallback). Edges stay near-axis-aligned on purpose: steeper diagonal cuts rasterise
   non-deterministically under the per-glyph rotation. Reel: ransom-demo.mp4 · ransom-color-demo.mp4.
 
-## Backgrounds (`core/backgrounds.js`): 22 canvas presets, theme-recolored
+## Backgrounds (`core/backgrounds/index.js`): 22 canvas presets, theme-recolored
 
 Light: `paper` `paperShapes` `paperDots` `soft` `accent` `accentPlain` `dotmatrix` `plain` · Dark:
 `ink` `aurora` `mesh` `constellation` `spotlight` `brandglow` `shapes`. Every preset reads the brand's
@@ -249,7 +249,7 @@ override any layer's emphasis colour with `emColor`.
   `glow` `sweep`; `particles` takes `count` `speed` `connectDist`. The vocabulary is therefore PER
   PRESET, and a key this preset's fx do not read is an **error** naming the keys they do (it used to be
   accepted and dropped: correct-looking JSON, unchanged render). The accepted set is read out of the fx
-  implementations themselves (`FX_PARAMS` in `core/backgrounds.js`), so it cannot go stale.
+  implementations themselves (`FX_PARAMS` in `core/backgrounds/index.js`), so it cannot go stale.
   Palette still owns colour by default, though `color` is a real fx parameter and may be overridden.
   `ink` draws accent-tinted dots, for a clean flat dark, use `plain` + `value:"dark"`.
 - **Seed variation (July 2026):** every preset now takes a `seed` (default = hash of theme name + preset),
@@ -266,7 +266,7 @@ override any layer's emphasis colour with `emColor`.
   paints raw HTML/CSS as the backdrop instead of a canvas preset, for the backgrounds the preset
   vocabulary can't express (reflecting a real site's hand-written hero CSS). `tone` is required: the
   engine can't read lightness out of your CSS, and without it a layer with no explicit `color` can land
-  white-on-white. Markup is sanitised (`core/sanitize-html.js`), same rules as the `html` layer.
+  white-on-white. Markup is sanitised (`core/type/sanitize-html.js`), same rules as the `html` layer.
   **Animate it with `var(--t)` (seconds) and `var(--p)` (0→1 across the window)**, both written every
   frame and usable inside `calc()`: `transform: rotate(calc(var(--t) * 12deg))`. CSS `animation` and
   `transition` are disabled engine-wide (`core/tokens.css`) because a frame is seeked, not played, the
@@ -288,7 +288,7 @@ accepting the default:
 Defaults are unchanged, so omitting a knob renders exactly as before. If a look feels generic, a
 baked default is usually why: override it.
 
-## Clips & adapters (`core/clips.js`)
+## Clips & adapters (`core/timeline/clips.js`)
 
 `driveClips(root, t)` runs any `[data-start]` element's window/enter/exit/z-track (12 anim names);
 `registerTimeline`/`seekAll` seek paused GSAP/WAAPI timelines deterministically.
@@ -337,7 +337,7 @@ cut writes exactly those onto the element the rig lives on. A tilted frame there
 the few frames a fading or blurring cut is in flight, and pops back. Steady state is safe. Pair depth with
 a cut that only translates.
 
-- Calculated moves: `cameraMove` sugar (`core/camera-moves.js`), `slowPush` · `diveIn` · `panFollow` ·
+- Calculated moves: `cameraMove` sugar (`core/camera-moves/index.js`), `slowPush` · `diveIn` · `panFollow` ·
   `workspaceZoomOut` · `orbit` · `multiPhase`. `orbit` sweeps `ry`, so under the rig it is a real orbit.
 - Global: per-scene `camera` (demo), eased pans+pushes.
 - Continuous: bg breathe `scale(1.05 + 0.02·sin(t·0.35))`, never resets at cuts.
@@ -360,7 +360,7 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   the sound with it. `span` sets how long the sound holds on its own side (default: to the next junction),
   `fade` is the equal-power crossfade at both ends (default 0.35s), `duck` pulls the music bed down under
   the bridge on the same curve. This is the continuous object that costs the picture nothing: it holds a
-  film together across cuts that share no visual. Resolved by `core/audio-bridges.js`, mixed by
+  film together across cuts that share no visual. Resolved by `core/audio/bridges.js`, mixed by
   `internal/audio/audio.go`. A junction the film does not have, a lead longer than the beat before it, or
   a `sound` that is not on disk all FAIL the render and name the cause. See `docs/CRAFT/SOUND.md` §2.
 - **Muted-social captions**: `captionMode: "pop"`, big bold bottom-third burned-in subtitles (accent on
@@ -671,7 +671,7 @@ Structure is designed per product; nothing here decides your story for you.
 
 ## Colour-grade filter presets (any layer)
 
-`filter:` accepts a raw CSS filter string OR a named grade (core/filters.js): `duotone` · `tritone` ·
+`filter:` accepts a raw CSS filter string OR a named grade (core/looks/filters.js): `duotone` · `tritone` ·
 `gradientMap` · `posterize` · `sepia` · `vignette` · **`chromaGlow`**, with params after a colon
 (`duotone:#141414,#7cffd4`, `posterize:5`, `sepia:0.6`, `vignette:0.55`, `chromaGlow:4,9`). Bare names
 derive their colours from the theme (ink shadows, accent highlights). Vignette is honestly an overlay,
@@ -682,7 +682,7 @@ not a filter. SVG defs inject once at build, so the render stays pure in n.
   per-frame work. Put it on a `text` layer over a dark bg for a neon sign; composes with any entrance
   preset (try `chroma`). `chromaGlow:1.5` for a bigger bloom on large display type.
 
-## Composite looks (`core/looks.js`): named filter stacks on any layer
+## Composite looks (`core/looks/index.js`): named filter stacks on any layer
 
 **Glow is a luminance bloom, not a drop-shadow.** The six glow-family looks (`neon`, `dreamyHaze`,
 `halationFilm`, `angelic`, `hologram`, `glitchGlow`) threshold the layer's own brightness, blur that,
@@ -716,14 +716,14 @@ no SVG, no per-frame work → deterministic. Tier A (20): **glow** `neon` `dream
   One number scales bloom radius, overlay alpha, grain and chromatic px together, and it is the only
   knob every look takes. The rest depend on the look's own passes: `grain` needs a grain pass,
   `color2` needs a colour split. **A knob a look cannot apply THROWS**, naming what that look does
-  take, rather than being silently dropped. `liveKnobs(name)` in `core/looks.js` is the list.
+  take, rather than being silently dropped. `liveKnobs(name)` in `core/looks/index.js` is the list.
   There is no `warmth`; it was advertised in three places and no pass ever read it (`docs/MISTAKES.md` #351).
 - **Colours** default to `var(--accent)`/tokens, so a look matches the brand; looks whose identity is a
   fixed palette (`cyberpunk` teal/magenta, `nightVision` green, `thermal` ramp) default to that but take
   overrides. Apply a full-frame look to a `group`/full-frame layer; a text look (`neon`, glow) to the text.
   Reel: looks-reel.mp4. (More looks needing Canvas/WebGL passes are wave-4.)
 
-## Naming a moment by its JOINT: `"cut@1"` (`core/junctions.js`)
+## Naming a moment by its JOINT: `"cut@1"` (`core/timeline/junctions.js`)
 
 A film already knows where it turns. Anywhere a time is expected you may instead write a **junction
 reference** and let the joint own the number:
@@ -745,7 +745,7 @@ film renders byte-identically and there is only one copy of each number.
 Audio said it first: `audio.bridges[].at` has used this grammar since sound shipped ("the junction is
 NAMED, never timed"). Backgrounds now share the same resolver rather than a second copy of it.
 
-## Canvas image passes (`core/canvas-fx.js`): `canvasFx` on an image layer
+## Canvas image passes (`core/canvas/effects.js`): `canvasFx` on an image layer
 
 Per-pixel Tier-2 looks BAKED ONCE at build (in boot's awaited image-preload) into a static PNG, so
 the pixels never change per frame → deterministic by construction (probe/snap prove it). Set
@@ -759,7 +759,7 @@ the pixels never change per frame → deterministic by construction (probe/snap 
 - Only bakes local/same-origin images (cross-origin taints `getImageData` → the raw image shows).
   Best on static images; pairs with a `filter:` grade for extra colour. Reel: canvasfx-reel / tierc-reel.
 
-## Layer as texture (`core/resample-fx.js`) · `resample` on a raster layer
+## Layer as texture (`core/resample/effects.js`) · `resample` on a raster layer
 
 A layer whose content is **already a raster** (an `image` layer's `<img>`, or the canvas a `paint` or
 `shader` layer draws into) is bound as a WebGL texture and re-sampled through a fragment shader. This
@@ -814,7 +814,7 @@ Not the same as its neighbours, and the difference is what to reach for:
   functions: it can blur and saturate that backdrop uniformly. It cannot **bend** it. `glass` for a
   frosted panel over a scene, `resample:"refract"` when the pixels should displace like real glass.
 
-## Raymarched 3D (`core/raymarch-fx.js`) · the `raymarch` layer type, 6 scenes
+## Raymarched 3D (`core/surfaces/raymarch-fx.js`) · the `raymarch` layer type, 6 scenes
 
 Real 3D without a 3D engine. A fullscreen quad plus a signed distance field IS a renderer: march a ray
 per pixel, hit an implicit surface, shade it from its normal. No geometry, no scene graph, no
@@ -853,7 +853,7 @@ three.js dependency would earn itself; see `docs/ROADMAP.md`.
 
 ## Caption styles
 
-`captionStyle:` layers a word-timed treatment on the pop caption layout (core/captions.js):
+`captionStyle:` layers a word-timed treatment on the pop caption layout (core/type/captions.js):
 `highlight` · `pillKaraoke` · `weightShift` · `clipWipe`. Per-line `words:[{t0,t1}]` gives real
 karaoke timing; without it, windows distribute across the line proportional to word length, so
 `make captions` output still reads as intentional. Inactive words dim via colour mix toward the bg,
