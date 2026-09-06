@@ -217,7 +217,7 @@ make probe [M=…]                        render-order purity (determinism)
 
 # author
 make beats D=… VS=<brand>               first/mid/last of every beat beside the source
-make expand D=…                         expand {type:block}/{type:comp} sugar → real layers
+make expand D=…                         debug: print the {type:block}/{type:beat}/{type:comp} expansion (auto at render)
 make compare / scrub / batch            variant selection · contact sheet · data-driven variants
 
 # publish

@@ -16,7 +16,7 @@ interpolated by `cameraAt` (`core/sequence.js`); author it with the calculated g
 "cameraMove": { "move": "diveIn", "start": 1.0, "dur": 2.2, "tx": 960, "ty": 420, "to": 1.6 }
 ```
 
-At the scene ROOT (not a layer). `make expand` turns it into `data.camera`. Pass an array of specs to chain
+At the scene ROOT (not a layer). It bakes into `data.camera` at load (`bakeCameraMove`, core/produce.js). Pass an array of specs to chain
 several moves across the film. Each generator emits interior `ease:"linear"` automatically for a
 velocity-continuous path.
 

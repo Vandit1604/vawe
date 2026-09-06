@@ -58,8 +58,8 @@ kinetic reveals, a living bg, border-beam/paint, svg draw/morph, `cameraMove`, d
 token travelling a path while a counter ticks and a check draws), author a bespoke **`composition`**.
 A first-party hand-authored per-beat GSAP timeline in `core/compositions/index.js`, named from the JSON
 (`{type:"composition",comp:"…",props:{…}}`); see [AUTHOR-THE-FRAME.md](../../docs/CRAFT/AUTHOR-THE-FRAME.md).
-Load `vawe-creative` + `vawe-effects` + `vawe-animation` + `vawe-camera`. `make expand` to lower
-beats/cameraMove into layers. **Iterate live** without rendering: `make studio D=<file>` serves the scene
+Load `vawe-creative` + `vawe-effects` + `vawe-animation` + `vawe-camera`. Beats/blocks/comps/cameraMove
+all resolve into real layers at load, no separate step. **Iterate live** without rendering: `make studio D=<file>` serves the scene
 with a frame scrubber: scrub/step, edit the JSON, reload, before you ever render an mp4.
 **Gate:** every storyboard beat is authored; `make validate` passes.
 
