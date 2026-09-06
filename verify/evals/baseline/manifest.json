@@ -1,0 +1,73 @@
+{
+ "when": "2026-09-06T10:23:38.948Z",
+ "commit": "77993ff0",
+ "briefsDir": "verify/evals/briefs",
+ "runDir": "verify/evals/baseline",
+ "sheet": "verify/evals/baseline/sheet.png",
+ "briefs": [
+  {
+   "name": "explainer",
+   "ok": true,
+   "duration": 9,
+   "expectedDuration": 9,
+   "dims": {
+    "w": 1080,
+    "h": 1920
+   },
+   "expectedDims": {
+    "w": 1080,
+    "h": 1920
+   },
+   "mp4": "verify/evals/baseline/explainer.mp4",
+   "sheet": "verify/evals/baseline/explainer.sheet.png"
+  },
+  {
+   "name": "launch",
+   "ok": true,
+   "duration": 8,
+   "expectedDuration": 8,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "expectedDims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "mp4": "verify/evals/baseline/launch.mp4",
+   "sheet": "verify/evals/baseline/launch.sheet.png"
+  },
+  {
+   "name": "recreation",
+   "ok": true,
+   "duration": 9,
+   "expectedDuration": 9,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "expectedDims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "mp4": "verify/evals/baseline/recreation.mp4",
+   "sheet": "verify/evals/baseline/recreation.sheet.png"
+  },
+  {
+   "name": "sting",
+   "ok": true,
+   "duration": 4,
+   "expectedDuration": 4,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "expectedDims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "mp4": "verify/evals/baseline/sting.mp4",
+   "sheet": "verify/evals/baseline/sting.sheet.png"
+  }
+ ]
+}

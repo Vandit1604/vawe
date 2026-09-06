@@ -905,6 +905,20 @@ worktrees:
 review:
 	node verify/review.mjs
 
+# make evals: render the fixed set of eval briefs (verify/evals/briefs/*.json) under the CURRENT
+# engine + rules, into a fresh verify/evals/runs/<timestamp>/ with a contact sheet per brief, one
+# combined sheet, and manifest.json. Asserts LIVENESS only (mp4 exists, duration + dims match the
+# scene): no aesthetic score, a human reads the sheets. Exits 1 if any brief is not live. docs/EVALS.md.
+evals: build
+	node scripts/dev/evals.mjs
+
+# make evals-compare BEFORE=verify/evals/runs/<ts> [AFTER=<ts>]: before/after sheets stacked per brief
+# plus compare.html laying the two mp4s side by side (opened automatically). No AFTER renders a fresh
+# run first. Run this whenever a change touches motion, transitions, backgrounds, type or layout, and
+# carry the compare.html link in the commit/PR body.
+evals-compare: build
+	node scripts/dev/evals.mjs --compare --before $(BEFORE) $(if $(AFTER),--after $(AFTER))
+
 # make critics D=<scene.json> [VS=brand] [RECORD=<panels.json>]: THE CRITIC PANEL (docs/CRAFT/SUBAGENTS.md),
 # as an invokable, recorded step. No RECORD: prints the six critics' prompts, concrete for this film, to
 # launch as parallel Agent calls. RECORD=<file>: given the six verdicts collected into one JSON file,
