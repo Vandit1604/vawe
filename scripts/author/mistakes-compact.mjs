@@ -38,7 +38,7 @@ for (let k = 0; k < heads.length; k++) {
 }
 
 const stripEmphasis = (s) => s.replace(/\*\*/g, '').replace(/__/g, '');
-const noEmdash = (s) => s.replace(/—/g, ', ');
+const noEmdash = (s) => s.replace(/\u2014/g, ', ');
 // A fenced code block collapsed onto one line still opens with ``` at that line's start once
 // written out, and nothing in a one-sentence lesson ever closes it: every line after it in the
 // compact file reads as "inside a fence" to a markdown-aware gate. A lesson is prose, not a fence.

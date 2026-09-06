@@ -81,7 +81,11 @@ const HEAD = /^## (?:#)?(\d+)[.:) ]*\s*(.*)$/;
 const heads = lines.map((l, i) => (/^## /.test(l) ? i : -1)).filter((i) => i >= 0);
 for (let k = 0; k < heads.length; k++) {
   const i = heads[k];
-  const end = k + 1 < heads.length ? heads[k + 1] : lines.length;
+  let end = k + 1 < heads.length ? heads[k + 1] : lines.length;
+  // The compact file ends with a block of `<!-- doc-refs-allow … -->` waivers carried over from the
+  // prose. They are not part of the last entry, so an entry's body stops at the first one.
+  const footer = lines.findIndex((l, j) => j > i && j < end && /^<!--/.test(l));
+  if (footer >= 0) end = footer;
   const body = lines.slice(i + 1, end).join('\n').trim();
   const m = HEAD.exec(lines[i]);
   // A SECTION THAT IS NOT A NUMBERED DEFECT IS STILL SEARCHABLE, and dropping it would be this file's

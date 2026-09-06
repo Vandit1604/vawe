@@ -31,7 +31,7 @@ below.
 |---|---|---|
 | [`motion-offsets`](motion-offsets.md) | writing a motion[] keyframe track | eye |
 | [`ease-direction`](ease-direction.md) | choosing an ease for an entrance, exit, or move | eye |
-| [`handover-glide`](handover-glide.md) | one layer becomes another | eye |
+| [`handover-glide`](handover-glide.md) | one layer becomes another | built: `scene.js`, `junctions.js` default 0.9s |
 | [`stagger-total`](stagger-total.md) | a group arrives with a stagger | warns: `make direct` |
 | [`first-arrival`](first-arrival.md) | a layer's first entrance in a beat | eye |
 | [`speed-bands`](speed-bands.md) | choosing a duration | warns: `make direct` |
