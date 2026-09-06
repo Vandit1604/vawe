@@ -55,6 +55,10 @@ function entry(name, mechanism) {
 }
 
 // THE CATALOG: derived from the live registries, so adding an effect to any registry auto-lists it.
+// `none` stays OUT of the anim listing's cut row in `make transitions` (it is the absence of an
+// effect, not one to browse), but it is still a real PRESENTATIONS entry, and `boundaryMechanism`
+// below routes it to `cut` explicitly: a scene using `transitions[]` must be able to say "hard cut,
+// no visual transition" the same way a raw `cuts[].style:"none"` always could.
 export const TRANSITIONS = [
   ...ANIM_NAMES.map((n) => entry(n, 'anim')),
   ...Object.keys(PRESENTATIONS).filter((n) => n !== 'none').map((n) => entry(n, 'cut')),
