@@ -57,7 +57,8 @@ import { okDir as seamDir } from '../../core/timeline/seams.js';
 import { BEATS } from '../../blueprints/index.mjs';
 import { ACCENT } from '../../blueprints/kit.mjs';
 import { produceBaseline } from '../../core/engine/produce.js';
-import { easeErrors, bgErrors, durationWordErrors, cssErrors } from '../../core/validate/validate.mjs';
+import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
+import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../author/migrate-junctions.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/registry/vocab.js';
 import { BASE_ENTER } from '../../core/timeline/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts/index.js';
@@ -308,6 +309,56 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
   ok('energy: the band reaches a seam pushed through the transitions sugar', (() => {
     const d = lowerScene({ energy: 'calm', transitions: [{ at: 2, fx: 'wipe', mech: 'seam' }] });
     return d.seams[0].timing === ENERGY.calm; // 'out'
+  })());
+
+  // `transitions[]` is the ONLY authored junction form now; `cuts`/`stings`/`seams` are the internal
+  // shape it lowers to (core/transitions/lower.js). An author who still writes one directly is refused
+  // at validate, not silently accepted (scripts/author/migrate-junctions.mjs converts an old scene).
+  ok('validate: an authored cuts[] is refused, naming the migration script', (() => {
+    const e = authoredJunctionErrors({ cuts: [{ t: 2, style: 'fade' }] });
+    return e.length === 1 && /cuts\[\]/.test(e[0]) && /migrate-junctions\.mjs/.test(e[0]);
+  })());
+  ok('validate: an authored stings[]/seams[] is refused the same way', (() => {
+    return authoredJunctionErrors({ stings: [{ t: 1, fx: 'flash' }] }).length === 1
+      && authoredJunctionErrors({ seams: [{ t: 1, fx: 'wipe' }] }).length === 1;
+  })());
+  ok('validate: a scene with no raw junction key passes clean', authoredJunctionErrors({ transitions: [{ at: 1, fx: 'fade' }] }).length === 0);
+  // `none` is a real cut (a hard cut with no visual transition) but sits outside the catalog's cut row
+  // (core/transitions/catalog.js: nothing to browse in `make transitions`); it must still ROUTE as a
+  // boundary cut, the same thing raw `cuts[].style:"none"` always meant.
+  ok('lowering: a boundary transition can say "none", and it routes to cut', (() => {
+    const d = lowerScene({ transitions: [{ at: 2, fx: 'none' }] });
+    return d.cuts?.[0]?.style === 'none';
+  })());
+
+  // migrate-junctions.mjs: the round-trip proof itself, not just its result on the library.
+  ok('migrate: raising a raw cut into transitions[] round-trips through lowerScene', (() => {
+    const old = { cuts: [{ t: 2, style: 'punch', dur: 0.3 }] };
+    const { next, ok: matched } = migrateOne(structuredClone(old));
+    return matched && Array.isArray(next.transitions) && next.cuts === undefined
+      && junctionDeepEqual(lowerScene(structuredClone(old)).cuts, lowerScene(structuredClone(next)).cuts);
+  })());
+  ok('migrate: a scene with no raw junction key is left untouched (clean, not rewritten)', (() => {
+    const { next, ok: matched, clean } = migrateOne({ layers: [] });
+    return clean === true && matched && next.transitions === undefined;
+  })());
+  // the one real conflict: a bare motion fx (RAMP_BY_DEFAULT) with no `timing` and no `energy` would
+  // silently gain a ramp through transitions[] sugar. `raise` must PIN the true old default (`smooth`)
+  // so the round trip still matches rather than silently re-timing the cut.
+  ok('migrate: a bare ramp-eligible cut is pinned to `smooth`, and still round-trips', (() => {
+    const old = { cuts: [{ t: 2, style: 'zoom' }] };
+    const { next, ok: matched } = migrateOne(structuredClone(old));
+    return matched && next.transitions[0].timing === 'smooth';
+  })());
+  ok('migrate: an author note (`_why`) on a raw seam survives into transitions[]', (() => {
+    const old = { seams: [{ t: 2, fx: 'wipe', _why: 'soft edge' }] };
+    const { next, ok: matched } = migrateOne(structuredClone(old));
+    return matched && next.transitions[0]._why === 'soft edge'
+      && lowerScene(structuredClone(next)).seams[0]._why === 'soft edge';
+  })());
+  ok('migrate: raise() marks the mechanism explicitly, so an ambiguous name (wipe) still routes right', (() => {
+    const t = raiseJunction({ t: 1, fx: 'wipe' }, 'stings', {});
+    return t.mech === 'sting' && boundaryMechanism(t.fx, t.mech) === 'sting';
   })());
   ok('vocab: seam dirVec resolves a numeric angle to a unit vector', (() => {
     const [x, y] = seamDirVec(90); // 90deg = up = [0,1] on this shader's y-up uv
