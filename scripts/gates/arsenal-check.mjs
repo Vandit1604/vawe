@@ -87,6 +87,11 @@ const WAIVED = new Map(Object.entries({
   BUILDERS: 'the lightfield pattern implementations behind PATTERNS, which IS catalogued',
   SLOTS: 'track slot names, internal to the track resolver',
   CANVAS_FX_PRESETS: 'preset bundles over CANVAS_FX_NAMES',
+  LOOK_SCALE_KEYS: 'the fixed shape of `theme.look.scale` (hook/headline/body/caption). LOOK_KEYS itself IS catalogued, as "Theme look keys"; this is the four fields inside one of those keys, not a fifth vocabulary',
+  LOOK_LAYOUT_ANCHORS: 'the fixed enum of `theme.look.layout.anchor` (left/center/right). Same argument as LOOK_SCALE_KEYS',
+  LOOK_MARK_KEYS: 'the fixed shape of `theme.look.marks`. Same argument as LOOK_SCALE_KEYS',
+  LOOK_CUT_SLOTS: 'the fixed shape of `theme.look.cuts` (default/accent). Same argument as LOOK_SCALE_KEYS',
+  LOOK_FIELD_KEYS: 'the fixed shape of `theme.look.field` (grain/vignette). Same argument as LOOK_SCALE_KEYS',
   // FOUND BY A COLLISION, not by a new export. `named()` is a bare word match over the catalogue
   // source, and the catalogue used to import `PRESETS` from core/type.js for the kinetic-preset
   // section, so core/lightfield/PRESETS was silently credited with a different file's import line.
