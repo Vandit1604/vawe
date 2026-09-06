@@ -5,9 +5,45 @@
   "usage": "Blocks and beats install as a LAYER OBJECT, not a file: append item.install.layer to the \"layers\" array of a scene JSON ({\"module\":\"scene\",…}), set x/y/start/dur, then `make expand`. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the block library. A generator installs its OUTPUT instead: item.install.layers is already-expanded layers to append, and where install.kind is \"generated-markup\" you turn item.install.options into markup (item.preview.url, or item.install.render) and paste that into a bg window.",
   "items": [
     {
+      "name": "blurResolveHook",
+      "type": "vawe:beat",
+      "description": "Open on a line that arrives smeared with motion blur and snaps into focus. It never slides, fades or scales.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
       "name": "cardCascade",
       "type": "vawe:beat",
       "description": "Show the feature set as cards that pop in one after another under a kinetic title.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "cardFan",
+      "type": "vawe:beat",
+      "description": "Fan a stack of cards open from one side around a fixed anchor, each a touch later and a touch more rotated than the last.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "cellMosaic",
+      "type": "vawe:beat",
+      "description": "Slide a grid of mixed cells as one surface while every cell keeps its own content, so words and pictures cross cell boundaries together.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "chipConverge",
+      "type": "vawe:beat",
+      "description": "Scatter a ring of chips in from every side, then converge them onto one point.",
       "tags": [
         "beat",
         "motion"
@@ -23,9 +59,27 @@
       ]
     },
     {
+      "name": "containerFill",
+      "type": "vawe:beat",
+      "description": "Hold a fixed frame on screen and fill it with chips one at a time. The frame is the constant; the count is the variable.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
       "name": "ctaEnd",
       "type": "vawe:beat",
       "description": "End on a held card: the mark, the install line, the url, and no exit.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "dialogueAccumulate",
+      "type": "vawe:beat",
+      "description": "Build the hook as sans/serif word pairs that accumulate on a held frame, a small dot joining each pair, then a bloomed payoff line.",
       "tags": [
         "beat",
         "motion"
@@ -53,6 +107,15 @@
       "name": "kineticHook",
       "type": "vawe:beat",
       "description": "Open on a kinetic hook: eyebrow, one hero number or word that counts up, a subline that arrives word by word.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "listBuildRows",
+      "type": "vawe:beat",
+      "description": "Grow a vertical list one row at a time under a fixed rule, never resetting what already landed.",
       "tags": [
         "beat",
         "motion"
@@ -167,9 +230,36 @@
       ]
     },
     {
+      "name": "viewportTrio",
+      "type": "vawe:beat",
+      "description": "Show the same real surface at three sizes at once, the \"it is really finished\" payoff shot.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
       "name": "wordBlast",
       "type": "vawe:beat",
       "description": "Punctuate with one word (or the mark) that arrives oversized, settles, creeps, then grows THROUGH the frame. It does not fade.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "wordWipe",
+      "type": "vawe:beat",
+      "description": "Wipe the frame with one word roughly eight times the normal type size, motion-blurred, and land the reveal the instant it clears.",
+      "tags": [
+        "beat",
+        "motion"
+      ]
+    },
+    {
+      "name": "wordmarkAssemble",
+      "type": "vawe:beat",
+      "description": "Assemble the brand mark from scattered letters while small tiles drift slowly at a different depth behind it.",
       "tags": [
         "beat",
         "motion"
