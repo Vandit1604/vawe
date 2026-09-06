@@ -26,6 +26,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+// A demo is an authored scene, so it carries transitions[] only; the migration's converter runs here.
+import { migrateOne } from '../author/migrate-junctions.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -223,7 +225,7 @@ const scene = {
 };
 
 const rel = `formats/scene/_demo-${slug}.json`;
-fs.writeFileSync(path.join(repoRoot, rel), JSON.stringify(scene, null, 1) + '\n');
+fs.writeFileSync(path.join(repoRoot, rel), JSON.stringify(migrateOne(scene).next, null, 1) + '\n');
 
 // The path goes to stdout alone, so `make demo` can hand it straight to `make dev`.
 console.error(`✓ ${rel}  ${D}s · one picture full bleed, one cut, one camera move, two grounds, a keyed track`);

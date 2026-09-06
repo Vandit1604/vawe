@@ -9,7 +9,7 @@ This repo turns **one self-describing JSON → one rendered video** (30fps mp4, 
 canvases: `16:9` 1920×1080 · `9:16` 1080×1920 · `1:1` 1080×1080 · `4:5` 1080×1350 · `4:3` 1440×1080,
 the table at `core/layout/safe.js:35`; an unnamed ratio is still honoured, fit to the long edge at
 1920). There is exactly **one module: `scene`**, an open canvas of **24 composable layer types**
-(`ls core/layers/`) plus camera · cuts · stings · captions. `html` counts as a picture: hand-authored
+(`ls core/layers/`) plus camera · transitions · captions. `html` counts as a picture: hand-authored
 markup is a picture too, not just text.
 
 **No templates.** You do not pour data into a canned layout; you compose each video from the
@@ -127,6 +127,9 @@ copy must be true, and a specific fact beats a dry number.
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - `{"preset": "black"}` (`core/backgrounds/presets.js:117`) is solid `#000000`, no grain: it means
   black, unlike every other dark preset, which carries a tint or wash.
+- Author a boundary through `transitions[]` only. `cuts`, `stings` and `seams` are its lowered
+  internal form and the validator refuses them when written directly;
+  `scripts/author/migrate-junctions.mjs` converts an old scene.
 
 ## Launch-video rules  `[eye]`
 

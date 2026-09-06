@@ -10,10 +10,13 @@
 // Theme is `vawe`: the real brand read off site/app/globals.css, white field, one cobalt accent.
 import fs from 'node:fs';
 import { BLOCKS } from '../../blocks/index.mjs';
+// Generators write authored scenes, and an authored scene carries transitions[] only (the validator
+// refuses cuts/stings/seams); the same converter the migration uses runs at the write site.
+import { migrateOne } from './migrate-junctions.mjs';
 
 const T = 'vawe';
 const write = (name, scene) => {
-  fs.writeFileSync(`formats/scene/${name}.json`, JSON.stringify(scene, null, 2));
+  fs.writeFileSync(`formats/scene/${name}.json`, JSON.stringify(migrateOne(scene).next, null, 2));
   console.log(`  ✓ ${name.padEnd(17)} ${String(scene.duration).padStart(4)}s  ${String(scene.layers.length).padStart(2)} layers  ${(scene.cuts || []).length} cuts  ${(scene.stings || []).length} stings`);
 };
 const txt = (o) => ({ type: 'text', ...o });
