@@ -13,7 +13,7 @@
 
 // The grammar moved to core/junctions.js when BACKGROUNDS needed it too, one copy, because two
 // hand-kept copies of a definition is MISTAKES #159 exactly.
-import { JUNCTION_KINDS as KINDS, junctionTable, describeJunctions as describe } from '../junctions.js';
+import { JUNCTION_KINDS as KINDS, junctionTable, describeJunctions as describe } from '../timeline/junctions.js';
 
 // resolveBridges turns `audio.bridges` into concrete spans the Go mixer can lay down.
 //   marks:    [{t, kind}], the film's joints (scene.js MARKS)

@@ -29,8 +29,8 @@
 //
 // WRONG ON: a logo (a squashed mark is a damaged mark) and usually on type, whose letterforms carry the
 // deformation and read as a bad font. Right on a chip, a token, a ball, anything with implied mass.
-import { velocityAt } from '../sequence.js';
-import { FPS } from '../motion.js';
+import { velocityAt } from '../timeline/sequence.js';
+import { FPS } from '../motion/motion.js';
 
 export const SQUASH_KEYS = ['amount', 'at'];
 

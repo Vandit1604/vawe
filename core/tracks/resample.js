@@ -8,14 +8,14 @@
 // It used to be two call sites: core/layers/image.js and core/layers/canvas.js each ticked their own,
 // which is why no other layer type could be resampled at all, a text layer has no frame() to hang it
 // off. One owner, every type, and the ordering fact lives in one place (docs/MISTAKES.md #425).
-import { tickResample } from '../resample.js';
+import { tickResample } from '../resample/index.js';
 
 export const slot = 'resample';
 
 // `resample` and `seed` are declared here rather than on each layer type, because this track is what
 // reads them for EVERY type now. core/resample.js still exports the same pair for image/canvas, and
 // mergeProps unions the two claims.
-export { PROPS } from '../resample.js';
+export { PROPS } from '../resample/index.js';
 
 export function frame(kit, el, L, units, t, f, start, end) {
   if (L.resample) tickResample(el, L, t, t >= start && t < end);

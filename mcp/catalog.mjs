@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { repoRoot } from './pipeline.mjs';
-import { KNOBS } from '../core/knobs.js';
+import { KNOBS } from '../core/registry/knobs.js';
 
 // A curated shortlist, not everything in formats/. Each teaches a different structure an author
 // reaches for, and each is self-contained. Returning the JSON is safe: a scene is authoring guidance,
@@ -54,15 +54,15 @@ export async function capabilities() {
   const [{ LOOK_NAMES }, { PRESETS, PRESET_BLURBS }, { PRESENTATIONS, CUT_BLURBS }, { registersOf }, { CATALOG },
     { SHADER_FX }, { SEAM_FX, SEAM_BLURBS }, { ANIM_NAMES, ANIM_BLURBS },
     { GSAP_FX, EXIT_FX, GSAP_BLURBS, GSAP_EXIT_BLURBS }] = await Promise.all([
-    import(path.join(repoRoot, 'core/looks.js')),
-    import(path.join(repoRoot, 'core/type.js')),
-    import(path.join(repoRoot, 'core/cuts.js')),
+    import(path.join(repoRoot, 'core/looks/index.js')),
+    import(path.join(repoRoot, 'core/type/type.js')),
+    import(path.join(repoRoot, 'core/cuts/index.js')),
     import(path.join(repoRoot, 'scripts/gates/craft-coverage.mjs')),
     import(path.join(repoRoot, 'blocks/catalog.mjs')),
-    import(path.join(repoRoot, 'core/stings.js')),
-    import(path.join(repoRoot, 'core/seams.js')),
-    import(path.join(repoRoot, 'core/clips.js')),
-    import(path.join(repoRoot, 'core/gsap-effects.js')),
+    import(path.join(repoRoot, 'core/stings/index.js')),
+    import(path.join(repoRoot, 'core/timeline/seams.js')),
+    import(path.join(repoRoot, 'core/timeline/clips.js')),
+    import(path.join(repoRoot, 'core/engine/gsap-effects.js')),
   ]);
   // A look's meaning is its REGISTER — the era it evokes — which is what an author picks between, and it
   // is already complete and gated in docs/CRAFT/SELECTION.md §4.

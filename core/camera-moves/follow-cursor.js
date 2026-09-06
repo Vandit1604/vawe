@@ -1,5 +1,5 @@
 import { span, hold } from './units.js';
-import { motionAt } from '../sequence.js';   // followCursor samples the cursor's OWN path evaluator
+import { motionAt } from '../timeline/sequence.js';   // followCursor samples the cursor's OWN path evaluator
 
 // followCursor. THE CAMERA DERIVED FROM THE POINTER: the `cursor` layer's own `path` and `clicks` are
 // the single owner of where the camera goes. Nothing else in this package reads a layer, and this one

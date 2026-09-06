@@ -34,8 +34,8 @@
 // WHY IT NEEDS A `motion` TRACK AND SAYS SO. The past pose is read off the keys the author wrote. A layer
 // with no motion track has no pose to look back at, and an effect that silently rendered nothing is the
 // single most-logged bug class in this repo (#210 #213 #215 #217). It throws, naming the layer.
-import { motionAt, poseBack } from '../sequence.js';
-import { clamp01, FPS } from '../motion.js';
+import { motionAt, poseBack } from '../timeline/sequence.js';
+import { clamp01, FPS } from '../motion/motion.js';
 
 const MARK = 'data-ghost';
 

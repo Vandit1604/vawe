@@ -8,13 +8,17 @@
 // callers: a {r,g,b,a} object shape that throws on garbage, linear-light mixing, HSL, and
 // hue-wheel harmonies.
 //
-// core/color.js is a different thing entirely (the token()/literal() theme-resolution markers) and
-// this package does not touch it.
+// color.js (root, W9) is a different thing entirely: the token()/literal()/lit() theme-resolution
+// markers, resolveColor() and its isToken/isLiteral/isMarked predicates. It moved into this
+// directory because the two shared a name and the root rule allows no orphaned root file, not
+// because they are one concern; its names do not overlap the ones below and it is exported
+// separately so a reader can still tell the two apart.
 export { parse, format, asColor } from './parse.js';
 export { srgbToLinear, linearToSrgb, relativeLuminance, contrastRatio, readableOn } from './linear.js';
 export { mix, lighten, darken, withAlpha } from './mix.js';
 export { toHsl, fromHsl } from './hsl.js';
 export { complementary, analogous, triad } from './harmony.js';
+export * from './color.js';
 
 // ---------- self-check ----------
 // `node core/color/index.js` runs this. No framework, no fixtures: asserts that fail loudly if the

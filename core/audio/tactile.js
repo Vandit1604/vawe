@@ -24,13 +24,13 @@
 // OPT IN, via `audio.tactile`. `audio.auto` already scores cuts and seams and the shipped films rely
 // on that mix being what it is; folding motion into `auto` would rewrite the sound of every one of
 // them. Silence stays the engine default and a film asks for this.
-import { resolveEasing } from '../motion.js';
-import { defineRegistry } from '../registry.js';
+import { resolveEasing } from '../motion/motion.js';
+import { defineRegistry } from '../registry/registry.js';
 // The per-unit delay of a stagger spec has ONE reader (core/type.js), so the object form
 // `{ each, from, amount }` cannot mean one thing to the picture and another to the sound. Before this
 // import `+(p.stagger)` on an object was NaN, and a NaN step silently collapsed a whole train to one
 // pluck.
-import { staggerStep } from '../type.js';
+import { staggerStep } from '../type/type.js';
 
 // The cue names this module reaches for. `tick` and the rest of the interaction vocabulary already
 // bake; the five motion voices live in CUES in core/audio-kit.mjs alongside them.

@@ -12,8 +12,8 @@
 //
 // Routing is a LOOKUP, not a heuristic: core/transitions.js already maps every fx to its mechanism(s).
 import { TRANSITIONS } from './catalog.js';
-import { resolveSeconds } from '../vocab.js';
-import { parseColor } from '../motion.js';
+import { resolveSeconds } from '../registry/vocab.js';
+import { parseColor } from '../motion/motion.js';
 import { ENERGY, okEnergy } from './energy.js';
 
 // The layer prop THIS file reads, declared beside the read (core/props.js). lowerScene() consumes it

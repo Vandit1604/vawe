@@ -1,7 +1,7 @@
 // core/backgrounds/palette.js: the palette a preset paints WITH. PAL_PLINTH is the built-in default
 // (plinthai.xyz's real CSS tokens); bgPaletteFrom(palette) derives the same shape out of a theme's own
 // colours pack so one colours-pack reskins every preset (the universal brand rule).
-import { parseColor, isLightBg } from '../motion.js';
+import { parseColor, isLightBg } from '../motion/motion.js';
 
 // PAL_PLINTH. The REAL plinthai.xyz palette (from CSS tokens). WHITE-dominant: paper #fff /
 // surface #f4f4f1 · ink #181815 · accent #1f3bff · accentSoft #ebedff · border #e6e6e1 · muted #6e6e68.

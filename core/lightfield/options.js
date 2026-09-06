@@ -6,7 +6,7 @@
 // ignores `patern:` hands you a field you did not ask for and no way to find out why.
 
 import { isHex } from './colour.js';
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 
 export const PATTERNS = ['slats', 'rings', 'shards'];
 // How an element's extent varies with where it sits. `full` is the no-op: every element runs the

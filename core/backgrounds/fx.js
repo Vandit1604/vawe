@@ -5,7 +5,7 @@
 // motion.js, never Math.random. These are the shared contract a PRESET (core/backgrounds/presets.js)
 // composes into a `{ base, fx:[...] }` spec; core/backgrounds/index.js is the generic runner that
 // dispatches `fx.type` to the function here with the matching name.
-import { random, parseColor } from '../motion.js';
+import { random, parseColor } from '../motion/motion.js';
 import { GRADIENT_RECIPE_REGISTRY } from './gradient-recipes.js';
 
 // ---- base fill: a tinted-neutral gradient (never pure #000/#fff). radial = spotlit, linear = flat,

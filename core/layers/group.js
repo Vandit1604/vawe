@@ -2,7 +2,7 @@
 // gap so a card+label+chip or a logo row can never desync. DOM ancestry = visual stacking.
 // A group's own vocabulary is the LAYOUT, and layoutGroup/chipBox/addGroupChild read it, so it is
 // declared in core/layers/util.js, where those live. This file reads only the tree.
-import { propsOf } from '../props.js';
+import { propsOf } from '../registry/props.js';
 
 // The prop is read off this signature (propsOf, core/props.js). No second list to drift from it.
 export function build(kit, el, L, { children } = L) {

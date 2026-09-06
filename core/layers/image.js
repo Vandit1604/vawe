@@ -1,8 +1,8 @@
 // core/layers/image.js. An <img> layer: ken-burns slow zoom (clipped) + edgeFade edge dissolve.
 // `canvasFx` (halftone/dither/mosaic/…) is baked to a static PNG in boot.js; swap the src to it here.
-import { canvasFxKey } from '../canvas-fx.js';
-import { mergeProps, propsOf } from '../props.js';
-import { attachResample, PROPS as RESAMPLE_PROPS } from '../resample.js';
+import { canvasFxKey } from '../canvas/effects.js';
+import { mergeProps, propsOf } from '../registry/props.js';
+import { attachResample, PROPS as RESAMPLE_PROPS } from '../resample/index.js';
 
 // `edgeFadeColor` paints the plate the fade dissolves toward and means nothing alone, so it keeps a
 // guarded hand-written entry; every other prop is read off build()/frame() below (propsOf, core/props.js).

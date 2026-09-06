@@ -5,8 +5,8 @@
 // this file only maps a number to a style object (plus the two presets, decode/flap, whose subject is
 // the text itself rather than a style, and so carry a small support function alongside them).
 // core/type.js re-exports every name below, unchanged, so no importer of './type.js' has to move.
-import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed, random } from '../motion.js';
-import { defineRegistry, blurbsOf, withBlurb } from '../registry.js';
+import { resolveEasing, clamp01, easeOutCubic, easeOutBack, easeOutSettle, spring, hashSeed, random } from '../motion/motion.js';
+import { defineRegistry, blurbsOf, withBlurb } from '../registry/registry.js';
 
 // Each preset carries its own one-liner, so adding a preset is ONE edit: the blurb rides the entry
 // instead of sitting in a second map that agreed with this one only because a gate said so. Say what

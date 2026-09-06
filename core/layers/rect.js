@@ -1,5 +1,5 @@
 // core/layers/rect.js. A panel / card / pill: pure box, no text (put text on a higher track).
-import { propsOf } from '../props.js';
+import { propsOf } from '../registry/props.js';
 
 // `fill` is accepted as an alias for `bg`. It is the obvious name for "the colour inside the shape" and
 // it is the real name on `svg`, so authors reach for it here constantly. It used to be swallowed: the

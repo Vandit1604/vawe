@@ -20,7 +20,7 @@
 // premultipliedAlpha:true, so their texels already are. Blur is a weighted average, which is only
 // correct in premultiplied space anyway; alpha-modulating effects scale the whole vec4.
 
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 
 export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift'];
 
@@ -266,4 +266,4 @@ export function createResampler(w, h) {
   };
 }
 
-import { glContext } from '../webgl.js';
+import { glContext } from '../engine/webgl.js';

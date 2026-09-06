@@ -1,6 +1,6 @@
-import { glowRGB } from '../filters.js';
-import { defineRegistry } from '../registry.js';
-import { lit } from '../color.js';
+import { glowRGB } from '../looks/filters.js';
+import { defineRegistry } from '../registry/registry.js';
+import { lit } from '../color/color.js';
 
 // These draw to a CANVAS, which cannot read a CSS custom property, so a token has to be resolved to
 // components. glowRGB already does exactly that against the live theme and caches it (core/filters.js),

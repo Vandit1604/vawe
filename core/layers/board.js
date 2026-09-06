@@ -2,7 +2,7 @@
 // with the elevation-1 treatment. Hard caps (4 cols × 5 cards); enters as ONE clip.
 // `cols` carries the whole board (titles, counts, cards, labels); its inner shape is the column's
 // vocabulary, not the layer's.
-import { propsOf } from '../props.js';
+import { propsOf } from '../registry/props.js';
 
 // The props are read off this signature (propsOf, core/props.js). No second list to drift from it.
 export function build(kit, el, L, { cols: colData, w, gap, headSize, cardSize } = L) {

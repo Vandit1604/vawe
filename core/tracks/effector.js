@@ -14,7 +14,7 @@
 // WRITES ON THE CHILDREN, never on the layer element. The layer's own transform belongs to the motion
 // track and its opacity to the clip envelope, and a track that wrote either from here would be the
 // two-owners drift this codebase logs most.
-import { effectorAt, effectorStyle } from '../effector.js';
+import { effectorAt, effectorStyle } from '../motion/effector.js';
 
 export const slot = 'effector';
 
