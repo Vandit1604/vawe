@@ -32,7 +32,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { themeErrors } from '../../core/theme-contract.js';
+import { themeErrors } from '../../core/registry/theme-contract.js';
 import { bgBlock, mix, contrast, relLum, parseHex } from '../lib/theme-bg.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

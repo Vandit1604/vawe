@@ -24,7 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS as SHARED } from '../../core/layers/vocabulary.js';
-import { firesOn } from '../../core/props.js';
+import { firesOn } from '../../core/registry/props.js';
 import { population, isTemplate } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { gateFindings } from '../lib/findings.mjs';

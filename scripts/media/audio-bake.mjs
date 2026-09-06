@@ -10,8 +10,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CUES, renderCue, musicBed, writeWav, normalize, SR } from '../../core/audio-kit.mjs';
-import { CUT_CUE, SEAM_CUE } from '../../core/audio-cues.js';
+import { CUES, renderCue, musicBed, writeWav, normalize, SR } from '../../core/audio/kit.mjs';
+import { CUT_CUE, SEAM_CUE } from '../../core/audio/cues.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SFX = path.join(root, 'assets/sfx');

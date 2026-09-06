@@ -4,7 +4,7 @@ import fs from 'node:fs';
 // shape this file was written in; `TOKENS` rides along because the colours here come from the kit.
 import { BLOCKS, TOKENS } from '../../blocks/index.mjs';
 const B = { ...BLOCKS, TOKENS };
-import { boundaryMechanism } from '../../core/transitions-lower.js';
+import { boundaryMechanism } from '../../core/transitions/lower.js';
 const p = 'formats/scene/vawe-launch.json';
 const d = JSON.parse(fs.readFileSync(p, 'utf8'));
 const T = B.TOKENS;

@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
 import { onScreenText, glyphText, snippet } from '../lib/text.mjs';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];

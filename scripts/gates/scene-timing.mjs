@@ -29,9 +29,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sceneDims } from '../../core/safe.js';
-import { cameraView } from '../../core/sequence.js';
-import { lowerScene } from '../../core/transitions-lower.js';
+import { sceneDims } from '../../core/layout/safe.js';
+import { cameraView } from '../../core/timeline/sequence.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 
 export const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
 

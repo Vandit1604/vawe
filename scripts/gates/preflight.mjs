@@ -123,7 +123,7 @@ const REACH = [
     when: () => !Array.isArray(scene.bg) || scene.bg.length <= 1,
     say: 'THE BACKDROP. One window paints the whole runtime, so the ground never turns with the film.',
     how: 'List the windows in the order the film turns and give none of them a from/to: the engine binds window i to the joint after it, so the cuts you already wrote own the numbers.',
-    read: 'core/junctions.js',
+    read: 'core/timeline/junctions.js',
     share: '112 of 134 films paint one window for their whole runtime.',
   },
   {

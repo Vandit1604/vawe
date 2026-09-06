@@ -11,7 +11,7 @@
 //   default: PRINT the caption array (dry run). --write merges into <scene>.captioned.json (non-destructive).
 import fs from 'node:fs';
 import path from 'node:path';
-import { CAP_STYLE_REGISTRY } from '../../core/captions.js';
+import { CAP_STYLE_REGISTRY } from '../../core/type/captions.js';
 
 const PAUSE_GAP = 0.6; // a gap > this between two words starts a new caption (a spoken pause)
 const TAIL = 0.3;      // the last word of the sidecar holds this long (no next word to bound it)

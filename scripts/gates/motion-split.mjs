@@ -16,8 +16,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { sceneDims } from '../../core/safe.js';
-import { marksOf } from '../../core/junctions.js';
+import { sceneDims } from '../../core/layout/safe.js';
+import { marksOf } from '../../core/timeline/junctions.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 

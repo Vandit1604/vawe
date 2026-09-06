@@ -17,7 +17,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { sourceHash } from '../sim/provenance.mjs';
 import { SCENE_DIR } from './paths.mjs';
-import { sceneDims } from '../../core/safe.js';
+import { sceneDims } from '../../core/layout/safe.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FIX = path.join(repoRoot, 'verify/fixtures');
@@ -716,7 +716,7 @@ const run = (cmd, args) => {
 
 const GATE_CMD = {
   audit: (f) => ['node', ['verify/audit.mjs', f]],
-  validate: (f) => ['node', ['core/validate.mjs', f]],
+  validate: (f) => ['node', ['core/validate/validate.mjs', f]],
   beatcheck: (f) => ['node', ['scripts/gates/beat-check.mjs', f]],
   layerprops: (f) => ['node', ['scripts/gates/layer-props.mjs', f]],
   directionfloor: (f) => ['node', ['scripts/gates/direction-floor.mjs', f]],
@@ -815,10 +815,10 @@ const srcCases = [
   { name: 'font-audit · @font-face removed', file: 'core/tokens.css',
     mutate: (s) => s.split('\n').filter((l) => !l.includes("font-family: 'Manrope'")).join('\n'),
     cmd: ['node', ['scripts/gates/font-audit.mjs', 'scene', 'formats/scene/tpot-launch.json']], match: /FALLBACK|not rendering/ },
-  { name: 'clipped-text · riseClip mask too short for descenders', file: 'core/type.js',
+  { name: 'clipped-text · riseClip mask too short for descenders', file: 'core/type/type.js',
     mutate: (s) => s.replace("        w.style.paddingBottom = '0.3em'; w.style.marginBottom = '-0.3em';\n", ''),
     cmd: ['node', ['verify/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-text/ },
-  { name: 'snap · opacity easing reverted to linear', file: 'core/clips.js',
+  { name: 'snap · opacity easing reverted to linear', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace('  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);',
                              '  clamp01(enterT) * (exitT > 0 ? 1 - clamp01(exitT) : 1);'),
     cmd: ['node', ['scripts/gates/scene-snap.mjs', 'scene']], match: /opacity: /, outputOnly: true,
@@ -829,7 +829,7 @@ const srcCases = [
   // showcase-count opens on a rect wiped rightward, so flipping the registry entry must now be seen.
   // Pointed at the EXPANDED sibling, which is what actually ships: the source carries un-expanded block
   // sugar, which the renderer now refuses instead of painting nothing, so snap skips it (MISTAKES #189).
-  { name: 'snap · a wipe reveals in the WRONG direction', file: 'core/clips.js',
+  { name: 'snap · a wipe reveals in the WRONG direction', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
     cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded']], match: /clip-path/,
     before: () => snapBaseline(['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded', '--save'],
@@ -838,7 +838,7 @@ const srcCases = [
   // The other half of the same blindness: the background is painted into <canvas>, which no DOM
   // signature can see, so any change of bg preset, colour, speed or direction diffed as nothing.
   // formats/scene/sample.json runs the `aurora` preset; brightening it must now register.
-  { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds.js',
+  { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds/index.js',
     // The preset is READ OFF THE SNAPSHOTTED SCENE, never named here. This case pinned
     // `intensity: 0.46` inside `case 'aurora'` and sample.json's backdrop later became `soft`, so the
     // mutation kept applying (to a preset the snapshot does not paint) and snap answered IDENTICAL
@@ -889,7 +889,7 @@ const srcCases = [
     // NB: the injected prop must be a name NO layer accepts. `fill` was used here until it became a real
     // svg-layer prop (docs/MISTAKES.md #149), pick a prop that can never be legitimised.
     mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "notARealProp": "#000" },'),
-    cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
+    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
   { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/surfaces/three-fx.js',
     mutate: (s) => s.replace('const ease = (p)', 'const jitter = Math.random();\nconst ease = (p)'),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /no wall-clock or unseeded randomness/ },
@@ -965,7 +965,7 @@ const srcCases = [
   // Conformance's distinctness check was self-fulfilling for four years of vocabulary (MISTAKES #74).
   // All three of its guards are pinned: the defect itself, and both halves of the proof that the
   // signature can still see it. A distinctness check nobody can make fail is not a passing check.
-  { name: 'conformance · two anim values that render identically', file: 'core/clips.js',
+  { name: 'conformance · two anim values that render identically', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace("wipe(t, 'up')", "wipe(t, 'left')"),
     cmd: ['node', ['scripts/gates/conformance.mjs', 'enums']], match: /render identically to another value/ },
   { name: 'conformance · the signature goes back to revealing identity', file: 'scripts/gates/conformance.mjs',
@@ -1050,7 +1050,7 @@ const srcCases = [
   // the array match cannot catch one by accident).
   { name: 'validate · a scene that declares no background at all', file: 'formats/scene/sample.json',
     mutate: (s) => s.replace(/,\s*"bg": \[[^\]]*\]/, ''),
-    cmd: ['node', ['core/validate.mjs', 'formats/scene/sample.json']], match: /bg is required/ },
+    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/sample.json']], match: /bg is required/ },
   // A hand-authored backdrop that animates in a browser and renders a dead still is the exact failure
   // the message exists to prevent; if the check stops firing, nothing else in the pipeline notices.
   // `untype` (reverse typing) used to be checked only for WIRING, that the engine reads the prop the
@@ -1061,7 +1061,7 @@ const srcCases = [
   // A cut on the single-root path may only move the frame, never hide it: exit runs to completion before
   // enter starts, so one root fading itself out empties the whole picture (MISTAKES #166). Anchored on
   // the identifiers, not on the channel list, so adding a channel does not go stale.
-  { name: 'cuts · solo mode stops pinning the visibility channels open', file: 'core/cuts.js',
+  { name: 'cuts · solo mode stops pinning the visibility channels open', file: 'core/cuts/index.js',
     mutate: (s) => s.replace('  for (const k of HIDE_CHANNELS) s[k] = IDENT[k];\n', ''),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /solo .* never hides the frame/ },
 
@@ -1071,15 +1071,15 @@ const srcCases = [
 
   // The two silent-wrongness fixes of this pass. Both are invisible to any gate that counts names, so
   // the contract lives in lib-test as a pure assertion and these prove lib-test can see it break.
-  { name: 'wipe-right · reveal direction flipped back to right-to-left', file: 'core/clips.js',
+  { name: 'wipe-right · reveal direction flipped back to right-to-left', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /wipe-right grows rightward/ },
-  { name: 'bg opts · pass-through removed, so a declared knob is silently dropped', file: 'core/backgrounds.js',
+  { name: 'bg opts · pass-through removed, so a declared knob is silently dropped', file: 'core/backgrounds/index.js',
     mutate: (s) => s.replace("    for (const [k, v] of Object.entries(over)) if (!(k in META) && (FX_PARAMS[fx.type] || []).includes(k)) fx[k] = v;\n", ''),
     cmd: ['node', ['scripts/gates/lib-test.mjs']], match: /bg opts reach the fx/ },
   // Proves the accepted-key list is DERIVED, not hand-copied: rename the property `liquid` reads and the
   // vocabulary must follow it. A hand-kept list would still advertise `scale` and this would stay green.
-  { name: 'bg opts · the accepted keys track the fx implementation', file: 'core/backgrounds.js',
+  { name: 'bg opts · the accepted keys track the fx implementation', file: 'core/backgrounds/index.js',
     // Anchored on the property NAME alone, not on the default beside it: pinning the literal made this
     // fixture go stale the moment `liquid`'s speed was retuned, and a stale fixture is an unproven gate.
     mutate: (s) => s.replace(', sc = o.scale ??', ', sc = o.scaleX ??'),
@@ -1087,10 +1087,10 @@ const srcCases = [
 
   { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'formats/scene/example-html-bg.json',
     mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),
-    cmd: ['node', ['core/validate.mjs', 'formats/scene/example-html-bg.json']], match: /DEAD STILL/ },
+    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/example-html-bg.json']], match: /DEAD STILL/ },
   { name: 'validate · a hand-authored bg that never says whether it is light or dark', file: 'formats/scene/example-html-bg.json',
     mutate: (s) => s.replace('"tone": "light",', ''),
-    cmd: ['node', ['core/validate.mjs', 'formats/scene/example-html-bg.json']], match: /declares no `tone`/ },
+    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/example-html-bg.json']], match: /declares no `tone`/ },
 ];
 console.log('');
 // EXCLUSIVE, because the cases below edit TRACKED SOURCE in place. Two runs overlapping is not a slow

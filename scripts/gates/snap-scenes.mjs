@@ -25,7 +25,7 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { sceneDims } from '../../core/safe.js';
+import { sceneDims } from '../../core/layout/safe.js';
 import { population } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { flattenLayers } from '../lib/layers.mjs';
