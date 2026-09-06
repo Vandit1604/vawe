@@ -19,7 +19,9 @@
 import { onScreenText, glyphText } from './on-screen-text.js';
 import { IDLE } from './idle.js';
 import { STAGGER_FROM } from '../core/type.js';
-import { themeErrors } from '../core/theme-contract.js';
+import { themeErrors, lookErrors } from '../core/theme-contract.js';
+import { TRANSITIONS } from '../core/transitions.js';
+import { nearMisses } from '../core/registry.js';
 // parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
 // absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
 import { parseColor, contrastRatio } from '../core/motion.js';
@@ -1265,6 +1267,10 @@ export function validateTheme(spec) {
       if (k in spec.motion && typeof spec.motion[k] !== 'number') errors.push(`theme.motion.${k} must be a number`);
     }
   }
+  // cueNames omitted here on purpose: its source (core/audio-kit.mjs) imports node:fs and must stay
+  // out of the bundle the browser loads (this function also runs from core/boot.js). The CLI branch
+  // below re-checks every theme PACK with the full list, cueNames included.
+  if ('look' in spec) errors.push(...lookErrors(spec.look, { bgNames: BG_NAMES, transitionNames: TRANSITIONS.map((t) => t.name), nearMisses }));
   return errors;
 }
 
@@ -1521,9 +1527,16 @@ if (isMain) {
   // Themes are checked directly, not only via a scene that happens to name one. A pack sitting in
   // themes/ half-written is a landmine for whoever authors the next video against that brand.
   let themeFailed = 0;
+  const transitionNames = TRANSITIONS.map((t) => t.name);
   for (const tf of themeTargets) {
     let errs;
-    try { errs = themeErrors(readJSON(tf), { parseColor, contrastRatio }); } catch (e) { errs = [`unreadable: ${e.message}`]; }
+    try {
+      const t = readJSON(tf);
+      errs = [
+        ...themeErrors(t, { parseColor, contrastRatio }),
+        ...lookErrors(t.look, { bgNames: BG_NAMES, transitionNames, cueNames: CUE_NAMES, nearMisses }),
+      ];
+    } catch (e) { errs = [`unreadable: ${e.message}`]; }
     if (errs.length) { themeFailed++; console.error(`✗ ${path.relative(root, tf)}`); for (const e of errs) console.error(`    • ${e}`); }
   }
   if (themeTargets.length) console.log(`themes: ${themeTargets.length - themeFailed} ok, ${themeFailed} incomplete`);
