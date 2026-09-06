@@ -20,6 +20,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const ROUTES = [
   {
     name: 'recreation',
+    type: 'recreation',
     file: 'docs/CRAFT/routes/recreation.md',
     keywords: ['recreate', 'recreation', 'match this site', 'look like this video', 'reference film', 'exact look', 'clone this ad', 'this ad'],
     intake: [
@@ -30,6 +31,7 @@ const ROUTES = [
   },
   {
     name: 'launch-video',
+    type: 'launch',
     file: 'docs/CRAFT/routes/launch-video.md',
     keywords: ['launch video', 'launch film', 'promo', 'market our', 'market this', 'showcase our', 'product video', 'site tour', '.com', '.co', '.ai', '.app', '.xyz', '.dev', '.io', 'our site', 'our product'],
     intake: [
@@ -41,6 +43,7 @@ const ROUTES = [
   },
   {
     name: 'explainer',
+    type: 'explainer',
     file: 'docs/CRAFT/routes/explainer.md',
     keywords: ['explain', 'explainer', 'how does', 'how rag works', 'how it works', 'teach', 'topic', 'article about', 'data about'],
     intake: [
@@ -52,6 +55,7 @@ const ROUTES = [
   },
   {
     name: 'motion-graphic',
+    type: 'sting',
     file: 'docs/CRAFT/routes/motion-graphic.md',
     keywords: ['sting', 'logo reveal', 'stat hit', 'title card that moves', 'lower-third', 'second logo', 'second sting', 'quick loop', '6 second', '6-second', '5 second', 'under 10s', 'under 10 seconds'],
     intake: [
@@ -63,6 +67,7 @@ const ROUTES = [
   },
   {
     name: 'demo',
+    type: 'demo',
     file: 'docs/CRAFT/routes/demo.md',
     keywords: ['demo', 'specimen', 'prove this effect', 'prove this blueprint', 'test render', 'quick test', 'show me this effect'],
     intake: [
@@ -122,6 +127,13 @@ function main() {
   if (matched.file) {
     const blueprint = readSection(matched.file, 'Blueprint family + docs');
     if (blueprint) { console.log(''); console.log(blueprint); }
+  }
+  // The playbook for this deliverable: one skill per video TYPE (AGENTS.md W10), each carrying its
+  // own beat spine + worked example. `make scaffold` composes from that spine, not the generic rotation.
+  if (matched.type) {
+    console.log('');
+    console.log(`Type skill: skills/vawe-type-${matched.type}/SKILL.md`);
+    console.log(`make scaffold OUT=formats/scene/<name>.json TYPE=${matched.type}`);
   }
 }
 

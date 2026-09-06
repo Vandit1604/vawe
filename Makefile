@@ -213,8 +213,8 @@ demo: ## scaffold a SPECIMEN demo scene (one subject, one shot) and iterate on i
 # construction: it clears sparse-beats, plain-slideshow and no-transition/no-bg-motion on write) plus its
 # `.storyboard.md` sidecar (structurally clean against storyboard-check and craft-checklist). The
 # author's only job afterwards is to replace the `REPLACE:`/`<fill: ...>` markers. docs/CRAFT/BLUEPRINTS.md.
-scaffold: ## write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=)
-	node scripts/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS))
+scaffold: ## write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=, TYPE=launch|explainer|talking-head|sting|demo|recreation)
+	node scripts/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS)) $(if $(TYPE),--type $(TYPE))
 
 # make pitch NAME=<name>: DIVERGE before the storyboard. Prints the pitch protocol (4 questions, 5 concepts
 # on 5 forced axes, the anti-median 0.10 gate, the silhouette check) so the chosen angle is not the median a
@@ -298,6 +298,12 @@ frame:
 # DOC=1 regenerates docs/CRAFT/GRAMMAR.md, the cross-film page, from the same store.
 grammar:
 	node scripts/author/grammar.mjs $(if $(DOC),--doc,$(N))
+
+# make evals [BRIEF=launch]: render the six fixed type briefs (verify/evals/briefs/*.json) to a
+# contact-sheet baseline (docs/EVALS.md). A doctrine change re-runs this and a human compares the
+# committed sheet against the new one; no score, no mp4.
+evals:
+	node scripts/dev/evals.mjs $(BRIEF)
 
 # make mistakes [Q="…"] [N=496] [FULL=1]: ASK the mistake log. docs/MISTAKES.md is now a three-line
 # index (title, lesson, what holds it) per entry; FULL=1 with N=<n> prints that entry's original

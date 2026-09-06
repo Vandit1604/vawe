@@ -1,73 +1,44 @@
-{
- "when": "2026-09-06T10:23:38.948Z",
- "commit": "77993ff0",
- "briefsDir": "verify/evals/briefs",
- "runDir": "verify/evals/baseline",
- "sheet": "verify/evals/baseline/sheet.png",
- "briefs": [
-  {
-   "name": "explainer",
-   "ok": true,
-   "duration": 9,
-   "expectedDuration": 9,
-   "dims": {
-    "w": 1080,
-    "h": 1920
-   },
-   "expectedDims": {
-    "w": 1080,
-    "h": 1920
-   },
-   "mp4": "verify/evals/baseline/explainer.mp4",
-   "sheet": "verify/evals/baseline/explainer.sheet.png"
-  },
-  {
-   "name": "launch",
-   "ok": true,
-   "duration": 8,
-   "expectedDuration": 8,
-   "dims": {
-    "w": 1920,
-    "h": 1080
-   },
-   "expectedDims": {
-    "w": 1920,
-    "h": 1080
-   },
-   "mp4": "verify/evals/baseline/launch.mp4",
-   "sheet": "verify/evals/baseline/launch.sheet.png"
-  },
-  {
-   "name": "recreation",
-   "ok": true,
-   "duration": 9,
-   "expectedDuration": 9,
-   "dims": {
-    "w": 1920,
-    "h": 1080
-   },
-   "expectedDims": {
-    "w": 1920,
-    "h": 1080
-   },
-   "mp4": "verify/evals/baseline/recreation.mp4",
-   "sheet": "verify/evals/baseline/recreation.sheet.png"
-  },
-  {
-   "name": "sting",
-   "ok": true,
-   "duration": 4,
-   "expectedDuration": 4,
-   "dims": {
-    "w": 1920,
-    "h": 1080
-   },
-   "expectedDims": {
-    "w": 1920,
-    "h": 1080
-   },
-   "mp4": "verify/evals/baseline/sting.mp4",
-   "sheet": "verify/evals/baseline/sting.sheet.png"
-  }
- ]
-}
+[
+ {
+  "name": "demo",
+  "duration": 10,
+  "aspect": "16:9",
+  "frames": 5,
+  "generatedAt": "2026-09-06T11:05:22.455Z"
+ },
+ {
+  "name": "explainer",
+  "duration": 12,
+  "aspect": "16:9",
+  "frames": 5,
+  "generatedAt": "2026-09-06T11:05:25.004Z"
+ },
+ {
+  "name": "launch",
+  "duration": 13,
+  "aspect": "16:9",
+  "frames": 5,
+  "generatedAt": "2026-09-06T11:05:27.147Z"
+ },
+ {
+  "name": "recreation",
+  "duration": 11,
+  "aspect": "16:9",
+  "frames": 5,
+  "generatedAt": "2026-09-06T11:05:29.549Z"
+ },
+ {
+  "name": "sting",
+  "duration": 6,
+  "aspect": "16:9",
+  "frames": 5,
+  "generatedAt": "2026-09-06T11:05:30.983Z"
+ },
+ {
+  "name": "talking-head",
+  "duration": 12,
+  "aspect": "9:16",
+  "frames": 5,
+  "generatedAt": "2026-09-06T11:05:33.195Z"
+ }
+]

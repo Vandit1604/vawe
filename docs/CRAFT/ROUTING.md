@@ -31,16 +31,20 @@ already owns the doctrine.
 
 ## The route table (priority order: first matching row wins)
 
-| Priority | Request | Route file |
-|---|---|---|
-| 1 | Recreate a specific reference film or website's exact look, with no product of ours to sell | [`routes/recreation.md`](routes/recreation.md) |
-| 2 | Market or showcase a real product, company, or site from a URL or site-specific brief | [`routes/launch-video.md`](routes/launch-video.md) |
-| 3 | Explain a topic, article, or data with invented visuals and no product/site capture | [`routes/explainer.md`](routes/explainer.md) |
-| 4 | A short, explicitly unnarrated, motion-first unit, typically under 10s (sting, stat hit, moving title) | [`routes/motion-graphic.md`](routes/motion-graphic.md) |
-| 5 | Prove one mechanism, effect, or blueprint works; not a shippable film | [`routes/demo.md`](routes/demo.md) |
+| Priority | Request | Route file | Type skill | Scaffold |
+|---|---|---|---|---|
+| 1 | Recreate a specific reference film or website's exact look, with no product of ours to sell | [`routes/recreation.md`](routes/recreation.md) | `vawe-type-recreation` | `make scaffold TYPE=recreation` |
+| 2 | Market or showcase a real product, company, or site from a URL or site-specific brief | [`routes/launch-video.md`](routes/launch-video.md) | `vawe-type-launch` | `make scaffold TYPE=launch` |
+| 3 | Explain a topic, article, or data with invented visuals and no product/site capture | [`routes/explainer.md`](routes/explainer.md) | `vawe-type-explainer` | `make scaffold TYPE=explainer` |
+| 4 | A short, explicitly unnarrated, motion-first unit, typically under 10s (sting, stat hit, moving title) | [`routes/motion-graphic.md`](routes/motion-graphic.md) | `vawe-type-sting` | `make scaffold TYPE=sting` |
+| 5 | Prove one mechanism, effect, or blueprint works; not a shippable film | [`routes/demo.md`](routes/demo.md) | `vawe-type-demo` | `make scaffold TYPE=demo` |
 
 Before finalizing the route, read the matched file's Trigger line. If the request does not satisfy it,
-keep going down the table instead of forcing the match.
+keep going down the table instead of forcing the match. Each row's type skill is a PLAYBOOK (the spine,
+the blueprints to reach for, the rules that matter most, a worked example): load it after the route file,
+before writing JSON. A sixth type, `vawe-type-talking-head`, is not in this priority table (a narrated
+presenter video is not one of the five deliverables above); reach it directly on request wording
+("narrated", "voiceover", "presenter", "talking head").
 
 ## Resolve common ambiguities
 
