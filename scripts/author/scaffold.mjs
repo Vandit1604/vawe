@@ -127,31 +127,39 @@ const CARDS = [
 ];
 const CHIPS = ['REPLACE: source A', 'REPLACE: source B', 'REPLACE: source C', 'REPLACE: source D'];
 
+// look.scale.body / look.scale.caption -> the rest of the beat library's own heroSize/bodySize/
+// captionSize kwargs (blueprints/beats.mjs, beats-punct.mjs, beats-mined.mjs), the same shape of
+// change as look.scale.hook/.headline above (docs/CRAFT/THEME-LOOK.md "Left undone" note, W8's
+// second half). Each factory keeps its own hardcoded default when the theme carries no scale.
+const bodyKw = (key) => (look?.scale?.body ? { [key]: look.scale.body } : {});
+const captionKw = (key) => (look?.scale?.caption ? { [key]: look.scale.caption } : {});
+
 function propsFor(name, span, isPayoff) {
   switch (name) {
     case 'kineticHook':
       // look.scale.hook -> kineticHook's own heroSize (blueprints/beats.mjs), so the theme's hook
       // scale is real without every existing kineticHook call needing to change.
       return { eyebrow: 'REPLACE: the open-loop question', to: 94, unit: '%', sub: 'REPLACE: the second cue, revealed later',
-        ...(look?.scale?.hook ? { heroSize: look.scale.hook } : {}) };
+        ...(look?.scale?.hook ? { heroSize: look.scale.hook } : {}), ...captionKw('captionSize') };
     case 'statReveal':
       // look.scale.headline -> statReveal's heroSize: the payoff's hero count reads as the film's
       // headline moment, so it takes the headline step of the scale, not the hook step.
       return { to: 3, prefix: '', unit: 'x', label: isPayoff ? 'REPLACE: the shocker payoff line' : 'REPLACE: a mid-film stat',
-        ...(look?.scale?.headline ? { heroSize: look.scale.headline } : {}) };
+        ...(look?.scale?.headline ? { heroSize: look.scale.headline } : {}), ...captionKw('captionSize') };
     case 'cardCascade':
-      return { title: 'REPLACE: feature grid title', cards: CARDS };
+      return { title: 'REPLACE: feature grid title', cards: CARDS, ...bodyKw('heroSize') };
     case 'wordBlast':
-      return { text: 'REPLACE' };
+      return { text: 'REPLACE', ...bodyKw('bodySize') };
     case 'chipGrid':
-      return { title: 'REPLACE: named things title', chips: CHIPS, footer: 'REPLACE: accent footer line' };
+      return { title: 'REPLACE: named things title', chips: CHIPS, footer: 'REPLACE: accent footer line',
+        ...bodyKw('bodySize'), ...captionKw('captionSize') };
     case 'ctaEnd':
       return { command: 'REPLACE install command', sub: 'REPLACE: one-line sub', url: 'REPLACE.dev' };
     // The type spines below reach for beats the generic rotation avoids because they need a real
     // asset. `--type` accepts that: it names the field the author must fill (`image`/`mark`), same
     // REPLACE convention as CARDS/CHIPS above, never a path to a file that happens to exist.
     case 'screenDive':
-      return { title: 'REPLACE: what this screen does', image: 'REPLACE: assets/brands/<name>/stills/<shot>.png' };
+      return { title: 'REPLACE: what this screen does', image: 'REPLACE: assets/brands/<name>/stills/<shot>.png', ...captionKw('captionSize') };
     case 'logoLockup':
       return { mark: 'REPLACE: assets/brands/<name>/mark.svg', wordmark: 'REPLACE: assets/brands/<name>/wordmark.svg', headline: 'REPLACE: brand line' };
     case 'logoReveal':
@@ -161,9 +169,9 @@ function propsFor(name, span, isPayoff) {
     case 'recordedPan':
       return { image: 'REPLACE: assets/brands/<name>/stills/<shot>.png' };
     case 'containerFill':
-      return { items: CHIPS };
+      return { items: CHIPS, ...bodyKw('itemSize') };
     case 'listBuildRows':
-      return { items: ['REPLACE: row one', 'REPLACE: row two', 'REPLACE: row three'] };
+      return { items: ['REPLACE: row one', 'REPLACE: row two', 'REPLACE: row three'], ...bodyKw('size') };
     case 'blurResolveHook':
       return { text: 'REPLACE: the hook line' };
     default:
@@ -208,10 +216,18 @@ if (layers[0] && layers[0].dur > FIRST_ARRIVAL_OFFSET) {
 // it with your own motif (a mark that travels, a UI object that persists and changes, a rule under the
 // operative word), but do NOT delete it: a film with nothing continuous is a slideshow, and
 // `no-continuous-object` will say so. It travels on a hand-keyed track, so it also seeds authored motion.
+//
+// y:1010, NOT the text band. It used to sit at y:900, close enough to the sub/label lines several
+// blueprints place around y:700-900 (kineticHook's `sub`, statReveal's `label`, chipGrid's `footer`)
+// that it read as an underline under whichever one landed nearby, an accident of two unrelated
+// elements sharing a row rather than an authored choice. 1010 sits in the lower safe margin
+// (`MARGIN` in core/layout/safe.js, 0.06 of 1080 = 65px, so the safe edge is 1015) below every
+// blueprint's default text band, so it reads as its own accent rather than punctuation for a line
+// above it.
 layers.push({
   type: 'rect',
   w: 140, h: 6, radius: 3,
-  x: 160, y: 900,
+  x: 160, y: 1010,
   fill: 'var(--accent)',
   start: 0,
   duration: dur,
@@ -328,7 +344,7 @@ arc: "hook -> build -> proof -> payoff -> CTA"
 format: 1920x1080
 theme: "themes/${theme}.json"
 duration: ${dur}s
-threads: "a CONTINUOUS OBJECT (the accent element the scaffold emits, spanning every cut on a hand-keyed track, REPLACE it with your real motif but keep something continuous) + a bookend (the hook's open loop, answered by the payoff)"
+threads: "a CONTINUOUS OBJECT (the accent element the scaffold emits, spanning every cut on a hand-keyed track, sitting at y:1010 in the lower safe margin so it never underlines a beat's own text, REPLACE it with your real motif but keep something continuous) + a bookend (the hook's open loop, answered by the payoff)"
 spectacle: "beat ${specIdx + 1} (${names[specIdx]}) · the hero count-up · the number carries the film's one loud moment"
 not: "<fill: the defaults this film refuses, e.g. no centered slide deck, no gradient hero, no Inter>"
 craft:
