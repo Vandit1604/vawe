@@ -77,6 +77,38 @@ Each takes `{ x?, y?, w?, start, dur, ...content }`. Defaults target the 1920×1
 A beat emits LAYER motion; pair it with the scene-level transition it wants (a `cinematicZoom` seam into a
 `screenDive`, a `dissolve` into a `logoLockup`): `make direct` suggests these.
 
+## HTML-first beats (`blueprints/beats-html.mjs`)
+
+An author with hand-written markup (a stat block, a browser frame, a table, a chat log) wants the same
+`parts`-driven choreography a rect/text beat gets for free, without re-deriving it. These five wrap ONE
+`html` layer around your own `body`/`rows`/`messages`, and `parts` reveals the marked children (default
+selector `[data-part]`, override with `select`) instead of the whole fragment arriving as one flat card.
+See [HTML-FRAGMENTS.md](HTML-FRAGMENTS.md) for `parts` itself.
+
+| Beat | Role | Emits |
+|---|---|---|
+| `htmlCard` | a hairline surface from your own markup | one `html` layer, `parts` reveals `data-part` children |
+| `htmlPanel` | a plain low-contrast surface for content you draw | a bare surface, no title slot, your `body` is the whole content |
+| `htmlBrowser` | a real page under browser chrome | traffic dots + url bar (decorative, no `data-part`) around your `body` |
+| `htmlTable` | a data table that fills row by row | `<table>` from `headers`/`rows`, `parts` reveals each `tr` |
+| `htmlChat` | a chat log that lands message by message | bubbles from `messages: [{from, text, me}]`, `parts` reveals each `.bubble` |
+
+**Why five and not one generic wrapper.** `htmlCard`/`htmlPanel` differ only in default chrome (accent
+title slot vs. none), kept separate because a caller reaching for "a card" and a caller reaching for "a
+plain surface for my own thing" are asking different questions; collapsing them into one beat with a
+`variant` flag would just move the same decision into a prop. `htmlBrowser`/`htmlTable`/`htmlChat` each
+draw a real, specific structure (chrome, a table, a bubble log) `htmlCard`'s free-form `body` does not
+give you for free.
+
+**When to reach for one of these instead of a rect/text beat.** You already have markup (captured or
+hand-written) and want it choreographed, or the shape (a real table, a chat log) is cheaper to write as
+markup than to compose from `group`/`text` layers. When you are instead composing from scratch and the
+shape is a card grid, a chip row, or a fixed frame that fills, the equivalent beats in `beats.mjs` /
+`beats-mined.mjs` (`cardCascade`, `chipGrid`, `containerFill`, `listBuildRows`) are pure `props → layers`
+factories with no markup to write; converting THEM to `html` internally is blocked today by
+`scripts/gates/lib-test.mjs`'s structural assertions on their exact layer shape (`type === 'group'`,
+nested `.children[].size`), which this repo's file ownership does not let a blueprint author edit.
+
 
 ## The three pictorial beats
 

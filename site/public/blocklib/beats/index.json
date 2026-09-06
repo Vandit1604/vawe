@@ -419,6 +419,76 @@
     "poster": "beats/wordWipe/poster.png",
     "sheet": "beats/wordWipe/sheet.png"
    }
+  },
+  {
+   "id": "htmlCard",
+   "duration": 3.9,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a hairline surface built from your own markup, revealed part by part via `parts`",
+   "files": {
+    "preview": "beats/htmlCard/preview.mp4",
+    "poster": "beats/htmlCard/poster.png",
+    "sheet": "beats/htmlCard/sheet.png"
+   }
+  },
+  {
+   "id": "htmlPanel",
+   "duration": 3.5,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a plain low-contrast surface for content you draw yourself (a terminal, a dialog)",
+   "files": {
+    "preview": "beats/htmlPanel/preview.mp4",
+    "poster": "beats/htmlPanel/poster.png",
+    "sheet": "beats/htmlPanel/sheet.png"
+   }
+  },
+  {
+   "id": "htmlBrowser",
+   "duration": 4.5,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a browser-chrome frame (traffic dots + url bar) around your own page content",
+   "files": {
+    "preview": "beats/htmlBrowser/preview.mp4",
+    "poster": "beats/htmlBrowser/poster.png",
+    "sheet": "beats/htmlBrowser/sheet.png"
+   }
+  },
+  {
+   "id": "htmlTable",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a real data table that reveals row by row, never the whole grid at once",
+   "files": {
+    "preview": "beats/htmlTable/preview.mp4",
+    "poster": "beats/htmlTable/poster.png",
+    "sheet": "beats/htmlTable/sheet.png"
+   }
+  },
+  {
+   "id": "htmlChat",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a chat log whose bubbles land one after another, not all at once",
+   "files": {
+    "preview": "beats/htmlChat/preview.mp4",
+    "poster": "beats/htmlChat/poster.png",
+    "sheet": "beats/htmlChat/sheet.png"
+   }
   }
  ]
 }
