@@ -16,12 +16,16 @@ import * as Punct from './beats-punct.mjs';
 // The MINED beats: harvested by `make mine` from grammar/*.json (studied real films), never invented.
 // See docs/CRAFT/BLUEPRINTS.md "Mined blueprints" and grammar/_mined-shapes.json for the source shots.
 import * as Mined from './beats-mined.mjs';
+// The HTML-FIRST beats: an author with hand-written markup gets the same `parts`-driven choreography a
+// rect/text beat gets for free (docs/CRAFT/HTML-FRAGMENTS.md). See beats-html.mjs for why these five.
+import * as Html from './beats-html.mjs';
 
 export * from './beats.mjs';
 export * from './beats-collage.mjs';
 export * from './beats-track.mjs';
 export * from './beats-punct.mjs';
 export * from './beats-mined.mjs';
+export * from './beats-html.mjs';
 export * from './kit.mjs';
 
 // name → factory. A beat factory is pure (props → array of scene-layer JSON) and takes at least {start, dur}.
@@ -56,6 +60,12 @@ export const BEATS = {
   wordWipe: withBlurb('an oversized word crosses the whole frame motion-blurred, and its passage is the transition', Mined.wordWipe),
   wordmarkAssemble: withBlurb('the brand mark settles from scattered letters while small tiles drift at a different depth behind it', Mined.wordmarkAssemble),
   viewportTrio: withBlurb('the same subject shown at three sizes at once, the "it is really finished" payoff shot', Mined.viewportTrio),
+  // ---- HTML-FIRST (beats-html.mjs): a fragment author's own markup, given `parts` choreography free ----
+  htmlCard: withBlurb('a hairline surface built from your own markup, revealed part by part via `parts`', Html.htmlCard),
+  htmlPanel: withBlurb('a plain low-contrast surface for content you draw yourself (a terminal, a dialog)', Html.htmlPanel),
+  htmlBrowser: withBlurb('a browser-chrome frame (traffic dots + url bar) around your own page content', Html.htmlBrowser),
+  htmlTable: withBlurb('a real data table that reveals row by row, never the whole grid at once', Html.htmlTable),
+  htmlChat: withBlurb('a chat log whose bubbles land one after another, not all at once', Html.htmlChat),
 };
 
 // The descriptions used to be TRAILING `//` COMMENTS on the lines above, parsed back out of this file's
@@ -80,6 +90,8 @@ export const BEAT_PITFALLS = {
   terminalReveal: 'a typed command with no visible consequence is a dead beat. Show what the command DID, not just that it ran.',
   screenDive: 'a KEN push onto a low-res or placeholder screen amplifies the flaw. Use a real captured surface at full resolution.',
   ctaEnd: 'a mark sized like a bullet beside the headline reads as punctuation. Give the logo real prominence on the end card (150px+).',
+  htmlCard: 'a body with no `data-part` (or custom `select`) arrives as one flat card, the exact rect-stack problem this beat exists to avoid.',
+  htmlBrowser: 'the traffic dots are chrome, not content: marking them `data-part` makes furniture perform. Mark the page content instead.',
 };
 
 export const BEAT_REGISTRY = defineRegistry('blueprint beat', BEATS, { slot: 'layers[].beat', blurbs: BEAT_BLURBS,
@@ -129,4 +141,9 @@ export const REQUESTS = {
   wordWipe: 'Wipe the frame with one word roughly eight times the normal type size, motion-blurred, and land the reveal the instant it clears.',
   wordmarkAssemble: 'Assemble the brand mark from scattered letters while small tiles drift slowly at a different depth behind it.',
   viewportTrio: 'Show the same real surface at three sizes at once, the "it is really finished" payoff shot.',
+  htmlCard: 'Draw a card from your own markup and reveal its pieces one at a time, not as one flat card.',
+  htmlPanel: 'Give your own content a plain surface to sit on, a terminal, a dialog, anything you draw yourself.',
+  htmlBrowser: 'Frame your own page content in a real browser chrome, traffic dots and a url bar, and reveal it part by part.',
+  htmlTable: 'Show a real table that fills in row by row, never the whole grid at once.',
+  htmlChat: 'Play a chat log whose bubbles land one after another, the way a conversation actually arrives.',
 };
