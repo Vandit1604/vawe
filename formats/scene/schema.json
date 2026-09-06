@@ -659,7 +659,8 @@
   },
   "cuts": {
    "type": "array",
-   "label": "Hard cuts between beats (timing x presentation, from core/cuts/index.js)",
+   "internal": true,
+   "label": "INTERNAL: the lowered output of transitions[] (mech:\"cut\"). Never author this directly, write transitions[] and run `node scripts/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
      "type": "number",
@@ -744,7 +745,8 @@
   },
   "stings": {
    "type": "array",
-   "label": "Shader boundary effects",
+   "internal": true,
+   "label": "INTERNAL: the lowered output of transitions[] (mech:\"sting\"). Never author this directly, write transitions[] and run `node scripts/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
      "type": "number",
@@ -819,7 +821,8 @@
   },
   "seams": {
    "type": "array",
-   "label": "Two-scene shader transitions (blend the beats either side of a boundary, from core/timeline/seams.js)",
+   "internal": true,
+   "label": "INTERNAL: the lowered output of transitions[] (mech:\"seam\"). Never author this directly, write transitions[] and run `node scripts/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
      "type": "number",
@@ -977,6 +980,30 @@
      "type": "number",
      "label": "Strength multiplier (seam/sting; 1 = default)",
      "min": 0
+    },
+    "snap": {
+     "type": "boolean",
+     "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beats/index.js)."
+    },
+    "cx": {
+     "type": "number",
+     "label": "Origin x, PER CENT of the frame, cut only (core/cuts/index.js formats it as `%` and defaults to 50)",
+     "min": 0,
+     "max": 100
+    },
+    "cy": {
+     "type": "number",
+     "label": "Origin y, PER CENT of the frame, cut only (core/cuts/index.js formats it as `%` and defaults to 50)",
+     "min": 0,
+     "max": 100
+    },
+    "dist": {
+     "type": "number",
+     "label": "Travel distance in px for a directional cut, cut only"
+    },
+    "colors": {
+     "type": "array",
+     "label": "leak: up to 4 hex colours the leak is built from, sting only (seed only arranges them)"
     }
    }
   },
