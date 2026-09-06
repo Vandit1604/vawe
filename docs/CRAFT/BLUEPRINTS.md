@@ -34,6 +34,14 @@ something you remember to add.
 > differ (their words, palette, and faces differ). The ledger + similarity gate still enforce uniqueness,
 > this is the opposite of a template.
 
+## See them
+
+A blurb tells you what a beat IS; it does not show you what it looks like. **`make previews`** renders
+a real ~4s clip per beat (placeholder copy, `theme: "default"`) to `site/public/blocklib/beats/<id>/
+{preview.mp4, poster.png, sheet.png}`, plus an `index.json` manifest. `make blueprints` prints the sheet
+path beside each beat once one exists, so picking a beat is picking a picture, not guessing from prose.
+Re-render one beat after changing its factory: `make previews ONLY=<id>`.
+
 ## Use one
 
 ```json
