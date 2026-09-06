@@ -659,10 +659,10 @@
       "id": "beat-blueprints",
       "title": "Beat blueprints",
       "tag": "blueprint",
-      "intro": "`{ \"type\":\"beat\", \"beat\":\"<name>\", ... }`. A whole beat's directed motion; `make expand`. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.",
+      "intro": "`{ \"type\":\"beat\", \"beat\":\"<name>\", ... }`. A whole beat's directed motion, expanded at load. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.",
       "mode": "table",
       "note": null,
-      "noPreview": "a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.",
+      "noPreview": "a beat writes a whole cast of layers from content you supply. Run `make expand D=<file>` to see what it writes.",
       "count": 29,
       "undescribed": 0,
       "entries": [
