@@ -1,5 +1,5 @@
 {
-  "total": 692,
+  "total": 697,
   "previewed": 322,
   "families": 56,
   "tags": [
@@ -17,7 +17,7 @@
     ],
     [
       "blueprint",
-      29
+      34
     ],
     [
       "camera",
@@ -659,7 +659,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a beat writes a whole cast of layers from content you supply. Run `make expand D=<file>` to see what it writes.",
-      "count": 29,
+      "count": 34,
       "undescribed": 0,
       "entries": [
         {
@@ -736,6 +736,41 @@
           "name": "focusRack",
           "stem": "beat-blueprints--focusrack",
           "desc": "a rack focus · one plane pulls sharp on the layer blur channel while the other blurs AND dims",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "htmlBrowser",
+          "stem": "beat-blueprints--htmlbrowser",
+          "desc": "a browser-chrome frame (traffic dots + url bar) around your own page content",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "htmlCard",
+          "stem": "beat-blueprints--htmlcard",
+          "desc": "a hairline surface built from your own markup, revealed part by part via `parts`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "htmlChat",
+          "stem": "beat-blueprints--htmlchat",
+          "desc": "a chat log whose bubbles land one after another, not all at once",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "htmlPanel",
+          "stem": "beat-blueprints--htmlpanel",
+          "desc": "a plain low-contrast surface for content you draw yourself (a terminal, a dialog)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "htmlTable",
+          "stem": "beat-blueprints--htmltable",
+          "desc": "a real data table that reveals row by row, never the whole grid at once",
           "scene": null,
           "noPreview": null
         },

@@ -138,6 +138,11 @@ named colour+kind(+angle) combos for the `gradient` background preset: `{"preset
 | `dialogueAccumulate` | sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom |
 | `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
 | `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
+| `htmlBrowser` | a browser-chrome frame (traffic dots + url bar) around your own page content |
+| `htmlCard` | a hairline surface built from your own markup, revealed part by part via `parts` |
+| `htmlChat` | a chat log whose bubbles land one after another, not all at once |
+| `htmlPanel` | a plain low-contrast surface for content you draw yourself (a terminal, a dialog) |
+| `htmlTable` | a real data table that reveals row by row, never the whole grid at once |
 | `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
 | `listBuildRows` | a vertical list that grows one row at a time under a fixed left rule |
 | `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
@@ -1114,4 +1119,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_692 effects across 56 families. Regenerate: `make effects`._
+_697 effects across 56 families. Regenerate: `make effects`._
