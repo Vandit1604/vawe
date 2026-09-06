@@ -299,10 +299,11 @@ frame:
 grammar:
 	node scripts/author/grammar.mjs $(if $(DOC),--doc,$(N))
 
-# make mistakes [Q="…"] [N=496]: ASK the mistake log. It is 533 entries and 45% of every documented
-# word in this repo, so nothing can read it whole; with no argument this prints the census and says so.
+# make mistakes [Q="…"] [N=496] [FULL=1]: ASK the mistake log. docs/MISTAKES.md is now a three-line
+# index (title, lesson, what holds it) per entry; FULL=1 with N=<n> prints that entry's original
+# write-up from the git commit taken just before the index migration.
 mistakes:
-	node scripts/author/mistakes.mjs $(if $(N),--n $(N),$(if $(Q),$(Q)))
+	node scripts/author/mistakes.mjs $(if $(N),--n $(N),$(if $(Q),$(Q))) $(if $(FULL),--full,)
 
 # make claims: check this repo's own doctrine against the films it claims to describe. Every
 # quantitative claim in CRAFT/CLAUDE.md is a test over grammar/*.json; the verdict strengthens or
