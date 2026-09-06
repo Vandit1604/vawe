@@ -1,0 +1,318 @@
+{
+ "_": "Shot clusters found by scripts/author/mine.mjs over grammar/*.json. A shape with sources is a real, traceable candidate for a beats-mined.mjs factory, never an invented one. Regenerate with `make mine`.",
+ "grammarsRead": [
+  "arc-space-swiping",
+  "arc-zero-chrome",
+  "framer-hero",
+  "pin-1119918632363453012",
+  "pin-310748443060787071",
+  "pin-333759022406760643",
+  "pin-333759022406800725",
+  "pin-333759022407965800",
+  "pin-415034921941332045",
+  "pin-522769469268499616",
+  "pin-583145851797705243",
+  "pin-72761350251141725",
+  "pin-924363892282992611",
+  "pin-933230354045109691",
+  "pinref",
+  "rebuilt",
+  "together-chat"
+ ],
+ "shapes": [
+  {
+   "shape": "blurResolveHook",
+   "role": "Hook",
+   "sources": [
+    {
+     "source": "pin-1119918632363453012",
+     "shot": 1,
+     "role": "Hook",
+     "snippet": "Dark navy with a blue bloom low in the frame. A bare caret, then a question typing in, heavily MO..."
+    },
+    {
+     "source": "pin-333759022406760643",
+     "shot": 1,
+     "role": "Hook",
+     "snippet": "Black with dark blue light streaks. Single words at hero scale, chrome-lit and heavily blurred, r..."
+    },
+    {
+     "source": "pin-333759022406760643",
+     "shot": 4,
+     "role": "Hook",
+     "snippet": "Black. Single words again at hero scale, blurred and resolving, then the closing question."
+    },
+    {
+     "source": "pin-415034921941332045",
+     "shot": 1,
+     "role": "Hook",
+     "snippet": "Near-white. Type arriving heavily MOTION-BLURRED and resolving, then a line with one word replace..."
+    },
+    {
+     "source": "pin-415034921941332045",
+     "shot": 3,
+     "role": "Hook",
+     "snippet": "Near-white. A word arriving blurred with visible colour fringing, resolving to a clean line, then..."
+    },
+    {
+     "source": "pin-72761350251141725",
+     "shot": 2,
+     "role": "Hook",
+     "snippet": "A light lavender wash. The same shape of word, now blue, with a blurred bloom behind it."
+    }
+   ]
+  },
+  {
+   "shape": "dialogueAccumulate",
+   "role": "Hook",
+   "sources": [
+    {
+     "source": "pin-310748443060787071",
+     "shot": 3,
+     "role": "Hook",
+     "snippet": "Black. Two slabs, blue and violet, then a bloom of colour, then a wordmark, then the closing line."
+    },
+    {
+     "source": "pin-333759022406760643",
+     "shot": 3,
+     "role": "Hook",
+     "snippet": "Black. Generated image cards multiplying and arranging themselves in perspective."
+    },
+    {
+     "source": "pin-333759022406800725",
+     "shot": 1,
+     "role": "Hook",
+     "snippet": "Deep green with soft glowing rings. Small yellow type, then a bloom, then live footage of a works..."
+    },
+    {
+     "source": "pin-933230354045109691",
+     "shot": 4,
+     "role": "Hook",
+     "snippet": "Cream. A black disc, then chat bubbles stacking inside it, then a white bloom."
+    },
+    {
+     "source": "pin-933230354045109691",
+     "shot": 7,
+     "role": "Hook",
+     "snippet": "The speaker under RED, then neutral, then BLUE, then a white bloom, captions throughout."
+    },
+    {
+     "source": "rebuilt",
+     "shot": 1,
+     "role": "Hook",
+     "snippet": "black. One word at a time in a sans, answered by a word in a SERIF ITALIC, with a small blue dot ..."
+    },
+    {
+     "source": "rebuilt",
+     "shot": 2,
+     "role": "Hook",
+     "snippet": "A single small UI chip on near-white, a label typing in beside a mark. Almost nothing else in frame."
+    }
+   ]
+  },
+  {
+   "shape": "containerFill",
+   "role": "Key_Feature",
+   "sources": [
+    {
+     "source": "arc-space-swiping",
+     "shot": 1,
+     "role": "Key_Feature",
+     "snippet": "A browser window on a pale ground. A warm-toned site, then a cool blue one sliding in over it, si..."
+    },
+    {
+     "source": "pin-1119918632363453012",
+     "shot": 2,
+     "role": "Key_Feature",
+     "snippet": "Near-white. Blue curly braces, and words filling the space between them, each arriving blurred an..."
+    },
+    {
+     "source": "pin-522769469268499616",
+     "shot": 7,
+     "role": "Key_Feature",
+     "snippet": "Dark. A real phone UI, an actual profile."
+    }
+   ]
+  },
+  {
+   "shape": "cardFan",
+   "role": "Key_Feature",
+   "sources": [
+    {
+     "source": "pin-333759022406800725",
+     "shot": 4,
+     "role": "Key_Feature",
+     "snippet": "Deep green. A small card, a loading dot row, then UI chips flying in perspective."
+    },
+    {
+     "source": "pinref",
+     "shot": 3,
+     "role": "Key_Feature",
+     "snippet": "the screen stack fans and rotates; \"Monitored\" label"
+    },
+    {
+     "source": "pinref",
+     "shot": 4,
+     "role": "Key_Feature",
+     "snippet": "one phone slides to centre and tilts; green ticks on its UI; the field shifts blue to purple"
+    },
+    {
+     "source": "pinref",
+     "shot": 5,
+     "role": "Key_Feature",
+     "snippet": "the phone holds; \"Liquidation Risk\" panels fan in behind it"
+    },
+    {
+     "source": "pinref",
+     "shot": 7,
+     "role": "Key_Feature",
+     "snippet": "\"Rate Changes\" cards fan with a small chart"
+    }
+   ]
+  },
+  {
+   "shape": "listBuildRows",
+   "role": "Key_Feature",
+   "sources": [
+    {
+     "source": "pinref",
+     "shot": 11,
+     "role": "Key_Feature",
+     "snippet": "a phone with a \"DeFi\" list; a blue blob"
+    },
+    {
+     "source": "pinref",
+     "shot": 12,
+     "role": "Key_Feature",
+     "snippet": "the list builds: \"DeFi · Tokens\""
+    },
+    {
+     "source": "pinref",
+     "shot": 13,
+     "role": "Key_Feature",
+     "snippet": "\"NFTs\" is added; the phone content updates"
+    },
+    {
+     "source": "pinref",
+     "shot": 14,
+     "role": "Key_Feature",
+     "snippet": "\"Perps\" is added"
+    },
+    {
+     "source": "pinref",
+     "shot": 15,
+     "role": "Key_Feature",
+     "snippet": "\"Prediction Markets\" is added; the list is complete"
+    }
+   ]
+  },
+  {
+   "shape": "chipConverge",
+   "role": "Proof",
+   "sources": [
+    {
+     "source": "pin-333759022406760643",
+     "shot": 5,
+     "role": "Proof",
+     "snippet": "Black. The mark, letters scattering into place around it, then the wordmark and a closing line."
+    },
+    {
+     "source": "pin-333759022407965800",
+     "shot": 13,
+     "role": "Proof",
+     "snippet": "A product photo, then two hero lines, then a scattered grid of user photographs."
+    },
+    {
+     "source": "pinref",
+     "shot": 16,
+     "role": "Proof",
+     "snippet": "status chips scatter: Sub-optimized, Claimable, At risk, Operational, Expired, Out of range"
+    },
+    {
+     "source": "pinref",
+     "shot": 17,
+     "role": "Proof",
+     "snippet": "\"Detected & Monitored\"; the chips resolve onto the phone"
+    }
+   ]
+  },
+  {
+   "shape": "cellMosaic",
+   "role": "Build",
+   "sources": [
+    {
+     "source": "pin-333759022406800725",
+     "shot": 5,
+     "role": "Build",
+     "snippet": "Deep green. Rows of chips settling into a grid, then a five-line statement with the last line in ..."
+    },
+    {
+     "source": "pin-415034921941332045",
+     "shot": 2,
+     "role": "Build",
+     "snippet": "Photographic. A forest plate with a typing field over it, then app cards, then a glass object fil..."
+    },
+    {
+     "source": "pin-924363892282992611",
+     "shot": 1,
+     "role": "Build",
+     "snippet": "Near-white. A rendered brain, a chip label, dotted orbit rings, then a grid of purple product tiles."
+    },
+    {
+     "source": "pinref",
+     "shot": 8,
+     "role": "Build",
+     "snippet": "cards spread flat; \"Filtered to your positions\" (accent on \"your positions\")"
+    },
+    {
+     "source": "rebuilt",
+     "shot": 3,
+     "role": "Build",
+     "snippet": "A dark GRID. Cells of photography, icons, currency and two huge sans words sliding through the ce..."
+    }
+   ]
+  },
+  {
+   "shape": "wordWipe",
+   "role": "Key_Feature",
+   "sources": [
+    {
+     "source": "rebuilt",
+     "shot": 4,
+     "role": "Key_Feature",
+     "snippet": "Near-white. A giant blue word blows through the frame far larger than the canvas, motion-blurred,..."
+    }
+   ]
+  },
+  {
+   "shape": "wordmarkAssemble",
+   "role": "CTA_Brand_Outro",
+   "sources": [
+    {
+     "source": "pin-310748443060787071",
+     "shot": 1,
+     "role": "CTA_Brand_Outro",
+     "snippet": "Black. A small line of type, then tall coloured SLABS filling the frame edge to edge, then a few ..."
+    },
+    {
+     "source": "rebuilt",
+     "shot": 5,
+     "role": "CTA_Brand_Outro",
+     "snippet": "Dark. Dimensional cards tumbling, small app tiles drifting at different distances, a wordmark scr..."
+    }
+   ]
+  },
+  {
+   "shape": "viewportTrio",
+   "role": "Payoff",
+   "sources": [
+    {
+     "source": "framer-hero",
+     "shot": 2,
+     "role": "Payoff",
+     "snippet": "Dark. The finished site, the agent panel that made it, then the same site in three viewports at o..."
+    }
+   ]
+  }
+ ]
+}
