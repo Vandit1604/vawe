@@ -307,25 +307,6 @@
    "exitDur": 0
   }
  ],
- "cuts": [
-  {
-   "t": 3.35,
-   "style": "slide",
-   "dur": 0.4
-  },
-  {
-   "t": 6.65,
-   "style": "riseBlur",
-   "dur": 0.42
-  }
- ],
- "stings": [
-  {
-   "t": 5.3,
-   "fx": "flash",
-   "intensity": 0.32
-  }
- ],
  "bg": [
   {
    "preset": "paperDots"
@@ -347,5 +328,26 @@
    "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
    "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
   }
- }
+ },
+ "transitions": [
+  {
+   "at": 3.35,
+   "mech": "cut",
+   "fx": "slide",
+   "dur": 0.4,
+   "timing": "smooth"
+  },
+  {
+   "at": 6.65,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 5.3,
+   "mech": "sting",
+   "fx": "flash",
+   "intensity": 0.32
+  }
+ ]
 }

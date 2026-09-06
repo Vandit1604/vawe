@@ -367,40 +367,6 @@
       "exitDur": 0.3
     }
   ],
-  "cuts": [
-    {
-      "t": 5,
-      "style": "punch"
-    },
-    {
-      "t": 9,
-      "style": "flip"
-    },
-    {
-      "t": 13,
-      "style": "rise"
-    }
-  ],
-  "stings": [
-    {
-      "t": 5,
-      "fx": "crossWarp",
-      "seed": 6,
-      "intensity": 0.5
-    },
-    {
-      "t": 9,
-      "fx": "crossWarp",
-      "seed": 7,
-      "intensity": 0.5
-    },
-    {
-      "t": 13,
-      "fx": "crossWarp",
-      "seed": 9,
-      "intensity": 0.45
-    }
-  ],
   "authoring": {
     "allow": [
       "off-colour",
@@ -418,5 +384,43 @@
       "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)",
       "static-bg": "legacy: grandfathered 2026-09-05, adopted 2026-09-05 (the backdrop moves, at least one beat is not a flat field asleep for the whole film)"
     }
-  }
+  },
+  "transitions": [
+    {
+      "at": 5,
+      "mech": "cut",
+      "fx": "punch"
+    },
+    {
+      "at": 9,
+      "mech": "cut",
+      "fx": "flip"
+    },
+    {
+      "at": 13,
+      "mech": "cut",
+      "fx": "rise"
+    },
+    {
+      "at": 5,
+      "mech": "sting",
+      "fx": "crossWarp",
+      "seed": 6,
+      "intensity": 0.5
+    },
+    {
+      "at": 9,
+      "mech": "sting",
+      "fx": "crossWarp",
+      "seed": 7,
+      "intensity": 0.5
+    },
+    {
+      "at": 13,
+      "mech": "sting",
+      "fx": "crossWarp",
+      "seed": 9,
+      "intensity": 0.45
+    }
+  ]
 }

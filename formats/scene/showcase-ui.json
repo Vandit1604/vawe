@@ -504,18 +504,6 @@
       "exitDur": 0
     }
   ],
-  "cuts": [
-    {
-      "t": 3.4,
-      "style": "slide",
-      "dur": 0.4
-    },
-    {
-      "t": 6.7,
-      "style": "riseBlur",
-      "dur": 0.42
-    }
-  ],
   "bg": [
     {
       "preset": "paperDots"
@@ -525,6 +513,21 @@
     },
     {
       "preset": "soft"
+    }
+  ],
+  "transitions": [
+    {
+      "at": 3.4,
+      "mech": "cut",
+      "fx": "slide",
+      "dur": 0.4,
+      "timing": "smooth"
+    },
+    {
+      "at": 6.7,
+      "mech": "cut",
+      "fx": "riseBlur",
+      "dur": 0.42
     }
   ]
 }
