@@ -11,14 +11,18 @@ import { defineRegistry } from '../registry/registry.js';
 //                       layer holds its built state until the exit begins, then animates away.
 
 // ENTRANCES: one-shot fromTo. `_p` marks effects that need 3D perspective (flips/tilts).
+//
+// `fadeIn`/`fadeUp`/`fadeDown`/`flyLeft`/`flyRight`/`popIn`/`zoomIn` used to live here too. Each
+// duplicated an `anim` preset exactly (fade/rise/slide-down/slide-left/slide-right/pop/scale), worked
+// on any layer type same as anim, and measured ZERO users across the library while carrying its own
+// doc row, its own arsenal entry, and its own way to spell the same motion. Removed rather than kept
+// as a fourth vocabulary for one idea (docs/MISTAKES.md #364, GSAP_FX comment below).
+//
+// `expandIn` looked like an eighth (it was mapped to `anim:"scale"` in an earlier pass), and it is
+// NOT ONE: `anim`'s `scale`/`pop` transform the whole layer's size, `expandIn` animates `letterSpacing`
+// (tracking) from crushed to normal, a property `anim` never touches. Verified before trusting the old
+// mapping: no `anim` entry reaches this look, so it is the only way to get it and it stays.
 const ENTRANCES = {
-  fadeIn:     { from: { opacity: 0 }, to: { opacity: 1 }, ease: 'power2.out', dur: 0.6 },
-  fadeUp:     { from: { opacity: 0, y: 60 }, to: { opacity: 1, y: 0 }, ease: 'power3.out', dur: 0.6 },
-  fadeDown:   { from: { opacity: 0, y: -60 }, to: { opacity: 1, y: 0 }, ease: 'power3.out', dur: 0.6 },
-  flyLeft:    { from: { opacity: 0, x: -320 }, to: { opacity: 1, x: 0 }, ease: 'power3.out', dur: 0.7 },
-  flyRight:   { from: { opacity: 0, x: 320 }, to: { opacity: 1, x: 0 }, ease: 'power3.out', dur: 0.7 },
-  popIn:      { from: { opacity: 0, scale: 0.6 }, to: { opacity: 1, scale: 1 }, ease: 'back.out(1.7)', dur: 0.55 },
-  zoomIn:     { from: { opacity: 0, scale: 0.2 }, to: { opacity: 1, scale: 1 }, ease: 'power2.out', dur: 0.6 },
   zoomBlur:   { from: { opacity: 0, scale: 1.4, filter: 'blur(16px)' }, to: { opacity: 1, scale: 1, filter: 'blur(0px)' }, ease: 'power3.out', dur: 0.7 },
   blurIn:     { from: { opacity: 0, filter: 'blur(14px)' }, to: { opacity: 1, filter: 'blur(0px)' }, ease: 'power2.out', dur: 0.6 },
   elasticIn:  { from: { opacity: 0, scale: 0.3 }, to: { opacity: 1, scale: 1 }, ease: 'elastic.out(1,0.5)', dur: 1.1 },
@@ -50,21 +54,13 @@ const TEXT = {
   charOvershoot:   { from: { opacity: 0, y: 40, scale: 0.7 }, to: { opacity: 1, y: 0, scale: 1 }, ease: 'back.out(2.2)', dur: 0.5 },
 };
 
-// EXITS: one-shot fromTo that LEAVES. Anchored to the layer exit (scene.html sets the delay); the tween
-// is built with immediateRender:false so the element holds its natural state until the exit begins.
-const EXITS = {
-  fadeOut:     { from: { opacity: 1 }, to: { opacity: 0 }, ease: 'power2.in', dur: 0.5 },
-  fadeOutUp:   { from: { opacity: 1, y: 0 }, to: { opacity: 0, y: -60 }, ease: 'power3.in', dur: 0.5 },
-  fadeOutDown: { from: { opacity: 1, y: 0 }, to: { opacity: 0, y: 60 }, ease: 'power3.in', dur: 0.5 },
-  flyOutLeft:  { from: { opacity: 1, x: 0 }, to: { opacity: 0, x: -320 }, ease: 'power3.in', dur: 0.55 },
-  flyOutRight: { from: { opacity: 1, x: 0 }, to: { opacity: 0, x: 320 }, ease: 'power3.in', dur: 0.55 },
-  popOut:      { from: { opacity: 1, scale: 1 }, to: { opacity: 0, scale: 0.6 }, ease: 'back.in(1.7)', dur: 0.45 },
-  zoomOut:     { from: { opacity: 1, scale: 1 }, to: { opacity: 0, scale: 1.6 }, ease: 'power2.in', dur: 0.5 },
-  blurOut:     { from: { opacity: 1, filter: 'blur(0px)' }, to: { opacity: 0, filter: 'blur(14px)' }, ease: 'power2.in', dur: 0.5 },
-  dropOut:     { from: { opacity: 1, y: 0 }, to: { opacity: 0, y: 220 }, ease: 'power2.in', dur: 0.55 },
-  collapseOut: { from: { opacity: 1, scaleY: 1, transformOrigin: 'top center' }, to: { opacity: 0, scaleY: 0 }, ease: 'power3.in', dur: 0.45 },
-  spinOut:     { from: { opacity: 1, rotation: 0, scale: 1 }, to: { opacity: 0, rotation: 180, scale: 0.4 }, ease: 'back.in(1.4)', dur: 0.6 },
-};
+// The `fxOut` exit family (11 named exits: fadeOut/fadeOutUp/fadeOutDown/flyOutLeft/flyOutRight/popOut/
+// zoomOut/blurOut/dropOut/collapseOut/spinOut) used to live here. It measured ZERO users, all eleven,
+// across the library: an `out` preset (`fade`/`slide-up`/`slide-down`/`slide-left`/`slide-right`/`pop`/
+// `scale`/`defocus`) already reaches every one of those motions on any layer type, and the three with
+// no exact `anim`/`out` twin (dropOut, collapseOut, spinOut) were unused all the same, so there was no
+// evidence a real capability was lost by removing the family as a unit. Removed with `fxOut`, `EXIT_FX`,
+// `GSAP_EXIT_BLURBS`, `GSAP_EXIT_REGISTRY` and `DEPRECATED_EXIT`. docs/MISTAKES.md #364.
 
 // LOOPS: continuous emphasis (repeat:-1, yoyo). Seeked to t → state at t mod period → deterministic.
 const LOOPS = {
@@ -77,25 +73,23 @@ const LOOPS = {
   heartbeat: { to: { scale: 1.12 }, ease: 'power1.inOut', dur: 0.5 },
 };
 
-// The one-shot families share a fromTo registration; only the immediateRender anchor differs (an entrance
-// pins t=0, an exit holds until its delay). EXITS carry `_exit` so registration flips that flag.
+// The one-shot entrances share a fromTo registration, pinned to t=0 (immediateRender).
 const ONESHOT = { ...ENTRANCES, ...TEXT };
 
 export function registerGsapEffects(gsap) {
   if (!gsap || gsap.__vaweEffects) return;
-  const registerOneShot = (name, e, isExit) => {
+  const registerOneShot = (name, e) => {
     gsap.registerEffect({
       name,
       defaults: { duration: e.dur, ease: e.ease },
       effect: (targets, cfg) => {
-        const from = { ...e.from }, to = { ...e.to, duration: cfg.duration, ease: cfg.ease, delay: cfg.delay || 0, immediateRender: !isExit };
+        const from = { ...e.from }, to = { ...e.to, duration: cfg.duration, ease: cfg.ease, delay: cfg.delay || 0, immediateRender: true };
         if (e._p) { from.transformPerspective = 800; to.transformPerspective = 800; }
         return gsap.fromTo(targets, from, to);
       },
     });
   };
-  for (const [name, e] of Object.entries(ONESHOT)) registerOneShot(name, e, false);
-  for (const [name, e] of Object.entries(EXITS)) registerOneShot(name, e, true);
+  for (const [name, e] of Object.entries(ONESHOT)) registerOneShot(name, e);
   for (const [name, e] of Object.entries(LOOPS)) {
     gsap.registerEffect({
       name,
@@ -116,13 +110,6 @@ export function registerGsapEffects(gsap) {
 // settles, elastic/bounce wobble, power4/expo are fast-then-long-settle, sine.inOut never stops.
 export const GSAP_BLURBS = {
   // entrances
-  fadeIn: 'plain opacity fade, nothing moves. The neutral default when motion would distract',
-  fadeUp: 'lifts 60px into place while fading. The workhorse entrance for body copy and cards',
-  fadeDown: 'as fadeUp but settling downward from above, for anything hanging off a header',
-  flyLeft: 'travels in from off the left edge and decelerates hard, pair with a leftward exit',
-  flyRight: 'travels in from off the right edge and decelerates hard, pair with a rightward exit',
-  popIn: 'springs up from 60% and overshoots slightly past full size before settling, playful, for badges and chips',
-  zoomIn: 'grows from a fifth of its size on a plain decelerate, no overshoot. Bigger travel than popIn, calmer landing',
   zoomBlur: 'rushes back from too close while the defocus resolves. A camera pulling focus, premium hero beat',
   blurIn: 'resolves out of heavy defocus in place, calm, premium, no travel at all',
   elasticIn: 'springs from tiny and wobbles several times before it stills, over a slow 1.1s, only ever playful, never for a serious brand',
@@ -157,23 +144,7 @@ export const GSAP_BLURBS = {
   heartbeat: 'LOOP, never settles: a fast 12% throb twice a second. Urgency, live counts, recording dots',
 };
 
-// GSAP_EXIT_BLURBS: one line per EXITS entry, i.e. the values valid in `fxOut`. Exits use `.in` eases,
-// so they ACCELERATE away rather than decelerating in.
-export const GSAP_EXIT_BLURBS = {
-  fadeOut: 'plain opacity fade to nothing, the neutral exit, safe under any cut',
-  fadeOutUp: 'accelerates upward off its mark as it fades, the exit that pairs with fadeDown',
-  fadeOutDown: 'accelerates downward as it fades, the exit that pairs with fadeUp',
-  flyOutLeft: 'throws off the left edge, gathering speed. The exit that pairs with flyRight',
-  flyOutRight: 'throws off the right edge, gathering speed, the exit that pairs with flyLeft',
-  popOut: 'shrinks away with a small anticipation swell first, the mirror of popIn, playful',
-  zoomOut: 'swells past the camera as it fades, product focus, the leaving beat gets out of the way',
-  blurOut: 'defocuses away without moving, correct for faces, cards and dense grids, where sliding reads as chaos',
-  dropOut: 'falls out of the bottom of the frame under gravity, a thing discarded',
-  collapseOut: 'folds down flat to a line from its top edge, terminal output, rows, receipts',
-  spinOut: 'rotates a half turn while shrinking away, winding up before it goes, the mirror of spinIn',
-};
-
-// the names, for the schema/docs to derive instead of restating. EXIT_FX are the ones valid in `fxOut`.
+// the names, for the schema/docs to derive instead of restating.
 export const GSAP_FX = [...Object.keys(ONESHOT), ...Object.keys(LOOPS)];
 
 // The loops, NAMED, because the flat list above cannot tell an entrance from something that never
@@ -182,66 +153,51 @@ export const GSAP_FX = [...Object.keys(ONESHOT), ...Object.keys(LOOPS)];
 // currently say so because nothing distinguishes the two halves of GSAP_FX. Exported so one can.
 export const LOOP_FX = Object.keys(LOOPS);
 export const ONESHOT_FX = Object.keys(ONESHOT);
-export const EXIT_FX = Object.keys(EXITS);
 // default duration per effect, so scene.html can anchor an exit so it ENDS exactly at the layer's end.
 export const FX_DUR = Object.fromEntries(
-  Object.entries({ ...ONESHOT, ...EXITS, ...LOOPS }).map(([k, v]) => [k, v.dur]));
+  Object.entries({ ...ONESHOT, ...LOOPS }).map(([k, v]) => [k, v.dur]));
+
+// "letters get squeezed together kerning" found nothing for a long time, though `expandIn` is exactly
+// that and its blurb even says "tracking". Type vocabulary has three words for one thing and a blurb
+// can only use one, so the words a person searches with that a blurb cannot honestly carry ride along
+// as `aka`, searched and never printed.
+const GSAP_AKA = { expandIn: ['kerning', 'letter-spacing', 'letterspacing', 'tracking out'] };
 
 // Registered so a name in the WRONG SLOT is diagnosable: `anim:"popIn"` is told popIn is a gsap effect.
 // Three shipped layers made exactly that mistake and silently faded for months (docs/MISTAKES.md #355).
-// The blurbs are PASSED, not merely exported. They were written (48 of them, above) and both
-// registries were built without them, so `defineRegistry` carried `blurbs: null` and every tool that
-// asks a registry what a name MEANS got nothing for the two largest effect families. Measured the day
-// this was found: `EXIT_FX` had zero users across 153 scenes and `GSAP_FX` 31 of 37 unused, which is
-// what an undescribed vocabulary looks like from the outside. Written and unread is the same as unwritten.
-// "letters get squeezed together kerning" found nothing, though `expandIn` is exactly that and its blurb
-// even says "tracking". Type vocabulary has three words for one thing and a blurb can only use one.
-const GSAP_AKA = { expandIn: ['kerning', 'letter-spacing', 'letterspacing', 'tracking out'] };
+// The blurbs are PASSED, not merely exported. They were written above and this registry used to be
+// built without them, so `defineRegistry` carried `blurbs: null` and every tool that asks a registry
+// what a name MEANS got nothing for the largest effect family. Written and unread is the same as
+// unwritten.
 export const GSAP_REGISTRY = defineRegistry('gsap effect',
   Object.fromEntries(GSAP_FX.map((n) => [n, n])), { slot: 'fx', blurbs: GSAP_BLURBS, aka: GSAP_AKA,
   catalog: {
     title: 'GSAP named effects',
     tag: 'per-layer/text',
-    intro: '`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`',
+    intro: '`fx` on a layer, pair with `anim:"none"` so GSAP owns the transform; per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`',
     usage: (n, { text }) => text({ anim: 'none', fx: n }),
     preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, anim: 'none', fx: n }] }),
   },
 });
-export const GSAP_EXIT_REGISTRY = defineRegistry('gsap exit',
-  Object.fromEntries(EXIT_FX.map((n) => [n, n])), { slot: 'fxOut', blurbs: GSAP_EXIT_BLURBS,
-  catalog: {
-    title: 'GSAP exits',
-    tag: 'exit',
-    intro: '`fxOut`: pair every entrance with a directional exit.',
-    usage: (n, { text }) => text({ anim: 'rise', fxOut: n, exitDur: 0.6 }),
-    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, anim: 'rise', fxOut: n, exitDur: 1, start: 0.4, duration: 4.2 }] }),
-  },
-});
 
-// ---- DEPRECATED: names that duplicate an `anim` exactly ------------------------------------------
+// ---- REMOVED (docs/MISTAKES.md #364): `fxOut` and 7 `fx` entrances that duplicated `anim` exactly ---
 //
-// The engine has FOUR vocabularies for "how does this appear": `anim` (19), kinetic `preset` (27),
-// `fx` (37) and `parts[].anim` (6), 89 names for one idea, with FIVE spelled identically in two of
-// them at once (`up`, `scale`, `swing`, `fadeUp`, `popIn`). That overlap is not cosmetic: three of the
-// five layers stranded in docs/MISTAKES.md #355 were real names written into the wrong slot, because an
+// The engine still has THREE vocabularies for "how does this appear": `anim` (19), kinetic `preset`
+// (27) and `fx` (30, down from 37), for one idea, and that overlap is not cosmetic: three of the five
+// layers stranded in docs/MISTAKES.md #355 were real names written into the wrong slot, because an
 // author who learns one vocabulary reasonably expects its words in the next field along.
 //
-// These 16 are the ones that can go without losing a capability. Each has an exact `anim`/`out`
-// equivalent that works on ANY layer type. The rest STAY, and the reason is worth stating: a kinetic
-// preset only works on a TEXT layer with `split`, so `bounceIn` is NOT a duplicate of `preset:"bounce"`
-// on an image. It is the only way to bounce one. `blurIn`, `elasticIn`, `dropIn`, `spinIn`, `rollIn`,
-// `skewIn`, `flipInX/Y`, `clipUp`, `maskReveal`, `revealUp`, `tiltIn`, `driftIn`, `glitchIn`, `foldIn`,
-// the four `char*` effects and every idle loop all survive that test.
+// `fadeIn`/`fadeUp`/`fadeDown`/`flyLeft`/`flyRight`/`popIn`/`zoomIn` each had an exact `anim`
+// equivalent that works on ANY layer type (`fade`/`rise`/`slide-down`/`slide-left`/`slide-right`/
+// `pop`/`scale`) and measured zero users, so they were deleted rather than kept as a second spelling
+// nobody reached for. `expandIn` was mapped as an eighth in an earlier pass and is NOT a duplicate:
+// it animates `letterSpacing`, a property no `anim` entry touches, verified before trusting that old
+// mapping rather than repeating it. The `fxOut` exit family (11 names) went the same way, whole: zero
+// users across all eleven, with or without an `out` twin (see the note above LOOPS).
 //
-// Deprecated, not deleted. Nothing in this library names one, but a fork might; the notice ships first
-// and the removal comes after. docs/MISTAKES.md #364.
-export const DEPRECATED_FX = {
-  fadeIn: 'anim:"fade"', fadeUp: 'anim:"rise"', fadeDown: 'anim:"slide-down"',
-  flyLeft: 'anim:"slide-left"', flyRight: 'anim:"slide-right"',
-  popIn: 'anim:"pop"', zoomIn: 'anim:"scale"', expandIn: 'anim:"scale"',
-};
-export const DEPRECATED_EXIT = {
-  fadeOut: 'out:"fade"', fadeOutUp: 'out:"slide-up"', fadeOutDown: 'out:"slide-down"',
-  flyOutLeft: 'out:"slide-left"', flyOutRight: 'out:"slide-right"',
-  popOut: 'out:"pop"', zoomOut: 'out:"scale"', blurOut: 'out:"defocus"',
-};
+// The rest STAY, and the reason is worth stating: a kinetic preset only works on a TEXT layer with
+// `split`, so `bounceIn` is NOT a duplicate of `preset:"bounce"` on an image, it is the only way to
+// bounce one. `zoomBlur`, `blurIn`, `elasticIn`, `dropIn`, `spinIn`, `rollIn`, `skewIn`, `flipInX/Y`,
+// `clipUp`, `maskReveal`, `revealUp`, `expandIn`, `tiltIn`, `driftIn`, `glitchIn`, `foldIn`, the four
+// `char*` effects and every idle loop all survive that test: no `anim`/`out`/`preset` reaches what
+// they do.

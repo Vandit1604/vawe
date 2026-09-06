@@ -411,9 +411,9 @@ what the film says it is, and records a receipt that goes stale the moment the s
 is ordered because each decision constrains the next: beats → the anchor → the per-beat effect →
 type/colour/layout/imagery → density → show-or-tell → what holds it across cuts → restraint → sound.
 
-**`make arsenal Q="<what you mean, in plain english>"`** searches all 804 named things at once and
+**`make arsenal Q="<what you mean, in plain english>"`** searches all 786 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
-`docs/EFFECTS.md`, 710 effects across 57 families). Reach for it before you invent anything. The measured cost
+`docs/EFFECTS.md`, 692 effects across 56 families). Reach for it before you invent anything. The measured cost
 of not doing so: the `{type:"beat"}` blueprint mechanism is used by 3 films in the whole library, and
 22 of its 29 beats have never appeared in one (measured 2026-09-06). Two things changed that day so the
 number can move: 10 of the 29 are MINED from studied reference films rather than invented (`make mine`,

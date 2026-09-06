@@ -65,18 +65,17 @@ ok(!disc.some((w) => /'C'|text: 'C'/.test(w)) && childWin.filter((w) => /DISCARD
 const clean = lintData(read('formats/scene/sample.json'));
 ok(clean.length === 0, `clean sample.json is silent (got ${clean.length}: ${clean.join('; ') || 'none'})`, 'sample-clean');
 
-// --- fxErrors: named GSAP effect/exit names must be real, and exit/split ownership must not clash (#82) ---
+// --- fxErrors: named GSAP effect names must be real, and split ownership must not clash (#82) ---
+// `fxOut` (the named GSAP exit family) was deleted for zero users (#364); it is an unknown prop now,
+// caught by core/layers/vocabulary.js checkLayer, not by fxErrors.
 const fxBad = fxErrors({ layers: [
   { type: 'text', text: 'a', fx: 'poprIn', duration: 2 },                    // typo entrance
-  { type: 'text', text: 'b', fxOut: 'blurout', out: 'rush', duration: 2 },   // typo exit + out clash
   { type: 'text', text: 'c', split: 'char', splitText: { mask: true }, duration: 2 }, // two splitters
 ] });
 ok(fxBad.some((e) => /fx "poprIn" is not a known effect/.test(e)), 'fxErrors: unknown fx name (with did-you-mean)', 'fx-unknown-name');
-ok(fxBad.some((e) => /fxOut "blurout" is not a known exit/.test(e)), 'fxErrors: unknown fxOut name', 'fx-unknown-fxout-name');
-ok(fxBad.some((e) => /both "out" and "fxOut"/.test(e)), 'fxErrors: out + fxOut clash', 'fx-out-fxout-clash');
 ok(fxBad.some((e) => /both "split" and "splitText"/.test(e)), 'fxErrors: split + splitText clash', 'fx-split-splittext-clash');
-const fxClean = fxErrors({ layers: [{ type: 'text', text: 'a', anim: 'none', fx: ['blurIn', 'float'], fxOut: 'flyOutLeft', duration: 2 }] });
-ok(fxClean.length === 0, `fxErrors: valid fx/fxOut is silent (got ${fxClean.join('; ') || 'none'})`, 'fx-clean-silent');
+const fxClean = fxErrors({ layers: [{ type: 'text', text: 'a', anim: 'none', fx: ['blurIn', 'float'], duration: 2 }] });
+ok(fxClean.length === 0, `fxErrors: valid fx is silent (got ${fxClean.join('; ') || 'none'})`, 'fx-clean-silent');
 
 // --- resolveEasing: an unknown name THROWS. #83 made it fall back to easeOutCubic and this assertion
 // pinned that; #367 reversed it, because a curve quietly swapped for another renders a plausible frame

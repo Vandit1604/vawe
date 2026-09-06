@@ -239,8 +239,8 @@ const round3 = (v) => (typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
 // how `cuts` are PRESENTED (whole-beat swaps), so its boundaries are the cut times already counted.
 const boundaries = [];
 // How far a declared handover may sit from the boundary time recorded here. A cut IS its time; a seam
-// and a lowered transition are recorded at the MIDDLE of their blend, while `matches` hangs on the mark
-// itself, so the two are half a blend apart by construction rather than by drift.
+// and a lowered transition are recorded at the MIDDLE of their blend, while a `becomes` hangs on the
+// mark itself, so the two are half a blend apart by construction rather than by drift.
 const boundTol = new Map();
 const boundary = (t, tol) => { boundaries.push(t); boundTol.set(t, Math.max(boundTol.get(t) ?? 0, tol)); };
 for (const c of d.cuts || []) if (c && typeof c.t === 'number') boundary(c.t, EPS);
@@ -326,8 +326,7 @@ const poseAt = (l, t) => {
 // `becomes` is not a claim the author makes and the gate has to trust. The engine PRODUCES the match:
 // resolveBecomes (formats/scene/scene.js) carries the outgoing form's centre, size and rotation onto
 // the incoming layer's opening pose, and core/validate/validate.mjs refuses a handover whose two halves do not
-// meet. `matches` is the same handover hung on a named joint, and core/timeline/junctions.js retimes both
-// layers onto it so the joint owns the only copy of the number.
+// meet.
 //
 // A handover therefore SPANS a boundary and CHANGES there, both by construction: the form persists
 // and its identity is what turns over. That is the strongest state change a junction can carry, not a
@@ -342,11 +341,8 @@ const addLink = (A, B, at) => {
   handovers.push({ A, B, at });
 };
 for (const A of d.layers || []) if (A && typeof A.becomes === 'string') addLink(A, byId[A.becomes], null);
-for (const M of Array.isArray(d.matches) ? d.matches : []) if (M && typeof M === 'object') addLink(byId[M.from], byId[M.to], M.at);
-// WHEN the handover lands. `matches` names a joint and the joint is authoritative, because the retiming
-// that lines the two layers up happens at boot and this gate reads the authored scene. A bare `becomes`
-// carries no joint, so it is where the two forms meet, a point validate already keeps them within
-// half a second of.
+// WHEN the handover lands. A bare `becomes` carries no joint, so it is where the two forms meet, a
+// point validate already keeps them within half a second of.
 const handoverAt = (L) => {
   if (L.at != null) {
     try { return isJunctionRef(L.at) ? resolveJunction(L.at, jTable) : (Number.isFinite(+L.at) ? +L.at : null); }
@@ -384,7 +380,7 @@ const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text)}"` : ''
 const carriedMsg = (spanning) => (spanning.length
   ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there. A fixed logo or watermark riding the cut is furniture, not a spine.`
   : `not one content layer is visible on both sides of any boundary. Every beat is born and dies inside itself.`);
-const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give both forms an `id` and declare `"matches": [{"at": "cut@0", "from": "<the X>", "to": "<the Y>"}]`. The joint retimes them onto itself and the engine carries the centre, size and rotation across (core/timeline/junctions.js). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: docs/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
+const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give the outgoing layer an `id` for `becomes` to name and declare `"becomes": "<the Y\'s id>"` on it, at the boundary time. The engine carries the centre, size and rotation across onto the incoming layer\'s opening pose (formats/scene/scene.js resolveBecomes; core/validate/validate.mjs refuses a handover whose two halves do not meet). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: docs/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
 
 // `acrossBeats: true` attaches a layer to the camera instead of its beat wrapper, keeping its authored
 // window, so a spine is expressible whatever the cut style. It replaced the advice that used to live

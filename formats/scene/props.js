@@ -22,8 +22,10 @@ export const PROPS = {
   anchor: {}, at: { when: 'anchor' }, dx: { when: 'anchor' }, dy: { when: 'anchor' },
   // split treatments the orchestrator applies at build (the per-frame half is core/tracks/)
   ransom: {}, ransomSeed: { when: 'ransom' }, circle: {}, text: {},
-  // the GSAP hooks (applyGsapHooks): each is its own opt-in surface
-  morph: {}, fx: {}, fxOut: {}, motionPath: {}, physics: {}, parts: {}, splitText: {},
+  // the GSAP hooks (applyGsapHooks): each is its own opt-in surface. `fxOut` (the named GSAP exit
+  // family) is gone: it measured zero users, all eleven names, and every one duplicated an `out`
+  // preset or had none the library ever reached for (docs/MISTAKES.md #364).
+  morph: {}, fx: {}, motionPath: {}, physics: {}, parts: {}, splitText: {},
   // sound derived from the film itself (buildSfx): a keystroke train exists only where text types
   typing: {}, keyClicks: { when: 'typing' }, keyCue: { when: 'typing' }, keyGain: { when: 'typing' },
 };

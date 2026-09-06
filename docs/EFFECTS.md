@@ -263,24 +263,6 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 | `snappy` | decisive, no overshoot. The cut lands and stops |
 | `spring` | a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number |
 
-## GSAP exits  `[exit]`
-
-`fxOut`: pair every entrance with a directional exit.
-
-| name | what / when |
-|---|---|
-| `blurOut` | defocuses away without moving, correct for faces, cards and dense grids, where sliding reads as chaos |
-| `collapseOut` | folds down flat to a line from its top edge, terminal output, rows, receipts |
-| `dropOut` | falls out of the bottom of the frame under gravity, a thing discarded |
-| `fadeOut` | plain opacity fade to nothing, the neutral exit, safe under any cut |
-| `fadeOutDown` | accelerates downward as it fades, the exit that pairs with fadeUp |
-| `fadeOutUp` | accelerates upward off its mark as it fades, the exit that pairs with fadeDown |
-| `flyOutLeft` | throws off the left edge, gathering speed. The exit that pairs with flyRight |
-| `flyOutRight` | throws off the right edge, gathering speed, the exit that pairs with flyLeft |
-| `popOut` | shrinks away with a small anticipation swell first, the mirror of popIn, playful |
-| `spinOut` | rotates a half turn while shrinking away, winding up before it goes, the mirror of spinIn |
-| `zoomOut` | swells past the camera as it fades, product focus, the leaving beat gets out of the way |
-
 ## Generators (the playground)  `[generator]`
 
 Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.
@@ -674,7 +656,7 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 
 ## GSAP named effects  `[per-layer/text]`
 
-`fx` (enter) / `fxOut` (exit); per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`
+`fx` on a layer, pair with `anim:"none"` so GSAP owns the transform; per-letter on a `split` layer. `{ "anim":"none", "fx":"charOvershoot" }`
 
 | name | what / when |
 |---|---|
@@ -692,19 +674,13 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `dropIn` | as bounceIn but falling from much further up, so it lands harder |
 | `elasticIn` | springs from tiny and wobbles several times before it stills, over a slow 1.1s, only ever playful, never for a serious brand |
 | `expandIn` | letters start crushed together and spread out of blur to their real tracking, an opening line settling into place |
-| `fadeDown` | as fadeUp but settling downward from above, for anything hanging off a header |
-| `fadeIn` | plain opacity fade, nothing moves. The neutral default when motion would distract |
-| `fadeUp` | lifts 60px into place while fading. The workhorse entrance for body copy and cards |
 | `flipInX` | hinges up into the frame about its horizontal axis, cards and panels, needs 3D perspective |
 | `flipInY` | hinges in about its vertical axis, like a page turning. Cards and panels, needs 3D perspective |
 | `float` | LOOP, never settles: rises and sinks 18px forever, idle life for a hero object |
-| `flyLeft` | travels in from off the left edge and decelerates hard, pair with a leftward exit |
-| `flyRight` | travels in from off the right edge and decelerates hard, pair with a rightward exit |
 | `foldIn` | unfolds downward from its top edge and springs level, dropdowns, panels, receipts; needs 3D perspective |
 | `glitchIn` | snaps in through five hard steps, sheared and offset. No smoothing at all, alarm and glitch beats only |
 | `heartbeat` | LOOP, never settles: a fast 12% throb twice a second. Urgency, live counts, recording dots |
 | `maskReveal` | a hard left-to-right wipe, fast then a long settle. The premium editorial reveal for a headline |
-| `popIn` | springs up from 60% and overshoots slightly past full size before settling, playful, for badges and chips |
 | `pulse` | LOOP, never settles: breathes 6% larger and back every second, draws the eye to a CTA |
 | `revealUp` | clipUp plus a short lift and fade, so the layer rises as it is uncovered, the fuller version of clipUp |
 | `rollIn` | rolls in from the left, its rotation unwinding as it travels, reads as a wheel arriving |
@@ -714,7 +690,6 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `tiltIn` | swings open about its left edge, like a door facing the camera, needs 3D perspective |
 | `wobble` | LOOP, never settles: rocks 3 degrees each way, restless, for a warning or a toy |
 | `zoomBlur` | rushes back from too close while the defocus resolves. A camera pulling focus, premium hero beat |
-| `zoomIn` | grows from a fifth of its size on a plain decelerate, no overshoot. Bigger travel than popIn, calmer landing |
 
 ## Spectacle devices  `[scene]`
 
@@ -1139,4 +1114,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_710 effects across 57 families. Regenerate: `make effects`._
+_692 effects across 56 families. Regenerate: `make effects`._

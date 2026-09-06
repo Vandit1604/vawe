@@ -242,15 +242,16 @@ const GSAP_PLUGINS = {
 // silent-substitution failure that shipped once already, when the boot→preload extraction dropped `parts`
 // from a hand-typed list (docs/MISTAKES.md #148).
 //
-// The plugin fields derive from GSAP_PLUGINS above, so that half cannot drift at all. The other five are
-// read in modules this one does not import (applyGsapHooks in formats/scene/scene.js for morph, fx, fxOut,
+// The plugin fields derive from GSAP_PLUGINS above, so that half cannot drift at all. The other four are
+// read in modules this one does not import (applyGsapHooks in formats/scene/scene.js for morph, fx,
 // parts, and core/layers/composition.js for comp) and are stated here instead. Stating them is safe only
 // because scripts/gates/lib-test.mjs RE-DERIVES the whole set from the source that does the reading and
 // fails when the two disagree; the list on its own is exactly what #148 was.
 //
 // `gsap` was the ninth name and is gone: the `gsap:{from,to}` field was removed in #208 and no code has
-// read it since, so it loaded a tween engine for a prop with no reader.
-const GSAP_HOOK_PROPS = ['morph', 'fx', 'fxOut', 'parts', 'comp'];
+// read it since, so it loaded a tween engine for a prop with no reader. `fxOut` went the same way: the
+// exit family it dispatched to measured zero users and was removed whole (docs/MISTAKES.md #364).
+const GSAP_HOOK_PROPS = ['morph', 'fx', 'parts', 'comp'];
 export const GSAP_PROPS = Object.freeze([...GSAP_HOOK_PROPS, ...Object.keys(GSAP_PLUGINS)]);
 const GSAP_TRIGGER_RE = new RegExp(`"(${GSAP_PROPS.join('|')})"\\s*:`);
 
@@ -271,7 +272,7 @@ export async function preloadGsap(data) {
   // then borrows that same tab and draws frames 0, 6, 12, … from a timeline whose playhead has already
   // been at the last frame. So one frame in six came back with every completed tween stuck at its end
   // state, which read as a 366-cell grid blinking five times a second (docs/MISTAKES.md #370).
-  // It hits every GSAP-driven field alike (fx · fxOut · motionPath · physics · splitText · parts · comp);
+  // It hits every GSAP-driven field alike (fx · motionPath · physics · splitText · parts · comp);
   // `parts` only made it loud by putting 80 elements on one tween.
   try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); window.gsap.globalTimeline.autoRemoveChildren = false; registerGsapEffects(window.gsap); } catch (e) {}
   for (const [field, p] of Object.entries(GSAP_PLUGINS)) {
