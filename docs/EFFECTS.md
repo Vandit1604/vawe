@@ -127,12 +127,19 @@ named colour+kind(+angle) combos for the `gradient` background preset: `{"preset
 
 | name | what / when |
 |---|---|
+| `blurResolveHook` | a hook whose type arrives smeared with motion blur and snaps into focus, never sliding or fading |
 | `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
+| `cardFan` | cards arrive from one side and fan open in perspective around a fixed anchor |
+| `cellMosaic` | a grid of mixed cells that slides as one surface while each cell keeps its own content |
+| `chipConverge` | chips scatter in from every side and then converge onto one point |
 | `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
+| `containerFill` | a fixed frame that never moves while chips fill it in one at a time |
 | `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
+| `dialogueAccumulate` | sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom |
 | `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
 | `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
 | `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
+| `listBuildRows` | a vertical list that grows one row at a time under a fixed left rule |
 | `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
 | `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
 | `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
@@ -145,7 +152,10 @@ named colour+kind(+angle) combos for the `gradient` background preset: `{"preset
 | `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
 | `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
 | `verdictProof` | claim proven: typing command + note + tone verdict chip |
+| `viewportTrio` | the same subject shown at three sizes at once, the "it is really finished" payoff shot |
 | `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
+| `wordWipe` | an oversized word crosses the whole frame motion-blurred, and its passage is the transition |
+| `wordmarkAssemble` | the brand mark settles from scattered letters while small tiles drift at a different depth behind it |
 
 ## Camera dials  `[camera]`
 
@@ -879,6 +889,20 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `last` | starts at the last unit and runs backwards to the first, pair it with a right-to-left exit |
 | `random` | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
 
+## Theme look keys  `[theme]`
+
+A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the seven keys it accepts.
+
+| name | what / when |
+|---|---|
+| `backdrop` | ordered bg preset names the brand turns through, one window per beat |
+| `cues` | the audio cue names the brand reaches for |
+| `cuts` | the default and accent cut/transition names the brand favours |
+| `field` | grain and vignette defaults for the backdrop |
+| `layout` | the anchor band (left/center/right) and margin every beat composes against |
+| `marks` | the logo path plus its end-card and headline-adjacent sizes |
+| `scale` | type sizes at 16:9 for hook / headline / body / caption |
+
 ## Easings  `[timing]`
 
 `ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.
@@ -1115,4 +1139,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_693 effects across 56 families. Regenerate: `make effects`._
+_710 effects across 57 families. Regenerate: `make effects`._

@@ -1,7 +1,7 @@
 {
-  "total": 689,
-  "previewed": 336,
-  "families": 55,
+  "total": 710,
+  "previewed": 340,
+  "families": 57,
   "tags": [
     [
       "asset",
@@ -17,7 +17,7 @@
     ],
     [
       "blueprint",
-      19
+      29
     ],
     [
       "camera",
@@ -96,8 +96,16 @@
       5
     ],
     [
+      "theme",
+      7
+    ],
+    [
       "timing",
       76
+    ],
+    [
+      "top-level",
+      4
     ],
     [
       "transition",
@@ -655,13 +663,41 @@
       "mode": "table",
       "note": null,
       "noPreview": "a beat writes a whole cast of layers from content you supply. Run `make expand` to see what it writes.",
-      "count": 19,
+      "count": 29,
       "undescribed": 0,
       "entries": [
+        {
+          "name": "blurResolveHook",
+          "stem": "beat-blueprints--blurresolvehook",
+          "desc": "a hook whose type arrives smeared with motion blur and snaps into focus, never sliding or fading",
+          "scene": null,
+          "noPreview": null
+        },
         {
           "name": "cardCascade",
           "stem": "beat-blueprints--cardcascade",
           "desc": "feature grid · kinetic title + cards that pop in one after another",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cardFan",
+          "stem": "beat-blueprints--cardfan",
+          "desc": "cards arrive from one side and fan open in perspective around a fixed anchor",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cellMosaic",
+          "stem": "beat-blueprints--cellmosaic",
+          "desc": "a grid of mixed cells that slides as one surface while each cell keeps its own content",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "chipConverge",
+          "stem": "beat-blueprints--chipconverge",
+          "desc": "chips scatter in from every side and then converge onto one point",
           "scene": null,
           "noPreview": null
         },
@@ -673,9 +709,23 @@
           "noPreview": null
         },
         {
+          "name": "containerFill",
+          "stem": "beat-blueprints--containerfill",
+          "desc": "a fixed frame that never moves while chips fill it in one at a time",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "ctaEnd",
           "stem": "beat-blueprints--ctaend",
           "desc": "held end card · mark + install chip + sub + url (exitDur 0)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "dialogueAccumulate",
+          "stem": "beat-blueprints--dialogueaccumulate",
+          "desc": "sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom",
           "scene": null,
           "noPreview": null
         },
@@ -697,6 +747,13 @@
           "name": "kineticHook",
           "stem": "beat-blueprints--kinetichook",
           "desc": "hook / open loop · eyebrow + hero count-up|word + kinetic subline",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "listBuildRows",
+          "stem": "beat-blueprints--listbuildrows",
+          "desc": "a vertical list that grows one row at a time under a fixed left rule",
           "scene": null,
           "noPreview": null
         },
@@ -785,9 +842,30 @@
           "noPreview": null
         },
         {
+          "name": "viewportTrio",
+          "stem": "beat-blueprints--viewporttrio",
+          "desc": "the same subject shown at three sizes at once, the \"it is really finished\" payoff shot",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "wordBlast",
           "stem": "beat-blueprints--wordblast",
           "desc": "scale punctuation · arrives oversized, settles, drifts, leaves by growing THROUGH the frame",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wordWipe",
+          "stem": "beat-blueprints--wordwipe",
+          "desc": "an oversized word crosses the whole frame motion-blurred, and its passage is the transition",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wordmarkAssemble",
+          "stem": "beat-blueprints--wordmarkassemble",
+          "desc": "the brand mark settles from scattered letters while small tiles drift at a different depth behind it",
           "scene": null,
           "noPreview": null
         }
@@ -4364,6 +4442,68 @@
       ]
     },
     {
+      "id": "theme-look-keys",
+      "title": "Theme look keys",
+      "tag": "theme",
+      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the seven keys it accepts.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme's whole look",
+      "count": 7,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "backdrop",
+          "stem": "theme-look-keys--backdrop",
+          "desc": "ordered bg preset names the brand turns through, one window per beat",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cues",
+          "stem": "theme-look-keys--cues",
+          "desc": "the audio cue names the brand reaches for",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cuts",
+          "stem": "theme-look-keys--cuts",
+          "desc": "the default and accent cut/transition names the brand favours",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "field",
+          "stem": "theme-look-keys--field",
+          "desc": "grain and vignette defaults for the backdrop",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "layout",
+          "stem": "theme-look-keys--layout",
+          "desc": "the anchor band (left/center/right) and margin every beat composes against",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "marks",
+          "stem": "theme-look-keys--marks",
+          "desc": "the logo path plus its end-card and headline-adjacent sizes",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "scale",
+          "stem": "theme-look-keys--scale",
+          "desc": "type sizes at 16 · 9 for hook / headline / body / caption",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "easings",
       "title": "Easings",
       "tag": "timing",
@@ -4707,6 +4847,47 @@
           "stem": "time-remaps-the-layer-s-own-clock--whip",
           "desc": "SPEED RAMP · crawls at 20% speed, whips through the middle at about 530%, lands slow. The AE three-key ramp, for a dull passage you want crossed fast",
           "scene": "/assets/effects/time-remaps-the-layer-s-own-clock--whip.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "film-energy",
+      "title": "Film energy",
+      "tag": "top-level",
+      "intro": "One word at the top of the scene sets the default speed curve for every cut and seam that names no `timing`. `energy:\"brand\"` gives the whole film the house speed ramp; `calm`, `hype` and `tense` shift the whole film's velocity at once. An explicit `timing` on a cut always wins.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "brand",
+          "stem": "film-energy--brand",
+          "desc": "the house slow-fast-slow speed ramp on every cut. Directed and confident, the default to reach for",
+          "scene": "/assets/effects/film-energy--brand.json",
+          "noPreview": null
+        },
+        {
+          "name": "calm",
+          "stem": "film-energy--calm",
+          "desc": "unhurried · every cut decelerates into place. Premium, editorial, a film with room to breathe",
+          "scene": "/assets/effects/film-energy--calm.json",
+          "noPreview": null
+        },
+        {
+          "name": "hype",
+          "stem": "film-energy--hype",
+          "desc": "decisive · cuts land and stop with no drift. Launch-reel energy, product drops, announcements",
+          "scene": "/assets/effects/film-energy--hype.json",
+          "noPreview": null
+        },
+        {
+          "name": "tense",
+          "stem": "film-energy--tense",
+          "desc": "restless · cuts accelerate away. Urgency, countdowns, a film that will not sit still",
+          "scene": "/assets/effects/film-energy--tense.json",
           "noPreview": null
         }
       ]
