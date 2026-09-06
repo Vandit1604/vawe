@@ -747,6 +747,7 @@
    "size": 80,
    "weight": 590,
    "color": "var(--text)",
+   "fit": true,
    "x": 150,
    "y": 440,
    "start": 38.2,
