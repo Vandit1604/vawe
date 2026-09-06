@@ -7029,7 +7029,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // A GATE THAT DOES NOT EXIST. The tag reads exactly as authoritative as a true one, which is why
     // this has to be mechanical: nobody re-checks a path in a heading they have read fifty times.
     fs.writeFileSync(claude, savedClaude.replace(
-      '`[gated: scripts/gates/author-check.mjs#no-authored-motion]`',
+      '`[gated: scripts/gates/author-check.mjs#no-storyboard]`',
       '`[gated: scripts/gates/no-such-gate.mjs]`'));
     const ghost = run();
     ok('rungs: a tag naming a gate that does not exist is REFUSED', ghost.code === 1);
@@ -7040,7 +7040,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // real prose about silence, emitting no finding code at all. It emits them now (see the sound-gate
     // block below), which is what let the SILENCE section leave [eye].
     fs.writeFileSync(claude, savedClaude.replace(
-      '`[gated: scripts/gates/author-check.mjs#no-authored-motion]`',
+      '`[gated: scripts/gates/author-check.mjs#no-storyboard]`',
       '`[gated: scripts/gates/author-check.mjs#no-such-code]`'));
     const wrongCode = run();
     ok('rungs: a gate named for a code it never emits is REFUSED', wrongCode.code === 1);
@@ -7049,11 +7049,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // AN UNTAGGED SECTION. [eye] is the honest default and costs one word, so the only reason a section
     // of CLAUDE.md carries no rung is that nobody asked the question.
     fs.writeFileSync(claude, savedClaude.replace(
-      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE  `[live: scripts/live/scene-live.mjs]`',
-      '## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE'));
+      '## Changing the ENGINE, not a film?  `[live: scripts/live/craft-live.mjs]`',
+      '## Changing the ENGINE, not a film?'));
     const bare = run();
     ok('rungs: an untagged section of CLAUDE.md is REFUSED', bare.code === 1);
-    ok('rungs: and it is named, so the fix is one word', /untagged: THE BACKGROUND MUST MOVE/.test(bare.out));
+    ok('rungs: and it is named, so the fix is one word', /untagged: Changing the ENGINE, not a film\?/.test(bare.out));
 
     // THE [live] RUNG'S FIRST OCCUPANT, asserted here rather than only in the rung count. A hook that
     // fires on everything gets turned off, so silence on a film doing fine is as much the contract as

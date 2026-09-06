@@ -106,3 +106,18 @@ Pick ONE as the register; it sets colors/typography/components together. Don't m
 A register that can't be justified by the brand's own site is the wrong one, restudy, don't guess.
 
 Effects to move over these surfaces: [EFFECTS.md](../EFFECTS.md) · skills: `vawe-effects` · `vawe-animation` · `vawe-camera`.
+
+## `static-bg`: the backdrop is always a decision
+
+`bg` is required, so a static field is a choice, never a default. The cheap fix: list windows in the
+order the film turns, give none of them a `from`/`to`, and the engine binds window `i` to the joint
+after it (`core/timeline/junctions.js`), so the cuts you already wrote own the numbers. Judge motion
+across 4+ frame timestamps, never on one still: a still hides speed, scale and direction
+([`../MISTAKES.md`](../MISTAKES.md) #155). `node scripts/dev/library-stats.mjs` prints how many
+gate-visible scenes still paint one window for the whole runtime; never quote that count from memory.
+
+## `ruled-grid`: opt in, don't default into one
+
+A ruled line grid is a design tool's canvas, not a film's. Want one? Write it explicitly: `grid: true`
+on a `softwash` fx, with `gridColor`, `gridAlpha` and `gridSpacing` beside it, and be able to say in one
+clause what the grid is doing. No preset bakes one in silently.
