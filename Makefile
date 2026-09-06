@@ -955,6 +955,17 @@ impeccable: ## impeccable detector on raw HTML fragment(s) (D=<file...>)
 blueprints: ## catalog the directed-motion beat blueprints (blueprints/index.mjs)
 	node scripts/site/blueprints-catalog.mjs
 
+# make previews [ONLY=<id>]: one rendered preview per beat blueprint (site/public/blocklib/beats/), so
+# `make blueprints` shows a picture beside each name instead of only a sentence. Draft, 2 workers: this
+# renders every blueprint back to back and other agents render too.
+previews: ## render one preview clip + sheet per beat blueprint (ONLY=<id>[,<id>...])
+	node scripts/dev/previews.mjs $(if $(ONLY),--only=$(ONLY))
+
+# make preset-sheets [ONLY=<name>]: one rendered showcase per reference profile (SELECTION.md Part 2),
+# site/public/blocklib/presets/. "an adjective is vague; a brand is a spec" made visible, not just named.
+preset-sheets: ## render one showcase clip + sheet per reference profile (ONLY=<name>[,<name>...])
+	node scripts/dev/preset-sheets.mjs $(if $(ONLY),--only=$(ONLY))
+
 # make arsenal Q="a page scrolling under a tilt", ONE ranked search across every vocabulary the engine
 # names: beats, effects, camera moves, cuts, seams, looks, anims. It owns no list; `defineRegistry`
 # already carries each name's kind, slot and blurb, and blueprints/index.mjs already carries a prose

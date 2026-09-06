@@ -262,3 +262,9 @@ assets/gradients/
 # Ransom feature is local-only (Resource Boy licence): its demo scene html and sprites are not shipped
 formats/scene/_ransom-intro-page.html
 assets/ransom/
+
+# site/public/blocklib/: `make previews` / `make preset-sheets` regenerate every mp4/png on demand
+# (docs/CRAFT/BLUEPRINTS.md, docs/CRAFT/SELECTION.md), the same rule as out/**/*.mp4 above: a video
+# instance is not the framework. The manifests (index.json) ARE committed, same as scenes-json's split.
+site/public/blocklib/**/*.mp4
+site/public/blocklib/**/*.png
