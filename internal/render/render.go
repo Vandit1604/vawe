@@ -40,6 +40,18 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	} else {
 		return fmt.Errorf("read data: %w", err)
 	}
+
+	// block/beat/comp sugar (core/expand.js) resolves SERVER-SIDE here, before the browser ever sees
+	// the JSON: the render page cannot reach it itself (internal/render/expand.go says why). A no-op,
+	// unchanged dataAbs, for the overwhelming majority of scenes that carry no sugar.
+	expandedAbs, expandedCleanup, err := expandSugar(repoRoot, dataAbs)
+	if err != nil {
+		return err
+	}
+	if expandedCleanup != "" {
+		defer os.Remove(expandedCleanup)
+	}
+	dataAbs = expandedAbs
 	// fps resolution: explicit CLI flag wins; else the scene's own "fps"; else the DRAFT SPLIT.
 	//
 	// A final render ships at 60 and an iteration pass runs at 30. The two rates are not a preference,
