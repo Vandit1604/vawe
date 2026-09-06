@@ -52,36 +52,6 @@
    "dur": 0.4
   }
  ],
- "cameraMove": [
-  {
-   "move": "slowPush",
-   "start": 0.1,
-   "dur": 4.2,
-   "from": 1,
-   "to": 1.05
-  },
-  {
-   "move": "punchIn",
-   "start": 10.1,
-   "dur": 0.34,
-   "from": 0.9,
-   "to": 1
-  },
-  {
-   "move": "slowPush",
-   "start": 16.1,
-   "dur": 3.9,
-   "from": 1.04,
-   "to": 1
-  },
-  {
-   "move": "punchIn",
-   "start": 20.05,
-   "dur": 0.34,
-   "from": 0.9,
-   "to": 1
-  }
- ],
  "spectacle": {
   "at": 16.1,
   "of": "growth",
@@ -1064,6 +1034,88 @@
    "duration": 2.1,
    "anim": "rise",
    "enterDur": 0.3
+  }
+ ],
+ "camera": [
+  {
+   "t": 0.1,
+   "s": 1,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 4.3,
+   "s": 1.05,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 10.1,
+   "s": 0.9,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 10.44,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeInExpo"
+  },
+  {
+   "t": 10.52,
+   "s": 0.96,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutQuad"
+  },
+  {
+   "t": 11.02,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutElastic"
+  },
+  {
+   "t": 16.1,
+   "s": 1.04,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 20,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutCubic"
+  },
+  {
+   "t": 20.05,
+   "s": 0.9,
+   "x": 0,
+   "y": 0
+  },
+  {
+   "t": 20.39,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeInExpo"
+  },
+  {
+   "t": 20.47,
+   "s": 0.96,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutQuad"
+  },
+  {
+   "t": 20.97,
+   "s": 1,
+   "x": 0,
+   "y": 0,
+   "ease": "easeOutElastic"
   }
  ]
 }

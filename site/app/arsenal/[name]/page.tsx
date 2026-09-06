@@ -100,7 +100,7 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
                 </div>
                 <pre className="bx-code mono">{snippet}</pre>
                 <p className="bx-note">
-                  <span className="mono">make expand</span> resolves this into real layers.
+                  This resolves into real layers automatically at load, no separate step.
                   <b> x and y are the block&apos;s top-left corner</b>, not its centre.
                 </p>
               </section>

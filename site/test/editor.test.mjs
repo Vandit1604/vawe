@@ -116,23 +116,19 @@ test("a scene loads, plays and seeks", async () => {
   await page.close();
 });
 
-test("a scene using build-time sugar is refused, and the refusal names the fix", async () => {
+test("a scene using build-time sugar boots directly, no separate expand step", async () => {
   const page = await open();
   await settled(page);
-  // saas-hero-launch is SHIPPED in the picker and carries four `"type":"block"` layers. A browser
-  // cannot run `make expand`, so this is the one path where the engine's own advice is unreachable
-  // and the editor has to say something truer.
+  // saas-hero-launch is SHIPPED in the picker and carries four `"type":"block"` layers. This used to
+  // be refused (a browser had no shell to run `make expand`); core/expand.js now resolves the same
+  // sugar at load, vendored into the site by scripts/site/site-engine.mjs, so it boots like any scene.
   await page.select("#ed-scene", "saas-hero-launch");
-  await page.waitForSelector(".ed-problem", { timeout: BOOT_MS });
-  const text = await problem(page);
-  assert.match(text, /build-time sugar/);
-  assert.match(text, /make expand/);
-  assert.match(text, /"type": "block" → logoWall/);
-  assert.match(text, /line \d+/, "the refusal must point at a line");
-  // and the stage must not go black: the last scene that rendered keeps playing
-  assert.match(await status(page), /the stage holds the last scene that rendered/);
-  const jump = await page.$(".ed-goto");
-  assert.ok(jump, "no way to get from the problem to the line that caused it");
+  await settled(page);
+  const meta = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engine?.meta);
+  assert.ok(meta, "window.__engine.meta never appeared — the engine did not boot");
+  assert.ok(meta.totalFrames > 0);
+  assert.equal(await problem(page), null, "a build-time-sugar scene must not raise a problem any more");
+  assert.match(await status(page), /rendering live/);
   await page.close();
 });
 
