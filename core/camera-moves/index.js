@@ -1,7 +1,7 @@
 import { defineRegistry, withBlurb, blurbsOf } from '../registry/registry.js';
 import { resolveCameraMove } from '../registry/vocab.js';
 // core/camera-moves/index.js: CAMERA CHOREOGRAPHY, the runner. Every move is its own file, pure
-// (params) → camera-keyframe array, the same shape core/sequence.js `cameraAt` interpolates
+// (params) → camera-keyframe array, the same shape core/timeline/sequence.js `cameraAt` interpolates
 // ([{t,s,x,y,rx,ry,ease}], t in absolute seconds). A move is smooth and CALCULATED instead of
 // hand-typed, and the multi-keyframe ones emit interior `ease:"linear"` automatically so a chained push
 // is velocity-CONTINUOUS (docs/MISTAKES.md #125: a chained ease-in-out pulses because it zeroes velocity
@@ -16,8 +16,9 @@ import { resolveCameraMove } from '../registry/vocab.js';
 // entry to CAMERA_MOVES with a blurb. CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS and CAMERA_REGISTRY are all
 // DERIVED from that one map, so nothing else has to be told a move now exists.
 //
-// Author sugar: `"cameraMove": { "move":"diveIn", ... }` at the scene root expands (make expand) to
-// `data.camera`. Compose legs by hand for anything these don't cover.
+// Author sugar: `"cameraMove": { "move":"diveIn", ... }` at the scene root bakes to `data.camera` at
+// load (`bakeCameraMove`, core/engine/produce.js, called from core/engine/boot.js and core/engine/expand.js). Compose legs
+// by hand for anything these don't cover.
 
 import { slowPush } from './slow-push.js';
 import { diveIn } from './dive-in.js';
@@ -39,7 +40,7 @@ export { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, trave
 // name → generator, each carrying its own catalogue row. The descriptions used to live in a hand-kept
 // map inside scripts/site/effects-catalog.mjs, which knew eight of the eleven: cameraShake, punchIn and
 // driftHold rendered as an em-dash in docs/EFFECTS.md, so three of the engine's camera moves existed and
-// could not be chosen. The blurb rides the entry non-enumerably (core/registry.js), so CAMERA_MOVES is
+// could not be chosen. The blurb rides the entry non-enumerably (core/registry/registry.js), so CAMERA_MOVES is
 // still exactly a name → function map for everything that walks it.
 export const CAMERA_MOVES = {
   slowPush: withBlurb('gentle continuous zoom in (the frame stays alive)', slowPush),
@@ -99,7 +100,7 @@ const targetsAPoint = (name, params) => TARGETING.has(name)
 export function buildCameraMove(spec, canvas = null) {
   if (!spec || !spec.move) throw new Error('cameraMove needs a "move" name');
   // A SHOT WORD resolves to a move name first ("pull back" → workspaceZoomOut), so the description a
-  // director would say is accepted in the slot the code name is accepted (core/vocab.js). A real move
+  // director would say is accepted in the slot the code name is accepted (core/registry/vocab.js). A real move
   // name passes through untouched, so nothing already authored changes.
   const move = resolveCameraMove(spec.move);
   const f = CAMERA_MOVES[move];
@@ -128,7 +129,7 @@ export function buildCameraMove(spec, canvas = null) {
 }
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
-// can say "that is a camera move" when someone writes it somewhere else. core/registry.js.
+// can say "that is a camera move" when someone writes it somewhere else. core/registry/registry.js.
 // "handheld camera feel" found nothing across all 445 named things, and `driftHold` IS that shot: a
 // held frame breathing on a sub-12px Lissajous. `handheld` is the only word a director would use for it
 // and no honest rewrite of that blurb puts it there, which is what `aka` is for.
@@ -143,14 +144,14 @@ export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(
   },
 });
 // The slot is `cameraMove.move` and not `cameraMove`: nothing reads a bare `"cameraMove": "slowPush"`,
-// bakeCameraMove (core/produce.js) reads `spec.move` off the object. The short form made `make arsenal`
+// bakeCameraMove (core/engine/produce.js) reads `spec.move` off the object. The short form made `make arsenal`
 // print a paste that throws.
 
 // A CAMERA DIAL is a top-level scene key that changes what the camera DOES rather than where it goes,
 // and until now there was no way to find one. `make arsenal` searches registries, so a film-level dial
 // was invisible to the one tool an author is told to reach for before inventing anything: you could
 // only meet `cameraBlur` by reading schema.json. Registered for exactly the reason FILTER_REGISTRY was,
-// so the search can answer for the engine and not for a hand-kept index (core/registry.js).
+// so the search can answer for the engine and not for a hand-kept index (core/registry/registry.js).
 export const CAMERA_DIAL_REGISTRY = defineRegistry('camera dial', { cameraBlur: 'cameraBlur' }, {
   slot: 'cameraBlur (a top-level boolean)',
   blurbs: {

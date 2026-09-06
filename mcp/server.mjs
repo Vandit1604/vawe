@@ -201,12 +201,12 @@ server.registerTool('vawe_capabilities', {
   const c = await catalog.capabilities();
   // Render each preset with its dials, so a caller does not just learn a name exists but how to tune
   // it. A dial set on a preset that ignores it is reported by the draft gates (dead-knob check).
-  // core/knobs.js writes a `desc` on 79 of its dials and this printed only `k.name`, so every one of
+  // core/registry/knobs.js writes a `desc` on 79 of its dials and this printed only `k.name`, so every one of
   // them was fetched across the wire and dropped on the floor — while the comment above claimed the
   // opposite. A caller learned that `stagger` exists and never that it is the rhythm offset per unit.
   // The DEFAULT goes over too, and it did not before. A caller that cannot see it either leaves the
   // dial out (fine) or writes what it guesses the default is (not fine): that guess is how a wrong
-  // number in this manifest turns into a wrong frame, and it is why core/knobs.js now reads every
+  // number in this manifest turns into a wrong frame, and it is why core/registry/knobs.js now reads every
   // kinetic default off the preset's own signature instead of keeping a second copy. `null` means the
   // preset states no default and resolves the dial at render (colorWave's two colours), so it is left
   // unsaid rather than printed as a value nobody can write.
@@ -228,7 +228,7 @@ server.registerTool('vawe_capabilities', {
     `looks (${c.looks.length}) — the register each evokes; pick the group your story is in, then one member:`,
     ...c.looks.map((l) => `  ${l.name.padEnd(20)} ${l.blurb || ''}`.trimEnd()),
     // Typed by hand, this line drifted from the manifest in both directions at once: it still offered
-    // `warmth`, removed because no pass in any of the 31 looks ever read it (core/knobs.js,
+    // `warmth`, removed because no pass in any of the 31 looks ever read it (core/registry/knobs.js,
     // docs/MISTAKES.md #351), and it omitted `colors`, the gradient-map ramp that IS the thermal and
     // chrome looks. So the tool advertised a dead dial and hid the one that matters. Read the manifest.
     knobLine('look'),
@@ -316,7 +316,7 @@ server.registerTool('vawe_draft', {
 
   (async () => {
     try {
-      const g = await pipe.gates(scenePath);          // expand + slop + ledger (browser, slow)
+      const g = await pipe.gates(scenePath);          // designspec + ledger + knobs (browser, slow)
       await pipe.render(g.target, out, { watermark: true, aspect: aspect || undefined });
       const seconds = pipe.durationOf(out);
       const auditOut = await pipe.audit(g.target);
@@ -373,8 +373,9 @@ server.registerTool('vawe_export', {
   // from the one that was approved, which is the one thing an export must never do.
   const scenePath = path.join(store.paths.scenes(),
     `${rec.id}${rec.revisions ? `.r${rec.revisions}` : ''}.json`);
-  const expanded = scenePath.replace(/\.json$/, '.expanded.json');
-  const src = fs.existsSync(expanded) ? expanded : scenePath;
+  // {"type":"block"/"beat"/"comp"} sugar expands at LOAD time now (core/engine/expand.js), so the renderer
+  // reads the source scene directly; there is no more `.expanded.json` derivative to prefer.
+  const src = scenePath;
 
   // One render per requested ratio, each to its own file. The scene's own aspect is expressed as
   // undefined (no --aspect), so a default export matches the draft exactly.

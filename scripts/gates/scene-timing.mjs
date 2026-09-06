@@ -1,7 +1,7 @@
 // scripts/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen.
 //
 // A scene JSON does not say when its layers are visible. `start` + `duration` are what the AUTHOR wrote;
-// the renderer then rewrites them. core/produce.js turns `sceneUnits` on for any cut film that is not
+// the renderer then rewrites them. core/engine/produce.js turns `sceneUnits` on for any cut film that is not
 // already choreographed, and formats/scene/scene.js (setLayerTiming) then REPLACES the duration of each
 // non-last-beat layer that is still the beat's CURRENT STATE with the run to `beatEnd + cutDur`, so the
 // beat wrapper can slide the whole beat out as one unit. A gate that reads the raw fields sees holes the
@@ -31,7 +31,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneDims } from '../../core/layout/safe.js';
 import { cameraView } from '../../core/timeline/sequence.js';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 
 export const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
 
@@ -228,17 +228,17 @@ export function inView(L, view, root = ROOT) {
 }
 
 // LOWER FIRST. The unified `transitions` surface is the documented way to declare a boundary, and the
-// engine expands it to cuts/seams/stings before it renders anything (core/transitions-lower.js). A model
+// engine expands it to cuts/seams/stings before it renders anything (core/transitions/lower.js). A model
 // of the clock that reads raw `cuts` therefore says brew-launch-act1 has no boundaries when it has four,
 // and every gate built on this model inherits that. #380 fixed eight consumers one at a time and missed
 // the ninth; lowering HERE is what makes the tenth impossible. docs/MISTAKES.md #394, #407.
 //
-// CLONED, because lowerScene mutates and `delete`s `transitions` off what it is given. That is right for
+// CLONED, because loadScene mutates and `delete`s `transitions` off what it is given. That is right for
 // the renderer, which lowers once at the top, and wrong for a gate: a check that rewrites the object it
-// is grading changes what every later check sees. core/validate.mjs clones for the same reason.
+// is grading changes what every later check sees. core/validate/validate.mjs clones for the same reason.
 // Lowering is idempotent, so a caller that already lowered pays a copy and nothing else.
 export function sceneTiming(input) {
-  const d = lowerScene(structuredClone(input));
+  const d = loadScene(structuredClone(input));
   const layers = (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object');
 
   const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])

@@ -128,7 +128,7 @@ const CASES = [
   { gate: 'audit', name: 'contrast · text barely off the bg', expect: 'fail', match: /contrast/,
     scene: scene([TXT({ text: 'Nearly invisible', color: '#fbfcfd' })]) },
   // No `produced: false` here any more, and its absence is the point. This fixture used to need it:
-  // core/produce.js injects a slowPush camera (s 1 -> 1.06) over the WHOLE runtime of any scene that
+  // core/engine/produce.js injects a slowPush camera (s 1 -> 1.06) over the WHOLE runtime of any scene that
   // declares none, and verify/audit.mjs then dropped every `safe` finding on any frame where a camera
   // was moving, so an injected camera nobody wrote switched a HARD rule off for the film. The fixture
   // had to opt out of production to see the rule at all. The frame-wide exemption is gone (#451), so a
@@ -307,7 +307,7 @@ const CASES = [
   // touched, on the reading that a transition fills its time. A transition is a TREATMENT of whatever is
   // already on screen: over an empty frame it produces an empty frame. Both sides are pinned, because the
   // two paths differ in the engine and the difference is the whole point.
-  //   SINGLE ROOT (a `motion` track makes the scene choreographed, so core/produce.js withholds
+  //   SINGLE ROOT (a `motion` track makes the scene choreographed, so core/engine/produce.js withholds
   //   sceneUnits): the cut only transforms the camera root. Nothing is extended, the hole stays a hole.
   { gate: 'beatcheck', name: 'dead-air · a cut over a hole does not fill it (single-root path)', expect: 'fail', match: /dead-air/,
     scene: scene([TXT({ duration: 0.6, motion: [{ t: 0, x: 200 }, { t: 0.6, x: 240 }] }),
@@ -401,11 +401,11 @@ const CASES = [
     scene: scene([{ type: 'html', x: 200, y: 300, w: 900, h: 400, start: 0.3, duration: 2.4,
                     html: '<svg viewBox="0 0 900 400" width="900" style="--rung:14px"><rect x="0" y="0" width="900" height="400" fill="none" stroke="var(--line)" style="stroke-width:var(--rung)"/></svg>' }],
       { duration: 3, theme: 'vawe' }) },
-  // The renderer dispatched `REGISTRY[L.type] || text`, so an un-expanded `block` ran the TEXT builder,
-  // painted nothing, and shipped a blank film at exit 0 while `validate` refused the same scene. The
-  // gate looked pedantic and the renderer looked lenient; the renderer was wrong (MISTAKES #189).
-  { gate: 'validate', name: 'un-expanded build-time sugar is not a renderable layer', expect: 'fail',
-    match: /expand/,
+  // The renderer used to dispatch `REGISTRY[L.type] || text`, so an un-expanded `block` ran the TEXT
+  // builder and painted nothing, a scene that boots and ships a blank film at exit 0 while validate
+  // refused the same scene (MISTAKES #189). `block`/`beat`/`comp` now expand at LOAD time
+  // (core/engine/expand.js), so the SAME un-expanded scene must validate clean: it is correct as authored.
+  { gate: 'validate', name: 'build-time sugar validates clean (expands at load, not a two-file world)', expect: 'pass',
     scene: scene([{ type: 'block', block: 'kpiRow', x: 200, y: 400, w: 1500, start: 0.3, duration: 4.4,
                     items: [{ label: 'Routes', value: '120' }] }],
       { duration: 5 }) },
@@ -827,14 +827,14 @@ const srcCases = [
   // The snap signature was DOM-only and recorded no clip-path, so a wipe / iris / clock reveal was
   // invisible to it: `wipe-right` pointed the wrong way for months and snap said "identical" every run.
   // showcase-count opens on a rect wiped rightward, so flipping the registry entry must now be seen.
-  // Pointed at the EXPANDED sibling, which is what actually ships: the source carries un-expanded block
-  // sugar, which the renderer now refuses instead of painting nothing, so snap skips it (MISTAKES #189).
+  // `showcase-count.json` carries block sugar, expanded at LOAD time (core/engine/expand.js) rather than a
+  // committed `.expanded.json` sibling, so snap-scenes now snapshots the source directly.
   { name: 'snap · a wipe reveals in the WRONG direction', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
-    cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded']], match: /clip-path/,
-    before: () => snapBaseline(['scripts/gates/snap-scenes.mjs', 'showcase-count.expanded', '--save'],
-      'verify/snap/scenes/showcase-count.expanded.json', 'verify/snap/scenes/.font-state.json'),
-    after: () => snapRestore('verify/snap/scenes/showcase-count.expanded.json', 'verify/snap/scenes/.font-state.json') },
+    cmd: ['node', ['scripts/gates/snap-scenes.mjs', 'showcase-count']], match: /clip-path/,
+    before: () => snapBaseline(['scripts/gates/snap-scenes.mjs', 'showcase-count', '--save'],
+      'verify/snap/scenes/showcase-count.json', 'verify/snap/scenes/.font-state.json'),
+    after: () => snapRestore('verify/snap/scenes/showcase-count.json', 'verify/snap/scenes/.font-state.json') },
   // The other half of the same blindness: the background is painted into <canvas>, which no DOM
   // signature can see, so any change of bg preset, colour, speed or direction diffed as nothing.
   // formats/scene/sample.json runs the `aurora` preset; brightening it must now register.

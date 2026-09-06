@@ -5,7 +5,7 @@
 // A beat fixes MOTION and STRUCTURE, never copy/colour/brand. Those come from props + the theme, so two
 // brands using the same beat still differ (the ledger/similarity gate enforce it). Placed in a scene as
 //   { "type": "beat", "beat": "kineticHook", "start": 0.3, "dur": 5.5, "eyebrow": "...", "to": 94, ... }
-// and expanded by `make expand`. See docs/CRAFT/BLUEPRINTS.md.
+// and expanded at load (core/engine/expand.js), no separate step. See docs/CRAFT/BLUEPRINTS.md.
 import { INK, DIM, ACCENT, kineticHeadline, dollyNumber, caption, chip, panel, verdictChip, rowGroup, colGroup } from './kit.mjs';
 import { glyphText } from '../core/type/on-screen-text.js';
 

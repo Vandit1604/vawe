@@ -30,7 +30,7 @@ type/colour/layout is decided ([TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) 
 
 Vetted, static-CSS card treatments that read premium under the determinism reset. **The rule: a block holds
 only STATIC CSS. Anything that MOVES comes from a Phase-2 engine effect** (a `beam` layer, an `aurora` paint
-behind glass), never a frozen CSS `@keyframes`. Drop via `{ "type":"block", "block":"<name>", ... }` + `make expand`.
+behind glass), never a frozen CSS `@keyframes`. Drop via `{ "type":"block", "block":"<name>", ... }`, which expands at load, no separate step.
 
 | Block | What it is | Give it |
 |---|---|---|

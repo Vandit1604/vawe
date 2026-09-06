@@ -18,7 +18,7 @@ import { ANIM_NAMES } from '../../core/timeline/clips.js';
 import { PRESENTATIONS } from '../../core/cuts/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
 import { execFileSync } from 'node:child_process';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dir = path.join(repoRoot, 'formats/scene');
@@ -46,7 +46,7 @@ const scenes = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 's
   // Lowered, for the same reason `scripts/gates/coverage.mjs` lowers: a cut style or sting fx declared
   // through the unified `transitions` surface is exercised by a real scene, and counting it as a gap
   // would put an already-covered effect back in the reel (docs/MISTAKES.md #408).
-  .map((f) => { try { return lowerScene(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))); } catch { return null; } })
+  .map((f) => { try { return loadScene(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))); } catch { return null; } })
   .filter((j) => j && j.module === 'scene');
 const seen = { anim: new Set(), cut: new Set(), sting: new Set() };
 for (const j of scenes) {

@@ -31,7 +31,7 @@ import { openScene } from './scene-page.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
 import { drawtext } from './sheets.mjs';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 // The ramp lengths have ONE definition and this is it. Re-deriving the default here is how the two
 // copies drift: the `--layers` window below carried a hand-written `?? 0.4` while the engine's default
 // has been 0.3 since the snap band landed, so every per-layer window was sampled ~33% too wide.
@@ -68,9 +68,9 @@ const desc = (l) => l.text ? `"${onScreenText(l.text).slice(0, 16)}"` : (l.src ?
 export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false, ghost = false, auto = false } = {}) {
   const ENTER = enter, NENTER = n;
   // `transitions` is the documented unified surface and lowers to cuts/seams/stings before the engine
-  // renders (core/transitions-lower.js). Without this, a film that declares its boundaries the
+  // renders (core/transitions/lower.js). Without this, a film that declares its boundaries the
   // documented way was read as a film with NO boundaries. Idempotent; a no-op for raw `cuts`. #380.
-  const data = lowerScene(JSON.parse(fs.readFileSync(dataArg, 'utf8')));
+  const data = loadScene(JSON.parse(fs.readFileSync(dataArg, 'utf8')));
   const { duration } = s.meta;
   const [VW, VH] = [s.width, s.height];
 

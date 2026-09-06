@@ -40,6 +40,18 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	} else {
 		return fmt.Errorf("read data: %w", err)
 	}
+
+	// block/beat/comp sugar (core/engine/expand.js) resolves SERVER-SIDE here, before the browser ever sees
+	// the JSON: the render page cannot reach it itself (internal/render/expand.go says why). A no-op,
+	// unchanged dataAbs, for the overwhelming majority of scenes that carry no sugar.
+	expandedAbs, expandedCleanup, err := expandSugar(repoRoot, dataAbs)
+	if err != nil {
+		return err
+	}
+	if expandedCleanup != "" {
+		defer os.Remove(expandedCleanup)
+	}
+	dataAbs = expandedAbs
 	// fps resolution: explicit CLI flag wins; else the scene's own "fps"; else the DRAFT SPLIT.
 	//
 	// A final render ships at 60 and an iteration pass runs at 30. The two rates are not a preference,
@@ -64,7 +76,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// The page fetches the scene over the render server, which serves a fixed prefix set and 404s
 	// everything else. A scene sitting outside those prefixes therefore reached the browser as the
 	// literal body "not found" and was reported as malformed JSON. Refuse it here, before a browser
-	// starts, and say where a scene may live — that is the only part of the answer the author needs.
+	// starts, and say where a scene may live: that is the only part of the answer the author needs.
 	if !scene.ServeAll() && !scene.Allowed(filepath.ToSlash(rel)) {
 		return fmt.Errorf("%s is outside the paths the render server serves (%s), so the page cannot fetch it.\n"+
 			"  Move the scene under formats/scene/ (or .vawe-data/scenes/), or set VAWE_SERVE_ALL=1 for a local debug render",
@@ -132,7 +144,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 			}
 			return fmt.Errorf("%s: every captured frame is fully opaque, so %s.\n"+
 				"  The scene's backdrop is already suppressed for this export, so something in the scene "+
-				"itself covers the whole canvas — a full-bleed rect, image, paint/shader/raymarch layer or "+
+				"itself covers the whole canvas: a full-bleed rect, image, paint/shader/raymarch layer or "+
 				"group. Give it a smaller box, or drop it, and render again", flag, purpose)
 		}
 		if o.BgVideo != "" {

@@ -141,16 +141,18 @@ const isSceneJSON = (abs) => { try { return JSON.parse(fs.readFileSync(abs, 'utf
 export const LIBRARY = (f, abs) => f !== 'schema.json' && !isTemplate(f) && !DERIVATIVE.test(f) && isSceneJSON(abs);
 
 /**
- * The library PLUS its generated siblings. The named opt-in for a sweep that grades the RENDERABLE
- * artifact rather than the authored film: an `.expanded.json` is what actually renders once a scene
- * carries block/beat sugar, so a check about what reaches the screen has to walk it.
+ * The library PLUS its generated siblings (`.beatsync`, `.captioned`, `.directed`, …). The named
+ * opt-in for a sweep that grades every renderable artifact, derivatives included. `.expanded.json` is
+ * matched here for a stray leftover only: `block`/`beat`/`comp` sugar now expands at LOAD time
+ * (core/engine/expand.js), so nothing generates that suffix any more and a source scene IS the renderable one.
  */
 export const LIBRARY_WITH_DERIVATIVES = (f, abs) => f !== 'schema.json' && !isTemplate(f) && isSceneJSON(abs);
 
 // Sweeps that deliberately walk NEITHER, named here so the next reader does not "fix" them into
 // disagreeing again:
-//   audit-scenes · paints-nothing · snap-scenes  audit the renderable artifact and skip the un-expanded
-//                                                source, so they resolve source→expanded themselves.
+//   audit-scenes · paints-nothing · snap-scenes  walk LIBRARY directly: a source scene renders on its
+//                                                own now (block/beat/comp expand at load), so there is
+//                                                no derivative to resolve to.
 //   unused                                       concatenates a text corpus of SHIPPED films: it drops
 //                                                `_`-prefixed scratch, which the library keeps.
 //   similarity · layer-props · feature-audit     carry their own extra exclusions (sample.json,

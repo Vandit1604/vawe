@@ -3,11 +3,10 @@
 // shipped films; this sweeps the 179 catalog entries in blocks/, and it exists because snap-scenes
 // cannot see a block at all.
 //
-// WHY THE FILMS DO NOT COVER THE BLOCKS. `{"type":"block"}` is build-time sugar: `make expand` bakes a
-// factory's output into concrete layers and the `.expanded.json` sibling is what ships. Only 6 of 158
-// scenes still carry the sugar, and snap-scenes skips every one of them by name ("skipping un-expanded
-// source"). So every film holds layers frozen as the factory was AT AUTHORING TIME. Restyling the whole
-// chart family and the core cards moved snap-scenes not one byte: 106 identical, 0 changed, twice.
+// WHY THE FILMS DO NOT COVER THE BLOCKS. `{"type":"block"}` is build-time sugar, expanded (core/engine/expand.js)
+// at LOAD time into a factory's concrete layers, so a snap-scenes snapshot of a scene JSON hashes the
+// SOURCE, sugar and all, never what a factory currently returns. So restyling the whole chart family and
+// the core cards would move snap-scenes not one byte: identical source, identical hash, changed pixels.
 //
 // WHAT IS HASHED: the LAYER JSON each factory returns, not a rendered pixel.
 //   A factory is a pure props → layer-JSON function (the contract at the top of blocks/index.mjs), and

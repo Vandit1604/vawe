@@ -40,7 +40,7 @@
 // `sceneUnits` the engine runs every non-last-beat layer to `beatEnd + cutDur`, and this gate computes the
 // same spans, so the coverage it credits is the coverage the renderer actually produces.
 //
-// STATIC BACKGROUNDS, and why this is not measured. core/backgrounds.js paints on a canvas, so it cannot
+// STATIC BACKGROUNDS, and why this is not measured. core/backgrounds/index.js paints on a canvas, so it cannot
 // be sampled from node. So the test is structural, not pixel-based, and it comes in two tiers.
 // It FAILS on a hand-authored (`html`) window whose markup names neither `var(--t)` nor `var(--p)`: CSS
 // animation is disabled engine-wide, so those two custom properties are the only clock a fragment has, and
@@ -61,7 +61,7 @@ import path from 'node:path';
 import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timing.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 import { snippet } from '../lib/text.mjs';
-import { lowerScene } from '../../core/transitions/lower.js';
+import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
@@ -77,10 +77,10 @@ if (!d || typeof d !== 'object') { console.error(`✗ ${file} is not a scene obj
 // there is nothing here to be right or wrong about. Say so and pass, rather than inventing findings.
 if (d.module !== 'scene') { console.log(`  beat check · ${file}: not a scene module (module=${d.module ?? 'none'}), nothing to check.`); process.exit(0); }
 // The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
-// renders anything (core/transitions-lower.js), and until this line the gates did not, so a scene
+// renders anything (core/transitions/lower.js), and until this line the gates did not, so a scene
 // that declared its boundaries the documented way was read as a film with no boundaries at all.
 // Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
-lowerScene(d);
+loadScene(d);
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // ---------- the clock ----------
@@ -203,7 +203,7 @@ if (emptyBeats.length) {
 // ---------- 4. static-bg ----------
 // The flat presets are honest choices, so a single flat window is never flagged. Two things are flagged:
 // a whole film with no moving window anywhere, and hand-authored markup that has no clock to move on.
-//  and  were missing, and their case arms in core/backgrounds.js are byte-for-byte the same
+//  and  were missing, and their case arms in core/backgrounds/index.js are byte-for-byte the same
 // shape as `plain`: a base gradient and `fx: [grain]`. So a film built entirely on a flat dark field
 // escaped the warning that exists to catch exactly that, while the same film on `plain` was flagged.
 const STATIC_PRESETS = new Set(['plain', 'accentPlain', 'paper', 'dark', 'deep', 'black']);
@@ -220,7 +220,7 @@ const backdropMotion = layers.some((L) => L.shader || L.canvasFx || L.three || L
 const movingWindows = bgs.filter((b) => !(typeof b.preset === 'string' && STATIC_PRESETS.has(b.preset)));
 if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion) {
   const names = [...new Set(bgs.map((b) => b.preset))].join(', ');
-  warn('static-bg', `every bg window in this ${s(duration)} film is a flat field (${names}) and nothing behind the content ever changes. One flat window is a deliberate look; a whole video on one puts the largest area of the frame to sleep. Reach for a moving preset on at least one beat (aurora / mesh / dotmatrix / gradientWash / metallic, see core/backgrounds.js), or split \`bg\` into windows with \`t\` so the field shifts with the story.`);
+  warn('static-bg', `every bg window in this ${s(duration)} film is a flat field (${names}) and nothing behind the content ever changes. One flat window is a deliberate look; a whole video on one puts the largest area of the frame to sleep. Reach for a moving preset on at least one beat (aurora / mesh / dotmatrix / gradientWash / metallic, see core/backgrounds/index.js), or split \`bg\` into windows with \`t\` so the field shifts with the story.`);
 }
 
 // ---------- 5. beats-wrapped-as-units ----------

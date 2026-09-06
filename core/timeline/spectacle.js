@@ -1,4 +1,4 @@
-// core/spectacle.js: the film NOMINATES its loud moment, and the engine makes room for it.
+// core/timeline/spectacle.js: the film NOMINATES its loud moment, and the engine makes room for it.
 //
 // THE DEFECT THIS CLOSES. A `SPECTACLE` line was added to the authoring brief and the storyboard
 // parser reads it. Nothing consumed it. A field an author must fill and no code reads is worse than
@@ -19,7 +19,7 @@
 // the attenuation exempts. The named layer keeps its full amplitude while the film quietens around it,
 // which is the difference between a peak and a raised floor.
 //
-// WHERE THIS RUNS. First thing in the scene callback, straight after `lowerScene`, because stings and
+// WHERE THIS RUNS. First thing in the scene callback, straight after `loadScene`, because stings and
 // seams are parsed further down and layers further down still. It mutates the JSON and nothing else.
 // The same shape as resolveBecomes and resolveAnchors, so renderFrame(n) is untouched and stays a
 // pure function of n.

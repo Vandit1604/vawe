@@ -2,7 +2,7 @@
   "$schema": "https://vawe.dev/schema/registry.json",
   "name": "vawe",
   "homepage": "https://vawe.dev",
-  "usage": "Blocks and beats install as a LAYER OBJECT, not a file: append item.install.layer to the \"layers\" array of a scene JSON ({\"module\":\"scene\",…}), set x/y/start/dur, then `make expand`. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the block library. A generator installs its OUTPUT instead: item.install.layers is already-expanded layers to append, and where install.kind is \"generated-markup\" you turn item.install.options into markup (item.preview.url, or item.install.render) and paste that into a bg window.",
+  "usage": "Blocks and beats install as a LAYER OBJECT, not a file: append item.install.layer to the \"layers\" array of a scene JSON ({\"module\":\"scene\",…}), set x/y/start/dur; it expands automatically at load. Items with a files[] entry also ship a pre-expanded standalone scene that renders without the block library. A generator installs its OUTPUT instead: item.install.layers is already-expanded layers to append, and where install.kind is \"generated-markup\" you turn item.install.options into markup (item.preview.url, or item.install.render) and paste that into a bg window.",
   "items": [
     {
       "name": "blurResolveHook",

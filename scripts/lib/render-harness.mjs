@@ -87,3 +87,25 @@ export async function waitForEngine(page, { timeout = 30000, throwOnTimeout = tr
   }
   return await page.evaluate(() => (window.__engineError ? String(window.__engineError) : null));
 }
+
+const SUGAR_RE = /"type"\s*:\s*"(block|beat|comp)"/;
+
+/**
+ * bootPathFor(root, rawText, expandedScene, relFile) -> the repo-relative path to `?data=` for THIS
+ * scene: `relFile` unchanged, unless `rawText` (the scene AS AUTHORED, before expansion) carries
+ * `block`/`beat`/`comp` sugar, in which case `formats/scene/scene.js` (the render page) cannot expand
+ * it itself (its own file banner says why: a deliberate server boundary, not a bundler limit), and
+ * this writes `expandedScene` (every one of these tools already runs the scene through
+ * `loadScene`/`sceneTiming` for its own measurements, so the caller has it on hand already) to a
+ * scratch file under `.vawe-data/scenes/` and returns THAT path instead. One function so every
+ * browser-side tool that boots a scene resolves sugar the same way `./bin/vawe` does a level down in
+ * Go (internal/render/expand.go): expand before the browser ever fetches the JSON, never in it.
+ */
+export function bootPathFor(root, rawText, expandedScene, relFile) {
+  if (!SUGAR_RE.test(rawText)) return relFile;
+  const dir = path.join(root, '.vawe-data', 'scenes');
+  fs.mkdirSync(dir, { recursive: true });
+  const abs = path.join(dir, `_boot.${process.pid}.${Date.now().toString(36)}.${path.basename(relFile)}`);
+  fs.writeFileSync(abs, JSON.stringify(expandedScene));
+  return path.relative(root, abs);
+}

@@ -1,0 +1,136 @@
+// core/engine/expand.js: expandScene(data), the PURE data->data expansion of the three build-time sugar layer
+// types (`block`, `beat`, `comp`) into the real layers they produce, and loadScene(data) =
+// lowerScene(expandScene(data)), the loader every Node gate and script calls to read a scene off disk.
+//
+// NODE-ONLY BY POLICY, NOT BY CONSTRAINT: expandScene itself is pure ESM (no `fs`) and boots fine in
+// any browser that can fetch `blocks/`/`blueprints/`. The render page cannot: internal/scene's file
+// server default-denies everything outside core/themes/formats/assets/.vawe-data
+// (internal/scene/scene.go `served`), by design, because it renders scenes from strangers over MCP,
+// and this module's dependency on ~186 block/beat factories (one of which, blocks/geo.mjs, imports
+// `d3-geo` by bare specifier, resolvable only through an import map the render page does not carry)
+// sits outside that allowlist on purpose. So `formats/scene/scene.js` never imports this file: a scene
+// using this vocabulary is expanded SERVER-SIDE instead, in Node (internal/render/expand.go shells out
+// to `scripts/author/expand-blocks.mjs`, the debug CLI this file now backs), before the browser ever
+// sees the JSON. Every OTHER consumer of a scene, every gate and script, is plain Node and imports
+// `loadScene` from here directly, `core/transitions/lower.js` untouched by this dependency.
+//
+// Was scripts/author/expand-blocks.mjs, a Node-only CLI that wrote a second file (`<name>.expanded.json`)
+// nothing but this same expansion could produce, so every author worked in a two-file world: write the
+// JSON, remember to expand it, render the derivative, keep both current. That CLI is now a thin wrapper
+// around this module (still useful standalone, to eyeball what a beat/block resolves to), and every
+// gate reads the ONE source file, sugar included; the render path resolves it a level down, in Go.
+//
+// Idempotent: a scene with no block/beat/comp layers passes through unchanged, so calling this twice (a
+// gate that clones and re-derives, or a Go pre-expand followed by a gate's own loadScene) never
+// double-expands.
+import * as B from '../../blocks/index.mjs';
+import { CATALOG } from '../../blocks/catalog.mjs';
+import { BEATS } from '../../blueprints/index.mjs';
+import { bakeCameraMove } from './produce.js';
+import { frameOf } from '../layout/safe.js';
+import { lowerScene } from '../transitions/lower.js';
+
+// An AUTHOR NOTE is not an unknown-prop finding. This repo writes notes as `_`-prefixed keys everywhere
+// (`_why`, `_template`, `_camera`); `note` is the one un-prefixed alias already in use.
+const isNote = (k) => k === 'note' || k.startsWith('_');
+
+// offset a comp's authored-at-origin layer by the instance's x/y/start (group children flow, untouched).
+const shift = (layer, dx, dy, dt) => ({
+  ...layer,
+  ...(dx || layer.x != null ? { x: (layer.x ?? 0) + dx } : {}),
+  ...(dy || layer.y != null ? { y: (layer.y ?? 0) + dy } : {}),
+  start: (layer.start ?? 0) + dt,
+});
+
+// warnUnknown(fn, opts, label): an unknown-prop finding for a block/beat instance, printed (an author
+// typo a factory silently ignores, docs/MISTAKES.md #60), never thrown: the same posture `make expand`
+// always had. Reads the factory's OWN signature, so nobody maintains a second copy of its parameter list.
+function warnUnknown(fn, opts, label) {
+  const sig = fn && /\(\s*\{([^}]*)\}/.exec(fn.toString());
+  if (!sig) return;
+  const known = new Set(sig[1].split(',').map((t) => t.split(/[:=]/)[0].trim()).filter(Boolean));
+  const unknown = Object.keys(opts).filter((k) => !known.has(k) && !isNote(k));
+  if (unknown.length) console.warn(`${label} ignores ${unknown.map((u) => `\`${u}\``).join(', ')}, not a prop it accepts (known: ${[...known].join(', ')})`);
+}
+
+// expandBlock(layer) -> [rawLayer...], the factory's own output, unrecursed (the caller flatMaps back
+// through `expand` so a block emitting a comp, in theory, still resolves).
+function expandBlock(layer) {
+  const f = B.BLOCKS[layer.block];
+  if (!f) throw new Error(`unknown block "${layer.block}". known: ${Object.keys(B.BLOCKS).join(', ')}`);
+  const { type: _type, block: _block, ...opts } = layer;
+  // A namespaced entry ("searchEngine.home") resolves to a WRAPPER; walk to the family the catalog
+  // declares so introspecting its signature reads the right function (docs/MISTAKES.md).
+  const entry = CATALOG.find((e) => e.name === layer.block);
+  const famFn = entry ? B.BLOCKS[entry.family] : (layer.block.includes('.') ? B.BLOCKS[layer.block.split('.')[0]] : f);
+  warnUnknown(famFn, opts, `block "${layer.block}"`);
+  return f(opts);
+}
+
+// expandBeat(layer) -> [rawLayer...], each tagged `_beat` (see the comment on the field below).
+function expandBeat(layer) {
+  const f = BEATS[layer.beat];
+  if (!f) throw new Error(`unknown beat "${layer.beat}". known: ${Object.keys(BEATS).join(', ')}`);
+  const { type: _type, beat: _beatName, ...opts } = layer;
+  warnUnknown(f, opts, `beat "${layer.beat}"`);
+  // `_beat` names the blueprint a layer came from. Annotation-shaped (`_`-prefixed, the same
+  // convention `_why`/`_card` use), so it is invisible to prop checking, but it is the one thing
+  // direction-floor.mjs needs and lost when the raw `{type:"beat"}` layer stopped surviving to
+  // render: without it, a beat's own opaque-motion credit and "composed from blueprints" reading
+  // (docs/CRAFT/DIRECTION.md) has nothing left to recognise post-expansion.
+  return f(opts).map((l) => ({ ...l, _beat: layer.beat }));
+}
+
+// expandComp(layer, comps, stack) -> [rawLayer...], the comp's own layers shifted onto the instance's
+// x/y/start, unrecursed (the caller flatMaps back through `expand`, extending `stack` for the cycle
+// guard: a comp's layers may themselves be blocks or other comps).
+function expandComp(layer, comps, stack) {
+  const c = comps[layer.ref];
+  if (!c) throw new Error(`unknown comp "${layer.ref}". defined: ${Object.keys(comps).join(', ') || '(none)'}`);
+  if (stack.includes(layer.ref)) throw new Error(`comp cycle: ${[...stack, layer.ref].join(' → ')}`);
+  const dx = layer.x ?? 0, dy = layer.y ?? 0, dt = layer.start ?? 0;
+  return (c.layers || []).map((l) => shift(l, dx, dy, dt));
+}
+
+/**
+ * expandScene(data) -> data, mutated in place and returned. Expands every `{type:"block"}`,
+ * `{type:"beat"}` and `{type:"comp"}` layer (at any nesting depth, recursively) into the concrete
+ * layers its factory/blueprint/definition produces, bakes `cameraMove` (idempotent: a no-op if it was
+ * already baked, e.g. by core/engine/boot.js for the browser render path), and strips the top-level `comps`
+ * map. Unknown-prop findings for a block/beat instance are printed as warnings (an author typo that a
+ * factory silently ignores, docs/MISTAKES.md #60), never thrown: the same posture `make expand` always had.
+ */
+export function expandScene(data) {
+  if (!data || typeof data !== 'object') return data;
+  const comps = data.comps || {};
+
+  function expand(layer, stack) {
+    if (layer.type === 'block') return expandBlock(layer).flatMap((l) => expand(l, stack));
+    if (layer.type === 'beat') return expandBeat(layer).flatMap((l) => expand(l, stack));
+    if (layer.type === 'comp') return expandComp(layer, comps, stack).flatMap((l) => expand(l, [...stack, layer.ref]));
+    // SLOTS: a container block/comp's `children` may themselves be sugar (a `listRow` block inside a
+    // `phoneFrame` block). Descend through every nesting level; a non-sugar child passes through untouched.
+    if (Array.isArray(layer.children) && layer.children.length) {
+      return [{ ...layer, children: layer.children.flatMap((c) => expand(c, stack)) }];
+    }
+    return [layer];
+  }
+
+  data.layers = (data.layers || []).flatMap((l) => expand(l, []));
+
+  // cameraMove sugar -> data.camera. ONE implementation, core/engine/produce.js. Idempotent (it deletes the
+  // field), so calling it here after core/engine/boot.js already baked it for a browser render is a no-op.
+  if (data.cameraMove) bakeCameraMove(data, frameOf(data));
+
+  delete data.comps;
+  return data;
+}
+
+// loadScene(data): THE loader every Node consumer of a scene JSON calls (a gate, a script). Expands
+// build-time sugar BEFORE lowering the unified transitions surface, so a beat/block emitting its own
+// `transition` sugar is normalised too. formats/scene/scene.js (the render page) does not call this:
+// see the file banner for why, and internal/render/expand.go for where the same expansion happens for
+// that path instead.
+export function loadScene(data) {
+  return lowerScene(expandScene(data));
+}

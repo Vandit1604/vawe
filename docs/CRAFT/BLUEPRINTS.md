@@ -50,8 +50,9 @@ Re-render one beat after changing its factory: `make previews ONLY=<id>`.
   "sub": "of your agent's tokens are re-reads." }
 ```
 
-`make expand D=<file>` turns each `{type:"beat"}` into its real, richly-animated layers (same pipeline
-blocks use). Browse the set first: **`make blueprints`**.
+Each `{type:"beat"}` expands into its real, richly-animated layers at load (core/engine/expand.js, same
+pipeline blocks use), no separate step. Browse the set first: **`make blueprints`**; `make expand
+D=<file>` still exists to print the expanded JSON to stdout when you want to eyeball what one becomes.
 
 ## The beats (`blueprints/index.mjs`)
 
@@ -173,7 +174,7 @@ construction. Directed lives *between* soup and slideshow.
 The gold standard in this repo is **`formats/scene/brew-native.json`**, study its seams, camera push,
 `motion[]` dolly heroes, gradient+motionBlur text, cursor click, and ken. The blueprint-era worked example
 (`tokenjam-launch`) was deleted from the library; `make blueprints` prints every beat it was built from, and
-`make expand` shows what one becomes. Before authoring, watch brew-native and read
+`make expand D=<file>` (printed to stdout) shows what one becomes. Before authoring, watch brew-native and read
 [`DIRECTION.md`](DIRECTION.md), anchor on ambition, then compose.
 
 ## Adding a blueprint
@@ -213,8 +214,8 @@ The ten mined today, each in `blueprints/beats-mined.mjs`, its blurb in `bluepri
 | `viewportTrio` | Payoff | the same subject shown at three sizes at once, the "it is really finished" shot | framer-hero#2 |
 
 **How to pick one.** Run `make mine` to see the current shape clusters and their sources, run `make
-blueprints` for the props each mined beat takes, then place `{"type":"beat","beat":"<name>", ...}` and
-`make expand` it, the same as any other beat.
+blueprints` for the props each mined beat takes, then place `{"type":"beat","beat":"<name>", ...}`,
+the same as any other beat: it expands at load, no separate step.
 
 `make mine` is a CLUSTERING tool, not a code generator: it scores every studied shot's `onScreen` /
 `moves` / `trigger` text against a fixed keyword dictionary and prints which grammar + shot backs each
