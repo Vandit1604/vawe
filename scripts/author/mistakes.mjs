@@ -1,33 +1,74 @@
 // scripts/author/mistakes.mjs: ASK the mistake log instead of reading it.
 //
 //   node scripts/author/mistakes.mjs                     # the census, and why you cannot read it whole
-//   node scripts/author/mistakes.mjs "silent fallback"   # the entries that match, in full
-//   node scripts/author/mistakes.mjs --n 496             # one entry by number
-//   make mistakes [Q="…"] [N=496]
+//   node scripts/author/mistakes.mjs "silent fallback"   # the entries that match, one line each
+//   node scripts/author/mistakes.mjs --n 496             # one entry's title + lesson + what holds it
+//   node scripts/author/mistakes.mjs --n 496 --full      # the ORIGINAL prose, from git history
+//   make mistakes [Q="…"] [N=496] [FULL=1]
 //
-// WHY. docs/MISTAKES.md is 16,142 lines and 533 entries, which is 45% of every word of documentation
-// in this repo. Its own header says "Read this before authoring a brand video", and that stopped being
-// possible a long time ago: no agent ingests it, so in practice nobody reads any of it, and the file
-// that exists so a mistake is never made twice is the one file nothing consults.
+// WHY THIS FILE CHANGED SHAPE. docs/MISTAKES.md was 17,797 lines and 569 entries, 45% of every word of
+// documentation in this repo. Its own header used to say "read this before authoring", and that was
+// never true in practice: nobody ingests 17,797 lines, so the log written so a mistake is never
+// repeated was the one file nothing actually consulted. The previous version of this comment argued
+// AGAINST compressing it, on the theory that shortening an entry throws away the reasoning that stops
+// a repeat. That argument is superseded: a full-text entry nobody reads preserves nothing either, and
+// git already preserves the reasoning without asking a working file to carry both jobs at once.
 //
-// THE FIX IS NOT TO COMPRESS IT. Every entry is a real defect with a real root cause, and shortening
-// them would throw away the only part that stops a repeat: the reasoning. The entries are already
-// structured (`## #N: title`, then What / Root cause / Fix), so the file is a store that was missing
-// its reader. Ask it a question and it answers with the two or three entries that matter, in full.
+// THE CURRENT SHAPE. `scripts/author/mistakes-compact.mjs` rewrote docs/MISTAKES.md to three lines
+// per entry: the title, one lesson sentence, and what holds it now (a gate or live check, by file, or
+// "none"). The full write-up, root cause and all, is unchanged and un-lost: it lives in git at
+// ARCHIVE_HASH below, the commit taken immediately before that migration. `--full` fetches it with
+// `git show <hash>:docs/MISTAKES.md` and slices out the one entry, so the reasoning is still one
+// command away, just no longer paid for on every read that only wanted the lesson.
 //
 // Same shape as `make arsenal`, deliberately: that tool solved the identical problem for the 337 named
 // things an author cannot remember, and a second shape for the same job would be a second thing to learn.
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FILE = path.join(ROOT, 'docs/MISTAKES.md');
+
+// The commit holding the last full-prose version of docs/MISTAKES.md, set once by the migration and
+// never moved: every entry number below was resolvable against this tree the moment it was recorded.
+const ARCHIVE_HASH = '77993ff0799dcc41efd2f948204e95531a15ed9f';
+
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : d; };
 const ONE = flag('n', null);
 const LIMIT = Number(flag('limit', 3));
+const FULL = argv.includes('--full');
 const QUERY = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--')).join(' ').trim();
+
+if (FULL) {
+  if (!ONE) { console.error('✗ --full needs --n <number>: it prints one entry\'s original prose.'); process.exit(2); }
+  let archived;
+  try {
+    archived = execFileSync('git', ['show', `${ARCHIVE_HASH}:docs/MISTAKES.md`], { cwd: ROOT, maxBuffer: 64 << 20 }).toString();
+  } catch {
+    console.error(`✗ could not read docs/MISTAKES.md at ${ARCHIVE_HASH}. Is this a shallow clone?`);
+    process.exit(2);
+  }
+  const alines = archived.split('\n');
+  const aheads = alines.map((l, i) => (/^## /.test(l) ? i : -1)).filter((i) => i >= 0);
+  const AHEAD = /^## (?:#)?(\d+)[.:) ]*\s*(.*)$/;
+  let found = null;
+  for (let k = 0; k < aheads.length; k++) {
+    const m = AHEAD.exec(alines[aheads[k]]);
+    if (m && Number(m[1]) === Number(ONE)) {
+      const end = k + 1 < aheads.length ? aheads[k + 1] : alines.length;
+      found = alines.slice(aheads[k], end).join('\n').trim();
+      break;
+    }
+  }
+  if (!found) { console.error(`✗ no entry #${ONE} in the archived MISTAKES.md at ${ARCHIVE_HASH}.`); process.exit(2); }
+  console.log(`\n  ── #${ONE} · original prose, from ${ARCHIVE_HASH}\n`);
+  console.log(found);
+  console.log('');
+  process.exit(0);
+}
 
 const src = fs.readFileSync(FILE, 'utf8');
 const lines = src.split('\n');
@@ -140,10 +181,8 @@ if (!QUERY) {
   console.log(`\n  MISTAKES · ${entries.length} sections · ${lines.length} lines · ${words.toLocaleString('en-US')} words`);
   console.log(`  ${ns.length} numbered defects, #${Math.min(...ns)} to #${Math.max(...ns)}`
     + `${unnumbered.length ? `, plus ${unnumbered.length} unnumbered section(s): method notes, waiver lists, hunt summaries` : ''}\n`);
-  console.log(`  ${String(withField(/\*\*What/)).padStart(4)} carry a **What**`);
-  console.log(`  ${String(withField(/\*\*Root cause/)).padStart(4)} carry a **Root cause**`);
-  console.log(`  ${String(withField(/\*\*Fix/)).padStart(4)} carry a **Fix**`);
-  console.log(`  ${String(withField(/Gate:|gate now catches|→ \*\*Gate/i)).padStart(4)} name the gate that now catches it\n`);
+  console.log(`  ${String(withField(/^holds: (?!none$)/m)).padStart(4)} held by a named gate or live check today`);
+  console.log(`  ${String(withField(/^holds: none$/m)).padStart(4)} still just a sentence (\`holds: none\`), nothing enforces them\n`);
 
   // THE ANSWER TO "what kind of mistake happens where", which is the question a 16,000-line log cannot
   // be asked directly. Both tables are derived from the entries' own text on every run, so an append
@@ -159,11 +198,11 @@ if (!QUERY) {
   if (unclassed) console.log(`  ${String(unclassed).padStart(4)}  unclassified`);
   console.log(`\n  An entry can carry more than one class, so these sum past ${entries.length}.`);
   console.log(`  Filter: make mistakes Q="<area or class>"\n`);
-  console.log(`  This file is 45% of every word of documentation in this repo and its own header says to`);
-  console.log(`  read it before authoring. Nothing can: at ${words.toLocaleString('en-US')} words it does not fit in a context window,`);
-  console.log(`  so in practice no entry is read at all. ASK it instead:\n`);
+  console.log(`  This file used to be 17,797 lines of prose nobody could read whole. It is now an index:`);
+  console.log(`  title, one lesson, what holds it. The full reasoning for any entry is one command away:\n`);
   console.log(`    make mistakes Q="a prop the engine accepted and ignored"`);
-  console.log(`    make mistakes N=496\n`);
+  console.log(`    make mistakes N=496`);
+  console.log(`    make mistakes N=496 FULL=1   # the original write-up, from git history\n`);
   process.exit(0);
 }
 
