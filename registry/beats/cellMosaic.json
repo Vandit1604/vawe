@@ -1,9 +1,9 @@
 {
   "$schema": "https://vawe.dev/schema/registry-item.json",
-  "name": "statReveal",
+  "name": "cellMosaic",
   "type": "vawe:beat",
-  "title": "statReveal",
-  "description": "Land the payoff as a hero stat that counts up under a kinetic label, and hold it.",
+  "title": "cellMosaic",
+  "description": "Slide a grid of mixed cells as one surface while every cell keeps its own content, so words and pictures cross cell boundaries together.",
   "tags": [
     "beat",
     "motion"
@@ -18,26 +18,20 @@
     "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
     "layer": {
       "type": "beat",
-      "beat": "statReveal",
+      "beat": "cellMosaic",
       "start": 0,
-      "dur": 4,
-      "to": null,
-      "decimals": null,
-      "prefix": null,
-      "label": null
+      "dur": 4
     },
-    "requiredProps": [
-      "to",
-      "decimals",
-      "prefix",
-      "label"
-    ],
+    "requiredProps": [],
     "props": [
+      "cells",
+      "cols",
+      "cellW",
+      "cellH",
+      "gap",
       "x",
       "y",
-      "w",
-      "unit",
-      "heroSize"
+      "travel"
     ]
   }
 }

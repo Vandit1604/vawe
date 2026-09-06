@@ -1,9 +1,9 @@
 {
   "$schema": "https://vawe.dev/schema/registry-item.json",
-  "name": "statReveal",
+  "name": "cardFan",
   "type": "vawe:beat",
-  "title": "statReveal",
-  "description": "Land the payoff as a hero stat that counts up under a kinetic label, and hold it.",
+  "title": "cardFan",
+  "description": "Fan a stack of cards open from one side around a fixed anchor, each a touch later and a touch more rotated than the last.",
   "tags": [
     "beat",
     "motion"
@@ -18,26 +18,22 @@
     "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
     "layer": {
       "type": "beat",
-      "beat": "statReveal",
+      "beat": "cardFan",
       "start": 0,
-      "dur": 4,
-      "to": null,
-      "decimals": null,
-      "prefix": null,
-      "label": null
+      "dur": 4
     },
-    "requiredProps": [
-      "to",
-      "decimals",
-      "prefix",
-      "label"
-    ],
+    "requiredProps": [],
     "props": [
-      "x",
-      "y",
-      "w",
-      "unit",
-      "heroSize"
+      "cards",
+      "anchorX",
+      "anchorY",
+      "cardW",
+      "cardH",
+      "radius",
+      "spread",
+      "arriveFrom",
+      "stagger",
+      "settleAt"
     ]
   }
 }

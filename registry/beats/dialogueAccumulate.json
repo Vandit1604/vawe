@@ -1,9 +1,9 @@
 {
   "$schema": "https://vawe.dev/schema/registry-item.json",
-  "name": "statReveal",
+  "name": "dialogueAccumulate",
   "type": "vawe:beat",
-  "title": "statReveal",
-  "description": "Land the payoff as a hero stat that counts up under a kinetic label, and hold it.",
+  "title": "dialogueAccumulate",
+  "description": "Build the hook as sans/serif word pairs that accumulate on a held frame, a small dot joining each pair, then a bloomed payoff line.",
   "tags": [
     "beat",
     "motion"
@@ -18,26 +18,25 @@
     "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
     "layer": {
       "type": "beat",
-      "beat": "statReveal",
+      "beat": "dialogueAccumulate",
       "start": 0,
       "dur": 4,
-      "to": null,
-      "decimals": null,
-      "prefix": null,
-      "label": null
+      "bloomLine": null
     },
     "requiredProps": [
-      "to",
-      "decimals",
-      "prefix",
-      "label"
+      "bloomLine"
     ],
     "props": [
+      "pairs",
       "x",
       "y",
       "w",
-      "unit",
-      "heroSize"
+      "size",
+      "gap",
+      "rowGap",
+      "dotColor",
+      "dotSize",
+      "stagger"
     ]
   }
 }

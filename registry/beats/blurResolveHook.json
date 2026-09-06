@@ -1,9 +1,9 @@
 {
   "$schema": "https://vawe.dev/schema/registry-item.json",
-  "name": "statReveal",
+  "name": "blurResolveHook",
   "type": "vawe:beat",
-  "title": "statReveal",
-  "description": "Land the payoff as a hero stat that counts up under a kinetic label, and hold it.",
+  "title": "blurResolveHook",
+  "description": "Open on a line that arrives smeared with motion blur and snaps into focus. It never slides, fades or scales.",
   "tags": [
     "beat",
     "motion"
@@ -18,26 +18,28 @@
     "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
     "layer": {
       "type": "beat",
-      "beat": "statReveal",
+      "beat": "blurResolveHook",
       "start": 0,
       "dur": 4,
-      "to": null,
-      "decimals": null,
-      "prefix": null,
-      "label": null
+      "text": null,
+      "font": null,
+      "sub": null
     },
     "requiredProps": [
-      "to",
-      "decimals",
-      "prefix",
-      "label"
+      "text",
+      "font",
+      "sub"
     ],
     "props": [
       "x",
       "y",
       "w",
-      "unit",
-      "heroSize"
+      "size",
+      "weight",
+      "color",
+      "align",
+      "blurFrom",
+      "resolveAt"
     ]
   }
 }

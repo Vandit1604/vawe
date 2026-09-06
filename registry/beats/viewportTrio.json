@@ -1,9 +1,9 @@
 {
   "$schema": "https://vawe.dev/schema/registry-item.json",
-  "name": "statReveal",
+  "name": "viewportTrio",
   "type": "vawe:beat",
-  "title": "statReveal",
-  "description": "Land the payoff as a hero stat that counts up under a kinetic label, and hold it.",
+  "title": "viewportTrio",
+  "description": "Show the same real surface at three sizes at once, the \"it is really finished\" payoff shot.",
   "tags": [
     "beat",
     "motion"
@@ -18,26 +18,20 @@
     "requires": "vawe engine (blueprints/index.mjs); expand with `make expand D=<scene.json>`",
     "layer": {
       "type": "beat",
-      "beat": "statReveal",
+      "beat": "viewportTrio",
       "start": 0,
       "dur": 4,
-      "to": null,
-      "decimals": null,
-      "prefix": null,
-      "label": null
+      "image": null,
+      "caption": null
     },
     "requiredProps": [
-      "to",
-      "decimals",
-      "prefix",
-      "label"
+      "image",
+      "caption"
     ],
     "props": [
-      "x",
-      "y",
-      "w",
-      "unit",
-      "heroSize"
+      "sizes",
+      "gap",
+      "y"
     ]
   }
 }
