@@ -251,6 +251,7 @@ export function validateData(schema, data) {
   errors.push(...layoutErrors(data || {})); // a centring keyword must have something to centre
   errors.push(...seamErrors(data || {}));   // seam windows must land inside the video
   errors.push(...transitionErrors(data || {})); // unified transitions must route to a real mechanism
+  errors.push(...authoredJunctionErrors(data || {})); // cuts/stings/seams are internal now, not authored
   errors.push(...fxErrors(data || {}));     // named GSAP fx must be a real effect
   errors.push(...knobErrors(data || {}));   // a dial set on a preset that does not read it is dead config
   errors.push(...staggerErrors(data || {})); // a stagger object names three dials, in both slots that take one
@@ -730,6 +731,24 @@ export function transitionErrors(cfg) {
     try { boundaryMechanism(T.fx, T.mech); }
     catch (e) { out.push(`transitions[${i}]: ${e.message}`); }
   });
+  return out;
+}
+
+// `transitions[]` IS THE ONLY AUTHORED JUNCTION FORM. `cuts[]`/`stings[]`/`seams[]` are what it lowers
+// to (core/transitions/lower.js), and every consumer reads that lowered shape, so a scene that still
+// authors one of the three raw keys is either pre-migration or a hand-written regression, not a second
+// legal spelling. Checked on the RAW file (this runs before lowering, both in boot.js and the CLI
+// below), so a scene this pass has already lowered never trips it: the lowered `cuts` it produced is
+// the engine's own output, not something the author wrote.
+const JUNCTION_KEY_MECH = { cuts: 'cut', stings: 'sting', seams: 'seam' };
+export function authoredJunctionErrors(cfg) {
+  const out = [];
+  for (const [key, mech] of Object.entries(JUNCTION_KEY_MECH)) {
+    if (Array.isArray(cfg?.[key]) && cfg[key].length)
+      out.push(`${key}[] is no longer an authored key, it is the INTERNAL lowered output of `
+        + `transitions[] (mech:"${mech}"). Write transitions[] instead, then run `
+        + `\`node scripts/author/migrate-junctions.mjs <file>\` to convert an old scene automatically.`);
+  }
   return out;
 }
 
