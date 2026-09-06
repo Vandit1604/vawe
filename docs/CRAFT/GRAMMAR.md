@@ -16,7 +16,7 @@ group: crosscutting
 > (or re-run `make study`) and regenerate. The measured half comes off the film; the authored half
 > is written by a person into the JSON and merged forward on every re-study.
 
-16 reference film(s) measured. 16 carry a written reading.
+17 reference film(s) measured. 16 carry a written reading.
 
 ## The numbers, on one scale
 
@@ -39,16 +39,17 @@ every render**, so this table is a target and not a mood.
 | pin-72761350251141725 | 12.54s | 7 | 1s | 33.5 | 0.52–2.83 | dark → light → dark → light → dark → light → dark |
 | pin-924363892282992611 | 19.11s | 7 | 1.63s | 22 | 0.59–8.89 | light → light → light → light → light → mid → light |
 | pin-933230354045109691 | 37.86s | 8 | 3s | 12.7 | 1.14–6.56 | dark → dark → dark → light → dark → light → mid? → dark |
+| pinref | 45.03s | · | · | · | 0.08–6.99 | light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light → light |
 | rebuilt | 29.23s | 5 | 4.07s | 10.3 | 0.41–6.04 | dark → light → dark → light → dark |
 | together-chat | 19.78s | · | · | · | 0.93–3.54 | light → light → light → light → light → light → light → light → light → light |
 
-**A shot in work that reads well measures 0.37 to 13.49.**
+**A shot in work that reads well measures 0.08 to 13.49.**
 Across the films whose cuts are measurable, the median shot runs **4.07s**.
 
 **`·` means no hard cut was found** (peak scene score below threshold), so the tool fell back to
 fixed sampling. Ground and motion stay real: they are measured over spans and do not care where the
 spans came from. A shot count is not, so it is not printed. That is often the finding rather than a
-failure: `arc-space-swiping`, `arc-zero-chrome`, `pin-583145851797705243`, `together-chat` are built on travel and dissolves.
+failure: `arc-space-swiping`, `arc-zero-chrome`, `pin-583145851797705243`, `pinref`, `together-chat` are built on travel and dissolves.
 
 ## What each film does
 
@@ -332,6 +333,34 @@ ITS PEAKS ARE ALL GRADES OR BLOOMS, never motion: 55.9, 28.2, 22.9. A film can b
 | 6 | 16.5s | 1.4s | light 208 | 3.39 | The chart rises and the shadow sweeps. Peak 22.9 is that sweep. | Hard cut back to the speaker. |
 | 7 | 17.9s | 7.37s | mid? 60.1 | 3.46 | The grade cycles through three colours inside one shot while the captions continue. | Hard cut. |
 | 8 | 25.27s | 12.59s | dark 53.2 | 1.54 | The frame itself becomes an object: the video is placed inside a card at the end. | Nothing: it ends on the card. |
+
+### pinref
+
+| # | in | len | ground | motion | what moves | what triggers the next |
+|---|---|---|---|---|---|---|
+| 1 | 0s | 1.96s | light 223.4 | 1.57 | the word arrives; the phone begins to slide in | the word completes |
+| 2 | 1.96s | 1.96s | light 217.1 | 3.88 | screens slide in from the right and stack with an offset | the stack settles |
+| 3 | 3.92s | 1.96s | light 226 | 2.63 | the stack fans open in perspective | the fan completes |
+| 4 | 5.87s | 1.96s | light 210.8 | 4.7 | the phone travels to centre and tilts back | the phone lands |
+| 5 | 7.83s | 1.96s | light 202.5 | 5.14 | 3D card panels arrive from the right and fan | the panels arrive |
+| 6 | 9.79s | 1.96s | light 190.8 | 1.74 | cards tilt and spread wider | the cards settle |
+| 7 | 11.75s | 1.96s | light 206.4 | 3.08 | cards fan; the chart line draws | the chart draws |
+| 8 | 13.71s | 1.96s | light 222.7 | 5.29 | cards spread to a grid; the phrase types | the phrase completes |
+| 9 | 15.66s | 1.96s | light 188.5 | 5.16 | the phone slides in from the right and tilts | the phone lands |
+| 10 | 17.62s | 1.96s | light 214.3 | 5.74 | the phone tilts away; the phrase arrives word by word | the phrase completes |
+| 11 | 19.58s | 1.96s | light 205.4 | 6.99 | the phone straightens; the list begins | the list begins |
+| 12 | 21.54s | 1.96s | light 209.4 | 0.85 | a row is added to the list | a row is added |
+| 13 | 23.5s | 1.96s | light 203.5 | 1.55 | a row is added; the screen content swaps | a row is added |
+| 14 | 25.45s | 1.96s | light 207.7 | 1.4 | a row is added | a row is added |
+| 15 | 27.41s | 1.96s | light 208 | 4.54 | the last row is added | the list completes |
+| 16 | 29.37s | 1.96s | light 220.1 | 6.22 | chips fly in and scatter in 3D | the chips scatter |
+| 17 | 31.33s | 1.96s | light 211.5 | 5.8 | chips converge onto the phone screen | the text lands |
+| 18 | 33.29s | 1.96s | light 216.8 | 3.23 | the word arrives; the phone drifts | the word lands |
+| 19 | 35.24s | 1.96s | light 229.5 | 0.58 | the sentence arrives word by word; the phone is gone | the sentence completes |
+| 20 | 37.2s | 1.96s | light 228.5 | 1.1 | the phrase arrives; bricks assemble | the phrase completes |
+| 21 | 39.16s | 1.96s | light 227.4 | 0.9 | bricks slide into the wordmark letter by letter | the mark completes |
+| 22 | 41.12s | 1.96s | light 214.5 | 3.15 | phones slide up; badges fade in | the end card assembles |
+| 23 | 43.08s | 1.96s | light 210.3 | 0.08 | nothing; a hold | the film ends |
 
 ### rebuilt
 
