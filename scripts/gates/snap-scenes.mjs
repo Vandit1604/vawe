@@ -28,11 +28,11 @@ import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/safe.js';
 import { population } from '../lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
-import { flattenLayers } from '../lib/layers.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
-import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { serveRepo, waitForEngine, bootPathFor } from '../lib/render-harness.mjs';
+import { loadScene } from '../../core/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -92,31 +92,12 @@ const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one 
 // a renderable scene and is skipped, not errored.
 const dir = path.join(repoRoot, SCENE_DIR);
 const isScene = (f) => { try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')).module === 'scene'; } catch { return false; } };
-// A source carrying un-expanded build-time sugar (`block` / `beat` / `comp`) is not renderable: those
-// are expanded by `make expand` into a `.expanded.json` sibling, and THAT is what ships. The renderer
-// used to run such a layer through the text builder and paint nothing, so this harness was quietly
-// baselining films with holes in them. Now it refuses, so snapshot the expanded sibling where one
-// exists and skip the source with a printed reason, the way a non-scene file is skipped rather than
-// errored. Silently snapshotting a lie was the actual bug; erroring is only the symptom.
-const SUGAR = new Set(['block', 'beat', 'comp']);
-const hasSugar = (f) => {
-  try {
-    const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-    return flattenLayers(d.layers).some((l) => SUGAR.has(l.type));
-  } catch { return false; }
-};
-const skippedSugar = [];
+// `block`/`beat`/`comp` sugar expands at LOAD time now (core/expand.js), so a source carrying it
+// renders directly; nothing here needs an expanded sibling any more.
 const scenes = population('snap-scenes', { filter: (f) => f !== 'schema.json' && !f.startsWith('_'), quiet: true }).names
   .filter((f) => !ONLY || f === ONLY || f === `${ONLY}.json`)
   .filter(isScene)
-  .filter((f) => {
-    if (!hasSugar(f)) return true;
-    const expanded = f.replace(/\.json$/, '.expanded.json');
-    skippedSugar.push(`${f} → ${fs.existsSync(path.join(dir, expanded)) ? `snapshotted as ${expanded}` : 'NO expanded sibling: run `make expand`'}`);
-    return false;
-  })
   .sort();
-for (const s of skippedSugar) console.log(`  · skipping un-expanded source: ${s}`);
 if (!scenes.length) { console.error('no scenes found'); process.exit(1); }
 
 const { server, port } = await serveRepo();
@@ -148,9 +129,12 @@ const freshBrowser = async () => {
 const identical = [], changed = [], quarantined = [], errored = [], saved = [], nobaseline = [];
 for (const scene of scenes) {
   const name = scene.replace(/\.json$/, '');
-  const dataPath = `/${SCENE_DIR}/${scene}`;
-  let cfg = {};
-  try { cfg = JSON.parse(fs.readFileSync(path.join(dir, scene), 'utf8')); } catch {}
+  let cfg = {}, raw = '';
+  try { raw = fs.readFileSync(path.join(dir, scene), 'utf8'); cfg = JSON.parse(raw); } catch {}
+  // `formats/scene/scene.js` never expands `block`/`beat`/`comp` sugar itself (deliberate, its own
+  // banner says why); boot the already-expanded form instead, the same trick every browser-side sweep
+  // in this repo now uses (scripts/lib/render-harness.mjs `bootPathFor`).
+  const dataPath = `/${bootPathFor(repoRoot, raw, loadScene(structuredClone(cfg)), `${SCENE_DIR}/${scene}`)}`;
   const [w, h] = sceneDims(cfg);
   await freshBrowser();
   sinceLaunch++;

@@ -116,17 +116,15 @@ function roleOf(blurb) {
 const results = [];
 for (const id of ids) {
   const scenePath = path.join(SCRATCH, `${id}.json`);
-  const expandedPath = path.join(SCRATCH, `${id}.expanded.json`);
   const destDir = path.join(OUT_DIR, id);
   try {
     fs.writeFileSync(scenePath, JSON.stringify(sceneFor(id), null, 1));
-    // validate.mjs does not know the {type:"beat"} sugar (that is expand-blocks' job), so it is run on
-    // the EXPANDED scene, the same order `make video` uses.
-    execFileSync('node', ['scripts/author/expand-blocks.mjs', scenePath, expandedPath], { cwd: ROOT, stdio: 'pipe' });
-    execFileSync('node', ['core/validate.mjs', expandedPath], { cwd: ROOT, stdio: 'pipe' });
-    execFileSync('./bin/vawe', [expandedPath, '--draft', '--workers', '2'], { cwd: ROOT, stdio: 'pipe' });
+    // {type:"beat"} sugar expands at LOAD time now (core/expand.js), so validate and the renderer both
+    // read the source directly, the same order `make video` uses.
+    execFileSync('node', ['core/validate.mjs', scenePath], { cwd: ROOT, stdio: 'pipe' });
+    execFileSync('./bin/vawe', [scenePath, '--draft', '--workers', '2'], { cwd: ROOT, stdio: 'pipe' });
 
-    const mp4 = path.join(ROOT, renderOf(expandedPath)); // out/<id>.mp4 -> renderOf strips .expanded
+    const mp4 = path.join(ROOT, renderOf(scenePath)); // out/<id>.mp4
     if (!fs.existsSync(mp4)) throw new Error(`renderer reported success but ${mp4} is missing`);
 
     fs.mkdirSync(destDir, { recursive: true });

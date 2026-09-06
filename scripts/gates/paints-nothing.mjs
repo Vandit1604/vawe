@@ -46,7 +46,8 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneTiming, spanOf } from './scene-timing.mjs';
 import { population, SCENE_DIR } from '../lib/census.mjs';
-import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { serveRepo, waitForEngine, bootPathFor } from '../lib/render-harness.mjs';
+import { loadScene } from '../../core/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -90,9 +91,11 @@ async function checkScene(browser, port, absFile) {
   catch (e) { return { file: relFile, error: `timing: ${e.message}` }; }
   if (!times.length) return { file: relFile, findings: [], waived, layerCount: 0 };
 
+  const raw = fs.readFileSync(absFile, 'utf8');
+  const bootRel = bootPathFor(repoRoot, raw, loadScene(structuredClone(scene)), relFile);
   const page = await browser.newPage();
   try {
-    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/${relFile}&fps=${FPS}`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/${bootRel}&fps=${FPS}`, { waitUntil: 'load' });
     const boot = await waitForEngine(page, { throwOnTimeout: false });
     if (boot) return { file: relFile, error: `boot: ${boot}` };
 
@@ -182,30 +185,12 @@ if (file) {
   if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); await browser.close(); server.close(); process.exit(2); }
   await reportOne(abs);
 } else {
-  // PREFER THE EXPANDED SIBLING, and skip the source that has sugar in it. This filter originally
-  // EXCLUDED `.expanded.json`, which is backwards: an unexpanded source carrying `block`/`beat`/`comp`
-  // is not renderable at all (the engine refuses it by design), so the sweep spent its time booting
-  // scenes that could never paint and reported on 38 of ~160. snap-scenes solved this already
-  // (scripts/gates/snap-scenes.mjs:84-88) and this mirrors its rule rather than inventing a second one.
+  // `block`/`beat`/`comp` sugar expands at LOAD time now (core/expand.js), so every scene the render
+  // page boots is renderable directly; there is no un-expanded source left to skip.
   // WAS `git ls-files`, which sees TRACKED scenes only. Films are gitignored, so on main this sweep
   // booted 40 of the 135 scenes in the same directory and called the silence a pass.
-  const all = population('paints-nothing', { filter: (f) => !/intent|schema\.json$/.test(f), quiet: true })
+  const files = population('paints-nothing', { filter: (f) => !/intent|schema\.json$/.test(f), quiet: true })
     .names.map((f) => `${SCENE_DIR}/${f}`);
-  const hasSugar = (rel) => {
-    try {
-      const src = fs.readFileSync(path.join(repoRoot, rel), 'utf8');
-      return /"type"\s*:\s*"(block|beat|comp|composition)"/.test(src);
-    } catch { return false; }
-  };
-  const skipped = [];
-  const files = all.filter((f) => {
-    if (/\.expanded\.json$/.test(f)) return true;                 // the renderable artifact: always check
-    if (!hasSugar(f)) return true;                                 // a plain scene: check it
-    const exp = f.replace(/\.json$/, '.expanded.json');
-    skipped.push(`${f} → ${all.includes(exp) ? `checked as ${path.basename(exp)}` : 'NO expanded sibling: run `make expand`'}`);
-    return false;
-  });
-  for (const s of skipped) console.log(`  · un-expanded source: ${s}`);
   let scenesWithFindings = 0;
   for (const sceneFile of files) {
     const r = await checkScene(browser, port, path.join(repoRoot, sceneFile));
