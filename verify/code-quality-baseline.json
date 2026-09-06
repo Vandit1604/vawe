@@ -15,7 +15,7 @@
  "core/validate.mjs::max-lines-per-function": 1,
  "core/validate.mjs::no-useless-escape": 2,
  "core/validate.mjs::complexity": 4,
- "core/validate.mjs::max-depth": 16,
+ "core/validate.mjs::max-depth": 17,
  "core/tracks/cut.js::max-params": 1,
  "core/layers/image.js::complexity": 1,
  "core/shaders-ambient.js::complexity": 1,

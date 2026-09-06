@@ -6,6 +6,7 @@
 // kind lives in ONE place (walkData) instead of five hand-copied recursive scanners.
 import { bakeCanvasFx, canvasFxKey } from './canvas-fx.js';
 import { registerGsapEffects } from './gsap-effects.js';
+import { srcUrl } from './src-url.js';
 
 // Visit every node of the scene JSON (objects, arrays, and string leaves), pre-order. Each preloader
 // passes a `visit` that picks out the nodes it cares about. One walker, five callers.
@@ -38,7 +39,7 @@ const decodeImage = (src, crossOrigin) => new Promise((res, rej) => {
   if (crossOrigin) im.crossOrigin = 'anonymous';
   im.onload = () => (im.decode ? im.decode().then(() => res(im), () => res(im)) : res(im));
   im.onerror = rej;
-  im.src = src;
+  im.src = srcUrl(src);
 });
 
 // AUDIO-REACTIVITY: `audio.spectrum` names a sidecar written offline by scripts/media/spectrum.mjs;
@@ -177,7 +178,7 @@ async function fetchHtmlText(src) {
   // Root-normalised like lottie's src (:182): "formats/scene/x.html" resolved against the scene page at
   // /formats/scene/ happens to work and resolves to nothing from anywhere else. Which page is loading a
   // fragment is not something an author should have to know.
-  const url = /^(https?:)?\//.test(src) ? src : '/' + src;
+  const url = srcUrl(src);
   let res;
   try { res = await fetch(url); }
   catch (e) { throw new Error(`html fragment: ${url} could not be fetched (${e.message})`); }

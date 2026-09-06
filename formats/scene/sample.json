@@ -2,6 +2,7 @@
  "$schema": "./schema.json",
  "module": "scene",
  "theme": "default",
+ "aspect": "9:16",
  "duration": 7.6,
  "captionMode": "sentence",
  "layers": [
