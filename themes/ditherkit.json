@@ -1,6 +1,6 @@
 {
   "name": "ditherkit",
-  "note": "Rebuilt from the real rendered page July 2026 — brandkit misread the SPA as light/coral; the actual experience is DARK: near-black canvas, monospace Geist wordmark, ordered-dither chart fills in blue (Desktop) → purple (Mobile). Blue is the one live accent (active tab, preview button, area glow). Use ONLY these. Motion: calm, editorial, slow settle, zero bounce.",
+  "note": "Rebuilt from the real rendered page July 2026: brandkit misread the SPA as light/coral; the actual experience is DARK: near-black canvas, monospace Geist wordmark, ordered-dither chart fills in blue (Desktop) → purple (Mobile). Blue is the one live accent (active tab, preview button, area glow). Use ONLY these. Motion: calm, editorial, slow settle, zero bounce.",
   "palette": {
     "bg": "#0a0a0b",
     "bg2": "#101013",

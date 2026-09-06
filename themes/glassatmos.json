@@ -1,6 +1,6 @@
 {
   "name": "glassatmos",
-  "note": "Remixed from the \"glass\" preset onto brand base #0a0f1c / accent #7cc5ff by scripts/brand/theme-remix.mjs. Glass / depth: a cool dark ground, an ice-blue accent, frosted surfaces over a living gradient. Premium and modern — pairs with the glassCard / borderBeamCard blocks and an aurora bg.",
+  "note": "Remixed from the \"glass\" preset onto brand base #0a0f1c / accent #7cc5ff by scripts/brand/theme-remix.mjs. Glass / depth: a cool dark ground, an ice-blue accent, frosted surfaces over a living gradient. Premium and modern, pairs with the glassCard / borderBeamCard blocks and an aurora bg.",
   "palette": {
     "bg": "#0a0f1c",
     "bg2": "#161b27",
