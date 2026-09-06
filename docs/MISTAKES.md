@@ -2333,25 +2333,12 @@ none new yet; both classes are named above with their write-site fix.
 holds: scripts/gates/lint-test.mjs
 
 ## 570. `screenDive`'s own `image` layer carries `border`, which `core/layers/image.js` never reads
-found authoring the W10 launch worked example: `blueprints/beats.mjs` screenDive writes
-`border: '1.5px solid var(--line)'` on an `image` layer, and `core/prop-audit.js` refuses the render
-("border was set and never read while this layer was built"). `rect`/`text`/`group`/`html` all consume
-`border` through `kit.chipBox`; `image` calls no such helper, so the prop this blueprint has always
-written has never once painted a border on a real render. core/ is out of scope for this pass (owned
-elsewhere); the fix is either to route `image` through `chipBox` too, or to drop `border` from
-`screenDive`'s own recipe.
-holds: none yet, logged for the next core/layers pass
+An image layer never consumes `border` (rect/text/group/html do, through kit.chipBox), so the prop-audit refused the render and the blueprint had never painted one; the same defect sat in viewportTrio. Fixed at the write site: `border` dropped from both recipes.
+holds: core/prop-audit.js (refuses a prop set and never read); blueprints/beats.mjs, blueprints/beats-mined.mjs
 
-## 571. the theme palette key is `surface2`; the CSS variable it becomes is `--surface-2`, and using the
-key's own spelling on a layer paints nothing, silently
-found the same way #545/#213/#369 were: a `rect fill:"var(--surface2)"` (the un-hyphenated name every
-palette JSON actually uses) resolved to an undefined custom property and the box rendered fully
-transparent, no warning anywhere in validate or the render log. `core/boot.js` sets `--surface-2`
-(hyphenated) off the palette's `surface2` key; `--text-2` follows the same hyphenated pattern. Every
-other single-word token (`--accent`, `--dim`, `--ink`, `--line`) has no number in it, so this trap only
-bites the two-tone pairs, and nothing greps for it at write time.
-holds: none yet, logged for the next core/boot.js pass (a validate-time check that a `var(--x)` in any
-color-shaped prop resolves against the real theme var list would catch this class before render)
+## 571. the theme palette key is `surface2`; the CSS variable it becomes is `--surface-2`, and using the key's own spelling paints nothing, silently
+A `var(--surface2)` resolves to an undefined custom property and the box renders transparent with no render-time warning; the hyphenated `--surface-2` (and `--text-2`) is what boot sets from the palette key. The designspec lock catches it before render as `dead-token`, with a did-you-mean; the film was authored without running it.
+holds: scripts/gates/designspec-check.mjs (dead-token, inside author-check)
 
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
