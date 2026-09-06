@@ -2,8 +2,20 @@
 // Introspects blueprints/index.mjs (no render): each beat's name, props it accepts, and what it emits.
 // Token-efficient by design: it's the "reach for a blueprint" priming step (docs/CRAFT/BLUEPRINTS.md).
 //   node scripts/site/blueprints-catalog.mjs   ·   make blueprints
-import { pathToFileURL } from 'node:url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 import { BEATS, BEAT_BLURBS, REQUESTS } from '../../blueprints/index.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// `make previews` renders one clip per beat into site/public/blocklib/beats/. Read here rather than
+// re-derived, so the picture (or its absence) sits right beside the prose that names the beat: pick a
+// finished part by SEEING it, not by reading the description and guessing what it looks like.
+let PREVIEWS = new Map();
+try {
+  const idx = JSON.parse(fs.readFileSync(path.join(ROOT, 'site/public/blocklib/beats/index.json'), 'utf8'));
+  PREVIEWS = new Map((idx.beats || []).map((b) => [b.id, b]));
+} catch { /* no previews rendered yet: `make previews` */ }
 
 // The destructured parameter list, brace-matched rather than regex-matched: a default value can be an
 // array or an object, so both the end of the list and the commas inside it need a depth count. Splitting
@@ -44,9 +56,13 @@ if (isMain) {
     console.log(`  • ${name}`);
     console.log(`      ${DESC[name]}`);
     console.log(`      ask:   "${REQUESTS[name]}"`);
-    console.log(`      props: ${propsOf(fn)}\n`);
+    console.log(`      props: ${propsOf(fn)}`);
+    const p = PREVIEWS.get(name);
+    console.log(p ? `      see:   site/public/blocklib/beats/${name}/sheet.png (${p.duration}s, ${p.dims.w}x${p.dims.h})\n`
+      : '      see:   (no preview yet · make previews ONLY=' + name + ')\n');
   }
   console.log('  A blueprint fixes MOTION + structure, never copy/colour. Two brands using one still differ.');
+  console.log(`  Previews: ${PREVIEWS.size}/${Object.keys(BEATS).length} beats rendered · make previews [ONLY=<id>]`);
   console.log('  Full doctrine + the reference reel: docs/CRAFT/BLUEPRINTS.md\n');
   
 }
