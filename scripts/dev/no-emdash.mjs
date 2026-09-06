@@ -15,20 +15,21 @@ import { execSync } from 'node:child_process';
 const EM = String.fromCharCode(0x2014);   // never write the literal here: this file is in scope
 const QUIET = process.argv.includes('--quiet');
 
-// The surfaces the rule covers today: the JS engine, its tooling, and every markdown file.
-const SCOPE = ['core', 'blocks', 'scripts', 'formats', 'verify', 'blueprints', 'cli', 'docs', 'Makefile', '*.md'];
+// The surfaces the rule covers: the JS engine, the Go render service, the MCP server, brand data, its
+// tooling, and every markdown file. Nothing is "not yet reached" any more; the whole repo is in scope.
+const SCOPE = [
+  'core', 'blocks', 'scripts', 'formats', 'verify', 'blueprints', 'cli', 'docs', 'Makefile', '*.md',
+  'cmd', 'internal', 'mcp', 'themes', 'presets', 'registry',
+];
 
-// NOT YET IN SCOPE, and named out loud rather than left silent. These carry the character too and were
-// out of the first pass. Add one to SCOPE when it has been cleaned; the count prints on every run so
-// the debt cannot go quiet.
-const PENDING = ['cmd', 'internal', 'mcp', 'themes', 'presets', 'registry'];
-
-// EXCLUSIONS, each one deliberate. Nothing here is "too hard to fix"; each is a different surface.
+// EXCLUSIONS, each one deliberate and each with its own reason. Nothing here is "too hard to fix";
+// each is a different surface with its own owner and its own build.
 const EXCLUDE = [
   // Another codebase with its own build and its own pass. Handled separately.
   (f) => f.startsWith('site/') || f.startsWith('docs-site/'),
-  // Vendored, not ours to rewrite.
-  (f) => f.startsWith('node_modules/') || f.includes('/vendor/'),
+  // Vendored, not ours to rewrite: assets/vendor and any third-party bundle carried under a vendor/
+  // directory, plus node_modules wherever it lands.
+  (f) => f.startsWith('assets/vendor/') || f.includes('/vendor/') || f.includes('node_modules/'),
 ];
 
 // docs/MISTAKES.md USED TO carry the full prose of each entry, and an entry below #418 was exempted
@@ -63,8 +64,4 @@ if (hits.length) {
     + 'period, or parentheses, or split the sentence. The choice is per site, not one character swap.');
   process.exit(1);
 }
-const pending = execSync(`git grep -cI '${EM}' -- ${PENDING.map((s2) => `'${s2}'`).join(' ')} || true`,
-  { encoding: 'utf8', maxBuffer: 8 << 20 }).trim().split('\n').filter(Boolean).length;
-console.log(`no-emdash: clean (${MISTAKES} included, no historical exemption any more)`);
-if (pending) console.log(`no-emdash: ${pending} file(s) still carry it in ${PENDING.join(', ')}, `
-  + 'which no pass has reached yet. Not a failure, a debt.');
+console.log(`no-emdash: clean (${MISTAKES} included, every allowlisted path is vendored, none is debt)`);
