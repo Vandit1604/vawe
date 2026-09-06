@@ -74,7 +74,7 @@ the part you skip.
 put a spring or an overshoot ease on a `count`. Don't. `core/layers/count.js` runs the value through
 whatever ease it is handed, so overshoot paints a number that is **not true** for several frames. The
 house motion guide recommended it, twice, for a year ([`../MISTAKES.md`](../MISTAKES.md) #385).
-`countEaseErrors` in `core/validate.mjs` now refuses it. Overshoot is a claim about MASS, and a number
+`countEaseErrors` in `core/validate/validate.mjs` now refuses it. Overshoot is a claim about MASS, and a number
 has none.
 
 ---
@@ -83,7 +83,7 @@ has none.
 
 The single highest-leverage taste control is the easing curve, and authors reach for the wrong one by
 default (linear, or a bounce). Pick the row by the FEELING the beat wants; the engine names are real
-(`core/motion.js`).
+(`core/motion/motion.js`).
 
 | Feeling you want | Ease (our name) | Duration | Use it for |
 |---|---|---|---|

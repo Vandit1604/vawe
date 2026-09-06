@@ -50,7 +50,7 @@ produces a grid every time, so the archetype arrives with the file:
 - **ONE subject, and it is a PICTURE, full bleed.** Never a grid, never a row of variants.
 - **A ground the subject sits ON**, chosen because it is good, never because it reveals the specimen,
   and carrying no ruling of any kind.
-- **TWO `bg` windows**, unbound, so `core/junctions.js` binds each to the joint after it.
+- **TWO `bg` windows**, unbound, so `core/timeline/junctions.js` binds each to the joint after it.
 - **ONE cut and ONE camera move.** Both are one line and both are what separates a shot from a slide.
 - **A hand-keyed `motion` track** on the subject, spanning the whole film and changing state across
   the cut, so the same object stands on both sides of the joint.

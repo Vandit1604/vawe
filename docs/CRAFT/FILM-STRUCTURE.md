@@ -31,7 +31,7 @@ the handover and the gate reads it as one form crossing the joint:
 "matches": [{ "at": "cut@0", "from": "dot", "to": "card" }]
 ```
 
-The joint owns the number: `core/junctions.js` retimes both layers onto it, and the engine carries the
+The joint owns the number: `core/timeline/junctions.js` retimes both layers onto it, and the engine carries the
 outgoing form's centre, size and rotation onto the incoming one. A handover declared away from any
 joint buys nothing, so this is not a pass you can decorate a slideshow with. The other sixteen devices
 in the table below are still invisible to the gate, and the section on its limits stands.

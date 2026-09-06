@@ -93,7 +93,7 @@ layer. Still treat generated stills (grade/edge-fade/ken) and match them to the 
 ## Provenance
 
 **Do not re-add:** a bare `curl -o` for fetching a logo. It zero-byted two shipped assets
-(`assets/icons/amazon.svg` among them), breaking three scenes silently, before `core/boot.js` learned
+(`assets/icons/amazon.svg` among them), breaking three scenes silently, before `core/engine/boot.js` learned
 to refuse an asset that never loaded. Use `make assets` or `curl -f`.
 
 **Sources:** Refactoring UI (working with images, scrims/overlap); Creative Commons licensing; simple-icons /

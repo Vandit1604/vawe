@@ -35,7 +35,7 @@ make pace-from-vo VO=<file>.words.json                    # paces the whole film
 ```
 
 `vo-captions` reads a TTS transcript sidecar, never a live model; there is no timing without one.
-Omit `words` and `core/captions.js` still distributes the line by word length, which reads as
+Omit `words` and `core/type/captions.js` still distributes the line by word length, which reads as
 intentional karaoke, just not word-perfect.
 
 ## 2. Safe placement: the strip is a property of the DESTINATION, not the shape
@@ -55,13 +55,13 @@ Declare where the film is watched, and the caption band moves with it:
 | `shorts` | 13% right rail, 8% top, 16% bottom | the most generous phone target |
 | `broadcast` | 5% every edge | classic overscan title-safe |
 
-(`core/safe.js` `DESTINATIONS`; the tiktok figures are this repo's own measured portrait numbers,
+(`core/layout/safe.js` `DESTINATIONS`; the tiktok figures are this repo's own measured portrait numbers,
 reels/shorts are conservative interpolations and should be re-measured against the real apps before a
 launch trusts them.)
 
 **`pin:"bottom"` always lands inside the safe box**, chrome included: an edge-pinned caption can never
 produce a safe-zone failure. The band itself reserves two lines at the skin's font size
-(`CAPTION_LINES = 2` in `core/safe.js`), so a headline placed near the bottom on a `tiktok` destination
+(`CAPTION_LINES = 2` in `core/layout/safe.js`), so a headline placed near the bottom on a `tiktok` destination
 can still collide with it, which `make audit` catches, not the placement code:
 
 ```bash
@@ -82,14 +82,14 @@ margins and then a real TikTok caption strip sits on top of your last line.
 | `pop` | the pop layout: bigger type (64px vs 46px), built for `captionStyle` to ride |
 
 `captionStyle` only applies on the `pop` layout and needs per-line `words` timing to read as karaoke
-rather than a proportional guess. The options (`core/captions.js`): `highlight`, `pillKaraoke`,
+rather than a proportional guess. The options (`core/type/captions.js`): `highlight`, `pillKaraoke`,
 `weightShift`, `clipWipe`, `neonEdge`, `kineticSlam`, `underlineDraw`, `flipUp`, `ghostSplit`,
 `waveRide`, `scramble`, `wordFlash`, `wordSlide`, `typeOn`, `readerFocus`, `inkFill`, `focusPull`,
 `letterRise`, `weightWave`. Pick one that matches the film's energy, not a default: `kineticSlam` and
 `scramble` read loud, `weightShift` and `underlineDraw` read quiet.
 
 A caption's own `size` overrides the skin's font size and grows the band it reserves accordingly
-(`captionBand()` in `core/safe.js`); a style with more visual weight (`neonEdge`'s halo, `kineticSlam`'s
+(`captionBand()` in `core/layout/safe.js`); a style with more visual weight (`neonEdge`'s halo, `kineticSlam`'s
 overshoot) is bounded to stay inside the `styled` skin's own padding, so it never silently outgrows the
 band the audit checks against.
 

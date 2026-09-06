@@ -160,7 +160,7 @@ not: "the defaults this film refuses, in your own words"
   camera movement, action, dialogue, duration and narrative purpose. This template had purpose (which
   most do not) and no shot vocabulary at all, which was a strange gap: the ENGINE already implements
   the camera (`slowPush · diveIn · panFollow · workspaceZoomOut · orbit · multiPhase`,
-  core/camera-moves.js), so the plan simply did not speak the language the renderer already had, and
+  core/camera-moves/index.js), so the plan simply did not speak the language the renderer already had, and
   camera work got invented at JSON time or not at all. Name `shot:` and `camera:` per beat.
 
   `shot:` NOW DRAWS SOMETHING, so it is worth filling in properly. `make panels SB=<this file>` renders

@@ -426,7 +426,7 @@ Consecutive beats alternate dark and light, so no cut needs an effect on it.
 
 **Why it works.** The inversion IS the transition. `pin-72761350251141725` has no continuous object, no camera and no shared subject across seven shots, and still reads as one film purely because the ground alternates. `pin-333759022406800725` does it within a single hue, which is the gentler form.
 
-**In our engine.** bg windows with no from/to bind to the joints in order (core/junctions.js), so the cuts own the numbers. 84% of our library paints ONE window for the whole runtime.
+**In our engine.** bg windows with no from/to bind to the joints in order (core/timeline/junctions.js), so the cuts own the numbers. 84% of our library paints ONE window for the whole runtime.
 
 ### There are three ways to invert a frame, not one
 
@@ -504,7 +504,7 @@ The film starts on single words at under a second and ends on sentences at four,
 
 **Seen in.** The outside standards (animations.dev / emilkowal.ski) name it as the strongest single technique: a thing scales from the point it CAME FROM, not from its own centre, so the motion explains the relationship.
 
-**Why we cannot.** `transformOrigin` is written in six engine files (core/type.js, core/parts.js, core/gsap-effects.js, core/compositions, core/layers/image.js, core/motion.js) and NO layer prop reaches it. Measured: 1 of 4,530 layers declares `origin`, and that one is a globe's route start, which is a different prop entirely and is how this was nearly missed. Every scale in every film we have grows from its own centre.
+**Why we cannot.** `transformOrigin` is written in six engine files (core/type/type.js, core/motion/parts.js, core/engine/gsap-effects.js, core/compositions, core/layers/image.js, core/motion/motion.js) and NO layer prop reaches it. Measured: 1 of 4,530 layers declares `origin`, and that one is a globe's route start, which is a different prop entirely and is how this was nearly missed. Every scale in every film we have grows from its own centre.
 
 **The fix.** FIXED. `origin` on any layer writes `transform-origin`, taking what CSS takes: a keyword pair ("top left"), a length pair or percentages. Written as a style and never animated, because it is where the motion starts FROM rather than part of the motion.
 IT WALKED STRAIGHT INTO A NAME COLLISION. A `three` globe has had `origin` as the [lon, lat] of a route's start for a long time and the schema entry said so; I read that entry and wrote the second meaning into the same prop anyway, and showcase-flight-globe failed at boot with my own error message quoting an array back at me. Dispatched on the VALUE now: a transform-origin is never an array and a lon/lat pair is never a string, so neither can be mistaken for the other.

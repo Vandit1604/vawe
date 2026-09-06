@@ -1,14 +1,14 @@
 ---
 name: vawe-camera
-description: "Add smooth, calculated camera movement to a vawe scene: slowPush, diveIn (zoom into a target), travel (the station-to-station flight that replaces cuts), truck (lateral), panFollow, workspaceZoomOut, orbit, multiPhase, plus depth parallax via the plane modifier. Load while authoring a scene JSON when a beat should move the viewer through space, or when the camera should BE the transition. Uses the pure generators in core/camera-moves.js via the cameraMove sugar, and enforces the velocity-continuous multi-keyframe rule (#125)."
+description: "Add smooth, calculated camera movement to a vawe scene: slowPush, diveIn (zoom into a target), travel (the station-to-station flight that replaces cuts), truck (lateral), panFollow, workspaceZoomOut, orbit, multiPhase, plus depth parallax via the plane modifier. Load while authoring a scene JSON when a beat should move the viewer through space, or when the camera should BE the transition. Uses the pure generators in core/camera-moves/index.js via the cameraMove sugar, and enforces the velocity-continuous multi-keyframe rule (#125)."
 codes: no-camera
 ---
 
 # vawe-camera: smooth, calculated camera work
 
 Camera movement contributes as much as any effect. The global camera is `[{t,s,x,y,rx,ry,ease}]`
-interpolated by `cameraAt` (`core/sequence.js`); author it with the calculated generators in
-`core/camera-moves.js` rather than hand-typing keyframes.
+interpolated by `cameraAt` (`core/timeline/sequence.js`); author it with the calculated generators in
+`core/camera-moves/index.js` rather than hand-typing keyframes.
 
 ## The sugar
 
@@ -20,7 +20,7 @@ At the scene ROOT (not a layer). `make expand` turns it into `data.camera`. Pass
 several moves across the film. Each generator emits interior `ease:"linear"` automatically for a
 velocity-continuous path.
 
-## The moves (all in `core/camera-moves.js`, all pure, all lib-tested)
+## The moves (all in `core/camera-moves/index.js`, all pure, all lib-tested)
 
 - **slowPush** `{from,to,dur}`: a gentle continuous zoom in. The default "the frame is alive" move; keep it
   small (to ≈ 1.08-1.15) under content.

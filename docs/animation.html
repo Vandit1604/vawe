@@ -162,7 +162,7 @@ pre .c{color:var(--muted)}
     <p>Browsers are full of things that want time to pass on their own: timers,
     <code>Date.now()</code>, <code>Math.random()</code>. So before drawing picture 47, the engine sets
     the page's clock to <strong>1.567 seconds</strong>, where frame 47 lands at 30 per second.</p>
-    <pre><span class="c">// core/boot.js</span>
+    <pre><span class="c">// core/engine/boot.js</span>
 vt.ms = (frame / fps) * 1000;       <span class="c">// the clock now reads 1567</span>
 rnd   = (frame * 2654435761) | 0;   <span class="c">// random restarts, seeded by the frame</span></pre>
     <p>The page believes 1.567 seconds went by. None did.</p>
@@ -270,7 +270,7 @@ rnd   = (frame * 2654435761) | 0;   <span class="c">// random restarts, seeded b
 const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
 const $ = (id) => document.getElementById(id);
 
-/* The demos use the engine's real easing curves. core/motion.js is a pure module, so this page can
+/* The demos use the engine's real easing curves. core/motion/motion.js is a pure module, so this page can
    import it and cannot drift from what a scene actually gets. Opened as a file rather than served,
    the import is blocked, so the same formulas stand in. */
 const LOCAL = {
@@ -281,7 +281,7 @@ const LOCAL = {
 };
 let EASINGS = LOCAL;
 try {
-  const m = await import('../core/motion.js');
+  const m = await import('../core/motion/motion.js');
   if (typeof m?.EASINGS?.brake === 'function') EASINGS = m.EASINGS;
 } catch { /* not served: the copy above stands in */ }
 

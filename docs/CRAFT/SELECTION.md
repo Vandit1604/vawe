@@ -100,8 +100,8 @@ principles of animation: slow-in/slow-out, anticipation, follow-through.)
 ## 4. Composite looks / stings / shaders, the texture and era
 
 Reach for one only on the **2–3 earned beats** (hero reveal · act break · CTA). **Pick the era of the
-story, not the loudest effect.** Two registries: *looks* (`core/looks.js`, a held texture over a beat)
-and *stings* (`SHADER_FX` in `core/stings.js`, a shader that peaks AT a cut). Complete coverage below,
+story, not the loudest effect.** Two registries: *looks* (`core/looks/index.js`, a held texture over a beat)
+and *stings* (`SHADER_FX` in `core/stings/index.js`, a shader that peaks AT a cut). Complete coverage below,
 grouped by the register each evokes: pick the group your story is in, then one member.
 
 **Looks: the held texture (register → the looks that carry it):**

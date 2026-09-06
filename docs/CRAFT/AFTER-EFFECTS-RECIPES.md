@@ -41,7 +41,7 @@ Ranked by how often the recipe appears in real commercial motion work, most-used
 
 | # | recipe | one line | verdict | where it would live here |
 |---|---|---|---|---|
-| 1 | **Slow in / slow out** | never start or stop at full speed | **HAVE** | `core/motion.js`, the full easing set |
+| 1 | **Slow in / slow out** | never start or stop at full speed | **HAVE** | `core/motion/motion.js`, the full easing set |
 | 2 | **Offset / stagger** | one animation down a list with a delay per item | **HAVE** | `stagger` on `split` text and on `parts` |
 | 3 | **Overshoot** | the value passes its target and settles back | **HAVE** | `overshoot: 0.12` on any directional entrance; the settle is `enterDur` |
 | 4 | **Motion blur (180 shutter)** | anything moving fast smears along its travel | **HAVE** | automatic above 480 px/s; the film's angle is `shutter` |
@@ -87,7 +87,7 @@ Web practice puts the same numbers in milliseconds: UI motion under 300ms, a str
 **When it is wrong.** A tracking camera and a scrolling surface both want linear: an eased pan reads as
 a lurch. `truck` and `recordedPan` are linear here on purpose.
 
-**Verdict: HAVE.** `core/motion.js` carries the whole easeIn/Out/InOut set across Back, Bounce, Circ,
+**Verdict: HAVE.** `core/motion/motion.js` carries the whole easeIn/Out/InOut set across Back, Bounce, Circ,
 Cubic, Elastic, Expo, Quad, Quart, Quint and Sine, plus `easeOutSettle`, `easeOutSnap` and `springEase`.
 Nothing to build.
 
@@ -320,7 +320,7 @@ setting, not an event.
 **Verdict: HAVE, both halves.** `cameraMove: cameraShake` is the impact version, pre-sampled at author
 time to one key per frame with 0.1s of eased recovery so the frame lands instead of stopping. `driftHold`
 is the calm handheld. `jitter` is the cut-level version and `kick` the per-layer one. See
-`core/camera-moves.js`.
+`core/camera-moves/index.js`.
 
 **Sources:** https://schoolofmotion.com/blog/how-to-simulate-camera-shake-adobe-after-effects ·
 https://schoolofmotion.com/blog/wiggle-expression
@@ -770,7 +770,7 @@ who writes it.
 > **ITEMS 1 TO 7 ARE BUILT.** The per-recipe sections below still carry the verdict they were
 > researched with; the TABLE above is the current one. What shipped, and where it differs from the plan:
 > `anticipate` and `overshoot` are one mechanism (both ARE the easing of an entrance, so both are a warp
-> of the anim's own curve, `core/motion.js`); `settle` is NOT a second prop, because `enterDur` already
+> of the anim's own curve, `core/motion/motion.js`); `settle` is NOT a second prop, because `enterDur` already
 > owns that number and a second spelling of it would be a fork; `step` is a layer prop rather than a
 > modifier, because a modifier runs LAST and a clock has to be quantised before anything reads it;
 > `squash` deforms along the DOMINANT axis, because an arbitrary axis needs a three-function transform
@@ -784,10 +784,10 @@ who writes it.
 1. **Anticipation** (#5, LACK). A fractional counter-move before every directional entrance, expressed as
    one number: `anticipate: 0.15` meaning 15% of the travel, back, over 2 to 4 frames, then straight into
    the main move. It is a curve, it needs no new layer type, and it is the loudest missing principle in
-   the engine. Build it as an easing plus an entrance flag, in `core/motion.js`.
+   the engine. Build it as an easing plus an entrance flag, in `core/motion/motion.js`.
 2. **The overshoot dial** (#3, PARTLY). Every overshooting preset here bakes its own amount. Expose the
    pair the practitioners argue about, `overshoot` (8 to 15% typical) and `settle` (0.3 to 0.5s), on any
-   entrance, so an author can tune weight without changing preset. Also `core/motion.js`.
+   entrance, so an author can tune weight without changing preset. Also `core/motion/motion.js`.
 
 **A per-layer modifier. `core/fx/`, where `ghost` already lives, so the pattern is proven.**
 

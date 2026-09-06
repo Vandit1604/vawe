@@ -28,7 +28,7 @@ cut: that is not "smooth," it is a seam that says nothing, ten times.
 deep dive for the cut**: the theory and the decision procedure. Read it when you cannot say *why* a
 given transition is there.
 
-> **The inventory (what exists) is `core/transitions.js`, run `make transitions`.** It catalogs all
+> **The inventory (what exists) is `core/transitions/catalog.js`, run `make transitions`.** It catalogs all
 > ~90 transitions across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
 > `seam` two-scene), marks the basics, and is derived from the source registries so it can't drift.
 > This doc is the *decision* layer; that catalog is the *inventory*. The basic two-scene transitions
@@ -44,7 +44,7 @@ given transition is there.
 > verify our OWN render matches what we authored). See [MEASURE.md](MEASURE.md).
 >
 > **Easing is half the feel.** Both a `cut` and a `seam` shape their progress through `timing` (the
-> `TIMINGS` curves in core/cuts.js: `smooth`/`out`/`snappy`/`pop`/`rush`/`brake`/`ramp`/`linear`).
+> `TIMINGS` curves in core/cuts/index.js: `smooth`/`out`/`snappy`/`pop`/`rush`/`brake`/`ramp`/`linear`).
 > Seams default to `smooth` (ease-in-out): a transition that MOVES content at constant speed reads
 > mechanical; ease-in-out gives it velocity (accelerate, then settle). Use `linear` only for a
 > deliberately flat sweep. Match the curve to the beat: entrances decelerate, exits/whips accelerate.
@@ -52,7 +52,7 @@ given transition is there.
 ## One surface to author them: the unified `transitions`
 
 The four mechanisms are the *machinery*; you rarely pick one by hand. Author a transition through **one
-field** and let the engine route it (core/transitions-lower.js), driven by the same catalog:
+field** and let the engine route it (core/transitions/lower.js), driven by the same catalog:
 
 - **Boundary** (between two beats): a top-level array:
   ```json
@@ -102,10 +102,10 @@ a bolder one ONCE, and a film already feels edited, not sprayed.
 `timing` says *how fast, and with what weight*. A transition with no speed profile reads FLAT, and a film
 whose seams all ride the same gentle curve feels repetitive however many effects it uses. So **the motion
 seams above carry `timing:"ramp"`, not `"smooth"`** (and a bare motion fx through the `transitions` sugar
-now defaults to `ramp`, `core/transitions-lower.js`). `ramp` is the editor's slow-fast-slow speed ramp
-(`core/motion.js` `speedRamp`): it eases in, races through the middle, and settles, which is what makes a
+now defaults to `ramp`, `core/transitions/lower.js`). `ramp` is the editor's slow-fast-slow speed ramp
+(`core/motion/motion.js` `speedRamp`): it eases in, races through the middle, and settles, which is what makes a
 whip or a zoom feel *thrown* rather than slid. Vary the VELOCITY across a film, not only the effect. The
-speed dial (every curve is a named member of `TIMINGS`, `core/cuts.js`):
+speed dial (every curve is a named member of `TIMINGS`, `core/cuts/index.js`):
 
 | timing | curve | reach for it on |
 |---|---|---|
@@ -141,7 +141,7 @@ the `timing` of every cut and seam that names none.
 
 It is a DEFAULT, never an override: an explicit `timing` on any cut or seam still wins, and it reaches
 hand-authored `cuts`/`seams`, not only the `transitions` sugar. A film that names no `energy` is
-untouched, so nothing re-times silently. `core/energy.js`.
+untouched, so nothing re-times silently. `core/transitions/energy.js`.
 
 ### Two more seam knobs: `feather` and an angled `dir`
 
@@ -165,7 +165,7 @@ unchanged):
 > model mounts and blends two LIVE scenes; vawe (like another engine' shader-transitions, the same seam
 > architecture) blends two BAKED stills. Our named-curve dial above is a nicer author surface than a raw
 > ease string, and `pop` already gives a spring-like overshoot. **`spring`** closes the shape gap: it is
-> the house damped-harmonic-oscillator easing (`core/motion.js` `easeOutSpring`, the same math behind
+> the house damped-harmonic-oscillator easing (`core/motion/motion.js` `easeOutSpring`, the same math behind
 > `easeOutSettle`/`easeOutSnap`) fixed at one tasteful bounce/settle rather than exposed as another engine's
 > per-call `{damping, stiffness}` API. A genuinely *parameterized* spring, where an author dials the
 > bounce and duration per transition, stays out until a film needs an arrival this fixed curve cannot

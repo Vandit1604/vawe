@@ -1,11 +1,11 @@
 ---
 name: vawe-animation
-description: "Make motion FEEL right in a vawe scene: the easing doctrine (smooth beats bouncy, ~3 easing characters per film), entrance/exit pairing, stagger as reading order, and the text-effect vocabulary. Load while authoring or tuning a scene JSON when motion reads floaty, monotone, or toy-like. Maps atomic motion rules onto OUR primitives (core/motion.js easings, type.js presets, gsap-effects.js)."
+description: "Make motion FEEL right in a vawe scene: the easing doctrine (smooth beats bouncy, ~3 easing characters per film), entrance/exit pairing, stagger as reading order, and the text-effect vocabulary. Load while authoring or tuning a scene JSON when motion reads floaty, monotone, or toy-like. Maps atomic motion rules onto OUR primitives (core/motion/motion.js easings, type.js presets, gsap-effects.js)."
 ---
 
 # vawe-animation: how motion should FEEL
 
-Everything animates as a pure function of the frame (`core/motion.js`). This skill is about the *feel*:
+Everything animates as a pure function of the frame (`core/motion/motion.js`). This skill is about the *feel*:
 which easing, how long, in what order. The vocabulary is real and checkable (`make lib-test`).
 
 ## Easing is physics (never linear on a visible move)
@@ -30,10 +30,10 @@ which easing, how long, in what order. The vocabulary is real and checkable (`ma
 
 ## Text effect vocabulary (`split` + `preset`, or GSAP `fx`)
 
-- **Presets** (`core/type.js`): `up` (default kinetic headline), `scale` (punch), `blur` (premium/calm),
+- **Presets** (`core/type/type.js`): `up` (default kinetic headline), `scale` (punch), `blur` (premium/calm),
   `decode` (techy scramble), `wave`/`shimmerWave`, `draw` (SVG stroke-on), `riseClip`, `colorWave`,
   `highlight`, `underline`, `gradient`, `chroma`. Choose by mood, not habit.
-- **GSAP char fx** (`core/gsap-effects.js`): `charOvershoot`, `charBlurCascade`, `charFold`, `charTilt` on a
+- **GSAP char fx** (`core/engine/gsap-effects.js`): `charOvershoot`, `charBlurCascade`, `charFold`, `charTilt` on a
   `split` layer; idle loops `float`/`pulse`/`breathe`. Pair with `anim:"none"`.
 - **A changing word belongs in a fixed box** (launch rule) so nothing reflows; the chip is the brand-colour spot.
 

@@ -150,12 +150,12 @@ including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._
   SELECTION, a doc names a removed effect, a CRAFT cross-link breaks, or a guide is orphaned from this index.
 
 ## The engine facts these guides are grounded in (not generic advice)
-- **Theme contract** (`core/theme-contract.js`): a theme MUST define `palette.{bg,bg2,surface,surface2,
+- **Theme contract** (`core/registry/theme-contract.js`): a theme MUST define `palette.{bg,bg2,surface,surface2,
   line,lineStrong,text,text2,dim,ink,accent,accentDim,accentGlow,up,down}`, `type.{sans,serif,mono,num}`,
   and 3 `gradient` stops. No fallback look, COLOR/TYPOGRAPHY map to exactly these keys.
 - **Bundled faces** (`core/tokens.css`): Inter, Inter Display, Space Grotesk, Instrument Serif, Geist,
   Geist Mono, Plus Jakarta Sans, JetBrains Mono, Hanken Grotesk, Caveat (Söhne is local/licensed).
-- **Real registries** the guides cover in full: 31 composite looks (`core/looks.js`), 35 shader stings
-  (`SHADER_FX` in `core/stings.js`), the palette-driven bg presets (`core/backgrounds.js`).
+- **Real registries** the guides cover in full: 31 composite looks (`core/looks/index.js`), 35 shader stings
+  (`SHADER_FX` in `core/stings/index.js`), the palette-driven bg presets (`core/backgrounds/index.js`).
 - **Doctrine**: colours ONLY from the brand (eyedrop, `make palette`); dominance decided by LOOKING;
   no em-dashes on screen; patterns are seasoning not wallpaper. See [`../MISTAKES.md`](../MISTAKES.md).

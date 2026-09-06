@@ -21,7 +21,7 @@
       voice the system explicitly does not allow.
 
    The one thing added: MOTION IS SPLIT BY JOB. Chrome uses the site's --ease. The demo uses the
-   ENGINE's easing, copied from core/motion.js, because there the curve is the subject rather than the
+   ENGINE's easing, copied from core/motion/motion.js, because there the curve is the subject rather than the
    styling. Mixing them would teach a curve the engine does not have.
    ================================================================================================== */
 :root{
@@ -40,7 +40,7 @@
   /* ---- this page only: hairlines INSIDE the ink media well, where --line would vanish ---- */
   --line-on-ink:rgba(255,255,255,.075);
 
-  /* ---- the ENGINE's easing, for the demo only (core/motion.js EASINGS) ---- */
+  /* ---- the ENGINE's easing, for the demo only (core/motion/motion.js EASINGS) ---- */
   --ease-brake:cubic-bezier(.16,.84,.32,1);   /* decel(t, 2.4) */
 
   --font-sans:"Anybody", system-ui, -apple-system, sans-serif;
@@ -152,7 +152,7 @@ input[type=range]{flex:1;min-width:14rem;accent-color:var(--accent);height:2px}
   <div class="notes">
     <div><h2>Scramble</h2><p>Asks for frames out of order. Each still lands correctly, because the
       position is a function of the number and of nothing else. That is the whole argument.</p></div>
-    <div><h2>Real curves</h2><p><code>brake</code> is <code>decel(t, 2.4)</code> from core/motion.js.
+    <div><h2>Real curves</h2><p><code>brake</code> is <code>decel(t, 2.4)</code> from core/motion/motion.js.
       The demo eases on the engine's curve; the buttons ease on the site's.</p></div>
     <div><h2>One voice</h2><p>Cobalt marks what you can move. A number the page measured is mono at
       ink, never coloured, so the accent never means two things.</p></div>
@@ -163,8 +163,8 @@ input[type=range]{flex:1;min-width:14rem;accent-color:var(--accent);height:2px}
 <script>
 (() => {
   'use strict';
-  // Copied VERBATIM from core/motion.js so the demo cannot teach a curve the engine does not have.
-  // The built page will `import { EASINGS } from '../core/motion.js'`, a pure module with no DOM
+  // Copied VERBATIM from core/motion/motion.js so the demo cannot teach a curve the engine does not have.
+  // The built page will `import { EASINGS } from '../core/motion/motion.js'`, a pure module with no DOM
   // dependency, which removes the drift risk the direction named as its one risk.
   const clamp01 = (t) => t < 0 ? 0 : t > 1 ? 1 : t;
   const decel = (t, k = 2.4) => 1 - Math.pow(1 - clamp01(t), k);   // EASINGS.brake

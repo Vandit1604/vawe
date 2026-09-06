@@ -59,7 +59,7 @@ belongs to the entrance and the exit; the hold is still, because words are not r
 assemble. That split is an inference from the published guidance, not a quoted rule, and it is the one
 place this gate reasons past its sources.
 
-`settleWindow` in `core/safe.js` already owns "when is this layer at rest". The gate asks it rather
+`settleWindow` in `core/layout/safe.js` already owns "when is this layer at rest". The gate asks it rather
 than deriving a second answer, and supplies the engine's own `BASE_ENTER`/`BASE_EXIT` defaults so the
 ramp it subtracts is the one the render actually spends.
 

@@ -21,7 +21,7 @@ guide is how to get that expressiveness in our engine, what already works, and t
 ## We already share the mechanism
 
 another engine seeks a **paused GSAP timeline per frame**, registered on `window.__timelines`. **Our engine
-does the identical thing**: `core/clips.js` `seekAll(t)` seeks every timeline in `window.__timelines` and
+does the identical thing**: `core/timeline/clips.js` `seekAll(t)` seeks every timeline in `window.__timelines` and
 pauses+seeks `gsap.globalTimeline`. So our motion is the same deterministic seek model theirs is; we are
 not behind on the mechanism, only on how a bespoke frame is authored.
 

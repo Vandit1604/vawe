@@ -100,7 +100,7 @@ Value is the strongest mood lever: **dark-first = serious/cinematic, light-first
 is the energy dial. Accent *frequency* is the excitement dial (once = restrained, several times = lively).
 
 ## 7. Gradient field vs flat, when to reach for a gradient
-Backgrounds are palette-driven presets (`core/backgrounds.js`). A gradient field adds atmosphere but competes
+Backgrounds are palette-driven presets (`core/backgrounds/index.js`). A gradient field adds atmosphere but competes
 with content, so it follows the plain-vs-busy rule (see [DENSITY.md](DENSITY.md), [STORY.md](STORY.md)):
 
 - **Reach for a gradient/atmospheric bg** (`aurora` · `mesh` · `brandglow` · `spotlight` · `soft` · `constellation`)
@@ -124,7 +124,7 @@ with content, so it follows the plain-vs-busy rule (see [DENSITY.md](DENSITY.md)
 ## 8. Cohesion
 One accent across the whole piece · vary **hue only within the brand's family**, flip **value** (light↔dark) for
 drama (a value flip is itself a transition) · patterns are seasoning, not wallpaper. Backgrounds pull from this
-same palette (`core/backgrounds.js` is palette-driven), so one pack reskins every bg.
+same palette (`core/backgrounds/index.js` is palette-driven), so one pack reskins every bg.
 
 ## Provenance
 

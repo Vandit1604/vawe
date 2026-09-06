@@ -46,7 +46,7 @@ VFR-dropped frames corrupt the timing). Then, in plain JS:
    `luma` (dissolve/flash/opacity). A rigid channel that moves < ~2% of frame is treated as noise (a word
    blurring in place jitters the centroid a few px) so a real channel wins.
 3. **Trim to the active window**: drop leading/trailing frames where nothing moves → the true duration.
-4. **Fit against OUR easing library**: `core/motion.js` EASINGS + `core/cuts.js` TIMINGS. Normalise the
+4. **Fit against OUR easing library**: `core/motion/motion.js` EASINGS + `core/cuts/index.js` TIMINGS. Normalise the
    channel 0→1 and RMS-compare to every preset; report the nearest + residual + runners-up. Overshoot
    past 1.0 → an anticipation ease (`pop`/`easeOutBack`/`spring-bouncy`).
 

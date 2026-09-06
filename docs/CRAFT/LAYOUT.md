@@ -101,7 +101,7 @@ arguing with these.
 ### 5a. The caption band, where a burnt-in caption will be painted
 
 The safe box says where content MAY live. It says nothing about the strip a caption lands in, so a
-headline could sit squarely under one and every layout check stayed green. `core/safe.js` now exports
+headline could sit squarely under one and every layout check stayed green. `core/layout/safe.js` now exports
 that strip beside the safe box, derived from the same destination numbers:
 
 ```js
