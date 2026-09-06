@@ -1,0 +1,255 @@
+{
+ "beats": [
+  {
+   "id": "wordBlast",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame",
+   "role": "scale punctuation",
+   "files": {
+    "preview": "beats/wordBlast/preview.mp4",
+    "poster": "beats/wordBlast/poster.png",
+    "sheet": "beats/wordBlast/sheet.png"
+   }
+  },
+  {
+   "id": "logoReveal",
+   "duration": 3.9,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade",
+   "role": "brand",
+   "files": {
+    "preview": "beats/logoReveal/preview.mp4",
+    "poster": "beats/logoReveal/poster.png",
+    "sheet": "beats/logoReveal/sheet.png"
+   }
+  },
+  {
+   "id": "focusRack",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims",
+   "role": "a rack focus",
+   "files": {
+    "preview": "beats/focusRack/preview.mp4",
+    "poster": "beats/focusRack/poster.png",
+    "sheet": "beats/focusRack/sheet.png"
+   }
+  },
+  {
+   "id": "recordedPan",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded",
+   "files": {
+    "preview": "beats/recordedPan/preview.mp4",
+    "poster": "beats/recordedPan/poster.png",
+    "sheet": "beats/recordedPan/sheet.png"
+   }
+  },
+  {
+   "id": "scrollStory",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop",
+   "files": {
+    "preview": "beats/scrollStory/preview.mp4",
+    "poster": "beats/scrollStory/poster.png",
+    "sheet": "beats/scrollStory/sheet.png"
+   }
+  },
+  {
+   "id": "kineticHook",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "hook / open loop: eyebrow + hero count-up|word + kinetic subline",
+   "role": "hook / open loop",
+   "files": {
+    "preview": "beats/kineticHook/preview.mp4",
+    "poster": "beats/kineticHook/poster.png",
+    "sheet": "beats/kineticHook/sheet.png"
+   }
+  },
+  {
+   "id": "statReveal",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "payoff: hero count-up + kinetic label",
+   "role": "payoff",
+   "files": {
+    "preview": "beats/statReveal/preview.mp4",
+    "poster": "beats/statReveal/poster.png",
+    "sheet": "beats/statReveal/sheet.png"
+   }
+  },
+  {
+   "id": "cardCascade",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "feature grid: kinetic title + cards that pop in one after another",
+   "role": "feature grid",
+   "files": {
+    "preview": "beats/cardCascade/preview.mp4",
+    "poster": "beats/cardCascade/poster.png",
+    "sheet": "beats/cardCascade/sheet.png"
+   }
+  },
+  {
+   "id": "chipGrid",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "named things (sources/tools) as pills that pop staggered + footer",
+   "files": {
+    "preview": "beats/chipGrid/preview.mp4",
+    "poster": "beats/chipGrid/poster.png",
+    "sheet": "beats/chipGrid/sheet.png"
+   }
+  },
+  {
+   "id": "terminalReveal",
+   "duration": 5.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a CLI beat: typing command + cursor + rising output + accent result",
+   "role": "a CLI beat",
+   "files": {
+    "preview": "beats/terminalReveal/preview.mp4",
+    "poster": "beats/terminalReveal/poster.png",
+    "sheet": "beats/terminalReveal/sheet.png"
+   }
+  },
+  {
+   "id": "logoLockup",
+   "duration": 3.9,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "brand: mark pops + wordmark travels + kinetic headline + sub",
+   "role": "brand",
+   "files": {
+    "preview": "beats/logoLockup/preview.mp4",
+    "poster": "beats/logoLockup/poster.png",
+    "sheet": "beats/logoLockup/sheet.png"
+   }
+  },
+  {
+   "id": "verdictProof",
+   "duration": 4.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "claim proven: typing command + note + tone verdict chip",
+   "role": "claim proven",
+   "files": {
+    "preview": "beats/verdictProof/preview.mp4",
+    "poster": "beats/verdictProof/poster.png",
+    "sheet": "beats/verdictProof/sheet.png"
+   }
+  },
+  {
+   "id": "ctaEnd",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "held end card: mark + install chip + sub + url (exitDur 0)",
+   "role": "held end card",
+   "files": {
+    "preview": "beats/ctaEnd/preview.mp4",
+    "poster": "beats/ctaEnd/poster.png",
+    "sheet": "beats/ctaEnd/sheet.png"
+   }
+  },
+  {
+   "id": "typedHook",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "hook that ERASES itself: types in, un-types ~2x faster, never fades",
+   "role": "hook that ERASES itself",
+   "files": {
+    "preview": "beats/typedHook/preview.mp4",
+    "poster": "beats/typedHook/poster.png",
+    "sheet": "beats/typedHook/sheet.png"
+   }
+  },
+  {
+   "id": "morphButton",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "the object that BECOMES the next thing: button shrinks/rounds to a dot",
+   "role": "the object that BECOMES the next thing",
+   "files": {
+    "preview": "beats/morphButton/preview.mp4",
+    "poster": "beats/morphButton/poster.png",
+    "sheet": "beats/morphButton/sheet.png"
+   }
+  },
+  {
+   "id": "propSentence",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger",
+   "role": "a sentence whose NOUNS are pictures",
+   "files": {
+    "preview": "beats/propSentence/preview.mp4",
+    "poster": "beats/propSentence/poster.png",
+    "sheet": "beats/propSentence/sheet.png"
+   }
+  },
+  {
+   "id": "echoRing",
+   "duration": 1.7,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a stroked ring replaying another layer's path one beat late, fading as it grows",
+   "files": {
+    "preview": "beats/echoRing/preview.mp4",
+    "poster": "beats/echoRing/poster.png",
+    "sheet": "beats/echoRing/sheet.png"
+   }
+  }
+ ]
+}

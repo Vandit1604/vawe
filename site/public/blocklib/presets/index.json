@@ -1,0 +1,116 @@
+{
+ "presets": [
+  {
+   "name": "vercel",
+   "theme": "presets/vercel",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "keynote restraint, black, sharp. A developer keynote. Maximum restraint",
+   "files": {
+    "showcase": "presets/vercel/showcase.mp4",
+    "sheet": "presets/vercel/sheet.png"
+   }
+  },
+  {
+   "name": "bloomberg",
+   "theme": "presets/bloomberg",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "dense, mechanical, functional. Data and finance. The count easing IS the story",
+   "files": {
+    "showcase": "presets/bloomberg/showcase.mp4",
+    "sheet": "presets/bloomberg/sheet.png"
+   }
+  },
+  {
+   "name": "linear",
+   "theme": "linear",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "technical, dark, restrained. Dev tools. Restraint IS the personality",
+   "files": {
+    "showcase": "presets/linear/showcase.mp4",
+    "sheet": "presets/linear/sheet.png"
+   }
+  },
+  {
+   "name": "duolingo",
+   "theme": "presets/duolingo",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "playful, bright, rounded. A consumer app. THE one profile where bounce is correct",
+   "files": {
+    "showcase": "presets/duolingo/showcase.mp4",
+    "sheet": "presets/duolingo/sheet.png"
+   }
+  },
+  {
+   "name": "apple",
+   "theme": "presets/apple",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "premium, calm, generous. A product launch. Dissolves, never whips",
+   "files": {
+    "showcase": "presets/apple/showcase.mp4",
+    "sheet": "presets/apple/sheet.png"
+   }
+  },
+  {
+   "name": "a24",
+   "theme": "presets/a24",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "dramatic, editorial, tense. A film trailer. Silence and stillness are the tension",
+   "files": {
+    "showcase": "presets/a24/showcase.mp4",
+    "sheet": "presets/a24/sheet.png"
+   }
+  },
+  {
+   "name": "nike",
+   "theme": "presets/nike",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "energetic, kinetic, high-contrast. A sports ad. Motion drives everything",
+   "files": {
+    "showcase": "presets/nike/showcase.mp4",
+    "sheet": "presets/nike/sheet.png"
+   }
+  },
+  {
+   "name": "stripe",
+   "theme": "stripe",
+   "duration": 6.3,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "pickWhen": "clean-tech, warm-serious. A developer brand. Trust plus a little warmth",
+   "files": {
+    "showcase": "presets/stripe/showcase.mp4",
+    "sheet": "presets/stripe/sheet.png"
+   }
+  }
+ ]
+}

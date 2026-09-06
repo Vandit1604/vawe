@@ -202,6 +202,17 @@ The profile is the coordination; `vawe_reflect` is the colour precision.
 > discipline, and it exists because a generator asked for three options produces the first thing three
 > times.
 
+## Pick by seeing
+
+The eight names above are prose; **`make preset-sheets`** renders each one as a real ~6s clip (a
+headline, a support line, a hard cut in the profile's own family, one count on the profile's own
+easing, one accent chip) to `site/public/blocklib/presets/<name>/{showcase.mp4, sheet.png}`, plus an
+`index.json` with a one-line "pick when" per preset (its `blurb` above). `linear` and `stripe` play in
+their real, already-committed theme; the other six play in a minimal `themes/presets/<name>.json`
+written for this pass, since no existing theme is a real preset for them. Re-render one after tuning it:
+`make preset-sheets ONLY=<name>`. Picking a profile by its rendered look, not its adjective, is the same
+discipline `make previews` (docs/CRAFT/BLUEPRINTS.md) gives a beat.
+
 ---
 
 ## Part 3: Choosing between whole directions (`make concept`)
