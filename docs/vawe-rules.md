@@ -41,13 +41,13 @@ JSON *is* the video.
 
 ## Layer types
 
-`text` · `count` · `image` · `video` · `group` · `rect` · `glow` · `beam` · `svg` · `cursor` · `clip` · `html` · `component` · `board` · `doc` · `shader` · `lottie` · `paint` · `raymarch` · `three` · `globe` · `composition` · `adjust`
+`text` · `count` · `image` · `video` · `group` · `rect` · `glow` · `beam` · `svg` · `cursor` · `clip` · `html` · `component` · `board` · `doc` · `shader` · `lottie` · `paint` · `raymarch` · `three` · `globe` · `particles` · `composition` · `adjust`
 
 ## The props you will actually use
 
 | prop | type | notes |
 |---|---|---|
-| `type` | string | Layer type. One of: `text` `count` `image` `video` `group` `rect` `glow` `beam` `svg` `cursor` `clip` `html` `component` `board` `doc` `shader` `lottie` `paint` `raymarch` `three` `globe` `composition` `adjust` |
+| `type` | string | Layer type. One of: `text` `count` `image` `video` `group` `rect` `glow` `beam` `svg` `cursor` `clip` `html` `component` `board` `doc` `shader` `lottie` `paint` `raymarch` `three` `globe` `particles` `composition` `adjust` |
 | `text` | string | Text (may use <b>/<em>) |
 | `x` | number|string | Left: px number, or relative "50%" / "50%-40" / center / left / right (resolve |
 | `y` | number|string | Top: px number, or relative "50%" / center / top / bottom (resolved per aspect |
@@ -59,7 +59,7 @@ JSON *is* the video.
 | `align` | string | Text align. One of: `left` `center` `right` |
 | `font` | string | Face. One of: `sans` `serif` `mono` `num` |
 | `split` | string | Kinetic split ('path' = SVG strokes, for the `draw` preset). One of: `char` `word` `line` `path` |
-| `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h. One of: `weight` `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` `shimmerWave` `flip` `fall` `elastic` `skew` `focus` `decode` `tilt` `stretch` `gradient` `highlight` `colorWave` `underline` `shadow` `riseClip` `draw` `chroma` `swing` `unfold` `strike` `flap` `assemble` `bloom` `halation` `diffusion` `rimLight` `spotlight` `chromatic` `chromaCycle` |
+| `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h. One of: `weight` `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` `shimmerWave` `flip` `fall` `elastic` `skew` `focus` `decode` `tilt` `stretch` `gradient` `highlight` `colorWave` `underline` `shadow` `riseClip` `draw` `chroma` `swing` `unfold` `strike` `flap` `assemble` `bloom` `halation` `diffusion` `rimLight` `spotlight` `chromatic` `chromaCycle` `confetti` `sparks` `dust` |
 | `presetOpts` | object | Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wav |
 | `stagger` | number|object | Per-unit delay (s), OR the three-dial object form { each, amount, from } that  |
 | `each` | number | Per-unit duration (s) |
@@ -109,16 +109,16 @@ Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are 
 
 A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 
-## Backgrounds (21)
+## Backgrounds (23)
 
-`"bg": [{ "t": 0, "preset": "plain" }]`, `plain` · `paper` · `paperDots` · `paperShapes` · `soft` · `accent` · `accentPlain` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `brandglow` · `spotlight` · `dark` · `deep` · `ink` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid`
+`"bg": [{ "t": 0, "preset": "plain" }]`, `plain` · `paper` · `paperDots` · `paperShapes` · `soft` · `accent` · `accentPlain` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `brandglow` · `spotlight` · `dark` · `deep` · `ink` · `black` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid` · `gradient`
 
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Themes (35)
+## Themes (41)
 
-`ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `argus` · `brew` · `brew-dark` · `cadence` · `default` · `ditherkit` · `emberyear` · `glassatmos` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `preface` · `satara` · `threadcite` · `tpot` · `vawe` · `vawe-dark` · `vawe-inter` · `vawe-night` · `vawe-paper` · `vawe-site`
+`a24` · `ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `apple` · `argus` · `bloomberg` · `brew` · `brew-dark` · `cadence` · `default` · `ditherkit` · `duolingo` · `emberyear` · `glassatmos` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `nike` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `preface` · `satara` · `threadcite` · `tpot` · `vawe` · `vawe-dark` · `vawe-inter` · `vawe-night` · `vawe-paper` · `vawe-site` · `vercel`
 
 Colours come from the theme, never hardcoded: `var(--text)` `var(--text-2)` `var(--dim)`
 `var(--accent)` `var(--surface)` `var(--line)`. `<b>` inside `text` renders in the accent.
