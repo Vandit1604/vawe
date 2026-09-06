@@ -5617,6 +5617,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // move, a flight path and a colour grade; asked in the engine's own words ("velocity through a
     // keyframe") it answered instantly. The mechanism was reachable only by somebody who already knew.
     ['the move stops dead in the middle of a travel', 'through'],
+    // theme.look (W8): the bg presets a brand turns through are fixed once, in the theme.
+    ['the backdrops a brand turns through, fixed once in its theme', 'backdrop'],
   ];
   for (const [q, want] of PRESENT) {
     ok(`arsenal answers "${q}" with ${want}`, covers(q, want) >= CONFIDENT);
