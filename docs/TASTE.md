@@ -26,6 +26,11 @@ files, and without an index an agent authors from its own priors, which regress 
 > nothing, it was slop. A frame earns its place by **showing** something true (a real artifact, a live
 > demo, a proof), not by **saying** it (a word in a box). Produced, not generated.
 
+**The numbers behind these spines, one rule per file:** [`RULES/INDEX.md`](RULES/INDEX.md). The
+contract every scene obeys, plus a table of atomic rules (motion offsets, ease direction, stagger
+caps, video scale, banned defaults, and more), each with a right-JSON recipe and a wrong-JSON
+anti-pattern.
+
 ## The three spines (what "taste" decomposes into)
 
 Great video-making is three separable decisions. another engine names them house-style / composition /

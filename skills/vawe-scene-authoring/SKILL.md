@@ -9,6 +9,14 @@ One self-describing JSON → one rendered Short (1080×1920, 30fps). Scenes are 
 a Go renderer (chromedp + ffmpeg) seeks to each frame and screenshots. **You almost never edit the
 Go renderer.** You write data JSON (most common) or a format's `scene.html`.
 
+## Rules, loaded before you write a layer
+
+Read [`docs/RULES/INDEX.md`](../../docs/RULES/INDEX.md) first: the contract every scene obeys
+(deterministic, seek-safe, offsets not absolutes, state the canvas, one cut family, the backdrop
+turns, something continuous crosses every cut). Then load only the rule files the beat you are
+writing needs, from the table there: one numeric rule per file, a right-JSON recipe and a wrong-JSON
+anti-pattern. This is where the specific numbers live (durations, sizes, offsets); do not guess one.
+
 ## The one hard rule: `renderFrame(n)` is PURE in `n`
 
 The scene exposes `window.__engine = { meta, renderFrame(n) }`. `renderFrame(n)` must produce

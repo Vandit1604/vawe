@@ -44,6 +44,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/RESEARCH/AI-AGENT-BOOK.md](../../docs/RESEARCH/AI-AGENT-BOOK.md) | somebody proposes an agent-architecture change here, or asks what an outside source says about our prompt, our catalogue, our gates or our critic panel | what the free book 'AI Agents in Depth' changes in THIS repo, what it independently confirms, and what it recommends that is wrong for a deterministic renderer |
 | [docs/RESEARCH/MOTION-CANON.md](../../docs/RESEARCH/MOTION-CANON.md) | you want to know what the motion-design literature says about a rule in this repo, or what the engine still cannot express | the canonical sources, what could actually be read of each, the findings that survive the four-part bar, the rules the canon independently confirms, and the graph-editor gaps |
 | [docs/RESEARCH/PROMPT-EVAL.md](../../docs/RESEARCH/PROMPT-EVAL.md) | somebody proposes moving, cutting or rewriting a section of CLAUDE.md, or asks what the prompt is measurably worth | the one recorded ablation of a CLAUDE.md section, the procedure that produced it, what it found, and what it is not allowed to prove |
+| [docs/RULES/svg-inline.md](../../docs/RULES/svg-inline.md) | writing an svg layer, or setting src on an image/video/html layer | svg is inline d/viewBox/stroke/draw, never a src; and how a repo path in src actually resolves |
 | [docs/SCENE-QUICK.md](../../docs/SCENE-QUICK.md) | you know the vocabulary and just need the shape of a scene file | the one-page cheat sheet: scene shape · layer kinds · the fields you reach for most |
 | [docs/vawe-rules.md](../../docs/vawe-rules.md) | you need the authoritative, engine-generated rules for writing a scene.json | the generated rulebook: if it is in this file, the engine really reads it |
 
@@ -78,6 +79,8 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/routes/launch-video.md](../../docs/CRAFT/routes/launch-video.md) | routed here by `docs/CRAFT/ROUTING.md`, or a request names a real product/site to market | the launch-video intake questions, its length band, and which CRAFT docs and blueprints it draws on |
 | [docs/CRAFT/routes/motion-graphic.md](../../docs/CRAFT/routes/motion-graphic.md) | routed here by `docs/CRAFT/ROUTING.md`, or a request wants a short unnarrated motion-first unit under 10s | the motion-graphic intake questions, its pace band, and which CRAFT docs and blueprints it draws on |
 | [docs/CRAFT/routes/recreation.md](../../docs/CRAFT/routes/recreation.md) | routed here by `docs/CRAFT/ROUTING.md`, or a request must faithfully reflect a real film or site with no product to sell | the recreation intake questions, its honesty ceiling, and which CRAFT docs it draws on |
+| [docs/RULES/INDEX.md](../../docs/RULES/INDEX.md) | before writing any layer in a scene, to load the shared contract and pick the rules the beat needs | the contract every scene obeys, plus the table of atomic rules: when to reach for each one, and what enforces it |
+| [docs/RULES/continuous-object.md](../../docs/RULES/continuous-object.md) | deciding what holds a film together across its cuts | the continuous-object device, the acrossBeats/becomes mechanism, and the waiver a real alternative device needs |
 | [docs/TASTE.md](../../docs/TASTE.md) | you are about to make something and want the front door to the taste system | the one law (every frame must fight for its value) · the spines · the block registry · the author→gate→render loop |
 
 ## Craft · what & why (the story layer)
@@ -93,6 +96,8 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/STORY.md](../../docs/CRAFT/STORY.md) | deciding the beats and their order | the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats |
 | [docs/CRAFT/TASTE-RULES.md](../../docs/CRAFT/TASTE-RULES.md) | it "renders fine but feels cheap" | cause→feeling ease table · the failure-modes catalog · restraint · continuity |
 | [docs/CRAFT/TRANSITIONS.md](../../docs/CRAFT/TRANSITIONS.md) | choosing the CUT between two beats (you can't say why a transition is there) | the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure |
+| [docs/RULES/one-cut-family.md](../../docs/RULES/one-cut-family.md) | choosing the cut between two beats | why a film keeps one transition family and earns only 2-3 accents by meaning |
+| [docs/RULES/payoff-last.md](../../docs/RULES/payoff-last.md) | ordering beats and writing the hook | the hook word count, the emoji cap, and the runtime band the best fact must land in |
 
 ## Craft · how it looks (the house-style layer)
 
@@ -113,6 +118,21 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/SURFACES.md](../../docs/CRAFT/SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [docs/CRAFT/TYPOGRAPHY.md](../../docs/CRAFT/TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
 | [docs/LIGHTFIELD.md](../../docs/LIGHTFIELD.md) | you need a light-field backdrop, or want to recolour or re-pattern one | the lightfield generator: the five dials (colour · pattern · envelope · shadow · motion), polarity, the seed, and how close each reference reproduction gets |
+| [docs/RULES/banned-defaults.md](../../docs/RULES/banned-defaults.md) | choosing type, colour, or layout for any hand-authored surface | the banned-defaults list and the escape valve for when the content genuinely calls for one |
+| [docs/RULES/blur-out-dense.md](../../docs/RULES/blur-out-dense.md) | exiting a face, a card, or a dense grid of elements | why a dense or face-bearing layer should exit through defocus, not through a slide |
+| [docs/RULES/ease-direction.md](../../docs/RULES/ease-direction.md) | choosing an ease for an entrance, an exit, or a move between two positions | which easing family belongs on an entrance, an exit, and a handover, and why easeOutExpo on a handover is wrong |
+| [docs/RULES/first-arrival.md](../../docs/RULES/first-arrival.md) | a layer's first entrance in a beat | why nothing should arrive at t=0, and the offset that fixes it |
+| [docs/RULES/handover-glide.md](../../docs/RULES/handover-glide.md) | one layer becomes another across a cut or a beat boundary | how long a becomes handover must glide so the viewer sees the object travel, not cut |
+| [docs/RULES/logo-prominence.md](../../docs/RULES/logo-prominence.md) | placing a brand mark beside a headline, or on the end card | the minimum logo size beside a title and on an end card, so it reads as an element, not punctuation |
+| [docs/RULES/motion-offsets.md](../../docs/RULES/motion-offsets.md) | writing a layer's motion[] keyframe track | motion track x/y are offsets on the base position, not absolute canvas coordinates |
+| [docs/RULES/no-css-clock.md](../../docs/RULES/no-css-clock.md) | hand-writing an html layer or a css fragment | why a fragment cannot own a CSS animation, transition, opacity, or filter, and what to use instead |
+| [docs/RULES/paired-directional-exit.md](../../docs/RULES/paired-directional-exit.md) | choosing anim/out for a layer that slides | why an entrance and its exit must travel in one continuous direction, never enter-and-retreat |
+| [docs/RULES/speed-bands.md](../../docs/RULES/speed-bands.md) | choosing a duration for an entrance, an exit, or a keyed move | the four named speed bands, the 3x rule between the slowest and fastest beat, and why no two independent layers share an ease in one beat |
+| [docs/RULES/stagger-total.md](../../docs/RULES/stagger-total.md) | a group of items arrives with a stagger | the cap on a staggered group's total arrival time, and why past it the last item lands in a different beat |
+| [docs/RULES/state-the-canvas.md](../../docs/RULES/state-the-canvas.md) | starting any scene JSON | why every scene must state aspect, and what it renders as when it does not |
+| [docs/RULES/text-on-flat.md](../../docs/RULES/text-on-flat.md) | placing a headline over a background fx, a blob, or a gradient | why a headline must sit on a flat patch, not a moving blob or gradient hot spot, and the 3:1 floor it is measured against |
+| [docs/RULES/video-scale.md](../../docs/RULES/video-scale.md) | sizing a hero graphic or any on-screen type | the hero-ink width band and the type scale a video needs, against the web sizes an agent defaults to |
+| [docs/RULES/world-turns.md](../../docs/RULES/world-turns.md) | authoring the bg block of any scene | why the backdrop must change tone per beat, and the 82% of the library that ships one window |
 
 ## Craft · how full · how it sounds
 
@@ -123,6 +143,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/CRAFT/DENSITY.md](../../docs/CRAFT/DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
 | [docs/CRAFT/READING.md](../../docs/CRAFT/READING.md) | a line is on screen and you do not know if anyone can read it | hold by word count · the flicker gap · what counts as prose · why the library reads once, not twice |
 | [docs/CRAFT/SHOW-DONT-TELL.md](../../docs/CRAFT/SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes |
+| [docs/RULES/caption-safe-strip.md](../../docs/RULES/caption-safe-strip.md) | shipping to a phone feed (tiktok/reels/shorts) or captioning any video | the per-destination safe strip a caption or a bottom-anchored headline must clear |
 
 ## Process & QA
 
