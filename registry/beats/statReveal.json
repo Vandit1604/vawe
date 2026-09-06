@@ -24,13 +24,15 @@
       "to": null,
       "decimals": null,
       "prefix": null,
-      "label": null
+      "label": null,
+      "captionSize": null
     },
     "requiredProps": [
       "to",
       "decimals",
       "prefix",
-      "label"
+      "label",
+      "captionSize"
     ],
     "props": [
       "x",

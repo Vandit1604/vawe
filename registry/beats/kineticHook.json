@@ -25,14 +25,16 @@
       "to": null,
       "decimals": null,
       "word": null,
-      "sub": null
+      "sub": null,
+      "captionSize": null
     },
     "requiredProps": [
       "eyebrow",
       "to",
       "decimals",
       "word",
-      "sub"
+      "sub",
+      "captionSize"
     ],
     "props": [
       "x",

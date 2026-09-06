@@ -81,7 +81,14 @@ function codeFiresOn(code, sceneFile) {
 // Rules that are being DELETED outright in the same change: nothing to fold, they stop being checked.
 const DELETED_RULES = new Set(['sparse-beats']);
 
-const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
+// The manifest was deleted in the same change that wrote this script, so a re-run (a machine whose
+// gitignored library was not folded yet) reads it from the last commit that carried it.
+const MANIFEST_LAST_COMMIT = '49e62765';
+const manifestText = fs.existsSync(MANIFEST)
+  ? fs.readFileSync(MANIFEST, 'utf8')
+  : spawnSync('git', ['show', `${MANIFEST_LAST_COMMIT}:scripts/gates/legacy-manifest.json`], { encoding: 'utf8', cwd: repoRoot }).stdout;
+if (!manifestText) { console.error('legacy-fold: no manifest on disk and none in git history'); process.exit(2); }
+const manifest = JSON.parse(manifestText);
 let written = 0, dropped = 0, alreadyCovered = 0, skippedDeleted = 0;
 const touched = new Set();
 
