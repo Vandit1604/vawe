@@ -97,7 +97,7 @@ const SPLIT_FLOOR = 2;      // a colour-step floor so a dead-silent window can't
 // thing LEAVING here), compare the box one frame after the transition's own `dur` ends against the same
 // box ten frames later, both against a frame well past either (fully settled). A layer correctly gone by
 // `dur` reads the same at +1f and +10f (both ≈ the settled reading); a ghost reads elevated at +1f and
-// has mostly resolved by +10f — the fingerprint is the DECAY, not the raw brightness, so a scene that is
+// has mostly resolved by +10f: the fingerprint is the DECAY, not the raw brightness, so a scene that is
 // simply dark or busy there never trips it on its own.
 for (const b of boundaries) {
   const jointFrame = Math.round(b.t * fps);
@@ -123,7 +123,7 @@ for (const b of boundaries) {
 
 // ── 2. RESURRECTION: a layer redrawn after its own authored end ────────────────────────────────────
 // Baseline is the frame just before the layer ever draws (a clean read, since the bug this exists to
-// catch is the layer coming back, not the layer failing to leave the frame it just occupied — that would
+// catch is the layer coming back, not the layer failing to leave the frame it just occupied: that would
 // already show as an unchanged reading right after `end`, which is why `end+1f` is NOT used as the
 // baseline here). Probe is one frame before every LATER boundary. Blind spot: a layer that legitimately
 // re-enters its own box later in the film (a second beat reusing the same coordinates on purpose) reads
