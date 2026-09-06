@@ -7,12 +7,6 @@
  "audio": {
   "silent": true
  },
- "cuts": [
-  {
-   "t": 3.9,
-   "style": "riseBlur"
-  }
- ],
  "layers": [
   {
    "type": "text",
@@ -107,6 +101,13 @@
   {
    "t": 0,
    "preset": "dotmatrix"
+  }
+ ],
+ "transitions": [
+  {
+   "at": 3.9,
+   "mech": "cut",
+   "fx": "riseBlur"
   }
  ]
 }

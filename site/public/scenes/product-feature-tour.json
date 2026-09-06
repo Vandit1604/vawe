@@ -9,41 +9,6 @@
  "sceneUnits": false,
  "_camera": "The camera is written as MOVES, not keys: core/camera-moves.js owns the arithmetic, so retiming a chapter is one number. The dive is the only large one, and it lands on the agent panel because chapter 3 is what the film is arguing. A dive is bounded by the copy it must not push off the frame. At scale s centred on tx the left edge of the visible stage is tx - 960/s, and both films set their text column at x=150, so tx must stay at or under 150 + 960/s. The first pass dove to 1.2 on the panel centre and cropped the whole left column for five seconds with every gate green; `make judge` was the only thing that saw it.",
  "_cuts": "The MOTION family, which is what the motion director picks for this theme's punchy personality, rotated across its members. A matte cut (wipe, iris, blinds) would have matched the three roadmap bars, but core/cuts.js refuses one on a whole-frame root and the only way to earn it is beat wrapping, which this film opts out of one field up. So the film carries two cut families: shape inside the beat, motion between them. Each cut sits on a chapter boundary, and the backdrop windows at the foot of the file carry no times because they bind to these joints (core/junctions.js).",
- "cuts": [
-  {
-   "t": 5.6,
-   "style": "whip",
-   "dur": 0.32,
-   "dir": "left"
-  },
-  {
-   "t": 13.7,
-   "style": "zoom",
-   "dur": 0.36
-  },
-  {
-   "t": 22.15,
-   "style": "whip",
-   "dur": 0.32,
-   "dir": "right"
-  },
-  {
-   "t": 31.7,
-   "style": "punch",
-   "dur": 0.3
-  },
-  {
-   "t": 38.2,
-   "style": "zoom",
-   "dur": 0.36
-  },
-  {
-   "t": 44,
-   "style": "slide",
-   "dur": 0.34,
-   "dir": "left"
-  }
- ],
  "spectacle": {
   "at": 34.4,
   "of": "adoptionCount",
@@ -873,6 +838,52 @@
   },
   {
    "preset": "constellation"
+  }
+ ],
+ "transitions": [
+  {
+   "at": 5.6,
+   "mech": "cut",
+   "fx": "whip",
+   "dur": 0.32,
+   "dir": "left",
+   "timing": "smooth"
+  },
+  {
+   "at": 13.7,
+   "mech": "cut",
+   "fx": "zoom",
+   "dur": 0.36,
+   "timing": "smooth"
+  },
+  {
+   "at": 22.15,
+   "mech": "cut",
+   "fx": "whip",
+   "dur": 0.32,
+   "dir": "right",
+   "timing": "smooth"
+  },
+  {
+   "at": 31.7,
+   "mech": "cut",
+   "fx": "punch",
+   "dur": 0.3
+  },
+  {
+   "at": 38.2,
+   "mech": "cut",
+   "fx": "zoom",
+   "dur": 0.36,
+   "timing": "smooth"
+  },
+  {
+   "at": 44,
+   "mech": "cut",
+   "fx": "slide",
+   "dur": 0.34,
+   "dir": "left",
+   "timing": "smooth"
   }
  ],
  "camera": [

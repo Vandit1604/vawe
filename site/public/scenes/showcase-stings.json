@@ -210,30 +210,6 @@
    "exitDur": 0
   }
  ],
- "cuts": [
-  {
-   "t": 2.9,
-   "style": "punch"
-  },
-  {
-   "t": 5.35,
-   "style": "zoom"
-  }
- ],
- "stings": [
-  {
-   "t": 2.92,
-   "fx": "ripple",
-   "intensity": 0.55,
-   "dur": 0.7
-  },
-  {
-   "t": 5.37,
-   "fx": "ripple",
-   "intensity": 0.3,
-   "dur": 0.8
-  }
- ],
  "bg": [
   {
    "preset": "paperDots"
@@ -243,6 +219,33 @@
   },
   {
    "preset": "gradientWash"
+  }
+ ],
+ "transitions": [
+  {
+   "at": 2.9,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 5.35,
+   "mech": "cut",
+   "fx": "zoom",
+   "timing": "smooth"
+  },
+  {
+   "at": 2.92,
+   "mech": "sting",
+   "fx": "ripple",
+   "dur": 0.7,
+   "intensity": 0.55
+  },
+  {
+   "at": 5.37,
+   "mech": "sting",
+   "fx": "ripple",
+   "dur": 0.8,
+   "intensity": 0.3
   }
  ]
 }

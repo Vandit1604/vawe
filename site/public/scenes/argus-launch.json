@@ -30,28 +30,6 @@
    "value": "light"
   }
  ],
- "cuts": [
-  {
-   "t": 4.35,
-   "style": "blur",
-   "dur": 0.4
-  },
-  {
-   "t": 10.1,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 16.1,
-   "style": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "t": 20.05,
-   "style": "blur",
-   "dur": 0.4
-  }
- ],
  "spectacle": {
   "at": 16.1,
   "of": "growth",
@@ -1034,6 +1012,32 @@
    "duration": 2.1,
    "anim": "rise",
    "enterDur": 0.3
+  }
+ ],
+ "transitions": [
+  {
+   "at": 4.35,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
+  },
+  {
+   "at": 10.1,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 16.1,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 20.05,
+   "mech": "cut",
+   "fx": "blur",
+   "dur": 0.4
   }
  ],
  "camera": [

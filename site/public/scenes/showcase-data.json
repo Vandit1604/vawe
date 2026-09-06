@@ -362,25 +362,6 @@
    "exitDur": 0
   }
  ],
- "cuts": [
-  {
-   "t": 3.35,
-   "style": "slide",
-   "dur": 0.4
-  },
-  {
-   "t": 6.65,
-   "style": "riseBlur",
-   "dur": 0.42
-  }
- ],
- "stings": [
-  {
-   "t": 5.3,
-   "fx": "flash",
-   "intensity": 0.32
-  }
- ],
  "bg": [
   {
    "preset": "paperDots"
@@ -392,5 +373,26 @@
    "preset": "paperShapes"
   }
  ],
- "_why_bg": "three windows for three slots. There were four, and the middle two were both `soft`: the same ground painted twice across a cut, which is a window that turns nothing. The scene failed validation on every determinism run because a fourth window had no joint left to bind to."
+ "_why_bg": "three windows for three slots. There were four, and the middle two were both `soft`: the same ground painted twice across a cut, which is a window that turns nothing. The scene failed validation on every determinism run because a fourth window had no joint left to bind to.",
+ "transitions": [
+  {
+   "at": 3.35,
+   "mech": "cut",
+   "fx": "slide",
+   "dur": 0.4,
+   "timing": "smooth"
+  },
+  {
+   "at": 6.65,
+   "mech": "cut",
+   "fx": "riseBlur",
+   "dur": 0.42
+  },
+  {
+   "at": 5.3,
+   "mech": "sting",
+   "fx": "flash",
+   "intensity": 0.32
+  }
+ ]
 }
