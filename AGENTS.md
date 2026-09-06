@@ -412,9 +412,12 @@ type/colour/layout/imagery → density → show-or-tell → what holds it across
 **`make arsenal Q="<what you mean, in plain english>"`** searches all 788 named things at once and
 prints the snippet with the key it goes in (`make effects` regenerates the full reference,
 `docs/EFFECTS.md`, 703 effects across 56 families). Reach for it before you invent anything. The measured cost
-of not doing so: the `{type:"beat"}` blueprint mechanism is used by a handful of gate-visible scenes (3
-of 149 when last measured; run `node scripts/gates/waiver-drift.mjs` for the current count), and 12 of
-its 19 beats have never been used once.
+of not doing so: the `{type:"beat"}` blueprint mechanism is used by 3 films in the whole library, and
+22 of its 29 beats have never appeared in one (measured 2026-09-06). Two things changed that day so the
+number can move: 10 of the 29 are MINED from studied reference films rather than invented (`make mine`,
+`blueprints/beats-mined.mjs`, each with the shots it came from), and `make scaffold` composes from beats
+by default. Pick one by SEEING it: `make previews` renders a sheet per beat and `make blueprints` prints
+the path beside each id.
 
 **`make schema AT="layers[].motion[]"`** answers the other half: not what the engine can DO, but what you
 may WRITE at one path, with every field's type and its written label, read live from
@@ -425,6 +428,14 @@ rejected three correct films, while the schema had the answer all along and serv
 
 **`make track SHAPE=pan|blast|drift|enter|exit`** emits a hand-keyed `motion` track from a shape
 measured off the two reference films. Use it instead of naming a preset. See the next section for why.
+
+**Four more that answer on demand, added 2026-09-06.** `make preset-sheets` renders a showcase per taste
+profile (`site/public/blocklib/presets/`), so a film with no site to study picks a rendered look, not an
+adjective. `make mistakes Q="<words>"` asks the lesson index (`docs/MISTAKES.md` is one line per entry
+now; `make mistakes N=<n> FULL=1` serves the original reasoning from git). `make evals` renders the fixed
+briefs under the current rules and `make evals-compare BEFORE=<run>` opens before/after side by side, the
+only honest way to know a doctrine change made films better ([`docs/EVALS.md`](docs/EVALS.md)). And the
+numbers behind every rule live one page each in [`docs/RULES/`](docs/RULES/INDEX.md).
 
 ## AUTHOR THE MOTION. DO NOT NAME IT.  `[gated: scripts/gates/author-check.mjs#no-authored-motion]`
 
