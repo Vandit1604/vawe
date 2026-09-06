@@ -6,7 +6,7 @@ Two different things live under `assets/`, with two completely different licence
 confuse them.
 
 **`assets/sfx/*.wav`: SYNTHESIZED. No licence at all.** Every cue is baked from parameters by
-`make audio` (`core/audio-kit.mjs`: noise, a biquad, an envelope, seeded). Same parameters always give
+`make audio` (`core/audio/kit.mjs`: noise, a biquad, an envelope, seeded). Same parameters always give
 the same bytes. Nothing was downloaded, so nothing can be claimed. This is the safest audio in the
 repo and it is safe by construction, not by permission.
 

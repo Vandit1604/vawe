@@ -61,7 +61,7 @@ four times, so the world turns on every junction and the picture is never still 
 
     cuts        4, all on the beat boundaries: 2.5 · 7.5 · 11.5 · 16.0
     styles      blur, riseBlur, blur, riseBlur         one family, soft
-    bg windows  5, no from/to, bound to the joints by core/junctions.js
+    bg windows  5, no from/to, bound to the joints by core/timeline/junctions.js
     spectacle   { at: 11.5, of: "arsenalWall", device: "ripple" }
     audio       tactile: true. It autoplays muted; the score is for whoever unmutes.
 

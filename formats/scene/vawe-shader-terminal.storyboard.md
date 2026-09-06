@@ -30,7 +30,7 @@ duration: 14s
   presentation (`style: "none"`): the centre panel survives that seam and is the continuity across it,
   so a `rise` would have carried the one thing holding the film together 70px along with everything else
   (docs/CRAFT/TRANSITIONS.md step 1). `audio.beatSync` is NOT set:
-  core/beat-bind.js refuses this bed at confidence 1.54 against a floor of 1.6, so the grid is applied
+  core/beats/index.js refuses this bed at confidence 1.54 against a floor of 1.6, so the grid is applied
   by hand at author time rather than by the engine at boot.
 
   THE GROUND IS WHITE and the terminal is a dark panel on it, which is what vawe.dev is. The three

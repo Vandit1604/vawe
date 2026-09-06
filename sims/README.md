@@ -15,7 +15,7 @@ and emits a PNG frame sequence. The scene plays that sequence back through the e
 which preloads a manifest and swaps an `<img>` src per frame. Non-determinism is confined to bake
 time; the renderer keeps exactly one contract.
 
-This is the same shape as two things already in the repo: `core/canvas-fx.js` bakes a per-pixel image
+This is the same shape as two things already in the repo: `core/canvas/effects.js` bakes a per-pixel image
 pass once at boot, and `make spectrum` bakes FFT band energy to a per-frame table the render reads by
 row.
 
@@ -77,7 +77,7 @@ the sequence still renders, still plays, and simply differs every time somebody 
 
 The baker writes both files the two consumers need:
 
-- `manifest.json`, `{fps, w, h, count, frames: [url…]}`, the shape `core/boot.js` preloads and
+- `manifest.json`, `{fps, w, h, count, frames: [url…]}`, the shape `core/engine/boot.js` preloads and
   `core/layers/clip.js` plays. Author it straight into a scene:
 
   ```json
