@@ -37,6 +37,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { docRegistry, computeFeatures, storyboardPathFor } from '../gates/craft-checklist.mjs';
 import { nearestExemplars, exemplarSignature } from '../lib/exemplars.mjs';
+import { TYPE_SPINES, typeNames } from './type-spines.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -46,10 +47,16 @@ function arg(name, dflt) {
 }
 
 const out = arg('out', null);
-if (!out) { console.error('usage: node scripts/author/scaffold.mjs --out formats/scene/<name>.json [--dur 13] [--theme default] [--beats 5]'); process.exit(2); }
+if (!out) { console.error('usage: node scripts/author/scaffold.mjs --out formats/scene/<name>.json [--dur 13] [--theme default] [--beats 5] [--type launch|explainer|talking-head|sting|demo|recreation]'); process.exit(2); }
 const dur = Number(arg('dur', 13));
 const theme = arg('theme', 'default');
 const beatsWanted = arg('beats', null) != null ? Number(arg('beats')) : null;
+const typeArg = arg('type', null);
+if (typeArg && !TYPE_SPINES[typeArg]) {
+  console.error(`scaffold.mjs: unknown --type "${typeArg}". Known: ${typeNames().join(', ')}`);
+  process.exit(2);
+}
+const spine = typeArg ? TYPE_SPINES[typeArg] : null;
 
 // COMPOSE FROM THE NEAREST PROVEN FILM, not a generic default. A blank draft regresses to the mean;
 // so does a scaffold whose backdrop is one fixed pair of windows. `--like "<brief>"` (or, absent that,
@@ -69,19 +76,30 @@ const total = Math.max(beatsWanted || 0, needed, 2);
 // real asset, swap one into the rotation then.
 const MIDDLE = ['cardCascade', 'wordBlast', 'chipGrid'];
 
-// Build the beat sequence: kineticHook opens, ctaEnd closes, the payoff (last middle slot, index
-// `payoffIdx`) is always statReveal so `spectacle:` in the storyboard has somewhere real to point.
-const names = ['kineticHook'];
-const midCount = total - 2;
-const payoffIdx = midCount > 0 ? midCount : -1; // index within `names` once kineticHook (index 0) is prepended
-for (let i = 0; i < midCount; i++) {
-  if (i === midCount - 1) { names.push('statReveal'); continue; }
-  // rotate, never repeating the previous name
-  let pick = MIDDLE[i % MIDDLE.length];
-  if (pick === names[names.length - 1]) pick = MIDDLE[(i + 1) % MIDDLE.length];
-  names.push(pick);
+// `--type` composes from the fixed spine in type-spines.mjs instead of the generic rotation: a launch
+// film is built differently from an explainer, and a rotation cannot tell the two apart. The spine's
+// beat COUNT wins over `--beats`/the sparse-beats floor, because the spine already IS a considered
+// beat count for that type; `--dur` still only changes how long each beat gets.
+let names, payoffIdx;
+if (spine) {
+  names = spine.beats.slice();
+  // the payoff is the beat right before the close, same convention as the generic rotation.
+  payoffIdx = names.length >= 2 ? names.length - 2 : -1;
+} else {
+  // Build the beat sequence: kineticHook opens, ctaEnd closes, the payoff (last middle slot, index
+  // `payoffIdx`) is always statReveal so `spectacle:` in the storyboard has somewhere real to point.
+  names = ['kineticHook'];
+  const midCount = total - 2;
+  payoffIdx = midCount > 0 ? midCount : -1; // index within `names` once kineticHook (index 0) is prepended
+  for (let i = 0; i < midCount; i++) {
+    if (i === midCount - 1) { names.push('statReveal'); continue; }
+    // rotate, never repeating the previous name
+    let pick = MIDDLE[i % MIDDLE.length];
+    if (pick === names[names.length - 1]) pick = MIDDLE[(i + 1) % MIDDLE.length];
+    names.push(pick);
+  }
+  names.push('ctaEnd');
 }
-names.push('ctaEnd');
 
 // Tile the duration with no gaps or overlaps.
 const share = dur / names.length;
@@ -113,6 +131,25 @@ function propsFor(name, span, isPayoff) {
       return { title: 'REPLACE: named things title', chips: CHIPS, footer: 'REPLACE: accent footer line' };
     case 'ctaEnd':
       return { command: 'REPLACE install command', sub: 'REPLACE: one-line sub', url: 'REPLACE.dev' };
+    // The type spines below reach for beats the generic rotation avoids because they need a real
+    // asset. `--type` accepts that: it names the field the author must fill (`image`/`mark`), same
+    // REPLACE convention as CARDS/CHIPS above, never a path to a file that happens to exist.
+    case 'screenDive':
+      return { title: 'REPLACE: what this screen does', image: 'REPLACE: assets/brands/<name>/stills/<shot>.png' };
+    case 'logoLockup':
+      return { mark: 'REPLACE: assets/brands/<name>/mark.svg', wordmark: 'REPLACE: assets/brands/<name>/wordmark.svg', headline: 'REPLACE: brand line' };
+    case 'logoReveal':
+      return { mark: 'REPLACE: <svg d path>', viewBox: '0 0 100 100', wordmark: 'REPLACE: brand name' };
+    case 'verdictProof':
+      return { command: 'REPLACE: the command', note: 'REPLACE: what it proves', verdict: 'REPLACE', tone: 'ok' };
+    case 'recordedPan':
+      return { image: 'REPLACE: assets/brands/<name>/stills/<shot>.png' };
+    case 'containerFill':
+      return { items: CHIPS };
+    case 'listBuildRows':
+      return { items: ['REPLACE: row one', 'REPLACE: row two', 'REPLACE: row three'] };
+    case 'blurResolveHook':
+      return { text: 'REPLACE: the hook line' };
     default:
       return {};
   }
@@ -161,24 +198,28 @@ layers.push({
 });
 
 // ---- transitions: one per boundary, mostly fade, one accent into the payoff --------------------------
+// A named type spine picks its own cut family (a launch film's fade-then-zoom reads differently from
+// an explainer's dissolve-then-punch); with no `--type`, fall back to the generic fade/cinematicZoom pair.
+const cutFamily = spine ? spine.cutFamily : { default: 'fade', accent: 'cinematicZoom' };
 const transitions = [];
 for (let i = 1; i < spans.length; i++) {
   const at = spans[i].start;
   const accent = i === payoffIdx; // the boundary INTO the payoff beat
-  transitions.push(accent
-    ? { at, fx: 'cinematicZoom', dur: 0.6 }
-    : { at, fx: 'fade', dur: 0.5 });
+  transitions.push({ at, fx: accent ? cutFamily.accent : cutFamily.default, dur: accent ? 0.6 : 0.5 });
 }
 
-// ---- bg: the backdrop turns, and the exemplar sets HOW MUCH ---------------------------------------
+// ---- bg: the backdrop turns, and the exemplar (or the type spine) sets HOW MUCH --------------------
 // CLAUDE.md's strongest single lever: 82% of the library paints one window for the whole runtime;
 // brew inverts the world on four of its five cuts. When an exemplar is in hand, mirror its backdrop
 // RHYTHM: one junction-bound window per beat (no from/to, so the cuts already written own the numbers,
 // core/junctions.js), cycling the exemplar's own presets so each cut turns the world the way that film
-// does. With no exemplar matched, fall back to the two-window default rather than invent a rhythm.
+// does. A named `--type` cycles its own preset list the same way, since the type IS the taste anchor
+// when no exemplar was asked for. With neither, fall back to the two-window default.
 let bg;
 if (sig && sig.bgPresets.length) {
   bg = spans.map((_, i) => ({ preset: sig.bgPresets[i % sig.bgPresets.length] }));
+} else if (spine) {
+  bg = spans.map((_, i) => ({ preset: spine.bgPresets[i % spine.bgPresets.length] }));
 } else {
   const bgSplit = +(dur * 0.6).toFixed(2);
   bg = [
@@ -270,8 +311,9 @@ fs.writeFileSync(path.resolve(ROOT, sbPath), storyboard);
 // The path goes to stdout ALONE (matching scripts/dev/demo.mjs), so `make scaffold` can hand it
 // straight to `make dev`/`make ship`; everything else is a note and goes to stderr.
 console.error(`✓ scaffold: ${names.length} beats (${names.join(' -> ')}) across ${dur}s -> ${out}`);
+if (typeArg) console.error(`  TYPE=${typeArg} spine: skills/vawe-type-${typeArg}/SKILL.md carries this type's rules and worked example.`);
 if (sig) console.error(`  composed to the shape of ${exemplar.file} (${exemplar.register || exemplar.teaches}): ${bg.length} bg windows turn the world. STUDY formats/scene/${exemplar.file}.`);
-else console.error(`  no exemplar matched "${likeText.trim()}"; used the two-window default. Pass --like "<brief>" to compose from the nearest proven film.`);
+else if (!spine) console.error(`  no exemplar matched "${likeText.trim()}"; used the two-window default. Pass --like "<brief>" to compose from the nearest proven film.`);
 console.error(`  storyboard: ${sbPath}`);
 console.error(`  Replace every REPLACE:/<fill: ...> marker, then \`make dev D=${out}\`.`);
 if (process.argv.includes('--print-path')) process.stdout.write(out + '\n');
