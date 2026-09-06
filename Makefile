@@ -299,12 +299,6 @@ frame:
 grammar:
 	node scripts/author/grammar.mjs $(if $(DOC),--doc,$(N))
 
-# make evals [BRIEF=launch]: render the six fixed type briefs (verify/evals/briefs/*.json) to a
-# contact-sheet baseline (docs/EVALS.md). A doctrine change re-runs this and a human compares the
-# committed sheet against the new one; no score, no mp4.
-evals:
-	node scripts/dev/evals.mjs $(BRIEF)
-
 # make mistakes [Q="…"] [N=496] [FULL=1]: ASK the mistake log. docs/MISTAKES.md is now a three-line
 # index (title, lesson, what holds it) per entry; FULL=1 with N=<n> prints that entry's original
 # write-up from the git commit taken just before the index migration.

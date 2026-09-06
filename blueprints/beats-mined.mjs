@@ -18,7 +18,9 @@ export function blurResolveHook({ text, x = 160, y = 400, w = 1600, size = 130, 
   const motion = [{ t: 0, blur: blurFrom }, { t: resolveAt, blur: 0, ease: 'easeOutCubic' }];
   const out = [{ type: 'text', text, x, y, w, align, size, weight, color, ...(font ? { font } : {}),
     start, duration: dur, anim: 'none', motion, out: 'fade', exitDur: 0.4 }];
-  if (sub) out.push(caption({ text: sub, x, y: y + Math.round(size * 0.9), w,
+  // The sub sits UNDER the headline's line box, not inside it: 0.9 x size landed it on the descenders
+  // and validate flagged the two lines colliding at every size (found by the acceptance run, 2026-09-06).
+  if (sub) out.push(caption({ text: sub, x, y: y + Math.round(size * 1.35), w,
     start: start + resolveAt + 0.15, dur: Math.max(0.4, dur - resolveAt - 0.15) }));
   return out;
 }

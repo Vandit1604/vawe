@@ -236,6 +236,10 @@ const scene = {
   aspect: '16:9',
   duration: dur,
   energy: 'brand',
+  // A type spine may carry a reasoned waiver for a floor its own pace legitimately crosses (the
+  // explainer's held band vs sparse-beats). Written by the spine, once, so the decision travels with
+  // every scaffold of that type instead of being rediscovered after a render.
+  ...(spine && spine.waive ? { authoring: { allow: Object.keys(spine.waive), _why: spine.waive } } : {}),
   // Each beat is a whole-frame composition, so the `fade` boundaries below must cross-fade the beats
   // as UNITS. Without this the renderer throws ("nothing underneath, the frame would go empty"): a
   // fade cut needs something to reveal, and flat-attached beats have nothing. produce.js auto-sets this
