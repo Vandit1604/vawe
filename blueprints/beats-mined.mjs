@@ -201,8 +201,10 @@ export function viewportTrio({ image, caption: cap, sizes = [280, 460, 760], gap
   let cx = Math.round((1920 - totalW) / 2);
   const layers = sizes.map((w, i) => {
     const h = Math.round(w * 0.62);
+    // No `border` on an image: core/layers/image.js never reads it and the expander refuses a prop
+    // that is set and never read (the same defect that kept screenDive from rendering).
     const layer = { type: 'image', src: image, x: cx, y: y + Math.round((tallest - h) / 2), w, h,
-      radius: 12, border: '1.5px solid var(--line)', start: start + i * 0.08,
+      radius: 12, start: start + i * 0.08,
       duration: Math.max(0.6, dur - i * 0.08), anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0.4 };
     cx += w + gap;
     return layer;

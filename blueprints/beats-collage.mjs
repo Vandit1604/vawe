@@ -137,10 +137,14 @@ export function slotSwap({ passes = [], x = 240, y = 330, badge = 150, badgeRadi
     const t0 = start + i * every;
     const span = win + (i < n - 1 ? over : 0);
     const at = (d) => ({ start: +(t0 + d).toFixed(3), duration: +(span - d).toFixed(3), enterDur, exitDur });
+    // The label is a `wave()` split layer, and the engine refuses `enterDur` on split text: a split
+    // arrival is timed by `each`/`stagger`, never by one entrance. So the label takes the window and the
+    // exit from `at()` but not the entrance, or the beat fails at boot and its preview never renders.
+    const atSplit = (d) => { const { enterDur: _unused, ...rest } = at(d); return rest; };
 
     if (p.label != null) {
       L.push({ type: 'text', text: p.label, x: x + badge + gap, y, w: labelW, align: 'left',
-        size: labelSize, weight: labelWeight, ...wave(labelColor), ...at(off.label) });
+        size: labelSize, weight: labelWeight, ...wave(labelColor), ...atSplit(off.label) });
     }
     if (p.icon) {
       L.push({ type: 'rect', x, y: y + 10, w: badge, h: badge, radius: badgeRadius,

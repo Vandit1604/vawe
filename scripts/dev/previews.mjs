@@ -44,6 +44,25 @@ const CONTENT = {
   verdictProof: { title: 'Does it hold under load?', dur: 3.8, command: 'loadtest --rps 5000', note: 'p99 latency 42ms', verdict: 'HOLDS', tone: 'ok' },
   ctaEnd: { mark: 'assets/cutouts/bulb.png', command: 'npx create-app', sub: 'Ready in under a minute', url: 'example.com/start' },
   typedHook: { text: 'Ship faster. Worry less.' },
+  // The ten beats mined from studied references (blueprints/beats-mined.mjs). Figures are the
+  // engine's own, read from the registry, so a preview never advertises a number the product lacks.
+  blurResolveHook: { text: 'Ship the whole film', sub: 'from one file', dur: 2.4 },
+  dialogueAccumulate: { dur: 5.5, bloomLine: 'One file does it all.', pairs: [
+    { sans: 'Write', serif: 'a scene.' }, { sans: 'Render', serif: 'a film.' }, { sans: 'Ship', serif: 'it.' },
+  ] },
+  containerFill: { dur: 4.5, items: ['24 layer types', '703 effects', '56 families', '29 blueprints', '5 canvases'] },
+  cardFan: { dur: 3.5, cards: [
+    { title: 'Plan', detail: '$ plan run' }, { title: 'Ship', detail: '$ ship deploy' }, { title: 'Learn', detail: '$ learn report' },
+  ] },
+  listBuildRows: { dur: 5, items: ['text', 'image', 'video', 'html', 'svg'] },
+  chipConverge: { dur: 2.6, chips: ['cuts', 'seams', 'stings', 'camera', 'captions', 'audio'] },
+  cellMosaic: { dur: 3.5, cells: [
+    { text: 'Plan' }, { text: 'Write' }, { text: 'Render' }, { text: 'Ship' },
+    { text: 'Judge' }, { text: 'Ledger' }, { text: 'Post' }, { text: 'Repeat' },
+  ] },
+  wordWipe: { word: 'SHIP', revealText: 'One JSON in.', subText: 'One film out.', dur: 1.8 },
+  wordmarkAssemble: { wordmark: 'vawe', dur: 3.2, tiles: ['assets/cutouts/bulb.png', 'assets/cutouts/bulb.png', 'assets/cutouts/bulb.png'] },
+  viewportTrio: { image: 'assets/cutouts/bulb.png', caption: 'One scene, three viewports', dur: 3.4 },
   morphButton: { label: 'GENERATE' },
   propSentence: { items: [{ word: 'Ship' }, { chip: '$ deploy' }, { word: 'in' }, { chip: '4.2s' }, { word: 'flat.' }] },
   slotSwap: { dur: 3.6, passes: [
