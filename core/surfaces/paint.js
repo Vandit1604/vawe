@@ -1,6 +1,6 @@
 // core/surfaces/paint.js: GENERATIVE Canvas 2D. The `paint` layer type's pixels.
 // See core/paint-fx.js for the determinism contract each effect keeps.
-import { PAINT_FX, PROPS as FX_PROPS, PAINT_REGISTRY } from '../paint-fx.js';
+import { PAINT_FX, PROPS as FX_PROPS, PAINT_REGISTRY } from './paint-fx.js';
 import { mergeProps } from '../props.js';
 
 export const size = (kit) => [kit.W, kit.H];   // an ambient field: fills the frame unless boxed

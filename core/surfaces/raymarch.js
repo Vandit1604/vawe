@@ -3,7 +3,7 @@
 // Unlike `shader`, this is a LIT SUBJECT with a silhouette, not an ambient field: give it a box
 // roughly the size you want the object to occupy and let its transparent surround do the compositing.
 // That is why its default box is a square rather than the frame.
-import { createRaymarchLayer, RAYMARCH_FX, RAYMARCH_REGISTRY } from '../raymarch-fx.js';
+import { createRaymarchLayer, RAYMARCH_FX, RAYMARCH_REGISTRY } from './raymarch-fx.js';
 import { palette } from './palette.js';
 import { keyAt, validateKeys, atOf } from './surface-keys.js';
 

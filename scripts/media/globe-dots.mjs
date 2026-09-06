@@ -31,7 +31,7 @@ const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ?
 
 const SPACING = Number(arg('spacing', 2.2));          // degrees between dots at the equator
 const SRC = arg('src', 'assets/globe/countries.geojson');
-const OUT = arg('out', 'core/globe-dots.js');
+const OUT = arg('out', 'core/surfaces/globe-dots.js');
 
 const srcPath = path.join(ROOT, SRC);
 if (!fs.existsSync(srcPath)) {

@@ -11,7 +11,7 @@
 //     numbers, so on a layer that has a motion track, `react: { prop: "blur" }` is computed here and
 //     then thrown away. Preserved exactly as it was; recorded so the next author reads it as a defect
 //     with a name rather than as a mystery.
-import { sampleAt } from '../spectrum.js';
+import { sampleAt } from './spectrum.js';
 import { baseOpacity } from './util.js';
 
 export const slot = 'react';
