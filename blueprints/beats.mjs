@@ -83,7 +83,10 @@ export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, pro
 export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: cap, zoom = [1.0, 1.28], start = 0, dur = 7 } = {}) {
   return [
     title && kineticHeadline({ text: title, x: 160, y: 108, w: 1600, size: 58, weight: 700, preset: 'scale', each: 0.3, stagger: 0.03, start, dur }),
-    { type: 'image', src: image, x, y, w, radius: 14, border: `1.5px solid var(--line)`, start: start + 0.3, duration: dur - 0.6, anim: 'scale', enterDur: 0.55, out: 'defocus', exitDur: 0.4, ken: { from: zoom[0], to: zoom[1] } },
+    // No `border` here: core/layers/image.js never reads it, and the expander refuses a prop that is
+    // set and never read, which is why this beat's preview failed to render. The hairline lives on
+    // the surface behind a capture, not on the image itself.
+    { type: 'image', src: image, x, y, w, radius: 14, start: start + 0.3, duration: dur - 0.6, anim: 'scale', enterDur: 0.55, out: 'defocus', exitDur: 0.4, ken: { from: zoom[0], to: zoom[1] } },
     cap && caption({ text: cap, x: 160, y: 918, w: 1600, size: 36, start: start + 0.6, dur: dur - 0.6 }),
   ].filter(Boolean);
 }

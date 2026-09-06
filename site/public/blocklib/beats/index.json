@@ -250,6 +250,147 @@
     "poster": "beats/echoRing/poster.png",
     "sheet": "beats/echoRing/sheet.png"
    }
+  },
+  {
+   "id": "screenDive",
+   "duration": 4.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "product surface: kinetic title + a real UI shot that KEN-pushes in",
+   "role": "product surface",
+   "files": {
+    "preview": "beats/screenDive/preview.mp4",
+    "poster": "beats/screenDive/poster.png",
+    "sheet": "beats/screenDive/sheet.png"
+   }
+  },
+  {
+   "id": "blurResolveHook",
+   "duration": 2.9,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a hook whose type arrives smeared with motion blur and snaps into focus, never sliding or fading",
+   "files": {
+    "preview": "beats/blurResolveHook/preview.mp4",
+    "poster": "beats/blurResolveHook/poster.png",
+    "sheet": "beats/blurResolveHook/sheet.png"
+   }
+  },
+  {
+   "id": "dialogueAccumulate",
+   "duration": 6,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom",
+   "files": {
+    "preview": "beats/dialogueAccumulate/preview.mp4",
+    "poster": "beats/dialogueAccumulate/poster.png",
+    "sheet": "beats/dialogueAccumulate/sheet.png"
+   }
+  },
+  {
+   "id": "containerFill",
+   "duration": 5,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a fixed frame that never moves while chips fill it in one at a time",
+   "files": {
+    "preview": "beats/containerFill/preview.mp4",
+    "poster": "beats/containerFill/poster.png",
+    "sheet": "beats/containerFill/sheet.png"
+   }
+  },
+  {
+   "id": "cardFan",
+   "duration": 4,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "cards arrive from one side and fan open in perspective around a fixed anchor",
+   "files": {
+    "preview": "beats/cardFan/preview.mp4",
+    "poster": "beats/cardFan/poster.png",
+    "sheet": "beats/cardFan/sheet.png"
+   }
+  },
+  {
+   "id": "listBuildRows",
+   "duration": 5.5,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a vertical list that grows one row at a time under a fixed left rule",
+   "files": {
+    "preview": "beats/listBuildRows/preview.mp4",
+    "poster": "beats/listBuildRows/poster.png",
+    "sheet": "beats/listBuildRows/sheet.png"
+   }
+  },
+  {
+   "id": "chipConverge",
+   "duration": 3.1,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "chips scatter in from every side and then converge onto one point",
+   "files": {
+    "preview": "beats/chipConverge/preview.mp4",
+    "poster": "beats/chipConverge/poster.png",
+    "sheet": "beats/chipConverge/sheet.png"
+   }
+  },
+  {
+   "id": "cellMosaic",
+   "duration": 4,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "a grid of mixed cells that slides as one surface while each cell keeps its own content",
+   "files": {
+    "preview": "beats/cellMosaic/preview.mp4",
+    "poster": "beats/cellMosaic/poster.png",
+    "sheet": "beats/cellMosaic/sheet.png"
+   }
+  },
+  {
+   "id": "wordmarkAssemble",
+   "duration": 3.7,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "the brand mark settles from scattered letters while small tiles drift at a different depth behind it",
+   "files": {
+    "preview": "beats/wordmarkAssemble/preview.mp4",
+    "poster": "beats/wordmarkAssemble/poster.png",
+    "sheet": "beats/wordmarkAssemble/sheet.png"
+   }
+  },
+  {
+   "id": "viewportTrio",
+   "duration": 3.9,
+   "dims": {
+    "w": 1920,
+    "h": 1080
+   },
+   "blurb": "the same subject shown at three sizes at once, the \"it is really finished\" payoff shot",
+   "files": {
+    "preview": "beats/viewportTrio/preview.mp4",
+    "poster": "beats/viewportTrio/poster.png",
+    "sheet": "beats/viewportTrio/sheet.png"
+   }
   }
  ]
 }
