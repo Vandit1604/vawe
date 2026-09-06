@@ -243,7 +243,12 @@
  ],
  "core/theme-contract.js": [
   "REQUIRED",
-  "ON_INK"
+  "ON_INK",
+  "LOOK_SCALE_KEYS",
+  "LOOK_LAYOUT_ANCHORS",
+  "LOOK_MARK_KEYS",
+  "LOOK_CUT_SLOTS",
+  "LOOK_FIELD_KEYS"
  ],
  "core/surfaces/three-fx.js": [
   "PROPS"
