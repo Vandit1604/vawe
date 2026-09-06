@@ -1,6 +1,6 @@
 {
   "name": "brew",
-  "note": "EYEDROPPED from the Brew launch film (twitter.mp4) July 2026 — WARM-LIGHT-first: cream/white type cards (#fbf2e4) with a vivid orange accent (#ff742e, from the send button; deep #f1642e), warm near-black text, and pure-black punch beats. Brand beats sit on a radial orange glow. Bold Hanken Grotesk headlines, Geist Mono for {{code}}. Motion: punchy — measured hero entrance is a ~0.33s easeOutBack (pop) scale-in (make measure).",
+  "note": "EYEDROPPED from the Brew launch film (twitter.mp4) July 2026, WARM-LIGHT-first: cream/white type cards (#fbf2e4) with a vivid orange accent (#ff742e, from the send button; deep #f1642e), warm near-black text, and pure-black punch beats. Brand beats sit on a radial orange glow. Bold Hanken Grotesk headlines, Geist Mono for {{code}}. Motion: punchy, measured hero entrance is a ~0.33s easeOutBack (pop) scale-in (make measure).",
   "palette": {
     "bg": "#fbf2e4",
     "bg2": "#f7e9d6",

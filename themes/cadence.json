@@ -1,6 +1,6 @@
 {
   "name": "cadence",
-  "note": "Made-up product theme for the Cadence launch clip, built in the higgsfield register: near-black field, ONE amber accent, and no third colour except the app chrome's greys. Faces are tracked free files (Bricolage Grotesque + Geist Mono), never Sohne — that one is paid and lives in the gitignored local/ folder, so a clean clone would silently fall back to the body face. exitRatio 0.4: things leave faster than they arrive.",
+  "note": "Made-up product theme for the Cadence launch clip, built in the higgsfield register: near-black field, ONE amber accent, and no third colour except the app chrome's greys. Faces are tracked free files (Bricolage Grotesque + Geist Mono), never Sohne (that one is paid and lives in the gitignored local/ folder, so a clean clone would silently fall back to the body face). exitRatio 0.4: things leave faster than they arrive.",
   "palette": {
     "bg": "#07080a", "bg2": "#0b0d10", "surface": "#14161b", "surface2": "#1c1f26",
     "line": "rgba(255,255,255,0.07)", "lineStrong": "rgba(255,255,255,0.16)",
