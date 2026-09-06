@@ -2,8 +2,8 @@
 // positioned/animated by the engine). MUST be static: any <script> is stripped so renderFrame(n) stays
 // pure. The sanitiser and the reasoning behind it live in core/sanitize-html.js, shared with the `html`
 // background so the layer and the backdrop cannot drift to different rules.
-import { sanitizeHtml, scopeStyles, htmlSource, droppedDecls } from '../sanitize-html.js';
-import { propsOf } from '../props.js';
+import { sanitizeHtml, scopeStyles, htmlSource, droppedDecls } from '../type/sanitize-html.js';
+import { propsOf } from '../registry/props.js';
 
 // `h` used to be accepted and then ignored: build() set width and not height, and the `.hs-html` wrapper
 // had no height of its own, so hand-authored CSS saying `height:100%` resolved against an auto-height

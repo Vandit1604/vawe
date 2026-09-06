@@ -20,14 +20,14 @@
 // createRenderer, which puts the completeness of the check in the caller's hands and makes an omitted
 // argument look exactly like a layer with no orchestrator props. A missing declaration must be
 // impossible, not merely unlikely.
-import { mergeProps } from '../props.js';
+import { mergeProps } from '../registry/props.js';
 import { PROPS as ORCHESTRATOR_PROPS } from '../../formats/scene/props.js';
 import { TRACK_PROPS } from '../tracks/index.js';
 import { PROPS as KIT_PROPS } from './util.js';
-import { PROPS as BOOT_PROPS } from '../boot.js';
-import { PROPS as PAN_PROPS } from '../pan-resolve.mjs';
+import { PROPS as BOOT_PROPS } from '../engine/boot.js';
+import { PROPS as PAN_PROPS } from '../layout/pan-resolve.mjs';
 import { PROPS as FX_PROPS } from '../fx/index.js';
-import { PROPS as LOWER_PROPS } from '../transitions-lower.js';
+import { PROPS as LOWER_PROPS } from '../transitions/lower.js';
 
 export const SHARED_PROPS = Object.freeze(mergeProps(
   ORCHESTRATOR_PROPS, TRACK_PROPS, KIT_PROPS, BOOT_PROPS, PAN_PROPS, FX_PROPS, LOWER_PROPS));

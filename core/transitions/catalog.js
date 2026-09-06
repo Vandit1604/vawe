@@ -14,10 +14,10 @@
 // This file is the INVENTORY (what exists); docs/CRAFT/TRANSITIONS.md is the DECISION layer (what to
 // pick and why). `make transitions` prints this catalog.
 
-import { ANIM_NAMES } from '../clips.js';
-import { PRESENTATIONS } from '../cuts.js';
-import { SHADER_FX } from '../stings.js';
-import { SEAM_FX } from '../seams.js';
+import { ANIM_NAMES } from '../timeline/clips.js';
+import { PRESENTATIONS } from '../cuts/index.js';
+import { SHADER_FX } from '../stings/index.js';
+import { SEAM_FX } from '../timeline/seams.js';
 
 // family = what the transition DOES (a name can appear in several mechanisms; the family is the same).
 const FAMILY_OF = (name) => {

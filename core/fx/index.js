@@ -30,7 +30,7 @@ import * as squash from './squash.js';
 import * as matte from './matte.js';
 import * as lag from './lag.js';
 import * as upright from './upright.js';
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 
 const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, shadow, squash, tilt, upright, wordSlot };
 

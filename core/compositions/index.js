@@ -18,7 +18,7 @@
 // SVG draw-on uses the pathLength=1 / dasharray "1 1" trick (as PARTS.drawOn) so it needs no getTotalLength
 // (the layer is not in the document yet at build() time, scene.js appends AFTER renderer.build).
 
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 const NS = 'http://www.w3.org/2000/svg';
 
 // small helpers kept local: a comp reaches for these, nothing global.

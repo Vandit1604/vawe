@@ -6,7 +6,7 @@
 // It is a DEFAULT, never an override. An explicit `timing` on a cut/seam always wins, and a film that
 // names no `energy` is untouched, so every existing film re-lowers byte-identical. Energy adds no new
 // curve: the words below map to timings that already live in core/cuts/timings.js.
-import { defineRegistry } from '../registry.js';
+import { defineRegistry } from '../registry/registry.js';
 
 // energy word -> the timing (speed curve) it makes the film's default. Every value is a TIMINGS key,
 // asserted in lib-test so a rename there cannot leave energy pointing at a curve that no longer exists.

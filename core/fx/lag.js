@@ -28,8 +28,8 @@
 //
 // WRONG ON: a rigid board. A card, a chip and a screenshot do not drag, and one that does reads as
 // jelly. Right on a label under a moving object, a shadow, a trailing token, a tail.
-import { poseBack, velocityAt } from '../sequence.js';
-import { FPS } from '../motion.js';
+import { poseBack, velocityAt } from '../timeline/sequence.js';
+import { FPS } from '../motion/motion.js';
 
 export const LAG_KEYS = ['of', 'delay', 'amp', 'freq', 'decay'];
 

@@ -8,7 +8,7 @@
 // driveClips rewrites transform from scratch each frame; width is a layout property nothing else
 // touches, so a value left behind by a later frame would survive a seek backwards and a warm render
 // would disagree with a cold one. renderFrame(n) has to be pure in n.
-import { motionAt } from '../sequence.js';
+import { motionAt } from '../timeline/sequence.js';
 
 export const slot = 'box';
 

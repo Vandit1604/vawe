@@ -1,5 +1,5 @@
 import { span, hold } from './units.js';
-import { shake } from '../motion.js';
+import { shake } from '../motion/motion.js';
 
 // cameraShake: an IMPACT, pre-sampled to keyframes. The randomness is the engine's own deterministic
 // `shake()` (core/motion.js, hashSeed/noise, lib-tested): sampled HERE, at author time, so renderFrame(n)

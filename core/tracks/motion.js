@@ -2,7 +2,7 @@
 // transform (which driveClips and the `enter` track already wrote to el.style), and multiply into the
 // composed opacity. Last before the modifiers, because every track above it writes a transform this
 // one is meant to carry rather than replace.
-import { motionAt, velocityAt } from '../sequence.js';
+import { motionAt, velocityAt } from '../timeline/sequence.js';
 import { baseOpacity } from './util.js';
 
 // PX PER SECOND, not per frame. It was 16 px/frame, which sounds fps-neutral and is not: at 30fps that

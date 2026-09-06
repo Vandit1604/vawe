@@ -21,8 +21,8 @@
 //
 // Back-compat: a glow with NO preset takes the exact original code path (same node, same background
 // string), existing scenes render byte-identical; the snap gate would catch any drift.
-import { mergeProps, propsOf } from '../props.js';
-import { defineRegistry } from '../registry.js';
+import { mergeProps, propsOf } from '../registry/props.js';
+import { defineRegistry } from '../registry/registry.js';
 
 // ---- pure helpers (exported for lib tests) -------------------------------------------------------
 

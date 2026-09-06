@@ -23,8 +23,8 @@
 //   fns      → CSS filter functions, concatenated in order onto the layer's `filter`.
 //   overlays → inset child divs (texture/vignette), appended in order, ungraded stacking on top.
 
-import { resolveFilter, bloomFilter, chromaSplitFilter, convolveFilter, morphFilter, reliefFilter } from '../filters.js';
-import { lit } from '../color.js';
+import { resolveFilter, bloomFilter, chromaSplitFilter, convolveFilter, morphFilter, reliefFilter } from './filters.js';
+import { lit } from '../color/color.js';
 
 // The theme's accent as a CSS value: every pass here writes CSS, so `var()` resolves for free.
 const CSS = { accent: 'var(--accent, #ffffff)' };

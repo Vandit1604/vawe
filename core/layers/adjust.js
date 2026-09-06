@@ -35,8 +35,8 @@
 // That is deliberate rather than lazy: a second keying mechanism for one layer type would be the
 // second-spelling fork this codebase logs as the source of most of its drift, and `vars` is already the
 // answer to "animate a number the layer's own CSS reads".
-import { defineRegistry } from '../registry.js';
-import { propsOf } from '../props.js';
+import { defineRegistry } from '../registry/registry.js';
+import { propsOf } from '../registry/props.js';
 
 // Each kind is (unit) => the CSS filter, where `unit` is the string `calc(var(--adjust) * amount)` in
 // whatever unit that kind needs. `--adjust` runs 0..1 and `amount` carries the strength, so a keyed

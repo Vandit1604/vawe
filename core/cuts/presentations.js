@@ -2,8 +2,8 @@
 // presentation: { enter(p, o) -> style, exit(p, o) -> style }. p is that phase's progress (enter
 // 0->1 = revealing, exit 0->1 = leaving); enter(1)/exit(0) must equal identity. cutStyle (./index.js)
 // picks a TIMING (./timings.js) to drive p, and applies the result to the active scene root.
-import { clamp01, lerp, wipe, circleWipe, clockWipe } from '../motion.js';
-import { withBlurb, blurbsOf } from '../registry.js';
+import { clamp01, lerp, wipe, circleWipe, clockWipe } from '../motion/motion.js';
+import { withBlurb, blurbsOf } from '../registry/registry.js';
 
 export const IDENT = { opacity: '1', transform: 'none', filter: 'none', clipPath: 'none', WebkitClipPath: 'none', maskImage: 'none', WebkitMaskImage: 'none', maskSize: 'auto', maskPosition: '0% 0%', WebkitMaskPosition: '0% 0%' };
 const style = (over) => ({ ...IDENT, ...over });

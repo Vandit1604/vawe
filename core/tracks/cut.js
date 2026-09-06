@@ -2,8 +2,8 @@
 // plain fade driveClips wrote a moment earlier. FIRST in the pipeline for that reason: it writes a
 // whole style block (transform, opacity, clip-path, filter) and everything after it composes onto
 // what it left, so anything running before it would be overwritten without a word.
-import { cutStyle } from '../cuts.js';
-import { clamp01 } from '../motion.js';
+import { cutStyle } from '../cuts/index.js';
+import { clamp01 } from '../motion/motion.js';
 
 export const slot = 'enter';
 

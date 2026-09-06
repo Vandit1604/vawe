@@ -63,7 +63,7 @@ export function resolveAudio(scene) {
   };
 }
 
-// ── CLI: `node core/audio-select.js <scene.json> [--write]`. Prints the resolved audio block;
+// ── CLI: `node core/audio/select.js <scene.json> [--write]`. Prints the resolved audio block;
 //    --write bakes it back INTO the scene (in place), turning `music:"auto"` into a concrete bed so
 //    the render path (a Go binary with no JS pre-pass) never sees the "auto" sentinel. `make audio-bed`.
 import { pathToFileURL } from 'node:url';
@@ -73,7 +73,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const file = args.find((a) => !a.startsWith('--'));
   const write = args.includes('--write');
   if (!file) {
-    console.error('usage: node core/audio-select.js <scene.json> [--write]');
+    console.error('usage: node core/audio/select.js <scene.json> [--write]');
     process.exit(1);
   }
   const scene = JSON.parse(readFileSync(file, 'utf8'));
