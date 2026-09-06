@@ -252,9 +252,9 @@
       </table>
       </div>
       <p>Above the primitives sit <b>blocks</b> (build-time sugar: a <code>type:"block"</code> layer
-         expands into real layers via <code>make expand</code>) and <b>blueprints</b> (whole
-         pre-directed beats). Both exist so that good motion is the default rather than something you
-         re-derive from a blank file.</p>
+         expands into real layers at LOAD time, <code>core/expand.js</code>, no separate step) and
+         <b>blueprints</b> (whole pre-directed beats, same mechanism). Both exist so that good motion
+         is the default rather than something you re-derive from a blank file.</p>
     </section>
 
     <section id="authoring">

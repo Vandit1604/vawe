@@ -118,8 +118,8 @@ and defended. It is not an answer to "I could not think of one".
 - **Blocks** (`docs/BLOCKS.md`, `make catalog`): `barChart` · `lineChart` · `donutChart` · `gauge` ·
   `progressRing` · `kpiRow` · `stepFlow` · `table` · `comparison`. Fastest route from a number to a
   shape. Note that a block is build-time sugar: `{"type":"block","block":"lineChart"}` becomes real
-  layers only after `make expand D=<file>`, so read the expanded file when you want to see what the
-  film actually draws.
+  layers at load, no separate step; run `make expand D=<file>` (prints to stdout) when you want to see
+  what the film actually draws.
 - **Captured UI**: `make capture` on the live product, previewed standalone with `make preview`.
 - **Blueprints** (`make blueprints`): count-ups, cascades, dashboard dives already choreographed.
 - **Bespoke SVG**: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) for a diagram no block covers, including
