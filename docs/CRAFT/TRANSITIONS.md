@@ -65,9 +65,11 @@ The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) res
 **cut** by default; add `"mech": "seam"` to upgrade to the real GPU blend of both beats.
 
 This lowers to the raw `cuts`/`stings`/`seams` fields at load, so everything above (easing, direction,
-the decision procedure) applies unchanged. The raw fields remain the low-level escape hatch; a raw
-value you also set on the same beat wins. An `fx` that names nothing, or a layer-only anim used as a
-boundary (`pop`), is rejected at validate with the catalog, never silently coerced.
+the decision procedure) applies unchanged. `transitions` is now the ONLY authored form: the raw fields
+are the INTERNAL shape it lowers to, and a scene that still authors `cuts`/`stings`/`seams` directly is
+refused at `make validate` with a pointer to `scripts/author/migrate-junctions.mjs`, which converts an
+old scene automatically. An `fx` that names nothing, or a layer-only anim used as a boundary (`pop`), is
+rejected at validate with the catalog, never silently coerced.
 
 A layer's own entrance/exit is `anim`/`out` directly (`docs/PRIMITIVES.md`), not a second sugar over
 the same two fields: a `transition: { in, out, dir, dur }` shorthand used to live here too and was
@@ -130,7 +132,7 @@ film and a hype launch reel do not accelerate the same way. `energy` is that per
 the `timing` of every cut and seam that names none.
 
 ```json
-{ "module": "scene", "energy": "brand", "cuts": [ ... ], "seams": [ ... ] }
+{ "module": "scene", "energy": "brand", "transitions": [ ... ] }
 ```
 
 | energy | the film's default curve | reach for it on |
@@ -140,9 +142,8 @@ the `timing` of every cut and seam that names none.
 | **hype** | `snappy` (lands and stops) | product drops, announcements, launch-reel energy |
 | **tense** | `rush` (accelerate away) | urgency, countdowns, a film that will not sit still |
 
-It is a DEFAULT, never an override: an explicit `timing` on any cut or seam still wins, and it reaches
-hand-authored `cuts`/`seams`, not only the `transitions` sugar. A film that names no `energy` is
-untouched, so nothing re-times silently. `core/transitions/energy.js`.
+It is a DEFAULT, never an override: an explicit `timing` on any transition still wins. A film that
+names no `energy` is untouched, so nothing re-times silently. `core/transitions/energy.js`.
 
 ### Two more seam knobs: `feather` and an angled `dir`
 

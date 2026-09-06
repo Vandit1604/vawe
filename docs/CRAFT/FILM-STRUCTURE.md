@@ -27,8 +27,8 @@ find it and a film held entirely by match cuts failed for doing the thing it was
 the handover and the gate reads it as one form crossing the joint:
 
 ```json
-"cuts":    [{ "t": 3, "style": "none" }],
-"matches": [{ "at": "cut@0", "from": "dot", "to": "card" }]
+"transitions": [{ "at": 3, "fx": "none", "mech": "cut" }],
+"matches":     [{ "at": "cut@0", "from": "dot", "to": "card" }]
 ```
 
 The joint owns the number: `core/timeline/junctions.js` retimes both layers onto it, and the engine carries the
@@ -69,8 +69,8 @@ The match cut is the one spatial device this engine PRODUCES rather than asks yo
 joint and the two forms, and it does the arithmetic:
 
 ```json
-"cuts":    [{ "t": 3.0, "style": "punch", "dur": 0.35 }],
-"matches": [{ "at": "cut@0", "from": "token", "to": "card" }]
+"transitions": [{ "at": 3.0, "fx": "punch", "dur": 0.35 }],
+"matches":     [{ "at": "cut@0", "from": "token", "to": "card" }]
 ```
 
 The outgoing layer is retimed to end on that joint; the incoming one opens wearing its centre, its size

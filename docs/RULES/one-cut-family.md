@@ -19,10 +19,10 @@ serves. `make direct`/`make critique` fail at 3 or more families in one film.
 
 Right:
 ```json
-{ "cuts": [{ "at": "beat:1", "type": "hard" }, { "at": "beat:2", "type": "hard" }, { "at": "beat:3", "type": "whip", "why": "the tone flips from problem to product" }] }
+{ "transitions": [{ "at": 2.1, "fx": "none", "mech": "cut" }, { "at": 4.6, "fx": "none", "mech": "cut" }, { "at": 7.2, "fx": "whip", "_why": "the tone flips from problem to product" }] }
 ```
 
 Wrong:
 ```json
-{ "cuts": [{ "at": "beat:1", "type": "wipe" }, { "at": "beat:2", "type": "dissolve" }, { "at": "beat:3", "type": "whip" }] }
+{ "transitions": [{ "at": 2.1, "fx": "wipe" }, { "at": 4.6, "fx": "dissolve" }, { "at": 7.2, "fx": "whip" }] }
 ```
