@@ -130,7 +130,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/JUDGE.md](JUDGE.md) | the render is done and something must actually LOOK at it | the 7 scoring dimensions · the verdict contract · why the static gates cannot replace this |
 | [docs/LAUNCH-VIDEO-GUIDE.md](LAUNCH-VIDEO-GUIDE.md) | making a product-launch film for a real brand or website | the launch workflow end to end · what to crawl · the references it is built from |
 | [docs/MCP.md](MCP.md) | driving this engine from a fresh session over MCP rather than from the shell | one-time setup · registering the server · the tools it exposes |
-| [docs/MISTAKES.md](MISTAKES.md) | you hit something odd in the engine, or you just fixed one and must log it | the numbered mistake→root-cause→fix→which-gate-catches-it log; the repo memory |
+| [docs/MISTAKES.md](MISTAKES.md) | you hit something odd in the engine, or you just fixed one and must log it | the one-line index of past mistakes; the full reasoning lives in git history |
 | [docs/MOTION-CRAFT.md](MOTION-CRAFT.md) | picking a preset, a cut or a sting and you need the mechanics behind it | the stored rules of good motion: timing, physics, the gates that enforce each one |
 
 ## The engine & its history
