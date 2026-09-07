@@ -183,6 +183,14 @@ const resolveAnim = (name) => (name == null ? ANIM.none : ANIM_REGISTRY.pick(nam
 // offset the instant the exit began and then slid home while fading. Every directional exit in the
 // engine was backwards (MISTAKES #40).
 const asExit = (fn, exitT) => fn(1 - clamp01(exitT));
+// ASEXIT ALREADY OBEYS docs/RULES/ease-direction.md FOR EVERY `anim`/`out` PAIR, structurally, with no
+// second curve to author: every ANIM entry decelerates INTO t=1 (an ease-out settle), and sampling that
+// same curve at a linearly DECREASING argument does not just walk it backwards, it inverts which half of
+// the curve is slow. The settle (low slope, near t=1) lands at the START of the exit and the departure
+// (high slope, near t=0) lands at its END, so the exit reads as accelerating even though no ease-in
+// function was ever written. The rule's remaining gap is the hand-keyed `motion[]` track, where a
+// segment's default ease is picked with no notion of entrance/exit/handover; that default lives in
+// core/timeline/sequence.js, outside this file.
 
 // collectClips(root): the FIXED set of timed elements a scene drives, taken ONCE when the scene has
 // finished building. driveClips used to run this query itself, on every frame, 780 attribute-selector

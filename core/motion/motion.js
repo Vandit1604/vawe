@@ -979,8 +979,7 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // time and defaulted to `easeOutCubic`, which is the weaker built-in they specifically argue against
 // (docs/CRAFT/MOTION-STANDARDS.md).
 //
-// `stagger` 0.045 is 45ms, mid-band of their 30 to 80. `exitRatio` defaults to 1 and is the one knob
-// here a theme should almost always override; the seven themes behind shipped films now do.
+// `stagger` 0.045 is 45ms, mid-band of their 30 to 80.
 // `bounce`, `settle` and `enter` are resolved here but NOT currently read by any entrance: `rise`
 // (core/motion.js) is hardcoded to `easeOutSnap` (bounce 0.2), `pop`/`lift` to `easeOutBack`/
 // `easeOutSettle`, none of them take `M`. Left as documented, inert knobs rather than wired up here:
@@ -989,18 +988,33 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // to 0 below so the field reads correctly if a future change wires it in.
 export const DEFAULT_MOTION = { easing: 'easeOutQuint', bounce: 0, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045, idle: 'none' };
 
+// exitRatioFromMotion(durationScale): `exitRatio` DERIVED from the theme's own overall pace, the same
+// axis `core/registry/theme-contract.js` already reads for the default cut tier (`durationScale` < 1
+// is a brisk brand, > 1 is cinematic). A theme that already runs fast should also leave fast: half its
+// own pace, anchored so the engine's own pace (durationScale 1) lands on 0.5, the exact value
+// `themes/default.json` names "the house default: half, the middle of the band" and `themes/plinth.json`
+// (durationScale 1) also authors by hand. Checked against the 11 themes that hand-author `exitRatio`:
+// this formula is within 0.05 of 8 of them (exact on plinth) and its one clear miss, `themes/
+// plainyear.json` (durationScale 0.9, hand-authored 0.6), is a calm brand that happens to also be
+// paced fast, which durationScale alone cannot see; an author who wants that split still states it
+// and wins (see below). Clamped to the authored band with a little headroom either side, so a custom
+// theme's `durationScale` outside 0.8-1.05 cannot compute an exit slower than its own entrance or one
+// so fast it reads as a glitch.
+export const exitRatioFromMotion = (durationScale) => Math.min(0.7, Math.max(0.3, 0.5 * durationScale));
+
 // motionDefaults(theme): the theme's motion personality with `easing` resolved to a function.
 // Scenes pass these into primitives, e.g. interpolate(t, inR, outR, { easing: M.easing }),
 // spring(t, M), or translateY(M.enter * (1 - eased)). durationScale lets a theme stretch/tighten
 // pacing; stagger is the per-item delay step.
 export function motionDefaults(theme) {
   const m = (theme && theme.motion) || DEFAULT_MOTION;
+  const durationScale = m.durationScale ?? 1;
   return {
     easing: resolveEasing(m.easing),
     bounce: m.bounce ?? DEFAULT_MOTION.bounce,
     settle: m.settle ?? DEFAULT_MOTION.settle,
     enter: m.enter ?? DEFAULT_MOTION.enter,
-    durationScale: m.durationScale ?? 1,
+    durationScale,
     stagger: m.stagger ?? DEFAULT_MOTION.stagger,
     // The theme's answer to "how does a layer behave once it has arrived". Read by
     // formats/scene/scene.js as the third rung of layer -> scene -> theme -> engine default, and
@@ -1010,8 +1024,9 @@ export function motionDefaults(theme) {
     // time; an exit is over. The exemplar states this per layer (a scrim that fades in over 0.32 and
     // out over 0.07, a hook that types at 33cps and erases at 60), and every other film in this library
     // leaves everything at the same speed it arrived because a single symmetric constant is the
-    // default. `exitRatio` moves that decision to the theme, where a brand's snap belongs.
-    // Defaults to 1 so no existing theme changes until it opts in (docs/CRAFT/KEYED-MOTION.md).
-    exitRatio: m.exitRatio ?? 1,
+    // default. `exitRatio` moves that decision to the theme, where a brand's snap belongs. An explicit
+    // `exitRatio` still wins outright; only the 30 of 41 themes that never say it now get a real number
+    // (`exitRatioFromMotion` above) instead of 1 (symmetric, which is what "no rule" actually shipped).
+    exitRatio: m.exitRatio ?? exitRatioFromMotion(durationScale),
   };
 }
