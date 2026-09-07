@@ -654,6 +654,10 @@
     "use": {
      "type": "string",
      "label": "use:\"theme\" \u2192 pull the brand\u2019s own authored backdrop (themes/<name>.json bgDefault)"
+    },
+    "breathe": {
+     "type": "boolean|object",
+     "label": "Slow scale pulse on the canvas while this window is active. Default OFF. `true` for the built-in feel (2% scale, ~18s period), or `{amp, period}` to tune it. A canvas-painted window only; a hand-authored (`html`) window has no effect to breathe."
     }
    }
   },
