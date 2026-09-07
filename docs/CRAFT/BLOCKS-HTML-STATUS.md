@@ -1,16 +1,16 @@
 ---
 when: you are about to convert another blocks/*.mjs family to html output, or wondering why one family still returns native layers
-answers: "which of the 65 remaining factories are already html, which are real candidates for the next conversion pass, and which are deliberately native, with the reason"
+answers: "which factories are already html, and which are deliberately native, with the reason"
 group: look
 ---
 
-# blocks/: which families are html, which are candidates, which stay native
+# blocks/: which families are html, which stay native, and why
 
 The owner's decision is that everything in `blocks/` builds from HTML: one markup string, kit chrome
 (`bg`/`border`/`radius`/`elevation`) carried as a LAYER PROP, and `parts` for a multi-item family's own
 staggered children (`docs/CRAFT/HTML-FRAGMENTS.md`). `blocks/ui.mjs`, `blocks/app.mjs`,
-`blocks/social.mjs` and `blocks/interact.mjs` are converted. This table is the census of everyone else,
-so the next author extends the list instead of re-deriving it.
+`blocks/social.mjs`, `blocks/interact.mjs` were converted first; `core.mjs`, `dev.mjs`, `glass.mjs`,
+`sleek.mjs` and `vfx.mjs`'s `redditPost` followed in the pass this table now reflects.
 
 Counted by `export function` factory, not by file: 65 factories across `board.mjs`, `camera-chrome.mjs`,
 `charts.mjs`, `codeanim.mjs`, `core.mjs`, `dev.mjs`, `diagram.mjs`, `geo.mjs`, `glass.mjs`, `sleek.mjs`,
@@ -18,9 +18,9 @@ Counted by `export function` factory, not by file: 65 factories across `board.mj
 blocks (`blocks/index.mjs`'s own `NOT_A_BLOCK`, with its reason): `codeanim.mjs`'s `palette` and
 `diagram.mjs`'s `routeEdge`.
 
-**27 already html · 27 convert candidates · 11 deliberately left native.**
+**51 already html · 0 convert candidates left · 14 deliberately native.**
 
-## Already html (27)
+## Already html (51)
 
 | file | factory |
 |---|---|
@@ -30,44 +30,28 @@ blocks (`blocks/index.mjs`'s own `NOT_A_BLOCK`, with its reason): `codeanim.mjs`
 | diagram.mjs | flowchart, nodeGraph |
 | geo.mjs | usMapHex, worldMap, usMap, usMapBubble, usMapFlow |
 | terminal-html.mjs | terminalHtml |
-| vfx.mjs | textCursor, parallaxZoom, parallaxUnzoom, morphText, uiReveal3d |
+| vfx.mjs | textCursor, parallaxZoom, parallaxUnzoom, morphText, uiReveal3d, redditPost |
+| core.mjs | card, colorCycle, quote, kpiRow (hybrid, see below), comparison (string-list path only, see below), captions, pricingCard |
+| dev.mjs | codeBlock, deploySuccess (success card only, see below), diff, fileTree, logLines, commitRow |
+| glass.mjs | glassWidgets, glassNotification, glassMenu, glassHome, glassControls |
+| sleek.mjs | glassCard, meshPanel, spotlightCard, borderBeamCard (panel half; the paired `beam` layer stays native), bento (pure composition of the three above, needed no edit of its own) |
 
-## Convert candidates (27): native group/text, no children slot, no native-only mechanism
+Four of these are not a flat "one factory, one markup string" and are worth naming so the next reader
+does not mistake a partial conversion for an incomplete one:
+- `kpiRow`: hybrid by design. An item with a numeric `to` still emits a native `type:'count'` layer
+  plus a native label under it (no html counter exists, per `statBig`/`statCard` below); an item with a
+  formatted `value` string is one `html` fragment. Both paths coexist in the same row.
+- `comparison`: only the plain string-list path (`left`/`right` arrays) converted, to two `html`
+  columns. The `leftScreen`/`rightScreen` path is untouched: it still calls the native `splitScreen`
+  container, which hosts caller-supplied blocks and cannot become markup (see below).
+- `deploySuccess`: the queued/running/done cascade is a tiled state machine over time (each step is a
+  short-lived layer whose window IS the state), which would need a CSS clock to reproduce in one
+  fragment, and CSS `animation`/`transition` are refused at boot. Only the final success card converted.
+- `colorCycle` and `captions` were never single cards; each already emitted N independently-timed
+  layers (one per hue step, one per caption line). They convert layer-by-layer: N `html` layers instead
+  of N `text` layers, same shape, same timing.
 
-The next conversion pass, in the order a caller is most likely to want them (product chrome, then
-frosted glass, then gradient cards):
-
-| file | factory | why it converts cleanly |
-|---|---|---|
-| core.mjs | card | group+text, no data picture, no children slot |
-| core.mjs | colorCycle | sequential top-level `text` layers, no native-only mechanism |
-| core.mjs | stripeCard | group+text/box bars, plain chrome |
-| core.mjs | quote | group+text |
-| core.mjs | kpiRow | group+text on its string-value path (the `count`-value path stays native, see below) |
-| core.mjs | comparison | group+text on its string-list form (the screen form is a container, see below) |
-| core.mjs | captions | array of `text` layers, no chrome needed but convertible |
-| core.mjs | pricingCard | group+text/ticks |
-| dev.mjs | codeBlock | group+text lines, no native-only mechanism |
-| dev.mjs | deploySuccess | group+text tiled-state glyphs |
-| dev.mjs | diff | group+text |
-| dev.mjs | fileTree | group+text rows |
-| dev.mjs | logLines | group+text rows |
-| dev.mjs | commitRow | group+text rows |
-| glass.mjs | glassWidgets | group+`frost()` chrome; `glass` (backdrop-filter) works on an html layer too |
-| glass.mjs | glassNotification | group+`frost()`, stacked cards |
-| glass.mjs | glassMenu | group+`frost()`, icon rows |
-| glass.mjs | glassHome | group+`frost()`, tile grid |
-| glass.mjs | glassDock | group+`frost()`, magnify row |
-| glass.mjs | glassControls | 2 of 3 panels are already html; the middle transport row is a native group |
-| sleek.mjs | glassCard | group+gradient/text, `glass` prop transfers to html |
-| sleek.mjs | meshPanel | group+gradient/text |
-| sleek.mjs | spotlightCard | group+gradient/text |
-| sleek.mjs | borderBeamCard | the panel half is group+text (candidate); its paired `type:'beam'` layer stays native regardless |
-| sleek.mjs | grainOverlay | one `rect` with a data-uri background + blend mode; both work as html or as a layer prop |
-| sleek.mjs | bento | pure composition of the four sleek factories above; converts once they do |
-| vfx.mjs | redditPost | group+text, the same shape `tweetCard` was before its own conversion |
-
-## Deliberately left as layers (11), with the reason
+## Deliberately native (14), with the reason
 
 | file | factory | reason |
 |---|---|---|
@@ -82,8 +66,11 @@ frosted glass, then gradient cards):
 | core.mjs | searchEngine | **no-html-equivalent**: uses `type:'image'`, a `typing` (char-reveal) prop, and a `type:'cursor'` layer, three native-only mechanisms in one factory |
 | dev.mjs | terminal | **no-html-equivalent**: `typing:cps`, the native char-reveal mechanism |
 | dev.mjs | spinner | **no-html-equivalent**: is a `type:'lottie'` layer, no html equivalent |
+| core.mjs | stripeCard | **gate dependency, found during the conversion pass**: `scripts/gates/lib-test.mjs` asserts the bar chart's span directly off `card.children[2].children` ("the bar chart spans the card's content box"). That gate file is out of scope for a blocks-only pass; converting stripeCard to one markup string would have broken a real invariant the test checks with no way to fix the test in the same pass. Reverted to its original `group`+`box()` bars. |
+| glass.mjs | glassDock | **gate dependency, found during the conversion pass**: `scripts/gates/lib-test.mjs` asserts every tile's corner is the same fraction of its own size off `dock.children[i].radius / .w`. Same constraint as stripeCard: reverted to its original `group`+`box()` tiles. Its magnified-item label chip converted to html regardless (that one had no test dependency). |
+| sleek.mjs | grainOverlay | **judgment call, converted to a decision not a mechanism**: it is a bare `type:'rect'` with a data-uri noise texture as `bg` plus `opacity`/`blend` as layer props, no text, no children, no `parts` target. `type:'html'` would carry the exact same three layer props with an empty markup body: a lateral rename, not a conversion, since there is no "what the frame looks like" content to move into markup. Left as `type:'rect'`. |
 
-None of the 11 fall in the fourth sub-reason this table started with ("a data picture needing SVG/canvas
+None of the 14 fall in the fourth sub-reason this table started with ("a data picture needing SVG/canvas
 primitives an html layer can't host"): every chart, gauge, ring, map and diagram in the "already html"
 list already proves an `<svg>` fragment inside an `html` layer covers that case, so nothing here is left
 native for that reason.
