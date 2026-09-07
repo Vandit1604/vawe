@@ -71,7 +71,7 @@ not: "no product, no CTA, no logo, no gradient hero, no centered text, no Inter,
 - duration: 3.5s
 - transition_in: dissolve
 
-## Beat 3: The proof (6.5s-10.5s) — SHOW, not tell
+## Beat 3: The proof (6.5s-10.5s): SHOW, not tell
 - type: proof
 - object_in: bottom-left@28
 - object_out: bottom-left@28

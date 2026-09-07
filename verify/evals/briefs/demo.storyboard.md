@@ -12,7 +12,7 @@ duration: 15.0s
 format: 1920x1080 (16:9)
 destination: web
 source: vawe-type-demo/SKILL.md worked example, rebuilt per docs/EVALS.md as a real demo (was 6 layers / 10s)
-theme: satara — warm off-white paper, one trail-orange accent, geometric rounded sans (Plus Jakarta Sans), snappy easeOutBack motion; picked over the cooler/darker themes in themes/ because Trailhead's register is outdoor, warm and spatial, and satara is the one theme here that reads as paper-and-sunlight rather than a dashboard or a night mode
+theme: satara: warm off-white paper, one trail-orange accent, geometric rounded sans (Plus Jakarta Sans), snappy easeOutBack motion; picked over the cooler/darker themes in themes/ because Trailhead's register is outdoor, warm and spatial, and satara is the one theme here that reads as paper-and-sunlight rather than a dashboard or a night mode
 spectacle: the click at 8.7s on the panel (layer id `panel`), a `ripple` sting timed to the "Save route" click, because the click and the stat pill it causes are the one moment the film is FOR; every other beat (the pop-in growth, the draw, the shrink) stays a plain easeOutBack/easeInOutSine move with no sting of its own
 not: no narration, no captured product screenshot (Trailhead is invented, per the owner's instruction), no dashboard chrome overload (one card, one route, one chart strip), no gradient hero on the hook/payoff text, no ruled grid on the map (contour lines only), no second click and no second consequence
 ---
