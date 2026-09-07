@@ -1629,94 +1629,24 @@
    "exitDur": 0.35
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 620,
    "y": 320,
-   "layout": "grid",
-   "gridCols": 3,
-   "colGap": 34,
-   "rowGap": 28,
    "start": 39.4,
    "duration": 2.6,
-   "anim": "rise",
-   "enterDur": 0.5,
+   "anim": "none",
+   "enterDur": 0,
    "exitDur": 0.35,
-   "children": [
+   "html": "<div style=\"display:grid;grid-template-columns:repeat(3,1fr);column-gap:34px;row-gap:28px\"><div data-part style=\"font:500 22px var(--font-mono);color:#148A4E;background:#FFFFFF;border:1px solid var(--line-strong);padding:22px 28px;border-radius:10px\">+2  Aims</div><div data-part style=\"font:500 22px var(--font-mono);color:#148A4E;background:#FFFFFF;border:1px solid var(--line-strong);padding:22px 28px;border-radius:10px\">+4  Craft</div><div data-part style=\"font:500 22px var(--font-mono);color:#148A4E;background:#FFFFFF;border:1px solid var(--line-strong);padding:22px 28px;border-radius:10px\">+1  Person</div><div data-part style=\"font:500 22px var(--font-mono);color:#148A4E;background:#FFFFFF;border:1px solid var(--line-strong);padding:22px 28px;border-radius:10px\">+3  Rhythm</div><div data-part style=\"font:500 22px var(--font-mono);color:#148A4E;background:#FFFFFF;border:1px solid var(--line-strong);padding:22px 28px;border-radius:10px\">+5  Voice</div><div data-part style=\"font:500 22px var(--font-mono);color:#148A4E;background:#FFFFFF;border:1px solid var(--line-strong);padding:22px 28px;border-radius:10px\">+3  Limits</div></div>",
+   "parts": [
     {
-     "type": "text",
-     "text": "+2  Aims",
-     "font": "mono",
-     "size": 22,
-     "weight": 500,
-     "color": "#148A4E",
-     "bg": "#FFFFFF",
-     "border": "1px solid #D6D6D2",
-     "pad": "22px 28px",
-     "radius": 10
-    },
-    {
-     "type": "text",
-     "text": "+4  Craft",
-     "font": "mono",
-     "size": 22,
-     "weight": 500,
-     "color": "#148A4E",
-     "bg": "#FFFFFF",
-     "border": "1px solid #D6D6D2",
-     "pad": "22px 28px",
-     "radius": 10
-    },
-    {
-     "type": "text",
-     "text": "+1  Person",
-     "font": "mono",
-     "size": 22,
-     "weight": 500,
-     "color": "#148A4E",
-     "bg": "#FFFFFF",
-     "border": "1px solid #D6D6D2",
-     "pad": "22px 28px",
-     "radius": 10
-    },
-    {
-     "type": "text",
-     "text": "+3  Rhythm",
-     "font": "mono",
-     "size": 22,
-     "weight": 500,
-     "color": "#148A4E",
-     "bg": "#FFFFFF",
-     "border": "1px solid #D6D6D2",
-     "pad": "22px 28px",
-     "radius": 10
-    },
-    {
-     "type": "text",
-     "text": "+5  Voice",
-     "font": "mono",
-     "size": 22,
-     "weight": 500,
-     "color": "#148A4E",
-     "bg": "#FFFFFF",
-     "border": "1px solid #D6D6D2",
-     "pad": "22px 28px",
-     "radius": 10
-    },
-    {
-     "type": "text",
-     "text": "+3  Limits",
-     "font": "mono",
-     "size": 22,
-     "weight": 500,
-     "color": "#148A4E",
-     "bg": "#FFFFFF",
-     "border": "1px solid #D6D6D2",
-     "pad": "22px 28px",
-     "radius": 10
+     "select": "[data-part]",
+     "anim": "riseIn",
+     "each": 0.45,
+     "stagger": 0.08,
+     "out": true
     }
-   ],
-   "each": 0.45,
-   "stagger": 0.08
+   ]
   },
   {
    "type": "count",
@@ -1852,65 +1782,24 @@
    "exitDur": 0.4
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 720,
    "y": 380,
-   "layout": "row",
-   "gap": 16,
-   "wrap": true,
    "start": 43.6,
    "duration": 3.5,
-   "anim": "rise",
-   "enterDur": 0.5,
+   "anim": "none",
+   "enterDur": 0,
    "exitDur": 0.4,
-   "children": [
+   "html": "<div style=\"display:flex;flex-wrap:wrap;gap:16px\"><div data-part style=\"font:500 20px var(--font-mono);color:var(--text);background:var(--surface-2);padding:10px 18px;border-radius:20px\">Specific</div><div data-part style=\"font:500 20px var(--font-mono);color:var(--text);background:var(--surface-2);padding:10px 18px;border-radius:20px\">Concrete</div><div data-part style=\"font:500 20px var(--font-mono);color:var(--dim);background:var(--surface-2);padding:10px 18px;border-radius:20px\">Thin</div><div data-part style=\"font:500 20px var(--font-mono);color:var(--dim);background:var(--surface-2);padding:10px 18px;border-radius:20px\">Vague</div></div>",
+   "parts": [
     {
-     "type": "text",
-     "text": "Specific",
-     "font": "mono",
-     "size": 20,
-     "weight": 500,
-     "color": "#0A0A0A",
-     "bg": "#F1F1EF",
-     "pad": "10px 18px",
-     "radius": 20
-    },
-    {
-     "type": "text",
-     "text": "Concrete",
-     "font": "mono",
-     "size": 20,
-     "weight": 500,
-     "color": "#0A0A0A",
-     "bg": "#F1F1EF",
-     "pad": "10px 18px",
-     "radius": 20
-    },
-    {
-     "type": "text",
-     "text": "Thin",
-     "font": "mono",
-     "size": 20,
-     "weight": 500,
-     "color": "#757570",
-     "bg": "#F1F1EF",
-     "pad": "10px 18px",
-     "radius": 20
-    },
-    {
-     "type": "text",
-     "text": "Vague",
-     "font": "mono",
-     "size": 20,
-     "weight": 500,
-     "color": "#757570",
-     "bg": "#F1F1EF",
-     "pad": "10px 18px",
-     "radius": 20
+     "select": "[data-part]",
+     "anim": "riseIn",
+     "each": 0.45,
+     "stagger": 0.08,
+     "out": true
     }
-   ],
-   "each": 0.45,
-   "stagger": 0.08
+   ]
   },
   {
    "type": "text",
