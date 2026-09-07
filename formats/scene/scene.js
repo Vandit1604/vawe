@@ -1166,12 +1166,39 @@ boot((data, fps, theme, canvas) => {
   // swaps the two beat wrappers over [ct, ct+dur) (driveSceneUnits below, default 0.4); the plain
   // camera-level cut is CENTRED on ct, [ct-dur/2, ct+dur/2) (drawCameraAndCut below, default 0.36). A
   // bg blend on the wrong window would drift out of sync with the transition the viewer is watching.
+  // p is not just the eased TIMING curve: a presentation shapes its OWN opacity on top of it
+  // (`punch`'s exit is `1 - T(raw)^2`, `fade`'s is linear in `T(raw)`), so a bg blend driven by
+  // T(raw) alone drifted from what the wrapper actually shows, worst on the shaped presentations
+  // (seam-forensics "split seam ... jumps 2.7 ... while the transition is still dissolving the
+  // layers on top of it", a punch cut). `cutStyle` IS the wrapper's own function (driveSceneUnits
+  // below calls it with these same args), so asking it for the incoming beat's OWN opacity at this
+  // progress reads its exact curve instead of re-deriving an approximation of it a second time. A
+  // presentation that reveals through a MASK rather than opacity (wipe/iris/blinds/…) holds opacity
+  // at '1' throughout, which would read as "already fully in": those fall back to the eased timing,
+  // a reasonable dissolve in place of a shape this canvas cannot draw a clip-path reveal of anyway.
   const bgCutAt = (t) => {
     for (const cu of sceneCuts) {
       const ct = +cu.t;
       const from = sceneUnits ? ct : ct - (cu.dur ?? 0.36) / 2;
       const dur = sceneUnits ? (cu.dur ?? 0.4) : (cu.dur ?? 0.36);
-      if (t >= from && t < from + dur) return { ct: from, dur, timing: cu.timing || 'smooth' };
+      if (t >= from && t < from + dur) {
+        const raw = clamp01((t - from) / dur);
+        const T = cu.timing == null ? CUT_TIMINGS.smooth : CUT_TIMINGS[cu.timing];
+        let p = T(raw);
+        if (sceneUnits) {
+          const opts = { timing: cu.timing, dir: cu.dir, dist: cu.dist ?? W, cx: cu.cx, cy: cu.cy };
+          // The OUTGOING wrapper's own exit opacity is the signal: as it clears (fades toward 0),
+          // more of the field behind it is what the viewer is actually seeing change, so the bg
+          // reveals the incoming window at the complement of that same curve. `enter`'s opacity was
+          // tried first and read WORSE (a punch's enter ramps `clamp01(p*1.5)`, reaching full before
+          // its own exit has cleared, so the bg would have switched while the outgoing card was
+          // still half-visible on top of it).
+          const exitStyle = cutStyle(cu.style, { exit: raw, enter: 1 }, opts);
+          const masked = exitStyle.clipPath !== 'none' || exitStyle.maskImage !== 'none';
+          if (!masked && exitStyle.opacity != null) p = clamp01(1 - parseFloat(exitStyle.opacity));
+        }
+        return { ct: from, dur, p };
+      }
     }
     return null;
   };
@@ -1200,7 +1227,7 @@ boot((data, fps, theme, canvas) => {
     // cross-fades a preset window into an html one, those stale pixels become visible.
     if (authored) { ctx.clearRect(0, 0, W, H); return; }
     if (blending) {
-      const p = CUT_TIMINGS[cut.timing](clamp01((t - cut.ct) / cut.dur));
+      const p = cut.p;
       renderBg(ctx, W, H, t, before.spec);       // the outgoing field, opaque, on the real canvas
       if (!bgBlendCv) { bgBlendCv = document.createElement('canvas'); bgBlendCv.width = W; bgBlendCv.height = H; }
       renderBg(bgBlendCv.getContext('2d'), W, H, t, after.spec); // the incoming field, off-screen
