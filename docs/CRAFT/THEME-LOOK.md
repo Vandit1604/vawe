@@ -67,6 +67,33 @@ background, so nobody ever designed one." Wiring `look.backdrop` as a render-tim
 reopen that hole under a new name; the next author who reaches for it should find this paragraph
 instead of rebuilding it.
 
+### `bgDefault` can now be a ROTATION, not only a single backdrop
+
+Measured across `formats/scene/`: 85 of 119 films (71%) paint exactly one `bg` window for the whole
+runtime, however many times the film cuts. That is not the mistake `backdrop` above guards against: an
+author who writes `bg:[{use:"theme"}]` has already asked for the theme's own backdrop, the same
+explicit door `bgDefault` opened as a single spec. `theme.bgDefault` now accepts an ARRAY of specs (a
+rotation) as well as the single object it always could:
+
+```json
+"bgDefault": [
+  { "preset": "paper" },
+  { "preset": "dark" },
+  { "preset": "accent" }
+]
+```
+
+On a film whose single `bg` window is `{use:"theme"}` with no `from`/`to` of its own, and whose theme
+declares a `bgDefault` array of 2+ specs, `core/backgrounds/theme-rotation.js`'s `expandThemeRotation`
+turns that one window into one per shot (`shotWindows`, `core/timeline/junctions.js`), cycling the
+rotation in order. A film with no joints stays one shot: there is nowhere for a second window to live,
+which is a true answer, not a fallback. A film that authors its own `bg` windows (any count, any
+`from`/`to`) is untouched, and a theme with a single-object `bgDefault` behaves exactly as before.
+
+This is NOT `look.backdrop` reopened under a new name. `look.backdrop` stays scaffold-only and is still
+never read at render; the rotation lives on the field already read at render (`bgDefault`), and only
+fires when the author already wrote the opt-in the engine has always honoured.
+
 `look` used to carry an eighth key, `cues`: a fixed per-theme list of audio cue names. It is gone.
 `buildSfx` (`formats/scene/scene.js:1593-1602`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
 tables in `core/audio/cues.js`, keyed on the transition actually used at each joint, so a fixed list
