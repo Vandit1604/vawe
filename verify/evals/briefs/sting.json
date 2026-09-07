@@ -1,27 +1,27 @@
 {
  "module": "scene",
- "note": "STING worked example (docs/EVALS.md, skills/vawe-type-sting/SKILL.md). One move, the mark, six seconds: the wave draws itself on stroke by stroke, resolves to a fill, and the wordmark settles in behind it. No cuts, no second beat: `BLACK MEANS #000000` (AGENTS.md) since the brief calls for a true black bumper. Theme vawe.",
- "theme": "vawe",
+ "note": "STING worked example (docs/EVALS.md, skills/vawe-type-sting/SKILL.md). One move, the mark, six seconds: Halyard's eye-splice mark, a taut line ending in a spliced loop, draws itself on stroke by stroke and holds as an outline (a closed loop filled solid would drop the line, which has no area of its own), and the wordmark settles in behind it. No cuts, no second beat: `BLACK MEANS #000000` (AGENTS.md) since the brief calls for a true black bumper. Theme mercury.",
+ "theme": "mercury",
  "aspect": "16:9",
  "duration": 6,
  "energy": "brand",
  "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited", "static-bg", "no-transition"], "_why": {
    "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
    "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
-   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass",
+   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full make preflight craft pass",
    "static-bg": "true black is the brief: BLACK MEANS #000000, a lit or moving field would be a tinted bumper, not this one",
    "no-transition": "one move, the mark, no second beat: this note already says so, a cut would be a second beat this sting deliberately does not have"
  } },
- "audio": { "silent": true, "_why": "worked example: one silent move, no music decision to make yet" },
+ "audio": { "silent": true, "_why": "a sting's one cue is a real sound decision this fixture defers: it exists to stay small and prove liveness, not to make an audio choice" },
  "bg": [ { "preset": "black" } ],
  "layers": [
-  { "type": "svg", "x": 810, "y": 380, "w": 300, "h": 156, "viewBox": "0 0 46 24",
-    "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "fill": "var(--accent)",
-    "draw": { "dur": 1.3, "weight": 5, "fillDur": 0.5, "ease": "easeInOutCubic" },
-    "start": 0, "duration": 5.8, "anim": "none", "out": "fade", "exitDur": 0.4,
-    "motion": [ { "t": 0, "scale": 0.7 }, { "t": 1.8, "scale": 1.0, "ease": "easeOutCubic" }, { "t": 5.8, "scale": 1.04, "ease": "easeInOutSine" } ]
+  { "type": "svg", "x": 830, "y": 260, "w": 260, "h": 260, "viewBox": "0 0 40 40",
+    "d": "M8 33 L24 17 A7 7 0 0 1 24 31 A7 7 0 0 1 24 17", "stroke": "var(--accent)",
+    "draw": { "dur": 1.3, "weight": 4, "ease": "easeInOutCubic" },
+    "start": 0.15, "duration": 5.65, "anim": "none", "out": "fade", "exitDur": 0.4,
+    "motion": [ { "t": 0, "scale": 0.7 }, { "t": 1.6, "scale": 1.0, "ease": "easeOutExpo" }, { "t": 5.5, "scale": 1.03, "ease": "easeInOutSine" } ]
   },
-  { "type": "text", "text": "vawe", "size": 104, "weight": 650, "color": "#ffffff", "align": "center", "x": 660, "y": 590, "w": 600, "start": 1.6, "duration": 4.2, "anim": "fade", "enterDur": 0.6, "out": "fade", "exitDur": 0.4 },
-  { "type": "text", "text": "one JSON. any canvas.", "size": 32, "weight": 500, "color": "rgba(255,255,255,0.55)", "align": "center", "x": 660, "y": 706, "w": 600, "font": "mono", "start": 2.4, "duration": 3.4, "anim": "fade", "enterDur": 0.5, "out": "fade", "exitDur": 0.4 }
+  { "type": "text", "text": "Halyard", "size": 104, "weight": 560, "color": "var(--text)", "align": "center", "x": 660, "y": 560, "w": 600, "start": 1.6, "duration": 4.2, "anim": "fade", "enterDur": 0.6, "out": "fade", "exitDur": 0.4 },
+  { "type": "text", "text": "small studio. held taut.", "size": 32, "weight": 500, "color": "var(--dim)", "align": "center", "x": 660, "y": 676, "w": 600, "font": "mono", "start": 2.4, "duration": 3.4, "anim": "fade", "enterDur": 0.5, "out": "fade", "exitDur": 0.4 }
  ]
 }
