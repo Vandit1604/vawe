@@ -1,50 +1,83 @@
 {
  "module": "scene",
- "note": "EXPLAINER worked example (docs/EVALS.md, skills/vawe-type-explainer/SKILL.md). No product, no site: teaches four real facts about THIS engine (24 layer types, 703 effects across 56 families, 29 beat blueprints, 5 canvases) and holds the payoff (no templates, every beat composed) for last. A thin accent rule underlines the active word and survives every cut: the continuous object. Theme vawe, white-first cobalt.",
+ "storyboard": "verify/evals/briefs/explainer.storyboard.md",
+ "note": "EXPLAINER worked example (docs/EVALS.md, skills/vawe-type-explainer/SKILL.md). No product, no site: teaches that a frame in this engine is a pure function of time (checkable facts: 24 layer types each built from `frame(kit,el,L,t)`, CSS animation/transition refused at boot, the render captures across worker tabs), and holds the payoff (splitting the render loses nothing because no frame depends on the one before it) for last. A live t-readout is the continuous object: it starts as a tiny corner mark and grows into the hero of the closing line, which is itself the proof made literal. Theme vawe, white-first cobalt, chosen because the theme's own motion note already calls this engine's register 'determinism and speed'.",
  "theme": "vawe",
  "aspect": "16:9",
- "duration": 12,
+ "duration": 20,
  "energy": "brand",
  "audio": { "silent": true, "_why": "worked example: proving the type spine and the show-not-tell fact set, not a mix" },
- "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited"], "_why": {
-   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
-   "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
-   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass"
+ "authoring": { "allow": ["no-preflight", "craft-unvisited", "linear-motion"], "_why": {
+   "no-preflight": "fixed eval fixture (docs/EVALS.md): re-run unchanged on every doctrine change, not a planned film with a requester to run the 9-step chain against",
+   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass",
+   "linear-motion": "the t-readout's count value is deliberately linear (ease:linear), because it displays the film's own real elapsed seconds: an eased curve would make the number lie about the clock it is reading. The continuous object's on-screen POSITION/scale still eases (easeInOutSine/easeOutExpo on its motion track); only the numeric value it displays is linear, on purpose."
  } },
  "bg": [
   { "from": 0, "to": 3.0, "preset": "paper" },
-  { "from": 3.0, "to": 6.5, "preset": "soft" },
-  { "from": 6.5, "to": 9.5, "preset": "dotmatrix" },
-  { "from": 9.5, "to": 12, "preset": "accentPlain" }
+  { "from": 3.0, "to": 6.5, "preset": "dotmatrix" },
+  { "from": 6.5, "to": 10.5, "preset": "deep" },
+  { "from": 10.5, "to": 14.0, "preset": "ink" },
+  { "from": 14.0, "to": 17.5, "preset": "accent" },
+  { "from": 17.5, "to": 20, "preset": "paper" }
  ],
  "transitions": [
   { "at": 3.0, "fx": "dissolve", "dur": 0.5 },
   { "at": 6.5, "fx": "dissolve", "dur": 0.5 },
-  { "at": 9.5, "fx": "punch", "dur": 0.5 }
+  { "at": 10.5, "fx": "dissolve", "dur": 0.5 },
+  { "at": 14.0, "fx": "cinematicZoom", "dur": 0.6 },
+  { "at": 17.5, "fx": "dissolve", "dur": 0.5 }
  ],
  "layers": [
-  { "type": "text", "text": "THE ENGINE", "font": "mono", "size": 32, "weight": 600, "color": "var(--dim)", "tracking": "0.22em", "x": 160, "y": 180, "start": 0, "duration": 2.8, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.35 },
-  { "type": "text", "text": "One JSON. <b>Twenty-four</b> layer types.", "size": 108, "weight": 650, "tracking": "-0.02em", "w": 1550, "x": 160, "y": 280, "split": "word", "preset": "up", "dist": 26, "stagger": 0.05, "each": 0.4, "start": 0.2, "duration": 2.6, "out": "fade", "exitDur": 0.35 },
+  { "type": "text", "text": "A QUESTION", "font": "mono", "size": 30, "weight": 500, "color": "var(--dim)", "tracking": "0.22em", "x": 160, "y": 200, "start": 0, "duration": 2.6, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Render frame 240 <b>before</b> frame 1.", "size": 84, "weight": 700, "tracking": "-0.02em", "w": 1500, "x": 160, "y": 300, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.4, "start": 0.2, "duration": 2.6, "out": "fade", "exitDur": 0.3 },
 
-  { "type": "text", "text": "core/layers/ holds every one of them", "size": 56, "weight": 600, "w": 1400, "x": 160, "y": 200, "start": 3.1, "duration": 3.2, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
-  { "type": "html", "x": 160, "y": 340, "w": 1600, "start": 3.4, "duration": 2.8, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0.3,
-    "html": "<div style=\"display:flex;flex-wrap:wrap;gap:22px\"><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">text</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">count</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">image</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">video</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">svg</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">cursor</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">component</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:12px 22px\">particles</span><span data-part style=\"font:600 32px var(--font-mono);color:var(--text-2);border-radius:999px;padding:12px 22px\">+16 more</span></div>",
-    "parts": [{ "select": "[data-part]", "anim": "popIn", "each": 0.32, "stagger": 0.09, "delay": 0.05 }] },
+  { "type": "text", "text": "THE RULE", "font": "mono", "size": 30, "weight": 500, "color": "var(--dim)", "tracking": "0.22em", "x": 160, "y": 180, "start": 2.8, "duration": 3.4, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Every layer type takes one input: <b>time</b>.", "size": 68, "weight": 600, "w": 1500, "align": "left", "x": 160, "y": 270, "start": 2.9, "duration": 3.4, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+  { "type": "html", "x": 160, "y": 480, "w": 1550, "start": 3.2, "duration": 3.0, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0.3,
+    "html": "<style>.sig-card{font:600 42px/1.35 var(--font-mono);color:var(--text-2)}.sig-line .t{color:var(--accent);font-weight:700}.chips{display:flex;gap:16px;margin-top:34px;flex-wrap:wrap;max-width:1500px}.chip{font:600 26px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:999px;padding:10px 22px}.chip.more{color:var(--dim);background:transparent}</style><div class=\"sig-card\"><div class=\"sig-line\" data-sig>build(kit, el, L)</div><div class=\"sig-line\" data-sig>frame(kit, el, L, <span class=\"t\">t</span>)</div></div><div class=\"chips\"><span class=\"chip\" data-chip>text</span><span class=\"chip\" data-chip>count</span><span class=\"chip\" data-chip>svg</span><span class=\"chip\" data-chip>particles</span><span class=\"chip\" data-chip>shader</span><span class=\"chip\" data-chip>three</span><span class=\"chip more\" data-chip>+18 more</span></div>",
+    "parts": [
+      { "select": "[data-sig]", "anim": "fadeUp", "each": 0.4, "stagger": 0.22 },
+      { "select": "[data-chip]", "anim": "popIn", "each": 0.3, "stagger": 0.08, "delay": 0.55 }
+    ] },
 
-  { "type": "text", "text": "and every one composes into an effect", "size": 56, "weight": 600, "w": 1400, "x": 160, "y": 200, "start": 6.6, "duration": 2.8, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
-  { "type": "count", "to": 703, "unit": "", "x": 160, "y": 340, "w": 900, "size": 220, "weight": 700, "color": "var(--ink)", "countStart": 0, "countDur": 1.6, "start": 6.9, "duration": 2.4, "anim": "none", "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "effects, across 56 families", "size": 44, "weight": 500, "color": "var(--dim)", "w": 900, "x": 160, "y": 610, "start": 8.1, "duration": 1.2, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "THE PROOF", "font": "mono", "size": 30, "weight": 500, "color": "var(--dim)", "tracking": "0.22em", "x": 160, "y": 180, "start": 6.3, "duration": 3.9, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Any order. Same pixel.", "size": 72, "weight": 700, "w": 1500, "align": "left", "x": 160, "y": 270, "start": 6.4, "duration": 3.9, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+  { "type": "html", "x": 160, "y": 480, "w": 1150, "start": 6.7, "duration": 3.5, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0.3,
+    "html": "<style>.frame-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:1100px}.frame-chip{position:relative;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:30px 0}.frame-chip .n{font:700 54px var(--font-mono);color:var(--text-2)}.frame-chip .dot{position:absolute;top:18px;right:18px;width:20px;height:20px;border-radius:50%;background:var(--accent)}</style><div class=\"frame-grid\"><div class=\"frame-chip\" data-chip><span class=\"n\">512</span><span class=\"dot\" data-dot></span></div><div class=\"frame-chip\" data-chip><span class=\"n\">037</span><span class=\"dot\" data-dot></span></div><div class=\"frame-chip\" data-chip><span class=\"n\">288</span><span class=\"dot\" data-dot></span></div><div class=\"frame-chip\" data-chip><span class=\"n\">431</span><span class=\"dot\" data-dot></span></div><div class=\"frame-chip\" data-chip><span class=\"n\">104</span><span class=\"dot\" data-dot></span></div><div class=\"frame-chip\" data-chip><span class=\"n\">019</span><span class=\"dot\" data-dot></span></div></div>",
+    "parts": [
+      { "select": "[data-chip]", "anim": "popIn", "each": 0.35, "stagger": 0.14 },
+      { "select": "[data-dot]", "anim": "popIn", "each": 0.25, "stagger": 0.01, "delay": 1.15 }
+    ] },
 
-  { "type": "count", "to": 29, "unit": "", "x": 160, "y": 260, "w": 700, "size": 260, "weight": 700, "color": "var(--accent)", "countStart": 0, "countDur": 1.0, "start": 9.6, "duration": 2.4, "anim": "none", "out": "fade", "exitDur": 0 },
-  { "type": "text", "text": "beat blueprints. No templates: <b>every beat is composed.</b>", "size": 46, "weight": 600, "w": 1400, "x": 160, "y": 560, "start": 10.6, "duration": 1.4, "anim": "slide-up", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "THE MECHANISM", "font": "mono", "size": 30, "weight": 500, "color": "var(--dim)", "tracking": "0.22em", "x": 160, "y": 180, "start": 10.3, "duration": 3.4, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "So the engine refuses its own shortcut.", "size": 62, "weight": 600, "w": 1500, "align": "left", "x": 160, "y": 270, "start": 10.4, "duration": 3.4, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+  { "type": "html", "x": 160, "y": 460, "w": 1200, "start": 10.8, "duration": 2.9, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0.3,
+    "html": "<style>.editor{font:600 32px/1.7 var(--font-mono);color:var(--text-2);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:36px 44px;max-width:1200px}.line{position:relative;white-space:nowrap}.refused .prop{color:var(--down)}.strike{position:absolute;left:0;top:50%;height:3px;width:100%;background:var(--down)}.ok{margin-top:18px}.ok .prop{color:var(--up)}</style><div class=\"editor\"><div class=\"line refused\" data-line1><span class=\"prop\">animation:</span> fade 1s ease;<span class=\"strike\" data-strike></span></div><div class=\"line ok\" data-line2><span class=\"prop\">width:</span> calc(var(--t) * 40px);</div></div>",
+    "parts": [
+      { "select": "[data-line1]", "anim": "fadeUp", "each": 0.35 },
+      { "select": "[data-strike]", "anim": "widen", "each": 0.4, "delay": 0.4 },
+      { "select": "[data-line2]", "anim": "riseIn", "each": 0.4, "delay": 0.95 }
+    ] },
 
-  { "type": "rect", "w": 220, "h": 6, "radius": 3, "x": 160, "y": 244, "fill": "var(--accent)", "start": 0, "duration": 12,
+  { "type": "text", "text": "THE PAYOFF", "font": "mono", "size": 30, "weight": 500, "color": "var(--dim)", "tracking": "0.22em", "x": 160, "y": 180, "start": 13.8, "duration": 3.4, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "So the render splits across workers, mid-film, and <b>nothing breaks</b>.", "size": 58, "weight": 600, "w": 1550, "align": "left", "x": 160, "y": 270, "start": 13.9, "duration": 3.4, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+  { "type": "html", "x": 160, "y": 560, "w": 700, "start": 14.2, "duration": 3.0, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0.3,
+    "html": "<style>.tracks{display:flex;flex-direction:column;gap:24px}.track{display:flex;gap:16px}.blk{width:58px;height:58px;border-radius:12px;background:var(--accent-dim);border:2px solid var(--accent)}</style><div class=\"tracks\"><div class=\"track\" data-t1><span class=\"blk\"></span><span class=\"blk\"></span><span class=\"blk\"></span></div><div class=\"track\" data-t2><span class=\"blk\"></span><span class=\"blk\"></span><span class=\"blk\"></span></div><div class=\"track\" data-t3><span class=\"blk\"></span><span class=\"blk\"></span><span class=\"blk\"></span></div></div>",
+    "parts": [
+      { "select": "[data-t1]", "anim": "slide-right", "each": 0.5, "stagger": 0 },
+      { "select": "[data-t2]", "anim": "slide-left", "each": 0.5, "stagger": 0, "delay": 0.08 },
+      { "select": "[data-t3]", "anim": "slide-right", "each": 0.5, "stagger": 0, "delay": 0.16 }
+    ] },
+
+  { "type": "text", "text": "Same input. Same output. Every time.", "size": 54, "weight": 600, "w": 1200, "align": "left", "x": 160, "y": 260, "start": 17.3, "duration": 2.7, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
+
+  { "type": "count", "prefix": "t = ", "suffix": "s", "from": 0, "to": 20, "decimals": 2, "ease": "linear", "countStart": 0, "countDur": 20, "font": "mono", "size": 28, "weight": 600, "color": "var(--accent)", "x": 160, "y": 940, "w": 500, "start": 0, "duration": 20, "anim": "none", "out": "none",
     "motion": [
-      { "t": 0, "x": 0, "y": 0 },
-      { "t": 3.0, "x": 0, "y": 60, "ease": "easeInOutSine" },
-      { "t": 6.5, "x": 0, "y": 100, "ease": "easeInOutSine" },
-      { "t": 9.5, "x": 0, "y": -20, "ease": "easeInOutSine" },
-      { "t": 12, "x": 0, "y": -20 }
+      { "t": 0, "x": 0, "y": 0, "scale": 1, "ease": "easeInOutSine" },
+      { "t": 14.0, "x": 0, "y": 0, "scale": 1, "ease": "easeInOutSine" },
+      { "t": 17.5, "x": 300, "y": -100, "scale": 1.6, "ease": "easeInOutSine" },
+      { "t": 19.0, "x": 700, "y": -300, "scale": 2.6, "ease": "easeOutExpo" },
+      { "t": 20, "x": 700, "y": -300, "scale": 2.6, "ease": "easeOutExpo" }
     ]
   }
  ]
