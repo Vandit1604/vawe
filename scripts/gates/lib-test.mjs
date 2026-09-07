@@ -6821,31 +6821,29 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const { nearMisses } = await import('../../core/registry/registry.js');
   const bgNames = ['soft', 'paper', 'ink'];
   const transitionNames = ['fade', 'cinematicZoom', 'dissolve'];
-  const cueNames = ['chime', 'whoosh', 'success'];
 
   ok('theme.look: absent is clean (no look block is not an error)', lookErrors(null).length === 0);
   ok('theme.look: a complete, valid look is clean', lookErrors({
     backdrop: ['soft', 'paper'], scale: { hook: 90, headline: 60 }, layout: { anchor: 'left', margin: 160 },
     marks: { logo: 'x.svg', endCardSize: 140, headlineSize: 100 }, cuts: { default: 'fade', accent: 'dissolve' },
-    cues: ['chime'], field: { grain: 0, vignette: 0.1 },
-  }, { bgNames, transitionNames, cueNames, nearMisses }).length === 0);
+    field: { grain: 0, vignette: 0.1 },
+  }, { bgNames, transitionNames, nearMisses }).length === 0);
 
   ok('theme.look: an unknown top-level key refuses with the near word', lookErrors({ backdorp: ['soft'] }, { bgNames, nearMisses })
     .some((m) => /look\.backdorp/.test(m) && /did you mean "backdrop"/.test(m)));
-  ok('theme.look: LOOK_KEYS is the registry\'s own name list (one owner, not a second copy)',
-    LOOK_KEYS.length === 7 && LOOK_KEYS.includes('backdrop') && LOOK_KEYS.includes('cues'));
+  // `cues` used to be a name here: dropped from LOOK_KEYS entirely, `buildSfx` (formats/scene/scene.js)
+  // already derives every cue from the transition actually used, so a fixed per-brand list is unanswerable.
+  ok('theme.look: LOOK_KEYS is the registry\'s own name list (one owner, not a second copy), and cues is gone',
+    LOOK_KEYS.length === 6 && LOOK_KEYS.includes('backdrop') && !LOOK_KEYS.includes('cues'));
 
   ok('theme.look: a bad bg preset name refuses with the near word', lookErrors({ backdrop: ['sof'] }, { bgNames, nearMisses })
     .some((m) => /look\.backdrop names "sof"/.test(m) && /did you mean "soft"/.test(m)));
   ok('theme.look: a real bg preset passes even with bgNames handed in', lookErrors({ backdrop: ['soft'] }, { bgNames, nearMisses }).length === 0);
-  ok('theme.look: backdrop names are unchecked (never assumed fine) when bgNames is not handed in, e.g. the browser boot path skipping cueNames',
+  ok('theme.look: backdrop names are unchecked (never assumed fine) when bgNames is not handed in, e.g. the browser boot path',
     lookErrors({ backdrop: ['not-a-real-preset'] }, {}).length === 0);
 
   ok('theme.look: a bad cut name refuses with the near word', lookErrors({ cuts: { default: 'fad' } }, { transitionNames, nearMisses })
     .some((m) => /look\.cuts\.default names "fad"/.test(m) && /did you mean "fade"/.test(m)));
-
-  ok('theme.look: a bad cue name refuses with the near word', lookErrors({ cues: ['chim'] }, { cueNames, nearMisses })
-    .some((m) => /look\.cues names "chim"/.test(m) && /did you mean "chime"/.test(m)));
 
   ok('theme.look: layout.anchor must be one of the three named directions', lookErrors({ layout: { anchor: 'up' } })
     .some((m) => /look\.layout\.anchor/.test(m)));
@@ -6856,9 +6854,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // uses, so this is the real contract, not a mocked one.
   const { BG_NAMES: liveBg } = await import('../../core/backgrounds/index.js');
   const { TRANSITIONS: liveTransitions } = await import('../../core/transitions/catalog.js');
-  const { CUES: liveCues } = await import('../../core/audio/kit.mjs');
   const liveTransitionNames = liveTransitions.map((t) => t.name);
-  const liveCueNames = Object.keys(liveCues);
   const themeDir = path.join(repoRoot, 'themes');
   const themeFiles = fs.readdirSync(themeDir).filter((n) => n.endsWith('.json'))
     .concat(fs.readdirSync(path.join(themeDir, 'presets')).filter((n) => n.endsWith('.json')).map((n) => `presets/${n}`));
@@ -6866,7 +6862,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   for (const tf of themeFiles) {
     const t = JSON.parse(fs.readFileSync(path.join(themeDir, tf), 'utf8'));
     if (!t.look) continue;
-    const errs = lookErrors(t.look, { bgNames: liveBg, transitionNames: liveTransitionNames, cueNames: liveCueNames, nearMisses });
+    const errs = lookErrors(t.look, { bgNames: liveBg, transitionNames: liveTransitionNames, nearMisses });
     if (errs.length) { themeLookErrs++; console.error(`  theme ${tf}: ${errs.join('; ')}`); }
   }
   ok('theme.look: every shipped theme with a `look` block validates clean against the live registries', themeLookErrs === 0);
