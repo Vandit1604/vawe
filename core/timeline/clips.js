@@ -122,7 +122,7 @@ const WINDUP_FRAMES = 3;
 export function entranceWarp(el, enterDur) {
   const aRaw = el.dataset.anticipate, oRaw = el.dataset.overshoot;
   if (aRaw == null && oRaw == null) return null;
-  const anim = el.dataset.anim || 'fade';
+  const anim = el.dataset.anim || 'none';
   if (!WARPABLE.includes(anim))
     throw new Error(`layer with anim "${anim}" sets ${aRaw != null ? '`anticipate`' : '`overshoot`'}, and `
       + `that entrance has no travel to bend: both dials ARE the easing of a move through space or scale. `
@@ -171,10 +171,11 @@ export const opacityEnvelope = (enterT, exitT = 0) =>
 // it. Now it throws, and because three of those five were real names from a NEIGHBOURING registry, the
 // error says where the name does live. See core/registry.js and docs/MISTAKES.md #355.
 // ABSENCE and a WRONG NAME are different questions, and the old `ANIM[name] || fade` answered both with
-// `fade`. A layer that declares no anim legitimately fades; a layer that names one the engine does not
-// have is a mistake. Splitting them is the whole point - and collapsing them is what let five layers in
-// three shipped scenes ask for an entrance that does not exist and get a cross-fade instead.
-const resolveAnim = (name) => (name == null ? fade : ANIM_REGISTRY.pick(name));
+// `fade`. A layer that declares no anim is simply PRESENT for its window (`none`, not `fade`, see
+// `anim` default in formats/scene/scene.js `setLayerTiming`); a layer that names one the engine does
+// not have is a mistake. Splitting them is the whole point - and collapsing them is what let five
+// layers in three shipped scenes ask for an entrance that does not exist and get a cross-fade instead.
+const resolveAnim = (name) => (name == null ? ANIM.none : ANIM_REGISTRY.pick(name));
 // invert an enter transition into an exit (reverse the progress: 1→hidden).
 // Play an entrance BACKWARDS to make an exit: progress 1 (settled) -> 0 (offset/hidden).
 // Takes exitT (0 at the start of the exit, 1 at the end), NOT exitMul, passing the already-inverted

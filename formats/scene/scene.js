@@ -594,7 +594,10 @@ boot((data, fps, theme, canvas) => {
     if (L.split && L.enterDur != null) {
       throw new Error(`layer ${idx} (${L.type}) sets enterDur: ${JSON.stringify(L.enterDur)} with ${owner}. The engine cannot honour it: a split layer's units reveal themselves, so its enter window is fixed at 0. Remove it, ${instead}.`);
     }
-    el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
+    // NO DEFAULT ENTRANCE. A layer that names no `anim` is simply PRESENT for its window, not faded
+    // in: `anim: "fade"` is one word for anyone who wants the old behaviour (core/timeline/clips.js
+    // resolveAnim/ANIM.none).
+    el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'none');
     if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake, exempt from shimmer checks
     // Resolve this layer's idle AT BUILD, and throw the result away. The idle track resolves it again
     // for itself; what this call buys is WHEN a misspelled name is refused. Left to the track alone,
