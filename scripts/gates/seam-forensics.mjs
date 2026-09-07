@@ -125,9 +125,13 @@ for (const b of boundaries) {
   // `overlapFraction(a, b)` divides by a's area, so a headline arriving INSIDE a big card scored 0.17
   // against the card and the card was still called a ghost. The question is not what fraction of the box
   // is covered, it is whether the arriving layer draws in there at all, so the larger fraction wins.
-  const arrivingOver = (l) => layers.some((o) => o.i !== l.i && o.box && o.start != null
+  // A BEAT BLUEPRINT'S OWN LAYERS CARRY NO AUTHORED BOX, laid out at render time, so they cannot be
+  // matched by overlap at all: the same hole `seam-resurrection` fills below with its active-group
+  // fallback. Any box-less layer arriving in this window is treated as covering the stage, which is what
+  // a blueprint beat does. The sensitivity traded is a real ghost under an arriving beat.
+  const arrivingOver = (l) => layers.some((o) => o.i !== l.i && o.start != null
     && o.start <= t1 && t1 <= o.start + 0.6 && (o.end == null || t1 <= o.end)
-    && Math.max(overlapFraction(l.box, o.box), overlapFraction(o.box, l.box)) > 0.4);
+    && (!o.box || Math.max(overlapFraction(l.box, o.box), overlapFraction(o.box, l.box)) > 0.4));
   for (const l of outgoing) {
     if (arrivingOver(l)) continue;
     const d1 = diffBoxes(mp4, f1, fSettled, l.box, W, H);
