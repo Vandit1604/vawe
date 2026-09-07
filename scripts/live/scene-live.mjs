@@ -38,6 +38,41 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // `rect` are deliberately absent there and absent here: a mark is not a picture.
 const PICTORIAL = new Set(['image', 'html', 'component', 'svg', 'video', 'clip', 'lottie', 'board', 'doc']);
 
+// The preset catalogue, read from the ONE place that owns it. The hook suggests and never writes, so
+// this is not the engine choosing a backdrop: `bg` stays a required field for the reason
+// docs/MISTAKES.md #159 records. A preset carries a name and a blurb and no light/dark marker, so this
+// deliberately does NOT filter by the theme's dominance. Guessing dominance from a name would be a
+// heuristic that misfires, and a wrong suggestion here is worse than three honest ones the author reads
+// and rejects. The blurb is what lets them judge fit, which is why it is printed and not just the name.
+let PRESETS = [];
+try {
+  const src = fs.readFileSync(path.join(ROOT, 'core/backgrounds/presets.js'), 'utf8');
+  for (const m of src.matchAll(/\{\s*name:\s*'([^']+)',\s*blurb:\s*'((?:[^'\\]|\\.)*)'/g)) {
+    PRESETS.push({ name: m[1], blurb: m[2].replace(/\\'/g, "'") });
+  }
+} catch { PRESETS = []; }   // no catalogue, no suggestion: the finding above still stands on its own
+
+// Three presets this film does not use, stable per film so the advice does not churn between saves,
+// and different between films so the library does not converge on whichever three sort first.
+function unusedPresets(scene, rel) {
+  if (!PRESETS.length) return [];
+  const used = new Set();
+  for (const w of (Array.isArray(scene.bg) ? scene.bg : scene.bg ? [scene.bg] : [])) {
+    if (w && typeof w === 'object' && w.preset) used.add(w.preset);
+  }
+  const pool = PRESETS.filter((p) => !used.has(p.name));
+  if (!pool.length) return [];
+  let h = 0;
+  for (const ch of rel) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const pick = [];
+  for (let i = 0; i < 3 && i < pool.length; i++) pick.push(pool[(h + i * 7) % pool.length]);
+  const out = [`  ${pool.length} presets this film does not use. Three of them:`];
+  for (const p of pick) out.push(`    ${p.name.padEnd(14)} ${p.blurb.slice(0, 78)}`);
+  out.push(`  The rest: \`make arsenal --kind "background preset"\`. None fit? A bg window takes`);
+  out.push(`  \`html\`/\`src\` for a hand-authored field, which 23 windows already use.`);
+  return out;
+}
+
 let raw = '';
 process.stdin.on('data', (d) => { raw += d; });
 process.stdin.on('end', () => {
@@ -81,6 +116,14 @@ process.stdin.on('end', () => {
   if (bgWindows <= 1) {
     say.push(`  ${bgWindows === 0 ? 'no' : 'one'} bg window for the whole runtime. 121 of 148 scenes do this, 82%, and it is`);
     say.push(`  the strongest single lever in CLAUDE.md: brew inverts the world on four of its five cuts.`);
+    // NAMING THREE IS THE WHOLE POINT, and it is why this branch is longer than the others. This rule
+    // has fired for a while and the library still sits at 82%, because "one bg window" tells an author
+    // they are wrong and not what to reach for instead. Finding the alternative is the expensive step,
+    // and the expensive step is the one that gets cut: the adoption gradient across this whole
+    // vocabulary (preset 173 films, parts 24, idle 6, exitRatio 0) says authors take whatever costs one
+    // word. So the fix is to make the ALTERNATIVE cost one word too. Three names with their blurbs is a
+    // choice; a count is a complaint.
+    for (const line of unusedPresets(j, rel)) say.push(line);
   }
   if (j.audio && j.audio.silent && !j.audio._why) {
     say.push(`  \`audio.silent\` with no \`_why\`. 106 scenes declare the silence and only 26 justify it.`);
