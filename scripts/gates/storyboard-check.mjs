@@ -15,9 +15,12 @@
 //   node scripts/gates/storyboard-check.mjs path/to/STORYBOARD.md   ·   make storyboard-check SB=<file>
 //   Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
 import fs from 'node:fs';
+import path from 'node:path';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
-import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE } from '../author/storyboard-parse.mjs';
+import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline } from '../author/storyboard-parse.mjs';
+import { chainErrors, edges, parseMotion } from '../lib/contract.mjs';
+import { resolvePx } from '../lib/placement-resolve.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 
@@ -234,6 +237,75 @@ if (timed.length && timed.length < spans.length) {
   // this is that check at the stage where it is still free to fix.
   if (durSec != null && last.end - durSec > 0.5) {
     err('timeline-overrun', `timeline-overrun, your beats run to ${last.end}s of a ${durSec}s film: ${(last.end - durSec).toFixed(2)}s more is storyboarded than the film has. Either raise \`duration:\` to ${Math.ceil(last.end)}s, or cut beats until they fit. Whichever you do, decide it here rather than letting the JSON run out mid-beat.`);
+  }
+}
+
+// ── THE FILM AGAINST THE PLAN: does the motion this storyboard promised actually exist? ────────────
+// Everything above grades the plan against itself. This is the one check that grades it against the
+// thing it claims to have produced: a storyboard saying "the headline pushes left" and a rendered
+// scene where nothing moves is a defect no static read of the markdown can ever find, because the
+// markdown is telling the truth about its own intentions and lying about the film.
+//
+// ADVISORY (warn, never a blocker): a storyboard is legitimately checked before `make assemble` has
+// ever run, and the film beside it may simply not exist yet, or may be mid-edit. What this reports is
+// PRESENCE of the declared motion in the built layers, read the same way `edges`/`parseMotion`
+// (scripts/lib/contract.mjs) already read the storyboard, never a second parser.
+const filmPath = /\.storyboard\.md$/.test(f) ? f.replace(/\.storyboard\.md$/, '.json') : null;
+if (filmPath && fs.existsSync(filmPath)) {
+  const full = parseStoryboard(src);
+  const { beats: tBeats } = timeline(full);
+  const scene = JSON.parse(fs.readFileSync(filmPath, 'utf8'));
+  const sceneLayers = Array.isArray(scene.layers) ? scene.layers : [];
+  const near = (a, b, tol) => a != null && b != null && Math.abs(a - b) <= tol;
+
+  // motion: each beat's declared entries must show up as `parts` on the layer that starts at that beat.
+  tBeats.forEach((b) => {
+    const motion = parseMotion(b.motion);
+    if (!motion.length) return;
+    const layer = sceneLayers.find((l) => l.type === 'html' && near(l.start, b.start, 0.05));
+    if (!layer) {
+      warn('motion-not-built', `beat "${b.name}" (${b.start}s) declares \`motion:\` but no scene layer starts there in ${path.basename(filmPath)}. Run \`make assemble D=${filmPath}\` to build it, or the storyboard is describing a film that does not exist.`);
+      return;
+    }
+    const built = Array.isArray(layer.parts) ? layer.parts : [];
+    for (const m of motion) {
+      const match = built.find((p) => p.select === m.selector && p.anim === m.kind);
+      if (!match) {
+        const have = built.length ? built.map((p) => `${p.select}@${p.anim}`).join(', ') : '(none)';
+        warn('motion-diverges', `beat "${b.name}": storyboard declares \`${m.selector}@${m.kind}\` but the built scene's layer at ${b.start}s carries: ${have}. The film does not do what the plan says. Re-run \`make assemble D=${filmPath}\`, or fix the storyboard.`);
+      }
+    }
+  });
+
+  // the continuous object: its edges must resolve to where the built layer's motion track actually is.
+  const chain = chainErrors(tBeats).length ? [] : edges(tBeats);
+  if (chain.length) {
+    const objLayer = sceneLayers.find((l) => l.acrossBeats && Array.isArray(l.motion) && l.motion.length);
+    if (!objLayer) {
+      warn('object-not-built', `the storyboard declares a continuous-object contract (object_in/object_out) but ${path.basename(filmPath)} has no \`acrossBeats\` layer with a motion track. Run \`make assemble D=${filmPath}\`.`);
+    } else {
+      const aspect = scene.aspect || '16:9';
+      const destination = scene.destination;
+      const layerStart = objLayer.start ?? 0;
+      const keyAt = (t) => {
+        const tt = +(t - layerStart).toFixed(3);
+        return objLayer.motion.find((k) => near(k.t, tt, 0.05));
+      };
+      for (const e of chain) {
+        const wantIn = resolvePx(e.in, { aspect, destination });
+        const wantOut = resolvePx(e.out, { aspect, destination });
+        const kIn = keyAt(e.start), kOut = keyAt(e.end);
+        const gotIn = kIn ? { x: objLayer.x + kIn.x, y: objLayer.y + kIn.y } : null;
+        const gotOut = kOut ? { x: objLayer.x + kOut.x, y: objLayer.y + kOut.y } : null;
+        const TOL = 4;
+        if (!gotIn || !near(gotIn.x, wantIn.x, TOL) || !near(gotIn.y, wantIn.y, TOL)) {
+          warn('object-diverges', `beat "${e.name}" (${e.start}s): storyboard says the object arrives at ${e.in.placement}@${e.in.w}x${e.in.h} (${wantIn.x},${wantIn.y}px) but the built layer is at ${gotIn ? `${gotIn.x},${gotIn.y}px` : 'nowhere (no key at that time)'}.`);
+        }
+        if (!gotOut || !near(gotOut.x, wantOut.x, TOL) || !near(gotOut.y, wantOut.y, TOL)) {
+          warn('object-diverges', `beat "${e.name}" (${e.end}s): storyboard says the object leaves at ${e.out.placement}@${e.out.w}x${e.out.h} (${wantOut.x},${wantOut.y}px) but the built layer is at ${gotOut ? `${gotOut.x},${gotOut.y}px` : 'nowhere (no key at that time)'}.`);
+        }
+      }
+    }
   }
 }
 

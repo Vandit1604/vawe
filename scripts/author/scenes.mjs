@@ -12,7 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors } from '../lib/contract.mjs';
+import { chainErrors, parseMotion, motionErrors } from '../lib/contract.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
 import { buildKit } from '../lib/stagekit.mjs';
@@ -31,6 +31,12 @@ const errs = chainErrors(beats);
 if (errs.length) {
   console.error(`scenes: the continuous-object contract does not chain. Fix the storyboard first (\`make contract D=${film}\`):`);
   for (const e of errs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+const mErrs = motionErrors(beats);
+if (mErrs.length) {
+  console.error(`scenes: the motion plan does not parse. Fix the storyboard first (\`make contract D=${film}\`):`);
+  for (const e of mErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
 
@@ -65,6 +71,15 @@ beats.forEach((b, i) => {
   if (b.object_in || b.object_out) {
     console.log(`Continuous object arrives at: ${b.object_in || '(unset)'}   leaves at: ${b.object_out || '(unset)'}`);
     console.log(`  (the object itself is drawn by \`make assemble\`, not by this fragment: the fragment is everything ELSE in the beat)`);
+  }
+  // THE MOTION PLAN, read BEFORE the markup is written, not discovered after: `make assemble` wires
+  // each entry's <selector> into a `parts[].select`, so an element the fragment never gives that
+  // selector to (a class, or a `data-part` attribute) is a plan the assembled film cannot reach.
+  const motion = parseMotion(b.motion);
+  if (motion.length) {
+    console.log('MUST BE ADDRESSABLE (give each of these elements the exact selector below, e.g. a `data-part` attribute or a class):');
+    for (const m of motion) console.log(`  - ${m.selector}  →  ${m.kind} (${m.inBand}${m.outBand !== m.inBand ? ' in / ' + m.outBand + ' out' : ''})`);
+    console.log('  (the entrance/exit itself is keyed by `make assemble`, not by CSS in this fragment: see AGENTS.md, no CSS animation/transition here)');
   }
   console.log('Anti-slop:');
   for (const r of ANTI_SLOP) console.log(`  - ${r}`);

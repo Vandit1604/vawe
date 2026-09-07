@@ -17,7 +17,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, SPEED_BAND } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
@@ -37,6 +37,12 @@ const errs = chainErrors(beats);
 if (errs.length) {
   console.error(`assemble: the continuous-object contract does not chain (\`make contract D=${film}\` for detail):`);
   for (const e of errs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+const motionErrs = motionErrors(beats);
+if (motionErrs.length) {
+  console.error(`assemble: the motion plan does not parse (\`make contract D=${film}\` for detail):`);
+  for (const e of motionErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
 
@@ -63,7 +69,16 @@ const htmlLayers = beats.map((b, i) => {
   // (near-zero), so a fragment written full-bleed (`position:absolute;inset:0`, the shape scenes.mjs's
   // briefs and preview-fragment.mjs both assume) would collapse to nothing at real render time even
   // though it previewed correctly (core/layers/html.js build(): w/h are the only thing that sizes it).
-  return { type: 'html', src: path.relative(ROOT, fragPath), start: b.start, duration: +(b.end - b.start).toFixed(3), track: 1, x: 0, y: 0, w: canvasW, h: canvasH };
+  // THE MOTION PLAN, consumed here and nowhere else: a beat's `motion:` entries become `parts[]` on
+  // its own html layer, the SAME `select`/`anim` vocabulary a hand-authored parts block already takes
+  // (core/motion/parts.js), so this is not a second motion mechanism, it is the storyboard filling in
+  // the one the engine already has. `each`/`exitDur` come from the named speed band
+  // (scripts/lib/contract.mjs SPEED_BAND), never a raw second written here.
+  const motion = parseMotion(b.motion);
+  const parts = motion.length ? motion.map((m) => ({
+    select: m.selector, anim: m.kind, each: SPEED_BAND[m.inBand], out: true, exitDur: SPEED_BAND[m.outBand],
+  })) : undefined;
+  return { type: 'html', src: path.relative(ROOT, fragPath), start: b.start, duration: +(b.end - b.start).toFixed(3), track: 1, x: 0, y: 0, w: canvasW, h: canvasH, ...(parts ? { parts } : {}) };
 });
 if (missing.length) {
   console.error(`assemble: missing fragment(s), run \`make scenes D=${film}\` for the briefs and write them first:`);
@@ -127,4 +142,6 @@ fs.writeFileSync(film, JSON.stringify(out, null, 1) + '\n');
 console.log(`✓ assemble: ${beats.length} scene(s) → ${film}`);
 console.log(`  ${htmlLayers.length} html fragment(s), ${objectLayer ? '1 continuous-object layer (' + chain[0].in.placement + ' → ' + chain[chain.length - 1].out.placement + ')' : 'no continuous object (film named none)'}`);
 console.log(`  ${transitions.length} transition(s), bg turns through: ${backdrop.slice(0, beats.length).join(' → ')}`);
+const motionCount = htmlLayers.reduce((n, l) => n + (l.parts ? l.parts.length : 0), 0);
+console.log(`  ${motionCount} motion-plan entr${motionCount === 1 ? 'y' : 'ies'} from the storyboard (\`motion:\`), built into ${htmlLayers.filter((l) => l.parts).length} scene(s)' \`parts\``);
 console.log(`  Next: make author-check D=${film}`);
