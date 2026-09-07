@@ -1,53 +1,60 @@
 {
  "module": "scene",
- "note": "DEMO worked example (docs/EVALS.md, skills/vawe-type-demo/SKILL.md). Proves the `cursor` layer: a pointer follows a real [{t,x,y}] path, clicks a real button, and the click has a visible CONSEQUENCE (the chip that only appears after the click, not on a timer of its own). The panel is ONE html layer (hand-authored, no captured site here) with `parts`: title+button rise in on entrance, `Exported.` is a second `parts` group that stays hidden until the click. Theme vawe.",
- "theme": "vawe",
+ "note": "DEMO worked example (docs/EVALS.md, skills/vawe-type-demo/SKILL.md). Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map with a real cursor path, and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. No captured site: fictional, self-contained, invented figures. Theme satara: warm paper, single trail-orange accent, geometric rounded sans, snappy easeOutBack motion, chosen for an outdoor/warm/spatial register.",
+ "theme": "satara",
  "aspect": "16:9",
- "duration": 10,
+ "duration": 15,
  "energy": "brand",
- "audio": { "silent": true, "_why": "worked example: proving the cursor+click mechanism, not a mix" },
- "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited"], "_why": {
-   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
-   "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
-   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass"
+ "storyboard": "verify/evals/briefs/demo.storyboard.md",
+ "audio": { "silent": true, "_why": "worked example: proving the draw+click+fill mechanism, not a mix" },
+ "authoring": { "allow": ["no-preflight", "craft-unvisited"], "_why": {
+   "no-preflight": "a small worked-example fixture (docs/EVALS.md) with a locked storyboard beside it; the 9-step decision chain is for a commissioned film with a requester to sign a lock sheet",
+   "craft-unvisited": "same fixture: sized to stay a liveness proof for `make evals`, not to carry a full multi-critic craft pass"
  } },
+ "spectacle": { "at": 8.7, "of": "panel", "device": "ripple", "why": "the click and the stat pill it causes are the one loud moment; every other move in the film is a plain eased pop/shrink with no sting of its own" },
  "bg": [
-  { "from": 0, "to": 2.4, "preset": "soft" },
-  { "from": 2.4, "to": 7.2, "preset": "paper" },
-  { "from": 7.2, "to": 10, "preset": "dotmatrix" }
+  { "from": 0, "to": 2.8, "preset": "soft" },
+  { "from": 2.8, "to": 11.5, "preset": "paperDots" },
+  { "from": 11.5, "to": 15, "preset": "gradientWash" }
  ],
  "transitions": [
-  { "at": 2.4, "fx": "fade", "dur": 0.5 },
-  { "at": 7.2, "fx": "punch", "dur": 0.45 }
+  { "at": 2.8, "fx": "fade", "dur": 0.5, "mech": "seam" },
+  { "at": 11.5, "fx": "cinematicZoom", "dur": 0.45, "mech": "seam" }
  ],
  "sceneUnits": true,
  "layers": [
-  { "type": "text", "text": "Watch the click <b>land.</b>", "size": 96, "weight": 650, "w": 1400, "x": 160, "y": 380, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0, "duration": 2.2, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Draw the route. The climb comes with it.", "size": 88, "weight": 650, "w": 1400, "x": 160, "y": 400, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0, "duration": 2.4, "out": "fade", "exitDur": 0.3 },
 
-  { "type": "html", "x": 440, "y": 260, "w": 1040, "h": 480, "start": 2.5, "duration": 4.5, "anim": "scale", "enterDur": 0.4, "out": "fade", "exitDur": 0.35,
-    "html": "<div style=\"position:relative;box-sizing:border-box;width:1040px;height:480px;background:var(--surface);border:1.5px solid var(--line);border-radius:20px\"><div data-part-open style=\"position:absolute;left:60px;top:60px;font:650 44px var(--font-sans);color:var(--text)\">Weekly report</div><div data-part-open style=\"position:absolute;left:60px;top:130px;font:500 30px var(--font-sans);color:var(--text-2)\">18 rows ready.</div><div data-part-open style=\"position:absolute;left:380px;top:340px;width:220px;height:64px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center\"><span style=\"font:650 28px var(--font-sans);color:var(--on-accent)\">Export</span></div><div data-part-done style=\"position:absolute;left:380px;top:240px;width:220px;text-align:center;font:650 30px var(--font-sans);color:var(--up)\">Exported.</div></div>",
+  { "type": "html", "id": "panel", "x": 370, "y": 170, "w": 1180, "h": 760, "start": 0, "duration": 15, "acrossBeats": true, "anim": "fade", "enterDur": 0.01, "out": "fade", "exitDur": 0.01,
+    "html": "<div style=\"position:relative;box-sizing:border-box;width:1180px;height:760px;background:var(--surface);border:1.5px solid var(--line);border-radius:24px;overflow:hidden;font-family:var(--font-sans)\"><div data-part-open style=\"position:absolute;left:48px;top:36px;font:700 34px var(--font-sans);color:var(--text)\">Trailhead</div><div data-part-open style=\"position:absolute;right:48px;top:44px;font:500 24px var(--font-sans);color:var(--text-2)\">Ridge Loop &middot; Sequoia</div><svg data-part-open viewBox=\"0 0 1180 520\" style=\"position:absolute;left:0;top:96px;width:1180px;height:520px\" preserveAspectRatio=\"none\"><path d=\"M -40 460 Q 260 340 560 400 T 1220 360\" style=\"fill:none;stroke:var(--line);stroke-width:2\" /><path d=\"M -40 380 Q 300 250 600 320 T 1220 260\" style=\"fill:none;stroke:var(--line);stroke-width:2\" /><path d=\"M -40 300 Q 320 170 620 240 T 1220 170\" style=\"fill:none;stroke:var(--line);stroke-width:2\" /><path d=\"M -40 210 Q 340 90 640 150 T 1220 90\" style=\"fill:none;stroke:var(--line);stroke-width:2\" /></svg><svg viewBox=\"0 0 1180 520\" style=\"position:absolute;left:0;top:96px;width:1180px;height:520px\" preserveAspectRatio=\"none\"><path id=\"route\" pathLength=\"1\" d=\"M 230 210 L 450 350 L 630 260 L 810 430 L 970 350\" style=\"fill:none;stroke:var(--accent);stroke-width:7;stroke-linecap:round;stroke-linejoin:round\" /><circle cx=\"230\" cy=\"210\" r=\"9\" style=\"fill:var(--accent)\" /></svg><div data-part-open id=\"save-btn\" style=\"position:absolute;left:900px;top:432px;width:190px;height:60px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center\"><span style=\"font:700 24px var(--font-sans);color:var(--on-accent)\">Save route</span></div><div data-part-open style=\"position:absolute;left:48px;top:632px;font:500 22px var(--font-sans);color:var(--text-2)\">Elevation</div><div style=\"position:absolute;left:48px;top:664px;width:1084px;height:64px;overflow:hidden\"><svg viewBox=\"0 0 1084 64\" style=\"position:absolute;left:0;top:0;width:calc(var(--fill,0) * 1084px);height:64px;overflow:visible\" preserveAspectRatio=\"none\"><polygon points=\"0,64 0,44 180,50 360,20 560,34 760,8 960,26 1084,18 1084,64\" style=\"fill:var(--accent);opacity:0.16\" /><polyline points=\"0,44 180,50 360,20 560,34 760,8 960,26 1084,18\" style=\"fill:none;stroke:var(--accent);stroke-width:3\" /></svg></div><div data-part-done style=\"position:absolute;left:790px;top:340px;width:330px;height:56px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center\"><span style=\"font:700 24px var(--font-sans);color:var(--on-accent)\">1,240 ft climb &middot; 6.2 mi</span></div></div>",
     "parts": [
-      { "select": "[data-part-open]", "anim": "riseIn", "each": 0.35, "stagger": 0.12, "delay": 0.15 },
-      { "select": "[data-part-done]", "anim": "popIn", "each": 0.3, "delay": 2.9, "out": true, "exitDur": 0.2 }
+      { "select": "[data-part-open]", "anim": "riseIn", "each": 0.5, "stagger": 0.12, "delay": 2.9 },
+      { "select": "#route", "anim": "drawOn", "each": 5.0, "delay": 3.5, "ease": "easeOutCubic" },
+      { "select": "[data-part-done]", "anim": "popIn", "each": 0.3, "delay": 8.8 }
+    ],
+    "vars": { "--fill": [0, 1] }, "varsDur": 5.0, "varsDelay": 3.5, "varsEase": "easeOutCubic",
+    "motion": [
+      { "t": 0, "scale": 0.30, "x": 700, "y": -350 },
+      { "t": 2.3, "scale": 0.30, "x": 700, "y": -350 },
+      { "t": 2.8, "scale": 1.0, "x": 0, "y": 0, "ease": "easeOutBack" },
+      { "t": 11.0, "scale": 1.0, "x": 0, "y": 0 },
+      { "t": 11.5, "scale": 0.32, "x": 690, "y": 330, "ease": "easeInOutSine" },
+      { "t": 15, "scale": 0.32, "x": 690, "y": 330 }
     ]
   },
 
   { "type": "cursor", "path": [
-      { "t": 0, "x": 300, "y": 240 },
-      { "t": 1.0, "x": 800, "y": 560, "ease": "easeInOutSine" },
-      { "t": 1.7, "x": 928, "y": 630, "ease": "easeOutCubic" }
-    ], "clicks": [1.7], "start": 3.7, "duration": 2.4, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+      { "t": 0, "x": 560, "y": 420 },
+      { "t": 0.5, "x": 600, "y": 476, "ease": "easeOutCubic" },
+      { "t": 1.75, "x": 820, "y": 616, "ease": "easeInOutSine" },
+      { "t": 3.0, "x": 1000, "y": 526, "ease": "easeInOutSine" },
+      { "t": 4.25, "x": 1180, "y": 696, "ease": "easeInOutSine" },
+      { "t": 5.5, "x": 1340, "y": 616, "ease": "easeOutCubic" },
+      { "t": 5.7, "x": 1365, "y": 632, "ease": "easeOutCubic" }
+    ], "clicks": [5.7], "start": 3.0, "duration": 6.2, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
 
-  { "type": "text", "text": "The click. The response. The proof.", "size": 64, "weight": 640, "w": 1500, "x": 160, "y": 420, "start": 7.4, "duration": 2.4, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0 },
-  { "type": "text", "text": "vawe.dev", "size": 40, "weight": 600, "color": "var(--accent)", "font": "mono", "x": 160, "y": 540, "start": 8.0, "duration": 1.8, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
-
-  { "type": "rect", "w": 10, "h": 10, "radius": 5, "x": 60, "y": 60, "fill": "var(--accent)", "start": 0, "duration": 10, "acrossBeats": true,
-    "motion": [
-      { "t": 0, "x": 0, "y": 0 },
-      { "t": 3.7, "x": 0, "y": 40, "ease": "easeInOutSine" },
-      { "t": 6.1, "x": 0, "y": -20, "ease": "easeInOutSine" },
-      { "t": 10, "x": 0, "y": 0, "ease": "easeInOutSine" }
-    ]
-  }
+  { "type": "text", "text": "The climb, visible before the first step.", "size": 60, "weight": 640, "w": 1400, "x": 160, "y": 420, "start": 11.5, "duration": 2.4, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "Trailhead", "size": 44, "weight": 700, "x": 160, "y": 520, "start": 12.6, "duration": 2.4, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "Plan the walk you can actually see.", "size": 32, "weight": 500, "color": "var(--accent)", "font": "mono", "x": 160, "y": 590, "start": 13.0, "duration": 2.0, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 }
  ]
 }
