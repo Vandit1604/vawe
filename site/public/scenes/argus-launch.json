@@ -176,177 +176,22 @@
    ]
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 1080,
    "y": 247,
    "w": 700,
-   "layout": "row",
-   "items": "flex-end",
-   "justify": "space-between",
-   "gap": 14,
-   "pad": 22,
    "bg": "var(--card)",
    "radius": 14,
    "border": "1px solid var(--line)",
    "elevation": 1,
+   "pad": 22,
    "start": 4.8,
    "duration": 5.2,
    "anim": "rise",
    "enterDur": 0.8,
    "exitDur": 0.35,
-   "children": [
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "60",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 112,
-       "h": 216,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "Mon",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "52",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 112,
-       "h": 188,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "Tue",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "44",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 112,
-       "h": 160,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "Wed",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "30",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 112,
-       "h": 111,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "Thu",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "22",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 112,
-       "h": 83,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "Fri",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    }
-   ],
-   "id": "leakchart"
+   "id": "leakchart",
+   "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:space-between;gap:14px\"><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">60</span><div style=\"width:112px;height:216px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">Mon</span></div><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">52</span><div style=\"width:112px;height:188px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">Tue</span></div><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">44</span><div style=\"width:112px;height:160px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">Wed</span></div><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">30</span><div style=\"width:112px;height:111px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">Thu</span></div><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">22</span><div style=\"width:112px;height:83px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">Fri</span></div></div>"
   },
   {
    "type": "group",
@@ -500,106 +345,21 @@
    "each": 0.42
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 460,
    "y": 361,
    "w": 820,
-   "layout": "column",
-   "items": "stretch",
-   "gap": 14,
-   "pad": 22,
    "bg": "var(--card)",
    "radius": 16,
    "border": "1px solid var(--line)",
    "elevation": 1,
+   "pad": 22,
    "start": 10.4,
    "duration": 5.6,
    "anim": "rise",
    "enterDur": 0.85,
    "exitDur": 0.35,
-   "children": [
-    {
-     "type": "group",
-     "layout": "row",
-     "items": "center",
-     "gap": 12,
-     "children": [
-      {
-       "type": "group",
-       "radius": 100,
-       "w": 48,
-       "h": 48,
-       "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
-       "layout": "row",
-       "justify": "center",
-       "items": "center",
-       "children": [
-        {
-         "type": "text",
-         "weight": 700,
-         "text": "F",
-         "size": 26,
-         "color": "var(--accent)"
-        }
-       ]
-      },
-      {
-       "type": "group",
-       "layout": "column",
-       "items": "flex-start",
-       "gap": 1,
-       "children": [
-        {
-         "type": "text",
-         "weight": 700,
-         "text": "a big account",
-         "size": 26,
-         "color": "var(--text)"
-        },
-        {
-         "type": "text",
-         "weight": 500,
-         "text": "@founder",
-         "font": "mono",
-         "size": 26,
-         "color": "var(--dim)"
-        }
-       ]
-      }
-     ]
-    },
-    {
-     "type": "text",
-     "weight": 400,
-     "text": "shipping is the only growth hack that compounds.",
-     "size": 26,
-     "color": "var(--text)"
-    },
-    {
-     "type": "group",
-     "layout": "row",
-     "gap": 28,
-     "items": "center",
-     "children": [
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "↻ 210",
-       "font": "mono",
-       "size": 26,
-       "color": "var(--dim)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "♥ 1.2k",
-       "font": "mono",
-       "size": 26,
-       "color": "var(--dim)"
-      }
-     ]
-    }
-   ]
+   "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;display:flex;flex-direction:column;align-items:stretch;gap:14px\"><div style=\"display:flex;align-items:center;gap:12px\"><div style=\"width:48px;height:48px;border-radius:100px;background:color-mix(in srgb, var(--accent) 14%, transparent);display:flex;justify-content:center;align-items:center\"><span style=\"font:700 26px var(--font-sans);color:var(--accent)\">F</span></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:1px\"><span style=\"font:700 26px var(--font-sans);color:var(--text)\">a big account</span><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">@founder</span></div></div><span style=\"font:400 26px var(--font-sans);color:var(--text)\">shipping is the only growth hack that compounds.</span><div style=\"display:flex;align-items:center;gap:28px\"><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">&#8635; 210</span><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">&#9829; 1.2k</span></div></div>"
   },
   {
    "type": "text",
@@ -616,66 +376,23 @@
    "enterDur": 0.55
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 560,
    "y": 692,
    "w": 820,
-   "layout": "column",
-   "items": "stretch",
-   "gap": 10,
    "start": 11.6,
    "duration": 4.4,
-   "anim": "rise",
-   "enterDur": 0.5,
-   "exitDur": 0.35,
-   "children": [
+   "anim": "none",
+   "enterDur": 0,
+   "html": "<div style=\"width:100%;display:flex;flex-direction:column;align-items:stretch;gap:10px\"><div class=\"bubble\" style=\"display:flex;justify-content:flex-end\"><div style=\"background:var(--accent);border-radius:16px;padding:12px 18px\"><span style=\"font:500 26px var(--font-sans);color:#fff\">agreed. we shipped 40 times last month and every reply here came from argus.</span></div></div><div class=\"bubble\" style=\"display:flex;justify-content:flex-end\"><div style=\"background:var(--accent);border-radius:16px;padding:12px 18px\"><span style=\"font:500 26px var(--font-sans);color:#fff\">the trick: reply to the right 5 people, not the loudest 50.</span></div></div></div>",
+   "parts": [
     {
-     "type": "group",
-     "layout": "row",
-     "justify": "flex-end",
-     "start": 11.6,
-     "duration": 4.4,
-     "children": [
-      {
-       "type": "group",
-       "bg": "var(--accent)",
-       "radius": 16,
-       "pad": "12px 18px",
-       "children": [
-        {
-         "type": "text",
-         "weight": 500,
-         "text": "agreed. we shipped 40 times last month and every reply here came from argus.",
-         "size": 26,
-         "color": "#fff"
-        }
-       ]
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "row",
-     "justify": "flex-end",
-     "start": 11.72,
-     "duration": 4.4,
-     "children": [
-      {
-       "type": "group",
-       "bg": "var(--accent)",
-       "radius": 16,
-       "pad": "12px 18px",
-       "children": [
-        {
-         "type": "text",
-         "weight": 500,
-         "text": "the trick: reply to the right 5 people, not the loudest 50.",
-         "size": 26,
-         "color": "#fff"
-        }
-       ]
-      }
-     ]
+     "select": ".bubble",
+     "anim": "riseIn",
+     "each": 0.5,
+     "stagger": 0.12,
+     "out": true,
+     "exitDur": 0.35
     }
    ]
   },
@@ -697,90 +414,14 @@
    "each": 0.32
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 140,
    "y": 345,
-   "layout": "row",
-   "items": "flex-start",
-   "gap": 120,
    "start": 16.6,
    "duration": 3.4,
    "anim": "rise",
    "enterDur": 0.3,
-   "children": [
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "flex-start",
-     "gap": 4,
-     "children": [
-      {
-       "type": "text",
-       "weight": 700,
-       "text": "4.9%",
-       "size": 78.1,
-       "color": "var(--text)",
-       "ls": "-0.02em"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "reply rate",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "flex-start",
-     "gap": 4,
-     "children": [
-      {
-       "type": "text",
-       "weight": 700,
-       "text": "38k",
-       "size": 78.1,
-       "color": "var(--text)",
-       "ls": "-0.02em"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "impressions",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "flex-start",
-     "gap": 4,
-     "children": [
-      {
-       "type": "text",
-       "weight": 700,
-       "text": "+612",
-       "size": 78.1,
-       "color": "var(--text)",
-       "ls": "-0.02em"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "followers / wk",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    }
-   ]
+   "html": "<div style=\"display:flex;align-items:flex-start;gap:120px\"><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px\"><span style=\"font:700 78.1px var(--font-sans);letter-spacing:-0.02em;color:var(--text)\">4.9%</span><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">reply rate</span></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px\"><span style=\"font:700 78.1px var(--font-sans);letter-spacing:-0.02em;color:var(--text)\">38k</span><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">impressions</span></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px\"><span style=\"font:700 78.1px var(--font-sans);letter-spacing:-0.02em;color:var(--text)\">+612</span><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">followers / wk</span></div></div>"
   },
   {
    "type": "text",
@@ -796,149 +437,24 @@
    "enterDur": 0.36
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 1080,
    "y": 247,
    "w": 700,
-   "layout": "row",
-   "items": "flex-end",
-   "justify": "space-between",
-   "gap": 14,
-   "pad": 22,
    "bg": "var(--card)",
    "radius": 14,
    "border": "1px solid var(--line)",
    "elevation": 1,
+   "pad": 22,
    "start": 16.8,
    "duration": 3.25,
    "anim": "rise",
    "enterDur": 0.34,
    "exitDur": 0.35,
-   "children": [
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "22",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 145.5,
-       "h": 96,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "W1",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "34",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 145.5,
-       "h": 146,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "W2",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "55",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 145.5,
-       "h": 232,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "W3",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    },
-    {
-     "type": "group",
-     "layout": "column",
-     "items": "center",
-     "gap": 8,
-     "children": [
-      {
-       "type": "text",
-       "weight": 600,
-       "text": "90",
-       "size": 26,
-       "color": "var(--text)"
-      },
-      {
-       "type": "group",
-       "radius": 6,
-       "w": 145.5,
-       "h": 376,
-       "bg": "var(--accent)"
-      },
-      {
-       "type": "text",
-       "weight": 500,
-       "text": "W4",
-       "size": 26,
-       "color": "var(--dim)",
-       "font": "mono"
-      }
-     ]
-    }
-   ],
    "id": "growth",
    "becomes": "mascot2",
-   "becomesDur": 0.5
+   "becomesDur": 0.5,
+   "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:space-between;gap:14px\"><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">22</span><div style=\"width:145.5px;height:96px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">W1</span></div><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">34</span><div style=\"width:145.5px;height:146px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">W2</span></div><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">55</span><div style=\"width:145.5px;height:232px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">W3</span></div><div style=\"display:flex;flex-direction:column;align-items:center;gap:8px\"><span style=\"font:600 26px var(--font-sans);color:var(--text)\">90</span><div style=\"width:145.5px;height:376px;border-radius:6px;background:var(--accent)\"></div><span style=\"font:500 26px var(--font-mono);color:var(--dim)\">W4</span></div></div>"
   },
   {
    "type": "image",
@@ -973,29 +489,18 @@
    ]
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 760,
    "y": 711,
    "w": 400,
    "bg": "var(--accent)",
    "radius": 999,
    "pad": "22px 0",
-   "layout": "row",
-   "justify": "center",
-   "items": "center",
    "start": 20.6,
    "duration": 2.4,
    "anim": "rise",
    "enterDur": 0.28,
-   "children": [
-    {
-     "type": "text",
-     "weight": 600,
-     "color": "#fff",
-     "text": "join the waitlist",
-     "size": 34.2
-    }
-   ]
+   "html": "<div style=\"display:flex;justify-content:center;align-items:center\"><span style=\"font:600 34.2px var(--font-sans);color:#fff\">join the waitlist</span></div>"
   },
   {
    "type": "text",

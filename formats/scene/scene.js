@@ -263,7 +263,10 @@ boot((data, fps, theme, canvas) => {
     if (data.grain !== true) spec.fx = (spec.fx || []).filter((f) => f.type !== 'grain');
     const sd = b.seed != null ? b.seed : hashSeed(String((theme && theme.name) || 'x') + ':' + (b.preset || 'paper')) % 1000;
     for (const f of spec.fx || []) if (f.seed == null) f.seed = sd;
-    return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, preset: b.preset || 'paper', value: b.value, spec };
+    // `breathe` is OPT-IN (see drawBg): a canvas-painted window held nothing but its own preset motion
+    // until now, so this is authoring, not a fallback. `true` uses the old feel (2% scale, ~18s period);
+    // an object overrides `amp`/`period`.
+    return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, preset: b.preset || 'paper', value: b.value, spec, breathe: b.breathe ?? null };
   });
   // --alpha exports a compositable OVERLAY, so the backdrop is the compositor's job, not the scene's.
   // Suppressing it here is what makes the alpha channel real: core/tokens.css clears CSS backgrounds
@@ -591,7 +594,10 @@ boot((data, fps, theme, canvas) => {
     if (L.split && L.enterDur != null) {
       throw new Error(`layer ${idx} (${L.type}) sets enterDur: ${JSON.stringify(L.enterDur)} with ${owner}. The engine cannot honour it: a split layer's units reveal themselves, so its enter window is fixed at 0. Remove it, ${instead}.`);
     }
-    el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'fade');
+    // NO DEFAULT ENTRANCE. A layer that names no `anim` is simply PRESENT for its window, not faded
+    // in: `anim: "fade"` is one word for anyone who wants the old behaviour (core/timeline/clips.js
+    // resolveAnim/ANIM.none).
+    el.dataset.anim = (L.split || L.cut) ? 'none' : (L.anim || 'none');
     if (L.cut === 'jitter') el.dataset.motion = 'loop'; // declared shake, exempt from shimmer checks
     // Resolve this layer's idle AT BUILD, and throw the result away. The idle track resolves it again
     // for itself; what this call buys is WHEN a misspelled name is refused. Left to the track alone,
@@ -1206,10 +1212,18 @@ boot((data, fps, theme, canvas) => {
   // blend a bg) and sized once: `renderBg` clears-then-paints its target, so painting both sides onto
   // the same canvas would erase the outgoing side the instant the incoming side starts drawing.
   let bgBlendCv = null;
-  // drawBg: the theme bg on canvas (last matching window wins outside a transition) + a continuous
-  // slow breathe. A hand-authored (`html`) window paints in the DOM instead, so the canvas is hidden
-  // for its span; a hand-authored window on either side of a cut cannot be blended here (the canvas
-  // cannot read lightness or pixels out of somebody's CSS), so that case keeps the hard switch.
+  // drawBg: the theme bg on canvas (last matching window wins outside a transition). A hand-authored
+  // (`html`) window paints in the DOM instead, so the canvas is hidden for its span; a hand-authored
+  // window on either side of a cut cannot be blended here (the canvas cannot read lightness or pixels
+  // out of somebody's CSS), so that case keeps the hard switch.
+  //
+  // NO DEFAULT ZOOM. This used to hardcode `scale(1.05 + 0.02*sin(t*0.35))` on every frame of every
+  // film: a permanent 5% overscan plus a slow pulse nobody authored. Checked before removing it:
+  // `renderBg` (core/backgrounds/index.js) clears then repaints the FULL `w`x`h` canvas every call, and
+  // every fx in core/backgrounds/fx.js draws within (or wrapping around, for `particles`) those same
+  // bounds, so the canvas never has an unpainted margin for a 5% overscan to hide. There is no edge
+  // artifact here to compensate for; the zoom was invented motion, like the idle default it shipped
+  // beside. Removed outright, not shrunk to a smaller constant.
   function drawBg(t) {
     if (!bgWins.length || ALPHA) return; // alpha export: no backdrop, so unpainted pixels stay transparent
     const cut = bgCutAt(t);
@@ -1235,7 +1249,13 @@ boot((data, fps, theme, canvas) => {
     } else {
       renderBg(ctx, W, H, t, w.spec);
     }
-    cv.style.transform = `scale(${(1.05 + 0.02 * Math.sin(t * 0.35)).toFixed(4)})`;
+    // `bg[].breathe`: authorable, default off (see the field's own comment above). Reset to identity
+    // when the active window does not ask for it, so a breathing window handing off to a still one
+    // does not leave its last scale stuck on the canvas.
+    const br = w && w.breathe;
+    cv.style.transform = br
+      ? `scale(${(1 + (br.amp ?? 0.02) * Math.sin((t / (br.period ?? 18)) * Math.PI * 2)).toFixed(4)})`
+      : '';
   }
 
   // THE PER-FRAME PIPELINE is core/tracks/: everything a single layer does at time t, including its

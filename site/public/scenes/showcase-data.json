@@ -136,15 +136,11 @@
    ]
   },
   {
-   "type": "group",
+   "type": "html",
    "id": "runA",
    "x": 180,
    "y": 600,
    "w": 700,
-   "layout": "row",
-   "items": "center",
-   "gap": 24,
-   "pad": "26px 36px",
    "bg": "var(--card)",
    "radius": 100,
    "elevation": 1,
@@ -187,32 +183,7 @@
      "y": 0
     }
    ],
-   "children": [
-    {
-     "type": "group",
-     "radius": 100,
-     "w": 16,
-     "h": 16,
-     "bg": "var(--up)"
-    },
-    {
-     "type": "text",
-     "text": "run 1",
-     "font": "mono",
-     "size": 28,
-     "weight": 600,
-     "color": "var(--dim)"
-    },
-    {
-     "type": "text",
-     "text": "a4f1e0c9d2",
-     "font": "mono",
-     "size": 42,
-     "weight": 600,
-     "color": "var(--text)",
-     "grow": 1
-    }
-   ]
+   "html": "<div style=\"box-sizing:border-box;width:700px;display:flex;align-items:center;gap:24px;padding:26px 36px\"><div style=\"width:16px;height:16px;border-radius:100px;background:var(--up);flex:none\"></div><span style=\"font:600 28px var(--font-mono);color:var(--dim)\">run 1</span><span style=\"flex:1;font:600 42px var(--font-mono);color:var(--text)\">a4f1e0c9d2</span></div>"
   },
   {
    "type": "text",
@@ -234,11 +205,14 @@
    "exitDur": 0.24
   },
   {
-   "type": "group",
+   "type": "html",
    "id": "runB",
    "x": 1040,
    "y": 600,
    "w": 700,
+   "bg": "var(--card)",
+   "radius": 100,
+   "elevation": 1,
    "start": 4,
    "duration": 5.8,
    "anim": "fade",
@@ -284,47 +258,7 @@
      "y": 0
     }
    ],
-   "children": [
-    {
-     "type": "group",
-     "w": 700,
-     "layout": "row",
-     "items": "center",
-     "gap": 24,
-     "pad": "26px 36px",
-     "bg": "var(--card)",
-     "radius": 100,
-     "elevation": 1,
-     "children": [
-      {
-       "type": "group",
-       "radius": 100,
-       "w": 16,
-       "h": 16,
-       "bg": "var(--up)"
-      },
-      {
-       "type": "text",
-       "text": "run 2",
-       "font": "mono",
-       "size": 28,
-       "weight": 600,
-       "color": "var(--dim)"
-      },
-      {
-       "type": "text",
-       "text": "a4f1e0c9d2",
-       "font": "mono",
-       "size": 42,
-       "weight": 600,
-       "color": "var(--text)",
-       "grow": 1
-      }
-     ]
-    }
-   ],
-   "layout": "column",
-   "pad": 0
+   "html": "<div style=\"box-sizing:border-box;width:700px;display:flex;align-items:center;gap:24px;padding:26px 36px\"><div style=\"width:16px;height:16px;border-radius:100px;background:var(--up);flex:none\"></div><span style=\"font:600 28px var(--font-mono);color:var(--dim)\">run 2</span><span style=\"flex:1;font:600 42px var(--font-mono);color:var(--text)\">a4f1e0c9d2</span></div>"
   },
   {
    "type": "text",
