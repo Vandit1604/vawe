@@ -1,50 +1,70 @@
 {
  "module": "scene",
- "note": "RECREATION worked example (docs/EVALS.md, skills/vawe-type-recreation/SKILL.md). Takes the GRAMMAR studied off grammar/framer-hero.json (make study), never its frames or brand: a prompt types, the generated artefact builds in beside it with no hard cut, and the SAME artefact is later shown from a different angle (the reference's own 'it is really finished' payoff, three viewports at once). Content here is generic (a made-up pricing page, no captured UI, no real brand), only the device is recreated. Dark ground throughout, matching the reference's own dark-to-dark. Theme vawe.",
- "theme": "vawe",
+ "note": "RECREATION worked example (docs/EVALS.md, skills/vawe-type-recreation/SKILL.md). The owner has ruled these six eval briefs stay fictional and self-contained (no captured brand, regenerated often), so this type's usual 'study a real site' step is INVENTED instead: Postmark Studio is a fictional letterpress print shop and type foundry, studied as though `make sections` had run against it (the design study lives in the sidecar storyboard). Every beat traces to a line in that study. Six sections in the site's own order: home, type specimens, the press, print runs, the craft line, the end card. Continuous object: a compositor's steel line gauge (the accent rule), hand-keyed on a `w` track that widens and narrows to measure whatever the beat is showing.",
+ "theme": "vawe-paper",
  "aspect": "16:9",
- "duration": 11,
- "energy": "calm",
+ "duration": 22,
  "sceneUnits": true,
- "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited", "feature-poverty"], "_why": {
-   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
-   "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
-   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass",
-   "feature-poverty": "pre-existing: this fixture's one job is the sceneUnits continuous-object device (transition/motionTrack/bgMotion), not a vocabulary tour; confirmed against the file before any html-first edits"
+ "authoring": { "allow": ["no-preflight"], "_why": {
+   "no-preflight": "fixed eval fixture (docs/EVALS.md): this brief is re-run unchanged on every doctrine change rather than planned fresh per request, so the 9-step decision chain that precedes a real brief does not apply. Storyboard sidecar IS present (recreation.storyboard.md) and carries the invented design study in its place."
  } },
- "audio": { "silent": true, "_why": "worked example: proving the recreated device, not a mix" },
- "bg": [ { "preset": "ink" } ],
+ "audio": { "silent": true, "_why": "worked example proving the recreation spine (invented source, studied grammar), not a mix" },
+ "bg": [
+  { "preset": "paper" },
+  { "preset": "paperDots" },
+  { "preset": "dotmatrix" },
+  { "preset": "soft" },
+  { "preset": "paperShapes" },
+  { "preset": "accentPlain" }
+ ],
  "transitions": [
-  { "at": 3.4, "fx": "dissolve", "dur": 0.6 },
-  { "at": 6.4, "fx": "dissolve", "dur": 0.6 },
-  { "at": 9.0, "fx": "dissolve", "dur": 0.5 }
+  { "at": 3.4, "fx": "dissolve", "dur": 0.6, "mech": "seam" },
+  { "at": 8.0, "fx": "dissolve", "dur": 0.6, "mech": "seam" },
+  { "at": 12.5, "fx": "dissolve", "dur": 0.6, "mech": "seam" },
+  { "at": 17.0, "fx": "dissolve", "dur": 0.5, "mech": "seam" },
+  { "at": 20.0, "fx": "dissolve", "dur": 0.5, "mech": "seam" }
  ],
  "layers": [
-  { "type": "text", "text": "PROMPT", "font": "mono", "size": 24, "weight": 600, "color": "var(--dim)", "tracking": "0.2em", "x": 160, "y": 160, "start": 0, "duration": 2.6, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
-  { "type": "rect", "x": 160, "y": 210, "w": 760, "h": 90, "radius": 14, "fill": "var(--surface-2)", "start": 0, "duration": 2.6, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "design a pricing page", "size": 34, "weight": 600, "color": "var(--ink)", "x": 194, "y": 236, "w": 700, "start": 0.2, "duration": 2.3, "typing": 16, "anim": "none", "out": "fade", "exitDur": 0.3 },
+  { "type": "svg", "x": 160, "y": 176, "w": 32, "h": 32, "start": 0, "duration": 3.4, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3,
+    "svg": "<svg viewBox=\"0 0 34 34\"><circle cx=\"17\" cy=\"17\" r=\"12\" fill=\"none\" stroke=\"var(--dim)\" stroke-width=\"1.4\"/><path d=\"M17 0V34M0 17H34\" stroke=\"var(--dim)\" stroke-width=\"1.4\"/></svg>" },
+  { "type": "text", "text": "LETTERPRESS &amp; TYPE FOUNDRY", "font": "mono", "size": 26, "weight": 600, "color": "var(--text2)", "tracking": "0.16em", "x": 210, "y": 172, "start": 0, "duration": 3.4, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Postmark Studio", "font": "sans", "size": 108, "weight": 700, "color": "var(--ink)", "tracking": "-0.02em", "x": 160, "y": 260, "w": 1600, "start": 0.15, "duration": 3.25, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.35 },
+  { "type": "text", "text": "Set by hand. Pulled by hand.", "font": "sans", "size": 40, "weight": 500, "color": "var(--text2)", "x": 160, "y": 440, "w": 1400, "start": 0.4, "duration": 3.0, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
 
-  { "type": "html", "x": 160, "y": 340, "w": 1040, "h": 620, "radius": 18, "bg": "var(--surface-2)", "start": 2.6, "duration": 6.0, "anim": "slide-right", "enterDur": 0.55, "out": "fade", "exitDur": 0.35, "acrossBeats": true,
-    "html": "<div style=\"padding:40px\"><div data-part-title style=\"font:650 40px var(--font-sans);color:var(--ink)\">Pricing</div><div style=\"display:flex;gap:24px;margin-top:40px\"><div data-part-tile style=\"width:280px;height:320px;border-radius:12px;background:var(--line)\"></div><div data-part-tile style=\"width:280px;height:320px;border-radius:12px;background:var(--accent-dim)\"></div><div data-part-tile style=\"width:280px;height:320px;border-radius:12px;background:var(--line)\"></div></div></div>",
-    "parts": [
-      { "select": "[data-part-title]", "anim": "fade", "each": 0.35, "delay": 0.4 },
-      { "select": "[data-part-tile]", "anim": "popIn", "each": 0.35, "stagger": 0.12, "delay": 0.6 }
-    ] },
+  { "type": "text", "text": "TYPE", "font": "mono", "size": 26, "weight": 600, "color": "var(--dim)", "tracking": "0.16em", "x": 160, "y": 200, "start": 3.4, "duration": 4.6, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Two faces from the case.", "font": "sans", "size": 58, "weight": 650, "color": "var(--ink)", "x": 160, "y": 250, "w": 1600, "start": 3.4, "duration": 4.6, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.35 },
+  { "type": "html", "x": 160, "y": 400, "w": 1600, "h": 500, "start": 3.55, "duration": 4.45, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.35,
+    "html": "<div style=\"padding:36px\"><style>.pm-card{box-shadow:none}.pm-reg{position:absolute;top:20px;left:20px;width:34px;height:34px}.pm-reg svg{width:100%;height:100%;display:block}.pm-spec{font:600 20px var(--font-mono);color:var(--text-2);letter-spacing:0.04em;margin:0}.pm-face{margin:0;line-height:0.9;color:var(--text)}</style><div data-part-row style=\"display:flex;gap:28px\"><div data-part-card class=\"pm-card\" style=\"position:relative;flex:1;padding:44px 40px 32px;min-height:420px;background:var(--surface);border:1px solid var(--line);border-radius:16px\"><div class=\"pm-reg\"><svg viewBox=\"0 0 34 34\"><circle cx=\"17\" cy=\"17\" r=\"12\" fill=\"none\" stroke=\"var(--dim)\" stroke-width=\"1.2\"/><path d=\"M17 0V34M0 17H34\" stroke=\"var(--dim)\" stroke-width=\"1.2\"/></svg></div><p class=\"pm-face\" style=\"font:400 168px 'Tiempos Headline', var(--font-serif)\">Aa</p><p class=\"pm-spec\" style=\"margin-top:34px\">GARAMONT No.3 &middot; 72PT / 18P0 &middot; WT 400</p></div><div data-part-card class=\"pm-card\" style=\"position:relative;flex:1;padding:44px 40px 32px;min-height:420px;background:var(--surface);border:1px solid var(--line);border-radius:16px\"><div class=\"pm-reg\"><svg viewBox=\"0 0 34 34\"><circle cx=\"17\" cy=\"17\" r=\"12\" fill=\"none\" stroke=\"var(--dim)\" stroke-width=\"1.2\"/><path d=\"M17 0V34M0 17H34\" stroke=\"var(--dim)\" stroke-width=\"1.2\"/></svg></div><p class=\"pm-face\" style=\"font:900 150px 'Big Shoulders Stencil', var(--font-sans);letter-spacing:0.08em\">Aa</p><p class=\"pm-spec\" style=\"margin-top:34px\">PLATEN GROTESK &middot; 60PT / 15P0 &middot; WT 900</p></div></div></div>",
+    "parts": [ { "select": "[data-part-card]", "anim": "popIn", "each": 0.4, "stagger": 0.15, "delay": 0.1, "out": true } ] },
 
-  { "type": "text", "text": "the SAME page, from a different angle", "size": 46, "weight": 620, "w": 1500, "x": 160, "y": 200, "start": 6.6, "duration": 2.2, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "PRESS", "font": "mono", "size": 26, "weight": 600, "color": "var(--dim)", "tracking": "0.16em", "x": 160, "y": 200, "start": 8.0, "duration": 4.5, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Every plate finds register.", "font": "sans", "size": 56, "weight": 650, "color": "var(--ink)", "x": 160, "y": 250, "w": 1600, "start": 8.0, "duration": 4.5, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.35 },
+  { "type": "html", "x": 160, "y": 470, "w": 1600, "h": 220, "start": 8.15, "duration": 4.35, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.35,
+    "html": "<div style=\"padding:36px;font-size:0\"><style>.pm-plate{font:600 26px var(--font-mono);color:var(--text);letter-spacing:0.04em;margin:0}.pm-plate-sub{font:400 18px var(--font-mono);color:var(--text-2);letter-spacing:0.04em;margin:8px 0 0}</style><div style=\"display:flex;align-items:center;gap:48px\"><svg viewBox=\"0 0 34 34\" style=\"width:64px;height:64px\"><circle cx=\"17\" cy=\"17\" r=\"12\" fill=\"none\" stroke=\"var(--text)\" stroke-width=\"1.4\"/><path d=\"M17 0V34M0 17H34\" stroke=\"var(--text)\" stroke-width=\"1.4\"/></svg><div data-part-swatch style=\"width:64px;height:64px;border-radius:999px;border:1px solid var(--line);background:var(--ink)\"></div><div data-part-swatch style=\"width:64px;height:64px;border-radius:999px;border:1px solid var(--line);background:var(--accent)\"></div><div data-part-swatch style=\"width:64px;height:64px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2)\"></div><div style=\"padding:26px 32px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:0\"><p class=\"pm-plate\">PLATE 03 &middot; IN REGISTER</p><p class=\"pm-plate-sub\">900GSM COTTON &middot; 2 PASS &middot; HAND-FED</p></div></div></div>",
+    "parts": [ { "select": "[data-part-swatch]", "anim": "popIn", "each": 0.3, "stagger": 0.12, "delay": 0.2, "out": true } ] },
 
-  { "type": "html", "x": 160, "y": 320, "w": 1600, "h": 372, "start": 9.1, "duration": 1.7, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0,
-    "html": "<div style=\"display:flex;align-items:center;gap:56px\"><div data-part style=\"width:260px;height:156px;border-radius:10px;background:var(--surface-2)\"></div><div data-part style=\"width:420px;height:252px;border-radius:14px;background:var(--surface-2)\"></div><div data-part style=\"width:620px;height:372px;border-radius:18px;background:var(--surface-2)\"></div></div>",
-    "parts": [{ "select": "[data-part]", "anim": "popIn", "each": 0.4, "stagger": 0.15, "delay": 0.05 }] },
-  { "type": "text", "text": "it is really finished.", "size": 44, "weight": 620, "color": "var(--dim)", "x": 160, "y": 780, "start": 9.6, "duration": 1.2, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "PRINT RUNS", "font": "mono", "size": 26, "weight": 600, "color": "var(--dim)", "tracking": "0.16em", "x": 160, "y": 200, "start": 12.5, "duration": 4.5, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Priced by the sheet, not the click.", "font": "sans", "size": 56, "weight": 650, "color": "var(--ink)", "x": 160, "y": 250, "w": 1600, "start": 12.5, "duration": 4.5, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.35 },
+  { "type": "html", "x": 160, "y": 470, "w": 1600, "h": 260, "start": 12.65, "duration": 4.35, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.35,
+    "html": "<div style=\"padding:36px\"><style>.pm-run{font:600 24px var(--font-sans);color:var(--text);margin:0 0 6px}.pm-price{font:700 28px var(--font-mono);color:var(--accent);margin:0;letter-spacing:0.02em}.pm-ct{font:400 18px var(--font-mono);color:var(--text-2);margin:6px 0 0;letter-spacing:0.04em}</style><div data-part-tile-row style=\"display:flex;gap:24px\"><div data-part-tile style=\"flex:1;padding:32px 28px;background:var(--surface);border:1px solid var(--line);border-radius:16px\"><p class=\"pm-run\">CARDS</p><p class=\"pm-price\">FROM $48</p><p class=\"pm-ct\">RUN OF 250CT</p></div><div data-part-tile style=\"flex:1;padding:32px 28px;background:var(--surface);border:1px solid var(--line);border-radius:16px\"><p class=\"pm-run\">INVITATIONS</p><p class=\"pm-price\">FROM $210</p><p class=\"pm-ct\">RUN OF 100CT</p></div><div data-part-tile style=\"flex:1;padding:32px 28px;background:var(--surface);border:1px solid var(--line);border-radius:16px\"><p class=\"pm-run\">BROADSIDES</p><p class=\"pm-price\">FROM $65</p><p class=\"pm-ct\">RUN OF 25CT</p></div></div></div>",
+    "parts": [ { "select": "[data-part-tile]", "anim": "riseIn", "each": 0.35, "stagger": 0.12, "delay": 0.15, "out": true } ] },
 
-  { "type": "rect", "w": 90, "h": 5, "radius": 3, "x": 160, "y": 148, "fill": "var(--accent)", "start": 0, "duration": 11, "acrossBeats": true,
+  { "type": "text", "text": "Every impression, one plate at a time.", "font": "sans", "size": 62, "weight": 650, "color": "var(--ink)", "align": "center", "x": 210, "y": 460, "w": 1500, "start": 17.0, "duration": 3.0, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "svg", "x": 928, "y": 380, "w": 32, "h": 32, "start": 20.0, "duration": 2.0, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3,
+    "svg": "<svg viewBox=\"0 0 34 34\"><circle cx=\"17\" cy=\"17\" r=\"12\" fill=\"none\" stroke=\"var(--dim)\" stroke-width=\"1.4\"/><path d=\"M17 0V34M0 17H34\" stroke=\"var(--dim)\" stroke-width=\"1.4\"/></svg>" },
+  { "type": "text", "text": "Postmark Studio", "font": "sans", "size": 64, "weight": 700, "color": "var(--ink)", "align": "center", "tracking": "-0.02em", "x": 660, "y": 440, "w": 600, "start": 20.1, "duration": 1.9, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "postmark.studio", "font": "mono", "size": 28, "weight": 500, "color": "var(--text2)", "align": "center", "tracking": "0.04em", "x": 660, "y": 530, "w": 600, "start": 20.25, "duration": 1.75, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0 },
+
+  { "type": "rect", "x": 160, "y": 1010, "w": 4, "h": 4, "radius": 2, "fill": "var(--accent)", "start": 0, "duration": 22, "acrossBeats": true,
     "motion": [
-      { "t": 0, "x": 0 },
-      { "t": 3.4, "x": 30, "ease": "easeInOutSine" },
-      { "t": 6.4, "x": -20, "ease": "easeInOutSine" },
-      { "t": 9.0, "x": 40, "ease": "easeInOutSine" },
-      { "t": 11, "x": 0, "ease": "easeInOutSine" }
+      { "t": 0, "w": 0 },
+      { "t": 1.2, "w": 140, "ease": "easeInOutSine" },
+      { "t": 5.0, "w": 1600, "ease": "easeInOutSine" },
+      { "t": 9.5, "w": 420, "ease": "easeInOutSine" },
+      { "t": 14.5, "w": 1600, "ease": "easeInOutSine" },
+      { "t": 18.2, "w": 340, "ease": "easeInOutSine" },
+      { "t": 21.0, "w": 200, "ease": "easeInOutSine" }
     ]
   }
  ]
