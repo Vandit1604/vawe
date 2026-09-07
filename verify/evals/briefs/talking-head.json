@@ -1,61 +1,80 @@
 {
  "module": "scene",
- "note": "TALKING-HEAD worked example (docs/EVALS.md, skills/vawe-type-talking-head/SKILL.md). No real voiceover exists for this example: the circle at top is the FACE-SAFE PLACEHOLDER, standing in for a real presenter shot, and the on-screen lines are a short hand-timed script (the `voWords`/`make vo-captions` path this skill names is for a real VO track). Shows the caption-safe strip on a `shorts` destination, a lower-third, a quiet field, and a B-roll cut away to a stat card and back: the cut rhythm this type needs and others do not. Theme vawe.",
- "theme": "vawe",
+ "note": "TALKING-HEAD worked example (docs/EVALS.md, skills/vawe-type-talking-head/SKILL.md). Subject: Corva, a fictional research assistant that answers with the passage it drew from rather than a summary. Presenter: Mira, a fictional Corva researcher, invented for this fixture, no real brand or person. No voice synthesis exists in this engine and no real presenter footage: the two nested circles (a plate ring plus a small accent core) stand in for a real presenter shot, deliberately abstract rather than an invented face, and the on-screen captions are a hand-timed script standing in for the `voWords`/`make vo-captions` path this skill names for a real VO track. The B-roll beat (9.0-14.0s) is a real `html` layer, a document mock with a highlighted line and a citation chip that resolves, illustrating the payoff (a citation you can check) rather than restating it in type. Theme preface: paper-white typographic stage, restrained motion (bounce 0, ease-out only), one warm accent reserved for the citation resolving, a deliberate fit for a calm editorial register.",
+ "theme": "preface",
  "aspect": "9:16",
  "destination": "shorts",
- "duration": 12,
+ "duration": 21,
  "energy": "calm",
- "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited", "ends-on-nothing"], "_why": {
-   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
+ "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited"], "_why": {
+   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness + before/after proof for `make evals`, not a planned film with a requester to sign a lock sheet",
    "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
-   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass",
-   "ends-on-nothing": "pre-existing: the last spoken caption ends at 11.6s inside a 12s scene, and the lower-third/accent-bar spine (acrossBeats) does not count as the closing content the check wants; a real edit would trim to 11.6s or extend the caption, out of scope for an html-first pass"
+   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full production craft pass"
  } },
- "audio": { "silent": true, "_why": "worked example: no real VO track exists yet, captions are hand-timed to stand in for it" },
+ "audio": { "silent": true, "_why": "worked example: no real VO track exists yet, the five captions below are hand-timed word-by-word to stand in for a real voWords sidecar" },
  "bg": [
-  { "from": 0, "to": 5.8, "preset": "ink" },
-  { "from": 5.8, "to": 8.6, "preset": "deep" },
-  { "from": 8.6, "to": 12, "preset": "ink" }
+  { "from": 0, "to": 9.0, "preset": "paperDots" },
+  { "from": 9.0, "to": 14.0, "preset": "soft" },
+  { "from": 14.0, "to": 21, "preset": "paperDots" }
  ],
  "transitions": [
-  { "at": 5.8, "fx": "punch", "dur": 0.4 },
-  { "at": 8.6, "fx": "punch", "dur": 0.4 }
+  { "at": 9.0, "fx": "dissolve", "mech": "seam", "dur": 0.6 },
+  { "at": 14.0, "fx": "dissolve", "mech": "seam", "dur": 0.6 }
  ],
+ "cameraMove": { "move": "slowPush" },
+ "spectacle": { "at": 10.6, "of": "citation-chip", "device": "flash", "why": "the citation resolving inside the document IS the film's argument (a citation you can check, not a summary); every other beat stays quiet so this one pop reads as the payoff" },
  "sceneUnits": true,
  "layers": [
-  { "type": "rect", "x": 290, "y": 260, "w": 500, "h": 500, "radius": 250, "fill": "var(--surface-2)", "start": 0, "duration": 5.6, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "face-safe slot", "size": 28, "weight": 500, "color": "var(--dim)", "align": "center", "x": 290, "y": 490, "w": 500, "font": "mono", "start": 0.3, "duration": 5.3, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
-
-  { "type": "html", "x": 140, "y": 640, "w": 800, "h": 380, "radius": 20, "bg": "var(--surface-2)", "start": 6.0, "duration": 2.4, "anim": "pop", "enterDur": 0.35, "out": "fade", "exitDur": 0.3,
-    "html": "<div style=\"padding:60px 60px 0\"><div data-part-open style=\"font:600 34px var(--font-sans);color:var(--text-2)\">cut to the proof</div><div data-part-late style=\"margin-top:150px;font:500 30px var(--font-sans);color:var(--dim)\">effects, not a slideshow</div></div>",
+  { "type": "html", "id": "presenter-plate-a", "x": 280, "y": 250, "w": 520, "h": 520, "start": 0, "duration": 9.0, "out": "defocus", "exitDur": 0.35,
+    "html": "<style>.plate{position:relative;width:520px;height:520px}.plate-ring{position:absolute;inset:0;border-radius:50%;background:var(--line)}.plate-inset{position:absolute;inset:35px;border-radius:50%;background:var(--bg)}.plate-core{position:absolute;top:190px;left:190px;width:140px;height:140px;border-radius:50%;background:var(--accent)}</style><div class=\"plate\"><div data-plate class=\"plate-ring\"><div class=\"plate-inset\"></div></div><div data-core class=\"plate-core\"></div></div>",
     "parts": [
-      { "select": "[data-part-open]", "anim": "fade", "each": 0.3, "delay": 0.2 },
-      { "select": "[data-part-late]", "anim": "fade", "each": 0.25, "delay": 1.4 }
+      { "select": "[data-plate]", "anim": "fade", "each": 0.75, "delay": 0 },
+      { "select": "[data-core]", "anim": "popIn", "each": 0.5, "delay": 0.3 }
     ] },
-  { "type": "count", "to": 693, "unit": "", "x": 200, "y": 780, "w": 700, "size": 130, "weight": 700, "color": "var(--accent)", "countStart": 0, "countDur": 1.1, "start": 6.3, "duration": 2.0, "anim": "none", "out": "fade", "exitDur": 0.3 },
 
-  { "type": "rect", "x": 290, "y": 260, "w": 500, "h": 500, "radius": 250, "fill": "var(--surface-2)", "start": 8.7, "duration": 3.0, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
+  { "type": "html", "id": "citation-chip", "x": 100, "y": 460, "w": 880, "h": 800, "start": 9.0, "duration": 5.0, "anim": "pop", "enterDur": 0.3, "out": "fade", "exitDur": 0.3,
+    "html": "<style>.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}.kit-radius-sm{border-radius:8px}.kit-radius-md{border-radius:16px}.kit-radius-lg{border-radius:28px}.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}.kit-hook{font:700 93px var(--font-sans);color:var(--text);margin:0}.kit-headline{font:700 65px var(--font-sans);color:var(--text);margin:0}.kit-body{font:400 38px var(--font-sans);color:var(--text-2);margin:0}.kit-caption{font:400 25px var(--font-sans);color:var(--dim);margin:0}.kit-accent{color:var(--accent)}.doc-card{box-shadow:none}.doc-line{height:22px;border-radius:4px;background:var(--line)}.doc-line.short{width:58%}.cite-chip{display:inline-flex;align-items:center;gap:14px;padding:16px 26px;border:1px solid var(--line);border-radius:999px}.cite-mark{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--surface);display:flex;align-items:center;justify-content:center;font:700 22px var(--font-mono, monospace)}.doc-label{font:600 22px var(--font-sans);color:var(--text-2);letter-spacing:.08em;text-transform:uppercase;margin:0}.doc-cite-text{font:400 34px var(--font-sans);color:var(--text-2);margin:0}</style><div class=\"kit-card doc-card\" style=\"width:880px;padding:70px 64px;display:flex;flex-direction:column;gap:22px\"><div class=\"doc-label\">source document &middot; page 14</div><div data-line class=\"doc-line\" style=\"width:92%\"></div><div data-line class=\"doc-line\" style=\"width:100%\"></div><div data-highlight class=\"doc-line\" style=\"width:88%;position:relative\"><span style=\"position:absolute;inset:0;border-radius:4px;background:var(--accent);opacity:.16\"></span></div><div data-line class=\"doc-line short\" style=\"width:64%\"></div><div data-line class=\"doc-line\" style=\"width:96%\"></div><div data-line class=\"doc-line short\" style=\"width:48%\"></div><div style=\"height:8px\"></div><div data-citation class=\"cite-chip\" style=\"align-self:flex-start\"><span class=\"cite-mark\">&#10003;</span><span class=\"doc-cite-text\">&sect;4.2 &middot; consensus, not a guess</span></div></div>",
+    "parts": [
+      { "select": "[data-line]", "anim": "fade", "each": 0.12, "delay": 0.15 },
+      { "select": "[data-highlight]", "anim": "fade", "each": 0.2, "delay": 1.0 },
+      { "select": "[data-citation]", "anim": "popIn", "each": 0.2, "delay": 1.6 }
+    ] },
 
-  { "type": "text", "text": "ALEX · PRODUCT", "size": 26, "weight": 650, "color": "var(--accent)", "font": "mono", "tracking": "0.14em", "x": 140, "y": 1500, "start": 0.5, "duration": 11.0, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3, "acrossBeats": true },
-  { "type": "rect", "w": 70, "h": 5, "radius": 3, "x": 140, "y": 1490, "fill": "var(--accent)", "start": 0, "duration": 12, "acrossBeats": true,
+  { "type": "html", "id": "presenter-plate-b", "x": 280, "y": 250, "w": 520, "h": 520, "start": 14.0, "duration": 4.0, "out": "fade", "exitDur": 0.3,
+    "html": "<style>.plate{position:relative;width:520px;height:520px}.plate-ring{position:absolute;inset:0;border-radius:50%;background:var(--line)}.plate-inset{position:absolute;inset:35px;border-radius:50%;background:var(--bg)}.plate-core{position:absolute;top:190px;left:190px;width:140px;height:140px;border-radius:50%;background:var(--accent)}</style><div class=\"plate\"><div data-plate class=\"plate-ring\"><div class=\"plate-inset\"></div></div><div data-core class=\"plate-core\"></div></div>",
+    "parts": [
+      { "select": "[data-plate]", "anim": "fade", "each": 0.6, "delay": 0 },
+      { "select": "[data-core]", "anim": "popIn", "each": 0.45, "delay": 0.25 }
+    ] },
+
+  { "type": "text", "text": "Corva", "size": 130, "weight": 700, "color": "var(--text)", "align": "center", "x": 90, "y": 800, "w": 900, "font": "sans", "start": 18.1, "duration": 2.9, "out": "fade", "exitDur": 0.35, "split": "word", "preset": "weight" },
+  { "type": "text", "text": "the passage, not the summary", "size": 34, "weight": 500, "color": "var(--dim)", "align": "center", "x": 90, "y": 960, "w": 900, "font": "sans", "start": 18.45, "duration": 2.5, "anim": "fade", "enterDur": 0.55, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "text", "text": "MIRA · CORVA", "size": 26, "weight": 650, "color": "var(--accent)", "font": "mono", "tracking": "0.14em", "x": 140, "y": 1330, "start": 0.5, "duration": 20.0, "anim": "fade", "enterDur": 0.85, "out": "fade", "exitDur": 0.3, "acrossBeats": true },
+  { "type": "rect", "w": 70, "h": 5, "radius": 3, "x": 140, "y": 1320, "fill": "var(--accent)", "start": 0, "duration": 21, "acrossBeats": true,
     "motion": [
       { "t": 0, "x": 0 },
-      { "t": 5.8, "x": 40, "ease": "easeInOutSine" },
-      { "t": 8.6, "x": -30, "ease": "easeInOutSine" },
-      { "t": 12, "x": 0, "ease": "easeInOutSine" }
+      { "t": 9.0, "x": 50, "ease": "easeInOutSine" },
+      { "t": 14.0, "x": -40, "ease": "easeInOutSine" },
+      { "t": 21, "x": 0, "ease": "easeInOutSine" }
     ]
   }
  ],
  "captions": [
-  { "t0": 0.6, "t1": 5.4, "text": "Here is the thing about a scene engine with no templates.",
-    "words": [ {"t0":0.6,"t1":0.75}, {"t0":0.75,"t1":1.0}, {"t0":1.0,"t1":1.4}, {"t0":1.4,"t1":1.7}, {"t0":1.7,"t1":2.3}, {"t0":2.3,"t1":2.9}, {"t0":2.9,"t1":3.6}, {"t0":3.6,"t1":4.2}, {"t0":4.2,"t1":4.9}, {"t0":4.9,"t1":5.4} ],
+  { "t0": 0.6, "t1": 3.8, "text": "Ask Corva anything. It will not summarize.",
+    "words": [ {"t0":0.6,"t1":0.85}, {"t0":0.85,"t1":1.2}, {"t0":1.2,"t1":1.85}, {"t0":1.85,"t1":2.05}, {"t0":2.05,"t1":2.35}, {"t0":2.35,"t1":2.6}, {"t0":2.6,"t1":3.8} ],
     "pin": "bottom" },
-  { "t0": 6.2, "t1": 8.3, "text": "Six hundred and ninety three real effects.",
-    "words": [ {"t0":6.2,"t1":6.5}, {"t0":6.5,"t1":6.8}, {"t0":6.8,"t1":7.1}, {"t0":7.1,"t1":7.5}, {"t0":7.5,"t1":7.9}, {"t0":7.9,"t1":8.3} ],
+  { "t0": 4.3, "t1": 8.6, "text": "It shows the exact sentence it read, every time.",
+    "words": [ {"t0":4.3,"t1":4.5}, {"t0":4.5,"t1":4.85}, {"t0":4.85,"t1":5.05}, {"t0":5.05,"t1":5.55}, {"t0":5.55,"t1":6.15}, {"t0":6.15,"t1":6.35}, {"t0":6.35,"t1":6.75}, {"t0":6.75,"t1":7.25}, {"t0":7.25,"t1":8.6} ],
     "pin": "bottom" },
-  { "t0": 8.9, "t1": 11.6, "text": "That is what one JSON can actually do.",
-    "words": [ {"t0":8.9,"t1":9.1}, {"t0":9.1,"t1":9.4}, {"t0":9.4,"t1":9.9}, {"t0":9.9,"t1":10.3}, {"t0":10.3,"t1":10.7}, {"t0":10.7,"t1":11.0}, {"t0":11.0,"t1":11.3}, {"t0":11.3,"t1":11.6} ],
+  { "t0": 9.3, "t1": 13.6, "text": "The citation resolves inside the page itself.",
+    "words": [ {"t0":9.3,"t1":9.5}, {"t0":9.5,"t1":10.3}, {"t0":10.3,"t1":11.1}, {"t0":11.1,"t1":11.7}, {"t0":11.7,"t1":11.9}, {"t0":11.9,"t1":12.5}, {"t0":12.5,"t1":13.6} ],
+    "pin": "bottom" },
+  { "t0": 14.3, "t1": 17.9, "text": "A citation you can check. Not a guess you trust.",
+    "words": [ {"t0":14.3,"t1":14.55}, {"t0":14.55,"t1":15.15}, {"t0":15.15,"t1":15.35}, {"t0":15.35,"t1":15.55}, {"t0":15.55,"t1":16.1}, {"t0":16.1,"t1":16.3}, {"t0":16.3,"t1":16.45}, {"t0":16.45,"t1":16.95}, {"t0":16.95,"t1":17.15}, {"t0":17.15,"t1":17.9} ],
+    "pin": "bottom" },
+  { "t0": 18.3, "t1": 20.6, "text": "Corva. Read the passage, not the summary.",
+    "words": [ {"t0":18.3,"t1":18.7}, {"t0":18.7,"t1":19.0}, {"t0":19.0,"t1":19.15}, {"t0":19.15,"t1":19.65}, {"t0":19.65,"t1":19.85}, {"t0":19.85,"t1":20.0}, {"t0":20.0,"t1":20.6} ],
     "pin": "bottom" }
  ],
  "captionMode": "pop",
