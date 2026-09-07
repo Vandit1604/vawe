@@ -21,12 +21,18 @@
 // `min(p, 1 - p)` is 0 at both ends and peaks at the middle, so a linear sweep of `--p` reads as
 // down-then-up with no second layer and no second timeline to keep in sync.
 
-import { TOKENS as T, text, box, r2, R, onColor } from './kit.mjs';
+import { TOKENS as T, r2, R, onColor } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
 export const CATEGORY = 'Interaction';
 
+// HTML-FIRST FAMILY, with one deliberate exception: `pointer` stays a `cursor` layer, the engine's own
+// path-and-click type, not markup pretending to be one. Design Read: instrument chrome (a tray, a
+// ring, a face), flat, one accent hue for the interaction's own colour, sans for keys and labels, no
+// gradient or card-in-card. VARIANCE low (this vocabulary supports a beat, it is not the beat);
+// MOTION is each block's own `vars`/`--p` sweep or its envelope `anim`, never `parts`: nothing here
+// has independently-arriving children. docs/CRAFT/HTML-FRAGMENTS.md.
 
 // press depth: 0 → 1 → 0 across the sweep. Linear `--p` in, a symmetric dip out.
 const DIP = 'min(var(--p,0), 1 - var(--p,0))';
@@ -113,18 +119,19 @@ export function keyboard({ x, y, w = 420, layout = 'qwerty', start = 0, dur = 4 
   // the tell of a drawn keyboard rather than a real one.
   const widest = rows.reduce((n, r) => Math.max(n, r.length), 1);
   const kw = r2(Math.max(24, (w - 2 * PAD - GAP * (widest - 1)) / widest));
-  const key = (ch) => box({
-    w: kw, h: H, radius: R.tight, bg: T.card, layout: 'row', justify: 'center', items: 'center',
-    children: [text({ text: ch, size: layout === 'numeric' ? 26 : 22, weight: 500, color: T.ink })],
-  });
+  const key = (ch) => `<div style="width:${kw}px;height:${H}px;border-radius:${R.tight}px;background:${T.card};`
+    + `display:flex;align-items:center;justify-content:center;font:500 ${layout === 'numeric' ? 26 : 22}px var(--font-sans);`
+    + `color:${T.ink}">${ch}</div>`;
+  const row = (r) => `<div style="display:flex;align-items:center;justify-content:center;gap:${GAP}px">`
+    + r.map(key).join('') + '</div>';
+  const html = `<div style="display:flex;flex-direction:column;gap:${GAP}px;box-sizing:border-box;width:${w}px;`
+    + `padding:${PAD}px;background:${T.surface};border-radius:${R.soft}px">` + rows.map(row).join('') + '</div>';
+  // RISE IS CORRECT HERE, and it is the one place in the library that is true: a phone keyboard
+  // genuinely enters by sliding up from the bottom edge of the screen, so `slide-up` depicts the real
+  // behaviour rather than decorating an entrance.
   return [{
-    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: GAP, pad: PAD,
-    bg: T.surface, radius: R.soft,
+    type: 'html', x, y, w, html,
     start, duration: dur, anim: 'slide-up', out: 'slide-down', enterDur: 0.45, exitDur: 0.3,
-    children: rows.map((row) => ({
-      type: 'group', layout: 'row', items: 'center', justify: 'center', gap: GAP,
-      children: row.map(key),
-    })),
   }];
 }
 
