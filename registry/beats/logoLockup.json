@@ -24,13 +24,17 @@
       "mark": null,
       "wordmark": null,
       "headline": null,
-      "sub": null
+      "sub": null,
+      "bodySize": null,
+      "captionSize": null
     },
     "requiredProps": [
       "mark",
       "wordmark",
       "headline",
-      "sub"
+      "sub",
+      "bodySize",
+      "captionSize"
     ],
     "props": [
       "markX",
