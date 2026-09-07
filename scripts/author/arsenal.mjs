@@ -37,6 +37,12 @@ import { newSince, WINDOW_DAYS } from './recency.mjs';
 // to grade a blurb by exactly the words this search will find it by.
 import { searchWords } from '../../core/registry/registry.js';
 import { emitJson } from '../lib/findings.mjs';
+// The same population walk `make unused` and `make census` already use. A hand-rolled `readdirSync`
+// here used to count whatever sat on THIS machine's disk, most of it gitignored brand content
+// (.gitignore:93), so "used in 34 films" was a number nobody else could reproduce. `population` is the
+// one owner of "which films can this checkout see, and is it blind to some of them" (its own header);
+// reusing it means a partial checkout SAYS so instead of quietly undercounting.
+import { population, LIBRARY } from '../lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -214,18 +220,27 @@ export async function collect() {
 }
 
 // ---- usage, so "built and never used" is a measured fact rather than an impression ----------------
+//
+// `soft: true` because this is a display number inside a search tool, not a gate: a blind checkout
+// should say so and keep answering, not exit(3) on an author who typed a query. A caller that shows
+// `used` MUST print `blind` where it would have printed the count (population's own contract) so a
+// partial number never reads as a complete one.
 const CACHE = { counts: null };
 function usage() {
   if (CACHE.counts) return CACHE.counts;
+  const { names, n, blind } = population('arsenal · usage corpus', { filter: LIBRARY, quiet: true, soft: true });
   const dir = path.join(repoRoot, 'formats/scene');
-  const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'schema.json') : [];
   const texts = [];
-  for (const f of files) {
-    let d; try { d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { continue; }
-    if (d.module !== 'scene') continue;
-    texts.push(JSON.stringify(d));
+  for (const f of names) {
+    try { texts.push(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { /* raced with a delete, skip it */ }
   }
-  CACHE.counts = { texts, count: (name) => texts.reduce((n, t) => n + (t.includes(`"${name}"`) ? 1 : 0), 0) };
+  CACHE.counts = {
+    texts, n, blind: blind || null,
+    count: (name) => texts.reduce((c, t) => c + (t.includes(`"${name}"`) ? 1 : 0), 0),
+    // What "used in N films" means, and the command that reproduces N without trusting this tool's word.
+    note: () => `usage counted across ${n} shipped scene(s) in formats/scene, reproducible via `
+      + `\`node scripts/lib/census.mjs\`${blind ? ` (PARTIAL: ${blind.split('\n')[0]})` : ''}`,
+  };
   return CACHE.counts;
 }
 
@@ -380,24 +395,42 @@ export function score(entry, qt) {
 // to drift from the first. `n` mirrors the CLI's `--n` (defaults the top-slice to 8); `guessN` mirrors
 // the CLI's fallback slice when nothing clears CONFIDENT (defaults to 3, the CLI's "a wall of guesses
 // is the noise this exists to remove" default).
+// Relevance (`s`, then `c`) decides which names answer the query at all: that part is unchanged, and
+// it is why `background` still returns backgrounds. Novelty (never used here, or newer than the
+// window) only gets a turn to reorder INSIDE a tie, never across one, which is the difference between
+// a tiebreak and an override.
+//
+// `s` is naturally discrete (12/6/3/1 per matched word, see `score` above) so an exact tie is already
+// a real band: most background presets tie on `s` for a bare "background" query, because they share
+// the same kind word and nothing else differs. `c` is not discrete (idf-weighted, continuous 0..1), so
+// tiebreaking on its exact value would tie almost never and novelty would almost never fire. `covBand`
+// rounds it to a 0.05 step first, wide enough to catch "these blurbs answer the question about equally
+// well" without being wide enough to call a much-better match merely comparable.
+const covBand = (c) => Math.round(c * 20);
+
 export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
   const qt = toks(query);
   const u = usage();
   const coverage = coverageIn(all);
-  const top = all
+  const matches = all
     .filter((e) => !kind || e.kind === kind)
     .map((e) => ({ ...e, s: score(e, qt), c: coverage(e, qt) }))
-    .filter((e) => e.s > 0)
-    .sort((a, b) => b.s - a.s || b.c - a.c || a.name.localeCompare(b.name))
+    .filter((e) => e.s > 0);
+
+  // Computed over every match, not just the slice that survives: a fresh or unused entry earns its
+  // place in the top `n` the same way a more-covering one would, by winning its own tied band, rather
+  // than being reordered after the cut had already decided it was not shown.
+  const fresh = newSince(matches.map((e) => e.name), { cwd: repoRoot });
+  const top = matches
+    .sort((a, b) => b.s - a.s || covBand(b.c) - covBand(a.c)
+      || Number(u.count(b.name) === 0) - Number(u.count(a.name) === 0)
+      || Number(fresh.has(b.name)) - Number(fresh.has(a.name))
+      || b.c - a.c || a.name.localeCompare(b.name))
     .slice(0, n);
 
   const answersRaw = top.filter((e) => e.c >= CONFIDENT);
   const guessesRaw = top.filter((e) => e.c < CONFIDENT);
-  let selected = answersRaw.length ? answersRaw : guessesRaw.slice(0, guessN);
-
-  // New entries first, same as the CLI: relevance already decided which names you see.
-  const fresh = newSince(selected.map((e) => e.name), { cwd: repoRoot });
-  selected = [...selected.filter((e) => fresh.has(e.name)), ...selected.filter((e) => !fresh.has(e.name))];
+  const selected = answersRaw.length ? answersRaw : guessesRaw.slice(0, guessN);
 
   const shape = (e) => ({
     name: e.name, kind: e.kind, slot: e.slot, blurb: e.blurb, pitfall: e.pitfall || null,
@@ -409,6 +442,7 @@ export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
     query,
     confident: answersRaw.length > 0,
     all: all.length,
+    usage: { films: u.n, blind: u.blind, note: u.note() },
     results: selected.map(shape),
     answers: answersRaw.map(shape),
     guesses: guessesRaw.map(shape),
@@ -508,6 +542,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   const census = argv.includes('--census');
   const newOnly = argv.includes('--new');
+  // --kind scopes --census/--new too: "what have I never reached for" is as often a question about ONE
+  // vocabulary ("--census --kind background") as about the whole arsenal, and the flag already exists.
+  // Read once, ahead of the query itself, since --census and --new both exit before the query is parsed.
+  const kind = flag('kind');
   // Consume `--flag value` pairs by POSITION. Filtering on `argv.indexOf(a)` looked equivalent and is
   // not: indexOf finds the FIRST occurrence, so a repeated word is tested against the wrong neighbour,
   // and any flag but --kind leaked its value into the query ("…static tilt 3").
@@ -522,12 +560,17 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   if (census) {
     const u = usage();
+    const scope = kind ? all.filter((e) => e.kind === kind) : all;
+    if (kind && !scope.length) {
+      console.error(`\n  no entries of kind "${kind}". Kinds: ${[...new Set(all.map((e) => e.kind))].sort().join(' · ')}\n`);
+      process.exit(2);
+    }
     const dead = new Map();
-    for (const e of all) if (u.count(e.name) === 0) {
+    for (const e of scope) if (u.count(e.name) === 0) {
       if (!dead.has(e.kind)) dead.set(e.kind, []);
       dead.get(e.kind).push(e.name);
     }
-    console.log(`\n  ARSENAL CENSUS · ${all.length} named things · ${u.texts.length} scenes read\n`);
+    console.log(`\n  ARSENAL CENSUS${kind ? ` · kind "${kind}"` : ''} · ${scope.length} named things · ${u.note()}\n`);
     console.log(`  Zero-user entries. This does not say they are BAD: it says nothing distinguishes`);
     console.log(`  "undiscoverable" from "genuinely unwanted", and until something does, both look the same.\n`);
     for (const [kind, names] of [...dead].sort((a, b) => b[1].length - a[1].length)) {
@@ -555,16 +598,17 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   // never heard of, so this is the one view that does not need a query.
   if (newOnly) {
     const u = usage();
-    const arr = newSince(all.map((e) => e.name), { cwd: repoRoot });
-    const fresh = all.filter((e) => arr.has(e.name))
+    const scope = kind ? all.filter((e) => e.kind === kind) : all;
+    const arr = newSince(scope.map((e) => e.name), { cwd: repoRoot });
+    const fresh = scope.filter((e) => arr.has(e.name))
       .map((e) => ({ ...e, used: u.count(e.name) }))
       .sort((a, b) => a.used - b.used || a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
-    console.log(`\n  ARSENAL · what did not exist ${WINDOW_DAYS} days ago\n`);
+    console.log(`\n  ARSENAL · what did not exist ${WINDOW_DAYS} days ago${kind ? ` · kind "${kind}"` : ''} · ${u.note()}\n`);
     if (!fresh.length) {
       console.log(`  nothing. Either the window was quiet, or git cannot answer here (a shallow clone).\n`);
       process.exit(0);
     }
-    console.log(`  ${fresh.length} of ${all.length} named things. New is not an endorsement, and neither is`);
+    console.log(`  ${fresh.length} of ${scope.length} named things. New is not an endorsement, and neither is`);
     console.log(`  "no users yet". Both only mean you may not know these exist.\n`);
     for (const e of fresh) {
       console.log(`  ${e.name.padEnd(18)} ${(e.slot ? `${e.kind} · ${e.slot}` : e.kind).padEnd(40)}`
@@ -592,7 +636,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.exit(2);
   }
 
-  const kind = flag('kind');
   const explicitN = flag('n');
   const result = rankQuery(all, query, {
     kind, n: Number(explicitN || 8), guessN: Number(explicitN) || 3,
@@ -625,7 +668,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`  Nearest by wording only, WEAK GUESSES, not answers:\n`);
   } else {
     console.log(`  ${ranked.length} matched · ${nFresh} newer than ${WINDOW_DAYS} days · ${nUnused} never used here.`
-      + `\n  New and unused is not a recommendation. It means you may not know it is there.\n`);
+      + `\n  New and unused is not a recommendation. It means you may not know it is there.`
+      + `\n  ${result.usage.note}\n`);
   }
   for (const e of ranked) {
     console.log(`  ${e.name}${e.isNew ? `   ← NEW, added in the last ${WINDOW_DAYS} days` : ''}`);
