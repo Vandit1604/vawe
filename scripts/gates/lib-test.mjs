@@ -5429,6 +5429,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     getAttribute(k) { return this.attrs[k]; },
     appendChild(n) { n.parentNode = this; this.childNodes.push(n); return n; },
     removeChild(n) { this.childNodes = this.childNodes.filter((c) => c !== n); return n; },
+    // svg.js's draw reveal measures the path's real length (getTotalLength) instead of relying on the
+    // browser's own pathLength=1 rescaling, which mismeasures arcs (docs/MISTAKES.md). This mock has no
+    // layout engine to measure a real `d`, so it returns a fixed stand-in; every assert below reads
+    // fill/stroke opacity, never the dash length itself, so the exact number does not matter.
+    getTotalLength() { return 100; },
   });
   const DOC = { createElement: mkSvgEl, createElementNS: (_ns, tag) => mkSvgEl(tag) };
   const svg = await import('../../core/layers/svg.js');

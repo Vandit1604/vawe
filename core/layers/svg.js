@@ -40,9 +40,16 @@ function applyDraw(el, p, draw, { fillIn, fill, stroke, strokeWidth }) {
   if (fillTo) p.style.fillOpacity = '0';
   p.setAttribute('stroke', stroke === 'none' ? (fill !== 'none' ? fill : 'var(--accent)') : stroke);
   p.setAttribute('stroke-width', draw.weight ?? strokeWidth ?? 3);
-  p.setAttribute('pathLength', '1');       // normalise so the offset is a pure function of u, no measuring
-  p.style.strokeDasharray = '1 1';
-  p.style.strokeDashoffset = '1';          // hidden at t=0
+  // REAL length, not the `pathLength="1"` normalise trick: for a path with an arc (`A`) command, Chromium's
+  // pathLength rescaling and its arc-flattening length estimate disagree at the seam between the line and
+  // the arc, so at u≈0 a stray round-cap dot paints at the seam (not the true start) for a frame or two
+  // before the correct growth from the start takes over. getTotalLength() is the same accurate, build-time
+  // DOM read path-morph.js already trusts for arc-bearing paths (resamplePath, core/layers/path-morph.js:18);
+  // dashing in its real units sidesteps the seam entirely. docs/MISTAKES.md.
+  const total = p.getTotalLength();
+  p.style.strokeDasharray = `${total} ${total}`;
+  p.style.strokeDashoffset = total;        // hidden at t=0
+  el.__drawLen = total;
   el.__drawFill = fillTo;
   // ABSENT → easeOutCubic, exactly as before. A WRONG NAME → throws naming the field. The curve used
   // to be hardcoded, so the write-on always started at maximum speed; the standard is Easy Ease at
@@ -96,6 +103,14 @@ export function build(kit, el, L, { w, h, viewBox, d, fill: fillIn, stroke: stro
   if (morph && morph.to) applyMorph(el, svg, p, morph);
 }
 
+// Pure: the dashoffset for one frame of the write-on, in the path's REAL length units (not the
+// pathLength=1 normalised units the browser used to compute, see applyDraw above). Monotonic from
+// `total` (u=0, nothing revealed) down to `0` (u=1, fully revealed) with no DOM involved, so it is the
+// one piece of this file's draw logic that a plain Node test can assert without a browser.
+export function drawOffset(total, u) {
+  return u >= 1 ? 0 : total * (1 - Math.max(0, Math.min(1, u)));
+}
+
 // The pattern sits in the SIXTH slot: core/layers/index.js calls frame(kit, el, L, t, scene) with
 // five arguments, so a pattern any earlier destructures `scene` and every prop reads undefined
 // (lib-test asserts the arity). `scene` itself is unused here, same as clip.js and lottie.js.
@@ -105,8 +120,9 @@ export function frame(kit, el, L, t, scene, { draw, morph } = L) {
   if (draw) {
     const dur = draw.dur ?? 1.2;
     const u = interpolate(t - begin, [0, dur], [0, 1], { easing: el.__drawEase || easeOutCubic, clamp: true });
+    const total = el.__drawLen || 0;
     if (u >= 1) { p.style.strokeDasharray = 'none'; p.style.strokeDashoffset = '0'; }
-    else { p.style.strokeDasharray = '1 1'; p.style.strokeDashoffset = (1 - u).toFixed(4); }
+    else { p.style.strokeDasharray = `${total} ${total}`; p.style.strokeDashoffset = drawOffset(total, u).toFixed(4); }
     // THE RESOLVE. The fill comes up over `fillDur` once the stroke has finished, and the stroke leaves
     // over the last 65% of that window rather than the whole of it: crossing them evenly puts both at
     // half alpha in the middle, which reads as the mark dimming rather than as one becoming the other.
