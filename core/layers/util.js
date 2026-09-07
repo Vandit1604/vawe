@@ -588,7 +588,11 @@ export function createKit(ctx) {
     // delay/anim/out/enterDur/exitDur mean here exactly what they mean out there.
     c.dataset.start = String(cStart);
     c.dataset.duration = String(cDur);
-    if (C.anim) c.dataset.anim = C.anim;
+    // Always written, like the top-level layer (formats/scene/scene.js setLayerTiming): leaving the
+    // attribute unset here meant `clipStyleAt`'s literal `dataset.anim === 'none'` check never fired for
+    // an un-authored child, so it kept fading in via the opacity envelope even after `resolveAnim(null)`
+    // stopped writing a transform for it.
+    c.dataset.anim = C.anim || 'none';
     if (C.out) c.dataset.out = C.out;
     if (C.enterDur != null) c.dataset.enter = String(C.enterDur);
     if (exitDur != null) c.dataset.exitDur = String(exitDur);

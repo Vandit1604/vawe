@@ -965,10 +965,13 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // can never render with fallback CSS. Motion personality alone keeps engine defaults, it tunes
 // HOW primitives move, not what the video looks like.
 // `idle` is the ONLY key here that describes how a layer LIVES; the other six all govern an entrance
-// or an exit. That asymmetry was the bug: `clipStyleAt` computes an entrance ramp and an exit ramp and
-// has NO branch for the middle, so stillness was never a decision anyone made, it was the shape of the
-// data model. Measured: the reference films in refs/ are still for 13-24% of their frames and ours for
-// 84%. The default is live, and `idle: "none"` on a theme, a scene or a layer is the opt-out.
+// or an exit. THE OWNER'S CALL (2026-09): a default that induces motion nobody authored is a bug, not
+// a taste choice, so `idle` defaults to `none`. It was briefly `'breathe'` (measured: the reference
+// films in refs/ are still for 13-24% of their frames and ours for 84%, and that number is real), but
+// shipping it as the SILENT default meant static text pulsed a 1.5% scale nobody asked for. The
+// argument for authored idle stands, it just has to be authored: `idle: "breathe"` on a theme, a
+// scene, or a layer opts in (core/engine/idle.js, which has said `none` is the default in its own
+// blurb the whole time; this line was the one place that disagreed with it).
 // THE DEFAULT EASE IS THE STRONG ONE, and the change is one word with a measurable reason behind it.
 // The outside standards argue the built-in CSS curves are too weak and name a custom ease-out,
 // `cubic-bezier(0.23, 1, 0.32, 1)`. Sampled at 21 points against all 41 of our easings, the nearest is
@@ -978,7 +981,13 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 //
 // `stagger` 0.045 is 45ms, mid-band of their 30 to 80. `exitRatio` defaults to 1 and is the one knob
 // here a theme should almost always override; the seven themes behind shipped films now do.
-export const DEFAULT_MOTION = { easing: 'easeOutQuint', bounce: 0.3, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045, idle: 'breathe' };
+// `bounce`, `settle` and `enter` are resolved here but NOT currently read by any entrance: `rise`
+// (core/motion.js) is hardcoded to `easeOutSnap` (bounce 0.2), `pop`/`lift` to `easeOutBack`/
+// `easeOutSettle`, none of them take `M`. Left as documented, inert knobs rather than wired up here:
+// wiring them into the entrance registry is a real change to what every `anim:"rise"` looks like, and
+// this pass is about removing motion nobody asked for, not adding a new one. `bounce` still defaults
+// to 0 below so the field reads correctly if a future change wires it in.
+export const DEFAULT_MOTION = { easing: 'easeOutQuint', bounce: 0, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045, idle: 'none' };
 
 // motionDefaults(theme): the theme's motion personality with `easing` resolved to a function.
 // Scenes pass these into primitives, e.g. interpolate(t, inR, outR, { easing: M.easing }),

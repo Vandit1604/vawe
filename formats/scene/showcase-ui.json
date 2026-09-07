@@ -323,140 +323,38 @@
       "exitDur": 0.28
     },
     {
-      "type": "group",
+      "type": "html",
       "id": "surface",
       "x": 580,
       "y": 200,
       "w": 760,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 18,
-      "pad": 38,
       "bg": "var(--ink)",
       "radius": 16,
       "elevation": 2,
+      "pad": 38,
       "start": 6.8,
       "duration": 1.75,
       "anim": "fade",
       "enterDur": 0.35,
       "exitDur": 0,
-      "children": [
-        {
-          "type": "text",
-          "text": "app.vawe.dev / overview",
-          "font": "mono",
-          "size": 20,
-          "weight": 500,
-          "color": "var(--line)",
-          "exitDur": 0
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "flex-start",
-          "gap": 30,
-          "children": [
-            {
-              "type": "text",
-              "text": "30fps",
-              "size": 58,
-              "weight": 700,
-              "color": "var(--paper)",
-              "exitDur": 0
-            },
-            {
-              "type": "text",
-              "text": "1350",
-              "size": 58,
-              "weight": 700,
-              "color": "var(--paper)",
-              "exitDur": 0
-            },
-            {
-              "type": "text",
-              "text": "0",
-              "size": 58,
-              "weight": 700,
-              "color": "var(--paper)",
-              "exitDur": 0
-            }
-          ],
-          "exitDur": 0
-        },
-        {
-          "type": "text",
-          "text": "frame rate  ·  frames  ·  timelines",
-          "font": "mono",
-          "size": 19,
-          "color": "var(--line)",
-          "exitDur": 0
-        }
-      ]
+      "html": "<div style=\"display:flex;flex-direction:column;gap:18px\"><span style=\"font:500 20px var(--font-mono);color:var(--line)\">app.vawe.dev / overview</span><div style=\"display:flex;align-items:flex-start;gap:30px\"><span style=\"font:700 58px var(--font-sans);color:var(--paper)\">30fps</span><span style=\"font:700 58px var(--font-sans);color:var(--paper)\">1350</span><span style=\"font:700 58px var(--font-sans);color:var(--paper)\">0</span></div><span style=\"font:400 19px var(--font-mono);color:var(--line)\">frame rate  ·  frames  ·  timelines</span></div>"
     },
     {
-      "type": "group",
+      "type": "html",
       "id": "surfaceBurn",
       "x": 580,
       "y": 200,
       "w": 760,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 18,
-      "pad": 38,
       "bg": "var(--ink)",
       "radius": 16,
       "elevation": 2,
+      "pad": 38,
       "start": 8.55,
       "duration": 1.5,
       "anim": "fade",
       "enterDur": 0.01,
       "exitDur": 0.25,
-      "children": [
-        {
-          "type": "text",
-          "text": "app.vawe.dev / overview",
-          "font": "mono",
-          "size": 20,
-          "weight": 500,
-          "color": "var(--line)"
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "flex-start",
-          "gap": 30,
-          "children": [
-            {
-              "type": "text",
-              "text": "30fps",
-              "size": 58,
-              "weight": 700,
-              "color": "var(--paper)"
-            },
-            {
-              "type": "text",
-              "text": "1350",
-              "size": 58,
-              "weight": 700,
-              "color": "var(--paper)"
-            },
-            {
-              "type": "text",
-              "text": "0",
-              "size": 58,
-              "weight": 700,
-              "color": "var(--paper)"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "text": "frame rate  ·  frames  ·  timelines",
-          "font": "mono",
-          "size": 19,
-          "color": "var(--line)"
-        }
-      ],
+      "html": "<div style=\"display:flex;flex-direction:column;gap:18px\"><span style=\"font:500 20px var(--font-mono);color:var(--line)\">app.vawe.dev / overview</span><div style=\"display:flex;align-items:flex-start;gap:30px\"><span style=\"font:700 58px var(--font-sans);color:var(--paper)\">30fps</span><span style=\"font:700 58px var(--font-sans);color:var(--paper)\">1350</span><span style=\"font:700 58px var(--font-sans);color:var(--paper)\">0</span></div><span style=\"font:400 19px var(--font-mono);color:var(--line)\">frame rate  ·  frames  ·  timelines</span></div>",
       "resample": {
         "fx": "dissolve",
         "amount": [

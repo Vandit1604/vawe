@@ -48,4 +48,18 @@ for (const name of ['fade', 'punch', 'slide', 'zoom', 'whip', 'wipe']) {
   assert.ok(op <= 0.001 || masked, `cut style "${name}" should be fully gone at exit=1 (opacity ${op}, masked ${masked})`);
 }
 
-console.log('✓ clips.test.mjs: no default fade-out, a held layer stays opaque to its own end, cut exits reach identity');
+// ---- NO DEFAULT ENTRANCE (formats/scene/scene.js setLayerTiming writes `data-anim="none"` for a
+// layer that names none). `none` is a real ANIM entry: no transform, and clipStyleAt's `fadeInT`
+// special-cases the literal string so the opacity envelope is skipped too. A layer that states no
+// `anim` is simply PRESENT for its window from frame one, not faded in.
+{
+  const el = { dataset: { start: '0', duration: '2', anim: 'none' } };
+  const first = clipStyleAt(el, 0);
+  assert.equal(first.opacity, '1.000', `anim:"none" is fully opaque on its very first frame, got ${first.opacity}`);
+  assert.equal(first.transform, 'none', `anim:"none" writes no transform, got ${first.transform}`);
+  // Unauthored `anim` (fresh from setLayerTiming, string "none") reads identically to an explicit one.
+  const mid = clipStyleAt(el, 1);
+  assert.equal(mid.opacity, '1.000', `anim:"none" stays fully opaque mid-window, got ${mid.opacity}`);
+}
+
+console.log('✓ clips.test.mjs: no default fade-out, no default entrance, a held layer stays opaque to its own end, cut exits reach identity');
