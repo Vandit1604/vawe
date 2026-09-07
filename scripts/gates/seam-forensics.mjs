@@ -185,8 +185,11 @@ for (const l of layers) {
   const activeGroup = layers.some((other) => other.type === 'group' && other.i !== l.i && other.start != null
     && other.start <= b.t && (other.end == null || b.t <= other.end + 0.6));
   const reoccupied = boxesToCheck.some(({ tag }) => tag === 'box') && (activeGroup || layers.some((other) => other.i !== l.i
-    && other.box && other.start != null && other.start <= b.t && (other.end == null || b.t <= other.end + 0.6)
-    && Math.max(overlapFraction(l.box, other.box), overlapFraction(other.box, l.box)) > 0.4));
+    && other.start != null && other.start <= b.t && (other.end == null || b.t <= other.end + 0.6)
+    // A box-less layer is the same signal as an active group, and for the same reason: a beat blueprint
+    // lays its children out at render time, so "something else was authored for this moment" is all that
+    // can be read about it. Counted here too, so the two checks share one rule.
+    && (!other.box || Math.max(overlapFraction(l.box, other.box), overlapFraction(other.box, l.box)) > 0.4)));
   for (const { tag, box } of boxesToCheck) {
     if (tag === 'box' && reoccupied) continue;
     const e0 = edgeReadingAt(mp4, baselineFrame, box, W, H);
