@@ -30,7 +30,7 @@ next starts, not to keep pace with a product tour.
 
 ## The blueprints to reach for
 
-By role (`make blueprints` for the full 29):
+By role (`make arsenal BLUEPRINTS=1` for the full 29):
 - **hook**: `kineticHook`, `dialogueAccumulate`, `wordWipe`
 - **named-things build**: `containerFill`, `chipGrid`, `listBuildRows`, `cardFan`
 - **counted proof**: `statReveal` (a `count` layer under a kinetic label)
