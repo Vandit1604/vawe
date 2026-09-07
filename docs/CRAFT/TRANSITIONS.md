@@ -26,11 +26,22 @@ cut: that is not "smooth," it is a seam that says nothing, ten times.
 
 > **A film with no authored joint at all no longer stays jointless.** `produceBaseline`
 > (`core/engine/produce.js`) infers likely beat boundaries from the gap between beat-layer starts
-> (`inferCuts`, `core/timeline/junctions.js`) and injects them as `data.cuts` styled with the theme's
-> `look.cuts.default`, absent-only: a film that already declares a cut, a seam, or a `motion` track is
-> untouched (docs/MISTAKES.md #578). That default is still a habit, not a choice: it exists so
-> `sceneUnits`/backdrop windows/audio cues have something to bind to, not so an author skips choosing
-> the seam theory below. Write real `transitions[]` to override it.
+> (`inferCuts`, `core/timeline/junctions.js`), absent-only: a film that already declares a cut, a seam,
+> or a `motion` track is untouched (docs/MISTAKES.md #578). Write real `transitions[]` to override
+> either of these passes.
+>
+> **The STYLE at each inferred joint is content-aware, not content-blind.** `inferCuts` only knows the
+> gap; `chooseCutStyles`/`classifyJoint` (same file) read the RELATIONSHIP at each joint (does a layer
+> survive it via `becomes`/`acrossBeats`/a straddling window, do the outgoing and incoming boxes
+> overlap, does the medium or the backdrop change, is a layer still moving) and RULE OUT what that
+> relationship makes dishonest. The engine never picks a look, the same line drawn at MISTAKES #159
+> (it once picked the BACKGROUND, and nobody designed one again): it narrows the theme's own two named
+> cuts (`look.cuts.default`/`accent`) plus the doctrine's hard-cut default down to the ones a survivor
+> or an overlap didn't rule out, then chooses among what remains by the signals above (a moving layer
+> or a medium change earns the default; a backdrop turn earns the accent, spent once per film). A joint
+> with no relationship crossing it lands on the hard cut, `docs/CRAFT/TRANSITIONS.md`'s own default for
+> most cuts, not a fade spent on every single one. Each choice keeps its reason on the cut (`_why`), for
+> a gate that later disagrees.
 
 [`SELECTION.md`](SELECTION.md) lists intent→effect across every family in one line each; **this is the
 deep dive for the cut**: the theory and the decision procedure. Read it when you cannot say *why* a
