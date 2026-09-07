@@ -1,7 +1,7 @@
 // blocks/dev.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
+  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, pill, onColor, onInk,
   R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
   sweep, stagger, growUp, fillRight, stackWindows,
   tint, TINT, DATA_CAP,
@@ -24,7 +24,7 @@ const T = TOKENS;
 // Every fg/label/syntax colour was checked against its bg with the WCAG formula, the minimum in the
 // set is 4.68:1, so nothing here can murk out on render. Names are descriptive, not editor brands.
 // `light: true` flips the card chrome (hairline + elevation instead of the dark inner border).
-const CODE_THEMES = {
+export const CODE_THEMES = {
   midnight: { bg: '#0D1117', fg: '#E6EDF3', label: '#8B949E', syntax: ['#79C0FF', '#7EE787', '#FFA657', '#D2A8FF', '#FF7B72', '#A5D6FF'] },
   ink:      { bg: '#16161E', fg: '#C8D0F0', label: '#8A91B4', syntax: ['#7AA2F7', '#9ECE6A', '#E0AF68', '#BB9AF7', '#7DCFFF'] },
   ember:    { bg: '#1F1210', fg: '#F2E4DC', label: '#B39A8F', syntax: ['#FF9F6B', '#F0C674', '#E89AA6', '#8FD3B6', '#D7A8F0'] },
@@ -39,6 +39,13 @@ const CODE_THEMES = {
   frost:    { bg: '#EFF4F8', fg: '#22303C', label: '#5D6E7E', light: true, syntax: ['#155FB0', '#0F6E62', '#7A3FA0', '#A03050', '#6B5A10'] },
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HTML-FIRST FAMILIES BELOW. Design Read: the machine-output register, `R.tight` corners because the
+// content is not a document, mono for figures/output, sans stays out entirely (this family has none),
+// one accent hue at two weights for state (diff bands, the lit accent hash, tinted success). MOTION
+// restrained: `parts` staggers a family's own rows/lines where it already did as native text, a
+// single-unit card keeps its envelope `anim`. docs/CRAFT/HTML-FRAGMENTS.md.
+
 // codeBlock: a code card. `lines` are strings OR {text,color} for syntax colour. Optional `theme`
 // names a CODE_THEMES palette; it overrides dark/light, and lines that don't bring a colour get the
 // palette's syntax colours cycled by line index (deterministic: same lines → same paint).
@@ -50,25 +57,30 @@ export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size
   // dark mode's plate is the fixed T.stripeNavy (not a theme var), so its ink must be computed off
   // that same fixed literal via onColor, not a separately-guessed literal that can drift from it.
   const bg = P ? P.bg : (dark ? T.stripeNavy : T.card), fg = P ? P.fg : (dark ? onColor(T.stripeNavy) : T.ink);
-  const kids = [];
   // The card's own caption is a FILENAME or a language, so mono is right; `--dim` was not. On the
   // untinted light card it is `--text-2`, the muted TEXT role, which clears 4.5:1 on every theme
   // where `--dim` measures 2.6:1 on higgsfield and fails `make audit` HARD. A CODE_THEMES palette
   // brings its own measured label colour and keeps it.
-  if (label) kids.push(text({ text: label, font: 'mono', size: TYPE.body, color: P ? P.label : (dark ? T.stripeGrey : T.sub) }));
+  const labelColor = P ? P.label : (dark ? T.stripeGrey : T.sub);
   // THE CODE WRITES ITSELF IN, line after line, off the top of the block, the motion a code card is
-  // FOR. The label (if any) is already there, so the reveal starts at the first line of code.
-  // cycle index advances per line (not per uncoloured line) so each line's hue is stable under edits
-  // to its neighbours' explicit colours
-  lines.forEach((ln, i) => {
+  // FOR: `parts` stagger, one `data-part` per line, matching the native `stagger()` timing this
+  // replaced. cycle index advances per line (not per uncoloured line) so each line's hue is stable
+  // under edits to its neighbours' explicit colours.
+  const rows = lines.map((ln, i) => {
     const auto = P ? P.syntax[i % P.syntax.length] : fg;
-    const s = typeof ln === 'string' ? { text: ln, color: auto } : { text: ln.text, color: ln.color || auto };
-    kids.push(text({ ...s, font: 'mono', size, weight: 400, ...stagger(i, { step: 0.14, delay: 0.2, anim: 'slide-left', enterDur: 0.28 }) }));
-  });
+    const t = typeof ln === 'string' ? ln : ln.text;
+    const color = typeof ln === 'string' ? auto : (ln.color || auto);
+    return `<div data-part style="font:400 ${size}px var(--font-mono);color:${color};white-space:pre">${t}</div>`;
+  }).join('');
+  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.xs}px;padding:${SPACE.xl}px;`
+    + `box-sizing:border-box;width:${w}px">`
+    + (label ? `<div style="font:400 ${TYPE.body}px var(--font-mono);color:${labelColor}">${label}</div>` : '')
+    + rows + '</div>';
   return [{
-    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.xs, pad: SPACE.xl,
+    type: 'html', x, y, w, html,
     bg, radius: R.tight, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, ...(isDark ? {} : { elevation: E.flat }),
-    start, duration: dur, anim, enterDur, exitDur: 0.35, children: kids,
+    start, duration: dur, anim, enterDur, exitDur: 0.35,
+    parts: [{ anim: 'slide-left', each: 0.28, stagger: 0.14, delay: 0.2 }],
   }];
 }
 
@@ -192,31 +204,31 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
     out.push(text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead, color: T.ink,
       start: t, duration: r2(end - t), anim: 'fade', enterDur: 0.2 }));
   });
-  // success card
+  // success card. HTML-CONVERTED, the cascade above is NOT: the queued/running/done glyphs are a
+  // state machine over time (a tiled sequence of short-lived layers, one per state, whose windows are
+  // computed from `start`/`t`/`done`), and reproducing that in one fragment would mean stepping it on
+  // a CSS clock, which the engine refuses (`animation`/`transition` render as a still). The success
+  // card is a single static-content unit once its window opens, so only it converts.
   const cy = y + steps.length * rowGap + 30;
-  out.push({
-    type: 'group', x, y: cy, w, layout: 'row', items: 'center', gap: SPACE.md, pad: SPACE.lg,
-    // The card is TINTED in the tone it reports, not left on plain card with a green rule around it:
-    // a success surface says so with its ground, one hue at two weights, the rule solid and the fill
-    // soft. Same idiom as `callout` and every data track.
+  // A TINTED DISC WITH A MIXED TICK, not a solid `--up` fill with assumed-white ink. `onColor` cannot
+  // grade a `var()` (it returned '#fff', 1.4:1 on higgsfield's lime, 2.8:1 on linear, HARD failures
+  // both). Soft fill, solid mark: the register's own idiom. `note` is a timing figure, so mono.
+  const successHtml = `<div style="display:flex;align-items:center;gap:${SPACE.md}px;padding:${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">`
+    + `<div style="display:flex;align-items:center;justify-content:center;border-radius:${R.pill}px;`
+    + `background:${tint(T.green, 22)};padding:${SPACE.xs}px ${SPACE.sm}px">`
+    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${onInk(T.green)}">✓</span></div>`
+    + `<div style="display:flex;flex-direction:column;gap:${SPACE.tight}px;align-items:flex-start">`
+    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink}">${title}</span>`
+    + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${onInk(T.green)}">${url}</span></div>`
+    + (note ? `<div style="flex:1;display:flex;justify-content:flex-end">`
+      + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${note}</span></div>` : '')
+    + '</div>';
+  // The card is TINTED in the tone it reports, not left on plain card with a green rule around it: a
+  // success surface says so with its ground, one hue at two weights, the rule solid and the fill soft.
+  out.push({ type: 'html', x, y: cy, w,
     ...cardChrome({ bg: tint(T.green, TINT.chip), border: `1px solid ${T.greenSoft}` }),
-    start: r2(start + steps.length * STEP), duration: 6, enterDur: 0.45, anim: 'pop',
-    children: [
-      // A TINTED DISC WITH A MIXED TICK, not a solid `--up` fill with assumed-white ink. `onColor`
-      // was called here believing it would pick a legible colour and it cannot: `--up` is a `var()`,
-      // so the hex branch misses and it returned '#fff', 1.4:1 on higgsfield's lime, 2.8:1 on
-      // linear, HARD failures both. Soft fill, solid mark: the register's own idiom.
-      { type: 'group', bg: tint(T.green, 22), radius: R.pill, pad: `${SPACE.xs}px ${SPACE.sm}px`, children: [text({ text: '✓', size: TYPE.lead, weight: 700, color: onInk(T.green) })] },
-      { type: 'group', layout: 'column', gap: SPACE.tight, items: 'flex-start', children: [
-        text({ text: title, size: TYPE.lead, weight: 700, color: T.ink }),
-        text({ text: url, font: 'mono', size: TYPE.body, color: onInk(T.green) }),
-      ] },
-      // `note` is a timing figure ("Ready in 1.2s"), so mono is right. `--dim` was not.
-      ...(note ? [{ type: 'group', grow: 1, layout: 'row', justify: 'flex-end', children: [
-        text({ text: note, font: 'mono', size: TYPE.body, color: T.sub }),
-      ] }] : []),
-    ],
-  });
+    html: successHtml, start: r2(start + steps.length * STEP), duration: 6, enterDur: 0.45, anim: 'pop' });
   return out;
 }
 
@@ -228,31 +240,33 @@ export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
   // mono; the band makes the shape of the change visible before a single word is. `--up` and `--down`
   // are spent here on real direction (added / removed), which is the one thing they are for.
   const band = { '+': tint(T.green, TINT.chip), '-': tint(T.down, TINT.chip) };
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.hair, pad: SPACE.lg,
-    ...cardChrome({ radius: R.tight }), start, duration: dur, enterDur: 0.5, exitDur: 0.35,
-    children: lines.map((ln) => text({ text: `${ln.sign} ${ln.text}`, font: 'mono', size: TYPE.lead, weight: 400,
-      color: col[ln.sign] || T.ink, ...(band[ln.sign] ? { bg: band[ln.sign], radius: R.micro } : {}),
-      pad: `${SPACE.tight}px ${SPACE.snug}px` })) }];
+  const rows = lines.map((ln) => `<div style="font:400 ${TYPE.lead}px var(--font-mono);color:${col[ln.sign] || T.ink};`
+    + `padding:${SPACE.tight}px ${SPACE.snug}px${band[ln.sign] ? `;background:${band[ln.sign]};border-radius:${R.micro}px` : ''};`
+    + `white-space:pre">${ln.sign} ${ln.text}</div>`).join('');
+  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.hair}px;padding:${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">${rows}</div>`;
+  return [{ type: 'html', x, y, w, ...cardChrome({ radius: R.tight }), html, start, duration: dur, enterDur: 0.5, exitDur: 0.35 }];
 }
 
 // fileTree: an indented file/folder list; `active` highlights the focused row.
 export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {}) {
-  // THE TREE EXPANDS: rows arrive top-down, each sliding in from its own indent. The highlight moved
-  // off the row wrapper and onto the row's own text leaf, because the wrapper is a nested group and
-  // the engine never registers one. The lit row would have been lit from the first frame while its
-  // label was still arriving.
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.hair, pad: SPACE.md,
-    ...cardChrome({ radius: R.tight, anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: SPACE.xs,
-      children: [
-        box({ w: (it.depth || 0) * 22, h: 18 }),
-        text({ text: (it.type === 'dir' ? '▾ ' : '· ') + it.name, font: 'mono', size: TYPE.base, pad: `${SPACE.snug}px ${SPACE.xs}px`,
-          ...(it.active ? { bg: T.accentSoft, radius: R.chip } : {}),
-          // The lit row is the accent as TEXT on an accent TINT, the lowest-contrast pairing in the
-          // block: 2.6:1 on linear. `onInk` pulls the glyph toward `--text` and it clears.
-          weight: it.active ? 600 : 400, color: it.active ? onInk(T.accent) : (it.type === 'dir' ? T.ink : T.sub),
-          ...stagger(i, { step: 0.11, delay: 0.2, anim: 'slide-left', enterDur: 0.3 }) }),
-      ] })) }];
+  // THE TREE EXPANDS: rows arrive top-down, each sliding in from its own indent (`parts`, one
+  // `data-part` per row). The lit row is the accent as TEXT on an accent TINT, the lowest-contrast
+  // pairing in the block: 2.6:1 on linear. `onInk` pulls the glyph toward `--text` and it clears.
+  const rows = items.map((it) => {
+    const indent = (it.depth || 0) * 22;
+    const color = it.active ? onInk(T.accent) : (it.type === 'dir' ? T.ink : T.sub);
+    const chip = it.active ? `background:${T.accentSoft};border-radius:${R.chip}px;` : '';
+    return `<div data-part style="display:flex;align-items:center;gap:${SPACE.xs}px">`
+      + `<div style="width:${indent}px;height:18px;flex:none"></div>`
+      + `<span style="font:${it.active ? 600 : 400} ${TYPE.base}px var(--font-mono);color:${color};${chip}`
+      + `padding:${SPACE.snug}px ${SPACE.xs}px">${it.type === 'dir' ? '▾ ' : '· '}${it.name}</span></div>`;
+  }).join('');
+  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.hair}px;padding:${SPACE.md}px;`
+    + `box-sizing:border-box;width:${w}px">${rows}</div>`;
+  return [{ type: 'html', x, y, w, ...cardChrome({ radius: R.tight, anim: 'fade' }), html,
+    start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    parts: [{ anim: 'slide-left', each: 0.3, stagger: 0.11, delay: 0.2 }] }];
 }
 
 // logLines: a log stream with optional timestamp + level colour. dark = terminal surface.
@@ -266,41 +280,36 @@ export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, du
     ? { info: '#8898AA', ok: T.greenBright, warn: '#F6A417', error: '#FF6B6B' }
     : { info: '#5A6B7F', ok: '#1F6B3A', warn: '#8A5A00', error: '#B02A37' };
   const base = dark ? '#E8ECF1' : T.ink;
+  // A timestamp is a FIGURE, so mono stays. The LIGHT card's stamp was `--dim` while the dark card's
+  // was a measured literal; both now share this one colour decision.
+  const tsColor = dark ? '#8FA3BA' : T.sub;
   // A LOG STREAMS: lines land one after another, fast and even, the way output actually arrives.
-  const beat = (i) => stagger(i, { step: 0.13, delay: 0.15, anim: 'fade', enterDur: 0.18 });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.snug, pad: SPACE.lg,
-    bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: E.flat }), start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.3,
-    children: lines.map((ln, i) => ({ type: 'group', layout: 'row', items: 'baseline', gap: SPACE.sm, children: [
-      // A timestamp is a FIGURE, so mono stays. The LIGHT card's stamp was `--dim` while the dark
-      // card's was a measured literal. The two halves of one block disagreeing about whether a
-      // timestamp has to be readable.
-      ln.t && text({ text: ln.t, font: 'mono', size: TYPE.body, color: dark ? '#8FA3BA' : T.sub, ...beat(i) }),
-      text({ text: (ln.level ? `[${ln.level}] ` : '') + ln.text, font: 'mono', size: TYPE.base, color: lc[ln.level] || base, ...beat(i) }),
-    ].filter(Boolean) })) }];
+  const rows = lines.map((ln) => `<div data-part style="display:flex;align-items:baseline;gap:${SPACE.sm}px">`
+    + (ln.t ? `<span style="font:400 ${TYPE.body}px var(--font-mono);color:${tsColor}">${ln.t}</span>` : '')
+    + `<span style="font:400 ${TYPE.base}px var(--font-mono);color:${lc[ln.level] || base}">`
+    + `${(ln.level ? `[${ln.level}] ` : '') + ln.text}</span></div>`).join('');
+  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.snug}px;padding:${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">${rows}</div>`;
+  return [{ type: 'html', x, y, w, bg, radius: R.tight, ...(dark ? {} : { border: HAIR, elevation: E.flat }), html,
+    start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.3,
+    parts: [{ anim: 'fade', each: 0.18, stagger: 0.13, delay: 0.15 }] }];
 }
 
 // commitRow: a git history list (hash · message · author · time), hairline-divided.
 export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: 0,
-    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    // HISTORY LANDS COMMIT BY COMMIT. Each commit's three leaves share one delay so the row arrives
-    // as a unit (the row wrapper itself is a nested group, which the engine never registers).
-    children: commits.flatMap((c, i) => {
-      const beat = stagger(i, { step: 0.18, delay: 0.2, anim: 'slide-left', enterDur: 0.32 });
-      return [
-        i > 0 && box({ h: 1, bg: T.hair }),
-        { type: 'group', layout: 'row', items: 'center', gap: SPACE.sm, pad: `${SPACE.md}px ${SPACE.lg}px`, children: [
-          // A hash IS a figure, so it keeps mono. The byline under it is a NAME and a phrase
-          // ("Ada Lovelace · 2h ago"), which is words, so it moves to sans, and off `--dim`, which
-          // `make audit` fails HARD at 2.6:1 on higgsfield.
-          text({ text: c.hash, font: 'mono', size: TYPE.body, weight: 600, color: onInk(T.accent), ...beat }),
-          { type: 'group', grow: 1, layout: 'column', items: 'flex-start', gap: 2, children: [
-            text({ text: c.msg, size: TYPE.base, weight: 500, color: T.ink, ...beat }),
-            text({ text: `${c.author} · ${c.time}`, size: TYPE.body, color: T.sub, ...beat }),
-          ] },
-        ] },
-      ].filter(Boolean);
-    }) }];
+  // HISTORY LANDS COMMIT BY COMMIT: `parts`, one `data-part` per row. A hash IS a figure, so it keeps
+  // mono. The byline under it is a NAME and a phrase ("Ada Lovelace · 2h ago"), which is words, so it
+  // is sans, off `--dim` (`make audit` fails it HARD at 2.6:1 on higgsfield).
+  const rows = commits.map((c, i) => `<div data-part style="display:flex;align-items:center;gap:${SPACE.sm}px;`
+    + `padding:${SPACE.md}px ${SPACE.lg}px${i > 0 ? `;border-top:${HAIR}` : ''}">`
+    + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${onInk(T.accent)}">${c.hash}</span>`
+    + `<div style="flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px">`
+    + `<span style="font:500 ${TYPE.base}px var(--font-sans);color:${T.ink}">${c.msg}</span>`
+    + `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub}">${c.author} · ${c.time}</span></div></div>`).join('');
+  const html = `<div style="display:flex;flex-direction:column;width:${w}px">${rows}</div>`;
+  return [{ type: 'html', x, y, w, ...cardChrome({ anim: 'fade' }), html,
+    start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    parts: [{ anim: 'slide-left', each: 0.32, stagger: 0.18, delay: 0.2 }] }];
 }
 
 // spinner: a looping Lottie animation (deterministic seek). Any bodymovin .json; defaults to the sample.
