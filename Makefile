@@ -224,6 +224,23 @@ demo: ## [dev] scaffold a SPECIMEN demo scene (one subject, one shot) and iterat
 scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=, TYPE=launch|explainer|talking-head|sting|demo|recreation)
 	node scripts/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS)) $(if $(TYPE),--type $(TYPE))
 
+# THE LOCK-STEP-BEFORE-FAN-OUT CHAIN, for per-scene HTML agents (docs/CRAFT/PER-SCENE-FANOUT.md):
+#   make stagekit D=<film>   the shared CSS block every fragment carries verbatim (fragments are @scope-isolated, cannot share a stylesheet)
+#   make contract D=<film>   validate the storyboard's continuous-object handoff chains before any fan-out spends a token
+#   make scenes   D=<film>   PRINT one agent brief per scene (kit + contract + copy + anti-slop + verify cmd); launches nothing
+#   make assemble D=<film>   write the scene JSON from the storyboard + the fragments once they exist
+stagekit: ## [preflight] the shared CSS block every per-scene HTML fragment carries verbatim, from the film's theme (D=<film>, --check verifies fragments)
+	node scripts/author/stagekit.mjs $(D) $(if $(CHECK),--check)
+
+contract: ## [preflight] validate the storyboard's per-beat continuous-object contract chains edge to edge (D=<film>)
+	node scripts/author/contract.mjs $(D)
+
+scenes: ## [preflight] PRINT one per-scene agent brief (kit, contract, copy, anti-slop, verify cmd); launches nothing (D=<film>)
+	node scripts/author/scenes.mjs $(D)
+
+assemble: ## [preflight] write the scene JSON from the storyboard's contract + the scene fragments already on disk (D=<film>)
+	node scripts/author/assemble.mjs $(D)
+
 # make pitch NAME=<name>: DIVERGE before the storyboard. Prints the pitch protocol (4 questions, 5 concepts
 # on 5 forced axes, the anti-median 0.10 gate, the silhouette check) so the chosen angle is not the median a
 # model would default to. Record the outcome: make pitch NAME=<name> CHOSE="<angle>" LEFT="<median left behind>"

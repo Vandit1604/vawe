@@ -71,6 +71,10 @@ export function parseStoryboard(src) {
       // all: a storyboard stating a HUD corner on every beat still drew centred boxes labelled
       // "placement not stated", which is a declaration accepted and ignored.
       placement: f('placement'),
+      // THE PER-SCENE CONTRACT (scripts/lib/contract.mjs): the continuous object's state at this
+      // beat's two edges, "<placement>@<w>x<h>" (a safe-area PLACEMENT name, never a raw pixel). Only
+      // meaningful once a beat names one; scripts/lib/contract.mjs chainErrors refuses a broken handoff.
+      object_in: f('object_in'), object_out: f('object_out'),
       // style · layout · rest: the three slots their beat formula has (Element · Motion · Layout ·
       // Style · Timing) and ours did not. Parsed here for the same reason `placement` above is: a slot
       // an author is told to fill and nothing reads is worse than no slot, because the storyboard looks
