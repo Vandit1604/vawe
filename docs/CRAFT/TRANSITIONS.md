@@ -24,6 +24,14 @@ is *grammar*, not decoration: it means something, and the meaning must be **chos
 The failure this doc exists to kill is picking one effect (a blur, a dissolve) and spraying it on every
 cut: that is not "smooth," it is a seam that says nothing, ten times.
 
+> **A film with no authored joint at all no longer stays jointless.** `produceBaseline`
+> (`core/engine/produce.js`) infers likely beat boundaries from the gap between beat-layer starts
+> (`inferCuts`, `core/timeline/junctions.js`) and injects them as `data.cuts` styled with the theme's
+> `look.cuts.default`, absent-only: a film that already declares a cut, a seam, or a `motion` track is
+> untouched (docs/MISTAKES.md #578). That default is still a habit, not a choice: it exists so
+> `sceneUnits`/backdrop windows/audio cues have something to bind to, not so an author skips choosing
+> the seam theory below. Write real `transitions[]` to override it.
+
 [`SELECTION.md`](SELECTION.md) lists intent→effect across every family in one line each; **this is the
 deep dive for the cut**: the theory and the decision procedure. Read it when you cannot say *why* a
 given transition is there.

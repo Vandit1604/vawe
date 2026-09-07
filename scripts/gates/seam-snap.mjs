@@ -19,6 +19,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { flattenLayers } from '../lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
+import { inferCuts } from '../../core/timeline/junctions.js';
 
 import { gradeable } from './tile.mjs';
 import { gateFindings } from '../lib/findings.mjs';
@@ -109,9 +110,10 @@ const bounds = new Set();
 for (const c of data.cuts || []) if (typeof c.t === 'number') bounds.add(c.t);
 for (const s of data.seams || []) if (typeof s.t === 'number') bounds.add(s.t);
 for (const s of data.stings || []) if (typeof s.t === 'number') bounds.add(s.t);
-// beat starts: a cluster of layer-starts after a >1.2s gap is a beat boundary (its transition_in)
-const starts = [...new Set(flat.filter((l) => l.track !== 0).map((l) => l.start ?? 0))].sort((a, b) => a - b);
-let last = -9; for (const t of starts) { if (t - last > 1.2 && t > 0.3) bounds.add(t); last = t; }
+// beat starts: a cluster of layer-starts after a gap is a beat boundary (its transition_in). The
+// inference itself lives in core/timeline/junctions.js now (inferCuts), beside shotWindows, so
+// core/engine/produce.js's baseline pass reads the same one copy instead of a second one drifting.
+for (const t of inferCuts(flat)) bounds.add(t);
 const seams = [...bounds].map((t) => Math.round(t * fps)).filter((n) => n > 2 && n < total - 2).sort((a, b) => a - b);
 
 if (!seams.length) { console.log('✓ seam-snap: no transition boundaries to sample (single-beat scene)'); f.emit(); process.exit(0); }

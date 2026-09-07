@@ -24,6 +24,7 @@ import { buildCameraMove } from '../camera-moves/index.js';
 import { resolveCameraMove } from '../registry/vocab.js';
 import { sceneDims } from '../layout/safe.js';
 import { depthZ } from '../fx/plane.js';
+import { inferCuts } from '../timeline/junctions.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
@@ -32,6 +33,18 @@ import { depthZ } from '../fx/plane.js';
 // can read the brand's own scale/layout/cuts/field defaults from the ONE place a scene's produced
 // baseline is decided, instead of a second call site somewhere else. Nothing reads it yet: this phase
 // only wires it through, phases 2-5 add the actual defaults inside this function.
+// Same walk as scripts/lib/layers.mjs flattenLayers, duplicated rather than imported because core/
+// never imports scripts/ (a Node-tooling directory) and this pass must stay pure JS the browser can
+// run. Parents before children, a non-object skipped rather than thrown on.
+function flattenLayers(list, out = []) {
+  for (const l of Array.isArray(list) ? list : []) {
+    if (!l || typeof l !== 'object') continue;
+    out.push(l);
+    if (Array.isArray(l.children)) flattenLayers(l.children, out);
+  }
+  return out;
+}
+
 export function produceBaseline(data, theme, frame, look) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
@@ -46,6 +59,34 @@ export function produceBaseline(data, theme, frame, look) {
   // DIRECTED injections (camera + sceneUnits) SKIP such a scene (a camera×motion / sceneUnits×motion
   // interaction produced non-deterministic garbage on motion-reel-v2, MISTAKES). The author can still opt in.
   const choreographed = (data.layers || []).some(function has(L) { return L && typeof L === 'object' && (Array.isArray(L.motion) && L.motion.length > 1 || (L.children || []).some(has)); });
+
+  // INFERRED CUTS. 101 of 181 films ship with no joint at all: no cut, no seam, no transition. That one
+  // fact suppresses four systems downstream that only fire when a film HAS a joint (sceneUnits below,
+  // bindWindowsToJunctions, audio-bridge cues, shotWindows). ABSENT-ONLY and ADDITIVE, the same two
+  // constraints MISTAKES #157 paid for: a film that already declares a cut, a seam, or motion tracks is
+  // untouched, and one where inferCuts finds no boundary (a contact sheet, everything arriving at once)
+  // gets none, which is the true answer for it. `look.cuts.default` supplies the fx name so the injected
+  // cut still carries the brand's own cut personality rather than a hardcoded 'fade'.
+  //
+  // `sceneUnits: false`, WRITTEN BY THE AUTHOR, skips injection outright. A `fade` (or any other
+  // fading/masking style) on a whole-frame cut with no scene-unit wrapper is refused at render
+  // (formats/scene/scene.js: "transitions only by fading/masking, which a whole-frame cut cannot do"),
+  // because there is nothing under the fade to cross into. sceneUnits below only fills an ABSENT field,
+  // so an explicit `false` would survive untouched under a freshly-injected fading cut and turn what was
+  // a clean render into a boot-time refusal. cadence-film.json is exactly this case in the library today
+  // (sceneUnits:false, no joints): skipped, not force-converted to a moving style, because "false" is a
+  // decision an author made and this pass does not get to overrule it.
+  //
+  // ORDER IS LOAD-BEARING: injection must run BEFORE the sceneUnits block below, so that block sees the
+  // cuts just added and turns beat wrappers on for them in the SAME pass. Reorder the two and a freshly
+  // cut film would hit the identical fading-cut refusal on its first render.
+  if (data.sceneUnits !== false
+      && !(Array.isArray(data.cuts) && data.cuts.length) && !(Array.isArray(data.seams) && data.seams.length)
+      && !choreographed) {
+    const flat = flattenLayers(data.layers);
+    const boundaries = inferCuts(flat, data.duration);
+    if (boundaries.length) data.cuts = boundaries.map((t) => ({ t, style: (look && look.cuts && look.cuts.default) || 'fade' }));
+  }
 
   // SCENE-UNIT TRANSITIONS. A film WITH cuts that hasn't opted into unit transitions gets them, so the
   //    beats swap as whole units (the produced default). Skip choreographed scenes.
