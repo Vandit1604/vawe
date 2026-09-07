@@ -988,19 +988,14 @@ evals: build ## [engine] render the fixed set of eval briefs (verify/evals/brief
 evals-compare: build ## [engine] before/after sheets stacked per brief plus compare.html laying the two mp4s side by side (opened
 	node scripts/dev/evals.mjs --compare --before $(BEFORE) $(if $(AFTER),--after $(AFTER))
 
-# make critics D=<scene.json> [VS=brand] [RECORD=<panels.json>]: THE CRITIC PANEL (docs/CRAFT/SUBAGENTS.md),
-# as an invokable, recorded step. No RECORD: prints the six critics' prompts, concrete for this film, to
-# launch as parallel Agent calls. RECORD=<file>: given the six verdicts collected into one JSON file,
-# writes the receipt to verify/approved/panels/<name>.json (goes stale when the scene changes).
-critics: ## [judge] THE CRITIC PANEL (docs/CRAFT/SUBAGENTS.md), as an invokable, recorded step.
-	node scripts/author/critics.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(RECORD),--record $(RECORD))
-
-# make deciders D=<scene.json>: THE DECIDER ROSTER (docs/CRAFT/SUBAGENTS.md), the other half of the
-# panel. A critic reports; a decider WRITES, so each brief carries the one field that role owns and
-# nothing else. Prints them in dependency order, concrete for this film. The order is the content:
-# motion before transitions, because the content-aware cut reads velocity at the joint.
-deciders: ## [dev] THE DECIDER ROSTER: one brief per role, in dependency order, for this film.
-	node scripts/author/critics.mjs $(D) --deciders
+# make critics D=<scene.json> [VS=brand] [DECIDERS=1] [RECORD=<panels.json>]: THE ROSTER
+# (docs/CRAFT/SUBAGENTS.md), as an invokable, recorded step. Bare: the six critics' prompts, concrete
+# for this film, to launch as parallel Agent calls. DECIDERS=1: the other half, the roles that WRITE
+# into the film, one brief each in dependency order (motion before transitions, because the
+# content-aware cut reads velocity at the joint). RECORD=<file>: given the six verdicts collected into
+# one JSON file, writes the receipt to verify/approved/panels/<name>.json (stale when the scene changes).
+critics: ## [judge] THE ROSTER (docs/CRAFT/SUBAGENTS.md): critics bare, deciders with DECIDERS=1.
+	node scripts/author/critics.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(DECIDERS),--deciders) $(if $(RECORD),--record $(RECORD))
 
 # make probe [M=scene]: assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.

@@ -89,7 +89,7 @@ print where they moved) for one release. `make demo Q="…"` writes a ten-second
 
 > Making something good: read [`docs/TASTE.md`](docs/TASTE.md) first.
 
-## HOW A REAL FILM GETS MADE: DECIDERS WRITE, CRITICS REPORT  `[ref: make deciders]`
+## HOW A REAL FILM GETS MADE: DECIDERS WRITE, CRITICS REPORT  `[ref: make critics]`
 
 One agent holding the whole film does every part of it worse. Authoring needs several DIFFERENT
 judgements (what this beat shows, what moves, what a cut means, what the copy earns) and they do not
@@ -114,7 +114,7 @@ backdrop all resolve from the theme, so a decider there re-decides what the bran
 | 5 | **transition** | `transitions[]` | the engine narrows the cut by structure; the rhetorical relationship between two beats is not in the data |
 | 6 | **sound** | the audio block | cue punctuation is automatic; choosing a bed is a register decision |
 
-**`make deciders D=<file>` prints these six as briefs, in order, filled in for that film**: its beats,
+**`make critics D=<file> DECIDERS=1` prints these six as briefs, in order, filled in for that film**: its beats,
 its fragments, its theme, and whether a storyboard exists yet. The scene deciders are the one row that
 runs in parallel, one per fragment; every other row reads what the row above it decided.
 
