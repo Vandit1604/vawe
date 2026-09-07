@@ -106,9 +106,13 @@ export function chipGrid({ x = 300, y = 380, w = 1320, title, chips = [], cols =
 // layers BESIDE the fragment: `typing`/`caret` and the `cursor` path are engine-owned clocks a static
 // fragment cannot reproduce (no CSS animation), so they sit on top of the chrome at the same absolute
 // coordinates the panel used to anchor them at.
+// `bodySize` overrides the command's own size (34 unchanged if omitted): a theme's `look.scale.body`.
+// `captionSize` overrides the output lines (28 unchanged if omitted), from `look.scale.caption`. Same
+// optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize` (docs/CRAFT/THEME-LOOK.md).
 export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, prompt = '$', command,
-  output = [], result, cps = 16, start = 0, dur = 6.7 } = {}) {
+  output = [], result, cps = 16, bodySize, captionSize, start = 0, dur = 6.7 } = {}) {
   const px = x + 50, py = y + 42;
+  const cmdSize = bodySize || 34, outSize = captionSize || 28;
   const chromeHtml = `<div style="box-sizing:border-box;width:${w}px;height:${h}px;background:var(--surface);`
     + `border:1.5px solid var(--line);border-radius:18px"></div>`;
   const L = [
@@ -118,10 +122,10 @@ export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, pro
     { type: 'html', x, y, w, h, html: chromeHtml, start: start + 0.2, duration: dur - 0.2,
       anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0, glow: 0.22 },
     { type: 'text', text: prompt, x: px, y: py, w: 40, align: 'left', size: 34, weight: 700, font: 'mono', color: ACCENT, start: start + 0.6, duration: dur - 0.6 },
-    { type: 'text', text: command, x: px + 52, y: py, w: w - 130, align: 'left', size: 34, weight: 500, font: 'mono', color: INK, typing: cps, start: start + 0.6, duration: dur - 0.6 },
+    { type: 'text', text: command, x: px + 52, y: py, w: w - 130, align: 'left', size: cmdSize, weight: 500, font: 'mono', color: INK, typing: cps, start: start + 0.6, duration: dur - 0.6 },
     { type: 'cursor', size: 34, start: start + 1.4, duration: 0.9, path: [{ t: 0, x: px + 340, y: py + 20 }, { t: 0.5, x: px + 340, y: py + 20 }] },
   ];
-  output.forEach((line, i) => L.push({ type: 'text', text: line, x: px, y: py + 88 + i * 50, w: w - 100, align: 'left', size: 28, weight: 500, font: 'mono', color: DIM, split: 'word', preset: 'up', each: 0.3, stagger: 0.02, start: start + 2.1 + i * 0.4, duration: dur - 2.1 - i * 0.4 }));
+  output.forEach((line, i) => L.push({ type: 'text', text: line, x: px, y: py + 88 + i * 50, w: w - 100, align: 'left', size: outSize, weight: 500, font: 'mono', color: DIM, split: 'word', preset: 'up', each: 0.3, stagger: 0.02, start: start + 2.1 + i * 0.4, duration: dur - 2.1 - i * 0.4 }));
   if (result) L.push({ type: 'text', text: result, x: px, y: y + h - 60, w: w - 100, align: 'left', size: 32, weight: 600, font: 'mono', color: ACCENT, anim: 'pop', enterDur: 0.5, start: start + 2.1 + output.length * 0.4 + 1.0, duration: 1.0 });
   return L.filter(Boolean);
 }
@@ -146,14 +150,20 @@ export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: c
 
 // logoLockup. The BRAND beat: the real mark pops (ken drift), the wordmark travels in, a kinetic
 // headline, a mono sub. Give the logo prominence (a deliberate element, not a bullet).
+//
+// No plate/panel behind the mark+wordmark today: the beat is two images on the bare backdrop plus type
+// (docs/CRAFT/HTML-FRAGMENTS.md's "html counts as a picture" note is about hand-authored markup; this
+// beat has none to convert). `bodySize` overrides the headline's own size (78 unchanged if omitted): a
+// theme's `look.scale.body`. `captionSize` overrides the sub (38 unchanged if omitted), from
+// `look.scale.caption`. Same optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize`.
 export function logoLockup({ markX = 690, markY = 300, markW = 150, wordX = 860, wordY = 322, wordW = 470,
-  mark, wordmark, headline, sub, start = 0, dur = 5.5 } = {}) {
+  mark, wordmark, headline, sub, bodySize, captionSize, start = 0, dur = 5.5 } = {}) {
   return [
     // exitDur 0 on both: held to the beat's own end, see cardCascade above.
     mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.6, out: 'defocus', exitDur: 0, ken: { from: 1.0, to: 1.05 } },
     wordmark && { type: 'image', src: wordmark, x: wordX, y: wordY, w: wordW, start: start + 0.7, duration: dur - 0.7, anim: 'slide-left', enterDur: 0.6, out: 'defocus', exitDur: 0 },
-    headline && kineticHeadline({ text: headline, x: 160, y: markY + 260, w: 1600, size: 78, weight: 700, each: 0.44, stagger: 0.05, start: start + 1.3, dur: dur - 1.3 }),
-    sub && caption({ text: sub, x: 160, y: markY + 400, w: 1600, size: 38, start: start + 2.0, dur: dur - 2.0 }),
+    headline && kineticHeadline({ text: headline, x: 160, y: markY + 260, w: 1600, size: bodySize || 78, weight: 700, each: 0.44, stagger: 0.05, start: start + 1.3, dur: dur - 1.3 }),
+    sub && caption({ text: sub, x: 160, y: markY + 400, w: 1600, size: captionSize || 38, start: start + 2.0, dur: dur - 2.0 }),
   ].filter(Boolean);
 }
 
@@ -165,8 +175,11 @@ export function logoLockup({ markX = 690, markY = 300, markW = 150, wordX = 860,
 // COORDS: `mark`/`morphFrom` are in the `viewBox` space (default "0 0 100 100"), NOT stage pixels, a path
 // like "M50 10 L90 88 L10 88 Z" fills the box; the box is placed/sized by x/size. Path coords outside the
 // viewBox render off-box (invisible) with no error. Pass a matching `viewBox` if your path uses other units.
+// `bodySize` overrides the wordmark's own size (92 unchanged if omitted): a theme's `look.scale.body`.
+// `captionSize` overrides the sub (38 unchanged if omitted), from `look.scale.caption`. Same
+// optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize`.
 export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', mark, morphFrom, spin = 0,
-  wordmark, sub, color = ACCENT, canvasW = 1920, start = 0, dur = 5 } = {}) {
+  wordmark, sub, color = ACCENT, canvasW = 1920, bodySize, captionSize, start = 0, dur = 5 } = {}) {
   const mx = x != null ? x : Math.round((canvasW - size) / 2);   // centre the mark box on the canvas
   const out = [
     // a bloom that SWELLS as the mark completes (attack-decay, not a strobe), light overflowing the mark
@@ -187,9 +200,9 @@ export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', ma
       // exitDur 0: held to the beat's own end, see cardCascade above.
       start: start + 0.3, duration: dur - 0.3, out: 'defocus', exitDur: 0 });
   }
-  if (wordmark) out.push(kineticHeadline({ text: wordmark, x: 160, y: y + size + 70, w: canvasW - 320, size: 92,
+  if (wordmark) out.push(kineticHeadline({ text: wordmark, x: 160, y: y + size + 70, w: canvasW - 320, size: bodySize || 92,
     weight: 800, preset: 'up', each: 0.42, stagger: 0.05, color: INK, start: start + 1.7, dur: dur - 1.7 }));
-  if (sub) out.push(caption({ text: sub, x: 160, y: y + size + 200, w: canvasW - 320, size: 38, start: start + 2.3, dur: dur - 2.3 }));
+  if (sub) out.push(caption({ text: sub, x: 160, y: y + size + 200, w: canvasW - 320, size: captionSize || 38, start: start + 2.3, dur: dur - 2.3 }));
   return out;
 }
 
@@ -199,8 +212,11 @@ export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', ma
 // Design Read: the panel behind the reading is ONE `html` layer, same flat surface as terminalReveal's
 // chrome. The typing command and the tone verdict chip stay real layers (typing is engine-owned; the
 // chip is a tiny result badge, not UI chrome, left as kit.mjs's `verdictChip` text pill).
+// `bodySize` overrides the command's own size (30 unchanged if omitted): a theme's `look.scale.body`.
+// `captionSize` overrides the note (30 unchanged if omitted), from `look.scale.caption`. Same
+// optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize`.
 export function verdictProof({ x = 360, y = 360, w = 1200, h = 300, title, prompt = '$', command, note,
-  verdict = 'HOLDS', tone = 'ok', cps = 22, start = 0, dur = 5.5 } = {}) {
+  verdict = 'HOLDS', tone = 'ok', cps = 22, bodySize, captionSize, start = 0, dur = 5.5 } = {}) {
   const px = x + 50, py = y + 42;
   const chromeHtml = `<div style="box-sizing:border-box;width:${w}px;height:${h}px;background:var(--surface);`
     + `border:1.5px solid var(--line);border-radius:18px"></div>`;
@@ -209,8 +225,8 @@ export function verdictProof({ x = 360, y = 360, w = 1200, h = 300, title, promp
     { type: 'html', x, y, w, h, html: chromeHtml, start: start + 0.3, duration: dur - 0.3,
       anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0, glow: 0.22 },
     { type: 'text', text: prompt, x: px, y: py, w: 40, align: 'left', size: 32, weight: 700, font: 'mono', color: ACCENT, start: start + 0.6, duration: dur - 0.6 },
-    { type: 'text', text: command, x: px + 50, y: py, w: w - 130, align: 'left', size: 30, weight: 500, font: 'mono', color: INK, typing: cps, start: start + 0.6, duration: dur - 0.6 },
-    note && { type: 'text', text: note, x: px, y: py + 98, w: w - 300, align: 'left', size: 30, weight: 500, font: 'mono', color: DIM, anim: 'fade', enterDur: 0.4, start: start + 2.2, duration: dur - 2.2 },
+    { type: 'text', text: command, x: px + 50, y: py, w: w - 130, align: 'left', size: bodySize || 30, weight: 500, font: 'mono', color: INK, typing: cps, start: start + 0.6, duration: dur - 0.6 },
+    note && { type: 'text', text: note, x: px, y: py + 98, w: w - 300, align: 'left', size: captionSize || 30, weight: 500, font: 'mono', color: DIM, anim: 'fade', enterDur: 0.4, start: start + 2.2, duration: dur - 2.2 },
     verdictChip({ text: verdict, tone, x: x + w - 350, y: py + 84, start: start + 2.6, dur: dur - 2.6 }),
   ].filter(Boolean);
 }
