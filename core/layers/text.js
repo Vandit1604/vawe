@@ -19,6 +19,13 @@ const GUARDED = {
 // about the ground under this layer, so they must ask it at the same instant or they disagree.
 const midT = (L) => (L.start ?? 0) + (L.duration ?? 2) / 2;
 
+// ONE default, one owner. `L.size` is a plain px number by the time any of this runs: a named role
+// ("headline") already lowered to the theme's real number at boot, before resolveCoords even ran
+// (core/engine/produce.js bakeTextSizeRoles). This is only the "no size at all" fallback, collapsed
+// off the five separate `size ?? 96` spellings this file used to carry (build:38/39/45/47, microType).
+const TEXT_SIZE_DEFAULT = 96;
+const sizeOf = (L) => (typeof L.size === 'number' ? L.size : TEXT_SIZE_DEFAULT);
+
 // The props are read off this signature (propsOf, core/props.js), for what build() reads DIRECTLY.
 // `fitH` stays off it (guarded, see GUARDED above); `split`/`type` stay `L.x` (shared vocabulary,
 // declared centrally, not this file's to declare).
@@ -35,16 +42,16 @@ export function build(kit, el, L, { fit, w, h, size, weight, text, maxLines } = 
     // this warning fired on correct fonts and stayed silent on missing ones. isPainting() width-probes
     // the family against three generics instead (all-equal = it really resolved). See core/fonts.js.
     if (!isPainting(fam)) console.warn(`fit: font "${fam}" is NOT painting (falling back), fit measurement will be wrong. Run: make font-audit`);
-    if (L.fitH) kit.fitBox(el, { maxW: w, maxH: L.fitH, max: size ?? 96, min: 34 });
-    else el.style.fontSize = kit.fitText(el.textContent, w, { font: (px) => `${weight ?? 800} ${px}px ${fam}`, max: size ?? 96, min: 34 }) + 'px';
+    if (L.fitH) kit.fitBox(el, { maxW: w, maxH: L.fitH, max: sizeOf(L), min: 34 });
+    else el.style.fontSize = kit.fitText(el.textContent, w, { font: (px) => `${weight ?? 800} ${px}px ${fam}`, max: sizeOf(L), min: 34 }) + 'px';
     el.remove();
   } else if (w && !L.split && (L.type === 'text' || !L.type) && text) {
     // AUTO-FIT SAFETY: a headline that overflows its box gets shrunk so it never clips. Fires only on
     // real overflow (output changes only where already broken). Pure (measured once).
     kit.cam.appendChild(el);
-    const lh = parseFloat(getComputedStyle(el).lineHeight) || (size ?? 96) * 1.15;
+    const lh = parseFloat(getComputedStyle(el).lineHeight) || sizeOf(L) * 1.15;
     const maxH = h ?? (maxLines ?? 5) * lh;
-    if (el.scrollHeight > maxH + 2 || el.scrollWidth > w + 1) kit.fitBox(el, { maxW: w, maxH, max: size ?? 96, min: 34 });
+    if (el.scrollHeight > maxH + 2 || el.scrollWidth > w + 1) kit.fitBox(el, { maxW: w, maxH, max: sizeOf(L), min: 34 });
     el.remove();
   }
 }
@@ -159,7 +166,7 @@ function paintSplitUnits(el, L, t) {
 // where tracking/wrap/ligatures are wrong. Author opts out with raw:true, or overrides ls explicitly.
 function microType(kit, el, L) {
   if (L.raw) return;
-  const size = L.size ?? 96;
+  const size = sizeOf(L);
   const mono = L.font === 'mono';
   // NO LETTER-SPACING HERE, EVER. This pass used to re-write it one statement after styleText had
   // resolved it, and that single statement silently discarded two different upstream decisions: the

@@ -24,7 +24,9 @@ import { buildCameraMove } from '../camera-moves/index.js';
 import { resolveCameraMove } from '../registry/vocab.js';
 import { sceneDims } from '../layout/safe.js';
 import { depthZ } from '../fx/plane.js';
-import { inferCuts } from '../timeline/junctions.js';
+import { inferCuts, chooseCutStyles } from '../timeline/junctions.js';
+import { layerSpeedAt } from '../timeline/velocity-cut.js';
+import { PRESENTATIONS as CUT_PRESENTATIONS } from '../cuts/presentations.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
@@ -43,6 +45,44 @@ function flattenLayers(list, out = []) {
     if (Array.isArray(l.children)) flattenLayers(l.children, out);
   }
   return out;
+}
+
+// resolveTextSize(value, scale, where) → a number. `size: "headline"` names a ROLE in `look.scale`
+// (hook/headline/body/caption, core/registry/theme-contract.js LOOK_SCALE_KEYS) rather than a raw px
+// count the author has to look up. Copies the refusal shape `resolveJunction`
+// (core/timeline/junctions.js) already uses for "cut@1": an unknown name throws and names every role
+// the theme actually defines, instead of silently landing on the hardcoded 96 the five `size ?? 96`
+// sites in core/layers/text.js used to fall back to (a mistyped "headine" drew body-sized and no error
+// said why). No new `role` field: the string already sitting in `size` IS the role.
+export function resolveTextSize(value, scale, where = 'size') {
+  if (value == null || typeof value === 'number') return value;
+  if (typeof value !== 'string' || !scale || typeof scale[value] !== 'number') {
+    const known = scale ? Object.keys(scale).filter((k) => typeof scale[k] === 'number') : [];
+    throw new Error(`${where}: "${value}" is not a size role this theme's look.scale defines. Known `
+      + `roles: ${known.length ? known.join(', ') : 'none (this theme carries no look.scale)'}.`);
+  }
+  return scale[value];
+}
+
+// bakeTextSizeRoles(data, look): lower every layer's `size: "<role>"` to the theme's real px number.
+// Walks the WHOLE tree including group children (unlike flattenLayers above, which this file's other
+// passes use top-level-only): a role written inside a group is still a role.
+//
+// CRITICAL ORDERING, and it is why this is a separate exported bake rather than a line inside
+// produceBaseline: resolveCoords (core/engine/boot.js) reads `L.size` DIRECTLY to estimate a text
+// layer's height for a bottom pin ("hEst"), and produceBaseline itself runs AFTER resolveCoords
+// (boot.js calls resolveCoords then produceBaseline, in that order). A string size reaching that
+// arithmetic becomes NaN with no error. boot.js calls this one line earlier, between resolving `look`
+// and calling resolveCoords, the one gap the existing ordering leaves for it.
+export function bakeTextSizeRoles(data, look) {
+  const scale = look && look.scale;
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (typeof L.size === 'string') L.size = resolveTextSize(L.size, scale, `layer "${L.id || L.type || 'text'}" size`);
+    walk(L.children);
+  } };
+  walk(data && data.layers);
+  return data;
 }
 
 export function produceBaseline(data, theme, frame, look) {
@@ -85,7 +125,28 @@ export function produceBaseline(data, theme, frame, look) {
       && !choreographed) {
     const flat = flattenLayers(data.layers);
     const boundaries = inferCuts(flat, data.duration);
-    if (boundaries.length) data.cuts = boundaries.map((t) => ({ t, style: (look && look.cuts && look.cuts.default) || 'fade' }));
+    // CONTENT-AWARE, NOT CONTENT-BLIND. inferCuts only knows the GAP between beat starts; it says
+    // nothing about what sits on either side. chooseCutStyles (core/timeline/junctions.js) reads the
+    // relationship at each joint (a surviving layer, overlapping boxes, a medium/backdrop change, a
+    // layer still moving) and RULES OUT what that relationship makes dishonest, choosing only among
+    // what remains: the theme's own two named cuts (`look.cuts.default`/`accent`) or the doctrine's
+    // hard-cut default. The engine narrows a set the theme already supplied; it never invents a name
+    // into it, which is the whole distinction that keeps this from repeating MISTAKES #159 (the engine
+    // once picked the BACKGROUND itself, and nobody ever designed one again).
+    if (boundaries.length) {
+      // A raw `cuts[].style` drives a whole-frame CUT presentation only (core/cuts/presentations.js);
+      // `look.cuts.accent` is written for the richer `transitions[]` sugar and its DEFAULT value
+      // (`cinematicZoom`) is a seam-only name that PRESENTATIONS does not carry at all, so offering it
+      // here would inject a cut that throws at render on the very first film that earns the accent.
+      // This is the same structural rule-out as a surviving layer or an overlapping box: a name that
+      // is not mechanically usable as a raw cut is never in the compatible set, theme-picked or not.
+      const defaultName = (look && look.cuts && look.cuts.default) || 'fade';
+      const accentName = (look && look.cuts && look.cuts.accent) || 'cinematicZoom';
+      const cutsLook = { default: CUT_PRESENTATIONS[defaultName] ? defaultName : 'fade' };
+      if (CUT_PRESENTATIONS[accentName]) cutsLook.accent = accentName;
+      data.cuts = chooseCutStyles(boundaries, flat, { cuts: cutsLook, bg: data.bg, layerSpeedAt })
+        .map(({ t, style, reason }) => ({ t, style, _why: reason }));
+    }
   }
 
   // SCENE-UNIT TRANSITIONS. A film WITH cuts that hasn't opted into unit transitions gets them, so the
