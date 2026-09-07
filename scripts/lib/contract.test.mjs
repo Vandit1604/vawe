@@ -2,7 +2,7 @@
 // is refused with BOTH values named.
 //   node scripts/lib/contract.test.mjs
 import assert from 'node:assert/strict';
-import { parseEdge, chainErrors, edges } from './contract.mjs';
+import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, SPEED_BAND } from './contract.mjs';
 
 // parseEdge: the happy path, quotes stripped (storyboard-parse.mjs's fieldIn does not strip them)
 assert.deepEqual(parseEdge('"bottom-left@120x40"'), { placement: 'bottom-left', w: 120, h: 40 });
@@ -49,4 +49,40 @@ assert.deepEqual(chainErrors([{ name: 'A' }, { name: 'B' }]), []);
   assert.equal(edges(beats).length, 0, 'a broken chain yields no edges to build a track from');
 }
 
-console.log('✓ contract.test.mjs: parseEdge, a clean chain, and a broken handoff (named, both sides) all behave');
+// ── the motion plan: parseMotionEntry / parseMotion / motionErrors ─────────────────────────────────
+{
+  const e = parseMotionEntry('[data-part="headline"]@slide-left:energy');
+  assert.deepEqual(e, { selector: '[data-part="headline"]', kind: 'slide-left', inBand: 'energy', outBand: 'energy' }, 'one band fills both in and out');
+}
+{
+  const e = parseMotionEntry('.card@popIn:energy/cinematic');
+  assert.deepEqual(e, { selector: '.card', kind: 'popIn', inBand: 'energy', outBand: 'cinematic' }, 'two bands: in then out');
+}
+{
+  // an unknown part kind is refused with a near-word hint, exactly as an unknown placement is above
+  const bad = parseMotionEntry('.card@slide-lft:energy');
+  assert.ok(bad.error, 'a typo\'d part kind must carry an error');
+  assert.match(bad.error, /slide-left/, 'the near-miss suggestion should name the real word');
+}
+{
+  const bad = parseMotionEntry('.card@popIn:blazing');
+  assert.ok(bad.error, 'an unknown speed band is refused');
+}
+assert.deepEqual(parseMotion(null), [], 'unset motion is no opinion, same convention as object_in/out');
+assert.deepEqual(parseMotion('none'), [], '`none` is an explicit no-motion beat');
+{
+  const es = parseMotion('.a@fadeUp:energy; .b@popIn:gravity/cinematic');
+  assert.equal(es.length, 2, '`;`-separated entries for more than one moving element in a beat');
+  assert.equal(es[0].selector, '.a');
+  assert.equal(es[1].outBand, 'cinematic');
+}
+{
+  const beats = [{ name: 'A', motion: '.a@fadeUp:energy' }, { name: 'B', motion: '.b@nope:energy' }];
+  const errs = motionErrors(beats);
+  assert.equal(errs.length, 1, 'only the beat with a broken entry is reported');
+  assert.match(errs[0], /beat 2 \(B\)/);
+}
+// every named band resolves to a real duration, so assemble.mjs never keys a `parts` entry with `undefined`
+for (const band of Object.keys(SPEED_BAND)) assert.ok(SPEED_BAND[band] > 0, `${band} must be a positive duration`);
+
+console.log('✓ contract.test.mjs: parseEdge, a clean chain, a broken handoff (named, both sides), and the motion plan all behave');
