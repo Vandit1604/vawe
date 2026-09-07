@@ -97,6 +97,17 @@ else {
   }
 }
 
+// ---- THE NOT LINE, DERIVED --------------------------------------------------------------------------
+// AGENTS.md's brief asks for a NOT line "from memory", which excludes whatever the author happens to
+// think of. The ledger already knows what recent films actually used (scripts/gates/ledger.mjs `not`);
+// asking it here, before the JSON is written, turns that memory into a line the author can paste.
+{
+  const r = spawnSync('node', [path.join(repoRoot, 'scripts/gates/ledger.mjs'), 'not', scene.theme || ''],
+    { encoding: 'utf8', cwd: repoRoot });
+  const out = (r.stdout || '').trim();
+  if (out) { console.log(`\n  THE NOT LINE, derived from what recent films already used:\n`); console.log(`   ${out}`); }
+}
+
 // ---- WHAT THIS FILM HAS NOT REACHED FOR --------------------------------------------------------
 // The chain above says what to decide. This says which capability the film currently declines, and it
 // is deliberately NOT a gate: `make check` already carries eight ratcheted codes, and the doctrine is

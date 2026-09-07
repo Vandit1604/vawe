@@ -168,7 +168,11 @@ NOT        what this film explicitly does not do (no narration, no stock photos,
 ```
 
 Naming the spectacle is also a promise every other beat stays restrained. The `NOT` line is cheap
-insurance: most generic output is an un-excluded default, not a wrong decision.
+insurance: most generic output is an un-excluded default, not a wrong decision. Do not write it from
+memory: `make preflight D=<file>` derives it from what recent films actually used
+(`node scripts/gates/ledger.mjs not <theme>`), so it excludes the real pattern, not whatever the author
+happens to think of. It is a constraint, not a ban: a beat with a real reason to repeat a value still
+can, waived in the scene with `_why`.
 
 **Do not hand-author a film from a blank JSON.** Compose from `make blueprints`; pick one by SEEING it
 (`make previews`). Never quote a library statistic from memory: run `node
