@@ -92,7 +92,10 @@
     "--border": "#efe2d2",
     "--accent-soft": "rgba(255,116,46,0.14)"
   },
-  "bgDefault": {
-    "preset": "paper"
-  }
+  "bgDefault": [
+    { "preset": "paper" },
+    { "preset": "dark" },
+    { "preset": "paper" },
+    { "preset": "accent" }
+  ]
 }
