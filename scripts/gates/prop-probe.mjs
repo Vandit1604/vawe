@@ -304,7 +304,14 @@ for (const type of types) {
   const props = batch.map((b) => b.prop);
   const layers = batch.map((b) => b.layer);
   const file = path.join(OUT, `${type}-${c}.json`);
-  fs.writeFileSync(file, JSON.stringify({ module: 'scene', theme: 'default', duration: 4, bg: [{ preset: 'plain' }], layers }, null, 1));
+  // `produced: false` because a PROBE IS NOT A FILM. The produced baseline injects a camera, scene
+  // units and (since the inferred-cut default) a cut into any film that declares none, and these
+  // fixtures declare none by construction: they are one layer per prop on a plain field. An injected
+  // `fade` cut puts an `opacity` on the wrapper every layer sits inside, which is exactly what a prop
+  // that reads the pixels BEHIND it (`glass`, `progressiveBlur`) cannot survive, so every such prop
+  // reported itself dead. The opt-out is the engine's own (core/engine/produce.js), and it is the right
+  // one here: this gate asks "does the engine read this prop", not "does this scene look directed".
+  fs.writeFileSync(file, JSON.stringify({ module: 'scene', produced: false, theme: 'default', duration: 4, bg: [{ preset: 'plain' }], layers }, null, 1));
 
   const page = await browser.newPage();
   await page.evaluateOnNewDocument(() => { window.__PROP_PROBE = []; });
