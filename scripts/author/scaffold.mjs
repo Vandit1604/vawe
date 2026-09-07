@@ -398,7 +398,7 @@ fs.writeFileSync(path.resolve(ROOT, sbPath), storyboard);
 // The path goes to stdout ALONE (matching scripts/dev/demo.mjs), so `make scaffold` can hand it
 // straight to `make dev`/`make ship`; everything else is a note and goes to stderr.
 console.error(`✓ scaffold: ${names.length} beats (${names.join(' -> ')}) across ${dur}s -> ${out}`);
-if (look) console.error(`  theme "${theme}" carries a look: bg/cuts/scale/layout above are the brand's own, not guessed.${look.cues ? ` Its cues: ${look.cues.join(', ')} (audio.auto derives from the cuts actually used; reach for these by hand where auto isn't enough).` : ''}`);
+if (look) console.error(`  theme "${theme}" carries a look: bg/cuts/scale/layout above are the brand's own, not guessed.`);
 if (typeArg) console.error(`  TYPE=${typeArg} spine: skills/vawe-type-${typeArg}/SKILL.md carries this type's rules and worked example.`);
 if (sig) console.error(`  composed to the shape of ${exemplar.file} (${exemplar.register || exemplar.teaches}): ${bg.length} bg windows turn the world. STUDY formats/scene/${exemplar.file}.`);
 else if (!spine) console.error(`  no exemplar matched "${likeText.trim()}"; used the two-window default. Pass --like "<brief>" to compose from the nearest proven film.`);
