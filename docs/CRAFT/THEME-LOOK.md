@@ -1,6 +1,6 @@
 ---
 when: a theme should carry more than colours and fonts, or a scaffold keeps re-deciding the same thing per film
-answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/cues/field) · how it is validated · how the scaffold merges it over the type spine · how to see it as a picture"
+answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field) · how it is validated · how the scaffold merges it over the type spine · how to see it as a picture"
 group: crosscutting
 ---
 
@@ -9,9 +9,9 @@ group: crosscutting
 ## AGENT SUMMARY
 
 - `theme.look` (optional; `core/registry/theme-contract.js`) fixes the things AGENTS.md names as re-decided per
-  film: `backdrop` (bg preset rotation), `scale` (hook/headline/body/caption type sizes), `layout`
-  (anchor + margin), `marks` (logo path + its two sizes), `cuts` (default/accent transition), `cues`
-  (audio cue names), `field` (grain/vignette).
+  film: `backdrop` (bg preset rotation, scaffold-only, see below), `scale` (hook/headline/body/caption
+  type sizes), `layout` (anchor + margin), `marks` (logo path + its two sizes), `cuts` (default/accent
+  transition), `field` (grain/vignette).
 - Validated at load, same discipline as every other named vocabulary: an unknown `look` key, an
   unknown bg preset, or an unknown transition refuses with the near word (`core/validate/validate.mjs`
   `validateTheme`, checked for every `themes/*.json` pack by `make validate`).
@@ -41,44 +41,46 @@ over the theme (the theme is a DEFAULT, never a constraint an author cannot over
   "layout": { "anchor": "left", "margin": 160 },
   "marks": { "logo": "site/public/assets/favicon.svg", "endCardSize": 160, "headlineSize": 108 },
   "cuts": { "default": "fade", "accent": "cinematicZoom" },
-  "cues": ["chime", "whoosh", "success"],
   "field": { "grain": 0, "vignette": 0 }
 }
 ```
 
 | Key | Shape | Checked against |
 |---|---|---|
-| `backdrop` | non-empty array of bg preset names | `core/backgrounds/index.js` `BG_NAMES` |
+| `backdrop` | non-empty array of bg preset names, **scaffold-only** (see below) | `core/backgrounds/index.js` `BG_NAMES` |
 | `scale` | `{hook, headline, body, caption}`, each a number | (structural only, no registry) |
 | `layout` | `{anchor: left\|center\|right, margin: number}` | `anchor` against a fixed enum |
 | `marks` | `{logo: path, endCardSize: number, headlineSize: number}` | (structural only, `logo` is a path an author must keep valid) |
 | `cuts` | `{default, accent}`, each a transition name | `core/transitions/catalog.js` `TRANSITIONS` (anim + cut + sting + seam, one merged catalog) |
-| `cues` | non-empty array of audio cue names | `core/audio/kit.mjs` `CUES` (Node-only check, see below) |
 | `field` | `{grain, vignette}`, each a number | (structural only) |
 
 Every field is optional; a theme with no `look` behaves exactly as it did before this existed. Writing
-one key does not require the others: a theme can fix only `backdrop` and leave scale/layout/cuts/cues
+one key does not require the others: a theme can fix only `backdrop` and leave scale/layout/cuts
 undecided.
 
-## Validation, and why cues are checked in one place only
+**`backdrop` is a scaffold-only authoring hint, and the engine deliberately does not read it.** `make
+scaffold TYPE=<type> THEME=<name>` seeds a new film's `bg[]` from it (see "How the scaffold uses it"
+below), but nothing at render time falls back to `theme.look.backdrop`: `bg` is a REQUIRED authoring
+field (`core/engine/produce.js:14-16`), written precisely so the engine can never again pick the
+backdrop for an author. `docs/MISTAKES.md` #159 is that exact mistake by name: "the engine PICKED the
+background, so nobody ever designed one." Wiring `look.backdrop` as a render-time fallback would
+reopen that hole under a new name; the next author who reaches for it should find this paragraph
+instead of rebuilding it.
+
+`look` used to carry an eighth key, `cues`: a fixed per-theme list of audio cue names. It is gone.
+`buildSfx` (`formats/scene/scene.js:1593-1602`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
+tables in `core/audio/cues.js`, keyed on the transition actually used at each joint, so a fixed list
+could never say which cue replaces which as a film's cut family changes beat to beat. It would have
+been a second, disagreeing owner of a fact `buildSfx` already owns.
+
+## Validation
 
 `core/registry/theme-contract.js` exports `lookErrors(look, opts)`, the same injection shape as the existing
-`themeErrors`: the lists it checks names against (`bgNames`, `transitionNames`, `cueNames`) are handed
+`themeErrors`: the lists it checks names against (`bgNames`, `transitionNames`) are handed
 in rather than imported, so this file stays importable from both Node and the browser (`core/engine/boot.js`
-loads `core/validate/validate.mjs`, which loads `theme-contract.js`, at render time).
-
-`core/audio/kit.mjs` (the source of real cue names) imports `node:fs` to bake `.wav` assets, so it
-cannot be imported into anything the browser loads. That is why `cues` is checked in two places with
-two different strictness levels:
-
-- **`validateTheme` (browser + CLI, every render)**: checks `backdrop` and `cuts` against the live
-  registries, skips the `cues` check (no `cueNames` handed in).
-- **`make validate`'s CLI branch (Node only, `themes/*.json` pack check)**: checks all three, `cues`
-  included, because it already dynamically imports `core/audio/kit.mjs` for the scene-level cue check
-  (`core/validate/validate.mjs`, look for `CUE_NAMES`).
-
-So a bad cue name in a theme PACK is always caught by `make validate`; a bad cue name would only slip
-past the browser's own theme check, which is why the CLI pass is the one that matters here.
+loads `core/validate/validate.mjs`, which loads `theme-contract.js`, at render time). Both checks run at
+every `validateTheme` call, browser and CLI alike: neither list requires a node-only import the way the
+old `cues` check did.
 
 ## How the scaffold uses it
 
@@ -103,9 +105,6 @@ otherwise pick:
   so a brand with no scale opinion renders byte-identical.
 - **`layout.margin` → `x`/`w` on every beat** except the three that name their own mark*/word* slots
   instead of a generic box (`logoLockup`, `ctaEnd`, `logoReveal`).
-- **`cues`**: surfaced as a console note (`audio.auto` derives its cues from the cuts/stings actually
-  used, not from a preference list, so `look.cues` is a reach-for-these-by-hand reference rather than
-  something the scaffold writes into the scene).
 
 **Left undone, stated plainly rather than faked**: `recordedPan` has no text of its own (a bare
 surface, riders are the caller's own layers), so there is nothing for `scale.body`/`scale.caption` to
@@ -156,18 +155,20 @@ in, not imported, the same injection shape `lookErrors` already uses for `bgName
 so `theme-contract.js` stays free of `core/motion/motion.js` and importable from node and the browser
 both.
 
-**Three keys stay uncomputed, on purpose:**
+**Two keys stay uncomputed, on purpose:**
 
-- **`backdrop` is never a computed default.** Which bg preset a film turns through is a taste decision,
-  and the engine choosing it for an author is `docs/MISTAKES.md` #159 by name: `bg` is a required
-  authoring field precisely so this cannot happen again. `theme.bgDefault` remains the one engine-owned
-  bg default; `computedLook` does not become a second one.
-- **`cues` cannot be derived per brand.** `buildSfx` (`formats/scene/scene.js`) already derives each
-  cue from `CUT_CUE`, keyed on the transition actually used, so a fixed per-theme cue list would be a
-  second, disagreeing owner of the same fact. It is flagged here as a candidate for deletion from
-  `LOOK_KEYS` rather than wired into `computedLook`.
+- **`backdrop` is never a computed default, and is never read at render time at all.** Which bg preset
+  a film turns through is a taste decision, and the engine choosing it for an author is
+  `docs/MISTAKES.md` #159 by name: `bg` is a required authoring field (`core/engine/produce.js:14-16`)
+  precisely so this cannot happen again. `theme.bgDefault` remains the one engine-owned bg default;
+  `computedLook` does not become a second one, and `look.backdrop` stays a `make scaffold` seed only.
 - **`marks` needs a real logo path.** No theme-agnostic default exists (a made-up path 404s at render),
   so a theme with no `marks` stays without one until it declares its own.
+
+(`cues` used to be a third uncomputed key. It is gone from `LOOK_KEYS` entirely: `buildSfx`
+(`formats/scene/scene.js:1593-1602`) already derives every cue from the transition actually used at
+each joint, so a fixed per-theme cue list was a second, disagreeing owner of the same fact rather than
+something worth computing a default for.)
 
 `scripts/author/scaffold.mjs` reads `computedLook(themeObj)` as its own last-resort fallback (in place
 of the literal `{default:"fade",accent:"cinematicZoom"}` and `margin ?? 160` it used to hold as a second
