@@ -50,13 +50,18 @@ plan-vs-render, always on; the style gates report only, `TASTE=1` makes them blo
 
 ## The loop  `[ref: make list]`
 
+Every target belongs to one of ten phases (preflight → dev → check → ship → judge → ledger → study →
+engine → site → maintenance); `make list` (alias `make help`) reads the Makefile itself and prints
+every target grouped that way, so it is the one front page and cannot drift from the real target list.
+
 ```bash
-make list                        # the scene module + its schema/sample
+make list                        # every target, grouped by phase: the spine below, always current
+make formats                     # the scene module + its schema/sample (was `make list`)
 make preflight D=<file>          # the 9 decisions before any JSON (docs/CRAFT/README.md)
 make dev   D=path/to/video.json  # THE ITERATION LOOP. Build, draft-render, open. No gates, no audit.
 make studio D=path/to/video.json # the same scene with a frame scrubber + a timeline
-make check D=path/to/video.json  # every gate, every finding, ZERO consequence
-make ship  D=path/to/video.json  # author-check → render → audit → seams, in order
+make check D=path/to/video.json  # every gate, every finding, ZERO consequence (runs preflight for you)
+make ship  D=path/to/video.json  # preflight (if needed) → author-check → render → audit ASPECT=all → seams
 make judge D=path/to/video.json  # the eye, MANDATORY post-render, the only step that SEES
 make ledger D=path/to/video.json # prove it is not a repeat; ledger-add after the user approves
 ```
@@ -74,9 +79,12 @@ What no gate can do, so you must: read the sheets (`make beats`, `make reveal`);
 for a phone feed); eyeball real frames (`make look D=<file>` / `make frame D=<file> N=<n>`); pace a
 narrated film (`make pace-from-vo VO=<file>.words.json`).
 
-**On demand:** `make arsenal Q="…"` searches every named effect/block; `make schema AT="layers[].motion[]"`
-answers what is legal at one path; `make track SHAPE=pan|blast|drift|enter|exit` emits a hand-keyed
-motion track; `make demo Q="…"` writes a ten-second film about one thing
+**On demand, ONE front door:** `make arsenal Q="…"` searches every named effect/block. The same
+command folds what used to be six others: `AT="layers[].motion[]"` answers what is legal at one path,
+`SHAPE=pan|blast|drift|enter|exit` emits a hand-keyed motion track, `BLUEPRINTS=1` catalogs the
+directed-motion beats, `PREVIEWS=1`/`PRESETS=1` open their rendered sheets, `MISTAKES=1 Q="…"` asks
+the mistake log, `THEME=<name>` renders one theme's look. The old separate targets still work (they
+print where they moved) for one release. `make demo Q="…"` writes a ten-second film about one thing
 ([`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md)). Full index: [`docs/CRAFT/README.md`](docs/CRAFT/README.md).
 
 > Fan-out: [`docs/CRAFT/SUBAGENT-BUDGET.md`](docs/CRAFT/SUBAGENT-BUDGET.md) first (fewer, larger

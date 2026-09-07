@@ -422,7 +422,47 @@ export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const argv = process.argv.slice(2);
   const VALUE_FLAGS = new Set(['kind', 'n']);
-  const flag = (n) => { const i = argv.indexOf('--' + n); return i < 0 ? null : argv[i + 1]; };
+  const flag = (n) => {
+    const eq = argv.find((a) => a.startsWith(`--${n}=`));
+    if (eq) return eq.slice(n.length + 3);
+    const i = argv.indexOf('--' + n);
+    return i < 0 ? null : argv[i + 1];
+  };
+
+  // ---- W11: the ONE discovery front door. `make schema`, `make track`, `make blueprints`,
+  // `make previews`, `make preset-sheets`, `make mistakes` and `make theme-sheet` were seven
+  // commands for "what can I say, and how do I ask for it". Each is now a flag here; each old
+  // target is a one-line alias in the Makefile that still runs, so muscle memory survives one
+  // release. This owns none of their logic, only dispatches to it, for the same reason `collect()`
+  // owns no list above: a copy of somebody else's answer is the thing that goes stale.
+  const runScript = async (rel, args) => {
+    const { spawnSync } = await import('node:child_process');
+    const r = spawnSync(process.execPath, [path.join(repoRoot, rel), ...args], { stdio: 'inherit' });
+    process.exit(r.status ?? 0);
+  };
+  if (flag('at') !== null) await runScript('scripts/author/schema-at.mjs', [flag('at') || '']);
+  if (argv.includes('--blueprints')) await runScript('scripts/site/blueprints-catalog.mjs', []);
+  if (argv.includes('--previews')) {
+    const only = flag('only');
+    await runScript('scripts/dev/previews.mjs', only ? [`--only=${only}`] : []);
+  }
+  if (argv.includes('--presets')) {
+    const only = flag('only');
+    await runScript('scripts/dev/preset-sheets.mjs', only ? [`--only=${only}`] : []);
+  }
+  if (flag('theme') !== null) await runScript('scripts/dev/theme-sheet.mjs', [`--theme=${flag('theme')}`]);
+  if (argv.includes('--mistakes')) {
+    await runScript('scripts/author/mistakes.mjs', argv.filter((a) => a !== '--mistakes'));
+  }
+  if (flag('shape') !== null) {
+    const pass = [flag('shape') || 'pan'];
+    for (const [n, opt] of [['to'], ['dur'], ['from'], ['amp'], ['axis'], ['offset'], ['scene', '--scene'], ['layer', '--layer']]) {
+      const v = flag(n);
+      if (v !== null) pass.push(opt || `--${n}`, v);
+    }
+    await runScript('scripts/author/track.mjs', pass);
+  }
+
   // ---- --for <scene.json>: the vocabularies this film is already using, and has barely touched ------
   //
   // DISCOVERY WORKS HERE. TRIGGERING IT IS WHAT FAILS, and the evidence is not subtle. In one day three
@@ -539,6 +579,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.error(`usage: node scripts/author/arsenal.mjs "<what you want, in plain english>" [--kind <kind>] [--n 8]
          node scripts/author/arsenal.mjs --census
          node scripts/author/arsenal.mjs --new
+         node scripts/author/arsenal.mjs --at 'layers[].motion[]'         # what may I write there (was: make schema)
+         node scripts/author/arsenal.mjs --shape pan [--to -600] [...]    # a hand-keyed track     (was: make track)
+         node scripts/author/arsenal.mjs --mistakes "<words>"             # ask the mistake log     (was: make mistakes)
+         node scripts/author/arsenal.mjs --blueprints                     # the beat catalog        (was: make blueprints)
+         node scripts/author/arsenal.mjs --previews [--only=<id>]         # open the preview sheet  (was: make previews)
+         node scripts/author/arsenal.mjs --presets [--only=<name>]        # preset showcases        (was: make preset-sheets)
+         node scripts/author/arsenal.mjs --theme=<name>                   # one theme's look        (was: make theme-sheet)
 
     ${all.length} named things across ${kinds.length} vocabularies, read live from the registries:
     ${kinds.join(' · ')}`);
