@@ -131,6 +131,12 @@ export function expandScene(data) {
 // `transition` sugar is normalised too. formats/scene/scene.js (the render page) does not call this:
 // see the file banner for why, and internal/render/expand.go for where the same expansion happens for
 // that path instead.
+// DO NOT call core/engine/produce.js's produceBaseline (or any other defaults pass) from here. It was
+// tried and reverted: docs/MISTAKES.md #157 records that wiring the produced baseline into the gates
+// masked the exact conditions they test (a gate checking "no camera was injected" can no longer see
+// that once loadScene injects one first). A gate coaches on what the author WROTE; the engine fills
+// the baseline only on the render path, at core/engine/boot.js. Two different jobs, read the same
+// source file, never the same derived one.
 export function loadScene(data) {
   return lowerScene(expandScene(data));
 }
