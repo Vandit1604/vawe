@@ -204,14 +204,28 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
 
 // ---------------------------------------------------------------------------------------------------
 // COMPUTED LOOK: only 7 of 44 themes carry a `look` block, so an engine default that reads `theme.look`
-// does nothing for the other 37 (including `themes/default.json`) unless one can be derived. `scale`,
-// `layout` and `cuts` below are not invented: they are `themes/vawe.json`'s own look values, the exact
-// numbers `docs/CRAFT/THEME-LOOK.md` already uses as its worked example, and `default.json`'s own note
-// says that file deliberately MIRRORS vawe (palette today, look by the same reasoning here). `field`
-// is read off all seven authored looks: every light-bg theme ships `{grain:0,vignette:0}`, every
-// dark-bg one (nike/vercel/a24) ships nonzero grain and vignette, so light-vs-dark decides it.
+// does nothing for the other 37 (including `themes/default.json`) unless one can be derived. The first
+// cut of this function filled every theme with the SAME four numbers and the SAME two cut names
+// (`themes/vawe.json`'s own look, copy-pasted into every theme with no look of its own): a calm brand
+// and a loud one got identical type scale and identical cuts, which is a default that SUPPLIES A
+// CONSTANT, not one that DERIVES. `scale` and `cuts` below instead read `theme.motion`, which every
+// theme already carries an opinion about (even themes with none fall back to the engine's own
+// `DEFAULT_MOTION`, `core/motion/motion.js`), so a calm theme and a punchy one compute different looks.
 //
-// TWO KEYS ARE DELIBERATELY LEFT UNCOMPUTED:
+// `field` already derived from light-vs-dark; unchanged, just re-verified against the wider library
+// (see `make theme-look-spread` below): every light-bg theme still reads `{grain:0,vignette:0}`, every
+// dark-bg one nonzero.
+//
+// `layout` STAYS A CONSTANT, on purpose, and this is the sentence that says why: no field ANY theme
+// carries (palette, type, motion, bg, bgDefault) correlates with anchor or margin across the 7 themes
+// that DID author one by hand (a24/apple/duolingo/vercel center, bloomberg/nike/vawe left, with no
+// split on dominance, contrast, bounce or a distinct display face that survives more than 4 of the 7
+// points). Margin is also structurally a CANVAS decision (how much a 16:9 frame needs on the sides)
+// that no theme file has an opinion about at all. Inventing a formula to fit 7 hand-placed points would
+// be curve-fitting, not derivation, so `layout` keeps `themes/vawe.json`'s own values and waits for a
+// real signal (a theme-level density field, if one is ever added) rather than a fake one.
+//
+// TWO KEYS ARE DELIBERATELY LEFT UNCOMPUTED (unchanged from before):
 //   - `backdrop` (which bg preset a film turns through) is a TASTE decision, never the engine's to
 //     pick for an author (docs/MISTAKES.md #159: the engine used to choose the background and nobody
 //     ever designed one again; `bg` is a required authoring field now, core/engine/produce.js's own
@@ -226,19 +240,59 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
 // the file header: node+browser purity is the whole point). Omit it and `field` stays the light
 // default, an under-estimate (no grain on what might be a dark brand) rather than a guess this file
 // has no business making on its own.
-const DEFAULT_SCALE = { hook: 92, headline: 64, body: 38, caption: 24 };
 const DEFAULT_LAYOUT = { anchor: 'left', margin: 160 };
-const DEFAULT_CUTS = { default: 'fade', accent: 'cinematicZoom' };
 const DEFAULT_FIELD_LIGHT = { grain: 0, vignette: 0 };
 const DEFAULT_FIELD_DARK = { grain: 0.08, vignette: 0.15 };
+
+// `theme.motion` is optional (one shipped theme, `themes/plinth-auto.json`, has none at all), so every
+// read below falls back to the SAME numbers `core/motion/motion.js`'s own `DEFAULT_MOTION` uses for a
+// missing field (`easeOutQuint`/0/0.6/48/1/0.045), quoted here rather than imported so this file keeps
+// its node+browser purity (see the file header). A theme this sparse gets the engine's own house
+// motion, never a second, disagreeing default.
+const MOTION_FALLBACK = { bounce: 0, settle: 0.6, enter: 48, durationScale: 1 };
+
+// `scale`: DERIVED from `motion.enter`, the pixel distance a theme's own layers already travel on
+// entrance. Regressed off the 7 hand-authored looks (vawe/a24/apple/bloomberg/duolingo/nike/vercel):
+// hook ~= 55 + 1.12*enter tracks all 7 within 7px (nike, the widest miss, predicts 106.5 against an
+// authored 110). The three smaller sizes are NOT independently derived: every authored look keeps the
+// same proportion to its own hook (headline ~0.70x, body ~0.41x, caption ~0.27x, again averaged off
+// the 7 and each within 0.03 of every one of them), so those three ratios are a real, and genuinely
+// constant, type-scale relationship, kept as constants deliberately rather than re-fit per theme.
+const scaleFromMotion = (m) => {
+  const hook = 55 + 1.12 * m.enter;
+  const r = (mul, lo) => Math.max(lo, Math.round(hook * mul));
+  return { hook: Math.round(hook), headline: r(0.70, 20), body: r(0.41, 14), caption: r(0.27, 10) };
+};
+
+// `cuts`: DERIVED from `motion.durationScale` (the theme's overall pace: >1 is slower/more cinematic,
+// <1 is faster) for the DEFAULT cut, which fires on almost every boundary and so should read as the
+// brand's ordinary pace, and from `motion.bounce` (the theme's own overshoot, 0..~0.5) for the ACCENT
+// cut, which fires rarely and should read as the brand's peak energy. Every name below is a real entry
+// in `core/transitions/catalog.js` (checked by `lookErrors` when `transitionNames` is injected, which
+// `make validate` and the new gate both do); a theme missing `motion` reads the engine's own pace (1)
+// and its own stillness (0), which lands it on the calmest tier of each, not a guess.
+const CUT_DEFAULT_TIERS = [ // ordered fast -> slow; each `max` is the upper edge of `durationScale` for that tier
+  { max: 0.85, name: 'whip' },       // faster than the house pace: a brisk, no-ceremony default cut
+  { max: 0.95, name: 'fade' },       // the house pace itself (engine default motion is 1, vawe is 0.88)
+  { max: 1.05, name: 'dissolve' },   // a touch slower: softer than a fade, still unremarkable
+  { max: Infinity, name: 'riseBlur' }, // deliberately slow (a24 1.25, apple 1.15): cuts read as cinematic
+];
+const CUT_ACCENT_TIERS = [ // ordered still -> bouncy; each `max` is the upper edge of `motion.bounce`
+  { max: 0.05, name: 'letterbox' },    // near-zero overshoot: the loud beat still arrives composed
+  { max: 0.15, name: 'cinematicZoom' }, // vawe's own accent: a little life, nothing showy
+  { max: 0.30, name: 'zoom' },
+  { max: Infinity, name: 'punch' },    // duolingo (0.5) territory: the brand visibly overshoots everywhere
+];
+const pickTier = (tiers, v) => (tiers.find((t) => v <= t.max) || tiers[tiers.length - 1]).name;
 
 export function computedLook(theme, { isLightBg } = {}) {
   const bg = theme && theme.palette && theme.palette.bg;
   const light = isLightBg && bg != null ? isLightBg(bg) : true; // unknown bg reads as light, the harmless side
+  const m = { ...MOTION_FALLBACK, ...(theme && theme.motion) };
   return {
-    scale: { ...DEFAULT_SCALE },
+    scale: scaleFromMotion(m),
     layout: { ...DEFAULT_LAYOUT },
-    cuts: { ...DEFAULT_CUTS },
+    cuts: { default: pickTier(CUT_DEFAULT_TIERS, m.durationScale), accent: pickTier(CUT_ACCENT_TIERS, m.bounce) },
     field: light ? { ...DEFAULT_FIELD_LIGHT } : { ...DEFAULT_FIELD_DARK },
   };
 }
