@@ -51,7 +51,7 @@ the beats in Step 4 so the reveals land on the words.
 **Gate:** VO generated, or the video is silent.
 
 ## Step 4: Author from blueprints (obey the spec)
-Compose the scene JSON from `{type:"beat"}` blueprints (`make blueprints`) + brand content, on the remixed
+Compose the scene JSON from `{type:"beat"}` blueprints (`make arsenal BLUEPRINTS=1`) + brand content, on the remixed
 theme, transcribing the storyboard exactly. Reach for the arsenal (`make effects` → `docs/EFFECTS.md`):
 kinetic reveals, a living bg, border-beam/paint, svg draw/morph, `cameraMove`, dense per-child figures via
 `parts`. For a **hero beat** whose choreography `parts`/blueprints can't express (overlapping tweens, a

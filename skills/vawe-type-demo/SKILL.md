@@ -30,7 +30,7 @@ can run longer than its neighbours: give the click room to read before the conse
 
 ## The blueprints to reach for
 
-By role (`make blueprints` for the full 29):
+By role (`make arsenal BLUEPRINTS=1` for the full 29):
 - **hook**: `kineticHook`, `typedHook`
 - **the mechanism itself**: no dedicated blueprint owns cursor+click; compose it from a real UI
   (`component`/`image`/`html`) plus a `cursor` layer, or reach for `recordedPan`/`scrollStory` when the
