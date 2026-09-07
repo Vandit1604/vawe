@@ -1,51 +1,275 @@
 {
  "module": "scene",
- "note": "LAUNCH worked example (docs/EVALS.md, skills/vawe-type-launch/SKILL.md). Captured UI (assets/brands/vawe/stills/glass-hero.png, a real product shot, not invented) carries the build beat; the payoff shows a real engine fact (5 real canvases) instead of a slogan; the wave mark gets its own beat, never a bullet next to a headline. The wordmark travels bottom-left across every cut: the continuous object. Theme vawe, white-first cobalt.",
- "theme": "vawe",
+ "note": "LAUNCH worked example (docs/EVALS.md, skills/vawe-type-launch/SKILL.md). Ledgerline is a fictional reconciliation tool for finance teams (verify/evals/briefs/launch.storyboard.md carries the full contract): matches two ledgers by amount and date, not by merchant string, and names what still disagrees. Theme ab4-a-ledgerline (an accounting pad, not a fintech app: ivory paper, one ledger green, one clay red, JetBrains Mono for every figure) carries the precise/dense/quietly-confident register the brief asked for. The reconciliation flag for one named row is the continuous object: it travels center to left to a zoomed center to a corner badge across all six beats, and flips from UNMATCHED (red) to MATCHED (green) on-screen the instant beat 3 resolves the merchant strings, driven by `vars`.",
+ "theme": "ab4-a-ledgerline",
  "aspect": "16:9",
- "duration": 13,
- "energy": "brand",
+ "duration": 26,
  "sceneUnits": true,
- "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited"], "_why": {
-   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
-   "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
-   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass"
- } },
- "audio": { "silent": true, "_why": "worked example: proving the type spine and captured-UI show-not-tell, not a mix" },
+ "audio": {
+  "auto": true
+ },
  "bg": [
-  { "from": 0, "to": 2.6, "preset": "paper" },
-  { "from": 2.6, "to": 6.5, "preset": "soft" },
-  { "from": 6.5, "to": 9.5, "preset": "dotmatrix" },
-  { "from": 9.5, "to": 13, "preset": "paperShapes" }
+  {
+   "from": 0,
+   "to": 3.5,
+   "preset": "paper"
+  },
+  {
+   "from": 3.5,
+   "to": 9,
+   "preset": "dotmatrix"
+  },
+  {
+   "from": 9,
+   "to": 13.5,
+   "preset": "soft"
+  },
+  {
+   "from": 13.5,
+   "to": 19,
+   "preset": "accent"
+  },
+  {
+   "from": 19,
+   "to": 23,
+   "preset": "paper"
+  },
+  {
+   "from": 23,
+   "to": 26,
+   "preset": "paperShapes"
+  }
  ],
  "transitions": [
-  { "at": 2.6, "fx": "fade", "dur": 0.5 },
-  { "at": 6.5, "fx": "cinematicZoom", "dur": 0.6 },
-  { "at": 9.5, "fx": "fade", "dur": 0.5 }
+  {
+   "at": 3.5,
+   "fx": "fade",
+   "mech": "seam"
+  },
+  {
+   "at": 9,
+   "fx": "fade",
+   "mech": "seam"
+  },
+  {
+   "at": 13.5,
+   "fx": "fade",
+   "mech": "seam"
+  },
+  {
+   "at": 19,
+   "fx": "fade",
+   "mech": "seam"
+  },
+  {
+   "at": 23,
+   "fx": "fade",
+   "mech": "seam"
+  }
  ],
  "layers": [
-  { "type": "text", "text": "VAWE", "font": "mono", "size": 30, "weight": 600, "color": "var(--dim)", "tracking": "0.24em", "x": 150, "y": 180, "start": 0, "duration": 2.4, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "One JSON becomes <b>any canvas.</b>", "size": 92, "weight": 640, "tracking": "-0.02em", "w": 1500, "x": 150, "y": 280, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0.2, "duration": 2.2, "out": "fade", "exitDur": 0.3 },
-
-  { "type": "text", "text": "the real product surface, captured", "size": 44, "weight": 600, "color": "var(--text-2)", "w": 1000, "x": 150, "y": 150, "start": 2.7, "duration": 3.6, "anim": "slide-up", "enterDur": 0.45, "out": "fade", "exitDur": 0.3 },
-  { "type": "image", "src": "/assets/brands/vawe/stills/glass-hero.png", "x": 340, "y": 300, "w": 1240, "h": 698, "radius": 16, "start": 2.9, "duration": 3.3, "anim": "scale", "enterDur": 0.55, "out": "defocus", "exitDur": 0.4, "ken": { "from": 1.0, "to": 1.12 } },
-
-  { "type": "text", "text": "five real canvases, one JSON", "size": 56, "weight": 600, "w": 1400, "x": 150, "y": 190, "start": 6.6, "duration": 2.7, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
-  { "type": "html", "x": 150, "y": 340, "w": 1600, "start": 6.9, "duration": 2.3, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0.3,
-    "html": "<div style=\"display:flex;gap:24px\"><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">16:9</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">9:16</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">1:1</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">4:5</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">4:3</span></div>",
-    "parts": [{ "select": "[data-part]", "anim": "popIn", "each": 0.3, "stagger": 0.09, "delay": 0.05 }] },
-
-  { "type": "svg", "x": 150, "y": 250, "w": 130, "h": 68, "viewBox": "0 0 46 24", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "draw": { "dur": 0.9, "weight": 4, "ease": "easeInOutCubic" }, "start": 9.7, "duration": 3.1, "anim": "none", "out": "fade", "exitDur": 0 },
-  { "type": "text", "text": "vawe.dev", "size": 84, "weight": 650, "color": "var(--ink)", "x": 150, "y": 420, "start": 10.3, "duration": 2.5, "anim": "slide-up", "enterDur": 0.45, "out": "fade", "exitDur": 0 },
-  { "type": "text", "text": "24 layers. 693 effects. one render.", "size": 36, "weight": 500, "color": "var(--dim)", "x": 150, "y": 540, "start": 10.7, "duration": 2.1, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
-
-  { "type": "svg", "x": 150, "y": 940, "w": 92, "h": 48, "viewBox": "0 0 46 24", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "start": 0, "duration": 13, "acrossBeats": true,
-    "motion": [
-      { "t": 0, "x": 0 },
-      { "t": 4.3, "x": 260, "ease": "easeInOutSine" },
-      { "t": 8.6, "x": 520, "ease": "easeInOutSine" },
-      { "t": 13, "x": 780, "ease": "easeInOutSine" }
+  {
+   "type": "text",
+   "text": "<b>$4,212.18</b> doesn&rsquo;t match your books.",
+   "size": 76,
+   "weight": 640,
+   "tracking": "-0.01em",
+   "color": "var(--ink)",
+   "w": 1220,
+   "x": 182,
+   "y": 205,
+   "split": "word",
+   "preset": "up",
+   "dist": 22,
+   "stagger": 0.045,
+   "each": 0.34,
+   "start": 0,
+   "duration": 3.5,
+   "out": "fade",
+   "exitDur": 0.3
+  },
+  {
+   "type": "html",
+   "start": 0,
+   "duration": 3.5,
+   "track": 1,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 1080,
+   "html": "<style>/* STAGEKIT:start (generated by `make stagekit`, DO NOT EDIT BY HAND, paste verbatim into every fragment) */\n.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-radius-sm{border-radius:8px}\n.kit-radius-md{border-radius:16px}\n.kit-radius-lg{border-radius:28px}\n.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-hook{font:700 93px var(--font-sans);color:var(--text);margin:0}\n.kit-headline{font:700 65px var(--font-sans);color:var(--text);margin:0}\n.kit-body{font:400 38px var(--font-sans);color:var(--text-2);margin:0}\n.kit-caption{font:400 25px var(--font-sans);color:var(--dim);margin:0}\n.kit-accent{color:var(--accent)}\n/* STAGEKIT:end */</style>\n<style>\n.s1{position:absolute;inset:0;container-type:size}\n.s1-sub{position:absolute;left:9.5cqw;top:65cqh;display:flex;align-items:center;gap:1cqw}\n.s1-sub span{font:500 1.5cqw var(--font-mono);color:var(--muted);letter-spacing:0.02em;text-transform:uppercase}\n.s1-sub .vs{color:var(--dim);font:400 1.3cqw var(--font-mono)}\n.s1-rule{position:absolute;left:9.5cqw;top:60cqh;width:22cqw;height:1px;background:var(--border)}\n</style>\n<div class=\"s1\">\n  <div class=\"s1-rule\"></div>\n  <div class=\"s1-sub\">\n    <span>Bank feed</span><span class=\"vs\">vs</span><span>Books ledger</span>\n  </div>\n</div>\n"
+  },
+  {
+   "type": "html",
+   "start": 3.5,
+   "duration": 5.5,
+   "track": 1,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 1080,
+   "html": "<style>/* STAGEKIT:start (generated by `make stagekit`, DO NOT EDIT BY HAND, paste verbatim into every fragment) */\n.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-radius-sm{border-radius:8px}\n.kit-radius-md{border-radius:16px}\n.kit-radius-lg{border-radius:28px}\n.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-hook{font:700 93px var(--font-sans);color:var(--text);margin:0}\n.kit-headline{font:700 65px var(--font-sans);color:var(--text);margin:0}\n.kit-body{font:400 38px var(--font-sans);color:var(--text-2);margin:0}\n.kit-caption{font:400 25px var(--font-sans);color:var(--dim);margin:0}\n.kit-accent{color:var(--accent)}\n/* STAGEKIT:end */</style>\n<style>\n.s2{position:absolute;inset:0;container-type:size}\n.s2-cap{position:absolute;left:41cqw;top:5cqh;width:52cqw;font:600 2.3cqw var(--font-sans);color:var(--ink);letter-spacing:-0.01em}\n.s2-books{position:absolute;left:41cqw;top:20cqh;width:56cqw}\n.s2-panel{display:grid;grid-template-columns:1fr 1fr;gap:1.6cqw}\n.s2-col{background:var(--card,var(--surface));border:1px solid var(--border);border-radius:0.7cqw;overflow:hidden}\n.s2-head{padding:1.1cqw 1.4cqw;border-bottom:1px solid var(--border);font:600 1.0cqw var(--font-mono);letter-spacing:0.1em;color:var(--muted)}\n.s2-row{display:flex;justify-content:space-between;align-items:baseline;gap:0.6cqw;padding:0.85cqw 1.2cqw;border-bottom:1px solid var(--border);font-family:var(--font-mono)}\n.s2-row:last-child{border-bottom:none}\n.s2-row .m{flex:1 1 auto;min-width:0;font-size:0.92cqw;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n.s2-row .a{flex:0 0 auto;font-size:0.92cqw;color:var(--dim);font-variant-numeric:tabular-nums}\n.s2-row.ok .a{color:var(--up)}\n.s2-row.flag .a{color:var(--down)}\n</style>\n<div class=\"s2\">\n  <div class=\"s2-cap\"><span class=\"s2-cap-t\">Ledgerline diffs every row by amount and date.</span></div>\n  <div class=\"s2-books\">\n    <div class=\"s2-panel\">\n      <div class=\"s2-col\">\n        <div class=\"s2-head\">BANK</div>\n        <div class=\"s2-row ok\"><span class=\"m\">03&#8209;09 &middot; ACH PAYROLL RUN 0311</span><span class=\"a\">&minus;9,204.50</span></div>\n        <div class=\"s2-row flag\"><span class=\"m\">03&#8209;11 &middot; SQ *NORTHSIDE ROASTERS</span><span class=\"a\">&minus;18.40</span></div>\n        <div class=\"s2-row ok\"><span class=\"m\">03&#8209;12 &middot; WIRE OUT 88214</span><span class=\"a\">&minus;2,600.00</span></div>\n        <div class=\"s2-row ok\"><span class=\"m\">03&#8209;14 &middot; CHECK 1042</span><span class=\"a\">&minus;740.00</span></div>\n      </div>\n      <div class=\"s2-col\">\n        <div class=\"s2-head\">BOOKS</div>\n        <div class=\"s2-row ok\"><span class=\"m\">03&#8209;09 &middot; Payroll, March 9</span><span class=\"a\">&minus;9,204.50</span></div>\n        <div class=\"s2-row flag\"><span class=\"m\">03&#8209;11 &middot; Northside Roasters LLC</span><span class=\"a\">&minus;18.40</span></div>\n        <div class=\"s2-row ok\"><span class=\"m\">03&#8209;12 &middot; Contractor wire, Reyes</span><span class=\"a\">&minus;2,600.00</span></div>\n        <div class=\"s2-row ok\"><span class=\"m\">03&#8209;14 &middot; Office lease, check 1042</span><span class=\"a\">&minus;740.00</span></div>\n      </div>\n    </div>\n  </div>\n</div>\n",
+   "parts": [
+    {
+     "select": ".s2-row",
+     "anim": "riseIn",
+     "each": 0.4,
+     "stagger": 0.12,
+     "delay": 0.05
+    }
+   ]
+  },
+  {
+   "type": "html",
+   "start": 9,
+   "duration": 4.5,
+   "track": 1,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 1080,
+   "html": "<style>/* STAGEKIT:start (generated by `make stagekit`, DO NOT EDIT BY HAND, paste verbatim into every fragment) */\n.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-radius-sm{border-radius:8px}\n.kit-radius-md{border-radius:16px}\n.kit-radius-lg{border-radius:28px}\n.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-hook{font:700 93px var(--font-sans);color:var(--text);margin:0}\n.kit-headline{font:700 65px var(--font-sans);color:var(--text);margin:0}\n.kit-body{font:400 38px var(--font-sans);color:var(--text-2);margin:0}\n.kit-caption{font:400 25px var(--font-sans);color:var(--dim);margin:0}\n.kit-accent{color:var(--accent)}\n/* STAGEKIT:end */</style>\n<style>\n.s3{position:absolute;inset:0;container-type:size}\n.s3-strings{position:absolute;left:50%;top:14cqh;transform:translateX(-50%);width:46cqw;text-align:center}\n.s3-strings div{font:500 2.1cqw var(--font-mono);color:var(--muted);padding:0.35cqw 0}\n.s3-strings .a{color:var(--ink)}\n.s3-strings .b{color:var(--muted)}\n.s3-arrow{font:400 1.2cqw var(--font-mono);color:var(--muted);padding:0.25cqw 0}\n.s3-cap{position:absolute;left:50%;bottom:22cqh;transform:translateX(-50%);width:50cqw;text-align:center;font:500 1.3cqw var(--font-sans);color:var(--muted)}\n</style>\n<div class=\"s3\">\n  <div class=\"s3-strings\">\n    <div class=\"a\">SQ *NORTHSIDE ROASTERS</div>\n    <div class=\"s3-arrow\">&darr;</div>\n    <div class=\"b\">Northside Roasters LLC</div>\n  </div>\n  <div class=\"s3-cap\">Matched on amount and date, not the memo string.</div>\n</div>\n"
+  },
+  {
+   "type": "html",
+   "start": 13.5,
+   "duration": 5.5,
+   "track": 1,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 1080,
+   "html": "<style>/* STAGEKIT:start (generated by `make stagekit`, DO NOT EDIT BY HAND, paste verbatim into every fragment) */\n.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-radius-sm{border-radius:8px}\n.kit-radius-md{border-radius:16px}\n.kit-radius-lg{border-radius:28px}\n.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-hook{font:700 93px var(--font-sans);color:var(--text);margin:0}\n.kit-headline{font:700 65px var(--font-sans);color:var(--text);margin:0}\n.kit-body{font:400 38px var(--font-sans);color:var(--text-2);margin:0}\n.kit-caption{font:400 25px var(--font-sans);color:var(--dim);margin:0}\n.kit-accent{color:var(--accent)}\n/* STAGEKIT:end */</style>\n<style>\n.s4{position:absolute;inset:0;container-type:size}\n.s4-of{position:absolute;left:50%;top:57.5cqh;transform:translateX(-50%);font:500 3cqw var(--font-mono);color:var(--muted)}\n.s4-line{position:absolute;left:50%;top:68cqh;transform:translateX(-50%);width:56cqw;text-align:center;font:600 1.7cqw var(--font-sans);color:var(--ink)}\n.s4-flag{position:absolute;left:50%;top:76cqh;transform:translateX(-50%);width:56cqw;text-align:center;font:500 1.15cqw var(--font-mono);color:var(--down)}\n</style>\n<div class=\"s4\">\n  <div class=\"s4-of\">of 9,431</div>\n  <div class=\"s4-line\">matched automatically.</div>\n  <div class=\"s4-flag\">19 flagged in 3.2 seconds</div>\n</div>\n"
+  },
+  {
+   "type": "html",
+   "start": 19,
+   "duration": 4,
+   "track": 1,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 1080,
+   "html": "<style>/* STAGEKIT:start (generated by `make stagekit`, DO NOT EDIT BY HAND, paste verbatim into every fragment) */\n.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-radius-sm{border-radius:8px}\n.kit-radius-md{border-radius:16px}\n.kit-radius-lg{border-radius:28px}\n.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-hook{font:700 93px var(--font-sans);color:var(--text);margin:0}\n.kit-headline{font:700 65px var(--font-sans);color:var(--text);margin:0}\n.kit-body{font:400 38px var(--font-sans);color:var(--text-2);margin:0}\n.kit-caption{font:400 25px var(--font-sans);color:var(--dim);margin:0}\n.kit-accent{color:var(--accent)}\n/* STAGEKIT:end */</style>\n<style>\n.s5{position:absolute;inset:0;container-type:size}\n.s5-word{position:absolute;left:50%;top:47cqh;transform:translateX(-50%);font:700 4.6cqw var(--font-sans);color:var(--ink);letter-spacing:-0.01em}\n</style>\n<div class=\"s5\">\n  <div class=\"s5-word\">LEDGERLINE</div>\n</div>\n"
+  },
+  {
+   "type": "html",
+   "start": 23,
+   "duration": 3,
+   "track": 1,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 1080,
+   "html": "<style>/* STAGEKIT:start (generated by `make stagekit`, DO NOT EDIT BY HAND, paste verbatim into every fragment) */\n.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-radius-sm{border-radius:8px}\n.kit-radius-md{border-radius:16px}\n.kit-radius-lg{border-radius:28px}\n.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}\n.kit-hook{font:700 93px var(--font-sans);color:var(--text);margin:0}\n.kit-headline{font:700 65px var(--font-sans);color:var(--text);margin:0}\n.kit-body{font:400 38px var(--font-sans);color:var(--text-2);margin:0}\n.kit-caption{font:400 25px var(--font-sans);color:var(--dim);margin:0}\n.kit-accent{color:var(--accent)}\n/* STAGEKIT:end */</style>\n<style>\n.s6{position:absolute;inset:0;container-type:size}\n.s6-url{position:absolute;left:50%;top:44cqh;transform:translateX(-50%);font:600 2.9cqw var(--font-mono);color:var(--accent)}\n.s6-tag{position:absolute;left:50%;top:57cqh;transform:translateX(-50%);font:500 1.3cqw var(--font-sans);color:var(--muted)}\n</style>\n<div class=\"s6\">\n  <div class=\"s6-url\">ledgerline.io</div>\n  <div class=\"s6-tag\">Reconcile with confidence.</div>\n</div>\n"
+  },
+  {
+   "type": "html",
+   "track": 5,
+   "x": 640,
+   "y": 437,
+   "w": 640,
+   "h": 120,
+   "start": 0,
+   "duration": 26,
+   "acrossBeats": true,
+   "vars": {
+    "--flag": [
+     0,
+     1
     ]
+   },
+   "varsDelay": 9,
+   "varsDur": 0.15,
+   "html": "<div style=\"position:absolute;inset:0;container-type:size\"><span style=\"position:absolute;left:14%;top:50%;width:22px;height:22px;border-radius:50%;transform:translateY(-50%);background:color-mix(in srgb, var(--down) calc((1 - var(--flag,0)) * 100%), var(--up) calc(var(--flag,0) * 100%))\"></span><span style=\"position:absolute;left:24%;top:50%;transform:translateY(-50%);font:700 3cqw var(--font-mono);letter-spacing:0.05em;color:var(--down);opacity:calc(1 - var(--flag,0))\">UNMATCHED</span><span style=\"position:absolute;left:24%;top:50%;transform:translateY(-50%);font:700 3cqw var(--font-mono);letter-spacing:0.05em;color:var(--up);opacity:var(--flag,0)\">MATCHED</span></div>",
+   "motion": [
+    {
+     "t": 0,
+     "x": 0,
+     "y": 0
+    },
+    {
+     "t": 3.5,
+     "x": 0,
+     "y": 0
+    },
+    {
+     "t": 9,
+     "x": -575,
+     "y": 43
+    },
+    {
+     "t": 13.5,
+     "x": -30,
+     "y": -10
+    },
+    {
+     "t": 19,
+     "x": -575,
+     "y": 514
+    },
+    {
+     "t": 23,
+     "x": -575,
+     "y": 514
+    },
+    {
+     "t": 26,
+     "x": -575,
+     "y": 514
+    }
+   ]
+  },
+  {
+   "type": "count",
+   "from": 0,
+   "to": 9412,
+   "track": 3,
+   "x": 640,
+   "y": 280,
+   "w": 640,
+   "size": 118,
+   "weight": 700,
+   "align": "center",
+   "font": "mono",
+   "color": "var(--ink)",
+   "start": 13.5,
+   "duration": 5.5,
+   "countStart": 0.15,
+   "countDur": 1.1,
+   "anim": "fade",
+   "enterDur": 0.3,
+   "out": "fade",
+   "exitDur": 0.3
+  },
+  {
+   "type": "svg",
+   "x": 150,
+   "y": 400,
+   "w": 160,
+   "h": 6,
+   "viewBox": "0 0 160 6",
+   "d": "M2 3 H158",
+   "stroke": "var(--accent)",
+   "draw": {
+    "dur": 0.7,
+    "weight": 4,
+    "ease": "easeInOutCubic"
+   },
+   "start": 19.3,
+   "duration": 3.7,
+   "anim": "none",
+   "out": "fade",
+   "exitDur": 0
+  }
+ ],
+ "cameraMove": [
+  {
+   "move": "slowPush",
+   "start": 0,
+   "dur": 26,
+   "from": 1,
+   "to": 1.035
   }
  ]
 }
