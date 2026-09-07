@@ -201,7 +201,7 @@ async function sweepEnums() {
   // The DEFAULT value of each vocabulary is by definition identical to the no-value baseline, so it
   // is not evidence of anything. Naming them keeps the sweep honest instead of reporting 1 false
   // finding per category forever.
-  const DEFAULTS = { 'layer anim': 'fade', 'kinetic preset': 'up' };
+  const DEFAULTS = { 'layer anim': 'none', 'kinetic preset': 'up' };
   const CUT_STYLES = (() => {
     const j = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats/scene/schema.json'), 'utf8'));
     let found = [];
@@ -249,9 +249,10 @@ async function sweepEnums() {
     // worth trusting MUST see them as one thing. If one stops colliding, the signature has gone back
     // to carrying the value's identity and every "distinct" printed below is unearned.
     // The first version of this assertion used the DEFAULT value instead, and it was vacuous: scene.html
-    // stamps `data-anim` on every layer and defaults it to `fade`, so the baseline and `anim:'fade'`
-    // matched even with redaction switched off. Verified by switching it off, the sweep still said
-    // clean. That is the same self-fulfilling shape as the bug being fixed, one level up.
+    // stamps `data-anim` on every layer and (at the time) defaulted it to `fade`, so the baseline and
+    // `anim:'fade'` matched even with redaction switched off. Verified by switching it off, the sweep
+    // still said clean. That is the same self-fulfilling shape as the bug being fixed, one level up.
+    // (The default is `none` now; this note describes the shape of the old bug, not today's setup.)
     for (const pair of Object.keys(aliases)) {
       if (!collided.includes(pair)) note('vocab', `${V.label} (falsifiability)`, `\`${pair}\` are the same entry in the registry and MUST hash identically, but this sweep saw them as distinct. The signature is identity-revealing again, so nothing below is evidence. Check BLIND_ATTRS against what scene.html now stamps on a layer.`);
     }
