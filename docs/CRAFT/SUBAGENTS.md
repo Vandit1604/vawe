@@ -76,6 +76,40 @@ frames, the source side by side. That is the difference between a second opinion
 of your own file. Run `copy` when you want the writing re-read by something that is not you, and know
 that is what you are buying.
 
+## DECIDERS: a second kind of agent, and the rule that makes it safe
+
+Everything above is a CRITIC. A critic reports and the main thread fixes, because a critic is evidence
+and never a ruling. A DECIDER is a different animal: it writes into the film. That is a larger
+permission and it needs a bound, or two of them will quietly fight over the same field.
+
+**The bound is one rule: a role owns ONE exclusive write scope, and may touch nothing else.** The
+transitions decider writes `transitions[]`. The subject decider writes the subject slot of a beat. The
+sound decider writes the audio block. Two deciders then cannot collide, and a decision that turns out
+wrong is revertable in one field instead of being tangled through the film. This is the same discipline
+the HTML migration used with disjoint file lists per agent, one level finer.
+
+**A role earns its place only if the engine cannot already decide it.** This test matters more than it
+sounds, because the engine now supplies a great deal by default, and an agent that re-decides a good
+default is pure cost.
+
+| Role | Writes | Has a job because |
+|---|---|---|
+| **scene** (one per scene) | one fragment file | HTML renders instantly, so the agent can look at its own work and iterate with no render. This is the loop, not a critique |
+| **transition** | `transitions[]` | the engine infers cuts from TIMING and narrows them by structure, but the rhetorical relationship between two beats is not in the data |
+| **subject** | a beat's subject slot | 36% of films carry no pictorial layer at all, and choosing what a beat SHOWS is the one thing the engine must never do alone (`docs/MISTAKES.md` #159) |
+| **sound** | the audio block | cue punctuation is automatic now; choosing a bed is a register decision, and the engine stays silent when it has no input |
+| type · colour · layout · backdrop | nothing | these resolve from the theme. A decider here would re-decide what the brand already decided |
+
+**The order is a dependency, not a preference.** Subject first, because a cut cannot be chosen without
+knowing what sits on either side of it. Then the scene fragments. Then transitions, reading the
+RENDERED joins rather than the JSON, which is the same admission test the critics above are held to.
+Then sound, which punctuates decisions already made.
+
+**When this is overkill, and it usually is.** `docs/CRAFT/SUBAGENT-BUDGET.md` measured a real fan-out
+here at 87 agents and 5.66M tokens, and its conclusion was that one well-briefed agent beats a fan-out
+for anything sequential. Choosing three cuts for a three-cut film is not worth an agent. The roster
+earns its cost on a film with real scenes and stays off for a demo.
+
 ## THE ROSTER IS UNMEASURED, AND HERE IS WHAT WOULD MEASURE IT
 
 **Everything above this line is an argument. No number in this repo supports it.** The observable that
