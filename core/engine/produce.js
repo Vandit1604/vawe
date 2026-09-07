@@ -28,7 +28,11 @@ import { depthZ } from '../fx/plane.js';
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
 
-export function produceBaseline(data, theme, frame) {
+// `look` (core/registry/theme-contract.js resolveLook): passed through from boot.js so a later phase
+// can read the brand's own scale/layout/cuts/field defaults from the ONE place a scene's produced
+// baseline is decided, instead of a second call site somewhere else. Nothing reads it yet: this phase
+// only wires it through, phases 2-5 add the actual defaults inside this function.
+export function produceBaseline(data, theme, frame, look) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
   if (data.produced === false) return bakeCameraMove(data, frame);  // opts out of the INJECTED baseline, not of
