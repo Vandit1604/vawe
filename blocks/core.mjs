@@ -11,7 +11,7 @@
 // the one avatar implementation, lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
 // exists because every one of those things had been copied per-block and had drifted per-copy.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
+  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, onColor,
   R, E, SPACE, TYPE, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
   sweep, stagger, growUp, fillRight, stackWindows, needData, blockFactory,
 } from './kit.mjs';
@@ -22,34 +22,38 @@ export const CATEGORY = 'Core';
 const T = TOKENS;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// HTML-FIRST FAMILY BELOW. Design Read: plain product cards and statements, no chrome opinion beyond
+// the hairline card every other family shares (kit.mjs's cardChrome/htmlCard idiom). VARIANCE low
+// (these are the boring, load-bearing surfaces a film composes around, not its loud moment); MOTION
+// restrained, either the layer's own envelope `anim` for a single-unit card or `parts` where a family
+// stages its own repeating children. docs/CRAFT/HTML-FRAGMENTS.md.
+
 // card. One product surface: hairline + a single step of elevation, content, a footer row.
 // The tinted inner panel it used to draw is gone by DEFAULT (`tint` now matches the card fill), because
 // a panel inside a panel is two surfaces saying one thing, the 2021 SaaS tile. `tint` still paints
 // when a caller passes a real one, so the prop keeps its meaning; only the default moved.
 export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc, pills = [],
   cta = 'Explore', start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
-  return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'stretch', gap: 0, pad: 0,
-    ...cardChrome({ radius: R.card, elevation: E.card, anim }),
-    start, duration: dur, enterDur, exitDur: 0.35,
-    children: [
-      { type: 'group', grow: 1, bg: tint, radius: R.chip, pad: SPACE.lg, layout: 'column', items: 'flex-start', gap: SPACE.sm, children: [
-        text({ text: title, size: TYPE.head, weight: 700, color: T.ink, ls: '-0.02em' }),
-        desc && text({ text: desc, size: TYPE.base, color: T.sub }),
-        // Neutral chips, not accent pills. A tag is metadata; spending the brand colour on a row of
-        // them leaves nothing louder for the thing that matters.
-        pills.length && { type: 'group', layout: 'row', wrap: true, gap: SPACE.xs, items: 'center',
-          children: pills.map((p) => pill(p, T.sub, T.surface)) },
-      ].filter(Boolean) },
-      // The footer sits BELOW a rule rather than floating under the content: it is a different kind of
-      // row (an action, not a fact), and the hairline is what says so.
-      cta && box({ h: 1, bg: T.hair }),
-      cta && { type: 'group', layout: 'row', justify: 'space-between', items: 'center', pad: `${SPACE.sm}px ${SPACE.lg}px`, children: [
-        text({ text: cta, size: TYPE.body, weight: 600, color: T.sub }),
-        text({ text: '→', size: TYPE.body, weight: 600, color: T.accent }),
-      ] },
-    ].filter(Boolean),
-  }];
+  // Neutral chips, not accent pills. A tag is metadata; spending the brand colour on a row of them
+  // leaves nothing louder for the thing that matters. Same size/pad/radius as kit.mjs's `pill`.
+  const pillsHtml = pills.length ? `<div style="display:flex;flex-wrap:wrap;gap:${SPACE.xs}px;align-items:center">`
+    + pills.map((p) => `<span style="display:inline-flex;align-items:center;font:500 ${TYPE.body}px var(--font-sans);`
+      + `color:${T.sub};background:${T.surface};border-radius:${R.pill}px;padding:6px 16px">${p}</span>`).join('') + '</div>' : '';
+  const html = `<div style="display:flex;flex-direction:column;width:${w}px;height:${h}px;box-sizing:border-box">`
+    + `<div style="flex:1;min-height:0;background:${tint};border-radius:${R.chip}px;padding:${SPACE.lg}px;`
+    + `box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.sm}px">`
+    + `<span style="font:700 ${TYPE.head}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">${title}</span>`
+    + (desc ? `<span style="font:400 ${TYPE.base}px var(--font-sans);color:${T.sub}">${desc}</span>` : '')
+    + pillsHtml + '</div>'
+    // The footer sits BELOW a rule rather than floating under the content: it is a different kind of
+    // row (an action, not a fact), and the hairline is what says so.
+    + (cta ? `<div style="height:1px;background:${T.hair}"></div>`
+      + `<div style="display:flex;justify-content:space-between;align-items:center;padding:${SPACE.sm}px ${SPACE.lg}px">`
+      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${T.sub}">${cta}</span>`
+      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${T.accent}">→</span></div>` : '')
+    + '</div>';
+  return [{ type: 'html', x, y, w, h, html, ...cardChrome({ radius: R.card, elevation: E.card, anim }),
+    start, duration: dur, enterDur, exitDur: 0.35 }];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -61,14 +65,19 @@ export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc
 // the theme still lands on all 38; and holding luminance constant leaves HUE as the only thing that
 // changes, which is what the block is for. The previous six ranged from a 2.1:1 amber to a dark
 // indigo, so on a white ground a third of the cycle was unreadable and the rest flickered in weight.
+// Each step is its own top-level layer with its own start/duration window (a hue tenanting one slice
+// of the timeline), so this is N independently-timed layers rather than one card with repeating
+// children: `html` per step, not one fragment with `parts`.
 export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
   colors = ['#7F6FE8', '#0C9455', '#B47305', '#E04392', '#2B7FEE', '#D65B26'],
   start = 0, dur = 4, each = 0.5 } = {}) {
   const out = [];
   let t = start;
   for (let i = 0; t < start + dur; i++, t = r2(t + each)) {
-    out.push(text({ text: word, x, y, size, weight, color: colors[i % colors.length], ls: '-0.02em',
-      start: r2(t), duration: r2(Math.min(each + 0.08, start + dur - t)) }));
+    const html = `<span style="display:inline-block;font:${weight} ${size}px var(--font-sans);`
+      + `color:${colors[i % colors.length]};letter-spacing:-0.02em">${word}</span>`;
+    out.push({ type: 'html', x, y, html,
+      start: r2(t), duration: r2(Math.min(each + 0.08, start + dur - t)) });
   }
   return out;
 }
@@ -78,6 +87,10 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 // Uses Stripe's real product hexes. The "reads a site → rebuilds its look" payoff.
 // `amount` is a prop because it is the only figure on the card and it reaches every caller. It was
 // baked, so every video that used this block published the same invented number (MISTAKES #67).
+// LEFT NATIVE, not a candidate after all: scripts/gates/lib-test.mjs asserts the bar chart's total
+// width off `card.children[2].children` directly ("the bar chart spans the card's content box"), and
+// this pass is not permitted to touch scripts/gates/**. A native `group` of `box()` bars is the form
+// that invariant can still be read off.
 export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = {}) {
   const bars = [38, 52, 44, 66, 58, 80, 72];
   // THE CHART SPANS THE CARD. The bars were a fixed 26px, so the only part of this card that reads as
@@ -106,32 +119,34 @@ export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {
   // "undefined" in quotation marks, at display size, in the finished film. An empty block is bad;
   // one that renders a JavaScript artefact as its headline is worse.
   needData('text', q, 'quote');
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.md, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
-    text({ text: `“${q}”`, size: TYPE.display, weight: 600, color: T.ink, ls: '-0.02em' }),
-    // The attribution is a label, so it is set like every other label in this file: mono, tracked,
-    // quiet. The leading mid-dot went with the styling that needed it to look deliberate.
-    author && text({ text: author, size: TYPE.body, font: 'mono', tracking: '0.04em', color: T.sub }),
-  ].filter(Boolean) }];
+  // The attribution is a label, so it is set like every other label in this file: mono, tracked, quiet.
+  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.md}px;width:${w}px">`
+    + `<span style="font:600 ${TYPE.display}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">“${q}”</span>`
+    + (author ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub};letter-spacing:0.04em">${author}</span>` : '')
+    + '</div>';
+  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
 }
 
 // kpiRow: a row of stat cells (value + label). Scale contrast without a card grid.
+// THE FIGURES COUNT UP, cell by cell across the row. An item that gives a numeric `to` becomes a
+// native `count` layer and runs (no html counter exists, so this path stays native by construction);
+// one that gives a formatted string `value` (`$2.4M`, `42ms`, shapes the count layer cannot render)
+// lands as one `html` fragment carrying value + label. Hybrid by construction: the two paths need
+// different layer types, so a caller opts into the counting by giving a number, not by rewriting the row.
 export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) {
-  // THE FIGURES COUNT UP, cell by cell across the row. An item that gives a numeric `to` becomes a
-  // `count` layer and runs; one that gives a formatted string `value` (`$2.4M`, `42ms`, shapes the
-  // count layer cannot render) lands as text, so a caller opts into the counting by giving a number
-  // rather than by rewriting the row.
-  const figure = (it, beat) => (it.to != null
-    ? { type: 'count', from: it.from ?? 0, to: it.to, unit: it.unit || '', font: 'sans', size: 64, weight: 700,
-        color: T.ink, ls: '-0.02em', countStart: 0.15, countDur: 1.1, ease: 'easeOutExpo', ...beat }
-    : text({ text: String(it.value), size: TYPE.hero, weight: 700, color: T.ink, ls: '-0.02em', ...beat }));
-  return [{ type: 'group', x, y, layout: 'row', items: 'flex-start', gap, start, duration: dur, anim: 'fade', enterDur: 0.25, children:
-    items.map((it, i) => {
-      const beat = stagger(i, { step: 0.14, delay: 0.15, enterDur: 0.35 });
-      return { type: 'group', layout: 'column', items: 'flex-start', gap: SPACE.tight, children: [
-        figure(it, beat),
-        text({ text: it.label, size: TYPE.body, tracking: '0.06em', color: T.dim, font: 'mono', ...beat }),
-      ] };
-    }) }];
+  const cell = (it, beat) => {
+    if (it.to != null) return { type: 'group', layout: 'column', items: 'flex-start', gap: SPACE.tight, children: [
+      { type: 'count', from: it.from ?? 0, to: it.to, unit: it.unit || '', font: 'sans', size: 64, weight: 700,
+        color: T.ink, ls: '-0.02em', countStart: 0.15, countDur: 1.1, ease: 'easeOutExpo', ...beat },
+      text({ text: it.label, size: TYPE.body, tracking: '0.06em', color: T.dim, font: 'mono', ...beat }),
+    ] };
+    const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.tight}px">`
+      + `<span style="font:700 ${TYPE.hero}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">${it.value}</span>`
+      + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.dim};letter-spacing:0.06em">${it.label}</span></div>`;
+    return { type: 'html', html, ...beat };
+  };
+  return [{ type: 'group', x, y, layout: 'row', items: 'flex-start', gap, start, duration: dur, anim: 'fade', enterDur: 0.25,
+    children: items.map((it, i) => cell(it, stagger(i, { step: 0.14, delay: 0.15, enterDur: 0.35 }))) }];
 }
 
 // comparison: two columns (e.g. Before / After, Others / Vawe). Rows are simple strings.
@@ -159,26 +174,36 @@ export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = '
       ...splitScreen({ x, y: r2(y + TITLE_H), w, gap, left: leftScreen, right: rightScreen, start, dur }),
     ];
   }
-  // `items: stretch` so the rule under the heading spans the column. The heading stays at TYPE.lead
-  // rather than dropping to a mono eyebrow: below 24px a normal-weight dim heading has to clear 4.5:1
-  // instead of 3:1, and both column colours are chosen to be subordinate.
-  const col = (title, items, accent) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: SPACE.sm, pad: SPACE.lg,
-    ...cardChrome({ radius: R.card, elevation: E.flat }), children: [
-      text({ text: title, size: TYPE.lead, weight: 700, color: accent }),
-      box({ h: 1, bg: T.hair }),
-      ...items.map((it) => text({ text: it, size: TYPE.base, color: T.sub })),
-    ] });
-  return [{ type: 'group', x, y, w, layout: 'row', gap, items: 'stretch', start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: [col(leftTitle, left, T.dim), col(rightTitle, right, TOKENS.accent)] }];
+  // The rule under the heading spans the column. The heading stays at TYPE.lead rather than dropping
+  // to a mono eyebrow: below 24px a normal-weight dim heading has to clear 4.5:1 instead of 3:1, and
+  // both column colours are chosen to be subordinate. Each column is one `html` fragment; its own rows
+  // stage with `parts` so the two lists fill in rather than land as one slab per side.
+  const col = (title, items, accent, st) => {
+    const html = `<div style="display:flex;flex-direction:column;align-items:stretch;gap:${SPACE.sm}px;`
+      + `width:${colW}px;box-sizing:border-box">`
+      + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${accent}">${title}</span>`
+      + `<div style="height:1px;background:${T.hair}"></div>`
+      + items.map((it) => `<span data-part style="font:400 ${TYPE.base}px var(--font-sans);color:${T.sub}">${it}</span>`).join('')
+      + '</div>';
+    return { type: 'html', w: colW, html, ...cardChrome({ radius: R.card, elevation: E.flat }),
+      start: st, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
+      parts: [{ anim: 'slide-left', each: 0.28, stagger: 0.12, delay: 0.3 }] };
+  };
+  return [
+    { ...col(leftTitle, left, T.dim, start), x, y },
+    { ...col(rightTitle, right, TOKENS.accent, start), x: r2(x + colW + gap), y },
+  ];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // captions, timed subtitle chips at the bottom (accessibility + muted-autoplay reach). Each line
 // is {t, text, dur?}; `t` is relative to `start`. Deterministic. Pair with a future VO track.
 export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } = {}) {
-  return lines.map((ln) => ({ type: 'text', text: ln.text, x, y, size, weight: 600, color: '#fff',
-    bg: 'rgba(10,10,10,0.82)', radius: 8, pad: '8px 16px',
-    start: r2(start + ln.t), duration: ln.dur ?? 2.2, anim: 'fade', enterDur: 0.2, exitDur: 0.2 }));
+  return lines.map((ln) => ({
+    type: 'html', x, y, bg: 'rgba(10,10,10,0.82)', radius: 8,
+    html: `<span style="display:inline-block;padding:8px 16px;font:600 ${size}px var(--font-sans);color:#fff">${ln.text}</span>`,
+    start: r2(start + ln.t), duration: ln.dur ?? 2.2, anim: 'fade', enterDur: 0.2, exitDur: 0.2,
+  }));
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -189,26 +214,31 @@ export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } 
 // `price` defaults to nothing. A DEFAULT price is a figure published by every caller who forgets to
 // set one, which is the same defect as deploySuccess's baked "Ready in 1.2s".
 export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.md, pad: SPACE.lg,
+  // The tick was `--up`. Green there means nothing directional: a feature is INCLUDED, not up, and
+  // spending the success colour on a static list is the stoplight-palette bug in miniature.
+  const featuresHtml = features.map((f) => `<div style="display:flex;align-items:center;gap:${SPACE.xs}px">`
+    + `<span style="font:700 ${TYPE.body}px var(--font-sans);color:${T.accent}">✓</span>`
+    + `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub}">${f}</span></div>`).join('');
+  // T.onAccent, not '#fff'. This CTA is filled with the accent, and on higgsfield's acid lime white
+  // measured 1.16:1, shipped, unreadable. The theme computes a readable ink for its own accent
+  // (core/boot.js); the block asks for it rather than assuming.
+  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.md}px;padding:${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">`
+    // The plan name reads as an eyebrow, not a heading: the price is the heading. Held at TYPE.base
+    // and 600 so it stays WCAG "large text" and the accent spelling keeps its 3:1 allowance.
+    + `<span style="font:600 ${TYPE.base}px var(--font-mono);color:${highlight ? T.accentInk : T.dim};`
+    + `letter-spacing:0.1em">${String(plan).toUpperCase()}</span>`
+    + `<div style="display:flex;align-items:flex-end;gap:${SPACE.tight}px">`
+    + `<span style="font:700 ${TYPE.display}px var(--font-sans);color:${T.ink};letter-spacing:-0.03em">${price}</span>`
+    + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.dim}">${period}</span></div>`
+    + `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.xs}px">${featuresHtml}</div>`
+    + `<div style="background:${highlight ? T.accent : T.surface};border-radius:${R.chip}px;padding:${SPACE.sm}px 0;`
+    + `display:flex;justify-content:center">`
+    + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${highlight ? T.onAccent : T.ink}">${cta}</span></div>`
+    + '</div>';
+  return [{ type: 'html', x, y, w, html,
     bg: T.card, radius: R.card, border: highlight ? `1.5px solid ${T.accent}` : HAIR, elevation: highlight ? E.card : E.flat,
-    start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35, children: [
-      // The plan name reads as an eyebrow, not a heading: the price is the heading. Held at TYPE.base
-      // and 600 so it stays WCAG "large text" and the accent spelling keeps its 3:1 allowance.
-      text({ text: String(plan).toUpperCase(), size: TYPE.base, weight: 600, font: 'mono', tracking: '0.1em', color: highlight ? T.accentInk : T.dim }),
-      { type: 'group', layout: 'row', items: 'flex-end', gap: SPACE.tight, children: [
-        text({ text: price, size: TYPE.display, weight: 700, color: T.ink, ls: '-0.03em' }),
-        text({ text: period, size: TYPE.body, font: 'mono', color: T.dim })] },
-      { type: 'group', layout: 'column', items: 'flex-start', gap: SPACE.xs, children:
-        // The tick was `--up`. Green there means nothing directional: a feature is INCLUDED, not up,
-        // and spending the success colour on a static list is the stoplight-palette bug in miniature.
-        features.map((f) => ({ type: 'group', layout: 'row', items: 'center', gap: SPACE.xs, children: [
-          text({ text: '✓', size: TYPE.body, weight: 700, color: T.accent }), text({ text: f, size: TYPE.body, color: T.sub })] })) },
-      { type: 'group', bg: highlight ? T.accent : T.surface, radius: R.chip, pad: `${SPACE.sm}px 0`, layout: 'row', justify: 'center',
-        // T.onAccent, not '#fff'. This CTA is filled with the accent, and on higgsfield's acid lime
-        // white measured 1.16:1, shipped, unreadable. The theme computes a readable ink for its own
-        // accent (core/boot.js); the block asks for it rather than assuming.
-        children: [text({ text: cta, size: TYPE.body, weight: 600, color: highlight ? T.onAccent : T.ink })] },
-    ] }];
+    start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
