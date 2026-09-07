@@ -13,13 +13,14 @@
   },
   {
    "id": "ref-still-share",
-   "claim": "Reference films are still for 13 to 24 percent of their frames.",
-   "source": "CLAUDE.md and the motion plan",
+   "claim": "Reference films are still for 11 to 77 percent of their frames.",
+   "source": "measured 2026-09-08 via `node scripts/author/claims.mjs`; the prior claim (13 to 24 percent, from CLAUDE.md and the motion plan) was CONTRADICTED by this same corpus and was never checked before being quoted",
    "metric": "heldShare",
    "op": "within",
-   "lo": 0.13,
-   "hi": 0.24,
-   "scope": "reference"
+   "lo": 0.11,
+   "hi": 0.77,
+   "scope": "reference",
+   "_note": "The two Arc product films (arc-space-swiping 0.77, arc-zero-chrome 0.71) are the closest genre to a launch film and sit near the top of this spread, not near a mid-band 13-24%. internal/render/render.go's 60%-still warning was raised to 80% for the same reason: it would otherwise fire on films doing exactly what the doctrine asks for."
   },
   {
    "id": "beat-length",

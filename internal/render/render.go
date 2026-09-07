@@ -206,10 +206,18 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	}
 	// STILLNESS RIDES OUT WITH THE DURATION, on every render, for every caller. Both are facts about the
 	// film rather than opinions about it, and this one answers the question no static gate can: is
-	// anything happening. The reference films in refs/ measure 13% to 24% still; a film of ours that
-	// passed the whole ladder measured 84%. An author who never sees the number optimises for the numbers
-	// that print. Measured off the frames still on disk (they are deleted a few lines from here), so it
-	// costs no second decode of the mp4 and no extra ffmpeg pass.
+	// anything happening. The reference films in refs/ measure 11% to 77% still, median 29% (`node
+	// scripts/author/claims.mjs`, grammar/_claims.json id ref-still-share): not the "13% to 24%" this
+	// comment quoted before, which was the doctrine's own CONTRADICTED figure, sourced from a plan file
+	// and never checked against the corpus it claimed to summarise. A film of ours that passed the whole
+	// ladder measured 84%, still above the real spread. An author who never sees the number optimises for
+	// the numbers that print. Measured off the frames still on disk (they are deleted a few lines from
+	// here), so it costs no second decode of the mp4 and no extra ffmpeg pass.
+	//
+	// THE CODEC IS PART OF THE NUMBER. The reference spread above was measured on decoded H.264 frames;
+	// these frames are JPEG by default (scene.CaptureExt), and scripts/gates/motion-split.mjs measured a
+	// JPEG quantisation floor around 0.9 against 0.05 for a lossless PNG of the same instant. So the
+	// printed line below names its own codec rather than implying an exact comparison.
 	// A NUMBER MEASURED ACROSS WORKERS IS NOT A PROPERTY OF THE FILM, so it is not printed.
 	//
 	// The capture shards across o.Workers tabs and adjacent frames can come from different ones. Those
@@ -235,11 +243,15 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 		fmt.Printf("    or re-render with -workers 1 if you want this line to carry a figure.\n")
 		return nil
 	}
-	if still, med, ok := scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent), meta.FPS); ok {
-		fmt.Printf("✓ done → %s  (%.1fs, %d frames · %.0f%% still, motion %.2f)\n",
-			out, meta.Duration, meta.TotalFrames, still, med)
-		if still > 60 {
-			fmt.Printf("  ⚠ %.0f%% of sampled frames are unchanged from the one before. The films in refs/ sit at 13-24%%.\n", still)
+	if still, med, peak, ok := scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent), meta.FPS); ok {
+		codec := strings.TrimPrefix(scene.CaptureExt(transparent), ".")
+		fmt.Printf("✓ done → %s  (%.1fs, %d frames · %.0f%% still on %s, motion %.2f, peak %.2f)\n",
+			out, meta.Duration, meta.TotalFrames, still, codec, med, peak)
+		// 80, not 60: the real reference spread tops out at 77% still (arc-space-swiping), so a 60%
+		// warning fired on films that were doing exactly what the doctrine asks for. See the comment
+		// above this block for where 60 came from and why it was never sourced.
+		if still > 80 {
+			fmt.Printf("  ⚠ %.0f%% of sampled %s frames are unchanged from the one before. The measured reference spread tops out at 77%%.\n", still, codec)
 			fmt.Printf("    Nothing is blocking you. The usual causes are a ground that does not move and layers with no idle.\n")
 		}
 		return nil

@@ -884,12 +884,22 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 // one frame at a time, or at the structure that produced it. None of them asks the only question a
 // viewer answers instantly: is anything happening right now.
 //
-// Measured against the reference films the owner keeps (refs/), the gap is not subtle. They are still
-// for 13% to 24% of their frames; a launch film of ours that passed the whole ladder was still for 84%.
-// Drawn over time theirs is a solid bar and ours was dead, spike, dead. That number belongs beside the
-// duration, printed by the renderer on every run, for the same reason the duration is: it is a fact
-// about the film, not an opinion about it, and an author who never sees it optimises for the gates that
-// do print.
+// Measured against the reference films the owner keeps (refs/) and reported by `node
+// scripts/author/claims.mjs`, the real spread is 11% to 77% still, median 29%: the "13% to 24%" figure
+// this comment carried before was CONTRADICTED by the corpus it claimed to summarise (grammar/_claims.json
+// id ref-still-share), sourced from a plan file and never checked. It sent authors chasing a target their
+// films did not have. A launch film of ours that passed the whole ladder was still for 84%, still above
+// the real spread. That number belongs beside the duration, printed by the renderer on every run, for the
+// same reason the duration is: it is a fact about the film, not an opinion about it, and an author who
+// never sees it optimises for the gates that do print.
+//
+// THE COMPARISON IS STILL LOOSE, EVEN CORRECTED, and the renderer says so when it prints: the reference
+// spread above was measured on decoded H.264 frames (scripts/media/study.mjs, via ffmpeg signalstats),
+// while this film's own frames are JPEG screenshots by default (CaptureExt). scripts/gates/motion-split.mjs
+// measured a JPEG quantisation floor around 0.9, well above `stillFloor` below, against 0.05 for a
+// lossless PNG of the same instant: two codecs read the same held frame as two different numbers. Render
+// with `VAWE_CAPTURE=png` for a codec-comparable reading, or read the codec printed beside the percentage
+// and treat the two figures as directional, not identical units.
 //
 // NOT A GATE, deliberately. It refuses nothing and blocks nobody. CLAUDE.md's architecture rule is that
 // a gate is the last resort and the fix belongs where the value is written; the fix here is the engine's
@@ -907,8 +917,19 @@ const (
 	// probe this was calibrated against (scale=160:90,tblend=difference,signalstats).
 )
 
-// Stillness samples consecutive frame PAIRS and reports what share of them are unchanged, plus the
-// median per-pair change. Returns ok=false when the film is too short to say anything useful.
+// Stillness samples consecutive frame PAIRS and reports what share of them are unchanged, the median
+// per-pair change, and the PEAK change among the samples. Returns ok=false when the film is too short
+// to say anything useful.
+//
+// PEAK EXISTS BECAUSE THE MEDIAN AND THE STILL SHARE HIDE A BURST-AND-HOLD FILM, which is the exact
+// shape our own doctrine tells authors to build (AGENTS.md, THE FILM'S ENERGY OVER TIME). 48 evenly
+// spaced probes measure velocity at 48 random instants, not motion over time: a shot that holds for
+// most of its length and then explodes for a few frames lands most of its probes inside the hold and
+// reports mostly-still, same as a shot that never moves at all. scripts/media/study.mjs solved this for
+// references by keeping `peak` (the loudest single frame) beside `held` (the still share) for exactly
+// this reason: "a shot that holds for three seconds and then explodes has the same mean as one that
+// moves steadily". A burst-and-hold film and a genuinely static one now read differently: both can
+// report a high still share, but only the first also reports a high peak.
 // A FRAME DIFFERENCE IS A MEASUREMENT OF THE GAP BETWEEN FRAMES, so the number it returns depends on
 // how far apart they are. The same film measured 0.43 rendered at 30fps and 0.22 at 60: consecutive
 // frames are half as far apart, so roughly half the change lands between them. Every reference in
@@ -920,9 +941,9 @@ const (
 // value for the same reason: a floor on a raw delta means a different thing at every frame rate.
 const normFPS = 30.0
 
-func Stillness(framesDir string, total int, ext string, fps float64) (stillPct float64, median float64, ok bool) {
+func Stillness(framesDir string, total int, ext string, fps float64) (stillPct float64, median float64, peak float64, ok bool) {
 	if total < 4 {
-		return 0, 0, false
+		return 0, 0, 0, false
 	}
 	step := total / stillPairs
 	if step < 1 {
@@ -983,12 +1004,15 @@ func Stillness(framesDir string, total int, ext string, fps float64) (stillPct f
 		deltas = append(deltas, d)
 	}
 	if len(deltas) < 3 {
-		return 0, 0, false
+		return 0, 0, 0, false
 	}
-	still := 0
+	still, top := 0, 0.0
 	for _, d := range deltas {
 		if d < stillFloor {
 			still++
+		}
+		if d > top {
+			top = d
 		}
 	}
 	sorted := append([]float64(nil), deltas...)
@@ -997,5 +1021,5 @@ func Stillness(framesDir string, total int, ext string, fps float64) (stillPct f
 			sorted[j], sorted[j-1] = sorted[j-1], sorted[j]
 		}
 	}
-	return 100 * float64(still) / float64(len(deltas)), sorted[len(sorted)/2], true
+	return 100 * float64(still) / float64(len(deltas)), sorted[len(sorted)/2], top, true
 }
