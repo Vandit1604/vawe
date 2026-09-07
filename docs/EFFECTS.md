@@ -618,7 +618,7 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 
 | name | what / when |
 |---|---|
-| `drawOn` | an SVG stroke draws itself along its own path (pathLength=1, no measurement) |
+| `drawOn` | an SVG stroke draws itself along its own path, measured at build with getTotalLength() |
 | `fade` | opacity alone, no displacement · the quiet default when a part should arrive without moving |
 | `fadeUp` | a short rise with a fade, the quiet default for any part |
 | `growUp` | scales up from its own bottom edge, a bar growing to its reading |
