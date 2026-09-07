@@ -23,12 +23,22 @@
 // `node scripts/dev/library-stats.mjs` over the gate-visible library, never a preference: it says what
 // the library actually does, and the two films this repo is proudest of sit far on the other side of it.
 //
+// IT NAMES THE ALTERNATIVE, NOT JUST THE PROBLEM. A rule that says "you have one bg window" and stops
+// tells an author they are wrong; it does not tell them what to do, and the expensive step (finding the
+// alternative) is exactly the step that gets cut under any pressure. So every finding below that CAN be
+// turned into a concrete next edit is: three presets THIS film does not use, two layers that could carry
+// the hand-keyed track, real files sitting unused on disk. Where naming a concrete edit would mean
+// guessing at the film's content (which idea a picture would carry, whether a preset's tone fits), it
+// does not guess: a wrong suggestion is worse than an honest "here are your options, you decide."
+//
 // It also cannot see the thing that matters most. Whether a picture EXPLAINS or merely decorates is a
 // judgement, and the one gate that ever tried to measure it (`visual-vocabulary`) was deleted for
 // squaring a 590x18 rule into 590x590 and crediting a hairline with a tenth of the frame. Counting
-// layers is not measuring area, and this file counts layers. `make judge` and your eyes are still the check.
+// layers is not measuring area, and this file counts layers. `make judge` and your eyes are still the
+// check.
 import fs from 'node:fs';
 import path from 'node:path';
+import { PRESETS } from '../../core/backgrounds/presets.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -37,6 +47,54 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // numbers in the hook and an author is told two different things about one film. `glow`, `beam` and
 // `rect` are deliberately absent there and absent here: a mark is not a picture.
 const PICTORIAL = new Set(['image', 'html', 'component', 'svg', 'video', 'clip', 'lottie', 'board', 'doc']);
+
+// STABLE PER FILE, VARIED BETWEEN FILES. The same string→int hash scripts/gates/motion-audit.mjs uses
+// to pick a deterministic ancestor chain. Two saves of the same film pick the same three presets; two
+// different films almost never do. That is the whole point: advice that churns between saves is noise
+// an author learns to skip, and advice that is identical for every film converges the library instead
+// of diversifying it.
+const strHash = (s) => { let h = 0; for (let c = 0; c < s.length; c++) h = (h * 31 + s.charCodeAt(c)) | 0; return h >>> 0; };
+
+// Three presets this FILM does not use, picked by the film's own path so the pick is stable here and
+// different next door. `bg` stays required (docs/MISTAKES.md #159): this only ever suggests a value,
+// never writes one.
+function unusedPresets(rel, used) {
+  const pool = PRESETS.filter((p) => !used.has(p.name));
+  if (!pool.length) return [];
+  const offset = strHash(rel) % pool.length;
+  const pick = [];
+  for (let i = 0; i < Math.min(3, pool.length); i++) pick.push(pool[(offset + i) % pool.length]);
+  return pick;
+}
+
+// Real files sitting beside this film that no layer currently points at. `post-corva.json` shows the
+// pattern already working: a `<stem>.<slug>.html` sidecar an author captured and then wired with
+// `src`. A sidecar nobody wired yet is not a hypothesis, it is a file on disk, so this is the one
+// pictorial suggestion honest enough to make without guessing at the film's content.
+function unusedSidecars(file, rel, j) {
+  const dir = path.dirname(file);
+  const stem = path.basename(rel, '.json');
+  const used = new Set((j.layers || []).map((L) => L.src).filter(Boolean));
+  let entries;
+  try { entries = fs.readdirSync(dir); } catch { return []; }
+  return entries.filter((f) => f !== path.basename(rel)
+    && f.startsWith(`${stem}.`)
+    && /\.(html|png|jpe?g|svg|webp)$/i.test(f)
+    && !/\.(storyboard|intent|lock)\./.test(f)
+    && ![...used].some((s) => s.endsWith(f)));
+}
+
+// A real brand asset folder for this film, found by shortening the stem one hyphen-segment at a time
+// (`brew-launch-act1` -> `brew-launch` -> `brew`). Existence on disk, not a guess from the name: this
+// only fires when the directory is actually there.
+function brandAssets(rel) {
+  const parts = path.basename(rel, '.json').split('-');
+  for (let i = parts.length; i > 0; i--) {
+    const dir = path.join(ROOT, 'assets/brands', parts.slice(0, i).join('-'));
+    if (fs.existsSync(dir)) return dir;
+  }
+  return null;
+}
 
 let raw = '';
 process.stdin.on('data', (d) => { raw += d; });
@@ -59,31 +117,56 @@ process.stdin.on('end', () => {
   if (layers.length < 3) process.exit(0);        // a scratch file or a fragment, not a film yet
 
   const pict = layers.filter((L) => PICTORIAL.has(L.type)).length;
-  const keyed = layers.filter((L) => Array.isArray(L.motion) && L.motion.length).length;
-  const bgWindows = Array.isArray(j.bg) ? j.bg.length : (j.bg ? 1 : 0);
+  const keyedLayers = layers.filter((L) => Array.isArray(L.motion) && L.motion.length);
+  const bg = Array.isArray(j.bg) ? j.bg : (j.bg ? [j.bg] : []);
   const pctP = Math.round((pict / layers.length) * 100);
-  const pctK = Math.round((keyed / layers.length) * 100);
+  const pctK = Math.round((keyedLayers.length / layers.length) * 100);
 
   const say = [];
-  // Each line names the measurement, then what the library does, then the film that argues otherwise.
-  // The comparison is the point: "17% is low" means nothing; "the median is 6% and brew is 46%" is a
-  // position an author can disagree with on purpose.
+  // Each line names the measurement, then what the library does, then the film that argues otherwise,
+  // then a concrete next edit where one can be made honestly.
   if (pict === 0) {
-    say.push(`  no pictorial layers at all. 64 of the 148 gate-visible scenes are the same and that was`);
+    say.push(`  no pictorial layers at all. 70 of the 171 gate-visible scenes are the same and that was`);
     say.push(`  nobody's decision, it is debt. brew-launch-act1 is 46% pictorial. docs/CRAFT/SHOW-DONT-TELL.md`);
-  } else if (pctP < 6) {
-    say.push(`  ${pctP}% pictorial (${pict}/${layers.length}). The library median is 6% and brew is 46%.`);
+  } else if (pctP < 8) {
+    say.push(`  ${pctP}% pictorial (${pict}/${layers.length}). The library median is 8% and brew is 46%.`);
   }
-  if (keyed === 0) {
+  if (pict === 0 || pctP < 8) {
+    const stem = path.basename(rel, '.json');
+    const sidecars = unusedSidecars(file, rel, j);
+    if (sidecars.length) {
+      say.push(`  ${stem} already has ${sidecars.join(', ')} sitting next to it, unwired. Add it as an`);
+      say.push(`  \`html\` or \`image\` layer with \`src: "${rel.replace(/[^/]+$/, sidecars[0])}"\`.`);
+    } else {
+      const dir = brandAssets(rel);
+      if (dir) say.push(`  assets/brands/${path.basename(dir)}/ exists (\`ls ${path.relative(ROOT, dir)}\`); a real image from there beats an invented one.`);
+    }
+  }
+  if (!keyedLayers.length) {
+    const unkeyed = layers.filter((L) => !(Array.isArray(L.motion) && L.motion.length) && L.type !== 'camera');
+    const longest = [...unkeyed].sort((a, b) => (b.duration || 0) - (a.duration || 0)).slice(0, 2);
+    // A layer rarely carries its own name (most don't set `id`), so fall back to a snippet of the text
+    // it renders, then to type@start, always something an author can find by eye in the JSON.
+    const name = (L) => L.id || (typeof L.text === 'string' && L.text.replace(/<[^>]+>/g, '').replace(/&\w+;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 24))
+      || `${L.type}@${L.start ?? 0}s`;
     say.push(`  no hand-keyed motion track. A preset animates ONE layer over ONE span with ONE curve;`);
     say.push(`  higgsfield hand-keys 6 of its 8 layers. \`make track SHAPE=pan|blast|drift|enter|exit\``);
+    if (longest.length) {
+      say.push(`  candidates from THIS film, on screen longest: ${longest.map((L) => `"${name(L)}" (${L.duration ?? '?'}s)`).join(', ')}.`);
+    }
   }
-  if (bgWindows <= 1) {
-    say.push(`  ${bgWindows === 0 ? 'no' : 'one'} bg window for the whole runtime. 121 of 148 scenes do this, 82%, and it is`);
+  if (bg.length <= 1) {
+    const used = new Set(bg.map((b) => b && b.preset).filter(Boolean));
+    const suggestions = unusedPresets(rel, used);
+    say.push(`  ${bg.length === 0 ? 'no' : 'one'} bg window for the whole runtime. 133 of 171 scenes do this, 78%, and it is`);
     say.push(`  the strongest single lever in CLAUDE.md: brew inverts the world on four of its five cuts.`);
+    if (suggestions.length) {
+      say.push(`  this film has not tried: ${suggestions.map((p) => `\`${p.name}\` (${p.blurb})`).join(' · ')}.`);
+      say.push(`  or hand-author one: an \`html\` layer at full-bleed z, behind everything else.`);
+    }
   }
   if (j.audio && j.audio.silent && !j.audio._why) {
-    say.push(`  \`audio.silent\` with no \`_why\`. 106 scenes declare the silence and only 26 justify it.`);
+    say.push(`  \`audio.silent\` with no \`_why\`. 119 scenes declare the silence and only 40 justify it.`);
     say.push(`  scripts/gates/audio-check.mjs will stop you at ship; a sentence here settles it now.`);
   }
   if (!say.length) process.exit(0);              // the reward for a film doing fine is silence
