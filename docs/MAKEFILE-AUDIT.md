@@ -1,10 +1,10 @@
 ---
-when: "deciding whether a Makefile target belongs, is a real build rule, or should fold into another (before adding target 217)"
-answers: "how many of the 214 targets are real build rules (zero, all .PHONY) vs pure aliases vs logic that belongs in a script · which targets already folded on the `make arsenal` precedent · the CLI-vs-Makefile call and its cost"
+when: "deciding whether a Makefile target belongs, is a real build rule, or should fold into another (before adding another one)"
+answers: "how many of the targets are real build rules (zero, all .PHONY) vs pure aliases vs logic that belongs in a script · which targets already folded on the `make arsenal` precedent · the CLI-vs-Makefile call and its cost"
 group: process
 ---
 
-# Makefile audit: what 216 targets actually are
+# Makefile audit: what the targets actually are
 
 This answers one question: is the Makefile a build system, or a command catalogue wearing one?
 Method: a small parser (`scripts/dev/` scratch, not committed) read every `name:` line in the
@@ -13,19 +13,21 @@ contains. Counts below are from that parse, cross-checked by hand against the fi
 
 ## The four counts
 
-**214 targets are defined** (`grep -c '^[a-zA-Z][a-zA-Z0-9_.-]*:'`, matching `make lib-test`'s own
-count of 214). The owner's "216" was close; the gap is `.PHONY` declaration lines, which name
-targets but do not define recipes, so the parser (correctly) does not double-count them.
+**215 targets are defined** (`grep -c '^[a-zA-Z][a-zA-Z0-9_.-]*:'`, matching `make lib-test`'s own
+count). The owner's "216" was close; the gap is `.PHONY` declaration lines, which name targets but
+do not define recipes, so the parser (correctly) does not double-count them. The audit below was
+measured at 214 and one target (`motion-trace`) landed while it ran, which is the ordinary rate this
+file grows at and is the reason the counts here are stated with the command that reproduces them.
 
 **1. Real build rules: zero.** Line 6 of the Makefile declares `build` itself `.PHONY`, alongside
 `video`, `render`, `all`, `dev`, `ship` and every other target that would, in a normal Makefile, be
 a file target make can skip when nothing changed. Nothing in this file has a real file
 prerequisite that lets `make` compare mtimes and skip stale work: `build: fonts` always reruns `go
 build`, `video: build` always reruns `build`. This is not a bug anyone introduced; it is a
-description of what the file is. Every one of the 214 targets is a command with a memorable name.
+description of what the file is. Every one of those targets is a command with a memorable name.
 The build-system half of what a Makefile is for is not present here at all.
 
-**2. Pure aliases: 204 of 214** (after the changes below; 200 before). A pure alias is a recipe of
+**2. Pure aliases: 204 of 214 at the time of the audit** (after the changes below; 200 before). A pure alias is a recipe of
 one or two lines that passes variables through to one script (`node scripts/gates/X.mjs $(D)
 $(if $(STRICT),--strict)`), with no shell logic of its own. This is the catalogue half, and it is
 the honest majority of the file. `make list` exists because a 200-plus-line catalogue needs an
@@ -90,7 +92,7 @@ with the recipe's own comment intact:
 Each is now reachable by `node`/`sh` directly, outside `make`, which is what "untestable by
 lib-test" meant in practice. No target was renamed, no `.PHONY` list changed, no phase tag moved.
 Verified green after the change: `make list` (byte-identical output), `make doc-refs`, `make
-generated-check`, `make lint-test`, `make lib-test` (still 214 targets, still 1986 asserts passing),
+generated-check`, `make lint-test`, `make lib-test` (no target lost, still 1986 asserts passing),
 `node scripts/dev/no-emdash.mjs`, and a live run of `make probe M=scene` and `make approve
 STAGE=beats D=formats/scene/sample.json` to prove the moved code still executes correctly, not just
 parses. `make docs-drift` fails both before and after this change on an unrelated pre-existing
@@ -120,7 +122,7 @@ here `lib-test` could not already see.
 ## The CLI question, settled honestly
 
 **Should this stop being a Makefile and become one CLI (`./bin/vawe` extended, or a new script
-under `scripts/`) with 214 subcommands?**
+under `scripts/`) with a subcommand per target?**
 
 What it would cost: every doc in this repo (`AGENTS.md`, all of `docs/CRAFT/`, every skill under
 `skills/`) currently says `make X`. `doc-refs` alone found 214 make-target references and 199
@@ -140,7 +142,7 @@ here is a build rule, so nothing here loses anything by not being one.
 
 **Recommendation: do not migrate.** The `make X` vocabulary is load-bearing across ~200 markdown
 files and every skill doc, `make list`'s self-describing front page already solves the
-discoverability problem a flat 214-command catalogue would otherwise have, and the concrete
+discoverability problem a flat catalogue this size would otherwise have, and the concrete
 `$(if $(VAR),--flag)` cost this audit found real instances of (`video`/`dev`/`ship`/`arsenal`) is
 already the ceiling of what needed fixing, not evidence the whole shape is wrong. The cheaper fix
 for "this isn't really `make`" is not a migration, it is a one-line note at the top of the file
