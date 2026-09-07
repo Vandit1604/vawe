@@ -64,9 +64,15 @@ function overlapFraction(a, b) {
 // boundary carries one. (seam-snap.mjs also treats an inferred beat-start cluster as a boundary, for its
 // flash check, which needs no `dur`; that inference is deliberately not repeated here.)
 const boundaries = [];
-for (const c of data.cuts || []) if (typeof c.t === 'number') boundaries.push({ t: c.t, dur: typeof c.dur === 'number' ? c.dur : 0.5 });
-for (const s of data.seams || []) if (typeof s.t === 'number') boundaries.push({ t: s.t, dur: typeof s.dur === 'number' ? s.dur : 0.5 });
-for (const s of data.stings || []) if (typeof s.t === 'number') boundaries.push({ t: s.t, dur: typeof s.dur === 'number' ? s.dur : 0.5 });
+// THE MECHANISM DECIDES WHICH CHECKS APPLY, so each boundary carries the one it lowered to. A `cut`
+// leaves the live stage on screen and the backdrop canvas visible, so all three checks read something
+// real. A `seam` composites two BAKED rasters over the whole stage, backdrop included, so the field
+// strip is inside the picture the shader is dissolving: a grainy dissolve's own noise front then reads
+// as the field stepping, which is the transition working, not a split seam. A `sting` paints a shader
+// over an unchanged stage, so a step in the strip is the sting, not the field.
+for (const c of data.cuts || []) if (typeof c.t === 'number') boundaries.push({ t: c.t, dur: typeof c.dur === 'number' ? c.dur : 0.5, mech: 'cut', style: c.style });
+for (const s of data.seams || []) if (typeof s.t === 'number') boundaries.push({ t: s.t, dur: typeof s.dur === 'number' ? s.dur : 0.5, mech: 'seam' });
+for (const s of data.stings || []) if (typeof s.t === 'number') boundaries.push({ t: s.t, dur: typeof s.dur === 'number' ? s.dur : 0.5, mech: 'sting' });
 boundaries.sort((a, b) => a.t - b.t);
 
 if (!boundaries.length) {
@@ -108,7 +114,22 @@ for (const b of boundaries) {
   if (f2 >= fSettled) continue; // too close to the end of the film to have a settled reference
   const outgoing = layers.filter((l) => l.box && l.end != null
     && l.end >= b.t - b.dur - 0.5 && l.end <= b.t + b.dur + 0.05);
+  // AN INCOMING LAYER SETTLING OVER THE SAME BOX WEARS A GHOST'S EXACT SIGNATURE, and this check had no
+  // guard against it while `seam-resurrection` below did. A layer still mid-entrance differs from the
+  // settled frame MORE at +1f than at +10f, which is the decay the ghost test looks for, so the demo's
+  // payoff line arriving across the outgoing card's box was reported as a ghost of the card through two
+  // engine fixes that could not have changed it. Skip the box when another layer is arriving over it:
+  // its own settling explains the decay, and a real ghost under a busy arrival is the sensitivity traded.
+  const t1 = f1 / fps;
+  // BOTH DIRECTIONS OF THE OVERLAP COUNT, and taking only one is how the guard missed on its first try:
+  // `overlapFraction(a, b)` divides by a's area, so a headline arriving INSIDE a big card scored 0.17
+  // against the card and the card was still called a ghost. The question is not what fraction of the box
+  // is covered, it is whether the arriving layer draws in there at all, so the larger fraction wins.
+  const arrivingOver = (l) => layers.some((o) => o.i !== l.i && o.box && o.start != null
+    && o.start <= t1 && t1 <= o.start + 0.6 && (o.end == null || t1 <= o.end)
+    && Math.max(overlapFraction(l.box, o.box), overlapFraction(o.box, l.box)) > 0.4);
   for (const l of outgoing) {
+    if (arrivingOver(l)) continue;
     const d1 = diffBoxes(mp4, f1, fSettled, l.box, W, H);
     const d2 = diffBoxes(mp4, f2, fSettled, l.box, W, H);
     if (d1 == null || d2 == null) { f.warn('seam-unread', `ghost check at boundary ${b.t}s, layer "${l.label}": a frame would not decode`); continue; }
@@ -161,7 +182,7 @@ for (const l of layers) {
     && other.start <= b.t && (other.end == null || b.t <= other.end + 0.6));
   const reoccupied = boxesToCheck.some(({ tag }) => tag === 'box') && (activeGroup || layers.some((other) => other.i !== l.i
     && other.box && other.start != null && other.start <= b.t && (other.end == null || b.t <= other.end + 0.6)
-    && overlapFraction(l.box, other.box) > 0.4));
+    && Math.max(overlapFraction(l.box, other.box), overlapFraction(other.box, l.box)) > 0.4));
   for (const { tag, box } of boxesToCheck) {
     if (tag === 'box' && reoccupied) continue;
     const e0 = edgeReadingAt(mp4, baselineFrame, box, W, H);
@@ -184,7 +205,19 @@ for (const l of layers) {
 // the size of the rest is a hard swap disguised inside a soft transition.
 const stripH = Math.max(20, Math.round(H * 0.037));
 const fieldBox = { x: 0, y: H - stripH, w: W, h: stripH };
+// SOFT PRESENTATIONS ONLY, because the finding is "a hard swap disguised inside a SOFT transition" and
+// an abrupt style is not disguising anything. A punch back-loads its whole exit into the last third of
+// its window by design (`1 - T²`), so the field moving with it lands as one big step against a near-zero
+// median, and the check would report the presentation doing its job. Measured on vawe-explainer-v2's
+// punch at 14.67s: step 2.7 against a median of 0.3, with the frames showing the cards blurring away and
+// the word landing exactly as authored. A better check would compare the field's progress against the
+// presentation's own curve rather than against an even dissolve; until it exists, an abrupt style is
+// out of scope and says so here rather than failing a film for its loudest cut.
+const SOFT_STYLES = new Set(['fade', 'blur', 'softwipe', 'softiris', 'dissolve', 'riseBlur', 'matchCut']);
 for (const b of boundaries) {
+  // Only a `cut` leaves the backdrop canvas painting live under the stage; see the mechanism note above.
+  if (b.mech !== 'cut') continue;
+  if (b.style && !SOFT_STYLES.has(b.style)) continue;
   const half = b.dur / 2;
   const startFrame = Math.max(0, Math.round((b.t - half) * fps));
   const endFrame = Math.min(total - 1, Math.round((b.t + half) * fps));
