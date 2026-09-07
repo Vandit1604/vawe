@@ -19,12 +19,18 @@ confirm: "does this film carry sound, or is the silence a stated decision?"
   `bed-missing`, `bed-provenance-unknown`, `bed-licence-unverified`, `bed-muted`).
 - Checkable action: does this film carry sound, or is the silence a stated decision?
 
-Measured across `formats/scene/`: **25 films carry a real track, 90 declare `audio.silent:true`, 20 name
-no `audio` block at all, and 1 has a block that produces nothing.** Not one of the 90 says why. Run
-`make audio-check` to see the census fresh; it is the first thing this document is for.
+**`audio.auto`, the cue-derivation flag §4 describes, is now a DEFAULT, not an opt-in**
+(`formats/scene/scene.js`, `buildSfx`): a scene's own cuts, stings and seams score themselves
+automatically unless it says `audio.auto: false`. Measured across `formats/scene/` before and after
+that flip: scenes that resolve at least one cue went from **18 to 68**. Run `make audio-check` to see
+the live census; it is the first thing this document is for.
 
-That is five films in six shipping mute, and until now the doctrine said that was correct. It is being
-reversed. **Sound is the default. Silence is a device, and a device has a reason you write down.**
+What is still true, and still the open problem, is the MUSIC BED: **119 films declare
+`audio.silent:true` (39 of them say why), and 12 name no `audio` block and have no junction to derive a
+cue from either, so they are silent with nobody having decided that.** Not the mute-by-reflex problem
+this section originally measured, cue derivation now closes most of it for free, but the bed. Sound is
+still the default the doctrine argues for; silence is still a device with a reason you write down; the
+work left is picking beds, not deriving cues.
 
 The reason is not that a bed makes a film nicer. It is that
 [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) sorts the ways a short film can be held together into four
@@ -329,10 +335,17 @@ to be borrowed from mickey-mousing: **a whoosh on every transition makes every t
 important, which means none of them are.** It is mickey-mousing applied to editorial structure instead
 of to on-screen action, and it dies of the same saturation.
 
-Which is exactly why `audio.auto:true`, which scores a `whoosh` on every cut and a `reveal` on every
-sting: is a *draft* setting, not a finish. It is the right way to hear the shape of an edit quickly.
-It is the wrong thing to ship, because it is definitionally a cue on every junction. **22 of our 25
-sounded scenes ship with it on**, and that is a to-do, not a house style.
+This was the argument against shipping `audio.auto:true`: draft it to hear the shape of an edit, then
+replace it with two or three hand-placed cues. **The default was flipped anyway** (`formats/scene/scene.js`),
+because the alternative measured worse: four films in five were shipping with NO cue on ANY junction,
+which is the same amateurish sameness this section warns about, just silent instead of loud. Two things
+soften the objection rather than answer it outright: the cue is not one `whoosh`, `CUT_CUE`/`SEAM_CUE`
+(core/audio/cues.js) voice a punch, a wipe, an iris and a whip differently, so a derived cue is not the
+"everything sounds the same" failure a single default sound would be; and an author-placed cue still
+wins over a derived one at the same joint, so hand-placing two or three cues on the beats that matter
+still reads as intentional, it is layered ON the default, not instead of it. What is NOT answered:
+scoring EVERY junction is still, structurally, a cue on every cut, and that is still worth trimming to
+the beats that earn one on a film anyone is actually shipping. `audio.auto: false` opts a film back out.
 
 ---
 
@@ -744,11 +757,18 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
 ## 9. Open work
 
 1. **`core/audio/select.js` still maps most profiles to nothing.** Five of eight profiles map to
-   `bed: null`, and an unknown profile yields silence, so `music:"auto"` mostly resolves to nothing. It
-   should map every profile to *something* (a bed, or an explicit held tone) before "sound by default"
-   is real.
-2. **`audio.auto:true` is on in 22 of 25 sounded films.** By §4 that is a cue on every junction, which
-   is mickey-mousing. Those films want hand-placed cues on two or three beats instead.
+   `bed: null`, and an unknown profile yields silence, so `music:"auto"` mostly resolves to nothing.
+   Deliberately left this way rather than guessed at: a scene with no `profile` at all is left silent on
+   purpose too (`resolveAudio` only defaults `music` to `"auto"` when a `profile` is present), because
+   picking a bed with nothing to go on is not a default, it is a guess (docs/MISTAKES.md #159 in the
+   audio domain). It should still map every profile to *something* before "sound by default" is real
+   for MUSIC; cue derivation (item 2, below) already is.
+2. **RESOLVED: `audio.auto` is now the engine default, not an opt-in.** `formats/scene/scene.js`
+   (`buildSfx`) derives a cue for every cut, sting and seam unless a scene says `audio.auto: false`.
+   Measured before/after: scenes that resolve at least one cue went from 18 to 68. §4 records the
+   mickey-mousing objection to this and why it was overridden anyway, plus what the objection still
+   gets right. `scripts/gates/audio-check.mjs` reads the same fact (`hasScoredJunction`, via the same
+   `lowerScene`) so its census counts what the engine will actually render, not what a scene declared.
 3. **`direction-floor` still cannot see a bridge as a continuous object.** `audio.bridges` (§2) authors
    J-cuts and L-cuts, but a film held together by sound alone still trips `no-continuous-object` and
    needs a waiver. Teaching the gate to read `audio.bridges` is the next piece: it would have to reason
