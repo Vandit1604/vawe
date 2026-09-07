@@ -599,55 +599,25 @@
    "exitDur": 0.35
   },
   {
-   "type": "text",
-   "text": "Build runner",
-   "font": "mono",
-   "size": 22,
-   "weight": 600,
-   "color": "var(--text-2)",
-   "radius": 6,
-   "pad": "8px 20px",
+   "id": "botChips",
+   "type": "html",
    "x": 890,
    "y": 560,
    "start": "agentPanel+4.2",
    "duration": 4.6,
-   "anim": "pop",
+   "anim": "none",
+   "enterDur": 0,
    "exitDur": 0.35,
-   "elevation": 1
-  },
-  {
-   "type": "text",
-   "text": "Review bot",
-   "font": "mono",
-   "size": 22,
-   "weight": 600,
-   "color": "var(--text-2)",
-   "radius": 6,
-   "pad": "8px 20px",
-   "x": 1110,
-   "y": 560,
-   "start": "agentPanel+4.45",
-   "duration": 4.35,
-   "anim": "pop",
-   "exitDur": 0.35,
-   "elevation": 1
-  },
-  {
-   "type": "text",
-   "text": "Release bot",
-   "font": "mono",
-   "size": 22,
-   "weight": 600,
-   "color": "var(--text-2)",
-   "radius": 6,
-   "pad": "8px 20px",
-   "x": 1320,
-   "y": 560,
-   "start": "agentPanel+4.7",
-   "duration": 4.1,
-   "anim": "pop",
-   "exitDur": 0.35,
-   "elevation": 1
+   "html": "<div class=\"chips\" style=\"display:flex;gap:28px;align-items:flex-start\"><span class=\"chip\">Build runner</span><span class=\"chip\">Review bot</span><span class=\"chip\">Release bot</span></div><style>.chip{display:inline-flex;align-items:center;font:600 22px var(--font-mono);color:var(--text-2);background:var(--surface);border-radius:6px;padding:8px 20px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 1px rgba(0,0,0,0.07), 0 2px 2px rgba(0,0,0,0.05)}</style>",
+   "parts": [
+    {
+     "select": ".chip",
+     "anim": "popIn",
+     "each": 0.3,
+     "stagger": 0.25,
+     "delay": 0
+    }
+   ]
   },
   {
    "type": "count",
