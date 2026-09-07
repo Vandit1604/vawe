@@ -397,67 +397,24 @@
    "exitDur": 0.4
   },
   {
-   "type": "group",
+   "type": "html",
    "x": 110,
    "y": 210,
-   "layout": "column",
-   "gap": 30,
    "start": 11.3,
    "duration": 8.2,
-   "anim": "fade",
+   "anim": "none",
+   "enterDur": 0,
    "exitDur": 0.4,
-   "children": [
+   "html": "<div style=\"display:flex;flex-direction:column;gap:30px\"><div data-part style=\"font:500 25px var(--font-mono);color:var(--text)\">Person</div><div data-part style=\"font:400 25px var(--font-mono);color:var(--dim)\">Aims</div><div data-part style=\"font:400 25px var(--font-mono);color:var(--dim)\">Craft</div><div data-part style=\"font:400 25px var(--font-mono);color:var(--dim)\">Voice</div><div data-part style=\"font:400 25px var(--font-mono);color:var(--dim)\">Rhythm</div><div data-part style=\"font:400 25px var(--font-mono);color:var(--dim)\">Limits</div></div>",
+   "parts": [
     {
-     "type": "text",
-     "text": "Person",
-     "font": "mono",
-     "size": 25,
-     "weight": 500,
-     "color": "#0A0A0A"
-    },
-    {
-     "type": "text",
-     "text": "Aims",
-     "font": "mono",
-     "size": 25,
-     "weight": 400,
-     "color": "#757570"
-    },
-    {
-     "type": "text",
-     "text": "Craft",
-     "font": "mono",
-     "size": 25,
-     "weight": 400,
-     "color": "#757570"
-    },
-    {
-     "type": "text",
-     "text": "Voice",
-     "font": "mono",
-     "size": 25,
-     "weight": 400,
-     "color": "#757570"
-    },
-    {
-     "type": "text",
-     "text": "Rhythm",
-     "font": "mono",
-     "size": 25,
-     "weight": 400,
-     "color": "#757570"
-    },
-    {
-     "type": "text",
-     "text": "Limits",
-     "font": "mono",
-     "size": 25,
-     "weight": 400,
-     "color": "#757570"
+     "select": "[data-part]",
+     "anim": "riseIn",
+     "each": 0.45,
+     "stagger": 0.08,
+     "out": true
     }
-   ],
-   "each": 0.45,
-   "stagger": 0.08
+   ]
   },
   {
    "type": "rect",
