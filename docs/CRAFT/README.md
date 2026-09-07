@@ -105,6 +105,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | Guide | Load it when you are… | Answers |
 |---|---|---|
 | [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) | a beat needs a bespoke SVG/HTML dataviz or diagram | authoring a bespoke inline-SVG beat · the `window.__timelines` seek bridge · the per-child-choreography gap |
+| [BLOCKS-HTML-STATUS.md](BLOCKS-HTML-STATUS.md) | you are about to convert another blocks/*.mjs family to html output, or wondering why one family still returns native layers | which of the 65 remaining factories are already html, which are real candidates for the next conversion pass, and which are deliberately native, with the reason |
 | [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
 | [EYE-TRACE.md](EYE-TRACE.md) | a cut moves the subject across the frame | where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports |
 | [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video, lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`). |
