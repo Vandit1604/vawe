@@ -86,6 +86,10 @@ arguing with these.
 - **Composition is built into placement** (resolves per aspect, deterministic): `pin:"thirds-tl|thirds-br|…"`
   drops a layer on a power point; `pin:"center"` uses OPTICAL center (~46%, reads centered); `col:"2-7"` places
   it on a 12-column grid (sets x + w). Reach for these instead of eyeballed px, well-composed by default.
+  Every `pin` name is one registry now (`core/layout/safe.js` `PLACEMENT_REGISTRY`, `make arsenal
+  Q="…"` finds it), including three named anchors for the de-facto pixel constants this repo already
+  hand-types: `stage` (the full-width content column), `text-band` (roughly two-thirds down, where a
+  headline sits) and `lower-band` (a thin strip flush to the safe bottom edge).
 
 ## 5. Video safe zones (this engine)
 - Keep essential text/hero inside **title-safe ≈ inner 90%** of the frame; for social keep key content out of the

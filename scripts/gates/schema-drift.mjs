@@ -37,6 +37,7 @@ import { SEAM_FX } from '../../core/timeline/seams.js';
 import { SPECTACLE_DEVICES } from '../../core/registry/knobs.js';
 import { BG_NAMES } from '../../core/backgrounds/index.js';
 import { CAP_STYLE_NAMES } from '../../core/type/captions.js';
+import { PLACEMENT_REGISTRY } from '../../core/layout/safe.js';
 import path from 'node:path';
 import { gateFindings } from '../lib/findings.mjs';
 
@@ -146,6 +147,10 @@ const OWNED = [
   // left lib-test comparing the two. Comparing is not owning: the gate said "they differ" and the
   // author still hand-edited schema.json. The registry owns it here, so --write derives it.
   { path: 'captionStyle',       want: CAP_STYLE_NAMES,                        src: 'core/captions.js CAP_STYLES' },
+  // The `pin` enum used to be a hand-typed 17-name copy, one of three (core/engine/boot.js resolved
+  // it, core/validate/validate.mjs's degenerate-pin check held a second copy). All three now read
+  // core/layout/safe.js PLACEMENT_REGISTRY; this line makes the schema the fourth reader, not a copy.
+  { path: 'layers.item.pin',    want: PLACEMENT_REGISTRY.names,               src: 'core/layout/safe.js PLACEMENT_REGISTRY' },
   // `out` sat on this table for as long as it has existed and derived NOTHING, because the schema
   // declared it a bare string and the loop below skipped a path with no enum without a word. The skip
   // is loud now, and the enum is seeded, so the claim and the effect finally agree.

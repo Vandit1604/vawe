@@ -196,6 +196,76 @@ export function safeArea(W, H, destination = 'web') {
   };
 }
 
+// ── PLACEMENT: the named position vocabulary a layer's `pin` (and a caption's) writes ─────────────
+// This was the `PIN` table, copied by hand three times: core/engine/boot.js (the one that actually
+// resolves it), core/validate/validate.mjs (the degenerate-pin check) and the `pin` enum in
+// formats/scene/schema.json. That is the exact drift this file's own header warns about, just for a
+// second question ("where does a name land") instead of the first one ("how big is the frame"). One
+// table now; the three consumers read it.
+//
+// SAME SHAPE AS `ASPECT_REGISTRY` ABOVE, on purpose: the value is plain data (an `[xKeyword, yKeyword,
+// widthFraction?]` tuple), not a function. Resolving a keyword into pixels stays core/engine/boot.js's
+// job (`resolveCoords`'s own `kw()`/`num()`), the same way choosing pixels for an aspect stays
+// `sceneDims`'s job; this registry's only purchase is the name, the blurb and the catalogue entry.
+//   xKeyword / yKeyword: 'center' | 'optical' | 'third1' | 'third2' | 'left' | 'right' | 'top' |
+//     'bottom' | 'text-band' | null (axis untouched, left to the author). Resolved against the SAFE
+//     BOX for every keyword except centre/optical/thirds, which read the CANVAS (boot.js explains why).
+//   widthFraction: an optional 0..1 slice of the safe box's width, applied only when the layer does
+//     not already declare its own `w`. Absent means "no opinion", same as the 15 classic pins have
+//     always had: `pin:"left"` alone was never enough to give a text layer a width.
+export const PLACEMENT = {
+  center: ['center', 'optical'], top: ['center', 'top'], bottom: ['center', 'bottom'],
+  left: ['left', 'center'], right: ['right', 'center'],
+  'top-left': ['left', 'top'], 'top-right': ['right', 'top'],
+  'bottom-left': ['left', 'bottom'], 'bottom-right': ['right', 'bottom'],
+  'thirds-tl': ['third1', 'third1'], 'thirds-tr': ['third2', 'third1'],
+  'thirds-bl': ['third1', 'third2'], 'thirds-br': ['third2', 'third2'],
+  'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
+  'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'],
+  // The de-facto anchors every launch film already hand-types as pixels: `x:160, w:1600` three times
+  // in blueprints/kit.mjs, the same margin in scripts/author/scaffold.mjs, and the y:1010 accent rule
+  // the scaffold's continuous object sits on. Named here so a film can ask for them at any of the five
+  // aspects instead of the one 1920x1080 stage those constants were measured against. Nothing calls
+  // these yet (blueprints/kit.mjs and scaffold.mjs still write their own numbers, deliberately, so this
+  // commit changes no rendered frame); a later pass points those call sites here.
+  stage: ['left', null, 1],       // the full-width content column between the left and right safe edges
+  'text-band': [null, 'text-band'], // roughly two-thirds down the safe box, where a headline/sub sits
+  'lower-band': ['left', 'bottom'], // the stage's left edge, flush to the safe bottom: a closing rule
+};
+
+export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
+  slot: 'pin',
+  blurbs: {
+    center: 'dead centre of the canvas, vertically at the optical centre rather than the exact middle',
+    top: 'horizontally centred, pinned to the top edge of the safe area',
+    bottom: 'horizontally centred, pinned to the bottom edge of the safe area',
+    left: 'pinned to the left safe edge, vertically centred',
+    right: 'pinned to the right safe edge, vertically centred',
+    'top-left': 'pinned into the top-left corner of the safe area',
+    'top-right': 'pinned into the top-right corner of the safe area',
+    'bottom-left': 'pinned into the bottom-left corner of the safe area',
+    'bottom-right': 'pinned into the bottom-right corner of the safe area',
+    'thirds-tl': 'lands on the upper-left rule-of-thirds power point',
+    'thirds-tr': 'lands on the upper-right rule-of-thirds power point',
+    'thirds-bl': 'lands on the lower-left rule-of-thirds power point',
+    'thirds-br': 'lands on the lower-right rule-of-thirds power point',
+    'thirds-t': 'centred horizontally, sat on the upper third line',
+    'thirds-b': 'centred horizontally, sat on the lower third line',
+    'thirds-l': 'vertically centred, sat on the left third line',
+    'thirds-r': 'vertically centred, sat on the right third line',
+    stage: 'the full-width content column between the left and right safe margins, at any aspect ratio: kit.mjs\'s hand-typed x:160/w:1600 anchor, portable',
+    'text-band': 'the horizontal strip roughly two-thirds down the frame where a headline or a sub-line usually sits',
+    'lower-band': 'a thin strip near the bottom safe edge, left-anchored: where a closing rule or a small persistent label sits',
+  },
+  catalog: {
+    title: 'Placement',
+    tag: 'pin',
+    intro: '`"pin": "<name>"` on a layer or a caption. An aspect-portable position, resolved against the safe box (`core/layout/safe.js safeArea`) rather than a hand-typed pixel, so the same JSON lands correctly at any of the five canvases. `stage`/`text-band`/`lower-band` are the de-facto anchors this repo already hand-types as 1920px pixels; use them instead of a new magic number.',
+    usage: (n, { j }) => j({ pin: n }),
+    noPreview: 'a placement is a position, not a motion: see it with `make audit M=<file> ASPECT=all`, which checks every name against the safe box at every aspect and destination.',
+  },
+});
+
 // ── THE CAPTION BAND ────────────────────────────────────────────────────────────────────────────
 // A burnt-in caption owns real estate, and nothing stopped a headline landing on it. The band belongs
 // HERE, next to safeArea, for the reason the header gives: where a caption sits is a property of the

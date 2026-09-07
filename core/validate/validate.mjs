@@ -25,7 +25,7 @@ import { nearMisses } from '../registry/registry.js';
 // parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
 // absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
 import { parseColor, contrastRatio } from '../motion/motion.js';
-import { ASPECTS } from '../layout/safe.js';
+import { ASPECTS, PLACEMENT } from '../layout/safe.js';
 import { boundaryMechanism, lowerScene } from '../transitions/lower.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../timeline/junctions.js';
 import { resolveSpectacle } from '../timeline/spectacle.js';
@@ -62,16 +62,10 @@ const typeOf = (v) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof
 // The Y axis is the same trap. It is enforced only where no honest estimate exists: a text layer's
 // height is reliably ~size*1.2 and scenes have tuned around the current behaviour, so applying that
 // estimate would MOVE shipped content. That is the deliberate "measure later" half, see ROADMAP.
-const PIN_AXIS = {
-  center: ['center', 'optical'], top: ['center', 'top'], bottom: ['center', 'bottom'],
-  left: ['left', 'center'], right: ['right', 'center'],
-  'top-left': ['left', 'top'], 'top-right': ['right', 'top'],
-  'bottom-left': ['left', 'bottom'], 'bottom-right': ['right', 'bottom'],
-  'thirds-tl': ['third1', 'third1'], 'thirds-tr': ['third2', 'third1'],
-  'thirds-bl': ['third1', 'third2'], 'thirds-br': ['third2', 'third2'],
-  'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
-  'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'],
-};
+// PIN_AXIS used to be its own copy of the same 17-name table core/engine/boot.js resolves and
+// formats/scene/schema.json enumerates. It is now core/layout/safe.js PLACEMENT, the one table all
+// three read; this file keeps the short local name only because `check()` below is written against it.
+const PIN_AXIS = PLACEMENT;
 // keywords that SUBTRACT the layer's size, and are therefore meaningless without one
 const NEEDS_SIZE = new Set(['center', 'optical', 'third1', 'third2', 'right', 'bottom']);
 // types whose extent the engine can estimate from `size`, excluded from the y rule for now
