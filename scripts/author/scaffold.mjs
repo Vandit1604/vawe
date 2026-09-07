@@ -349,6 +349,12 @@ function beatSection(s, i) {
     `- onscreen: "<fill: the on-screen copy for this beat>"`,
     `- mechanism: ${s.name} (make blueprints)`,
     `- becomes: ${becomes}`,
+    // THE PER-SCENE CONTRACT: only meaningful if a per-scene fan-out is actually happening (`make
+    // scenes`), so left as an unfilled marker rather than a guessed value. scripts/lib/contract.mjs
+    // chainErrors refuses to run `make scenes`/`make assemble` until every beat's object_in matches the
+    // beat before it's object_out. Delete both lines if this film carries no continuous object.
+    `- object_in: "<fill: <placement>@<w>x<h>, e.g. bottom-left@120x40, must equal the beat before's object_out>"`,
+    `- object_out: "<fill: <placement>@<w>x<h>, what this beat hands to the next one>"`,
     `- why: ${why}`,
     `- duration: ${s.dur}s`,
     '',
