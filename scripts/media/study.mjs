@@ -571,9 +571,11 @@ ${shots.map((s) => `| ${s.i} | ${fx(s.t0)}s | ${fx(s.len)}s | ${s.ground ?? '?'}
 with the same \`motion\` are different shots when one of them holds for three seconds and then explodes,
 and the contact sheet is now cut AT those peaks rather than at each shot's midpoint.
 
-**The film's own motion, for comparison with ours.** Reference films in \`refs/\` run 1.7 to 2.0 and are
-still for 13-24% of their frames; this library's median film runs far below that. \`./bin/vawe <scene>\`
-prints the same number for our attempt, so the recreation has a target rather than an impression.
+**The film's own motion, for comparison with ours.** The studied reference corpus measures 1.06 to
+5.01 motion (median 2.84) and 11% to 77% still (median 29%), not the 1.7-2.0 / 13-24% this doc quoted
+before checking it against the corpus (\`node scripts/author/claims.mjs\`, grammar/_claims.json). \`./bin/vawe
+<scene>\` prints the same still-share for our attempt, but on JPEG-captured frames against this figure's
+H.264-decoded ones: read the codec it prints beside the number before comparing the two directly.
 
 ## Then cut it
 
