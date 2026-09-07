@@ -1,0 +1,35 @@
+{
+  "module": "scene",
+  "note": "STING, postable: Halyard's eye-splice mark (the eval fixture's mark, kept because it is a genuinely good rope-studio mark) gathers itself in a brief coil-and-snap before it draws on, then holds as a cobalt outline while the wordmark settles in behind it. One move: gather, draw, resolve. The anticipation is School of Motion's twelfth principle, a warm-up before the payoff, not a second beat. A swell rides the draw and collapses exactly on the resolved mark: BLACK MEANS #000000 since this is a true-black bumper.",
+  "theme": "mercury",
+  "aspect": "16:9",
+  "destination": "web",
+  "duration": 6.5,
+  "energy": "brand",
+  "authoring": { "allow": ["static-bg", "no-transition"], "_why": {
+    "static-bg": "BLACK MEANS #000000 (AGENTS.md): a lit or moving field would be a tinted bumper, not the true-black one this brief asks for",
+    "no-transition": "one continuous shot: the storyboard's two beats are the gather-and-draw and the settle-and-hold of the SAME take, not two shots that need a seam between them. The spine for this type is explicitly no cuts at all (skills/vawe-type-sting/SKILL.md)"
+  } },
+  "audio": {
+    "cues": [ { "t": 0.4, "name": "swell", "gain": 0.7 } ]
+  },
+  "bg": [ { "preset": "black" } ],
+  "layers": [
+    { "type": "svg", "x": 830, "y": 250, "w": 260, "h": 260, "viewBox": "0 0 40 40",
+      "d": "M8 33 L24 17 A7 7 0 0 1 24 31 A7 7 0 0 1 24 17", "stroke": "var(--accent)",
+      "draw": { "dur": 1.0, "weight": 4, "ease": "easeInOutCubic" },
+      "start": 0.2, "duration": 6.3, "anim": "none", "out": "fade", "exitDur": 0.4,
+      "motion": [
+        { "t": 0, "scale": 0.82, "rot": -5 },
+        { "t": 0.22, "scale": 0.82, "rot": -5, "ease": "linear" },
+        { "t": 0.42, "scale": 1.06, "rot": 1, "ease": "easeOutBack" },
+        { "t": 0.68, "scale": 1.0, "rot": 0, "ease": "easeOutCubic" },
+        { "t": 5.8, "scale": 1.03, "ease": "easeInOutSine" }
+      ]
+    },
+    { "type": "text", "text": "Halyard", "size": 112, "weight": 560, "color": "var(--text)", "align": "center",
+      "x": 660, "y": 552, "w": 600, "start": 1.3, "duration": 5.2, "anim": "fade", "enterDur": 0.5, "out": "fade", "exitDur": 0.4 },
+    { "type": "text", "text": "the knot that holds", "size": 30, "weight": 500, "color": "var(--text2)", "align": "center",
+      "x": 660, "y": 672, "w": 600, "font": "mono", "start": 1.6, "duration": 4.0, "anim": "fade", "enterDur": 0.5, "out": "fade", "exitDur": 0.4 }
+  ]
+}
