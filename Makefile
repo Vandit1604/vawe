@@ -443,6 +443,14 @@ snap-blocks: ## [check] the BLOCK library's regression net, and it is the half s
 motion: ## [check] animation-over-time audit: renders every frame headless (no video) and asserts the motion contract
 	@node scripts/gates/motion-audit.mjs $(M) $(if $(D),--data $(D)) $(if $(STRIDE),--stride $(STRIDE)) $(if $(JSON),--json,)
 
+# make motion-trace M=<format> D=<file.json> [STRIDE=N], per-layer velocity/area trace over time: when
+# each layer moves vs holds, its peak position velocity and peak area-change (a scale pulse with no
+# position velocity still shows here), when each peak lands, and whether the motion is monotonic or
+# oscillating. An INSTRUMENT (no pass/fail), sampled not rendered whole, so it costs seconds. Read
+# docs/CRAFT/MOTION-TRACE.md for what it can and cannot see.
+motion-trace: ## [check] per-layer velocity/area-change trace over time: an agent's way to SEE motion without watching the video
+	@node scripts/gates/motion-audit.mjs $(M) --trace $(if $(D),--data $(D)) $(if $(STRIDE),--stride $(STRIDE)) $(if $(JSON),--json,)
+
 # make conformance [enums|props|paths]: does the engine DO what it says it accepts? Applies every
 # declared enum value and every layer prop, and asserts the OUTPUT CHANGED. Catches the dominant bug
 # class in this repo (docs/MISTAKES.md #19-28): input accepted, then silently ignored or substituted.
