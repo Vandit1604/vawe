@@ -31,7 +31,7 @@ the brand beat, never after it: a stat after the logo reads as an afterthought.
 
 ## The blueprints to reach for
 
-By role (`make blueprints` for the full 29):
+By role (`make arsenal BLUEPRINTS=1` for the full 29):
 - **hook**: `kineticHook`, `typedHook`, `blurResolveHook`
 - **product (needs a real captured asset)**: `screenDive`, `recordedPan`, `scrollStory`
 - **feature proof**: `cardCascade`, `chipGrid`, `containerFill`

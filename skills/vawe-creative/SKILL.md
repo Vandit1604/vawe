@@ -12,7 +12,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 
 ## The mandates (every one is gate-backed, not suggestions)
 
-1. **Compose from BLUEPRINTS, don't hand-roll motion.** `make blueprints` lists directed beats
+1. **Compose from BLUEPRINTS, don't hand-roll motion.** `make arsenal BLUEPRINTS=1` lists directed beats
    (`{type:"beat"}`, docs/CRAFT/BLUEPRINTS.md): kineticHook, statReveal, cardCascade, chipGrid,
    terminalReveal, screenDive, verdictProof, logoLockup, ctaEnd. Drop one per storyboard beat, fill brand
    content; it expands into real layers at load, no separate step. Good motion becomes the default
@@ -53,7 +53,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 ## The loop (do not skip a rung)
 
 ```
-make blueprints                 # browse directed beats → pick one per storyboard beat
+make arsenal BLUEPRINTS=1       # browse directed beats → pick one per storyboard beat
 … author formats/scene/<x>.json (beats + brand content + a living bg + camera + seams) …
                                  # beats/blocks/comps expand into real layers at LOAD, no separate step
 make author-check D=<x>.json    # validate · critique · direct(effect-soup ceiling) · FLOOR(slideshow) · slop

@@ -183,7 +183,7 @@ Leaving motion at defaults is shared DNA across brands; don't.
 type scale, the layout anchor/margin, the mark's two sizes, the cut family, the audio cues. This
 is the same study, spent a second time: a theme with `motion` but no `look` still forces every
 FILM for that brand to re-decide its own backdrop and cut family from scratch. `make scaffold
-TYPE=<type> THEME=<name>` reads `look` and uses it; `make theme-sheet THEME=<name>` renders it
+TYPE=<type> THEME=<name>` reads `look` and uses it; `make arsenal THEME=<name>` renders it
 as a picture so you can check it before authoring the film.
 
 **Name 2–3 references** that fit THIS brand ("Vercel keynote restraint", "Sandwich Video
@@ -213,7 +213,7 @@ There is ONE module: **scene** (the open canvas, layers/cuts/stings/bg windows/c
 `formats/scene/schema.json` is the contract). No templates. You compose every video from the
 primitive vocabulary in `docs/PRIMITIVES.md`; the JSON is the video.
 
-**Compose beats from BLUEPRINTS, not blank JSON.** `make blueprints` lists directed-motion beat
+**Compose beats from BLUEPRINTS, not blank JSON.** `make arsenal BLUEPRINTS=1` lists directed-motion beat
 blueprints (`{type:"beat"}`, [`docs/CRAFT/BLUEPRINTS.md`](../../docs/CRAFT/BLUEPRINTS.md)), kineticHook,
 statReveal, cardCascade, screenDive, terminalReveal, verdictProof, ctaEnd, … Each bakes in kinetic
 reveals / count-ups / cascades / a dashboard dive so good motion is the DEFAULT. Authoring plain
@@ -252,7 +252,7 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   `paperShapes`) if the site itself has that texture. And even then a pattern is a SEASONING, not the
   wallpaper: at most one or two beats (a hook or one accent moment), never throughout. Content/proof
   beats stay plain so the content reads. Recurring mistakes + fixes live in `docs/MISTAKES.md`; ask it
-  with `make mistakes Q="…"` before authoring rather than reading it end to end.
+  with `make arsenal MISTAKES=1 Q="…"` before authoring rather than reading it end to end.
 
 ## Step 3b.1: Every frame FIGHTS for its value (the value gate)
 
