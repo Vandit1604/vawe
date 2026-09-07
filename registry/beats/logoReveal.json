@@ -25,14 +25,18 @@
       "mark": null,
       "morphFrom": null,
       "wordmark": null,
-      "sub": null
+      "sub": null,
+      "bodySize": null,
+      "captionSize": null
     },
     "requiredProps": [
       "x",
       "mark",
       "morphFrom",
       "wordmark",
-      "sub"
+      "sub",
+      "bodySize",
+      "captionSize"
     ],
     "props": [
       "y",
