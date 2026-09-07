@@ -125,7 +125,19 @@ a threshold on this curve would manufacture a finding on every film that made it
 been deleted for measuring a proxy for a judgement ([`../TASTE.md`](../TASTE.md)), and the printer says
 so in its own comments so the next author does not add the teeth back.
 
-## 3. Restraint, the single biggest amateur-vs-pro tell
+## 3. Restraint, the single biggest amateur-vs-pro tell, and it has TWO answers
+
+**Read [`MOTION-REGISTERS.md`](MOTION-REGISTERS.md) before applying anything below.** The rules in
+this section were stated as universal and are not: they are correct for the UI-adjacent / quiet
+explainer register, where motion is a cost the viewer pays for legibility (NN/g, Apple's HIG), and
+backwards for kinetic typography, hype/launch promos and continuous title sequences, where sustained
+motion IS the content and stillness is the cost (kinetic-typography practice, beat-synced editing, the
+Saul Bass / Kyle Cooper title-sequence tradition). **Both films this file argues from,
+`higgsfield-recreation` and `brew-launch-act1`, sit in the second register**, so read their numbers in
+§1 above as evidence for sustained motion, not as an exception to a quiet-by-default rule. Pick the
+register from `scripts/author/type-spines.mjs`'s `register` field (`kinetic` or `quiet`) before judging
+a beat against the list below; a `kinetic`-register film with every beat moving differently is directed,
+not effect soup, and a `quiet`-register film held to the same density is undirected.
 
 - **One motion idea per beat.** A dolly, OR a colour-wave, OR a stagger, not all three. Stacking them
   is maximalism that reads as a demo reel, not a film. `[gated]` direct: `effect-soup`

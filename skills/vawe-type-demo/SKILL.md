@@ -17,6 +17,9 @@ can run longer than its neighbours: give the click room to read before the conse
 
 ## What this type needs that others do not
 
+- **Quiet register.** A demo IS the interface being demonstrated, so it inherits the UI-adjacent
+  restraint rule: the click and its consequence are the one thing allowed to be loud
+  (`docs/CRAFT/MOTION-REGISTERS.md` §1, `register: 'quiet'` in `type-spines.mjs`).
 - **A real cursor path.** The `cursor` layer follows `path:[{t,x,y}]` (times LOCAL to the layer's own
   `start`, coordinates absolute screen px when the layer carries no `x`/`y` of its own) and fires a
   ripple at each time in `clicks:[t...]`.

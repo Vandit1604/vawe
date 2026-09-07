@@ -17,6 +17,10 @@ the brand beat, never after it: a stat after the logo reads as an afterthought.
 
 ## What this type needs that others do not
 
+- **Kinetic register.** A launch film sells sustained motion, not one loud moment against a quiet
+  field: `docs/CRAFT/MOTION-REGISTERS.md` §1 and `type-spines.mjs`'s `register: 'kinetic'`. A beat that
+  moves differently from its neighbours is directed; a beat that copies the last beat's timing is the
+  real failure, not the fact that most beats move.
 - **Captured UI, not invented UI.** `make sections` / `make capture` before writing a single layer.
   A hand-drawn dashboard is the fastest way into generic-AI-slop territory.
 - **A continuous object.** One element (the wordmark, a UI element, an accent rule) that survives

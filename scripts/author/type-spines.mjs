@@ -10,8 +10,16 @@
 //
 // Every blueprint name here is real: cross-checked by hand against `make blueprints`
 // (scripts/site/blueprints-catalog.mjs), which prints the full 29-beat roster.
+//
+// `register`: 'kinetic' or 'quiet', per docs/CRAFT/MOTION-REGISTERS.md. Restraint (how many beats may
+// move, how loud the loud moment gets) is not one universal rule: a 'quiet' type pays a legibility cost
+// for every millisecond of motion (NN/g, Apple HIG) and wants one loud moment against a still field; a
+// 'kinetic' type sells sustained motion as the content itself (kinetic-typography practice, beat-synced
+// editing, the Saul Bass / Kyle Cooper title tradition) and a still beat is the cost. Selected here so
+// an author does not have to remember which register a film is in.
 export const TYPE_SPINES = {
   launch: {
+    register: 'kinetic',
     // captured UI (screenDive) carries the middle; logoLockup gives the brand its own beat, never a bullet.
     beats: ['kineticHook', 'screenDive', 'cardCascade', 'statReveal', 'logoLockup', 'ctaEnd'],
     paceBand: [2.0, 3.2],
@@ -20,6 +28,7 @@ export const TYPE_SPINES = {
     cues: ['chime', 'whoosh', 'success'],
   },
   explainer: {
+    register: 'quiet',
     // no product beat: the spine is entirely hook -> build -> counted proof -> payoff, held pace.
     beats: ['kineticHook', 'containerFill', 'listBuildRows', 'chipGrid', 'statReveal', 'ctaEnd'],
     paceBand: [2.5, 4.0],
@@ -32,6 +41,7 @@ export const TYPE_SPINES = {
     waive: { 'sparse-beats': 'explainer pace band, 2.5-4.0s per beat (skills/vawe-type-explainer): one idea must land before the next starts, so a boundary every ~3.7s is the type\'s own rhythm, not a slideshow' },
   },
   'talking-head': {
+    register: 'quiet',
     // the face-safe slot is the placeholder rect the worked example fills; captions carry the beat
     // rhythm instead of blueprint variety, so the spine stays short and repeats on purpose.
     beats: ['blurResolveHook', 'containerFill', 'statReveal', 'ctaEnd'],
@@ -41,6 +51,7 @@ export const TYPE_SPINES = {
     cues: ['tick'],
   },
   sting: {
+    register: 'kinetic',
     // one move, one blueprint, no filler. `dur` should be 4-8s; the spine has no build slot at all.
     beats: ['logoReveal'],
     paceBand: [4.0, 8.0],
@@ -49,7 +60,9 @@ export const TYPE_SPINES = {
     cues: ['chime'],
   },
   demo: {
-    // recordedPan/scrollStory carry a real cursor path; the payoff is the verdict, not a stat.
+    register: 'quiet',
+    // recordedPan/scrollStory carry a real cursor path; the payoff is the verdict, not a stat. A demo
+    // is UI-adjacent by definition (it IS the interface), so it inherits the quiet register.
     beats: ['kineticHook', 'recordedPan', 'verdictProof', 'ctaEnd'],
     paceBand: [2.5, 4.5],
     bgPresets: ['soft', 'ink'],
@@ -57,8 +70,9 @@ export const TYPE_SPINES = {
     cues: ['click', 'success'],
   },
   recreation: {
-    // the spine is deliberately generic: a recreation takes its beat shapes from `make study`'s
-    // grammar, not from this table. Kept as the two-beat fallback so `--type recreation` still runs.
+    // no fixed register: a recreation inherits whatever register the studied source film is in
+    // (`make study`'s grammar), which is exactly why this spine stays a generic two-beat fallback.
+    register: null,
     beats: ['kineticHook', 'statReveal', 'ctaEnd'],
     paceBand: [2.0, 4.0],
     bgPresets: ['soft', 'accent'],
