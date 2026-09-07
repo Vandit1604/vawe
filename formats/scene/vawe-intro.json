@@ -63,15 +63,11 @@
       "exitDur": 0.26
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 470,
       "y": 215,
       "w": 980,
       "h": 570,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 0,
-      "pad": 0,
       "bg": "var(--card)",
       "radius": 14,
       "elevation": 2,
@@ -80,62 +76,7 @@
       "anim": "rise",
       "enterDur": 0.5,
       "exitDur": 0.35,
-      "children": [
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 8,
-          "pad": "14px 18px",
-          "children": [
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 12,
-              "h": 12,
-              "bg": "#FF5F57"
-            },
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 12,
-              "h": 12,
-              "bg": "#FEBC2E"
-            },
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 12,
-              "h": 12,
-              "bg": "#28C840"
-            },
-            {
-              "type": "group",
-              "grow": 1,
-              "layout": "row",
-              "justify": "center",
-              "children": [
-                {
-                  "type": "group",
-                  "bg": "var(--surface-2)",
-                  "radius": 100,
-                  "pad": "6px 20px",
-                  "children": [
-                    {
-                      "type": "text",
-                      "weight": 500,
-                      "text": "app.vawe.dev",
-                      "font": "mono",
-                      "size": 18,
-                      "color": "var(--text-2)"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "html": "<div style=\"display:flex;align-items:center;gap:8px;padding:14px 18px;box-sizing:border-box\"><div style=\"width:12px;height:12px;border-radius:100px;background:#FF5F57;flex:none\"></div><div style=\"width:12px;height:12px;border-radius:100px;background:#FEBC2E;flex:none\"></div><div style=\"width:12px;height:12px;border-radius:100px;background:#28C840;flex:none\"></div><div style=\"flex:1;display:flex;justify-content:center\"><div style=\"background:var(--surface-2);border-radius:100px;padding:6px 20px\"><span style=\"font:500 18px var(--font-mono);color:var(--text-2)\">app.vawe.dev</span></div></div></div>"
     },
     {
       "type": "group",
@@ -233,58 +174,20 @@
       ]
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 1000,
       "y": 620,
       "w": 410,
-      "layout": "row",
-      "items": "center",
-      "gap": 14,
-      "pad": "16px 20px",
       "bg": "#0A0A0A",
       "radius": 12,
       "elevation": 2,
+      "pad": "16px 20px",
       "start": 7.65,
       "duration": 0.65,
       "anim": "rise",
       "enterDur": 0.4,
       "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 22,
-          "h": 22,
-          "bg": "var(--up)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "✓",
-              "size": 14,
-              "color": "#fff"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "Rendered to out.mp4",
-          "size": 19,
-          "color": "#F5F5F3",
-          "grow": 1
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "Open",
-          "size": 18,
-          "color": "#3ECF8E"
-        }
-      ]
+      "html": "<div style=\"display:flex;align-items:center;gap:14px\"><div style=\"width:22px;height:22px;border-radius:100px;background:var(--up);display:flex;align-items:center;justify-content:center;flex:none\"><span style=\"font:700 14px var(--font-sans);color:#fff\">✓</span></div><span style=\"flex:1;font:500 19px var(--font-sans);color:#F5F5F3\">Rendered to out.mp4</span><span style=\"font:600 18px var(--font-sans);color:#3ECF8E\">Open</span></div>"
     },
     {
       "type": "count",
