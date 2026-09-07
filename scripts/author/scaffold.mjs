@@ -39,6 +39,7 @@ import { docRegistry, computeFeatures, storyboardPathFor } from '../gates/craft-
 import { loadScene } from '../../core/engine/expand.js';
 import { nearestExemplars, exemplarSignature } from '../lib/exemplars.mjs';
 import { TYPE_SPINES, typeNames } from './type-spines.mjs';
+import { computedLook } from '../../core/registry/theme-contract.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -63,11 +64,17 @@ const spine = typeArg ? TYPE_SPINES[typeArg] : null;
 // straight off the theme file so a scaffold for THIS brand doesn't re-decide them the way the type
 // spine decides them for a whole TYPE. Optional: a theme with no `look` changes nothing below, same as
 // before this existed. `theme` here is always a name (scaffold never takes an inline theme object).
-let look = null;
+let look = null, themeObj = null;
 try {
   const themePath = path.resolve(ROOT, 'themes', `${theme}.json`);
-  if (fs.existsSync(themePath)) look = JSON.parse(fs.readFileSync(themePath, 'utf8')).look || null;
+  if (fs.existsSync(themePath)) { themeObj = JSON.parse(fs.readFileSync(themePath, 'utf8')); look = themeObj.look || null; }
 } catch { /* an unreadable theme file is core/validate/validate.mjs's job to report, not scaffold's */ }
+// The house default (core/registry/theme-contract.js computedLook): the same `scale`/`layout.margin`/
+// `cuts` this scaffold used to hardcode as its own last-resort literal, now sourced from the one place
+// that owns them, so this file cannot drift from it the way the two independent copies of `bgBlock`
+// once did (scripts/lib/theme-bg.mjs's own header). `look` above stays the AUTHORED-only object: the
+// priority below is still authored `theme.look` > the `--type` spine > this house default, unchanged.
+const houseDefault = computedLook(themeObj || {});
 
 // COMPOSE FROM THE NEAREST PROVEN FILM, not a generic default. A blank draft regresses to the mean;
 // so does a scaffold whose backdrop is one fixed pair of windows. `--like "<brief>"` (or, absent that,
@@ -196,7 +203,7 @@ const LAYOUT_OPT_OUT = new Set(['logoLockup', 'ctaEnd', 'logoReveal']);
 const CANVAS_W = 1920;
 function layoutFor(name) {
   if (!look?.layout || LAYOUT_OPT_OUT.has(name)) return {};
-  const margin = look.layout.margin ?? 160;
+  const margin = look.layout.margin ?? houseDefault.layout.margin;
   return { x: margin, w: CANVAS_W - margin * 2 };
 }
 
@@ -265,7 +272,7 @@ layers.push({
 // ---- transitions: one per boundary, mostly fade, one accent into the payoff --------------------------
 // theme.look.cuts wins over the TYPE spine, which wins over the generic default: the brand's own cut
 // family is a fixed fact about the brand, the type spine only a fact about the kind of film.
-const cutFamily = look?.cuts ? look.cuts : spine ? spine.cutFamily : { default: 'fade', accent: 'cinematicZoom' };
+const cutFamily = look?.cuts ? look.cuts : spine ? spine.cutFamily : houseDefault.cuts;
 const transitions = [];
 for (let i = 1; i < spans.length; i++) {
   const at = spans[i].start;
