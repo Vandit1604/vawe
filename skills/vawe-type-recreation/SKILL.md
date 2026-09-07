@@ -20,6 +20,10 @@ not a skippable step.
 
 ## What this type needs that others do not
 
+- **No fixed register.** `register: null` in `type-spines.mjs`: a recreation inherits whatever register
+  the STUDIED source is in. Grade a kinetic reference (a continuous title sequence) against a quiet
+  restraint rule and the recreation will read as under-directed no matter how faithful it is
+  (`docs/CRAFT/MOTION-REGISTERS.md` §1).
 - **`make study VIDEO=refs/ref.mp4 NAME=ref`.** Nothing else in this repo has looked at a reference
   film by machine; this is the only type that starts here. It writes `grammar/<name>.json` and a
   contact sheet at `refs/<name>/study.md` with the shot boundaries, ground pattern, motion curve and a
