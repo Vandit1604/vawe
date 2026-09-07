@@ -67,6 +67,24 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
   }
 }
 
+// ---- computedLook is DERIVED, not a constant: a real spread across the themes with no authored look ----
+// (docs/CRAFT/THEME-LOOK.md, scripts/gates/theme-look-spread.mjs is the fuller version of this check,
+// run over the whole library on every `make theme-look-spread`.) This is the sibling assertion the
+// engine change instructions asked for: computedLook must not collapse back to one value per key.
+{
+  const unauthored = [];
+  for (const f of fs.readdirSync(path.join(ROOT, 'themes'))) {
+    if (!f.endsWith('.json')) continue;
+    const t = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', f), 'utf8'));
+    if (!t.look) unauthored.push(t);
+  }
+  assert.ok(unauthored.length >= 30, `expected most of the library to have no authored look, found ${unauthored.length}`);
+  const hooks = new Set(unauthored.map((t) => computedLook(t, { isLightBg }).scale.hook));
+  const defaults = new Set(unauthored.map((t) => computedLook(t, { isLightBg }).cuts.default));
+  assert.ok(hooks.size > 5, `computedLook.scale.hook must vary across un-authored themes, got only ${hooks.size} distinct value(s): a constant default divides variety to one`);
+  assert.ok(defaults.size > 1, `computedLook.cuts.default must vary across un-authored themes, got only ${defaults.size} distinct value(s)`);
+}
+
 // ---- consecutive computed backdrops would differ if computed at all (they are not: this documents why) ----
 // `computedLook` never fills `backdrop` (docs/MISTAKES.md #159: the engine picking a background is the
 // mistake this repo already made and undid). So there is nothing here to check for CONTRASTING

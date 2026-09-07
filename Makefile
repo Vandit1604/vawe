@@ -141,6 +141,12 @@ rung: ## [maintenance] which rules in CLAUDE.md and docs/CRAFT are enforced by s
 docs-drift: ## [maintenance] ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count.
 	@node scripts/gates/docs-drift.mjs $(if $(JSON),--json,)
 
+# make theme-look-spread: does computedLook (core/registry/theme-contract.js) actually vary by theme,
+# or has the derivation gone back to a constant? Counts distinct values per derived look key across all
+# 44 themes and fails the key by name when it collapses toward one value (docs/CRAFT/THEME-LOOK.md).
+theme-look-spread: ## [maintenance] does the computed theme look (scale/cuts/field) actually vary across themes, or has it gone constant?
+	@node scripts/gates/theme-look-spread.mjs $(if $(JSON),--json,)
+
 layer-props: ## [check] does the engine READ the props a layer sets on a layer? (D=<file>)
 	@node scripts/gates/layer-props.mjs $(D) $(if $(JSON),--json,)
 

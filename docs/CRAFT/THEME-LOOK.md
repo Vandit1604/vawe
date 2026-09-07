@@ -144,16 +144,36 @@ opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: 
 key by key, and a theme that fixes only `backdrop` still gets a computed `scale`/`layout`/`cuts`/`field`
 for the rest.
 
-The computed constants are not invented: `scale` (`{hook:92,headline:64,body:38,caption:24}`) and
-`layout.margin` (`160`) and `cuts` (`{default:"fade",accent:"cinematicZoom"}`) are `themes/vawe.json`'s
-own look values, the same numbers this doc already uses as its worked example above, and
-`themes/default.json`'s own note says that file deliberately mirrors vawe. `field` reads
-light-vs-dark off `isLightBg(theme.palette.bg)`: every light-bg authored look ships
-`{grain:0,vignette:0}`, every dark-bg one (nike/vercel/a24) ships nonzero grain and vignette, so
-computed field follows the same split (`{grain:0.08,vignette:0.15}` when dark). `isLightBg` is handed
-in, not imported, the same injection shape `lookErrors` already uses for `bgNames`/`transitionNames`,
-so `theme-contract.js` stays free of `core/motion/motion.js` and importable from node and the browser
-both.
+**`scale` and `cuts` are DERIVED, not constants.** A first cut of this function filled every theme
+with `themes/vawe.json`'s own numbers, so a calm brand and a loud one computed the identical type
+scale and the identical cuts. `scripts/gates/theme-look-spread.mjs` (`make theme-look-spread`) exists
+because nothing caught that: it counts distinct values per derived key across every shipped theme and fails
+by name if one collapses.
+
+- `scale`: `hook ~= 55 + 1.12 * motion.enter` (regressed off the 7 hand-authored looks; the 7 numbers
+  vawe/a24/apple/bloomberg/duolingo/nike/vercel already carried are within 7px of what the formula
+  predicts). `headline`/`body`/`caption` stay a fixed proportion of `hook` (~0.70 / ~0.41 / ~0.27,
+  again averaged off the same 7 and each within 0.03 of every one of them): that ratio is a genuine
+  type-scale relationship, kept constant on purpose, not re-fit per theme.
+- `cuts.default` reads `motion.durationScale` (the brand's ordinary pace: `whip` when faster than the
+  house pace, up through `fade`/`dissolve`/`riseBlur` as it slows). `cuts.accent` reads `motion.bounce`
+  (the brand's peak energy: `letterbox` near zero overshoot, up through `cinematicZoom`/`zoom`/`punch`
+  as it climbs). Every name is a real `core/transitions/catalog.js` entry, so a bad tier boundary fails
+  loud at `lookErrors` rather than shipping an unknown transition.
+- `field` is unchanged: `isLightBg(theme.palette.bg)` decides `{grain:0,vignette:0}` vs
+  `{grain:0.08,vignette:0.15}`, the same light-vs-dark split every authored look already used.
+- `layout` STAYS a constant (`{anchor:"left", margin:160}`, `themes/vawe.json`'s own values), and says
+  so where it is written: no field any theme carries (palette, type, motion, bg, bgDefault) correlates
+  with anchor or margin across the 7 hand-authored looks, and margin is structurally a per-video canvas
+  decision, not a brand one. Fitting a formula to 7 points with no real signal would be curve-fitting,
+  not derivation.
+
+`isLightBg` is handed in, not imported, the same injection shape `lookErrors` already uses for
+`bgNames`/`transitionNames`, so `theme-contract.js` stays free of `core/motion/motion.js` and
+importable from node and the browser both. `theme.motion` itself is optional (one shipped theme,
+`themes/plinth-auto.json`, has none), so a missing field falls back to the same numbers
+`core/motion/motion.js`'s own `DEFAULT_MOTION` uses, quoted rather than imported for the same purity
+reason.
 
 **Two keys stay uncomputed, on purpose:**
 
