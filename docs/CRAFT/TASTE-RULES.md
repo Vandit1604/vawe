@@ -156,9 +156,13 @@ reveal, an act break, the CTA, a music punctuation. Everything else is a hard cu
 One cut family per film. One accent hue. Mixing whip and iris in one piece, or a new look every beat,
 is the video equivalent of five fonts on a slide.
 
-The effect budget flexes with the video's PURPOSE (a launch film is restrained; an effects showreel is
-allowed to be dense, but even it earns each beat), and the director gate judges busyness against that
-purpose rather than a fixed count.
+The effect budget flexes with the video's REGISTER, not with a fixed count. Two registers, named and
+sourced in [`MOTION-REGISTERS.md`](MOTION-REGISTERS.md): **quiet** (UI-adjacent, explainer, talking-head:
+motion is a cost the viewer pays, so one loud moment against a still field is correct), and **kinetic**
+(launch, sting, hype promo, continuous title: sustained motion is the content, so a still beat is the
+cost). `scripts/author/type-spines.mjs` carries `register` per type so this is picked, not guessed.
+"An effects showreel is allowed to be dense" was the old hedge for what a kinetic register actually is;
+the director gate judges busyness against the film's own register rather than a fixed count.
 
 ---
 
