@@ -38,11 +38,15 @@ export function dialogueAccumulate({ pairs = [], bloomLine, x = 160, y = 260, w 
     { type: 'rect', w: dotSize, h: dotSize, radius: Math.round(dotSize / 2), bg: dotColor },
     p.serif && { type: 'text', text: p.serif, font: 'serif', size, weight: 500, color: DIM },
   ].filter(Boolean) }));
-  const bloomStart = start + 0.3 + pairs.length * stagger + 0.4;
+  // First row at start+0.15, inside the first-arrival window (docs/RULES/first-arrival.md, 0.1-0.3s),
+  // not the 0.3s hold this beat used to give before anything appeared: as a hook (this beat opens the
+  // `explainer` type spine, scripts/author/type-spines.mjs), frame 1 needs a ramp, not an empty hold.
+  const FIRST = 0.15;
+  const bloomStart = start + FIRST + pairs.length * stagger + 0.4;
   const bloomY = y + pairs.length * (size + rowGap);
   // exitDur 0: held to the beat's own end, see blurResolveHook above.
-  const out = [{ type: 'group', x, y, w, layout: 'column', gap: rowGap, start: start + 0.3,
-    duration: Math.max(0.5, dur - 0.3), anim: 'pop', enterDur: 0.5, each: stagger, out: 'fade',
+  const out = [{ type: 'group', x, y, w, layout: 'column', gap: rowGap, start: start + FIRST,
+    duration: Math.max(0.5, dur - FIRST), anim: 'pop', enterDur: 0.5, each: stagger, out: 'fade',
     exitDur: 0, children: rows }];
   if (bloomLine) {
     out.push({ type: 'glow', x: x - 60, y: bloomY - 40, w: w + 120, h: Math.round(size * 2.4),

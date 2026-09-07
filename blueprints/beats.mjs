@@ -19,8 +19,13 @@ export function kineticHook({ x = 160, y = 160, w = 1600, eyebrow, to, unit = ''
   heroSize = 360, sub, captionSize, start = 0, dur = 5.5 } = {}) {
   const out = [];
   if (eyebrow) out.push(caption({ text: eyebrow, x, y: y + 90, w, size: 56, start, dur }));
-  if (to != null) out.push(dollyNumber({ to, unit, decimals, x, y: y + 190, w, size: heroSize, start: start + 0.4, dur: dur - 0.4 }));
-  else if (word) out.push(kineticHeadline({ text: word, x, y: y + 190, w, size: wordSize, weight: 800, preset: 'scale', each: 0.34, start: start + 0.4, dur: dur - 0.4 }));
+  // The hero's own entrance offset: 0.4s when an eyebrow already fills frame 1 (the hero landing later
+  // is a build, not an empty hold), 0.15s when it does not, so the very first thing on screen in a
+  // no-eyebrow hook still shows up inside the first-arrival window (docs/RULES/first-arrival.md,
+  // 0.1-0.3s) rather than holding on an empty frame until 0.4s in.
+  const heroAt = eyebrow ? 0.4 : 0.15;
+  if (to != null) out.push(dollyNumber({ to, unit, decimals, x, y: y + 190, w, size: heroSize, start: start + heroAt, dur: dur - heroAt }));
+  else if (word) out.push(kineticHeadline({ text: word, x, y: y + 190, w, size: wordSize, weight: 800, preset: 'scale', each: 0.34, start: start + heroAt, dur: dur - heroAt }));
   if (sub) out.push(kineticHeadline({ text: sub, x, y: y + 620, w, size: captionSize || 74, weight: 700, start: start + 1.9, dur: dur - 1.9 }));
   return out;
 }
