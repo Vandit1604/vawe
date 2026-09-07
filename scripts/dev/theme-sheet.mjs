@@ -4,8 +4,11 @@
 // scripts/gates/tile.mjs), reused rather than reimplemented: a second render-and-tile pipeline is a
 // second thing to drift.
 //
-// A theme with no `look` has nothing to show; this refuses by name rather than rendering a blank sheet
-// that would look like a bug.
+// Reads the RESOLVED look (`resolveLook`), not the authored one: `computedLook` now derives scale/cuts/
+// field from a theme's own motion and dominance (docs/CRAFT/THEME-LOOK.md), so the 37 themes with no
+// authored `look` block have a real, non-constant one to show too. Only `backdrop` stays a taste
+// decision that is never computed (the same file explains why), so an un-authored theme's sheet falls
+// back to a single `plain` window rather than refusing outright.
 //
 //   node scripts/dev/theme-sheet.mjs --theme vawe   ·   make theme-sheet THEME=vawe
 import fs from 'node:fs';
@@ -13,6 +16,8 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { frameTile, tileGrid, tileBox, renderOf } from '../gates/tile.mjs';
+import { resolveLook } from '../../core/registry/theme-contract.js';
+import { isLightBg } from '../../core/motion/motion.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCRATCH = path.join(ROOT, 'formats/scene/_batch/theme-sheets');
@@ -25,8 +30,7 @@ if (!theme) { console.error('usage: node scripts/dev/theme-sheet.mjs --theme <na
 const themePath = path.join(ROOT, 'themes', `${theme}.json`);
 if (!fs.existsSync(themePath)) { console.error(`theme-sheet: no theme at ${path.relative(ROOT, themePath)}`); process.exit(2); }
 const themeSpec = JSON.parse(fs.readFileSync(themePath, 'utf8'));
-const look = themeSpec.look;
-if (!look) { console.error(`theme-sheet: theme "${theme}" has no \`look\` block, nothing to show. See docs/CRAFT/THEME-LOOK.md.`); process.exit(2); }
+const look = resolveLook(themeSpec, { isLightBg });
 
 const windows = look.backdrop && look.backdrop.length ? look.backdrop : ['plain'];
 const perWindow = 2.2, tail = 0.4;
