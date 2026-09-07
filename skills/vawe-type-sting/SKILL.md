@@ -17,6 +17,9 @@ film needs no cuts, use none: `docs/RULES/one-cut-family.md`'s floor does not fi
 
 ## What this type needs that others do not
 
+- **Kinetic register.** A sting is the purest case of `docs/CRAFT/MOTION-REGISTERS.md` §1's second
+  register: at 4-8s there is no still beat to hold, so the whole runtime is the "loud moment," and
+  restraint means one move done well, not motion held back (`register: 'kinetic'` in `type-spines.mjs`).
 - **One move, named up front.** Before writing anything, say in one sentence what the single motion
   is (a draw-on, a scale-through, a wipe). If you cannot say it in one sentence, it is not one move.
 - **The mark, not a slogan.** A sting's job is brand recognition in under 8 seconds; the wordmark or

@@ -18,6 +18,9 @@ next starts, not to keep pace with a product tour.
 
 ## What this type needs that others do not
 
+- **Quiet register.** An explainer is UI-adjacent: motion is a cost the viewer pays to keep reading
+  (NN/g, Apple HIG; `docs/CRAFT/MOTION-REGISTERS.md` §1). Name ONE loud moment (the payoff) and hold
+  everything else still enough that the facts can be read (`register: 'quiet'` in `type-spines.mjs`).
 - **Counts with REAL figures.** The `count` layer compacts >=1e6 automatically; use a real number,
   never a round placeholder. This type's own worked example (`docs/EVALS.md`) uses this engine's own
   facts (24 layer types, 703 effects, 29 blueprints) precisely because they are checkable.

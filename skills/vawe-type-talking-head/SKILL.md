@@ -17,6 +17,9 @@ beat**, the slowest of any type, because the voice track, not a blueprint, sets 
 
 ## What this type needs that others do not
 
+- **Quiet register.** The quiet field this section already asks for is `docs/CRAFT/MOTION-REGISTERS.md`
+  §1's first register stated another way: a face reads only against restraint, so motion is a cost paid
+  in attention taken away from the voice (`register: 'quiet'` in `type-spines.mjs`).
 - **VO + word-timed captions.** A real film needs `audio.vo` + `audio.voWords` (a `[{w,t}]` sidecar),
   then `make vo-captions D=<file> WRITE=1` builds karaoke-timed `captions[]` from it. `docs/CRAFT/CAPTIONS.md`.
 - **`make pace-from-vo`.** Once a real VO track exists, `make pace-from-vo VO=<file>.words.json`
