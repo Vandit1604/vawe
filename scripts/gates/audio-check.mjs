@@ -1,10 +1,26 @@
 // scripts/gates/audio-check.mjs. THE SOUND GATE: is this film's silence a decision, or an omission?
 //
-// WHY THIS EXISTS. Measured across the library: 90 scenes set `audio.silent:true`, 20 name no `audio`
-// key at all, and 25 carry a real bed. So five films in six ship with no sound, and nothing anywhere
-// asked why. `docs/CRAFT/FILM-STRUCTURE.md` found that this closes a whole family of structural device:
-// the sound bridge, music-led structure, the unfinished sentence all need a track to exist, and the
-// engine has had the machinery for all of it since `374ffa9` and has barely been asked to use it.
+// WHY THIS EXISTS. `docs/CRAFT/FILM-STRUCTURE.md` found that shipping mute closes a whole family of
+// structural device: the sound bridge, music-led structure, the unfinished sentence all need a track
+// to exist. The engine had the machinery since `374ffa9` and was barely asked to use it, because the
+// derivation it needed was gated behind an OPT-IN flag (`audio.auto`) that almost nobody set.
+//
+// THAT FLAG IS NOW A DEFAULT. `formats/scene/scene.js` (buildSfx) derives a cue for every cut, sting
+// and seam UNLESS a scene says `audio.auto: false`. So a film's own junctions now score themselves for
+// free, and this gate's job has narrowed: it used to have to notice a film that never asked for cues at
+// all (`silent-by-omission`, `audio-block-produces-nothing`). Most of those films now sound on their
+// own, and calling them silent would be the exact "message describes the old behaviour" failure this
+// gate exists to avoid. `hasScoredJunction()` below re-derives the same fact `buildSfx` derives, via the
+// same pure `lowerScene()`, so the two can never read a film's junctions differently.
+//
+// What is still real, and still gated: `silent:true` still short-circuits the mixer completely
+// (`internal/audio/audio.go`, `cfg.Silent`) regardless of any derived cue, so it still costs one
+// sentence. A scene with NO junctions to derive from, and no music/vo/cues/bridges of its own, still
+// renders true digital silence, whether the audio key is present or not, and that is still worth a
+// finding. And `music:"auto"` only resolves to a real bed when the scene ALSO names a `profile`
+// (`core/audio/select.js`): picking a bed with nothing to go on is the same mistake `bg` injection
+// made for backgrounds (docs/MISTAKES.md #159), so a profile-less film choosing to stay musically
+// silent is not flagged, that part is unchanged.
 //
 // This gate does NOT add sound to anything. It cannot: choosing a bed is a taste decision and picking
 // one for you is how "buzzing under everything" happens. What it does is make silence COST ONE
@@ -13,8 +29,8 @@
 //
 //     "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries it alone" }
 //
-// passes and is finished. A film that just omits the block has not decided anything, and the honest
-// name for that is unfinished, not silent.
+// passes and is finished. A film with no junctions AND no audio block has not decided anything, and
+// the honest name for that is unfinished, not silent.
 //
 // It also checks the thing nothing else checks: WHERE THE BED CAME FROM. `assets/music/credits.json`
 // records provenance, and every entry in it is currently `licenceVerified: false`. A bed with no
@@ -30,6 +46,7 @@ import { fileURLToPath } from 'node:url';
 
 import { population, LIBRARY } from '../lib/census.mjs';
 import { gateFindings } from '../lib/findings.mjs';
+import { lowerScene } from '../../core/transitions/lower.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -62,18 +79,36 @@ const resolveBed = (m, sceneDir) => {
 // this repo keeps having to fix.
 const OMITTED = 'omitted', SILENT = 'silent', HOLLOW = 'hollow', SOUNDED = 'sounded';
 
+// Does this scene have a cut, sting or seam for `audio.auto`'s default derivation to score?
+// Reuses the SAME pure lowering `formats/scene/scene.js` runs before its own `buildSfx` reads
+// `data.cuts`/`data.stings`/`data.seams` (and `formats/scene/scene.js:buildSfx` reads a layer's own
+// `L.cut` too), so this gate cannot read a film's junctions differently than the render path does.
+function hasScoredJunction(scene) {
+  let data;
+  try { data = lowerScene(JSON.parse(JSON.stringify(scene))); } catch { return false; }
+  if (Array.isArray(data.cuts) && data.cuts.some((c) => c && c.style !== 'none')) return true;
+  if (Array.isArray(data.stings) && data.stings.length) return true;
+  if (Array.isArray(data.seams) && data.seams.some((s) => s && s.fx && s.fx !== 'none')) return true;
+  const cutLayer = (L) => L && typeof L === 'object'
+    && ((L.cut && L.cut !== 'none') || (Array.isArray(L.children) && L.children.some(cutLayer)));
+  return Array.isArray(data.layers) && data.layers.some(cutLayer);
+}
+
 export function classify(scene) {
   const a = scene && scene.audio;
-  if (a === undefined || a === null) return OMITTED;
-  if (typeof a !== 'object') return OMITTED;
-  if (a.silent === true) return SILENT;
-  const makesSound = (typeof a.music === 'string' && a.music !== '')
-    || (typeof a.vo === 'string' && a.vo !== '')
-    || a.auto === true
-    || (Array.isArray(a.cues) && a.cues.length > 0)
+  const audio = (a && typeof a === 'object') ? a : null;
+  if (audio && audio.silent === true) return SILENT;
+  // `audio.auto` is a default now (formats/scene/scene.js): ON unless a scene says `false` outright.
+  const autoOn = !audio || audio.auto !== false;
+  const ownsSound = !!audio && (
+    (typeof audio.music === 'string' && audio.music !== '')
+    || (typeof audio.vo === 'string' && audio.vo !== '')
     // A film can be held together by sound bridges alone (that is the point of them) so a scene
     // whose only audio is a J-cut across its junctions is sounded, not hollow.
-    || (Array.isArray(a.bridges) && a.bridges.length > 0);
+    || (Array.isArray(audio.bridges) && audio.bridges.length > 0)
+    || (Array.isArray(audio.cues) && audio.cues.length > 0));
+  const makesSound = ownsSound || (autoOn && hasScoredJunction(scene));
+  if (!audio) return makesSound ? SOUNDED : OMITTED;
   return makesSound ? SOUNDED : HOLLOW;
 }
 
@@ -107,8 +142,9 @@ function findings(scene, sceneDir) {
 
   if (state === OMITTED) {
     F.fail('silent-by-omission',
-      'this film names no `audio` block, so it renders with no sound and nobody decided that.',
-      { fix: 'Give it a bed (`make audio-bed D=<file> WRITE=1`), or state the silence:\n' +
+      'this film names no `audio` block AND has no cut, sting or seam for the engine\'s default cue',
+      { fix: 'derivation to score, so it renders with no sound at all and nobody decided that.\n' +
+      '        Give it a junction to cut on, name a bed (`make audio-bed D=<file> WRITE=1`), or state the silence:\n' +
       '        "audio": { "silent": true, "_why": "why this film is better with no sound" }' });
   } else if (state === SILENT && !reasonOf(a)) {
     F.fail('silence-without-a-reason',
@@ -117,31 +153,35 @@ function findings(scene, sceneDir) {
       '        "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries it alone" }' });
   } else if (state === HOLLOW) {
     F.fail('audio-block-produces-nothing',
-      'there is an `audio` block, but it names no music, no VO, no cues and no `auto`, the mixer\'s',
-      { fix: 'emptiness guard writes no track at all, so this renders SILENT while reading as sounded.\n' +
-      '        Name a bed, or say `"silent": true` with a `_why` and mean it.' });
+      'this scene has an `audio` block, but between it and its own cuts/stings/seams nothing produces a',
+      { fix: 'sound: no music, no VO, no cues, no bridges, and either `auto:false` opts out of the default\n' +
+      '        cue derivation or the film has no junction to derive one from. The mixer\'s emptiness guard\n' +
+      '        writes no track at all, so this renders SILENT while reading as sounded.\n' +
+      '        Name a bed, drop the `auto:false`, or say `"silent": true` with a `_why` and mean it.' });
   }
 
-  if (!a) return { state, out };
-
-  // A DECLARATION IS NOT A TRACK. `auto: true` and an explicit `cues` array both make this gate say
-  // "this film has sound", and both render DIGITAL SILENCE when `assets/sfx/` is empty: the Go mixer
-  // resolves each cue to `sfx/<name>.wav` (internal/audio/audio.go:140), finds nothing, and writes a
-  // silent track. Two films shipped that way this week at -91 dB while this gate printed its tick.
+  // A DECLARATION IS NOT A TRACK. `auto` defaulting on and an explicit `cues` array both make this
+  // gate say "this film has sound", and both render DIGITAL SILENCE when `assets/sfx/` is empty: the
+  // Go mixer resolves each cue to `sfx/<name>.wav` (internal/audio/audio.go:140), finds nothing, and
+  // writes a silent track. Two films shipped that way this week at -91 dB while this gate printed its
+  // tick. Checked whenever derivation is actually LIVE, which since the default flip is any scene that
+  // has not said `auto:false` AND has a junction to score, `a` present or not.
   //
   // `assets/sfx/` is gitignored build output regenerated by `make audio`, so a FRESH CLONE is exactly
   // the machine where this bites, and it is the machine nobody checks on. The bed already gets this
   // treatment (`bed-missing`, above); a cue never did.
-  if (a.auto === true || (Array.isArray(a.cues) && a.cues.length)) {
+  const autoLive = (!a || a.auto !== false) && hasScoredJunction(scene);
+  if (autoLive || (a && Array.isArray(a.cues) && a.cues.length)) {
     const dir = path.join(ROOT, 'assets/sfx');
     const have = fs.existsSync(dir) ? new Set(fs.readdirSync(dir).filter((f) => f.endsWith('.wav')).map((f) => f.slice(0, -4))) : new Set();
-    const named = new Set(Array.isArray(a.cues) ? a.cues.map((c) => c && c.name).filter(Boolean) : []);
+    const named = new Set(a && Array.isArray(a.cues) ? a.cues.map((c) => c && c.name).filter(Boolean) : []);
     // With `auto`, the cue set is derived from the film's own junctions, so the honest check is
     // whether the sfx pack exists at all rather than which entry a given cut will reach for.
     if (!have.size) {
       F.fail('cues-have-no-sound',
-        'this film declares cues (or `auto: true`) and assets/sfx/ holds no .wav at all, so every cue',
-        { fix: 'resolves to nothing and the mixer writes a SILENT track while this gate reads it as sounded.\n' +
+        'this film derives or declares cues (auto by default, or an explicit `cues` array) and',
+        { fix: 'assets/sfx/ holds no .wav at all, so every cue resolves to nothing and the mixer writes a\n' +
+        '        SILENT track while this gate reads it as sounded.\n' +
         '        Bake them:  make audio' });
     } else {
       const missing = [...named].filter((n) => !have.has(n));
@@ -150,6 +190,18 @@ function findings(scene, sceneDir) {
         { fix: 'Each one is dropped in silence. Run `make audio`, or name a cue that exists.' });
     }
   }
+
+  // `core/audio/select.js` now ALSO defaults `music` to "auto" when a scene names no `music` at all
+  // but does declare `profile`: same sentinel, same trap, just no explicit word to have grepped for.
+  const impliedAutoMusic = !!(scene && scene.profile) && !(a && 'music' in a);
+  if (impliedAutoMusic) {
+    F.warn('bed-unresolved',
+      '`profile` is set and no `music` is named, so `core/audio/select.js` defaults `music` to the',
+      { fix: '"auto" sentinel, resolved at AUTHORING time, not at render, the mixer does not run\n' +
+      `        core/audio-select.js. Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
+  }
+
+  if (!a) return { state, out };
 
   if (a.music === 'auto') {
     F.warn('bed-unresolved',
@@ -188,8 +240,10 @@ function findings(scene, sceneDir) {
 }
 
 // ---- library census ---------------------------------------------------------------------------
-// The three counts, because "we ship silent" was a feeling until somebody counted. Only OMITTED
-// changes behaviour if a default is ever flipped; SILENT is an author's decision and stays.
+// The four counts, because "we ship silent" was a feeling until somebody counted. `auto` cue
+// derivation now defaults ON, so OMITTED/HOLLOW here are what is left AFTER that default: a film with
+// nothing for it to derive from, or one that opted out and named no sound of its own. SILENT is an
+// author's decision and stays exactly as authored either way.
 if (all) {
   const dir = path.join(ROOT, 'formats/scene');
   const tally = { [OMITTED]: [], [SILENT]: [], [HOLLOW]: [], [SOUNDED]: [] };
@@ -205,12 +259,11 @@ if (all) {
   }
   const n = Object.values(tally).reduce((a, b) => a + b.length, 0);
   console.log(`\n  sound census · ${n} scene(s) in formats/scene\n`);
-  console.log(`    ${String(tally[SOUNDED].length).padStart(4)}  sounded          a bed, a VO, or cues, the mixer writes a track`);
+  console.log(`    ${String(tally[SOUNDED].length).padStart(4)}  sounded          a bed, a VO, cues, or a derived auto cue: the mixer writes a track`);
   console.log(`    ${String(tally[SILENT].length).padStart(4)}  silent:true      ${reasoned} of them state a reason`);
-  console.log(`    ${String(tally[OMITTED].length).padStart(4)}  no audio key     silent, and nobody decided it`);
-  console.log(`    ${String(tally[HOLLOW].length).padStart(4)}  hollow block     an audio block that produces no sound`);
-  console.log(`\n  Only the last two would change if the engine default were ever flipped. A scene that says`);
-  console.log(`  silent:true keeps its silence. That is an author's decision and it stays.\n`);
+  console.log(`    ${String(tally[OMITTED].length).padStart(4)}  no audio key     no junction to derive a cue from either: silent, nobody decided it`);
+  console.log(`    ${String(tally[HOLLOW].length).padStart(4)}  hollow block     opted out (or nothing to derive) and names no sound of its own`);
+  console.log(`\n  A scene that says silent:true keeps its silence. That is an author's decision and it stays.\n`);
   for (const f of tally[OMITTED]) console.log(`      · no audio key: ${f}`);
   for (const f of tally[HOLLOW]) console.log(`      · hollow block: ${f}`);
   console.log('');

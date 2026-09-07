@@ -46,13 +46,23 @@ export function selectBed(profile) {
 }
 
 // resolveAudio(scene) -> a NEW audio block (never mutates the scene).
-// Only `audio.music === "auto"` is resolved; any other audio block is returned as a copy untouched.
-// A profile that maps to silence (or is absent/unknown) yields `{silent:true}`, the engine default.
+// `audio.music === "auto"` is resolved, same as always. NEW: a scene that names no `music` at all but
+// DOES declare `profile` defaults to "auto" too, so a bed gets picked from the taste mapping instead
+// of shipping silent purely because nobody typed the word "auto". A scene with no profile is left
+// alone: picking a bed with no input is choosing taste with nothing to go on, the same mistake
+// `bg` injection made for backgrounds (docs/MISTAKES.md #159), so it stays silent, the engine default.
+// Any OTHER explicit `music` value (a real path, or absent-with-no-profile) is returned untouched.
 export function resolveAudio(scene) {
   const audio = (scene && scene.audio) || {};
-  if (audio.music !== 'auto') return { ...audio };
+  // The default fires only when the author left `music` UNSAID. `silent:true` is already a decision
+  // (`audio-check`'s `silent-without-a-reason` even makes it cost a sentence), so it is never
+  // second-guessed by a bed the author never asked for.
+  const noOpinion = audio.music === undefined && audio.silent !== true;
+  const defaulted = noOpinion && scene && scene.profile ? 'auto' : audio.music;
+  if (defaulted !== 'auto') return { ...audio };
 
-  const { music, ...rest } = audio; // drop the "auto" sentinel either way
+  const rest = { ...audio };
+  delete rest.music; // drop the (real or defaulted) "auto" sentinel either way
   const chosen = selectBed(scene && scene.profile);
   if (!chosen.bed) return { ...rest, silent: true };
   return {

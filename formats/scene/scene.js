@@ -1584,10 +1584,14 @@ boot((data, fps, theme, canvas) => {
   function buildSfx() {
     let sfx = [];
     const audioCfg = data.audio || {};
-    // `tactile` IMPLIES `auto`. Motion cues without the cuts under them would be a film that thuds
-    // and plucks through junctions it never marks, so asking for the richer sound design cannot mean
-    // asking for less of the existing one.
-    const auto = !!(audioCfg.auto || audioCfg.tactile);
+    // Joint-cue derivation is ON BY DEFAULT: `audio.auto` opts OUT with an explicit `false`, not in
+    // with an explicit `true`. Four in five films shipped silent because the mechanism existed and
+    // nobody flipped the flag; the mechanism was proven (27 films already set it), the flag was the
+    // gap. Author-placed `audio.cues` still win over a derived cue at the same joint (unchanged,
+    // below), and a cut mapped to `none` in CUT_CUE stays silence, so opting out of nothing new is
+    // free. `tactile` still IMPLIES it: motion cues without the cuts under them would be a film that
+    // thuds and plucks through junctions it never marks.
+    const auto = audioCfg.auto !== false || !!audioCfg.tactile;
     // CUT_CUE (cut style -> cue) and SEAM_CUE (seam fx -> cue) come from /core/audio-cues.js, one
     // shared source of truth, so the render mix and the baked catalogue cannot drift.
     const cues = [];
