@@ -87,10 +87,54 @@ the mistake log, `THEME=<name>` renders one theme's look. The old separate targe
 print where they moved) for one release. `make demo Q="…"` writes a ten-second film about one thing
 ([`docs/CRAFT/SPECIMEN.md`](docs/CRAFT/SPECIMEN.md)). Full index: [`docs/CRAFT/README.md`](docs/CRAFT/README.md).
 
-> Fan-out: [`docs/CRAFT/SUBAGENT-BUDGET.md`](docs/CRAFT/SUBAGENT-BUDGET.md) first (fewer, larger
-> agents). Shipping a real video: dedicated subagents, one job each, in parallel
-> ([`docs/CRAFT/SUBAGENTS.md`](docs/CRAFT/SUBAGENTS.md), a critic is evidence, never a ruling). Making
-> something good: read [`docs/TASTE.md`](docs/TASTE.md) first.
+> Making something good: read [`docs/TASTE.md`](docs/TASTE.md) first.
+
+## HOW A REAL FILM GETS MADE: DECIDERS WRITE, CRITICS REPORT  `[ref: make deciders]`
+
+One agent holding the whole film does every part of it worse. Authoring needs several DIFFERENT
+judgements (what this beat shows, what moves, what a cut means, what the copy earns) and they do not
+fit in one context at once. So a real film is made by a roster, and the roster has two kinds of member
+that must never be confused.
+
+**A DECIDER writes into the film. A CRITIC only reports.** A critic that can fix will fix instead of
+finding, and six agents writing to one file produce a film nobody chose. That separation is the whole
+safety of the arrangement.
+
+**A decider owns ONE exclusive write scope and touches nothing else.** Two deciders then cannot
+collide, and a decision that turns out wrong reverts in one field instead of being tangled through the
+film. **A role earns its place only if the engine cannot already decide it**: type, colour, layout and
+backdrop all resolve from the theme, so a decider there re-decides what the brand already decided.
+
+| Order | Decider | Writes | Because |
+|---|---|---|---|
+| 1 | **storyboard** | the storyboard file | it decides the film as a whole. Every role below transcribes it |
+| 2 | **subject** | a beat's subject slot | what a beat SHOWS is the one thing the engine must never choose alone (`docs/MISTAKES.md` #159) |
+| 3 | **scene** (one per scene) | one fragment file | HTML renders instantly, so the agent iterates against its own work with no render |
+| 4 | **motion** | `motion[]` and `idle` | nothing moves that nobody asked to move, so every keyed track is a decision |
+| 5 | **transition** | `transitions[]` | the engine narrows the cut by structure; the rhetorical relationship between two beats is not in the data |
+| 6 | **sound** | the audio block | cue punctuation is automatic; choosing a bed is a register decision |
+
+**`make deciders D=<file>` prints these six as briefs, in order, filled in for that film**: its beats,
+its fragments, its theme, and whether a storyboard exists yet. The scene deciders are the one row that
+runs in parallel, one per fragment; every other row reads what the row above it decided.
+
+**The order is a dependency, not a preference,** and the one non-obvious link is motion before
+transitions: the content-aware cut reads the velocity at a joint as its strongest signal, so a cut
+chosen before the motion exists is choosing against a still frame.
+
+**Then the critics, in ONE parallel message,** each handed an artifact the author has not already
+seen: beat, bg-motion, reveal, fidelity, copy, seam. `make critics D=<file>` emits them as ready-to-run
+prompts with the real sheet paths filled in. A critic is EVIDENCE, never a ruling: look before you act,
+and if your own eye confirms the flaw, that is a fix and never a rationalisation.
+
+**This is not free, and it is usually overkill.** A measured fan-out here ran to 87 agents and 5.66M
+tokens, and the finding was that one well-briefed agent beats a fan-out for anything sequential
+([`docs/CRAFT/SUBAGENT-BUDGET.md`](docs/CRAFT/SUBAGENT-BUDGET.md), read it first). Choosing three cuts
+for a three-cut film is not worth an agent. **The roster earns its cost on a film with real scenes:
+a full authoring pass, any recreation, anything you intend to ship.** Below that, do it yourself.
+
+Full roster, verdict shapes, and the six brief lines a fan-out pays for by omitting:
+[`docs/CRAFT/SUBAGENTS.md`](docs/CRAFT/SUBAGENTS.md).
 
 ## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS  `[gated: scripts/gates/author-check.mjs#no-storyboard]`
 

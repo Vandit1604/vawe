@@ -12,7 +12,8 @@
 // this only composes what to hand each one and records what came back. Pure fs + JSON, no side effects
 // on import.
 //
-//   node scripts/author/critics.mjs formats/scene/x.json                 # emit the six prompts
+//   node scripts/author/critics.mjs formats/scene/x.json                 # emit the six critic prompts
+//   node scripts/author/critics.mjs formats/scene/x.json --deciders      # emit the decider roster, in order
 //   node scripts/author/critics.mjs formats/scene/x.json --record p.json # write the panel receipt
 import fs from 'node:fs';
 import path from 'node:path';
@@ -74,6 +75,112 @@ function flatLayers(ls) {
   return (ls || []).flatMap((L) => [L, ...flatLayers(L.layers), ...flatLayers(L.children)]);
 }
 
+// The DECIDER roster, kept in lockstep with docs/CRAFT/SUBAGENTS.md's second table and with AGENTS.md.
+// A decider WRITES into the film, which is a larger permission than a critic's, so each one carries the
+// field it owns and nothing else: two deciders that share a field fight over it, and a decision that
+// turns out wrong has to be untangled instead of reverted. Order is a dependency chain, not a
+// preference. The one link worth stating twice: motion comes BEFORE transitions, because the
+// content-aware cut reads the velocity at a joint as its strongest signal, so a cut chosen against a
+// still frame is choosing blind.
+export const DECIDERS = [
+  {
+    name: 'storyboard',
+    scope: 'the storyboard file, and nothing in the scene JSON',
+    job: 'decide the film as a whole: the beats, the through-line, the motion plan and the cut plan',
+    why: 'it is the lock artefact. Every role below transcribes it, so a gap here becomes an invention further down',
+  },
+  {
+    name: 'subject',
+    scope: "each beat's subject slot",
+    job: 'decide what each beat SHOWS, and capture or name the real asset that shows it',
+    why: '36% of films carry no pictorial layer at all, and what a beat shows is the one thing the engine must never choose alone (docs/MISTAKES.md #159)',
+  },
+  {
+    name: 'scene',
+    scope: 'exactly one fragment file, named in your brief',
+    job: 'write the markup for one beat, and put addressable handles where the motion plan says something must move',
+    why: 'HTML renders instantly, so you iterate against your own work with no render. That is the loop, not a critique',
+    perScene: true,
+  },
+  {
+    name: 'motion',
+    scope: 'motion[] and idle, on layers the storyboard says move',
+    job: 'key the motion the storyboard planned, and prove it moved by MEASURING across frames',
+    why: 'nothing moves that nobody asked to move, so every keyed track is a decision somebody made',
+    extra: [
+      'You cannot watch the film. A description of the motion written from the JSON is a restatement of what you just wrote, so it proves nothing.',
+      'Measure instead: sample the element across frames and report the numbers. A claimed wind-up that measures 3% variance where 24% was claimed is absent, whatever the JSON says.',
+      'You carry a budget. The register split (docs/CRAFT/MOTION-REGISTERS.md) licenses sustained motion for kinetic work, and that licence is the door effect soup comes through. One named peak, and every other moving thing able to say what it is for.',
+    ],
+  },
+  {
+    name: 'transition',
+    scope: 'transitions[] only',
+    job: 'name the relationship across each join, then choose the transition that serves it',
+    why: 'the engine narrows the cut by structure, but the rhetorical relationship between two beats is not in the data',
+    extra: [
+      'Read the RENDERED joins, not the JSON. That is the same admission test the critics are held to: what did you see that the author did not.',
+      'Most joins are invisible. Earn two or three accents by meaning and make the outro the simplest one.',
+    ],
+  },
+  {
+    name: 'sound',
+    scope: 'the audio block only',
+    job: 'choose the bed, and place any cue the automatic punctuation cannot derive',
+    why: 'cue punctuation is automatic now; choosing a bed is a register decision and the engine stays silent when it has no input',
+  },
+];
+
+export function buildRoster(scenePath) {
+  const abs = path.resolve(repoRoot, scenePath);
+  const scene = JSON.parse(fs.readFileSync(abs, 'utf8'));
+  const name = path.basename(scenePath, '.json');
+  const D = path.relative(repoRoot, abs);
+  const dir = path.dirname(D);
+  const storyboard = `${dir}/${name}.storyboard.md`;
+  const fragments = flatLayers(scene.layers)
+    .filter((L) => L.type === 'html' && typeof L.src === 'string')
+    .map((L) => L.src);
+  const ctx = {
+    scene: D,
+    name,
+    storyboard,
+    hasStoryboard: fs.existsSync(path.resolve(repoRoot, storyboard)),
+    fragments,
+    beats: fragments.length,
+    transitions: (scene.transitions || []).length,
+    hasAudio: !!scene.audio,
+    theme: scene.theme || '(none)',
+    aspect: scene.aspect || '16:9',
+    duration: scene.duration,
+  };
+  const roster = DECIDERS.map((d) => {
+    const lines = [
+      `You are the "${d.name}" decider for ${ctx.scene}.`,
+      `You WRITE: ${d.scope}. You touch nothing else, and you do not edit another role's field.`,
+      `Your job: ${d.job}.`,
+      `You exist because ${d.why}.`,
+      '',
+      `The film: ${ctx.beats} beat(s), ${ctx.duration}s, ${ctx.aspect}, theme ${ctx.theme}, ${ctx.transitions} authored transition(s).`,
+      ctx.hasStoryboard
+        ? `Read the storyboard first: ${ctx.storyboard}. It is the source; you transcribe it, you do not re-decide it.`
+        : `There is NO storyboard at ${ctx.storyboard}. Nothing below you can start until the storyboard decider writes one.`,
+    ];
+    if (d.perScene && ctx.fragments.length) {
+      lines.push('', 'Launch ONE of these per fragment, each owning exactly one file:');
+      for (const f of ctx.fragments) lines.push(`  · ${f}`);
+    }
+    if (d.extra) { lines.push(''); for (const e of d.extra) lines.push(e); }
+    lines.push(
+      '',
+      'Standing rules: no em-dashes anywhere. Stage explicit paths. Do not block on a background render.',
+      'Do not delegate to sub-agents. Report what you wrote and what you deliberately left alone.',
+    );
+    return { name: d.name, scope: d.scope, prompt: lines.join('\n') };
+  });
+  return { ...ctx, roster };
+}
+
 // Every on-screen string in beat order, for the `copy` critic. "Beat order" here means layer order in
 // the JSON, the only order the tool can see without rendering.
 function copyLines(scene) {
@@ -123,6 +230,25 @@ function main() {
 
   const vsIdx = process.argv.indexOf('--vs');
   const vs = vsIdx >= 0 ? process.argv[vsIdx + 1] : undefined;
+
+  if (process.argv.includes('--deciders')) {
+    const r = buildRoster(file);
+    console.log(`\n  DECIDER ROSTER · ${r.scene}\n`);
+    console.log('  Deciders WRITE into the film; critics only report. Run these IN ORDER, not in parallel:');
+    console.log('  each one reads what the one above it decided. The scene deciders are the exception,');
+    console.log('  one per fragment, and those do run in parallel.\n');
+    console.log('  Motion comes BEFORE transitions: the content-aware cut reads velocity at the joint,');
+    console.log('  so a cut chosen before the motion exists is choosing against a still frame.\n');
+    if (!r.hasStoryboard) console.log(`  ! no storyboard at ${r.storyboard}. Step 1 is not optional.\n`);
+    r.roster.forEach((d, i) => {
+      console.log(`  ── ${i + 1}. ${d.name} ${'─'.repeat(Math.max(1, 56 - d.name.length))}`);
+      console.log(d.prompt.split('\n').map((l) => '  ' + l).join('\n'));
+      console.log('');
+    });
+    console.log('  Then the critic panel, in ONE parallel message:');
+    console.log(`    node scripts/author/critics.mjs ${file}\n`);
+    return;
+  }
 
   if (!recordFile) {
     const panel = buildPanel(file, vs);
