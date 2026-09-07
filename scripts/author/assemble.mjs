@@ -1,4 +1,4 @@
-// assemble.mjs: `make assemble D=<film>` — ASSEMBLE. Writes the scene JSON from the storyboard's
+// assemble.mjs: `make assemble D=<film>`: ASSEMBLE. Writes the scene JSON from the storyboard's
 // per-beat contract + the fragment files a scene fan-out (or one agent) already wrote:
 //   - one `html` layer per scene, `src`-loaded, timed at the contract's start/end
 //   - the continuous object: ONE layer with a hand-keyed `motion` track built from every beat's

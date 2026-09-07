@@ -1,4 +1,4 @@
-// stagekit.mjs: `make stagekit D=<film>` — THE STAGE KIT for a per-scene HTML-fragment fan-out.
+// stagekit.mjs: `make stagekit D=<film>`: THE STAGE KIT for a per-scene HTML-fragment fan-out.
 // Writes <film>.kit.css (the bare rules) next to the film, prints the exact <style> block every scene
 // agent must paste VERBATIM into its fragment, and `--check` verifies they did (byte-identical, no
 // drift): scripts/lib/stagekit.mjs explains why a shared stylesheet cannot work here (fragment <style>

@@ -21,7 +21,7 @@ const RADIUS = { sm: 8, md: 16, lg: 28 };
 
 /**
  * buildKit(theme) → { css, block }
- *   css:   the bare CSS rules (no <style> tag, no markers) — what `make stagekit` writes to a file.
+ *   css:   the bare CSS rules (no <style> tag, no markers): what `make stagekit` writes to a file.
  *   block: `<style>${KIT_START}\n${css}\n${KIT_END}</style>`, the exact bytes a fragment must paste in.
  */
 export function buildKit(theme, resolveLook, isLightBg) {
