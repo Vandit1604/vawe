@@ -9,6 +9,7 @@ import { GSAP_REGISTRY } from '/core/engine/gsap-effects.js';
 import { ransomStyle } from '/core/type/ransom.js';
 import { capUnitWins, capShape, wordU, lineU, CAP_STYLES, CAP_STYLE_REGISTRY } from '/core/type/captions.js';
 import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds/index.js';
+import { expandThemeRotation } from '/core/backgrounds/theme-rotation.js';
 import { createBgHtml } from '/core/layout/bg-html.js';
 import { htmlSource } from '/core/type/sanitize-html.js';
 import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts/index.js';
@@ -243,9 +244,14 @@ boot((data, fps, theme, canvas) => {
   // core/timeline/junctions.js, docs/MISTAKES.md #358.
   const BG_JUNCTIONS = junctionTable(marksOf(data));
   const atTime = (v, where) => (isJunctionRef(v) ? resolveJunction(v, BG_JUNCTIONS, where) : v);
+  const BG_DURATION = Number(data.duration) || Infinity;
+  // A single undated `{use:"theme"}` window, on a film with joints, whose theme declares a ROTATION
+  // (`bgDefault` as an array), expands to one window per shot BEFORE bindWindowsToJunctions places
+  // them: applying a decision the theme already made, not inventing one (core/backgrounds/theme-rotation.js).
+  const bgAuthored = expandThemeRotation(data.bg || [], theme, BG_JUNCTIONS, BG_DURATION);
   // Windows that declare NO times at all bind to the film's own joints, in order, see
   // bindWindowsToJunctions. Untouched when there is one window, or when any window names an edge.
-  const bgWins = bindWindowsToJunctions(data.bg || [], BG_JUNCTIONS, Number(data.duration) || Infinity).map((b0, bi) => {
+  const bgWins = bindWindowsToJunctions(bgAuthored, BG_JUNCTIONS, BG_DURATION).map((b0, bi) => {
     // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault),
     // so each brand has a custom bg it declares once, not a shared global preset name repeated
     // (the "customize, don't default" rule; fails loud if the theme never authored one).
