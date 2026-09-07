@@ -37,7 +37,19 @@ export const PARTS = {
     popIn: [(t) => { t.style.transformBox = 'fill-box'; t.style.transformOrigin = '50% 50%'; }, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1 }, { scale: 0, opacity: 0 }],
     fadeUp: [null, { y: 24, opacity: 0 }, { y: 0, opacity: 1 }, { y: -24, opacity: 0 }],
     riseIn: [null, { y: 48, opacity: 0 }, { y: 0, opacity: 1 }, { y: -48, opacity: 0 }],
-    drawOn: [(t) => { try { t.setAttribute('pathLength', '1'); } catch (e) {} t.style.strokeDasharray = '1 1'; }, { strokeDashoffset: 1 }, { strokeDashoffset: 0 }, { strokeDashoffset: 1 }],
+    // REAL length, not the `pathLength="1"` normalise trick: GSAP/the browser round a px-unit style
+    // value to the nearest whole pixel, so animating strokeDashoffset across a [0,1] normalised range
+    // has only two representable states (1px, 0px) and a seven-second draw renders as a one-frame
+    // snap partway through. getTotalLength() gives GSAP hundreds of real pixels to interpolate
+    // across, so the rounding is imperceptible. Same fix shape as core/layers/svg.js's applyDraw
+    // (docs/MISTAKES.md #581), for a different, GSAP-side reason: that bug was Chromium's own
+    // arc-flattening estimate disagreeing with pathLength=1, not integer px rounding.
+    drawOn: [(t) => {
+      try { t.removeAttribute('pathLength'); } catch (e) {}
+      const total = typeof t.getTotalLength === 'function' ? t.getTotalLength() : 0;
+      t.__drawLen = total;
+      t.style.strokeDasharray = `${total} ${total}`;
+    }, { strokeDashoffset: (i, t) => t.__drawLen ?? 0 }, { strokeDashoffset: 0 }, { strokeDashoffset: (i, t) => t.__drawLen ?? 0 }],
     // THESE THREE TAKE THE LAYER'S OWN NAMES, and the casing mismatch beside `fadeUp` is deliberate.
     // The two vocabularies had ZERO overlap: nineteen layer `anim` names, six part entrances, not one
     // word shared. So an author who already knew `anim: "fade"` had to learn a second, disjoint set to
@@ -57,7 +69,7 @@ export const PART_BLURBS = {
   popIn: 'scales from nothing at its centre with a fade, dots, chips, markers',
   fadeUp: 'a short rise with a fade, the quiet default for any part',
   riseIn: 'a longer rise with a fade, for parts that should feel like they arrive',
-  drawOn: 'an SVG stroke draws itself along its own path (pathLength=1, no measurement)',
+  drawOn: 'an SVG stroke draws itself along its own path, measured at build with getTotalLength()',
   fade: 'opacity alone, no displacement · the quiet default when a part should arrive without moving',
   'slide-left': 'enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat',
   'slide-right': 'enters from its right and, with `out`, keeps going left · the mirror of slide-left',
