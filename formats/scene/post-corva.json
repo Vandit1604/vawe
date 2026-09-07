@@ -140,14 +140,15 @@
    "src": "formats/scene/post-corva.doc.html",
    "x": 90,
    "y": 470,
-   "w": 900,
-   "h": 900,
+   "w": 800,
+   "h": 680,
    "start": 4.2,
    "duration": 7,
    "anim": "pop",
    "enterDur": 0.35,
    "out": "defocus",
    "exitDur": 0.35,
+   "idle": "drift",
    "parts": [
     {
      "select": "[data-label]",
@@ -196,14 +197,15 @@
    "src": "formats/scene/post-corva.guess-row.html",
    "x": 90,
    "y": 560,
-   "w": 900,
-   "h": 220,
+   "w": 800,
+   "h": 160,
    "start": 11.3,
    "duration": 2.3,
    "anim": "fade",
    "enterDur": 0.3,
    "out": "fade",
-   "exitDur": 0.3
+   "exitDur": 0.3,
+   "idle": "drift"
   },
   {
    "type": "html",
@@ -211,14 +213,15 @@
    "src": "formats/scene/post-corva.cite-row.html",
    "x": 90,
    "y": 820,
-   "w": 900,
-   "h": 220,
+   "w": 800,
+   "h": 160,
    "start": 12.9,
    "duration": 3.3,
    "anim": "pop",
    "enterDur": 0.35,
    "out": "fade",
-   "exitDur": 0.3
+   "exitDur": 0.3,
+   "idle": "drift"
   },
   {
    "type": "count",
@@ -237,7 +240,8 @@
    "start": 16.2,
    "duration": 2.6,
    "out": "fade",
-   "exitDur": 0.3
+   "exitDur": 0.3,
+   "idle": "drift"
   },
   {
    "type": "rect",
@@ -299,7 +303,7 @@
    "text": "not the summary",
    "size": 36,
    "weight": 500,
-   "color": "var(--dim)",
+   "color": "var(--text-2)",
    "align": "center",
    "x": 90,
    "y": 960,
@@ -332,9 +336,9 @@
    "type": "text",
    "id": "mono-label",
    "text": "CORVA · CITED, NOT GUESSED",
-   "size": 24,
+   "size": 28,
    "weight": 650,
-   "color": "var(--accent)",
+   "color": "color-mix(in srgb, var(--accent) 60%, black)",
    "font": "mono",
    "tracking": "0.12em",
    "x": 90,
