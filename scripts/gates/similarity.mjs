@@ -27,11 +27,17 @@ export function fingerprint(input) {
   // and a fingerprint must never rewrite the scene its caller goes on to grade.
   const data = loadScene(structuredClone(input));
   const vocab = new Set(), structure = [], layout = [], colors = new Set();
+  // Category-tagged vocabulary, kept ALONGSIDE the merged `vocab` set (not instead of it): the ledger's
+  // forward-looking "not" query (scripts/gates/ledger.mjs) needs to say WHICH kind of thing a value is
+  // (a background preset vs. a cut) to write a useful NOT line; the merged set alone can't tell them
+  // apart. Purely additive, so it never touches the existing SAME/CLOSE scoring in similarity()/verdict().
+  const cats = { bg: new Set(), entrance: new Set(), exit: new Set(), cut: new Set() };
   const word = (v) => { if (typeof v === 'string' && v) vocab.add(v); };
   if (Array.isArray(data.scenes)) {
     for (const sc of data.scenes) {
       structure.push(sc.type || 'scene');
       word(sc.transition); word(sc.bg); word(sc.dir && `dir:${sc.dir}`);
+      if (typeof sc.bg === 'string' && sc.bg) cats.bg.add(sc.bg);
     }
   }
   if (Array.isArray(data.layers)) {
@@ -39,15 +45,19 @@ export function fingerprint(input) {
     for (const L of ls) {
       structure.push(L.type || 'text');
       word(L.cut); word(L.anim); word(L.out); word(L.preset); word(L.split && `split:${L.split}`);
+      if (typeof L.cut === 'string' && L.cut) cats.cut.add(L.cut);
+      if (typeof L.anim === 'string' && L.anim) cats.entrance.add(L.anim);
+      if (typeof L.out === 'string' && L.out) cats.exit.add(L.out);
       if ((L.type || 'text') === 'text') layout.push(`${Math.round((L.x ?? 60) / 120)}:${Math.round((L.y ?? 240) / 120)}:${Math.round((L.size ?? 96) / 24)}`);
     }
   }
   for (const s of data.stings || []) word(`fx:${s.fx}`);
-  for (const b of data.bg || []) word(`bg:${b.preset}`);
+  for (const b of data.bg || []) { word(`bg:${b.preset}`); if (typeof b.preset === 'string' && b.preset) cats.bg.add(b.preset); }
   (function scanColors(o) { if (Array.isArray(o)) o.forEach(scanColors); else if (o && typeof o === 'object') Object.values(o).forEach(scanColors);
     else if (typeof o === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(o)) colors.add(o.toLowerCase()); })(data);
   return { theme: typeof data.theme === 'string' ? data.theme : (data.module || 'inline'), module: data.module,
-    vocab: [...vocab].sort(), structure, layout: layout.sort(), colors: [...colors].sort() };
+    vocab: [...vocab].sort(), structure, layout: layout.sort(), colors: [...colors].sort(),
+    cats: { bg: [...cats.bg].sort(), entrance: [...cats.entrance].sort(), exit: [...cats.exit].sort(), cut: [...cats.cut].sort() } };
 }
 
 // ---------- scoring ----------
