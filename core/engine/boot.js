@@ -7,7 +7,7 @@ import { bakeResamples } from '../resample/index.js';
 import { glLive } from './webgl.js';
 import '../layers/frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { canvasKind } from '../canvas/kind.js'; // records each canvas's context kind at creation
-import { themeErrors, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from '../registry/theme-contract.js';
+import { themeErrors, resolveLook, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from '../registry/theme-contract.js';
 import { parseColor, contrastRatio, ensureContrast } from '../motion/motion.js';
 import { validateAll } from '../validate/validate.mjs';
 import { produceBaseline, bakeCameraMove, bakeDepth, bakeFocus } from './produce.js';
@@ -482,13 +482,19 @@ export async function boot(build) {
       data.bg = [{ preset: dark ? 'dark' : 'plain' }];
     }
     if (params.get('bounds') != null) globalThis.__FRAME_BOUNDS_CHECK = true;
-    resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
+    // Theme resolved BEFORE resolveCoords now (it used to run one line after): nothing between the two
+    // reads the theme, and a later phase's named size/placement needs `look` to lower through
+    // resolveCoords the same way a pin does, not one line too late to reach it.
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
-    produceBaseline(data, theme, frame); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
+    const look = resolveLook(theme, { isLightBg }); // the whole-film default (docs/CRAFT/THEME-LOOK.md);
+    // an authored theme.look wins key by key, computedLook fills the rest for the 37 themes with none.
+    resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
+    produceBaseline(data, theme, frame, look); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
     // scene that didn't specify it: absent-only, theme-aware, additive (never rewrites an authored layer),
     // `"produced":false` opts out. Pure: mutates data once, pre-first-frame, so renderFrame stays deterministic.
     // Nothing downstream reads `cameraMove` (renderFrame reads data.camera). If one survives this far it
     // is a field written and then ignored. The failure this whole path exists to make impossible.
+    // `look` is not consumed here yet: phases 2-5 add the actual defaults inside produceBaseline itself.
     if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
     // `depth` sugar -> the real `plane` modifier. AFTER the camera is baked, because the lens it resolves
     // against is the camera's, and before the first frame, because nothing at render time reads the word.
