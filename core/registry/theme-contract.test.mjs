@@ -16,8 +16,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 {
   const noLook = computedLook({ palette: { bg: '#ffffff' } }, { isLightBg });
   for (const k of ['scale', 'layout', 'cuts', 'field']) assert.ok(noLook[k], `computedLook must fill look.${k}`);
-  // deliberately uncomputed: backdrop/cues/marks are never invented (docs/CRAFT/THEME-LOOK.md)
-  for (const k of ['backdrop', 'cues', 'marks']) assert.equal(noLook[k], undefined, `computedLook must not invent look.${k}`);
+  // deliberately uncomputed: backdrop/marks are never invented (docs/CRAFT/THEME-LOOK.md)
+  for (const k of ['backdrop', 'marks']) assert.equal(noLook[k], undefined, `computedLook must not invent look.${k}`);
 }
 
 // ---- light vs dark dominance picks the field default, the one place colour enters at all ----

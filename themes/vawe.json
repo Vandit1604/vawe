@@ -102,7 +102,6 @@
     "layout": { "anchor": "left", "margin": 160 },
     "marks": { "logo": "site/public/assets/favicon.svg", "endCardSize": 160, "headlineSize": 108 },
     "cuts": { "default": "fade", "accent": "cinematicZoom" },
-    "cues": ["chime", "whoosh", "success"],
     "field": { "grain": 0, "vignette": 0 }
   }
 }

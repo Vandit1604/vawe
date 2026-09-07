@@ -400,6 +400,26 @@
   "gsap-named-effects--tiltin": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"none\",\n  \"fx\": \"tiltIn\"\n}",
   "gsap-named-effects--wobble": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"none\",\n  \"fx\": \"wobble\"\n}",
   "gsap-named-effects--zoomblur": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"none\",\n  \"fx\": \"zoomBlur\"\n}",
+  "placement--bottom": "{\n  \"pin\": \"bottom\"\n}",
+  "placement--bottom-left": "{\n  \"pin\": \"bottom-left\"\n}",
+  "placement--bottom-right": "{\n  \"pin\": \"bottom-right\"\n}",
+  "placement--center": "{\n  \"pin\": \"center\"\n}",
+  "placement--left": "{\n  \"pin\": \"left\"\n}",
+  "placement--lower-band": "{\n  \"pin\": \"lower-band\"\n}",
+  "placement--right": "{\n  \"pin\": \"right\"\n}",
+  "placement--stage": "{\n  \"pin\": \"stage\"\n}",
+  "placement--text-band": "{\n  \"pin\": \"text-band\"\n}",
+  "placement--thirds-b": "{\n  \"pin\": \"thirds-b\"\n}",
+  "placement--thirds-bl": "{\n  \"pin\": \"thirds-bl\"\n}",
+  "placement--thirds-br": "{\n  \"pin\": \"thirds-br\"\n}",
+  "placement--thirds-l": "{\n  \"pin\": \"thirds-l\"\n}",
+  "placement--thirds-r": "{\n  \"pin\": \"thirds-r\"\n}",
+  "placement--thirds-t": "{\n  \"pin\": \"thirds-t\"\n}",
+  "placement--thirds-tl": "{\n  \"pin\": \"thirds-tl\"\n}",
+  "placement--thirds-tr": "{\n  \"pin\": \"thirds-tr\"\n}",
+  "placement--top": "{\n  \"pin\": \"top\"\n}",
+  "placement--top-left": "{\n  \"pin\": \"top-left\"\n}",
+  "placement--top-right": "{\n  \"pin\": \"top-right\"\n}",
   "spectacle-devices--chromaticsplit": "{\n  \"spectacle\": {\n    \"at\": 2.4,\n    \"of\": \"hero\",\n    \"device\": \"chromaticSplit\",\n    \"why\": \"the one loud moment, and every other dial drops to 55%\"\n  }\n}",
   "spectacle-devices--cinematiczoom": "{\n  \"spectacle\": {\n    \"at\": 2.4,\n    \"of\": \"hero\",\n    \"device\": \"cinematicZoom\",\n    \"why\": \"the one loud moment, and every other dial drops to 55%\"\n  }\n}",
   "spectacle-devices--dispersion": "{\n  \"spectacle\": {\n    \"at\": 2.4,\n    \"of\": \"hero\",\n    \"device\": \"dispersion\",\n    \"why\": \"the one loud moment, and every other dial drops to 55%\"\n  }\n}",
@@ -521,13 +541,6 @@
     "theme": {
       "look": {
         "backdrop": "…"
-      }
-    }
-  },
-  "theme-look-keys--cues": {
-    "theme": {
-      "look": {
-        "cues": "…"
       }
     }
   },
