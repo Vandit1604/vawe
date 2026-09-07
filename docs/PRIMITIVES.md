@@ -342,7 +342,9 @@ a cut that only translates.
 - Calculated moves: `cameraMove` sugar (`core/camera-moves/index.js`), `slowPush` · `diveIn` · `panFollow` ·
   `workspaceZoomOut` · `orbit` · `multiPhase`. `orbit` sweeps `ry`, so under the rig it is a real orbit.
 - Global: per-scene `camera` (demo), eased pans+pushes.
-- Continuous: bg breathe `scale(1.05 + 0.02·sin(t·0.35))`, never resets at cuts.
+- Continuous: `bg[].breathe` (default OFF; `true` for `scale(1 + 0.02·sin(t/18·2π))`, or `{amp, period}`).
+  No longer a hardcoded 5% overscan on every film: checked, `renderBg` paints the full canvas every
+  frame, so there was no edge artifact the zoom was hiding.
 - Per-image: `ken: true | {from, to, fx, fy}` on image layers, clipped frame, slow zoom.
 - Impact: `shake(t - hitT, {seed})` on the camera wrapper at slam moments.
 
