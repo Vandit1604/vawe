@@ -898,12 +898,11 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 ## Theme look keys  `[theme]`
 
-A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the seven keys it accepts.
+A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the six keys it accepts.
 
 | name | what / when |
 |---|---|
-| `backdrop` | ordered bg preset names the brand turns through, one window per beat |
-| `cues` | the audio cue names the brand reaches for |
+| `backdrop` | ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`'s `bg[]`, never read at render (bg is required, docs/MISTAKES.md #159) |
 | `cuts` | the default and accent cut/transition names the brand favours |
 | `field` | grain and vignette defaults for the backdrop |
 | `layout` | the anchor band (left/center/right) and margin every beat composes against |
@@ -1146,4 +1145,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_717 effects across 57 families. Regenerate: `make effects`._
+_716 effects across 57 families. Regenerate: `make effects`._

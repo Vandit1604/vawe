@@ -1244,9 +1244,6 @@ export function validateTheme(spec) {
       if (k in spec.motion && typeof spec.motion[k] !== 'number') errors.push(`theme.motion.${k} must be a number`);
     }
   }
-  // cueNames omitted here on purpose: its source (core/audio/kit.mjs) imports node:fs and must stay
-  // out of the bundle the browser loads (this function also runs from core/engine/boot.js). The CLI branch
-  // below re-checks every theme PACK with the full list, cueNames included.
   if ('look' in spec) errors.push(...lookErrors(spec.look, { bgNames: BG_NAMES, transitionNames: TRANSITIONS.map((t) => t.name), nearMisses }));
   return errors;
 }
@@ -1504,7 +1501,7 @@ if (isMain) {
       const t = readJSON(tf);
       errs = [
         ...themeErrors(t, { parseColor, contrastRatio }),
-        ...lookErrors(t.look, { bgNames: BG_NAMES, transitionNames, cueNames: CUE_NAMES, nearMisses }),
+        ...lookErrors(t.look, { bgNames: BG_NAMES, transitionNames, nearMisses }),
       ];
     } catch (e) { errs = [`unreadable: ${e.message}`]; }
     if (errs.length) { themeFailed++; console.error(`✗ ${path.relative(root, tf)}`); for (const e of errs) console.error(`    • ${e}`); }

@@ -1,7 +1,7 @@
 {
-  "total": 697,
+  "total": 716,
   "previewed": 322,
-  "families": 56,
+  "families": 57,
   "tags": [
     [
       "asset",
@@ -76,6 +76,10 @@
       30
     ],
     [
+      "pin",
+      20
+    ],
+    [
       "scene",
       12
     ],
@@ -93,7 +97,7 @@
     ],
     [
       "theme",
-      7
+      6
     ],
     [
       "timing",
@@ -3411,6 +3415,159 @@
       ]
     },
     {
+      "id": "placement",
+      "title": "Placement",
+      "tag": "pin",
+      "intro": "`\"pin\": \"<name>\"` on a layer or a caption. An aspect-portable position, resolved against the safe box (`core/layout/safe.js safeArea`) rather than a hand-typed pixel, so the same JSON lands correctly at any of the five canvases. `stage`/`text-band`/`lower-band` are the de-facto anchors this repo already hand-types as 1920px pixels; use them instead of a new magic number.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a placement is a position, not a motion: see it with `make audit M=<file> ASPECT=all`, which checks every name against the safe box at every aspect and destination.",
+      "count": 20,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bottom",
+          "stem": "placement--bottom",
+          "desc": "horizontally centred, pinned to the bottom edge of the safe area",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-left",
+          "stem": "placement--bottom-left",
+          "desc": "pinned into the bottom-left corner of the safe area",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-right",
+          "stem": "placement--bottom-right",
+          "desc": "pinned into the bottom-right corner of the safe area",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "center",
+          "stem": "placement--center",
+          "desc": "dead centre of the canvas, vertically at the optical centre rather than the exact middle",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "left",
+          "stem": "placement--left",
+          "desc": "pinned to the left safe edge, vertically centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "lower-band",
+          "stem": "placement--lower-band",
+          "desc": "a thin strip near the bottom safe edge, left-anchored · where a closing rule or a small persistent label sits",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "right",
+          "stem": "placement--right",
+          "desc": "pinned to the right safe edge, vertically centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "stage",
+          "stem": "placement--stage",
+          "desc": "the full-width content column between the left and right safe margins, at any aspect ratio · kit.mjs's hand-typed x · 160/w · 1600 anchor, portable",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "text-band",
+          "stem": "placement--text-band",
+          "desc": "the horizontal strip roughly two-thirds down the frame where a headline or a sub-line usually sits",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-b",
+          "stem": "placement--thirds-b",
+          "desc": "centred horizontally, sat on the lower third line",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-bl",
+          "stem": "placement--thirds-bl",
+          "desc": "lands on the lower-left rule-of-thirds power point",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-br",
+          "stem": "placement--thirds-br",
+          "desc": "lands on the lower-right rule-of-thirds power point",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-l",
+          "stem": "placement--thirds-l",
+          "desc": "vertically centred, sat on the left third line",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-r",
+          "stem": "placement--thirds-r",
+          "desc": "vertically centred, sat on the right third line",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-t",
+          "stem": "placement--thirds-t",
+          "desc": "centred horizontally, sat on the upper third line",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-tl",
+          "stem": "placement--thirds-tl",
+          "desc": "lands on the upper-left rule-of-thirds power point",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "thirds-tr",
+          "stem": "placement--thirds-tr",
+          "desc": "lands on the upper-right rule-of-thirds power point",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top",
+          "stem": "placement--top",
+          "desc": "horizontally centred, pinned to the top edge of the safe area",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-left",
+          "stem": "placement--top-left",
+          "desc": "pinned into the top-left corner of the safe area",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-right",
+          "stem": "placement--top-right",
+          "desc": "pinned into the top-right corner of the safe area",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "spectacle-devices",
       "title": "Spectacle devices",
       "tag": "scene",
@@ -4337,24 +4494,17 @@
       "id": "theme-look-keys",
       "title": "Theme look keys",
       "tag": "theme",
-      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the seven keys it accepts.",
+      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md). These are the six keys it accepts.",
       "mode": "table",
       "note": null,
       "noPreview": "a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme's whole look",
-      "count": 7,
+      "count": 6,
       "undescribed": 0,
       "entries": [
         {
           "name": "backdrop",
           "stem": "theme-look-keys--backdrop",
-          "desc": "ordered bg preset names the brand turns through, one window per beat",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "cues",
-          "stem": "theme-look-keys--cues",
-          "desc": "the audio cue names the brand reaches for",
+          "desc": "ordered bg preset names the brand turns through, one window per beat · scaffold-only, seeds `make scaffold`'s `bg[]`, never read at render (bg is required, docs/MISTAKES.md #159)",
           "scene": null,
           "noPreview": null
         },

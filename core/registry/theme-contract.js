@@ -87,7 +87,7 @@ export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
 // it per video. Unlike REQUIRED.palette/type this is OPTIONAL: a theme with no `look` behaves exactly
 // as it did before this block existed. Kept small on purpose, only the things AGENTS.md already names
 // as re-decided per film: which bg presets the brand turns through, its type scale, its layout anchor,
-// its mark sizes, its cut family, its audio cues, its field (grain/vignette) defaults.
+// its mark sizes, its cut family, its field (grain/vignette) defaults.
 //
 // LOOK_KEYS is a real registry, not a bare array: an author types these as keys of `theme.look`, so a
 // typo deserves the same near-word hint every other named vocabulary gets (core/registry/registry.js), rather
@@ -95,22 +95,30 @@ export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
 // imports), so pulling it in here does not cost this file its node+browser purity.
 import { defineRegistry } from './registry.js';
 
-const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', cues: 'cues', field: 'field' };
+// `cues` used to be an eighth key here (a fixed per-theme audio-cue list). Deleted: `buildSfx`
+// (formats/scene/scene.js:1593-1602) already derives every cue from `CUT_CUE`/`SEAM_CUE`, keyed on the
+// transition actually used at each joint, so a fixed list cannot say which cue replaces which. A film
+// changes its cut family beat to beat; the cue has to follow the cut, not a brand-wide preference.
+const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field' };
 export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRIES, {
   slot: 'theme.look',
   blurbs: {
-    backdrop: 'ordered bg preset names the brand turns through, one window per beat',
+    // SCAFFOLD-ONLY, not read at render: `bg` is a REQUIRED authoring field (core/engine/produce.js:14-16),
+    // written precisely so the engine never picks the backdrop for an author again (docs/MISTAKES.md
+    // #159: "the engine PICKED the background, so nobody ever designed one"). `backdrop` here is only
+    // the theme's own suggested rotation, read by `make scaffold` to seed `bg[]`; a film's own `bg`
+    // array is what actually renders, and the engine will not fall back to this list on your behalf.
+    backdrop: 'ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`\'s `bg[]`, never read at render (bg is required, docs/MISTAKES.md #159)',
     scale: 'type sizes at 16:9 for hook / headline / body / caption',
     layout: 'the anchor band (left/center/right) and margin every beat composes against',
     marks: 'the logo path plus its end-card and headline-adjacent sizes',
     cuts: 'the default and accent cut/transition names the brand favours',
-    cues: 'the audio cue names the brand reaches for',
     field: 'grain and vignette defaults for the backdrop',
   },
   catalog: {
     title: 'Theme look keys', tag: 'theme', intro: 'A theme (`themes/<name>.json`) may carry a `look` '
       + 'block: the whole-film default a brand fixes so a scaffold does not re-decide it per video '
-      + '(docs/CRAFT/THEME-LOOK.md). These are the seven keys it accepts.',
+      + '(docs/CRAFT/THEME-LOOK.md). These are the six keys it accepts.',
     usage: (n) => ({ theme: { look: { [n]: '…' } } }),
     noPreview: 'a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme\'s whole look',
   },
@@ -129,16 +137,14 @@ export const LOOK_FIELD_KEYS = ['grain', 'vignette'];
 const isObj = (o) => o != null && typeof o === 'object' && !Array.isArray(o);
 
 // lookErrors(look, opts) → [] when clean, else human-readable messages, "look.<key> ...".
-// SAME INJECTION SHAPE AS themeErrors: `bgNames`/`transitionNames`/`cueNames` are handed in rather than
+// SAME INJECTION SHAPE AS themeErrors: `bgNames`/`transitionNames` are handed in rather than
 // imported, so this file never has to know how a bg preset or a cut is named (registry.js already owns
 // that lookup and its near-word hint). `nearMisses` is core/registry/registry.js's own helper; when omitted, a
 // bad name is still refused, just without the "did you mean" suggestion. Any check whose list was not
 // handed in is SKIPPED, never defaulted to "assume it's fine": `themes/*.json` (the write site, checked
 // by `make validate`) hands in every list; `core/engine/boot.js`'s browser-side theme check does too, since
-// backgrounds and transitions are already browser-safe imports there. Only `cueNames` is commonly
-// omitted, because its source (core/audio/kit.mjs) imports `node:fs` and must stay out of the bundle
-// the browser loads: see core/validate/validate.mjs's CLI branch for where it IS checked.
-export function lookErrors(look, { bgNames, transitionNames, cueNames, nearMisses } = {}) {
+// backgrounds and transitions are already browser-safe imports there.
+export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) {
   if (look == null) return [];
   if (!isObj(look)) return ['look must be an object'];
   const near = (word, known) => (nearMisses ? nearMisses(String(word), known) : []);
@@ -189,15 +195,6 @@ export function lookErrors(look, { bgNames, transitionNames, cueNames, nearMisse
       }
     }
   }
-  if ('cues' in look) {
-    if (!Array.isArray(look.cues) || !look.cues.length) errs.push('look.cues must be a non-empty array of audio cue names');
-    else if (cueNames) for (const name of look.cues) {
-      if (!cueNames.includes(name)) {
-        const s = near(name, cueNames);
-        errs.push(`look.cues names "${name}", which is not a real audio cue${s.length ? `, did you mean "${s[0]}"?` : ''}. Known: ${cueNames.join(', ')}`);
-      }
-    }
-  }
   if ('field' in look) {
     if (!isObj(look.field)) errs.push('look.field must be an object');
     else for (const k of LOOK_FIELD_KEYS) if (k in look.field && typeof look.field[k] !== 'number') errs.push(`look.field.${k} must be a number`);
@@ -214,16 +211,15 @@ export function lookErrors(look, { bgNames, transitionNames, cueNames, nearMisse
 // is read off all seven authored looks: every light-bg theme ships `{grain:0,vignette:0}`, every
 // dark-bg one (nike/vercel/a24) ships nonzero grain and vignette, so light-vs-dark decides it.
 //
-// THREE KEYS ARE DELIBERATELY LEFT UNCOMPUTED:
+// TWO KEYS ARE DELIBERATELY LEFT UNCOMPUTED:
 //   - `backdrop` (which bg preset a film turns through) is a TASTE decision, never the engine's to
 //     pick for an author (docs/MISTAKES.md #159: the engine used to choose the background and nobody
 //     ever designed one again; `bg` is a required authoring field now, core/engine/produce.js's own
-//     header explains why). `theme.bgDefault` stays the one engine-owned bg default.
-//   - `cues` cannot be derived per brand: `buildSfx` (formats/scene/scene.js) already derives each cue
-//     from `CUT_CUE` keyed on the transition actually used, so a fixed per-theme list would be a
-//     second, disagreeing owner of the same fact. Candidate for deletion from LOOK_KEYS; not wired.
+//     header explains why). `theme.bgDefault` stays the one engine-owned bg default; `look.backdrop`
+//     is a `make scaffold` seed only, never read by the renderer (see its blurb above).
 //   - `marks` needs a real logo PATH. No theme-agnostic default exists (a made-up path 404s at
 //     render), so a theme with no marks stays without one until it declares its own.
+// (`cues` used to be a third: deleted from LOOK_KEYS entirely, see the comment beside LOOK_KEY_ENTRIES.)
 //
 // SAME INJECTION SHAPE as themeErrors/lookErrors above: `isLightBg` decides only the light/dark field
 // default and is handed in rather than imported, so this file stays free of core/motion/motion.js (see
