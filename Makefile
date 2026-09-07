@@ -1,5 +1,9 @@
 # Vawe: render engine
 # Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
+#
+# Every target here is .PHONY (see below): nothing in this file is a build rule make can skip when
+# nothing changed. This is a command catalogue with memorable names, not a dependency graph, and
+# that is deliberate: see docs/MAKEFILE-AUDIT.md for why it stays a Makefile despite that.
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
@@ -172,14 +176,7 @@ build: fonts ## [ship] compile bin/vawe from the Go source
 # Go cross-compiles with no toolchain per target, so this costs one command and no dependencies.
 .PHONY: build-all
 build-all: fonts ## [ship] cross-compile a render binary for every shipped platform
-	@set -e; for t in darwin-arm64 darwin-amd64 linux-amd64 linux-arm64 windows-amd64; do \
-	  os=$${t%%-*}; arch=$${t##*-}; ext=""; [ "$$os" = "windows" ] && ext=".exe"; \
-	  echo "  building bin/vawe-$$t$$ext"; \
-	  GOOS=$$os GOARCH=$$arch go build -o bin/vawe-$$t$$ext ./cmd/render; \
-	done
-	@echo "" && ls -lh bin/vawe-* | awk '{printf "  %-28s %s\n", $$9, $$5}'
-	@echo "  NOTE: five binaries is ~55MB. scripts/dev/pack-check.mjs caps the tarball at 25MB, so"
-	@echo "  publishing all five needs per-platform optionalDependencies (the esbuild/swc pattern)."
+	@sh scripts/dev/build-all.sh
 
 # make video D=path/to/video.json: one self-describing JSON → out/<name>.mp4
 # Runs the mandatory authoring-quality ladder first (set NOCHECK=1 to skip during rapid iteration), then
@@ -653,7 +650,7 @@ concept-pick: ## [preflight] promote one direction and record the rest.
 # editing the file silently withdraws its own approval; an approval that outlives what it approved is
 # worse than none, because it reads as verified. Stages: beats · concept · treatment · draft.
 approve: ## [preflight] SIGN OFF a stage for this exact file.
-	@node -e "import('./scripts/lib/receipt.mjs').then(({writeReceipt})=>{const r=writeReceipt(process.argv[1],process.argv[2],{by:'make approve'});console.log(r?'  ✓ '+process.argv[1]+' approved for '+process.argv[2]:'  ✗ could not read '+process.argv[2]);})" "$(STAGE)" "$(D)"
+	@node scripts/author/approve.mjs "$(STAGE)" "$(D)"
 
 beats: ## [judge] first/mid/last frame of every beat in one contact sheet (D=<file> [VS=brand])
 	node scripts/author/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))
@@ -990,9 +987,7 @@ critics: ## [judge] THE CRITIC PANEL (docs/CRAFT/SUBAGENTS.md), as an invokable,
 # make probe [M=scene]: assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.
 probe: ## [check] assert renderFrame(n) is PURE in n (byte-identical regardless of render order).
-	@if [ -n "$(M)" ]; then node scripts/gates/probe-purity.mjs $(M); else \
-		for d in formats/*/scene.html; do f=$$(basename $$(dirname $$d)); \
-		node scripts/gates/probe-purity.mjs $$f || exit 1; done; fi
+	@$(if $(M),node scripts/gates/probe-purity.mjs $(M),sh scripts/dev/probe-all.sh)
 
 # make font-audit [D=formats/scene/x.json] [M=scene]: assert every family the scene renders is
 # actually vendored, loaded and painting. Catches the silent substitution that shipped Geist,
@@ -1173,14 +1168,7 @@ expand: ## [dev] expand {type:block} + {type:comp} sugar into real layers (D=<fi
 
 catalog: build ## [site] render the block registry to paged sheets (browse the arsenal)
 	node scripts/site/blocks-catalog.mjs
-	@# render only pages whose JSON changed since their mp4 (blocks-catalog writes-on-change): the
-	@# renderer's frame-dedup makes re-renders of UNCHANGED pages pixel-different (worker-order picks
-	@# a different representative frame per static group), which churns every cropped clip in git.
-	@for f in formats/scene/_catalog-*.json; do \
-	  m=out/_catalog-$$(basename $$f .json | sed 's/_catalog-//').mp4; \
-	  if [ ! -f $$m ] || [ $$f -nt $$m ]; then ./bin/vawe $$f --draft || exit 1; else echo "  · $$m up to date"; fi; \
-	done
-	@echo "→ out/_catalog-*.mp4 (one page per file)"
+	@sh scripts/site/catalog-render.sh
 
 blocks-docs: ## [site] regenerate the docs/BLOCKS.md table from the manifest (CHECK=1 to verify only)
 	node scripts/site/blocks-docs.mjs $(if $(CHECK),--check,)
