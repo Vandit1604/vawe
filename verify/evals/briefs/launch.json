@@ -6,6 +6,11 @@
  "duration": 13,
  "energy": "brand",
  "sceneUnits": true,
+ "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited"], "_why": {
+   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
+   "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
+   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass"
+ } },
  "audio": { "silent": true, "_why": "worked example: proving the type spine and captured-UI show-not-tell, not a mix" },
  "bg": [
   { "from": 0, "to": 2.6, "preset": "paper" },
@@ -19,26 +24,22 @@
   { "at": 9.5, "fx": "fade", "dur": 0.5 }
  ],
  "layers": [
-  { "type": "text", "text": "VAWE", "font": "mono", "size": 30, "weight": 600, "color": "var(--dim)", "tracking": "0.24em", "x": 150, "y": 180, "start": 0.1, "duration": 2.3, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "One JSON becomes <b>any canvas.</b>", "size": 92, "weight": 640, "tracking": "-0.02em", "w": 1500, "x": 150, "y": 280, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0.3, "duration": 2.1, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "VAWE", "font": "mono", "size": 30, "weight": 600, "color": "var(--dim)", "tracking": "0.24em", "x": 150, "y": 180, "start": 0, "duration": 2.4, "anim": "fade", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "One JSON becomes <b>any canvas.</b>", "size": 92, "weight": 640, "tracking": "-0.02em", "w": 1500, "x": 150, "y": 280, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0.2, "duration": 2.2, "out": "fade", "exitDur": 0.3 },
 
   { "type": "text", "text": "the real product surface, captured", "size": 44, "weight": 600, "color": "var(--text-2)", "w": 1000, "x": 150, "y": 150, "start": 2.7, "duration": 3.6, "anim": "slide-up", "enterDur": 0.45, "out": "fade", "exitDur": 0.3 },
   { "type": "image", "src": "/assets/brands/vawe/stills/glass-hero.png", "x": 340, "y": 300, "w": 1240, "h": 698, "radius": 16, "start": 2.9, "duration": 3.3, "anim": "scale", "enterDur": 0.55, "out": "defocus", "exitDur": 0.4, "ken": { "from": 1.0, "to": 1.12 } },
 
   { "type": "text", "text": "five real canvases, one JSON", "size": 56, "weight": 600, "w": 1400, "x": 150, "y": 190, "start": 6.6, "duration": 2.7, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
-  { "type": "group", "x": 150, "y": 340, "w": 1600, "layout": "row", "gap": 24, "start": 6.9, "duration": 2.3, "anim": "pop", "enterDur": 0.4, "each": 0.09, "out": "fade", "exitDur": 0.3, "children": [
-    { "type": "text", "text": "16:9", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
-    { "type": "text", "text": "9:16", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
-    { "type": "text", "text": "1:1", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
-    { "type": "text", "text": "4:5", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" },
-    { "type": "text", "text": "4:3", "size": 40, "weight": 700, "color": "var(--accent)", "bg": "var(--accent-dim)", "pad": "16px 26px", "radius": 14, "font": "mono" }
-  ] },
+  { "type": "html", "x": 150, "y": 340, "w": 1600, "start": 6.9, "duration": 2.3, "anim": "none", "enterDur": 0, "out": "fade", "exitDur": 0.3,
+    "html": "<div style=\"display:flex;gap:24px\"><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">16:9</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">9:16</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">1:1</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">4:5</span><span data-part style=\"font:700 40px var(--font-mono);color:var(--accent);background:var(--accent-dim);border-radius:14px;padding:16px 26px\">4:3</span></div>",
+    "parts": [{ "select": "[data-part]", "anim": "popIn", "each": 0.3, "stagger": 0.09, "delay": 0.05 }] },
 
   { "type": "svg", "x": 150, "y": 250, "w": 130, "h": 68, "viewBox": "0 0 46 24", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "draw": { "dur": 0.9, "weight": 4, "ease": "easeInOutCubic" }, "start": 9.7, "duration": 3.1, "anim": "none", "out": "fade", "exitDur": 0 },
   { "type": "text", "text": "vawe.dev", "size": 84, "weight": 650, "color": "var(--ink)", "x": 150, "y": 420, "start": 10.3, "duration": 2.5, "anim": "slide-up", "enterDur": 0.45, "out": "fade", "exitDur": 0 },
   { "type": "text", "text": "24 layers. 693 effects. one render.", "size": 36, "weight": 500, "color": "var(--dim)", "x": 150, "y": 540, "start": 10.7, "duration": 2.1, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
 
-  { "type": "svg", "x": 150, "y": 940, "w": 92, "h": 48, "viewBox": "0 0 46 24", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "start": 0, "duration": 13,
+  { "type": "svg", "x": 150, "y": 940, "w": 92, "h": 48, "viewBox": "0 0 46 24", "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "stroke": "var(--accent)", "start": 0, "duration": 13, "acrossBeats": true,
     "motion": [
       { "t": 0, "x": 0 },
       { "t": 4.3, "x": 260, "ease": "easeInOutSine" },
