@@ -1327,7 +1327,10 @@
       "thirds-t",
       "thirds-b",
       "thirds-l",
-      "thirds-r"
+      "thirds-r",
+      "stage",
+      "text-band",
+      "lower-band"
      ]
     },
     "col": {

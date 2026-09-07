@@ -19,7 +19,7 @@ const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
 import { assertKeyHandles } from '../timeline/sequence.js';
 import { bakeTimeRemap } from '../timeline/time.js';
 import { loadBeatGrid } from '../beats/index.js';
-import { safeArea, ASPECTS, sceneDims, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
+import { safeArea, ASPECTS, sceneDims, PLACEMENT, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from '../type/ransom.js';
@@ -77,7 +77,10 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
       : v === 'third1' ? dim / 3 - size / 2
       : v === 'third2' ? (2 * dim) / 3 - size / 2
       : (v === 'left' || v === 'top') ? lo
-      : (v === 'right' || v === 'bottom') ? hi - est : null;
+      : (v === 'right' || v === 'bottom') ? hi - est
+      // roughly two-thirds down the safe box: PLACEMENT's "text-band", the y half of `pin:"text-band"`.
+      : v === 'text-band' ? lo + 0.63 * (hi - lo)
+      : null;
   const num = (v, dim, size, lo, hi, est = size) => {
     if (typeof v !== 'string') return v;
     const s = v.trim();
@@ -86,20 +89,25 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
     if (m) return Math.round((parseFloat(m[1]) / 100) * dim + (m[2] ? parseFloat(m[2].replace(/\s+/g, '')) : 0));
     const n = parseFloat(s); return isNaN(n) ? v : n;
   };
-  // pin → [x-keyword, y-keyword]. center uses OPTICAL vertical; thirds land on the power points.
-  const PIN = { center: ['center', 'optical'], top: ['center', 'top'], bottom: ['center', 'bottom'],
-    left: ['left', 'center'], right: ['right', 'center'], 'top-left': ['left', 'top'], 'top-right': ['right', 'top'],
-    'bottom-left': ['left', 'bottom'], 'bottom-right': ['right', 'bottom'],
-    'thirds-tl': ['third1', 'third1'], 'thirds-tr': ['third2', 'third1'], 'thirds-bl': ['third1', 'third2'],
-    'thirds-br': ['third2', 'third2'], 'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
-    'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'] };
+  // pin → [x-keyword, y-keyword, widthFraction?]. Read from core/layout/safe.js PLACEMENT, the one
+  // table core/validate/validate.mjs's degenerate-pin check and formats/scene/schema.json's `pin`
+  // enum also read now, in place of the three hand-kept copies this used to be.
+  const PIN = PLACEMENT;
   // Children were never walked, so `pin`, `col`, `gutter` and string coords ("50%", "center") were
   // inert inside a group, and in a `layout:"free"` group a "50%" string reached CSS as `left:50%px`,
   // which is not a coordinate at all. `applyAt` already recurses; this did not (MISTAKES #70).
   const allLayers = [];
   (function walk(ls) { for (const L of ls || []) { if (!isObj(L)) continue; allLayers.push(L); if (L.children) walk(L.children); } })(data.layers);
   for (const L of allLayers) {
-    if (L.pin && PIN[L.pin]) { const [px, py] = PIN[L.pin]; if (L.x == null) L.x = px; if (L.y == null) L.y = py; }
+    if (L.pin && PIN[L.pin]) {
+      const [px, py, wFrac] = PIN[L.pin];
+      if (px != null && L.x == null) L.x = px;
+      if (py != null && L.y == null) L.y = py;
+      // The three anchors (`stage`, …) carry a width nobody has to hand-type: a fraction of the safe
+      // box, applied only when the layer declares none of its own (the same "author wins" rule every
+      // other pin field already follows).
+      if (wFrac != null && L.w == null) L.w = Math.round(wFrac * (safe.x1 - safe.x0));
+    }
     // 12-col grid: col "3" (one column) or "2-7" (a span) → x + w from a gutter grid (col overrides pin-x).
     // The grid spans the SAFE box, not the canvas, for the same reason the edge keywords do: a column
     // layout that runs under a platform's rail is not a layout.

@@ -696,6 +696,33 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `wobble` | LOOP, never settles: rocks 3 degrees each way, restless, for a warning or a toy |
 | `zoomBlur` | rushes back from too close while the defocus resolves. A camera pulling focus, premium hero beat |
 
+## Placement  `[pin]`
+
+`"pin": "<name>"` on a layer or a caption. An aspect-portable position, resolved against the safe box (`core/layout/safe.js safeArea`) rather than a hand-typed pixel, so the same JSON lands correctly at any of the five canvases. `stage`/`text-band`/`lower-band` are the de-facto anchors this repo already hand-types as 1920px pixels; use them instead of a new magic number.
+
+| name | what / when |
+|---|---|
+| `bottom` | horizontally centred, pinned to the bottom edge of the safe area |
+| `bottom-left` | pinned into the bottom-left corner of the safe area |
+| `bottom-right` | pinned into the bottom-right corner of the safe area |
+| `center` | dead centre of the canvas, vertically at the optical centre rather than the exact middle |
+| `left` | pinned to the left safe edge, vertically centred |
+| `lower-band` | a thin strip near the bottom safe edge, left-anchored: where a closing rule or a small persistent label sits |
+| `right` | pinned to the right safe edge, vertically centred |
+| `stage` | the full-width content column between the left and right safe margins, at any aspect ratio: kit.mjs's hand-typed x:160/w:1600 anchor, portable |
+| `text-band` | the horizontal strip roughly two-thirds down the frame where a headline or a sub-line usually sits |
+| `thirds-b` | centred horizontally, sat on the lower third line |
+| `thirds-bl` | lands on the lower-left rule-of-thirds power point |
+| `thirds-br` | lands on the lower-right rule-of-thirds power point |
+| `thirds-l` | vertically centred, sat on the left third line |
+| `thirds-r` | vertically centred, sat on the right third line |
+| `thirds-t` | centred horizontally, sat on the upper third line |
+| `thirds-tl` | lands on the upper-left rule-of-thirds power point |
+| `thirds-tr` | lands on the upper-right rule-of-thirds power point |
+| `top` | horizontally centred, pinned to the top edge of the safe area |
+| `top-left` | pinned into the top-left corner of the safe area |
+| `top-right` | pinned into the top-right corner of the safe area |
+
 ## Spectacle devices  `[scene]`
 
 `"spectacle": { "at", "of", "device", "why" }`. The film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/timeline/spectacle.js`.
@@ -1119,4 +1146,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_697 effects across 56 families. Regenerate: `make effects`._
+_717 effects across 57 families. Regenerate: `make effects`._
