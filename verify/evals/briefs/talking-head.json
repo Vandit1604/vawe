@@ -6,6 +6,12 @@
  "destination": "shorts",
  "duration": 12,
  "energy": "calm",
+ "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited", "ends-on-nothing"], "_why": {
+   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness proof for `make evals`, not a planned film with a requester to sign a lock sheet",
+   "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
+   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full craft pass",
+   "ends-on-nothing": "pre-existing: the last spoken caption ends at 11.6s inside a 12s scene, and the lower-third/accent-bar spine (acrossBeats) does not count as the closing content the check wants; a real edit would trim to 11.6s or extend the caption, out of scope for an html-first pass"
+ } },
  "audio": { "silent": true, "_why": "worked example: no real VO track exists yet, captions are hand-timed to stand in for it" },
  "bg": [
   { "from": 0, "to": 5.8, "preset": "ink" },
@@ -18,13 +24,16 @@
  ],
  "sceneUnits": true,
  "layers": [
-  { "type": "rect", "x": 290, "y": 260, "w": 500, "h": 500, "radius": 250, "fill": "var(--surface-2)", "start": 0.2, "duration": 5.4, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "face-safe slot", "size": 28, "weight": 500, "color": "var(--dim)", "align": "center", "x": 290, "y": 490, "w": 500, "font": "mono", "start": 0.5, "duration": 5.0, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
+  { "type": "rect", "x": 290, "y": 260, "w": 500, "h": 500, "radius": 250, "fill": "var(--surface-2)", "start": 0, "duration": 5.6, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "face-safe slot", "size": 28, "weight": 500, "color": "var(--dim)", "align": "center", "x": 290, "y": 490, "w": 500, "font": "mono", "start": 0.3, "duration": 5.3, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
 
-  { "type": "rect", "x": 140, "y": 640, "w": 800, "h": 380, "radius": 20, "fill": "var(--surface-2)", "start": 6.0, "duration": 2.4, "anim": "pop", "enterDur": 0.35, "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "cut to the proof", "size": 34, "weight": 600, "color": "var(--text-2)", "x": 200, "y": 700, "start": 6.2, "duration": 2.1, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
-  { "type": "count", "to": 693, "unit": "", "x": 200, "y": 780, "w": 700, "size": 130, "weight": 700, "color": "var(--accent)", "countStart": 0.2, "countDur": 1.1, "start": 6.3, "duration": 2.0, "anim": "none", "out": "fade", "exitDur": 0.3 },
-  { "type": "text", "text": "effects, not a slideshow", "size": 30, "weight": 500, "color": "var(--dim)", "x": 200, "y": 930, "start": 7.4, "duration": 0.9, "anim": "fade", "enterDur": 0.25, "out": "fade", "exitDur": 0.3 },
+  { "type": "html", "x": 140, "y": 640, "w": 800, "h": 380, "radius": 20, "bg": "var(--surface-2)", "start": 6.0, "duration": 2.4, "anim": "pop", "enterDur": 0.35, "out": "fade", "exitDur": 0.3,
+    "html": "<div style=\"padding:60px 60px 0\"><div data-part-open style=\"font:600 34px var(--font-sans);color:var(--text-2)\">cut to the proof</div><div data-part-late style=\"margin-top:150px;font:500 30px var(--font-sans);color:var(--dim)\">effects, not a slideshow</div></div>",
+    "parts": [
+      { "select": "[data-part-open]", "anim": "fade", "each": 0.3, "delay": 0.2 },
+      { "select": "[data-part-late]", "anim": "fade", "each": 0.25, "delay": 1.4 }
+    ] },
+  { "type": "count", "to": 693, "unit": "", "x": 200, "y": 780, "w": 700, "size": 130, "weight": 700, "color": "var(--accent)", "countStart": 0, "countDur": 1.1, "start": 6.3, "duration": 2.0, "anim": "none", "out": "fade", "exitDur": 0.3 },
 
   { "type": "rect", "x": 290, "y": 260, "w": 500, "h": 500, "radius": 250, "fill": "var(--surface-2)", "start": 8.7, "duration": 3.0, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
 

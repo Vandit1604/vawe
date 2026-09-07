@@ -1,10 +1,10 @@
 // blocks/ui.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor, onInk,
-  R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows, TONE_NAMES,
-  tint, TINT, SHADOW_CARD, capCss, labelCss, numCss,
+  TOKENS, HAIR, r2, text, rect, box, onColor, onInk,
+  R, TYPE, SPACE, E, cardChrome, toneColor, avatarEl,
+  stackWindows, TONE_NAMES,
+  tint, TINT, SHADOW_CARD, labelCss, numCss,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
@@ -49,12 +49,22 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// HTML-FIRST FAMILIES BELOW. Design Read: flat chips and hairline surfaces, one accent hue at two
+// weights (kit.mjs's DATA TREATMENT idiom), mono for figures/sans for words, never a gradient or a
+// card-in-card. VARIANCE low (utility chrome, not the film's loud moment); MOTION restrained, either
+// the layer's own envelope anim for a single-unit card or `parts` where the family already staggers
+// its own children. docs/CRAFT/HTML-FRAGMENTS.md.
+
 // pillRow, a horizontal row of chip tags.
 export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft, start = 0, dur = 4 } = {}) {
-  // the chips POP IN one after another: a tag row filling, not a slab sliding up
-  return [{ type: 'group', x, y, layout: 'row', wrap: true, gap: SPACE.xs, items: 'center',
-    start, duration: dur, anim: 'fade', enterDur: 0.2, children: items.map((p, i) => ({
-      ...pill(p, fg, bg), ...stagger(i, { step: 0.08, delay: 0.1, anim: 'pop', enterDur: 0.26 }) })) }];
+  // the chips POP IN one after another: a tag row filling, not a slab sliding up. `parts` default
+  // select (`[data-part]` among others) picks up every chip with no selector to restate.
+  const html = `<div style="display:flex;flex-wrap:wrap;gap:${SPACE.xs}px;align-items:center">`
+    + items.map((p) => `<span data-part style="display:inline-flex;align-items:center;`
+      + `font:500 ${TYPE.body}px var(--font-sans);color:${fg};background:${bg};border-radius:${R.pill}px;`
+      + `padding:6px 16px;white-space:nowrap">${p}</span>`).join('') + '</div>';
+  return [{ type: 'html', x, y, html, start, duration: dur, anim: 'none', enterDur: 0,
+    parts: [{ anim: 'popIn', each: 0.26, stagger: 0.08, delay: 0.1 }] }];
 }
 
 // notification: a toast card (icon + title + body). Good for "it just happened" beats.
@@ -79,20 +89,20 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
   // 26/TYPE.body, not 22/14: `make audit` fails any text under 14.04px as unreadable, so the glyph
   // that says WHAT happened was the one part of the alert nobody could read. The dot grows to fit it.
   const dot = icon
-    ? box({ w: 26, h: 26, radius: R.pill, bg: accent, layout: 'row', justify: 'center', items: 'center',
-        children: [text({ text: String(icon), size: TYPE.body, weight: 700, color: onColor(accent) })] })
-    : box({ w: 12, h: 12, radius: R.pill, bg: accent });
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: SPACE.sm, pad: SPACE.md,
-    // a notification ARRIVES FROM THE EDGE and leaves the way it came, the short, correct entrance
-    // for a chip. Nothing inside it should perform; it is one small statement.
-    ...cardChrome({ elevation: E.card, anim: 'slide-right' }), out: 'slide-right',
-    start, duration: dur, enterDur: 0.4, exitDur: 0.3, children: [
-      dot,
-      { type: 'group', layout: 'column', gap: SPACE.snug, items: 'flex-start', grow: 1, children: [
-        text({ text: title, size: TYPE.lead, weight: 700, color: T.ink }),
-        body && text({ text: body, size: TYPE.body, color: T.sub }),
-      ].filter(Boolean) },
-    ] }];
+    ? `<div style="width:26px;height:26px;border-radius:${R.pill}px;background:${accent};flex:none;`
+      + `display:flex;align-items:center;justify-content:center;font:700 ${TYPE.body}px var(--font-sans);`
+      + `color:${onColor(accent)}">${icon}</div>`
+    : `<div style="width:12px;height:12px;border-radius:${R.pill}px;background:${accent};flex:none"></div>`;
+  const html = `<div style="display:flex;align-items:flex-start;gap:${SPACE.sm}px;padding:${SPACE.md}px;`
+    + `box-sizing:border-box;width:${w}px">` + dot
+    + `<div style="display:flex;flex-direction:column;gap:${SPACE.snug}px;align-items:flex-start;flex:1;min-width:0">`
+    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink}">${title}</span>`
+    + (body ? `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub}">${body}</span>` : '')
+    + '</div></div>';
+  // a notification ARRIVES FROM THE EDGE and leaves the way it came, the short, correct entrance for a
+  // chip. Nothing inside it should perform; it is one small statement, so no `parts` here.
+  return [{ type: 'html', x, y, w, html, ...cardChrome({ elevation: E.card, anim: 'slide-right' }), out: 'slide-right',
+    start, duration: dur, enterDur: 0.4, exitDur: 0.3 }];
 }
 
 // callout: an info/success/warn strip with a leading bar (full-height, per shape lock).
@@ -105,11 +115,13 @@ export function callout({ x, y, w = 720, text: msg, body = '', title = '', tone 
   // whose only coloured mark is a 4px rule reads as a grey box with a stripe: the tone has to be in
   // the GROUND for the strip to say anything before it is read. Same one-hue-at-two-weights idiom the
   // data family uses, solid rule, soft fill, one colour.
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.md, pad: `${SPACE.md}px ${SPACE.lg}px`,
-    bg: tint(ac, TINT.chip), radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.4, children: [
-      box({ w: 4, h: 30, radius: R.none, bg: ac }),
-      text({ text: msg, size: TYPE.base, weight: 500, color: T.ink, delay: 0.2, anim: 'fade', enterDur: 0.28 }),
-    ] }];
+  const html = `<div style="display:flex;align-items:center;gap:${SPACE.md}px;padding:${SPACE.md}px ${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">`
+    + `<div style="width:4px;height:30px;background:${ac};flex:none"></div>`
+    + `<span data-part style="font:500 ${TYPE.base}px var(--font-sans);color:${T.ink}">${msg}</span></div>`;
+  return [{ type: 'html', x, y, w, bg: tint(ac, TINT.chip), radius: R.tight, html,
+    start, duration: dur, anim: 'wipe', enterDur: 0.4,
+    parts: [{ anim: 'fade', each: 0.28, delay: 0.2 }] }];
 }
 
 // phoneFrame: a phone shell (dark bezel, dynamic-island notch, light screen). Draw content on top.
@@ -221,77 +233,74 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null
 
 // checklist: items with checked/unchecked boxes; done rows dim (reads as completed).
 export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
-  // ITEMS TICK OFF ONE AFTER ANOTHER, top to bottom. The motion a checklist is FOR. The card only
-  // fades in; the rows perform.
-  //
-  // The box is a LEAF (a chip on a text layer) rather than a group wrapping a glyph, because only a
-  // leaf child is handed to the clip driver: a nested group child is built and then never registered,
-  // so it cannot carry its own timing. Both states are the SAME glyph in the SAME chip, the open one
-  // simply unpainted, so a row does not resize at the moment it completes.
-  const CHIP = { text: '✓', size: TYPE.body, weight: 700, radius: R.chip, pad: `${SPACE.tight}px ${SPACE.snug}px` };
-  const beat = (i, extra) => stagger(i, { step: 0.26, delay: 0.2, enterDur: 0.3, ...extra });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.sm, pad: SPACE.lg,
-    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'center', gap: SPACE.sm, children: [
-      it.done
-        // A TINTED CHIP WITH A MIXED TICK, not a solid `--up` fill with white on it. `onColor` was
-        // called here believing it would pick a legible ink and it cannot: `--up` is a `var()`, so the
-        // hex branch misses and it returned '#fff' every time, 2.5:1 on linear, 1.3:1 on higgsfield's
-        // lime, HARD failures both. The tinted form is guaranteed on every theme AND is the register's
-        // own idiom: one hue at two weights, soft fill, solid mark.
-        ? text({ ...CHIP, color: onInk(T.green), bg: tint(T.green, TINT.chip), border: `2px solid ${tint(T.green, 30)}`, ...beat(i, { anim: 'pop', delay: 0.34 }) })
-        : text({ ...CHIP, color: 'transparent', bg: T.card, border: `2px solid ${T.hair}`, ...beat(i, { anim: 'fade' }) }),
-      // A completed row is `--text-2`, not `--dim`. Struck-through-quiet is a look; unreadable is a
-      // HARD `make audit` failure, and `--dim` measures 2.6:1 on higgsfield.
-      text({ text: it.text, size: TYPE.base, weight: 500, color: it.done ? T.sub : T.ink, ...beat(i) }),
-    ] })) }];
+  // ITEMS TICK OFF ONE AFTER ANOTHER, top to bottom, the motion a checklist is FOR: `parts` staggers
+  // each row (its default select already picks up `[data-part]`), the card itself only fades in.
+  // A TINTED CHIP WITH A MIXED TICK, not a solid `--up` fill with white on it. `onColor` cannot grade a
+  // `var()` (`--up` returned '#fff' every time, 2.5:1 on linear, a HARD failure); the tinted form is
+  // guaranteed on every theme and is the register's own idiom: one hue at two weights, soft fill, solid mark.
+  const chip = (done) => done
+    ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;`
+      + `flex:none;border-radius:${R.chip}px;background:${tint(T.green, TINT.chip)};border:2px solid ${tint(T.green, 30)};`
+      + `font:700 ${TYPE.body}px var(--font-sans);color:${onInk(T.green)}">✓</span>`
+    : `<span style="display:inline-flex;width:28px;height:28px;flex:none;border-radius:${R.chip}px;`
+      + `background:${T.card};border:2px solid ${T.hair}"></span>`;
+  // A completed row is `--text-2`, not `--dim`. Struck-through-quiet is a look; unreadable is a HARD
+  // `make audit` failure, and `--dim` measures 2.6:1 on higgsfield.
+  const row = (it) => `<div data-part style="display:flex;align-items:center;gap:${SPACE.sm}px">` + chip(it.done)
+    + `<span style="font:500 ${TYPE.base}px var(--font-sans);color:${it.done ? T.sub : T.ink}">${it.text}</span></div>`;
+  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.sm}px;padding:${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">` + items.map(row).join('') + '</div>';
+  return [{ type: 'html', x, y, w, ...cardChrome({ anim: 'fade' }), html,
+    start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    parts: [{ anim: 'fadeUp', each: 0.3, stagger: 0.26, delay: 0.2 }] }];
 }
 
 // table. A data table: `cols` header + `rows` of cells, hairline-divided.
 export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 } = {}) {
   // ROWS FILL IN ONE AFTER ANOTHER under a header that is already there, how a table actually
-  // populates. The timing rides the CELLS, not the row: only a leaf child is registered with the clip
-  // driver, so a row wrapper cannot carry its own window. Every cell in a row shares one delay, so
-  // the row still reads as a single arrival.
+  // populates: `parts` staggers each `<tr>`-equivalent row, the header sits static above them.
   // MONO CARRIES NUMBERS, SANS CARRIES WORDS, and this block had it backwards: the column HEADINGS
   // ("Plan", "Seats") were set in mono and the cells under them in sans, which spends the one thing
   // mono is for (a column of digits that lines up) on the one row that never holds a figure. A cell
   // that is entirely numeric now gets the theme's tabular face; a heading is a word, so it is sans.
   const NUMERIC = /^[-+]?[$€£]?[\d,]+(\.\d+)?%?$/;
-  const cell = (t, head, beat) => { const v = String(t); return text({ text: v, grow: 1,
-    font: head ? 'sans' : (NUMERIC.test(v.trim()) ? 'num' : 'sans'),
-    size: head ? TYPE.body : TYPE.base, weight: head ? 600 : 500, color: head ? T.sub : T.ink, ...beat }); };
-  const row = (cells, head, beat = {}) => ({ type: 'group', layout: 'row', gap: SPACE.md, items: 'center', pad: `${SPACE.sm}px 0`, children: cells.map((c) => cell(c, head, beat)) });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: `${SPACE.md}px ${SPACE.lg}px`,
-    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: [row(cols, true), box({ h: 1, bg: T.hair }),
-      ...rows.flatMap((r, i) => [i > 0 && box({ h: 1, bg: T.hair }),
-        row(r, false, stagger(i, { step: 0.16, delay: 0.3, anim: 'slide-left', enterDur: 0.32 }))].filter(Boolean))] }];
+  const cellCss = (v, head) => { const numeric = !head && NUMERIC.test(String(v).trim());
+    return `flex:1;font:${head ? 600 : 500} ${head ? TYPE.body : TYPE.base}px var(--font-${numeric ? 'num' : 'sans'});color:${head ? T.sub : T.ink}`; };
+  const headRow = `<div style="display:flex;gap:${SPACE.md}px;align-items:center;padding:${SPACE.sm}px 0">`
+    + cols.map((c) => `<span style="${cellCss(c, true)}">${c}</span>`).join('') + '</div>';
+  // every body row carries its own top hairline, which is the divider after the header AND between rows.
+  const bodyRows = rows.map((r) => `<div data-part style="display:flex;gap:${SPACE.md}px;align-items:center;`
+    + `padding:${SPACE.sm}px 0;border-top:${HAIR}">` + r.map((c) => `<span style="${cellCss(c, false)}">${c}</span>`).join('') + '</div>').join('');
+  const html = `<div style="display:flex;flex-direction:column;padding:${SPACE.md}px ${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">` + headRow + bodyRows + '</div>';
+  return [{ type: 'html', x, y, w, ...cardChrome({ anim: 'fade' }), html,
+    start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    parts: [{ anim: 'slide-left', each: 0.32, stagger: 0.16, delay: 0.3 }] }];
 }
 
 // timeline: a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
 export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
-  // THE RAIL ADVANCES DOWN THE SEQUENCE: each dot lands and its entry arrives beside it, in order,
-  // so the eye travels the timeline instead of being handed the whole thing at once. The dot is a
-  // LEAF (an empty text layer carrying the chip) because a nested group child is never registered
-  // with the clip driver and so cannot be timed; the connecting rail stays static, as scaffolding.
-  const beat = (i, extra) => stagger(i, { step: 0.3, delay: 0.2, enterDur: 0.3, ...extra });
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 0, pad: SPACE.lg,
-    ...cardChrome({ anim: 'fade' }), start, duration: dur, enterDur: 0.25, exitDur: 0.35,
-    children: items.map((it, i) => ({ type: 'group', layout: 'row', items: 'stretch', gap: SPACE.md, children: [
-      { type: 'group', layout: 'column', items: 'center', gap: 0, w: 18, children: [
-        // An unreached dot sits on a TINT of the accent, not on `--line`. `--line` is the BORDER
-        // colour: painting the rest of a sequence with it says "divider", not "step not yet taken".
-        // The same correction the meters got when their tracks stopped being hairline-coloured.
-        text({ text: '', w: 14, h: 14, radius: R.pill, bg: it.done ? T.accent : tint(T.accent, TINT.track), ...beat(i, { anim: 'pop', enterDur: 0.26 }) }),
-        i < items.length - 1 && box({ w: 2, grow: 1, bg: T.hair }),
-      ].filter(Boolean) },
-      { type: 'group', layout: 'column', items: 'flex-start', gap: 2, pad: `0 0 ${SPACE.lg}px`, children: [
-        text({ text: it.title, size: TYPE.base, weight: 600, color: T.ink, ...beat(i, { anim: 'slide-left', delay: 0.3 }) }),
-        // The meta line is a date or a figure, so mono is right here. Its colour is not: `--dim` again.
-        it.meta && text({ text: it.meta, font: 'mono', size: TYPE.body, color: T.sub, ...beat(i, { anim: 'fade', delay: 0.36 }) }),
-      ].filter(Boolean) },
-    ] })) }];
+  // THE RAIL ADVANCES DOWN THE SEQUENCE: each dot lands and its entry arrives beside it, in order, so
+  // the eye travels the timeline instead of being handed the whole thing at once. `parts` staggers one
+  // dot+entry row at a time; the connecting rail stays static, as scaffolding.
+  // An unreached dot sits on a TINT of the accent, not on `--line`. `--line` is the BORDER colour:
+  // painting the rest of a sequence with it says "divider", not "step not yet taken". The same
+  // correction the meters got when their tracks stopped being hairline-coloured.
+  const row = (it, last) => `<div data-part style="display:flex;align-items:stretch;gap:${SPACE.md}px">`
+    + `<div style="display:flex;flex-direction:column;align-items:center;width:18px;flex:none">`
+    + `<span style="width:14px;height:14px;border-radius:${R.pill}px;flex:none;`
+    + `background:${it.done ? T.accent : tint(T.accent, TINT.track)}"></span>`
+    + (!last ? `<span style="width:2px;flex:1;background:${T.hair}"></span>` : '') + '</div>'
+    // The meta line is a date or a figure, so mono is right here. Its colour is not: `--dim` again.
+    + `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding-bottom:${SPACE.lg}px">`
+    + `<span style="font:600 ${TYPE.base}px var(--font-sans);color:${T.ink}">${it.title}</span>`
+    + (it.meta ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${it.meta}</span>` : '')
+    + '</div></div>';
+  const html = `<div style="display:flex;flex-direction:column;padding:${SPACE.lg}px;box-sizing:border-box;width:${w}px">`
+    + items.map((it, i) => row(it, i === items.length - 1)).join('') + '</div>';
+  return [{ type: 'html', x, y, w, ...cardChrome({ anim: 'fade' }), html,
+    start, duration: dur, enterDur: 0.25, exitDur: 0.35,
+    parts: [{ anim: 'slide-left', each: 0.3, stagger: 0.3, delay: 0.2 }] }];
 }
 
 // stepFlow: a horizontal numbered progress track; `active` is the current step (connectors fill behind it).
@@ -358,23 +367,24 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
 
 // kanban: columns of small cards. columns = [{title, cards:[string]}].
 export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {}) {
-  const colW = (w - 16 * (columns.length - 1)) / columns.length;
-  // THE BOARD DEALS ITSELF: column headers first, then the cards drop in reading order, across the
-  // columns, then down, so the eye is led through the board instead of watching it arrive as a slab.
-  // Each card is a LEAF with the card chrome on it (a group child is never registered with the clip
-  // driver, so a card wrapping its own text could not be timed).
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'flex-start', gap: SPACE.md, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
-    children: columns.map((col, ci) => ({ type: 'group', w: colW, layout: 'column', items: 'stretch', gap: SPACE.xs, children: [
-      // A column heading is a WORD ("In review"), so it is sans. It was mono, which is the library's
-      // standing inversion, and `--dim`, which `make audit` fails HARD on a dark theme.
-      text({ text: col.title, size: TYPE.body, weight: 600, color: T.sub, ...stagger(ci, { step: 0.09, delay: 0.15, enterDur: 0.28 }) }),
-      // reading order across the board: card row `ri` in every column lands before row `ri + 1` does
-      // HAIRLINE, NO SHADOW. A card sitting inside a board already has a boundary; giving it a drop
-      // shadow as well is two pieces of chrome saying the same thing, and the register spends one.
-      ...col.cards.map((c, ri) => text({ text: c, size: TYPE.body, weight: 500, color: T.ink,
-        bg: T.card, radius: R.card, border: HAIR, pad: `${SPACE.sm}px ${SPACE.md}px`,
-        ...stagger(ri * columns.length + ci, { step: 0.11, delay: 0.4, anim: 'pop', enterDur: 0.3 }) })),
-    ] })) }];
+  const colW = r2((w - 16 * (columns.length - 1)) / Math.max(1, columns.length));
+  // THE BOARD DEALS ITSELF: `parts` staggers every marked child in DOM order, column by column (a
+  // header then its own cards, then the next column). The original native version read the board
+  // across-then-down; `parts` staggers in document order and has no per-element delay override, so a
+  // column-major reveal is the honest shape here rather than a hand-computed one it cannot express.
+  // A column heading is a WORD ("In review"), so it is sans. It was mono, which is the library's
+  // standing inversion, and `--dim`, which `make audit` fails HARD on a dark theme.
+  // HAIRLINE, NO SHADOW. A card sitting inside a board already has a boundary; giving it a drop
+  // shadow as well is two pieces of chrome saying the same thing, and the register spends one.
+  const col = (c) => `<div style="display:flex;flex-direction:column;gap:${SPACE.xs}px;width:${colW}px;flex:none">`
+    + `<span data-part style="font:600 ${TYPE.body}px var(--font-sans);color:${T.sub}">${c.title}</span>`
+    + c.cards.map((card) => `<span data-part style="font:500 ${TYPE.body}px var(--font-sans);color:${T.ink};`
+      + `background:${T.card};border-radius:${R.card}px;border:${HAIR};padding:${SPACE.sm}px ${SPACE.md}px">${card}</span>`).join('')
+    + '</div>';
+  const html = `<div style="display:flex;align-items:flex-start;gap:${SPACE.md}px;width:${w}px">`
+    + columns.map(col).join('') + '</div>';
+  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
+    parts: [{ anim: 'popIn', each: 0.3, stagger: 0.1, delay: 0.15 }] }];
 }
 
 // OPTICAL_NUDGE: one line of type, centred by eye rather than by box.
@@ -510,33 +520,42 @@ export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, du
   // applied and the two halves met with nothing between them. Each half is a group with its own fill
   // now, which is what makes its padding real.
   const half = `${SPACE.snug}px ${SPACE.sm}px`;
-  return [{ type: 'group', x, y, bg: TOKENS.ink, radius: R.chip, layout: 'row', items: 'stretch', gap: 0,
+  // ONE RECTANGLE IN TWO HALVES, which is what a shields.io badge is: the label half stamps in with
+  // the plate, the value half pops a beat later. `parts` on the value half alone reproduces that;
+  // the label is plain content, not a separately-timed part.
+  const html = `<div style="display:flex;align-items:stretch">`
+    + `<div style="background:${TOKENS.ink};padding:${half};display:flex;align-items:center">`
+    + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${TOKENS.paper}">${label}</span></div>`
+    + `<div data-part style="background:${ac};padding:${half};display:flex;align-items:center">`
+    + `<span style="font:700 ${TYPE.body}px var(--font-mono);color:${onAc}">${value}</span></div>`
+    + '</div>';
+  return [{ type: 'html', x, y, bg: TOKENS.ink, radius: R.chip,
     // The clip is what keeps the coloured half square at the seam and round at the plate's edge, so
     // one radius describes the whole object and there is no nested radius to get wrong.
-    css: { overflow: 'hidden' },
-    shadow: true,
-    start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3, children: [
-      { type: 'group', bg: TOKENS.ink, radius: R.none, pad: half, layout: 'row', items: 'center',
-        children: [text({ text: label, font: 'mono', size: TYPE.body, weight: 600, color: TOKENS.paper })] },
-      { type: 'group', bg: ac, radius: R.none, pad: half, layout: 'row', items: 'center',
-        children: [text({ text: value, font: 'mono', size: TYPE.body, weight: 700, color: onAc, delay: 0.22, anim: 'pop', enterDur: 0.26 })] },
-    ] }];
+    css: { overflow: 'hidden' }, shadow: true, html,
+    start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3,
+    parts: [{ anim: 'popIn', each: 0.26, delay: 0.22 }] }];
 }
 
 // banner. A full-width accent announcement bar: icon · message · CTA.
 export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
   msg = msg || body || title;
   const ink = onColor(accent);
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.sm, pad: `${SPACE.md}px ${SPACE.lg}px`,
-    // a full-width bar arrives EDGE-FIRST (broadcast grammar), then its CTA lands
-    bg: accent, radius: R.tight, start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3, children: [
-      text({ text: icon, size: TYPE.base, color: ink }), text({ text: msg, size: TYPE.base, weight: 600, color: ink, grow: 1 }),
-      // THE CTA CHIP IS A TINT OF ITS OWN INK, not a hardcoded white wash. `rgba(255,255,255,0.18)`
-      // assumes the bar is dark; on a light accent (higgsfield's lime) it was a white chip carrying
-      // dark text, i.e. invisible against the bar it sits on. Tinting the colour `onColor` already
-      // chose lifts the chip off the bar in both directions without the block knowing which it is in.
-      cta && { type: 'group', bg: tint(ink, 18), radius: R.chip, pad: `${SPACE.xs}px ${SPACE.md}px`, children: [text({ text: cta, size: TYPE.body, weight: 600, color: ink, delay: 0.35, anim: 'pop', enterDur: 0.3 })] },
-    ].filter(Boolean) }];
+  // THE CTA CHIP IS A TINT OF ITS OWN INK, not a hardcoded white wash. `rgba(255,255,255,0.18)` assumes
+  // the bar is dark; on a light accent (higgsfield's lime) it was a white chip carrying dark text, i.e.
+  // invisible against the bar it sits on. Tinting the colour `onColor` already chose lifts the chip off
+  // the bar in both directions without the block knowing which it is in.
+  const html = `<div style="display:flex;align-items:center;gap:${SPACE.sm}px;padding:${SPACE.md}px ${SPACE.lg}px;`
+    + `box-sizing:border-box;width:${w}px">`
+    + `<span style="font:400 ${TYPE.base}px var(--font-sans);color:${ink}">${icon}</span>`
+    + `<span style="flex:1;font:600 ${TYPE.base}px var(--font-sans);color:${ink}">${msg}</span>`
+    + (cta ? `<div data-part style="background:${tint(ink, 18)};border-radius:${R.chip}px;padding:${SPACE.xs}px ${SPACE.md}px">`
+      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${ink}">${cta}</span></div>` : '')
+    + '</div>';
+  // a full-width bar arrives EDGE-FIRST (broadcast grammar), then its CTA lands
+  return [{ type: 'html', x, y, w, bg: accent, radius: R.tight, html,
+    start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3,
+    ...(cta ? { parts: [{ anim: 'popIn', each: 0.3, delay: 0.35 }] } : {}) }];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

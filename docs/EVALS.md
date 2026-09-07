@@ -26,27 +26,50 @@ single score erases that instead of surfacing it. So the machine checks only wha
 honestly (did it render, at the right shape and length) and a human does the judging every other gate in
 this repo already asks for (`make judge`, `docs/JUDGE.md`).
 
-## The four briefs
+## The six briefs
 
-`verify/evals/briefs/` holds four small (4-9s) real scenes, each exercising a different deliverable so a
-change that only affects one family still shows up somewhere:
+`verify/evals/briefs/` holds six small (6-13s) real scenes, each exercising a different deliverable so a
+change that only affects one family still shows up somewhere. Every one is **HTML-first**: wherever the
+brief used to hand-stack a group of `rect`/`text` for a card, a row of chips, or a stat panel, it is now
+one `html` layer with `parts` driving the reveal (`docs/CRAFT/HTML-FRAGMENTS.md`). What stays native is
+what genuinely is not a picture: a `count` layer's live figure, a `cursor` layer's path, `typing`, an
+`acrossBeats` spine.
 
-- **`launch.json`**: a hook, a product still, a CTA; one `becomes` handover; two `bg` windows.
-- **`explainer.json`**: kinetic type, a count-up stat grid, a payoff line.
-- **`sting.json`**: a 4s logo sting, the wave draws on, the wordmark types in.
-- **`recreation.json`**: `sceneUnits` with a continuous object (`acrossBeats` + `kick`) crossing two cuts.
+- **`demo.json`**: the `cursor` layer proving a real click has a real consequence. The card is one html
+  layer; `Exported.` is a second `parts` group that stays hidden until the click lands.
+- **`explainer.json`**: kinetic type, a count-up stat grid (`countStart: 0`, so the figure starts
+  climbing the instant it enters), a payoff line. The nine layer-type chips are one html+parts row.
+- **`launch.json`**: a hook, a captured product still (Ken Burns, left as an `image` layer on purpose:
+  a real screenshot is not group-of-rect debt), a five-canvas chip row (html+parts), and a wordmark that
+  now actually carries `acrossBeats: true` across all three cuts.
+- **`talking-head.json`**: the face-safe placeholder circle, word-timed captions on a `shorts`
+  destination, and a B-roll stat card (html+parts around a native `count`).
+- **`sting.json`**: a 6s logo sting, the wave draws on frame 1, the wordmark fades in behind it. No
+  group-of-rect here to convert: "type and mark" is the whole brief.
+- **`recreation.json`**: `sceneUnits` with a continuous object (the pricing card, `acrossBeats`,
+  now one html+parts layer) crossing a cut, then the reference's own "it is really finished" payoff, a
+  three-viewport row (also html+parts).
+
+Every brief opens with its hook visible on frame 1 (`start: 0`, first arrival by ~0.2s). Each carries an
+`authoring.allow` waiver, with a `_why` per code, for the process-ladder findings a fixed fixture cannot
+clear the way a planned film does (`no-storyboard`/`no-preflight`/`craft-unvisited`) plus whatever
+house-style finding was already true of that brief's own design before this pass (documented per-brief
+in its `_why`, e.g. `static-bg`+`no-transition` on the sting's true-black bumper).
 
 They are fixtures, not showcase films: small, honest, and kept passing `node core/validate/validate.mjs`. Adding
-a fifth deliberately widens what the harness watches; do not grow them into full productions.
+a seventh deliberately widens what the harness watches; do not grow them into full productions.
 
 ## Running it
 
 ```bash
-make evals                                        # render all 4, assert liveness, print the run dir
+make evals                                        # render all 6, assert liveness, print the run dir
 make evals-compare BEFORE=verify/evals/baseline    # against the committed baseline, fresh AFTER run
 make evals-compare BEFORE=<run-a> AFTER=<run-b>    # two specific runs
 node scripts/dev/evals.mjs --save-baseline         # render + commit sheets/manifest as the new baseline
 ```
+
+The renderer refuses a path under `verify/`: to render one brief by hand (not through `make evals`),
+copy it to `formats/scene/_eval-<name>.json`, render/gate that copy, then delete it.
 
 `verify/evals/runs/` is gitignored (mp4s, scratch). `verify/evals/baseline/` is committed, sheets and
 `manifest.json` only: mp4s are too big to carry per change, so a compare against the baseline shows the
