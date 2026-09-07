@@ -6,7 +6,7 @@
 // brands using the same beat still differ (the ledger/similarity gate enforce it). Placed in a scene as
 //   { "type": "beat", "beat": "kineticHook", "start": 0.3, "dur": 5.5, "eyebrow": "...", "to": 94, ... }
 // and expanded at load (core/engine/expand.js), no separate step. See docs/CRAFT/BLUEPRINTS.md.
-import { INK, DIM, ACCENT, kineticHeadline, dollyNumber, caption, chip, panel, verdictChip, rowGroup, colGroup } from './kit.mjs';
+import { INK, DIM, ACCENT, LINE, SURF2, kineticHeadline, dollyNumber, caption, verdictChip } from './kit.mjs';
 import { glyphText } from '../core/type/on-screen-text.js';
 
 // kineticHook: the OPEN LOOP. An eyebrow question, a hero number (count-up + pop) OR a big kinetic word,
@@ -41,51 +41,77 @@ export function statReveal({ x = 160, y = 330, w = 1600, to, unit = '', decimals
 // `heroSize` overrides each card's desc/body text (26 unchanged if omitted): a theme's `look.scale.body`
 // (core/registry/theme-contract.js W8) is the one caller that passes it, the same optional-kwarg,
 // unchanged-default shape as `kineticHook`'s `heroSize` (blueprints/kit.mjs doc, docs/CRAFT/THEME-LOOK.md).
+//
+// Design Read: ONE `html` layer, a flex-wrapped row of hairline-bordered cards (flat surface, one
+// accent reserved for the name), `parts` pops each `.card` in turn instead of a rect/text stack per
+// card. No gradient, no card-in-card. Theme tokens only: --surface/--line/--accent/--text-2/--dim/
+// --font-sans/--font-serif/--font-mono.
 export function cardCascade({ x = 197, y = 300, w = 1526, title, cards = [], cols = 3, cardW = 490,
   heroSize, start = 0, dur = 8 } = {}) {
-  const card = (c) => colGroup([
-    { type: 'text', text: c.name, size: 36, weight: 700, color: ACCENT },
-    c.desc && { type: 'text', text: c.desc, font: 'serif', w: cardW - 56, size: heroSize || 26, weight: 500, color: 'var(--text-2)' },
-    c.detail && { type: 'text', text: c.detail, w: cardW - 56, font: 'mono', size: 22, weight: 500, color: DIM },
-  ].filter(Boolean), 12);
-  const rows = [];
-  for (let i = 0; i < cards.length; i += cols) {
-    rows.push(rowGroup(cards.slice(i, i + cols).map((c) => ({ ...card(c), w: cardW, pad: 28, bg: 'var(--surface)', radius: 18, border: `1.5px solid var(--line)` })), 28));
-  }
+  const bodySize = heroSize || 26;
+  const cardHtml = (c) => `<div class="card" style="box-sizing:border-box;width:${cardW}px;padding:28px;`
+    + `background:var(--surface);border:1.5px solid var(--line);border-radius:18px;display:flex;`
+    + `flex-direction:column;gap:12px">`
+    + `<div style="font:700 36px var(--font-sans);color:${ACCENT}">${c.name}</div>`
+    + (c.desc ? `<div style="font:500 ${bodySize}px var(--font-serif);color:var(--text-2)">${c.desc}</div>` : '')
+    + (c.detail ? `<div style="font:500 22px var(--font-mono);color:${DIM}">${c.detail}</div>` : '')
+    + `</div>`;
+  const html = `<div style="box-sizing:border-box;display:flex;flex-wrap:wrap;gap:28px;width:${w}px">`
+    + `${cards.map(cardHtml).join('')}</div>`;
   return [
     title && kineticHeadline({ text: title, x: 160, y: y - 150, w: 1600, size: 62, weight: 700, each: 0.36, stagger: 0.04, start, dur }),
     // exitDur 0: held to the beat's own end (docs/RULES/first-arrival.md), so a dissolve into the next
-    // beat crosses real content rather than an already-faded field.
-    { type: 'group', x, y, w, layout: 'column', gap: 26, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.46, each: 0.06, out: 'defocus', exitDur: 0, children: rows },
+    // beat crosses real content rather than an already-faded field. `parts` pops each `.card` in turn,
+    // the same follow-through the old rect-stack group gave for free (core/motion/parts.js).
+    { type: 'html', x, y, w, start: start + 0.4, duration: dur - 0.4, anim: 'none', enterDur: 0, exitDur: 0,
+      html, parts: [{ select: '.card', anim: 'popIn', each: 0.46, stagger: 0.06, out: true, exitDur: 0.3 }] },
   ].filter(Boolean);
 }
 
 // chipGrid: NAMED things (sources, integrations, tools) as mono pills that pop in staggered, with an
 // accent footer line. Backs a "reads every X" / "works with Y" claim by SHOWING the set.
-// `bodySize` overrides each chip's own text (34 unchanged if omitted, `chip()` in kit.mjs), from
-// `look.scale.body`; `captionSize` overrides the footer line (40 unchanged if omitted), from
-// `look.scale.caption`. Same optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize`
-// (docs/CRAFT/THEME-LOOK.md "Left undone" note names this beat as the next slice of that work).
+// `bodySize` overrides each chip's own text (34 unchanged if omitted), from `look.scale.body`;
+// `captionSize` overrides the footer line (40 unchanged if omitted), from `look.scale.caption`. Same
+// optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize` (docs/CRAFT/THEME-LOOK.md
+// "Left undone" note names this beat as the next slice of that work).
+//
+// Design Read: ONE `html` layer, mono pills in a flex-wrapped row, `parts` pops each `.chip` in turn.
+// Flat surface, hairline border, no gradient. Theme tokens only: --surface-2/--line/--text/--font-mono.
 export function chipGrid({ x = 300, y = 380, w = 1320, title, chips = [], cols = 4, footer,
   bodySize, captionSize, start = 0, dur = 6.5 } = {}) {
-  const rows = [];
-  for (let i = 0; i < chips.length; i += cols) rows.push(rowGroup(chips.slice(i, i + cols).map((c) => chip({ text: c, ...(bodySize ? { size: bodySize } : {}) })), 26));
+  const size = bodySize || 34;
+  const chipHtml = (t) => `<div class="chip" style="box-sizing:border-box;font:500 ${size}px var(--font-mono);`
+    + `color:${INK};background:${SURF2};padding:18px 30px;border-radius:12px;border:1.5px solid ${LINE}">${t}</div>`;
+  const html = `<div style="box-sizing:border-box;display:flex;flex-wrap:wrap;gap:26px;width:${w}px">`
+    + `${chips.map(chipHtml).join('')}</div>`;
   return [
     title && kineticHeadline({ text: title, x: 160, y: y - 180, w: 1600, size: 62, weight: 700, preset: 'scale', each: 0.34, stagger: 0.035, start, dur }),
     // exitDur 0: held to the beat's own end, see cardCascade above.
-    { type: 'group', x, y, w, layout: 'column', gap: 26, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.5, each: 0.05, out: 'defocus', exitDur: 0, children: rows },
+    { type: 'html', x, y, w, start: start + 0.4, duration: dur - 0.4, anim: 'none', enterDur: 0, exitDur: 0,
+      html, parts: [{ select: '.chip', anim: 'popIn', each: 0.5, stagger: 0.05, out: true, exitDur: 0.3 }] },
     footer && caption({ text: footer, x: 160, y: y + 380, w: 1600, size: captionSize || 40, weight: 600, color: ACCENT, anim: 'pop', start: start + 1.5, dur: dur - 1.5 }),
   ].filter(Boolean);
 }
 
 // terminalReveal. The product IS a CLI: a light panel, a typing command with a cursor, output that
 // rises in word-by-word, and an accent result. A live demo, not a screenshot of one.
+//
+// Design Read: the window chrome (the panel behind the prompt) is ONE `html` layer, a flat surface
+// with a hairline border, no gradient. The typing prompt/command/cursor/output/result stay real
+// layers BESIDE the fragment: `typing`/`caret` and the `cursor` path are engine-owned clocks a static
+// fragment cannot reproduce (no CSS animation), so they sit on top of the chrome at the same absolute
+// coordinates the panel used to anchor them at.
 export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, prompt = '$', command,
   output = [], result, cps = 16, start = 0, dur = 6.7 } = {}) {
   const px = x + 50, py = y + 42;
+  const chromeHtml = `<div style="box-sizing:border-box;width:${w}px;height:${h}px;background:var(--surface);`
+    + `border:1.5px solid var(--line);border-radius:18px"></div>`;
   const L = [
     title && kineticHeadline({ text: title, x: 160, y: y - 160, w: 1600, size: 58, weight: 700, each: 0.34, stagger: 0.035, start, dur }),
-    panel({ x, y, w, h, start: start + 0.2, dur: dur - 0.2 }),
+    // Same anim/glow as kit.mjs's `panel()` (a whole-layer effect, applies to `html` exactly as it did
+    // to `rect`, docs/CRAFT/HTML-FRAGMENTS.md): scales in with a whisper of glow, holds to the beat end.
+    { type: 'html', x, y, w, h, html: chromeHtml, start: start + 0.2, duration: dur - 0.2,
+      anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0, glow: 0.22 },
     { type: 'text', text: prompt, x: px, y: py, w: 40, align: 'left', size: 34, weight: 700, font: 'mono', color: ACCENT, start: start + 0.6, duration: dur - 0.6 },
     { type: 'text', text: command, x: px + 52, y: py, w: w - 130, align: 'left', size: 34, weight: 500, font: 'mono', color: INK, typing: cps, start: start + 0.6, duration: dur - 0.6 },
     { type: 'cursor', size: 34, start: start + 1.4, duration: 0.9, path: [{ t: 0, x: px + 340, y: py + 20 }, { t: 0.5, x: px + 340, y: py + 20 }] },
@@ -164,12 +190,19 @@ export function logoReveal({ x, y = 360, size = 300, viewBox = '0 0 100 100', ma
 
 // verdictProof. A claim PROVEN, not asserted: a typing command, a stats note, and a tone-coloured
 // verdict chip that pops (the reading first, then the verdict on it).
+//
+// Design Read: the panel behind the reading is ONE `html` layer, same flat surface as terminalReveal's
+// chrome. The typing command and the tone verdict chip stay real layers (typing is engine-owned; the
+// chip is a tiny result badge, not UI chrome, left as kit.mjs's `verdictChip` text pill).
 export function verdictProof({ x = 360, y = 360, w = 1200, h = 300, title, prompt = '$', command, note,
   verdict = 'HOLDS', tone = 'ok', cps = 22, start = 0, dur = 5.5 } = {}) {
   const px = x + 50, py = y + 42;
+  const chromeHtml = `<div style="box-sizing:border-box;width:${w}px;height:${h}px;background:var(--surface);`
+    + `border:1.5px solid var(--line);border-radius:18px"></div>`;
   return [
     title && kineticHeadline({ text: title, x: 160, y: y - 170, w: 1600, size: 56, weight: 700, each: 0.32, stagger: 0.035, start, dur }),
-    panel({ x, y, w, h, start: start + 0.3, dur: dur - 0.3 }),
+    { type: 'html', x, y, w, h, html: chromeHtml, start: start + 0.3, duration: dur - 0.3,
+      anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0, glow: 0.22 },
     { type: 'text', text: prompt, x: px, y: py, w: 40, align: 'left', size: 32, weight: 700, font: 'mono', color: ACCENT, start: start + 0.6, duration: dur - 0.6 },
     { type: 'text', text: command, x: px + 50, y: py, w: w - 130, align: 'left', size: 30, weight: 500, font: 'mono', color: INK, typing: cps, start: start + 0.6, duration: dur - 0.6 },
     note && { type: 'text', text: note, x: px, y: py + 98, w: w - 300, align: 'left', size: 30, weight: 500, font: 'mono', color: DIM, anim: 'fade', enterDur: 0.4, start: start + 2.2, duration: dur - 2.2 },
@@ -179,10 +212,16 @@ export function verdictProof({ x = 360, y = 360, w = 1200, h = 300, title, promp
 
 // ctaEnd. The HELD end card: mark pops, the install command sits in an accent-bordered chip, a mono
 // sub, the URL. Everything holds to the final frame (exitDur 0), never fade the payoff.
+//
+// Design Read: the install command is drawn UI (a bordered pill), so it is ONE `html` layer, same
+// pop/exitDur-0 as before, a whole-layer effect that applies to `html` exactly as it did to `text`.
 export function ctaEnd({ mark, markX = 895, markY = 250, markW = 130, command, sub, url, start = 0, dur = 3.6 } = {}) {
+  const buttonHtml = command != null ? `<div style="box-sizing:border-box;font:600 60px var(--font-mono);`
+    + `color:var(--ink);background:var(--surface);padding:22px 40px;border-radius:14px;`
+    + `border:2px solid var(--accent);text-align:center">${command}</div>` : '';
   return [
     mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.1, duration: dur - 0.1, anim: 'pop', enterDur: 0.6, exitDur: 0, fx: 'breathe' },
-    command && { type: 'text', text: command, x: 660, y: 470, w: 600, align: 'center', size: 60, weight: 600, font: 'mono', color: INK, bg: 'var(--surface)', pad: '22px 40px', radius: 14, border: `2px solid ${ACCENT}`, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.5, exitDur: 0 },
+    command && { type: 'html', x: 660, y: 470, w: 600, html: buttonHtml, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.5, exitDur: 0 },
     sub && { type: 'text', text: sub, x: 160, y: 640, w: 1600, align: 'center', size: 38, weight: 500, font: 'mono', color: DIM, start: start + 0.7, duration: dur - 0.7, anim: 'fade', enterDur: 0.6, exitDur: 0 },
     url && { type: 'text', text: url, x: 160, y: 730, w: 1600, align: 'center', size: 44, weight: 700, color: ACCENT, start: start + 1.0, duration: dur - 1.0, anim: 'pop', enterDur: 0.5, exitDur: 0 },
   ].filter(Boolean);

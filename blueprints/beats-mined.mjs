@@ -7,7 +7,7 @@
 // blueprint here fixes MOTION + STRUCTURE, never copy/colour/brand, exactly like every other beat file.
 //
 // Colours are semantic theme vars; coordinates are the 1920x1080 stage. Pure: props in, layers out.
-import { INK, DIM, ACCENT, LINE, SURF2, caption, chip, panel, kineticHeadline } from './kit.mjs';
+import { INK, DIM, ACCENT, LINE, SURF2, caption, kineticHeadline } from './kit.mjs';
 
 // blurResolveHook: a hook whose type arrives SMEARED with motion blur and snaps into focus. Nothing
 // slides, fades or scales; the blur channel alone carries the entrance, which reads as speed in a
@@ -60,23 +60,33 @@ export function dialogueAccumulate({ pairs = [], bloomLine, x = 160, y = 260, w 
 // continuity device the corpus has, the eye rests on the frame while the list grows. Measured off the
 // pattern seen across four films: the container is the constant, the count is the variable.
 // sources: pin-1119918632363453012#2, pin-583145851797705243, arc-space-swiping, pin-333759022406800725.
+//
+// Design Read: ONE `html` layer, the panel chrome and every chip in one fragment, `parts` fills the
+// `.chip`s in one at a time. Flat surface, hairline border, mono pills, no gradient. Theme tokens:
+// --surface/--line/--surface-2/--text/--font-mono.
 export function containerFill({ items = [], x = 460, y = 400, w = 1000, h = 220, gap = 28,
   itemSize = 42, glow = 0.28, stagger = 0.35, start = 0, dur = 4.5 } = {}) {
-  const chips = items.map((t) => chip({ text: t, size: itemSize }));
+  const chipHtml = (t) => `<div class="chip" style="box-sizing:border-box;font:500 ${itemSize}px var(--font-mono);`
+    + `color:${INK};background:${SURF2};padding:18px 30px;border-radius:12px;border:1.5px solid ${LINE}">${t}</div>`;
+  const html = `<div style="box-sizing:border-box;width:${w}px;height:${h}px;background:var(--surface);`
+    + `border:1.5px solid ${LINE};border-radius:18px;display:flex;flex-wrap:wrap;align-content:center;`
+    + `justify-content:flex-start;gap:${gap}px;padding:0 40px">${items.map(chipHtml).join('')}</div>`;
   // First arrival: 0.2s hold (docs/RULES/first-arrival.md), not the 0.3-0.4s this beat used to give the
   // chips before anything readable appeared. exitDur 0: held to the beat's own end (see blurResolveHook
   // above), so the outgoing side of a dissolve into/out of this beat still shows real content.
-  return [
-    panel({ x, y, w, h, start, dur, glow }),
-    { type: 'group', x: x + 40, y: y + Math.round((h - itemSize - 36) / 2), w: w - 80,
-      layout: 'row', wrap: true, gap, start: start + 0.2, duration: Math.max(0.5, dur - 0.2),
-      anim: 'pop', enterDur: 0.35, each: stagger, out: 'fade', exitDur: 0, children: chips },
-  ];
+  return [{
+    type: 'html', x, y, w, h, start, duration: dur, anim: 'scale', enterDur: 0.5, out: 'defocus', exitDur: 0, glow,
+    html, parts: [{ select: '.chip', anim: 'popIn', each: 0.35, stagger, delay: 0.2, out: true, exitDur: 0.3 }],
+  }];
 }
 
 // cardFan: N cards arrive from one side and FAN open in perspective around a fixed anchor, each a
 // touch later and a touch more rotated than its neighbour. Measured off `pinref` shots 3, 5-7, where a
 // phone's supporting panels repeatedly arrive from the right and fan. sources: pinref#3, #5, #6, #7.
+//
+// Design Read: PER-ITEM MOTION, so each card is its OWN `html` layer (the card is markup: title +
+// mono detail on a flat surface), keeping the exact per-card `motion` track a `parts` fragment cannot
+// express (`parts` staggers children of one fragment; this beat needs one fan angle per card).
 export function cardFan({ cards = [], anchorX = 1350, anchorY = 540, cardW = 360, cardH = 220,
   radius = 18, spread = 26, arriveFrom = 500, stagger = 0.18, settleAt = 0.5, start = 0, dur = 3.5 } = {}) {
   const n = cards.length;
@@ -86,20 +96,21 @@ export function cardFan({ cards = [], anchorX = 1350, anchorY = 540, cardW = 360
     const dx = Math.round((i - mid) * cardW * 0.42);
     const dy = Math.round(Math.abs(i - mid) * 18);
     const t0 = i * stagger;
+    const html = `<div style="box-sizing:border-box;width:${cardW}px;height:${cardH}px;padding:24px;`
+      + `background:var(--surface);border:1.5px solid var(--line);border-radius:${radius}px;`
+      + `display:flex;flex-direction:column;gap:10px">`
+      + (c.title ? `<div style="font:700 30px var(--font-sans);color:${INK}">${c.title}</div>` : '')
+      + (c.detail ? `<div style="font:500 22px var(--font-mono);color:${DIM}">${c.detail}</div>` : '')
+      + `</div>`;
     return {
-      type: 'group', x: anchorX - Math.round(cardW / 2), y: anchorY - Math.round(cardH / 2),
-      w: cardW, pad: 24, bg: 'var(--surface)', radius, border: `1.5px solid var(--line)`,
-      layout: 'column', gap: 10,
+      type: 'html', x: anchorX - Math.round(cardW / 2), y: anchorY - Math.round(cardH / 2),
+      w: cardW, h: cardH, html,
       // exitDur 0: held to the beat's own end, see blurResolveHook above.
       start: start + t0, duration: Math.max(0.4, dur - t0), anim: 'none', out: 'defocus', exitDur: 0,
       motion: [
         { t: 0, x: arriveFrom, rot: rot * 2, opacity: 0 },
         { t: settleAt, x: dx, y: dy, rot, opacity: 1, ease: 'easeOutCubic' },
       ],
-      children: [
-        c.title && { type: 'text', text: c.title, size: 30, weight: 700, color: INK },
-        c.detail && { type: 'text', text: c.detail, size: 22, weight: 500, color: DIM, font: 'mono' },
-      ].filter(Boolean),
     };
   });
 }
@@ -107,33 +118,42 @@ export function cardFan({ cards = [], anchorX = 1350, anchorY = 540, cardW = 360
 // listBuildRows: a vertical list that BUILDS, one row landing after another under a fixed left rule,
 // the list itself never resets. Measured off `pinref` shots 11-15, five consecutive shots each adding
 // exactly one row to the same list. sources: pinref#11, #12, #13, #14, #15.
+//
+// Design Read: ONE `html` layer for the whole list, `parts` reveals each `.row` in turn instead of a
+// row-per-layer stack. A dot + mono label per row, flat, no chrome. Theme tokens: --text/--font-mono.
 export function listBuildRows({ items = [], x = 240, y = 260, w = 900, rowH = 86, gap = 18,
   size = 40, weight = 600, dotColor = ACCENT, stagger = 0.5, start = 0, dur = 5 } = {}) {
-  return items.map((label, i) => ({
-    // exitDur 0: held to the beat's own end, see blurResolveHook above.
-    type: 'group', x, y: y + i * (rowH + gap), w, layout: 'row', items: 'center', gap: 20,
-    start: start + i * stagger, duration: Math.max(0.4, dur - i * stagger),
-    anim: 'slide-up', enterDur: 0.35, out: 'fade', exitDur: 0,
-    children: [
-      { type: 'rect', w: 12, h: 12, radius: 6, bg: dotColor },
-      { type: 'text', text: label, size, weight, color: INK, font: 'mono' },
-    ],
-  }));
+  const rowHtml = (label) => `<div class="row" style="box-sizing:border-box;height:${rowH}px;display:flex;`
+    + `align-items:center;gap:20px">`
+    + `<div style="width:12px;height:12px;border-radius:6px;background:${dotColor};flex:none"></div>`
+    + `<div style="font:${weight} ${size}px var(--font-mono);color:${INK}">${label}</div></div>`;
+  const html = `<div style="box-sizing:border-box;width:${w}px;display:flex;flex-direction:column;`
+    + `gap:${gap}px">${items.map(rowHtml).join('')}</div>`;
+  // exitDur 0: held to the beat's own end, see blurResolveHook above.
+  return [{
+    type: 'html', x, y, w, start, duration: dur, anim: 'none', enterDur: 0, exitDur: 0,
+    html, parts: [{ select: '.row', anim: 'fadeUp', each: 0.35, stagger, out: true, exitDur: 0.3 }],
+  }];
 }
 
 // chipConverge: a scattered ring of chips flies in from every side and then CONVERGES onto one point,
 // the opposite choreography to a cascade. Measured off `pinref` shots 16-17, six status chips
 // scattering in 3D and then resolving onto the phone. sources: pinref#16, #17.
+//
+// Design Read: PER-ITEM MOTION (each chip has its own scatter angle + settle time), so each chip is
+// its OWN `html` layer, a mono pill on a flat surface, keeping its exact `motion` track.
 export function chipConverge({ chips = [], targetX = 960, targetY = 540, radius = 480, size = 34,
   scatterAt = 0.55, start = 0, dur = 2.6 } = {}) {
   const n = chips.length || 1;
   return chips.map((t, i) => {
     const ang = (i / n) * Math.PI * 2;
     const sx = Math.round(Math.cos(ang) * radius), sy = Math.round(Math.sin(ang) * radius);
+    const html = `<div style="box-sizing:border-box;font:600 ${size}px var(--font-mono);color:${INK};`
+      + `background:${SURF2};padding:14px 22px;border-radius:12px;border:1.5px solid ${LINE};`
+      + `text-align:center">${t}</div>`;
     return {
-      type: 'text', text: t, x: targetX - 80, y: targetY - 20, w: 160, align: 'center',
-      font: 'mono', size, weight: 600, color: INK, bg: SURF2, pad: '14px 22px', radius: 12,
-      border: `1.5px solid ${LINE}`, start, duration: dur, anim: 'none', exitDur: 0,
+      type: 'html', x: targetX - 80, y: targetY - 20, w: 160, html,
+      start, duration: dur, anim: 'none', exitDur: 0,
       motion: [
         { t: 0, x: sx, y: sy, scale: 0.8, opacity: 0 },
         { t: Math.min(dur - 0.1, 0.35 + i * 0.03), x: sx, y: sy, scale: 1, opacity: 1, ease: 'easeOutCubic' },
@@ -147,11 +167,17 @@ export function chipConverge({ chips = [], targetX = 960, targetY = 540, radius 
 // words and pictures cross cell boundaries together instead of reading as separate slides. Measured
 // off `rebuilt` shot 3, its busiest shot (motion 5.77), a dark grid sliding under dotted rules.
 // sources: rebuilt#3.
+//
+// Design Read: the GROUP's motion (one slide track, unchanged) still carries the whole grid as one
+// object. Only a cell's OWN representation changes: a text cell is drawn UI, so it is an `html` layer
+// (a plain sans label); an image cell is already a real picture and stays `type:'image'`.
 export function cellMosaic({ cells = [], cols = 4, cellW = 260, cellH = 170, gap = 14,
   x = 0, y = 300, travel = -260, start = 0, dur = 3.5 } = {}) {
   const children = cells.map((c) => (c.image
     ? { type: 'image', src: c.image, w: cellW, h: cellH, radius: 12 }
-    : { type: 'text', text: c.text, w: cellW, size: 30, weight: 700, color: INK }));
+    : { type: 'html', w: cellW, h: cellH, html: `<div style="box-sizing:border-box;width:${cellW}px;`
+      + `height:${cellH}px;display:flex;align-items:center;font:700 30px var(--font-sans);`
+      + `color:${INK}">${c.text}</div>` }));
   return [{
     type: 'group', x, y, w: cols * (cellW + gap), layout: 'row', wrap: true, gap,
     // exitDur 0: held to the beat's own end, see blurResolveHook above.
