@@ -239,6 +239,10 @@ export function morphText({ x, y, w = 900, words = [], size = TYPE.display, hold
 // different words: the score sits to the LEFT of the title, vertically between its two arrows, and
 // that column is what makes a reader recognise the surface before reading a single word. The score is
 // `num`'s job (mono, tabular) because it is a figure; everything else is sans.
+// HTML-FIRST. Design Read: the same shape `tweetCard` (blocks/social.mjs) had before its own
+// conversion, mirrored here: one `html` card, `cardChrome` as layer props, the vote rail + title/body/
+// meta column as one markup string. The measured-contrast colour logic (`onInk`, the lit/quiet arrow
+// distinction) is untouched, only moved from JSON layers into inline styles.
 export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', title = '', body = '',
   votes = 0, comments = 0, voted = 'up', start = 0, dur = 4 } = {}) {
   needData('title', title, 'redditPost');
@@ -251,44 +255,37 @@ export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', tit
   // THE LIT ARROW IS THE TONE PUSHED TOWARD `--text`, never the raw token. A bare `--accent` on the
   // rail's own accent tint measured 2.7:1 on `linear` and `make audit` failed it HARD. `onInk` is the
   // one owner of that mix; see kit.mjs for why it is not `onColor`.
-  // The QUIET arrow takes the same treatment, because it is on the same tinted ground: `--text-2`
-  // alone measured 3.8:1 there on higgsfield. The lit/quiet distinction survives it, because what
-  // separates them is the accent HUE, not the amount of contrast.
+  // THE QUIET ARROW IS `--text-2`, NOT `--dim`, for the same reason: it does not clear 4.5:1 on a
+  // tinted ground (measured 4.4:1 on this very rail), where `--dim` fails HARD.
   const quietInk = onInk(T.sub);
-  // The arrow is the SAME size as the score beside it, for the reason deltaChip's is: `make audit`
-  // fails text under 14.04px, so a glyph shrunk to look secondary is the part nobody can read.
-  // THE QUIET ARROW IS `--text-2`, NOT `--dim`. `--dim` is the de-emphasised CHROME role and it does not
-  // clear 4.5:1 on a tinted ground, `make audit` measured the un-lit arrow at 4.4:1 on this very rail.
-  // kit.mjs already says this about captions and ticks; an arrow a reader has to see is the same case.
-  const arrow = (glyph, on, tone) => text({ text: glyph, size: TYPE.base, weight: 700, color: on ? onInk(tone) : quietInk });
-  const meta = (t) => text({ text: t, font: 'mono', size: TYPE.body, color: T.sub, weight: 500 });
+  // The arrow is the SAME size as the score beside it: `make audit` fails text under 14.04px, so a
+  // glyph shrunk to look secondary is the part nobody can read.
+  const arrow = (glyph, on, tone) => `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${on ? onInk(tone) : quietInk}">${glyph}</span>`;
+  const meta = (t) => `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${t}</span>`;
   const RAIL = 64;
   const bodyW = w - RAIL - 3 * SPACE.md;
 
-  return [{ type: 'group', x, y, w, layout: 'row', items: 'stretch', gap: SPACE.md, pad: SPACE.md,
-    ...cardChrome({ radius: R.soft, elevation: E.card }), start, duration: dur,
-    enterDur: 0.45, exitDur: 0.35, children: [
-      // the vote rail: arrow, score, arrow, on its own tinted ground so it reads as a control and not
-      // as three loose glyphs beside the headline.
-      box({ w: RAIL, layout: 'column', items: 'center', justify: 'center', gap: SPACE.tight,
-        radius: R.chip, bg: tint(T.accent, TINT.track), pad: `${SPACE.xs}px 0`, children: [
-          arrow('▲', lit === 1, T.accent),
-          text({ text: String(votes), font: 'num', size: TYPE.body, weight: 700, color: T.ink }),
-          arrow('▼', lit === -1, T.down),
-        ] }),
-      { type: 'group', layout: 'column', items: 'flex-start', gap: SPACE.xs, children: [
-        { type: 'group', layout: 'row', items: 'center', gap: SPACE.snug, children: [
-          sub && meta('r/' + sub), author && meta('·'), author && meta('u/' + author),
-          age && meta('·'), age && meta(age),
-        ].filter(Boolean) },
-        text({ text: title, size: TYPE.lead, weight: 700, color: T.ink, w: bodyW, ls: '-0.01em' }),
-        body && text({ text: body, size: TYPE.body, weight: 400, color: T.sub, w: bodyW }),
-        { type: 'group', layout: 'row', items: 'center', gap: SPACE.sm, children: [
-          text({ text: `${comments} comments`, font: 'mono', size: TYPE.body, weight: 600, color: T.sub }),
-          text({ text: 'share', font: 'mono', size: TYPE.body, weight: 600, color: T.sub }),
-        ] },
-      ].filter(Boolean) },
-    ] }];
+  // the vote rail: arrow, score, arrow, on its own tinted ground so it reads as a control and not as
+  // three loose glyphs beside the headline.
+  const rail = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;`
+    + `gap:${SPACE.tight}px;width:${RAIL}px;border-radius:${R.chip}px;background:${tint(T.accent, TINT.track)};`
+    + `padding:${SPACE.xs}px 0">` + arrow('▲', lit === 1, T.accent)
+    + `<span style="font:700 ${TYPE.body}px var(--font-num);color:${T.ink}">${votes}</span>`
+    + arrow('▼', lit === -1, T.down) + '</div>';
+  const metaRow = [sub && meta('r/' + sub), author && meta('·'), author && meta('u/' + author),
+    age && meta('·'), age && meta(age)].filter(Boolean).join('');
+  const col = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.xs}px">`
+    + (metaRow ? `<div style="display:flex;align-items:center;gap:${SPACE.snug}px">${metaRow}</div>` : '')
+    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink};letter-spacing:-0.01em;width:${bodyW}px">${title}</span>`
+    + (body ? `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub};width:${bodyW}px">${body}</span>` : '')
+    + `<div style="display:flex;align-items:center;gap:${SPACE.sm}px">`
+    + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${T.sub}">${comments} comments</span>`
+    + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${T.sub}">share</span></div></div>`;
+  const html = `<div style="display:flex;align-items:stretch;gap:${SPACE.md}px;padding:${SPACE.md}px;`
+    + `box-sizing:border-box;width:${w}px">` + rail + col + '</div>';
+
+  return [{ type: 'html', x, y, w, html, ...cardChrome({ radius: R.soft, elevation: E.card }),
+    start, duration: dur, enterDur: 0.45, exitDur: 0.35 }];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────

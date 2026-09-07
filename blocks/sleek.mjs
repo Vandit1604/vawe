@@ -7,7 +7,6 @@
 // Each factory is PURE (props → array of scene-layer JSON), the same contract as blocks/ui.mjs. Compose in
 // an authoring script or via `{ "type":"block", "block":"glassCard", ... }`, which expands at load
 // (core/engine/expand.js), no separate step.
-import { TOKENS as T, text } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
@@ -18,24 +17,31 @@ const WHITE_HAIR = 'rgba(255,255,255,0.14)';
 
 // glassCard. A frosted glass panel: it BLURS whatever moves behind it (put an aurora/mesh/paint under it),
 // a hairline white edge, a top sheen. The signature glassmorphism surface. Give it a living background.
+// HTML-FIRST. Design Read: this surface is white-on-dark by construction (no `bg` dial: the moving
+// backdrop it blurs is the scene's decision), so the `#fff`/`rgba(255,255,255,…)` literals below are
+// the family's own established vocabulary, not the library's theme-token rule. `glass`/`shadow` stay
+// LAYER PROPS (they are not CSS the engine can write into a fragment); only the interior became markup.
 export function glassCard({ x, y, w = 640, h = 360, title, desc, kicker, tint = 0.06,
   radius = 22, start = 0, dur = 4, anim = 'pop', enterDur = 0.5 } = {}) {
+  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:32px;`
+    + `box-sizing:border-box;width:${w}px;height:${h}px">`
+    // top sheen: a thin bright gradient bar reading as a light edge on glass
+    + `<div style="width:${w - 80}px;height:2px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)"></div>`
+    + (kicker ? `<span style="font:600 22px var(--font-mono);color:var(--accent);letter-spacing:0.08em">${kicker}</span>` : '')
+    + (title ? `<span style="font:700 52px var(--font-sans);color:#fff;letter-spacing:-0.02em">${title}</span>` : '')
+    + (desc ? `<span style="font:400 28px var(--font-serif);color:rgba(255,255,255,0.72);width:${w - 80}px">${desc}</span>` : '')
+    + '</div>';
   return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 12, pad: 32,
+    type: 'html', x, y, w, h, html,
     bg: `rgba(255,255,255,${tint})`, radius, border: `1.5px solid ${WHITE_HAIR}`, glass: 16,
     shadow: true, start, duration: dur, anim, enterDur, out: 'defocus', exitDur: 0.4,
-    children: [
-      // top sheen: a thin bright gradient bar reading as a light edge on glass
-      { type: 'rect', w: w - 80, h: 2, bg: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)', radius: 0 },
-      kicker && text({ text: kicker, font: 'mono', size: 22, weight: 600, color: 'var(--accent)', ls: '0.08em' }),
-      title && text({ text: title, size: 52, weight: 700, color: '#fff', ls: '-0.02em' }),
-      desc && text({ text: desc, font: 'serif', size: 28, weight: 400, color: 'rgba(255,255,255,0.72)', w: w - 80 }),
-    ].filter(Boolean),
   }];
 }
 
 // meshPanel: a rounded panel whose fill is a soft MESH GRADIENT (stacked radial blobs in accent hues).
 // Static (the drift version is the `aurora` paint field); use this as a calm branded surface behind copy.
+// HTML-FIRST. Design Read: same white-on-dark vocabulary as glassCard; `bg` (the mesh stack) and
+// `border` stay LAYER PROPS, only title/desc moved into markup.
 export function meshPanel({ x, y, w = 720, h = 420, title, desc, radius = 26, start = 0, dur = 4,
   anim = 'scale', enterDur = 0.55 } = {}) {
   const mesh = [
@@ -44,50 +50,61 @@ export function meshPanel({ x, y, w = 720, h = 420, title, desc, radius = 26, st
     'radial-gradient(70% 70% at 70% 90%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 72%)',
     'linear-gradient(135deg, var(--surface-2), var(--card))',
   ].join(', ');
+  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:48px;`
+    + `box-sizing:border-box;width:${w}px;height:${h}px">`
+    + (title ? `<span style="font:800 56px var(--font-sans);color:#fff;letter-spacing:-0.02em">${title}</span>` : '')
+    + (desc ? `<span style="font:500 30px var(--font-sans);color:rgba(255,255,255,0.85);width:${w - 92}px">${desc}</span>` : '')
+    + '</div>';
   return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 16, pad: 48,
-    bg: mesh, radius, border: `1.5px solid var(--line)`, start, duration: dur, anim, enterDur,
-    out: 'defocus', exitDur: 0.4, children: [
-      title && text({ text: title, size: 56, weight: 800, color: '#fff', ls: '-0.02em' }),
-      desc && text({ text: desc, size: 30, weight: 500, color: 'rgba(255,255,255,0.85)', w: w - 92 }),
-    ].filter(Boolean),
+    type: 'html', x, y, w, h, html, bg: mesh, radius, border: `1.5px solid var(--line)`,
+    start, duration: dur, anim, enterDur, out: 'defocus', exitDur: 0.4,
   }];
 }
 
 // spotlightCard: a dark card with a soft SPOTLIGHT glow washing down from a corner (a radial highlight
 // over a dark surface). Stages a single hero line; the light directs the eye. Pair `from` to aim it.
+// HTML-FIRST. Design Read: same white-on-dark vocabulary; the radial-gradient `bg` stays a LAYER PROP.
 export function spotlightCard({ x, y, w = 640, h = 360, title, desc, from = 'top', radius = 22,
   start = 0, dur = 4, anim = 'pop', enterDur = 0.5 } = {}) {
   const at = { top: '50% -10%', 'top-left': '12% -5%', 'top-right': '88% -5%', center: '50% 30%' }[from] || '50% -10%';
   const bg = `radial-gradient(120% 90% at ${at}, color-mix(in srgb, var(--accent) 26%, transparent), transparent 60%), ` +
     `linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--bg) 80%, black))`;
+  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:48px;`
+    + `box-sizing:border-box;width:${w}px;height:${h}px">`
+    + (title ? `<span style="font:700 54px var(--font-sans);color:#fff;letter-spacing:-0.02em">${title}</span>` : '')
+    + (desc ? `<span style="font:400 28px var(--font-serif);color:rgba(255,255,255,0.7);width:${w - 84}px">${desc}</span>` : '')
+    + '</div>';
   return [{
-    type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 12, pad: 48,
-    bg, radius, border: `1.5px solid ${WHITE_HAIR}`, shadow: true, start, duration: dur, anim, enterDur,
-    out: 'defocus', exitDur: 0.4, children: [
-      title && text({ text: title, size: 54, weight: 700, color: '#fff', ls: '-0.02em' }),
-      desc && text({ text: desc, font: 'serif', size: 28, weight: 400, color: 'rgba(255,255,255,0.7)', w: w - 84 }),
-    ].filter(Boolean),
+    type: 'html', x, y, w, h, html, bg, radius, border: `1.5px solid ${WHITE_HAIR}`, shadow: true,
+    start, duration: dur, anim, enterDur, out: 'defocus', exitDur: 0.4,
   }];
 }
 
 // borderBeamCard: a card with a light TRAVELLING its border (the animated Phase-2 `beam` layer over a
 // glass panel). The one sleek surface that MOVES. Returns [panel, content group, beam] so the beam sits on top.
+// HTML-FIRST. Design Read: same white-on-dark vocabulary. The PANEL half converts; the paired
+// `type:'beam'` layer is a native-only mechanism (a travelling border light) and stays as-is.
 export function borderBeamCard({ x, y, w = 640, h = 300, title, desc, radius = 22, thickness = 2.5,
   speed = 0.55, start = 0, dur = 4 } = {}) {
+  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;`
+    + `gap:12px;padding:48px;box-sizing:border-box;width:${w}px;height:${h}px">`
+    + (title ? `<span style="font:700 46px var(--font-sans);color:#fff;letter-spacing:-0.02em">${title}</span>` : '')
+    + (desc ? `<span style="font:500 26px var(--font-mono);color:rgba(255,255,255,0.7);width:${w - 84}px">${desc}</span>` : '')
+    + '</div>';
   return [
-    { type: 'group', x, y, w, h, layout: 'column', items: 'flex-start', gap: 12, pad: 48, justify: 'center',
-      bg: 'rgba(255,255,255,0.04)', radius, border: `1.5px solid ${WHITE_HAIR}`, glass: 12,
-      start, duration: dur, anim: 'pop', enterDur: 0.5, out: 'defocus', exitDur: 0.4, children: [
-        title && text({ text: title, size: 46, weight: 700, color: '#fff', ls: '-0.02em' }),
-        desc && text({ text: desc, font: 'mono', size: 26, weight: 500, color: 'rgba(255,255,255,0.7)', w: w - 84 }),
-      ].filter(Boolean) },
+    { type: 'html', x, y, w, h, html, bg: 'rgba(255,255,255,0.04)', radius, border: `1.5px solid ${WHITE_HAIR}`, glass: 12,
+      start, duration: dur, anim: 'pop', enterDur: 0.5, out: 'defocus', exitDur: 0.4 },
     { type: 'beam', x, y, w, h, radius, thickness, tail: 90, speed, glow: 0.6, start: start + 0.2, duration: dur - 0.2 },
   ];
 }
 
 // grainOverlay: a fine FILM GRAIN texture over the frame or a region (feTurbulence, screen-blended, low
 // opacity). The finishing touch that lifts flat digital gradients into something shot. Static, pure in n.
+// LEFT AS `type:'rect'`, DELIBERATELY. It carries no text and no children, only a data-uri noise texture
+// painted through `bg`/`opacity`/`blend`, which are LAYER PROPS on `rect` exactly as they would be on
+// `html`. Swapping the type here would not move anything into markup, there is no markup to write, so
+// it buys nothing: a rect painting a background texture is chrome, not "what the frame looks like" in
+// the sense the html-first rule cares about (no `parts`, no interior content, no stagger to gain).
 export function grainOverlay({ x = 0, y = 0, w = 1080, h = 1920, opacity = 0.08, freq = 0.9,
   start = 0, dur = 4 } = {}) {
   const svg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'>` +
@@ -99,6 +116,8 @@ export function grainOverlay({ x = 0, y = 0, w = 1080, h = 1920, opacity = 0.08,
 // bento. An asymmetric BENTO grid: one hero cell + supporting cells, sizes deliberately unequal (scale
 // contrast, not a uniform card grid. The AI-slop tell the taste system fights). `cells` are placed into a
 // 2-col layout with the first spanning tall. Each cell = { title, desc, kind:'glass'|'mesh'|'spotlight' }.
+// PURE COMPOSITION: unchanged. It only positions whatever glassCard/meshPanel/spotlightCard return, so
+// converting those three (above) converts this one for free, no edit needed here.
 export function bento({ x, y, w = 900, h = 560, gap = 20, cells = [], start = 0, dur = 5 } = {}) {
   const colW = (w - gap) / 2, out = [];
   const mk = (kind, o) => (kind === 'mesh' ? meshPanel : kind === 'spotlight' ? spotlightCard : glassCard)(o);
