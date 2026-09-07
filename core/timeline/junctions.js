@@ -135,6 +135,33 @@ export function shotWindows(table, duration) {
   return out;
 }
 
+// GAP (seconds) that promotes a beat-layer start into an inferred cut. Lifted verbatim from
+// scripts/gates/seam-snap.mjs, which shipped this heuristic first (a gate reasoning about a fact the
+// engine itself never derived, MISTAKES #159/#358). Tune here if a slow film over-cuts.
+export const CUT_INFER_GAP_S = 1.2;
+const CUT_INFER_FLOOR_S = 0.3; // a start this close to 0 is the opening beat, not a cut into it
+
+/**
+ * inferCuts(layers, duration) → seconds where this film LIKELY turns, derived rather than declared.
+ * `layers` is the flat layer list (a caller's own flattenLayers); a layer whose `track !== 0` marks a
+ * beat, and a beat whose start lands more than CUT_INFER_GAP_S after the previous one reads as a cut.
+ * `duration` bounds the candidates the way shotWindows bounds joints (0 < t < duration); pass Infinity
+ * (the default) to skip that bound, which is what the gate that originated this loop always did.
+ */
+export function inferCuts(layers, duration = Infinity) {
+  const starts = [...new Set((layers || [])
+    .filter((l) => l && typeof l === 'object' && l.track !== 0)
+    .map((l) => l.start ?? 0))]
+    .sort((a, b) => a - b);
+  const out = [];
+  let last = -9;
+  for (const t of starts) {
+    if (t - last > CUT_INFER_GAP_S && t > CUT_INFER_FLOOR_S && t > 0 && t < duration) out.push(t);
+    last = t;
+  }
+  return out;
+}
+
 // `matches`, a top-level array binding two named layers onto a junction (`{ "at": "cut@1", "from",
 // "to" }`), used to live here: bindMatchesToJunctions retimed both layers onto the joint and handed
 // the handover to `becomes`, so the boundary had one copy of its number instead of three (the cut's
