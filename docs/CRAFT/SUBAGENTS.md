@@ -1,6 +1,6 @@
 ---
 when: "judging your own render (a full pass, a recreation, anything you'll ship)"
-answers: "why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message · what to record so per-critic survival rate becomes computable"
+answers: "why a self-grading agent grades kindly · the six standing critics (beat · bg-motion · reveal · fidelity · copy · seam) with the exact input and verdict shape for each · run them in parallel, in one message · what to record so per-critic survival rate becomes computable · the decider roster and its order, and the six brief lines a fan-out pays for by omitting"
 group: crosscutting
 ---
 
@@ -94,16 +94,32 @@ default is pure cost.
 
 | Role | Writes | Has a job because |
 |---|---|---|
+| **storyboard** | the storyboard file | it is the only artefact that decides the film as a whole: the beats, the through-line, the motion plan and the cut plan. Everything below transcribes it |
+| **subject** | a beat's subject slot | 36% of films carry no pictorial layer at all, and choosing what a beat SHOWS is the one thing the engine must never do alone (`../MISTAKES.md` #159) |
 | **scene** (one per scene) | one fragment file | HTML renders instantly, so the agent can look at its own work and iterate with no render. This is the loop, not a critique |
+| **motion** | `motion[]` tracks and `idle` | the engine now moves nothing nobody asked to move, so a keyed track is always a decision. 74 of 186 films carry one and it is almost always the same one: the continuous object travelling through |
 | **transition** | `transitions[]` | the engine infers cuts from TIMING and narrows them by structure, but the rhetorical relationship between two beats is not in the data |
-| **subject** | a beat's subject slot | 36% of films carry no pictorial layer at all, and choosing what a beat SHOWS is the one thing the engine must never do alone (`docs/MISTAKES.md` #159) |
 | **sound** | the audio block | cue punctuation is automatic now; choosing a bed is a register decision, and the engine stays silent when it has no input |
 | type · colour · layout · backdrop | nothing | these resolve from the theme. A decider here would re-decide what the brand already decided |
 
-**The order is a dependency, not a preference.** Subject first, because a cut cannot be chosen without
-knowing what sits on either side of it. Then the scene fragments. Then transitions, reading the
-RENDERED joins rather than the JSON, which is the same admission test the critics above are held to.
-Then sound, which punctuates decisions already made.
+**The order is a dependency, not a preference.** The storyboard first, because it is the lock artefact
+and every role below reads it. Then subject, because a cut cannot be chosen without knowing what sits on
+either side of it. Then the scene fragments, written by an author who already knows what has to move and
+puts handles where motion needs to grab. Then motion. Then transitions, reading the RENDERED joins
+rather than the JSON, which is the same admission test the critics above are held to. Then sound, which
+punctuates decisions already made.
+
+**Motion moves BEFORE transitions, and that ordering is the one thing here that is not obvious.** The
+content-aware cut reads the velocity at a joint as its strongest signal, so a cut chosen before the
+motion exists is choosing against a still frame. Put another way: the transition decider's input is the
+thing the motion decider produces.
+
+**The motion decider is the one role that must MEASURE rather than describe.** It cannot watch the
+film, and a description of motion written from the JSON is a restatement of what it just wrote. Hand it
+a per-layer velocity trace and hold it to the same admission test as a critic: what did it read that it
+did not author. It also carries a budget, because the register split ([`../MOTION-CRAFT.md`](../MOTION-CRAFT.md)) licenses
+sustained motion for kinetic and launch work and that licence is exactly how effect soup gets in. A
+named peak, and every other moving thing able to say what it is for.
 
 **When this is overkill, and it usually is.** `docs/CRAFT/SUBAGENT-BUDGET.md` measured a real fan-out
 here at 87 agents and 5.66M tokens, and its conclusion was that one well-briefed agent beats a fan-out
@@ -203,6 +219,28 @@ Convening six agents for a two-token change is theatre.
 **Run the panel for:** a full authoring pass, any recreation, and any render you intend to ship. Those
 three, always. Between them, use judgement, and remember that the cost of the panel is one message and
 the cost of skipping it is a shipped video with a background running twice too fast.
+
+## THE BRIEF: six lines that each cost a real session to learn
+
+A brief that omits these does not fail loudly. The agent works for an hour and returns less than it
+should have, which is why each of these is written down rather than remembered.
+
+- **Fast-forward onto main before starting, and again before the last commit.** A worktree cut from a
+  stale tip produces a merge nobody asked for.
+- **Stage explicit paths.** A hook already refuses `git add -A` and `git stash`; the brief should say so,
+  because an agent that discovers this by being refused spends turns recovering.
+- **Name the files the agent owns, and the files it must not touch.** Two agents editing one file is the
+  only fan-out failure that cannot be fixed by merging harder.
+- **Do not block on a background render, and do not delegate.** Both were observed: agents that launched
+  a render and then waited, and agents that spawned their own sub-agents and stalled on them. A render in
+  the foreground with `--workers 1` finishes; a sub-agent's brief is written by something that already
+  has the context, so delegating it loses more than it saves.
+- **A worktree does not carry the gitignored film library.** Only the tracked `post-*` films are there,
+  so a check that globs `formats/scene/*.json` comes back nearly empty and the agent will report it as a
+  defect. Say it in the brief. For the same reason a finished film cannot travel home through a merge:
+  copy it across by hand, or track it.
+- **Never run the mutation gate inside an agent.** An interrupted run leaves planted mutations in the
+  tree, and the next agent inherits them as real findings.
 
 ## Provenance
 
