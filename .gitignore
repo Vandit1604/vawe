@@ -277,3 +277,4 @@ site/public/blocklib/**/*.png
 !formats/scene/post-*.json
 !formats/scene/post-*.storyboard.md
 !formats/scene/post-*.html
+!formats/scene/post-*.kit.css
