@@ -95,20 +95,23 @@ otherwise pick:
 - **`scale.body` / `scale.caption` → the remaining beats' own size kwargs**: `cardCascade` (`heroSize`,
   the card body copy), `chipGrid` (`bodySize` for the chips, `captionSize` for the footer), `wordBlast`
   (`bodySize`), `screenDive` (`captionSize`), `kineticHook`/`statReveal` (`captionSize`, alongside their
-  existing hook/headline `heroSize`), `containerFill` (`itemSize`) and `listBuildRows` (`size`). Same
-  shape as `scale.hook`/`scale.headline` above: an optional kwarg, current value as its default, so a
-  brand with no scale opinion renders byte-identical.
+  existing hook/headline `heroSize`), `containerFill` (`itemSize`), `listBuildRows` (`size`),
+  `terminalReveal` (`bodySize` for the command, `captionSize` for the output lines), `verdictProof`
+  (`bodySize` for the command, `captionSize` for the note), `logoLockup` (`bodySize` for the headline,
+  `captionSize` for the sub) and `logoReveal` (`bodySize` for the wordmark, `captionSize` for the sub).
+  Same shape as `scale.hook`/`scale.headline` above: an optional kwarg, current value as its default,
+  so a brand with no scale opinion renders byte-identical.
 - **`layout.margin` → `x`/`w` on every beat** except the three that name their own mark*/word* slots
   instead of a generic box (`logoLockup`, `ctaEnd`, `logoReveal`).
 - **`cues`**: surfaced as a console note (`audio.auto` derives its cues from the cuts/stings actually
   used, not from a preference list, so `look.cues` is a reach-for-these-by-hand reference rather than
   something the scaffold writes into the scene).
 
-**Left undone, stated plainly rather than faked**: `terminalReveal`, `verdictProof`, `logoLockup`,
-`logoReveal`, `recordedPan` and the keyed-track beats still hardcode their own internal type sizes;
-`scale.body`/`scale.caption` reach only the beats named above. Wiring the rest is the same shape of
-change (an optional kwarg, current value as its default) but touches more call sites than this slice
-covered.
+**Left undone, stated plainly rather than faked**: `recordedPan` has no text of its own (a bare
+surface, riders are the caller's own layers), so there is nothing for `scale.body`/`scale.caption` to
+reach; the keyed-track beats (`echoRing`, `scrollStory`, `focusRack`) still hardcode their own internal
+type sizes. Wiring those (where they have one) is the same shape of change (an optional kwarg, current
+value as its default) but touches more call sites than this slice covered.
 
 ## Seeing it: `make theme-sheet`
 

@@ -161,13 +161,21 @@ function propsFor(name, span, isPayoff) {
     case 'screenDive':
       return { title: 'REPLACE: what this screen does', image: 'REPLACE: assets/brands/<name>/stills/<shot>.png', ...captionKw('captionSize') };
     case 'logoLockup':
-      return { mark: 'REPLACE: assets/brands/<name>/mark.svg', wordmark: 'REPLACE: assets/brands/<name>/wordmark.svg', headline: 'REPLACE: brand line' };
+      return { mark: 'REPLACE: assets/brands/<name>/mark.svg', wordmark: 'REPLACE: assets/brands/<name>/wordmark.svg', headline: 'REPLACE: brand line',
+        ...bodyKw('bodySize'), ...captionKw('captionSize') };
     case 'logoReveal':
-      return { mark: 'REPLACE: <svg d path>', viewBox: '0 0 100 100', wordmark: 'REPLACE: brand name' };
+      return { mark: 'REPLACE: <svg d path>', viewBox: '0 0 100 100', wordmark: 'REPLACE: brand name',
+        ...bodyKw('bodySize'), ...captionKw('captionSize') };
     case 'verdictProof':
-      return { command: 'REPLACE: the command', note: 'REPLACE: what it proves', verdict: 'REPLACE', tone: 'ok' };
+      return { command: 'REPLACE: the command', note: 'REPLACE: what it proves', verdict: 'REPLACE', tone: 'ok',
+        ...bodyKw('bodySize'), ...captionKw('captionSize') };
     case 'recordedPan':
+      // No text of its own (a bare surface + caller-supplied riders), so no scale.body/.caption kwarg:
+      // there is nothing here for a theme's type scale to reach (docs/CRAFT/THEME-LOOK.md).
       return { image: 'REPLACE: assets/brands/<name>/stills/<shot>.png' };
+    case 'terminalReveal':
+      return { title: 'REPLACE: what this shows', command: 'REPLACE: the command', output: ['REPLACE: output line'],
+        ...bodyKw('bodySize'), ...captionKw('captionSize') };
     case 'containerFill':
       return { items: CHIPS, ...bodyKw('itemSize') };
     case 'listBuildRows':
