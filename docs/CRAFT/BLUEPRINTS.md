@@ -100,14 +100,23 @@ plain surface for my own thing" are asking different questions; collapsing them 
 draw a real, specific structure (chrome, a table, a bubble log) `htmlCard`'s free-form `body` does not
 give you for free.
 
-**When to reach for one of these instead of a rect/text beat.** You already have markup (captured or
-hand-written) and want it choreographed, or the shape (a real table, a chat log) is cheaper to write as
-markup than to compose from `group`/`text` layers. When you are instead composing from scratch and the
-shape is a card grid, a chip row, or a fixed frame that fills, the equivalent beats in `beats.mjs` /
-`beats-mined.mjs` (`cardCascade`, `chipGrid`, `containerFill`, `listBuildRows`) are pure `props → layers`
-factories with no markup to write; converting THEM to `html` internally is blocked today by
-`scripts/gates/lib-test.mjs`'s structural assertions on their exact layer shape (`type === 'group'`,
-nested `.children[].size`), which this repo's file ownership does not let a blueprint author edit.
+**When to reach for one of these instead of a card-grid/chip-row beat.** You already have markup
+(captured or hand-written) and want it choreographed, or the shape (a real table, a chat log) is
+cheaper to write as markup than to compose from `body`/`rows`/`messages` props. When you are instead
+composing from scratch and the shape is a card grid, a chip row, or a fixed frame that fills, the
+equivalent beats in `beats.mjs` / `beats-mined.mjs` (`cardCascade`, `chipGrid`, `containerFill`,
+`listBuildRows`) are still pure `props → layers` factories with no markup to write; each one now emits
+ONE `html` layer internally, with `parts` driving the per-card/chip/row reveal, so choosing between
+these five and those four is purely "do I already have markup" (`htmlCard` et al.) vs. "give me the
+grid/row/frame and I'll write the markup" (`cardCascade` et al.), never a difference in what gets
+rendered under the hood.
+
+**Per-item motion is the one shape `parts` cannot give you.** `cardFan`, `chipConverge`, `cellMosaic`
+(its text cells), `propSentence`'s `chip` item and `slotSwap`'s tile/chip payload each key an
+INDEPENDENT `motion` track per item (a different fan angle, a different scatter radius, a different
+arrival offset), and `parts` stages the children of ONE clock, it cannot give five items five different
+tracks. Those beats emit one `html` layer PER ITEM instead, each with its own motion track, inside the
+shared group/list the beat already builds.
 
 
 ## The three pictorial beats
