@@ -75,6 +75,10 @@ export function parseStoryboard(src) {
       // beat's two edges, "<placement>@<w>x<h>" (a safe-area PLACEMENT name, never a raw pixel). Only
       // meaningful once a beat names one; scripts/lib/contract.mjs chainErrors refuses a broken handoff.
       object_in: f('object_in'), object_out: f('object_out'),
+      // THE MOTION PLAN (scripts/lib/contract.mjs parseMotion): what else moves in this beat, beyond
+      // the one continuous object above. "<selector>@<kind>:<inBand>[/<outBand>]", `;`-separated for
+      // more than one moving element. Only meaningful once a beat names one.
+      motion: f('motion'),
       // style · layout · rest: the three slots their beat formula has (Element · Motion · Layout ·
       // Style · Timing) and ours did not. Parsed here for the same reason `placement` above is: a slot
       // an author is told to fill and nothing reads is worse than no slot, because the storyboard looks

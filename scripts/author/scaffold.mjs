@@ -355,6 +355,10 @@ function beatSection(s, i) {
     // beat before it's object_out. Delete both lines if this film carries no continuous object.
     `- object_in: "<fill: <placement>@<w>x<h>, e.g. bottom-left@120x40, must equal the beat before's object_out>"`,
     `- object_out: "<fill: <placement>@<w>x<h>, what this beat hands to the next one>"`,
+    // THE MOTION PLAN (scripts/lib/contract.mjs parseMotion): what ELSE moves in this beat, beyond the
+    // one continuous object above. Same convention as object_in/out: an unfilled marker, never a
+    // guessed value, and delete the line entirely if nothing but the continuous object moves here.
+    `- motion: "<fill: <selector>@<kind>:<band>, e.g. [data-part=\\"headline\\"]@slide-left:energy>"`,
     `- why: ${why}`,
     `- duration: ${s.dur}s`,
     '',

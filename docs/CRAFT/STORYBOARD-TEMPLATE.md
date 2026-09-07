@@ -114,7 +114,24 @@ not: "the defaults this film refuses, in your own words"
   frame (`dead-air`) and nothing on the other side, so the cheap answer was always more motion rather
   than better motion. `rest: none` is a legal answer and it is the right one on the spectacle beat.
 
-    either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md, a
+    THE MOTION PLAN. `object_in`/`object_out` say where the ONE continuous object is; `motion:` says what
+  ELSE moves in this beat, beyond that one thing, so a fragment author is told what has to move BEFORE
+  writing the markup rather than inventing entrances after. One or more `;`-separated entries,
+  `<selector>@<kind>:<inBand>[/<outBand>]`: `<selector>` is a CSS selector into the fragment's own
+  markup (`[data-part="headline"]`, `.card`), the SAME selector a hand-authored `parts[].select`
+  already takes (core/motion/parts.js); `<kind>` is one of the engine's named part entrances (growUp,
+  fadeUp, riseIn, drawOn, fade, slide-left, slide-right, popIn, widen); `<inBand>`/`<outBand>` are the
+  four named speed bands this repo already has (docs/RULES/speed-bands.md: energy, professional,
+  gravity, cinematic), reused rather than invented so a beat's motion speaks the same words a duration
+  decision already speaks. `<outBand>` defaults to `<inBand>`. THIS is the boundary velocity a
+  content-aware cut (core/timeline/velocity-cut.js) hunts for: a fast (short) exit band lands the next
+  cut on a picture already moving, which is the strongest signal that gate reads. `make assemble`
+  builds every entry into `parts[]` on that beat's own scene layer, the same vocabulary a hand-authored
+  parts block already takes, so this is not a second motion mechanism, it is the storyboard filling in
+  the one the engine already has. Optional, and delete the line if nothing but the continuous object
+  moves in a beat.
+
+  either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md, a
   match cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence, an open
   question. Carry two, not one. `object:` is the one device the scene-side gate can also see: one noun
   stays on screen across the cuts and every cut is a state change of it. Declare `object:` only if that
@@ -199,6 +216,7 @@ not: "the defaults this film refuses, in your own words"
 - picture: the empty stage with one hairline rule where the number will land
 - blueprint: kineticHook (Adapt: keep the open-loop question; change the hero word to the brand's stat)
 - onscreen: "the strong first line" / "the second cue, revealed later"
+- motion: [data-part="headline"]@slide-left:energy
 - mechanism: count-up · kinetic word reveal · slow-push camera
 - becomes: the bare stage becomes a question, and the question becomes a number climbing toward it
 - trigger: nothing yet. This beat opens the film, so its cause is the question it asks

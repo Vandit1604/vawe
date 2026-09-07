@@ -57,12 +57,33 @@ whichever aspect the film ends up at. `make scenes D=<film>` refuses to print a 
 chain is clean: handing three agents a contract that does not chain is handing them three disagreeing
 instructions, not three that will assemble into one film.
 
+## The motion plan: what else moves
+
+`object_in`/`object_out` cover the one thing that survives every cut. Everything ELSE in a beat, a
+headline that pushes in, a card that pops, had no contract at all: a fragment agent invented its own
+entrances after the markup was written, `assemble.mjs` never built them, and a storyboard that said
+"the headline slides in hard" produced a film where nothing moved.
+
+A beat's `motion:` field (also `scripts/lib/contract.mjs`) is one or more `;`-separated entries,
+`<selector>@<kind>:<inBand>[/<outBand>]`. `<selector>` is a CSS selector into the fragment's own
+markup, the same selector a hand-authored `parts[].select` already takes (`core/motion/parts.js`);
+`<kind>` is one of the engine's named part entrances (`growUp`, `fadeUp`, `slide-left`, …); the bands
+are the four this repo already names for a duration decision (`docs/RULES/speed-bands.md`: energy,
+professional, gravity, cinematic), reused here as the boundary velocity, because a fast (short) exit
+lands the next cut on a picture already moving, exactly what the content-aware cut
+(`core/timeline/velocity-cut.js`) reads for. `make scenes D=<film>` prints each entry's selector under
+"MUST BE ADDRESSABLE": the fragment author is told what has to carry that selector (a `data-part`
+attribute, a class) BEFORE writing the markup, not after. `make assemble D=<film>` builds every entry
+into `parts[]` on that beat's own scene layer, the same vocabulary a hand-authored parts block already
+takes, so nothing here is a second motion mechanism.
+
 ## The fan-out: print, never launch
 
 `make scenes D=<film>` prints one brief per scene: which fragment file to write, the kit block to
 paste, that scene's exact on-screen copy (do not paraphrase), the continuous object's arrival and
 departure state for this scene (the object itself is drawn later by `make assemble`, not by the
-fragment), the anti-slop rules from `AGENTS.md`, and the one verify command
+fragment), the motion plan's elements the fragment MUST make addressable (see above), the anti-slop
+rules from `AGENTS.md`, and the one verify command
 (`make preview HTML=<frag> THEME=<name>`). It launches nothing. Whether to spend a real fan-out's
 tokens on the briefs it prints is a decision for whoever is running this, per
 `docs/CRAFT/SUBAGENT-BUDGET.md`: fewer, larger agents beat one-per-item, and a fan-out that cannot
@@ -72,10 +93,11 @@ state in one sentence what a single agent would plausibly have produced is a gue
 
 `make assemble D=<film>` reads the storyboard's contract and writes the scene JSON: one `html` layer
 per scene (`src`-loaded, timed at the beat's start/end, sized to the full canvas so a full-bleed
-fragment does not collapse to its wrapper's default near-zero box), one continuous-object layer with a
-hand-keyed `motion` track built from every edge (resolved to real px through the engine's own
-`resolveCoords`, never a second copy of that math), a `bg` window per beat cycling the theme's own
-`look.backdrop` rotation, and an explicit `transitions[]` boundary at every beat start.
+fragment does not collapse to its wrapper's default near-zero box), that scene's `motion:` entries
+built into the layer's own `parts[]`, one continuous-object layer with a hand-keyed `motion` track
+built from every edge (resolved to real px through the engine's own `resolveCoords`, never a second
+copy of that math), a `bg` window per beat cycling the theme's own `look.backdrop` rotation, and an
+explicit `transitions[]` boundary at every beat start.
 
 Two things it gets right that are easy to get wrong by hand:
 
@@ -91,6 +113,17 @@ Two things it gets right that are easy to get wrong by hand:
 
 `assemble` deliberately does nothing else: no camera, no captions, no authored `cuts`/`sceneUnits`
 beyond the one line above. Everything past that is the engine's, or the next author's, to add.
+
+## The film against the plan
+
+`storyboard-check SB=<file>` (`scripts/gates/storyboard-check.mjs`) reads the sibling `<film>.json` if
+one already exists and compares it against the storyboard's own motion plan and continuous-object
+contract, advisory, never a blocker (the film may legitimately not exist yet, or be mid-edit). A beat
+whose `motion:` entry names a selector/kind the built layer's `parts[]` does not carry is reported by
+name, both the declared and the built value; a continuous-object edge whose resolved px does not match
+the built layer's real motion key is reported the same way. Nothing here is a second reader of the
+storyboard: it calls the same `parseMotion`/`edges` functions `assemble.mjs` itself calls, so a plan
+and a film can only agree or disagree, never each be individually "correct" by two different readings.
 
 ## When this is overkill
 
