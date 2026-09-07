@@ -7355,19 +7355,58 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const hook = BEATS.blurResolveHook({ text: 'x', dur: 2 });
   ok('seam overlap: blurResolveHook (beats-mined.mjs) holds its headline to the beat end (exitDur 0)',
     hook[0].exitDur === 0);
+  // containerFill/listBuildRows/cardCascade/chipGrid were rect+text stacks; they now emit ONE `html`
+  // layer with `parts` driving the per-item reveal (docs/CRAFT/HTML-FRAGMENTS.md `parts`). The shape
+  // that matters is "one html layer, held to the beat end, with `parts` reaching the items", not the
+  // old internal rect/text tree, so that is what these assert now.
   const fill = BEATS.containerFill({ items: ['a', 'b'], dur: 2 });
-  const chipGroup = fill.find((l) => l.type === 'group');
-  ok('seam overlap: containerFill (beats-mined.mjs, the beat on the broken 3.67s/7.33s seams) holds '
-    + 'its chip group to the beat end (exitDur 0)', chipGroup.exitDur === 0);
+  const fillHtml = fill.find((l) => l.type === 'html');
+  ok('seam overlap: containerFill (beats-mined.mjs, the beat on the broken 3.67s/7.33s seams) emits '
+    + 'one html layer holding to the beat end (exitDur 0)', !!fillHtml && fillHtml.exitDur === 0);
+  ok('containerFill: parts reveals every item, and the fragment carries both chips',
+    fillHtml.parts[0].select === '.chip' && fillHtml.html.includes('>a<') && fillHtml.html.includes('>b<'));
   const rows = BEATS.listBuildRows({ items: ['a', 'b'], dur: 2 });
-  ok('seam overlap: listBuildRows (beats-mined.mjs, the beat on the broken 11.0s seam) holds every row '
-    + 'to the beat end (exitDur 0)', rows.every((r) => r.exitDur === 0));
+  ok('seam overlap: listBuildRows (beats-mined.mjs, the beat on the broken 11.0s seam) emits one html '
+    + 'layer holding to the beat end (exitDur 0)', rows.length === 1 && rows[0].type === 'html' && rows[0].exitDur === 0);
+  ok('listBuildRows: parts reveals every row, and the fragment carries both labels',
+    rows[0].parts[0].select === '.row' && rows[0].html.includes('>a<') && rows[0].html.includes('>b<'));
   const cascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a' }], dur: 2 });
-  ok('seam overlap: cardCascade (beats.mjs) holds its card group to the beat end (exitDur 0)',
-    cascade.find((l) => l.type === 'group').exitDur === 0);
-  const sentence = BEATS.propSentence({ items: [{ word: 'x' }] });
+  const cascadeHtml = cascade.find((l) => l.type === 'html');
+  ok('seam overlap: cardCascade (beats.mjs) emits one html layer holding to the beat end (exitDur 0)',
+    !!cascadeHtml && cascadeHtml.exitDur === 0);
+  ok('cardCascade: parts reveals every card, and the fragment carries the card name',
+    cascadeHtml.parts[0].select === '.card' && cascadeHtml.html.includes('>a<'));
+  const gridBeat = BEATS.chipGrid({ title: 'x', chips: ['a'], dur: 2 });
+  const gridHtml = gridBeat.find((l) => l.type === 'html');
+  ok('chipGrid emits one html layer holding to the beat end (exitDur 0), parts reveals every chip',
+    !!gridHtml && gridHtml.exitDur === 0 && gridHtml.parts[0].select === '.chip' && gridHtml.html.includes('>a<'));
+  // cardFan/chipConverge/cellMosaic/propSentence/slotSwap key each ITEM's own motion track, which
+  // `parts` cannot express (it stages the children of one clock; these are independently timed
+  // siblings). So each item stays its own layer, `html` instead of rect/group/text, its motion track
+  // unchanged.
+  const fan = BEATS.cardFan({ cards: [{ title: 'a' }, { title: 'b' }], dur: 2 });
+  ok('cardFan: each card is its own html layer (the card is markup) with its own motion track',
+    fan.every((c) => c.type === 'html' && Array.isArray(c.motion)) && fan[0].html.includes('>a<'));
+  const conv = BEATS.chipConverge({ chips: ['a', 'b'], dur: 2 });
+  ok('chipConverge: each chip is its own html layer with its own scatter/converge motion track',
+    conv.every((c) => c.type === 'html' && Array.isArray(c.motion)) && conv[0].html.includes('>a<'));
+  const mosaic = BEATS.cellMosaic({ cells: [{ text: 'a' }, { image: 'x.png' }], dur: 2 });
+  const mosaicGroup = mosaic.find((l) => l.type === 'group');
+  ok('cellMosaic: the group keeps ONE shared motion track (the grid travels as one object)',
+    Array.isArray(mosaicGroup.motion) && mosaicGroup.motion.length === 2);
+  ok('cellMosaic: a text cell becomes html (drawn UI); an image cell stays a real image (already a picture)',
+    mosaicGroup.children[0].type === 'html' && mosaicGroup.children[1].type === 'image');
+  const sentence = BEATS.propSentence({ items: [{ word: 'x' }, { chip: 'c' }] });
   ok('seam overlap: propSentence (beats-collage.mjs) defaults exitDur to 0 on its items',
     sentence[0].children[0].exitDur === 0);
+  ok('propSentence: a word item stays text (colorWave needs a text layer); a chip item becomes html',
+    sentence[0].children[0].type === 'text' && sentence[0].children[1].type === 'html'
+    && sentence[0].children[1].exitDur === 0 && sentence[0].children[1].html.includes('>c<'));
+  const swap = BEATS.slotSwap({ passes: [{ label: 'l', icon: 'i.svg', payload: { chip: 'p' } }], dur: 2 });
+  ok('slotSwap: the badge tile is html (drawn UI); the icon stays a real image; the payload chip is html',
+    swap.find((l) => l.type === 'html' && l.html.includes('border-radius:34px')) != null
+    && swap.some((l) => l.type === 'image')
+    && swap.find((l) => l.type === 'html' && l.html.includes('>p<')) != null);
   const pan = BEATS.recordedPan({ image: 'x.png' });
   ok('seam overlap: recordedPan (beats-track.mjs) defaults exitDur to 0', pan[0].exitDur === 0);
 
@@ -7400,16 +7439,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // 5. SCALE KWARG: look.scale.body/.caption reach the remaining beat factories the same optional-kwarg,
   // unchanged-default way heroSize already reaches kineticHook/statReveal.
+  // cardCascade/chipGrid now write the size straight into the card/chip fragment's own inline CSS
+  // (`font:500 <size>px …`), not a nested layer's `.size` prop, so the kwarg is asserted the same way:
+  // read off the html layer's own `html` string.
   const plainCascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a', desc: 'd' }], dur: 2 });
-  const plainDesc = plainCascade[1].children[0].children[0].children[1];
-  ok('scale kwarg: cardCascade keeps its default body size (26) when heroSize is absent',
-    plainDesc.size === 26);
+  ok('scale kwarg: cardCascade keeps its default body size (26px) in the card fragment when heroSize is absent',
+    /font:500 26px/.test(plainCascade.find((l) => l.type === 'html').html));
   const scaledCascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a', desc: 'd' }], heroSize: 30, dur: 2 });
   ok('scale kwarg: cardCascade honours heroSize (look.scale.body) for the card body text when given',
-    scaledCascade[1].children[0].children[0].children[1].size === 30);
+    /font:500 30px/.test(scaledCascade.find((l) => l.type === 'html').html));
   const grid = BEATS.chipGrid({ title: 'x', chips: ['a'], footer: 'f', bodySize: 20, captionSize: 22, dur: 2 });
-  ok('scale kwarg: chipGrid honours bodySize (look.scale.body) for its chip text',
-    grid[1].children[0].children[0].size === 20);
+  ok('scale kwarg: chipGrid honours bodySize (look.scale.body) for its chip fragment',
+    /font:500 20px/.test(grid.find((l) => l.type === 'html').html));
   ok('scale kwarg: chipGrid honours captionSize (look.scale.caption) for its footer',
     grid.find((l) => l !== undefined && l.color === ACCENT && l.text === 'f').size === 22);
   ok('scale kwarg: kineticHook keeps its default sub size (74) when captionSize is absent',
