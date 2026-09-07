@@ -274,3 +274,6 @@ assets/ransom/
 # instance is not the framework. The manifests (index.json) ARE committed, same as scenes-json's split.
 site/public/blocklib/**/*.mp4
 site/public/blocklib/**/*.png
+!formats/scene/post-*.json
+!formats/scene/post-*.storyboard.md
+!formats/scene/post-*.html
