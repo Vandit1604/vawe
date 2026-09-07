@@ -987,6 +987,13 @@ evals-compare: build ## [engine] before/after sheets stacked per brief plus comp
 critics: ## [judge] THE CRITIC PANEL (docs/CRAFT/SUBAGENTS.md), as an invokable, recorded step.
 	node scripts/author/critics.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(RECORD),--record $(RECORD))
 
+# make deciders D=<scene.json>: THE DECIDER ROSTER (docs/CRAFT/SUBAGENTS.md), the other half of the
+# panel. A critic reports; a decider WRITES, so each brief carries the one field that role owns and
+# nothing else. Prints them in dependency order, concrete for this film. The order is the content:
+# motion before transitions, because the content-aware cut reads velocity at the joint.
+deciders: ## [dev] THE DECIDER ROSTER: one brief per role, in dependency order, for this film.
+	node scripts/author/critics.mjs $(D) --deciders
+
 # make probe [M=scene]: assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.
 probe: ## [check] assert renderFrame(n) is PURE in n (byte-identical regardless of render order).
