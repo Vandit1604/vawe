@@ -15,6 +15,7 @@
 // a pixel pair is not.
 import { PLACEMENT } from '../../core/layout/safe.js';
 import { nearMisses } from '../../core/registry/registry.js';
+import { PART_NAMES } from '../../core/motion/parts.js';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*$/i;
 
@@ -71,4 +72,68 @@ export function edges(beats) {
   if (chainErrors(beats).length) return [];
   return beats.map((b) => ({ name: b.name, start: b.start, end: b.end, in: parseEdge(b.object_in), out: parseEdge(b.object_out) }))
     .filter((e) => e.in && e.out && !e.in.error && !e.out.error);
+}
+
+// ── THE MOTION PLAN: what moves in a beat, beyond the one continuous object above ──────────────────
+//
+// object_in/object_out say where the ONE thing that survives every cut is. Everything ELSE in a beat
+// (a headline that pushes in, a card that pops) had no contract at all: a fragment agent invented its
+// own entrances, `assemble.mjs` never built them, and a storyboard that said "the headline slides in
+// hard" produced a film where nothing moved, because nothing read that sentence.
+//
+// `motion:` on a beat is one or more entries, `;`-separated: `<selector>@<kind>:<inBand>[/<outBand>]`.
+//   - <selector>  a CSS selector into the fragment's own markup (`[data-part="headline"]`), the SAME
+//     selector `parts[].select` already takes (core/motion/parts.js). Naming it here, before the
+//     fragment is written, is what scenes.mjs's brief now hands the fragment author: give this element
+//     that attribute or that class, or the motion plan has nothing to reach.
+//   - <kind>      one of the engine's own named part entrances (growUp, fadeUp, slide-left, …,
+//     PART_NAMES below): a placement name for MOTION the same way `<placement>` above is one for
+//     POSITION, checkable by a person who knows the vocabulary rather than by reading a bezier.
+//   - <inBand>/<outBand>  one of the four named speed bands already in this repo's doctrine
+//     (docs/RULES/speed-bands.md: energy · professional · gravity · cinematic), reused rather than
+//     invented so a beat's motion plan speaks the same words a duration decision already speaks.
+//     <outBand> defaults to <inBand> when only one is given. THIS is the boundary velocity: a fast
+//     (short) exit band arrives at the next cut moving quickly, which is exactly what the content-aware
+//     cut (core/timeline/velocity-cut.js) is hunting for, and a named band is something a plan can be
+//     reviewed against without anyone doing the px/s arithmetic by hand.
+export const SPEED_BAND = { energy: 0.22, professional: 0.4, gravity: 0.65, cinematic: 1.2 };
+
+const MOTION_RE = /^\s*([^@]+?)\s*@\s*([a-z-]+)\s*:\s*([a-z]+)(?:\s*\/\s*([a-z]+))?\s*$/i;
+
+/** parseMotionEntry("[data-part=\"headline\"]@slide-left:energy/cinematic") → {selector,kind,inBand,outBand} | {error} */
+export function parseMotionEntry(raw) {
+  const s = String(raw).trim();
+  const m = MOTION_RE.exec(s);
+  if (!m) return { error: `"${s}" is not "<selector>@<kind>:<band>[/<outBand>]" (e.g. "[data-part=\\"headline\\"]@slide-left:energy")` };
+  const [, selector, kind, inBand, outBandRaw] = m;
+  if (!PART_NAMES.includes(kind)) {
+    const near = nearMisses(kind, PART_NAMES);
+    return { error: `"${kind}" is not a known part entrance${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${PART_NAMES.join(', ')}` };
+  }
+  if (!SPEED_BAND[inBand]) {
+    const near = nearMisses(inBand, Object.keys(SPEED_BAND));
+    return { error: `"${inBand}" is not a speed band${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
+  }
+  const outBand = outBandRaw || inBand;
+  if (!SPEED_BAND[outBand]) return { error: `"${outBand}" is not a speed band. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
+  return { selector: selector.trim(), kind, inBand, outBand };
+}
+
+/** parseMotion("a@k:b; c@k2:b2") → [{...} | {error}] for a beat's raw `motion:` field. Empty for unset ("no opinion", same convention as parseEdge). */
+export function parseMotion(raw) {
+  if (raw == null) return [];
+  const s = String(raw).trim().replace(/^["']|["']$/g, '');
+  if (!s || /^<fill:/i.test(s) || /^none$/i.test(s)) return [];
+  return s.split(';').map((e) => e.trim()).filter(Boolean).map(parseMotionEntry);
+}
+
+/** motionErrors(beats) → string[] naming every beat whose `motion:` entry does not parse. */
+export function motionErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    for (const e of parseMotion(b.motion)) {
+      if (e.error) errs.push(`beat ${i + 1} (${b.name}) motion: ${e.error}`);
+    }
+  });
+  return errs;
 }

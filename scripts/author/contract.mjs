@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { storyboardPathFor } from '../gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges } from '../lib/contract.mjs';
+import { chainErrors, edges, motionErrors, parseMotion } from '../lib/contract.mjs';
 
 const film = process.argv[2];
 if (!film || !fs.existsSync(film)) { console.error('usage: node scripts/author/contract.mjs <film.json>'); process.exit(1); }
@@ -22,9 +22,19 @@ if (errs.length) {
   process.exit(1);
 }
 const chain = edges(beats);
-if (!chain.length) {
-  console.log('  (no continuous-object contract: no beat names object_in/object_out. Nothing to check.)');
-  process.exit(0);
+if (!chain.length) console.log('  (no continuous-object contract: no beat names object_in/object_out. Nothing to check.)');
+else {
+  for (const e of chain) console.log(`  ✓ ${e.name} (${e.start}s-${e.end}s): ${e.in.placement}@${e.in.w}x${e.in.h} → ${e.out.placement}@${e.out.w}x${e.out.h}`);
+  console.log('  ✓ every handoff matches');
 }
-for (const e of chain) console.log(`  ✓ ${e.name} (${e.start}s-${e.end}s): ${e.in.placement}@${e.in.w}x${e.in.h} → ${e.out.placement}@${e.out.w}x${e.out.h}`);
-console.log('  ✓ every handoff matches');
+
+const mErrs = motionErrors(beats);
+if (mErrs.length) {
+  for (const e of mErrs) console.log(`  ✗ ${e}`);
+  process.exit(1);
+}
+const withMotion = beats.filter((b) => parseMotion(b.motion).length);
+if (!withMotion.length) console.log('  (no motion plan: no beat names `motion:`. Nothing else to check.)');
+else for (const b of withMotion) {
+  for (const m of parseMotion(b.motion)) console.log(`  ✓ ${b.name}: ${m.selector} @ ${m.kind} (${m.inBand}${m.outBand !== m.inBand ? '/' + m.outBand : ''})`);
+}
