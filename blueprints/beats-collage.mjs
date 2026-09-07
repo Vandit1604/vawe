@@ -8,6 +8,14 @@
 // geometry holds and the world inside it turns over, so three shots read as one.
 //
 // Colours are SEMANTIC theme vars, so both beats are brand-agnostic. Coordinates are the 1920x1080 stage.
+//
+// Design Read: the `chip`/`icon` item in either beat is DRAWN UI (a bordered pill, a filled tile), so
+// it is an `html` layer rather than a rect/text stack. PER-ITEM MOTION STAYS PER LAYER: each chip/tile
+// keeps the exact `delay`/`enterDur`/`exitDur` (propSentence) or `at()` offset (slotSwap) timing the
+// stack version had, one `html` layer per item, never merged into one shared fragment (a `parts`
+// fragment stages the CHILDREN of one layer on one clock; these items are independently-timed
+// siblings). Flat surfaces, hairline borders, no gradient. Theme tokens: --font-mono only (colour
+// stays whatever the caller passed, since both items take an explicit `color`/`bg` prop already).
 import { INK, ACCENT, LINE, SURF2 } from './kit.mjs';
 
 // The colour wave brew lights every word of a collage with: each word arrives in the accent and settles
@@ -76,9 +84,13 @@ export function propSentence({ items = [], x = 120, y = 250, w = 1680, gap = 44,
       return { type: 'component', src: it.component, w: it.w || 420, anim: 'pop', out: 'defocus', ...t };
     }
     if (it.chip != null) {
-      return { type: 'text', text: it.chip, font: 'mono', size: it.size || 34, weight: 500,
-        color: it.color || INK, bg: it.bg || SURF2, pad: it.pad || '18px 30px', radius: it.radius ?? 12,
-        border: `1.5px solid ${LINE}`, anim: 'pop', out: 'defocus', ...t };
+      // A chip is drawn UI (a bordered pill), so it is one `html` layer, its own markup, keeping the
+      // exact per-item `delay`/`enterDur`/`exitDur` timing every other item type in this sentence gets.
+      const pad = it.pad || '18px 30px', radius = it.radius ?? 12, size = it.size || 34;
+      const html = `<div style="box-sizing:border-box;font:500 ${size}px var(--font-mono);`
+        + `color:${it.color || INK};background:${it.bg || SURF2};padding:${pad};border-radius:${radius}px;`
+        + `border:1.5px solid ${LINE}">${it.chip}</div>`;
+      return { type: 'html', html, anim: 'pop', out: 'defocus', ...t };
     }
     throw new Error('propSentence: each item needs one of word | image | icon | component | chip; got '
       + JSON.stringify(it));
@@ -149,8 +161,12 @@ export function slotSwap({ passes = [], x = 240, y = 330, badge = 150, badgeRadi
         size: labelSize, weight: labelWeight, ...wave(labelColor), ...atSplit(off.label) });
     }
     if (p.icon) {
-      L.push({ type: 'rect', x, y: y + 10, w: badge, h: badge, radius: badgeRadius,
-        bg: p.badgeBg || badgeBg, anim: 'pop', ...at(off.tile) });
+      // The tile is drawn UI (a filled rounded square), so it is `html`, its own layer with its own
+      // arrival offset (`off.tile`), kept separate from the icon image's own `off.icon` offset: the two
+      // still land a beat apart, the same choreography the rect+image pair had.
+      const tileHtml = `<div style="box-sizing:border-box;width:${badge}px;height:${badge}px;`
+        + `border-radius:${badgeRadius}px;background:${p.badgeBg || badgeBg}"></div>`;
+      L.push({ type: 'html', x, y: y + 10, w: badge, h: badge, html: tileHtml, anim: 'pop', ...at(off.tile) });
       L.push({ type: 'image', src: p.icon, x: x + Math.round((badge - iconW) / 2),
         y: y + 10 + Math.round((badge - iconW) / 2), w: iconW, h: iconW, anim: 'pop', ...at(off.icon) });
     }
@@ -180,9 +196,12 @@ export function slotSwap({ passes = [], x = 240, y = 330, badge = 150, badgeRadi
         align: 'center', size: q.size || 110, weight: q.weight || 700,
         ...wave(q.color || labelColor), ...atSplit(off.payload) });
     } else if (q.chip != null) {
-      L.push({ type: 'text', text: q.chip, font: 'mono', x: px, y: Math.round(cy - 34), w,
-        align: 'center', size: q.size || 30, weight: 600, color: q.color || INK, bg: q.bg || SURF2,
-        pad: '16px 22px', radius: 14, border: `1.5px solid ${LINE}`, anim: 'pop', ...tm });
+      // Drawn UI (a bordered pill), so `html`, its own layer, keeping the payload's own `off.payload`
+      // arrival timing exactly as the text-with-bg pill did.
+      const chipHtml = `<div style="box-sizing:border-box;font:600 ${q.size || 30}px var(--font-mono);`
+        + `color:${q.color || INK};background:${q.bg || SURF2};padding:16px 22px;border-radius:14px;`
+        + `border:1.5px solid ${LINE};text-align:center">${q.chip}</div>`;
+      L.push({ type: 'html', x: px, y: Math.round(cy - 34), w, html: chipHtml, anim: 'pop', ...tm });
     } else if (q.component) {
       L.push({ type: 'component', src: q.component, x: px, y: Math.round(cy - (q.h || w * 0.6) / 2),
         w, anim: 'pop', ...tm });

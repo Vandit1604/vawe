@@ -23,12 +23,16 @@
       "dur": 4,
       "title": null,
       "command": null,
-      "result": null
+      "result": null,
+      "bodySize": null,
+      "captionSize": null
     },
     "requiredProps": [
       "title",
       "command",
-      "result"
+      "result",
+      "bodySize",
+      "captionSize"
     ],
     "props": [
       "x",

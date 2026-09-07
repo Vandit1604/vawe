@@ -97,7 +97,7 @@
     "preset": "plain"
   },
   "look": {
-    "backdrop": ["dotmatrix", "paperDots", "paperShapes", "soft", "paper"],
+    "backdrop": ["paper", "ink", "dotmatrix", "deep", "accent"],
     "scale": { "hook": 92, "headline": 64, "body": 38, "caption": 24 },
     "layout": { "anchor": "left", "margin": 160 },
     "marks": { "logo": "site/public/assets/favicon.svg", "endCardSize": 160, "headlineSize": 108 },
