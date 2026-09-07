@@ -135,3 +135,47 @@ Refuses by name, rather than rendering a blank sheet, when the theme has no `loo
 `themes/presets/*.json` (the taste-anchor profiles: a24, apple, bloomberg, duolingo, nike, vercel)
 carry one. `themes/default.json` and `themes/linear.json`/`themes/stripe.json` do not yet; a theme
 with no `look` is not an error, it is a theme that has not been given one.
+
+## The computed look, for the other 37
+
+7 of 44 themes carrying a `look` means an engine default that reads `theme.look` does nothing for 84%
+of themes, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
+opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
+`{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
+key by key, and a theme that fixes only `backdrop` still gets a computed `scale`/`layout`/`cuts`/`field`
+for the rest.
+
+The computed constants are not invented: `scale` (`{hook:92,headline:64,body:38,caption:24}`) and
+`layout.margin` (`160`) and `cuts` (`{default:"fade",accent:"cinematicZoom"}`) are `themes/vawe.json`'s
+own look values, the same numbers this doc already uses as its worked example above, and
+`themes/default.json`'s own note says that file deliberately mirrors vawe. `field` reads
+light-vs-dark off `isLightBg(theme.palette.bg)`: every light-bg authored look ships
+`{grain:0,vignette:0}`, every dark-bg one (nike/vercel/a24) ships nonzero grain and vignette, so
+computed field follows the same split (`{grain:0.08,vignette:0.15}` when dark). `isLightBg` is handed
+in, not imported, the same injection shape `lookErrors` already uses for `bgNames`/`transitionNames`,
+so `theme-contract.js` stays free of `core/motion/motion.js` and importable from node and the browser
+both.
+
+**Three keys stay uncomputed, on purpose:**
+
+- **`backdrop` is never a computed default.** Which bg preset a film turns through is a taste decision,
+  and the engine choosing it for an author is `docs/MISTAKES.md` #159 by name: `bg` is a required
+  authoring field precisely so this cannot happen again. `theme.bgDefault` remains the one engine-owned
+  bg default; `computedLook` does not become a second one.
+- **`cues` cannot be derived per brand.** `buildSfx` (`formats/scene/scene.js`) already derives each
+  cue from `CUT_CUE`, keyed on the transition actually used, so a fixed per-theme cue list would be a
+  second, disagreeing owner of the same fact. It is flagged here as a candidate for deletion from
+  `LOOK_KEYS` rather than wired into `computedLook`.
+- **`marks` needs a real logo path.** No theme-agnostic default exists (a made-up path 404s at render),
+  so a theme with no `marks` stays without one until it declares its own.
+
+`scripts/author/scaffold.mjs` reads `computedLook(themeObj)` as its own last-resort fallback (in place
+of the literal `{default:"fade",accent:"cinematicZoom"}` and `margin ?? 160` it used to hold as a second
+copy), so the scaffold and the engine cannot drift on the same numbers the way two copies of
+`scripts/lib/theme-bg.mjs`'s `bgBlock` once did. The scaffold's own priority is unchanged: an authored
+`theme.look` still wins over the `--type` spine, which still wins over this house default.
+
+`core/engine/produce.js`'s `produceBaseline(data, theme, frame, look)` now takes the resolved look as
+its fourth argument, wired from `core/engine/boot.js` (theme resolved once, before `resolveCoords`, so
+`resolveLook` runs early enough for anything downstream to read it). Nothing inside `produceBaseline`
+reads `look` yet: this is plumbing only, and a later phase adds the defaults that actually consume it.

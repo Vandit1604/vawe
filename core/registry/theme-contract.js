@@ -204,3 +204,55 @@ export function lookErrors(look, { bgNames, transitionNames, cueNames, nearMisse
   }
   return errs;
 }
+
+// ---------------------------------------------------------------------------------------------------
+// COMPUTED LOOK: only 7 of 44 themes carry a `look` block, so an engine default that reads `theme.look`
+// does nothing for the other 37 (including `themes/default.json`) unless one can be derived. `scale`,
+// `layout` and `cuts` below are not invented: they are `themes/vawe.json`'s own look values, the exact
+// numbers `docs/CRAFT/THEME-LOOK.md` already uses as its worked example, and `default.json`'s own note
+// says that file deliberately MIRRORS vawe (palette today, look by the same reasoning here). `field`
+// is read off all seven authored looks: every light-bg theme ships `{grain:0,vignette:0}`, every
+// dark-bg one (nike/vercel/a24) ships nonzero grain and vignette, so light-vs-dark decides it.
+//
+// THREE KEYS ARE DELIBERATELY LEFT UNCOMPUTED:
+//   - `backdrop` (which bg preset a film turns through) is a TASTE decision, never the engine's to
+//     pick for an author (docs/MISTAKES.md #159: the engine used to choose the background and nobody
+//     ever designed one again; `bg` is a required authoring field now, core/engine/produce.js's own
+//     header explains why). `theme.bgDefault` stays the one engine-owned bg default.
+//   - `cues` cannot be derived per brand: `buildSfx` (formats/scene/scene.js) already derives each cue
+//     from `CUT_CUE` keyed on the transition actually used, so a fixed per-theme list would be a
+//     second, disagreeing owner of the same fact. Candidate for deletion from LOOK_KEYS; not wired.
+//   - `marks` needs a real logo PATH. No theme-agnostic default exists (a made-up path 404s at
+//     render), so a theme with no marks stays without one until it declares its own.
+//
+// SAME INJECTION SHAPE as themeErrors/lookErrors above: `isLightBg` decides only the light/dark field
+// default and is handed in rather than imported, so this file stays free of core/motion/motion.js (see
+// the file header: node+browser purity is the whole point). Omit it and `field` stays the light
+// default, an under-estimate (no grain on what might be a dark brand) rather than a guess this file
+// has no business making on its own.
+const DEFAULT_SCALE = { hook: 92, headline: 64, body: 38, caption: 24 };
+const DEFAULT_LAYOUT = { anchor: 'left', margin: 160 };
+const DEFAULT_CUTS = { default: 'fade', accent: 'cinematicZoom' };
+const DEFAULT_FIELD_LIGHT = { grain: 0, vignette: 0 };
+const DEFAULT_FIELD_DARK = { grain: 0.08, vignette: 0.15 };
+
+export function computedLook(theme, { isLightBg } = {}) {
+  const bg = theme && theme.palette && theme.palette.bg;
+  const light = isLightBg && bg != null ? isLightBg(bg) : true; // unknown bg reads as light, the harmless side
+  return {
+    scale: { ...DEFAULT_SCALE },
+    layout: { ...DEFAULT_LAYOUT },
+    cuts: { ...DEFAULT_CUTS },
+    field: light ? { ...DEFAULT_FIELD_LIGHT } : { ...DEFAULT_FIELD_DARK },
+  };
+}
+
+// resolveLook(theme, opts): the look a film actually gets. An authored `theme.look` wins KEY BY KEY
+// over the computed one (docs/CRAFT/THEME-LOOK.md: "the theme is a DEFAULT, never a constraint an
+// author cannot override"), so a brand that fixes only `backdrop` still gets a computed `scale`/
+// `layout`/`cuts`/`field` for the rest instead of losing them to an all-or-nothing merge.
+export function resolveLook(theme, opts) {
+  const computed = computedLook(theme, opts);
+  const authored = (theme && isObj(theme.look)) ? theme.look : {};
+  return { ...computed, ...authored };
+}
