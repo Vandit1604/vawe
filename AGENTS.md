@@ -53,6 +53,8 @@ plan-vs-render, always on; the style gates report only, `TASTE=1` makes them blo
 Every target belongs to one of ten phases (preflight → dev → check → ship → judge → ledger → study →
 engine → site → maintenance); `make list` (alias `make help`) reads the Makefile itself and prints
 every target grouped that way, so it is the one front page and cannot drift from the real target list.
+Every one of those targets is `.PHONY`: this is a command catalogue, not a build graph, on purpose
+([`docs/MAKEFILE-AUDIT.md`](docs/MAKEFILE-AUDIT.md)).
 
 ```bash
 make list                        # every target, grouped by phase: the spine below, always current
