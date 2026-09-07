@@ -27,6 +27,16 @@
 //
 //   node scripts/gates/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
 //   make motion [M=<format>] [STRIDE=2]
+//
+// --trace: an INSTRUMENT, not a check (no pass/fail, always exits 0). An agent cannot watch a video, it
+// reads frames, and the series this file already builds to run the nine checks above was thrown away
+// after scoring them. --trace keeps it: per layer, when it moves vs holds, its peak position velocity
+// and peak area-change (a scale pulse moves no pixel and still shows here), when each peak lands, and
+// whether its motion is monotonic (one direction) or oscillating. Sampled, not rendered whole: default
+// stride auto-scales to ~200 samples over the film so a trace costs seconds. See docs/CRAFT/MOTION-TRACE.md.
+//
+//   node scripts/gates/motion-audit.mjs scene --data formats/scene/x.json --trace [--stride N] [--json]
+//   make motion-trace M=scene D=formats/scene/x.json
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,6 +59,8 @@ const STRIDE = Math.max(1, parseInt(flag('--stride') || '1', 10));
 const DATA = flag('--data');
 const DATA_LIST = DATA ? DATA.split(',').filter(Boolean) : [null];
 const JSON_OUT = args.includes('--json');
+const TRACE = args.includes('--trace');
+const TRACE_TARGET_SAMPLES = 200; // stride auto-scales to land near this many samples, unless --stride is given
 let formats = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--stride' && args[i - 1] !== '--data');
 if (!formats.length) formats = fs.readdirSync(path.join(repoRoot, 'formats')).filter((f) => fs.existsSync(path.join(repoRoot, 'formats', f, 'sample.json'))).sort();
 
@@ -120,12 +132,21 @@ const captureSeries = (page, total, stride) => page.evaluate(async (total, strid
   // its bounding rect, opacity and text all sit perfectly still. Measuring only the outside made
   // `cadence`'s waveform read as frozen through the exact seconds it was drawing itself on. So a
   // cheap fingerprint of descendant transforms rides along, capped so a 90-layer film stays cheap.
+  // `drawOn` (core/motion/parts.js:40) animates an SVG stroke by setting `strokeDashoffset` on the
+  // element itself, never a `transform`. A film built on it (post-trailhead's 7s route draw) measured
+  // as fully held here until this line was added: folding the inline dash-offset into the same
+  // fingerprint costs nothing extra, since the walk already visits every descendant.
   const kidSig = (el) => {
-    let sig = 0, seen = 0;
+    // `drawOn`'s own target IS the tracked element half the time (an `id`'d `<path>`), so its own
+    // dash-offset has to be read here too: `querySelectorAll('*')` below walks DESCENDANTS only.
+    let sig = el.style && el.style.strokeDashoffset ? hash('d:' + el.style.strokeDashoffset, 0) : 0;
+    let seen = 0;
     for (const kid of el.querySelectorAll('*')) {
       if (seen++ >= 24) break;
       const tr = getComputedStyle(kid).transform;
       if (tr && tr !== 'none') sig = hash(tr, sig);
+      const dash = kid.style && kid.style.strokeDashoffset;
+      if (dash) sig = hash('d:' + dash, sig);
     }
     return sig;
   };
@@ -148,7 +169,9 @@ const captureSeries = (page, total, stride) => page.evaluate(async (total, strid
       }
       if (!laidOut || hidden || (b.width < 1 && b.height < 1)) { out.rows[i].push(null); return; }
       const t = (el.textContent || '').trim();
-      out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32), kidSig(el), rig]);
+      // area rides along at index 7 for --trace: a scale pulse (a wind-up, a punch-in) moves no pixel
+      // of the centre and would be invisible to every position-based check above it.
+      out.rows[i].push([Math.round((b.left + b.width / 2) * 10) / 10, Math.round((b.top + b.height / 2) * 10) / 10, Math.round(eop * 1000) / 1000, t.length, t.slice(0, 32), kidSig(el), rig, Math.round(b.width * b.height)]);
     });
   }
   return out;
@@ -410,7 +433,10 @@ function presetFinding(data) {
   return { level: 'WARN', check: 'x:preset', seg: '(video)', key: '', msg: top[1] + '/' + presets.length + ' kinetic text layers use preset "' + top[0] + '". Vary the entrance device per scene (decode/riseClip/tilt/stretch/…), not one global reveal' };
 }
 
-async function audit(format, dataArg) {
+// Shared by audit() and traceOf(): load the scene, wait for the engine, hand back an open page plus
+// its data/meta. One door for both readers so a change to how a page is opened (a query param, a wait
+// condition) cannot drift between the check and the instrument.
+async function loadPage(format, dataArg) {
   const dataPath = dataArg || `formats/${format}/sample.json`;
   const dataName = dataPath.split('/').pop();
   const data = JSON.parse(fs.readFileSync(path.join(repoRoot, dataPath), 'utf8'));
@@ -419,8 +445,15 @@ async function audit(format, dataArg) {
   await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
   await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
   const err = await waitForEngine(page);
-  if (err) { await page.close(); return { format, data: dataName, error: String(err), findings: [] }; }
+  if (err) { await page.close(); return { dataName, error: String(err) }; }
   const meta = await page.evaluate(() => window.__engine.meta);
+  return { page, data, dataName, meta };
+}
+
+async function audit(format, dataArg) {
+  const opened = await loadPage(format, dataArg);
+  if (opened.error) return { format, data: opened.dataName, error: opened.error, findings: [] };
+  const { page, data, dataName, meta } = opened;
   const total = meta.totalFrames;
   const TOTAL_SEC = total / FPS;   // runtime in seconds, the frozen-span budget scales with it
 
@@ -481,6 +514,116 @@ async function audit(format, dataArg) {
   if (preset) findings.push(preset);
 
   return { format, data: dataName, total, segments: windows.length, findings, windowSource };
+}
+
+// ---- --trace: one element's row → when it moved, when it held, its peak, its shape --------------
+// One pass over the strided samples. "moved" reuses the same per-step thresholds frozenSpans already
+// checks a film against (0.3px position, 0.005 opacity, a text/kidSig change), plus a 1% area-change
+// threshold that none of the nine checks above needed: they all ask about a LAYER's fade or position,
+// never about a scale pulse that moves no pixel of its own centre.
+function layerTrace(row, F, dt) {
+  let peakVel = 0, peakVelAt = 0, peakAreaPct = 0, peakAreaAt = 0;
+  let netDX = 0, netDY = 0, posPath = 0;   // position: pixels
+  let netAreaRel = 0, areaPath = 0;        // area: relative (fraction of the box, scale-free)
+  const states = []; // states[k]: the interval (F[k] → F[k+1]) is 'moving' | 'held' | null (a gap)
+  for (let j = 1; j < F.length; j++) {
+    const a = row[j - 1], b = row[j];
+    if (!a || !b) { states.push(null); continue; }
+    const dx = b[0] - a[0], dy = b[1] - a[1], dist = Math.hypot(dx, dy);
+    netDX += dx; netDY += dy; posPath += dist;
+    const vel = dist / dt;
+    if (vel > peakVel) { peakVel = vel; peakVelAt = F[j] / FPS; }
+    const areaRel = (b[7] - a[7]) / Math.max(a[7], b[7], 1); // signed, relative: scale-free across layers
+    netAreaRel += areaRel; areaPath += Math.abs(areaRel);
+    if (Math.abs(areaRel) > peakAreaPct) { peakAreaPct = Math.abs(areaRel); peakAreaAt = F[j] / FPS; }
+    const moved = dist > 0.3 || Math.abs(b[2] - a[2]) > 0.005 || Math.abs(areaRel) > 0.01 || b[3] !== a[3] || b[5] !== a[5];
+    states.push(moved ? 'moving' : 'held');
+  }
+  // collapse the per-step states into spans, the same shape `frozenSpans` already reports in
+  const spans = [];
+  let cur = null, start = 0;
+  for (let j = 0; j < states.length; j++) {
+    if (states[j] !== cur) {
+      if (cur !== null) spans.push({ state: cur, from: +(F[start] / FPS).toFixed(2), to: +(F[j] / FPS).toFixed(2) });
+      cur = states[j]; start = j;
+    }
+  }
+  if (cur !== null) spans.push({ state: cur, from: +(F[start] / FPS).toFixed(2), to: +(F[states.length] / FPS).toFixed(2) });
+  // SHAPE, not just a peak: net travel over total path length. A layer that moves straight from A to B
+  // scores near 1; one that wobbles in place scores low. Mirrors study.mjs's peak+curve reasoning
+  // (scripts/media/study.mjs:306-311): a mean (or one peak number) cannot tell a held-then-launch beat
+  // from a steady drift, so the shape rides beside the peak. Judged on POSITION when the layer travels
+  // (posPath >= 2px); else on AREA, because a wind-up or a punch-in moves no pixel of its own centre and
+  // grow-then-shrink-back is exactly what "oscillating" (net near zero over a real path) already means.
+  let shape;
+  if (posPath >= 2) shape = Math.hypot(netDX, netDY) / posPath >= 0.6 ? 'monotonic' : 'oscillating';
+  else if (areaPath > 0.05) shape = Math.abs(netAreaRel) / areaPath >= 0.6 ? 'monotonic' : 'oscillating';
+  else shape = 'held';
+  return {
+    spans,
+    peakVelocity: Math.round(peakVel), peakVelocityAt: +peakVelAt.toFixed(2),
+    peakAreaChangePct: +(peakAreaPct * 100).toFixed(1), peakAreaChangeAt: +peakAreaAt.toFixed(2),
+    shape,
+  };
+}
+
+async function traceOf(format, dataArg) {
+  const opened = await loadPage(format, dataArg);
+  if (opened.error) return { format, data: opened.dataName, error: opened.error };
+  const { page, data, dataName, meta } = opened;
+  const total = meta.totalFrames;
+  // Auto-scaled stride: a trace an agent will actually run has to cost seconds regardless of the
+  // film's length, so the default lands near TRACE_TARGET_SAMPLES samples. --stride overrides it.
+  const stride = args.includes('--stride') ? STRIDE : Math.max(1, Math.round(total / TRACE_TARGET_SAMPLES));
+  const t0 = Date.now();
+  const series = await captureSeries(page, total, stride);
+  await page.close();
+  const renderMs = Date.now() - t0;
+
+  const K = series.keys, LOOP = series.loop;
+  const content = K.map((k, i) => !INFRA.has(k) && !LOOP[i]);
+  const F = series.frames;
+  const dt = stride / FPS;
+  const layers = [];
+  K.forEach((k, i) => {
+    if (!content[i] || series.live[i] === 0) return; // chrome, a loop-exempt layer, or never on screen
+    layers.push({ key: k, samples: series.live[i], ...layerTrace(series.rows[i], F, dt) });
+  });
+  return {
+    format, data: dataName, total, fps: FPS, strideFrames: stride,
+    sampleIntervalMs: Math.round(dt * 1000), samples: F.length, durationSec: +(total / FPS).toFixed(2),
+    renderMs, layers,
+  };
+}
+
+function fmtSpans(spans) {
+  const shown = spans.slice(0, 8).map((s) => `${s.state} ${s.from}-${s.to}s`);
+  return shown.join(' → ') + (spans.length > 8 ? ` … +${spans.length - 8} more` : '');
+}
+
+if (TRACE) {
+  const results = [];
+  for (const f of formats) for (const d of DATA_LIST) {
+    try { results.push(await traceOf(f, d)); }
+    catch (e) { results.push({ format: f, data: d, error: String(e && e.message || e) }); }
+  }
+  await browser.close(); server.close();
+  if (JSON_OUT) { emitJson(results); }
+  else {
+    console.log('==================== MOTION TRACE ====================');
+    for (const r of results) {
+      if (r.error) { console.log(`✗ err  ${r.format}: ${r.error}`); continue; }
+      console.log(`${r.format} · ${r.data}  (${r.durationSec}s · ${r.total} frames · sampled every `
+        + `${r.strideFrames} frame(s) = ${r.sampleIntervalMs}ms · ${r.samples} samples · ${r.renderMs}ms to trace)`);
+      if (!r.layers.length) console.log('    no tracked content elements. Add `data-layer="critical"` (or an id) to key elements to trace them');
+      for (const L of r.layers) {
+        console.log(`    ${L.key}: ${fmtSpans(L.spans)}`);
+        console.log(`        peak ${L.peakVelocity}px/s @${L.peakVelocityAt}s · peak area Δ${L.peakAreaChangePct}% @${L.peakAreaChangeAt}s · shape=${L.shape}`);
+      }
+    }
+    console.log('\nAn instrument, not a gate: no pass/fail, nothing here blocks. Read the spans and the shape.');
+  }
+  process.exit(0);
 }
 
 const results = [];
