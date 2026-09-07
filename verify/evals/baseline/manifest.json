@@ -1,6 +1,6 @@
 {
- "when": "2026-09-06T11:39:03.669Z",
- "commit": "e94cfeb4",
+ "when": "2026-09-07T17:52:54.882Z",
+ "commit": "e818b2cb",
  "briefsDir": "verify/evals/briefs",
  "runDir": "verify/evals/baseline",
  "sheet": "verify/evals/baseline/sheet.png",
@@ -8,8 +8,8 @@
   {
    "name": "demo",
    "ok": true,
-   "duration": 10,
-   "expectedDuration": 10,
+   "duration": 15,
+   "expectedDuration": 15,
    "dims": {
     "w": 1920,
     "h": 1080
@@ -24,8 +24,8 @@
   {
    "name": "explainer",
    "ok": true,
-   "duration": 12,
-   "expectedDuration": 12,
+   "duration": 20,
+   "expectedDuration": 20,
    "dims": {
     "w": 1920,
     "h": 1080
@@ -40,8 +40,8 @@
   {
    "name": "launch",
    "ok": true,
-   "duration": 13,
-   "expectedDuration": 13,
+   "duration": 26,
+   "expectedDuration": 26,
    "dims": {
     "w": 1920,
     "h": 1080
@@ -56,8 +56,8 @@
   {
    "name": "recreation",
    "ok": true,
-   "duration": 11,
-   "expectedDuration": 11,
+   "duration": 22,
+   "expectedDuration": 22,
    "dims": {
     "w": 1920,
     "h": 1080
@@ -88,8 +88,8 @@
   {
    "name": "talking-head",
    "ok": true,
-   "duration": 12,
-   "expectedDuration": 12,
+   "duration": 21,
+   "expectedDuration": 21,
    "dims": {
     "w": 1080,
     "h": 1920
