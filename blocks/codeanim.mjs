@@ -22,8 +22,8 @@
 //   * `var(--t)`: the raw scene clock, used only for the caret blink, which is genuinely periodic and
 //     therefore something a one-shot vars ramp cannot express.
 // Nothing here reads Date or Math.random. Same props → same layers → same pixels.
-import { TOKENS, HAIR, r2, R } from './kit.mjs';
-import { codeBlock } from './dev.mjs';
+import { TOKENS, HAIR, r2, R, E } from './kit.mjs';
+import { CODE_THEMES } from './dev.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
@@ -37,21 +37,19 @@ const P_EASE = 'easeOutCubic';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// palette(theme): dev.mjs's CODE_THEMES, harvested rather than copied.
+// palette(theme): dev.mjs's CODE_THEMES, read directly.
 //
-// CODE_THEMES is module-private to blocks/dev.mjs, so the only two ways to reach it are to duplicate
-// twelve palettes here (which drifts the moment anyone edits one) or to ASK the factory that owns
-// them. codeBlock is a pure function of its props, so calling it with a known shape and reading the
-// colours back off the layer it returns is deterministic, costs nothing at render, and means a
-// thirteenth theme added over there is available here for free. See `frameworkFindings` in the
-// handover: the honest fix is one `export` keyword in dev.mjs, which this task may not touch.
-const PAL_ROWS = 12;   // ≥ the longest syntax ring in CODE_THEMES, so nothing is truncated
+// This used to call codeBlock and harvest colours back off the native `children` it returned (the
+// only way to reach a module-private palette without duplicating twelve theme tables here). codeBlock
+// is now an `html` fragment with no `children` to harvest, so the honest fix named in that old comment
+// (export CODE_THEMES from dev.mjs) is the one taken: one table, read by both files, chrome derived
+// with the same isDark rule codeBlock itself applies.
 export function palette(theme = 'midnight') {
-  const [card] = codeBlock({ x: 0, y: 0, theme, label: '·', lines: Array.from({ length: PAL_ROWS }, () => '') });
-  const kids = card.children;
+  const P = CODE_THEMES[theme] || CODE_THEMES.midnight;
+  const isDark = !P.light;
   return {
-    bg: card.bg, border: card.border, elevation: card.elevation || 0,
-    label: kids[0].color, syntax: kids.slice(1).map((k) => k.color),
+    bg: P.bg, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, elevation: isDark ? 0 : E.flat,
+    label: P.label, syntax: P.syntax,
   };
 }
 // One line's colour: the palette's syntax ring, cycled by line index, the identical rule codeBlock
