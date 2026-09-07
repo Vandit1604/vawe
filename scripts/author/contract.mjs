@@ -1,4 +1,4 @@
-// contract.mjs CLI: `make contract D=<film>` — validate the per-beat continuous-object contract a
+// contract.mjs CLI: `make contract D=<film>`: validate the per-beat continuous-object contract a
 // storyboard carries (object_in/object_out on each beat, scripts/lib/contract.mjs). Standalone so a
 // broken handoff is visible before `make scenes`/`make assemble` refuse to run it for you.
 import fs from 'node:fs';

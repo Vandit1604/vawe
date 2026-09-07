@@ -1,4 +1,4 @@
-// scenes.mjs: `make scenes D=<film>` — THE FAN-OUT. PRINTS one agent brief per scene: the kit block,
+// scenes.mjs: `make scenes D=<film>`: THE FAN-OUT. PRINTS one agent brief per scene: the kit block,
 // that scene's contract, its exact copy, the anti-slop rules, and the one verify command. It launches
 // NOTHING: docs/CRAFT/SUBAGENT-BUDGET.md is the reason (fewer, larger agents; a fan-out's cost is a
 // deliberate human choice, never a default). The owner reads the briefs and decides whether to spend
@@ -61,10 +61,10 @@ beats.forEach((b, i) => {
   console.log('═'.repeat(78));
   console.log(`Write: ${path.relative(ROOT, fragPath)}`);
   console.log(`Kit:   paste ${path.relative(ROOT, kitPath)}'s block verbatim at the top (regenerate: node scripts/author/stagekit.mjs ${film})`);
-  console.log(`Copy (exact words, do not paraphrase): ${b.onscreen.length ? b.onscreen.map((l) => JSON.stringify(l)).join(' / ') : '(none stated — REPLACE the storyboard\'s onscreen: line first)'}`);
+  console.log(`Copy (exact words, do not paraphrase): ${b.onscreen.length ? b.onscreen.map((l) => JSON.stringify(l)).join(' / ') : '(none stated: REPLACE the storyboard\'s onscreen: line first)'}`);
   if (b.object_in || b.object_out) {
     console.log(`Continuous object arrives at: ${b.object_in || '(unset)'}   leaves at: ${b.object_out || '(unset)'}`);
-    console.log(`  (the object itself is drawn by \`make assemble\`, not by this fragment — the fragment is everything ELSE in the beat)`);
+    console.log(`  (the object itself is drawn by \`make assemble\`, not by this fragment: the fragment is everything ELSE in the beat)`);
   }
   console.log('Anti-slop:');
   for (const r of ANTI_SLOP) console.log(`  - ${r}`);
