@@ -203,9 +203,20 @@ const layers = spans.map((s, i) => ({
 // Nothing arrives on frame one. A layer whose entrance starts at t=0 is already fully on screen at the
 // first rendered frame, so there is no arrival to see, it reads as a jump-cut rather than an entrance.
 // Push the hook beat's start by 0.2s and shrink it by the same amount so it still ends exactly where the
-// next beat begins (the tiling above has no gaps or overlaps, and this must not reopen one).
+// next beat begins (the tiling above has no gaps or overlaps, and this must not reopen one). 0.2s sits
+// inside docs/RULES/first-arrival.md's own 0.1-0.3s window, so the two are already reconciled: this is
+// the delay that doc asks for, not a second number competing with it.
+//
+// THE HOOK-REGISTER BEATS ARE THE EXCEPTION, not an oversight. kineticHook/blurResolveHook/wordWipe/
+// dialogueAccumulate each already put something on screen at their OWN start:0 (a ramp: a fade,
+// blur-resolve, or in-motion sweep), because they are built to open a film with no prior beat to have
+// registered first. Pushing THEIR start by another 0.2s does not add a ramp, it inserts a true empty
+// hold in front of a beat that was already correct, which is the exact failure first-arrival.md warns
+// against, just introduced by this scaffold instead of by hand. So the offset applies to every OTHER
+// beat that lands first, and skips these four.
+const HOOK_BEATS = new Set(['kineticHook', 'blurResolveHook', 'wordWipe', 'dialogueAccumulate']);
 const FIRST_ARRIVAL_OFFSET = 0.2;
-if (layers[0] && layers[0].dur > FIRST_ARRIVAL_OFFSET) {
+if (layers[0] && !HOOK_BEATS.has(layers[0].beat) && layers[0].dur > FIRST_ARRIVAL_OFFSET) {
   layers[0].start = +(layers[0].start + FIRST_ARRIVAL_OFFSET).toFixed(2);
   layers[0].dur = +(layers[0].dur - FIRST_ARRIVAL_OFFSET).toFixed(2);
 }
