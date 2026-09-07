@@ -10,7 +10,7 @@ import { canvasKind } from '../canvas/kind.js'; // records each canvas's context
 import { themeErrors, resolveLook, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from '../registry/theme-contract.js';
 import { parseColor, contrastRatio, ensureContrast } from '../motion/motion.js';
 import { validateAll } from '../validate/validate.mjs';
-import { produceBaseline, bakeCameraMove, bakeDepth, bakeFocus } from './produce.js';
+import { produceBaseline, bakeCameraMove, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -496,6 +496,10 @@ export async function boot(build) {
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
     const look = resolveLook(theme, { isLightBg }); // the whole-film default (docs/CRAFT/THEME-LOOK.md);
     // an authored theme.look wins key by key, computedLook fills the rest for the 37 themes with none.
+    // A NAMED size ("headline") lowers to the theme's real px number HERE, before resolveCoords: that
+    // function reads `L.size` directly to estimate a text layer's height for a bottom pin, and a string
+    // reaching that arithmetic would silently become NaN (core/engine/produce.js bakeTextSizeRoles).
+    bakeTextSizeRoles(data, look);
     resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
     produceBaseline(data, theme, frame, look); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
     // scene that didn't specify it: absent-only, theme-aware, additive (never rewrites an authored layer),

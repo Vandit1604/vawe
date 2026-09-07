@@ -162,6 +162,200 @@ export function inferCuts(layers, duration = Infinity) {
   return out;
 }
 
+// ---------------------------------------------------------------------------------------------------
+// CONTENT-AWARE CUT STYLE. inferCuts (above) finds WHERE a film likely turns, purely from the GAP
+// between beat starts. It knows nothing about what sits on either side of that gap, and the owner's
+// objection is correct: a content-blind cut cannot make a good film. This is the other half.
+//
+// THE DISTINCTION THAT KEEPS THIS HONEST, so it does not repeat MISTAKES #159 (the engine once picked
+// the BACKGROUND, and nobody ever designed one again). RULING OUT a style is a structural fact about
+// the two beats: a fade over a layer that is still on screen erases it, a dissolve over two boxes that
+// occupy the same pixels reads muddy. Those are true or false, not a matter of taste. CHOOSING among
+// what survives that narrowing never reaches past the two names the THEME already picked
+// (`look.cuts.default`/`look.cuts.accent`) plus the doctrine's own unconditional fallback, the hard
+// cut (`docs/CRAFT/TRANSITIONS.md`: "if a seam can't answer with a real relationship or feeling, it is
+// a hard cut"). The engine narrows a set someone else supplied; it never invents a name into it.
+const RAPID_JOINT_S = 1.6; // joints closer together than this stay in one cut family (rhythm)
+const VELOCITY_FLOOR = 200; // px/s; cutVelocityAdvice's own floor for "this is a move, not drift"
+const STRADDLE_EPS = 0.02; // seconds; float-safe "at the same instant" for window/start/end compares
+
+const windowOf = (L) => {
+  const s = typeof L?.start === 'number' ? L.start : 0;
+  return [s, s + (typeof L?.duration === 'number' ? L.duration : 2)];
+};
+
+// a picture (a claim the eye reads) vs text vs decoration (a rect/paint/glow/beam/particles field that
+// dresses the frame but carries no content of its own). Decoration is excluded from the overlap and
+// medium checks below on purpose: a full-bleed backdrop paint trivially "overlaps" everything it sits
+// under, and scoring that as muddy would rule out the theme's default cut on nearly every film.
+const PICTURE_TYPES = new Set(['image', 'video', 'svg', 'lottie', 'component', 'html', 'three', 'globe', 'clip', 'doc', 'board']);
+const mediumOf = (L) => {
+  if (!L || typeof L !== 'object') return null;
+  if (!L.type || L.type === 'text' || L.type === 'count') return 'text';
+  return PICTURE_TYPES.has(L.type) ? 'picture' : null;
+};
+
+// a layer's authored box in canvas px. Top-level layers only, resolved by the time this runs
+// (produceBaseline is called AFTER resolveCoords, core/engine/boot.js), so x/y/w are already numbers,
+// not "50%"/"center". A text layer with no `h` gets the same size*1.2 estimate resolveCoords itself
+// uses for the same reason (core/engine/boot.js's own `hEst`): one guess, read from one place.
+function layerBox(L) {
+  if (!L || typeof L.x !== 'number' || typeof L.y !== 'number' || typeof L.w !== 'number') return null;
+  let h = typeof L.h === 'number' ? L.h : null;
+  if (h == null && (L.type === 'text' || L.type === 'count' || !L.type) && typeof L.size === 'number') h = L.size * 1.2;
+  return h == null ? null : { x: L.x, y: L.y, w: L.w, h };
+}
+const boxesOverlap = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+
+// SURVIVES: does anything stay on screen ACROSS this joint, so the frame it sits in must not be
+// wiped or masked out from under it? Three shapes, all listed by the owner: a window that straddles
+// `t` outright (on screen before AND after), an `acrossBeats:true` layer whose window covers `t` (the
+// mechanism scene.js gives a continuous object to opt out of beat-wrapping), and a `becomes` handover
+// landing AT `t` (the outgoing layer ends here and hands its pose to a named layer that starts here,
+// the shared-element morph: two layers, one identity, and a fading wrapper would cut the join in half).
+function survivesJoint(layers, t) {
+  for (const L of layers) {
+    if (!L || typeof L !== 'object') continue;
+    const [s, e] = windowOf(L);
+    if (s < t - STRADDLE_EPS && t < e - STRADDLE_EPS) return true;
+    if (L.acrossBeats === true && s <= t && t < e) return true;
+  }
+  for (const L of layers) {
+    if (typeof L?.becomes !== 'string') continue;
+    if (Math.abs(windowOf(L)[1] - t) > STRADDLE_EPS) continue;
+    const B = layers.find((x) => x && x.id === L.becomes);
+    if (B && Math.abs(windowOf(B)[0] - t) <= STRADDLE_EPS) return true;
+  }
+  return false;
+}
+
+// the OUTGOING/INCOMING shot at a joint: not "whatever ends/starts exactly at t" (a film with dead air
+// around its own cut, showcase-lumen.json among them, has nothing at that exact instant), but the last
+// layers to leave before t and the first to arrive at/after it, whichever instant that turns out to be.
+const outgoingAt = (layers, t) => {
+  const ends = layers.map((L) => windowOf(L)[1]).filter((e) => e <= t + STRADDLE_EPS);
+  if (!ends.length) return [];
+  const last = Math.max(...ends);
+  return layers.filter((L) => Math.abs(windowOf(L)[1] - last) <= STRADDLE_EPS);
+};
+const incomingAt = (layers, t) => {
+  const starts = layers.map((L) => windowOf(L)[0]).filter((s) => s >= t - STRADDLE_EPS);
+  if (!starts.length) return [];
+  const first = Math.min(...starts);
+  return layers.filter((L) => Math.abs(windowOf(L)[0] - first) <= STRADDLE_EPS);
+};
+
+// does the medium change cleanly (all text -> all picture, or back)? A mixed shot on either side (a
+// caption over a photo) is not a "medium change", it is two media sharing a beat, so this only fires
+// when the two sets of REAL content (decoration excluded, see mediumOf) don't overlap at all.
+function mediumChangedAt(outgoing, incoming) {
+  const om = new Set(outgoing.map(mediumOf).filter(Boolean));
+  const im = new Set(incoming.map(mediumOf).filter(Boolean));
+  if (!om.size || !im.size) return false;
+  return [...om].every((m) => !im.has(m));
+}
+
+// does the backdrop turn at this joint? `bg` windows with no explicit from/to auto-bind to the film's
+// own joints IN ORDER (bindWindowsToJunctions above), so every joint is a window boundary in that case.
+// Windows that declare their own from/to are on their own clock; read which one is live either side.
+function bgChangesAt(bg, t) {
+  if (!Array.isArray(bg) || bg.length < 2) return false;
+  if (!bg.some((w) => w && (w.from != null || w.to != null))) return true;
+  const at = (tt) => bg.find((w) => w && (w.from ?? w.t ?? 0) <= tt && tt < (w.to ?? Infinity)) || null;
+  return at(t - STRADDLE_EPS) !== at(t + STRADDLE_EPS);
+}
+
+// is a layer's picture still moving through this joint? Reuses velocityAt's own reader
+// (core/timeline/velocity-cut.js layerSpeedAt) rather than a second speed computation: one owner of
+// "how fast is this layer going", the same rule that file's own header states about `sequence.js`.
+function jointHasVelocity(layers, t, layerSpeedAt) {
+  return layers.some((L) => layerSpeedAt(L, t) >= VELOCITY_FLOOR);
+}
+
+/**
+ * classifyJoint(t, layers, opts) → { compatible, chosen, reason }.
+ *
+ * `compatible` is the SET this joint can honestly use: some of `'none'` (hard cut, always safe),
+ * `'default'`, `'accent'` (the theme's two named cuts, `opts.cuts = { default, accent }`, names only,
+ * this file never imports the theme). `chosen` is one member of `compatible`; `reason` is a short
+ * human sentence, kept on the injected cut (`_why`) so a gate that later disagrees can quote why the
+ * engine picked what it picked, the same contract `authoring.allow._why` already gives an author.
+ *
+ * `opts`: `bg` (the film's raw `bg` array), `layerSpeedAt` (injected so this file needs no DOM/import
+ * cycle with velocity-cut.js's own dependencies; pass `layerSpeedAt` from that module), `prevFamily`
+ * and `accentUsed` (rhythm + "spend the accent once", threaded by the caller across joints in order).
+ */
+export function classifyJoint(t, layers, { cuts = {}, bg = null, layerSpeedAt = () => 0, prevT = null, prevFamily = null, accentUsed = false } = {}) {
+  const survivor = survivesJoint(layers, t);
+  const outgoing = outgoingAt(layers, t).filter((L) => mediumOf(L));
+  const incoming = incomingAt(layers, t).filter((L) => mediumOf(L));
+  const oBoxes = outgoing.map(layerBox).filter(Boolean);
+  const iBoxes = incoming.map(layerBox).filter(Boolean);
+  const overlap = oBoxes.length > 0 && iBoxes.length > 0 && oBoxes.some((a) => iBoxes.some((b) => boxesOverlap(a, b)));
+  const mediumChange = mediumChangedAt(outgoing, incoming);
+  const tonal = bgChangesAt(bg, t);
+  const velocity = jointHasVelocity(layers, t, layerSpeedAt);
+  const rhythmFast = prevT != null && (t - prevT) < RAPID_JOINT_S && prevFamily != null;
+
+  // 'default'/'accent' are only in play when the caller resolved a real name for them (a raw cut
+  // style, not merely a name the theme wrote down: see core/engine/produce.js's own guard against
+  // `look.cuts.accent` naming a seam-only fx). Absent is a rule-out, exactly like an overlap or a
+  // survivor: the engine still never INVENTS a name to fill the gap.
+  let compatible = ['none', ...(['default', 'accent'].filter((f) => cuts && cuts[f]))];
+  const why = [];
+
+  // RULE-OUTS: structural facts, never a look. Each removes a name; none of them ever adds one.
+  if (survivor) {
+    compatible = ['none'];
+    why.push('a layer survives this joint (becomes/acrossBeats/a window straddling it): a soft or match cut is the only honest family, and the invisible cut is the softest one there is');
+  } else if (overlap) {
+    compatible = compatible.filter((f) => f !== 'default');
+    why.push('the outgoing and incoming boxes overlap: a dissolve there reads muddy');
+  }
+  if (!survivor && rhythmFast) {
+    compatible = compatible.filter((f) => f === prevFamily || f === 'none');
+    why.push(`this joint follows the last one inside ${RAPID_JOINT_S}s: staying in one family (${prevFamily})`);
+  }
+
+  // CHOOSE WITHIN WHAT REMAINS. Still only the theme's two names or the doctrine's hard-cut default.
+  let chosen;
+  if (compatible.length === 1) {
+    chosen = compatible[0];
+  } else if (tonal && compatible.includes('accent') && !accentUsed) {
+    chosen = 'accent';
+    why.push('the backdrop turns here: the one loud moment earns the accent, spent once');
+  } else if ((velocity || mediumChange) && compatible.includes('default')) {
+    chosen = 'default';
+    why.push(velocity ? 'a layer is still moving as this joint arrives: worth marking, not hiding'
+      : 'the medium changes across this joint (text/picture): worth marking');
+  } else {
+    chosen = compatible.includes('none') ? 'none' : compatible[0];
+  }
+  if (!why.length) why.push('no relationship or feeling crosses this joint (docs/CRAFT/TRANSITIONS.md): the doctrine default, a hard cut');
+
+  return { compatible, chosen, reason: why.join('; ') };
+}
+
+/**
+ * chooseCutStyles(joints, layers, opts) → [{ t, style, family, compatible, reason }], one row per
+ * joint IN ORDER. Threads the two things a single joint cannot know on its own: the previous joint's
+ * family (rhythm) and whether the accent has already been spent this film (`look.cuts.accent` is the
+ * one loud moment, `AGENTS.md` says do not spread it). `opts.cuts = { default, accent }` are the real
+ * transition NAMES those two families resolve to; `style: 'none'` is the hard cut, name-free.
+ */
+export function chooseCutStyles(joints, layers, opts = {}) {
+  const out = [];
+  let prevT = null, prevFamily = null, accentUsed = false;
+  for (const t of joints) {
+    const { compatible, chosen, reason } = classifyJoint(t, layers, { ...opts, prevT, prevFamily, accentUsed });
+    const style = chosen === 'none' ? 'none' : (opts.cuts && opts.cuts[chosen]) || 'none';
+    out.push({ t, style, family: chosen, compatible, reason });
+    prevT = t; prevFamily = chosen;
+    if (chosen === 'accent') accentUsed = true;
+  }
+  return out;
+}
+
 // `matches`, a top-level array binding two named layers onto a junction (`{ "at": "cut@1", "from",
 // "to" }`), used to live here: bindMatchesToJunctions retimed both layers onto the joint and handed
 // the handover to `becomes`, so the boundary had one copy of its number instead of three (the cut's
