@@ -84,9 +84,9 @@ frosted glass, then gradient cards):
 | dev.mjs | spinner | **no-html-equivalent**: is a `type:'lottie'` layer, no html equivalent |
 
 None of the 11 fall in the fourth sub-reason this table started with ("a data picture needing SVG/canvas
-primitives an html layer can't host") — every chart, gauge, ring, map and diagram in the "already html"
+primitives an html layer can't host"): every chart, gauge, ring, map and diagram in the "already html"
 list already proves an `<svg>` fragment inside an `html` layer covers that case, so nothing here is left
-native FOR that reason.
+native for that reason.
 
 ## Method
 
