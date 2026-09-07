@@ -159,8 +159,12 @@ export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: c
 export function logoLockup({ markX = 690, markY = 300, markW = 150, wordX = 860, wordY = 322, wordW = 470,
   mark, wordmark, headline, sub, bodySize, captionSize, start = 0, dur = 5.5 } = {}) {
   return [
-    // exitDur 0 on both: held to the beat's own end, see cardCascade above.
-    mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.4, duration: dur - 0.4, anim: 'pop', enterDur: 0.6, out: 'defocus', exitDur: 0, ken: { from: 1.0, to: 1.05 } },
+    // exitDur 0 on both: held to the beat's own end, see cardCascade above. Mark at +0.3, not +0.4: the
+    // engine no longer fades a layer's default exit (core/timeline/clips.js exitDurOf), so the PRECEDING
+    // beat now holds crisply to its own end with nothing trailing into the cut. A first entrance further
+    // out than the beat-check dead-air breath threshold (0.4s) then reads as a stall, not a beat of
+    // rest. 0.3s stays inside first-arrival.md's own 0.1-0.3s window and under that threshold.
+    mark && { type: 'image', src: mark, x: markX, y: markY, w: markW, start: start + 0.3, duration: dur - 0.3, anim: 'pop', enterDur: 0.6, out: 'defocus', exitDur: 0, ken: { from: 1.0, to: 1.05 } },
     wordmark && { type: 'image', src: wordmark, x: wordX, y: wordY, w: wordW, start: start + 0.7, duration: dur - 0.7, anim: 'slide-left', enterDur: 0.6, out: 'defocus', exitDur: 0 },
     headline && kineticHeadline({ text: headline, x: 160, y: markY + 260, w: 1600, size: bodySize || 78, weight: 700, each: 0.44, stagger: 0.05, start: start + 1.3, dur: dur - 1.3 }),
     sub && caption({ text: sub, x: 160, y: markY + 400, w: 1600, size: captionSize || 38, start: start + 2.0, dur: dur - 2.0 }),

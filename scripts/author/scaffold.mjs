@@ -36,6 +36,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { docRegistry, computeFeatures, storyboardPathFor } from '../gates/craft-checklist.mjs';
+import { loadScene } from '../../core/engine/expand.js';
 import { nearestExemplars, exemplarSignature } from '../lib/exemplars.mjs';
 import { TYPE_SPINES, typeNames } from './type-spines.mjs';
 
@@ -347,9 +348,16 @@ function beatSection(s, i) {
   ].join('\n');
 }
 
-// Which CRAFT docs will craft-checklist ask about? Compute the same features it computes and answer
-// every relevant one with a REPLACE stub, so the scaffold starts craft-checklist-clean too.
-const features = computeFeatures(scene);
+// Which CRAFT docs will craft-checklist ask about? It runs `loadScene` first (core/engine/expand.js),
+// so it sees the beats EXPANDED (kineticHook's caption, containerFill's html fragment, ...), never the
+// bare `{type:"beat"}` this scaffold writes to disk. Reading features off the unexpanded `scene` used
+// to miss every doc a beat's own expansion turns on (hasTextBeats, hasHtml): a beat-composed film always
+// carries text and, since the html-first conversion, often html, but scaffold answered neither, so
+// `make author-check` failed craft-unvisited on a fresh scaffold before a single REPLACE: marker was
+// touched. Compute on a deep clone through the SAME loader craft-checklist uses, so scaffold answers the
+// docs the checker will actually ask about, not the docs a beat REFERENCE happens to satisfy.
+const expandedForFeatures = loadScene(JSON.parse(JSON.stringify(scene)));
+const features = computeFeatures(expandedForFeatures);
 const relevantDocs = docRegistry().filter((d) => features[d.appliesWhen] === true);
 const specIdx = payoffIdx >= 0 ? payoffIdx : 0; // no dedicated payoff slot on a 2-beat film: spectacle is the hook's count-up
 const craftLines = relevantDocs.length
