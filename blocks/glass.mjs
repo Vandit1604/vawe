@@ -23,6 +23,14 @@ import { svgIcon } from '../core/layout/icons.js';
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
 export const CATEGORY = 'Surfaces';
 
+// HTML-FIRST FAMILY. Design Read: the frosted-glass register, generic (no OS chrome, no vendor marks),
+// one edge/sheen/ink vocabulary reused across all six. `frost()` stays a LAYER prop set (bg/border/
+// glass/elevation are chrome, not markup) spread onto `type:'html'` layers; the panel interior is one
+// markup string per panel. Motion is engine-driven only: envelope `anim`/`out` for an independently
+// timed unit (a stacked card, a grid tile), `parts` with `data-part` where several rows share one
+// panel's stagger, `motion` for the keyed spread track. Never CSS `animation`/`transition`/`opacity`/
+// `filter`; `glass` (blur) is the layer prop, not a CSS filter in the fragment.
+
 
 // The three constants the whole family shares, so the edge, the sheen and the readable ink cannot
 // drift between six blocks the way fifteen copies of the hairline card once did.
@@ -53,17 +61,18 @@ const scrimFor = ({ x, y, w, h, radius = R.round, alpha = 0.62, start, dur, anim
   rect({ x, y, w, h, radius, bg: `rgba(9,11,17,${alpha})`, start, duration: dur, anim, enterDur,
     out: 'defocus', exitDur: 0.4 });
 
-// the top sheen: a bright hairline reading as light caught on the panel's upper edge.
-const sheen = (w) => rect({ w, h: 2, radius: R.pill,
-  bg: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)' });
+// the top sheen: a bright hairline reading as light caught on the panel's upper edge. A markup string
+// now (spliced into a fragment), not a layer: nothing here draws it on its own any more.
+const sheenHtml = (w) => `<div style="width:${w}px;height:2px;border-radius:${R.pill}px;`
+  + 'background:linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)"></div>';
 
 // an icon in its own soft tile: the one identity element these surfaces have, drawn from OUR icon
-// set (core/icons.js refuses an unknown name rather than rendering an icon-shaped hole).
-const iconTile = (name, { size = 52, glyph = 26, radius = R.tight, color = INK } = {}) => box({
-  w: size, h: size, radius, bg: 'rgba(255,255,255,0.15)', border: `1px solid ${EDGE_SOFT}`,
-  layout: 'row', justify: 'center', items: 'center',
-  children: [{ type: 'html', w: glyph, h: glyph, html: svgIcon(name, { size: glyph, color }) }],
-});
+// set (core/icons.js refuses an unknown name rather than rendering an icon-shaped hole). A markup
+// string spliced into a fragment, so a panel with several tiles pays for one layer, not one per tile.
+const iconTileHtml = (name, { size = 52, glyph = 26, radius = R.tight, color = INK } = {}) =>
+  `<div style="width:${size}px;height:${size}px;border-radius:${radius}px;flex:none;`
+  + `display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);`
+  + `border:1px solid ${EDGE_SOFT}">${svgIcon(name, { size: glyph, color })}</div>`;
 
 // spreadFrom: a keyed track that carries a panel OUT of a collapsed centre into its resting place.
 // The layer's base position is where it ENDS (offsets are relative), so the collapsed state is key 0.
@@ -97,33 +106,39 @@ export function glassWidgets({ x, y, w = 1080, h = 560, title = 'Frosted surface
     ...glassCard({ x, y, w: heroW, h: bodyH, title, desc, tint: 0.09,
       radius: R.round, start, dur, anim: 'pop', enterDur: 0.55 })];
 
+  // ONE HTML LAYER PER TILE, not `parts`: each tile already carries its own start offset off `i`, and
+  // `parts`' flat stagger cannot express a per-item delay that is also a function of loop index here.
   stats.forEach((s, i) => {
+    const th = r2(tileH);
+    const html = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;`
+      + `gap:${SPACE.snug}px;padding:${SPACE.lg}px;box-sizing:border-box;width:${sideW}px;height:${th}px">`
+      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK_SUB};letter-spacing:.10em">${s.label ?? ''}</span>`
+      + `<span style="font:700 ${TYPE.display}px var(--font-sans);color:${INK};letter-spacing:-.02em">${s.value ?? ''}${s.unit ?? ''}</span>`
+      // the theme's own success colour, lifted toward white: `var(--up)` straight measured 1.6:1
+      // on this panel, and a status colour nobody can read is decoration.
+      + (s.delta ? `<span style="font:700 ${TYPE.body}px var(--font-sans);color:color-mix(in srgb, var(--up) 45%, #fff)">${s.delta}</span>` : '')
+      + '</div>';
     out.push({
-      type: 'group', x: x + heroW + gap, y: r2(y + i * (tileH + gap)), w: sideW, h: r2(tileH),
-      layout: 'column', justify: 'center', items: 'flex-start', gap: SPACE.snug, pad: SPACE.lg,
+      type: 'html', x: x + heroW + gap, y: r2(y + i * (tileH + gap)), w: sideW, h: th, html,
       ...frost({ radius: R.soft, tint: 0.11, blur: 16 }),
       start: r2(start + 0.25 + i * 0.14), duration: r2(dur - 0.25 - i * 0.14),
       anim: 'slide-right', enterDur: 0.42, out: 'defocus', exitDur: 0.4,
-      children: [
-        text({ text: s.label, size: TYPE.body, weight: 600, color: INK_SUB, ls: '0.10em' }),
-        text({ text: `${s.value ?? ''}${s.unit ?? ''}`, size: TYPE.display, weight: 700, color: INK, ls: '-0.02em' }),
-        // the theme's own success colour, lifted toward white: `var(--up)` straight measured 1.6:1
-        // on this panel, and a status colour nobody can read is decoration.
-        s.delta && text({ text: s.delta, size: TYPE.body, weight: 700,
-          color: 'color-mix(in srgb, var(--up) 45%, #fff)' }),
-      ].filter(Boolean),
     });
   });
 
+  // EACH CHIP KEEPS ITS OWN `frost()`, so this stays N html layers inside one row group rather than one
+  // fragment: glass blur is a LAYER prop (`glass:`), so a chip that reads as its own pane of glass needs
+  // its own layer, and the group is what keeps the row's flex gap without hand-computed x offsets.
   if (chips.length) {
     out.push({
       type: 'group', x, y: r2(y + bodyH + gap), layout: 'row', items: 'center', gap: SPACE.sm,
       start: r2(start + 0.55), duration: r2(dur - 0.55), anim: 'rise', enterDur: 0.4,
       out: 'defocus', exitDur: 0.35,
-      children: chips.map((c, i) => text({
-        text: c, size: TYPE.body, weight: 600, color: INK, pad: '11px 22px',
+      children: chips.map((c, i) => ({
+        type: 'html', html: `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK};white-space:nowrap">${c}</span>`,
+        pad: '11px 22px',
         ...frost({ radius: R.pill, tint: 0.13, blur: 14, elevation: E.card }),
-        ...stagger(i, { step: 0.07, anim: 'pop', enterDur: 0.3 }),
+        delay: r2(0.15 + i * 0.07), anim: 'pop', enterDur: 0.3,
       })),
     });
   }
@@ -137,22 +152,24 @@ export function glassWidgets({ x, y, w = 1080, h = 560, title = 'Frosted surface
 // BACKDROP: `mesh` or `gradientWash`. A card is small, so the movement under it must be fine-grained.
 export function glassNotification({ x, y, w = 600, items = [], step = 0.5, indent = 26, rowGap = SPACE.sm,
   cardH = 108, start = 0, dur = 5 } = {}) {
-  return items.map((it, i) => ({
-    type: 'group', x: r2(x + i * (indent / 2)), y: r2(y + i * (cardH + rowGap)),
-    w: r2(w - i * indent), h: cardH,
-    layout: 'row', items: 'center', gap: SPACE.md, pad: SPACE.md,
-    ...frost({ radius: R.soft, tint: r2(0.12 - i * 0.015), blur: 20 }),
-    start: r2(start + i * step), duration: r2(dur - i * step),
-    anim: 'slide-right', enterDur: 0.45, out: 'slide-left', exitDur: 0.4,
-    children: [
-      iconTile(it.icon || 'spark', { size: 56, glyph: 28 }),
-      box({ layout: 'column', items: 'flex-start', gap: SPACE.tight, grow: 1, children: [
-        text({ text: it.title || '', size: TYPE.base, weight: 700, color: INK }),
-        it.body && text({ text: it.body, size: TYPE.body, weight: 500, color: INK_SUB, w: r2(w - i * indent - 200) }),
-      ].filter(Boolean) }),
-      it.meta && text({ text: it.meta, size: TYPE.body, weight: 600, color: INK_SUB }),
-    ].filter(Boolean),
-  }));
+  return items.map((it, i) => {
+    const cw = r2(w - i * indent);
+    const html = `<div style="display:flex;align-items:center;gap:${SPACE.md}px;padding:${SPACE.md}px;`
+      + `box-sizing:border-box;width:${cw}px;height:${cardH}px">`
+      + iconTileHtml(it.icon || 'spark', { size: 56, glyph: 28 })
+      + `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.tight}px;flex:1;min-width:0">`
+      + `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${INK}">${it.title || ''}</span>`
+      + (it.body ? `<span style="font:500 ${TYPE.body}px var(--font-sans);color:${INK_SUB}">${it.body}</span>` : '')
+      + '</div>'
+      + (it.meta ? `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK_SUB};flex:none">${it.meta}</span>` : '')
+      + '</div>';
+    return {
+      type: 'html', x: r2(x + i * (indent / 2)), y: r2(y + i * (cardH + rowGap)), w: cw, h: cardH, html,
+      ...frost({ radius: R.soft, tint: r2(0.12 - i * 0.015), blur: 20 }),
+      start: r2(start + i * step), duration: r2(dur - i * step),
+      anim: 'slide-right', enterDur: 0.45, out: 'slide-left', exitDur: 0.4,
+    };
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -163,33 +180,30 @@ export function glassNotification({ x, y, w = 600, items = [], step = 0.5, inden
 export function glassMenu({ x, y, w = 440, title = '', rows = [], highlight = -1,
   rowH = 54, start = 0, dur = 4 } = {}) {
   const inner = w - 2 * SPACE.sm;
-  const children = [];
-  if (title) children.push(text({ text: title, size: TYPE.body, weight: 700, color: INK_SUB,
-    ls: '0.12em', pad: '6px 14px 10px', ...stagger(0, { step: 0, delay: 0.1, anim: 'fade', enterDur: 0.25 }) }));
-
-  rows.forEach((r, i) => {
-    const d = stagger(i, { step: 0.055, delay: 0.16, anim: 'fade', enterDur: 0.26 });
-    if (r.sep) {
-      children.push(rect({ w: inner, h: 1, bg: EDGE_SOFT, ...d }));
-      return;
-    }
+  // ONE FRAGMENT, `parts` STAGGERS THE ROWS: title is plain content (it is not a row and does not
+  // arrive with them), every row and separator carries `data-part` in DOM order.
+  let inner_html = title
+    ? `<span style="font:700 ${TYPE.body}px var(--font-sans);color:${INK_SUB};letter-spacing:.12em;padding:6px 14px 10px">${title}</span>`
+    : '';
+  inner_html += rows.map((r, i) => {
+    if (r.sep) return `<div data-part style="width:${inner}px;height:1px;background:${EDGE_SOFT}"></div>`;
     const lit = i === highlight;
-    children.push(box({
-      w: inner, h: rowH, radius: R.tight, layout: 'row', items: 'center', gap: SPACE.sm,
-      pad: '0 14px', ...(lit ? { bg: HILITE, border: `1px solid ${EDGE}` } : {}), ...d,
-      children: [
-        { type: 'html', w: 22, h: 22, html: svgIcon(r.icon || 'arrowRight', { size: 22, color: lit ? INK : INK_SUB }) },
-        text({ text: r.label || '', size: TYPE.body, weight: lit ? 700 : 500, color: lit ? INK : INK_SUB, grow: 1 }),
-        r.hint && text({ text: r.hint, font: 'mono', size: TYPE.body, weight: 500, color: 'rgba(255,255,255,0.62)' }),
-      ].filter(Boolean),
-    }));
-  });
+    return `<div data-part style="width:${inner}px;height:${rowH}px;border-radius:${R.tight}px;box-sizing:border-box;`
+      + `display:flex;align-items:center;gap:${SPACE.sm}px;padding:0 14px;`
+      + (lit ? `background:${HILITE};border:1px solid ${EDGE}` : '') + '">'
+      + svgIcon(r.icon || 'arrowRight', { size: 22, color: lit ? INK : INK_SUB })
+      + `<span style="flex:1;font:${lit ? 700 : 500} ${TYPE.body}px var(--font-sans);color:${lit ? INK : INK_SUB}">${r.label || ''}</span>`
+      + (r.hint ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:rgba(255,255,255,0.62)">${r.hint}</span>` : '')
+      + '</div>';
+  }).join('');
+  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.tight}px;`
+    + `padding:${SPACE.sm}px;box-sizing:border-box;width:${w}px">${inner_html}</div>`;
 
   return [{
-    type: 'group', x, y, w, layout: 'column', items: 'flex-start', gap: SPACE.tight, pad: SPACE.sm,
+    type: 'html', x, y, w, html,
     ...frost({ radius: R.soft, tint: 0.10, blur: 22 }),
     start, duration: dur, anim: 'scale', enterDur: 0.36, out: 'defocus', exitDur: 0.32,
-    children,
+    parts: [{ anim: 'fade', each: 0.26, stagger: 0.055, delay: 0.16 }],
   }];
 }
 
@@ -224,11 +238,9 @@ export function glassControls({ x, y, w = 760, track = 'Deterministic render', e
       `<div class="gc-bar" style="flex:1;height:${barH(i)}px;border-radius:4px;background:linear-gradient(180deg,var(--accent),rgba(255,255,255,0.35))"></div>`).join('')
     + `</div>`;
 
-  const btn = (icon, size) => box({ w: size, h: size, radius: R.pill,
-    bg: size > 64 ? INK : 'rgba(255,255,255,0.16)', border: `1px solid ${EDGE}`,
-    layout: 'row', justify: 'center', items: 'center',
-    children: [{ type: 'html', w: Math.round(size * 0.42), h: Math.round(size * 0.42),
-      html: svgIcon(icon, { size: Math.round(size * 0.42), color: size > 64 ? 'var(--accent)' : INK }) }] });
+  const btnHtml = (icon, size) => `<div style="width:${size}px;height:${size}px;border-radius:${R.pill}px;flex:none;`
+    + `display:flex;align-items:center;justify-content:center;background:${size > 64 ? INK : 'rgba(255,255,255,0.16)'};`
+    + `border:1px solid ${EDGE}">${svgIcon(icon, { size: Math.round(size * 0.42), color: size > 64 ? 'var(--accent)' : INK })}</div>`;
 
   return [
     { type: 'html', x, y, w, h: scrubH, pad: SPACE.lg, html: scrub,
@@ -238,13 +250,14 @@ export function glassControls({ x, y, w = 760, track = 'Deterministic render', e
       parts: [{ select: '.gc-fill', anim: 'widen', delay: 0.85, ease: 'easeOutCubic', out: true },
         { select: '.gc-head', anim: 'popIn', delay: 1.25, out: true }] },
 
-    { type: 'group', x, y: r2(y + scrubH + gap), w: transW, h: rowH,
-      layout: 'row', justify: 'center', items: 'center', gap: SPACE.lg, pad: SPACE.md,
+    { type: 'html', x, y: r2(y + scrubH + gap), w: transW, h: rowH,
+      html: `<div style="display:flex;align-items:center;justify-content:center;gap:${SPACE.lg}px;`
+        + `padding:${SPACE.md}px;box-sizing:border-box;width:${transW}px;height:${rowH}px">`
+        + btnHtml('arrowLeft', 52) + btnHtml('bolt', 72) + btnHtml('arrowRight', 52) + '</div>',
       ...frost({ radius: R.pill, tint: 0.12, blur: 20 }),
       start: r2(start + 0.1), duration: r2(dur - 0.1), anim: 'fade', enterDur: 0.3,
       out: 'defocus', exitDur: 0.4,
-      motion: spreadFrom(r2(cx - (x + transW / 2)), r2(cy - (y + scrubH + gap + rowH / 2)), { at: 0.2 }),
-      children: [btn('arrowLeft', 52), btn('bolt', 72), btn('arrowRight', 52)] },
+      motion: spreadFrom(r2(cx - (x + transW / 2)), r2(cy - (y + scrubH + gap + rowH / 2)), { at: 0.2 }) },
 
     { type: 'html', x: r2(x + transW + gap), y: r2(y + scrubH + gap), w: meterW, h: rowH,
       pad: SPACE.xs, html: meter,
@@ -274,30 +287,34 @@ export function glassHome({ x, y, tiles = [], cols = 4, size = 132, gap = SPACE.
   const out = [];
 
   if (widget) {
+    const html = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;`
+      + `gap:${SPACE.snug}px;padding:${SPACE.lg}px;box-sizing:border-box;width:${w}px;height:${widgetH}px">`
+      + sheenHtml(Math.round(w * 0.5))
+      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK_SUB};letter-spacing:.10em">${widget.label || ''}</span>`
+      + `<span style="font:700 ${TYPE.hero}px var(--font-sans);color:${INK};letter-spacing:-.03em">${widget.value || ''}</span>`
+      + (widget.sub ? `<span style="font:500 ${TYPE.body}px var(--font-sans);color:${INK_SUB}">${widget.sub}</span>` : '')
+      + '</div>';
     out.push({
-      type: 'group', x, y, w, h: widgetH, layout: 'column', justify: 'center', items: 'flex-start',
-      gap: SPACE.snug, pad: SPACE.lg, ...frost({ radius: R.round, tint: 0.11, blur: 22 }),
+      type: 'html', x, y, w, h: widgetH, html,
+      ...frost({ radius: R.round, tint: 0.11, blur: 22 }),
       start, duration: dur, anim: 'pop', enterDur: 0.5, out: 'defocus', exitDur: 0.4,
-      children: [
-        sheen(Math.round(w * 0.5)),
-        text({ text: widget.label || '', size: TYPE.body, weight: 600, color: INK_SUB, ls: '0.10em' }),
-        text({ text: widget.value || '', size: TYPE.hero, weight: 700, color: INK, ls: '-0.03em' }),
-        widget.sub && text({ text: widget.sub, size: TYPE.body, weight: 500, color: INK_SUB }),
-      ].filter(Boolean),
     });
   }
 
+  // ONE HTML LAYER PER TILE, not `parts`: the diagonal-wave delay is a function of each tile's own
+  // row/col, which `parts`' flat stagger cannot express.
   const gridY = y + (widget ? widgetH + gap : 0);
   tiles.forEach((t, i) => {
     const c = i % cols, r = Math.floor(i / cols);
     const tx = x + c * (size + gap), ty = gridY + r * (size + gap + labelH);
     const st = r2(start + 0.2 + (c + r) * 0.07);          // the diagonal wave
     out.push({
-      type: 'group', x: tx, y: r2(ty), w: size, h: size, layout: 'row', justify: 'center', items: 'center',
+      type: 'html', x: tx, y: r2(ty), w: size, h: size,
+      html: `<div style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center">`
+        + svgIcon(t.icon || 'cube', { size: glyph, color: INK, stroke: 1.6 }) + '</div>',
       ...frost({ radius: R.round, tint: 0.13, blur: 18 }),
       start: st, duration: r2(dur - (st - start)), anim: 'pop', enterDur: 0.4,
       out: 'defocus', exitDur: 0.35,
-      children: [{ type: 'html', w: glyph, h: glyph, html: svgIcon(t.icon || 'cube', { size: glyph, color: INK, stroke: 1.6 }) }],
     });
     if (label && t.label) {
       // TYPE.base, not TYPE.fine: a TOP-LEVEL text layer is floored at 18px by the validator, and
@@ -317,6 +334,13 @@ export function glassHome({ x, y, tiles = [], cols = 4, size = 132, gap = SPACE.
 // everything else is context. A frosted label sits above the magnified item and a running dot below.
 // The dock is a row of unequal boxes, so it is asymmetric by construction.
 // BACKDROP: `gradientWash` or `metallicSheen`. The strip is short and wide; it wants lateral movement.
+//
+// LEFT NATIVE, not a candidate after all: scripts/gates/lib-test.mjs asserts the per-tile corner
+// fraction directly off `dock.children[i].radius / .w` (the "every tile's corner is the same fraction
+// of its own size" invariant). That is a real check worth keeping, and this pass is not permitted to
+// touch scripts/gates/**, so a native `group` of `box()` tiles is the form the invariant can still be
+// read off. The label chip and running dot already worked in html/native as appropriate; only the
+// dock strip itself stayed a group, for this one reason.
 export function glassDock({ x, y, items = [], magnify = -1, size = 76, peak = 1.62, gap = SPACE.sm,
   start = 0, dur = 4.5 } = {}) {
   const pad = SPACE.sm;
@@ -349,11 +373,14 @@ export function glassDock({ x, y, items = [], magnify = -1, size = 76, peak = 1.
   if (magnify >= 0 && magnify < items.length && items[magnify]) {
     const it = items[magnify];
     if (it.label) {
-      out.push(text({ text: it.label, x: r2(centreOf(magnify) - 130), y: r2(y - 68), w: 260, align: 'center',
-        size: TYPE.base, weight: 700, color: INK, pad: '9px 18px',
+      out.push({
+        type: 'html', x: r2(centreOf(magnify) - 130), y: r2(y - 68), w: 260,
+        html: `<div style="text-align:center;padding:9px 18px;box-sizing:border-box;width:260px">`
+          + `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${INK}">${it.label}</span></div>`,
         ...frost({ radius: R.pill, tint: 0.16, blur: 16, elevation: E.card }),
         start: r2(start + 0.45), duration: r2(dur - 0.45), anim: 'pop', enterDur: 0.3,
-        out: 'defocus', exitDur: 0.3 }));
+        out: 'defocus', exitDur: 0.3,
+      });
     }
     out.push(rect({ x: r2(centreOf(magnify) - 4), y: r2(y + dockH + 10), w: 8, h: 8, radius: R.pill,
       bg: 'var(--accent)', start: r2(start + 0.55), duration: r2(dur - 0.55),
