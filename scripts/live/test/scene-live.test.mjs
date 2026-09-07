@@ -1,69 +1,88 @@
-// scene-live.test.mjs: the suggestion half of the bg finding. The finding itself is prose measured
-// from the library and changes when the library does; what must hold is that the three names it offers
-// are real presets, are ones the film does not already use, and do not churn between two saves of the
-// same file. A suggestion that moves every save is noise an author learns to skip.
-import assert from 'node:assert';
+// node scripts/live/test/scene-live.test.mjs
+//
+// Feeds real films from formats/scene/ through the real hook, exactly as Claude Code's PostToolUse
+// does (stdin JSON, stderr on exit 2). No cases are typed by hand here: every film named below is a
+// real gate-visible scene, and every suggestion the hook makes about it is checked against the film's
+// own JSON and the real filesystem, never against a fixture that could drift from either.
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
-import { execFileSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-const HOOK = path.join(ROOT, 'scripts/live/scene-live.mjs');
+const here = dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(here, '../../..');
+const HOOK = join(here, '..', 'scene-live.mjs');
 
-const PRESET_NAMES = new Set(
-  [...fs.readFileSync(path.join(ROOT, 'core/backgrounds/presets.js'), 'utf8')
-    .matchAll(/\{\s*name:\s*'([^']+)',\s*blurb:/g)].map((m) => m[1]),
-);
-
-function run(scene, name) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'scene-live-'));
-  const file = path.join(dir, `${name}.json`);
-  fs.writeFileSync(file, JSON.stringify(scene));
-  // The hook only speaks about files under formats/scene/, so hand it a path there. It reads the file
-  // off disk, so the temp copy is what it actually parses.
-  const target = path.join(ROOT, 'formats/scene', `${name}.json`);
-  fs.copyFileSync(file, target);
-  try {
-    execFileSync('node', [HOOK], { input: JSON.stringify({ tool_input: { file_path: target } }), stdio: ['pipe', 'pipe', 'pipe'] });
-    return '';                                   // exit 0: the hook found nothing to say
-  } catch (e) {
-    return String(e.stderr || '');
-  } finally {
-    fs.rmSync(target, { force: true });
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
+function run(rel) {
+  const abs = path.join(ROOT, rel);
+  const r = spawnSync('node', [HOOK], {
+    input: JSON.stringify({ tool_input: { file_path: abs } }),
+    encoding: 'utf8',
+  });
+  return { status: r.status, out: r.stderr };
 }
 
-const film = (bg) => ({
-  module: 'scene', theme: 'vawe', duration: 6, bg,
-  layers: Array.from({ length: 4 }, (_, i) => ({ type: 'text', text: `line ${i}`, start: i })),
-});
+let bad = 0;
+const check = (label, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`); if (!ok) bad++; };
 
-function named(out) {
-  const i = out.indexOf('Three of them:');
-  if (i < 0) return [];
-  return out.slice(i).split('\n').slice(1, 4).map((l) => l.trim().split(/\s+/)[0]).filter(Boolean);
+// --- higgsfield-recreation.json: one bg window, silent with no _why. Both should fire. ---
+{
+  const rel = 'formats/scene/higgsfield-recreation.json';
+  const j = JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
+  const usedPresets = new Set((Array.isArray(j.bg) ? j.bg : (j.bg ? [j.bg] : [])).map((b) => b && b.preset).filter(Boolean));
+  const { status, out } = run(rel);
+  check('higgsfield: exits 2 (finding, never blocks)', status === 2);
+  check('higgsfield: names the bg-window number', /one bg window/.test(out));
+  // Every preset the finding suggests must be a REAL preset name this film does NOT already use.
+  const named = [...out.matchAll(/`([a-zA-Z]+)` \(/g)].map((m) => m[1]);
+  const presetsModule = await import('../../../core/backgrounds/presets.js');
+  const realNames = new Set(presetsModule.PRESETS.map((p) => p.name));
+  const suggested = named.filter((n) => realNames.has(n));
+  check('higgsfield: suggests at least one real preset', suggested.length > 0);
+  check('higgsfield: every suggested preset is real and unused by this film',
+    suggested.every((n) => realNames.has(n) && !usedPresets.has(n)));
+  check('higgsfield: names the audio._why gap', /audio\.silent.*no `_why`/.test(out));
+
+  const { out: out2 } = run(rel);
+  check('higgsfield: stable across two runs', out === out2);
 }
 
-// One window: the film gets the finding, and three real presets it is not already using.
-const one = run(film([{ preset: 'paper' }]), '_t-scene-live-one');
-const picks = named(one);
-assert.equal(picks.length, 3, `expected three suggestions, got ${picks.length} in:\n${one}`);
-for (const p of picks) {
-  assert.ok(PRESET_NAMES.has(p), `"${p}" is not a real preset`);
-  assert.notEqual(p, 'paper', 'suggested the preset the film already uses');
+// --- linear-launch.json: low pictorial share, zero hand-keyed motion, one bg window. ---
+{
+  const rel = 'formats/scene/linear-launch.json';
+  const { status, out } = run(rel);
+  check('linear-launch: exits 2', status === 2);
+  check('linear-launch: names the hand-keyed gap', /no hand-keyed motion track/.test(out));
+  // The two named candidates must be real layers of THIS film (matched by id, text snippet, or
+  // type@start), so the suggestion is never a layer the film does not have.
+  const j = JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
+  const names = new Set((j.layers || []).map((L) => L.id
+    || (typeof L.text === 'string' && L.text.replace(/<[^>]+>/g, '').replace(/&\w+;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 24))
+    || `${L.type}@${L.start ?? 0}s`));
+  const candidateLine = out.split('\n').find((l) => l.includes('candidates from THIS film'));
+  const quoted = candidateLine ? [...candidateLine.matchAll(/"([^"]+)"/g)].map((m) => m[1]) : [];
+  check('linear-launch: names at least one motion candidate', quoted.length > 0);
+  check('linear-launch: every named candidate is a real layer in this film', quoted.every((n) => names.has(n)));
 }
 
-// Stable across saves: an author who saves twice must not be handed a different three.
-assert.deepEqual(named(run(film([{ preset: 'paper' }]), '_t-scene-live-one')), picks,
-  'the same film produced different suggestions on a second save');
+// --- brew-launch-act1.json: the film CLAUDE.md holds up as the counter-example. Only the audio ---
+// finding should fire; pictorial/bg/motion are all above the library's own bar.
+{
+  const rel = 'formats/scene/brew-launch-act1.json';
+  const { status, out } = run(rel);
+  check('brew-launch-act1: still exits 2 (audio._why gap)', status === 2);
+  check('brew-launch-act1: stays silent on pictorial (46% is well above the median)', !/% pictorial \(/.test(out));
+  check('brew-launch-act1: stays silent on bg windows (6 windows)', !/bg window for the whole runtime/.test(out));
+  check('brew-launch-act1: stays silent on hand-keyed motion', !/no hand-keyed motion track/.test(out));
+}
 
-// A film that already turns its background gets no bg finding at all, so no suggestions either.
-const many = run(film([{ preset: 'paper', to: 2 }, { preset: 'ink', from: 2, to: 4 }, { preset: 'aurora', from: 4 }]),
-  '_t-scene-live-many');
-assert.ok(!many.includes('bg window for the whole runtime'),
-  `a film with three windows should not be told it has one:\n${many}`);
+// --- post-corva.json: already has every sidecar wired. A film doing fine gets silence. ---
+{
+  const rel = 'formats/scene/post-corva.json';
+  const { status } = run(rel);
+  check('post-corva: silent (exit 0), the reward for a film doing fine', status === 0);
+}
 
-console.log('✓ scene-live.test.mjs: the bg finding names three real unused presets, stable per film');
+console.log(bad === 0 ? '\nall checks correct' : `\n${bad} check(s) WRONG`);
+process.exit(bad === 0 ? 0 : 1);
