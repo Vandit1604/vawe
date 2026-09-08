@@ -9,7 +9,16 @@ A launch film is built from CAPTURE, not invention. Its taste already lives on t
 is to reflect it, never redesign it. This is the playbook; `vawe-launch` (a separate skill) is the
 step-by-step orchestrated pipeline if you want the full gated flow instead of authoring by hand.
 
-## The spine
+## The spine changes shape with length
+
+**Under ~15s: ONE CONTINUOUS ACTION, not the six-beat spine below.** `make scaffold TYPE=launch DUR=<n>`
+switches automatically at `CONTINUOUS_ACTION_MAX_S` (`scripts/author/type-spines.mjs`, 15s): the primary
+action control (the button or field the viewer would press) is named once, carries a hand-keyed track
+across the whole film, and never cuts. Read `skills/vawe-continuous-action/SKILL.md` first at this
+length; the six-beat spine below is the wrong shape for it, not a shorter version of it.
+
+**At or past ~15s: the six-beat spine**, hook -> captured UI -> feature proof -> payoff -> brand lockup
+-> CTA:
 
 Hook (open loop, 2-3s) -> captured UI (the product itself, 3-4s) -> feature proof (2-3s) -> payoff stat
 (2-3s) -> brand lockup (2-3s) -> CTA (2-3s). Pace band: 2.0-3.2s per beat. The payoff lands right before

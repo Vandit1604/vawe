@@ -46,6 +46,14 @@ before writing JSON. A sixth type, `vawe-type-talking-head`, is not in this prio
 presenter video is not one of the five deliverables above); reach it directly on request wording
 ("narrated", "voiceover", "presenter", "talking head").
 
+**The route picks the deliverable; the DURATION picks the shape.** Every type skill above now states
+which shape it takes at which length, right under its own `## The spine` heading: under
+`CONTINUOUS_ACTION_MAX_S` (`scripts/author/type-spines.mjs`, 15s) most types are ONE CONTINUOUS ACTION
+(`skills/vawe-continuous-action/SKILL.md`), not the multi-beat spine the route file's Output section
+describes for a longer film. `talking-head` and `recreation` are the two exceptions and say so in their
+own skill. `make scaffold TYPE=<type> DUR=<n>` makes this decision for you; it is not something to
+remember by hand.
+
 ## Resolve common ambiguities
 
 - A request that names a site but wants to sell nothing (no product, no CTA) is `recreation`, not
