@@ -40,6 +40,115 @@ import { flattenLayers } from '../lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../lib/findings.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
+import { population, LIBRARY } from '../lib/census.mjs';
+
+// ── THE 15 EXPRESSIVE FAMILIES, named once ──────────────────────────────────────────────────────
+// Both the per-film `vocab` (below, from `sig`) and the library-wide census (`libraryProfile`) key on
+// this same set of names, so a family counted here is the family suggested there. One vocabulary.
+const HIGH_VALUE = [
+  ['camera', 'a camera move (cameraMove: slowPush / diveIn)'],
+  ['motionTrack', 'a hand-keyed motion track (make track)'],
+  ['countup', 'a count-up (a count layer)'],
+  ['cursor', 'a cursor demo'],
+  ['ken', 'a ken push on an image'],
+  ['fx', 'a per-layer effect'],
+  ['svgMotion', 'an svg that draws itself on'],
+  ['beam', 'a border-beam accent'],
+  ['composition', 'a bespoke composition beat'],
+];
+
+// ── THE ANTI-TEMPLATE CHECK: a bar derived from the LIBRARY, not a constant somebody chose ─────────
+// The research this repo argues from (docs/CRAFT/AFTER-EFFECTS-RECIPES.md's own census, and outside:
+// the another engine community's anti-template checklist) found the same shape twice: a tool with 800+ named
+// things and an author who still reaches for the same five every time, because same-tool-same-result is
+// what an unforced default produces. Refusing "too few effects" (feature-poverty, above) does not catch
+// this: a film can clear that floor by using three of the FIVE things everyone already reaches for and
+// still be indistinguishable from the last twenty. So this asks a different question: not "how many
+// families" but "which ones, measured against what the library itself already leans on".
+//
+// libraryProfile() answers it from real files, not a guess: for every film this checkout can see (the
+// same `LIBRARY` population `make census`/`make unused` walk), which of the 15 families does it use at
+// least once, and what cadence (stagger / per-unit `each`) values does it author. The result moves as
+// the library moves; nobody has to remember to update a threshold when the library's habits change.
+let _libProfile = null;
+function libraryProfile() {
+  if (_libProfile) return _libProfile;
+  const { names, blind } = population('direction-floor · library profile', { filter: LIBRARY, quiet: true, soft: true });
+  const dir = path.join(repoRoot, 'formats/scene');
+  const famCount = {};
+  const cadence = [];
+  let n = 0;
+  for (const f of names) {
+    let j;
+    try { j = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { continue; }
+    if (j.module !== 'scene') continue;
+    n++;
+    const ls = flattenLayers(j.layers || []);
+    const fam = new Set();
+    if (ls.some((l) => l.type === 'beat' || l._beat)) fam.add('beats');
+    if (ls.some((l) => l.split || l.preset || l.fx || (Array.isArray(l.motion) && l.motion.length) || l.ken)) fam.add('kineticText');
+    if (ls.some((l) => l.type === 'count')) fam.add('countup');
+    if ((j.camera && j.camera.length > 1) || j.cameraMove) fam.add('camera');
+    if ((j.cuts || []).length || (j.seams || []).length || (j.transitions || []).length) fam.add('transition');
+    if (ls.some((l) => l.ken)) fam.add('ken');
+    if (ls.some((l) => l.type === 'cursor')) fam.add('cursor');
+    if (ls.some((l) => Array.isArray(l.motion) && l.motion.length > 1)) fam.add('motionTrack');
+    if (ls.some((l) => l.fx)) fam.add('fx');
+    if (ls.some((l) => l.type === 'beam')) fam.add('beam');
+    if (ls.some((l) => l.type === 'paint')) fam.add('paint');
+    if (ls.some((l) => l.type === 'glow' && l.flash)) fam.add('glowFlash');
+    if (ls.some((l) => l.type === 'svg' && (l.draw || l.morph))) fam.add('svgMotion');
+    if (ls.some((l) => l.type === 'composition')) fam.add('composition');
+    const bgArr = Array.isArray(j.bg) ? j.bg : (j.bg ? [j.bg] : []);
+    if (bgArr.some((b) => b && (b.mode || b.period || b.driftX != null || b.driftY != null || (b.preset && b.preset !== 'black')))) fam.add('bgMotion');
+    for (const k of fam) famCount[k] = (famCount[k] || 0) + 1;
+    for (const l of ls) {
+      const s = l.stagger;
+      if (typeof s === 'number') cadence.push(s);
+      else if (s && typeof s === 'object' && typeof s.each === 'number') cadence.push(s.each);
+      if (typeof l.each === 'number') cadence.push(l.each);
+    }
+  }
+  const ranked = Object.entries(famCount).sort((a, b) => b[1] - a[1]).map(([k]) => k);
+  _libProfile = { n, ranked, top5: new Set(ranked.slice(0, 5)), famCount, cadence, blind: blind || null };
+  return _libProfile;
+}
+
+// ── ROUTE THROUGH THE AE RECIPES TABLE, INSTEAD OF DUPLICATING IT ──────────────────────────────────
+// docs/CRAFT/AFTER-EFFECTS-RECIPES.md already carries 26 named recipes with a HAVE/PARTLY/LACK verdict
+// and the exact field to reach for; nothing consulted it at the moment a beat gets picked. This reads
+// the table LIVE and answers one question ("which HAVE recipe covers this family?") from it, so the
+// only thing kept here is a search TERM per family, never the recipe's name, verdict or field, which
+// stays owned by the doc. A doc rename or a verdict flip is read on the next run, not stale here.
+let _aeTable = null;
+function aeTable() {
+  if (_aeTable) return _aeTable;
+  let text = '';
+  try { text = fs.readFileSync(path.join(repoRoot, 'docs/CRAFT/AFTER-EFFECTS-RECIPES.md'), 'utf8'); } catch { _aeTable = []; return _aeTable; }
+  const section = text.split('## The table')[1] || '';
+  const rows = [];
+  for (const line of section.split('\n')) {
+    const m = line.match(/^\|\s*(\d+)\s*\|\s*\*\*(.+?)\*\*\s*\|.*?\|\s*\*\*(HAVE|PARTLY|LACK)\*\*\s*\|\s*(.+?)\s*\|\s*$/);
+    if (m) rows.push({ num: +m[1], name: m[2], verdict: m[3], where: m[4] });
+  }
+  _aeTable = rows;
+  return _aeTable;
+}
+// One unique substring per family, checked against every row's `where` text (see the table printed
+// by `docs/CRAFT/AFTER-EFFECTS-RECIPES.md`'s own header) so each resolves to exactly the row it names,
+// not the first row that happens to share a common word. `fx` and `composition` have no clean single-row
+// answer in the table (both are catch-alls), so they are left unmapped rather than forced onto a wrong
+// citation: aeRecipeFor returns null and the caller falls back to its own description alone.
+const AE_LOOKUP = {
+  camera: 'cameraShake', motionTrack: 'motion key', countup: 'count', kineticText: 'wordBlast',
+  svgMotion: 'svg', beam: 'beam', ken: 'ken', paint: 'matte',
+};
+const aeRecipeFor = (key) => {
+  const term = AE_LOOKUP[key];
+  if (!term) return null;
+  const hit = aeTable().find((r) => r.verdict === 'HAVE' && r.where.toLowerCase().includes(term));
+  return hit ? `AE recipe #${hit.num} "${hit.name}" (${hit.where}), docs/CRAFT/AFTER-EFFECTS-RECIPES.md` : null;
+};
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -219,9 +328,60 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
 {
   const need = dur >= 8 ? Math.min(6, 3 + Math.floor(dur / 8)) : 0;
   if (need && vocab.length < need) {
-    const HIGH_VALUE = [['camera', 'a camera move (cameraMove: slowPush / diveIn)'], ['motionTrack', 'a hand-keyed motion track (make track)'], ['countup', 'a count-up (a count layer)'], ['cursor', 'a cursor demo'], ['ken', 'a ken push on an image'], ['fx', 'a per-layer effect'], ['svgMotion', 'an svg that draws itself on'], ['beam', 'a border-beam accent'], ['composition', 'a bespoke composition beat']];
-    const reach = HIGH_VALUE.filter(([k]) => !sig[k]).map(([, v]) => v).slice(0, 5);
+    const reach = HIGH_VALUE.filter(([k]) => !sig[k]).map(([k, v]) => {
+      const ae = aeRecipeFor(k);
+      return ae ? `${v} → ${ae}` : v;
+    }).slice(0, 5);
     fail('feature-poverty', `this film uses ${vocab.length} expressive famil(y/ies) (${vocab.join(', ') || 'none'}); a ${Math.round(dur * 10) / 10}s film should reach for about ${need}. The engine has ~15 families and this draws from the top of the box. Reach for one of: ${reach.join(' · ')}. Rank them for THIS film with \`make preflight\`, or search: \`make arsenal Q="<the feeling>"\`.`);
+  }
+}
+
+// ── TEMPLATE FILM: same shape as the last twenty, whatever the vocab count says ────────────────────
+// feature-poverty (above) asks "how many families"; this asks "which ones, next to what the library
+// already leans on". A film can clear the count by using three of the five things every other film
+// already uses and still be a template: same primitives, same defaults, the exact failure the outside
+// research names (the another engine community's own anti-template checklist, cited in the doc this repo
+// argues from). Both checks below derive their bar from `libraryProfile()`, never from a number chosen
+// here, so the bar moves as the library's own habits move.
+{
+  const prof = libraryProfile();
+  if (prof.n >= 8) {   // fewer than that and "the library's top 5" is not a measurement, it is noise
+    // library-top5-only: this film's whole vocabulary sits inside the five families most OTHER films
+    // already reach for, AND it only TOUCHES each one (≤2 instances) rather than building with it. That
+    // second half is what tells a template apart from a film that leans hard into a common family:
+    // higgsfield hand-keys 6 motion tracks, a common family used at unusual depth, and 6 is not a touch.
+    if (vocab.length > 0 && vocab.length <= 3 && vocab.every((k) => prof.top5.has(k) && sig[k] <= 2)) {
+      // Suggest families OUTSIDE the top 5 this film has not used, ranked rarest-first in the library
+      // (the ones fewest other films reach for), so the fix is the opposite of what made the film generic.
+      const rare = HIGH_VALUE.filter(([k]) => !sig[k] && !prof.top5.has(k))
+        .sort((a, b) => (prof.famCount[a[0]] || 0) - (prof.famCount[b[0]] || 0))
+        .map(([k, v]) => { const ae = aeRecipeFor(k); return ae ? `${v} → ${ae}` : v; })
+        .slice(0, 3);
+      warn('library-top5-only', `this film's whole motion vocabulary (${vocab.join(', ')}) is barely `
+        + `touched (≤2 uses each) and sits entirely inside ${[...prof.top5].join(', ')}, the 5 families `
+        + `the other ${prof.n} films this checkout can see already reach for most `
+        + `(\`node scripts/lib/census.mjs\` reproduces the population${prof.blind ? `, PARTIAL checkout: ${prof.blind.split('\n')[0]}` : ''}). `
+        + `Same tool, same primitives, same shape as the last twenty.`
+        + `${rare.length ? ` Reach outside it: ${rare.join(' · ')}.` : ''}`);
+    }
+    // uniform-cadence: every staggered reveal in this film runs on the identical spacing. The outside
+    // evidence this repo argues from is specifically about IDENTICAL SPACING surviving unforced, so this
+    // reads the one authored cadence dial (stagger / parts each) the same way `motion-monotony` reads
+    // the reveal preset, and flags it only when the library itself demonstrably uses more than one value.
+    const mine = flat.map((l) => {
+      const s = l.stagger;
+      if (typeof s === 'number') return s;
+      if (s && typeof s === 'object' && typeof s.each === 'number') return s.each;
+      return typeof l.each === 'number' ? l.each : null;
+    }).filter((v) => v != null);
+    const libDistinct = new Set(prof.cadence.map((v) => Math.round(v * 1000) / 1000));
+    if (mine.length >= 4 && new Set(mine.map((v) => Math.round(v * 1000) / 1000)).size === 1 && libDistinct.size > 1) {
+      const alt = [...libDistinct].filter((v) => v !== Math.round(mine[0] * 1000) / 1000).sort((a, b) => a - b);
+      warn('uniform-cadence', `all ${mine.length} staggered reveals in this film run on the identical `
+        + `spacing (${mine[0]}s). The library this checkout can see (${prof.n} films) authors ${libDistinct.size} `
+        + `distinct values, so this is a choice this film never made, it is the field's own default surviving `
+        + `unforced. Vary it: ${alt.slice(0, 3).map((v) => `${v}s`).join(' · ') || 'try a different value per beat'}.`);
+    }
   }
 }
 

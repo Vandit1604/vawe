@@ -84,6 +84,15 @@ Opt-in, but the **final taste check before shipping**, run it on the near-final 
 ladder is green. It catches what the others structurally can't; on the argus film it flagged a stat with a
 dropped unit and a scattered beat that `critique` (0 findings) and `slop` (clean) both missed.
 
+**What this judge cannot see: whether a film is a TEMPLATE.** A frame can score well on all 7 dimensions
+and still be the same shape as the last twenty; "produced-not-generated" asks whether each frame earns
+its place, not whether the film reached past the five families every other film already reaches for.
+That comparison needs the library, not one film's frames, so it lives before the render, in
+`direction-floor.mjs` (`library-top5-only`, `uniform-cadence`; `docs/TASTE.md`). Neither check assigns a
+score: they report an absence against a measured bar and name what to reach for instead. A judge PASS
+still says nothing about sameness across the library; that is `direction-floor`'s question, not this
+gate's.
+
 ## Provenance
 
 **Do not re-add:** the claim that a blind A/B judge was never built. It shipped (`05a5123`,

@@ -15,6 +15,10 @@ group: crosscutting
 - Enforced by `make author-check D=<file>` every time (BLOCKS: validate, beats, inspect,
   plan-vs-render; REPORTS: critique, direct, floor, dissolve, designspec, copy, pace, hero,
   treatment, waiver-drift, promoted to blocking by `TASTE=1`), then post-render `make judge`.
+- `floor` (direction-floor.mjs) also reports whether THIS film is a template: `library-top5-only`
+  (its whole vocabulary sits inside the handful of families the library already leans on hardest,
+  barely touched) and `uniform-cadence` (every staggered reveal shares one spacing value). Both are
+  measured against the library, not a chosen constant, and both name what to reach for instead.
 - Checkable action: does every design decision trace to the brand's real site or the locked plan, not
   to a default?
 
@@ -25,6 +29,14 @@ files, and without an index an agent authors from its own priors, which regress 
 > **The one law:** *every frame must fight for its value.* If you cut a beat and the viewer loses
 > nothing, it was slop. A frame earns its place by **showing** something true (a real artifact, a live
 > demo, a proof), not by **saying** it (a word in a box). Produced, not generated.
+
+**Competent is not the same as directed.** Same tool, same primitives, same defaults produces the same
+film: that is not a guess, it is why the another engine community had to publish an anti-template checklist
+for its own showcase. `library-top5-only` (above) is this engine's version of that check, and the fix is
+always the same shape: reach for a family fewer films already use. [`CRAFT/AFTER-EFFECTS-RECIPES.md`](CRAFT/AFTER-EFFECTS-RECIPES.md)
+names 26 real procedures with a HAVE/PARTLY/LACK verdict against this engine; `direction-floor.mjs`
+reads that table live and cites the recipe by name when it names something to reach for, so the table
+answers "what do I use for this" instead of sitting there for you to remember to open.
 
 **The numbers behind these spines, one rule per file:** [`RULES/INDEX.md`](RULES/INDEX.md). The
 contract every scene obeys, plus a table of atomic rules (motion offsets, ease direction, stagger
