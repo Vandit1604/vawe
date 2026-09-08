@@ -114,6 +114,33 @@ Two things it gets right that are easy to get wrong by hand:
 `assemble` deliberately does nothing else: no camera, no captions, no authored `cuts`/`sceneUnits`
 beyond the one line above. Everything past that is the engine's, or the next author's, to add.
 
+## Ownership: what a re-assemble keeps, and what it warns about
+
+A real film outgrows the per-beat contract: a hand-keyed height ramp, a `count` layer, a `cameraMove`,
+anything the contract has no vocabulary for yet. `assemble` owns what it GENERATES and nothing else.
+It stamps `id: scene<N>` on every html layer and `id: object` on the one continuous-object layer it
+builds, so its own set is nameable rather than guessed at from shape. Any existing `layers[]` entry
+whose `id` is not in that set passes through untouched, appended after the generated layers in its
+original relative order, so re-assembling twice in a row with nothing changed reproduces the file
+byte-identically. A short allowlist of film-level fields (`cameraMove`, for now) survives the same
+way; `duration`, `bg`, `transitions` and `sceneUnits` stay assemble's own and are never resurrected
+from a stale scene.
+
+A preserved layer can still go stale: it was timed against beats that have since moved or shrunk.
+`assemble` reports every preserved layer and field by name, and warns when a preserved layer's
+`[start, start+duration]` window no longer lands inside the film:
+
+```
+preserved 1 hand-authored layer(s) the per-beat contract has no vocabulary for: depth-rule
+STALE:
+  ⚠ "depth-rule" spans 0s–17.5s, outside the new film (0s–17.3s): its beat likely moved or was
+    deleted. Review before shipping.
+```
+
+A preserved layer that carries `acrossBeats` is flagged as a candidate for the continuous-object
+contract, not a permanent exception: once the contract's vocabulary can express what it does (a pose
+beyond position, say), it belongs back in the per-beat fields, not hand-maintained forever.
+
 ## The film against the plan
 
 `storyboard-check SB=<file>` (`scripts/gates/storyboard-check.mjs`) reads the sibling `<film>.json` if

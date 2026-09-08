@@ -1,0 +1,44 @@
+<style>
+.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.kit-radius-sm{border-radius:8px}
+.kit-radius-md{border-radius:16px}
+.kit-radius-lg{border-radius:28px}
+.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.kit-hook{font:700 98px var(--font-sans);color:var(--text);margin:0}
+.kit-headline{font:700 68px var(--font-sans);color:var(--text);margin:0}
+.kit-body{font:400 40px var(--font-sans);color:var(--text-2);margin:0}
+.kit-caption{font:400 26px var(--font-sans);color:var(--dim);margin:0}
+.kit-accent{color:var(--accent)}
+.s-wrap{position:absolute;inset:0}
+.s-eyebrow{position:absolute;left:200px;top:214px;font:500 26px var(--font-mono);color:var(--accent);letter-spacing:.26em}
+.s-head{position:absolute;left:198px;top:262px;font:700 76px var(--font-sans);color:var(--text);letter-spacing:-.02em;margin:0}
+.s-labels{position:absolute;left:200px;top:420px;width:470px}
+.s-label{font:400 32px var(--font-mono);color:var(--text-2);padding:22px 0;border-top:1px solid var(--line);letter-spacing:.01em}
+.s-label:last-child{border-bottom:1px solid var(--line)}
+.s-idx{color:var(--accent);margin-right:20px}
+.s-stack{position:absolute;left:900px;top:300px;width:820px;height:520px}
+.s-layer{position:absolute;left:0;width:640px;height:26px;border:2px solid var(--accent);box-sizing:border-box;
+  background:linear-gradient(180deg, rgba(10,16,20,.94), rgba(5,9,11,.9))}
+.s-layer:nth-child(1){top:20px;left:120px}
+.s-layer:nth-child(2){top:150px;left:80px}
+.s-layer:nth-child(3){top:280px;left:40px}
+.s-layer:nth-child(4){top:410px;left:0}
+.s-lead{position:absolute;left:0;top:0;width:100%;height:100%}
+.s-lead i{position:absolute;left:0;height:1px;background:var(--line-strong);display:block}
+</style>
+<div class="s-wrap">
+  <div class="s-eyebrow">SENSOR STACK</div>
+  <h2 class="s-head">four sensing layers</h2>
+  <div class="s-labels">
+    <div class="s-label" data-part="label"><span class="s-idx">01</span>titanium diaphragm</div>
+    <div class="s-label" data-part="label"><span class="s-idx">02</span>strain bridge</div>
+    <div class="s-label" data-part="label"><span class="s-idx">03</span>thermal trim</div>
+    <div class="s-label" data-part="label"><span class="s-idx">04</span>seal</div>
+  </div>
+  <div class="s-stack">
+    <div class="s-layer" data-part="layer"></div>
+    <div class="s-layer" data-part="layer"></div>
+    <div class="s-layer" data-part="layer"></div>
+    <div class="s-layer" data-part="layer"></div>
+  </div>
+</div>

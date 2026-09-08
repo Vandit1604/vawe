@@ -1,0 +1,32 @@
+<style>
+.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.kit-radius-sm{border-radius:8px}
+.kit-radius-md{border-radius:16px}
+.kit-radius-lg{border-radius:28px}
+.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.kit-hook{font:700 98px var(--font-sans);color:var(--text);margin:0}
+.kit-headline{font:700 68px var(--font-sans);color:var(--text);margin:0}
+.kit-body{font:400 40px var(--font-sans);color:var(--text-2);margin:0}
+.kit-caption{font:400 26px var(--font-sans);color:var(--dim);margin:0}
+.kit-accent{color:var(--accent)}
+.g-wrap{position:absolute;inset:0}
+.g-bezel{position:absolute;left:220px;top:300px;width:520px;height:520px;border-radius:50%;
+  border:14px solid var(--accent);box-sizing:border-box;
+  background:radial-gradient(circle at 50% 46%, #0d1318 0%, #05090b 72%)}
+.g-notch{position:absolute;left:50%;top:-8px;width:4px;height:26px;background:var(--text);transform:translateX(-50%)}
+.g-read{position:absolute;left:0;right:0;top:196px;text-align:center;font:600 128px var(--font-mono);color:var(--text);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.g-sub{position:absolute;left:0;right:0;top:334px;text-align:center;font:400 26px var(--font-mono);color:#817a69;letter-spacing:.22em}
+.g-name{position:absolute;left:840px;top:392px;font:700 104px var(--font-sans);color:var(--text);letter-spacing:-.02em;margin:0}
+.g-spec{position:absolute;left:844px;top:534px;font:400 36px var(--font-mono);color:var(--text-2);letter-spacing:.01em}
+.g-rule{position:absolute;left:844px;top:506px;width:210px;height:2px;background:var(--accent)}
+</style>
+<div class="g-wrap">
+  <div class="g-bezel" data-part="bezel">
+    <div class="g-notch"></div>
+    <div class="g-read">41.2</div>
+    <div class="g-sub">METRES</div>
+  </div>
+  <h2 class="g-name">Fathom One</h2>
+  <div class="g-rule"></div>
+  <div class="g-spec" data-part="spec">titanium, 120 m rated</div>
+</div>
