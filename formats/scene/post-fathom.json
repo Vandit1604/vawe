@@ -15,19 +15,19 @@
  ],
  "transitions": [
   {
-   "at": 3.5,
+   "at": 3.55,
    "fx": "whip"
   },
   {
-   "at": 7,
+   "at": 7.1,
    "fx": "whip"
   },
   {
-   "at": 11,
+   "at": 11.15,
    "fx": "whip"
   },
   {
-   "at": 14.5,
+   "at": 14.7,
    "fx": "dissolve"
   }
  ],
@@ -58,22 +58,22 @@
      "opacity": 0.8
     },
     {
-     "t": 6.8,
+     "t": 6.65,
      "h": 470,
      "opacity": 0.9
     },
     {
-     "t": 10.6,
+     "t": 10.7,
      "h": 790,
      "opacity": 1.0
     },
     {
-     "t": 13.8,
+     "t": 14.25,
      "h": 1010,
      "opacity": 1.0
     },
     {
-     "t": 14.4,
+     "t": 14.7,
      "h": 1080,
      "opacity": 1.0
     },
@@ -85,6 +85,7 @@
    ]
   },
   {
+   "id": "scene1",
    "type": "html",
    "src": "formats/scene/post-fathom.scene1.html",
    "start": 0,
@@ -105,9 +106,10 @@
    ]
   },
   {
+   "id": "scene2",
    "type": "html",
    "src": "formats/scene/post-fathom.scene2.html",
-   "start": 3.5,
+   "start": 3.55,
    "duration": 3.5,
    "track": 1,
    "x": 0,
@@ -132,9 +134,10 @@
    ]
   },
   {
+   "id": "scene3",
    "type": "html",
    "src": "formats/scene/post-fathom.scene3.html",
-   "start": 7,
+   "start": 7.1,
    "duration": 4,
    "track": 1,
    "x": 0,
@@ -159,9 +162,10 @@
    ]
   },
   {
+   "id": "scene4",
    "type": "html",
    "src": "formats/scene/post-fathom.scene4.html",
-   "start": 11,
+   "start": 11.15,
    "duration": 3.5,
    "track": 1,
    "x": 0,
@@ -186,10 +190,11 @@
    ]
   },
   {
+   "id": "scene5",
    "type": "html",
    "src": "formats/scene/post-fathom.scene5.html",
-   "start": 14.5,
-   "duration": 3,
+   "start": 14.7,
+   "duration": 2.8,
    "track": 1,
    "x": 0,
    "y": 0,
@@ -216,7 +221,7 @@
    "size": 38,
    "color": "var(--text)",
    "start": 0.9,
-   "duration": 2.4,
+   "duration": 2.45,
    "track": 2
   },
   {
@@ -228,7 +233,7 @@
    "w": 1100,
    "size": 300,
    "color": "#05090b",
-   "start": 11.2,
+   "start": 11.35,
    "duration": 2.6,
    "track": 2,
    "font": "mono"
