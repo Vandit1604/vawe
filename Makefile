@@ -184,7 +184,8 @@ build-all: fonts ## [ship] cross-compile a render binary for every shipped platf
 # effect-soup video shipping silently; NOCHECK=1 is the explicit, logged waiver.
 video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mandatory authoring-quality ladder first (set
 	@$(if $(NOCHECK),echo "  · author-check skipped (NOCHECK=1)",echo "▶ author-check (every step, every time; TASTE=1 gives the style findings teeth) …" && node scripts/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS)))
-	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	. scripts/dev/chrome-pin.sh video && scripts/dev/render-lock.sh "$(D)" ./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	@node scripts/gates/render-verify.mjs $(D)
 	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node verify/audit.mjs $(D))
 	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)), then read /tmp/judge/sheet.png vs the rubric (docs/JUDGE.md)."
 
@@ -196,7 +197,7 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # separate commands nobody remembered. Set NOSHEETS=1 to skip them: they cost roughly one more render.
 dev: build ## [dev] THE ITERATION LOOP.
 	@echo "▶ [dev] the iteration loop, no gates, no audit"
-	./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
+	. scripts/dev/chrome-pin.sh dev && scripts/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node scripts/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
@@ -287,10 +288,17 @@ check: ## [check] every gate, every finding, ZERO consequence (runs preflight fi
 # seam check is the same `seam-snap.mjs` `make seam-check` calls, no longer a step to remember. The
 # forensics pass runs right after: seam-check flags a luminance flash, forensics catches the three
 # defects flat luminance can't see (a redraw, a lingering fade, a field that steps).
+# make render-verify D=<file>: does out/<name>[.-*].mp4's REAL duration match the scene's declared
+# duration? Catches a clobbered/truncated render (two renders racing one output path) that ffmpeg's
+# own exit code does not see (`./bin/vawe` reports success either way). ship/video already run it.
+render-verify: ## [check] does the rendered mp4's duration match what the scene declares? (D=<file>, render first)
+	node scripts/gates/render-verify.mjs $(D)
+
 ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
 	@$(if $(D),node scripts/lib/ensure-preflight.mjs $(D),)
 	node scripts/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
-	./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	. scripts/dev/chrome-pin.sh ship && scripts/dev/render-lock.sh "$(D)" ./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	@node scripts/gates/render-verify.mjs $(D)
 	@$(if $(NOSPLIT),echo "  · motion split skipped (NOSPLIT=1)",node scripts/gates/motion-split.mjs $(D))
 	node verify/audit.mjs $(D) --aspect $(if $(ASPECT),$(ASPECT),all)
 	@node scripts/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
@@ -314,14 +322,18 @@ help: list ## [maintenance] alias for `make list`
 
 # make render M=scene: render a format's bundled sample.json
 render: build ## [ship] render a format's bundled sample.json
-	./bin/vawe --module $(M) --data formats/$(M)/sample.json --out out/$(M).mp4
+	. scripts/dev/chrome-pin.sh render && scripts/dev/render-lock.sh "render-$(M)" ./bin/vawe --module $(M) --data formats/$(M)/sample.json --out out/$(M).mp4
 
 # make all: every format via the render queue
 all: build ## [ship] every format via the render queue
-	./bin/vawe --all
+	. scripts/dev/chrome-pin.sh all && scripts/dev/render-lock.sh all ./bin/vawe --all
 
 # make look D=<file.json>: storyboard (key frames) for visual review, of the film at D.
 # make frame D=<file.json> N=560: one exact frame of the film at D.
+# make frame D=<file.json> N=b3: JUMP TO BEAT 3, no frame arithmetic. N=b<k> resolves to the start of
+# the kth beat via shotWindows (core/timeline/junctions.js), the same cut/seam joints the engine itself
+# cuts the film on. This is Manim's `-n <k>`, named by an outside survey as the single best iteration
+# ergonomic across every HTML/animation-to-video tool it looked at.
 # There is one module, scene, so these no longer take M=<module> the way `make render` does: that read
 # as "name your film here" by analogy with every D=-taking target, and `make look M=<film>` failed with
 # preview.mjs's raw usage blob, naming neither the mistake nor the fix. D omitted previews the module's
@@ -332,7 +344,7 @@ look: ## [dev] storyboard (key frames) for visual review, of the film at D.
 	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing formats/scene/sample.json"
 	node scripts/author/preview.mjs scene "" $(if $(D),--data $(D))
 
-frame: ## [dev] one exact frame of the film at D (D=<file.json> N=<n>)
+frame: ## [dev] one exact frame of the film at D (D=<file.json> N=<n> or N=b<beat>)
 	@test -z "$(M)" || { echo "make frame takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make frame D=$(M) N=$(N)"; exit 1; }
 	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing formats/scene/sample.json"
 	node scripts/author/preview.mjs scene $(N) $(if $(D),--data $(D))
