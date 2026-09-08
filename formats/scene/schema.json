@@ -2030,6 +2030,10 @@
        "type": "number",
        "label": "Height (px) at this key. Same rule as `w`."
       },
+      "radius": {
+       "type": "number",
+       "label": "Corner radius (px) at this key. Keyed alongside `w`/`h`, this is what turns a rectangle into a pill and then a circle: a pill is a rectangle whose radius reached half its height, a circle is a pill whose width reached its height. Unstated means unstated, the same as `w`/`h`/`track`: a track that never mentions radius leaves the layer's authored corner alone rather than starting to write one. A radius past half the box clamps silently in CSS, so judge it on a rendered frame and not on the number."
+      },
       "track": {
        "type": "number",
        "label": "Z-order at this key. Depth over TIME: key it across a neighbour's track and the layer passes behind that neighbour and out again, which is how a ribbon orbits the thing it circles. Rounded to an integer when applied. Defaults to the layer's own `track`, or its index."
