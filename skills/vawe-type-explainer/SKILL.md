@@ -9,7 +9,15 @@ No product, no site: the taste anchor is a NAMED reference (a style word, or a m
 never "clean modern SaaS". The whole film has to earn attention on the strength of the facts and the
 counts, so it holds pace longer per idea than a launch film does.
 
-## The spine
+## The spine changes shape with length
+
+**Under ~15s: ONE CONTINUOUS ACTION**, not the multi-beat spine below. `make scaffold TYPE=explainer
+DUR=<n>` switches automatically at `CONTINUOUS_ACTION_MAX_S` (`scripts/author/type-spines.mjs`, 15s): a
+held FIGURE (the one number this film proves) counts up from zero and holds at its final value, no cut.
+Read `skills/vawe-continuous-action/SKILL.md` first at this length. A single counted fact genuinely IS a
+continuous action; do not force the four-beat build below into 10s just because the type is explainer.
+
+**At or past ~15s: the multi-beat spine**, hook -> build -> counted proof -> payoff:
 
 Hook (open loop, 2-3s) -> build 1 (a set of named things, 3-4s) -> build 2 (a counted fact, 2-3s) ->
 payoff (the shocker number/fact, last, 2-3s) -> optional CTA/close. Pace band: **2.5-4.0s per beat**,
@@ -55,13 +63,14 @@ icon; see `docs/CRAFT/SHOW-DONT-TELL.md` for what counts as explanation versus d
 ## `make scaffold TYPE=explainer`
 
 ```bash
-make scaffold OUT=formats/scene/<name>.json TYPE=explainer DUR=12
+make scaffold OUT=formats/scene/<name>.json TYPE=explainer DUR=12   # < 15s: continuous action (the held figure)
+make scaffold OUT=formats/scene/<name>.json TYPE=explainer DUR=20   # >= 15s: the beat spine below
 ```
 
-Composes `kineticHook -> containerFill -> listBuildRows -> chipGrid -> statReveal -> ctaEnd`
+At DUR>=15 it composes `kineticHook -> containerFill -> listBuildRows -> chipGrid -> statReveal -> ctaEnd`
 (`scripts/author/type-spines.mjs`), cycling `paper/soft/dotmatrix` bg presets and a
-dissolve-then-punch cut family. This is the one type whose scaffold needs no captured asset at all, so
-it is also the fastest `--type` to validate clean out of the box.
+dissolve-then-punch cut family. This is the one type whose beat-spine scaffold needs no captured asset
+at all, so it is also the fastest `--type` to validate clean out of the box at that length.
 
 ## What the judge weighs for this type
 

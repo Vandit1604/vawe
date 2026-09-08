@@ -11,12 +11,18 @@ film together, the ground tone: these transfer. The literal pixels, the brand ma
 do not, and copying them is both a taste failure and, for anything captured from someone else's site or
 footage, a rights problem this repo's asset rules already forbid.
 
-## The spine
+## The spine, at every length
 
 Whatever the reference's own spine is. Do not force a hook/build/payoff shape onto a film that was
 built differently: `make study` measures the reference's actual shot lengths, ground pattern and
 threads, and THAT is the spine to recreate. If nothing has been studied yet, that is the first move,
 not a skippable step.
+
+**`make scaffold TYPE=recreation` never switches to the continuous-action shape, at any duration.**
+`type-spines.mjs` declares `continuousObject: null` for this type on purpose, the same reasoning as
+`register: null`: the studied source may or may not be a continuous action, and this scaffold cannot
+know which until you have studied it. Forcing one prop across a reference that was actually cut into
+chapters (or the reverse) lies about the content. Study first, then decide, same as the register.
 
 ## What this type needs that others do not
 

@@ -9,7 +9,14 @@ Not in the priority route table (`docs/CRAFT/ROUTING.md` names five deliverables
 reached directly by request wording: "narrated", "voiceover", "presenter", "talking head"). This is the
 one type built around a VOICE, not a visual device: everything else follows the pace of the words.
 
-## The spine
+## The spine, at any length
+
+**Talking-head does NOT take the continuous-action shape, even under ~15s.** `type-spines.mjs` declares
+`continuousObject: null` for this type on purpose: a face and its VO are held by the voice and the
+captions, not by one transforming prop, so `make scaffold TYPE=talking-head` keeps the beat spine below
+at every duration instead of switching at `CONTINUOUS_ACTION_MAX_S` the way every other type does. Read
+`skills/vawe-continuous-action/SKILL.md`'s own "Before you use this skill" section: this is exactly the
+"a manifesto... this skill's law would lie about the content" case it names.
 
 Cold open on the presenter (2-3s) -> VO builds the case, captions carry it (mid-film, 4-6s) -> B-roll
 cutaway to the proof (2-3s) -> back to the presenter for the close (2-3s). Pace band: **3.0-5.0s per

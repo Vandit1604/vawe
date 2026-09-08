@@ -21,6 +21,19 @@ changing state.
 
 That is the grammar this skill plans in. Read it before the storyboard, not after.
 
+**`make scaffold` now starts here by default, not the beat rotation.** `scripts/author/type-spines.mjs`
+exports `CONTINUOUS_ACTION_MAX_S` (15s, measured off the library: films under 15s carry 0-1.3 declared
+transitions on average and are transition-free most of the time; films past it jump to 2.5+, the same
+15s already used by `storyboard-check.mjs`'s `SPINE_MAX_S` and `direction-floor.mjs`'s
+`CONTINUITY_MAX_DUR`). `make scaffold OUT=<file> TYPE=<type> DUR=<n>` under that length emits ONE
+object (`id:"spine"`), a hand-keyed track welded from `track.mjs`'s measured `pan`/`blast` shapes, zero
+`transitions`, and a storyboard with `object`/`object_t0`/`object_states`/`object_last` already filled
+from that type's own spine (`skills/vawe-type-*/SKILL.md` each say which shape their type takes at
+which length). Two types (`talking-head`, `recreation`) opt out at every length, for the same reason
+"Before you use this skill" below gives: their content is not held by one transforming prop. The
+scaffold is a skeleton to REPLACE, not a finished film; Steps 1-7 below still decide whether the object,
+the states and the transform it built are the RIGHT ones, which no scaffold can know for your brief.
+
 ## Before you use this skill: it is one device, not the law
 
 This skill was written from one reference and then treated as a floor for every short film. It is not.
