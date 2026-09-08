@@ -22,6 +22,7 @@ import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
 import { sceneDims } from '../../core/layout/safe.js';
+import { boundaryMechanism } from '../../core/transitions/lower.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
@@ -113,8 +114,18 @@ if (chain.length) {
 }
 
 // ---- bg: one window per beat, cycling the theme's own backdrop rotation --------------------------
+// A THEME THAT DECLARES ITS OWN ROTATION OWNS THE DECISION, and this pass must not restate it.
+// `theme.bgDefault` as an array is the render-time rotation core/backgrounds/theme-rotation.js expands
+// behind `{use:"theme"}`, one window per shot. Writing the presets out here instead would fork that
+// decision: the theme would say one thing and every assembled film a copy of it, drifting the moment
+// the brand changed its mind. `look.backdrop` is deliberately NOT that field (docs/CRAFT/THEME-LOOK.md
+// says three times it is scaffold-only and never read at render), so it stays the fallback for a theme
+// that declares no rotation at all.
+const rotation = Array.isArray(theme && theme.bgDefault) ? theme.bgDefault : null;
 const backdrop = (look.backdrop && look.backdrop.length) ? look.backdrop : ['soft', 'accent'];
-const bg = beats.map((b, i) => ({ from: b.start, to: b.end, preset: backdrop[i % backdrop.length] }));
+const bg = rotation
+  ? [{ use: 'theme' }]
+  : beats.map((b, i) => ({ from: b.start, to: b.end, preset: backdrop[i % backdrop.length] }));
 
 // ---- transitions: an explicit boundary at every internal cut, since a choreographed scene (this one
 // always is, once it has an object layer) is skipped by produce.js's own auto-injection -------------
@@ -122,7 +133,15 @@ const bg = beats.map((b, i) => ({ from: b.start, to: b.end, preset: backdrop[i %
 // opacity ramp over the whole stack), so two beats with DIFFERENT bg presets swap hard mid-ramp rather
 // than blending, which is exactly the "hard swap disguised inside a soft transition" seam-forensics.mjs
 // (#seam-split) exists to catch. "seam" is the real two-scene GPU blend, so the bg crossfades too.
-const transitions = beats.slice(1).map((b) => ({ at: b.start, fx: look.cuts.default || 'fade', mech: 'seam' }));
+// ...WHEN THE FX CAN BE ONE. `look.cuts.default` is DERIVED from the theme's own pace
+// (core/registry/theme-contract.js), so a brisk brand resolves to `whip`, which is cut-only, and
+// pairing it with mech:"seam" wrote a scene `make validate` refuses: "whip is not a seam". Asking
+// boundaryMechanism instead of assuming keeps the crossfade wherever it is available and lets a
+// cut-only family through as the cut it is, rather than making every fast theme unassemblable.
+const cutFx = look.cuts.default || 'fade';
+let cutMech;
+try { cutMech = boundaryMechanism(cutFx, 'seam'); } catch { cutMech = undefined; }
+const transitions = beats.slice(1).map((b) => ({ at: b.start, fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) }));
 
 const out = {
   module: 'scene',

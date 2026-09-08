@@ -1,0 +1,108 @@
+{
+  "name": "fathom",
+  "note": "Fathom: a machined titanium dive instrument. Near-black anodised field with a single brass (#c8a24a), the colour of the milled bezel itself rather than a screen glow. Cyan-on-dark was the first choice and the anti-slop detector was right to refuse it: cyan neon on a dark field is one of the most recognisable AI-generated palettes, and a brass instrument mark is both more specific and more true to a milled object. Type is instrument-face: mono for every measured value, sans only for prose. Motion is kinetic register (docs/CRAFT/MOTION-REGISTERS.md): a launch film, so sustained motion is the content, not a cost. Fast easing, no bounce, because an instrument does not overshoot.",
+  "palette": {
+    "bg": "#05090b",
+    "bg2": "#0a1014",
+    "surface": "#0f171c",
+    "surface2": "#0a1014",
+    "line": "rgba(236,231,221,0.08)",
+    "lineStrong": "rgba(236,231,221,0.16)",
+    "text": "#ece7dd",
+    "text2": "#a89f90",
+    "dim": "#6d6759",
+    "accent": "#c8a24a",
+    "accentDim": "rgba(200,162,74,0.14)",
+    "accentGlow": "rgba(200,162,74,0.34)",
+    "up": "#c8a24a",
+    "down": "#c8a24a",
+    "ink": "#080e11"
+  },
+  "gradient": [
+    "#0b141a",
+    "#070d10",
+    "#04080a"
+  ],
+  "type": {
+    "sans": "Geist",
+    "mono": "Geist Mono",
+    "num": "Geist Mono",
+    "serif": "Geist"
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0,
+    "settle": 0.28,
+    "enter": 38,
+    "durationScale": 0.85,
+    "stagger": 0.045
+  },
+  "bg": {
+    "accent": "200,162,74",
+    "tint": "109,103,89",
+    "tint2": "200,162,74",
+    "dotLight": "140,132,114",
+    "paperBase": [
+      "#ffffff",
+      "#f4f7f6"
+    ],
+    "softBase": [
+      "#0d1c22",
+      "#071114"
+    ],
+    "accentBase": [
+      "#c8a24a",
+      "#9c7b32"
+    ],
+    "inkBase": [
+      "#080e11",
+      "#04080a"
+    ],
+    "border": "#16232a",
+    "dark": [
+      "#080e11",
+      "#04080a"
+    ],
+    "darkMesh": [
+      "#0b1a1f",
+      "#04080a"
+    ],
+    "deep": [
+      "#08131a",
+      "#03070a"
+    ],
+    "light": [
+      "#ffffff",
+      "#f4f7f6"
+    ],
+    "ink": [
+      "#080e11",
+      "#04080a"
+    ],
+    "paper": "#05090b"
+  },
+  "vars": {
+    "--ink": "#05090b",
+    "--paper": "#05090b",
+    "--muted": "#5c6f6b",
+    "--em": "#c8a24a",
+    "--on-light": "#05090b",
+    "--on-dark": "#ece7dd",
+    "--border": "#16232a",
+    "--accent-soft": "rgba(200,162,74,0.14)"
+  },
+  "bgDefault": [
+    {
+      "preset": "metallicSheen"
+    },
+    {
+      "preset": "deep"
+    },
+    {
+      "preset": "ink"
+    },
+    {
+      "preset": "accentPlain"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+<style>
+.kit-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.kit-radius-sm{border-radius:8px}
+.kit-radius-md{border-radius:16px}
+.kit-radius-lg{border-radius:28px}
+.kit-shadow{box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.kit-hook{font:700 98px var(--font-sans);color:var(--text);margin:0}
+.kit-headline{font:700 68px var(--font-sans);color:var(--text);margin:0}
+.kit-body{font:400 40px var(--font-sans);color:var(--text-2);margin:0}
+.kit-caption{font:400 26px var(--font-sans);color:var(--dim);margin:0}
+.kit-accent{color:var(--accent)}
+/* This beat is the film's one bright frame: the brass field it sits on is painted HERE rather than
+   left to the bg window alone, so the fragment is legible on its own in `make preview` and cannot
+   drift from the field the film actually gives it. Dark ink on brass is the deliberate inversion. */
+.p-wrap{position:absolute;inset:0;background:linear-gradient(160deg,#c8a24a 0%,#b08c37 100%)}
+.p-num{position:absolute;left:198px;top:300px;font:700 300px var(--font-mono);color:var(--ink);letter-spacing:-.045em;line-height:.86;margin:0;font-variant-numeric:tabular-nums;transform-origin:left bottom}
+.p-unit{font-size:104px;letter-spacing:-.01em;margin-left:14px}
+.p-proof{position:absolute;left:206px;top:660px;font:500 40px var(--font-sans);color:#241c08}
+.p-profile{position:absolute;left:200px;top:790px;width:1520px;height:150px}
+.p-profile svg{width:100%;height:100%;display:block}
+</style>
+<div class="p-wrap">
+  <div class="p-proof" data-part="proof">one dive, one charge, no surface check</div>
+  <div class="p-profile">
+    <svg viewBox="0 0 1520 150" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 8 L210 8 L470 96 L860 108 L1120 62 L1360 20 L1520 8"
+            fill="none" stroke="#05090b" stroke-width="5" stroke-opacity=".8"
+            stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+  </div>
+</div>
