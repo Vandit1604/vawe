@@ -166,6 +166,72 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 > the engine's OWN features (the `glow` layer, the card recipe at `core/layers/doc.js:25`, the `eyebrow`
 > blueprint prop, the blinds-wipe mask in `core/cuts/index.js:130` that `lib-test` asserts).
 
+## The stage kit: a foundation, not a reset
+
+`node scripts/author/stagekit.mjs <film.json>` (`make stagekit D=<film>`) prints one `<style>` block
+every scene fragment in a per-scene fan-out pastes VERBATIM (`node ... --check` asserts byte identity,
+`docs/CRAFT/PER-SCENE-FANOUT.md`). It is generated from the FILM's theme, so it is not one fixed
+stylesheet: 41 themes get 41 different kits, never one kit in 41 colours. Every number in it traces back
+to `resolveLook` (`core/registry/theme-contract.js`), never a literal the kit author picked:
+
+- **Type scale**: `.kit-hook/.kit-headline/.kit-body/.kit-caption` (unchanged from before) plus
+  `.kit-eyebrow` (an uppercase mono kicker) and `.kit-stat` (a tabular-numeral display size for a real
+  number, `font-variant-numeric:tabular-nums` so digits don't jitter width).
+- **Spacing rhythm**: `--kit-space-1` through `--kit-space-8`, an atom derived from the theme's own hook
+  size (a bigger, louder brand gets a roomier rhythm; a quieter one gets tighter), calibrated so vawe's
+  own hook (92px) reproduces LAYOUT.md's own house ladder (8 16 24 32 48 64 96 128) exactly. Reach for
+  these in your own CSS (`padding:var(--kit-space-4)`) rather than a literal px: the kit gives you the
+  atom, not a fixed set of margin utility classes, because the composition is still yours to invent.
+- **The content column and a grid**: `--kit-margin` (the theme's own layout margin) and `.kit-stage`
+  (a full-height column inset by it); `.kit-grid` (a 12-column grid, `--kit-gutter` wide) plus
+  `.kit-col-1`.."`.kit-col-12`" for asymmetric splits (`col:"2-7"` by hand, LAYOUT.md §4). An
+  **unequal** split (4/8, 7/5) is a choice you make with these; the grid itself does not impose one.
+- **Two surfaces, not one**: `.kit-card` (raised: border + a light/dark-aware shadow) for one object that
+  reads as ON TOP of the ground, and `.kit-panel` (fill only, `--surface-2`, no border or shadow) for a
+  region that reads as PART of it. Giving every surface a border is the `Nested cards` tell the detector
+  catches; `.kit-panel` is the way out. Radius (`.kit-radius-sm/md/lg`) scales with the theme's own
+  ACCENT cut (`look.cuts.accent`): a near-still brand (`letterbox`) reads more rectilinear, a bouncy one
+  (`punch`) reads rounder, so the corners agree with the brand's own energy instead of a fixed default.
+- **A hairline**: `.kit-divider`, the structural rule LAYOUT.md §0 asks for ("rules, dividers, border
+  panels… they create paths for the eye"), distinct from a card's own border.
+- **A ground for a full-bleed root**: `.kit-root` (`position:absolute;inset:0`) fills itself with a
+  faint tint of the theme's own `--line`, so a full-bleed fragment is never one giant transparent text
+  box to `verify/audit.mjs` and never collides with a sibling layer underneath it.
+
+## Beautiful, not merely correct
+
+A fragment can obey every rule above and still read as a template. These are the checks that catch the
+gap, each stated so it can be verified by looking rather than argued about:
+
+- **Optical alignment, not mathematical.** Two edges that are numerically equal do not always look
+  equal: a circle or an italic against a straight edge reads short by a few pixels and needs a nudge a
+  ruler would call wrong. If every edge in a fragment is `left:0` against every other, check by eye, not
+  by the CSS, whether they actually line up.
+- **Scale contrast is a ratio, not an adjective.** "Big hero, small caption" is not a decision until it
+  is a number: the kit's own hook-to-caption ratio is **~3.4:1** to **~4:1** across the library (a 92px
+  hook against a 24-27px caption). A fragment where the biggest and smallest sizes sit inside 2:1 of each
+  other has not made a hierarchy decision yet, whatever the copy says.
+- **An equal grid reads as unconsidered because it answers a question nobody asked.** Three cards at
+  `flex:1` each says "these three things matter exactly the same amount," which is a claim, not a
+  layout default, and it is almost never the true claim (`formats/scene/post-postmark.scene2.html`
+  before this pass: two `flex:1` cards for two typefaces with different jobs). An asymmetric split
+  (`.kit-col-4`/`.kit-col-8`, `.kit-col-7`/`.kit-col-5`) forces the question to be answered: which one is
+  more important, by how much.
+- **A border is doing work when it separates two things that could otherwise be confused for one; it is
+  a default when it wraps a surface that already reads as separate from its ground by fill alone.**
+  `.kit-panel` (a fill-only surface, no border) is correct for a region that IS part of the frame's
+  composition (an instrument face, a grouped section); `.kit-card` (a border and a shadow) is correct
+  for the one object in the frame that has to read as sitting ON something, physically above it. Reach
+  for a border reflexively and every surface looks like a form field.
+- **The type scale carries hierarchy so weight doesn't have to do all of it.** `.kit-hook` and
+  `.kit-body` differ in size by 2.4-2.7x already; setting the body to 700 to "make it pop" fights a
+  distinction the SIZE already made and flattens the one dimension (size) a viewer reads fastest, in
+  favour of one (weight) that reads slower and closer up. Reserve weight for the SECOND distinction
+  inside one size (`<b>` recolours, per TYPOGRAPHY.md §0b: it never gets heavier than its own line).
+
+Four fragments that pass every gate here and still look different from each other, plus what each one
+deliberately refuses: [`FRAGMENT-EXEMPLARS.md`](FRAGMENT-EXEMPLARS.md).
+
 ## Preview before you render
 
 ```bash
@@ -184,6 +250,8 @@ right? Then render.
   the recipe lives beside the implementation, so the next author inherits the name rather than the guess.
 - **`core/layout/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
   says in its comments why it does that rather than referencing one on the page.
+- **`formats/scene/demo-frag-*.html`**, four kit-built exemplars, one archetype and one theme each:
+  [`FRAGMENT-EXEMPLARS.md`](FRAGMENT-EXEMPLARS.md) says what each one refuses.
 
 ## The one thing to remember
 
