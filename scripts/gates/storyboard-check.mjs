@@ -19,7 +19,7 @@ import path from 'node:path';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline } from '../author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 import { gateFindings } from '../lib/findings.mjs';
@@ -121,8 +121,10 @@ const CHANGE_VERB = /(becomes?|turns? into|opens? into|collapses?|morphs?|splits
 //
 // post hoc is not propter hoc: a trigger that only says WHEN is a sequence, and a slideshow already
 // has one of those.
-const TRIGGER_SEQUENCE = /^(then\b|next\b|and then\b|afterwards?\b|later\b|time passes|the (?:beat|shot|scene|cut|film) (?:begins|starts|ends|changes|moves on)|\d+(?:\.\d+)?\s*s\b)/i;
-const TRIGGER_EMPTY = /^(none|nothing|n\/?a|tbd|[-\u2013\u2014.\u00b7]+)$/i;
+//
+// TRIGGER_SEQUENCE/TRIGGER_EMPTY/isCausedTrigger now live in scripts/lib/contract.mjs (imported above):
+// assemble.mjs needs the exact same "is this a real cause" test to decide what to stage, and two copies
+// of it is exactly the drift MISTAKES.md #159 already names.
 
 // The time range the beat headings already carry: the SAME shape intent-from-storyboard reads.
 const RANGE = SB_RANGE;
@@ -176,7 +178,7 @@ for (const b of blocks) {
   const trigger = fieldIn(b, 'trigger');
   const filled = !!trigger && !TRIGGER_EMPTY.test(trigger);
   spans[n - 1].trigger = filled ? trigger : null;
-  spans[n - 1].caused = filled && !TRIGGER_SEQUENCE.test(trigger);
+  spans[n - 1].caused = isCausedTrigger(trigger);
   if (filled && TRIGGER_SEQUENCE.test(trigger)) {
     warn('trigger-is-sequence', `beat "${title}": trigger-is-a-sequence, "${trigger}". That says WHEN this beat happens, not what made it happen, and every slideshow already has an order. Name the act on screen that forces it: the cursor clicking Send, a number crossing the line, the hand letting go of the card.`);
   } else if (filled && trigger.split(/\s+/).length <= 6 && ANIM_VOCAB.test(trigger)) {
@@ -257,12 +259,17 @@ if (filmPath && fs.existsSync(filmPath)) {
   const scene = JSON.parse(fs.readFileSync(filmPath, 'utf8'));
   const sceneLayers = Array.isArray(scene.layers) ? scene.layers : [];
   const near = (a, b, tol) => a != null && b != null && Math.abs(a - b) <= tol;
+  // assemble.mjs writes exactly one `html` layer per beat, IN BEAT ORDER (scene1, scene2, …), so beat i
+  // is html layer i by position. A staged junction (scripts/lib/contract.mjs STAGE_S) now legitimately
+  // writes a RELATIVE `start` ("scene1.end+0.05"), which `near()` on a raw number can no longer match,
+  // so position is the one lookup that survives a start being either a number or a junction reference.
+  const htmlLayersBuilt = sceneLayers.filter((l) => l.type === 'html');
 
-  // motion: each beat's declared entries must show up as `parts` on the layer that starts at that beat.
-  tBeats.forEach((b) => {
+  // motion: each beat's declared entries must show up as `parts` on the layer built for that beat.
+  tBeats.forEach((b, i) => {
     const motion = parseMotion(b.motion);
     if (!motion.length) return;
-    const layer = sceneLayers.find((l) => l.type === 'html' && near(l.start, b.start, 0.05));
+    const layer = htmlLayersBuilt[i];
     if (!layer) {
       warn('motion-not-built', `beat "${b.name}" (${b.start}s) declares \`motion:\` but no scene layer starts there in ${path.basename(filmPath)}. Run \`make assemble D=${filmPath}\` to build it, or the storyboard is describing a film that does not exist.`);
       return;
@@ -291,20 +298,45 @@ if (filmPath && fs.existsSync(filmPath)) {
         const tt = +(t - layerStart).toFixed(3);
         return objLayer.motion.find((k) => near(k.t, tt, 0.05));
       };
-      for (const e of chain) {
+      // A staged junction (scripts/lib/contract.mjs stagedSchedule, the SAME schedule assemble.mjs
+      // builds the film from) moves where a beat's pose really lands: comparing against the storyboard's
+      // raw beat.start/end here would flag every staged handoff as "diverges" even on a clean build.
+      const { shiftedStart, shiftedEnd } = stagedSchedule(tBeats);
+      const TOL = 4;
+      // THE POSE, not only the position: w/h/rot/opacity are read off the built key exactly the way
+      // motion-diverges already reads `parts` against `motion:`. A key that omits one of these (assemble
+      // only writes w/h/rot/opacity when the chain actually uses them, contract.mjs) means "unchanged",
+      // so a beat that DECLARES a pose value the built key does not carry is exactly the divergence this
+      // was missing: the storyboard's promise (a rotation, a fade) silently did not survive the build.
+      const poseCheck = (edge, key, base, when, verb) => {
+        if (!key) return; // reported by the position check below, do not double-report
+        if (edge.w !== base.w || edge.h !== base.h) {
+          if (key.w == null || key.h == null || !near(key.w, edge.w, TOL) || !near(key.h, edge.h, TOL)) {
+            warn('object-diverges', `beat "${when}": storyboard says the object ${verb} sized ${edge.w}x${edge.h} but the built key is ${key.w != null ? `${key.w}x${key.h}` : 'unsized (no w/h on this key)'}.`);
+          }
+        }
+        if (edge.rot && (key.rot == null || !near(key.rot, edge.rot, 1))) {
+          warn('object-diverges', `beat "${when}": storyboard says the object ${verb} rotated ${edge.rot}deg but the built key carries ${key.rot ?? 'no rotation'}.`);
+        }
+        if (edge.opacity !== 1 && (key.opacity == null || !near(key.opacity, edge.opacity, 0.02))) {
+          warn('object-diverges', `beat "${when}": storyboard says the object ${verb} at opacity ${edge.opacity} but the built key carries ${key.opacity ?? 'full opacity'}.`);
+        }
+      };
+      const base = { w: chain[0].in.w, h: chain[0].in.h };
+      chain.forEach((e, i) => {
+        const at = shiftedStart[i], to = shiftedEnd[i];
         const wantIn = resolvePx(e.in, { aspect, destination });
         const wantOut = resolvePx(e.out, { aspect, destination });
-        const kIn = keyAt(e.start), kOut = keyAt(e.end);
+        const kIn = keyAt(at), kOut = keyAt(to);
         const gotIn = kIn ? { x: objLayer.x + kIn.x, y: objLayer.y + kIn.y } : null;
         const gotOut = kOut ? { x: objLayer.x + kOut.x, y: objLayer.y + kOut.y } : null;
-        const TOL = 4;
         if (!gotIn || !near(gotIn.x, wantIn.x, TOL) || !near(gotIn.y, wantIn.y, TOL)) {
-          warn('object-diverges', `beat "${e.name}" (${e.start}s): storyboard says the object arrives at ${e.in.placement}@${e.in.w}x${e.in.h} (${wantIn.x},${wantIn.y}px) but the built layer is at ${gotIn ? `${gotIn.x},${gotIn.y}px` : 'nowhere (no key at that time)'}.`);
-        }
+          warn('object-diverges', `beat "${e.name}" (${at}s): storyboard says the object arrives at ${e.in.placement}@${e.in.w}x${e.in.h} (${wantIn.x},${wantIn.y}px) but the built layer is at ${gotIn ? `${gotIn.x},${gotIn.y}px` : 'nowhere (no key at that time)'}.`);
+        } else poseCheck(e.in, kIn, base, `${e.name} (${at}s)`, 'arrives');
         if (!gotOut || !near(gotOut.x, wantOut.x, TOL) || !near(gotOut.y, wantOut.y, TOL)) {
-          warn('object-diverges', `beat "${e.name}" (${e.end}s): storyboard says the object leaves at ${e.out.placement}@${e.out.w}x${e.out.h} (${wantOut.x},${wantOut.y}px) but the built layer is at ${gotOut ? `${gotOut.x},${gotOut.y}px` : 'nowhere (no key at that time)'}.`);
-        }
-      }
+          warn('object-diverges', `beat "${e.name}" (${to}s): storyboard says the object leaves at ${e.out.placement}@${e.out.w}x${e.out.h} (${wantOut.x},${wantOut.y}px) but the built layer is at ${gotOut ? `${gotOut.x},${gotOut.y}px` : 'nowhere (no key at that time)'}.`);
+        } else poseCheck(e.out, kOut, base, `${e.name} (${to}s)`, 'leaves');
+      });
     }
   }
 }
