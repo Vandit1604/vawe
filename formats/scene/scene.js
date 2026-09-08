@@ -24,6 +24,7 @@ import { CUT_CUE, SEAM_CUE } from '/core/audio/cues.js';
 import { tactileCues } from '/core/audio/tactile.js';
 import { resolveBridges } from '/core/audio/bridges.js';
 import { cameraAt, cameraVelocityAt, dollyZ, motionAt, resolveKeyedProps } from '/core/timeline/sequence.js';
+import { layerTime } from '/core/timeline/time.js';
 import { specsOf } from '/core/fx/index.js';
 import { resolvePans } from '/core/layout/pan-resolve.mjs';
 import { watchProps, auditLayer, watchedTree } from '/core/registry/prop-audit.js';
@@ -905,7 +906,14 @@ boot((data, fps, theme, canvas) => {
       const { L, el } = layers[i];
       const start = L.start ?? 0, end = start + (L.duration ?? 2);
       const visible = t >= start && t < end;
-      const m = visible && L.motion && L.motion.length ? motionAt(L.motion, t - start, L.motionDelay) : null;
+      // THE LAYER'S OWN CLOCK, not the film's. `timeWarp`/`timeRemap` (core/timeline/time.js) are what
+      // runTracks feeds every other track before it samples this layer's motion, so a warped layer's
+      // real on-screen position at t is at layerTime(t), not at t. Reading `t - start` here instead used
+      // to sample the UNWARPED track: a box, and therefore a `follow` pinned to it, would agree with the
+      // layer's own rendering only where the warp happens to be the identity. layerTime is pure in
+      // (L, t, start, end), so this keeps resolveBoxes pure in t.
+      const lt = layerTime(L, t, start, end) - start;
+      const m = visible && L.motion && L.motion.length ? motionAt(L.motion, lt, L.motionDelay) : null;
       const base = (L.id && baseSize.get(L.id)) || { w: 0, h: 0 };
       const w = m && m.w != null ? m.w : (L.w ?? base.w);
       const h = m && m.h != null ? m.h : (L.h ?? base.h);
@@ -961,7 +969,14 @@ boot((data, fps, theme, canvas) => {
         cx, cy, scale: p.scale * q.scale, rot: p.rot, opacity: p.opacity, visible }));
     }
   }
-  const boxOf = (id) => boxes.get(id) || null;
+  // boxOf's box IS AXIS-ALIGNED, and it is left that way rather than half-fixed. `g.rot` rides along as
+// metadata that some callers read for the angle alone, but x/y/w/h/cx/cy never turn with it. So a
+// `follow` pinned to a rotating layer resolves against the layer's UNROTATED box: on an arm pivoting
+// about its foot it lands near the neutral position rather than riding the tip, which is what a real
+// film measured today. Fixing it properly means a rotation-aware `edge` mode that computes the rotated
+// edge from cx/cy/w/h/scale/rot, and that belongs in core/tracks/follow.js beside the other edge modes,
+// not here. Recorded so the next author finds the gap rather than the symptom.
+const boxOf = (id) => boxes.get(id) || null;
 
   // ---- THE REST OF THE VIEW: identity, the clock, the locked look, the backdrop, the joints ----
   // Geometry alone was not enough to write real effects against. An effect could ask WHERE another

@@ -29,6 +29,14 @@
 //
 // WRONG ON: a logo (a squashed mark is a damaged mark) and usually on type, whose letterforms carry the
 // deformation and read as a bad font. Right on a chip, a token, a ball, anything with implied mass.
+//
+// ROTATION ABOUT A FIXED ANCHOR READS TOO, not just translation. `velocityAt` only ever saw `dx`/`dy`,
+// so a layer that pivots on its own `ox`/`oy` (a swinging arm, a pendulum, a clock hand) has zero
+// translational velocity by construction and squash silently did nothing on exactly the layer it looks
+// most natural on. The fix reads `omega` (deg/s, off the same two pose samples) and converts it to a
+// tangential px/s at the box's own farthest point from its anchor, in `frame()` below, because only
+// this modifier has the box in hand to do that conversion. A layer that both moves and turns takes
+// whichever of the two reads faster; see the comment in `frame()` for the anchor/axis arithmetic.
 import { velocityAt } from '../timeline/sequence.js';
 import { FPS } from '../motion/motion.js';
 
@@ -79,9 +87,33 @@ export function build(kit, el, L, spec) {
 export function frame(kit, el, L, t, scene, spec) {
   const { amount, at } = resolve(spec, L);
   const fps = (scene.clock && scene.clock.fps) || FPS;
-  const { vx, vy } = velocityAt(L.motion, Math.max(0, t - (L.start ?? 0)), 1 / fps);
-  const horizontal = Math.abs(vx) >= Math.abs(vy);
-  const speed = horizontal ? Math.abs(vx) : Math.abs(vy);
+  const { vx, vy, omega, now } = velocityAt(L.motion, Math.max(0, t - (L.start ?? 0)), 1 / fps);
+  let horizontal = Math.abs(vx) >= Math.abs(vy);
+  let speed = horizontal ? Math.abs(vx) : Math.abs(vy);
+  // ROTATION ABOUT A FIXED ANCHOR has zero dx/dy by construction (the anchor itself never moves), so a
+  // layer pivoting on its own `ox`/`oy` (a swinging arm, a pendulum, a clock hand) read zero here and
+  // squash silently did nothing on exactly the case it looks most natural on. `velocityAt`'s `omega` is
+  // in deg/s, not px/s, and cannot be compared to vx/vy without a radius: the point that actually
+  // stretches is the layer's own farthest EXTREMITY from its anchor, not its centre, and only this
+  // modifier knows the box, so the conversion happens here rather than in the shared sampler.
+  //
+  // `el.offsetWidth/Height` READ THE DOM rather than `L.w`/`L.h`, which a text layer never states (its
+  // box is its content, sized by the browser). core/fx/ghost.js already reads the same two properties
+  // for the same reason; this runs once per squashed layer per frame, not once per layer in the scene.
+  if (omega) {
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const ax = ((now.ox ?? 50) - 50) / 100 * w, ay = ((now.oy ?? 50) - 50) / 100 * h;
+    // How far the box reaches from its own anchor along each of its OWN axes (pre-rotation: `scale`,
+    // the longhand this modifier writes, composes BEFORE `rotate` (core/fx/lag.js's header states the
+    // order), so it always deforms in the layer's own, un-rotated axes, whatever `rot` is this frame).
+    const reachX = Math.max(w / 2 - ax, w / 2 + ax), reachY = Math.max(h / 2 - ay, h / 2 + ay);
+    // The farthest point sweeps PERPENDICULAR to its own radius: an anchor near one edge with the box
+    // reaching mostly along local x (reachX large, an arm to the side) swings its tip mostly along local
+    // y, and the reverse (an arm hanging down, reachY large, swings its tip mostly along local x).
+    const R = Math.hypot(reachX, reachY);
+    const tipSpeed = Math.abs(omega) * (Math.PI / 180) * R;
+    if (tipSpeed > speed) { speed = tipSpeed; horizontal = reachY >= reachX; }
+  }
   // Linear in speed up to `at`, then held: past the point where the deform is already at its stated
   // maximum, a faster move should not keep growing into a smear the author never asked for.
   const s = 1 + amount * Math.min(1, speed / at);
