@@ -2,12 +2,15 @@
 //
 // It is NOT a second planning artefact. It reads the SAME storyboard `make scaffold` already writes
 // (scripts/author/storyboard-parse.mjs), off two fields scaffold now also emits per beat:
-//   object_in:  "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>]"   the object's POSE at this beat's START
-//   object_out: "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>]"   its POSE at this beat's END
+//   object_in:  "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   the object's POSE at beat START
+//   object_out: "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   its POSE at beat END
 // `<placement>` is a name from the safe-area PLACEMENT registry (core/layout/safe.js), never a raw
 // pixel: an author writes "bottom-left@120x40", not "x:65,y:975", so the contract is aspect-portable
 // the same way `pin` already is. `<w>x<h>` is the object's size in px at that edge; `/rot:` and `/op:`
-// are optional trailing pose fields, degrees and an opacity multiplier, both omittable (default 0/1).
+// are optional trailing pose fields, degrees and an opacity multiplier, both omittable (default 0/1),
+// and `/radius:` is the corner in px, omittable with no default at all: unstated means the layer
+// keeps its authored corner. Those three together are what turns a rectangle into a pill and then a
+// circle, which is the one shape change a continuous object could not previously express.
 //
 // WHY A NAME AND NOT A PIXEL: three scene agents each write a fragment against ONE film, and the only
 // thing that keeps their three beautiful, independently-authored fragments from being three unrelated
@@ -39,7 +42,11 @@ import { PART_NAMES } from '../../core/motion/parts.js';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
-const POSE_FIELDS = { rot: 'rot', op: 'opacity' };
+// `radius` joins as a TOKEN rather than a third positional segment, because the token grammar already
+// generalises and a fourth number in `@120x40x11` reads as a typo. Its default is undefined, not 0:
+// an edge that says nothing about radius must leave the layer's authored corner alone, which is the
+// same identity `radius` carries in core/timeline/sequence.js's POSE table.
+const POSE_FIELDS = { rot: 'rot', op: 'opacity', r: 'radius', radius: 'radius' };
 
 /** parseEdge("bottom-left@120x40/rot:15/op:0.4") → {placement,w,h,rot,opacity} | null (null = no opinion) */
 export function parseEdge(raw) {
@@ -49,7 +56,7 @@ export function parseEdge(raw) {
   const s = String(raw).trim().replace(/^["']|["']$/g, '');
   if (!s || /^<fill:/i.test(s) || /^REPLACE/i.test(s)) return null; // scaffold's own unfilled markers
   const m = EDGE_RE.exec(s);
-  if (!m) return { error: `"${s}" is not "<placement>@<w>x<h>" (e.g. "bottom-left@120x40", optionally "/rot:15" and/or "/op:0.4")` };
+  if (!m) return { error: `"${s}" is not "<placement>@<w>x<h>" (e.g. "bottom-left@120x40", optionally "/rot:15", "/op:0.4", "/radius:11")` };
   const [, placement, w, h, poseRaw] = m;
   if (!PLACEMENT[placement]) {
     const near = nearMisses(placement, Object.keys(PLACEMENT));
@@ -61,15 +68,15 @@ export function parseEdge(raw) {
     let pm;
     while ((pm = POSE_TOKEN_RE.exec(poseRaw))) {
       const key = pm[1].toLowerCase();
-      if (!POSE_FIELDS[key]) return { error: `"${key}" in "${s}" is not a known pose field. Known: rot, op` };
+      if (!POSE_FIELDS[key]) return { error: `"${key}" in "${s}" is not a known pose field. Known: rot, op, radius` };
       pose[POSE_FIELDS[key]] = +pm[2];
     }
   }
-  return { placement, w: +w, h: +h, rot: pose.rot, opacity: pose.opacity };
+  return { placement, w: +w, h: +h, rot: pose.rot, opacity: pose.opacity, ...(pose.radius != null ? { radius: pose.radius } : {}) };
 }
 
 const edgeEq = (a, b) => a && b && a.placement === b.placement && a.w === b.w && a.h === b.h
-  && a.rot === b.rot && a.opacity === b.opacity;
+  && a.rot === b.rot && a.opacity === b.opacity && a.radius === b.radius;
 const fmtEdge = (e) => {
   if (!e) return '(unset)';
   let s = `${e.placement}@${e.w}x${e.h}`;

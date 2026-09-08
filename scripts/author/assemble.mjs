@@ -112,7 +112,7 @@ if (missing.length) {
 // ---- the continuous object: one layer, a keyed motion track derived from the contract's edges -----
 const chain = edges(beats);
 let objectLayer = null;
-let usesSize = false, usesRot = false, usesOpacity = false;
+let usesSize = false, usesRot = false, usesOpacity = false, usesRadius = false;
 if (chain.length) {
   const first = chain[0];
   const base0 = resolvePx(first.in, { aspect, destination });
@@ -122,6 +122,10 @@ if (chain.length) {
   // (motion[].w/h are absolute, unlike x/y which are offsets); `rot`/`opacity` are absolute too.
   usesSize = chain.some((e) => e.in.w !== base0.w || e.in.h !== base0.h || e.out.w !== base0.w || e.out.h !== base0.h);
   usesRot = chain.some((e) => e.in.rot || e.out.rot);
+  // A radius is keyed only when an edge actually names one. Unstated means the object keeps the
+  // corner it was built with, matching the null identity radius carries in the engine's POSE table:
+  // a track that never mentions radius must not start writing one.
+  usesRadius = chain.some((e) => e.in.radius != null || e.out.radius != null);
   usesOpacity = chain.some((e) => e.in.opacity !== 1 || e.out.opacity !== 1);
   // Keyed on the SHIFTED schedule, not the storyboard's raw beat.start/end: the object's arrival has to
   // land where the beat visually starts NOW, staged junctions included, or it would reach its next pose
@@ -135,13 +139,14 @@ if (chain.length) {
     if (usesSize) { key.w = p.w; key.h = p.h; }
     if (usesRot) key.rot = edge.rot;
     if (usesOpacity) key.opacity = edge.opacity;
+    if (usesRadius && edge.radius != null) key.radius = edge.radius;
     if (keys.length && keys[keys.length - 1].t === tt) keys[keys.length - 1] = key;
     else keys.push(key);
   };
   chain.forEach((e, i) => { pushKey(shiftedStart[i], e.in); pushKey(shiftedEnd[i], e.out); });
   objectLayer = {
     type: 'rect', track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
-    fill: 'var(--accent)', radius: 4,
+    fill: 'var(--accent)', radius: chain[0].in.radius ?? 4,
     start: objStart, duration: +(shiftedEnd[chain.length - 1] - objStart).toFixed(3),
     // `sceneUnits: true` wraps each beat as its own unit, so nothing survives a cut unless it opts
     // out: `acrossBeats` attaches this layer to the camera instead of its beat wrapper

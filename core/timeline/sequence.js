@@ -133,6 +133,11 @@ export const LAYER_OWNED = ['w', 'h', 'track'];
 //   authored          pose key    identity when the key omits it
 export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['rot', 0],
   opacity: ['opacity', 1], blur: ['blur', 0], w: ['w', null], h: ['h', null], track: ['track', null],
+  // `radius` is a STYLE WRITE like `w`/`h`, not a transform: a border-radius the layer never declared
+  // has no shape to animate from, so identity is null rather than 0. Unlike `w`/`h` it is not in
+  // LAYER_OWNED: a track that keys it states both endpoints explicitly (same contract as `ox`/`oy`
+  // below), so an omitted `radius` leaves the layer's authored corner exactly as it was.
+  radius: ['radius', null],
   // THE ANCHOR POINT, KEYED. `origin` is a static CSS transform-origin written once at build
   // (core/layers/util.js applyOrigin), so the pivot a scale or rotation grows out of could never move.
   // AE keys the anchor point, and a travelling pivot is how a door swings from one hinge and then the

@@ -221,6 +221,9 @@ export function createKit(ctx) {
     if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
     if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
     if (L.bg) el.style.background = L.bg; else if (L.elevation) el.style.background = 'var(--surface)';
+    // The RESTING radius, written once at build. A keyed `radius` (core/timeline/sequence.js POSE)
+    // overwrites this per frame from formats/scene/scene.js resolveBoxes, the same split box.js already
+    // makes for w/h beside their own build-time write: this stays the one place the default lives.
     el.style.borderRadius = (L.radius ?? 16) + 'px';
     if (L.border && !L.elevation) el.style.border = L.border === true ? '1px solid var(--line)' : L.border;
     // `glow` used to be reachable ONLY from inside the elevation branch, so a layer that asked for a
