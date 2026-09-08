@@ -114,9 +114,26 @@ not: "the defaults this film refuses, in your own words"
   frame (`dead-air`) and nothing on the other side, so the cheap answer was always more motion rather
   than better motion. `rest: none` is a legal answer and it is the right one on the spectacle beat.
 
-    THE MOTION PLAN. `object_in`/`object_out` say where the ONE continuous object is; `motion:` says what
-  ELSE moves in this beat, beyond that one thing, so a fragment author is told what has to move BEFORE
-  writing the markup rather than inventing entrances after. One or more `;`-separated entries,
+    THE OBJECT'S POSE, NOT ONLY ITS POSITION. `object_in`/`object_out` say where the ONE continuous
+  object is: `<placement>@<w>x<h>`, a safe-area PLACEMENT name (never a raw pixel) and its size in px.
+  Two MORE fields ride the same edge, both optional and both trailing after a `/`: `/rot:<deg>` (the
+  object's rotation at that edge) and `/op:<0-1>` (its opacity), e.g.
+  `object_out: center@40x26/rot:15/op:0.4`. This is a POSE, not just a spot: the film this repo holds up
+  as its best (higgsfield-recreation) has an object that holds a constant bbox area while it travels
+  (already `w`x`h`), spins into its fastest frame and rights itself on landing (`rot`), and fades its
+  label out as it goes (`op`). `make assemble` keys all four (x, y, w, h, rot, opacity are all properties
+  `layers[].motion[]` already takes) into the SAME motion track the plain position form always built, so
+  a film that never states a pose builds the exact track it always did. A stated pose is part of the
+  contract exactly like placement already is: `make contract` refuses a beat whose pose does not match
+  the one it hands off to, named on both sides, same as a placement mismatch.
+  What this still cannot say: a shape morph (a rectangle becoming a pill becoming a circle) needs a
+  keyable corner radius the engine does not have yet; reach for `morph` (character/path melt, one layer)
+  or `becomes` (hand a pose to a DIFFERENT layer id, docs/CRAFT/KEYED-MOTION.md) directly on a layer for
+  that, the way 1 and 9 films in this library already do.
+
+    THE MOTION PLAN. `motion:` says what ELSE moves in this beat, beyond the one continuous object above,
+  so a fragment author is told what has to move BEFORE writing the markup rather than inventing entrances
+  after. One or more `;`-separated entries,
   `<selector>@<kind>:<inBand>[/<outBand>]`: `<selector>` is a CSS selector into the fragment's own
   markup (`[data-part="headline"]`, `.card`), the SAME selector a hand-authored `parts[].select`
   already takes (core/motion/parts.js); `<kind>` is one of the engine's named part entrances (growUp,
@@ -151,6 +168,18 @@ not: "the defaults this film refuses, in your own words"
   ("then", "next": that says when, not why), on `trigger-is-a-mechanism` ("it cuts to the next shot"),
   and on `chain-breaks` once some junctions state a cause and others do not. Full register, and what
   no static gate can see here: docs/CRAFT/FILM-STRUCTURE.md Part 5.
+
+  A DOCUMENTED CAUSE IS NOW A MECHANICAL STAGGER, not just a line in the chain report. `make assemble`
+  reads the same "is this a real cause" test the gate does (scripts/lib/contract.mjs isCausedTrigger)
+  and, for every junction that passes it, INSERTS a small stagger of real time before the next beat
+  (0.05s, resolved to its own real second, not carved out of either beat's planned duration) instead of
+  firing every junction at the flat absolute second every junction used to, regardless of cause. 0.05s is
+  evidence, not a guess: higgsfield-recreation stages its own three key events roughly 30ms and 150ms
+  apart. An UNSTATED junction is left exactly as it was: staging a cause the storyboard never wrote down
+  would be inventing one, not reading one off it. (`layers[].start` also legally accepts a live relative
+  reference, `"otherId.end+0.5"`; measured trying it here, `scripts/gates/beat-check` and
+  `scripts/author/motion-director.mjs` both read `start` as a number in places that string breaks, one
+  of them a crash, so `make assemble` resolves the reference itself rather than leaving it live.)
 
   TWO MORE FIELDS, TWO MORE QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).
   `becomes:` is WHAT IT TURNED INTO, written as "the X becomes the Y". A preset name answers the

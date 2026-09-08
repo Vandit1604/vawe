@@ -2,10 +2,11 @@
 // is refused with BOTH values named.
 //   node scripts/lib/contract.test.mjs
 import assert from 'node:assert/strict';
-import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, SPEED_BAND } from './contract.mjs';
+import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, SPEED_BAND, isCausedTrigger, STAGE_S } from './contract.mjs';
 
-// parseEdge: the happy path, quotes stripped (storyboard-parse.mjs's fieldIn does not strip them)
-assert.deepEqual(parseEdge('"bottom-left@120x40"'), { placement: 'bottom-left', w: 120, h: 40 });
+// parseEdge: the happy path, quotes stripped (storyboard-parse.mjs's fieldIn does not strip them).
+// rot/opacity default to 0/1 (no pose stated = no pose change), same "no opinion" convention as before.
+assert.deepEqual(parseEdge('"bottom-left@120x40"'), { placement: 'bottom-left', w: 120, h: 40, rot: 0, opacity: 1 });
 assert.equal(parseEdge(null), null);
 assert.equal(parseEdge('<fill: <placement>@<w>x<h>>'), null, 'an unfilled scaffold marker is "no opinion", not a value');
 
@@ -85,4 +86,46 @@ assert.deepEqual(parseMotion('none'), [], '`none` is an explicit no-motion beat'
 // every named band resolves to a real duration, so assemble.mjs never keys a `parts` entry with `undefined`
 for (const band of Object.keys(SPEED_BAND)) assert.ok(SPEED_BAND[band] > 0, `${band} must be a positive duration`);
 
-console.log('✓ contract.test.mjs: parseEdge, a clean chain, a broken handoff (named, both sides), and the motion plan all behave');
+// ── the pose: rot/op on top of placement@wxh ───────────────────────────────────────────────────────
+{
+  const e = parseEdge('center@40x26/rot:15/op:0.4');
+  assert.deepEqual(e, { placement: 'center', w: 40, h: 26, rot: 15, opacity: 0.4 }, 'pose fields parse alongside size');
+}
+{
+  // = works the same as :, and the order (op before rot) does not matter
+  const e = parseEdge('center@40x26/op=0.4/rot=15');
+  assert.deepEqual(e, { placement: 'center', w: 40, h: 26, rot: 15, opacity: 0.4 });
+}
+{
+  const bad = parseEdge('center@40x26/spin:15');
+  assert.ok(bad.error, 'an unknown pose field is refused, not silently dropped');
+}
+// a pose mismatch at a handoff is a chain break exactly like a placement or size mismatch already is
+{
+  const beats = [
+    { name: 'A', object_in: 'center@40x26', object_out: 'center@40x26/rot:15' },
+    { name: 'B', object_in: 'center@40x26', object_out: 'center@40x26' }, // should have been rot:15
+  ];
+  const errs = chainErrors(beats);
+  assert.equal(errs.length, 1, 'a beat ending rotated must hand off to a beat starting rotated the same amount');
+  assert.match(errs[0], /rot:15/);
+}
+// the edges a pose-using chain actually produces, for assemble.mjs to build a size/rot/opacity track from
+{
+  const beats = [
+    { name: 'A', start: 0, end: 1, object_in: 'center@40x26', object_out: 'center@40x40/rot:15/op:0.5' },
+    { name: 'B', start: 1, end: 2, object_in: 'center@40x40/rot:15/op:0.5', object_out: 'center@40x40/rot:15/op:0.5' },
+  ];
+  const [e1] = edges(beats);
+  assert.equal(e1.out.w, 40); assert.equal(e1.out.h, 40); assert.equal(e1.out.rot, 15); assert.equal(e1.out.opacity, 0.5);
+}
+
+// ── the staging: isCausedTrigger, shared verbatim with storyboard-check.mjs ────────────────────────
+assert.equal(isCausedTrigger(null), false, 'no trigger stated: no opinion, same convention as object_in/motion');
+assert.equal(isCausedTrigger('none'), false, 'an explicit empty marker is not a cause');
+assert.equal(isCausedTrigger('then the card lifts'), false, 'a sequence word ("then") says WHEN, not WHY: not a cause');
+assert.equal(isCausedTrigger('3.2s'), false, 'a bare timestamp is a sequence marker, not a cause');
+assert.equal(isCausedTrigger('the cursor clicks Send'), true, 'a real act on screen is a cause');
+assert.ok(STAGE_S > 0 && STAGE_S < 0.2, 'the causal stagger is a small, evidence-based offset (higgsfield: ~30-150ms), never a whole beat');
+
+console.log('✓ contract.test.mjs: parseEdge (pose included), a clean chain, a broken handoff (named, both sides), the motion plan, and staging all behave');
