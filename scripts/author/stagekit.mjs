@@ -52,5 +52,7 @@ console.log(`✓ stagekit: theme "${themeName}" → ${kitPath}`);
 console.log('\nPaste this block verbatim at the top of EVERY scene fragment for this film:\n');
 console.log(block);
 console.log(`\nTokens (already global, applyTheme sets them; never redeclare): ${['--surface', '--line', '--text', '--text-2', '--dim', '--accent', '--font-sans'].join(', ')} (full list: scripts/lib/stagekit.mjs KIT_TOKENS)`);
-console.log(`Classes: .kit-card .kit-radius-sm/md/lg .kit-shadow .kit-hook .kit-headline .kit-body .kit-caption .kit-accent`);
+console.log(`Vars: --kit-space-1..8 --kit-unit --kit-margin --kit-gutter (a spacing rhythm derived from this theme's own hook size, docs/CRAFT/HTML-FRAGMENTS.md)`);
+console.log(`Classes: .kit-root .kit-stage .kit-grid .kit-col-1..12 .kit-card .kit-panel .kit-radius-sm/md/lg .kit-shadow .kit-divider .kit-hook .kit-headline .kit-body .kit-caption .kit-eyebrow .kit-stat .kit-accent`);
+console.log(`Four worked fragments, one per archetype: docs/CRAFT/FRAGMENT-EXEMPLARS.md`);
 console.log(`\nVerify identity across fragments once they exist: node scripts/author/stagekit.mjs ${film} --check`);
