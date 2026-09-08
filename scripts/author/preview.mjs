@@ -2,6 +2,7 @@
 // into one labeled contact sheet. ~5s, not a full render.
 //   node scripts/author/preview.mjs higherlower            (storyboard)
 //   node scripts/author/preview.mjs higherlower 560         (single exact frame)
+//   node scripts/author/preview.mjs higherlower b3          (single frame: the START of beat 3)
 //   node scripts/author/preview.mjs higherlower 560 mydata.json   (custom data file)
 //   node scripts/author/preview.mjs higherlower --data mydata.json          (any position)
 //
@@ -17,6 +18,8 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/layout/safe.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
+import { loadScene } from '../../core/engine/expand.js';
+import { marksOf, junctionTable, shotWindows } from '../../core/timeline/junctions.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -24,7 +27,13 @@ const flagIdx = argv.indexOf('--data');
 const flagData = flagIdx >= 0 ? argv[flagIdx + 1] : undefined;
 if (flagIdx >= 0) argv.splice(flagIdx, flagData === undefined ? 1 : 2);
 const format = argv[0];
-const single = argv[1] != null && argv[1] !== '' ? Number(argv[1]) : null;
+// `bN` (N=b3) is a BEAT INDEX, not a frame number: resolved below, once the scene's own beats are known
+// (shotWindows off the real cut/seam joints, the same joints the engine cuts the film on). This is the
+// jump-to-beat ergonomic Manim's `-n <k>` names as the single best iteration feature in any of these
+// tools: without it, `make frame` needs a frame computed from a beat by hand every time.
+const frameArg = argv[1] != null && argv[1] !== '' ? argv[1] : null;
+const beatMatch = frameArg != null ? /^b(\d+)$/i.exec(frameArg.trim()) : null;
+let single = frameArg != null && !beatMatch ? Number(frameArg) : null;
 const dataArg = flagData ?? argv[2];
 if (flagIdx >= 0 && flagData === undefined) {
   console.error('preview.mjs: --data needs a file path after it');
@@ -61,6 +70,22 @@ const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); process.exit(1); }
 const meta = await page.evaluate(() => window.__engine.meta);
 const { duration, stings, fps: F } = meta;
+
+// Resolve bN now that the film's own duration is known: shotWindows cuts it into beats at the SAME
+// joints the engine cuts on (cuts + seams; a sting is punctuation, not a boundary), no second copy of
+// that math (core/timeline/junctions.js). b1 is always the first beat, even a film with zero cuts (one
+// shot, one window).
+if (beatMatch) {
+  const beatIdx = parseInt(beatMatch[1], 10); // 1-based, matches how a storyboard numbers its beats
+  const lowered = loadScene(structuredClone(cfg));
+  const shots = shotWindows(junctionTable(marksOf(lowered)), duration);
+  if (beatIdx < 1 || beatIdx > shots.length) {
+    console.error(`preview.mjs: beat b${beatIdx} out of range, this film has ${shots.length} beat(s) (b1..b${shots.length})`);
+    await browser.close(); server.close(); process.exit(1);
+  }
+  single = Math.round(shots[beatIdx - 1].start * F);
+  console.log(`  b${beatIdx} → frame ${single} (${shots[beatIdx - 1].start.toFixed(2)}s of ${shots.length} beat(s))`);
+}
 
 const grab = async (frame, file) => {
   await page.evaluate((n) => window.__engine.renderFrame(n), frame);
