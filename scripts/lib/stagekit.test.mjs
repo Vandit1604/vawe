@@ -22,7 +22,12 @@ const { block } = buildKit(theme, resolveLook, isLightBg);
 
 // one fragment with a hand-edited kit block: drift, named
 {
-  const drifted = block.replace('border-radius:16px', 'border-radius:99px');
+  // Read the actual computed radius back out of the golden block rather than hardcoding a px value:
+  // buildKit derives `.kit-card`'s radius from the theme's own accent cut (see stagekit.mjs), so the
+  // literal number here would go stale the moment that derivation changes, same trap as the block itself.
+  const [, mdRadius] = /\.kit-card\{[^}]*border-radius:(\d+)px/.exec(block) || [];
+  assert.ok(mdRadius, 'golden block must declare .kit-card border-radius');
+  const drifted = block.replace(`border-radius:${mdRadius}px`, 'border-radius:99px');
   const frags = [{ path: 'a.html', src: block }, { path: 'b.html', src: drifted }];
   const { ok, findings } = kitCheck(block, frags);
   assert.equal(ok, false, 'a hand-edited kit block must fail');
