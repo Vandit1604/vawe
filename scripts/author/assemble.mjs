@@ -24,6 +24,21 @@ import { isLightBg } from '../../core/motion/motion.js';
 import { sceneDims } from '../../core/layout/safe.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 
+// OWNERSHIP. Assemble owns what it GENERATES and nothing else: the html layer per beat, each stamped
+// `id: scene<N>`, and the one continuous object it builds from the contract, stamped `id: object`. So
+// the set it owns is nameable rather than guessed at from shape. Everything else in `layers[]` (a
+// hand-keyed height ramp, a count that climbs, anything the per-beat contract has no vocabulary for)
+// passes through untouched, appended after the generated layers in its original order, so a
+// re-assemble is idempotent. A few film-level fields survive the same way through the allowlist below,
+// which is an allowlist and not a blanket spread on purpose: `duration`, `bg`, `transitions` and
+// `sceneUnits` are assemble's own and resurrecting a stale copy of them would be the worse bug.
+//
+// A PRESERVED LAYER CAN GO STALE, and staging makes that likelier: every caused junction shifts, so a
+// layer that was correct before a re-assemble can now point at nothing. Carrying it silently would be
+// worse than dropping it was, so each one is reported by name and any whose window falls outside the
+// new film is warned about.
+const PRESERVED_FILM_FIELDS = ['cameraMove'];
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
 if (!film || !fs.existsSync(film)) { console.error('usage: node scripts/author/assemble.mjs <film.json>'); process.exit(1); }
@@ -145,7 +160,7 @@ if (chain.length) {
   };
   chain.forEach((e, i) => { pushKey(shiftedStart[i], e.in); pushKey(shiftedEnd[i], e.out); });
   objectLayer = {
-    type: 'rect', track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
+    id: 'object', type: 'rect', track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
     fill: 'var(--accent)', radius: chain[0].in.radius ?? 4,
     start: objStart, duration: +(shiftedEnd[chain.length - 1] - objStart).toFixed(3),
     // `sceneUnits: true` wraps each beat as its own unit, so nothing survives a cut unless it opts
@@ -191,6 +206,22 @@ let cutMech;
 try { cutMech = boundaryMechanism(cutFx, 'seam'); } catch { cutMech = undefined; }
 const transitions = beats.slice(1).map((b, i) => ({ at: shiftedStart[i + 1], fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) }));
 
+// ---- ownership: what this pass generated, against what the last one (or a hand edit) left behind ----
+const newDuration = shiftedEnd[shiftedEnd.length - 1];
+const ownedIds = new Set(htmlLayers.map((l) => l.id).concat(objectLayer ? [objectLayer.id] : []));
+const prevLayers = Array.isArray(scene.layers) ? scene.layers : [];
+const preserved = prevLayers.filter((l) => !(l && typeof l === 'object' && l.id && ownedIds.has(l.id)));
+const nameOf = (l) => l.id || `${l.type || '?'}@${l.start ?? '?'}`;
+const staleWarnings = [];
+for (const l of preserved) {
+  if (typeof l.start !== 'number' || typeof l.duration !== 'number') continue;   // no window to check
+  const end = l.start + l.duration;
+  if (l.start < -0.01 || end > newDuration + 0.01) {
+    staleWarnings.push(`  ! "${nameOf(l)}" spans ${l.start}s to ${+end.toFixed(3)}s, outside the new film (0s to ${newDuration}s): its beat likely moved or was deleted. Review before shipping.`);
+  }
+}
+const preservedFilmFields = PRESERVED_FILM_FIELDS.filter((k) => scene[k] !== undefined);
+
 const out = {
   module: 'scene',
   theme: scene.theme,
@@ -200,9 +231,10 @@ const out = {
   sceneUnits: true,
   ...(scene.authoring ? { authoring: scene.authoring } : {}),   // preserve a hand-written waiver across re-assembles
   audio: scene.audio || { auto: true },
+  ...Object.fromEntries(preservedFilmFields.map((k) => [k, scene[k]])),
   bg,
   transitions,
-  layers: objectLayer ? [...htmlLayers, objectLayer] : htmlLayers,
+  layers: objectLayer ? [...htmlLayers, objectLayer, ...preserved] : [...htmlLayers, ...preserved],
 };
 
 fs.writeFileSync(film, JSON.stringify(out, null, 1) + '\n');
@@ -212,9 +244,20 @@ console.log(`  ${transitions.length} transition(s), bg turns through: ${backdrop
 const motionCount = htmlLayers.reduce((n, l) => n + (l.parts ? l.parts.length : 0), 0);
 console.log(`  ${motionCount} motion-plan entr${motionCount === 1 ? 'y' : 'ies'} from the storyboard (\`motion:\`), built into ${htmlLayers.filter((l) => l.parts).length} scene(s)' \`parts\``);
 if (chain.length) {
-  const poseBits = [usesSize && 'size', usesRot && 'rotation', usesOpacity && 'opacity'].filter(Boolean);
+  const poseBits = [usesSize && 'size', usesRot && 'rotation', usesOpacity && 'opacity', usesRadius && 'radius'].filter(Boolean);
   console.log(`  pose: ${poseBits.length ? poseBits.join(' + ') + ' keyed alongside position' : 'position only (no beat declared a size/rot/op change)'}`);
 }
 console.log(`  ${staged} of ${htmlLayers.length - 1} junction(s) staged (\`trigger:\` names a cause): ${staged ? `+${STAGE_S}s each, inserted (film runs ${(staged * STAGE_S).toFixed(2)}s longer), not carved out of a beat` : 'none: no junction states a real cause'}.`);
 if (staged) console.log(`  (resolved to real seconds, not left as "sceneN.end+${STAGE_S}": beats-check/motion-director read \`start\` as a number)`);
+if (preservedFilmFields.length) console.log(`  preserved film-level field(s): ${preservedFilmFields.join(", ")}`);
+if (!preserved.length) console.log("  no hand-authored layers to preserve: everything in this film is generated from the storyboard.");
+if (preserved.length) {
+  console.log(`  preserved ${preserved.length} hand-authored layer(s) this contract has no vocabulary for: ${preserved.map(nameOf).join(", ")}`);
+  // A preserved layer that rides the whole film is the SHAPE of a continuous object, so it is the one
+  // worth pulling back into the contract rather than leaving as a permanent exception. Saying so is
+  // the point of reporting at all: the gaps in the contract become visible instead of being papered over.
+  const candidates = preserved.filter((l) => l.acrossBeats);
+  if (candidates.length) console.log(`  (${candidates.map(nameOf).join(", ")} spans beats: a candidate for the continuous-object contract, not a permanent exception)`);
+}
+if (staleWarnings.length) { console.log("  STALE:"); for (const w of staleWarnings) console.log(w); }
 console.log(`  Next: make author-check D=${film}`);
