@@ -164,7 +164,7 @@ with no `look` is not an error, it is a theme that has not been given one.
 
 ## The computed look, for the other 37
 
-Only 1 of the 41 themes in the registry carries an authored `look`, so an engine default reading
+Only 1 of the 42 themes in the registry carries an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
