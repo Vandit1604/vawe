@@ -18,7 +18,11 @@ node scripts/gates/motion-audit.mjs scene --data formats/scene/<file>.json --tra
 
 ## What it shows
 
-For every element with an `id` or `data-layer="critical"` that ever appears on screen:
+For every element the engine itself considers a timed layer, top-level or nested inside a group
+(selected on `[data-start]`, the same attribute `core/timeline/clips.js` uses to find "every timed
+element", stamped on every layer by `formats/scene/scene.js` and `core/layers/util.js`'s
+`addGroupChild`; an authored `id` reaches this report when the layer has one, but it is never a
+requirement to be tracked):
 
 - **spans**: when it was `moving` vs `held`, in seconds. A step counts as moving if its centre moved
   more than 0.3px, its opacity changed more than 0.005, its area changed more than 1%, or its text or
@@ -44,10 +48,34 @@ whose sampling is unstated is how this repo got a false reference band once alre
 (`scripts/gates/motion-split.mjs`'s header). Read the stated interval before trusting a peak: a
 burst shorter than the sample interval can be missed or its true peak underestimated.
 
+## Candidates: a fast stop with nothing trailing it
+
+The trace also names a candidate for `modifiers:[{"lag":...}]` (core/fx/lag.js), FOLLOW-THROUGH after
+Dan Ebberts: a layer trails another's motion by a frame or three and overruns its stop before
+settling back. Used by 0 of 187 films in this library as of this writing (`morph` by 1, `follow` by
+1), which does not mean it belongs on any of them: it means nobody had ever measured where it might.
+
+A candidate fires when a layer is a top mover in its own film (peak velocity within half the film's
+own max, floored at 150px/s so a gentle-easing film does not manufacture one), it comes to a full
+stop, and no OTHER tracked layer's own motion starts within 0.4s of that stop. It reads:
+
+```
+"btn" peaks at 34046px/s at 1.57s and stops at 3.73s, and nothing trails it. Candidate for
+`modifiers:[{"lag":"btn"}]` follow-through (core/fx/lag.js, 1-3 frame delay), UNLESS this is a rigid
+board: a card that drags reads as jelly.
+```
+
+The caveat is not decorative: `lag`'s own schema note is "wrong on a rigid board, a card that drags
+reads as jelly", and this trace cannot tell a card from a token. It names the candidate and the
+caveat in the same breath and leaves the call to whoever is reading it, the same shape
+`scripts/live/scene-live.mjs` uses for `unusedPresets`. No pass/fail here either: a film with no
+candidates said nothing wrong, and a film with one is not required to act on it.
+
 ## What it cannot show
 
-- **Nothing without an id or `data-layer="critical"`.** Same blind spot `make motion` already has.
-  The trace says so explicitly (`no tracked content elements`) instead of printing an empty block.
+- **Whether a candidate is actually right.** It names a fast, unanswered stop; it does not know
+  whether the layer is a card, a chip, a label or a trailing token, so it cannot tell you whether
+  `lag` belongs there. Read the caveat every time.
 - **Anything the fingerprint does not fold in.** The per-step "moved" signal reads position, opacity,
   text length, a capped set of descendant `transform`s, and `strokeDashoffset` (added for `drawOn`,
   core/motion/parts.js:40). A CSS custom property driving a shader, a canvas draw, or a `filter`
