@@ -34,6 +34,7 @@ below.
 | [`handover-glide`](handover-glide.md) | one layer becomes another | built: `scene.js`, `junctions.js` default 0.9s |
 | [`stagger-total`](stagger-total.md) | a group arrives with a stagger | warns: `make direct` |
 | [`first-arrival`](first-arrival.md) | a layer's first entrance in a beat | eye |
+| [`anticipate-default`](anticipate-default.md) | a directional entrance after the film's opening wave | built: `core/engine/produce.js` |
 | [`speed-bands`](speed-bands.md) | choosing a duration | warns: `make direct` |
 | [`video-scale`](video-scale.md) | sizing a hero graphic or type | warns: `make audit` |
 | [`text-on-flat`](text-on-flat.md) | placing a headline over a background fx | gated: `make audit` |

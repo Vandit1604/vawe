@@ -3,7 +3,8 @@
 // at each inferred joint (core/timeline/junctions.js classifyJoint/chooseCutStyles). Pure-JS, no DOM.
 //   node core/engine/produce.test.mjs
 import assert from 'node:assert/strict';
-import { produceBaseline, resolveTextSize, bakeTextSizeRoles } from './produce.js';
+import { produceBaseline, resolveTextSize, bakeTextSizeRoles, applyAnticipateDefault } from './produce.js';
+import { anticipateFromMotion } from '../motion/motion.js';
 
 const look = { cuts: { default: 'fade', accent: 'cinematicZoom' }, scale: { hook: 92, headline: 64, body: 38, caption: 24 } };
 const frame = { w: 1920, h: 1080 };
@@ -134,6 +135,72 @@ const beatLayers = (starts) => starts.map((start, i) => ({ type: 'text', track: 
   resolveCoords(data, 1920, 1080);
   assert.equal(data.layers[0].size, 64, 'the role lowered to the theme number before resolveCoords ran');
   assert.ok(Number.isFinite(data.layers[0].y), 'the bottom pin resolved to a real number, not NaN from a string size');
+}
+
+// ---- applyAnticipateDefault: opt-out, not opt-in, on a WARPABLE entrance that arrives after the first
+// wave, derived from the theme's bounce (not a constant) ----
+{
+  const data = {
+    module: 'scene',
+    layers: [
+      { type: 'text', id: 'hook', start: 0, anim: 'rise' },       // first wave: excluded
+      { type: 'text', id: 'headline', start: 2, anim: 'rise' },   // qualifies
+      { type: 'text', id: 'still', start: 2 },                    // no anim at all: excluded, nothing moves that wasn't
+      { type: 'count', id: 'n', start: 2, anim: 'pop' },           // informational: excluded
+      { type: 'text', id: 'opted-out', start: 2, anim: 'rise', anticipate: false }, // author opt-out
+      { type: 'text', id: 'authored', start: 2, anim: 'rise', anticipate: 0.33 },   // author's own value wins
+    ],
+  };
+  applyAnticipateDefault(data, { motion: { bounce: 0 } });
+  const byId = (id) => data.layers.find((L) => L.id === id);
+  assert.equal(byId('hook').anticipate, undefined, 'the first wave is already being looked at: excluded');
+  assert.equal(byId('headline').anticipate, anticipateFromMotion(0), 'a later WARPABLE entrance gets the derived default');
+  assert.equal(byId('still').anticipate, undefined, 'a layer with no anim at all never starts moving');
+  assert.equal(byId('n').anticipate, undefined, 'a count layer is informational, excluded by name');
+  assert.equal('anticipate' in byId('opted-out'), false, 'anticipate:false is consumed as an opt-out, not left for scene.js to reject');
+  assert.equal(byId('authored').anticipate, 0.33, 'an authored value wins outright, untouched');
+}
+
+// ---- applyAnticipateDefault: DERIVED, not constant, from the theme's own bounce ----
+{
+  const two = () => [{ type: 'text', id: 'first', start: 0, anim: 'rise' }, { type: 'text', id: 'a', start: 2, anim: 'rise' }];
+  const calm = { module: 'scene', layers: two() };
+  const bouncy = { module: 'scene', layers: two() };
+  applyAnticipateDefault(calm, { motion: { bounce: 0 } });
+  applyAnticipateDefault(bouncy, { motion: { bounce: 0.4 } });
+  assert.ok(bouncy.layers[1].anticipate > calm.layers[1].anticipate, 'a bouncier theme winds up more than a calm one');
+}
+
+// ---- applyAnticipateDefault: split/cut layers never get the dial, matching scene.js's own refusal ----
+{
+  const data = {
+    module: 'scene',
+    layers: [
+      { type: 'text', id: 's', start: 2, split: 'word' },
+      { type: 'text', id: 'c', start: 2, cut: 'jitter' },
+    ],
+  };
+  applyAnticipateDefault(data, { motion: { bounce: 0 } });
+  assert.equal(data.layers[0].anticipate, undefined, 'a split layer\'s entrance is owned elsewhere');
+  assert.equal(data.layers[1].anticipate, undefined, 'a cut layer\'s entrance is owned elsewhere');
+}
+
+// ---- produceBaseline wires applyAnticipateDefault in, and produced:false opts out of it too ----
+{
+  const data = {
+    module: 'scene', duration: 5, bg: [{ preset: 'plain' }],
+    layers: [{ type: 'text', id: 'a', start: 0 }, { type: 'text', id: 'b', start: 2, anim: 'rise' }],
+  };
+  produceBaseline(data, { motion: { bounce: 0 } }, frame, look);
+  assert.equal(data.layers[1].anticipate, anticipateFromMotion(0), 'produceBaseline applies the anticipate default');
+}
+{
+  const data = {
+    module: 'scene', duration: 5, bg: [{ preset: 'plain' }], produced: false,
+    layers: [{ type: 'text', id: 'a', start: 0 }, { type: 'text', id: 'b', start: 2, anim: 'rise' }],
+  };
+  produceBaseline(data, { motion: { bounce: 0 } }, frame, look);
+  assert.equal(data.layers[1].anticipate, undefined, 'produced:false opts out of the injected baseline, anticipate included');
 }
 
 console.log('produce.test.mjs: ok');

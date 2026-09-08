@@ -3,7 +3,7 @@
 // three DEFAULT_MOTION values that changed, and that a theme with no `motion` key still resolves them.
 //   node core/motion/motion.test.mjs
 import assert from 'node:assert/strict';
-import { DEFAULT_MOTION, motionDefaults, exitRatioFromMotion } from './motion.js';
+import { DEFAULT_MOTION, motionDefaults, exitRatioFromMotion, anticipateFromMotion } from './motion.js';
 
 // ---- DEFAULT_MOTION itself: the values a theme falls back to when it names none of its own ----
 assert.equal(DEFAULT_MOTION.idle, 'none', 'idle defaults to none: a settled layer does not breathe unless authored');
@@ -51,4 +51,11 @@ assert.equal(exitRatioFromMotion(3), 0.7, 'exitRatioFromMotion clamps at 0.7 so 
   assert.equal(m.exitRatio, 0.4, 'an explicit exitRatio is not overridden by the derived default');
 }
 
-console.log('✓ motion.test.mjs: idle, bounce and exitRatio are all still (or derived) by default, and a theme can opt back in');
+// ---- anticipateFromMotion: derived from bounce, anchored at the recipe's own 10-20% band ----
+assert.equal(anticipateFromMotion(0), 0.1, 'bounce 0 (the engine default, and most themes) derives the floor of the practitioner band');
+assert.equal(anticipateFromMotion(undefined), 0.1, 'a missing bounce reads as 0, not NaN');
+assert.ok(anticipateFromMotion(0.2) > 0.1 && anticipateFromMotion(0.2) < 0.2, 'a mid bounce derives a mid amount, never the two other themes\' numbers');
+assert.equal(anticipateFromMotion(0.42), 0.2, 'threadcite\'s bounce (0.42, the highest shipped) lands at the band ceiling');
+assert.equal(anticipateFromMotion(1), 0.2, 'an even bouncier theme still clamps at 0.2, never past the recipe\'s own band');
+
+console.log('✓ motion.test.mjs: idle, bounce, exitRatio and anticipateFromMotion are all still (or derived) by default, and a theme can opt back in');
