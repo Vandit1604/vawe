@@ -12,7 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, parseMotion, motionErrors } from '../lib/contract.mjs';
+import { chainErrors, parseMotion, motionErrors, parseEdge } from '../lib/contract.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
 import { buildKit } from '../lib/stagekit.mjs';
@@ -69,7 +69,20 @@ beats.forEach((b, i) => {
   console.log(`Kit:   paste ${path.relative(ROOT, kitPath)}'s block verbatim at the top (regenerate: node scripts/author/stagekit.mjs ${film})`);
   console.log(`Copy (exact words, do not paraphrase): ${b.onscreen.length ? b.onscreen.map((l) => JSON.stringify(l)).join(' / ') : '(none stated: REPLACE the storyboard\'s onscreen: line first)'}`);
   if (b.object_in || b.object_out) {
+    // WHAT THE OBJECT DOES, not only that it exists. `make assemble` draws the object itself; what the
+    // fragment author needs is what NOT to draw there (its own copy of the object) and what its pose is
+    // doing across the beat, because a size/rotation/opacity change is exactly the kind of thing an
+    // agent invents its own version of if nobody tells it one is already coming.
+    const edgeIn = parseEdge(b.object_in), edgeOut = parseEdge(b.object_out);
     console.log(`Continuous object arrives at: ${b.object_in || '(unset)'}   leaves at: ${b.object_out || '(unset)'}`);
+    if (edgeIn && edgeOut && !edgeIn.error && !edgeOut.error) {
+      const does = [];
+      if (edgeIn.w !== edgeOut.w || edgeIn.h !== edgeOut.h) does.push(`resizes ${edgeIn.w}x${edgeIn.h} → ${edgeOut.w}x${edgeOut.h}`);
+      if (edgeIn.rot !== edgeOut.rot) does.push(`rotates ${edgeIn.rot}deg → ${edgeOut.rot}deg`);
+      if (edgeIn.opacity !== edgeOut.opacity) does.push(`fades ${edgeIn.opacity} → ${edgeOut.opacity} opacity`);
+      if (edgeIn.placement !== edgeOut.placement) does.push(`travels ${edgeIn.placement} → ${edgeOut.placement}`);
+      console.log(`  It ${does.length ? does.join(', while it ') : 'holds still'} across this beat. Do not draw your own copy of it; leave it room.`);
+    }
     console.log(`  (the object itself is drawn by \`make assemble\`, not by this fragment: the fragment is everything ELSE in the beat)`);
   }
   // THE MOTION PLAN, read BEFORE the markup is written, not discovered after: `make assemble` wires
