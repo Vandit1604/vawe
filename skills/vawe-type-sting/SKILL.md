@@ -8,7 +8,12 @@ description: "Playbook for a motion-graphic sting/bumper in this engine: one mov
 The shortest type and the least forgiving: at 4-8s there is no room for a second idea. A sting that
 tries to do two things does neither. Judge every addition against "does this serve the ONE move".
 
-## The spine
+## The spine, at every length
+
+A sting's own paceBand (4.0-8.0s) sits entirely under `CONTINUOUS_ACTION_MAX_S` (15s), so this type is
+ALWAYS the continuous-action shape (`skills/vawe-continuous-action/SKILL.md`), never the beat rotation:
+`type-spines.mjs` names the mark itself as the one object (`continuousObject`), unformed at t=0,
+assembling into its full form, held. There is no length at which this type takes a different shape.
 
 One move. No hook/build/payoff structure at all: the mark or the word arrives, resolves, holds. Pace
 band: **4.0-8.0s total runtime**, not per-beat, because there is usually exactly one beat. Where the
@@ -56,9 +61,10 @@ other asset; if it does, that is a sign the brief wants a different type.
 make scaffold OUT=formats/scene/<name>.json TYPE=sting DUR=6
 ```
 
-Composes a single `logoReveal` beat (`scripts/author/type-spines.mjs`) on a `black` bg with no
-transitions: the scaffold's own continuous-object motif is still emitted by default, but for a true
-one-move sting, consider removing it and letting the mark itself be the only thing that moves.
+Emits the CONTINUOUS-ACTION shape (`scripts/author/type-spines.mjs`'s `continuousObject`): the mark,
+named as the one object, on a hand-keyed track from `track.mjs`'s measured `pan`/`blast` shapes, `black`
+bg, zero transitions. Replace the placeholder `html` box with your real `svg` mark; the track and the
+zero-transitions waiver are already right for this type at any length inside its paceBand.
 
 ## What the judge weighs for this type
 
