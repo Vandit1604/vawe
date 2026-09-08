@@ -350,7 +350,16 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
     // already reach for, AND it only TOUCHES each one (≤2 instances) rather than building with it. That
     // second half is what tells a template apart from a film that leans hard into a common family:
     // higgsfield hand-keys 6 motion tracks, a common family used at unusual depth, and 6 is not a touch.
-    if (vocab.length > 0 && vocab.length <= 3 && vocab.every((k) => prof.top5.has(k) && sig[k] <= 2)) {
+    // DEPTH IS NOT INSTANCE COUNT FOR A KEYED TRACK, and reading it that way misfires on exactly the
+    // shape this engine now scaffolds by default. `sig.motionTrack` counts LAYERS carrying a track, so a
+    // film with one hand-authored nineteen-key track scores 1 and reads as a touch, while six three-key
+    // tracks score 6 and read as depth. That is backwards: a nineteen-key track is choreography and a
+    // three-key track is a preset spelled long. A continuous-action film is one object with one deep
+    // track by construction, so without this the check would fire on every film the under-15s default
+    // produces. Keys are the measure for a keyed track; instances stay the measure for everything else.
+    const keyDepth = flat.reduce((n, l) => n + (Array.isArray(l.motion) ? l.motion.length : 0), 0);
+    const touched = (k) => (k === 'motionTrack' ? (sig[k] <= 2 && keyDepth <= 8) : sig[k] <= 2);
+    if (vocab.length > 0 && vocab.length <= 3 && vocab.every((k) => prof.top5.has(k) && touched(k))) {
       // Suggest families OUTSIDE the top 5 this film has not used, ranked rarest-first in the library
       // (the ones fewest other films reach for), so the fix is the opposite of what made the film generic.
       const rare = HIGH_VALUE.filter(([k]) => !sig[k] && !prof.top5.has(k))
