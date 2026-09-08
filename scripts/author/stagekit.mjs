@@ -34,12 +34,32 @@ const dir = path.dirname(film);
 const fragGlob = (n) => path.join(dir, `${base}.scene${n}.html`);
 
 if (check) {
+  // ASK THE FILM WHICH FRAGMENTS IT USES, rather than enumerating a naming convention. This used to
+  // walk `<base>.scene1.html` through `.scene30.html` and stop, so a film whose layers point at any
+  // other fragment name had those fragments silently unchecked: the kit could drift in them and this
+  // check would still print a tick. A continuous-action film is exactly that case, since its layers are
+  // named for what they are (`<base>.arm.html`) rather than numbered by beat. The film's own `src`
+  // values are the authoritative list; the numbered sweep stays as a fallback for a film whose JSON is
+  // not readable yet, which is the case while a fan-out is still writing fragments.
+  const seen = new Set();
   const fragments = [];
-  for (let n = 1; n <= 30; n++) {
-    const p = fragGlob(n);
-    if (fs.existsSync(p)) fragments.push({ path: path.relative(ROOT, p), src: fs.readFileSync(p, 'utf8') });
-  }
-  if (!fragments.length) { console.error(`stagekit --check: no ${base}.sceneN.html fragments found beside ${film}`); process.exit(1); }
+  const add = (p0) => {
+    // Resolve before the dedup: the film's `src` values and the numbered fallback arrive in different
+    // shapes (absolute against relative), so keying the set on the raw string counted one fragment twice.
+    const abs = path.resolve(ROOT, p0);
+    if (!fs.existsSync(abs) || seen.has(abs)) return;
+    seen.add(abs);
+    fragments.push({ path: path.relative(ROOT, abs), src: fs.readFileSync(abs, 'utf8') });
+  };
+  const walk = (ls) => { for (const L of ls || []) {
+    if (L && typeof L === 'object') {
+      if (typeof L.src === 'string' && L.src.endsWith('.html')) add(L.src);
+      walk(L.layers); walk(L.children);
+    }
+  } };
+  try { walk(JSON.parse(fs.readFileSync(path.resolve(ROOT, film), 'utf8')).layers); } catch { /* fall back */ }
+  for (let n = 1; n <= 30; n++) add(fragGlob(n));
+  if (!fragments.length) { console.error(`stagekit --check: ${film} names no .html fragments, and no ${base}.sceneN.html sits beside it`); process.exit(1); }
   const { ok, findings } = kitCheck(block, fragments);
   console.log(`stagekit --check · ${fragments.length} fragment(s)`);
   for (const f of findings) console.log(`  ✗ [${f.code}] ${f.message}`);
