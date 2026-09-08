@@ -7,7 +7,7 @@ spectacle: "beat 3 (The mechanism) - the sensor stack drawing itself open, layer
 not: "no diver, no ocean footage, no stock photography, no gradient hero, no Inter/Space Grotesk/Instrument Serif, no drop shadow (a machined instrument is milled, not floated), no captured brand (fictional, per docs/EVALS.md), and no background this library already leans on: the field opens and closes on metallicSheen, the one preset of 23 with zero users, surfaced by `make arsenal --census`, and the two dense beats sit on quiet grounds instead, because a signature field is seasoning and not wallpaper"
 format: 1920x1080
 theme: fathom
-duration: 17.5s
+duration: 17.3s
 craft:
   captions: "no spoken track, so no word-timed captions; on-screen copy only, checked against the web safe strip"
   color: "fathom's own locked palette: near-black anodised field, one backlit sea-glass green. No fragment invents a colour"
@@ -16,6 +16,7 @@ craft:
   html-fragments: "every fragment moves via `parts` stagger; the sensor stack opens on `--t` in a calc(), never a CSS animation or transition"
   layout: "left-anchored at the stage margin, with the depth rule occupying the left edge as a fixed column; only the close centers"
   motion-craft: "the depth rule is a 6-key hand-authored height track, never a fired preset, and it never reverses: a descent that goes back up is not a descent"
+  fragment-exemplars: "each fragment names its refusal in this sheet: the hook refuses a card and sets the reading on the bare field; the instrument beat refuses a centred lockup for a left-anchored face with the spec beneath; the mechanism beat refuses a filled exploded view for hairline outlines so the ground reads through; the payoff refuses the near-black field entirely, and is the only beat that does; the close refuses everything except the wordmark and the rule"
   show-dont-tell: "every claim beat shows the thing that makes it true rather than asserting it: beat 2 shows the bezel that produced the hook's reading, beat 3 opens the sensor stack into four labelled layers, and beat 4 counts the run time up on a live count layer instead of printing it. No beat is type on a field"
   typography: "Geist Mono for every measured value and Geist sans for prose, because an instrument face separates what was measured from what is claimed. The size scale is the theme's own derived ramp (hook 98 / headline 68 / body 40 / caption 26 from core/registry/theme-contract.js), so no fragment invents a size; the two deliberate departures are the hook depth reading and the payoff count, both oversized because they are the film's two numbers"
   sound: "sound is on: an auto-resolved bed, no cue, because nothing in this film makes a noise underwater"
@@ -129,7 +130,7 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - duration: 3.5s
 - transition_in: whip
 
-## Beat 5: Close (14.5s-17.5s)
+## Beat 5: Close (14.5s-17.3s)
 - type: cta
 - object: the wordmark, with the depth rule at full height beside it
 - shot: medium (centred, the one centred frame in the film)
@@ -145,5 +146,5 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - rest: none. The rule has arrived and holding still is the point
 - why: close on the name, at the bottom of the descent
 - emotion: quiet
-- duration: 3s
+- duration: 2.8s
 - transition_in: dissolve
