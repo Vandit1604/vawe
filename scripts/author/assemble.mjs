@@ -12,6 +12,20 @@
 //     engine.
 // Kept THIN on purpose: no camera, no captions, no audio beyond `auto:true`. Everything else the
 // engine already supplies once cuts + sceneUnits are on the page.
+//
+// OWNERSHIP: assemble owns what it GENERATES and nothing else. It stamps `id: scene<N>` on every html
+// layer it writes and `id: object` on the one continuous-object layer it can build (edges-derived,
+// placement@wxh), so the set it owns is nameable, not guessed at from shape. Any existing layer whose
+// `id` is NOT in that set (a hand-keyed height ramp, a `count` layer, anything the per-beat contract
+// has no vocabulary for) passes through untouched, appended after the generated layers in its original
+// relative order, so a re-assemble is idempotent. A handful of film-level fields survive the same way,
+// through PRESERVED_FILM_FIELDS below, an allowlist rather than a blanket spread: `duration`, `bg`,
+// `transitions` and `sceneUnits` are assemble's own and must never be resurrected from a stale scene.
+//
+// A preserved layer can go stale: it was timed against beats that have since moved or been deleted.
+// Carrying it silently would be worse than dropping it was, so every preserved layer (and film-level
+// field) is REPORTED by name, and one whose [start, start+duration] window no longer lands inside the
+// new film's duration is WARNED about, loudly, below.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,6 +36,9 @@ import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
 import { sceneDims } from '../../core/layout/safe.js';
+import { boundaryMechanism } from '../../core/transitions/lower.js';
+
+const PRESERVED_FILM_FIELDS = ['cameraMove']; // owned fields (duration/bg/transitions/sceneUnits/…) are never in this list
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
@@ -78,7 +95,7 @@ const htmlLayers = beats.map((b, i) => {
   const parts = motion.length ? motion.map((m) => ({
     select: m.selector, anim: m.kind, each: SPEED_BAND[m.inBand], out: true, exitDur: SPEED_BAND[m.outBand],
   })) : undefined;
-  return { type: 'html', src: path.relative(ROOT, fragPath), start: b.start, duration: +(b.end - b.start).toFixed(3), track: 1, x: 0, y: 0, w: canvasW, h: canvasH, ...(parts ? { parts } : {}) };
+  return { id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: b.start, duration: +(b.end - b.start).toFixed(3), track: 1, x: 0, y: 0, w: canvasW, h: canvasH, ...(parts ? { parts } : {}) };
 });
 if (missing.length) {
   console.error(`assemble: missing fragment(s), run \`make scenes D=${film}\` for the briefs and write them first:`);
@@ -101,7 +118,7 @@ if (chain.length) {
   };
   for (const e of chain) { pushKey(e.start, e.in); pushKey(e.end, e.out); }
   objectLayer = {
-    type: 'rect', track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
+    id: 'object', type: 'rect', track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
     fill: 'var(--accent)', radius: 4,
     start: first.start, duration: +(chain[chain.length - 1].end - first.start).toFixed(3),
     // `sceneUnits: true` wraps each beat as its own unit, so nothing survives a cut unless it opts
@@ -122,20 +139,50 @@ const bg = beats.map((b, i) => ({ from: b.start, to: b.end, preset: backdrop[i %
 // opacity ramp over the whole stack), so two beats with DIFFERENT bg presets swap hard mid-ramp rather
 // than blending, which is exactly the "hard swap disguised inside a soft transition" seam-forensics.mjs
 // (#seam-split) exists to catch. "seam" is the real two-scene GPU blend, so the bg crossfades too.
-const transitions = beats.slice(1).map((b) => ({ at: b.start, fx: look.cuts.default || 'fade', mech: 'seam' }));
+// ...WHEN THE FX CAN BE ONE. `look.cuts.default` is DERIVED from the theme's own pace
+// (core/registry/theme-contract.js), so a brisk brand resolves to `whip`, which is cut-only, and
+// pairing it with mech:"seam" writes a scene `make validate` refuses: "whip is not a seam". Asking
+// boundaryMechanism instead of assuming keeps the crossfade wherever it is available and lets a
+// cut-only family through as the cut it is, rather than making every fast theme unassemblable.
+const cutFx = look.cuts.default || 'fade';
+let cutMech;
+try { cutMech = boundaryMechanism(cutFx, 'seam'); } catch { cutMech = undefined; }
+const transitions = beats.slice(1).map((b) => ({ at: b.start, fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) }));
+
+// ---- ownership: what assemble just built vs. what a previous pass (or a hand edit) left behind -----
+const newDuration = beats[beats.length - 1].end;
+const ownedIds = new Set(htmlLayers.map((l) => l.id).concat(objectLayer ? [objectLayer.id] : []));
+const prevLayers = Array.isArray(scene.layers) ? scene.layers : [];
+// Anything the last build owned that this one doesn't reclaim (its id isn't in ownedIds, whether
+// because it was never assemble's to begin with, or because the beat count shrank and its slot is
+// gone) is preserved, not discarded: dropping it silently is the exact failure this ownership rule
+// exists to end.
+const preserved = prevLayers.filter((l) => !(l && typeof l === 'object' && l.id && ownedIds.has(l.id)));
+const nameOf = (l) => l.id || `${l.type || '?'}@${l.start ?? '?'}`;
+const staleWarnings = [];
+for (const l of preserved) {
+  if (typeof l.start !== 'number' || typeof l.duration !== 'number') continue; // no window to check
+  const end = l.start + l.duration;
+  if (l.start < -0.01 || end > newDuration + 0.01) {
+    staleWarnings.push(`  ⚠ "${nameOf(l)}" spans ${l.start}s–${+end.toFixed(3)}s, outside the new film (0s–${newDuration}s): its beat likely moved or was deleted. Review before shipping.`);
+  }
+}
+
+const preservedFilmFields = PRESERVED_FILM_FIELDS.filter((k) => scene[k] !== undefined);
 
 const out = {
   module: 'scene',
   theme: scene.theme,
   aspect,
   ...(destination ? { destination } : {}),
-  duration: beats[beats.length - 1].end,
+  duration: newDuration,
   sceneUnits: true,
   ...(scene.authoring ? { authoring: scene.authoring } : {}),   // preserve a hand-written waiver across re-assembles
   audio: scene.audio || { auto: true },
   bg,
   transitions,
-  layers: objectLayer ? [...htmlLayers, objectLayer] : htmlLayers,
+  ...Object.fromEntries(preservedFilmFields.map((k) => [k, scene[k]])),
+  layers: objectLayer ? [...htmlLayers, objectLayer, ...preserved] : [...htmlLayers, ...preserved],
 };
 
 fs.writeFileSync(film, JSON.stringify(out, null, 1) + '\n');
@@ -144,4 +191,13 @@ console.log(`  ${htmlLayers.length} html fragment(s), ${objectLayer ? '1 continu
 console.log(`  ${transitions.length} transition(s), bg turns through: ${backdrop.slice(0, beats.length).join(' → ')}`);
 const motionCount = htmlLayers.reduce((n, l) => n + (l.parts ? l.parts.length : 0), 0);
 console.log(`  ${motionCount} motion-plan entr${motionCount === 1 ? 'y' : 'ies'} from the storyboard (\`motion:\`), built into ${htmlLayers.filter((l) => l.parts).length} scene(s)' \`parts\``);
+if (preservedFilmFields.length) console.log(`  preserved film-level field(s): ${preservedFilmFields.join(', ')}`);
+if (preserved.length) {
+  console.log(`  preserved ${preserved.length} hand-authored layer(s) the per-beat contract has no vocabulary for: ${preserved.map(nameOf).join(', ')}`);
+  const candidates = preserved.filter((l) => l.acrossBeats);
+  if (candidates.length) console.log(`    (${candidates.map(nameOf).join(', ')} carr${candidates.length === 1 ? 'ies' : 'y'} \`acrossBeats\`: a candidate for the continuous-object contract once it can express what this layer does, not a permanent exception)`);
+} else {
+  console.log('  no hand-authored layers to preserve');
+}
+if (staleWarnings.length) { console.log('  STALE:'); for (const w of staleWarnings) console.log(w); }
 console.log(`  Next: make author-check D=${film}`);
