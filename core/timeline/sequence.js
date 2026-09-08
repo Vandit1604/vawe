@@ -427,7 +427,17 @@ export function velocityAt(kfs, lt, dt) {
   if (!(dt > 0)) throw new Error(`velocityAt: dt must be a positive lookback in seconds, got ${JSON.stringify(dt)}.`);
   const now = motionAt(kfs, lt), prev = poseBack(kfs, lt, dt);
   const vx = (now.dx - prev.dx) / dt, vy = (now.dy - prev.dy) / dt;
-  return { vx, vy, speed: Math.hypot(vx, vy), now, prev };
+  // `omega`, added beside vx/vy rather than folded into `speed`: a layer that only TURNS (a pendulum
+  // pivoting on a fixed anchor, `ox`/`oy` keyed, `dx`/`dy` never keyed) has zero translation by
+  // construction, so vx/vy/speed read exactly zero however fast it spins, and a caller reading only
+  // `speed` sees nothing moving. That is why `squash` had zero users: the most natural thing to squash
+  // is the one thing it could not see. Translation and rotation are different quantities, px/s against
+  // deg/s, with no shared unit to add them in HERE, where there is no box to convert one into the
+  // other. core/fx/squash.js turns this into a tangential px/s at the layer's own extremity, which is
+  // where the number becomes comparable to vx/vy. Read off the same two samples, so a caller never
+  // evaluates the track a third time.
+  const omega = (now.rot - prev.rot) / dt;
+  return { vx, vy, speed: Math.hypot(vx, vy), omega, now, prev };
 }
 
 // cameraVelocityAt(camKf, t, dt): the camera's TRANSLATION over the window ending at t, in px per

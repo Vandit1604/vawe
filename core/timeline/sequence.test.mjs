@@ -4,7 +4,7 @@
 // object stands in for an element's authored data.
 //   node core/timeline/sequence.test.mjs
 import assert from 'node:assert/strict';
-import { motionAt, resolveKeyedProps, KEYFRAME_PROPS } from './sequence.js';
+import { motionAt, resolveKeyedProps, velocityAt, KEYFRAME_PROPS } from './sequence.js';
 
 // `radius` is a real pose output, not a second unnamed key: the boot-time refusal for stray keyframe
 // props (sequence.js:163) reads KEYFRAME_PROPS, so this is the one place adding it to POSE has to show.
@@ -60,3 +60,28 @@ assert.ok(KEYFRAME_PROPS.includes('radius'), 'KEYFRAME_PROPS carries `radius`, g
 }
 
 console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an unkeyed layer untouched, and the button reaches pill then circle');
+
+// ---- ANGULAR VELOCITY (`omega`), the half `squash` could not see (docs/MISTAKES.md #588) ----
+// A layer that only turns has zero dx/dy by construction, so `speed` reads 0 however fast it spins.
+{
+  const kfs = [{ t: 0, x: 0 }, { t: 1, x: 300, ease: 'linear' }];
+  const { vx, vy, omega, speed } = velocityAt(kfs, 0.5, 1 / 30);
+  assert.equal(omega, 0, `a track that never keys rot has zero angular velocity, got ${omega}`);
+  assert.ok(vx > 0, `a rightward move still reads a positive vx, got ${vx}`);
+  assert.equal(speed, Math.hypot(vx, vy), 'speed is still hypot(vx, vy)');
+}
+
+{
+  const kfs = [{ t: 0, rot: 0 }, { t: 1, rot: 90, ease: 'linear' }];
+  const { vx, vy, omega } = velocityAt(kfs, 0.5, 1 / 30);
+  assert.equal(vx, 0, `a track that never keys x has zero vx, got ${vx}`);
+  assert.equal(vy, 0, `a track that never keys y has zero vy, got ${vy}`);
+  assert.ok(omega > 0, `a rot 0->90 over 1s reads a positive omega, got ${omega}`);
+  assert.ok(Math.abs(omega - 90) < 1, `omega is in deg/s (90deg over 1s ~= 90), got ${omega}`);
+}
+
+{
+  const kfs = [{ t: 0, rot: 180 }, { t: 1, rot: 0, ease: 'linear' }];
+  const { omega } = velocityAt(kfs, 0.5, 1 / 30);
+  assert.ok(omega < 0, `a rot 180->0 reads a negative omega, got ${omega}`);
+}
