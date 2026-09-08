@@ -27,6 +27,8 @@ import { depthZ } from '../fx/plane.js';
 import { inferCuts, chooseCutStyles } from '../timeline/junctions.js';
 import { layerSpeedAt } from '../timeline/velocity-cut.js';
 import { PRESENTATIONS as CUT_PRESENTATIONS } from '../cuts/presentations.js';
+import { WARPABLE } from '../timeline/clips.js';
+import { anticipateFromMotion } from '../motion/motion.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
@@ -161,8 +163,51 @@ export function produceBaseline(data, theme, frame, look) {
   // baselines are unsafe to inject blindly; kinetic type is nudged by the direction floor (no-kinetic-type)
   // and authored per-headline instead. The baseline stays ADDITIVE (sceneUnits + baking authored sugar),
   // it never rewrites a layer the author already wrote.
+  applyAnticipateDefault(data, theme);
   bakeCameraMove(data, frame);
   return data;
+}
+
+// applyAnticipateDefault(data, theme): ANTICIPATE, OPT-OUT NOT OPT-IN. docs/CRAFT/AFTER-EFFECTS-
+// RECIPES.md #5 calls a wind-up before a directional entrance "the loudest missing principle in the
+// engine" as long as it has to be typed. On every entrance that already carries travel (`WARPABLE`,
+// core/timeline/clips.js, imported rather than re-listed: one fact, one owner) it becomes the reflex
+// instead: a qualifying layer that names none gets `anticipate` added, amount DERIVED from the theme's
+// own `bounce` (`anticipateFromMotion`, core/motion/motion.js) the same way `exitRatioFromMotion` reads
+// `durationScale` above it, so a calm brand winds up less than a bouncy one instead of every theme
+// getting one constant.
+//
+// STILL BY DEFAULT, KEPT: this reshapes the EASE CURVE of an entrance the author already wrote; it
+// never sets an unmoving layer moving. `warpEase` is terminal at both ends (0 at u<=0, 1 at u>=1), so
+// the resting pose a layer settles to is unchanged.
+//
+// TWO EXCLUSIONS, both named by the recipe doc's own caution ("wrong: anywhere the viewer is already
+// looking, and on anything informational"):
+//   - the FIRST WAVE (the earliest `start` in the flattened tree): the viewer is watching the frame
+//     open, already looking there, so a wind-up would buy attention already held.
+//   - `type: "count"`: a rolling number is read, not glanced at; the doc names counters by name.
+// Split and cut layers are excluded outright: `formats/scene/scene.js` (setLayerTiming) THROWS if
+// either carries an `anticipate`, because a split's rhythm and a cut's entrance are owned elsewhere.
+//
+// OPT-OUT via the same sentinel this file already uses for `produced`/`sceneUnits`: `anticipate: false`
+// on a qualifying layer strips the field, rather than reaching scene.js, which validates it as a
+// 0.01-0.6 fraction and would throw on `false`. Any OTHER authored value (including a real number) is
+// the author's own choice and is left untouched (ABSENT-ONLY).
+export function applyAnticipateDefault(data, theme) {
+  const flat = flattenLayers(data.layers);
+  if (!flat.length) return;
+  const bounce = (theme && theme.motion && typeof theme.motion.bounce === 'number') ? theme.motion.bounce : 0;
+  const amount = anticipateFromMotion(bounce);
+  const starts = flat.map((L) => L.start ?? 0);
+  const firstWave = Math.min(...starts);
+  flat.forEach((L, i) => {
+    if ('anticipate' in L) { if (L.anticipate === false) delete L.anticipate; return; }
+    if (L.split || L.cut) return;
+    if (L.type === 'count') return;
+    if (starts[i] === firstWave) return;
+    if (!WARPABLE.includes(L.anim)) return;
+    L.anticipate = amount;
+  });
 }
 
 // THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (formats/scene/scene.js reads

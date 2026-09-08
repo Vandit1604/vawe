@@ -1002,6 +1002,17 @@ export const DEFAULT_MOTION = { easing: 'easeOutQuint', bounce: 0, settle: 0.6, 
 // so fast it reads as a glitch.
 export const exitRatioFromMotion = (durationScale) => Math.min(0.7, Math.max(0.3, 0.5 * durationScale));
 
+// anticipateFromMotion(bounce): the wind-up AMOUNT `core/engine/produce.js` defaults onto a qualifying
+// directional entrance (any WARPABLE `anim`, core/timeline/clips.js), so `anticipate` becomes opt-out
+// rather than a word an author has to remember. DERIVED, same shape as exitRatioFromMotion above: reads
+// `theme.motion.bounce`, the axis `core/registry/theme-contract.js` already reads for the accent-cut
+// tier, so a calm brand and a bouncy one wind up by different amounts instead of all getting one
+// constant. docs/CRAFT/AFTER-EFFECTS-RECIPES.md states the practitioner band directly ("roughly 10 to
+// 20% of the total move"): the engine default (bounce 0) sits at the floor, and the bounciest theme
+// shipped today (threadcite, 0.42) lands at the ceiling; clamped so a still-bouncier future theme
+// cannot wind up past the band the recipe names.
+export const anticipateFromMotion = (bounce) => Math.min(0.2, Math.max(0.1, 0.1 + 0.25 * (bounce ?? 0)));
+
 // motionDefaults(theme): the theme's motion personality with `easing` resolved to a function.
 // Scenes pass these into primitives, e.g. interpolate(t, inR, outR, { easing: M.easing }),
 // spring(t, M), or translateY(M.enter * (1 - eased)). durationScale lets a theme stretch/tighten
