@@ -10,6 +10,7 @@ import { defineRegistry } from '../registry/registry.js';
 import { paintBase, dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain, gradientFill } from './fx.js';
 import { PAL_PLINTH, PAL, bgPaletteFrom } from './palette.js';
 import { PRESETS } from './presets.js';
+import { exitRatioFromMotion } from '../motion/motion.js';
 
 export { paintBase, dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain, gradientFill };
 export { PAL_PLINTH, PAL, bgPaletteFrom };
@@ -129,6 +130,23 @@ export function renderBg(ctx, w, h, t, spec) {
     else if (fx.type === 'grain') grain(ctx, w, h, t, fx);
     else if (fx.type === 'gradientFill') gradientFill(ctx, w, h, t, fx);
   }
+}
+
+// bgTurnRatio(authored, durationScale): a bg window's OWN departure, when a later window replaces
+// it at a cut. THE WORLD SHOULD LEAVE THE WAY A LAYER DOES: FASTER THAN IT ARRIVED. Until this, a bg
+// crossfade rode its cut's eased curve end to end regardless of direction, so every world turn in the
+// library dissolved at one even pace, reading as a dissolve rather than a decision. Rather than invent
+// a second, bg-only constant, this reuses `exitRatioFromMotion` (core/motion/motion.js) outright: the
+// same theme fact (durationScale: a brisk brand snaps, a cinematic one lingers) already answers the
+// identical question for every layer's exit, and a bg-only re-tuning would just be that fact drifting
+// into a second copy (docs/CRAFT/ENGINE-CHANGES.md, "one fact, one owner").
+//
+// `authored` (a window's own `turnRatio`) wins outright when set; `1` is the explicit opt-out back to
+// the old, even crossfade. See formats/scene/scene.js drawBg for where the ratio actually reshapes
+// the blend (scoped to the plain camera-level cut only; a `sceneUnits` cut keeps riding its wrapper's
+// own opacity curve, see the comment there for why).
+export function bgTurnRatio(authored, durationScale) {
+  return authored ?? exitRatioFromMotion(durationScale);
 }
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
