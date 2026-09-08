@@ -116,7 +116,7 @@ A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Themes (41)
+## Themes (42)
 
 `a24` · `ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `apple` · `argus` · `bloomberg` · `brew` · `brew-dark` · `cadence` · `default` · `ditherkit` · `duolingo` · `emberyear` · `glassatmos` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `nike` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `preface` · `satara` · `threadcite` · `tpot` · `vawe` · `vawe-dark` · `vawe-inter` · `vawe-night` · `vawe-paper` · `vawe-site` · `vercel`
 
