@@ -13,6 +13,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { serveRepo } from '../lib/render-harness.mjs';
+import { extractKitBlock } from '../lib/stagekit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -30,6 +31,14 @@ const tSec = parseFloat(flag('--t', '0'));
 // and nothing says so (docs/MISTAKES.md #271). `#frag` declares a width and no height, so a child at
 // `position:absolute; inset:0` collapses to zero. Detected rather than declared, because the author of
 // a backdrop should not have to know this tool's layout; the choice is PRINTED so it is never silent.
+//
+// SCAN THE FRAGMENT'S OWN MARKUP, NOT THE PASTED STAGE KIT. Every scene fragment carries the mandatory
+// STAGEKIT block (scripts/lib/stagekit.mjs) verbatim, and that block is CSS the fragment's author did
+// not write and mostly does not use: this regex used to scan `raw` whole, so any kit rule that happened
+// to declare `position:absolute` + an inset made every fragment carrying the kit read as full-bleed,
+// including a 140x640 box that never referenced that class. `extractKitBlock` finds the exact pasted
+// bytes (the STAGEKIT:start/:end markers are unambiguous) and they are cut out before either regex
+// runs, so the detector answers what the fragment's OWN markup uses, not what the kit merely defines.
 const FULLBLEED_RE = /position\s*:\s*(?:absolute|fixed)/i;
 const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
 // THE THEME IS APPLIED, NOT SAMPLED. This used to read `palette.bg` and nothing else, so `--theme`
@@ -68,8 +77,12 @@ if (src.endsWith('.json')) {
   raw = j.html || (j.parts || []).map((p) => `<div style="position:relative;margin:24px auto">${p.html}</div>`).join('') || raw;
 }
 
-// Decided after `raw` is resolved, because a captured .json carries its markup one level in.
-const fullBleed = FULLBLEED_RE.test(raw) && INSET_RE.test(raw);
+// Decided after `raw` is resolved, because a captured .json carries its markup one level in. Strip the
+// pasted kit block first (see the comment on the regexes above) so its CSS cannot decide this on the
+// fragment's behalf.
+const kitBlock = extractKitBlock(raw);
+const ownMarkup = kitBlock ? raw.replace(kitBlock, '') : raw;
+const fullBleed = FULLBLEED_RE.test(ownMarkup) && INSET_RE.test(ownMarkup);
 
 const page$html = `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="/core/tokens.css">
