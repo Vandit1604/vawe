@@ -8,7 +8,7 @@ import { buildMorph } from '/core/motion/morph.js';
 import { GSAP_REGISTRY } from '/core/engine/gsap-effects.js';
 import { ransomStyle } from '/core/type/ransom.js';
 import { capUnitWins, capShape, wordU, lineU, CAP_STYLES, CAP_STYLE_REGISTRY } from '/core/type/captions.js';
-import { renderBg, bgPreset, applyBgOver, bgPaletteFrom, bgTurnRatio } from '/core/backgrounds/index.js';
+import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds/index.js';
 import { expandThemeRotation } from '/core/backgrounds/theme-rotation.js';
 import { createBgHtml } from '/core/layout/bg-html.js';
 import { htmlSource } from '/core/type/sanitize-html.js';
@@ -272,10 +272,7 @@ boot((data, fps, theme, canvas) => {
     // `breathe` is OPT-IN (see drawBg): a canvas-painted window held nothing but its own preset motion
     // until now, so this is authoring, not a fallback. `true` uses the old feel (2% scale, ~18s period);
     // an object overrides `amp`/`period`.
-    // `turnRatio`: this window's OWN departure, when a later window replaces it at a cut. `null` means
-    // "derive it" (drawBg falls back to `exitRatioFromMotion`, see there); an authored number wins
-    // outright, `1` being the explicit opt-out back to a plain, even crossfade.
-    return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, preset: b.preset || 'paper', value: b.value, spec, breathe: b.breathe ?? null, turnRatio: b.turnRatio ?? null };
+    return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, preset: b.preset || 'paper', value: b.value, spec, breathe: b.breathe ?? null };
   });
   // --alpha exports a compositable OVERLAY, so the backdrop is the compositor's job, not the scene's.
   // Suppressing it here is what makes the alpha channel real: core/tokens.css clears CSS backgrounds
@@ -912,6 +909,17 @@ boot((data, fps, theme, canvas) => {
       const base = (L.id && baseSize.get(L.id)) || { w: 0, h: 0 };
       const w = m && m.w != null ? m.w : (L.w ?? base.w);
       const h = m && m.h != null ? m.h : (L.h ?? base.h);
+      // `radius` is a STYLE WRITE beside w/h, not a transform: core/layers/util.js chipBox already
+      // wrote the resting borderRadius at build, and this only overwrites it on a frame where the
+      // track actually keys the property (both endpoints of the segment stated a number, POSE's null
+      // identity). Written EVERY frame a track keys radius at all, inside the window or out, the same
+      // purity rule core/tracks/box.js states for w/h: a value a later frame left behind must not
+      // survive a seek backwards, so an out-of-window frame re-asserts the authored `L.radius` (or, if
+      // that is also absent, leaves chipBox's own default alone rather than re-deriving it here).
+      if (L.motion && L.motion.some((k) => k && k.radius != null)) {
+        const r = m && m.radius != null ? m.radius : L.radius;
+        if (r != null) el.style.borderRadius = r.toFixed(2) + 'px';
+      }
       // The enter/exit transform, composed on top of the authored geometry and the motion track,
       // exactly as the browser composes them: driveClips writes this transform and the motion track
       // prepends to it, so the two are independent offsets of the same centre.
@@ -1212,10 +1220,7 @@ boot((data, fps, theme, canvas) => {
           const masked = exitStyle.clipPath !== 'none' || exitStyle.maskImage !== 'none';
           if (!masked && exitStyle.opacity != null) p = clamp01(1 - parseFloat(exitStyle.opacity));
         }
-        // `raw`/`timing`/`sceneUnits` ride along so drawBg can re-run the SAME eased curve on a
-        // shrunk clock for the asymmetric bg turn below, instead of re-deriving its own copy of
-        // this timing lookup (one fact, one owner).
-        return { ct: from, dur, p, raw, timing: T, sceneUnits: !!sceneUnits };
+        return { ct: from, dur, p };
       }
     }
     return null;
@@ -1253,25 +1258,7 @@ boot((data, fps, theme, canvas) => {
     // cross-fades a preset window into an html one, those stale pixels become visible.
     if (authored) { ctx.clearRect(0, 0, W, H); return; }
     if (blending) {
-      // THE WORLD SHOULD TURN THE WAY A LAYER LEAVES: FASTER THAN IT ARRIVED. Until now `p` rode the
-      // cut's own eased curve end to end, so the field dissolved at one even pace whichever way the
-      // window changed, reading as a dissolve rather than a decision. `bgTurnRatio` (core/backgrounds/
-      // index.js) derives the same asymmetry `exitRatioFromMotion` gives every layer's exit, from the
-      // theme's own pace (`before.turnRatio` authored on the OUTGOING window wins outright, `1` is the
-      // explicit opt-out back to the old even crossfade). The curve finishes in the first `ratio`
-      // fraction of the shared cut window and HOLDS fully-swapped for the remainder, the same shape a
-      // shortened exit leaves behind: same easing, less time, then rest.
-      //
-      // Scoped to the plain camera-level cut only. A `sceneUnits` cut already drives `p` off the
-      // outgoing wrapper's OWN opacity curve (above), which is the film's real signal for "how much of
-      // the field behind it is visible"; re-timing that independently is exactly the drift the note on
-      // `bgCutAt` warns about (a bg switching while the wrapper on top is still mid-dissolve), and the
-      // wrapper's own timing is core/timeline's to own, not bg's.
-      let p = cut.p;
-      if (!cut.sceneUnits) {
-        const ratio = clamp01(bgTurnRatio(before.turnRatio, M.durationScale));
-        if (ratio > 0 && ratio < 1) p = cut.timing(clamp01(cut.raw / ratio));
-      }
+      const p = cut.p;
       renderBg(ctx, W, H, t, before.spec);       // the outgoing field, opaque, on the real canvas
       if (!bgBlendCv) { bgBlendCv = document.createElement('canvas'); bgBlendCv.width = W; bgBlendCv.height = H; }
       renderBg(bgBlendCv.getContext('2d'), W, H, t, after.spec); // the incoming field, off-screen
