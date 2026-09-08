@@ -57,6 +57,17 @@ whichever aspect the film ends up at. `make scenes D=<film>` refuses to print a 
 chain is clean: handing three agents a contract that does not chain is handing them three disagreeing
 instructions, not three that will assemble into one film.
 
+**A POSE, not only a position.** Two optional trailing fields ride the same edge string:
+`/rot:<deg>` and `/op:<0-1>`, e.g. `object_out: center@40x26/rot:15/op:0.4`. Before this, `w`/`h` were
+parsed and then discarded (`assemble.mjs` only ever built x/y offsets), so a beat could declare a size
+and the built film would ignore it. `x`, `y`, `w`, `h`, `rot` and `opacity` are all properties
+`layers[].motion[]` can already key (`formats/scene/schema.json`), so `make assemble` now writes
+`w`/`h`/`rot`/`opacity` keys whenever the chain actually uses one (a film that states no pose beyond
+placement builds the identical track it always did). A pose mismatch at a handoff is a chain error
+exactly like a placement mismatch, named on both sides. What this cannot do: a shape morph (rectangle
+to pill to circle) needs a keyable corner radius the engine does not expose to `motion[]` yet, so reach
+for `morph` or `becomes` directly on a layer for that.
+
 ## The motion plan: what else moves
 
 `object_in`/`object_out` cover the one thing that survives every cut. Everything ELSE in a beat, a
@@ -110,9 +121,20 @@ Two things it gets right that are easy to get wrong by hand:
   presets swap hard mid-ramp instead of blending, the exact "hard swap disguised inside a soft
   transition" `scripts/gates/seam-forensics.mjs`'s `seam-split` check exists to catch. `seam` is the
   real two-scene GPU blend.
+- **A caused junction is staged, not fired flat.** Every html layer carries an `id` (`scene1`,
+  `scene2`, …), and `assemble` keeps one SHIFTED schedule the whole file is built from. When beat *i*'s
+  `trigger:` names a real cause (`scripts/lib/contract.mjs isCausedTrigger`, the same test
+  `storyboard-check`'s causal-chain report already uses), 0.05s of REAL time is inserted before that
+  beat: every beat keeps its full planned duration (nothing is shrunk to make room), so the film runs
+  0.05s longer per caused junction. 0.05s is evidence, not a guess: higgsfield-recreation's own three
+  key events land roughly 30ms and 150ms apart. A junction with no stated trigger is left exactly where
+  it always was: staging an undocumented cause would be inventing one. `layers[].start` also legally
+  accepts a live relative reference (`"otherId.end+0.5"`, 2 of 120 films used it); `assemble` resolves
+  it to a real second instead, because `scripts/gates/beat-check` and `scripts/author/motion-director.mjs`
+  both read `start` as a number in places a string breaks (measured: one of them crashes).
 
 `assemble` deliberately does nothing else: no camera, no captions, no authored `cuts`/`sceneUnits`
-beyond the one line above. Everything past that is the engine's, or the next author's, to add.
+beyond the two lines above. Everything past that is the engine's, or the next author's, to add.
 
 ## The film against the plan
 
@@ -121,7 +143,9 @@ one already exists and compares it against the storyboard's own motion plan and 
 contract, advisory, never a blocker (the film may legitimately not exist yet, or be mid-edit). A beat
 whose `motion:` entry names a selector/kind the built layer's `parts[]` does not carry is reported by
 name, both the declared and the built value; a continuous-object edge whose resolved px does not match
-the built layer's real motion key is reported the same way. Nothing here is a second reader of the
+the built layer's real motion key is reported the same way, and now so is its POSE: a declared size,
+rotation or opacity the built key does not carry is named too, the same way `motion-diverges` already
+compares a fragment's `parts[]` against the storyboard's `motion:`. Nothing here is a second reader of the
 storyboard: it calls the same `parseMotion`/`edges` functions `assemble.mjs` itself calls, so a plan
 and a film can only agree or disagree, never each be individually "correct" by two different readings.
 

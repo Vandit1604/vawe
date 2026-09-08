@@ -90,6 +90,11 @@ export function parseStoryboard(src) {
       // two are different channels: a line can be said and not shown, or shown and not said. The
       // animatic reads this when present and falls back to the on-screen copy as a reading-time proxy.
       narration: f('narration'),
+      // THE CAUSE (scripts/lib/contract.mjs isCausedTrigger, storyboard-check.mjs's causal chain):
+      // WHAT MADE THIS BEAT HAPPEN, read here so assemble.mjs can stage a caused junction instead of
+      // firing it at the exact same instant as the cut, the way every OTHER field on this beat already
+      // reaches assemble through this one parser.
+      trigger: f('trigger'),
     };
   });
   return {

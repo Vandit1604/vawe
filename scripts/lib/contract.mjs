@@ -2,24 +2,46 @@
 //
 // It is NOT a second planning artefact. It reads the SAME storyboard `make scaffold` already writes
 // (scripts/author/storyboard-parse.mjs), off two fields scaffold now also emits per beat:
-//   object_in:  "<placement>@<w>x<h>"   the continuous object's state at the START of this beat
-//   object_out: "<placement>@<w>x<h>"   its state at the END of this beat
+//   object_in:  "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>]"   the object's POSE at this beat's START
+//   object_out: "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>]"   its POSE at this beat's END
 // `<placement>` is a name from the safe-area PLACEMENT registry (core/layout/safe.js), never a raw
 // pixel: an author writes "bottom-left@120x40", not "x:65,y:975", so the contract is aspect-portable
-// the same way `pin` already is. `<w>x<h>` is the object's size in px at that edge.
+// the same way `pin` already is. `<w>x<h>` is the object's size in px at that edge; `/rot:` and `/op:`
+// are optional trailing pose fields, degrees and an opacity multiplier, both omittable (default 0/1).
 //
 // WHY A NAME AND NOT A PIXEL: three scene agents each write a fragment against ONE film, and the only
 // thing that keeps their three beautiful, independently-authored fragments from being three unrelated
 // pictures is that the object handing off between them lands in the SAME place. A placement name is
 // something a person reviewing the contract can actually check ("bottom-left, that's the same corner");
-// a pixel pair is not.
+// a pixel pair is not. `rot`/`op` stay raw numbers for the same reason `w`/`h` already are: a degree or
+// an opacity fraction is something a reviewer can sanity-check by eye, unlike a bezier or a matrix.
+//
+// A POSE, NOT ONLY A POSITION. `formats/scene/higgsfield-recreation.json`, the film this repo holds up
+// as its best, has an object that holds a constant bbox AREA while it travels (measured ~800px² at both
+// x=170 and x=98, which is exactly what w/h already encode), spins into its fastest frame and rights
+// itself on landing (rot), and fades its label out as it goes (opacity). Before this, `w`/`h` were
+// parsed and then THROWN AWAY by assemble.mjs (only x/y made it into the built motion track), so this
+// contract could say a size and never keep the promise. `rot`/`op` are new; `w`/`h` were always here,
+// they just were not honoured. All four are properties `layers[].motion[]` can already key
+// (formats/scene/schema.json: x, y, w, h, rot, opacity), so this is a REACH problem, not a capability
+// one: assemble.mjs now builds them (see there), no core/** change is needed or made.
+//
+// WHAT THIS STILL CANNOT SAY: a shape morph (rectangle -> pill -> circle) needs a keyable corner
+// `radius`, which `layers[].motion[]` does not have today; getting there is a core/** change, out of
+// scope for this file. `morph` (character/path melt), `becomes` (hand off to a DIFFERENT layer id) and
+// `lag` (follow-through overrun, Dan Ebberts) stay reachable the way they already are, hand-authored on
+// a layer directly, because each names a mechanism between DIFFERENT layers or shapes and folding all
+// three into a single per-beat edge would be a second, parallel way to say what a layer's own `becomes`/
+// `modifiers[].lag`/`follow` fields already say once, which is the drift CLAUDE.md calls a fork, not a fix.
 import { PLACEMENT } from '../../core/layout/safe.js';
 import { nearMisses } from '../../core/registry/registry.js';
 import { PART_NAMES } from '../../core/motion/parts.js';
 
-const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*$/i;
+const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
+const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
+const POSE_FIELDS = { rot: 'rot', op: 'opacity' };
 
-/** parseEdge("bottom-left@120x40") → {placement,w,h} | null (also null for "" / undefined: no opinion) */
+/** parseEdge("bottom-left@120x40/rot:15/op:0.4") → {placement,w,h,rot,opacity} | null (null = no opinion) */
 export function parseEdge(raw) {
   if (raw == null) return null;
   // storyboard-parse.mjs's generic fieldIn() does not strip quotes (only frontmatter's field() does),
@@ -27,17 +49,34 @@ export function parseEdge(raw) {
   const s = String(raw).trim().replace(/^["']|["']$/g, '');
   if (!s || /^<fill:/i.test(s) || /^REPLACE/i.test(s)) return null; // scaffold's own unfilled markers
   const m = EDGE_RE.exec(s);
-  if (!m) return { error: `"${s}" is not "<placement>@<w>x<h>" (e.g. "bottom-left@120x40")` };
-  const [, placement, w, h] = m;
+  if (!m) return { error: `"${s}" is not "<placement>@<w>x<h>" (e.g. "bottom-left@120x40", optionally "/rot:15" and/or "/op:0.4")` };
+  const [, placement, w, h, poseRaw] = m;
   if (!PLACEMENT[placement]) {
     const near = nearMisses(placement, Object.keys(PLACEMENT));
     return { error: `"${placement}" is not a known placement${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(PLACEMENT).join(', ')}` };
   }
-  return { placement, w: +w, h: +h };
+  const pose = { rot: 0, opacity: 1 };
+  if (poseRaw) {
+    POSE_TOKEN_RE.lastIndex = 0;
+    let pm;
+    while ((pm = POSE_TOKEN_RE.exec(poseRaw))) {
+      const key = pm[1].toLowerCase();
+      if (!POSE_FIELDS[key]) return { error: `"${key}" in "${s}" is not a known pose field. Known: rot, op` };
+      pose[POSE_FIELDS[key]] = +pm[2];
+    }
+  }
+  return { placement, w: +w, h: +h, rot: pose.rot, opacity: pose.opacity };
 }
 
-const edgeEq = (a, b) => a && b && a.placement === b.placement && a.w === b.w && a.h === b.h;
-const fmtEdge = (e) => e ? `${e.placement}@${e.w}x${e.h}` : '(unset)';
+const edgeEq = (a, b) => a && b && a.placement === b.placement && a.w === b.w && a.h === b.h
+  && a.rot === b.rot && a.opacity === b.opacity;
+const fmtEdge = (e) => {
+  if (!e) return '(unset)';
+  let s = `${e.placement}@${e.w}x${e.h}`;
+  if (e.rot) s += `/rot:${e.rot}`;
+  if (e.opacity !== 1) s += `/op:${e.opacity}`;
+  return s;
+};
 
 /**
  * chainErrors(beats) → string[]. `beats` are storyboard-parse.mjs beats, each carrying `object_in` /
@@ -136,4 +175,53 @@ export function motionErrors(beats) {
     }
   });
   return errs;
+}
+
+// ── STAGING: a documented cause becomes a mechanical stagger ────────────────────────────────────────
+//
+// `trigger:` on a beat (docs/CRAFT/STORYBOARD-TEMPLATE.md, graded by storyboard-check.mjs) already
+// answers WHAT MADE THIS BEAT HAPPEN. storyboard-check reports "N/M junctions caused" and then throws
+// that answer away: nobody stages, because staging means inventing an id and typing arithmetic.
+// isCausedTrigger is the ONE test for "this junction names a real cause", shared verbatim with
+// storyboard-check.mjs (previously two copies of the same two regexes) so the count that gate reports
+// and the stagger assemble.mjs builds can never drift apart.
+//
+// post hoc is not propter hoc: a trigger that only says WHEN ("then", "3.2s", "the beat ends") is a
+// sequence, and a slideshow already has one of those; it does not earn a stagger.
+export const TRIGGER_SEQUENCE = /^(then\b|next\b|and then\b|afterwards?\b|later\b|time passes|the (?:beat|shot|scene|cut|film) (?:begins|starts|ends|changes|moves on)|\d+(?:\.\d+)?\s*s\b)/i;
+export const TRIGGER_EMPTY = /^(none|nothing|n\/?a|tbd|[-\u2013\u2014.\u00b7]+)$/i;
+
+/** isCausedTrigger(raw) → true when a beat's `trigger:` names a real cause, not a sequence marker. */
+export function isCausedTrigger(raw) {
+  if (!raw) return false;
+  const s = String(raw).trim();
+  if (!s || TRIGGER_EMPTY.test(s)) return false;
+  return !TRIGGER_SEQUENCE.test(s);
+}
+
+// STAGE_S: the causal stagger assemble.mjs offsets a caused beat's start by. Evidence, not a guess:
+// higgsfield-recreation.json (docs/MISTAKES.md's own reference film) stages its three key events
+// roughly 30ms and 150ms apart (button lands 3.07s, world floods 3.10s, ring appears 3.25s). 0.05s
+// sits at the small end of that range on purpose: it is enough to read as "because", never enough to
+// visibly shorten a beat or read as its own edit. `docs/CRAFT/PER-SCENE-FANOUT.md` names it.
+export const STAGE_S = 0.05;
+
+/**
+ * stagedSchedule(beats) → { caused, shiftedStart, shiftedEnd }, the ONE shifted timeline both
+ * assemble.mjs (to BUILD the film) and storyboard-check.mjs (to CHECK it) read. A caused junction
+ * (isCausedTrigger on that beat's `trigger:`) inserts STAGE_S of real time before it; every beat keeps
+ * its full planned span, so nothing is carved out to make room. Two independent copies of "when does
+ * beat i really start" is exactly the drift CLAUDE.md calls a fork, so this is the only place it is
+ * computed; a film with no `trigger:` at all reproduces `beats[i].start/end` exactly (shift stays 0).
+ */
+export function stagedSchedule(beats) {
+  const caused = beats.map((b, i) => i > 0 && isCausedTrigger(b.trigger));
+  const shiftedStart = [], shiftedEnd = [];
+  let shift = 0;
+  beats.forEach((b, i) => {
+    if (caused[i]) shift += STAGE_S;
+    shiftedStart.push(+(b.start + shift).toFixed(3));
+    shiftedEnd.push(+(b.end + shift).toFixed(3));
+  });
+  return { caused, shiftedStart, shiftedEnd };
 }
