@@ -1,6 +1,7 @@
 // scripts/gates/motion-audit.mjs: check ANIMATION OVER TIME without rendering video. Renders every frame
 // headless (no encode, no screenshots), builds a per-element time series ({effective opacity, position,
-// text}) for id'd / [data-layer="critical"] elements, and asserts the motion contract per segment:
+// text}) for every timed layer (selected on `[data-start]`, see the note above `captureSeries`), and
+// asserts the motion contract per segment:
 //
 //   FAIL  (i)   final hold. The LAST frame of the video is not faded (per-shot: see MISTAKES #425)
 //   FAIL  (ii)  reveal monotonic. A reveal's opacity DIPS and comes back (a layer's own exit is not a dip)
@@ -91,9 +92,44 @@ const parseNum = (t) => {
 // Renders every strided frame and records, per tracked element, one row of {centre x, centre y,
 // effective opacity, text length, text head, descendant-transform hash, rig hash} plus the life
 // tallies (xi)/(xii) need. Everything below this line runs INSIDE the page.
-const captureSeries = (page, total, stride) => page.evaluate(async (total, stride) => {
-  const els = [...document.querySelectorAll('[id], [data-layer="critical"]')];
-  const keys = els.map((el, i) => el.id || ((typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName) + '#' + i));
+//
+// SELECTOR: `[data-start]`, not `[id], [data-layer="critical"]`. An authored layer's `id` (scene JSON
+// `L.id`) is used all over the JS side (geometry maps, `becomes`, error messages) but is NEVER written
+// to the DOM: `formats/scene/scene.js` keeps a separate geometry object (`g.id = L.id`, scene.js:922)
+// and never sets `el.id`. So `[id]` matched only the four hand-authored ids in scene.html's static
+// markup (stage/root/cv/cam) plus whatever a browser default happens to be, never an authored layer.
+// `[data-layer="critical"]` only catches text layers ≥60px that default (or opt) into the layout
+// audit, which is why exactly two elements showed up on an 8-layer film: both were big text. Every
+// OTHER layer, top-level or nested in a group, is invisible to the old selector regardless of size,
+// motion or role. `[data-start]` is the one attribute every layer actually gets, unconditionally:
+// `setLayerTiming` stamps it on every top-level layer (scene.js:585) and `addGroupChild` stamps it on
+// every nested one (core/layers/util.js:589); it is also the exact selector the engine's own clip
+// driver uses to find "every timed element" (core/timeline/clips.js:213). Selecting on it is not a
+// wider net, it is the real one: an element the engine itself does not consider timed is correctly
+// left untracked (chrome markup, SVG defs, decoration overlays never get a `data-start`).
+const captureSeries = (page, total, stride, idsByIdx) => page.evaluate(async (total, stride, idsByIdx) => {
+  const els = [...document.querySelectorAll('[data-start]')];
+  // A human name for a layer the report can print. `el.id` is kept first in case a future core change
+  // ever does write it; `idsByIdx` recovers the AUTHORED id for a top-level layer via `data-idx`
+  // (scene.js:584), the one back-reference from DOM to JSON that already exists. A nested group child
+  // has neither, so it falls back to its own text (what an author would recognise it by) and, failing
+  // that, to class+index.
+  // `textContent` walks INTO a `<style>` child too (an `html` layer's scoped CSS reads as its own
+  // name otherwise: "@scope { .kit-card{backg…"), so the label is read off a clone with style/script
+  // stripped rather than the live element.
+  const labelText = (el) => {
+    let node = el;
+    if (el.querySelector('style, script')) {
+      node = el.cloneNode(true);
+      node.querySelectorAll('style, script').forEach((n) => n.remove());
+    }
+    return (node.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+  };
+  const keys = els.map((el, i) => {
+    const idx = el.dataset.idx;
+    const authoredId = idx != null ? idsByIdx[+idx] : null;
+    return el.id || authoredId || labelText(el) || ((typeof el.className === 'string' ? el.className.split(' ')[0] : el.tagName) + '#' + i);
+  });
   const chains = els.map((el) => { const c = [el]; let p = el.parentElement; while (p && p !== document.body) { c.push(p); p = p.parentElement; } return c; });
   const loop = els.map((el) => !!el.closest('[data-motion]')); // any data-motion (loop/swap/…) opts out of motion checks
   // Markup that is not meant to paint: the SVG filter-definition host (core/looks/filters.js stamps it
@@ -175,7 +211,7 @@ const captureSeries = (page, total, stride) => page.evaluate(async (total, strid
     });
   }
   return out;
-}, total, stride);
+}, total, stride, idsByIdx);
 
 // ---- windows: the film's OWN JOINTS ----
 // This used to read `meta.segments`, and NO SCENE HAS EVER SET IT: core/engine/boot.js read
@@ -450,6 +486,10 @@ async function loadPage(format, dataArg) {
   return { page, data, dataName, meta };
 }
 
+// top-level layers only carry `data-idx` (nested group children get none, see captureSeries above):
+// this recovers the authored `id` for those by the same index the DOM already exposes.
+const idsByIdxOf = (data) => (data.layers || []).map((L) => (L && L.id) || null);
+
 async function audit(format, dataArg) {
   const opened = await loadPage(format, dataArg);
   if (opened.error) return { format, data: opened.dataName, error: opened.error, findings: [] };
@@ -457,7 +497,7 @@ async function audit(format, dataArg) {
   const total = meta.totalFrames;
   const TOTAL_SEC = total / FPS;   // runtime in seconds, the frozen-span budget scales with it
 
-  const series = await captureSeries(page, total, STRIDE);
+  const series = await captureSeries(page, total, STRIDE, idsByIdxOf(data));
   await page.close();
 
   const { windows, windowSource } = shotWindowsOf(data, total);
@@ -489,7 +529,9 @@ async function audit(format, dataArg) {
     // below survives because at the end of a film "every tracked layer is gone" and "the frame is empty"
     // stop being different claims: brew-launch-act1, tpot-launch, example-kinetic-type and _catalog-2
     // were all checked against the render and all four end on an empty frame.
-    if (!any) add('WARN', 'coverage', w, '', 'no tracked content elements. Add data-layer="critical" to key elements');
+    // `[data-start]` now tracks every timed layer unconditionally, so "no tracked content elements"
+    // means the shot's window is genuinely empty, not that a layer opted out of being seen.
+    if (!any) add('WARN', 'coverage', w, '', 'no tracked content elements in this shot window');
 
     ENTRIES.push(...entryDurations(series, K, content, F, w));
 
@@ -567,6 +609,43 @@ function layerTrace(row, F, dt) {
   };
 }
 
+// ---- candidates: a fast stop with nothing trailing it -----------------------------------------------
+// The trace already computes, per layer, when it moves, its peak velocity and when the peak lands.
+// That is also everything `modifiers[].lag` (core/fx/lag.js, FOLLOW-THROUGH after Dan Ebberts: a layer
+// trails another's motion by a frame or three and overruns its stop before settling back) needs to be
+// worth naming: a leader that snaps to a hard stop, and no OTHER tracked layer answers it nearby. It is
+// used by 0 of 187 films in this library (`morph` by 1, `follow` by 1), which does not mean it belongs
+// on any of these three: it means the instrument had never once said where it might.
+// A finding that only names the problem changes nothing (scripts/live/scene-live.mjs's own argument);
+// naming the candidate is the whole point, and naming the caveat beside it is what keeps this honest,
+// since the schema's own note is blunt: "wrong on a rigid board: a card that drags reads as jelly."
+// This never claims to know a board from a token, so it says both and leaves the call to the author.
+const TRAIL_WINDOW = 0.4; // seconds a trailing layer's own motion may start after the leader's stop
+function dragCandidates(layers) {
+  const movers = layers.filter((L) => L.peakVelocity > 0);
+  if (movers.length < 2) return []; // nothing else on screen to compare a leader against
+  const maxV = Math.max(...movers.map((L) => L.peakVelocity));
+  // "fast" is read relative to THIS film, not one fixed number: a leader is a top mover here, and
+  // a 150px/s floor keeps a whole film of gentle easing (where the "fastest" layer still barely moves)
+  // from producing a candidate that names nothing worth naming.
+  const leaders = movers.filter((L) => L.peakVelocity >= Math.max(150, maxV * 0.5));
+  const out = [];
+  for (const L of leaders) {
+    // the leader's own STOP: the first 'held' span beginning at or after its fastest frame. A layer
+    // still moving at the end of the film has nothing to overrun yet, so it is not a candidate.
+    const stop = L.spans.find((s) => s.state === 'held' && s.from >= L.peakVelocityAt);
+    if (!stop) continue;
+    const trailedBy = layers.find((O) => O.key !== L.key
+      && (O.spans.some((s) => s.state === 'moving' && s.from >= stop.from && s.from <= stop.from + TRAIL_WINDOW)
+        || (O.peakVelocity > 0 && O.peakVelocityAt >= stop.from && O.peakVelocityAt <= stop.from + TRAIL_WINDOW)));
+    if (!trailedBy)
+      out.push(`"${L.key}" peaks at ${L.peakVelocity}px/s at ${L.peakVelocityAt}s and stops at ${stop.from}s, `
+        + `and nothing trails it. Candidate for \`modifiers:[{"lag":"${L.key}"}]\` follow-through `
+        + `(core/fx/lag.js, 1-3 frame delay), UNLESS this is a rigid board: a card that drags reads as jelly.`);
+  }
+  return out;
+}
+
 async function traceOf(format, dataArg) {
   const opened = await loadPage(format, dataArg);
   if (opened.error) return { format, data: opened.dataName, error: opened.error };
@@ -576,7 +655,7 @@ async function traceOf(format, dataArg) {
   // film's length, so the default lands near TRACE_TARGET_SAMPLES samples. --stride overrides it.
   const stride = args.includes('--stride') ? STRIDE : Math.max(1, Math.round(total / TRACE_TARGET_SAMPLES));
   const t0 = Date.now();
-  const series = await captureSeries(page, total, stride);
+  const series = await captureSeries(page, total, stride, idsByIdxOf(data));
   await page.close();
   const renderMs = Date.now() - t0;
 
@@ -592,7 +671,7 @@ async function traceOf(format, dataArg) {
   return {
     format, data: dataName, total, fps: FPS, strideFrames: stride,
     sampleIntervalMs: Math.round(dt * 1000), samples: F.length, durationSec: +(total / FPS).toFixed(2),
-    renderMs, layers,
+    renderMs, layers, candidates: dragCandidates(layers),
   };
 }
 
@@ -615,10 +694,14 @@ if (TRACE) {
       if (r.error) { console.log(`✗ err  ${r.format}: ${r.error}`); continue; }
       console.log(`${r.format} · ${r.data}  (${r.durationSec}s · ${r.total} frames · sampled every `
         + `${r.strideFrames} frame(s) = ${r.sampleIntervalMs}ms · ${r.samples} samples · ${r.renderMs}ms to trace)`);
-      if (!r.layers.length) console.log('    no tracked content elements. Add `data-layer="critical"` (or an id) to key elements to trace them');
+      if (!r.layers.length) console.log('    no tracked content elements (nothing in this scene carries `data-start`)');
       for (const L of r.layers) {
         console.log(`    ${L.key}: ${fmtSpans(L.spans)}`);
         console.log(`        peak ${L.peakVelocity}px/s @${L.peakVelocityAt}s · peak area Δ${L.peakAreaChangePct}% @${L.peakAreaChangeAt}s · shape=${L.shape}`);
+      }
+      if (r.candidates && r.candidates.length) {
+        console.log('    candidates:');
+        for (const c of r.candidates) console.log(`      - ${c}`);
       }
     }
     console.log('\nAn instrument, not a gate: no pass/fail, nothing here blocks. Read the spans and the shape.');
