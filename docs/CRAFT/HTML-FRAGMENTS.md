@@ -171,7 +171,7 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 `node scripts/author/stagekit.mjs <film.json>` (`make stagekit D=<film>`) prints one `<style>` block
 every scene fragment in a per-scene fan-out pastes VERBATIM (`node ... --check` asserts byte identity,
 `docs/CRAFT/PER-SCENE-FANOUT.md`). It is generated from the FILM's theme, so it is not one fixed
-stylesheet: 41 themes get 41 different kits, never one kit in 41 colours. Every number in it traces back
+stylesheet: 42 themes get 42 different kits, never one kit in 42 colours. Every number in it traces back
 to `resolveLook` (`core/registry/theme-contract.js`), never a literal the kit author picked:
 
 - **Type scale**: `.kit-hook/.kit-headline/.kit-body/.kit-caption` (unchanged from before) plus
