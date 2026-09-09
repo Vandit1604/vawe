@@ -164,7 +164,29 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   const fps = kit.fps;
   const m = motionAt(L.motion, t - start, L.motionDelay);
   const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
-  el.style.transform = `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
+  // A LAYER THAT NEVER KEYS DEPTH GETS THE EXACT STRING IT ALWAYS GOT. `m.z`/`m.rotX`/`m.rotY` read back
+  // 0 for EVERY layer with a motion track (POSE gives them a constant identity, same as `dx`/`rot`), so
+  // testing the resolved pose could not tell "never keyed" from "keyed and currently at rest" and would
+  // put `translate3d`/`rotateX`/`rotateY` on every moving layer in the library. Those are 3D transform
+  // functions: writing one, even at its identity value, is documented above (scene.js "THE CAMERA RIG")
+  // to promote the element into its own 3D rendering context and change how it rasterises, which is
+  // exactly the byte-for-byte regression requirement 1 of this change exists to forbid. So the branch is
+  // decided from the AUTHORED keyframes, once per frame, the same shape scene.js already uses to decide
+  // whether a track keys `radius` at all.
+  const has3D = L.motion.some((k) => k && (k.z != null || k.rotX != null || k.rotY != null));
+  // COMPOSITION ORDER, matched to the camera rig's own (formats/scene/scene.js drawCameraAndCut):
+  // `translate3d(...) rotateZ(...) rotateX(...) rotateY(...)`. CSS applies a function list right to
+  // left, so that string is rotateY first, rotateX second, rotateZ (`rotate`, already this layer's `rot`)
+  // third, and the position last. Reusing the camera's own Y-X-Z order rather than inventing an
+  // AE-textbook one is the point: the camera and a layer with depth now share ONE rig
+  // (scene.js: "every layer rotation now composes with the rig's own transform in ONE 3D space"), and a
+  // shared space with two different rotation orders is the fact-with-two-owners shape this file argues
+  // against everywhere else. `scale` stays where it always sat, between the 2D rotate and the position,
+  // because a flat film's transform must still read `translate(...) scale(...) rotate(...)` to the byte.
+  el.style.transform = has3D
+    ? `translate3d(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px, ${m.z.toFixed(2)}px) scale(${m.scale.toFixed(4)}) `
+      + `rotate(${m.rot.toFixed(2)}deg) rotateX(${m.rotX.toFixed(2)}deg) rotateY(${m.rotY.toFixed(2)}deg)${base}`
+    : `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
   // A KEYED ANCHOR POINT. Written only when the track mentions it, so a layer's static `origin` is
   // untouched by every film that does not: `ox`/`oy` come back null from the pose otherwise. It is set
   // BEFORE the browser applies the transform above in the same frame, and both are plain style writes,

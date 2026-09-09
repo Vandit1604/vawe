@@ -148,7 +148,25 @@ export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['ro
   // keyword-or-length-or-percentage grammar per frame to move a point. `ox`/`oy` are PERCENTAGES of the
   // layer's own box, which is the form authors already write for the static prop, and identity is null
   // so a track that never mentions them leaves `origin` exactly as the layer set it.
-  ox: ['ox', null], oy: ['oy', null] };
+  ox: ['ox', null], oy: ['oy', null],
+  // DEPTH AND OUT-OF-PLANE ROTATION, KEYED. `z`/`rotX`/`rotY` give a LAYER the same thing the camera
+  // already has: a position and an orientation in space that can move over time, not just stand at
+  // one. Identity is 0 (on the picture plane, facing the eye), the same shape as `x`/`y`/`rot`, and
+  // NOT null: unlike `w`/`h`/`radius` these three describe a place in space rather than a box, and a
+  // layer that never declared a depth still HAS one (zero), exactly as `dollyZ`'s own comment says a
+  // camera at s=1 stands at a real, nameable distance rather than "no distance yet".
+  //
+  // NOT a second `plane`/`tilt`. Those are STATIC per-layer modifiers, resolved once at build
+  // (core/fx/plane.js, core/fx/tilt.js) into a `translate`/`rotate` CSS LONGHAND that composes OUTSIDE
+  // everything the tracks write, deliberately so a depth is a placement and not an animated value.
+  // These are the animated form, read every frame off the SAME `motion` track x/y/rot already live on,
+  // because a keyframe that can move x and y but not z is not "AE minus one axis", it is a different,
+  // smaller idea, and this repo already has the bigger one two properties over. formats/scene/scene.js
+  // composes them into the layer's own `transform` (core/tracks/motion.js), never into the `translate`/
+  // `rotate` longhands `plane`/`tilt` own, so keying a layer's depth and giving it a static one at the
+  // same time cannot collide: they are different CSS properties by construction, the same split
+  // `plane.js` made for its own reason (see that file's "WHY THE translate LONGHAND").
+  z: ['z', 0], rotX: ['rotX', 0], rotY: ['rotY', 0] };
 
 export function resolveKeyedProps(layers) {
   (layers || []).forEach((L, idx) => {
