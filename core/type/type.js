@@ -232,3 +232,22 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
     }
   });
 }
+
+// formatNumber(n, {currency, decimals, compact}): on-screen number formatting. compact abbreviates
+// to K/M/B/T; currency prefixes '$'. Moved from core/motion/motion.js (was grouped with the other
+// scene helpers there; it is text formatting, so it lives with the rest of the type package).
+export function formatNumber(n, { currency = false, decimals = 0, compact = false } = {}) {
+  let s;
+  if (compact) {
+    const a = Math.abs(n);
+    if (a >= 1e12) s = (n / 1e12).toFixed(decimals === 0 ? 2 : decimals) + 'T';
+    else if (a >= 1e9) s = (n / 1e9).toFixed(decimals === 0 ? 1 : decimals) + 'B';
+    else if (a >= 1e6) s = (n / 1e6).toFixed(decimals === 0 ? 1 : decimals) + 'M';
+    else if (a >= 1e3) s = (n / 1e3).toFixed(decimals === 0 ? 1 : decimals) + 'K';
+    else s = n.toFixed(decimals);
+    s = s.replace(/\.0+([TBMK])$/, '$1'); // 40.0M -> 40M
+  } else {
+    s = Number(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+  return (currency ? '$' : '') + s;
+}

@@ -1,5 +1,5 @@
 // core/motion.js: pure motion math + scene helpers (easing, spring, interpolate,
-// transforms, text-fit, colour, formatters). No DOM, no fetch, safe to import in node (lib-test).
+// transforms, text-fit, colour). No DOM, no fetch, safe to import in node (lib-test).
 // The theme/clock/boot RUNTIME lives in core/boot.js.
 // just time->data transforms + the scene boot.
 
@@ -907,44 +907,6 @@ export function clockWipe(t) {
   if (a > 0 && a < 360) pts.push(boxEdge(a)); else if (a >= 360) pts.push([50, 0]);
   const poly = 'polygon(' + pts.map(([x, y]) => `${x.toFixed(1)}% ${y.toFixed(1)}%`).join(', ') + ')';
   return { clipPath: poly, WebkitClipPath: poly };
-}
-
-export function formatNumber(n, { currency = false, decimals = 0, compact = false } = {}) {
-  let s;
-  if (compact) {
-    const a = Math.abs(n);
-    if (a >= 1e12) s = (n / 1e12).toFixed(decimals === 0 ? 2 : decimals) + 'T';
-    else if (a >= 1e9) s = (n / 1e9).toFixed(decimals === 0 ? 1 : decimals) + 'B';
-    else if (a >= 1e6) s = (n / 1e6).toFixed(decimals === 0 ? 1 : decimals) + 'M';
-    else if (a >= 1e3) s = (n / 1e3).toFixed(decimals === 0 ? 1 : decimals) + 'K';
-    else s = n.toFixed(decimals);
-    s = s.replace(/\.0+([TBMK])$/, '$1'); // 40.0M -> 40M
-  } else {
-    s = Number(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  }
-  return (currency ? '$' : '') + s;
-}
-
-// returns { num, unit } so the scene can style the unit smaller/dim
-export function formatValue(n, unit) {
-  if (unit === '$' || unit === 'USD') return { num: formatNumber(n, { currency: true, decimals: 0, compact: Math.abs(n) >= 1e6 }), unit: '' };
-  if (unit && unit.length > 1 && unit[0] === '$') return { num: '$' + formatNumber(n, { decimals: 0 }), unit: unit.slice(1) };
-  const compact = Math.abs(n) >= 1e6;
-  return { num: formatNumber(n, { decimals: 0, compact }), unit: unit || '' };
-}
-
-// deterministic digit scramble (redacted cold-open bait).
-// Large salted seed so frame 0 is already varied (never all-zeros / broken-looking).
-function lcg01(seed) { const s = (Math.imul(seed >>> 0, 1103515245) + 12345) & 0x7fffffff; return s / 0x7fffffff; }
-export function scrambleDigits(frame, sample) {
-  let out = '';
-  for (let i = 0; i < sample.length; i++) {
-    const ch = sample[i];
-    out += ch >= '0' && ch <= '9'
-      ? String(Math.floor(lcg01(0x9e3779b1 + frame * 2654435761 + (i + 1) * 40503) * 10))
-      : ch;
-  }
-  return out;
 }
 
 // deterministic per-data duration in [58,62]s so uploads vary but a given video is stable
