@@ -102,16 +102,24 @@ export function stageOf(arg) {
  * A film that errors while staging (unparseable storyboard, say) is reported, not thrown, because one
  * bad film should not blind the roster to the rest.
  */
-export function roster() {
+export function roster({ all = false, cap = 12 } = {}) {
   const pop = population('stage roster', { filter: LIBRARY, quiet: true });
-  const rows = pop.names.map((f) => {
+  // A LEADING UNDERSCORE IS THIS REPO'S SCRATCH CONVENTION, and 164 of the 176 films in this library
+  // are probes: _catalog-1, _camera-blur-probe, _auto-orient. Listing them alphabetically puts every
+  // throwaway ahead of every real film, so the front door opened on 176 rows of test scenes. A front
+  // door that answers with the whole directory is not an answer. `--all` still prints everything.
+  const names = all ? pop.names : pop.names.filter((f) => !path.basename(f).startsWith('_'));
+  const rows = names.map((f) => {
     const base = f.replace(/\.json$/, '');
     try { const st = stageOf(base); return { name: st.name, stage: st.stage, next: st.next, ok: true }; }
     catch (err) { return { name: base, stage: 'error', next: String(err && err.message || err), ok: false }; }
   });
   rows.sort((a, b) => STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage));
   const worst = rows.find((r) => r.ok) || rows[0] || null;
-  return { n: rows.length, rows, worst };
+  // Furthest from done first, then capped: the rows that matter are the unfinished ones, and a film
+  // already at judge needs no prompting. `total` counts what was found, `rows` is what is worth reading.
+  const shown = all ? rows : rows.slice(0, cap);
+  return { n: rows.length, total: pop.names.length, rows: shown, hidden: rows.length - shown.length, worst };
 }
 
 // Stage 1 has no film yet, so stageOf() has nothing to read. What DOES exist is the same deliverable
@@ -144,10 +152,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   if (!arg) {
-    const r = roster();
+    const r = roster({ all: argv.includes('--all') });
     if (json) { console.log(JSON.stringify(r, null, 2)); process.exit(0); }
-    console.log(`\n  ${r.n} film(s) in the library\n`);
+    const scratch = r.total - r.n;
+    console.log(`\n  ${r.n} film(s)${scratch > 0 ? `, and ${scratch} scratch scene(s) not listed` : ''}\n`);
     for (const row of r.rows) console.log(`  ${row.stage.toUpperCase().padEnd(9)} ${row.name}`);
+    if (r.hidden > 0) console.log(`\n  ...and ${r.hidden} further along. \`make stage --all\` lists every one.`);
     if (r.worst) console.log(`\n  furthest from done: ${r.worst.name} (${r.worst.stage.toUpperCase()})`
       + `\n  do:  ${r.worst.next}\n`);
     else console.log('');
