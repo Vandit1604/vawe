@@ -21,10 +21,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseStoryboard, blocksOf, fieldIn } from '../author/storyboard-parse.mjs';
+import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../author/storyboard-parse.mjs';
 import { extractKitBlock } from '../lib/stagekit.mjs';
 import { KIT_ROLE, offRampSizes, offRampShadows } from '../lib/kit-ramp.mjs';
 import { gateFindings } from '../lib/findings.mjs';
+import { sceneDims } from '../../core/layout/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CANVAS = { w: 1920, h: 1080 };
@@ -190,6 +191,72 @@ if (measured) {
       warn('peak-barely-leads', `the peak "${peak.name}" is only ${(peak.area / second.area).toFixed(2)}x the next beat. `
         + 'A peak a viewer has to measure is not a peak.');
     }
+  }
+}
+
+// ── 3. the object the storyboard promised, against the layer the assembly actually shipped ─────────
+// `object:` names a continuous thing that survives every cut, and docs/CRAFT/STORYBOARD-TEMPLATE.md
+// gives it TWO legal ways to keep that promise: a per-beat `object:` line (the object is drawn fresh,
+// by hand, inside each beat's own fragment, and nothing here can see into that) or a structured
+// `object_in`/`object_out` chain, which `assemble.mjs` turns into one real cross-beat layer. Only the
+// second way leaves a trace this gate can check, so this fires only when NEITHER beat-level mechanism
+// was ever reached for: the frontmatter names an object and no beat locates it at all (the same "claim
+// nobody kept" storyboard-check.mjs already names), and the assembled scene shows it, either no layer
+// named "object" exists, or `assemble.mjs`'s own literal default shipped untouched (a plain rect, `fill:
+// 'var(--accent)'`, docs/MISTAKES.md #596's sibling: the plan said one thing, the frame carries the
+// tool's placeholder for it). A film that DOES locate the object per beat is answering the promise the
+// other legal way and must not be flagged for it.
+const jsonPath = sbPath.replace(/\.storyboard\.md$/, '.json');
+let scene = null;
+if (fs.existsSync(jsonPath)) {
+  try { scene = JSON.parse(fs.readFileSync(jsonPath, 'utf8')); } catch { scene = null; }
+}
+
+const beatLocatesObject = blocks.some((b) => fieldIn(b, 'object') || fieldIn(b, 'object_in') || fieldIn(b, 'object_out'));
+// A film with neither `object:` nor `threads:` has promised no continuity at all, a manifesto or an
+// anthology says so on purpose (docs/CRAFT/FILM-STRUCTURE.md), and full-bleed beats are the honest
+// shape of that. `claimsContinuity` is true only once the plan itself says something should carry
+// across the cuts, which is the fact that makes an unmet promise a defect rather than a valid style.
+const threads = frontmatter(src).field('threads');
+const claimsContinuity = !!(sb.object || threads);
+if (scene && sb.object && !beatLocatesObject) {
+  const layers = Array.isArray(scene.layers) ? scene.layers : [];
+  const objectLayer = layers.find((l) => l && l.id === 'object');
+  const isDefaultPlaceholder = objectLayer && objectLayer.type === 'rect' && objectLayer.fill === 'var(--accent)';
+  if (!objectLayer || isDefaultPlaceholder) {
+    err('object-is-placeholder',
+      `the storyboard's \`object:\` line promises "${sb.object}", but no beat ever locates it (no beat carries `
+      + 'an `object:` line of its own, nor `object_in`/`object_out`), and the assembled scene '
+      + (objectLayer
+        ? 'still carries `assemble.mjs`\'s literal default for it: a plain rect filled `var(--accent)`, never given a real appearance.'
+        : 'has no layer named "object" at all: nothing was ever built for it.')
+      + ' Extend that `object:` line into either a per-beat `object:` describing what it becomes at each cut, '
+      + 'or a structured `object_in`/`object_out` chain that `assemble.mjs` can build and you then style. '
+      + 'A promise this repo\'s own tool can name and skip is not a decision anyone made.');
+  }
+}
+
+// ── 4. every beat as its own whole frame, so nothing has anywhere to survive a cut ──────────────────
+// A full-bleed html layer (0,0, the whole canvas) is the right call for a film with one beat, and it
+// stays right for a film that never claimed continuity at all: a manifesto or an anthology names no
+// `object:` and no `threads:` on purpose, and seven independent full frames is that film done correctly
+// (docs/CRAFT/FILM-STRUCTURE.md, `vawe-continuous-action`'s own "do not use it for a manifesto"). What
+// this fires on is narrower: a plan that DOES claim something carries across the cuts (`object:` or
+// `threads:`) and then never locates it in a single beat, so the claim and the frames disagree. A film
+// that locates the object per beat (vawe-oblique's own device: the same prop, described as changing
+// state at each cut, drawn fresh inside each full-bleed fragment) is answering the claim the narrative
+// way and must not be flagged for choosing that over a positioned cross-beat layer.
+if (scene && claimsContinuity && !beatLocatesObject) {
+  const [canvasW, canvasH] = sceneDims(scene);
+  const htmlLayers = (Array.isArray(scene.layers) ? scene.layers : []).filter((l) => l && l.type === 'html');
+  const fullBleed = (l) => l.x === 0 && l.y === 0 && l.w === canvasW && l.h === canvasH;
+  if (htmlLayers.length > 1 && htmlLayers.every(fullBleed)) {
+    err('frame-as-surface',
+      `all ${htmlLayers.length} html layer(s) are full-bleed (0,0,${canvasW}x${canvasH}), so every beat swaps the `
+      + 'entire canvas rather than a piece of it, yet the storyboard claims something carries across the cuts '
+      + `(\`${sb.object ? 'object' : 'threads'}: "${sb.object || threads}"\`) and no beat ever locates it. `
+      + 'Either write a per-beat `object:` naming what it becomes at each cut, or give at least one element a '
+      + 'real position and size a later beat can pick up, instead of every beat swapping the whole canvas.');
   }
 }
 
