@@ -1,4 +1,4 @@
-// scripts/lib/layer-boxes.mjs: a layer's AUTHORED box, in canvas px, the way the engine itself places it.
+// harness/lib/layer-boxes.mjs: a layer's AUTHORED box, in canvas px, the way the engine itself places it.
 //
 // `x`/`y`/`w`/`h` may be a keyword ("center"), a percent ("50%"), a `pin`, or a column span, and the one
 // place that already turns all of that into real pixels is `resolveCoords` (core/engine/boot.js), which

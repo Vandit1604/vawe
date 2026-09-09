@@ -1,10 +1,10 @@
-// scripts/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script,
+// harness/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script,
 // entirely offline with macOS `say` (on-device neural voices, no cloud, no API key, no downloads). The
 // engine already mixes VO (audio.go: `vo` + `voWords`, ducks the music under speech), this is the missing
 // generation half, adapted from another engine' Step 3.1 to a local model.
 //
-//   node scripts/media/tts.mjs --script narration.txt --out formats/scene/myvideo.vo [--voice Samantha]
-//   node scripts/media/tts.mjs --text "Line one.\nLine two." --out out/vo
+//   node harness/media/tts.mjs --script narration.txt --out formats/scene/myvideo.vo [--voice Samantha]
+//   node harness/media/tts.mjs --text "Line one.\nLine two." --out out/vo
 //   make tts SCRIPT=narration.txt OUT=formats/scene/myvideo.vo VOICE=Samantha
 //
 // Writes <out>.wav (the VO) and <out>.words.json ([{w,t}], the voWords format captions read). Each

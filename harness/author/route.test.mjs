@@ -1,7 +1,7 @@
-// scripts/author/route.test.mjs: does route() send a real request to the deliverable a human would
+// harness/author/route.test.mjs: does route() send a real request to the deliverable a human would
 // pick? Each case is drawn from AGENTS.md's own ambiguity examples or docs/CRAFT/ROUTING.md's table,
 // so a change here means the table drifted, not that the test is wrong.
-//   node scripts/author/route.test.mjs
+//   node harness/author/route.test.mjs
 import assert from 'node:assert/strict';
 import { route } from './route.mjs';
 

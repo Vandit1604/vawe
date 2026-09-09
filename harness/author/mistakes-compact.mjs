@@ -1,4 +1,4 @@
-// scripts/author/mistakes-compact.mjs: ONE-TIME migration, kept for the record.
+// harness/author/mistakes-compact.mjs: ONE-TIME migration, kept for the record.
 //
 // docs/MISTAKES.md was 17,797 lines and 569 entries. Nobody could read that; `mistakes.mjs`'s own
 // header argued against compressing it, on the theory that the reasoning IS the value. The owner
@@ -6,7 +6,7 @@
 // index (title, the one-sentence lesson, what holds it now) and the full reasoning for every entry
 // moves into git history, retrievable on demand by number.
 //
-// Run once: `node scripts/author/mistakes-compact.mjs`. It reads the CURRENT docs/MISTAKES.md,
+// Run once: `node harness/author/mistakes-compact.mjs`. It reads the CURRENT docs/MISTAKES.md,
 // writes the compact version in place, and prints the archive hash to paste into mistakes.mjs's
 // ARCHIVE_HASH constant (must be the commit made BEFORE this migration's own commit).
 import fs from 'node:fs';
@@ -85,10 +85,10 @@ const lessonOf = (e) => {
   );
 };
 
-// "holds": every quality/gates/*.mjs or scripts/live/*.mjs that cites this entry by number, found
+// "holds": every quality/gates/*.mjs or harness/live/*.mjs that cites this entry by number, found
 // by grep so this never drifts into a hand-kept second list. `mistakes-dupes.mjs` and its own test
 // fixtures are excluded from being cited targets, not from citing: this is a straight text search.
-const GATE_DIRS = ['quality/gates', 'scripts/live'];
+const GATE_DIRS = ['quality/gates', 'harness/live'];
 const gateFiles = [];
 for (const d of GATE_DIRS) {
   const dir = path.join(ROOT, d);
@@ -159,4 +159,4 @@ const footer = WAIVERS ? `\n\n<!-- carried over from the archived file; doc-refs
 fs.writeFileSync(FILE, header + body + footer);
 
 console.log(`Migrated ${entries.length} entries. Archive hash: ${ARCHIVE_HASH}`);
-console.log(`Paste that hash into scripts/author/mistakes.mjs's ARCHIVE_HASH constant.`);
+console.log(`Paste that hash into harness/author/mistakes.mjs's ARCHIVE_HASH constant.`);

@@ -663,7 +663,7 @@ boot((data, fps, theme, canvas) => {
         // alone. data-duration stays what the renderer needs (driveClips must hold the layer through
         // the wrapper's slide, or it vanishes mid-move); data-authored-duration is what the author
         // asked for, so every tool that REPORTS timing can show both and name the substitution.
-        // KEPT (not deleted): scripts/dev/studio-page.mjs reads it to show both numbers in the studio
+        // KEPT (not deleted): harness/dev/studio-page.mjs reads it to show both numbers in the studio
         // inspector. Its OWN pose is no longer at risk from this stretch: renderFrame's per-layer loop
         // clamps every primitive's clock to `L.start + L.duration` (the authored number, read straight
         // off this object, not off the dataset this stretches), so the substitution below only ever
@@ -1070,7 +1070,7 @@ const boxOf = (id) => boxes.get(id) || null;
   // The camera is a position in space (core/timeline/sequence.js). Where NOTHING in the frame leaves the canvas
   // plane, every point sits at z=0 and the perspective projection of the whole frame collapses exactly
   // to the affine `scale(s) translate(x,y)` this engine has always written, same picture, to the pixel,
-  // proved in scripts/dev/spike-dolly.mjs. So that string is still what gets emitted, for the reason
+  // proved in harness/dev/spike-dolly.mjs. So that string is still what gets emitted, for the reason
   // #59 gives: a 3D transform promotes the subtree into a 3D rendering context and changes rasterisation
   // even when it changes no geometry, and a film with no depth in it should not pay that.
   //

@@ -1,7 +1,7 @@
-// scripts/author/pitch.mjs: THE PITCH ROUND, before the storyboard converges.
+// harness/author/pitch.mjs: THE PITCH ROUND, before the storyboard converges.
 //
-//   node scripts/author/pitch.mjs <name>                                   # print the protocol
-//   node scripts/author/pitch.mjs <name> --chose "<angle>" [--left "<median>"]  # record the decision
+//   node harness/author/pitch.mjs <name>                                   # print the protocol
+//   node harness/author/pitch.mjs <name> --chose "<angle>" [--left "<median>"]  # record the decision
 //
 // WHY. docs/CRAFT/PITCH.md is the doctrine: an unformed brief has nothing to converge on, so five
 // concepts get sampled wide (one per path) under an anti-median gate before any storyboard question
@@ -10,7 +10,7 @@
 // the protocol's shape in front of the agent every time (so the four questions and the five paths are
 // never re-derived from memory), and make the outcome auditable the same way every other stage-gate in
 // this repo is: a receipt, hashed against the subject, that goes stale the moment the subject changes.
-// See scripts/lib/receipt.mjs and quality/gates/preflight.mjs for the pattern this mirrors.
+// See harness/lib/receipt.mjs and quality/gates/preflight.mjs for the pattern this mirrors.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,7 +32,7 @@ if (isMain) main();
 function main() {
 const name = process.argv[2];
 if (!name || name.startsWith('--')) {
-  console.error('usage: node scripts/author/pitch.mjs <name-or-scene.json> [--chose "<angle>"] [--left "<median>"]');
+  console.error('usage: node harness/author/pitch.mjs <name-or-scene.json> [--chose "<angle>"] [--left "<median>"]');
   process.exit(2);
 }
 
@@ -59,7 +59,7 @@ const left = arg('left');
 if (chose) {
   if (!subjectExists) {
     console.error(`✗ cannot record: no file at ${subject.rel} yet. Write the scene or storyboard first,`);
-    console.error(`  or point at one directly: node scripts/author/pitch.mjs formats/scene/<name>.json --chose "..."`);
+    console.error(`  or point at one directly: node harness/author/pitch.mjs formats/scene/<name>.json --chose "..."`);
     process.exit(2);
   }
   const rec = writeReceipt(STAGE, subject.abs, {
@@ -119,7 +119,7 @@ console.log(`
   the recommendation. ONE round.
 
   Record the outcome:
-    node scripts/author/pitch.mjs ${name} --chose "<the one-line chosen angle>" [--left "<the median left behind>"]
+    node harness/author/pitch.mjs ${name} --chose "<the one-line chosen angle>" [--left "<the median left behind>"]
 
   read: docs/CRAFT/PITCH.md
 `);

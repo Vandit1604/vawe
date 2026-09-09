@@ -3,7 +3,7 @@
 // scale, and actually LOOK at it. Before it disappears into a 900-frame render. Reuses the repo http
 // server so /assets/… and @font-face URLs resolve exactly as they do at render time.
 //
-//   node scripts/author/preview-fragment.mjs <fragment.(html|json)> [--theme linear] [--bg #08090a] [--w 1400]
+//   node harness/author/preview-fragment.mjs <fragment.(html|json)> [--theme linear] [--bg #08090a] [--w 1400]
 //   make preview HTML=path/to/frag.html THEME=linear
 //
 // Accepts a raw HTML file, OR a captured component/scene JSON ({html} or {parts:[{html}]}) so you can
@@ -21,7 +21,7 @@ const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const has = (n) => argv.includes(n);
 const src = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-if (!src || !fs.existsSync(src)) { console.error('usage: node scripts/author/preview-fragment.mjs <fragment.html|component.json> [--theme name] [--bg #hex] [--w px]'); process.exit(1); }
+if (!src || !fs.existsSync(src)) { console.error('usage: node harness/author/preview-fragment.mjs <fragment.html|component.json> [--theme name] [--bg #hex] [--w px]'); process.exit(1); }
 const boxW = parseInt(flag('--w', '1400'), 10);
 // `--t` is the frame clock, in SECONDS, written every frame by core/bg-html.js. A preview that never
 // sets it leaves every `calc(... var(--t) ...)` INVALID, so the browser drops the whole declaration and
@@ -34,7 +34,7 @@ const tSec = parseFloat(flag('--t', '0'));
 // a backdrop should not have to know this tool's layout; the choice is PRINTED so it is never silent.
 //
 // SCAN THE FRAGMENT'S OWN MARKUP, NOT THE PASTED STAGE KIT. Every scene fragment carries the mandatory
-// STAGEKIT block (scripts/lib/stagekit.mjs) verbatim, and that block is CSS the fragment's author did
+// STAGEKIT block (harness/lib/stagekit.mjs) verbatim, and that block is CSS the fragment's author did
 // not write and mostly does not use: this regex used to scan `raw` whole, so any kit rule that happened
 // to declare `position:absolute` + an inset made every fragment carrying the kit read as full-bleed,
 // including a 140x640 box that never referenced that class. `extractKitBlock` finds the exact pasted
@@ -52,7 +52,7 @@ const tSec = parseFloat(flag('--t', '0'));
 // (core/boot.js), so the token names cannot drift from what a real render sets, and they had already
 // drifted, since the palette key is `surface2` while the token is `--surface-2`.
 // docs/MISTAKES.md #382.
-// --theme-file previews a theme that is not (yet) in themes/. It exists for scripts/author/invent-look.mjs,
+// --theme-file previews a theme that is not (yet) in themes/. It exists for harness/author/invent-look.mjs,
 // which photographs candidate looks BEFORE one is chosen: without it a generator would have to write
 // five throwaway files into themes/ and remember to delete them.
 const themeFileArg = flag('--theme-file', null);
@@ -150,7 +150,7 @@ console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName},
 // THIRD-PARTY, AND SAID SO. `impeccable` is not house tooling: it is a vendored skill (v3.5.0,
 // Apache 2.0, LICENSE at skills/impeccable/LICENSE) and its detector is the only thing in this repo
 // that opens a browser and measures what actually rendered. Our OWN anti-slop is elsewhere and is
-// named for itself: scripts/live/craft-live.mjs reads a fragment's source for off-ramp sizes and
+// named for itself: harness/live/craft-live.mjs reads a fragment's source for off-ramp sizes and
 // shadows, and quality/gates/frame-check.mjs compares the plan with the frames. Neither is impeccable
 // and neither should ever be called it.
 //

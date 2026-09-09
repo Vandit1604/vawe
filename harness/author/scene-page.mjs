@@ -1,4 +1,4 @@
-// scripts/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber.
+// harness/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber.
 //
 // Every tool that wants to LOOK at a scene without rendering an mp4 needs the same twenty lines: serve
 // the repo, boot scene.html against the JSON, wait for __engineReady, read meta, then seek and shoot.
@@ -10,7 +10,7 @@
 //   await page.close();
 //
 // That debt is paid: `beats.mjs` and `reveal.mjs` both boot through here now, and neither owns a server
-// or a browser any more. What that buys beyond one copy of the code: `scripts/author/sheets.mjs` builds
+// or a browser any more. What that buys beyond one copy of the code: `harness/author/sheets.mjs` builds
 // BOTH contact sheets off ONE open page, because the expensive thing is no longer per-tool.
 import fs from 'node:fs';
 import path from 'node:path';

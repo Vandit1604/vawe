@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/author/migrate-junctions.mjs: ONE-TIME (but re-runnable) migration. `transitions[]` is now
+// harness/author/migrate-junctions.mjs: ONE-TIME (but re-runnable) migration. `transitions[]` is now
 // the ONLY authored junction form; `cuts[]`/`stings[]`/`seams[]` are the INTERNAL shape it lowers to
 // (core/transitions/lower.js `lowerScene`). This rewrites every scene that still authors one of the
 // three raw keys into the equivalent `transitions[]` entries, and proves the rewrite changes nothing:
@@ -13,7 +13,7 @@
 // this whole engine refuses elsewhere, so this script refuses it too and leaves that file for a human
 // to look at (it will still validate-refuse, naming this script, until it is migrated by hand).
 //
-//   node scripts/author/migrate-junctions.mjs [--dry-run] [file.json ...]
+//   node harness/author/migrate-junctions.mjs [--dry-run] [file.json ...]
 // No files named -> every formats/scene/*.json (site-tracked and gitignored alike).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -118,7 +118,7 @@ export function migrateOne(data) {
   return { next, ok, err };
 }
 
-// ---- CLI: `node scripts/author/migrate-junctions.mjs [--dry-run] [file.json ...]` ----
+// ---- CLI: `node harness/author/migrate-junctions.mjs [--dry-run] [file.json ...]` ----
 // No files named -> every formats/scene/*.json (site-tracked and gitignored alike).
 const isMain = typeof process !== 'undefined' && process.argv?.[1] && import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {

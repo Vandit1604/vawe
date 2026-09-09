@@ -1,6 +1,6 @@
-// scripts/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at.
+// harness/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at.
 //
-//   node scripts/dev/candidates.mjs formats/scene/plinth-ad.json --at 7.7 --axis bg --n 6
+//   node harness/dev/candidates.mjs formats/scene/plinth-ad.json --at 7.7 --axis bg --n 6
 //
 // WHY. Search needs a word, and the person who most needs help is the one who can see what they want
 // and cannot name it. `make arsenal` answers a question; this one asks it. It takes the film you are
@@ -127,7 +127,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const flag = (n, d) => { const i = argv.indexOf('--' + n); return i < 0 ? d : argv[i + 1]; };
   const die = (msg) => { console.error(`candidates: ${msg}`); process.exit(2); };
 
-  const USAGE = `usage: node scripts/dev/candidates.mjs <scene.json> --at <seconds> [--axis bg] [--n 6]
+  const USAGE = `usage: node harness/dev/candidates.mjs <scene.json> --at <seconds> [--axis bg] [--n 6]
                                        [--dur 2] [--scale 0.35] [--fps 30] [--outdir out/candidates]`;
 
   // The positional is the first argument that is neither a flag nor a flag's VALUE. Filtering on

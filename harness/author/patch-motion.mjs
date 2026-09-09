@@ -9,7 +9,7 @@
 // and `]`, and a brace counter that does not know it is inside a string will find the wrong layer and
 // corrupt the file. Escapes are handled for the same reason.
 //
-// Pure and dependency-free so it can be tested without a browser, the editor in scripts/dev/studio.mjs
+// Pure and dependency-free so it can be tested without a browser, the editor in harness/dev/studio.mjs
 // calls it, and quality/gates/lib-test.mjs proves it.
 
 // scan forward from `i` (which must sit on the opening bracket) to the matching close, skipping strings.
@@ -217,7 +217,7 @@ export function upsertKey(keys, k, eps = 1e-4) {
   return out.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
 }
 
-// applyOps(src, ops) → new source text, for the RFC 6902 patches scripts/dev/candidates.mjs emits.
+// applyOps(src, ops) → new source text, for the RFC 6902 patches harness/dev/candidates.mjs emits.
 //
 // Same reason the rest of this file exists: a candidate accepted in studio changes ONE preset name, and
 // a parse/stringify round trip would reformat the whole hand-written scene around it. The ops that tool

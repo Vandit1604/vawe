@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just
+// harness/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just
 // saved, at the moment the JSON is still open.
 //
 // WHY THIS EXISTS, AS A NUMBER. `node quality/gates/rung.mjs` reports the enforcement ladder over this
@@ -18,9 +18,9 @@
 // file. This is the first entry in that empty column.
 //
 // WHAT IT WILL NOT DO. It will not block, and it will not fire on a film that is doing fine. A hook
-// that speaks every time is a hook that gets turned off, which is scripts/live/vocabulary.mjs's
+// that speaks every time is a hook that gets turned off, which is harness/live/vocabulary.mjs's
 // argument and this file is deliberately its twin. Every threshold below is a measurement from
-// `node scripts/dev/library-stats.mjs` over the gate-visible library, never a preference: it says what
+// `node harness/dev/library-stats.mjs` over the gate-visible library, never a preference: it says what
 // the library actually does, and the two films this repo is proudest of sit far on the other side of it.
 //
 // IT NAMES THE ALTERNATIVE, NOT JUST THE PROBLEM. A rule that says "you have one bg window" and stops
@@ -42,7 +42,7 @@ import { PRESETS } from '../../core/backgrounds/presets.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
-// ONE OWNER. This set is copied from scripts/dev/library-stats.mjs:33, which is the script that prints
+// ONE OWNER. This set is copied from harness/dev/library-stats.mjs:33, which is the script that prints
 // every figure CLAUDE.md quotes. If the two ever disagree, the numbers in the doc stop matching the
 // numbers in the hook and an author is told two different things about one film. `glow`, `beam` and
 // `rect` are deliberately absent there and absent here: a mark is not a picture.

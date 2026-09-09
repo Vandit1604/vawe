@@ -1,6 +1,6 @@
 ---
 when: "you are about to add a feature to `make studio`, or you want to know why a feature the other video editors have is deliberately absent here"
-answers: "what another engine Studio and another engine Studio really do (interaction model, timeline, refresh loop, assets) · a COPY / REJECT table with a reason per row · a ranked build list for `scripts/dev/studio.mjs` with costs · the three to build first"
+answers: "what another engine Studio and another engine Studio really do (interaction model, timeline, refresh loop, assets) · a COPY / REJECT table with a reason per row · a ranked build list for `harness/dev/studio.mjs` with costs · the three to build first"
 group: reference
 ---
 
@@ -8,19 +8,19 @@ group: reference
 
 ## AGENT SUMMARY
 
-- Read this before adding a feature to `make studio` (`scripts/dev/studio.mjs`): it holds the COPY/REJECT
+- Read this before adding a feature to `make studio` (`harness/dev/studio.mjs`): it holds the COPY/REJECT
   verdict (§4) and the ranked build list with costs (§5) for every candidate feature, each with a reason.
-- `scripts/dev/studio.mjs` is ONE file: no build step, no dependency, no framework, light theme by
+- `harness/dev/studio.mjs` is ONE file: no build step, no dependency, no framework, light theme by
   default. A feature that needs a bundler, a component tree, or a second way to say what the JSON
   already says is a bad borrow no matter how good it is in another engine or another engine.
 - Checkable action: before building, find your feature's row in §4; if it says REJECT, read the reason
-  before reopening the question. `[ref: scripts/dev/studio.mjs]`
+  before reopening the question. `[ref: harness/dev/studio.mjs]`
 
 Two other systems ship a developer-facing video editor. Both are far ahead of ours on features, and
 both are built on a format ours does not have. This file reads them, then says which of their
 decisions belong here.
 
-**The constraint that decides every row below.** `scripts/dev/studio.mjs` is ONE file: a Node server
+**The constraint that decides every row below.** `harness/dev/studio.mjs` is ONE file: a Node server
 plus a page written as a template literal, no build step, no dependency, no framework, light theme by
 default because vawe is a white-first product. The scene it edits is a JSON file that a human or an
 agent opens and edits directly. A feature that needs a bundler, a component tree, or a second way to
@@ -132,7 +132,7 @@ timeline of one bar per layer with cuts and seams and stings on the ruler, enter
 off the settled middle, dead-air holes painted as hazard bands from the real `quality/gates/beat-check.mjs`
 findings, a picker that hit-tests the frame and hands back the exact authored JSON, and one write:
 drag a selected layer and a motion key lands on disk through the surgical text patcher in
-`scripts/author/patch-motion.mjs`, with a whole-file undo stack.
+`harness/author/patch-motion.mjs`, with a whole-file undo stack.
 
 Two things it is fair to call better than both. The bars are read from the LIVE DOM, so they show what
 the engine really did rather than what the JSON asked for, including a window the beat wrapper held
@@ -179,7 +179,7 @@ Cost is measured against this one file with no build step.
 |---|---|---|---|
 | 1 | **Reload on change.** Watch the scene file, push a line over Server-Sent Events, call the existing `reloadScene()` so the frame is kept. Refresh the timeline model in the same beat. | cheap | Every other item. The edit-and-reload tax is paid on every single change today, and it is the reason people scrub less than they should. |
 | 2 | **A selection endpoint.** `GET /api/selection` returns the current layer index, its authored object, the frame and time, and the picker's hit box, or `{"selection":null,"code":"no-selection"}`. The page POSTs it on every pick. Print the curl line in the studio banner. | cheap | The context hand-off the owner asked for. A person clicks the wrong thing on screen and the agent knows exactly which layer it is, without a screenshot or a description. |
-| 3 | **Generalise the write.** `POST /api/set {layer, path, value}` on top of `propSpan` and `layerSpan`, which `scripts/author/patch-motion.mjs` already exports. Every write pushes the whole file onto the existing undo stack, so undo covers everything at once. | medium | Editing a number without leaving the studio, and items 5, 6 and 8, which are all writes. |
+| 3 | **Generalise the write.** `POST /api/set {layer, path, value}` on top of `propSpan` and `layerSpan`, which `harness/author/patch-motion.mjs` already exports. Every write pushes the whole file onto the existing undo stack, so undo covers everything at once. | medium | Editing a number without leaving the studio, and items 5, 6 and 8, which are all writes. |
 | 4 | **The plan beside the film.** Draw the storyboard's beat spans as a band on the timeline ruler, and put the `make panels` sheet behind a key as an overlay. The storyboard path is already resolved by the authoring ladder. | medium | Seeing the promise and the render on one clock, which is the question `plan-check` answers in text and nobody reads at the moment of the edit. |
 | 5 | **In and out points.** `i`, `o`, `x` on the scrubber. Playback loops the range, and the range is offered as the draft render window. | cheap | Iterating on one beat of a long film instead of scrubbing past it every time. |
 | 6 | **Search the arsenal.** A key opens a box, you type what the beat should do, and the studio ranks effects, blocks and themes by word overlap against their own descriptions. Selecting one copies the JSON snippet; it does not insert it. | medium | The 566 effects that are currently reachable only by reading a generated 849-line file. Copy the ranked-search shape, not the auto-install. |

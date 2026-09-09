@@ -22,7 +22,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sourceHash } from './provenance.mjs';
-import { serveRepo } from '../../scripts/lib/render-harness.mjs';
+import { serveRepo } from '../../harness/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const BAKE_ROOT = path.join(repoRoot, 'assets/baked');

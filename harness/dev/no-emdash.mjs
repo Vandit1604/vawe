@@ -1,7 +1,7 @@
-// scripts/dev/no-emdash.mjs: refuse the em dash anywhere the repo writes prose.
+// harness/dev/no-emdash.mjs: refuse the em dash anywhere the repo writes prose.
 //
-//   node scripts/dev/no-emdash.mjs           report every em dash in scope, exit 1 if any
-//   node scripts/dev/no-emdash.mjs --quiet   count only
+//   node harness/dev/no-emdash.mjs           report every em dash in scope, exit 1 if any
+//   node harness/dev/no-emdash.mjs --quiet   count only
 //
 // WHY THIS EXISTS. The house rule bans the em dash in code, comments, docs, commit messages and
 // engine OUTPUT. The engine broke its own rule 7,345 times, error messages included, and it was
@@ -36,7 +36,7 @@ const EXCLUDE = [
 // docs/MISTAKES.md USED TO carry the full prose of each entry, and an entry below #418 was exempted
 // as history: rewriting it would have edited the record of what was written at the time. That record
 // now lives in git, not in the working file: the migration to a three-line index
-// (scripts/author/mistakes-compact.mjs) rewrote every entry's lesson line fresh, so nothing in the
+// (harness/author/mistakes-compact.mjs) rewrote every entry's lesson line fresh, so nothing in the
 // current file is verbatim historical text any more. The exemption is gone; the whole file is held to
 // the rule, same as everything else in SCOPE.
 const MISTAKES = 'docs/MISTAKES.md';

@@ -34,10 +34,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { collect } from '../../scripts/author/arsenal.mjs';
+import { collect } from '../../harness/author/arsenal.mjs';
 import { registries } from '../../core/registry/registry.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/discovery-ratchet.json');
@@ -123,7 +123,7 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
   const missing = families.filter((fam) => !represented.has(fam));
   if (missing.length) f.fail('block-unsearchable',
     `\n  ✗ ${missing.length} block famil(ies) are not in the search: ${missing.slice(0, 8).join(' ')} ` +
-    `\n    scripts/author/arsenal.mjs reads blocks/catalog.mjs. If a family is missing, that read broke.`);
+    `\n    harness/author/arsenal.mjs reads blocks/catalog.mjs. If a family is missing, that read broke.`);
   else console.log(`  ✓ all ${families.length} block families are searchable`);
 }
 
@@ -149,7 +149,7 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
       `\n  ✗ ${unexplained.length} thing(s) the WEBSITE lists that the CLI cannot find: ` +
       `\n    ${unexplained.slice(0, 8).join(' ')} ` +
       `\n    The site would show these and \`make arsenal\` would answer "assume the engine does not` +
-      `\n    have it". Add them to the corpus in scripts/author/arsenal.mjs, beside the blocks.`);
+      `\n    have it". Add them to the corpus in harness/author/arsenal.mjs, beside the blocks.`);
     else console.log(`  ✓ the two indexes agree, apart from ${variants.length} namespaced variants left out on purpose`);
   }
 }
@@ -160,10 +160,10 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
 // FAMILY nobody wrote a query for. This closes it the way checkBlurb closes a bare entry: a searchable
 // family with no author-phrased golden query FAILS, so a new vocabulary cannot land undiscoverable-in-
 // -practice and pass in silence. Families reached by mechanism (an easing, a blend mode, a keyframe
-// handle) are exempt and named in scripts/dev/family-coverage.mjs; they are still covered per-entry by
+// handle) are exempt and named in harness/dev/family-coverage.mjs; they are still covered per-entry by
 // blurb self-retrieval. This owns no list of its own: it reads that module, which reads the live eval.
 {
-  const { familyCoverage } = await import('../../scripts/dev/family-coverage.mjs');
+  const { familyCoverage } = await import('../../harness/dev/family-coverage.mjs');
   const { uncovered, covered, wantCount } = await familyCoverage();
   if (!wantCount) f.fail('family-uncovered',
     '\n  ✗ read ZERO queries from lib-test.mjs: the PRESENT/PLAIN parse in family-coverage.mjs has rotted.');
@@ -172,8 +172,8 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
     `\n    ${uncovered.map((u) => u.family).slice(0, 8).join(', ')} ` +
     `\n    An author who cannot phrase a family in plain English cannot find it, whatever its blurbs say.` +
     `\n    Add one query per family to PRESENT/PLAIN in quality/gates/lib-test.mjs that resolves to it,` +
-    `\n    and close any miss with \`aka\` at the write site. Worklist: node scripts/dev/family-coverage.mjs` +
-    `\n    If a family is genuinely reached only by mechanism, exempt it in scripts/dev/family-coverage.mjs.`);
+    `\n    and close any miss with \`aka\` at the write site. Worklist: node harness/dev/family-coverage.mjs` +
+    `\n    If a family is genuinely reached only by mechanism, exempt it in harness/dev/family-coverage.mjs.`);
   else console.log(`  ✓ all ${covered.size} searchable families are asked for by the eval`);
 }
 

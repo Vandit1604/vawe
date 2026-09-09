@@ -1,4 +1,4 @@
-// scripts/lib/receipt.mjs: STAGE APPROVAL, as a content hash.
+// harness/lib/receipt.mjs: STAGE APPROVAL, as a content hash.
 //
 // A studio pipeline works because a person says "proceed" between stages. This engine generates every
 // artifact in one pass and then grades its own output, which is the structural difference between our

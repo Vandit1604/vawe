@@ -1,4 +1,4 @@
-// scripts/author/animatic.mjs: cut the picture to the sound, before building the film.
+// harness/author/animatic.mjs: cut the picture to the sound, before building the film.
 //
 // THE FIRST VERSION OF THIS FILE WAS NOT AN ANIMATIC. It laid grey boxes on the storyboard's own
 // declared timings and shipped `audio: {silent: true}`, and the trade's own definition is blunt about
@@ -16,7 +16,7 @@
 // It is also DETERMINISTIC (same text + voice → same audio, same timings), so an animatic never breaks
 // the render's purity contract.
 //
-//   node scripts/author/animatic.mjs <STORYBOARD.md> [--voice Samantha] [--out <scene.json>]
+//   node harness/author/animatic.mjs <STORYBOARD.md> [--voice Samantha] [--out <scene.json>]
 //   make animatic SB=<file>            (generates, then renders draft)
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
@@ -78,7 +78,7 @@ const parts = [];
 for (const [i, s] of speech.entries()) {
   if (!s.text) { parts.push({ ...s, sec: 0, wav: null, words: [] }); continue; }
   const base = path.join(VODIR, `beat-${String(i).padStart(2, '0')}`);
-  execFileSync('node', ['scripts/media/tts.mjs', '--text', s.text, '--out', base,
+  execFileSync('node', ['harness/media/tts.mjs', '--text', s.text, '--out', base,
     ...(VOICE ? ['--voice', VOICE] : [])], { stdio: 'pipe' });
   parts.push({ ...s, sec: durOf(`${base}.wav`), wav: `${base}.wav`,
     words: JSON.parse(fs.readFileSync(`${base}.words.json`, 'utf8')) });
@@ -187,7 +187,7 @@ const scene = {
     allow: ['no-continuous-object', 'no-continuous-object-inferred', 'plain-slideshow',
       'dead-air', 'ends-on-nothing', 'linear-motion', 'monotone-timing', 'static-bg', 'overlap', 'contrast', 'safe',
       'no-camera', 'no-transition', 'no-kinetic-type', 'no-bg-motion', 'low-vocab', 'front-loaded'],
-    _why: { animatic: `Timing pass generated from ${path.basename(SB)} by scripts/author/animatic.mjs. It is meant to look like nothing so that pacing is the only thing left to judge, and it is never a deliverable. The taste gates are waived BY CONSTRUCTION here rather than per-scene by an author talking themselves into it.` },
+    _why: { animatic: `Timing pass generated from ${path.basename(SB)} by harness/author/animatic.mjs. It is meant to look like nothing so that pacing is the only thing left to judge, and it is never a deliverable. The taste gates are waived BY CONSTRUCTION here rather than per-scene by an author talking themselves into it.` },
   },
   theme: 'vawe',
   aspect: W >= H ? '16:9' : '9:16',

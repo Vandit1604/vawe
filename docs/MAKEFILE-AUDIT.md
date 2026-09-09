@@ -7,7 +7,7 @@ group: process
 # Makefile audit: what the targets actually are
 
 This answers one question: is the Makefile a build system, or a command catalogue wearing one?
-Method: a small parser (`scripts/dev/` scratch, not committed) read every `name:` line in the
+Method: a small parser (`harness/dev/` scratch, not committed) read every `name:` line in the
 Makefile, split prerequisites from the recipe, and classified each target by what its recipe
 contains. Counts below are from that parse, cross-checked by hand against the file.
 
@@ -81,19 +81,19 @@ the target name," which is most of the value `make list` exists to replace.
 Four targets had real shell logic moved into a script, keeping the Makefile line a one-line call
 with the recipe's own comment intact:
 
-- `build-all` -> `scripts/dev/build-all.sh` (the five-platform cross-compile loop)
-- `probe` -> `scripts/dev/probe-all.sh` for the no-`M=` sweep branch; the `M=<fmt>` branch stays a
+- `build-all` -> `harness/dev/build-all.sh` (the five-platform cross-compile loop)
+- `probe` -> `harness/dev/probe-all.sh` for the no-`M=` sweep branch; the `M=<fmt>` branch stays a
   direct one-line call to `probe-purity.mjs`, now expressed as `$(if $(M),...,...)` instead of a
   shell `if`
 - `catalog` -> `scripts/site/catalog-render.sh` (the write-on-change render loop, with its own
   comment explaining why re-rendering an unchanged page churns git)
-- `approve` -> `scripts/author/approve.mjs` (the inline `node -e` became a two-line module)
+- `approve` -> `harness/author/approve.mjs` (the inline `node -e` became a two-line module)
 
 Each is now reachable by `node`/`sh` directly, outside `make`, which is what "untestable by
 lib-test" meant in practice. No target was renamed, no `.PHONY` list changed, no phase tag moved.
 Verified green after the change: `make list` (byte-identical output), `make doc-refs`, `make
 generated-check`, `make lint-test`, `make lib-test` (no target lost, still 1986 asserts passing),
-`node scripts/dev/no-emdash.mjs`, and a live run of `make probe M=scene` and `make approve
+`node harness/dev/no-emdash.mjs`, and a live run of `make probe M=scene` and `make approve
 STAGE=beats D=formats/scene/sample.json` to prove the moved code still executes correctly, not just
 parses. `make docs-drift` fails both before and after this change on an unrelated pre-existing
 finding (`waiver-drift.mjs` unreachable from its current check path); that failure is untouched by
@@ -136,7 +136,7 @@ not adding.
 
 What it would buy: real command completion (`make` has none; a CLI can), a single place to add
 cross-cutting behavior (structured `--json` everywhere is already half-true via
-`scripts/lib/findings.mjs`, but a CLI could make it total in one file instead of 200 recipes each
+`harness/lib/findings.mjs`, but a CLI could make it total in one file instead of 200 recipes each
 doing `$(if $(JSON),--json,)`), and the honest naming this audit's finding #1 argues for: nothing
 here is a build rule, so nothing here loses anything by not being one.
 

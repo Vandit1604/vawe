@@ -5,8 +5,8 @@
 // judging a beat by its hold and missing the reveal (docs/MISTAKES.md, the "settled not reveal" trap).
 //
 //   make reveal D=formats/scene/x.json                 → /tmp/reveal/<name>.png (one row per beat: enter | set | exit)
-//   node scripts/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]
-//   GHOST=1 node scripts/author/reveal.mjs <scene.json> → /tmp/reveal/<name>.ghost.png (onion skin)
+//   node harness/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]
+//   GHOST=1 node harness/author/reveal.mjs <scene.json> → /tmp/reveal/<name>.ghost.png (onion skin)
 //   make sheets D=…                                    → this sheet AND the beat sheet, one browser
 //
 // GHOST=1 answers a question the side-by-side sheet cannot. Three stills in a row show three poses, and
@@ -21,7 +21,7 @@
 // (no guessing), and renders headless via the engine's pure renderFrame(n). For a raw reference video
 // (no JSON) use `make filmstrip … FROM=<beat> FPS=12` per beat instead, this tool is for our renders.
 //
-// The serve+boot block this file used to carry is gone: `openScene` owns it (scripts/author/scene-page.mjs).
+// The serve+boot block this file used to carry is gone: `openScene` owns it (harness/author/scene-page.mjs).
 // `revealSheet` takes an ALREADY-OPEN scene, which is what lets `make sheets` build both sheets from one browser.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -45,7 +45,7 @@ const GHOST_MAX = 15;                 // a long film has dozens of entrances; a 
 // ffmpeg's hstack/vstack reject `inputs=1` outright, so a scene with ONE beat crashed the whole tool at
 // the last step, after every frame had already been rendered. A one-item stack is the identity, and it
 // is the single-beat film that most needs looking at, so it is answered here rather than by ffmpeg.
-// Pre-existing: `node scripts/author/reveal.mjs formats/scene/ab3-nogate-tenor.json` failed on HEAD.
+// Pre-existing: `node harness/author/reveal.mjs formats/scene/ab3-nogate-tenor.json` failed on HEAD.
 const stack = (dir, inputs, out, what, extra = '') => {
   if (inputs.length === 1 && !extra) { fs.copyFileSync(inputs[0], out); return out; }
   const chain = inputs.length === 1 ? `[0:v]${extra.replace(/^,/, '')}` : `${dir}stack=inputs=${inputs.length}${extra}`;
@@ -107,7 +107,7 @@ export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false,
   // per scene, so two authors running at once cannot read each other's reveal (same reason as beats.mjs)
   const SLUG = path.basename(dataArg, '.json');
   // The frames and the sheet MUST come off one base. They did not, and the sheet's parent was therefore
-  // never created under a job dir, see scripts/lib/scratch.mjs.
+  // never created under a job dir, see harness/lib/scratch.mjs.
   const sheet = scratch('reveal', `${SLUG}.png`);
   const tmp = scratch('reveal', `${SLUG}.frames`);
   fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
@@ -258,7 +258,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const argv = process.argv.slice(2);
   const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? +argv[i + 1] : d; };
   const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-  if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]'); process.exit(1); }
+  if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node harness/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]'); process.exit(1); }
   const all = argv.includes('--layers') || process.env.LAYERS === '1';
   const ghost = argv.includes('--ghost') || process.env.GHOST === '1';
   let s;

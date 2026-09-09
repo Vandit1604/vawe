@@ -1,4 +1,4 @@
-// scripts/dev/bar-probe.mjs: PROVE the continuous subject is actually drawn, by counting pixels.
+// harness/dev/bar-probe.mjs: PROVE the continuous subject is actually drawn, by counting pixels.
 //
 // A film whose spine is one travelling mark can pass every static gate while that mark is invisible:
 // under the 3D rig painting is by DEPTH, not by layer order, so a tilted 1440px capture happily paints
@@ -7,7 +7,7 @@
 //
 // So: recolour the subject layers to a colour that appears nowhere else, render headless, and COUNT.
 //
-//   node scripts/dev/bar-probe.mjs formats/scene/playhead.json --ids playhead,bar --at 0.5,2,3.2,3.4
+//   node harness/dev/bar-probe.mjs formats/scene/playhead.json --ids playhead,bar --at 0.5,2,3.2,3.4
 //
 // Headless (this tool) is for iterating. The shipped proof is counted off the ENCODED mp4, because
 // that is the artifact that ships and h264 is one more thing between the bar and the viewer.

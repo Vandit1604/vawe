@@ -1,4 +1,4 @@
-// node --test scripts/live/test/stage-gate.test.mjs
+// node --test harness/live/test/stage-gate.test.mjs
 //
 // The three denials, and the writes that must stay allowed. Real films from formats/scene/ through the
 // real hook, exactly as Claude Code's PreToolUse feeds it. The allows matter as much as the denials: a

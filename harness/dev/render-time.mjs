@@ -1,4 +1,4 @@
-// scripts/dev/render-time.mjs: THE STOPWATCH. How long does a render take, and did that change?
+// harness/dev/render-time.mjs: THE STOPWATCH. How long does a render take, and did that change?
 //
 // WHY THIS EXISTS. Nothing in this repo reported render time against a baseline, so a change that
 // halved throughput landed green and silent. Two flags were added and one CSS hint removed for
@@ -6,10 +6,10 @@
 // "SPEED IS A PROPERTY YOU CAN LOSE WITHOUT NOTICING" asks for two wall-clock numbers in the commit
 // body when you touch the capture path. This is how you get them.
 //
-//   node scripts/dev/render-time.mjs                      # the default pair, 3 runs each
-//   node scripts/dev/render-time.mjs --films a,b --runs 5
-//   node scripts/dev/render-time.mjs --save               # write verify/perf/baseline.json
-//   node scripts/dev/render-time.mjs --against            # diff against the saved baseline
+//   node harness/dev/render-time.mjs                      # the default pair, 3 runs each
+//   node harness/dev/render-time.mjs --films a,b --runs 5
+//   node harness/dev/render-time.mjs --save               # write verify/perf/baseline.json
+//   node harness/dev/render-time.mjs --against            # diff against the saved baseline
 //
 // WHAT IT CANNOT DO, said plainly. There is no per-stage split, because the renderer prints one line
 // at the end and does not report capture, encode and mux separately. Getting that means teaching

@@ -15,7 +15,7 @@ group: crosscutting
   render, classify each friction point as framework bug / gate gap / authoring choice and log framework
   bugs to `docs/MISTAKES.md`.
 - Two of the five (a save under `internal/scene`/`internal/render`, a new file under `quality/gates/`)
-  are spoken at the keystroke by the Claude Code hook `scripts/live/craft-live.mjs`; the rest are `[eye]`,
+  are spoken at the keystroke by the Claude Code hook `harness/live/craft-live.mjs`; the rest are `[eye]`,
   check them yourself before committing an engine change.
 
 <!-- doc-refs-allow: make slop · retired in `docs/MISTAKES.md` #326; the paragraph below is the record of why -->

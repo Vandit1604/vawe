@@ -1,7 +1,7 @@
-// scripts/author/grammar.mjs: what we have learned about how good films are BUILT.
+// harness/author/grammar.mjs: what we have learned about how good films are BUILT.
 //
-//   node scripts/author/grammar.mjs            # the whole store, as one comparison table
-//   node scripts/author/grammar.mjs <name>     # one film's full reading
+//   node harness/author/grammar.mjs            # the whole store, as one comparison table
+//   node harness/author/grammar.mjs <name>     # one film's full reading
 //   make grammar [N=<name>]
 //
 // WHY THIS EXISTS. `make study` reads one reference and writes `grammar/<name>.json`. That is a fact
@@ -11,7 +11,7 @@
 //
 // IT REPORTS WHAT IS MISSING AS LOUDLY AS WHAT IS THERE. A grammar file with every judgement blank is
 // a film that was measured and never read, and a table that quietly omitted those rows would present a
-// corpus of three as a corpus of nine. That is the absence-read-as-a-pass shape scripts/lib/census.mjs
+// corpus of three as a corpus of nine. That is the absence-read-as-a-pass shape harness/lib/census.mjs
 // exists for, so the unread films are counted in the header and listed at the end.
 import fs from 'node:fs';
 import path from 'node:path';

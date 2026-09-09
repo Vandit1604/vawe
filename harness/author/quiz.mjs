@@ -1,7 +1,7 @@
-// scripts/author/quiz.mjs: THE BRIEF, asked before anything is authored.
+// harness/author/quiz.mjs: THE BRIEF, asked before anything is authored.
 //
-//   node scripts/author/quiz.mjs --ask [--url … --name … --slug …]   ·   make quiz
-//   node scripts/author/quiz.mjs --self-test
+//   node harness/author/quiz.mjs --ask [--url … --name … --slug …]   ·   make quiz
+//   node harness/author/quiz.mjs --self-test
 //
 // It prints an AskUserQuestion payload as JSON. The agent asks it, the answers come back, and `--apply`
 // turns them into a storyboard. This file owns BOTH halves on purpose: the option table and the mapping
@@ -316,7 +316,7 @@ function look({ sb, n = 3 }) {
   if (!sb || !fs.existsSync(sb)) return { error: 'no-storyboard', message: `--look needs a storyboard (got ${sb || 'nothing'}). Run --apply first.` };
   const N = Math.min(3, Math.max(2, +n || 3));
   const run = (args) => spawnSync(process.execPath, args, { encoding: 'utf8', cwd: ROOT });
-  const c = run([path.join(ROOT, 'scripts/author/concept.mjs'), sb, '--n', String(N)]);
+  const c = run([path.join(ROOT, 'harness/author/concept.mjs'), sb, '--n', String(N)]);
   if (c.status !== 0) return { error: 'concept-failed', message: (c.stderr || c.stdout || '').trim() };
   const stem = path.basename(sb).replace(/\.storyboard\.md$/, '');
   const dir = path.join(ROOT, 'formats/scene/_concepts');
@@ -327,7 +327,7 @@ function look({ sb, n = 3 }) {
   const sheets = [];
   for (const v of variants) {
     const slug = v.slice(stem.length + 1).replace(/\.storyboard\.md$/, '');
-    const r = run([path.join(ROOT, 'scripts/author/panels.mjs'), path.join(dir, v)]);
+    const r = run([path.join(ROOT, 'harness/author/panels.mjs'), path.join(dir, v)]);
     const m = (r.stdout || '').match(/(\/[^\s]*\.png)/);
     const d = DIRECTIONS.find((x) => x.slug === slug);
     sheets.push({ slug, sheet: m ? m[1] : null, thread: d ? d.thread : slug, why: d ? d.why : '', pace: d ? d.pace : null,

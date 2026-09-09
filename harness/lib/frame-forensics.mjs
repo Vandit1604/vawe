@@ -1,4 +1,4 @@
-// scripts/lib/frame-forensics.mjs: read PIXELS inside one authored BOX, at one frame.
+// harness/lib/frame-forensics.mjs: read PIXELS inside one authored BOX, at one frame.
 //
 // seam-snap.mjs already reads the rendered mp4 for a luminance flash across the WHOLE frame at a
 // boundary. Three defects survive that check because they never touch the whole-frame average: a layer

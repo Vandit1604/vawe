@@ -403,7 +403,7 @@ most-logged bug class in this repo.
 make lightfield                                  # ref, tide and fern only: the loop in the Makefile
                                                  # is hardcoded and does not yet know about the two
                                                  # new presets. Use the CLI for those.
-node scripts/author/lightfield.mjs --preset ember --out formats/scene/_lightfield-ember.html --shot
+node harness/author/lightfield.mjs --preset ember --out formats/scene/_lightfield-ember.html --shot
 make lightfield PRESET=tide                      # one preset
 make lightfield ARGS='--seed 91 --pattern.kind shards --bloom "#ffd166" --out /tmp/f.html --shot'
 

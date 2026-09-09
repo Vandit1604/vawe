@@ -1,7 +1,7 @@
 // contract.mjs: THE PER-BEAT CONTRACT for a fan-out of per-scene HTML-fragment agents.
 //
 // It is NOT a second planning artefact. It reads the SAME storyboard `make scaffold` already writes
-// (scripts/author/storyboard-parse.mjs), off two fields scaffold now also emits per beat:
+// (harness/author/storyboard-parse.mjs), off two fields scaffold now also emits per beat:
 //   object_in:  "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   the object's POSE at beat START
 //   object_out: "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   its POSE at beat END
 // `<placement>` is a name from the safe-area PLACEMENT registry (core/layout/safe.js), never a raw
@@ -277,14 +277,14 @@ export function stagedSchedule(beats) {
 // scale track on the LAYER that never stops moving for the length of the beat. `move:` is that decision,
 // named on the beat the same way `motion:` (parts entrances, above) and `object_in`/`object_out`
 // (the continuous object) already are, and it reads the SAME vocabulary as both: a `SHAPES` key from
-// scripts/author/track.mjs (`make arsenal SHAPE=pan`, never a new motion mechanism) and a `SPEED_BAND`
+// harness/author/track.mjs (`make arsenal SHAPE=pan`, never a new motion mechanism) and a `SPEED_BAND`
 // name (the four words `motion:` already uses).
 //
 //   move: pan:cinematic     the higgsfield beat-2 scroll rhythm, at the "cinematic" scale
 //   move: drift:gravity     an ambient hold that keeps moving, never sitting still
 //
 // A beat that names no `move:` builds nothing here and assembles exactly as it did before this field
-// existed (byte-identical, scripts/author/assemble.test.mjs).
+// existed (byte-identical, harness/author/assemble.test.mjs).
 //
 // WHY BAND SCALES MAGNITUDE AND NEVER DURATION. The requirement this field exists to meet is that the
 // track spans the WHOLE beat, so nothing goes still inside it; if a band shortened the track, the beat

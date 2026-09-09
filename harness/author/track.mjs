@@ -1,10 +1,10 @@
 // track.mjs: emit a hand-keyed `motion` track from a MEASURED shape, and optionally patch it in.
 //
-//   node scripts/author/track.mjs pan   --to -600 --dur 1.25
-//   node scripts/author/track.mjs blast --dur 1.5
-//   node scripts/author/track.mjs drift --dur 3 --amp 12
-//   node scripts/author/track.mjs enter --from 40 --dur 0.9
-//   node scripts/author/track.mjs pan --to -600 --dur 1.25 --offset 0.12   # weld a rider to the same pan
+//   node harness/author/track.mjs pan   --to -600 --dur 1.25
+//   node harness/author/track.mjs blast --dur 1.5
+//   node harness/author/track.mjs drift --dur 3 --amp 12
+//   node harness/author/track.mjs enter --from 40 --dur 0.9
+//   node harness/author/track.mjs pan --to -600 --dur 1.25 --offset 0.12   # weld a rider to the same pan
 //   … --scene formats/scene/x.json --layer 4                               # write it, surgically
 //
 // WHY THIS EXISTS, and why studio's keyframe mode is not it. `docs/CRAFT/KEYED-MOTION.md` says the
@@ -126,7 +126,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const num = (n, d) => { const v = flag(n, null); return v == null ? d : Number(v); };
 
   if (!shape || !SHAPES[shape]) {
-    console.error(`usage: node scripts/author/track.mjs <${Object.keys(SHAPES).join('|')}> [flags]
+    console.error(`usage: node harness/author/track.mjs <${Object.keys(SHAPES).join('|')}> [flags]
 
     pan    --to -600 --dur 1.25 [--from 0] [--axis x]   the higgsfield scroll rhythm
     blast  --dur 1.5 [--peak 1.5] [--out 1.9]           the brew four-key punctuation

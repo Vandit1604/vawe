@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// scripts/live/craft-live.mjs - three rules of CLAUDE.md that were held up by nothing but the
+// harness/live/craft-live.mjs - three rules of CLAUDE.md that were held up by nothing but the
 // sentence, said at the moment the file is still open.
 //
 // WHY A SECOND LIVE HOOK. `node quality/gates/rung.mjs` reports how each rule in CLAUDE.md is
 // enforced, and thirteen of them sat at [eye]: a rule an author can read, agree with, and not follow,
-// with nothing anywhere noticing. scripts/live/scene-live.mjs took the first three of those and this
+// with nothing anywhere noticing. harness/live/scene-live.mjs took the first three of those and this
 // file takes three more. It is deliberately its twin, and it inherits the whole contract:
 //
 //   IT DOES NOT BLOCK. Exit 2, a message, and the work continues.
@@ -26,7 +26,7 @@ import { KIT_ROLE, offRampSizes, offRampShadows } from '../lib/kit-ramp.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
-// The same set scripts/dev/library-stats.mjs:33 and scene-live use, minus `html`: this check asks
+// The same set harness/dev/library-stats.mjs:33 and scene-live use, minus `html`: this check asks
 // whether the film has a real PICTURE anywhere, and hand-written markup is the thing an author reaches
 // for INSTEAD of one. A mark (`glow`, `beam`, `rect`) was never a picture in any of the three.
 const PICTURE = new Set(['image', 'svg', 'video', 'clip', 'lottie', 'component', 'board', 'doc']);

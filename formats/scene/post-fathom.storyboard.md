@@ -32,7 +32,7 @@ craft:
        - the REGISTER came from the type spine, not from memory. `launch` is kinetic, so sustained
          motion is correct here and the "one loud moment" rule does not apply the way it does to an
          explainer. The budget still applies: beat 3 is the named peak.
-       - the BACKGROUND came from `node scripts/author/arsenal.mjs "" --census --kind "background
+       - the BACKGROUND came from `node harness/author/arsenal.mjs "" --census --kind "background
          preset"`, which reported metallicSheen as the 1 of 23 with zero users. Novelty is not a
          recommendation, so it was checked for fit: a near-black anodised field with slow accent rods
          is what a machined instrument looks like, and the fit is the reason, not the novelty.

@@ -129,7 +129,7 @@ env.REPO = ROOT;
 // Stage the scene where the render server will serve it from, EXPANDING it on the way in.
 //
 // `{type:"block"}` / `{type:"beat"}` / `{type:"comp"}` are authoring sugar that a Node build step
-// resolves (scripts/author/expand-blocks.mjs); the Go renderer never expands, it only strips the
+// resolves (harness/author/expand-blocks.mjs); the Go renderer never expands, it only strips the
 // `.expanded` suffix off the output name (main.go:184-188). So without this, any scene using a block,
 // which is most of them, reaches the validator as an unknown layer type and dies. That is exactly the
 // failure the gh-wrapped source shows when it is validated directly instead of expanded.
@@ -142,7 +142,7 @@ const stageDir = path.join(ROOT, '.vawe-data', 'scenes');
 fs.mkdirSync(stageDir, { recursive: true });
 const staged = path.join(stageDir, `${base}.json`);
 
-const expander = path.join(ROOT, 'scripts', 'author', 'expand-blocks.mjs');
+const expander = path.join(ROOT, 'harness', 'author', 'expand-blocks.mjs');
 if (fs.existsSync(expander)) {
   const r = spawnSync(process.execPath, [expander, path.resolve(scene), staged], { encoding: 'utf8' });
   if (r.status !== 0) {

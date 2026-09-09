@@ -3,14 +3,14 @@
 // overlapping, or off. With --vs <brand> it stacks each beat beside its source-section screenshot (from
 // `make sections`). A side-by-side taste diff: does our beat actually reflect the real section?
 //
-//   node scripts/author/beats.mjs <data.json> [--vs brand] [--stride 1]
+//   node harness/author/beats.mjs <data.json> [--vs brand] [--stride 1]
 //   make beats D=formats/scene/linear-30.json            (self check)
 //   make beats D=formats/scene/linear-30.json VS=linear  (fidelity vs captured sections)
 //   make sheets D=…                                      (this sheet AND the reveal sheet, one browser)
 //
 // Beat boundaries: authored cut times, else layer-start clusters (>1.2s gap), else camera/captions, else even chop.
 //
-// The serve+boot block this file used to carry is gone: `openScene` owns it (scripts/author/scene-page.mjs),
+// The serve+boot block this file used to carry is gone: `openScene` owns it (harness/author/scene-page.mjs),
 // as its header asked for. `beatSheet` takes an ALREADY-OPEN scene, which is what lets `make sheets` pay
 // for one browser and get both contact sheets out of it.
 import fs from 'node:fs';
@@ -70,7 +70,7 @@ export async function beatSheet(s, { dataArg, vs = null, auto = false } = {}) {
   // they had looked at their own. `judge.mjs` was moved off a shared directory for exactly this; the rest
   // of the sheet-writers were not, and a campaign is when that stops being theoretical.
   const SLUG = path.basename(dataArg, '.json');
-  // The frames and the sheet come off ONE base (scripts/lib/scratch.mjs). This file used to write both
+  // The frames and the sheet come off ONE base (harness/lib/scratch.mjs). This file used to write both
   // as `/tmp/...` literals, which is the half of #245 that was fixed in reveal.mjs and left here.
   const sheet = scratch('beats', `${SLUG}.png`);
   const tmp = scratch('beats', `${SLUG}.frames`);
@@ -134,7 +134,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const argv = process.argv.slice(2);
   const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
   const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-  if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/author/beats.mjs <data.json> [--vs brand]'); process.exit(1); }
+  if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node harness/author/beats.mjs <data.json> [--vs brand]'); process.exit(1); }
   let s;
   try { s = await openScene(dataArg); }
   catch (e) { console.error(`✗ ${e.message}`); process.exit(1); }

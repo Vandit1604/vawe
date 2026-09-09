@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // blurb-retrieval.mjs: does an entry's own description find that entry?
 //
-//   node scripts/dev/blurb-retrieval.mjs            # the distribution, plus the entries that fail
-//   node scripts/dev/blurb-retrieval.mjs --all      # every entry and its rank
+//   node harness/dev/blurb-retrieval.mjs            # the distribution, plus the entries that fail
+//   node harness/dev/blurb-retrieval.mjs --all      # every entry and its rank
 //
 // WHY THIS EXISTS, from a real failure. An author searched the arsenal in plain English for
 // "elements react to a moving point by distance". `core/tracks/effector.js` IS that, exactly, and the
 // search said NOTHING HERE CLEARLY MATCHES. One blurb was then rewritten and the query started
 // working, which fixed one row and left the class alone.
 //
-// The class is this: `scripts/author/arsenal.mjs` ranks on name + kind + blurb and nothing else (read
+// The class is this: `harness/author/arsenal.mjs` ranks on name + kind + blurb and nothing else (read
 // `score` and `coverageIn` there), so a blurb is not a caption, it IS the retrieval index. Nothing said
 // so and nothing measured it, which is how a blurb could be written that reads well and finds nothing.
 //

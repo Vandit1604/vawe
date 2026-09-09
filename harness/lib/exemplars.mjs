@@ -1,4 +1,4 @@
-// scripts/lib/exemplars.mjs: the ONE owner of exemplar retrieval. `examples.json`'s goldSet names the
+// harness/lib/exemplars.mjs: the ONE owner of exemplar retrieval. `examples.json`'s goldSet names the
 // full films this repo is proudest of; two callers reach for them and must not drift apart:
 //   - preflight prints "EXEMPLARS TO STUDY" (rules tell you what to avoid; an exemplar shows what to reach for).
 //   - scaffold composes the first draft to the shape of the nearest one, so the default draft inherits a

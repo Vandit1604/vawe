@@ -1,4 +1,4 @@
-// scripts/lib/census.mjs: ONE owner for "which files does this sweep walk, and can it see them all?"
+// harness/lib/census.mjs: ONE owner for "which files does this sweep walk, and can it see them all?"
 //
 // THE BUG CLASS THIS CLOSES: absence read as a pass. A tool walks a population, finds nothing because
 // it was looking at nothing, and prints a green tick. `make slop` ran 41 rules over a DOM dump carrying
@@ -104,7 +104,7 @@ export function population(what, { dir = SCENE_DIR, ext = '.json', filter = () =
       blind = stop(`this worktree sees ${names.length} of the ${theirs.length} in ${anchor}/${dir}.\n`
         + `    A worktree checks out TRACKED files only and most of this library is gitignored, so the\n`
         + `    sweep would have reported a confident green over a third of its subject (docs/MISTAKES.md #391).\n`
-        + `    Fix: scripts/dev/worktree.sh add <name>, which copies the library in.`);
+        + `    Fix: harness/dev/worktree.sh add <name>, which copies the library in.`);
     }
   }
   return { names, n: names.length, dir, root: ROOT, line, blind: blind || null };
@@ -170,7 +170,7 @@ export const LIBRARY_WITH_DERIVATIVES = (f, abs) => f !== 'schema.json' && !isTe
 //
 // So the fix is not another definition. It is making the existing ones REACHABLE:
 //
-//   node scripts/lib/census.mjs      (make census)
+//   node harness/lib/census.mjs      (make census)
 //
 // Quote a NAME in prose and print the number here. A number typed into a doc is a copy with no owner,
 // and this repo has already logged eight of those going stale across five files.

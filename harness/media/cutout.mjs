@@ -1,4 +1,4 @@
-// scripts/media/cutout.mjs. A photograph becomes a PROP: background removed, alpha kept.
+// harness/media/cutout.mjs. A photograph becomes a PROP: background removed, alpha kept.
 //
 // Why this exists, from the film that needed it. A rectangular photo cannot be both recognisable and
 // edge-free in a frame it does not fill: crop it to fill and the subject becomes an unidentifiable
@@ -10,7 +10,7 @@
 // Runs locally in .venv-tools (rembg + u2net, ~176MB model cached in ~/.u2net). No network after the
 // first run, no API key, and the same input gives the same output.
 //
-//   node scripts/media/cutout.mjs <src> <name>     ·   make cutout SRC=photo.jpg NAME=bulb
+//   node harness/media/cutout.mjs <src> <name>     ·   make cutout SRC=photo.jpg NAME=bulb
 //   → assets/cutouts/<name>.png
 import fs from 'node:fs';
 import path from 'node:path';

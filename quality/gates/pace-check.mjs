@@ -25,8 +25,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { population, LIBRARY, SCENE_DIR } from '../../scripts/lib/census.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { population, LIBRARY, SCENE_DIR } from '../../harness/lib/census.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;

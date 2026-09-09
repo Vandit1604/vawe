@@ -30,7 +30,7 @@ need another visual. An untreated stock photo is worse than none.
 **Use `make assets` for logos, and if you curl one by hand, use `-f`.** `curl -o` writes the response
 body whatever the status is, and Simple Icons removes marks on trademark request, so a bare curl can
 404 and leave a **zero-byte .svg** on disk. The file then exists, passes every path check, and renders
-as an invisible hole. `scripts/media/assets.mjs`'s `tryFetch` gets this right: it requires 200, a
+as an invisible hole. `harness/media/assets.mjs`'s `tryFetch` gets this right: it requires 200, a
 minimum size AND a literal `<svg` before it writes, which is why `make assets` is the answer and a
 bare curl is not:
 

@@ -1,4 +1,4 @@
-// scripts/author/scaffold.mjs: THE DEFAULT START. Blank JSON is the #1 authoring failure this repo
+// harness/author/scaffold.mjs: THE DEFAULT START. Blank JSON is the #1 authoring failure this repo
 // names (AGENTS.md, docs/CRAFT/BLUEPRINTS.md): an agent opens an empty scene, writes `anim:"fade"` on
 // every layer, and every gate lets it through. This writes the OPPOSITE default: a scene composed
 // entirely from beat blueprints ({type:"beat"}), directed by construction, plus a storyboard sidecar
@@ -6,7 +6,7 @@
 // `REPLACE:`-marked copy; the structure, the motion, the transitions, the backdrop and the sound are
 // already there and already pass the floors.
 //
-//   node scripts/author/scaffold.mjs --out formats/scene/<name>.json [--dur 13] [--theme default] [--beats 5]
+//   node harness/author/scaffold.mjs --out formats/scene/<name>.json [--dur 13] [--theme default] [--beats 5]
 //   make scaffold OUT=formats/scene/<name>.json DUR=13 THEME=default BEATS=5
 //
 // TWO SHAPES, PICKED BY DURATION, NOT BY THE AUTHOR REMEMBERING. Below `CONTINUOUS_ACTION_MAX_S`
@@ -71,7 +71,7 @@ function arg(name, dflt) {
 }
 
 const out = arg('out', null);
-if (!out) { console.error('usage: node scripts/author/scaffold.mjs --out formats/scene/<name>.json [--dur 13] [--theme default] [--beats 5] [--type launch|explainer|talking-head|sting|demo|recreation]'); process.exit(2); }
+if (!out) { console.error('usage: node harness/author/scaffold.mjs --out formats/scene/<name>.json [--dur 13] [--theme default] [--beats 5] [--type launch|explainer|talking-head|sting|demo|recreation]'); process.exit(2); }
 const dur = Number(arg('dur', 13));
 const theme = arg('theme', 'default');
 const beatsWanted = arg('beats', null) != null ? Number(arg('beats')) : null;
@@ -100,7 +100,7 @@ try {
 // The house default (core/registry/theme-contract.js computedLook): the same `scale`/`layout.margin`/
 // `cuts` this scaffold used to hardcode as its own last-resort literal, now sourced from the one place
 // that owns them, so this file cannot drift from it the way the two independent copies of `bgBlock`
-// once did (scripts/lib/theme-bg.mjs's own header). `look` above stays the AUTHORED-only object: the
+// once did (harness/lib/theme-bg.mjs's own header). `look` above stays the AUTHORED-only object: the
 // priority below is still authored `theme.look` > the `--type` spine > this house default, unchanged.
 const houseDefault = computedLook(themeObj || {});
 
@@ -552,12 +552,12 @@ ${states.map(stateSection).join('\n')}`;
       `- mechanism: ${s.name} (make blueprints)`,
       `- becomes: ${becomes}`,
       // THE PER-SCENE CONTRACT: only meaningful if a per-scene fan-out is actually happening (`make
-      // scenes`), so left as an unfilled marker rather than a guessed value. scripts/lib/contract.mjs
+      // scenes`), so left as an unfilled marker rather than a guessed value. harness/lib/contract.mjs
       // chainErrors refuses to run `make scenes`/`make assemble` until every beat's object_in matches the
       // beat before it's object_out. Delete both lines if this film carries no continuous object.
       `- object_in: "<fill: <placement>@<w>x<h>, e.g. bottom-left@120x40, must equal the beat before's object_out>"`,
       `- object_out: "<fill: <placement>@<w>x<h>, what this beat hands to the next one>"`,
-      // THE MOTION PLAN (scripts/lib/contract.mjs parseMotion): what ELSE moves in this beat, beyond the
+      // THE MOTION PLAN (harness/lib/contract.mjs parseMotion): what ELSE moves in this beat, beyond the
       // one continuous object above. Same convention as object_in/out: an unfilled marker, never a
       // guessed value, and delete the line entirely if nothing but the continuous object moves here.
       `- motion: "<fill: <selector>@<kind>:<band>, e.g. [data-part=\\"headline\\"]@slide-left:energy>"`,

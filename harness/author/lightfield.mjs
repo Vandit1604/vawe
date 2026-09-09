@@ -1,8 +1,8 @@
-// scripts/author/lightfield.mjs: generate a light field from the command line.
+// harness/author/lightfield.mjs: generate a light field from the command line.
 //
-//   node scripts/author/lightfield.mjs --out formats/scene/_lightfield-ref.html
-//   node scripts/author/lightfield.mjs --preset tide --shot
-//   node scripts/author/lightfield.mjs --seed 12 --pattern.kind rings --bloom '#7ad9ff' --out /tmp/f.html
+//   node harness/author/lightfield.mjs --out formats/scene/_lightfield-ref.html
+//   node harness/author/lightfield.mjs --preset tide --shot
+//   node harness/author/lightfield.mjs --seed 12 --pattern.kind rings --bloom '#7ad9ff' --out /tmp/f.html
 //
 // Options mirror core/lightfield exactly: a flag per leaf key, dotted for the groups. An unknown
 // flag is an error here for the same reason an unknown option is an error there.
@@ -57,7 +57,7 @@ function die(msg) {
   process.exit(1);
 }
 function usage(code) {
-  console.log('usage: node scripts/author/lightfield.mjs [--preset name] [--out file.html] [--shot] [--<option> value ...]');
+  console.log('usage: node harness/author/lightfield.mjs [--preset name] [--out file.html] [--shot] [--<option> value ...]');
   console.log('presets: ' + Object.keys(PRESETS).join(' '));
   console.log('options: ' + [...FLAGS.keys()].filter((k) => k.includes('.') || !k.includes('.')).sort().map((k) => '--' + k).join(' '));
   process.exit(code);

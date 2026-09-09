@@ -231,7 +231,7 @@ Only one glyph now. `▪ LEGACY` (nobody has looked yet) is retired along with t
 
 **Any rule can join `HARD_CODES`.** No probe needs to be cheap and pure any more, because nothing
 re-evaluates the whole library at check time: a code's severity is a Set lookup against the codes the
-ladder's own steps already produced for THIS scene. `scripts/lib/finding-codes.mjs` still derives which
+ladder's own steps already produced for THIS scene. `harness/lib/finding-codes.mjs` still derives which
 gate owns a code, so a hand-kept map cannot rot the first time a rule moves file.
 
 **Re-running the fold.** Scenes are gitignored, so a fresh clone has never run

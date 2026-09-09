@@ -6,7 +6,7 @@
 // ready-to-paste scene layer stubs. The author gives each part a window/cut/anim; typing is
 // re-created by overlaying our own `type`-preset text layer on the captured input box.
 //
-//   node scripts/author/capture-scene.mjs <url> "<sectionSel>" <brand> <label> --parts "sel1,sel2,…" [--viewport WxH]
+//   node harness/author/capture-scene.mjs <url> "<sectionSel>" <brand> <label> --parts "sel1,sel2,…" [--viewport WxH]
 //   make capture-scene URL=… SEL="section" NAME=brand LABEL=intake PARTS="sel1,sel2"
 //
 // Output: assets/brands/<brand>/scenes/<label>.json  { w, h, parts: [{name, html, x, y, w, h, z}] }
@@ -23,7 +23,7 @@ const pos = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').st
 const [url, sectionSel, brand, label] = pos;
 const partSels = (flag('--parts', '') || '').split(',').map((s) => s.trim()).filter(Boolean);
 if (!url || !sectionSel || !brand || !label || !partSels.length) {
-  console.error('usage: node scripts/author/capture-scene.mjs <url> "<sectionSel>" <brand> <label> --parts "sel1,sel2,…" [--viewport WxH]');
+  console.error('usage: node harness/author/capture-scene.mjs <url> "<sectionSel>" <brand> <label> --parts "sel1,sel2,…" [--viewport WxH]');
   process.exit(1);
 }
 const [VW, VH] = (flag('--viewport', '1512x950')).split('x').map(Number);

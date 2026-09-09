@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/dev/pack-check.mjs: refuse to publish a package that cannot render, or that carries the
+// harness/dev/pack-check.mjs: refuse to publish a package that cannot render, or that carries the
 // demo reel.  `npm run pack-check`, and automatically via `prepublishOnly`.
 //
 // TWO FAILURES THIS EXISTS TO PREVENT, and they pull in opposite directions.
@@ -28,7 +28,7 @@ const REQUIRED = [
   ['formats/scene/sample.json', 'the one scene a new user can render before writing their own'],
   ['core/engine/boot.js', 'the engine entry the page imports'],
   ['core/validate/validate.mjs', 'the loud refusals; shipping without it turns errors into silent wrong output'],
-  ['scripts/author/expand-blocks.mjs', 'block/beat/comp sugar is expanded here, NOT by the renderer'],
+  ['harness/author/expand-blocks.mjs', 'block/beat/comp sugar is expanded here, NOT by the renderer'],
   ['blocks/index.mjs', 'expand-blocks imports it; a block scene dies without it'],
   ['blueprints/index.mjs', 'same, for beats'],
 ];

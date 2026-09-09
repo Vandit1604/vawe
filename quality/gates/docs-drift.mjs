@@ -18,7 +18,7 @@ import { RESAMPLE_FX } from '../../core/resample/effects.js';
 import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
 import { BG_NAMES } from '../../core/backgrounds/index.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
@@ -136,7 +136,7 @@ if (fs.existsSync(LAYERS_MDX)) {
 // page. The insert had also silently failed to apply before that, and I read the green tick as a pass
 // twice. Absence read as a pass, in the gate for absence read as a pass.
 {
-  const r = spawnSync('node', [path.join(repoRoot, 'scripts/author/grammar.mjs'), '--check'],
+  const r = spawnSync('node', [path.join(repoRoot, 'harness/author/grammar.mjs'), '--check'],
     { cwd: repoRoot, encoding: 'utf8' });
   if (r.status !== 0) f.fail('grammar-stale', String(r.stderr || r.stdout).replace(/✗/g, "").trim().split("\n").map((l) => l.trim()).filter(Boolean).join(" "));
 }
@@ -159,13 +159,13 @@ if (fs.existsSync(LAYERS_MDX)) {
   };
   const effects = /(\d+) effects across (\d+) families/.exec(
     fs.readFileSync(path.join(repoRoot, 'docs/EFFECTS.md'), 'utf8'));
-  const census = ask('scripts/author/arsenal.mjs', ['--census'], /ARSENAL CENSUS · (\d+) named things/);
+  const census = ask('harness/author/arsenal.mjs', ['--census'], /ARSENAL CENSUS · (\d+) named things/);
   const scenes = ask('quality/gates/waiver-drift.mjs', [], /WAIVER CENSUS · (\d+) scenes/);
 
   const CLAIMS = [
     { re: /(\d+) effects across (\d+) families/, want: effects && effects.slice(1),
       src: 'docs/EFFECTS.md, which `make effects` generates' },
-    { re: /(\d+) named things/, want: census, src: 'scripts/author/arsenal.mjs --census' },
+    { re: /(\d+) named things/, want: census, src: 'harness/author/arsenal.mjs --census' },
     { re: /(\d+) gate-visible scenes/, want: scenes, src: 'quality/gates/waiver-drift.mjs' },
   ];
   for (const { re, want, src } of CLAIMS) {

@@ -223,7 +223,7 @@ export const PLACEMENT = {
   'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
   'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'],
   // The de-facto anchors every launch film already hand-types as pixels: `x:160, w:1600` three times
-  // in blueprints/kit.mjs, the same margin in scripts/author/scaffold.mjs, and the y:1010 accent rule
+  // in blueprints/kit.mjs, the same margin in harness/author/scaffold.mjs, and the y:1010 accent rule
   // the scaffold's continuous object sits on. Named here so a film can ask for them at any of the five
   // aspects instead of the one 1920x1080 stage those constants were measured against. Nothing calls
   // these yet (blueprints/kit.mjs and scaffold.mjs still write their own numbers, deliberately, so this

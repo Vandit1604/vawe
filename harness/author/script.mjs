@@ -1,4 +1,4 @@
-// scripts/author/script.mjs: the WORDS, as a two-column AV script, checked before a picture exists.
+// harness/author/script.mjs: the WORDS, as a two-column AV script, checked before a picture exists.
 //
 // Stage 3 of the studio pipeline. A script is written and approved before storyboarding because words
 // are the cheapest thing to change: a line rewritten costs a minute, the same line rewritten after it
@@ -18,7 +18,7 @@
 // iterate on while writing, and waiting on TTS for every draft would stop you writing. `make animatic`
 // owns the measured clock. This owns the words.
 //
-//   node scripts/author/script.mjs <STORYBOARD.md> [--strict]
+//   node harness/author/script.mjs <STORYBOARD.md> [--strict]
 //   make script SB=<storyboard.md>
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';

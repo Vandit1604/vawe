@@ -1,6 +1,6 @@
 // spectrum.mjs: bake a track's per-frame band energy beside the audio.
 //
-//   node scripts/media/spectrum.mjs assets/music/launch.wav [--fps 30]
+//   node harness/media/spectrum.mjs assets/music/launch.wav [--fps 30]
 //   make spectrum MUSIC=assets/music/launch.wav
 //
 // Writes assets/music/<name>.spectrum.json = { fps, bands, frames: [[low,mid,high], …] }, one row per
@@ -17,7 +17,7 @@ import { bandEnergies, BANDS } from '../../core/tracks/spectrum.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
-if (!file) { console.error('usage: node scripts/media/spectrum.mjs <file.wav> [--fps 30]'); process.exit(2); }
+if (!file) { console.error('usage: node harness/media/spectrum.mjs <file.wav> [--fps 30]'); process.exit(2); }
 const fpsAt = process.argv.indexOf('--fps');
 const fps = fpsAt > 0 ? Number(process.argv[fpsAt + 1]) : 30;
 const abs = path.resolve(repoRoot, file);

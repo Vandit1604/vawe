@@ -25,7 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv.find((a) => a.endsWith('.json'));
@@ -45,7 +45,7 @@ if (RENDER || !fs.existsSync(mp4)) {
 }
 
 const studyName = `_verify-${name}`;
-const s = spawnSync('node', [path.join(ROOT, 'scripts/media/study.mjs'), path.relative(ROOT, mp4), studyName],
+const s = spawnSync('node', [path.join(ROOT, 'harness/media/study.mjs'), path.relative(ROOT, mp4), studyName],
   { cwd: ROOT, encoding: 'utf8' });
 const gp = path.join(ROOT, 'grammar', `${studyName}.json`);
 if (!fs.existsSync(gp)) { console.error(`✗ study wrote no grammar file\n${s.stderr || s.stdout}`); process.exit(1); }

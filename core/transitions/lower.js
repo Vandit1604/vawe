@@ -47,7 +47,7 @@ const BOUNDARY_ORDER = ['cut', 'seam', 'sting'];
 // sugar and names no timing, it gets the slow-fast-slow speed ramp for free. A pure blend (fade/dissolve)
 // stays on the gentle default. An explicit `timing` always wins, and raw hand-authored `seams`/`cuts`
 // are untouched (this only fills the sugar's default, so no legacy film re-times silently).
-// Exported so scripts/author/migrate-junctions.mjs can PIN the render-time default (`smooth`, see
+// Exported so harness/author/migrate-junctions.mjs can PIN the render-time default (`smooth`, see
 // core/cuts/index.js and formats/scene/scene.js) explicitly on a raw cut/seam it is converting, rather
 // than let it fall through to this ramp: a legacy scene earns identical rendered output, never a
 // silent re-time, from moving into `transitions[]`.

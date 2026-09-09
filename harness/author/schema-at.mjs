@@ -1,8 +1,8 @@
 // schema-at.mjs: what may I WRITE at this path in a scene JSON?
 //
-//   node scripts/author/schema-at.mjs                          # the top-level shape, one line per field
-//   node scripts/author/schema-at.mjs 'layers[].motion[]'      # every field legal on a keyframe
-//   node scripts/author/schema-at.mjs motion                   # a partial path, found rather than refused
+//   node harness/author/schema-at.mjs                          # the top-level shape, one line per field
+//   node harness/author/schema-at.mjs 'layers[].motion[]'      # every field legal on a keyframe
+//   node harness/author/schema-at.mjs motion                   # a partial path, found rather than refused
 //
 // WHY THIS EXISTS, from a real failure. An author needed the names of the two bezier handles on a
 // motion keyframe, guessed `in`/`out` from a comment, and shipped a refusal that rejected three

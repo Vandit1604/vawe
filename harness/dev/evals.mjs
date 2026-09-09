@@ -1,4 +1,4 @@
-// scripts/dev/evals.mjs: THE EVAL HARNESS (another engine's skills-evals, adapted; W6 of the motion-design
+// harness/dev/evals.mjs: THE EVAL HARNESS (another engine's skills-evals, adapted; W6 of the motion-design
 // plan). A fixed set of brief scenes, rendered under the CURRENT engine + rules, kept with a contact
 // sheet, and a before/after diff so a doctrine or engine change can be judged against what it actually
 // moved instead of a hunch.
@@ -10,10 +10,10 @@
 // that, a human looks at the sheets and the compare page and says which one is better. See
 // docs/EVALS.md.
 //
-//   node scripts/dev/evals.mjs                                    render every brief, write a run, assert liveness
-//   node scripts/dev/evals.mjs --compare --before <run-dir> [--after <run-dir>]
+//   node harness/dev/evals.mjs                                    render every brief, write a run, assert liveness
+//   node harness/dev/evals.mjs --compare --before <run-dir> [--after <run-dir>]
 //                                                                  before/after sheets + an html side-by-side (opens it)
-//   node scripts/dev/evals.mjs --save-baseline [--run <run-dir>]  copy sheets + manifest into quality/runs/evals/baseline/
+//   node harness/dev/evals.mjs --save-baseline [--run <run-dir>]  copy sheets + manifest into quality/runs/evals/baseline/
 //                                                                  (mp4s excluded: see .gitignore). No --run renders fresh.
 //
 // make evals / make evals-compare BEFORE=... [AFTER=...] are the Makefile forms.

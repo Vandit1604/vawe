@@ -1,6 +1,6 @@
-// scripts/lib/contract.test.mjs: the per-beat continuous-object contract chains, and a broken handoff
+// harness/lib/contract.test.mjs: the per-beat continuous-object contract chains, and a broken handoff
 // is refused with BOTH values named.
-//   node scripts/lib/contract.test.mjs
+//   node harness/lib/contract.test.mjs
 import assert from 'node:assert/strict';
 import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, SPEED_BAND, isCausedTrigger, STAGE_S } from './contract.mjs';
 

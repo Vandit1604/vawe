@@ -36,7 +36,7 @@
 //   node quality/gates/dissolve-check.mjs <scene.json> [--strict]   ·   make dissolve D=<file>
 // FAIL: crossfade-mud.   Waive with {"authoring":{"allow":["crossfade-mud"]}}.
 import fs from 'node:fs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';

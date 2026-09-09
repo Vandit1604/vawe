@@ -2,7 +2,7 @@
 //
 // Pure maths, no deps, no I/O: every function here is a deterministic transform of a sample array,
 // so the same track always yields the same grid and a beat-matched video stays reproducible.
-// (scripts/media/beatmap.mjs does the file reading and writes the sidecar.)
+// (harness/media/beatmap.mjs does the file reading and writes the sidecar.)
 //
 // The chain is the standard one, kept deliberately small:
 //   samples -> onset envelope -> tempo by autocorrelation -> phase by pulse-train correlation -> grid

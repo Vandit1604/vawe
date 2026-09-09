@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 
 const file = process.argv[2];
-if (!file) { console.error('usage: node scripts/author/cinematic.mjs <scene.json> [--write]'); process.exit(2); }
+if (!file) { console.error('usage: node harness/author/cinematic.mjs <scene.json> [--write]'); process.exit(2); }
 const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));
 const layers = d.layers || [];

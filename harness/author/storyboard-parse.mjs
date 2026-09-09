@@ -102,17 +102,17 @@ export function parseStoryboard(src) {
       // all: a storyboard stating a HUD corner on every beat still drew centred boxes labelled
       // "placement not stated", which is a declaration accepted and ignored.
       placement: f('placement'),
-      // THE PER-SCENE CONTRACT (scripts/lib/contract.mjs): the continuous object's state at this
+      // THE PER-SCENE CONTRACT (harness/lib/contract.mjs): the continuous object's state at this
       // beat's two edges, "<placement>@<w>x<h>" (a safe-area PLACEMENT name, never a raw pixel). Only
-      // meaningful once a beat names one; scripts/lib/contract.mjs chainErrors refuses a broken handoff.
+      // meaningful once a beat names one; harness/lib/contract.mjs chainErrors refuses a broken handoff.
       object_in: f('object_in'), object_out: f('object_out'),
-      // THE MOTION PLAN (scripts/lib/contract.mjs parseMotion): what else moves in this beat, beyond
+      // THE MOTION PLAN (harness/lib/contract.mjs parseMotion): what else moves in this beat, beyond
       // the one continuous object above. "<selector>@<kind>:<inBand>[/<outBand>]", `;`-separated for
       // more than one moving element. Only meaningful once a beat names one.
       motion: f('motion'),
-      // SUSTAINED MOTION (scripts/lib/contract.mjs parseMove): a hand-keyed track on this beat's OWN
+      // SUSTAINED MOTION (harness/lib/contract.mjs parseMove): a hand-keyed track on this beat's OWN
       // layer, spanning the whole beat, so the beat never goes still after an entrance lands.
-      // "<shape>:<band>", a scripts/author/track.mjs SHAPES key and a SPEED_BAND name. Only meaningful
+      // "<shape>:<band>", a harness/author/track.mjs SHAPES key and a SPEED_BAND name. Only meaningful
       // once a beat names one.
       move: f('move'),
       // style · layout · rest: the three slots their beat formula has (Element · Motion · Layout ·
@@ -126,7 +126,7 @@ export function parseStoryboard(src) {
       // two are different channels: a line can be said and not shown, or shown and not said. The
       // animatic reads this when present and falls back to the on-screen copy as a reading-time proxy.
       narration: f('narration'),
-      // THE CAUSE (scripts/lib/contract.mjs isCausedTrigger, storyboard-check.mjs's causal chain):
+      // THE CAUSE (harness/lib/contract.mjs isCausedTrigger, storyboard-check.mjs's causal chain):
       // WHAT MADE THIS BEAT HAPPEN, read here so assemble.mjs can stage a caused junction instead of
       // firing it at the exact same instant as the cut, the way every OTHER field on this beat already
       // reaches assemble through this one parser.
@@ -140,7 +140,7 @@ export function parseStoryboard(src) {
       //   borrows:   "<reference device> -> <our object>", so a borrowed SHAPE must name its ROLE here
       archetype: f('archetype'), weight: f('weight'), borrows: f('borrows'),
       // WHICH FILE, AND WHERE. Optional; assemble.mjs's own convention (`<base>.scene<N>.html`) is
-      // unchanged when this is unset. `scripts/lib/contract.mjs parseFragmentSpec` reads the raw
+      // unchanged when this is unset. `harness/lib/contract.mjs parseFragmentSpec` reads the raw
       // string, so this parser stays a raw-field reader like every field above it.
       fragment: f('fragment'),
     };

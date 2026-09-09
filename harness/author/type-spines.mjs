@@ -1,4 +1,4 @@
-// scripts/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `scaffold.mjs --type <type>`.
+// harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `scaffold.mjs --type <type>`.
 //
 // WHY A SEPARATE TABLE. `scaffold.mjs`'s default MIDDLE rotation (cardCascade/wordBlast/chipGrid) is
 // one shape: a generic feature reel. A launch film, an explainer and a sting are not built the same

@@ -395,7 +395,7 @@ export const CAPTION_BLURBS = blurbsOf('caption style', CAP_STYLES);
 // The registry, and with it the catalogue section that used to be hand-listed in
 // scripts/site/effects-catalog.mjs, with its usage snippet keyed by a slug of the section TITLE over in
 // scripts/site/effects-json.mjs. It also gives the two hand-rolled refusals below one owner: formats/
-// scene/scene.js and scripts/media/vo-captions.mjs each wrote out `unknown style, known: <join>` over
+// scene/scene.js and harness/media/vo-captions.mjs each wrote out `unknown style, known: <join>` over
 // this same list, so a caption style could be rejected in two different sentences, and neither of them
 // could say that the name the author typed is really a kinetic preset or a look.
 //

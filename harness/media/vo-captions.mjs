@@ -1,4 +1,4 @@
-// scripts/media/vo-captions.mjs: VO CAPTION BUILDER. Turns a voiceover word-timing sidecar
+// harness/media/vo-captions.mjs: VO CAPTION BUILDER. Turns a voiceover word-timing sidecar
 // (audio.voWords → [{ w, t }]) into timed caption layers the scene engine reads: a top-level
 // `captions` array of { t0, t1, text, words } plus a `captionStyle` (core/captions.js CAP_STYLES).
 // Deterministic + pure: reads files only, no TTS, no speech recognition, no network/clock/random.
@@ -7,7 +7,7 @@
 // longer than PAUSE_GAP opens between two words (a natural sentence break). Each word's end is the
 // next word's start (or +TAIL for the last word), so the per-line `words` windows track the real VO.
 //
-// Usage: node scripts/media/vo-captions.mjs <scene.json> [--style weightShift] [--group 6] [--write]
+// Usage: node harness/media/vo-captions.mjs <scene.json> [--style weightShift] [--group 6] [--write]
 //   default: PRINT the caption array (dry run). --write merges into <scene>.captioned.json (non-destructive).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,7 +19,7 @@ const DEFAULT_GROUP = 6;
 
 const file = process.argv[2];
 if (!file || file.startsWith('--')) {
-  console.error('usage: node scripts/media/vo-captions.mjs <scene.json> [--style weightShift] [--group 6] [--write]');
+  console.error('usage: node harness/media/vo-captions.mjs <scene.json> [--style weightShift] [--group 6] [--write]');
   process.exit(2);
 }
 const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');

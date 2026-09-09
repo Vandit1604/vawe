@@ -664,7 +664,7 @@
   "cuts": {
    "type": "array",
    "internal": true,
-   "label": "INTERNAL: the lowered output of transitions[] (mech:\"cut\"). Never author this directly, write transitions[] and run `node scripts/author/migrate-junctions.mjs` on an old file that still has one.",
+   "label": "INTERNAL: the lowered output of transitions[] (mech:\"cut\"). Never author this directly, write transitions[] and run `node harness/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
      "type": "number",
@@ -750,7 +750,7 @@
   "stings": {
    "type": "array",
    "internal": true,
-   "label": "INTERNAL: the lowered output of transitions[] (mech:\"sting\"). Never author this directly, write transitions[] and run `node scripts/author/migrate-junctions.mjs` on an old file that still has one.",
+   "label": "INTERNAL: the lowered output of transitions[] (mech:\"sting\"). Never author this directly, write transitions[] and run `node harness/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
      "type": "number",
@@ -826,7 +826,7 @@
   "seams": {
    "type": "array",
    "internal": true,
-   "label": "INTERNAL: the lowered output of transitions[] (mech:\"seam\"). Never author this directly, write transitions[] and run `node scripts/author/migrate-junctions.mjs` on an old file that still has one.",
+   "label": "INTERNAL: the lowered output of transitions[] (mech:\"seam\"). Never author this directly, write transitions[] and run `node harness/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
      "type": "number",
@@ -2603,7 +2603,7 @@
     },
     "words": {
      "type": "array",
-     "label": "Optional per-word timings [{t0,t1}], aligned to this line's markup-stripped word list. Drives every captionStyle. Omit and core/type/captions.js distributes the line proportionally to word length, which still reads as intentional karaoke. Written for you by scripts/media/vo-captions.mjs from a TTS sidecar."
+     "label": "Optional per-word timings [{t0,t1}], aligned to this line's markup-stripped word list. Drives every captionStyle. Omit and core/type/captions.js distributes the line proportionally to word length, which still reads as intentional karaoke. Written for you by harness/media/vo-captions.mjs from a TTS sidecar."
     },
     "pin": {
      "type": "string",

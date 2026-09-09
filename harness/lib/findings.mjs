@@ -1,4 +1,4 @@
-// scripts/lib/findings.mjs: a gate returns a typed RESULT, never a paragraph the caller re-reads.
+// harness/lib/findings.mjs: a gate returns a typed RESULT, never a paragraph the caller re-reads.
 //
 // WHY THIS EXISTS. quality/gates/author-check.mjs is the aggregator over this repo's gates. It ran each
 // one as a subprocess and then decided whether a rule had fired by SCRAPING ITS PROSE:

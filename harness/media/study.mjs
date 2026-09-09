@@ -5,7 +5,7 @@
 // make reveal, make seam-check, make judge) points at our OWN output, so a reference is studied by
 // eye, once, and the study is lost. This writes the study down.
 //
-//   node scripts/media/study.mjs <video> [name] [--threshold 0.3] [--min-shot 0.4] [--fixed 2] [--cells 4]
+//   node harness/media/study.mjs <video> [name] [--threshold 0.3] [--min-shot 0.4] [--fixed 2] [--cells 4]
 //
 // NAME IT FOR A PERSON. The name becomes grammar/<name>.json, a row in docs/CRAFT/GRAMMAR.md and, if
 // the film earns a deep study, docs/CRAFT/REF-<name>.md. The first one written here was called
@@ -70,7 +70,7 @@ if (argv.includes('--selftest')) {
   process.exit(0);
 }
 
-if (!VIDEO) die('usage: node scripts/media/study.mjs <video> [name] [--threshold 0.3]');
+if (!VIDEO) die('usage: node harness/media/study.mjs <video> [name] [--threshold 0.3]');
 if (!fs.existsSync(VIDEO)) die(`no such file: ${VIDEO}`);
 // A missing tool is not a clean result. seam-snap reported one for months (docs/MISTAKES.md), so this
 // refuses at the entry point and names the binary rather than producing an empty study.
@@ -573,7 +573,7 @@ and the contact sheet is now cut AT those peaks rather than at each shot's midpo
 
 **The film's own motion, for comparison with ours.** The studied reference corpus measures 1.06 to
 5.01 motion (median 2.84) and 11% to 77% still (median 29%), not the 1.7-2.0 / 13-24% this doc quoted
-before checking it against the corpus (\`node scripts/author/claims.mjs\`, grammar/_claims.json). \`./bin/vawe
+before checking it against the corpus (\`node harness/author/claims.mjs\`, grammar/_claims.json). \`./bin/vawe
 <scene>\` prints the same still-share for our attempt, but on JPEG-captured frames against this figure's
 H.264-decoded ones: read the codec it prints beside the number before comparing the two directly.
 

@@ -1,6 +1,6 @@
 // theme-bg.mjs: the `bg` block every background preset reads (core/backgrounds.js), derived from a
 // finished palette. Extracted from scripts/brand/theme-remix.mjs when a second theme WRITER appeared
-// (scripts/author/invent-look.mjs): two copies of this mapping is how a theme ends up rendering fine
+// (harness/author/invent-look.mjs): two copies of this mapping is how a theme ends up rendering fine
 // under `plain` and crashing under `spotlight`, because one copy forgot a key.
 //
 // BOTH grounds always exist, whatever the theme's dominance. A scene may pick ANY bg preset, and a

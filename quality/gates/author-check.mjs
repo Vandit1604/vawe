@@ -62,12 +62,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readReceipt } from '../../scripts/lib/receipt.mjs';
+import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
-import { readFindings } from '../../scripts/lib/findings.mjs';
+import { readFindings } from '../../harness/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
-import { LIBRARY } from '../../scripts/lib/census.mjs';
+import { LIBRARY } from '../../harness/lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -182,7 +182,7 @@ const HARD_CODES = {
 // printed its verdict line to stdout after its JSON, so the documented machine-readable output was not
 // machine-readable, and a sweep reported all 154 scenes as crashed.
 //
-// So a gate writes its records to the file named in VAWE_FINDINGS_OUT (scripts/lib/findings.mjs) while
+// So a gate writes its records to the file named in VAWE_FINDINGS_OUT (harness/lib/findings.mjs) while
 // printing exactly the prose it printed before. One run, both shapes: the person watching gets the
 // sentences and this file gets `code` and `severity`. A gate that does not speak records yet writes
 // nothing, and reads here as no findings, which is what the regex said about it too.
@@ -464,7 +464,7 @@ record('sweep-static', runGate('sweep-static', 'sweep-static (rendered pixels mo
 // 2. critique, value gate; errors report, waivable by rule code.
 styleGate('critique', 'critique (value gate)', 'quality/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 3. direct, direction gate; FAILs report, waivable by code.
-styleGate('direct', 'direct (direction gate)', 'scripts/author/motion-director.mjs', [], { waivable: true });
+styleGate('direct', 'direct (direction gate)', 'harness/author/motion-director.mjs', [], { waivable: true });
 // 3b. direction floor. The AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
 styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.mjs', strict ? ['--strict'] : [], { waivable: true });
 
@@ -484,8 +484,8 @@ styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.
       + `      Every move in this film was SELECTED (anim, preset, cut), not authored. That is a slideshow,\n`
       + `      and no other gate can see it: presets satisfy the ambition floor by being counted.\n`
       + `      Cheapest fix, and the numbers are measured off the two exemplars rather than invented:\n`
-      + `        node scripts/author/track.mjs pan   --to -600 --dur 1.25 --scene ${target} --layer <n>\n`
-      + `        node scripts/author/track.mjs blast --dur 1.5              --scene ${target} --layer <n>\n`
+      + `        node harness/author/track.mjs pan   --to -600 --dur 1.25 --scene ${target} --layer <n>\n`
+      + `        node harness/author/track.mjs blast --dur 1.5              --scene ${target} --layer <n>\n`
       + `      Or reach for a keyed BEAT: recordedPan / scrollStory / focusRack / echoRing (make blueprints).\n`
       + `      Theory and the measurements: docs/CRAFT/KEYED-MOTION.md.\n`);
     printDocs(['no-authored-motion']);
@@ -728,7 +728,7 @@ console.log(`      If your eye catches a flaw, it is a FIX, never ship one you n
   for (const r of results) for (const c of [...(r.blockCodes || []), ...(r.warnCodes || [])]) {
     if (HARD_CODES[c] && !seen.has(c)) seen.set(c, r.name);
   }
-  // A DERIVATIVE CANNOT OWE THIS. `scripts/lib/census.mjs` excludes generated siblings (.beatsync/
+  // A DERIVATIVE CANNOT OWE THIS. `harness/lib/census.mjs` excludes generated siblings (.beatsync/
   // .expanded/.animatic/.captioned/.directed/.intent) from the library; blocking one anyway would be a
   // population mismatch, not a finding: you would fix the SOURCE, not the derivative.
   const inLibrary = LIBRARY(path.basename(file), file);

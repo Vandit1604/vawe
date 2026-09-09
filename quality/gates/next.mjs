@@ -14,7 +14,7 @@
 // advance past.
 //
 // APPROVAL IS REFUSED, NOT RUN. It is the one stage whose next act is the user's signature
-// (`/vawe-approve`), and scripts/live/stage-gate.mjs already refuses to let an agent write that line.
+// (`/vawe-approve`), and harness/live/stage-gate.mjs already refuses to let an agent write that line.
 // Letting `make next` run "the thing that gets the user to approve" would make the irreducible human
 // step into a thing an agent performs by proxy. There is no flag past this, same as that gate.
 import { spawnSync } from 'node:child_process';

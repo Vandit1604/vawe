@@ -1,4 +1,4 @@
-// scripts/media/export-edl.mjs: A RENDERED SCENE IS CURRENTLY A DEAD END. An editor can only get at
+// harness/media/export-edl.mjs: A RENDERED SCENE IS CURRENTLY A DEAD END. An editor can only get at
 // the cuts, the on-screen text, and the audio events by re-reading the JSON, and most editors do not
 // read JSON. This reads the same LOWERED timeline the engine itself renders from (loadScene +
 // core/timeline/junctions.js, no second copy of the cut math) and writes two sidecars beside the scene: a
@@ -7,7 +7,7 @@
 //
 // Pure and read-only: the input JSON is cloned before lowering, nothing here renders or mutates.
 //
-//   node scripts/media/export-edl.mjs <scene.json> [--out <dir>]
+//   node harness/media/export-edl.mjs <scene.json> [--out <dir>]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,7 +21,7 @@ const argv = process.argv.slice(2);
 const dataArg = argv[0];
 const outIdx = argv.indexOf('--out');
 if (!dataArg || dataArg.startsWith('--') || !fs.existsSync(dataArg)) {
-  console.error('usage: node scripts/media/export-edl.mjs <scene.json> [--out <dir>]');
+  console.error('usage: node harness/media/export-edl.mjs <scene.json> [--out <dir>]');
   process.exit(2);
 }
 const OUT_DIR = outIdx >= 0 && argv[outIdx + 1] ? argv[outIdx + 1] : path.dirname(path.resolve(dataArg));

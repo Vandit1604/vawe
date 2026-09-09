@@ -135,7 +135,7 @@ motion IS the content and stillness is the cost (kinetic-typography practice, be
 Saul Bass / Kyle Cooper title-sequence tradition). **Both films this file argues from,
 `higgsfield-recreation` and `brew-launch-act1`, sit in the second register**, so read their numbers in
 §1 above as evidence for sustained motion, not as an exception to a quiet-by-default rule. Pick the
-register from `scripts/author/type-spines.mjs`'s `register` field (`kinetic` or `quiet`) before judging
+register from `harness/author/type-spines.mjs`'s `register` field (`kinetic` or `quiet`) before judging
 a beat against the list below; a `kinetic`-register film with every beat moving differently is directed,
 not effect soup, and a `quiet`-register film held to the same density is undirected.
 
@@ -204,7 +204,7 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ## Reading `make direct`: every finding carries a census
 
-Twelve checks run in `scripts/author/motion-director.mjs` and eleven of them warn. Across the 135
+Twelve checks run in `harness/author/motion-director.mjs` and eleven of them warn. Across the 135
 gate-visible scenes, 104 trip at least one. That is 77% of the library meeting the same wall of prose,
 film after film, and a warning nobody reads is a rule that has already been repealed with nobody
 writing it down.
@@ -246,7 +246,7 @@ its median: the aim is to catch a film that is asleep, not to make every film mo
 
 ### The library view
 
-`node scripts/author/motion-director.mjs` with no file prints the census on its own: how often each code
+`node harness/author/motion-director.mjs` with no file prints the census on its own: how often each code
 fires, and the p10, median and p90 of the measure behind it. Use it to argue about a rule. It reaches no
 verdict and exits 0.
 

@@ -20,5 +20,5 @@ done
 
 echo ""
 ls -lh bin/vawe-* | awk '{printf "  %-28s %s\n", $9, $5}'
-echo "  NOTE: five binaries is ~55MB. scripts/dev/pack-check.mjs caps the tarball at 25MB, so"
+echo "  NOTE: five binaries is ~55MB. harness/dev/pack-check.mjs caps the tarball at 25MB, so"
 echo "  publishing all five needs per-platform optionalDependencies (the esbuild/swc pattern)."

@@ -1,9 +1,9 @@
-// scripts/dev/complexity.mjs, where is this codebase hard to change?
+// harness/dev/complexity.mjs, where is this codebase hard to change?
 //
-//   node scripts/dev/complexity.mjs                 # the worst 30 functions
-//   node scripts/dev/complexity.mjs --all           # every function over the threshold
-//   node scripts/dev/complexity.mjs --json          # machine-readable
-//   node scripts/dev/complexity.mjs core/layers     # limit to a subtree
+//   node harness/dev/complexity.mjs                 # the worst 30 functions
+//   node harness/dev/complexity.mjs --all           # every function over the threshold
+//   node harness/dev/complexity.mjs --json          # machine-readable
+//   node harness/dev/complexity.mjs core/layers     # limit to a subtree
 //
 // Cyclomatic complexity counts the branches through a function: decision points plus one. It is the
 // minimum number of tests needed to touch every path, so it measures the SIZE OF THE JOB, not whether

@@ -1,6 +1,6 @@
-// scripts/dev/theme-sheet.mjs: ONE rendered contact sheet for ONE theme's `look` (W8,
+// harness/dev/theme-sheet.mjs: ONE rendered contact sheet for ONE theme's `look` (W8,
 // core/registry/theme-contract.js), so a brand's look is a picture an author can glance at, not a JSON they have
-// to read. Same machinery as scripts/dev/preset-sheets.mjs (frameTile/tileGrid/tileBox/renderOf from
+// to read. Same machinery as harness/dev/preset-sheets.mjs (frameTile/tileGrid/tileBox/renderOf from
 // quality/gates/tile.mjs), reused rather than reimplemented: a second render-and-tile pipeline is a
 // second thing to drift.
 //
@@ -10,7 +10,7 @@
 // decision that is never computed (the same file explains why), so an un-authored theme's sheet falls
 // back to a single `plain` window rather than refusing outright.
 //
-//   node scripts/dev/theme-sheet.mjs --theme vawe   ·   make theme-sheet THEME=vawe
+//   node harness/dev/theme-sheet.mjs --theme vawe   ·   make theme-sheet THEME=vawe
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -25,7 +25,7 @@ const OUT_DIR = path.join(ROOT, 'site/public/blocklib/themes');
 
 const themeArg = process.argv.find((a) => a.startsWith('--theme='));
 const theme = themeArg ? themeArg.slice('--theme='.length) : (process.env.THEME || '');
-if (!theme) { console.error('usage: node scripts/dev/theme-sheet.mjs --theme <name>   ·   make theme-sheet THEME=<name>'); process.exit(2); }
+if (!theme) { console.error('usage: node harness/dev/theme-sheet.mjs --theme <name>   ·   make theme-sheet THEME=<name>'); process.exit(2); }
 
 const themePath = path.join(ROOT, 'themes', `${theme}.json`);
 if (!fs.existsSync(themePath)) { console.error(`theme-sheet: no theme at ${path.relative(ROOT, themePath)}`); process.exit(2); }
@@ -95,7 +95,7 @@ const scene = {
   aspect: '16:9',
   duration: dur,
   // `fade`/`dissolve`-family cuts need something underneath to cross-fade INTO: without this, a
-  // whole-frame fade cut throws "the frame would go empty" (scripts/author/scaffold.mjs carries the
+  // whole-frame fade cut throws "the frame would go empty" (harness/author/scaffold.mjs carries the
   // same note).
   sceneUnits: true,
   audio: { silent: true, _why: 'theme-sheet: a look reference, not a film' },

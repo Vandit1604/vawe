@@ -1,4 +1,4 @@
-// node scripts/live/test/scene-live.test.mjs
+// node harness/live/test/scene-live.test.mjs
 //
 // Feeds real films from formats/scene/ through the real hook, exactly as Claude Code's PostToolUse
 // does (stdin JSON, stderr on exit 2). No cases are typed by hand here: every film named below is a

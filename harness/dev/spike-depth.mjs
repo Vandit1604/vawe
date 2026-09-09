@@ -1,4 +1,4 @@
-// scripts/dev/spike-depth.mjs: DOES `plane` PRODUCE PARALLAX, OR ONLY A SCALE?
+// harness/dev/spike-depth.mjs: DOES `plane` PRODUCE PARALLAX, OR ONLY A SCALE?
 //
 // The two are easy to confuse and look similar on a still: a layer pushed back gets smaller either way.
 // They part company the moment the CAMERA MOVES. Under a real depth the projection divides by the
@@ -21,7 +21,7 @@
 // and say nothing about whether the engine reaches it. The scene is served from memory, so the spike
 // leaves no file behind and cannot rot against one.
 //
-//   node scripts/dev/spike-depth.mjs
+//   node harness/dev/spike-depth.mjs
 import puppeteer from 'puppeteer';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 

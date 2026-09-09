@@ -1,6 +1,6 @@
-// scripts/author/recreate.mjs: turn a studied reference into a scene SKELETON.
+// harness/author/recreate.mjs: turn a studied reference into a scene SKELETON.
 //
-//   node scripts/author/recreate.mjs rebuilt --theme vawe --out formats/scene/vawe-rebuilt.json
+//   node harness/author/recreate.mjs rebuilt --theme vawe --out formats/scene/vawe-rebuilt.json
 //   make recreate NAME=rebuilt THEME=vawe OUT=formats/scene/vawe-rebuilt.json
 //
 // WHAT IT EMITS AND WHAT IT REFUSES TO. Everything the study MEASURED becomes real: the duration, a
@@ -27,7 +27,7 @@ const flag = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[
 const NAME = argv.find((a) => !a.startsWith('--') && !(argv[argv.indexOf(a) - 1] || '').startsWith('--'));
 const THEME = flag('theme', 'vawe');
 const OUT = flag('out', null);
-if (!NAME) { console.error('usage: node scripts/author/recreate.mjs <grammar-name> [--theme vawe] [--out path]'); process.exit(2); }
+if (!NAME) { console.error('usage: node harness/author/recreate.mjs <grammar-name> [--theme vawe] [--out path]'); process.exit(2); }
 
 const gp = path.join(ROOT, 'grammar', `${NAME}.json`);
 if (!fs.existsSync(gp)) { console.error(`✗ no grammar for "${NAME}". Run: make study VIDEO=refs/<file>.mp4 NAME=${NAME}`); process.exit(2); }

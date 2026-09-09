@@ -14,8 +14,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/layout/safe.js';
-import { serveRepo, waitForEngine } from '../../scripts/lib/render-harness.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const f = gateFindings();
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// scripts/dev/overlap-sweep.mjs: does OVERLAP (when the next reveal starts, relative to the last
+// harness/dev/overlap-sweep.mjs: does OVERLAP (when the next reveal starts, relative to the last
 // one's own duration) move the motion-floor, holding the number of moves per beat CONSTANT at 4?
 // docs/MISTAKES.md #608 ruled out structure (a shared fragment, a keyed object chain); this rig tests
 // the gate's own stated advice instead: "the fix is overlap, not ambience: start the next reveal
 // before the last one lands."
 //
-//   node scripts/dev/overlap-sweep.mjs [--keep]
+//   node harness/dev/overlap-sweep.mjs [--keep]
 //
 // Five variants, one fragment (4 addressable rows), same easings, same beat duration (4s). Only
 // parts[].delay changes: each row's move starts at FRACTION * (the previous row's own duration) after
@@ -13,7 +13,7 @@
 // (today's default when no delay is set on multiple parts).
 //
 // WHY THIS DOES NOT GO THROUGH motion-lab.mjs / the storyboard's `motion:` line: assemble.mjs's own
-// spread (docs comment at scripts/author/assemble.mjs:176) always distributes a beat's entries evenly
+// spread (docs comment at harness/author/assemble.mjs:176) always distributes a beat's entries evenly
 // across the beat's own leftover time; it has no dial for "start at X% of the PREVIOUS entry's
 // duration". That is a real gap in the storyboard vocabulary, not an oversight in this script: an
 // overlap fraction is written directly into `parts[].delay` here, bypassing `motion:` entirely.

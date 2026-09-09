@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/author/mine.mjs · MINE beat blueprints out of the studied reference corpus (grammar/*.json).
+// harness/author/mine.mjs · MINE beat blueprints out of the studied reference corpus (grammar/*.json).
 //
 // WHY. The another engine shot-template library (22 templates) was distilled from 178 real ads, not
 // invented. vawe's 19 hand-invented blueprints (blueprints/index.mjs) went the other way, and 12 of
@@ -17,7 +17,7 @@
 // grammar/_mined-shapes.json, and the "sources:" line atop every factory in beats-mined.mjs is read
 // straight off it.
 //
-// Usage: node scripts/author/mine.mjs [--json]   ·   make mine
+// Usage: node harness/author/mine.mjs [--json]   ·   make mine
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -89,7 +89,7 @@ function mine() {
   }
 
   const report = {
-    _: 'Shot clusters found by scripts/author/mine.mjs over grammar/*.json. A shape with sources is a '
+    _: 'Shot clusters found by harness/author/mine.mjs over grammar/*.json. A shape with sources is a '
       + 'real, traceable candidate for a beats-mined.mjs factory, never an invented one. Regenerate with `make mine`.',
     grammarsRead: grammars.map((g) => g.name),
     shapes: SHAPES.map((s) => ({ shape: s.shape, role: s.role, sources: matches[s.shape] })),

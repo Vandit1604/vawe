@@ -1,13 +1,13 @@
 // gh-wrapped.mjs: a GitHub year in review, as DATA. Pulls one account's real contribution record and
 // derives the handful of facts a film can carry, plus the contribution heatmap as an SVG fragment.
 //
-//   node scripts/media/gh-wrapped.mjs <login> [--from 2025-08-19] [--to 2026-08-19]
+//   node harness/media/gh-wrapped.mjs <login> [--from 2025-08-19] [--to 2026-08-19]
 //
 // Writes:
 //   formats/scene/_data/gh-wrapped.json          the batch row(s), scalars only, see below
 //   assets/gen/gh-heat-<login>.html              the 366-cell heatmap as an inline SVG fragment
 //
-// WHY THE HEATMAP IS A FILE AND NOT A FIELD. scripts/author/batch.mjs substitutes `{{key}}` into the
+// WHY THE HEATMAP IS A FILE AND NOT A FIELD. harness/author/batch.mjs substitutes `{{key}}` into the
 // template's raw JSON TEXT and parses afterwards, so a value carrying a `"` breaks the parse. Rows are
 // therefore safe for scalars only. The fragment goes to disk and the row carries its PATH, which is a
 // scalar. Anything richer than a number or a bare word has to travel this way.
@@ -21,7 +21,7 @@ import { execFileSync } from 'node:child_process';
 
 const argv = process.argv.slice(2);
 const login = argv.find((a) => !a.startsWith('--'));
-if (!login) { console.error('usage: node scripts/media/gh-wrapped.mjs <login> [--from YYYY-MM-DD] [--to YYYY-MM-DD]'); process.exit(2); }
+if (!login) { console.error('usage: node harness/media/gh-wrapped.mjs <login> [--from YYYY-MM-DD] [--to YYYY-MM-DD]'); process.exit(2); }
 const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const to = opt('--to', new Date().toISOString().slice(0, 10));
 const from = opt('--from', new Date(new Date(to).getTime() - 365 * 864e5).toISOString().slice(0, 10));

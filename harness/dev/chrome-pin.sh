@@ -1,5 +1,5 @@
 #!/bin/sh
-# scripts/dev/chrome-pin.sh <target-name>: resolve, pin, and RECORD the Chrome build a render uses.
+# harness/dev/chrome-pin.sh <target-name>: resolve, pin, and RECORD the Chrome build a render uses.
 #
 # WHY THIS EXISTS. renderFrame(n) is pure in n and probe-purity.mjs proves it adversarially
 # (docs/CRAFT/ENGINE-CHANGES.md), and an outside survey named that the best-evidenced determinism

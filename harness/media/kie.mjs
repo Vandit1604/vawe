@@ -2,11 +2,11 @@
 // Async job model: createTask → poll recordInfo → parse resultJson.resultUrls → download.
 // Key from env KIE_API_KEY or a gitignored .kie.key file. Import as a lib OR run as a CLI.
 //
-//   node scripts/media/kie.mjs tts   "Hello world" --out assets/gen/vo.mp3
-//   node scripts/media/kie.mjs image "a neon city"  --out assets/gen/city.png --aspect 9:16
-//   node scripts/media/kie.mjs music "lofi, calm"    --out assets/gen/bed.mp3 --instrumental
-//   node scripts/media/kie.mjs video "a drone shot"  --out assets/gen/clip.mp4 --aspect 9:16
-//   node scripts/media/kie.mjs stt   assets/gen/vo.mp3 --out captions.json
+//   node harness/media/kie.mjs tts   "Hello world" --out assets/gen/vo.mp3
+//   node harness/media/kie.mjs image "a neon city"  --out assets/gen/city.png --aspect 9:16
+//   node harness/media/kie.mjs music "lofi, calm"    --out assets/gen/bed.mp3 --instrumental
+//   node harness/media/kie.mjs video "a drone shot"  --out assets/gen/clip.mp4 --aspect 9:16
+//   node harness/media/kie.mjs stt   assets/gen/vo.mp3 --out captions.json
 //   add --dry to print the request(s) without calling the API (no key needed).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -87,7 +87,7 @@ export async function uploadFile(localPath) {
 // READ BACK the body, not just the status. A 200 is not a promise that the bytes are media: a CDN that
 // has expired the asset answers 200 with an HTML or JSON error page, and writing it to `dest` leaves a
 // file that EXISTS, passes every path check, and renders as a hole. That is docs/MISTAKES.md #446 with
-// a different fetcher, `tryFetch` in scripts/media/assets.mjs already requires a status AND a size AND
+// a different fetcher, `tryFetch` in harness/media/assets.mjs already requires a status AND a size AND
 // a magic number before it writes, and this is the same demand.
 const MAGIC = [ // enough of each container to tell media from an error page
   [[0xff, 0xd8, 0xff], 'jpeg'], [[0x89, 0x50, 0x4e, 0x47], 'png'], [[0x47, 0x49, 0x46], 'gif'],

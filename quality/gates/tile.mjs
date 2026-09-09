@@ -49,7 +49,7 @@ export const tileBox = (landscape) => (landscape ? { tw: 600, th: 338 } : { tw: 
 export const baseOf = (p) => path.basename(p).replace(/\.[^.]+$/, '');
 
 // renderOf(sceneJson) → the mp4 the RENDERER actually writes for it. `.expanded` is a build artifact
-// (scripts/author/expand-blocks.mjs), and cmd/render/main.go:188 trims it so a scene never ships as
+// (harness/author/expand-blocks.mjs), and cmd/render/main.go:188 trims it so a scene never ships as
 // "x.expanded.mp4". Two gates kept their own copy of that name and only stripped `.json`, so
 // `make judge D=<x>.expanded.json` looked for a file the renderer never writes. Normally that is a
 // clean "render first" error; when a stale `x.expanded.mp4` from an earlier film is lying in out/, the

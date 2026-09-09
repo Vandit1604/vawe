@@ -1,6 +1,6 @@
-// scripts/dev/seam-c-proto.mjs: does the Seam C technique hold renderFrame(n) purity?
+// harness/dev/seam-c-proto.mjs: does the Seam C technique hold renderFrame(n) purity?
 //
-//   node scripts/dev/seam-c-proto.mjs
+//   node harness/dev/seam-c-proto.mjs
 //
 // Serves the repo, renders five frames forwards, backwards, shuffled and again, and compares pixel
 // hashes. See the header of seam-c-proto.html for what this is and why it exists.
@@ -18,7 +18,7 @@ const { server } = await serveRepo({ port: PORT });
 const b = await puppeteer.launch({ args: ['--no-sandbox'] });
 const p = await b.newPage(); await p.setCacheEnabled(false);
 p.on('pageerror', (e) => console.log('PAGE ERROR:', e.message));
-await p.goto(`http://127.0.0.1:${PORT}/scripts/dev/seam-c-proto.html`);
+await p.goto(`http://127.0.0.1:${PORT}/harness/dev/seam-c-proto.html`);
 await p.waitForFunction("document.title === 'READY'", { timeout: 20000 });
 const order = [0, 12, 25, 40, 60];
 const fwd = await p.evaluate((n) => window.__frames(n), order);

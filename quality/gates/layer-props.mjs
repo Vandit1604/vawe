@@ -25,9 +25,9 @@ import path from 'node:path';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS as SHARED } from '../../core/layers/vocabulary.js';
 import { firesOn } from '../../core/registry/props.js';
-import { population, isTemplate } from '../../scripts/lib/census.mjs';
+import { population, isTemplate } from '../../harness/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const f = gateFindings();

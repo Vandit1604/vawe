@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/code-quality.mjs - tell the author about a tangled function while they are still in it.
+// harness/live/code-quality.mjs - tell the author about a tangled function while they are still in it.
 //
 // PostToolUse on Edit|Write. Exit 2 returns stderr to the model, so the feedback arrives at the moment
 // the code was written rather than at push time. That timing is the whole point: a rule enforced at the
@@ -71,6 +71,6 @@ process.stdin.on('end', () => {
     + 'does is usually two functions. Keep the comments, move each one with the code it explains.\n\n'
     + 'If the shape you wrote is genuinely right and the rule is wrong here, say so in your reply and\n'
     + 'run: make code-quality WRITE=1  (that accepts the new number as the line to hold).\n\n'
-    + 'Refused by scripts/live/code-quality.mjs. Limits live in .oxlintrc.json.\n');
+    + 'Refused by harness/live/code-quality.mjs. Limits live in .oxlintrc.json.\n');
   process.exit(2);
 });
