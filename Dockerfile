@@ -29,6 +29,8 @@ COPY formats/scene ./formats/scene
 COPY assets/icons ./assets/icons
 COPY assets/vendor ./assets/vendor
 COPY scripts ./scripts
+# generators/ bakes the standing assets (fonts here); the RUN below needs it in the image
+COPY generators ./generators
 # Only the marks the playable scenes reference survive .dockerignore's negations here (144K of
 # brands' 59M); site-engine.mjs ships exactly those and fails the build if one is missing.
 COPY assets/brands ./assets/brands
@@ -38,7 +40,7 @@ COPY assets/plinth ./assets/plinth
 # Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none — and
 # boot() blocks on document.fonts for every registered face, so the editor would hang without them.
 # fonts.mjs uses only node builtins, hence no install needed here.
-RUN node scripts/media/fonts.mjs
+RUN node generators/media/fonts.mjs
 
 # --- the site ---
 COPY site/package.json site/package-lock.json ./site/

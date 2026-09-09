@@ -9,7 +9,7 @@ name: "snap-all: baseline the library (MANUAL, never scheduled)"
 # 2. THE FONT SET IS NOT PINNED, AND CANNOT BE PINNED BY `make fonts` AS IT STANDS. A snap baseline is
 #    only valid inside one font state, and snap-scenes.mjs stamps the state precisely because a changed
 #    one silently rewrites every text width in the library (its own words: a "changed" scene is then not
-#    evidence about the code). scripts/media/fonts.mjs fetches 16 faces from jsDelivr with NO VERSION in
+#    evidence about the code). generators/media/fonts.mjs fetches 16 faces from jsDelivr with NO VERSION in
 #    any URL, so the bytes are whatever Fontsource published on the day the job ran. A runner and a
 #    laptop can therefore hold different faces under identical filenames and neither will know.
 #    Consequence: DO NOT compare a baseline saved here against one saved anywhere else, or on another

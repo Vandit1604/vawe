@@ -1,5 +1,5 @@
 {
-  "_why": "sha256 of every face `make fonts` fetches. Pinned so two machines hold identical bytes and a snap baseline means something across them. Regenerate with `node scripts/media/fonts.mjs --relock` ONLY when a version bump is intended, and re-save the snap baselines in the same pass.",
+  "_why": "sha256 of every face `make fonts` fetches. Pinned so two machines hold identical bytes and a snap baseline means something across them. Regenerate with `node generators/media/fonts.mjs --relock` ONLY when a version bump is intended, and re-save the snap baselines in the same pass.",
   "faces": {
     "InterVariable.woff2": {
       "pkg": "@fontsource-variable/inter",

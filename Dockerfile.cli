@@ -55,7 +55,7 @@ COPY blueprints ./blueprints
 COPY themes ./themes
 COPY assets/vendor ./assets/vendor
 COPY scripts/author/expand-blocks.mjs ./scripts/author/expand-blocks.mjs
-COPY scripts/media/fonts.mjs ./scripts/media/fonts.mjs
+COPY generators/media/fonts.mjs ./generators/media/fonts.mjs
 COPY formats/scene/scene.html formats/scene/scene.js formats/scene/props.js \
      formats/scene/scene.css formats/scene/schema.json formats/scene/sample.json ./formats/scene/
 COPY CREDITS.md LICENSE-FAQ.md ./
@@ -63,7 +63,7 @@ COPY CREDITS.md LICENSE-FAQ.md ./
 # Font binaries are deliberately not committed (redistribution), and boot() blocks on document.fonts
 # for every registered face, so an image without this step renders nothing. fonts.mjs uses only node
 # builtins and hash-verifies each download. One paid face (Sohne) is bring-your-own by design.
-RUN node scripts/media/fonts.mjs
+RUN node generators/media/fonts.mjs
 
 COPY --from=builder /src/bin/vawe ./bin/vawe
 
