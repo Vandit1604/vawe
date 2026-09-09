@@ -635,8 +635,11 @@ motion-floor: ## [check] DOES THE FILM EVER STOP: local (content) motion per 0.5
 frame-check: ## [check] THE PLAN vs THE FRAMES: archetype rotation, one measurable peak, and every size on the kit ramp (D=<film>)
 	@node scripts/gates/frame-check.mjs $(D) $(if $(JSON),--json,)
 
-stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next command (D=<film>)
-	@node scripts/gates/stage.mjs $(D) $(if $(JSON),--json,)
+stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next command (D=<film>, or no D= for the roster, or Q="…" before a film exists)
+	@node scripts/gates/stage.mjs $(D) $(if $(Q),--q "$(Q)") $(if $(JSON),--json,)
+
+next: ## [preflight] RUN the one command the stage names, then stop (D=<film>). Refuses at approval: only the user signs.
+	@node scripts/gates/next.mjs $(D)
 
 preflight: ## [preflight] the decisions that belong BEFORE the JSON, recorded for this version of the scene
 	node scripts/gates/preflight.mjs $(D) --record
