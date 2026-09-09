@@ -62,12 +62,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readReceipt } from '../lib/receipt.mjs';
+import { readReceipt } from '../../scripts/lib/receipt.mjs';
 import { spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
-import { readFindings } from '../lib/findings.mjs';
+import { readFindings } from '../../scripts/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
-import { LIBRARY } from '../lib/census.mjs';
+import { LIBRARY } from '../../scripts/lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 

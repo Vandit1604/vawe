@@ -39,7 +39,7 @@ import { BG_NAMES } from '../../core/backgrounds/index.js';
 import { CAP_STYLE_NAMES } from '../../core/type/captions.js';
 import { PLACEMENT_REGISTRY } from '../../core/layout/safe.js';
 import path from 'node:path';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 // One record per drift check, rendered verbatim (each summary already carries the full multi-line
 // report a human reads, same shape discovery.mjs uses). `--write` is a generator, not a report, and

@@ -45,8 +45,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';
-import { parseStoryboard } from '../author/storyboard-parse.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { parseStoryboard } from '../../scripts/author/storyboard-parse.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';

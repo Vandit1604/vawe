@@ -20,12 +20,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadScene } from '../../core/engine/expand.js';
-import { layerBoxes, sceneDims } from '../lib/layer-boxes.mjs';
+import { layerBoxes, sceneDims } from '../../scripts/lib/layer-boxes.mjs';
 import { gradeable } from './tile.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 import {
   requireTool, probeFps, probeTotalFrames, edgeReadingAt, diffBoxes, meanColorAt, savePNG, median,
-} from '../lib/frame-forensics.mjs';
+} from '../../scripts/lib/frame-forensics.mjs';
 
 const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

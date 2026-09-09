@@ -34,10 +34,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { collect } from '../author/arsenal.mjs';
+import { collect } from '../../scripts/author/arsenal.mjs';
 import { registries } from '../../core/registry/registry.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/discovery-ratchet.json');
@@ -163,7 +163,7 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
 // handle) are exempt and named in scripts/dev/family-coverage.mjs; they are still covered per-entry by
 // blurb self-retrieval. This owns no list of its own: it reads that module, which reads the live eval.
 {
-  const { familyCoverage } = await import('../dev/family-coverage.mjs');
+  const { familyCoverage } = await import('../../scripts/dev/family-coverage.mjs');
   const { uncovered, covered, wantCount } = await familyCoverage();
   if (!wantCount) f.fail('family-uncovered',
     '\n  ✗ read ZERO queries from lib-test.mjs: the PRESENT/PLAIN parse in family-coverage.mjs has rotted.');

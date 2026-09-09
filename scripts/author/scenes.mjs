@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { storyboardPathFor } from '../gates/craft-checklist.mjs';
+import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { chainErrors, parseMotion, motionErrors, parseEdge } from '../lib/contract.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';

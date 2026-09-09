@@ -22,8 +22,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { codesEmitted } from '../lib/finding-codes.mjs';
-import { readFindings } from '../lib/findings.mjs';
+import { codesEmitted } from '../../scripts/lib/finding-codes.mjs';
+import { readFindings } from '../../scripts/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');

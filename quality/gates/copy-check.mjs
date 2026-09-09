@@ -9,9 +9,9 @@
 // WARN by default (coaching); --strict blocks. Not taste-policing, it flags the specific tells that make
 // copy read as generated, so you reach past them.
 import fs from 'node:fs';
-import { onScreenText as stripTags } from '../lib/text.mjs';
-import { flattenLayers } from '../lib/layers.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { onScreenText as stripTags } from '../../scripts/lib/text.mjs';
+import { flattenLayers } from '../../scripts/lib/layers.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');

@@ -18,11 +18,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
-import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY } from '../lib/contract.mjs';
-import { resolvePx } from '../lib/placement-resolve.mjs';
-import { readReceipt } from '../lib/receipt.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../scripts/author/storyboard-parse.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY } from '../../scripts/lib/contract.mjs';
+import { resolvePx } from '../../scripts/lib/placement-resolve.mjs';
+import { readReceipt } from '../../scripts/lib/receipt.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const f = process.argv.slice(2).find((a) => !a.startsWith('--'));
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: docs/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }

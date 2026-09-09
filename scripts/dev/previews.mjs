@@ -17,7 +17,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { BEATS, BEAT_BLURBS } from '../../blueprints/index.mjs';
-import { frameTile, tileGrid, tileBox, renderOf } from '../gates/tile.mjs';
+import { frameTile, tileGrid, tileBox, renderOf } from '../../quality/gates/tile.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCRATCH = path.join(ROOT, 'formats/scene/_batch/previews'); // _batch/ is already gitignored whole

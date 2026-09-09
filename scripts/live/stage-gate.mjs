@@ -19,7 +19,7 @@
 // flag on this would be a way to skip the step, which is the thing being prevented.
 import fs from 'node:fs';
 import path from 'node:path';
-import { stageOf, filePaths, ROOT } from '../gates/stage.mjs';
+import { stageOf, filePaths, ROOT } from '../../quality/gates/stage.mjs';
 
 const deny = (reason) => {
   process.stdout.write(JSON.stringify({

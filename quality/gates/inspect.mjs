@@ -24,9 +24,9 @@
 //
 // Usage: node quality/gates/inspect.mjs <scene.json> [--intent path] [--strict]
 import fs from 'node:fs';
-import { onScreenText } from '../lib/text.mjs';
-import { flattenLayer } from '../lib/layers.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { onScreenText } from '../../scripts/lib/text.mjs';
+import { flattenLayer } from '../../scripts/lib/layers.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');

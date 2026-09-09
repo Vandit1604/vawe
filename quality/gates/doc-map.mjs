@@ -28,8 +28,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { codesEmitted } from '../lib/finding-codes.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { codesEmitted } from '../../scripts/lib/finding-codes.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 

@@ -33,7 +33,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const ROOTS = ['scripts/gates', 'scripts/author', 'verify'];
+const ROOTS = ['quality/gates', 'scripts/author', 'verify'];
 
 const PATTERNS = [
   /\b(?:fail|warn)\(\s*'([a-z][a-z0-9-]{2,})'/g,          // the shared gate convention

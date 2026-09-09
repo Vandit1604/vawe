@@ -21,10 +21,10 @@ import { LOOK_NAMES } from '../../core/looks/index.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas/effects.js';
 import { PRESENTATIONS } from '../../core/cuts/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
-import { population, LIBRARY_WITH_DERIVATIVES } from '../lib/census.mjs';
+import { population, LIBRARY_WITH_DERIVATIVES } from '../../scripts/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dir = path.join(repoRoot, SCENE_DIR);

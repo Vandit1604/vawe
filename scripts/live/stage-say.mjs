@@ -17,7 +17,7 @@
 // whole design refuses those (see quality/gates/stage.mjs, state is derived).
 import fs from 'node:fs';
 import path from 'node:path';
-import { stageOf, ROOT } from '../gates/stage.mjs';
+import { stageOf, ROOT } from '../../quality/gates/stage.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const dir = path.join(ROOT, 'formats/scene');

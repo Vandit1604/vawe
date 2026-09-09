@@ -51,7 +51,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { docRegistry, computeFeatures, storyboardPathFor } from '../gates/craft-checklist.mjs';
+import { docRegistry, computeFeatures, storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { nearestExemplars, exemplarSignature } from '../lib/exemplars.mjs';
 import { TYPE_SPINES, typeNames, CONTINUOUS_ACTION_MAX_S } from './type-spines.mjs';

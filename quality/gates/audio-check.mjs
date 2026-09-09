@@ -44,8 +44,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { population, LIBRARY } from '../lib/census.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { population, LIBRARY } from '../../scripts/lib/census.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 import { lowerScene } from '../../core/transitions/lower.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

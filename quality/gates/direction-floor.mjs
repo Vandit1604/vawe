@@ -35,12 +35,12 @@ import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion/motion.js';
 import { sceneDims } from '../../core/layout/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
-import { glyphText, snippet } from '../lib/text.mjs';
-import { flattenLayers } from '../lib/layers.mjs';
+import { glyphText, snippet } from '../../scripts/lib/text.mjs';
+import { flattenLayers } from '../../scripts/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
-import { population, LIBRARY } from '../lib/census.mjs';
+import { population, LIBRARY } from '../../scripts/lib/census.mjs';
 
 // ── THE 15 EXPRESSIVE FAMILIES, named once ──────────────────────────────────────────────────────
 // Both the per-film `vocab` (below, from `sig`) and the library-wide census (`libraryProfile`) key on

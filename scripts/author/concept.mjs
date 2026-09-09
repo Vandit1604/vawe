@@ -42,8 +42,8 @@ import { spawnSync } from 'node:child_process';
 import { parseStoryboard } from './storyboard-parse.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { DIRECTIONS } from './directions.mjs';   // the table moved so the quiz can read it too
-import { beatStarts } from '../gates/beats-of.mjs';   // the repo's ONE beat model, not a second one
-import { SCENE_DIR } from '../gates/paths.mjs';
+import { beatStarts } from '../../quality/gates/beats-of.mjs';   // the repo's ONE beat model, not a second one
+import { SCENE_DIR } from '../../quality/gates/paths.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);

@@ -35,7 +35,7 @@ import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { openScene } from './scene-page.mjs';
-import { frameTile, tileGrid, tileBox, baseOf } from '../gates/tile.mjs';
+import { frameTile, tileGrid, tileBox, baseOf } from '../../quality/gates/tile.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 
 const args = process.argv.slice(2);
