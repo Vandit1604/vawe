@@ -76,7 +76,7 @@ const STAMP = path.join(SNAP, '.font-state.json');
 // scene moved, not what moved inside it. The what stays local, where the 20MB lives and where a person
 // can read a diff. A digest row for a scene this checkout does not have is inert, not an error.
 //
-// This is only honest because the faces are pinned. scripts/media/fonts.mjs carries an exact version
+// This is only honest because the faces are pinned. generators/media/fonts.mjs carries an exact version
 // and a sha256 for every one of them, so two machines hold identical bytes and a hash mismatch is
 // evidence about the code. Under the unversioned URLs this file used to fetch, the same comparison
 // would have been noise wearing a regression's clothes.

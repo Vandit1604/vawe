@@ -1,4 +1,4 @@
-// scripts/media/gradients.mjs: DEPRECATED. bake a gradient-background pack into a render-ready library.
+// generators/media/gradients.mjs: DEPRECATED. bake a gradient-background pack into a render-ready library.
 //   make gradients [SRC=~/Downloads/…zip] [W=1920] [N=0]
 //
 // DEPRECATED (Approach B, kept as a local-only fallback). The shippable path is the `gradient`

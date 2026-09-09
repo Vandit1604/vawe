@@ -58,7 +58,7 @@
     "formats/scene/schema.json",
     "formats/scene/sample.json",
     "scripts/author/expand-blocks.mjs",
-    "scripts/media/fonts.mjs",
+    "generators/media/fonts.mjs",
     "assets/fonts/",
     "bin/",
     "CREDITS.md",
